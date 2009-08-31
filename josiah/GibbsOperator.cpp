@@ -78,19 +78,25 @@ void GibbsOperator::Quench() {
 void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta) {
   if (deltas.empty()) return;
   
-  size_t chosen = m_acceptor->choose(deltas);
+  TranslationDelta* chosenDelta = m_acceptor->choose(deltas);
   
-  if (m_gf)
-    doOnlineLearning(deltas, noChangeDelta, chosen);
+  if (m_mhacceptor) {
+     chosenDelta = m_mhacceptor->choose(noChangeDelta, chosenDelta);
+  }
+  
+  if (m_gf) {
+    doOnlineLearning(deltas, noChangeDelta, chosenDelta);
+  }
+    
   
   //apply it to the sample
-  if (deltas[chosen] != noChangeDelta) {
-    deltas[chosen]->apply(*noChangeDelta);
+  if (chosenDelta != noChangeDelta) {
+    chosenDelta->apply(*noChangeDelta);
   }
   
 }
 
-void GibbsOperator::UpdateGainOptimalSol(const vector<TranslationDelta*>& deltas, int chosen, int target, TranslationDelta* noChangeDelta){
+void GibbsOperator::UpdateGainOptimalSol(const vector<TranslationDelta*>& deltas, TranslationDelta* chosenDelta, int target, TranslationDelta* noChangeDelta){
   int currentBestGainSol = -1;
   //Store best gain solution
   if (m_assigner->m_name == "Best") {
@@ -98,7 +104,7 @@ void GibbsOperator::UpdateGainOptimalSol(const vector<TranslationDelta*>& deltas
   }
   else {
     BestNeighbourTgtAssigner assigner;
-    currentBestGainSol = assigner.getTarget(deltas, deltas[chosen]);
+    currentBestGainSol = assigner.getTarget(deltas, chosenDelta);
   }
   
   float currentBestGain = deltas[currentBestGainSol]->getGain();
@@ -110,23 +116,23 @@ void GibbsOperator::UpdateGainOptimalSol(const vector<TranslationDelta*>& deltas
   }
 }
   
-void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen) {
+void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, TranslationDelta* chosenDelta) {
   bool error = false;
   
-  float chosenScore = deltas[chosen]->getScore();
-  float chosenGain = deltas[chosen]->getGain();
+  float chosenScore = chosenDelta->getScore();
+  float chosenGain = chosenDelta->getGain();
 
   if (m_useApproxDocBleu)
-    m_sampler->UpdateGainFunctionStats(deltas[chosen]->getGainSufficientStats());
+    m_sampler->UpdateGainFunctionStats(chosenDelta->getGainSufficientStats());
   
-  int target = m_assigner->getTarget(deltas, deltas[chosen]);
+  int target = m_assigner->getTarget(deltas, chosenDelta);
   
   if (target == -1)
     return;
   
   
   if (m_sampler->GetOnlineLearner()->GetName() == "MIRA++"){
-    UpdateGainOptimalSol(deltas, chosen, target, noChangeDelta);
+    UpdateGainOptimalSol(deltas, chosenDelta, target, noChangeDelta);
   }
   
   float targetScore = deltas[target]->getScore();
@@ -149,7 +155,7 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
     
   if (error) {
     cerr << "Hill-climbed gain function to gain = " << deltas[target]->getGain() << endl;
-    m_sampler->GetOnlineLearner()->doUpdate(deltas[chosen], deltas[target], noChangeDelta, *m_sampler);//deltas[target], noChangeDelta  
+    m_sampler->GetOnlineLearner()->doUpdate(chosenDelta, deltas[target], noChangeDelta, *m_sampler);//deltas[target], noChangeDelta  
   }
   else {
     m_sampler->GetOnlineLearner()->UpdateCumul();//deltas[target], noChangeDelta  
@@ -179,6 +185,10 @@ void MergeSplitOperator::scan(
   //the delta corresponding to the current translation scores, needs to be subtracted off the delta before applying
   TranslationDelta* noChangeDelta = NULL; 
   vector<TranslationDelta*> deltas;
+  
+  auto_ptr<TargetGap> gap;
+  auto_ptr<TargetGap> leftGap;
+  auto_ptr<TargetGap> rightGap;
     
   //find out which source and target segments this split-merge operator should consider
   //if we're at the left edge of a segment, then we're on a split
@@ -197,12 +207,12 @@ void MergeSplitOperator::scan(
       //Add MergeDeltas
       WordsRange sourceSegment(leftSourceSegment.GetStartPos(), rightSourceSegment.GetEndPos());
       WordsRange targetSegment(leftTargetSegment.GetStartPos(), rightTargetSegment.GetEndPos());
-      TargetGap gap(prev->GetPrevHypo(), hypothesis->GetNextHypo(), targetSegment);
+      gap.reset( new TargetGap(prev->GetPrevHypo(), hypothesis->GetNextHypo(), targetSegment));
       VERBOSE(3, "Creating merge deltas for merging source segments  " << leftSourceSegment << " with " <<
              rightSourceSegment << " and target segments " << leftTargetSegment << " with " << rightTargetSegment  << endl);
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
       for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-        TranslationDelta* delta = new MergeDelta(sample,*i,gap, GetGainFunction());
+        TranslationDelta* delta = new MergeDelta(this, sample,*i,*(gap.get()), GetGainFunction());
         deltas.push_back(delta);
       }
     }
@@ -210,8 +220,7 @@ void MergeSplitOperator::scan(
     //make sure that the 'left' and 'right' refer to the target order
     const TranslationOptionList* leftOptions = NULL;
     const TranslationOptionList* rightOptions = NULL;
-    auto_ptr<TargetGap> leftGap;
-    auto_ptr<TargetGap> rightGap;
+    
     if (leftTargetSegment < rightTargetSegment) {
         //source and target order same
         leftOptions = &(toc.GetTranslationOptionList(leftSourceSegment));
@@ -219,7 +228,7 @@ void MergeSplitOperator::scan(
         leftGap.reset(new TargetGap(prev->GetPrevHypo(), prev->GetNextHypo(), prev->GetCurrTargetWordsRange()));
         rightGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), 
               hypothesis->GetCurrTargetWordsRange()));
-        noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(prev->GetTranslationOption())
+        noChangeDelta = new   PairedTranslationUpdateDelta(this, sample,&(prev->GetTranslationOption())
           ,&(hypothesis->GetTranslationOption()),*leftGap, *rightGap, GetGainFunction());
         
     } else {
@@ -229,7 +238,7 @@ void MergeSplitOperator::scan(
         leftGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), 
               hypothesis->GetCurrTargetWordsRange()));
         rightGap.reset(new TargetGap(prev->GetPrevHypo(), prev->GetNextHypo(), prev->GetCurrTargetWordsRange()));
-        noChangeDelta = new   PairedTranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption())
+        noChangeDelta = new   PairedTranslationUpdateDelta(this, sample,&(hypothesis->GetTranslationOption())
           ,&(prev->GetTranslationOption()),*leftGap, *rightGap, GetGainFunction());
     }
       
@@ -238,7 +247,7 @@ void MergeSplitOperator::scan(
       
     for (TranslationOptionList::const_iterator ri = rightOptions->begin(); ri != rightOptions->end(); ++ri) {
       for (TranslationOptionList::const_iterator li = leftOptions->begin(); li != leftOptions->end(); ++li) {
-        TranslationDelta* delta = new PairedTranslationUpdateDelta(sample,*li, *ri, *leftGap, *rightGap, GetGainFunction());
+        TranslationDelta* delta = new PairedTranslationUpdateDelta(this, sample,*li, *ri, *leftGap, *rightGap, GetGainFunction());
         deltas.push_back(delta);
       }
     }
@@ -246,15 +255,15 @@ void MergeSplitOperator::scan(
   } else {
       VERBOSE(3, "No existing split" << endl);
       WordsRange sourceSegment = hypothesis->GetCurrSourceWordsRange();
-      TargetGap gap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), hypothesis->GetCurrTargetWordsRange());
-      noChangeDelta = new TranslationUpdateDelta(sample,&(hypothesis->GetTranslationOption()),gap, GetGainFunction());
+      gap.reset( new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), hypothesis->GetCurrTargetWordsRange()));
+      noChangeDelta = new TranslationUpdateDelta(this, sample,&(hypothesis->GetTranslationOption()),*(gap.get()), GetGainFunction());
       //Add TranslationUpdateDeltas
       const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
       //cerr << "Got " << options.size() << " options for " << sourceSegment << endl;
-      VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " <<gap.segment
+      VERBOSE(3, "Creating simple deltas for source segment " << sourceSegment << " and target segment " <<gap.get()->segment
             << endl);
       for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
-        TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap, GetGainFunction());
+        TranslationDelta* delta = new TranslationUpdateDelta(this, sample,*i,*(gap.get()), GetGainFunction());
         deltas.push_back(delta);
       }
       //cerr << "Added " << ds << " deltas" << endl;
@@ -269,7 +278,7 @@ void MergeSplitOperator::scan(
       const TranslationOptionList&  rightOptions = toc.GetTranslationOptionList(rightSourceSegment);
       for (TranslationOptionList::const_iterator ri = rightOptions.begin(); ri != rightOptions.end(); ++ri) {
         for (TranslationOptionList::const_iterator li = leftOptions.begin(); li != leftOptions.end(); ++li) {
-          TranslationDelta* delta = new SplitDelta(sample, *li, *ri, gap, GetGainFunction());
+          TranslationDelta* delta = new SplitDelta(this, sample, *li, *ri, *(gap.get()), GetGainFunction());
           deltas.push_back(delta);
         }
       }
@@ -305,14 +314,14 @@ void TranslationSwapOperator::scan(
     
   vector<TranslationDelta*> deltas;
   const TranslationOption* noChangeOption = &(currHypo->GetTranslationOption());
-  TranslationDelta* noChangeDelta = new TranslationUpdateDelta(sample,noChangeOption,gap, GetGainFunction());
+  TranslationDelta* noChangeDelta = new TranslationUpdateDelta(this, sample,noChangeOption,gap, GetGainFunction());
   deltas.push_back(noChangeDelta);
     
     
   const TranslationOptionList&  options = toc.GetTranslationOptionList(sourceSegment);
   for (TranslationOptionList::const_iterator i = options.begin(); i != options.end(); ++i) {
     if (*i != noChangeOption) {
-      TranslationDelta* delta = new TranslationUpdateDelta(sample,*i,gap, GetGainFunction());
+      TranslationDelta* delta = new TranslationUpdateDelta(this, sample,*i,gap, GetGainFunction());
       deltas.push_back(delta);  
     }
   }
@@ -325,89 +334,6 @@ void TranslationSwapOperator::scan(
   
 }
 
-//FIXME - not doing this properly
-bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion){
-  totalDistortion = 0;
-  //linear distortion
-  //const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
-  //Calculate distortion for leftmost target 
-  //who is proposed new leftmost's predecessor?   
-//  Hypothesis *leftPrevHypo = const_cast<Hypothesis*>(rightTgtHypo->GetPrevHypo());      
-  float distortionScore = 0.0;
-
-
-  if (leftTgtPrevHypo) {
-    distortionScore = ComputeDistortionDistance(
-                                                leftTgtPrevHypo->GetCurrSourceWordsRange(),
-                                                leftTgtHypo->GetCurrSourceWordsRange()
-                                                );
-    
-    if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
-      return false;
-    }  
-    totalDistortion += distortionScore;
-  }
-  
-    
-  
-  if (leftTgtNextHypo) {  
-    //Calculate distortion from leftmost target to right target
-    distortionScore = ComputeDistortionDistance(
-                                                  leftTgtHypo->GetCurrSourceWordsRange(),
-                                                  leftTgtNextHypo->GetCurrSourceWordsRange()
-                                                  ); 
-    
-    if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
-      return false;
-    }
-    
-    totalDistortion += distortionScore;
-  }  
-    
-  //Calculate distortion from rightmost target to its successor
-  //Hypothesis *rightNextHypo = const_cast<Hypothesis*> (leftTgtHypo->GetNextHypo());  
-  
-  if (rightTgtPrevHypo  && rightTgtPrevHypo != leftTgtHypo) {  
-    distortionScore = ComputeDistortionDistance(
-                                              rightTgtPrevHypo->GetCurrSourceWordsRange(),
-                                              rightTgtHypo->GetCurrSourceWordsRange()
-                                              );
-  
-    if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
-      return false;
-    }
-  
-    totalDistortion += distortionScore;
-  } 
-  
-  if (rightTgtNextHypo) {  
-    //Calculate distortion from leftmost target to right target
-    distortionScore = ComputeDistortionDistance(
-                                              rightTgtHypo->GetCurrSourceWordsRange(),
-                                              rightTgtNextHypo->GetCurrSourceWordsRange()
-                                              ); 
-  
-    if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
-      return false;
-    }
-  
-    totalDistortion += distortionScore;
-  }
-  
-  return true;
-}
-  
-void FlipOperator::CollectAllSplitPoints(Sample& sample) {
-  m_splitPoints.clear();
-  size_t sourceSize = sample.GetSourceSize();
-  for (size_t splitIndex = 0; splitIndex < sourceSize; ++splitIndex) {
-    Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
-    if (hypothesis->GetCurrSourceWordsRange().GetEndPos() == splitIndex) {
-      m_splitPoints.push_back(splitIndex);
-    }
-  }
-}
-  
   
 void FlipOperator::scan(
     Sample& sample,
@@ -445,6 +371,8 @@ void FlipOperator::scan(
   TranslationDelta* noChangeDelta = NULL; 
   vector<TranslationDelta*> deltas;
   
+  auto_ptr<TargetGap> leftGap;
+  auto_ptr<TargetGap> rightGap;
   
   if (thisTargetSegment <  followingTargetSegment ) {
     //source and target order are the same
@@ -466,17 +394,17 @@ void FlipOperator::scan(
     
     bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
     if (isValidSwap) {//yes
-      TargetGap leftGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
-      TargetGap rightGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
-      TranslationDelta* delta = new FlipDelta(sample, &(followingHyp->GetTranslationOption()), 
+      leftGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment));
+      rightGap.reset(new TargetGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment));
+      TranslationDelta* delta = new FlipDelta(this, sample, &(followingHyp->GetTranslationOption()), 
                                               &(hypothesis->GetTranslationOption()), 
-                                              leftGap, rightGap, totalDistortion, GetGainFunction());
+                                              *(leftGap.get()), *(rightGap.get()), totalDistortion, GetGainFunction());
       deltas.push_back(delta);
       
       CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
       
-      noChangeDelta = new   FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                      &(followingHyp->GetTranslationOption()), leftGap, rightGap,
+      noChangeDelta = new   FlipDelta(this, sample, &(hypothesis->GetTranslationOption()), 
+                                      &(followingHyp->GetTranslationOption()), *(leftGap.get()), *(rightGap.get()),
                                       totalDistortion, GetGainFunction()); 
       deltas.push_back(noChangeDelta);   
       
@@ -498,19 +426,19 @@ void FlipOperator::scan(
     }
     bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
     if (isValidSwap) {//yes
-      TargetGap leftGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment);
-      TargetGap rightGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment);
+      leftGap.reset(new TargetGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment));
+      rightGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment));
       
       
-      TranslationDelta* delta = new FlipDelta(sample, &(hypothesis->GetTranslationOption()), 
-                                              &(followingHyp->GetTranslationOption()),  leftGap, rightGap,
+      TranslationDelta* delta = new FlipDelta(this, sample, &(hypothesis->GetTranslationOption()), 
+                                              &(followingHyp->GetTranslationOption()),  *(leftGap.get()), *(rightGap.get()),
                                               totalDistortion, GetGainFunction());
       deltas.push_back(delta);
       
       
       CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
-      noChangeDelta = new FlipDelta(sample,&(followingHyp->GetTranslationOption()), 
-                                    &(hypothesis->GetTranslationOption()), leftGap, rightGap, totalDistortion, GetGainFunction());
+      noChangeDelta = new FlipDelta(this, sample,&(followingHyp->GetTranslationOption()), 
+                                    &(hypothesis->GetTranslationOption()), *(leftGap.get()), *(rightGap.get()), totalDistortion, GetGainFunction());
       deltas.push_back(noChangeDelta); 
     }  
   }
@@ -523,5 +451,88 @@ void FlipOperator::scan(
   RemoveAllInColl(deltas);
 
 } 
+
+  bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion){
+    totalDistortion = 0;
+    //linear distortion
+    //const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+    //Calculate distortion for leftmost target 
+    //who is proposed new leftmost's predecessor?   
+    //  Hypothesis *leftPrevHypo = const_cast<Hypothesis*>(rightTgtHypo->GetPrevHypo());      
+    float distortionScore = 0.0;
+    
+    
+    if (leftTgtPrevHypo) {
+      distortionScore = ComputeDistortionDistance(
+                                                  leftTgtPrevHypo->GetCurrSourceWordsRange(),
+                                                  leftTgtHypo->GetCurrSourceWordsRange()
+                                                  );
+      
+      if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+        return false;
+      }  
+      totalDistortion += distortionScore;
+    }
+    
+    
+    
+    if (leftTgtNextHypo) {  
+      //Calculate distortion from leftmost target to right target
+      distortionScore = ComputeDistortionDistance(
+                                                  leftTgtHypo->GetCurrSourceWordsRange(),
+                                                  leftTgtNextHypo->GetCurrSourceWordsRange()
+                                                  ); 
+      
+      if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+        return false;
+      }
+      
+      totalDistortion += distortionScore;
+    }  
+    
+    //Calculate distortion from rightmost target to its successor
+    //Hypothesis *rightNextHypo = const_cast<Hypothesis*> (leftTgtHypo->GetNextHypo());  
+    
+    if (rightTgtPrevHypo  && rightTgtPrevHypo != leftTgtHypo) {  
+      distortionScore = ComputeDistortionDistance(
+                                                  rightTgtPrevHypo->GetCurrSourceWordsRange(),
+                                                  rightTgtHypo->GetCurrSourceWordsRange()
+                                                  );
+      
+      if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+        return false;
+      }
+      
+      totalDistortion += distortionScore;
+    } 
+    
+    if (rightTgtNextHypo) {  
+      //Calculate distortion from leftmost target to right target
+      distortionScore = ComputeDistortionDistance(
+                                                  rightTgtHypo->GetCurrSourceWordsRange(),
+                                                  rightTgtNextHypo->GetCurrSourceWordsRange()
+                                                  ); 
+      
+      if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
+        return false;
+      }
+      
+      totalDistortion += distortionScore;
+    }
+    
+    return true;
+  }
+  
+  void FlipOperator::CollectAllSplitPoints(Sample& sample) {
+    m_splitPoints.clear();
+    size_t sourceSize = sample.GetSourceSize();
+    for (size_t splitIndex = 0; splitIndex < sourceSize; ++splitIndex) {
+      Hypothesis* hypothesis = sample.GetHypAtSourceIndex(splitIndex);
+      if (hypothesis->GetCurrSourceWordsRange().GetEndPos() == splitIndex) {
+        m_splitPoints.push_back(splitIndex);
+      }
+    }
+  }
+  
   
 }//namespace

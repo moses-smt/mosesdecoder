@@ -50,6 +50,7 @@ namespace Josiah {
   class SampleAcceptor;
   class TargetAssigner;
   class SampleCollector;
+  class MHAcceptor;
     
   
   typedef boost::mt19937 base_generator_type;
@@ -110,13 +111,16 @@ namespace Josiah {
         Sampler* GetSampler()  {return m_sampler;}
         void disableGainFunction() { m_gf_bk = m_gf; m_gf = NULL; }
         void enableGainFunction() { m_gf = m_gf_bk; m_gf_bk = NULL; }
-        void doOnlineLearning(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, size_t chosen);
+        void doOnlineLearning(std::vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, TranslationDelta* chosen);
         void addSampleAcceptor(SampleAcceptor* acceptor) { m_acceptor = acceptor;}
+        void addMHAcceptor(MHAcceptor* acceptor) {m_mhacceptor = acceptor;}
         void addTargetAssigner(TargetAssigner* assigner) { m_assigner = assigner;}
         void UseApproxDocBleu(bool use) { m_useApproxDocBleu = use;}
-        void UpdateGainOptimalSol(const std::vector<TranslationDelta*>& deltas, int chosen, int target, TranslationDelta* noChangeDelta);
+        void UpdateGainOptimalSol(const std::vector<TranslationDelta*>& deltas, TranslationDelta* chosen, int target, TranslationDelta* noChangeDelta);
         bool keepGoing()  {return m_OpIterator->keepGoing();}
         void resetIterator() { m_OpIterator->reset();}
+        void setGibbsLMInfo(const std::map <LanguageModel*, int> & lms) { m_LMInfo = lms;}
+        std::map <LanguageModel*, int> & getGibbsLMInfo() {return m_LMInfo;}
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
@@ -131,11 +135,11 @@ namespace Josiah {
       const GainFunction* m_gf;
       const GainFunction* m_gf_bk;
       SampleAcceptor* m_acceptor;
+      MHAcceptor* m_mhacceptor;
       TargetAssigner* m_assigner;
       Sampler* m_sampler;
       bool m_useApproxDocBleu;
-      
-      
+      std::map< LanguageModel*, int> m_LMInfo;
   };
   
   /**
@@ -147,7 +151,6 @@ namespace Josiah {
       MergeSplitOperator() : GibbsOperator("merge-split") {m_OpIterator = new MergeSplitIterator();}
       virtual ~MergeSplitOperator() {}
       virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
-      
   };
   
   /**
@@ -158,7 +161,6 @@ namespace Josiah {
       TranslationSwapOperator() : GibbsOperator("translation-swap") {m_OpIterator = new SwapIterator();}
       virtual ~TranslationSwapOperator() {}
       virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
-      
   };
   
   /**

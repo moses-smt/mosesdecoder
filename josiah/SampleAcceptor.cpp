@@ -7,6 +7,9 @@ using namespace std;
 
 namespace Josiah {
   
+long MHAcceptor::mhtotal = 0;  
+long MHAcceptor::acceptanceCtr = 0;  
+  
 void SampleAcceptor::getScores(const vector<TranslationDelta*>& deltas, vector<double>& scores) {
   for (vector<TranslationDelta*>::const_iterator i = deltas.begin(); i != deltas.end(); ++i) {
     scores.push_back((**i).getScore());
@@ -39,8 +42,7 @@ size_t SampleAcceptor::getSample(const vector<double>& scores, double random) {
   return chosen;
 }
   
-size_t FixedTempAcceptor::choose(const vector<TranslationDelta*>& deltas) {
-  
+TranslationDelta* FixedTempAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   //get the scores
   vector<double> scores;
   getScores(deltas, scores);
@@ -62,11 +64,10 @@ size_t FixedTempAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   double random = getRandom();
   size_t chosen = getSample(scores, random);
   
-  return chosen;
+  return deltas[chosen];
 }
 
-size_t RegularAcceptor::choose(const vector<TranslationDelta*>& deltas) {
-  
+TranslationDelta* RegularAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   //get the scores
   vector<double> scores;
   getScores(deltas, scores);
@@ -75,19 +76,17 @@ size_t RegularAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   double random = getRandom();
   size_t chosen = getSample(scores, random);
   
-  return chosen;
+  return deltas[chosen];
 }
 
 
-size_t GreedyAcceptor::choose(const vector<TranslationDelta*>& deltas) {
-  
+TranslationDelta* GreedyAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   size_t chosen = maxScore(deltas);
-  return chosen;
+  return deltas[chosen];
 }
 
 
 size_t GreedyAcceptor::maxScore(const vector<TranslationDelta*>& deltas) {
-  
   size_t best(0);
   float bestScore = -1e10;
   float score;
@@ -101,6 +100,63 @@ size_t GreedyAcceptor::maxScore(const vector<TranslationDelta*>& deltas) {
   }
   return best;
 }
+  
+TranslationDelta* MHAcceptor::choose(TranslationDelta* currSample, TranslationDelta* nextSample) {
+  //First, get scores using proposal distribution 
+  float nextSampleProposalScore =  nextSample->getScore();
+  float currSampleProposalScore =  currSample->getScore();
+  
+  VERBOSE(2, "Curr Sample Prop Score " << currSample->getScores() << " : " << currSample->getScore() << endl)
+  VERBOSE(2, "Next Sample Prop Score " << nextSample->getScores() << " : " << nextSample->getScore() << endl)
+  //Update the score producer
+  currSample->getOperator()->setGibbsLMInfo(m_targetLMInfo);
+  
+  
+  //Now calculate scores using target distribution
+  TranslationDelta* nextTargetSample = nextSample->Create();
+  TranslationDelta* currTargetSample = currSample->Create();
+  
+  float nextSampleTargetScore = nextTargetSample->getScore();
+  float currSampleTargetScore = currTargetSample->getScore();
+
+  VERBOSE(2, "Curr Sample Target Score " << currTargetSample->getScores() << " : " << currTargetSample->getScore() << endl)
+  VERBOSE(2, "Next Sample Target Score " << nextTargetSample->getScores() << " : " << nextTargetSample->getScore() << endl)
+
+  //Restore the score producer
+  currSample->getOperator()->setGibbsLMInfo(m_proposalLMInfo);
+  
+  //Calculate a
+  float a = (nextSampleProposalScore + nextSampleTargetScore) - (currSampleProposalScore + currSampleTargetScore);
+  
+  //Copy modified fvs back
+  currSample->setScores(currTargetSample->getScores());
+  nextSample->setScores(nextTargetSample->getScores());
+  currSample->updateWeightedScore();
+  nextSample->updateWeightedScore();
+  
+  //Delete samples
+  delete nextTargetSample;
+  delete currTargetSample;
+  
+  
+  VERBOSE (2, " A : " << a << endl)
+  //Accept/reject
+  mhtotal++;
+  if (a >= 0) { //accept
+    acceptanceCtr++;
+    return nextSample; 
+  }
+  else {
+    double random =  RandomNumberGenerator::instance().next();
+    random = log(random);
+    VERBOSE (2, " Random : " << random << endl)  
+    if (a >= random) //accept with prob random
+      return nextSample;
+    else
+      return currSample; //reject 
+  }
+}  
+  
 
 size_t BestNeighbourTgtAssigner::getTarget(const vector<TranslationDelta*>& deltas, const TranslationDelta* noChangeDelta) {
   //Only do best neighbour for the moment
