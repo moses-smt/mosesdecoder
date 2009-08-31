@@ -39,6 +39,7 @@ public:
 	//! sum of all score components from every score producer
 	size_t GetTotalNumberOfScores() const { return m_last; }
 	const std::string& GetFeatureName(size_t n) const { return m_featureNames[n]; }
+  const ScoreProducer* GetScoreProducer(size_t n) const { return m_producers[n]; }
 	//! ??? print unweighted scores of each ScoreManager to stream os
 	void Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
 	//! ??? print weighted scores of each ScoreManager to stream os
