@@ -53,6 +53,7 @@ namespace Moses {
   class Hypothesis;
   class Factor;
   class WordsRange;
+  class Word;
 }
 
 using namespace Moses;
@@ -60,7 +61,8 @@ using namespace Moses;
 namespace Josiah {
 
 class Sample;
-class GainFunction;  
+class GainFunction;
+class GibbsOperator;  
 struct TargetGap;  
 
 #ifdef LM_CACHE
@@ -94,10 +96,7 @@ class LanguageModelCache {
 class TranslationDelta {
   public:
     static long lmcalls;
-    TranslationDelta(Sample& sample, const GainFunction* gf): m_score(-1e6), m_gain(-1.0), m_sample(sample), m_gf(gf) {
-      
-    }
-  
+    TranslationDelta(GibbsOperator* g_operator, Sample& sample, const GainFunction* gf): m_score(-1e6), m_gain(-1.0), m_operator(g_operator), m_sample(sample), m_gf(gf) {}
     /**
       Get the absolute score of this delta
     **/
@@ -116,12 +115,19 @@ class TranslationDelta {
     void updateWeightedScore();
     const ScoreComponentCollection& getScores() const { return m_scores;}
     const BleuSufficientStats & getGainSufficientStats() {return m_sufficientStats;}
-  
+    GibbsOperator* getOperator()  const {return m_operator;} 
+    const GainFunction* getGainFunction() const {return m_gf; }
+    virtual TranslationDelta* Create() const = 0;
+    void setScores(const ScoreComponentCollection& scores)  { m_scores = scores;}
   protected:
     
   Moses::ScoreComponentCollection m_scores;
     double m_score;
     double m_gain;
+    GibbsOperator* m_operator;
+    Sample& m_sample;
+    const GainFunction* m_gf;
+  
     //FIXME: The four LM scoring methods should be merged with the three scoring methods for other features.
     /**
       Compute the change in language model score by adding this target phrase
@@ -158,8 +164,6 @@ class TranslationDelta {
 #ifdef LM_CACHE
     static std::map<LanguageModel*,LanguageModelCache> m_cache;
 #endif
-    Sample& m_sample;
-    const GainFunction* m_gf;
     void calcSufficientStatsAndGain(const std::vector<const Factor*> & sentence);
     BleuSufficientStats m_sufficientStats;
 };
@@ -169,11 +173,14 @@ class TranslationDelta {
   **/
 class TranslationUpdateDelta : public virtual TranslationDelta {
   public:
-     TranslationUpdateDelta(Sample& sample, const TranslationOption* option , const TargetGap& gap, const GainFunction* gf);
+     TranslationUpdateDelta(GibbsOperator* g_operator, Sample& sample, const TranslationOption* option , const TargetGap& gap, const GainFunction* gf);
      virtual void apply(const TranslationDelta& noChangeDelta);
-     
+     TranslationUpdateDelta* Create() const;
+     const TranslationOption* getOption() const {return m_option;} 
+     const TargetGap& getGap() const { return m_gap;} 
   private:
     const TranslationOption* m_option;
+    const TargetGap& m_gap;
 };
 
 /**
@@ -186,11 +193,14 @@ class MergeDelta : public virtual TranslationDelta {
      * option - the source/target phrase to go into the merged segment
      * targetSegment - the location of the target segment
      **/
-    MergeDelta(Sample& sample, const TranslationOption* option, const TargetGap& gap, const GainFunction* gf);
+    MergeDelta(GibbsOperator* g_operator, Sample& sample, const TranslationOption* option, const TargetGap& gap, const GainFunction* gf);
     virtual void apply(const TranslationDelta& noChangeDelta);
-  
+    MergeDelta* Create() const;
+  const TranslationOption* getOption() const  {return m_option;} 
+  const TargetGap& getGap()  const { return m_gap;} 
   private:
     const TranslationOption* m_option;
+    const TargetGap& m_gap;
   
 };
 
@@ -200,15 +210,22 @@ class MergeDelta : public virtual TranslationDelta {
 class PairedTranslationUpdateDelta : public virtual TranslationDelta {
   public: 
     /** Options and gaps in target order */
-    PairedTranslationUpdateDelta(Sample& sample,
+    PairedTranslationUpdateDelta(GibbsOperator* g_operator, Sample& sample,
         const TranslationOption* leftOption, const TranslationOption* rightOption, 
         const TargetGap& leftGap, const TargetGap& rightGap, const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
-    
+    PairedTranslationUpdateDelta* Create() const;
+    const TranslationOption* getLeftOption()  const {return m_leftOption;} 
+    const TranslationOption* getRightOption()  const {return m_rightOption;}  
+    const TargetGap& getLeftGap()  const { return m_leftGap;} 
+    const TargetGap& getRightGap()  const { return m_rightGap;} 
+  
   private:
     const TranslationOption* m_leftOption;
     const TranslationOption* m_rightOption;
+    const TargetGap& m_leftGap;
+    const TargetGap& m_rightGap;
 };
 
 /**
@@ -217,14 +234,18 @@ class PairedTranslationUpdateDelta : public virtual TranslationDelta {
 class SplitDelta : public virtual TranslationDelta {
   public:
     /** Options and gaps in target order */
-    SplitDelta(Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, 
+    SplitDelta(GibbsOperator* g_operator, Sample& sample, const TranslationOption* leftOption, const TranslationOption* rightOption, 
     const TargetGap& gap, const GainFunction* gf);
     virtual void apply(const TranslationDelta& noChangeDelta);
-    
+    SplitDelta* Create() const;
+  const TranslationOption* getLeftOption()  const {return m_leftOption;} 
+  const TranslationOption* getRightOption() const  {return m_rightOption;}  
+  const TargetGap& getGap()  const { return m_gap;} 
+  
   private:
     const TranslationOption* m_leftOption;
     const TranslationOption* m_rightOption;
-    
+    const TargetGap& m_gap;
 };
 
 /**
@@ -233,14 +254,22 @@ class SplitDelta : public virtual TranslationDelta {
 class FlipDelta : public virtual TranslationDelta {
   public: 
     /**  Options and gaps in target order */
-    FlipDelta(Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
+    FlipDelta(GibbsOperator* g_operator, Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
               const TargetGap& leftGap, const TargetGap& rightGap, float distortion, const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
-    
+    FlipDelta* Create() const;
+  const TranslationOption* getLeftOption()  const {return m_leftTgtOption;} 
+  const TranslationOption* getRightOption()  const {return m_rightTgtOption;}  
+  const TargetGap& getLeftGap() const  { return m_leftGap;} 
+  const TargetGap& getRightGap()  const { return m_rightGap;}
+  float getTotalDistortion()  const { return m_totalDistortion;}
   private:
     const TranslationOption* m_leftTgtOption;
     const TranslationOption* m_rightTgtOption;
+    const TargetGap& m_leftGap;
+    const TargetGap& m_rightGap;
+    float m_totalDistortion;
     Hypothesis* m_prevTgtHypo;
     Hypothesis* m_nextTgtHypo;
 };

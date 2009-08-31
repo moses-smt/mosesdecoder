@@ -150,6 +150,7 @@ int main(int argc, char** argv) {
   bool greedy, fixedTemp;
   float fixed_temperature;
   bool collectAll, sampleCtrAll;
+  vector<string> ngramorders;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -218,7 +219,8 @@ int main(int argc, char** argv) {
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
   ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
-  ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected");
+  ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
+  ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs");
   
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -283,7 +285,47 @@ int main(int argc, char** argv) {
   }
   
   
+  auto_ptr<MHAcceptor> mhAcceptor;
+  mhAcceptor.reset(new MHAcceptor());
+  bool doMH = false;
   
+  
+  //Initialise LMs info
+  map <LanguageModel*, int> proposalLMInfo, targetLMInfo;
+  
+  const LMList& languageModels = StaticData::Instance().GetAllLM();
+  for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {  
+    LanguageModel* lm = *i; 
+    targetLMInfo[lm] = lm->GetNGramOrder();
+  }
+  proposalLMInfo = targetLMInfo;
+  if (ngramorders.size()) { //MH info
+    mhAcceptor.get()->setTargetLMInfo(targetLMInfo);
+    bool success = false;
+    for (size_t i = 0; i < ngramorders.size(); ++i) {
+      vector <string> tokens = Tokenize(ngramorders[i], ":");
+      assert (tokens.size() == 2);
+      string name = tokens[0];
+      int order = atoi(tokens[1].c_str());
+      LanguageModel* lm;
+      success = ValidateAndGetLMFromName(name, lm);
+      if (success) {
+        doMH = true;
+        proposalLMInfo[lm] = order;
+        mhAcceptor.get()->addScoreProducer(lm); 
+      }
+      else {
+        cerr << "Error: That feature does not exist. " << endl;
+#ifdef MPI_ENABLED
+        MPI_Finalize();
+#endif
+        return -1;
+      }
+    }
+    if (success) {
+      mhAcceptor.get()->setProposalLMInfo(proposalLMInfo);  
+    } 
+  }
   
   // may be invoked just to get a features list
   if (show_features) {
@@ -420,6 +462,17 @@ int main(int argc, char** argv) {
   MergeSplitOperator mso;
   FlipOperator fo;
   TranslationSwapOperator tso;
+  mso.setGibbsLMInfo(targetLMInfo);
+  fo.setGibbsLMInfo(targetLMInfo);
+  tso.setGibbsLMInfo(targetLMInfo);
+  
+  if (proposalLMInfo.size()) {
+    mso.setGibbsLMInfo(proposalLMInfo);
+    mso.addMHAcceptor(mhAcceptor.get());
+    tso.setGibbsLMInfo(proposalLMInfo);
+    tso.addMHAcceptor(mhAcceptor.get()); 
+  }
+  
   sampler.AddOperator(&mso);
   sampler.AddOperator(&tso);
   sampler.AddOperator(&fo);
@@ -517,8 +570,15 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
     
     TranslationDelta::lmcalls = 0;
+    if (doMH) {
+      MHAcceptor::mhtotal = 0;  
+      MHAcceptor::acceptanceCtr = 0;  
+    }
     sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer);  
-    
+    if (doMH) {
+      VERBOSE(0, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 
+      VERBOSE(0, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 
+    }
     
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");

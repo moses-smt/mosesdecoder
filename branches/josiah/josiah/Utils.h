@@ -5,9 +5,13 @@
 #include "GainFunction.h"
 #include "FeatureFunction.h"
 
+namespace Moses {
+  class LanguageModel; 
+}
 namespace Josiah {
   
   class GainFunctionVector;
+  
   
   /**
    * Wrap moses timer to give a way to no-op it.
@@ -24,5 +28,6 @@ namespace Josiah {
   
   void configure_features_from_file(const std::string& filename, feature_vector& fv);
   void LoadReferences(const vector<string>& ref_files, string input_file, GainFunctionVector* g, float bp_scale = 1.0, bool use_bp_denum_hack = false);
+  bool ValidateAndGetLMFromName(string featsName, LanguageModel* &lm);
 }
 

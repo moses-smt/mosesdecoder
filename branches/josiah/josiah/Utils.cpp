@@ -122,6 +122,20 @@ namespace Josiah {
     in.close();
   }
   
+  bool ValidateAndGetLMFromName(string featsName, LanguageModel* &lm) {
+    const ScoreIndexManager& scoreIndexManager = StaticData::Instance().GetScoreIndexManager();
+    size_t numScores = scoreIndexManager.GetTotalNumberOfScores();
+    
+    for (size_t i = 0; i < numScores; ++i) {
+      if (scoreIndexManager.GetFeatureName(i) == featsName) {
+        const ScoreProducer* scoreProducer = scoreIndexManager.GetScoreProducer(i);
+        lm = static_cast<LanguageModel*>(const_cast<ScoreProducer*>(scoreProducer));
+        return true;
+      }
+    }
+    return false;  
+  }
+  
 }
 
 

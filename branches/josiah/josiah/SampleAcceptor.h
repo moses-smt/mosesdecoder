@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <fstream>
 #include <vector> 
+#include "ScoreProducer.h"
+#include "LanguageModel.h"
 
 namespace Josiah {
 
@@ -13,7 +15,7 @@ class SampleAcceptor {
 public:
   SampleAcceptor() {}
   virtual ~SampleAcceptor() {}
-  virtual size_t choose(const std::vector<TranslationDelta*>& deltas) = 0;
+  virtual TranslationDelta* choose(const std::vector<TranslationDelta*>& deltas) = 0;
   void getScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores);
   void normalize(std::vector<double>& scores); 
   double getRandom() ;
@@ -24,7 +26,7 @@ class FixedTempAcceptor : public SampleAcceptor {
 public:
   FixedTempAcceptor(float temp) {m_temp = temp;}
   virtual ~FixedTempAcceptor() {}
-  virtual size_t choose(const std::vector<TranslationDelta*>& deltas) ;
+  virtual TranslationDelta*choose(const std::vector<TranslationDelta*>& deltas) ;
   void SetTemp(float temp) { m_temp = temp;}
 private:
   float m_temp;
@@ -34,15 +36,30 @@ class RegularAcceptor : public SampleAcceptor {
 public:
   RegularAcceptor() {}
   virtual ~RegularAcceptor() {}
-  virtual size_t choose(const std::vector<TranslationDelta*>& deltas) ;
+  virtual TranslationDelta* choose(const std::vector<TranslationDelta*>& deltas) ;
 };
 
 class GreedyAcceptor : public SampleAcceptor {
 public:
   GreedyAcceptor() {}
   virtual ~GreedyAcceptor() {}
-  virtual size_t choose(const std::vector<TranslationDelta*>& deltas) ;
+  virtual TranslationDelta* choose(const std::vector<TranslationDelta*>& deltas) ;
   size_t maxScore(const std::vector<TranslationDelta*>& deltas);
+};
+  
+class MHAcceptor {
+  public:
+    MHAcceptor() {}
+    ~MHAcceptor() {}
+    TranslationDelta* choose(TranslationDelta* curr, TranslationDelta* next);
+    void addScoreProducer(Moses::ScoreProducer* sp) {m_scoreProducers.push_back(sp);} 
+  void setProposalLMInfo(const std::map <Moses::LanguageModel*, int> & proposal) { m_proposalLMInfo = proposal;}
+  void setTargetLMInfo(const std::map <Moses::LanguageModel*, int> & target) { m_targetLMInfo = target;}
+  static long mhtotal;
+  static long acceptanceCtr;
+  private:  
+    std::vector <Moses::ScoreProducer*> m_scoreProducers;
+  std::map <Moses::LanguageModel*, int> m_targetLMInfo, m_proposalLMInfo;
 };
   
 class TargetAssigner {
