@@ -290,7 +290,6 @@ int main(int argc, char** argv) {
   }
   
   auto_ptr<MHAcceptor> mhAcceptor;
-  mhAcceptor.reset(new MHAcceptor());
   bool doMH = false;
   
   
@@ -304,6 +303,7 @@ int main(int argc, char** argv) {
   }
   proposalLMInfo = targetLMInfo;
   if (ngramorders.size()) { //MH info
+    mhAcceptor.reset(new MHAcceptor());
     mhAcceptor.get()->setTargetLMInfo(targetLMInfo);
     bool success = false;
     for (size_t i = 0; i < ngramorders.size(); ++i) {
@@ -698,7 +698,7 @@ int main(int argc, char** argv) {
         pair<const Derivation*, float> map_soln = derivationCollector->getMAP();
         vector<string> sentence;
         map_soln.first->getTargetSentence(sentence);
-        VERBOSE(1, "MAP Soln, model score [" << map_soln.second << "]" << endl)
+        VERBOSE(0, "MAP Soln, model score [" << map_soln.second << "]" << endl)
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
         (*out) << endl << flush;
       }

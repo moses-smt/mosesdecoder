@@ -122,10 +122,6 @@ namespace Josiah {
       if (f) VERBOSE(1,endl);
     }
 
-    for (size_t j = 0; j < m_collectors.size(); ++j) {
-      cerr << "Collected " << m_collectors[j]->N() << " samples" << endl;
-    }
-
   }
   
   void Sampler::collectSample(Sample& sample) {

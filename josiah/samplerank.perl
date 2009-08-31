@@ -203,26 +203,43 @@ while(1) {
         print TEST "-X $feature_file \\\n";
     }
 
-    print TEST "-s $samples -d -t -m -b $burnin ";
+    if (!($extra_args =~ m/mapdecode/)) {
+      print TEST "-s $samples -d -t -m -b $burnin ";
+    }
+    else {
+      print TEST "-s $samples -d -m -b $burnin ";
+    }
     if ($reheatings) {
         print TEST "-a --reheatings $reheatings ";
     }
     print TEST "--decode-random ";
     print TEST "-w $new_weight_file ";
-    print TEST "--mbr --mbr-size $mbr_size ";
+
+    if (!($extra_args =~ m/mapdecode/)) {
+      print TEST "--mbr --mbr-size $mbr_size ";
+    }
     print TEST $extra_args;
     print TEST "\n";
 
     print TEST "cat $output_file*_of_* > $output_file\n";
     print TEST "rm -f $output_file*_of_*\n";
-    print TEST "echo \"Max Derivation\"\n";
-    print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 0; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
-    print TEST "echo \"Max Translation\"\n";
-    print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 1; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
-    print TEST "echo \"MBR\"\n";
-    print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 2; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
 
-    close TEST;
+    if ($extra_args =~ m/mapdecode/) {
+	print TEST "echo \"MAP\"\n";
+    	print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%2) == 0; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
+
+	print TEST "echo \"Max Derivation\"\n";
+    	print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%2) == 1; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
+    }
+    else {
+	print TEST "echo \"Max Derivation\"\n";
+    	print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 0; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
+    	print TEST "echo \"Max Translation\"\n";
+    	print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 1; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
+    	print TEST "echo \"MBR\"\n";
+    	print TEST  "perl -e '\$deriv=0; while(<>) {print if (\$deriv%3) == 2; ++\$deriv;}' $output_file  | $bleu_script $test_reference_file\n";
+    }
+        close TEST;
 
     #launch testing
     my $qsub_result = `qsub -P $queue $test_script_file`;

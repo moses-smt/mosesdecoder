@@ -286,7 +286,6 @@ int main(int argc, char** argv) {
   
   
   auto_ptr<MHAcceptor> mhAcceptor;
-  mhAcceptor.reset(new MHAcceptor());
   bool doMH = false;
   
   
@@ -300,6 +299,7 @@ int main(int argc, char** argv) {
   }
   proposalLMInfo = targetLMInfo;
   if (ngramorders.size()) { //MH info
+    mhAcceptor.reset(new MHAcceptor());
     mhAcceptor.get()->setTargetLMInfo(targetLMInfo);
     bool success = false;
     for (size_t i = 0; i < ngramorders.size(); ++i) {
@@ -462,17 +462,17 @@ int main(int argc, char** argv) {
   MergeSplitOperator mso;
   FlipOperator fo;
   TranslationSwapOperator tso;
-  mso.setGibbsLMInfo(targetLMInfo);
-  fo.setGibbsLMInfo(targetLMInfo);
-  tso.setGibbsLMInfo(targetLMInfo);
+    mso.setGibbsLMInfo(targetLMInfo);
+    fo.setGibbsLMInfo(targetLMInfo);
+    tso.setGibbsLMInfo(targetLMInfo);
   
-  if (proposalLMInfo.size()) {
-    mso.setGibbsLMInfo(proposalLMInfo);
-    mso.addMHAcceptor(mhAcceptor.get());
-    tso.setGibbsLMInfo(proposalLMInfo);
-    tso.addMHAcceptor(mhAcceptor.get()); 
-  }
-  
+    if (proposalLMInfo.size()) {
+      mso.setGibbsLMInfo(proposalLMInfo);
+      mso.addMHAcceptor(mhAcceptor.get());
+      tso.setGibbsLMInfo(proposalLMInfo);
+      tso.addMHAcceptor(mhAcceptor.get()); 
+    }
+
   sampler.AddOperator(&mso);
   sampler.AddOperator(&tso);
   sampler.AddOperator(&fo);
@@ -564,6 +564,7 @@ int main(int argc, char** argv) {
     TranslationOptionCollection* toc;
     
     timer.check("Running decoder");
+    
     
     std::vector<Word> source;
     decoder->decode(line,hypothesis,toc,source);
