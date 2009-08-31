@@ -280,7 +280,10 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 	}
 }
 
-void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId)
+
+
+
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder,long translationId)
 {
 	const StaticData &staticData = StaticData::Instance();
 	bool labeledOutput = staticData.IsLabeledNBestList();
@@ -294,13 +297,13 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 		const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
 		// print the surface factor of the translation
-		*m_nBestStream << translationId << " ||| ";
+		out << translationId << " ||| ";
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(*m_nBestStream, edge.GetCurrTargetPhrase(), m_outputFactorOrder, false); // false for not reporting all factors
+			OutputSurface(out, edge.GetCurrTargetPhrase(), outputFactorOrder, false); // false for not reporting all factors
 		}
-		*m_nBestStream << " |||";
+		out << " |||";
 
 		std::string lastName = "";
 		const vector<const StatefulFeatureFunction*>& sff =
@@ -310,12 +313,12 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
 			{
 				lastName = sff[i]->GetScoreProducerWeightShortName();
-				*m_nBestStream << " " << lastName << ":";
+				out << " " << lastName << ":";
 			}
 			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( sff[i] );
 			for (size_t j = 0; j<scores.size(); ++j) 
 			{
-		  		*m_nBestStream << " " << scores[j];
+		  		out << " " << scores[j];
 			}
 		}
 
@@ -326,12 +329,12 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
 			{
 				lastName = slf[i]->GetScoreProducerWeightShortName();
-				*m_nBestStream << " " << lastName << ":";
+				out << " " << lastName << ":";
 			}
 			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( slf[i] );
 			for (size_t j = 0; j<scores.size(); ++j) 
 			{
-		  		*m_nBestStream << " " << scores[j];
+		  		out << " " << scores[j];
 			}
 		}
 
@@ -376,12 +379,12 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
-					*m_nBestStream << " tm:";
+					out << " tm:";
 				vector<PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
-						*m_nBestStream << " " << scores[j];
+						out << " " << scores[j];
 				}
 			}
 		}
@@ -401,10 +404,10 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 				if (pd_numinputscore){
 					
 					if (labeledOutput)
-						*m_nBestStream << " I:";
+						out << " I:";
 
 					for (size_t j = 0; j < pd_numinputscore; ++j)
-						*m_nBestStream << " " << scores[j];
+						out << " " << scores[j];
 				}
 					
 					
@@ -414,9 +417,9 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 					size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
-						*m_nBestStream << " tm:";
+						out << " tm:";
 					for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-						*m_nBestStream << " " << scores[j];
+						out << " " << scores[j];
 				}
 			}
 		}
@@ -425,34 +428,34 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
 		if (gds.size() > 0) {
 			if (labeledOutput)
-				*m_nBestStream << " g: ";
+				out << " g: ";
 			vector<GenerationDictionary*>::iterator iter;
 			for (iter = gds.begin(); iter != gds.end(); ++iter) {
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 				for (size_t j = 0; j<scores.size(); j++) {
-					*m_nBestStream << scores[j] << " ";
+					out << scores[j] << " ";
 				}
 			}
 		}
 		
 		// total						
-		*m_nBestStream << " ||| " << path.GetTotalScore();
+		out << " ||| " << path.GetTotalScore();
 		
 		//phrase-to-phrase alignment
 		if (includeAlignment) {
-			*m_nBestStream << " |||";
+			out << " |||";
 			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
 			{
 				const Hypothesis &edge = *edges[currEdge];
 				const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
 				WordsRange targetRange = path.GetTargetWordsRange(edge);
-				*m_nBestStream << " " << sourceRange.GetStartPos();
+				out << " " << sourceRange.GetStartPos();
 				if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-					*m_nBestStream << "-" << sourceRange.GetEndPos();
+					out << "-" << sourceRange.GetEndPos();
 				}
-				*m_nBestStream << "=" << targetRange.GetStartPos();
+				out<< "=" << targetRange.GetStartPos();
 				if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-					*m_nBestStream << "-" << targetRange.GetEndPos();
+					out<< "-" << targetRange.GetEndPos();
 				}
 			}
     }
@@ -460,11 +463,15 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 				
 		
 				
-		*m_nBestStream << endl;
+		out << endl;
 	}
 
 
-	*m_nBestStream<<std::flush;
+	out <<std::flush;
+}
+
+void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
+    OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
 }
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
