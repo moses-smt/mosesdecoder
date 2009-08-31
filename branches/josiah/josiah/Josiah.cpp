@@ -643,7 +643,7 @@ int main(int argc, char** argv) {
     timer.check("Running sampler");
 
     TranslationDelta::lmcalls = 0;
-    TranslationDelta::ngrams.clear();
+    
     if (doMH) {
       MHAcceptor::mhtotal = 0;  
       MHAcceptor::acceptanceCtr = 0;  
