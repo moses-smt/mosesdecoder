@@ -50,51 +50,10 @@ using namespace Moses;
   **/
 class OutputCollector {
     public:
-        OutputCollector() :
-            m_nextOutput(0)  {}
+        OutputCollector(std::ostream* outStream= &cout) :
+            m_nextOutput(0),m_outStream(outStream)  {}
 
-        void Write(int sourceId, Manager& manager) {
-            //create the output string
-            //Note that this is copied from Main.cpp. Some refactoring
-            //could remove the duplicate code.
-            const StaticData& staticData = StaticData::Instance();
-            ostringstream out;
-            if (!staticData.UseMBR()) {
-                const Hypothesis* hypo = manager.GetBestHypothesis();
-                if (hypo) {
-                    OutputSurface(
-                            out,
-                            hypo,
-                            staticData.GetOutputFactorOrder(), 
-                            staticData.GetReportSegmentation(),
-                            staticData.GetReportAllFactors());
-                }
-                out << endl;
-            } else {
-                //MBR decoding
-		        size_t nBestSize = staticData.GetMBRSize();
-                if (nBestSize <= 0) {
-		            cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
-		            exit(1);
-		        } else {
-		            TrellisPathList nBestList;
-		            manager.CalcNBest(nBestSize, nBestList,true);
-		            VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-		            IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-		            vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-                    for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
-                        const Factor *factor = mbrBestHypo[i];
-                        if (i>0) out << " ";
-                        out << factor->GetString();
-                    }
-                    out << endl;
-		            IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
-            }
-        }
-        Write(sourceId,out.str());
-    }
 
-    private:
         /**
           * Write or cache the output, as appropriate.
           **/
@@ -102,12 +61,12 @@ class OutputCollector {
             boost::mutex::scoped_lock lock(m_mutex);
             if (sourceId == m_nextOutput) {
                 //This is the one we were expecting
-                cout << output;
+                *m_outStream << output;
                 ++m_nextOutput;
                 //see if there's any more
                 map<int,string>::iterator iter;
                 while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
-                    cout << iter->second;
+                    *m_outStream << iter->second;
                     m_outputs.erase(iter);
                     ++m_nextOutput;
                 }
@@ -116,8 +75,11 @@ class OutputCollector {
                 m_outputs[sourceId] = output;
             }
         }
+        
+     private:
         map<int,string> m_outputs;
         int m_nextOutput;
+        ostream* m_outStream;
         boost::mutex m_mutex;
 };
 
@@ -129,9 +91,9 @@ class TranslationTask : public Task {
     public:
 
         TranslationTask(size_t lineNumber,
-             InputType* source, OutputCollector& outputCollector) :
+             InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector) :
              m_source(source), m_lineNumber(lineNumber),
-                m_outputCollector(outputCollector) {}
+                m_outputCollector(outputCollector), m_nbestCollector(nbestCollector) {}
 
         void Run() {
 #if defined(BOOST_HAS_PTHREADS)
@@ -139,11 +101,52 @@ class TranslationTask : public Task {
 #endif
             const StaticData &staticData = StaticData::Instance();
             Sentence sentence(Input);
-            const vector<FactorType> &inputFactorOrder = 
-                staticData.GetInputFactorOrder();
             Manager manager(*m_source,staticData.GetSearchAlgorithm());
             manager.ProcessSentence();
-            m_outputCollector.Write(m_lineNumber,manager);
+            
+            if (m_outputCollector) {
+                ostringstream out;
+                if (!staticData.UseMBR()) {
+                    const Hypothesis* hypo = manager.GetBestHypothesis();
+                    if (hypo) {
+                        OutputSurface(
+                                out,
+                                hypo,
+                                staticData.GetOutputFactorOrder(), 
+                                staticData.GetReportSegmentation(),
+                                staticData.GetReportAllFactors());
+                    }
+                    out << endl;
+                } else {
+                    //MBR decoding
+                    size_t nBestSize = staticData.GetMBRSize();
+                    if (nBestSize <= 0) {
+                        cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+                        exit(1);
+                    } else {
+                        TrellisPathList nBestList;
+                        manager.CalcNBest(nBestSize, nBestList,true);
+                        VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+                        IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
+                        vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+                        for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
+                            const Factor *factor = mbrBestHypo[i];
+                            if (i>0) out << " ";
+                            out << factor->GetString();
+                        }
+                        out << endl;
+                        IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
+                    }
+                }
+                m_outputCollector->Write(m_lineNumber,out.str());
+            }
+            if (m_nbestCollector) {
+                TrellisPathList nBestList;
+                ostringstream out;
+                manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
+                OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), m_lineNumber);
+                m_nbestCollector->Write(m_lineNumber, out.str());
+            }
         }
 
         ~TranslationTask() {delete m_source;}
@@ -151,7 +154,8 @@ class TranslationTask : public Task {
     private:
         InputType* m_source;
         size_t m_lineNumber;
-        OutputCollector& m_outputCollector;
+        OutputCollector* m_outputCollector;
+        OutputCollector* m_nbestCollector;
 
 };
 
@@ -199,10 +203,30 @@ int main(int argc, char** argv) {
     ThreadPool pool(threadcount);
     InputType* source = NULL;
     size_t lineCount = 0;
-    OutputCollector outputCollector;
+    auto_ptr<OutputCollector> outputCollector;//for translations
+    auto_ptr<OutputCollector> nbestCollector;
+    auto_ptr<ofstream> nbestOut;
+    size_t nbestSize = staticData.GetNBestSize();
+    string nbestFile = staticData.GetNBestFilePath();
+    if (nbestSize) {
+        if (nbestFile == "-") {
+            //nbest to stdout, no 1-best
+            //FIXME: Moses doesn't actually let you pass a '-' on the command line.
+            nbestCollector.reset(new OutputCollector());
+        } else {
+            //nbest to file, 1-best to stdout
+            nbestOut.reset(new ofstream(nbestFile.c_str()));
+            assert(nbestOut->good());
+            nbestCollector.reset(new OutputCollector(nbestOut.get()));
+            outputCollector.reset(new OutputCollector());
+        }
+    } else {
+        outputCollector.reset(new OutputCollector());
+    }
+    
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
         TranslationTask* task = 
-            new TranslationTask(lineCount,source, outputCollector);
+            new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get());
         pool.Submit(task);
         source = NULL; //make sure it doesn't get deleted
         ++lineCount;
