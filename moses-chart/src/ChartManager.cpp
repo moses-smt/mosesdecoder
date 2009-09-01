@@ -11,6 +11,11 @@
 using namespace std;
 using namespace Moses;
 
+namespace Moses
+{
+	extern bool g_debug;
+}
+
 namespace MosesChart
 {
 
@@ -46,15 +51,13 @@ void Manager::ProcessSentence()
 		{
 			size_t endPos = startPos + width - 1;
 			WordsRange range(startPos, endPos);
-			//TRACE_ERR(endl << "starting " << range << endl);
-			
+			TRACE_ERR(endl << "starting " << range << endl);
+						
 			// create trans opt
 			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
-			//cerr << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
-
-//			if (startPos == 1 && endPos == 5)
-//				cerr << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
-
+			//if (g_debug)
+			//	cerr << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
+			
 			// decode			
 			ChartCell &cell = m_hypoStackColl.Get(range);
 
@@ -63,6 +66,9 @@ void Manager::ProcessSentence()
 			cell.PruneToSize(cell.GetMaxHypoStackSize());
 			cell.CleanupArcList();
 			cell.SortHypotheses();
+			
+			//if (g_debug)
+			//	cerr << cell << endl;
 			
 			//VERBOSE(1,range << "=" << cell.GetSize() << " ");
 		}

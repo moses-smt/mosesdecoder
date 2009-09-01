@@ -375,11 +375,27 @@ void ChartCell::CleanupArcList()
 
 std::ostream& operator<<(std::ostream &out, const ChartCell &cell)
 {
+	/*
 	ChartCell::HCType::const_iterator iter;
 	for (iter = cell.m_hypos.begin(); iter != cell.m_hypos.end(); ++iter)
 	{
 		const Hypothesis &hypo = **iter;
 		out << hypo << endl;
+	}
+	*/
+	
+	std::map<Moses::Word, OrderHypos>::const_iterator iterOuter;
+	for (iterOuter = cell.m_hyposOrdered.begin(); iterOuter != cell.m_hyposOrdered.end(); ++iterOuter)
+	{
+		const Moses::Word &targetLHS = iterOuter->first;
+		out << targetLHS << ":\n";
+		
+		const OrderHypos &hypos = iterOuter->second;
+		OrderHypos::const_iterator iterInner;
+		for (iterInner = hypos.begin(); iterInner != hypos.end(); ++iterInner)
+		{
+			out << **iterInner << endl;
+		}
 	}
 
 	return out;
