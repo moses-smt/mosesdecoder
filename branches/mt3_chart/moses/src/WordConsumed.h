@@ -8,6 +8,8 @@ namespace Moses
 
 class WordConsumed
 {
+	friend std::ostream& operator<<(std::ostream&, const WordConsumed&);
+
 protected:
 	WordsRange	m_coverage;
 	const Word &m_sourceWord; // can be non-term headword, or term

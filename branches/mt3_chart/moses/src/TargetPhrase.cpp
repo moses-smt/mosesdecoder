@@ -252,7 +252,9 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 	}
 	else
 	{
-		os << static_cast<const Phrase&>(tp) << ", "
+		os << tp.m_lhsSource
+			<< tp.m_lhsTarget
+			<< static_cast<const Phrase&>(tp) << ", "
 			<< tp.GetAlignmentInfo() << ","
 			<< " fullScore=" << tp.m_fullScore << " "
 			<< tp.GetScoreBreakdown();

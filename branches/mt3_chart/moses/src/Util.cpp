@@ -42,6 +42,7 @@ namespace Moses
 
 //global variable
 Timer g_timer;
+bool g_debug = false;
 
 string GetTempFolder()
 {	

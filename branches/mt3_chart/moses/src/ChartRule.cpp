@@ -29,7 +29,7 @@ void ChartRule::CreateNonTermIndex()
 
 std::ostream& operator<<(std::ostream &out, const ChartRule &rule)
 {
-	out << rule.m_targetPhrase << " " << rule.m_lastWordConsumed.GetWordsRange();
+	out << rule.m_targetPhrase << " " << rule.m_lastWordConsumed;
 	return out;
 }
 
