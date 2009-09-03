@@ -194,7 +194,7 @@ while(1) {
     my $burnin = &param("test.burnin",100);
     my $reheatings = &param("test.reheatings",2);
     my $mbr_size = &param("test.mbr-size",1000);
-    my $extra_args = &param("test.extra_args");
+    my $extra_args = &param("test.extra-args");
 
     #file names
     my $test_script_file = $working_dir . "/" . $test_script . ".$train_iteration.sh"; 
