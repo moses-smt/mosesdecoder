@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "DecodeStep.h"
+#include "PhraseDictionary.h"
 
 namespace Moses
 {
@@ -57,6 +58,7 @@ private:
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
+    PhraseDictionary* m_phraseDictionary;   
 };
 
 

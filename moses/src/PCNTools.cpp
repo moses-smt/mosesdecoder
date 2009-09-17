@@ -1,6 +1,7 @@
 #include "PCNTools.h"
 
 #include <iostream>
+#include <cstdlib>
 
 namespace PCN
 {

@@ -42,10 +42,8 @@ protected:
 	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 	
 public:
-	PhraseDictionaryMemory(size_t numScoreComponent)
-		: MyBase(numScoreComponent)
-	{
-	}
+	PhraseDictionaryMemory(size_t numScoreComponent, PhraseDictionaryFeature* feature) 
+       : PhraseDictionary(numScoreComponent,feature) {}
 	virtual ~PhraseDictionaryMemory();
 
 	bool Load(const std::vector<FactorType> &input
@@ -62,6 +60,8 @@ public:
 
 	// for mert
 	void SetWeightTransModel(const std::vector<float> &weightT);
+  virtual void InitializeForInput(InputType const&) 
+    {/* Don't do anything source specific here as this object is shared between threads.*/}
 	
 	TO_STRING();
 	

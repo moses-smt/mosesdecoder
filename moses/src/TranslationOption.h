@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
-#include "AlignmentPair.h"
 #include "StaticData.h"
 
 namespace Moses

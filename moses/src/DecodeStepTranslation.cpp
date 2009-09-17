@@ -29,14 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev)
-: DecodeStep(dict, prev)
+: DecodeStep(dict, prev), m_phraseDictionary(dict)
 {
 }
 
-const PhraseDictionary &DecodeStepTranslation::GetPhraseDictionary() const
+/*const PhraseDictionary &DecodeStepTranslation::GetPhraseDictionary() const
 {
-  return *static_cast<const PhraseDictionary*>(m_ptr);
-}
+  return *m_phraseDictionary;
+}*/
 
 TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const
 {
@@ -102,15 +102,19 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 															,PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit) const
 {
-	const PhraseDictionary &phraseDictionary = GetPhraseDictionary();
-	const size_t tableLimit = phraseDictionary.GetTableLimit();
+	const size_t tableLimit = m_phraseDictionary->GetTableLimit();
 
 	const WordsRange wordsRange(startPos, endPos);
-	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(source,wordsRange); 
+	const TargetPhraseCollection *phraseColl =	m_phraseDictionary->GetTargetPhraseCollection(source,wordsRange); 
 
 	if (phraseColl != NULL)
 	{
-		VERBOSE(3,"[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+		IFVERBOSE(3) {
+			if(StaticData::Instance().GetInputType() == SentenceInput)
+				TRACE_ERR("[" << source.GetSubString(wordsRange) << "; " << startPos << "-" << endPos << "]\n");
+			else
+				TRACE_ERR("[" << startPos << "-" << endPos << "]" << std::endl);
+		}
 			
 		TargetPhraseCollection::const_iterator iterTargetPhrase, iterEnd;
 		iterEnd = (!adhereTableLimit || tableLimit == 0 || phraseColl->GetSize() < tableLimit) ? phraseColl->end() : phraseColl->begin() + tableLimit;

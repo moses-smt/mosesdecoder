@@ -44,6 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TrellisPathList.h"
 #include "InputFileStream.h"
 #include "InputType.h"
+#include "WordLattice.h"
 
 class IOWrapper
 {
@@ -98,3 +99,8 @@ public:
 	  return *m_outputSearchGraphStream;
 	}
 };
+
+IOWrapper *GetIODevice(const Moses::StaticData &staticData);
+bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
+void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors);
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&, long translationId);

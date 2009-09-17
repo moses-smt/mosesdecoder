@@ -30,7 +30,7 @@ protected:
 	void PrintBitmapContainerGraph();
 
 public:
-	SearchCubePruning(const InputType &source, const TranslationOptionCollection &transOptColl);
+	SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
 	~SearchCubePruning();
 
 	void ProcessSentence();

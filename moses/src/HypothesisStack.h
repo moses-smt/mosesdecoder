@@ -8,14 +8,19 @@
 
 namespace Moses
 {
+  
+  class Manager;
 
 class HypothesisStack
 {
+  
 protected:
 	typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
 	_HCType m_hypos; /**< contains hypotheses */
+  Manager& m_manager;
 
 public:
+  HypothesisStack(Manager& manager): m_manager(manager) {}
 	typedef _HCType::iterator iterator;
 	typedef _HCType::const_iterator const_iterator;
 	//! iterators

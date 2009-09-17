@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 #include "LMList.h"
+#include "Manager.h"
 #include "hash.h"
 
 using namespace std;
@@ -48,9 +49,8 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
-Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
+Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
-	, m_transOpt(NULL)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize())
@@ -60,8 +60,10 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 	, m_wordDeleted(false)
 	, m_ffStates(StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions().size())
 	, m_arcList(NULL)
-	, m_id(0)
-  , m_alignPair(source.GetSize())
+  , m_transOpt(NULL)
+  , m_manager(manager)
+
+  , m_id(0)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
@@ -78,7 +80,6 @@ Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
 Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt)
 	: m_prevHypo(&prevHypo)
 	, m_targetPhrase(transOpt.GetTargetPhrase())
-	, m_transOpt(&transOpt)
 	, m_sourcePhrase(transOpt.GetSourcePhrase())
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
 	, m_sourceInput						(prevHypo.m_sourceInput)
@@ -88,11 +89,12 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_wordDeleted(false)
 	,	m_totalScore(0.0f)
 	,	m_futureScore(0.0f)
-	, m_ffStates(prevHypo.m_ffStates.size())
 	, m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
+  , m_ffStates(prevHypo.m_ffStates.size())
 	, m_arcList(NULL)
+  , m_transOpt(&transOpt)
+  , m_manager(prevHypo.GetManager())
 	, m_id(s_HypothesesCreated++)
-  , m_alignPair(prevHypo.m_alignPair)
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -221,13 +223,13 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
+Hypothesis* Hypothesis::Create(Manager& manager, InputType const& m_source, const TargetPhrase &emptyTarget)
 {
 #ifdef USE_HYPO_POOL
 	Hypothesis *ptr = s_objectPool.getPtr();
-	return new(ptr) Hypothesis(m_source, emptyTarget);
+	return new(ptr) Hypothesis(manager, m_source, emptyTarget);
 #else
-	return new Hypothesis(m_source, emptyTarget);
+	return new Hypothesis(manager, m_source, emptyTarget);
 #endif
 }
 
@@ -269,6 +271,8 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 {
   // some stateless score producers cache their values in the translation
 	// option: add these here
+  // language model scores for n-grams completely contained within a target
+  // phrase are also included here
 	m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
 
 	const StaticData &staticData = StaticData::Instance();
@@ -299,7 +303,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
-	IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
+	IFVERBOSE(2) { m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
 }
 
 /** Calculates the expected score of extending this hypothesis with the
@@ -332,7 +336,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	// TOTAL
 	float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
 
-	IFVERBOSE(2) { staticData.GetSentenceStats().AddTimeEstimateScore( clock()-t ); }
+  IFVERBOSE(2) { m_manager.GetSentenceStats().AddTimeEstimateScore( clock()-t ); }
 	return total;
 }
 
@@ -353,7 +357,7 @@ void Hypothesis::CalcRemainingScore()
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
 
-	IFVERBOSE(2) { StaticData::Instance().GetSentenceStats().AddTimeOtherScore( clock()-t ); }
+	IFVERBOSE(2) { m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const{
@@ -385,10 +389,7 @@ void Hypothesis::PrintHypothesis() const
 	TRACE_ERR( "\tcovering "<<m_currSourceWordsRange.GetStartPos()<<"-"<<m_currSourceWordsRange.GetEndPos()<<": "
 	  << *m_sourcePhrase <<endl);
 	TRACE_ERR( "\ttranslated as: "<<(Phrase&) m_targetPhrase<<endl); // <<" => translation cost "<<m_score[ScoreType::PhraseTrans];
-	if (PrintAlignmentInfo()){
-		TRACE_ERR( "\tsource-target word alignment: "<< m_targetPhrase.GetAlignmentPair().GetAlignmentPhrase(Input) << endl); // <<" => source to target word-to-word alignment
-		TRACE_ERR( "\ttarget-source word alignment: "<< m_targetPhrase.GetAlignmentPair().GetAlignmentPhrase(Output) << endl); // <<" => target to source word-to-word alignment
-	}
+	
 	if (m_wordDeleted) TRACE_ERR( "\tword deleted"<<endl); 
   //	TRACE_ERR( "\tdistance: "<<GetCurrSourceWordsRange().CalcDistortion(m_prevHypo->GetCurrSourceWordsRange())); // << " => distortion cost "<<(m_score[ScoreType::Distortion]*weightDistortion)<<endl;
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
@@ -454,14 +455,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
 	out << " " << hypothesis.GetScoreBreakdown();
 	
 	// alignment
-	if (hypothesis.PrintAlignmentInfo()){
-		out << " [f2e:";
-		hypothesis.SourceAlignmentToStream(out);
-		out << "]";
-		out << " [e2f:";
-		hypothesis.TargetAlignmentToStream(out);
-		out << "]";
-	}
+	
 	return out;
 }
 
