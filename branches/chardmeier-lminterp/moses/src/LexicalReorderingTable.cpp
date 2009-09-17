@@ -206,9 +206,10 @@ LexicalReorderingTableTree::LexicalReorderingTableTree(
 			    const std::vector<FactorType>& f_factors, 
 				const std::vector<FactorType>& e_factors,
 			    const std::vector<FactorType>& c_factors)
-  : LexicalReorderingTable(f_factors, e_factors, c_factors) 
+  : LexicalReorderingTable(f_factors, e_factors, c_factors), m_UseCache(false), m_FilePath(filePath) 
 {
-  m_Table.Read(filePath+".binlexr"); 
+  m_Table.reset(new PrefixTreeMap());
+  m_Table->Read(m_FilePath+".binlexr");
 }
 
 LexicalReorderingTableTree::~LexicalReorderingTableTree(){
@@ -240,7 +241,7 @@ Score LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, con
   //not in cache go to file...
   Score      score;
   Candidates cands; 
-  m_Table.GetCandidates(MakeTableKey(f,e), &cands);
+  m_Table->GetCandidates(MakeTableKey(f,e), &cands);
   if(cands.empty()){
     return Score();
   } 
@@ -271,7 +272,7 @@ Score LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands
       */
 	  cvec.push_back(context.GetWord(i).GetString(m_FactorsC, false));
 	}
-	IPhrase c = m_Table.ConvertPhrase(cvec,TargetVocId);
+	IPhrase c = m_Table->ConvertPhrase(cvec,TargetVocId);
 	IPhrase sub_c;
 	IPhrase::iterator start = c.begin();
 	for(size_t j = 0; j <= context.GetSize(); ++j, ++start){
@@ -301,6 +302,11 @@ void LexicalReorderingTableTree::InitializeForInput(const InputType& input){
   } else if(Sentence const* s = dynamic_cast<Sentence const*>(&input)){
     // Cache(*s); ... this just takes up too much memory, we cache elsewhere
     DisableCache();
+  }
+  if (!m_Table.get()) {
+    //load thread specific table. 
+    m_Table.reset(new PrefixTreeMap());
+    m_Table->Read(m_FilePath+".binlexr");
   }
 };
  
@@ -515,7 +521,7 @@ IPhrase LexicalReorderingTableTree::MakeTableKey(const Phrase& f,
       */
 	  keyPart.push_back(f.GetWord(i).GetString(m_FactorsF, false));
     }
-    auxAppend(key, m_Table.ConvertPhrase(keyPart, SourceVocId));
+    auxAppend(key, m_Table->ConvertPhrase(keyPart, SourceVocId));
 	keyPart.clear();
   }
   if(!m_FactorsE.empty()){
@@ -529,7 +535,7 @@ IPhrase LexicalReorderingTableTree::MakeTableKey(const Phrase& f,
       */
 	  keyPart.push_back(e.GetWord(i).GetString(m_FactorsE, false));
     }      
-	auxAppend(key, m_Table.ConvertPhrase(keyPart,TargetVocId));
+	auxAppend(key, m_Table->ConvertPhrase(keyPart,TargetVocId));
 	//keyPart.clear();
   }
   return key;
@@ -547,20 +553,20 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f){
   if(m_FactorsE.empty()){
 	//f is all of key...
 	Candidates cands;
-	m_Table.GetCandidates(MakeTableKey(f,Phrase(Output)),&cands);
+	m_Table->GetCandidates(MakeTableKey(f,Phrase(Output)),&cands);
 	m_Cache[MakeCacheKey(f,Phrase(Output))] = cands;
   } else {
 	ObjectPool<PPimp>     pool;
-	PPimp* pPos  = m_Table.GetRoot();
+	PPimp* pPos  = m_Table->GetRoot();
 	//1) goto subtree for f
 	for(int i = 0; i < f.GetSize() && 0 != pPos && pPos->isValid(); ++i){
 	  /* old code
 	  pPos = m_Table.Extend(pPos, auxClearString(f.GetWord(i).ToString(m_FactorsF)), SourceVocId);
 	  */
-	  pPos = m_Table.Extend(pPos, f.GetWord(i).GetString(m_FactorsF, false), SourceVocId);
+	  pPos = m_Table->Extend(pPos, f.GetWord(i).GetString(m_FactorsF, false), SourceVocId);
 	}
 	if(0 != pPos && pPos->isValid()){
-	  pPos = m_Table.Extend(pPos, PrefixTreeMap::MagicWord);
+	  pPos = m_Table->Extend(pPos, PrefixTreeMap::MagicWord);
 	}
 	if(0 == pPos || !pPos->isValid()){
 	  return;
@@ -574,9 +580,9 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f){
 	while(!stack.empty()){
 	  if(stack.back().pos->isValid()){
 		LabelId w = stack.back().pos->ptr()->getKey(stack.back().pos->idx);
-		std::string next_path = stack.back().path + " " + m_Table.ConvertWord(w,TargetVocId);
+		std::string next_path = stack.back().path + " " + m_Table->ConvertWord(w,TargetVocId);
 		//cache this 
-		m_Table.GetCandidates(*stack.back().pos,&cands);
+		m_Table->GetCandidates(*stack.back().pos,&cands);
 		if(!cands.empty()){ 
 		  m_Cache[cache_key + auxClearString(next_path)] = cands;
 		}

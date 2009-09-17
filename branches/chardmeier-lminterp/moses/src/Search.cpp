@@ -1,24 +1,22 @@
 
+#include "Manager.h"
 #include "SearchCubePruning.h"
 #include "SearchNormal.h"
 #include "UserMessage.h"
 
 namespace Moses
 {
-Search::Search()
-{
-//	long sentenceID = m_source.GetTranslationId();
-//	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
-}
 
-Search *Search::CreateSearch(const InputType &source, SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl)
+
+Search *Search::CreateSearch(Manager& manager, const InputType &source, 
+                             SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl)
 {
 	switch(searchAlgorithm)
 	{
 		case Normal:		
-			return new SearchNormal(source, transOptColl);
+			return new SearchNormal(manager,source, transOptColl);
 		case CubePruning:
-			return new SearchCubePruning(source, transOptColl);
+			return new SearchCubePruning(manager, source, transOptColl);
 		case CubeGrowing:
 			return NULL;
 		default:

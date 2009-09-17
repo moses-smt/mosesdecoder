@@ -32,6 +32,7 @@ namespace Moses
 {
 
 class PhraseDictionaryMemory;
+class PhraseDictionaryFeature;
 
 /** One node of the PhraseDictionaryMemory structure
 */

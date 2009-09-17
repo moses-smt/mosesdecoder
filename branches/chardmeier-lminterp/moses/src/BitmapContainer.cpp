@@ -57,22 +57,27 @@ class HypothesisScoreOrdererNoDistortion
 class HypothesisScoreOrdererWithDistortion
 {
 	public:
-		static const WordsRange *transOptRange; // TODO. HACK!!
+        HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
+            m_transOptRange(transOptRange) {}
+
+		const WordsRange* m_transOptRange; 
 
 		bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 		{
-			assert (transOptRange != NULL);
+			assert (m_transOptRange != NULL);
 
 			const float weightDistortion = StaticData::Instance().GetWeightDistortion();
 			const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
 			const float distortionScoreA = dsp->CalculateDistortionScore(
+                    *hypoA,
 										hypoA->GetCurrSourceWordsRange(),
-										*transOptRange,
+										*m_transOptRange,
 										hypoA->GetWordsBitmap().GetFirstGapPos()
 									 );
 			const float distortionScoreB = dsp->CalculateDistortionScore(
+                    *hypoB,
 										hypoB->GetCurrSourceWordsRange(),
-										*transOptRange,
+										*m_transOptRange,
 										hypoB->GetWordsBitmap().GetFirstGapPos()
 									 );
 
@@ -95,8 +100,6 @@ class HypothesisScoreOrdererWithDistortion
 
 };
 
-const WordsRange *HypothesisScoreOrdererWithDistortion::transOptRange = NULL;
-
 ////////////////////////////////////////////////////////////////////////////////
 // BackwardsEdge Code
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +107,8 @@ const WordsRange *HypothesisScoreOrdererWithDistortion::transOptRange = NULL;
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 							 , BitmapContainer &parent
 							 , const TranslationOptionList &translations
-							 , const SquareMatrix &futureScore)
+							 , const SquareMatrix &futureScore,
+                                const InputType& itype)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
@@ -131,7 +135,6 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 	}
 
 	const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
-	const InputType *itype = StaticData::Instance().GetInput();
 
 	HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
 	HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();
@@ -149,7 +152,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 			}
 		else
 			{
-				int distortionDistance = itype->ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
+				int distortionDistance = itype.ComputeDistortionDistance(hypo.GetCurrSourceWordsRange()
 																		, transOptRange);
 
 				if (distortionDistance <= maxDistortion)
@@ -169,8 +172,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		assert(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
 	}	
 
-	HypothesisScoreOrdererWithDistortion::transOptRange = &transOptRange;
-	std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererWithDistortion());
+	HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
+	std::sort(m_hypotheses.begin(), m_hypotheses.end(), orderer);
 
 	// std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());
 }

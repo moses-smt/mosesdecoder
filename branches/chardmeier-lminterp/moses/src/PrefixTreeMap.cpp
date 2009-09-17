@@ -59,11 +59,26 @@ void PrefixTreeMap::FreeMemory() {
   for(Data::iterator i = m_Data.begin(); i != m_Data.end(); ++i){
 	i->free();
   }
-  for(size_t i = 0; i < m_Voc.size(); ++i){
+  /*for(size_t i = 0; i < m_Voc.size(); ++i){
 	delete m_Voc[i];
 	m_Voc[i] = 0;
-  }
+  }*/
   m_PtrPool.reset();
+}
+
+static WordVoc* ReadVoc(const std::string& filename) {
+    static std::map<std::string,WordVoc*> vocs;
+#ifdef WITH_THREADS
+    boost::mutex mutex;
+    boost::mutex::scoped_lock lock(mutex);
+#endif
+    std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
+    if (vi == vocs.end()) {
+        WordVoc* voc = new WordVoc();
+        voc->Read(filename);
+        vocs[filename] = voc;
+    }
+    return vocs[filename];
 }
 
 int PrefixTreeMap::Read(const std::string& fileNameStem, int numVocs){
@@ -77,7 +92,13 @@ int PrefixTreeMap::Read(const std::string& fileNameStem, int numVocs){
   fReadVector(ii,srcOffsets);
   fClose(ii);
  
+  if (m_FileSrc) {
+      fClose(m_FileSrc);
+  }
   m_FileSrc = fOpen(ifs.c_str(),"rb");
+  if (m_FileTgt) {
+      fClose(m_FileTgt);
+  }
   m_FileTgt = fOpen(ift.c_str(),"rb");
   
   m_Data.resize(srcOffsets.size());
@@ -99,8 +120,9 @@ int PrefixTreeMap::Read(const std::string& fileNameStem, int numVocs){
 	m_Voc.resize(numVocs);
 	for(int i = 0; i < numVocs; ++i){
 	  sprintf(num, "%d", i);
-	  m_Voc[i] = new WordVoc();
-	  m_Voc[i]->Read(ifv + num);
+	  //m_Voc[i] = new WordVoc();
+	  //m_Voc[i]->Read(ifv + num);
+        m_Voc[i] = ReadVoc(ifv + num);  
 	}
 
 	TRACE_ERR("binary file loaded, default OFF_T: "<< PTF::getDefault()<<"\n");
