@@ -278,7 +278,7 @@ sub header {
     print $OUT "\n";
 # some eddie specific stuff
     print $OUT ". /etc/profile.d/modules.sh\n";
-    print $OUT "module load openmpi/gcc/64/1.2.5/tcp\n";
+    print $OUT "module load openmpi/ethernet/gcc/latest\n";
     print $OUT "export LD_LIBRARY_PATH=/exports/informatics/inf_iccs_smt/shared/boost/lib:\$LD_LIBRARY_PATH\n";
 }
 

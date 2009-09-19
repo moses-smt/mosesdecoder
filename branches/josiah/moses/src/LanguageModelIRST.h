@@ -76,6 +76,7 @@ public:
 
   void CleanUpAfterSentenceProcessing();
   void InitializeBeforeSentenceProcessing();
+  virtual std::string GetScoreProducerDescription() const;	
 
   void set_dictionary_upperbound(int dub){ m_lmtb_size=dub ; 
 //m_lmtb->set_dictionary_upperbound(dub);
