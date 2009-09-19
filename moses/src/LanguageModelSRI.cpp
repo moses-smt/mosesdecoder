@@ -168,6 +168,15 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 	return ret;
 }
 
+std::string LanguageModelSRI::GetScoreProducerDescription() const
+{
+  std::ostringstream oss;
+  // what about LMs that are over multiple factors at once, POS + stem, for example?
+  oss << "LM_" << GetNGramOrder() << "gram, factor-type=" << GetFactorType() << ", file=" << m_filePath;
+  return oss.str();
+} 
+  
+  
 }
 
 

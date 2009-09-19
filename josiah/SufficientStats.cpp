@@ -1,4 +1,5 @@
 #include "SufficientStats.h"
+#include <cassert>
 
 namespace Josiah{
   
