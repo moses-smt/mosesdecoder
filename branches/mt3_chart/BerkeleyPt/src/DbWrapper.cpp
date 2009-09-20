@@ -6,8 +6,11 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
-#include "sys/stat.h"
+#ifdef WIN32
+#include <direct.h>
+#endif
 
+#include "sys/stat.h"
 #include "../../moses/src/PhraseDictionary.h"
 #include "DbWrapper.h"
 #include "Vocab.h"
@@ -96,8 +99,12 @@ void DbWrapper::EndSave()
 
 bool DbWrapper::OpenForSave(const std::string &filePath)
 {
-	mkdir(filePath.c_str(), 0777);
-	
+	#ifdef WIN32
+		mkdir(filePath.c_str());
+	#else
+		mkdir(filePath.c_str(), 0777);
+	#endif
+
 	if (OpenDb(m_dbMisc, filePath + "/Misc.db", DB_BTREE, DB_CREATE | DB_EXCL, 0664)
 			&& 
 			// store string -> vocab id
