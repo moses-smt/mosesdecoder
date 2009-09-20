@@ -192,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Cube.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\QueueEntry.cpp"
 				>
 			</File>
@@ -246,6 +250,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Cube.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\QueueEntry.h"
 				>
 			</File>
@@ -256,6 +264,10 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<File
+			RelativePath=".\src\Makefile.am"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
