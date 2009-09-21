@@ -232,7 +232,7 @@ void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
 std::string LanguageModelIRST::GetScoreProducerDescription() const {
   std::ostringstream oss;
   // what about LMs that are over multiple factors at once, POS + stem, for example?
-  oss << "LM_" << GetNGramOrder() << "gram, factor-type=" << GetFactorType() << ", file=" << m_filePath;
+  oss << "LM_" << GetNGramOrder() << "gram,factor-type=" << GetFactorType() << ",file=" << m_filePath;
   return oss.str();
 } 
   
