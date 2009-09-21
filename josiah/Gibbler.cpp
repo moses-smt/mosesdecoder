@@ -67,6 +67,53 @@ Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const J
       
 }
  
+Sample::Sample(const Sample& s) : m_targetWords(s.m_targetWords), m_sourceWords(s.m_sourceWords), feature_values(s.feature_values), _extra_features(s._extra_features) {
+  
+  assert(s.cachedSampledHyps.size() == 0); //don't wanna be copying samples with cached hyps. too much work
+  
+  std::map<int, Hypothesis*> source_order;
+  
+  //now traverse hypothesis left to right target side and create new hyps
+  
+  Hypothesis* target_tail = Hypothesis::Create(s.target_tail->GetWordsBitmap().GetSize(), s.target_tail->GetTargetPhraseRef()); //create the new target tail
+  
+  cachedSampledHyps.insert(target_tail);
+  this->target_tail = target_tail; //set it
+  SetSourceIndexedHyps(target_tail);  //source index it
+  source_order[-1] = target_tail;
+  
+  Hypothesis *prev = target_tail; //current prev is target tail
+  for (Hypothesis* h = const_cast<Hypothesis*>(s.target_tail->GetNextHypo()); h; h = const_cast<Hypothesis*>(h->GetNextHypo())) { //traverse target side L to R
+    Hypothesis* newH = CreateHypothesis(*prev, h->GetTranslationOption());
+    SetSourceIndexedHyps(newH); 
+    size_t startPos = newH->GetCurrSourceWordsRange().GetStartPos();
+    source_order[startPos] = newH;  
+    this->target_head = newH;
+    prev->SetNextHypo(newH);
+    prev = newH;
+  }
+  
+  std::map<int, Hypothesis*>::const_iterator source_it = source_order.begin();
+  prev = NULL;
+  this->source_tail = source_it->second;
+  
+  for (; source_it != source_order.end(); source_it++) {
+    Hypothesis *h = source_it->second;  
+    h->SetSourcePrevHypo(prev);
+    if (prev != NULL) 
+      prev->SetSourceNextHypo(h);
+    this->source_head = h;
+    prev = h;
+  }
+  
+  this->source_head->SetSourceNextHypo(NULL);
+  this->target_head->SetNextHypo(NULL);
+  
+  this->source_tail->SetSourcePrevHypo(NULL);
+  this->target_tail->SetPrevHypo(NULL);
+  
+}
+  
 Sample::~Sample() {
   RemoveAllInColl(cachedSampledHyps);
 }
@@ -79,7 +126,6 @@ Hypothesis* Sample::CreateHypothesis(Hypothesis& prevTarget, const TranslationOp
   prevTarget.SetNextHypo(hypo);
   cachedSampledHyps.insert(hypo);
   SetSourceIndexedHyps(hypo);
-  //SetTgtIndexedHyps(hypo);
   return hypo;
 }
 
@@ -393,6 +439,13 @@ void Sample::DeleteFromCache(Hypothesis *hyp) {
     delete *it;
     cachedSampledHyps.erase(it);
   }
+}
+
+double Sample::GetTemperedScore(float temp){
+  const vector<float> & weights = StaticData::Instance().GetAllWeights();
+  double score = GetFeatureValues().InnerProduct(weights);
+  score /= temp;
+  return score;
 }
 
 }

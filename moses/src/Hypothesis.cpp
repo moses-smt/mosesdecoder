@@ -46,13 +46,12 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
-Hypothesis::Hypothesis(InputType const& source, const TargetPhrase &emptyTarget)
+Hypothesis::Hypothesis(size_t sourceSize, const TargetPhrase &emptyTarget)
 	: m_prevHypo(NULL)
 	, m_transOpt(NULL)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
-	, m_sourceCompleted(source.GetSize())
-	, m_sourceInput(source)
+	, m_sourceCompleted(sourceSize)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
@@ -78,7 +77,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_targetPhrase(transOpt.GetTargetPhrase())
 	, m_sourcePhrase(transOpt.GetSourcePhrase())
 	, m_sourceCompleted				(prevHypo.m_sourceCompleted )
-	, m_sourceInput						(prevHypo.m_sourceInput)
+	
 	, m_currSourceWordsRange	(transOpt.GetSourceWordsRange())
 	, m_currTargetWordsRange	( prevHypo.m_currTargetWordsRange.GetEndPos() + 1
 														 ,prevHypo.m_currTargetWordsRange.GetEndPos() + transOpt.GetTargetPhrase().GetSize())
@@ -215,9 +214,9 @@ Hypothesis* Hypothesis::Create(const Hypothesis &prevHypo, const TranslationOpti
  * return the subclass of Hypothesis most appropriate to the given target phrase
  */
 
-Hypothesis* Hypothesis::Create(InputType const& m_source, const TargetPhrase &emptyTarget)
+Hypothesis* Hypothesis::Create(size_t sourceSize, const TargetPhrase &emptyTarget)
 {
-	return new Hypothesis(m_source, emptyTarget);
+  return new Hypothesis(sourceSize, emptyTarget);
 }
 
 /** check, if two hypothesis can be recombined.
@@ -586,10 +585,6 @@ std::string Hypothesis::GetSourcePhraseStringRep(const vector<FactorType> factor
 	{
 		return m_sourcePhrase->GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
 	}
-	else
-	{ 
-		return m_sourceInput.GetSubString(m_currSourceWordsRange).GetStringRep(factorsToPrint);
-	}	
 #endif
 }
 std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const 
