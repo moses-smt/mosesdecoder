@@ -78,7 +78,7 @@ void SearchCubePruning::ProcessSentence()
 	const StaticData &staticData = StaticData::Instance();
 
 	// initial seed hypothesis: nothing translated, no words produced
-	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+	Hypothesis *hypo = Hypothesis::Create(m_source.GetSize(), m_initialTargetPhrase);
 
 	HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
 	firstStack.AddInitial(hypo);

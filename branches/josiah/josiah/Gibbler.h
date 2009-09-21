@@ -53,6 +53,7 @@ class Sample {
   float ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) ;
  public:
   Sample(Hypothesis* target_head, const std::vector<Word>& source, const feature_vector& extra_features);
+  Sample(const Sample&);
   ~Sample();
   int GetSourceSize() const { return m_sourceWords.size(); }
   Hypothesis* GetHypAtSourceIndex(size_t ) ;
@@ -82,6 +83,9 @@ class Sample {
   const std::vector<Word>& GetSourceWords() const { return m_sourceWords; } 
   
   int GetTargetLength()  { return m_targetWords.size(); }
+  
+  double GetTemperedScore(float);
+  
   friend class Sampler;
   friend class GibbsOperator;
 };

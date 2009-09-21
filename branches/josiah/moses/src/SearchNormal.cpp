@@ -52,7 +52,7 @@ void SearchNormal::ProcessSentence()
 	clock_t t=0; // used to track time for steps
 
 	// initial seed hypothesis: nothing translated, no words produced
-	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+	Hypothesis *hypo = Hypothesis::Create(m_source.GetSize(), m_initialTargetPhrase);
 	m_hypoStackColl[0]->AddPrune(hypo);
 
 	// go through each stack

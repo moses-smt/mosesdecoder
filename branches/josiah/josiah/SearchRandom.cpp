@@ -53,7 +53,7 @@ void SearchRandom::ProcessSentence()
 
 
 	// initial seed hypothesis: nothing translated, no words produced
-	Hypothesis *hypo = Hypothesis::Create(m_source, m_initialTargetPhrase);
+	Hypothesis *hypo = Hypothesis::Create(m_source.GetSize(), m_initialTargetPhrase);
 	m_hypoStackColl[0]->AddPrune(hypo);
 
 	// go through each stack

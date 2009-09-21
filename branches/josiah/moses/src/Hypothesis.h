@@ -75,7 +75,7 @@ protected:
 	WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
 	//TODO: how to integrate this into confusion network framework; what if
 	//it's a confusion network in the end???
-	InputType const&  m_sourceInput;
+	//InputType const&  m_sourceInput;
 	WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
 	WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
@@ -98,7 +98,7 @@ protected:
 	//TODO: add appropriate arguments to score calculator
 
 	/*! used by initial seeding of the translation process */	
-	Hypothesis(InputType const& source, const TargetPhrase &emptyTarget);
+	Hypothesis(size_t sourceSize, const TargetPhrase &emptyTarget);
 	/*! used when creating a new hypothesis using a translation option (phrase translation) */
 	Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
@@ -134,7 +134,7 @@ public:
 	static Hypothesis* Create(const WordsBitmap &initialCoverage);
 
 	/** return the subclass of Hypothesis most appropriate to the given target phrase */
-	static Hypothesis* Create(InputType const& source, const TargetPhrase &emptyTarget);
+	static Hypothesis* Create(size_t sourceSize, const TargetPhrase &emptyTarget);
 	
 	/** return the subclass of Hypothesis most appropriate to the given translation option */
 	Hypothesis* CreateNext(const TranslationOption &transOpt, const Phrase* constraint) const;
@@ -216,9 +216,14 @@ public:
 		return m_sourcePhrase;
 	}
 
+//  inline const InputType& GetInputType() const {
+//    return m_sourceInput;  
+//  }
+  
 	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;
 	std::string GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const;
 	inline const TargetPhrase GetTargetPhrase() const { return m_targetPhrase; }
+  inline const TargetPhrase& GetTargetPhraseRef() const { return m_targetPhrase; }
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
 

@@ -152,6 +152,9 @@ int main(int argc, char** argv) {
   bool collectAll, sampleCtrAll;
   bool mapdecode;
   vector<string> ngramorders;
+  int numChains;
+  vector<float> temperingTemps;
+  float exchangeProb;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -225,7 +228,11 @@ int main(int argc, char** argv) {
   ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
   ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
   ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding")
-  ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs");
+  ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs")
+  ("num-chains",  po::value<int>(&numChains)->default_value(1), "Number of chains to run when parallel tempering")
+  ("tempering-temp", po::value<vector<float> >(&temperingTemps), "Temperatures for parallel tempering chains. Have to pass num-chains number of temperatures. First one will be overriden to temp = 1")
+  ("exchange-prob", po::value<float>(&exchangeProb)->default_value(0.5f), "Exchange prob")
+  ;
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -468,6 +475,25 @@ int main(int argc, char** argv) {
   }
   
   int initialQuenchingIteration = -1;
+  
+  
+  //Parallel tempering
+  if (numChains == 1) {
+    temperingTemps.resize(1);
+    temperingTemps[0] = 1.0;
+  }
+  else {
+    if (temperingTemps.size() != numChains) {
+      cerr << "There are " << numChains << " but only " << temperingTemps.size() << " temperatures specified" << endl;
+#ifdef MPI_ENABLED
+      MPI_Finalize();
+#endif
+      return -1;
+    }
+    else {
+      temperingTemps[0] = 1.0;
+    }
+  }  
 
   timer.check("Processing input file");
   while (input->HasMore()) {
@@ -648,6 +674,12 @@ int main(int argc, char** argv) {
       MHAcceptor::mhtotal = 0;  
       MHAcceptor::acceptanceCtr = 0;  
     }
+    
+    
+    sampler.SetNumChains(numChains);
+    sampler.SetTemperingSchedule(temperingTemps);
+    sampler.SetExchangeProb(exchangeProb);
+    
     
     sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer);  
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
