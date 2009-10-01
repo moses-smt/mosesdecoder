@@ -30,7 +30,7 @@ fi
 
 cmp $scfile $scfile.2 
 cmp $ffile $ffile.2 
-wc $ffile $scfile $ffile.2 $scfile.2 | grep run
+wc $ffile $scfile $ffile.2 $scfile.2 | grep run | perl -pe 's/ +/ /g;s/^ //;'
 
 prevscfile=$scfile
 prevffile=$ffile
