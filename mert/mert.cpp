@@ -127,10 +127,10 @@ int main (int argc, char **argv) {
 
   if (hasSeed) {
       cerr << "Seeding random numbers with " << seed << endl;
-      srand(seed);
+      srandom(seed);
   } else {
       cerr << "Seeding random numbers with system clock " << endl;
-      srand(time(NULL));
+      srandom(time(NULL));
   }
   
   if(tooptimize.empty()){

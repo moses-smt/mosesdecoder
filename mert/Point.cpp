@@ -18,7 +18,7 @@ void Point::Randomize(const vector<parameter_t>& min,const vector<parameter_t>& 
   assert(min.size()==Point::dim);
   assert(max.size()==Point::dim);
   for (unsigned int i=0; i<size(); i++)
-    operator[](i)= min[i] + (float)rand()/(float)RAND_MAX * (float)(max[i]-min[i]);
+    operator[](i)= min[i] + (float)random()/(float)RAND_MAX * (float)(max[i]-min[i]);
 }
 
 void Point::NormalizeL2(){
