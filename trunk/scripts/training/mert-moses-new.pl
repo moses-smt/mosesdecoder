@@ -132,7 +132,7 @@ my $___AVERAGE = 0;
 my $___CLOSEST = 0;
 
 # Use "--nocase" to compute case-insensitive scores
-my $__NOCASE = 0;
+my $___NOCASE = 0;
 
 # Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
@@ -228,8 +228,7 @@ if ($___ASYNC) {
 }
 
 print STDERR "After default: $queue_flags\n";
-
-if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || !defined $___CONFIG) {
+if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER || !defined $___CONFIG) {
   print STDERR "usage: mert-moses-new.pl input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
