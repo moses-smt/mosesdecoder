@@ -609,7 +609,7 @@ while(1) {
   my $feature_file = "run$run.${base_feature_file}";
   my $score_file = "run$run.${base_score_file}";
 
-  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file  -r ".join(",", @references)." -n $nbest_file";
+  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
@@ -683,6 +683,8 @@ while(1) {
   else{
     $cmd = $cmd." --scfile $score_file";
   }
+
+  $cmd = $cmd." --ifile run$run.$weights_in_file";
 
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
