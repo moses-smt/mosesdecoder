@@ -27,8 +27,10 @@ $extractor --binary --nbest $nbest --reference $ref --ffile $ffile.b --scfile $s
 $extractor --ffile $ffile.2 --scfile $scfile.2 --prev-scfile $scfile.b --prev-ffile $ffile.b
 fi
 
+
 cmp $scfile $scfile.2 
 cmp $ffile $ffile.2 
+wc $ffile $scfile $ffile.2 $scfile.2 | grep run
 
 prevscfile=$scfile
 prevffile=$ffile
@@ -36,7 +38,6 @@ prevffile=$ffile
 run=$(($run +1))
 done
 
-wc *.run* | grep run
 
 for run in 1 2 3 4 5 ; do
 scfile=SCORESTAT.run$run
@@ -44,5 +45,4 @@ ffile=FEATSTAT.run$run
 
 rm $ffile $scfile
 rm $ffile.2 $scfile.2
-rm $ffile.b $scfile.b
 done
