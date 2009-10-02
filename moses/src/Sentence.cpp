@@ -20,6 +20,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <stdexcept>
+
 #include "Sentence.h"
 #include "PhraseDictionaryMemory.h"
 #include "TranslationOptionCollectionText.h"
@@ -49,8 +51,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	std::vector< size_t > xmlWalls;
 	if (staticData.GetXmlInputType() != XmlPassThrough) {
 		if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls )) {
-			TRACE_ERR("Unable to parse XML in line " << line);
-			abort();
+            const string msg("Unable to parse XML in line: " + line);
+			TRACE_ERR(msg << endl);
+			throw runtime_error(msg);
 		}			
 	}
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
