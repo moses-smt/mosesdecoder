@@ -17,10 +17,8 @@ local_moses_ini=`perl $cwd/create_localized_moses_ini.pl $data_dir ./moses.ini 2
 nbest=200
 #if you want distinct nbest change this:
 nbestdistinct=""
-#nbestdistinct="--nbest-distinct"
 
 devset="input"
-reference="reference"
 reference="reference."
 config=$local_moses_ini
 
