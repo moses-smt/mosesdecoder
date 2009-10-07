@@ -9,6 +9,7 @@ my @tests = qw (
   mert-moses-new
   mert-moses-new-nocase
   mert-moses-new-aggregate
+  mert-moses-new-continue
 );
 
 ###########################################################
