@@ -97,14 +97,12 @@ sub print_parameters(){
 ### you always have to call it
 init();
 
-#my $archive_list;
-#my $actual_index;
 my $pwd =`pwd`;
 chomp($pwd);
 my $archive_list = "$pwd/archive.list";
 my $actual_index = "$pwd/actual.index";
 print STDERR "archivelist: $archive_list\n";
-print STDERR "actualindex: $actual_index\n";
+print STDERR "actualindex is taken from: $actual_index\n";
 
 
 my $index=0;
@@ -113,6 +111,7 @@ if (-e $actual_index){
         $index=<IN>; chomp($index);
         close(IN);
 }
+print STDERR "actualindex: $index\n";
 
 
 open(IN,"$archive_list");
