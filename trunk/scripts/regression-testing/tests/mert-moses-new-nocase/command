@@ -7,7 +7,6 @@ data_dir=$1; shift
 testdir=$1; shift
 
 cwd=`pwd`
-cwd=/Users/nicolabertoldi/workspace/mosesdecoder/trunk/scripts/regression-testing/
 cwd=$moses_scripts_dir/regression-testing/
 
 pushd $testdir 2> /dev/null > /dev/null
