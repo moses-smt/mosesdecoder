@@ -37,8 +37,7 @@ gzip -d working_dir/run*.NBEST.out.gz 2> /dev/null
 
 parameters="--nonorm --closest --no-filter-phrase-table --efficient_scorenbest_flag  --predictable-seeds --continue"
 
-/Users/nicolabertoldi/workspace/mosesdecoder/trunk/scripts/regression-testing/tests/mert-moses-new-continue/mert-moses-new.pl $devset $reference $decoder $config --mertdir $mert_dir --mertargs "--binary" --working-dir working_dir --nbest $nbest $nbestdistinct --lambdas "$lambdas" $parameters > working_dir/MERT.out 2> working_dir/MERT.err
-#$moses_scripts_dir/training/mert-moses-new.pl $devset $reference $decoder $config --mertdir $mert_dir --mertargs "--binary" --working-dir working_dir --nbest $nbest $nbestdistinct --lambdas "$lambdas" $parameters > working_dir/MERT.out 2> working_dir/MERT.err
+$moses_scripts_dir/training/mert-moses-new.pl $devset $reference $decoder $config --mertdir $mert_dir --mertargs "--binary" --working-dir working_dir --nbest $nbest $nbestdistinct --lambdas "$lambdas" $parameters > working_dir/MERT.out 2> working_dir/MERT.err
 
 # checking for weights.opt files
 cat working_dir/run[0-9].weights.txt | awk '{a++; print "weights_"a": "$0}' > tmpout$$ 
