@@ -497,38 +497,101 @@ my $weights_out_file = "weights.txt";
 
 # set start run
 my $start_run = 1;
+my $bestpoint = undef;
+my $devbleu = undef;
+
+my $prev_feature_file = undef;
+my $prev_score_file = undef;
 
 if ($continue) {
-  die "continue not yet supported by the new mert script\nNeed to load features and scores from last iteration\n";
-  # need to load last best values
+  # getting the last finished step
   print STDERR "Trying to continue an interrupted optimization.\n";
   open IN, "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
   my $step = <IN>;
   chomp $step;
-  $step++;
   close IN;
 
-  if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz") {
-    # allow stepping one extra iteration back
-    $step--;
-    die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!"
-      if ! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz";
+  print STDERR "Last finished step is $step\n";
+
+  # getting the first needed step
+  my $firststep;
+  if ($prev_aggregate_nbl_size==-1){
+    $firststep=1;
+  }
+  else{
+    $firststep=$step-$prev_aggregate_nbl_size+1;
+    $firststep=($firststep>0)?$firststep:1;
+  }
+
+#checking if all needed data are available
+  if ($firststep<=$step){
+    print STDERR "First previous needed data index is $firststep\n";
+    print STDERR "Checking whether all needed data (from step $firststep to step $step) are available\n";
+    
+    for (my $prevstep=$firststep; $prevstep<=$step;$prevstep++){
+      print STDERR "Checking whether data of step $prevstep are available\n";
+      if (! -e "run$prevstep.features.dat"){
+	die "Can't start from step $step, because run$prevstep.features.dat was not found!";
+      }else{
+	if (defined $prev_feature_file){
+	  $prev_feature_file = "${prev_feature_file},run$prevstep.features.dat";
+	}
+	else{
+	  $prev_feature_file = "run$prevstep.features.dat";
+	}
+      }
+      if (! -e "run$prevstep.scores.dat"){
+	die "Can't start from step $step, because run$prevstep.scores.dat was not found!";
+      }else{
+	if (defined $prev_score_file){
+	  $prev_score_file = "${prev_score_file},run$prevstep.scores.dat";
+	}
+	else{
+	  $prev_score_file = "run$prevstep.scores.dat";
+	}
+      }
+    }
+    if (! -e "run$step.weights.txt"){
+      die "Can't start from step $step, because run$step.weights.txt was not found!";
+    }
+    if (! -e "run$step.$mert_logfile"){
+      die "Can't start from step $step, because run$step.$mert_logfile was not found!";
+    }
+    if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz"){
+      die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!";
+    }
+    print STDERR "All needed data are available\n";
+
+    print STDERR "Loading information from last step ($step)\n";
+    open(IN,"run$step.$mert_logfile") or die "Can't open run$step.$mert_logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+	$bestpoint = $1;
+	$devbleu = $2;
+	last;
+      }
+    }
+    close IN;
+    die "Failed to parse mert.log, missed Best point there."
+      if !defined $bestpoint || !defined $devbleu;
+    print "($step) BEST at $step $bestpoint => $devbleu at ".`date`;
+    
+    my @newweights = split /\s+/, $bestpoint;
+    
+    
+    print STDERR "Reading last cached lambda values (result from step $step)\n";
+    @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
+    
+    
+    # update my cache of lambda values
+    store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+    
+  }
+  else{
+    print STDERR "No pevious data are needed\n";
   }
 
   $start_run = $step +1;
-
-  print STDERR "Reading last cached lambda values (result from step $step)\n";
-  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
-
-  open IN, "$weights_out_file" or die "Can't read $weights_out_file";
-  my $newweights = <IN>;
-  chomp $newweights;
-  close IN;
-  my @newweights = split /\s+/, $newweights;
-
-  #dump_triples(\%used_triples);
-  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
-  #dump_triples(\%used_triples);
 }
 
 if ($___FILTER_PHRASE_TABLE){
@@ -557,8 +620,6 @@ my $PARAMETERS;
 #$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
 $PARAMETERS = $___DECODER_FLAGS;
 
-my $devbleu = undef;
-my $bestpoint = undef;
 my $run=$start_run-1;
 
 my $oldallsorted = undef;
@@ -566,8 +627,6 @@ my $allsorted = undef;
 
 my $cmd;
 # features and scores from the last run.
-my $prev_feature_file=undef;
-my $prev_score_file=undef;
 my $nbest_file=undef;
 
 while(1) {
@@ -770,8 +829,8 @@ while(1) {
       $prev_score_file = "run${i}.${base_score_file}";
     }
   }
-  print "loading data from $prev_feature_file\n";
-  print "loading data from $prev_score_file\n";
+  print "loading data from $prev_feature_file\n" if defined($prev_feature_file);
+  print "loading data from $prev_score_file\n" if defined($prev_score_file);
 }
 print "Training finished at ".`date`;
 
