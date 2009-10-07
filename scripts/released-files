@@ -36,6 +36,7 @@ training/mert-moses.pl
 training/mert-moses-new.pl
 training/phrase-extract/extract
 training/phrase-extract/score
+training/phrase-extract/consolidate
 training/postprocess-lopar.perl
 training/reduce_combine.pl
 training/combine_factors.pl
