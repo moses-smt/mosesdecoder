@@ -468,7 +468,7 @@ my $need_to_normalize = 1;
 
 
 
-my @order_of_lambdas_from_decoder = ();
+my @order_of_lambdas = ();
 # this will store the labels of scores coming out of the decoder (and hence the order of lambdas coming out of mert)
 # we will use the array to interpret the lambdas
 # the array gets filled with labels only after first nbestlist was generated
@@ -493,6 +493,7 @@ chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
 my $mert_logfile = "mert.log";
 my $weights_in_file = "init.opt";
 my $weights_out_file = "weights.txt";
+my $names_file = "names.txt";
 
 
 # set start run
@@ -557,8 +558,8 @@ if ($continue) {
     if (! -e "run$step.$mert_logfile"){
       die "Can't start from step $step, because run$step.$mert_logfile was not found!";
     }
-    if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz"){
-      die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!";
+    if (! -e "run$step.$names_file"){
+      die "Can't start from step $step, because run$step.$names_file was not found!";
     }
     print STDERR "All needed data are available\n";
 
@@ -580,11 +581,10 @@ if ($continue) {
     
     
     print STDERR "Reading last cached lambda values (result from step $step)\n";
-    @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
-    
+    @order_of_lambdas = get_order_of_scores_from_names("run$step.$names_file");
     
     # update my cache of lambda values
-    store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+    store_new_lambda_values(\%used_triples, \@order_of_lambdas, \@newweights);
     
   }
   else{
@@ -643,7 +643,7 @@ while(1) {
   # skip if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      $nbest_file = run_decoder(\%used_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
+      $nbest_file = run_decoder(\%used_triples, $PARAMETERS, $run, \@order_of_lambdas, $need_to_normalize);
       $need_to_normalize = 0;
       safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
       $nbest_file = $nbest_file.".gz";
@@ -651,8 +651,8 @@ while(1) {
   else {
       die "Skipping not yet supported\n";
       #print "skipped decoder run\n";
-      #if (0 == scalar @order_of_lambdas_from_decoder) {
-      #  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc run*.best*.out.gz | head -1 |");
+      #if (0 == scalar @order_of_lambdas) {
+      #  @order_of_lambdas = get_order_of_scores_from_nbestlist("gunzip -dc run*.best*.out.gz | head -1 |");
       #}
       #$skip_decoder = 0;
       #$need_to_normalize = 0;
@@ -682,8 +682,7 @@ while(1) {
   # values of lambda.
 
   # We need to prepare the files and **the order of the lambdas must
-  # correspond to the order @order_of_lambdas_from_decoder
-
+  # correspond to the order @order_of_lambdas
   # NB: This code is copied from the old version of mert-moses.pl,
   # even though the max,min and name are not yet used in the new
   # version.
@@ -693,9 +692,9 @@ while(1) {
   my @CURR = ();   # the starting values
   my @NAME = ();  # to which model does the lambda belong
   
-  # walk in order of @order_of_lambdas_from_decoder and collect the min,max,val
+  # walk in order of @order_of_lambdas and collect the min,max,val
   my %visited = ();
-  foreach my $name (@order_of_lambdas_from_decoder) {
+  foreach my $name (@order_of_lambdas) {
     next if $visited{$name};
     $visited{$name} = 1;
 	if (!defined $used_triples{$name})
@@ -716,6 +715,10 @@ while(1) {
 
   open(OUT,"> $weights_in_file") or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
   print OUT join(" ", @CURR)."\n";
+  close(OUT);
+  
+  open(OUT,"> $names_file") or die "Can't write $names_file (WD now $___WORKING_DIR)";
+  print OUT join(" ", @NAME)."\n";
   close(OUT);
   
   # make a backup copy labelled with this run number
@@ -760,6 +763,7 @@ while(1) {
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
+  safesystem ("\\cp -f $names_file run$run.$names_file") or die; # this one is needed for restarts, too
 
   print "run $run end at ".`date`;
 
@@ -781,7 +785,7 @@ while(1) {
   my @newweights = split /\s+/, $bestpoint;
 
   # update my cache of lambda values
-  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+  store_new_lambda_values(\%used_triples, \@order_of_lambdas, \@newweights);
 
   ## additional stopping criterion: weights have not changed
   my $shouldstop = 1;
@@ -837,6 +841,7 @@ print "Training finished at ".`date`;
 if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
+safesystem("\\cp -f $names_file run$run.$names_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
 create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
@@ -967,6 +972,22 @@ sub get_order_of_scores_from_nbestlist {
       die "Not a label, not a score '$tok'. Failed to parse the scores string: '$scores' of nbestlist '$fname_or_source'";
     }
   }
+  print STDERR "The decoder returns the scores in this order: @order\n";
+  return @order;
+}
+
+sub get_order_of_scores_from_names {
+  # read the files containing the ordered names of the features
+  # return the score labels in order
+  my $fname_or_source = shift;
+  print STDERR "Peeking the order of scores from $fname_or_source\n";
+  open IN, $fname_or_source or die "Failed to get order of scores from file of names '$fname_or_source'";
+  my $line = <IN>;
+  close IN;
+  $line =~ s/^\s*|\s*$//g;
+  die "Line empty in file of names '$fname_or_source'" if !defined $line;
+  my (@order) = split / +/, $line;
+
   print STDERR "The decoder returns the scores in this order: @order\n";
   return @order;
 }
