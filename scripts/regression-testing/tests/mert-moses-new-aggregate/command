@@ -32,8 +32,8 @@ mkdir working_dir 2> /dev/null
 
 cp $0 working_dir/ 2> /dev/null
 cp ./data/archive.list working_dir/ 2> /dev/null
-cp ./data/run*.TRANS.out working_dir/ 2> /dev/null
-cp ./data/run*.NBEST.out working_dir/ 2> /dev/null
+cp ./data/run* working_dir/ 2> /dev/null
+gzip -d working_dir/run*.NBEST.out.gz 2> /dev/null
 
 parameters="--nonorm --closest --no-filter-phrase-table --efficient_scorenbest_flag  --predictable-seeds --prev-aggregate-nbestlist 4"
 
