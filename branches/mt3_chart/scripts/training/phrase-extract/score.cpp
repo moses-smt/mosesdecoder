@@ -87,7 +87,7 @@ PhraseTable phraseTableT;
 PhraseTable phraseTableS;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
-bool newAlignmentFormatFlag = false;
+bool newAlignmentFormatFlag = true;
 bool wordAlignmentFlag = false;
 bool onlyDirectFlag = false;
 bool goodTuringFlag = false;
