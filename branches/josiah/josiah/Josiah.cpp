@@ -152,6 +152,7 @@ int main(int argc, char** argv) {
   bool collectAll, sampleCtrAll;
   bool mapdecode;
   vector<string> ngramorders;
+  bool raoBlackwell;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -224,6 +225,7 @@ int main(int argc, char** argv) {
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
   ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
   ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
+          ("rao-blackwell", po::value(&raoBlackwell)->zero_tokens()->default_value(false), "Do Rao-Blackwellisation (aka conditional estimation")
   ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding")
   ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs");
  
@@ -649,7 +651,7 @@ int main(int argc, char** argv) {
       MHAcceptor::acceptanceCtr = 0;  
     }
     
-    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer);  
+    sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer,raoBlackwell);  
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     if (doMH) {
       VERBOSE(0, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 

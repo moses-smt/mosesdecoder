@@ -14,8 +14,8 @@ namespace Josiah {
 
 
 
-Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features) : 
-    m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()),  _extra_features(extra_features){ 
+Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features, bool doRaoBlackwell) : 
+        m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()),  _extra_features(extra_features), m_doRaoBlackwell(doRaoBlackwell), m_updates(0) { 
   
   std::map<int, Hypothesis*> source_order;
   this->target_head = target_head;
@@ -394,6 +394,35 @@ void Sample::DeleteFromCache(Hypothesis *hyp) {
     cachedSampledHyps.erase(it);
   }
 }
+
+
+
+bool Sample::DoRaoBlackwell() const {
+    return m_doRaoBlackwell;
+}
+
+void Sample::AddConditionalFeatureValues( const ScoreComponentCollection & fv ) {
+    m_conditionalFeatureValues.PlusEquals(fv);
+    ++m_updates;
+}
+
+const ScoreComponentCollection Sample::GetConditionalFeatureValues( ) const {
+    if (m_doRaoBlackwell) {
+        ScoreComponentCollection fv(m_conditionalFeatureValues);
+        fv.DivideEquals(m_updates);
+        return fv;
+    } else {
+        return GetFeatureValues();
+    }
+}
+
+void Sample::ResetConditionalFeatureValues(){
+    m_updates = 0;
+    m_conditionalFeatureValues.ZeroAll();
+}
+
+
+
 
 }
 

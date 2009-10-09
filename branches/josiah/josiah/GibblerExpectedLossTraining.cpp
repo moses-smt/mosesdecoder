@@ -14,11 +14,12 @@ void ExpectedLossCollector::collect(Sample& s) {
   h->GetTranslation(&trans, 0);
   const float gain = g[0]->ComputeGain(trans);
   m_lengths.push_back(trans.size());
-  VERBOSE(2, gain << "\tFeatures=" << s.GetFeatureValues() << endl);
+  ScoreComponentCollection fvs = s.GetConditionalFeatureValues();
+  VERBOSE(2, gain << "\tFeatures=" << fvs << endl);
   //VERBOSE(0, "Collected : Target " << s << ", gain " << gain << "\tFeatures=" << s.GetFeatureValues() << endl);
   m_gains.push_back(gain);
 //  m_samples.push_back(Derivation(s));
-  m_featureVectors.push_back(s.GetFeatureValues());
+  m_featureVectors.push_back(fvs);
   MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
 

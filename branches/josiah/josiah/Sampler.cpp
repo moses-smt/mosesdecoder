@@ -38,8 +38,8 @@ namespace Josiah {
     
   }
   
-  void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAllSamples, bool defaultCtrIncrementer) {
-    Sample sample(starting,source,extra_fv);
+  void Sampler::Run(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const Josiah::feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAllSamples, bool defaultCtrIncrementer, bool raoBlackwell) {
+    Sample sample(starting,source,extra_fv,raoBlackwell);
     ResetGainStats();
     bool f = false;
     
@@ -146,5 +146,6 @@ namespace Josiah {
     ScoreComponentCollection minusDeltaFV;
     minusDeltaFV.MinusEquals(importanceScores);
     sample.UpdateFeatureValues(minusDeltaFV);
+    sample.ResetConditionalFeatureValues();
   }
 }

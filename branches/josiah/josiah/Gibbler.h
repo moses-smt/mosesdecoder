@@ -39,6 +39,11 @@ class Sample {
   
   std::map<size_t, Hypothesis*>  sourceIndexedHyps;
   
+  //Used for conditional estimation (aka Rao-Blackwellisation)
+  bool m_doRaoBlackwell;
+  ScoreComponentCollection m_conditionalFeatureValues;
+  size_t m_updates;
+  
   void SetSourceIndexedHyps(Hypothesis* h);
   void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
@@ -52,7 +57,7 @@ class Sample {
   void DeleteFromCache(Hypothesis *hyp);
   float ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) ;
  public:
-  Sample(Hypothesis* target_head, const std::vector<Word>& source, const feature_vector& extra_features);
+  Sample(Hypothesis* target_head, const std::vector<Word>& source, const feature_vector& extra_features, bool raoBlackwell);
   ~Sample();
   int GetSourceSize() const { return m_sourceWords.size(); }
   Hypothesis* GetHypAtSourceIndex(size_t ) ;
@@ -82,6 +87,13 @@ class Sample {
   const std::vector<Word>& GetSourceWords() const { return m_sourceWords; } 
   
   int GetTargetLength()  { return m_targetWords.size(); }
+  
+  //Used for conditional estimation (aka Rao-Blackwellisation)
+  bool DoRaoBlackwell() const;
+  void AddConditionalFeatureValues(const ScoreComponentCollection& fv);
+  void ResetConditionalFeatureValues();
+  const ScoreComponentCollection GetConditionalFeatureValues() const;
+  
   friend class Sampler;
   friend class GibbsOperator;
 };

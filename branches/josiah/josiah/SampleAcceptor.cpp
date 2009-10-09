@@ -41,25 +41,35 @@ size_t SampleAcceptor::getSample(const vector<double>& scores, double random) {
   VERBOSE(3,"The chosen sample is " << chosen << endl);
   return chosen;
 }
+
+void SampleAcceptor::getNormalisedScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores) {
+    //get the scores
+    getScores(deltas, scores);
+    normalize(scores);
+}
+
+void FixedTempAcceptor::getNormalisedScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores) {
+    getScores(deltas, scores);
+    IFVERBOSE(2) {
+        cerr << "Before annealing, scores are :";
+        copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
+        cerr << endl;
+    }
+  //do annealling
+    transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(), 1.0/m_temp));
+    IFVERBOSE(2) {
+        cerr << "After annealing, scores are :";
+        copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
+        cerr << endl;
+    }
   
-TranslationDelta* FixedTempAcceptor::choose(const vector<TranslationDelta*>& deltas) {
+    normalize(scores);
+}
+  
+TranslationDelta* SampleAcceptor::choose(const vector<TranslationDelta*>& deltas) {
   //get the scores
   vector<double> scores;
-  getScores(deltas, scores);
-  IFVERBOSE(2) {
-    cerr << "Before annealing, scores are :";
-    copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
-    cerr << endl;
-  }
-  //do annealling
-  transform(scores.begin(),scores.end(),scores.begin(),bind2nd(multiplies<double>(), 1.0/m_temp));
-  IFVERBOSE(2) {
-    cerr << "After annealing, scores are :";
-    copy(scores.begin(),scores.end(),ostream_iterator<double>(cerr," "));
-    cerr << endl;
-  }
-  
-  normalize(scores);
+  getNormalisedScores(deltas,scores);
   
   double random = getRandom();
   size_t chosen = getSample(scores, random);
@@ -67,17 +77,6 @@ TranslationDelta* FixedTempAcceptor::choose(const vector<TranslationDelta*>& del
   return deltas[chosen];
 }
 
-TranslationDelta* RegularAcceptor::choose(const vector<TranslationDelta*>& deltas) {
-  //get the scores
-  vector<double> scores;
-  getScores(deltas, scores);
-  normalize(scores);
-  
-  double random = getRandom();
-  size_t chosen = getSample(scores, random);
-  
-  return deltas[chosen];
-}
 
 
 TranslationDelta* GreedyAcceptor::choose(const vector<TranslationDelta*>& deltas) {
