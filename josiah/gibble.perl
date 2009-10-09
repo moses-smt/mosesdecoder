@@ -34,6 +34,7 @@ foreach my $key ($config->param) {
     $config->param($key,$value);
 }
 
+my $mpienv = "openmpi-smp";
 
 #required global parameters
 my $name = &param_required("general.name");
@@ -66,7 +67,8 @@ if ($feature_file) {
 my $working_dir = &param("general.working-dir");
 system("mkdir -p $working_dir") == 0 or  die "Error: unable to create directory \"$working_dir\"";
 my $train_script = "$name-train";
-my $jobs = &param("train.jobs",10);
+my $jobs = &param("train.jobs",8);
+die "Number of jobs should be multiple of 4" if (($jobs % 4) != 0);
 my $job_name = "$name-t";
 my $hours = &param("train.hours",48);
 
@@ -186,7 +188,8 @@ while(1) {
     }
     #new weight file written. create test script and submit
     my $test_script = "$name-test";
-    my $jobs = &param("test.jobs",5);
+    my $jobs = &param("test.jobs",4);
+    die "Number of jobs should be multiple of 4" if (($jobs % 4) != 0);
     my $job_name = $name . "_$train_iteration";
     my $hours = &param("test.hours",12);
 
@@ -271,7 +274,7 @@ sub header {
     print $OUT "#!/bin/sh\n";
     print $OUT "#\$ -N $name\n";
     print $OUT "#\$ -wd $working_dir\n";
-    print $OUT "#\$ -pe openmpi $jobs\n";
+    print $OUT "#\$ -pe $mpienv $jobs\n";
     print $OUT "#\$ -l h_rt=$hours:00:00\n";
     print $OUT "#\$ -o $out\n";
     print $OUT "#\$ -e $err\n";
