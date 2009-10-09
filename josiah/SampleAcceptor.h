@@ -15,19 +15,24 @@ class SampleAcceptor {
 public:
   SampleAcceptor() {}
   virtual ~SampleAcceptor() {}
-  virtual TranslationDelta* choose(const std::vector<TranslationDelta*>& deltas) = 0;
-  void getScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores);
+  virtual TranslationDelta* choose(const std::vector<TranslationDelta*>& deltas);
   void normalize(std::vector<double>& scores); 
   double getRandom() ;
   size_t getSample(const std::vector<double>& scores, double random);
+  //scores normalised to give a probability
+  virtual void getNormalisedScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores);
+  
+  
+protected:
+    void getScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores);
 };
 
 class FixedTempAcceptor : public SampleAcceptor {
 public:
   FixedTempAcceptor(float temp) {m_temp = temp;}
   virtual ~FixedTempAcceptor() {}
-  virtual TranslationDelta*choose(const std::vector<TranslationDelta*>& deltas) ;
   void SetTemp(float temp) { m_temp = temp;}
+  virtual void getNormalisedScores(const std::vector<TranslationDelta*>& deltas, std::vector<double>& scores);
 private:
   float m_temp;
 };
@@ -36,7 +41,6 @@ class RegularAcceptor : public SampleAcceptor {
 public:
   RegularAcceptor() {}
   virtual ~RegularAcceptor() {}
-  virtual TranslationDelta* choose(const std::vector<TranslationDelta*>& deltas) ;
 };
 
 class GreedyAcceptor : public SampleAcceptor {

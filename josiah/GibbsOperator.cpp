@@ -75,7 +75,7 @@ void GibbsOperator::Quench() {
 }  
   
   
-void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta) {
+void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, Sample& sample) {
   if (deltas.empty()) return;
   
   TranslationDelta* chosenDelta = m_acceptor->choose(deltas);
@@ -87,12 +87,32 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   if (m_gf) {
     doOnlineLearning(deltas, noChangeDelta, chosenDelta);
   }
+  
+  //do Conditional Estimation (Rao-Blackwellisation)
+  if (sample.DoRaoBlackwell()) {
+      ScoreComponentCollection fv(sample.GetFeatureValues());
+      fv.MinusEquals(noChangeDelta->getScores());
+      //Add FV(d)*p(d) for each delta.
+      vector<double> scores;
+      m_acceptor->getNormalisedScores(deltas,scores);
+      //scores now contain the normalised logprobs
+      assert(scores.size() == deltas.size());
+      for (size_t i = 0; i < deltas.size(); ++i) {
+          if (scores[i] < -30) continue; //floor
+          ScoreComponentCollection deltaFv = deltas[i]->getScores();
+          deltaFv.MultiplyEquals(exp(scores[i]));
+          fv.PlusEquals(deltaFv);
+      }
+      //cout << "Rao-Blackwellised fv: " << fv << endl;
+      sample.AddConditionalFeatureValues(fv);
+  }
     
   
   //apply it to the sample
   if (chosenDelta != noChangeDelta) {
     chosenDelta->apply(*noChangeDelta);
   }
+  //cout << "Sample fv: " << sample.GetFeatureValues() << endl;
   
 }
 
@@ -286,7 +306,7 @@ void MergeSplitOperator::scan(
   }
     
   VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
-  doSample(deltas, noChangeDelta);
+  doSample(deltas, noChangeDelta, sample);
     
   //clean up
   RemoveAllInColl(deltas);
@@ -328,7 +348,7 @@ void TranslationSwapOperator::scan(
   
   static_cast<SwapIterator*>(m_OpIterator)->SetNextHypo(const_cast<Hypothesis*>(currHypo->GetSourceNextHypo()));
   
-  doSample(deltas, noChangeDelta);
+  doSample(deltas, noChangeDelta, sample);
     
   RemoveAllInColl(deltas);
   
@@ -445,7 +465,7 @@ void FlipOperator::scan(
   
   VERBOSE(3,"Created " << deltas.size() << " delta(s)" << endl);
   
-  doSample(deltas, noChangeDelta);
+  doSample(deltas, noChangeDelta, sample);
   
   //clean up
   RemoveAllInColl(deltas);
