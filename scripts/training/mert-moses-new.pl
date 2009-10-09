@@ -552,8 +552,8 @@ if ($continue) {
 	}
       }
     }
-    if (! -e "run$step.weights.txt"){
-      die "Can't start from step $step, because run$step.weights.txt was not found!";
+    if (! -e "run$step.$weights_out_file"){
+      die "Can't start from step $step, because run$step.$weights_out_file was not found!";
     }
     if (! -e "run$step.$mert_logfile"){
       die "Can't start from step $step, because run$step.$mert_logfile was not found!";
