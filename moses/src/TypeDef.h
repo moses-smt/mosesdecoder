@@ -207,6 +207,7 @@ typedef size_t FactorType;
 #else
 #include <stdint.h>
 typedef uint32_t UINT32;
+typedef uint64_t UINT64;
 #endif
 
 typedef std::vector<float> Scores;
