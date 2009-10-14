@@ -34,7 +34,6 @@ foreach my $key ($config->param) {
     $config->param($key,$value);
 }
 
-my $mpienv = "openmpi-smp";
 
 #required global parameters
 my $name = &param_required("general.name");
@@ -49,6 +48,7 @@ die "Error: No josiah tester specified" if (! $josiah_test);
 
 #optional globals
 my $queue = &param("general.queue", "inf_iccs_smt");
+my $mpienv = &param("general.mpienv", "openmpi-smp");
 
 &check_exists ("weights file", $weights_file);
 &check_exists("josiah train executable", $josiah_train);
