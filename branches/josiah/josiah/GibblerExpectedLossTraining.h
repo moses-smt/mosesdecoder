@@ -40,6 +40,7 @@ class ExpectedLossCollector : public SampleCollector {
   
   private:
     std::vector<ScoreComponentCollection> m_featureVectors;
+    std::vector<ScoreComponentCollection> m_rbFeatureVectors; // Rao-Blackwellised feature vectors
     std::vector<float> m_gains;
     std::vector<size_t> m_lengths;
 //    std::vector<Derivation> m_samples;
