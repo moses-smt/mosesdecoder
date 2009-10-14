@@ -14,12 +14,15 @@ void ExpectedLossCollector::collect(Sample& s) {
   h->GetTranslation(&trans, 0);
   const float gain = g[0]->ComputeGain(trans);
   m_lengths.push_back(trans.size());
-  ScoreComponentCollection fvs = s.GetConditionalFeatureValues();
+  ScoreComponentCollection fvs = s.GetFeatureValues();
+  ScoreComponentCollection rbFvs = s.GetConditionalFeatureValues();
   VERBOSE(2, gain << "\tFeatures=" << fvs << endl);
+  VERBOSE(2, gain << "\tRao-Blackwellised features=" << rbFvs << endl);
   //VERBOSE(0, "Collected : Target " << s << ", gain " << gain << "\tFeatures=" << s.GetFeatureValues() << endl);
   m_gains.push_back(gain);
 //  m_samples.push_back(Derivation(s));
   m_featureVectors.push_back(fvs);
+  m_rbFeatureVectors.push_back(rbFvs);
   MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
 
@@ -82,6 +85,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 
   
 void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {
+    //FIXME: This probably does not handle Rao-Blackwellisation correctly.
   const vector<double>& importanceWeights =  getImportanceWeights();
   ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
 
@@ -127,7 +131,7 @@ ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vec
   //do calculation at double precision to try to maintain accuracy
   vector<double> sum(StaticData::Instance().GetTotalScoreComponents());
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
-    ScoreComponentCollection fv = m_featureVectors[i];
+    ScoreComponentCollection fv = m_rbFeatureVectors[i];
     for (size_t j = 0; j < fv.size(); ++j) {
         sum[j] += fv[j]*importanceWeights[i];
     }
