@@ -22,6 +22,17 @@ void TargetPhraseCollection::Save(Db &db, Moses::UINT32 sourceNodeId, int numSco
 	Dbt data(mem, memUsed);
 
 	int ret = db.put(NULL, &key, &data, DB_NOOVERWRITE);
+	if (ret != 0)
+	{
+		cerr << "ERROR!!! " 
+				<< ret << " " 
+				<< sourceNodeId << " "
+				<< numScores << " "
+				<< sourceWordSize << " "
+				<< targetWordSize << " "
+				<< memUsed << endl;
+	}
+
 	assert(ret == 0);
 
 	free(mem);
