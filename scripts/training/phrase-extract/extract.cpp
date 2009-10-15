@@ -491,8 +491,9 @@ void printHieroPhrase( SentenceAlignment &sentence, int startT, int endT, int st
 	// phrase labels
 	string targetLabel = targetSyntax ? 
 		sentence.targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
-	string sourceLabel = sourceSyntax ?
-		sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
+	//string sourceLabel = sourceSyntax ?
+	//	sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
+	string sourceLabel = "X";
 
 	// target
 	rule.target = "[" + targetLabel + "] " + 
@@ -729,8 +730,9 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 	// phrase labels
 	string targetLabel,sourceLabel;
 	if (hierarchicalFlag) {
-		sourceLabel = sourceSyntax ? 
-			sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
+	  //sourceLabel = sourceSyntax ? 
+	  //	sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
+	        sourceLabel = "X";
 		targetLabel = targetSyntax ?
 			sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
 	}
