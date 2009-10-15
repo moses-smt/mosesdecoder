@@ -89,6 +89,7 @@ libmoses_a_SOURCES = \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
+	WordConsumed.cpp \
 	XmlOption.cpp 
 
 if PROTOBUF
