@@ -34,6 +34,12 @@ DbWrapper::DbWrapper()
 ,m_nextTargetNodeId(1)
 ,m_initNode(0)
 {
+	m_dbVocab.set_cachesize(0,200 * 1024 * 1024,0);
+	m_dbSource.set_cachesize(0,200 * 1024 * 1024,0);
+	m_dbTarget.set_cachesize(0,200 * 1024 * 1024,0);
+	m_dbTargetInd.set_cachesize(0,200 * 1024 * 1024,0);
+	m_dbTargetColl.set_cachesize(0,200 * 1024 * 1024,0);
+
 	m_dbMisc.set_error_stream(&std::cerr);
 	m_dbVocab.set_error_stream(&std::cerr);
 	m_dbSource.set_error_stream(&std::cerr);

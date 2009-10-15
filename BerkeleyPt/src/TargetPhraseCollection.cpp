@@ -31,6 +31,7 @@ void TargetPhraseCollection::Save(Db &db, Moses::UINT32 sourceNodeId, int numSco
 				<< sourceWordSize << " "
 				<< targetWordSize << " "
 				<< memUsed << endl;
+		abort();
 	}
 
 	assert(ret == 0);
