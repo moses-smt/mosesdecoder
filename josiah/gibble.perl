@@ -34,7 +34,6 @@ foreach my $key ($config->param) {
     $config->param($key,$value);
 }
 
-
 #required global parameters
 my $name = &param_required("general.name");
 my $weights_file = &param_required("general.weights-file");
@@ -257,7 +256,8 @@ sub param {
     my ($key,$default) = @_;
     my $value = $config->param($key);
     $value = $default if !$value;
-    #$value = join $value if (ref($value) eq 'ARRAY');
+    # Empty arguments get interpreted as arrays
+    $value = "" if (ref($value) eq 'ARRAY' && scalar(@$value) == 0);
     return $value;
 }
 
