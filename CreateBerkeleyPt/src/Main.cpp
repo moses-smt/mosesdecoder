@@ -25,7 +25,7 @@ void Save(map<SourcePhrase, TargetPhraseCollection> &tpCollMap, DbWrapper &dbWra
 	for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 	{ // could be 1st. tpColl == NULL
 		const SourcePhrase &sourcePhrase = iter->first;
-		long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId());
+		long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId(), dbWrapper.GetSourceWordSize());
 		
 		const TargetPhraseCollection &tpColl = iter->second;
 		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
