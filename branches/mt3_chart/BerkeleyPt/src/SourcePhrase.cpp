@@ -85,7 +85,8 @@ Moses::UINT32 SourcePhrase::SaveWord(Moses::UINT32 currSourceNodeId, const Word 
 		retSourceNodeId = nextSourceId;
 		++nextSourceId;
 	}
-	
+
+	free(mem);
 	return retSourceNodeId;
 }
 
