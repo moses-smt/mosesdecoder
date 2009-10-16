@@ -1042,7 +1042,7 @@ sub score_phrase {
 
 	my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
 	$cmd .= " --Hierarchical" if $_HIERARCHICAL;
-	$cmd .= " --NegLogProb" if $_HIERARCHICAL; # temporary fix for Hiero format
+	#$cmd .= " --NegLogProb" if $_HIERARCHICAL; # temporary fix for Hiero format
         $cmd .= " ".$_SCORE_OPTIONS if defined($_SCORE_OPTIONS);
 	print $cmd."\n";
 	safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
