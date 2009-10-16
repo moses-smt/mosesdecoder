@@ -24,20 +24,7 @@ class Phrase;
 class TargetPhrase;
 class TargetPhraseCollection;
 class Word;
-	
-class SourceKey
-{
-public:
-	SourceKey(Moses::UINT32 sourceId, Moses::UINT32 vocabId)
-	:m_sourceId(sourceId)
-	,m_vocabId(vocabId)
-	{	}
-	
-	Moses::UINT32 m_sourceId;
-	Moses::UINT32 m_vocabId;
-	
-};
-	
+		
 class DbWrapper
 {
 	Db m_dbMisc, m_dbVocab, m_dbSource, m_dbTarget, m_dbTargetInd, m_dbTargetColl;
@@ -80,14 +67,8 @@ public:
 	const SourcePhraseNode &GetInitNode() const
 	{ return m_initNode; }
 	
-	size_t GetSourceWordSize() const
-	{
-		return m_numSourceFactors * sizeof(Moses::UINT32) + sizeof(char);
-	}
-	size_t GetTargetWordSize() const
-	{
-		return m_numTargetFactors * sizeof(Moses::UINT32) + sizeof(char);
-	}
+	size_t GetSourceWordSize() const;
+	size_t GetTargetWordSize() const;
 
 	Vocab &GetVocab()
 	{ return m_vocab; }

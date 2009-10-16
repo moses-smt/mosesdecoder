@@ -35,10 +35,10 @@ DbWrapper::DbWrapper()
 ,m_initNode(0)
 {
 	m_dbVocab.set_cachesize(0,200 * 1024 * 1024,0);
-	m_dbSource.set_cachesize(0,200 * 1024 * 1024,0);
-	m_dbTarget.set_cachesize(0,200 * 1024 * 1024,0);
-	m_dbTargetInd.set_cachesize(0,200 * 1024 * 1024,0);
-	m_dbTargetColl.set_cachesize(0,200 * 1024 * 1024,0);
+	m_dbSource.set_cachesize(0,400 * 1024 * 1024,0);
+	m_dbTarget.set_cachesize(0,400 * 1024 * 1024,0);
+	m_dbTargetInd.set_cachesize(0,400 * 1024 * 1024,0);
+	m_dbTargetColl.set_cachesize(0,400 * 1024 * 1024,0);
 
 	m_dbMisc.set_error_stream(&std::cerr);
 	m_dbVocab.set_error_stream(&std::cerr);
@@ -57,6 +57,17 @@ DbWrapper::~DbWrapper()
 	m_dbTargetInd.close(0);
 	m_dbTargetColl.close(0);
 }
+	
+size_t DbWrapper::GetSourceWordSize() const
+{
+	return m_numSourceFactors * sizeof(Moses::UINT32) + sizeof(char);
+}
+
+size_t DbWrapper::GetTargetWordSize() const
+{
+	return m_numTargetFactors * sizeof(Moses::UINT32) + sizeof(char);
+}
+	
 
 // helper callback fn for target secondary db
 Moses::UINT32 GetIdFromTargetPhrase(Db *sdbp,          // secondary db handle
@@ -260,9 +271,18 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 {	
 	// create db data
 	Moses::UINT32 sourceNodeId = parentNode.GetSourceNodeId();
-	SourceKey sourceKey(sourceNodeId, word.GetVocabId(0));
-		
-	Dbt key(&sourceKey, sizeof(SourceKey));
+	
+	// create ket data - source node id + word 
+	size_t memAlloc = sizeof(sourceNodeId) + GetSourceWordSize();
+	Moses::UINT32 *mem = (Moses::UINT32*) malloc(memAlloc); 
+	mem[0] = sourceNodeId;
+	size_t memUsed = word.WriteToMemory((char*) &mem[1]);
+	
+	memUsed += sizeof(sourceNodeId);
+	assert(memUsed == memAlloc);
+	
+	// db key
+	Dbt key(mem, memAlloc);
 	Dbt data;
 	
 	// get from db

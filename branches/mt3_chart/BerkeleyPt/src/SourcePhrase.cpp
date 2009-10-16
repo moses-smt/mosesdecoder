@@ -30,7 +30,7 @@ SourcePhrase::~SourcePhrase()
 size_t SourcePhrase::GetNumNonTerminals() const
 { return m_targetNonTerms.size(); }
 
-Moses::UINT32 SourcePhrase::Save(Db &db, Moses::UINT32 &nextSourceId) const
+Moses::UINT32 SourcePhrase::Save(Db &db, Moses::UINT32 &nextSourceId, size_t sourceWordSize) const
 {
 	Moses::UINT32 currSourceNodeId = 0;
 	size_t targetInd = 0;
@@ -39,29 +39,35 @@ Moses::UINT32 SourcePhrase::Save(Db &db, Moses::UINT32 &nextSourceId) const
 	for (size_t pos = 0; pos < GetSize(); ++pos)
 	{
 		const Word &word = GetWord(pos);
-		currSourceNodeId = SaveWord(currSourceNodeId, word, db, nextSourceId);
+		currSourceNodeId = SaveWord(currSourceNodeId, word, db, nextSourceId, sourceWordSize);
 		
 		if (word.IsNonTerminal())
 		{ // store the TARGET non-term label straight after source non-term label
 			const Word &targetWord = m_targetNonTerms[targetInd];
 			targetInd++;
 			
-			currSourceNodeId = SaveWord(currSourceNodeId, targetWord, db, nextSourceId);
+			currSourceNodeId = SaveWord(currSourceNodeId, targetWord, db, nextSourceId, sourceWordSize);
 		}
 	}
 	
 	return currSourceNodeId;	
 }
 
-Moses::UINT32 SourcePhrase::SaveWord(Moses::UINT32 currSourceNodeId, const Word &word, Db &db, Moses::UINT32 &nextSourceId) const
+Moses::UINT32 SourcePhrase::SaveWord(Moses::UINT32 currSourceNodeId, const Word &word, Db &db, Moses::UINT32 &nextSourceId, size_t sourceWordSize) const
 {
 	Moses::UINT32 retSourceNodeId;
 	
-	// create db data
-	SourceKey sourceKey(currSourceNodeId, word.GetVocabId(0));
-	Dbt key(&sourceKey, sizeof(SourceKey));
+	// create ket data - source node id + word 
+	size_t memAlloc = sizeof(currSourceNodeId) + sourceWordSize;
+	Moses::UINT32 *mem = (Moses::UINT32*) malloc(memAlloc); 
+	mem[0] = currSourceNodeId;
+	size_t memUsed = word.WriteToMemory((char*) &mem[1]);
 	
-	Dbt data(&nextSourceId, sizeof(long));
+	memUsed += sizeof(currSourceNodeId);
+	assert(memUsed == memAlloc);
+	
+	Dbt key(mem, memAlloc);
+	Dbt data(&nextSourceId, sizeof(Moses::UINT32));
 	
 	// save
 	int ret = db.put(NULL, &key, &data, DB_NOOVERWRITE);
@@ -92,7 +98,7 @@ void SourcePhrase::SaveTargetNonTerminals(const TargetPhrase &targetPhrase)
 		const Word &word = GetWord(pos);
 		
 		if (word.IsNonTerminal())
-		{ // store the TARGET non-term label straight after source non-term label
+		{ // store the TARGET non-term label in vector
 			size_t targetPos = targetPhrase.GetAlign(pos);
 			const Word &targetWord = targetPhrase.GetWord(targetPos);
 			m_targetNonTerms.push_back(targetWord);
