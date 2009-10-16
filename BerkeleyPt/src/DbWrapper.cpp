@@ -269,6 +269,8 @@ void DbWrapper::SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const Tar
 
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word)
 {	
+  const SourcePhraseNode *ret;
+
 	// create db data
 	Moses::UINT32 sourceNodeId = parentNode.GetSourceNodeId();
 	
@@ -293,12 +295,16 @@ const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, 
 		Moses::UINT32 sourceNodeId = *(Moses::UINT32*) data.get_data();
 	
 		SourcePhraseNode *node = new SourcePhraseNode(sourceNodeId);
-		return node;
+		ret = node;
 	}
 	else
 	{
-		return NULL;
+		ret = NULL;
 	}	
+
+	free(mem);
+	
+	return ret;
 }
 
 const TargetPhraseCollection *DbWrapper::GetTargetPhraseCollection(const SourcePhraseNode &node)
