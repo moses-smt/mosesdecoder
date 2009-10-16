@@ -75,8 +75,8 @@ Moses::UINT32 SourcePhrase::SaveWord(Moses::UINT32 currSourceNodeId, const Word 
 	{ // already exist. get node id
 		db.get(NULL, &key, &data, 0);
 		
-		long *sourceId = (long*) data.get_data();
-		assert(data.get_size() == sizeof(long));
+		assert(data.get_size() == sizeof(Moses::UINT32));
+		Moses::UINT32 *sourceId = (Moses::UINT32*) data.get_data();
 		
 		retSourceNodeId = *sourceId;
 	}
