@@ -428,6 +428,9 @@ Word *DbWrapper::ConvertFromMoses(Moses::FactorDirection direction
 		}
 	} // for (size_t factorType
 	
+	// non-term
+	newWord->SetNonTerminal(origWord.IsNonTerminal());
+
 	return newWord;
 	
 }
