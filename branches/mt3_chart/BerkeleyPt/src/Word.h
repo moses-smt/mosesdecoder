@@ -48,6 +48,8 @@ public:
 
 	bool IsNonTerminal() const
 	{ return m_isNonTerminal; }
+	void SetNonTerminal(bool value)
+	{ m_isNonTerminal = value; }
 	
 	size_t WriteToMemory(char *mem) const;
 	size_t ReadFromMemory(const char *mem, size_t numFactors);
