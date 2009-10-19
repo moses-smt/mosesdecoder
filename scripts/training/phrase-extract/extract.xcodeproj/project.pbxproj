@@ -15,6 +15,7 @@
 		1C730173100F69F000EE3BE0 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730171100F69F000EE3BE0 /* XmlTree.cpp */; };
 		1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE2C0FC6EA0200924FEA /* extract.cpp */; };
 		1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
+		1CF9F71E108C9FF800EABCE5 /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +44,8 @@
 		1CE8CE2D0FC6EA0200924FEA /* extract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = extract.h; sourceTree = "<group>"; };
 		1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "tables-core.cpp"; sourceTree = "<group>"; };
 		1CE8CE4C0FC6EAA200924FEA /* tables-core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "tables-core.h"; sourceTree = "<group>"; };
+		1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "consolidate-direct.cpp"; sourceTree = "<group>"; };
+		1CF9F71A108C9FE700EABCE5 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = "consolidate-direct"; path = "build/Debug/consolidate-direct"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +57,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1C4757C2102B7EAA00AB74DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1CF9F718108C9FE700EABCE5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -93,6 +103,7 @@
 				1CE8CE4C0FC6EAA200924FEA /* tables-core.h */,
 				1CE8CE2C0FC6EA0200924FEA /* extract.cpp */,
 				1CE8CE2D0FC6EA0200924FEA /* extract.h */,
+				1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -103,6 +114,7 @@
 				1C5C088A0FFE54F400B00995 /* extract */,
 				1C47578F102B78AD00AB74DB /* score */,
 				1C4757C4102B7EAA00AB74DB /* consolidate */,
+				1CF9F71A108C9FE700EABCE5 /* consolidate-direct */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -149,6 +161,22 @@
 			productReference = 1C4757C4102B7EAA00AB74DB /* consolidate */;
 			productType = "com.apple.product-type.tool";
 		};
+		1CF9F719108C9FE700EABCE5 /* consolidate-direct */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1CF9F729108CA01F00EABCE5 /* Build configuration list for PBXNativeTarget "consolidate-direct" */;
+			buildPhases = (
+				1CF9F717108C9FE700EABCE5 /* Sources */,
+				1CF9F718108C9FE700EABCE5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "consolidate-direct";
+			productName = "consolidate-direct";
+			productReference = 1CF9F71A108C9FE700EABCE5 /* consolidate-direct */;
+			productType = "com.apple.product-type.tool";
+		};
 		8DD76F620486A84900D96B5E /* extract */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "extract" */;
@@ -182,6 +210,7 @@
 				8DD76F620486A84900D96B5E /* extract */,
 				1C47578E102B78AD00AB74DB /* score */,
 				1C4757C3102B7EAA00AB74DB /* consolidate */,
+				1CF9F719108C9FE700EABCE5 /* consolidate-direct */,
 			);
 		};
 /* End PBXProject section */
@@ -202,6 +231,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				1C4757CA102B7EC600AB74DB /* consolidate.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1CF9F717108C9FE700EABCE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1CF9F71E108C9FF800EABCE5 /* consolidate-direct.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,6 +318,36 @@
 			};
 			name = Release;
 		};
+		1CF9F71C108C9FE800EABCE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = "consolidate-direct";
+			};
+			name = Debug;
+		};
+		1CF9F71D108C9FE800EABCE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = "consolidate-direct";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		1DEB923208733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -353,6 +420,15 @@
 			buildConfigurations = (
 				1C4757C6102B7EAB00AB74DB /* Debug */,
 				1C4757C7102B7EAB00AB74DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1CF9F729108CA01F00EABCE5 /* Build configuration list for PBXNativeTarget "consolidate-direct" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1CF9F71C108C9FE800EABCE5 /* Debug */,
+				1CF9F71D108C9FE800EABCE5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
