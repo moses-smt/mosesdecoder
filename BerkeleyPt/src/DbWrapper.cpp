@@ -396,7 +396,7 @@ Moses::TargetPhraseCollection *DbWrapper::ConvertToMoses(const TargetPhraseColle
 		ret->Add(mosesPhrase);
 	}
 
-	ret->NthElement(phraseDict.GetTableLimit());
+	ret->Prune(true, phraseDict.GetTableLimit());
 	
 	return ret;
 }
