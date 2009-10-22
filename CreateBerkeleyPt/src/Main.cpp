@@ -21,13 +21,14 @@ using namespace MosesBerkeleyPt;
 void Save(map<SourcePhrase, TargetPhraseCollection> &tpCollMap, DbWrapper &dbWrapper)
 {
 	//write out all target phrase colls
-	map<SourcePhrase, TargetPhraseCollection>::const_iterator iter;
+	map<SourcePhrase, TargetPhraseCollection>::iterator iter;
 	for (iter = tpCollMap.begin(); iter != tpCollMap.end(); ++iter)
 	{ // could be 1st. tpColl == NULL
 		const SourcePhrase &sourcePhrase = iter->first;
 		long sourceNodeId = sourcePhrase.Save(dbWrapper.GetSourceDb(), dbWrapper.GetNextSourceNodeId(), dbWrapper.GetSourceWordSize());
 		
-		const TargetPhraseCollection &tpColl = iter->second;
+		TargetPhraseCollection &tpColl = iter->second;
+		tpColl.Sort();
 		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
 	}	
 	

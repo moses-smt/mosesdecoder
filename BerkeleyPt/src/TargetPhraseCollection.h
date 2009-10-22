@@ -39,6 +39,8 @@ public:
 	
 	void Save(Db &db, Moses::UINT32 sourceNodeId, int numScores, size_t sourceWordSize, size_t targetWordSize) const;
 	
+	void Sort();
+
 };
 
 };

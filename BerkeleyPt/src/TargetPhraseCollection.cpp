@@ -54,6 +54,19 @@ char *TargetPhraseCollection::WriteToMemory(size_t &memUsed, int numScores, size
 	return mem;
 }
 
+class TargetPhraseOrderBy1stScore
+	{
+	public:	
+		bool operator()(const TargetPhrase* a, const TargetPhrase *b) const
+		{
+			return a->GetScores()[0] > b->GetScores()[0];
+		}
+	};
 
+void TargetPhraseCollection::Sort()
+{
+	std::sort(m_coll.begin(), m_coll.end(), TargetPhraseOrderBy1stScore());
+}
+	
 };
 
