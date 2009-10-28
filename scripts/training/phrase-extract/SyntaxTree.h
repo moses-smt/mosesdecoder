@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
 
 class SyntaxNode {
 protected:
@@ -47,26 +48,43 @@ SyntaxNode( int startPos, int endPos, std::string label )
 };
 
 
+typedef std::vector< int > SplitPoints;
+typedef std::vector< SplitPoints > ParentNodes;
+
 class SyntaxTree {
 protected:
 	std::vector< SyntaxNode* > m_nodes;
-	std::map< int, std::map< int, std::vector< SyntaxNode* > > > m_index;
 	SyntaxNode* m_top;
-	typedef std::map< int, std::map< int, std::vector< SyntaxNode* > > >::const_iterator SyntaxTreeIndexIterator;
-	typedef std::map< int, std::vector< SyntaxNode* > >::const_iterator SyntaxTreeIndexIterator2;
-	
+
+	typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
+	typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
+	typedef std::map< int, SyntaxTreeIndex2 > SyntaxTreeIndex;
+	typedef SyntaxTreeIndex::const_iterator SyntaxTreeIndexIterator;
+	SyntaxTreeIndex m_index;
+	std::vector< SyntaxNode* > m_emptyNode;
+
+	friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
+
 public:
-	SyntaxTree() {}
+	SyntaxTree() {
+			m_emptyNode.clear();
+	}
 	~SyntaxTree() {
 		// loop through all m_nodes, delete them
+		for(int i=0; i<m_nodes.size(); i++)
+		{
+			//delete m_nodes[i];
+		}
 	}
 	
 	void AddNode( int startPos, int endPos, std::string label );
-	void Parse();
-	bool HasNode( int startPos, int endPos );
-	const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos );
-	const std::vector< SyntaxNode* >& GetAllNodes() 
-  { return m_nodes; };
+	ParentNodes Parse();
+	bool HasNode( int startPos, int endPos ) const;
+	const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
+	const std::vector< SyntaxNode* >& GetAllNodes() { return m_nodes; };
+	size_t GetNumWords() const { return m_index.size(); }
+	std::string ToString() const;
 };
 
+std::ostream& operator<<(std::ostream&, const SyntaxTree&);
 
