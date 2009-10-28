@@ -45,7 +45,7 @@
 		1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "tables-core.cpp"; sourceTree = "<group>"; };
 		1CE8CE4C0FC6EAA200924FEA /* tables-core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "tables-core.h"; sourceTree = "<group>"; };
 		1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "consolidate-direct.cpp"; sourceTree = "<group>"; };
-		1CF9F71A108C9FE700EABCE5 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = "consolidate-direct"; path = "build/Debug/consolidate-direct"; sourceTree = "<group>"; };
+		1CF9F71A108C9FE700EABCE5 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "consolidate-direct"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
