@@ -951,9 +951,9 @@ void writeGlueGrammar( string fileName )
 	grammarFile.open(fileName.c_str());
 	if (!targetSyntax)
 	{
-		grammarFile << "[X] [S] ||| <s> ||| <s> |||  ||| 0" << endl
-								<< "[X] [S] ||| [X] </s> ||| [S] </s> ||| 0-0 ||| 0" << endl
-								<< "[X] [S] ||| [X] [X] ||| [S] [X] ||| 0-0 1-1 ||| -1" << endl;
+		grammarFile << "[X] [S] ||| <s> ||| <s> |||  ||| 1" << endl
+		            << "[X] [S] ||| [X] </s> ||| [S] </s> ||| 0-0 ||| 1" << endl
+		            << "[X] [S] ||| [X] [X] ||| [S] [X] ||| 0-0 1-1 ||| 2.76" << endl;
 	}
 	else
 	{
@@ -968,23 +968,23 @@ void writeGlueGrammar( string fileName )
 			}
 		}
 		// basic rules
-		grammarFile << "[X] [" << topLabel << "] ||| <s> ||| <s> |||  ||| 0" << endl
-								<< "[X] [" << topLabel << "] ||| [X] </s> ||| [" << topLabel << "] </s> ||| 0-0 ||| 0" << endl;
+		grammarFile << "[X] [" << topLabel << "] ||| <s> ||| <s> |||  ||| 1" << endl
+								<< "[X] [" << topLabel << "] ||| [X] </s> ||| [" << topLabel << "] </s> ||| 0-0 ||| 1" << endl;
 
 		// top rules
 		for( map<string,int>::const_iterator i =  targetTopLabelCollection.begin();
 				 i !=  targetTopLabelCollection.end(); i++ )
 		{
-			grammarFile << "[X] [" << topLabel << "] ||| <s> [X] </s> ||| <s> [" << i->first << "] </s> ||| 0-0 ||| 0" << endl;
+			grammarFile << "[X] [" << topLabel << "] ||| <s> [X] </s> ||| <s> [" << i->first << "] </s> ||| 0-0 ||| 1" << endl;
 		}
 
 		// glue rules
 		for( set<string>::const_iterator i =  targetLabelCollection.begin();
 				 i !=  targetLabelCollection.end(); i++ )
 		{
-			grammarFile << "[X] [" << topLabel << "] ||| [X] [X] ||| [" << topLabel << "] [" << *i << "] ||| 0-0 1-1 ||| -1" << endl;
+			grammarFile << "[X] [" << topLabel << "] ||| [X] [X] ||| [" << topLabel << "] [" << *i << "] ||| 0-0 1-1 ||| 2.76" << endl;
 		}
-		grammarFile << "[X] [" << topLabel << "] ||| [X] [X] ||| [" << topLabel << "] [X] ||| 0-0 1-1 ||| -1" << endl; // glue rule for unknown word... 
+		grammarFile << "[X] [" << topLabel << "] ||| [X] [X] ||| [" << topLabel << "] [X] ||| 0-0 1-1 ||| 2.76" << endl; // glue rule for unknown word... 
 	}
 	grammarFile.close();
 }

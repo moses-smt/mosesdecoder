@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 	}
 
 	// output word alignment file
-	if (wordAlignmentFlag)
+	if (! inverseFlag && wordAlignmentFlag)
 	{
 		wordAlignmentFile.open(fileNameWordAlignment);
 		if (wordAlignmentFile.fail())
@@ -254,7 +254,7 @@ int main(int argc, char* argv[])
 	}
 	processPhrasePairs( phrasePairsWithSameF );
 	phraseTableFile.close();
-	if (wordAlignmentFlag)
+	if (! inverseFlag && wordAlignmentFlag)
 		wordAlignmentFile.close();
 }
 

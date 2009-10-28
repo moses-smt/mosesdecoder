@@ -86,14 +86,14 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
 	fileDirect.open(fileNameDirect);
 	if (fileDirect.fail()) {
-    cerr << "ERROR: could not open extract file " << fileNameDirect << endl;
+    cerr << "ERROR: could not open phrase table file " << fileNameDirect << endl;
     exit(1);
   }
   istream &fileDirectP = fileDirect;
 
 	fileIndirect.open(fileNameIndirect);
 	if (fileIndirect.fail()) {
-    cerr << "ERROR: could not open extract file " << fileNameIndirect << endl;
+    cerr << "ERROR: could not open phrase table file " << fileNameIndirect << endl;
     exit(1);
   }
   istream &fileIndirectP = fileIndirect;
@@ -111,9 +111,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   int i=0;
   while(true) {
 		i++;
-    if (i%1000 == 0) cerr << "." << flush;
-    if (i%10000 == 0) cerr << ":" << flush;
-    if (i%100000 == 0) cerr << "!" << flush;
+    if (i%100000 == 0) cerr << "." << flush;
 		
 		vector< string > itemDirect, itemIndirect;
 		if (! getLine(fileIndirectP,itemIndirect) ||
@@ -186,7 +184,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 											 << " " << itemDirect[3]; // prob direct
 		else
 			fileConsolidated << itemIndirect[2]      // prob indirect
-											 << " " << itemDirect[3]; // prob direct
+											 << " " << itemDirect[2]; // prob direct
 		fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
 		
 		// counts
