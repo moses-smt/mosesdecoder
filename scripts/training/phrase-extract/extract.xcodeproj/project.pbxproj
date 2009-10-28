@@ -13,6 +13,7 @@
 		1C4757CA102B7EC600AB74DB /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C4757C8102B7EC600AB74DB /* consolidate.cpp */; };
 		1C730165100F69A000EE3BE0 /* SyntaxTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */; };
 		1C730173100F69F000EE3BE0 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730171100F69F000EE3BE0 /* XmlTree.cpp */; };
+		1C8FDA9D1098858800B54D9C /* relax-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8FDA9C1098858800B54D9C /* relax-parse.cpp */; };
 		1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE2C0FC6EA0200924FEA /* extract.cpp */; };
 		1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1CF9F71E108C9FF800EABCE5 /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */; };
@@ -40,6 +41,10 @@
 		1C730164100F69A000EE3BE0 /* SyntaxTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SyntaxTree.h; sourceTree = "<group>"; };
 		1C730171100F69F000EE3BE0 /* XmlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XmlTree.cpp; sourceTree = "<group>"; };
 		1C730172100F69F000EE3BE0 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XmlTree.h; sourceTree = "<group>"; };
+		1C8FDA921098853F00B54D9C /* relax-parse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = "relax-parse"; path = "build/Debug/relax-parse"; sourceTree = "<group>"; };
+		1C8FDA9C1098858800B54D9C /* relax-parse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "relax-parse.cpp"; sourceTree = "<group>"; };
+		1C8FDAA0109885D300B54D9C /* SyntaxTree.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = SyntaxTree.o; sourceTree = "<group>"; };
+		1C8FDAA3109885F500B54D9C /* XmlTree.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = XmlTree.o; sourceTree = "<group>"; };
 		1CE8CE2C0FC6EA0200924FEA /* extract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extract.cpp; sourceTree = "<group>"; };
 		1CE8CE2D0FC6EA0200924FEA /* extract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = extract.h; sourceTree = "<group>"; };
 		1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "tables-core.cpp"; sourceTree = "<group>"; };
@@ -57,6 +62,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		1C4757C2102B7EAA00AB74DB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1C8FDA901098853F00B54D9C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -83,6 +95,9 @@
 		08FB7794FE84155DC02AAC07 /* extract */ = {
 			isa = PBXGroup;
 			children = (
+				1C8FDAA3109885F500B54D9C /* XmlTree.o */,
+				1C8FDAA0109885D300B54D9C /* SyntaxTree.o */,
+				1C8FDA9C1098858800B54D9C /* relax-parse.cpp */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -115,6 +130,7 @@
 				1C47578F102B78AD00AB74DB /* score */,
 				1C4757C4102B7EAA00AB74DB /* consolidate */,
 				1CF9F71A108C9FE700EABCE5 /* consolidate-direct */,
+				1C8FDA921098853F00B54D9C /* relax-parse */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -159,6 +175,22 @@
 			name = consolidate;
 			productName = consolidate;
 			productReference = 1C4757C4102B7EAA00AB74DB /* consolidate */;
+			productType = "com.apple.product-type.tool";
+		};
+		1C8FDA911098853F00B54D9C /* relax-parse */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1C8FDA9B1098855B00B54D9C /* Build configuration list for PBXNativeTarget "relax-parse" */;
+			buildPhases = (
+				1C8FDA8F1098853F00B54D9C /* Sources */,
+				1C8FDA901098853F00B54D9C /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "relax-parse";
+			productName = "relax-parse";
+			productReference = 1C8FDA921098853F00B54D9C /* relax-parse */;
 			productType = "com.apple.product-type.tool";
 		};
 		1CF9F719108C9FE700EABCE5 /* consolidate-direct */ = {
@@ -211,6 +243,7 @@
 				1C47578E102B78AD00AB74DB /* score */,
 				1C4757C3102B7EAA00AB74DB /* consolidate */,
 				1CF9F719108C9FE700EABCE5 /* consolidate-direct */,
+				1C8FDA911098853F00B54D9C /* relax-parse */,
 			);
 		};
 /* End PBXProject section */
@@ -231,6 +264,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				1C4757CA102B7EC600AB74DB /* consolidate.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1C8FDA8F1098853F00B54D9C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C8FDA9D1098858800B54D9C /* relax-parse.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,6 +355,36 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		1C8FDA941098854000B54D9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = "relax-parse";
+			};
+			name = Debug;
+		};
+		1C8FDA951098854000B54D9C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = "relax-parse";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -420,6 +491,15 @@
 			buildConfigurations = (
 				1C4757C6102B7EAB00AB74DB /* Debug */,
 				1C4757C7102B7EAB00AB74DB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1C8FDA9B1098855B00B54D9C /* Build configuration list for PBXNativeTarget "relax-parse" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C8FDA941098854000B54D9C /* Debug */,
+				1C8FDA951098854000B54D9C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
