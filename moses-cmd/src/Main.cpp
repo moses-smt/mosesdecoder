@@ -38,6 +38,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <fstream>
+#include <iostream> 
+#include <sstream> 
+#include <string> 
 #include "Main.h"
 #include "TrellisPath.h"
 #include "FactorCollection.h"
@@ -65,40 +68,85 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
-int main(int argc, char* argv[])
+bool CheckCommand(const InputType *line, string** cmd)
 {
-   
 
-#ifdef HAVE_PROTOBUF
-	GOOGLE_PROTOBUF_VERIFY_VERSION;
-#endif
-	IFVERBOSE(1)
+	stringstream stream;
+	string str;
+	stream << *line;
+	str = stream.str();
+	if ( str.find("<decoder ") == 0 )
 	{
-		TRACE_ERR("command: ");
-		for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
-		TRACE_ERR(endl);
+	  // remove last char due to the stream
+	  str = str.substr(0,(str.size()-1));
+	  *cmd = new string(str.c_str());
+	  VERBOSE(1, "detected a command: " << **cmd << endl);
+	  return true;
+	} 
+	return false;
+}
+
+bool CommandIsQuit(string* cmd) 
+{
+	return cmd->find("<decoder quit>") != string::npos;
+}
+
+void ParseCommand(string* cmd, int* argc, vector<string>* argv)
+{
+	*argc=0;
+	size_t len = 0;
+	cmd->erase(cmd->find_last_not_of(" ")+1);// strip
+
+	// <decoder config="...">
+	size_t posStart = cmd->find("<decoder ") + 9;
+	size_t posEnd = cmd->find("=");
+
+	if ((len=(posEnd-posStart))<=0) { return; }
+	string commandType(cmd->substr(posStart, len));
+	if ((len=(cmd->size()-2-posEnd-2))<=0) { return; }
+	string commandArgs(cmd->substr(posEnd+2, len));
+
+	istringstream stream( commandArgs ) ;
+	int args_len = commandArgs.size();
+	int read_len = 0;
+	string item ;
+
+	(*argc)++;
+	argv->push_back(commandType);
+
+	while ( read_len < args_len){
+	  stream >> item;
+	  (*argc)++;
+	  read_len += (item.size()+1);
+	  argv->push_back(item);
 	}
 
-	cout.setf(std::ios::fixed);
-	cout.precision(3);
-	cerr.setf(std::ios::fixed);
-	cerr.precision(3);
+}
 
+int Config(int argc, char* argv[])
+{
 	// load data structures
 	Parameter *parameter = new Parameter();
 	if (!parameter->LoadParam(argc, argv))
 	{
 		parameter->Explain();
 		delete parameter;
-		return EXIT_FAILURE;
+		TRACE_ERR("parameters wrong! \n");
+		return EXIT_SUCCESS;
 	}
 
 	const StaticData &staticData = StaticData::Instance();
+
+	// precheck and prepare static data
+	if (!StaticData::SetUpBeforeReconfigStatic(parameter))
+	{
+		  TRACE_ERR("configurations wrong! \n");
+		  return EXIT_SUCCESS;
+	}
+
+	// if runs here, re-configuration starts
 	if (!StaticData::LoadDataStatic(parameter))
 		return EXIT_FAILURE;
-
-	// set up read/writing class
-	IOWrapper *ioWrapper = GetIODevice(staticData);
 
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
@@ -114,9 +162,18 @@ int main(int argc, char* argv[])
 	  return EXIT_FAILURE;
 	}
 
+	return EXIT_SUCCESS;
+}
+
+int Translating(string** nextCmd)
+{
+	const StaticData &staticData = StaticData::Instance();
+
+	// set up read/writing class
+	IOWrapper *ioWrapper = GetIODevice(staticData);
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
-
+	
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
@@ -125,6 +182,12 @@ int main(int argc, char* argv[])
 			// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
+
+		//if this source is a command, stop translation for this time.
+		if (CheckCommand(source, nextCmd))
+		{
+		  break;
+		}
 
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
@@ -203,6 +266,110 @@ int main(int argc, char* argv[])
 
 	IFVERBOSE(1)
 		PrintUserTime("End.");
+	return EXIT_SUCCESS;
+}
+
+
+int main(int argc, char* argv[])
+{
+   
+
+#ifdef HAVE_PROTOBUF
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+#endif
+	string* cmd = new string("");
+	int res;
+
+	IFVERBOSE(1)
+	{
+		TRACE_ERR("command: ");
+		for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
+		TRACE_ERR(endl);
+	}
+
+	cout.setf(std::ios::fixed);
+	cout.precision(3);
+	cerr.setf(std::ios::fixed);
+	cerr.precision(3);
+
+	// load data structures
+	Parameter *parameter = new Parameter();
+	if (!parameter->LoadParam(argc, argv))
+	{
+		parameter->Explain();
+		delete parameter;
+		exit(EXIT_FAILURE);
+	}
+
+	const StaticData &staticData = StaticData::Instance();
+
+	if (!StaticData::LoadDataStatic(parameter))
+		exit(EXIT_FAILURE);
+
+	// check on weights
+	vector<float> weights = staticData.GetAllWeights();
+	IFVERBOSE(2) {
+	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
+	  TRACE_ERR("The global weight vector looks like this:");
+	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+	  TRACE_ERR("\n");
+	}
+	// every score must have a weight!  check that here:
+	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
+	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
+	  exit(EXIT_FAILURE);
+	}
+
+  do{
+	if ( cmd->compare("") ==0 )
+	{
+	  res = Translating(&cmd);
+	}
+	else
+	{
+	  int arg_count;
+	  vector<string> arguments;
+
+	  ParseCommand(cmd, &arg_count, &arguments);
+
+	  char* args[arg_count];
+	  for (int i=0; i<arg_count; i++)
+	  {
+		args[i] = (char*)arguments.at(i).c_str();	
+	  }
+
+	  VERBOSE(1, "going to ProcessCommand, arguments: "<< " ");
+	  for (int i=0; i<arg_count; i++)
+	  {	
+		VERBOSE(1,args[i] << " ");
+	  }
+	  VERBOSE(1,endl);
+
+	  //if (string(args[0]).compare("#config")==0)
+	  if (string(args[0]).compare("config")==0)
+	  {
+	    res = Config(arg_count, args);
+	    *cmd = "";
+	  }
+	  else
+	  {
+	    VERBOSE(1,"command not supported." << endl);
+	    res = EXIT_SUCCESS;
+	    *cmd = "";
+	  }
+	}
+
+	if (res != EXIT_SUCCESS)
+	{
+	  #ifndef EXIT_RETURN
+	  //This avoids that detructors are called (it can take a long time)
+		exit(res);
+	  #else
+		return res;
+	  #endif
+	}
+
+  }while (!CommandIsQuit(cmd));
 
 	#ifndef EXIT_RETURN
 	//This avoids that detructors are called (it can take a long time)

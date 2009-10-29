@@ -36,8 +36,21 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	/*VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
 						<< " " << sp->GetScoreProducerDescription()
 						<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
-	*/
+*/
+// 	
 }
+
+void ScoreIndexManager::Reset() 
+{
+	m_begins.clear();
+	m_ends.clear();
+	m_producers.clear();
+	m_stateful.clear(); 
+	m_stateless.clear();
+	m_featureNames.clear();
+	m_last = 0;
+}
+
 
 void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const
 {

@@ -86,6 +86,132 @@ StaticData::StaticData()
 	Phrase::InitializeMemPool();
 }
 
+bool StaticData::SetUpBeforeReconfig(Parameter *parameter)
+{
+	m_parameter = parameter;
+
+	// check if parameters are valid
+	// if not, don't reset and keep the old config
+	// check n-best-list
+	if (m_parameter->GetParam("n-best-list").size() == 1) {
+	  UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
+	  return false;
+	}
+	// check output-search-graph and output-search-graph-pb
+	if (m_parameter->GetParam("output-search-graph").size() > 0)
+	{
+	  if (m_parameter->GetParam("output-search-graph").size() != 1) {
+	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
+	    return false;
+	  }	    
+	}
+#ifdef HAVE_PROTOBUF
+	if (m_parameter->GetParam("output-search-graph-pb").size() > 0)
+	{
+	  if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
+	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
+	    return false;
+	  }	    
+	}
+
+#endif
+	// check input-factors
+	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
+	if(inputFactorVector.size()==0)
+	{
+		UserMessage::Add(string("no input factor specified in config file"));
+		return false;
+	}
+	// check stack-diversity
+	int inputType = 0;
+	if(m_parameter->GetParam("inputtype").size()) 
+		inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
+	int maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
+		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
+		: -1;
+	if (m_parameter->GetParam("stack-diversity").size() > 0) {
+		if (maxDistortion > 15) {
+			UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
+			return false;
+		}
+		if (inputType == WordLatticeInput) {
+			UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
+			return false;
+		}
+	}
+	// check xml-input
+	if (m_parameter->GetParam("xml-input").size() > 0)
+	{
+		if ( (m_parameter->GetParam("xml-input")[0]!="exclusive") &&
+		     (m_parameter->GetParam("xml-input")[0]!="inclusive") &&
+		     (m_parameter->GetParam("xml-input")[0]!="ignore") &&
+		     (m_parameter->GetParam("xml-input")[0]!="pass-through") )
+		{
+		  UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
+		  return false;
+		}
+	}
+	// check weight-file
+	if (m_parameter->GetParam("weight-file").size() > 0) {
+		if (m_parameter->GetParam("weight-file").size() != 1) {
+			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
+			return false;
+		}
+	}
+
+	// reset 
+	m_isAlwaysCreateDirectTranslationOption = false;
+	m_sourceStartPosMattersForRecombination = false;
+	m_inputType = SentenceInput;
+	m_numInputScores = 0;
+	m_factorDelimiter = "|";
+	m_isDetailedTranslationReportingEnabled=false;
+	m_onlyDistinctNBest=false;
+	m_computeLMBackoffStats=false;
+	m_numLinkParams=1;
+	m_maxFactorIdx[0] = 0;
+	m_maxFactorIdx[1] = 0;
+	m_nBestFilePath = "";
+	m_constraintFileName = "";
+
+	m_inputFactorOrder.clear(); m_outputFactorOrder.clear();
+	m_constraints.clear();
+	m_allWeights.clear();
+
+	
+	RemoveAllInColl(m_generationDictionary);
+	RemoveAllInColl(m_globalLexicalModels);
+	RemoveAllInColl(m_reorderModels);
+	RemoveAllInColl(m_phraseDictionary);
+
+	const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
+
+	if (m_configs.switchLMs(lmVector))
+	{
+		RemoveAllInColl(m_languageModel);
+		m_fLMsLoaded = false;
+		m_configs.updateLMs(lmVector);
+	}
+
+	ClearTransOptCache();
+
+	if (m_distortionScoreProducer)//to be cared
+	{
+		m_distortionScoreProducer->ResetScoreBookkeepingID();
+	}
+	else 
+	{
+		TRACE_ERR("------ScoreBookkeepingID not reset!!!\n");
+	}
+	// small score producers
+	delete m_distortionScoreProducer;
+	delete m_wpProducer;
+	delete m_unknownWordPenaltyProducer;
+
+	m_scoreIndexManager.Reset();
+	return true;
+}
+
 bool StaticData::LoadData(Parameter *parameter)
 {
 	ResetUserTime();
@@ -385,6 +511,10 @@ bool StaticData::LoadData(Parameter *parameter)
 		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
 	}
 
+	if (m_configs.LMs.size()==0)
+	{
+	  m_configs.updateLMs(m_parameter->GetParam("lmodel-file"));
+	}
 	return true;
 }
 
@@ -454,7 +584,7 @@ bool StaticData::LoadLexicalReorderingModel()
   }
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i)
-	{
+  {
     vector<string> spec = Tokenize<string>(fileStr[f], " ");
     ++f; //mark file as consumed
     if(4 != spec.size()){
@@ -583,8 +713,7 @@ bool StaticData::LoadLexicalReorderingModel()
 			return false;
 		}
 		//std::cerr << "\n";
-
-	} 
+  }
   return true;
 }
 
@@ -635,14 +764,15 @@ bool StaticData::LoadLanguageModels()
 		
 		// dictionary upper-bounds fo all IRST LMs
 		vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
-    if (m_parameter->GetParam("lmodel-dub").size() == 0){
+    		if (m_parameter->GetParam("lmodel-dub").size() == 0){
 			for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
 				LMdub.push_back(0);
 		}
 
+		if (!m_fLMsLoaded)
+		{
 	  // initialize n-gram order for each factor. populated only by factored lm
 		const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
-
 		for(size_t i=0; i<lmVector.size(); i++) 
 		{
 			vector<string>	token		= Tokenize(lmVector[i]);
@@ -668,7 +798,7 @@ bool StaticData::LoadLanguageModels()
 			    UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
 			    return false;
 			  }
-		}
+			}
 		IFVERBOSE(1)
 				PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
 			
@@ -680,18 +810,38 @@ bool StaticData::LoadLanguageModels()
 																									, weightAll[i]
 																									, m_scoreIndexManager
 																									, LMdub[i]);
-      if (lm == NULL) 
+      if (lm == NULL)
       {
       	UserMessage::Add("no LM created. We probably don't have it compiled");
       	return false;
       }
 
 			m_languageModel.push_back(lm);
+		}//for
+
+	}//if(!m_fLMsLoaded)
+	else//add existing lms to ScoreProducerIndexManager
+	{
+		VERBOSE(1,"------LM is already loaded." << endl);
+		LMList::const_iterator iterLM;
+		for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
+		{
+			LanguageModel *languageModel = *iterLM;
+			m_scoreIndexManager.AddScoreProducer(languageModel);
+			VERBOSE(1,"------Add to ScoreProducer(" << languageModel->GetScoreBookkeepingID()
+						<< " " <<languageModel->GetScoreProducerDescription()
+						<< ") "<< endl);
 		}
-	}
+
+  	}
+  }
+
+
+
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
   m_fLMsLoaded = true;
+
 	IFVERBOSE(1)
 		PrintUserTime("Finished loading LanguageModels");
   return true;
@@ -773,6 +923,7 @@ bool StaticData::LoadPhraseTables()
 
 		size_t index = 0;
 		size_t weightAllOffset = 0;
+
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
@@ -867,6 +1018,7 @@ bool StaticData::LoadPhraseTables()
 	
 	IFVERBOSE(1)
 		PrintUserTime("Finished loading phrase tables");
+
 	return true;
 }
 
@@ -885,27 +1037,27 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 		size_t index;
 		if (token.size() == 2) 
 		{
-		  vectorList = 0;
+			vectorList = 0;
 			decodeType = token[0] == "T" ? Translate : Generate;
 			index = Scan<size_t>(token[1]);
 		}
 		//Smoothing
 		else if (token.size() == 3) 
 		{
-		  vectorList = Scan<size_t>(token[0]);
+			vectorList = Scan<size_t>(token[0]);
 			//the vectorList index can only increment by one 
 			assert(vectorList == previousVectorList || vectorList == previousVectorList + 1);
-      if (vectorList > previousVectorList) 
-      {
-        prev = NULL;
-      }
-			decodeType = token[1] == "T" ? Translate : Generate;
-			index = Scan<size_t>(token[2]);
+			if (vectorList > previousVectorList) 
+			{
+			  prev = NULL;
+			}
+			  decodeType = token[1] == "T" ? Translate : Generate;
+			  index = Scan<size_t>(token[2]);
 		}		 
 		else 
 		{
-			UserMessage::Add("Malformed mapping!");
-			assert(false);
+			  UserMessage::Add("Malformed mapping!");
+			  assert(false);
 		}
 		
 		DecodeStep* decodeStep = 0;
@@ -920,6 +1072,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 						assert(false);
 					}
 				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index]->GetDictionary(source), prev);
+
 			break;
 			case Generate:
 				if(index>=m_generationDictionary.size())
@@ -938,7 +1091,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 		}
 		assert(decodeStep);
 		if (decodeStepVL.size() < vectorList + 1) 
-		{
+		{	
 			decodeStepVL.push_back(new DecodeGraph(decodeStepVL.size()));
 		}
 		decodeStepVL[vectorList]->Add(decodeStep);
@@ -1010,6 +1163,19 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
 	return iter->second.first;
 }
 
+void StaticData::ClearTransOptCache() const
+{
+	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
+	iter = m_transOptCache.begin();
+	while( iter != m_transOptCache.end() )
+	{
+		std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
+		delete iterRemove->second.first;
+		m_transOptCache.erase(iterRemove);
+
+	}
+
+}
 void StaticData::ReduceTransOptCache() const
 {
 	if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
@@ -1053,6 +1219,47 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 	m_transOptCache[key] = make_pair( storedTransOptList, clock() );
 	ReduceTransOptCache();
 }
+
+
+bool StaticData::Configurations::switchLMs (const std::vector<string> &LMFiles)
+{
+	bool equal = compareVectors(LMs,LMFiles);
+	return !equal;
+}
+
+void StaticData::Configurations::updateLMs(const std::vector<string> &LMFiles)
+{
+	LMs.clear();
+	for (size_t i=0; i<LMFiles.size(); i++)
+	{
+	  LMs.push_back(LMFiles[i]);
+	}
+}
+
+bool StaticData::Configurations::compareVectors(std::vector<string> newV, std::vector<string> oldV)
+{
+	if (newV.size() != oldV.size())
+	  return false;
+
+	bool found;
+	for (size_t i=0; i<newV.size(); i++)
+	{
+		found = false;
+		for (size_t j=0; j<oldV.size(); j++)
+		{
+		  if (newV[i].compare(oldV[i]) == 0)
+		  {
+		    found=true;
+		    break;
+		  }
+		}
+		if (!found) return false;
+	}
+
+	return true;
+}
+
+
 
 }
 
