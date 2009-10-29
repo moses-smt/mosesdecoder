@@ -14,6 +14,103 @@
 using namespace Moses;
 using namespace std;
 
+class Config : public xmlrpc_c::method {
+public:
+    Config() {
+        // signature and help strings are documentation -- the client
+        // can query this information with a system.methodSignature and
+        // system.methodHelp RPC.
+        this->_signature = "S:S";
+        this->_help = "Does new configuration";
+    }
+
+    typedef std::map<std::string, xmlrpc_c::value> params_t;
+
+    void
+    execute(xmlrpc_c::paramList const& paramList,
+            xmlrpc_c::value *   const  retvalP) {
+        
+        const params_t params = paramList.getStruct(0);
+        paramList.verifyEnd(1);
+        params_t::const_iterator si = params.find("config");
+        if (si == params.end()) {
+            throw xmlrpc_c::fault(
+                "Missing config command", 
+                xmlrpc_c::fault::CODE_PARSE);
+        }
+        string command(
+            (xmlrpc_c::value_string(si->second)));
+
+        cerr << "Config command: " << command << endl;
+
+	// does config here...
+	// parse command
+	int arg_count;
+	vector<string> arguments;
+	parseCommand(&command, &arg_count, &arguments);
+	char* args[arg_count];
+	for (int i=0; i<arg_count; i++)
+	{
+		args[i] = (char*)arguments.at(i).c_str();	
+	}
+
+	// load parameters
+	Parameter* parameter = new Parameter();
+	if (!parameter->LoadParam(arg_count,args)) {
+		parameter->Explain();
+		respond(1,retvalP);
+		return;
+	}
+
+	// re-config
+	if (!StaticData::SetUpBeforeReconfigStatic(parameter)){
+		respond(1,retvalP);
+		return;
+	}
+	// if runs here, parameters should be ok, will crash only if table files are abnormal
+	// load static data
+	if (!StaticData::LoadDataStatic(parameter)) {
+		// cannot proceed
+		exit(1);
+	}
+
+	respond(0,retvalP);
+
+    }
+
+	void respond(int res, xmlrpc_c::value *   const  retvalP)
+	{
+		// responding result
+        	map<string, xmlrpc_c::value> retData;
+        	pair<string, xmlrpc_c::value> 
+        	    text("result", xmlrpc_c::value_int(res));
+        	cerr << "Config finished, " << res <<  endl;
+        	retData.insert(text);
+        	*retvalP = xmlrpc_c::value_struct(retData);
+	}
+
+	void parseCommand(string* cmd, int* argc, vector<string>* argv)
+	{
+		cmd->erase(cmd->find_last_not_of(" ")+1);// strip
+
+		istringstream stream( *cmd ) ;
+		int cmd_len = cmd->size();
+		int read_len = 0;
+
+		string item ;
+		*argc=0;
+
+		while ( read_len < cmd_len){
+		  stream >> item;
+		  (*argc)++;
+		  read_len += (item.size()+1);
+		  argv->push_back(item);
+		}
+	}
+
+
+};
+
 
 class Translator : public xmlrpc_c::method {
 public:
@@ -148,6 +245,10 @@ int main(int argc, char** argv) {
     xmlrpc_c::methodPtr const translator(new Translator);
 
     myRegistry.addMethod("translate", translator);
+
+    xmlrpc_c::methodPtr const config(new Config);
+
+    myRegistry.addMethod("config", config);
     
     xmlrpc_c::serverAbyss myAbyssServer(
         myRegistry,

@@ -186,7 +186,20 @@ protected:
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
     void ReduceTransOptCache() const;   
-	
+	void ClearTransOptCache() const; 
+
+	class Configurations
+	{
+	  public:
+		std::vector<string> LMs;
+		std::vector<string> PhraseTables;
+		std::vector<string> ReorderingTables;
+
+		bool switchLMs (const std::vector<string> &LMFiles);
+		void updateLMs(const std::vector<string> &LMFiles);
+		inline bool compareVectors(std::vector<string> newV, std::vector<string> oldV); 
+	};
+	Configurations m_configs;
 public:
 
 	bool IsAlwaysCreateDirectTranslationOption() const {
@@ -203,6 +216,13 @@ public:
 	#ifdef WIN32
 	static void Reset() { s_instance = StaticData(); }
 	#endif
+	
+	// add a func to reset s_instance, but not all- tables may mentain
+	static bool SetUpBeforeReconfigStatic(Parameter *parameter)
+	{
+		return s_instance.SetUpBeforeReconfig(parameter);
+	}
+	bool SetUpBeforeReconfig(Parameter *parameter); 
 	
 	/** load data into static instance. This function is required
 		* as LoadData() is not const

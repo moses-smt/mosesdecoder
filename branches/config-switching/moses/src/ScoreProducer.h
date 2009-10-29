@@ -41,6 +41,7 @@ public:
 	//! contiguous id
 	unsigned int GetScoreBookkeepingID() const { return m_scoreBookkeepingId; }
 	void CreateScoreBookkeepingID()	{	m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;}
+	void ResetScoreBookkeepingID()	{	s_globalScoreBookkeepingIdCounter=0;}
 	//! returns the number of scores that a subclass produces.
 	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
 	virtual size_t GetNumScoreComponents() const = 0;
