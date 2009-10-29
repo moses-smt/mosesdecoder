@@ -14,6 +14,12 @@
 		1C730165100F69A000EE3BE0 /* SyntaxTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */; };
 		1C730173100F69F000EE3BE0 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730171100F69F000EE3BE0 /* XmlTree.cpp */; };
 		1C8FDA9D1098858800B54D9C /* relax-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8FDA9C1098858800B54D9C /* relax-parse.cpp */; };
+		1CBF101A109A019C00FBA941 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730171100F69F000EE3BE0 /* XmlTree.cpp */; };
+		1CBF101B109A019C00FBA941 /* XmlTree.h in Sources */ = {isa = PBXBuildFile; fileRef = 1C730172100F69F000EE3BE0 /* XmlTree.h */; };
+		1CBF101D109A01A900FBA941 /* SyntaxTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */; };
+		1CBF101E109A01A900FBA941 /* SyntaxTree.h in Sources */ = {isa = PBXBuildFile; fileRef = 1C730164100F69A000EE3BE0 /* SyntaxTree.h */; };
+		1CBF1032109A020900FBA941 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
+		1CBF1033109A020900FBA941 /* tables-core.h in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4C0FC6EAA200924FEA /* tables-core.h */; };
 		1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE2C0FC6EA0200924FEA /* extract.cpp */; };
 		1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1CF9F71E108C9FF800EABCE5 /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */; };
@@ -41,10 +47,8 @@
 		1C730164100F69A000EE3BE0 /* SyntaxTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SyntaxTree.h; sourceTree = "<group>"; };
 		1C730171100F69F000EE3BE0 /* XmlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XmlTree.cpp; sourceTree = "<group>"; };
 		1C730172100F69F000EE3BE0 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XmlTree.h; sourceTree = "<group>"; };
-		1C8FDA921098853F00B54D9C /* relax-parse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = "relax-parse"; path = "build/Debug/relax-parse"; sourceTree = "<group>"; };
+		1C8FDA921098853F00B54D9C /* relax-parse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "relax-parse"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C8FDA9C1098858800B54D9C /* relax-parse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "relax-parse.cpp"; sourceTree = "<group>"; };
-		1C8FDAA0109885D300B54D9C /* SyntaxTree.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = SyntaxTree.o; sourceTree = "<group>"; };
-		1C8FDAA3109885F500B54D9C /* XmlTree.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = XmlTree.o; sourceTree = "<group>"; };
 		1CE8CE2C0FC6EA0200924FEA /* extract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extract.cpp; sourceTree = "<group>"; };
 		1CE8CE2D0FC6EA0200924FEA /* extract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = extract.h; sourceTree = "<group>"; };
 		1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "tables-core.cpp"; sourceTree = "<group>"; };
@@ -95,9 +99,6 @@
 		08FB7794FE84155DC02AAC07 /* extract */ = {
 			isa = PBXGroup;
 			children = (
-				1C8FDAA3109885F500B54D9C /* XmlTree.o */,
-				1C8FDAA0109885D300B54D9C /* SyntaxTree.o */,
-				1C8FDA9C1098858800B54D9C /* relax-parse.cpp */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -108,6 +109,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1C8FDA9C1098858800B54D9C /* relax-parse.cpp */,
 				1C4757C8102B7EC600AB74DB /* consolidate.cpp */,
 				1C475794102B78DD00AB74DB /* score.cpp */,
 				1C730171100F69F000EE3BE0 /* XmlTree.cpp */,
@@ -271,6 +273,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1CBF1032109A020900FBA941 /* tables-core.cpp in Sources */,
+				1CBF1033109A020900FBA941 /* tables-core.h in Sources */,
+				1CBF101D109A01A900FBA941 /* SyntaxTree.cpp in Sources */,
+				1CBF101E109A01A900FBA941 /* SyntaxTree.h in Sources */,
+				1CBF101A109A019C00FBA941 /* XmlTree.cpp in Sources */,
+				1CBF101B109A019C00FBA941 /* XmlTree.h in Sources */,
 				1C8FDA9D1098858800B54D9C /* relax-parse.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
