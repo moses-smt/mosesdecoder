@@ -1,0 +1,14 @@
+--------------------------
+moses:
+	Process two commands:
+	<decoder config="-f moses.ini">
+	<decoder quit>
+
+-------------------------
+mosesserver:
+	c = proxy.config
+	c({"config":"-f moses-fr.ini"})
+	// takes the second value as arguments that a common moses supports, i.g. can also do like: 
+	// c({"config":"-f moses-fr.ini -verbose 2"}) 
+-------------------------
+
