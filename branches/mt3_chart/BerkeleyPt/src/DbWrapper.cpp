@@ -262,9 +262,9 @@ void DbWrapper::SaveTarget(TargetPhrase &phrase)
 													, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
 }
 
-void DbWrapper::SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const TargetPhraseCollection &tpColl)
+void DbWrapper::SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const TargetPhraseCollection &tpColl, int tableLimit)
 {
-	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize());	
+	tpColl.Save(m_dbTargetColl, sourceNodeId, m_numScores, GetSourceWordSize(), GetTargetWordSize(), tableLimit);
 }
 
 const SourcePhraseNode *DbWrapper::GetChild(const SourcePhraseNode &parentNode, const Word &word)
