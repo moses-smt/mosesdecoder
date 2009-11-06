@@ -13,10 +13,10 @@ TargetPhraseCollection::~TargetPhraseCollection()
 	Moses::RemoveAllInColl(m_coll);
 }
 
-void TargetPhraseCollection::Save(Db &db, Moses::UINT32 sourceNodeId, int numScores, size_t sourceWordSize, size_t targetWordSize) const
+void TargetPhraseCollection::Save(Db &db, Moses::UINT32 sourceNodeId, int numScores, size_t sourceWordSize, size_t targetWordSize, int tableLimit) const
 {
 	size_t memUsed;
-	char *mem = WriteToMemory(memUsed, numScores, sourceWordSize, targetWordSize);
+	char *mem = WriteToMemory(memUsed, numScores, sourceWordSize, targetWordSize, tableLimit);
 
 	Dbt key(&sourceNodeId, sizeof(sourceNodeId));
 	Dbt data(mem, memUsed);
@@ -27,20 +27,19 @@ void TargetPhraseCollection::Save(Db &db, Moses::UINT32 sourceNodeId, int numSco
 	free(mem);
 }
 
-char *TargetPhraseCollection::WriteToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize) const
+char *TargetPhraseCollection::WriteToMemory(size_t &memUsed, int numScores, size_t sourceWordSize, size_t targetWordSize, int tableLimit) const
 {
 	memUsed = sizeof(int);
 	char *mem = (char*) malloc(memUsed);
 	
 	// size
-	int sizeColl = m_coll.size();
+	int sizeColl = (tableLimit == 0) ? m_coll.size() : tableLimit;
 	memcpy(mem, &sizeColl, memUsed);
 
-	vector<const TargetPhrase*>::const_iterator iter;
-	for (iter = m_coll.begin(); iter != m_coll.end(); ++iter)
+	for (size_t ind = 0; ind < sizeColl; ++ind)
 	{
-		const TargetPhrase &phrase = **iter;
-		
+		const TargetPhrase &phrase = *m_coll[ind];
+				
 		size_t memUsed1;
 		char *mem1 = phrase.WriteOtherInfoToMemory(memUsed1, numScores, sourceWordSize, targetWordSize);
 		

@@ -18,7 +18,7 @@
 using namespace std;
 using namespace MosesBerkeleyPt;
 
-void Save(map<SourcePhrase, TargetPhraseCollection> &tpCollMap, DbWrapper &dbWrapper)
+void Save(map<SourcePhrase, TargetPhraseCollection> &tpCollMap, DbWrapper &dbWrapper, int tableLimit)
 {
 	//write out all target phrase colls
 	map<SourcePhrase, TargetPhraseCollection>::iterator iter;
@@ -29,7 +29,7 @@ void Save(map<SourcePhrase, TargetPhraseCollection> &tpCollMap, DbWrapper &dbWra
 		
 		TargetPhraseCollection &tpColl = iter->second;
 		tpColl.Sort();
-		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl);
+		dbWrapper.SaveTargetPhraseCollection(sourceNodeId, tpColl, tableLimit);
 	}	
 	
 	// delete all tp coll
@@ -46,9 +46,10 @@ int main (int argc, char * const argv[])
 
 	int numSourceFactors		= Moses::Scan<int>(argv[1])
 			, numTargetFactors	= Moses::Scan<int>(argv[2])
-			, numScores					= Moses::Scan<int>(argv[3]);
-	string filePath = argv[4]
-				,destPath = argv[5];
+			, numScores					= Moses::Scan<int>(argv[3])
+			, tableLimit				= Moses::Scan<int>(argv[4]);
+	string filePath = argv[5]
+				,destPath = argv[6];
 
 	Moses::InputFileStream inStream(filePath);
 
@@ -105,7 +106,7 @@ int main (int argc, char * const argv[])
 		if (prevSourcePhraseStr != sourcePhraseStr)
 		{ // different source from last time. 
 			prevSourcePhraseStr = sourcePhraseStr;
-			Save(tpCollMap, dbWrapper);
+			Save(tpCollMap, dbWrapper, tableLimit);
 		}
 		else
 		{ // same source as last time. do nothing
@@ -118,7 +119,7 @@ int main (int argc, char * const argv[])
 	} // while(getline(inStream, line))
 
 	// save the last coll
-	Save(tpCollMap, dbWrapper);
+	Save(tpCollMap, dbWrapper, tableLimit);
 			
 	dbWrapper.EndSave();
 	

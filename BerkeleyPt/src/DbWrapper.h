@@ -54,7 +54,7 @@ public:
 	bool Load(const std::string &filePath);
 
 	void SaveTarget(TargetPhrase &phrase);
-	void SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const TargetPhraseCollection &tpColl);
+	void SaveTargetPhraseCollection(Moses::UINT32 sourceNodeId, const TargetPhraseCollection &tpColl, int tableLimit);
 
 	Word *ConvertFromMoses(Moses::FactorDirection direction
 												, const std::vector<Moses::FactorType> &factorsVec
