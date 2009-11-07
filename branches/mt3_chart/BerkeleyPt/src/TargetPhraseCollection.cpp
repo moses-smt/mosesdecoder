@@ -33,7 +33,7 @@ char *TargetPhraseCollection::WriteToMemory(size_t &memUsed, int numScores, size
 	char *mem = (char*) malloc(memUsed);
 	
 	// size
-	int sizeColl = (tableLimit == 0) ? m_coll.size() : tableLimit;
+	int sizeColl = (tableLimit == 0) ? m_coll.size() : min( (int) m_coll.size(), tableLimit);
 	memcpy(mem, &sizeColl, memUsed);
 
 	for (size_t ind = 0; ind < sizeColl; ++ind)
