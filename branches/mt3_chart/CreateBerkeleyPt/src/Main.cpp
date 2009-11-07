@@ -42,7 +42,7 @@ int main (int argc, char * const argv[])
 	Moses::ResetUserTime();
 	Moses::PrintUserTime("Starting");
 
-	assert(argc == 6);
+	assert(argc == 7);
 
 	int numSourceFactors		= Moses::Scan<int>(argv[1])
 			, numTargetFactors	= Moses::Scan<int>(argv[2])
