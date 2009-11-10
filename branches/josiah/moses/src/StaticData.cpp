@@ -384,19 +384,21 @@ bool StaticData::LoadData(Parameter *parameter)
 
   m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
+    bool l1normWeights = false;
+    SetBooleanParameter( &l1normWeights, "l1norm-weights", false );
 	  if (m_parameter->GetParam("weight-file").size() != 1) {
 	    UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
 	    return false;
 	  }
 		string fnam = m_parameter->GetParam("weight-file")[0];
-    InitWeightsFromFile(fnam);
+    InitWeightsFromFile(fnam, l1normWeights);
 	}
 
 	return true;
 }
 
-void StaticData::InitWeightsFromFile(const string& filename) {
-  m_scoreIndexManager.InitWeightVectorFromFile(filename, &m_allWeights);
+void StaticData::InitWeightsFromFile(const string& filename, bool l1normWeights) {
+  m_scoreIndexManager.InitWeightVectorFromFile(filename, &m_allWeights, l1normWeights);
 }
 
 void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue ) 

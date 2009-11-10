@@ -105,6 +105,7 @@ Parameter::Parameter()
 	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("num-gibbler-iterations", "gi", "How many iterations of the sampler should we run. (default = 0)");
+  AddParam("l1norm-weights", "l1", "Normalize weights from file before running (default = false)");
 }
 
 Parameter::~Parameter()

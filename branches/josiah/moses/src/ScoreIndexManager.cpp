@@ -81,7 +81,7 @@ void ScoreIndexManager::SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const 
 }
 #endif
 
-void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector<float>* m_allWeights) const {
+void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector<float>* m_allWeights, bool l1normWeights) const {
 	assert(m_allWeights->size() == m_featureNames.size());
 	ifstream in(fnam.c_str());
 	assert(in.good());
@@ -101,7 +101,8 @@ void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector
 		VERBOSE(1,"weight: " << fname << " = " << val << std::endl);
 	}
 	assert(m_allWeights->size() == m_featureNames.size());
-	for (size_t i = 0; i < m_featureNames.size(); ++i) {
+  
+  for (size_t i = 0; i < m_featureNames.size(); ++i) {
 		map<string, double>::iterator iter = name2val.find(m_featureNames[i]);
 		if (iter == name2val.end()) {
 			cerr << "No weight found found for feature: " << m_featureNames[i] << endl;
@@ -109,8 +110,29 @@ void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector
 		}
 		(*m_allWeights)[i] = iter->second;
 	}
+  
+  if (l1normWeights) {
+    l1normalizeWeights(m_allWeights);
+    cerr << "L1 normalized weights: " <<endl;
+    for (size_t i = 0; i < m_featureNames.size(); ++i) {
+      VERBOSE(1,"weight: " << m_featureNames[i] << " = " << (*m_allWeights)[i] << std::endl);
+    }  
+  }
+    
+  
+  
 }
 
+void ScoreIndexManager::l1normalizeWeights( vector<float>* weights) const{
+  float normalizer = 0.0;
+  for (size_t i = 0; i < weights->size(); ++i) {
+    normalizer += abs((*weights)[i]);    
+  }
+  for (size_t i = 0; i < weights->size(); ++i) {
+    (*weights)[i] /= normalizer;    
+  }
+}
+  
 std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 {
 	for (size_t i = 0; i < sim.m_featureNames.size(); ++i) {

@@ -47,7 +47,8 @@ public:
 #ifdef HAVE_PROTOBUF
 	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
 #endif
-	void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights) const;
+	void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights, bool l1normWeights = false) const;
+  void l1normalizeWeights( std::vector<float>* weights) const;
 private:
 	ScoreIndexManager(const ScoreIndexManager&); // don't implement
 
