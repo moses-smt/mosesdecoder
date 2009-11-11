@@ -48,6 +48,7 @@ die "Error: No josiah tester specified" if (! $josiah_test);
 #optional globals
 my $queue = &param("general.queue", "inf_iccs_smt");
 my $mpienv = &param("general.mpienv", "openmpi-smp");
+my $vmem = &param("general.vmem", "6");
 
 &check_exists ("weights file", $weights_file);
 &check_exists("josiah train executable", $josiah_train);
@@ -119,7 +120,7 @@ my $train_err = $train_script . ".err";
 #write the script
 open TRAIN, ">$train_script_file" || die "Unable to open \"$train_script_file\" for writing";
 
-&header(*TRAIN,$job_name,$working_dir,$jobs,$hours,$train_out,$train_err);
+&header(*TRAIN,$job_name,$working_dir,$jobs,$hours,$vmem,$train_out,$train_err);
 print TRAIN "mpirun -np \$NSLOTS $josiah_train \\\n";
 print TRAIN "-f $moses_ini_file \\\n";
 print TRAIN "-i $input_file \\\n";
@@ -209,7 +210,7 @@ while(1) {
         next
     }
 
-    &header(*TEST,$job_name,$working_dir,$jobs,$hours,$test_out,$test_err);
+    &header(*TEST,$job_name,$working_dir,$jobs,$hours,$vmem,$test_out,$test_err);
     print TEST "mpirun -np \$NSLOTS $josiah_test \\\n";
     print TEST "-f $test_ini_file \\\n";
     print TEST "-i $test_input_file \\\n";
@@ -270,12 +271,13 @@ sub param_required {
 }
 
 sub header {
-    my ($OUT,$name,$working_dir,$jobs,$hours,$out,$err) = @_;
+    my ($OUT,$name,$working_dir,$jobs,$hours,$vmem,$out,$err) = @_;
     print $OUT "#!/bin/sh\n";
     print $OUT "#\$ -N $name\n";
     print $OUT "#\$ -wd $working_dir\n";
     print $OUT "#\$ -pe $mpienv $jobs\n";
-    print $OUT "#\$ -l h_rt=$hours:00:00 -l h_vmem=6G\n";
+    print $OUT "#\$ -l h_rt=$hours:00:00\n";
+    print $OUT "#\$ -l h_vmem=$vmem" . "G" . "\n";
     print $OUT "#\$ -o $out\n";
     print $OUT "#\$ -e $err\n";
     print $OUT "\n";
