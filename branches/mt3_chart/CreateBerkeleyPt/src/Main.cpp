@@ -68,7 +68,7 @@ int main (int argc, char * const argv[])
 		lineNum++;
     if (lineNum%1000 == 0) cerr << "." << flush;
     if (lineNum%10000 == 0) cerr << ":" << flush;
-    if (lineNum%100000 == 0) cerr << "!" << flush;
+    if (lineNum%100000 == 0) cerr << lineNum << flush;
 		
 		line = Moses::Trim(line);
 		if (line.size() == 0)
