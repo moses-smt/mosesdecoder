@@ -69,13 +69,7 @@ public:
 	SyntaxTree() {
 			m_emptyNode.clear();
 	}
-	~SyntaxTree() {
-		// loop through all m_nodes, delete them
-		for(int i=0; i<m_nodes.size(); i++)
-		{
-			//delete m_nodes[i];
-		}
-	}
+	~SyntaxTree();
 	
 	void AddNode( int startPos, int endPos, std::string label );
 	ParentNodes Parse();
