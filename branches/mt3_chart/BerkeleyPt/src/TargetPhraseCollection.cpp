@@ -1,5 +1,6 @@
 
 #include <db_cxx.h>
+#include <algorithm>
 #include "TargetPhraseCollection.h"
 #include "../../moses/src/Util.h"
 
