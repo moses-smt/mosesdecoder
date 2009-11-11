@@ -275,7 +275,7 @@ sub header {
     print $OUT "#\$ -N $name\n";
     print $OUT "#\$ -wd $working_dir\n";
     print $OUT "#\$ -pe $mpienv $jobs\n";
-    print $OUT "#\$ -l h_rt=$hours:00:00\n";
+    print $OUT "#\$ -l h_rt=$hours:00:00 -l h_vmem=6G\n";
     print $OUT "#\$ -o $out\n";
     print $OUT "#\$ -e $err\n";
     print $OUT "\n";
