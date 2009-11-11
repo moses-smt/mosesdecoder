@@ -24,6 +24,15 @@
 #include "SyntaxTree.h"
 #include <iostream>
 
+SyntaxTree::~SyntaxTree()
+{
+	// loop through all m_nodes, delete them
+	for(int i=0; i<m_nodes.size(); i++)
+	{
+		delete m_nodes[i];
+	}
+}
+
 void SyntaxTree::AddNode( int startPos, int endPos, std::string label ) 
 {
 	SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
