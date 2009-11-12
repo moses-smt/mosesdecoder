@@ -61,7 +61,7 @@ protected:
 	const std::vector<Moses::FactorType>	&m_inputFactorOrder;
 	const std::vector<Moses::FactorType>	&m_outputFactorOrder;
 	const Moses::FactorMask								&m_inputFactorUsed;
-	std::ostream 									*m_nBestStream;
+	std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
 	Moses::InputFileStream				*m_inputFile;
@@ -90,4 +90,7 @@ public:
 
 	void ResetTranslationId() { m_translationId = 0; }
 
+	std::ostream &GetOutputSearchGraphStream()
+	{ return *m_outputSearchGraphStream; }
+	
 };

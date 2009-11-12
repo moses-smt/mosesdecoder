@@ -167,6 +167,10 @@ int main(int argc, char* argv[])
 			
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}
+			
+			if (staticData.GetOutputSearchGraph())
+				manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
+
 		}
 		else {
 			/*
@@ -187,7 +191,7 @@ int main(int argc, char* argv[])
 				IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 		  }
 			*/
-			
+
 		}	
 		/*		 
 		if (staticData.IsDetailedTranslationReportingEnabled()) {
@@ -198,7 +202,7 @@ int main(int argc, char* argv[])
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
     
 		manager.CalcDecoderStatistics();    
-	}
+	} // while(ReadInput
 	
 	delete ioWrapper;
 

@@ -6,6 +6,18 @@
 
 namespace Moses
 {
+class XMLParseOutput
+{
+public:
+	std::string m_label;
+	WordsRange m_range;
+	
+	XMLParseOutput(const std::string &label, const WordsRange &range)
+	: m_label(label)
+	, m_range(range)
+	{}
+};
+	
 class ChartInput : public Sentence
 {
 	friend std::ostream& operator<<(std::ostream&, const ChartInput&);
@@ -19,6 +31,8 @@ protected:
 	{
 		return m_sourceChart[startPos][endPos - startPos];
 	}
+	
+	bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels);
 
 public:
 	ChartInput(FactorDirection direction)	

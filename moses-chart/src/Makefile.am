@@ -4,6 +4,7 @@ libmoses_chart_a_SOURCES = \
 	ChartCell.cpp \
 	ChartCellCollection.cpp \
 	ChartHypothesis.cpp \
+	ChartHypothesisCollection.cpp \
 	ChartManager.cpp \
 	ChartTranslationOption.cpp \
 	ChartTranslationOptionCollection.cpp \

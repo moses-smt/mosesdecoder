@@ -28,10 +28,11 @@ TranslationOption::~TranslationOption()
 // friend
 ostream& operator<<(ostream& out, const TranslationOption& transOpt)
 {
-	out << transOpt.GetChartRule().GetTargetPhrase()
+	out << transOpt.GetTotalScore()
+			<< " " << transOpt.GetChartRule().GetTargetPhrase()
 			<< " " << transOpt.GetChartRule().GetTargetPhrase().GetScoreBreakdown()
 			<< " " << transOpt.m_rule;
-
+	
 	return out;
 }
 

@@ -85,11 +85,11 @@ libmoses_a_SOURCES = \
 	TranslationOptionList.cpp \
 	UserMessage.cpp \
 	Util.cpp \
+	WordConsumed.cpp \
 	Word.cpp \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
-	WordConsumed.cpp \
 	XmlOption.cpp 
 
 if PROTOBUF

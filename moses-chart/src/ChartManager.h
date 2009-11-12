@@ -34,6 +34,8 @@ public:
 	 */
 	void CalcDecoderStatistics() const;
 
+	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+
 };
 
 }

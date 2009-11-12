@@ -127,7 +127,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																															, adhereTableLimit
 																															, m_hypoStackColl);
 	assert(chartRuleCollection != NULL);
-
+	//cerr << "chartRuleCollection size=" << chartRuleCollection->GetSize();
+	
 	ChartRuleCollection::const_iterator iterTargetPhrase;
 	for (iterTargetPhrase = chartRuleCollection->begin(); iterTargetPhrase != chartRuleCollection->end(); ++iterTargetPhrase)
 	{
@@ -222,9 +223,13 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			const string &lhsStr = iterLHS->first;
 			float prob = iterLHS->second;
 			
-			// headword
-			Word targetLHS(true);
-			targetLHS.CreateFromString(Input, staticData.GetOutputFactorOrder(), lhsStr, true);
+			// lhs
+			Word sourceLHS(true)
+						,targetLHS(true);
+			sourceLHS.CreateFromString(Input, staticData.GetInputFactorOrder(), lhsStr, true);
+			assert(sourceLHS.GetFactor(0) != NULL);
+
+			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), lhsStr, true);
 			assert(targetLHS.GetFactor(0) != NULL);
 
 			// add to dictionary
@@ -241,8 +246,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 			targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
 			targetPhrase->SetSourcePhrase(m_unksrc);
+			targetPhrase->SetSourceLHS(sourceLHS);
 			targetPhrase->SetTargetLHS(targetLHS);
-			
+						
 			// chart rule
 			ChartRule *chartRule = new ChartRule(*targetPhrase
 																					, *wordsConsumed->back());
