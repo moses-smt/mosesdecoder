@@ -1,4 +1,4 @@
-// $Id: relax-parse.cpp 0 2009-09-18 01:00:00Z init $
+// $Id: relax-grammar.cpp 0 2009-09-18 01:00:00Z init $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -20,26 +20,38 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "relax-parse.h"
+#include "relax-grammar.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) 
 {
 	init( argc, argv ); // initialize from switches, set flags
+	char* &fileNameIn = argv[1];
+	char* &fileNameOut = argv[2];
+  
+	// input grammar
+	ifstream inFile;
+	inFile.open( fileNameIn );
+	istream *inFileP = &inFile;
+	
+	// output grammar
+	ofstream outFile;
+	outFile.open( fileNameOut );
 	
 	// loop through all sentences
 	int i=0;
 	char inBuffer[LINE_MAX_LENGTH];
 	while(true) {
+		cerr << "LOOP" << endl;
 		i++;
 		if (i%1000 == 0) cerr << "." << flush;
 		if (i%10000 == 0) cerr << ":" << flush;
 		if (i%100000 == 0) cerr << "!" << flush;
 		
-		// get line from stdin
-		SAFE_GETLINE( cin, inBuffer, LINE_MAX_LENGTH, '\n' );
-		if (cin.eof()) break;
+		// get line from file
+		SAFE_GETLINE( (*inFileP), inBuffer, LINE_MAX_LENGTH, '\n' );
+		if (inFileP->eof()) break;
 		
 		// process into syntax tree representation
 		string inBufferString = string( inBuffer );
@@ -49,12 +61,11 @@ int main(int argc, char* argv[])
 		ProcessAndStripXMLTags( inBufferString, tree, labelCollection, topLabelCollection );
 		vector< string > inWords = tokenize( inBufferString.c_str() );
 
-		// output tree
-		// cerr << "BEFORE:" << endl << tree;
-
+		cerr << "BEFORE:" << endl << tree;
+		
 		ParentNodes parents = tree.Parse();
 
-		// execute selected grammar relaxation schemes
+    // execute selected grammar relaxation schemes
 		if (leftBinarizeFlag)
 			LeftBinarize( tree, parents );
 		
@@ -65,9 +76,9 @@ int main(int argc, char* argv[])
 			SAMT( tree, parents );
 		
 		// output tree
-		// cerr << "AFTER:" << endl << tree;
+		cerr << "AFTER:" << endl << tree;
 
-		store( tree, inWords );
+		store( tree, inWords, outFile );
 	}
 }
 
@@ -78,59 +89,57 @@ void init(int argc, char* argv[])
 	cerr << "Grammar Relaxer v1.0, written by Philipp Koehn\n";
 	cerr << "adds additional constituents to a parse tree\n";
 	
-	if (argc < 1) 
+	if (argc < 2) 
 	{
-		cerr << "syntax: relax-grammar < in-grammar > out-grammar ["
+		cerr << "syntax: relax-grammar in-grammar out-grammar ["
 				 << " --LeftBinarize | ---RightBinarize |"
 				 << " --SAMT 1-4 ]" << endl;
 		exit(1);
 	}
 	
-	for(int i=1;i<argc;i++) {
+	for(int i=3;i<argc;i++) {
 		// add constituents with binarization
 		if (strcmp(argv[i],"--LeftBinarize") == 0) {
-			leftBinarizeFlag = true;
+	    leftBinarizeFlag = true;
 		}
 		else if (strcmp(argv[i],"--RightBinarize") == 0) {
-			rightBinarizeFlag = true;
+	    rightBinarizeFlag = true;
 		}
 		
 		// add constituents according to samt (Zollmann/Venugopal)
 		else if (strcmp(argv[i],"--SAMT") == 0) {
-			SAMTLevel = atoi( argv[++i] );
+	    SAMTLevel = atoi( argv[++i] );
 			cerr << "using SAMT grammar, level " <<  SAMTLevel << endl;
 		}
 		
 		// error
 		else {
-			cerr << "relax-grammar: syntax error, unknown option '" << string(argv[i]) << "'\n";
-			exit(1);
+	    cerr << "relax-grammar: syntax error, unknown option '" << string(argv[i]) << "'\n";
+	    exit(1);
 		}
 	}
 }
 
-void store( SyntaxTree &tree, vector< string > &words )
+void store( SyntaxTree &tree, vector< string > &words, ofstream &outFile )
 {
-	// output words
 	for( size_t i=0; i<words.size(); i++ )
 	{
 		if (i>0) 
 		{
-			cout << " ";
+			outFile << " ";
 		}
-		cout << words[i];
+		outFile << words[i];
 	}
 
-	// output tree nodes
 	vector< SyntaxNode* > nodes = tree.GetAllNodes();
 	for( size_t i=0; i<nodes.size(); i++ )
 	{
-		cout << " <tree span=\"" << nodes[i]->GetStart()
-					 << "-" << nodes[i]->GetEnd()
-					 << "\" label=\"" << nodes[i]->GetLabel()
-					 << "\"/>";
+		outFile << " <tree span=\"" << nodes[i]->GetStart()
+						<< "-" << nodes[i]->GetEnd()
+						<< "\" label=\"" << nodes[i]->GetLabel()
+						<< "\"/>";
 	}
-	cout << endl;
+	outFile << endl;
 }
 
 void LeftBinarize( SyntaxTree &tree, ParentNodes &parents ) 
@@ -228,7 +237,7 @@ void SAMT( SyntaxTree &tree, ParentNodes &parents )
 			bool done = false;
 
 			if (tree.HasNode( start,end ) || newTree.HasNode( start,end )
-					|| SAMTLevel <= 1)
+					|| SAMTLevel == 1)
 			{
 				continue;
 			}

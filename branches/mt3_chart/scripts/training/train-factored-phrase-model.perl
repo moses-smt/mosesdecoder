@@ -29,6 +29,7 @@ $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
 @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
 $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+$_PHRASE_WORD_ALIGNMENT,
 $_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -91,6 +92,7 @@ $_HELP = 1
 		       'target-syntax' => \$_TARGET_SYNTAX,
 		       'xml' => \$_XML,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
+		       'phrase-word-alignment=s' => \$_PHRASE_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG		       		     
                       );
 
@@ -443,7 +445,7 @@ sub reduce_factors {
         $nr++;
         print STDERR "." if $nr % 10000 == 0;
         print STDERR "($nr)" if $nr % 100000 == 0;
-	s/<\S[^>]*>//g; # remove xml
+	#s/<\S[^>]*>//g; # remove xml
 	chomp; s/ +/ /g; s/^ //; s/ $//;
 	my $first = 1;
 	foreach (split) {
@@ -1042,7 +1044,7 @@ sub score_phrase {
 
 	my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
 	$cmd .= " --Hierarchical" if $_HIERARCHICAL;
-	#$cmd .= " --NegLogProb" if $_HIERARCHICAL; # temporary fix for Hiero format
+	$cmd .= " --WordAlignment $_PHRASE_WORD_ALIGNMENT" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " ".$_SCORE_OPTIONS if defined($_SCORE_OPTIONS);
 	print $cmd."\n";
 	safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    

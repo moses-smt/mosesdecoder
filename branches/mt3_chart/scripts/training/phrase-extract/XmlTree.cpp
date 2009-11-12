@@ -289,13 +289,13 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
 				string span = ParseXmlTagAttribute(tagContent,"span");
 				if (! span.empty()) 
 				{
-					vector<string> ij = Tokenize(span, ",");
+					vector<string> ij = Tokenize(span, "-");
 					if (ij.size() != 1 && ij.size() != 2) {
-					    cerr << "ERROR: span attribute must be of the form \"i,j\" or \"i\": " << line << endl;
+					    cerr << "ERROR: span attribute must be of the form \"i-j\" or \"i\": " << line << endl;
 						return false;
 					}
 					startPos = atoi(ij[0].c_str());
-					if (ij.size() == 1) endPos = startPos;
+					if (ij.size() == 1) endPos = startPos + 1;
 					else endPos = atoi(ij[1].c_str()) + 1;
 				}
 
@@ -303,7 +303,7 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
 
 				if (startPos >= endPos)
 				{
-				    cerr << "ERROR: tag " << tagName << " must span at least one word: " << line << endl;
+				    cerr << "ERROR: tag " << tagName << " must span at least one word (" << startPos << "-" << endPos << "): " << line << endl;
 					return false;
 				}
 

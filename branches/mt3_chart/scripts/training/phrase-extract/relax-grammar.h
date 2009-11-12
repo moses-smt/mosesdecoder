@@ -1,4 +1,4 @@
-// $Id: relax-parse.h 0 2009-09-18 01:00:00Z init $
+// $Id: relax-grammar.h 0 2009-09-18 01:00:00Z init $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -43,7 +43,7 @@ using namespace std;
 			exit(1);																													 \
 		}																																		 \
 	}
-#define LINE_MAX_LENGTH 1000000
+#define LINE_MAX_LENGTH 60000
 
 // tokenize is coded in tables-core.cpp
 vector<string> tokenize( const char [] );
@@ -54,7 +54,7 @@ char SAMTLevel = 0;
 
 // functions
 void init(int argc, char* argv[]);
-void store( SyntaxTree &tree, vector<string> &words );
+void store( SyntaxTree &tree, vector<string> &words, ofstream &outFile );
 void LeftBinarize( SyntaxTree &tree, ParentNodes &parents );
 void RightBinarize( SyntaxTree &tree, ParentNodes &parents );
 void SAMT( SyntaxTree &tree, ParentNodes &parents );

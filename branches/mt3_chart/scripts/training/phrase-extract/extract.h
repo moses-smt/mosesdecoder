@@ -273,7 +273,7 @@ bool fractionalCounting = true;
                     exit(1); \
                 } \
               }
-#define LINE_MAX_LENGTH 60000
+#define LINE_MAX_LENGTH 1000000
 
 std::string IntToString( int i )
 {

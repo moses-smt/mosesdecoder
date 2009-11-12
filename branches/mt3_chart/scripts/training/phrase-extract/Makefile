@@ -1,6 +1,5 @@
 all: extract score consolidate relax-parse consolidate-direct
 
-
 clean: 
 	rm -f *.o
 
@@ -15,6 +14,9 @@ score: tables-core.o AlignmentPhrase.o score.o
 
 consolidate: consolidate.o
 	g++ consolidate.o -o consolidate
+
+relax-grammar: tables-core.o SyntaxTree.o XmlTree.o relax-grammar.o relax-grammar.h
+	g++ tables-core.o SyntaxTree.o XmlTree.o relax-grammar.o -o relax-grammar
 
 consolidate-direct: consolidate-direct.o
 	g++ consolidate-direct.o -o consolidate-direct
