@@ -39,7 +39,6 @@ public:
 		const ChartCell &cell = Get(coverage);
 		return cell.GetHeadwords();
 	}
-
 };
 
 }

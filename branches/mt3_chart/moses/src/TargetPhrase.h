@@ -198,6 +198,8 @@ public:
 
 	void SetSourceLHS(const Word &lhs)
 	{ 	m_lhsSource = lhs; }
+	const Word &GetSourceLHS() const
+	{ return m_lhsSource; }
 
 	void SetTargetLHS(const Word &lhs)
 	{ 	m_lhsTarget = lhs; }

@@ -59,7 +59,10 @@ IOWrapper::IOWrapper(
 ,m_inputFile(NULL)
 ,m_inputStream(&std::cin)
 ,m_nBestStream(NULL)
+,m_outputSearchGraphStream(NULL)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	m_surpressSingleBestOutput = false;
 	if (nBestSize > 0)
 	{
@@ -75,6 +78,16 @@ IOWrapper::IOWrapper(
 			nBestFile->open(nBestFilePath.c_str());
 		}
 	}
+	
+	// search graph output
+	if (staticData.GetOutputSearchGraph())
+	{
+	  string fileName = staticData.GetParam("output-search-graph")[0];
+	  std::ofstream *file = new std::ofstream;
+	  m_outputSearchGraphStream = file;
+	  file->open(fileName.c_str());
+	}
+	
 }
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
@@ -89,7 +102,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_inputFilePath(inputFilePath)
 ,m_inputFile(new InputFileStream(inputFilePath))
 ,m_nBestStream(NULL)
+,m_outputSearchGraphStream(NULL)
 {
+	const StaticData &staticData = StaticData::Instance();
+
 	m_surpressSingleBestOutput = false;
 	m_inputStream = m_inputFile;
 
@@ -107,6 +123,16 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 			nBestFile->open(nBestFilePath.c_str());
 		}
 	}
+
+	// search graph output
+	if (staticData.GetOutputSearchGraph())
+	{
+	  string fileName = staticData.GetParam("output-search-graph")[0];
+	  std::ofstream *file = new std::ofstream;
+	  m_outputSearchGraphStream = file;
+	  file->open(fileName.c_str());
+	}
+	
 }
 
 IOWrapper::~IOWrapper()
@@ -116,6 +142,11 @@ IOWrapper::~IOWrapper()
 	if (m_nBestStream != NULL && !m_surpressSingleBestOutput)
 	{ // outputting n-best to file, rather than stdout. need to close file and delete obj
 		delete m_nBestStream;
+	}
+
+	if (m_outputSearchGraphStream != NULL)
+	{
+	  delete m_outputSearchGraphStream;
 	}
 }
 
@@ -227,8 +258,11 @@ void OutputInput(std::ostream& os, const MosesChart::Hypothesis* hypo)
 void OutputTranslationOptions(const MosesChart::Hypothesis *hypo, long translationId)
 { // recursive
 	if (hypo != NULL)
-	  cerr << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << " = " <<  hypo->GetCurrTargetPhrase() << endl;
-
+	{
+	  //cerr << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << " = " <<  hypo->GetCurrTargetPhrase() << endl;
+		cerr << *hypo;
+	}
+	
 	const std::vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
 	std::vector<const MosesChart::Hypothesis*>::const_iterator iter;
 	for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)

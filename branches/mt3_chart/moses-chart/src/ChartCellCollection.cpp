@@ -34,5 +34,5 @@ ChartCellCollection::~ChartCellCollection()
 	}
 }
 
-}
+} // namespace
 

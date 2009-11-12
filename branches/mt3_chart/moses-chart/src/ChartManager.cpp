@@ -51,8 +51,8 @@ void Manager::ProcessSentence()
 		{
 			size_t endPos = startPos + width - 1;
 			WordsRange range(startPos, endPos);
-			//TRACE_ERR(endl << "starting " << range << endl);
-						
+			TRACE_ERR(" " << range << "=");
+				
 			// create trans opt
 			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
 			//if (g_debug)
@@ -63,14 +63,12 @@ void Manager::ProcessSentence()
 
 			cell.ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
 														,m_hypoStackColl);
-			cell.PruneToSize(cell.GetMaxHypoStackSize());
+			cell.PruneToSize();
 			cell.CleanupArcList();
 			cell.SortHypotheses();
 			
-			//if (g_debug)
-			//	cerr << cell << endl;
-			
-			//VERBOSE(1,range << "=" << cell.GetSize() << " ");
+			cerr << cell.GetSize();
+			//cell.OutputSizes(cerr);
 		}
 	}
 
@@ -174,5 +172,24 @@ void Manager::CalcDecoderStatistics() const
 {
 }
 
+void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+{
+	size_t size = m_source.GetSize();
+	for (size_t width = 1; width <= size; ++width)
+	{
+		for (size_t startPos = 0; startPos <= size-width; ++startPos)
+		{
+			size_t endPos = startPos + width - 1;
+			WordsRange range(startPos, endPos);
+			TRACE_ERR(" " << range << "=");
+			
+	
+			const ChartCell &cell = m_hypoStackColl.Get(range);
+			cell.GetSearchGraph(translationId, outputSearchGraphStream);
+		}
+	}
+	
+}
+	
 } // namespace
 

@@ -384,27 +384,27 @@ TO_STRING_BODY(Hypothesis)
 // friend
 ostream& operator<<(ostream& out, const Hypothesis& hypo)
 {
-	Phrase outPhrase(Output);
-	hypo.CreateOutputPhrase(outPhrase);
-	
+	//Phrase outPhrase(Output);
+	//hypo.CreateOutputPhrase(outPhrase);
+
 	// words bitmap
 	out << " " << hypo.GetId()
-	<< " " << outPhrase
-	//<< " " << hypo.m_currSourceWordsRange
-	<< " " << hypo.GetTotalScore()
-	//<< " " << hypo.m_scoreBreakdown
-	<< " " << hypo.m_targetPhrase;
+			<< " " << hypo.m_targetPhrase
+			//<< " " << outPhrase
+			<< " " << hypo.GetCurrSourceRange()
+			//<< " " << hypo.m_currSourceWordsRange
+			<< " " << hypo.GetTotalScore()
+			<< " " << hypo.GetScoreBreakDown();
+	
+	HypoList::const_iterator iter;
+	for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter)
+	{
+		const Hypothesis &prevHypo = **iter;
+		out << " " << prevHypo.GetId();
+	}
+
 	//out << endl;
-	
-	/*
-	 std::vector<const Hypothesis*>::const_iterator iter;
-	 for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter)
-	 {
-	 const Hypothesis &prevHypo = **iter;
-	 out << "*    " << prevHypo << endl;
-	 }
-	 */
-	
+
 	return out;
 }
 

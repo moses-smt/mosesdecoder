@@ -13,6 +13,7 @@
 namespace Moses
 {
 	class WordConsumed;
+	extern bool g_debug;
 };
 
 namespace MosesChart
@@ -25,7 +26,7 @@ class ChartCell;
 class ChartCellCollection;
 class QueueEntry;
 
-typedef std::vector<const Hypothesis*> OrderHypos;
+typedef std::vector<const Hypothesis*> HypoList;
 
 	// wrapper around list of hypothese for a particular non-term of a trans opt
 class ChildEntry
@@ -34,11 +35,10 @@ class ChildEntry
 
 protected:
 	size_t m_pos;
-	const OrderHypos *m_orderedHypos;
-	//const Moses::Word &m_headWord;
+	const HypoList *m_orderedHypos;
 
 public:
-	ChildEntry(size_t pos, const OrderHypos &orderedHypos, const Moses::Word &headWord)
+	ChildEntry(size_t pos, const HypoList &orderedHypos, const Moses::Word &headWord)
 		:m_pos(pos)
 		,m_orderedHypos(&orderedHypos)
 		//,m_headWord(headWord)
@@ -53,7 +53,9 @@ public:
 	}
 	
 	const Hypothesis *GetHypothesis() const
-	{ return (*m_orderedHypos)[m_pos]; }
+	{ 		
+		return (*m_orderedHypos)[m_pos]; 
+	}
 	
 	//const Moses::Word &GetHeadWord() const
 	//{ return m_headWord; }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C04F8E4104C4A5C0090020F /* ChartHypothesisCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C04F8E1104C4A5C0090020F /* ChartHypothesisCollection.cpp */; };
+		1C04F8E5104C4A5C0090020F /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C04F8E2104C4A5C0090020F /* ChartHypothesisCollection.h */; };
 		1C335A840F20F8A200D0D9DF /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A6E0F20F8A200D0D9DF /* ChartCell.cpp */; };
 		1C335A850F20F8A200D0D9DF /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A6F0F20F8A200D0D9DF /* ChartCell.h */; };
 		1C335A860F20F8A200D0D9DF /* ChartHypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */; };
@@ -36,6 +38,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C04F8E1104C4A5C0090020F /* ChartHypothesisCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesisCollection.cpp; path = src/ChartHypothesisCollection.cpp; sourceTree = "<group>"; };
+		1C04F8E2104C4A5C0090020F /* ChartHypothesisCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesisCollection.h; path = src/ChartHypothesisCollection.h; sourceTree = "<group>"; };
+		1C04F8E3104C4A5C0090020F /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
 		1C335A6E0F20F8A200D0D9DF /* ChartCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCell.cpp; path = src/ChartCell.cpp; sourceTree = "<group>"; };
 		1C335A6F0F20F8A200D0D9DF /* ChartCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCell.h; path = src/ChartCell.h; sourceTree = "<group>"; };
 		1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesis.cpp; path = src/ChartHypothesis.cpp; sourceTree = "<group>"; };
@@ -95,6 +100,8 @@
 				1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */,
 				1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */,
 				1C335A710F20F8A200D0D9DF /* ChartHypothesis.h */,
+				1C04F8E1104C4A5C0090020F /* ChartHypothesisCollection.cpp */,
+				1C04F8E2104C4A5C0090020F /* ChartHypothesisCollection.h */,
 				1C335A720F20F8A200D0D9DF /* ChartManager.cpp */,
 				1C335A730F20F8A200D0D9DF /* ChartManager.h */,
 				1C335A740F20F8A200D0D9DF /* ChartTranslationOption.cpp */,
@@ -113,6 +120,7 @@
 				1C335A810F20F8A200D0D9DF /* ChartTrellisPathList.h */,
 				1C5870CB103AEA97008C67A8 /* Cube.cpp */,
 				1C5870CA103AEA97008C67A8 /* Cube.h */,
+				1C04F8E3104C4A5C0090020F /* Makefile.am */,
 				1C335A820F20F8A200D0D9DF /* QueueEntry.cpp */,
 				1C335A830F20F8A200D0D9DF /* QueueEntry.h */,
 			);
@@ -154,6 +162,7 @@
 				1C335A990F20F8A200D0D9DF /* QueueEntry.h in Headers */,
 				1C500AC70FB9EC3100DFD24F /* ChartCellCollection.h in Headers */,
 				1C5870CC103AEA97008C67A8 /* Cube.h in Headers */,
+				1C04F8E5104C4A5C0090020F /* ChartHypothesisCollection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,6 +221,7 @@
 				1C335A980F20F8A200D0D9DF /* QueueEntry.cpp in Sources */,
 				1C500AC60FB9EC3100DFD24F /* ChartCellCollection.cpp in Sources */,
 				1C5870CD103AEA97008C67A8 /* Cube.cpp in Sources */,
+				1C04F8E4104C4A5C0090020F /* ChartHypothesisCollection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

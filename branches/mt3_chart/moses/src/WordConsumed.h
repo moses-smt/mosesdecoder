@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "WordsRange.h"
 #include "Word.h"
 
