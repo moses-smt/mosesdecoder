@@ -75,12 +75,12 @@ int main(int argc, char* argv[])
 
 void init(int argc, char* argv[]) 
 {
-	cerr << "Grammar Relaxer v1.0, written by Philipp Koehn\n";
+	cerr << "Parse Relaxer v1.0, written by Philipp Koehn\n";
 	cerr << "adds additional constituents to a parse tree\n";
 	
 	if (argc < 1) 
 	{
-		cerr << "syntax: relax-grammar < in-grammar > out-grammar ["
+		cerr << "syntax: relax-parse < in-parse > out-parse ["
 				 << " --LeftBinarize | ---RightBinarize |"
 				 << " --SAMT 1-4 ]" << endl;
 		exit(1);
