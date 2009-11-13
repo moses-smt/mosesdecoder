@@ -54,7 +54,9 @@ void Moses::ThreadPool::Execute()
         }
         m_threadAvailable.notify_all();
     } while (!m_stopped);
+#if defined(BOOST_HAS_PTHREADS)
     TRACE_ERR("Thread " << (int)pthread_self() << " exiting" << endl);
+#endif
 }
 
 void Moses::ThreadPool::Submit( Task* task )
