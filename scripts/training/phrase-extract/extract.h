@@ -218,6 +218,8 @@ void addRuleToCollection( ExtractedRule &rule );
 void consolidateRules();
 void writeRulesToFile();
 void writeGlueGrammar( std::string );
+void collectWordLabelCounts( SentenceAlignment &sentence );
+void writeUnknownWordLabel( std::string );
 
 typedef std::vector< int > LabelIndex;
 
@@ -246,6 +248,7 @@ int phraseCount = 0;
 bool onlyDirectFlag = false;
 bool orientationFlag = false;
 bool glueGrammarFlag = false;
+bool unknownWordLabelFlag = false;
 std::set< std::string > targetLabelCollection, sourceLabelCollection;
 std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;
 bool hierarchicalFlag = false;
