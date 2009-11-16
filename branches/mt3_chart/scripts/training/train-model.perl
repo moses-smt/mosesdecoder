@@ -6,10 +6,10 @@ use FindBin qw($Bin);
 use File::Spec::Functions;
 use File::Basename;
 
-# Train Factored Phrase Model
+# Train Model
 # (c) 2006-2009 Philipp Koehn
 # with contributions from other JHU WS participants
-# Train a phrase model from a parallel corpus
+# Train a model from a parallel corpus
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
 my $SCRIPTS_ROOTDIR = $Bin;
@@ -28,7 +28,7 @@ $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
 @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
-$_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+$_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
 $_PHRASE_WORD_ALIGNMENT,
 $_CONTINUE,$_PROPER_CONDITIONING);
 
@@ -86,6 +86,7 @@ $_HELP = 1
 		       'hierarchical' => \$_HIERARCHICAL,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'extract-options=s' => \$_EXTRACT_OPTIONS,
 		       'score-options=s' => \$_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
@@ -200,6 +201,8 @@ my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
 my $___GLUE_GRAMMAR_FILE = $___MODEL_DIR."/glue-grammar";
 $___GLUE_GRAMMAR_FILE = $_GLUE_GRAMMAR_FILE if $_GLUE_GRAMMAR_FILE;
+my $___UNKNOWN_WORD_LABEL_FILE = $___MODEL_DIR."/unknown-word-label";
+$___UNKNOWN_WORD_LABEL_FILE = $_UNKNOWN_WORD_LABEL_FILE if $_UNKNOWN_WORD_LABEL_FILE;
 
 my $___CONFIG = $___MODEL_DIR."/moses.ini";
 $___CONFIG = $_CONFIG if $_CONFIG;
@@ -445,7 +448,7 @@ sub reduce_factors {
         $nr++;
         print STDERR "." if $nr % 10000 == 0;
         print STDERR "($nr)" if $nr % 100000 == 0;
-	#s/<\S[^>]*>//g; # remove xml
+	s/<\S[^>]*>/ /g if $_XML; # remove xml
 	chomp; s/ +/ /g; s/^ //; s/ $//;
 	my $first = 1;
 	foreach (split) {
@@ -978,6 +981,7 @@ sub extract_phrase {
     $cmd .= " --Hierarchical" if defined($_HIERARCHICAL);
     $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
+    $cmd .= " --UnknownWordLabel $___UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX;
     $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
     $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
@@ -999,7 +1003,7 @@ sub score_phrase_factored {
     print STDERR "(6) score phrases @ ".`date`;
     my @SPECIFIED_TABLE = @_PHRASE_TABLE;
     if ($___NOT_FACTORED) {
-	my $file = "$___MODEL_DIR/phrase-table";
+	my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table");
 	$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	&score_phrase($file,$___LEXICAL_FILE,$___EXTRACT_FILE);
     }
@@ -1007,7 +1011,7 @@ sub score_phrase_factored {
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
 	    print STDERR "(6) [$factor] score phrases @ ".`date`;
 	    my ($factor_f,$factor_e) = split(/\-/,$factor);
-	    my $file = "$___MODEL_DIR/phrase-table.$factor";
+	    my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").".$factor";
 	    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    &score_phrase($file,$___LEXICAL_FILE.".".$factor,$___EXTRACT_FILE.".".$factor);
 	}
@@ -1443,12 +1447,12 @@ sub create_ini {
      $num_of_ttables++;
      my $ff = $f;
      $ff =~ s/\-/ /;
-     my $file = "$___MODEL_DIR/phrase-table".($___NOT_FACTORED ? "" : ".$f").".gz";
+     my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      print INI "6 " if $_HIERARCHICAL;
      print INI "$ff 5 $file\n";
    }
-   if ($_HIERARCHICAL) {
+   if ($_GLUE_GRAMMAR) {
      print INI "6 0 0 1 $___GLUE_GRAMMAR_FILE\n";
    }
    if ($num_of_ttables != $stepsused{"T"}) {
@@ -1561,12 +1565,14 @@ sub create_ini {
   print INI "\n# word penalty\n[weight-w]\n-1\n\n";
 
   if ($_HIERARCHICAL) {
-    print INI "[pop-limit]\n1000\n\n";
+    print INI "[cube-pruning-pop-limit]\n1000\n\n";
     print INI "[glue-rule-type]\n0\n\n";
-    print INI "[non-terminals]\nX\nS\n\n";
+    print INI "[non-terminals]\nX\n\n";
     print INI "[search-algorithm]\n3\n\n";
     print INI "[inputtype]\n3\n\n";
-    print INI "[max-chart-span]\n20\n1000\n";
+    print INI "[max-chart-span]\n";
+    foreach (split(/\+/,$___TRANSLATION_FACTORS)) { print INI "20\n"; }
+    print INI "1000\n";
   }
   else {
     print INI "[distortion-limit]\n6\n";

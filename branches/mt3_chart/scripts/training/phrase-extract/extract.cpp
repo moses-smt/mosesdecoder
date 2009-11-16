@@ -43,7 +43,8 @@ int main(int argc, char* argv[])
 
 	if (argc < 5) {
 		cerr << "syntax: extract corpus.target corpus.source corpus.align extract "
-		     << " [ --Hierarchical | --Orientation | --GlueGrammar FILE"
+		     << " [ --Hierarchical | --Orientation"
+				 << " | --GlueGrammar FILE | --UnknownWordLabel FILE"
 				 << " | --OnlyDirect"
 		     << " | --MaxSpan[" << maxSpan << "]"
 				 << " | --MinHoleTarget[" << minHoleTarget << "]"
@@ -59,8 +60,9 @@ int main(int argc, char* argv[])
   char* &fileNameT = argv[1];
   char* &fileNameS = argv[2];
   char* &fileNameA = argv[3];
-	string fileNameG;
-  string fileNameExtract = string(argv[4]);
+	string fileNameGlueGrammar;
+ 	string fileNameUnknownWordLabel;
+	string fileNameExtract = string(argv[4]);
 
 	int optionInd = 5;
 
@@ -158,9 +160,19 @@ int main(int argc, char* argv[])
 				cerr << "ERROR: Option --GlueGrammar requires a file name" << endl;
 				exit(0);
 			}
-			fileNameG = string(argv[i]);
-			cerr << "creating glue grammar in '" << fileNameG << "'" << endl;
+			fileNameGlueGrammar = string(argv[i]);
+			cerr << "creating glue grammar in '" << fileNameGlueGrammar << "'" << endl;
     }
+		else if (strcmp(argv[i],"--UnknownWordLabel") == 0) {
+			unknownWordLabelFlag = true;
+			if (++i >= argc)
+			{
+				cerr << "ERROR: Option --UnknownWordLabel requires a file name" << endl;
+				exit(0);
+			}
+			fileNameUnknownWordLabel = string(argv[i]);
+			cerr << "creating unknown word labels in '" << fileNameUnknownWordLabel << "'" << endl;
+		}
     else if (strcmp(argv[i],"--Hierarchical") == 0) {
 			cerr << "extracting hierarchical rules" << endl;
       hierarchicalFlag = true;
@@ -223,7 +235,12 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
       
-    if (sentence.create( targetString, sourceString, alignmentString, i )) {
+    if (sentence.create( targetString, sourceString, alignmentString, i )) 
+		{
+			if (unknownWordLabelFlag)
+			{
+				collectWordLabelCounts(sentence);
+			}
       extractRules(sentence);
 			consolidateRules();
 			writeRulesToFile();
@@ -243,7 +260,10 @@ int main(int argc, char* argv[])
   }
 
 	if (glueGrammarFlag)
-		writeGlueGrammar(fileNameG);
+		writeGlueGrammar(fileNameGlueGrammar);
+
+	if (unknownWordLabelFlag)
+		writeUnknownWordLabel(fileNameUnknownWordLabel);
 }
  
 void extractRules( SentenceAlignment &sentence ) {
@@ -987,4 +1007,53 @@ void writeGlueGrammar( string fileName )
 		grammarFile << "[X] [" << topLabel << "] ||| [X] [X] ||| [" << topLabel << "] [X] ||| 0-0 1-1 ||| 2.76" << endl; // glue rule for unknown word... 
 	}
 	grammarFile.close();
+}
+
+// collect counts for labels for each word
+// ( labels of singleton words are used to estimate
+//   distribution oflabels for unknown words )
+
+map<string,int> wordCount;
+map<string,string> wordLabel;
+void collectWordLabelCounts( SentenceAlignment &sentence ) 
+{
+	int countT = sentence.target.size();
+	for(int ti=0;ti<=countT;ti++) 
+	{
+		string &word = sentence.target[ ti ];
+		const vector< SyntaxNode* >& labels = sentence.targetTree.GetNodes(ti,ti);
+		if (labels.size() > 0)
+		{
+			wordCount[ word ]++;
+			wordLabel[ word ] = labels[0]->GetLabel();
+		}
+	}
+}
+
+void writeUnknownWordLabel( string fileName )
+{
+	ofstream outFile;
+	outFile.open(fileName.c_str());
+	typedef map<string,int>::const_iterator I;
+
+	map<string,int> count;
+	int total = 0;
+	for(I word = wordCount.begin(); word != wordCount.end(); word++)
+	{
+		// only consider singletons
+		if (word->second == 1)
+		{
+		  count[ wordLabel[ word->first ] ]++;
+			total++;
+		}
+	}
+
+	for(I pos = count.begin(); pos != count.end(); pos++)
+	{
+		double ratio = ((double) pos->second / (double) total);
+		if (ratio > 0.03)
+			outFile << ratio << " " << pos -> first << endl;
+	}
+
+	outFile.close();
 }
