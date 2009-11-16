@@ -21,11 +21,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <stdint.h>
 #include <list>
 #include <limits>
 #include <vector>
 #include <string>
+
+#ifdef WIN32
+#include <BaseTsd.h>
+#else
+#include <stdint.h>
+typedef uint32_t UINT32;
+#endif
 
 namespace Moses
 {
@@ -177,13 +183,6 @@ enum SearchAlgorithm
 
 // typedef
 typedef size_t FactorType;
-
-#ifdef WIN32
-#include <BaseTsd.h>
-#else
-#include <stdint.h>
-typedef uint32_t UINT32;
-#endif
 
 typedef std::vector<float> Scores;
 typedef std::vector<std::string> WordAlignments;

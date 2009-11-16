@@ -39,7 +39,6 @@ libmoses_a_SOURCES = \
 	LexicalReordering.cpp \
 	LexicalReorderingTable.cpp \
 	Manager.cpp \
-	mempool.cpp \
 	NGramCollection.cpp \
 	NGramNode.cpp \
 	PCNTools.cpp \
