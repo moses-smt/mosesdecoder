@@ -7,3 +7,4 @@ Minimalist installation instructions:
 - make
 - set #! lines and sys.path lines in Python scripts
 - see run-cmert for example
+

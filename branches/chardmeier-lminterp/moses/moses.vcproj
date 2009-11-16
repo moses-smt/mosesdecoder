@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="moses"
 	ProjectGUID="{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}"
 	RootNamespace="moses"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -283,18 +284,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\AlignmentElement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPair.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPhrase.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\BitmapContainer.cpp"
 				>
 			</File>
@@ -352,6 +341,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GenerationDictionary.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GlobalLexicalModel.cpp"
 				>
 			</File>
 			<File
@@ -484,10 +477,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Manager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\mempool.cpp"
 				>
 			</File>
 			<File
@@ -693,18 +682,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\AlignmentElement.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPair.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlignmentPhrase.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\BitmapContainer.h"
 				>
 			</File>
@@ -766,6 +743,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GenerationDictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GlobalLexicalModel.h"
 				>
 			</File>
 			<File
@@ -850,10 +831,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Manager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\mempool.h"
 				>
 			</File>
 			<File
