@@ -110,7 +110,7 @@ Parameter::Parameter()
 	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
 	AddParam("glue-rule-type", "Left branching, or both branching. 0=left. 2=both. 1=right(not implemented). Default=0");
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
-	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob\n");
+	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
 }
 
 Parameter::~Parameter()
