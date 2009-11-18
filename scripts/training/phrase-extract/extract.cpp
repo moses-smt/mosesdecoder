@@ -1052,7 +1052,7 @@ void writeUnknownWordLabel( string fileName )
 	{
 		double ratio = ((double) pos->second / (double) total);
 		if (ratio > 0.03)
-			outFile << ratio << " " << pos -> first << endl;
+			outFile << pos->first << " " << ratio << endl;
 	}
 
 	outFile.close();
