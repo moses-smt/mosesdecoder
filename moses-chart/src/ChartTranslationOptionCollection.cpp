@@ -216,20 +216,22 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		assert(wordsConsumed->size());
 
 		// loop
+		const string &sourceLHSStr = staticData.GetDefaultNonTerminal();
+
 		const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
 		UnknownLHSList::const_iterator iterLHS; 
 		for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS)
 		{
-			const string &lhsStr = iterLHS->first;
+			const string &stargetLHSStr = iterLHS->first;
 			float prob = iterLHS->second;
 			
 			// lhs
 			Word sourceLHS(true)
 						,targetLHS(true);
-			sourceLHS.CreateFromString(Input, staticData.GetInputFactorOrder(), lhsStr, true);
+			sourceLHS.CreateFromString(Input, staticData.GetInputFactorOrder(), sourceLHSStr, true);
 			assert(sourceLHS.GetFactor(0) != NULL);
 
-			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), lhsStr, true);
+			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), stargetLHSStr, true);
 			assert(targetLHS.GetFactor(0) != NULL);
 
 			// add to dictionary
