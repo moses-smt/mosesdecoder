@@ -125,7 +125,7 @@ TranslationDelta* MHAcceptor::choose(TranslationDelta* currSample, TranslationDe
   currSample->getOperator()->setGibbsLMInfo(m_proposalLMInfo);
   
   //Calculate a
-  float a = (nextSampleProposalScore + nextSampleTargetScore) - (currSampleProposalScore + currSampleTargetScore);
+  float a = (currSampleProposalScore + nextSampleTargetScore) - (nextSampleProposalScore + currSampleTargetScore);
   
   //Copy modified fvs back
   currSample->setScores(currTargetSample->getScores());
