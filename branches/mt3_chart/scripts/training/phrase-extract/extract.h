@@ -236,7 +236,7 @@ bool isAligned ( SentenceAlignment &, int, int );
 std::ofstream extractFile;
 std::ofstream extractFileInv;
 std::ofstream extractFileOrientation;
-int maxSpan = 12;
+int maxSpan = 10;
 int minHoleSource = 2;
 int minHoleTarget = 1;
 int minWords = 1;
