@@ -55,11 +55,18 @@ while(my $line = <PARSER>) {
             my ($label,$rest) = split(/[\( ]/,substr($line,$i+1));
             print STDERR substr("                                                                               ",0,scalar @LABEL)."BEGINNING of $label\n" if $DEBUG;
             $i+=length($label);
-	    $label =~ s/\$/PUNC/g;       # no $!
-	    $label =~ s/\|/:/g;          # moses does not like bars
-	    $label =~ s/^[^A-Z]*([A-Z]+).*/$1/g if $BASIC; # basic labels only
-            push @OUT,"<tree label=\"$label\">";
-	    push @LABEL,$label;
+            if (&is_aux_label($label)) {
+                # Discard auxiliary nodes.  Since we don't create a <tree> node,
+                # any (non-auxiliary) subtrees will instead be attached to the
+                # parent (or closest non-auxiliary ancestor).
+            }
+            else {
+                $label =~ s/\$/PUNC/g;       # no $!
+                $label =~ s/\|/:/g;          # moses does not like bars
+                $label =~ s/^[^A-Z]*([A-Z]+).*/$1/g if $BASIC; # basic labels only
+                push @OUT,"<tree label=\"$label\">";
+            }
+            push @LABEL,$label;
             $i++ if substr($line,$i+1,1) eq " ";
 	    $i++ if substr($line,$i+1,1) eq " ";
         }
@@ -67,7 +74,9 @@ while(my $line = <PARSER>) {
             die("ERROR: NO LABEL ON STACK") unless @LABEL;
             my $label = pop @LABEL;
             print STDERR substr("                                                                               ",0,scalar @LABEL)."END of $label\n" if $DEBUG;
-            push @OUT,"</tree>";
+            if (!&is_aux_label($label)) {
+                push @OUT,"</tree>";
+            }
 	    $i++ if substr($line,$i+1,1) eq " ";
         }
         elsif (substr($line,$i,3) eq "*T*") {
@@ -103,3 +112,7 @@ while(my $line = <PARSER>) {
 
 `rm $tmpfile`;
 
+sub is_aux_label {
+    my ($label) = @_;
+    return ($label =~ /^\\<.*\\>$/);
+}
