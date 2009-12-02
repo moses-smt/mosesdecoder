@@ -479,8 +479,7 @@ public:
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 
 	const std::string &GetDefaultNonTerminal() const
-	{ return m_defaultNonTerminals; 
-	}
+	{ return m_defaultNonTerminals; }
 	size_t GetRuleLimit() const
 	{ return m_ruleLimit; }
 	SourceLabelOverlap GetSourceLabelOverlap() const

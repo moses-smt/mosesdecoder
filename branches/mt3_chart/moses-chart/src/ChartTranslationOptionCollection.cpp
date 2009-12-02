@@ -222,7 +222,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		UnknownLHSList::const_iterator iterLHS; 
 		for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS)
 		{
-			const string &stargetLHSStr = iterLHS->first;
+			const string &targetLHSStr = iterLHS->first;
 			float prob = iterLHS->second;
 			
 			// lhs
@@ -231,7 +231,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			sourceLHS.CreateFromString(Input, staticData.GetInputFactorOrder(), sourceLHSStr, true);
 			assert(sourceLHS.GetFactor(0) != NULL);
 
-			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), stargetLHSStr, true);
+			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
 			assert(targetLHS.GetFactor(0) != NULL);
 
 			// add to dictionary
