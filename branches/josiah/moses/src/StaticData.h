@@ -99,7 +99,7 @@ protected:
 		m_constraintFileName;	
 	
 	std::string									m_nBestFilePath;
-	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
+	bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment, m_nBestIncludesUnknownWord;
 	/***
 	 * false = treat unknown words as unknowns, and translate them as themselves;
 	 * true = drop (ignore) them
@@ -392,6 +392,10 @@ public:
 	bool NBestIncludesAlignment() const
 	{
 		return m_nBestIncludesAlignment;
+	}
+  bool NBestIncludesUnknownWord() const
+	{
+		return m_nBestIncludesUnknownWord;
 	}
 	const std::vector<std::string> &GetDescription() const
 	{
