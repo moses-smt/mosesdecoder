@@ -49,6 +49,7 @@ Parameter::Parameter()
 	AddParam("inputtype", "text (0) or confusion network (1)");
 	AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
 	AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
+  AddParam("include-unk-word-in-n-best", "include unknown word feature in the n-best list. default is false");
 	AddParam("lmodel-file", "location and properties of the language models");
 	AddParam("lmodel-dub", "dictionary upper bounds of language models");
 	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");

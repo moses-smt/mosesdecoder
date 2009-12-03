@@ -322,6 +322,7 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
+  bool includeUnknownWord = StaticData::Instance().NBestIncludesUnknownWord();
 	bool includeWordAlignment = StaticData::Instance().PrintAlignmentInfoInNbest();
 	
 	TrellisPathList::const_iterator iter;
@@ -432,6 +433,14 @@ void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translati
 	    *m_nBestStream << "w: ";
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
 		
+    // word penalty
+    if (includeUnknownWord) {
+      if (labeledOutput)
+        *m_nBestStream << "u: ";
+      *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetUnknownWordPenaltyProducer()) << " ";  
+    }
+		
+    
 		// generation
 		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
     if (gds.size() > 0) {

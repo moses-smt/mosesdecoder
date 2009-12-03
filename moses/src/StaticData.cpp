@@ -194,6 +194,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// include word alignment in the n-best list
 	SetBooleanParameter( &m_nBestIncludesAlignment, "include-alignment-in-n-best", false );
+  
+  // include unknown word feature in the n-best list
+	SetBooleanParameter( &m_nBestIncludesUnknownWord, "include-unk-word-in-n-best", false );
 
 	// printing source phrase spans
 	SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
