@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
   bool hack_bp_denum;
   int weight_dump_freq;
   string weight_dump_stem;
+  int init_iteration_number;
   bool greedy, fixedTemp;
   float fixed_temperature;
   bool collectAll, sampleCtrAll;
@@ -215,6 +216,7 @@ int main(int argc, char** argv) {
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
   ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
   ("weight-dump-stem", po::value<string>(&weight_dump_stem)->default_value("weights"), "Stem of filename to use for dumping weights")
+      ("init-iteration-number", po::value<int>(&init_iteration_number)->default_value(0), "First training iteration will be one after this (useful for restarting)")
   ("greedy", po::value(&greedy)->zero_tokens()->default_value(false), "Greedy sample acceptor")
   ("fixed-temp-accept", po::value(&fixedTemp)->zero_tokens()->default_value(false), "Fixed temperature sample acceptor")
   ("fixed-temperature", po::value<float>(&fixed_temperature)->default_value(1.0f), "Temperature for fixed temp sample acceptor")
@@ -410,6 +412,9 @@ int main(int argc, char** argv) {
                                                      max_training_iterations,
                                                      ScoreComponentCollection(prev_gradient)));
   }
+  if (optimizer.get()) {
+      optimizer->SetIteration(init_iteration_number);
+  }
   if (prior_variance != 0.0f) {
     assert(prior_variance > 0);
     std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance << endl;
@@ -433,7 +438,7 @@ int main(int argc, char** argv) {
     training_batch_size = input_lines.size();
   VERBOSE(1, "Batch size: " << training_batch_size << endl);
   trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines, seed, randomize, optimizer.get(),     
-                                      weight_dump_freq, weight_dump_stem);
+                                      init_iteration_number,weight_dump_freq, weight_dump_stem);
   trainer->SetComputeScaleGradient(false);
 
   input.reset(trainer);

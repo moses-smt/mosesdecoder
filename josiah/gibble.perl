@@ -6,9 +6,10 @@ use lib "/exports/informatics/inf_iccs_smt/perl/lib/perl5/site_perl";
 use Config::Simple;
 use Getopt::Long "GetOptions";
 
-my ($config_file,$execute);
+my ($config_file,$execute,$continue);
 die("gibble.perl -config config-file [-exec]")
     unless  &GetOptions('config=s' => \$config_file,
+        'cont=s' => \$continue,
         'exec' => \$execute);
 
 my $config = new Config::Simple($config_file) || 
@@ -33,6 +34,7 @@ foreach my $key ($config->param) {
     print STDERR "$key => "; print STDERR $value; print STDERR "\n";
     $config->param($key,$value);
 }
+
 
 #required global parameters
 my $name = &param_required("general.name");
@@ -107,9 +109,6 @@ if ($test_freq) {
     &check_exists ("test ini file", $test_ini_file);
 }
 my $weight_file_stem = "$name-weights";
-if (glob ($weight_file_stem . "_*")) {
-    die "Error: weights files with stem $weight_file_stem already exist";
-}
 
 
 #file names
@@ -117,8 +116,58 @@ my $train_script_file = $working_dir . "/" . $train_script . ".sh";
 my $train_out = $train_script . ".out";
 my $train_err = $train_script . ".err";
 
+# Continuation options
+my @prev_grads;
+my @prev_etas;
+my $prev_iteration;
+if (defined($continue)) {
+    print STDERR "Attempting to continue from iteration $continue\n";
+    $weights_file = $working_dir . "/" . $weight_file_stem . "_" . $continue;
+    &check_exists("previous weights file", $weights_file);
+    $train_script_file =~ s/\.sh/_c$continue.sh/g;
+    # Look through previous log for etas and gradient
+    open PREV, "$working_dir/$train_err" or die "Unable to open previous log file $train_err";
+    while(<PREV>) {
+        chomp;
+        my $re_number = "\\d+(\\.\\d+)?(e-\\d\\d)?"; 
+        if (!defined($prev_iteration) && /^OPTIMIZER ITERATION #(\d+)$/) {
+            $prev_iteration = $1;
+            if ($prev_iteration < $continue) {
+                $prev_iteration = undef;
+            } 
+        }
+        if (defined($prev_iteration)) {
+            # Look for etas and gradients
+            if (!defined(@prev_grads)) {
+                if (/^  GRADIENT: <<((-?$re_number(, )?)+)>>$/) {
+                   my $gradients = $1;
+                   @prev_grads = split /, /, $gradients;
+                }
+            }
+            if (!defined(@prev_etas)) {
+                if (/^ETA: <<((-?$re_number(, )?)+)>>$/) {
+                   my $etas = $1;
+                   @prev_etas = split /, /, $etas;
+                }
+            }
+        }
+    }
+    die "Unable to find previous gradients" if (!defined(@prev_grads));
+    die "Unable to find previous etas" if (!defined(@prev_etas));
+
+    print "Previous etas: ";
+    print join " ", @prev_etas;
+    print "\n";
+    print "Previous gradients: ";
+    print join " ", @prev_grads;
+    print "\n";
+    print "Previous interation: " . $prev_iteration . "\n";
+} else {
+    $prev_iteration = 0;
+}
+
 #write the script
-open TRAIN, ">$train_script_file" || die "Unable to open \"$train_script_file\" for writing";
+open TRAIN, ">$train_script_file" or die "Unable to open \"$train_script_file\" for writing";
 
 &header(*TRAIN,$job_name,$working_dir,$jobs,$hours,$vmem,$train_out,$train_err);
 print TRAIN "mpirun -np \$NSLOTS $josiah_train \\\n";
@@ -140,6 +189,13 @@ if ($feature_file) {
     print TRAIN "-X $feature_file \\\n";
 }
 print TRAIN "--weight-dump-freq $test_freq --weight-dump-stem $weight_file_stem \\\n";
+if (defined(@prev_grads)) {
+    for my $g (@prev_grads) {
+        print TRAIN "--prev-gradient $g ";
+    }
+    print TRAIN "\\\n";
+}
+print TRAIN "--init-iteration-number $prev_iteration ";
 print TRAIN "--gradient --xbleu ";
 print TRAIN "-S $batch -M 10000 ";
 print TRAIN "-b $burnin -s $samples ";
@@ -147,7 +203,11 @@ if ($reheatings) {
     print TRAIN "-a --reheatings $reheatings ";
 }
 print TRAIN "--optimizer-freq $optimisations ";
-if (ref($eta)) {
+if (defined(@prev_etas)) {
+    for my $e (@prev_etas) {
+        print TRAIN "--eta $e ";
+    }
+} elsif (ref($eta)) {
     for my $e (@$eta) {
         print TRAIN "--eta $e ";
     }
@@ -174,11 +234,12 @@ my $train_job_id = $1;
 print "Submitted training job id: $train_job_id at " . scalar(localtime()) . "\n";
 
 #wait for the next weights file to appear, or the training job to end
-my $train_iteration = 0;
+my $train_iteration = $prev_iteration;
 
 while(1) {
     $train_iteration += $test_freq;
     my $new_weight_file = "$working_dir/$weight_file_stem" . "_" . $train_iteration;
+    print "Waiting for $new_weight_file\n";
     while ((! $test_freq || ! -e $new_weight_file) && `qstat | grep $train_job_id`) {
         sleep 10;
     }

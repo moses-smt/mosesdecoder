@@ -25,6 +25,7 @@ class ExpectedBleuTrainer : public InputSource {
     unsigned int rseed,
     bool randomize,
     Optimizer* o,
+    int init_iteration_number,
     int wt_dump_freq,
     std::string wt_dump_stem);
   void ReserveNextBatch();
