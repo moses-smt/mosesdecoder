@@ -995,7 +995,7 @@ void writeGlueGrammar( string fileName )
 		for( map<string,int>::const_iterator i =  targetTopLabelCollection.begin();
 				 i !=  targetTopLabelCollection.end(); i++ )
 		{
-			grammarFile << "[X] [" << topLabel << "] ||| <s> [X] </s> ||| <s> [" << i->first << "] </s> ||| 0-0 ||| 1" << endl;
+			grammarFile << "[X] [" << topLabel << "] ||| <s> [X] </s> ||| <s> [" << i->first << "] </s> ||| 1-1 ||| 1" << endl;
 		}
 
 		// glue rules
