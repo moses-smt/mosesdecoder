@@ -47,10 +47,8 @@ namespace Moses
 			Phrase									m_prevSource;
 			TargetPhraseCollection	*m_prevPhraseColl;
 			
-			TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target
-																																, std::list<std::pair<size_t,size_t> > &alignmentInfo);
-			PhraseDictionaryNodeSourceLabel &GetOrCreateNode(const Phrase &source, const TargetPhrase &target
-																											 , std::list<std::pair<size_t,size_t> > &alignmentInfo);
+			TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target);
+			PhraseDictionaryNodeSourceLabel &GetOrCreateNode(const Phrase &source, const TargetPhrase &target);
 			
 			bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output

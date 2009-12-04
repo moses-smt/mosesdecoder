@@ -83,8 +83,7 @@ namespace Moses
 		targetHeadWord.CreateFromString(Output, output, vec[1].substr(1, vec[1].size()-2), true);
 	}
 	
-	void CreateAlignmentInfo(list<pair<size_t,size_t> > &alignmentInfo, const string &alignString
-													 , const Phrase &sourcePhrase, const Phrase &targetPhrase)
+	void CreateAlignmentInfo(list<pair<size_t,size_t> > &alignmentInfo, const string &alignString)
 	{
 		vector<string> alignVec = Tokenize(alignString);
 		
@@ -211,10 +210,10 @@ namespace Moses
 			
 			// alignment
 			list<pair<size_t,size_t> > alignmentInfo;
-			CreateAlignmentInfo(alignmentInfo, alignString, sourcePhrase, *targetPhrase);
+			CreateAlignmentInfo(alignmentInfo, alignString);
 
 			// rest of target phrase
-			targetPhrase->CreateAlignmentInfo(alignmentInfo);
+			targetPhrase->SetAlignmentInfo(alignmentInfo);
 			targetPhrase->SetSourceLHS(sourceLHS);
 			targetPhrase->SetTargetLHS(targetLHS);
 			//targetPhrase->SetDebugOutput(string("New Format pt ") + line);
@@ -236,7 +235,7 @@ namespace Moses
 			if (tokens.size() >= 6)
 				targetPhrase->CreateCountInfo(tokens[5]);
 
-			TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(sourcePhrase, *targetPhrase, alignmentInfo);
+			TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(sourcePhrase, *targetPhrase);
 			AddEquivPhrase(phraseColl, targetPhrase);
 			
 			count++;
@@ -250,26 +249,19 @@ namespace Moses
 		return true;
 	}
 		
-	TargetPhraseCollection &PhraseDictionaryNewFormat::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target
-																																											 , list<pair<size_t,size_t> > &alignmentInfo)
+	TargetPhraseCollection &PhraseDictionaryNewFormat::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target)
 	{
-		PhraseDictionaryNodeSourceLabel &currNode = GetOrCreateNode(source, target, alignmentInfo);
+		PhraseDictionaryNodeSourceLabel &currNode = GetOrCreateNode(source, target);
 		return currNode.GetOrCreateTargetPhraseCollection();
 	}
 	
-	PhraseDictionaryNodeSourceLabel &PhraseDictionaryNewFormat::GetOrCreateNode(const Phrase &source, const TargetPhrase &target
-																																							, list<pair<size_t,size_t> > &alignmentInfo)
+	PhraseDictionaryNodeSourceLabel &PhraseDictionaryNewFormat::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
 	{
 		const size_t size = source.GetSize();
 		
-		// sort alignment info into source order
-		map<size_t, size_t> sortedAlignment;
-		list<pair<size_t,size_t> >::const_iterator iterAlign;
-		for (iterAlign = alignmentInfo.begin(); iterAlign != alignmentInfo.end(); ++iterAlign)
-		{
-			sortedAlignment[iterAlign->first] = iterAlign->second;
-		}
-				 		
+        const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+        AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
+
 		PhraseDictionaryNodeSourceLabel *currNode = &m_collection;
 		for (size_t pos = 0 ; pos < size ; ++pos)
 		{
@@ -279,10 +271,13 @@ namespace Moses
 			{ // indexed by source label 1st
 				const Word &sourceNonTerm = word;
 				
-				size_t targetNonTermInd = sortedAlignment[pos];
+				assert(iterAlign != target.GetAlignmentInfo().end());
+				assert(iterAlign->first == pos);
+				size_t targetNonTermInd = iterAlign->second;
+				++iterAlign;
 				const Word &targetNonTerm = target.GetWord(targetNonTermInd);
-				currNode = currNode->GetOrCreateChild(targetNonTerm, sourceNonTerm);
 
+				currNode = currNode->GetOrCreateChild(targetNonTerm, sourceNonTerm);
 			}
 			else
 			{

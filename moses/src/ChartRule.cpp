@@ -15,11 +15,17 @@ void ChartRule::CreateNonTermIndex()
 	const AlignmentInfo &alignInfo = m_targetPhrase.GetAlignmentInfo();
 
 	size_t nonTermInd = 0;
+	size_t prevSourcePos = 0;
 	AlignmentInfo::const_iterator iter;
 	for (iter = alignInfo.begin(); iter != alignInfo.end(); ++iter)
 	{
-		// just for assert
-		//size_t sourcePos = iter->first;
+		// alignment pairs must be ordered by source index
+		size_t sourcePos = iter->first;
+		if (nonTermInd > 0)
+		{
+			assert(sourcePos > prevSourcePos);
+		}
+		prevSourcePos = sourcePos;
 
 		size_t targetPos = iter->second;
 		m_wordsConsumedTargetOrder[targetPos] = nonTermInd;

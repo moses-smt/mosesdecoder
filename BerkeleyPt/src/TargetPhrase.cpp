@@ -385,11 +385,13 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 	ret->SetScoreChart(&phraseDict, m_scores, weightT, lmList, true);
 	
 	// alignments
+	std::list<std::pair<size_t, size_t> > alignmentInfo;
 	for (size_t ind = 0; ind < m_align.size(); ++ind)
 	{
 		const std::pair<size_t, size_t> &entry = m_align[ind];
-		ret->AddAlignment(entry);
+		alignmentInfo.push_back(entry);
 	}
+	ret->SetAlignmentInfo(alignmentInfo);
 	
 	// lhs
 	Moses::Word *lhs = m_headWords[0].ConvertToMoses(Moses::Input, inputFactors, vocab);
