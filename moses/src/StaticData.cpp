@@ -258,7 +258,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
 	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
-	m_weightUnknownWord				= 1; // do we want to let mert decide weight for this ???
+  m_weightUnknownWord				= 1;
+  if (m_parameter->GetParam("weight-u").size () > 0)
+    m_weightUnknownWord				= Scan<float>( m_parameter->GetParam("weight-u")[0] ); 
 
 	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightDistortion);
