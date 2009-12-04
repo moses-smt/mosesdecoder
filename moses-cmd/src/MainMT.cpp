@@ -50,18 +50,19 @@ using namespace Moses;
   **/
 class OutputCollector {
     public:
-        OutputCollector(std::ostream* outStream= &cout) :
-            m_nextOutput(0),m_outStream(outStream)  {}
+        OutputCollector(std::ostream* outStream= &cout, std::ostream* debugStream=&cerr) :
+            m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
 
 
         /**
           * Write or cache the output, as appropriate.
           **/
-        void Write(int sourceId,const string& output) {
+        void Write(int sourceId,const string& output,const string& debug="") {
             boost::mutex::scoped_lock lock(m_mutex);
             if (sourceId == m_nextOutput) {
                 //This is the one we were expecting
                 *m_outStream << output;
+                *m_debugStream << debug;
                 ++m_nextOutput;
                 //see if there's any more
                 map<int,string>::iterator iter;
@@ -69,17 +70,25 @@ class OutputCollector {
                     *m_outStream << iter->second;
                     m_outputs.erase(iter);
                     ++m_nextOutput;
+                    map<int,string>::iterator debugIter = m_debugs.find(iter->first);
+                    if (debugIter != m_debugs.end()) {
+                      *m_debugStream << debugIter->second;
+                      m_debugs.erase(debugIter);
+                    }
                 }
             } else {
                 //save for later
                 m_outputs[sourceId] = output;
+                m_debugs[sourceId] = debug;
             }
         }
         
      private:
         map<int,string> m_outputs;
+        map<int,string> m_debugs;
         int m_nextOutput;
         ostream* m_outStream;
+        ostream* m_debugStream;
         boost::mutex m_mutex;
 };
 
@@ -106,6 +115,7 @@ class TranslationTask : public Task {
             
             if (m_outputCollector) {
                 ostringstream out;
+                ostringstream debug;
                 if (!staticData.UseMBR()) {
                     const Hypothesis* hypo = manager.GetBestHypothesis();
                     if (hypo) {
@@ -115,6 +125,9 @@ class TranslationTask : public Task {
                                 staticData.GetOutputFactorOrder(), 
                                 staticData.GetReportSegmentation(),
                                 staticData.GetReportAllFactors());
+                        IFVERBOSE(1) {
+                          debug << "BEST TRANSLATION: " << *hypo << endl;
+                        }
                     }
                     out << endl;
                 } else {
@@ -138,7 +151,7 @@ class TranslationTask : public Task {
                         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
                     }
                 }
-                m_outputCollector->Write(m_lineNumber,out.str());
+                m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
             }
             if (m_nbestCollector) {
                 TrellisPathList nBestList;
