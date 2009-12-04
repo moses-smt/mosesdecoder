@@ -77,6 +77,7 @@ Parameter::Parameter()
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
+  AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
 	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
