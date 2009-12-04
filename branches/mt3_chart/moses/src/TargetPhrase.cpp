@@ -235,7 +235,7 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
-void TargetPhrase::CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
+void TargetPhrase::SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
 {
 	m_alignmentInfo.AddAlignment(alignmentInfo);
 }

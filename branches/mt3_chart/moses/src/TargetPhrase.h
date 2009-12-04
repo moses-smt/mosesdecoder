@@ -174,8 +174,7 @@ public:
 		return m_alignmentInfo;
 	}
 	
-	/** Parse the alignment info portion of phrase table string to create alignment info */
-	void CreateAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
+	void SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
@@ -188,12 +187,6 @@ public:
 	}
 	bool PrintAlignmentInfo() const {
 		return printalign;
-	}
-
-	// giza++ style alignment format
-	void AddAlignment(const std::pair<size_t, size_t> &entry)
-	{
-		m_alignmentInfo.AddAlignment(entry);
 	}
 
 	void SetSourceLHS(const Word &lhs)

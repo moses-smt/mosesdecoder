@@ -242,7 +242,7 @@ bool PhraseDictionarySourceLabel::Load(const std::vector<FactorType> &input
 			alignmentInfo.push_back(pair<size_t,size_t>(sourceAlignMap[ alignVec[0] ], targetAlignMap[ alignVec[1] ]));
 		}
 
-		targetPhrase->CreateAlignmentInfo(alignmentInfo);
+		targetPhrase->SetAlignmentInfo(alignmentInfo);
 		
 		targetPhrase->SetDebugOutput(string("Source Label pt ") +  line);
 
@@ -421,7 +421,7 @@ bool PhraseDictionarySourceLabel::LoadBackoff(const std::vector<FactorType> &inp
 			alignmentInfo.push_back(pair<size_t,size_t>(sourceAlignMap[ alignVec[0] ], targetAlignMap[ alignVec[1] ]));
 		}
 		
-		targetPhrase->CreateAlignmentInfo(alignmentInfo);
+		targetPhrase->SetAlignmentInfo(alignmentInfo);
 		targetPhrase->SetDebugOutput(string("Backoff pt ") +  line);
 		
 		// lhs

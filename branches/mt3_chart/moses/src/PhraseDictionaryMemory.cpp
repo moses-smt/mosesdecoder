@@ -211,7 +211,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		//targetPhrase->SetSourcePhrase(sourcePhrase); // TODO not valid
 		targetPhrase->CreateFromString( output, targetPhraseVector);
 
-		targetPhrase->CreateAlignmentInfo(alignmentInfo);
+		targetPhrase->SetAlignmentInfo(alignmentInfo);
 		targetPhrase->SetTargetLHS(headWord);
 
 		targetPhrase->SetDebugOutput(string("Mem pt " )+ line);
