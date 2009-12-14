@@ -283,7 +283,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 
 
 
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder,long translationId)
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder,long translationId, int CfgId)
 {
 	const StaticData &staticData = StaticData::Instance();
 	bool labeledOutput = staticData.IsLabeledNBestList();
@@ -307,7 +307,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 		std::string lastName = "";
 		const vector<const StatefulFeatureFunction*>& sff =
-			staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+			staticData.GetScoreIndexManager(CfgId).GetStatefulFeatureFunctions();
 		for( size_t i=0; i<sff.size(); i++ )
 		{
 			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
@@ -323,7 +323,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 
 		const vector<const StatelessFeatureFunction*>& slf =
-			staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+			staticData.GetScoreIndexManager(CfgId).GetStatelessFeatureFunctions();
 		for( size_t i=0; i<slf.size(); i++ )
 		{
 			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
@@ -470,8 +470,8 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	out <<std::flush;
 }
 
-void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
-    OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
+void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId, int CfgId) {
+    OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId, CfgId);
 }
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)

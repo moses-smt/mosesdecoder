@@ -91,7 +91,8 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t tableLimit);
+                            , size_t tableLimit
+                            , ScoreIndexManager &scoreIndexManager);
                             
 	virtual ~PhraseDictionaryFeature();
 	

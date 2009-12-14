@@ -178,6 +178,62 @@ std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
 	}
 	return meta;
 }
+std::map<std::string, std::string> ProcessAndStripCfg(std::string &line)
+{
+	std::map<std::string, std::string> meta;
+	std::string lline = ToLower(line);
+	if (lline.find("<cfg")!=0) return meta;
+	size_t close = lline.find(">");
+	if (close == std::string::npos) return meta; // error
+	size_t end = lline.find("</cfg>");
+	std::string cfg = Trim(lline.substr(4, close-4));
+	std::string text = line.substr(close+1, end - close - 1);
+	for (size_t i = 1; i < cfg.size(); i++) {
+		if (cfg[i] == '=' && cfg[i-1] == ' ') {
+			std::string less = cfg.substr(0, i-1) + cfg.substr(i);
+			cfg = less; i = 0; continue;
+		}
+		if (cfg[i] == '=' && cfg[i+1] == ' ') {
+			std::string less = cfg.substr(0, i+1);
+			if (i+2 < cfg.size()) less += cfg.substr(i+2);
+			cfg = less; i = 0; continue;
+		}
+	}
+	line = Trim(text);
+	if (cfg == "") return meta;
+	for (size_t i = 1; i < cfg.size(); i++) {
+		if (cfg[i] == '=') {
+			std::string label = cfg.substr(0, i);
+			std::string val = cfg.substr(i+1);
+			if (val[0] == '"') {
+				val = val.substr(1);
+				size_t close = val.find('"');
+				if (close == std::string::npos) {
+					TRACE_ERR("Cfg parse error: missing \"\n");
+					cfg = "";
+					i = 0;
+				} else {
+					cfg = val.substr(close+1);
+					val = val.substr(0, close);
+					i = 0;
+				}
+			} else {
+				size_t close = val.find(' ');
+				if (close == std::string::npos) {
+					cfg = "";
+					i = 0;
+				} else {
+					cfg = val.substr(close+1);
+					val = val.substr(0, close);
+				}
+			}
+			label = Trim(label);
+			cfg = Trim(cfg);
+			meta[label] = val;
+		}
+	}
+	return meta;
+}
 
 }
 

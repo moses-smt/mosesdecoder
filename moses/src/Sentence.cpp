@@ -44,6 +44,14 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	// if sentences is specified as "<seg id=1> ... </seg>", extract id
   meta = ProcessAndStripSGML(line);
 	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
+	// if sentences is specified as "<cfg id=1> ... </seg>", extract id
+  meta = ProcessAndStripCfg(line);
+	if (meta.find("id") != meta.end()) 
+	{
+	  m_cfgId = atol(meta["id"].c_str());
+	  cout << "<cfg> id = "<< m_cfgId <<endl; 
+	}
+	else{ m_cfgId = 0; }
 	
 	// parse XML markup in translation line
 	const StaticData &staticData = StaticData::Instance();

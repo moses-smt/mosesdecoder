@@ -107,7 +107,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
     }
   }
 	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED):" << std::endl;
-  StaticData::Instance().GetScoreIndexManager().Debug_PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
+//  StaticData::Instance().GetScoreIndexManager().Debug_PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
 	os << std::endl;
 }
 

@@ -307,6 +307,7 @@ double GetUserTime();
 
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
-
+// dump parser for <cfg> tags
+std::map<std::string, std::string> ProcessAndStripCfg(std::string &line);
 }
 

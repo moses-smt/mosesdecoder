@@ -58,18 +58,20 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_wordDeleted(false)
-	, m_ffStates(StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions().size())
+	, m_ffStates(StaticData::Instance().GetScoreIndexManager(source.GetCfgId()).GetStatefulFeatureFunctions().size())
 	, m_arcList(NULL)
   , m_transOpt(NULL)
   , m_manager(manager)
-
+  
   , m_id(0)
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
+ 
+ m_scoreBreakdown = ScoreComponentCollection(source.GetCfgId()); //bo ?
 	s_HypothesesCreated = 1;
 	ResetScore();
-	const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions();
+	const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetScoreIndexManager(source.GetCfgId()).GetStatefulFeatureFunctions();
 	for (unsigned i = 0; i < ffs.size(); ++i)
 	  m_ffStates[i] = ffs[i]->EmptyHypothesisState();
 }
@@ -281,13 +283,13 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
 	const vector<const StatelessFeatureFunction*>& sfs =
-	  staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+	  staticData.GetScoreIndexManager(m_sourceInput.GetCfgId()).GetStatelessFeatureFunctions();
 	for (unsigned i = 0; i < sfs.size(); ++i) {
     sfs[i]->Evaluate(m_targetPhrase, &m_scoreBreakdown);
 	}
 
 	const vector<const StatefulFeatureFunction*>& ffs =
-	  staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+	  staticData.GetScoreIndexManager(m_sourceInput.GetCfgId()).GetStatefulFeatureFunctions();
 	for (unsigned i = 0; i < ffs.size(); ++i) {
 		m_ffStates[i] = ffs[i]->Evaluate(
 			*this,
@@ -327,7 +329,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
 	//LEXICAL REORDERING COST
-	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
+	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels(m_sourceInput.GetCfgId());
 	for(unsigned int i = 0; i < reorderModels.size(); i++)
 	{
 		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));

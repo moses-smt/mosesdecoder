@@ -1,14 +1,18 @@
 --------------------------
-moses:
-	Process two commands:
-	<decoder config="-f moses.ini">
-	<decoder quit>
+moses and mosesmt:
+	Process command:
+	<decoder addconfig="-f moses.ini">
+
+	Input with a tag:
+	<cfg id=0>a sentence to be translated with the first config</cfg>
+	<cfg id=1>a sentence to be translated with the second config</cfg>
 
 -------------------------
 mosesserver:
-	c = proxy.config
-	c({"config":"-f moses-fr.ini"})
-	// takes the second value as arguments that a common moses supports, i.g. can also do like: 
-	// c({"config":"-f moses-fr.ini -verbose 2"}) 
+	c = proxy.addconfig
+	c({"addconfig":"-f moses-fr.ini"})
+
+	t({"text":"<cfg id=0>deutsch</cfg>"})
+	t({"text":"<cfg id=1>français</cfg>"})
 -------------------------
 

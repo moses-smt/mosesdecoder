@@ -13,7 +13,7 @@ GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
 	std::cerr << "Creating global lexical model...\n";
 
 	// register as score producer
-	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
+	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager(0)).AddScoreProducer(this);
 	std::vector< float > weights;
 	weights.push_back( weight );
 	const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);

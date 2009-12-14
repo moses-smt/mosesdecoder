@@ -11,6 +11,7 @@
 #include "Util.h"
 #include "WordsRange.h"
 #include "ScoreProducer.h"
+#include "ScoreIndexManager.h"
 #include "FeatureFunction.h"
 
 #include "LexicalReorderingTable.h"
@@ -36,7 +37,8 @@ class LexicalReordering : public StatefulFeatureFunction {
 		    Direction direction, 
 		    Condition condition, 
 		    std::vector< FactorType >& f_factors, 
-		    std::vector< FactorType >& e_factors);
+		    std::vector< FactorType >& e_factors, 
+		    ScoreIndexManager &scoreIndexManager);
   virtual ~LexicalReordering();
  public: //interface
   //inherited
@@ -94,8 +96,9 @@ class LexicalMonotonicReordering : public LexicalReordering {
 			     Direction direction, 
 			     Condition condition, 
 			     std::vector< FactorType >& f_factors, 
-			     std::vector< FactorType >& e_factors)
-    : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors){
+			     std::vector< FactorType >& e_factors, 
+			     ScoreIndexManager &scoreIndexManager)
+    : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors, scoreIndexManager){
 	std::cerr << "Created lexical monotonic reordering\n";
   }
  public:
@@ -117,8 +120,9 @@ class LexicalOrientationReordering : public LexicalReordering {
 			     Direction direction, 
 			     Condition condition, 
 			     std::vector< FactorType >& f_factors, 
-			     std::vector< FactorType >& e_factors)
-      : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors){
+			     std::vector< FactorType >& e_factors, 
+			     ScoreIndexManager &scoreIndexManager)
+      : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors, scoreIndexManager){
 	  std::cerr << "Created lexical orientation reordering\n";
   }
  public:
@@ -140,8 +144,9 @@ class LexicalDirectionalReordering : public LexicalReordering {
 							  Direction direction, 
 							  Condition condition, 
 							  std::vector< FactorType >& f_factors, 
-							  std::vector< FactorType >& e_factors)
-   : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors){
+							  std::vector< FactorType >& e_factors, 
+							  ScoreIndexManager &scoreIndexManager)
+   : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors, scoreIndexManager){
    std::cerr << "Created lexical directional Reordering\n";
   }
  public:

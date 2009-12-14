@@ -43,6 +43,7 @@ protected:
 	long m_translationId; 	//< contiguous Id
 	bool m_hasMetaData;
 	long m_segId;
+	int m_cfgId;
 	ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
  
 public:
@@ -59,6 +60,10 @@ public:
 	void SetTranslationId(long translationId)
 	{
 		m_translationId = translationId;
+	}
+	int GetCfgId() const
+	{
+		return m_cfgId;
 	}
 	//! returns the number of words moved
 	virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;

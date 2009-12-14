@@ -42,6 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+#include "ConfigurationsManager.h"
+#include "Configuration.h"
 
 using namespace std;
 
@@ -208,10 +210,135 @@ bool StaticData::SetUpBeforeReconfig(Parameter *parameter)
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
 
-	m_scoreIndexManager.Reset();
+	m_scoreIndexManager[0].Reset();
 	return true;
 }
 
+
+int StaticData::AddConfig(Parameter *parameter)
+{
+	m_parameter = parameter;
+
+	// check parameter!!! valid? already loaded? return -1;............
+	// input type
+	if(m_parameter->GetParam("inputtype").size()) 
+		m_inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
+	if (m_inputType != SentenceInput)
+	{
+	  TRACE_ERR("------donot support input type other than SentenceInput for multiple configs!!!\n");
+	  return -1;
+	}
+
+
+	int newId = m_configurationsManager.m_configurations.size();
+	if (newId >4)
+	{
+	  TRACE_ERR("------exceed maximum configuration number!!!\n");
+	  return -1;
+	}
+
+	
+	if (m_inputType == SentenceInput)
+	{
+		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
+		m_transOptCacheMaxSize = (m_parameter->GetParam("persistent-cache-size").size() > 0)
+					? Scan<size_t>(m_parameter->GetParam("persistent-cache-size")[0]) : DEFAULT_MAX_TRANS_OPT_CACHE_SIZE;
+	}
+	else
+	{
+		m_useTransOptCache = false;
+	}
+
+	m_inputFactorOrder.clear(); m_outputFactorOrder.clear();
+	//input factors
+	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
+	for(size_t i=0; i<inputFactorVector.size(); i++) 
+	{
+		m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
+	}
+	if(m_inputFactorOrder.empty())
+	{
+		UserMessage::Add(string("no input factor specified in config file"));
+		return -1;
+	}
+	//output factors
+	const vector<string> &outputFactorVector = m_parameter->GetParam("output-factors");
+	for(size_t i=0; i<outputFactorVector.size(); i++) 
+	{
+		m_outputFactorOrder.push_back(Scan<FactorType>(outputFactorVector[i]));
+	}
+	if(m_outputFactorOrder.empty())
+	{ // default. output factor 0
+		m_outputFactorOrder.push_back(0);
+	}
+	// to cube or not to cube
+	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
+										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+	//clear global var in scoreProducer
+	if (m_distortionScoreProducer)
+	{
+		m_distortionScoreProducer->ResetScoreBookkeepingID();
+	}
+	else 
+	{
+		TRACE_ERR("------ScoreBookkeepingID not reset!!!\n");
+		return -1;
+	}
+
+	m_allWeights.clear();
+
+	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
+	m_weightDistortion = Scan<float>(distortionWeights[0]);
+	m_weightWordPenalty = Scan<float>( m_parameter->GetParam("weight-w")[0] );
+	m_weightUnknownWord = (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
+	m_allWeights.push_back(m_weightDistortion);
+	m_allWeights.push_back(m_weightWordPenalty);
+	m_allWeights.push_back(m_weightUnknownWord);
+
+	// add producers to new scoreIndexManager
+	m_scoreIndexManager[newId].AddScoreProducer(m_distortionScoreProducer);
+	m_scoreIndexManager[newId].AddScoreProducer(m_wpProducer);
+	m_scoreIndexManager[newId].AddScoreProducer(m_unknownWordPenaltyProducer);
+
+	// build a new configuration
+	Configuration *newConfig = new Configuration();
+	cout << "newConfig sizes: "<< newConfig->ttableFiles.size()<< " " <<newConfig->m_pDs.size()<<endl;
+	m_configurationsManager.m_configurations.push_back(newConfig);
+	//int startPos = m_phraseDictionary.size();
+	if (!LoadLexicalReorderingModel(newId)) 
+	{
+	  return -1;
+	  m_configurationsManager.m_configurations.pop_back(); 
+	  delete newConfig;
+	}
+	if (!LoadLanguageModels(newId))
+	{
+	  return -1;
+	  m_configurationsManager.m_configurations.pop_back(); 
+	  delete newConfig;
+	}
+	if (!LoadPhraseTables(newId))
+	{
+	  return -1;
+	  m_configurationsManager.m_configurations.pop_back(); 
+	  delete newConfig;
+	}
+
+	m_scoreIndexManager[newId].InitFeatureNames();
+
+	cout << "newConfig->m_pDs size = "<<newConfig->m_pDs.size()<<endl;
+
+	newConfig->m_weights = m_allWeights;
+	newConfig->m_searchAlgorithm = m_searchAlgorithm;
+	newConfig->m_inputFactorOrder = m_inputFactorOrder;
+	newConfig->m_outputFactorOrder = m_outputFactorOrder;
+	newConfig->mappingVector = m_parameter->GetParam("mapping");
+	newConfig->m_useTransOptCache = m_useTransOptCache;
+	newConfig->m_transOptCacheMaxSize = m_transOptCacheMaxSize;
+	
+
+	return newId;
+}
 bool StaticData::LoadData(Parameter *parameter)
 {
 	ResetUserTime();
@@ -325,7 +452,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
 
-	// 
+	
 	if (m_inputType == SentenceInput)
 	{
 		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
@@ -381,13 +508,13 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
 	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
+	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager[0]);
 	m_allWeights.push_back(m_weightDistortion);
 
-	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
+	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager[0]);
 	m_allWeights.push_back(m_weightWordPenalty);
 
-	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
+	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager[0]);
 	m_allWeights.push_back(m_weightUnknownWord);
 
 	// reordering constraints
@@ -494,27 +621,55 @@ bool StaticData::LoadData(Parameter *parameter)
 		UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
 		return false;
 	}
-	
-	if (!LoadLexicalReorderingModel()) return false;
-	if (!LoadLanguageModels()) return false;
+
+	Configuration *newConfig = new Configuration();
+	m_configurationsManager.m_configurations.push_back(newConfig);
+
+	if (!LoadLexicalReorderingModel(0)) 
+	{
+	  return false;
+	  m_configurationsManager.m_configurations.pop_back(); 
+	  delete newConfig;
+	}
+	if (!LoadLanguageModels(0))
+	{
+	  return false;
+	  m_configurationsManager.m_configurations.pop_back(); 
+	  delete newConfig;
+	}
 	if (!LoadGenerationTables()) return false;
-	if (!LoadPhraseTables()) return false;
+	if (!LoadPhraseTables(0))
+	{
+	  return false;
+	  m_configurationsManager.m_configurations.pop_back(); 
+	  delete newConfig;
+	}
 	if (!LoadGlobalLexicalModel()) return false;
 
-	m_scoreIndexManager.InitFeatureNames();
+	m_scoreIndexManager[0].InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
 		if (m_parameter->GetParam("weight-file").size() != 1) {
 			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
 			return false;
 		}
 		string fnam = m_parameter->GetParam("weight-file")[0];
-		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
+		m_scoreIndexManager[0].InitWeightVectorFromFile(fnam, &m_allWeights);
 	}
 
 	if (m_configs.LMs.size()==0)
 	{
 	  m_configs.updateLMs(m_parameter->GetParam("lmodel-file"));
 	}
+
+	newConfig->m_pDs = m_phraseDictionary;
+	newConfig->m_weights = m_allWeights;
+	newConfig->m_searchAlgorithm = m_searchAlgorithm;
+	newConfig->m_inputFactorOrder = m_inputFactorOrder;
+	newConfig->m_outputFactorOrder = m_outputFactorOrder;
+	newConfig->mappingVector = m_parameter->GetParam("mapping");
+	newConfig->m_useTransOptCache = m_useTransOptCache;
+	newConfig->m_transOptCacheMaxSize = m_transOptCacheMaxSize;
+
 	return true;
 }
 
@@ -551,12 +706,15 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_globalLexicalModels);
 	
 	// delete trans opt
+  for(int i=0; i<MaxConfigsNum; i++)
+  {
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
-	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
+	for (iterCache = m_transOptCache[i].begin() ; iterCache != m_transOptCache[i].end() ; ++iterCache)
 	{
 		TranslationOptionList *transOptList = iterCache->second.first;
 		delete transOptList;
 	}
+  }
 
 	// small score producers
 	delete m_distortionScoreProducer;
@@ -568,11 +726,14 @@ StaticData::~StaticData()
 
 }
 
-bool StaticData::LoadLexicalReorderingModel()
+bool StaticData::LoadLexicalReorderingModel(int id)
 {
   std::cerr << "Loading lexical distortion models...\n";
   const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
   const vector<string> weightsStr = m_parameter->GetParam("weight-d");
+
+  bool gotLRs = false;
+  int copyId;
 
   std::vector<float>   weights;
   size_t w = 1; //cur weight
@@ -582,6 +743,9 @@ bool StaticData::LoadLexicalReorderingModel()
   for(size_t j = 0; j < weightsStr.size(); ++j){
     weights.push_back(Scan<float>(weightsStr[j]));
   }
+
+  gotLRs = m_configurationsManager.GetReorderingModels(fileStr,id,&copyId);
+
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i)
   {
@@ -604,83 +768,83 @@ bool StaticData::LoadLexicalReorderingModel()
     //decode factor map
     vector<string> inputfactors = Tokenize(spec[0],"-");
     if(inputfactors.size() == 2){
-			input  = Tokenize<FactorType>(inputfactors[0],",");
-			output = Tokenize<FactorType>(inputfactors[1],",");
+	input  = Tokenize<FactorType>(inputfactors[0],",");
+	output = Tokenize<FactorType>(inputfactors[1],",");
     } 
-		else if(inputfactors.size() == 1)
-		{
-			//if there is only one side assume it is on e side... why?
-			output = Tokenize<FactorType>(inputfactors[0],",");
+    else if(inputfactors.size() == 1)
+    {
+	  //if there is only one side assume it is on e side... why?
+	  output = Tokenize<FactorType>(inputfactors[0],",");
     } 
-		else 
-		{
-			//format error
-			return false;
+    else 
+    {
+	  //format error
+	  return false;
     }
     //decode name
     vector<string> params = Tokenize<string>(spec[1],"-");
     std::string type(ToLower(params[0]));
-		std::string dir;
-		std::string cond;
+    std::string dir;
+    std::string cond;
 
-		if(3 == params.size())
-		{
-			//name format is 'type'-'direction'-'condition'
-			dir  = ToLower(params[1]);
-			cond = ToLower(params[2]);
-		} 
-		else if(2 == params.size()) 
-		{
+    if(3 == params.size())
+    {
+        //name format is 'type'-'direction'-'condition'
+        dir  = ToLower(params[1]);
+        cond = ToLower(params[2]);
+    } 
+    else if(2 == params.size()) 
+    {
 			//assume name format is 'type'-'condition' with implicit unidirectional
 			std::cerr << "Warning: Lexical model type underspecified...assuming unidirectional in model " << i << "\n";
 			dir  = "unidirectional";
 			cond = ToLower(params[1]);
-		} 
-		else 
-		{
+    } 
+    else 
+    {
 			std::cerr << "Lexical model type underspecified for model " << i << "!\n";
 			return false;
-		}
+    }
     
-		if(dir == "forward"){
+    if(dir == "forward"){
 			direction = LexicalReordering::Forward;
-		 } 
-		else if(dir == "backward" || dir == "unidirectional" || dir == "uni")
-		{
+    } 
+    else if(dir == "backward" || dir == "unidirectional" || dir == "uni")
+    {
 			direction = LexicalReordering::Backward; 
-		} 
-		else if(dir == "bidirectional" || dir == "bi") 
-		{
+    } 
+    else if(dir == "bidirectional" || dir == "bi") 
+    {
 			direction = LexicalReordering::Bidirectional;
-		}
-		else 
-		{
+    }
+    else 
+    {
 			std::cerr << "Unknown direction declaration '" << dir << "'for lexical reordering model " << i << "\n";
 			return false;
-		}
+    }
       
-		if(cond == "f"){
+    if(cond == "f"){
 			condition = LexicalReordering::F; 
-		}
-		else if(cond == "fe")
-		{
+    }
+    else if(cond == "fe")
+    {
 			condition = LexicalReordering::FE; 
-		 } 
-		else if(cond == "fec")
-		{
+    } 
+    else if(cond == "fec")
+    {
 			condition = LexicalReordering::FEC;
-		} 
-		else 
-		{
+    } 
+    else 
+    {
 			std::cerr << "Unknown conditioning declaration '" << cond << "'for lexical reordering model " << i << "!\n";
 			return false;
-		}
+    }
 
-		//decode num weights (and fetch weight from array...)
-		std::vector<float> mweights;
-		numWeights = atoi(spec[2].c_str());
-		for(size_t k = 0; k < numWeights; ++k, ++w)
-		{
+    //decode num weights (and fetch weight from array...)
+    std::vector<float> mweights;
+    numWeights = atoi(spec[2].c_str());
+    for(size_t k = 0; k < numWeights; ++k, ++w)
+    {
 			if(w >= weights.size()){
 				//error not enough weights...
 				std::cerr << "Lexicalized distortion model: Not enough weights, add to [weight-d]\n";
@@ -688,32 +852,59 @@ bool StaticData::LoadLexicalReorderingModel()
 			} else {
 				mweights.push_back(weights[w]);
 			}
-		}
+    }
+    std::copy(mweights.begin(),mweights.end(),std::back_inserter(m_allWeights));
+    //decode filename
+    string filePath = spec[3];
     
-		//decode filename
-		string filePath = spec[3];
+    //all ready load it
+    //std::cerr << type;
 
-		//all ready load it
-		//std::cerr << type;
-		if("monotonicity" == type){
-			m_reorderModels.push_back(new LexicalMonotonicReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else if("orientation" == type || "msd" == type)
-		{
-			m_reorderModels.push_back(new LexicalOrientationReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else if("directional" == type)
-		{
-			m_reorderModels.push_back(new LexicalDirectionalReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else 
-		{
-			//error unknown type!
-			std::cerr << " ...unknown type!\n";
-			return false;
-		}
-		//std::cerr << "\n";
+    if (!gotLRs)
+    {
+      if("monotonicity" == type){
+        LexicalReordering *lr = new LexicalMonotonicReordering(filePath, mweights, direction, condition, input, output, m_scoreIndexManager[id]);
+        m_reorderModels.push_back(lr);
+        m_configurationsManager.m_configurations[id]->m_reorders.push_back(lr);
+      } 
+      else if("orientation" == type || "msd" == type)
+      {
+        LexicalReordering *lr = new LexicalOrientationReordering(filePath, mweights, direction, condition, input, output, m_scoreIndexManager[id]);
+        m_reorderModels.push_back(lr);
+        m_configurationsManager.m_configurations[id]->m_reorders.push_back(lr);
+      } 
+      else if("directional" == type)
+      {
+        LexicalReordering *lr = new LexicalDirectionalReordering(filePath, mweights, direction, condition, input, output, m_scoreIndexManager[id]);
+        m_reorderModels.push_back(lr);
+        m_configurationsManager.m_configurations[id]->m_reorders.push_back(lr);
+      } 
+      else 
+      {
+        //error unknown type!
+        std::cerr << " ...unknown type!\n";
+        return false;
+      }
+      //std::cerr << "\n";
+    }
   }
+
+  if (gotLRs)
+  {
+    vector<LexicalReordering*> &lRs = m_configurationsManager.m_configurations[copyId]->m_reorders;
+    std::cout<<"------reorderingModels already exitst. size="<<lRs.size()<<std::endl;
+    std::vector<LexicalReordering*>::const_iterator it;
+    for (it = lRs.begin() ; it != lRs.end() ; ++it)
+    {
+      LexicalReordering *lr = *it;
+      m_configurationsManager.m_configurations[id]->m_reorders.push_back(lr);
+      m_scoreIndexManager[id].AddScoreProducer(lr);
+      VERBOSE(1,"------Add to ScoreProducer(" << lr->GetScoreBookkeepingID()
+						<< " " <<lr->GetScoreProducerDescription()
+						<< ") "<< endl);
+    }
+  }
+
   return true;
 }
 
@@ -750,7 +941,7 @@ bool StaticData::LoadGlobalLexicalModel()
 	return true;
 }
 
-bool StaticData::LoadLanguageModels()
+bool StaticData::LoadLanguageModels(int id)
 {
 	if (m_parameter->GetParam("lmodel-file").size() > 0)
 	{
@@ -808,7 +999,7 @@ bool StaticData::LoadLanguageModels()
                                    								, nGramOrder
 																									, languageModelFile
 																									, weightAll[i]
-																									, m_scoreIndexManager
+																									, m_scoreIndexManager[id]
 																									, LMdub[i]);
       if (lm == NULL)
       {
@@ -827,7 +1018,7 @@ bool StaticData::LoadLanguageModels()
 		for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
 		{
 			LanguageModel *languageModel = *iterLM;
-			m_scoreIndexManager.AddScoreProducer(languageModel);
+			m_scoreIndexManager[id].AddScoreProducer(languageModel);
 			VERBOSE(1,"------Add to ScoreProducer(" << languageModel->GetScoreBookkeepingID()
 						<< " " <<languageModel->GetScoreProducerDescription()
 						<< ") "<< endl);
@@ -883,7 +1074,7 @@ bool StaticData::LoadGenerationTables()
 
 			VERBOSE(1, filePath << endl);
 
-			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager));
+			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager[0]));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			if (!m_generationDictionary.back()->Load(input
 																		, output
@@ -906,14 +1097,18 @@ bool StaticData::LoadGenerationTables()
 	return true;
 }
 
-bool StaticData::LoadPhraseTables()
+bool StaticData::LoadPhraseTables(int id)
 {
 	VERBOSE(2,"About to LoadPhraseTables" << endl);
 
 	// language models must be loaded prior to loading phrase tables
 	assert(m_fLMsLoaded);
+
+	bool gotPDs = false;
+	int copyId;
+
 	// load phrase translation tables
-  if (m_parameter->GetParam("ttable-file").size() > 0)
+	if (m_parameter->GetParam("ttable-file").size() > 0)
 	{
 		// weights
 		vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
@@ -924,6 +1119,8 @@ bool StaticData::LoadPhraseTables()
 		size_t index = 0;
 		size_t weightAllOffset = 0;
 
+		gotPDs = m_configurationsManager.GetPhraseDictionaries(translationVector,id,&copyId);
+
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
@@ -932,7 +1129,7 @@ bool StaticData::LoadPhraseTables()
 				,output = Tokenize<FactorType>(token[1], ",");
 			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
-      m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
+			m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
 			string filePath= token[3];
 			size_t numScoreComponent = Scan<size_t>(token[2]);
 
@@ -990,13 +1187,14 @@ bool StaticData::LoadPhraseTables()
 			numScoreComponent += tableInputScores;
 			
 			assert(numScoreComponent==weight.size());
-
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
 			
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath << endl);
-            
+        
+        if (!gotPDs)
+        {
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
                   numScoreComponent
                 ,  (currDict==0 ? m_numInputScores : 0)
@@ -1004,16 +1202,32 @@ bool StaticData::LoadPhraseTables()
                 , output
                 , filePath
                 , weight
-                , maxTargetPhrase[index]);
+                , maxTargetPhrase[index]
+                , m_scoreIndexManager[id]);
+
                 
              m_phraseDictionary.push_back(pdf);
-                
-                
-            
-			
+             m_configurationsManager.m_configurations[id]->m_pDs.push_back(pdf);
+         }	
 
 			index++;
 		}
+	
+	if (gotPDs)
+        {
+		vector<PhraseDictionaryFeature*> &pDs = m_configurationsManager.m_configurations[copyId]->m_pDs;
+		std::cout<<"------phraseDictionaries already exitst. size="<<pDs.size()<<std::endl;
+		std::vector<PhraseDictionaryFeature*>::const_iterator it;
+		for (it = pDs.begin() ; it != pDs.end() ; ++it)
+		{
+			PhraseDictionaryFeature *pD = *it;
+			m_configurationsManager.m_configurations[id]->m_pDs.push_back(pD);
+			m_scoreIndexManager[id].AddScoreProducer(pD);
+			VERBOSE(1,"------Add to ScoreProducer(" << pD->GetScoreBookkeepingID()
+						<< " " <<pD->GetScoreProducerDescription()
+						<< ") "<< endl);
+		}
+        }
 	}
 	
 	IFVERBOSE(1)
@@ -1025,10 +1239,13 @@ bool StaticData::LoadPhraseTables()
 vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 {
     vector<DecodeGraph*> decodeStepVL;
+	int cfgId = source.GetCfgId();
 	// mapping
-	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
+	vector<string> &mappingVector = m_configurationsManager.m_configurations[cfgId]->mappingVector;
 	DecodeStep *prev = 0;
 	size_t previousVectorList = 0;
+	vector<PhraseDictionaryFeature*> &pD = m_configurationsManager.m_configurations[cfgId]->m_pDs;
+
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
@@ -1063,7 +1280,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 		DecodeStep* decodeStep = 0;
 		switch (decodeType) {
 			case Translate:
-				if(index>=m_phraseDictionary.size())
+				if(index>=pD.size())
 					{
 						stringstream strme;
 						strme << "No phrase dictionary with index "
@@ -1071,7 +1288,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 						UserMessage::Add(strme.str());
 						assert(false);
 					}
-				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index]->GetDictionary(source), prev);
+				decodeStep = new DecodeStepTranslation(pD[index]->GetDictionary(source), prev);
 
 			break;
 			case Generate:
@@ -1121,8 +1338,9 @@ void StaticData::CleanUpAfterSentenceProcessing() const
     binary format is used) */
 void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 {
-	for(size_t i=0;i<m_reorderModels.size();++i) {
-		m_reorderModels[i]->InitializeForInput(in);
+	vector<LexicalReordering*> &reorders = m_configurationsManager.m_configurations[in.GetCfgId()]->m_reorders;
+	for(size_t i=0;i<reorders.size();++i) {
+		reorders[i]->InitializeForInput(in);
 	}
 	for(size_t i=0;i<m_globalLexicalModels.size();++i) {
 		m_globalLexicalModels[i]->InitializeForInput((Sentence const&)in);
@@ -1139,8 +1357,8 @@ void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
 {
   const size_t id = sp->GetScoreBookkeepingID();
-  const size_t begin = m_scoreIndexManager.GetBeginIndex(id);
-  const size_t end = m_scoreIndexManager.GetEndIndex(id);
+  const size_t begin = m_scoreIndexManager[0].GetBeginIndex(id);
+  const size_t end = m_scoreIndexManager[0].GetEndIndex(id);
   assert(end - begin == weights.size());
   if (m_allWeights.size() < end)
     m_allWeights.resize(end);
@@ -1149,15 +1367,15 @@ void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::
     m_allWeights[i] = *weightIter++;
 }
 
-const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
+const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, int id) const
 {
 	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
 #ifdef WITH_THREADS   
-	boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+	boost::mutex::scoped_lock lock(m_transOptCacheMutex[id]);
 #endif   
 	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-			= m_transOptCache.find(key);
-	if (iter == m_transOptCache.end())
+			= m_transOptCache[id].find(key);
+	if (iter == m_transOptCache[id].end())
 		return NULL;
 	iter->second.second = clock(); // update last used time
 	return iter->second.first;
@@ -1166,57 +1384,58 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
 void StaticData::ClearTransOptCache() const
 {
 	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-	iter = m_transOptCache.begin();
-	while( iter != m_transOptCache.end() )
+	iter = m_transOptCache[m_configurationsManager.currentConfigId].begin();
+	while( iter != m_transOptCache[m_configurationsManager.currentConfigId].end() )
 	{
 		std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
 		delete iterRemove->second.first;
-		m_transOptCache.erase(iterRemove);
+		m_transOptCache[m_configurationsManager.currentConfigId].erase(iterRemove);
 
 	}
 
 }
 void StaticData::ReduceTransOptCache() const
 {
-	if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
+	size_t maxSize = m_configurationsManager.m_configurations[m_configurationsManager.currentConfigId]->m_transOptCacheMaxSize;
+	if (m_transOptCache[m_configurationsManager.currentConfigId].size() <=maxSize ) return; // not full
 	clock_t t = clock();
 	
 	// find cutoff for last used time
 	priority_queue< clock_t > lastUsedTimes;
 	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-	iter = m_transOptCache.begin();
-	while( iter != m_transOptCache.end() )
+	iter = m_transOptCache[m_configurationsManager.currentConfigId].begin();
+	while( iter != m_transOptCache[m_configurationsManager.currentConfigId].end() )
 	{
 		lastUsedTimes.push( iter->second.second );
 		iter++;
 	}
-	for( size_t i=0; i < lastUsedTimes.size()-m_transOptCacheMaxSize/2; i++ )
+	for( size_t i=0; i < lastUsedTimes.size()-maxSize/2; i++ )
 		lastUsedTimes.pop();
 	clock_t cutoffLastUsedTime = lastUsedTimes.top();
 
 	// remove all old entries
-	iter = m_transOptCache.begin();
-	while( iter != m_transOptCache.end() )
+	iter = m_transOptCache[m_configurationsManager.currentConfigId].begin();
+	while( iter != m_transOptCache[m_configurationsManager.currentConfigId].end() )
 	{
 		if (iter->second.second < cutoffLastUsedTime)
 		{
 			std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
 			delete iterRemove->second.first;
-			m_transOptCache.erase(iterRemove);
+			m_transOptCache[m_configurationsManager.currentConfigId].erase(iterRemove);
 		}
 		else iter++;
 	}
 	VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
 }
 
-void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
+void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList, int id) const
 {
 	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
 	TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
 #ifdef WITH_THREADS   
-    boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+    boost::mutex::scoped_lock lock(m_transOptCacheMutex[id]);
 #endif
-	m_transOptCache[key] = make_pair( storedTransOptList, clock() );
+	m_transOptCache[id][key] = make_pair( storedTransOptList, clock() );
 	ReduceTransOptCache();
 }
 

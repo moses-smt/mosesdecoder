@@ -85,7 +85,7 @@ public:
 	Moses::InputType* GetInput(Moses::InputType *inputType);
 	void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputNBestList(const Moses::TrellisPathList &nBestList, long translationId);
+	void OutputNBestList(const Moses::TrellisPathList &nBestList, long translationId, int CfgId);
 	void Backtrack(const Moses::Hypothesis *hypo);
 
 	void ResetTranslationId() { m_translationId = 0; }
@@ -103,4 +103,4 @@ public:
 IOWrapper *GetIODevice(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors);
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&, long translationId);
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&, long translationId, int CfgId);

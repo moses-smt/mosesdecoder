@@ -33,10 +33,10 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
-	/*VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
-						<< " " << sp->GetScoreProducerDescription()
+	VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
+						//<< " " << sp->GetScoreProducerDescription()
 						<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
-*/
+
 // 	
 }
 

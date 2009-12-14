@@ -8,13 +8,14 @@ LexicalReordering::LexicalReordering(const std::string &filePath,
 									 Direction direction, 
 									 Condition condition, 
 									 std::vector< FactorType >& f_factors, 
-									 std::vector< FactorType >& e_factors)
+									 std::vector< FactorType >& e_factors, 
+								         ScoreIndexManager &scoreIndexManager)
   : m_NumScoreComponents(weights.size()), m_MaxContextLength(0) 
 {
   std::cerr << "Creating lexical reordering...\n";
   //add ScoreProducer
-  const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+  scoreIndexManager.AddScoreProducer(this);
+  //const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
   std::cerr << "weights: ";
   for(size_t w = 0; w < weights.size(); ++w){
 	std::cerr << weights[w] << " ";
