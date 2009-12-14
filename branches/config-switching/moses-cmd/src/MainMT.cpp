@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <sstream>
 #include <vector>
+#include <string> 
 
 #include <boost/thread/mutex.hpp>
 
@@ -40,10 +41,100 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ThreadPool.h"
 #include "Util.h"
 #include "mbr.h"
+#include "TypeDef.h"
 
 using namespace std;
 using namespace Moses;
 
+InputTag CheckTag(const InputType *line, string** cmd)
+{
+	stringstream stream;
+	string str, id_str;
+	stream << *line;
+	str = stream.str();
+
+	if ( str.find("<decoder ") == 0 )
+	{
+	  // remove last char due to the stream
+	  str = str.substr(0,(str.size()-1));
+	  *cmd = new string(str.c_str());
+	  VERBOSE(1, "detected a command: " << **cmd << endl);
+	  return Command;
+	} 
+	else
+	{
+	  return Source;
+	}
+}
+
+void ParseCommand(string* cmd, int* argc, vector<string>* argv)
+{
+	*argc=0;
+	argv->clear();
+	size_t len = 0;
+	cmd->erase(cmd->find_last_not_of(" ")+1);// strip
+
+        if (cmd->find("<decoder quit")!= string::npos)
+        {
+            (*argc)++;
+	    argv->push_back("quit");
+            return;
+        }
+
+	// <decoder addconfig="...">
+	size_t posStart = cmd->find("<decoder ") + 9;
+	size_t posEnd = cmd->find("=");
+
+	if ((len=(posEnd-posStart))<=0) { return; }
+	string commandType(cmd->substr(posStart, len));
+	if ((len=(cmd->size()-2-posEnd-2))<=0) { return; }
+	string commandArgs(cmd->substr(posEnd+2, len));
+
+	istringstream stream( commandArgs ) ;
+	int args_len = commandArgs.size();
+	int read_len = 0;
+	string item ;
+
+	(*argc)++;
+	argv->push_back(commandType);
+
+	while ( read_len < args_len){
+	  stream >> item;
+	  (*argc)++;
+	  read_len += (item.size()+1);
+	  argv->push_back(item);
+	}
+
+}
+
+int Addconfig(int argc, char* argv[])
+{
+	// load data structures
+	Parameter *parameter = new Parameter();
+	if (!parameter->LoadParam(argc, argv))
+	{
+		parameter->Explain();
+		delete parameter;
+		TRACE_ERR("parameters wrong! \n");
+		return EXIT_SUCCESS;
+	}
+
+	//const StaticData &staticData = StaticData::Instance();
+
+	// precheck and prepare static data
+	int id = StaticData::AddConfigStatic(parameter);
+	if (id==-1)
+	{
+		  TRACE_ERR("Add configuration wrong! \n");
+		  return EXIT_SUCCESS;
+	}
+	else
+	{
+		TRACE_ERR("------Add new configuration, id = "<< id << std::endl);
+	}
+
+	return EXIT_SUCCESS;
+}
 
 /**
   * Makes sure output goes in the correct order.
@@ -99,6 +190,7 @@ class TranslationTask : public Task {
 #if defined(BOOST_HAS_PTHREADS)
             TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << (int)pthread_self() << std::endl);
 #endif
+            std::cout<<"------getcfgId="<<m_source->GetCfgId()<<std::endl;
             const StaticData &staticData = StaticData::Instance();
             Sentence sentence(Input);
             Manager manager(*m_source,staticData.GetSearchAlgorithm());
@@ -144,7 +236,7 @@ class TranslationTask : public Task {
                 TrellisPathList nBestList;
                 ostringstream out;
                 manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-                OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), m_lineNumber);
+                OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,m_source->GetCfgId());
                 m_nbestCollector->Write(m_lineNumber, out.str());
             }
         }
@@ -164,6 +256,10 @@ int main(int argc, char** argv) {
     char** mosesargv = new char*[argc+2];
     int mosesargc = 0;
     int threadcount = 10;
+    string* cmd = new string("");
+    int arg_count;
+    vector<string> arguments;
+
     for (int i = 0; i < argc; ++i) {
         if (!strcmp(argv[i], "-threads")) {
             ++i;
@@ -225,6 +321,41 @@ int main(int argc, char** argv) {
     }
     
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+        // command is processed in this thread
+        if ( Command == CheckTag(source, &cmd) ) {
+            ParseCommand(cmd, &arg_count, &arguments);
+
+            char* args[arg_count];
+            for (int i=0; i<arg_count; i++)
+            { 
+                args[i] = (char*)arguments.at(i).c_str();	
+	    }
+	    VERBOSE(1, "going to ProcessCommand, arguments: "<< " ");
+	    for (int i=0; i<arg_count; i++)
+	    {	
+		VERBOSE(1,args[i] << " ");
+	    }
+	    VERBOSE(1,endl);
+
+	    if (string(args[0]).compare("quit")==0)
+	    {
+	        *cmd = "";
+                break;
+	    }
+	    else if (string(args[0]).compare("addconfig")==0)
+	    {
+	        Addconfig(arg_count, args);
+	        *cmd = "";
+                continue;
+	    }
+	    else
+	    {
+	        VERBOSE(1,"command not supported." << endl);
+	        *cmd = "";
+                continue;
+	    }
+        }
+
         TranslationTask* task = 
             new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get());
         pool.Submit(task);

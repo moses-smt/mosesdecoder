@@ -41,7 +41,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t tableLimit):
+                            , size_t tableLimit
+                            , ScoreIndexManager &scoreIndexManager):
                             m_numScoreComponent(numScoreComponent),
                             m_numInputScores(numInputScores),
                             m_input(input),
@@ -51,8 +52,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             m_tableLimit(tableLimit)
   {
     const StaticData& staticData = StaticData::Instance();
-    const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-    
+    //const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
+    scoreIndexManager.AddScoreProducer(this);
     
     //if we're using an in-memory phrase table, then load it now, otherwise wait
     if (!FileExists(filePath+".binphr.idx"))

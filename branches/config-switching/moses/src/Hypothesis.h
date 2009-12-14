@@ -114,7 +114,8 @@ public:
 
 	void PrintHypothesis() const;
   
-  const InputType& GetInput() const {return m_sourceInput;}
+	const InputType& GetInput() const {return m_sourceInput;}
+	int GetCfgId() const {return m_sourceInput.GetCfgId();}
 
 	/** return target phrase used to create this hypothesis */
 //	const Phrase &GetCurrTargetPhrase() const

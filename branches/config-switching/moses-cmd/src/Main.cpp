@@ -55,6 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordLattice.h"
 #include "TranslationAnalysis.h"
 #include "mbr.h"
+#include "TypeDef.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -68,22 +69,50 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
-bool CheckCommand(const InputType *line, string** cmd)
-{
 
+InputTag CheckTag(const InputType *line, string** cmd, int *id)
+{
+	int id_temp;
 	stringstream stream;
-	string str;
+	string str, id_str;
 	stream << *line;
 	str = stream.str();
+
 	if ( str.find("<decoder ") == 0 )
 	{
 	  // remove last char due to the stream
 	  str = str.substr(0,(str.size()-1));
 	  *cmd = new string(str.c_str());
 	  VERBOSE(1, "detected a command: " << **cmd << endl);
-	  return true;
+	  return Command;
 	} 
-	return false;
+	else if ( str.find("<use config ") == 0 )
+	{
+	  size_t pos = str.find(">");
+	  if (pos == string::npos)
+	  {
+	    VERBOSE(1, "detected config id tag, but error format." << endl);
+	    return InvalidTag;  // ignore the tag
+	  }
+	  id_str = str.substr(12,(pos-12));
+	  id_temp = Scan<int>(id_str);
+	  // check if this id is valid......
+	  if (id_temp<2 && id_temp>=0) 
+	  {
+	    *id = id_temp;
+	    VERBOSE(1, "detected the config id: " << id_str << " = "<<*id << endl);
+	    return ConfigId;
+	  }
+	  else
+	  {
+	    VERBOSE(1, "detected config id tag, but id exceeds the range." << endl);
+	    return InvalidTag;  // ignore the tag
+	  }
+	} 
+	else
+	{
+	  return Source;
+	}
 }
 
 bool CommandIsQuit(string* cmd) 
@@ -123,7 +152,7 @@ void ParseCommand(string* cmd, int* argc, vector<string>* argv)
 
 }
 
-int Config(int argc, char* argv[])
+int Reconfig(int argc, char* argv[])
 {
 	// load data structures
 	Parameter *parameter = new Parameter();
@@ -151,6 +180,50 @@ int Config(int argc, char* argv[])
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
 	IFVERBOSE(2) {
+	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager(0));
+	  TRACE_ERR("The global weight vector looks like this:");
+	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+	  TRACE_ERR("\n");
+	}
+	// every score must have a weight!  check that here:
+	if(weights.size() != staticData.GetScoreIndexManager(0).GetTotalNumberOfScores()) {
+	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager(0).GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
+	  return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int Addconfig(int argc, char* argv[])
+{
+	// load data structures
+	Parameter *parameter = new Parameter();
+	if (!parameter->LoadParam(argc, argv))
+	{
+		parameter->Explain();
+		delete parameter;
+		TRACE_ERR("parameters wrong! \n");
+		return EXIT_SUCCESS;
+	}
+
+	//const StaticData &staticData = StaticData::Instance();
+
+	// precheck and prepare static data
+	int id = StaticData::AddConfigStatic(parameter);
+	if (id==-1)
+	{
+		  TRACE_ERR("Add configuration wrong! \n");
+		  return EXIT_SUCCESS;
+	}
+	else
+	{
+		TRACE_ERR("------Add new configuration, id = "<< id << std::endl);
+	}
+
+	// comment them because currentId is not known until Readinput
+/*	// check on weights
+	vector<float> weights = staticData.GetAllWeights();
+	IFVERBOSE(2) {
 	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
 	  TRACE_ERR("The global weight vector looks like this:");
 	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
@@ -159,14 +232,16 @@ int Config(int argc, char* argv[])
 	// every score must have a weight!  check that here:
 	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
 	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-	  return EXIT_FAILURE;
+	  return EXIT_SUCCESS;//bo
 	}
-
+*/
 	return EXIT_SUCCESS;
 }
 
 int Translating(string** nextCmd)
 {
+	int config_id=0;
+	InputTag tag;
 	const StaticData &staticData = StaticData::Instance();
 
 	// set up read/writing class
@@ -174,6 +249,8 @@ int Translating(string** nextCmd)
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 	
+
+
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
@@ -184,11 +261,31 @@ int Translating(string** nextCmd)
 			ResetUserTime();
 
 		//if this source is a command, stop translation for this time.
-		if (CheckCommand(source, nextCmd))
+		tag = CheckTag(source, nextCmd, &config_id);
+		if (tag == Command)
 		{
 		  break;
 		}
-
+		else if (tag == ConfigId)
+		{
+		  // configuration id
+		  const_cast<ConfigurationsManager&>(staticData.GetConfigManager()).SetCurrentConfigId(config_id);
+		  continue;
+		}
+		else if (tag == InvalidTag)
+		{
+		  continue;
+		}	
+		std::cout<<"------getcfgId="<<source->GetCfgId()<<std::endl;
+const_cast<ConfigurationsManager&>(staticData.GetConfigManager()).SetCurrentConfigId(source->GetCfgId());
+	// move check here, temp!!!
+	vector<float> weights = staticData.GetAllWeights();
+	IFVERBOSE(2) {
+	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager(source->GetCfgId()));
+	  TRACE_ERR("The global weight vector looks like this:");
+	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+	  TRACE_ERR("\n");
+	}
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 
 		Manager manager(*source, staticData.GetSearchAlgorithm());
@@ -224,7 +321,7 @@ int Translating(string** nextCmd)
 			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					TrellisPathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
+					ioWrapper->OutputNBestList(nBestList, source->GetTranslationId(), source->GetCfgId());
 					//RemoveAllInColl(nBestList);
 
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
@@ -309,14 +406,14 @@ int main(int argc, char* argv[])
 	// check on weights
 	vector<float> weights = staticData.GetAllWeights();
 	IFVERBOSE(2) {
-	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
+	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager(0));
 	  TRACE_ERR("The global weight vector looks like this:");
 	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
 	  TRACE_ERR("\n");
 	}
 	// every score must have a weight!  check that here:
-	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
+	if(weights.size() != staticData.GetScoreIndexManager(0).GetTotalNumberOfScores()) {
+	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager(0).GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
 	  exit(EXIT_FAILURE);
 	}
 
@@ -346,9 +443,14 @@ int main(int argc, char* argv[])
 	  VERBOSE(1,endl);
 
 	  //if (string(args[0]).compare("#config")==0)
-	  if (string(args[0]).compare("config")==0)
+	  if (string(args[0]).compare("reconfig")==0)
 	  {
-	    res = Config(arg_count, args);
+	    res = Reconfig(arg_count, args);
+	    *cmd = "";
+	  }
+	  else if (string(args[0]).compare("addconfig")==0)
+	  {
+	    res = Addconfig(arg_count, args);
 	    *cmd = "";
 	  }
 	  else

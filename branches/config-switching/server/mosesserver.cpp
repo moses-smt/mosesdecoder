@@ -14,14 +14,14 @@
 using namespace Moses;
 using namespace std;
 
-class Config : public xmlrpc_c::method {
+class AddConfig : public xmlrpc_c::method {
 public:
-    Config() {
+    AddConfig() {
         // signature and help strings are documentation -- the client
         // can query this information with a system.methodSignature and
         // system.methodHelp RPC.
         this->_signature = "S:S";
-        this->_help = "Does new configuration";
+        this->_help = "Add a configuration";
     }
 
     typedef std::map<std::string, xmlrpc_c::value> params_t;
@@ -32,7 +32,7 @@ public:
         
         const params_t params = paramList.getStruct(0);
         paramList.verifyEnd(1);
-        params_t::const_iterator si = params.find("config");
+        params_t::const_iterator si = params.find("addconfig");
         if (si == params.end()) {
             throw xmlrpc_c::fault(
                 "Missing config command", 
@@ -41,7 +41,7 @@ public:
         string command(
             (xmlrpc_c::value_string(si->second)));
 
-        cerr << "Config command: " << command << endl;
+        cerr << "addconfig command: " << command << endl;
 
 	// does config here...
 	// parse command
@@ -62,19 +62,16 @@ public:
 		return;
 	}
 
-	// re-config
-	if (!StaticData::SetUpBeforeReconfigStatic(parameter)){
-		respond(1,retvalP);
+	int id = StaticData::AddConfigStatic(parameter);
+	if (id==-1)
+	{
+		respond(-1,retvalP);
 		return;
 	}
-	// if runs here, parameters should be ok, will crash only if table files are abnormal
-	// load static data
-	if (!StaticData::LoadDataStatic(parameter)) {
-		// cannot proceed
-		exit(1);
+	else
+	{
+		respond(id,retvalP);
 	}
-
-	respond(0,retvalP);
 
     }
 
@@ -82,10 +79,20 @@ public:
 	{
 		// responding result
         	map<string, xmlrpc_c::value> retData;
-        	pair<string, xmlrpc_c::value> 
-        	    text("result", xmlrpc_c::value_int(res));
-        	cerr << "Config finished, " << res <<  endl;
-        	retData.insert(text);
+		if (res<0)
+		{
+		  pair<string, xmlrpc_c::value> 
+        	  text("failed", xmlrpc_c::value_int(res));
+		  retData.insert(text);
+		}
+		else
+		{
+		  pair<string, xmlrpc_c::value> 
+        	  text("added config, id", xmlrpc_c::value_int(res));
+		  retData.insert(text);
+		}
+        	
+        	cerr << "AddConfig finished, res=" << res <<  endl;
         	*retvalP = xmlrpc_c::value_struct(retData);
 	}
 
@@ -246,9 +253,9 @@ int main(int argc, char** argv) {
 
     myRegistry.addMethod("translate", translator);
 
-    xmlrpc_c::methodPtr const config(new Config);
+    xmlrpc_c::methodPtr const addconfig(new AddConfig);
 
-    myRegistry.addMethod("config", config);
+    myRegistry.addMethod("addconfig", addconfig);
     
     xmlrpc_c::serverAbyss myAbyssServer(
         myRegistry,

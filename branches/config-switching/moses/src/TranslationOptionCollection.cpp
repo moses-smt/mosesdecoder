@@ -181,7 +181,7 @@ void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGr
 				if (numTransOpt == 0)
 				{
 					CreateTranslationOptionsForRange(decodeStepList
-																				, pos, pos, false);
+																				, pos, pos, false, m_source.GetCfgId());
 				}
 		}
 	}
@@ -393,7 +393,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++)
 			{
-				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);
+				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true, m_source.GetCfgId());
  			}
 		}
 	}
@@ -411,7 +411,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	CalcFutureScore();
 
 	// Cached lex reodering costs
-	CacheLexReordering();
+	CacheLexReordering(m_source.GetCfgId());
 }
 
 void TranslationOptionCollection::Sort()
@@ -444,7 +444,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 const DecodeGraph &decodeGraph
 																													 , size_t startPos
 																													 , size_t endPos
-																													 , bool adhereTableLimit)
+																													 , bool adhereTableLimit, int id)
 {
 	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 	{
@@ -458,7 +458,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		  const WordsRange wordsRange(startPos, endPos);
 		  sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 
-			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase);
+			const TranslationOptionList *transOptList = StaticData::Instance().FindTransOptListInCache(decodeGraph, *sourcePhrase, id);
 			// is phrase in cache?
 			if (transOptList != NULL) {
 				skipTransOptCreation = true;
@@ -528,7 +528,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				if (partTransOptList.size() > 0)
 				{
 					TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
-					StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);
+					StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList,id);
 				}
 			}
 
@@ -578,6 +578,7 @@ void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
 	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
+// std::cout<<translationOption->GetTargetPhrase()<<std::endl;
 }
 
 TO_STRING_BODY(TranslationOptionCollection);
@@ -611,9 +612,9 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 	return out;
 }
 
-void TranslationOptionCollection::CacheLexReordering()
+void TranslationOptionCollection::CacheLexReordering(int id)
 {
-	const std::vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetReorderModels();
+	const std::vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetReorderModels(id);
 
 	std::vector<LexicalReordering*>::const_iterator iterLexreordering;
 

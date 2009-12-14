@@ -106,7 +106,7 @@ protected:
 
 	//! implemented by inherited class, called by this class
 	virtual void ProcessUnknownWord(size_t sourcePos)=0;
-	void CacheLexReordering();
+	void CacheLexReordering(int id);
 
 public:
   virtual ~TranslationOptionCollection();
@@ -123,7 +123,7 @@ public:
 	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
 																			, size_t startPosition
 																			, size_t endPosition
-																			, bool adhereTableLimit);
+																			, bool adhereTableLimit, int id);
 																			
 	//!Check if this range has XML options
 	virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;

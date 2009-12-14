@@ -39,11 +39,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
+#include "ConfigurationsManager.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 //#include "UnknownWordHandler.h"
+
+#define MaxConfigsNum 5
 
 namespace Moses
 {
@@ -65,13 +68,14 @@ private:
 	static StaticData									s_instance;
 protected:	
 
+	ConfigurationsManager m_configurationsManager;
 	std::map<long,Phrase> m_constraints;
 	std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
 	std::vector<GenerationDictionary*>	m_generationDictionary;
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
-	ScoreIndexManager				m_scoreIndexManager;
+	ScoreIndexManager				m_scoreIndexManager[MaxConfigsNum];
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
@@ -148,12 +152,12 @@ protected:
 	size_t m_timeout_threshold; //! seconds after which time out is activated
 
 	bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
+	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache[MaxConfigsNum]; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
     //FIXME: Single lock for cache not most efficient. However using a 
     //reader-writer for LRU cache is tricky - how to record last used time? 
 #ifdef WITH_THREADS   
-    mutable boost::mutex m_transOptCacheMutex;
+    mutable boost::mutex m_transOptCacheMutex[MaxConfigsNum];
 #endif
 	bool m_isAlwaysCreateDirectTranslationOption;
 	//! constructor. only the 1 static variable can be created
@@ -174,16 +178,16 @@ protected:
 	/***
 	 * load all language models as specified in ini file
 	 */
-	bool LoadLanguageModels();
+	bool LoadLanguageModels(int id);
 	/***
 	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
 	 * (eg word-deletion, word-insertion tables)
 	 */
-	bool LoadPhraseTables();
+	bool LoadPhraseTables(int id);
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
-	bool LoadLexicalReorderingModel();
+	bool LoadLexicalReorderingModel(int id);
 	bool LoadGlobalLexicalModel();
     void ReduceTransOptCache() const;   
 	void ClearTransOptCache() const; 
@@ -223,7 +227,18 @@ public:
 		return s_instance.SetUpBeforeReconfig(parameter);
 	}
 	bool SetUpBeforeReconfig(Parameter *parameter); 
+
+	// add a func to add a new configuration
+	static int AddConfigStatic(Parameter *parameter)
+	{
+		return s_instance.AddConfig(parameter);
+	}
+	int AddConfig(Parameter *parameter);
 	
+	const ConfigurationsManager &GetConfigManager() const
+	{
+		return m_configurationsManager; 
+	}
 	/** load data into static instance. This function is required
 		* as LoadData() is not const
 		*/
@@ -290,9 +305,9 @@ public:
 	{ 
 		return m_maxPhraseLength;
 	}
-	const std::vector<LexicalReordering*> &GetReorderModels() const
+	const std::vector<LexicalReordering*> &GetReorderModels(int id) const
 	{
-		return m_reorderModels;
+		return m_configurationsManager.m_configurations[id]->m_reorders;
 	}
 	float GetWeightDistortion() const
 	{
@@ -355,13 +370,13 @@ public:
 		return m_translationOptionThreshold;
 	}
 	//! returns the total number of score components across all types, all factors
-	size_t GetTotalScoreComponents() const
-	{
-		return m_scoreIndexManager.GetTotalNumberOfScores();
+	size_t GetTotalScoreComponents(int id) const
+	{  //std::cout << "------Static::GetTotalScoreComponents()" << std::endl;
+		return m_scoreIndexManager[id].GetTotalNumberOfScores();
 	}
-	const ScoreIndexManager& GetScoreIndexManager() const
-	{
-		return m_scoreIndexManager;
+	const ScoreIndexManager& GetScoreIndexManager(int id) const
+	{ //std::cout << "------Static::GetScoreIndexManager()" << std::endl;
+		return m_scoreIndexManager[id];
 	}
 
 	size_t GetLMSize() const
@@ -449,14 +464,17 @@ public:
 	//! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	InputTypeEnum GetInputType() const {return m_inputType;}
-	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
+	SearchAlgorithm GetSearchAlgorithm() const 
+	{ // std::cout << "------Static::GetSearchAlgorithm()" << std::endl;
+		return m_configurationsManager.GetSearchAlgorithm();
+	}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
 	void CleanUpAfterSentenceProcessing() const;
 	
 	const std::vector<float>& GetAllWeights() const
-	{
-		return m_allWeights;
+	{  //std::cout << "------Static::GetAllWeights()" << std::endl;
+		return m_configurationsManager.GetAllWeights();
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
@@ -484,12 +502,15 @@ public:
 
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 
-	bool GetUseTransOptCache() const { return m_useTransOptCache; }
+	bool GetUseTransOptCache() const  
+	{ // std::cout << "------Static::GetUseTransOptCache()" << std::endl;
+		return m_configurationsManager.GetUseTransOptCache();
+	}
 
-	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
+	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList, int id) const;
 	
 
-	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, int id) const;
 };
 
 }

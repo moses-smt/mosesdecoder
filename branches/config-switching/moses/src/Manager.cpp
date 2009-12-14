@@ -260,7 +260,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
 
 			// lexicalised re-ordering
-			const std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
+			const std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels(hypo->GetCfgId());
 			std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
 			for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering)
 			{
@@ -446,7 +446,7 @@ void Manager::SerializeSearchGraphPB(
 	hg.set_is_sorted(false);
 	int num_feats = (*m_search->GetHypothesisStacks().back()->begin())->GetScoreBreakdown().size();
 	hg.set_num_features(num_feats);
-	StaticData::Instance().GetScoreIndexManager().SerializeFeatureNamesToPB(&hg);
+	StaticData::Instance().GetScoreIndexManager(m_source.GetCfgId()).SerializeFeatureNamesToPB(&hg);
 	Hypergraph_Node* goal = hg.add_nodes();  // idx=0 goal node must have idx 0
 	Hypergraph_Node* source = hg.add_nodes();  // idx=1
 	i2hgnode[-1] = 1; // source node
