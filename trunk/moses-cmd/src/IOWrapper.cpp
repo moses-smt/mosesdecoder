@@ -225,11 +225,11 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
-			{
-				const Factor *factor = mbrBestHypo[i];
-				if (i>0) cout << " ";
-				cout << factor->GetString();
-			}
+	{
+		const Factor *factor = mbrBestHypo[i];
+		if (i>0) cout << " ";
+			cout << factor->GetString();
+	}
 	cout << endl;
 }													 
 
@@ -259,7 +259,6 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 		VERBOSE(3,"Best path: ");
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);
-
 		if (!m_surpressSingleBestOutput)
 		{
 			if (StaticData::Instance().IsPathRecoveryEnabled()) {
@@ -458,10 +457,12 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 					out<< "-" << targetRange.GetEndPos();
 				}
 			}
-    }
-		
-				
-		
+    		}
+	
+                if (StaticData::Instance().IsPathRecoveryEnabled()) {
+                	out << "|||";
+                        OutputInput(out, edges[0]);
+                }
 				
 		out << endl;
 	}
