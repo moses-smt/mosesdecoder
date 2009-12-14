@@ -182,7 +182,9 @@ int main(int argc, char* argv[])
 		      manager.CalcNBest(nBestSize, nBestList,true);
 		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-		      std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+
+		      //std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+        	      const Hypothesis *mbrBestHypo = doMBR(nBestList)->GetEdges().at(0);
 		      ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
 					       staticData.GetReportSegmentation(),
 					       staticData.GetReportAllFactors());
