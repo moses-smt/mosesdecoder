@@ -187,6 +187,12 @@ int main(int argc, char* argv[])
 					       staticData.GetReportSegmentation(),
 					       staticData.GetReportAllFactors());
 		      IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
+		      if (!staticData.GetNBestFilePath().empty()){ 
+			//print the all nbest used for MBR (and not the amount passed through the parameter
+			VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+			ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
+                        IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+		      }
 		    }
 		}
 
