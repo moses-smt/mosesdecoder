@@ -27,7 +27,7 @@ $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
 $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-@_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
+@_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
 $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -61,6 +61,8 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
+			   'mgiza' => \$_MGIZA, # multi-thread 
+			   'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
 		       'hmm-align' => \$_HMM_ALIGN,
 		       'debug' => \$debug,
 		       'dont-zip' => \$_DONT_ZIP,
@@ -110,7 +112,21 @@ $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # supporting binaries from other packages
-my $GIZA = "$BINDIR/GIZA++";
+my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
+my $GIZA;
+if(!defined $_MGIZA ){
+	$GIZA = "$BINDIR/GIZA++";
+	print STDERR "Using single-thread GIZA\n";
+}
+else {
+    $GIZA = "$BINDIR/mgizapp";
+	print STDERR "Using multi-thread GIZA\n";	
+    if (!defined($_MGIZA_CPUS)) {
+        $_MGIZA_CPUS=4;
+    }
+    die("ERROR: Cannot find merge_alignment.py") unless (-x $MGIZA_MERGE_ALIGN);
+}
+
 my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
 my $MKCLS = "$BINDIR/mkcls";
 
@@ -697,6 +713,9 @@ sub run_single_giza {
 	 CoocurrenceFile => "$dir/$f-$e.cooc",
 	 o => "$dir/$f-$e");
 
+	# 5 Giza threads
+	if (defined $_MGIZA){ $GizaDefaultOptions{"ncpus"} = $_MGIZA_CPUS; }
+
     if ($_HMM_ALIGN) {
        $GizaDefaultOptions{m3} = 0;
        $GizaDefaultOptions{m4} = 0;
@@ -731,6 +750,14 @@ sub run_single_giza {
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
+ 
+	if (defined $_MGIZA){
+		print STDERR "Merging $___GIZA_EXTENSION.part\* tables\n";
+		safesystem("$MGIZA_MERGE_ALIGN  $dir/$f-$e.$___GIZA_EXTENSION.part*>$dir/$f-$e.$___GIZA_EXTENSION");
+		#system("rm -f $dir/$f-$e/*.part*");
+	}
+
+
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
