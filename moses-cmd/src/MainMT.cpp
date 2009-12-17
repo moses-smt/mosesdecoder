@@ -116,20 +116,9 @@ class TranslationTask : public Task {
             if (m_outputCollector) {
                 ostringstream out;
                 ostringstream debug;
+                const Hypothesis* bestHypo = NULL;
                 if (!staticData.UseMBR()) {
-                    const Hypothesis* hypo = manager.GetBestHypothesis();
-                    if (hypo) {
-                        OutputSurface(
-                                out,
-                                hypo,
-                                staticData.GetOutputFactorOrder(), 
-                                staticData.GetReportSegmentation(),
-                                staticData.GetReportAllFactors());
-                        IFVERBOSE(1) {
-                          debug << "BEST TRANSLATION: " << *hypo << endl;
-                        }
-                    }
-                    out << endl;
+                    bestHypo = manager.GetBestHypothesis();
                 } else {
                     //MBR decoding
                     size_t nBestSize = staticData.GetMBRSize();
@@ -141,16 +130,23 @@ class TranslationTask : public Task {
                         manager.CalcNBest(nBestSize, nBestList,true);
                         VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
                         IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-                        vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-                        for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
-                            const Factor *factor = mbrBestHypo[i];
-                            if (i>0) out << " ";
-                            out << factor->GetString();
-                        }
-                        out << endl;
+                        bestHypo = doMBR(nBestList)->GetEdges().at(0);
                         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
                     }
                 }
+                if (bestHypo) {
+                    OutputSurface(
+                            out,
+                            bestHypo,
+                            staticData.GetOutputFactorOrder(), 
+                            staticData.GetReportSegmentation(),
+                            staticData.GetReportAllFactors());
+                    IFVERBOSE(1) {
+                      debug << "BEST TRANSLATION: " << *bestHypo << endl;
+                    }
+                }
+                out << endl;
+
                 m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
             }
             if (m_nbestCollector) {
