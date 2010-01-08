@@ -28,6 +28,7 @@ $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
 @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
+$_FINAL_ALIGNMENT_MODEL,
 $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -64,6 +65,7 @@ $_HELP = 1
 			   'mgiza' => \$_MGIZA, # multi-thread 
 			   'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
 		       'hmm-align' => \$_HMM_ALIGN,
+		       'final-alignment-model=s' => \$_FINAL_ALIGNMENT_MODEL, # use word alignment model 1/2/hmm/3/4/5 as final (default is 4); value 'hmm' equivalent to the --hmm-align switch
 		       'debug' => \$debug,
 		       'dont-zip' => \$_DONT_ZIP,
 		       'parts=i' => \$_PARTS,
@@ -152,8 +154,18 @@ $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
 
+# check the final-alignment-model switch
+my $___FINAL_ALIGNMENT_MODEL = undef;
+$___FINAL_ALIGNMENT_MODEL = 'hmm' if $_HMM_ALIGN;
+$___FINAL_ALIGNMENT_MODEL = $_FINAL_ALIGNMENT_MODEL if $_FINAL_ALIGNMENT_MODEL;
+
+die("ERROR: --final-alignment-model can be set to '1', '2', 'hmm', '3', '4' or '5'")
+	unless (!defined($___FINAL_ALIGNMENT_MODEL) or $___FINAL_ALIGNMENT_MODEL =~ /^(1|2|hmm|3|4|5)$/);
+
 my $___GIZA_EXTENSION = 'A3.final';
-$___GIZA_EXTENSION = 'Ahmm.5' if $_HMM_ALIGN;
+$___GIZA_EXTENSION = 'A1.5' if $___FINAL_ALIGNMENT_MODEL eq '1';
+$___GIZA_EXTENSION = 'A2.5' if $___FINAL_ALIGNMENT_MODEL eq '2';
+$___GIZA_EXTENSION = 'Ahmm.5' if $___FINAL_ALIGNMENT_MODEL eq 'hmm';
 $___GIZA_EXTENSION = $_GIZA_EXTENSION if $_GIZA_EXTENSION;
 
 my $___CORPUS_COMPRESSION = '';
@@ -724,6 +736,22 @@ sub run_single_giza {
        $GizaDefaultOptions{nodumps} = 0;
     }
 
+    if ($___FINAL_ALIGNMENT_MODEL) {
+        $GizaDefaultOptions{nodumps} =               ($___FINAL_ALIGNMENT_MODEL =~ /^[345]$/)? 1: 0;
+        $GizaDefaultOptions{model345dumpfrequency} = 0;
+        
+        $GizaDefaultOptions{model1dumpfrequency} =   ($___FINAL_ALIGNMENT_MODEL eq '1')? 5: 0;
+        
+        $GizaDefaultOptions{m2} =                    ($___FINAL_ALIGNMENT_MODEL eq '2')? 5: 0;
+        $GizaDefaultOptions{model2dumpfrequency} =   ($___FINAL_ALIGNMENT_MODEL eq '2')? 5: 0;
+        
+        $GizaDefaultOptions{hmmiterations} =         ($___FINAL_ALIGNMENT_MODEL =~ /^(hmm|[345])$/)? 5: 0;
+        $GizaDefaultOptions{hmmdumpfrequency} =      ($___FINAL_ALIGNMENT_MODEL eq 'hmm')? 5: 0;
+        
+        $GizaDefaultOptions{m3} =                    ($___FINAL_ALIGNMENT_MODEL =~ /^[345]$/)? 3: 0;
+        $GizaDefaultOptions{m4} =                    ($___FINAL_ALIGNMENT_MODEL =~ /^[45]$/)? 3: 0;
+        $GizaDefaultOptions{m5} =                    ($___FINAL_ALIGNMENT_MODEL eq '5')? 3: 0;
+    }
 
     if ($___GIZA_OPTION) {
 	foreach (split(/[ ,]+/,$___GIZA_OPTION)) {
