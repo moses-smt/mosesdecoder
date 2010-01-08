@@ -34,14 +34,14 @@ Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start)
   assert(start.size()==Pd);
   Point::dim=i2O.size();
   Point::optindices=i2O;
-  if (Point::pdim<Point::dim){
+  if (Point::pdim>Point::dim){
     for (unsigned int i=0;i<Point::pdim;i++){
-      unsigned int j;
-      for(j=0;j<Point::dim;j++)
-	    if (i==i2O[j])
-	       break;
-      if(j==Point::dim)//the index i wasnt found on optindices, it is a fixed index, we use the valu of hte start vector
-	    Point::fixedweights[i]=start[i];
+      unsigned int j = 0;
+      while (j<Point::dim && i!=i2O[j])
+	j++;
+
+      if (j==Point::dim)//the index i wasnt found on optindices, it is a fixed index, we use the value of the start vector
+        Point::fixedweights[i]=start[i];
     }
   }
 };
