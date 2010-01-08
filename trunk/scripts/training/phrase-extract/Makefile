@@ -1,5 +1,5 @@
 
-all: extract score
+all: extract score statistics
 
 clean: 
 	rm -f *.o
@@ -13,3 +13,5 @@ extract: tables-core.o extract.o
 score: tables-core.o AlignmentPhrase.o score.o
 	$(CXX) tables-core.o AlignmentPhrase.o score.o -o score
 
+statistics: tables-core.o AlignmentPhrase.o statistics.o
+	$(CXX) tables-core.o AlignmentPhrase.o statistics.o -o statistics
