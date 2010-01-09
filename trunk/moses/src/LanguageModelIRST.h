@@ -45,7 +45,6 @@ protected:
 	std::vector<int> m_lmIdLookup;
 	lmtable* m_lmtb;
 	ngram* m_lmtb_ng;
-  char *m_filenames;
 	
 	int	m_unknownId;
 	int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with

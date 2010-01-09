@@ -412,8 +412,6 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
 
 StaticData::~StaticData()
 {
-	delete m_parameter;
-
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_languageModel);
