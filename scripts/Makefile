@@ -27,8 +27,9 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 all: compile
 
 SUBDIRS=cmert-0.5 phrase-extract symal mbr
+SUBDIRS_CLEAN=$(SUBDIRS) memscore
 
-compile:
+compile: compile-memscore
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C training/$$subdir || exit 1; \
@@ -37,9 +38,14 @@ compile:
 	done
 	## All files that need compilation were compiled
 
+compile-memscore:
+	# Building memscore may fail e.g. if boost is not available.
+	# We ignore this because traditional scoring will still work and memscore isn't used by default.
+	(cd training/memscore; ./configure && $(MAKE) || echo "WARNING: Building memscore failed."; exit 0)
+
 clean:
 	pwd=`pwd`; \
-	for subdir in $(SUBDIRS); do \
+	for subdir in $(SUBDIRS_CLEAN); do \
 	  $(MAKE) -C training/$$subdir clean || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
