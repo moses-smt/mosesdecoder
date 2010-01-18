@@ -139,11 +139,11 @@ int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRa
 		return 0;
 	} else {
 		//TRACE_ERR("returning reverse distance from "<< (prev.GetEndPos()+1) << " to " << (current.GetStartPos()+1) << " which is " << (distances[prev.GetEndPos()+1][current.GetStartPos()+1] - 1) <<"\n");
-		result = distances[prev.GetEndPos() + 1][current.GetStartPos()] - 1;
+		result = distances[prev.GetEndPos() + 1][current.GetStartPos() + 1] - 1;
 		if (result < 0 || result > 99999) {
 			TRACE_ERR("prev: " << prev << "\n current: " << current << "\n");
 
-			TRACE_ERR("C: got a weird distance from "<< prev.GetEndPos()+1 << " to " << current.GetStartPos() << " of " << result << "\n");
+			TRACE_ERR("C: got a weird distance from "<< prev.GetEndPos()+1 << " to " << current.GetStartPos()+1 << " of " << result << "\n");
 		}
 	}
 	return result;
