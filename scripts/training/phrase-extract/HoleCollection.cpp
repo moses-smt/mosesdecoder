@@ -6,8 +6,10 @@
  *  Copyright 2010 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <algorithm>
 #include "HoleCollection.h"
+
+using namespace std;
 
 void HoleCollection::SortSourceHoles()
 {
