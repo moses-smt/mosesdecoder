@@ -9,6 +9,7 @@
  *
  */
 #include <list>
+#include <cassert>
 
 class Hole
 	{
