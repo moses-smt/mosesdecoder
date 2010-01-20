@@ -4,6 +4,7 @@
 #include "ChartTranslationOptionCollection.h"
 #include "ChartTranslationOption.h"
 #include "ChartCellCollection.h"
+#include "Cube.h"
 #include "QueueEntry.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/Util.h"
@@ -57,6 +58,8 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 {
 	const StaticData &staticData = StaticData::Instance();
 
+	Cube cube;
+
 	// add all trans opt into queue. using only 1st child node.
 	TranslationOptionList::const_iterator iterList;
 	for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList)
@@ -67,7 +70,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells, isOK);
 
 		if (isOK)
-			AddQueueEntry(queueEntry);
+			cube.Add(queueEntry);
 		else
 			delete queueEntry;
 	}
@@ -75,9 +78,9 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	// pluck things out of queue and add to hypo collection
 	const size_t popLimit = staticData.GetCubePruningPopLimit();
 
-	for (size_t numPops = 0; numPops < popLimit && !m_queueUnique.IsEmpty(); ++numPops)
+	for (size_t numPops = 0; numPops < popLimit && !cube.IsEmpty(); ++numPops)
 	{
-		QueueEntry *queueEntry = m_queueUnique.Pop();
+		QueueEntry *queueEntry = cube.Pop();
 		
 		queueEntry->GetTranslationOption().GetTotalScore();
 		Hypothesis *hypo = new Hypothesis(*queueEntry);
@@ -87,15 +90,9 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		
 		AddHypothesis(hypo);
 
-		ExpandQueueEntry(*queueEntry);
+		// Expand queue entry
+	    queueEntry->CreateDeviants(cube);
 	}
-
-	// empty queue
-	while (!m_queueUnique.IsEmpty())
-	{
-		QueueEntry *queueEntry = m_queueUnique.Pop();
-	}
-
 }
 
 void ChartCell::SortHypotheses()
@@ -132,16 +129,6 @@ const Hypothesis *ChartCell::GetBestHypothesis() const
 	}
 	
 	return ret;
-}
-
-void ChartCell::AddQueueEntry(QueueEntry *queueEntry)
-{
-	bool inserted = m_queueUnique.Add(queueEntry);
-}
-
-void ChartCell::ExpandQueueEntry(const QueueEntry &queueEntry)
-{
-	queueEntry.CreateDeviants(*this);
 }
 
 bool ChartCell::HeadwordExists(const Moses::Word &headWord) const

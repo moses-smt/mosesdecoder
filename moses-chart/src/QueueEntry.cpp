@@ -5,6 +5,7 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
+#include "Cube.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/ChartRule.h"
 #include "../../moses/src/Util.h"
@@ -84,10 +85,8 @@ QueueEntry::~QueueEntry()
 	//Moses::RemoveAllInColl(m_childEntries);
 }
 
-void QueueEntry::CreateDeviants(ChartCell &currCell) const
+void QueueEntry::CreateDeviants(Cube &cube) const
 {
-	//float threshold = currCell.GetThreshold();
-
 	for (size_t ind = 0; ind < m_childEntries.size(); ind++)
 	{
 		const ChildEntry &childEntry = m_childEntries[ind];
@@ -95,19 +94,7 @@ void QueueEntry::CreateDeviants(ChartCell &currCell) const
 		if (childEntry.HasMoreHypo())
 		{
 			QueueEntry *newEntry = new QueueEntry(*this, ind);
-			currCell.AddQueueEntry(newEntry);
-			
-			/*
-			if (newEntry->m_combinedScore > threshold)
-			{
-				currCell.AddQueueEntry(newEntry);
-			}
-			else
-			{
-				delete newEntry;
-			}
-			*/
-			
+			cube.Add(newEntry);
 		}
 	}
 }

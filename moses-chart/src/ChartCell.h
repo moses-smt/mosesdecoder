@@ -10,7 +10,6 @@
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
 #include "QueueEntry.h"
-#include "Cube.h"
 
 namespace MosesChart
 {
@@ -30,11 +29,8 @@ protected:
 	std::vector<Moses::Word> m_headWords;
 
 	Moses::WordsRange m_coverage;
-	Cube m_queueUnique;
 
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
-
-	void ExpandQueueEntry(const QueueEntry &queueEntry);
 
 public:
 	ChartCell(size_t startPos, size_t endPos);
@@ -43,7 +39,6 @@ public:
 											,const ChartCellCollection &allChartCells);
 
 	const HypoList &GetSortedHypotheses(const Moses::Word &headWord) const;
-	void AddQueueEntry(QueueEntry *queueEntry);
 	bool AddHypothesis(Hypothesis *hypo);
 
 	void SortHypotheses();
