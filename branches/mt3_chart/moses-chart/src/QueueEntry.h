@@ -25,6 +25,7 @@ class TranslationOption;
 class ChartCell;
 class ChartCellCollection;
 class QueueEntry;
+class Cube;
 
 typedef std::vector<const Hypothesis*> HypoList;
 
@@ -95,7 +96,7 @@ public:
 	float GetCombinedScore() const
 	{ return m_combinedScore; }
 
-	void CreateDeviants(ChartCell &currCell) const;
+	void CreateDeviants(Cube &) const;
 
 	bool operator<(const QueueEntry &compare) const;
 	

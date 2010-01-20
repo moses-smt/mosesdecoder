@@ -50,6 +50,8 @@ public:
 
 	QueueEntry *Pop();
 	bool Add(QueueEntry *queueEntry);
+
+	void clear();
 };
 
 
