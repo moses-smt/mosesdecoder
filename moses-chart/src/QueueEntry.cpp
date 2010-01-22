@@ -63,20 +63,10 @@ bool QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, cons
 
 QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
 :m_transOpt(copy.m_transOpt)
+,m_childEntries(copy.m_childEntries)
 {
-	// deep copy of child entries
-	//m_childEntries(copy.m_childEntries)
-	std::vector<ChildEntry>::const_iterator iter;
-	for (iter = copy.m_childEntries.begin(); iter != copy.m_childEntries.end(); ++iter)
-	{
-		const ChildEntry &origEntry = *iter;
-		ChildEntry newEntry(origEntry);
-		m_childEntries.push_back(newEntry);
-	}
-
 	ChildEntry &childEntry = m_childEntries[childEntryIncr];
 	childEntry.IncrementPos();
-
 	CalcScore();
 }
 

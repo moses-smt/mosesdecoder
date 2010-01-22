@@ -234,21 +234,14 @@ void HypothesisCollection::PruneToSize()
 
 void HypothesisCollection::SortHypotheses()
 {
-	if (m_hypos.size() == 0)
-	{
-	}
-	else
+	assert(m_hyposOrdered.empty());
+	if (!m_hypos.empty())
 	{
 		// done everything for this cell. 
 		// sort
 		// put into vec
-		HCType::iterator iter;
-		for (iter = m_hypos.begin(); iter != m_hypos.end(); ++iter)
-		{
-			const Hypothesis *hypo = *iter;
-			m_hyposOrdered.push_back(hypo);
-		}
-
+        m_hyposOrdered.reserve(m_hypos.size());
+		std::copy(m_hypos.begin(), m_hypos.end(), back_inserter(m_hyposOrdered));
 		std::sort(m_hyposOrdered.begin(), m_hyposOrdered.end(), ChartHypothesisScoreOrderer());
 	}
 }

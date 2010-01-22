@@ -54,6 +54,7 @@ public:
 
 	void Sort();
 
+	void Reserve(CollType::size_type n) { m_coll.reserve(n); }
 };
 
 }
