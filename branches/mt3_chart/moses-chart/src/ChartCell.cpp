@@ -98,6 +98,8 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 void ChartCell::SortHypotheses()
 {
 	// sort each mini cells & fill up target lhs list
+	assert(m_headWords.empty());
+	m_headWords.reserve(m_hypoColl.size());
 	std::map<Moses::Word, HypothesisCollection>::iterator iter;
 	for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter)
 	{

@@ -37,6 +37,8 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry)
 	m_numTargetTerminals = m_targetPhrase.GetNumTerminals();
 
 	const std::vector<ChildEntry> &childEntries = queueEntry.GetChildEntries();
+	assert(m_prevHypos.empty());
+	m_prevHypos.reserve(childEntries.size());
 	vector<ChildEntry>::const_iterator iter;
 	for (iter = childEntries.begin(); iter != childEntries.end(); ++iter)
 	{

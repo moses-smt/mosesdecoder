@@ -22,13 +22,13 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& source
 :m_source(source)
 ,m_decodeGraphList(decodeGraphList)
 ,m_hypoStackColl(hypoStackColl)
+,m_collection(source.GetSize())
 {
 	// create 2-d vector
 	size_t size = source.GetSize();
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
 	{
-		m_collection.push_back( vector< TranslationOptionList >() );
-
+		m_collection[startPos].reserve(size-startPos);
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
 			m_collection[startPos].push_back( TranslationOptionList(WordsRange(startPos, endPos)) );
@@ -129,6 +129,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	assert(chartRuleCollection != NULL);
 	//cerr << "chartRuleCollection size=" << chartRuleCollection->GetSize();
 	
+	translationOptionList.Reserve(translationOptionList.GetSize()+chartRuleCollection->GetSize());
 	ChartRuleCollection::const_iterator iterTargetPhrase;
 	for (iterTargetPhrase = chartRuleCollection->begin(); iterTargetPhrase != chartRuleCollection->end(); ++iterTargetPhrase)
 	{

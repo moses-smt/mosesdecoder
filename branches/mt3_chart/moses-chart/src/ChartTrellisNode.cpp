@@ -13,6 +13,7 @@ TrellisNode::TrellisNode(const Hypothesis *hypo)
 {
 	const std::vector<const Hypothesis*> &prevHypos = hypo->GetPrevHypos();
 
+	m_edge.reserve(prevHypos.size());
 	for (size_t ind = 0; ind < prevHypos.size(); ++ind)
 	{
 		const Hypothesis *prevHypo = prevHypos[ind];
@@ -46,6 +47,8 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
 		// follow prev hypos back to beginning
 		const std::vector<const Hypothesis*> &prevHypos = replacementHypo.GetPrevHypos();
 		vector<const Hypothesis*>::const_iterator iter;
+		assert(m_edge.empty());
+		m_edge.reserve(prevHypos.size());
 		for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)
 		{
 			const Hypothesis *prevHypo = *iter;
@@ -58,6 +61,8 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
 	{ // not the node we're looking for. Copy as-is and continue finding node
 		m_hypo = &origNode.GetHypothesis();
 		NodeChildren::const_iterator iter;
+		assert(m_edge.empty());
+		m_edge.reserve(origNode.m_edge.size());
 		for (iter = origNode.m_edge.begin(); iter != origNode.m_edge.end(); ++iter)
 		{
 			const TrellisNode &prevNode = **iter;
