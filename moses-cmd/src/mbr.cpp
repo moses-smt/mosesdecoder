@@ -111,14 +111,14 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList){
   {
     const TrellisPath &path = **iter;
     float score = StaticData::Instance().GetMBRScale()
-      * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights());
+      * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights(0));
     if (maxScore < score) maxScore = score;
   }
   
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
   {
     const TrellisPath &path = **iter;
-    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights()) - maxScore);
+    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights(0)) - maxScore);
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
 

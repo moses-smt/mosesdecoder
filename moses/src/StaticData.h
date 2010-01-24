@@ -189,8 +189,7 @@ protected:
 	//! load decoding steps
 	bool LoadLexicalReorderingModel(int id);
 	bool LoadGlobalLexicalModel();
-    void ReduceTransOptCache() const;   
-	void ClearTransOptCache() const; 
+    void ReduceTransOptCache(int id) const;   
 
 	class Configurations
 	{
@@ -220,13 +219,6 @@ public:
 	#ifdef WIN32
 	static void Reset() { s_instance = StaticData(); }
 	#endif
-	
-	// add a func to reset s_instance, but not all- tables may mentain
-	static bool SetUpBeforeReconfigStatic(Parameter *parameter)
-	{
-		return s_instance.SetUpBeforeReconfig(parameter);
-	}
-	bool SetUpBeforeReconfig(Parameter *parameter); 
 
 	// add a func to add a new configuration
 	static int AddConfigStatic(Parameter *parameter)
@@ -464,17 +456,17 @@ public:
 	//! Sets the global score vector weights for a given ScoreProducer.
 	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	InputTypeEnum GetInputType() const {return m_inputType;}
-	SearchAlgorithm GetSearchAlgorithm() const 
-	{ // std::cout << "------Static::GetSearchAlgorithm()" << std::endl;
-		return m_configurationsManager.GetSearchAlgorithm();
+	SearchAlgorithm GetSearchAlgorithm(int id) const 
+	{
+		return m_configurationsManager.GetSearchAlgorithm(id);
 	}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
 	void CleanUpAfterSentenceProcessing() const;
 	
-	const std::vector<float>& GetAllWeights() const
-	{  //std::cout << "------Static::GetAllWeights()" << std::endl;
-		return m_configurationsManager.GetAllWeights();
+	const std::vector<float>& GetAllWeights(int id) const
+	{
+		return m_configurationsManager.GetAllWeights(id);
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
@@ -502,15 +494,20 @@ public:
 
 	XmlInputType GetXmlInputType() const { return m_xmlInputType; }
 
-	bool GetUseTransOptCache() const  
-	{ // std::cout << "------Static::GetUseTransOptCache()" << std::endl;
-		return m_configurationsManager.GetUseTransOptCache();
+	bool GetUseTransOptCache(int id) const  
+	{ 
+		return m_configurationsManager.GetUseTransOptCache(id);
 	}
 
 	void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList, int id) const;
 	
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, int id) const;
+
+	bool IsValidId(int id) const  
+	{ 
+		return m_configurationsManager.IsValidId(id);
+	}
 };
 
 }

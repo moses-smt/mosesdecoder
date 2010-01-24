@@ -88,135 +88,15 @@ StaticData::StaticData()
 	Phrase::InitializeMemPool();
 }
 
-bool StaticData::SetUpBeforeReconfig(Parameter *parameter)
-{
-	m_parameter = parameter;
-
-	// check if parameters are valid
-	// if not, don't reset and keep the old config
-	// check n-best-list
-	if (m_parameter->GetParam("n-best-list").size() == 1) {
-	  UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
-	  return false;
-	}
-	// check output-search-graph and output-search-graph-pb
-	if (m_parameter->GetParam("output-search-graph").size() > 0)
-	{
-	  if (m_parameter->GetParam("output-search-graph").size() != 1) {
-	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
-	    return false;
-	  }	    
-	}
-#ifdef HAVE_PROTOBUF
-	if (m_parameter->GetParam("output-search-graph-pb").size() > 0)
-	{
-	  if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
-	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
-	    return false;
-	  }	    
-	}
-
-#endif
-	// check input-factors
-	const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
-	if(inputFactorVector.size()==0)
-	{
-		UserMessage::Add(string("no input factor specified in config file"));
-		return false;
-	}
-	// check stack-diversity
-	int inputType = 0;
-	if(m_parameter->GetParam("inputtype").size()) 
-		inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
-	int maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
-		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
-		: -1;
-	if (m_parameter->GetParam("stack-diversity").size() > 0) {
-		if (maxDistortion > 15) {
-			UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
-			return false;
-		}
-		if (inputType == WordLatticeInput) {
-			UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
-			return false;
-		}
-	}
-	// check xml-input
-	if (m_parameter->GetParam("xml-input").size() > 0)
-	{
-		if ( (m_parameter->GetParam("xml-input")[0]!="exclusive") &&
-		     (m_parameter->GetParam("xml-input")[0]!="inclusive") &&
-		     (m_parameter->GetParam("xml-input")[0]!="ignore") &&
-		     (m_parameter->GetParam("xml-input")[0]!="pass-through") )
-		{
-		  UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
-		  return false;
-		}
-	}
-	// check weight-file
-	if (m_parameter->GetParam("weight-file").size() > 0) {
-		if (m_parameter->GetParam("weight-file").size() != 1) {
-			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
-			return false;
-		}
-	}
-
-	// reset 
-	m_isAlwaysCreateDirectTranslationOption = false;
-	m_sourceStartPosMattersForRecombination = false;
-	m_inputType = SentenceInput;
-	m_numInputScores = 0;
-	m_factorDelimiter = "|";
-	m_isDetailedTranslationReportingEnabled=false;
-	m_onlyDistinctNBest=false;
-	m_computeLMBackoffStats=false;
-	m_numLinkParams=1;
-	m_maxFactorIdx[0] = 0;
-	m_maxFactorIdx[1] = 0;
-	m_nBestFilePath = "";
-	m_constraintFileName = "";
-
-	m_inputFactorOrder.clear(); m_outputFactorOrder.clear();
-	m_constraints.clear();
-	m_allWeights.clear();
-
-	
-	RemoveAllInColl(m_generationDictionary);
-	RemoveAllInColl(m_globalLexicalModels);
-	RemoveAllInColl(m_reorderModels);
-	RemoveAllInColl(m_phraseDictionary);
-
-	const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
-
-	if (m_configs.switchLMs(lmVector))
-	{
-		RemoveAllInColl(m_languageModel);
-		m_fLMsLoaded = false;
-		m_configs.updateLMs(lmVector);
-	}
-
-	ClearTransOptCache();
-
-	if (m_distortionScoreProducer)//to be cared
-	{
-		m_distortionScoreProducer->ResetScoreBookkeepingID();
-	}
-	else 
-	{
-		TRACE_ERR("------ScoreBookkeepingID not reset!!!\n");
-	}
-	// small score producers
-	delete m_distortionScoreProducer;
-	delete m_wpProducer;
-	delete m_unknownWordPenaltyProducer;
-
-	m_scoreIndexManager[0].Reset();
-	return true;
-}
-
-
 int StaticData::AddConfig(Parameter *parameter)
 {
+	int newId = m_configurationsManager.m_configurations.size();
+	if (newId >= MaxConfigsNum)
+	{
+	  TRACE_ERR("------exceed maximum configuration number!!!\n");
+	  return -1;
+	}
+
 	m_parameter = parameter;
 
 	// check parameter!!! valid? already loaded? return -1;............
@@ -228,15 +108,6 @@ int StaticData::AddConfig(Parameter *parameter)
 	  TRACE_ERR("------donot support input type other than SentenceInput for multiple configs!!!\n");
 	  return -1;
 	}
-
-
-	int newId = m_configurationsManager.m_configurations.size();
-	if (newId >4)
-	{
-	  TRACE_ERR("------exceed maximum configuration number!!!\n");
-	  return -1;
-	}
-
 	
 	if (m_inputType == SentenceInput)
 	{
@@ -302,7 +173,6 @@ int StaticData::AddConfig(Parameter *parameter)
 
 	// build a new configuration
 	Configuration *newConfig = new Configuration();
-	cout << "newConfig sizes: "<< newConfig->ttableFiles.size()<< " " <<newConfig->m_pDs.size()<<endl;
 	m_configurationsManager.m_configurations.push_back(newConfig);
 	//int startPos = m_phraseDictionary.size();
 	if (!LoadLexicalReorderingModel(newId)) 
@@ -325,8 +195,6 @@ int StaticData::AddConfig(Parameter *parameter)
 	}
 
 	m_scoreIndexManager[newId].InitFeatureNames();
-
-	cout << "newConfig->m_pDs size = "<<newConfig->m_pDs.size()<<endl;
 
 	newConfig->m_weights = m_allWeights;
 	newConfig->m_searchAlgorithm = m_searchAlgorithm;
@@ -1381,30 +1249,17 @@ const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGra
 	return iter->second.first;
 }
 
-void StaticData::ClearTransOptCache() const
+void StaticData::ReduceTransOptCache(int id) const
 {
-	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-	iter = m_transOptCache[m_configurationsManager.currentConfigId].begin();
-	while( iter != m_transOptCache[m_configurationsManager.currentConfigId].end() )
-	{
-		std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
-		delete iterRemove->second.first;
-		m_transOptCache[m_configurationsManager.currentConfigId].erase(iterRemove);
-
-	}
-
-}
-void StaticData::ReduceTransOptCache() const
-{
-	size_t maxSize = m_configurationsManager.m_configurations[m_configurationsManager.currentConfigId]->m_transOptCacheMaxSize;
-	if (m_transOptCache[m_configurationsManager.currentConfigId].size() <=maxSize ) return; // not full
+	size_t maxSize = m_configurationsManager.m_configurations[id]->m_transOptCacheMaxSize;
+	if (m_transOptCache[id].size() <=maxSize ) return; // not full
 	clock_t t = clock();
 	
 	// find cutoff for last used time
 	priority_queue< clock_t > lastUsedTimes;
 	std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-	iter = m_transOptCache[m_configurationsManager.currentConfigId].begin();
-	while( iter != m_transOptCache[m_configurationsManager.currentConfigId].end() )
+	iter = m_transOptCache[id].begin();
+	while( iter != m_transOptCache[id].end() )
 	{
 		lastUsedTimes.push( iter->second.second );
 		iter++;
@@ -1414,14 +1269,14 @@ void StaticData::ReduceTransOptCache() const
 	clock_t cutoffLastUsedTime = lastUsedTimes.top();
 
 	// remove all old entries
-	iter = m_transOptCache[m_configurationsManager.currentConfigId].begin();
-	while( iter != m_transOptCache[m_configurationsManager.currentConfigId].end() )
+	iter = m_transOptCache[id].begin();
+	while( iter != m_transOptCache[id].end() )
 	{
 		if (iter->second.second < cutoffLastUsedTime)
 		{
 			std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
 			delete iterRemove->second.first;
-			m_transOptCache[m_configurationsManager.currentConfigId].erase(iterRemove);
+			m_transOptCache[id].erase(iterRemove);
 		}
 		else iter++;
 	}
@@ -1436,7 +1291,7 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
     boost::mutex::scoped_lock lock(m_transOptCacheMutex[id]);
 #endif
 	m_transOptCache[id][key] = make_pair( storedTransOptList, clock() );
-	ReduceTransOptCache();
+	ReduceTransOptCache(id);
 }
 
 

@@ -452,7 +452,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 		// consult persistent (cross-sentence) cache for stored translation options
 		bool skipTransOptCreation = false
-				, useCache = StaticData::Instance().GetUseTransOptCache();
+				, useCache = StaticData::Instance().GetUseTransOptCache(id);
 		if (useCache)
 		{
 		  const WordsRange wordsRange(startPos, endPos);
