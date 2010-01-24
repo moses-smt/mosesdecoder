@@ -173,14 +173,6 @@ enum SearchAlgorithm
 	,CubeGrowing	= 2
 };
 
-enum InputTag
-{
-	Source		= 0
-	,Command	= 1
-	,ConfigId	= 2
-	,InvalidTag
-};
-
 // typedef
 typedef size_t FactorType;
 

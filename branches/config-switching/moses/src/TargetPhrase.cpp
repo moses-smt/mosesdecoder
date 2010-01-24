@@ -73,7 +73,7 @@ void TargetPhrase::SetScore(float score)
 	//get the weight list
 	unsigned int id = prod->GetScoreBookkeepingID();
 	
-	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
+	const vector<float> &allWeights = StaticData::Instance().GetAllWeights(0);
 
 	size_t beginIndex = StaticData::Instance().GetScoreIndexManager(0).GetBeginIndex(id);
 	size_t endIndex = StaticData::Instance().GetScoreIndexManager(0).GetEndIndex(id);
@@ -103,7 +103,7 @@ void TargetPhrase::SetScore(const Scores &scoreVector)
 
 	//get the weight list
 	unsigned int id = prod->GetScoreBookkeepingID();
-	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
+	const vector<float> &allWeights = StaticData::Instance().GetAllWeights(0);
 	size_t beginIndex = StaticData::Instance().GetScoreIndexManager(0).GetBeginIndex(id);
 	size_t endIndex = StaticData::Instance().GetScoreIndexManager(0).GetEndIndex(id);
 	vector<float> weights;

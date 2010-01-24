@@ -156,7 +156,7 @@ public:
             staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence,staticData.GetSearchAlgorithm());
+        Manager manager(sentence,staticData.GetSearchAlgorithm(sentence.GetCfgId()));
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 

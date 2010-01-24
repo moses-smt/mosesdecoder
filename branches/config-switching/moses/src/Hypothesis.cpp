@@ -303,7 +303,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 	
 	// TOTAL
-	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights(m_sourceInput.GetCfgId())) + m_futureScore;
 
 	IFVERBOSE(2) { m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
 }
@@ -323,7 +323,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	//CalcDistortionScore();
 	
 	// LANGUAGE MODEL ESTIMATE (includes word penalty cost)
-  float estimatedLMScore = m_transOpt->GetFutureScore() - m_transOpt->GetScoreBreakdown().InnerProduct(staticData.GetAllWeights());
+  float estimatedLMScore = m_transOpt->GetFutureScore() - m_transOpt->GetScoreBreakdown().InnerProduct(staticData.GetAllWeights(m_sourceInput.GetCfgId()));
 
 	// FUTURE COST
 	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
@@ -336,7 +336,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	}
 
 	// TOTAL
-	float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
+	float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights(m_sourceInput.GetCfgId())) + m_futureScore + estimatedLMScore;
 
   IFVERBOSE(2) { m_manager.GetSentenceStats().AddTimeEstimateScore( clock()-t ); }
 	return total;
@@ -357,7 +357,7 @@ void Hypothesis::CalcRemainingScore()
 	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// TOTAL
-	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights(m_sourceInput.GetCfgId())) + m_futureScore;
 
 	IFVERBOSE(2) { m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t ); }
 }

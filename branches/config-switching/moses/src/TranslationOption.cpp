@@ -149,7 +149,7 @@ void TranslationOption::CalcScore()
 	size_t phraseSize = GetTargetPhrase().GetSize();
 	// future score
 	m_futureScore = retFullScore - ngramScore
-								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
+								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights(0)) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
 }
 
 TO_STRING_BODY(TranslationOption);

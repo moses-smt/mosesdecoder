@@ -41,15 +41,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ThreadPool.h"
 #include "Util.h"
 #include "mbr.h"
-#include "TypeDef.h"
 
 using namespace std;
 using namespace Moses;
 
-InputTag CheckTag(const InputType *line, string** cmd)
+bool CheckCommand(const InputType *line, string** cmd)
 {
 	stringstream stream;
-	string str, id_str;
+	string str;
 	stream << *line;
 	str = stream.str();
 
@@ -59,11 +58,11 @@ InputTag CheckTag(const InputType *line, string** cmd)
 	  str = str.substr(0,(str.size()-1));
 	  *cmd = new string(str.c_str());
 	  VERBOSE(1, "detected a command: " << **cmd << endl);
-	  return Command;
+	  return true;
 	} 
 	else
 	{
-	  return Source;
+	  return false;
 	}
 }
 
@@ -190,10 +189,12 @@ class TranslationTask : public Task {
 #if defined(BOOST_HAS_PTHREADS)
             TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << (int)pthread_self() << std::endl);
 #endif
-            std::cout<<"------getcfgId="<<m_source->GetCfgId()<<std::endl;
             const StaticData &staticData = StaticData::Instance();
+    if (staticData.IsValidId(m_source->GetCfgId()))
+    {
+
             Sentence sentence(Input);
-            Manager manager(*m_source,staticData.GetSearchAlgorithm());
+            Manager manager(*m_source,staticData.GetSearchAlgorithm(m_source->GetCfgId()));
             manager.ProcessSentence();
             
             if (m_outputCollector) {
@@ -239,6 +240,11 @@ class TranslationTask : public Task {
                 OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), m_lineNumber,m_source->GetCfgId());
                 m_nbestCollector->Write(m_lineNumber, out.str());
             }
+    }
+    else{  
+            TRACE_ERR("------invalid cfg id" << std::endl);  
+            // more process here!!!
+        }
         }
 
         ~TranslationTask() {delete m_source;}
@@ -322,7 +328,7 @@ int main(int argc, char** argv) {
     
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
         // command is processed in this thread
-        if ( Command == CheckTag(source, &cmd) ) {
+        if ( CheckCommand(source, &cmd) ) {
             ParseCommand(cmd, &arg_count, &arguments);
 
             char* args[arg_count];
