@@ -1,0 +1,30 @@
+package hgmert;
+
+import "rule.proto";
+
+message Hypergraph {
+
+  message Node {
+    optional string category = 1;
+    repeated string lm_state = 2;
+  }
+
+  message Edge {
+    repeated int32 tail_nodes = 4;
+    required int32 head_node = 5;
+    // must be as many as num_features below
+    repeated float feature_values = 6;
+    required Rule rule = 7;
+  }
+
+  repeated Node nodes = 8;
+  repeated Edge edges = 9;
+  required bool is_sorted = 10;
+  // the number of features in the feature vector
+  required int32 num_features = 11;
+  // string names of the features
+  repeated string feature_names = 12;
+  optional string src_string = 13;
+  optional string sysid = 14;
+}
+
