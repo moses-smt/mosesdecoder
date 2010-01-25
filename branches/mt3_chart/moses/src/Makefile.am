@@ -13,7 +13,6 @@ libmoses_a_SOURCES = \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
 	DotChart.cpp \
-	DotChartBerkeleyDb.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
@@ -49,8 +48,6 @@ libmoses_a_SOURCES = \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
-	PhraseDictionaryBerkeleyDb.cpp \
-	PhraseDictionaryBerkeleyDbChart.cpp \
 	PhraseDictionaryMemory.cpp \
 	PhraseDictionaryMemoryChart.cpp \
 	PhraseDictionaryNewFormat.cpp \
