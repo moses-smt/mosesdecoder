@@ -103,21 +103,6 @@ then
   AM_CONDITIONAL([IRST_LM], true)
 fi
 
-if test "x$with_berkeleydb" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_berkeleydb}/include"
-
-  AC_CHECK_HEADER(db_cxx.h,
-                 [AC_DEFINE([HAVE_BERKELEYDB], [], [flag for BERKELEYDB])],
-                 [AC_MSG_ERROR([Cannot find Berkeley Db!])])
-
-  LDFLAGS="$LDFLAGS -L${with_berkeleydb}/lib"
-  FMTLIBS="$FMTLIBS libdb_cxx.a"
-  AM_CONDITIONAL([BERKELEYDB], true)
-
-fi
-
-LIBS="$LIBS -lz -ldb_cxx -lpthread"
+LIBS="$LIBS -lz -lpthread"
 
 AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile moses-chart/src/Makefile moses-chart-cmd/src/Makefile)
