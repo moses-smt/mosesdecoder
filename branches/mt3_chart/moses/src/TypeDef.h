@@ -153,6 +153,7 @@ enum PhraseTableImplementation
 	,MemorySourceLabel	= 5
 	,NewFormat	= 6
 	,BerkeleyDb	= 7
+        ,dynSuffixArray = 8
 };
 
 enum InputTypeEnum

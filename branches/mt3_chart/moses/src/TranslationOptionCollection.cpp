@@ -371,17 +371,15 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
 	{
 	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
-		for (size_t startPos = 0 ; startPos < size; startPos++)
-		{
-      size_t maxSize = size - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, maxSizePhrase);
-
-			for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++)
-			{
-				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);
- 			}
-		}
+          for (size_t startPos = 0 ; startPos < size; startPos++) {
+            size_t maxSize = size - startPos;
+            size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+            maxSize = std::min(maxSize, maxSizePhrase);
+            for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++)
+            {
+              CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);
+            }
+          }
 	}
 
 	VERBOSE(3,"Translation Option Collection\n " << *this << endl);

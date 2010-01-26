@@ -43,7 +43,7 @@ protected:
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 	mutable std::vector<ProcessedRuleStack*>	m_runningNodesVec;
 
-	Phrase									m_prevSource;
+	Phrase m_prevSource;
 	TargetPhraseCollection	*m_prevPhraseColl;
 
 	TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source);
@@ -87,11 +87,8 @@ public:
 
 	void InitializeForInput(const InputType& i);
 
-	const ChartRuleCollection *GetChartRuleCollection(
-																	InputType const& src
-																	,WordsRange const& range
-																	,bool adhereTableLimit
-																	,const CellCollection &cellColl) const;
+	const ChartRuleCollection* GetChartRuleCollection(InputType const& src, WordsRange const& range,
+          bool adhereTableLimit,const CellCollection &cellColl) const;
 	void CleanUp();
 };
 
