@@ -8,17 +8,12 @@ use strict;
 use File::Path;
 use File::Basename;
 use File::Copy;
+use Getopt::Long;
 
-if ($#ARGV+1 != 1)
-{
-	print "\n\n INPUT:";
-   	print "\n 1) Search graph file ";
-   	print "\n"; 
-   	exit(-1);
-}
-
-my $searchgraph = $ARGV[0]; 	
-print STDERR "searchgraph    = $searchgraph\n";
+my $organize_to_stacks = 0;
+GetOptions(
+  "organize-to-stacks" => \$organize_to_stacks,
+) or exit 1;
 
 my %stacks = ();
 $stacks{0}{0} = 0;
@@ -29,10 +24,9 @@ print STDOUT "digraph searchgraph\n{\nrankdir=LR\n";
 my($line, $cpt, $from, $to, $label, $recombined, $transition, $o, $stack, $state);
 $cpt = 0;
  
-open(LISTFD, "<$searchgraph") or die "Cannot read input file $searchgraph, Erreur: $!\n";
-$line=<LISTFD>; #skip first line ...
+$line=<>; #skip first line (the empty hypothesis, no arc in fact)
 
-while(($line=<LISTFD>) ) 
+while(($line=<>) ) 
 {
 	$from = "";
 	$to = "";
@@ -58,7 +52,7 @@ while(($line=<LISTFD>) )
 		$label = "[color=blue label=";
 		
 		$to = $recombined;
-		$stacks{$stack}{$recombined} = $recombined;
+		$stacks{$stack}{$recombined} = $recombined if $organize_to_stacks;
 		#$stack++;
 		#$stacks{$stack}{$recombined} = $recombined;
 	}
@@ -71,7 +65,7 @@ while(($line=<LISTFD>) )
 		$transition=$4;
 		$o = $5;
 		$label = "[label=";
-		$stacks{$stack}{$to} = $to;
+		$stacks{$stack}{$to} = $to if $organize_to_stacks;
 		#$stack++;
 		#$stacks{$stack}{$to} = $to;
 	}
@@ -87,15 +81,16 @@ while(($line=<LISTFD>) )
 	$cpt++;
 }
 
-
-foreach $stack (sort (keys(%stacks)))
-{
-	print STDOUT "{ rank=same; ";
-	foreach $state (sort keys %{ $stacks{$stack} } )
+if ($organize_to_stacks) {
+	foreach $stack (sort (keys(%stacks)))
 	{
-		print STDOUT "$stacks{$stack}{$state} ";
+		print STDOUT "{ rank=same; ";
+		foreach $state (sort keys %{ $stacks{$stack} } )
+		{
+			print STDOUT "$stacks{$stack}{$state} ";
+		}
+		print STDOUT "}\n";
 	}
-	print STDOUT "}\n";
 }
 
 print STDOUT "\n}\n";
