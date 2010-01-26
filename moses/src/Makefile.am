@@ -87,7 +87,11 @@ libmoses_a_SOURCES = \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
-	XmlOption.cpp 
+	XmlOption.cpp \
+	DynSAInclude/vocab.cpp \
+	DynSAInclude/file.cpp \
+	DynSuffixArray.cpp \
+	PhraseDictionaryDynSuffixArray.cpp 
 
 if PROTOBUF
 BUILT_SOURCES = \
