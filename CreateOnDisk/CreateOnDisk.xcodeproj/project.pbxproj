@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1C5E1DF010F2B551002CF64E /* libBerkeleyPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C5E1DEC10F2B525002CF64E /* libBerkeleyPt.a */; };
 		1C62016010F010C700146F11 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C62015E10F0108600146F11 /* libOnDiskPt.a */; };
 		1CCE342810ECC24800F81933 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CCE342710ECC24800F81933 /* Main.cpp */; };
 		1CCE352210ECD44F00F81933 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CCE351D10ECD3E300F81933 /* libmoses.a */; };
@@ -20,20 +19,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = OnDiskPt;
-		};
-		1C5E1DEB10F2B525002CF64E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C5E1DE710F2B525002CF64E /* BerkeleyPt.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D;
-			remoteInfo = BerkeleyPt;
-		};
-		1C5E1DEE10F2B543002CF64E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C5E1DE710F2B525002CF64E /* BerkeleyPt.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = BerkeleyPt;
 		};
 		1C62015D10F0108600146F11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -71,7 +56,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1C5E1DE710F2B525002CF64E /* BerkeleyPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BerkeleyPt.xcodeproj; path = ../BerkeleyPt/BerkeleyPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1C9536D910EE1EB200BFA19C /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
 		1CCE342610ECC24800F81933 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
@@ -84,7 +68,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C5E1DF010F2B551002CF64E /* libBerkeleyPt.a in Frameworks */,
 				1C62016010F010C700146F11 /* libOnDiskPt.a in Frameworks */,
 				1CCE352210ECD44F00F81933 /* libmoses.a in Frameworks */,
 			);
@@ -96,7 +79,6 @@
 		08FB7794FE84155DC02AAC07 /* CreateOnDisk */ = {
 			isa = PBXGroup;
 			children = (
-				1C5E1DE710F2B525002CF64E /* BerkeleyPt.xcodeproj */,
 				1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */,
 				1CCE351810ECD3E300F81933 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
@@ -119,14 +101,6 @@
 			isa = PBXGroup;
 			children = (
 				1C9536D910EE1EB200BFA19C /* CreateOnDisk */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		1C5E1DE810F2B525002CF64E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1C5E1DEC10F2B525002CF64E /* libBerkeleyPt.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -170,7 +144,6 @@
 			dependencies = (
 				1CCE351F10ECD40B00F81933 /* PBXTargetDependency */,
 				1C06EB2910F0C83700192BAB /* PBXTargetDependency */,
-				1C5E1DEF10F2B543002CF64E /* PBXTargetDependency */,
 			);
 			name = CreateOnDisk;
 			productInstallPath = "$(HOME)/bin";
@@ -190,10 +163,6 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 1C5E1DE810F2B525002CF64E /* Products */;
-					ProjectRef = 1C5E1DE710F2B525002CF64E /* BerkeleyPt.xcodeproj */;
-				},
-				{
 					ProductGroup = 1CCE351910ECD3E300F81933 /* Products */;
 					ProjectRef = 1CCE351810ECD3E300F81933 /* moses.xcodeproj */;
 				},
@@ -210,13 +179,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		1C5E1DEC10F2B525002CF64E /* libBerkeleyPt.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libBerkeleyPt.a;
-			remoteRef = 1C5E1DEB10F2B525002CF64E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		1C62015E10F0108600146F11 /* libOnDiskPt.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -249,11 +211,6 @@
 			isa = PBXTargetDependency;
 			name = OnDiskPt;
 			targetProxy = 1C06EB2810F0C83700192BAB /* PBXContainerItemProxy */;
-		};
-		1C5E1DEF10F2B543002CF64E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = BerkeleyPt;
-			targetProxy = 1C5E1DEE10F2B543002CF64E /* PBXContainerItemProxy */;
 		};
 		1CCE351F10ECD40B00F81933 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
