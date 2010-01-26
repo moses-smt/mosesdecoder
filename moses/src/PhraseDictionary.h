@@ -73,11 +73,8 @@ class PhraseDictionary : public Dictionary, public ScoreProducer
 	//! find list of translations that can translates a portion of src. Used by confusion network decoding
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
 
-	virtual const ChartRuleCollection *GetChartRuleCollection(
-																				InputType const& src
-																				,WordsRange const& range
-																				,bool adhereTableLimit
-																				,const CellCollection &cellColl) const=0;
+	virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
+          bool adhereTableLimit,const CellCollection &cellColl) const=0;
 };
 
 }

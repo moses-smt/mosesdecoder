@@ -139,7 +139,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			abort();
 		}
 
-		string &headString					= tokens[0]
+		string &headString = tokens[0]
 					, &sourcePhraseString	= tokens[1]
 					, &targetPhraseString	= tokens[2]
 					, &scoreString				= tokens[3];

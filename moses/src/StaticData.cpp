@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <cassert>
 #include "PhraseDictionaryMemory.h"
+#include "PhraseDictionaryDynSuffixArray.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -1003,6 +1004,17 @@ bool StaticData::LoadPhraseTables()
 			}
 			m_phraseDictionary.push_back(pd);
 		}
+                else if(impl == dynSuffixArray) {
+                  PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent);
+                  assert(token.size() == 7);
+                  if(!(pd && pd->Load(token[4], token[5], token[6]))) {
+                    delete pd;
+                    return false;
+                  }
+                  m_phraseDictionary.push_back(pd);
+                  std::cerr << "GOT HERE\n" << std::endl;
+			abort();
+                }
 		else
 		{
 			TRACE_ERR("unkknow phrase table type" << endl);

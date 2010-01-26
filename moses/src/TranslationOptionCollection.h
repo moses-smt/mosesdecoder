@@ -121,10 +121,8 @@ public:
 	//! Create all possible translations from the phrase tables
 	virtual void CreateTranslationOptions(const std::vector <DecodeGraph*> &decodeStepVL);
 	//! Create translation options that exactly cover a specific input span. 
-	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-																			, size_t startPosition
-																			, size_t endPosition
-																			, bool adhereTableLimit);
+	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList,
+        size_t startPosition, size_t endPosition, bool adhereTableLimit);
 																			
 	//!Check if this range has XML options
 	virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;

@@ -59,22 +59,22 @@ typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 class StaticData
 {
 private:
-	static StaticData									s_instance;
+	static StaticData s_instance;
 protected:	
 
 	std::map<long,Phrase> m_constraints;
-	std::vector<PhraseDictionary*>	m_phraseDictionary;
-	std::vector<GenerationDictionary*>	m_generationDictionary;
-	std::vector <DecodeGraph*>		m_decodeGraphList;
-	Parameter			*m_parameter;
-	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
-	LMList									m_languageModel;
-	ScoreIndexManager				m_scoreIndexManager;
-	std::vector<float>			m_allWeights;
-	std::vector<LexicalReordering*>                   m_reorderModels;
-		// Initial	= 0 = can be used when creating poss trans
-		// Other		= 1 = used to calculate LM score once all steps have been processed
-	std::string							m_defaultNonTerminals;
+	std::vector<PhraseDictionary*> m_phraseDictionary;
+	std::vector<GenerationDictionary*> m_generationDictionary;
+	std::vector <DecodeGraph*> m_decodeGraphList;
+	Parameter *m_parameter;
+	std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
+	LMList m_languageModel;
+	ScoreIndexManager m_scoreIndexManager;
+	std::vector<float> m_allWeights;
+	std::vector<LexicalReordering*> m_reorderModels;
+	std::string m_defaultNonTerminals;
+        // Initial = 0 = can be used when creating poss trans
+        // Other = 1 = used to calculate LM score once all steps have been processed
 	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
 	
 	float
@@ -85,11 +85,11 @@ protected:
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
 		m_weightUnknownWord;
-									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
-	int																	m_maxDistortion;
-									// do it differently from old pharaoh
-									// -ve	= no limit on distortion
-									// 0		= no disortion (monotone in old pharaoh)
+        // PhraseTrans, Generation & LanguageModelScore has multiple weights.
+	int	m_maxDistortion;
+        // do it differently from old pharaoh
+        // -ve	= no limit on distortion
+        // 0		= no disortion (monotone in old pharaoh)
 	bool m_reorderingConstraint; // use additional reordering constraints
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
