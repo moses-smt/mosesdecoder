@@ -484,6 +484,16 @@ void StaticData::LoadNonTerminals()
 		m_defaultNonTerminals = tokens[0];
 	}
 	
+	FactorCollection &factorCollection = FactorCollection::Instance();
+
+	m_inputDefaultNonTerminal.SetIsNonTerminal(true);
+	const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, m_defaultNonTerminals);
+	m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
+	
+	m_outputDefaultNonTerminal.SetIsNonTerminal(true);
+	const Factor *targetFactor = factorCollection.AddFactor(Output, 0, m_defaultNonTerminals);
+	m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
+	
 	// for unknwon words
 	if (m_parameter->GetParam("unknown-lhs").size() == 0)
   {

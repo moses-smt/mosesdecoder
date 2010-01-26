@@ -26,6 +26,11 @@
 		0396E1B50C0B189200D95CFF /* TrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1A40C0B189200D95CFF /* TrellisPathList.h */; };
 		0396E1B60C0B189200D95CFF /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0396E1A50C0B189200D95CFF /* WordLattice.cpp */; };
 		0396E1B70C0B189200D95CFF /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 0396E1A60C0B189200D95CFF /* WordLattice.h */; };
+		1C32918A110F416100E9F5E1 /* DotChartOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C329188110F416100E9F5E1 /* DotChartOnDisk.cpp */; };
+		1C32918B110F416100E9F5E1 /* DotChartOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C329189110F416100E9F5E1 /* DotChartOnDisk.h */; };
+		1C329190110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C32918D110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp */; };
+		1C329191110F419200E9F5E1 /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C32918E110F419200E9F5E1 /* PhraseDictionaryOnDisk.h */; };
+		1C329192110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C32918F110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp */; };
 		1C500A4F0FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */; };
 		1C500A500FB9E68400DFD24F /* PhraseDictionaryGlueRule.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */; };
 		1C500A530FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */; };
@@ -219,6 +224,11 @@
 		0396E1A40C0B189200D95CFF /* TrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TrellisPathList.h; path = src/TrellisPathList.h; sourceTree = "<group>"; };
 		0396E1A50C0B189200D95CFF /* WordLattice.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice.cpp; path = src/WordLattice.cpp; sourceTree = "<group>"; };
 		0396E1A60C0B189200D95CFF /* WordLattice.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordLattice.h; path = src/WordLattice.h; sourceTree = "<group>"; };
+		1C329188110F416100E9F5E1 /* DotChartOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartOnDisk.cpp; path = src/DotChartOnDisk.cpp; sourceTree = "<group>"; };
+		1C329189110F416100E9F5E1 /* DotChartOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartOnDisk.h; path = src/DotChartOnDisk.h; sourceTree = "<group>"; };
+		1C32918D110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
+		1C32918E110F419200E9F5E1 /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
+		1C32918F110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDiskChart.cpp; path = src/PhraseDictionaryOnDiskChart.cpp; sourceTree = "<group>"; };
 		1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryGlueRule.cpp; path = src/PhraseDictionaryGlueRule.cpp; sourceTree = "<group>"; };
 		1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryGlueRule.h; path = src/PhraseDictionaryGlueRule.h; sourceTree = "<group>"; };
 		1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryMemoryChart.cpp; path = src/PhraseDictionaryMemoryChart.cpp; sourceTree = "<group>"; };
@@ -446,6 +456,8 @@
 				1C8CFE1B0AD67A9700FA22E2 /* Dictionary.h */,
 				1C500A680FB9E6B700DFD24F /* DotChart.cpp */,
 				1C500A690FB9E6B700DFD24F /* DotChart.h */,
+				1C329188110F416100E9F5E1 /* DotChartOnDisk.cpp */,
+				1C329189110F416100E9F5E1 /* DotChartOnDisk.h */,
 				1C8CFE1C0AD67A9700FA22E2 /* DummyScoreProducers.cpp */,
 				1C8CFE1D0AD67A9700FA22E2 /* DummyScoreProducers.h */,
 				1C8CFE1E0AD67A9700FA22E2 /* Factor.cpp */,
@@ -543,6 +555,9 @@
 				1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */,
 				1C500A470FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.cpp */,
 				1C500A480FB9E68400DFD24F /* PhraseDictionaryNodeSourceLabel.h */,
+				1C32918D110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp */,
+				1C32918E110F419200E9F5E1 /* PhraseDictionaryOnDisk.h */,
+				1C32918F110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp */,
 				1C500A4C0FB9E68400DFD24F /* PhraseDictionarySourceLabel.cpp */,
 				1C500A4D0FB9E68400DFD24F /* PhraseDictionarySourceLabel.h */,
 				1C500A4E0FB9E68400DFD24F /* PhraseDictionarySourceLabelChart.cpp */,
@@ -739,6 +754,8 @@
 				1C500A810FB9E6B700DFD24F /* LanguageModelRemote.h in Headers */,
 				1C500A840FB9E6B700DFD24F /* WordConsumed.h in Headers */,
 				1CA87AA3100B8F090017FF50 /* PhraseDictionaryNewFormat.h in Headers */,
+				1C32918B110F416100E9F5E1 /* DotChartOnDisk.h in Headers */,
+				1C329191110F419200E9F5E1 /* PhraseDictionaryOnDisk.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -876,6 +893,9 @@
 				1C500A830FB9E6B700DFD24F /* WordConsumed.cpp in Sources */,
 				1CA87AA2100B8F090017FF50 /* PhraseDictionaryNewFormat.cpp in Sources */,
 				1CA87AA4100B8F090017FF50 /* PhraseDictionaryNewFormatChart.cpp in Sources */,
+				1C32918A110F416100E9F5E1 /* DotChartOnDisk.cpp in Sources */,
+				1C329190110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp in Sources */,
+				1C329192110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
