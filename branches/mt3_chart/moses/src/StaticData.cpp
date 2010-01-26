@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryGlueRule.h"
 #include "PhraseDictionarySourceLabel.h"
 #include "PhraseDictionaryNewFormat.h"
+#include "PhraseDictionaryOnDisk.h"
 
 using namespace std;
 
@@ -983,6 +984,19 @@ bool StaticData::LoadPhraseTables()
 										, maxTargetPhrase[index]
 										, GetAllLM()
 										, GetWeightWordPenalty()))
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
+		}
+		else if (impl == OnDisk)
+		{ // binary phrase table
+			VERBOSE(1, "using On-Disk phrase tables for idx "<<currDict<<"\n");
+			PhraseDictionaryOnDisk *pd=new PhraseDictionaryOnDisk(numScoreComponent);
+			if (!pd->Load(input,output,filePath,weight,
+										maxTargetPhrase[index])
+					)
 			{
 				delete pd;
 				return false;

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		03306D820C0B249A00CA1311 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03306D800C0B249A00CA1311 /* mbr.cpp */; };
 		03306D830C0B249A00CA1311 /* mbr.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03306D810C0B249A00CA1311 /* mbr.h */; };
+		1C329406110F778A00E9F5E1 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C32916B110F40B400E9F5E1 /* libOnDiskPt.a */; };
 		1C8CFF4D0AD68D3600FA22E2 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF450AD68D3600FA22E2 /* Main.cpp */; };
 		1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF460AD68D3600FA22E2 /* Main.h */; };
 		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
@@ -91,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1C329406110F778A00E9F5E1 /* libOnDiskPt.a in Frameworks */,
 				1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */,
 				1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */,
 			);
