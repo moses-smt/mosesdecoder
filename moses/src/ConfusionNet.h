@@ -17,6 +17,7 @@ class Sentence;
 class ConfusionNet : public InputType {
  public: 
 	typedef std::vector<std::pair<Word,float> > Column;
+	LabelList m_defaultLabelList;
 
  protected:
 	std::vector<Column> data;
@@ -52,6 +53,10 @@ class ConfusionNet : public InputType {
 	const Word& GetWord(size_t pos) const;
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+	
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	{	return m_defaultLabelList;	}
+
 };
 
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn);

@@ -30,7 +30,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libOnDiskPt.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
 		1C335ABA0F20F9EA00D0D9DF /* PBXContainerItemProxy */ = {

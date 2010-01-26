@@ -75,6 +75,7 @@ protected:
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	std::string							m_defaultNonTerminals;
+	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
 	
 	float
 		m_beamWidth,
@@ -491,6 +492,13 @@ public:
 		
 	const UnknownLHSList &GetUnknownLHS() const
 	{ return m_unknownLHS; }
+	
+	const Word &GetInputDefaultNonTerminal() const
+	{ return m_inputDefaultNonTerminal; }
+	const Word &GetOutputDefaultNonTerminal() const
+	{ return m_outputDefaultNonTerminal; }
+	float GetRuleCountThreshold() const
+	{ return 999999; }
 	
 };
 

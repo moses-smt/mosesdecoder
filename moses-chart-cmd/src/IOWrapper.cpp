@@ -260,7 +260,7 @@ void OutputTranslationOptions(const MosesChart::Hypothesis *hypo, long translati
 	if (hypo != NULL)
 	{
 	  //cerr << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << " = " <<  hypo->GetCurrTargetPhrase() << endl;
-		cerr << *hypo;
+		cerr << *hypo << endl;
 	}
 	
 	const std::vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();

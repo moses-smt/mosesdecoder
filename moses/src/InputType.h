@@ -36,6 +36,8 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 
+typedef std::vector<Word> LabelList;
+
 //! base class for sentences and confusion networks
 class InputType 
 {
@@ -119,6 +121,8 @@ public:
 	{
 		return m_reorderingConstraint;
 	};
+
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const = 0;
 
 	TO_STRING();
 	
