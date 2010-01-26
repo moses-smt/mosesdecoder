@@ -105,4 +105,4 @@ fi
 
 LIBS="$LIBS -lz -lpthread"
 
-AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile moses-chart/src/Makefile moses-chart-cmd/src/Makefile)
+AC_OUTPUT(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile CreateOnDisk/src/Makefile OnDiskPt/src/Makefile moses-chart/src/Makefile moses-chart-cmd/src/Makefile)

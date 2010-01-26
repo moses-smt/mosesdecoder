@@ -13,6 +13,7 @@ libmoses_a_SOURCES = \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
 	DotChart.cpp \
+	DotChartOnDisk.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
@@ -60,6 +61,8 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PhraseDictionaryGlueRule.cpp \
+	PhraseDictionaryOnDisk.cpp \
+	PhraseDictionaryOnDiskChart.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ScoreComponentCollection.cpp \
