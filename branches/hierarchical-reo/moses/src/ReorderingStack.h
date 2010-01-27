@@ -23,14 +23,15 @@ namespace Moses
  {
    private:
 	
-             std::vector<WordsRange> m_stack;
+            std::vector<WordsRange> m_stack;
 
    public:
 	
-		int Compare(const ReorderingStack& o);
+		int Compare(const ReorderingStack& o) const;
 
 		
-		int push(WordsRange input_span);
+		int Push(WordsRange input_span);
+                void Merge(WordsRange input_span);
  };	
 
 
