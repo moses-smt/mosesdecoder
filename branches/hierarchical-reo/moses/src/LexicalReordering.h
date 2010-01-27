@@ -26,7 +26,7 @@ class InputType;
 class LexicalReordering : public StatefulFeatureFunction {
 public:
     typedef int ReorderingType;
-    
+    typedef int OrientationType;
     enum Direction {Forward, Backward, Bidirectional, Unidirectional = Backward};
     enum Condition {F,E,C,FE,FEC};
     
