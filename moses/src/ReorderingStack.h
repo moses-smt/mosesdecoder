@@ -30,7 +30,7 @@ namespace Moses
 		int Compare(const ReorderingStack& o);
 
 		
-		int ReorderingStack::push(WordsRange input_span);
+		int push(WordsRange input_span);
  };	
 
 
