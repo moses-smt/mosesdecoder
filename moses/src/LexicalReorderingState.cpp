@@ -175,7 +175,7 @@ LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const Hypoth
   //  const WordsRange currWordsRange  = hypo.GetCurrSourceWordsRange();
   HierarchicalReorderingBackwardState* nextState = new HierarchicalReorderingBackwardState(m_modelType, m_reoStack);
 
-  int reoDistance = nextState->m_reoStack.Push(hypo.GetCurrSourceWordsRange());
+  int reoDistance = nextState->m_reoStack.ShiftReduce(hypo.GetCurrSourceWordsRange());
 
   if (m_modelType == MSD) {
     reoType = GetOrientationTypeMSD(reoDistance);
