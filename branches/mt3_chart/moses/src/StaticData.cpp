@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryGlueRule.h"
 #include "PhraseDictionarySourceLabel.h"
 #include "PhraseDictionaryNewFormat.h"
-#include "PhraseDictionaryOnDisk.h"
+//#include "PhraseDictionaryOnDisk.h"
 
 using namespace std;
 
@@ -991,7 +991,7 @@ bool StaticData::LoadPhraseTables()
 			}
 			m_phraseDictionary.push_back(pd);
 		}
-		else if (impl == OnDisk)
+		/*else if (impl == OnDisk)
 		{ // binary phrase table
 			VERBOSE(1, "using On-Disk phrase tables for idx "<<currDict<<"\n");
 			PhraseDictionaryOnDisk *pd=new PhraseDictionaryOnDisk(numScoreComponent);
@@ -1003,7 +1003,7 @@ bool StaticData::LoadPhraseTables()
 				return false;
 			}
 			m_phraseDictionary.push_back(pd);
-		}
+		}*/
                 else if(impl == dynSuffixArray) {
                   PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent);
                   assert(token.size() == 7);
