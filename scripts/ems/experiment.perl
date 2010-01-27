@@ -27,7 +27,7 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
 			'sleep=i' => \$SLEEP,
 			'max-active=i' => \$MAX_ACTIVE,
 			'no-graph' => \$NO_GRAPH);
-if (! -e "steps") { `mkdir steps`; `touch steps/new`; }
+if (! -e "steps") { `mkdir -p steps`; `touch steps/new`; }
 my $NEW = (-e "steps/new");
 die("error: could not find config file") 
     unless ($CONFIG_FILE && -e $CONFIG_FILE) ||
@@ -62,7 +62,7 @@ my (@MODULE_LIST,  # list of modules (included sets) used
 my $VERSION = 0;     # experiment number
 $VERSION = $CONTINUE if $CONTINUE;
 &compute_version_number() if $EXECUTE && !$CONTINUE;
-`mkdir steps/$VERSION` if $NEW;
+`mkdir -p steps/$VERSION` if $NEW;
 
 &log_config();
 print "VERSION = $VERSION\n";
@@ -445,7 +445,7 @@ sub find_steps_for_module {
 	
 	# special case for passing: steps that only affect factor 0
 	if (defined($ONLY_FACTOR_0{$defined_step})) {
-	    my $FACTOR = &check_backoff_and_get_array("LM:$set:factors");
+	    my $FACTOR = &backoff_and_get_array("LM:$set:factors");
 	    if (defined($FACTOR)) {
 		my $ok = 0;
 		foreach my $factor (@{$FACTOR}) {
@@ -1130,11 +1130,11 @@ sub get_parameters_relevant_for_re_use {
     my %VALUE;
     my $step = $DO_STEP[$i];
     #my $module_set = $step; $module_set =~ s/:[^:]+$//;
-    my ($module,$set,$dummy) = &deconstruct_local_name($step);
+    my ($module,$set,$dummy) = &deconstruct_name($step);
     foreach my $parameter (@{$RERUN_ON_CHANGE{&defined_step($step)}}) {
 	my $value = &backoff_and_get(&extend_local_name($module,$set,$parameter));
 	#my $value = &backoff_and_get($module_set.":".$parameter);
-        print "XXX step: $step, parameter: $parameter -> ".(&extend_local_name($module,$set,$parameter))." = $value\n";
+        #print "XXX step: $step, parameter: $parameter -> ".(&extend_local_name($module,$set,$parameter))." = $value\n";
 	$VALUE{$parameter} = $value if $value;
     }
 
@@ -1260,9 +1260,10 @@ sub defined_step {
 
 sub construct_name {
     my ($module,$set,$step) = @_;
-    my $name = "$module:$set:$step";
-    $name =~ s/::/:/;
-    return $name;
+    if (!defined($set) || $set eq "") {
+	return "$module:$step";
+    }
+    return "$module:$set:$step";
 }
 
 sub deconstruct_name {
@@ -2238,12 +2239,10 @@ sub create_step {
     print STEP "#!/bin/bash\n\n";
     print STEP "PATH=".$ENV{"PATH"}."\n";
     print STEP "cd $dir\n";
-    print STEP "echo 'starting at '\n";
-    print STEP "date >&2\n";
+    print STEP "echo 'starting at '`date`' on '`hostname`\n";
     print STEP "mkdir -p $dir/$subdir\n\n";
     print STEP "$cmd\n\n";
-    print STEP "echo 'finished at '\n";
-    print STEP "date >&2\n";
+    print STEP "echo 'finished at '`date`\n";
     print STEP "touch $file.DONE\n";
     close(STEP);
 }    
@@ -2269,6 +2268,10 @@ sub backoff_and_get {
 sub check_backoff_and_get {
     my $VALUE = &check_backoff_and_get_array(@_);
     return ${$VALUE}[0] if $VALUE;
+}
+
+sub backoff_and_get_array {
+    return &check_backoff_and_get_array($_[0],"allow_undef");
 }
 
 sub check_backoff_and_get_array {
