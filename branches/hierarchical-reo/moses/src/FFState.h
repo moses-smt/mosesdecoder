@@ -1,3 +1,6 @@
+
+#pragma once
+
 namespace Moses {
 
 class FFState {

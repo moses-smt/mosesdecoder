@@ -7,6 +7,7 @@
 #include "FFState.h"
 #include "Hypothesis.h"
 #include "WordsRange.h"
+#include "WordsBitmap.h"
 #include "ReorderingStack.h"
 
 
@@ -16,18 +17,19 @@ namespace Moses
 class LexicalReorderingState : public FFState {
   public:
 
-    enum modelType {Monotonic, MSD, MSLR, LeftRight, None};
+    enum ModelType {Monotonic, MSD, MSLR, LeftRight, None};
 
-  LexicalReorderingState(modelType mt) 
+  inline LexicalReorderingState(ModelType mt) 
     : m_modelType(mt) {}
 
     virtual int Compare(const FFState& o) const = 0;
-    virtual LexicalReorderingState* expand(const Hypothesis& hypo, 
-					   LexicalReordering::ReorderingType& reoType);
+    virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
+					   LexicalReordering::ReorderingType& reoType) const;
 
-    LexicalReorderingState* CreateLexicalReorderingState(std::vector<std::string>& conf) const;
+    static LexicalReorderingState* CreateLexicalReorderingState(std::vector<std::string>& config,
+								LexicalReordering::Direction dir);
   protected:
-    modelType m_modelType;
+    ModelType m_modelType;
 
     //constants for the different type of reorderings (corresponding to indexes in the table file)
     static const LexicalReordering::ReorderingType M = 0;  // monotonic
@@ -45,28 +47,32 @@ class LexicalReorderingState : public FFState {
 class PhraseBasedReorderingState : public LexicalReorderingState {
   private:
     WordsRange m_prevRange;
+    bool m_first;
   public:
-    PhraseBasedReorderingState(modelType mt, WordsRange wr);
+    PhraseBasedReorderingState(ModelType mt);
+    PhraseBasedReorderingState(ModelType mt, WordsRange wr);
     virtual int Compare(const FFState& o) const;
-    virtual LexicalReorderingState* expand(const Hypothesis& hypo, 
-					   LexicalReordering::ReorderingType& reoType);
+    virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
+					   LexicalReordering::ReorderingType& reoType) const;
 
-    LexicalReordering::ReorderingType GetOrientationTypeMSD(bool first, WordsRange currRange) const;
-    LexicalReordering::ReorderingType GetOrientationTypeMSLR(bool first, WordsRange currRange) const;
-    LexicalReordering::ReorderingType GetOrientationTypeMonotonic(bool first, WordsRange currRange) const;
-    LexicalReordering::ReorderingType GetOrientationTypeLeftRight(bool first, WordsRange currRange) const;
+    LexicalReordering::ReorderingType GetOrientationTypeMSD(WordsRange currRange) const;
+    LexicalReordering::ReorderingType GetOrientationTypeMSLR(WordsRange currRange) const;
+    LexicalReordering::ReorderingType GetOrientationTypeMonotonic(WordsRange currRange) const;
+    LexicalReordering::ReorderingType GetOrientationTypeLeftRight(WordsRange currRange) const;
 };
 
   //! State for a hierarchical reordering model 
   //! (see Galley and Manning, A Simple and Effective Hierarchical Phrase Reordering Model, EMNLP 2008)
-class HierarchicalReorderingState : public LexicalReorderingState {
+  //!backward state (conditioned on the previous phrase)
+class HierarchicalReorderingBackwardState : public LexicalReorderingState {
   private:
     ReorderingStack m_reoStack;
   public:
-    HierarchicalReorderingState(modelType mt, ReorderingStack reoStack);
+    HierarchicalReorderingBackwardState(ModelType mt);
+    HierarchicalReorderingBackwardState(ModelType mt, ReorderingStack reoStack);
     virtual int Compare(const FFState& o) const;
-    virtual LexicalReorderingState* expand(const Hypothesis& hypo, 
-					   LexicalReordering::ReorderingType& reoType);
+    virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
+					   LexicalReordering::ReorderingType& reoType) const;
 
   private:
     LexicalReordering::ReorderingType GetOrientationTypeMSD(int reoDistance) const;
@@ -75,5 +81,21 @@ class HierarchicalReorderingState : public LexicalReorderingState {
     LexicalReordering::ReorderingType GetOrientationTypeLeftRight(int reoDistance) const;
 };
 
+
+  //!backward state (conditioned on the next phrase)
+class HierarchicalReorderingForwardState : public LexicalReorderingState {
+    
+  public:
+    HierarchicalReorderingForwardState(ModelType mt);
+    virtual int Compare(const FFState& o) const;
+    virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
+					   LexicalReordering::ReorderingType& reoType) const;
+
+  private:
+    LexicalReordering::ReorderingType GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const;
+    LexicalReordering::ReorderingType GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const;
+    LexicalReordering::ReorderingType GetOrientationTypeMonotonic(WordsRange currRange, WordsBitmap coverage) const;
+    LexicalReordering::ReorderingType GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const;
+};
 
 }
