@@ -225,6 +225,7 @@ LexicalReordering::OrientationType LexicalOrientationReordering::GetOrientationT
       return Discontinuous;
     }
   }
+
 }
 
 

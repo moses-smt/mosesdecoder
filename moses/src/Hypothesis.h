@@ -172,8 +172,8 @@ public:
 		return m_sourcePhrase;
 	}
 
-	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;
-	std::string GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const;
+	std::string GetSourcePhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
+	std::string GetTargetPhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
 	inline const TargetPhrase GetTargetPhrase() const { return m_targetPhrase; }
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
