@@ -17,12 +17,8 @@ using namespace std;
 
 namespace Moses
 {
-const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
-																																								InputType const& src
-																																								,WordsRange const& range
-																																								,bool adhereTableLimit
-																																								,const CellCollection &cellColl
-																																								,size_t maxDefaultSpan, size_t maxSyntaxSpan) const
+	const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(InputType const& src, WordsRange const& range,
+																																						bool adhereTableLimit,const CellCollection &cellColl) const
 	{
 		const StaticData &staticData = StaticData::Instance();
 		float weightWP = staticData.GetWeightWordPenalty();
@@ -142,9 +138,9 @@ const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(
 
 					//cerr << sourceLHS << " " << defaultSourceNonTerm << " " << targetLHS << " " << defaultTargetNonTerm << endl;
 					
-					bool isSyntaxNonTerm = (sourceLHS != defaultSourceNonTerm) || (targetLHS != defaultTargetNonTerm);
-					bool doSearch = isSyntaxNonTerm ? nonTermNumWordsCovered <=  maxSyntaxSpan :
-																						nonTermNumWordsCovered <= maxDefaultSpan;
+					//bool isSyntaxNonTerm = (sourceLHS != defaultSourceNonTerm) || (targetLHS != defaultTargetNonTerm);
+					bool doSearch = true; //isSyntaxNonTerm ? nonTermNumWordsCovered <=  maxSyntaxSpan :
+																//						nonTermNumWordsCovered <= maxDefaultSpan;
 
 					if (doSearch)
 					{

@@ -18,7 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
-
+#include <iostream>
 #include "PhraseDictionaryNodeMemory.h"
 #include "TargetPhrase.h"
 #include "PhraseDictionary.h"
@@ -72,7 +72,7 @@ PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetOrCreateChild(const W
 }
 
 const PhraseDictionaryNodeMemory *PhraseDictionaryNodeMemory::GetChild(const Word &word) const
-{
+{	
 	NodeMap::const_iterator iter = m_map.find(word);
 	if (iter != m_map.end())
 		return &iter->second;	// found it

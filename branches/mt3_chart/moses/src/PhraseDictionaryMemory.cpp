@@ -139,9 +139,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			abort();
 		}
 
-		string &headString = tokens[0]
-					, &sourcePhraseString	= tokens[1]
-					, &targetPhraseString	= tokens[2]
+		string  &sourcePhraseString	= tokens[0]
+					, &targetPhraseString	= tokens[1]
 					, &scoreString				= tokens[3];
 
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
@@ -201,20 +200,14 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			alignmentInfo.push_back(pair<size_t,size_t>(sourceAlign[ind], targetAlign[ind]));
 		}
 
-		// head word
-		headString = headString.substr(1, headString.size() - 2);
-		Word headWord;
-		headWord.CreateFromString(Input, input,headString);
-
 		// create target phrase obj
 		TargetPhrase *targetPhrase = new TargetPhrase(Output, targetPhraseVector.size());
 		//targetPhrase->SetSourcePhrase(sourcePhrase); // TODO not valid
 		targetPhrase->CreateFromString( output, targetPhraseVector);
 
 		targetPhrase->SetAlignmentInfo(alignmentInfo);
-		targetPhrase->SetTargetLHS(headWord);
 
-		targetPhrase->SetDebugOutput(string("Mem pt " )+ line);
+		//targetPhrase->SetDebugOutput(string("Mem pt " )+ line);
 
 		// remove strings
 		RemoveAllInColl(targetPhraseVector);

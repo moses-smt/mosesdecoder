@@ -61,12 +61,8 @@ public:
 	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
 	
-	virtual const ChartRuleCollection *GetChartRuleCollection(
-																														InputType const& src
-																														,WordsRange const& range
-																														,bool adhereTableLimit
-																														,const CellCollection &cellColl
-																														,size_t maxDefaultSpan, size_t maxSyntaxSpan) const;
+	virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
+																														bool adhereTableLimit,const CellCollection &cellColl) const;
 	
 	void InitializeForInput(const InputType& input);
 	void CleanUp();
