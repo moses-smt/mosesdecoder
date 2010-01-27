@@ -128,7 +128,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (numElement == NOT_FOUND)
 		{ // init numElement
 			numElement = tokens.size();
-			assert(numElement == 4);
+			assert(numElement == 5);
 		}
 
 		if (tokens.size() != numElement)
@@ -141,7 +141,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 		string  &sourcePhraseString	= tokens[0]
 					, &targetPhraseString	= tokens[1]
-					, &scoreString				= tokens[3];
+					, &scoreString				= tokens[4];
 
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
