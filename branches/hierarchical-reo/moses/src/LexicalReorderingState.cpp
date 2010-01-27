@@ -12,6 +12,21 @@
 
 namespace Moses {
 
+  int LexicalReorderingState::GetNumberOfScores() const {
+    switch (m_modelType) {
+    case MSD:
+      return 3;
+      break;
+    case MSLR:
+      return 4;
+      break;
+    default:
+      return 2;
+    }
+  }
+
+
+
   LexicalReorderingState* LexicalReorderingState::CreateLexicalReorderingState(std::vector<std::string>& config, LexicalReordering::Direction dir) {
   
   ModelType mt = None;
@@ -32,8 +47,7 @@ namespace Moses {
       mt = Monotonic;
     } else if (config[i] == "leftright") {
       mt = LeftRight;
-    }
-    else {
+    } else {
       UserMessage::Add("Illegal part in the lexical reordering configuration string: "+config[i]);
       exit(1);      
     }
@@ -69,8 +83,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const {
   const PhraseBasedReorderingState& other = static_cast<const PhraseBasedReorderingState&>(o);
   if (m_prevRange == other.m_prevRange) {
     return 0;
-  }
-  else if (m_prevRange < other.m_prevRange) {
+  } else if (m_prevRange < other.m_prevRange) {
     return -1;
   }
   return 1;
@@ -83,14 +96,11 @@ LexicalReorderingState* PhraseBasedReorderingState::Expand(const Hypothesis& hyp
 
   if (m_modelType == MSD) {
     reoType = GetOrientationTypeMSD(currWordsRange);
-  }
-  else if (m_modelType == MSLR) {
+  } else if (m_modelType == MSLR) {
     reoType = GetOrientationTypeMSLR(currWordsRange);
-  }
-  else if (m_modelType == Monotonic) {
+  } else if (m_modelType == Monotonic) {
     reoType = GetOrientationTypeMonotonic(currWordsRange);
-  }
-  else  {
+  } else  {
     reoType = GetOrientationTypeLeftRight(currWordsRange);
   }
 
@@ -101,15 +111,13 @@ LexicalReordering::ReorderingType PhraseBasedReorderingState::GetOrientationType
   if (m_first) {
     if (currRange.GetStartPos() == 0) {
       return M;
-    }
-    else {
+    } else {
       return D;
     }
   }
   if (m_prevRange.GetEndPos() == currRange.GetStartPos()-1) {
     return M;
-  }
-  else if (m_prevRange.GetStartPos() == currRange.GetEndPos()+1) {
+  } else if (m_prevRange.GetStartPos() == currRange.GetEndPos()+1) {
     return S;
   }
   return D;
@@ -119,18 +127,15 @@ LexicalReordering::ReorderingType PhraseBasedReorderingState::GetOrientationType
   if (m_first) {
     if (currRange.GetStartPos() == 0) {
       return M;
-    }
-    else {
+    } else {
       return DR;
     }
   }
   if (m_prevRange.GetEndPos() == currRange.GetStartPos()-1) {
     return M;
-  }
-  else if (m_prevRange.GetStartPos() == currRange.GetEndPos()+1) {
+  } else if (m_prevRange.GetStartPos() == currRange.GetEndPos()+1) {
     return S;
-  }
-  else if (m_prevRange.GetEndPos() < currRange.GetStartPos()) {
+  } else if (m_prevRange.GetEndPos() < currRange.GetStartPos()) {
     return DR;
   }
   return DL;
@@ -179,14 +184,11 @@ LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const Hypoth
 
   if (m_modelType == MSD) {
     reoType = GetOrientationTypeMSD(reoDistance);
-  }
-  else if (m_modelType == MSLR) {
+  } else if (m_modelType == MSLR) {
     reoType = GetOrientationTypeMSLR(reoDistance);
-  }
-  else if (m_modelType == LeftRight) {
+  } else if (m_modelType == LeftRight) {
     reoType = GetOrientationTypeLeftRight(reoDistance);  
-  }
-  else {
+  } else {
     reoType = GetOrientationTypeMonotonic(reoDistance);
   }
 
@@ -196,8 +198,7 @@ LexicalReorderingState* HierarchicalReorderingBackwardState::Expand(const Hypoth
 LexicalReordering::ReorderingType HierarchicalReorderingBackwardState::GetOrientationTypeMSD(int reoDistance) const {
   if (reoDistance == 1) {
     return M;
-  }
-  else if (reoDistance == -1) {
+  } else if (reoDistance == -1) {
     return S;
   }
   return D;
@@ -206,11 +207,9 @@ LexicalReordering::ReorderingType HierarchicalReorderingBackwardState::GetOrient
 LexicalReordering::ReorderingType HierarchicalReorderingBackwardState::GetOrientationTypeMSLR(int reoDistance) const {
   if (reoDistance == 1) {
     return M;
-  }
-  else if (reoDistance == -1) {
+  } else if (reoDistance == -1) {
     return S;
-  }
-  else if (reoDistance > 1) {
+  } else if (reoDistance > 1) {
     return DR;
   }
   return DL;
@@ -253,14 +252,11 @@ LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothe
   
   if (m_modelType == MSD) {
     reoType = GetOrientationTypeMSD(currWordsRange, coverage);
-  }
-  else if (m_modelType == MSLR) {
+  } else if (m_modelType == MSLR) {
     reoType = GetOrientationTypeMSLR(currWordsRange, coverage);
-  }
-  else if (m_modelType == Monotonic) {
+  } else if (m_modelType == Monotonic) {
     reoType = GetOrientationTypeMonotonic(currWordsRange, coverage);
-  }
-  else  {
+  } else  {
     reoType = GetOrientationTypeLeftRight(currWordsRange, coverage);
   }
   return new HierarchicalReorderingForwardState(m_modelType);
