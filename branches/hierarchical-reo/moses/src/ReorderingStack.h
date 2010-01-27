@@ -21,17 +21,17 @@ namespace Moses
 
  class ReorderingStack
  {
-   private:
+ private:
 	
-            std::vector<WordsRange> m_stack;
+   std::vector<WordsRange> m_stack;
 
-   public:
+ public:
 	
-		int Compare(const ReorderingStack& o) const;
-
-		
-		int Push(WordsRange input_span);
-                void Merge(WordsRange input_span);
+   int Compare(const ReorderingStack& o) const;
+   int ShiftReduce(WordsRange input_span);
+                
+ private:
+   void Reduce(WordsRange input_span);
  };	
 
 
