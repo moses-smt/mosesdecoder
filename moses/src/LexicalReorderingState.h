@@ -28,6 +28,7 @@ class LexicalReorderingState : public FFState {
 
     static LexicalReorderingState* CreateLexicalReorderingState(std::vector<std::string>& config,
 								LexicalReordering::Direction dir);
+    int GetNumberOfScores() const;
   protected:
     ModelType m_modelType;
 
