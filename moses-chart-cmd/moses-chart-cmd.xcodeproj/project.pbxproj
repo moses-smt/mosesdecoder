@@ -55,6 +55,13 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
+		1CF9A7EB11105A1A00071293 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* OnDiskPt */;
+			remoteInfo = OnDiskPt;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -184,6 +191,7 @@
 			dependencies = (
 				1C6689C5100D3A3900A606B2 /* PBXTargetDependency */,
 				1C6689C9100D3A4200A606B2 /* PBXTargetDependency */,
+				1CF9A7EC11105A1A00071293 /* PBXTargetDependency */,
 			);
 			name = "moses-chart-cmd";
 			productInstallPath = "$(HOME)/bin";
@@ -270,6 +278,11 @@
 			isa = PBXTargetDependency;
 			name = moses;
 			targetProxy = 1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */;
+		};
+		1CF9A7EC11105A1A00071293 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1CF9A7EB11105A1A00071293 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
