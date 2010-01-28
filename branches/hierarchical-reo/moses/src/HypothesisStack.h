@@ -8,6 +8,7 @@
 
 namespace Moses
 {
+using namespace std;
   
   class Manager;
 

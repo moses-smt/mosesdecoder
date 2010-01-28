@@ -29,9 +29,6 @@ class ConfusionNet;
 
 //additional types
 
-typedef std::vector<float>      Score;
-typedef std::vector<FactorType> FactorList;
-
 class LexicalReorderingTable {
  public:
  LexicalReorderingTable(const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors)
@@ -42,7 +39,7 @@ class LexicalReorderingTable {
  public:
   static LexicalReorderingTable* LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors);
  public:
-  virtual Score GetScore(const Phrase& f, const Phrase& e, const Phrase& c) = 0;
+  virtual Scores GetScore(const Phrase& f, const Phrase& e, const Phrase& c) = 0;
   virtual void InitializeForInput(const InputType&){
     /* override for on-demand loading */
   };
@@ -133,8 +130,8 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
   void Cache(const ConfusionNet& input);
   void Cache(const Sentence& input);
 
-  void  auxCacheForSrcPhrase(const Phrase& f);
-  Score auxFindScoreForContext(const Candidates& cands, const Phrase& contex);
+  void   auxCacheForSrcPhrase(const Phrase& f);
+  Scores auxFindScoreForContext(const Candidates& cands, const Phrase& contex);
  private:
   //typedef LexicalReorderingCand          CandType;
   typedef std::map< std::string, Candidates > CacheType;

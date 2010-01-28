@@ -7,6 +7,7 @@
 
 namespace Moses
 {
+using namespace std;
 
 inline bool existsFile(const char* filePath) {
   struct stat mystat;

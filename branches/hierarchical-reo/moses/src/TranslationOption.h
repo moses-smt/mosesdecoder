@@ -37,6 +37,7 @@ namespace Moses
 
 class PhraseDictionary;
 class GenerationDictionary;
+class LexicalReordering;
 
 /** Available phrase translation for a particular sentence pair.
  * In a multi-factor model, this is expanded from the entries in the 
@@ -177,7 +178,7 @@ public:
 	void CalcScore();
 	
 	void CacheReorderingProb(const LexicalReordering &lexreordering
-													, const Score &score);
+													, const Scores &score);
 
 	TO_STRING();
 };

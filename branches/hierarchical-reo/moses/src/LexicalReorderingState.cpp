@@ -8,6 +8,7 @@
 #include "WordsRange.h"
 #include "ReorderingStack.h"
 
+#include "LexicalReordering.h"
 #include "LexicalReorderingState.h"
 
 namespace Moses {
@@ -27,12 +28,10 @@ namespace Moses {
 
 
 
-  LexicalReorderingState* LexicalReorderingState::CreateLexicalReorderingState(std::vector<std::string>& config, LexicalReordering::Direction dir) {
+  LexicalReorderingState* LexicalReorderingState::CreateLexicalReorderingState(const std::vector<std::string>& config, LexicalReordering::Direction dir) {
   
   ModelType mt = None;
   bool phraseBased = true;
-
-  assert(dir != LexicalReordering::Bidirectional);
 
   for (int i=0; i<config.size(); ++i) {
     if (config[i] == "hier") {

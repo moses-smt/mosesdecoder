@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+using namespace std;
+
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
@@ -158,7 +160,6 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const {
 
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const {
 	//iterate over XmlOptions list, find exact source/target matches
-	const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	
 	for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
 	        iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
