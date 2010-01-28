@@ -40,10 +40,10 @@ public:
 	size_t GetEndIndex(size_t scoreBookkeepingID) const { return m_ends[scoreBookkeepingID]; }
 	//! sum of all score components from every score producer
 	size_t GetTotalNumberOfScores() const { return m_last; }
-	//! ??? print unweighted scores of each ScoreManager to stream os
-	void Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
-	//! ??? print weighted scores of each ScoreManager to stream os
-	void Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const;
+	//! print unweighted scores of each ScoreManager to stream os
+	void PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
+	//! print weighted scores of each ScoreManager to stream os
+	void PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const;
 #ifdef HAVE_PROTOBUF
 	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
 #endif
@@ -60,6 +60,7 @@ private:
 	std::vector<const StatefulFeatureFunction*> m_stateful; /**< all the score producers in this run */
 	std::vector<const StatelessFeatureFunction*> m_stateless; /**< all the score producers in this run */
 	std::vector<std::string> m_featureNames;
+	std::vector<std::string> m_featureShortNames;
 	size_t m_last;
 };
 

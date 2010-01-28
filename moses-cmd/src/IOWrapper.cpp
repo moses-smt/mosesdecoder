@@ -144,7 +144,11 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	// search graph output
 	if (staticData.GetOutputSearchGraph())
 	{
-	  string fileName = staticData.GetParam("output-search-graph")[0];
+		string fileName;
+		if (staticData.GetOutputSearchGraphExtended())
+			fileName = staticData.GetParam("output-search-graph-extended")[0];
+		else
+			fileName = staticData.GetParam("output-search-graph")[0];
 	  std::ofstream *file = new std::ofstream;
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
