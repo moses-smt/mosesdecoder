@@ -21,7 +21,6 @@ public:
 						, float weightWP);
 	void LoadVocabLookup();
 	
-  float getPhraseProb(vector<unsigned>*);
   // functions below required by base class
   PhraseTableImplementation GetPhraseTableImplementation() const { return dynSuffixArray; }
   void SetWeightTransModel(const std::vector<float, std::allocator<float> >&);
