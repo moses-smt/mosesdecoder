@@ -53,8 +53,8 @@ private:
 	
 	class SentenceAlignment {
 	public:
-		vector<string> english;
-		vector<string> foreign;
+		vector<wordID_t> english;
+		vector<wordID_t> foreign;
 		vector<int> alignedCountF;
 		vector< vector<int> > alignedToE;
 		
