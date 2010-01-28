@@ -8,15 +8,31 @@
 #include "DynSAInclude/types.h"
 #include "DynSAInclude/utils.h"
 namespace Moses {
-class SentenceAlignment {
+	
+class PhrasePair
+{
+public:
+	int m_startE, m_endE, m_startF, m_endF;
+	PhrasePair(int startE, int endE, int startF, int endF)
+	: m_startE(startE)
+	, m_endE(endE)
+	, m_startF(startF)
+	, m_endF(endF)
+	{}
+};
+	
+class SentenceAlignment 
+{
 public:
   vector<wordID_t> english;
   vector<wordID_t> foreign;
   vector<int> alignedCountF;
   vector< vector<int> > alignedToE;
+
   int create( char[], char[], char[], int );
-  //  void clear() { delete(alignment); };
+	std::vector<PhrasePair> Extract(int maxPhraseLength);
 };
+	
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
 public: 
   PhraseDictionaryDynSuffixArray(size_t numScoreComponent);
