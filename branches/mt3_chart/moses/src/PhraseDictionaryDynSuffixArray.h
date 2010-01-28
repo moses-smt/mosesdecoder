@@ -57,7 +57,7 @@ private:
 		vector<wordID_t> foreign;
 		vector<int> alignedCountF;
 		vector< vector<int> > alignedToE;
-		
+\\jjjj
 		int create( char[], char[], char[], int );
 		//  void clear() { delete(alignment); };
 	};
