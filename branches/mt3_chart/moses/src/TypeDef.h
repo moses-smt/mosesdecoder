@@ -147,13 +147,13 @@ enum PhraseTableImplementation
 {
 	Memory			= 0
 	,Binary			= 1
-	,OnDisk			= 2 // deprecated 
+	,OnDisk			= 2 
 	,GlueRule		= 3
-	,Joshua			= 4
-	,MemorySourceLabel	= 5
+	,Joshua			= 4 // deprecated 
+	,MemorySourceLabel	= 5 // deprecated 
 	,NewFormat	= 6
-	,BerkeleyDb	= 7
-        ,dynSuffixArray = 8
+	,BerkeleyDb	= 7 // deprecated 
+  ,dynSuffixArray = 8
 };
 
 enum InputTypeEnum

@@ -23,7 +23,7 @@
 #pragma once
 
 #include "PhraseDictionary.h"
-#include "PhraseDictionaryNodeSourceLabel.h"
+#include "PhraseDictionaryNodeNewFormat.h"
 #include "ChartRuleCollection.h"
 
 namespace Moses
@@ -40,7 +40,7 @@ namespace Moses
 			friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryNewFormat&);
 			
 		protected:
-			PhraseDictionaryNodeSourceLabel m_collection;
+			PhraseDictionaryNodeNewFormat m_collection;
 			mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 			mutable std::vector<ProcessedRuleStack*>	m_runningNodesVec;
 			
@@ -48,7 +48,7 @@ namespace Moses
 			TargetPhraseCollection	*m_prevPhraseColl;
 			
 			TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target);
-			PhraseDictionaryNodeSourceLabel &GetOrCreateNode(const Phrase &source, const TargetPhrase &target);
+			PhraseDictionaryNodeNewFormat &GetOrCreateNode(const Phrase &source, const TargetPhrase &target);
 			
 			bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output

@@ -251,18 +251,18 @@ namespace Moses
 		
 	TargetPhraseCollection &PhraseDictionaryNewFormat::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target)
 	{
-		PhraseDictionaryNodeSourceLabel &currNode = GetOrCreateNode(source, target);
+		PhraseDictionaryNodeNewFormat &currNode = GetOrCreateNode(source, target);
 		return currNode.GetOrCreateTargetPhraseCollection();
 	}
 	
-	PhraseDictionaryNodeSourceLabel &PhraseDictionaryNewFormat::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
+	PhraseDictionaryNodeNewFormat &PhraseDictionaryNewFormat::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
 	{
 		const size_t size = source.GetSize();
 		
         const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
         AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
 
-		PhraseDictionaryNodeSourceLabel *currNode = &m_collection;
+		PhraseDictionaryNodeNewFormat *currNode = &m_collection;
 		for (size_t pos = 0 ; pos < size ; ++pos)
 		{
 			const Word& word = source.GetWord(pos);
@@ -303,7 +303,7 @@ namespace Moses
 		/*
 		 const size_t size = source.GetSize();
 		 
-		 const PhraseDictionaryNodeSourceLabel *currNode = &m_collection;
+		 const PhraseDictionaryNodeNewFormat *currNode = &m_collection;
 		 for (size_t pos = 0 ; pos < size ; ++pos)
 		 {
 		 const Word& word = source.GetWord(pos);
@@ -340,15 +340,15 @@ namespace Moses
 	
 	void PhraseDictionaryNewFormat::SetWeightTransModel(const vector<float> &weightT)
 	{
-		PhraseDictionaryNodeSourceLabel::iterator iterDict;
+		PhraseDictionaryNodeNewFormat::iterator iterDict;
 		for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
 		{
-			PhraseDictionaryNodeSourceLabel::InnerNodeMap &innerNode = iterDict->second;
-			PhraseDictionaryNodeSourceLabel::InnerNodeMap::iterator iterInner;
+			PhraseDictionaryNodeNewFormat::InnerNodeMap &innerNode = iterDict->second;
+			PhraseDictionaryNodeNewFormat::InnerNodeMap::iterator iterInner;
 			for (iterInner = innerNode.begin() ; iterInner != innerNode.end() ; ++iterInner)
 			{
 				// recursively set weights in nodes
-				PhraseDictionaryNodeSourceLabel &node = iterInner->second;
+				PhraseDictionaryNodeNewFormat &node = iterInner->second;
 				node.SetWeightTransModel(this, weightT);
 			}
 		}
@@ -374,8 +374,8 @@ namespace Moses
 	// friend
 	ostream& operator<<(ostream& out, const PhraseDictionaryNewFormat& phraseDict)
 	{
-		const PhraseDictionaryNodeSourceLabel &coll = phraseDict.m_collection;
-		PhraseDictionaryNodeSourceLabel::const_iterator iter;
+		const PhraseDictionaryNodeNewFormat &coll = phraseDict.m_collection;
+		PhraseDictionaryNodeNewFormat::const_iterator iter;
 		for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 		{
 			const Word &word = (*iter).first;

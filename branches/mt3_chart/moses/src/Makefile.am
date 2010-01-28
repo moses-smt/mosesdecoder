@@ -13,6 +13,7 @@ libmoses_a_SOURCES = \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
 	DotChart.cpp \
+	DotChartOnDisk.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
@@ -48,18 +49,19 @@ libmoses_a_SOURCES = \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
+	PhraseDictionaryOnDisk.cpp \
+	PhraseDictionaryOnDiskChart.cpp \
 	PhraseDictionaryMemory.cpp \
 	PhraseDictionaryMemoryChart.cpp \
 	PhraseDictionaryNewFormat.cpp \
 	PhraseDictionaryNewFormatChart.cpp \
 	PhraseDictionaryNode.cpp \
+	PhraseDictionaryNodeNewFormat.cpp \
 	PhraseDictionaryNodeMemory.cpp \
-	PhraseDictionaryNodeSourceLabel.cpp \
-	PhraseDictionarySourceLabel.cpp \
-	PhraseDictionarySourceLabelChart.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PhraseDictionaryGlueRule.cpp \
+	PhraseDictionaryDynSuffixArray.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ScoreComponentCollection.cpp \
@@ -90,8 +92,7 @@ libmoses_a_SOURCES = \
 	XmlOption.cpp \
 	DynSAInclude/vocab.cpp \
 	DynSAInclude/file.cpp \
-	DynSuffixArray.cpp \
-	PhraseDictionaryDynSuffixArray.cpp 
+	DynSuffixArray.cpp 
 
 if PROTOBUF
 BUILT_SOURCES = \
