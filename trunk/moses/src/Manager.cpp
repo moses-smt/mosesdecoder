@@ -323,33 +323,59 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 
 void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const Hypothesis *hypo, const Hypothesis *recombinationHypo, int forward, double fscore)
 {
-        outputSearchGraphStream << translationId
-				<< " hyp=" << hypo->GetId()
-				<< " stack=" << hypo->GetWordsBitmap().GetNumWordsCovered();
-	if (hypo->GetId() > 0)
+	const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+	bool extendedFormat = StaticData::Instance().GetOutputSearchGraphExtended();
+	outputSearchGraphStream << translationId;
+
+	// special case: initial hypothesis
+	if ( hypo->GetId() == 0 )
 	{
-	  const Hypothesis *prevHypo = hypo->GetPrevHypo();
-	  outputSearchGraphStream << " back=" << prevHypo->GetId()
-				  << " score=" << hypo->GetScore()
-				  << " transition=" << (hypo->GetScore() - prevHypo->GetScore());
+		outputSearchGraphStream << " hyp=0 stack=0";
+		if (!extendedFormat) 
+		{
+			outputSearchGraphStream << " forward=" << forward	<< " fscore=" << fscore;
+		}
+		outputSearchGraphStream << endl;
+		return;
 	}
 
-	if (recombinationHypo != NULL)
+  const Hypothesis *prevHypo = hypo->GetPrevHypo();
+
+	// output in traditional format
+	if (!extendedFormat)
 	{
-	  outputSearchGraphStream << " recombined=" << recombinationHypo->GetId();
+		outputSearchGraphStream << " hyp=" << hypo->GetId()
+			<< " stack=" << hypo->GetWordsBitmap().GetNumWordsCovered()
+		  << " back=" << prevHypo->GetId()
+		  << " score=" << hypo->GetScore()
+			<< " transition=" << (hypo->GetScore() - prevHypo->GetScore());
+
+		if (recombinationHypo != NULL)
+		  outputSearchGraphStream << " recombined=" << recombinationHypo->GetId();
+		
+		outputSearchGraphStream << " forward=" << forward	<< " fscore=" << fscore
+		  << " covered=" << hypo->GetCurrSourceWordsRange().GetStartPos() 
+			<< "-" << hypo->GetCurrSourceWordsRange().GetEndPos()
+			<< " out=" << hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
+			<< endl;
+		return;
 	}
+	
+	// output in extended format
+	if (recombinationHypo != NULL) 
+		outputSearchGraphStream << " hyp=" << recombinationHypo->GetId();
+	else
+		outputSearchGraphStream << " hyp=" << hypo->GetId();
 
-	outputSearchGraphStream << " forward=" << forward
-				<< " fscore=" << fscore;
+	outputSearchGraphStream << " back=" << prevHypo->GetId();
 
-	if (hypo->GetId() > 0)
-	{
-	  outputSearchGraphStream << " covered=" << hypo->GetCurrSourceWordsRange().GetStartPos() 
-				  << "-" << hypo->GetCurrSourceWordsRange().GetEndPos()
-				  << " out=" << hypo->GetCurrTargetPhrase();
-	}
+	ScoreComponentCollection scoreBreakdown = hypo->GetScoreBreakdown();
+	scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
+	outputSearchGraphStream << " [ ";
+	StaticData::Instance().GetScoreIndexManager().PrintLabeledScores( outputSearchGraphStream, scoreBreakdown );
+	outputSearchGraphStream << " ]";
 
-	outputSearchGraphStream << endl;
+	outputSearchGraphStream << " out=" << hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }
 
 void Manager::GetConnectedGraph(

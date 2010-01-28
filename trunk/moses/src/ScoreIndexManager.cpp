@@ -39,21 +39,34 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	*/
 }
 
-void ScoreIndexManager::Debug_PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const
+void ScoreIndexManager::PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scores) const
 {
-	std::vector<float> weights(scc.m_scores.size(), 1.0f);
-	Debug_PrintLabeledWeightedScores(os, scc, weights);
+	std::vector<float> weights(scores.m_scores.size(), 1.0f);
+	PrintLabeledWeightedScores(os, scores, weights);
 }
 
-void ScoreIndexManager::Debug_PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const
+void ScoreIndexManager::PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scores, const std::vector<float>& weights) const
 {
-  assert(m_featureNames.size() == weights.size());
-  for (size_t i = 0; i < m_featureNames.size(); ++i)
-    os << m_featureNames[i] << "\t" << weights[i] << endl;
+  assert(m_featureShortNames.size() == weights.size());
+	string lastName = "";
+  for (size_t i = 0; i < m_featureShortNames.size(); ++i)
+	{
+		if (i>0)
+		{ 
+			os << " ";
+		}
+		if (lastName != m_featureShortNames[i])
+		{
+			os << m_featureShortNames[i] << ": ";
+			lastName = m_featureShortNames[i];
+		}
+    os << weights[i] * scores[i];
+	}
 }
 
 void ScoreIndexManager::InitFeatureNames() {
 	m_featureNames.clear();
+	m_featureShortNames.clear();
 	size_t cur_i = 0;
 	size_t cur_scoreType = 0;
 	while (cur_i < m_last) {
@@ -77,6 +90,7 @@ void ScoreIndexManager::InitFeatureNames() {
 			if (add_idx)
 				os << '_' << ind;
 			m_featureNames.push_back(os.str());
+			m_featureShortNames.push_back( m_producers[cur_scoreType]->GetScoreProducerWeightShortName() );
 			++cur_i;
 			++ind;
 		}

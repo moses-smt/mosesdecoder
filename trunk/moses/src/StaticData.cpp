@@ -172,7 +172,17 @@ bool StaticData::LoadData(Parameter *parameter)
 	  }	    
 	  m_outputSearchGraph = true;
 	}
-        else
+	// ... in extended format
+	else if (m_parameter->GetParam("output-search-graph-extended").size() > 0)
+	{
+	  if (m_parameter->GetParam("output-search-graph-extended").size() != 1) {
+	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-extended file"));
+	    return false;
+	  }	    
+	  m_outputSearchGraph = true;
+		m_outputSearchGraphExtended = true;
+	}
+	else
 	  m_outputSearchGraph = false;
 #ifdef HAVE_PROTOBUF
 	if (m_parameter->GetParam("output-search-graph-pb").size() > 0)
@@ -255,14 +265,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
 	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion);
-
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
 
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
+
+	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
+	m_allWeights.push_back(m_weightDistortion);
 
 	// reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?

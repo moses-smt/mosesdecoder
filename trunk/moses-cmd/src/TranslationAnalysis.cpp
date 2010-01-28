@@ -106,8 +106,8 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
       os << "\tdropped=" << *dwi << std::endl;
     }
   }
-	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED):" << std::endl;
-  StaticData::Instance().GetScoreIndexManager().Debug_PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
+	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
+  StaticData::Instance().GetScoreIndexManager().PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
 	os << std::endl;
 }
 

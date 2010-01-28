@@ -97,6 +97,7 @@ Parameter::Parameter()
 	AddParam("output-word-graph", "owg", "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
 	AddParam("time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
 	AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
+	AddParam("output-search-graph-extended", "osgx", "Output connected hypotheses of search into specified filename, in extended format");
 #ifdef HAVE_PROTOBUF
 	AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
 #endif
