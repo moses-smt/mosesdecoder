@@ -39,6 +39,7 @@ public:
     }
     
     virtual int Compare(const FFState& other) const {
+    return 0;
         const FFStateArray *a = dynamic_cast<const FFStateArray *> (&other);
         
         // if the types are different, fall back on pointer comparison to get a well-defined ordering
@@ -49,17 +50,15 @@ public:
         for(i = 0; i < m_states.size(); i++) {
             if(i >= a->m_states.size())
                 return -1;
-            if(m_states[i] < a->m_states[i])
-                return -1;
-            if(m_states[i] > a->m_states[i])
-                return 1;
+            int comp = m_states[i]->Compare(*(a->m_states[i]));
+            if(comp != 0)
+                return comp;
         }
         
         if(i == a->m_states.size())
             return 0;
         else
             return 1;
-
     }
 };
 }
