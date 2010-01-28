@@ -50,6 +50,18 @@ private:
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;
 	
+	
+	class SentenceAlignment {
+	public:
+		vector<string> english;
+		vector<string> foreign;
+		vector<int> alignedCountF;
+		vector< vector<int> > alignedToE;
+		
+		int create( char[], char[], char[], int );
+		//  void clear() { delete(alignment); };
+	};
+	
 };
 
 } // end namespace
