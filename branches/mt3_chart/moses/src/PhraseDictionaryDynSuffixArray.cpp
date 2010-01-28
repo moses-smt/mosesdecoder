@@ -17,8 +17,19 @@ namespace Moses {
     delete srcCrp_;
     delete trgCrp_;
   }
-bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string alignments) {
-  loadCorpus(new FileHandler(source), *srcCrp_, srcSntBreaks_);
+bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string alignments
+																					, const std::vector<float> &weight
+																					, size_t tableLimit
+																					, const LMList &languageModels
+																					, float weightWP) 
+{
+
+	m_weight = weight;
+	m_tableLimit = tableLimit;
+	m_languageModels = &languageModels;
+	m_weightWP = weightWP;
+
+	loadCorpus(new FileHandler(source), *srcCrp_, srcSntBreaks_);
   loadCorpus(new FileHandler(target), *trgCrp_, trgSntBreaks_);
   //assert(srcSntBreaks_.size() == trgSntBreaks_.size());
   std::cerr << "Vocab: " << std::endl;
@@ -91,4 +102,13 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(FileHandler* corpus, vector<wordI
   }
   return cArray.size();
 }
+	
+const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const 
+{
+	const TargetPhraseCollection *ret = new const TargetPhraseCollection();
+
+	
+	return ret;
+} 
+
 }// end namepsace

@@ -986,7 +986,11 @@ bool StaticData::LoadPhraseTables()
     else if(impl == dynSuffixArray) {
       PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent);
       assert(token.size() == 7);
-      if(!(pd && pd->Load(token[4], token[5], token[6]))) {
+      if(!(pd && pd->Load(token[4], token[5], token[6]
+													, weight, maxTargetPhrase[index]
+													, GetAllLM()
+													, GetWeightWordPenalty()))) 
+			{
         std::cerr << "FAILED TO LOAD\n" << endl;
         delete pd;
         return false;
@@ -996,8 +1000,7 @@ bool StaticData::LoadPhraseTables()
       test[1] = 4;
       pd->getPhraseProb(&test);
       m_phraseDictionary.push_back(pd);
-      std::cerr << "GOT HERE\n" << std::endl;
-			abort();
+      std::cerr << "Suffix array phrase table loaded" << std::endl;
     }
 		else
 		{
