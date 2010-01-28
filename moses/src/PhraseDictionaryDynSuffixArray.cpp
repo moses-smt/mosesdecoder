@@ -41,6 +41,8 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
   //trgSA_ = new DynSuffixArray(trgCrp_); 
   //if(!trgSA_) return false;
   loadAlignments(new FileHandler(alignments));
+	LoadVocabLookup();
+	
   return true;
 }
 int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
@@ -126,6 +128,7 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(FileHandler* corpus, vector<wordI
 	
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const 
 {
+	cerr << src << " ";
 	const TargetPhraseCollection *ret = new const TargetPhraseCollection();
 
 	size_t phraseSize = src.GetSize();
@@ -139,12 +142,12 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		
 		if (iterLookup == vocabLookup_.end())
 		{ // vocab doesn't exist -> phrase doesn't exist
-
+			cerr << "? ";
 		}
 		else
 		{
 			wordID_t arrayId = iterLookup->second;
-	
+			cerr << arrayId << " ";
 		}
 		
 	}
