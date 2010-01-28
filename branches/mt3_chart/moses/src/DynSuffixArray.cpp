@@ -29,7 +29,6 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   for(int i=0; i < size; ++i) {
     std::cerr << tmpArr[i] << std::endl;
   }
-  exit(1);
   SA_ = new vuint_t(tmpArr, tmpArr + size);
   std::cerr << "printing SA " << std::endl;
   for(int i=0; i < size; ++i) std::cerr << SA_->at(i) << std::endl;
