@@ -51,10 +51,11 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
   while(getline(*align, line)) {
     Utils::splitToInt(line, vtmp, "- ");
     assert(vtmp.size() % 2 == 0);
-    SentenceAlignment curSnt(vtmp.size() / 2); // initialize empty sentence 
+    SentenceAlignment curSnt(vtmp.size()/2); // initialize empty sentence 
     // get cnt of trg nodes each src node is attached to  
-    for(int i=0; i < vtmp.size(); i+=2)
-      curSnt.alignedCountSrc[vtmp[i]/2]++;
+    for(int i=0; i < vtmp.size(); ++i)
+      if(i % 2 == 0) curSnt.alignedCountSrc[vtmp[i]/2]++;
+      else curSnt.alignedTrg[vtmp[i]/2].push_back(vtmp[i-1]);
   }
   return 1;
 }
