@@ -90,9 +90,11 @@ libmoses_a_SOURCES = \
 	WordLattice.cpp \
 	WordsRange.cpp \
 	XmlOption.cpp \
+	PhraseDictionaryDynSuffixArray.cpp \ 
+	DynSuffixArray.cpp \
 	DynSAInclude/vocab.cpp \
 	DynSAInclude/file.cpp \
-	DynSuffixArray.cpp 
+	DynSAInclude/sarray.cpp
 
 if PROTOBUF
 BUILT_SOURCES = \

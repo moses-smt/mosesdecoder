@@ -4,8 +4,8 @@
 namespace Moses {
   PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(size_t numScoreComponent):
     PhraseDictionary(numScoreComponent) { 
-    srcSA_ = new DynSuffixArray(); 
-    trgSA_ = new DynSuffixArray(); 
+    srcSA_ = 0; 
+    trgSA_ = 0;
     srcCrp_ = new vector<wordID_t>();
     trgCrp_ = new vector<wordID_t>();
     vocab_ = new Vocab();
@@ -20,7 +20,41 @@ namespace Moses {
 bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string alignments) {
   loadCorpus(new FileHandler(source), *srcCrp_, srcSntBreaks_);
   loadCorpus(new FileHandler(target), *trgCrp_, trgSntBreaks_);
-  assert(srcSntBreaks_.size() == trgSntBreaks_.size());
+  //assert(srcSntBreaks_.size() == trgSntBreaks_.size());
+  std::cerr << "Vocab: " << std::endl;
+  vocab_->printVocab();
+  // build suffix arrays and auxilliary arrays
+  srcSA_ = new DynSuffixArray(srcCrp_); 
+  if(!srcSA_) return false;
+  //trgSA_ = new DynSuffixArray(trgCrp_); 
+  //if(!trgSA_) return false;
+  loadAlignments(new FileHandler(alignments));
+  return true;
+}
+int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
+  alignments_ = new vector<vector<pair<short, short> > >();
+  string line;
+  vector<int> vtmp;
+  while(getline(*align, line)) {
+    vector<pair<short, short> > sntAlg;
+    Utils::splitToInt(line, vtmp, "- ");    
+    assert(vtmp.size() % 2 == 0);
+    for(int i=0; i < vtmp.size(); i+=2) {
+      pair<short, short> ap = std::make_pair(vtmp[i], vtmp[i+1]);
+      sntAlg.push_back(ap);
+    }
+    alignments_->push_back(sntAlg);
+    for(algItr_ = alignments_->begin(); algItr_ != alignments_->end(); ++algItr_) 
+      for(sntAlgItr_ = algItr_->begin(); sntAlgItr_ != algItr_->end(); ++sntAlgItr_) {
+        std::cerr << sntAlgItr_->first << "-" << sntAlgItr_->second << " ";
+      }
+    std::cerr  << std::endl;
+  }
+  return alignments_->size();
+}
+float PhraseDictionaryDynSuffixArray::getPhraseProb(vector<unsigned>* phrase) {
+  srcSA_->countPhrase(phrase);
+  return 0;
 }
 void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
 {
@@ -46,6 +80,7 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(FileHandler* corpus, vector<wordI
     vector<wordID_t>& sntArray) {
   string line, word;
   int sntIdx(0);
+  corpus->seekg(0);
   while(getline(*corpus, line)) {
     sntArray.push_back(sntIdx);
     std::istringstream ss(line.c_str());
@@ -54,7 +89,6 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(FileHandler* corpus, vector<wordI
       cArray.push_back(vocab_->getWordID(word));
     }          
   }
-  iterate(cArray, itr) cerr << *itr << endl;
   return cArray.size();
 }
 }// end namepsace
