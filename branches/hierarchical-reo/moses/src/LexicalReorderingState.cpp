@@ -79,10 +79,11 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(ModelType mt)
 
 
 int PhraseBasedReorderingState::Compare(const FFState& o) const {
-  const PhraseBasedReorderingState& other = static_cast<const PhraseBasedReorderingState&>(o);
-  if (m_prevRange == other.m_prevRange) {
+  const PhraseBasedReorderingState* other = dynamic_cast<const PhraseBasedReorderingState*>(&o);
+  assert(other != NULL);
+  if (m_prevRange == other->m_prevRange) {
     return 0;
-  } else if (m_prevRange < other.m_prevRange) {
+  } else if (m_prevRange < other->m_prevRange) {
     return -1;
   }
   return 1;
