@@ -58,11 +58,15 @@ class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 
+class Hypothesis;
+
 /** Contains global variables and contants */
 class StaticData
 {
 private:
 	static StaticData									s_instance;
+public:
+	std::vector<Hypothesis*> m_batchedHypotheses;
 protected:	
 
 	std::map<long,Phrase> m_constraints;
@@ -470,6 +474,9 @@ public:
 	
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+
+	void AddBatchedHypo(Hypothesis* hypo) { m_batchedHypotheses.push_back(hypo); }
+	bool IsBatched() const { return true; }
 };
 
 }

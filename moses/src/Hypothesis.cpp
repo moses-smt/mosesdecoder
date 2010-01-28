@@ -264,11 +264,21 @@ void Hypothesis::ResetScore()
 	m_futureScore = m_totalScore = 0.0f;
 }
 
+void Hypothesis::PrepareScore(const SquareMatrix &futureScore)
+{
+	m_preparedFutureScore = futureScore;
+}
+
+void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
+{
+	m_preparedFutureScore = futureScore;
+	CalcScore();
+}
+
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
-void Hypothesis::CalcScore(const SquareMatrix &futureScore) 
-{
+void Hypothesis::CalcScore() {
   // some stateless score producers cache their values in the translation
 	// option: add these here
   // language model scores for n-grams completely contained within a target
@@ -298,7 +308,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
 	// FUTURE COST
-	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
+	m_futureScore = m_preparedFutureScore.CalcFutureScore( m_sourceCompleted );
 	
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
