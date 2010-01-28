@@ -37,6 +37,7 @@ libmoses_a_SOURCES = \
 	TrellisPathCollection.cpp \
 	LexicalReordering.cpp \
 	LexicalReorderingTable.cpp \
+	LexicalReorderingState.cpp \
 	Manager.cpp \
 	NGramCollection.cpp \
 	NGramNode.cpp \
@@ -51,6 +52,7 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
+	ReorderingStack.cpp \
 	ScoreComponentCollection.cpp \
 	ScoreIndexManager.cpp \
 	ScoreProducer.cpp \
