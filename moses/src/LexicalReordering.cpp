@@ -214,7 +214,7 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
 }
 
 const FFState* LexicalReordering::EmptyHypothesisState() const {
-    FFStateArray *states = new FFStateArray(m_direction.size());
+    FFStateArray *states = new FFStateArray();
     for(int i = 0; i < m_direction.size(); i++)
         states->push_back(LexicalReorderingState::CreateLexicalReorderingState(m_modelType, m_direction[i]));
     return states;
