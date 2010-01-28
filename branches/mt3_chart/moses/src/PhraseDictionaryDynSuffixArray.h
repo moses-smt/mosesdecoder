@@ -24,6 +24,13 @@ public:
 class SentenceAlignment 
 {
 public:
+  SentenceAlignment(int size) {
+    for(int i=0; i < size; ++i) {
+      alignedCountSrc.push_back(0);
+      vector<int> trgWrd;
+      alignedTrg.push_back(trgWrd);
+    }
+  }
   vector<wordID_t>* trgSnt;
   vector<wordID_t>* srcSnt;
   vector<int> alignedCountSrc;

@@ -49,14 +49,14 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
   string line;
   vector<int> vtmp;
   while(getline(*align, line)) {
-    SentenceAlignment curSnt; 
     Utils::splitToInt(line, vtmp, "- ");
     assert(vtmp.size() % 2 == 0);
+    SentenceAlignment curSnt(vtmp.size() / 2); // initialize empty sentence 
     // get cnt of trg nodes each src node is attached to  
-    for(int i=0; i < vtmp.size(); i+=2) {
-       
-    }
+    for(int i=0; i < vtmp.size(); i+=2)
+      curSnt.alignedCountSrc[vtmp[i]/2]++;
   }
+  return 1;
 }
 void PhraseDictionaryDynSuffixArray::LoadVocabLookup()
 {
