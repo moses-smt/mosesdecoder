@@ -14,11 +14,11 @@ namespace Moses {
     // get id and possibly add to vocab 
     if (words2ids_.find(word) == words2ids_.end())
       if (!closed_) {
-	words2ids_[word] = words2ids_.size(); // size() returns size AFTER insertion of word
-	ids2words_[words2ids_.size()] = word; // so size() is the same here ... 
+        words2ids_[word] = words2ids_.size(); // size() returns size AFTER insertion of word
+        ids2words_[words2ids_.size()] = word; // so size() is the same here ... 
       } 
       else {
-	return Vocab::kOOVWordID;
+        return Vocab::kOOVWordID;
       }
     wordID_t id = words2ids_[word];
     return id;
