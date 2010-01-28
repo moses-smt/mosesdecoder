@@ -691,7 +691,7 @@ typedef struct token_s {
 #define KEY_TOKEN 1
 #define KEY_MAX_LENGTH 250
 
-#define MAX_TOKENS 8
+#define MAX_TOKENS 800
 
 /*
  * Tokenize the command string by replacing whitespace with '\0' and update
@@ -882,6 +882,51 @@ static void process_stat(conn *c, token_t *tokens, const size_t ntokens) {
     out_string(c, "ERROR");
 }
 
+int str2int(char * src) {
+	int result;
+	sscanf(src, "%d", &result);
+	return result;
+}
+
+void appendStuff(conn * c, void * data, int size) {
+	memcpy(c->wbuf + c->wbytes, data, size);
+	c->wbytes += size;
+}
+
+void appendProb(conn * c, float p, int isEnd) {
+	appendStuff(c, &p, sizeof(float));
+}
+
+/**
+ * command format: bprob (size (word){size})+
+ * example: bprob 2 word1 word2 4 w1 w2 w3 w4 3 word1 word2 word3
+ */
+static inline void process_batch_command(conn *c, token_t *tokens, size_t ntokens) {
+	int i = 1;
+	
+	c->wbytes = 0;
+	
+	while (tokens[i].length) {
+		int contextSize = str2int(tokens[i].value);
+		int * context = (int*)malloc(sizeof(int) * (contextSize + 1)); // +1 for the terminating -1
+		i++;
+		
+		int j;
+		for (j = 0; j < contextSize; j++) {
+			context[j] = srilm_getvoc(tokens[i].value);
+			i++;
+		}
+		context[contextSize] = -1;
+		float p = srilm_wordprob(context[0], &context[1]);
+		
+		appendProb(c, p, (tokens[i].length == 0));
+	}
+	
+    c->wcurr = c->wbuf;
+	conn_set_state(c, conn_write);
+	c->write_and_go = conn_read;
+}
+
 static inline void process_srilm_command(conn *c, token_t *tokens, size_t ntokens) {
     int context[6];
     int i = 1;
@@ -933,6 +978,8 @@ static void process_command(conn *c, char *command) {
     if (ntokens >1 &&
       strcmp(tokens[COMMAND_TOKEN].value, "prob") == 0) {
         process_srilm_command(c, tokens, ntokens);
+	} else if (ntokens > 1 && strcmp(tokens[COMMAND_TOKEN].value, "batch") == 0) {
+		process_batch_command(c, tokens, ntokens);
     } else if (ntokens >= 2 && (strcmp(tokens[COMMAND_TOKEN].value, "stats") == 0)) {
 
         process_stat(c, tokens, ntokens);
