@@ -14,6 +14,26 @@
 #include <string.h>
 #include <map>
 
+typedef struct _float_arr FloatArr;
+typedef struct _word_ctx WordCtx;
+typedef struct _word_ctx_arr WordCtxArr;
+
+struct _float_arr {
+	float * data;
+	int size;
+};
+
+struct _word_ctx {
+	int word;
+	int * context;
+	int size;
+};
+
+struct _word_ctx_arr {
+	WordCtx ** data;
+	int size;
+};
+
 struct Cache {
   map<int, Cache> tree;
   float prob;
@@ -59,6 +79,8 @@ struct LMClient {
     }
     std::cerr << "Connected to LM on " << host << " on port " << port << std::endl;
   }
+  
+  
   float wordProb(int word, int* context) {
     Cache* cur = &cache;
     int i = 0;
@@ -83,21 +105,97 @@ struct LMClient {
     while (1) {
       if (r < 0) {
         errors++; sleep(1);
-	cerr << "Error: read()\n";
-	if (errors > 5) exit(1);
+        cerr << "Error: read()\n";
+        if (errors > 5) exit(1);
       } else if (r==0 || res[cnt] == '\n') { break; }
       else {
         cnt += r;
-	if (cnt==6) break;
-	read(sock, &res[cnt], 6-cnt);
+        if (cnt==6) break;
+        read(sock, &res[cnt], 6-cnt);
       }
     }
     cur->prob = *reinterpret_cast<float*>(res);
     return cur->prob;
   }
+  
   void clear() {
     cache.tree.clear();
   }
-  Cache cache;
-};
+  Cache cache;  
 
+	/**
+	 *
+	 */
+	string serialize(WordCtxArr * wordContextArr) {
+		ostringstream os;
+		
+		os << "batch";
+		
+		for (int i = 0; i < wordContextArr->size; i++) {
+			WordCtx * c = wordContextArr->data[i];
+			os << ' ' << (c->size + 1) << ' ' << voc->getWord((VocabIndex)c->word);
+			
+			for (int j = 0; j < c->size; j++) {
+				os << ' ' << voc->getWord((VocabIndex)c->context[j]);
+			}
+		}
+		
+		return os.str();
+	}
+	
+	/**
+	 * reads size chars from sock or dies trying
+	 */
+	void readSafe(char * buf, int size) {
+		int r = read(sock, buf, size);
+		
+		int errors = 0;
+		int cnt = 0;
+		
+		while (1) {
+			if (r < 0) {
+				errors++;
+				sleep(1);
+				cerr << "Error: read()\n";
+				if (errors > 5)
+					exit(1);
+			}
+			else if (r==0 || buf[cnt] == '\n') {
+				break;
+			}
+			else {
+				cnt += r;
+				if (cnt==6)
+					break;
+				read(sock, &buf[cnt], size - cnt);
+			}
+		}
+	}
+	
+	/**
+	 *
+	 */
+	void evaluate(string out, FloatArr * result) {
+		write(sock, out.c_str(), out.size());
+		
+		int responseSize = sizeof(float) * result->size;
+		char * buf = (char*)malloc(responseSize);
+		
+		readSafe(buf, responseSize);
+		
+		result->data = reinterpret_cast<float*>(buf);
+	}
+	
+	/**
+	 *
+	 */
+	FloatArr * batchProb(WordCtxArr * wordContextArr) {
+		string out = serialize(wordContextArr);
+		
+		FloatArr * result = initArr(wordContextArr->size);
+		
+		evaluate(out, result);
+		
+		return result;
+	}
+};
