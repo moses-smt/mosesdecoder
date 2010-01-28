@@ -14,9 +14,6 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      const std::string &filePath, 
                                      const std::vector<float>& weights) {
     std::cerr << "Creating lexical reordering...\n";
-    //add ScoreProducer
-    const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-    const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
     std::cerr << "weights: ";
     for(size_t w = 0; w < weights.size(); ++w){
         std::cerr << weights[w] << " ";
@@ -28,11 +25,16 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     m_modelTypeString = modelType;
     m_modelType = Tokenize<std::string>(modelType,"-");
     std::vector<LexicalReordering::Condition> conditions;
-    for(std::vector<std::string>::iterator it = m_modelType.begin(); it != m_modelType.end(); ++it)
+    for(std::vector<std::string>::iterator it = m_modelType.begin(); it != m_modelType.end();) {
+        std::cerr << "Processing: " << *it << std::endl;
         if(DecodeDirection(*it) ||
            DecodeCondition(*it) ||
-           DecodeNumFeatureFunctions(*it))
+           DecodeNumFeatureFunctions(*it)) {
+            std::cerr << "Erasing: " << *it << std::endl;
             it = m_modelType.erase(it);
+        } else
+            ++it;
+    }
  
     if(m_direction.empty())
         m_direction.push_back(Backward); // default setting
@@ -40,7 +42,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     //m_FactorsE = e_factors;
     //m_FactorsF = f_factors;
     //Todo:should check that
-    //- if condition contains e or c than e_factors non empty
+    //- if condition contains e than e_factors non empty
     //- if condition contains f f_factors non empty
     for(size_t i = 0; i < m_condition.size(); ++i){
         switch(m_condition[i]){
@@ -85,6 +87,10 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
         exit(1);
     }
     
+    //add ScoreProducer
+    const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
+    const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+
     m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 }
 
