@@ -265,7 +265,7 @@ LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothe
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
     return M;
-  } else if (currRange.GetEndPos()-1 >= 0 && coverage.GetValue(currRange.GetEndPos()-1)) {
+  } else if (currRange.GetEndPos() >= 1 && coverage.GetValue(currRange.GetEndPos()-1)) {
     return S;
   }
   return D;
@@ -274,7 +274,7 @@ LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrienta
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
     return M;
-  } else if (currRange.GetStartPos()-1 >= 0 && coverage.GetValue(currRange.GetStartPos()-1)) {
+  } else if (currRange.GetStartPos() >= 1 && coverage.GetValue(currRange.GetStartPos()-1)) {
     return S;
   } else if (coverage.GetLastGapPos() > currRange.GetEndPos()) {
     return DR;
@@ -292,7 +292,7 @@ LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrienta
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
     return R;
-  } else if (currRange.GetStartPos()-1 >= 0 && coverage.GetValue(currRange.GetStartPos()-1)) {
+  } else if (currRange.GetStartPos() >= 1 && coverage.GetValue(currRange.GetStartPos()-1)) {
     return L;
   } else if (coverage.GetLastGapPos() > currRange.GetEndPos()) {
     return R;
