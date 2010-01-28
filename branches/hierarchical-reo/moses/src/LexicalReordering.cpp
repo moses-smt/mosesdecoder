@@ -192,6 +192,8 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
             case Backward:
                 cache_hypo = &hypo;
                 break;
+            default:
+                abort();
         }
 
         const ScoreComponentCollection &reorderingScoreColl = cache_hypo->GetCachedReorderingScore();
@@ -215,7 +217,7 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
 
 const FFState* LexicalReordering::EmptyHypothesisState() const {
     FFStateArray *states = new FFStateArray();
-    for(int i = 0; i < m_direction.size(); i++)
+    for(size_t i = 0; i < m_direction.size(); i++)
         states->push_back(LexicalReorderingState::CreateLexicalReorderingState(m_modelType, m_direction[i]));
     return states;
 }
