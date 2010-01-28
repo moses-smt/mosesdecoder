@@ -33,11 +33,11 @@ namespace Moses {
   ModelType mt = None;
   bool phraseBased = true;
 
-  for (int i=0; i<config.size(); ++i) {
+  for (size_t i=0; i<config.size(); ++i) {
     if (config[i] == "hier") {
-      phraseBased == false;
+      phraseBased = false;
     } else if (config[i] == "phrase") {
-      phraseBased == true;
+      phraseBased = true;
     } else if (config[i] == "msd") {
       mt = MSD;
     } else if (config[i] == "mslr") {
@@ -75,7 +75,7 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(ModelType mt, WordsRange 
 
 
 PhraseBasedReorderingState::PhraseBasedReorderingState(ModelType mt)
-  : LexicalReorderingState(mt), m_first(true), m_prevRange(WordsRange(NOT_FOUND,NOT_FOUND)) {};
+  : LexicalReorderingState(mt), m_prevRange(WordsRange(NOT_FOUND,NOT_FOUND)), m_first(true) {};
 
 
 int PhraseBasedReorderingState::Compare(const FFState& o) const {
