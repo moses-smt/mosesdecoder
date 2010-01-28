@@ -996,8 +996,8 @@ bool StaticData::LoadPhraseTables()
         return false;
       }
       std::vector<unsigned> test(2);
-      test[0] = 3;
-      test[1] = 4;
+      test[0] = 1;
+      test[1] = 2;
       pd->getPhraseProb(&test);
       m_phraseDictionary.push_back(pd);
       std::cerr << "Suffix array phrase table loaded" << std::endl;
