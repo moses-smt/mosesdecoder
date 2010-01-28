@@ -126,7 +126,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 			
 			VERBOSE(3,"\t" << targetPhrase << "\n");
 		}
-		VERBOSE(3,endl);
+		VERBOSE(3,std::endl);
 	}
 }
 

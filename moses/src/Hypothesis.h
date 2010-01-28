@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
-#include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
 
@@ -47,6 +46,7 @@ class WordsRange;
 class Hypothesis;
 class FFState;
 class Manager;
+class LexicalReordering;
 
 typedef std::vector<Hypothesis*> ArcList;
 

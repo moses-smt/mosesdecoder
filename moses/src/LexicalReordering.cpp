@@ -155,7 +155,7 @@ bool LexicalReordering::DecodeNumFeatureFunctions(std::string configElement) {
     return false;
 }
 
-Score LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const {
+Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const {
     return m_table->GetScore(f, e, Phrase(Output));
 }
 

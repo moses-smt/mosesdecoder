@@ -24,7 +24,7 @@ class LexicalReorderingState : public FFState {
 
     virtual int Compare(const FFState& o) const = 0;
     virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
-					   LexicalReordering::ReorderingType& reoType) const;
+					   LexicalReordering::ReorderingType& reoType) const = 0;
 
     static LexicalReorderingState* CreateLexicalReorderingState(const std::vector<std::string>& config,
 								LexicalReordering::Direction dir);

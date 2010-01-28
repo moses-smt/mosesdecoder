@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LMList.h"
+#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 
@@ -165,7 +166,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 }
 
 void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreordering
-												, const Score &score)
+												, const Scores &score)
 {
 	m_reordering.Assign(&lexreordering, score);
 }

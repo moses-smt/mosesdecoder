@@ -4,6 +4,7 @@
 #include "NGramNode.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 

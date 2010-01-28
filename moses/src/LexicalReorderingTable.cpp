@@ -94,7 +94,7 @@ std::vector<float>  LexicalReorderingTableMemory::GetScore(const Phrase& f,
 	  }
 	}
   }
-  return Score(); 
+  return Scores(); 
 }
 
 void LexicalReorderingTableMemory::DbgDump(std::ostream* out) const{
@@ -215,14 +215,14 @@ LexicalReorderingTableTree::LexicalReorderingTableTree(
 LexicalReorderingTableTree::~LexicalReorderingTableTree(){
 }
 
-Score LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, const Phrase& c) {
+Scores LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, const Phrase& c) {
   if(   (!m_FactorsF.empty() && 0 == f.GetSize())
      || (!m_FactorsE.empty() && 0 == e.GetSize())){
     //NOTE: no check for c as c might be empty, e.g. start of sentence
     //not a proper key
     // phi: commented out, since e may be empty (drop-unknown)
     //std::cerr << "Not a proper key!\n";
-    return Score();
+    return Scores();
   }
   CacheType::iterator i;;
   if(m_UseCache){
@@ -239,11 +239,11 @@ Score LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, con
 	}
   }
   //not in cache go to file...
-  Score      score;
+  Scores      score;
   Candidates cands; 
   m_Table->GetCandidates(MakeTableKey(f,e), &cands);
   if(cands.empty()){
-    return Score();
+    return Scores();
   } 
 
   if(m_FactorsC.empty()){
@@ -259,10 +259,10 @@ Score LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, con
   return score;
 };
 
-Score LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands, const Phrase& context){
+Scores LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands, const Phrase& context){
   if(m_FactorsC.empty()){
 	assert(cands.size() <= 1);
-	return (1 == cands.size())?(cands[0].GetScore(0)):(Score());
+	return (1 == cands.size())?(cands[0].GetScore(0)):(Scores());
   } else {
 	std::vector<std::string> cvec;
 	for(size_t i = 0; i < context.GetSize(); ++i){
@@ -284,7 +284,7 @@ Score LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands
 		}
 	  }
 	}
-	return Score();
+	return Scores();
   }
 }
 
@@ -347,7 +347,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
 	  TRACE_ERR(".");
 	}
     IPhrase key;
-    Score   score;
+    Scores   score;
 
     std::vector<std::string> tokens = TokenizeMultiCharSeparator(line, "|||");
     std::string w;
@@ -396,7 +396,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     //transform score now...
     std::transform(score.begin(),score.end(),score.begin(),TransformScore);
     std::transform(score.begin(),score.end(),score.begin(),FloorScore);
-    std::vector<Score> scores;
+    std::vector<Scores> scores;
     scores.push_back(score);
     
     if(key.empty()) {

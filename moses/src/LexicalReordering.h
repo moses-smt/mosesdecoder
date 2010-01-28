@@ -46,7 +46,9 @@ public:
     
     const FFState* EmptyHypothesisState() const;
     
-    virtual std::string GetScoreProducerDescription() const;
+    virtual std::string GetScoreProducerDescription() const {
+        return "Lexical reordering model of type " + m_modelTypeString;
+    }
     
     std::string GetScoreProducerWeightShortName() const {
         return "d";
@@ -57,7 +59,7 @@ public:
         m_table->InitializeForInput(i);
     }
     
-    Score GetProb(const Phrase& f, const Phrase& e) const;
+    Scores GetProb(const Phrase& f, const Phrase& e) const;
     
 private:
     bool DecodeCondition(std::string s);
