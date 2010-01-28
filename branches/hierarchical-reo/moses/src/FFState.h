@@ -39,7 +39,6 @@ public:
     }
     
     virtual int Compare(const FFState& other) const {
-    return 0;
         const FFStateArray *a = dynamic_cast<const FFStateArray *> (&other);
         
         // if the types are different, fall back on pointer comparison to get a well-defined ordering
