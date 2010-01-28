@@ -9,7 +9,7 @@ namespace Moses {
     trgSA_ = 0;
     srcCrp_ = new vector<wordID_t>();
     trgCrp_ = new vector<wordID_t>();
-    vocab_ = new Vocab();
+    vocab_ = new Vocab(false);
   }
   PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray(){
     delete srcSA_;
@@ -120,6 +120,7 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(FileHandler* corpus, vector<wordI
       cArray.push_back(vocab_->getWordID(word));
     }          
   }
+  cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus for ssarray
   return cArray.size();
 }
 	
