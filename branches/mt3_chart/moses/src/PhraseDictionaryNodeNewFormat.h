@@ -47,7 +47,6 @@ class PhraseDictionaryNodeNewFormat : public PhraseDictionaryNode
 		// 2nd word = target side non term, or the word if term
 
 	// only these classes are allowed to instantiate this class
-	friend class PhraseDictionarySourceLabel;
 	friend class PhraseDictionaryNewFormat;
 	friend class std::map<Word, PhraseDictionaryNodeNewFormat>;
 	
