@@ -116,20 +116,21 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 
 	// n-best
 	m_surpressSingleBestOutput = false;
+       
 	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		} 
-		else 
-		{
-			std::ofstream *file = new std::ofstream;
-			m_nBestStream = file;
-			file->open(nBestFilePath.c_str());
-		}
-	}
+        {
+                if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout")
+                {
+                        m_nBestStream = &std::cout;
+                        m_surpressSingleBestOutput = true;
+                } 
+                else 
+                {
+                        std::ofstream *file = new std::ofstream;
+                        m_nBestStream = file;
+                        file->open(nBestFilePath.c_str());
+                }
+        }
 
 	// wordgraph output
 	if (staticData.GetOutputWordGraph())
