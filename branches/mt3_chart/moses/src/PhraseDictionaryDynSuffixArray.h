@@ -24,12 +24,10 @@ public:
 class SentenceAlignment 
 {
 public:
-  vector<wordID_t> english;
-  vector<wordID_t> foreign;
-  vector<int> alignedCountF;
-  vector< vector<int> > alignedToE;
-
-  int create( char[], char[], char[], int );
+  vector<wordID_t>* trgSnt;
+  vector<wordID_t>* srcSnt;
+  vector<int> alignedCountSrc;
+  vector< vector<int> > alignedTrg;
 	std::vector<PhrasePair> Extract(int maxPhraseLength);
 };
 	
