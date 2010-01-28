@@ -36,11 +36,31 @@ class SquareMatrix
 protected:
 	const size_t m_size; /**< length of the square (sentence length) */
 	float *m_array; /**< two-dimensional array to store floats */
-
-	SquareMatrix(); // not implemented
-	SquareMatrix(const SquareMatrix &copy); // not implemented
 	
 public:
+	SquareMatrix()
+	:m_size(0), m_array(NULL)
+	{}
+
+	SquareMatrix(const SquareMatrix& copy)
+	:m_size(copy.m_size)
+	{
+		int array_size = sizeof(float) * copy.m_size * copy.m_size;
+		m_array = (float*) malloc(array_size);
+		memcpy(m_array, copy.m_array, array_size);
+	}
+	
+	SquareMatrix& operator=(const SquareMatrix& copy)
+	{
+		int array_size = sizeof(float) * copy.m_size * copy.m_size;
+		if (m_array) {
+			free(m_array);
+		}
+		m_array = (float*) malloc(array_size);
+		memcpy(m_array, copy.m_array, array_size);
+		return *this;
+	}
+
 	SquareMatrix(size_t size)
 	:m_size(size)
 	{

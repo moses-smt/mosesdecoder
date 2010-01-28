@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "ObjectPool.h"
 
+#include "SquareMatrix.h"
+
 namespace Moses
 {
 
@@ -87,6 +89,8 @@ protected:
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
 	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
+
+	SquareMatrix m_preparedFutureScore;
 
 	/*! used by initial seeding of the translation process */
 	Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
@@ -149,6 +153,8 @@ public:
 
 	void ResetScore();
 
+	void PrepareScore(const SquareMatrix &futureScore);
+	void CalcScore();
 	void CalcScore(const SquareMatrix &futureScore);
 
   float CalcExpectedScore( const SquareMatrix &futureScore );

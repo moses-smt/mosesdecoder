@@ -88,6 +88,30 @@ void SearchNormal::ProcessSentence()
 		// some logging
 		IFVERBOSE(2) { OutputHypoStackSize(); }
 
+		if (staticData.IsBatched()) {
+			// cfedermann: we now process the batched requests and see where that
+			//             brings us wrt. number of generated hypotheses.
+			std::vector<Hypothesis*>& batchedHypos =
+				const_cast<StaticData*>(&staticData)->m_batchedHypotheses;
+			for (size_t currPos = 0; currPos < batchedHypos.size(); ++currPos) {
+				Hypothesis* batchedHypo = batchedHypos[currPos];
+				batchedHypo->CalcScore();
+			}
+
+			for (size_t currPos = 0; currPos < batchedHypos.size(); ++currPos) {
+				Hypothesis* batchedHypo = batchedHypos[currPos];
+				size_t wordsTranslated = batchedHypo->GetWordsBitmap().GetNumWordsCovered();
+				IFVERBOSE(2) { t = clock(); }
+				m_hypoStackColl[wordsTranslated]->AddPrune(batchedHypo);
+				IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
+			}
+			VERBOSE(3, "BATCH_COMPUTED_HYPOS: " << batchedHypos.size() << std::endl);
+			batchedHypos.clear();
+			
+			// some logging
+			IFVERBOSE(2) { OutputHypoStackSize(); }
+		}
+
 		// this stack is fully expanded;
 		actual_hypoStack = &sourceHypoColl;
 	}
@@ -287,7 +311,18 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 		newHypo = hypothesis.CreateNext(transOpt, m_constraint);
 		IFVERBOSE(2) { stats.AddTimeBuildHyp( clock()-t ); }
 		if (newHypo==NULL) return;
-		newHypo->CalcScore(m_transOptColl.GetFutureScore());
+		
+		if (!staticData.IsBatched()) {
+			newHypo->CalcScore(m_transOptColl.GetFutureScore());
+		}
+		else {
+			newHypo->PrepareScore(m_transOptColl.GetFutureScore());
+
+			// cfedermann: now the score compuation is prepared, we put the partial
+			//             hypothesis into the static vector of batched hypotheses.
+			const_cast<StaticData*>(&staticData)->AddBatchedHypo(newHypo);
+		}
+
 	}
 	else
 	// early discarding: check if hypothesis is too bad to build
@@ -340,11 +375,16 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
 		newHypo->PrintHypothesis();
 	}
 
+	// cfedermann: the hypo has been stored inside the central "batch" vector.
+	//             It will be added to the respective stack after all hypos for
+	//             the current stack are processed.
 	// add to hypothesis stack
-	size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
-	IFVERBOSE(2) { t = clock(); }
-	m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
-	IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
+	if (!staticData.IsBatched()) {
+		size_t wordsTranslated = newHypo->GetWordsBitmap().GetNumWordsCovered();
+		IFVERBOSE(2) { t = clock(); }
+		m_hypoStackColl[wordsTranslated]->AddPrune(newHypo);
+		IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
+	}
 }
 
 const std::vector < HypothesisStack* >& SearchNormal::GetHypothesisStacks() const
