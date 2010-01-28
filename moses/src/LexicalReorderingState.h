@@ -26,7 +26,7 @@ class LexicalReorderingState : public FFState {
     virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
 					   LexicalReordering::ReorderingType& reoType) const;
 
-    static LexicalReorderingState* CreateLexicalReorderingState(std::vector<std::string>& config,
+    static LexicalReorderingState* CreateLexicalReorderingState(const std::vector<std::string>& config,
 								LexicalReordering::Direction dir);
     int GetNumberOfScores() const;
   protected:

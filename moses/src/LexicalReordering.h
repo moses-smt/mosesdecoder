@@ -26,23 +26,21 @@ class InputType;
 class LexicalReordering : public StatefulFeatureFunction {
 public:
     typedef int ReorderingType;
-    typedef int OrientationType;
-    enum Direction {Forward, Backward, Bidirectional, Unidirectional = Backward};
-    enum Condition {F,E,C,FE,FEC};
+    enum Direction {Forward, Backward};
+    enum Condition {F,E,FE};
     
-    LexicalReordering *CreateLexicalReorderingModel(std::vector<FactorType>& f_factors, 
-                                                    std::vector<FactorType>& e_factors,
-                                                    const std::string &modelType,
-                                                    const std::string &filePath, 
-                                                    const std::vector<float>& weights);
+    LexicalReordering(std::vector<FactorType>& f_factors, 
+                      std::vector<FactorType>& e_factors,
+                      const std::string &modelType,
+                      const std::string &filePath, 
+                      const std::vector<float>& weights);
     virtual ~LexicalReordering();
     
     virtual size_t GetNumScoreComponents() const {
-        return m_NumScoreComponents; 
+        return m_numScoreComponents; 
     };
     
-    virtual FFState* Evaluate(
-                              const Hypothesis& cur_hypo,
+    virtual FFState* Evaluate(const Hypothesis& cur_hypo,
                               const FFState* prev_state,
                               ScoreComponentCollection* accumulator) const;
     
@@ -54,28 +52,27 @@ public:
         return "d";
     };
     
-    virtual int             GetNumOrientationTypes() const = 0;
-    virtual OrientationType GetOrientationType(Hypothesis*) const = 0;
-    
     std::vector<float> CalcScore(Hypothesis* hypothesis) const;
     void InitializeForInput(const InputType& i){
-        m_Table->InitializeForInput(i);
+        m_table->InitializeForInput(i);
     }
     
     Score GetProb(const Phrase& f, const Phrase& e) const;
-    //helpers
-    static std::vector<Condition> DecodeCondition(Condition c);
-    static std::vector<Direction> DecodeDirection(Direction d);
+    
 private:
-    Phrase auxGetContext(const Hypothesis* hypothesis) const;
-private:
-    LexicalReorderingTable* m_Table;
-    size_t m_NumScoreComponents;
-    std::vector< Direction > m_Direction;
-    std::vector< Condition > m_Condition;
-    bool m_OneScorePerDirection;
-    std::vector< FactorType > m_FactorsE, m_FactorsF, m_FactorsC;
-    int m_MaxContextLength;
+    bool DecodeCondition(std::string s);
+    bool DecodeDirection(std::string s);
+    bool DecodeNumFeatureFunctions(std::string s);
+
+    std::string m_modelTypeString;
+    std::vector<std::string> m_modelType;
+    LexicalReorderingTable* m_table;
+    size_t m_numScoreComponents;
+    std::vector<Direction> m_direction;
+    std::vector<Condition> m_condition;
+    std::vector<size_t> m_scoreOffset;
+    bool m_oneScorePerDirection;
+    std::vector<FactorType> m_factorsE, m_factorsF;
 };
 
 }

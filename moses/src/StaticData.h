@@ -21,10 +21,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
+#include <limits>
 #include <list>
 #include <vector>
 #include <map>
 #include <memory>
+#include <utility>
 
 #ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
@@ -148,7 +150,7 @@ protected:
 	size_t m_timeout_threshold; //! seconds after which time out is activated
 
 	bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
+	mutable std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
     //FIXME: Single lock for cache not most efficient. However using a 
     //reader-writer for LRU cache is tricky - how to record last used time? 
@@ -169,7 +171,7 @@ protected:
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
-	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
+	void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
 
 	/***
 	 * load all language models as specified in ini file
@@ -328,7 +330,7 @@ public:
 	}
 	bool UseEarlyDiscarding() const 
 	{
-		return m_earlyDiscardingThreshold != -numeric_limits<float>::infinity();
+		return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
 	}
 	float GetTranslationOptionThreshold() const
 	{
