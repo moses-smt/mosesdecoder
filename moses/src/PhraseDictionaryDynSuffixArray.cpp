@@ -1,5 +1,6 @@
 #include "PhraseDictionaryDynSuffixArray.h"
 #include "DynSAInclude/utils.h"
+#include "FactorCollection.h"
 
 namespace Moses {
   PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(size_t numScoreComponent):
@@ -61,8 +62,27 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
       }
     std::cerr  << std::endl;
   }
+	
+	
   return alignments_->size();
 }
+	
+void PhraseDictionaryDynSuffixArray::LoadVocabLookup()
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	Vocab::Word2Id::const_iterator iter;
+	for (iter = vocab_->vocabStart(); iter != vocab_->vocabEnd(); ++iter)
+	{
+		const word_t &str = iter->first;
+		wordID_t arrayId = iter->second;
+		const Factor *factor = factorCollection.AddFactor(Input, 0, str, false);
+		vocabLookup_[factor] = arrayId;
+		vocabLookupRev_[arrayId] = factor;
+	}
+			
+}
+	
 float PhraseDictionaryDynSuffixArray::getPhraseProb(vector<unsigned>* phrase) {
   srcSA_->countPhrase(phrase);
   return 0;
@@ -107,6 +127,26 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 {
 	const TargetPhraseCollection *ret = new const TargetPhraseCollection();
 
+	size_t phraseSize = src.GetSize();
+	for (size_t pos = 0; pos < phraseSize; ++pos)
+	{
+		const Word &word = src.GetWord(pos);
+		const Factor *factor = word.GetFactor(0);
+		
+		std::map<const Factor *, wordID_t>::const_iterator iterLookup;
+		iterLookup = vocabLookup_.find(factor);
+		
+		if (iterLookup == vocabLookup_.end())
+		{ // vocab doesn't exist -> phrase doesn't exist
+
+		}
+		else
+		{
+			wordID_t arrayId = iterLookup->second;
+	
+		}
+		
+	}
 	
 	return ret;
 } 

@@ -11,6 +11,9 @@ namespace Moses {
 
   class Vocab {
   public:
+		typedef std::map<word_t, wordID_t> Word2Id;
+		typedef std::map<wordID_t, word_t> Id2Word;
+		
     static const wordID_t kOOVWordID = 0;   // out of vocabulary word id
     static const wordID_t kBOSWordID = 1;    
     static const word_t kBOS;  // beginning of sentence marker
@@ -45,15 +48,15 @@ namespace Moses {
     bool load(const std::string & vocab_path, bool closed = true);
     bool load(FileHandler* fin, bool closed = true);
     void printVocab();
-    std::map<word_t, wordID_t>::const_iterator vocabStart() {
+    Word2Id::const_iterator vocabStart() {
       return words2ids_.begin();
     }
-    std::map<word_t, wordID_t>::const_iterator vocabEnd() {
+    Word2Id::const_iterator vocabEnd() {
       return words2ids_.end();
     }
   private:
-    std::map<word_t, wordID_t> words2ids_;  // map from strings to word ids
-    std::map<wordID_t, word_t> ids2words_;  // map from ids to strings
+    Word2Id words2ids_;  // map from strings to word ids
+    Id2Word ids2words_;  // map from ids to strings
     bool closed_;  // can more words be added
   };
 }

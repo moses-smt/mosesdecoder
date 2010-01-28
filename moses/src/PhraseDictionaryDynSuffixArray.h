@@ -19,6 +19,7 @@ public:
 						, size_t tableLimit
 						, const LMList &languageModels
 						, float weightWP);
+	void LoadVocabLookup();
 	
   float getPhraseProb(vector<unsigned>*);
   // functions below required by base class
@@ -46,6 +47,9 @@ private:
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
 	float m_weightWP;
+	
+	std::map<const Factor *, wordID_t> vocabLookup_;
+	std::map<wordID_t, const Factor *> vocabLookupRev_;
 	
 };
 
