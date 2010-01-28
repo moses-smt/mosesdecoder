@@ -1018,7 +1018,7 @@ map<string,string> wordLabel;
 void collectWordLabelCounts( SentenceAlignment &sentence ) 
 {
 	int countT = sentence.target.size();
-	for(int ti=0;ti<=countT;ti++) 
+	for(int ti=0; ti < countT; ti++) 
 	{
 		string &word = sentence.target[ ti ];
 		const vector< SyntaxNode* >& labels = sentence.targetTree.GetNodes(ti,ti);
