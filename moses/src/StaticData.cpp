@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "PhraseDictionaryGlueRule.h"
+#include "PhraseDictionarySourceLabel.h"
 #include "PhraseDictionaryNewFormat.h"
 #include "PhraseDictionaryOnDisk.h"
 
@@ -948,8 +949,24 @@ bool StaticData::LoadPhraseTables()
 		  assert(false);
 		}
 		else if (impl == MemorySourceLabel)
-		{ // delete impl
-				assert(false);
+		{	// memory phrase table
+			VERBOSE(2,"using standard phrase tables");
+			string fileBackoffPath = (token.size() >= 6) ? token[5] : "";
+			
+			PhraseDictionarySourceLabel *pd=new PhraseDictionarySourceLabel(numScoreComponent);
+			if (!pd->Load(input
+							 , output
+							 , filePath
+ 							 , fileBackoffPath
+							 , weight
+							 , maxTargetPhrase[index]
+							 , GetAllLM()
+							 , GetWeightWordPenalty()))
+			{
+				delete pd;
+				return false;
+			}
+			m_phraseDictionary.push_back(pd);
 		}
 		else if (impl == NewFormat)
 		{	// memory phrase table
@@ -987,17 +1004,22 @@ bool StaticData::LoadPhraseTables()
 			}
 			m_phraseDictionary.push_back(pd);
 		}
-                else if(impl == dynSuffixArray) {
-                  PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent);
-                  assert(token.size() == 7);
-                  if(!(pd && pd->Load(token[4], token[5], token[6]))) {
-                    delete pd;
-                    return false;
-                  }
-                  m_phraseDictionary.push_back(pd);
-                  std::cerr << "GOT HERE\n" << std::endl;
+    else if(impl == dynSuffixArray) {
+      PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent);
+      assert(token.size() == 7);
+      if(!(pd && pd->Load(token[4], token[5], token[6]))) {
+        std::cerr << "FAILED TO LOAD\n" << endl;
+        delete pd;
+        return false;
+      }
+      std::vector<unsigned> test(2);
+      test[0] = 3;
+      test[1] = 4;
+      pd->getPhraseProb(&test);
+      m_phraseDictionary.push_back(pd);
+      std::cerr << "GOT HERE\n" << std::endl;
 			abort();
-                }
+    }
 		else
 		{
 			TRACE_ERR("unkknow phrase table type" << endl);
