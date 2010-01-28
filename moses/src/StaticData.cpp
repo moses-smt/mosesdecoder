@@ -43,7 +43,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "PhraseDictionaryGlueRule.h"
-#include "PhraseDictionarySourceLabel.h"
 #include "PhraseDictionaryNewFormat.h"
 #include "PhraseDictionaryOnDisk.h"
 
@@ -947,26 +946,6 @@ bool StaticData::LoadPhraseTables()
 		else if (impl == Joshua)
 		{ // delete impl
 		  assert(false);
-		}
-		else if (impl == MemorySourceLabel)
-		{	// memory phrase table
-			VERBOSE(2,"using standard phrase tables");
-			string fileBackoffPath = (token.size() >= 6) ? token[5] : "";
-			
-			PhraseDictionarySourceLabel *pd=new PhraseDictionarySourceLabel(numScoreComponent);
-			if (!pd->Load(input
-							 , output
-							 , filePath
- 							 , fileBackoffPath
-							 , weight
-							 , maxTargetPhrase[index]
-							 , GetAllLM()
-							 , GetWeightWordPenalty()))
-			{
-				delete pd;
-				return false;
-			}
-			m_phraseDictionary.push_back(pd);
 		}
 		else if (impl == NewFormat)
 		{	// memory phrase table

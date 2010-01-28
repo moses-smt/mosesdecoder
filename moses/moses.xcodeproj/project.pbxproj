@@ -31,6 +31,8 @@
 		1C329190110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C32918D110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp */; };
 		1C329191110F419200E9F5E1 /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C32918E110F419200E9F5E1 /* PhraseDictionaryOnDisk.h */; };
 		1C329192110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C32918F110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp */; };
+		1C46DB321111CDAD0000F834 /* sarray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C46DB301111CDAD0000F834 /* sarray.cpp */; };
+		1C46DB331111CDAD0000F834 /* sarray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C46DB311111CDAD0000F834 /* sarray.h */; };
 		1C500A4F0FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */; };
 		1C500A500FB9E68400DFD24F /* PhraseDictionaryGlueRule.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */; };
 		1C500A530FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */; };
@@ -237,6 +239,8 @@
 		1C32918D110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
 		1C32918E110F419200E9F5E1 /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
 		1C32918F110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDiskChart.cpp; path = src/PhraseDictionaryOnDiskChart.cpp; sourceTree = "<group>"; };
+		1C46DB301111CDAD0000F834 /* sarray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sarray.cpp; path = src/DynSAInclude/sarray.cpp; sourceTree = "<group>"; };
+		1C46DB311111CDAD0000F834 /* sarray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sarray.h; path = src/DynSAInclude/sarray.h; sourceTree = "<group>"; };
 		1C500A400FB9E68400DFD24F /* PhraseDictionaryGlueRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryGlueRule.cpp; path = src/PhraseDictionaryGlueRule.cpp; sourceTree = "<group>"; };
 		1C500A410FB9E68400DFD24F /* PhraseDictionaryGlueRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryGlueRule.h; path = src/PhraseDictionaryGlueRule.h; sourceTree = "<group>"; };
 		1C500A440FB9E68400DFD24F /* PhraseDictionaryMemoryChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryMemoryChart.cpp; path = src/PhraseDictionaryMemoryChart.cpp; sourceTree = "<group>"; };
@@ -447,8 +451,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1CF9AADA1110C4DD00071293 /* PhraseDictionaryNodeNewFormat.cpp */,
-				1CF9AADB1110C4DD00071293 /* PhraseDictionaryNodeNewFormat.h */,
 				1C500A5F0FB9E6B700DFD24F /* AlignmentInfo.cpp */,
 				1C500A600FB9E6B700DFD24F /* AlignmentInfo.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
@@ -489,8 +491,8 @@
 				1CF9A80311105B3600071293 /* fdstream.h */,
 				1CF9A80411105B3600071293 /* file.cpp */,
 				D39BA8400B11FF0C0089AE6A /* File.cpp */,
-				1CF9A80511105B3600071293 /* file.h */,
 				1C8CFE240AD67A9700FA22E2 /* File.h */,
+				1CF9A80511105B3600071293 /* file.h */,
 				1C8CFE250AD67A9700FA22E2 /* FilePtr.h */,
 				E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */,
 				E2B7CA710DDB3B5C0089EFE0 /* FloydWarshall.h */,
@@ -578,6 +580,8 @@
 				1C8CFE600AD67A9700FA22E2 /* PhraseDictionaryNode.h */,
 				1C500A450FB9E68400DFD24F /* PhraseDictionaryNodeMemory.cpp */,
 				1C500A460FB9E68400DFD24F /* PhraseDictionaryNodeMemory.h */,
+				1CF9AADA1110C4DD00071293 /* PhraseDictionaryNodeNewFormat.cpp */,
+				1CF9AADB1110C4DD00071293 /* PhraseDictionaryNodeNewFormat.h */,
 				1C32918D110F419200E9F5E1 /* PhraseDictionaryOnDisk.cpp */,
 				1C32918E110F419200E9F5E1 /* PhraseDictionaryOnDisk.h */,
 				1C32918F110F419200E9F5E1 /* PhraseDictionaryOnDiskChart.cpp */,
@@ -591,6 +595,8 @@
 				B2639DE60EF199D400A67519 /* ReorderingConstraint.cpp */,
 				B2639DE70EF199D400A67519 /* ReorderingConstraint.h */,
 				1C500A700FB9E6B700DFD24F /* rule.proto */,
+				1C46DB301111CDAD0000F834 /* sarray.cpp */,
+				1C46DB311111CDAD0000F834 /* sarray.h */,
 				1C8CFE680AD67A9700FA22E2 /* ScoreComponentCollection.cpp */,
 				1C8CFE690AD67A9700FA22E2 /* ScoreComponentCollection.h */,
 				1C8CFE6A0AD67A9700FA22E2 /* ScoreIndexManager.cpp */,
@@ -786,6 +792,7 @@
 				1CF9A80E11105B3600071293 /* utils.h in Headers */,
 				1CF9A81011105B3600071293 /* vocab.h in Headers */,
 				1CF9AADD1110C4DD00071293 /* PhraseDictionaryNodeNewFormat.h in Headers */,
+				1C46DB331111CDAD0000F834 /* sarray.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -928,6 +935,7 @@
 				1CF9A80B11105B3600071293 /* file.cpp in Sources */,
 				1CF9A80F11105B3600071293 /* vocab.cpp in Sources */,
 				1CF9AADC1110C4DD00071293 /* PhraseDictionaryNodeNewFormat.cpp in Sources */,
+				1C46DB321111CDAD0000F834 /* sarray.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -33,6 +33,13 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
+		1C46DADB1111C8B60000F834 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1CF9A8AD11105D6C00071293 /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
 		1CF9A8B411105D6C00071293 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CF9A8AD11105D6C00071293 /* OnDiskPt.xcodeproj */;
@@ -157,6 +164,7 @@
 			);
 			dependencies = (
 				03306D780C0B244800CA1311 /* PBXTargetDependency */,
+				1C46DADC1111C8B60000F834 /* PBXTargetDependency */,
 			);
 			name = "moses-cmd";
 			productInstallPath = "$(HOME)/bin";
@@ -227,6 +235,11 @@
 			isa = PBXTargetDependency;
 			name = moses;
 			targetProxy = 03306D770C0B244800CA1311 /* PBXContainerItemProxy */;
+		};
+		1C46DADC1111C8B60000F834 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1C46DADB1111C8B60000F834 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
