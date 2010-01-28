@@ -1,7 +1,7 @@
 #include <algorithm>
 #include "DotChartOnDisk.h"
 #include "Util.h"
-#include "PhraseDictionaryNodeSourceLabel.h"
+#include "PhraseDictionaryNodeNewFormat.h"
 #include "../../OnDiskPt/src/PhraseNode.h"
 
 using namespace std;

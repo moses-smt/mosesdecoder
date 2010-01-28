@@ -1,6 +1,6 @@
 #include "DotChart.h"
 #include "Util.h"
-#include "PhraseDictionaryNodeSourceLabel.h"
+#include "PhraseDictionaryNodeNewFormat.h"
 
 using namespace std;
 

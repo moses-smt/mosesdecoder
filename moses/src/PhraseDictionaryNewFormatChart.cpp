@@ -51,7 +51,7 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 	{
 		const SavedNode &savedNode = *savedNodeColl[ind];
 		const ProcessedRule &prevProcessedRule = savedNode.GetProcessedRule();
-		const PhraseDictionaryNodeSourceLabel &prevNode = static_cast<const PhraseDictionaryNodeSourceLabel &>(prevProcessedRule.GetLastNode());
+		const PhraseDictionaryNodeNewFormat &prevNode = static_cast<const PhraseDictionaryNodeNewFormat &>(prevProcessedRule.GetLastNode());
 		const WordConsumed *prevWordConsumed = prevProcessedRule.GetLastWordConsumed();
 		size_t startPos = (prevWordConsumed == NULL) ? range.GetStartPos() : prevWordConsumed->GetWordsRange().GetEndPos() + 1;
 		
@@ -59,7 +59,7 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 		if (startPos == absEndPos)
 		{
 			const Word &sourceWord = src.GetWord(absEndPos);
-			const PhraseDictionaryNodeSourceLabel *node = prevNode.GetChild(sourceWord, sourceWord);
+			const PhraseDictionaryNodeNewFormat *node = prevNode.GetChild(sourceWord, sourceWord);
 			if (node != NULL)
 			{
 				const Word &sourceWord = node->GetSourceWord();
@@ -104,7 +104,7 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 			{
 				const Word &headWord = *iterHeadWords;
 				
-				const PhraseDictionaryNodeSourceLabel *node = prevNode.GetChild(headWord, sourceLabel);
+				const PhraseDictionaryNodeNewFormat *node = prevNode.GetChild(headWord, sourceLabel);
 				if (node != NULL)
 				{
 					//const Word &sourceWord = node->GetSourceWord();
@@ -128,7 +128,7 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 	for (iterNode = nodes.begin(); iterNode != nodes.end(); ++iterNode)
 	{
 		const ProcessedRule &processedRule = **iterNode;
-		const PhraseDictionaryNodeSourceLabel &node = static_cast<const PhraseDictionaryNodeSourceLabel &>(processedRule.GetLastNode());
+		const PhraseDictionaryNodeNewFormat &node = static_cast<const PhraseDictionaryNodeNewFormat &>(processedRule.GetLastNode());
 		const WordConsumed *wordConsumed = processedRule.GetLastWordConsumed();
 		assert(wordConsumed);
 		
@@ -154,7 +154,7 @@ void PhraseDictionaryNewFormat::DeleteDuplicates(ProcessedRuleColl &nodes) const
 	for (iter = nodes.begin(); iter != nodes.end(); ++iter)
 	{
 		const ProcessedRule *processedRule = *iter;
-		const PhraseDictionaryNodeSourceLabel &node = static_cast<const PhraseDictionaryNodeSourceLabel&> (processedRule->GetLastNode());
+		const PhraseDictionaryNodeNewFormat &node = static_cast<const PhraseDictionaryNodeNewFormat&> (processedRule->GetLastNode());
 		size_t nodeId = node.GetId();
 		float entropy = node.GetEntropy();
 		
@@ -178,7 +178,7 @@ void PhraseDictionaryNewFormat::DeleteDuplicates(ProcessedRuleColl &nodes) const
 	while (ind < nodes.GetSize())
 	{
 		const ProcessedRule &processedRule = nodes.Get(ind);
-		const PhraseDictionaryNodeSourceLabel &node = static_cast<const PhraseDictionaryNodeSourceLabel&> (processedRule.GetLastNode());
+		const PhraseDictionaryNodeNewFormat &node = static_cast<const PhraseDictionaryNodeNewFormat&> (processedRule.GetLastNode());
 		size_t nodeId = node.GetId();
 		float entropy = node.GetEntropy();
 		float minEntropy1 = minEntropy[nodeId];

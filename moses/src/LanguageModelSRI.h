@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Vocab.h"
+#include "Ngram.h"
 #include "LanguageModelSingleFactor.h"
 
 class Factor;
