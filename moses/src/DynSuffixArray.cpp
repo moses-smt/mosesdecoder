@@ -156,33 +156,34 @@ void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPELEMNT SUBSITITUTE FACTOR\n";
   return;
 }
-unsigned DynSuffixArray::countPhrase(vuint_t* phrase) {
+unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   std::set<int> skipSet;
+  indices->clear();
   // find lower and upper bounds on phrase[0]
   bounds = std::equal_range(F_->begin(), F_->end(), phrase->at(0));
+  int phrasesize = phrase->size();
   // bounds holds first and last index of phrase[0] in SA_
   cerr << "Lower Bound=" << int(bounds.first - F_->begin()) << endl;
   int lwrBnd = int(bounds.first - F_->begin());
   cerr << "Upper Bound=" << int(bounds.second - F_->begin() - 1) << endl;
   int uprBnd = int(bounds.second - F_->begin());
   int pcnt = uprBnd - lwrBnd; // assume all matching words are phrase initially
-  cerr << "phrase count at first  = " << pcnt << endl;
-  for(int pos = 1; pos < phrase->size(); ++pos) { // for all following words
+  for(int pos = 1; pos < phrasesize; ++pos) { // for all following words
     // for each index returned from check corpus SA[i] + 1 for phrase[1]
-    for(int i=lwrBnd; i < uprBnd; ++i) {
+    for(int i=lwrBnd; i < uprBnd; ++i) { // cut off for sampling here
       if(skipSet.find(i) != skipSet.end()) continue;
       int idx = SA_->at(i) + pos;
       cerr << "idx = " << idx << endl;
       if(corpus_->at(idx) != phrase->at(pos)) {
-        // save index to not check 
-        skipSet.insert(i);
-        --pcnt;
+        skipSet.insert(i);  // save index to not check next iteration 
+        --pcnt;  // decrement current phrase count
       }
+      else if(pos == phrasesize-1) // found phrase so store word index for snt retrieval
+        indices->push_back(idx);
     }
   }
-  cerr << "Total count of {3 4} = " << pcnt << endl;
-  // for each index re
+  cerr << "Total count of phrase = " << pcnt << endl;
   return pcnt;
 }
 } // end namespace

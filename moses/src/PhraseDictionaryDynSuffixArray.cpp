@@ -84,11 +84,6 @@ void PhraseDictionaryDynSuffixArray::LoadVocabLookup()
 	}
 			
 }
-	
-float PhraseDictionaryDynSuffixArray::getPhraseProb(vector<unsigned>* phrase) {
-  srcSA_->countPhrase(phrase);
-  return 0;
-}
 void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
 {
   /*assert(m_runningNodesVec.size() == 0);
@@ -126,12 +121,11 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(FileHandler* corpus, vector<wordI
   return cArray.size();
 }
 	
-const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const 
-{
+const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	cerr << src << " ";
-	const TargetPhraseCollection *ret = new const TargetPhraseCollection();
-
+	TargetPhraseCollection *ret = new TargetPhraseCollection();
 	size_t phraseSize = src.GetSize();
+  vector<wordID_t> srcLocal(phraseSize), indices(0);  
 	for (size_t pos = 0; pos < phraseSize; ++pos)
 	{
 		const Word &word = src.GetWord(pos);
@@ -141,17 +135,16 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		iterLookup = vocabLookup_.find(factor);
 		
 		if (iterLookup == vocabLookup_.end())
-		{ // vocab doesn't exist -> phrase doesn't exist
-			cerr << "? ";
-		}
+      return ret;
 		else
 		{
 			wordID_t arrayId = iterLookup->second;
+      srcLocal[pos] = arrayId;
 			cerr << arrayId << " ";
 		}
-		
 	}
-	
+  unsigned denom = srcSA_->countPhrase(&srcLocal, &indices);
+  	
 	return ret;
 } 
 

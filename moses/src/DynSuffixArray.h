@@ -19,7 +19,7 @@ public:
   DynSuffixArray();
   DynSuffixArray(vuint_t*);
   ~DynSuffixArray();
-  unsigned countPhrase(vuint_t*);
+  unsigned countPhrase(vuint_t*, vuint_t*);
 private: 
   vuint_t* SA_;
   vuint_t* ISA_;
