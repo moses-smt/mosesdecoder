@@ -19,9 +19,6 @@ class LexicalReorderingState : public FFState {
 
     enum ModelType {Monotonic, MSD, MSLR, LeftRight, None};
 
-  inline LexicalReorderingState(ModelType mt) 
-    : m_modelType(mt) {}
-
     virtual int Compare(const FFState& o) const = 0;
     virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
 					   LexicalReordering::ReorderingType& reoType) const = 0;
@@ -29,8 +26,12 @@ class LexicalReorderingState : public FFState {
     static LexicalReorderingState* CreateLexicalReorderingState(const std::vector<std::string>& config,
 								LexicalReordering::Direction dir);
     int GetNumberOfScores() const;
+
   protected:
     ModelType m_modelType;
+
+    inline LexicalReorderingState(ModelType mt) 
+      : m_modelType(mt) {}
 
     //constants for the different type of reorderings (corresponding to indexes in the table file)
     static const LexicalReordering::ReorderingType M = 0;  // monotonic
