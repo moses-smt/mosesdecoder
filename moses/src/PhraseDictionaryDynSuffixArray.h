@@ -13,12 +13,18 @@ class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
 public: 
   PhraseDictionaryDynSuffixArray(size_t numScoreComponent);
   ~PhraseDictionaryDynSuffixArray();
-  bool Load(string source, string target, string alignments);
+  
+	bool Load(string source, string target, string alignments
+						, const std::vector<float> &weight
+						, size_t tableLimit
+						, const LMList &languageModels
+						, float weightWP);
+	
   float getPhraseProb(vector<unsigned>*);
   // functions below required by base class
   PhraseTableImplementation GetPhraseTableImplementation() const { return dynSuffixArray; }
   void SetWeightTransModel(const std::vector<float, std::allocator<float> >&);
-  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const {return new const TargetPhraseCollection();} 
+  const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
   void InitializeForInput(const InputType& i);
   const ChartRuleCollection* GetChartRuleCollection(InputType const& src, WordsRange const& range,
     bool adhereTableLimit,const CellCollection &cellColl) const {}
@@ -35,6 +41,12 @@ private:
   vector<pair<short, short> >::iterator sntAlgItr_;
   int loadCorpus(FileHandler* corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(FileHandler* aligs);
+	
+	std::vector<float> m_weight;
+	size_t m_tableLimit;
+	const LMList *m_languageModels;
+	float m_weightWP;
+	
 };
 
 } // end namespace
