@@ -171,53 +171,67 @@ void extract( SentenceAlignment &sentence ) {
   int countF = sentence.foreign.size();
 
   // check alignments for english phrase startE...endE
-  for(int startE=0;startE<countE;startE++) {
-    for(int endE=startE;
-	(endE<countE && endE<startE+maxPhraseLength);
-	endE++) {
+  for(int startE=0;startE<countE;startE++) 
+	{
+    for(int endE=startE; 
+				(endE<countE && endE<startE+maxPhraseLength);
+				endE++) 
+		{
       
       int minF = 9999;
       int maxF = -1;
       vector< int > usedF = sentence.alignedCountF;
-      for(int ei=startE;ei<=endE;ei++) {
-	for(int i=0;i<sentence.alignedToE[ei].size();i++) {
-	  int fi = sentence.alignedToE[ei][i];
-	  // cout << "point (" << fi << ", " << ei << ")\n";
-	  if (fi<minF) { minF = fi; }
-	  if (fi>maxF) { maxF = fi; }
-	  usedF[ fi ]--;
-	}
-      }
+      for(int ei=startE;ei<=endE;ei++) 
+			{
+				for(int i=0;i<sentence.alignedToE[ei].size();i++) 
+				{
+					int fi = sentence.alignedToE[ei][i];
+					// cout << "point (" << fi << ", " << ei << ")\n";
+					if (fi<minF) { minF = fi; }
+					if (fi>maxF) { maxF = fi; }
+					usedF[ fi ]--;
+				} // for(int i=0;i<sentence
+      } // for(int ei=startE
       
       // cout << "f projected ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
 
       if (maxF >= 0 && // aligned to any foreign words at all
-	  maxF-minF < maxPhraseLength) { // foreign phrase within limits
+					maxF-minF < maxPhraseLength) 
+			{ // foreign phrase within limits
 	
-	// check if foreign words are aligned to out of bound english words
-	bool out_of_bounds = false;
-	for(int fi=minF;fi<=maxF && !out_of_bounds;fi++)
-	  if (usedF[fi]>0) {
-	    // cout << "ouf of bounds: " << fi << "\n";
-	    out_of_bounds = true;
-	  }
-	
-	// cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
-	if (!out_of_bounds)
-	  // start point of foreign phrase may retreat over unaligned
-	  for(int startF=minF;
-	      (startF>=0 &&
-	       startF>maxF-maxPhraseLength && // within length limit
-	       (startF==minF || sentence.alignedCountF[startF]==0)); // unaligned
-	      startF--)
-	    // end point of foreign phrase may advance over unaligned
-	    for(int endF=maxF;
-		(endF<countF && 
-		 endF<startF+maxPhraseLength && // within length limit
-		 (endF==maxF || sentence.alignedCountF[endF]==0)); // unaligned
-		endF++) 
-	      addPhrase(sentence,startE,endE,startF,endF);
-      }
+				// check if foreign words are aligned to out of bound english words
+				bool out_of_bounds = false;
+				for(int fi=minF;fi<=maxF && !out_of_bounds;fi++)
+				{
+					if (usedF[fi]>0) 
+					{
+						// cout << "ouf of bounds: " << fi << "\n";
+						out_of_bounds = true;
+					}
+				}
+				
+				// cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
+				if (!out_of_bounds)
+				{
+					// start point of foreign phrase may retreat over unaligned
+					for(int startF=minF;
+							(startF>=0 &&
+							 startF>maxF-maxPhraseLength && // within length limit
+							 (startF==minF || sentence.alignedCountF[startF]==0)); // unaligned
+							startF--)
+					{
+						// end point of foreign phrase may advance over unaligned
+						for (int endF=maxF;
+								(endF<countF && 
+										endF<startF+maxPhraseLength && // within length limit
+										(endF==maxF || sentence.alignedCountF[endF]==0)); // unaligned
+								endF++)
+						{
+							addPhrase(sentence,startE,endE,startF,endF);
+						} // for (int endF=maxF;
+					}	// for(int startF=minF;
+				} // if (!out_of_bounds)
+      } // if (maxF >= 0 &&
     }
   }
 }
