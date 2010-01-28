@@ -46,29 +46,7 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
   return true;
 }
 int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
-  alignments_ = new vector<vector<pair<short, short> > >();
-  string line;
-  vector<int> vtmp;
-  while(getline(*align, line)) {
-    vector<pair<short, short> > sntAlg;
-    Utils::splitToInt(line, vtmp, "- ");    
-    assert(vtmp.size() % 2 == 0);
-    for(int i=0; i < vtmp.size(); i+=2) {
-      pair<short, short> ap = std::make_pair(vtmp[i], vtmp[i+1]);
-      sntAlg.push_back(ap);
-    }
-    alignments_->push_back(sntAlg);
-    for(algItr_ = alignments_->begin(); algItr_ != alignments_->end(); ++algItr_) 
-      for(sntAlgItr_ = algItr_->begin(); sntAlgItr_ != algItr_->end(); ++sntAlgItr_) {
-        std::cerr << sntAlgItr_->first << "-" << sntAlgItr_->second << " ";
-      }
-    std::cerr  << std::endl;
-  }
-	
-	
-  return alignments_->size();
 }
-	
 void PhraseDictionaryDynSuffixArray::LoadVocabLookup()
 {
 	FactorCollection &factorCollection = FactorCollection::Instance();
@@ -125,7 +103,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	cerr << src << " ";
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
 	size_t phraseSize = src.GetSize();
-  vector<wordID_t> srcLocal(phraseSize), indices(0);  
+  vector<wordID_t> srcLocal(phraseSize), wrdIndices(0);  
 	for (size_t pos = 0; pos < phraseSize; ++pos)
 	{
 		const Word &word = src.GetWord(pos);
@@ -143,9 +121,17 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 			cerr << arrayId << " ";
 		}
 	}
-  unsigned denom = srcSA_->countPhrase(&srcLocal, &indices);
-  	
+  unsigned denom = srcSA_->countPhrase(&srcLocal, &wrdIndices);
+  const int* sntIndexes = getSntIndexes(wrdIndices);	
 	return ret;
 } 
-
+const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const {
+  vector<unsigned>::const_iterator vit;
+  int* sntIndexes = new int[wrdIndices.size()];
+  for(int i = 0; i < wrdIndices.size(); ++i) {
+    vit = std::lower_bound(srcSntBreaks_.begin(), srcSntBreaks_.end(), wrdIndices[i]);
+    sntIndexes[i] = unsigned(vit - srcSntBreaks_.begin());
+  }
+  return sntIndexes;
+}
 }// end namepsace

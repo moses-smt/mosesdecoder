@@ -8,7 +8,15 @@
 #include "DynSAInclude/types.h"
 #include "DynSAInclude/utils.h"
 namespace Moses {
-
+class SentenceAlignment {
+public:
+  vector<wordID_t> english;
+  vector<wordID_t> foreign;
+  vector<int> alignedCountF;
+  vector< vector<int> > alignedToE;
+  int create( char[], char[], char[], int );
+  //  void clear() { delete(alignment); };
+};
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
 public: 
   PhraseDictionaryDynSuffixArray(size_t numScoreComponent);
@@ -36,32 +44,17 @@ private:
   vector<wordID_t>* trgCrp_;
   vector<unsigned> srcSntBreaks_, trgSntBreaks_;
   Vocab* vocab_;
-  vector<vector<pair<short, short> > >* alignments_;
-  vector<vector<pair<short, short> > >::iterator algItr_;
-  vector<pair<short, short> >::iterator sntAlgItr_;
+  vector<SentenceAlignment> alignments_;
   int loadCorpus(FileHandler* corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(FileHandler* aligs);
-	
+  const int* getSntIndexes(vector<unsigned>&) const; 	
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
 	float m_weightWP;
 	
 	std::map<const Factor *, wordID_t> vocabLookup_;
-	std::map<wordID_t, const Factor *> vocabLookupRev_;
-	
-	
-	class SentenceAlignment {
-	public:
-		vector<wordID_t> english;
-		vector<wordID_t> foreign;
-		vector<int> alignedCountF;
-		vector< vector<int> > alignedToE;
-\\jjjj
-		int create( char[], char[], char[], int );
-		//  void clear() { delete(alignment); };
-	};
-	
+	std::map<wordID_t, const Factor *> vocabLookupRev_;	
 };
 
 } // end namespace
