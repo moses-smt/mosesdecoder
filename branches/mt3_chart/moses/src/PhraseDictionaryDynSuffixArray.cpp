@@ -150,73 +150,73 @@ std::vector<PhrasePair> SentenceAlignment::Extract(int maxPhraseLength)
 {
 	std::vector<PhrasePair>	ret;
 	
-	int countE = english.size();
-  int countF = foreign.size();
+	int countTarget = trgSnt->size();
+  int countSource = srcSnt->size();
 	
-  // check alignments for english phrase startE...endE
-  for(int startE=0;startE<countE;startE++) 
+  // check alignments for english phrase startTarget...endTarget
+  for(int startTarget=0;startTarget<countTarget;startTarget++) 
 	{
-    for(int endE=startE; 
-				(endE<countE && endE<startE+maxPhraseLength);
-				endE++) 
+    for(int endTarget=startTarget; 
+				(endTarget<countTarget && endTarget<startTarget+maxPhraseLength);
+				endTarget++) 
 		{
       
-      int minF = 9999;
-      int maxF = -1;
-      vector< int > usedF = alignedCountF;
-      for(int ei=startE;ei<=endE;ei++) 
+      int minSource = 9999;
+      int maxSource = -1;
+      vector< int > usedSource = alignedCountSrc;
+      for(int targetPos=startTarget;targetPos<=endTarget;targetPos++) 
 			{
-				for(int i=0;i<alignedToE[ei].size();i++) 
+				for(int ind = 0; ind < alignedTrg[targetPos].size(); ind++) 
 				{
-					int fi = alignedToE[ei][i];
-					// cout << "point (" << fi << ", " << ei << ")\n";
-					if (fi<minF) { minF = fi; }
-					if (fi>maxF) { maxF = fi; }
-					usedF[ fi ]--;
+					int sourcePos = alignedTrg[targetPos][ind];
+					// cout << "point (" << fi << ", " << targetPos << ")\n";
+					if (sourcePos<minSource) { minSource = sourcePos; }
+					if (sourcePos>maxSource) { maxSource = sourcePos; }
+					usedSource[ sourcePos ]--;
 				} // for(int i=0;i<sentence
-      } // for(int ei=startE
+      } // for(int targetPos=startTarget
       
-      // cout << "f projected ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
+      // cout << "f projected ( " << minSource << "-" << maxSource << ", " << startTarget << "," << endTarget << ")\n"; 
 			
-      if (maxF >= 0 && // aligned to any foreign words at all
-					maxF-minF < maxPhraseLength) 
+      if (maxSource >= 0 && // aligned to any foreign words at all
+					maxSource-minSource < maxPhraseLength) 
 			{ // foreign phrase within limits
 				
 				// check if foreign words are aligned to out of bound english words
 				bool out_of_bounds = false;
-				for(int fi=minF;fi<=maxF && !out_of_bounds;fi++)
+				for(int sourcePos = minSource; sourcePos <= maxSource && !out_of_bounds; sourcePos++)
 				{
-					if (usedF[fi]>0) 
+					if (usedSource[sourcePos]>0) 
 					{
 						// cout << "ouf of bounds: " << fi << "\n";
 						out_of_bounds = true;
 					}
 				}
 				
-				// cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n"; 
+				// cout << "doing if for ( " << minSource << "-" << maxSource << ", " << startTarget << "," << endTarget << ")\n"; 
 				if (!out_of_bounds)
 				{
 					// start point of foreign phrase may retreat over unaligned
-					for(int startF=minF;
-							(startF>=0 &&
-							 startF>maxF-maxPhraseLength && // within length limit
-							 (startF==minF || alignedCountF[startF]==0)); // unaligned
-							startF--)
+					for(int startSource=minSource;
+							(startSource>=0 &&
+							 startSource>maxSource-maxPhraseLength && // within length limit
+							 (startSource==minSource || alignedCountSrc[startSource]==0)); // unaligned
+							startSource--)
 					{
 						// end point of foreign phrase may advance over unaligned
-						for (int endF=maxF;
-								 (endF<countF && 
-									endF<startF+maxPhraseLength && // within length limit
-									(endF==maxF || alignedCountF[endF]==0)); // unaligned
-								 endF++)
+						for (int endSource=maxSource;
+								 (endSource<countSource && 
+									endSource<startSource+maxPhraseLength && // within length limit
+									(endSource==maxSource || alignedCountSrc[endSource]==0)); // unaligned
+								 endSource++)
 						{
 							
-							PhrasePair phrasePair(startE,endE,startF,endF);
+							PhrasePair phrasePair(startTarget,endTarget,startSource,endSource);
 							ret.push_back(phrasePair);
-						} // for (int endF=maxF;
-					}	// for(int startF=minF;
+						} // for (int endSource=maxSource;
+					}	// for(int startSource=minSource;
 				} // if (!out_of_bounds)
-      } // if (maxF >= 0 &&
+      } // if (maxSource >= 0 &&
     }
   }	
 	
