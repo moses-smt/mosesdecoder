@@ -69,9 +69,7 @@ void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslO
   const PhraseDictionary &phraseDictionary  = decodeStep.GetPhraseDictionary();
 	const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
 	const size_t tableLimit = phraseDictionary.GetTableLimit();
-  cerr << "before getTargetPhraseCollection\n";	
   const TargetPhraseCollection *phraseColl= phraseDictionary.GetTargetPhraseCollection(toc->GetSource(),sourceWordsRange);
-  cerr << "after getTargetPhraseCollection\n";	
 
   if (phraseColl != NULL)
     {

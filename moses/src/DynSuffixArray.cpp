@@ -175,6 +175,7 @@ unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices,
       indices->push_back(SA_->at(i));
       mapBnds[indices->size()-1] = std::make_pair(i,i);   
     }
+    cerr << "Total count of phrase = " << indices->size() << endl;
     return pcnt;
   }
   //find longer phrases if they exist
