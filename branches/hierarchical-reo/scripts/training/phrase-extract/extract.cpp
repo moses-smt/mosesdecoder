@@ -43,14 +43,14 @@ typedef vector < HPhrase > HPhraseVector;
 typedef map <int, set<int> > HSenteceVertices;
 
 class SentenceAlignment {
- public:
-  vector<string> english;
-  vector<string> foreign;
-  vector<int> alignedCountF;
-  vector< vector<int> > alignedToE;
+	public:
+		vector<string> english;
+		vector<string> foreign;
+		vector<int> alignedCountF;
+		vector< vector<int> > alignedToE;
 
-  int create( char[], char[], char[], int );
-  //  void clear() { delete(alignment); };
+		int create( char[], char[], char[], int );
+		//  void clear() { delete(alignment); };
 };
 
 void extractBase( SentenceAlignment & );
@@ -87,41 +87,63 @@ bool properConditioning = false;
 
 int main(int argc, char* argv[]) 
 {
-  cerr << "PhraseExtract v1.4, written by Philipp Koehn\n"
-       << "phrase extraction from an aligned parallel corpus\n";
-  time_t starttime = time(NULL);
+	cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
+			<< "phrase extraction from an aligned parallel corpus\n";
+	time_t starttime = time(NULL);
 
-  if (argc < 6) {
-    cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning | --hierarchical-reo]\n";
-    exit(1);
-  }
-  char* &fileNameE = argv[1];
-  char* &fileNameF = argv[2];
-  char* &fileNameA = argv[3];
-  fileNameExtract = argv[4];
-  maxPhraseLength = atoi(argv[5]);
-  
-  for(int i=6;i<argc;i++) {
-    if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
-      onlyOutputSpanInfo = true;
-    }
-    else if (strcmp(argv[i],"--NoFileLimit") == 0) {
-      noFileLimit = true;
-    }
-    else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
-      orientationFlag = true;
-      selectedModels.insert(make_pair(REO_WORD, REO_MSD));
-    }
-    else if(strcmp(argv[i],"--model") == 0){
-    	char* modelParams = argv[++i];
-    	char* modelName = strtok(modelParams, "-");
-    	char* modelType = strtok(modelParams, "-");
-    	REO_MODEL_NAME intModelName;
-    	REO_MODEL_TYPE
-    	if(strcmp(modelName, "word" == 0))
+	if (argc < 6) {
+		cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning | --hierarchical-reo]\n";
+		exit(1);
+	}
+	char* &fileNameE = argv[1];
+	char* &fileNameF = argv[2];
+	char* &fileNameA = argv[3];
+	fileNameExtract = argv[4];
+	maxPhraseLength = atoi(argv[5]);
 
-    	cout << modelName << modelType << modelParams <<  endl;
-    	exit(1);
+	for(int i=6;i<argc;i++) {
+		if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
+			onlyOutputSpanInfo = true;
+		}
+		else if (strcmp(argv[i],"--NoFileLimit") == 0) {
+			noFileLimit = true;
+		}
+		else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
+			orientationFlag = true;
+			selectedModels.insert(make_pair(REO_WORD, REO_MSD));
+		}
+		else if(strcmp(argv[i],"--model") == 0){
+			char* modelParams = argv[++i];
+			char* modelName = strtok(modelParams, "-");
+			char* modelType = strtok(modelParams, "-");
+
+			REO_MODEL_NAME intModelName;
+			REO_MODEL_TYPE intModelType;
+
+			if(strcmp(modelName, "word") == 0)
+				intModelName = REO_WORD;
+			else if(strcmp(modelName, "phrase") == 0)
+				intModelName = REO_PHRASE;
+			else if(strcmp(modelName, "phrase") == 0)
+				intModelName = REO_HIER;
+			else{
+				cerr << "extract: syntax error, unknown reordering model: " << modelName << endl;
+				exit(1);
+			}
+
+			if(strcmp(modelType, "msd") == 0)
+				intModelType = REO_MSD;
+			else if(strcmp(modelType, "mslr") == 0)
+				intModelType = REO_MSLR;
+			else if(strcmp(modelType, "mono") == 0)
+				intModelType = REO_MONO;
+			else if(strcmp(modelType, "leftright") == 0)
+				intModelType = REO_LR;
+			else{
+				cerr << "extract: syntax error, unknown reordering model type: " << modelType << endl;
+				exit(1);
+			}
+		}
     }
     else if (strcmp(argv[i],"--ZipFiles") == 0) {
       zipFiles = true;
