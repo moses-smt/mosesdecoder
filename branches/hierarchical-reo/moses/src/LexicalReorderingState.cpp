@@ -38,11 +38,11 @@ namespace Moses {
       phraseBased = false;
     } else if (config[i] == "phrase") {
       phraseBased = true;
-    } else if (config[i] == "word") {
+    } else if (config[i] == "wbe") {
       phraseBased = true;  
       // no word-based decoding available, fall-back to phrase-based
       // This is the old lexical reordering model combination of moses
-    }  else if (config[i] == "msd") {
+    } else if (config[i] == "msd") {
       mt = MSD;
     } else if (config[i] == "mslr") {
       mt = MSLR;
@@ -256,11 +256,24 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const {
   return 1;
 }
 
+// For compatibility with the phrase-based reordering model, scoring is one step delayed.
+// The forward model takes determines orientations heuristically as follows:
+//  mono:   if the next phrase comes after the conditioning phrase and
+//          - there is a gap to the right of the conditioning phrase, or
+//          - the next phrase immediately follows it
+//  swap:   if the next phrase goes before the conditioning phrase and
+//          - there is a gap to the left of the conditioning phrase, or
+//          - the next phrase immediately precedes it
+//  dright: if the next phrase follows the conditioning phrase and other stuff comes in between
+//  dleft:  if the next phrase precedes the conditioning phrase and other stuff comes in between
+
 LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothesis& hypo, 
 								   LexicalReordering::ReorderingType& reoType) const {
   const WordsRange currWordsRange = hypo.GetCurrSourceWordsRange();
   const WordsBitmap coverage = hypo.GetWordsBitmap();
   
+  // Note: If this is the first hypothesis, reoType will not be set to a meaningful value.
+  // Since scoring is one step delayed, the value will never be used however.
   if (m_modelType == MSD) {
     reoType = GetOrientationTypeMSD(currWordsRange, coverage);
   } else if (m_modelType == MSLR) {
@@ -272,17 +285,6 @@ LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothe
   }
   return new HierarchicalReorderingForwardState(m_modelType, currWordsRange);
 }
-
-// For compatibility with the phrase-based reordering model, scoring is one step delayed.
-// The forward model takes determines orientations heuristically as follows:
-//  mono:   if the next phrase comes after the conditioning phrase and
-//          - there is a gap to the right of the conditioning phrase, or
-//          - the next phrase immediately follows it
-//  swap:   if the next phrase goes before the conditioning phrase and
-//          - there is a gap to the left of the conditioning phrase, or
-//          - the next phrase immediately precedes it
-//  dright: if the next phrase follows the conditioning phrase and other stuff comes in between
-//  dleft:  if the next phrase precedes the conditioning phrase and other stuff comes in between
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
