@@ -158,7 +158,7 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair
   TargetPhrase* targetPhrase = new TargetPhrase(Output);
   int sntIndex = phrasepair.m_sntIndex;
 	std::map<wordID_t, const Factor *>::const_iterator rIterLookup;	
-  for(int i=phrasepair.m_startTarget; i < phrasepair.m_endTarget; ++i) { // look up trg words
+  for(int i=phrasepair.m_startTarget; i <= phrasepair.m_endTarget; ++i) { // look up trg words
     rIterLookup = vocabLookupRev_.find(trgCrp_->at(trgSntBreaks_[sntIndex] + i));
     assert(rIterLookup != vocabLookupRev_.end());
     const Factor* factor = rIterLookup->second; 
