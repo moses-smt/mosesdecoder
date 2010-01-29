@@ -38,7 +38,11 @@ namespace Moses {
       phraseBased = false;
     } else if (config[i] == "phrase") {
       phraseBased = true;
-    } else if (config[i] == "msd") {
+    } else if (config[i] == "word") {
+      phraseBased = true;  
+      // no word-based decoding available, fall-back to phrase-based
+      // This is the old lexical reordering model combination of moses
+    }  else if (config[i] == "msd") {
       mt = MSD;
     } else if (config[i] == "mslr") {
       mt = MSLR;
