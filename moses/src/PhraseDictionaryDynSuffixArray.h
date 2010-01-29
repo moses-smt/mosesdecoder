@@ -12,12 +12,13 @@ namespace Moses {
 class PhrasePair
 {
 public:
-	int m_startE, m_endE, m_startF, m_endF;
+	int m_sntIndex, m_startE, m_endE, m_startF, m_endF;
 	PhrasePair(int startE, int endE, int startF, int endF)
 	: m_startE(startE)
 	, m_endE(endE)
 	, m_startF(startF)
 	, m_endF(endF)
+  , m_sntIndex(-1)
 	{}
 };
 	

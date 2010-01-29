@@ -142,7 +142,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   const int* sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
     vector<PhrasePair> phrPairs;
-    alignments_[sntIndexes[snt]].Extract(3, phrPairs);
+    alignments_[sntIndexes[snt]].Extract(3, phrPairs); // extract all alignments
   }
 	return ret;
 } 
