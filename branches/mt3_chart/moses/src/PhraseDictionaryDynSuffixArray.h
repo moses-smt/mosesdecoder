@@ -4,9 +4,9 @@
 #include "PhraseDictionary.h"
 #include "DynSuffixArray.h" 
 #include "DynSAInclude/vocab.h"
-#include "DynSAInclude/file.h"
 #include "DynSAInclude/types.h"
 #include "DynSAInclude/utils.h"
+#include "InputFileStream.h"
 namespace Moses {
 	
 class PhrasePair
@@ -35,7 +35,7 @@ public:
   vector<wordID_t>* srcSnt;
   vector<int> alignedCountSrc;
   vector< vector<int> > alignedTrg;
-	std::vector<PhrasePair> Extract(int maxPhraseLength);
+	bool Extract(int maxPhraseLength, vector<PhrasePair>&) const;
 };
 	
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
@@ -49,7 +49,8 @@ public:
 						, const LMList &languageModels
 						, float weightWP);
 	void LoadVocabLookup();
-	
+  void save(string);
+  void load(string);
   // functions below required by base class
   PhraseTableImplementation GetPhraseTableImplementation() const { return dynSuffixArray; }
   void SetWeightTransModel(const std::vector<float, std::allocator<float> >&);
@@ -66,8 +67,8 @@ private:
   vector<unsigned> srcSntBreaks_, trgSntBreaks_;
   Vocab* vocab_;
   vector<SentenceAlignment> alignments_;
-  int loadCorpus(FileHandler* corpus, vector<wordID_t>&, vector<wordID_t>&);
-  int loadAlignments(FileHandler* aligs);
+  int loadCorpus(InputFileStream* corpus, vector<wordID_t>&, vector<wordID_t>&);
+  int loadAlignments(InputFileStream* aligs);
   const int* getSntIndexes(vector<unsigned>&) const; 	
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
