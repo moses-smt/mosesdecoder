@@ -169,7 +169,7 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair
   return targetPhrase;
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
-	cerr << src << "~~~ ";	
+	cerr << "\n" << src << "\n";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
  
 	const StaticData &staticData = StaticData::Instance();
@@ -187,6 +187,8 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		int sntIndex = sntIndexes.at(snt);
 		//int targetSize = GetTargetSentenceSize(sntIndex);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
+    cerr << "left bnd = " << sntBounds[sntIndex].first << endl;
+    cerr << "right bnd = " << sntBounds[sntIndex].second << endl;
 		/*
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
@@ -215,10 +217,6 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 }
 vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
 {
-  cerr << "wrdIndices.size() = " << wrdIndices.size() << endl;
-  iterate(wrdIndices, itr) cerr << *itr << endl;
-  cerr << "size of srcSntbreaks=" << srcSntBreaks_.size() << endl;
-  iterate(srcSntBreaks_, itr) cerr << *itr << endl;
   vector<unsigned>::const_iterator vit;
   vector<int> sntIndexes(wrdIndices.size()); 
   for(int i = 0; i < wrdIndices.size(); ++i) {
@@ -226,8 +224,6 @@ vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdI
     int index = int(vit - srcSntBreaks_.begin());
     sntIndexes.at(i) = index > 0 ? index - 1 : 0;
   }
-  cerr << "Printing sentence indexes: " << sntIndexes.size() << endl;
-  for(int i = 0; i < sntIndexes.size(); ++i) cerr << i <<  "-" << sntIndexes.at(i) << endl; 
   return sntIndexes;
 }
 void PhraseDictionaryDynSuffixArray::save(string fname) {
