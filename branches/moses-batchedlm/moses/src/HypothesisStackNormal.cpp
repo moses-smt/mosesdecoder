@@ -92,8 +92,7 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 }
 
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
-{ 
-	VERBOSE(2, "HYPO: " << hypo->GetId() << ", score: " << hypo->GetTotalScore() << ", worst: " << m_worstScore << std::endl);
+{
 	// too bad for stack. don't bother adding hypo into collection
 	if (hypo->GetTotalScore() < m_worstScore
 	    && ! ( m_minHypoStackDiversity > 0
