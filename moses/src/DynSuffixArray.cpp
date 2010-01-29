@@ -161,14 +161,16 @@ unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices,
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   std::set<int> skipSet;
   indices->clear();
+  mapBnds.clear();
   int phrasesize = phrase->size();
+    cerr << "Phrase size is " << phrasesize << endl;
   // find lower and upper bounds on phrase[0]
   bounds = std::equal_range(F_->begin(), F_->end(), phrase->at(0));
   // bounds holds first and last index of phrase[0] in SA_
-  cerr << "Lower Bound=" << int(bounds.first - F_->begin()) << endl;
   int lwrBnd = int(bounds.first - F_->begin());
-  cerr << "Upper Bound=" << int(bounds.second - F_->begin() - 1) << endl;
   int uprBnd = int(bounds.second - F_->begin());
+  cerr << "Lower Bound=" << lwrBnd << endl; 
+  cerr << "Upper Bound=" << uprBnd << endl;
   int pcnt = uprBnd - lwrBnd; // assume all matching words are phrase initially
   if(phrasesize == 1) {
     for(int i=lwrBnd; i < uprBnd; ++i) {
