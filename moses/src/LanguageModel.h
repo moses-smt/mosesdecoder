@@ -142,7 +142,7 @@ public:
 
 	void CollectNGrams(const Hypothesis& cur_hypo) const;
 	
-	void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
+	virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
 };
 
 }

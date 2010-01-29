@@ -39,6 +39,8 @@ class LanguageModelRemote : public LanguageModelSingleFactor {
                                         , float weight
                                         , size_t nGramOrder);
 		void ScoreHypoBatch(std::vector<Hypothesis*> * hypoBatch);
+
+		virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
 };
 
 }

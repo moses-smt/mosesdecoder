@@ -153,6 +153,18 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   return cur->prob;
 }
 
+void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
+{
+	std::cout << "WE NEED TO OVERWRITE ScoreNGrams WITH A \"BATCHED\" VERSION!!!" << std::endl;
+	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
+	{
+		// cfedermann: we should lookup ngrams that are already scored here!
+		//             This will further optimize LM score computation.
+		float lmScore = GetValue(*batchedNGrams[currPos]);
+		m_cachedNGrams.insert(make_pair(batchedNGrams[currPos], lmScore));
+	}
+}
+
 //===============================
 
 bool NgramCmp::operator()(Ngram * k1, Ngram * k2) {
