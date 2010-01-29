@@ -32,8 +32,11 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 	m_languageModels = &languageModels;
 	m_weightWP = weightWP;
 
-	loadCorpus(new InputFileStream(source), *srcCrp_, srcSntBreaks_);
-  loadCorpus(new InputFileStream(target), *trgCrp_, trgSntBreaks_);
+	InputFileStream sourceStrme(source);
+	InputFileStream targetStrme(target);
+	
+	loadCorpus(sourceStrme, *srcCrp_, srcSntBreaks_);
+  loadCorpus(targetStrme, *trgCrp_, trgSntBreaks_);
   //assert(srcSntBreaks_.size() == trgSntBreaks_.size());
   std::cerr << "Vocab: " << std::endl;
   vocab_->printVocab();
@@ -42,17 +45,19 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
   if(!srcSA_) return false;
   //trgSA_ = new DynSuffixArray(trgCrp_); 
   //if(!trgSA_) return false;
-  loadAlignments(new InputFileStream(alignments));
+	InputFileStream alignStrme(alignments);
+  loadAlignments(alignStrme);
 	LoadVocabLookup();
 	
   return true;
 }
-int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream* align) {
+int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
   // stores the alignments in the format used by SentenceAlignment.Extract()
   string line;
   vector<int> vtmp;
   int sntIndex(0);
-  while(getline(*align, line)) {
+	
+  while(getline(align, line)) {
     Utils::splitToInt(line, vtmp, "- ");
     assert(vtmp.size() % 2 == 0);
 		
@@ -61,8 +66,10 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream* align) {
 
     SentenceAlignment curSnt(sntIndex, sourceSize, targetSize); // initialize empty sentence 
     for(int i=0; i < vtmp.size(); i+=2) {
-      curSnt.alignedCountSrc[vtmp[i]]++; // cnt of trg nodes each src node is attached to  
-      curSnt.alignedTrg[vtmp[i+1]].push_back(vtmp[i]);  // list of source nodes each target node connects with
+			int sourcePos = vtmp[i];
+			int targetPos = vtmp[i+1];
+      curSnt.alignedCountSrc[sourcePos]++; // cnt of trg nodes each src node is attached to  
+      curSnt.alignedTrg[targetPos].push_back(sourcePos);  // list of source nodes each target node connects with
     }
     curSnt.srcSnt = srcCrp_ + sntIndex;  // point source and target sentence
     curSnt.trgSnt = trgCrp_ + sntIndex; 
@@ -107,12 +114,12 @@ void PhraseDictionaryDynSuffixArray::CleanUp() {
 void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float, std::allocator<float> >&) {
   return;
 }
-int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream* corpus, vector<wordID_t>& cArray, 
+int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<wordID_t>& cArray, 
     vector<wordID_t>& sntArray) {
   string line, word;
   int sntIdx(0);
-  corpus->seekg(0);
-  while(getline(*corpus, line)) {
+  corpus.seekg(0);
+  while(getline(corpus, line)) {
     sntArray.push_back(sntIdx);
     std::istringstream ss(line.c_str());
     while(ss >> word) {
