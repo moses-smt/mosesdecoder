@@ -12,13 +12,13 @@ namespace Moses {
 class PhrasePair
 {
 public:
-	int m_sntIndex, m_startE, m_endE, m_startF, m_endF;
-	PhrasePair(int startE, int endE, int startF, int endF)
-	: m_startE(startE)
-	, m_endE(endE)
-	, m_startF(startF)
-	, m_endF(endF)
-  , m_sntIndex(-1)
+	int m_sntIndex, m_startTarget, m_endTarget, m_startSource, m_endSource;
+	PhrasePair(int sntIndex, int startTarget, int endTarget, int startSource, int endSource)
+	: m_startTarget(startTarget)
+	, m_endTarget(endTarget)
+	, m_startSource(startSource)
+	, m_endSource(endSource)
+  , m_sntIndex(sntIndex)
 	{}
 };
 	
@@ -32,7 +32,9 @@ public:
       alignedTrg.push_back(trgWrd);
     }
   }
-  vector<wordID_t>* trgSnt;
+  
+	int m_sntIndex;
+	vector<wordID_t>* trgSnt;
   vector<wordID_t>* srcSnt;
   vector<int> alignedCountSrc;
   vector< vector<int> > alignedTrg;
