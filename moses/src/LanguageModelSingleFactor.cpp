@@ -74,7 +74,7 @@ void LanguageModelSingleFactor::ScoreNGrams(const std::vector<std::vector<const 
 }
 */
 
-void LanguageModelSingleFactor::CacheNGram(NGram * ngram, float score) {
+void LanguageModelSingleFactor::CacheNGram(NGram *ngram, float score) {
 	m_cachedNGrams.insert(make_pair(new FactoredNGram(ngram, GetFactorType()), score));
 }
 

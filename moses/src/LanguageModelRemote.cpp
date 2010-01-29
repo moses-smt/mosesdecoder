@@ -84,7 +84,7 @@ void readNBytesForSure(int sock, char * buf, int size) {
 	}
 }
 
-float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const {
+float LanguageModelRemote::GetValue(const NGram &contextFactor, State* finalState, unsigned int* len) const {
   size_t count = contextFactor.size();
   if (count == 0) {
     if (finalState) *finalState = NULL;
@@ -116,18 +116,21 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
 	// OK, I really need a solution to store the ngram context factors in a
 	// hashable form somewhere.  I guess the LM would be the natural place?
 	// It is mandatory to patch the LM destructor code to clean up later!!!
-	/*
-	std::map<std::vector<const Word*>*,float>
-	std::map<std::vector<const Word*>,float>::iterator it =	m_cachedNGrams.find(contextFactor);
-	if (it != m_cachedNGrams.end())
-	{
+	
+	const NGram * ngramPtr = &contextFactor;
+	
+	FactoredNGram * seed =
+		new FactoredNGram(ngramPtr, factor);
+	
+	FactoredNGramScoreMap::const_iterator it =
+		m_cachedNGrams.find(seed);
+	
+	delete seed;
+	
+	if (it != m_cachedNGrams.end()) {
 		lmScore = it->second;
 	}
-	else
-	{
-	*/
-	if (true)
-	{
+	else {
 	  std::ostringstream os;
 	  os << "prob ";
 	  if (event_word == NULL) {

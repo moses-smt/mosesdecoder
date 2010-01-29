@@ -112,7 +112,7 @@ void LanguageModel::CollectNGrams(const Hypothesis& hypo) const
 	}
 }
 
-void LanguageModel::CacheNGram(NGram * ngram, float score) {
+void LanguageModel::CacheNGram(NGram *ngram, float score) {
 	m_cachedNGrams.insert(make_pair(new FactoredNGram(ngram, -1), score));
 }
 
@@ -273,9 +273,9 @@ FFState* LanguageModel::Evaluate(
 	return res;
 }
 
-bool compareFactored(FactoredNGram * k1, FactoredNGram * k2, FactorType factor) {
-	NGram * n1 = k1->first;
-	NGram * n2 = k2->first;
+bool compareFactored(const FactoredNGram * k1, const FactoredNGram * k2, FactorType factor) {
+	const NGram * n1 = k1->first;
+	const NGram * n2 = k2->first;
 	
 	int s1 = n1->size();
 	int s2 = n2->size();
@@ -296,9 +296,9 @@ bool compareFactored(FactoredNGram * k1, FactoredNGram * k2, FactorType factor) 
 	return false;
 }
 
-bool compareUnFactored(FactoredNGram * k1, FactoredNGram * k2) {
-	NGram * n1 = k1->first;
-	NGram * n2 = k2->first;
+bool compareUnFactored(const FactoredNGram * k1, const FactoredNGram * k2) {
+	const NGram * n1 = k1->first;
+	const NGram * n2 = k2->first;
 	
 	int s1 = n1->size();
 	int s2 = n2->size();
@@ -318,7 +318,7 @@ bool compareUnFactored(FactoredNGram * k1, FactoredNGram * k2) {
 	return false;
 }
 
-bool FactoredNGramCmp::operator()(FactoredNGram * k1, FactoredNGram * k2) {
+bool FactoredNGramCmp::operator()(const FactoredNGram * k1, const FactoredNGram * k2) const {
 	const FactorType factor = k1->second;
 	
 	return (factor < 0)? compareUnFactored(k1, k2): compareFactored(k1, k2, factor);
