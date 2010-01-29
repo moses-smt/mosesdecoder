@@ -44,10 +44,10 @@ bool LanguageModelRemote::Load(const std::string &filePath
 
 
 bool LanguageModelRemote::start(const std::string& host, int port) {
-  //std::cerr << "host = " << host << ", port = " << port << "\n";
+  std::cerr << "host = " << host << ", port = " << port << "\n";
   sock = socket(AF_INET, SOCK_STREAM, 0);
   hp = gethostbyname(host.c_str());
-  if (hp==NULL) { herror("gethostbyname failed"); exit(1); }
+  if (hp==NULL) { herror("gethostbyname totally failed"); exit(1); }
 
   bzero((char *)&server, sizeof(server));
   bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
@@ -191,7 +191,7 @@ int serializeSet(FactoredNGramScoreMap * set, FactoredNGramScoreMap::iterator * 
 	
 	int count = 0;
 	
-	for (; *it != set->end() and count < maxSize; *it++) {
+	for (; *it != set->end() and count < maxSize; (*it)++) {
 		FactoredNGram * fNGram = (*it)->first;
 		
 		const NGram * nGram = fNGram->first;
@@ -220,6 +220,8 @@ void placeResults(FactoredNGramScoreMap::iterator * it, float * raw, int size) {
 
 float * evaluateSerSet(int sock, std::string * serStr, int size) {
 	write(sock, serStr->c_str(), serStr->size());
+	VERBOSE(2, "LMSERVER BATCH REQUEST (" << size << "): " << *serStr << ';' << std::endl);
+	exit(-1);
 	
 	int bufSize = size * sizeof(float);
 	
@@ -236,10 +238,16 @@ void ScoreUnseen(int sock, FactoredNGramScoreMap * ngramMap) {
 	FactoredNGramScoreMap::iterator constructIt = ngramMap->begin();
 	FactoredNGramScoreMap::iterator fillIt = ngramMap->begin();
 	
+	VERBOSE(2, "size: " << ngramMap->size() << std::endl);
+	
 	while (constructIt != ngramMap->end()) {
 		std::string * serStr = new std::string();
 		
+		VERBOSE(2, "batch size: " << COMMUNICATION_BATCH_SIZE << std::endl);
+		
 		int actualSize = serializeSet(ngramMap, &constructIt, COMMUNICATION_BATCH_SIZE, serStr);
+		
+		VERBOSE(2, "real size: " << actualSize << std::endl);
 		
 		float * rawResults = evaluateSerSet(sock, serStr, actualSize);
 		
@@ -251,11 +259,17 @@ void ScoreUnseen(int sock, FactoredNGramScoreMap * ngramMap) {
 	}
 }
 
+/*
+// smart way: do batch requests
 void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
 {
 	FactoredNGramScoreMap unseenNGrams;
 	
-	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
+	int batchSize = batchedNGrams.size();
+	
+	VERBOSE(2, "LMB: processing vector of size " << batchSize << std::endl);
+	
+	for (size_t currPos = 0; currPos < batchSize; ++currPos)
 	{
 		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
 		
@@ -271,10 +285,46 @@ void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>
 		}
 	}
 	
+	VERBOSE(2, "LMB: unseen: " << unseenNGrams.size() << std::endl);
+	
 	ScoreUnseen(sock, &unseenNGrams);
 	
 	//copy the unseen seen
 	m_cachedNGrams.insert(unseenNGrams.begin(), unseenNGrams.end());
+}
+*/
+
+// stupid way: evaluate one by one
+void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
+{
+	//VERBOSE(2, "cache size: " << m_cachedNGrams.size() << std::endl);
+	
+	int total = 0;
+	int unseen = 0;
+	
+	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
+	{
+		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
+		
+		float lmScore;
+		
+		total++;
+		
+		if (!FindCachedNGram(*ngram, &lmScore)) {
+			// Create a copy of the ngram for the LM-internal cache.
+			StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
+			ngram_copy->reserve(ngram->size());
+			std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
+			
+			// Compute LM score and add it to the LM-internal cache.
+			lmScore = GetValue(*ngram_copy);
+			CacheNGram(ngram_copy, lmScore);
+			
+			unseen++;
+		}
+	}
+	
+	//VERBOSE(2, "unseen/total: " << unseen << '/' << total << "; new size: " << m_cachedNGrams.size() << std::endl);
 }
 
 LanguageModelRemote::~LanguageModelRemote() {
