@@ -122,8 +122,8 @@ void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& b
 		
 		// Create a copy of the ngram for the LM-internal cache.
 		StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
-		ngram_copy.reserve(ngram->size());
-		std::copy(ngram->begin(), ngram->end(), ngram_copy.begin());
+		ngram_copy->reserve(ngram->size());
+		std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
 		
 		// Compute LM score and add it to the LM-internal cache.
 		float lmScore = GetValue(*ngram_copy);
