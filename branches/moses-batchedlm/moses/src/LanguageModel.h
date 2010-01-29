@@ -51,7 +51,13 @@ class LanguageModel : public StatefulFeatureFunction
 {
 protected:	
 	FactoredNGramScoreMap m_cachedNGrams;
+	
+	int MaybeGetFactor() const {
+		return -1;
+	}
+	
 	void CacheNGram(NGram *ngram, float score);
+	bool FindCachedNGram(const NGram &contextFactor, float * resultBuf) const;
 
 	float				m_weight; //! scoring weight. Shouldn't this now be superceded by ScoreProducer???
 	std::string	m_filePath; //! for debugging purposes

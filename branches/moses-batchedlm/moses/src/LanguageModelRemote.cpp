@@ -116,19 +116,11 @@ float LanguageModelRemote::GetValue(const NGram &contextFactor, State* finalStat
 	// OK, I really need a solution to store the ngram context factors in a
 	// hashable form somewhere.  I guess the LM would be the natural place?
 	// It is mandatory to patch the LM destructor code to clean up later!!!
+
+	float currScore;
 	
-	const NGram * ngramPtr = &contextFactor;
-	
-	FactoredNGram * seed =
-		new FactoredNGram(ngramPtr, factor);
-	
-	FactoredNGramScoreMap::const_iterator it =
-		m_cachedNGrams.find(seed);
-	
-	delete seed;
-	
-	if (it != m_cachedNGrams.end()) {
-		lmScore = it->second;
+	if (FindCachedNGram(contextFactor, &currScore)) {
+		lmScore = currScore;
 	}
 	else {
 	  std::ostringstream os;
@@ -182,35 +174,17 @@ float LanguageModelRemote::GetValue(const NGram &contextFactor, State* finalStat
   return cur->prob;
 }
 
-void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
-{
-	std::cout << "WE NEED TO OVERWRITE ScoreNGrams WITH A \"BATCHED\" VERSION!!!" << std::endl;
-	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
-	{
-		// cfedermann: we should lookup ngrams that are already scored here!
-		//             This will further optimize LM score computation.
-		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
-		
-		// Create a copy of the ngram for the LM-internal cache.
-		StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
-		ngram_copy->reserve(ngram->size());
-		std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
-		
-		// Compute LM score and add it to the LM-internal cache.
-		float lmScore = GetValue(*ngram_copy);
-		
-		//m_cachedNGrams.insert(make_pair(ngram_copy, lmScore));
-		CacheNGram(ngram_copy, lmScore);
+#define COMMUNICATION_BATCH_SIZE 100
+
+void serializeNGram(ostringstream * os, const NGram * nGram, int factor) {
+	*os << ' ' << nGram->size();
+	
+	for (NGram::const_reverse_iterator it = nGram->rbegin(); it != nGram->rend(); it++) {
+		*os << ' ' << (*it)->GetFactor(factor)->GetString() ;
 	}
 }
 
-//===============================
-
-/*
-
-#define COMMUNICATION_BATCH_SIZE 100
-
-int serializeSet(NgramSet * set, NgramSet::iterator * it, int maxSize, std::string * tgt) {
+int serializeSet(FactoredNGramScoreMap * set, FactoredNGramScoreMap::iterator * it, int maxSize, std::string * tgt) {
 	ostringstream os;
 	
 	os << "batch";
@@ -218,14 +192,12 @@ int serializeSet(NgramSet * set, NgramSet::iterator * it, int maxSize, std::stri
 	int count = 0;
 	
 	for (; *it != set->end() and count < maxSize; *it++) {
-		Ngram * currCtx = **it;
-		Tail * currTail = currCtx->tail;
+		FactoredNGram * fNGram = (*it)->first;
 		
-		os << ' ' << (currTail->size() + 1) << ' ' << *(currCtx->head);
+		const NGram * nGram = fNGram->first;
+		int factor = fNGram->second;
 		
-		for (Tail::reverse_iterator it2 = currTail->rbegin(); it2 != currTail->rend(); it2++) {
-			os << ' ' << **it2;
-		}
+		serializeNGram(&os, nGram, factor);
 		
 		count++;
 	}
@@ -235,6 +207,15 @@ int serializeSet(NgramSet * set, NgramSet::iterator * it, int maxSize, std::stri
 	*tgt = os.str();
 	
 	return count;
+}
+
+void placeResults(FactoredNGramScoreMap::iterator * it, float * raw, int size) {
+	int idx = 0;
+	
+	for (; idx < size; *it++) {
+		(*it)->second = FloorScore(TransformSRIScore(raw[idx]));
+		idx++;
+	}
 }
 
 float * evaluateSerSet(int sock, std::string * serStr, int size) {
@@ -251,22 +232,14 @@ float * evaluateSerSet(int sock, std::string * serStr, int size) {
 	return result;
 }
 
-void placeResults(NgramSet::iterator * it, float * raw, int size) {
-	int idx = 0;
+void ScoreUnseen(int sock, FactoredNGramScoreMap * ngramMap) {
+	FactoredNGramScoreMap::iterator constructIt = ngramMap->begin();
+	FactoredNGramScoreMap::iterator fillIt = ngramMap->begin();
 	
-	for (; idx < size; *it++) {
-		(**it)->prob = FloorScore(TransformSRIScore(raw[idx]));
-		idx++;
-	}
-}
-
-void evaluateNgramSet(int sock, NgramSet * ngramSet) {
-	NgramSet::iterator constructIt = ngramSet->begin();
-	NgramSet::iterator fillIt = ngramSet->begin();
-	
-	while (constructIt != ngramSet->end()) {
+	while (constructIt != ngramMap->end()) {
 		std::string * serStr = new std::string();
-		int actualSize = serializeSet(ngramSet, &constructIt, COMMUNICATION_BATCH_SIZE, serStr);
+		
+		int actualSize = serializeSet(ngramMap, &constructIt, COMMUNICATION_BATCH_SIZE, serStr);
 		
 		float * rawResults = evaluateSerSet(sock, serStr, actualSize);
 		
@@ -278,9 +251,31 @@ void evaluateNgramSet(int sock, NgramSet * ngramSet) {
 	}
 }
 
-*/
-
-//===============================
+void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
+{
+	FactoredNGramScoreMap unseenNGrams;
+	
+	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
+	{
+		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
+		
+		float lmScore;
+		
+		if (!FindCachedNGram(*ngram, &lmScore)) {
+			// Create a copy of the ngram for the LM-internal cache.
+			StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
+			ngram_copy->reserve(ngram->size());
+			std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
+			
+			unseenNGrams.insert(make_pair(new FactoredNGram(ngram_copy, MaybeGetFactor()), 0));
+		}
+	}
+	
+	ScoreUnseen(sock, &unseenNGrams);
+	
+	//copy the unseen seen
+	m_cachedNGrams.insert(unseenNGrams.begin(), unseenNGrams.end());
+}
 
 LanguageModelRemote::~LanguageModelRemote() {
   // Step 8 When finished send all lingering transmissions and close the connection
