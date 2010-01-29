@@ -117,6 +117,7 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
 	// hashable form somewhere.  I guess the LM would be the natural place?
 	// It is mandatory to patch the LM destructor code to clean up later!!!
 	/*
+	std::map<std::vector<const Word*>*,float>
 	std::map<std::vector<const Word*>,float>::iterator it =	m_cachedNGrams.find(contextFactor);
 	if (it != m_cachedNGrams.end())
 	{
@@ -185,8 +186,16 @@ void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>
 	{
 		// cfedermann: we should lookup ngrams that are already scored here!
 		//             This will further optimize LM score computation.
-		float lmScore = GetValue(*batchedNGrams[currPos]);
-		m_cachedNGrams.insert(make_pair(batchedNGrams[currPos], lmScore));
+		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
+		
+		// Create a copy of the ngram for the LM-internal cache.
+		StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
+		ngram_copy.reserve(ngram->size());
+		std::copy(ngram->begin(), ngram->end(), ngram_copy.begin());
+		
+		// Compute LM score and add it to the LM-internal cache.
+		float lmScore = GetValue(*ngram_copy);
+		m_cachedNGrams.insert(make_pair(ngram_copy, lmScore));
 	}
 }
 
