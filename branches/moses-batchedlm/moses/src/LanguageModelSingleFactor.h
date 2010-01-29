@@ -37,7 +37,7 @@ protected:
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 
-	void CacheNGram(NGram * ngram, float score);
+	void CacheNGram(NGram *ngram, float score);
 	
 	LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
 
@@ -81,9 +81,6 @@ public:
 		m_weight = weight;
 	}
 	std::string GetScoreProducerDescription() const;
-
-	// cfedermann: this fixes the compilation bug?
-	//virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
 };
 
 }
