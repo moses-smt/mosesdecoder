@@ -68,8 +68,8 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
     for(int i=0; i < vtmp.size(); i+=2) {
 			int sourcePos = vtmp[i];
 			int targetPos = vtmp[i+1];
-      curSnt.alignedCountSrc[sourcePos]++; // cnt of trg nodes each src node is attached to  
-      curSnt.alignedTrg[targetPos].push_back(sourcePos);  // list of source nodes each target node connects with
+      curSnt.alignedCountTrg[targetPos]++; // cnt of trg nodes each src node is attached to  
+      curSnt.alignedSrc[sourcePos].push_back(targetPos);  // list of source nodes each target node connects with
     }
     curSnt.srcSnt = srcCrp_ + sntIndex;  // point source and target sentence
     curSnt.trgSnt = trgCrp_ + sntIndex; 
@@ -181,13 +181,13 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     vector<PhrasePair*> phrasePairs;
 		// extract all Alignments
 		int sntIndex = sntIndexes[snt];
-		int targetSize = GetTargetSentenceSize(sntIndex);
+		//int targetSize = GetTargetSentenceSize(sntIndex);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
 															sntBounds[snt].second,
-															targetSize); 
+															4534); 
 
 		cerr << "extracted " << phrasePairs.size() << endl;
 		
@@ -204,7 +204,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		// done. delete SA phrase pairs
 		RemoveAllInColl(phrasePairs);
   }
-	
+
 	return ret;
 }
 const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
@@ -215,6 +215,7 @@ const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIn
     vit = std::lower_bound(srcSntBreaks_.begin(), srcSntBreaks_.end(), wrdIndices[i]);
     sntIndexes[i] = unsigned(vit - srcSntBreaks_.begin());
   }
+	
   return sntIndexes;
 }
 void PhraseDictionaryDynSuffixArray::save(string fname) {
@@ -226,12 +227,12 @@ void PhraseDictionaryDynSuffixArray::load(string fname) {
 	
 SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
 	:m_sntIndex(sntIndex)
-	,alignedCountSrc(sourceSize, 0)
-	,alignedTrg(targetSize)
+	,alignedCountTrg(targetSize, 0)
+	,alignedSrc(sourceSize)
 {
 	for(int i=0; i < targetSize; ++i) {
 		vector<int> trgWrd;
-		alignedTrg[i] = trgWrd;
+		alignedSrc[i] = trgWrd;
 	}
 }
 	
@@ -240,16 +241,16 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 	// foreign = target, F=T
 	// english = source, E=S
 	
-  int countTarget = alignedTrg.size();
+  int countTarget = alignedCountTrg.size();
 	
 	int minTarget = 9999;
 	int maxTarget = -1;
-	vector< int > usedTarget = alignedCountSrc;
+	vector< int > usedTarget = alignedCountTrg;
 	for(int sourcePos = startSource; sourcePos <= endSource; sourcePos++) 
 	{
-		for(int ind=0; ind < alignedTrg[sourcePos].size();ind++) 
+		for(int ind=0; ind < alignedSrc[sourcePos].size();ind++) 
 		{
-			int targetPos = alignedTrg[sourcePos][ind];
+			int targetPos = alignedSrc[sourcePos][ind];
 			// cout << "point (" << targetPos << ", " << sourcePos << ")\n";
 			if (targetPos<minTarget) { minTarget = targetPos; }
 			if (targetPos>maxTarget) { maxTarget = targetPos; }
@@ -281,14 +282,14 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 			for(int startTarget = minTarget;
 					(startTarget >= 0 &&
 					 startTarget > maxTarget-maxPhraseLength && // within length limit
-					 (startTarget==minTarget || alignedCountSrc[startTarget]==0)); // unaligned
+					 (startTarget==minTarget || alignedCountTrg[startTarget]==0)); // unaligned
 					startTarget--)
 			{
 				// end point of foreign phrase may advance over unaligned
 				for (int endTarget=maxTarget;
 						 (endTarget<countTarget && 
 							endTarget<startTarget+maxPhraseLength && // within length limit
-							(endTarget==maxTarget || alignedCountSrc[endTarget]==0)); // unaligned
+							(endTarget==maxTarget || alignedCountTrg[endTarget]==0)); // unaligned
 						 endTarget++)
 				{
 					PhrasePair *phrasePair = new PhrasePair(m_sntIndex, startTarget,endTarget,startSource,endSource);

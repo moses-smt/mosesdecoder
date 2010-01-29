@@ -29,8 +29,8 @@ public:
 	int m_sntIndex;
 	vector<wordID_t>* trgSnt;
   vector<wordID_t>* srcSnt;
-  vector<int> alignedCountSrc;
-  vector< vector<int> > alignedTrg;
+  vector<int> alignedCountTrg;
+  vector< vector<int> > alignedSrc;
 	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource, int countTarget) const;
 };
 	
