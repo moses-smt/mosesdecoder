@@ -40,14 +40,16 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
   assert(srcSntBreaks_.size() == trgSntBreaks_.size());
   std::cerr << "Vocab: " << std::endl;
   vocab_->printVocab();
+	LoadVocabLookup();
+
   // build suffix arrays and auxilliary arrays
   srcSA_ = new DynSuffixArray(srcCrp_); 
   if(!srcSA_) return false;
   trgSA_ = new DynSuffixArray(trgCrp_); 
   if(!trgSA_) return false;
+	
 	InputFileStream alignStrme(alignments);
   loadAlignments(alignStrme);
-	LoadVocabLookup();
 	
   return true;
 }
@@ -192,8 +194,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
-															sntBounds[snt].second,
-															4534); 
+															sntBounds[snt].second); 
     cerr << "gets here " << snt << endl;
 
 		cerr << "extracted " << phrasePairs.size() << endl;
@@ -244,7 +245,7 @@ SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSiz
 	}
 }
 	
-bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource, int countTargetOLD) const
+bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const
 {
 	// foreign = target, F=T
 	// english = source, E=S

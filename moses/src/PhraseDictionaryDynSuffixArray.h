@@ -31,7 +31,7 @@ public:
   vector<wordID_t>* srcSnt;
   vector<int> alignedCountTrg;
   vector< vector<int> > alignedSrc;
-	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource, int countTarget) const;
+	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const;
 };
 	
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
