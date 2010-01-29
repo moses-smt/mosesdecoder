@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <utility>
 #include "Util.h"
+#include "File.h"
 #include "DynSAInclude/types.h"
 #include "DynSAInclude/sarray.h"
 
@@ -20,6 +21,8 @@ public:
   DynSuffixArray(vuint_t*);
   ~DynSuffixArray();
   unsigned countPhrase(vuint_t*, vuint_t*);
+  void load(FILE*);
+  void save(FILE*);
 private: 
   vuint_t* SA_;
   vuint_t* ISA_;

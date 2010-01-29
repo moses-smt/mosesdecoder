@@ -186,4 +186,11 @@ unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices) {
   cerr << "Total count of phrase = " << pcnt << endl;
   return pcnt;
 }
+void DynSuffixArray::save(FILE* fout) {
+  fWriteVector(fout, *SA_);
+}
+void DynSuffixArray::load(FILE* fin) {
+  fReadVector(fin, *SA_);
+}
+
 } // end namespace
