@@ -64,6 +64,26 @@ bool LanguageModelRemote::start(const std::string& host, int port) {
   return true;
 }
 
+void readNBytesForSure(int sock, char * buf, int size) {
+	int r = read(sock, buf, size);
+	int errors = 0;
+	int cnt = 0;
+	while (1) {
+		if (r < 0) {
+			errors++; sleep(1);
+			if (errors > 5) exit(1);
+		}
+		else if (r==0 || buf[cnt] == '\n') {
+			break;
+		}
+		else {
+			cnt += r;
+			if (cnt==size) break;
+			read(sock, &buf[cnt], size-cnt);
+		}
+	}
+}
+
 float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const {
   size_t count = contextFactor.size();
   if (count == 0) {
@@ -126,6 +146,9 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
 	  std::string out = os.str();
 	  write(sock, out.c_str(), out.size());
 	  char res[6];
+	  readNBytesForSure(sock, res, 6);
+	  
+	  /*
 	  int r = read(sock, res, 6);
 	  int errors = 0;
 	  int cnt = 0;
@@ -141,6 +164,8 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
 	        read(sock, &res[cnt], 6-cnt);
 	      }
 	  }
+	  */
+	  
 	  lmScore = FloorScore(TransformSRIScore(*reinterpret_cast<float*>(res)));
 	}
 	
@@ -196,16 +221,16 @@ NgramSet * generateSetFromHypos(std::vector<Hypothesis*> * hypoBatch) {
 	//TODO
 }
 
-#define COMMUNICATION_BATCH_SIZE 10
+#define COMMUNICATION_BATCH_SIZE 100
 
-std::string * serializeSet(NgramSet * set, NgramSet::iterator * it, int size) {
+int serializeSet(NgramSet * set, NgramSet::iterator * it, int maxSize, std::string * tgt) {
 	ostringstream os;
 	
 	os << "batch";
 	
 	int count = 0;
 	
-	for (; *it != set->end() and count < size; *it++) {
+	for (; *it != set->end() and count < maxSize; *it++) {
 		Ngram * currCtx = **it;
 		Tail * currTail = currCtx->tail;
 		
@@ -220,33 +245,47 @@ std::string * serializeSet(NgramSet * set, NgramSet::iterator * it, int size) {
 	
 	os << std::endl;
 	
-	std::string * result = new std::string(os.str());
+	*tgt = os.str();
+	
+	return count;
+}
+
+float * evaluateSerSet(int sock, std::string * serStr, int size) {
+	write(sock, serStr->c_str(), serStr->size());
+	
+	int bufSize = size * sizeof(float);
+	
+	char * buf = (char *)malloc(bufSize);
+	
+	readNBytesForSure(sock, buf, bufSize);
+	
+	float * result = reinterpret_cast<float*>(buf);
 	
 	return result;
 }
 
-float * evaluateSerSet(std::string * serStr) {
-}
-
-void placeResults(NgramSet * set, NgramSet::iterator * it, float * raw, int size) {
+void placeResults(NgramSet::iterator * it, float * raw, int size) {
 	int idx = 0;
 	
-	for (; *it != set->end() and idx < size; *it++) {
-		(**it)->prob = raw[idx];
+	for (; idx < size; *it++) {
+		(**it)->prob = FloorScore(TransformSRIScore(raw[idx]));
 		idx++;
 	}
 }
 
-void evaluateNgramSet(NgramSet * ngramSet) {
+void evaluateNgramSet(int sock, NgramSet * ngramSet) {
 	NgramSet::iterator constructIt = ngramSet->begin();
 	NgramSet::iterator fillIt = ngramSet->begin();
 	
 	while (constructIt != ngramSet->end()) {
-		std::string * serStr = serializeSet(ngramSet, &constructIt, COMMUNICATION_BATCH_SIZE);
+		std::string * serStr = new std::string();
+		int actualSize = serializeSet(ngramSet, &constructIt, COMMUNICATION_BATCH_SIZE, serStr);
 		
-		float * rawResults = evaluateSerSet(serStr);
+		float * rawResults = evaluateSerSet(sock, serStr, actualSize);
 		
-		placeResults(ngramSet, &fillIt, rawResults, COMMUNICATION_BATCH_SIZE);
+		delete serStr;
+		
+		placeResults(&fillIt, rawResults, actualSize);
 		
 		free(rawResults);
 	}
@@ -255,7 +294,7 @@ void evaluateNgramSet(NgramSet * ngramSet) {
 void LanguageModelRemote::ScoreHypoBatch(std::vector<Hypothesis*> * hypoBatch) {
 	NgramSet * ngramSet = generateSetFromHypos(hypoBatch);
 	
-	evaluateNgramSet(ngramSet);
+	evaluateNgramSet(sock, ngramSet);
 	
 	//TODO: score the hungry hungry hypos
 }
