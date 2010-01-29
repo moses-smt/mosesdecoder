@@ -85,6 +85,8 @@ namespace Moses {
   void Vocab::printVocab() {
     iterate(ids2words_, iter)
       std::cerr << iter->second << "\t" << iter->first << "\n";
+    iterate(words2ids_, iter)
+      std::cerr << iter->second << "\t" << iter->first << "\n";
   }
 
 } //end namespace
