@@ -3,6 +3,7 @@
 #include "LanguageModelSingleFactor.h"
 #include "TypeDef.h"
 #include "Factor.h"
+#include "LMBatch.h"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -30,12 +31,14 @@ class LanguageModelRemote : public LanguageModelSingleFactor {
 	public:
 		LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager);
 		~LanguageModelRemote();
+		
 		void ClearSentenceCache() { m_cache.tree.clear(); m_curId = 1000; }
 		virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;
         	bool Load(const std::string &filePath
                                         , FactorType factorType
                                         , float weight
                                         , size_t nGramOrder);
+		void ScoreHypoBatch(std::vector<Hypothesis*> * hypoBatch);
 };
 
 }

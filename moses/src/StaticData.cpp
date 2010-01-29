@@ -78,6 +78,7 @@ StaticData::StaticData()
 ,m_isAlwaysCreateDirectTranslationOption(false)
 ,m_sourceStartPosMattersForRecombination(false)
 ,m_numLinkParams(1)
+//,m_lmBatch(new LMBatch())
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
