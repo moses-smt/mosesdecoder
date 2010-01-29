@@ -1,6 +1,7 @@
 #include "PhraseDictionaryDynSuffixArray.h"
 #include "DynSAInclude/utils.h"
 #include "FactorCollection.h"
+#include "StaticData.h"
 
 namespace Moses {
   PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(size_t numScoreComponent):
@@ -118,6 +119,8 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream* corpus, vector<w
 	
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	cerr << src << " ";
+	
+	const StaticData &staticData = StaticData::Instance();
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
 	size_t phraseSize = src.GetSize();
   vector<wordID_t> srcLocal(phraseSize), wrdIndices(0);  
@@ -142,7 +145,8 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   const int* sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
     vector<PhrasePair> phrPairs;
-    alignments_[sntIndexes[snt]].Extract(3, phrPairs); // extract all alignments
+		
+    alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), phrPairs, 5, 666); // extract all alignments
   }
 	return ret;
 } 
@@ -161,81 +165,70 @@ void PhraseDictionaryDynSuffixArray::save(string fname) {
 void PhraseDictionaryDynSuffixArray::load(string fname) {
   // read vocab, SAs, corpus, alignments 
 }
-bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair>& ret) const
+bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair>& ret, int startSource, int endSource) const
 {
 	// foreign = target, F=T
 	// english = source, E=S
 	
-  int countSource = srcSnt->size();
   int countTarget = trgSnt->size();
 	
-  // check alignments for english phrase startSource...endSource
-  for(int startSource = 0; startSource < countSource; startSource++) 
+	int minTarget = 9999;
+	int maxTarget = -1;
+	vector< int > usedTarget = alignedCountSrc;
+	for(int sourcePos = startSource; sourcePos <= endSource; sourcePos++) 
 	{
-    for(int endSource = startSource; 
-				(endSource<countSource && endSource<startSource+maxPhraseLength);
-				endSource++) 
+		for(int ind=0; ind < alignedTrg[sourcePos].size();ind++) 
 		{
-      
-      int minTarget = 9999;
-      int maxTarget = -1;
-      vector< int > usedTarget = alignedCountSrc;
-      for(int sourcePos = startSource; sourcePos <= endSource; sourcePos++) 
+			int targetPos = alignedTrg[sourcePos][ind];
+			// cout << "point (" << targetPos << ", " << sourcePos << ")\n";
+			if (targetPos<minTarget) { minTarget = targetPos; }
+			if (targetPos>maxTarget) { maxTarget = targetPos; }
+			usedTarget[ targetPos ]--;
+		} // for(int ind=0;ind<sentence
+	} // for(int sourcePos=startSource
+	
+	// cout << "f projected ( " << minTarget << "-" << maxTarget << ", " << startSource << "," << endSource << ")\n"; 
+	
+	if (maxTarget >= 0 && // aligned to any foreign words at all
+			maxTarget-minTarget < maxPhraseLength) 
+	{ // foreign phrase within limits
+		
+		// check if foreign words are aligned to out of bound english words
+		bool out_of_bounds = false;
+		for(int targetPos=minTarget; targetPos <= maxTarget && !out_of_bounds; targetPos++)
+		{
+			if (usedTarget[targetPos]>0) 
 			{
-				for(int ind=0; ind < alignedTrg[sourcePos].size();ind++) 
+				// cout << "ouf of bounds: " << targetPos << "\n";
+				out_of_bounds = true;
+			}
+		}
+		
+		// cout << "doing if for ( " << minTarget << "-" << maxTarget << ", " << startSource << "," << endSource << ")\n"; 
+		if (!out_of_bounds)
+		{
+			// start point of foreign phrase may retreat over unaligned
+			for(int startTarget = minTarget;
+					(startTarget >= 0 &&
+					 startTarget > maxTarget-maxPhraseLength && // within length limit
+					 (startTarget==minTarget || alignedCountSrc[startTarget]==0)); // unaligned
+					startTarget--)
+			{
+				// end point of foreign phrase may advance over unaligned
+				for (int endTarget=maxTarget;
+						 (endTarget<countTarget && 
+							endTarget<startTarget+maxPhraseLength && // within length limit
+							(endTarget==maxTarget || alignedCountSrc[endTarget]==0)); // unaligned
+						 endTarget++)
 				{
-					int targetPos = alignedTrg[sourcePos][ind];
-					// cout << "point (" << targetPos << ", " << sourcePos << ")\n";
-					if (targetPos<minTarget) { minTarget = targetPos; }
-					if (targetPos>maxTarget) { maxTarget = targetPos; }
-					usedTarget[ targetPos ]--;
-				} // for(int ind=0;ind<sentence
-      } // for(int sourcePos=startSource
-      
-      // cout << "f projected ( " << minTarget << "-" << maxTarget << ", " << startSource << "," << endSource << ")\n"; 
-			
-      if (maxTarget >= 0 && // aligned to any foreign words at all
-					maxTarget-minTarget < maxPhraseLength) 
-			{ // foreign phrase within limits
-				
-				// check if foreign words are aligned to out of bound english words
-				bool out_of_bounds = false;
-				for(int targetPos=minTarget; targetPos <= maxTarget && !out_of_bounds; targetPos++)
-				{
-					if (usedTarget[targetPos]>0) 
-					{
-						// cout << "ouf of bounds: " << targetPos << "\n";
-						out_of_bounds = true;
-					}
-				}
-				
-				// cout << "doing if for ( " << minTarget << "-" << maxTarget << ", " << startSource << "," << endSource << ")\n"; 
-				if (!out_of_bounds)
-				{
-					// start point of foreign phrase may retreat over unaligned
-					for(int startTarget = minTarget;
-							(startTarget >= 0 &&
-							 startTarget > maxTarget-maxPhraseLength && // within length limit
-							 (startTarget==minTarget || alignedCountSrc[startTarget]==0)); // unaligned
-							startTarget--)
-					{
-						// end point of foreign phrase may advance over unaligned
-						for (int endTarget=maxTarget;
-								 (endTarget<countTarget && 
-									endTarget<startTarget+maxPhraseLength && // within length limit
-									(endTarget==maxTarget || alignedCountSrc[endTarget]==0)); // unaligned
-								 endTarget++)
-						{
-							PhrasePair phrasePair(m_sntIndex, startTarget,endTarget,startSource,endSource);
-							ret.push_back(phrasePair);
-							
-							//addPhrase(sentence,startSource,endSource,startTarget,endTarget);
-						} // for (int endTarget=maxTarget;
-					}	// for(int startTarget=minTarget;
-				} // if (!out_of_bounds)
-      } // if (maxTarget >= 0 &&
-    }
-  }
+					PhrasePair phrasePair(m_sntIndex, startTarget,endTarget,startSource,endSource);
+					ret.push_back(phrasePair);
+					
+					//addPhrase(sentence,startSource,endSource,startTarget,endTarget);
+				} // for (int endTarget=maxTarget;
+			}	// for(int startTarget=minTarget;
+		} // if (!out_of_bounds)
+	} // if (maxTarget >= 0 &&
 	
 	return (ret.size() > 0);
 }
