@@ -182,21 +182,16 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices, sntBounds);
   vector<int> sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
-    cerr << "wordIndices.size()="  << wrdIndices.size() << endl;
-    cerr << "snt index = " << snt << endl;
     vector<PhrasePair*> phrasePairs;
 		// extract all Alignments
-		int sntIndex = sntIndexes[snt];
-    cerr << "snt index = " << sntIndex << endl;
+		int sntIndex = sntIndexes.at(snt);
 		//int targetSize = GetTargetSentenceSize(sntIndex);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
-    cerr << "sntbnd" << sntBounds[snt].first << " " << endl;
 		/*
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
 															sntBounds[snt].second); 
-    cerr << "gets here " << snt << endl;
 		*/
 		
 		cerr << "extracted " << phrasePairs.size() << endl;
@@ -220,13 +215,19 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 }
 vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
 {
+  cerr << "wrdIndices.size() = " << wrdIndices.size() << endl;
+  iterate(wrdIndices, itr) cerr << *itr << endl;
+  cerr << "size of srcSntbreaks=" << srcSntBreaks_.size() << endl;
+  iterate(srcSntBreaks_, itr) cerr << *itr << endl;
   vector<unsigned>::const_iterator vit;
   vector<int> sntIndexes(wrdIndices.size()); 
   for(int i = 0; i < wrdIndices.size(); ++i) {
     vit = std::lower_bound(srcSntBreaks_.begin(), srcSntBreaks_.end(), wrdIndices[i]);
-    sntIndexes.at(i) = unsigned(vit - srcSntBreaks_.begin());
+    int index = int(vit - srcSntBreaks_.begin());
+    sntIndexes.at(i) = index > 0 ? index - 1 : 0;
   }
-	
+  cerr << "Printing sentence indexes: " << sntIndexes.size() << endl;
+  for(int i = 0; i < sntIndexes.size(); ++i) cerr << i <<  "-" << sntIndexes.at(i) << endl; 
   return sntIndexes;
 }
 void PhraseDictionaryDynSuffixArray::save(string fname) {

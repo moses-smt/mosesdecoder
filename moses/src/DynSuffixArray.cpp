@@ -156,7 +156,7 @@ void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPELEMNT SUBSITITUTE FACTOR\n";
   return;
 }
-unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices, 
+unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices, 
     std::map<int, pair<int, int> >& mapBnds) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   std::set<int> skipSet;
