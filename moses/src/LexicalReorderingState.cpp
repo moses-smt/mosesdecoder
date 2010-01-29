@@ -273,25 +273,23 @@ LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothe
   return new HierarchicalReorderingForwardState(m_modelType, currWordsRange);
 }
 
-#if 0
-bool HierarchicalReorderingForwardState::RangeEmpty(const WordsBitmap &wb, size_t from, size_t to) {
-  assert(from <= to);
-  // start and end position are assumed to be covered!
-  for (size_t i = from+1; i < to; i++) {
-      if (!wb.GetValue(i)) {
-          return false;
-      }
-  }
-  return true;
-}
-#endif
+// For compatibility with the phrase-based reordering model, scoring is one step delayed.
+// The forward model takes determines orientations heuristically as follows:
+//  mono:   if the next phrase comes after the conditioning phrase and
+//          - there is a gap to the right of the conditioning phrase, or
+//          - the next phrase immediately follows it
+//  swap:   if the next phrase goes before the conditioning phrase and
+//          - there is a gap to the left of the conditioning phrase, or
+//          - the next phrase immediately precedes it
+//  dright: if the next phrase follows the conditioning phrase and other stuff comes in between
+//  dleft:  if the next phrase precedes the conditioning phrase and other stuff comes in between
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
-      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || coverage.GetEdgeToTheRightOf(m_prevRange.GetEndPos())+1 == currRange.GetStartPos())) {
+      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || currRange.GetStartPos() == m_prevRange.GetEndPos()+1)) {
       return M;
   } else if (currRange.GetEndPos() < m_prevRange.GetStartPos() &&
-             (!coverage.GetValue(m_prevRange.GetStartPos()-1) || coverage.GetEdgeToTheLeftOf(m_prevRange.GetStartPos())-1 == currRange.GetEndPos())) {
+             (!coverage.GetValue(m_prevRange.GetStartPos()-1) || currRange.GetEndPos() == m_prevRange.GetStartPos()-1)) {
       return S;
   }
   return D;
@@ -299,10 +297,10 @@ LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrienta
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
-      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || coverage.GetEdgeToTheRightOf(m_prevRange.GetEndPos())+1 == currRange.GetStartPos())) {
+      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || currRange.GetStartPos() == m_prevRange.GetEndPos()+1)) {
       return M;
   } else if (currRange.GetEndPos() < m_prevRange.GetStartPos() &&
-             (!coverage.GetValue(m_prevRange.GetStartPos()-1) || coverage.GetEdgeToTheLeftOf(m_prevRange.GetStartPos())-1 == currRange.GetEndPos())) {
+             (!coverage.GetValue(m_prevRange.GetStartPos()-1) || currRange.GetEndPos() == m_prevRange.GetStartPos()-1)) {
       return S;
   } else if (currRange.GetStartPos() > m_prevRange.GetEndPos()) {
       return DR;
@@ -312,7 +310,7 @@ LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrienta
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMonotonic(WordsRange currRange, WordsBitmap coverage) const {
   if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
-      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || coverage.GetEdgeToTheRightOf(m_prevRange.GetEndPos())+1 == currRange.GetStartPos())) {
+      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || currRange.GetStartPos() == m_prevRange.GetEndPos()+1)) {
       return M;
   }
   return NM;

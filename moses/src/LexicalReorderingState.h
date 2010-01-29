@@ -103,8 +103,6 @@ class HierarchicalReorderingForwardState : public LexicalReorderingState {
     LexicalReordering::ReorderingType GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const;
     LexicalReordering::ReorderingType GetOrientationTypeMonotonic(WordsRange currRange, WordsBitmap coverage) const;
     LexicalReordering::ReorderingType GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const;
-    
-    //static bool BitmapFullyCovered(const WordsBitmap &wb, size_t from, size_t to);
 };
 
 }
