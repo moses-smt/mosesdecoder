@@ -120,7 +120,7 @@ bool LexicalReordering::DecodeDirection(std::string configElement) {
     } else if(configElement == "forward") {
         if(!m_direction.empty())
             goto double_spec;
-        m_direction.push_back(Backward);
+        m_direction.push_back(Forward);
         return true;
     } else if(configElement == "bidirectional") {
         if(!m_direction.empty())

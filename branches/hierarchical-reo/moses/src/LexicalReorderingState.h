@@ -51,7 +51,7 @@ class PhraseBasedReorderingState : public LexicalReorderingState {
     WordsRange m_prevRange;
     bool m_first;
   public:
-    PhraseBasedReorderingState(ModelType mt);
+    explicit PhraseBasedReorderingState(ModelType mt);
     PhraseBasedReorderingState(ModelType mt, WordsRange wr);
     virtual int Compare(const FFState& o) const;
     virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
@@ -70,7 +70,7 @@ class HierarchicalReorderingBackwardState : public LexicalReorderingState {
   private:
     ReorderingStack m_reoStack;
   public:
-    HierarchicalReorderingBackwardState(ModelType mt);
+    explicit HierarchicalReorderingBackwardState(ModelType mt);
     HierarchicalReorderingBackwardState(ModelType mt, ReorderingStack reoStack);
     virtual int Compare(const FFState& o) const;
     virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
@@ -84,11 +84,16 @@ class HierarchicalReorderingBackwardState : public LexicalReorderingState {
 };
 
 
-  //!backward state (conditioned on the next phrase)
+  //!forward state (conditioned on the next phrase)
 class HierarchicalReorderingForwardState : public LexicalReorderingState {
+  private:
+    WordsRange m_prevRange;
+    bool m_first;
     
   public:
-    HierarchicalReorderingForwardState(ModelType mt);
+    explicit HierarchicalReorderingForwardState(ModelType mt);
+    HierarchicalReorderingForwardState(ModelType mt, WordsRange wf);
+    
     virtual int Compare(const FFState& o) const;
     virtual LexicalReorderingState* Expand(const Hypothesis& hypo, 
 					   LexicalReordering::ReorderingType& reoType) const;
@@ -98,6 +103,8 @@ class HierarchicalReorderingForwardState : public LexicalReorderingState {
     LexicalReordering::ReorderingType GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const;
     LexicalReordering::ReorderingType GetOrientationTypeMonotonic(WordsRange currRange, WordsBitmap coverage) const;
     LexicalReordering::ReorderingType GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const;
+    
+    //static bool BitmapFullyCovered(const WordsBitmap &wb, size_t from, size_t to);
 };
 
 }
