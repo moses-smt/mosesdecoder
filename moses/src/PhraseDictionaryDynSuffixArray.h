@@ -31,7 +31,7 @@ public:
   vector<wordID_t>* srcSnt;
   vector<int> alignedCountSrc;
   vector< vector<int> > alignedTrg;
-	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const;
+	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource, int countTarget) const;
 };
 	
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
@@ -77,9 +77,9 @@ private:
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
 	
 	int GetSourceSentenceSize(int sentenceId) const
-	{ return (sentenceId==srcSntBreaks_.size()-1) ? srcCrp_->size() - srcSntBreaks_[sentenceId] : srcSntBreaks_[sentenceId+1] - srcSntBreaks_[sentenceId]; }
+	{ return (sentenceId==srcSntBreaks_.size()-1) ? srcCrp_->size() - srcSntBreaks_.at(sentenceId) : srcSntBreaks_.at(sentenceId+1) - srcSntBreaks_.at(sentenceId); }
 	int GetTargetSentenceSize(int sentenceId) const
-	{ return (sentenceId==trgSntBreaks_.size()-1) ? trgCrp_->size() - trgSntBreaks_[sentenceId] : trgSntBreaks_[sentenceId+1] - trgSntBreaks_[sentenceId]; }
+	{ return (sentenceId==trgSntBreaks_.size()-1) ? trgCrp_->size() - trgSntBreaks_.at(sentenceId) : trgSntBreaks_.at(sentenceId+1) - trgSntBreaks_.at(sentenceId); }
 	
 };
 
