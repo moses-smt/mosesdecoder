@@ -112,6 +112,10 @@ void LanguageModel::CollectNGrams(const Hypothesis& hypo) const
 	}
 }
 
+void LanguageModel::CacheNGram(NGram * ngram, float score) {
+	m_cachedNGrams.insert(make_pair(new FactoredNGram(ngram, -1), score));
+}
+
 void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
 {
 	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
@@ -127,7 +131,7 @@ void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& b
 		
 		// Compute LM score and add it to the LM-internal cache.
 		float lmScore = GetValue(*ngram_copy);
-		m_cachedNGrams.insert(make_pair(ngram_copy, lmScore));
+		CacheNGram(ngram_copy, lmScore);
 	}
 }
 
@@ -267,6 +271,57 @@ FFState* LanguageModel::Evaluate(
 	out->PlusEquals(this, lmScore);
   IFVERBOSE(2) { hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t ); }
 	return res;
+}
+
+bool compareFactored(FactoredNGram * k1, FactoredNGram * k2, FactorType factor) {
+	NGram * n1 = k1->first;
+	NGram * n2 = k2->first;
+	
+	int s1 = n1->size();
+	int s2 = n2->size();
+  
+	if (s1 != s2) {
+		return (s1 < s2);
+	}
+	
+	for (int j = 0; j < s1; j++) {
+		int w1 = n1->at(j)->GetFactor(factor)->GetId();
+		int w2 = n2->at(j)->GetFactor(factor)->GetId();
+		
+		if (w1 != w2) {
+			return (w1 < w2);
+		}
+	}
+	
+	return false;
+}
+
+bool compareUnFactored(FactoredNGram * k1, FactoredNGram * k2) {
+	NGram * n1 = k1->first;
+	NGram * n2 = k2->first;
+	
+	int s1 = n1->size();
+	int s2 = n2->size();
+  
+	if (s1 != s2) {
+		return (s1 < s2);
+	}
+	
+	for (int j = 0; j < s1; j++) {
+		int cmpRes = Word::Compare(*(n1->at(j)), *(n2->at(j)));
+		
+		if (cmpRes != 0) {
+			return (cmpRes > 0);
+		}
+	}
+	
+	return false;
+}
+
+bool FactoredNGramCmp::operator()(FactoredNGram * k1, FactoredNGram * k2) {
+	const FactorType factor = k1->second;
+	
+	return (factor < 0)? compareUnFactored(k1, k2): compareFactored(k1, k2, factor);
 }
 
 }

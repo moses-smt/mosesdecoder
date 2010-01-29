@@ -53,6 +53,7 @@ std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 	return oss.str();
 } 
 
+/*
 void LanguageModelSingleFactor::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
 {
 	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
@@ -70,6 +71,11 @@ void LanguageModelSingleFactor::ScoreNGrams(const std::vector<std::vector<const 
 		float lmScore = GetValue(*ngram_copy);
 		m_cachedNGrams.insert(make_pair(ngram_copy, lmScore));
 	}
+}
+*/
+
+void LanguageModelSingleFactor::CacheNGram(NGram * ngram, float score) {
+	m_cachedNGrams.insert(make_pair(new FactoredNGram(ngram, GetFactorType()), score));
 }
 
 }

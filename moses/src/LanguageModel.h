@@ -36,11 +36,20 @@ class FactorCollection;
 class Factor;
 class Phrase;
 
+typedef std::vector<const Word*> NGram;
+typedef std::pair<NGram *, int> FactoredNGram;
+
+class FactoredNGramCmp {
+	public:
+		bool operator()(FactoredNGram * k1, FactoredNGram * k2);
+};
+
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction
 {
 protected:	
-	std::map<std::vector<const Word*>*,float> m_cachedNGrams;
+	std::map<FactoredNGram *, float, FactoredNGramCmp> m_cachedNGrams;
+	void CacheNGram(NGram * ngram, float score);
 
 	float				m_weight; //! scoring weight. Shouldn't this now be superceded by ScoreProducer???
 	std::string	m_filePath; //! for debugging purposes
