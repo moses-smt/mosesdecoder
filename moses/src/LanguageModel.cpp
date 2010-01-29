@@ -112,8 +112,29 @@ void LanguageModel::CollectNGrams(const Hypothesis& hypo) const
 	}
 }
 
+bool LanguageModel::FindCachedNGram(const NGram &contextFactor, float * resultBuf) const {
+	const NGram * ngramPtr = &contextFactor;
+	
+	int factor = MaybeGetFactor();
+	
+	FactoredNGram * seed =
+		new FactoredNGram(ngramPtr, factor);
+	
+	FactoredNGramScoreMap::const_iterator it =
+		m_cachedNGrams.find(seed);
+	
+	delete seed;
+	
+	if (it != m_cachedNGrams.end()) {
+		*resultBuf = it->second;
+		return true;
+	}
+	
+	return false;
+}
+
 void LanguageModel::CacheNGram(NGram *ngram, float score) {
-	m_cachedNGrams.insert(make_pair(new FactoredNGram(ngram, -1), score));
+	m_cachedNGrams.insert(make_pair(new FactoredNGram(ngram, MaybeGetFactor()), score));
 }
 
 void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
@@ -122,16 +143,23 @@ void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& b
 	{
 		// cfedermann: we should lookup ngrams that are already scored here!
 		//             This will further optimize LM score computation.
+		// mphi: in addition, since a duplicate pair isn't inserted into the map,
+		//             its copy would be undeleted
+		// mphi: lookup done (see 4 lines below)
 		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
 		
-		// Create a copy of the ngram for the LM-internal cache.
-		StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
-		ngram_copy->reserve(ngram->size());
-		std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
+		float lmScore;
 		
-		// Compute LM score and add it to the LM-internal cache.
-		float lmScore = GetValue(*ngram_copy);
-		CacheNGram(ngram_copy, lmScore);
+		if (!FindCachedNGram(*ngram, &lmScore)) {
+			// Create a copy of the ngram for the LM-internal cache.
+			StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
+			ngram_copy->reserve(ngram->size());
+			std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
+			
+			// Compute LM score and add it to the LM-internal cache.
+			lmScore = GetValue(*ngram_copy);
+			CacheNGram(ngram_copy, lmScore);
+		}
 	}
 }
 
@@ -319,7 +347,7 @@ bool compareUnFactored(const FactoredNGram * k1, const FactoredNGram * k2) {
 }
 
 bool FactoredNGramCmp::operator()(const FactoredNGram * k1, const FactoredNGram * k2) const {
-	const FactorType factor = k1->second;
+	int factor = k1->second;
 	
 	return (factor < 0)? compareUnFactored(k1, k2): compareFactored(k1, k2, factor);
 }
