@@ -55,14 +55,20 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream* align) {
   while(getline(*align, line)) {
     Utils::splitToInt(line, vtmp, "- ");
     assert(vtmp.size() % 2 == 0);
-    SentenceAlignment curSnt(vtmp.size()/2); // initialize empty sentence 
+		
+		int sourceSize = GetSourceSentenceSize(sntIndex);
+		int targetSize = GetTargetSentenceSize(sntIndex);
+
+    SentenceAlignment curSnt(sntIndex, sourceSize, targetSize); // initialize empty sentence 
     for(int i=0; i < vtmp.size(); i+=2) {
       curSnt.alignedCountSrc[vtmp[i]]++; // cnt of trg nodes each src node is attached to  
       curSnt.alignedTrg[vtmp[i+1]].push_back(vtmp[i]);  // list of source nodes each target node connects with
     }
     curSnt.srcSnt = srcCrp_ + sntIndex;  // point source and target sentence
-    curSnt.trgSnt = trgCrp_ + sntIndex++; 
+    curSnt.trgSnt = trgCrp_ + sntIndex; 
     alignments_.push_back(curSnt);
+		
+		sntIndex++;
   }
   return alignments_.size();
 }
@@ -199,6 +205,18 @@ void PhraseDictionaryDynSuffixArray::save(string fname) {
 void PhraseDictionaryDynSuffixArray::load(string fname) {
   // read vocab, SAs, corpus, alignments 
 }
+	
+SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
+	:m_sntIndex(sntIndex)
+	,alignedCountSrc(sourceSize, 0)
+	,alignedTrg(targetSize)
+{
+	for(int i=0; i < targetSize; ++i) {
+		vector<int> trgWrd;
+		alignedTrg[i] = trgWrd;
+	}
+}
+	
 bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const
 {
 	// foreign = target, F=T

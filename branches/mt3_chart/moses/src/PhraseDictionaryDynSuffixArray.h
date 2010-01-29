@@ -25,13 +25,7 @@ public:
 class SentenceAlignment 
 {
 public:
-  SentenceAlignment(int size) {
-    for(int i=0; i < size; ++i) {
-      alignedCountSrc.push_back(0);
-      vector<int> trgWrd;
-      alignedTrg.push_back(trgWrd);
-    }
-  }
+  SentenceAlignment(int sntIndex, int sourceSize, int targetSize);
   
 	int m_sntIndex;
 	vector<wordID_t>* trgSnt;
@@ -82,6 +76,12 @@ private:
 	
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
+	
+	int GetSourceSentenceSize(int sentenceId) const
+	{ return srcSntBreaks_[sentenceId+1] - srcSntBreaks_[sentenceId]; }
+	int GetTargetSentenceSize(int sentenceId) const
+	{ return trgSntBreaks_[sentenceId+1] - trgSntBreaks_[sentenceId]; }
+	
 };
 
 } // end namespace
