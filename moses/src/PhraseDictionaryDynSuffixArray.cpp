@@ -137,14 +137,19 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<
 	}
   return (localIDs.size() > 0);
 }
-void PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair& phrasepair) const {
+TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair& phrasepair) const {
+  TargetPhrase* targetPhrase = new TargetPhrase(Output);
   int sntIndex = phrasepair.m_sntIndex;
 	std::map<wordID_t, const Factor *>::const_iterator rIterLookup;	
-  for(int i=phrasepair.m_startTarget; i < phrasepair.m_endTarget; ++i) { // look up src words
+  for(int i=phrasepair.m_startTarget; i < phrasepair.m_endTarget; ++i) { // look up trg words
     rIterLookup = vocabLookupRev_.find(trgCrp_->at(trgSntBreaks_[sntIndex] + i));
-    if(rIterLookup != vocabLookupRev_.end())
-      const Factor* factor = rIterLookup->second; 
+    assert(rIterLookup != vocabLookupRev_.end());
+    const Factor* factor = rIterLookup->second; 
+    Word word;
+    word.SetFactor(0, factor);
+    targetPhrase->AddWord(word);
   }
+  return targetPhrase;
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	cerr << src << " ";	
