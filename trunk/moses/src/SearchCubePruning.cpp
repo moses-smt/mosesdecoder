@@ -51,8 +51,10 @@ SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, 
 {
 	const StaticData &staticData = StaticData::Instance();
 
+        /* constraint search not implemented in cube pruning
 	long sentenceID = source.GetTranslationId();
 	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+        */
 
 	std::vector < HypothesisStackCubePruning >::iterator iterStack;
 	for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind)

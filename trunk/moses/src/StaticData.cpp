@@ -336,8 +336,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
 
 	// Read in constraint decoding file, if provided
-	if(m_parameter->GetParam("constraint").size()) 
+	if(m_parameter->GetParam("constraint").size()) {
+	  if (m_parameter->GetParam("search-algorithm").size() > 0
+            && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
+            cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
+            exit(1);
+          }
 		m_constraintFileName = m_parameter->GetParam("constraint")[0];		
+        }
 	
 	InputFileStream constraintFile(m_constraintFileName);
 	
