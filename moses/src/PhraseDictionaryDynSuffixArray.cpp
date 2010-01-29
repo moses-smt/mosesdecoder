@@ -191,12 +191,14 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		//int targetSize = GetTargetSentenceSize(sntIndex);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     cerr << "sntbnd" << sntBounds[snt].first << " " << endl;
+		/*
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
 															sntBounds[snt].second); 
     cerr << "gets here " << snt << endl;
-
+		*/
+		
 		cerr << "extracted " << phrasePairs.size() << endl;
 		
 		// convert to moses phrase pairs
