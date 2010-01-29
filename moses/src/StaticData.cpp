@@ -338,35 +338,36 @@ bool StaticData::LoadData(Parameter *parameter)
 	// Read in constraint decoding file, if provided
 	if(m_parameter->GetParam("constraint").size()) {
 	  if (m_parameter->GetParam("search-algorithm").size() > 0
-            && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
-            cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
-            exit(1);
-          }
+      && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
+      cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
+      exit(1);
+    }
 		m_constraintFileName = m_parameter->GetParam("constraint")[0];		
-        }
 	
-	InputFileStream constraintFile(m_constraintFileName);
+	  InputFileStream constraintFile(m_constraintFileName);
 	
-	
-	std::string line;
-	
-	long sentenceID = -1;
-	while (getline(constraintFile, line)) 
-	{
-		vector<string> vecStr = Tokenize(line, "\t");
+		std::string line;
 		
-		if (vecStr.size() == 1) {
-			sentenceID++;
-			Phrase phrase(Output);
-			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
-			m_constraints.insert(make_pair(sentenceID,phrase));
-		} else if (vecStr.size() == 2) {
-			sentenceID = Scan<long>(vecStr[0]);
-			Phrase phrase(Output);
-			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
-			m_constraints.insert(make_pair(sentenceID,phrase));
-		} else {
-			assert(false);
+		long sentenceID = -1;
+		while (getline(constraintFile, line)) 
+		{
+			vector<string> vecStr = Tokenize(line, "\t");
+			
+			if (vecStr.size() == 1) {
+				sentenceID++;
+				Phrase phrase(Output);
+				phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
+				m_constraints.insert(make_pair(sentenceID,phrase));
+			}
+			else if (vecStr.size() == 2) {
+				sentenceID = Scan<long>(vecStr[0]);
+				Phrase phrase(Output);
+				phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+				m_constraints.insert(make_pair(sentenceID,phrase));
+			}
+			else {
+				assert(false);
+			}
 		}
 	}
 
