@@ -197,6 +197,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		{
 			const PhrasePair &phrasePair = **iterPhrasePair;
 			TargetPhrase *targetPhrase = getMosesFactorIDs(phrasePair); 
+			cerr << *targetPhrase << endl;
 			
 			ret->Add(targetPhrase);
 		}
