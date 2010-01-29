@@ -117,17 +117,9 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream* corpus, vector<w
   cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus for ssarray
   return cArray.size();
 }
-	
-const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
-	cerr << src << " ";	
-	TargetPhraseCollection *ret = new TargetPhraseCollection();
- 
-	const StaticData &staticData = StaticData::Instance();
-
+bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<wordID_t>& localIDs) const {
 	size_t phraseSize = src.GetSize();
-  vector<wordID_t> srcLocal(phraseSize), wrdIndices(0);  
-	for (size_t pos = 0; pos < phraseSize; ++pos)
-	{
+	for (size_t pos = 0; pos < phraseSize; ++pos) {
 		const Word &word = src.GetWord(pos);
 		const Factor *factor = word.GetFactor(0);
 		
@@ -135,15 +127,26 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		iterLookup = vocabLookup_.find(factor);
 		
 		if (iterLookup == vocabLookup_.end())
-      return ret;
+      break; 
 		else
 		{
 			wordID_t arrayId = iterLookup->second;
-      srcLocal[pos] = arrayId;
+      localIDs.push_back(arrayId);
 			cerr << arrayId << " ";
 		}
 	}
-  unsigned denom = srcSA_->countPhrase(&srcLocal, &wrdIndices);
+  return (localIDs.size() > 0);
+}
+const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
+	cerr << src << " ";	
+	TargetPhraseCollection *ret = new TargetPhraseCollection();
+ 
+	const StaticData &staticData = StaticData::Instance();
+  
+  vector<wordID_t> localIDs(0), wrdIndices(0);  
+  if(!getLocalVocabIDs(src, localIDs)) return ret; 
+
+  unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices);
   const int* sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
@@ -158,17 +161,17 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 			const PhrasePair &phrasePair = **iterPhrasePair;
 			TargetPhrase *targetPhrase = new TargetPhrase(Output);
 			
-			
 			ret->Add(targetPhrase);
 		}
 				 
 		// done. delete SA phrase pairs
 		RemoveAllInColl(phrasePairs);
   }
-
 	
 	return ret;
-} 
+}
+void PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair& phrasepair) const {
+}
 const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const {
   vector<unsigned>::const_iterator vit;
   int* sntIndexes = new int[wrdIndices.size()];

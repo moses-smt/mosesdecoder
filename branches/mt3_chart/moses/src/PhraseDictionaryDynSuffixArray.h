@@ -73,6 +73,8 @@ private:
   int loadCorpus(InputFileStream* corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(InputFileStream* aligs);
   const int* getSntIndexes(vector<unsigned>&) const; 	
+  void getMosesFactorIDs(const PhrasePair&) const;
+  bool getLocalVocabIDs(const Phrase&, vector<wordID_t>&) const;
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
