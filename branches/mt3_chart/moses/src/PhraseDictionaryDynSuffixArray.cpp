@@ -166,13 +166,14 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   vector<wordID_t> localIDs(0), wrdIndices(0);  
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
-  unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices);
+  std::map<int, pair<int, int> > sntBounds; 
+  unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices, sntBounds);
   const int* sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
 		
 		// extract from SA
-    alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), phrasePairs, 5, 666); // extract all alignments
+    alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), phrasePairs, sntBounds[snt].first, sntBounds[snt].second); // extract all alignments
 
 		// convert to moses phrase pairs
 		vector<PhrasePair*>::iterator iterPhrasePair;
