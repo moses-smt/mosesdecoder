@@ -173,8 +173,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair)
 		{
 			const PhrasePair &phrasePair = **iterPhrasePair;
-      getMosesFactorIDs(phrasePair);
-			TargetPhrase *targetPhrase = new TargetPhrase(Output);
+			TargetPhrase *targetPhrase = getMosesFactorIDs(phrasePair); 
 			
 			ret->Add(targetPhrase);
 		}
