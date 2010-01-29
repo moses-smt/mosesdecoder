@@ -64,8 +64,8 @@ private:
   vector<unsigned> srcSntBreaks_, trgSntBreaks_;
   Vocab* vocab_;
   vector<SentenceAlignment> alignments_;
-  int loadCorpus(InputFileStream* corpus, vector<wordID_t>&, vector<wordID_t>&);
-  int loadAlignments(InputFileStream* aligs);
+  int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
+  int loadAlignments(InputFileStream& aligs);
   const int* getSntIndexes(vector<unsigned>&) const; 	
   TargetPhrase* getMosesFactorIDs(const PhrasePair&) const;
   bool getLocalVocabIDs(const Phrase&, vector<wordID_t>&) const;
@@ -78,9 +78,9 @@ private:
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
 	
 	int GetSourceSentenceSize(int sentenceId) const
-	{ return srcSntBreaks_[sentenceId+1] - srcSntBreaks_[sentenceId]; }
+	{ return (sentenceId==srcSntBreaks_.size()-1) ? srcCrp_->size() - srcSntBreaks_[sentenceId] : srcSntBreaks_[sentenceId+1] - srcSntBreaks_[sentenceId]; }
 	int GetTargetSentenceSize(int sentenceId) const
-	{ return trgSntBreaks_[sentenceId+1] - trgSntBreaks_[sentenceId]; }
+	{ return (sentenceId==trgSntBreaks_.size()-1) ? trgCrp_->size() - trgSntBreaks_[sentenceId] : trgSntBreaks_[sentenceId+1] - trgSntBreaks_[sentenceId]; }
 	
 };
 
