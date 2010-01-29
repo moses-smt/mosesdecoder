@@ -161,15 +161,23 @@ unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices,
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   std::set<int> skipSet;
   indices->clear();
+  int phrasesize = phrase->size();
   // find lower and upper bounds on phrase[0]
   bounds = std::equal_range(F_->begin(), F_->end(), phrase->at(0));
-  int phrasesize = phrase->size();
   // bounds holds first and last index of phrase[0] in SA_
   cerr << "Lower Bound=" << int(bounds.first - F_->begin()) << endl;
   int lwrBnd = int(bounds.first - F_->begin());
   cerr << "Upper Bound=" << int(bounds.second - F_->begin() - 1) << endl;
   int uprBnd = int(bounds.second - F_->begin());
   int pcnt = uprBnd - lwrBnd; // assume all matching words are phrase initially
+  if(phrasesize == 1) {
+    for(int i=lwrBnd; i < uprBnd; ++i) {
+      indices->push_back(SA_->at(i));
+      mapBnds[indices->size()-1] = std::make_pair(i,i);   
+    }
+    return pcnt;
+  }
+  //find longer phrases if they exist
   for(int pos = 1; pos < phrasesize; ++pos) { // for all following words
     // for each index returned from check corpus SA[i] + 1 for phrase[1]
     for(int i=lwrBnd; i < uprBnd; ++i) { // cut off for sampling here
@@ -186,7 +194,7 @@ unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices,
       }
     }
   }
-  cerr << "Total count of phrase = " << pcnt << endl;
+  cerr << "Total count of phrase = " << indices->size() << endl;
   return pcnt;
 }
 void DynSuffixArray::save(FILE* fout) {
