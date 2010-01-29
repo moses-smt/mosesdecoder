@@ -47,7 +47,7 @@ public:
     const FFState* EmptyHypothesisState() const;
     
     virtual std::string GetScoreProducerDescription() const {
-        return "Lexical reordering model of type " + m_modelTypeString;
+        return "LexicalReordering_" + m_modelTypeString;
     }
     
     std::string GetScoreProducerWeightShortName() const {

@@ -23,27 +23,18 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     m_oneScorePerDirection = false; // default setting
     
     m_modelTypeString = modelType;
-    m_modelType = Tokenize<std::string>(modelType,"-");
+    m_modelType = Tokenize<std::string>(modelType, "-");
     std::vector<LexicalReordering::Condition> conditions;
     for(std::vector<std::string>::iterator it = m_modelType.begin(); it != m_modelType.end();) {
-        std::cerr << "Processing: " << *it << std::endl;
-        if(DecodeDirection(*it) ||
-           DecodeCondition(*it) ||
-           DecodeNumFeatureFunctions(*it)) {
-            std::cerr << "Erasing: " << *it << std::endl;
+        if(DecodeDirection(*it) || DecodeCondition(*it) || DecodeNumFeatureFunctions(*it))
             it = m_modelType.erase(it);
-        } else
+        else
             ++it;
     }
  
     if(m_direction.empty())
         m_direction.push_back(Backward); // default setting
     
-    //m_FactorsE = e_factors;
-    //m_FactorsF = f_factors;
-    //Todo:should check that
-    //- if condition contains e than e_factors non empty
-    //- if condition contains f f_factors non empty
     for(size_t i = 0; i < m_condition.size(); ++i){
         switch(m_condition[i]){
             case E:
@@ -87,7 +78,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
         exit(1);
     }
     
-    //add ScoreProducer
+    // add ScoreProducer - don't do this before our object is set up
     const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
     const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 
