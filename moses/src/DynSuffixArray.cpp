@@ -156,7 +156,8 @@ void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPELEMNT SUBSITITUTE FACTOR\n";
   return;
 }
-unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices) {
+unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices, 
+    std::map<int, pair<int, int> >& mapBnds) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   std::set<int> skipSet;
   indices->clear();
@@ -179,8 +180,10 @@ unsigned DynSuffixArray::countPhrase(vuint_t* phrase, vuint_t* indices) {
         skipSet.insert(i);  // save index to not check next iteration 
         --pcnt;  // decrement current phrase count
       }
-      else if(pos == phrasesize-1) // found phrase so store word index for snt retrieval
+      else if(pos == phrasesize-1) { // found phrase so store word index for snt retrieval
         indices->push_back(idx);
+        mapBnds[indices->size()-1] = std::make_pair(lwrBnd, uprBnd);   
+      }
     }
   }
   cerr << "Total count of phrase = " << pcnt << endl;
