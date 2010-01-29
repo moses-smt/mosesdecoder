@@ -46,16 +46,21 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
   return true;
 }
 int PhraseDictionaryDynSuffixArray::loadAlignments(FileHandler* align) {
+  // stores the alignments in the format used by SentenceAlignment.Extract()
   string line;
   vector<int> vtmp;
+  int sntIndex(0);
   while(getline(*align, line)) {
     Utils::splitToInt(line, vtmp, "- ");
     assert(vtmp.size() % 2 == 0);
     SentenceAlignment curSnt(vtmp.size()/2); // initialize empty sentence 
-    // get cnt of trg nodes each src node is attached to  
-    for(int i=0; i < vtmp.size(); ++i)
-      if(i % 2 == 0) curSnt.alignedCountSrc[vtmp[i]/2]++;
-      else curSnt.alignedTrg[vtmp[i]/2].push_back(vtmp[i-1]);
+    for(int i=0; i < vtmp.size(); i+=2) {
+      curSnt.alignedCountSrc[vtmp[i]]++; // cnt of trg nodes each src node is attached to  
+      curSnt.alignedTrg[vtmp[i+1]].push_back(vtmp[i]);  // list of source nodes each target node connects with
+    }
+    curSnt.srcSnt = srcCrp_ + sntIndex;
+    curSnt.trgSnt = trgCrp_ + sntIndex; 
+    ++sntIndex;
   }
   return 1;
 }
