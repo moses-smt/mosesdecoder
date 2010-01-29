@@ -82,7 +82,8 @@ public:
 	}
 	std::string GetScoreProducerDescription() const;
 
-	virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
+	// cfedermann: this fixes the compilation bug?
+	//virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
 };
 
 }
