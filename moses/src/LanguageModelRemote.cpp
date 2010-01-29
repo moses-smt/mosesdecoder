@@ -91,41 +91,61 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   cur->boState = *reinterpret_cast<const State*>(&m_curId);
   ++m_curId;
 
-  std::ostringstream os;
-  os << "prob ";
-  if (event_word == NULL) {
-	os << "</s>";
-  } else {
-	os << event_word->GetString();
-  }
-  for (size_t i=1; i<max; i++) {
-        const Factor* f = contextFactor[count-1-i]->GetFactor(factor);
-	if (f == NULL) {
-		os << " <s>";
-	} else {
-		os << ' ' << f->GetString();
+	float lmScore = 0;
+	
+	// OK, I really need a solution to store the ngram context factors in a
+	// hashable form somewhere.  I guess the LM would be the natural place?
+	// It is mandatory to patch the LM destructor code to clean up later!!!
+	/*
+	std::map<std::vector<const Word*>,float>::iterator it =	m_cachedNGrams.find(contextFactor);
+	if (it != m_cachedNGrams.end())
+	{
+		lmScore = it->second;
 	}
-  }
-  os << std::endl;
-  std::string out = os.str();
-  write(sock, out.c_str(), out.size());
-  char res[6];
-  int r = read(sock, res, 6);
-  int errors = 0;
-  int cnt = 0;
-  while (1) {
-      if (r < 0) {
-        errors++; sleep(1);
-        //std::cerr << "Error: read()\n";
-        if (errors > 5) exit(1);
-        } else if (r==0 || res[cnt] == '\n') { break; }
-      else {
-        cnt += r;
-        if (cnt==6) break;
-        read(sock, &res[cnt], 6-cnt);
-      }
-  }
-  cur->prob = FloorScore(TransformSRIScore(*reinterpret_cast<float*>(res)));
+	else
+	{
+	*/
+	if (true)
+	{
+	  std::ostringstream os;
+	  os << "prob ";
+	  if (event_word == NULL) {
+		os << "</s>";
+	  } else {
+		os << event_word->GetString();
+	  }
+	  for (size_t i=1; i<max; i++) {
+	        const Factor* f = contextFactor[count-1-i]->GetFactor(factor);
+		if (f == NULL) {
+			os << " <s>";
+		} else {
+			os << ' ' << f->GetString();
+		}
+	  }
+	  os << std::endl;
+	  std::string out = os.str();
+	  write(sock, out.c_str(), out.size());
+	  char res[6];
+	  int r = read(sock, res, 6);
+	  int errors = 0;
+	  int cnt = 0;
+	  while (1) {
+	      if (r < 0) {
+	        errors++; sleep(1);
+	        //std::cerr << "Error: read()\n";
+	        if (errors > 5) exit(1);
+	        } else if (r==0 || res[cnt] == '\n') { break; }
+	      else {
+	        cnt += r;
+	        if (cnt==6) break;
+	        read(sock, &res[cnt], 6-cnt);
+	      }
+	  }
+	  lmScore = FloorScore(TransformSRIScore(*reinterpret_cast<float*>(res)));
+	}
+	
+	cur->prob = lmScore;
+	
   if (finalState) {
     *finalState = cur->boState;
     if (len) *len = m_nGramOrder;

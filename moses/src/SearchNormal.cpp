@@ -105,9 +105,24 @@ void SearchNormal::ProcessSentence()
 				m_hypoStackColl[wordsTranslated]->AddPrune(batchedHypo);
 				IFVERBOSE(2) { stats.AddTimeStack( clock()-t ); }
 			}
-			VERBOSE(3, "BATCH_COMPUTED_HYPOS: " << batchedHypos.size() << std::endl);
+			VERBOSE(2, "BATCH_COMPUTED_HYPOS: " << batchedHypos.size() << std::endl);
 			batchedHypos.clear();
 			
+			std::map<const LanguageModel*, std::vector<StaticData::batchedNGram*>* > batchedNGrams =
+				const_cast<StaticData*>(&staticData)->m_batchedNGrams;
+			
+			size_t ngrams_size = 0;
+			std::map<const LanguageModel*, std::vector<StaticData::batchedNGram*>* >::iterator it;
+			for (it = batchedNGrams.begin(); it != batchedNGrams.end(); ++it)
+			{
+				ngrams_size += it->second->size();
+				const LanguageModel* lm = it->first;
+				const_cast<LanguageModel*>(lm)->ScoreNGrams(*(it->second));
+			}
+
+			VERBOSE(2, "BATCHED_NGRAMS: " << ngrams_size << std::endl);
+			const_cast<StaticData*>(&staticData)->ClearBatchedNGrams();			
+
 			// some logging
 			IFVERBOSE(2) { OutputHypoStackSize(); }
 		}

@@ -50,6 +50,79 @@ size_t LanguageModel::GetNumScoreComponents() const
 	return 1;
 }
 
+void LanguageModel::CollectNGrams(const Hypothesis& hypo) const
+{
+	const StaticData &staticData = StaticData::Instance();
+
+	if (m_nGramOrder <= 1 || hypo.GetCurrTargetLength() == 0)
+		return;
+
+	const size_t currEndPos = hypo.GetCurrTargetWordsRange().GetEndPos();
+	const size_t startPos = hypo.GetCurrTargetWordsRange().GetStartPos();
+
+	// 1st n-gram
+	vector<const Word*> contextFactor(m_nGramOrder);
+	size_t index = 0;
+	for (int currPos = (int) startPos - (int) m_nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
+	{
+		if (currPos >= 0)
+			contextFactor[index++] = &hypo.GetWord(currPos);
+		else			
+			contextFactor[index++] = &GetSentenceStartArray();
+	}
+	const_cast<StaticData*>(&staticData)->AddBatchedNGram(this, contextFactor);
+
+	// main loop
+	size_t endPos = std::min(startPos + m_nGramOrder - 2
+			, currEndPos);
+	for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
+	{
+		// shift all args down 1 place
+		for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+			contextFactor[i] = contextFactor[i + 1];
+
+		// add last factor
+		contextFactor.back() = &hypo.GetWord(currPos);
+
+		const_cast<StaticData*>(&staticData)->AddBatchedNGram(this, contextFactor);
+	}
+
+	// end of sentence
+	if (hypo.IsSourceCompleted())
+	{
+		const size_t size = hypo.GetSize();
+		contextFactor.back() = &GetSentenceEndArray();
+
+		for (size_t i = 0 ; i < m_nGramOrder - 1 ; i ++)
+		{
+			int currPos = (int)(size - m_nGramOrder + i + 1);
+			if (currPos < 0)
+				contextFactor[i] = &GetSentenceStartArray();
+			else
+				contextFactor[i] = &hypo.GetWord((size_t)currPos);
+		}
+		const_cast<StaticData*>(&staticData)->AddBatchedNGram(this, contextFactor);
+	} else {
+		for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+			for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+				contextFactor[i] = contextFactor[i + 1];
+			contextFactor.back() = &hypo.GetWord(currPos);
+		}
+		const_cast<StaticData*>(&staticData)->AddBatchedNGram(this, contextFactor);
+	}
+}
+
+void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
+{
+	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
+	{
+		// cfedermann: we should lookup ngrams that are already scored here!
+		//             This will further optimize LM score computation.
+		float lmScore = GetValue(*batchedNGrams[currPos]);
+		m_cachedNGrams.insert(make_pair(batchedNGrams[currPos], lmScore));
+	}
+}
+
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore) const

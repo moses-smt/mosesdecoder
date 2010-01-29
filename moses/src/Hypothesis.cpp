@@ -267,6 +267,19 @@ void Hypothesis::ResetScore()
 void Hypothesis::PrepareScore(const SquareMatrix &futureScore)
 {
 	m_preparedFutureScore = futureScore;
+
+	// cfedermann: experimental -- for any LM feature function, collect all the
+	//             n-grams that will be scored to score the current hypothesis.
+	const StaticData &staticData = StaticData::Instance();
+
+	const vector<const StatefulFeatureFunction*>& ffs =
+	  staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+
+	for (unsigned i = 0; i < ffs.size(); ++i) {
+		if (ffs[i]->GetScoreProducerWeightShortName() == "lm") {
+			static_cast<const LanguageModel*>(ffs[i])->CollectNGrams(*this);
+		}
+	}
 }
 
 void Hypothesis::CalcScore(const SquareMatrix &futureScore) 

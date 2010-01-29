@@ -67,6 +67,8 @@ private:
 	static StaticData									s_instance;
 public:
 	std::vector<Hypothesis*> m_batchedHypotheses;
+	typedef std::vector<const Word*> batchedNGram;
+	std::map<const LanguageModel*, std::vector<batchedNGram*>* > m_batchedNGrams;
 protected:	
 
 	std::map<long,Phrase> m_constraints;
@@ -477,6 +479,40 @@ public:
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 
 	void AddBatchedHypo(Hypothesis* hypo) { m_batchedHypotheses.push_back(hypo); }
+	void AddBatchedNGram(const LanguageModel* lm, std::vector<const Word*>& ngram)
+	{
+		std::map<const LanguageModel*, std::vector<batchedNGram*>* >::iterator it;
+		it = m_batchedNGrams.find(lm);
+		
+		std::vector<const Word*>* new_ngram = new std::vector<const Word*>();
+		new_ngram->resize(ngram.size());
+		std::copy(ngram.begin(), ngram.end(), new_ngram->begin());
+		
+		if (it == m_batchedNGrams.end())
+		{
+			std::vector<batchedNGram*>* new_ngrams = new std::vector<batchedNGram*>();
+			new_ngrams->push_back(new_ngram);
+			m_batchedNGrams.insert(make_pair(lm, new_ngrams));
+		}
+		else {
+			it->second->push_back(new_ngram);
+		}
+	}
+	void ClearBatchedNGrams()
+	{
+		std::map<const LanguageModel*, std::vector<batchedNGram*>* >::iterator it;
+		for (it = m_batchedNGrams.begin(); it != m_batchedNGrams.end(); ++it)
+		{
+			std::vector<batchedNGram*>* new_ngrams = it->second;
+			for (size_t currPos = 0; currPos < new_ngrams->size(); ++currPos)
+			{
+				delete(new_ngrams->at(currPos));
+			}
+			new_ngrams->clear();
+			delete(new_ngrams);
+		}
+		m_batchedNGrams.clear();
+	}
 	bool IsBatched() const { return true; }
 };
 

@@ -40,6 +40,8 @@ class Phrase;
 class LanguageModel : public StatefulFeatureFunction
 {
 protected:	
+	std::map<std::vector<const Word*>*,float> m_cachedNGrams;
+
 	float				m_weight; //! scoring weight. Shouldn't this now be superceded by ScoreProducer???
 	std::string	m_filePath; //! for debugging purposes
 	size_t			m_nGramOrder; //! max n-gram length contained in this LM
@@ -138,6 +140,9 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
+	void CollectNGrams(const Hypothesis& cur_hypo) const;
+	
+	void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
 };
 
 }
