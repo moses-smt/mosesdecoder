@@ -242,8 +242,15 @@ int main(int argc, char** argv) {
     }
 
     pool.Stop(true); //flush remaining jobs
-    return 0;
+
+	#ifndef EXIT_RETURN
+		//This avoids that detructors are called (it can take a long time)
+		exit(EXIT_SUCCESS);
+	#else
+		return EXIT_SUCCESS;
+	#endif
 }
+
 
 
 
