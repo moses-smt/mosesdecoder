@@ -26,7 +26,6 @@ class SentenceAlignment
 {
 public:
   SentenceAlignment(int sntIndex, int sourceSize, int targetSize);
-  
 	int m_sntIndex;
 	vector<wordID_t>* trgSnt;
   vector<wordID_t>* srcSnt;

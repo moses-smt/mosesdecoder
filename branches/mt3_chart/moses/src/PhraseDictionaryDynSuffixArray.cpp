@@ -43,8 +43,8 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
   // build suffix arrays and auxilliary arrays
   srcSA_ = new DynSuffixArray(srcCrp_); 
   if(!srcSA_) return false;
-  //trgSA_ = new DynSuffixArray(trgCrp_); 
-  //if(!trgSA_) return false;
+  trgSA_ = new DynSuffixArray(trgCrp_); 
+  if(!trgSA_) return false;
 	InputFileStream alignStrme(alignments);
   loadAlignments(alignStrme);
 	LoadVocabLookup();
@@ -174,13 +174,14 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
   std::map<int, pair<int, int> > sntBounds; 
+  // extract sentence IDs from SA
   unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices, sntBounds);
   const int* sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
-		
-		// extract from SA
-    alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), phrasePairs, sntBounds[snt].first, sntBounds[snt].second); // extract all alignments
+		// extract all Alignments
+    alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), 
+        phrasePairs, sntBounds[snt].first, sntBounds[snt].second); 
 
 		// convert to moses phrase pairs
 		vector<PhrasePair*>::iterator iterPhrasePair;
@@ -198,7 +199,8 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	
 	return ret;
 }
-const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const {
+const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
+{
   vector<unsigned>::const_iterator vit;
   int* sntIndexes = new int[wrdIndices.size()];
   for(int i = 0; i < wrdIndices.size(); ++i) {
@@ -287,7 +289,7 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 			}	// for(int startTarget=minTarget;
 		} // if (!out_of_bounds)
 	} // if (maxTarget >= 0 &&
-	
+  	
 	return (ret.size() > 0);
 }
 
