@@ -37,7 +37,7 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 	
 	loadCorpus(sourceStrme, *srcCrp_, srcSntBreaks_);
   loadCorpus(targetStrme, *trgCrp_, trgSntBreaks_);
-  //assert(srcSntBreaks_.size() == trgSntBreaks_.size());
+  assert(srcSntBreaks_.size() == trgSntBreaks_.size());
   std::cerr << "Vocab: " << std::endl;
   vocab_->printVocab();
   // build suffix arrays and auxilliary arrays
@@ -127,7 +127,7 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<w
       cArray.push_back(vocab_->getWordID(word));
     }          
   }
-  cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus for ssarray
+  //cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus for ssarray
   return cArray.size();
 }
 bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<wordID_t>& localIDs) const {
