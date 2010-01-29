@@ -38,8 +38,8 @@ class LexicalReorderingState : public FFState {
     static const LexicalReordering::ReorderingType NM = 1; // non-monotonic
     static const LexicalReordering::ReorderingType S = 1;  // swap
     static const LexicalReordering::ReorderingType D = 2;  // discontinuous
-    static const LexicalReordering::ReorderingType DR = 2; // discontinuous, left
-    static const LexicalReordering::ReorderingType DL = 3; // discontinuous, right
+    static const LexicalReordering::ReorderingType DL = 2; // discontinuous, left
+    static const LexicalReordering::ReorderingType DR = 3; // discontinuous, right
     static const LexicalReordering::ReorderingType L = 0;  // left
     static const LexicalReordering::ReorderingType R = 1;  // right
 };
