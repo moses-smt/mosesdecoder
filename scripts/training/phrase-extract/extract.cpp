@@ -10,9 +10,7 @@
 #include <time.h>
 #include <cstring>
 
-#include <map>
-#include <set>
-#include <vector>
+#include "hierarchical.h"
 
 using namespace std;
 
@@ -27,20 +25,6 @@ using namespace std;
                 } \
               }
 #define LINE_MAX_LENGTH 60000
-
-// HPhraseVertex represents a point in the alignment matrix
-typedef pair <int, int> HPhraseVertex;
-
-// Phrase represents a bi-phrase; each bi-phrase is defined by two points in the alignment matrix:
-// bottom-left and top-right
-typedef pair<HPhraseVertex, HPhraseVertex> HPhrase;
-
-// HPhraseVector is a vector of HPhrases
-typedef vector < HPhrase > HPhraseVector;
-
-// SentenceVertices represents, from all extracted phrases, all vertices that have the same positioning
-// The key of the map is the English index and the value is a set of the foreign ones
-typedef map <int, set<int> > HSenteceVertices;
 
 class SentenceAlignment {
 	public:
@@ -59,19 +43,10 @@ void addPhrase( SentenceAlignment &, int, int, int, int );
 vector<string> tokenize( char [] );
 bool isAligned ( SentenceAlignment &, int, int );
 
-// Reordering
+// Hierarchical reordering
 void HRextract( SentenceAlignment & );
 void HRaddPhrase( SentenceAlignment &, int, int, int, int, string &, string & );
 void PBextract( SentenceAlignment & );
-
-enum REO_MODEL_NAME {REO_HIER, REO_PHRASE, REO_WORD};
-enum REO_MODEL_TYPE {REO_MSD, REO_MSLR, REO_MONO, REO_LR};
-
-bool allModelsOutputFlag = false;
-REO_MODEL_NAME modelName;
-REO_MODEL_TYPE modelType;
-
-map < REO_MODEL_NAME, REO_MODEL_TYPE > selectedModels;
 
 ofstream extractFile;
 ofstream extractFileInv;
@@ -80,6 +55,8 @@ int maxPhraseLength;
 int phraseCount = 0;
 char* fileNameExtract;
 bool orientationFlag = false;
+bool HRorientationFlag = false;
+bool PBorientationFlag = false;
 bool onlyOutputSpanInfo = false;
 bool noFileLimit = false;
 bool zipFiles = false;
@@ -91,65 +68,37 @@ int main(int argc, char* argv[])
 			<< "phrase extraction from an aligned parallel corpus\n";
 	time_t starttime = time(NULL);
 
-	if (argc < 6) {
-		cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning | --hierarchical-reo]\n";
-		exit(1);
-	}
-	char* &fileNameE = argv[1];
-	char* &fileNameF = argv[2];
-	char* &fileNameA = argv[3];
-	fileNameExtract = argv[4];
-	maxPhraseLength = atoi(argv[5]);
-
-	for(int i=6;i<argc;i++) {
-		if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
-			onlyOutputSpanInfo = true;
-		}
-		else if (strcmp(argv[i],"--NoFileLimit") == 0) {
-			noFileLimit = true;
-		}
-		else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
-			orientationFlag = true;
-			selectedModels.insert(make_pair(REO_WORD, REO_MSD));
-		}
-		else if(strcmp(argv[i],"--model") == 0){
-			char* modelParams = argv[++i];
-			char* modelName = strtok(modelParams, "-");
-			char* modelType = strtok(modelParams, "-");
-
-			REO_MODEL_NAME intModelName;
-			REO_MODEL_TYPE intModelType;
-
-			if(strcmp(modelName, "word") == 0)
-				intModelName = REO_WORD;
-			else if(strcmp(modelName, "phrase") == 0)
-				intModelName = REO_PHRASE;
-			else if(strcmp(modelName, "phrase") == 0)
-				intModelName = REO_HIER;
-			else{
-				cerr << "extract: syntax error, unknown reordering model: " << modelName << endl;
-				exit(1);
-			}
-
-			if(strcmp(modelType, "msd") == 0)
-				intModelType = REO_MSD;
-			else if(strcmp(modelType, "mslr") == 0)
-				intModelType = REO_MSLR;
-			else if(strcmp(modelType, "mono") == 0)
-				intModelType = REO_MONO;
-			else if(strcmp(modelType, "leftright") == 0)
-				intModelType = REO_LR;
-			else{
-				cerr << "extract: syntax error, unknown reordering model type: " << modelType << endl;
-				exit(1);
-			}
-		}
+  if (argc < 6) {
+    cerr << "syntax: phrase-extract en de align extract max-length [orientation | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning | --hierarchical-reo]\n";
+    exit(1);
+  }
+  char* &fileNameE = argv[1];
+  char* &fileNameF = argv[2];
+  char* &fileNameA = argv[3];
+  fileNameExtract = argv[4];
+  maxPhraseLength = atoi(argv[5]);
+  
+  for(int i=6;i<argc;i++) {
+    if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
+      onlyOutputSpanInfo = true;
+    }
+    else if (strcmp(argv[i],"--NoFileLimit") == 0) {
+      noFileLimit = true;
+    }
+    else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
+      orientationFlag = true;
     }
     else if (strcmp(argv[i],"--ZipFiles") == 0) {
       zipFiles = true;
     }
     else if (strcmp(argv[i],"--ProperConditioning") == 0) {
       properConditioning = true;
+    }
+    else if (strcmp(argv[i],"--hierarchical-reo") == 0) {
+    	HRorientationFlag = true;
+    }
+    else if (strcmp(argv[i],"--phrase-based-reo") == 0) {
+    	PBorientationFlag = true;
     }
     else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
@@ -192,7 +141,6 @@ int main(int argc, char* argv[])
     		HRextract(sentence);
     	else if(PBorientationFlag)
     		PBextract(sentence);
-    	else
     		extract(sentence);
       if (properConditioning) extractBase(sentence);
     }
@@ -286,7 +234,7 @@ void extract( SentenceAlignment &sentence ) {
 		(endF<countF && 
 		 endF<startF+maxPhraseLength && // within length limit
 		 (endF==maxF || sentence.alignedCountF[endF]==0)); // unaligned
-		endF++)
+		endF++) 
 	      addPhrase(sentence,startE,endE,startF,endF);
       }
     }
@@ -369,11 +317,8 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     // orientation to previous E
     bool connectedLeftTop  = isAligned( sentence, startF-1, startE-1 );
     bool connectedRightTop = isAligned( sentence, endF+1,   startE-1 );
-    if      ( connectedLeftTop && !connectedRightTop)
-    {
-    	if()
+    if      ( connectedLeftTop && !connectedRightTop) 
       extractFileOrientation << "mono";
-    }
     else if (!connectedLeftTop &&  connectedRightTop) 
       extractFileOrientation << "swap";
     else 
