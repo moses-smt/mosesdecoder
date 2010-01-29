@@ -193,7 +193,8 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices,
       }
       else if(pos == phrasesize-1) { // found phrase so store word index for snt retrieval
         indices->push_back(idx);
-        mapBnds[indices->size()-1] = std::make_pair(lwrBnd, uprBnd+pos-1);   
+        // store indexes of phrase in sentence for alignment extractor 
+        mapBnds[indices->size()-1] = std::make_pair(lwrBnd, uprBnd+pos-1); 
       }
     }
   }

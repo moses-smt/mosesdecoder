@@ -189,12 +189,10 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     cerr << "left bnd = " << sntBounds[sntIndex].first << endl;
     cerr << "right bnd = " << sntBounds[sntIndex].second << endl;
-		/*
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
 															sntBounds[snt].second); 
-		*/
 		
 		cerr << "extracted " << phrasePairs.size() << endl;
 		
