@@ -170,6 +170,7 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
+	
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line

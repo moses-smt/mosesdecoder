@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sstream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -8,6 +9,7 @@
 #include <netdb.h>
 #include "LanguageModelRemote.h"
 #include "Factor.h"
+#include "StaticData.h"
 
 namespace Moses {
 
@@ -130,6 +132,103 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   }
   return cur->prob;
 }
+
+//===============================
+
+bool NgramCmp::operator()(Ngram * k1, Ngram * k2) {
+	int s1 = k1->tail->size();
+	int s2 = k2->tail->size();
+	
+	if (s1 != s2) {
+		return (s1 < s2);
+	}
+	
+	int cmpRes = k1->head->compare(*(k2->head));
+	
+	if (cmpRes != 0) {
+		return (cmpRes > 0);
+	}
+	
+	for (int j = 0; j < s1; j++) {
+		cmpRes = k1->tail->at(j)->compare(*(k2->tail->at(j)));
+		
+		if (cmpRes != 0) {
+			return (cmpRes > 0);
+		}
+	}
+	
+	return false;
+}
+
+NgramSet * generateSetFromHypos(std::vector<Hypothesis*> * hypoBatch) {
+	//TODO
+}
+
+#define COMMUNICATION_BATCH_SIZE 10
+
+std::string * serializeSet(NgramSet * set, NgramSet::iterator * it, int size) {
+	ostringstream os;
+	
+	os << "batch";
+	
+	int count = 0;
+	
+	for (; *it != set->end() and count < size; *it++) {
+		Ngram * currCtx = **it;
+		Tail * currTail = currCtx->tail;
+		
+		os << ' ' << (currTail->size() + 1) << ' ' << *(currCtx->head);
+		
+		for (Tail::reverse_iterator it2 = currTail->rbegin(); it2 != currTail->rend(); it2++) {
+			os << ' ' << **it2;
+		}
+		
+		count++;
+	}
+	
+	os << std::endl;
+	
+	std::string * result = new std::string(os.str());
+	
+	return result;
+}
+
+float * evaluateSerSet(std::string * serStr) {
+}
+
+void placeResults(NgramSet * set, NgramSet::iterator * it, float * raw, int size) {
+	int idx = 0;
+	
+	for (; *it != set->end() and idx < size; *it++) {
+		(**it)->prob = raw[idx];
+		idx++;
+	}
+}
+
+void evaluateNgramSet(NgramSet * ngramSet) {
+	NgramSet::iterator constructIt = ngramSet->begin();
+	NgramSet::iterator fillIt = ngramSet->begin();
+	
+	while (constructIt != ngramSet->end()) {
+		std::string * serStr = serializeSet(ngramSet, &constructIt, COMMUNICATION_BATCH_SIZE);
+		
+		float * rawResults = evaluateSerSet(serStr);
+		
+		placeResults(ngramSet, &fillIt, rawResults, COMMUNICATION_BATCH_SIZE);
+		
+		free(rawResults);
+	}
+}
+
+void LanguageModelRemote::ScoreHypoBatch(std::vector<Hypothesis*> * hypoBatch) {
+	NgramSet * ngramSet = generateSetFromHypos(hypoBatch);
+	
+	evaluateNgramSet(ngramSet);
+	
+	//TODO: score the hungry hungry hypos
+}
+
+//===============================
 
 LanguageModelRemote::~LanguageModelRemote() {
   // Step 8 When finished send all lingering transmissions and close the connection
