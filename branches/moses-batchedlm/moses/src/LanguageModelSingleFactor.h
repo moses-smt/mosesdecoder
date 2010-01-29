@@ -37,6 +37,8 @@ protected:
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 
+	void CacheNGram(NGram * ngram, float score);
+	
 	LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
 
 public:

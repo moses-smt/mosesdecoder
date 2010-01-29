@@ -195,40 +195,15 @@ void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>
 		
 		// Compute LM score and add it to the LM-internal cache.
 		float lmScore = GetValue(*ngram_copy);
-		m_cachedNGrams.insert(make_pair(ngram_copy, lmScore));
+		
+		//m_cachedNGrams.insert(make_pair(ngram_copy, lmScore));
+		CacheNGram(ngram_copy, lmScore);
 	}
 }
 
 //===============================
 
-bool NgramCmp::operator()(Ngram * k1, Ngram * k2) {
-	int s1 = k1->tail->size();
-	int s2 = k2->tail->size();
-	
-	if (s1 != s2) {
-		return (s1 < s2);
-	}
-	
-	int cmpRes = k1->head->compare(*(k2->head));
-	
-	if (cmpRes != 0) {
-		return (cmpRes > 0);
-	}
-	
-	for (int j = 0; j < s1; j++) {
-		cmpRes = k1->tail->at(j)->compare(*(k2->tail->at(j)));
-		
-		if (cmpRes != 0) {
-			return (cmpRes > 0);
-		}
-	}
-	
-	return false;
-}
-
-NgramSet * generateSetFromHypos(std::vector<Hypothesis*> * hypoBatch) {
-	//TODO
-}
+/*
 
 #define COMMUNICATION_BATCH_SIZE 100
 
@@ -300,13 +275,7 @@ void evaluateNgramSet(int sock, NgramSet * ngramSet) {
 	}
 }
 
-void LanguageModelRemote::ScoreHypoBatch(std::vector<Hypothesis*> * hypoBatch) {
-	NgramSet * ngramSet = generateSetFromHypos(hypoBatch);
-	
-	evaluateNgramSet(sock, ngramSet);
-	
-	//TODO: score the hungry hungry hypos
-}
+*/
 
 //===============================
 

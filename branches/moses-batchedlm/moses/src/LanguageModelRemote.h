@@ -3,7 +3,6 @@
 #include "LanguageModelSingleFactor.h"
 #include "TypeDef.h"
 #include "Factor.h"
-#include "LMBatch.h"
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
