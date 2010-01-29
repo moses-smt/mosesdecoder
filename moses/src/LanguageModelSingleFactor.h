@@ -79,6 +79,8 @@ public:
 		m_weight = weight;
 	}
 	std::string GetScoreProducerDescription() const;
+
+	virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
 };
 
 }
