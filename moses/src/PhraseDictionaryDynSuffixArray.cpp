@@ -118,11 +118,11 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream* corpus, vector<w
   return cArray.size();
 }
 bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<wordID_t>& localIDs) const {
+  // looks up the SA vocab ids for the current src phrase
 	size_t phraseSize = src.GetSize();
 	for (size_t pos = 0; pos < phraseSize; ++pos) {
 		const Word &word = src.GetWord(pos);
 		const Factor *factor = word.GetFactor(0);
-		
 		std::map<const Factor *, wordID_t>::const_iterator iterLookup;
 		iterLookup = vocabLookup_.find(factor);
 		
@@ -136,6 +136,15 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<
 		}
 	}
   return (localIDs.size() > 0);
+}
+void PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair& phrasepair) const {
+  int sntIndex = phrasepair.m_sntIndex;
+	std::map<wordID_t, const Factor *>::const_iterator rIterLookup;	
+  for(int i=phrasepair.m_startTarget; i < phrasepair.m_endTarget; ++i) { // look up src words
+    rIterLookup = vocabLookupRev_.find(trgCrp_->at(trgSntBreaks_[sntIndex] + i));
+    if(rIterLookup != vocabLookupRev_.end())
+      const Factor* factor = rIterLookup->second; 
+  }
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	cerr << src << " ";	
@@ -159,6 +168,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair)
 		{
 			const PhrasePair &phrasePair = **iterPhrasePair;
+      getMosesFactorIDs(phrasePair);
 			TargetPhrase *targetPhrase = new TargetPhrase(Output);
 			
 			ret->Add(targetPhrase);
@@ -169,8 +179,6 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   }
 	
 	return ret;
-}
-void PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair& phrasepair) const {
 }
 const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const {
   vector<unsigned>::const_iterator vit;
