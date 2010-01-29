@@ -20,7 +20,7 @@ public:
   DynSuffixArray();
   DynSuffixArray(vuint_t*);
   ~DynSuffixArray();
-  unsigned countPhrase(vuint_t*, vuint_t*, std::map<int, pair<int, int> >&);
+  unsigned countPhrase(const vuint_t*, vuint_t*, std::map<int, pair<int, int> >&);
   void load(FILE*);
   void save(FILE*);
 private: 
