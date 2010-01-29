@@ -114,6 +114,8 @@ void PhraseDictionaryDynSuffixArray::CleanUp() {
 void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float, std::allocator<float> >&) {
   return;
 }
+float PhraseDictionaryDynSuffixArray::MLEProb(int denom, vector<PhrasePair>& phrasepairs) const {
+}
 int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<wordID_t>& cArray, 
     vector<wordID_t>& sntArray) {
   string line, word;
@@ -165,7 +167,7 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair
   return targetPhrase;
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
-	cerr << src << " ";	
+	cerr << src << "~~~ ";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
  
 	const StaticData &staticData = StaticData::Instance();
@@ -176,18 +178,23 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   std::map<int, pair<int, int> > sntBounds; 
   // extract sentence IDs from SA
   unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices, sntBounds);
-  const int* sntIndexes = getSntIndexes(wrdIndices);	
-  for(int snt = 0; snt < wrdIndices.size(); ++snt) {
+  vector<int> sntIndexes = getSntIndexes(wrdIndices);	
+  for(int snt = 0; snt < sntIndexes.size(); ++snt) {
+    cerr << "wordIndices.size()="  << wrdIndices.size() << endl;
+    cerr << "snt index = " << snt << endl;
     vector<PhrasePair*> phrasePairs;
 		// extract all Alignments
 		int sntIndex = sntIndexes[snt];
+    cerr << "snt index = " << sntIndex << endl;
 		//int targetSize = GetTargetSentenceSize(sntIndex);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
+    cerr << "sntbnd" << sntBounds[snt].first << " " << endl;
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
 															sntBounds[snt].second,
 															4534); 
+    cerr << "gets here " << snt << endl;
 
 		cerr << "extracted " << phrasePairs.size() << endl;
 		
@@ -208,13 +215,13 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 
 	return ret;
 }
-const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
+vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
 {
   vector<unsigned>::const_iterator vit;
-  int* sntIndexes = new int[wrdIndices.size()];
+  vector<int> sntIndexes(wrdIndices.size()); 
   for(int i = 0; i < wrdIndices.size(); ++i) {
     vit = std::lower_bound(srcSntBreaks_.begin(), srcSntBreaks_.end(), wrdIndices[i]);
-    sntIndexes[i] = unsigned(vit - srcSntBreaks_.begin());
+    sntIndexes.at(i) = unsigned(vit - srcSntBreaks_.begin());
   }
 	
   return sntIndexes;
@@ -241,7 +248,6 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 {
 	// foreign = target, F=T
 	// english = source, E=S
-	
   int countTarget = alignedCountTrg.size();
 	
 	int minTarget = 9999;
@@ -299,8 +305,8 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 			}	// for(int startTarget=minTarget;
 		} // if (!out_of_bounds)
 	} // if (maxTarget >= 0 &&
-  	
 	return (ret.size() > 0);
+  
 }
 
 }// end namepsace
