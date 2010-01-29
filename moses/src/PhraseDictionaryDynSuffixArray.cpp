@@ -117,6 +117,26 @@ void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float
   return;
 }
 float PhraseDictionaryDynSuffixArray::MLEProb(int denom, vector<PhrasePair>& phrasepairs) const {
+  // search through phrase pairs and collect counts of similar target phrases
+  std::map<vector<wordID_t>, int> phraseCounts;
+  for(int i = 0; i < phrasepairs.size(); ++i) {
+    PhrasePair& phrase = phrasepairs[i];
+    int sntIndex = phrase.m_sntIndex;
+    for(int i=phrase.m_startTarget; i < phrase.m_endTarget; ++i) { // look up trg ids 
+      int trgid = trgCrp_->at(trgSntBreaks_[sntIndex] + i);
+    }
+  }
+  // divide each count by denom
+   /*
+  for(int i=phrasepair.m_startTarget; i < phrasepair.m_endTarget; ++i) { // look up trg words
+    rIterLookup = vocabLookupRev_.find(trgCrp_->at(trgSntBreaks_[sntIndex] + i));
+    assert(rIterLookup != vocabLookupRev_.end());
+    const Factor* factor = rIterLookup->second; 
+    Word word;
+    word.SetFactor(0, factor);
+    targetPhrase->AddWord(word);
+  }
+  */
 }
 int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<wordID_t>& cArray, 
     vector<wordID_t>& sntArray) {
