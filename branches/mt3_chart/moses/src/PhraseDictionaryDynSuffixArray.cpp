@@ -180,9 +180,17 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
 		// extract all Alignments
-    alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), 
-        phrasePairs, sntBounds[snt].first, sntBounds[snt].second); 
+		int sntIndex = sntIndexes[snt];
+		int targetSize = GetTargetSentenceSize(sntIndex);
+		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
+    sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
+															phrasePairs, 
+															sntBounds[snt].first, 
+															sntBounds[snt].second,
+															targetSize); 
 
+		cerr << "extracted " << phrasePairs.size() << endl;
+		
 		// convert to moses phrase pairs
 		vector<PhrasePair*>::iterator iterPhrasePair;
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair)
@@ -227,12 +235,12 @@ SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSiz
 	}
 }
 	
-bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const
+bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource, int countTargetOLD) const
 {
 	// foreign = target, F=T
 	// english = source, E=S
 	
-  int countTarget = trgSnt->size();
+  int countTarget = alignedTrg.size();
 	
 	int minTarget = 9999;
 	int maxTarget = -1;
