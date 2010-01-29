@@ -118,10 +118,11 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream* corpus, vector<w
 }
 	
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
-	cerr << src << " ";
-	
-	const StaticData &staticData = StaticData::Instance();
+	cerr << src << " ";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
+ 
+	const StaticData &staticData = StaticData::Instance();
+
 	size_t phraseSize = src.GetSize();
   vector<wordID_t> srcLocal(phraseSize), wrdIndices(0);  
 	for (size_t pos = 0; pos < phraseSize; ++pos)
@@ -144,10 +145,18 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   unsigned denom = srcSA_->countPhrase(&srcLocal, &wrdIndices);
   const int* sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < wrdIndices.size(); ++snt) {
-    vector<PhrasePair> phrPairs;
+    vector<PhrasePair*> phrPairs;
 		
+		// extract from SA
     alignments_[sntIndexes[snt]].Extract(staticData.GetMaxPhraseLength(), phrPairs, 5, 666); // extract all alignments
+
+		// convert to moses phrase pairs
+		
+		// done. delete SA phrase pairs
+		RemoveAllInColl(phrPairs);
   }
+
+	
 	return ret;
 } 
 const int* PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const {
@@ -165,7 +174,7 @@ void PhraseDictionaryDynSuffixArray::save(string fname) {
 void PhraseDictionaryDynSuffixArray::load(string fname) {
   // read vocab, SAs, corpus, alignments 
 }
-bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair>& ret, int startSource, int endSource) const
+bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const
 {
 	// foreign = target, F=T
 	// english = source, E=S
@@ -221,10 +230,8 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair>& ret, in
 							(endTarget==maxTarget || alignedCountSrc[endTarget]==0)); // unaligned
 						 endTarget++)
 				{
-					PhrasePair phrasePair(m_sntIndex, startTarget,endTarget,startSource,endSource);
+					PhrasePair *phrasePair = new PhrasePair(m_sntIndex, startTarget,endTarget,startSource,endSource);
 					ret.push_back(phrasePair);
-					
-					//addPhrase(sentence,startSource,endSource,startTarget,endTarget);
 				} // for (int endTarget=maxTarget;
 			}	// for(int startTarget=minTarget;
 		} // if (!out_of_bounds)
