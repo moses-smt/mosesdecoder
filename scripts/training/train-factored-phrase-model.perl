@@ -284,6 +284,7 @@ my @REORDERING_MODELS;
 my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
 my $model_num = 0;
 my $reotype;
+my %REORDERING_MODEL_TYPES = ();
 foreach my $r (split(/\,/,$___REORDERING)) {
    #change some config string options, to be backward compatible
    $r =~ s/orientation/msd/;
@@ -344,11 +345,32 @@ foreach my $r (split(/\,/,$___REORDERING)) {
     else {
       $REORDERING_MODELS[$model_num]{"numfeatures"} *= 2;
     }
-  print STDERR "Reordering model configuration: ".$REORDERING_MODELS[$model_num]{"all"}."\n";
-    $model_num++;
   }
+
+  # fix the overall model selection
+  if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
+     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
+        $REORDERING_MODELS[$model_num]{"orient"}."-"; 
+  }
+  else  {
+     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
+        $REORDERING_MODELS[$model_num]{"orient"};
+  }
+  $model_num++;
 }
 
+# pick the overall most specific model for each reordering model type
+for my $mtype ( keys %REORDERING_MODEL_TYPES) {
+  if ($REORDERING_MODEL_TYPES{$mtype} =~ /lr/) {
+    $REORDERING_MODEL_TYPES{$mtype} = "mslr"
+  }
+  elsif ($REORDERING_MODEL_TYPES{$mtype} =~ /msd/) {
+    $REORDERING_MODEL_TYPES{$mtype} = "msd"
+  }
+  else {
+    $REORDERING_MODEL_TYPES{$mtype} = "monotonicity"
+  }
+}
 
 my ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f);
 my ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe);
@@ -1052,12 +1074,13 @@ sub extract_phrase_factored {
 }
 
 sub get_extract_reordering_flags {
-    return "";  #FIX: interface this function correctly with new phrase extraction!!
-    my $config_string = "";
+    my $config_string = ""; 
     return "" unless @REORDERING_MODELS;
-    $config_string .= " --model-type ".$REORDERING_MODELS[0]{"type"};
-    $config_string .= " --model-type mslr";
-    #Might want to pick the moste general model needed here. (now mlsr is always chosen, and reduced later)
+    for my $type ( keys %REORDERING_MODEL_TYPES) {
+	$config_string .= " --model $type-".$REORDERING_MODEL_TYPES{$type};
+    }
+    print STDERR "extract-flags: $config_string\n";
+    return ""; #comment out when using new training scripts (do we need an option for backward compatibility???
     return $config_string;
 }
 
