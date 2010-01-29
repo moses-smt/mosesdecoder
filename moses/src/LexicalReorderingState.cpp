@@ -79,7 +79,7 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(ModelType mt, WordsRange 
 
 
 PhraseBasedReorderingState::PhraseBasedReorderingState(ModelType mt)
-  : LexicalReorderingState(mt), m_prevRange(WordsRange(NOT_FOUND,NOT_FOUND)), m_first(true) {};
+  : LexicalReorderingState(mt), m_prevRange(NOT_FOUND,NOT_FOUND), m_first(true) {};
 
 
 int PhraseBasedReorderingState::Compare(const FFState& o) const {
@@ -240,17 +240,24 @@ LexicalReordering::ReorderingType HierarchicalReorderingBackwardState::GetOrient
 //HierarchicalReorderingForwardState
 
 HierarchicalReorderingForwardState::HierarchicalReorderingForwardState(ModelType mt)
-  : LexicalReorderingState(mt) {};
-
+  : LexicalReorderingState(mt), m_prevRange(NOT_FOUND,NOT_FOUND) {}
+  
+HierarchicalReorderingForwardState::HierarchicalReorderingForwardState(ModelType mt, WordsRange wf)
+  : LexicalReorderingState(mt), m_prevRange(wf) {}
 
 int HierarchicalReorderingForwardState::Compare(const FFState& o) const {
-  return 0;
+  const HierarchicalReorderingForwardState* other = dynamic_cast<const HierarchicalReorderingForwardState*>(&o);
+  assert(other != NULL);
+  if (m_prevRange == other->m_prevRange) {
+    return 0;
+  } else if (m_prevRange < other->m_prevRange) {
+    return -1;
+  }
+  return 1;
 }
 
 LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothesis& hypo, 
 								   LexicalReordering::ReorderingType& reoType) const {
-  //implement heuristic for forward probs!!
- 
   const WordsRange currWordsRange = hypo.GetCurrSourceWordsRange();
   const WordsBitmap coverage = hypo.GetWordsBitmap();
   
@@ -263,45 +270,58 @@ LexicalReorderingState* HierarchicalReorderingForwardState::Expand(const Hypothe
   } else  {
     reoType = GetOrientationTypeLeftRight(currWordsRange, coverage);
   }
-  return new HierarchicalReorderingForwardState(m_modelType);
+  return new HierarchicalReorderingForwardState(m_modelType, currWordsRange);
 }
 
+#if 0
+bool HierarchicalReorderingForwardState::RangeEmpty(const WordsBitmap &wb, size_t from, size_t to) {
+  assert(from <= to);
+  // start and end position are assumed to be covered!
+  for (size_t i = from+1; i < to; i++) {
+      if (!wb.GetValue(i)) {
+          return false;
+      }
+  }
+  return true;
+}
+#endif
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSD(WordsRange currRange, WordsBitmap coverage) const {
-  if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
-    return M;
-  } else if (currRange.GetEndPos() >= 1 && coverage.GetValue(currRange.GetEndPos()-1)) {
-    return S;
+  if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
+      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || coverage.GetEdgeToTheRightOf(m_prevRange.GetEndPos())+1 == currRange.GetStartPos())) {
+      return M;
+  } else if (currRange.GetEndPos() < m_prevRange.GetStartPos() &&
+             (!coverage.GetValue(m_prevRange.GetStartPos()-1) || coverage.GetEdgeToTheLeftOf(m_prevRange.GetStartPos())-1 == currRange.GetEndPos())) {
+      return S;
   }
   return D;
 }
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMSLR(WordsRange currRange, WordsBitmap coverage) const {
-  if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
-    return M;
-  } else if (currRange.GetStartPos() >= 1 && coverage.GetValue(currRange.GetStartPos()-1)) {
-    return S;
-  } else if (coverage.GetLastGapPos() > currRange.GetEndPos()) {
-    return DR;
+  if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
+      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || coverage.GetEdgeToTheRightOf(m_prevRange.GetEndPos())+1 == currRange.GetStartPos())) {
+      return M;
+  } else if (currRange.GetEndPos() < m_prevRange.GetStartPos() &&
+             (!coverage.GetValue(m_prevRange.GetStartPos()-1) || coverage.GetEdgeToTheLeftOf(m_prevRange.GetStartPos())-1 == currRange.GetEndPos())) {
+      return S;
+  } else if (currRange.GetStartPos() > m_prevRange.GetEndPos()) {
+      return DR;
   }
   return DL;
 }
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeMonotonic(WordsRange currRange, WordsBitmap coverage) const {
-  if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
-    return M;
-  } 
+  if (currRange.GetStartPos() > m_prevRange.GetEndPos() &&
+      (!coverage.GetValue(m_prevRange.GetEndPos()+1) || coverage.GetEdgeToTheRightOf(m_prevRange.GetEndPos())+1 == currRange.GetStartPos())) {
+      return M;
+  }
   return NM;
 }
 
 LexicalReordering::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const {
-  if (currRange.GetEndPos()+1 < coverage.GetSize() && coverage.GetValue(currRange.GetEndPos()+1)) {
-    return R;
-  } else if (currRange.GetStartPos() >= 1 && coverage.GetValue(currRange.GetStartPos()-1)) {
-    return L;
-  } else if (coverage.GetLastGapPos() > currRange.GetEndPos()) {
-    return R;
-  }
+  if (currRange.GetStartPos() > m_prevRange.GetEndPos()) {
+      return R;
+  } 
   return L;
 }
 
