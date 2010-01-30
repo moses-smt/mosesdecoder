@@ -8,6 +8,7 @@
 
 #include "scorer-impl.h"
 #include "timestamp.h"
+#include "lexdecom.h"
 
 #ifdef ENABLE_CHANNEL_SCORER
 #include "channel-scorer.h"
@@ -24,6 +25,7 @@ const std::vector<String> &PhraseScorerFactory::scorer_list() {
 		list.push_back("channel <sigma> <srclm> <tgtlm> - channel adaptation");
 #endif
 		list.push_back("const <constant>                - constant phrase penalty");
+                list.push_back("lexdecomp <weightfile>          - lexical decomposition smoothing");
 	}
 
 	return list;
@@ -48,6 +50,8 @@ PhraseScorer *PhraseScorerFactory::create_scorer(const char *argv[], int &argp, 
 #endif
 	else if(!strcmp(arg, "const"))
 		return ConstantPhraseScorer::create_scorer(argv, argp, reverse, *this);
+        else if (!strcmp(arg, "lexdecomp"))
+                return LexicalDecompositionPhraseScorer::create_scorer(argv, argp, reverse, *this);
 	else {
 		std::cerr << "Unknown phrase scorer type: " << arg << std::endl << std::endl;
 		usage();
@@ -112,7 +116,17 @@ void AbsoluteDiscountPhraseScorer::do_score_phrases() {
 	discount_ = static_cast<Score>(n1) / (n1 + 2*n2);
 }
 
+inline Score AbsoluteDiscountPhraseScorer::get_discount() {
+        return discount_;
+}
+
 Score AbsoluteDiscountPhraseScorer::do_get_score(const PhraseTable::const_iterator &it) {
+
+        /*
+        The implementation of LexicalDecompositionPhraseScorer relies
+        on the asumption that the smoothed probabilities produced by
+        this method are deficient. 
+         */
 	PhraseInfo &tgt_phrase = phrase_table_.get_tgt_phrase(it->get_tgt());
 	return (it->get_count() - discount_) / tgt_phrase.get_count();
 }
