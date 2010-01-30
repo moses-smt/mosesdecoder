@@ -14,6 +14,10 @@
 
 @SET_MAKE@
 
+# memscore - in-memory phrase scoring for Statistical Machine Translation
+# Christian Hardmeier, FBK-irst, Trento, 2010
+# $Id: Makefile.am 2653 2010-01-18 14:52:34Z chardmeier $
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -56,12 +60,13 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__memscore_SOURCES_DIST = datastorage.h memscore.h phrasetable.h \
 	scorer.h scorer-impl.h statistic.h timestamp.h phrasetable.cpp \
-	memscore.cpp scorer.cpp phraselm.cpp phraselm.h \
-	channel-scorer.cpp channel-scorer.h
+	memscore.cpp scorer.cpp lexdecom.cpp lexdecom.h phraselm.cpp \
+	phraselm.h channel-scorer.cpp channel-scorer.h
 @IRSTLM_TRUE@am__objects_1 = phraselm.$(OBJEXT)
 @CHANNEL_SCORER_TRUE@am__objects_2 = channel-scorer.$(OBJEXT)
 am_memscore_OBJECTS = phrasetable.$(OBJEXT) memscore.$(OBJEXT) \
-	scorer.$(OBJEXT) $(am__objects_1) $(am__objects_2)
+	scorer.$(OBJEXT) lexdecom.$(OBJEXT) $(am__objects_1) \
+	$(am__objects_2)
 memscore_OBJECTS = $(am_memscore_OBJECTS)
 memscore_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -137,6 +142,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 SET_MAKE = @SET_MAKE@
@@ -186,7 +192,8 @@ AUTOMAKE_OPTIONS = foreign
 AM_CXXFLAGS = $(BOOST_CPPFLAGS) -Wall -ffast-math -ftrapping-math -fomit-frame-pointer
 memscore_SOURCES = datastorage.h memscore.h phrasetable.h scorer.h \
 	scorer-impl.h statistic.h timestamp.h phrasetable.cpp \
-	memscore.cpp scorer.cpp $(am__append_1) $(am__append_2)
+	memscore.cpp scorer.cpp lexdecom.cpp lexdecom.h \
+	$(am__append_1) $(am__append_2)
 memscore_LDADD = $(IRSTLM_LIBS) $(GSL_LIBS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -277,6 +284,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/channel-scorer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexdecom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memscore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phraselm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phrasetable.Po@am__quote@

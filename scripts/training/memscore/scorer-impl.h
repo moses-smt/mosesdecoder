@@ -42,6 +42,7 @@ private:
 	virtual Score do_get_score(const PhraseTable::const_iterator &it);
 
 public:
+        Score get_discount();
 	static PhraseScorer *create_scorer(const char *argv[], int &argp, bool reverse, const PhraseScorerFactory &ptf);
 };
 

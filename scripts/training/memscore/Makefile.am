@@ -11,7 +11,7 @@ AM_CXXFLAGS = $(BOOST_CPPFLAGS) -Wall -ffast-math -ftrapping-math -fomit-frame-p
 
 bin_PROGRAMS = memscore
 memscore_SOURCES =	datastorage.h memscore.h phrasetable.h scorer.h scorer-impl.h statistic.h timestamp.h \
-			phrasetable.cpp memscore.cpp scorer.cpp
+			phrasetable.cpp memscore.cpp scorer.cpp lexdecom.cpp lexdecom.h
 
 if IRSTLM
 memscore_SOURCES +=	phraselm.cpp phraselm.h

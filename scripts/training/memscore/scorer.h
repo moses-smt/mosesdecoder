@@ -46,12 +46,18 @@ private:
 public:
 	virtual ~PhraseScorer() {}
 
+        virtual Score get_discount() {}
+
 	void score_phrases() {
 		do_score_phrases();
 	}
 
 	Score get_score(const PhrasePairCounts::const_iterator &it) {
 		return do_get_score(phrase_table_.find(it));
+	}
+
+	Score get_score(const PhraseTable::const_iterator &it) {
+		return do_get_score(it);
 	}
 
 	Score get_score(Phrase src, Phrase tgt) {
