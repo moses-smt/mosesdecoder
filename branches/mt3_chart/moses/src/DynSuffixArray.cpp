@@ -19,25 +19,15 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   corpus_ = crp; 
   int size = corpus_->size();
   int* tmpArr = new int[size];
-  //for(int i=0 ; i < size; ++i) tmpArr[i] = (int)corpus_->at(i); 
   for(int i=0 ; i < size; ++i) tmpArr[i] = i; 
   qsort(tmpArr, 0, size-1);
-  cerr << "gets here\n";
-  //if(sarray(tmpArr, size) == -1) {
-  //  TRACE_ERR("Failed to build suffix array" << std::endl);
- // }
-  cerr << "printing TmpArr\n";
-  for(int i=0; i < size; ++i) {
-    std::cerr << tmpArr[i] << std::endl;
-  }
-  cerr << "done \n";
   SA_ = new vuint_t(tmpArr, tmpArr + size);
-  std::cerr << "printing SA " << std::endl;
-  for(int i=0; i < size; ++i) std::cerr << SA_->at(i) << std::endl;
+  //std::cerr << "printing SA " << std::endl;
+  //for(int i=0; i < size; ++i) std::cerr << SA_->at(i) << std::endl;
   delete[] tmpArr;
   std::cerr << "DYNAMIC SUFFIX ARRAY CLASS INSTANTIATED WITH SIZE " << size << std::endl;
   buildAuxArrays();
-  printAuxArrays();
+  //printAuxArrays();
 }
 void DynSuffixArray::buildAuxArrays() {
   int size = SA_->size();
