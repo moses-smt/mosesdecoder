@@ -71,6 +71,9 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
     for(int i=0; i < vtmp.size(); i+=2) {
 			int sourcePos = vtmp[i];
 			int targetPos = vtmp[i+1];
+			assert(sourcePos < sourceSize);
+			assert(targetPos < targetSize);
+			
       curSnt.alignedCountTrg[targetPos]++; // cnt of trg nodes each src node is attached to  
       curSnt.alignedSrc[sourcePos].push_back(targetPos);  // list of source nodes each target node connects with
     }
@@ -259,7 +262,7 @@ SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSiz
 	,alignedCountTrg(targetSize, 0)
 	,alignedSrc(sourceSize)
 {
-	for(int i=0; i < targetSize; ++i) {
+	for(int i=0; i < sourceSize; ++i) {
 		vector<int> trgWrd;
 		alignedSrc[i] = trgWrd;
 	}
