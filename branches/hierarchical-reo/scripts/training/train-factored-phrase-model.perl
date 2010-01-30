@@ -285,6 +285,10 @@ my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
 my $model_num = 0;
 my $reotype;
 my %REORDERING_MODEL_TYPES = ();
+my @REORDERING_SMOOTH_PREVIOUS;
+my @REORDERING_SMOOTH_FOLLOWING;
+
+
 foreach my $r (split(/\,/,$___REORDERING)) {
    #change some config string options, to be backward compatible
    $r =~ s/orientation/msd/;
@@ -372,10 +376,10 @@ for my $mtype ( keys %REORDERING_MODEL_TYPES) {
   }
 }
 
-my ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f);
-my ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe);
-my ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f);
-my ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe);
+my ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f);
+my ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe);
+my ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_f);
+my ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe,$other_following_fe);
 my ($f_current,$e_current);
 
 ### Factored translation models
@@ -1372,8 +1376,8 @@ sub get_reordering {
     }
 
     my $smooth = $___REORDERING_SMOOTH;
-    my @REORDERING_SMOOTH_PREVIOUS = ($smooth,$smooth,$smooth,0);
-    my @REORDERING_SMOOTH_FOLLOWING = ($smooth,$smooth,$smooth,0);
+    @REORDERING_SMOOTH_PREVIOUS = ($smooth,$smooth,$smooth,$smooth,$smooth);
+    @REORDERING_SMOOTH_FOLLOWING = ($smooth,$smooth,$smooth,$smooth,$smooth);
 
     my (%SMOOTH_PREVIOUS,%SMOOTH_FOLLOWING);
     if ($smooth =~ /(.+)u$/) {
@@ -1393,21 +1397,23 @@ sub get_reordering {
 	@REORDERING_SMOOTH_PREVIOUS = ($smooth*($SMOOTH_PREVIOUS{"mono"}+0.1)/$smooth_total,
 				       $smooth*($SMOOTH_PREVIOUS{"swap"}+0.1)/$smooth_total,
 				       $smooth*($SMOOTH_PREVIOUS{"left"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"right"}+0.1)/$smooth_total);
+				       $smooth*($SMOOTH_PREVIOUS{"right"}+0.1)/$smooth_total,
+				       $smooth*($SMOOTH_PREVIOUS{"other"}+0.1)/$smooth_total);
 	@REORDERING_SMOOTH_FOLLOWING = ($smooth*($SMOOTH_FOLLOWING{"mono"}+0.1)/$smooth_total,
 					$smooth*($SMOOTH_FOLLOWING{"swap"}+0.1)/$smooth_total,
 					$smooth*($SMOOTH_FOLLOWING{"left"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"right"}+0.1)/$smooth_total);
+					$smooth*($SMOOTH_FOLLOWING{"right"}+0.1)/$smooth_total,
+					$smooth*($SMOOTH_FOLLOWING{"other"}+0.1)/$smooth_total);
 	printf "$smooth*($SMOOTH_FOLLOWING{mono}+0.1)/$smooth_total,
 					$smooth*($SMOOTH_FOLLOWING{swap}+0.1)/$smooth_total,
 					$smooth*($SMOOTH_FOLLOWING{other}+0.1)/$smooth_total\n";
 	printf "smoothed following to %f,%f,%f\n",@REORDERING_SMOOTH_FOLLOWING;
     }
     
-    ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f) = @REORDERING_SMOOTH_PREVIOUS;
-    ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe) = @REORDERING_SMOOTH_PREVIOUS;
-    ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f) = @REORDERING_SMOOTH_FOLLOWING;
-    ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe) = @REORDERING_SMOOTH_FOLLOWING;
+    ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f) = (0,0,0,0,0); #@REORDERING_SMOOTH_PREVIOUS;
+    ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe) = (0,0,0,0,0); #@REORDERING_SMOOTH_PREVIOUS;
+    ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_f) = (0,0,0,0,0); #@REORDERING_SMOOTH_FOLLOWING;
+    ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe,$other_following_fe) = (0,0,0,0,0); #@REORDERING_SMOOTH_FOLLOWING;
 
     print STDERR "(7.2) building tables @ ".`date`;
     open(O,"$extract_file.o.sorted")
@@ -1439,8 +1445,8 @@ sub get_reordering {
 	    &store_reordering_fe();
 	    
 	    # reset counters
-	    ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe) = @REORDERING_SMOOTH_PREVIOUS;
-	    ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe) = @REORDERING_SMOOTH_FOLLOWING;
+	    ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe) = (0,0,0,0,0);
+	    ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe,$other_following_fe) = (0,0,0,0,0);
 #	    }
 
 	    # store counts if new f
@@ -1450,8 +1456,8 @@ sub get_reordering {
 		&store_reordering_f();
 	    
 		# reset counters
-		($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f) = @REORDERING_SMOOTH_PREVIOUS;
-		($mono_following_f,$swap_following_f,$left_following_f,$right_following_f) = @REORDERING_SMOOTH_FOLLOWING;
+		($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f) = (0,0,0,0,0);
+		($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_fe) = (0,0,0,0,0);
 		
 	    }
 	    $f_current = $f;
@@ -1463,7 +1469,7 @@ sub get_reordering {
 	elsif ($o_previous eq 'left'){ $left_previous_f++; $left_previous_fe++; }
 	elsif ($o_previous eq 'right'){ $right_previous_f++; $right_previous_fe++; }
         #keep other option for backward compatibility
-	elsif ($o_previous eq 'other'){ $right_previous_f++; $right_previous_fe++; }
+	elsif ($o_previous eq 'other'){ $other_previous_f++; $other_previous_fe++; }
 	else { print STDERR "buggy line (o_previous:$o_previous): $_\n"; }
 	
 	if    ($o_following eq 'mono') {  $mono_following_f++;  $mono_following_fe++; }
@@ -1471,7 +1477,7 @@ sub get_reordering {
 	elsif ($o_following eq 'left') { $left_following_f++; $left_following_fe++; }
 	elsif ($o_following eq 'right') { $right_previous_f++; $right_previous_fe++; }
         #keep other option for backward compatibility
-	elsif ($o_following eq 'other') { $right_previous_f++; $right_previous_fe++; }
+	elsif ($o_following eq 'other') { $other_previous_f++; $other_previous_fe++; }
 	else { print STDERR "buggy line (o_following:$o_following): $_\n"; }
 
     }
@@ -1483,37 +1489,46 @@ sub get_reordering {
 
 sub store_reordering_f {
     my ($total_previous_f,$total_following_f);
-    $total_previous_f = ($mono_previous_f+$swap_previous_f+$left_previous_f+$right_previous_f);
-    $total_following_f = ($mono_following_f+$swap_following_f+$left_following_f+$right_following_f);
+    $total_previous_f = ($mono_previous_f+$swap_previous_f+$left_previous_f+$right_previous_f+$other_previous_f);
+    $total_following_f = ($mono_following_f+$swap_following_f+$left_following_f+$right_following_f+$other_following_f);
 
     foreach my $model (@REORDERING_MODELS) {
 	next if ($model->{"lang"} ne "f");
 	if ($model->{"orient"} eq "mslr") {
+	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[2]+$REORDERING_SMOOTH_PREVIOUS[3];
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g %g %g\n",
 					   $f_current, 
-					   $mono_previous_f/$total_previous_f,
-					   $swap_previous_f/$total_previous_f,
-					   $left_previous_f/$total_previous_f,
-					   $right_previous_f/$total_previous_f);
+					   ($mono_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/
+					       $total_previous_f,
+					   ($swap_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/
+					       $total_previous_f,
+					   ($left_previous_f+$REORDERING_SMOOTH_PREVIOUS[2])/
+					       $total_previous_f,
+					   ($right_previous_f+$REORDERING_SMOOTH_PREVIOUS[3])
+					       /$total_previous_f);
 	}
 	elsif ($model->{"orient"} eq "msd") {
+	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[4];
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g %g\n",
 					   $f_current, 
-					   $mono_previous_f/$total_previous_f,
-					   $swap_previous_f/$total_previous_f,
-					   ($left_previous_f+$right_previous_f)/$total_previous_f);
+					   ($mono_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_f,
+					   ($swap_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_f,
+					   ($other_previous_f+$REORDERING_SMOOTH_PREVIOUS[4])/
+					       $total_previous_f);
 	}
 	elsif ($model->{"orient"} eq "monotonicity") {
+	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g\n",
 					   $f_current, 
-					   $mono_previous_f/$total_previous_f,
-					   ($swap_previous_f+$left_previous_f+$right_previous_f)/$total_previous_f);
+					   ($mono_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_f,
+					   ($swap_previous_f+$left_previous_f+$right_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_f);
 	}
 	elsif ($model->{"orient"} eq "leftright") {
+	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g\n",
 					   $f_current, 
-					   ($mono_previous_f+$left_previous_f)/$total_previous_f,
-					   ($swap_previous_f+$right_previous_f)/$total_previous_f);
+					   ($mono_previous_f+$left_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_f,
+					   ($swap_previous_f+$right_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_f);
 	}
     }
 }
@@ -1525,56 +1540,64 @@ sub store_reordering_fe {
     foreach my $model (@REORDERING_MODELS) {
 	next if ($model->{"lang"} ne "fe");
 	if ($model->{"orient"} eq "mslr") {
+	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[2]+$REORDERING_SMOOTH_PREVIOUS[3];
+	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1]+$REORDERING_SMOOTH_FOLLOWING[2]+$REORDERING_SMOOTH_FOLLOWING[3];
 	    printf { $model->{"filehandle"} } ("%s ||| %s ||| %g %g %g %g ",
 					   $f_current, $e_current, 
-					   $mono_previous_fe/$total_previous_fe,
-					   $swap_previous_fe/$total_previous_fe,
-					   $left_previous_fe/$total_previous_fe,
-					   $right_previous_fe/$total_previous_fe);
+					   ($mono_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
+					   ($swap_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe,
+					   ($left_previous_fe+$REORDERING_SMOOTH_PREVIOUS[2])/$total_previous_fe,
+					   ($right_previous_fe+$REORDERING_SMOOTH_PREVIOUS[3])/$total_previous_fe);
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } ("%g %g %g %g",
-					       $mono_following_fe/$total_following_fe,
-					       $swap_following_fe/$total_following_fe,
-					       $left_following_fe/$total_following_fe,
-					       $right_following_fe/$total_following_fe);
+					       ($mono_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
+					       ($swap_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe,
+					       ($left_following_fe+$REORDERING_SMOOTH_FOLLOWING[2])/$total_following_fe,
+					       ($right_following_fe+$REORDERING_SMOOTH_FOLLOWING[3])/$total_following_fe);
 	    }
 	    printf { $model->{"filehandle"} } ("\n");
 	}
 	elsif ($model->{"orient"} eq "msd") {
+	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[4];
+	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1]+$REORDERING_SMOOTH_FOLLOWING[4];
 	    printf { $model->{"filehandle"} } ("%s |||  %s ||| %g %g %g ",
 					   $f_current, $e_current,  
-					   $mono_previous_fe/$total_previous_fe,
-					   $swap_previous_fe/$total_previous_fe,
-					   ($left_previous_fe+$right_previous_fe)/$total_previous_fe);
+					   ($mono_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
+					   ($swap_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe,
+					   ($other_previous_fe+$REORDERING_SMOOTH_PREVIOUS[4])/$total_previous_fe);
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } ("%g %g %g",
-					       $mono_following_fe/$total_following_fe,
-					       $swap_following_fe/$total_following_fe,
-					       ($left_following_fe+$right_following_fe)/$total_following_fe);
+					       ($mono_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
+					       ($swap_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe,
+					       ($other_following_fe+$REORDERING_SMOOTH_FOLLOWING[4])/$total_following_fe);
 	    }
 	    printf { $model->{"filehandle"} } ("\n");
 	}
 	elsif ($model->{"orient"} eq "monotonicity") {
+	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
+	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1];
 	    printf { $model->{"filehandle"} } ("%s %s ||| %g %g ",
 					   $f_current,  $e_current, 
-					   $mono_previous_fe/$total_previous_fe,
-					   ($swap_previous_fe+$left_previous_fe+$right_previous_fe)/$total_previous_fe);
+					   ($mono_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
+					   ($swap_previous_fe+$left_previous_fe+$right_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe);
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } ("%g %g",
-					       $mono_following_fe/$total_following_fe,
-					       ($swap_following_fe+$left_following_fe+$right_following_fe)/$total_following_fe);
+					       ($mono_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
+					       ($swap_following_fe+$left_following_fe+$right_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe);
 	    }
 	    printf { $model->{"filehandle"} } ("\n");	
 	}
 	elsif ($model->{"orient"} eq "leftright") {
+	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
+	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1];
 	    printf { $model->{"filehandle"} } ("%s |||  %s ||| %g %g ",
 					   $f_current, $e_current, 
-					   ($mono_previous_fe+$left_previous_fe)/$total_previous_fe,
-					   ($swap_previous_fe+$right_previous_fe)/$total_previous_fe);
+					   ($mono_previous_fe+$left_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
+					   ($swap_previous_fe+$right_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe);
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } ("%g %g",
-					       ($mono_following_fe+$left_following_fe)/$total_following_fe,
-					       ($swap_following_fe+$right_following_fe)/$total_following_fe);
+					       ($mono_following_fe+$left_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
+					       ($swap_following_fe+$right_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe);
 	    }
 	    printf { $model->{"filehandle"} } ("\n");
 	}
