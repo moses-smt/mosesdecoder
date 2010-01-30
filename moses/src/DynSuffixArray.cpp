@@ -19,9 +19,9 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   corpus_ = crp; 
   int size = corpus_->size();
   int* tmpArr = new int[size];
-  for(int i=0 ; i < size; ++i) tmpArr[i] = (int)corpus_->at(i); 
-  cerr << "printing TmpArr\n";
-  for(int i=0; i < size; ++i) std::cerr << tmpArr[i] << std::endl;
+  //for(int i=0 ; i < size; ++i) tmpArr[i] = (int)corpus_->at(i); 
+  for(int i=0 ; i < size; ++i) tmpArr[i] = i; 
+  cerr << "gets here\n";
   if(sarray(tmpArr, size) == -1) {
     TRACE_ERR("Failed to build suffix array" << std::endl);
   }
@@ -29,6 +29,7 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   for(int i=0; i < size; ++i) {
     std::cerr << tmpArr[i] << std::endl;
   }
+  cerr << "done \n";
   SA_ = new vuint_t(tmpArr, tmpArr + size);
   std::cerr << "printing SA " << std::endl;
   for(int i=0; i < size; ++i) std::cerr << SA_->at(i) << std::endl;
@@ -156,12 +157,10 @@ void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPELEMNT SUBSITITUTE FACTOR\n";
   return;
 }
-unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices, 
-    std::map<int, pair<int, int> >& mapBnds) {
+unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   std::set<int> skipSet;
   indices->clear();
-  mapBnds.clear();
   int phrasesize = phrase->size();
     cerr << "Phrase size is " << phrasesize << endl;
   // find lower and upper bounds on phrase[0]
@@ -175,7 +174,6 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices,
   if(phrasesize == 1) {
     for(int i=lwrBnd; i < uprBnd; ++i) {
       indices->push_back(SA_->at(i));
-      mapBnds[indices->size()-1] = std::make_pair(i,i);   
     }
     cerr << "Total count of phrase = " << indices->size() << endl;
     return pcnt;
@@ -194,8 +192,6 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices,
       else if(pos == phrasesize-1) { // found phrase so store word index for snt retrieval
         indices->push_back(rightIdx);
         // store indexes of phrase in sentence for alignment extractor 
-        int leftIdx;
-        mapBnds[indices->size()-1] = std::make_pair(42, rightIdx); 
       }
     }
   }
@@ -208,5 +204,51 @@ void DynSuffixArray::save(FILE* fout) {
 void DynSuffixArray::load(FILE* fin) {
   fReadVector(fin, *SA_);
 }
+int DynSuffixArray::compare(int pos1, int pos2, int max) {
+  for (int i=0; i < max; ++i) {
+    if((pos1 + i < corpus_->size()) && (pos2 + i >= corpus_->size()))
+      return 1;
+    if((pos2 + i < corpus_->size()) && (pos1 + i >= corpus_->size()))
+      return -1;
+  
+    int diff = corpus_->at(pos1+i) - corpus_->at(pos2+i);
+    if(diff != 0) return diff;
+  }
+  return 0;
+}
+void DynSuffixArray::qsort(int* array, int begin, int end) {
+  if(end > begin) 
+  {
+    int index; 
+    {	
+      index = begin + (rand() % (end - begin + 1));
+      int pivot = array[index];
+      {
+        int tmp = array[index];
+        array[index] = array[end];
+        array[end] = tmp;
+      }
+      for(int i=index=begin; i < end; ++i) {
+        if (compare(array[i], pivot, 20) <= 0) {
+          {
+            int tmp = array[index];
+            array[index] = array[i];
+            array[i] = tmp;
+            index++;
+          }
+        }
+      }
+      {
+        int tmp = array[index];
+        array[index] = array[end];
+        array[end] = tmp;
+      }
+    }
+    qsort(array, begin, index - 1);
+    qsort(array, index + 1,  end);
+  }
+}
+
+
 
 } // end namespace

@@ -38,19 +38,20 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 	loadCorpus(sourceStrme, *srcCrp_, srcSntBreaks_);
   loadCorpus(targetStrme, *trgCrp_, trgSntBreaks_);
   assert(srcSntBreaks_.size() == trgSntBreaks_.size());
-  std::cerr << "Vocab: " << std::endl;
-  vocab_->printVocab();
+  //std::cerr << "Vocab: " << std::endl;
+  //vocab_->printVocab();
 	LoadVocabLookup();
 
   // build suffix arrays and auxilliary arrays
+  cerr << "Building Source Suffix Array\n"; 
   srcSA_ = new DynSuffixArray(srcCrp_); 
   if(!srcSA_) return false;
+  cerr << "Building Target Suffix Array\n"; 
   trgSA_ = new DynSuffixArray(trgCrp_); 
   if(!trgSA_) return false;
 	
 	InputFileStream alignStrme(alignments);
   loadAlignments(alignStrme);
-	
   return true;
 }
 int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
@@ -197,9 +198,8 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   vector<wordID_t> localIDs(0), wrdIndices(0);  
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
-  std::map<int, pair<int, int> > sntBounds; 
   // extract sentence IDs from SA and return rightmost index of phrases
-  unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices, sntBounds);
+  unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices);
   vector<int> sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
@@ -214,7 +214,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		// extract all Alignments
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
-															sntBounds[snt].first, 
+															leftIdx, 
 															rightIdx); 
 		
 		cerr << "extracted " << phrasePairs.size() << endl;
