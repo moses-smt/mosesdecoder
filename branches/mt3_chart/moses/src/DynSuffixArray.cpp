@@ -21,10 +21,11 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   int* tmpArr = new int[size];
   //for(int i=0 ; i < size; ++i) tmpArr[i] = (int)corpus_->at(i); 
   for(int i=0 ; i < size; ++i) tmpArr[i] = i; 
+  qsort(tmpArr, 0, size-1);
   cerr << "gets here\n";
-  if(sarray(tmpArr, size) == -1) {
-    TRACE_ERR("Failed to build suffix array" << std::endl);
-  }
+  //if(sarray(tmpArr, size) == -1) {
+  //  TRACE_ERR("Failed to build suffix array" << std::endl);
+ // }
   cerr << "printing TmpArr\n";
   for(int i=0; i < size; ++i) {
     std::cerr << tmpArr[i] << std::endl;

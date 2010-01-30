@@ -93,8 +93,7 @@ libmoses_a_SOURCES = \
 	PhraseDictionaryDynSuffixArray.cpp \ 
 	DynSuffixArray.cpp \
 	DynSAInclude/vocab.cpp \
-	DynSAInclude/file.cpp \
-	DynSAInclude/sarray.cpp
+	DynSAInclude/file.cpp
 
 if PROTOBUF
 BUILT_SOURCES = \
