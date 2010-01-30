@@ -185,16 +185,17 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices,
     // for each index returned from check corpus SA[i] + 1 for phrase[1]
     for(int i=lwrBnd; i < uprBnd; ++i) { // cut off for sampling here
       if(skipSet.find(i) != skipSet.end()) continue;
-      int idx = SA_->at(i) + pos;
-      cerr << "idx = " << idx << endl;
-      if(corpus_->at(idx) != phrase->at(pos)) {
+      int rightIdx = SA_->at(i) + pos;
+      cerr << "idx = " << rightIdx << endl;
+      if(corpus_->at(rightIdx) != phrase->at(pos)) {
         skipSet.insert(i);  // save index to not check next iteration 
         --pcnt;  // decrement current phrase count
       }
       else if(pos == phrasesize-1) { // found phrase so store word index for snt retrieval
-        indices->push_back(idx);
+        indices->push_back(rightIdx);
         // store indexes of phrase in sentence for alignment extractor 
-        mapBnds[indices->size()-1] = std::make_pair(lwrBnd, uprBnd+pos-1); 
+        int leftIdx;
+        mapBnds[indices->size()-1] = std::make_pair(42, rightIdx); 
       }
     }
   }

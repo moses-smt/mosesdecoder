@@ -198,21 +198,24 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
   std::map<int, pair<int, int> > sntBounds; 
-  // extract sentence IDs from SA
+  // extract sentence IDs from SA and return rightmost index of phrases
   unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices, sntBounds);
   vector<int> sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
-		// extract all Alignments
 		int sntIndex = sntIndexes.at(snt);
-		//int targetSize = GetTargetSentenceSize(sntIndex);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
-    cerr << "left bnd = " << sntBounds[sntIndex].first << endl;
-    cerr << "right bnd = " << sntBounds[sntIndex].second << endl;
+    // get span of phrase in source sentence 
+    int rightIdx = wrdIndices[snt] - sntIndex, leftIdx(0);
+    if(rightIdx >= src.GetSize()) 
+      leftIdx = rightIdx - (src.GetSize()-1);
+    cerr << "left bnd = " << leftIdx << endl;
+    cerr << "right bnd = " << rightIdx << endl;
+		// extract all Alignments
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															sntBounds[snt].first, 
-															sntBounds[snt].second); 
+															rightIdx); 
 		
 		cerr << "extracted " << phrasePairs.size() << endl;
 		
