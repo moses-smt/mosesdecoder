@@ -311,7 +311,7 @@ foreach my $r (split(/\,/,$___REORDERING)) {
       elsif ($reoconf =~ /((bidirectional)|(backward)|(forward))/) {
         $REORDERING_MODELS[$model_num]{"dir"} = $reoconf;
       }
-      elsif ($reoconf =~ /(fe)|(f)/) {
+      elsif ($reoconf =~ /^(fe)|(f))/) {
         $REORDERING_MODELS[$model_num]{"lang"} = $reoconf;
       }
       elsif ($reoconf =~ /(hier)|(phrase)|(word)/) {
