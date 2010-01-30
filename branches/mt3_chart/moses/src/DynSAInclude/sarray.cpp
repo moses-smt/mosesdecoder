@@ -50,6 +50,7 @@ Return value
 #include <cstdlib>
 #include <cstring>
 #include "sarray.h"
+#include "vocab.h"
 
 namespace Moses {
 
@@ -121,7 +122,6 @@ sarray(int a[], int n)
 		}
 		lab = cum;
 	}
-
 	result = ssortit(a, p, n, 1, p+i, nbuck);
 	memcpy(a, p, n*sizeof(int));
 	
