@@ -190,14 +190,19 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair
     word.SetFactor(0, factor);
     targetPhrase->AddWord(word);
   }
+	
+	// scoring
+	
+	
   return targetPhrase;
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	cerr << "\n" << src << "\n";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
- 
+
 	const StaticData &staticData = StaticData::Instance();
-  
+	size_t sourceSize = src.GetSize();
+	
   vector<wordID_t> localIDs(0), wrdIndices(0);  
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
@@ -209,10 +214,10 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		int sntIndex = sntIndexes.at(snt);
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     // get span of phrase in source sentence 
-    int rightIdx = wrdIndices[snt] - sntIndex, leftIdx(0);
-    if(rightIdx >= src.GetSize()) 
-      leftIdx = rightIdx - (src.GetSize()-1);
-    cerr << "left bnd = " << leftIdx << endl;
+		int beginSentence = srcSntBreaks_[sntIndex];
+    int rightIdx = wrdIndices[snt] - beginSentence
+				,leftIdx = rightIdx - sourceSize + 1;
+    cerr << "left bnd = " << leftIdx << " ";
     cerr << "right bnd = " << rightIdx << endl;
 		// extract all Alignments
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
@@ -227,7 +232,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair)
 		{
 			const PhrasePair &phrasePair = **iterPhrasePair;
-			TargetPhrase *targetPhrase = getMosesFactorIDs(phrasePair); 
+			TargetPhrase *targetPhrase = getMosesFactorIDs(phrasePair);
 			cerr << *targetPhrase << endl;
 			
 			ret->Add(targetPhrase);
