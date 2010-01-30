@@ -8,7 +8,6 @@
 #include "Util.h"
 #include "File.h"
 #include "DynSAInclude/types.h"
-#include "DynSAInclude/sarray.h"
 
 namespace Moses {
 using std::vector;
