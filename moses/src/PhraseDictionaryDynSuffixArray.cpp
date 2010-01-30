@@ -120,16 +120,21 @@ void PhraseDictionaryDynSuffixArray::CleanUp() {
 void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float, std::allocator<float> >&) {
   return;
 }
-float PhraseDictionaryDynSuffixArray::MLEProb(int denom, vector<PhrasePair>& phrasepairs) const {
+float PhraseDictionaryDynSuffixArray::MLEProb(int denom, vector<PhrasePair*>& phrasepairs) const {
   // search through phrase pairs and collect counts of similar target phrases
   std::map<vector<wordID_t>, int> phraseCounts;
   for(int i = 0; i < phrasepairs.size(); ++i) {
-    PhrasePair& phrase = phrasepairs[i];
+    PhrasePair& phrase = *phrasepairs[i];
     int sntIndex = phrase.m_sntIndex;
+		SAPhrase saTargetPhrase(phrase.GetTargetSize());
+
     for(int i=phrase.m_startTarget; i < phrase.m_endTarget; ++i) { // look up trg ids 
       int trgid = trgCrp_->at(trgSntBreaks_[sntIndex] + i);
+			saTargetPhrase.SetId(i, trgid);
     }
   }
+	
+	
   // divide each count by denom
    /*
   for(int i=phrasepair.m_startTarget; i < phrasepair.m_endTarget; ++i) { // look up trg words
@@ -158,7 +163,7 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<w
   //cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus for ssarray
   return cArray.size();
 }
-bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<wordID_t>& localIDs) const {
+bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, SAPhrase &output) const {
   // looks up the SA vocab ids for the current src phrase
 	size_t phraseSize = src.GetSize();
 	for (size_t pos = 0; pos < phraseSize; ++pos) {
@@ -168,16 +173,19 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, vector<
 		iterLookup = vocabLookup_.find(factor);
 		
 		if (iterLookup == vocabLookup_.end())
-      break; 
+		{ // oov
+      return false;
+		}
 		else
 		{
 			wordID_t arrayId = iterLookup->second;
-      localIDs.push_back(arrayId);
+      output.SetId(pos, arrayId);
 			cerr << arrayId << " ";
 		}
 	}
-  return (localIDs.size() > 0);
+  return true;
 }
+	
 TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const PhrasePair& phrasepair) const {
   TargetPhrase* targetPhrase = new TargetPhrase(Output);
   int sntIndex = phrasepair.m_sntIndex;
@@ -203,11 +211,12 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	const StaticData &staticData = StaticData::Instance();
 	size_t sourceSize = src.GetSize();
 	
-  vector<wordID_t> localIDs(0), wrdIndices(0);  
+	SAPhrase localIDs(sourceSize);
+  vector<wordID_t> wrdIndices(0);  
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
   // extract sentence IDs from SA and return rightmost index of phrases
-  unsigned denom = srcSA_->countPhrase(&localIDs, &wrdIndices);
+  unsigned denom = srcSA_->countPhrase(&(localIDs.words), &wrdIndices);
   vector<int> sntIndexes = getSntIndexes(wrdIndices);	
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
     vector<PhrasePair*> phrasePairs;
@@ -227,11 +236,14 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		
 		cerr << "extracted " << phrasePairs.size() << endl;
 		
+		MLEProb(denom, phrasePairs);
+		
 		// convert to moses phrase pairs
 		vector<PhrasePair*>::iterator iterPhrasePair;
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair)
 		{
-			const PhrasePair &phrasePair = **iterPhrasePair;
+			const PhrasePair &phrasePair = **iterPhrasePair;			
+			
 			TargetPhrase *targetPhrase = getMosesFactorIDs(phrasePair);
 			cerr << *targetPhrase << endl;
 			

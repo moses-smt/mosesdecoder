@@ -9,6 +9,21 @@
 #include "InputFileStream.h"
 namespace Moses {
 	
+class SAPhrase
+{
+public:
+	vector<wordID_t> words;		
+	
+	SAPhrase(size_t phraseSize)
+	:words(phraseSize)
+	{}
+	
+	void SetId(size_t pos, wordID_t id)
+	{
+		words[pos] = id;
+	}
+};
+
 class PhrasePair
 {
 public:
@@ -20,6 +35,9 @@ public:
 	, m_endSource(endSource)
   , m_sntIndex(sntIndex)
 	{}
+
+	size_t GetTargetSize() const
+	{ return m_endTarget - m_startTarget + 1; }
 };
 	
 class SentenceAlignment 
@@ -67,12 +85,12 @@ private:
   int loadAlignments(InputFileStream& aligs);
   vector<int> getSntIndexes(vector<unsigned>&) const; 	
   TargetPhrase* getMosesFactorIDs(const PhrasePair&) const;
-  bool getLocalVocabIDs(const Phrase&, vector<wordID_t>&) const;
+  bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
 	float m_weightWP;
-  float MLEProb(int denom, vector<PhrasePair>&) const;	
+  float MLEProb(int denom, vector<PhrasePair*>&) const;	
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
 	
