@@ -279,6 +279,7 @@ $___ONLY_PRINT_GIZA = 1 if $_ONLY_PRINT_GIZA;
 # Reordering model (esp. lexicalized)
 my $___REORDERING = "distance";
 $___REORDERING = $_REORDERING if $_REORDERING;
+my $smooth;
 my $___REORDERING_SMOOTH = 0.5;
 $___REORDERING_SMOOTH = $_REORDERING_SMOOTH if $_REORDERING_SMOOTH;
 my @REORDERING_MODELS;
@@ -286,6 +287,7 @@ my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
 my $model_num = 0;
 my $reotype;
 my %REORDERING_MODEL_TYPES = ();
+my %number_features = ("mslr" => 4, "msd" => 3, "monotonicity" => 2, "leftright" => 2);
 foreach my $r (split(/\,/,$___REORDERING)) {
    #change some config string options, to be backward compatible
    $r =~ s/orientation/msd/;
@@ -1360,55 +1362,59 @@ sub get_reordering {
     else {
         safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
     }
-    my @x = [];
-    my $smooth = $___REORDERING_SMOOTH;
-    for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-	$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"} = [$smooth,$smooth,$smooth,$smooth,$smooth,$smooth];
-	$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"} = [$smooth,$smooth,$smooth,$smooth,$smooth,$smooth];
-	$REORDERING_MODEL_TYPES{$mtype}{"smooth_total"} = 0;
-    }
+    $smooth = $___REORDERING_SMOOTH;
+    # for my $mtype ( keys %REORDERING_MODEL_TYPES) {
+    # 	@{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}} = ($smooth,$smooth,$smooth,$smooth,$smooth,$smooth);
+    # 	@{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"}} = ($smooth,$smooth,$smooth,$smooth,$smooth,$smooth);
+    # 	$REORDERING_MODEL_TYPES{$mtype}{"smooth_total"} = 0;
+    # }
     if ($smooth =~ /(.+)u$/) {
-	$smooth = $1;
-	my $smooth_total = 0; 
-	open(O,"$extract_file.o.sorted")
-	    or die "ERROR: Can't read $extract_file.o.sorted";
-	while(<O>) {
-	    chomp;
-	    my ($f,$e,$o) = split(/ \|\|\| /);
-	    my ($o_wbe,$o_phrase,$o_hier) = split(/ \| /);
-	    for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-		my ($o_previous,$o_following);
-		if ($REORDERING_MODEL_TYPES{$mtype}{"orient"} eq "hier") {
-		    ($o_previous,$o_following) = split(/ /,$o_hier);
-		}
-		elsif ($REORDERING_MODEL_TYPES{$mtype}{"orient"} eq "phrase") {
-		    ($o_previous,$o_following) = split(/ /,$o_phrase);
-		}
-		else {
-		    ($o_previous,$o_following) = split(/ /,$o_wbe);
-		}
-		$REORDERING_MODEL_TYPES{$mtype}{$o_previous}++;
-		$REORDERING_MODEL_TYPES{$mtype}{$o_following}++;
-		$REORDERING_MODEL_TYPES{$mtype}{"smooth_total"}++;
-	    }
-	}
-	close(O);
-	for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-	    $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"} = 
-		[$smooth*($REORDERING_MODEL_TYPES{$mtype}{"mono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"swap"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"left"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"right"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"other"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"nomono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"}];
-	    $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"} = 
-		[$smooth*($REORDERING_MODEL_TYPES{$mtype}{"mono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"swap"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"left"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"right"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"other"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
-		 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"nomono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"}];
-	}
+	
+        print STDERR "using the flag --reordering-smooth is currently not supported\n";
+        exit(1);
+    }
+	# $smooth = $1;
+	# my $smooth_total = 0; 
+	# open(O,"$extract_file.o.sorted")
+	#     or die "ERROR: Can't read $extract_file.o.sorted";
+	# while(<O>) {
+	#     chomp;
+	#     my ($f,$e,$o) = split(/ \|\|\| /);
+	#     my ($o_wbe,$o_phrase,$o_hier) = split(/ \| /);
+	#     for my $mtype ( keys %REORDERING_MODEL_TYPES) {
+	# 	my ($o_previous,$o_following);
+	# 	if ($REORDERING_MODEL_TYPES{$mtype}{"orient"} eq "hier") {
+	# 	    ($o_previous,$o_following) = split(/ /,$o_hier);
+	# 	}
+	# 	elsif ($REORDERING_MODEL_TYPES{$mtype}{"orient"} eq "phrase") {
+	# 	    ($o_previous,$o_following) = split(/ /,$o_phrase);
+	# 	}
+	# 	else {
+	# 	    ($o_previous,$o_following) = split(/ /,$o_wbe);
+	# 	}
+	# 	$REORDERING_MODEL_TYPES{$mtype}{$o_previous}++;
+	# 	$REORDERING_MODEL_TYPES{$mtype}{$o_following}++;
+	# 	$REORDERING_MODEL_TYPES{$mtype}{"smooth_total"}++;
+	#     }
+	# }
+	# close(O);
+	# for my $mtype ( keys %REORDERING_MODEL_TYPES) {
+	#     $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"} = 
+	# 	[$smooth*($REORDERING_MODEL_TYPES{$mtype}{"mono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"swap"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"left"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"right"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"other"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"nomono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"}];
+	#     $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"} = 
+	# 	[$smooth*($REORDERING_MODEL_TYPES{$mtype}{"mono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"swap"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"left"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"right"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"other"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"},
+	# 	 $smooth*($REORDERING_MODEL_TYPES{$mtype}{"nomono"}+0.1)/$REORDERING_MODEL_TYPES{$mtype}{"$smooth_total"}];
+#	 }
+
         #check if illegal combinations of models and orientation types occur
 	#TODO!!!
 #UPDATE THE CLAUSES BELOW FOR TRACES!!!
@@ -1417,15 +1423,16 @@ sub get_reordering {
 #					$smooth*($SMOOTH_FOLLOWING{other}+0.1)/$smooth_total\n";
 #	printf "smoothed following to %f,%f,%f\n",@REORDERING_SMOOTH_FOLLOWING;
 	 
-    }
+ #   }
 
     for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-	$REORDERING_MODEL_TYPES{$mtype}{"previous_f"} = $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"};
-	$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"} = $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"};
-	$REORDERING_MODEL_TYPES{$mtype}{"following_f"} = $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"};
-	$REORDERING_MODEL_TYPES{$mtype}{"following_fe"} = $REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"};
+	
+	@{$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}} = (0,0,0,0,0,0); #$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"};
+	@{$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}} = (0,0,0,0,0,0); #$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"};
+	@{$REORDERING_MODEL_TYPES{$mtype}{"following_f"}} = (0,0,0,0,0,0); #$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"};
+	@{$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}} = (0,0,0,0,0,0); #$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"};
     }
-
+    
     print STDERR "(7.2) building tables @ ".`date`;
     open(O,"$extract_file.o.sorted")
 	or die "ERROR: Can't read $extract_file.o.sorted";
@@ -1453,29 +1460,29 @@ sub get_reordering {
 #always store the counts for both directions.	    
 #	    if (defined($REORDERING_MODELS{"fe"})) {
 	    # compute probs, store them
-	    &store_reordering_fe();
+	    &store_reordering_fe("fe");
 	    
 	    # reset counters
 	    
     	    for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-		my @a = map { $_; } @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}}; 
-		$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"} = \@a; #@{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}};
-		@a = map { $_; } @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"}}; 
-		$REORDERING_MODEL_TYPES{$mtype}{"following_fe"} = \@a;
+#		my @a = map { $_; } @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}}; 
+		@{$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}} = (0,0,0,0,0,0); #\@a; #@{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}};
+#		@a = map { $_; } @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"}}; 
+		@{$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}} = (0,0,0,0,0,0); #\@a;
 #		@{$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}} = @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"}};
-		print "resetting counters ($mtype): ".$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[0] ." ".$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[0]." ".$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}[0]."\n";
+		print "resetting counters ($mtype): ".$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[0] ." ".$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[0]."\n";
 	    }
 
 	    # store counts if new f
 	    if ($f ne $f_current) { 
 	    
 		# compute probs, store them
-		&store_reordering_f();
+		&store_reordering_fe("f");
 	    
 		# reset counters
 		for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-		    @{$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}} = @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}};
-		    @{$REORDERING_MODEL_TYPES{$mtype}{"following_f"}} = @{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"}};
+		    @{$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}} = (0,0,0,0,0,0); #@{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_PREVIOUS"}};
+		    @{$REORDERING_MODEL_TYPES{$mtype}{"following_f"}} = (0,0,0,0,0,0); #@{$REORDERING_MODEL_TYPES{$mtype}{"REO_SMOOTH_FOLLOWING"}};
 		}
 #		($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f) = @REORDERING_SMOOTH_PREVIOUS;
 #		($mono_following_f,$swap_following_f,$left_following_f,$right_following_f) = @REORDERING_SMOOTH_FOLLOWING;
@@ -1502,7 +1509,7 @@ sub get_reordering {
 	    elsif ($o_previous eq 'other'){ 
 		$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$other]++; 
 		$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$other]++; }
-	    elsif ($o_previous eq 'other'){ 
+	    elsif ($o_previous eq 'nomono'){ 
 		$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$nomono]++; 
 		$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$nomono]++; }
 	    else { print STDERR "buggy line (o_previous:$o_previous): $_\n"; }
@@ -1528,8 +1535,8 @@ sub get_reordering {
 	    else { print STDERR "buggy line (o_following:$o_following): $_\n"; }
 	}
     }
-    &store_reordering_f();
-    &store_reordering_fe();
+    &store_reordering_fe("f");
+    &store_reordering_fe("fe");
 
     if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
 }
@@ -1552,39 +1559,46 @@ sub store_reordering_f {
 	next if ($model->{"lang"} ne "f");
 	my $mtype = $model->{"type"};
 	if ($model->{"orient"} eq "mslr") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"} += 4*$smooth;
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g %g %g\n",
 					       $f_current, 
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$swap]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dright]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"});
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$swap]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dright]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"});
 	}
 	elsif ($model->{"orient"} eq "msd") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"} += 3*$smooth;
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g %g\n",
 					       $f_current, 
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$swap]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$swap]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
 					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$other]+
 						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dright]+
-						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft])/
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft]+$smooth)/
 					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"});
 	}
 	elsif ($model->{"orient"} eq "monotonicity") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"} += 2*$smooth;
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g\n",
 					       $f_current, 
-					       $REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
-					       ($REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"}-
-						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono])/
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]+$smooth)/$REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$swap]+
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$other]+
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dright]+
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft]+
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$nomono]+$smooth)/
 					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"});
 	}
 	elsif ($model->{"orient"} eq "leftright") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"} += 2*$smooth;
 	    printf { $model->{"filehandle"} } ("%s ||| %g %g\n",
 					       $f_current, 
 					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$mono]+
-						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dright])/
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dright]+$smooth)/
 					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"},
 					       ($REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$swap]+
-						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft])/
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_f"}[$dleft]+$smooth)/
 					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_f"});
 	}
     }
@@ -1592,107 +1606,123 @@ sub store_reordering_f {
 
 sub store_reordering_fe {
 
+    my $orient = shift;
+
     my ($mono,$swap,$dleft,$dright,$other,$nomono) = (0,1,2,3,4,5);
 
      for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-	$REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"} = 0; 
-	foreach my $v (@{$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}}) {
-	   $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"} += $v; 
-	   print STDERR "ADDING t_prev_fe: $v \n";
+	$REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"} = 0; 
+	foreach my $v (@{$REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}}) {
+	   $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"} += $v; 
+	   print STDERR "ADDING t_prev_$orient: $v \n";
 	}
-	$REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"} = 0;
-	foreach my $v (@{$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}}) {
-	    $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"} += $v;
+	$REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"} = 0;
+	foreach my $v (@{$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}}) {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"} += $v;
 	}
     }
 
     foreach my $model (@REORDERING_MODELS) {
 	my $mtype = $model->{"type"};
-	next if ($model->{"lang"} ne "fe");
+	next if ($model->{"lang"} ne "$orient");
 	if ($model->{"orient"} eq "mslr") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"} += 4*$smooth;
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"} += 4*$smooth;
 #	    print STDERR "mono: $mtype";
 	    printf { $model->{"filehandle"} } ("%s ||| %s ||| %g %g %g %g",
 					   $f_current, $e_current, 
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$mono]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$swap]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dleft]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dright]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"});
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$mono]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$swap]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dleft]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dright]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"});
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } (" %g %g %g %g",
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$mono]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$swap]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$dleft]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$dright]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"});
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$mono]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$swap]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$dleft]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$dright]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"});
 	    }
 	    printf { $model->{"filehandle"} } ("\n");
 	}
 	elsif ($model->{"orient"} eq "msd") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"} += 3*$smooth;
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"} += 3*$smooth;
 	    printf { $model->{"filehandle"} } ("%s |||  %s ||| %g %g %g",
-					   $f_current, $e_current,  
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$mono]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$swap]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$other]+
-					    $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dright]+
-					    $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dleft])/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"});
+					       $f_current, $e_current,  
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$mono]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$swap]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$other]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dright]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dleft]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"});
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } (" %g %g %g",
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$mono]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$swap]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       ($REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$other]+
-						$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$dright]+
-						$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$dleft])/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"});
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$mono]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$swap]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$other]+
+						$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$dright]+
+						$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$dleft]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"});
 	    }
 	    printf { $model->{"filehandle"} } ("\n");
 	}
 	elsif ($model->{"orient"} eq "monotonicity") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"} += 2*$smooth;
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"} += 2*$smooth;
 	    printf { $model->{"filehandle"} } ("%s ||| %s ||| %g %g",
 					   $f_current,  $e_current, 
-					   $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$mono]/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   ($REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"}-
-					    $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$mono])/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"});
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$mono]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$swap]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$other]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dright]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dleft]+$REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$nomono]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"});
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } (" %g %g",
-					       $REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$mono]/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       ($REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"}-
-						$REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$mono])/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"});
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$mono]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$swap]+
+						$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$other]+
+						$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$dleft]+
+						$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$dright]+
+						$REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$nomono]+
+						$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"});
 	    }
 	    printf { $model->{"filehandle"} } ("\n");	
 	}
 	elsif ($model->{"orient"} eq "leftright") {
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"} += 2*$smooth;
+	    $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"} += 2*$smooth;
 	    printf { $model->{"filehandle"} } ("%s ||| %s ||| %g %g",
 					   $f_current, $e_current, 
-					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$mono]+
-					    $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dright])/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"},
-					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$swap]+
-					    $REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dleft])/
-					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_fe"});
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$mono]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dright]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"},
+					   ($REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$swap]+
+					    $REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dleft]+$smooth)/
+					       $REORDERING_MODEL_TYPES{$mtype}{"total_previous_$orient"});
 	    if ($model->{"dir"} eq "bidirectional") {
 		printf { $model->{"filehandle"} } (" %g %g",
-					       ($REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$mono]+
-						$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dright])/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"},
-					       ($REORDERING_MODEL_TYPES{$mtype}{"following_fe"}[$swap]+
-						$REORDERING_MODEL_TYPES{$mtype}{"previous_fe"}[$dleft])/
-						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_fe"});
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$mono]+
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dright]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"},
+					       ($REORDERING_MODEL_TYPES{$mtype}{"following_$orient"}[$swap]+
+						$REORDERING_MODEL_TYPES{$mtype}{"previous_$orient"}[$dleft]+$smooth)/
+						   $REORDERING_MODEL_TYPES{$mtype}{"total_following_$orient"});
 	    }
 	    printf { $model->{"filehandle"} } ("\n");
 	}
