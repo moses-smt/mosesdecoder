@@ -287,7 +287,6 @@ my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
 my $model_num = 0;
 my $reotype;
 my %REORDERING_MODEL_TYPES = ();
-my %number_features = ("mslr" => 4, "msd" => 3, "monotonicity" => 2, "leftright" => 2);
 foreach my $r (split(/\,/,$___REORDERING)) {
    #change some config string options, to be backward compatible
    $r =~ s/orientation/msd/;
@@ -306,6 +305,10 @@ foreach my $r (split(/\,/,$___REORDERING)) {
       }
       if ($reoconf =~ /^((msd)|(mslr)|(monotonicity)|(leftright))/) { 
         $REORDERING_MODELS[$model_num]{"orient"} = $reoconf;
+        if ($reoconf ne "msd") {
+          print STDERR "only the msd reordering model is currently supported, not mslr, monotonicity or leftright\n";
+          exit(1);     
+        } 
       }
       elsif ($reoconf =~ /^((bidirectional)|(backward)|(forward))/) {
         $REORDERING_MODELS[$model_num]{"dir"} = $reoconf;
