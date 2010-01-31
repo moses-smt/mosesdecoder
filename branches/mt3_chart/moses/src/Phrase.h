@@ -113,7 +113,8 @@ public:
 	void CreateFromStringNewFormat(FactorDirection direction
 												, const std::vector<FactorType> &factorOrder
 												, const std::string &phraseString
-												, const std::string &factorDelimiter);
+												, const std::string &factorDelimiter
+												, Word &lhs);
 	
 	/**	copy factors from the other phrase to this phrase. 
 		IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
