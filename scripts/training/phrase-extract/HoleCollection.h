@@ -13,42 +13,35 @@
 class HoleCollection
 	{
 	protected:
-		HoleList m_sourceHoles, m_targetHoles;
+		HoleList m_holes;
 		std::vector<Hole*> m_sortedSourceHoles;
 		
 	public:
 		HoleCollection()
 		{}
 		HoleCollection(const HoleCollection &copy)
-		:m_sourceHoles(copy.m_sourceHoles)
-		,m_targetHoles(copy.m_targetHoles)
+		:m_holes(copy.m_holes)
 		{} // don't copy sorted target holes. messes up sorting fn
 		
-		const HoleList &GetSourceHoles() const
-		{ return m_sourceHoles; }
-		const HoleList &GetTargetHoles() const
-		{ return m_targetHoles; }
-		
-		HoleList &GetSourceHoles()
-		{ return m_sourceHoles; }
-		HoleList &GetTargetHoles()
-		{ return m_targetHoles; }
+		const HoleList &GetHoles() const
+		{ return m_holes; }		
+		HoleList &GetHoles()
+		{ return m_holes; }
 		std::vector<Hole*> &GetSortedSourceHoles()
 		{ return m_sortedSourceHoles; }
 		
 		void Add(int startT, int endT, int startS, int endS)
 		{
-			m_sourceHoles.push_back(Hole(startS, endS));
-			m_targetHoles.push_back(Hole(startT, endT));
+			m_holes.push_back(Hole(startS, endS, startT, endT));
 		}
 		
 		bool OverlapSource(const Hole &sourceHole) const
 		{
 			HoleList::const_iterator iter;
-			for (iter = m_sourceHoles.begin(); iter != m_sourceHoles.end(); ++iter)
+			for (iter = m_holes.begin(); iter != m_holes.end(); ++iter)
 			{
 				const Hole &currHole = *iter;
-				if (currHole.Overlap(sourceHole))
+				if (currHole.Overlap(sourceHole, 0))
 					return true;
 			}
 			return false;
@@ -57,10 +50,10 @@ class HoleCollection
 		bool ConsecSource(const Hole &sourceHole) const
 		{
 			HoleList::const_iterator iter;
-			for (iter = m_sourceHoles.begin(); iter != m_sourceHoles.end(); ++iter)
+			for (iter = m_holes.begin(); iter != m_holes.end(); ++iter)
 			{
 				const Hole &currHole = *iter;
-				if (currHole.Neighbor(sourceHole))
+				if (currHole.Neighbor(sourceHole, 0))
 					return true;
 			}
 			return false;

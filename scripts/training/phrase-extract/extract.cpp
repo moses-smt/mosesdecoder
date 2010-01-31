@@ -370,8 +370,8 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
 															, int startT, int endT, int startS, int endS 
 															, WordIndex &indexT, HoleCollection &holeColl, LabelIndex &labelIndex)
 {
-	HoleList::iterator iterHoleList = holeColl.GetTargetHoles().begin();
-	assert(iterHoleList != holeColl.GetTargetHoles().end());
+	HoleList::iterator iterHoleList = holeColl.GetHoles().begin();
+	assert(iterHoleList != holeColl.GetHoles().end());
 
 	string out = "";
 	int outPos = 0;
@@ -379,10 +379,10 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
   for(int currPos = startT; currPos <= endT; currPos++) 
 	{
 		bool isHole = false;
-		if (iterHoleList != holeColl.GetTargetHoles().end())
+		if (iterHoleList != holeColl.GetHoles().end())
 		{
 			const Hole &hole = *iterHoleList;
-			isHole = hole.GetStart() == currPos;
+			isHole = hole.GetStart(1) == currPos;
 		}
 
 		if (isHole)
@@ -390,11 +390,11 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
 			Hole &hole = *iterHoleList;
 			int labelI = labelIndex[ 2+holeCount ];
 			string label = targetSyntax ? 
-				sentence.targetTree.GetNodes(currPos,hole.GetEnd())[ labelI ]->GetLabel() : "X";
+				sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
 			out += " [" + label + "]";
 
-			currPos = hole.GetEnd();
-			hole.SetPos(outPos);
+			currPos = hole.GetEnd(1);
+			hole.SetPos(outPos, 1);
 			++iterHoleList;
 			holeCount++;
 		}
@@ -407,7 +407,7 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
 		outPos++;
 	}
 
-	assert(iterHoleList == holeColl.GetTargetHoles().end());
+	assert(iterHoleList == holeColl.GetHoles().end());
 	return out.substr(1);
 }
 
@@ -422,14 +422,14 @@ string printSourceHieroPhrase( SentenceAlignment &sentence
 	string out = "";
 	int outPos = 0;
 	int holeCount = 0;
-	int holeTotal = holeColl.GetTargetHoles().size();
+	int holeTotal = holeColl.GetHoles().size();
   for(int currPos = startS; currPos <= endS; currPos++) 
 	{
 		bool isHole = false;
 		if (iterHoleList != holeColl.GetSortedSourceHoles().end())
 		{
 			const Hole &hole = **iterHoleList;
-			isHole = hole.GetStart() == currPos;
+			isHole = hole.GetStart(0) == currPos;
 		}
 
 		if (isHole)
@@ -446,11 +446,11 @@ string printSourceHieroPhrase( SentenceAlignment &sentence
 			//}
 			int labelI = labelIndex[ 2+holeCount+holeTotal ];
 			string label = sourceSyntax ? 
-				sentence.sourceTree.GetNodes(currPos,hole.GetEnd())[ labelI ]->GetLabel() : "X";
+				sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
 			out += " [" + label + "]";
 			
-			currPos = hole.GetEnd();
-			hole.SetPos(outPos);		
+			currPos = hole.GetEnd(0);
+			hole.SetPos(outPos, 0);		
 			++iterHoleList;
 			++holeCount;
 		}
@@ -484,17 +484,14 @@ void printHieroAlignment(SentenceAlignment &sentence
 	}
   
 	// print alignment of non terminals
-	HoleList::const_iterator iterSource, iterTarget;
-	iterTarget = holeColl.GetTargetHoles().begin();
-	for (iterSource = holeColl.GetSourceHoles().begin(); iterSource != holeColl.GetSourceHoles().end(); ++iterSource)
+	HoleList::const_iterator iterHole;
+	for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole)
 	{
-		rule.alignment      += " " + IntToString(iterSource->GetPos()) + "-" + IntToString(iterTarget->GetPos());
+		rule.alignment      += " " + IntToString(iterHole->GetPos(0)) + "-" + IntToString(iterHole->GetPos(1));
 		if (!onlyDirectFlag)
-			rule.alignmentInv += " " + IntToString(iterTarget->GetPos()) + "-" + IntToString(iterSource->GetPos());
-		++iterTarget;
+			rule.alignmentInv += " " + IntToString(iterHole->GetPos(1)) + "-" + IntToString(iterHole->GetPos(0));
 	}
 
-	assert(iterTarget == holeColl.GetTargetHoles().end());
 	rule.alignment = rule.alignment.substr(1);
 	if (!onlyDirectFlag)
 		rule.alignmentInv = rule.alignmentInv.substr(1);
@@ -549,11 +546,11 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 	labelIndex.push_back(0);
 
 	// number of target hole labels
-	for( HoleList::const_iterator hole = holeColl.GetTargetHoles().begin();
-			 hole != holeColl.GetTargetHoles().end(); hole++ )
+	for( HoleList::const_iterator hole = holeColl.GetHoles().begin();
+			 hole != holeColl.GetHoles().end(); hole++ )
 	{
 		labelCount.push_back( targetSyntax ?
-													sentence.targetTree.GetNodes(hole->GetStart(),hole->GetEnd()).size() : 1 );
+													sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 );
 		labelIndex.push_back(0);
 	}
 
@@ -564,7 +561,7 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 	{
 		const Hole &hole = **i;
 		labelCount.push_back( sourceSyntax ?
-													sentence.sourceTree.GetNodes(hole.GetStart(),hole.GetEnd()).size() : 1 );
+													sentence.sourceTree.GetNodes(hole.GetStart(1),hole.GetEnd(1)).size() : 1 );
 		labelIndex.push_back(0);
 	}
 //	cerr << "LABEL COUNT: ";
@@ -648,21 +645,21 @@ void addHieroRule( SentenceAlignment &sentence
 				// cerr << "source" << sourceHole.GetStart() << "-" << sourceHole.GetEnd() << endl; 
 
 				// enforce minimum hole size
-				if (sourceHole.GetEnd()-sourceHole.GetStart()+1 < minHoleSource)
+				if (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1 < minHoleSource)
 					continue;
 
 				// if last non-terminal, enforce word count limit
 				if (numHoles == maxNonTerm-1 && 
-						wordCountS - (sourceHole.GetEnd()-sourceHole.GetStart()+1) + (numHoles+1) > maxSymbolsSource)
+						wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > maxSymbolsSource)
 					continue;
 
 				// enforce min word count limit
-				if (wordCountS - (sourceHole.GetEnd()-sourceHole.GetStart()+1) < minWords)
+				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) < minWords)
 					continue;
 				
 				// hole must be subphrase of the source phrase
 				// (may be violated if subphrase contains additional unaligned source word)
-				if (startS > sourceHole.GetStart() || endS <  sourceHole.GetEnd())
+				if (startS > sourceHole.GetStart(0) || endS <  sourceHole.GetEnd(0))
 					continue;
 
 				// make sure target side does not overlap with another hole
@@ -676,7 +673,7 @@ void addHieroRule( SentenceAlignment &sentence
 				// require that at least one aligned word is left
 				if (requireAlignedWord)
 				{
-					HoleList::const_iterator iterHoleList = holeColl.GetTargetHoles().begin();
+					HoleList::const_iterator iterHoleList = holeColl.GetHoles().begin();
 					bool foundAlignedWord = false;
 					// loop through all word positions
 					for(int pos = startT; pos <= endT && !foundAlignedWord; pos++) 
@@ -687,9 +684,9 @@ void addHieroRule( SentenceAlignment &sentence
 							pos = endHoleT;
 						}
 						// covered by hole? moving on...
-						else if (iterHoleList != holeColl.GetTargetHoles().end() && iterHoleList->GetStart() == pos)
+						else if (iterHoleList != holeColl.GetHoles().end() && iterHoleList->GetStart(1) == pos)
 						{
-							pos = iterHoleList->GetEnd();
+							pos = iterHoleList->GetEnd(1);
 							++iterHoleList;
 						}
 						// covered by word? check if it is aligned
@@ -705,13 +702,13 @@ void addHieroRule( SentenceAlignment &sentence
 
 				// update list of holes in this phrase pair
 				HoleCollection copyHoleColl(holeColl);
-				copyHoleColl.Add(startHoleT, endHoleT, sourceHole.GetStart(), sourceHole.GetEnd());
+				copyHoleColl.Add(startHoleT, endHoleT, sourceHole.GetStart(0), sourceHole.GetEnd(0));
 
 				// now some checks that disallow this phrase pair, but not further recursion
 				bool allowablePhrase = true;
 
 				// maximum words count violation?
-				if (wordCountS - (sourceHole.GetEnd()-sourceHole.GetStart()+1) + (numHoles+1) > maxSymbolsSource)
+				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > maxSymbolsSource)
 					allowablePhrase = false;
 
 				if (wordCountT - (endHoleT-startHoleT+1) + (numHoles+1) > maxSymbolsTarget)
@@ -727,7 +724,7 @@ void addHieroRule( SentenceAlignment &sentence
 				addHieroRule(sentence, startT, endT, startS, endS 
 										 , ruleExist, copyHoleColl, numHoles + 1, nextInitStartT
 										 , wordCountT - (endHoleT-startHoleT+1)
-										 , wordCountS - (sourceHole.GetEnd()-sourceHole.GetStart()+1));
+										 , wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1));
 			}
 		}
 	}

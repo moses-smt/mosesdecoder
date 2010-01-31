@@ -9,56 +9,72 @@
  *
  */
 #include <list>
+#include <vector>
 #include <cassert>
 
 class Hole
 	{
 	protected:
-		int m_start, m_end, m_pos;
+		std::vector<int> m_start, m_end, m_pos;
 		
 	public:
+		Hole()
+		:m_start(2)
+		,m_end(2)
+		,m_pos(2)
+		{}
+		
 		Hole(const Hole &copy)
 		:m_start(copy.m_start)
 		,m_end(copy.m_end)
-		{}
-		Hole(int startPos, int endPos)
-		:m_start(startPos)
-		,m_end(endPos)
+		,m_pos(copy.m_pos)
 		{}
 		
-		int GetStart() const
-		{ return m_start; }
-		int GetEnd() const
-		{ return m_end; }
-		
-		void SetPos(int pos)
-		{ m_pos = pos; }
-		int GetPos() const
-		{ return m_pos; }
-		
-		bool Overlap(const Hole &otherHole) const
+		Hole(int startS, int endS, int startT, int endT)
+		:m_start(2)
+		,m_end(2)
+		,m_pos(2)
 		{
-			return ! ( otherHole.GetEnd()   < GetStart() || 
-								otherHole.GetStart() > GetEnd() );
+			m_start[0] = startS;
+			m_end[0] = endS;
+			
+			m_start[1] = startT;
+			m_end[1] = endT;
 		}
 		
-		bool Neighbor(const Hole &otherHole) const
+		int GetStart(size_t direction) const
+		{ return m_start[direction]; }
+		int GetEnd(size_t direction) const
+		{ return m_end[direction]; }
+		
+		void SetPos(int pos, size_t direction)
+		{ m_pos[direction] = pos; }
+		int GetPos(size_t direction) const
+		{ return m_pos[direction]; }
+		
+		bool Overlap(const Hole &otherHole, size_t direction) const
 		{
-			return ( otherHole.GetEnd()+1 == GetStart() || 
-							otherHole.GetStart() == GetEnd()+1 ); 
+			return ! ( otherHole.GetEnd(direction)   < GetStart(direction) || 
+								otherHole.GetStart(direction) > GetEnd(direction) );
 		}
 		
+		bool Neighbor(const Hole &otherHole, size_t direction) const
+		{
+			return ( otherHole.GetEnd(direction)+1 == GetStart(direction) || 
+							otherHole.GetStart(direction) == GetEnd(direction)+1 ); 
+		}
 		
 	};
 
 typedef std::list<Hole> HoleList;
 
-class HoleOrderer
+class HoleSourceOrderer
 	{
 	public:
 		bool operator()(const Hole* holeA, const Hole* holeB) const
 		{
-			assert(holeA->GetStart() != holeB->GetStart());
-			return holeA->GetStart() < holeB->GetStart();
+			assert(holeA->GetStart(0) != holeB->GetStart(0));
+			return holeA->GetStart(0) < holeB->GetStart(0);
 		}
 	};
+

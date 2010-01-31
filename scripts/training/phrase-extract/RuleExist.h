@@ -35,7 +35,7 @@ class RuleExist
 		void Add(int startT, int endT, int startS, int endS)
 		{
 			// m_phraseExist[startS][endS - startS].push_back(Hole(startT, endT));
-			m_phraseExist[startT][endT - startT].push_back(Hole(startS, endS));
+			m_phraseExist[startT][endT - startT].push_back(Hole(startS, endS, startT, endT));
 		}
 		//const HoleList &GetTargetHoles(int startS, int endS) const
 		//{
