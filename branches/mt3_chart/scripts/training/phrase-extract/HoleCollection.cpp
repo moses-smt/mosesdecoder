@@ -17,12 +17,12 @@ void HoleCollection::SortSourceHoles()
 	
 	// add
 	HoleList::iterator iter;
-	for (iter = m_sourceHoles.begin(); iter != m_sourceHoles.end(); ++iter)
+	for (iter = m_holes.begin(); iter != m_holes.end(); ++iter)
 	{
 		Hole &currHole = *iter;
 		m_sortedSourceHoles.push_back(&currHole);
 	}
 	
 	// sort
-	std::sort(m_sortedSourceHoles.begin(), m_sortedSourceHoles.end(), HoleOrderer());
+	std::sort(m_sortedSourceHoles.begin(), m_sortedSourceHoles.end(), HoleSourceOrderer());
 }
