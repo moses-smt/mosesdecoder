@@ -391,6 +391,7 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
 			int labelI = labelIndex[ 2+holeCount ];
 			string label = targetSyntax ? 
 				sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
+			hole.SetLabel(label, 1);
 			out += " [" + label + "]";
 
 			currPos = hole.GetEnd(1);
@@ -447,6 +448,7 @@ string printSourceHieroPhrase( SentenceAlignment &sentence
 			int labelI = labelIndex[ 2+holeCount+holeTotal ];
 			string label = sourceSyntax ? 
 				sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
+			hole.SetLabel(label, 0);
 			out += " [" + label + "]";
 			
 			currPos = hole.GetEnd(0);

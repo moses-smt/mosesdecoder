@@ -11,29 +11,34 @@
 #include <list>
 #include <vector>
 #include <cassert>
+#include <string>
 
 class Hole
 	{
 	protected:
 		std::vector<int> m_start, m_end, m_pos;
-		
+		std::vector<std::string> m_label;
+
 	public:
 		Hole()
 		:m_start(2)
 		,m_end(2)
 		,m_pos(2)
+		,m_label(2)
 		{}
 		
 		Hole(const Hole &copy)
 		:m_start(copy.m_start)
 		,m_end(copy.m_end)
 		,m_pos(copy.m_pos)
+		,m_label(copy.m_label)
 		{}
 		
 		Hole(int startS, int endS, int startT, int endT)
 		:m_start(2)
 		,m_end(2)
 		,m_pos(2)
+		,m_label(2)
 		{
 			m_start[0] = startS;
 			m_end[0] = endS;
@@ -51,6 +56,11 @@ class Hole
 		{ m_pos[direction] = pos; }
 		int GetPos(size_t direction) const
 		{ return m_pos[direction]; }
+		
+		void SetLabel(const std::string &label, size_t direction)
+		{ m_label[direction] = label; }
+		const std::string &GetLabel(size_t direction) const
+		{ return m_label[direction]; }
 		
 		bool Overlap(const Hole &otherHole, size_t direction) const
 		{
