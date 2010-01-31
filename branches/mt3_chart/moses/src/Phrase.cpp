@@ -336,22 +336,24 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 				annotatedWord = annotatedWord.substr(1, nextPos - 2);
 			else
 				annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
-				
+			
 			m_arity++;
 		}
 		else
 		{
 			isNonTerminal = false;
 		}
-	
+		
 		Word &word = AddWord();
 		word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);		
-
+		
 	}
 	
 	// lhs
 	string &annotatedWord = annotatedWordVector.back();
 	assert(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
+	annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
+	
 	lhs.CreateFromString(direction, factorOrder, annotatedWord, true);		
 	assert(lhs.IsNonTerminal());
 }
