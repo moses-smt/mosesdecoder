@@ -445,11 +445,14 @@ string printSourceHieroPhrase( SentenceAlignment &sentence
 			//	{ sequenceNumber = i; }
 			//	++i;
 			//}
+			const string &targetLabel = hole.GetLabel(1);
+			assert(targetLabel != "");
+			
 			int labelI = labelIndex[ 2+holeCount+holeTotal ];
 			string label = sourceSyntax ? 
 				sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
 			hole.SetLabel(label, 0);
-			out += " [" + label + "]";
+			out += " [" + label + "][" + targetLabel + "]";
 			
 			currPos = hole.GetEnd(0);
 			hole.SetPos(outPos, 0);		
@@ -515,13 +518,13 @@ void printHieroPhrase( SentenceAlignment &sentence, int startT, int endT, int st
 	string sourceLabel = "X";
 
 	// target
-	rule.target = "[" + targetLabel + "] " + 
-		printTargetHieroPhrase(sentence, startT, endT, startS, endS, indexT, holeColl, labelIndex);
+	rule.target = printTargetHieroPhrase(sentence, startT, endT, startS, endS, indexT, holeColl, labelIndex)
+							+ " [" + targetLabel + "]";
 	
 	// source
 	// holeColl.SortSourceHoles();
-	rule.source = "[" + sourceLabel + "] " +
-		printSourceHieroPhrase(sentence, startT, endT, startS, endS, indexS, holeColl, labelIndex);
+	rule.source = printSourceHieroPhrase(sentence, startT, endT, startS, endS, indexS, holeColl, labelIndex)
+							+ " [" + sourceLabel + "]";
 
 	// alignment
 	printHieroAlignment(sentence, startT, endT, startS, endS, indexS, indexT, holeColl, rule);
@@ -757,17 +760,19 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 	}
 
 	// source
-	if (hierarchicalFlag)
-		rule.source = " [" + sourceLabel + "]";
+	rule.source = "";
   for(int si=startS;si<=endS;si++)
 		rule.source += " " + sentence.source[si];
+	if (hierarchicalFlag)
+		rule.source += " [" + sourceLabel + "]";
 	rule.source = rule.source.substr(1);
 
   // target
-	if (hierarchicalFlag)
-		rule.target = " [" + targetLabel + "]";
+	rule.target = "";
   for(int ti=startT;ti<=endT;ti++) 
 		rule.target += " " + sentence.target[ti];
+	if (hierarchicalFlag)
+		rule.target += " [" + targetLabel + "]";
 	rule.target = rule.target.substr(1);
 
   // alignment
