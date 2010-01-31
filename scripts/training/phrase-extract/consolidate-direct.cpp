@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 		fileConsolidated << " 2.718"; // phrase count feature
 		
 		// counts
-		fileConsolidated << " ||| " << itemDirect[4] << " 0"; // indirect
+		fileConsolidated << " ||| 0 " << itemDirect[4]; // indirect
 		fileConsolidated << endl;
 		
 	}
