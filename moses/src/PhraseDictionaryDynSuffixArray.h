@@ -86,7 +86,7 @@ private:
   vector<SentenceAlignment> alignments_;
   int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(InputFileStream& aligs);
-  vector<int> getSntIndexes(vector<unsigned>&) const; 	
+  vector<int> getSntIndexes(vector<unsigned>&, const int) const; 	
   TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
   SAPhrase phraseFromSntIdx(const PhrasePair&) const;
   bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;

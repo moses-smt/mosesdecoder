@@ -38,8 +38,6 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 	loadCorpus(sourceStrme, *srcCrp_, srcSntBreaks_);
   loadCorpus(targetStrme, *trgCrp_, trgSntBreaks_);
   assert(srcSntBreaks_.size() == trgSntBreaks_.size());
-  //std::cerr << "Vocab: " << std::endl;
-  //vocab_->printVocab();
 	LoadVocabLookup();
 
   // build suffix arrays and auxilliary arrays
@@ -102,16 +100,6 @@ void PhraseDictionaryDynSuffixArray::LoadVocabLookup()
 }
 void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
 {
-  /*assert(m_runningNodesVec.size() == 0);
-  size_t sourceSize = input.GetSize();
-  m_runningNodesVec.resize(sourceSize);
-  for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind)
-  {
-    ProcessedRule *initProcessedRule = new ProcessedRule(m_collection);
-    ProcessedRuleStack *processedStack = new ProcessedRuleStack(sourceSize - ind + 1);
-    processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
-    m_runningNodesVec[ind] = processedStack;
-  }*/
   return;
 }
 void PhraseDictionaryDynSuffixArray::CleanUp() {
@@ -127,13 +115,14 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<w
   corpus.seekg(0);
   while(getline(corpus, line)) {
     sntArray.push_back(sntIdx);
+    int tmp = sntIdx;
     std::istringstream ss(line.c_str());
     while(ss >> word) {
       ++sntIdx;
       cArray.push_back(vocab_->getWordID(word));
     }          
   }
-  //cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus for ssarray
+  //cArray.push_back(Vocab::kOOVWordID);  // signify end of corpus 
   return cArray.size();
 }
 bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, SAPhrase &output) const {
@@ -199,18 +188,19 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 
   // extract sentence IDs from SA and return rightmost index of phrases
   unsigned denom = srcSA_->countPhrase(&(localIDs.words), &wrdIndices);
-  vector<int> sntIndexes = getSntIndexes(wrdIndices);	
+  vector<int> sntIndexes = getSntIndexes(wrdIndices, sourceSize);	
   // for each sentence with this phrase
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
     vector<PhrasePair*> phrasePairs; // to store all phrases possible from current sentence
 		int sntIndex = sntIndexes.at(snt); // get corpus index for sentence
+    if(sntIndex == -1) continue;  // bad flag set by getSntIndexes()
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     // get span of phrase in source sentence 
 		int beginSentence = srcSntBreaks_[sntIndex];
     int rightIdx = wrdIndices[snt] - beginSentence
 				,leftIdx = rightIdx - sourceSize + 1;
-    cerr << "left bnd = " << leftIdx << " ";
-    cerr << "right bnd = " << rightIdx << endl;
+    //cerr << "left bnd = " << leftIdx << " ";
+    //cerr << "right bnd = " << rightIdx << endl;
 		// extract all phrase Alignments in sentence
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
@@ -232,23 +222,26 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   std::map<SAPhrase, int>::const_iterator iterPhrases = phraseCounts.begin(); 
   for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
     TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
-    float prb = (float)iterPhrases->second / (float) denom;
+    float prb = float(iterPhrases->second) / float(denom);
     targetPhrase->SetScore(prb);
-    cerr << *targetPhrase << endl;
+    //cerr << *targetPhrase << "\t" << prb << endl;
     ret->Add(targetPhrase);
   }
-  
-
 	return ret;
 }
-vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices) const 
+vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices, 
+  const int sourceSize) const 
 {
   vector<unsigned>::const_iterator vit;
-  vector<int> sntIndexes(wrdIndices.size()); 
-  for(int i = 0; i < wrdIndices.size(); ++i) {
-    vit = std::lower_bound(srcSntBreaks_.begin(), srcSntBreaks_.end(), wrdIndices[i]);
-    int index = int(vit - srcSntBreaks_.begin());
-    sntIndexes.at(i) = index > 0 ? index - 1 : 0;
+  vector<int> sntIndexes; 
+  for(int i=0; i < wrdIndices.size(); ++i) {
+    vit = std::upper_bound(srcSntBreaks_.begin(), srcSntBreaks_.end(), wrdIndices[i]);
+    int index = int(vit - srcSntBreaks_.begin()) - 1;
+    // check for phrases that cross sentence boundaries
+    if(wrdIndices[i] - sourceSize + 1 < srcSntBreaks_.at(index)) 
+      sntIndexes.push_back(-1);  // set bad flag
+    else
+      sntIndexes.push_back(index);  // store the index of the sentence in the corpus
   }
   return sntIndexes;
 }
