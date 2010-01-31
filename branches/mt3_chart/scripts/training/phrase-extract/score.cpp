@@ -213,6 +213,8 @@ int main(int argc, char* argv[])
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n');
     if (extractFileP.eof())	break;
 		
+		cerr << line << endl;
+		
 		// identical to last line? just add count
 		if (lastSource > 0 && strcmp(line,lastLine) == 0)
 		{
@@ -471,12 +473,12 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	{
 		if (newAlignmentFormatFlag)
 		{
-			for(int j=1;j<phraseT.size();j++)
+			for(int j = 0; j < phraseT.size() - 1; j++)
 			{
 				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
 				{
-					int sourcePos = bestAlignment->alignedToT[ j-1 ][ 0 ];
-					phraseTableFile << sourcePos << "-" << (j-1) << " ";
+					int sourcePos = bestAlignment->alignedToT[ j ][ 0 ];
+					phraseTableFile << sourcePos << "-" << j << " ";
 				}
 			}
 		}
@@ -485,16 +487,16 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 			map< int, int > NTalignment;
 			int nt = 0;
 			// find positions of source non-terminals
-			for(int j=1;j<phraseS.size();j++)
+			for(int j=0 ; j < phraseS.size() - 1; j++)
 			{
 				if (isNonTerminal(vcbS.getWord( phraseS[j] )))
 				{
-					NTalignment[ j-1 ] = nt++;
+					NTalignment[j] = nt++;
 				}
 			}
 			// match with target non-terminals
 			nt=0;
-			for(int j=1;j<phraseT.size();j++)
+			for(int j = 0; j < phraseT.size() - 1;j++)
 			{
 				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
 				{
