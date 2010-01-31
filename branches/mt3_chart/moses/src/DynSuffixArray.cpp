@@ -175,7 +175,7 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
     for(int i=lwrBnd; i < uprBnd; ++i) { // cut off for sampling here
       if(skipSet.find(i) != skipSet.end()) continue;
       int rightIdx = SA_->at(i) + pos;
-      cerr << "idx = " << rightIdx << endl;
+      //cerr << "idx = " << rightIdx << endl;
       if(corpus_->at(rightIdx) != phrase->at(pos)) {
         skipSet.insert(i);  // save index to not check next iteration 
         --pcnt;  // decrement current phrase count
