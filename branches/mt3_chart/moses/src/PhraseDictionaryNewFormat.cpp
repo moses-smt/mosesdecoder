@@ -73,16 +73,6 @@ namespace Moses
 		}
 	}
 	
-	inline void CreateHeadWord(Word &sourceHeadWord, Word &targetHeadWord, const string &headString
-											, const std::vector<FactorType> &input, const std::vector<FactorType> &output
-											, const string &factorDelimiter)
-	{
-		vector<string> vec = Tokenize(headString);
-		
-		sourceHeadWord.CreateFromString(Input, input,vec[0].substr(1, vec[0].size()-2), true);
-		targetHeadWord.CreateFromString(Output, output, vec[1].substr(1, vec[1].size()-2), true);
-	}
-	
 	void CreateAlignmentInfo(list<pair<size_t,size_t> > &alignmentInfo, const string &alignString)
 	{
 		vector<string> alignVec = Tokenize(alignString);
@@ -197,7 +187,6 @@ namespace Moses
 			
 			// head word
 			Word sourceLHS, targetLHS;
-			//CreateHeadWord(sourceLHS, targetLHS, headString, input, output, factorDelimiter);
 
 			// source
 			Phrase sourcePhrase(Input);
@@ -206,7 +195,6 @@ namespace Moses
 			// create target phrase obj
 			TargetPhrase *targetPhrase = new TargetPhrase(Output);
 			targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
-			cerr << sourcePhrase << endl << sourceLHS << endl << *targetPhrase << endl << targetLHS << endl;
 			
 			// alignment
 			list<pair<size_t,size_t> > alignmentInfo;
