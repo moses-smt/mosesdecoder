@@ -165,8 +165,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 		
 		// counts
 		if (itemIndirect.size() == 4 && itemDirect.size() == 5)
-				fileConsolidated << " ||| " << itemIndirect[3] << " "      // direct
-																		<< itemDirect[4]; // indirect
+				fileConsolidated << " ||| " << itemIndirect[3] << " " // indirect
+																		<< itemDirect[4];					// direct
 		
 		fileConsolidated << endl;
 	}
