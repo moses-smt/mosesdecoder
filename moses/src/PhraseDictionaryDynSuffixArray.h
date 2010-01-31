@@ -8,7 +8,7 @@
 #include "DynSAInclude/utils.h"
 #include "InputFileStream.h"
 namespace Moses {
-	
+
 class SAPhrase
 {
 public:
@@ -20,8 +20,11 @@ public:
 	
 	void SetId(size_t pos, wordID_t id)
 	{
+    assert(pos < words.size());
 		words[pos] = id;
 	}
+	bool operator<(const SAPhrase& phr2) const
+  { return words < phr2.words; }
 };
 
 class PhrasePair
@@ -84,13 +87,13 @@ private:
   int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(InputFileStream& aligs);
   vector<int> getSntIndexes(vector<unsigned>&) const; 	
-  TargetPhrase* getMosesFactorIDs(const PhrasePair&) const;
+  TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
+  SAPhrase phraseFromSntIdx(const PhrasePair&) const;
   bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
 	float m_weightWP;
-  float MLEProb(int denom, vector<PhrasePair*>&) const;	
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
 	
