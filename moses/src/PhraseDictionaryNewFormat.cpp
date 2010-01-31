@@ -164,7 +164,7 @@ namespace Moses
 			
 			TokenizeMultiCharSeparator(tokens, line , "|||" );
 						
-			if (tokens.size() != 5 && tokens.size() != 6)
+			if (tokens.size() != 4 && tokens.size() != 5)
 			{
 				stringstream strme;
 				strme << "Syntax error at " << m_filePath << ":" << count;
@@ -172,11 +172,10 @@ namespace Moses
 				abort();
 			}
 			
-			const string &headString					= tokens[0]
-									, &sourcePhraseString	= tokens[1]
-									, &targetPhraseString	= tokens[2]
-									, &alignString				= tokens[3]
-									, &scoreString				= tokens[4];
+			const string &sourcePhraseString	= tokens[0]
+									, &targetPhraseString	= tokens[1]
+									, &alignString				= tokens[2]
+									, &scoreString				= tokens[3];
 
 			bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 			if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -198,15 +197,16 @@ namespace Moses
 			
 			// head word
 			Word sourceLHS, targetLHS;
-			CreateHeadWord(sourceLHS, targetLHS, headString, input, output, factorDelimiter);
+			//CreateHeadWord(sourceLHS, targetLHS, headString, input, output, factorDelimiter);
 
 			// source
 			Phrase sourcePhrase(Input);
-			sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter);
+			sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 			
 			// create target phrase obj
 			TargetPhrase *targetPhrase = new TargetPhrase(Output);
-			targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter);
+			targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
+			cerr << sourcePhrase << endl << sourceLHS << endl << *targetPhrase << endl << targetLHS << endl;
 			
 			// alignment
 			list<pair<size_t,size_t> > alignmentInfo;
