@@ -112,39 +112,14 @@ int main(int argc, char* argv[])
 		if (! getLine(fileDirectP,  itemDirect  ))
 			break;
 			
-		
-		// output hierarchical phrase pair (with separated labels)
-		if (hierarchicalFlag) {
-			size_t spaceSource = itemDirect[0].find(" ");
-			size_t spaceTarget = itemDirect[1].find(" ");
-			if (spaceSource == string::npos) {
-				cerr << "ERROR: expected source as 'label words' in line " 
-				<< i << ": '" << itemDirect[1] << "'" << endl;
-				exit(1);
-			}
-			if (spaceTarget == string::npos) {
-				cerr << "ERROR: expected target as 'label words' in line " 
-				<< i << ": '" << itemDirect[0] << "'" << endl;
-				exit(1);
-			}
-			fileConsolidated 
-			<< itemDirect[0].substr(0,spaceSource)            // label source
-			<< " " << itemDirect[1].substr(0,spaceTarget)     // label target
-			<< " ||| " << itemDirect[0].substr(spaceSource+1) // source
-			<< " ||| " << itemDirect[1].substr(spaceTarget+1) // target
-			<< " ||| ";
-		}
-		// output regular phrase pair
-		else {
-			fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
-		}
+		fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
 		
 		// output alignment and probabilities
 		if (hierarchicalFlag) 
-			fileConsolidated << itemDirect[2]   << " ||| " // alignment
-											<< " " << itemDirect[3]; // prob direct
+			fileConsolidated << itemDirect[2]							// alignment
+											<< " ||| " << itemDirect[3];	// prob direct
 
-		fileConsolidated << "  2.718"; // phrase count feature
+		fileConsolidated << " 2.718"; // phrase count feature
 		
 		// counts
 		fileConsolidated << " ||| " << itemDirect[4] << " 0"; // indirect

@@ -122,10 +122,9 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // indirect: source target probabilities
 
 		// consistency checks
-		if ((itemDirect.size() != 5 && hierarchicalFlag) ||
-				(itemDirect.size() != 4 && !hierarchicalFlag))
+		if (itemDirect.size() != 5)
 		{
-			cerr << "ERROR: expected " << (hierarchicalFlag ? "5" : "4") << " items in file " 
+			cerr << "ERROR: expected 5 items in file " 
 					 << fileNameDirect << ", line " << i << endl;
 			exit(1);
 		}
@@ -152,30 +151,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 		}
 
 		// output hierarchical phrase pair (with separated labels)
-		if (hierarchicalFlag) {
-			size_t spaceSource = itemDirect[0].find(" ");
-			size_t spaceTarget = itemDirect[1].find(" ");
-			if (spaceSource == string::npos) {
-				cerr << "ERROR: expected source as 'label words' in line " 
-						 << i << ": '" << itemDirect[1] << "'" << endl;
-				exit(1);
-			}
-			if (spaceTarget == string::npos) {
-				cerr << "ERROR: expected target as 'label words' in line " 
-						 << i << ": '" << itemDirect[0] << "'" << endl;
-				exit(1);
-			}
-			fileConsolidated 
-				<< itemDirect[0].substr(0,spaceSource)            // label source
-				<< " " << itemDirect[1].substr(0,spaceTarget)     // label target
-				<< " ||| " << itemDirect[0].substr(spaceSource+1) // source
-				<< " ||| " << itemDirect[1].substr(spaceTarget+1) // target
-				<< " ||| ";
-		}
-		// output regular phrase pair
-		else {
-			fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
-		}
+		fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
 
 		// output alignment and probabilities
 		if (hierarchicalFlag) 
