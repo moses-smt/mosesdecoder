@@ -213,8 +213,6 @@ int main(int argc, char* argv[])
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n');
     if (extractFileP.eof())	break;
 		
-		cerr << line << endl;
-		
 		// identical to last line? just add count
 		if (lastSource > 0 && strcmp(line,lastLine) == 0)
 		{
