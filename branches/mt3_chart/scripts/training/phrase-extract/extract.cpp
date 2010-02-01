@@ -40,19 +40,22 @@ int main(int argc, char* argv[])
   cerr << "Extract v2.0, written by Philipp Koehn\n"
        << "rule extraction from an aligned parallel corpus\n";
   time_t starttime = time(NULL);
-
+	
+	Global *global = new Global();
+	g_global = global;
+	
 	if (argc < 5) {
 		cerr << "syntax: extract corpus.target corpus.source corpus.align extract "
 		     << " [ --Hierarchical | --Orientation"
 				 << " | --GlueGrammar FILE | --UnknownWordLabel FILE"
 				 << " | --OnlyDirect"
-		     << " | --MaxSpan[" << maxSpan << "]"
-				 << " | --MinHoleTarget[" << minHoleTarget << "]"
-				 << " | --MinHoleSource[" << minHoleSource << "]"
-				 << " | --MinWords[" << minWords << "]"
-				 << " | --MaxSymbolsTarget[" << maxSymbolsTarget << "]"
-				 << " | --MaxSymbolsSource[" << maxSymbolsSource << "]"
-				 << " | --MaxNonTerm[" << maxNonTerm << "]"
+		     << " | --MaxSpan[" << global->maxSpan << "]"
+				 << " | --MinHoleTarget[" << global->minHoleTarget << "]"
+				 << " | --MinHoleSource[" << global->minHoleSource << "]"
+				 << " | --MinWords[" << global->minWords << "]"
+				 << " | --MaxSymbolsTarget[" << global->maxSymbolsTarget << "]"
+				 << " | --MaxSymbolsSource[" << global->maxSymbolsSource << "]"
+				 << " | --MaxNonTerm[" << global->maxNonTerm << "]"
 		     << " | --SourceSyntax | --TargetSyntax" 
 		     << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting ]\n";
 		exit(1);
@@ -69,92 +72,92 @@ int main(int argc, char* argv[])
   for(int i=optionInd;i<argc;i++) {
 		// maximum span length
 		if (strcmp(argv[i],"--MaxSpan") == 0) {
-			maxSpan = atoi(argv[++i]);
-			if (maxSpan < 1) {
+			global->maxSpan = atoi(argv[++i]);
+			if (global->maxSpan < 1) {
 				cerr << "extract error: --maxSpan should be at least 1" << endl;
 				exit(1);
 			}
 		}
 		else if (strcmp(argv[i],"--MinHoleTarget") == 0) {
-			minHoleTarget = atoi(argv[++i]);
-			if (minHoleTarget < 1) {
+			global->minHoleTarget = atoi(argv[++i]);
+			if (global->minHoleTarget < 1) {
 				cerr << "extract error: --minHoleTarget should be at least 1" << endl;
 				exit(1);
 			}
 		}
 		else if (strcmp(argv[i],"--MinHoleSource") == 0) {
-			minHoleSource = atoi(argv[++i]);
-			if (minHoleSource < 1) {
+			global->minHoleSource = atoi(argv[++i]);
+			if (global->minHoleSource < 1) {
 				cerr << "extract error: --minHoleSource should be at least 1" << endl;
 				exit(1);
 			}
 		}
 		// maximum number of words in hierarchical phrase
 		else if (strcmp(argv[i],"--MaxSymbolsTarget") == 0) {
-			maxSymbolsTarget = atoi(argv[++i]);
-			if (maxSymbolsTarget < 1) {
+			global->maxSymbolsTarget = atoi(argv[++i]);
+			if (global->maxSymbolsTarget < 1) {
 				cerr << "extract error: --MaxSymbolsTarget should be at least 1" << endl;
 				exit(1);
 			}
 		}
 		// maximum number of words in hierarchical phrase
 		else if (strcmp(argv[i],"--MaxSymbolsSource") == 0) {
-			maxSymbolsSource = atoi(argv[++i]);
-			if (maxSymbolsSource < 1) {
+			global->maxSymbolsSource = atoi(argv[++i]);
+			if (global->maxSymbolsSource < 1) {
 				cerr << "extract error: --MaxSymbolsSource should be at least 1" << endl;
 				exit(1);
 			}
 		}
 		// minimum number of words in hierarchical phrase
 		else if (strcmp(argv[i],"--MinWords") == 0) {
-			minWords = atoi(argv[++i]);
-			if (minWords < 0) {
+			global->minWords = atoi(argv[++i]);
+			if (global->minWords < 0) {
 				cerr << "extract error: --MinWords should be at least 0" << endl;
 				exit(1);
 			}
 		}
 		// maximum number of non-terminals
 		else if (strcmp(argv[i],"--MaxNonTerm") == 0) {
-			maxNonTerm = atoi(argv[++i]);
-			if (maxNonTerm < 1) {
+			global->maxNonTerm = atoi(argv[++i]);
+			if (global->maxNonTerm < 1) {
 				cerr << "extract error: --MaxNonTerm should be at least 1" << endl;
 				exit(1);
 			}
 		}		
 		// allow consecutive non-terminals (X Y | X Y)
     else if (strcmp(argv[i],"--TargetSyntax") == 0) {
-      targetSyntax = true;
+      global->targetSyntax = true;
     }
     else if (strcmp(argv[i],"--SourceSyntax") == 0) {
-      sourceSyntax = true;
+      global->sourceSyntax = true;
     }
     else if (strcmp(argv[i],"--AllowOnlyUnalignedWords") == 0) {
-      requireAlignedWord = false;
+      global->requireAlignedWord = false;
     }
     else if (strcmp(argv[i],"--DisallowNonTermConsecTarget") == 0) {
-      nonTermConsecTarget = false;
+      global->nonTermConsecTarget = false;
     }
     else if (strcmp(argv[i],"--NonTermConsecSource") == 0) {
-      nonTermConsecSource = true;
+      global->nonTermConsecSource = true;
     }
     else if (strcmp(argv[i],"--NoNonTermFirstWord") == 0) {
-      nonTermFirstWord = false;
+      global->nonTermFirstWord = false;
     }
     else if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
-      onlyOutputSpanInfo = true;
+      global->onlyOutputSpanInfo = true;
     }
 		// do not create many part00xx files!
     else if (strcmp(argv[i],"--NoFileLimit") == 0) {
       // now default
     }
 		else if (strcmp(argv[i],"--OnlyDirect") == 0) {
-      onlyDirectFlag = true;
+      global->onlyDirectFlag = true;
     }
     else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
-      orientationFlag = true;
+      global->orientationFlag = true;
     }
 		else if (strcmp(argv[i],"--GlueGrammar") == 0) {
-			glueGrammarFlag = true;
+			global->glueGrammarFlag = true;
 			if (++i >= argc)
 			{
 				cerr << "ERROR: Option --GlueGrammar requires a file name" << endl;
@@ -164,7 +167,7 @@ int main(int argc, char* argv[])
 			cerr << "creating glue grammar in '" << fileNameGlueGrammar << "'" << endl;
     }
 		else if (strcmp(argv[i],"--UnknownWordLabel") == 0) {
-			unknownWordLabelFlag = true;
+			global->unknownWordLabelFlag = true;
 			if (++i >= argc)
 			{
 				cerr << "ERROR: Option --UnknownWordLabel requires a file name" << endl;
@@ -175,7 +178,7 @@ int main(int argc, char* argv[])
 		}
     else if (strcmp(argv[i],"--Hierarchical") == 0) {
 			cerr << "extracting hierarchical rules" << endl;
-      hierarchicalFlag = true;
+      global->hierarchicalFlag = true;
     }
 		// TODO: this should be a useful option
     //else if (strcmp(argv[i],"--ZipFiles") == 0) {
@@ -183,7 +186,10 @@ int main(int argc, char* argv[])
     //}
 		// if an source phrase is paired with two target phrases, then count(t|s) = 0.5
     else if (strcmp(argv[i],"--NoFractionalCounting") == 0) {
-      fractionalCounting = false;
+      global->fractionalCounting = false;
+    }
+    else if (strcmp(argv[i],"--Mixed") == 0) {
+			global->mixed = true;
     }
     else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
@@ -206,9 +212,9 @@ int main(int argc, char* argv[])
   string fileNameExtractInv = fileNameExtract + ".inv";
   string fileNameExtractOrientation = fileNameExtract + ".o";
   extractFile.open(fileNameExtract.c_str());
-	if (!onlyDirectFlag)
+	if (!global->onlyDirectFlag)
 		extractFileInv.open(fileNameExtractInv.c_str());
-  if (orientationFlag)
+  if (global->orientationFlag)
     extractFileOrientation.open(fileNameExtractOrientation.c_str());
   
 	// loop through all sentence pairs
@@ -228,16 +234,16 @@ int main(int argc, char* argv[])
     SentenceAlignment sentence;
     //cerr << "read in: " << targetString << " & " << sourceString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
-    if (onlyOutputSpanInfo) {
+    if (global->onlyOutputSpanInfo) {
       cout << "LOG: SRC: " << sourceString << endl;
       cout << "LOG: TGT: " << targetString << endl;
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
       
-    if (sentence.create( targetString, sourceString, alignmentString, i )) 
+    if (sentence.create( targetString, sourceString, alignmentString, i, *global )) 
 		{
-			if (unknownWordLabelFlag)
+			if (global->unknownWordLabelFlag)
 			{
 				collectWordLabelCounts(sentence);
 			}
@@ -246,23 +252,23 @@ int main(int argc, char* argv[])
 			writeRulesToFile();
 			extractedRules.clear();
     }
-    if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
+    if (global->onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
 
   tFile.close();
   sFile.close();
   aFile.close();
   // only close if we actually opened it
-  if (!onlyOutputSpanInfo) {
+  if (!global->onlyOutputSpanInfo) {
     extractFile.close();
-		if (!onlyDirectFlag) extractFileInv.close();
-    if (orientationFlag) extractFileOrientation.close();
+		if (!global->onlyDirectFlag) extractFileInv.close();
+    if (global->orientationFlag) extractFileOrientation.close();
   }
 
-	if (glueGrammarFlag)
+	if (global->glueGrammarFlag)
 		writeGlueGrammar(fileNameGlueGrammar);
 
-	if (unknownWordLabelFlag)
+	if (global->unknownWordLabelFlag)
 		writeUnknownWordLabel(fileNameUnknownWordLabel);
 }
  
@@ -275,7 +281,7 @@ void extractRules( SentenceAlignment &sentence ) {
 
 	// check alignments for target phrase startT...endT
 	for(int lengthT=1;
-			lengthT <= maxSpan && lengthT <= countT;
+			lengthT <= g_global->maxSpan && lengthT <= countT;
 			lengthT++) {
 		for(int startT=0; startT < countT-(lengthT-1); startT++) {
 			
@@ -283,7 +289,7 @@ void extractRules( SentenceAlignment &sentence ) {
 			int endT = startT + lengthT - 1;
 
 			// if there is target side syntax, there has to be a node
-			if (targetSyntax && !sentence.targetTree.HasNode(startT,endT))
+			if (g_global->targetSyntax && !sentence.targetTree.HasNode(startT,endT))
 				continue;
 			
 			// find find aligned source words
@@ -306,7 +312,7 @@ void extractRules( SentenceAlignment &sentence ) {
 				continue;
 
 			// source phrase has to be within limits
-			if( maxS-minS >= maxSpan )
+			if( maxS-minS >= g_global->maxSpan )
 				continue;
 			
 			// check if source words are aligned to out of bound target words
@@ -324,24 +330,24 @@ void extractRules( SentenceAlignment &sentence ) {
 			// start point of source phrase may retreat over unaligned
 			for(int startS=minS;
 					(startS>=0 &&
-					 startS>maxS-maxSpan && // within length limit
+					 startS>maxS - g_global->maxSpan && // within length limit
 					 (startS==minS || sentence.alignedCountS[startS]==0)); // unaligned
 					startS--)
 			{
 				// end point of source phrase may advance over unaligned
 				for(int endS=maxS;
-						(endS<countS && endS<startS+maxSpan && // within length limit
+						(endS<countS && endS<startS + g_global->maxSpan && // within length limit
 						 (endS==maxS || sentence.alignedCountS[endS]==0)); // unaligned
 						endS++) 
 				{
 					// if there is source side syntax, there has to be a node
-					if (sourceSyntax && !sentence.sourceTree.HasNode(startS,endS))
+					if (g_global->sourceSyntax && !sentence.sourceTree.HasNode(startS,endS))
 						continue;
 
 					// TODO: loop over all source and target syntax labels
 
 					// if within length limits, add as fully-lexical phrase pair
-					if (endT-startT < maxSymbolsTarget && endS-startS < maxSymbolsSource)
+					if (endT-startT < g_global->maxSymbolsTarget && endS-startS < g_global->maxSymbolsSource)
 					{
 						addRule(sentence,startT,endT,startS,endS, ruleExist);
 					}
@@ -350,10 +356,10 @@ void extractRules( SentenceAlignment &sentence ) {
 					ruleExist.Add(startT, endT, startS, endS);
 
 					// extract hierarchical rules
-					if (hierarchicalFlag)
+					if (g_global->hierarchicalFlag)
 					{
 						// are rules not allowed to start non-terminals?
-						int initStartT = nonTermFirstWord ? startT : startT + 1;
+						int initStartT = g_global->nonTermFirstWord ? startT : startT + 1;
 					
 						HoleCollection holeColl; // empty hole collection
 						addHieroRule(sentence, startT, endT, startS, endS, 
@@ -390,7 +396,7 @@ void preprocessSourceHieroPhrase( SentenceAlignment &sentence
 			Hole &hole = **iterHoleList;
 						
 			int labelI = labelIndex[ 2+holeCount+holeTotal ];
-			string label = sourceSyntax ? 
+			string label = g_global->sourceSyntax ? 
 			sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
 			hole.SetLabel(label, 0);
 			
@@ -413,7 +419,7 @@ void preprocessSourceHieroPhrase( SentenceAlignment &sentence
 string printTargetHieroPhrase(SentenceAlignment &sentence
 															, int startT, int endT, int startS, int endS 
 															, WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex)
-{
+{	
 	HoleList::iterator iterHoleList = holeColl.GetHoles().begin();
 	assert(iterHoleList != holeColl.GetHoles().end());
 
@@ -437,7 +443,7 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
 			assert(sourceLabel != "");
 
 			int labelI = labelIndex[ 2+holeCount ];
-			string targetLabel = targetSyntax ? 
+			string targetLabel = g_global->targetSyntax ? 
 				sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
 			hole.SetLabel(targetLabel, 1);
 
@@ -518,7 +524,7 @@ void printHieroAlignment(SentenceAlignment &sentence
 			for(int i=0;i<sentence.alignedToT[ti].size();i++) {
 				int si = sentence.alignedToT[ti][i];
 				rule.alignment      += " " + IntToString(indexS.find(si)->second) + "-" + IntToString(indexT.find(ti)->second);
-				if (!onlyDirectFlag)
+				if (! g_global->onlyDirectFlag)
 					rule.alignmentInv += " " + IntToString(indexT.find(ti)->second) + "-" + IntToString(indexS.find(si)->second);
 			}
 		}
@@ -529,12 +535,12 @@ void printHieroAlignment(SentenceAlignment &sentence
 	for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole)
 	{
 		rule.alignment      += " " + IntToString(iterHole->GetPos(0)) + "-" + IntToString(iterHole->GetPos(1));
-		if (!onlyDirectFlag)
+		if (!g_global->onlyDirectFlag)
 			rule.alignmentInv += " " + IntToString(iterHole->GetPos(1)) + "-" + IntToString(iterHole->GetPos(0));
 	}
 
 	rule.alignment = rule.alignment.substr(1);
-	if (!onlyDirectFlag)
+	if (!g_global->onlyDirectFlag)
 		rule.alignmentInv = rule.alignmentInv.substr(1);
 }
 
@@ -547,9 +553,9 @@ void printHieroPhrase( SentenceAlignment &sentence, int startT, int endT, int st
 	ExtractedRule rule( startT, endT, startS, endS );
 
 	// phrase labels
-	string targetLabel = targetSyntax ? 
+	string targetLabel = g_global->targetSyntax ? 
 		sentence.targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
-	string sourceLabel = sourceSyntax ?
+	string sourceLabel = g_global->sourceSyntax ?
 	sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
 	//string sourceLabel = "X";
 
@@ -580,12 +586,12 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 	LabelIndex labelIndex,labelCount;
 
 	// number of target head labels
-	int numLabels = targetSyntax ? sentence.targetTree.GetNodes(startT,endT).size() : 1;
+	int numLabels = g_global->targetSyntax ? sentence.targetTree.GetNodes(startT,endT).size() : 1;
 	labelCount.push_back(numLabels);
 	labelIndex.push_back(0);
 	
 	// number of source head labels
-	numLabels =  sourceSyntax ?	sentence.sourceTree.GetNodes(startS,endS).size() : 1;
+	numLabels =  g_global->sourceSyntax ?	sentence.sourceTree.GetNodes(startS,endS).size() : 1;
 	labelCount.push_back(numLabels);
 	labelIndex.push_back(0);
 	
@@ -593,7 +599,7 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 	for( HoleList::const_iterator hole = holeColl.GetHoles().begin();
 			 hole != holeColl.GetHoles().end(); hole++ )
 	{
-		int numLabels =  targetSyntax ? sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
+		int numLabels =  g_global->targetSyntax ? sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
 		labelCount.push_back(numLabels);
 		labelIndex.push_back(0);
 	}
@@ -604,7 +610,7 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 			 i != holeColl.GetSortedSourceHoles().end(); i++ )
 	{
 		const Hole &hole = **i;
-		int numLabels =  sourceSyntax ?	sentence.sourceTree.GetNodes(hole.GetStart(0),hole.GetEnd(0)).size() : 1 ;
+		int numLabels =  g_global->sourceSyntax ?	sentence.sourceTree.GetNodes(hole.GetStart(0),hole.GetEnd(0)).size() : 1 ;
 		labelCount.push_back(numLabels);
 		labelIndex.push_back(0);
 	}
@@ -654,22 +660,22 @@ void addHieroRule( SentenceAlignment &sentence
 {
 	// cerr << "phrase " << startT << "-" << endT << "=>" << startS << "-" << endS << " (" << numHoles << ")" << endl;
 	// done, if already the maximum number of non-terminals in phrase pair
-	if (numHoles >= maxNonTerm)
+	if (numHoles >= g_global->maxNonTerm)
 		return;
 
 	// find a hole...
 	for (int startHoleT = initStartT; startHoleT <= endT; ++startHoleT)
 	{
 		//cerr << "phrase " << startT << "-" << endT << "=>" << startS << "-" << endS << " (" << numHoles << ")" << endl;
-		for (int endHoleT = startHoleT+(minHoleTarget-1); endHoleT <= endT; ++endHoleT)
+		for (int endHoleT = startHoleT+(g_global->minHoleTarget-1); endHoleT <= endT; ++endHoleT)
 		{
 			//cerr << "considering from hole " << startHoleT << "-" << endHoleT << " from phrase " << startT << "-" << endT << "=>" << startS << "-" << endS << " (" << numHoles << ")" << endl;
 			// if last non-terminal, enforce word count limit
-			if (numHoles == maxNonTerm-1 && wordCountT - (endHoleT-startT+1) + (numHoles+1) > maxSymbolsTarget)
+			if (numHoles == g_global->maxNonTerm-1 && wordCountT - (endHoleT-startT+1) + (numHoles+1) > g_global->maxSymbolsTarget)
 				continue;
 
 			// always enforce min word count limit
-			if (wordCountT - (endHoleT-startHoleT+1) < minWords)
+			if (wordCountT - (endHoleT-startHoleT+1) < g_global->minWords)
 				continue;
 
 			// except the whole span
@@ -690,16 +696,16 @@ void addHieroRule( SentenceAlignment &sentence
 				// cerr << "source" << sourceHole.GetStart() << "-" << sourceHole.GetEnd() << endl; 
 
 				// enforce minimum hole size
-				if (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1 < minHoleSource)
+				if (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1 < g_global->minHoleSource)
 					continue;
 
 				// if last non-terminal, enforce word count limit
-				if (numHoles == maxNonTerm-1 && 
-						wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > maxSymbolsSource)
+				if (numHoles == g_global->maxNonTerm-1 && 
+						wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > g_global->maxSymbolsSource)
 					continue;
 
 				// enforce min word count limit
-				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) < minWords)
+				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) < g_global->minWords)
 					continue;
 				
 				// hole must be subphrase of the source phrase
@@ -712,11 +718,11 @@ void addHieroRule( SentenceAlignment &sentence
 					continue;
 
 				// if consecutive non-terminals are not allowed, also check for source
-				if (!nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
+				if (!g_global->nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
 					continue;
 
 				// require that at least one aligned word is left
-				if (requireAlignedWord)
+				if (g_global->requireAlignedWord)
 				{
 					HoleList::const_iterator iterHoleList = holeColl.GetHoles().begin();
 					bool foundAlignedWord = false;
@@ -753,10 +759,10 @@ void addHieroRule( SentenceAlignment &sentence
 				bool allowablePhrase = true;
 
 				// maximum words count violation?
-				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > maxSymbolsSource)
+				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > g_global->maxSymbolsSource)
 					allowablePhrase = false;
 
-				if (wordCountT - (endHoleT-startHoleT+1) + (numHoles+1) > maxSymbolsTarget)
+				if (wordCountT - (endHoleT-startHoleT+1) + (numHoles+1) > g_global->maxSymbolsTarget)
 					allowablePhrase = false;
 				
 				// passed all checks...
@@ -765,7 +771,7 @@ void addHieroRule( SentenceAlignment &sentence
 					printAllHieroPhrases(sentence, startT, endT, startS, endS, copyHoleColl);
 
 				// recursively search for next hole
-				int nextInitStartT = nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
+				int nextInitStartT = g_global->nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
 				addHieroRule(sentence, startT, endT, startS, endS 
 										 , ruleExist, copyHoleColl, numHoles + 1, nextInitStartT
 										 , wordCountT - (endHoleT-startHoleT+1)
@@ -781,7 +787,7 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
   // source
   //cerr << "adding ( " << startS << "-" << endS << ", " << startT << "-" << endT << ")\n"; 
 
-  if (onlyOutputSpanInfo) {
+  if (g_global->onlyOutputSpanInfo) {
     cout << startS << " " << endS << " " << startT << " " << endT << endl;
     return;
   }
@@ -791,11 +797,11 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 	
 	// phrase labels
 	string targetLabel,sourceLabel;
-	if (hierarchicalFlag) {
-	  sourceLabel = sourceSyntax ? 
+	if (g_global->hierarchicalFlag) {
+	  sourceLabel = g_global->sourceSyntax ? 
 	  	sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
 	  //      sourceLabel = "X";
-		targetLabel = targetSyntax ?
+		targetLabel = g_global->targetSyntax ?
 			sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
 	}
 
@@ -803,7 +809,7 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 	rule.source = "";
 	for(int si=startS;si<=endS;si++)
 		rule.source += " " + sentence.source[si];
-	if (hierarchicalFlag)
+	if (g_global->hierarchicalFlag)
 		rule.source += " [" + sourceLabel + "]";
 	rule.source = rule.source.substr(1);
 
@@ -811,7 +817,7 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 	rule.target = "";
 	for(int ti=startT;ti<=endT;ti++) 
 		rule.target += " " + sentence.target[ti];
-	if (hierarchicalFlag)
+	if (g_global->hierarchicalFlag)
 		rule.target += " [" + targetLabel + "]";
 	rule.target = rule.target.substr(1);
 
@@ -822,16 +828,16 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 		{
       int si = sentence.alignedToT[ti][i];
 			rule.alignment += " " + IntToString(si-startS) + "-" + IntToString(ti-startT);
-			if (!onlyDirectFlag)
+			if (!g_global->onlyDirectFlag)
 				rule.alignmentInv += " " + IntToString(ti-startT) + "-" + IntToString(si-startS);
     }
 	}
 	rule.alignment = rule.alignment.substr(1);
-	if (!onlyDirectFlag)
+	if (!g_global->onlyDirectFlag)
 		rule.alignmentInv = rule.alignmentInv.substr(1);
 
 	// orientation
-  if (orientationFlag) {
+  if (g_global->orientationFlag) {
     // orientation to previous E
     bool connectedLeftTop  = isAligned( sentence, startS-1, startT-1 );
     bool connectedRightTop = isAligned( sentence, endS+1,   startT-1 );
@@ -865,72 +871,11 @@ bool isAligned ( SentenceAlignment &sentence, int si, int ti ) {
   return false;
 }
 
-int SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID ) {
-  // tokenizing English (and potentially extract syntax spans)
-  if (targetSyntax) {
-      string targetStringCPP = string(targetString);
-      ProcessAndStripXMLTags( targetStringCPP, targetTree, targetLabelCollection , targetTopLabelCollection );
-      target = tokenize( targetStringCPP.c_str() );
-      // cerr << "E: " << targetStringCPP << endl;
-  }
-  else {
-      target = tokenize( targetString );
-  }
-
-  // tokenizing source (and potentially extract syntax spans)
-  if (sourceSyntax) {
-      string sourceStringCPP = string(sourceString);
-      ProcessAndStripXMLTags( sourceStringCPP, sourceTree, sourceLabelCollection , sourceTopLabelCollection );
-      source = tokenize( sourceStringCPP.c_str() );
-      // cerr << "F: " << sourceStringCPP << endl;
-  }
-  else {
-      source = tokenize( sourceString );
-  }
-
-  // check if sentences are empty
-  if (target.size() == 0 || source.size() == 0) {
-    cerr << "no target (" << target.size() << ") or source (" << source.size() << ") words << end insentence " << sentenceID << endl;
-    cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
-    return 0;
-  }
-
-  // prepare data structures for alignments
-  for(int i=0; i<source.size(); i++) {
-    alignedCountS.push_back( 0 );
-  }
-  for(int i=0; i<target.size(); i++) {
-    vector< int > dummy;
-    alignedToT.push_back( dummy );
-  }
-
-  // reading in alignments
-  vector<string> alignmentSequence = tokenize( alignmentString );
-  for(int i=0; i<alignmentSequence.size(); i++) {
-    int s,t;
-    // cout << "scaning " << alignmentSequence[i].c_str() << endl;
-    if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {
-      cerr << "WARNING: " << alignmentSequence[i] << " is a bad alignment point in sentence " << sentenceID << endl; 
-      cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
-      return 0;
-    }
-      // cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << s << ", " << t << endl;
-    if (t >= target.size() || s >= source.size()) { 
-      cerr << "WARNING: sentence " << sentenceID << " has alignment point (" << s << ", " << t << ") out of bounds (" << source.size() << ", " << target.size() << ")\n";
-      cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
-      return 0;
-    }
-    alignedToT[t].push_back( s );
-    alignedCountS[s]++;
-  }
-  return 1;
-}
-
 void addRuleToCollection( ExtractedRule &newRule ) {
 	//cerr << "add ( " << newRule.source << " , " << newRule.target << " )\n";
 	 
 	// no double-counting of identical rules from overlapping spans
-	if (!duplicateRules)
+	if (!g_global->duplicateRules)
 	{
 		vector<ExtractedRule>::const_iterator rule;
 		for(rule = extractedRules.begin(); rule != extractedRules.end(); rule++ )
@@ -952,7 +897,7 @@ void consolidateRules()
 	map<int, map<int, map<int, map<int,int> > > > spanCount;
 
 	// compute number of rules per span
-	if (fractionalCounting) 
+	if (g_global->fractionalCounting) 
 	{
 		for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ )
 		{
@@ -963,7 +908,7 @@ void consolidateRules()
 	// compute fractional counts
 	for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ )
 	{
-		rule->count =    1.0/(float) (fractionalCounting ? spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ] : 1.0 );
+		rule->count =    1.0/(float) (g_global->fractionalCounting ? spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ] : 1.0 );
 	}
 
 	// consolidate counts
@@ -996,13 +941,13 @@ void writeRulesToFile() {
 								<< rule->alignment << " ||| " 
 								<< rule->count << "\n";
 
-		if (!onlyDirectFlag)
+		if (!g_global->onlyDirectFlag)
 			extractFileInv << rule->target << " ||| " 
 										 << rule->source << " ||| " 
 										 << rule->alignmentInv << " ||| " 
 										 << rule->count << "\n";
 		
-		if (orientationFlag)
+		if (g_global->orientationFlag)
 			extractFileOrientation << rule->source << " ||| " 
 														 << rule->target << " ||| " 
 														 << rule->orientation << " " << rule->orientationForward << "\n";
@@ -1013,7 +958,7 @@ void writeGlueGrammar( string fileName )
 {
 	ofstream grammarFile;
 	grammarFile.open(fileName.c_str());
-	if (!targetSyntax)
+	if (!g_global->targetSyntax)
 	{
 		grammarFile << "[X] [S] ||| <s> ||| <s> |||  ||| 1" << endl
 		            << "[X] [S] ||| [X] </s> ||| [S] </s> ||| 0-0 ||| 1" << endl

@@ -9,6 +9,7 @@
  */
 #include <vector>
 #include "SyntaxTree.h"
+#include "Global.h"
 
 class SentenceAlignment {
 public:
@@ -19,7 +20,7 @@ public:
   SyntaxTree targetTree;
   SyntaxTree sourceTree;
 	
-  int create( char[], char[], char[], int );
+  int create(char targetString[], char sourceString[], char alignmentString[], int sentenceID, const Global &global);
   //  void clear() { delete(alignment); };
 };
 
