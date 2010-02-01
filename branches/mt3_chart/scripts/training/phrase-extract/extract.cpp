@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
     SAFE_GETLINE((*sFileP), sourceString, LINE_MAX_LENGTH, '\n');
     SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n');
     SentenceAlignment sentence;
-    // cout << "read in: " << targetString << " & " << sourceString << " & " << alignmentString << endl;
+    //cerr << "read in: " << targetString << " & " << sourceString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
     if (onlyOutputSpanInfo) {
       cout << "LOG: SRC: " << sourceString << endl;
@@ -368,7 +368,7 @@ void extractRules( SentenceAlignment &sentence ) {
 
 void preprocessSourceHieroPhrase( SentenceAlignment &sentence
 															, int startT, int endT, int startS, int endS 
-															, WordIndex &indexS, HoleCollection &holeColl, LabelIndex &labelIndex)
+															, WordIndex &indexS, HoleCollection &holeColl, const LabelIndex &labelIndex)
 {
 	vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
 	assert(iterHoleList != holeColl.GetSortedSourceHoles().end());
@@ -388,7 +388,7 @@ void preprocessSourceHieroPhrase( SentenceAlignment &sentence
 		if (isHole)
 		{
 			Hole &hole = **iterHoleList;
-			
+						
 			int labelI = labelIndex[ 2+holeCount+holeTotal ];
 			string label = sourceSyntax ? 
 			sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
@@ -412,7 +412,7 @@ void preprocessSourceHieroPhrase( SentenceAlignment &sentence
 
 string printTargetHieroPhrase(SentenceAlignment &sentence
 															, int startT, int endT, int startS, int endS 
-															, WordIndex &indexT, HoleCollection &holeColl, LabelIndex &labelIndex)
+															, WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex)
 {
 	HoleList::iterator iterHoleList = holeColl.GetHoles().begin();
 	assert(iterHoleList != holeColl.GetHoles().end());
@@ -464,7 +464,7 @@ string printTargetHieroPhrase(SentenceAlignment &sentence
 
 string printSourceHieroPhrase( SentenceAlignment &sentence
 	, int startT, int endT, int startS, int endS 
-	, WordIndex &indexS, HoleCollection &holeColl, LabelIndex &labelIndex)
+	, HoleCollection &holeColl, const LabelIndex &labelIndex)
 {
 	vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
 	assert(iterHoleList != holeColl.GetSortedSourceHoles().end());
@@ -498,7 +498,6 @@ string printSourceHieroPhrase( SentenceAlignment &sentence
 		}
 		else
 		{
-			indexS[currPos] = outPos;
 			out += " " + sentence.source[currPos];
 		}
 
@@ -550,9 +549,9 @@ void printHieroPhrase( SentenceAlignment &sentence, int startT, int endT, int st
 	// phrase labels
 	string targetLabel = targetSyntax ? 
 		sentence.targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
-	//string sourceLabel = sourceSyntax ?
-	//	sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
-	string sourceLabel = "X";
+	string sourceLabel = sourceSyntax ?
+	sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
+	//string sourceLabel = "X";
 
 	// create non-terms on the source side
 	preprocessSourceHieroPhrase(sentence, startT, endT, startS, endS, indexS, holeColl, labelIndex);
@@ -563,7 +562,7 @@ void printHieroPhrase( SentenceAlignment &sentence, int startT, int endT, int st
 	
 	// source
 	// holeColl.SortSourceHoles();
-	rule.source = printSourceHieroPhrase(sentence, startT, endT, startS, endS, indexS, holeColl, labelIndex)
+	rule.source = printSourceHieroPhrase(sentence, startT, endT, startS, endS, holeColl, labelIndex)
 							+ " [" + sourceLabel + "]";
 	
 	// alignment
@@ -581,21 +580,21 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 	LabelIndex labelIndex,labelCount;
 
 	// number of target head labels
-	labelCount.push_back( targetSyntax ?
-												sentence.targetTree.GetNodes(startT,endT).size() : 1 );
+	int numLabels = targetSyntax ? sentence.targetTree.GetNodes(startT,endT).size() : 1;
+	labelCount.push_back(numLabels);
 	labelIndex.push_back(0);
-
+	
 	// number of source head labels
-	labelCount.push_back( sourceSyntax ?
-												sentence.sourceTree.GetNodes(startS,endS).size() : 1 );
+	numLabels =  sourceSyntax ?	sentence.sourceTree.GetNodes(startS,endS).size() : 1;
+	labelCount.push_back(numLabels);
 	labelIndex.push_back(0);
-
+	
 	// number of target hole labels
 	for( HoleList::const_iterator hole = holeColl.GetHoles().begin();
 			 hole != holeColl.GetHoles().end(); hole++ )
 	{
-		labelCount.push_back( targetSyntax ?
-													sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 );
+		int numLabels =  targetSyntax ? sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
+		labelCount.push_back(numLabels);
 		labelIndex.push_back(0);
 	}
 
@@ -605,11 +604,12 @@ void printAllHieroPhrases( SentenceAlignment &sentence
 			 i != holeColl.GetSortedSourceHoles().end(); i++ )
 	{
 		const Hole &hole = **i;
-		labelCount.push_back( sourceSyntax ?
-													sentence.sourceTree.GetNodes(hole.GetStart(1),hole.GetEnd(1)).size() : 1 );
+		int numLabels =  sourceSyntax ?	sentence.sourceTree.GetNodes(hole.GetStart(0),hole.GetEnd(0)).size() : 1 ;
+		labelCount.push_back(numLabels);
 		labelIndex.push_back(0);
 	}
-//	cerr << "LABEL COUNT: ";
+	
+	//	cerr << "LABEL COUNT: ";
 //	for(int i=0;i<labelCount.size();i++) 
 //	{
 //		cerr << " " << labelCount[i];
@@ -792,9 +792,9 @@ void addRule( SentenceAlignment &sentence, int startT, int endT, int startS, int
 	// phrase labels
 	string targetLabel,sourceLabel;
 	if (hierarchicalFlag) {
-	  //sourceLabel = sourceSyntax ? 
-	  //	sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
-	        sourceLabel = "X";
+	  sourceLabel = sourceSyntax ? 
+	  	sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
+	  //      sourceLabel = "X";
 		targetLabel = targetSyntax ?
 			sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
 	}

@@ -18,7 +18,6 @@ void Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targ
 							, char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
 							, std::string &sourceStr, int numScores
 							, std::vector<float> &misc);
-std::string Sort(const std::string &filePath, bool doSort);
 void InsertTargetNonTerminals(std::vector<std::string> &sourceToks, const std::vector<std::string> &targetToks, const AlignType &alignments);
 void SortAlign(AlignType &alignments);
 bool Flush(const OnDiskPt::SourcePhrase *prevSource, const OnDiskPt::SourcePhrase *currSource);

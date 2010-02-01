@@ -265,8 +265,8 @@
 					../srilm/misc/src,
 					../srilm/dstruct/src,
 					../srilm/include,
-					../irstlm/include,
 					../srilm/lm/src,
+					../irstlm/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
@@ -337,6 +337,14 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../srilm/misc/src,
+					../srilm/dstruct/src,
+					../srilm/include,
+					../srilm/lm/src,
+					../irstlm/include,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = "";
