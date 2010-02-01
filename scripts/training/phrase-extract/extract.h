@@ -14,6 +14,7 @@
 #include "HoleCollection.h"
 #include "RuleExist.h"
 #include "SentenceAlignment.h"
+#include "Global.h"
 
 typedef std::map< int, int > WordIndex;
 
@@ -38,39 +39,6 @@ void addHieroRule( SentenceAlignment &sentence, int startT, int endT, int startS
 std::vector<std::string> tokenize( const char [] );
 bool isAligned ( SentenceAlignment &, int, int );
 
-std::ofstream extractFile;
-std::ofstream extractFileInv;
-std::ofstream extractFileOrientation;
-int maxSpan = 10;
-int minHoleSource = 2;
-int minHoleTarget = 1;
-int minWords = 1;
-int maxSymbolsTarget = 999;
-int maxSymbolsSource = 5;
-// int minHoleSize = 1;
-// int minSubPhraseSize = 1; // minimum size of a remaining lexical phrase 
-int phraseCount = 0;
-bool onlyDirectFlag = false;
-bool orientationFlag = false;
-bool glueGrammarFlag = false;
-bool unknownWordLabelFlag = false;
-std::set< std::string > targetLabelCollection, sourceLabelCollection;
-std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;
-bool hierarchicalFlag = false;
-bool onlyOutputSpanInfo = false;
-bool noFileLimit = false;
-//bool zipFiles = false;
-bool properConditioning = false;
-int maxNonTerm = 2;
-bool nonTermFirstWord = true;
-bool nonTermConsecTarget = true;
-bool nonTermConsecSource = false;
-bool requireAlignedWord = true;
-bool sourceSyntax = false;
-bool targetSyntax = false;
-bool duplicateRules = true;
-bool fractionalCounting = true;
-
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
                 _IS.getline(_LINE, _SIZE, _DELIM); \
                 if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
@@ -83,7 +51,7 @@ bool fractionalCounting = true;
               }
 #define LINE_MAX_LENGTH 1000000
 
-std::string IntToString( int i )
+inline std::string IntToString( int i )
 {
 	std::string s;
 	std::stringstream out;
@@ -91,3 +59,11 @@ std::string IntToString( int i )
 	return out.str();
 }
 
+const Global *g_global;
+
+int phraseCount;
+std::ofstream extractFile;
+std::ofstream extractFileInv;
+std::ofstream extractFileOrientation;
+std::set< std::string > targetLabelCollection, sourceLabelCollection;
+std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;

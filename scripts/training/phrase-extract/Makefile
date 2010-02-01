@@ -6,8 +6,8 @@ clean:
 .cpp.o:
 	g++ -O6 -g -c $<
 
-extract: tables-core.o extract.o SyntaxTree.o XmlTree.o ExtractedRule.o Hole.o HoleCollection.o RuleExist.o SentenceAlignment.o
-	g++ tables-core.o extract.o SyntaxTree.o XmlTree.o ExtractedRule.o Hole.o HoleCollection.o RuleExist.o SentenceAlignment.o -o extract
+extract: tables-core.o extract.o SyntaxTree.o XmlTree.o ExtractedRule.o Hole.o HoleCollection.o SentenceAlignment.o Global.o
+	g++ tables-core.o extract.o SyntaxTree.o XmlTree.o ExtractedRule.o Hole.o HoleCollection.o SentenceAlignment.o  Global.o -o extract
 
 score: tables-core.o AlignmentPhrase.o score.o 
 	g++ tables-core.o AlignmentPhrase.o score.o -o score

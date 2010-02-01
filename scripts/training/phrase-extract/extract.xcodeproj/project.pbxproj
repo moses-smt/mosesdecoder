@@ -11,20 +11,21 @@
 		1C4757A8102B797900AB74DB /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1C4757A9102B797900AB74DB /* tables-core.h in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4C0FC6EAA200924FEA /* tables-core.h */; };
 		1C4757CA102B7EC600AB74DB /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C4757C8102B7EC600AB74DB /* consolidate.cpp */; };
-		1C6D10241106224900935904 /* Hole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6D10231106224900935904 /* Hole.cpp */; };
-		1C6D10281106226A00935904 /* HoleCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6D10271106226A00935904 /* HoleCollection.cpp */; };
-		1C6D102D1106229F00935904 /* RuleExist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6D102C1106229F00935904 /* RuleExist.cpp */; };
-		1C6D1032110622B600935904 /* SentenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6D1031110622B600935904 /* SentenceAlignment.cpp */; };
-		1C6D1036110622DC00935904 /* ExtractedRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6D1035110622DC00935904 /* ExtractedRule.cpp */; };
 		1C730165100F69A000EE3BE0 /* SyntaxTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */; };
 		1C730173100F69F000EE3BE0 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730171100F69F000EE3BE0 /* XmlTree.cpp */; };
 		1C8FDA9D1098858800B54D9C /* relax-parse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8FDA9C1098858800B54D9C /* relax-parse.cpp */; };
+		1CA70E9B1101F2A100DACDF4 /* ExtractedRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CA70E9A1101F2A100DACDF4 /* ExtractedRule.cpp */; };
+		1CA710321102311400DACDF4 /* RuleExist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CA710311102311400DACDF4 /* RuleExist.cpp */; };
+		1CBDE48C1100B42800EDEB45 /* Hole.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CBDE48B1100B42800EDEB45 /* Hole.cpp */; };
+		1CBDE4911100B45200EDEB45 /* HoleCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CBDE4901100B45200EDEB45 /* HoleCollection.cpp */; };
+		1CBDE4E41100C25100EDEB45 /* SentenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CBDE4E31100C25100EDEB45 /* SentenceAlignment.cpp */; };
 		1CBF101A109A019C00FBA941 /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730171100F69F000EE3BE0 /* XmlTree.cpp */; };
 		1CBF101B109A019C00FBA941 /* XmlTree.h in Sources */ = {isa = PBXBuildFile; fileRef = 1C730172100F69F000EE3BE0 /* XmlTree.h */; };
 		1CBF101D109A01A900FBA941 /* SyntaxTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */; };
 		1CBF101E109A01A900FBA941 /* SyntaxTree.h in Sources */ = {isa = PBXBuildFile; fileRef = 1C730164100F69A000EE3BE0 /* SyntaxTree.h */; };
 		1CBF1032109A020900FBA941 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1CBF1033109A020900FBA941 /* tables-core.h in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4C0FC6EAA200924FEA /* tables-core.h */; };
+		1CC2301311177EDB00821879 /* Global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CC2301211177EDB00821879 /* Global.cpp */; };
 		1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE2C0FC6EA0200924FEA /* extract.cpp */; };
 		1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1CF9F71E108C9FF800EABCE5 /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CF9F6A2108C963900EABCE5 /* consolidate-direct.cpp */; };
@@ -48,22 +49,24 @@
 		1C4757C4102B7EAA00AB74DB /* consolidate */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = consolidate; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C4757C8102B7EC600AB74DB /* consolidate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consolidate.cpp; sourceTree = "<group>"; };
 		1C5C088A0FFE54F400B00995 /* extract */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = extract; sourceTree = BUILT_PRODUCTS_DIR; };
-		1C6D10221106224900935904 /* Hole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hole.h; sourceTree = "<group>"; };
-		1C6D10231106224900935904 /* Hole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Hole.cpp; sourceTree = "<group>"; };
-		1C6D10261106226A00935904 /* HoleCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HoleCollection.h; sourceTree = "<group>"; };
-		1C6D10271106226A00935904 /* HoleCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HoleCollection.cpp; sourceTree = "<group>"; };
-		1C6D102B1106229F00935904 /* RuleExist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RuleExist.h; sourceTree = "<group>"; };
-		1C6D102C1106229F00935904 /* RuleExist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RuleExist.cpp; sourceTree = "<group>"; };
-		1C6D1030110622B600935904 /* SentenceAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SentenceAlignment.h; sourceTree = "<group>"; };
-		1C6D1031110622B600935904 /* SentenceAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SentenceAlignment.cpp; sourceTree = "<group>"; };
-		1C6D1034110622DC00935904 /* ExtractedRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExtractedRule.h; sourceTree = "<group>"; };
-		1C6D1035110622DC00935904 /* ExtractedRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExtractedRule.cpp; sourceTree = "<group>"; };
 		1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SyntaxTree.cpp; sourceTree = "<group>"; };
 		1C730164100F69A000EE3BE0 /* SyntaxTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SyntaxTree.h; sourceTree = "<group>"; };
 		1C730171100F69F000EE3BE0 /* XmlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XmlTree.cpp; sourceTree = "<group>"; };
 		1C730172100F69F000EE3BE0 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XmlTree.h; sourceTree = "<group>"; };
 		1C8FDA921098853F00B54D9C /* relax-parse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "relax-parse"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C8FDA9C1098858800B54D9C /* relax-parse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "relax-parse.cpp"; sourceTree = "<group>"; };
+		1CA70E991101F2A100DACDF4 /* ExtractedRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExtractedRule.h; sourceTree = "<group>"; };
+		1CA70E9A1101F2A100DACDF4 /* ExtractedRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExtractedRule.cpp; sourceTree = "<group>"; };
+		1CA710301102311400DACDF4 /* RuleExist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RuleExist.h; sourceTree = "<group>"; };
+		1CA710311102311400DACDF4 /* RuleExist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RuleExist.cpp; sourceTree = "<group>"; };
+		1CBDE48A1100B42800EDEB45 /* Hole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hole.h; sourceTree = "<group>"; };
+		1CBDE48B1100B42800EDEB45 /* Hole.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Hole.cpp; sourceTree = "<group>"; };
+		1CBDE48F1100B45200EDEB45 /* HoleCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HoleCollection.h; sourceTree = "<group>"; };
+		1CBDE4901100B45200EDEB45 /* HoleCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HoleCollection.cpp; sourceTree = "<group>"; };
+		1CBDE4E21100C25100EDEB45 /* SentenceAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SentenceAlignment.h; sourceTree = "<group>"; };
+		1CBDE4E31100C25100EDEB45 /* SentenceAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SentenceAlignment.cpp; sourceTree = "<group>"; };
+		1CC2301111177EDB00821879 /* Global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Global.h; sourceTree = "<group>"; };
+		1CC2301211177EDB00821879 /* Global.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Global.cpp; sourceTree = "<group>"; };
 		1CE8CE2C0FC6EA0200924FEA /* extract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extract.cpp; sourceTree = "<group>"; };
 		1CE8CE2D0FC6EA0200924FEA /* extract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = extract.h; sourceTree = "<group>"; };
 		1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "tables-core.cpp"; sourceTree = "<group>"; };
@@ -128,18 +131,20 @@
 				1C4757C8102B7EC600AB74DB /* consolidate.cpp */,
 				1CE8CE2C0FC6EA0200924FEA /* extract.cpp */,
 				1CE8CE2D0FC6EA0200924FEA /* extract.h */,
-				1C6D1035110622DC00935904 /* ExtractedRule.cpp */,
-				1C6D1034110622DC00935904 /* ExtractedRule.h */,
-				1C6D10231106224900935904 /* Hole.cpp */,
-				1C6D10221106224900935904 /* Hole.h */,
-				1C6D10271106226A00935904 /* HoleCollection.cpp */,
-				1C6D10261106226A00935904 /* HoleCollection.h */,
+				1CA70E9A1101F2A100DACDF4 /* ExtractedRule.cpp */,
+				1CA70E991101F2A100DACDF4 /* ExtractedRule.h */,
+				1CC2301211177EDB00821879 /* Global.cpp */,
+				1CC2301111177EDB00821879 /* Global.h */,
+				1CBDE48B1100B42800EDEB45 /* Hole.cpp */,
+				1CBDE48A1100B42800EDEB45 /* Hole.h */,
+				1CBDE4901100B45200EDEB45 /* HoleCollection.cpp */,
+				1CBDE48F1100B45200EDEB45 /* HoleCollection.h */,
 				1C8FDA9C1098858800B54D9C /* relax-parse.cpp */,
-				1C6D102C1106229F00935904 /* RuleExist.cpp */,
-				1C6D102B1106229F00935904 /* RuleExist.h */,
+				1CA710311102311400DACDF4 /* RuleExist.cpp */,
+				1CA710301102311400DACDF4 /* RuleExist.h */,
 				1C475794102B78DD00AB74DB /* score.cpp */,
-				1C6D1031110622B600935904 /* SentenceAlignment.cpp */,
-				1C6D1030110622B600935904 /* SentenceAlignment.h */,
+				1CBDE4E31100C25100EDEB45 /* SentenceAlignment.cpp */,
+				1CBDE4E21100C25100EDEB45 /* SentenceAlignment.h */,
 				1C730163100F69A000EE3BE0 /* SyntaxTree.cpp */,
 				1C730164100F69A000EE3BE0 /* SyntaxTree.h */,
 				1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */,
@@ -324,11 +329,12 @@
 				1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */,
 				1C730165100F69A000EE3BE0 /* SyntaxTree.cpp in Sources */,
 				1C730173100F69F000EE3BE0 /* XmlTree.cpp in Sources */,
-				1C6D10241106224900935904 /* Hole.cpp in Sources */,
-				1C6D10281106226A00935904 /* HoleCollection.cpp in Sources */,
-				1C6D102D1106229F00935904 /* RuleExist.cpp in Sources */,
-				1C6D1032110622B600935904 /* SentenceAlignment.cpp in Sources */,
-				1C6D1036110622DC00935904 /* ExtractedRule.cpp in Sources */,
+				1CBDE48C1100B42800EDEB45 /* Hole.cpp in Sources */,
+				1CBDE4911100B45200EDEB45 /* HoleCollection.cpp in Sources */,
+				1CBDE4E41100C25100EDEB45 /* SentenceAlignment.cpp in Sources */,
+				1CA70E9B1101F2A100DACDF4 /* ExtractedRule.cpp in Sources */,
+				1CA710321102311400DACDF4 /* RuleExist.cpp in Sources */,
+				1CC2301311177EDB00821879 /* Global.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
