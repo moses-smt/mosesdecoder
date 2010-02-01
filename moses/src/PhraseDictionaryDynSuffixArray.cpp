@@ -202,7 +202,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     //cerr << "left bnd = " << leftIdx << " ";
     //cerr << "right bnd = " << rightIdx << endl;
 		// extract all phrase Alignments in sentence
-    cerr << "Max phrase length = " << staticData.GetMaxPhraseLength() << endl;
+    cerr << "Max phrase length = " << staticData.GetMaxPhraseLength() << endl ;
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															leftIdx, 
