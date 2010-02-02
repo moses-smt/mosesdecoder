@@ -52,7 +52,7 @@ inline std::vector<std::string> Tokenize(const std::string& str,
 	return tokens;
 }
 
-const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r")
+std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r")
 {
 	std::string res = str;
 	res.erase(str.find_last_not_of(dropChars)+1);
@@ -114,7 +114,7 @@ bool isXmlTag(const string& tag)
  *
  * \param str input string
  */
-inline vector<string> TokenizeXml(const string& str)
+vector<string> TokenizeXml(const string& str)
 {
 	string lbrack = "<";
 	string rbrack = ">";
