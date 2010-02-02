@@ -42,7 +42,20 @@ LanguageModel::LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexMa
 	if (registerScore)
 		scoreIndexManager.AddScoreProducer(this);
 }
-LanguageModel::~LanguageModel() {}
+LanguageModel::~LanguageModel() {
+  // cfedermann: clean up LM cache ;)
+  FactoredNGramScoreMap::iterator it;
+  for (it = m_cachedNGrams.begin(); it != m_cachedNGrams.end(); ++it)
+  {
+    NGram* words = const_cast<NGram*>(it->first->first);
+    for (size_t currPos = 0; words->size(); ++currPos)
+    {
+      delete(words->at(currPos));
+    }
+    words->clear();
+  }
+  delete(it->first);
+}
 
 // don't inline virtual funcs...
 size_t LanguageModel::GetNumScoreComponents() const
