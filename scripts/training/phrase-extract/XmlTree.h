@@ -28,7 +28,8 @@
 #include "SyntaxTree.h"
 
 std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
+std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 std::string TrimXml(const std::string& str);
 bool isXmlTag(const std::string& tag);
-inline std::vector<std::string> TokenizeXml(const std::string& str);
+std::vector<std::string> TokenizeXml(const std::string& str);
 bool ProcessAndStripXMLTags(std::string &line, SyntaxTree &tree, std::set< std::string > &labelCollection, std::map< std::string, int > &topLabelCollection );
