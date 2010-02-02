@@ -115,6 +115,8 @@ float LanguageModelRemote::GetValue(const NGram &contextFactor, State* finalStat
 	
 	// OK, I really need a solution to store the ngram context factors in a
 	// hashable form somewhere.  I guess the LM would be the natural place?
+	// mphi: done
+	
 	// It is mandatory to patch the LM destructor code to clean up later!!!
 
 	float currScore;
@@ -141,6 +143,7 @@ float LanguageModelRemote::GetValue(const NGram &contextFactor, State* finalStat
 	  os << std::endl;
 	  std::string out = os.str();
 	  write(sock, out.c_str(), out.size());
+	  VERBOSE(2, "LMSERVER SINGLE REQUEST" << std::endl);
 	  char res[6];
 	  readNBytesForSure(sock, res, 6);
 	  
@@ -259,10 +262,11 @@ void ScoreUnseen(int sock, FactoredNGramScoreMap * ngramMap) {
 	}
 }
 
-/*
-// smart way: do batch requests
 void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
 {
+	LanguageModel::ScoreNGrams(batchedNGrams);
+	
+	/*
 	FactoredNGramScoreMap unseenNGrams;
 	
 	int batchSize = batchedNGrams.size();
@@ -271,15 +275,13 @@ void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>
 	
 	for (size_t currPos = 0; currPos < batchSize; ++currPos)
 	{
-		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
+		NGram* ngram = batchedNGrams[currPos];
 		
 		float lmScore;
 		
 		if (!FindCachedNGram(*ngram, &lmScore)) {
 			// Create a copy of the ngram for the LM-internal cache.
-			StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
-			ngram_copy->reserve(ngram->size());
-			std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
+			NGram* ngram_copy = new NGram(ngram->begin(), ngram->end());
 			
 			unseenNGrams.insert(make_pair(new FactoredNGram(ngram_copy, MaybeGetFactor()), 0));
 		}
@@ -291,40 +293,7 @@ void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>
 	
 	//copy the unseen seen
 	m_cachedNGrams.insert(unseenNGrams.begin(), unseenNGrams.end());
-}
-*/
-
-// stupid way: evaluate one by one
-void LanguageModelRemote::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
-{
-	//VERBOSE(2, "cache size: " << m_cachedNGrams.size() << std::endl);
-	
-	int total = 0;
-	int unseen = 0;
-	
-	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
-	{
-		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
-		
-		float lmScore;
-		
-		total++;
-		
-		if (!FindCachedNGram(*ngram, &lmScore)) {
-			// Create a copy of the ngram for the LM-internal cache.
-			StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
-			ngram_copy->reserve(ngram->size());
-			std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
-			
-			// Compute LM score and add it to the LM-internal cache.
-			lmScore = GetValue(*ngram_copy);
-			CacheNGram(ngram_copy, lmScore);
-			
-			unseen++;
-		}
-	}
-	
-	//VERBOSE(2, "unseen/total: " << unseen << '/' << total << "; new size: " << m_cachedNGrams.size() << std::endl);
+	*/
 }
 
 LanguageModelRemote::~LanguageModelRemote() {

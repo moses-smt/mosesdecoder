@@ -139,28 +139,36 @@ void LanguageModel::CacheNGram(NGram *ngram, float score) {
 
 void LanguageModel::ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams)
 {
+	int total = 0;
+	int unseen = 0;
+	
 	for (size_t currPos = 0; currPos < batchedNGrams.size(); ++currPos)
 	{
 		// cfedermann: we should lookup ngrams that are already scored here!
 		//             This will further optimize LM score computation.
 		// mphi: in addition, since a duplicate pair isn't inserted into the map,
 		//             its copy would be undeleted
-		// mphi: lookup done (see 4 lines below)
-		StaticData::batchedNGram* ngram = batchedNGrams[currPos];
+		// mphi: lookup done
+		NGram* ngram = batchedNGrams[currPos];
 		
 		float lmScore;
 		
+		total++;
+		
 		if (!FindCachedNGram(*ngram, &lmScore)) {
 			// Create a copy of the ngram for the LM-internal cache.
-			StaticData::batchedNGram* ngram_copy = new StaticData::batchedNGram();
-			ngram_copy->reserve(ngram->size());
-			std::copy(ngram->begin(), ngram->end(), ngram_copy->begin());
+			NGram* ngram_copy = new NGram(ngram->begin(), ngram->end());
 			
 			// Compute LM score and add it to the LM-internal cache.
 			lmScore = GetValue(*ngram_copy);
+			
 			CacheNGram(ngram_copy, lmScore);
+			
+			unseen++;
 		}
 	}
+	
+	VERBOSE(2, "unseen/total: " << unseen << '/' << total << "; new size: " << m_cachedNGrams.size() << std::endl);
 }
 
 void LanguageModel::CalcScore(const Phrase &phrase
@@ -313,8 +321,11 @@ bool compareFactored(const FactoredNGram * k1, const FactoredNGram * k2, FactorT
 	}
 	
 	for (int j = 0; j < s1; j++) {
-		int w1 = n1->at(j)->GetFactor(factor)->GetId();
-		int w2 = n2->at(j)->GetFactor(factor)->GetId();
+		const Factor * f1 = n1->at(j)->GetFactor(factor);
+		const Factor * f2 = n2->at(j)->GetFactor(factor);
+		
+		int w1 = (f1 == NULL)? -1: f1->GetId();
+		int w2 = (f2 == NULL)? -1: f2->GetId();
 		
 		if (w1 != w2) {
 			return (w1 < w2);

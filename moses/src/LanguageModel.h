@@ -52,7 +52,7 @@ class LanguageModel : public StatefulFeatureFunction
 protected:	
 	FactoredNGramScoreMap m_cachedNGrams;
 	
-	int MaybeGetFactor() const {
+	virtual int MaybeGetFactor() const {
 		return -1;
 	}
 	
@@ -159,7 +159,7 @@ public:
 
 	void CollectNGrams(const Hypothesis& cur_hypo) const;
 	
-	virtual void ScoreNGrams(const std::vector<std::vector<const Word*>* >& batchedNGrams);
+	virtual void ScoreNGrams(const std::vector<NGram* >& batchedNGrams);
 };
 
 }

@@ -70,7 +70,7 @@ public:
 	{
 		return m_factorType;
 	}
-	int MaybeGetFactor() const {
+	virtual int MaybeGetFactor() const {
 		return (int)m_factorType;
 	}
 	float GetWeight() const
