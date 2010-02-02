@@ -148,12 +148,11 @@ void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPELEMNT SUBSITITUTE FACTOR\n";
   return;
 }
-unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
+bool DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
-  std::set<int> skipSet;
   indices->clear();
   int phrasesize = phrase->size();
-    cerr << "Phrase size is " << phrasesize << endl;
+  //cerr << "Phrase size is " << phrasesize << endl;
   // find lower and upper bounds on phrase[0]
   bounds = std::equal_range(F_->begin(), F_->end(), phrase->at(0));
   // bounds holds first and last index of phrase[0] in SA_
@@ -161,15 +160,16 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
   int uprBnd = int(bounds.second - F_->begin());
   cerr << "Lower Bound=" << lwrBnd << endl; 
   cerr << "Upper Bound=" << uprBnd << endl;
-  int pcnt = uprBnd - lwrBnd; // assume all matching words are phrase initially
+  if(uprBnd - lwrBnd == 0) return false;  // not found
   if(phrasesize == 1) {
     for(int i=lwrBnd; i < uprBnd; ++i) {
       indices->push_back(SA_->at(i));
     }
     cerr << "Total count of phrase = " << indices->size() << endl;
-    return pcnt;
+    return (indices->size() > 0);
   }
   //find longer phrases if they exist
+  std::set<int> skipSet;
   for(int pos = 1; pos < phrasesize; ++pos) { // for all following words
     // for each index returned from check corpus SA[i] + 1 for phrase[1]
     for(int i=lwrBnd; i < uprBnd; ++i) { // cut off for sampling here
@@ -178,7 +178,6 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
       //cerr << "idx = " << rightIdx << endl;
       if(corpus_->at(rightIdx) != phrase->at(pos)) {
         skipSet.insert(i);  // save index to not check next iteration 
-        --pcnt;  // decrement current phrase count
       }
       else if(pos == phrasesize-1) { // found phrase so store word index for snt retrieval
         indices->push_back(rightIdx);
@@ -186,8 +185,8 @@ unsigned DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
       }
     }
   }
-  cerr << "Total count of phrase = " << indices->size() << endl;
-  return pcnt;
+  //cerr << "Total count of phrase = " << indices->size() << endl;
+  return (indices->size() > 0);
 }
 void DynSuffixArray::save(FILE* fout) {
   fWriteVector(fout, *SA_);

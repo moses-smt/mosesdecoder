@@ -3,6 +3,7 @@
 #include "FactorCollection.h"
 #include "StaticData.h"
 #include "TargetPhrase.h"
+#include <iomanip>
 
 namespace Moses {
   PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(size_t numScoreComponent):
@@ -14,11 +15,11 @@ namespace Moses {
     vocab_ = new Vocab(false);
   }
   PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray(){
-    delete srcSA_;
-    delete trgSA_;
-    delete vocab_;
-    delete srcCrp_;
-    delete trgCrp_;
+    if(srcSA_) delete srcSA_;
+    if(trgSA_) delete trgSA_;
+    if(vocab_) delete vocab_;
+    if(srcCrp_) delete srcCrp_;
+    if(trgCrp_) delete trgCrp_;
   }
 bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string alignments
 																					, const std::vector<float> &weight
@@ -34,26 +35,28 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 
 	InputFileStream sourceStrme(source);
 	InputFileStream targetStrme(target);
-	
+  cerr << "Loading source and target parallel corpus...\n";	
 	loadCorpus(sourceStrme, *srcCrp_, srcSntBreaks_);
   loadCorpus(targetStrme, *trgCrp_, trgSntBreaks_);
   assert(srcSntBreaks_.size() == trgSntBreaks_.size());
 	LoadVocabLookup();
 
   // build suffix arrays and auxilliary arrays
-  cerr << "Building Source Suffix Array\n"; 
+  cerr << "Building Source Suffix Array...\n"; 
   srcSA_ = new DynSuffixArray(srcCrp_); 
   if(!srcSA_) return false;
-  cerr << "Building Target Suffix Array\n"; 
+  // NOTE -- DON'T NEED TO BUILD TARGET SUFFIX ARRAY
+  /*cerr << "Building Target Suffix Array...\n"; 
   trgSA_ = new DynSuffixArray(trgCrp_); 
-  if(!trgSA_) return false;
+  if(!trgSA_) return false;*/
 	
 	InputFileStream alignStrme(alignments);
+  cerr << "Loading Alignment File...\n"; 
   loadAlignments(alignStrme);
   return true;
 }
 int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
-  // stores the alignments in the format used by SentenceAlignment.Extract()
+  // stores the alignments in the format used by SentenceAlignment.extract()
   string line;
   vector<int> vtmp;
   int sntIndex(0);
@@ -142,7 +145,7 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, SAPhras
 		{
 			wordID_t arrayId = iterLookup->second;
       output.SetId(pos, arrayId);
-			cerr << arrayId << " ";
+			//cerr << arrayId << " ";
 		}
 	}
   return true;
@@ -175,19 +178,19 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const SAPhrase& 
   return targetPhrase;
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
-	cerr << "\n" << src << "\n";	
+	cout << "\n" << src << "\n";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
   std::map<SAPhrase, int> phraseCounts;
   
 	const StaticData &staticData = StaticData::Instance();
 	size_t sourceSize = src.GetSize();
-	
+	unsigned denom(0); 
 	SAPhrase localIDs(sourceSize);
   vector<wordID_t> wrdIndices(0);  
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
 
   // extract sentence IDs from SA and return rightmost index of phrases
-  unsigned denom = srcSA_->countPhrase(&(localIDs.words), &wrdIndices);
+  if(!srcSA_->countPhrase(&(localIDs.words), &wrdIndices)) return ret;
   vector<int> sntIndexes = getSntIndexes(wrdIndices, sourceSize);	
   // for each sentence with this phrase
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
@@ -197,17 +200,17 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     // get span of phrase in source sentence 
 		int beginSentence = srcSntBreaks_[sntIndex];
+    cerr << "Sentence Index = " << sntIndex << endl;
     int rightIdx = wrdIndices[snt] - beginSentence
 				,leftIdx = rightIdx - sourceSize + 1;
     //cerr << "left bnd = " << leftIdx << " ";
     //cerr << "right bnd = " << rightIdx << endl;
 		// extract all phrase Alignments in sentence
-    cerr << "Max phrase length = " << staticData.GetMaxPhraseLength() << endl;
     sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
 															phrasePairs, 
 															leftIdx, 
 															rightIdx); 
-		cerr << "extracted " << phrasePairs.size() << endl;
+		//cerr << "extracted " << phrasePairs.size() << endl;
     
 	  // keep track of count of each extracted phrase pair  	
 		vector<PhrasePair*>::iterator iterPhrasePair;
@@ -215,6 +218,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		{
       SAPhrase phrase = phraseFromSntIdx(**iterPhrasePair);
       phraseCounts[phrase]++;
+      denom++;
 		}
 		// done with sentence. delete SA phrase pairs
 		RemoveAllInColl(phrasePairs);
@@ -225,7 +229,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
     float prb = float(iterPhrases->second) / float(denom);
     targetPhrase->SetScore(prb);
-    //cerr << *targetPhrase << "\t" << prb << endl;
+    cout << *targetPhrase << "\t" << std::setprecision(8) << prb << endl;
     ret->Add(targetPhrase);
   }
 	return ret;
