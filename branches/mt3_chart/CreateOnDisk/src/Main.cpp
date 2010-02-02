@@ -52,10 +52,9 @@ int main (int argc, char * const argv[])
 		//cerr << lineNum << " " << line << endl;
 		
 		std::vector<float> misc;
-		string sourceStr;
 		SourcePhrase sourcePhrase;
 		TargetPhrase *targetPhrase = new TargetPhrase(numScores);
-		Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, sourceStr, numScores, misc);
+		Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
 		assert(misc.size() == onDiskWrapper.GetNumCounts());
 		
 		rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, misc);	
@@ -84,7 +83,7 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
 	return ret;
 }
 
-void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, string &sourceStr, int numScores, vector<float> &misc)
+void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
 	size_t scoreInd = 0;
 	
@@ -108,18 +107,12 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 			{
 				case 0:
 				{
-					sourceStr += string(tok) + " ";
-
-					Word *word = new Word();
-					word->CreateFromString(tok, onDiskWrapper.GetVocab());
-					sourcePhrase.AddWord(word);
+					Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
 					break;
 				}
 				case 1:
 				{
-					Word *word = new Word();
-					word->CreateFromString(tok, onDiskWrapper.GetVocab());
-					targetPhrase.AddWord(word);
+					Tokenize(targetPhrase, tok, false, true, onDiskWrapper);
 					break;
 				}
 				case 2:
@@ -156,6 +149,59 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 	targetPhrase.SortAlign();
 	
 } // Tokenize()
+
+void Tokenize(OnDiskPt::Phrase &phrase
+							, const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
+							, OnDiskPt::OnDiskWrapper &onDiskWrapper)
+{
+	
+	bool nonTerm = false;
+	size_t tokSize = token.size();
+	int comStr =token.compare(0, 1, "[");
+	
+	if (comStr == 0)
+	{
+		comStr = token.compare(tokSize - 1, 1, "]");
+		nonTerm = comStr == 0;
+	}
+	
+	if (nonTerm)
+	{ // non-term
+		size_t splitPos		= token.find_first_of("[", 2);
+		string wordStr	= token.substr(0, splitPos);
+
+		if (splitPos == string::npos)
+		{ // lhs - only 1 word
+			Word *word = new Word();
+			word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+			phrase.AddWord(word);
+		}
+		else
+		{ // source & target non-terms
+			if (addSourceNonTerm)
+			{
+				Word *word = new Word();
+				word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+				phrase.AddWord(word);
+			}
+			
+			wordStr = token.substr(splitPos, tokSize - splitPos);
+			if (addTargetNonTerm)
+			{
+				Word *word = new Word();
+				word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+				phrase.AddWord(word);
+			}
+			
+		}
+	}
+	else
+	{ // term
+		Word *word = new Word();
+		word->CreateFromString(token, onDiskWrapper.GetVocab());
+		phrase.AddWord(word);
+	}	
+}
 
 void InsertTargetNonTerminals(std::vector<std::string> &sourceToks, const std::vector<std::string> &targetToks, const ::AlignType &alignments)
 {
