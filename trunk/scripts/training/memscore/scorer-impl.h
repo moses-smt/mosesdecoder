@@ -42,8 +42,44 @@ private:
 	virtual Score do_get_score(const PhraseTable::const_iterator &it);
 
 public:
-        Score get_discount();
+	Score get_discount();
 	static PhraseScorer *create_scorer(const char *argv[], int &argp, bool reverse, const PhraseScorerFactory &ptf);
+};
+
+class KNDiscount1PhraseScorer : public PhraseScorer {
+private:
+	Count total_distinct_; 
+	Score discount_;
+	Count total_count_;
+ 
+        explicit KNDiscount1PhraseScorer(PhraseTable &pd, bool reverse) :
+                PhraseScorer(pd, reverse) {}
+
+        virtual void do_score_phrases();
+        virtual Score do_get_score(const PhraseTable::const_iterator &it);
+
+public:
+        static PhraseScorer *create_scorer(const char *argv[], int &argp, bool reverse, const PhraseScorerFactory &ptf);
+};
+
+class KNDiscount3PhraseScorer : public PhraseScorer {
+private:
+        Score discount1_;
+	Score discount2_;
+	Score discount3plus_;
+       
+	Count total_distinct_n1_;
+	Count total_distinct_n2_;
+	Count total_distinct_n3plus_;
+ 
+        explicit KNDiscount3PhraseScorer(PhraseTable &pd, bool reverse) :
+                PhraseScorer(pd, reverse) {}
+
+        virtual void do_score_phrases();
+        virtual Score do_get_score(const PhraseTable::const_iterator &it);
+
+public:
+        static PhraseScorer *create_scorer(const char *argv[], int &argp, bool reverse, const PhraseScorerFactory &ptf);
 };
 
 class LexicalWeightPhraseScorer : public PhraseScorer {
