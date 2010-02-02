@@ -904,6 +904,8 @@ void appendProb(conn * c, float p, int isEnd) {
 static inline void process_batch_command(conn *c, token_t *tokens, size_t ntokens) {
 	int i = 1;
 	
+	int count = 0;
+	
 	c->wbytes = 0;
 	
 	while (tokens[i].length) {
@@ -920,11 +922,15 @@ static inline void process_batch_command(conn *c, token_t *tokens, size_t ntoken
 		float p = srilm_wordprob(context[0], &context[1]);
 		
 		appendProb(c, p, (tokens[i].length == 0));
+		
+		count++;
 	}
 	
     c->wcurr = c->wbuf;
 	conn_set_state(c, conn_write);
 	c->write_and_go = conn_read;
+	 
+	fprintf(stderr, "!");
 }
 
 static inline void process_srilm_command(conn *c, token_t *tokens, size_t ntokens) {
@@ -948,6 +954,8 @@ static inline void process_srilm_command(conn *c, token_t *tokens, size_t ntoken
 
     conn_set_state(c, conn_write);
     c->write_and_go = conn_read;
+	
+	fprintf(stderr, ".");
 }
 
 static void process_command(conn *c, char *command) {
