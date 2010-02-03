@@ -186,7 +186,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
   }
 }
     
-vector<Word>  calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores, const vector<float> & thetas) {
+vector<Word>  calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores, const vector<float> & thetas, float p, float r) {
   vector<Word> bestHyp;
   return bestHyp;
 }
@@ -401,7 +401,22 @@ bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b) {
   return a->GetWordsBitmap().GetNumWordsCovered() <  b->GetWordsBitmap().GetNumWordsCovered();
 }
 
-vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas){
+vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores, const vector<float> & thetas, float p, float r){
+  
+  vector<float> mbrThetas = thetas;
+  if (thetas.size() == 0) { //thetas not specified on the command line, use p and r instead
+    mbrThetas.push_back(-1); //Theta 0
+    mbrThetas.push_back(1/(4*p));
+    for (size_t i = 2; i <= bleu_order; ++i){
+      mbrThetas.push_back(mbrThetas[i-1] / r);  
+    }
+  }
+  
+  //cout << "Thetas: ";
+//  for (size_t i = 0; i < mbrThetas.size(); ++i) {
+//    cout << mbrThetas[i] << " ";
+//  }
+//  cout << endl;
   
   float argmaxScore = -1e20;
   TrellisPathList::const_iterator iter;
@@ -419,16 +434,16 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
     extract_ngrams(translation,counts);
     
     //Now score this translation
-    float mbrScore = thetas[0] * translation.size();
+    float mbrScore = mbrThetas[0] * translation.size();
     
     float ngramScore = 0;
     
     for (map < Phrase, int >::iterator ngrams = counts.begin(); ngrams != counts.end(); ++ngrams) {
       if (ngramScore == 0) {
-        ngramScore = log(ngrams->second) + finalNgramScores[ngrams->first] + log(thetas[(ngrams->first).GetSize()]);
+        ngramScore = log(ngrams->second) + finalNgramScores[ngrams->first] + log(mbrThetas[(ngrams->first).GetSize()]);
       }
       else {
-        ngramScore = log_sum(ngramScore, float(log(ngrams->second) + finalNgramScores[ngrams->first] + log(thetas[(ngrams->first).GetSize()])));
+        ngramScore = log_sum(ngramScore, float(log(ngrams->second) + finalNgramScores[ngrams->first] + log(mbrThetas[(ngrams->first).GetSize()])));
       }
       //cout << "Ngram: " << ngrams->first << endl;
     }
