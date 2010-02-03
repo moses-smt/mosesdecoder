@@ -191,11 +191,11 @@ int main(int argc, char* argv[])
 		      manager.CalcNBest(nBestSize, nBestList,true);
 		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
 		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-          mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas());
+          mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas(), staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
          }
       }  
       else {
-        mbrBestHypo = calcMBRSol(connectedList, ngramPosteriors, staticData.GetLatticeMBRThetas());
+        mbrBestHypo = calcMBRSol(connectedList, ngramPosteriors, staticData.GetLatticeMBRThetas(), staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
       }
       
       ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),

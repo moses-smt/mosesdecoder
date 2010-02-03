@@ -94,6 +94,8 @@ Parameter::Parameter()
  	AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
   AddParam("lmbr-thetas", "theta(s) for lattice mbr calculation");
   AddParam("lmbr-pruning-factor", "average number of nodes/word wanted in pruned lattice");
+  AddParam("lmbr-p", "unigram precision value for lattice mbr");
+  AddParam("lmbr-r", "ngram precision decay value for lattice mbr");
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");

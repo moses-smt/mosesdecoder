@@ -338,6 +338,10 @@ bool StaticData::LoadData(Parameter *parameter)
   Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
   m_lmbrThetas = Scan<float>(m_parameter->GetParam("lmbr-thetas"));
   SetBooleanParameter( &m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
+  m_lmbrPrecision = (m_parameter->GetParam("lmbr-p").size() > 0) ?
+    Scan<float>(m_parameter->GetParam("lmbr-p")[0]) : 0.8f;
+  m_lmbrPRatio = (m_parameter->GetParam("lmbr-r").size() > 0) ?
+    Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
   
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
