@@ -38,8 +38,8 @@ typedef map<Path, size_t> PathCounts;
 typedef map<Phrase, PathCounts > NgramHistory;
 
 class Edge {
-   const Hypothesis* m_headNode;
    const Hypothesis* m_tailNode;
+   const Hypothesis* m_headNode;
    float m_score;
    TargetPhrase m_targetPhrase;
    NgramHistory m_ngrams;
