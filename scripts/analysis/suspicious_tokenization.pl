@@ -49,10 +49,14 @@ foreach my $ngr (keys %$ngrams) {
   $report->{$ngr}->{"tok"} = $tokcnt;
   $report->{$ngr}->{"untok"} = $untokcnt;
   $report->{$ngr}->{"diff"} = abs($untokcnt-$tokcnt);
+  $report->{$ngr}->{"sum"} = $untokcnt+$tokcnt;
 }
 
 # Report
-foreach my $ngr (sort {$report->{$a}->{"diff"} <=> $report->{$b}->{"diff"}}
+foreach my $ngr (sort {
+                         $report->{$a}->{"diff"} <=> $report->{$b}->{"diff"}
+                      || $report->{$b}->{"sum"} <=> $report->{$a}->{"sum"}
+                      }
                   keys %$report) {
   print "$ngr\t$report->{$ngr}->{untok}\t$report->{$ngr}->{tok}\t$report->{$ngr}->{diff}\n";
 }
