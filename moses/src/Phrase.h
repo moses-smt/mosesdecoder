@@ -164,6 +164,9 @@ public:
 	*		used to insert & find phrase in dictionary
 	*/
 	bool operator< (const Phrase &compare) const;
+  
+  bool operator== (const Phrase &compare) const;
+  
 	
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);

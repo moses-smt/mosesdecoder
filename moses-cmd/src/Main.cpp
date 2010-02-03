@@ -52,6 +52,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordLattice.h"
 #include "TranslationAnalysis.h"
 #include "mbr.h"
+#include "LatticeMBR.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -148,7 +149,7 @@ int main(int argc, char* argv[])
 #endif
 
 		// pick best translation (maximum a posteriori decoding)
-		if (! staticData.UseMBR()) {
+		if (! staticData.UseMBR() ) {
 			ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
 						 staticData.GetReportSegmentation(), staticData.GetReportAllFactors());
 			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
@@ -166,6 +167,41 @@ int main(int argc, char* argv[])
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}
 		}
+    else if (staticData.UseLatticeMBR()) {
+      std::map < int, bool > connected;
+      std::vector< const Hypothesis *> connectedList;
+      map<Phrase, float> ngramPosteriors;
+      std::map < const Hypothesis*, set <const Hypothesis*> > outgoingHyps;
+      map<const Hypothesis*, vector<Edge> > incomingEdges;
+      vector< float> estimatedScores;
+      manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
+      pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, staticData.GetLatticeMBRPruningFactor());
+      calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);      
+      const Hypothesis *mbrBestHypo;
+      if (staticData.UseNbestHypSetForLatticeMBR()) {
+        size_t nBestSize = staticData.GetMBRSize();
+        if (nBestSize <= 0)
+		    {
+		      cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+		      return EXIT_FAILURE;
+		    }
+        else
+		    {
+		      TrellisPathList nBestList;
+		      manager.CalcNBest(nBestSize, nBestList,true);
+		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
+          mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas());
+         }
+      }  
+      else {
+        mbrBestHypo = calcMBRSol(connectedList, ngramPosteriors, staticData.GetLatticeMBRThetas());
+      }
+      
+      ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
+                                staticData.GetReportAllFactors());
+      IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
+    }
 		// consider top candidate translations to find minimum Bayes risk translation
 		else {
 		  size_t nBestSize = staticData.GetMBRSize();
