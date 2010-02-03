@@ -75,8 +75,8 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
 			assert(sourcePos < sourceSize);
 			assert(targetPos < targetSize);
 			
-      curSnt.alignedCountTrg[targetPos]++; // cnt of trg nodes each src node is attached to  
-      curSnt.alignedSrc[sourcePos].push_back(targetPos);  // list of source nodes each target node connects with
+      curSnt.alignedSrc[sourcePos].push_back(targetPos);  // list of target nodes for each source word 
+      curSnt.alignedCountTrg[targetPos]++; // cnt of how many source words connect to this target word 
     }
     curSnt.srcSnt = srcCrp_ + sntIndex;  // point source and target sentence
     curSnt.trgSnt = trgCrp_ + sntIndex; 
@@ -150,6 +150,61 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, SAPhras
 	}
   return true;
 }
+void PhraseDictionaryDynSuffixArray::cacheWordProbs(wordID_t srcWord) const {
+  std::map<wordID_t, int> counts;
+  vector<wordID_t> vword(1, srcWord), wrdIndices;  
+  assert(srcSA_->getCorpusIndex(&vword, &wrdIndices));
+  vector<int> sntIndexes = getSntIndexes(wrdIndices, 1);	
+  float denom(0);
+  // for each occurrence of this word 
+  for(int snt = 0; snt < sntIndexes.size(); ++snt) {
+    int sntIdx = sntIndexes.at(snt); // get corpus index for sentence
+    assert(sntIdx != -1); 
+    int wrdSntIdx = wrdIndices.at(snt) - srcSntBreaks_.at(sntIdx); // get word index in sentence
+    const vector<int>& srcAlg = alignments_.at(sntIdx).alignedSrc.at(wrdSntIdx); // list of target words for this source word
+    // get target words aligned to srcword in this sentence
+    for(int i=0; i < srcAlg.size(); ++i) {
+      wordID_t trgID = trgCrp_->at(wrdIndices.at(snt));
+      ++counts[trgID];
+      ++denom;
+    }
+  }
+  // now we've gotten counts of all target words aligned to this source word
+  // get probs and cache all pairs
+  for(std::map<wordID_t, int>::const_iterator itrCnt = counts.begin();
+      itrCnt != counts.end(); ++itrCnt) {
+    pair<wordID_t, wordID_t> wordPair = std::make_pair(srcWord, itrCnt->first);
+    float prob = float(itrCnt->second) / denom;
+    wordPairCache_[wordPair] = prob;
+  }
+}
+float PhraseDictionaryDynSuffixArray::getLexicalWeight(const PhrasePair& phrasepair) const {
+  float lexWeight(1.0);
+  const SentenceAlignment& alignment = alignments_[phrasepair.m_sntIndex];
+  // for each source word
+  for(int srcIdx = phrasepair.m_startSource; srcIdx <= phrasepair.m_endSource; ++srcIdx) {
+    float sumPairProbs(0);
+    wordID_t srcWord = srcCrp_->at(srcIdx + srcSntBreaks_[phrasepair.m_sntIndex]);  // localIDs
+    const vector<int>& srcWordAlignments = alignment.alignedSrc.at(srcIdx);
+    // extract target words aligned with this source word
+    for(int i = 0; i < srcWordAlignments.size(); ++i) {
+      int trgIdx = srcWordAlignments[i];
+      wordID_t trgWord = trgCrp_->at(trgIdx + trgSntBreaks_[phrasepair.m_sntIndex]);
+      // get probability of this source->target word pair
+      pair<wordID_t, wordID_t> wordpair = std::make_pair(srcWord, trgWord);
+      std::map<pair<wordID_t, wordID_t>, float>::const_iterator itrCache; 
+      itrCache = wordPairCache_.find(wordpair);
+      if(itrCache == wordPairCache_.end()) { // if not in cache
+        cacheWordProbs(srcWord);
+        itrCache = wordPairCache_.find(wordpair); // search cache again
+      }
+      assert(itrCache != wordPairCache_.end());
+      sumPairProbs += itrCache->second;
+    }
+    lexWeight *= ((1.0 / float(srcWordAlignments.size())) * sumPairProbs);  
+  }  // end for each source word
+  return lexWeight;
+}
 SAPhrase PhraseDictionaryDynSuffixArray::phraseFromSntIdx(const PhrasePair& phrasepair) const {
 // takes sentence indexes and looks up vocab IDs
   SAPhrase phraseIds(phrasepair.GetTargetSize());
@@ -180,17 +235,17 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const SAPhrase& 
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	cout << "\n" << src << "\n";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
-  std::map<SAPhrase, int> phraseCounts;
-  
 	const StaticData &staticData = StaticData::Instance();
 	size_t sourceSize = src.GetSize();
-	unsigned denom(0); 
 	SAPhrase localIDs(sourceSize);
-  vector<wordID_t> wrdIndices(0);  
   if(!getLocalVocabIDs(src, localIDs)) return ret; 
-
+	float denom(0); 
+  std::map<SAPhrase, int> phraseCounts;
+  std::map<SAPhrase, float> lexicalWeights;
+  std::map<SAPhrase, float>::iterator itrLexW;
+  vector<wordID_t> wrdIndices(0);  
   // extract sentence IDs from SA and return rightmost index of phrases
-  if(!srcSA_->countPhrase(&(localIDs.words), &wrdIndices)) return ret;
+  if(!srcSA_->getCorpusIndex(&(localIDs.words), &wrdIndices)) return ret;
   vector<int> sntIndexes = getSntIndexes(wrdIndices, sourceSize);	
   // for each sentence with this phrase
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
@@ -200,25 +255,27 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		const SentenceAlignment &sentenceAlignment = alignments_[sntIndex];
     // get span of phrase in source sentence 
 		int beginSentence = srcSntBreaks_[sntIndex];
-    cerr << "Sentence Index = " << sntIndex << endl;
     int rightIdx = wrdIndices[snt] - beginSentence
 				,leftIdx = rightIdx - sourceSize + 1;
     //cerr << "left bnd = " << leftIdx << " ";
     //cerr << "right bnd = " << rightIdx << endl;
-		// extract all phrase Alignments in sentence
-    sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), 
+		
+    sentenceAlignment.Extract(staticData.GetMaxPhraseLength(), // extract all phrase Alignments in sentence
 															phrasePairs, 
 															leftIdx, 
 															rightIdx); 
 		//cerr << "extracted " << phrasePairs.size() << endl;
-    
-	  // keep track of count of each extracted phrase pair  	
+	  
+    denom += phrasePairs.size(); // keep track of count of each extracted phrase pair  	
 		vector<PhrasePair*>::iterator iterPhrasePair;
-		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair)
-		{
+		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair) {
       SAPhrase phrase = phraseFromSntIdx(**iterPhrasePair);
-      phraseCounts[phrase]++;
-      denom++;
+      phraseCounts[phrase]++;  // count each unique phrase
+      float lexWeight = getLexicalWeight(**iterPhrasePair);  // get lexical weighting for this phrase pair 
+      itrLexW = lexicalWeights.find(phrase); // check if phrase already has lexical weight attached
+      if((itrLexW != lexicalWeights.end()) && (itrLexW->second < lexWeight)) 
+        itrLexW->second = lexWeight;  // if this lex weight is greater save it
+      else lexicalWeights[phrase] = lexWeight; // else save 
 		}
 		// done with sentence. delete SA phrase pairs
 		RemoveAllInColl(phrasePairs);
@@ -227,9 +284,9 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   std::map<SAPhrase, int>::const_iterator iterPhrases = phraseCounts.begin(); 
   for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
     TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
-    float prb = float(iterPhrases->second) / float(denom);
-    targetPhrase->SetScore(prb);
-    cout << *targetPhrase << "\t" << std::setprecision(8) << prb << endl;
+    float MLEprb = float(iterPhrases->second) / denom;
+    targetPhrase->SetScore(MLEprb);
+    //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
     ret->Add(targetPhrase);
   }
 	return ret;
@@ -279,7 +336,7 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 	vector< int > usedTarget = alignedCountTrg;
 	for(int sourcePos = startSource; sourcePos <= endSource; sourcePos++) 
 	{
-		for(int ind=0; ind < alignedSrc[sourcePos].size();ind++) 
+		for(int ind=0; ind < (int)alignedSrc[sourcePos].size();ind++) 
 		{
 			int targetPos = alignedSrc[sourcePos][ind];
 			// cout << "point (" << targetPos << ", " << sourcePos << ")\n";
@@ -323,7 +380,7 @@ bool SentenceAlignment::Extract(int maxPhraseLength, vector<PhrasePair*> &ret, i
 							(endTarget==maxTarget || alignedCountTrg[endTarget]==0)); // unaligned
 						 endTarget++)
 				{
-					PhrasePair *phrasePair = new PhrasePair(m_sntIndex, startTarget,endTarget,startSource,endSource);
+					PhrasePair *phrasePair = new PhrasePair(startTarget,endTarget,startSource,endSource, m_sntIndex);
 					ret.push_back(phrasePair);
 				} // for (int endTarget=maxTarget;
 			}	// for(int startTarget=minTarget;

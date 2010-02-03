@@ -148,7 +148,7 @@ void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPELEMNT SUBSITITUTE FACTOR\n";
   return;
 }
-bool DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
+bool DynSuffixArray::getCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   indices->clear();
   int phrasesize = phrase->size();
@@ -158,14 +158,14 @@ bool DynSuffixArray::countPhrase(const vuint_t* phrase, vuint_t* indices) {
   // bounds holds first and last index of phrase[0] in SA_
   int lwrBnd = int(bounds.first - F_->begin());
   int uprBnd = int(bounds.second - F_->begin());
-  cerr << "Lower Bound=" << lwrBnd << endl; 
-  cerr << "Upper Bound=" << uprBnd << endl;
+  //cerr << "Lower Bound=" << lwrBnd << endl; 
+  //cerr << "Upper Bound=" << uprBnd << endl;
   if(uprBnd - lwrBnd == 0) return false;  // not found
   if(phrasesize == 1) {
     for(int i=lwrBnd; i < uprBnd; ++i) {
       indices->push_back(SA_->at(i));
     }
-    cerr << "Total count of phrase = " << indices->size() << endl;
+    //cerr << "Total count of phrase = " << indices->size() << endl;
     return (indices->size() > 0);
   }
   //find longer phrases if they exist
