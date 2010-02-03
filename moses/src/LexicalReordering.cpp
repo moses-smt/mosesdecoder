@@ -189,7 +189,7 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
 
         const ScoreComponentCollection &reorderingScoreColl = cache_hypo->GetCachedReorderingScore();
         values = reorderingScoreColl.GetScoresForProducer(this);
-        assert(values.size() == (m_numScoreComponents));
+        assert(values.size() == m_numScoreComponents);
      
         float value = values[reo + m_scoreOffset[i]];
         if(m_oneScorePerDirection) { 

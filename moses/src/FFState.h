@@ -39,6 +39,7 @@ public:
     }
     
     virtual int Compare(const FFState& other) const {
+	//return 0;
         if(&other == this)
             return 0;
 
