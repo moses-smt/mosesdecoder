@@ -26,8 +26,10 @@ $cpt = 0;
  
 $line=<>; #skip first line (the empty hypothesis, no arc in fact)
 
+my $nr = 0;
 while(($line=<>) ) 
 {
+        $nr++;
 	$from = "";
 	$to = "";
 	$label = "";
@@ -40,7 +42,7 @@ while(($line=<>) )
 	#0 hyp=5 stack=1 back=0 score=-0.53862 transition=-0.53862 forward=181 fscore=-205.36 covered=0-0 out=I am , pC=-0.401291, c=-0.98555
 	#256 hyp=6566 stack=2 back=23 score=-2.15644 transition=-0.921959 recombined=6302 forward=15519 fscore=-112.807 covered=2-2 out=countries , , pC=-0.640574, c=-1.07215
 
-	if($line =~ /hyp=(\d+).+stack=(\d+).+back=(\d+).+transition=([^ ]*).+recombined=(\d+).+out=(.*), pC/)
+	if($line =~ /hyp=(\d+).+stack=(\d+).+back=(\d+).+transition=([^ ]*).+recombined=(\d+).+out=(.*)(, pC|$)/)
 	{ 
 		#print STDERR "hyp=$1, stack=$2, from=$3, transition=$4, recombined=$5, out=$6\n";
 		$to = $1;
@@ -56,7 +58,7 @@ while(($line=<>) )
 		#$stack++;
 		#$stacks{$stack}{$recombined} = $recombined;
 	}
-	elsif($line =~ /hyp=(\d+).+stack=(\d+).+back=(\d+).+transition=([^ ]*).+out=(.*), pC/)
+	elsif($line =~ /hyp=(\d+).+stack=(\d+).+back=(\d+).+transition=([^ ]*).+out=(.*)(, pC|$)/)
 	{
 		#print STDERR "hyp=$1, stack=$2, from=$3, transition=$4, out=$5\n";
 		$to = $1;
@@ -69,7 +71,9 @@ while(($line=<>) )
 		#$stack++;
 		#$stacks{$stack}{$to} = $to;
 	}
-	else{ print STDERR "Bad file format ..."; exit(); }
+	else{
+          die "$nr:Bad line: $line\n";
+        }
 
 	$o =~ s/\"/\\"/g	;
 	#print STDERR "out = $o after regexp\n";
@@ -94,3 +98,5 @@ if ($organize_to_stacks) {
 }
 
 print STDOUT "\n}\n";
+
+print STDERR "Converted $nr lines.\n";
