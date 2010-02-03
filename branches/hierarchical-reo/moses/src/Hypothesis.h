@@ -307,13 +307,19 @@ struct CompareHypothesisTotalScore
 * which hypothesis are equal based on:
 *   the last n-1 target words are the same
 *   and the covers (source words translated) are the same
+* Directly using RecombineCompare is unreliable because the Compare methods
+* of some states are based on archictecture-dependent pointer comparisons.
+* That's why we use the hypothesis IDs instead.
 */
 class HypothesisRecombinationOrderer
 {
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		return hypoA->RecombineCompare(*hypoB) < 0;
+		if(hypoA->RecombineCompare(*hypoB) != 0)
+            return (hypoA->GetId() < hypoB->GetId());
+        else
+            return 0;
 	}
 };
 
