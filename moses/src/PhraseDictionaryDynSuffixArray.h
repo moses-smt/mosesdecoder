@@ -31,7 +31,7 @@ class PhrasePair
 {
 public:
 	int m_sntIndex, m_startTarget, m_endTarget, m_startSource, m_endSource;
-	PhrasePair(int sntIndex, int startTarget, int endTarget, int startSource, int endSource)
+	PhrasePair(int startTarget, int endTarget, int startSource, int endSource, int sntIndex)
 	: m_startTarget(startTarget)
 	, m_endTarget(endTarget)
 	, m_startSource(startSource)
@@ -50,8 +50,8 @@ public:
 	int m_sntIndex;
 	vector<wordID_t>* trgSnt;
   vector<wordID_t>* srcSnt;
-  vector<int> alignedCountTrg;
-  vector< vector<int> > alignedSrc;
+  vector<int> alignedCountTrg; 
+  vector< vector<int> > alignedSrc; 
 	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const;
 };
 	
@@ -74,7 +74,7 @@ public:
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
   void InitializeForInput(const InputType& i);
   const ChartRuleCollection* GetChartRuleCollection(InputType const& src, WordsRange const& range,
-    bool adhereTableLimit,const CellCollection &cellColl) const {}
+    bool adhereTableLimit,const CellCollection &cellColl) const {return 0;}
   void CleanUp();
 private:
   DynSuffixArray* srcSA_;
@@ -84,19 +84,21 @@ private:
   vector<unsigned> srcSntBreaks_, trgSntBreaks_;
   Vocab* vocab_;
   vector<SentenceAlignment> alignments_;
-  int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
-  int loadAlignments(InputFileStream& aligs);
-  vector<int> getSntIndexes(vector<unsigned>&, const int) const; 	
-  TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
-  SAPhrase phraseFromSntIdx(const PhrasePair&) const;
-  bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
 	float m_weightWP;
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
-	
+  mutable std::map<pair<wordID_t, wordID_t>, float> wordPairCache_; 
+  int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
+  int loadAlignments(InputFileStream& aligs);
+  vector<int> getSntIndexes(vector<unsigned>&, const int) const; 	
+  TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
+  SAPhrase phraseFromSntIdx(const PhrasePair&) const;
+  bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;
+  void cacheWordProbs(wordID_t) const;
+  float getLexicalWeight(const PhrasePair&) const;
 	int GetSourceSentenceSize(int sentenceId) const
 	{ return (sentenceId==srcSntBreaks_.size()-1) ? srcCrp_->size() - srcSntBreaks_.at(sentenceId) : srcSntBreaks_.at(sentenceId+1) - srcSntBreaks_.at(sentenceId); }
 	int GetTargetSentenceSize(int sentenceId) const
