@@ -326,11 +326,19 @@ bool StaticData::LoadData(Parameter *parameter)
 	  
 	// minimum Bayes risk decoding
 	SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
-	m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
+  m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
 	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
 	  Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
 
+  //lattice mbr
+  SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
+  SetBooleanParameter( &m_mbr, "lminimum-bayes-risk", false );
+	m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
+  Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
+  m_lmbrThetas = Scan<float>(m_parameter->GetParam("lmbr-thetas"));
+  SetBooleanParameter( &m_useNbestHypSetForLatticeMBR, "nbest-hypo-set", false );
+  
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;

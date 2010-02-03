@@ -266,6 +266,11 @@ bool Phrase::operator < (const Phrase &compare) const
 		return false;
 	}
 }
+  
+bool Phrase::operator== (const Phrase &compare) const
+{  
+  return !(*this < compare) && !(compare < *this);
+}
 
 bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 										, const vector<FactorType> &inputFactor) const

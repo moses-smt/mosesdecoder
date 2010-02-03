@@ -89,8 +89,12 @@ Parameter::Parameter()
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
  	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
+  AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
 	AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
  	AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
+  AddParam("lmbr-thetas", "theta(s) for lattice mbr calculation");
+  AddParam("lmbr-pruning-factor", "average number of nodes/word wanted in pruned lattice");
+  AddParam("nbest-hypo-set", "to use nbest list as hypo set during lattice MBR");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");

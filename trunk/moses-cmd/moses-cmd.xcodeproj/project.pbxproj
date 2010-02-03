@@ -15,6 +15,7 @@
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
 		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
+		B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,8 @@
 		8DD76F6C0486A84900D96B5E /* moses-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
 		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
+		B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LatticeMBR.cpp; path = src/LatticeMBR.cpp; sourceTree = "<group>"; };
+		B28B1ED4110F52C600AAD188 /* LatticeMBR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LatticeMBR.h; path = src/LatticeMBR.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +99,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B28B1ED4110F52C600AAD188 /* LatticeMBR.h */,
+				B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */,
 				B219B8560E9381AC00EAB407 /* IOWrapper.cpp */,
 				B219B8570E9381AC00EAB407 /* IOWrapper.h */,
 				03306D800C0B249A00CA1311 /* mbr.cpp */,
@@ -187,6 +192,7 @@
 				1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */,
 				03306D820C0B249A00CA1311 /* mbr.cpp in Sources */,
 				B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */,
+				B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

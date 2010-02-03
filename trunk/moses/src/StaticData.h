@@ -141,8 +141,12 @@ protected:
 	XmlInputType m_xmlInputType; //! method for handling sentence XML input
 
 	bool m_mbr; //! use MBR decoder
+  bool m_useLatticeMBR; //! use MBR decoder
 	size_t m_mbrSize; //! number of translation candidates considered
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
+  size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
+  vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
+  bool m_useNbestHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
 
 	bool m_timeout; //! use timeout
 	size_t m_timeout_threshold; //! seconds after which time out is activated
@@ -414,7 +418,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr || m_outputSearchGraph
+	  return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph
 #ifdef HAVE_PROTOBUF
 	|| m_outputSearchGraphPB
 #endif
@@ -452,8 +456,13 @@ public:
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 	bool UseMBR() const { return m_mbr; }
+  bool UseLatticeMBR() const { return m_useLatticeMBR ;}
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
+  size_t GetLatticeMBRPruningFactor() const { return m_lmbrPruning; }
+  const vector<float>& GetLatticeMBRThetas() const {return m_lmbrThetas;}
+  bool  UseNbestHypSetForLatticeMBR() const { return m_useNbestHypSetForLatticeMBR;}
+  
 	
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }

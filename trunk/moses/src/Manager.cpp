@@ -426,6 +426,55 @@ void Manager::GetConnectedGraph(
   }
 }
 
+void Manager::GetWinnerConnectedGraph(
+                                  std::map< int, bool >* pConnected,
+                                  std::vector< const Hypothesis* >* pConnectedList) const {
+  std::map < int, bool >& connected = *pConnected;
+  std::vector< const Hypothesis *>& connectedList = *pConnectedList;
+    
+  // start with the ones in the final stack
+  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+  const HypothesisStack &finalStack = *hypoStackColl.back();
+  HypothesisStack::const_iterator iterHypo;
+  for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
+  {
+    const Hypothesis *hypo = *iterHypo;
+    connected[ hypo->GetId() ] = true;
+    connectedList.push_back( hypo );
+  }
+    
+  // move back from known connected hypotheses
+  for(size_t i=0; i<connectedList.size(); i++) {
+    const Hypothesis *hypo = connectedList[i];
+    
+    // add back pointer
+    const Hypothesis *prevHypo = hypo->GetPrevHypo();
+    if (prevHypo->GetId() > 0 // don't add empty hypothesis
+          && connected.find( prevHypo->GetId() ) == connected.end()) // don't add already added
+    {
+      connected[ prevHypo->GetId() ] = true;
+      connectedList.push_back( prevHypo );
+    }
+      
+    // add arcs
+    const ArcList *arcList = hypo->GetArcList();
+    if (arcList != NULL)
+    {
+      ArcList::const_iterator iterArcList;
+      for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+      {
+        const Hypothesis *loserHypo = *iterArcList;
+        if (connected.find( loserHypo->GetPrevHypo()->GetId() ) == connected.end() && loserHypo->GetPrevHypo()->GetId() > 0) // don't add already added & don't add hyp 0
+        {
+          connected[ loserHypo->GetPrevHypo()->GetId() ] = true;
+          connectedList.push_back( loserHypo->GetPrevHypo() );
+        }
+      }
+    }
+  }
+}
+  
+
 #ifdef HAVE_PROTOBUF
 
 void SerializeEdgeInfo(const Hypothesis* hypo, hgmert::Hypergraph_Edge* edge) {
@@ -626,6 +675,92 @@ void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraph
   } // end for iterStack 
 }
 
+  void Manager::GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
+                                       std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, set< const Hypothesis* > >* pOutgoingHyps, vector< float>* pFwdBwdScores) const
+  {
+    std::map < int, bool > &connected = *pConnected;
+    std::vector< const Hypothesis *>& connectedList = *pConnectedList;
+    std::map < int, int > forward;
+    std::map < int, double > forwardScore;
+    
+    std::map < const Hypothesis*, set <const Hypothesis*> > & outgoingHyps = *pOutgoingHyps;
+    vector< float> & estimatedScores = *pFwdBwdScores;
+    
+    // *** find connected hypotheses ***
+    GetWinnerConnectedGraph(&connected, &connectedList);
+    
+    // ** compute best forward path for each hypothesis *** //
+    
+    // forward cost of hypotheses on final stack is 0
+    const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+    const HypothesisStack &finalStack = *hypoStackColl.back();
+    HypothesisStack::const_iterator iterHypo;
+    for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
+    {
+      const Hypothesis *hypo = *iterHypo;
+      forwardScore[ hypo->GetId() ] = 0.0f;
+      forward[ hypo->GetId() ] = -1;
+    }
+    
+    // compete for best forward score of previous hypothesis
+    std::vector < HypothesisStack* >::const_iterator iterStack;
+    for (iterStack = --hypoStackColl.end() ; iterStack != hypoStackColl.begin() ; --iterStack)
+    {
+      const HypothesisStack &stack = **iterStack;
+      HypothesisStack::const_iterator iterHypo;
+      for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+      {
+        const Hypothesis *hypo = *iterHypo;
+        if (connected.find( hypo->GetId() ) != connected.end())
+        {
+          // make a play for previous hypothesis
+          const Hypothesis *prevHypo = hypo->GetPrevHypo();
+          double fscore = forwardScore[ hypo->GetId() ] +
+          hypo->GetScore() - prevHypo->GetScore();
+          if (forwardScore.find( prevHypo->GetId() ) == forwardScore.end()
+              || forwardScore.find( prevHypo->GetId() )->second < fscore)
+          {
+            forwardScore[ prevHypo->GetId() ] = fscore;
+            forward[ prevHypo->GetId() ] = hypo->GetId();
+          }
+          //store outgoing info
+          outgoingHyps[prevHypo].insert(hypo);
+
+          // all arcs also make a play
+          const ArcList *arcList = hypo->GetArcList();
+          if (arcList != NULL)
+          {
+            ArcList::const_iterator iterArcList;
+            for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+            {
+              const Hypothesis *loserHypo = *iterArcList;
+              // make a play
+              const Hypothesis *loserPrevHypo = loserHypo->GetPrevHypo();
+              double fscore = forwardScore[ hypo->GetId() ] +
+              loserHypo->GetScore() - loserPrevHypo->GetScore();
+              if (forwardScore.find( loserPrevHypo->GetId() ) == forwardScore.end()
+                  || forwardScore.find( loserPrevHypo->GetId() )->second < fscore)
+              {
+                forwardScore[ loserPrevHypo->GetId() ] = fscore;
+                forward[ loserPrevHypo->GetId() ] = loserHypo->GetId();
+              }
+              //store outgoing info 
+              outgoingHyps[loserPrevHypo].insert(hypo);
+              
+              
+            } // end for arc list  
+          } // end if arc list empty
+        } // end if hypo connected
+      } // end for hypo
+    } // end for stack
+    
+    for (std::vector< const Hypothesis *>::iterator it = connectedList.begin(); it != connectedList.end(); ++it) {
+      float estimatedScore = (*it)->GetScore() + forwardScore[(*it)->GetId()];
+      estimatedScores.push_back(estimatedScore);
+    }
+}  
+  
+  
 const Hypothesis *Manager::GetBestHypothesis() const
 {
 	return m_search->GetBestHypothesis();
