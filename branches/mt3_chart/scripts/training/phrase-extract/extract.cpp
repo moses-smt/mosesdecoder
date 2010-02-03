@@ -868,7 +868,7 @@ bool isAligned ( SentenceAlignment &sentence, int si, int ti ) {
   if (ti >= sentence.target.size() || si >= sentence.source.size()) return false;
   for(int i=0;i<sentence.alignedToT[ti].size();i++) 
     if (sentence.alignedToT[ti][i] == si) return true;
-  return false;
+  return false; 
 }
 
 void addRuleToCollection( ExtractedRule &newRule ) {
