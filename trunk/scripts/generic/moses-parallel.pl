@@ -63,7 +63,7 @@ my @wordgraphlist=();
 my $wordgraphlist=undef;
 my $wordgraphfile=undef;
 my $wordgraphflag=0;
-my $robust=1; # undef; # resubmit crashed jobs
+my $robust=5; # resubmit crashed jobs robust-times
 my $logfile="";
 my $logflag="";
 my $searchgraphlist="";
@@ -82,7 +82,7 @@ sub init(){
 	     'debug'=>\$dbg,
 	     'jobs=i'=>\$jobs,
 	     'decoder=s'=> \$mosescmd,
-	     'robust' => \$robust,
+	     'robust=i' => \$robust,
              'decoder-parameters=s'=> \$mosesparameters,
              'feed-decoder-via-stdin'=> \$feed_moses_via_stdin,
 	     'logfile=s'=> \$logfile,
@@ -426,13 +426,12 @@ preparing_script();
 #launching process through the queue
 my @sgepids =();
 
-# if robust switch is used, redo jobs that crashed
 my @idx_todo = ();
 foreach (@idxlist) { push @idx_todo,$_; }
 
-my $looped_once = 0;
-while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
- $looped_once = 1;
+# loop up to --robust times
+while ($robust && scalar @idx_todo) {
+ $robust--;
 
  my $failure=0;
  foreach my $idx (@idx_todo){
@@ -444,7 +443,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
   } else {
     $batch_and_join = "-b no -j yes";
   }
-  $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash >& ${jobscript}${idx}.log";
+  $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash > ${jobscript}${idx}.log 2>&1";
   print STDERR "$cmd\n" if $dbg; 
 
   safesystem($cmd) or die;
@@ -456,6 +455,8 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
   chomp($res=<IN>);
   split(/\s+/,$res);
   $id=$_[2];
+  die "Failed to guess job id from $jobscript$idx.log, got: $res"
+    if $id !~ /^[0-9]+$/;
   close(IN);
 
   push @sgepids, $id;
@@ -477,7 +478,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
   safesystem("\\rm -f $checkpointfile") or kill_all_and_quit();
 
   # start the 'hold' job, i.e. the job that will wait
-  $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript >& $qsubname.W.log";
+  $cmd="qsub -cwd $queueparameters $hj -o $checkpointfile -e /dev/null -N $qsubname.W $syncscript 2> $qsubname.W.log";
   safesystem($cmd) or kill_all_and_quit();
   
   # and wait for checkpoint file to appear
@@ -504,7 +505,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
   }
  } else {
   # use the -sync option for qsub
-  $cmd="qsub $queueparameters -sync y $hj -j y -o /dev/null -e /dev/null -N $qsubname.W -b y /bin/ls >& $qsubname.W.log";
+  $cmd="qsub $queueparameters -sync y $hj -j y -o /dev/null -e /dev/null -N $qsubname.W -b y /bin/ls > $qsubname.W.log";
   safesystem($cmd) or kill_all_and_quit();
 
   $failure=&check_exit_status();
@@ -519,6 +520,7 @@ while((!$robust && !$looped_once) || ($robust && scalar @idx_todo)) {
      if ((scalar @idx_still_todo) == (scalar @idxlist)) {
 	 # ... but not if all crashed
 	 print STDERR "everything crashed, not trying to resubmit jobs\n";
+         $robust = 0;
 	 kill_all_and_quit();
      }
      @idx_todo = @idx_still_todo;
