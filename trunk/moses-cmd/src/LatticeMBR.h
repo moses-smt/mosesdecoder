@@ -86,8 +86,8 @@ class Edge {
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
                     const vector< float> & estimatedScores, size_t edgeDensity);
 
-const Hypothesis * calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores,const vector<float> & thetas);
-const Hypothesis * calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas);
+vector<Word> calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores,const vector<float> & thetas);
+vector<Word> calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas);
 void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, float scale, map<Phrase, float>& finalNgramScores);
 void GetOutputFactors(const TrellisPath &path, vector <Word> &translation);
 void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngrams);

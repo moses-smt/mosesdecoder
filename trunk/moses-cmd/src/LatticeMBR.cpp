@@ -186,9 +186,9 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
   }
 }
     
-const Hypothesis * calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores, const vector<float> & thetas) {
-  const Hypothesis* hyp;
-  return hyp;
+vector<Word>  calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores, const vector<float> & thetas) {
+  vector<Word> bestHyp;
+  return bestHyp;
 }
 
 
@@ -301,158 +301,7 @@ void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<E
   
 }
 
-//
-//void calcNgramPosteriors(Lattice & connectedHyp, float scale, map<Phrase, float>& finalNgramScores) {
-//  //Find empty hypothesis
-//  const Hypothesis* emptyHyp = connectedHyp.at(0);
-//  while (emptyHyp->GetId() != 0) {
-//    emptyHyp = emptyHyp->GetPrevHypo();
-//  }
-//  connectedHyp.push_back(emptyHyp);
-//  
-//  sort(connectedHyp.begin(),connectedHyp.end(),ascendingCoverageCmp); //sort by increasing source word cov
-//  
-//  map<const Hypothesis*, float> forwardScore;
-//  forwardScore[connectedHyp[0]] = 0.0f;
-//  set< const Hypothesis *> finalHyps; //store completed hyps
-//  
-//  map<const Hypothesis*, vector<Edge> > incomingEdges;
-//  map<const Hypothesis*, map<Phrase,float> > ngramScores;
-//  
-//  for (size_t i = 1; i < connectedHyp.size(); ++i) {
-//    const Hypothesis* currHyp = connectedHyp[i];
-//    
-//    if (currHyp->GetWordsBitmap().IsComplete()) {
-//      finalHyps.insert(currHyp);
-//    }
-//    //cout << "Processing hyp: " << currHyp->GetId() << ", num words cov= " << currHyp->GetWordsBitmap().GetNumWordsCovered() <<  endl;
-//    
-//    vector <Edge>& edges = incomingEdges[currHyp];
-//    
-//    //Get incoming
-//    const Hypothesis* prevHypo = currHyp->GetPrevHypo();
-//    Edge winningEdge(prevHypo,currHyp,currHyp->GetScore() - prevHypo->GetScore(),currHyp->GetTargetPhrase());
-//    edges.push_back(winningEdge);
-//    //cout << edges[0] << endl;
-//    
-//    //cout << "Prev hyp: " << prevHypo->GetId() << endl;
-//    double incScore = forwardScore[prevHypo] + currHyp->GetScore() - prevHypo->GetScore();  
-//    forwardScore[currHyp] = incScore;
-//    
-//    const ArcList *arcList = currHyp->GetArcList();
-//    if (arcList != NULL)
-//    {
-//      ArcList::const_iterator iterArcList;
-//      for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
-//      {
-//        const Hypothesis *loserHypo = *iterArcList;
-//        //cout << "Loser hyp: " << loserHypo->GetId() << endl;
-//        
-//        double arcScore = loserHypo->GetScore() - loserHypo->GetPrevHypo()->GetScore(); 
-//        Edge losingEdge(loserHypo->GetPrevHypo(),currHyp,arcScore, loserHypo->GetTargetPhrase());
-//        edges.push_back(losingEdge);
-//
-//        double arcFScore = forwardScore[loserHypo->GetPrevHypo()] + arcScore; 
-//        forwardScore[currHyp] = log_sum<float>(forwardScore[currHyp], arcFScore);
-//      }
-//    }
-//    //cout << "Forward score of hyp " << currHyp->GetId() << "= " << forwardScore[currHyp] << endl;
-//    
-//    //Process ngrams now
-//    for (int j =0 ; j < edges.size(); ++j) {
-//      //cout << edges[j] << endl;
-//      Edge& edge = edges[j];
-//      
-//      const NgramHistory & incomingPhrases = edge.GetNgrams(incomingEdges);
-//      
-//      //let's first score ngrams introduced by this edge
-//      for (NgramHistory::const_iterator it = incomingPhrases.begin(); it != incomingPhrases.end(); ++it) { 
-//        const Phrase& ngram = it->first;
-//        const PathCounts& pathCounts = it->second;
-//        //cout << "Calculating score for: " << it->first << endl;
-//        
-//        for (PathCounts::const_iterator pathCountIt = pathCounts.begin(); pathCountIt != pathCounts.end(); ++pathCountIt) {
-//          //Score of an n-gram is forward score of head node of leftmost edge + all edge scores
-//          const Path&  path = pathCountIt->first;
-//          float score = forwardScore[path[0]->GetTailNode()]; 
-//          for (size_t i = 0; i < path.size(); ++i) {
-//            score += path[i]->GetScore();
-//          }
-//          map<Phrase, float>& currHypNgramScores = ngramScores[currHyp];
-//          if (currHypNgramScores.find(ngram) == currHypNgramScores.end())
-//            currHypNgramScores[ngram] = score;
-//          else
-//            currHypNgramScores[ngram] = log_sum(currHypNgramScores[ngram], score);   
-//        }
-//      }
-//      
-//      //Now score ngrams that are just being propagated from the history
-//      map<Phrase, float>& thisEdgeNgramScores = ngramScores[edge.GetTailNode()];
-//      for (map<Phrase, float>::iterator it = thisEdgeNgramScores.begin(); it != thisEdgeNgramScores.end(); ++it) {
-//        const Phrase & currNgram = it->first;
-//        float currNgramScore = it->second;
-//        //cout << "Calculating score for: " << currNgram << endl;
-//        
-//        if (incomingPhrases.find(currNgram) == incomingPhrases.end()) {
-//          map<Phrase, float>& currHypNgramScores = ngramScores[currHyp];
-//          float score = edge.GetScore() + currNgramScore;
-//          if (currHypNgramScores.find(currNgram) == currHypNgramScores.end())
-//            currHypNgramScores[currNgram] = score;
-//          else
-//            currHypNgramScores[currNgram] = log_sum(currHypNgramScores[currNgram], score);
-//        }
-//      }
-//      
-//    }
-//  }
-//  
-//  float Z = 9999999; //the total score of the lattice
-//  
-//  //Done - Print out ngram posteriors for final hyps
-//  for (set< const Hypothesis *>::iterator finalHyp = finalHyps.begin(); finalHyp != finalHyps.end(); ++finalHyp) {
-//    const Hypothesis* hyp = *finalHyp;
-//    const map<Phrase,float> & ngramPosteriors = ngramScores[hyp];
-//    
-//    for (map<Phrase, float>::const_iterator it = ngramPosteriors.begin(); it != ngramPosteriors.end(); ++it) {
-//      if (finalNgramScores.find(it->first) == finalNgramScores.end()) {
-//        finalNgramScores[it->first] = it->second;
-//      }
-//      else {
-//        finalNgramScores[it->first] = log_sum(it->second,  finalNgramScores[it->first]);
-//      }
-//    }
-//    
-//    if (Z == 9999999) {
-//      Z = forwardScore[hyp];
-//    }
-//    else {
-//      Z = log_sum(Z, forwardScore[hyp]);
-//    }
-//  }
-//  
-//  Z *= scale;  //scale the score
-// 
-//  //cout << "Z : " << Z << endl;
-//  
-//  //cout << "Before scaling posteriors " << endl;
-////  for (map<Phrase, float>::iterator finalScoresIt = finalNgramScores.begin();  finalScoresIt != finalNgramScores.end(); ++finalScoresIt) {
-////    cout << finalScoresIt->first << " : " << finalScoresIt->second << endl;
-////  }
-//  
-//  for (map<Phrase, float>::iterator finalScoresIt = finalNgramScores.begin();  finalScoresIt != finalNgramScores.end(); ++finalScoresIt) {
-//    finalScoresIt->second =  finalScoresIt->second * scale - Z;
-//  }
-//  //cout << "After scaling posteriors [scale=" << scale << "]"  << endl;
-//  
-//  //for (map<Phrase, float>::iterator finalScoresIt = finalNgramScores.begin();  finalScoresIt != finalNgramScores.end(); ++finalScoresIt) {
-////    cout << finalScoresIt->first << " : " << finalScoresIt->second << endl;
-////  }
-//  
-//}
-
-
 const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & incomingEdges)  {
-  //cout << "Edge: "<< *this <<endl;
   
   if (m_ngrams.size() > 0)
     return m_ngrams;
@@ -488,9 +337,12 @@ const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & inco
         const PathCounts &  edgeIncomingNgramPaths = edgeInNgramHist->second;
         size_t back = min(edgeIncomingNgram.GetSize(), edge->GetWordsSize());
         const Phrase&  edgeWords = edge->GetWords();
-        //cout << "Edge: "<< *edge <<endl;
-        //cout << "edgeWords: " << edgeWords << endl;
-        //cout << "edgeInNgram: " << edgeIncomingNgram << endl;
+        IFVERBOSE(3) {
+          cerr << "Edge: "<< *edge <<endl;
+          cerr << "edgeWords: " << edgeWords << endl;
+          cerr << "edgeInNgram: " << edgeIncomingNgram << endl;  
+        }
+        
         Phrase edgeSuffix(Output);
         Phrase ngramSuffix(Output);
         GetPhraseSuffix(edgeWords,back,edgeSuffix);
@@ -504,7 +356,7 @@ const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & inco
             for (size_t j = 0; j <= i ; ++j){
               newNgram.AddWord(GetWords().GetWord(j));
             }
-            //cout << "Inserting New Phrase : " << newNgram << endl;
+            VERBOSE(3, "Inserting New Phrase : " << newNgram << endl)
             
             for (PathCounts::const_iterator pathIt = edgeIncomingNgramPaths.begin(); pathIt !=  edgeIncomingNgramPaths.end(); ++pathIt) {
               Path newNgramPath = pathIt->first;
@@ -549,12 +401,12 @@ bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b) {
   return a->GetWordsBitmap().GetNumWordsCovered() <  b->GetWordsBitmap().GetNumWordsCovered();
 }
 
-const Hypothesis * calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas){
+vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas){
   
   float argmaxScore = -1e20;
-  TrellisPathList::const_iterator minMBRLossIterator;
-  
   TrellisPathList::const_iterator iter;
+  
+  vector<Word> argmaxTranslation;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
   {
     const TrellisPath &path = **iter;
@@ -568,12 +420,6 @@ const Hypothesis * calcMBRSol(const TrellisPathList& nBestList, map<Phrase, floa
     
     //Now score this translation
     float mbrScore = thetas[0] * translation.size();
-    
-    //Print out this translation
-    //cout << "Candidate: ";
-//    for (int i = 0; i < translation.size(); ++i)
-//      cout << translation[i] << " " ;
-//    cout << endl;  
     
     float ngramScore = 0;
     
@@ -591,9 +437,13 @@ const Hypothesis * calcMBRSol(const TrellisPathList& nBestList, map<Phrase, floa
 
     if (mbrScore > argmaxScore){
       argmaxScore = mbrScore;
-      minMBRLossIterator = iter;
+      cout << "NEW BEST: ";
+      for (int i = 0; i < translation.size(); ++i)
+        cout << translation[i] << " " ;
+      cout << "[" << argmaxScore << "]" << endl;  
+      argmaxTranslation = translation;
     }
   }
-  return (*minMBRLossIterator)->GetEdges().at(0);
+  return argmaxTranslation;
 }
 
