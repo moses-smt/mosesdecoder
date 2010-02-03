@@ -437,10 +437,12 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
 
     if (mbrScore > argmaxScore){
       argmaxScore = mbrScore;
-      cout << "NEW BEST: ";
-      for (int i = 0; i < translation.size(); ++i)
-        cout << translation[i] << " " ;
-      cout << "[" << argmaxScore << "]" << endl;  
+      IFVERBOSE(3) {
+        cout << "NEW BEST: ";
+        for (int i = 0; i < translation.size(); ++i)
+          cout << translation[i] << " " ;
+        cout << "[" << argmaxScore << "]" << endl;    
+      }
       argmaxTranslation = translation;
     }
   }
