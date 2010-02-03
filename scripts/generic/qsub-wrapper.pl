@@ -137,7 +137,7 @@ preparing_script();
 my $maysync = $old_sge ? "" : "-sync y";
 
 # submit the main job
-my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname $jobscript 2> $jobscript.log";
+my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname $jobscript > $jobscript.log 2>&1";
 safesystem($qsubcmd) or die;
 
 #getting id of submitted job
@@ -146,10 +146,12 @@ open (IN,"$jobscript.log") or die "Can't read main job id: $jobscript.log";
 chomp($res=<IN>);
 split(/\s+/,$res);
 my $id=$_[2];
+die "Failed to get job id from $jobscript.log, got: $res"
+  if $id !~ /^[0-9]+$/;
 close(IN);
 
-print SDTERR " res:$res\n";
-print SDTERR " id:$id\n";
+print STDERR " res:$res\n";
+print STDERR " id:$id\n";
 
 if ($old_sge) {
   # need to workaround -sync, add another job that will wait for the main one
