@@ -238,6 +238,15 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
 	cout << endl;
 }													 
 
+void IOWrapper::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+{
+	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
+	{
+		cout << mbrBestHypo[i];
+	}
+	cout << endl;
+}													 
+
 void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
 	if (hypo->GetPrevHypo())

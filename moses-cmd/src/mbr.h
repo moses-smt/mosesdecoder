@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-//std::vector<const Moses::Factor*> doMBR(const Moses::TrellisPathList& nBestList);
-const Moses::TrellisPath* doMBR(const Moses::TrellisPathList& nBestList);
+std::vector<const Moses::Factor*> doMBR(const Moses::TrellisPathList& nBestList);
 void GetOutputFactors(const Moses::TrellisPath &path, std::vector <const Moses::Factor*> &translation);
 float calculate_score(const std::vector< std::vector<const Moses::Factor*> > & sents, int ref, int hyp,  std::vector < std::map < std::vector < const Moses::Factor *>, int > > & ngram_stats );

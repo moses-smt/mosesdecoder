@@ -85,6 +85,7 @@ public:
 	Moses::InputType* GetInput(Moses::InputType *inputType);
 	void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+  void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors);
 	void OutputNBestList(const Moses::TrellisPathList &nBestList, long translationId);
 	void Backtrack(const Moses::Hypothesis *hypo);
 
