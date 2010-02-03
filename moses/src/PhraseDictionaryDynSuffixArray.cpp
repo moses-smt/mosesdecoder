@@ -150,34 +150,6 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, SAPhras
 	}
   return true;
 }
-void PhraseDictionaryDynSuffixArray::cacheWordProbs(wordID_t srcWord) const {
-  std::map<wordID_t, int> counts;
-  vector<wordID_t> vword(1, srcWord), wrdIndices;  
-  assert(srcSA_->getCorpusIndex(&vword, &wrdIndices));
-  vector<int> sntIndexes = getSntIndexes(wrdIndices, 1);	
-  float denom(0);
-  // for each occurrence of this word 
-  for(int snt = 0; snt < sntIndexes.size(); ++snt) {
-    int sntIdx = sntIndexes.at(snt); // get corpus index for sentence
-    assert(sntIdx != -1); 
-    int wrdSntIdx = wrdIndices.at(snt) - srcSntBreaks_.at(sntIdx); // get word index in sentence
-    const vector<int>& srcAlg = alignments_.at(sntIdx).alignedSrc.at(wrdSntIdx); // list of target words for this source word
-    // get target words aligned to srcword in this sentence
-    for(int i=0; i < srcAlg.size(); ++i) {
-      wordID_t trgID = trgCrp_->at(wrdIndices.at(snt));
-      ++counts[trgID];
-      ++denom;
-    }
-  }
-  // now we've gotten counts of all target words aligned to this source word
-  // get probs and cache all pairs
-  for(std::map<wordID_t, int>::const_iterator itrCnt = counts.begin();
-      itrCnt != counts.end(); ++itrCnt) {
-    pair<wordID_t, wordID_t> wordPair = std::make_pair(srcWord, itrCnt->first);
-    float prob = float(itrCnt->second) / denom;
-    wordPairCache_[wordPair] = prob;
-  }
-}
 float PhraseDictionaryDynSuffixArray::getLexicalWeight(const PhrasePair& phrasepair) const {
   float lexWeight(1.0);
   const SentenceAlignment& alignment = alignments_[phrasepair.m_sntIndex];
@@ -204,6 +176,34 @@ float PhraseDictionaryDynSuffixArray::getLexicalWeight(const PhrasePair& phrasep
     lexWeight *= ((1.0 / float(srcWordAlignments.size())) * sumPairProbs);  
   }  // end for each source word
   return lexWeight;
+}
+void PhraseDictionaryDynSuffixArray::cacheWordProbs(wordID_t srcWord) const {
+  std::map<wordID_t, int> counts;
+  vector<wordID_t> vword(1, srcWord), wrdIndices;  
+  assert(srcSA_->getCorpusIndex(&vword, &wrdIndices));
+  vector<int> sntIndexes = getSntIndexes(wrdIndices, 1);	
+  float denom(0);
+  // for each occurrence of this word 
+  for(int snt = 0; snt < sntIndexes.size(); ++snt) {
+    int sntIdx = sntIndexes.at(snt); // get corpus index for sentence
+    assert(sntIdx != -1); 
+    int srcWrdSntIdx = wrdIndices.at(snt) - srcSntBreaks_.at(sntIdx); // get word index in sentence
+    const vector<int>& srcAlg = alignments_.at(sntIdx).alignedSrc.at(srcWrdSntIdx); // list of target words for this source word
+    // get target words aligned to srcword in this sentence
+    for(int i=0; i < srcAlg.size(); ++i) {
+      wordID_t trgWord = trgCrp_->at(srcAlg[i] + trgSntBreaks_[sntIdx]);
+      ++counts[trgWord];
+      ++denom;
+    }
+  }
+  // now we've gotten counts of all target words aligned to this source word
+  // get probs and cache all pairs
+  for(std::map<wordID_t, int>::const_iterator itrCnt = counts.begin();
+      itrCnt != counts.end(); ++itrCnt) {
+    pair<wordID_t, wordID_t> wordPair = std::make_pair(srcWord, itrCnt->first);
+    float prob = float(itrCnt->second) / denom;
+    wordPairCache_[wordPair] = prob;
+  }
 }
 SAPhrase PhraseDictionaryDynSuffixArray::phraseFromSntIdx(const PhrasePair& phrasepair) const {
 // takes sentence indexes and looks up vocab IDs
