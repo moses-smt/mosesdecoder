@@ -36,6 +36,8 @@ my $debug = 0; # debug this script, do not delete any files in debug mode
 # the following line is set installation time by 'make release'.  BEWARE!
 my $BINDIR="";
 
+my $force_factored_filenames = 0;
+
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
 		       'bin-dir=s' => \$BINDIR, # allow to override default bindir path
@@ -88,7 +90,8 @@ $_HELP = 1
 		       'continue' => \$_CONTINUE,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
-		       'memscore:s' => \$_MEMSCORE
+		       'memscore:s' => \$_MEMSCORE,
+                       'force-factored-filenames' => \$force_factored_filenames,
                       );
 
 if ($_HELP) {
@@ -252,7 +255,7 @@ if ($___LAST_STEP == 9) {
     my ($f, $order, $filename);
     ($f, $order, $filename, $type) = split /:/, $lm, 4;
     die "ERROR: Wrong format of --lm. Expected: --lm factor:order:filename"
-      if $f !~ /^[0-9]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
+      if $f !~ /^[0-9,]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
     die "ERROR: Filename is not absolute: $filename"
       unless file_name_is_absolute $filename;
     die "ERROR: Language model file not found or empty: $filename"
@@ -306,7 +309,7 @@ my ($mono_following_fe,$swap_following_fe,$other_following_fe);
 my ($f_current,$e_current);
 
 ### Factored translation models
-my $___NOT_FACTORED = 1;
+my $___NOT_FACTORED = !$force_factored_filenames;
 my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("ERROR: format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
