@@ -96,7 +96,6 @@ bool logProbFlag = false;
 int negLogProb = 1;
 bool lexFlag = true;
 int firstWord = 0; // in hierarchical models the first word is the label
-int firstWordOutput = 0; // ... which in onlyDirect will be separated
 int countOfCounts[GT_MAX+1];
 float discountFactor[GT_MAX+1];
 
@@ -123,12 +122,10 @@ int main(int argc, char* argv[])
 		else if (strcmp(argv[i],"--Hierarchical") == 0) {
 			hierarchicalFlag = true;
 			firstWord = 1;       // phrase starts with word 1 (word 0 is label)
-			firstWordOutput = 0; // but still output label together with phrase
 			cerr << "processing hierarchical rules\n";
 		}
 		else if (strcmp(argv[i],"--OnlyDirect") == 0) {
 			onlyDirectFlag = true;
-			firstWordOutput = 1; // output label separately, so it's good to go
 			cerr << "outputing in correct phrase table format (no merging with inverse)\n";
 		}
 		else if (strcmp(argv[i],"--NewAlignmentFormat") == 0) {
@@ -426,20 +423,10 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 
 	// labels (if hierarchical)
 
-	if (hierarchicalFlag && onlyDirectFlag) 
-	{
-		if (! inverseFlag)
-			phraseTableFile << vcbS.getWord( phraseS[0] ) << " ";
-		phraseTableFile << vcbT.getWord( phraseT[0] ) << " ";
-		if (inverseFlag)
-			phraseTableFile << vcbS.getWord( phraseS[0] ) << " ";
-		phraseTableFile << "||| ";
-	}
-
 	// source phrase (unless inverse)
 	if (! inverseFlag) 
 	{
-		for(int j=firstWordOutput;j<phraseS.size();j++)
+		for(int j=0;j<phraseS.size();j++)
 		{
 			phraseTableFile << vcbS.getWord( phraseS[j] );
 			phraseTableFile << " ";
@@ -448,7 +435,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	}
 	
 	// target phrase
-	for(int j=firstWordOutput;j<phraseT.size();j++)
+	for(int j=0;j<phraseT.size();j++)
 	{
 		phraseTableFile << vcbT.getWord( phraseT[j] );
 		phraseTableFile << " ";
@@ -458,7 +445,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	// source phrase (if inverse)
 	if (inverseFlag) 
 	{
-		for(int j=firstWordOutput;j<phraseS.size();j++)
+		for(int j=0;j<phraseS.size();j++)
 		{
 			phraseTableFile << vcbS.getWord( phraseS[j] );
 			phraseTableFile << " ";
