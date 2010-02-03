@@ -224,7 +224,7 @@ void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<E
     }
     
     //Process ngrams now
-    for (int j =0 ; j < edges.size(); ++j) {
+    for (size_t j =0 ; j < edges.size(); ++j) {
       Edge& edge = edges[j];
       const NgramHistory & incomingPhrases = edge.GetNgrams(incomingEdges);
       

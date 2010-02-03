@@ -146,7 +146,7 @@ protected:
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
   size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
   vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
-  bool m_useNbestHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
+  bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
 
 	bool m_timeout; //! use timeout
 	size_t m_timeout_threshold; //! seconds after which time out is activated
@@ -461,9 +461,9 @@ public:
 	float GetMBRScale() const { return m_mbrScale; }
   size_t GetLatticeMBRPruningFactor() const { return m_lmbrPruning; }
   const vector<float>& GetLatticeMBRThetas() const {return m_lmbrThetas;}
-  bool  UseNbestHypSetForLatticeMBR() const { return m_useNbestHypSetForLatticeMBR;}
+  bool  UseLatticeHypSetForLatticeMBR() const { return m_useLatticeHypSetForLatticeMBR;}
   
-	
+  
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
 	

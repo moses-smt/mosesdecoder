@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
       pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, staticData.GetLatticeMBRPruningFactor());
       calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);      
       const Hypothesis *mbrBestHypo;
-      if (staticData.UseNbestHypSetForLatticeMBR()) {
+      if (!staticData.UseLatticeHypSetForLatticeMBR()) {
         size_t nBestSize = staticData.GetMBRSize();
         if (nBestSize <= 0)
 		    {
