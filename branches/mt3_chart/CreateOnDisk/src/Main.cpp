@@ -93,6 +93,7 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 	 1 = target phrase
 	 2 = align
 	 3 = scores
+	 4 = count
 	 */
 	char *tok = strtok (line," ");
 	while (tok != NULL)
@@ -128,12 +129,16 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 					break;
 				}
 				case 4:
-				{ // count info. Only store the 1st one
+					++stage;
+					break;
+				case 5:					
+				{ // count info. Only store the 2nd one
 					if (misc.size() == 0)
 					{
 						float val = Moses::Scan<float>(tok);
 						misc.push_back(val);
 					}
+					++stage;
 					break;
 				}
 				default:
