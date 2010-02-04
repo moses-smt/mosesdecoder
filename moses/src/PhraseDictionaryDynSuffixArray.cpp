@@ -290,7 +290,6 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
     float MLEprb = float(iterPhrases->second) / denom;
 		Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
-    targetPhrase->SetScore(MLEprb);
 		
     itrLexW = lexicalWeights.find(iterPhrases->first);
 		assert(itrLexW != lexicalWeights.end());
@@ -300,7 +299,6 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		scoreVector[1] = itrLexW->second;
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-
 		targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
 		
     //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
