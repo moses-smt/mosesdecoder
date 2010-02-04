@@ -69,7 +69,7 @@ int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
 		int targetSize = GetTargetSentenceSize(sntIndex);
 
     SentenceAlignment curSnt(sntIndex, sourceSize, targetSize); // initialize empty sentence 
-    for(int i=0; i < vtmp.size(); i+=2) {
+    for(int i=0; i < (int)vtmp.size(); i+=2) {
 			int sourcePos = vtmp[i];
 			int targetPos = vtmp[i+1];
 			assert(sourcePos < sourceSize);
@@ -106,7 +106,7 @@ void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
   return;
 }
 void PhraseDictionaryDynSuffixArray::CleanUp() {
-  return;
+  wordPairCache_.clear();
 }
 void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float, std::allocator<float> >&) {
   return;
@@ -118,7 +118,6 @@ int PhraseDictionaryDynSuffixArray::loadCorpus(InputFileStream& corpus, vector<w
   corpus.seekg(0);
   while(getline(corpus, line)) {
     sntArray.push_back(sntIdx);
-    int tmp = sntIdx;
     std::istringstream ss(line.c_str());
     while(ss >> word) {
       ++sntIdx;
@@ -189,19 +188,25 @@ void PhraseDictionaryDynSuffixArray::cacheWordProbs(wordID_t srcWord) const {
     assert(sntIdx != -1); 
     int srcWrdSntIdx = wrdIndices.at(snt) - srcSntBreaks_.at(sntIdx); // get word index in sentence
     const vector<int>& srcAlg = alignments_.at(sntIdx).alignedSrc.at(srcWrdSntIdx); // list of target words for this source word
-    // get target words aligned to srcword in this sentence
-    for(int i=0; i < srcAlg.size(); ++i) {
-      wordID_t trgWord = trgCrp_->at(srcAlg[i] + trgSntBreaks_[sntIdx]);
-      ++counts[trgWord];
+    if(srcAlg.size() == 0) {
+      ++counts[Vocab::kOOVWordID]; // if not alligned then align to NULL word
       ++denom;
+    }
+    else { //get target words aligned to srcword in this sentence
+      for(int i=0; i < srcAlg.size(); ++i) {
+        wordID_t trgWord = trgCrp_->at(srcAlg[i] + trgSntBreaks_[sntIdx]);
+        ++counts[trgWord];
+        ++denom;
+      }
     }
   }
   // now we've gotten counts of all target words aligned to this source word
+  // add null word pair
   // get probs and cache all pairs
   for(std::map<wordID_t, int>::const_iterator itrCnt = counts.begin();
       itrCnt != counts.end(); ++itrCnt) {
     pair<wordID_t, wordID_t> wordPair = std::make_pair(srcWord, itrCnt->first);
-    float prob = float(itrCnt->second) / denom;
+    float prob = float(itrCnt->second) / float(denom);
     wordPairCache_[wordPair] = prob;
   }
 }
@@ -317,7 +322,7 @@ void PhraseDictionaryDynSuffixArray::load(string fname) {
 SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
 	:m_sntIndex(sntIndex)
 	,alignedCountTrg(targetSize, 0)
-	,alignedSrc(sourceSize)
+	,alignedSrc(sourceSize, 0)
 {
 	for(int i=0; i < sourceSize; ++i) {
 		vector<int> trgWrd;
