@@ -288,9 +288,21 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   // convert to moses phrase pairs
   std::map<SAPhrase, int>::const_iterator iterPhrases = phraseCounts.begin(); 
   for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
-    TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
     float MLEprb = float(iterPhrases->second) / denom;
+		Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
     targetPhrase->SetScore(MLEprb);
+		
+    itrLexW = lexicalWeights.find(iterPhrases->first);
+		assert(itrLexW != lexicalWeights.end());
+		
+		Scores scoreVector(2);
+		scoreVector[0] = MLEprb;
+		scoreVector[1] = itrLexW->second;
+		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
+		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
+
+		targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
+		
     //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
     ret->Add(targetPhrase);
   }
