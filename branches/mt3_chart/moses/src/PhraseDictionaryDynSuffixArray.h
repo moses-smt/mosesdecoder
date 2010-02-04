@@ -30,7 +30,7 @@ public:
 class PhrasePair
 {
 public:
-	int m_sntIndex, m_startTarget, m_endTarget, m_startSource, m_endSource;
+	int m_startTarget, m_endTarget, m_startSource, m_endSource, m_sntIndex;
 	PhrasePair(int startTarget, int endTarget, int startSource, int endSource, int sntIndex)
 	: m_startTarget(startTarget)
 	, m_endTarget(endTarget)
@@ -99,9 +99,9 @@ private:
   bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;
   void cacheWordProbs(wordID_t) const;
   float getLexicalWeight(const PhrasePair&) const;
-	int GetSourceSentenceSize(int sentenceId) const
+	int GetSourceSentenceSize(size_t sentenceId) const
 	{ return (sentenceId==srcSntBreaks_.size()-1) ? srcCrp_->size() - srcSntBreaks_.at(sentenceId) : srcSntBreaks_.at(sentenceId+1) - srcSntBreaks_.at(sentenceId); }
-	int GetTargetSentenceSize(int sentenceId) const
+	int GetTargetSentenceSize(size_t sentenceId) const
 	{ return (sentenceId==trgSntBreaks_.size()-1) ? trgCrp_->size() - trgSntBreaks_.at(sentenceId) : trgSntBreaks_.at(sentenceId+1) - trgSntBreaks_.at(sentenceId); }
 	
 };
