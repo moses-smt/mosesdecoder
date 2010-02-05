@@ -154,6 +154,7 @@ int main(int argc, char** argv) {
   bool mapdecode;
   vector<string> ngramorders;
   bool raoBlackwell;
+  bool use_moses_kbesthyposet;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -229,7 +230,8 @@ int main(int argc, char** argv) {
   ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
           ("rao-blackwell", po::value(&raoBlackwell)->zero_tokens()->default_value(false), "Do Rao-Blackwellisation (aka conditional estimation")
   ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding")
-  ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs");
+  ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs")
+  ("use-moses-kbesthyposet", po::value(&use_moses_kbesthyposet)->zero_tokens()->default_value(false), "Use Moses to generate kbest hypothesis set");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -739,9 +741,25 @@ int main(int argc, char** argv) {
       }
     }
     if (mbr_decoding) {
-      pair<const Translation*,float> maxtrans = transCollector->getMbr(mbr_size, topNsize);
-      (*out) << *maxtrans.first;
-      (*out) << endl << flush;
+      pair<const Translation*,float> maxtrans;
+      if (use_moses_kbesthyposet) {
+        //let's run the decoder
+        MosesDecoder moses;
+        Hypothesis* hypothesis;
+        TranslationOptionCollection* toc;
+        std::vector<Word> source;
+        timer.check("Running decoder");
+        moses.decode(line,hypothesis,toc,source, mbr_size);
+        const std::vector<Translation> &  translations = moses.GetNbestTranslations(); 
+        size_t maxtransIndex = transCollector->getMbr(translations, topNsize);  
+        (*out) << translations[maxtransIndex];
+        (*out) << endl << flush;
+      }
+      else {
+        maxtrans = transCollector->getMbr(mbr_size, topNsize);  
+        (*out) << *maxtrans.first;
+        (*out) << endl << flush;
+      }
     }
     ++lineno;
   }

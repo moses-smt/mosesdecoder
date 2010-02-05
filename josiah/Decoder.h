@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SearchNormal.h"
 #include "SearchRandom.h"
 #include "StaticData.h"
+#include "TrellisPathList.h"
 #include "TranslationOptionCollectionText.h"
 
 //
@@ -35,6 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 namespace Josiah {
+  
+typedef std::vector<const Moses::Factor*> Translation;
 
 /**
  * Initialise moses (including StaticData) using the given ini file and debuglevel, passing through any 
@@ -58,11 +61,12 @@ void OutputWeights(const std::vector<float>& weights, std::ostream& out);
 class Decoder {
   public:
     Decoder(): m_isMonotone(false), m_useNoLM(false), m_useZeroWeights(false) {}
-    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent) = 0;
+    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent, size_t nBestSize = 0) = 0;
     virtual void SetMonotone(bool isMonotone) {m_isMonotone = isMonotone;}
     virtual void SetNoLM(bool useNoLM) {m_useNoLM = useNoLM;}
     virtual void SetZeroWeights(bool useZeroWeights) {m_useZeroWeights = useZeroWeights;}
     virtual ~Decoder();
+    
   
   protected:
     bool m_isMonotone;
@@ -77,12 +81,18 @@ class MosesDecoder : public virtual Decoder {
   public:
     MosesDecoder()  {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc,  
-                        std::vector<Moses::Word>& sent);
+                        std::vector<Moses::Word>& sent, size_t nBestSize = 0);
     virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
-     
+    void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
+    void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<Translation> &);
+    const std::vector<Translation> & GetNbestTranslations() {
+      return m_translations;
+    }
   private:
     std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
+    std::vector<Translation> m_translations;
+
 };
 
 
