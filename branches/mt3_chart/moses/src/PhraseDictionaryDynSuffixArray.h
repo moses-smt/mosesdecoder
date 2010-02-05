@@ -91,6 +91,7 @@ private:
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
   mutable std::map<pair<wordID_t, wordID_t>, float> wordPairCache_; 
+
   int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(InputFileStream& aligs);
   vector<int> getSntIndexes(vector<unsigned>&, const int) const; 	
