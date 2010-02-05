@@ -146,10 +146,19 @@ namespace Josiah {
       for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
       {
           const Hypothesis &edge = *edges[currEdge];
-          for (size_t pos = 0; pos < edge.GetCurrTargetLength(); ++pos) {
-            t.push_back(edge.GetFactor(pos, 0));
+          const Phrase& phrase = edge.GetCurrTargetPhrase();
+          size_t size = phrase.GetSize();
+          for (size_t pos = 0 ; pos < size ; pos++)
+          {
+            const Factor *factor = phrase.GetFactor(pos, 0);
+            t.push_back(factor);
           }
       }
+      //for (size_t i = 0; i < t.size(); ++i) {
+//        cout << *(t[i]) << " ";
+//      }
+//      cout << endl;
+      
       m_translations.push_back(t);
     }  
   }
