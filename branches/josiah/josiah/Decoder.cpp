@@ -18,6 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "Decoder.h"
+#include "TrellisPathCollection.h"
+#include "TrellisPath.h"
 
 using namespace std;
 using namespace Moses;
@@ -58,11 +60,10 @@ namespace Josiah {
     }
     delete[] mosesargv;
     if (!weightfile.empty())
-      const_cast<StaticData&>(StaticData::Instance()).InitWeightsFromFile(weightfile);
+      const_cast<StaticData&>(StaticData::Instance()).InitWeightsFromFile(weightfile, true); //l1-normalize weights 
   }
   
-  
-  void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc, std::vector<Word>& sent_vector) {
+  void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc, std::vector<Word>& sent_vector, size_t nBestSize) {
      
       const StaticData &staticData = StaticData::Instance();
 
@@ -107,7 +108,10 @@ namespace Josiah {
       const vector <DecodeGraph*>
             &decodeStepVL = staticData.GetDecodeStepVL();
       m_toc->CreateTranslationOptions(decodeStepVL);
-      
+       
+      if (nBestSize > 0)
+        const_cast<StaticData&>(staticData).SetOutputSearchGraph(true);
+    
       m_searcher.reset(createSearch(sentence,*m_toc));
       m_searcher->ProcessSentence();
   
@@ -115,10 +119,103 @@ namespace Josiah {
       bestHypo = const_cast<Hypothesis*>(m_searcher->GetBestHypothesis());
       cerr << "Moses hypothesis: " << *bestHypo << endl;
       toc = m_toc.get();
+    
+      // n-best
+      if (nBestSize > 0) {
+        TrellisPathList nBestList;
+        CalcNBest(nBestSize, nBestList,true);
+        //need to convert m_nBestList into some format the gibbler can use
+        TrellisToTranslations(nBestList, m_translations);
+      }
       
       const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
       SetFeatureWeights(prevFeatureWeights);
+      if (nBestSize > 0)
+        const_cast<StaticData&>(staticData).SetOutputSearchGraph(false);
+    
   }
+  
+  void MosesDecoder::TrellisToTranslations(const TrellisPathList &nBestList, vector<Translation> &m_translations){
+    TrellisPathList::const_iterator iter;
+    for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
+    {
+      const TrellisPath &path = **iter;
+      const std::vector<const Hypothesis *> &edges = path.GetEdges();
+      Translation t;
+      
+      for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+      {
+          const Hypothesis &edge = *edges[currEdge];
+          for (size_t pos = 0; pos < edge.GetCurrTargetLength(); ++pos) {
+            t.push_back(edge.GetFactor(pos, 0));
+          }
+      }
+      m_translations.push_back(t);
+    }  
+  }
+  
+  void MosesDecoder::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) const
+  {
+    if (count <= 0)
+      return;
+    
+    const std::vector < HypothesisStack* > &hypoStackColl = m_searcher->GetHypothesisStacks();
+    
+    vector<const Hypothesis*> sortedPureHypo = hypoStackColl.back()->GetSortedList();
+    
+    if (sortedPureHypo.size() == 0)
+      return;
+    
+    TrellisPathCollection contenders;
+    
+    set<Phrase> distinctHyps;
+    
+    // add all pure paths
+    vector<const Hypothesis*>::const_iterator iterBestHypo;
+    for (iterBestHypo = sortedPureHypo.begin() 
+         ; iterBestHypo != sortedPureHypo.end()
+         ; ++iterBestHypo)
+    {
+      contenders.Add(new TrellisPath(*iterBestHypo));
+    }
+    
+    // factor defines stopping point for distinct n-best list if too many candidates identical
+    size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+    if (nBestFactor < 1) nBestFactor = 1000; // 0 = unlimited
+    
+    // MAIN loop
+    for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * nBestFactor) ; iteration++)
+    {
+      // get next best from list of contenders
+      TrellisPath *path = contenders.pop();
+      assert(path);
+      if(onlyDistinct)
+      {
+        Phrase tgtPhrase = path->GetSurfacePhrase();
+        if (distinctHyps.insert(tgtPhrase).second) 
+          ret.Add(path);
+      }
+      else 
+      {
+        ret.Add(path);
+      }
+      
+      // create deviations from current best
+      path->CreateDeviantPaths(contenders);		
+      
+      if(onlyDistinct)
+      {
+        const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+        if (nBestFactor > 0)
+          contenders.Prune(count * nBestFactor);
+      }
+      else
+      {
+        contenders.Prune(count);
+      }
+    }
+  }
+  
   
   Search* MosesDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
     return new SearchNormal(sentence,toc);

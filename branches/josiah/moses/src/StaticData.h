@@ -484,6 +484,10 @@ public:
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
   
   size_t GetNumSamplingIterations() const { return m_numSamplingIters;} ;
+  
+  void SetOutputSearchGraph(bool osg) {
+    m_outputSearchGraph = osg;
+  }
 };
 
 }

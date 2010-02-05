@@ -211,6 +211,60 @@ namespace Josiah
     return topNTranslations[minMBRLossIdx];
   }
   
+  size_t GibblerMaxTransDecoder::getMbr(const vector<Translation>& translations, size_t topNsize) const {
+    
+    //Posterior probs computed using the whole evidence set
+    //MBR decoding outer loop using configurable size
+    vector<pair<const Translation*, float> > topNTranslations;
+    getNbest(topNTranslations,topNsize);
+    
+    GainFunctionVector gEvidenceSet;
+    vector<pair<const Translation*, float> >::iterator it;
+    for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it) {
+      VERBOSE(1, "translation: " <<   ToString(*it->first) << " " << (it->second) << endl);
+      gEvidenceSet.push_back(new SentenceBLEU(4,*it->first)); //Calc the sufficient statistics for the translation
+    }
+    
+    GainFunctionVector gHypothesisSet;
+    vector<Translation>::const_iterator itt;
+    for (itt = translations.begin(); itt != translations.end(); ++itt) {
+      VERBOSE(1, "translation: " <<   ToString(*itt)  << endl);
+      gHypothesisSet.push_back(new SentenceBLEU(4,*itt)); //Calc the sufficient statistics for the translation
+    }
+    
+    //Main MBR computation done here
+    float bleu(0.0), weightedLoss(0.0), weightedLossCumul(0.0), minMBRLoss(100000);
+    vector<float> mbrLoss;
+    int minMBRLossIdx(-1);
+    size_t mbrSize = translations.size();
+    VERBOSE(0, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
+    
+    //Outer loop using only the top #mbrSize samples 
+    for(size_t i = 0; i < mbrSize; ++i) {
+      weightedLossCumul = 0.0;
+      const GainFunction& gf = gHypothesisSet[i];
+      VERBOSE(2, "Reference " << ToString(translations[i]) << endl);
+      for(size_t j = 0; j < topNTranslations.size(); ++j) {//Inner loop using all samples
+        //if (static_cast<size_t>(i) != j) {
+          bleu = gf.ComputeGain(gEvidenceSet[j]);
+          VERBOSE(2, "Hypothesis " << ToString(*topNTranslations[j].first) << endl);
+          weightedLoss = (1- bleu) * topNTranslations[j].second;
+          VERBOSE(2, "Bleu " << bleu << ", prob " <<  topNTranslations[j].second << ", weightedLoss : " << weightedLoss << endl);
+          weightedLossCumul += weightedLoss;
+          if (weightedLossCumul > minMBRLoss)
+            break;
+        //}
+      }
+      VERBOSE(2, "Bayes risk for cand " << i << " " <<  weightedLossCumul << endl);
+      if (weightedLossCumul < minMBRLoss){
+        minMBRLoss = weightedLossCumul;
+        minMBRLossIdx = i;
+      }
+    }
+    VERBOSE(2, "Minimum Bayes risk cand is " <<  minMBRLossIdx << " with risk " << minMBRLoss << endl);
+    
+    return minMBRLossIdx;
+  }
   
 }
 
