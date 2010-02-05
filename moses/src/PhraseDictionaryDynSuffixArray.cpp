@@ -53,6 +53,12 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 	InputFileStream alignStrme(alignments);
   cerr << "Loading Alignment File...\n"; 
   loadAlignments(alignStrme);
+  //for(int i=0; i < srcCrp_->size(); ++i)
+  //  cacheWordProbs(srcCrp_->at(i));
+  //std::map<pair<wordID_t, wordID_t>, float>::iterator itrLex =  wordPairCache_.begin();
+  //for(; itrLex != wordPairCache_.end(); ++itrLex)
+  //  cout << vocab_->getWord(itrLex->first.second) << " " << vocab_->getWord(itrLex->first.first) << " " << std::setprecision(7) << itrLex->second << endl;
+  //exit(1);
   return true;
 }
 int PhraseDictionaryDynSuffixArray::loadAlignments(InputFileStream& align) {
@@ -152,18 +158,14 @@ bool PhraseDictionaryDynSuffixArray::getLocalVocabIDs(const Phrase& src, SAPhras
 float PhraseDictionaryDynSuffixArray::getLexicalWeight(const PhrasePair& phrasepair) const {
   float lexWeight(1.0);
   const SentenceAlignment& alignment = alignments_[phrasepair.m_sntIndex];
+  std::map<pair<wordID_t, wordID_t>, float>::const_iterator itrCache; 
   // for each source word
   for(int srcIdx = phrasepair.m_startSource; srcIdx <= phrasepair.m_endSource; ++srcIdx) {
     float sumPairProbs(0);
     wordID_t srcWord = srcCrp_->at(srcIdx + srcSntBreaks_[phrasepair.m_sntIndex]);  // localIDs
     const vector<int>& srcWordAlignments = alignment.alignedSrc.at(srcIdx);
-    // extract target words aligned with this source word
-    for(int i = 0; i < srcWordAlignments.size(); ++i) {
-      int trgIdx = srcWordAlignments[i];
-      wordID_t trgWord = trgCrp_->at(trgIdx + trgSntBreaks_[phrasepair.m_sntIndex]);
-      // get probability of this source->target word pair
-      pair<wordID_t, wordID_t> wordpair = std::make_pair(srcWord, trgWord);
-      std::map<pair<wordID_t, wordID_t>, float>::const_iterator itrCache; 
+    if(srcWordAlignments.size() == 0) { // get p(src|NULL)
+      pair<wordID_t, wordID_t> wordpair = std::make_pair(srcWord, Vocab::kOOVWordID);
       itrCache = wordPairCache_.find(wordpair);
       if(itrCache == wordPairCache_.end()) { // if not in cache
         cacheWordProbs(srcWord);
@@ -172,8 +174,26 @@ float PhraseDictionaryDynSuffixArray::getLexicalWeight(const PhrasePair& phrasep
       assert(itrCache != wordPairCache_.end());
       sumPairProbs += itrCache->second;
     }
-    lexWeight *= ((1.0 / float(srcWordAlignments.size())) * sumPairProbs);  
+    else { // extract p(src|trg) 
+      for(int i = 0; i < srcWordAlignments.size(); ++i) {
+        int trgIdx = srcWordAlignments[i];
+        wordID_t trgWord = trgCrp_->at(trgIdx + trgSntBreaks_[phrasepair.m_sntIndex]);
+        // get probability of this source->target word pair
+        pair<wordID_t, wordID_t> wordpair = std::make_pair(srcWord, trgWord);
+        itrCache = wordPairCache_.find(wordpair);
+        if(itrCache == wordPairCache_.end()) { // if not in cache
+          cacheWordProbs(srcWord);
+          itrCache = wordPairCache_.find(wordpair); // search cache again
+        }
+        assert(itrCache != wordPairCache_.end());
+        sumPairProbs += itrCache->second;
+      }
+    }
+    float normalizer = srcWordAlignments.size() < 1 ? 1 : 
+      1.0 / float(srcWordAlignments.size());
+    lexWeight *= (normalizer * sumPairProbs);  
   }  // end for each source word
+  // TODO::Need to get p(NULL|trg)
   return lexWeight;
 }
 void PhraseDictionaryDynSuffixArray::cacheWordProbs(wordID_t srcWord) const {
@@ -201,12 +221,12 @@ void PhraseDictionaryDynSuffixArray::cacheWordProbs(wordID_t srcWord) const {
     }
   }
   // now we've gotten counts of all target words aligned to this source word
-  // add null word pair
   // get probs and cache all pairs
   for(std::map<wordID_t, int>::const_iterator itrCnt = counts.begin();
       itrCnt != counts.end(); ++itrCnt) {
     pair<wordID_t, wordID_t> wordPair = std::make_pair(srcWord, itrCnt->first);
-    float prob = float(itrCnt->second) / float(denom);
+    float prob = float(itrCnt->second) / float(denom);  // gives p(src->trg)
+    //float(itrCnt->second) / float(counts.size()) gives p(trg->src) 
     wordPairCache_[wordPair] = prob;
   }
 }
@@ -238,7 +258,7 @@ TargetPhrase* PhraseDictionaryDynSuffixArray::getMosesFactorIDs(const SAPhrase& 
   return targetPhrase;
 }
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
-	cout << "\n" << src << "\n";	
+	//cout << "\n" << src << "\n";	
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
 	const StaticData &staticData = StaticData::Instance();
 	size_t sourceSize = src.GetSize();
@@ -304,6 +324,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
     ret->Add(targetPhrase);
   }
+  ret->NthElement(m_tableLimit); // sort the phrases for the dcoder
 	return ret;
 }
 vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdIndices, 
@@ -332,7 +353,7 @@ void PhraseDictionaryDynSuffixArray::load(string fname) {
 SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
 	:m_sntIndex(sntIndex)
 	,alignedCountTrg(targetSize, 0)
-	,alignedSrc(sourceSize, 0)
+	,alignedSrc(sourceSize)
 {
 	for(int i=0; i < sourceSize; ++i) {
 		vector<int> trgWrd;
