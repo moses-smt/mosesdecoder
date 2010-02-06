@@ -90,7 +90,7 @@ libmoses_a_SOURCES = \
 	WordLattice.cpp \
 	WordsRange.cpp \
 	XmlOption.cpp \
-	PhraseDictionaryDynSuffixArray.cpp \ 
+	PhraseDictionaryDynSuffixArray.cpp \
 	DynSuffixArray.cpp \
 	DynSAInclude/vocab.cpp \
 	DynSAInclude/file.cpp

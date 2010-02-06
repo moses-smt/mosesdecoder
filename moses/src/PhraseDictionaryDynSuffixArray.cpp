@@ -7,7 +7,7 @@
 
 namespace Moses {
   PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(size_t numScoreComponent):
-    PhraseDictionary(numScoreComponent) { 
+    PhraseDictionary(numScoreComponent), maxSampleSize_(500) { 
     srcSA_ = 0; 
     trgSA_ = 0;
     srcCrp_ = new vector<wordID_t>();
@@ -189,7 +189,7 @@ float PhraseDictionaryDynSuffixArray::getLexicalWeight(const PhrasePair& phrasep
         sumPairProbs += itrCache->second;
       }
     }
-    float normalizer = srcWordAlignments.size() < 1 ? 1 : 
+    float normalizer = srcWordAlignments.size() < 2 ? 1.0 : 
       1.0 / float(srcWordAlignments.size());
     lexWeight *= (normalizer * sumPairProbs);  
   }  // end for each source word
@@ -268,9 +268,11 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
   std::map<SAPhrase, int> phraseCounts;
   std::map<SAPhrase, float> lexicalWeights;
   std::map<SAPhrase, float>::iterator itrLexW;
-  vector<wordID_t> wrdIndices(0);  
+  vector<unsigned> wrdIndices(0);  
   // extract sentence IDs from SA and return rightmost index of phrases
   if(!srcSA_->getCorpusIndex(&(localIDs.words), &wrdIndices)) return ret;
+  if(wrdIndices.size() > maxSampleSize_) 
+    wrdIndices = sampleSelection(wrdIndices);
   vector<int> sntIndexes = getSntIndexes(wrdIndices, sourceSize);	
   // for each sentence with this phrase
   for(int snt = 0; snt < sntIndexes.size(); ++snt) {
@@ -290,7 +292,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 															leftIdx, 
 															rightIdx); 
 		//cerr << "extracted " << phrasePairs.size() << endl;
-	  
+    
     denom += phrasePairs.size(); // keep track of count of each extracted phrase pair  	
 		vector<PhrasePair*>::iterator iterPhrasePair;
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair) {
@@ -306,23 +308,55 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		RemoveAllInColl(phrasePairs);
   } // done with ALL sentences
   // convert to moses phrase pairs
-  std::map<SAPhrase, int>::const_iterator iterPhrases = phraseCounts.begin(); 
-  for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
-    float MLEprb = float(iterPhrases->second) / denom;
-		Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
-		
-    itrLexW = lexicalWeights.find(iterPhrases->first);
-		assert(itrLexW != lexicalWeights.end());
-		
-		Scores scoreVector(2);
-		scoreVector[0] = MLEprb;
-		scoreVector[1] = itrLexW->second;
-		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
-		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-		targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
-		
-    //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
-    ret->Add(targetPhrase);
+  std::map<SAPhrase, int>::const_iterator iterPhrases; 
+  const int maxReturn = 10;
+  if(phraseCounts.size() > maxReturn) {  // only return top scoring phrases
+    std::multimap<float, const SAPhrase*> bestScoringPhrases;
+    iterPhrases = phraseCounts.begin(); 
+    for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
+      float MLEprb = float(iterPhrases->second) / denom;
+      itrLexW = lexicalWeights.find(iterPhrases->first);
+      assert(itrLexW != lexicalWeights.end());
+      float score = MLEprb * itrLexW->second;
+      bestScoringPhrases.insert(pair<float, const SAPhrase*>(score, &iterPhrases->first));	
+    }
+    std::multimap<float, const SAPhrase*>::reverse_iterator riterBest;
+    riterBest = bestScoringPhrases.rbegin();
+    int cnt(0);
+    for(; riterBest != bestScoringPhrases.rend() && (cnt++ < maxReturn); ++riterBest) {
+      iterPhrases = phraseCounts.find(*riterBest->second);
+      Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
+      float MLEprb = float(iterPhrases->second) / denom;
+      itrLexW = lexicalWeights.find(iterPhrases->first);
+      assert(itrLexW != lexicalWeights.end());
+      Scores scoreVector(2);
+      scoreVector[0] = MLEprb;
+      scoreVector[1] = itrLexW->second;
+      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
+      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
+      targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
+      
+      //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
+      ret->Add(targetPhrase);
+    }
+  }
+  else {  // return all phrases found
+    iterPhrases = phraseCounts.begin(); 
+    for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
+      Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
+      float MLEprb = float(iterPhrases->second) / denom;
+      itrLexW = lexicalWeights.find(iterPhrases->first);
+      assert(itrLexW != lexicalWeights.end());
+      Scores scoreVector(2);
+      scoreVector[0] = MLEprb;
+      scoreVector[1] = itrLexW->second;
+      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
+      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
+      targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
+      
+      //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
+      ret->Add(targetPhrase);
+    }
   }
   ret->NthElement(m_tableLimit); // sort the phrases for the dcoder
 	return ret;
@@ -342,6 +376,15 @@ vector<int> PhraseDictionaryDynSuffixArray::getSntIndexes(vector<unsigned>& wrdI
       sntIndexes.push_back(index);  // store the index of the sentence in the corpus
   }
   return sntIndexes;
+}
+vector<unsigned> PhraseDictionaryDynSuffixArray::sampleSelection(vector<unsigned> sample) const {
+  int size = sample.size();
+  //if(size < maxSampleSize_) return sample;
+  vector<unsigned> subSample;
+  int jump = size / maxSampleSize_;
+  for(int i=0; i < size; i+=jump)
+   subSample.push_back(sample.at(i));
+  return subSample;
 }
 void PhraseDictionaryDynSuffixArray::save(string fname) {
   // save vocab, SAs, corpus, alignments 
