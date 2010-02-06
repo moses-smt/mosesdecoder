@@ -44,7 +44,7 @@ typedef std::vector<const Moses::Factor*> Translation;
  * other command line arguments. This must be called, even if the moses decoder is not being used, as the
  * sampler requires the moses tables.
  **/
-void initMoses(const std::string& inifile, const std::string& weightfile, int debuglevel, int argc=0, char** argv=NULL);
+void initMoses(const std::string& inifile, const std::string& weightfile, int debuglevel, bool l1normalize = false, int argc=0, char** argv=NULL );
 
 //Convenience methods for accessing the moses global data structures
 void GetFeatureNames(std::vector<std::string>* featureNames);
