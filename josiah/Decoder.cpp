@@ -39,7 +39,7 @@ namespace Josiah {
   }
     
   
-  void initMoses(const string& inifile, const std::string& weightfile, int debuglevel, int argc, char** argv) {
+  void initMoses(const string& inifile, const std::string& weightfile, int debuglevel, bool l1normalize, int argc, char** argv) {
     static int BASE_ARGC = 4;
     Parameter* params = new Parameter();
     char ** mosesargv = new char*[BASE_ARGC + argc];
@@ -60,7 +60,7 @@ namespace Josiah {
     }
     delete[] mosesargv;
     if (!weightfile.empty())
-      const_cast<StaticData&>(StaticData::Instance()).InitWeightsFromFile(weightfile, true); //l1-normalize weights 
+      const_cast<StaticData&>(StaticData::Instance()).InitWeightsFromFile(weightfile, l1normalize); //l1-normalize weights 
   }
   
   void MosesDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc, std::vector<Word>& sent_vector, size_t nBestSize) {
