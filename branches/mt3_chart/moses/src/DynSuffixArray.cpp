@@ -169,13 +169,14 @@ bool DynSuffixArray::getCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
     // for each index returned from check corpus SA[i] + pos for phrase[pos]
     for(int i=lwrBnd; i < uprBnd; ++i) { 
       int rightIdx = SA_->at(i) + pos;
-      if(corpus_->at(rightIdx) != phrase->at(pos)) {
-        if(indices->size() > 0) // past the phrases since SA is ordered
-          break;
+      if((rightIdx >= corpus_->size()) || // at end of corpus
+          (corpus_->at(rightIdx) != phrase->at(pos))) {  // or if word doesn't match
+        if(indices->size() > 0) break; // past the phrases since SA is ordered
         ++lwrBnd; // else move index up so not checked again
       }
       else if(pos == phrasesize-1) { // found phrase so store word index for snt retrieval
         indices->push_back(rightIdx);  // store rigthmost index of phrase in sentence for alignment extractor 
+        //if(indices->size() > 300) break;
       }
     }
   }

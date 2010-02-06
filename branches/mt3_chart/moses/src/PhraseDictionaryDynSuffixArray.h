@@ -91,9 +91,10 @@ private:
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
   mutable std::map<pair<wordID_t, wordID_t>, float> wordPairCache_; 
-
+  const int maxSampleSize_;
   int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(InputFileStream& aligs);
+  vector<unsigned> sampleSelection(vector<unsigned>) const;
   vector<int> getSntIndexes(vector<unsigned>&, const int) const; 	
   TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
   SAPhrase phraseFromSntIdx(const PhrasePair&) const;
@@ -104,7 +105,6 @@ private:
 	{ return (sentenceId==srcSntBreaks_.size()-1) ? srcCrp_->size() - srcSntBreaks_.at(sentenceId) : srcSntBreaks_.at(sentenceId+1) - srcSntBreaks_.at(sentenceId); }
 	int GetTargetSentenceSize(size_t sentenceId) const
 	{ return (sentenceId==trgSntBreaks_.size()-1) ? trgCrp_->size() - trgSntBreaks_.at(sentenceId) : trgSntBreaks_.at(sentenceId+1) - trgSntBreaks_.at(sentenceId); }
-	
 };
 
 } // end namespace
