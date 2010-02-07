@@ -86,9 +86,8 @@ class MosesDecoder : public virtual Decoder {
     virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
     void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
     void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<std::pair<Translation,float> > &);
-    const std::vector<std::pair<Translation, float> > & GetNbestTranslations() {
-      return m_translations;
-    }
+    const std::vector<std::pair<Translation, float> > & GetNbestTranslations() {return m_translations;}
+    void PrintNBest(std::ostream& out) const;
   private:
     std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;

@@ -155,6 +155,7 @@ int main(int argc, char** argv) {
   vector<string> ngramorders;
   bool raoBlackwell;
   bool use_moses_kbesthyposet;
+  bool print_moseskbest;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -231,7 +232,8 @@ int main(int argc, char** argv) {
           ("rao-blackwell", po::value(&raoBlackwell)->zero_tokens()->default_value(false), "Do Rao-Blackwellisation (aka conditional estimation")
   ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding")
   ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs")
-  ("use-moses-kbesthyposet", po::value(&use_moses_kbesthyposet)->zero_tokens()->default_value(false), "Use Moses to generate kbest hypothesis set");
+  ("use-moses-kbesthyposet", po::value(&use_moses_kbesthyposet)->zero_tokens()->default_value(false), "Use Moses to generate kbest hypothesis set")
+  ("print-moseskbest", po::value(&print_moseskbest)->zero_tokens()->default_value(false), "Print Moses kbest");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -759,6 +761,10 @@ int main(int argc, char** argv) {
         
         timer.check("Running decoder");
         moses.decode(line,hypothesis,toc,source, mbr_size);
+        
+        if (print_moseskbest) {
+          moses.PrintNBest(std::cout);
+        }
         //Restore original weights
         transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),normalizer));
         const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
