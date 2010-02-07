@@ -751,14 +751,17 @@ int main(int argc, char** argv) {
         TranslationOptionCollection* toc;
         std::vector<Word> source;
         //Should L1Normalize weights before running the decoder
-        vector<float> weights = StaticData::Instance().GetAllWeights();
+        /*vector<float> weights = StaticData::Instance().GetAllWeights();
         float normalizer = 0.0;
         for (size_t i = 0; i < weights.size(); ++i) {
           normalizer += abs((weights)[i]);    
         }
         transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),1.0/normalizer));
         const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
-        
+        cout << "L1Normalized weights: " ;
+        copy(weights.begin(),weights.end(),ostream_iterator<float>(cout," "));
+        cout << endl << flush;*/
+    
         timer.check("Running decoder");
         moses.decode(line,hypothesis,toc,source, mbr_size);
         
@@ -766,8 +769,8 @@ int main(int argc, char** argv) {
           moses.PrintNBest(std::cout);
         }
         //Restore original weights
-        transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),normalizer));
-        const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+        //transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),normalizer));
+        //const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
         
         const std::vector<pair<Translation, float > > &  translations = moses.GetNbestTranslations(); 
         size_t maxtransIndex = transCollector->getMbr(translations, topNsize);  
