@@ -66,6 +66,7 @@ my $additional_triples = {
 	      [ 1.0, 0.0, 2.0 ],
 	      [ 1.0, 0.0, 2.0 ] ],
     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
+    "u" => [ [ 0.0, -1.0, 1.0 ] ],  # unknown word 
     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
 	      [ 1.0, 0.0, 2.0 ] ],
     "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
@@ -135,6 +136,9 @@ my $___NONORM = 0;
 my $___INPUTTYPE = 0; 
 
 
+# set to 1 if we wanna optimize weights for unk word feature
+my $___OPT_UNK = 0;
+
 my $allow_unknown_lambdas = 0;
 my $allow_skipping_lambdas = 0;
 
@@ -180,6 +184,7 @@ GetOptions(
   "average" => \$___AVERAGE,
   "closest" => \$___CLOSEST,
   "nonorm" => \$___NONORM,
+  "optimize-unknown" => \$___OPT_UNK,
   "help" => \$usage,
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
   "allow-skipping-lambdas" => \$allow_skipping_lambdas,
@@ -285,6 +290,17 @@ if ($___INPUTTYPE == 2)
 {
 # TODO
 }
+
+
+if ($___OPT_UNK == 1)
+{
+  $ABBR_FULL_MAP = "$ABBR_FULL_MAP u=weight-u";
+  %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
+  %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
+
+  push @{$default_triples -> {"u"}}, [ -1.0, 0.0, 1.0 ];
+}
+
 
 # Check validity of input parameters and set defaults if needed
 
