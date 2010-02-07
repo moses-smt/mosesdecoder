@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 #include <sstream>
 
+
 #include "Hypothesis.h"
 #include "Parameter.h"
 #include "Sentence.h"
@@ -84,14 +85,14 @@ class MosesDecoder : public virtual Decoder {
                         std::vector<Moses::Word>& sent, size_t nBestSize = 0);
     virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
     void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
-    void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<Translation> &);
-    const std::vector<Translation> & GetNbestTranslations() {
+    void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<std::pair<Translation,float> > &);
+    const std::vector<std::pair<Translation, float> > & GetNbestTranslations() {
       return m_translations;
     }
   private:
     std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
-    std::vector<Translation> m_translations;
+    std::vector<std::pair<Translation,float> > m_translations;
 
 };
 

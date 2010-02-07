@@ -135,7 +135,7 @@ namespace Josiah {
     
   }
   
-  void MosesDecoder::TrellisToTranslations(const TrellisPathList &nBestList, vector<Translation> &m_translations){
+  void MosesDecoder::TrellisToTranslations(const TrellisPathList &nBestList, vector<pair<Translation, float> > &m_translations){
     TrellisPathList::const_iterator iter;
     for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
     {
@@ -154,12 +154,15 @@ namespace Josiah {
             t.push_back(factor);
           }
       }
-      //for (size_t i = 0; i < t.size(); ++i) {
-//        cout << *(t[i]) << " ";
-//      }
-//      cout << endl;
-      
-      m_translations.push_back(t);
+      IFVERBOSE(1) {
+        VERBOSE(1, "Kbest Translation: ")
+        for (size_t i = 0; i < t.size(); ++i) {
+          VERBOSE(1, *(t[i]) << " ")
+        }
+        VERBOSE(1, path.GetTotalScore() << endl)
+      }
+
+      m_translations.push_back(make_pair(t, path.GetTotalScore()));
     }  
   }
   
