@@ -16,7 +16,6 @@ use strict;
 #constants
 my $TIMES_TO_REPEAT_SUBSAMPLING = 1000;
 my $SUBSAMPLE_SIZE = 0; # if 0 then subsample size is equal to the whole set
-my $TMP_PREFIX = "/tmp/signigicance_test_file_";
 my $MAX_NGRAMS_FOR_BLEU = 4;
 
 #checking cmdline argument consistency
@@ -34,6 +33,14 @@ print "reading data; " . `date`;
 
 #read all data
 my $data = readAllData(@ARGV);
+
+
+#calculate each sentence's contribution to BP and ngram precision
+print "performing preliminary calculations (hypothesis 1); " . `date`;
+preEvalHypo($data, "hyp1");
+
+print "performing preliminary calculations (hypothesis 2); " . `date`;
+preEvalHypo($data, "hyp2");
 
 #start comparing
 print "comparing hypotheses; " . `date`;
@@ -72,23 +79,29 @@ print "average subsample bleu: $averageSubSampleBleuDiff " . `date`;
 #calculating p-value
 my $count = 0;
 
-my $realBleuDiff = abs(getBleu($data->{refs}, $data->{hyp2}) - getBleu($data->{refs}, $data->{hyp1}));
+my $realBleu1 = getBleu($data->{refs}, $data->{hyp1});
+my $realBleu2 = getBleu($data->{refs}, $data->{hyp2});
+
+print "actual BLEU of hypothesis 1: $realBleu1\n";
+print "actual BLEU of hypothesis 1: $realBleu2\n";
+
+my $realBleuDiff = abs($realBleu2 - $realBleu1);
 
 for my $subSampleDiff (@subSampleBleuDiffArr) {
-#	my $op;
+	my $op;
 	
 	if ($subSampleDiff - $averageSubSampleBleuDiff >= $realBleuDiff) {
 		$count++;
-#		$op = ">=";
+		$op = ">=";
 	}
 	else {
-#		$op = "< ";
+		$op = "< ";
 	}
 	
-#	print "$subSampleDiff - $averageSubSampleBleuDiff $op $realBleuDiff\n";
+	#print "$subSampleDiff - $averageSubSampleBleuDiff $op $realBleuDiff\n";
 }
 
-my $result = ($count + 1) / $TIMES_TO_REPEAT_SUBSAMPLING;
+my $result = $count / $TIMES_TO_REPEAT_SUBSAMPLING;
 
 print "Assuming that essentially the same system generated the two hypothesis translations (null-hypothesis),\n";
 print "the probability of actually getting them (p-value) is: $result.\n";
@@ -144,12 +157,57 @@ sub readData {
 	open (FILE, $file) or die ("Failed to open `$file' for reading");
 	
 	while (<FILE>) {
-		push @result, [split(/\s+/, $_)];
+		push @result, { words => [split(/\s+/, $_)] };
 	}
 	
 	close (FILE);
 	
 	return \@result;
+}
+
+#####
+# calculate each sentence's contribution to the ngram precision and brevity penalty
+#####
+sub preEvalHypo {
+	my $data = shift;
+	my $hypId = shift;
+	
+	my ($correctNgramCounts, $totalNgramCounts);
+	my ($refNgramCounts, $hypNgramCounts);
+	
+	for my $lineIdx (0..($data->{size} - 1)) {
+		my $hypSnt = $data->{$hypId}->[$lineIdx];
+		
+		#update total hyp len
+		$hypSnt->{hyplen} = scalar @{$hypSnt->{words}};
+		
+		#update total ref len with closest current ref len
+		$hypSnt->{reflen} = getClosestLength($data->{refs}, $lineIdx, $hypSnt->{hyplen});
+		
+		$hypSnt->{correctNgrams} = [];
+		$hypSnt->{totalNgrams} = [];
+		
+		#update ngram precision for each n-gram order
+		for my $order (1..$MAX_NGRAMS_FOR_BLEU) {
+			#hyp ngrams
+			$hypNgramCounts = groupNgrams($hypSnt, $order);
+			
+			#ref ngrams
+			$refNgramCounts = groupNgramsMultiSrc($data->{refs}, $lineIdx, $order);
+			
+			$correctNgramCounts = 0;
+			$totalNgramCounts = 0;
+			
+			#correct, total
+			for my $ngram (keys %$hypNgramCounts) {
+				$correctNgramCounts += min($hypNgramCounts->{$ngram}, $refNgramCounts->{$ngram});
+				$totalNgramCounts += $hypNgramCounts->{$ngram};
+			}
+			
+			$hypSnt->{correctNgrams}->[$order] = $correctNgramCounts;
+			$hypSnt->{totalNgrams}->[$order] = $totalNgramCounts;
+		}
+	}
 }
 
 #####
@@ -190,24 +248,15 @@ sub getBleu {
 		my $hypSnt = $hyp->[$lineIdx];
 		
 		#update total hyp len
-		$hypothesisLength += scalar @$hypSnt;
+		$hypothesisLength += $hypSnt->{hyplen};
 		
 		#update total ref len with closest current ref len
-		$referenceLength += getClosestLength($refs, $lineIdx, $hypothesisLength);
+		$referenceLength += $hypSnt->{reflen};
 		
 		#update ngram precision for each n-gram order
 		for my $order (1..$MAX_NGRAMS_FOR_BLEU) {
-			#hyp ngrams
-			$hypNgramCounts = groupNgrams($hypSnt, $order);
-			
-			#ref ngrams
-			$refNgramCounts = groupNgramsMultiSrc($refs, $lineIdx, $order);
-			
-			#correct, total
-			for my $ngram (keys %$hypNgramCounts) {
-				$correctNgramCounts[$order] += min($hypNgramCounts->{$ngram}, $refNgramCounts->{$ngram});
-				$totalNgramCounts[$order] += $hypNgramCounts->{$ngram};
-			}
+			$correctNgramCounts[$order] += $hypSnt->{correctNgrams}->[$order];
+			$totalNgramCounts[$order] += $hypSnt->{totalNgrams}->[$order];
 		}
 	}
 	
@@ -235,7 +284,7 @@ sub getClosestLength {
 	my ($currLen, $currDiff);
 	
 	for my $ref (@$refs) {
-		$currLen = scalar @{$ref->[$lineIdx]};
+		$currLen = scalar @{$ref->[$lineIdx]->{words}};
 		$currDiff = abs($currLen - $hypothesisLength);
 		
 		if ($currDiff < $bestDiff or ($currDiff == $bestDiff and $currLen < $bestLen)) {
@@ -254,11 +303,11 @@ sub groupNgrams {
 	my ($snt, $order) = @_;
 	my %result;
 	
-	my $size = scalar @$snt;
+	my $size = scalar @{$snt->{words}};
 	my $ngram;
 	
 	for my $i (0..($size-$order)) {
-		$ngram = join(" ", @$snt[$i..($i + $order - 1)]);
+		$ngram = join(" ", @{$snt->{words}}[$i..($i + $order - 1)]);
 		
 		$result{$ngram}++;
 	}
