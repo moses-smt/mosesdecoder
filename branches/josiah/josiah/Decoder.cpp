@@ -154,16 +154,30 @@ namespace Josiah {
             t.push_back(factor);
           }
       }
-      IFVERBOSE(1) {
-        VERBOSE(1, "Kbest Translation: ")
+      IFVERBOSE(2) {
+        VERBOSE(2, "Kbest Translation: ")
         for (size_t i = 0; i < t.size(); ++i) {
-          VERBOSE(1, *(t[i]) << " ")
+          VERBOSE(2, *(t[i]) << " ")
         }
-        VERBOSE(1, path.GetTotalScore() << endl)
+        VERBOSE(2, path.GetTotalScore() << endl)
       }
 
       m_translations.push_back(make_pair(t, path.GetTotalScore()));
     }  
+  }
+  
+  void MosesDecoder::PrintNBest(ostream& out) const
+  {
+    vector<pair<Translation, float> >::const_iterator itt;
+    out << "MosesNbest BEGIN:" << endl; 
+    for (itt = m_translations.begin(); itt != m_translations.end(); ++itt) {
+      const Translation& t = itt->first;
+      for (size_t i = 0; i < t.size(); ++i) {
+        out << *(t[i]) << " ";
+      }
+      out << (itt->second) << endl;
+    }  
+    out << "MosesNbest END:" << endl;  
   }
   
   void MosesDecoder::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) const
