@@ -33,14 +33,20 @@ namespace Josiah
         p[sample] += importanceWeights[*j];
       }
     }
-    IFVERBOSE(1) {
+    IFVERBOSE(2) {
       float total = 0;
-      VERBOSE(1, "Distribution: ");
-      for (typename map<const M*,double>::const_iterator i = p.begin(); i != p.end(); ++i) {
-        VERBOSE(1, i->first << "{ " << *i->first << " }: " <<  i->second << " " << endl;);
-        total += i->second;
+      VERBOSE(2, "Distribution: ");
+      //sort it
+      multimap<double, const M*> sortedp;
+      for (typename map<const M*,double>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
+        sortedp.insert(make_pair(pi->second,pi->first));
+        total += pi->second;
       }
-      VERBOSE(1, endl << "Total = " << total << endl);
+      
+      for (typename multimap<double, const M*>::reverse_iterator spi = sortedp.rbegin(); spi != sortedp.rend(); ++spi) {
+        VERBOSE(2, spi->second << "{ " << *(spi->second) << " }: " <<  spi->first << " " << endl;);
+      }
+      VERBOSE(2, endl << "Total = " << total << endl);
     }
   }
   
@@ -49,8 +55,14 @@ namespace Josiah
   {
     map<const M*, double> p;
     getDistribution(p);
+    //sort it
+    multimap<double, const M*> sortedp;
     for (typename map<const M*,double>::const_iterator pi = p.begin(); pi != p.end(); ++pi) {
-      out << pi->second << "|||" << *(pi->first) << endl;
+      sortedp.insert(make_pair(pi->second,pi->first));
+    }
+    
+    for (typename multimap<double, const M*>::reverse_iterator spi = sortedp.rbegin(); spi != sortedp.rend(); ++spi) {
+      out << *(spi->second) << "|||" << spi->first << endl;
     }
   }
   
@@ -211,7 +223,7 @@ namespace Josiah
     return topNTranslations[minMBRLossIdx];
   }
   
-  size_t GibblerMaxTransDecoder::getMbr(const vector<Translation>& translations, size_t topNsize) const {
+  size_t GibblerMaxTransDecoder::getMbr(const vector<pair<Translation,float> >& translations, size_t topNsize) const {
     
     //Posterior probs computed using the whole evidence set
     //MBR decoding outer loop using configurable size
@@ -221,15 +233,15 @@ namespace Josiah
     GainFunctionVector gEvidenceSet;
     vector<pair<const Translation*, float> >::iterator it;
     for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it) {
-      VERBOSE(1, "translation: " <<   ToString(*it->first) << " " << (it->second) << endl);
+      VERBOSE(1, "Evidence translation: " <<   ToString(*it->first) << " " << (it->second) << endl);
       gEvidenceSet.push_back(new SentenceBLEU(4,*it->first)); //Calc the sufficient statistics for the translation
     }
     
     GainFunctionVector gHypothesisSet;
-    vector<Translation>::const_iterator itt;
+    vector<pair<Translation, float> >::const_iterator itt;
     for (itt = translations.begin(); itt != translations.end(); ++itt) {
-      VERBOSE(1, "translation: " <<   ToString(*itt)  << endl);
-      gHypothesisSet.push_back(new SentenceBLEU(4,*itt)); //Calc the sufficient statistics for the translation
+      VERBOSE(1, "Hypothesis translation: " <<   ToString(itt->first) << " " << (itt->second) << endl);
+      gHypothesisSet.push_back(new SentenceBLEU(4,itt->first)); //Calc the sufficient statistics for the translation
     }
     
     //Main MBR computation done here
@@ -243,20 +255,21 @@ namespace Josiah
     for(size_t i = 0; i < mbrSize; ++i) {
       weightedLossCumul = 0.0;
       const GainFunction& gf = gHypothesisSet[i];
-      VERBOSE(2, "Reference " << ToString(translations[i]) << endl);
+      VERBOSE(1, "Reference " << ToString(translations[i].first) << " : [" << translations[i].second << "]" <<  endl);
       for(size_t j = 0; j < topNTranslations.size(); ++j) {//Inner loop using all samples
         //if (static_cast<size_t>(i) != j) {
           bleu = gf.ComputeGain(gEvidenceSet[j]);
-          VERBOSE(2, "Hypothesis " << ToString(*topNTranslations[j].first) << endl);
+          VERBOSE(1, "Hypothesis " << ToString(*topNTranslations[j].first) << endl);
           weightedLoss = (1- bleu) * topNTranslations[j].second;
-          VERBOSE(2, "Bleu " << bleu << ", prob " <<  topNTranslations[j].second << ", weightedLoss : " << weightedLoss << endl);
+          VERBOSE(1, "Bleu " << bleu << ", prob " <<  topNTranslations[j].second << ", weightedLoss : " << weightedLoss << endl);
           weightedLossCumul += weightedLoss;
           if (weightedLossCumul > minMBRLoss)
             break;
         //}
       }
-      VERBOSE(2, "Bayes risk for cand " << i << " " <<  weightedLossCumul << endl);
+      VERBOSE(1, "Bayes risk for cand " << i << " " <<  weightedLossCumul << endl);
       if (weightedLossCumul < minMBRLoss){
+        VERBOSE(1, "New best MBR sol: " << ToString(translations[i].first) << " " <<  weightedLossCumul << endl);
         minMBRLoss = weightedLossCumul;
         minMBRLossIdx = i;
       }

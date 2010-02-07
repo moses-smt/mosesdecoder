@@ -759,9 +759,13 @@ int main(int argc, char** argv) {
         
         timer.check("Running decoder");
         moses.decode(line,hypothesis,toc,source, mbr_size);
-        const std::vector<Translation> &  translations = moses.GetNbestTranslations(); 
+        //Restore original weights
+        transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),normalizer));
+        const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+        
+        const std::vector<pair<Translation, float > > &  translations = moses.GetNbestTranslations(); 
         size_t maxtransIndex = transCollector->getMbr(translations, topNsize);  
-        (*out) << translations[maxtransIndex];
+        (*out) << translations[maxtransIndex].first;
         (*out) << endl << flush;
       }
       else {
