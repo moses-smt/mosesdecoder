@@ -308,55 +308,30 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		RemoveAllInColl(phrasePairs);
   } // done with ALL sentences
   // convert to moses phrase pairs
-  std::map<SAPhrase, int>::const_iterator iterPhrases; 
   const int maxReturn = 10;
-  if(phraseCounts.size() > maxReturn) {  // only return top scoring phrases
-    std::multimap<float, const SAPhrase*> bestScoringPhrases;
-    iterPhrases = phraseCounts.begin(); 
-    for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
-      float MLEprb = float(iterPhrases->second) / denom;
-      itrLexW = lexicalWeights.find(iterPhrases->first);
-      assert(itrLexW != lexicalWeights.end());
-      float score = MLEprb * itrLexW->second;
-      bestScoringPhrases.insert(pair<float, const SAPhrase*>(score, &iterPhrases->first));	
-    }
-    std::multimap<float, const SAPhrase*>::reverse_iterator riterBest;
-    riterBest = bestScoringPhrases.rbegin();
-    int cnt(0);
-    for(; riterBest != bestScoringPhrases.rend() && (cnt++ < maxReturn); ++riterBest) {
-      iterPhrases = phraseCounts.find(*riterBest->second);
-      Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
-      float MLEprb = float(iterPhrases->second) / denom;
-      itrLexW = lexicalWeights.find(iterPhrases->first);
-      assert(itrLexW != lexicalWeights.end());
-      Scores scoreVector(2);
-      scoreVector[0] = MLEprb;
-      scoreVector[1] = itrLexW->second;
-      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
-      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-      targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
-      
-      //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
-      ret->Add(targetPhrase);
-    }
+  std::map<SAPhrase, int>::const_iterator iterPhrases; 
+  std::multimap<Scores, const SAPhrase*, ScoresComp> phraseScores;
+  // get scores of all phrases
+  for(iterPhrases = phraseCounts.begin(); iterPhrases != phraseCounts.end(); ++iterPhrases) {
+    float MLEprb = float(iterPhrases->second) / denom;
+    itrLexW = lexicalWeights.find(iterPhrases->first);
+    assert(itrLexW != lexicalWeights.end());
+    Scores scoreVector(2);
+    scoreVector[0] = MLEprb;
+    scoreVector[1] = itrLexW->second;
+    phraseScores.insert(pair<Scores, const SAPhrase*>(scoreVector, &iterPhrases->first));
   }
-  else {  // return all phrases found
-    iterPhrases = phraseCounts.begin(); 
-    for(; iterPhrases != phraseCounts.end(); ++iterPhrases) {
-      Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(iterPhrases->first);
-      float MLEprb = float(iterPhrases->second) / denom;
-      itrLexW = lexicalWeights.find(iterPhrases->first);
-      assert(itrLexW != lexicalWeights.end());
-      Scores scoreVector(2);
-      scoreVector[0] = MLEprb;
-      scoreVector[1] = itrLexW->second;
-      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
-      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-      targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
-      
-      //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
-      ret->Add(targetPhrase);
-    }
+  // return top scoring phrases
+  std::multimap<Scores, const SAPhrase*, ScoresComp>::reverse_iterator ritr;
+  for(ritr = phraseScores.rbegin(); ritr != phraseScores.rend(); ++ritr) {
+    Scores scoreVector = ritr->first;
+    Moses::TargetPhrase *targetPhrase = getMosesFactorIDs(*ritr->second);
+    std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
+    std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
+    targetPhrase->SetScore(this, scoreVector, m_weight, m_weightWP, *m_languageModels);
+    //cout << *targetPhrase << "\t" << std::setprecision(8) << MLEprb << endl;
+    ret->Add(targetPhrase);
+    if(ret->GetSize() > maxReturn) break;
   }
   ret->NthElement(m_tableLimit); // sort the phrases for the dcoder
 	return ret;
