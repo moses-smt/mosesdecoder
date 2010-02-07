@@ -54,7 +54,16 @@ public:
   vector< vector<int> > alignedSrc; 
 	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const;
 };
-	
+
+struct ScoresComp {
+  bool operator()(const Scores& s1, const Scores& s2) const { 
+    float score1(1), score2(1);
+    iterate(s1, itr) score1 *= *itr;
+    iterate(s2, itr) score2 *= *itr;
+    return score1 < score2;
+  }
+};
+
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
 public: 
   PhraseDictionaryDynSuffixArray(size_t numScoreComponent);
