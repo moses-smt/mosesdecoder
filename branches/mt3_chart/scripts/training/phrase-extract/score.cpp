@@ -87,7 +87,6 @@ PhraseTable phraseTableT;
 PhraseTable phraseTableS;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
-bool newAlignmentFormatFlag = true;
 bool wordAlignmentFlag = false;
 bool onlyDirectFlag = false;
 bool goodTuringFlag = false;
@@ -127,9 +126,6 @@ int main(int argc, char* argv[])
 		else if (strcmp(argv[i],"--OnlyDirect") == 0) {
 			onlyDirectFlag = true;
 			cerr << "outputing in correct phrase table format (no merging with inverse)\n";
-		}
-		else if (strcmp(argv[i],"--NewAlignmentFormat") == 0) {
-			newAlignmentFormatFlag = true;
 		}
 		else if (strcmp(argv[i],"--WordAlignment") == 0) {
 			wordAlignmentFlag = true;
@@ -456,38 +452,12 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	// alignment info for non-terminals
 	if (! inverseFlag && hierarchicalFlag) 
 	{
-		if (newAlignmentFormatFlag)
+		for(int j = 0; j < phraseT.size() - 1; j++)
 		{
-			for(int j = 0; j < phraseT.size() - 1; j++)
+			if (isNonTerminal(vcbT.getWord( phraseT[j] )))
 			{
-				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
-				{
-					int sourcePos = bestAlignment->alignedToT[ j ][ 0 ];
-					phraseTableFile << sourcePos << "-" << j << " ";
-				}
-			}
-		}
-		else
-		{
-			map< int, int > NTalignment;
-			int nt = 0;
-			// find positions of source non-terminals
-			for(int j=0 ; j < phraseS.size() - 1; j++)
-			{
-				if (isNonTerminal(vcbS.getWord( phraseS[j] )))
-				{
-					NTalignment[j] = nt++;
-				}
-			}
-			// match with target non-terminals
-			nt=0;
-			for(int j = 0; j < phraseT.size() - 1;j++)
-			{
-				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
-				{
-					int sourcePos = bestAlignment->alignedToT[ j-1 ][ 0 ];
-					phraseTableFile << NTalignment[ sourcePos ] << "-" << nt++ << " ";
-				}
+				int sourcePos = bestAlignment->alignedToT[ j ][ 0 ];
+				phraseTableFile << sourcePos << "-" << j << " ";
 			}
 		}
 		phraseTableFile << "||| ";
