@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include <iostream>
 #include "../../moses/src/Util.h"
 #include "../../moses/src/TargetPhraseCollection.h"
