@@ -406,12 +406,14 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
-		if (m_parameter->GetParam("weight-file").size() != 1) {
-			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
-			return false;
-		}
-		string fnam = m_parameter->GetParam("weight-file")[0];
-		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
+    UserMessage::Add("ERROR: weight-file option is broken\n");
+    abort();
+//		if (m_parameter->GetParam("weight-file").size() != 1) {
+//			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
+//			return false;
+//		}
+//		string fnam = m_parameter->GetParam("weight-file")[0];
+//		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
 	}
 
 	return true;
