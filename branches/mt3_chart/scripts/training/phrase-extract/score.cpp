@@ -28,7 +28,6 @@
 #include <string>
 #include <stdlib.h>
 #include <assert.h>
-#include <time.h>
 #include <cstring>
 #include <set>
 #include "tables-core.h"
@@ -42,7 +41,6 @@ class PhraseAlignment
 {
 public:
 	int target, source;
-	string targetLabel, sourceLabel;
 	float count;
 	vector< set<size_t> > alignedToT;
 	vector< set<size_t> > alignedToS;
@@ -102,7 +100,6 @@ int main(int argc, char* argv[])
 {
 	cerr << "Score v2.0 written by Philipp Koehn\n"
 	     << "scoring methods for extracted rules\n";
-	time_t starttime = time(NULL);
 
 	if (argc < 4) {
 		cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--OnlyDirect] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--WordAlignment file]\n";
@@ -240,7 +237,6 @@ int main(int argc, char* argv[])
 		
 		// add phrase pairs to list, it's now the last one
 		lastSource = phrasePair.source;
-		lastPhrasePair = &phrasePair;
 		phrasePairsWithSameF.push_back( phrasePair );
 		lastPhrasePair = &phrasePairsWithSameF[phrasePairsWithSameF.size()-1];
 	}
