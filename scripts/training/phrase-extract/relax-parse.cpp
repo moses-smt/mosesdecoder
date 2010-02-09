@@ -78,7 +78,7 @@ void init(int argc, char* argv[])
 	cerr << "Parse Relaxer v1.0, written by Philipp Koehn\n";
 	cerr << "adds additional constituents to a parse tree\n";
 	
-	if (argc < 1) 
+	if (argc < 2) 
 	{
 		cerr << "syntax: relax-parse < in-parse > out-parse ["
 				 << " --LeftBinarize | ---RightBinarize |"
