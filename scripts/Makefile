@@ -70,6 +70,7 @@ release:
 	mkdir -p $(RELEASEDIR)
 	rsync -r --files-from ./released-files . $(RELEASEDIR)/
 	sed 's#^my \$$BINDIR\s*=.*#my \$$BINDIR="$(BINDIR)";#' training/train-model.perl > $(RELEASEDIR)/training/train-factored-phrase-model.perl
+	chmod a+x $(RELEASEDIR)/training/train-factored-phrase-model.perl
 	@echo "####### Do not forget to:" >> $(RELEASEDIR)/README
 	@echo "  export SCRIPTS_ROOTDIR=$(RELEASEDIR)" >> $(RELEASEDIR)/README
 	## Remember, only files listed in released-files are released!!
