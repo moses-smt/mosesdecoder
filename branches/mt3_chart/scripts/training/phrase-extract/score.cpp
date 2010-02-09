@@ -670,14 +670,18 @@ bool PhraseAlignment::match( const PhraseAlignment& other )
 	if (!hierarchicalFlag) return true;
 
 	PHRASE phraseT = phraseTableT.getPhrase( target );
+
+  assert(phraseT.size() == alignedToT.size() + 1);
+  assert(alignedToT.size() == other.alignedToT.size());
+
 	// loop over all words (note: 0 = left hand side of rule)
-	for(int i=1;i<phraseT.size();i++)
+	for(int i=0;i<phraseT.size()-1;i++)
 	{
 		if (isNonTerminal( vcbT.getWord( phraseT[i] ) ))
 		{
-			if (alignedToT[i-1].size() != 1 ||
-			    other.alignedToT[i-1].size() != 1 ||
-		    	    alignedToT[i-1][0] != other.alignedToT[i-1][0])
+			if (alignedToT[i].size() != 1 ||
+			    other.alignedToT[i].size() != 1 ||
+		    	    alignedToT[i][0] != other.alignedToT[i][0])
 				return false;
 		}
 	}
