@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <time.h>
 #include <cstring>
+#include <set>
 #include "tables-core.h"
 
 using namespace std;
@@ -43,8 +44,8 @@ public:
 	int target, source;
 	string targetLabel, sourceLabel;
 	float count;
-	vector< vector<size_t> > alignedToT;
-	vector< vector<size_t> > alignedToS;
+	vector< set<size_t> > alignedToT;
+	vector< set<size_t> > alignedToS;
   
 	void create( char*, int );
 	void addToCount( char* );
@@ -455,7 +456,8 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		{
 			if (isNonTerminal(vcbT.getWord( phraseT[j] )))
 			{
-				int sourcePos = bestAlignment->alignedToT[ j ][ 0 ];
+        assert(bestAlignment->alignedToT[ j ].size() == 1);
+				int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
 				phraseTableFile << sourcePos << "-" << j << " ";
 			}
 		}
@@ -498,10 +500,10 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		// alignment
 		for(int j=0;j<bestAlignment->alignedToT.size();j++)
 		{
-			vector< size_t > &aligned = bestAlignment->alignedToT[j];
-			for(int i=0; i<aligned.size(); i++)
+			const set< size_t > &aligned = bestAlignment->alignedToT[j];
+      for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p)
 			{
-				wordAlignmentFile << " " << aligned[i] << "-" << j;
+				wordAlignmentFile << " " << *p << "-" << j;
 			}
 		}
 		wordAlignmentFile << endl;
@@ -514,17 +516,18 @@ double computeLexicalTranslation( PHRASE &phraseS, PHRASE &phraseT, PhraseAlignm
 	int null = vcbS.getWordID("NULL");
 	// all target words have to be explained
 	for(int ti=0;ti<alignment->alignedToT.size();ti++) { 
-		if (alignment->alignedToT[ ti ].size() == 0)
+    const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
+		if (srcIndices.empty())
 		{ // explain unaligned word by NULL
 			lexScore *= lexTable.permissiveLookup( null, phraseT[ ti ] ); 
 		}
 		else 
 		{ // go through all the aligned words to compute average
 			double thisWordScore = 0;
-			for(int j=0;j<alignment->alignedToT[ ti ].size();j++) {
-				thisWordScore += lexTable.permissiveLookup( phraseS[alignment->alignedToT[ ti ][ j ]], phraseT[ ti ] );
+      for (set< size_t >::const_iterator p(srcIndices.begin()); p != srcIndices.end(); ++p) {
+				thisWordScore += lexTable.permissiveLookup( phraseS[ *p ], phraseT[ ti ] );
 			}
-			lexScore *= thisWordScore / (double)alignment->alignedToT[ ti ].size();
+			lexScore *= thisWordScore / (double)srcIndices.size();
 		}
 	}
 	return lexScore;
@@ -592,8 +595,8 @@ void PhraseAlignment::create( char line[], int lineID )
 					target = phraseTableT.storeIfNew( phraseT );
 				}
 				// add alignment point
-				alignedToT[t].push_back( s );
-				alignedToS[s].push_back( t );
+				alignedToT[t].insert( s );
+				alignedToS[s].insert( t );
 			}
 		}
 		else if (item == 4) // count
@@ -612,10 +615,6 @@ void PhraseAlignment::create( char line[], int lineID )
 }
 
 void PhraseAlignment::clear() {
-  for(int i=0;i<alignedToT.size();i++)
- 		alignedToT[i].clear();
-  for(int i=0;i<alignedToS.size();i++)
-		alignedToS[i].clear();
   alignedToT.clear();
   alignedToS.clear();
 }
@@ -626,28 +625,8 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
 	if (this == &other) return true;
 	if (other.target != target) return false;
 	if (other.source != source) return false;
-	PHRASE phraseT = phraseTableT.getPhrase( target );
-	PHRASE phraseS = phraseTableS.getPhrase( source );
-	for(int i=0;i<alignedToT.size();i++) 
-	{
-		if (alignedToT[i].size() != other.alignedToT[i].size()) 
-			return false;
-		for(int j=0; j<alignedToT[i].size(); j++) 
-		{
-			if (alignedToT[i][j] != other.alignedToT[i][j]) 
-				return false;
-		}
-	}
-	for(int i=0;i<alignedToS.size();i++) 
-	{
-		if (alignedToS[i].size() != other.alignedToS[i].size()) 
-			return false;
-		for(int j=0; j<alignedToS[i].size(); j++) 
-		{
-			if (alignedToS[i][j] != other.alignedToS[i][j]) 
-				return false;
-		}
-	}
+	if (other.alignedToT != alignedToT) return false;
+	if (other.alignedToS != alignedToS) return false;
 	return true;
 }
 
@@ -672,7 +651,7 @@ bool PhraseAlignment::match( const PhraseAlignment& other )
 		{
 			if (alignedToT[i].size() != 1 ||
 			    other.alignedToT[i].size() != 1 ||
-		    	    alignedToT[i][0] != other.alignedToT[i][0])
+		    	    *(alignedToT[i].begin()) != *(other.alignedToT[i].begin()))
 				return false;
 		}
 	}
