@@ -333,8 +333,10 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //lattice mbr
   SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
-  SetBooleanParameter( &m_mbr, "lminimum-bayes-risk", false );
-	m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
+  if (m_useLatticeMBR)
+    m_mbr = m_useLatticeMBR;
+
+  m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
   Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
   m_lmbrThetas = Scan<float>(m_parameter->GetParam("lmbr-thetas"));
   SetBooleanParameter( &m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
