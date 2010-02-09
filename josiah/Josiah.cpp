@@ -760,7 +760,7 @@ int main(int argc, char** argv) {
         const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
         cout << "L1Normalized weights: " ;
         copy(weights.begin(),weights.end(),ostream_iterator<float>(cout," "));
-        cout << endl << flush;*/
+        cout << endl << flush; */
     
         timer.check("Running decoder");
         moses.decode(line,hypothesis,toc,source, mbr_size);
