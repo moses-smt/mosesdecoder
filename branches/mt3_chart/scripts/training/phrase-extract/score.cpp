@@ -94,7 +94,6 @@ bool goodTuringFlag = false;
 bool logProbFlag = false;
 int negLogProb = 1;
 bool lexFlag = true;
-int firstWord = 0; // in hierarchical models the first word is the label
 int countOfCounts[GT_MAX+1];
 float discountFactor[GT_MAX+1];
 
@@ -120,7 +119,6 @@ int main(int argc, char* argv[])
 		}
 		else if (strcmp(argv[i],"--Hierarchical") == 0) {
 			hierarchicalFlag = true;
-			firstWord = 1;       // phrase starts with word 1 (word 0 is label)
 			cerr << "processing hierarchical rules\n";
 		}
 		else if (strcmp(argv[i],"--OnlyDirect") == 0) {
@@ -452,6 +450,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	// alignment info for non-terminals
 	if (! inverseFlag && hierarchicalFlag) 
 	{
+    assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
 		for(int j = 0; j < phraseT.size() - 1; j++)
 		{
 			if (isNonTerminal(vcbT.getWord( phraseT[j] )))
@@ -482,35 +481,27 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	// optional output of word alignments
 	if (! inverseFlag && wordAlignmentFlag)
 	{
-		// LHS non-terminals, if hierarchical
-		if (hierarchicalFlag)
-		{
-			wordAlignmentFile << vcbS.getWord( phraseS[0] ) << " ";
-			wordAlignmentFile << vcbT.getWord( phraseT[0] ) << " ";
-			wordAlignmentFile << "||| ";
-		}
-
 		// source phrase
-		for(int j=firstWord;j<phraseS.size();j++)
+		for(int j=0;j<phraseS.size();j++)
 		{
 			wordAlignmentFile << vcbS.getWord( phraseS[j] ) << " ";
 		}
 		wordAlignmentFile << "||| ";
 	
 		// target phrase
-		for(int j=firstWord;j<phraseT.size();j++)
+		for(int j=0;j<phraseT.size();j++)
 		{
 			wordAlignmentFile << vcbT.getWord( phraseT[j] ) << " ";
 		}
 		wordAlignmentFile << "|||";
 
 		// alignment
-		for(int j=firstWord;j<phraseT.size();j++)
+		for(int j=0;j<bestAlignment->alignedToT.size();j++)
 		{
-			vector< size_t > &aligned = bestAlignment->alignedToT[ j-firstWord ];
+			vector< size_t > &aligned = bestAlignment->alignedToT[j];
 			for(int i=0; i<aligned.size(); i++)
 			{
-				wordAlignmentFile << " " << aligned[i] << "-" << (j-firstWord);
+				wordAlignmentFile << " " << aligned[i] << "-" << j;
 			}
 		}
 		wordAlignmentFile << endl;
@@ -522,18 +513,18 @@ double computeLexicalTranslation( PHRASE &phraseS, PHRASE &phraseT, PhraseAlignm
 	double lexScore = 1.0;
 	int null = vcbS.getWordID("NULL");
 	// all target words have to be explained
-	for(int ti=firstWord;ti<phraseT.size();ti++) { 
-		if (alignment->alignedToT[ ti-firstWord ].size() == 0)
+	for(int ti=0;ti<alignment->alignedToT.size();ti++) { 
+		if (alignment->alignedToT[ ti ].size() == 0)
 		{ // explain unaligned word by NULL
 			lexScore *= lexTable.permissiveLookup( null, phraseT[ ti ] ); 
 		}
 		else 
 		{ // go through all the aligned words to compute average
 			double thisWordScore = 0;
-			for(int j=0;j<alignment->alignedToT[ ti-firstWord ].size();j++) {
-				thisWordScore += lexTable.permissiveLookup( phraseS[alignment->alignedToT[ ti-firstWord ][ j ]+firstWord ], phraseT[ ti ] );
+			for(int j=0;j<alignment->alignedToT[ ti ].size();j++) {
+				thisWordScore += lexTable.permissiveLookup( phraseS[alignment->alignedToT[ ti ][ j ]], phraseT[ ti ] );
 			}
-			lexScore *= thisWordScore / (double)alignment->alignedToT[ ti-firstWord ].size();
+			lexScore *= thisWordScore / (double)alignment->alignedToT[ ti ].size();
 		}
 	}
 	return lexScore;
@@ -592,11 +583,11 @@ void PhraseAlignment::create( char line[], int lineID )
 				// first alignment point? -> initialize
 				if (alignedToT.size() == 0) 
 				{
-					vector< size_t > dummy;
-					for(int i=0;i<phraseT.size();i++)
-						alignedToT.push_back( dummy );
-					for(int i=0;i<phraseS.size();i++)
-						alignedToS.push_back( dummy );
+          assert(alignedToS.size() == 0);
+          size_t numTgtSymbols = (hierarchicalFlag ? phraseT.size()-1 : phraseT.size());
+          alignedToT.resize(numTgtSymbols);
+          size_t numSrcSymbols = (hierarchicalFlag ? phraseS.size()-1 : phraseS.size());
+          alignedToS.resize(numSrcSymbols);
 					source = phraseTableS.storeIfNew( phraseS );
 					target = phraseTableT.storeIfNew( phraseT );
 				}
@@ -637,7 +628,7 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
 	if (other.source != source) return false;
 	PHRASE phraseT = phraseTableT.getPhrase( target );
 	PHRASE phraseS = phraseTableS.getPhrase( source );
-	for(int i=0;i<phraseT.size();i++) 
+	for(int i=0;i<alignedToT.size();i++) 
 	{
 		if (alignedToT[i].size() != other.alignedToT[i].size()) 
 			return false;
@@ -647,7 +638,7 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
 				return false;
 		}
 	}
-	for(int i=0;i<phraseS.size();i++) 
+	for(int i=0;i<alignedToS.size();i++) 
 	{
 		if (alignedToS[i].size() != other.alignedToS[i].size()) 
 			return false;
