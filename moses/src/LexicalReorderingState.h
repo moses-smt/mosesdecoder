@@ -40,8 +40,8 @@ class LexicalReorderingState : public FFState {
     static const LexicalReordering::ReorderingType D = 2;  // discontinuous
     static const LexicalReordering::ReorderingType DL = 2; // discontinuous, left
     static const LexicalReordering::ReorderingType DR = 3; // discontinuous, right
-    static const LexicalReordering::ReorderingType L = 0;  // left
-    static const LexicalReordering::ReorderingType R = 1;  // right
+    static const LexicalReordering::ReorderingType R = 0;  // right
+    static const LexicalReordering::ReorderingType L = 1;  // left
 };
 
 //! State for the standard Moses implementation of lexical reordering models
