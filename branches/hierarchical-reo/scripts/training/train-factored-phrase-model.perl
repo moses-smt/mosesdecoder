@@ -135,6 +135,7 @@ my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
@@ -296,7 +297,7 @@ foreach my $r (split(/\,/,$___REORDERING)) {
    #set default values
    push @REORDERING_MODELS, {};
    $REORDERING_MODELS[$model_num]{"dir"} = "backward";   
-   $REORDERING_MODELS[$model_num]{"type"} = "word";
+   $REORDERING_MODELS[$model_num]{"type"} = "wbe";
    $REORDERING_MODELS[$model_num]{"collapse"} = "allff";
 
    #handle the options set in the config string
@@ -305,27 +306,19 @@ foreach my $r (split(/\,/,$___REORDERING)) {
         $REORDERING_LEXICAL = 0;
         next;
       }
-      if ($reoconf =~ /(msd)|(mslr)|(monotonicity)|(leftright)/) { 
+      if ($reoconf =~ /^((msd)|(mslr)|(monotonicity)|(leftright))/) { 
         $REORDERING_MODELS[$model_num]{"orient"} = $reoconf;
       }
-      elsif ($reoconf =~ /((bidirectional)|(backward)|(forward))/) {
+      elsif ($reoconf =~ /^((bidirectional)|(backward)|(forward))/) {
         $REORDERING_MODELS[$model_num]{"dir"} = $reoconf;
       }
-      elsif ($reoconf =~ /^(fe)|(f))/) {
+      elsif ($reoconf =~ /^((fe)|(f))/) {
         $REORDERING_MODELS[$model_num]{"lang"} = $reoconf;
       }
-      elsif ($reoconf =~ /(hier)|(phrase)|(word)/) {
-        if ($model_num == 0) {
-          $reotype = $reoconf;
-        }
-        elsif ($reotype ne $reoconf) {
-           #TODO: update extract to make it possible to have more types of model (return the options for all models used!!)
-          print STDERR "you are not allowed to use more than one reordering model type, now using: $reotype and $reoconf";
-          exit(1);
-        }
+      elsif ($reoconf =~ /^((hier)|(phrase)|(wbe))/) {
         $REORDERING_MODELS[$model_num]{"type"} = $reoconf;
       }
-      elsif ($reoconf =~ /(collapseff)|(allff)/) {
+      elsif ($reoconf =~ /^((collapseff)|(allff))/) {
         $REORDERING_MODELS[$model_num]{"collapse"} = $reoconf;
       }
       else {
@@ -333,8 +326,18 @@ foreach my $r (split(/\,/,$___REORDERING)) {
         exit(1);
       }
   }
+  #check that the required attributes are given
+  if (!defined($REORDERING_MODELS[$model_num]{"type"})) {
+     print STDERR "you have to give the type of the reordering models (mslr, msd, monotonicity or leftright); it is not done in $r\n";
+     exit(1);
+  }
+  if (!defined($REORDERING_MODELS[$model_num]{"lang"})) {
+     print STDERR "you have specify which languages to condition on (f or fe); it is not done in $r\n";
+     exit(1);
+  }
+
   #fix the all-string
-  $REORDERING_MODELS[$model_num]{"all"} = $REORDERING_MODELS[$model_num]{"orient"}.'-'.$REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"}."-".$REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
+  $REORDERING_MODELS[$model_num]{"all"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.$REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
 
   # fix numfeatures
   $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
@@ -365,7 +368,7 @@ foreach my $r (split(/\,/,$___REORDERING)) {
 
 # pick the overall most specific model for each reordering model type
 for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-  if ($REORDERING_MODEL_TYPES{$mtype} =~ /lr/) {
+  if ($REORDERING_MODEL_TYPES{$mtype} =~ /(mslr)|(leftright)/) {
     $REORDERING_MODEL_TYPES{$mtype} = "mslr"
   }
   elsif ($REORDERING_MODEL_TYPES{$mtype} =~ /msd/) {
@@ -376,6 +379,7 @@ for my $mtype ( keys %REORDERING_MODEL_TYPES) {
   }
 }
 
+#TODO - remove the below
 my ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f);
 my ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe);
 my ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_f);
@@ -1084,7 +1088,6 @@ sub get_extract_reordering_flags {
 	$config_string .= " --model $type-".$REORDERING_MODEL_TYPES{$type};
     }
     print STDERR "extract-flags: $config_string\n";
-    return ""; #comment out when using new training scripts (do we need an option for backward compatibility???
     return $config_string;
 }
 
@@ -1325,38 +1328,34 @@ sub score_phrase_memscore {
 
 sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
-    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
-#    my @TYPE = ("msd-f","msd-fe","msd-bidirectional-f","msd-bidirectional-fe","monotonicity-f","monotonicity-fe","monotonicity-bidirectional-f","monotonicity-bidirectional-fe");
+
+#This @REORDERING_TABLE is now not used. Did anyone use it???
+#    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
+    if (scalar(@_REORDERING_TABLE)) {
+	print STDERR "WARNING: you specified -reordering-table. That feature is not implemented in this version of train-factored-phrase-model.perl. Standard file names will be used.\n";
+    }
     if ($REORDERING_LEXICAL) {
 	if ($___NOT_FACTORED) {
-#	    my %FILE;
-	    foreach my $model (@REORDERING_MODELS) {
-#		if (defined($REORDERING_MODELS{$type})) {
-		my $file = "$___MODEL_DIR/reordering-table.";
-		$file .= $model->{"all"};
-#$file .= ".$type" if (scalar keys %REORDERING_MODELS) > 2;
-		$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		$model->{"file"} = $file;
-#		}
-	    }
-	    &get_reordering($___EXTRACT_FILE);
+	    print STDERR "(7.1) [no factors] learn reordering model @ ".`date`;
+	    # foreach my $model (@REORDERING_MODELS) {
+	    # 	#my $file = "$___MODEL_DIR/reordering-table.";
+	    # 	$file .= $model->{"all"};
+	    # 	#$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    # 	$model->{"file"} = $file;
+	    # }
+	    &get_reordering($___EXTRACT_FILE,"$___MODEL_DIR/reordering-table.");
 	}
  	else {
 	    foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-		print STDERR "(7) [$factor] learn reordering model @ ".`date`;
+		print STDERR "(7.1) [$factor] learn reordering model @ ".`date`;
 		my ($factor_f,$factor_e) = split(/\-/,$factor);
-#		my %FILE;
-		foreach my $model (@REORDERING_MODELS) { #$type (@TYPE) {
-		    #if (defined($REORDERING_MODELS{$type})) {
-		    my $file = "$___MODEL_DIR/reordering-table.$factor";
-		    #$file .= ".$type" if (scalar keys %REORDERING_MODELS) > 2;
-		    $file .= $model->{"all"};
-		    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		    $model->{"file"} = $file;
-		}
-	    
-#		&get_reordering(\%FILE,"$___EXTRACT_FILE.$factor");
-		&get_reordering("$___EXTRACT_FILE.$factor");
+		# foreach my $model (@REORDERING_MODELS) { 
+		#     my $file = "$___MODEL_DIR/reordering-table.$factor";
+		#     $file .= $model->{"all"};
+		#     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+		#     $model->{"file"} = $file;
+		# }
+		&get_reordering("$___EXTRACT_FILE.$factor","$___MODEL_DIR/reordering-table.$factor");
 	    }
 	} 
     }
@@ -1366,8 +1365,7 @@ sub get_reordering_factored {
 }
 
 sub get_reordering {
-    #my ($MODEL_FILE,$extract_file) = @_;
-    my ($extract_file) = @_;
+    my ($extract_file,$reo_model_path) = @_;
     if (-e "$extract_file.o.gz") {
 	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
     }
@@ -1376,233 +1374,28 @@ sub get_reordering {
     }
 
     my $smooth = $___REORDERING_SMOOTH;
-    @REORDERING_SMOOTH_PREVIOUS = ($smooth,$smooth,$smooth,$smooth,$smooth);
-    @REORDERING_SMOOTH_FOLLOWING = ($smooth,$smooth,$smooth,$smooth,$smooth);
-
-    my (%SMOOTH_PREVIOUS,%SMOOTH_FOLLOWING);
-    if ($smooth =~ /(.+)u$/) {
-	$smooth = $1;
-	my $smooth_total = 0; 
-	open(O,"$extract_file.o.sorted")
-	    or die "ERROR: Can't read $extract_file.o.sorted";
-	while(<O>) {
-	    chomp;
-	    my ($f,$e,$o) = split(/ \|\|\| /);
-	    my ($o_previous,$o_following) = split(/ /,$o);
-	    $SMOOTH_PREVIOUS{$o_previous}++;
-	    $SMOOTH_FOLLOWING{$o_following}++;
-	    $smooth_total++;
-	}
-	close(O);
-	@REORDERING_SMOOTH_PREVIOUS = ($smooth*($SMOOTH_PREVIOUS{"mono"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"swap"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"left"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"right"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"other"}+0.1)/$smooth_total);
-	@REORDERING_SMOOTH_FOLLOWING = ($smooth*($SMOOTH_FOLLOWING{"mono"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"swap"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"left"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"right"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"other"}+0.1)/$smooth_total);
-	printf "$smooth*($SMOOTH_FOLLOWING{mono}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{swap}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{other}+0.1)/$smooth_total\n";
-	printf "smoothed following to %f,%f,%f\n",@REORDERING_SMOOTH_FOLLOWING;
-    }
-    
-    ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f) = (0,0,0,0,0); #@REORDERING_SMOOTH_PREVIOUS;
-    ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe) = (0,0,0,0,0); #@REORDERING_SMOOTH_PREVIOUS;
-    ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_f) = (0,0,0,0,0); #@REORDERING_SMOOTH_FOLLOWING;
-    ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe,$other_following_fe) = (0,0,0,0,0); #@REORDERING_SMOOTH_FOLLOWING;
 
     print STDERR "(7.2) building tables @ ".`date`;
-    open(O,"$extract_file.o.sorted")
-	or die "ERROR: Can't read $extract_file.o.sorted";
 
-    foreach my $model ( @REORDERING_MODELS ) {
-	local *FILE;
-	open(FILE, "|gzip >".$model->{"file"}.".gz");
-	$model->{"filehandle"} = *FILE;	
-    }
-
-    my $first = 1;
-    while(<O>) {
-	chomp;
-	my ($f,$e,$o) = split(/ \|\|\| /);
-	my ($o_previous,$o_following) = split(/ /,$o);
-	
-	# store counts if new f,e
-	if ($first) {
-	    $f_current = $f;
-	    $e_current = $e;
-	    $first = 0;
-	}
-	elsif ($f ne $f_current || $e ne $e_current) {
-
-#always store the counts for both directions.	    
-#	    if (defined($REORDERING_MODELS{"fe"})) {
-	    # compute probs, store them
-	    &store_reordering_fe();
-	    
-	    # reset counters
-	    ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe) = (0,0,0,0,0);
-	    ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe,$other_following_fe) = (0,0,0,0,0);
-#	    }
-
-	    # store counts if new f
-	    if ($f ne $f_current) {  # && defined($REORDERING_MODELS{"f"})) {
-	    
-		# compute probs, store them
-		&store_reordering_f();
-	    
-		# reset counters
-		($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f) = (0,0,0,0,0);
-		($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_fe) = (0,0,0,0,0);
-		
+    #create cmd string for lexical reordering scoring
+    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted $smooth $reo_model_path";
+    $cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
+    for my $mtype (keys %REORDERING_MODEL_TYPES) {
+	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
+	foreach my $model (@REORDERING_MODELS) {
+	    if ($model->{"type"} eq $mtype) {
+		$cmd .= " ".$model->{"all"};
 	    }
-	    $f_current = $f;
-	    $e_current = $e;
-	}	
-	# update counts
-	if    ($o_previous eq 'mono') {  $mono_previous_f++;  $mono_previous_fe++; }
-	elsif ($o_previous eq 'swap') {  $swap_previous_f++;  $swap_previous_fe++; }
-	elsif ($o_previous eq 'left'){ $left_previous_f++; $left_previous_fe++; }
-	elsif ($o_previous eq 'right'){ $right_previous_f++; $right_previous_fe++; }
-        #keep other option for backward compatibility
-	elsif ($o_previous eq 'other'){ $other_previous_f++; $other_previous_fe++; }
-	else { print STDERR "buggy line (o_previous:$o_previous): $_\n"; }
-	
-	if    ($o_following eq 'mono') {  $mono_following_f++;  $mono_following_fe++; }
-	elsif ($o_following eq 'swap') {  $swap_following_f++;  $swap_following_fe++; }
-	elsif ($o_following eq 'left') { $left_following_f++; $left_following_fe++; }
-	elsif ($o_following eq 'right') { $right_previous_f++; $right_previous_fe++; }
-        #keep other option for backward compatibility
-	elsif ($o_following eq 'other') { $other_previous_f++; $other_previous_fe++; }
-	else { print STDERR "buggy line (o_following:$o_following): $_\n"; }
-
+	}
+	$cmd .= "\"";
     }
-    &store_reordering_f();
-    &store_reordering_fe();
+    
+    #Call the lexical reordering scorer
+    safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
 
     if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
 }
 
-sub store_reordering_f {
-    my ($total_previous_f,$total_following_f);
-    $total_previous_f = ($mono_previous_f+$swap_previous_f+$left_previous_f+$right_previous_f+$other_previous_f);
-    $total_following_f = ($mono_following_f+$swap_following_f+$left_following_f+$right_following_f+$other_following_f);
-
-    foreach my $model (@REORDERING_MODELS) {
-	next if ($model->{"lang"} ne "f");
-	if ($model->{"orient"} eq "mslr") {
-	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[2]+$REORDERING_SMOOTH_PREVIOUS[3];
-	    printf { $model->{"filehandle"} } ("%s ||| %g %g %g %g\n",
-					   $f_current, 
-					   ($mono_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/
-					       $total_previous_f,
-					   ($swap_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/
-					       $total_previous_f,
-					   ($left_previous_f+$REORDERING_SMOOTH_PREVIOUS[2])/
-					       $total_previous_f,
-					   ($right_previous_f+$REORDERING_SMOOTH_PREVIOUS[3])
-					       /$total_previous_f);
-	}
-	elsif ($model->{"orient"} eq "msd") {
-	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[4];
-	    printf { $model->{"filehandle"} } ("%s ||| %g %g %g\n",
-					   $f_current, 
-					   ($mono_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_f,
-					   ($swap_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_f,
-					   ($other_previous_f+$REORDERING_SMOOTH_PREVIOUS[4])/
-					       $total_previous_f);
-	}
-	elsif ($model->{"orient"} eq "monotonicity") {
-	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
-	    printf { $model->{"filehandle"} } ("%s ||| %g %g\n",
-					   $f_current, 
-					   ($mono_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_f,
-					   ($swap_previous_f+$left_previous_f+$right_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_f);
-	}
-	elsif ($model->{"orient"} eq "leftright") {
-	    $total_previous_f += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
-	    printf { $model->{"filehandle"} } ("%s ||| %g %g\n",
-					   $f_current, 
-					   ($mono_previous_f+$left_previous_f+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_f,
-					   ($swap_previous_f+$right_previous_f+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_f);
-	}
-    }
-}
-
-sub store_reordering_fe {
-    my $total_previous_fe = $mono_previous_fe+$swap_previous_fe+$left_previous_fe+$right_previous_fe;
-    my $total_following_fe = $mono_following_fe+$swap_following_fe+$left_following_fe+$right_following_fe;
-
-    foreach my $model (@REORDERING_MODELS) {
-	next if ($model->{"lang"} ne "fe");
-	if ($model->{"orient"} eq "mslr") {
-	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[2]+$REORDERING_SMOOTH_PREVIOUS[3];
-	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1]+$REORDERING_SMOOTH_FOLLOWING[2]+$REORDERING_SMOOTH_FOLLOWING[3];
-	    printf { $model->{"filehandle"} } ("%s ||| %s ||| %g %g %g %g ",
-					   $f_current, $e_current, 
-					   ($mono_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
-					   ($swap_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe,
-					   ($left_previous_fe+$REORDERING_SMOOTH_PREVIOUS[2])/$total_previous_fe,
-					   ($right_previous_fe+$REORDERING_SMOOTH_PREVIOUS[3])/$total_previous_fe);
-	    if ($model->{"dir"} eq "bidirectional") {
-		printf { $model->{"filehandle"} } ("%g %g %g %g",
-					       ($mono_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
-					       ($swap_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe,
-					       ($left_following_fe+$REORDERING_SMOOTH_FOLLOWING[2])/$total_following_fe,
-					       ($right_following_fe+$REORDERING_SMOOTH_FOLLOWING[3])/$total_following_fe);
-	    }
-	    printf { $model->{"filehandle"} } ("\n");
-	}
-	elsif ($model->{"orient"} eq "msd") {
-	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1]+$REORDERING_SMOOTH_PREVIOUS[4];
-	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1]+$REORDERING_SMOOTH_FOLLOWING[4];
-	    printf { $model->{"filehandle"} } ("%s |||  %s ||| %g %g %g ",
-					   $f_current, $e_current,  
-					   ($mono_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
-					   ($swap_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe,
-					   ($other_previous_fe+$REORDERING_SMOOTH_PREVIOUS[4])/$total_previous_fe);
-	    if ($model->{"dir"} eq "bidirectional") {
-		printf { $model->{"filehandle"} } ("%g %g %g",
-					       ($mono_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
-					       ($swap_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe,
-					       ($other_following_fe+$REORDERING_SMOOTH_FOLLOWING[4])/$total_following_fe);
-	    }
-	    printf { $model->{"filehandle"} } ("\n");
-	}
-	elsif ($model->{"orient"} eq "monotonicity") {
-	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
-	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1];
-	    printf { $model->{"filehandle"} } ("%s %s ||| %g %g ",
-					   $f_current,  $e_current, 
-					   ($mono_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
-					   ($swap_previous_fe+$left_previous_fe+$right_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe);
-	    if ($model->{"dir"} eq "bidirectional") {
-		printf { $model->{"filehandle"} } ("%g %g",
-					       ($mono_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
-					       ($swap_following_fe+$left_following_fe+$right_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe);
-	    }
-	    printf { $model->{"filehandle"} } ("\n");	
-	}
-	elsif ($model->{"orient"} eq "leftright") {
-	    $total_previous_fe += $REORDERING_SMOOTH_PREVIOUS[0]+$REORDERING_SMOOTH_PREVIOUS[1];
-	    $total_following_fe += $REORDERING_SMOOTH_FOLLOWING[0]+$REORDERING_SMOOTH_FOLLOWING[1];
-	    printf { $model->{"filehandle"} } ("%s |||  %s ||| %g %g ",
-					   $f_current, $e_current, 
-					   ($mono_previous_fe+$left_previous_fe+$REORDERING_SMOOTH_PREVIOUS[0])/$total_previous_fe,
-					   ($swap_previous_fe+$right_previous_fe+$REORDERING_SMOOTH_PREVIOUS[1])/$total_previous_fe);
-	    if ($model->{"dir"} eq "bidirectional") {
-		printf { $model->{"filehandle"} } ("%g %g",
-					       ($mono_following_fe+$left_following_fe+$REORDERING_SMOOTH_FOLLOWING[0])/$total_following_fe,
-					       ($swap_following_fe+$right_following_fe+$REORDERING_SMOOTH_FOLLOWING[1])/$total_following_fe);
-	    }
-	    printf { $model->{"filehandle"} } ("\n");
-	}
-    }
-}
 
 
 ### (8) LEARN GENERATION MODEL
@@ -1703,7 +1496,7 @@ sub create_ini {
     
     if (defined $___TRANSLATION_FACTORS) {
 	print INI "# input factors\n";
-	    print INI "[input-factors]\n";
+	print INI "[input-factors]\n";
 	my $INPUT_FACTOR_MAX = 0;
 	foreach my $table (split /\+/, $___TRANSLATION_FACTORS) {
 	    my ($factor_list, $output) = split /-+/, $table;
@@ -1798,25 +1591,16 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
     my $file = "# distortion (reordering) files\n\[distortion-file]\n";
     my $factor_i = 0;
  
-    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
+    #my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-#	foreach my $type (keys %REORDERING_MODELS) {
 	foreach my $model (@REORDERING_MODELS) {	
-#	    next if $type eq "fe" || $type eq "f";
-#	    next if $type eq "distance";
-#		my $w;
-#		if ($type =~ /msd/) { $w = 3; } else { $w = 1; }
-#		if ($type =~ /bi/) { $w *= 2; }
-		$weight_d_count += $model->{"numfeatures"};
-
-	        my $table_file = "$___MODEL_DIR/reordering-table.";
-	        $table_file .= ".$factor" unless $___NOT_FACTORED;
-#                $table_file .= ".$type" if (scalar keys %REORDERING_MODELS) > 2;
-		$table_file .= $model->{"all"};
-                $table_file .= ".gz";
-		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		#$type =~ s/\-f/\-unidirectional\-f/ unless $type =~ /\-bi/;
-		$file .= ".$factor ".$model->{"all"}." ".$model->{"numfeatures"}." $table_file\n";
+	    $weight_d_count += $model->{"numfeatures"};
+	    my $table_file = "$___MODEL_DIR/reordering-table.";
+	    $table_file .= ".$factor" unless $___NOT_FACTORED;
+	    $table_file .= $model->{"all"};
+	    $table_file .= ".gz";
+	    #$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    $file .= ".$factor ".$model->{"all"}." ".$model->{"numfeatures"}." $table_file\n";
 	}
         $factor_i++;
       }
