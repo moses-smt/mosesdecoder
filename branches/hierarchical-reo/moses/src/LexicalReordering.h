@@ -13,6 +13,7 @@
 #include "ScoreProducer.h"
 #include "FeatureFunction.h"
 
+#include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"
 
 namespace Moses
@@ -24,11 +25,7 @@ class Hypothesis;
 class InputType;
 
 class LexicalReordering : public StatefulFeatureFunction {
-public:
-    typedef int ReorderingType;
-    enum Direction {Forward, Backward};
-    enum Condition {F,E,FE};
-    
+public:   
     LexicalReordering(std::vector<FactorType>& f_factors, 
                       std::vector<FactorType>& e_factors,
                       const std::string &modelType,
@@ -37,14 +34,14 @@ public:
     virtual ~LexicalReordering();
     
     virtual size_t GetNumScoreComponents() const {
-        return m_numScoreComponents; 
-    };
+        return m_configuration.GetNumScoreComponents(); 
+    }
     
     virtual FFState* Evaluate(const Hypothesis& cur_hypo,
                               const FFState* prev_state,
                               ScoreComponentCollection* accumulator) const;
     
-    const FFState* EmptyHypothesisState() const;
+    virtual const FFState* EmptyHypothesisState(const InputType &input) const;
     
     virtual std::string GetScoreProducerDescription() const {
         return "LexicalReordering_" + m_modelTypeString;
@@ -66,14 +63,15 @@ private:
     bool DecodeDirection(std::string s);
     bool DecodeNumFeatureFunctions(std::string s);
 
+    LexicalReorderingConfiguration m_configuration;
     std::string m_modelTypeString;
     std::vector<std::string> m_modelType;
     LexicalReorderingTable* m_table;
     size_t m_numScoreComponents;
-    std::vector<Direction> m_direction;
-    std::vector<Condition> m_condition;
-    std::vector<size_t> m_scoreOffset;
-    bool m_oneScorePerDirection;
+    //std::vector<Direction> m_direction;
+    std::vector<LexicalReorderingConfiguration::Condition> m_condition;
+    //std::vector<size_t> m_scoreOffset;
+    //bool m_oneScorePerDirection;
     std::vector<FactorType> m_factorsE, m_factorsF;
 };
 
