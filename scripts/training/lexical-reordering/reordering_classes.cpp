@@ -27,7 +27,7 @@ ModelScore* ModelScore::createModelScore(const string& modeltype) {
     return new ModelScoreMSLR();
   } else if (modeltype.compare("msd") == 0) {
     return new ModelScoreMSD();
-  } else if (modeltype.compare("monotonoicity") == 0 ) {
+  } else if (modeltype.compare("monotonicity") == 0 ) {
     return new ModelScoreMonotonicity();
   } else if (modeltype.compare("leftright") == 0) {
     return new ModelScoreLR();

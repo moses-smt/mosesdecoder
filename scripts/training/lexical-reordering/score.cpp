@@ -24,7 +24,8 @@ void get_orientations(const string& pair, string& previous, string& next);
 
 int main(int argc, char* argv[])
 {
-  cerr << "Lexical Reordering Scorer, written by Sara Stymne\n"
+
+  cerr << "Lexical Reordering Scorer\n"
        << "scores lexical reordering models of several types (hierarchical, phrase-based and word-based-extraction\n";
 
   if (argc < 3) {
@@ -140,7 +141,7 @@ int main(int argc, char* argv[])
     } else if (f.compare(f_current) != 0 || e.compare(e_current) != 0) {
       //fe - score
       for (int i=0; i<models.size();++i) {
-	models[i]->score_fe(f,e);
+	models[i]->score_fe(f_current,e_current);
       }
       //reset
       for(map<string,ModelScore*>::const_iterator it = modelScores.begin(); it != modelScores.end(); ++it) {
@@ -150,7 +151,7 @@ int main(int argc, char* argv[])
       if (f.compare(f_current) != 0) {
 	//f - score
 	for (int i=0; i<models.size();++i) {
-	  models[i]->score_f(f);
+	  models[i]->score_f(f_current);
 	}
       //reset
 	for(map<string,ModelScore*>::const_iterator it = modelScores.begin(); it != modelScores.end(); ++it) {
