@@ -29,6 +29,8 @@ training/cmert-0.5/README
 training/cmert-0.5/score-nbest.py
 training/combine_factors.pl
 training/filter-model-given-input.pl
+training/lexical-reordering/score.exe
+training/memscore/memscore.exe
 training/mert-moses.pl
 training/phrase-extract/extract.exe
 training/phrase-extract/score.exe

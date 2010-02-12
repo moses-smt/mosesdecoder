@@ -257,7 +257,7 @@ void Model::score_fe(const string& f, const string& e)  {
     for(int i=0; i<scores.size(); ++i) {
       fprintf(file,"%f ",scores[i]/sum);
     }
-    fprintf(file, "||| ");
+    //fprintf(file, "||| ");
   }
   //condition on the next phrase
   if (next) {
