@@ -65,37 +65,37 @@ class ModelScoreMonotonicity : public ModelScore {
 class Scorer {
  public:
   ~Scorer() {}
-  virtual std::vector<double> score(std::vector<double>) const = 0;
-  virtual std::vector<double> createSmoothing(std::vector<double>, double) const = 0;
-  virtual std::vector<double> createConstSmoothing(double) const = 0;
+  virtual void score(const std::vector<double>&, std::vector<double>&) const = 0;
+  virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const = 0;
+  virtual void createConstSmoothing(double, std::vector<double>&) const = 0;
 };
 
 class ScorerMSLR : public Scorer {
  public:
-  virtual std::vector<double> score(std::vector<double>) const;
-  virtual std::vector<double> createSmoothing(std::vector<double>, double) const;
-  virtual std::vector<double> createConstSmoothing(double) const;
+  virtual void score(const std::vector<double>&, std::vector<double>&) const;
+  virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
+  virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
 class ScorerMSD : public Scorer {
  public:
-  virtual std::vector<double> score(std::vector<double>) const;
-  virtual std::vector<double> createSmoothing(std::vector<double>, double) const;
-  virtual std::vector<double> createConstSmoothing(double) const;
+  virtual void score(const std::vector<double>&, std::vector<double>&) const;
+  virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
+  virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
 class ScorerMonotonicity : public Scorer {
  public:
-  virtual std::vector<double> score(std::vector<double>) const;
-  virtual std::vector<double> createSmoothing(std::vector<double>, double) const;
-  virtual std::vector<double> createConstSmoothing(double) const;
+  virtual void score(const std::vector<double>&, std::vector<double>&) const;
+  virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
+  virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
 class ScorerLR : public Scorer {
  public:
-  virtual std::vector<double> score(std::vector<double>) const;
-  virtual std::vector<double> createSmoothing(std::vector<double>, double) const;
-  virtual std::vector<double> createConstSmoothing(double) const;
+  virtual void score(const std::vector<double>&, std::vector<double>&) const;
+  virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
+  virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
 

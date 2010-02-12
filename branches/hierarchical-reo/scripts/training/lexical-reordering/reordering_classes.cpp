@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <numeric>
 #include <cstdio>
-//#include <iostream>
 #include <sstream>
 #include <string>
 #include "zlib.h"
@@ -51,31 +50,31 @@ void ModelScore::reset_f() {
   }
 }
 
-void ModelScore::add_example(const std::string& previous, std::string& next) { 
+void ModelScore::add_example(const string& previous, string& next) { 
   count_fe_prev[getType(previous)]++;
   count_f_prev[getType(previous)]++;
   count_fe_next[getType(next)]++;
   count_f_next[getType(next)]++;
 }
 
-const std::vector<double>& ModelScore::get_scores_fe_prev() const {
+const vector<double>& ModelScore::get_scores_fe_prev() const {
   return count_fe_prev;
 }
 
-const std::vector<double>& ModelScore::get_scores_fe_next() const {
+const vector<double>& ModelScore::get_scores_fe_next() const {
   return count_fe_next;
 }
 
-const std::vector<double>& ModelScore::get_scores_f_prev() const {
+const vector<double>& ModelScore::get_scores_f_prev() const {
   return count_f_prev;
 }
 
-const std::vector<double>& ModelScore::get_scores_f_next() const {
+const vector<double>& ModelScore::get_scores_f_next() const {
   return count_f_next;
 }
 
 
-ORIENTATION ModelScore::getType(const std::string& s) {
+ORIENTATION ModelScore::getType(const string& s) {
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0) {
@@ -95,7 +94,7 @@ ORIENTATION ModelScore::getType(const std::string& s) {
 }
 
 
-ORIENTATION ModelScoreMSLR::getType(const std::string& s) {
+ORIENTATION ModelScoreMSLR::getType(const string& s) {
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0) {
@@ -114,7 +113,7 @@ ORIENTATION ModelScoreMSLR::getType(const std::string& s) {
 }
 
 
-ORIENTATION ModelScoreLR::getType(const std::string& s) {
+ORIENTATION ModelScoreLR::getType(const string& s) {
   if (s.compare("mono") == 0 || s.compare("dright") == 0) {
     return DRIGHT;
   } else if (s.compare("swap") == 0 || s.compare("dleft") == 0) {
@@ -129,7 +128,7 @@ ORIENTATION ModelScoreLR::getType(const std::string& s) {
 }
 
 
-ORIENTATION ModelScoreMSD::getType(const std::string& s) {
+ORIENTATION ModelScoreMSD::getType(const string& s) {
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0) {
@@ -147,7 +146,7 @@ ORIENTATION ModelScoreMSD::getType(const std::string& s) {
   }
 }
 
-ORIENTATION ModelScoreMonotonicity::getType(const std::string& s) {
+ORIENTATION ModelScoreMonotonicity::getType(const string& s) {
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0 ||
@@ -163,152 +162,127 @@ ORIENTATION ModelScoreMonotonicity::getType(const std::string& s) {
 }
 
 
-std::vector<double> ScorerMSLR::createSmoothing(std::vector<double> scores, double weight) const {
-  double total = accumulate(scores.begin(), scores.end(), 0);
-  vector<double> res;
-  res.push_back(weight*(scores[MONO]+0.1)/total);
-  res.push_back(weight*(scores[SWAP]+0.1)/total);
-  res.push_back(weight*(scores[DRIGHT]+0.1)/total);
-  res.push_back(weight*(scores[DLEFT]+0.1)/total);
-  return res;
+  
+void ScorerMSLR::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+  scores.push_back(all_scores[MONO]);
+  scores.push_back(all_scores[SWAP]);
+  scores.push_back(all_scores[DLEFT]);
+  scores.push_back(all_scores[DRIGHT]);
+}
+  
+void ScorerMSD::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+  scores.push_back(all_scores[MONO]);
+  scores.push_back(all_scores[SWAP]);
+  scores.push_back(all_scores[DRIGHT]+all_scores[DLEFT]+all_scores[OTHER]);
 }
 
-std::vector<double> ScorerMSLR::createConstSmoothing(double weight) const {
-  vector<double> smoothing;
+void ScorerMonotonicity::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+  scores.push_back(all_scores[MONO]);
+  scores.push_back(all_scores[SWAP]+all_scores[DRIGHT]+all_scores[DLEFT]+all_scores[OTHER]+all_scores[NOMONO]);
+}
+
+  
+void ScorerLR::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+  scores.push_back(all_scores[MONO]+all_scores[DRIGHT]);
+  scores.push_back(all_scores[SWAP]+all_scores[DLEFT]);
+}
+
+
+void ScorerMSLR::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
+  double total = accumulate(scores.begin(), scores.end(), 0);
+  smoothing.push_back(weight*(scores[MONO]+0.1)/total);
+  smoothing.push_back(weight*(scores[SWAP]+0.1)/total);
+  smoothing.push_back(weight*(scores[DLEFT]+0.1)/total);
+  smoothing.push_back(weight*(scores[DRIGHT]+0.1)/total);
+}
+
+void ScorerMSLR::createConstSmoothing(double weight, vector<double>& smoothing) const {
   for (int i=1; i<=4; ++i) {
     smoothing.push_back(weight);
   }
-  return smoothing;
 }
 
 
-std::vector<double> ScorerMSD::createSmoothing(std::vector<double> scores, double weight) const {
+void ScorerMSD::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
   double total = accumulate(scores.begin(), scores.end(), 0);
-  vector<double> res;
-  res.push_back(weight*(scores[MONO]+0.1)/total);
-  res.push_back(weight*(scores[SWAP]+0.1)/total);
-  res.push_back(weight*(scores[DLEFT]+scores[DRIGHT]+scores[OTHER]+0.1)/total);
-  return res;
+  smoothing.push_back(weight*(scores[MONO]+0.1)/total);
+  smoothing.push_back(weight*(scores[SWAP]+0.1)/total);
+  smoothing.push_back(weight*(scores[DLEFT]+scores[DRIGHT]+scores[OTHER]+0.1)/total);
 }
 
-std::vector<double> ScorerMSD::createConstSmoothing(double weight) const {
-  vector<double> smoothing;
+void ScorerMSD::createConstSmoothing(double weight, vector<double>& smoothing) const {
   for (int i=1; i<=3; ++i) {
     smoothing.push_back(weight);
   }
-  return smoothing;
 }
 
-std::vector<double> ScorerMonotonicity::createSmoothing(std::vector<double> scores, double weight) const {
+void ScorerMonotonicity::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
   double total = accumulate(scores.begin(), scores.end(), 0);
-  vector<double> res;
-  res.push_back(weight*(scores[MONO]+0.1)/total);
-  res.push_back(weight*(scores[SWAP]+scores[DLEFT]+scores[DRIGHT]+scores[OTHER]+scores[NOMONO]+0.1)/total);
-  return res;
+  smoothing.push_back(weight*(scores[MONO]+0.1)/total);
+  smoothing.push_back(weight*(scores[SWAP]+scores[DLEFT]+scores[DRIGHT]+scores[OTHER]+scores[NOMONO]+0.1)/total);
 }
 
-std::vector<double> ScorerMonotonicity::createConstSmoothing(double weight) const {
-  vector<double> smoothing;
+void ScorerMonotonicity::createConstSmoothing(double weight, vector<double>& smoothing) const {
   for (double i=1; i<=2; ++i) {
     smoothing.push_back(weight);
   }
-  return smoothing;
 }
 
 
-std::vector<double> ScorerLR::createSmoothing(std::vector<double> scores, double weight) const {
+void ScorerLR::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
   double total = accumulate(scores.begin(), scores.end(), 0);
-  vector<double> res;
-  res.push_back(weight*(scores[MONO]+scores[DRIGHT]+0.1)/total);
-  res.push_back(weight*(scores[SWAP]+scores[DLEFT])/total);
-  return res;
+  smoothing.push_back(weight*(scores[MONO]+scores[DRIGHT]+0.1)/total);
+  smoothing.push_back(weight*(scores[SWAP]+scores[DLEFT])/total);
 }
 
-std::vector<double> ScorerLR::createConstSmoothing(double weight) const {
-  vector<double> smoothing;
+void ScorerLR::createConstSmoothing(double weight, vector<double>& smoothing) const {
   for (int i=1; i<=2; ++i) {
     smoothing.push_back(weight);
   }
-  return smoothing;
-}
-  
-std::vector<double> ScorerMSLR::score(vector<double> all_scores) const {
-  vector<double> s;
-  s.push_back(all_scores[MONO]);
-  s.push_back(all_scores[SWAP]);
-  s.push_back(all_scores[DRIGHT]);
-  s.push_back(all_scores[DLEFT]);
-  return s;
-}
-  
-std::vector<double> ScorerMSD::score(vector<double> all_scores) const {
-  vector<double> s;
-  s.push_back(all_scores[MONO]);
-  s.push_back(all_scores[SWAP]);
-  s.push_back(all_scores[DRIGHT]+all_scores[DLEFT]+all_scores[OTHER]);
-  return s;
-}
-
-std::vector<double> ScorerMonotonicity::score(vector<double> all_scores) const {
-  vector<double> s;
-  s.push_back(all_scores[MONO]);
-  s.push_back(all_scores[SWAP]+all_scores[DRIGHT]+all_scores[DLEFT]+all_scores[OTHER]+all_scores[NOMONO]);
-  return s;
-}
-
-  
-std::vector<double> ScorerLR::score(vector<double> all_scores) const {
-  vector<double> s;
-  s.push_back(all_scores[MONO]+all_scores[DRIGHT]);
-  s.push_back(all_scores[SWAP]+all_scores[DLEFT]);
-  return s;
 }
 
 void Model::score_fe(const string& f, const string& e)  {
   if (!fe)    //Make sure we do not do anything if it is not a fe model
     return;
-  //file >> f >> " " >> e >> " ||| ";
   fprintf(file,"%s ||| %s ||| ",f.c_str(),e.c_str());
   //condition on the previous phrase
   if (previous) {
-    vector<double> scores = scorer->score(modelscore->get_scores_fe_prev());
+    vector<double> scores;
+    scorer->score(modelscore->get_scores_fe_prev(), scores);
     double sum = 0;
     for(int i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_prev[i];
       sum += scores[i];
     }
     for(int i=0; i<scores.size(); ++i) {
-      //file >> scores[i]/sum >> " ";
       fprintf(file,"%f ",scores[i]/sum);
     }
+    fprintf(file, "||| ");
   }
   //condition on the next phrase
   if (next) {
-    //file >> "||| ";
-    fprintf(file, "||| ");
-    vector<double> scores = scorer->score(modelscore->get_scores_fe_next());
+    vector<double> scores;
+    scorer->score(modelscore->get_scores_fe_next(), scores);
     double sum = 0;
     for(int i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_next[i];
       sum += scores[i];
     }
     for(int i=0; i<scores.size(); ++i) {
-      //file >> scores[i]/sum >> " ";
       fprintf(file, "%f ", scores[i]/sum);
     }
   }
-  //file >> "\n";
   fprintf(file,"\n");
 }
 
 void Model::score_f(const string& f) {
   if (fe)      //Make sure we do not do anything if it is not a f model
     return;
-  //file >> f >> " ||| ";
   fprintf(file, "%s ||| ", f.c_str());
   //condition on the previous phrase
   if (previous) {
-    vector<double> scores = scorer->score(modelscore->get_scores_f_prev());
+    vector<double> scores;
+    scorer->score(modelscore->get_scores_f_prev(), scores);
     double sum = 0;
     for(int i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_prev[i];
@@ -317,23 +291,21 @@ void Model::score_f(const string& f) {
     for(int i=0; i<scores.size(); ++i) {
       fprintf(file, "%f ", scores[i]/sum);
     }
+    fprintf(file, "||| ");
   }
   //condition on the next phrase
   if (next) {
-    //file >> "||| ";
-    fprintf(file, "||| ");
-    vector<double> scores = scorer->score(modelscore->get_scores_f_next());
+    vector<double> scores;
+    scorer->score(modelscore->get_scores_f_next(), scores);
     double sum = 0;
     for(int i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_next[i];
       sum += scores[i];
     }
     for(int i=0; i<scores.size(); ++i) {
-      //file >> scores[i]/sum >> " ";
       fprintf(file, "%f ", scores[i]/sum);
     }
   }
-  //file >> "\n";
   fprintf(file, "\n");
 }
 
@@ -395,7 +367,7 @@ void Model::split_config(const string& config, string& dir, string& lang, string
   getline(is, lang, '-');
 }
 
-Model* Model::createModel(ModelScore* modelscore, const std::string& config, const std::string& filepath) {
+Model* Model::createModel(ModelScore* modelscore, const string& config, const string& filepath) {
   string dir, lang, orient, filename;
   split_config(config,dir,lang,orient);
 
@@ -415,13 +387,14 @@ Model* Model::createModel(ModelScore* modelscore, const std::string& config, con
   }
 }
 
+
+
 void Model::createSmoothing(double w)  {
-  smoothing_prev = scorer->createSmoothing(modelscore->get_scores_fe_prev(),w);
-  smoothing_next = scorer->createSmoothing(modelscore->get_scores_fe_prev(),w);
+  scorer->createSmoothing(modelscore->get_scores_fe_prev(), w, smoothing_prev);
+  scorer->createSmoothing(modelscore->get_scores_fe_prev(), w, smoothing_next);
 }
 
 void Model::createConstSmoothing(double w)  {
-  vector<double> i;
-  smoothing_prev = scorer->createConstSmoothing(w);
-  smoothing_next = scorer->createConstSmoothing(w);
+  scorer->createConstSmoothing(w, smoothing_prev);
+  scorer->createConstSmoothing(w, smoothing_next);
 }
