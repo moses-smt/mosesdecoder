@@ -13,7 +13,7 @@
 #include <set>
 
 int bleu_order = 4;
-
+float UNKNGRAMLOGPROB = -20;
 void GetOutputWords(const TrellisPath &path, vector <Word> &translation){
 	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 	
@@ -297,6 +297,9 @@ void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<E
   
   for (map<Phrase, float>::iterator finalScoresIt = finalNgramScores.begin();  finalScoresIt != finalNgramScores.end(); ++finalScoresIt) {
     finalScoresIt->second =  finalScoresIt->second * scale - Z;
+    IFVERBOSE(2) {
+      cout << finalScoresIt->first << " [" << finalScoresIt->second << "]" << endl;
+    }
   }
   
 }
@@ -411,18 +414,20 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
       mbrThetas.push_back(mbrThetas[i-1] / r);  
     }
   }
-  
-  //cout << "Thetas: ";
-//  for (size_t i = 0; i < mbrThetas.size(); ++i) {
-//    cout << mbrThetas[i] << " ";
-//  }
-//  cout << endl;
+  IFVERBOSE(2) {  
+  cout << "Thetas: ";
+  for (size_t i = 0; i < mbrThetas.size(); ++i) {
+    cout << mbrThetas[i] << " ";
+  }
+  cout << endl;
+  }
   
   float argmaxScore = -1e20;
   TrellisPathList::const_iterator iter;
+  size_t ctr = 0;
   
   vector<Word> argmaxTranslation;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
+  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter, ++ctr)
   {
     const TrellisPath &path = **iter;
     // get words in translation
@@ -439,23 +444,29 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
     float ngramScore = 0;
     
     for (map < Phrase, int >::iterator ngrams = counts.begin(); ngrams != counts.end(); ++ngrams) {
+      float ngramPosterior = UNKNGRAMLOGPROB; 
+      map<Phrase,float>::const_iterator ngramPosteriorIt = finalNgramScores.find(ngrams->first);
+      if (ngramPosteriorIt != finalNgramScores.end()) {
+        ngramPosterior = ngramPosteriorIt->second;
+      }
+          
       if (ngramScore == 0) {
-        ngramScore = log(ngrams->second) + finalNgramScores[ngrams->first] + log(mbrThetas[(ngrams->first).GetSize()]);
+        ngramScore = log(ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()]);
       }
       else {
-        ngramScore = log_sum(ngramScore, float(log(ngrams->second) + finalNgramScores[ngrams->first] + log(mbrThetas[(ngrams->first).GetSize()])));
+        ngramScore = log_sum(ngramScore, float(log(ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()])));
       }
       //cout << "Ngram: " << ngrams->first << endl;
-    }
+    } 
 
     mbrScore += exp(ngramScore);
 
     if (mbrScore > argmaxScore){
       argmaxScore = mbrScore;
-      IFVERBOSE(3) {
-        cout << "NEW BEST: ";
+      IFVERBOSE(2) {
+        cout << "HYP " << ctr << "IS NEW BEST: ";
         for (int i = 0; i < translation.size(); ++i)
-          cout << translation[i] << " " ;
+          cout << translation[i]  ;
         cout << "[" << argmaxScore << "]" << endl;    
       }
       argmaxTranslation = translation;
