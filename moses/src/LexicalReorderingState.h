@@ -102,8 +102,8 @@ class LexicalReorderingState : public FFState {
     static const ReorderingType D = 2;  // discontinuous
     static const ReorderingType DL = 2; // discontinuous, left
     static const ReorderingType DR = 3; // discontinuous, right
-    static const ReorderingType R = 0;  // left
-    static const ReorderingType L = 1;  // right
+    static const ReorderingType R = 0;  // right
+    static const ReorderingType L = 1;  // left
 };
 
 class BidirectionalReorderingState : public LexicalReorderingState {
