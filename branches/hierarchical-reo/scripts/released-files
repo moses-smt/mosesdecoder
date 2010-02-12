@@ -32,6 +32,7 @@ training/cmert-0.5/score-nbest.py
 training/mbr/mbr
 training/filter-model-given-input.pl
 training/filter-and-binarize-model-given-input.pl
+training/lexical-reordering/score
 training/memscore/memscore
 training/mert-moses.pl
 training/mert-moses-new.pl
