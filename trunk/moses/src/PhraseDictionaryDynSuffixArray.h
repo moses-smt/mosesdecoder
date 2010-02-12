@@ -50,22 +50,10 @@ public:
 	int m_sntIndex;
 	vector<wordID_t>* trgSnt;
   vector<wordID_t>* srcSnt;
-  vector<int> alignedCountTrg; 
-  vector< vector<int> > alignedSrc; 
+  vector<int> numberAligned; 
+  vector< vector<int> > alignedList; 
 	bool Extract(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const;
 };
-class SentenceAlignment2 
-{
-public:
-  SentenceAlignment2(int sntIndex, int sourceSize, int targetSize);
-	int m_sntIndex;
-	vector<wordID_t>* trgSnt;
-  vector<wordID_t>* srcSnt;
-  vector<int> alignedCountSrc; 
-  vector< vector<int> > alignedTrg; 
-	bool Extract2(int maxPhraseLength, vector<PhrasePair*> &ret, int startSource, int endSource) const;
-};
-
 class ScoresComp {
 public: 
   ScoresComp(const vector<float>& weights): m_weights(weights) {}
@@ -107,7 +95,7 @@ private:
   Vocab* vocab_;
   ScoresComp* scoreCmp_;
   vector<SentenceAlignment> alignments_;
-  vector<SentenceAlignment2> alignments2_;
+  vector<vector<short> > rawAlignments_;
 	vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
@@ -115,15 +103,17 @@ private:
 	std::map<const Factor *, wordID_t> vocabLookup_;
 	std::map<wordID_t, const Factor *> vocabLookupRev_;	
   mutable std::map<pair<wordID_t, wordID_t>, pair<float, float> > wordPairCache_; 
-  const int maxSampleSize_;
-  int loadCorpus(InputFileStream& corpus, vector<wordID_t>&, vector<wordID_t>&);
+  const int maxPhraseLength_, maxSampleSize_;
+  int loadCorpus(InputFileStream&, vector<wordID_t>&, vector<wordID_t>&);
   int loadAlignments(InputFileStream& aligs);
-  int loadAlignments2(InputFileStream& aligs);
+  int loadRawAlignments(InputFileStream& aligs);
+  bool extractPhrases(const int&, const int&, const int&, vector<PhrasePair*>&, bool=false) const;
+  SentenceAlignment getSentenceAlignment(const int, bool=false) const; 
   vector<unsigned> sampleSelection(vector<unsigned>) const;
   vector<int> getSntIndexes(vector<unsigned>&, const int) const; 	
   TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
   SAPhrase trgPhraseFromSntIdx(const PhrasePair&) const;
-  bool getLocalVocabIDs(const Phrase&, SAPhrase &output) const;
+  bool getLocalVocabIDs(const Phrase&, SAPhrase &) const;
   void cacheWordProbs(wordID_t) const;
   pair<float, float> getLexicalWeight(const PhrasePair&) const;
 	int GetSourceSentenceSize(size_t sentenceId) const
