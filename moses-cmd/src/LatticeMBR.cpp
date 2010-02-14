@@ -451,10 +451,10 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
       }
           
       if (ngramScore == 0) {
-        ngramScore = log(ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()]);
+        ngramScore = log((double) ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()]);
       }
       else {
-        ngramScore = log_sum(ngramScore, float(log(ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()])));
+        ngramScore = log_sum(ngramScore, float(log((double) ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()])));
       }
       //cout << "Ngram: " << ngrams->first << endl;
     } 
