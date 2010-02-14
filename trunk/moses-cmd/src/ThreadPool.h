@@ -27,10 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #if defined(BOOST_HAS_PTHREADS)
 #include <pthread.h>
-#endif
-
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#endif
 
 #include "Util.h"
 
