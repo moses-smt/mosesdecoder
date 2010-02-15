@@ -30,8 +30,10 @@ int main (int argc, char * const argv[])
 			, numTargetFactors	= Moses::Scan<int>(argv[2])
 			, numScores					= Moses::Scan<int>(argv[3])
 			, tableLimit				= Moses::Scan<int>(argv[4]);
-	string filePath = argv[5]
-				,destPath = argv[6];
+	TargetPhraseCollection::s_sortScoreInd			= Moses::Scan<int>(argv[5]);
+	string filePath = argv[6]
+				,destPath = argv[7];
+	
 	
 	Moses::InputFileStream inStream(filePath);
 	

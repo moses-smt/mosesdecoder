@@ -15,6 +15,15 @@ namespace OnDiskPt
 
 class TargetPhraseCollection
 {
+	class TargetPhraseOrderByScore
+	{
+	public:	
+		bool operator()(const TargetPhrase* a, const TargetPhrase *b) const
+		{
+			return a->GetScore(s_sortScoreInd) > b->GetScore(s_sortScoreInd);
+		}
+	};
+
 protected:
 	typedef std::vector<TargetPhrase*> CollType;
 	CollType m_coll;
@@ -22,6 +31,8 @@ protected:
 	std::string m_debugStr;
 
 public:
+	static size_t s_sortScoreInd;
+
 	TargetPhraseCollection();
 	TargetPhraseCollection(const TargetPhraseCollection &copy);
 	

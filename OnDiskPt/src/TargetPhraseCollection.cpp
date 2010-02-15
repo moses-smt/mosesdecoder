@@ -13,6 +13,8 @@ using namespace std;
 namespace OnDiskPt
 {
 
+size_t TargetPhraseCollection::s_sortScoreInd;
+
 TargetPhraseCollection::TargetPhraseCollection()
 :m_filePos(777)
 {}
@@ -32,16 +34,6 @@ void TargetPhraseCollection::AddTargetPhrase(TargetPhrase *targetPhrase)
 {
 	m_coll.push_back(targetPhrase);
 }
-
-	
-class TargetPhraseOrderBy1stScore
-	{
-	public:	
-		bool operator()(const TargetPhrase* a, const TargetPhrase *b) const
-		{
-			return a->GetScore(0) > b->GetScore(0);
-		}
-	};
 
 void TargetPhraseCollection::Sort(size_t tableLimit)
 {
