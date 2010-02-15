@@ -31,8 +31,8 @@ int main (int argc, char * const argv[])
 			, numScores					= Moses::Scan<int>(argv[3])
 			, tableLimit				= Moses::Scan<int>(argv[4]);
 	TargetPhraseCollection::s_sortScoreInd			= Moses::Scan<int>(argv[5]);
-	string filePath = argv[6]
-				,destPath = argv[7];
+	const string filePath = argv[6]
+							,destPath = argv[7];
 	
 	
 	Moses::InputFileStream inStream(filePath);
@@ -65,8 +65,7 @@ int main (int argc, char * const argv[])
 	
 	rootNode.Save(onDiskWrapper, 0, tableLimit);
 	onDiskWrapper.EndSave();
-	Moses::DeleteFile(filePath);
-
+	
 	Moses::PrintUserTime("Finished");
   
 	//pause();
