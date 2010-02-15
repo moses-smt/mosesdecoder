@@ -37,7 +37,7 @@ void TargetPhraseCollection::AddTargetPhrase(TargetPhrase *targetPhrase)
 
 void TargetPhraseCollection::Sort(size_t tableLimit)
 {
-	std::sort(m_coll.begin(), m_coll.end(), TargetPhraseOrderBy1stScore());
+	std::sort(m_coll.begin(), m_coll.end(), TargetPhraseOrderByScore());
 	
 	if (m_coll.size() > tableLimit)
 	{
