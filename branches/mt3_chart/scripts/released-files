@@ -43,6 +43,8 @@ training/combine_factors.pl
 training/train-model.perl
 training/symal/symal
 training/symal/giza2bal.pl
+training/wrappers/parse-de-bitpar.perl
+training/wrappers/parse-en-collins.perl
 recaser/train-recaser.perl
 recaser/recase.perl
 recaser/detokenizer.perl
