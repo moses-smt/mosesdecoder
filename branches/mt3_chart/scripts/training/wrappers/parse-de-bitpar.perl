@@ -61,9 +61,16 @@ while(my $line = <PARSER>) {
                 # parent (or closest non-auxiliary ancestor).
             }
             else {
-                $label =~ s/\$/PUNC/g;       # no $!
-                $label =~ s/\|/:/g;          # moses does not like bars
-                $label =~ s/^[^A-Z]*([A-Z]+).*/$1/g if $BASIC; # basic labels only
+                if ($label =~ /^\\\$(,|.|Par)$/)
+                {
+                    $label = "PUNC$1";
+                }
+                else
+                {
+                    $label =~ s/\$/PUNC/g;       # no $!
+                    $label =~ s/\|/:/g;          # moses does not like bars
+                    $label =~ s/^[^A-Z]*([A-Z]+).*/$1/g if $BASIC; # basic labels only
+                }
                 push @OUT,"<tree label=\"$label\">";
             }
             push @LABEL,$label;
