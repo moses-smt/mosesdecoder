@@ -243,19 +243,21 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     while(my $entry = <FILE>) {
         my $use_entry;
 	if ($quick_hierarchical) {
-	    my ($lhs,$foreign,$rest) = split(/ \|\|\| /,$entry,3);
+	    my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
+            $foreign =~ s/\s+\[[^\]]+\]$//;
 	    $use_entry = 1;
-	    foreach my $subphrase (split(/\s*\[[^\]]+\]\s*/,$foreign)) {
+	    foreach my $subphrase (split(/\s*\[[^\]]+\]\[[^\]]+\]\s*/,$foreign)) {
 		$use_entry = 0
 		    if ($subphrase ne ""
 			&& !defined($PHRASE_USED{$factors}{$subphrase}));
 	    }
 	}
         elsif ($opt_hierarchical) {
-            my ($lhs,$foreign,$rest) = split(/ \|\|\| /,$entry,3);
+            my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
             $foreign =~ s/^\s+//;
             $foreign =~ s/\s+$//;
-            $foreign =~ s/\[[^\]]+\]/\[NT\]/g;
+            $foreign =~ s/\[[^\]]+\]\[[^\]]+\]/\[NT\]/g;
+            $foreign =~ s/\s+\[[^\]]+\]$//;
             $use_entry = defined($PHRASE_USED{$factors}{$foreign});
         } else {
             my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
