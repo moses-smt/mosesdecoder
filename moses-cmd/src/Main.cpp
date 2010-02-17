@@ -168,40 +168,9 @@ int main(int argc, char* argv[])
 			}
 		}
     else if (staticData.UseLatticeMBR()) {
-      std::map < int, bool > connected;
-      std::vector< const Hypothesis *> connectedList;
-      map<Phrase, float> ngramPosteriors;
-      std::map < const Hypothesis*, set <const Hypothesis*> > outgoingHyps;
-      map<const Hypothesis*, vector<Edge> > incomingEdges;
-      vector< float> estimatedScores;
-      manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-      pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, staticData.GetLatticeMBRPruningFactor());
-      calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);      
-      vector<Word> mbrBestHypo;
-      if (!staticData.UseLatticeHypSetForLatticeMBR()) {
-        size_t nBestSize = staticData.GetMBRSize();
-        if (nBestSize <= 0)
-		    {
-		      cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
-		      return EXIT_FAILURE;
-		    }
-        else
-		    {
-		      TrellisPathList nBestList;
-		      manager.CalcNBest(nBestSize, nBestList,true);
-		      VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-		      IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-          mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas(), staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
-         }
-      }  
-      else {
-          cerr << "Using Lattice for Hypothesis set not yet implemented" << endl;
-          return EXIT_FAILURE;
-        //mbrBestHypo = calcMBRSol(connectedList, ngramPosteriors, staticData.GetLatticeMBRThetas(), staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
-      }
-      
-      ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
-                                staticData.GetReportAllFactors());
+      vector<Word> mbrBestHypo = doLatticeMBR(manager); 
+      OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
+                                staticData.GetReportAllFactors(),cout);
       IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
     }
 		// consider top candidate translations to find minimum Bayes risk translation
@@ -220,9 +189,9 @@ int main(int argc, char* argv[])
         VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
         IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
         std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-        ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+        OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
                                   staticData.GetReportSegmentation(),
-                                  staticData.GetReportAllFactors());
+                                  staticData.GetReportAllFactors(),cout);
         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
         if (!staticData.GetNBestFilePath().empty()){ 
           //print the all nbest used for MBR (and not the amount passed through the parameter

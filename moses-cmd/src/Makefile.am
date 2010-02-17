@@ -8,7 +8,7 @@ moses_SOURCES = Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMB
 moses_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
 moses_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a 
 
-mosesmt_SOURCES = MainMT.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp ThreadPool.cpp
+mosesmt_SOURCES = MainMT.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp ThreadPool.cpp LatticeMBR.cpp
 mosesmt_LDADD = -L$(top_srcdir)/moses/src $(BOOST_LDFLAGS) -lmoses $(BOOST_THREAD_LIB)
 mosesmt_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a 
 

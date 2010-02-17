@@ -227,27 +227,27 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
 {
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
 	{
 		const Factor *factor = mbrBestHypo[i];
-		if (i>0) cout << " ";
-			cout << factor->GetString();
+		if (i>0) out << " ";
+			out << factor->GetString();
 	}
-	cout << endl;
+	out << endl;
 }													 
 
-void IOWrapper::OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
 {
   
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
 	{
-            const Factor *factor = mbrBestHypo[i].GetFactor(m_outputFactorOrder[0]);
-	    if (i>0) cout << " ";
-            cout << *factor;
+        const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+	    if (i>0) out << " ";
+            out << *factor;
 	}
-	cout << endl;
+	out << endl;
 }		
 
 
