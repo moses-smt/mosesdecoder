@@ -195,7 +195,9 @@ int main(int argc, char* argv[])
          }
       }  
       else {
-        mbrBestHypo = calcMBRSol(connectedList, ngramPosteriors, staticData.GetLatticeMBRThetas(), staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
+          cerr << "Using Lattice for Hypothesis set not yet implemented" << endl;
+          return EXIT_FAILURE;
+        //mbrBestHypo = calcMBRSol(connectedList, ngramPosteriors, staticData.GetLatticeMBRThetas(), staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
       }
       
       ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
