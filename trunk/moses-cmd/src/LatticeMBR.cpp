@@ -492,3 +492,39 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
   return argmaxTranslation;
 }
 
+vector<Word> doLatticeMBR(Manager& manager) {
+    const StaticData& staticData = StaticData::Instance();
+    std::map < int, bool > connected;
+    std::vector< const Hypothesis *> connectedList;
+    map<Phrase, float> ngramPosteriors;
+    std::map < const Hypothesis*, set <const Hypothesis*> > outgoingHyps;
+    map<const Hypothesis*, vector<Edge> > incomingEdges;
+    vector< float> estimatedScores;
+    manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
+    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, staticData.GetLatticeMBRPruningFactor());
+    calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);      
+    vector<Word> mbrBestHypo;
+    if (!staticData.UseLatticeHypSetForLatticeMBR()) {
+        size_t nBestSize = staticData.GetMBRSize();
+        if (nBestSize <= 0)
+        {
+            cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+            exit(1);
+        }
+        else
+        {
+            TrellisPathList nBestList;
+            manager.CalcNBest(nBestSize, nBestList,true);
+            VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+            IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
+            mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas(), 
+                                     staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
+        }
+    }  
+    else {
+        cerr << "Using Lattice for Hypothesis set not yet implemented" << endl;
+        exit(1);
+    }
+    return mbrBestHypo;
+}
+
