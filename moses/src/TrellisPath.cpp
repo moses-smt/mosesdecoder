@@ -44,6 +44,7 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
 TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc)
 :m_prevEdgeChanged(edgeIndex)
 {
+    m_path.reserve(copy.m_path.size());
 	for (size_t currEdge = 0 ; currEdge < edgeIndex ; currEdge++)
 	{ // copy path from parent
 		m_path.push_back(copy.m_path[currEdge]);
