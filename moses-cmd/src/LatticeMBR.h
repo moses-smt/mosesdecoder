@@ -83,6 +83,26 @@ class Edge {
   
 };
 
+/**
+* Data structure to hold the ngram scores as we traverse the lattice. Maps (hypo,ngram) to score
+*/
+class NgramScores {
+    public:
+        NgramScores() {}
+        
+        /** logsum this score to the existing score */
+        void addScore(const Hypothesis* node, const Phrase& ngram, float score);
+        
+        /** Iterate through ngrams for selected node */
+        typedef map<const Phrase*, float>::const_iterator NodeScoreIterator;
+        NodeScoreIterator nodeBegin(const Hypothesis* node);
+        NodeScoreIterator nodeEnd(const Hypothesis* node);
+        
+    private:
+        set<Phrase> m_ngrams;
+        map<const Hypothesis*, map<const Phrase*, float> > m_scores;
+};
+
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
                     const vector< float> & estimatedScores, size_t edgeDensity);
 
