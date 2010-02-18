@@ -3,6 +3,7 @@ AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES $(BOOST
 libmoses_a_SOURCES = \
 	BitmapContainer.cpp \
 	ConfusionNet.cpp \
+	ConfigurationsManager.cpp \
 	DecodeGraph.cpp \
 	DecodeStep.cpp \
 	DecodeStepGeneration.cpp \
