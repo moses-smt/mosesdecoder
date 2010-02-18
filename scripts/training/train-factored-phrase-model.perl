@@ -1078,12 +1078,14 @@ sub extract_phrase_factored {
 }
 
 sub get_extract_reordering_flags {
-    my $config_string = ""; 
-    return "" unless @REORDERING_MODELS;
-    for my $type ( keys %REORDERING_MODEL_TYPES) {
-	$config_string .= " --model $type-". ($___MAX_LEXICAL_REORDERING ? "mslr" : $REORDERING_MODEL_TYPES{$type});
+    if ($___MAX_LEXICAL_REORDERING) {
+	return " --model wbe-mslr --model phrase-mslr --model hier-mslr";
     }
-    print STDERR "extract-flags: $config_string\n";
+    return "" unless @REORDERING_MODELS; 
+    my $config_string = "";
+    for my $type ( keys %REORDERING_MODEL_TYPES) {
+	$config_string .= " --model $type-".$REORDERING_MODEL_TYPES{$type};
+    }
     return $config_string;
 }
 
