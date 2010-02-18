@@ -209,6 +209,9 @@ bool StaticData::LoadData(Parameter *parameter)
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
 
+	// print all factors of output translations
+	SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
+
 	// 
 	if (m_inputType == SentenceInput)
 	{

@@ -126,6 +126,7 @@ protected:
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
+	bool m_reportAllFactorsNBest;
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
 	bool m_computeLMBackoffStats;
@@ -388,6 +389,10 @@ public:
 	bool GetReportAllFactors() const
 	{
 		return m_reportAllFactors;
+	}
+	bool GetReportAllFactorsNBest() const
+	{
+		return m_reportAllFactorsNBest;
 	}
 	bool IsDetailedTranslationReportingEnabled() const
 	{
