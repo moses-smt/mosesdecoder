@@ -29,7 +29,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING);
+   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING,$_SKIP_PHRASE_SCORING);
 
 my $debug = 1; # debug this script, do not delete any files in debug mode
 
@@ -89,7 +89,8 @@ $_HELP = 1
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
 		       'memscore:s' => \$_MEMSCORE,
-		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING
+		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
+		       'skip-phrase-scoring' => \$_SKIP_PHRASE_SCORING
     );
 
 if ($_HELP) {
@@ -421,7 +422,7 @@ die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DE
 &word_align()              if $___FIRST_STEP<=3 && $___LAST_STEP>=3;
 &get_lexical_factored()    if $___FIRST_STEP<=4 && $___LAST_STEP>=4;
 &extract_phrase_factored() if $___FIRST_STEP<=5 && $___LAST_STEP>=5;
-&score_phrase_factored()   if $___FIRST_STEP<=6 && $___LAST_STEP>=6;
+&score_phrase_factored()   if $___FIRST_STEP<=6 && $___LAST_STEP>=6 && !$_SKIP_PHRASE_SCORING;
 &get_reordering_factored() if $___FIRST_STEP<=7 && $___LAST_STEP>=7;
 &get_generation_factored() if $___FIRST_STEP<=8 && $___LAST_STEP>=8;
 &create_ini()              if                      $___LAST_STEP==9;
