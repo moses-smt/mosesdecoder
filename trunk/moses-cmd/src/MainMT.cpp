@@ -137,20 +137,20 @@ class TranslationTask : public Task {
                     if (nBestSize <= 0) {
                         cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
                         exit(1);
-                    } 
+                    }
+                    TrellisPathList nBestList;
+                    manager.CalcNBest(nBestSize, nBestList,true);
+                    VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+                    IFVERBOSE(2) { PrintUserTime("calculated n-best list for (L)MBR decoding"); }
                     
                     if (staticData.UseLatticeMBR()) {
                         //Lattice MBR decoding
-                        vector<Word> mbrBestHypo = doLatticeMBR(manager); 
+                        vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
                         OutputBestHypo(mbrBestHypo, m_lineNumber, staticData.GetReportSegmentation(),
                                        staticData.GetReportAllFactors(),out);
                         IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
                     } else {
                         //MBR decoding
-                        TrellisPathList nBestList;
-                        manager.CalcNBest(nBestSize, nBestList,true);
-                        VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-                        IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
                         std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
                         OutputBestHypo(mbrBestHypo, m_lineNumber,
                                     staticData.GetReportSegmentation(),

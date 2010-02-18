@@ -146,7 +146,7 @@ protected:
 	size_t m_mbrSize; //! number of translation candidates considered
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
   size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
-  vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
+  std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
   bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
   float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
   float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
@@ -467,14 +467,26 @@ public:
   bool UseLatticeMBR() const { return m_useLatticeMBR ;}
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
+    void SetMBRScale(float scale) {
+        m_mbrScale = scale;
+    }
   size_t GetLatticeMBRPruningFactor() const { return m_lmbrPruning; }
-  const vector<float>& GetLatticeMBRThetas() const {return m_lmbrThetas;}
+  void SetLatticeMBRPruningFactor(size_t prune) {
+      prune = m_lmbrPruning;
+  }
+  const std::vector<float>& GetLatticeMBRThetas() const {return m_lmbrThetas;}
   bool  UseLatticeHypSetForLatticeMBR() const { return m_useLatticeHypSetForLatticeMBR;}
   float GetLatticeMBRPrecision() const {
     return m_lmbrPrecision;
   }
+  void SetLatticeMBRPrecision(float p) {
+      m_lmbrPrecision = p;
+  }
   float GetLatticeMBRPRatio() const {
     return m_lmbrPRatio;
+  }
+  void SetLatticeMBRPRatio(float r) {
+      m_lmbrPRatio = r;
   }
   
 	bool UseTimeout() const { return m_timeout; }
