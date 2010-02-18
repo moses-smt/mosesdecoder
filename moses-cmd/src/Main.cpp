@@ -167,48 +167,49 @@ int main(int argc, char* argv[])
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}
 		}
-    else if (staticData.UseLatticeMBR()) {
-      vector<Word> mbrBestHypo = doLatticeMBR(manager); 
-      OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
-                                staticData.GetReportAllFactors(),cout);
-      IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
-    }
-		// consider top candidate translations to find minimum Bayes risk translation
-		else {
-		  size_t nBestSize = staticData.GetMBRSize();
+        else  {
+            size_t nBestSize = staticData.GetMBRSize();
       
-		  if (nBestSize <= 0)
-      {
-        cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
-        return EXIT_FAILURE;
-      }
-		  else
-      {
-        TrellisPathList nBestList;
-        manager.CalcNBest(nBestSize, nBestList,true);
-        VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-        IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-        std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-        OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
-                                  staticData.GetReportSegmentation(),
-                                  staticData.GetReportAllFactors(),cout);
-        IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
-        if (!staticData.GetNBestFilePath().empty()){ 
-          //print the all nbest used for MBR (and not the amount passed through the parameter
-          VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-          ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
-          IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+            if (nBestSize <= 0)
+            {
+                cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
+                return EXIT_FAILURE;
+            }
+            TrellisPathList nBestList;
+            manager.CalcNBest(nBestSize, nBestList,true);
+            VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+            IFVERBOSE(2) { PrintUserTime("calculated n-best list for (L)MBR decoding"); }
+            if (staticData.UseLatticeMBR()) {
+                vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
+                OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
+                               staticData.GetReportAllFactors(),cout);
+                IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
+            } else {
+                std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+                OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+                               staticData.GetReportSegmentation(),
+                               staticData.GetReportAllFactors(),cout);
+                IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
+            }
+            
+            if (!staticData.GetNBestFilePath().empty()){ 
+            //print the all nbest used for MBR (and not the amount passed through the parameter
+                VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+                ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
+                IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+            }
         }
-      }
-		}
+        
+    
+		
+        if (staticData.IsDetailedTranslationReportingEnabled()) {
+            TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
+        }
 
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
-		  TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
-		}
+        IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
 
-		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
+        manager.CalcDecoderStatistics();
 
-		manager.CalcDecoderStatistics();
 	}
 
 	delete ioWrapper;

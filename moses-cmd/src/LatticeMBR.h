@@ -113,4 +113,4 @@ void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<E
 void GetOutputFactors(const TrellisPath &path, vector <Word> &translation);
 void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngrams);
 bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b);
-vector<Word> doLatticeMBR(Manager& manager);
+vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);

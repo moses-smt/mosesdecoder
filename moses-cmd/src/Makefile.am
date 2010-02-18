@@ -1,7 +1,7 @@
 if WITH_THREADS
-bin_PROGRAMS = moses mosesmt 
+bin_PROGRAMS = moses mosesmt lmbrgrid
 else
-bin_PROGRAMS = moses
+bin_PROGRAMS = moses lmbrgrid
 endif
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -DUSE_HYPO_POOL -I$(top_srcdir)/moses/src  $(BOOST_CPPFLAGS)
 moses_SOURCES = Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMBR.cpp
@@ -13,4 +13,7 @@ mosesmt_LDADD = -L$(top_srcdir)/moses/src $(BOOST_LDFLAGS) -lmoses $(BOOST_THREA
 mosesmt_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a 
 
 
+lmbrgrid_SOURCES = LatticeMBRGrid.cpp LatticeMBR.cpp IOWrapper.cpp
+lmbrgrid_LDADD = -L$(top_srcdir)/moses/src $(BOOST_LDFLAGS) -lmoses $(BOOST_THREAD_LIB)
+lmbrgrid_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a 
 
