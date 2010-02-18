@@ -29,7 +29,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
+   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING);
 
 my $debug = 1; # debug this script, do not delete any files in debug mode
 
@@ -88,7 +88,8 @@ $_HELP = 1
 		       'continue' => \$_CONTINUE,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
-		       'memscore:s' => \$_MEMSCORE
+		       'memscore:s' => \$_MEMSCORE,
+		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING
     );
 
 if ($_HELP) {
@@ -283,12 +284,12 @@ my $___REORDERING_SMOOTH = 0.5;
 $___REORDERING_SMOOTH = $_REORDERING_SMOOTH if $_REORDERING_SMOOTH;
 my @REORDERING_MODELS;
 my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
-my $model_num = 0;
-my $reotype;
 my %REORDERING_MODEL_TYPES = ();
-my @REORDERING_SMOOTH_PREVIOUS;
-my @REORDERING_SMOOTH_FOLLOWING;
 
+my $___MAX_LEXICAL_REORDERING = 0;
+$___MAX_LEXICAL_REORDERING = 1 if $_MAX_LEXICAL_REORDERING;
+
+my $model_num = 0;
 
 foreach my $r (split(/\,/,$___REORDERING)) {
    #change some config string options, to be backward compatible
@@ -337,7 +338,9 @@ foreach my $r (split(/\,/,$___REORDERING)) {
   }
 
   #fix the all-string
-  $REORDERING_MODELS[$model_num]{"all"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.$REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
+  $REORDERING_MODELS[$model_num]{"filename"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.
+                                               $REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"};
+  $REORDERING_MODELS[$model_num]{"config"} = $REORDERING_MODELS[$model_num]{"filename"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
 
   # fix numfeatures
   $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
@@ -378,13 +381,6 @@ for my $mtype ( keys %REORDERING_MODEL_TYPES) {
     $REORDERING_MODEL_TYPES{$mtype} = "monotonicity"
   }
 }
-
-#TODO - remove the below
-my ($mono_previous_f,$swap_previous_f,$left_previous_f,$right_previous_f,$other_previous_f);
-my ($mono_previous_fe,$swap_previous_fe,$left_previous_fe,$right_previous_fe,$other_previous_fe);
-my ($mono_following_f,$swap_following_f,$left_following_f,$right_following_f,$other_following_f);
-my ($mono_following_fe,$swap_following_fe,$left_following_fe,$right_following_fe,$other_following_fe);
-my ($f_current,$e_current);
 
 ### Factored translation models
 my $___NOT_FACTORED = 1;
@@ -1085,7 +1081,7 @@ sub get_extract_reordering_flags {
     my $config_string = ""; 
     return "" unless @REORDERING_MODELS;
     for my $type ( keys %REORDERING_MODEL_TYPES) {
-	$config_string .= " --model $type-".$REORDERING_MODEL_TYPES{$type};
+	$config_string .= " --model $type-". ($___MAX_LEXICAL_REORDERING ? "mslr" : $REORDERING_MODEL_TYPES{$type});
     }
     print STDERR "extract-flags: $config_string\n";
     return $config_string;
@@ -1384,7 +1380,7 @@ sub get_reordering {
 	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
 	foreach my $model (@REORDERING_MODELS) {
 	    if ($model->{"type"} eq $mtype) {
-		$cmd .= " ".$model->{"all"};
+		$cmd .= " ".$model->{"filename"};
 	    }
 	}
 	$cmd .= "\"";
@@ -1597,10 +1593,10 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 	    $weight_d_count += $model->{"numfeatures"};
 	    my $table_file = "$___MODEL_DIR/reordering-table.";
 	    $table_file .= ".$factor" unless $___NOT_FACTORED;
-	    $table_file .= $model->{"all"};
+	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
 	    #$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-	    $file .= ".$factor ".$model->{"all"}." ".$model->{"numfeatures"}." $table_file\n";
+	    $file .= ".$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
 	}
         $factor_i++;
       }
