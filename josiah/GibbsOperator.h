@@ -162,7 +162,7 @@ namespace Josiah {
     **/
   class MergeSplitOperator : public virtual GibbsOperator {
     public:
-      MergeSplitOperator(bool randomScan = false, float scanProb) : GibbsOperator("merge-split", scanProb) {
+      MergeSplitOperator(bool randomScan = false, float scanProb = 0.333) : GibbsOperator("merge-split", scanProb) {
         if (randomScan)
           m_OpIterator = new MergeSplitRandomIterator();
         else
@@ -177,7 +177,7 @@ namespace Josiah {
     **/
   class TranslationSwapOperator : public virtual GibbsOperator {
     public:
-      TranslationSwapOperator(bool randomScan = false, float scanProb) :  GibbsOperator("translation-swap", scanProb) {
+      TranslationSwapOperator(bool randomScan = false, float scanProb = 0.333) :  GibbsOperator("translation-swap", scanProb) {
         if (randomScan)
           m_OpIterator = new SwapRandomIterator();
         else
@@ -193,7 +193,7 @@ namespace Josiah {
    **/
   class FlipOperator : public virtual GibbsOperator {
   public:
-    FlipOperator(bool randomScan = false, float scanProb) : GibbsOperator("flip", scanProb) {
+    FlipOperator(bool randomScan = false, float scanProb = 0.333) : GibbsOperator("flip", scanProb) {
       if (randomScan)
         m_OpIterator = new FlipRandomIterator(this);
       else
