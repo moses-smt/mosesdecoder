@@ -61,7 +61,7 @@ namespace Josiah {
     size_t GetCurPos() { return m_curPos;}
     virtual  void init(const Sample& sample) { m_curPos++; m_nextHypo = NULL; m_size = sample.GetSourceSize();}
     void SetNextHypo(Hypothesis* hyp) { m_nextHypo = hyp; }
-  private:
+  protected:
     size_t  m_curPos;
     Hypothesis* m_nextHypo;
   };
@@ -83,7 +83,7 @@ namespace Josiah {
     }
     size_t GetCurPos() { return m_curPos;}
     
-  private:
+  protected:
     size_t  m_curPos;
   };
   
@@ -105,11 +105,45 @@ namespace Josiah {
     }
     size_t GetThisPos() { return m_thisPos;}    
     size_t GetThatPos() { return m_thatPos;}   
-  private:
+  protected:
     size_t  m_thisPos;
     size_t  m_thatPos;
     int m_direction;
     FlipOperator* m_operator;
   };  
+  
+  class SwapRandomIterator : public SwapIterator {
+  public:
+    SwapRandomIterator() : SwapIterator() {}
+    virtual ~SwapRandomIterator() {}
+    virtual bool isStartScan() { return true; } 
+    virtual void next();
+    virtual  void init(const Sample& sample) { m_size = sample.GetSourceSize(); next();}
+    virtual bool keepGoing() {
+      return true;
+    }
+  };
+  
+  class MergeSplitRandomIterator : public MergeSplitIterator {
+  public:
+    MergeSplitRandomIterator() : MergeSplitIterator() {}
+    virtual ~MergeSplitRandomIterator() {}
+    virtual bool isStartScan() { return true;} 
+    virtual void next();
+    //virtual void next() { m_curPos = RandomNumberGenerator::instance().getRandomIndexFromZeroToN(m_size);}
+    virtual bool keepGoing() {
+      return true;
+    }
+  };
+  
+  class FlipRandomIterator : public FlipIterator {
+  public:
+    FlipRandomIterator(FlipOperator* op) : FlipIterator(op) {}
+    virtual ~FlipRandomIterator() {}
+    virtual bool isStartScan() { return true;} 
+    virtual void next();
+    virtual bool keepGoing() { return true;}
+  };  
+  
 }
 

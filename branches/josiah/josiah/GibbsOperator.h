@@ -82,6 +82,18 @@ namespace Josiah {
           m_generator.seed(seed);
           std::cerr << "Setting random seed to " << seed << std::endl;
       }
+    
+      size_t getRandomIndexFromZeroToN(size_t n) {
+        double increment = 1.0/n;
+        double random = next();
+        double val = increment;
+        for (size_t i = 0; i < n; ++i, val+= increment) {
+          if (random > val)
+            continue;
+          else 
+            return i;
+        }
+      }
       
     private:
       static RandomNumberGenerator s_instance;
@@ -95,7 +107,7 @@ namespace Josiah {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-        GibbsOperator(const std::string& name) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false), m_OpIterator(NULL), m_acceptor(NULL), m_mhacceptor(NULL) {}
+        GibbsOperator(const std::string& name, float prob) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false), m_OpIterator(NULL), m_prob(prob), m_acceptor(NULL), m_mhacceptor(NULL) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/
@@ -121,6 +133,7 @@ namespace Josiah {
         void resetIterator() { m_OpIterator->reset();}
         void setGibbsLMInfo(const std::map <LanguageModel*, int> & lms) { m_LMInfo = lms;}
         std::map <LanguageModel*, int> & getGibbsLMInfo() {return m_LMInfo;}
+        float GetScanProb() const {return m_prob;}
      protected:
         /**
           * Randomly select and apply one of the translation deltas.
@@ -130,6 +143,7 @@ namespace Josiah {
         std::string m_name;
 				double T;  // annealing temperature
         GibbsOperatorIterator* m_OpIterator;  
+        float m_prob; // the probability of sampling this operator
     private:
       static RandomNumberGenerator m_random;
       const GainFunction* m_gf;
@@ -148,7 +162,12 @@ namespace Josiah {
     **/
   class MergeSplitOperator : public virtual GibbsOperator {
     public:
-      MergeSplitOperator() : GibbsOperator("merge-split") {m_OpIterator = new MergeSplitIterator();}
+      MergeSplitOperator(bool randomScan = false, float scanProb) : GibbsOperator("merge-split", scanProb) {
+        if (randomScan)
+          m_OpIterator = new MergeSplitRandomIterator();
+        else
+        m_OpIterator = new MergeSplitIterator();
+      }
       virtual ~MergeSplitOperator() {}
       virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
   };
@@ -158,7 +177,12 @@ namespace Josiah {
     **/
   class TranslationSwapOperator : public virtual GibbsOperator {
     public:
-      TranslationSwapOperator() : GibbsOperator("translation-swap") {m_OpIterator = new SwapIterator();}
+      TranslationSwapOperator(bool randomScan = false, float scanProb) :  GibbsOperator("translation-swap", scanProb) {
+        if (randomScan)
+          m_OpIterator = new SwapRandomIterator();
+        else
+          m_OpIterator = new SwapIterator();
+      }
       virtual ~TranslationSwapOperator() {}
       virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
   };
@@ -169,16 +193,19 @@ namespace Josiah {
    **/
   class FlipOperator : public virtual GibbsOperator {
   public:
-    FlipOperator() : GibbsOperator("flip") {m_OpIterator = new FlipIterator(this);}
+    FlipOperator(bool randomScan = false, float scanProb) : GibbsOperator("flip", scanProb) {
+      if (randomScan)
+        m_OpIterator = new FlipRandomIterator(this);
+      else
+        m_OpIterator = new FlipIterator(this);
+    }
     virtual ~FlipOperator() {}
     virtual void scan(Sample& sample, const TranslationOptionCollection& toc);
-    virtual const std::string& name() const {return m_name;}
     
     const vector<size_t> & GetSplitPoints() {
       return m_splitPoints;
     }
   private:
-    std::string m_name;
     bool CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion);
     void CollectAllSplitPoints(Sample& sample);
     vector<size_t> m_splitPoints;

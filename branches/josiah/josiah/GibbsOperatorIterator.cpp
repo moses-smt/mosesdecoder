@@ -46,4 +46,20 @@ namespace Josiah {
     return true;
   }
   
+  void MergeSplitRandomIterator::next() { m_curPos = RandomNumberGenerator::instance().getRandomIndexFromZeroToN(m_size) + 1; cerr << "MSRIt pos " << m_curPos << endl; }
+  
+  void SwapRandomIterator::next() { m_curPos = RandomNumberGenerator::instance().getRandomIndexFromZeroToN(m_size); cerr << "SwapRIt pos " << m_curPos << endl;}
+  
+  void FlipRandomIterator::next() { 
+    m_thisPos = RandomNumberGenerator::instance().getRandomIndexFromZeroToN(m_operator->GetSplitPoints().size());
+    m_thatPos = RandomNumberGenerator::instance().getRandomIndexFromZeroToN(m_operator->GetSplitPoints().size());
+    if (m_thisPos == m_thatPos) {
+      next();
+    }
+    
+    m_direction = -1;
+    if (m_thatPos > m_thisPos)
+      m_direction = 1;
+    cerr << "Flip RandIt this pos " << m_thisPos << ", that pos " << m_thatPos << endl;
+  } 
 }

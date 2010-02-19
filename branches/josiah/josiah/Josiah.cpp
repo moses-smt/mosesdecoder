@@ -156,6 +156,9 @@ int main(int argc, char** argv) {
   bool raoBlackwell;
   bool use_moses_kbesthyposet;
   bool print_moseskbest;
+  bool randomScan;
+  size_t lag;
+  float flip_prob, merge_split_prob, retrans_prob;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -233,7 +236,12 @@ int main(int argc, char** argv) {
   ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding")
   ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs")
   ("use-moses-kbesthyposet", po::value(&use_moses_kbesthyposet)->zero_tokens()->default_value(false), "Use Moses to generate kbest hypothesis set")
-  ("print-moseskbest", po::value(&print_moseskbest)->zero_tokens()->default_value(false), "Print Moses kbest");
+  ("print-moseskbest", po::value(&print_moseskbest)->zero_tokens()->default_value(false), "Print Moses kbest")
+  ("random-scan", po::value(&randomScan)->zero_tokens()->default_value(false), "Sample using random scan")
+  ("lag", po::value<size_t>(&lag)->default_value(10), "Lag between collecting samples")
+  ("flip-prob", po::value<float>(&flip_prob)->default_value(0.6f), "Probability of applying flip operator during random scan")
+  ("merge-split-prob", po::value<float>(&merge_split_prob)->default_value(0.2f), "Probability of applying merge-split operator during random scan")
+  ("retrans-prob", po::value<float>(&retrans_prob)->default_value(0.2f), "Probability of applying retrans operator during random scan");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -258,6 +266,15 @@ int main(int argc, char** argv) {
     std::cerr << "Incorrect usage: Cannot do both expected bleu training and expected bleu deterministic annealing training" << std::endl;
     return 0;
   }
+  
+  if (randomScan) {
+    float opProb = flip_prob + merge_split_prob + retrans_prob;
+    if (fabs(1.0 - opProb) > 0.00001) {
+      std::cerr << "Incorrect usage: specified operator probs should sum up to 1" << std::endl;
+      return 0;  
+    }
+  }
+  
   
   if (translation_distro) translate = true;
   if (derivation_distro) decode = true;
@@ -494,6 +511,8 @@ int main(int argc, char** argv) {
     sampler.SetAnnealingSchedule(annealingSchedule.get());
     VERBOSE(2,"Reheatings: " << reheatings << endl);
     sampler.SetReheatings(reheatings);
+    sampler.SetRandomScan(randomScan); //random or sequential scan
+    sampler.SetLag(lag); //thinning factor for sample collection
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
@@ -565,9 +584,9 @@ int main(int argc, char** argv) {
       sampler.AddCollector(transCollector.get() );
     }
     
-    MergeSplitOperator mso;
-    FlipOperator fo;
-    TranslationSwapOperator tso;
+    MergeSplitOperator mso(randomScan, merge_split_prob);
+    FlipOperator fo(randomScan, flip_prob);
+    TranslationSwapOperator tso(randomScan, retrans_prob);
     mso.setGibbsLMInfo(targetLMInfo);
     fo.setGibbsLMInfo(targetLMInfo);
     tso.setGibbsLMInfo(targetLMInfo);

@@ -41,10 +41,14 @@ private:
   size_t m_numSuffStats;
   ScoreComponentCollection m_GainOptimalSol;
   float m_optimalGain;
+  bool m_runRandom;
+  size_t m_lag;
 public:
   Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0){}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
            const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor*, bool collectAll = false, bool defaultCtrIncrementer = true, bool raoBlackwell = false) ;
+  void RunSequential(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAllSamples, bool defaultCtrIncrementer, bool raoBlackwell) ;
+  void RunRandom(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAllSamples, bool defaultCtrIncrementer, bool raoBlackwell, size_t);
   void AddOperator(GibbsOperator* o);
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
@@ -52,6 +56,8 @@ public:
   void SetIterations(size_t iterations) {m_iterations = iterations;}
   void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
   void SetReheatings(size_t r) {m_reheatings = r;}
+  void SetRandomScan(bool r) {m_runRandom = r;}
+  void SetLag(size_t l) {m_lag = l;}
   void SetBurnIn(size_t burnin_its) {m_burninIts = burnin_its;}
   void AddOnlineLearner(OnlineLearner* learner) {m_onlineLearner = learner;}
   OnlineLearner* GetOnlineLearner()  {return m_onlineLearner;}
@@ -63,6 +69,7 @@ public:
   void SetOptimalGainSol(TranslationDelta*, TranslationDelta*);
   const ScoreComponentCollection & GetOptimalGainSol() { return m_GainOptimalSol;}
   void collectSample(Sample& sample);
+  GibbsOperator* SampleNextOperator(const std::vector<GibbsOperator*>& );
 };
 
 }

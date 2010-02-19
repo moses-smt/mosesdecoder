@@ -361,8 +361,8 @@ void FlipOperator::scan(
   VERBOSE(2, "Running an iteration of the flip operator" << endl);
   
   if (m_OpIterator->isStartScan()) {
-    m_OpIterator->init(sample);
     CollectAllSplitPoints(sample);
+    m_OpIterator->init(sample);
   }
   
   if (m_splitPoints.size() < 2)
