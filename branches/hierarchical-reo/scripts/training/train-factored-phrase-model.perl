@@ -29,7 +29,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING,$_SKIP_PHRASE_SCORING);
+   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
 
 my $debug = 1; # debug this script, do not delete any files in debug mode
 
@@ -90,7 +90,7 @@ $_HELP = 1
 		       'config=s' => \$_CONFIG,
 		       'memscore:s' => \$_MEMSCORE,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
-		       'skip-phrase-scoring' => \$_SKIP_PHRASE_SCORING
+		       'do-steps=s' => \$_DO_STEPS
     );
 
 if ($_HELP) {
@@ -115,6 +115,41 @@ my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
 $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
 
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
+
+# Setting the steps to perform
+my $___VERBOSE = 0;
+my $___FIRST_STEP = 1;
+my $___LAST_STEP = 9;
+$___VERBOSE = $_VERBOSE if $_VERBOSE;
+$___FIRST_STEP = $_FIRST_STEP if $_FIRST_STEP;
+$___LAST_STEP =  $_LAST_STEP  if $_LAST_STEP;
+my $___DO_STEPS = $___FIRST_STEP."-".$___LAST_STEP;
+$___DO_STEPS = $_DO_STEPS if $_DO_STEPS;
+my @STEPS = (0,0,0,0,0,0,0,0,0);
+
+my @step_conf = split(',',$___DO_STEPS);
+my ($f,$l);
+foreach my $step (@step_conf) {
+  if ($step =~ /^(\d)$/) {
+    $f = $1;
+    $l = $1;
+  }
+  elsif ($step =~ /^(\d)-(\d)$/) {
+    $f = $1;
+    $l = $2;
+  }
+  else {
+    die ("Malformed argument to --do-steps");
+  }
+  die("Only steps between 0 and 9 can be used") if ($f < 1 || $l > 9);
+  die("The first step must be smaller than the last step") if ($f > $l);
+	
+  for (my $i=$f; $i<=$l; $i++) {
+    $STEPS[$i] = 1;
+  }
+}
+
+
 
 # supporting binaries from other packages
 my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
@@ -150,7 +185,7 @@ my $BZCAT = "bzcat";
 # do a sanity check to make sure we can find the necessary binaries since
 # these are not installed by default
 # not needed if we start after step 2
-die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless (($_FIRST_STEP > 2) ||
+die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
                                        (-x $GIZA && -x $SNT2COOC && -x $MKCLS));
 
 # set varibles to defaults or from options
@@ -158,7 +193,7 @@ my $___ROOT_DIR = ".";
 $___ROOT_DIR = $_ROOT_DIR if $_ROOT_DIR;
 my $___CORPUS_DIR  = $___ROOT_DIR."/corpus";
 $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
-die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
+die("ERROR: use --corpus to specify corpus") unless $_CORPUS || !($STEPS[1] || $STEPS[4] || $STEPS[5] || $STEPS[8]);
 my $___CORPUS      = $_CORPUS;
 
 # check the final-alignment-model switch
@@ -241,15 +276,9 @@ $___PHRASE_SCORER = "memscore" if defined $_MEMSCORE;
 my $___MEMSCORE_OPTIONS = "-s ml -s lexweights \$LEX_E2F -r ml -r lexweights \$LEX_F2E -s const 2.718";
 $___MEMSCORE_OPTIONS = $_MEMSCORE if $_MEMSCORE;
 
-my $___VERBOSE = 0;
-my $___FIRST_STEP = 1;
-my $___LAST_STEP = 9;
-$___VERBOSE = $_VERBOSE if $_VERBOSE;
-$___FIRST_STEP = $_FIRST_STEP if $_FIRST_STEP;
-$___LAST_STEP =  $_LAST_STEP  if $_LAST_STEP;
 
 my @___LM = ();
-if ($___LAST_STEP == 9) {
+if ($STEPS[9]) {
   die "ERROR: use --lm factor:order:filename to specify at least one language model"
     if scalar @_LM == 0;
   foreach my $lm (@_LM) {
@@ -417,15 +446,15 @@ die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DE
 
 ### MAIN
 
-&prepare()                 if $___FIRST_STEP==1;
-&run_giza()                if $___FIRST_STEP<=2 && $___LAST_STEP>=2;
-&word_align()              if $___FIRST_STEP<=3 && $___LAST_STEP>=3;
-&get_lexical_factored()    if $___FIRST_STEP<=4 && $___LAST_STEP>=4;
-&extract_phrase_factored() if $___FIRST_STEP<=5 && $___LAST_STEP>=5;
-&score_phrase_factored()   if $___FIRST_STEP<=6 && $___LAST_STEP>=6 && !$_SKIP_PHRASE_SCORING;
-&get_reordering_factored() if $___FIRST_STEP<=7 && $___LAST_STEP>=7;
-&get_generation_factored() if $___FIRST_STEP<=8 && $___LAST_STEP>=8;
-&create_ini()              if                      $___LAST_STEP==9;
+&prepare()                 if $STEPS[1];
+&run_giza()                if $STEPS[2];
+&word_align()              if $STEPS[3];
+&get_lexical_factored()    if $STEPS[4];
+&extract_phrase_factored() if $STEPS[5];
+&score_phrase_factored()   if $STEPS[6];
+&get_reordering_factored() if $STEPS[7];
+&get_generation_factored() if $STEPS[8];
+&create_ini()              if $STEPS[9];
 
 ### (1) PREPARE CORPUS
 
@@ -1703,3 +1732,4 @@ sub open_or_zcat {
   open($hdl,$read) or die "Can't read $fn ($read)";
   return $hdl;
 }
+

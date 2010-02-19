@@ -31,7 +31,7 @@ ModelScore* ModelScore::createModelScore(const string& modeltype) {
   } else if (modeltype.compare("leftright") == 0) {
     return new ModelScoreLR();
   } else {
-    cerr << "Illegal model type given for lexical reordering model scoring: " << modeltype << endl;
+    cerr << "Illegal model type given for lexical reordering model scoring: " << modeltype << ". The allowed types are: mslr, msd, monotonicity, leftright" << endl;
     exit(1);
   }
 }
@@ -104,7 +104,7 @@ ORIENTATION ModelScoreMSLR::getType(const string& s) {
   } else if (s.compare("dleft") == 0) {
     return DLEFT;
   } else if (s.compare("other") == 0 || s.compare("nomono") == 0) {
-    cerr << "Illegal reordering type used: " << s << " for model type MSLR" <<  endl;
+    cerr << "Illegal reordering type used: " << s << " for model type mslr. You have to re-run step 5 in order to train such a model." <<  endl;
     exit(1);   
   } else {
     cerr << "Illegal reordering type used: " << s << endl;
@@ -119,7 +119,7 @@ ORIENTATION ModelScoreLR::getType(const string& s) {
   } else if (s.compare("swap") == 0 || s.compare("dleft") == 0) {
     return DLEFT;
   } else if (s.compare("other") == 0 || s.compare("nomono") == 0) {
-    cerr << "Illegal reordering type used: " << s << " for model type LeftRight" <<  endl;
+    cerr << "Illegal reordering type used: " << s << " for model type LeftRight. You have to re-run step 5 in order to train such a model." <<  endl;
     exit(1);
   } else {
     cerr << "Illegal reordering type used: " << s << endl;
@@ -138,7 +138,7 @@ ORIENTATION ModelScoreMSD::getType(const string& s) {
 	     s.compare("other") == 0) {
     return OTHER;
   } else if (s.compare("nomono") == 0) {
-    cerr << "Illegal reordering type used: " << s << " for model type MSD" <<  endl;
+    cerr << "Illegal reordering type used: " << s << " for model type msd. You have to re-run step 5 in order to train such a model." <<  endl;
     exit(1);
   } else {
     cerr << "Illegal reordering type used: " << s << endl;
