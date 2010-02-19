@@ -61,14 +61,14 @@ public:
   //  void clear() { delete(alignment); };
 };
 
-REO_POS getOrientWordModel(SentenceAlignment &, REO_MODEL_TYPE,
+REO_POS getOrientWordModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
 			   int, int, int, int, int, int, int,
 			   bool (*)(int, int), bool (*)(int, int));
-REO_POS getOrientPhraseModel(SentenceAlignment &, REO_MODEL_TYPE,
+REO_POS getOrientPhraseModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
 			     int, int, int, int, int, int, int,
 			     bool (*)(int, int), bool (*)(int, int),
 			     const HSentenceVertices &, const HSentenceVertices &);
-REO_POS getOrientHierModel(SentenceAlignment &, REO_MODEL_TYPE,
+REO_POS getOrientHierModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
 			   int, int, int, int, int, int, int,
 			   bool (*)(int, int), bool (*)(int, int),
 			   const HSentenceVertices &, const HSentenceVertices &,
@@ -341,12 +341,15 @@ void extract(SentenceAlignment &sentence) {
 		string orientationInfo = "";
 		if(wordModel){
 		  REO_POS wordPrevOrient, wordNextOrient;
-		  wordPrevOrient = getOrientWordModel(sentence, wordType, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
-		  wordNextOrient = getOrientWordModel(sentence, wordType, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
+		  bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
+		  bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
+		  bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
+		  bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
+		  wordPrevOrient = getOrientWordModel(sentence, wordType, connectedLeftTopP, connectedRightTopP, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
+		  wordNextOrient = getOrientWordModel(sentence, wordType, connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
+		  orientationInfo += getOrientString(wordPrevOrient, wordType) + " " + getOrientString(wordNextOrient, wordType);
 		  if(allModelsOutputFlag)
-		    orientationInfo += getOrientString(wordPrevOrient, wordType) + " " + getOrientString(wordNextOrient, wordType) + " | | ";
-		  else
-		    orientationInfo += getOrientString(wordPrevOrient, wordType) + " " + getOrientString(wordNextOrient, wordType);
+		     " | | ";
 		}
 		addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
 	      }
@@ -366,29 +369,44 @@ void extract(SentenceAlignment &sentence) {
       int endF = inboundPhrases[i].second.first;
       int endE = inboundPhrases[i].second.second;
 
+      bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
+      bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
+      bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
+      bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
+      
       if(wordModel){
 	wordPrevOrient = getOrientWordModel(sentence, wordType,
+					    connectedLeftTopP, connectedRightTopP,
 					    startF, endF, startE, endE, countF, 0, 1,
 					    &ge, &lt);
 	wordNextOrient = getOrientWordModel(sentence, wordType,
+					    connectedLeftTopN, connectedRightTopN,
 					    endF, startF, endE, startE, 0, countF, -1,
 					    &lt, &ge);
       }
       if (phraseModel) {
-	phrasePrevOrient = getOrientPhraseModel(sentence, phraseType, startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft);
-	phraseNextOrient = getOrientPhraseModel(sentence, phraseType, endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight);
+	phrasePrevOrient = getOrientPhraseModel(sentence, phraseType, 
+						connectedLeftTopP, connectedRightTopP,
+						startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft);
+	phraseNextOrient = getOrientPhraseModel(sentence, phraseType,
+						connectedLeftTopN, connectedRightTopN,
+						endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight);
       }
       else {
 	phrasePrevOrient = phraseNextOrient = UNKNOWN;
       }
       if(hierModel){
-	hierPrevOrient = getOrientHierModel(sentence, hierType, startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft, outBottomRight, outBottomLeft, phrasePrevOrient);
-	hierNextOrient = getOrientHierModel(sentence, hierType, endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight, outBottomLeft, outBottomRight, phraseNextOrient);
+	hierPrevOrient = getOrientHierModel(sentence, hierType, 
+					    connectedLeftTopP, connectedRightTopP,
+					    startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft, outBottomRight, outBottomLeft, phrasePrevOrient);
+	hierNextOrient = getOrientHierModel(sentence, hierType,
+					    connectedLeftTopN, connectedRightTopN,
+					    endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight, outBottomLeft, outBottomRight, phraseNextOrient);
       }
 
       orientationInfo = ((wordModel)? getOrientString(wordPrevOrient, wordType) + " " + getOrientString(wordNextOrient, wordType) : "") + " | " +
-	((phraseModel)? getOrientString(phrasePrevOrient, phraseType) + " " + getOrientString(phraseNextOrient, phraseType) : "") + " | " +
-	((hierModel)? getOrientString(hierPrevOrient, hierType) + " " + getOrientString(hierNextOrient, hierType) : "");
+	 ((phraseModel)? getOrientString(phrasePrevOrient, phraseType) + " " + getOrientString(phraseNextOrient, phraseType) : "") + " | " +
+	 ((hierModel)? getOrientString(hierPrevOrient, hierType) + " " + getOrientString(hierNextOrient, hierType) : "");
 
       addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
     }
@@ -396,12 +414,11 @@ void extract(SentenceAlignment &sentence) {
 }
 
 REO_POS getOrientWordModel(SentenceAlignment & sentence, REO_MODEL_TYPE modelType,
+			   bool connectedLeftTop, bool connectedRightTop,
 			   int startF, int endF, int startE, int endE, int countF, int zero, int unit,
 			   bool (*ge)(int, int), bool (*lt)(int, int) ){
 
-  bool connectedLeftTop  = isAligned( sentence, startF-unit, startE-unit );
-  bool connectedRightTop = isAligned( sentence, endF+unit,   startE-unit );
-  if( connectedLeftTop && !connectedRightTop)
+   if( connectedLeftTop && !connectedRightTop)
     return LEFT;
   if(modelType == REO_MONO)
     return UNKNOWN;
@@ -421,31 +438,33 @@ REO_POS getOrientWordModel(SentenceAlignment & sentence, REO_MODEL_TYPE modelTyp
 }
 
 // to be called with countF-1 instead of countF
-REO_POS getOrientPhraseModel (SentenceAlignment & sentence, 
-			      REO_MODEL_TYPE modelType,
+REO_POS getOrientPhraseModel (SentenceAlignment & sentence, REO_MODEL_TYPE modelType,
+			      bool connectedLeftTop, bool connectedRightTop,
 			      int startF, int endF, int startE, int endE, int countF, int zero, int unit,
 			      bool (*ge)(int, int), bool (*lt)(int, int),
 			      const HSentenceVertices & inBottomRight, const HSentenceVertices & inBottomLeft){
 
   HSentenceVertices::const_iterator it;
 
-  if((startE == 0 && startF == 0) ||
-     (startE == sentence.english.size()-1 && startF == sentence.foreign.size()-1) ||
-     (it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
-     it->second.find(startF-unit) != it->second.end())
+  if((connectedLeftTop && !connectedRightTop) ||
+     //(startE == 0 && startF == 0) ||
+     //(startE == sentence.english.size()-1 && startF == sentence.foreign.size()-1) ||
+     ((it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
+      it->second.find(startF-unit) != it->second.end()))
     return LEFT;
   if(modelType == REO_MONO)
     return UNKNOWN;
-  if((it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() && it->second.find(endF + unit) != it->second.end())
+  if((!connectedLeftTop &&  connectedRightTop) ||
+     ((it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() && it->second.find(endF + unit) != it->second.end()))
     return RIGHT;
   if(modelType == REO_MSD)
     return UNKNOWN;
-  bool connectedLeftTop = false;
+  connectedLeftTop = false;
   for(int indexF=startF-2*unit; (*ge)(indexF, zero) && !connectedLeftTop; indexF=indexF-unit)
     if(connectedLeftTop = (it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
        it->second.find(indexF) != it->second.end())
       return DRIGHT;
-  bool connectedRightTop = false;
+  connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit)
     if(connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomRight.end() &&
        it->second.find(indexF) != it->second.end())
@@ -454,8 +473,8 @@ REO_POS getOrientPhraseModel (SentenceAlignment & sentence,
 }
 
 // to be called with countF-1 instead of countF
-REO_POS getOrientHierModel (SentenceAlignment & sentence, 
-			    REO_MODEL_TYPE modelType,
+REO_POS getOrientHierModel (SentenceAlignment & sentence, REO_MODEL_TYPE modelType,
+			    bool connectedLeftTop, bool connectedRightTop,
 			    int startF, int endF, int startE, int endE, int countF, int zero, int unit,
 			    bool (*ge)(int, int), bool (*lt)(int, int),
 			    const HSentenceVertices & inBottomRight, const HSentenceVertices & inBottomLeft,
@@ -463,10 +482,11 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence,
 			    REO_POS phraseOrient){
 
   HSentenceVertices::const_iterator it;
-
+  
   if(phraseOrient == LEFT ||
-     (startE == 0 && startF == 0) ||
-     (startE == sentence.english.size()-1 && startF == sentence.foreign.size()-1) ||
+     (connectedLeftTop && !connectedRightTop) ||
+     //    (startE == 0 && startF == 0) ||
+     //(startE == sentence.english.size()-1 && startF == sentence.foreign.size()-1) ||
      ((it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
       it->second.find(startF-unit) != it->second.end()) || 
      ((it = outBottomRight.find(startE - unit)) != outBottomRight.end() &&
@@ -475,6 +495,7 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence,
   if(modelType == REO_MONO)
     return UNKNOWN;  
   if(phraseOrient == RIGHT || 
+     (!connectedLeftTop &&  connectedRightTop) ||
      ((it = inBottomLeft.find(startE - unit)) != inBottomLeft.end() && 
       it->second.find(endF + unit) != it->second.end()) ||
      ((it = outBottomLeft.find(startE - unit)) != outBottomLeft.end() && 
@@ -484,7 +505,7 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence,
     return UNKNOWN;
   if(phraseOrient != UNKNOWN)
     return phraseOrient;
-  bool connectedLeftTop = false;
+  connectedLeftTop = false;
   for(int indexF=startF-2*unit; (*ge)(indexF, zero) && !connectedLeftTop; indexF=indexF-unit) {
     if((connectedLeftTop = (it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
 	it->second.find(indexF) != it->second.end()) ||
@@ -492,7 +513,7 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence,
 	it->second.find(indexF) != it->second.end()))
       return DRIGHT;
   }
-  bool connectedRightTop = false;
+  connectedRightTop = false;
   for(int indexF=endF+2*unit; (*lt)(indexF, countF) && !connectedRightTop; indexF=indexF+unit) {
     if((connectedRightTop = (it = inBottomLeft.find(startE - unit)) != inBottomRight.end() &&
 	it->second.find(indexF) != it->second.end()) ||
