@@ -642,9 +642,8 @@ void TranslationOptionCollection::CacheLexReordering()
 					{
 						Scores score = lexreordering.GetProb(*sourcePhrase
 															, transOpt.GetTargetPhrase());
-						// TODO should have better handling of unknown reordering entries
 						if (!score.empty())
-							transOpt.CacheReorderingProb(lexreordering, score);
+							transOpt.CacheScores(lexreordering, score);
 					}
 				}
 			}

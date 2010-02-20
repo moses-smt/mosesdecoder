@@ -502,11 +502,5 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 	return GetTargetPhraseStringRep(allFactors);
 }
 
-
-const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
-{
-	return m_transOpt->GetReorderingScore();
-}
-
 }
 

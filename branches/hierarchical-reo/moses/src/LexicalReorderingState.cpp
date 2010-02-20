@@ -116,9 +116,14 @@ LexicalReorderingState *LexicalReorderingConfiguration::CreateLexicalReorderingS
 void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption &topt, ReorderingType reoType) const {
   // don't call this on a bidirectional object
   assert(m_direction == LexicalReorderingConfiguration::Backward || m_direction == LexicalReorderingConfiguration::Forward);
-  const Scores &scoreSet = (m_direction == LexicalReorderingConfiguration::Backward) ?
-    topt.GetReorderingScore().GetScoresForProducer(m_configuration.GetScoreProducer()) : m_prevScore;
+  const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
+    topt.GetCachedScores(m_configuration.GetScoreProducer()) : m_prevScore;
   
+  // No scores available. TODO: Using a good prior distribution would be nicer.
+  if(cachedScores == NULL)
+    return;
+
+  const Scores &scoreSet = *cachedScores;
   if(m_configuration.CollapseScores())
     scores[m_offset] = scoreSet[m_offset + reoType];
   else {
@@ -134,11 +139,19 @@ void LexicalReorderingState::ClearScores(Scores& scores) const {
     std::fill(scores.begin() + m_offset, scores.begin() + m_offset + m_configuration.GetNumberOfTypes(), 0);
 }
 
-int LexicalReorderingState::ComparePrevScores(const Scores &other) const {
+int LexicalReorderingState::ComparePrevScores(const Scores *other) const {
+  if(m_prevScore == other)
+    return 0;
+    
+  if(other == NULL)
+    return -1;
+
+  const Scores &my = *m_prevScore;
+  const Scores &their = *other;
   for(size_t i = m_offset; i < m_offset + m_configuration.GetNumberOfTypes(); i++)
-    if(m_prevScore[i] < other[i])
+    if(my[i] < their[i])
       return -1;
-    else if(m_prevScore[i] > other[i])
+    else if(my[i] > their[i])
       return 1;
 
   return 0;

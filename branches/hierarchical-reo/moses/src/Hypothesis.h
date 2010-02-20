@@ -273,8 +273,6 @@ public:
 		return s_HypothesesCreated;
 	}
 
-	const ScoreComponentCollection &GetCachedReorderingScore() const;
-
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }
 };
