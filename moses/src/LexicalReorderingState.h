@@ -81,11 +81,11 @@ class LexicalReorderingState : public FFState {
     // The following is the true direction of the object, which can be Backward or Forward even if the Configuration has Bidirectional.
     LexicalReorderingConfiguration::Direction m_direction;
     size_t m_offset;
-    Scores m_prevScore;
+    const Scores *m_prevScore;
     
     inline LexicalReorderingState(const LexicalReorderingState *prev, const TranslationOption &topt) :
         m_configuration(prev->m_configuration), m_direction(prev->m_direction), m_offset(prev->m_offset),
-        m_prevScore(topt.GetReorderingScore().GetScoresForProducer(m_configuration.GetScoreProducer())) {}
+        m_prevScore(topt.GetCachedScores(m_configuration.GetScoreProducer())) {}
 
     inline LexicalReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset) 
       : m_configuration(config), m_direction(dir), m_offset(offset) {}
@@ -93,7 +93,7 @@ class LexicalReorderingState : public FFState {
     // copy the right scores in the right places, taking into account forward/backward, offset, collapse
     void CopyScores(Scores& scores, const TranslationOption& topt, ReorderingType reoType) const;
     void ClearScores(Scores& scores) const;
-    int ComparePrevScores(const Scores &other) const;
+    int ComparePrevScores(const Scores *other) const;
     
     //constants for the different type of reorderings (corresponding to indexes in the table file)
     static const ReorderingType M = 0;  // monotonic

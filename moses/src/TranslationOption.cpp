@@ -93,7 +93,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy)
 , m_sourceWordsRange(copy.m_sourceWordsRange)
 , m_futureScore(copy.m_futureScore)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
-, m_reordering(copy.m_reordering)
+, m_cachedScores(copy.m_cachedScores)
 {}
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
@@ -103,7 +103,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 , m_sourceWordsRange(sourceWordsRange)
 , m_futureScore(copy.m_futureScore)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
-, m_reordering(copy.m_reordering)
+, m_cachedScores(copy.m_cachedScores)
 {}
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
@@ -165,10 +165,9 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 	return out;
 }
 
-void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreordering
-												, const Scores &score)
+void TranslationOption::CacheScores(const ScoreProducer &producer, const Scores &score)
 {
-	m_reordering.Assign(&lexreordering, score);
+	m_cachedScores[&producer] = new Scores(score);
 }
 
 }
