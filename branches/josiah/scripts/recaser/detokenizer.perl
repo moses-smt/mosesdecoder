@@ -1,40 +1,30 @@
 #!/usr/bin/perl -w
 
+# $Id: detokenizer.perl 928 2009-09-02 02:58:01Z philipp $
 # Sample De-Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
-# further modifications by Ondrej Bojar
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 use strict;
-use utf8; # tell perl this script file is in UTF-8 (see all funny punct below)
 
 my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
-my $UPPERCASE_SENT = 0;
 
 while (@ARGV) {
 	$_ = shift;
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
-	/^-u$/ && ($UPPERCASE_SENT = 1, next);
 }
 
 if ($HELP) {
-	print "Usage ./detokenizer.perl (-l [en|fr|cs]) < tokenizedfile > detokenizedfile\n";
-        print "Options:\n";
-        print "  -u  ... uppercase the first char in the final sentence.\n";
-        print "  -q  ... don't report detokenizer revision.\n";
+	print "Usage ./detokenizer.perl (-l [en|de|...]) < tokenizedfile > detokenizedfile\n";
 	exit;
 }
-
-die "No built-in rules for language $language, claim en for default behaviour."
-	if $language !~ /^(cs|en|fr)$/;
-
 if (!$QUIET) {
-	print STDERR "Detokenizer Version ".'$Revision$'."\n";
+	print STDERR "Detokenizer Version 1.0\n";
 	print STDERR "Language: $language\n";
 }
 
@@ -52,6 +42,7 @@ sub detokenize {
 	my($text) = @_;
 	chomp($text);
 	$text = " $text ";
+        $text =~ s/ \@\-\@ /-/g;
 	
 	my $word;
 	my $i;
@@ -72,34 +63,13 @@ sub detokenize {
 			#left-shift the contraction for English
 			$text=$text.$words[$i];
 			$prependSpace = " ";
-		} elsif (($language eq "fr") && ($i<(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
-			#right-shift the contraction for French
+		}  elsif ((($language eq "fr") ||($language eq "it")) && ($i<(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
+			#right-shift the contraction for French and Italian
 			$text = $text.$prependSpace.$words[$i];
 			$prependSpace = "";
-		} elsif (($language eq "cs") && ($i<(scalar(@words)-3))
-				&& ($words[$i] =~ /[\p{IsAlpha}]$/)
-				&& ($words[$i+1] =~ /^[-–]$/)
-				&& ($words[$i+2] =~ /^li$/i)
-				) {
-			#right-shift "-li" in Czech
-			$text = $text.$prependSpace.$words[$i].$words[$i+1];
-			$i++; # advance over the dash
-			$prependSpace = "";
-		} elsif ($words[$i] =~ /^[\'\"„“`]+$/) {
+		} elsif ($words[$i] =~ /^[\'\"]+$/) {
 			#combine punctuation smartly
-                        my $normalized_quo = $words[$i];
-                        $normalized_quo = '"' if $words[$i] =~ /^[„“”]+$/;
-                        $quoteCount{$normalized_quo} = 0
-                                if !defined $quoteCount{$normalized_quo};
-                        if ($language eq "cs" && $words[$i] eq "„") {
-                          # this is always the starting quote in Czech
-                          $quoteCount{$normalized_quo} = 0;
-                        }
-                        if ($language eq "cs" && $words[$i] eq "“") {
-                          # this is usually the ending quote in Czech
-                          $quoteCount{$normalized_quo} = 1;
-                        }
-			if (($quoteCount{$normalized_quo} % 2) eq 0) {
+			if (($quoteCount{$words[$i]} % 2) eq 0) {
 				if(($language eq "en") && ($words[$i] eq "'") && ($i > 0) && ($words[$i-1] =~ /[s]$/)) {
 					#single quote for posesssives ending in s... "The Jones' house"
 					#left shift
@@ -109,14 +79,14 @@ sub detokenize {
 					#right shift
 					$text = $text.$prependSpace.$words[$i];
 					$prependSpace = "";
-					$quoteCount{$normalized_quo} ++;
+					$quoteCount{$words[$i]} = $quoteCount{$words[$i]} + 1;
 
 				}
 			} else {
 				#left shift
 				$text=$text.$words[$i];
 				$prependSpace = " ";
-				$quoteCount{$normalized_quo} ++;
+				$quoteCount{$words[$i]} = $quoteCount{$words[$i]} + 1;
 
 			}
 			
@@ -135,8 +105,6 @@ sub detokenize {
 	
 	#add trailing break
 	$text .= "\n" unless $text =~ /\n$/;
-
-        $text = ucfirst($text) if $UPPERCASE_SENT;
 
 	return $text;
 }
