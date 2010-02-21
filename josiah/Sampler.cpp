@@ -143,7 +143,6 @@ namespace Josiah {
     for (; position < operators.size() && sum < random; ++position) {
       sum += operators[position]->GetScanProb();
     }
-    cerr << "Random : "<< random << ", the chosen sample is " << position-1 << endl;
     return operators[position-1];
   }
   
@@ -202,7 +201,6 @@ namespace Josiah {
         VERBOSE(2,"Gibbs sampling iteration: " << i << endl);
         
         GibbsOperator* currOperator = SampleNextOperator(m_operators);
-        cerr << "Sampling with operator " << currOperator->name() << endl;
         currOperator->scan(sample,*options);
         
         if (allSamples % Lag == 0) {//collect and increment now
