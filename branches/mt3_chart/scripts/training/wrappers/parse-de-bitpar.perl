@@ -101,7 +101,7 @@ while(my $line = <PARSER>) {
             }
             $i+=length($word)-1;
             print STDERR substr("                                                                               ",0,scalar @LABEL)."WORD $word\n" if $DEBUG;
-            push @OUT,"$word";
+            push @OUT,&escape($word);
         }
     }
     die("ERROR: STACK NOT EMPTY $#LABEL\n") if @LABEL;
@@ -122,4 +122,12 @@ while(my $line = <PARSER>) {
 sub is_aux_label {
     my ($label) = @_;
     return ($label =~ /^\\<.*\\>$/);
+}
+
+sub escape {
+    my ($text) = @_;
+    $text =~ s/&/&amp;/g;
+    $text =~ s/</&lt;/g;
+    $text =~ s/>/&gt;/g;
+    return $text;
 }
