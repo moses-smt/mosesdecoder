@@ -10,33 +10,33 @@
 
 use strict;
 
+use FindBin qw($Bin);
 use Getopt::Long;
 
+my $SCRIPTS_ROOTDIR;
+if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
+    $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+} else {
+    $SCRIPTS_ROOTDIR = $Bin;
+    if ($SCRIPTS_ROOTDIR eq '') {
+        $SCRIPTS_ROOTDIR = dirname(__FILE__);
+    }
+    $SCRIPTS_ROOTDIR =~ s/\/training$//;
+    $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
+}
+
 my $opt_hierarchical = 0;
-my $opt_max_nts = 2;
 my $opt_max_span = 10;
-my $opt_max_symbols_source = 5;
-my $quick_hierarchical = 0;
 
 GetOptions(
     "Hierarchical" => \$opt_hierarchical,
-    "MaxNonTerm=i" => \$opt_max_nts,
-    "MaxSpan=i" => \$opt_max_span,
-    "MaxSymbolsSource=i" => \$opt_max_symbols_source,
-    # FIXME Add NonTermConsecSource as we're implicitly filtering out rules
-    # that contain consecutive NTs.
-    # TODO Add NoNonTermFirstWord.
-    # TODO Add MinWords.
+    "MaxSpan=i" => \$opt_max_span  # TODO To be removed.  No longer used, but
+                                   # old experiment.perl scripts supply it.
 ) or exit(1);
-
-$quick_hierarchical = 1 if $opt_hierarchical && ($opt_max_span>10 || $opt_max_symbols_source>5 || $opt_max_nts>2);
 
 # consider phrases in input up to $MAX_LENGTH
 # in other words, all non-hierarchical phrase-tables will be truncated at least
-# to 10 words per phrase and hierarchical rules will be truncated to 5 symbols
-# (by default).
-# TODO Allow options to override $MAX_LENGTH for non-hierarchical translation
-# tables.  Defaults should probably be different though(?)
+# to 10 words per phrase.
 my $MAX_LENGTH = 10;
 
 my $dir = shift; 
@@ -142,82 +142,56 @@ while(<INI>) {
 close(INI);
 close(INI_OUT);
 
+my %TMP_INPUT_FILENAME;
 
-# get the phrases appearing in the input text, up to the $MAX_LENGTH, or
-# if hierarchical, generate the source sides of all possible rules.
+if ($opt_hierarchical)
+{
+    # Write a separate, temporary input file for each combination of source
+    # factors
+    foreach my $key (keys %CONSIDER_FACTORS) {
+        my $filename = "$dir/input-$key";
+        open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
+        $TMP_INPUT_FILENAME{$key} = $filename;
+        my @FACTOR = split(/,/, $key);
+        open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
+        while (my $line = <PIPE>) {
+            print FILEHANDLE $line
+        }
+        close(FILEHANDLE);
+    }
+}
+
 my %PHRASE_USED;
-open(INPUT,$input) or die "Can't read $input";
-while(my $line = <INPUT>) {
-    chomp($line);
-    $line =~ s/<\S[^>]+>//g;
-    $line =~ s/^ +//;
-    $line =~ s/ +$//;
-    my @WORD = split(/ +/,$line);
-    if ($opt_hierarchical) {
-        # Generate the source side of every possible rule given the input
-        # text, using "[NT]" to stand for any NT.
-        for(my $start=0;$start<=$#WORD;$start++) {
-            my $end = &min($#WORD,$start+$opt_max_span-1);
-            my $PHRASES = &generate_phrases(\@WORD,$start,$end,
-                                          $opt_max_symbols_source,$opt_max_nts);
-            foreach my $PHRASE (@$PHRASES) {
+if (!$opt_hierarchical) {
+    # get the phrases appearing in the input text, up to the $MAX_LENGTH.
+    open(INPUT,$input) or die "Can't read $input";
+    while(my $line = <INPUT>) {
+        chomp($line);
+        $line =~ s/<\S[^>]+>//g;
+        $line =~ s/^ +//;
+        $line =~ s/ +$//;
+        my @WORD = split(/ +/,$line);
+        my $max = $MAX_LENGTH;
+        for(my $i=0;$i<=$#WORD;$i++) {
+            for(my $j=0;$j<$max && $j+$i<=$#WORD;$j++) {
                 foreach (keys %CONSIDER_FACTORS) {
                     my @FACTOR = split(/,/);
                     my $phrase = "";
-                    foreach my $symbol (@$PHRASE) {
-                        if ($symbol eq "[NT]") {
-                            $phrase .= $symbol;
-                        } else {
-                            my @WORD_FACTOR = split(/\|/,$symbol);
-                            for(my $f=0;$f<=$#FACTOR;$f++) {
-                                $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
-                            }
-                            chop($phrase);
+                    for(my $k=$i;$k<=$i+$j;$k++) {
+                        my @WORD_FACTOR = split(/\|/,$WORD[$k]);
+                        for(my $f=0;$f<=$#FACTOR;$f++) {
+                            $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
                         }
+                        chop($phrase);
                         $phrase .= " ";
                     }
                     chop($phrase);
                     $PHRASE_USED{$_}{$phrase}++;
                 }
             }
-	}
-    } else {
-	my $max = $MAX_LENGTH;
-	$max = $opt_max_symbols_source if $quick_hierarchical;
-        for(my $i=0;$i<=$#WORD;$i++) {
-            for(my $j=0;$j<$max && $j+$i<=$#WORD;$j++) {
-            foreach (keys %CONSIDER_FACTORS) {
-                my @FACTOR = split(/,/);
-                my $phrase = "";
-                for(my $k=$i;$k<=$i+$j;$k++) {
-                my @WORD_FACTOR = split(/\|/,$WORD[$k]);
-                for(my $f=0;$f<=$#FACTOR;$f++) {
-                    $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
-                }
-                chop($phrase);
-                $phrase .= " ";
-                }
-                chop($phrase);
-                $PHRASE_USED{$_}{$phrase}++;
-            }
-            }
         }
     }
-}
-close(INPUT);
-
-# glue grammar phrases
-if ($quick_hierarchical) {
-    $PHRASE_USED{0}{"<s>"} ++;
-    $PHRASE_USED{0}{"</s>"} ++;
-}
-elsif ($opt_hierarchical) {
-    $PHRASE_USED{0}{"<s> [NT] </s>"} ++;
-    $PHRASE_USED{0}{"<s> [NT]"} ++;
-    $PHRASE_USED{0}{"[NT] </s>"} ++;
-    $PHRASE_USED{0}{"<s>"} ++;
-    $PHRASE_USED{0}{"</s>"} ++;	
-    $PHRASE_USED{0}{"[NT] [NT]"} ++;
+    close(INPUT);
 }
 
 # filter files
@@ -233,48 +207,44 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       $openstring = "zcat $file.gz |";
     } elsif ($file =~ /\.gz$/) {
       $openstring = "zcat $file |";
+    } elsif ($opt_hierarchical) {
+      $openstring = "cat $file |";
     } else {
       $openstring = "< $file";
     }
 
-    open(FILE,$openstring) or die "Can't open '$openstring'";
     open(FILE_OUT,">$new_file") or die "Can't write $new_file";
 
-    while(my $entry = <FILE>) {
-        my $use_entry;
-	if ($quick_hierarchical) {
-	    my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
-            $foreign =~ s/\s+\[[^\]]+\]$//;
-	    $use_entry = 1;
-	    foreach my $subphrase (split(/\s*\[[^\]]+\]\[[^\]]+\]\s*/,$foreign)) {
-		$use_entry = 0
-		    if ($subphrase ne ""
-			&& !defined($PHRASE_USED{$factors}{$subphrase}));
-	    }
-	}
-        elsif ($opt_hierarchical) {
-            my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
-            $foreign =~ s/^\s+//;
-            $foreign =~ s/\s+$//;
-            $foreign =~ s/\[[^\]]+\]\[[^\]]+\]/\[NT\]/g;
-            $foreign =~ s/\s+\[[^\]]+\]$//;
-            $use_entry = defined($PHRASE_USED{$factors}{$foreign});
-        } else {
+    if ($opt_hierarchical) {
+        my $tmp_input = $TMP_INPUT_FILENAME{$factors};
+        open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $tmp_input |");
+        while (my $line = <PIPE>) {
+            print FILE_OUT $line
+        }
+        close(FILEHANDLE);
+    } else {
+        open(FILE,$openstring) or die "Can't open '$openstring'";
+        while(my $entry = <FILE>) {
             my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
             $foreign =~ s/ $//;
-            $use_entry = defined($PHRASE_USED{$factors}{$foreign});
+            if (defined($PHRASE_USED{$factors}{$foreign})) {
+                print FILE_OUT $entry;
+                $used++;
+            }
+            $total++;
         }
-        if ($use_entry) {
-           print FILE_OUT $entry;
-           $used++;
-        }
-        $total++;
+        close(FILE);
+        die "No phrases found in $file!" if $total == 0;
+        printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
     }
-    close(FILE);
+
     close(FILE_OUT);
-    die "No phrases found in $file!" if $total == 0;
-    # FIXME Change message for $opt_hierarchical (doesn't use $MAX_LENGTH)
-    printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+}
+
+if ($opt_hierarchical)
+{
+    # Remove the temporary input files
+    unlink values %TMP_INPUT_FILENAME;
 }
 
 open(INFO,">$dir/info");
@@ -321,66 +291,4 @@ sub ensure_full_path {
     $PATH =~ s/\/[^\/]+\/\.\.$//;
     $PATH =~ s/\/+$//;
     return $PATH;
-}
-
-sub min {
-    my ($a,$b) = @_;
-    return ($a < $b) ? $a : $b;
-}
-
-# Generate the source side phrase of every possible allowed rule from the
-# sentence @$WORD, using "[NT]" to stand for any NT.
-sub generate_phrases {
-    my ($WORD,$start,$end,$max_symbols,$max_nts) = @_;
-
-    my $w = &generate_phrases_w($WORD,$start,$end,$max_symbols,$max_nts);
-    my $nt = &generate_phrases_nt($WORD,$start,$end,$max_symbols,$max_nts);
-
-    return [@$w, @$nt];
-}
-
-# Generate all allowed hierarchical phrases that begin with a word
-sub generate_phrases_w {
-    my ($WORD,$start,$end,$max_symbols,$max_nts) = @_;
-
-    return () if ($max_symbols < 1);
-
-    my @PHRASES = ();
-    my $max_words = &min($max_symbols,$end-$start+1);
-    for (my $num_words=1;$num_words<=$max_words;$num_words++) {
-        my @PHRASE = @$WORD[$start..$start+$num_words-1];
-        push(@PHRASES,\@PHRASE);
-        my $tails=&generate_phrases_nt($WORD,$start+$num_words,$end,
-                                       $max_symbols-$num_words,$max_nts);
-        foreach my $tail (@$tails) {
-            push(@PHRASES,[@PHRASE,@$tail]);
-        }
-    }
-
-    return \@PHRASES;
-}
-
-# Generate all allowed hierarchical phrases that begin with a NT
-# FIXME Can't generate phrases containing consecutive NTs (which will be
-# present if the --NonTermConsecSource option was given to the extractor).
-sub generate_phrases_nt {
-    my ($WORD,$start,$end,$max_symbols,$max_nts) = @_;
-
-    return () if ($max_symbols < 1 || $max_nts < 1 || $end < $start);
-
-    my @PHRASES = ();
-
-    my $head = "[NT]";
-    push(@PHRASES,[$head]);
-
-    for (my $nt_span=1;$nt_span<=$end-$start;$nt_span++) {
-        my $new_start = $start + $nt_span;
-        my $tails = &generate_phrases_w($WORD,$new_start,$end,$max_symbols-1,
-                                        $max_nts-1);
-        foreach my $tail (@$tails) {
-            push(@PHRASES,[$head,@$tail]);
-        }
-    }
-
-    return \@PHRASES;
 }
