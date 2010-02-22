@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
-#include "AlignmentPair.h"
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -50,13 +49,10 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
-	AlignmentPair m_alignmentPair;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
 
-	static bool wordalignflag;
-	static bool printalign;
 	
 public:
 		TargetPhrase(FactorDirection direction=Output);
@@ -131,34 +127,7 @@ public:
 	{
 		return m_sourcePhrase;
 	}
-	AlignmentPair &GetAlignmentPair()
-	{
-		return m_alignmentPair;
-	}
-	const AlignmentPair &GetAlignmentPair() const
-	{
-		return m_alignmentPair;
-	}
 	
-	/** Parse the alignment info portion of phrase table string to create alignment info */
-	void CreateAlignmentInfo(const std::string &sourceStr
-													 , const std::string &targetStr);
-	void CreateAlignmentInfo(const WordAlignments &swa
-													 , const WordAlignments &twa);
-	
-	void UseWordAlignment(bool a){
-		wordalignflag=a;
-	};
-	bool UseWordAlignment() const {
-		return wordalignflag;
-	};
-	void PrintAlignmentInfo(bool a) {
-		printalign=a; 
-	}
-	bool PrintAlignmentInfo() const {
-		return printalign;
-	}
-
 	TO_STRING();
 };
 

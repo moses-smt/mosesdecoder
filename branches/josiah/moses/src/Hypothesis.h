@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
-#include "AlignmentPair.h"
 
 namespace Moses
 {
@@ -85,7 +84,6 @@ protected:
 	std::vector<LanguageModelSingleFactor::State> m_languageModelStates; /*! relevant history for language model scoring -- used for recombination */
 	const Hypothesis 	*m_winningHypo;
 	ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-	AlignmentPair     m_alignPair;
 	const TranslationOption *m_transOpt;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
@@ -287,40 +285,6 @@ public:
 		out << (Phrase) GetCurrTargetPhrase();
   }
 	
-	inline bool PrintAlignmentInfo() const{ return GetCurrTargetPhrase().PrintAlignmentInfo(); }
-	
-	void SourceAlignmentToStream(std::ostream& out) const
-	{
-		if (m_prevHypo != NULL)
-		{
-			m_prevHypo->SourceAlignmentToStream(out);
-			AlignmentPhrase alignSourcePhrase=GetCurrTargetPhrase().GetAlignmentPair().GetAlignmentPhrase(Input);
-			alignSourcePhrase.Shift(m_currTargetWordsRange.GetStartPos());
-			out << " ";
- /*
-			out << "\nGetCurrTargetPhrase(): " << GetCurrTargetPhrase();
-			out << "\nm_currTargetWordsRange: " << m_currTargetWordsRange << "->";
-*/
-			alignSourcePhrase.print(out,m_currSourceWordsRange.GetStartPos());
-		}
-	}
-
-	void TargetAlignmentToStream(std::ostream& out) const
-	{
-		if (m_prevHypo != NULL)
-		{
-			m_prevHypo->TargetAlignmentToStream(out);
-			AlignmentPhrase alignTargetPhrase=GetCurrTargetPhrase().GetAlignmentPair().GetAlignmentPhrase(Output);
-			alignTargetPhrase.Shift(m_currSourceWordsRange.GetStartPos());
-			out << " ";
-/*
-			 out << "\nGetCurrTargetPhrase(): " << GetCurrTargetPhrase();
-			out << "\nm_currSourceWordsRange: " << m_currSourceWordsRange << "->";
-*/
-			alignTargetPhrase.print(out,m_currTargetWordsRange.GetStartPos());
-		}
-	}
-
 	TO_STRING();
 
 	inline void SetWinningHypo(const Hypothesis *hypo)
@@ -349,11 +313,6 @@ public:
 	
 	
 	
-	//! vector of what source words were aligned to each target
-	const AlignmentPair &GetAlignmentPair() const
-	{
-		return m_alignPair;
-	}
 	//! target span that trans opt would populate if applied to this hypo. Used for alignment check
 	size_t GetNextStartPos(const TranslationOption &transOpt) const;
 	
