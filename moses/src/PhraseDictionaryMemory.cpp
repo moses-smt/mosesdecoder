@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "AlignmentPair.h"
 
 using namespace std;
 
@@ -133,15 +132,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
 		
 		// load alignment info only when present and relevant	
-		if (staticData.UseAlignmentInfo()){
-			if (numElement==3){
-				stringstream strme;
-				strme << "You are using AlignmentInfo, but this info not available in the Phrase Table. Only " <<numElement<<" fields on line " << line_num;
-				UserMessage::Add(strme.str());
-				return false;
-			}
-			targetPhrase.CreateAlignmentInfo(sourceAlignString, targetAlignString);
-		}
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
