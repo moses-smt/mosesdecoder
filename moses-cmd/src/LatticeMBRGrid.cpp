@@ -35,9 +35,9 @@ POSSIBILITY OF SUCH DAMAGE.
     EMNLP 2008 for details of the parameters.
     
   The grid search is controlled by specifying comma separated lists for the lmbr parameters (-lmbr-p, -lmbr-r,
-  -lmbr-pruning-factor and -mbr-size). All other parameters are passed through to moses. If any of the lattice mbr
+  -lmbr-pruning-factor and -mbr-scale). All other parameters are passed through to moses. If any of the lattice mbr
   parameters are missing, then they are set to their default values. Output is of the form:
-   sentence-id ||| p r prune size ||| translation-hypothesis
+   sentence-id ||| p r prune scale ||| translation-hypothesis
 **/
 
 #include <cstdlib>
@@ -69,7 +69,7 @@ class Grid {
         
         /** Parse the arguments, removing those that define the grid and returning a copy of the rest */
         void parseArgs(int& argc, char**& argv) {
-            char** newargv = new char*[argc];
+            char** newargv = new char*[argc+1]; //Space to add mbr parameter
             int newargc = 0;
             for (int i = 0; i < argc; ++i) {
                 bool consumed = false;
@@ -148,6 +148,7 @@ int main(int argc, char* argv[]) {
     }
     
     StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
+    staticData.SetUseLatticeMBR(true);
     IOWrapper* ioWrapper = GetIODevice(staticData);
 
     if (!ioWrapper) {

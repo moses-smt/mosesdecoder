@@ -465,6 +465,7 @@ public:
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 	bool UseMBR() const { return m_mbr; }
   bool UseLatticeMBR() const { return m_useLatticeMBR ;}
+  void SetUseLatticeMBR(bool flag) {m_useLatticeMBR = flag; }
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
     void SetMBRScale(float scale) {
@@ -472,7 +473,7 @@ public:
     }
   size_t GetLatticeMBRPruningFactor() const { return m_lmbrPruning; }
   void SetLatticeMBRPruningFactor(size_t prune) {
-      prune = m_lmbrPruning;
+      m_lmbrPruning = prune;
   }
   const std::vector<float>& GetLatticeMBRThetas() const {return m_lmbrThetas;}
   bool  UseLatticeHypSetForLatticeMBR() const { return m_useLatticeHypSetForLatticeMBR;}
