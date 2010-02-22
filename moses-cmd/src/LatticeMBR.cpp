@@ -315,7 +315,7 @@ void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<E
   for (map<Phrase, float>::iterator finalScoresIt = finalNgramScores.begin();  finalScoresIt != finalNgramScores.end(); ++finalScoresIt) {
     finalScoresIt->second =  finalScoresIt->second * scale - Z;
     IFVERBOSE(2) {
-      cout << finalScoresIt->first << " [" << finalScoresIt->second << "]" << endl;
+      VERBOSE(2,finalScoresIt->first << " [" << finalScoresIt->second << "]" << endl);
     }
   }
   
@@ -432,11 +432,11 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
     }
   }
   IFVERBOSE(2) {  
-  cout << "Thetas: ";
+  VERBOSE(2,"Thetas: ");
   for (size_t i = 0; i < mbrThetas.size(); ++i) {
-    cout << mbrThetas[i] << " ";
+    VERBOSE(2,mbrThetas[i] << " ");
   }
-  cout << endl;
+  VERBOSE(2,endl);
   }
   
   float argmaxScore = -1e20;
@@ -481,10 +481,10 @@ vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& f
     if (mbrScore > argmaxScore){
       argmaxScore = mbrScore;
       IFVERBOSE(2) {
-        cout << "HYP " << ctr << " IS NEW BEST: ";
+        VERBOSE(2,"HYP " << ctr << " IS NEW BEST: ");
         for (size_t i = 0; i < translation.size(); ++i)
-          cout << translation[i]  ;
-        cout << "[" << argmaxScore << "]" << endl;    
+          VERBOSE(2,translation[i]);
+        VERBOSE(2,"[" << argmaxScore << "]" << endl);
       }
       argmaxTranslation = translation;
     }
