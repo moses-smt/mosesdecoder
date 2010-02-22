@@ -71,6 +71,7 @@ while(my $line = <PARSER>) {
 	    my ($w,$p) = ($1,$2);
 	    $w = "(" if $w eq "-LRB-";
 	    $w = ")" if $w eq "-RRB-";
+	    $w = &escape($w);
 	    $p =~ s/^-//;
 	    $p =~ s/-$//;
             push @OUT,"<tree label=\"$p\"> $w </tree>";
@@ -89,3 +90,10 @@ while(my $line = <PARSER>) {
 
 #`rm $tmpfile`;
 
+sub escape {
+    my ($text) = @_;
+    $text =~ s/&/&amp;/g;
+    $text =~ s/</&lt;/g;
+    $text =~ s/>/&gt;/g;
+    return $text;
+}
