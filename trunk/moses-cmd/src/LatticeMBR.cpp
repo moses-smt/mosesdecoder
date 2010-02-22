@@ -77,6 +77,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
                     const vector< float> & estimatedScores, size_t edgeDensity) {
   
   //Need hyp 0 in connectedHyp - Find empty hypothesis
+  VERBOSE(2,"Pruning lattice to edge density " << edgeDensity << endl);
   const Hypothesis* emptyHyp = connectedHyp.at(0);
   while (emptyHyp->GetId() != 0) {
     emptyHyp = emptyHyp->GetPrevHypo();
@@ -113,6 +114,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
   
   size_t numEdgesTotal = edgeDensity * connectedHyp[0]->GetWordsBitmap().GetSize();
   size_t numEdgesCreated = 0;
+  VERBOSE(2, "Target edge count: " << numEdgesTotal << endl);
 
   float prevScore = -999999;
   
@@ -200,7 +202,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
     connectedHyp.push_back(*it);
   }
   
-  VERBOSE(3, "Done! Num edges created : "<< numEdgesCreated << ", numEdges wanted " << numEdgesTotal << endl)
+  VERBOSE(2, "Done! Num edges created : "<< numEdgesCreated << ", numEdges wanted " << numEdgesTotal << endl)
   
   IFVERBOSE(3) {
     cerr << "Surviving hyps: " ;
