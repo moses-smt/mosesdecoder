@@ -13,4 +13,4 @@ mosesmt_SOURCES = MainMT.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp Threa
 mosesmt_LDADD = $(top_builddir)/moses/src/libmoses.la $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
 
 lmbrgrid_SOURCES = LatticeMBRGrid.cpp LatticeMBR.cpp IOWrapper.cpp
-lmbrgrid_LDADD = $(top_builddir)/moses/src/libmoses.la $(BOOST_THREAD_LIB)
+lmbrgrid_LDADD = $(top_builddir)/moses/src/libmoses.la $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
