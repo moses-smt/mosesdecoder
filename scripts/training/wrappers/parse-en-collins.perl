@@ -9,11 +9,14 @@ my $TMPDIR = "tmp";
 my $DEBUG = 0;
 my $DEBUG_SPACE = "                                                       ";
 
+my $RAW = "";
+
 my $BASIC = 0;
 GetOptions(
     "collins=s" => \$COLLINS,
     "mxpost=s" => \$MXPOST,
-    "tmpdir=s" => \$TMPDIR
+    "tmpdir=s" => \$TMPDIR,
+    "raw=s" => \$RAW
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
@@ -27,7 +30,12 @@ while(<MXPOST>)
 }
 close($TMP);
 
-open(PARSER,"$COLLINS/parse3.pl -maxw 200 -maxc 10000 < $tmpfile |");
+my $pipeline = "$COLLINS/parse3.pl -maxw 200 -maxc 10000 < $tmpfile |";
+if ($RAW)
+{
+    $pipeline .= "tee \"$RAW\" |";
+}
+open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     next unless $line =~ /^\(/;
     if ($line =~ /SentenceTooLong/) {

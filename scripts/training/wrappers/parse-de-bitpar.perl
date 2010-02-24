@@ -10,9 +10,13 @@ my $TMPDIR = "tmp";
 
 my $DEBUG = 0;
 my $BASIC = 0;
+
+my $RAW = "";
+
 GetOptions(
     "basic" => \$BASIC,
-    "bitpar=s" => \$BITPAR
+    "bitpar=s" => \$BITPAR,
+    "raw=s" => \$RAW
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
@@ -30,7 +34,13 @@ while(<INPUT>)
 }
 close($TMP);
 
-open(PARSER,"cat $tmpfile | $BITPAR/bin/bitpar -ts '()' -s TOP -v $BITPAR/Tiger/grammar $BITPAR/Tiger/lexicon -u $BITPAR/Tiger/open-class-tags -w $BITPAR/Tiger/wordclass.txt | iconv -c -t utf8 -f iso-8859-1 |");
+my $pipeline = "cat $tmpfile | $BITPAR/bin/bitpar -ts '()' -s TOP -v $BITPAR/Tiger/grammar $BITPAR/Tiger/lexicon -u $BITPAR/Tiger/open-class-tags -w $BITPAR/Tiger/wordclass.txt |";
+if ($RAW)
+{
+    $pipeline .= "tee \"$RAW\" |";
+}
+$pipeline .= "iconv -c -t utf8 -f iso-8859-1 |";
+open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {
         print "\n";
