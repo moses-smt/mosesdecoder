@@ -58,6 +58,12 @@ AC_ARG_ENABLE(threads,
             [with_threads=yes]
         )
 
+AC_ARG_WITH(zlib,
+            [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
+            [with_zlib=$withval],
+            [with_zlib=no]
+           )
+
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
@@ -167,6 +173,12 @@ if test "x$have_xmlrpc_c" = "xyes" && test "x$with_threads" = "xyes"; then
     AM_CONDITIONAL([WITH_SERVER],true)
 else
    AC_MSG_NOTICE([Disabling server])
+fi
+
+if test "x$with_zlib" != 'xno'
+then
+  CPPFLAGS="$CPPFLAGS -I${with_zlib}/include"
+  LDFLAGS="$LDFLAGS -L${with_zlib}/lib"
 fi
 
 LIBS="$LIBS -lz"
