@@ -202,7 +202,9 @@ void ConfusionNet::Print(std::ostream& out) const {
 	out<<"\n\n";
 }
 
+#ifdef _WIN32
 #pragma warning(disable:4716)
+#endif
 Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	TRACE_ERR("ERROR: call to ConfusionNet::GetSubString\n");
 	abort();
@@ -213,13 +215,16 @@ std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) 
 	TRACE_ERR("ERROR: call to ConfusionNet::GeStringRep\n");
 	return "";
 }
+#ifdef _WIN32
 #pragma warning(disable:4716)
+#endif
 const Word& ConfusionNet::GetWord(size_t) const {
 	TRACE_ERR("ERROR: call to ConfusionNet::GetFactorArray\n");
 	abort();
 }
+#ifdef _WIN32
 #pragma warning(default:4716)
-
+#endif
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn) 
 {
 	cn.Print(out);return out;
