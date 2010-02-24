@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef _LANGUAGE_MODEL_FACTORY_H_
-#define _LANGUAGE_MODEL_FACTORY_H_
+#ifndef moses_LanguageModelFactory_h
+#define moses_LanguageModelFactory_h
 
 #include <string>
 #include <vector>

@@ -1,3 +1,6 @@
+#ifndef moses_FFState_h
+#define moses_FFState_h
+
 namespace Moses {
 
 class FFState {
@@ -7,3 +10,4 @@ class FFState {
 };
 
 }
+#endif

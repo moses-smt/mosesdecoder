@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef moses_Time_H
+#define moses_Time_H
 
 #include <ctime>
 #include <iostream>
@@ -37,4 +37,4 @@ class Timer
 
 }
 
-#endif // TIMER_H
+#endif

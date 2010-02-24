@@ -1,5 +1,5 @@
-#ifndef INC_DYNSFXARY_VOCAB_H
-#define INC_DYNSFXARY_VOCAB_H
+#ifndef moses_DynSAInclude_vocab_h
+#define moses_DynSAInclude_vocab_h
 
 #include <map>
 #include <string>
@@ -61,4 +61,4 @@ namespace Moses {
   };
 }
 
-#endif // INC_VOCAB_H
+#endif

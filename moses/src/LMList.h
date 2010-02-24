@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_LMList_h
+#define moses_LMList_h
 
 #include <list>
 #include "LanguageModel.h"
@@ -20,3 +20,4 @@ public:
 };
 
 }
+#endif

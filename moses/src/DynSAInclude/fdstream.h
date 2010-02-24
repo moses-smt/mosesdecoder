@@ -25,8 +25,8 @@
  *                fdinbuf::underflow(): cast for return statements
  *  Aug 05, 2001: first public version
  */
-#ifndef FDSTREAM_H
-#define FDSTREAM_H
+#ifndef moses_DynSAInclude_fdstream_h
+#define moses_DynSAInclude_fdstream_h
 
 #include <streambuf>
 // for EOF:
@@ -144,4 +144,4 @@ class fdstreambuf : public std::streambuf {
 };
 //} // END namespace 
 
-#endif /*FDSTREAM_H*/
+#endif

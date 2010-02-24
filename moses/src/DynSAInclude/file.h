@@ -1,5 +1,5 @@
-#ifndef INC_FILE_H
-#define INC_FILE_H
+#ifndef moses_File_h
+#define moses_File_h
 
 #include <iostream>
 #include <fstream>
@@ -57,4 +57,5 @@ protected:
 };
 
 } // end namespace
-#endif //INC_FILE_H
+
+#endif

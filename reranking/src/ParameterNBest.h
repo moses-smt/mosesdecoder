@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef _PARAMETER_NBEST_H_
+#define _PARAMETER_NBEST_H_
 
 #include <string>
 #include <map>
@@ -74,3 +75,4 @@ public:
 
 };
 
+#endif

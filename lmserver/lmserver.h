@@ -1,5 +1,7 @@
 /* -*- Mode: C; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* $Id$ */
+#ifndef lmserver_lmserver_h
+#define lmserver_lmserver_h
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -369,3 +371,5 @@ int   mt_store_item(item *item, int comm);
 
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
+
+#endif

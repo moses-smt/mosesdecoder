@@ -1,7 +1,8 @@
 // $Id$
 
-#ifndef CONFUSIONNET_H_
-#define CONFUSIONNET_H_
+#ifndef moses_ConfusionNet_h
+#define moses_ConfusionNet_h
+
 #include <vector>
 #include <iostream>
 #include "Word.h"

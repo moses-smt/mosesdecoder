@@ -1,5 +1,6 @@
-#ifndef STREAM_TYPES_H
-#define STREAM_TYPES_H
+#ifndef moses_DynSAInclude_types_h
+#define moses_DynSAInclude_types_h
+
 #include <iostream>
 #include <map>
 #include <set>
@@ -27,4 +28,5 @@ typedef std::string word_t;     // word as string
 typedef unsigned int wordID_t;      // word mapped to integer
 typedef std::string date_t;     // a date marker
 typedef unsigned int count_t;   // for 64-bit to 32-bit compatibility 
-#endif // STREAM_TYPES_H
+
+#endif

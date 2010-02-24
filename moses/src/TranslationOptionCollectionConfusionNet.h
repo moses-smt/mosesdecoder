@@ -1,5 +1,6 @@
 // $Id$
-#pragma once
+#ifndef moses_TranslationOptionCollectionConfusionNet_h
+#define moses_TranslationOptionCollectionConfusionNet_h
 
 #include "TranslationOptionCollection.h"
 
@@ -17,3 +18,4 @@ class TranslationOptionCollectionConfusionNet : public TranslationOptionCollecti
 };
 
 }
+#endif

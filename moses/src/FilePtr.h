@@ -5,8 +5,9 @@
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
 
-#ifndef FILEPTR_H_
-#define FILEPTR_H_
+#ifndef moses_FilePtr_h
+#define moses_FilePtr_h
+
 #include "File.h"
 
 namespace Moses

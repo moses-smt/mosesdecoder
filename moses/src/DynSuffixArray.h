@@ -1,5 +1,5 @@
-#ifndef MOSES_DYNSFXARY_H
-#define MOSES_DYNSFXARY_H
+#ifndef moses_DynSuffixArray_h
+#define moses_DynSuffixArray_h
 
 #include <vector>
 #include <set>
@@ -46,4 +46,5 @@ private:
 };
 
 } //end namespace
+
 #endif
