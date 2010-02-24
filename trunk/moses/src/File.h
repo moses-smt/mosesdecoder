@@ -4,8 +4,9 @@
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
-#ifndef FILE_H_
-#define FILE_H_
+#ifndef moses_File_h
+#define moses_File_h
+
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -119,4 +120,3 @@ inline void fClose(FILE* f) {fclose(f);} // for consistent function names only
 }
 
 #endif
-

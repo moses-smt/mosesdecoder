@@ -1,7 +1,5 @@
-//#ifndef LEXICAL_REORDERING_H
-//#define LEXICAL_REORDERING_H
-
-#pragma once
+#ifndef moses_LexicalReordering_h
+#define moses_LexicalReordering_h
 
 #include <string>
 #include <vector>
@@ -156,4 +154,6 @@ class LexicalDirectionalReordering : public LexicalReordering {
 
 
 }
-//#endif //LEXICAL_REORDERING_H
+
+#endif
+

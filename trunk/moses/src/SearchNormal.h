@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_SearchNormal_h
+#define moses_SearchNormal_h
 
 #include <vector>
 #include "Search.h"
@@ -46,3 +46,4 @@ public:
 
 }
 
+#endif

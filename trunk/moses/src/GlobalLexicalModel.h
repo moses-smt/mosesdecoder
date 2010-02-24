@@ -1,4 +1,5 @@
-#pragma once
+#ifndef moses_GlobalLexicalModel_h
+#define moses_GlobalLexicalModel_h
 
 #include <string>
 #include <vector>
@@ -72,3 +73,4 @@ public:
 };
 
 }
+#endif

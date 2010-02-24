@@ -7,8 +7,8 @@
  *
  */
 
-#pragma once
-
+#ifndef moses_cmd_LatticeMBR_h
+#define moses_cmd_LatticeMBR_h
 
 #include <map>
 #include <vector>
@@ -114,3 +114,4 @@ void GetOutputFactors(const TrellisPath &path, vector <Word> &translation);
 void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngrams);
 bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b);
 vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);
+#endif

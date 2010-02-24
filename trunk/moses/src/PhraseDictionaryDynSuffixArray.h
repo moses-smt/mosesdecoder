@@ -1,5 +1,5 @@
-#ifndef MOSES_DICTSFXARY_H
-#define MOSES_DICTSFXARY_H
+#ifndef moses_PhraseDictionaryDynSuffixArray_h
+#define moses_PhraseDictionaryDynSuffixArray_h
 
 #include "PhraseDictionary.h"
 #include "DynSuffixArray.h" 

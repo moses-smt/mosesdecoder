@@ -1,7 +1,8 @@
 // $Id$
 
-#ifndef PHRASEDICTIONARYTREE_H_
-#define PHRASEDICTIONARYTREE_H_
+#ifndef moses_PhraseDictionaryTree_h
+#define moses_PhraseDictionaryTree_h
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -129,4 +130,5 @@ public:
 
 
 }
-#endif /*PHRASEDICTIONARYTREE_H_*/
+
+#endif

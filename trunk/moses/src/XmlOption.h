@@ -1,4 +1,5 @@
-#pragma once
+#ifndef moses_XmlOption_h
+#define moses_XmlOption_h
 
 #include <vector>
 #include <string>
@@ -27,4 +28,5 @@ bool ProcessAndStripXMLTags(std::string &line,std::vector<std::vector<XmlOption*
 
 }
 
+#endif
 

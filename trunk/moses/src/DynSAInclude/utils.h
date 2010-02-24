@@ -1,5 +1,5 @@
-#ifndef STREAM_UTILS_H
-#define STREAM_UTILS_H
+#ifndef moses_DynSAInclude_utils_h
+#define moses_DynSAInclude_utils_h
 
 #include <cstdlib>
 #include <vector>
@@ -77,4 +77,5 @@ public:
     else return random;
   }
 };
-#endif //STREAM_UTILS_H
+
+#endif

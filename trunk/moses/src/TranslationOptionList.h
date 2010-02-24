@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_TranslationOptionList_h
+#define moses_TranslationOptionList_h
 
 #include <vector>
 #include <cassert>
@@ -53,3 +53,4 @@ protected:
 
 }
 
+#endif

@@ -32,7 +32,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 // example file on how to use moses library
 
-#pragma once
+#ifndef moses_cmd_IOWrapper_h
+#define moses_cmd_IOWrapper_h
 
 #include <fstream>
 #include <ostream>
@@ -110,3 +111,5 @@ void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long 
                     bool reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/, 
                         bool reportSegmentation, bool reportAllFactors, std::ostream& out);
+
+#endif

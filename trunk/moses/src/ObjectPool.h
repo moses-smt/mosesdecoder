@@ -5,8 +5,8 @@
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
 
-#ifndef OBJECTPOOL_H_
-#define OBJECTPOOL_H_
+#ifndef moses_ObjectPool_h
+#define moses_ObjectPool_h
 
 #include <vector>
 #include <deque>
@@ -124,4 +124,4 @@ template<typename T> class ObjectPool {
 		}
 };
 
-#endif //OBJECTPOOL_H_
+#endif
