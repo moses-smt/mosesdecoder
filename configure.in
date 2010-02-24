@@ -116,7 +116,7 @@ then
     LIBS="$LIBS -lsrilm"
   fi
   AM_CONDITIONAL([SRI_LM], true)
-  fi
+fi
 
 if test "x$with_irstlm" != 'xno'
 then
