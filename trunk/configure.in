@@ -9,7 +9,8 @@ AC_PROG_CXX
 AC_PROG_CXXCPP
 AC_LANG_CPLUSPLUS
 
-AM_PROG_LIBTOOL
+# Shared library are disabled for default
+LT_INIT([disable-shared])
 
 AX_XMLRPC_C
 
