@@ -3,6 +3,7 @@
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
+use File::Temp qw/tempfile/;
 
 my $BITPAR = "/home/pkoehn/statmt/project/bitpar/GermanParser";
 my $TMPDIR = "tmp";
@@ -15,21 +16,19 @@ GetOptions(
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
-my $tmpfile = "$TMPDIR/parse.tmp.$$";
-
-open(TMP,"| iconv -c -f utf8 -t iso-8859-1 >$tmpfile");
-while(<STDIN>) 
+my ($TMP, $tmpfile) = tempfile("$0-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
+open(INPUT,"iconv -c -f utf8 -t iso-8859-1 |");
+while(<INPUT>)
 {
-    foreach (split) 
-    { 
-	s/\(/\*LRB\*/g;
-	s/\)/\*RRB\*/g;
-	print TMP $_."\n"; 
-    } 
-    print TMP "\n";
+    foreach (split)
+    {
+        s/\(/\*LRB\*/g;
+        s/\)/\*RRB\*/g;
+        print $TMP $_."\n";
+    }
+    print $TMP "\n";
 }
-close(STDIN);
-close(TMP);
+close($TMP);
 
 open(PARSER,"cat $tmpfile | $BITPAR/bin/bitpar -ts '()' -s TOP -v $BITPAR/Tiger/grammar $BITPAR/Tiger/lexicon -u $BITPAR/Tiger/open-class-tags -w $BITPAR/Tiger/wordclass.txt | iconv -c -t utf8 -f iso-8859-1 |");
 while(my $line = <PARSER>) {
@@ -116,8 +115,6 @@ while(my $line = <PARSER>) {
     }
     print "\n";
 }
-
-`rm $tmpfile`;
 
 sub is_aux_label {
     my ($label) = @_;

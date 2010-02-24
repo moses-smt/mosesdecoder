@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use File::Temp qw/tempfile/;
 use Getopt::Long "GetOptions";
 my $COLLINS = "/home/pkoehn/statmt/project/collins-parser.linux";
 my $MXPOST  = "/home/pkoehn/statmt/project/mxpost";
@@ -16,20 +17,17 @@ GetOptions(
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
-#my $tmpfile2 = "tmp/collins.8087";
-my $tmpfile = "$TMPDIR/mxpost.$$";
-my $tmpfile2 = "$TMPDIR/collins.$$";
 
-open(MXPOST,"|$MXPOST/mxpost.unicode $MXPOST/tagger.project > $tmpfile");
-while(<STDIN>) 
+my ($TMP, $tmpfile) = tempfile("$0-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
+
+open(MXPOST,"$MXPOST/mxpost.unicode $MXPOST/tagger.project |");
+while(<MXPOST>) 
 {
-  print MXPOST $_;
+    print $TMP $_;
 }
-close(MXPOST);
+close($TMP);
 
-`$COLLINS/parse3.pl -maxw 200 -maxc 10000 < $tmpfile > $tmpfile2`;
-
-open(PARSER,"$tmpfile2");
+open(PARSER,"$COLLINS/parse3.pl -maxw 200 -maxc 10000 < $tmpfile |");
 while(my $line = <PARSER>) {
     next unless $line =~ /^\(/;
     if ($line =~ /SentenceTooLong/) {
@@ -87,8 +85,6 @@ while(my $line = <PARSER>) {
     }
     print "\n";
 }
-
-#`rm $tmpfile`;
 
 sub escape {
     my ($text) = @_;
