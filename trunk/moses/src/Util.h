@@ -76,20 +76,6 @@ inline T Scan(const std::string &input)
 	return ret;
 }
 
-//! Specialisation for performance
-template<>
-inline int Scan<int>(const std::string &input)
-{
-	return atoi(input.c_str());
-}
-
-//! Specialisation for performance
-template<>
-inline float Scan<float>(const std::string &input)
-{
-	return (float) atof(input.c_str());
-}
-
 //! just return input
 template<>
 inline std::string Scan<std::string>(const std::string &input)
