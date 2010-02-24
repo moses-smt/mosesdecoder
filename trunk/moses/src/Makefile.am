@@ -1,6 +1,6 @@
-lib_LIBRARIES = libmoses.a
+lib_LTLIBRARIES = libmoses.la
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES $(BOOST_CPPFLAGS)
-libmoses_a_SOURCES = \
+libmoses_la_SOURCES = \
 	BitmapContainer.cpp \
 	ConfusionNet.cpp \
 	DecodeGraph.cpp \
@@ -97,24 +97,24 @@ hypergraph.pb.cc: hypergraph.proto
 hypergraph.pb.h: hypergraph.proto
 	@PROTOC@ --cpp_out=. $<			
 
-libmoses_a_SOURCES += rule.pb.cc hypergraph.pb.cc
+libmoses_la_SOURCES += rule.pb.cc hypergraph.pb.cc
 
 endif
 
 if SRI_LM
-libmoses_a_SOURCES += LanguageModelSRI.cpp
+libmoses_la_SOURCES += LanguageModelSRI.cpp
 endif
 
 if IRST_LM
-libmoses_a_SOURCES += LanguageModelIRST.cpp
+libmoses_la_SOURCES += LanguageModelIRST.cpp
 endif
 
 if RAND_LM
-libmoses_a_SOURCES += LanguageModelRandLM.cpp
+libmoses_la_SOURCES += LanguageModelRandLM.cpp
 endif
 
 if INTERNAL_LM
-libmoses_a_SOURCES += LanguageModelInternal.cpp \
+libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
 endif

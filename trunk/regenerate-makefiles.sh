@@ -30,6 +30,11 @@ then
     AUTOCONF=`which autoconf`
 fi
 
+if [ -z "$LIBTOOLIZE" ]
+then
+    LIBTOOLIZE=`which libtoolize`
+fi
+
 
 echo "Calling $ACLOCAL..."
 $ACLOCAL -I m4 || die "aclocal failed"
@@ -37,6 +42,9 @@ echo "Calling $AUTOCONF..."
 $AUTOCONF  || die "autoconf failed"
 echo "Calling $AUTOMAKE..."
 $AUTOMAKE || die "automake failed"
+echo "Calling $LIBTOOLIZE"
+$LIBTOOLIZE || die "libtoolize failed"
+
 
 echo
 echo "You should now be able to configure and build:"
