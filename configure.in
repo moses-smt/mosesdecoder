@@ -23,6 +23,12 @@ AC_ARG_WITH(srilm,
             [with_srilm=no]
            )
 
+AC_ARG_WITH(srilm-dynamic,
+            [AC_HELP_STRING([--with-srilm-dynamic], [(optional) link dynamically with srilm])],
+            [with_srilm_dynamic=yes],
+            [with_srilm_dynamic=no]
+            )
+
 AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
@@ -92,19 +98,25 @@ then
   CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
 
   AC_CHECK_HEADER(Ngram.h,
-                 [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
-                 [AC_MSG_ERROR([Cannot find SRILM!])])
+                  [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
+                  [AC_MSG_ERROR([Cannot find SRILM!])])
 
-  LIB_SRILM="-loolm -ldstruct -lmisc"
-  # ROOT/lib/i686-m64/liboolm.a
-  # ROOT/lib/i686-m64/libdstruct.a
-  # ROOT/lib/i686-m64/libmisc.a
-  MY_ARCH=`${with_srilm}/sbin/machine-type`
-  LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
-  LIBS="$LIBS $LIB_SRILM"
-  FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
+  if test "x$with_srilm_dynamic" != 'xyes'
+  then
+    LIB_SRILM="-loolm -ldstruct -lmisc"
+    # ROOT/lib/i686-m64/liboolm.a
+    # ROOT/lib/i686-m64/libdstruct.a
+    # ROOT/lib/i686-m64/libmisc.a
+    MY_ARCH=`${with_srilm}/sbin/machine-type`
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
+    LIBS="$LIBS $LIB_SRILM"
+    FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
+  else
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib"
+    LIBS="$LIBS -lsrilm"
+  fi
   AM_CONDITIONAL([SRI_LM], true)
-fi
+  fi
 
 if test "x$with_irstlm" != 'xno'
 then
