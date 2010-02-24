@@ -186,6 +186,8 @@ public:
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
 										 FloorScore);
 		    CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,&src);
+      costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(), 
+          tCands.size()));
 			tCands.push_back(targetPhrase);
 		}
 		
