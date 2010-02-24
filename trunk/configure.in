@@ -58,6 +58,11 @@ AC_ARG_ENABLE(threads,
             [with_threads=yes]
         )
 
+AC_ARG_ENABLE(trace,
+            [AC_HELP_STRING([--enable-trace], [enable trace])],
+            [CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE"],
+           )
+
 AC_ARG_WITH(zlib,
             [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
             [with_zlib=$withval],

@@ -24,8 +24,8 @@ Optimizer.cpp \
 extractor.cpp
 
 
-mert_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
-extractor_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
+mert_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope
+extractor_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope
 
 extractor_LDADD = -lm -lz
 mert_LDADD = -lm -lz
