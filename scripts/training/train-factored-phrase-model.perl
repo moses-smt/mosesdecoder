@@ -442,6 +442,12 @@ sub open_compressed {
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
 
+    # my %INCLUDE;
+    # foreach my $factor (split(/,/,$factors)) {
+	# $INCLUDE{$factor} = 1;
+    # }
+    my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
+
     print STDERR "(1.0.5) reducing factors to produce $reduced  @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
@@ -450,13 +456,34 @@ sub reduce_factors {
         print STDERR "  $reduced in place, reusing\n";
         return;
     }
-    `touch $reduced.lock`;
-    # my %INCLUDE;
-    # foreach my $factor (split(/,/,$factors)) {
-	# $INCLUDE{$factor} = 1;
-    # }
-    my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
+    if (-e $reduced.".gz") {
+        print STDERR "  $reduced.gz in place, reusing\n";
+        return;
+    }
+    # peek at input, to check if we are asked to produce exactly the available
+    # factors
+    my $inh = open_or_zcat($full);
+    my $firstline = <$inh>;
+    close $inh;
+    # pick first word
+    $firstline =~ s/^\s*//;
+    $firstline =~ s/\s.*//;
+    # count factors
+    my $maxfactorindex = $firstline =~ tr/|/|/;
+    if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
+      # create just symlink; preserving compression
+      my $realfull = $full;
+      if (!-e $realfull && -e $realfull.".gz") {
+        $realfull .= ".gz";
+        $reduced =~ s/(\.gz)?$/.gz/;
+      }
+      safesystem("ln -s $realfull $reduced")
+        or die "Failed to create symlink $realfull -> $reduced";
+      return;
+    }
 
+    # The default is to select the needed factors
+    `touch $reduced.lock`;
     *IN = open_or_zcat($full);
     open(OUT,">".$reduced) or die "ERROR: Can't write $reduced";
     my $nr = 0;
