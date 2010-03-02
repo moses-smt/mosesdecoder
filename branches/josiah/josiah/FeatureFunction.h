@@ -73,7 +73,7 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
   
   public:
   
-    FeatureFunctionScoreProducer(const std::string& name);
+    FeatureFunctionScoreProducer(const std::string& name, size_t numValues);
     
   
     size_t GetNumScoreComponents() const;
@@ -81,6 +81,7 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
   
   private:
     std::string m_name;
+    size_t m_numValues;
   
 };
 
@@ -89,7 +90,7 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
  **/
 class FeatureFunction {
   public:
-    FeatureFunction(const string& name) : m_scoreProducer(name) {}
+    FeatureFunction(const string& name, size_t numValues=1) : m_scoreProducer(name,numValues) {}
     /** Initialise with new sample */
     virtual void init(const Sample& sample) {/* do nothing */};
     /** Update the target words.*/
@@ -147,6 +148,9 @@ class SingleValuedFeatureFunction: public FeatureFunction {
                               const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores)
     {scores.Assign(&getScoreProducer(), getFlipUpdateScore(leftOption,rightOption,leftGap,rightGap));}
     
+    /**
+      * Actual feature functions need to implement these methods.
+    **/
   protected:
     virtual float getImportanceWeight() {return 0;}
     virtual float computeScore() = 0;
@@ -166,6 +170,24 @@ class SingleValuedFeatureFunction: public FeatureFunction {
   
     
 };
+
+/**
+  * A feature function with multiple values.
+  **/
+/*class MultipleValuedFeatureFunction : public FeatureFunction {
+  public:
+    MultipleValuedFeatureFunction(const std::string& name, size_t numValues) 
+    : FeatureFunction(name,numValues),m_defaultImportanceWeights(numValues) {}
+    
+  
+  protected:
+      virtual void assignImportanceScore(ScoreComponentCollection& scores)
+        {scores.Assign(&getScoreProducer(), m_defaultImportanceWeights);}
+      
+      
+  private:
+      std::vector<float>  m_defaultImportanceWeights;
+};*/
 
 
 

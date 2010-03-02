@@ -4,6 +4,7 @@
 #include "Model1.h"
 #include "Pos.h"
 #include "Dependency.h"
+#include "ParenthesisFeature.h"
 #include "SourceToTargetRatio.h"
 
 #include <boost/program_options.hpp>
@@ -61,6 +62,8 @@ namespace Josiah {
     bool useCherry = false;
     bool useDepDist = false;
     bool useSrcTgtRatio = false;
+    std::string parenthesisLefts;
+    std::string parenthesisRights;
     size_t dependencyFactor;
     desc.add_options()
     ("model1.table", "Model 1 table")
@@ -72,7 +75,10 @@ namespace Josiah {
     ("dependency.cherry", po::value<bool>(&useCherry)->default_value(false), "Use Colin Cherry's syntactic cohesiveness feature")
     ("dependency.distortion", po::value<bool>(&useDepDist)->default_value(false), "Use the dependency distortion feature")
     ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree")
-    ("srctgtratio.useFeat", po::value<bool>(&useSrcTgtRatio)->default_value(false), "Use source length to target length ratio feature");
+    ("srctgtratio.useFeat", po::value<bool>(&useSrcTgtRatio)->default_value(false), "Use source length to target length ratio feature")
+    ("parenthesis.lefts", po::value<std::string>(&parenthesisLefts), "Left parentheses")
+    ("parenthesis.rights", po::value<std::string>(&parenthesisRights), "Right parentheses");
+    
     
     po::variables_map vm;
     po::store(po::parse_config_file(in,desc,true), vm);
@@ -118,6 +124,10 @@ namespace Josiah {
     }
     if (useDepDist) {
       fv.push_back(feature_handle(new DependencyDistortionFeature(dependencyFactor)));
+    }
+    if (parenthesisRights.size() > 0 || parenthesisLefts.size() > 0) {
+        assert(parenthesisRights.size() == parenthesisLefts.size());
+        fv.push_back(feature_handle(new ParenthesisFeature(parenthesisLefts,parenthesisRights)));
     }
     in.close();
   }
