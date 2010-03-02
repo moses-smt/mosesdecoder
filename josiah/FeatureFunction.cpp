@@ -28,17 +28,18 @@ FeatureFunction::~FeatureFunction(){} // n.b. is pure virtual, must be empty
 
 
 
-FeatureFunctionScoreProducer::FeatureFunctionScoreProducer(const std::string & name ) :m_name(name){
+FeatureFunctionScoreProducer::FeatureFunctionScoreProducer(const std::string & name, size_t numValues)
+        :m_name(name), m_numValues(numValues) {
   StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
   const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-  vector<float> w(1); //default weight of 0
+  vector<float> w(m_numValues); //default weight of 0
   staticData.SetWeightsForScoreProducer(this,w);
 }
 
 
 
 size_t FeatureFunctionScoreProducer::GetNumScoreComponents() const {
-  return 1;
+  return m_numValues;
 }
 
 string FeatureFunctionScoreProducer::GetScoreProducerDescription() const {

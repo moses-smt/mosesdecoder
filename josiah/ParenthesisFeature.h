@@ -1,0 +1,127 @@
+/***********************************************************************
+Moses - factored phrase-based language decoder
+Copyright (C) 2010 University of Edinburgh
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
+
+#pragma once
+
+
+#include "FeatureFunction.h"
+#include "Gibbler.h"
+
+namespace Josiah {
+
+/**
+ * Store the various counts at each position.
+**/
+class ParenthesisCounts {
+    public:
+        ParenthesisCounts(size_t numValues):
+            m_ll(numValues), m_rl(numValues), m_lr(numValues), m_rr(numValues)
+                ,m_leftPositions(numValues),m_rightPositions(numValues) {}
+        
+        //getters
+        size_t numValues() const {return m_ll.size();}
+        size_t segmentLength() const {return m_ll[0].size();}
+        size_t ll(size_t pid, size_t position) const {return m_ll[pid][position];}
+        size_t rl(size_t pid, size_t position) const {return m_rl[pid][position];}
+        size_t lr(size_t pid, size_t position) const {return m_lr[pid][position];}
+        size_t rr(size_t pid, size_t position) const {return m_rr[pid][position];}
+        
+        const std::vector<std::vector<size_t> >& leftPositions() const {return m_leftPositions;}
+        const std::vector<std::vector<size_t> >& rightPositions() const {return m_rightPositions;}
+        
+        //setters
+        /*void ll(size_t par_id, size_t position, size_t value)  {m_ll[par_id][position] = value;}
+        void rl(size_t par_id, size_t position, size_t value)  {m_rl[par_id][position] = value;}
+        void lr(size_t par_id, size_t position, size_t value)  {m_lr[par_id][position] = value;}
+        void rr(size_t par_id, size_t position, size_t value)  {m_rr[par_id][position] = value;}*/
+        
+        //Initialise counts
+        void count(std::vector<Word>::const_iterator begin, std::vector<Word>::const_iterator end,
+                  const string& lefts, const string& rights);
+
+    private:
+        std::vector<std::vector<size_t> > m_ll; //left brackets to left
+        std::vector<std::vector<size_t> > m_rl; //right brackets to left
+        std::vector<std::vector<size_t> > m_lr; //left brackets to right
+        std::vector<std::vector<size_t> > m_rr; //right brackets to right
+        
+        std::vector<std::vector<size_t> > m_leftPositions; //positions of left parentheses
+        std::vector<std::vector<size_t> > m_rightPositions; //positions of right parentheses
+};
+
+
+/**
+ * Feature that checks for matching between brackets and similar construcions.
+**/
+class ParenthesisFeature: public virtual FeatureFunction {
+    public:
+        ParenthesisFeature(const std::string lefts, const std::string rights) 
+    : FeatureFunction("parenthesis",lefts.size()), m_defaultImportanceWeights(lefts.size()),
+        m_sample(NULL),
+        m_numValues(lefts.size()), m_lefts(lefts), m_rights(rights),
+        m_counts(m_numValues) {}
+        
+        /** Initialise with a new sample */
+        virtual void init(const Sample& sample);
+        /** Update the target words.*/
+        virtual void updateTarget();
+        /** Insert the log of the importance weight. This is log(true score) - log (approximate score). The assignScore()
+          *  method inserts the approximate, as do all the doXXXUpdate() methods. **/
+        virtual void assignImportanceScore(ScoreComponentCollection& scores);
+    
+        /** Assign the total score of this feature on the current hypo */
+        virtual void assignScore(ScoreComponentCollection& scores);
+    
+        /** Score due to one segment */
+        virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores);
+        /** Score due to two segments. The left and right refer to the target positions.**/
+        virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                              const TargetGap& gap, ScoreComponentCollection& scores);
+        virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores);
+    
+        /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
+        virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+                                  const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) ;
+    
+        virtual ~ParenthesisFeature() {}
+    
+    private:
+        void getViolations(const ParenthesisCounts& counts, std::vector<float>& violations, 
+                           const ParenthesisCounts* outsideCounts=NULL, const WordsRange* segment=NULL);
+        
+        void scoreUpdate(const Moses::Phrase& phrase, const Moses::WordsRange& segment, Moses::ScoreComponentCollection& scores);
+                           
+        
+        std::vector<float> m_defaultImportanceWeights;
+        const Sample* m_sample;
+        size_t m_numValues;
+        
+        //left and right parenthesis characters
+        std::string m_lefts;
+        std::string m_rights;
+        
+        //Counts for current target
+        ParenthesisCounts m_counts;
+        
+        
+        
+};
+
+}
