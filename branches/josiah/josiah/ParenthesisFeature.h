@@ -103,8 +103,15 @@ class ParenthesisFeature: public virtual FeatureFunction {
         virtual ~ParenthesisFeature() {}
     
     private:
+        /** Violations from a segment, with optional outside counts. If outside counts and segment are missing, then 
+        it is assumed that we are */
         void getViolations(const ParenthesisCounts& counts, std::vector<float>& violations, 
                            const ParenthesisCounts* outsideCounts=NULL, const WordsRange* segment=NULL);
+        
+        /** Violations from a pair of segments, with outside counts */
+        void getViolations(const ParenthesisCounts& leftSegmentCounts, const ParenthesisCounts& rightSegmentCounts,
+                           const WordsRange& leftSegment, const WordsRange rightSegment,
+                           const ParenthesisCounts& outsideCounts, std::vector<float>& violations);
         
         void scoreUpdate(const Moses::Phrase& phrase, const Moses::WordsRange& segment, Moses::ScoreComponentCollection& scores);
                            
