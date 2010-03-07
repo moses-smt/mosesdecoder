@@ -107,7 +107,7 @@ void Manager::ProcessSentence()
  *
  */
 
-void Manager::PrintAllDerivations() const
+void Manager::PrintAllDerivations(long translationId ) const
 {
 	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
 
@@ -137,7 +137,9 @@ void Manager::PrintAllDerivations() const
       assert(path);
       
       const std::vector<const Hypothesis *> &edges = path->GetEdges();
-
+      
+      cerr << translationId << " ||| ";
+      
 		  // print the surface factor of the translation
 		  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		  {
