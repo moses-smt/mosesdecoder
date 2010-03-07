@@ -101,6 +101,70 @@ void Manager::ProcessSentence()
 	VERBOSE(1, "Search took " << ((clock()-m_start)/(float)CLOCKS_PER_SEC) << " seconds" << endl);
     RemoveAllInColl(decodeStepVL);  
 }
+	
+/**
+ * Print all derivations in search graph. Note: The number of derivations is exponential in the sentence length
+ *
+ */
+
+void Manager::PrintAllDerivations() const
+{
+	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+
+	vector<const Hypothesis*> sortedPureHypo = hypoStackColl.back()->GetSortedList();
+
+	if (sortedPureHypo.size() == 0)
+		return;
+
+	TrellisPathList contenders, uninspectedConts;
+
+
+	// add all pure paths
+	vector<const Hypothesis*>::const_iterator iterBestHypo;
+	for (iterBestHypo = sortedPureHypo.begin() 
+			; iterBestHypo != sortedPureHypo.end()
+			; ++iterBestHypo)
+	{
+		contenders.Add(new TrellisPath(*iterBestHypo));
+	}
+
+  // MAIN loop
+	while( !(contenders.GetSize() == 0 && uninspectedConts.GetSize() == 0) )
+	{
+		if (contenders.GetSize() > 0) {
+      // get next best from list of contenders
+		  const TrellisPath *path = contenders.pop();
+      assert(path);
+      
+      const std::vector<const Hypothesis *> &edges = path->GetEdges();
+
+		  // print the surface factor of the translation
+		  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+		  {
+			  const Hypothesis &edge = *edges[currEdge];
+        const Phrase& phrase = edge.GetCurrTargetPhrase();
+			  size_t size = phrase.GetSize();
+  		  for (size_t pos = 0 ; pos < size ; pos++)
+	  	  {
+		  	  const Factor *factor = phrase.GetFactor(pos, 0);
+			    cerr << *factor;
+          cerr << " ";
+   		  }
+		  }
+		
+      cerr << "||| " << path->GetTotalScore();
+		  cerr << endl;
+    
+		  // create deviations from current best
+      uninspectedConts.Add(const_cast<TrellisPath*>(path));
+    }
+    else {
+      const TrellisPath *path = uninspectedConts.pop();
+      assert(path);
+      path->CreateDeviantPaths(contenders);		    
+    }
+	}
+}
 
 /**
  * After decoding, the hypotheses in the stacks and additional arcs
@@ -172,6 +236,9 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
 		}
 	}
 }
+  
+  
+  
 
 void Manager::CalcDecoderStatistics() const 
 {

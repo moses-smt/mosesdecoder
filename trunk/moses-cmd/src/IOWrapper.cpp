@@ -356,41 +356,6 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 			}
 		}
 
-		// print the scores in a hardwired order
-    // before each model type, the corresponding command-line-like name must be emitted
-    // MERT script relies on this
-
-		// basic distortion
-//		if (labeledOutput)
-//	    *m_nBestStream << "d: ";
-//		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
-
-//		reordering
-//		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
-//		if(rms.size() > 0)
-//		{
-//				vector<LexicalReordering*>::iterator iter;
-//				for(iter = rms.begin(); iter != rms.end(); ++iter)
-//				{
-//					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-//					for (size_t j = 0; j<scores.size(); ++j) 
-//					{
-//				  		*m_nBestStream << scores[j] << " ";
-//					}
-//				}
-//		}
-//			
-//		// lm
-//		const LMList& lml = StaticData::Instance().GetAllLM();
-//		if (lml.size() > 0) {
-//			if (labeledOutput)
-//				*m_nBestStream << "lm: ";
-//		  LMList::const_iterator lmi = lml.begin();
-//		  for (; lmi != lml.end(); ++lmi) {
-//			  *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
-//		  }
-//		}
-//
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input

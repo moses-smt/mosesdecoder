@@ -147,6 +147,11 @@ int main(int argc, char* argv[])
 			manager.SerializeSearchGraphPB(source->GetTranslationId(), output);
 		}
 #endif
+    
+    //Print all derivations in search graph
+    if (staticData.PrintAllDerivations()) {
+      manager.PrintAllDerivations();
+    }
 
 		// pick best translation (maximum a posteriori decoding)
 		if (! staticData.UseMBR() ) {

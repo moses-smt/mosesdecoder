@@ -113,6 +113,8 @@ protected:
 	 */
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
+  bool m_disableDiscarding;
+  bool m_printAllDerivations;
 
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
@@ -255,6 +257,10 @@ public:
 	{ 
 		return m_dropUnknown; 
 	}
+  inline bool GetDisableDiscarding() const
+  {
+    return m_disableDiscarding;
+  }
 	inline size_t GetMaxNoTransOptPerCoverage() const 
 	{ 
 		return m_maxNoTransOptPerCoverage;
@@ -508,6 +514,8 @@ public:
 	
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+  
+  bool PrintAllDerivations() const { return m_printAllDerivations;}
 };
 
 }
