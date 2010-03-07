@@ -74,7 +74,7 @@ NgramScores::NodeScoreIterator NgramScores::nodeEnd(const Hypothesis* node)  {
 
 
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
-                    const vector< float> & estimatedScores, size_t edgeDensity) {
+                    const vector< float> & estimatedScores, const Hypothesis* bestHypo, size_t edgeDensity) {
   
   //Need hyp 0 in connectedHyp - Find empty hypothesis
   VERBOSE(2,"Pruning lattice to edge density " << edgeDensity << endl);
@@ -112,7 +112,8 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
   
   set <const Hypothesis*> survivingHyps; //store hyps that make the cut in this
   
-  size_t numEdgesTotal = edgeDensity * connectedHyp[0]->GetWordsBitmap().GetSize();
+  VERBOSE(2, "BEST HYPO TARGET LENGTH : " << bestHypo->GetSize() << endl)
+  size_t numEdgesTotal = edgeDensity * bestHypo->GetSize(); //as per Shankar, aim for (density * target length of MAP solution) arcs 
   size_t numEdgesCreated = 0;
   VERBOSE(2, "Target edge count: " << numEdgesTotal << endl);
 
@@ -213,12 +214,6 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
   }
 }
     
-/*vector<Word>  calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores, const vector<float> & thetas, float p, float r) {
-  vector<Word> bestHyp;
-  return bestHyp;
-}*/
-
-
 void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, float scale, map<Phrase, float>& finalNgramScores) {
   
   sort(connectedHyp.begin(),connectedHyp.end(),ascendingCoverageCmp); //sort by increasing source word cov
@@ -503,7 +498,7 @@ vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList) {
     map<const Hypothesis*, vector<Edge> > incomingEdges;
     vector< float> estimatedScores;
     manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, staticData.GetLatticeMBRPruningFactor());
+    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor());
     calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);      
     vector<Word> mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas(), 
             staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());

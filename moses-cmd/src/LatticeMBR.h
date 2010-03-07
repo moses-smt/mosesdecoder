@@ -105,7 +105,7 @@ class NgramScores {
 };
 
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
-                    const vector< float> & estimatedScores, size_t edgeDensity);
+                    const vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity);
 
 vector<Word> calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores,const vector<float> & thetas, float, float);
 vector<Word> calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas, float, float);

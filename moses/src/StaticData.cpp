@@ -251,6 +251,12 @@ bool StaticData::LoadData(Parameter *parameter)
 	//source word deletion
 	SetBooleanParameter( &m_wordDeletionEnabled, "phrase-drop-allowed", false );
 
+  //Disable discarding
+  SetBooleanParameter(&m_disableDiscarding, "disable-discarding", false);
+  
+  //Print All Derivations
+  SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
+
 	// additional output
 	SetBooleanParameter( &m_isDetailedTranslationReportingEnabled, 
 			     "translation-details", false );

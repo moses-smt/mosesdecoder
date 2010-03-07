@@ -42,6 +42,7 @@ Parameter::Parameter()
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
+  AddParam("disable-discarding", "dd", "disable hypothesis discarding");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
 	AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
@@ -59,6 +60,7 @@ Parameter::Parameter()
 	AddParam("max-phrase-length", "maximum phrase length (default 20)");
 	AddParam("n-best-list", "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
 	AddParam("n-best-factor", "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
+  AddParam("print-all-derivations", "to print all derivations in search graph");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
 	AddParam("report-all-factors", "report all factors in output, not just first");

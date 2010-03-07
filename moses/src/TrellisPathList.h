@@ -55,6 +55,15 @@ public:
 	{
 		m_collection.push_back(trellisPath);
 	}
+  
+  const TrellisPath *pop()
+	{
+		const TrellisPath *top = m_collection.front();
+
+		// Detach
+		m_collection.pop_front();
+		return top;
+	}
 
 	size_t GetSize() const
 	{
