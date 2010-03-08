@@ -106,18 +106,20 @@ void ParenthesisFeature::init(const Sample& sample) {
 void ParenthesisFeature::updateTarget() {
     const vector<Word>& words = m_sample->GetTargetWords();
     m_counts.count(words.begin(),words.end(),m_lefts,m_rights);
-    IFVERBOSE(1) {
-        VERBOSE(1, "Target: ");
+    IFVERBOSE(2) {
+        VERBOSE(2, "PF Target: ");
         for (size_t i = 0; i < words.size(); ++i) {
             VERBOSE(1,words[i][0]->GetString() << " ");
         }
-        VERBOSE(1,endl);
-        VERBOSE(1,m_sample->GetFeatureValues() << endl);
+        VERBOSE(2,endl);
+        VERBOSE(2,m_sample->GetFeatureValues() << endl);
         
         ScoreComponentCollection scores;
         assignScore(scores);
+        //Note that PairedTranslationUpdateDelta::apply() calls this method twice, with the target words and
+        //scores mismatching in between
         if (scores[0] != m_sample->GetFeatureValues()[0]) {
-            VERBOSE(1,"ERROR: PF mismatch expected=" << scores[0] << " actual=" << m_sample->GetFeatureValues()[0] << endl);
+            VERBOSE(2,"ERROR: PF mismatch expected=" << scores[0] << " actual=" << m_sample->GetFeatureValues()[0] << endl);
         }
     }
 }
@@ -134,10 +136,45 @@ void ParenthesisFeature::assignScore(ScoreComponentCollection& scores) {
     
 }
 
+struct WordsRangeCovers {
+    WordsRangeCovers(const WordsRange& range) : m_range(range) {}
+    bool operator() (size_t pos) {return m_range.covers(pos);}
+    const WordsRange& m_range;
+};
+
 void ParenthesisFeature::getViolations(const ParenthesisCounts& counts, vector<float>& violations,
-                                       const ParenthesisCounts* outsideCounts, const WordsRange* segment) {
-    
+                                       const ParenthesisCounts* outsideCounts, const WordsRange* segment) 
+{
+                                          
     for (size_t pid = 0; pid < m_numValues; ++pid) {
+        //left violations to left of segment
+        if (outsideCounts) {
+            size_t leftsInSegment = count_if(outsideCounts->leftPositions()[pid].begin(), 
+                                                 outsideCounts->leftPositions()[pid].end(),
+                                                 WordsRangeCovers(*segment));
+            size_t rightsInSegment = count_if(outsideCounts->rightPositions()[pid].begin(), 
+                                             outsideCounts->rightPositions()[pid].end(),
+                                             WordsRangeCovers(*segment));
+            for (size_t i = 0; i < outsideCounts->leftPositions()[pid].size(); ++i) {
+                size_t ppos = outsideCounts->leftPositions()[pid][i];
+                if (ppos >= segment->GetStartPos()) continue;
+                size_t lr = outsideCounts->lr(pid,ppos);
+                size_t rr = outsideCounts->rr(pid,ppos);
+                //cerr << "lr: " <<  lr << " rr: " << rr << " ";
+                //account for contents of segment
+                lr += counts.leftPositions()[pid].size() - leftsInSegment;
+                rr += counts.rightPositions()[pid].size() - rightsInSegment;
+                //cerr << "lr: " <<  lr << " rr: " << rr << " rpos " << counts.rightPositions().size() << " ris: " << rightsInSegment << endl;
+                if (lr > rr) {
+                    ++violations[pid];
+                }
+            }
+        }
+        
+        //right violations to left of segment
+        //Ignore since the new segment cannot change these
+        
+        //left violations inside the segment 
         for (size_t i = 0; i < counts.leftPositions()[pid].size(); ++i) {
             size_t ppos = counts.leftPositions()[pid][i];
             size_t lr = counts.lr(pid,ppos);
@@ -152,6 +189,7 @@ void ParenthesisFeature::getViolations(const ParenthesisCounts& counts, vector<f
                 ++violations[pid];
             }
         }
+        //right violations in the segment
         for (size_t i = 0; i < counts.rightPositions()[pid].size(); ++i) {
             size_t ppos = counts.rightPositions()[pid][i];
             size_t rl = counts.rl(pid,ppos);
@@ -167,14 +205,35 @@ void ParenthesisFeature::getViolations(const ParenthesisCounts& counts, vector<f
             }
         }
         
+        //left violations to right of segment
+        //Ignore since the new segment cannot change these
+        
+        //right violations to right of segment
+        if (outsideCounts) {
+            size_t leftsInSegment = count_if(outsideCounts->leftPositions()[pid].begin(), 
+                                             outsideCounts->leftPositions()[pid].end(),
+                                             WordsRangeCovers(*segment));
+            size_t rightsInSegment = count_if(outsideCounts->rightPositions()[pid].begin(), 
+                                              outsideCounts->rightPositions()[pid].end(),
+                                              WordsRangeCovers(*segment));
+            for (size_t i = 0; i < outsideCounts->rightPositions()[pid].size(); ++i) {
+                size_t ppos = outsideCounts->rightPositions()[pid][i];
+                if (ppos <= segment->GetEndPos()) continue;
+                size_t rl = outsideCounts->rl(pid,ppos);
+                size_t ll = outsideCounts->ll(pid,ppos);
+                //account for segment
+                rl += counts.rightPositions()[pid].size() - rightsInSegment;
+                ll += counts.leftPositions()[pid].size() - leftsInSegment;
+                if (rl > ll) {
+                    ++violations[pid];
+                }
+            }
+        }
+        
     }
 }
 
-struct WordsRangeCovers {
-    WordsRangeCovers(const WordsRange& range) : m_range(range) {}
-    bool operator() (size_t pos) {return m_range.covers(pos);}
-    const WordsRange& m_range;
-};
+
 
 void ParenthesisFeature::getViolations(const ParenthesisCounts& leftSegmentCounts, const ParenthesisCounts& rightSegmentCounts,
                    const WordsRange& leftSegment, const WordsRange rightSegment,
@@ -257,36 +316,51 @@ void ParenthesisFeature::getViolations(const ParenthesisCounts& leftSegmentCount
             }
         }
         
-        //check for left parentheses in between
+        //check for left parentheses outside of both segments
         for (size_t i = 0; i < outsideCounts.leftPositions()[pid].size(); ++i) {
             size_t ppos = outsideCounts.leftPositions()[pid][i];
-            if (ppos > leftSegment.GetEndPos() && ppos < rightSegment.GetStartPos()) {
-                size_t lr = outsideCounts.lr(pid,ppos);
-                size_t rr = outsideCounts.rr(pid,ppos);
+            //ignore if parenthesis is in the left segment, right segment, or to the right of the right segment
+            if (ppos >= rightSegment.GetStartPos() || leftSegment.covers(ppos)) continue;
+            size_t lr = outsideCounts.lr(pid,ppos);
+            size_t rr = outsideCounts.rr(pid,ppos);
+            if (ppos < rightSegment.GetStartPos()) {
                 //account for right segment
                 lr += (rightSegmentCounts.leftPositions()[pid].size() - leftsInRightSegment);
                 rr += (rightSegmentCounts.rightPositions()[pid].size() - rightsInRightSegment);
-                if (lr > rr) {
-                    ++violations[pid];
-                }
-                
+            }
+            if (ppos < leftSegment.GetStartPos()) {
+                //account for left segment
+                lr += (leftSegmentCounts.leftPositions()[pid].size() - leftsInLeftSegment);
+                rr += (leftSegmentCounts.rightPositions()[pid].size() - rightsInLeftSegment);
+            }
+            if (lr > rr) {
+                ++violations[pid];
             }
         }
         
-        //check for right parentheses in between
+        //check for right parentheses outside of both segments
         for (size_t i = 0; i < outsideCounts.rightPositions()[pid].size(); ++i) {
             size_t ppos = outsideCounts.rightPositions()[pid][i];
-            if (ppos > leftSegment.GetEndPos() && ppos < rightSegment.GetStartPos()) {
-                size_t rl = outsideCounts.rl(pid,ppos);
-                size_t ll = outsideCounts.ll(pid,ppos);
+            //ignore if parenthesis is in the right segment, left segment, or to the left of left segment
+            if (ppos <= leftSegment.GetEndPos() || rightSegment.covers(ppos)) continue;
+            size_t rl = outsideCounts.rl(pid,ppos);
+            size_t ll = outsideCounts.ll(pid,ppos);
+            if (ppos > leftSegment.GetEndPos()) {
                 //account for the left segment
                 rl += (leftSegmentCounts.rightPositions()[pid].size() - rightsInLeftSegment);
                 ll += (leftSegmentCounts.leftPositions()[pid].size() - leftsInLeftSegment);
-                if (rl > ll) {
-                    ++violations[pid];
-                }
+            }
+            if (ppos > rightSegment.GetEndPos()) {
+                //account for right segment
+                rl += (rightSegmentCounts.rightPositions()[pid].size() - rightsInRightSegment);
+                ll += (rightSegmentCounts.leftPositions()[pid].size() - leftsInRightSegment);
+            }
+            if (rl > ll) {
+                ++violations[pid];
             }
         }
+        
+        
     }
 }
 
@@ -296,6 +370,10 @@ void ParenthesisFeature::scoreUpdate(const Phrase& phrase, const WordsRange& seg
     counts.count(phrase.begin(), phrase.end(), m_lefts, m_rights);
     getViolations(counts,violations,&m_counts,&segment);
     scores.Assign(&getScoreProducer(),violations);
+    IFVERBOSE(2) {
+        VERBOSE(2,"CONT " << phrase << " " << segment << endl);
+        VERBOSE(2,"VIOL " << violations[0] << endl);
+    }
 }
 
 void ParenthesisFeature::doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores) {
@@ -323,9 +401,9 @@ void ParenthesisFeature::doDiscontiguousPairedUpdate(const TranslationOption* le
     rightCounts.count(rightPhrase.begin(),rightPhrase.end(),m_lefts,m_rights);
     getViolations(leftCounts,rightCounts,leftGap.segment,rightGap.segment,m_counts,violations);
     scores.Assign(&getScoreProducer(),violations);
-    IFVERBOSE(1) {
-        VERBOSE(1,"DISC " << leftPhrase << " " << leftGap.segment << " " <<  rightPhrase << " " << rightGap.segment << endl);
-        VERBOSE(1,"VIOL " << violations[0] << endl);
+    IFVERBOSE(2) {
+        VERBOSE(2,"DISC " << leftPhrase << " " << leftGap.segment << " " <<  rightPhrase << " " << rightGap.segment << endl);
+        VERBOSE(2,"VIOL " << violations[0] << endl);
     }
 }
 

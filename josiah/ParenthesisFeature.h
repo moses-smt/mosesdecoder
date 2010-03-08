@@ -45,12 +45,6 @@ class ParenthesisCounts {
         const std::vector<std::vector<size_t> >& leftPositions() const {return m_leftPositions;}
         const std::vector<std::vector<size_t> >& rightPositions() const {return m_rightPositions;}
         
-        //setters
-        /*void ll(size_t par_id, size_t position, size_t value)  {m_ll[par_id][position] = value;}
-        void rl(size_t par_id, size_t position, size_t value)  {m_rl[par_id][position] = value;}
-        void lr(size_t par_id, size_t position, size_t value)  {m_lr[par_id][position] = value;}
-        void rr(size_t par_id, size_t position, size_t value)  {m_rr[par_id][position] = value;}*/
-        
         //Initialise counts
         void count(std::vector<Word>::const_iterator begin, std::vector<Word>::const_iterator end,
                   const string& lefts, const string& rights);
