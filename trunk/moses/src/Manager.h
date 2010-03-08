@@ -105,6 +105,8 @@ public:
 	const Hypothesis *GetActualBestHypothesis() const;
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
   void PrintAllDerivations(long translationId) const;
+  void printDivergentHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase*> & remainingPhrases, float remainingScore  ) const;
+  void printThisHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase* > & remainingPhrases, float remainingScore  ) const;
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
 #ifdef HAVE_PROTOBUF
 	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
