@@ -70,7 +70,8 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_nGramOrder	 = nGramOrder;
 
   // get name of LM file and, if any, of the micro-macro map file
-  char *filenames = strdup(filePath.c_str());
+  char *filenamesOrig = strdup(filePath.c_str());
+  char *filenames = filenamesOrig;
   m_filePath = strsep(&filenames, SepString);
 
   // Open the input file (possibly gzipped)
@@ -82,6 +83,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
     m_mapFilePath = strsep(&filenames, SepString);
     if (!FileExists(m_mapFilePath)) {
       cerr << "ERROR: Map file <" << m_mapFilePath << "> does not exist\n";
+			free(filenamesOrig);
       return false;
     }
     InputFileStream inpMap(m_mapFilePath);
@@ -123,6 +125,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 
   if (m_lmtb_dub >0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 
+	free(filenamesOrig);
   return true;
 }
 

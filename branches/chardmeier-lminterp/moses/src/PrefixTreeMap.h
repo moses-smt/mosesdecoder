@@ -1,5 +1,5 @@
-#ifndef PREFIX_TREE_MAP_H
-#define PREFIX_TREE_MAP_H
+#ifndef moses_PrefixTreeMap_h
+#define moses_PrefixTreeMap_h
 
 #include<vector>
 #include<climits>
@@ -134,5 +134,4 @@ public: //low level
 
 }
 
-#endif //PREFIX_TREE_MAP_H
-
+#endif

@@ -25,6 +25,9 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
 	// only if constraint decoding (having to match a specified output)
 	long sentenceID = source.GetTranslationId();
 	m_constraint = staticData.GetConstrainingPhrase(sentenceID);
+        if (m_constraint) {
+          VERBOSE(1, "Search constraint to output: " << *m_constraint<<endl);
+        }
 
 	// initialize the stacks: create data structure and set limits
 	std::vector < HypothesisStackNormal >::iterator iterStack;

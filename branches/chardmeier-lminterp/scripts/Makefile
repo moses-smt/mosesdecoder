@@ -9,9 +9,9 @@ DS?=$(shell date '+%Y%m%d')
 # to.
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
 # The values here are just the defaults in case your environment does not set
-# them.
-TARGETDIR=/exports/home/s0565741/inf_iccs_smt/hieu/bin
-BINDIR=/exports/home/s0565741/inf_iccs_smt/hieu/bin
+# them. (For this to work, use ?=, not = in the Makefile.)
+TARGETDIR?=/exports/home/s0565741/inf_iccs_smt/hieu/bin
+BINDIR?=/exports/home/s0565741/inf_iccs_smt/hieu/bin
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
@@ -27,8 +27,10 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 all: compile
 
 SUBDIRS=cmert-0.5 phrase-extract symal mbr
+SUBDIRS_CLEAN=$(SUBDIRS) memscore
 
-compile:
+compile: compile-memscore
+	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C training/$$subdir || exit 1; \
@@ -37,9 +39,17 @@ compile:
 	done
 	## All files that need compilation were compiled
 
+compile-memscore:
+	# Building memscore may fail e.g. if boost is not available.
+	# We ignore this because traditional scoring will still work and memscore isn't used by default.
+	cd training/memscore ; \
+	  ./configure && $(MAKE) \
+	  || ( echo "WARNING: Building memscore failed."; \
+	       echo 'training/memscore/memscore' >> ../../release-exclude )
+
 clean:
 	pwd=`pwd`; \
-	for subdir in $(SUBDIRS); do \
+	for subdir in $(SUBDIRS_CLEAN); do \
 	  $(MAKE) -C training/$$subdir clean || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
@@ -68,7 +78,9 @@ release:
 	$(MAKE) all
 	@./check-dependencies.pl "$(HOME)" "$(TARGETDIR)" "$(RELEASEDIR)" "$(BINDIR)"
 	mkdir -p $(RELEASEDIR)
-	rsync -r --files-from ./released-files . $(RELEASEDIR)/
+	cat ./released-files \
+	| grep -v -x -f release-exclude \
+	| rsync -r --files-from - . $(RELEASEDIR)/
 	sed 's#^my \$$BINDIR\s*=.*#my \$$BINDIR="$(BINDIR)";#' training/train-factored-phrase-model.perl > $(RELEASEDIR)/training/train-factored-phrase-model.perl
 	@echo "####### Do not forget to:" >> $(RELEASEDIR)/README
 	@echo "  export SCRIPTS_ROOTDIR=$(RELEASEDIR)" >> $(RELEASEDIR)/README

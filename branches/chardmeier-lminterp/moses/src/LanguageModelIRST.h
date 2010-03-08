@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_LanguageModelIRST_h
+#define moses_LanguageModelIRST_h
 
 #include <string>
 #include <vector>
@@ -45,7 +46,7 @@ protected:
 	std::vector<int> m_lmIdLookup;
 	lmtable* m_lmtb;
 	ngram* m_lmtb_ng;
-  
+	
 	int	m_unknownId;
 	int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
 	int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with 
@@ -84,3 +85,4 @@ public:
 
 }
 
+#endif

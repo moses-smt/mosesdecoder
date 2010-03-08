@@ -2,6 +2,8 @@
 # have all needed files, that a GNU package needs
 AUTOMAKE_OPTIONS = foreign
 
+ACLOCAL_AMFLAGS = -I m4
+
 # order is important here: build moses before moses-cmd
 if WITH_MERT
     MERT = mert

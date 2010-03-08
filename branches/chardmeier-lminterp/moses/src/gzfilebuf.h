@@ -1,5 +1,5 @@
-#ifndef _GZFILEBUF_H_
-#define _GZFILEBUF_H_
+#ifndef moses_gzfile_buf_h
+#define moses_gzfile_buf_h
 
 #include <streambuf>
 #include <zlib.h>

@@ -116,20 +116,21 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 
 	// n-best
 	m_surpressSingleBestOutput = false;
+       
 	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		} 
-		else 
-		{
-			std::ofstream *file = new std::ofstream;
-			m_nBestStream = file;
-			file->open(nBestFilePath.c_str());
-		}
-	}
+        {
+                if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout")
+                {
+                        m_nBestStream = &std::cout;
+                        m_surpressSingleBestOutput = true;
+                } 
+                else 
+                {
+                        std::ofstream *file = new std::ofstream;
+                        m_nBestStream = file;
+                        file->open(nBestFilePath.c_str());
+                }
+        }
 
 	// wordgraph output
 	if (staticData.GetOutputWordGraph())
@@ -143,7 +144,11 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	// search graph output
 	if (staticData.GetOutputSearchGraph())
 	{
-	  string fileName = staticData.GetParam("output-search-graph")[0];
+		string fileName;
+		if (staticData.GetOutputSearchGraphExtended())
+			fileName = staticData.GetParam("output-search-graph-extended")[0];
+		else
+			fileName = staticData.GetParam("output-search-graph")[0];
 	  std::ofstream *file = new std::ofstream;
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
@@ -222,16 +227,29 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
 {
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
-			{
-				const Factor *factor = mbrBestHypo[i];
-				if (i>0) cout << " ";
-				cout << factor->GetString();
-			}
-	cout << endl;
+	{
+		const Factor *factor = mbrBestHypo[i];
+		if (i>0) out << " ";
+			out << factor->GetString();
+	}
+	out << endl;
 }													 
+
+void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
+{
+  
+	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
+	{
+        const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+	    if (i>0) out << " ";
+            out << *factor;
+	}
+	out << endl;
+}		
+
 
 void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
@@ -259,7 +277,6 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 		VERBOSE(3,"Best path: ");
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);
-
 		if (!m_surpressSingleBestOutput)
 		{
 			if (StaticData::Instance().IsPathRecoveryEnabled()) {
@@ -287,6 +304,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 {
 	const StaticData &staticData = StaticData::Instance();
 	bool labeledOutput = staticData.IsLabeledNBestList();
+	bool reportAllFactors = staticData.GetReportAllFactorsNBest();
 	bool includeAlignment = staticData.NBestIncludesAlignment();
 	bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 	
@@ -301,7 +319,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(out, edge.GetCurrTargetPhrase(), outputFactorOrder, false); // false for not reporting all factors
+			OutputSurface(out, edge.GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 		}
 		out << " |||";
 
@@ -458,10 +476,12 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 					out<< "-" << targetRange.GetEndPos();
 				}
 			}
-    }
-		
-				
-		
+    		}
+	
+                if (StaticData::Instance().IsPathRecoveryEnabled()) {
+                	out << "|||";
+                        OutputInput(out, edges[0]);
+                }
 				
 		out << endl;
 	}

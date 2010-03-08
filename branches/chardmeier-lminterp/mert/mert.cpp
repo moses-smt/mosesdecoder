@@ -38,8 +38,8 @@ void usage(void) {
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
   cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
-	cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
-	cerr<<"[-v] verbose level"<<endl;
+  cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
+  cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
   exit(1);
 }
@@ -65,7 +65,7 @@ int option_index;
 int main (int argc, char **argv) {
 	
 	
-	ResetUserTime();
+   ResetUserTime();
 		
 	/*
 	 Timer timer;
@@ -83,10 +83,16 @@ int main (int argc, char **argv) {
   string scorerfile("statscore.data");
   string featurefile("features.data");
   string initfile("init.opt");
-	vector<unsigned> tooptimize;
+
+  string tooptimizestr("");
+  vector<unsigned> tooptimize;
   vector<parameter_t> start;
-  while ((c=getopt_long (argc, argv, "r:d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
+
+  while ((c=getopt_long (argc, argv, "o:r:d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
     switch (c) {
+    case 'o':
+      tooptimizestr = string(optarg);
+      break;
     case 'd':
       pdim = strtol(optarg, NULL, 10);
       break;
@@ -133,11 +139,6 @@ int main (int argc, char **argv) {
       srandom(time(NULL));
   }
   
-  if(tooptimize.empty()){
-    tooptimize.resize(pdim);//We'll optimize on everything
-    for(i=0;i<pdim;i++)
-      tooptimize[i]=i;
-  }
   ifstream opt(initfile.c_str());
   if(opt.fail()){
     cerr<<"could not open initfile: " << initfile << endl;
@@ -187,9 +188,29 @@ int main (int argc, char **argv) {
     D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
 
+  PrintUserTime("Data loaded");
 	
-	PrintUserTime("Data loaded");
-	
+  if (tooptimizestr.length() > 0){
+    cerr << "Weights to optimize: " << tooptimizestr << endl;
+
+    //parse string to get weights to optimize
+    //and set them as active
+    std::string substring;
+    int index;
+    while (!tooptimizestr.empty()){
+      getNextPound(tooptimizestr, substring, ",");
+      index = D.getFeatureIndex(substring);
+      cerr << "FeatNameIndex:" << index << " to insert" << endl;
+      //index = strtol(substring.c_str(), NULL, 10);
+      if (index >= 0 && index < pdim){ tooptimize.push_back(index); }
+      else{ cerr << "Index " << index << " is out of bounds. Allowed indexes are [0," << (pdim-1) << "]." << endl; }
+    }
+  }else{
+    //set all weights as active
+    tooptimize.resize(pdim);//We'll optimize on everything
+    for(int  i=0;i<pdim;i++){ tooptimize[i]=1; }
+  }
+
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);
   O->SetFData(D.getFeatureData());

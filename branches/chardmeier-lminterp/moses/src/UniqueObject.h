@@ -2,8 +2,9 @@
 /* Copyright 2004 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
-#ifndef UNIQUEOBJECT_HH_
-#define UNIQUEOBJECT_HH_
+#ifndef moses_UniqueObject_h
+#define moses_UniqueObject_h
+
 #include <iostream>
 #include <set>
 

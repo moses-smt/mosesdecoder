@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_Util_h
+#define moses_Util_h
 
 #include <iostream>
 #include <cassert>
@@ -47,9 +48,9 @@ namespace Moses
  * output on command line
  * */
 #ifdef TRACE_ENABLE
-#define TRACE_ERR(str) std::cerr << str
+#define TRACE_ERR(str) do { std::cerr << str; } while (false)
 #else
-#define TRACE_ERR(str) {}
+#define TRACE_ERR(str) do {} while (false)
 #endif
 
 /** verbose macros
@@ -74,20 +75,6 @@ inline T Scan(const std::string &input)
 	T ret;
 	stream >> ret;
 	return ret;
-}
-
-//! Specialisation for performance
-template<>
-inline int Scan<int>(const std::string &input)
-{
-	return atoi(input.c_str());
-}
-
-//! Specialisation for performance
-template<>
-inline float Scan<float>(const std::string &input)
-{
-	return (float) atof(input.c_str());
 }
 
 //! just return input
@@ -310,3 +297,4 @@ std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 
 }
 
+#endif

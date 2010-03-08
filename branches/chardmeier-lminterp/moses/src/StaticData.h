@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_StaticData_h
+#define moses_StaticData_h
 
 #include <list>
 #include <vector>
@@ -126,6 +127,7 @@ protected:
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
+	bool m_reportAllFactorsNBest;
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
 	bool m_computeLMBackoffStats;
@@ -141,8 +143,15 @@ protected:
 	XmlInputType m_xmlInputType; //! method for handling sentence XML input
 
 	bool m_mbr; //! use MBR decoder
+  bool m_useLatticeMBR; //! use MBR decoder
 	size_t m_mbrSize; //! number of translation candidates considered
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
+  size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
+  std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
+  bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
+  float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
+  float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
+    
 
 	bool m_timeout; //! use timeout
 	size_t m_timeout_threshold; //! seconds after which time out is activated
@@ -159,7 +168,8 @@ protected:
 	//! constructor. only the 1 static variable can be created
 
 	bool m_outputWordGraph; //! whether to output word graph
-        bool m_outputSearchGraph; //! whether to output search graph
+	bool m_outputSearchGraph; //! whether to output search graph
+	bool m_outputSearchGraphExtended; //! ... in extended format
 #ifdef HAVE_PROTOBUF
 	bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
@@ -381,6 +391,10 @@ public:
 	{
 		return m_reportAllFactors;
 	}
+	bool GetReportAllFactorsNBest() const
+	{
+		return m_reportAllFactorsNBest;
+	}
 	bool IsDetailedTranslationReportingEnabled() const
 	{
 		return m_isDetailedTranslationReportingEnabled;
@@ -413,7 +427,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr || m_outputSearchGraph
+	  return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph
 #ifdef HAVE_PROTOBUF
 	|| m_outputSearchGraphPB
 #endif
@@ -451,13 +465,37 @@ public:
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 	bool UseMBR() const { return m_mbr; }
+  bool UseLatticeMBR() const { return m_useLatticeMBR ;}
+  void SetUseLatticeMBR(bool flag) {m_useLatticeMBR = flag; }
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
-	
+    void SetMBRScale(float scale) {
+        m_mbrScale = scale;
+    }
+  size_t GetLatticeMBRPruningFactor() const { return m_lmbrPruning; }
+  void SetLatticeMBRPruningFactor(size_t prune) {
+      m_lmbrPruning = prune;
+  }
+  const std::vector<float>& GetLatticeMBRThetas() const {return m_lmbrThetas;}
+  bool  UseLatticeHypSetForLatticeMBR() const { return m_useLatticeHypSetForLatticeMBR;}
+  float GetLatticeMBRPrecision() const {
+    return m_lmbrPrecision;
+  }
+  void SetLatticeMBRPrecision(float p) {
+      m_lmbrPrecision = p;
+  }
+  float GetLatticeMBRPRatio() const {
+    return m_lmbrPRatio;
+  }
+  void SetLatticeMBRPRatio(float r) {
+      m_lmbrPRatio = r;
+  }
+  
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
 	
-	size_t GetOutputSearchGraph() const { return m_outputSearchGraph; }
+	bool GetOutputSearchGraph() const { return m_outputSearchGraph; }
+	bool GetOutputSearchGraphExtended() const { return m_outputSearchGraphExtended; }
 #ifdef HAVE_PROTOBUF
 	bool GetOutputSearchGraphPB() const { return m_outputSearchGraphPB; }
 #endif
@@ -473,3 +511,4 @@ public:
 };
 
 }
+#endif

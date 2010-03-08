@@ -32,10 +32,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 // example file on how to use moses library
 
-#pragma once
+#ifndef moses_cmd_IOWrapper_h
+#define moses_cmd_IOWrapper_h
 
 #include <fstream>
+#include <ostream>
 #include <vector>
+
 #include "TypeDef.h"
 #include "Sentence.h"
 #include "FactorTypeSet.h"
@@ -83,8 +86,8 @@ public:
 	~IOWrapper();
 
 	Moses::InputType* GetInput(Moses::InputType *inputType);
-	void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+	
+    void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputNBestList(const Moses::TrellisPathList &nBestList, long translationId);
 	void Backtrack(const Moses::Hypothesis *hypo);
 
@@ -104,3 +107,9 @@ IOWrapper *GetIODevice(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors);
 void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&, long translationId);
+void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, 
+                    bool reportSegmentation, bool reportAllFactors, std::ostream& out);
+void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/, 
+                        bool reportSegmentation, bool reportAllFactors, std::ostream& out);
+
+#endif
