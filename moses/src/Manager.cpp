@@ -134,7 +134,7 @@ void Manager::PrintAllDerivations(long translationId ) const
 void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore  ) const
 {
    //Backtrack from the predecessor
-   if (hypo->GetPrevHypo()->GetId()  > 0) {
+   if (hypo->GetId()  > 0) {
      vector <const TargetPhrase*> followingPhrases;
      followingPhrases.push_back(& (hypo->GetCurrTargetPhrase()));
      ///((Phrase) hypo->GetPrevHypo()->GetTargetPhrase());
