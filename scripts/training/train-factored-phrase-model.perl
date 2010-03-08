@@ -27,13 +27,16 @@ $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
 $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
 $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
 $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-@_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP, $_HMM_ALIGN, $_CONFIG,
+@_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
+$_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
 $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
 my $BINDIR="";
+
+my $force_factored_filenames = 0;
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -61,7 +64,10 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
+			   'mgiza' => \$_MGIZA, # multi-thread 
+			   'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
 		       'hmm-align' => \$_HMM_ALIGN,
+		       'final-alignment-model=s' => \$_FINAL_ALIGNMENT_MODEL, # use word alignment model 1/2/hmm/3/4/5 as final (default is 4); value 'hmm' equivalent to the --hmm-align switch
 		       'debug' => \$debug,
 		       'dont-zip' => \$_DONT_ZIP,
 		       'parts=i' => \$_PARTS,
@@ -83,7 +89,9 @@ $_HELP = 1
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
-		       'config=s' => \$_CONFIG		       
+		       'config=s' => \$_CONFIG,
+		       'memscore:s' => \$_MEMSCORE,
+                       'force-factored-filenames' => \$force_factored_filenames,
                       );
 
 if ($_HELP) {
@@ -110,12 +118,27 @@ $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # supporting binaries from other packages
-my $GIZA = "$BINDIR/GIZA++";
+my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
+my $GIZA;
+if(!defined $_MGIZA ){
+	$GIZA = "$BINDIR/GIZA++";
+	print STDERR "Using single-thread GIZA\n";
+}
+else {
+    $GIZA = "$BINDIR/mgizapp";
+	print STDERR "Using multi-thread GIZA\n";	
+    if (!defined($_MGIZA_CPUS)) {
+        $_MGIZA_CPUS=4;
+    }
+    die("ERROR: Cannot find merge_alignment.py") unless (-x $MGIZA_MERGE_ALIGN);
+}
+
 my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
 my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
@@ -136,8 +159,20 @@ $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
 die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
 my $___CORPUS      = $_CORPUS;
 
+# check the final-alignment-model switch
+my $___FINAL_ALIGNMENT_MODEL = undef;
+$___FINAL_ALIGNMENT_MODEL = 'hmm' if $_HMM_ALIGN;
+$___FINAL_ALIGNMENT_MODEL = $_FINAL_ALIGNMENT_MODEL if $_FINAL_ALIGNMENT_MODEL;
+
+die("ERROR: --final-alignment-model can be set to '1', '2', 'hmm', '3', '4' or '5'")
+	unless (!defined($___FINAL_ALIGNMENT_MODEL) or $___FINAL_ALIGNMENT_MODEL =~ /^(1|2|hmm|3|4|5)$/);
+
 my $___GIZA_EXTENSION = 'A3.final';
-$___GIZA_EXTENSION = 'Ahmm.5' if $_HMM_ALIGN;
+if(defined $___FINAL_ALIGNMENT_MODEL) {
+    $___GIZA_EXTENSION = 'A1.5' if $___FINAL_ALIGNMENT_MODEL eq '1';
+    $___GIZA_EXTENSION = 'A2.5' if $___FINAL_ALIGNMENT_MODEL eq '2';
+    $___GIZA_EXTENSION = 'Ahmm.5' if $___FINAL_ALIGNMENT_MODEL eq 'hmm';
+}
 $___GIZA_EXTENSION = $_GIZA_EXTENSION if $_GIZA_EXTENSION;
 
 my $___CORPUS_COMPRESSION = '';
@@ -199,6 +234,11 @@ $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
 
+my $___PHRASE_SCORER = "phrase-extract";
+$___PHRASE_SCORER = "memscore" if defined $_MEMSCORE;
+my $___MEMSCORE_OPTIONS = "-s ml -s lexweights \$LEX_E2F -r ml -r lexweights \$LEX_F2E -s const 2.718";
+$___MEMSCORE_OPTIONS = $_MEMSCORE if $_MEMSCORE;
+
 my $___VERBOSE = 0;
 my $___FIRST_STEP = 1;
 my $___LAST_STEP = 9;
@@ -215,7 +255,7 @@ if ($___LAST_STEP == 9) {
     my ($f, $order, $filename);
     ($f, $order, $filename, $type) = split /:/, $lm, 4;
     die "ERROR: Wrong format of --lm. Expected: --lm factor:order:filename"
-      if $f !~ /^[0-9]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
+      if $f !~ /^[0-9,]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
     die "ERROR: Filename is not absolute: $filename"
       unless file_name_is_absolute $filename;
     die "ERROR: Language model file not found or empty: $filename"
@@ -269,7 +309,7 @@ my ($mono_following_fe,$swap_following_fe,$other_following_fe);
 my ($f_current,$e_current);
 
 ### Factored translation models
-my $___NOT_FACTORED = 1;
+my $___NOT_FACTORED = !$force_factored_filenames;
 my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("ERROR: format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
@@ -402,6 +442,12 @@ sub open_compressed {
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
 
+    # my %INCLUDE;
+    # foreach my $factor (split(/,/,$factors)) {
+	# $INCLUDE{$factor} = 1;
+    # }
+    my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
+
     print STDERR "(1.0.5) reducing factors to produce $reduced  @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
@@ -410,13 +456,34 @@ sub reduce_factors {
         print STDERR "  $reduced in place, reusing\n";
         return;
     }
-    `touch $reduced.lock`;
-    # my %INCLUDE;
-    # foreach my $factor (split(/,/,$factors)) {
-	# $INCLUDE{$factor} = 1;
-    # }
-    my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
+    if (-e $reduced.".gz") {
+        print STDERR "  $reduced.gz in place, reusing\n";
+        return;
+    }
+    # peek at input, to check if we are asked to produce exactly the available
+    # factors
+    my $inh = open_or_zcat($full);
+    my $firstline = <$inh>;
+    close $inh;
+    # pick first word
+    $firstline =~ s/^\s*//;
+    $firstline =~ s/\s.*//;
+    # count factors
+    my $maxfactorindex = $firstline =~ tr/|/|/;
+    if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
+      # create just symlink; preserving compression
+      my $realfull = $full;
+      if (!-e $realfull && -e $realfull.".gz") {
+        $realfull .= ".gz";
+        $reduced =~ s/(\.gz)?$/.gz/;
+      }
+      safesystem("ln -s $realfull $reduced")
+        or die "Failed to create symlink $realfull -> $reduced";
+      return;
+    }
 
+    # The default is to select the needed factors
+    `touch $reduced.lock`;
     *IN = open_or_zcat($full);
     open(OUT,">".$reduced) or die "ERROR: Can't write $reduced";
     my $nr = 0;
@@ -697,6 +764,9 @@ sub run_single_giza {
 	 CoocurrenceFile => "$dir/$f-$e.cooc",
 	 o => "$dir/$f-$e");
 
+	# 5 Giza threads
+	if (defined $_MGIZA){ $GizaDefaultOptions{"ncpus"} = $_MGIZA_CPUS; }
+
     if ($_HMM_ALIGN) {
        $GizaDefaultOptions{m3} = 0;
        $GizaDefaultOptions{m4} = 0;
@@ -705,6 +775,22 @@ sub run_single_giza {
        $GizaDefaultOptions{nodumps} = 0;
     }
 
+    if ($___FINAL_ALIGNMENT_MODEL) {
+        $GizaDefaultOptions{nodumps} =               ($___FINAL_ALIGNMENT_MODEL =~ /^[345]$/)? 1: 0;
+        $GizaDefaultOptions{model345dumpfrequency} = 0;
+        
+        $GizaDefaultOptions{model1dumpfrequency} =   ($___FINAL_ALIGNMENT_MODEL eq '1')? 5: 0;
+        
+        $GizaDefaultOptions{m2} =                    ($___FINAL_ALIGNMENT_MODEL eq '2')? 5: 0;
+        $GizaDefaultOptions{model2dumpfrequency} =   ($___FINAL_ALIGNMENT_MODEL eq '2')? 5: 0;
+        
+        $GizaDefaultOptions{hmmiterations} =         ($___FINAL_ALIGNMENT_MODEL =~ /^(hmm|[345])$/)? 5: 0;
+        $GizaDefaultOptions{hmmdumpfrequency} =      ($___FINAL_ALIGNMENT_MODEL eq 'hmm')? 5: 0;
+        
+        $GizaDefaultOptions{m3} =                    ($___FINAL_ALIGNMENT_MODEL =~ /^[345]$/)? 3: 0;
+        $GizaDefaultOptions{m4} =                    ($___FINAL_ALIGNMENT_MODEL =~ /^[45]$/)? 3: 0;
+        $GizaDefaultOptions{m5} =                    ($___FINAL_ALIGNMENT_MODEL eq '5')? 3: 0;
+    }
 
     if ($___GIZA_OPTION) {
 	foreach (split(/[ ,]+/,$___GIZA_OPTION)) {
@@ -731,6 +817,14 @@ sub run_single_giza {
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
+ 
+	if (defined $_MGIZA and (!defined $___FINAL_ALIGNMENT_MODEL or $___FINAL_ALIGNMENT_MODEL ne '2')){
+		print STDERR "Merging $___GIZA_EXTENSION.part\* tables\n";
+		safesystem("$MGIZA_MERGE_ALIGN  $dir/$f-$e.$___GIZA_EXTENSION.part*>$dir/$f-$e.$___GIZA_EXTENSION");
+		#system("rm -f $dir/$f-$e/*.part*");
+	}
+
+
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
@@ -1015,6 +1109,18 @@ sub score_phrase_factored {
 sub score_phrase {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
+    if ($___PHRASE_SCORER eq "phrase-extract") {
+        &score_phrase_phrase_extract($ttable_file,$lexical_file,$extract_file);
+    } elsif ($___PHRASE_SCORER eq "memscore") {
+        &score_phrase_memscore($ttable_file,$lexical_file,$extract_file);
+    } else {
+        die "ERROR: Unknown phrase scorer: ".$___PHRASE_SCORER;
+    }
+}
+
+sub score_phrase_phrase_extract {
+    my ($ttable_file,$lexical_file,$extract_file) = @_;
+
     my $substep = 1;
     for my $direction ("f2e","e2f") {
 	next if $___CONTINUE && -e "$ttable_file.half.$direction";
@@ -1134,6 +1240,27 @@ sub split_extract {
     return $part;
 }
 
+sub score_phrase_memscore {
+    my ($ttable_file,$lexical_file,$extract_file) = @_;
+
+    return if $___CONTINUE && -e "$ttable_file.gz";
+
+    my $options = $___MEMSCORE_OPTIONS;
+    $options =~ s/\$LEX_F2E/$lexical_file.f2e/g;
+    $options =~ s/\$LEX_E2F/$lexical_file.e2f/g;
+
+    # The output is sorted to avoid breaking scripts that rely on the
+    # sorting behaviour of the previous scoring algorithm.
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    if (-e "$extract_file.gz") {
+        $cmd = "$ZCAT $extract_file.gz | ".$cmd;
+    } else {
+        $cmd = $cmd." <".$extract_file;
+    }
+
+    print $cmd."\n";
+    safesystem($cmd) or die "ERROR: Scoring of phrases failed";
+}
 
 ### (7) LEARN REORDERING MODEL
 

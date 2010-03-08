@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_LanguageModelInternal_h
+#define moses_LanguageModelInternal_h
 
 #include "LanguageModelSingleFactor.h"
 #include "NGramCollection.h"
@@ -38,3 +38,4 @@ public:
 
 }
 
+#endif

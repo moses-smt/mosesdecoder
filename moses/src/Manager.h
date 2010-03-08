@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_Manager_h
+#define moses_Manager_h
 
 #include <vector>
 #include <list>
@@ -87,14 +88,18 @@ protected:
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	clock_t m_start; /**< starting time, used for logging */
 	size_t interrupted_flag;
-	void GetConnectedGraph(
-		std::map< int, bool >* pConnected,
-		std::vector< const Hypothesis* >* pConnectedList) const;
+  void GetConnectedGraph(
+                         std::map< int, bool >* pConnected,
+                         std::vector< const Hypothesis* >* pConnectedList) const;
+	void GetWinnerConnectedGraph(
+                               std::map< int, bool >* pConnected,
+                               std::vector< const Hypothesis* >* pConnectedList) const;
+  
 		
 public:
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
 	~Manager();
-
+  
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
 	const Hypothesis *GetActualBestHypothesis() const;
@@ -103,6 +108,7 @@ public:
 #ifdef HAVE_PROTOBUF
 	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
+  
 	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
     const InputType& GetSource() const {return m_source;}   
 
@@ -119,7 +125,14 @@ public:
     return *m_sentenceStats;
   }
   
+  /***
+   *For Lattice MBR 
+  */
+  void GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
+                                     std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, set < const Hypothesis* > >* pOutgoingHyps, vector< float>* pFwdBwdScores) const;
+  
   std::auto_ptr<SentenceStats> m_sentenceStats;
 };
 
 }
+#endif

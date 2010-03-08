@@ -3,10 +3,16 @@ AC_INIT(moses/src)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(moses, 0.1)
 
+AC_CONFIG_MACRO_DIR([m4])
+
 AC_PROG_CXX
+AC_PROG_CXXCPP
 AC_LANG_CPLUSPLUS
-AC_PROG_RANLIB
-#AM_PROG_LIBTOOL
+
+AC_DISABLE_SHARED 
+AC_PROG_LIBTOOL
+# Shared library are disabled for default
+#LT_INIT([disable-shared])
 
 AX_XMLRPC_C
 
@@ -22,6 +28,12 @@ AC_ARG_WITH(srilm,
             [with_srilm=no]
            )
 
+AC_ARG_WITH(srilm-dynamic,
+            [AC_HELP_STRING([--with-srilm-dynamic], [(optional) link dynamically with srilm])],
+            [with_srilm_dynamic=yes],
+            [with_srilm_dynamic=no]
+            )
+
 AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
@@ -33,6 +45,13 @@ AC_ARG_WITH(randlm,
             [with_randlm=$withval],
             [with_randlm=no]
            )
+
+AC_ARG_WITH(notrace,
+            [AC_HELP_STRING([--notrace], [disable trace])],
+            [without_trace=yes],
+           )
+
+
 
 AC_ARG_ENABLE(profiling,
             [AC_HELP_STRING([--enable-profiling], [moses will dump profiling info])],
@@ -49,6 +68,13 @@ AC_ARG_ENABLE(threads,
             [with_threads=yes]
         )
 
+
+AC_ARG_WITH(zlib,
+            [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
+            [with_zlib=$withval],
+            [with_zlib=no]
+           )
+
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
@@ -56,6 +82,15 @@ AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
 AM_CONDITIONAL([WITH_THREADS],false)
+
+
+if test "x$without_trace" = 'xyes'
+then
+    AC_MSG_NOTICE([trace disabled, most regression test will fail])
+else
+    AC_MSG_NOTICE([trace enabled (default)])
+    CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
+fi
 
 if test "x$with_threads" = 'xyes'
 then
@@ -91,17 +126,23 @@ then
   CPPFLAGS="$CPPFLAGS -I${with_srilm}/include"
 
   AC_CHECK_HEADER(Ngram.h,
-                 [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
-                 [AC_MSG_ERROR([Cannot find SRILM!])])
+                  [AC_DEFINE([HAVE_SRILM], [], [flag for SRILM])],
+                  [AC_MSG_ERROR([Cannot find SRILM!])])
 
-  LIB_SRILM="-loolm -ldstruct -lmisc"
-  # ROOT/lib/i686-m64/liboolm.a
-  # ROOT/lib/i686-m64/libdstruct.a
-  # ROOT/lib/i686-m64/libmisc.a
-  MY_ARCH=`${with_srilm}/sbin/machine-type`
-  LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
-  LIBS="$LIBS $LIB_SRILM"
-  FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
+  if test "x$with_srilm_dynamic" != 'xyes'
+  then
+    LIB_SRILM="-loolm -ldstruct -lmisc"
+    # ROOT/lib/i686-m64/liboolm.a
+    # ROOT/lib/i686-m64/libdstruct.a
+    # ROOT/lib/i686-m64/libmisc.a
+    MY_ARCH=`${with_srilm}/sbin/machine-type`
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
+    LIBS="$LIBS $LIB_SRILM"
+    FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
+  else
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib"
+    LIBS="$LIBS -lsrilm"
+  fi
   AM_CONDITIONAL([SRI_LM], true)
 fi
 
@@ -152,6 +193,12 @@ if test "x$have_xmlrpc_c" = "xyes" && test "x$with_threads" = "xyes"; then
     AM_CONDITIONAL([WITH_SERVER],true)
 else
    AC_MSG_NOTICE([Disabling server])
+fi
+
+if test "x$with_zlib" != 'xno'
+then
+  CPPFLAGS="$CPPFLAGS -I${with_zlib}/include"
+  LDFLAGS="$LDFLAGS -L${with_zlib}/lib"
 fi
 
 LIBS="$LIBS -lz"

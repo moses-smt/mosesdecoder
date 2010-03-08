@@ -1,5 +1,5 @@
-#ifndef LVOC_H
-#define LVOC_H
+#ifndef moses_LVoc_h
+#define moses_LVoc_h
 
 #include<map>
 #include<vector>
@@ -65,4 +65,4 @@ public:
   }	
 };
 
-#endif //LVOC_H
+#endif

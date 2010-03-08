@@ -1,7 +1,8 @@
 // $Id$
 
-#ifndef PHRASEDICTIONARYTREEADAPTOR_H_
-#define PHRASEDICTIONARYTREEADAPTOR_H_
+#ifndef moses_PhraseDictionaryTreeAdaptor_h
+#define moses_PhraseDictionaryTreeAdaptor_h
+
 #include <vector>
 #include "TypeDef.h"
 #include "PhraseDictionaryMemory.h"

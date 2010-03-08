@@ -141,6 +141,7 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList){
    int minMBRLossIdx = -1;
    
    /* Main MBR computation done here */
+   iter = nBestList.begin();
    for (unsigned int i = 0; i < nBestList.GetSize(); i++){
        weightedLossCumul = 0;
        for (unsigned int j = 0; j < nBestList.GetSize(); j++){
@@ -156,6 +157,7 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList){
            minMBRLoss = weightedLossCumul;
            minMBRLossIdx = i;
        }
+       iter++;
    }
    /* Find sentence that minimises Bayes Risk under 1- BLEU loss */
    return translations[minMBRLossIdx];

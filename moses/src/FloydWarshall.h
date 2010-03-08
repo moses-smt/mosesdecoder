@@ -1,4 +1,5 @@
-#pragma once
+#ifndef moses_FloydWarshall_h
+#define moses_FloydWarshall_h
 
 #include <vector>
 
@@ -8,3 +9,4 @@
  */
 void floyd_warshall(const std::vector<std::vector<bool> >& edges, std::vector<std::vector<int> >& distances);
 
+#endif

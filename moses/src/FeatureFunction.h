@@ -1,5 +1,5 @@
-#ifndef _FEATURE_FUNCTION_H_
-#define _FEATURE_FUNCTION_H_
+#ifndef moses_FeatureFunction_h
+#define moses_FeatureFunction_h
 
 #include <vector>
 

@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef _DUMMY_SCORE_PRODUCERS_H_
-#define _DUMMY_SCORE_PRODUCERS_H_
+#ifndef moses_DummyScoreProducers_h
+#define moses_DummyScoreProducers_h
 
 #include "FeatureFunction.h"
 

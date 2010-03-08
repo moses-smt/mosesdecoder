@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_TypeDef_h
+#define moses_TypeDef_h
 
 #include <list>
 #include <limits>
@@ -70,7 +71,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #if HAVE_CONFIG_H
 #include "config.h"
 
-#define TRACE_ENABLE 1		// REMOVE after we figure this out
+//#define TRACE_ENABLE 1		// REMOVE after we figure this out
 
 #define LM_INTERNAL 1
 #define LM_REMOTE 1
@@ -191,3 +192,4 @@ typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
 }
+#endif

@@ -48,6 +48,13 @@ while(<STDIN>) {
 	}
 }
 
+
+sub ucsecondarg {
+  my $arg1 = shift;
+  my $arg2 = shift;
+  return $arg1.uc($arg2);
+}
+
 sub detokenize {
 	my($text) = @_;
 	chomp($text);
@@ -136,7 +143,7 @@ sub detokenize {
 	#add trailing break
 	$text .= "\n" unless $text =~ /\n$/;
 
-        $text = ucfirst($text) if $UPPERCASE_SENT;
+        $text =~ s/^([[:punct:]\s]*)([[:alpha:]])/ucsecondarg($1, $2)/e if $UPPERCASE_SENT;
 
 	return $text;
 }

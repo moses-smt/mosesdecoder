@@ -95,8 +95,8 @@ public:
 	};
 	
   size_t getFeatureIndex(const std::string& name){
-		if (featname2idx_.find(name)!=featname2idx_.end())
-			throw runtime_error("Error: feature is unknown");
+		if (featname2idx_.find(name)==featname2idx_.end())
+			throw runtime_error("Error: feature " + name +" is unknown");
 		return featname2idx_[name];
 	};
 	
