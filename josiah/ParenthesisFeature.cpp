@@ -236,7 +236,7 @@ void ParenthesisFeature::getViolations(const ParenthesisCounts& counts, vector<f
 
 
 void ParenthesisFeature::getViolations(const ParenthesisCounts& leftSegmentCounts, const ParenthesisCounts& rightSegmentCounts,
-                   const WordsRange& leftSegment, const WordsRange rightSegment,
+                   const WordsRange& leftSegment, const WordsRange& rightSegment,
                    const ParenthesisCounts& outsideCounts, std::vector<float>& violations) 
 {
     for (size_t pid = 0; pid < m_numValues; ++pid) {
