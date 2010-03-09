@@ -130,9 +130,9 @@ void ParenthesisFeature::assignImportanceScore(ScoreComponentCollection& scores)
 
 void ParenthesisFeature::assignScore(ScoreComponentCollection& scores) {
     //count number of mismatches of each type
-    vector<float> violations(m_numValues);
-    getViolations(m_counts,violations);
-    scores.Assign(&getScoreProducer(), violations);
+    m_violations.assign(m_numValues,0);
+    getViolations(m_counts,m_violations);
+    scores.Assign(&getScoreProducer(), m_violations);
     
 }
 
@@ -365,14 +365,13 @@ void ParenthesisFeature::getViolations(const ParenthesisCounts& leftSegmentCount
 }
 
 void ParenthesisFeature::scoreUpdate(const Phrase& phrase, const WordsRange& segment, ScoreComponentCollection& scores) {
-    vector<float> violations(m_numValues);
-    ParenthesisCounts counts(m_numValues);
-    counts.count(phrase.begin(), phrase.end(), m_lefts, m_rights);
-    getViolations(counts,violations,&m_counts,&segment);
-    scores.Assign(&getScoreProducer(),violations);
+    m_violations.assign(m_numValues,0);
+    m_leftSegmentCounts.count(phrase.begin(), phrase.end(), m_lefts, m_rights);
+    getViolations(m_leftSegmentCounts,m_violations,&m_counts,&segment);
+    scores.Assign(&getScoreProducer(),m_violations);
     IFVERBOSE(2) {
         VERBOSE(2,"CONT " << phrase << " " << segment << endl);
-        VERBOSE(2,"VIOL " << violations[0] << endl);
+        VERBOSE(2,"VIOL " << m_violations[0] << endl);
     }
 }
 
@@ -392,18 +391,16 @@ void ParenthesisFeature::doContiguousPairedUpdate(const TranslationOption* leftO
 void ParenthesisFeature::doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
         const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores)
 {
-    vector<float> violations(m_numValues);
+    m_violations.assign(m_numValues,0);
     const Phrase& leftPhrase = leftOption->GetTargetPhrase();
-    ParenthesisCounts leftCounts(m_numValues);
-    leftCounts.count(leftPhrase.begin(),leftPhrase.end(),m_lefts,m_rights);
+    m_leftSegmentCounts.count(leftPhrase.begin(),leftPhrase.end(),m_lefts,m_rights);
     const Phrase& rightPhrase = rightOption->GetTargetPhrase();
-    ParenthesisCounts rightCounts(m_numValues);
-    rightCounts.count(rightPhrase.begin(),rightPhrase.end(),m_lefts,m_rights);
-    getViolations(leftCounts,rightCounts,leftGap.segment,rightGap.segment,m_counts,violations);
-    scores.Assign(&getScoreProducer(),violations);
+    m_rightSegmentCounts.count(rightPhrase.begin(),rightPhrase.end(),m_lefts,m_rights);
+    getViolations(m_leftSegmentCounts,m_rightSegmentCounts,leftGap.segment,rightGap.segment,m_counts,m_violations);
+    scores.Assign(&getScoreProducer(),m_violations);
     IFVERBOSE(2) {
         VERBOSE(2,"DISC " << leftPhrase << " " << leftGap.segment << " " <<  rightPhrase << " " << rightGap.segment << endl);
-        VERBOSE(2,"VIOL " << violations[0] << endl);
+        VERBOSE(2,"VIOL " << m_violations[0] << endl);
     }
 }
 

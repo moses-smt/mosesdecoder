@@ -69,7 +69,8 @@ class ParenthesisFeature: public virtual FeatureFunction {
     : FeatureFunction("parenthesis",lefts.size()), m_defaultImportanceWeights(lefts.size()),
         m_sample(NULL),
         m_numValues(lefts.size()), m_lefts(lefts), m_rights(rights),
-        m_counts(m_numValues) {}
+        m_counts(m_numValues), m_leftSegmentCounts(m_numValues), m_rightSegmentCounts(m_numValues),
+        m_violations(m_numValues) {}
         
         /** Initialise with a new sample */
         virtual void init(const Sample& sample);
@@ -120,6 +121,12 @@ class ParenthesisFeature: public virtual FeatureFunction {
         
         //Counts for current target
         ParenthesisCounts m_counts;
+        
+        //counts for current segments
+        ParenthesisCounts m_leftSegmentCounts;
+        ParenthesisCounts m_rightSegmentCounts;
+        
+        std::vector<float> m_violations;
         
         
         
