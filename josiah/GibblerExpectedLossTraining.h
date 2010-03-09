@@ -28,6 +28,8 @@ class ExpectedLossCollector : public SampleCollector {
     virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain, float *scaling_gradient);
     virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v);
     void addGainFunction (const GainFunction* f) {g.push_back(f);}
+    ScoreComponentCollection getFeatureExpectations() const;
+    double getExpectedGain() const;
     
   protected:
     ScoreComponentCollection getFeatureExpectations(const vector<double>& importanceWeights) const;

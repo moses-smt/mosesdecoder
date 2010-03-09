@@ -103,6 +103,7 @@ int main(int argc, char** argv) {
   bool expected_sbleu = false;
   bool expected_sbleu_gradient;
   bool expected_sbleu_training;
+  bool output_expected_sbleu;
   unsigned training_batch_size;
   bool mbr_decoding;
   bool do_timing;
@@ -195,6 +196,7 @@ int main(int argc, char** argv) {
         ("gaussian-prior-variance", po::value<float>(&prior_variance)->default_value(0.0f), "Gaussian prior variance (0 for no prior)")
         ("gaussian-prior-mean,P", po::value<vector<float> >(&prior_mean), "Gaussian prior means")
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
+          ("output-expected-sbleu", po::value(&output_expected_sbleu)->zero_tokens()->default_value(false), "Output expected bleu and feature expectations at end of sampling")
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
         ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
 	("reheatings", po::value<unsigned int>(&reheatings)->default_value(1), "Number of times to reheat the sampler")
@@ -516,7 +518,7 @@ int main(int argc, char** argv) {
     auto_ptr<DerivationCollector> derivationCollector;
     auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
-    if (expected_sbleu) {
+    if (expected_sbleu || output_expected_sbleu) {
       elCollector.reset(new ExpectedLossCollector(&(g[lineno])));
       sampler.AddCollector(elCollector.get());
     }
@@ -713,6 +715,15 @@ int main(int argc, char** argv) {
            decoder.get(), 
            hessianV, 
            scaling_gradient);
+    }
+    if (output_expected_sbleu) {
+        (*out) << "ESBLEU: " << elCollector->getExpectedGain() << endl;
+        (*out) << "EFVs: ";
+        ScoreComponentCollection scores = elCollector->getFeatureExpectations();
+        for (size_t i = 0; i < scores.size(); ++i) {
+            (*out) << scores[i] << " ";
+        }
+        (*out) << endl;
     }
     if (derivationCollector.get()) {
       cerr << "DerivEntropy " << derivationCollector->getEntropy() << endl;
