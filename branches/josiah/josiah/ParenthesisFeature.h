@@ -105,7 +105,7 @@ class ParenthesisFeature: public virtual FeatureFunction {
         
         /** Violations from a pair of segments, with outside counts */
         void getViolations(const ParenthesisCounts& leftSegmentCounts, const ParenthesisCounts& rightSegmentCounts,
-                           const WordsRange& leftSegment, const WordsRange rightSegment,
+                           const WordsRange& leftSegment, const WordsRange& rightSegment,
                            const ParenthesisCounts& outsideCounts, std::vector<float>& violations);
         
         void scoreUpdate(const Moses::Phrase& phrase, const Moses::WordsRange& segment, Moses::ScoreComponentCollection& scores);
