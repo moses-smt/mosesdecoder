@@ -125,7 +125,20 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
     hessian->PlusEquals(fv);
   }
 
-}  
+}
+ 
+ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations() const {
+    const vector<double>& importanceWeights =  getImportanceWeights();
+    return getFeatureExpectations(importanceWeights);
+}
+double ExpectedLossCollector::getExpectedGain() const {
+    const vector<double>& importanceWeights =  getImportanceWeights();
+    double exp_gain = 0;
+    for (size_t i = 0; i < N(); ++i) {
+        exp_gain += importanceWeights[i]*m_gains[i];
+    }
+    return exp_gain;
+}
   
 ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<double>& importanceWeights) const {
   //do calculation at double precision to try to maintain accuracy
