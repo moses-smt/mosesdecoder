@@ -1,3 +1,5 @@
+#include <boost/program_options.hpp>
+
 #include "Utils.h"
 #include "GainFunction.h"
 #include "SentenceBleu.h"
@@ -5,9 +7,9 @@
 #include "Pos.h"
 #include "Dependency.h"
 #include "ParenthesisFeature.h"
+#include "PosProjectionFeature.h"
 #include "SourceToTargetRatio.h"
 
-#include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
 namespace Josiah {
@@ -62,9 +64,12 @@ namespace Josiah {
     bool useCherry = false;
     bool useDepDist = false;
     bool useSrcTgtRatio = false;
+    vector<string> posProjectBigramTags;
     std::string parenthesisLefts;
     std::string parenthesisRights;
     size_t dependencyFactor;
+    size_t posSourceFactor;
+    size_t posTargetFactor;
     desc.add_options()
     ("model1.table", "Model 1 table")
     ("model1.pef_column", "Column containing p(e|f) score")
@@ -72,9 +77,12 @@ namespace Josiah {
     ("model1.approx_pef",po::value<bool>(&useApproxPef)->default_value(false), "Approximate the p(e|f), and use importance sampling")
     ("model1.approx_pfe",po::value<bool>(&useApproxPfe)->default_value(false), "Approximate the p(f|e), and use importance sampling")
     ("pos.verbdiff", po::value<bool>(&useVerbDiff)->default_value(false), "Verb difference feature")
+    ("pos.projectbigram", po::value<vector<string> >(&posProjectBigramTags), "Pos project bigram - list of tags")
     ("dependency.cherry", po::value<bool>(&useCherry)->default_value(false), "Use Colin Cherry's syntactic cohesiveness feature")
     ("dependency.distortion", po::value<bool>(&useDepDist)->default_value(false), "Use the dependency distortion feature")
     ("dependency.factor", po::value<size_t>(&dependencyFactor)->default_value(1), "Factor representing the dependency tree")
+    ("pos.sourcefactor", po::value<size_t>(&posSourceFactor)->default_value(1), "Factor representing the source pos tag")
+    ("pos.targetfactor", po::value<size_t>(&posTargetFactor)->default_value(1), "Factor representing the target pos tag")
     ("srctgtratio.useFeat", po::value<bool>(&useSrcTgtRatio)->default_value(false), "Use source length to target length ratio feature")
     ("parenthesis.lefts", po::value<std::string>(&parenthesisLefts), "Left parentheses")
     ("parenthesis.rights", po::value<std::string>(&parenthesisRights), "Right parentheses");
@@ -114,7 +122,7 @@ namespace Josiah {
     }
     if (useVerbDiff) {
       //FIXME: Should be configurable
-      fv.push_back(feature_handle(new VerbDifferenceFeature(1,1)));
+      fv.push_back(feature_handle(new VerbDifferenceFeature(posSourceFactor,posTargetFactor)));
     }
     if (useCherry) {
       fv.push_back(feature_handle(new CherrySyntacticCohesionFeature(dependencyFactor)));
@@ -128,6 +136,9 @@ namespace Josiah {
     if (parenthesisRights.size() > 0 || parenthesisLefts.size() > 0) {
         assert(parenthesisRights.size() == parenthesisLefts.size());
         fv.push_back(feature_handle(new ParenthesisFeature(parenthesisLefts,parenthesisRights)));
+    }
+    if (posProjectBigramTags.size()) {
+        fv.push_back(feature_handle(new PosProjectionBigramFeature(posSourceFactor,posProjectBigramTags)));
     }
     in.close();
   }

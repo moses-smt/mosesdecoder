@@ -717,11 +717,11 @@ int main(int argc, char** argv) {
            scaling_gradient);
     }
     if (output_expected_sbleu) {
-        (*out) << "ESBLEU: " << elCollector->getExpectedGain() << endl;
-        (*out) << "EFVs: ";
+        (*out) << "ESBLEU: " <<  lineno << " " << elCollector->getExpectedGain() << endl;
+        (*out) << "EFVs: " << lineno;
         ScoreComponentCollection scores = elCollector->getFeatureExpectations();
         for (size_t i = 0; i < scores.size(); ++i) {
-            (*out) << scores[i] << " ";
+            (*out) << " " << scores[i];
         }
         (*out) << endl;
     }

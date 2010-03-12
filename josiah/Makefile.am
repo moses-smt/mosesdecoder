@@ -16,6 +16,7 @@ josiah_SOURCES = Derivation.cpp \
     MpiDebug.cpp \
 	Model1.cpp \
     ParenthesisFeature.cpp \
+    PosProjectionFeature.cpp \
     Pos.cpp \
     SourceToTargetRatio.cpp \
 	TranslationDelta.cpp \
@@ -57,6 +58,7 @@ corpustrainer_SOURCES = Derivation.cpp \
     FeatureFunction.cpp \
     SearchRandom.cpp \
     ParenthesisFeature.cpp \
+    PosProjectionFeature.cpp \
     QuenchingSchedule.cpp \
     CorpusSampler.cpp \
     CorpusSamplerAnnealed.cpp \
@@ -84,6 +86,7 @@ samplerank_SOURCES = Derivation.cpp \
         Model1.cpp \
     Pos.cpp \
     ParenthesisFeature.cpp \
+    PosProjectionFeature.cpp \
     SourceToTargetRatio.cpp \
         TranslationDelta.cpp \
         SentenceBleu.cpp \
