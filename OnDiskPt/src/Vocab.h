@@ -39,7 +39,7 @@ public:
 	{}
 	Moses::UINT64 AddVocabId(const std::string &factorString);
 	Moses::UINT64 GetVocabId(const std::string &factorString, bool &found) const;
-	const Moses::Factor *GetFactor(Moses::UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction) const;
+	const Moses::Factor *GetFactor(Moses::UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const;
 
 	bool Load(OnDiskWrapper &onDiskWrapper);
 	void Save(OnDiskWrapper &onDiskWrapper);

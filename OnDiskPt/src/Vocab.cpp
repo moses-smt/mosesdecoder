@@ -91,9 +91,13 @@ Moses::UINT64 Vocab::GetVocabId(const std::string &factorString, bool &found) co
 	}
 }
 	
-const Moses::Factor *Vocab::GetFactor(Moses::UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction) const
+const Moses::Factor *Vocab::GetFactor(Moses::UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const
 {
-	const string &str = GetString(vocabId);
+	string str = GetString(vocabId);
+	if (isNonTerminal)
+	{
+		str = str.substr(1, str.size() - 2);
+	}
 	const Moses::Factor *factor = Moses::FactorCollection::Instance().AddFactor(direction, factorType, str);
 	return factor;	
 }

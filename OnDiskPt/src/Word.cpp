@@ -26,27 +26,17 @@ Word::~Word()
 
 void Word::CreateFromString(const std::string &inString, Vocab &vocab)
 {
-	string str = inString;
-	if (str.substr(0, 1) == "[" && str.substr(str.size() - 1, 1) == "]")
+	if (inString.substr(0, 1) == "[" && inString.substr(inString.size() - 1, 1) == "]")
 	{ // non-term
-		str = str.substr(1, str.size() - 2);
 		m_isNonTerminal = true;
 	}
 	else
 	{
 		m_isNonTerminal = false;
 	}
-	
-	std::vector<string> factorsStr;
-	Moses::Tokenize(factorsStr, str, "|");
-	m_factors.resize(factorsStr.size());
-	
-	for (size_t ind = 0; ind < factorsStr.size(); ++ind)
-	{
-		const string &str = factorsStr[ind];
-		m_factors[ind] = vocab.AddVocabId(str);
-	}
-	
+
+	m_factors.resize(1);
+	m_factors[0] = vocab.AddVocabId(inString);	
 }
 
 size_t Word::WriteToMemory(char *mem) const
@@ -110,7 +100,7 @@ Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
 	{
 		Moses::FactorType factorType = outputFactorsVec[ind];
 		Moses::UINT32 vocabId = m_factors[ind];
-		const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, direction);
+		const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, direction, m_isNonTerminal);
 		ret->SetFactor(factorType, factor);
 	}
 	
