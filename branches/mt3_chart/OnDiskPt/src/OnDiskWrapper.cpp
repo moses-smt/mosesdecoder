@@ -152,7 +152,7 @@ void OnDiskWrapper::EndSave()
 
 void OnDiskWrapper::SaveMisc()
 {
-	m_fileMisc << "Version 2" << endl;
+	m_fileMisc << "Version 3" << endl;
 	m_fileMisc << "NumSourceFactors " << m_numSourceFactors << endl;
 	m_fileMisc << "NumTargetFactors " << m_numTargetFactors << endl;
 	m_fileMisc << "NumScores " << m_numScores << endl;
@@ -185,7 +185,8 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection direction
 																	, const std::vector<Moses::FactorType> &factorsVec
 																	, const Moses::Word &origWord) const
 {
-	Word *newWord = new Word(1, origWord.IsNonTerminal()); // TODO - num of factors
+	bool isNonTerminal = origWord.IsNonTerminal();
+	Word *newWord = new Word(1, isNonTerminal); // TODO - num of factors
 	
 	for (size_t ind = 0 ; ind < factorsVec.size() ; ++ind)
 	{
@@ -194,7 +195,12 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection direction
 		const Moses::Factor *factor = origWord.GetFactor(factorType);
 		assert(factor);
 		
-		const string &str = factor->GetString();
+		string str = factor->GetString();
+		if (isNonTerminal)
+		{
+			str = "[" + str + "]";
+		}
+		
 		bool found;
 		Moses::UINT64 vocabId = m_vocab.GetVocabId(str, found);
 		if (!found)
