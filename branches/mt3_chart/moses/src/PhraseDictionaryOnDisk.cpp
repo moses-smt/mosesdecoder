@@ -42,7 +42,7 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 	if (!m_dbWrapper.BeginLoad(filePath))
 		return false;
 
-	assert(m_dbWrapper.GetMisc("Version") == 2);
+	assert(m_dbWrapper.GetMisc("Version") == 3);
 	assert(m_dbWrapper.GetMisc("NumSourceFactors") == input.size());
 	assert(m_dbWrapper.GetMisc("NumTargetFactors") == output.size());
 	assert(m_dbWrapper.GetMisc("NumScores") == weight.size());
