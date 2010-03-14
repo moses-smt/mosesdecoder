@@ -99,6 +99,8 @@ Parameter::Parameter()
   AddParam("lmbr-pruning-factor", "average number of nodes/word wanted in pruned lattice");
   AddParam("lmbr-p", "unigram precision value for lattice mbr");
   AddParam("lmbr-r", "ngram precision decay value for lattice mbr");
+  AddParam("lmbr-map-weight", "weight given to map solution when doing lattice MBR (default 0)");
+  AddParam("lmbr-n-best-list", "generate an nbest list from lattice MBR decoding");
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");

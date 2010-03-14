@@ -353,6 +353,15 @@ bool StaticData::LoadData(Parameter *parameter)
     Scan<float>(m_parameter->GetParam("lmbr-p")[0]) : 0.8f;
   m_lmbrPRatio = (m_parameter->GetParam("lmbr-r").size() > 0) ?
     Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
+  m_lmbrMapWeight = (m_parameter->GetParam("lmbr-map-weight").size() >0) ?
+    Scan<float>(m_parameter->GetParam("lmbr-map-weight")[0]) : 0.0f;
+    
+   if (m_parameter->GetParam("lmbr-n-best-list").size() == 1) {
+      m_lmbrNbestFilePath = m_parameter->GetParam("lmbr-n-best-list")[0];
+      m_useLatticeMBR = true;
+      m_mbr = true;
+   }
+    
   
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
