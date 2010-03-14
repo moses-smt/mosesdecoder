@@ -79,6 +79,13 @@
 		B2DB42691010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
 		B2DB426A1010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
 		B2DB426B1010D834001B262D /* SufficientStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DB42681010D834001B262D /* SufficientStats.cpp */; };
+		B2DBD2A5114CE33700CD820C /* ParenthesisFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2A4114CE33700CD820C /* ParenthesisFeature.cpp */; };
+		B2DBD2A6114CE33700CD820C /* ParenthesisFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2A4114CE33700CD820C /* ParenthesisFeature.cpp */; };
+		B2DBD2A7114CE33700CD820C /* ParenthesisFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2A4114CE33700CD820C /* ParenthesisFeature.cpp */; };
+		B2DBD2AB114CE36100CD820C /* PosProjectionFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2AA114CE36100CD820C /* PosProjectionFeature.cpp */; };
+		B2DBD2AC114CE36100CD820C /* PosProjectionFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2AA114CE36100CD820C /* PosProjectionFeature.cpp */; };
+		B2DBD2AD114CE36100CD820C /* PosProjectionFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2AA114CE36100CD820C /* PosProjectionFeature.cpp */; };
+		B2DBD2E5114D035300CD820C /* KLDivergenceCalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DBD2E4114D035300CD820C /* KLDivergenceCalculator.cpp */; };
 		B2E1C311100655D600039083 /* OnlineLearnerTrainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */; };
 		B2F94C1C0FF52AE700998793 /* AnnealingSchedule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */; };
 		B2F94C1D0FF52AE700998793 /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B218AB110F8BBF29000E5EB9 /* Decoder.cpp */; };
@@ -233,6 +240,12 @@
 		B2A748870F976BCD00A5DE76 /* MpiDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MpiDebug.cpp; sourceTree = "<group>"; };
 		B2A748880F976BCD00A5DE76 /* MpiDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MpiDebug.h; sourceTree = "<group>"; };
 		B2DB42681010D834001B262D /* SufficientStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SufficientStats.cpp; sourceTree = "<group>"; };
+		B2DBD2A4114CE33700CD820C /* ParenthesisFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParenthesisFeature.cpp; sourceTree = "<group>"; };
+		B2DBD2A8114CE34200CD820C /* ParenthesisFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParenthesisFeature.h; sourceTree = "<group>"; };
+		B2DBD2A9114CE35400CD820C /* PosProjectionFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosProjectionFeature.h; sourceTree = "<group>"; };
+		B2DBD2AA114CE36100CD820C /* PosProjectionFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosProjectionFeature.cpp; sourceTree = "<group>"; };
+		B2DBD2E3114D035300CD820C /* KLDivergenceCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KLDivergenceCalculator.h; sourceTree = "<group>"; };
+		B2DBD2E4114D035300CD820C /* KLDivergenceCalculator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KLDivergenceCalculator.cpp; sourceTree = "<group>"; };
 		B2E1C30F100655D600039083 /* OnlineLearnerTrainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnlineLearnerTrainer.h; sourceTree = "<group>"; };
 		B2E1C310100655D600039083 /* OnlineLearnerTrainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OnlineLearnerTrainer.cpp; sourceTree = "<group>"; };
 		B2F94C170FF52AB900998793 /* SampleRank.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SampleRank.cpp; sourceTree = "<group>"; };
@@ -284,6 +297,10 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				B2DBD2AA114CE36100CD820C /* PosProjectionFeature.cpp */,
+				B2DBD2A9114CE35400CD820C /* PosProjectionFeature.h */,
+				B2DBD2A8114CE34200CD820C /* ParenthesisFeature.h */,
+				B2DBD2A4114CE33700CD820C /* ParenthesisFeature.cpp */,
 				B218AAFE0F8BBF29000E5EB9 /* AnnealingSchedule.cpp */,
 				B218AAFF0F8BBF29000E5EB9 /* AnnealingSchedule.h */,
 				B21212610FDEFB7500B07445 /* CorpusSampler.cpp */,
@@ -354,6 +371,8 @@
 				B218AB380F8BBF29000E5EB9 /* TranslationDelta.h */,
 				B2476D0E1015DBD90038140D /* Utils.cpp */,
 				B2476D0D1015DBD90038140D /* Utils.h */,
+				B2DBD2E3114D035300CD820C /* KLDivergenceCalculator.h */,
+				B2DBD2E4114D035300CD820C /* KLDivergenceCalculator.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -514,6 +533,9 @@
 				B24768BB1014D0150038140D /* SampleCollector.cpp in Sources */,
 				B2476D101015DBD90038140D /* Utils.cpp in Sources */,
 				B27C123C1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */,
+				B2DBD2A5114CE33700CD820C /* ParenthesisFeature.cpp in Sources */,
+				B2DBD2AB114CE36100CD820C /* PosProjectionFeature.cpp in Sources */,
+				B2DBD2E5114D035300CD820C /* KLDivergenceCalculator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -553,6 +575,8 @@
 				B24768BC1014D0150038140D /* SampleCollector.cpp in Sources */,
 				B2476D111015DBD90038140D /* Utils.cpp in Sources */,
 				B27C123A1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */,
+				B2DBD2A6114CE33700CD820C /* ParenthesisFeature.cpp in Sources */,
+				B2DBD2AC114CE36100CD820C /* PosProjectionFeature.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -587,6 +611,8 @@
 				B24768BA1014D0150038140D /* SampleCollector.cpp in Sources */,
 				B2476D0F1015DBD90038140D /* Utils.cpp in Sources */,
 				B27C123B1021FA0300E44282 /* GibbsOperatorIterator.cpp in Sources */,
+				B2DBD2A7114CE33700CD820C /* ParenthesisFeature.cpp in Sources */,
+				B2DBD2AD114CE36100CD820C /* PosProjectionFeature.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
