@@ -49,6 +49,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Optimizer.h"
 #include "SampleAcceptor.h"
 #include "Utils.h"
+#include "KLDivergenceCalculator.h"
 
 #if 0
   vector<string> refs;
@@ -160,6 +161,7 @@ int main(int argc, char** argv) {
   bool randomScan;
   size_t lag;
   float flip_prob, merge_split_prob, retrans_prob;
+  bool calcDDKL, calcTDKL;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -243,7 +245,9 @@ int main(int argc, char** argv) {
   ("lag", po::value<size_t>(&lag)->default_value(10), "Lag between collecting samples")
   ("flip-prob", po::value<float>(&flip_prob)->default_value(0.6f), "Probability of applying flip operator during random scan")
   ("merge-split-prob", po::value<float>(&merge_split_prob)->default_value(0.2f), "Probability of applying merge-split operator during random scan")
-  ("retrans-prob", po::value<float>(&retrans_prob)->default_value(0.2f), "Probability of applying retrans operator during random scan");
+  ("retrans-prob", po::value<float>(&retrans_prob)->default_value(0.2f), "Probability of applying retrans operator during random scan")
+  ("calc-ddistro-kl", po::value(&calcDDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated derivation distro and true")
+  ("calc-tdistro-kl", po::value(&calcTDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated translation distro and true");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -315,6 +319,7 @@ int main(int argc, char** argv) {
   } else {
     decoder.reset(new MosesDecoder());
   }
+  
   
   auto_ptr<MHAcceptor> mhAcceptor;
   bool doMH = false;
@@ -725,6 +730,12 @@ int main(int argc, char** argv) {
         }
         (*out) << endl;
     }
+    
+    auto_ptr<KLDivergenceCalculator> klCalculator; //to calculate KL Divergence
+    if (calcDDKL || calcTDKL){
+      klCalculator.reset(new KLDivergenceCalculator(line));
+    }
+    
     if (derivationCollector.get()) {
       cerr << "DerivEntropy " << derivationCollector->getEntropy() << endl;
       vector<pair<const Derivation*, float> > nbest;
@@ -760,6 +771,12 @@ int main(int argc, char** argv) {
         derivationCollector->printDistribution(std::cout);
         std::cout << "END: derivation probability distribution" << std::endl;
       }
+      if (calcDDKL) {
+        vector<pair<const Derivation*, float> > nbest;
+        derivationCollector->getNbest(nbest,max(topn,0u));
+        float ddDivergence = klCalculator->calcDDDivergence(nbest);
+        std::cout << "Derivation distribution divergence, for n=" << nbest.size() << " is: " << ddDivergence << std::endl;
+      }
     }
     if (translate) {
       cerr << "TransEntropy " << transCollector->getEntropy() << endl;
@@ -771,43 +788,35 @@ int main(int argc, char** argv) {
         transCollector->printDistribution(std::cout);
         std::cout << "END: translation probability distribution" << std::endl;
       }
+      if (calcTDKL) {
+        vector<pair<const Translation*, float> > nbest;
+        transCollector->getNbest(nbest,max(topn,0u));
+        float tdDivergence = klCalculator->calcTDDivergence(nbest);
+        std::cout << "Translation distribution divergence, for n=" << nbest.size() << " is: " << tdDivergence << std::endl;
+      }
     }
     if (mbr_decoding) {
       pair<const Translation*,float> maxtrans;
-      if (use_moses_kbesthyposet) {
-        //let's run the decoder
+      if (use_moses_kbesthyposet) { //use moses kbest as hypothesis set
+        //let's run the decoder to get the hyp set
         MosesDecoder moses;
         Hypothesis* hypothesis;
         TranslationOptionCollection* toc;
         std::vector<Word> source;
-        //Should L1Normalize weights before running the decoder
-        /*vector<float> weights = StaticData::Instance().GetAllWeights();
-        float normalizer = 0.0;
-        for (size_t i = 0; i < weights.size(); ++i) {
-          normalizer += abs((weights)[i]);    
-        }
-        transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),1.0/normalizer));
-        const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
-        cout << "L1Normalized weights: " ;
-        copy(weights.begin(),weights.end(),ostream_iterator<float>(cout," "));
-        cout << endl << flush; */
-    
+        
         timer.check("Running decoder");
         moses.decode(line,hypothesis,toc,source, mbr_size);
         
         if (print_moseskbest) {
           moses.PrintNBest(std::cout);
         }
-        //Restore original weights
-        //transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),normalizer));
-        //const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
         
         const std::vector<pair<Translation, float > > &  translations = moses.GetNbestTranslations(); 
         size_t maxtransIndex = transCollector->getMbr(translations, topNsize);  
         (*out) << translations[maxtransIndex].first;
         (*out) << endl << flush;
       }
-      else {
+      else {// use samples as hyp set
         maxtrans = transCollector->getMbr(mbr_size, topNsize);  
         (*out) << *maxtrans.first;
         (*out) << endl << flush;

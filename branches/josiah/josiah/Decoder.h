@@ -56,6 +56,10 @@ void OutputWeights(const std::vector<float>& weights, std::ostream& out);
 //inline float GetCurrQuenchingTemp() { return quenching_temp;}
 //void SetQuenchingTemp(const std::vector<float>& weights);
 
+//comparison method for sorting container of hyps
+bool hypCompare(const Moses::Hypothesis* a, const Moses::Hypothesis* b);
+
+
 /**
   * Wrapper around any decoder. Notice the moses specific return values!
   **/
@@ -83,17 +87,33 @@ class MosesDecoder : public virtual Decoder {
     MosesDecoder()  {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc,  
                         std::vector<Moses::Word>& sent, size_t nBestSize = 0);
-    virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
-    void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
-    void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<std::pair<Translation,float> > &);
     const std::vector<std::pair<Translation, float> > & GetNbestTranslations() {return m_translations;}
+    virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
     void PrintNBest(std::ostream& out) const;
-  private:
+    double CalcZ() const;
+    double GetTranslationScore(const std::vector <const Moses::Factor *>& target) const;
+  protected:
     std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
     std::vector<std::pair<Translation,float> > m_translations;
-
+    void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
+    void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<std::pair<Translation,float> > &);
+    void GetWinnerConnectedGraph( std::map< int, bool >* pConnected, std::vector< const Moses::Hypothesis* >* pConnectedList) const ;
+    
 };
+
+/**
+  * Wraps moses decoder to calculate KL
+ **/
+class KLDecoder : public  MosesDecoder {
+  public:
+    KLDecoder() : MosesDecoder() {}
+    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc,  
+                        std::vector<Moses::Word>& sent, size_t nBestSize = 0);
+    double GetZ(const std::string& source); //only makes sense to ask for Z for KL decoder since other decoders do pruning
+};
+
+
 
 
 /**

@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Decoder.h"
 #include "TrellisPathCollection.h"
 #include "TrellisPath.h"
+#include "GibbsOperator.h"
 
 using namespace std;
 using namespace Moses;
@@ -242,9 +243,308 @@ namespace Josiah {
     }
   }
   
+  void MosesDecoder::GetWinnerConnectedGraph(
+                                  std::map< int, bool >* pConnected,
+                                  std::vector< const Hypothesis* >* pConnectedList) const {
+  std::map < int, bool >& connected = *pConnected;
+  std::vector< const Hypothesis *>& connectedList = *pConnectedList;
+    
+  // start with the ones in the final stack
+  const std::vector < HypothesisStack* > &hypoStackColl = m_searcher->GetHypothesisStacks();
+  const HypothesisStack &finalStack = *hypoStackColl.back();
+  HypothesisStack::const_iterator iterHypo;
+  for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
+  {
+    const Hypothesis *hypo = *iterHypo;
+    connected[ hypo->GetId() ] = true;
+    connectedList.push_back( hypo );
+  }
+    
+  // move back from known connected hypotheses
+  for(size_t i=0; i<connectedList.size(); i++) {
+    const Hypothesis *hypo = connectedList[i];
+    
+    // add back pointer
+    const Hypothesis *prevHypo = hypo->GetPrevHypo();
+    if (prevHypo->GetId() > 0 // don't add empty hypothesis
+          && connected.find( prevHypo->GetId() ) == connected.end()) // don't add already added
+    {
+      connected[ prevHypo->GetId() ] = true;
+      connectedList.push_back( prevHypo );
+    }
+      
+    // add arcs
+    const ArcList *arcList = hypo->GetArcList();
+    if (arcList != NULL)
+    {
+      ArcList::const_iterator iterArcList;
+      for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+      {
+        const Hypothesis *loserHypo = *iterArcList;
+        if (connected.find( loserHypo->GetPrevHypo()->GetId() ) == connected.end() && loserHypo->GetPrevHypo()->GetId() > 0) // don't add already added & don't add hyp 0
+        {
+          connected[ loserHypo->GetPrevHypo()->GetId() ] = true;
+          connectedList.push_back( loserHypo->GetPrevHypo() );
+        }
+      }
+    }
+  }
+  }
+
+  
+  double MosesDecoder::CalcZ() const
+  {
+    std::map < int, bool > connected;
+    std::vector< const Hypothesis *> connectedList;
+    
+    // *** find connected hypotheses ***
+    GetWinnerConnectedGraph(&connected, &connectedList);
+    
+    // ** compute lattice score *** //
+    std::map < int, double > forwardScore;
+    const std::vector < HypothesisStack* > &hypoStackColl = m_searcher->GetHypothesisStacks();
+    std::vector < HypothesisStack* >::const_iterator iterStack;
+    for (iterStack = --hypoStackColl.end() ; iterStack != hypoStackColl.begin() ; --iterStack)
+    {
+      const HypothesisStack &stack = **iterStack;
+      HypothesisStack::const_iterator iterHypo;
+      for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+      {
+        const Hypothesis *hypo = *iterHypo;
+        if (connected.find( hypo->GetId() ) != connected.end())
+        {
+          // make a play for previous hypothesis
+          const Hypothesis *prevHypo = hypo->GetPrevHypo();
+          double fscore = forwardScore[ hypo->GetId() ] +
+          hypo->GetScore() - prevHypo->GetScore();
+          if (forwardScore.find( prevHypo->GetId() ) == forwardScore.end())
+          {
+            forwardScore[ prevHypo->GetId() ] = fscore;
+          }
+          else {
+            forwardScore[ prevHypo->GetId() ] = log_sum(fscore,forwardScore[ prevHypo->GetId() ] ) ;
+          }
+          
+          // all arcs also make a play
+          const ArcList *arcList = hypo->GetArcList();
+          if (arcList != NULL)
+          {
+            ArcList::const_iterator iterArcList;
+            for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+            {
+              const Hypothesis *loserHypo = *iterArcList;
+              // make a play
+              const Hypothesis *loserPrevHypo = loserHypo->GetPrevHypo();
+              double fscore = forwardScore[ hypo->GetId() ] +
+              loserHypo->GetScore() - loserPrevHypo->GetScore();
+              if (forwardScore.find( loserPrevHypo->GetId() ) == forwardScore.end())
+              {
+                forwardScore[ loserPrevHypo->GetId() ] = fscore;
+              }
+              else {
+                forwardScore[ loserPrevHypo->GetId() ] = log_sum(fscore, forwardScore[ loserPrevHypo->GetId() ]) ;
+              }
+            } // end for arc list  
+          } // end if arc list empty
+        } // end if hypo connected
+      } // end for hypo
+    } // end for stack
+   
+    return forwardScore[0];
+  } 
+  
+  double MosesDecoder::GetTranslationScore(const vector <const Factor *>& target) const
+  {
+   std::map < int, bool > connected;
+   std::vector< const Hypothesis *> connectedList;
+	 GetWinnerConnectedGraph(&connected, &connectedList);
+    
+   std::map< int, int > prefix;
+   std::set< int> isPrefix;
+   std::map< int, double > scores;
+   
+   const std::vector<FactorType>& outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+   
+   //sort hyps
+   sort(connectedList.begin(),connectedList.end(), hypCompare); //sort by number of words covered
+    
+   isPrefix.insert(0); //start hyp is a prefix
+   vector <const Factor*> emptyPrefix;
+   prefix[0] = 0; //prefix of start hyp is empty
+    
+   for (size_t i = 0; i < connectedList.size(); ++i) {
+     const Hypothesis* hyp = connectedList[i];
+     const Hypothesis* prevHypo = hyp->GetPrevHypo();
+     if (isPrefix.find(prevHypo->GetId()) != isPrefix.end()) { //let's first deal with best predecessor
+       int matchedSoFar = prefix[prevHypo->GetId()];   
+       const TargetPhrase& phrase = hyp->GetCurrTargetPhrase();
+       bool match = true;
+       for (size_t p = 0; p < phrase.GetSize(); ++p) {
+         const Factor* factor  = phrase.GetFactor(p, outputFactorOrder[0]);
+         if (factor != target[matchedSoFar+p]) {
+           match = false;
+           break;
+         }
+       }
+       if (match) {//special processing if it's a final hyp
+         if (hyp->IsSourceCompleted()) {
+           if (matchedSoFar + phrase.GetSize() != target.size())
+             match = false;
+         }
+       }
+       if (match) {
+         prefix[hyp->GetId()] = matchedSoFar + phrase.GetSize();
+         isPrefix.insert(hyp->GetId());
+         double score = hyp->GetScore() - prevHypo->GetScore() ;
+         if (scores.find(prevHypo->GetId()) != scores.end()) {
+           score += scores[prevHypo->GetId()];
+         }
+         if (scores.find(hyp->GetId()) != scores.end()) {
+           scores[hyp->GetId()] = log_sum(scores[hyp->GetId()], score);
+         }
+         else {
+           scores[hyp->GetId()] = score; 
+         }
+       }
+     }
+     //now let's consider arcs
+     const ArcList *arcList = hyp->GetArcList();
+     
+     if (arcList != NULL) {
+       ArcList::const_iterator iterArcList;
+       for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList) {
+         const Hypothesis *loserHypo = *iterArcList;
+         const Hypothesis *loserPrevHypo = loserHypo->GetPrevHypo();
+         if (isPrefix.find(loserPrevHypo->GetId()) != isPrefix.end()) { 
+           int matchedSoFar = prefix[loserPrevHypo->GetId()];   
+           const TargetPhrase& phrase = loserHypo->GetCurrTargetPhrase();
+           bool match = true;
+           for (size_t p = 0; p < phrase.GetSize(); ++p) {
+             const Factor* factor  = phrase.GetFactor(p, outputFactorOrder[0]);
+             if (factor != target[matchedSoFar+p]) {
+               match = false;
+               break;
+             }
+           }
+           if (match) {
+             if (hyp->IsSourceCompleted()) {//special processing if it's a final hyp
+               if (matchedSoFar + phrase.GetSize() != target.size())
+                 match = false;
+             }
+           }
+           if (match) {
+             prefix[hyp->GetId()] = matchedSoFar + phrase.GetSize();
+             isPrefix.insert(hyp->GetId());
+             double score = loserHypo->GetScore() - loserPrevHypo->GetScore() ;
+             if (scores.find(loserPrevHypo->GetId()) != scores.end()) {
+               score += scores[loserPrevHypo->GetId()];
+             }
+             if (scores.find(hyp->GetId()) != scores.end()) {
+               scores[hyp->GetId()] = log_sum(scores[hyp->GetId()], score);
+             }
+             else {
+               scores[hyp->GetId()] = score; 
+             }
+           }
+         }
+       } // end for arc list  
+     }
+   }
+   
+       
+   //Total Score for this target string
+   const std::vector < HypothesisStack* > &hypoStackColl = m_searcher->GetHypothesisStacks();
+   const HypothesisStack &finalStack = *hypoStackColl.back();
+   double targetScore = -10000;
+   
+   HypothesisStack::const_iterator iterHypo;
+   for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo) {
+     const Hypothesis *hypo = *iterHypo;
+     if (isPrefix.find(hypo->GetId()) != isPrefix.end()) {
+       targetScore = log_sum(targetScore, scores[hypo->GetId()]);  
+     }    
+   }
+   
+   return targetScore;
+  } 
   
   Search* MosesDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
     return new SearchNormal(sentence,toc);
+  }
+  
+  double KLDecoder::GetZ(const std::string& source) {
+    Hypothesis* hypothesis;
+    TranslationOptionCollection* toc;
+    std::vector<Word> sentVector;
+    decode(source, hypothesis, toc, sentVector); //decode with no pruning and no early discarding
+    return CalcZ(); //run forward algorithm to get sum of all paths score 
+  }
+  
+  void KLDecoder::decode(const std::string& source, Hypothesis*& bestHypo, TranslationOptionCollection*& toc, std::vector<Word>& sent_vector, size_t nBestSize) {
+     
+      const StaticData &staticData = StaticData::Instance();
+
+      //clean up previous sentence
+      staticData.CleanUpAfterSentenceProcessing();
+      
+      //maybe ignore lm
+      const LMList& languageModels = StaticData::Instance().GetAllLM();
+      vector<float> prevFeatureWeights;
+      GetFeatureWeights(&prevFeatureWeights);
+      if (m_useZeroWeights) {
+        vector<float> newFeatureWeights = prevFeatureWeights; //copy
+        fill(newFeatureWeights.begin(),newFeatureWeights.end(),0);
+        SetFeatureWeights(newFeatureWeights);
+      } else if (m_useNoLM) {
+        vector<float> newFeatureWeights = prevFeatureWeights; //copy
+        for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
+          LanguageModel* lm = *i;
+          const ScoreIndexManager& siManager = StaticData::Instance().GetScoreIndexManager();
+          size_t lmindex = siManager.GetBeginIndex(lm->GetScoreBookkeepingID());
+          newFeatureWeights[lmindex] = 0;
+        }
+        SetFeatureWeights(newFeatureWeights);
+      }
+  
+      //the sentence
+      Sentence sentence(Input);
+      stringstream in(source + "\n");
+      const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+      sentence.Read(in,inputFactorOrder);
+      
+      //monotone
+      int distortionLimit = staticData.GetMaxDistortion();
+      if (m_isMonotone) {
+        const_cast<StaticData&>(staticData).SetMaxDistortion(0);
+      }
+  
+      //pruning parameters
+      size_t prevStackSize = staticData.GetMaxHypoStackSize();
+      const_cast<StaticData&>(staticData).SetDisableDiscarding(true);
+      const_cast<StaticData&>(staticData).SetMaxHypoStackSize(1000000); //this should be big enough for most sentences
+  
+      //the searcher
+      staticData.ResetSentenceStats(sentence);
+      staticData.InitializeBeforeSentenceProcessing(sentence);
+      m_toc.reset(sentence.CreateTranslationOptionCollection());
+      const vector <DecodeGraph*>
+            &decodeStepVL = staticData.GetDecodeStepVL();
+      m_toc->CreateTranslationOptions(decodeStepVL);
+       
+      
+      const_cast<StaticData&>(staticData).SetOutputSearchGraph(true);
+    
+      m_searcher.reset(createSearch(sentence,*m_toc));
+      m_searcher->ProcessSentence();
+  
+      //Restore settings
+      const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
+      SetFeatureWeights(prevFeatureWeights);
+      const_cast<StaticData&>(staticData).SetOutputSearchGraph(false);
+      const_cast<StaticData&>(staticData).SetDisableDiscarding(false);
+      const_cast<StaticData&>(staticData).SetMaxHypoStackSize(prevStackSize); //this should be big enough for most sentences
+      
+    
   }
 
   void GetFeatureNames(std::vector<std::string>* featureNames) {
@@ -295,6 +595,9 @@ namespace Josiah {
     return new SearchRandom(sentence,toc);
   }
   
- 
+  bool hypCompare(const Hypothesis* a, const Hypothesis* b){
+    return a->GetWordsBitmap().GetNumWordsCovered() <  b->GetWordsBitmap().GetNumWordsCovered();
+  }
+
   
 }
