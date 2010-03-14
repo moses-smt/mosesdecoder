@@ -161,6 +161,9 @@ protected:
   //The Gibbler variables
   size_t m_numSamplingIters; //number of iterations of sampler to run
   
+  //Exhaustive decoding
+  bool m_disableDiscarding;
+
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
@@ -273,7 +276,7 @@ public:
 	}
 	float GetWeightDistortion() const
 	{
-		return m_weightDistortion;
+    return m_weightDistortion;
 	}
 	float GetWeightWordPenalty() const
 	{
@@ -488,6 +491,19 @@ public:
   void SetOutputSearchGraph(bool osg) {
     m_outputSearchGraph = osg;
   }
+  
+  inline bool GetDisableDiscarding() const {
+    return m_disableDiscarding;
+  }
+  
+  void SetDisableDiscarding(bool disable) {
+    m_disableDiscarding = disable;
+  }
+  
+  void SetMaxHypoStackSize(size_t size) 
+	{
+		m_maxHypoStackSize = size;
+	}
 };
 
 }

@@ -92,9 +92,10 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 { 
 	// too bad for stack. don't bother adding hypo into collection
-	if (hypo->GetTotalScore() < m_worstScore
-	    && ! ( m_minHypoStackDiversity > 0
-	           && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) )
+  if (!StaticData::Instance().GetDisableDiscarding() &&
+      hypo->GetTotalScore() < m_worstScore
+            && ! ( m_minHypoStackDiversity > 0
+                   && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) )
 	{
 		StaticData::Instance().GetSentenceStats().AddDiscarded();
 		VERBOSE(3,"discarded, too bad for stack" << std::endl);
