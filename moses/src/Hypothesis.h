@@ -341,6 +341,11 @@ public:
   unsigned long GetNumSpans() {
     return m_numSpans;
   }
+  
+  inline bool IsSourceCompleted() const {
+		return m_sourceCompleted.IsComplete();
+	}
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

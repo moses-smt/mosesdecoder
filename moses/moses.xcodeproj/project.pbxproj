@@ -132,12 +132,6 @@
 		1C8CFF090AD67A9700FA22E2 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */; };
 		1C8CFF0A0AD67A9700FA22E2 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */; };
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
-		B219B8610E9382EE00EAB407 /* AlignmentElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */; };
-		B219B8620E9382EE00EAB407 /* AlignmentElement.h in Headers */ = {isa = PBXBuildFile; fileRef = B219B85C0E9382EE00EAB407 /* AlignmentElement.h */; };
-		B219B8630E9382EE00EAB407 /* AlignmentPair.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */; };
-		B219B8640E9382EE00EAB407 /* AlignmentPair.h in Headers */ = {isa = PBXBuildFile; fileRef = B219B85E0E9382EE00EAB407 /* AlignmentPair.h */; };
-		B219B8650E9382EE00EAB407 /* AlignmentPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B85F0E9382EE00EAB407 /* AlignmentPhrase.cpp */; };
-		B219B8660E9382EE00EAB407 /* AlignmentPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = B219B8600E9382EE00EAB407 /* AlignmentPhrase.h */; };
 		B219B8690E93836100EAB407 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8680E93836100EAB407 /* Timer.cpp */; };
 		B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */; };
 		B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */ = {isa = PBXBuildFile; fileRef = B23821370EB73DCB007303C3 /* LanguageModelIRST.h */; };
@@ -304,12 +298,6 @@
 		1C8CFE8C0AD67A9700FA22E2 /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = src/WordsBitmap.h; sourceTree = "<group>"; };
 		1C8CFE8D0AD67A9700FA22E2 /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = src/WordsRange.cpp; sourceTree = "<group>"; };
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
-		B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentElement.cpp; path = src/AlignmentElement.cpp; sourceTree = "<group>"; };
-		B219B85C0E9382EE00EAB407 /* AlignmentElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentElement.h; path = src/AlignmentElement.h; sourceTree = "<group>"; };
-		B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentPair.cpp; path = src/AlignmentPair.cpp; sourceTree = "<group>"; };
-		B219B85E0E9382EE00EAB407 /* AlignmentPair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentPair.h; path = src/AlignmentPair.h; sourceTree = "<group>"; };
-		B219B85F0E9382EE00EAB407 /* AlignmentPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentPhrase.cpp; path = src/AlignmentPhrase.cpp; sourceTree = "<group>"; };
-		B219B8600E9382EE00EAB407 /* AlignmentPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentPhrase.h; path = src/AlignmentPhrase.h; sourceTree = "<group>"; };
 		B219B8680E93836100EAB407 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = src/Timer.cpp; sourceTree = "<group>"; };
 		B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
 		B23821370EB73DCB007303C3 /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = src/LanguageModelIRST.h; sourceTree = "<group>"; };
@@ -374,12 +362,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				B219B85B0E9382EE00EAB407 /* AlignmentElement.cpp */,
-				B219B85C0E9382EE00EAB407 /* AlignmentElement.h */,
-				B219B85D0E9382EE00EAB407 /* AlignmentPair.cpp */,
-				B219B85E0E9382EE00EAB407 /* AlignmentPair.h */,
-				B219B85F0E9382EE00EAB407 /* AlignmentPhrase.cpp */,
-				B219B8600E9382EE00EAB407 /* AlignmentPhrase.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
 				E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */,
 				1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */,
@@ -650,9 +632,6 @@
 				E21C11190DFEE88800ADAED0 /* Search.h in Headers */,
 				E21C111B0DFEE88800ADAED0 /* SearchCubePruning.h in Headers */,
 				E21C111D0DFEE88800ADAED0 /* SearchNormal.h in Headers */,
-				B219B8620E9382EE00EAB407 /* AlignmentElement.h in Headers */,
-				B219B8640E9382EE00EAB407 /* AlignmentPair.h in Headers */,
-				B219B8660E9382EE00EAB407 /* AlignmentPhrase.h in Headers */,
 				B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */,
 				B2639DEB0EF199D400A67519 /* ReorderingConstraint.h in Headers */,
 				B2639DED0EF199D400A67519 /* TranslationOptionList.h in Headers */,
@@ -773,9 +752,6 @@
 				E21C11180DFEE88800ADAED0 /* Search.cpp in Sources */,
 				E21C111A0DFEE88800ADAED0 /* SearchCubePruning.cpp in Sources */,
 				E21C111C0DFEE88800ADAED0 /* SearchNormal.cpp in Sources */,
-				B219B8610E9382EE00EAB407 /* AlignmentElement.cpp in Sources */,
-				B219B8630E9382EE00EAB407 /* AlignmentPair.cpp in Sources */,
-				B219B8650E9382EE00EAB407 /* AlignmentPhrase.cpp in Sources */,
 				B219B8690E93836100EAB407 /* Timer.cpp in Sources */,
 				B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */,
 				B2639DEA0EF199D400A67519 /* ReorderingConstraint.cpp in Sources */,
