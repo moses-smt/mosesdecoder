@@ -137,6 +137,8 @@
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
 		1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */; };
 		1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */; };
+		1CCE5B10114E60A500F79AD5 /* DPR_reordering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CCE5B0E114E60A500F79AD5 /* DPR_reordering.cpp */; };
+		1CCE5B11114E60A500F79AD5 /* DPR_reordering.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CCE5B0F114E60A500F79AD5 /* DPR_reordering.h */; };
 		B219B8690E93836100EAB407 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8680E93836100EAB407 /* Timer.cpp */; };
 		B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */; };
 		B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */ = {isa = PBXBuildFile; fileRef = B23821370EB73DCB007303C3 /* LanguageModelIRST.h */; };
@@ -304,6 +306,8 @@
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
 		1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
 		1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = src/GlobalLexicalModel.h; sourceTree = "<group>"; };
+		1CCE5B0E114E60A500F79AD5 /* DPR_reordering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DPR_reordering.cpp; path = src/DPR_reordering.cpp; sourceTree = "<group>"; };
+		1CCE5B0F114E60A500F79AD5 /* DPR_reordering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DPR_reordering.h; path = src/DPR_reordering.h; sourceTree = "<group>"; };
 		B219B8680E93836100EAB407 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = src/Timer.cpp; sourceTree = "<group>"; };
 		B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
 		B23821370EB73DCB007303C3 /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = src/LanguageModelIRST.h; sourceTree = "<group>"; };
@@ -366,6 +370,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1CCE5B0E114E60A500F79AD5 /* DPR_reordering.cpp */,
+				1CCE5B0F114E60A500F79AD5 /* DPR_reordering.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
 				E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */,
 				1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */,
@@ -643,6 +649,7 @@
 				1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */,
 				1C5009C20FB9E09700DFD24F /* FFState.h in Headers */,
 				1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */,
+				1CCE5B11114E60A500F79AD5 /* DPR_reordering.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -766,6 +773,7 @@
 				1C5009BF0FB9E09700DFD24F /* FeatureFunction.cpp in Sources */,
 				1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */,
 				1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */,
+				1CCE5B10114E60A500F79AD5 /* DPR_reordering.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -42,6 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+/*******************************************************************************************/
+#include "DPR_reordering.h"
+/*******************************************************************************************/
 
 using namespace std;
 
@@ -414,6 +417,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadGlobalLexicalModel()) return false;
+	/*******************************************************************************************/
+	//Load the reordering probabilities
+	if (!LoadDPRReordering()) return false;
+	/*******************************************************************************************/
 
 	m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
@@ -459,6 +466,10 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
+	/*******************************************************************************************/
+	//remove all items in DPR model
+	RemoveAllInColl(m_dprReorderModels);
+	/*******************************************************************************************/
 	
 	// delete trans opt
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
@@ -477,6 +488,34 @@ StaticData::~StaticData()
 	Phrase::FinalizeMemPool();
 
 }
+
+
+/*******************************Loading DPR model**********************************************/
+//load the reordering model
+//push it in m_dprReorderModels
+bool StaticData::LoadDPRReordering()
+{
+  std::cerr << "Loading DPR reordering models...\n";
+
+  //1. Read the start position of the sentence options file	 
+  string filePath    = m_parameter->GetParam("DPR-file")[0];           //path of the sentence option
+  
+  //2. Get the weight (only the first weight is used)
+  vector<float> weights = Scan<float>(m_parameter->GetParam("weight-DPR")); 
+  
+  //3. Get the class setup
+  string classString = m_parameter->GetParam("class-DPR")[0];          //the number of classes
+  
+	
+  DPR_reordering *model = new DPR_reordering(m_scoreIndexManager, filePath, classString, weights);
+	
+  m_dprReorderModels.push_back(model);
+
+	
+	return true;
+}
+/*******************************************************************************************/
+
 
 bool StaticData::LoadLexicalReorderingModel()
 {

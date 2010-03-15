@@ -42,7 +42,6 @@ Parameter::Parameter()
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
-  AddParam("disable-discarding", "dd", "disable hypothesis discarding");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");
 	AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
@@ -60,11 +59,9 @@ Parameter::Parameter()
 	AddParam("max-phrase-length", "maximum phrase length (default 20)");
 	AddParam("n-best-list", "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
 	AddParam("n-best-factor", "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
-  AddParam("print-all-derivations", "to print all derivations in search graph");
 	AddParam("output-factors", "list of factors in the output");
 	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
 	AddParam("report-all-factors", "report all factors in output, not just first");
-	AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
 	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 	AddParam("stack", "s", "maximum stack size for histogram pruning");
 	AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
@@ -119,6 +116,12 @@ Parameter::Parameter()
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
+    /*******************************Loading DPR model**********************************************/
+	AddParam("DPR-file","DPR-file","Model file for the DPR model");
+	AddParam("weight-DPR","weight-DPR","weight for the DPR model");
+	AddParam("class-DPR","class-DPR","the number of orientations for the DPR model");
+	/*******************************Loading DPR model**********************************************/
+	
 }
 
 Parameter::~Parameter()
