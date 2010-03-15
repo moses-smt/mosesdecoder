@@ -58,6 +58,9 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+/*******************************************************************************************/
+class DPR_reordering;
+/*******************************************************************************************/
 
 /** Contains global variables and contants */
 class StaticData
@@ -76,6 +79,12 @@ protected:
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+	
+	/*******************************************************************************************/
+	//define the DPR model vector<pointer>
+	std::vector<DPR_reordering*>                   m_dprReorderModels;
+	/*******************************************************************************************/
+	
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
 	float
@@ -197,6 +206,10 @@ protected:
 	//! load decoding steps
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
+	/*******************************************************************************************/
+	//Define the DPR funciton
+	bool LoadDPRReordering();
+	/*******************************************************************************************/
     void ReduceTransOptCache() const;   
 	
 public:
