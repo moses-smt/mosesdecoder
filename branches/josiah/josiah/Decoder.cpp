@@ -292,13 +292,11 @@ namespace Josiah {
   }
 
   
-  double MosesDecoder::CalcZ() const
+  double MosesDecoder::CalcZ() 
   {
-    std::map < int, bool > connected;
-    std::vector< const Hypothesis *> connectedList;
-    
     // *** find connected hypotheses ***
     GetWinnerConnectedGraph(&connected, &connectedList);
+    sort(connectedList.begin(),connectedList.end(), hypCompare);
     
     // ** compute lattice score *** //
     std::map < int, double > forwardScore;
@@ -355,9 +353,6 @@ namespace Josiah {
   
   double MosesDecoder::GetTranslationScore(const vector <const Factor *>& target) const
   {
-   std::map < int, bool > connected;
-   std::vector< const Hypothesis *> connectedList;
-	 GetWinnerConnectedGraph(&connected, &connectedList);
     
    std::map< int, int > prefix;
    std::set< int> isPrefix;
@@ -366,7 +361,7 @@ namespace Josiah {
    const std::vector<FactorType>& outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
    
    //sort hyps
-   sort(connectedList.begin(),connectedList.end(), hypCompare); //sort by number of words covered
+    //sort by number of words covered
     
    isPrefix.insert(0); //start hyp is a prefix
    vector <const Factor*> emptyPrefix;

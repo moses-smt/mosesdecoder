@@ -90,7 +90,7 @@ class MosesDecoder : public virtual Decoder {
     const std::vector<std::pair<Translation, float> > & GetNbestTranslations() {return m_translations;}
     virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
     void PrintNBest(std::ostream& out) const;
-    double CalcZ() const;
+    double CalcZ() ;
     double GetTranslationScore(const std::vector <const Moses::Factor *>& target) const;
   protected:
     std::auto_ptr<Moses::Search> m_searcher;
@@ -99,7 +99,9 @@ class MosesDecoder : public virtual Decoder {
     void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
     void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<std::pair<Translation,float> > &);
     void GetWinnerConnectedGraph( std::map< int, bool >* pConnected, std::vector< const Moses::Hypothesis* >* pConnectedList) const ;
-    
+  private:
+    std::map < int, bool > connected;
+    std::vector< const Moses::Hypothesis *> connectedList;    
 };
 
 /**
