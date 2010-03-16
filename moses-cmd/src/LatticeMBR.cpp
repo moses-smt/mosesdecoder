@@ -72,6 +72,59 @@ NgramScores::NodeScoreIterator NgramScores::nodeEnd(const Hypothesis* node)  {
     return m_scores[node].end();
 }
 
+LatticeMBRSolution::LatticeMBRSolution(const TrellisPath& path, bool isMap) :
+        m_score(0.0f){
+    const std::vector<const Hypothesis *> &edges = path.GetEdges();
+    
+    for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+    {
+        const Hypothesis &edge = *edges[currEdge];
+        const Phrase &phrase = edge.GetCurrTargetPhrase();
+        size_t size = phrase.GetSize();
+        for (size_t pos = 0 ; pos < size ; pos++)
+        {
+            m_words.push_back(phrase.GetWord(pos));
+        }
+    }
+    if (isMap) {
+        m_mapScore = path.GetTotalScore();
+    } else {
+        m_mapScore = 0;
+    }
+}
+
+
+void LatticeMBRSolution::CalcScore(map<Phrase, float>& finalNgramScores, const vector<float>& thetas, float mapWeight) {
+    m_ngramScores.assign(thetas.size()-1, -10000);
+    
+    map < Phrase, int > counts;
+    extract_ngrams(m_words,counts);
+    
+    //Now score this translation
+    m_score = thetas[0] * m_words.size();
+
+    //Calculate the ngramScores, working in log space at first
+    for (map < Phrase, int >::iterator ngrams = counts.begin(); ngrams != counts.end(); ++ngrams) {
+        float ngramPosterior = UNKNGRAMLOGPROB; 
+        map<Phrase,float>::const_iterator ngramPosteriorIt = finalNgramScores.find(ngrams->first);
+        if (ngramPosteriorIt != finalNgramScores.end()) {
+            ngramPosterior = ngramPosteriorIt->second;
+        }
+        size_t ngramSize = ngrams->first.GetSize();
+        m_ngramScores[ngramSize-1] = log_sum(log((float)ngrams->second) + ngramPosterior,m_ngramScores[ngramSize-1]);
+    }
+    
+    //convert from log to probability and create weighted sum
+    for (size_t i = 0; i < m_ngramScores.size(); ++i) {
+        m_ngramScores[i] = exp(m_ngramScores[i]);
+        m_score += thetas[i+1] * m_ngramScores[i];
+    }
+
+    
+    //The map score
+    m_score += m_mapScore*mapWeight;
+}
+
 
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
                     const vector< float> & estimatedScores, const Hypothesis* bestHypo, size_t edgeDensity) {
@@ -418,78 +471,9 @@ bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b) {
   return a->GetWordsBitmap().GetNumWordsCovered() <  b->GetWordsBitmap().GetNumWordsCovered();
 }
 
-vector<Word>  calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores, const vector<float> & thetas, float p, float r){
-  
-  vector<float> mbrThetas = thetas;
-  if (thetas.size() == 0) { //thetas not specified on the command line, use p and r instead
-    mbrThetas.push_back(-1); //Theta 0
-    mbrThetas.push_back(1/(bleu_order*p));
-    for (size_t i = 2; i <= bleu_order; ++i){
-      mbrThetas.push_back(mbrThetas[i-1] / r);  
-    }
-  }
-  IFVERBOSE(2) {  
-  VERBOSE(2,"Thetas: ");
-  for (size_t i = 0; i < mbrThetas.size(); ++i) {
-    VERBOSE(2,mbrThetas[i] << " ");
-  }
-  VERBOSE(2,endl);
-  }
-  
-  float argmaxScore = -1e20;
-  TrellisPathList::const_iterator iter;
-  size_t ctr = 0;
-  
-  vector<Word> argmaxTranslation;
-  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter, ++ctr)
-  {
-    const TrellisPath &path = **iter;
-    // get words in translation
-    vector<Word> translation;
-    GetOutputWords(path, translation);
-    
-    // collect n-gram counts
-    map < Phrase, int > counts;
-    extract_ngrams(translation,counts);
-    
-    //Now score this translation
-    float mbrScore = mbrThetas[0] * translation.size();
-    
-    float ngramScore = 0;
-    
-    for (map < Phrase, int >::iterator ngrams = counts.begin(); ngrams != counts.end(); ++ngrams) {
-      float ngramPosterior = UNKNGRAMLOGPROB; 
-      map<Phrase,float>::const_iterator ngramPosteriorIt = finalNgramScores.find(ngrams->first);
-      if (ngramPosteriorIt != finalNgramScores.end()) {
-        ngramPosterior = ngramPosteriorIt->second;
-      }
-          
-      if (ngramScore == 0) {
-        ngramScore = log((double) ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()]);
-      }
-      else {
-        ngramScore = log_sum(ngramScore, float(log((double) ngrams->second) + ngramPosterior + log(mbrThetas[(ngrams->first).GetSize()])));
-      }
-      //cout << "Ngram: " << ngrams->first << endl;
-    } 
-
-    mbrScore += exp(ngramScore);
-
-    if (mbrScore > argmaxScore){
-      argmaxScore = mbrScore;
-      IFVERBOSE(2) {
-        VERBOSE(2,"HYP " << ctr << " IS NEW BEST: ");
-        for (size_t i = 0; i < translation.size(); ++i)
-          VERBOSE(2,translation[i]);
-        VERBOSE(2,"[" << argmaxScore << "]" << endl);
-      }
-      argmaxTranslation = translation;
-    }
-  }
-  return argmaxTranslation;
-}
-
-vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList) {
+void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, 
+                        vector<LatticeMBRSolution>& solutions, size_t n) 
+{
     const StaticData& staticData = StaticData::Instance();
     std::map < int, bool > connected;
     std::vector< const Hypothesis *> connectedList;
@@ -499,9 +483,46 @@ vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList) {
     vector< float> estimatedScores;
     manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
     pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor());
-    calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);      
-    vector<Word> mbrBestHypo = calcMBRSol(nBestList, ngramPosteriors, staticData.GetLatticeMBRThetas(), 
-            staticData.GetLatticeMBRPrecision(), staticData.GetLatticeMBRPRatio());
-    return mbrBestHypo;
+    calcNgramPosteriors(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors);
+    
+    vector<float> mbrThetas = staticData.GetLatticeMBRThetas();
+    float p = staticData.GetLatticeMBRPrecision();
+    float r = staticData.GetLatticeMBRPRatio();
+    float mapWeight = staticData.GetLatticeMBRMapWeight();
+    if (mbrThetas.size() == 0) { //thetas not specified on the command line, use p and r instead
+        mbrThetas.push_back(-1); //Theta 0
+        mbrThetas.push_back(1/(bleu_order*p));
+        for (size_t i = 2; i <= bleu_order; ++i){
+            mbrThetas.push_back(mbrThetas[i-1] / r);  
+        }
+    }
+    IFVERBOSE(2) {  
+        VERBOSE(2,"Thetas: ");
+        for (size_t i = 0; i < mbrThetas.size(); ++i) {
+            VERBOSE(2,mbrThetas[i] << " ");
+        }
+        VERBOSE(2,endl);
+    }
+    TrellisPathList::const_iterator iter;
+    size_t ctr = 0;
+    LatticeMBRSolutionComparator comparator;
+    for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter, ++ctr)
+    {
+        const TrellisPath &path = **iter;
+        solutions.push_back(LatticeMBRSolution(path,iter==nBestList.begin()));
+        solutions.back().CalcScore(ngramPosteriors,mbrThetas,mapWeight);
+        sort(solutions.begin(), solutions.end(), comparator);
+        while (solutions.size() > n) {
+            solutions.pop_back();
+        }
+    }
+    VERBOSE(2,"LMBR Score: " << solutions[0].GetScore() << endl);
+}
+
+vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList) {
+
+    vector<LatticeMBRSolution> solutions;
+    getLatticeMBRNBest(manager, nBestList, solutions,1);
+    return solutions.at(0).GetWords();
 }
 

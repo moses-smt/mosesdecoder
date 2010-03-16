@@ -184,7 +184,13 @@ int main(int argc, char* argv[])
             manager.CalcNBest(nBestSize, nBestList,true);
             VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
             IFVERBOSE(2) { PrintUserTime("calculated n-best list for (L)MBR decoding"); }
-            if (staticData.UseLatticeMBR()) {
+            if (!staticData.GetNBestFilePath().empty()) {
+                vector<LatticeMBRSolution> solutions;
+                size_t n  = min(nBestSize, staticData.GetNBestSize());
+                getLatticeMBRNBest(manager,nBestList,solutions,n);
+                VERBOSE(2,"WRITING " << solutions.size() << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+                ioWrapper->OutputLatticeMBRNBestList(solutions,source->GetTranslationId());
+            } else if (staticData.UseLatticeMBR()) {
                 vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
                 OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors(),cout);
@@ -197,7 +203,7 @@ int main(int argc, char* argv[])
                 IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
             }
             
-            if (!staticData.GetNBestFilePath().empty()){ 
+            if (!staticData.UseLatticeMBR() && !staticData.GetNBestFilePath().empty()){ 
             //print the all nbest used for MBR (and not the amount passed through the parameter
                 VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
                 ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());

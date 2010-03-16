@@ -104,11 +104,38 @@ class NgramScores {
         map<const Hypothesis*, map<const Phrase*, float> > m_scores;
 };
 
+
+/** Holds a lattice mbr solution, and its scores */
+class LatticeMBRSolution {
+    public:
+        /** Read the words from the path */
+        LatticeMBRSolution(const TrellisPath& path, bool isMap);
+        const vector<float>& GetNgramScores() const {return m_ngramScores;}
+        const vector<Word>& GetWords() const {return m_words;}
+        float GetMapScore() const {return m_mapScore;}
+        float GetScore() const {return m_score;}
+        
+        /** Initialise ngram scores */
+        void CalcScore(map<Phrase, float>& finalNgramScores, const vector<float>& thetas, float mapWeight);
+    
+    private:
+        vector<Word> m_words;
+        float m_mapScore;
+        vector<float> m_ngramScores;
+        float m_score;
+};
+
+struct LatticeMBRSolutionComparator {
+    bool operator()(const LatticeMBRSolution& a, const LatticeMBRSolution& b) {
+        return a.GetScore() > b.GetScore();
+    }
+};
+
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
                     const vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity);
 
-vector<Word> calcMBRSol(Lattice & connectedHyp, map<Phrase, float>& finalNgramScores,const vector<float> & thetas, float, float);
-vector<Word> calcMBRSol(const TrellisPathList& nBestList, map<Phrase, float>& finalNgramScores,const vector<float> & thetas, float, float);
+//Use the ngram scores to rerank the nbest list, return at most n solutions
+void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, vector<LatticeMBRSolution>& solutions, size_t n);
 void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, float scale, map<Phrase, float>& finalNgramScores);
 void GetOutputFactors(const TrellisPath &path, vector <Word> &translation);
 void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngrams);
