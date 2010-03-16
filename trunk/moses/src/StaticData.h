@@ -154,7 +154,6 @@ protected:
   float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
   float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
   float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
-  std::string m_lmbrNbestFilePath; //! Where to output nbest lmbr solutions
     
 
 	bool m_timeout; //! use timeout
@@ -500,7 +499,6 @@ public:
   }
   
   float GetLatticeMBRMapWeight() const {return m_lmbrMapWeight;}
-  const std::string& GetLatticeMBRNbestFilePath() {return m_lmbrNbestFilePath;}
   
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }

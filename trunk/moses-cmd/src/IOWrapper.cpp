@@ -455,8 +455,37 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	out <<std::flush;
 }
 
+void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) {
+    for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
+        out << translationId;
+        out << " ||| ";
+        const vector<Word> mbrHypo = si->GetWords();
+        for (size_t i = 0 ; i < mbrHypo.size() ; i++)
+        {
+            const Factor *factor = mbrHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+            if (i>0) out << " ";
+            out << *factor;
+        }
+        out << " ||| ";
+        out << "map: " << si->GetMapScore();
+        out << " w: " << mbrHypo.size();
+        const vector<float>& ngramScores = si->GetNgramScores();
+        for (size_t i = 0; i < ngramScores.size(); ++i) {
+            out << " " << ngramScores[i];
+        }
+        out << " ||| ";
+        out << si->GetScore();
+        
+        out << endl;
+    }
+}
+
 void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
     OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
+}
+
+void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId) {
+    OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
