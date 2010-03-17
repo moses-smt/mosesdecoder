@@ -5,6 +5,7 @@
 
 #include "Phrase.h"
 #include "GibblerExpectedLossTraining.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -24,9 +25,8 @@ SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, const st
     lengths_.push_back(fv.size());
     CountRef(fv, ngrams_);
   }
-  vector<const Factor*> fv;
-  GainFunction::ConvertStringToFactorArray(src, &fv);
-  m_src_len = fv.size(); 
+  vector<string> src_tokens = Tokenize(src);
+  m_src_len = src_tokens.size(); 
 }
 
 SentenceBLEU::SentenceBLEU(int n, const vector<const Factor*> & ref, int src_len, float bp_scale, bool denum_hack) :
