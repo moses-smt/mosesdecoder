@@ -39,6 +39,9 @@ GetOptions(
 # to 10 words per phrase.
 my $MAX_LENGTH = 10;
 
+# utilities
+my $ZCAT = "gzip -cd";
+
 my $dir = shift; 
 my $config = shift;
 my $input = shift;
@@ -204,9 +207,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
 
     my $openstring;
     if ($file !~ /\.gz$/ && -e "$file.gz") {
-      $openstring = "zcat $file.gz |";
+      $openstring = "$ZCAT $file.gz |";
     } elsif ($file =~ /\.gz$/) {
-      $openstring = "zcat $file |";
+      $openstring = "$ZCAT $file |";
     } elsif ($opt_hierarchical) {
       $openstring = "cat $file |";
     } else {
