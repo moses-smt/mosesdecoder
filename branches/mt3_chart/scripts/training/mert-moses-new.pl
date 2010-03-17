@@ -11,6 +11,8 @@
 
 # Revision history
 
+# 5 Aug 2009  Handling with different reference length policies (shortest, average, closest) for BLEU 
+#             and case-sensistive/insensitive evaluation (Nicola Bertoldi)
 # 5 Jun 2008  Forked previous version to support new mert implementation.
 # 13 Feb 2007 Better handling of default values for lambda, now works with multiple
 #             models and lexicalized reordering
@@ -112,23 +114,26 @@ my $___LAMBDA = undef; # string specifying the seed weights and boundaries of al
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
-
+my $___PREDICTABLE_SEEDS = 0;
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
 
 # Parameter for effective reference length when computing BLEU score
-# This is used by score-nbest-bleu.py
 # Default is to use shortest reference
+# Use "--shortest" to use shortest reference length
 # Use "--average" to use average reference length
 # Use "--closest" to use closest reference length
-# Only one between --average and --closest can be set
-# If both --average is used
-#TODO: Pass these through to scorer
+# Only one between --shortest, --average and --closest can be set
+# If more than one choice the defualt (--shortest) is used
+my $___SHORTEST = 0;
 my $___AVERAGE = 0;
 my $___CLOSEST = 0;
 
-# Use "--nonorm" to non normalize translation before computing BLEU
+# Use "--nocase" to compute case-insensitive scores
+my $___NOCASE = 0;
+
+# Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
@@ -177,8 +182,10 @@ GetOptions(
   "lambdas=s" => \$___LAMBDA,
   "continue" => \$continue,
   "skip-decoder" => \$skip_decoder,
+  "shortest" => \$___SHORTEST,
   "average" => \$___AVERAGE,
   "closest" => \$___CLOSEST,
+  "nocase" => \$___NOCASE,
   "nonorm" => \$___NONORM,
   "help" => \$usage,
   "allow-unknown-lambdas" => \$allow_unknown_lambdas,
@@ -194,12 +201,15 @@ GetOptions(
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
+  "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
   "obo-scorenbest=s" => \$obo_scorenbest, # see above
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
 ) or exit(1);
+
+print "Predict $___PREDICTABLE_SEEDS\n";
 
 # the 4 required parameters can be supplied on the command line directly
 # or using the --options
@@ -217,8 +227,7 @@ if ($___ASYNC) {
 }
 
 print STDERR "After default: $queue_flags\n";
-
-if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || !defined $___CONFIG) {
+if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER || !defined $___CONFIG) {
   print STDERR "usage: mert-moses-new.pl input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
@@ -239,11 +248,11 @@ Options:
   --continue  ... continue from the last achieved state
   --skip-decoder ... skip the decoder run for the first time, assuming that
                      we got interrupted during optimization
-  --average ... Use either average or shortest (default) reference
-                  length as effective reference length
-  --closest ... Use either closest or shortest (default) reference
-                  length as effective reference length
-  --nonorm ... Do not use text normalization
+  --shortest ... Use shortest reference length as effective reference length (mutually exclusive with --average and --closest)
+  --average ... Use average reference length as effective reference length (mutually exclusive with --shortest and --closest)
+  --closest ... Use closest reference length as effective reference length (mutually exclusive with --shortest and --average)
+  --nocase ... Do not preserve case information; i.e. case-insensitive evaluation (default is false)
+  --nonorm ... Do not use text normalization (flag is not active, i.e. text is NOT normalized)
   --filtercmd=STRING  ... path to filter-model-given-input.pl
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --mertdir=STRING ... path to new mert implementation
@@ -254,6 +263,7 @@ Options:
   --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
+  --predictable-seeds ... provide predictable seeds to mert so that random restarts are the same on every run
   --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
                                   (this method is more memory-consumptive)
   --activate-features=STRING  ... comma-separated list of features to work on
@@ -310,10 +320,46 @@ die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
 
 $mertargs = "" if !defined $mertargs;
+
+my $scconfig = undef;
+if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/){
+  $scconfig=$1;
+  $scconfig =~ s/\,/ /g;
+  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+}
+
+# handling reference lengh strategy
+if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1){
+  die "You can specify just ONE reference length strategy (closest or shortest or average) not both\n";
+}
+
+if ($___SHORTEST){
+  $scconfig .= " reflen:shortest";
+}elsif ($___AVERAGE){
+  $scconfig .= " reflen:average";
+}elsif ($___CLOSEST){
+  $scconfig .= " reflen:closest";
+}
+
+# handling case-insensitive flag
+if ($___NOCASE) {
+  $scconfig .= " case:false";
+}else{
+  $scconfig .= " case:true";
+}
+$scconfig =~ s/^\s+//;
+$scconfig =~ s/\s+$//;
+$scconfig =~ s/\s+/,/g;
+
+$scconfig = "--scconfig $scconfig" if ($scconfig);
+
 my $mert_extract_args=$mertargs;
+$mert_extract_args .=" $scconfig";
+
 my $mert_mert_args=$mertargs;
 $mert_mert_args =~ s/\-+(binary|b)\b//;
-
+$mert_mert_args .=" $scconfig";
+if ($___ACTIVATE_FEATURES){ $mert_mert_args .=" -o \"$___ACTIVATE_FEATURES\""; }
 
 my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
 die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
@@ -450,38 +496,101 @@ my $weights_out_file = "weights.txt";
 
 # set start run
 my $start_run = 1;
+my $bestpoint = undef;
+my $devbleu = undef;
+
+my $prev_feature_file = undef;
+my $prev_score_file = undef;
 
 if ($continue) {
-  die "continue not yet supported by the new mert script\nNeed to load features and scores from last iteration\n";
-  # need to load last best values
+  # getting the last finished step
   print STDERR "Trying to continue an interrupted optimization.\n";
   open IN, "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
   my $step = <IN>;
   chomp $step;
-  $step++;
   close IN;
 
-  if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz") {
-    # allow stepping one extra iteration back
-    $step--;
-    die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!"
-      if ! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz";
+  print STDERR "Last finished step is $step\n";
+
+  # getting the first needed step
+  my $firststep;
+  if ($prev_aggregate_nbl_size==-1){
+    $firststep=1;
+  }
+  else{
+    $firststep=$step-$prev_aggregate_nbl_size+1;
+    $firststep=($firststep>0)?$firststep:1;
+  }
+
+#checking if all needed data are available
+  if ($firststep<=$step){
+    print STDERR "First previous needed data index is $firststep\n";
+    print STDERR "Checking whether all needed data (from step $firststep to step $step) are available\n";
+    
+    for (my $prevstep=$firststep; $prevstep<=$step;$prevstep++){
+      print STDERR "Checking whether data of step $prevstep are available\n";
+      if (! -e "run$prevstep.features.dat"){
+	die "Can't start from step $step, because run$prevstep.features.dat was not found!";
+      }else{
+	if (defined $prev_feature_file){
+	  $prev_feature_file = "${prev_feature_file},run$prevstep.features.dat";
+	}
+	else{
+	  $prev_feature_file = "run$prevstep.features.dat";
+	}
+      }
+      if (! -e "run$prevstep.scores.dat"){
+	die "Can't start from step $step, because run$prevstep.scores.dat was not found!";
+      }else{
+	if (defined $prev_score_file){
+	  $prev_score_file = "${prev_score_file},run$prevstep.scores.dat";
+	}
+	else{
+	  $prev_score_file = "run$prevstep.scores.dat";
+	}
+      }
+    }
+    if (! -e "run$step.weights.txt"){
+      die "Can't start from step $step, because run$step.weights.txt was not found!";
+    }
+    if (! -e "run$step.$mert_logfile"){
+      die "Can't start from step $step, because run$step.$mert_logfile was not found!";
+    }
+    if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz"){
+      die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!";
+    }
+    print STDERR "All needed data are available\n";
+
+    print STDERR "Loading information from last step ($step)\n";
+    open(IN,"run$step.$mert_logfile") or die "Can't open run$step.$mert_logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+	$bestpoint = $1;
+	$devbleu = $2;
+	last;
+      }
+    }
+    close IN;
+    die "Failed to parse mert.log, missed Best point there."
+      if !defined $bestpoint || !defined $devbleu;
+    print "($step) BEST at $step $bestpoint => $devbleu at ".`date`;
+    
+    my @newweights = split /\s+/, $bestpoint;
+    
+    
+    print STDERR "Reading last cached lambda values (result from step $step)\n";
+    @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
+    
+    
+    # update my cache of lambda values
+    store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+    
+  }
+  else{
+    print STDERR "No pevious data are needed\n";
   }
 
   $start_run = $step +1;
-
-  print STDERR "Reading last cached lambda values (result from step $step)\n";
-  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
-
-  open IN, "$weights_out_file" or die "Can't read $weights_out_file";
-  my $newweights = <IN>;
-  chomp $newweights;
-  close IN;
-  my @newweights = split /\s+/, $newweights;
-
-  #dump_triples(\%used_triples);
-  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
-  #dump_triples(\%used_triples);
 }
 
 if ($___FILTER_PHRASE_TABLE){
@@ -510,8 +619,6 @@ my $PARAMETERS;
 #$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
 $PARAMETERS = $___DECODER_FLAGS;
 
-my $devbleu = undef;
-my $bestpoint = undef;
 my $run=$start_run-1;
 
 my $oldallsorted = undef;
@@ -519,8 +626,6 @@ my $allsorted = undef;
 
 my $cmd;
 # features and scores from the last run.
-my $prev_feature_file=undef;
-my $prev_score_file=undef;
 my $nbest_file=undef;
 
 while(1) {
@@ -562,7 +667,7 @@ while(1) {
   my $feature_file = "run$run.${base_feature_file}";
   my $score_file = "run$run.${base_score_file}";
 
-  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file  -r ".join(",", @references)." -n $nbest_file";
+  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
@@ -619,6 +724,10 @@ while(1) {
 
   # run mert
   $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n 20";
+  if ($___PREDICTABLE_SEEDS) {
+      my $seed = $run * 1000;
+      $cmd = $cmd." -r $seed";
+  }
 
   if (defined $prev_feature_file) {
     $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
@@ -632,6 +741,8 @@ while(1) {
   else{
     $cmd = $cmd." --scfile $score_file";
   }
+
+  $cmd = $cmd." --ifile run$run.$weights_in_file";
 
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
@@ -717,8 +828,8 @@ while(1) {
       $prev_score_file = "run${i}.${base_score_file}";
     }
   }
-  print "loading data from $prev_feature_file\n";
-  print "loading data from $prev_score_file\n";
+  print "loading data from $prev_feature_file\n" if defined($prev_feature_file);
+  print "loading data from $prev_score_file\n" if defined($prev_score_file);
 }
 print "Training finished at ".`date`;
 
@@ -1058,7 +1169,7 @@ sub scan_config {
 	#  $error = 1;
 	#  print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
 	#}
-	#if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx") {
+	#if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx" && ! -s "$fn.binlexr.idx" ) {
 	#  $error = 1;
 	#  print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
 	#}
