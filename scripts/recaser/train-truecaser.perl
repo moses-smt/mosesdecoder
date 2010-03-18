@@ -4,9 +4,6 @@
 use strict;
 use Getopt::Long "GetOptions";
 
-binmode(STDIN, ":utf8");
-binmode(STDOUT, ":utf8");
-
 # apply switches
 my ($MODEL,$CORPUS);
 die("train-truecaser.perl --model truecaser --corpus cased")
@@ -16,6 +13,7 @@ my %CASING;
 my %SENTENCE_END = ("."=>1,":"=>1,"?"=>1,"!"=>1);
 my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1);
 open(CORPUS,$CORPUS) || die("ERROR: could not open '$CORPUS'");
+binmode(CORPUS, ":utf8");
 while(<CORPUS>) {
   chop;
   my @WORD = split;
@@ -30,6 +28,7 @@ while(<CORPUS>) {
 close(CORPUS);
 
 open(MODEL,">$MODEL") || die("ERROR: could not create '$MODEL'");
+binmode(MODEL, ":utf8");
 foreach my $type (keys %CASING) {
   my ($score,$total,$best) = (-1,0,"");
   foreach my $word (keys %{$CASING{$type}}) {
