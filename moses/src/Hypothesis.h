@@ -314,10 +314,7 @@ class HypothesisRecombinationOrderer
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		if(hypoA->RecombineCompare(*hypoB) != 0)
-            return (hypoA->GetId() < hypoB->GetId());
-        else
-            return 0;
+		return (hypoA->RecombineCompare(*hypoB) < 0);
 	}
 };
 
