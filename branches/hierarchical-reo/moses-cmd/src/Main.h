@@ -32,10 +32,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 // example file on how to use moses library
 
-#pragma once
+#ifndef moses_cmd_Main_h
+#define moses_cmd_Main_h
 
 #include "StaticData.h"
 
 class IOWrapper;
 
 int main(int argc, char* argv[]);
+#endif

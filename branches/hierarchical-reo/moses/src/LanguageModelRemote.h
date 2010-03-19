@@ -1,4 +1,5 @@
-#pragma once
+#ifndef moses_LanguageModelRemote_h
+#define moses_LanguageModelRemote_h
 
 #include "LanguageModelSingleFactor.h"
 #include "TypeDef.h"
@@ -39,3 +40,4 @@ class LanguageModelRemote : public LanguageModelSingleFactor {
 };
 
 }
+#endif

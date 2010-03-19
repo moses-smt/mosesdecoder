@@ -105,9 +105,13 @@ protected:
 	Count distinct_;
 	PhraseText phrase_;
 	Score *data_;
+	
+	Count n1_;
+	Count n2_;
+	Count n3plus_;
 
 	PhraseInfo(Count data_size, const String &phrase) :
-		data_size_(data_size), count_(0), distinct_(0), phrase_(phrase) {
+		data_size_(data_size), count_(0), distinct_(0), phrase_(phrase), n1_(0), n2_(0), n3plus_(0){
 		data_ = DataStorage<Score>::get_instance().alloc(data_size_);
 	}
 
@@ -129,18 +133,43 @@ public:
 	void inc_count() {
 		count_++;
 	}
-
+	
 	Count get_distinct() const {
 		return distinct_;
 	}
 
-	void inc_distinct() {
+	void inc_distinct(){
 		distinct_++;
 	}
 
 	const PhraseText &get_phrase() const {
 		return phrase_;
 	}
+
+	void inc_n1(){
+		n1_++;
+	}
+
+	Count get_n1(){
+		return n1_;
+	}
+
+	void inc_n2(){
+                n2_++;
+        }
+
+        Count get_n2(){
+                return n2_;
+        }
+
+	void inc_n3plus(){
+                n3plus_++;
+        }
+
+        Count get_n3plus(){
+                return n3plus_;
+        }
+
 };
 
 inline std::ostream &operator<<(std::ostream &os, const PhraseInfo &pt) {
@@ -161,7 +190,6 @@ protected:
 	boost::object_pool<PhraseInfo> phrase_info_pool_;
 
 	Count data_size_;
-
 public:
 	typedef ListType_::iterator iterator;
 	typedef ListType_::const_iterator const_iterator;
@@ -197,6 +225,7 @@ public:
 	size_type size() const {
 		return list_.size();
 	}
+
 };
 
 class PhraseAlignment {

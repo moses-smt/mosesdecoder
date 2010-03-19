@@ -52,7 +52,7 @@ void Candidates::readBin(FILE* f) {
   }
 }
 
-const LabelId PrefixTreeMap::MagicWord = InvalidLabelId - 1; 
+const LabelId PrefixTreeMap::MagicWord = std::numeric_limits<LabelId>::max() - 1;
 
 
 void PrefixTreeMap::FreeMemory() {

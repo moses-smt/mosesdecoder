@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_SearchCubePruning_h
+#define moses_SearchCubePruning_h
 
 #include <vector>
 #include "Search.h"
@@ -44,3 +44,4 @@ public:
 
 
 }
+#endif

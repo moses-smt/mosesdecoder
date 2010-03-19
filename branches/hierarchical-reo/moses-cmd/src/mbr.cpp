@@ -95,8 +95,7 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
   return exp(logbleu);
 }
 
-//vector<const Factor*> doMBR(const TrellisPathList& nBestList){
-const TrellisPath* doMBR(const TrellisPathList& nBestList){
+vector<const Factor*> doMBR(const TrellisPathList& nBestList){
   float marginal = 0;
 
   vector<float> joint_prob_vec;
@@ -139,10 +138,9 @@ const TrellisPath* doMBR(const TrellisPathList& nBestList){
    float bleu, weightedLoss;
    float weightedLossCumul = 0;
    float minMBRLoss = 1000000;
-//   int minMBRLossIdx = -1;
+   int minMBRLossIdx = -1;
    
    /* Main MBR computation done here */
-   TrellisPathList::const_iterator minMBRLossIterator;
    iter = nBestList.begin();
    for (unsigned int i = 0; i < nBestList.GetSize(); i++){
        weightedLossCumul = 0;
@@ -157,14 +155,12 @@ const TrellisPath* doMBR(const TrellisPathList& nBestList){
        }
        if (weightedLossCumul < minMBRLoss){
            minMBRLoss = weightedLossCumul;
-//           minMBRLossIdx = i;
-           minMBRLossIterator = iter;
+           minMBRLossIdx = i;
        }
        iter++;
    }
    /* Find sentence that minimises Bayes Risk under 1- BLEU loss */
-   //return translations[minMBRLossIdx];
-   return *minMBRLossIterator;
+   return translations[minMBRLossIdx];
 }
 
 void GetOutputFactors(const TrellisPath &path, vector <const Factor*> &translation){

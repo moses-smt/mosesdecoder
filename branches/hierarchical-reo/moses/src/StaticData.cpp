@@ -172,7 +172,17 @@ bool StaticData::LoadData(Parameter *parameter)
 	  }	    
 	  m_outputSearchGraph = true;
 	}
-        else
+	// ... in extended format
+	else if (m_parameter->GetParam("output-search-graph-extended").size() > 0)
+	{
+	  if (m_parameter->GetParam("output-search-graph-extended").size() != 1) {
+	    UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-extended file"));
+	    return false;
+	  }	    
+	  m_outputSearchGraph = true;
+		m_outputSearchGraphExtended = true;
+	}
+	else
 	  m_outputSearchGraph = false;
 #ifdef HAVE_PROTOBUF
 	if (m_parameter->GetParam("output-search-graph-pb").size() > 0)
@@ -198,6 +208,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
+
+	// print all factors of output translations
+	SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
 
 	// 
 	if (m_inputType == SentenceInput)
@@ -237,6 +250,12 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	//source word deletion
 	SetBooleanParameter( &m_wordDeletionEnabled, "phrase-drop-allowed", false );
+
+  //Disable discarding
+  SetBooleanParameter(&m_disableDiscarding, "disable-discarding", false);
+  
+  //Print All Derivations
+  SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
 
 	// additional output
 	SetBooleanParameter( &m_isDetailedTranslationReportingEnabled, 
@@ -316,41 +335,65 @@ bool StaticData::LoadData(Parameter *parameter)
 	  
 	// minimum Bayes risk decoding
 	SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
-	m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
+  m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
 	m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
 	  Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
 
+  //lattice mbr
+  SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
+  if (m_useLatticeMBR)
+    m_mbr = m_useLatticeMBR;
+
+  m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
+  Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
+  m_lmbrThetas = Scan<float>(m_parameter->GetParam("lmbr-thetas"));
+  SetBooleanParameter( &m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
+  m_lmbrPrecision = (m_parameter->GetParam("lmbr-p").size() > 0) ?
+    Scan<float>(m_parameter->GetParam("lmbr-p")[0]) : 0.8f;
+  m_lmbrPRatio = (m_parameter->GetParam("lmbr-r").size() > 0) ?
+    Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
+  m_lmbrMapWeight = (m_parameter->GetParam("lmbr-map-weight").size() >0) ?
+    Scan<float>(m_parameter->GetParam("lmbr-map-weight")[0]) : 0.0f;
+    
+  
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
 
 	// Read in constraint decoding file, if provided
-	if(m_parameter->GetParam("constraint").size()) 
+	if(m_parameter->GetParam("constraint").size()) {
+	  if (m_parameter->GetParam("search-algorithm").size() > 0
+      && Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) != 0) {
+      cerr << "Can use -constraint only with stack-based search (-search-algorithm 0)" << endl;
+      exit(1);
+    }
 		m_constraintFileName = m_parameter->GetParam("constraint")[0];		
 	
-	InputFileStream constraintFile(m_constraintFileName);
+	  InputFileStream constraintFile(m_constraintFileName);
 	
-	
-	std::string line;
-	
-	long sentenceID = -1;
-	while (getline(constraintFile, line)) 
-	{
-		vector<string> vecStr = Tokenize(line, "\t");
+		std::string line;
 		
-		if (vecStr.size() == 1) {
-			sentenceID++;
-			Phrase phrase(Output);
-			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
-			m_constraints.insert(make_pair(sentenceID,phrase));
-		} else if (vecStr.size() == 2) {
-			sentenceID = Scan<long>(vecStr[0]);
-			Phrase phrase(Output);
-			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
-			m_constraints.insert(make_pair(sentenceID,phrase));
-		} else {
-			assert(false);
+		long sentenceID = -1;
+		while (getline(constraintFile, line)) 
+		{
+			vector<string> vecStr = Tokenize(line, "\t");
+			
+			if (vecStr.size() == 1) {
+				sentenceID++;
+				Phrase phrase(Output);
+				phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
+				m_constraints.insert(make_pair(sentenceID,phrase));
+			}
+			else if (vecStr.size() == 2) {
+				sentenceID = Scan<long>(vecStr[0]);
+				Phrase phrase(Output);
+				phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+				m_constraints.insert(make_pair(sentenceID,phrase));
+			}
+			else {
+				assert(false);
+			}
 		}
 	}
 
@@ -377,12 +420,14 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
-		if (m_parameter->GetParam("weight-file").size() != 1) {
-			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
-			return false;
-		}
-		string fnam = m_parameter->GetParam("weight-file")[0];
-		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
+    UserMessage::Add("ERROR: weight-file option is broken\n");
+    abort();
+//		if (m_parameter->GetParam("weight-file").size() != 1) {
+//			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
+//			return false;
+//		}
+//		string fnam = m_parameter->GetParam("weight-file")[0];
+//		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
 	}
 
 	return true;

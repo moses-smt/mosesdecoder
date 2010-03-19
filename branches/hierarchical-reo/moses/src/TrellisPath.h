@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_TrellisPath_h
+#define moses_TrellisPath_h
 
 #include <iostream>
 #include <vector>
@@ -31,6 +32,7 @@ namespace Moses
 {
 
 class TrellisPathCollection;
+class TrellisPathList;
 
 /** Encapsulate the set of hypotheses/arcs that goes from decoding 1 phrase to all the source phrases
  *	to reach a final translation. For the best translation, this consist of all hypotheses, for the other 
@@ -73,6 +75,9 @@ public:
 
 	//! create a set of next best paths by wiggling 1 of the node at a time. 
 	void CreateDeviantPaths(TrellisPathCollection &pathColl) const;
+  
+  //! create a list of next best paths by wiggling 1 of the node at a time. 
+  void CreateDeviantPaths(TrellisPathList &pathColl) const;
 
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
@@ -108,3 +113,4 @@ inline std::ostream& operator<<(std::ostream& out, const TrellisPath& path)
 }
 
 }
+#endif

@@ -1,5 +1,5 @@
-#ifndef WORDLATTICE_H_
-#define WORDLATTICE_H_
+#ifndef moses_WordLattice_h
+#define moses_WordLattice_h
 
 #include <vector>
 #include "ConfusionNet.h"

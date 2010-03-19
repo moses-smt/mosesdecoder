@@ -340,6 +340,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LatticeMBR.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Main.cpp"
 				>
 			</File>
@@ -362,6 +366,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LatticeMBR.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Main.h"
 				>
 			</File>
@@ -371,6 +379,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationAnalysis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\utf8.h"
 				>
 			</File>
 		</Filter>

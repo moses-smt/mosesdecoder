@@ -19,7 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#ifndef moses_TrellisPathList_h
+#define moses_TrellisPathList_h
 
 #include <list>
 #include <set>
@@ -54,6 +55,15 @@ public:
 	{
 		m_collection.push_back(trellisPath);
 	}
+  
+  const TrellisPath *pop()
+	{
+		const TrellisPath *top = m_collection.front();
+
+		// Detach
+		m_collection.pop_front();
+		return top;
+	}
 
 	size_t GetSize() const
 	{
@@ -63,3 +73,4 @@ public:
 
 }
 
+#endif

@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Hypothesis.h"
 #include "IOWrapper.h"
+#include "LatticeMBR.h"
 #include "Manager.h"
 #include "StaticData.h"
 #include "ThreadPool.h"
@@ -119,37 +120,58 @@ class TranslationTask : public Task {
                 const Hypothesis* bestHypo = NULL;
                 if (!staticData.UseMBR()) {
                     bestHypo = manager.GetBestHypothesis();
+                    if (bestHypo) {
+                        OutputSurface(
+                                out,
+                                bestHypo,
+                                staticData.GetOutputFactorOrder(), 
+                                staticData.GetReportSegmentation(),
+                                staticData.GetReportAllFactors());
+                        IFVERBOSE(1) {
+                            debug << "BEST TRANSLATION: " << *bestHypo << endl;
+                        }
+                    }
+                    out << endl;
                 } else {
-                    //MBR decoding
                     size_t nBestSize = staticData.GetMBRSize();
                     if (nBestSize <= 0) {
                         cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
                         exit(1);
+                    }
+                    TrellisPathList nBestList;
+                    manager.CalcNBest(nBestSize, nBestList,true);
+                    VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
+                    IFVERBOSE(2) { PrintUserTime("calculated n-best list for (L)MBR decoding"); }
+                    
+                    if (staticData.UseLatticeMBR()) {
+                        if (m_nbestCollector) {
+                            //lattice mbr nbest
+                            vector<LatticeMBRSolution> solutions;
+                            size_t n  = min(nBestSize, staticData.GetNBestSize());
+                            getLatticeMBRNBest(manager,nBestList,solutions,n);
+                            ostringstream out;
+                            OutputLatticeMBRNBest(out, solutions,m_lineNumber);
+                            m_nbestCollector->Write(m_lineNumber, out.str());
+                        } else {
+                            //Lattice MBR decoding
+                            vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
+                            OutputBestHypo(mbrBestHypo, m_lineNumber, staticData.GetReportSegmentation(),
+                                        staticData.GetReportAllFactors(),out);
+                            IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
+                        }
                     } else {
-                        TrellisPathList nBestList;
-                        manager.CalcNBest(nBestSize, nBestList,true);
-                        VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
-                        IFVERBOSE(2) { PrintUserTime("calculated n-best list for MBR decoding"); }
-                        bestHypo = doMBR(nBestList)->GetEdges().at(0);
+                        //MBR decoding
+                        std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+                        OutputBestHypo(mbrBestHypo, m_lineNumber,
+                                    staticData.GetReportSegmentation(),
+                                    staticData.GetReportAllFactors(),out);
                         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
+                        
                     }
                 }
-                if (bestHypo) {
-                    OutputSurface(
-                            out,
-                            bestHypo,
-                            staticData.GetOutputFactorOrder(), 
-                            staticData.GetReportSegmentation(),
-                            staticData.GetReportAllFactors());
-                    IFVERBOSE(1) {
-                      debug << "BEST TRANSLATION: " << *bestHypo << endl;
-                    }
-                }
-                out << endl;
-
                 m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
             }
-            if (m_nbestCollector) {
+            if (m_nbestCollector && !staticData.UseLatticeMBR()) {
                 TrellisPathList nBestList;
                 ostringstream out;
                 manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
@@ -242,8 +264,15 @@ int main(int argc, char** argv) {
     }
 
     pool.Stop(true); //flush remaining jobs
-    return 0;
+
+	#ifndef EXIT_RETURN
+		//This avoids that detructors are called (it can take a long time)
+		exit(EXIT_SUCCESS);
+	#else
+		return EXIT_SUCCESS;
+	#endif
 }
+
 
 
 

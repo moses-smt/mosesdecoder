@@ -21,6 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "InputFileStream.h"
 #include "gzfilebuf.h"
+#include <iostream>
+
+using namespace std;
 
 namespace Moses
 {
@@ -34,7 +37,11 @@ InputFileStream::InputFileStream(const std::string &filePath)
     m_streambuf = new gzfilebuf(filePath.c_str());
   } else {
     std::filebuf* fb = new std::filebuf();
-    fb->open(filePath.c_str(), std::ios::in);
+    fb = fb->open(filePath.c_str(), std::ios::in);
+    if (! fb) {
+      cerr << "Can't read " << filePath.c_str() << endl;
+      exit(1);
+    }
     m_streambuf = fb;
   }
   this->init(m_streambuf);

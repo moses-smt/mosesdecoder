@@ -1,7 +1,8 @@
 // $Id$
 // vim:tabstop=2
 
-#pragma once
+#ifndef moses_PDTAimp_h
+#define moses_PDTAimp_h
 
 #include "StaticData.h"  // needed for factor splitter
 
@@ -543,3 +544,4 @@ public:
 };
 
 }
+#endif

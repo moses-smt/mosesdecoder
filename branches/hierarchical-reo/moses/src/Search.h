@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_Search_h
+#define moses_Search_h
 
 #include <vector>
 #include "TypeDef.h"
@@ -37,3 +37,4 @@ protected:
 
 
 }
+#endif
