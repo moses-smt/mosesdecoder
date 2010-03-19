@@ -1,5 +1,5 @@
-#ifndef LEXICAL_REORDERING_TABLE_H
-#define LEXICAL_REORDERING_TABLE_H
+#ifndef moses_LexicalReorderingTable_h
+#define moses_LexicalReorderingTable_h
 
 //stdlib dependencies:
 #include <vector>
@@ -152,4 +152,4 @@ class LexicalReorderingTableTree : public LexicalReorderingTable {
 
 }
 
-#endif //LEXICAL_REORDERING_TABLE_H
+#endif

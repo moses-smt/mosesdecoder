@@ -90,7 +90,7 @@ while(<INI>) {
     	}
     	my ($factors,$t,$weights,$file) = ($1,$2,$3,$4);
 	my $source_factor = $factors;
-	$source_factor =~ s/\-\d+$//;
+	$source_factor =~ s/\-[\d\,]+$//;
 
     	chomp($file);
     	push @TABLE,$file;

@@ -116,20 +116,21 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 
 	// n-best
 	m_surpressSingleBestOutput = false;
+       
 	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		} 
-		else 
-		{
-			std::ofstream *file = new std::ofstream;
-			m_nBestStream = file;
-			file->open(nBestFilePath.c_str());
-		}
-	}
+        {
+                if (nBestFilePath == "-" || nBestFilePath == "/dev/stdout")
+                {
+                        m_nBestStream = &std::cout;
+                        m_surpressSingleBestOutput = true;
+                } 
+                else 
+                {
+                        std::ofstream *file = new std::ofstream;
+                        m_nBestStream = file;
+                        file->open(nBestFilePath.c_str());
+                }
+        }
 
 	// wordgraph output
 	if (staticData.GetOutputWordGraph())
@@ -143,7 +144,11 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	// search graph output
 	if (staticData.GetOutputSearchGraph())
 	{
-	  string fileName = staticData.GetParam("output-search-graph")[0];
+		string fileName;
+		if (staticData.GetOutputSearchGraphExtended())
+			fileName = staticData.GetParam("output-search-graph-extended")[0];
+		else
+			fileName = staticData.GetParam("output-search-graph")[0];
 	  std::ofstream *file = new std::ofstream;
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
@@ -222,16 +227,29 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
 {
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
 	{
 		const Factor *factor = mbrBestHypo[i];
-		if (i>0) cout << " ";
-			cout << factor->GetString();
+		if (i>0) out << " ";
+			out << factor->GetString();
 	}
-	cout << endl;
+	out << endl;
 }													 
+
+void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
+{
+  
+	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
+	{
+        const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+	    if (i>0) out << " ";
+            out << *factor;
+	}
+	out << endl;
+}		
+
 
 void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo)
 {
@@ -286,6 +304,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 {
 	const StaticData &staticData = StaticData::Instance();
 	bool labeledOutput = staticData.IsLabeledNBestList();
+	bool reportAllFactors = staticData.GetReportAllFactorsNBest();
 	bool includeAlignment = staticData.NBestIncludesAlignment();
 	//bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 	
@@ -300,7 +319,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 		{
 			const Hypothesis &edge = *edges[currEdge];
-			OutputSurface(out, edge.GetCurrTargetPhrase(), outputFactorOrder, false); // false for not reporting all factors
+			OutputSurface(out, edge.GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 		}
 		out << " |||";
 
@@ -337,41 +356,6 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 			}
 		}
 
-		// print the scores in a hardwired order
-    // before each model type, the corresponding command-line-like name must be emitted
-    // MERT script relies on this
-
-		// basic distortion
-//		if (labeledOutput)
-//	    *m_nBestStream << "d: ";
-//		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
-
-//		reordering
-//		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
-//		if(rms.size() > 0)
-//		{
-//				vector<LexicalReordering*>::iterator iter;
-//				for(iter = rms.begin(); iter != rms.end(); ++iter)
-//				{
-//					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-//					for (size_t j = 0; j<scores.size(); ++j) 
-//					{
-//				  		*m_nBestStream << scores[j] << " ";
-//					}
-//				}
-//		}
-//			
-//		// lm
-//		const LMList& lml = StaticData::Instance().GetAllLM();
-//		if (lml.size() > 0) {
-//			if (labeledOutput)
-//				*m_nBestStream << "lm: ";
-//		  LMList::const_iterator lmi = lml.begin();
-//		  for (; lmi != lml.end(); ++lmi) {
-//			  *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
-//		  }
-//		}
-//
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
@@ -471,8 +455,37 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	out <<std::flush;
 }
 
+void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) {
+    for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
+        out << translationId;
+        out << " ||| ";
+        const vector<Word> mbrHypo = si->GetWords();
+        for (size_t i = 0 ; i < mbrHypo.size() ; i++)
+        {
+            const Factor *factor = mbrHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+            if (i>0) out << " ";
+            out << *factor;
+        }
+        out << " ||| ";
+        out << "map: " << si->GetMapScore();
+        out << " w: " << mbrHypo.size();
+        const vector<float>& ngramScores = si->GetNgramScores();
+        for (size_t i = 0; i < ngramScores.size(); ++i) {
+            out << " " << ngramScores[i];
+        }
+        out << " ||| ";
+        out << si->GetScore();
+        
+        out << endl;
+    }
+}
+
 void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
     OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
+}
+
+void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId) {
+    OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)

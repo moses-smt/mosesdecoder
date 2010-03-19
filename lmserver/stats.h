@@ -1,3 +1,6 @@
+#ifndef lmserver_stats_h
+#define lmserver_stats_h
+
 /* stats */
 void stats_prefix_init(void);
 void stats_prefix_clear(void);
@@ -6,3 +9,5 @@ void stats_prefix_record_delete(const char *key);
 void stats_prefix_record_set(const char *key);
 /*@null@*/
 char *stats_prefix_dump(int *length);
+
+#endif

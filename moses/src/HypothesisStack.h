@@ -1,5 +1,5 @@
-
-#pragma once
+#ifndef moses_HypothesisStack_h
+#define moses_HypothesisStack_h
 
 #include <vector>
 #include <set>
@@ -46,3 +46,4 @@ public:
 
 }
 
+#endif

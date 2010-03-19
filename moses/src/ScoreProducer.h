@@ -1,7 +1,7 @@
 // $Id$
 
-#ifndef _SCORE_PRODUCER_H_
-#define _SCORE_PRODUCER_H_
+#ifndef moses_ScoreProducer_h
+#define moses_ScoreProducer_h
 
 #include <string>
 #include <limits>

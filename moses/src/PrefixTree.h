@@ -4,8 +4,9 @@
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */
 /* Richard Zens                                                     */
 /* ---------------------------------------------------------------- */
-#ifndef PREFIXTREE_H_
-#define PREFIXTREE_H_
+#ifndef moses_PrefixTree_h
+#define moses_PrefixTree_h
+
 #include <vector>
 #include <algorithm>
 #include <cassert>

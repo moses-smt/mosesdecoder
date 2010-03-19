@@ -36,6 +36,8 @@ my $debug = 1; # debug this script, do not delete any files in debug mode
 # the following line is set installation time by 'make release'.  BEWARE!
 my $BINDIR="";
 
+my $force_factored_filenames = 0;
+
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
 		       'bin-dir=s' => \$BINDIR, # allow to override default bindir path
@@ -88,10 +90,11 @@ $_HELP = 1
 		       'continue' => \$_CONTINUE,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
-		       'memscore:s' => \$_MEMSCORE,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS
-    );
+		       'memscore:s' => \$_MEMSCORE,
+               'force-factored-filenames' => \$force_factored_filenames,
+               );
 
 if ($_HELP) {
     print "Train Phrase Model
@@ -286,7 +289,7 @@ if ($STEPS[9]) {
     my ($f, $order, $filename);
     ($f, $order, $filename, $type) = split /:/, $lm, 4;
     die "ERROR: Wrong format of --lm. Expected: --lm factor:order:filename"
-      if $f !~ /^[0-9]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
+      if $f !~ /^[0-9,]+$/ || $order !~ /^[0-9]+$/ || !defined $filename;
     die "ERROR: Filename is not absolute: $filename"
       unless file_name_is_absolute $filename;
     die "ERROR: Language model file not found or empty: $filename"
@@ -413,7 +416,7 @@ for my $mtype ( keys %REORDERING_MODEL_TYPES) {
 }
 
 ### Factored translation models
-my $___NOT_FACTORED = 1;
+my $___NOT_FACTORED = !$force_factored_filenames;
 my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("ERROR: format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
@@ -546,6 +549,12 @@ sub open_compressed {
 sub reduce_factors {
     my ($full,$reduced,$factors) = @_;
 
+    # my %INCLUDE;
+    # foreach my $factor (split(/,/,$factors)) {
+	# $INCLUDE{$factor} = 1;
+    # }
+    my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
+
     print STDERR "(1.0.5) reducing factors to produce $reduced  @ ".`date`;
     while(-e $reduced.".lock") {
 	sleep(10);
@@ -554,13 +563,34 @@ sub reduce_factors {
         print STDERR "  $reduced in place, reusing\n";
         return;
     }
-    `touch $reduced.lock`;
-    # my %INCLUDE;
-    # foreach my $factor (split(/,/,$factors)) {
-	# $INCLUDE{$factor} = 1;
-    # }
-    my @INCLUDE = sort {$a <=> $b} split(/,/,$factors);
+    if (-e $reduced.".gz") {
+        print STDERR "  $reduced.gz in place, reusing\n";
+        return;
+    }
+    # peek at input, to check if we are asked to produce exactly the available
+    # factors
+    my $inh = open_or_zcat($full);
+    my $firstline = <$inh>;
+    close $inh;
+    # pick first word
+    $firstline =~ s/^\s*//;
+    $firstline =~ s/\s.*//;
+    # count factors
+    my $maxfactorindex = $firstline =~ tr/|/|/;
+    if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
+      # create just symlink; preserving compression
+      my $realfull = $full;
+      if (!-e $realfull && -e $realfull.".gz") {
+        $realfull .= ".gz";
+        $reduced =~ s/(\.gz)?$/.gz/;
+      }
+      safesystem("ln -s $realfull $reduced")
+        or die "Failed to create symlink $realfull -> $reduced";
+      return;
+    }
 
+    # The default is to select the needed factors
+    `touch $reduced.lock`;
     *IN = open_or_zcat($full);
     open(OUT,">".$reduced) or die "ERROR: Can't write $reduced";
     my $nr = 0;
@@ -895,7 +925,7 @@ sub run_single_giza {
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
  
-	if (defined $_MGIZA){
+	if (defined $_MGIZA and (!defined $___FINAL_ALIGNMENT_MODEL or $___FINAL_ALIGNMENT_MODEL ne '2')){
 		print STDERR "Merging $___GIZA_EXTENSION.part\* tables\n";
 		safesystem("$MGIZA_MERGE_ALIGN  $dir/$f-$e.$___GIZA_EXTENSION.part*>$dir/$f-$e.$___GIZA_EXTENSION");
 		#system("rm -f $dir/$f-$e/*.part*");
