@@ -91,7 +91,7 @@ $_HELP = 1
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
-		       'do-steps=s' => \$_DO_STEPS
+		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
                'force-factored-filenames' => \$force_factored_filenames,
                );
