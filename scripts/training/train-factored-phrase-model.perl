@@ -1658,7 +1658,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
 	    #$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-	    $file .= ".$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
+	    $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
 	}
         $factor_i++;
       }
