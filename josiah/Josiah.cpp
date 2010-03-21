@@ -162,6 +162,9 @@ int main(int argc, char** argv) {
   size_t lag;
   float flip_prob, merge_split_prob, retrans_prob;
   bool calcDDKL, calcTDKL;
+  bool calc_exact_posterior;
+  float evidenceSetShrinkFactor;
+  bool randomShrink;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -247,7 +250,10 @@ int main(int argc, char** argv) {
   ("merge-split-prob", po::value<float>(&merge_split_prob)->default_value(0.2f), "Probability of applying merge-split operator during random scan")
   ("retrans-prob", po::value<float>(&retrans_prob)->default_value(0.2f), "Probability of applying retrans operator during random scan")
   ("calc-ddistro-kl", po::value(&calcDDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated derivation distro and true")
-  ("calc-tdistro-kl", po::value(&calcTDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated translation distro and true");
+  ("calc-tdistro-kl", po::value(&calcTDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated translation distro and true")
+  ("calc-exact-post", po::value(&calc_exact_posterior)->zero_tokens()->default_value(false), "Calculate exact posterior")
+  ("evidence-shrink",  po::value<float>(&evidenceSetShrinkFactor)->default_value(0.9f), "Evidence set shrink factor for MBR decoding")
+  ("random-shrink",  po::value(&randomShrink)->zero_tokens()->default_value(false), "Shrink evidence set randomly, otherwise shrink by discarding low probability elements");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -524,7 +530,12 @@ int main(int argc, char** argv) {
     auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     if (expected_sbleu || output_expected_sbleu) {
-      elCollector.reset(new ExpectedLossCollector(&(g[lineno])));
+      if (calc_exact_posterior) {
+        elCollector.reset(new ExactExpectedLossCollector(line, evidenceSetShrinkFactor, randomShrink, &(g[lineno])));
+      }
+      else { 
+        elCollector.reset(new ExpectedLossCollector(&(g[lineno])));
+      }
       sampler.AddCollector(elCollector.get());
     }
     else if (expected_sbleu_da) {
@@ -815,6 +826,14 @@ int main(int argc, char** argv) {
         size_t maxtransIndex = transCollector->getMbr(translations, topNsize);  
         (*out) << translations[maxtransIndex].first;
         (*out) << endl << flush;
+      }
+      else if (calc_exact_posterior) {
+        vector< pair<const Translation*,float> > maxMBR;
+        transCollector->getExactMbr(line, maxMBR, evidenceSetShrinkFactor, mbr_size);
+        for (size_t i = 0; i < maxMBR.size(); ++i) {
+          (*out) <<  *(maxMBR[i].first);
+          (*out) << endl << flush;
+        } 
       }
       else {// use samples as hyp set
         maxtrans = transCollector->getMbr(mbr_size, topNsize);  
