@@ -408,6 +408,156 @@ namespace Josiah
     
     
   }
+  
+  /**** Algorithm: Run exact decoder for given input. Then compute exact p(e|f) for elements in evidence set.  
+   Then perform MBR a) by using a sample from the evidence set b) by sorting evidence set and discarding low prob translations.
+   Recompute p(e|f) estimating it from sample set.
+  ****/
+  void GibblerMaxTransDecoder::getExactMbrSamplerDistro(const std::string& line, std::vector< std::pair<const Translation*,float> > & best, float shrinkEvidenceRatio, size_t mbrSize, size_t topNsize)  {
+    //Posterior probs computed using the whole evidence set
+    //MBR decoding outer loop using configurable size
+    vector<pair<const Translation*, float> > topNTranslations;
+    getNbest(topNTranslations,topNsize);
+    
+    topNsize = topNTranslations.size(); //size of full evidence set
+    size_t evidenceSize = topNsize * shrinkEvidenceRatio; //New size of evidence set
+    mbrSize = min(mbrSize,  evidenceSize);
+
+    //Construct hypothesis set
+    GainFunctionVector gHypothesisSet;
+    for (size_t i = 0; i < mbrSize; ++i) {
+      gHypothesisSet.push_back(new SentenceBLEU(4, *(topNTranslations[i].first))); //Calc the sufficient statistics for the translation
+    }
+    
+    //Construct randomly sampled evidence set
+    vector<pair<const Translation*, float> > randomEvidenceSet(evidenceSize);
+    random_sample(topNTranslations.begin(), topNTranslations.end(), randomEvidenceSet.begin(), randomEvidenceSet.end());
+    for (size_t i = 0; i < evidenceSize; ++i) {
+      VERBOSE(1, "random evidence translation: " <<   ToString(*(randomEvidenceSet[i].first)) << " " << randomEvidenceSet[i].second << endl);
+    }
+
+    GainFunctionVector gRandomEvidenceSet;
+    for (size_t i = 0; i < evidenceSize; ++i) {
+      gRandomEvidenceSet.push_back(new SentenceBLEU(4, *(randomEvidenceSet[i].first))); //Calc the sufficient statistics for the translation
+    }
+    
+    //Main random evidence set MBR computation done here
+    float bleu(0.0), weightedLoss(0.0), weightedLossCumul(0.0), minMBRLoss(100000);
+    int minMBRLossIdx(-1);
+    VERBOSE(0, "MBR SIZE " << mbrSize << ", evidence Size " << evidenceSize << endl);
+  
+    //Outer loop using only the top #mbrSize samples 
+    for(size_t i = 0; i < mbrSize; ++i) {
+      weightedLossCumul = 0.0;
+      const GainFunction& gf = gHypothesisSet[i];
+      VERBOSE(1, "Reference " << ToString(*topNTranslations[i].first) << endl);
+      for(size_t j = 0; j < evidenceSize; ++j) {//Inner loop using samples in evidence set
+        bleu = gf.ComputeGain(gRandomEvidenceSet[j]);
+        VERBOSE(2, "Hypothesis " << ToString(*randomEvidenceSet[j].first) << endl);
+        weightedLoss = (1- bleu) * randomEvidenceSet[j].second;
+        VERBOSE(2, "Bleu " << bleu << ", prob " <<  randomEvidenceSet[j].second << ", weightedLoss : " << weightedLoss << endl);
+        weightedLossCumul += weightedLoss;
+        if (weightedLossCumul > minMBRLoss)
+          break;
+      }
+      VERBOSE(2, "Bayes risk for cand " << i << " " <<  weightedLossCumul << endl);
+      if (weightedLossCumul < minMBRLoss){
+        minMBRLoss = weightedLossCumul;
+        minMBRLossIdx = i;
+      }
+    }
+    VERBOSE(1, "Minimum Bayes risk cand for sampled evidence set is " <<  minMBRLossIdx << " with risk " << minMBRLoss << endl);
+    assert(minMBRLossIdx > -1);
+    best.push_back(topNTranslations[minMBRLossIdx]);
+
+
+    //Now do MBR discarding low probability translations
+    //First Get unpruned lattice for input
+    auto_ptr<KLDecoder> klDecoder;
+    klDecoder.reset(new KLDecoder); 
+    double trueZ = klDecoder->GetZ(line); //Lattice Z
+    
+    //back up sampler estimated distro in a convenient data structure
+    vector<pair<const Translation*, float> >::iterator it; 
+    map<const Translation*, float> topNTranslationsSamplerDistro;
+    for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it) {
+      topNTranslationsSamplerDistro[it->first] = it->second;
+    }
+
+    //Now calculate true p(e|f) for all translations samples
+    VERBOSE(1,"Hypothesis set: " << endl);
+    for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it) {
+      float trueTransScore = exp(klDecoder->GetTranslationScore(*it->first) - trueZ);;
+      VERBOSE(1, "translation: " <<   ToString(*it->first) << " " << (it->second) << " " << trueTransScore << endl);
+      it->second = trueTransScore;
+    }
+    
+    //Now do MBR for evidence set ranked by true p(e|f)
+    ProbGreaterThan<Translation> comparator;
+    vector<pair<const Translation*, float> > topNTranslationsByPEF = topNTranslations;
+    nth_element(topNTranslationsByPEF.begin(), topNTranslationsByPEF.begin() + evidenceSize, topNTranslationsByPEF.end(), comparator);
+    
+    for (it = topNTranslationsByPEF.begin(); it < topNTranslationsByPEF.begin() + evidenceSize ; ++it) {
+      VERBOSE(1, "retained top translation: " <<   ToString(*it->first) << " " << (it->second) << endl);
+    }
+    for (it = topNTranslationsByPEF.begin() + evidenceSize; it != topNTranslationsByPEF.end() ; ++it) {
+      VERBOSE(1, "discarded translations: " <<   ToString(*it->first) << " " << (it->second) << endl);
+    }
+
+    //Set evidence set's distribution - this requires 2 passes, first calculate new denominator, then renormalize 
+    double totalScore = 0.0;
+    for (size_t i = 0; i < topNTranslationsByPEF.size(); ++i) {
+       double samplerScore =  topNTranslationsSamplerDistro[topNTranslationsByPEF[i].first];
+       totalScore += samplerScore;
+       topNTranslationsByPEF[i].second = samplerScore;
+    }
+    
+    for (size_t i = 0; i < topNTranslationsByPEF.size(); ++i) {
+       topNTranslationsByPEF[i].second /= totalScore;
+    }
+    
+    //Create Evidence Set
+    GainFunctionVector gTopNEvidenceSet;
+    for (size_t i = 0; i < evidenceSize; ++i) {
+      gTopNEvidenceSet.push_back(new SentenceBLEU(4, *(topNTranslationsByPEF[i].first))); //Calc the sufficient statistics for the translation
+    }
+    
+    //Main MBR computation done here
+    //Reset variables
+    bleu = 0.0;
+    weightedLoss = 0.0;
+    weightedLossCumul = 0.0;
+    minMBRLoss = 100000;
+    minMBRLossIdx = -1;
+    
+    //Outer loop using only the top #mbrSize samples and inner loop using topNByPEF samples
+    for(size_t i = 0; i < mbrSize; ++i) {
+      weightedLossCumul = 0.0;
+      const GainFunction& gf = gHypothesisSet[i];
+      VERBOSE(1, "Reference " << ToString(*topNTranslations[i].first) << endl);
+      for(size_t j = 0; j < evidenceSize; ++j) {//Inner loop using samples in evidence set
+        bleu = gf.ComputeGain(gTopNEvidenceSet[j]);
+        VERBOSE(2, "Hypothesis " << ToString(*topNTranslationsByPEF[j].first) << endl);
+        weightedLoss = (1- bleu) * topNTranslationsByPEF[j].second;
+        VERBOSE(2, "Bleu " << bleu << ", prob " <<  topNTranslationsByPEF[j].second << ", weightedLoss : " << weightedLoss << endl);
+        weightedLossCumul += weightedLoss;
+        if (weightedLossCumul > minMBRLoss)
+          break;
+      }
+      VERBOSE(2, "Bayes risk for cand " << i << " " <<  weightedLossCumul << endl);
+      if (weightedLossCumul < minMBRLoss){
+        minMBRLoss = weightedLossCumul;
+        minMBRLossIdx = i;
+      }
+    }
+    VERBOSE(1, "Minimum Bayes risk cand for sampled evidence set is " <<  minMBRLossIdx << " with risk " << minMBRLoss << endl);
+    assert(minMBRLossIdx > -1);
+    best.push_back(topNTranslations[minMBRLossIdx]);
+    
+    
+  }
+
+  
 }
 
 
