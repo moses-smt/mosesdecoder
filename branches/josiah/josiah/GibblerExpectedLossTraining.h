@@ -28,7 +28,7 @@ class ExpectedLossCollector : public SampleCollector {
     virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain, float *scaling_gradient);
     virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v);
     void addGainFunction (const GainFunction* f) {g.push_back(f);}
-    ScoreComponentCollection getFeatureExpectations() const;
+    virtual ScoreComponentCollection getFeatureExpectations() const;
     double getExpectedGain() const;
     
   protected:
@@ -37,10 +37,7 @@ class ExpectedLossCollector : public SampleCollector {
     virtual float getRegularisationGradientFactor(size_t i) {return 0;}
     virtual float getRegularisation() {return 0;}
     virtual bool ComputeScaleGradient() {return false;}
-    
     vector<const GainFunction*> g;
-  
-  private:
     std::vector<ScoreComponentCollection> m_featureVectors;
     std::vector<ScoreComponentCollection> m_rbFeatureVectors; // Rao-Blackwellised feature vectors
     std::vector<float> m_gains;
@@ -50,5 +47,22 @@ class ExpectedLossCollector : public SampleCollector {
     
   
 };
+
+class ExactExpectedLossCollector : public ExpectedLossCollector {
+ public:
+   ExactExpectedLossCollector(const std::string& src, float shrinkFactor, bool randomShrink, const GainFunction*  f) : 
+                          m_srcLine(src), m_shrinkFactor(shrinkFactor), m_randomShrink(randomShrink), ExpectedLossCollector(f) {}
+   virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain, float *scaling_gradient);
+   virtual ~ExactExpectedLossCollector() {}
+   virtual ScoreComponentCollection getFeatureExpectations() const;
+ private:
+   const std::string& m_srcLine;
+   float m_shrinkFactor;
+   bool m_randomShrink;
+   vector<double> m_exactProbs;
+   void ShrinkAndCalcTrueDistribution();
+   void ShrinkRandom(size_t);
+   void ShrinkByProb(size_t);
+}; 
 
 }

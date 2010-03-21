@@ -71,6 +71,8 @@ class GibblerMaxTransDecoder : public virtual MaxCollector<Translation> {
   std::pair<const Translation*,float> getMbr(size_t mbrSize, size_t topNsize = 0) const;
   /** Do mbr decoding */
   size_t getMbr(const std::vector<std::pair<Translation, float> > & translations, size_t topNsize = 0) const;
+  /** Do mbr decoding using true posteriors */
+  void getExactMbr(const std::string& line, std::vector< std::pair<const Translation*,float> > &, float, size_t mbrSize, size_t topNsize = 0) ;
 
   virtual ~GibblerMaxTransDecoder(){}
 

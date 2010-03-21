@@ -23,6 +23,7 @@ namespace Josiah {
       m_importanceWeights.clear();
       m_normalisedImportanceWeights.clear();
     }
+    void SetN(size_t n) { m_n = n;}
   protected:
     /** The actual collection.*/
     virtual void collect(Sample& sample) = 0;

@@ -49,6 +49,7 @@ namespace Josiah {
     Sample sample(starting,source,extra_fv,raoBlackwell);
     ResetGainStats();
     bool f = false;
+    vector<size_t> samplesPerOperator(m_operators.size()); // to keep track of number of samples per operator
     
     for (size_t j = 0; j < m_operators.size(); ++j) {
       m_operators[j]->addSampleAcceptor(acceptor); 
@@ -100,7 +101,8 @@ namespace Josiah {
           VERBOSE(2,"Sampling with operator " << m_operators[j]->name() << endl);
           while (m_operators[j]->keepGoing() && keepGoing) {
             m_operators[j]->scan(sample,*options); 
-            allSamples++;
+            ++allSamples;
+            ++samplesPerOperator[j];
           }
           if (collectAllSamples) {
               collectSample(sample);
@@ -129,6 +131,13 @@ namespace Josiah {
           
       }
       cerr << "Sampled " << allSamples << ", collected " << i << endl;
+      IFVERBOSE(2) {
+        for (size_t s = 0; s < samplesPerOperator.size(); ++s) {
+          cerr << "Sampled operator " << m_operators[s]->name() << ": " << samplesPerOperator[s] << " times." << endl;;
+        }
+      }
+      
+      
       if (f) VERBOSE(1,endl);
     }
 
@@ -150,6 +159,7 @@ namespace Josiah {
     Sample sample(starting,source,extra_fv,raoBlackwell);
     ResetGainStats();
     bool f = false;
+    map<GibbsOperator*, size_t> samplesPerOperator; // to keep track of number of samples per operator
     
     for (size_t j = 0; j < m_operators.size(); ++j) {
       m_operators[j]->addSampleAcceptor(acceptor); 
@@ -216,10 +226,17 @@ namespace Josiah {
           keepGoing = false;
           break;
         }
+        ++samplesPerOperator[currOperator];
         ++allSamples;
       } 
       
       cerr << "Sampled " << allSamples << ", collected " << i << endl;
+      IFVERBOSE(2) {
+        for (map<GibbsOperator*, size_t>::const_iterator it = samplesPerOperator.begin(); it != samplesPerOperator.end(); ++it) {
+          cerr << "Sampled operator " << (it->first)->name() << ": " << it->second << " times." << endl;
+        }  
+      }
+      
       if (f) VERBOSE(1,endl);
     }
   }
