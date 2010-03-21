@@ -304,7 +304,7 @@ float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradi
     fv.MinusEquals(feature_expectations);
     MPI_VERBOSE(2,"DIFF: " << fv)
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
-    MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) << " IF: " << importanceWeights[i] << endl)
+    MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) << " IF: " << m_exactProbs[i] << endl)
     exp_gain += gain*m_exactProbs[i];
     //VERBOSE(0, "Sample=" << m_samples[i] << ", gain: " << gain << ", imp weights: " << importanceWeights[i] << endl);
     fv.MultiplyEquals(m_exactProbs[i]);
