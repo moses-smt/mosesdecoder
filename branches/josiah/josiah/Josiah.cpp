@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
   size_t lag;
   float flip_prob, merge_split_prob, retrans_prob;
   bool calcDDKL, calcTDKL;
-  bool calc_exact_posterior;
+  bool calc_exact_posterior, filter_by_posterior;
   float evidenceSetShrinkFactor;
   bool randomShrink;
   po::options_description desc("Allowed options");
@@ -252,6 +252,7 @@ int main(int argc, char** argv) {
   ("calc-ddistro-kl", po::value(&calcDDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated derivation distro and true")
   ("calc-tdistro-kl", po::value(&calcTDKL)->zero_tokens()->default_value(false), "Calculate KL divergence between sampler estimated translation distro and true")
   ("calc-exact-post", po::value(&calc_exact_posterior)->zero_tokens()->default_value(false), "Calculate exact posterior")
+  ("filter-exact-post", po::value(&filter_by_posterior)->zero_tokens()->default_value(false), "Filter sample set using exact posterior")
   ("evidence-shrink",  po::value<float>(&evidenceSetShrinkFactor)->default_value(0.9f), "Evidence set shrink factor for MBR decoding")
   ("random-shrink",  po::value(&randomShrink)->zero_tokens()->default_value(false), "Shrink evidence set randomly, otherwise shrink by discarding low probability elements");
  
@@ -830,6 +831,14 @@ int main(int argc, char** argv) {
       else if (calc_exact_posterior) {
         vector< pair<const Translation*,float> > maxMBR;
         transCollector->getExactMbr(line, maxMBR, evidenceSetShrinkFactor, mbr_size);
+        for (size_t i = 0; i < maxMBR.size(); ++i) {
+          (*out) <<  *(maxMBR[i].first);
+          (*out) << endl << flush;
+        } 
+      }
+      else if (filter_by_posterior) {
+        vector< pair<const Translation*,float> > maxMBR;
+        transCollector->getExactMbrSamplerDistro(line, maxMBR, evidenceSetShrinkFactor, mbr_size);
         for (size_t i = 0; i < maxMBR.size(); ++i) {
           (*out) <<  *(maxMBR[i].first);
           (*out) << endl << flush;
