@@ -306,6 +306,7 @@ namespace Josiah
     
     topNsize = topNTranslations.size(); //size of full evidence set
     size_t evidenceSize = topNsize * shrinkEvidenceRatio; //New size of evidence set
+    evidenceSize = max(static_cast<size_t>(1), evidenceSize);
     mbrSize = min(mbrSize,  evidenceSize);
 
     //Construct hypothesis set
@@ -421,6 +422,7 @@ namespace Josiah
     
     topNsize = topNTranslations.size(); //size of full evidence set
     size_t evidenceSize = topNsize * shrinkEvidenceRatio; //New size of evidence set
+    evidenceSize = max(static_cast<size_t>(1), evidenceSize);
     mbrSize = min(mbrSize,  evidenceSize);
 
     //Construct hypothesis set
