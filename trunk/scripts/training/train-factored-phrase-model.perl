@@ -1698,7 +1698,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 	    next if $type eq "fe" || $type eq "f";
 	    next if $type eq "distance";
 		my $w;
-		if ($type =~ /msd/) { $w = 3; } else { $w = 1; }
+		if ($type =~ /msd/) { $w = 3; } else { $w = 2; }
 		if ($type =~ /bi/) { $w *= 2; }
 		$weight_d_count += $w;
 
