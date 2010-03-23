@@ -1649,7 +1649,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
     my $file = "# distortion (reordering) files\n\[distortion-file]\n";
     my $factor_i = 0;
  
-    #my @SPECIFIED_TABLE = @_REORDERING_TABLE;
+    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
 	foreach my $model (@REORDERING_MODELS) {	
 	    $weight_d_count += $model->{"numfeatures"};
@@ -1657,7 +1657,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
 	    $table_file .= ".$factor" unless $___NOT_FACTORED;
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
-	    #$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
 	}
         $factor_i++;
