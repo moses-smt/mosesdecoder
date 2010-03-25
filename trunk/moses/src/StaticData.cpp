@@ -483,154 +483,69 @@ StaticData::~StaticData()
 
 bool StaticData::LoadLexicalReorderingModel()
 {
-  std::cerr << "Loading lexical distortion models...\n";
-  const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
-  const vector<string> weightsStr = m_parameter->GetParam("weight-d");
-
-  std::vector<float>   weights;
-  size_t w = 1; //cur weight
-  size_t f = 0; //cur file
-  //get weights values
-  std::cerr << "have " << fileStr.size() << " models\n";
-  for(size_t j = 0; j < weightsStr.size(); ++j){
-    weights.push_back(Scan<float>(weightsStr[j]));
-  }
-  //load all models
-  for(size_t i = 0; i < fileStr.size(); ++i)
-	{
-    vector<string> spec = Tokenize<string>(fileStr[f], " ");
-    ++f; //mark file as consumed
-    if(4 != spec.size()){
-			//wrong file specification string...
-			std::cerr << "Wrong Lexical Reordering Model Specification for model " << i << "!\n";
-			return false;
-    }
-    //spec[0] = factor map
-    //spec[1] = name
-    //spec[2] = num weights
-    //spec[3] = fileName
-    //decode data into these
-    vector<FactorType> input,output;
-    LexicalReordering::Direction direction;
-    LexicalReordering::Condition condition;
-    size_t numWeights;
-    //decode factor map
-    vector<string> inputfactors = Tokenize(spec[0],"-");
-    if(inputfactors.size() == 2){
-			input  = Tokenize<FactorType>(inputfactors[0],",");
-			output = Tokenize<FactorType>(inputfactors[1],",");
-    } 
-		else if(inputfactors.size() == 1)
-		{
-			//if there is only one side assume it is on e side... why?
-			output = Tokenize<FactorType>(inputfactors[0],",");
-    } 
-		else 
-		{
-			//format error
-			return false;
-    }
-    //decode name
-    vector<string> params = Tokenize<string>(spec[1],"-");
-    std::string type(ToLower(params[0]));
-		std::string dir;
-		std::string cond;
-
-		if(3 == params.size())
-		{
-			//name format is 'type'-'direction'-'condition'
-			dir  = ToLower(params[1]);
-			cond = ToLower(params[2]);
-		} 
-		else if(2 == params.size()) 
-		{
-			//assume name format is 'type'-'condition' with implicit unidirectional
-			std::cerr << "Warning: Lexical model type underspecified...assuming unidirectional in model " << i << "\n";
-			dir  = "unidirectional";
-			cond = ToLower(params[1]);
-		} 
-		else 
-		{
-			std::cerr << "Lexical model type underspecified for model " << i << "!\n";
-			return false;
-		}
+    VERBOSE(1, "Loading lexical distortion models...");
+    const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
+    const vector<string> weightsStr = m_parameter->GetParam("weight-d");
     
-		if(dir == "forward"){
-			direction = LexicalReordering::Forward;
-		 } 
-		else if(dir == "backward" || dir == "unidirectional" || dir == "uni")
-		{
-			direction = LexicalReordering::Backward; 
-		} 
-		else if(dir == "bidirectional" || dir == "bi") 
-		{
-			direction = LexicalReordering::Bidirectional;
-		}
-		else 
-		{
-			std::cerr << "Unknown direction declaration '" << dir << "'for lexical reordering model " << i << "\n";
-			return false;
-		}
-      
-		if(cond == "f"){
-			condition = LexicalReordering::F; 
-		}
-		else if(cond == "fe")
-		{
-			condition = LexicalReordering::FE; 
-		 } 
-		else if(cond == "fec")
-		{
-			condition = LexicalReordering::FEC;
-		} 
-		else 
-		{
-			std::cerr << "Unknown conditioning declaration '" << cond << "'for lexical reordering model " << i << "!\n";
-			return false;
-		}
+    std::vector<float>   weights;
+    size_t w = 1; //cur weight
+    size_t f = 0; //cur file
+    //get weights values
+    VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
+    for(size_t j = 0; j < weightsStr.size(); ++j){
+        weights.push_back(Scan<float>(weightsStr[j]));
+    }
+    //load all models
+    for(size_t i = 0; i < fileStr.size(); ++i)
+    {
+        vector<string> spec = Tokenize<string>(fileStr[f], " ");
+        ++f; //mark file as consumed
+        if(spec.size() != 4){
+            UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[f]);
+            return false;
+        }
+        
+        // spec[0] = factor map
+        // spec[1] = name
+        // spec[2] = num weights
+        // spec[3] = fileName
 
-		//decode num weights (and fetch weight from array...)
-		std::vector<float> mweights;
-		numWeights = atoi(spec[2].c_str());
-		for(size_t k = 0; k < numWeights; ++k, ++w)
-		{
-			if(w >= weights.size()){
-				//error not enough weights...
-				std::cerr << "Lexicalized distortion model: Not enough weights, add to [weight-d]\n";
-				return false;
-			} else {
-				mweights.push_back(weights[w]);
-			}
-		}
-    
-		//decode filename
-		string filePath = spec[3];
-
-		//all ready load it
-		//std::cerr << type;
-		if("monotonicity" == type){
-			m_reorderModels.push_back(new LexicalMonotonicReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else if("orientation" == type || "msd" == type)
-		{
-			m_reorderModels.push_back(new LexicalOrientationReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else if("directional" == type)
-		{
-			m_reorderModels.push_back(new LexicalDirectionalReordering(filePath, mweights, direction, condition, input, output));
-		} 
-		else 
-		{
-			//error unknown type!
-			std::cerr << " ...unknown type!\n";
-			return false;
-		}
-		//std::cerr << "\n";
-
-	} 
-  return true;
+        // decode factor map
+        
+        vector<FactorType> input, output;
+        vector<string> inputfactors = Tokenize(spec[0],"-");
+        if(inputfactors.size() == 2){
+            input  = Tokenize<FactorType>(inputfactors[0],",");
+            output = Tokenize<FactorType>(inputfactors[1],",");
+        } else if(inputfactors.size() == 1) {
+            //if there is only one side assume it is on e side... why?
+            output = Tokenize<FactorType>(inputfactors[0],",");
+        } else {
+            //format error
+            return false;
+        }
+        
+        string modelType = spec[1];
+        
+        // decode num weights and fetch weights from array
+        std::vector<float> mweights;
+        size_t numWeights = atoi(spec[2].c_str());
+        for(size_t k = 0; k < numWeights; ++k, ++w)
+        {
+            if(w >= weights.size()){
+                UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
+                return false;
+            } else
+                mweights.push_back(weights[w]);
+        }
+        
+        string filePath = spec[3];
+        
+        m_reorderModels.push_back(new LexicalReordering(input, output, modelType, filePath, mweights));
+    } 
+    return true;
 }
-
+    
 bool StaticData::LoadGlobalLexicalModel()
 {
 	const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lex"));

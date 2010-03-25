@@ -26,7 +26,7 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 all: compile
 
-SUBDIRS=cmert-0.5 phrase-extract symal mbr
+SUBDIRS=cmert-0.5 phrase-extract symal mbr lexical-reordering
 SUBDIRS_CLEAN=$(SUBDIRS) memscore
 
 compile: compile-memscore

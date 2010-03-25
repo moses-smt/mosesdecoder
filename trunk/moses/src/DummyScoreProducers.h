@@ -24,7 +24,7 @@ public:
 	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
-	virtual const FFState* EmptyHypothesisState() const;
+	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   virtual FFState* Evaluate(
     const Hypothesis& cur_hypo,

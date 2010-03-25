@@ -103,6 +103,22 @@ public:
 		return NOT_FOUND;
 	}
 
+
+	//! position of last word not yet translated, or NOT_FOUND if everything already translated
+	size_t GetLastGapPos() const
+	{
+		for (int pos = (int) m_size - 1 ; pos >= 0 ; pos--)
+		{
+			if (!m_bitmap[pos])
+			{
+				return pos;
+			}
+		}
+		// no starting pos
+		return NOT_FOUND;
+	}
+
+
 	//! position of last translated word
 	size_t GetLastPos() const
 	{

@@ -306,7 +306,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	bool labeledOutput = staticData.IsLabeledNBestList();
 	bool reportAllFactors = staticData.GetReportAllFactorsNBest();
 	bool includeAlignment = staticData.NBestIncludesAlignment();
-	bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
+	//bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 	
 	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)

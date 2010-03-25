@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
-#include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
 
@@ -48,6 +47,7 @@ class WordsRange;
 class Hypothesis;
 class FFState;
 class Manager;
+class LexicalReordering;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -173,8 +173,8 @@ public:
 		return m_sourcePhrase;
 	}
 
-	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;
-	std::string GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const;
+	std::string GetSourcePhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
+	std::string GetTargetPhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
 	inline const TargetPhrase GetTargetPhrase() const { return m_targetPhrase; }
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
@@ -274,8 +274,6 @@ public:
 		return s_HypothesesCreated;
 	}
 
-	const ScoreComponentCollection &GetCachedReorderingScore() const;
-
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }
 };
@@ -308,13 +306,16 @@ struct CompareHypothesisTotalScore
 * which hypothesis are equal based on:
 *   the last n-1 target words are the same
 *   and the covers (source words translated) are the same
+* Directly using RecombineCompare is unreliable because the Compare methods
+* of some states are based on archictecture-dependent pointer comparisons.
+* That's why we use the hypothesis IDs instead.
 */
 class HypothesisRecombinationOrderer
 {
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		return hypoA->RecombineCompare(*hypoB) < 0;
+		return (hypoA->RecombineCompare(*hypoB) < 0);
 	}
 };
 

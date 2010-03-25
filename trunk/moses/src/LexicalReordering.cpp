@@ -1,268 +1,88 @@
+#include <sstream>
+
+#include "FFState.h"
 #include "LexicalReordering.h"
+#include "LexicalReorderingState.h"
 #include "StaticData.h"
 
 namespace Moses
 {
-LexicalReordering::LexicalReordering(const std::string &filePath, 
-									 const std::vector<float>& weights, 
-									 Direction direction, 
-									 Condition condition, 
-									 std::vector< FactorType >& f_factors, 
-									 std::vector< FactorType >& e_factors)
-  : m_NumScoreComponents(weights.size()), m_MaxContextLength(0) 
-{
-  std::cerr << "Creating lexical reordering...\n";
-  //add ScoreProducer
-  const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
-  std::cerr << "weights: ";
-  for(size_t w = 0; w < weights.size(); ++w){
-	std::cerr << weights[w] << " ";
-  }
-  std::cerr << "\n";
-  m_Direction = DecodeDirection(direction);
-  m_Condition = DecodeCondition(condition);
     
-  //m_FactorsE = e_factors;
-  //m_FactorsF = f_factors;
-  //Todo:should check that
-  //- if condition contains e or c than e_factors non empty
-  //- if condition contains f f_factors non empty
-  for(size_t i = 0; i < m_Condition.size(); ++i){
-    switch(m_Condition[i]){
-    case E:
-      m_FactorsE = e_factors;
-	  if(m_FactorsE.empty()){
-		//problem
-		std::cerr << "Problem e factor mask is unexpectedly empty\n";
-      }
-      break;
-    case F:
-      m_FactorsF = f_factors;
-	  if(m_FactorsF.empty()){
-		//problem
-		std::cerr << "Problem f factor mask is unexpectedly empty\n";
-      }
-      break;
-    case C:
-      m_FactorsC         = e_factors;
-	  m_MaxContextLength = 1;
-      if(m_FactorsC.empty()){
-		//problem
-		std::cerr << "Problem c factor mask is unexpectedly empty\n";
-      }
-      break;
-    default:
-      //problem
-	  std::cerr << "Unknown conditioning option!\n";
-      break;
+LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors, 
+                                     std::vector<FactorType>& e_factors,
+                                     const std::string &modelType,
+                                     const std::string &filePath, 
+                                     const std::vector<float>& weights)
+        : m_configuration(this, modelType) {
+    std::cerr << "Creating lexical reordering...\n";
+    std::cerr << "weights: ";
+    for(size_t w = 0; w < weights.size(); ++w){
+        std::cerr << weights[w] << " ";
     }
-  }
-  if(weights.size() == m_Direction.size()){
-    m_OneScorePerDirection = true;
-	std::cerr << "Reordering types NOT individualy weighted!\n";
-  } else {
-	m_OneScorePerDirection = false;
-  }
-  m_Table = LexicalReorderingTable::LoadAvailable(filePath, m_FactorsF, m_FactorsE, m_FactorsC);
-}
-
-LexicalReordering::~LexicalReordering(){
-  if(m_Table){
-	delete m_Table;
-  }
-}
-  
-std::vector<float> LexicalReordering::CalcScore(Hypothesis* hypothesis) const {
-  std::vector<float> score(GetNumScoreComponents(), 0);
-  std::vector<float> values;
-
-  //for every direction
-  for(size_t i = 0; i < m_Direction.size(); ++i){
-    //grab data
-    if(Forward == m_Direction[i]){
-      //relates to prev hypothesis as we dont know next phrase for current yet
-      //sanity check: is there a previous hypothesis?
-      if(0 == hypothesis->GetPrevHypo()->GetId()){
-				continue; //no score continue with next direction
-      }
-      //grab probs for prev hypothesis
-			const ScoreComponentCollection &reorderingScoreColl = 
-							hypothesis->GetPrevHypo()->GetCachedReorderingScore();
-			values = reorderingScoreColl.GetScoresForProducer(this);
-			/*
-      values = m_Table->GetScore((hypothesis->GetPrevHypo()->GetSourcePhrase()).GetSubString(hypothesis->GetPrevHypo()->GetCurrSourceWordsRange()),
-								 hypothesis->GetPrevHypo()->GetCurrTargetPhrase(),
-								 auxGetContext(hypothesis->GetPrevHypo()));
-			*/
-    }
-    if(Backward == m_Direction[i])
-		{
-			const ScoreComponentCollection &reorderingScoreColl = 
-				hypothesis->GetCachedReorderingScore();
-			values = reorderingScoreColl.GetScoresForProducer(this);
-			/*
-      values = m_Table->GetScore(hypothesis->GetSourcePhrase().GetSubString(hypothesis->GetCurrSourceWordsRange()),
-								 hypothesis->GetCurrTargetPhrase(),
-								 auxGetContext(hypothesis));
-								 */
+    std::cerr << "\n";
+    
+    m_modelTypeString = modelType;
+    
+    switch(m_configuration.GetCondition()){
+        case LexicalReorderingConfiguration::FE:
+        case LexicalReorderingConfiguration::E:
+            m_factorsE = e_factors;
+            if(m_factorsE.empty()){
+                UserMessage::Add("TL factor mask for lexical reordering is unexpectedly empty");
+                exit(1);
+            }
+            if(m_configuration.GetCondition() == LexicalReorderingConfiguration::E)
+                break; // else fall through
+        case LexicalReorderingConfiguration::F:
+            m_factorsF = f_factors;
+            if(m_factorsF.empty()){
+                UserMessage::Add("SL factor mask for lexical reordering is unexpectedly empty");
+                exit(1);
+            }
+            break;
+        default:
+            UserMessage::Add("Unknown conditioning option!");
+            exit(1);
     }
     
-    //add score
-    //sanity check: do we have any probs?
-	  assert(values.size() == (GetNumOrientationTypes() * m_Direction.size()));
 
-		OrientationType orientation = GetOrientationType(hypothesis); 
-    float value = values[orientation + i * GetNumOrientationTypes()];
-    if(m_OneScorePerDirection){ 
-      //one score per direction
-      score[i] = value;
-    } else {
-      //one score per direction and orientation
-      score[orientation + i * GetNumOrientationTypes()] = value; 
+    if(weights.size() != m_configuration.GetNumScoreComponents()) {
+        std::ostringstream os;
+        os << "Lexical reordering model (type " << modelType << "): expected " << m_numScoreComponents << " weights, got " << weights.size() << std::endl;
+        UserMessage::Add(os.str());
+        exit(1);
     }
-  }
-  return score;
+    
+    // add ScoreProducer - don't do this before our object is set up
+    const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
+    const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+
+    m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 }
 
-Phrase LexicalReordering::auxGetContext(const Hypothesis* hypothesis) const { 
-  const Hypothesis* h = hypothesis;
-  Phrase c(Output);
-  if(0 == hypothesis->GetId()){
-	return c;
-  }
-  while(0 != hypothesis->GetPrevHypo()->GetId() && c.GetSize() < m_MaxContextLength){
-	hypothesis = hypothesis->GetPrevHypo();
-	int needed = m_MaxContextLength - c.GetSize();
-	const Phrase& p = hypothesis->GetCurrTargetPhrase();
-	Phrase tmp(Output);
-	if(needed > p.GetSize()){
-	  //needed -= p.GetSize();
-	  tmp = p;
-	} else {
-	  WordsRange range(p.GetSize() - needed, p.GetSize()-1);
-	  tmp = p.GetSubString(range);
-	}
-	//new code: new append returns void not this...
-	tmp.Append(c); c = tmp;
-  }
-  return c;
+LexicalReordering::~LexicalReordering() {
+    if(m_table)
+        delete m_table;
 }
 
-std::vector<LexicalReordering::Condition> LexicalReordering::DecodeCondition(LexicalReordering::Condition c){
-  std::vector<LexicalReordering::Condition> result;
-  switch(c){
-  case F:
-  case E:
-  case C:
-    result.push_back(c);
-    break;
-  case FE:
-    result.push_back(F);
-    result.push_back(E);
-    break;
-  case FEC:
-    result.push_back(F);
-    result.push_back(E);
-    result.push_back(C);
-    break;
-  }
-  return result;
+Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const {
+    return m_table->GetScore(f, e, Phrase(Output));
 }
 
-std::vector<LexicalReordering::Direction> LexicalReordering::DecodeDirection(LexicalReordering::Direction d){
-  std::vector<Direction> result;
-  if(Bidirectional == d){
-    result.push_back(Backward);
-    result.push_back(Forward);
-  } else {
-    result.push_back(d);
-  }
-  return result;
+FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
+                                     const FFState* prev_state,
+                                     ScoreComponentCollection* out) const {
+    Scores score(GetNumScoreComponents(), 0);
+    const LexicalReorderingState *prev = dynamic_cast<const LexicalReorderingState *>(prev_state);
+    LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), score);
+
+    out->PlusEquals(this, score);
+    
+    return next_state;
 }
 
-LexicalReordering::OrientationType LexicalMonotonicReordering::GetOrientationType(Hypothesis* currHypothesis) const
-{
-  const Hypothesis* prevHypothesis = currHypothesis->GetPrevHypo();
-  const WordsRange currWordsRange  = currHypothesis->GetCurrSourceWordsRange();
-  //check if there is a previous hypo 
-  if(0 == prevHypothesis->GetId()){
-    if(0 == currWordsRange.GetStartPos()){
-      return Monotone;
-    } else {
-      return NonMonotone;
-    }
-  } else {
-	const WordsRange  prevWordsRange = prevHypothesis->GetCurrSourceWordsRange();
-
-    if(prevWordsRange.GetEndPos() == currWordsRange.GetStartPos()-1){
-      return Monotone;
-    } else {
-      return NonMonotone;
-    }
-  }
-} 
-
-LexicalReordering::OrientationType LexicalOrientationReordering::GetOrientationType(Hypothesis* currHypothesis) const
-{
-  const Hypothesis* prevHypothesis = currHypothesis->GetPrevHypo();
-  const WordsRange currWordsRange  = currHypothesis->GetCurrSourceWordsRange();
-  //check if there is a previous hypo 
-  if(0 == prevHypothesis->GetId()){
-    if(0 == currWordsRange.GetStartPos()){
-      return Monotone;
-    } else {
-      return Discontinuous;
-    }
-  } else {
-	const WordsRange prevWordsRange  = prevHypothesis->GetCurrSourceWordsRange();
-
-    if(prevWordsRange.GetEndPos() == currWordsRange.GetStartPos()-1){
-      return Monotone;
-    } else if(prevWordsRange.GetStartPos() == currWordsRange.GetEndPos()+1) {
-      return Swap;
-    } else {
-      return Discontinuous;
-    }
-  }
-}
-
-
-LexicalReordering::OrientationType LexicalDirectionalReordering::GetOrientationType(Hypothesis* currHypothesis) const{
-  const Hypothesis* prevHypothesis = currHypothesis->GetPrevHypo();
-  const WordsRange currWordsRange = currHypothesis->GetCurrSourceWordsRange();
-  //check if there is a previous hypo 
-  if(0 == prevHypothesis->GetId()){
-	return Right;
-  } else {
-	const WordsRange prevWordsRange = prevHypothesis->GetCurrSourceWordsRange();
-
-    if(prevWordsRange.GetEndPos() <= currWordsRange.GetStartPos()){
-	  return Right;
-	} else {
-	  return Left;
-	}
-  }
-} 
-
-Score LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
-{
-	return m_Table->GetScore(f, e, Phrase(Output));
-}
-
-FFState* LexicalReordering::Evaluate(
-		const Hypothesis& hypo,
-		const FFState* prev_state,
-		ScoreComponentCollection* out) const {
-	out->PlusEquals(this, CalcScore(const_cast<Hypothesis*>(&hypo)));
-
-	//TODO need to return proper state, calc score should not use previous
-	//hypothesis, it should use the state.
-	return NULL;
-}
-
-const FFState* LexicalReordering::EmptyHypothesisState() const {
-  return NULL;
+const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) const {
+    return m_configuration.CreateLexicalReorderingState(input);
 }
 
 }

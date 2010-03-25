@@ -65,7 +65,12 @@ public:
 		return (m_startPos<x.m_startPos 
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
-	
+
+	// equality operator
+	inline bool operator==(const WordsRange& x) const 
+	{
+	  return (m_startPos==x.m_startPos && m_endPos==x.m_endPos);
+	}	
 	// Whether two word ranges overlap or not
 	inline bool Overlap(const WordsRange& x) const
 	{
