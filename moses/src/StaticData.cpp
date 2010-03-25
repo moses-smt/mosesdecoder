@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
+#include "SyntacticLanguageModel.h"
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
@@ -411,6 +412,10 @@ bool StaticData::LoadData(Parameter *parameter)
 		UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
 		return false;
 	}
+
+	if (m_parameter->GetParam("slmodel-file").size() > 0) {
+	  if (!LoadSyntacticLanguageModel()) return false;
+	}
 	
 	if (!LoadLexicalReorderingModel()) return false;
 	if (!LoadLanguageModels()) return false;
@@ -463,6 +468,8 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
 	
+	delete m_syntacticLanguageModel;
+
 	// delete trans opt
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
 	for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache)
@@ -475,11 +482,40 @@ StaticData::~StaticData()
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
-
+       
 	// memory pools
 	Phrase::FinalizeMemPool();
 
 }
+
+
+  bool StaticData::LoadSyntacticLanguageModel() {
+    cerr << "Loading syntactic language models..." << std::endl;
+    
+    const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
+    const vector<string> files = m_parameter->GetParam("slmodel-file");
+
+    if (files.size() < 1) {
+      cerr << "No syntactic language model files specified!" << std::endl;
+      return false;
+    }
+
+    // check if feature is used
+    if (weights.size() >= 1) {
+      
+      // create the feature
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights); 
+      
+      if (m_syntacticLanguageModel==NULL) {
+	return false;
+      }
+
+    }
+    
+    return true;
+
+  }
+
 
 bool StaticData::LoadLexicalReorderingModel()
 {
