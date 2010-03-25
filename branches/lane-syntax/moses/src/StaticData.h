@@ -58,6 +58,7 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+ class SyntacticLanguageModel;
 
 /** Contains global variables and contants */
 class StaticData
@@ -72,6 +73,7 @@ protected:
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
+	SyntacticLanguageModel* m_syntacticLanguageModel;
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
@@ -188,6 +190,10 @@ protected:
 	 * load all language models as specified in ini file
 	 */
 	bool LoadLanguageModels();
+
+
+	bool LoadSyntacticLanguageModel();
+
 	/***
 	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
 	 * (eg word-deletion, word-insertion tables)

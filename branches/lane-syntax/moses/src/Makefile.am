@@ -70,6 +70,7 @@ libmoses_la_HEADERS = \
 	SentenceStats.h \
 	SquareMatrix.h \
 	StaticData.h \
+	SyntacticLanguageModel.h \
 	TargetPhrase.h \
 	TargetPhraseCollection.h \
 	Timer.h \
@@ -169,6 +170,7 @@ libmoses_la_SOURCES = \
 	SentenceStats.cpp \
 	SquareMatrix.cpp \
 	StaticData.cpp \
+	SyntacticLanguageModel.cpp \
 	TargetPhrase.cpp \
 	TargetPhraseCollection.cpp \
 	Timer.cpp \
