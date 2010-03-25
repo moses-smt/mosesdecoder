@@ -71,7 +71,7 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 	ResetScore();
 	const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions();
 	for (unsigned i = 0; i < ffs.size(); ++i)
-	  m_ffStates[i] = ffs[i]->EmptyHypothesisState();
+	  m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
 }
 
 /***
@@ -500,12 +500,6 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 		allFactors.push_back(i);
 	}
 	return GetTargetPhraseStringRep(allFactors);
-}
-
-
-const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
-{
-	return m_transOpt->GetReorderingScore();
 }
 
 }

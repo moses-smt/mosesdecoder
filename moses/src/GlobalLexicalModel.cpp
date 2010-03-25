@@ -2,6 +2,7 @@
 #include "GlobalLexicalModel.h"
 #include "StaticData.h"
 #include "InputFileStream.h"
+#include "UserMessage.h"
 
 namespace Moses
 {

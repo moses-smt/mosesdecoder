@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "InputType.h"
+#include "LexicalReordering.h"
 #include "Util.h"
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
@@ -639,11 +640,10 @@ void TranslationOptionCollection::CacheLexReordering()
 					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
 					if (sourcePhrase)
 					{
-						Score score = lexreordering.GetProb(*sourcePhrase
+						Scores score = lexreordering.GetProb(*sourcePhrase
 															, transOpt.GetTargetPhrase());
-						// TODO should have better handling of unknown reordering entries
 						if (!score.empty())
-							transOpt.CacheReorderingProb(lexreordering, score);
+							transOpt.CacheScores(lexreordering, score);
 					}
 				}
 			}

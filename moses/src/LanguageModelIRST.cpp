@@ -60,7 +60,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 			     float weight,
 			     size_t nGramOrder)
 {
-  char *SepString = " \t\n";
+  const char *SepString = " \t\n";
   cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
 
   FactorCollection &factorCollection = FactorCollection::Instance();

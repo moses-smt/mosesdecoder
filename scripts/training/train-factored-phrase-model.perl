@@ -14,24 +14,24 @@ use File::Basename;
 $ENV{"LC_ALL"} = "C";
 my $SCRIPTS_ROOTDIR = $Bin;
 if ($SCRIPTS_ROOTDIR eq '') {
-  $SCRIPTS_ROOTDIR = dirname(__FILE__);
+    $SCRIPTS_ROOTDIR = dirname(__FILE__);
 }
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
 my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_CORPUS,
-$_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
-$_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
-$_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
-$_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
-$_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
-$_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
-$_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-@_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
-$_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-$_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING);
+   $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
+   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
+   $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
+   $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
+   $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
+   $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
+   $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
+   @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
+   $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
+   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
 
-my $debug = 0; # debug this script, do not delete any files in debug mode
+my $debug = 1; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
 my $BINDIR="";
@@ -64,8 +64,8 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
-			   'mgiza' => \$_MGIZA, # multi-thread 
-			   'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
+		       'mgiza' => \$_MGIZA, # multi-thread 
+		       'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
 		       'hmm-align' => \$_HMM_ALIGN,
 		       'final-alignment-model=s' => \$_FINAL_ALIGNMENT_MODEL, # use word alignment model 1/2/hmm/3/4/5 as final (default is 4); value 'hmm' equivalent to the --hmm-align switch
 		       'debug' => \$debug,
@@ -90,9 +90,11 @@ $_HELP = 1
 		       'continue' => \$_CONTINUE,
 		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
+		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
+		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
-                       'force-factored-filenames' => \$force_factored_filenames,
-                      );
+               'force-factored-filenames' => \$force_factored_filenames,
+               );
 
 if ($_HELP) {
     print "Train Phrase Model
@@ -108,7 +110,7 @@ Steps: (--first-step to --last-step)
 (8) learn generation model
 (9) create decoder config file
 
-For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
+    For more, please check manual or contact koehn\@inf.ed.ac.uk\n";
   exit(1);
 }
 
@@ -116,6 +118,41 @@ my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
 $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
 
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
+
+# Setting the steps to perform
+my $___VERBOSE = 0;
+my $___FIRST_STEP = 1;
+my $___LAST_STEP = 9;
+$___VERBOSE = $_VERBOSE if $_VERBOSE;
+$___FIRST_STEP = $_FIRST_STEP if $_FIRST_STEP;
+$___LAST_STEP =  $_LAST_STEP  if $_LAST_STEP;
+my $___DO_STEPS = $___FIRST_STEP."-".$___LAST_STEP;
+$___DO_STEPS = $_DO_STEPS if $_DO_STEPS;
+my @STEPS = (0,0,0,0,0,0,0,0,0);
+
+my @step_conf = split(',',$___DO_STEPS);
+my ($f,$l);
+foreach my $step (@step_conf) {
+  if ($step =~ /^(\d)$/) {
+    $f = $1;
+    $l = $1;
+  }
+  elsif ($step =~ /^(\d)-(\d)$/) {
+    $f = $1;
+    $l = $2;
+  }
+  else {
+    die ("Malformed argument to --do-steps");
+  }
+  die("Only steps between 0 and 9 can be used") if ($f < 1 || $l > 9);
+  die("The first step must be smaller than the last step") if ($f > $l);
+	
+  for (my $i=$f; $i<=$l; $i++) {
+    $STEPS[$i] = 1;
+  }
+}
+
+
 
 # supporting binaries from other packages
 my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
@@ -138,6 +175,7 @@ my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
@@ -149,14 +187,16 @@ my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
 # these are not installed by default
-die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless (-x $GIZA && -x $SNT2COOC && -x $MKCLS);
+# not needed if we start after step 2
+die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
+                                       (-x $GIZA && -x $SNT2COOC && -x $MKCLS));
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";
 $___ROOT_DIR = $_ROOT_DIR if $_ROOT_DIR;
 my $___CORPUS_DIR  = $___ROOT_DIR."/corpus";
 $___CORPUS_DIR = $_CORPUS_DIR if $_CORPUS_DIR;
-die("ERROR: use --corpus to specify corpus") unless $_CORPUS || ($_FIRST_STEP && $_FIRST_STEP>1 && $_FIRST_STEP!=8);
+die("ERROR: use --corpus to specify corpus") unless $_CORPUS || !($STEPS[1] || $STEPS[4] || $STEPS[5] || $STEPS[8]);
 my $___CORPUS      = $_CORPUS;
 
 # check the final-alignment-model switch
@@ -239,15 +279,9 @@ $___PHRASE_SCORER = "memscore" if defined $_MEMSCORE;
 my $___MEMSCORE_OPTIONS = "-s ml -s lexweights \$LEX_E2F -r ml -r lexweights \$LEX_F2E -s const 2.718";
 $___MEMSCORE_OPTIONS = $_MEMSCORE if $_MEMSCORE;
 
-my $___VERBOSE = 0;
-my $___FIRST_STEP = 1;
-my $___LAST_STEP = 9;
-$___VERBOSE = $_VERBOSE if $_VERBOSE;
-$___FIRST_STEP = $_FIRST_STEP if $_FIRST_STEP;
-$___LAST_STEP =  $_LAST_STEP  if $_LAST_STEP;
 
 my @___LM = ();
-if ($___LAST_STEP == 9) {
+if ($STEPS[9]) {
   die "ERROR: use --lm factor:order:filename to specify at least one language model"
     if scalar @_LM == 0;
   foreach my $lm (@_LM) {
@@ -281,32 +315,105 @@ my $___REORDERING = "distance";
 $___REORDERING = $_REORDERING if $_REORDERING;
 my $___REORDERING_SMOOTH = 0.5;
 $___REORDERING_SMOOTH = $_REORDERING_SMOOTH if $_REORDERING_SMOOTH;
-my %REORDERING_MODEL;
-my $REORDERING_LEXICAL = 0; # flag for building lexicalized reordering models
-foreach my $r (split(/,/,$___REORDERING)) {
-    $r =~ s/orientation/msd/;
-    if (!( $r eq "msd-f" ||
-         $r eq "msd-fe" ||
-         $r eq "msd-bidirectional-f" ||
-         $r eq "msd-bidirectional-fe" ||
-         $r eq "monotonicity-f" ||
-         $r eq "monotonicity-fe" ||
-         $r eq "monotonicity-bidirectional-f" ||
-         $r eq "monotonicity-bidirectional-fe" ||
-         $r eq "distance")) {
-       print STDERR "unknown reordering type: $r";
-       exit(1);
+my @REORDERING_MODELS;
+my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
+my %REORDERING_MODEL_TYPES = ();
+
+my $___MAX_LEXICAL_REORDERING = 0;
+$___MAX_LEXICAL_REORDERING = 1 if $_MAX_LEXICAL_REORDERING;
+
+my $model_num = 0;
+
+foreach my $r (split(/\,/,$___REORDERING)) {
+   #change some config string options, to be backward compatible
+   $r =~ s/orientation/msd/;
+   $r =~ s/unidirectional/backward/;
+   #set default values
+   push @REORDERING_MODELS, {};
+   $REORDERING_MODELS[$model_num]{"dir"} = "backward";   
+   $REORDERING_MODELS[$model_num]{"type"} = "wbe";
+   $REORDERING_MODELS[$model_num]{"collapse"} = "allff";
+
+   #handle the options set in the config string
+   foreach my $reoconf (split(/\-/,$r)) {
+      if ($reoconf eq "distance") {
+        $REORDERING_LEXICAL = 0;
+        next;
+      }
+      if ($reoconf =~ /^((msd)|(mslr)|(monotonicity)|(leftright))/) { 
+        $REORDERING_MODELS[$model_num]{"orient"} = $reoconf;
+      }
+      elsif ($reoconf =~ /^((bidirectional)|(backward)|(forward))/) {
+        $REORDERING_MODELS[$model_num]{"dir"} = $reoconf;
+      }
+      elsif ($reoconf =~ /^((fe)|(f))/) {
+        $REORDERING_MODELS[$model_num]{"lang"} = $reoconf;
+      }
+      elsif ($reoconf =~ /^((hier)|(phrase)|(wbe))/) {
+        $REORDERING_MODELS[$model_num]{"type"} = $reoconf;
+      }
+      elsif ($reoconf =~ /^((collapseff)|(allff))/) {
+        $REORDERING_MODELS[$model_num]{"collapse"} = $reoconf;
+      }
+      else {
+        print STDERR "unknown type in reordering model config string: $reoconf in $r\n";
+        exit(1);
+      }
+  }
+  #check that the required attributes are given
+  if (!defined($REORDERING_MODELS[$model_num]{"type"})) {
+     print STDERR "you have to give the type of the reordering models (mslr, msd, monotonicity or leftright); it is not done in $r\n";
+     exit(1);
+  }
+  if (!defined($REORDERING_MODELS[$model_num]{"lang"})) {
+     print STDERR "you have specify which languages to condition on (f or fe); it is not done in $r\n";
+     exit(1);
+  }
+
+  #fix the all-string
+  $REORDERING_MODELS[$model_num]{"filename"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.
+                                               $REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"};
+  $REORDERING_MODELS[$model_num]{"config"} = $REORDERING_MODELS[$model_num]{"filename"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
+
+  # fix numfeatures
+  $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
+  $REORDERING_MODELS[$model_num]{"numfeatures"} = 2 if $REORDERING_MODELS[$model_num]{"dir"} eq "bidirectional";
+  if ($REORDERING_MODELS[$model_num]{"collapse"} ne "collapseff") {
+    if ($REORDERING_MODELS[$model_num]{"orient"} eq "msd") {
+      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 3;
     }
-    if ($r ne "distance") { $REORDERING_LEXICAL = 1; }
-    $REORDERING_MODEL{$r}++;
-    if ($r =~ /-f$/) { $REORDERING_MODEL{"f"}++; }
-    if ($r =~ /-fe$/) { $REORDERING_MODEL{"fe"}++; }
+    elsif ($REORDERING_MODELS[$model_num]{"orient"} eq "mslr") {
+      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 4;
+    }
+    else {
+      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 2;
+    }
+  }
+
+  # fix the overall model selection
+  if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
+     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
+        $REORDERING_MODELS[$model_num]{"orient"}."-"; 
+  }
+  else  {
+     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
+        $REORDERING_MODELS[$model_num]{"orient"};
+  }
+  $model_num++;
 }
-my ($mono_previous_f,$swap_previous_f,$other_previous_f);
-my ($mono_previous_fe,$swap_previous_fe,$other_previous_fe);
-my ($mono_following_f,$swap_following_f,$other_following_f);
-my ($mono_following_fe,$swap_following_fe,$other_following_fe);
-my ($f_current,$e_current);
+
+# pick the overall most specific model for each reordering model type
+for my $mtype ( keys %REORDERING_MODEL_TYPES) {
+  if ($REORDERING_MODEL_TYPES{$mtype} =~ /(mslr)|(leftright)/) {
+    $REORDERING_MODEL_TYPES{$mtype} = "mslr"
+  }
+  elsif ($REORDERING_MODEL_TYPES{$mtype} =~ /msd/) {
+    $REORDERING_MODEL_TYPES{$mtype} = "msd"
+  }
+  else {
+    $REORDERING_MODEL_TYPES{$mtype} = "monotonicity"
+  }
+}
 
 ### Factored translation models
 my $___NOT_FACTORED = !$force_factored_filenames;
@@ -342,15 +449,15 @@ die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DE
 
 ### MAIN
 
-&prepare()                 if $___FIRST_STEP==1;
-&run_giza()                if $___FIRST_STEP<=2 && $___LAST_STEP>=2;
-&word_align()              if $___FIRST_STEP<=3 && $___LAST_STEP>=3;
-&get_lexical_factored()    if $___FIRST_STEP<=4 && $___LAST_STEP>=4;
-&extract_phrase_factored() if $___FIRST_STEP<=5 && $___LAST_STEP>=5;
-&score_phrase_factored()   if $___FIRST_STEP<=6 && $___LAST_STEP>=6;
-&get_reordering_factored() if $___FIRST_STEP<=7 && $___LAST_STEP>=7;
-&get_generation_factored() if $___FIRST_STEP<=8 && $___LAST_STEP>=8;
-&create_ini()              if                      $___LAST_STEP==9;
+&prepare()                 if $STEPS[1];
+&run_giza()                if $STEPS[2];
+&word_align()              if $STEPS[3];
+&get_lexical_factored()    if $STEPS[4];
+&extract_phrase_factored() if $STEPS[5];
+&score_phrase_factored()   if $STEPS[6];
+&get_reordering_factored() if $STEPS[7];
+&get_generation_factored() if $STEPS[8];
+&create_ini()              if $STEPS[9];
 
 ### (1) PREPARE CORPUS
 
@@ -415,7 +522,7 @@ sub prepare {
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
 			    $___CORPUS_DIR."/$___F-$___E-int-train.snt");
-    
+	
 	&numberize_txt_file($VCB_E,$corpus.".".$___E,
 			    $VCB_F,$corpus.".".$___F,
 			    $___CORPUS_DIR."/$___E-$___F-int-train.snt");
@@ -1030,6 +1137,18 @@ sub extract_phrase_factored {
     }
 }
 
+sub get_extract_reordering_flags {
+    if ($___MAX_LEXICAL_REORDERING) {
+	return " --model wbe-mslr --model phrase-mslr --model hier-mslr";
+    }
+    return "" unless @REORDERING_MODELS; 
+    my $config_string = "";
+    for my $type ( keys %REORDERING_MODEL_TYPES) {
+	$config_string .= " --model $type-".$REORDERING_MODEL_TYPES{$type};
+    }
+    return $config_string;
+}
+
 sub extract_phrase {
     my ($alignment_file_f,$alignment_file_e,$extract_file) = @_;
     my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
@@ -1045,6 +1164,7 @@ sub extract_phrase {
     $cmd .= " --NoFileLimit" unless $_FILE_LIMIT;
     $cmd .= " --ProperConditioning" if $_PROPER_CONDITIONING;
     $cmd .= " orientation" if $REORDERING_LEXICAL;
+    $cmd .= get_extract_reordering_flags();
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
@@ -1134,14 +1254,14 @@ sub score_phrase_phrase_extract {
 	my $extract = "$extract_filename.sorted";
 
 	if (!($___CONTINUE && -e "$extract_filename.sorted")) {
-	  # sorting
-    	  print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
-          if (-e "$extract_filename.gz") {
-      	    safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
-    	  }
-          else {
-            safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
-	  }
+	    # sorting
+	    print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
+	    if (-e "$extract_filename.gz") {
+		safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+	    }
+	    else {
+		safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+	    }
         }
 
 	print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
@@ -1173,19 +1293,19 @@ sub score_phrase_phrase_extract {
     # sorting inverse phrase-table-half to sync up with regular one
     print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
     if (! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
-      safesystem("LC_ALL=C sort -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
-      if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
+	safesystem("LC_ALL=C sort -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
+	if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
     }
 
     # merging the two halves
     return if $___CONTINUE && -e "$ttable_file.gz";
     print STDERR "(6.6)  consolidating the two halves @ ".`date`;
     open(F2E,"$ttable_file.half.f2e")
-      or die "ERROR: Can't read $ttable_file.half.f2e";
+	or die "ERROR: Can't read $ttable_file.half.f2e";
     open(E2F,"$ttable_file.half.e2f.sorted")
-      or die "ERROR: Can't read $ttable_file.half.e2f.sorted";
+	or die "ERROR: Can't read $ttable_file.half.e2f.sorted";
     open(TABLE,"| gzip >$ttable_file.gz")
-      or die "ERROR: Can't write $ttable_file.gz";
+	or die "ERROR: Can't write $ttable_file.gz";
     my $i=0;
     my $mismatch = 0;
     while(my $f2e = <F2E>) {
@@ -1194,9 +1314,9 @@ sub score_phrase_phrase_extract {
 	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$e2f); chop($p);
 	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2e); chop($p2);
 	if ($english ne $english2 
-		|| $foreign ne $foreign2)
+	    || $foreign ne $foreign2)
 	{
-		print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2 )\n";
+	    print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2 )\n";
             $mismatch++;
             last if $mismatch > 10;
 	    next;
@@ -1266,45 +1386,44 @@ sub score_phrase_memscore {
 
 sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
-    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
-    my @TYPE = ("msd-f","msd-fe","msd-bidirectional-f","msd-bidirectional-fe","monotonicity-f","monotonicity-fe","monotonicity-bidirectional-f","monotonicity-bidirectional-fe");
+
+#This @REORDERING_TABLE is now not used. Did anyone use it???
+#    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
+    if (scalar(@_REORDERING_TABLE)) {
+	print STDERR "WARNING: you specified -reordering-table. That feature is not implemented in this version of train-factored-phrase-model.perl. Standard file names will be used.\n";
+    }
     if ($REORDERING_LEXICAL) {
 	if ($___NOT_FACTORED) {
-	    my %FILE;
-	    foreach my $type (@TYPE) {
-		if (defined($REORDERING_MODEL{$type})) {
-		    my $file = "$___MODEL_DIR/reordering-table";
-                    $file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
-		    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		    $FILE{$type} = $file;
-		}
-	    }
-	    &get_reordering(\%FILE,$___EXTRACT_FILE);
+	    print STDERR "(7.1) [no factors] learn reordering model @ ".`date`;
+	    # foreach my $model (@REORDERING_MODELS) {
+	    # 	#my $file = "$___MODEL_DIR/reordering-table.";
+	    # 	$file .= $model->{"all"};
+	    # 	#$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    # 	$model->{"file"} = $file;
+	    # }
+	    &get_reordering($___EXTRACT_FILE,"$___MODEL_DIR/reordering-table.");
 	}
-	else {
+ 	else {
 	    foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-		print STDERR "(7) [$factor] learn reordering model @ ".`date`;
+		print STDERR "(7.1) [$factor] learn reordering model @ ".`date`;
 		my ($factor_f,$factor_e) = split(/\-/,$factor);
-		my %FILE;
-		foreach my $type (@TYPE) {
-		    if (defined($REORDERING_MODEL{$type})) {
-			my $file = "$___MODEL_DIR/reordering-table.$factor";
-                        $file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
-			$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-			$FILE{$type} = $file;
-		    }
-		}
-		&get_reordering(\%FILE,"$___EXTRACT_FILE.$factor");
+		# foreach my $model (@REORDERING_MODELS) { 
+		#     my $file = "$___MODEL_DIR/reordering-table.$factor";
+		#     $file .= $model->{"all"};
+		#     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+		#     $model->{"file"} = $file;
+		# }
+		&get_reordering("$___EXTRACT_FILE.$factor","$___MODEL_DIR/reordering-table.$factor");
 	    }
-	}
-    } 
+	} 
+    }
     else {
 	print STDERR "  ... skipping this step, reordering is not lexicalized ...\n";
     }
 }
 
 sub get_reordering {
-    my ($MODEL_FILE,$extract_file) = @_;
+    my ($extract_file,$reo_model_path) = @_;
     if (-e "$extract_file.o.gz") {
 	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
     }
@@ -1313,191 +1432,29 @@ sub get_reordering {
     }
 
     my $smooth = $___REORDERING_SMOOTH;
-    my @REORDERING_SMOOTH_PREVIOUS = ($smooth,$smooth,$smooth);
-    my @REORDERING_SMOOTH_FOLLOWING = ($smooth,$smooth,$smooth);
-
-    my (%SMOOTH_PREVIOUS,%SMOOTH_FOLLOWING);
-    if ($smooth =~ /(.+)u$/) {
-	$smooth = $1;
-	my $smooth_total = 0; 
-	open(O,"$extract_file.o.sorted")
-          or die "ERROR: Can't read $extract_file.o.sorted";
-	while(<O>) {
-	    chomp;
-	    my ($f,$e,$o) = split(/ \|\|\| /);
-	    my ($o_previous,$o_following) = split(/ /,$o);
-	    $SMOOTH_PREVIOUS{$o_previous}++;
-	    $SMOOTH_FOLLOWING{$o_following}++;
-	    $smooth_total++;
-	}
-	close(O);
-	@REORDERING_SMOOTH_PREVIOUS = ($smooth*($SMOOTH_PREVIOUS{"mono"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"swap"}+0.1)/$smooth_total,
-				       $smooth*($SMOOTH_PREVIOUS{"other"}+0.1)/$smooth_total);
-	@REORDERING_SMOOTH_FOLLOWING = ($smooth*($SMOOTH_FOLLOWING{"mono"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"swap"}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{"other"}+0.1)/$smooth_total);
-	printf "$smooth*($SMOOTH_FOLLOWING{mono}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{swap}+0.1)/$smooth_total,
-					$smooth*($SMOOTH_FOLLOWING{other}+0.1)/$smooth_total\n";
-	printf "smoothed following to %f,%f,%f\n",@REORDERING_SMOOTH_FOLLOWING;
-    }
-    
-    ($mono_previous_f,$swap_previous_f,$other_previous_f) = @REORDERING_SMOOTH_PREVIOUS;
-    ($mono_previous_fe,$swap_previous_fe,$other_previous_fe) = @REORDERING_SMOOTH_PREVIOUS;
-    ($mono_following_f,$swap_following_f,$other_following_f) = @REORDERING_SMOOTH_FOLLOWING;
-    ($mono_following_fe,$swap_following_fe,$other_following_fe) = @REORDERING_SMOOTH_FOLLOWING;
 
     print STDERR "(7.2) building tables @ ".`date`;
-    open(O,"$extract_file.o.sorted")
-      or die "ERROR: Can't read $extract_file.o.sorted";
-    open(OF,  "|gzip >".$$MODEL_FILE{"msd-f"}.".gz")
-	if defined($REORDERING_MODEL{"msd-f"});
-    open(OFE, "|gzip >".$$MODEL_FILE{"msd-fe"}.".gz")
-	if defined($REORDERING_MODEL{"msd-fe"});
-    open(OBF, "|gzip >".$$MODEL_FILE{"msd-bidirectional-f"}.".gz")
-	if defined($REORDERING_MODEL{"msd-bidirectional-f"});
-    open(OBFE,"|gzip >".$$MODEL_FILE{"msd-bidirectional-fe"}.".gz")
-	if defined($REORDERING_MODEL{"msd-bidirectional-fe"});
-    open(MF,  "|gzip >".$$MODEL_FILE{"monotonicity-f"}.".gz")
-	if defined($REORDERING_MODEL{"monotonicity-f"});
-    open(MFE, "|gzip >".$$MODEL_FILE{"monotonicity-fe"}.".gz")
-	if defined($REORDERING_MODEL{"monotonicity-fe"});
-    open(MBF, "|gzip >".$$MODEL_FILE{"monotonicity-bidirectional-f"}.".gz")
-	if defined($REORDERING_MODEL{"monotonicity-bidirectional-f"});
-    open(MBFE,"|gzip >".$$MODEL_FILE{"monotonicity-bidirectional-fe"}.".gz")
-	if defined($REORDERING_MODEL{"monotonicity-bidirectional-fe"});
 
-    my $first = 1;
-    while(<O>) {
-	chomp;
-	my ($f,$e,$o) = split(/ \|\|\| /);
-	my ($o_previous,$o_following) = split(/ /,$o);
-	
-	# store counts if new f,e
-	if ($first) {
-	    $f_current = $f;
-	    $e_current = $e;
-	    $first = 0;
+    #create cmd string for lexical reordering scoring
+    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted $smooth $reo_model_path";
+    $cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
+    for my $mtype (keys %REORDERING_MODEL_TYPES) {
+	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
+	foreach my $model (@REORDERING_MODELS) {
+	    if ($model->{"type"} eq $mtype) {
+		$cmd .= " ".$model->{"filename"};
+	    }
 	}
-	elsif ($f ne $f_current || $e ne $e_current) {
-	    
-	    if (defined($REORDERING_MODEL{"fe"})) {
-		# compute probs, store them
-		&store_reordering_fe();
-		
-		# reset counters
-		($mono_previous_fe,$swap_previous_fe,$other_previous_fe) = @REORDERING_SMOOTH_PREVIOUS;
-		($mono_following_fe,$swap_following_fe,$other_following_fe) = @REORDERING_SMOOTH_FOLLOWING;
-	    }
+	$cmd .= "\"";
+    }
+    
+    #Call the lexical reordering scorer
+    safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
 
-	    # store counts if new f
-	    if ($f ne $f_current && defined($REORDERING_MODEL{"f"})) {
-		
-		# compute probs, store them
-		&store_reordering_f();
-		
-		# reset counters
-		($mono_previous_f,$swap_previous_f,$other_previous_f) = @REORDERING_SMOOTH_PREVIOUS;
-		($mono_following_f,$swap_following_f,$other_following_f) = @REORDERING_SMOOTH_FOLLOWING;
-		
-	    }
-	    $f_current = $f;
-	    $e_current = $e;
-	}	
-	# update counts
-	if    ($o_previous eq 'mono') {  $mono_previous_f++;  $mono_previous_fe++; }
-	elsif ($o_previous eq 'swap') {  $swap_previous_f++;  $swap_previous_fe++; }
-	elsif ($o_previous eq 'other'){ $other_previous_f++; $other_previous_fe++; }
-	else { print STDERR "buggy line (o_previous:$o_previous): $_\n"; }
-	
-	if    ($o_following eq 'mono') {  $mono_following_f++;  $mono_following_fe++; }
-	elsif ($o_following eq 'swap') {  $swap_following_f++;  $swap_following_fe++; }
-	elsif ($o_following eq 'other'){ $other_following_f++; $other_following_fe++; }
-	else { print STDERR "buggy line (o_following:$o_following): $_\n"; }
-
-    }
-    if (defined($REORDERING_MODEL{"f"})) {
-	&store_reordering_f();
-    }
-    if (defined($REORDERING_MODEL{"fe"})) {
-	&store_reordering_fe();
-    }
     if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
 }
 
-sub store_reordering_f {
-    my $total_previous_f = $mono_previous_f+$swap_previous_f+$other_previous_f;
-    my $total_following_f = $mono_following_f+$swap_following_f+$other_following_f;
-    if(defined($REORDERING_MODEL{"msd-f"})) {
-      printf OF ("%s ||| %g %g %g\n",
-		   $f_current, 
-		   $mono_previous_f/$total_previous_f,
-		   $swap_previous_f/$total_previous_f,
-		   $other_previous_f/$total_previous_f);
-    }
-    if(defined($REORDERING_MODEL{"msd-bidirectional-f"})) {
-      printf OBF ("%s ||| %g %g %g %g %g %g\n",
-		    $f_current, 
-		    $mono_previous_f/$total_previous_f,
-		    $swap_previous_f/$total_previous_f,
-		    $other_previous_f/$total_previous_f,
-		    $mono_following_f/$total_following_f,
-		    $swap_following_f/$total_following_f,
-		    $other_following_f/$total_following_f);
-    }
-    if(defined($REORDERING_MODEL{"monotonicity-f"})) {
-      printf MF ("%s ||| %g %g\n",
-		  $f_current, 
-		   $mono_previous_f/$total_previous_f,
-		   ($swap_previous_f+$other_previous_f)/$total_previous_f);
-    }
-    if(defined($REORDERING_MODEL{"monotonicity-bidirectional-f"})) {
-      printf MBF ("%s ||| %g %g %g %g\n",
-		    $f_current, 
-		    $mono_previous_f/$total_previous_f,
-		    ($swap_previous_f+$other_previous_f)/$total_previous_f,
-		    $mono_following_f/$total_following_f,
-		    ($swap_following_f+$other_following_f)/$total_following_f);
-    }
-}
 
-sub store_reordering_fe {
-    my $total_previous_fe = $mono_previous_fe+$swap_previous_fe+$other_previous_fe;
-    my $total_following_fe = $mono_following_fe+$swap_following_fe+$other_following_fe;
-    
-    if(defined($REORDERING_MODEL{"msd-fe"})) {
-      printf OFE ("%s ||| %s ||| %g %g %g\n",
-		   $f_current, $e_current, 
-		   $mono_previous_fe/$total_previous_fe,
-		   $swap_previous_fe/$total_previous_fe,
-		   $other_previous_fe/$total_previous_fe);
-    }
-    if(defined($REORDERING_MODEL{"msd-bidirectional-fe"})) {
-      printf OBFE ("%s ||| %s ||| %g %g %g %g %g %g\n",
-		    $f_current, $e_current, 
-		    $mono_previous_fe/$total_previous_fe,
-		    $swap_previous_fe/$total_previous_fe,
-		    $other_previous_fe/$total_previous_fe,
-		    $mono_following_fe/$total_following_fe,
-		    $swap_following_fe/$total_following_fe,
-		    $other_following_fe/$total_following_fe);
-    }
-    if(defined($REORDERING_MODEL{"monotonicity-fe"})) {
-      printf MFE ("%s ||| %s ||| %g %g\n",
-		   $f_current, $e_current, 
-		   $mono_previous_fe/$total_previous_fe,
-		   ($swap_previous_fe+$other_previous_fe)/$total_previous_fe);
-    }
-    if(defined($REORDERING_MODEL{"monotonicity-bidirectional-fe"})) {
-      printf MBFE ("%s ||| %s ||| %g %g %g %g\n",
-		    $f_current, $e_current, 
-		    $mono_previous_fe/$total_previous_fe,
-		    ($swap_previous_fe+$other_previous_fe)/$total_previous_fe,
-		    $mono_following_fe/$total_following_fe,
-		    ($swap_following_fe+$other_following_fe)/$total_following_fe);
-    }
-}
 
 ### (8) LEARN GENERATION MODEL
 
@@ -1563,7 +1520,7 @@ sub get_generation {
 	}
     } 
     close(E);
- 
+    
     open(GEN,">$file") or die "ERROR: Can't write $file";
     foreach my $source (keys %GENERATION) {
 	foreach my $target (keys %{$GENERATION{$source}}) {
@@ -1596,17 +1553,17 @@ sub create_ini {
 \n";
     
     if (defined $___TRANSLATION_FACTORS) {
-      print INI "# input factors\n";
-      print INI "[input-factors]\n";
-      my $INPUT_FACTOR_MAX = 0;
-      foreach my $table (split /\+/, $___TRANSLATION_FACTORS) {
-	      my ($factor_list, $output) = split /-+/, $table;
-        foreach (split(/,/,$factor_list)) {
-          $INPUT_FACTOR_MAX = $_ if $_>$INPUT_FACTOR_MAX;
-        }  
-      }
-      $INPUT_FACTOR_MAX = $_INPUT_FACTOR_MAX if $_INPUT_FACTOR_MAX; # use specified, if exists
-      for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
+	print INI "# input factors\n";
+	print INI "[input-factors]\n";
+	my $INPUT_FACTOR_MAX = 0;
+	foreach my $table (split /\+/, $___TRANSLATION_FACTORS) {
+	    my ($factor_list, $output) = split /-+/, $table;
+	    foreach (split(/,/,$factor_list)) {
+		$INPUT_FACTOR_MAX = $_ if $_>$INPUT_FACTOR_MAX;
+	    }  
+	}
+	$INPUT_FACTOR_MAX = $_INPUT_FACTOR_MAX if $_INPUT_FACTOR_MAX; # use specified, if exists
+	for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
     } else {
       die "ERROR: No translation steps defined, cannot prepare [input-factors] section\n";
     }
@@ -1694,21 +1651,14 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
  
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-	foreach my $type (keys %REORDERING_MODEL) {
-	    next if $type eq "fe" || $type eq "f";
-	    next if $type eq "distance";
-		my $w;
-		if ($type =~ /msd/) { $w = 3; } else { $w = 2; }
-		if ($type =~ /bi/) { $w *= 2; }
-		$weight_d_count += $w;
-
-	        my $table_file = "$___MODEL_DIR/reordering-table";
-	        $table_file .= ".$factor" unless $___NOT_FACTORED;
-                $table_file .= ".$type" if (scalar keys %REORDERING_MODEL) > 2;
-                $table_file .= ".gz";
-		$table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-		$type =~ s/\-f/\-unidirectional\-f/ unless $type =~ /\-bi/;
-		$file .= "$factor $type $w $table_file\n";
+	foreach my $model (@REORDERING_MODELS) {	
+	    $weight_d_count += $model->{"numfeatures"};
+	    my $table_file = "$___MODEL_DIR/reordering-table.";
+	    $table_file .= ".$factor" unless $___NOT_FACTORED;
+	    $table_file .= $model->{"filename"};
+	    $table_file .= ".gz";
+	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+	    $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
 	}
         $factor_i++;
       }
@@ -1720,7 +1670,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
   
   print INI "# distortion (reordering) weight\n[weight-d]\n";
   for(my $i=0;$i<$weight_d_count;$i++) { 
-    print INI "".(0.6/(scalar keys %REORDERING_MODEL))."\n";
+    print INI "".(0.6/(scalar @REORDERING_MODELS))."\n";
   }
   print INI "\n# language model weights
 [weight-l]\n";
@@ -1812,3 +1762,4 @@ sub open_or_zcat {
   open($hdl,$read) or die "Can't read $fn ($read)";
   return $hdl;
 }
+

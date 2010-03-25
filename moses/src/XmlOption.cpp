@@ -31,6 +31,7 @@
 
 namespace Moses 
 {
+using namespace std;
 
 string ParseXmlTagAttribute(const string& tag,const string& attributeName){
 	/*TODO deal with unescaping \"*/

@@ -311,7 +311,7 @@ void SearchCubePruning::PrintBitmapContainerGraph()
 	for (iterAccessor = bitmapAccessor.begin(); iterAccessor != bitmapAccessor.end(); ++iterAccessor)
 	{
 		cerr << iterAccessor->first << endl;
-		BitmapContainer &container = *iterAccessor->second;
+		//BitmapContainer &container = *iterAccessor->second;
 	}
 
 }

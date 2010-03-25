@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TranslationOption_h
 #define moses_TranslationOption_h
 
+#include <map>
 #include <vector>
 #include "WordsBitmap.h"
 #include "WordsRange.h"
@@ -38,6 +39,7 @@ namespace Moses
 
 class PhraseDictionary;
 class GenerationDictionary;
+class LexicalReordering;
 
 /** Available phrase translation for a particular sentence pair.
  * In a multi-factor model, this is expanded from the entries in the 
@@ -71,7 +73,9 @@ protected:
 	//! TargetPhrase may be shorter than the n-gram order.  But, if it is
 	//! possible to estimate, it is included here.
 	ScoreComponentCollection	m_scoreBreakdown;
-	ScoreComponentCollection	m_reordering;
+
+	typedef std::map<const ScoreProducer *, const Scores *> _ScoreCacheMap;
+	_ScoreCacheMap m_cachedScores;
 
 public:
 	/** constructor. Used by initial translation step */
@@ -92,6 +96,8 @@ public:
 	~TranslationOption()
 	{
 		delete m_sourcePhrase;
+		for(_ScoreCacheMap::const_iterator it = m_cachedScores.begin(); it != m_cachedScores.end(); ++it)
+			delete it->second;
 	}
 
 	/** returns true if all feature types in featuresToCheck are compatible between the two phrases */
@@ -157,28 +163,32 @@ public:
 		return m_futureScore; 	 
 	}
 
-  /** return true if the source phrase translates into nothing */
+	/** return true if the source phrase translates into nothing */
 	inline bool IsDeletionOption() const
-  {
-    return m_targetPhrase.GetSize() == 0;
-  }
+	{
+		return m_targetPhrase.GetSize() == 0;
+	}
 
 	/** returns detailed component scores */
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
-	/** returns detailed component scores */
-	inline const ScoreComponentCollection &GetReorderingScore() const
+    
+	/** returns cached scores */
+	inline const Scores *GetCachedScores(const ScoreProducer *scoreProducer) const
 	{
-		return m_reordering;
+		_ScoreCacheMap::const_iterator it = m_cachedScores.find(scoreProducer);
+		if(it == m_cachedScores.end())
+			return NULL;
+		else
+			return it->second;
 	}
 
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
 	void CalcScore();
 	
-	void CacheReorderingProb(const LexicalReordering &lexreordering
-													, const Score &score);
+	void CacheScores(const ScoreProducer &scoreProducer, const Scores &score);
 
 	TO_STRING();
 };
