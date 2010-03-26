@@ -1388,10 +1388,7 @@ sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
 
 #This @REORDERING_TABLE is now not used. Did anyone use it???
-#    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
-    if (scalar(@_REORDERING_TABLE)) {
-	print STDERR "WARNING: you specified -reordering-table. That feature is not implemented in this version of train-factored-phrase-model.perl. Standard file names will be used.\n";
-    }
+    my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     if ($REORDERING_LEXICAL) {
 	if ($___NOT_FACTORED) {
 	    print STDERR "(7.1) [no factors] learn reordering model @ ".`date`;
@@ -1401,7 +1398,10 @@ sub get_reordering_factored {
 	    # 	#$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    # 	$model->{"file"} = $file;
 	    # }
-	    &get_reordering($___EXTRACT_FILE,"$___MODEL_DIR/reordering-table.");
+        my $file = "$___MODEL_DIR/reordering-table";
+	    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+        $file .= ".";
+	    &get_reordering($___EXTRACT_FILE,$file);
 	}
  	else {
 	    foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
@@ -1413,7 +1413,10 @@ sub get_reordering_factored {
 		#     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 		#     $model->{"file"} = $file;
 		# }
-		&get_reordering("$___EXTRACT_FILE.$factor","$___MODEL_DIR/reordering-table.$factor");
+        my $file ="$___MODEL_DIR/reordering-table.$factor";
+		$file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+        $file .= ".";
+		&get_reordering("$___EXTRACT_FILE.$factor",$file);
 	    }
 	} 
     }
@@ -1653,11 +1656,12 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
 	foreach my $model (@REORDERING_MODELS) {	
 	    $weight_d_count += $model->{"numfeatures"};
-	    my $table_file = "$___MODEL_DIR/reordering-table.";
+	    my $table_file = "$___MODEL_DIR/reordering-table";
+	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+        $table_file .= ".";
 	    $table_file .= ".$factor" unless $___NOT_FACTORED;
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
-	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
 	}
         $factor_i++;
