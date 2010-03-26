@@ -1,22 +1,35 @@
 //
 
-#include "SyntacticLanguageModel.h"
 #include "StaticData.h"
+#include "SyntacticLanguageModel.h"
+#include "HHMMLangModel-gf.h"
+#include "TextObsModel.h"
+#include "SyntacticLanguageModelFiles.h"
+#include "SyntacticLanguageModelState.h"
+
 
 namespace Moses
 {
 
   SyntacticLanguageModel::SyntacticLanguageModel(const std::vector<std::string>& filePath,
-						 const std::vector<float>& weights) 
-    : m_NumScoreComponents(weights.size()) {
+						 const std::vector<float>& weights,
+						 const FactorType factorType,
+						 size_t beamWidth) 
+    // Initialize member variables  
+  : m_NumScoreComponents(weights.size())
+  , m_beamWidth(beamWidth)
+  , m_factorType(factorType)
+  , m_files(new SyntacticLanguageModelFiles<HModel,OModel>(filePath)) {
 
+    // Inform Moses score manager of this feature and its weight(s)
     const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
     const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 
-    //    cerr << "Loading syntactic language model..." << std::endl;
-
   }
 
+  SyntacticLanguageModel::~SyntacticLanguageModel() {
+    delete m_files;
+  }
 
   size_t SyntacticLanguageModel::GetNumScoreComponents() const {
     return m_NumScoreComponents;
@@ -32,9 +45,8 @@ namespace Moses
 
   const FFState* SyntacticLanguageModel::EmptyHypothesisState() const {
 
-    cerr << "Constructing empty syntactic language model state" << std::endl;
+    return new SyntacticLanguageModelState<HModel,OModel,S,R>(m_files,m_beamWidth);
 
-    return NULL;
   }
 
 
@@ -42,8 +54,37 @@ namespace Moses
 		    const FFState* prev_state,
 		    ScoreComponentCollection* accumulator) const {
 
-    accumulator->PlusEquals( this, -40.0 );
-    return NULL;
+    const SyntacticLanguageModelState<HModel,OModel,S,R>& prev =
+      static_cast<const SyntacticLanguageModelState<HModel,OModel,S,R>&>(*prev_state);
+
+    const SyntacticLanguageModelState<HModel,OModel,S,R>* currentState = &prev;
+    SyntacticLanguageModelState<HModel,OModel,S,R>* nextState = NULL;
+  
+
+    const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+
+    for (size_t i=0, n=targetPhrase.GetSize(); i<n; i++) {
+      
+      const Word& word = targetPhrase.GetWord(i);
+      const Factor* factor = word.GetFactor(m_factorType);
+      
+      const std::string& string = factor->GetString();
+      
+      if (i==0) {
+	nextState = new SyntacticLanguageModelState<HModel,OModel,S,R>(&prev, string);
+      } else {
+	currentState = nextState;
+	nextState = new SyntacticLanguageModelState<HModel,OModel,S,R>(currentState, string);
+      }
+      
+      double score = nextState->getScore();
+
+      accumulator->Assign( this, score );
+    }
+
+  
+
+    return nextState;
 
   }
 

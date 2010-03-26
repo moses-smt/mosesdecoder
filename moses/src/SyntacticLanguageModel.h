@@ -5,15 +5,25 @@
 
 #include "FeatureFunction.h"
 
+
+class HModel;
+class OModel;
+
 namespace Moses
 {
+
+  template <class MH, class MO> class SyntacticLanguageModelFiles;
   
   class SyntacticLanguageModel : public StatefulFeatureFunction {
 
   public:
 
     SyntacticLanguageModel(const std::vector<std::string>& filePaths,
-			   const std::vector<float>& weights);
+			   const std::vector<float>& weights,
+			   const FactorType factorType,
+			   const size_t beamWidth);
+
+    ~SyntacticLanguageModel();
 
     size_t GetNumScoreComponents() const;
     std::string GetScoreProducerDescription() const;
@@ -27,7 +37,10 @@ namespace Moses
 
   private:
 
-    size_t m_NumScoreComponents;
+    const size_t m_NumScoreComponents;
+    SyntacticLanguageModelFiles<HModel,OModel>* m_files;
+    const FactorType m_factorType;
+    const size_t m_beamWidth;
 
   };
 
