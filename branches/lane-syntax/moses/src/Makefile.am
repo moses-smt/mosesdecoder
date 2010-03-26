@@ -70,7 +70,6 @@ libmoses_la_HEADERS = \
 	SentenceStats.h \
 	SquareMatrix.h \
 	StaticData.h \
-	SyntacticLanguageModel.h \
 	TargetPhrase.h \
 	TargetPhraseCollection.h \
 	Timer.h \
@@ -107,6 +106,10 @@ if INTERNAL_LM
 libmoses_la_HEADERS += LanguageModelInternal.h \
 		      NGramCollection.h \
 		      NGramNode.h
+endif
+
+if SYN_LM
+libmoses_la_HEADERS += SyntacticLanguageModel.h
 endif
 
 libmoses_la_SOURCES = \
@@ -170,7 +173,6 @@ libmoses_la_SOURCES = \
 	SentenceStats.cpp \
 	SquareMatrix.cpp \
 	StaticData.cpp \
-	SyntacticLanguageModel.cpp \
 	TargetPhrase.cpp \
 	TargetPhraseCollection.cpp \
 	Timer.cpp \
@@ -186,7 +188,7 @@ libmoses_la_SOURCES = \
 	WordLattice.cpp \
 	WordsRange.cpp \
 	XmlOption.cpp 
-	
+
 if PROTOBUF
 BUILT_SOURCES = \
   rule.pb.h \
@@ -227,6 +229,10 @@ if INTERNAL_LM
 libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
+endif
+
+if SYN_LM
+libmoses_la_SOURCES += SyntacticLanguageModel.cpp
 endif
 
 libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)

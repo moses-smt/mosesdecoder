@@ -66,7 +66,12 @@ Parameter::Parameter()
 	AddParam("report-all-factors", "report all factors in output, not just first");
 	AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
 	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
+#ifdef HAVE_SYNLM
 	AddParam("slmodel-file", "location of the syntactic language model file(s)");
+	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
+	AddParam("slmodel-factor", "factor to use with syntactic language model");
+	AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
+#endif
 	AddParam("stack", "s", "maximum stack size for histogram pruning");
 	AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
 	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
@@ -84,7 +89,6 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
-	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
 	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");

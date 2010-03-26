@@ -21,6 +21,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the <nl-cpt.h> header file. */
+#undef HAVE_NL_CPT_H
+
 /* flag for protobuf */
 #undef HAVE_PROTOBUF
 
@@ -41,6 +44,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
+
+/* flag for Syntactic Parser */
+#undef HAVE_SYNLM
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

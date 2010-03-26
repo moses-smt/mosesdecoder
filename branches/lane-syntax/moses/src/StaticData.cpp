@@ -36,13 +36,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
-#include "SyntacticLanguageModel.h"
 #include "SentenceStats.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+
+#ifdef HAVE_SYNLM
+#include "SyntacticLanguageModel.h"
+#endif
 
 using namespace std;
 
@@ -413,9 +416,11 @@ bool StaticData::LoadData(Parameter *parameter)
 		return false;
 	}
 
+#ifdef HAVE_SYNLM
 	if (m_parameter->GetParam("slmodel-file").size() > 0) {
 	  if (!LoadSyntacticLanguageModel()) return false;
 	}
+#endif
 	
 	if (!LoadLexicalReorderingModel()) return false;
 	if (!LoadLanguageModels()) return false;
@@ -468,7 +473,9 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
 	
+#ifdef HAVE_SYNLM
 	delete m_syntacticLanguageModel;
+#endif
 
 	// delete trans opt
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
@@ -488,12 +495,20 @@ StaticData::~StaticData()
 
 }
 
-
+#ifdef HAVE_SYNLM
   bool StaticData::LoadSyntacticLanguageModel() {
     cerr << "Loading syntactic language models..." << std::endl;
     
     const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
     const vector<string> files = m_parameter->GetParam("slmodel-file");
+    
+    const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
+      : 0;
+
+    const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
+      : 500;
 
     if (files.size() < 1) {
       cerr << "No syntactic language model files specified!" << std::endl;
@@ -504,7 +519,7 @@ StaticData::~StaticData()
     if (weights.size() >= 1) {
       
       // create the feature
-      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights); 
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
       
       if (m_syntacticLanguageModel==NULL) {
 	return false;
@@ -515,7 +530,7 @@ StaticData::~StaticData()
     return true;
 
   }
-
+#endif
 
 bool StaticData::LoadLexicalReorderingModel()
 {

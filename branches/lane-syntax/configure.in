@@ -46,6 +46,12 @@ AC_ARG_WITH(randlm,
             [with_randlm=no]
            )
 
+AC_ARG_WITH(synlm,
+	   [AC_HELP_STRING([--with-synlm=PATH], [(optional) path to syntactic language model parser])],
+	   [with_synlm=$withval],
+	   [with_synlm=no]
+	   )
+
 AC_ARG_WITH(notrace,
             [AC_HELP_STRING([--notrace], [disable trace])],
             [without_trace=yes],
@@ -79,6 +85,7 @@ AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
+AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
 AM_CONDITIONAL([WITH_THREADS],false)
@@ -181,6 +188,21 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+
+if test "x$with_synlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS" 
+  CPPFLAGS="$CPPFLAGS -I${with_synlm}/rvtl/include -I${with_synlm}/wsjparse/include -lboost_thread -lm"
+
+  AX_BOOST_BASE([1.35.0])
+  AX_BOOST_THREAD
+
+  AC_CHECK_HEADERS(nl-cpt.h,
+	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])])
+
+  AM_CONDITIONAL([SYN_LM], true)
+
+fi
 
 
 AM_CONDITIONAL([WITH_MERT],false)
