@@ -367,23 +367,24 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// Read in constraint decoding file, if provided
 	if(m_parameter->GetParam("constraint").size())
-		m_constraintFileName = m_parameter->GetParam("constraint")[0];
-
-	InputFileStream constraintFile(m_constraintFileName);
-
-	std::string line;
-
-	while (getline(constraintFile, line))
 	{
-		vector<string> vecStr = Tokenize(line, "\t");
-		assert(vecStr.size() == 2);
+		m_constraintFileName = m_parameter->GetParam("constraint")[0];
+		InputFileStream constraintFile(m_constraintFileName);
 
-		long sentenceID = Scan<long>(vecStr[0]);
-		Phrase phrase(Output);
-		phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
-		m_constraints.insert(make_pair(sentenceID,phrase));
+		std::string line;
+
+		while (getline(constraintFile, line))
+		{
+			vector<string> vecStr = Tokenize(line, "\t");
+			assert(vecStr.size() == 2);
+
+			long sentenceID = Scan<long>(vecStr[0]);
+			Phrase phrase(Output);
+			phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+			m_constraints.insert(make_pair(sentenceID,phrase));
+		}
 	}
-
+	
 	if (m_parameter->GetParam("input-file").size() > 0)
 	{
 		LoadInputSentences(m_parameter->GetParam("input-file")[0]);
