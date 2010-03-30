@@ -85,5 +85,12 @@ const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) c
     return m_configuration.CreateLexicalReorderingState(input);
 }
 
+std::vector<float> LexicalReordering::CalcScore(Hypothesis* hypothesis) const
+{ // TODO get rid of this function
+	assert(false);
+	abort();
+	return std::vector<float>();
+}
+
 }
 

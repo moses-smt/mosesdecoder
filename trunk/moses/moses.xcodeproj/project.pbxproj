@@ -30,6 +30,10 @@
 		1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */; };
 		1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C5009BD0FB9E09700DFD24F /* FFState.cpp */; };
 		1C5009C20FB9E09700DFD24F /* FFState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BE0FB9E09700DFD24F /* FFState.h */; };
+		1C679DC81162099C00DC3892 /* LexicalReorderingState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */; };
+		1C679DC91162099C00DC3892 /* LexicalReorderingState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C679DC31162099C00DC3892 /* LexicalReorderingState.h */; };
+		1C679DCC1162099C00DC3892 /* ReorderingStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679DC61162099C00DC3892 /* ReorderingStack.cpp */; };
+		1C679DCD1162099C00DC3892 /* ReorderingStack.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C679DC71162099C00DC3892 /* ReorderingStack.h */; };
 		1C8CFE8F0AD67A9700FA22E2 /* ConfusionNet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */; };
 		1C8CFE900AD67A9700FA22E2 /* ConfusionNet.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE130AD67A9600FA22E2 /* ConfusionNet.h */; };
 		1C8CFE910AD67A9700FA22E2 /* DecodeStep.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFE140AD67A9600FA22E2 /* DecodeStep.cpp */; };
@@ -197,6 +201,10 @@
 		1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureFunction.h; path = src/FeatureFunction.h; sourceTree = "<group>"; };
 		1C5009BD0FB9E09700DFD24F /* FFState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFState.cpp; path = src/FFState.cpp; sourceTree = "<group>"; };
 		1C5009BE0FB9E09700DFD24F /* FFState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFState.h; path = src/FFState.h; sourceTree = "<group>"; };
+		1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingState.cpp; path = src/LexicalReorderingState.cpp; sourceTree = "<group>"; };
+		1C679DC31162099C00DC3892 /* LexicalReorderingState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReorderingState.h; path = src/LexicalReorderingState.h; sourceTree = "<group>"; };
+		1C679DC61162099C00DC3892 /* ReorderingStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReorderingStack.cpp; path = src/ReorderingStack.cpp; sourceTree = "<group>"; };
+		1C679DC71162099C00DC3892 /* ReorderingStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReorderingStack.h; path = src/ReorderingStack.h; sourceTree = "<group>"; };
 		1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ConfusionNet.cpp; path = src/ConfusionNet.cpp; sourceTree = "<group>"; };
 		1C8CFE130AD67A9600FA22E2 /* ConfusionNet.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = ConfusionNet.h; path = src/ConfusionNet.h; sourceTree = "<group>"; };
 		1C8CFE140AD67A9600FA22E2 /* DecodeStep.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeStep.cpp; path = src/DecodeStep.cpp; sourceTree = "<group>"; };
@@ -366,6 +374,10 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */,
+				1C679DC31162099C00DC3892 /* LexicalReorderingState.h */,
+				1C679DC61162099C00DC3892 /* ReorderingStack.cpp */,
+				1C679DC71162099C00DC3892 /* ReorderingStack.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
 				E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */,
 				1C8CFE120AD67A9600FA22E2 /* ConfusionNet.cpp */,
@@ -643,6 +655,8 @@
 				1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */,
 				1C5009C20FB9E09700DFD24F /* FFState.h in Headers */,
 				1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */,
+				1C679DC91162099C00DC3892 /* LexicalReorderingState.h in Headers */,
+				1C679DCD1162099C00DC3892 /* ReorderingStack.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -766,6 +780,8 @@
 				1C5009BF0FB9E09700DFD24F /* FeatureFunction.cpp in Sources */,
 				1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */,
 				1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */,
+				1C679DC81162099C00DC3892 /* LexicalReorderingState.cpp in Sources */,
+				1C679DCC1162099C00DC3892 /* ReorderingStack.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
