@@ -464,6 +464,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LexicalReorderingState.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LexicalReorderingTable.cpp"
 				>
 			</File>
@@ -565,6 +569,10 @@
 			</File>
 			<File
 				RelativePath=".\src\ReorderingConstraint.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ReorderingStack.cpp"
 				>
 			</File>
 			<File
@@ -818,6 +826,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LexicalReorderingState.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LexicalReorderingTable.h"
 				>
 			</File>
@@ -895,6 +907,10 @@
 			</File>
 			<File
 				RelativePath=".\src\ReorderingConstraint.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ReorderingStack.h"
 				>
 			</File>
 			<File
