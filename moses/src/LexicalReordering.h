@@ -49,7 +49,6 @@ public:
         return "d";
     };
     
-    std::vector<float> CalcScore(Hypothesis* hypothesis) const;
     void InitializeForInput(const InputType& i){
         m_table->InitializeForInput(i);
     }
