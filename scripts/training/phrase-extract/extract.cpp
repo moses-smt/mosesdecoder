@@ -674,8 +674,11 @@ void addHieroRule( SentenceAlignment &sentence
 			if (numHoles == g_global->maxNonTerm-1 && wordCountT - (endHoleT-startT+1) + (numHoles+1) > g_global->maxSymbolsTarget)
 				continue;
 
+            // determine the number of remaining target words
+            const int newWordCountT = wordCountT - (endHoleT-startHoleT+1);
+
 			// always enforce min word count limit
-			if (wordCountT - (endHoleT-startHoleT+1) < g_global->minWords)
+			if (newWordCountT < g_global->minWords)
 				continue;
 
 			// except the whole span
@@ -695,17 +698,21 @@ void addHieroRule( SentenceAlignment &sentence
 
 				// cerr << "source" << sourceHole.GetStart() << "-" << sourceHole.GetEnd() << endl; 
 
+                const int sourceHoleSize = sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1;
+
 				// enforce minimum hole size
-				if (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1 < g_global->minHoleSource)
+				if (sourceHoleSize < g_global->minHoleSource)
 					continue;
 
+                // determine the number of remaining source words
+                const int newWordCountS = wordCountS - sourceHoleSize;
+
 				// if last non-terminal, enforce word count limit
-				if (numHoles == g_global->maxNonTerm-1 && 
-						wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > g_global->maxSymbolsSource)
+				if (numHoles == g_global->maxNonTerm-1 && newWordCountS + (numHoles+1) > g_global->maxSymbolsSource)
 					continue;
 
 				// enforce min word count limit
-				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) < g_global->minWords)
+				if (newWordCountS < g_global->minWords)
 					continue;
 				
 				// hole must be subphrase of the source phrase
@@ -721,8 +728,8 @@ void addHieroRule( SentenceAlignment &sentence
 				if (!g_global->nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
 					continue;
 
-				// require that at least one aligned word is left
-				if (g_global->requireAlignedWord)
+				// require that at least one aligned word is left (unless there are no words at all)
+				if (g_global->requireAlignedWord && (newWordCountS > 0 || newWordCountT > 0))
 				{
 					HoleList::const_iterator iterHoleList = holeColl.GetHoles().begin();
 					bool foundAlignedWord = false;
@@ -759,10 +766,10 @@ void addHieroRule( SentenceAlignment &sentence
 				bool allowablePhrase = true;
 
 				// maximum words count violation?
-				if (wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1) + (numHoles+1) > g_global->maxSymbolsSource)
+				if (newWordCountS + (numHoles+1) > g_global->maxSymbolsSource)
 					allowablePhrase = false;
 
-				if (wordCountT - (endHoleT-startHoleT+1) + (numHoles+1) > g_global->maxSymbolsTarget)
+				if (newWordCountT + (numHoles+1) > g_global->maxSymbolsTarget)
 					allowablePhrase = false;
 				
 				// passed all checks...
@@ -774,8 +781,7 @@ void addHieroRule( SentenceAlignment &sentence
 				int nextInitStartT = g_global->nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
 				addHieroRule(sentence, startT, endT, startS, endS 
 										 , ruleExist, copyHoleColl, numHoles + 1, nextInitStartT
-										 , wordCountT - (endHoleT-startHoleT+1)
-										 , wordCountS - (sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1));
+										 , newWordCountT, newWordCountS);
 			}
 		}
 	}
