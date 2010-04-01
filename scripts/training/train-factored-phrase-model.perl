@@ -365,39 +365,41 @@ foreach my $r (split(/\,/,$___REORDERING)) {
      print STDERR "you have to give the type of the reordering models (mslr, msd, monotonicity or leftright); it is not done in $r\n";
      exit(1);
   }
-  if (!defined($REORDERING_MODELS[$model_num]{"lang"})) {
-     print STDERR "you have specify which languages to condition on (f or fe); it is not done in $r\n";
-     exit(1);
-  }
+  if ($REORDERING_LEXICAL) {
+      if (!defined($REORDERING_MODELS[$model_num]{"lang"})) {
+         print STDERR "you have specify which languages to condition on (f or fe); it is not done in $r\n";
+         exit(1);
+      }
 
-  #fix the all-string
-  $REORDERING_MODELS[$model_num]{"filename"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.
-                                               $REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"};
-  $REORDERING_MODELS[$model_num]{"config"} = $REORDERING_MODELS[$model_num]{"filename"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
+      #fix the all-string
+      $REORDERING_MODELS[$model_num]{"filename"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.
+                                                   $REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"};
+      $REORDERING_MODELS[$model_num]{"config"} = $REORDERING_MODELS[$model_num]{"filename"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
 
-  # fix numfeatures
-  $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
-  $REORDERING_MODELS[$model_num]{"numfeatures"} = 2 if $REORDERING_MODELS[$model_num]{"dir"} eq "bidirectional";
-  if ($REORDERING_MODELS[$model_num]{"collapse"} ne "collapseff") {
-    if ($REORDERING_MODELS[$model_num]{"orient"} eq "msd") {
-      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 3;
-    }
-    elsif ($REORDERING_MODELS[$model_num]{"orient"} eq "mslr") {
-      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 4;
-    }
-    else {
-      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 2;
-    }
-  }
+      # fix numfeatures
+      $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
+      $REORDERING_MODELS[$model_num]{"numfeatures"} = 2 if $REORDERING_MODELS[$model_num]{"dir"} eq "bidirectional";
+      if ($REORDERING_MODELS[$model_num]{"collapse"} ne "collapseff") {
+        if ($REORDERING_MODELS[$model_num]{"orient"} eq "msd") {
+          $REORDERING_MODELS[$model_num]{"numfeatures"} *= 3;
+        }
+        elsif ($REORDERING_MODELS[$model_num]{"orient"} eq "mslr") {
+          $REORDERING_MODELS[$model_num]{"numfeatures"} *= 4;
+        }
+        else {
+          $REORDERING_MODELS[$model_num]{"numfeatures"} *= 2;
+        }
+      }
 
-  # fix the overall model selection
-  if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
-     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
-        $REORDERING_MODELS[$model_num]{"orient"}."-"; 
-  }
-  else  {
-     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
-        $REORDERING_MODELS[$model_num]{"orient"};
+      # fix the overall model selection
+      if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
+         $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
+            $REORDERING_MODELS[$model_num]{"orient"}."-"; 
+      }
+      else  {
+         $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
+            $REORDERING_MODELS[$model_num]{"orient"};
+      }
   }
   $model_num++;
 }
