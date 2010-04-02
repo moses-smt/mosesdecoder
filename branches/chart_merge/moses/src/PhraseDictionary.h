@@ -86,7 +86,8 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
  
 
  public:
-	PhraseDictionaryFeature(  size_t numScoreComponent
+	PhraseDictionaryFeature(  PhraseTableImplementation implementation
+														, size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
@@ -125,6 +126,7 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
     std::auto_ptr<PhraseDictionary> m_treeDictionary;
     #endif
 
+	PhraseTableImplementation m_implementation;
 };
 
 

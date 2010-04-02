@@ -36,7 +36,8 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 }
 
 PhraseDictionaryFeature::PhraseDictionaryFeature 
-                            ( size_t numScoreComponent
+                            (PhraseTableImplementation implementation
+														, size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
@@ -50,74 +51,81 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             m_filePath(filePath),
                             m_weight(weight),
                             m_tableLimit(tableLimit)
-  {
-    const StaticData& staticData = StaticData::Instance();
-    const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-    
-    
-    //if we're using an in-memory phrase table, then load it now, otherwise wait
-    if (!FileExists(filePath+".binphr.idx"))
-    {   // memory phrase table
-        VERBOSE(2,"using standard phrase tables" << std::endl);
-        if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-            m_filePath += ".gz";
-            VERBOSE(2,"Using gzipped file" << std::endl);
-        }
-        if (staticData.GetInputType() != SentenceInput)
-        {
-            UserMessage::Add("Must use binary phrase table for this input type");
-            assert(false);
-        }
-        
-        PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
-        assert(pdm->Load(m_input
-                            , m_output
-                            , m_filePath
-                            , m_weight
-                            , m_tableLimit
-                            , staticData.GetAllLM()
-                            , staticData.GetWeightWordPenalty()));
-        m_memoryDictionary.reset(pdm);
-    }
-    else 
-    {   
-        //don't initialise the tree dictionary until it's required
-    }
-  
-  
-  }
-  
-  PhraseDictionary* PhraseDictionaryFeature::GetDictionary
-        (const InputType& source) {
-    PhraseDictionary* dict = NULL;
-    if (m_memoryDictionary.get()) {
-        dict = m_memoryDictionary.get();
-    } else {
-        if (!m_treeDictionary.get()) {
-            //load the tree dictionary for this thread   
-            const StaticData& staticData = StaticData::Instance();
-            PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
-            assert(pdta->Load(
-                                  m_input
-                                , m_output
-                                , m_filePath
-                                , m_weight
-                                , m_tableLimit
-                                , staticData.GetAllLM()
-                                , staticData.GetWeightWordPenalty()));
-            m_treeDictionary.reset(pdta);
-        }
-        dict = m_treeDictionary.get();
-    }
-    dict->InitializeForInput(source);
-    return dict;
-  }
+{
+	const StaticData& staticData = StaticData::Instance();
+	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
 
-
-
-PhraseDictionaryFeature::~PhraseDictionaryFeature() {}
+	m_implementation = implementation;
 	
+	//if we're using an in-memory phrase table, then load it now, otherwise wait
+	if (!FileExists(filePath+".binphr.idx"))
+	{   // memory phrase table
+			VERBOSE(2,"using standard phrase tables" << std::endl);
+			if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+					m_filePath += ".gz";
+					VERBOSE(2,"Using gzipped file" << std::endl);
+			}
+			if (staticData.GetInputType() != SentenceInput)
+			{
+					UserMessage::Add("Must use binary phrase table for this input type");
+					assert(false);
+			}
+			
+			PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
+			assert(pdm->Load(m_input
+													, m_output
+													, m_filePath
+													, m_weight
+													, m_tableLimit
+													, staticData.GetAllLM()
+													, staticData.GetWeightWordPenalty()));
+			m_memoryDictionary.reset(pdm);
+	}
+	else 
+	{   
+			//don't initialise the tree dictionary until it's required
+	}
 
+
+}
+  
+PhraseDictionary* PhraseDictionaryFeature::GetDictionary
+			(const InputType& source) 
+{
+	PhraseDictionary* dict = NULL;
+	if (m_memoryDictionary.get()) 
+	{
+			dict = m_memoryDictionary.get();
+	}
+	else 
+	{
+		if (!m_treeDictionary.get()) 
+		{
+				//load the tree dictionary for this thread   
+				const StaticData& staticData = StaticData::Instance();
+				PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
+				assert(pdta->Load(
+															m_input
+														, m_output
+														, m_filePath
+														, m_weight
+														, m_tableLimit
+														, staticData.GetAllLM()
+														, staticData.GetWeightWordPenalty()));
+				m_treeDictionary.reset(pdta);
+		}
+		dict = m_treeDictionary.get();
+	}
+	
+	dict->InitializeForInput(source);
+	return dict;
+}
+
+
+
+PhraseDictionaryFeature::~PhraseDictionaryFeature() 
+{}
+	
 
 std::string PhraseDictionaryFeature::GetScoreProducerDescription() const
 {

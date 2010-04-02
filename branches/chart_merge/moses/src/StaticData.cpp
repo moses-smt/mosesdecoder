@@ -734,14 +734,17 @@ bool StaticData::LoadPhraseTables()
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
+			assert(token.size() == 4);
 			//characteristics of the phrase table
-			vector<FactorType>      input           = Tokenize<FactorType>(token[0], ",")
-				,output = Tokenize<FactorType>(token[1], ",");
+
+			PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+			vector<FactorType>  input		= Tokenize<FactorType>(token[0], ",")
+													,output = Tokenize<FactorType>(token[1], ",");
 			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-			string filePath= token[3];
 			size_t numScoreComponent = Scan<size_t>(token[2]);
+			string filePath= token[3];
 
 			assert(weightAll.size() >= weightAllOffset + numScoreComponent);
 
@@ -805,8 +808,9 @@ bool StaticData::LoadPhraseTables()
 			VERBOSE(1,"filePath: " << filePath << endl);
             
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-                  numScoreComponent
-                ,  (currDict==0 ? m_numInputScores : 0)
+								implementation
+								, numScoreComponent
+                , (currDict==0 ? m_numInputScores : 0)
                 , input
                 , output
                 , filePath
