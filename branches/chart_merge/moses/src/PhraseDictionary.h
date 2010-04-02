@@ -119,11 +119,10 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
     std::vector<float> m_weight;
     size_t m_tableLimit;
     //Only instantiate one of these
-    std::auto_ptr<PhraseDictionary> m_memoryDictionary;
     #ifdef WITH_THREADS
-    boost::thread_specific_ptr<PhraseDictionary>  m_treeDictionary;
+    boost::thread_specific_ptr<PhraseDictionary>  m_phraseDictionary;
     #else
-    std::auto_ptr<PhraseDictionary> m_treeDictionary;
+    std::auto_ptr<PhraseDictionary> m_phraseDictionary;
     #endif
 
 	PhraseTableImplementation m_implementation;

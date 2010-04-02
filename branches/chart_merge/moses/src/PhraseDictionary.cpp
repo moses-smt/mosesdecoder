@@ -79,7 +79,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 													, m_tableLimit
 													, staticData.GetAllLM()
 													, staticData.GetWeightWordPenalty()));
-			m_memoryDictionary.reset(pdm);
+			m_phraseDictionary.reset(pdm);
 	}
 	else 
 	{   
@@ -94,21 +94,14 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 											, m_tableLimit
 											, staticData.GetAllLM()
 											, staticData.GetWeightWordPenalty()));
-		m_treeDictionary.reset(pdta);
+		m_phraseDictionary.reset(pdta);
 	}
 }
   
 PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) 
 {
-	PhraseDictionary* dict = NULL;
-	if (m_memoryDictionary.get()) 
-	{
-		dict = m_memoryDictionary.get();
-	}
-	else 
-	{
-		dict = m_treeDictionary.get();
-	}
+	PhraseDictionary* dict = m_phraseDictionary.get();
+	assert(dict);
 	
 	dict->InitializeForInput(source);
 	return dict;
