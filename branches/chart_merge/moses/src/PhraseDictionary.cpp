@@ -83,37 +83,30 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	}
 	else 
 	{   
-			//don't initialise the tree dictionary until it's required
+		//load the tree dictionary for this thread   
+		const StaticData& staticData = StaticData::Instance();
+		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
+		assert(pdta->Load(
+											m_input
+											, m_output
+											, m_filePath
+											, m_weight
+											, m_tableLimit
+											, staticData.GetAllLM()
+											, staticData.GetWeightWordPenalty()));
+		m_treeDictionary.reset(pdta);
 	}
-
-
 }
   
-PhraseDictionary* PhraseDictionaryFeature::GetDictionary
-			(const InputType& source) 
+PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) 
 {
 	PhraseDictionary* dict = NULL;
 	if (m_memoryDictionary.get()) 
 	{
-			dict = m_memoryDictionary.get();
+		dict = m_memoryDictionary.get();
 	}
 	else 
 	{
-		if (!m_treeDictionary.get()) 
-		{
-				//load the tree dictionary for this thread   
-				const StaticData& staticData = StaticData::Instance();
-				PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
-				assert(pdta->Load(
-															m_input
-														, m_output
-														, m_filePath
-														, m_weight
-														, m_tableLimit
-														, staticData.GetAllLM()
-														, staticData.GetWeightWordPenalty()));
-				m_treeDictionary.reset(pdta);
-		}
 		dict = m_treeDictionary.get();
 	}
 	
