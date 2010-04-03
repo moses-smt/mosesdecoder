@@ -300,7 +300,7 @@ bool Parameter::Validate()
 	  ext.push_back(".gz");
 		// alternative file extension for binary phrase table format:
 		ext.push_back(".binphr.idx");
-		noErrorFlag = FilesExist("ttable-file", 3,ext);
+		noErrorFlag = FilesExist("ttable-file", 4,ext);
 	}
 	// language model
 //	if (noErrorFlag)

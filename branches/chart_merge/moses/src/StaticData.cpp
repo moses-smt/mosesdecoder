@@ -734,17 +734,17 @@ bool StaticData::LoadPhraseTables()
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
-			assert(token.size() == 4);
+			assert(token.size() == 5);
 			//characteristics of the phrase table
 
 			PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-			vector<FactorType>  input		= Tokenize<FactorType>(token[0], ",")
-													,output = Tokenize<FactorType>(token[1], ",");
+			vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
+													,output = Tokenize<FactorType>(token[2], ",");
 			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-			size_t numScoreComponent = Scan<size_t>(token[2]);
-			string filePath= token[3];
+			size_t numScoreComponent = Scan<size_t>(token[3]);
+			string filePath= token[4];
 
 			assert(weightAll.size() >= weightAllOffset + numScoreComponent);
 

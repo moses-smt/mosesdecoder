@@ -58,7 +58,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	m_implementation = implementation;
 	
 	//if we're using an in-memory phrase table, then load it now, otherwise wait
-	if (!FileExists(filePath+".binphr.idx"))
+	if (implementation == Memory)
 	{   // memory phrase table
 			VERBOSE(2,"using standard phrase tables" << std::endl);
 			if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
@@ -81,7 +81,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 													, staticData.GetWeightWordPenalty()));
 			m_phraseDictionary.reset(pdm);
 	}
-	else 
+	else if (implementation == Binary)
 	{   
 		//load the tree dictionary for this thread   
 		const StaticData& staticData = StaticData::Instance();
