@@ -114,6 +114,11 @@ public:
 	*	Should make it non-static
 	*/
 	static int Compare(const Word &targetWord, const Word &sourceWord);
+	
+	void CreateFromString(FactorDirection direction
+												, const std::vector<FactorType> &factorOrder
+												, const std::string &str
+												, bool isNonTerminal);	
 
 };
 

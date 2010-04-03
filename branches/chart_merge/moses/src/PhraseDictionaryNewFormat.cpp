@@ -278,6 +278,11 @@ PhraseDictionaryNodeNewFormat &PhraseDictionaryNewFormat::GetOrCreateNode(const 
 	return *currNode;
 }
 
+void PhraseDictionaryNewFormat::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+{
+	assert(false); // TODO
+}
+
 void PhraseDictionaryNewFormat::AddEquivPhrase(TargetPhraseCollection	&targetPhraseColl, TargetPhrase *targetPhrase)
 {
 	targetPhraseColl.Add(targetPhrase);

@@ -48,6 +48,7 @@ class Phrase
 	size_t								m_arraySize;	/** current size of vector m_words. This number is equal or bigger
 																					than m_phraseSize. Used for faster allocation of m_word */
 	std::vector<Word>			m_words;
+	size_t m_arity;
 
 public:
 	/** No longer does anything as not using mem pool for Phrase class anymore */

@@ -24,7 +24,7 @@ ProcessedRuleStack::~ProcessedRuleStack()
 std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
 {
 	const PhraseDictionaryNode &node = rule.GetLastNode();
-	out << node;
+	//out << node;
 	
 	return out;
 }

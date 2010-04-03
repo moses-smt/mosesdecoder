@@ -120,14 +120,14 @@ void PhraseDictionaryNodeNewFormat::SetWeightTransModel(const PhraseDictionary *
 				++iterTargetPhrase)
 	{
 		TargetPhrase &targetPhrase = **iterTargetPhrase;
-		targetPhrase.SetWeights(phraseDictionary, weightT);
+		targetPhrase.SetWeights(phraseDictionary->GetFeature(), weightT);
 	}
 
 }
 
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeNewFormat &node)
 {
-	out << *node.GetTargetPhraseCollection();
+	out << node.GetTargetPhraseCollection();
 	return out;
 }
 

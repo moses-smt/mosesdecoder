@@ -92,6 +92,8 @@ namespace Moses
 			
 			const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 			
+			void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
+			
 			void AddEquivPhrase(TargetPhraseCollection	&targetPhraseColl, TargetPhrase *targetPhrase);
 			
 			// for mert

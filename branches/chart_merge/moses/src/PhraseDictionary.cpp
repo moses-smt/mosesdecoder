@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryTreeAdaptor.h"
+#include "PhraseDictionaryNewFormat.h"
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOption.h"
@@ -96,6 +97,30 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 											, staticData.GetWeightWordPenalty()));
 		m_phraseDictionary.reset(pdta);
 	}
+	else if (implementation == NewFormat)
+	{   // memory phrase table
+		VERBOSE(2,"using standard phrase tables" << std::endl);
+		if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+			m_filePath += ".gz";
+			VERBOSE(2,"Using gzipped file" << std::endl);
+		}
+		if (staticData.GetInputType() != SentenceInput)
+		{
+			UserMessage::Add("Must use binary phrase table for this input type");
+			assert(false);
+		}
+		
+		PhraseDictionaryNewFormat* pdm  = new PhraseDictionaryNewFormat(m_numScoreComponent,this);
+		assert(pdm->Load(m_input
+										 , m_output
+										 , m_filePath
+										 , m_weight
+										 , m_tableLimit
+										 , staticData.GetAllLM()
+										 , staticData.GetWeightWordPenalty()));
+		m_phraseDictionary.reset(pdm);
+	}
+
 }
   
 PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) 

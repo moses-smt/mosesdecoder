@@ -266,7 +266,59 @@ bool Phrase::operator < (const Phrase &compare) const
 		return false;
 	}
 }
-  
+
+void Phrase::CreateFromStringNewFormat(FactorDirection direction
+																			 , const std::vector<FactorType> &factorOrder
+																			 , const std::string &phraseString
+																			 , const std::string &factorDelimiter
+																			 , Word &lhs)
+{
+	m_arity = 0;
+	
+	// parse
+	vector<string> annotatedWordVector;
+	Tokenize(annotatedWordVector, phraseString);
+	// KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none 
+	//		to
+	// "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+	
+	for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++)
+	{
+		string &annotatedWord = annotatedWordVector[phrasePos];
+		bool isNonTerminal;
+		if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]")
+		{ // non-term
+			isNonTerminal = true;
+			
+			size_t nextPos = annotatedWord.find("[", 1);
+			assert(nextPos != string::npos);
+			
+			if (direction == Input)
+				annotatedWord = annotatedWord.substr(1, nextPos - 2);
+			else
+				annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
+			
+			m_arity++;
+		}
+		else
+		{
+			isNonTerminal = false;
+		}
+		
+		Word &word = AddWord();
+		word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);		
+		
+	}
+	
+	// lhs
+	string &annotatedWord = annotatedWordVector.back();
+	assert(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
+	annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
+	
+	lhs.CreateFromString(direction, factorOrder, annotatedWord, true);		
+	assert(lhs.IsNonTerminal());
+}
+	
 bool Phrase::operator== (const Phrase &compare) const
 {  
   return !(*this < compare) && !(compare < *this);

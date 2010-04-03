@@ -82,6 +82,29 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
 	return strme.str();
 }
 
+void Word::CreateFromString(FactorDirection direction
+														, const std::vector<FactorType> &factorOrder
+														, const std::string &str
+														, bool isNonTerminal)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	vector<string> wordVec;
+	Tokenize(wordVec, str, "|");
+	assert(wordVec.size() == factorOrder.size());
+	
+	const Factor *factor;
+	for (size_t ind = 0; ind < wordVec.size(); ++ind)
+	{
+		FactorType factorType = factorOrder[ind];
+		factor = factorCollection.AddFactor(direction, factorType, wordVec[ind]); 
+		m_factorArray[factorType] = factor;
+	}
+	
+	// assume term/non-term same for all factors
+	m_isNonTerminal = isNonTerminal;
+}
+	
 TO_STRING_BODY(Word);
 
 // friend
