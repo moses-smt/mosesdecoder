@@ -37,23 +37,23 @@ class DecodeGraph
 protected:
 	std::list<const DecodeStep*> m_steps;
     size_t m_position;   
+	size_t m_maxChartSpan;
 
 public:
     /**
       * position: The position of this graph within the decode sequence.
       **/
-    DecodeGraph(size_t position): m_position(position) {}
+	DecodeGraph(size_t position, size_t maxChartSpan)
+	: m_position(position) 
+	, m_maxChartSpan(maxChartSpan)
+	{}
+	
 	//! iterators
 	typedef std::list<const DecodeStep*>::iterator iterator;
 	typedef std::list<const DecodeStep*>::const_iterator const_iterator;
 	const_iterator begin() const { return m_steps.begin(); }
 	const_iterator end() const { return m_steps.end(); }
-	
-    size_t GetPosition() const
-    {
-        return m_position;
-    }   
-    
+	    
 	~DecodeGraph();
 
 	//! Add another decode step to the graph
@@ -64,6 +64,12 @@ public:
 	
 	size_t GetSize() const
 	{ return m_steps.size(); }
+
+	size_t GetMaxChartSpan() const
+	{ return m_maxChartSpan; }
+
+	size_t GetPosition() const
+	{ return m_position; }   
 
 };
 

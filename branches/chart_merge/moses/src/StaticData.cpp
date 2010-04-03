@@ -900,7 +900,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 		assert(decodeStep);
 		if (decodeStepVL.size() < vectorList + 1) 
 		{
-			decodeStepVL.push_back(new DecodeGraph(decodeStepVL.size()));
+			decodeStepVL.push_back(new DecodeGraph(decodeStepVL.size(), 999)); // TODO max chart span
 		}
 		decodeStepVL[vectorList]->Add(decodeStep);
 		prev = decodeStep;
