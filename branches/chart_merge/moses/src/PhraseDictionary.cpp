@@ -124,7 +124,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	else if (implementation == OnDisk)
 	{   
 		//load the tree dictionary for this thread   
-		const StaticData& staticData = StaticData::Instance();
+		//const StaticData& staticData = StaticData::Instance();
 		PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(m_numScoreComponent, this);
 		pdta->Load(
 											m_input

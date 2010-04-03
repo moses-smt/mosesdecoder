@@ -219,54 +219,6 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 	CreateFromString(factorOrder, phraseVector);
 }
 
-bool Phrase::operator < (const Phrase &compare) const
-{	
-#ifdef min
-#undef min
-#endif
-	size_t thisSize			= GetSize()
-				,compareSize	= compare.GetSize();
-
-	// decide by using length. quick decision
-	if (thisSize != compareSize)
-	{
-		return thisSize < compareSize;
-	}
-	else
-	{
-		size_t minSize = std::min( thisSize , compareSize );
-
-		const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
-		// taken from word.Compare()
-		for (size_t i = 0 ; i < maxNumFactors ; i++)
-		{
-			FactorType factorType = static_cast<FactorType>(i);
-
-			for (size_t currPos = 0 ; currPos < minSize ; currPos++)
-			{
-				const Factor *thisFactor		= GetFactor(currPos, factorType)
-										,*compareFactor	= compare.GetFactor(currPos, factorType);
-
-				if (thisFactor != NULL && compareFactor != NULL)
-				{
-					const int result = thisFactor->Compare(*compareFactor);
-					if (result == 0)
-					{
-						continue;
-					}
-					else 
-					{
-						return (result < 0);
-					}
-				}
-			}
-		}
-
-		// identical
-		return false;
-	}
-}
-
 void Phrase::CreateFromStringNewFormat(FactorDirection direction
 																			 , const std::vector<FactorType> &factorOrder
 																			 , const std::string &phraseString
@@ -318,12 +270,33 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 	lhs.CreateFromString(direction, factorOrder, annotatedWord, true);		
 	assert(lhs.IsNonTerminal());
 }
+
+int Phrase::Compare(const Phrase &other) const
+{
+#ifdef min
+#undef min
+#endif
+	size_t thisSize			= GetSize()
+	,compareSize	= other.GetSize();
+	if (thisSize != compareSize)
+	{
+		return (thisSize < compareSize) ? -1 : 1;
+	}
 	
-bool Phrase::operator== (const Phrase &compare) const
-{  
-  return !(*this < compare) && !(compare < *this);
+	for (size_t pos = 0 ; pos < thisSize ; pos++)
+	{
+		const Word &thisWord	= GetWord(pos)
+		,&otherWord	= other.GetWord(pos);
+		int ret = Word::Compare(thisWord, otherWord);
+		
+		if (ret != 0)
+			return ret;
+	}
+	
+	return 0;
 }
 
+	
 bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
 										, const vector<FactorType> &inputFactor) const
 {

@@ -164,6 +164,11 @@ public:
 	void Append(const Phrase &endPhrase);
 	void PrependWord(const Word &newWord);
 	
+	void Clear()
+	{
+		m_words.clear();
+	}
+	
 	//! create new phrase class that is a substring of this phrase
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
@@ -172,13 +177,22 @@ public:
   
 	TO_STRING();
 
+	
+	int Compare(const Phrase &other) const;
+	
 	/** transitive comparison between 2 phrases
-	*		used to insert & find phrase in dictionary
-	*/
-	bool operator< (const Phrase &compare) const;
-  
-  bool operator== (const Phrase &compare) const;
-  
+	 *		used to insert & find phrase in dictionary
+	 */
+	bool operator< (const Phrase &compare) const
+	{
+		return Compare(compare) < 0;
+	}
+	
+	bool operator== (const Phrase &compare) const
+	{
+		return Compare(compare) == 0;
+	}
+	
 	size_t GetArity() const
 	{ return m_arity; }
 
