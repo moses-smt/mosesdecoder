@@ -22,8 +22,9 @@ namespace Moses
 namespace MosesChart
 {
 
-ChartCell::ChartCell(size_t startPos, size_t endPos)
+ChartCell::ChartCell(size_t startPos, size_t endPos, Manager &manager)
 :m_coverage(startPos, endPos)
+,m_manager(manager)
 {
 	const StaticData &staticData = StaticData::Instance();
 	m_nBestIsEnabled = staticData.IsNBestEnabled();
@@ -40,7 +41,7 @@ const HypoList &ChartCell::GetSortedHypotheses(const Moses::Word &headWord) cons
 bool ChartCell::AddHypothesis(Hypothesis *hypo)
 {
 	const Word &targetLHS = hypo->GetTargetLHS();
-	return m_hypoColl[targetLHS].AddHypothesis(hypo);
+	return m_hypoColl[targetLHS].AddHypothesis(hypo, m_manager);
 }
 
 void ChartCell::PruneToSize()
@@ -49,7 +50,7 @@ void ChartCell::PruneToSize()
 	for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter)
 	{
 		HypothesisCollection &coll = iter->second;
-		coll.PruneToSize();
+		coll.PruneToSize(m_manager);
 	}
 }
 
@@ -83,7 +84,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		QueueEntry *queueEntry = cube.Pop();
 		
 		queueEntry->GetTranslationOption().GetTotalScore();
-		Hypothesis *hypo = new Hypothesis(*queueEntry);
+		Hypothesis *hypo = new Hypothesis(*queueEntry, m_manager);
 		assert(hypo);
 				
 		hypo->CalcScore();

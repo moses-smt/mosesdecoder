@@ -132,6 +132,8 @@ public:
 												, const std::string &str
 												, bool isNonTerminal);	
 
+	void CreateUnknownWord(const Word &sourceWord);
+	
 };
 
 struct WordComparer

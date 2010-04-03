@@ -104,6 +104,23 @@ void Word::CreateFromString(FactorDirection direction
 	// assume term/non-term same for all factors
 	m_isNonTerminal = isNonTerminal;
 }
+
+void Word::CreateUnknownWord(const Word &sourceWord)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	{
+		FactorType factorType = static_cast<FactorType>(currFactor);
+		
+		const Factor *sourceFactor = sourceWord[currFactor];
+		if (sourceFactor == NULL)
+			SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR));
+		else
+			SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));		
+	}	
+	m_isNonTerminal = sourceWord.IsNonTerminal();
+}
 	
 TO_STRING_BODY(Word);
 

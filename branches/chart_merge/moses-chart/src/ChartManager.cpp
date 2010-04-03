@@ -21,7 +21,7 @@ namespace MosesChart
 
 Manager::Manager(InputType const& source)
 :m_source(source)
-,m_hypoStackColl(source)
+,m_hypoStackColl(source, *this)
 ,m_transOptColl(source, StaticData::Instance().GetDecodeGraphList(), m_hypoStackColl)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -37,8 +37,7 @@ void Manager::ProcessSentence()
 {
 	VERBOSE(1,"Translating: " << m_source << endl);
 
-	const StaticData &staticData = StaticData::Instance();
-	staticData.ResetSentenceStats(m_source);
+	ResetSentenceStats(m_source);
 
 	VERBOSE(2,"Decoding: " << endl);
 	//Hypothesis::ResetHypoCount();

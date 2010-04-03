@@ -5,7 +5,7 @@
 
 namespace MosesChart
 {
-ChartCellCollection::ChartCellCollection(const Moses::InputType &input)
+ChartCellCollection::ChartCellCollection(const Moses::InputType &input, Manager &manager)
 :m_hypoStackColl(input.GetSize())
 {
 	size_t size = input.GetSize();
@@ -17,7 +17,7 @@ ChartCellCollection::ChartCellCollection(const Moses::InputType &input)
 		size_t ind = 0;
 		for (size_t endPos = startPos ; endPos < size; ++endPos)
 		{
-			ChartCell *cell = new ChartCell(startPos, endPos);
+			ChartCell *cell = new ChartCell(startPos, endPos, manager);
 			inner[ind] = cell;
 			++ind;
 		}

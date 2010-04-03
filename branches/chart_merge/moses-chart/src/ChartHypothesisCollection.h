@@ -80,7 +80,7 @@ protected:
 	/** add hypothesis to stack. Prune if necessary.
 	 * Returns false if equiv hypo exists in collection, otherwise returns true
 	 */
-	std::pair<HCType::iterator, bool> Add(Hypothesis *hypo);
+	std::pair<HCType::iterator, bool> Add(Hypothesis *hypo, Manager &manager);
 
 public:
 	typedef HCType::iterator iterator;
@@ -91,14 +91,14 @@ public:
 	
 	HypothesisCollection();
 	~HypothesisCollection();
-	bool AddHypothesis(Hypothesis *hypo);
+	bool AddHypothesis(Hypothesis *hypo, Manager &manager);
 
 	//! remove hypothesis pointed to by iterator but don't delete the object
 	void Detach(const HCType::iterator &iter);
 	/** destroy Hypothesis pointed to by iterator (object pool version) */
 	void Remove(const HCType::iterator &iter);
 	
-	void PruneToSize();
+	void PruneToSize(Manager &manager);
 
 	size_t GetSize() const
 	{ return m_hypos.size(); }

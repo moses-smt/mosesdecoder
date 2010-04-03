@@ -18,6 +18,7 @@ class TranslationOptionCollection;
 class TranslationOptionList;
 class TranslationOption;
 class ChartCellCollection;
+class Manager;
 
 class ChartCell
 {
@@ -31,9 +32,10 @@ protected:
 	Moses::WordsRange m_coverage;
 
 	bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
-
+	Manager &m_manager;
+	
 public:
-	ChartCell(size_t startPos, size_t endPos);
+	ChartCell(size_t startPos, size_t endPos, Manager &manager);
 
 	void ProcessSentence(const TranslationOptionList &transOptList
 											,const ChartCellCollection &allChartCells);

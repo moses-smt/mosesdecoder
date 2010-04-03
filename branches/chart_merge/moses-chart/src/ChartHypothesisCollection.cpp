@@ -10,6 +10,7 @@
 #include "../../moses/src/StaticData.h"
 #include "ChartHypothesisCollection.h"
 #include "ChartHypothesis.h"
+#include "ChartManager.h"
 
 using namespace std;
 using namespace Moses;
@@ -38,18 +39,18 @@ HypothesisCollection::~HypothesisCollection()
 	//Moses::RemoveAllInColl(m_hypos);
 }
 	
-bool HypothesisCollection::AddHypothesis(Hypothesis *hypo)
+bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 {
 	if (hypo->GetTotalScore() < m_bestScore + m_beamWidth)
 	{ // really bad score. don't bother adding hypo into collection
-		StaticData::Instance().GetSentenceStats().AddDiscarded();
+		manager.GetSentenceStats().AddDiscarded();
 		VERBOSE(3,"discarded, too bad for stack" << std::endl);
 		Hypothesis::Delete(hypo);
 		return false;
 	}
 	
 	// over threshold, try to add to collection
-	std::pair<HCType::iterator, bool> addRet = Add(hypo);
+	std::pair<HCType::iterator, bool> addRet = Add(hypo, manager);
 	if (addRet.second)
 	{ // nothing found. add to collection
 		return true;
@@ -74,7 +75,7 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo)
 			Remove(iterExisting);
 		}
 		
-		bool added = Add(hypo).second;
+		bool added = Add(hypo, manager).second;
 		if (!added)
 		{
 			iterExisting = m_hypos.find(hypo);
@@ -95,7 +96,7 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo)
 	}
 }
 
-pair<HypothesisCollection::HCType::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo)
+pair<HypothesisCollection::HCType::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo, Manager &manager)
 {
 	std::pair<HCType::iterator, bool> ret = m_hypos.insert(hypo);
 	if (ret.second)
@@ -113,7 +114,7 @@ pair<HypothesisCollection::HCType::iterator, bool> HypothesisCollection::Add(Hyp
 		VERBOSE(3,", now size " << m_hypos.size());
 		if (m_hypos.size() > 2*m_maxHypoStackSize-1)
 		{
-			PruneToSize();
+			PruneToSize(manager);
 		}
 		else {
 			VERBOSE(3,std::endl);
@@ -150,7 +151,7 @@ void HypothesisCollection::Remove(const HCType::iterator &iter)
 	Hypothesis::Delete(h);
 }
 
-void HypothesisCollection::PruneToSize()
+void HypothesisCollection::PruneToSize(Manager &manager)
 {
 	if (GetSize() > m_maxHypoStackSize) // ok, if not over the limit
 	{
@@ -190,7 +191,7 @@ void HypothesisCollection::PruneToSize()
 			{
 				HCType::iterator iterRemove = iter++;
 				Remove(iterRemove);
-				StaticData::Instance().GetSentenceStats().AddPruning();
+				manager.GetSentenceStats().AddPruning();
 			}
 			else
 			{

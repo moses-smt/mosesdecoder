@@ -61,6 +61,10 @@ public:
 	{
 		m_steps.push_back(decodeStep);
 	}
+	
+	size_t GetSize() const
+	{ return m_steps.size(); }
+
 };
 
 

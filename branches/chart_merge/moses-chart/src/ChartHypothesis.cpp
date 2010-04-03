@@ -4,6 +4,7 @@
 #include "QueueEntry.h"
 #include "ChartCell.h"
 #include "ChartTranslationOption.h"
+#include "ChartManager.h"
 #include "../../moses/src/TargetPhrase.h"
 #include "../../moses/src/Phrase.h"
 #include "../../moses/src/StaticData.h"
@@ -22,7 +23,7 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
-Hypothesis::Hypothesis(const QueueEntry &queueEntry)
+Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
 :m_targetPhrase(queueEntry.GetTranslationOption().GetChartRule().GetTargetPhrase())
 ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetChartRule().GetWordsConsumedTargetOrder())
 ,m_id(++s_HypothesesCreated)
@@ -30,6 +31,7 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry)
 ,m_contextPrefix(Output, StaticData::Instance().GetAllLM().GetMaxNGramOrder())
 ,m_contextSuffix(Output, StaticData::Instance().GetAllLM().GetMaxNGramOrder())
 ,m_arcList(NULL)
+,m_manager(manager)
 {
 	assert(m_targetPhrase.GetSize() == m_wordsConsumedTargetOrder.size());
 	//TRACE_ERR(m_targetPhrase << endl);
@@ -177,7 +179,7 @@ int Hypothesis::LMContextCompare(const Hypothesis &other) const
 	}
 
 	// suffix
-	size_t inputSize = StaticData::Instance().GetInput()->GetSize();
+	size_t inputSize = m_manager.GetSource().GetSize();
 	if (m_currSourceWordsRange.GetEndPos() < inputSize - 1)
 	{
 		int ret = GetSuffix().Compare(other.GetSuffix());

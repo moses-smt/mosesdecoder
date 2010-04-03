@@ -13,7 +13,8 @@ namespace MosesChart
 {
 class QueueEntry;
 class Hypothesis;
-
+class Manager;
+	
 typedef std::vector<Hypothesis*> ArcList;
 
 class Hypothesis
@@ -44,6 +45,8 @@ protected:
 
 	std::vector<const Hypothesis*> m_prevHypos;
 
+	Manager& m_manager;
+	
 	size_t CalcPrefix(Moses::Phrase &ret, size_t size) const;
 	size_t CalcSuffix(Moses::Phrase &ret, size_t size) const;
 
@@ -76,7 +79,7 @@ public:
 	}
 #endif
 
-	explicit Hypothesis(const QueueEntry &queueEntry);
+	explicit Hypothesis(const QueueEntry &queueEntry, Manager &manager);
 	~Hypothesis();
 
 	int GetId()const
