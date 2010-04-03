@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
+#include "AlignmentInfo.h"
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -41,6 +43,22 @@ class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
 
+class CountInfo
+	{
+	public:
+		CountInfo()
+		{}
+		CountInfo(float countSource, float countTarget)
+		:m_countSource(countSource)
+		,m_countTarget(countTarget)
+		{	}
+		
+		float m_countSource;
+		float m_countTarget;
+		
+	};
+
+	
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
@@ -50,9 +68,13 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
+	AlignmentInfo m_alignmentInfo;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
+	Word m_lhsSource // not used for anything at the moment
+			, m_lhsTarget;
+	CountInfo m_countInfo;
 
 	static bool wordalignflag;
 	static bool printalign;
@@ -93,7 +115,13 @@ public:
 								const std::vector<float> &weightT,
 								float weightWP,
 								const LMList &languageModels);
-
+	
+	void SetScoreChart(const ScoreProducer* translationScoreProducer
+										 ,const Scores &scoreVector
+										 ,const std::vector<float> &weightT
+										 ,const LMList &languageModels
+										 ,bool calcWordPenalty);
+	
 	
 	// used when creating translations of unknown words:
 	void ResetScore();
@@ -135,8 +163,22 @@ public:
 		return m_sourcePhrase;
 	}
 	
+	void SetSourceLHS(const Word &lhs)
+	{ 	m_lhsSource = lhs; }
+	const Word &GetSourceLHS() const
+	{ return m_lhsSource; }
 	
+	void SetTargetLHS(const Word &lhs)
+	{ 	m_lhsTarget = lhs; }
+	const Word &GetTargetLHS() const
+	{ return m_lhsTarget; }
 	
+	void SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
+	
+	AlignmentInfo &GetAlignmentInfo()
+	{ return m_alignmentInfo; }
+	const AlignmentInfo &GetAlignmentInfo() const
+	{ return m_alignmentInfo; }
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
@@ -150,6 +192,8 @@ public:
 	bool PrintAlignmentInfo() const {
 		return printalign;
 	}
+
+	void CreateCountInfo(const std::string &countStr);
 
 	TO_STRING();
 };

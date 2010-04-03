@@ -93,6 +93,12 @@ public:
 											, const std::string &phraseString
 											, const std::string &factorDelimiter);
 
+	void CreateFromStringNewFormat(FactorDirection direction
+																 , const std::vector<FactorType> &factorOrder
+																 , const std::string &phraseString
+																 , const std::string &factorDelimiter
+																 , Word &lhs);
+	
 	/**	copy factors from the other phrase to this phrase. 
 		IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
 	*/
@@ -141,6 +147,8 @@ public:
 		Word &ptr = m_words[pos];
 		ptr[factorType] = factor;
 	}
+
+	size_t GetNumTerminals() const;
 
 	//! whether the 2D vector is a substring of this phrase
 	bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector

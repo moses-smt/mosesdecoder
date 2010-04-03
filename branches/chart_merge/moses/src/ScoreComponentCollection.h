@@ -192,6 +192,8 @@ public:
 		return m_scores[begin];
 	}
 
+	float GetWeightedScore() const;
+
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)

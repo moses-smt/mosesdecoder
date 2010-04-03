@@ -47,6 +47,7 @@ protected:
 	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
 
 	FactorArray m_factorArray; /**< set of factors */
+	bool m_isNonTerminal;
 
 public:
 	/** deep copy */
@@ -55,8 +56,10 @@ public:
 	}
 
 	/** empty word */
-	Word() {
+	explicit Word(bool isNonTerminal = false)
+	{
 		std::memset(m_factorArray, 0, sizeof(FactorArray));
+		m_isNonTerminal = isNonTerminal;
 	}
 
 	~Word() {}
@@ -79,10 +82,15 @@ public:
 		m_factorArray[factorType] = factor;
 	}
 
+	inline bool IsNonTerminal() const 
+	{	return m_isNonTerminal;	}
+	inline void SetIsNonTerminal(bool val)
+	{	m_isNonTerminal = val;	}
+	
 	/** add the factors from sourceWord into this representation,
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
-
+	
 	/** get string representation of list of factors. Used by PDTimp so supposed 
 	* to be invariant to changes in format of debuggin output, therefore, doesn't 
 	* use streaming output or ToString() from any class so not dependant on 
