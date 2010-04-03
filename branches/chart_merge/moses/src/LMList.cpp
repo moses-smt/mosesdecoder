@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include "StaticData.h"
 #include "LMList.h"
 #include "Phrase.h"
 #include "LanguageModelSingleFactor.h"
@@ -59,6 +60,13 @@ void LMList::Add(LanguageModel *lm)
 {
 	m_coll.push_back(lm);
 	m_maxNGramOrder = (lm->GetNGramOrder() > m_maxNGramOrder) ? lm->GetNGramOrder() : m_maxNGramOrder;
+
+	const ScoreIndexManager &scoreMgr = StaticData::Instance().GetScoreIndexManager();
+	size_t startInd = scoreMgr.GetBeginIndex(lm->GetScoreBookkeepingID())
+				,endInd		= scoreMgr.GetEndIndex(lm->GetScoreBookkeepingID()) - 1;
+	
+	m_minInd = min(m_minInd, startInd);
+	m_maxInd = max(m_maxInd, endInd);
 }
 	
 }

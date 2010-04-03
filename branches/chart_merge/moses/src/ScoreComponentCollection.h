@@ -194,6 +194,9 @@ public:
 
 	float GetWeightedScore() const;
 
+	void ZeroAllLM();
+	void PlusEqualsAllLM(const ScoreComponentCollection& rhs);
+
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
