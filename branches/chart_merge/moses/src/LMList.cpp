@@ -28,6 +28,11 @@ using namespace std;
 
 namespace Moses
 {
+LMList::~LMList()
+{
+	RemoveAllInColl(m_coll);
+}
+	
 void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const
 { 
 	const_iterator lmIter;
@@ -50,5 +55,11 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 	}	
 }
 
+void LMList::Add(LanguageModel *lm)
+{
+	m_coll.push_back(lm);
+	m_maxNGramOrder = (lm->GetNGramOrder() > m_maxNGramOrder) ? lm->GetNGramOrder() : m_maxNGramOrder;
+}
+	
 }
 

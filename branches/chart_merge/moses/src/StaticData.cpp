@@ -459,7 +459,6 @@ StaticData::~StaticData()
 {
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
-	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
 	
@@ -644,7 +643,7 @@ bool StaticData::LoadLanguageModels()
       	return false;
       }
 
-			m_languageModel.push_back(lm);
+			m_languageModel.Add(lm);
 		}
 	}
   // flag indicating that language models were loaded,
