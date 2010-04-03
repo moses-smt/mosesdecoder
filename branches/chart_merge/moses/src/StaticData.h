@@ -61,6 +61,9 @@ class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 
+typedef std::pair<std::string, float> UnknownLHSEntry;	
+typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
+
 /** Contains global variables and contants */
 class StaticData
 {
@@ -187,6 +190,8 @@ protected:
 	// Other = 1 = used to calculate LM score once all steps have been processed
 	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
 	SourceLabelOverlap m_sourceLabelOverlap;
+	UnknownLHSList m_unknownLHS;
+
 
 	StaticData();
 
@@ -529,6 +534,9 @@ public:
   
   bool PrintAllDerivations() const { return m_printAllDerivations;}
 	
+	const UnknownLHSList &GetUnknownLHS() const
+	{ return m_unknownLHS; }
+
 	const std::string &GetDefaultNonTerminal() const
 	{ return m_defaultNonTerminals; }
 	SourceLabelOverlap GetSourceLabelOverlap() const
