@@ -44,9 +44,6 @@ class Phrase
 																					Input = Source, Output = Target. 
 																					Not really used, but nice to know for debugging purposes
 																			*/
-	size_t								m_phraseSize; //number of words
-	size_t								m_arraySize;	/** current size of vector m_words. This number is equal or bigger
-																					than m_phraseSize. Used for faster allocation of m_word */
 	std::vector<Word>			m_words;
 	size_t m_arity;
 
@@ -62,7 +59,7 @@ public:
 	/** create empty phrase 
 	* \param direction = language (Input = Source, Output = Target)
 	*/
-	Phrase(FactorDirection direction);
+	Phrase(FactorDirection direction, size_t reserveSize = ARRAY_SIZE_INCR);
 	/** create phrase from vectors of words	*/
 	Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
 
@@ -125,7 +122,7 @@ public:
 	//! number of words
 	inline size_t GetSize() const
 	{
-		return m_phraseSize;
+		return m_words.size();
 	}
 
 	//! word at a particular position
@@ -162,6 +159,11 @@ public:
 	{
     AddWord() = newWord;
   }
+	
+	/** appends a phrase at the end of current phrase **/
+	void Append(const Phrase &endPhrase);
+	void PrependWord(const Word &newWord);
+	
 	//! create new phrase class that is a substring of this phrase
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	
@@ -177,10 +179,6 @@ public:
   
   bool operator== (const Phrase &compare) const;
   
-	
-	/** appends a phrase at the end of current phrase **/
-	void Append(const Phrase &endPhrase);
-	
 	size_t GetArity() const
 	{ return m_arity; }
 
