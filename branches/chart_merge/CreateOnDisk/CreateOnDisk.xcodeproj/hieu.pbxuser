@@ -1,0 +1,116 @@
+// !$*UTF8*$!
+{
+	08FB7793FE84155DC02AAC07 /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 1CD9820411679794002BE765 /* CreateOnDisk */;
+		activeTarget = 8DD76F620486A84900D96B5E /* CreateOnDisk */;
+		codeSenseManager = 1CD9820B116797A3002BE765 /* Code sense */;
+		executables = (
+			1CD9820411679794002BE765 /* CreateOnDisk */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 292001684;
+			PBXWorkspaceStateSaveDate = 292001684;
+		};
+		perUserProjectItems = {
+			1CD9821E1167984C002BE765 /* PBXTextBookmark */ = 1CD9821E1167984C002BE765 /* PBXTextBookmark */;
+			1CD9821F1167984C002BE765 /* PBXTextBookmark */ = 1CD9821F1167984C002BE765 /* PBXTextBookmark */;
+		};
+		sourceControlManager = 1CD9820A116797A3002BE765 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	1CD9820411679794002BE765 /* CreateOnDisk */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = CreateOnDisk;
+		sourceDirectories = (
+		);
+	};
+	1CD9820A116797A3002BE765 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	1CD9820B116797A3002BE765 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	1CD9820E116797EC002BE765 /* Vocab.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = Vocab.h;
+		path = /Users/hieu/Documents/unison/workspace/Projects/sourceforge/branches/chart_merge/OnDiskPt/src/Vocab.h;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {561, 812}}";
+			sepNavSelRange = "{332, 49}";
+			sepNavVisRange = "{281, 306}";
+			sepNavWindowFrame = "{{38, 100}, {1183, 876}}";
+		};
+	};
+	1CD9821E1167984C002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: template argument 4 is invalid";
+		fRef = 1CD9820E116797EC002BE765 /* Vocab.h */;
+		rLen = 1;
+		rLoc = 26;
+		rType = 1;
+	};
+	1CD9821F1167984C002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1CD9820E116797EC002BE765 /* Vocab.h */;
+		name = "Vocab.h: 27";
+		rLen = 49;
+		rLoc = 332;
+		rType = 0;
+		vrLen = 225;
+		vrLoc = 244;
+	};
+	8DD76F620486A84900D96B5E /* CreateOnDisk */ = {
+		activeExec = 0;
+		executables = (
+			1CD9820411679794002BE765 /* CreateOnDisk */,
+		);
+	};
+}

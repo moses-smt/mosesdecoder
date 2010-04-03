@@ -1,0 +1,146 @@
+// !$*UTF8*$!
+{
+	08FB7793FE84155DC02AAC07 /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeTarget = D2AAC045055464E500DB518D /* OnDiskPt */;
+		codeSenseManager = 1CD9822C1167986C002BE765 /* Code sense */;
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 292001783;
+			PBXWorkspaceStateSaveDate = 292001783;
+		};
+		perUserProjectItems = {
+			1CD9823711679919002BE765 /* PBXTextBookmark */ = 1CD9823711679919002BE765 /* PBXTextBookmark */;
+			1CD9824F1167997F002BE765 /* PBXTextBookmark */ = 1CD9824F1167997F002BE765 /* PBXTextBookmark */;
+			1CD982501167997F002BE765 /* PBXTextBookmark */ = 1CD982501167997F002BE765 /* PBXTextBookmark */;
+			1CD982511167997F002BE765 /* PBXTextBookmark */ = 1CD982511167997F002BE765 /* PBXTextBookmark */;
+			1CD982521167997F002BE765 /* PBXTextBookmark */ = 1CD982521167997F002BE765 /* PBXTextBookmark */;
+			1CD982531167997F002BE765 /* PBXTextBookmark */ = 1CD982531167997F002BE765 /* PBXTextBookmark */;
+		};
+		sourceControlManager = 1CD9822B1167986C002BE765 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	1C62012B10F0105300146F11 /* TargetPhrase.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {612, 4494}}";
+			sepNavSelRange = "{4980, 0}";
+			sepNavVisRange = "{4730, 546}";
+			sepNavWindowFrame = "{{61, 79}, {1183, 876}}";
+		};
+	};
+	1C62012D10F0105300146F11 /* TargetPhraseCollection.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {648, 2450}}";
+			sepNavSelRange = "{3397, 44}";
+			sepNavVisRange = "{3309, 339}";
+		};
+	};
+	1C62012F10F0105300146F11 /* Vocab.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {720, 1470}}";
+			sepNavSelRange = "{2020, 0}";
+			sepNavVisRange = "{1099, 363}";
+		};
+	};
+	1C62013110F0105300146F11 /* Word.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {720, 2408}}";
+			sepNavSelRange = "{2906, 0}";
+			sepNavVisRange = "{636, 256}";
+		};
+	};
+	1CD9822B1167986C002BE765 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	1CD9822C1167986C002BE765 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	1CD9823711679919002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "error: ‘class Moses::TargetPhrase’ has no member named ‘SetDebugOutput’";
+		fRef = 1C62012D10F0105300146F11 /* TargetPhraseCollection.cpp */;
+		rLen = 1;
+		rLoc = 126;
+		rType = 1;
+	};
+	1CD9824F1167997F002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1C62013110F0105300146F11 /* Word.cpp */;
+		name = "Word.cpp: 144";
+		rLen = 0;
+		rLoc = 2906;
+		rType = 0;
+		vrLen = 345;
+		vrLoc = 704;
+	};
+	1CD982501167997F002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1C62012B10F0105300146F11 /* TargetPhrase.cpp */;
+		name = "TargetPhrase.cpp: 211";
+		rLen = 0;
+		rLoc = 4980;
+		rType = 0;
+		vrLen = 546;
+		vrLoc = 4730;
+	};
+	1CD982511167997F002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1C62013110F0105300146F11 /* Word.cpp */;
+		name = "Word.cpp: 144";
+		rLen = 0;
+		rLoc = 2906;
+		rType = 0;
+		vrLen = 345;
+		vrLoc = 704;
+	};
+	1CD982521167997F002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1C62012B10F0105300146F11 /* TargetPhrase.cpp */;
+		name = "TargetPhrase.cpp: 211";
+		rLen = 0;
+		rLoc = 4980;
+		rType = 0;
+		vrLen = 546;
+		vrLoc = 4730;
+	};
+	1CD982531167997F002BE765 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1C62012D10F0105300146F11 /* TargetPhraseCollection.cpp */;
+		name = "TargetPhraseCollection.cpp: 127";
+		rLen = 44;
+		rLoc = 3397;
+		rType = 0;
+		vrLen = 454;
+		vrLoc = 3309;
+	};
+	D2AAC045055464E500DB518D /* OnDiskPt */ = {
+		activeExec = 0;
+	};
+}
