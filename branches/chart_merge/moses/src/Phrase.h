@@ -180,6 +180,10 @@ public:
 	
 	/** appends a phrase at the end of current phrase **/
 	void Append(const Phrase &endPhrase);
+	
+	size_t GetArity() const
+	{ return m_arity; }
+
 };
 
 

@@ -38,14 +38,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libOnDiskPt.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
 		1CE6472D1167A11600EC77CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* OnDiskPt */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
 /* End PBXContainerItemProxy section */
