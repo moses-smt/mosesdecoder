@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "PhraseDictionaryNewFormat.h"
+#include "PhraseDictionaryOnDisk.h"
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOption.h"
@@ -99,7 +100,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	}
 	else if (implementation == NewFormat)
 	{   // memory phrase table
-		VERBOSE(2,"using standard phrase tables" << std::endl);
+		VERBOSE(2,"using New Format phrase tables" << std::endl);
 		if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
 			m_filePath += ".gz";
 			VERBOSE(2,"Using gzipped file" << std::endl);
@@ -120,7 +121,23 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 										 , staticData.GetWeightWordPenalty()));
 		m_phraseDictionary.reset(pdm);
 	}
-
+	else if (implementation == OnDisk)
+	{   
+		//load the tree dictionary for this thread   
+		const StaticData& staticData = StaticData::Instance();
+		PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(m_numScoreComponent, this);
+		pdta->Load(
+											m_input
+											, m_output
+											, m_filePath
+											, m_weight
+											, m_tableLimit);
+											//, staticData.GetAllLM()
+											//, staticData.GetWeightWordPenalty()));
+		assert(pdta);
+		m_phraseDictionary.reset(pdta);
+	}
+	
 }
   
 PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) 
