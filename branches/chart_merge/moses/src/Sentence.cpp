@@ -169,25 +169,6 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
 	}
 }
 
-
-std::string Sentence::ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName){
-	/*TODO deal with unescaping \"*/
-	string tagOpen = attributeName + "=\"";
-	size_t contentsStart = tag.find(tagOpen);
-	if (contentsStart == std::string::npos) return "";
-	contentsStart += tagOpen.size();
-	size_t contentsEnd = tag.find_first_of('"',contentsStart+1);
-	if (contentsEnd == std::string::npos) {
-		TRACE_ERR("Malformed XML attribute: "<< tag);
-		return "";	
-	}
-	size_t possibleEnd;
-	while (tag.at(contentsEnd-1) == '\\' && (possibleEnd = tag.find_first_of('"',contentsEnd+1)) != std::string::npos) {
-		contentsEnd = possibleEnd;
-	}
-	return tag.substr(contentsStart,contentsEnd-contentsStart);
-}
-
 void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder
 											, const std::string &phraseString
 											, const std::string &factorDelimiter)

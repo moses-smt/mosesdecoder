@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #include <stdint.h>
 typedef uint32_t UINT32;
+typedef uint64_t UINT64;
 #endif
 
 namespace Moses
@@ -169,6 +170,7 @@ enum InputTypeEnum
 	SentenceInput						= 0
 	,ConfusionNetworkInput	= 1
 	,WordLatticeInput				= 2
+	,ChartSentenceInput			= 3
 };
 
 enum XmlInputType
@@ -190,8 +192,16 @@ enum SearchAlgorithm
 	Normal				= 0
 	,CubePruning	= 1
 	,CubeGrowing	= 2
+	,ChartDecoding= 3
 };
 
+enum SourceLabelOverlap
+{
+	SourceLabelOverlapAdd = 0
+	,SourceLabelOverlapReplace = 1
+	,SourceLabelOverlapDiscard = 2
+};
+	
 // typedef
 typedef size_t FactorType;
 

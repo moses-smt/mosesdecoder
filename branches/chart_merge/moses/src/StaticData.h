@@ -181,6 +181,13 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
+	
+	std::string m_defaultNonTerminals;
+	// Initial = 0 = can be used when creating poss trans
+	// Other = 1 = used to calculate LM score once all steps have been processed
+	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
+	SourceLabelOverlap m_sourceLabelOverlap;
+
 	StaticData();
 
 	//! helper fn to set bool param from ini file/command line
@@ -521,6 +528,12 @@ public:
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
   
   bool PrintAllDerivations() const { return m_printAllDerivations;}
+	
+	const std::string &GetDefaultNonTerminal() const
+	{ return m_defaultNonTerminals; }
+	SourceLabelOverlap GetSourceLabelOverlap() const
+	{ return m_sourceLabelOverlap; }
+	
 };
 
 }

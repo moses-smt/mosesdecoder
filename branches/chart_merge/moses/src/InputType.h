@@ -36,6 +36,8 @@ class WordsRange;
 class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
+	
+typedef std::vector<Word> LabelList;
 
 //! base class for sentences and confusion networks
 class InputType 

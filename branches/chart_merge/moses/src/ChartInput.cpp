@@ -271,7 +271,7 @@ void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const string &lab
 	// to many ways to specify non-terms. need to rationalise
 	//word.CreateFromString(Input, factorOrder, label);
 	
-	const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true);
+	const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label);
 	word.SetFactor(0, factor);
 	word.SetIsNonTerminal(true);
 	

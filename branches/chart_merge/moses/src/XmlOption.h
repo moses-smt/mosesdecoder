@@ -24,6 +24,11 @@ struct XmlOption {
 
 };
 
+std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
+std::string TrimXml(const std::string& str) ;
+bool isXmlTag(const std::string& tag);
+std::vector<std::string> TokenizeXml(const std::string& str);
+
 bool ProcessAndStripXMLTags(std::string &line,std::vector<std::vector<XmlOption*> > &res, ReorderingConstraint &reorderingConstraint, std::vector< size_t > &walls );
 
 }

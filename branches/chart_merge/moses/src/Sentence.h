@@ -51,7 +51,6 @@ class Sentence : public Phrase, public InputType
 	 * Utility method that takes in a string representing an XML tag and the name of the attribute,
 	 * and returns the value of that tag if present, empty string otherwise
 	 */
-	static std::string ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName);
 	std::vector <TranslationOption*> m_xmlOptionsList;
 	std::vector <bool> m_xmlCoverageMap;
 
