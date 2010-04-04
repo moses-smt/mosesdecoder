@@ -22,7 +22,7 @@ namespace MosesChart
 Manager::Manager(InputType const& source)
 :m_source(source)
 ,m_hypoStackColl(source, *this)
-,m_transOptColl(source, StaticData::Instance().GetDecodeGraphList(), m_hypoStackColl)
+,m_transOptColl(source, StaticData::Instance().GetDecodeStepVL(source), m_hypoStackColl)
 {
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);

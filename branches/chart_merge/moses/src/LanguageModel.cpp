@@ -88,6 +88,13 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	fullScore += ngramScore;	
 }
 
+void LanguageModel::CalcScore2(const Phrase &phrase
+								, float &beginningBitsOnly
+								, float &ngramScore) const
+{
+	assert(false);
+}
+	
 LanguageModel::State LanguageModel::GetState(const std::vector<const Word*> &contextFactor, unsigned int* len) const
 {
   State state;

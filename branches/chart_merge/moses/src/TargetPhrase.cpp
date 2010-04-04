@@ -212,6 +212,13 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 	m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;
 }
 	
+void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
+{ // used when creating translations of unknown words (chart decoding)
+	m_scoreBreakdown.Assign(producer, scoreVector);
+	m_transScore = m_ngramScore = 0;
+	m_fullScore = m_scoreBreakdown.GetWeightedScore();
+}
+	
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {

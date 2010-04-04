@@ -34,6 +34,10 @@ namespace Moses
 
 class PhraseDictionaryMemory;
 class PhraseDictionaryNewFormat;
+class ChartRuleCollection;
+class CellCollection;
+class InputType;
+
 	
 /** One node of the PhraseDictionaryMemory structure
 */
@@ -106,7 +110,7 @@ public:
 	const_iterator end() const { return m_map.end(); }
 	iterator begin() { return m_map.begin(); }
 	iterator end() { return m_map.end(); }
-	
+		
 	TO_STRING();
 };
 

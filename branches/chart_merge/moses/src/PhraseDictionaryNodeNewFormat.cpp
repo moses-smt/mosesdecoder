@@ -132,6 +132,6 @@ std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeNewFormat 
 }
 
 TO_STRING_BODY(PhraseDictionaryNodeNewFormat)
-
+	
 }
 

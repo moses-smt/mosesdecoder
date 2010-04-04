@@ -126,6 +126,9 @@ public:
 										 ,const LMList &languageModels
 										 ,bool calcWordPenalty);
 	
+	// used by for unknown word proc in chart decoding
+	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
+
 	
 	// used when creating translations of unknown words:
 	void ResetScore();
