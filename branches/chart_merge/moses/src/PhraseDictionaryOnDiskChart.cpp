@@ -255,6 +255,7 @@ namespace Moses
 		
 		return ret;
 		 */
+		return NULL;
 	}
 	
 }; // namespace

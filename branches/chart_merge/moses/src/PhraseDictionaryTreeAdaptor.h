@@ -4,6 +4,7 @@
 #define moses_PhraseDictionaryTreeAdaptor_h
 
 #include <vector>
+#include <cassert>
 #include "TypeDef.h"
 #include "PhraseDictionaryMemory.h"
 #include "TargetPhraseCollection.h"
@@ -73,7 +74,10 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	
 	const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
 																										bool adhereTableLimit,const CellCollection &cellColl) const
-	{ assert(false); }
+	{ 
+		assert(false);
+		return NULL;
+	}
 };
 
 }

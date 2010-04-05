@@ -1,4 +1,4 @@
-// $Id: ChartRuleCollection.h 2451 2009-08-04 13:46:24Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

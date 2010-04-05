@@ -1,4 +1,4 @@
-// $Id: StaticData.h 992 2006-11-21 23:06:30Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
