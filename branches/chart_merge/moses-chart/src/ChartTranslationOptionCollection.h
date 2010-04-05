@@ -23,7 +23,7 @@ class TranslationOptionCollection
 	friend std::ostream& operator<<(std::ostream&, const TranslationOptionCollection&);
 protected:
 	const Moses::InputType		&m_source;
-	const std::vector<Moses::DecodeGraph*> &m_decodeGraphList;
+	const std::vector<Moses::DecodeGraph*> m_decodeGraphList;
 	const ChartCellCollection &m_hypoStackColl;
 
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */

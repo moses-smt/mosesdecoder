@@ -28,10 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Util.h"
 
-namespace Moses
-{
 using namespace std;
 
+namespace Moses
+{
+
+Sentence::Sentence(FactorDirection direction)	
+: Phrase(direction)
+, InputType()
+{
+	assert(direction == Input);	
+	m_defaultLabelList.push_back(StaticData::Instance().GetInputDefaultNonTerminal());
+}
+	
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();

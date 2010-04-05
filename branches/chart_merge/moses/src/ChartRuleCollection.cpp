@@ -1,3 +1,4 @@
+// $Id$
 
 #include <algorithm>
 #include "ChartRuleCollection.h"

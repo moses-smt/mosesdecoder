@@ -543,8 +543,11 @@ public:
 	const UnknownLHSList &GetUnknownLHS() const
 	{ return m_unknownLHS; }
 
-	const std::string &GetDefaultNonTerminal() const
-	{ return m_defaultNonTerminals; }
+	const Word &GetInputDefaultNonTerminal() const
+	{ return m_inputDefaultNonTerminal; }
+	const Word &GetOutputDefaultNonTerminal() const
+	{ return m_outputDefaultNonTerminal; }
+	
 	SourceLabelOverlap GetSourceLabelOverlap() const
 	{ return m_sourceLabelOverlap; }
 	
@@ -552,6 +555,8 @@ public:
 	{ return m_outputHypoScore; }
 	size_t GetRuleLimit() const
 	{ return m_ruleLimit; }
+	float GetRuleCountThreshold() const
+	{ return 999999; /* TODO wtf! */ }
 	
 
 };

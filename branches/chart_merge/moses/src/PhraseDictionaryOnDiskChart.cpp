@@ -20,8 +20,6 @@ namespace Moses
 	const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(InputType const& src, WordsRange const& range,
 																																						bool adhereTableLimit,const CellCollection &cellColl) const
 	{
-		
-		/*
 		const StaticData &staticData = StaticData::Instance();
 		float weightWP = staticData.GetWeightWordPenalty();
 		const LMList &lmList = staticData.GetAllLM();
@@ -110,8 +108,7 @@ namespace Moses
 								,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
 
 			// go through each SOURCE lhs
-			const Sentence &sentence = static_cast<const Sentence&>(src);
-			const LabelList &sourceLHSList = sentence.GetLabelList(startPos, endPos);
+			const LabelList &sourceLHSList = src.GetLabelList(startPos, endPos);
 			
 			LabelList::const_iterator iterSourceLHS;
 			for (iterSourceLHS = sourceLHSList.begin(); iterSourceLHS != sourceLHSList.end(); ++iterSourceLHS)
@@ -208,8 +205,8 @@ namespace Moses
 					const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
 					if (node)
 					{
-						Moses::UINT64 tpCollFilePos = node->GetValue();
-						std::map<Moses::UINT64, const TargetPhraseCollection*>::const_iterator iterCache = m_cache.find(tpCollFilePos);
+						UINT64 tpCollFilePos = node->GetValue();
+						std::map<UINT64, const TargetPhraseCollection*>::const_iterator iterCache = m_cache.find(tpCollFilePos);
 						if (iterCache == m_cache.end())
 						{ // not in case							
 							overThreshold = node->GetCount(0) > staticData.GetRuleCountThreshold();
@@ -254,8 +251,6 @@ namespace Moses
 		cerr << numDerivations << " ";
 		
 		return ret;
-		 */
-		return NULL;
 	}
 	
 }; // namespace

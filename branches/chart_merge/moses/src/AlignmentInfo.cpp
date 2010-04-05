@@ -1,3 +1,4 @@
+// $Id$
 #include "AlignmentInfo.h"
 
 namespace Moses

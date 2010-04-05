@@ -1,3 +1,4 @@
+// $Id$
 
 #include "ChartInput.h"
 #include "StaticData.h"
@@ -233,7 +234,7 @@ int ChartInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder
 	{
 		const XMLParseOutput &labelItem = *iterLabel;
 		const WordsRange &range = labelItem.m_range;
-		const string &label = labelItem.m_label;
+		const string &label = labelItem.m_label;		
 		AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
 	}
 	
@@ -242,7 +243,7 @@ int ChartInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder
 	{
 		for (size_t endPos = startPos; endPos < sourceSize; ++endPos)
 		{
-			AddChartLabel(startPos, endPos, staticData.GetDefaultNonTerminal(), factorOrder);
+			AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
 		}
 	}
 	
@@ -262,37 +263,40 @@ TranslationOptionCollection* ChartInput::CreateTranslationOptionCollection() con
 	return NULL;
 }
 
-void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
+void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
 															, const std::vector<FactorType>& factorOrder)
-{
-	Word word(true);
-	
-	// TODO
-	// to many ways to specify non-terms. need to rationalise
-	//word.CreateFromString(Input, factorOrder, label);
-	
-	const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label);
-	word.SetFactor(0, factor);
+{	
+	assert(label.IsNonTerminal());
 	
 	SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
 	LabelList &list = GetLabelList(startPos, endPos);
 	switch (overlapType)
 	{
 		case SourceLabelOverlapAdd: 
-			list.push_back(word);
+			list.push_back(label);
 			break;
 		case SourceLabelOverlapReplace:
 			if (list.size() > 0) // replace existing label
-				list[0] = word;
+				list[0] = label;
 			else
-				list.push_back(word);
+				list.push_back(label);
 			break;
 		case SourceLabelOverlapDiscard:
 			if (list.size() == 0) 
-				list.push_back(word);
+				list.push_back(label);
 			break;
 	}
 }
+	
+	void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
+																 , const std::vector<FactorType>& factorOrder)
+	{
+		Word word(true);
+		const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label); // TODO - no factors
+		word.SetFactor(0, factor);
+
+		AddChartLabel(startPos, endPos, word, factorOrder);
+	}	
 
 std::ostream& operator<<(std::ostream &out, const ChartInput &input)
 {	

@@ -217,8 +217,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		assert(wordsConsumed->size());
 
 		// loop
-		const string &sourceLHSStr = staticData.GetDefaultNonTerminal();
-
 		const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
 		UnknownLHSList::const_iterator iterLHS; 
 		for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS)
@@ -227,10 +225,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			float prob = iterLHS->second;
 			
 			// lhs
-			Word sourceLHS(true)
-						,targetLHS(true);
-			sourceLHS.CreateFromString(Input, staticData.GetInputFactorOrder(), sourceLHSStr, true);
-			assert(sourceLHS.GetFactor(0) != NULL);
+			const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
+			Word targetLHS(true);
 
 			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
 			assert(targetLHS.GetFactor(0) != NULL);

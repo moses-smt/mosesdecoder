@@ -27,6 +27,8 @@ protected:
 
 	void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
 										,const std::vector<FactorType>& factorOrder);
+	void AddChartLabel(size_t startPos, size_t endPos, const Word &label
+										 ,const std::vector<FactorType>& factorOrder);
 	LabelList &GetLabelList(size_t startPos, size_t endPos)
 	{
 		return m_sourceChart[startPos][endPos - startPos];

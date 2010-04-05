@@ -54,10 +54,10 @@ class Sentence : public Phrase, public InputType
 	std::vector <TranslationOption*> m_xmlOptionsList;
 	std::vector <bool> m_xmlCoverageMap;
 
+	LabelList m_defaultLabelList;
+
  public:
-	Sentence(FactorDirection direction)	: Phrase(direction), InputType()
-	{
-	}
+	Sentence(FactorDirection direction);
 
 	InputTypeEnum GetType() const
 	{	return SentenceInput;}
@@ -95,6 +95,9 @@ class Sentence : public Phrase, public InputType
 												, const std::string &phraseString
 												, const std::string &factorDelimiter);
 	
+	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	{	return m_defaultLabelList;	}
+
 };
 
 

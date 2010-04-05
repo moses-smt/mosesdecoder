@@ -418,7 +418,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */,
 				1CD9808911678B5D002BE765 /* AlignmentInfo.cpp */,
 				1CD9808A11678B5D002BE765 /* AlignmentInfo.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
@@ -532,6 +531,7 @@
 				D39BA82A0AFBB7090089AE6A /* PhraseDictionaryMemory.h */,
 				1CB22CD611676E3D0083E5A6 /* PhraseDictionaryNewFormat.cpp */,
 				1CB22CD711676E3D0083E5A6 /* PhraseDictionaryNewFormat.h */,
+				1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */,
 				1C8CFE5F0AD67A9700FA22E2 /* PhraseDictionaryNode.cpp */,
 				1C8CFE600AD67A9700FA22E2 /* PhraseDictionaryNode.h */,
 				1CD9815611679309002BE765 /* PhraseDictionaryNodeNewFormat.cpp */,

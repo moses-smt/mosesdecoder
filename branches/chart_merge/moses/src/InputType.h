@@ -123,6 +123,8 @@ public:
 		return m_reorderingConstraint;
 	};
 
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const = 0;
+
 	TO_STRING();
 	
 };
