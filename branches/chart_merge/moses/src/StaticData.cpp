@@ -985,8 +985,19 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 	return decodeStepVL;
 }
 
+#include "PhraseDictionary.h"
+	
 void StaticData::CleanUpAfterSentenceProcessing() const
 {
+	
+	for(size_t i=0;i<m_phraseDictionary.size();++i)
+	{
+		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
+		PhraseDictionary &phraseDictionary = *phraseDictionaryFeature.GetDictionary();
+		phraseDictionary.CleanUp();
+
+	}
+	
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
   

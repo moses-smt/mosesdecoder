@@ -140,7 +140,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	
 }
   
-PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) 
+const PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) const
 {
 	PhraseDictionary* dict = m_phraseDictionary.get();
 	assert(dict);

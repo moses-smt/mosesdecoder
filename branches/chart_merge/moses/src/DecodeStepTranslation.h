@@ -36,7 +36,7 @@ class DecodeStepTranslation : public DecodeStep
 {
 public:
 	DecodeStepTranslation(); //! not implemented
-	DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev);
+	DecodeStepTranslation(const PhraseDictionary* dict, const DecodeStep* prev);
 
   //! returns phrase table (dictionary) for translation step 
   const PhraseDictionary &GetPhraseDictionary() const;
@@ -59,7 +59,6 @@ private:
 		This function runs IsCompatible() to ensure the two can be merged
 	*/
 	TranslationOption *MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const;
-    PhraseDictionary* m_phraseDictionary;   
 };
 
 

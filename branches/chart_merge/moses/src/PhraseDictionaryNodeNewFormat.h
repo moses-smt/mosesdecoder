@@ -58,7 +58,7 @@ protected:
 	static size_t s_id;
 	size_t m_id; // used for backoff	
 	NodeMap m_map;
-	TargetPhraseCollection *m_targetPhraseCollection;
+	mutable TargetPhraseCollection *m_targetPhraseCollection;
 	const Word *m_sourceWord;
 	float m_entropy;
 	

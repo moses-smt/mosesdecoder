@@ -91,9 +91,59 @@ void LanguageModel::CalcScore(const Phrase &phrase
 void LanguageModel::CalcScore2(const Phrase &phrase
 								, float &beginningBitsOnly
 								, float &ngramScore) const
-{
-	assert(false);
+{ // TODO - get rid of this function
+	
+	beginningBitsOnly	= 0;
+	ngramScore	= 0;
+	
+	size_t phraseSize = phrase.GetSize();
+	
+	vector<const Word*> contextFactor;
+	contextFactor.reserve(m_nGramOrder);
+	
+	size_t currPos = 0;
+	while (currPos < phraseSize)
+	{
+		const Word &word = phrase.GetWord(currPos);
+		assert(!word.IsNonTerminal());
+		
+		ShiftOrPush(contextFactor, word);
+		assert(contextFactor.size() <= m_nGramOrder);
+		
+		if (word == GetSentenceStartArray())
+		{ // do nothing, don't include prob for <s> unigram
+			assert(currPos == 0);
+		}
+		else
+		{
+			float partScore = GetValue(contextFactor);
+			
+			if (contextFactor.size() == m_nGramOrder)
+				ngramScore += partScore;
+			else
+				beginningBitsOnly += partScore;
+		}
+		
+		currPos++;
+	}
 }
+	
+void LanguageModel::ShiftOrPush(vector<const Word*> &contextFactor, const Word &word) const
+{
+	if (contextFactor.size() < m_nGramOrder)
+	{
+		contextFactor.push_back(&word);
+	}
+	else
+	{ // shift
+		for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
+		{
+			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
+		}
+		contextFactor[m_nGramOrder - 1] = &word;
+	}
+}
+	
 	
 LanguageModel::State LanguageModel::GetState(const std::vector<const Word*> &contextFactor, unsigned int* len) const
 {

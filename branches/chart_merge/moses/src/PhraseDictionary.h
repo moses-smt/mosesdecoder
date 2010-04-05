@@ -112,8 +112,13 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
 
 	size_t GetNumInputScores() const;
 
-	PhraseDictionary* GetDictionary(const InputType& source);
-    
+	const PhraseDictionary* GetDictionary(const InputType& source) const;
+
+	PhraseDictionary* GetDictionary() // TODO - get rid of this, make Cleanup() const. only to be called by static data
+	{
+		return m_phraseDictionary.get();
+	}
+	
  private:
     size_t m_numScoreComponent;
     unsigned m_numInputScores;

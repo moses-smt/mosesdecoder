@@ -33,7 +33,7 @@ public:
 	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
 	{
 		assert(false);
-		return LabelList();
+		return *(new LabelList());
 	}
 	
 };
