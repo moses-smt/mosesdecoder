@@ -197,6 +197,9 @@ protected:
 
 	StaticData();
 
+	void LoadChartDecodingParameters();
+	void LoadNonTerminals();
+
 	//! helper fn to set bool param from ini file/command line
 	void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
 

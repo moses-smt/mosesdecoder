@@ -98,6 +98,13 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
   }
 
+	// to cube or not to cube
+	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
+											(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+	
+	if (m_searchAlgorithm == ChartDecoding)
+		LoadChartDecodingParameters();
+	
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter->GetParam("inputtype").size()) 
 		m_inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
@@ -125,6 +132,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
 	SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
 
+	SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
+	
 	if (!m_UseAlignmentInfo && m_PrintAlignmentInfo){
 		  TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
 		m_PrintAlignmentInfo=false;
@@ -396,10 +405,6 @@ bool StaticData::LoadData(Parameter *parameter)
 			}
 		}
 	}
-
-	// to cube or not to cube
-	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
-										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
 
 	// use of xml in input
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
@@ -831,6 +836,68 @@ bool StaticData::LoadPhraseTables()
 	return true;
 }
 
+void StaticData::LoadNonTerminals()
+{
+	if (m_parameter->GetParam("non-terminals").size() == 0)
+	{
+		m_defaultNonTerminals = "X";
+	}
+	else
+	{
+		vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
+		m_defaultNonTerminals = tokens[0];
+	}
+	
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	m_inputDefaultNonTerminal.SetIsNonTerminal(true);
+	const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, m_defaultNonTerminals);
+	m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
+	
+	m_outputDefaultNonTerminal.SetIsNonTerminal(true);
+	const Factor *targetFactor = factorCollection.AddFactor(Output, 0, m_defaultNonTerminals);
+	m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
+	
+	// for unknwon words
+	if (m_parameter->GetParam("unknown-lhs").size() == 0)
+	{
+		UnknownLHSEntry entry(m_defaultNonTerminals, 0.0f);
+		m_unknownLHS.push_back(entry);
+	}
+	else
+	{
+		const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
+		
+		InputFileStream inStream(filePath);
+		string line;
+		while(getline(inStream, line))
+		{
+			vector<string> tokens = Tokenize(line);
+			assert(tokens.size() == 2);
+			UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
+			m_unknownLHS.push_back(entry);	
+		}
+		
+	}
+	
+}
+	
+void StaticData::LoadChartDecodingParameters()
+{
+	LoadNonTerminals();
+	
+	// source label overlap
+	if (m_parameter->GetParam("source-label-overlap").size() > 0) 
+	{
+		m_sourceLabelOverlap = (SourceLabelOverlap) Scan<int>(m_parameter->GetParam("source-label-overlap")[0]);
+	}
+	else
+	{
+		m_sourceLabelOverlap = SourceLabelOverlapAdd;
+	}
+	
+}
+	
 vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 {
     vector<DecodeGraph*> decodeStepVL;
