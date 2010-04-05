@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
+#include "PhraseDictionary.h"
 #include "../../moses-chart/src/ChartTrellisPathList.h"
 #include "../../moses-chart/src/ChartTrellisPath.h"
 
@@ -390,9 +391,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 				vector<PhraseDictionary*>::iterator iter;
 
 				iter = pds.begin();
-				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer((*iter)->GetFeature());
 
-				size_t pd_numinputscore = (*iter)->GetNumInputScores();
+				size_t pd_numinputscore = (*iter)->GetFeature()->GetNumInputScores();
 
 				if (pd_numinputscore){
 
@@ -405,9 +406,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 
 
 				for (iter = pds.begin() ; iter != pds.end(); ++iter) {
-					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer((*iter)->GetFeature());
 
-					size_t pd_numinputscore = (*iter)->GetNumInputScores();
+					size_t pd_numinputscore = (*iter)->GetFeature()->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
 						*m_nBestStream << "tm: ";

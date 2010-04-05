@@ -169,6 +169,12 @@ public:
 		m_words.clear();
 	}
 	
+	void RemoveWord(size_t pos)
+	{
+		assert(pos < m_words.size());
+		m_words.erase(m_words.begin() + pos);
+	}
+	
 	//! create new phrase class that is a substring of this phrase
 	Phrase GetSubString(const WordsRange &wordsRange) const;
 	

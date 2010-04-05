@@ -123,6 +123,7 @@ protected:
 
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
+	bool m_outputHypoScore;
 
 	SearchAlgorithm m_searchAlgorithm;
 	InputTypeEnum m_inputType;
@@ -542,6 +543,9 @@ public:
 	SourceLabelOverlap GetSourceLabelOverlap() const
 	{ return m_sourceLabelOverlap; }
 	
+	bool GetOutputHypoScore() const
+	{ return m_outputHypoScore; }
+
 };
 
 }
