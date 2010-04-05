@@ -105,11 +105,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 			m_filePath += ".gz";
 			VERBOSE(2,"Using gzipped file" << std::endl);
 		}
-		if (staticData.GetInputType() != SentenceInput)
-		{
-			UserMessage::Add("Must use binary phrase table for this input type");
-			assert(false);
-		}
 		
 		PhraseDictionaryNewFormat* pdm  = new PhraseDictionaryNewFormat(m_numScoreComponent,this);
 		assert(pdm->Load(m_input
