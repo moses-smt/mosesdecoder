@@ -104,6 +104,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	
 	if (m_searchAlgorithm == ChartDecoding)
 		LoadChartDecodingParameters();
+	else
+		LoadPhraseBasedParameters();
 	
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter->GetParam("inputtype").size()) 
@@ -278,20 +280,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
 
 	// score weights
-	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
-	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
-	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
-
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
 
+	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
-
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion);
-
+	
 	// reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
@@ -756,7 +752,7 @@ bool StaticData::LoadPhraseTables()
 			// first InputScores (if any), then translation scores
 			vector<float> weight;
 
-			if(currDict==0 && m_inputType)
+			if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput))
 			{	// TODO. find what the assumptions made by confusion network about phrase table output which makes
 				// it only work with binrary file. This is a hack 	
 				
@@ -895,7 +891,19 @@ void StaticData::LoadChartDecodingParameters()
 	{
 		m_sourceLabelOverlap = SourceLabelOverlapAdd;
 	}
+		
+	m_ruleLimit = (m_parameter->GetParam("rule-limit").size() > 0)
+	? Scan<size_t>(m_parameter->GetParam("rule-limit")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
+}
 	
+void StaticData::LoadPhraseBasedParameters()
+{
+	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
+	m_weightDistortion				= Scan<float>(distortionWeights[0]);
+	
+	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
+	m_allWeights.push_back(m_weightDistortion);
+		
 }
 	
 vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const

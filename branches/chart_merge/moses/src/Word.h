@@ -51,7 +51,9 @@ protected:
 
 public:
 	/** deep copy */
-	Word(const Word &copy) {
+	Word(const Word &copy)
+	:m_isNonTerminal(copy.m_isNonTerminal)
+	{
 		std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
 	}
 

@@ -227,7 +227,7 @@ int ChartInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder
 		m_sourceChart[pos].resize(sourceSize - pos);
 	}
 	
-	// do chart labels
+	// do source labels
 	vector<XMLParseOutput>::const_iterator iterLabel;
 	for (iterLabel = sourceLabels.begin(); iterLabel != sourceLabels.end(); ++iterLabel)
 	{
@@ -265,7 +265,7 @@ TranslationOptionCollection* ChartInput::CreateTranslationOptionCollection() con
 void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
 															, const std::vector<FactorType>& factorOrder)
 {
-	Word word;
+	Word word(true);
 	
 	// TODO
 	// to many ways to specify non-terms. need to rationalise
@@ -273,7 +273,6 @@ void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const string &lab
 	
 	const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label);
 	word.SetFactor(0, factor);
-	word.SetIsNonTerminal(true);
 	
 	SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
 	LabelList &list = GetLabelList(startPos, endPos);
