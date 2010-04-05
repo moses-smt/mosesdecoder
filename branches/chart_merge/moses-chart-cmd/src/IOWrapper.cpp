@@ -370,11 +370,11 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){
 			// translation components	for text input
-			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					*m_nBestStream << "tm: ";
-				vector<PhraseDictionary*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j)
@@ -386,14 +386,14 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionary*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
 			if (pds.size() > 0) {
-				vector<PhraseDictionary*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 
 				iter = pds.begin();
-				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer((*iter)->GetFeature());
+				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 
-				size_t pd_numinputscore = (*iter)->GetFeature()->GetNumInputScores();
+				size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 				if (pd_numinputscore){
 
@@ -406,9 +406,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 
 
 				for (iter = pds.begin() ; iter != pds.end(); ++iter) {
-					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer((*iter)->GetFeature());
+					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 
-					size_t pd_numinputscore = (*iter)->GetFeature()->GetNumInputScores();
+					size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
 						*m_nBestStream << "tm: ";
