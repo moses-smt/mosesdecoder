@@ -204,6 +204,6 @@ fi
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile)
 
 AC_OUTPUT()

@@ -25,7 +25,7 @@ Word PhraseDictionaryNewFormat::CreateCoveredWord(const Word &origSourceLabel, c
 	
 	Word ret;
 	
-	const Factor *factor = factorCollection.AddFactor(Input, 0, coveredWordsString, true);
+	const Factor *factor = factorCollection.AddFactor(Input, 0, coveredWordsString);
 	ret.SetFactor(0, factor);
 	
 	return ret;

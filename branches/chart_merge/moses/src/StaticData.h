@@ -185,7 +185,8 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
-	
+	size_t m_ruleLimit;
+
 	std::string m_defaultNonTerminals;
 	// Initial = 0 = can be used when creating poss trans
 	// Other = 1 = used to calculate LM score once all steps have been processed
@@ -545,6 +546,9 @@ public:
 	
 	bool GetOutputHypoScore() const
 	{ return m_outputHypoScore; }
+	size_t GetRuleLimit() const
+	{ return m_ruleLimit; }
+	
 
 };
 

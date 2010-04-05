@@ -30,6 +30,7 @@
 		1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */; };
 		1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C5009BD0FB9E09700DFD24F /* FFState.cpp */; };
 		1C5009C20FB9E09700DFD24F /* FFState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BE0FB9E09700DFD24F /* FFState.h */; };
+		1C66276E116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */; };
 		1C679DC81162099C00DC3892 /* LexicalReorderingState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */; };
 		1C679DC91162099C00DC3892 /* LexicalReorderingState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C679DC31162099C00DC3892 /* LexicalReorderingState.h */; };
 		1C679DCC1162099C00DC3892 /* ReorderingStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679DC61162099C00DC3892 /* ReorderingStack.cpp */; };
@@ -222,6 +223,7 @@
 		1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureFunction.h; path = src/FeatureFunction.h; sourceTree = "<group>"; };
 		1C5009BD0FB9E09700DFD24F /* FFState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFState.cpp; path = src/FFState.cpp; sourceTree = "<group>"; };
 		1C5009BE0FB9E09700DFD24F /* FFState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFState.h; path = src/FFState.h; sourceTree = "<group>"; };
+		1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNewFormatChart.cpp; path = src/PhraseDictionaryNewFormatChart.cpp; sourceTree = "<group>"; };
 		1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingState.cpp; path = src/LexicalReorderingState.cpp; sourceTree = "<group>"; };
 		1C679DC31162099C00DC3892 /* LexicalReorderingState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReorderingState.h; path = src/LexicalReorderingState.h; sourceTree = "<group>"; };
 		1C679DC61162099C00DC3892 /* ReorderingStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReorderingStack.cpp; path = src/ReorderingStack.cpp; sourceTree = "<group>"; };
@@ -416,6 +418,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */,
 				1CD9808911678B5D002BE765 /* AlignmentInfo.cpp */,
 				1CD9808A11678B5D002BE765 /* AlignmentInfo.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
@@ -866,6 +869,7 @@
 				1CE646AE11679D8D00EC77CC /* PhraseDictionaryOnDisk.cpp in Sources */,
 				1CE646E811679F9200EC77CC /* DotChartOnDisk.cpp in Sources */,
 				1CE646EF11679FC700EC77CC /* PhraseDictionaryOnDiskChart.cpp in Sources */,
+				1C66276E116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -107,10 +107,7 @@ namespace Moses
 																												InputType const& src
 																												,WordsRange const& range
 																												,bool adhereTableLimit
-																												,const CellCollection &cellColl) const
-			{
-				assert(false);
-			}
+																												,const CellCollection &cellColl) const;
 			
 			void CleanUp();
 		};

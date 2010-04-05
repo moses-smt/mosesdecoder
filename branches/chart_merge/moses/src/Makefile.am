@@ -111,13 +111,16 @@ libmoses_la_HEADERS += LanguageModelInternal.h \
 endif
 
 libmoses_la_SOURCES = \
+	AlignmentInfo.cpp \
 	BitmapContainer.cpp \
+	ChartInput.cpp \	ChartRule.cpp \	ChartRuleCollection.cpp \
 	ConfusionNet.cpp \
 	DecodeGraph.cpp \
 	DecodeStep.cpp \
 	DecodeStepGeneration.cpp \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
+	DotChart.cpp \	DotChartOnDisk.cpp \
 	DummyScoreProducers.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
@@ -157,7 +160,10 @@ libmoses_la_SOURCES = \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
 	PhraseDictionaryMemory.cpp \
+	PhraseDictionaryNewFormat.cpp \	PhraseDictionaryNewFormatChart.cpp \
 	PhraseDictionaryNode.cpp \
+	PhraseDictionaryNodeNewFormat.cpp \
+	PhraseDictionaryOnDisk.cpp \	PhraseDictionaryOnDiskChart.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
 	PrefixTreeMap.cpp \
@@ -183,6 +189,7 @@ libmoses_la_SOURCES = \
 	TranslationOptionList.cpp \
 	UserMessage.cpp \
 	Util.cpp \
+	WordConsumed.cpp \
 	Word.cpp \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
