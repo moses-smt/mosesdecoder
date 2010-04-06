@@ -803,7 +803,7 @@ bool StaticData::LoadPhraseTables()
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath << endl);
-            
+      if(token.size() < 6 ) {
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
                   numScoreComponent
                 ,  (currDict==0 ? m_numInputScores : 0)
@@ -812,13 +812,20 @@ bool StaticData::LoadPhraseTables()
                 , filePath
                 , weight
                 , maxTargetPhrase[index]);
-                
              m_phraseDictionary.push_back(pdf);
-                
-                
-            
-			
-
+      }
+      else {
+            PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
+                  numScoreComponent
+                ,  (currDict==0 ? m_numInputScores : 0)
+                , input
+                , output
+                , filePath
+                , weight
+                , maxTargetPhrase[index]
+                , token[4], token[5]);
+             m_phraseDictionary.push_back(pdf);
+      }
 			index++;
 		}
 	}
