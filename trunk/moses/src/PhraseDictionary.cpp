@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOption.h"
+#include "PhraseDictionaryDynSuffixArray.h"
 #include "UserMessage.h"
 
 namespace Moses {
@@ -42,7 +43,9 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t tableLimit):
+                            , size_t tableLimit
+                            , const std::string targetFile  // default param
+                            , const std::string alignmentsFile):  // default param
                             m_numScoreComponent(numScoreComponent),
                             m_numInputScores(numInputScores),
                             m_input(input),
@@ -54,9 +57,22 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
     const StaticData& staticData = StaticData::Instance();
     const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
     
-    
+    // HACKING IN DYN SA PHRASE TABLES
+    if((targetFile != "") && (alignmentsFile != "")) {
+            PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent, this);
+            if(!(pd && pd->Load(filePath, targetFile, alignmentsFile
+                                , weight, tableLimit 
+                                , staticData.GetAllLM()
+                                , staticData.GetWeightWordPenalty())))
+            {
+              std::cerr << "FAILED TO LOAD\n" << endl;
+              delete pd;
+            }
+            m_memoryDictionary.reset(pd);
+            std::cerr << "Suffix array phrase table loaded" << std::endl;
+    }
     //if we're using an in-memory phrase table, then load it now, otherwise wait
-    if (!FileExists(filePath+".binphr.idx"))
+    else if (!FileExists(filePath+".binphr.idx"))
     {   // memory phrase table
         VERBOSE(2,"using standard phrase tables" << std::endl);
         if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
