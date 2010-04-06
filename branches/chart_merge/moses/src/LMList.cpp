@@ -73,6 +73,8 @@ void LMList::CalcAllLMScores(const Phrase &phrase
 		
 		float beginningScore, nGramScore;
 		lm.CalcScoreChart(phrase, beginningScore, nGramScore);
+		beginningScore = UntransformLMScore(beginningScore);
+		nGramScore = UntransformLMScore(nGramScore);
 		
 		nGramOnly.PlusEquals(&lm, nGramScore);
 		

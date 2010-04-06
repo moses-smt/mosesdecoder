@@ -210,7 +210,7 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	float prob = m_lmtb->clprob(*m_lmtb_ng);
   
   
-	return TransformIRSTScore(prob);
+	return TransformLMScore(prob);
 }
 
 

@@ -123,7 +123,7 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
         read(sock, &res[cnt], 6-cnt);
       }
   }
-  cur->prob = FloorScore(TransformSRIScore(*reinterpret_cast<float*>(res)));
+  cur->prob = FloorScore(TransformLMScore(*reinterpret_cast<float*>(res)));
   if (finalState) {
     *finalState = cur->boState;
     if (len) *len = m_nGramOrder;

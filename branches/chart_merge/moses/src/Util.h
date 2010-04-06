@@ -265,12 +265,12 @@ inline float UntransformScore(float score)
 }
 
 //! irst number are in log 10, transform to natural log
-inline float TransformIRSTScore(float irstScore)
+inline float TransformLMScore(float irstScore)
 { 
 	return irstScore * 2.30258509299405f;
 }
 
-inline float UntransformIRSTScore(float logNScore)
+inline float UntransformLMScore(float logNScore)
 { // opposite of above
 	return logNScore / 2.30258509299405f;
 }
@@ -279,17 +279,6 @@ inline float UntransformIRSTScore(float logNScore)
 inline float FloorScore(float logScore)
 {
 	return (std::max)(logScore , LOWEST_SCORE);
-}
-
-//! Should SRI & IRST transform functions be merged ???
-inline float TransformSRIScore(float sriScore)
-{
-	return sriScore * 2.30258509299405f;
-}
-
-inline float UntransformSRIScore(float logNScore)
-{ // opposite of above
-	return logNScore / 2.30258509299405f;
 }
 
 /** convert prob vector to log prob and calc inner product with weight vector.

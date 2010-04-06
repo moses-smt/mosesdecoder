@@ -194,6 +194,9 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 			float fullScore, nGramScore;
 			
 			lm.CalcScore(*this, fullScore, nGramScore);
+			fullScore = UntransformLMScore(fullScore);
+			nGramScore = UntransformLMScore(nGramScore);
+			
 			m_scoreBreakdown.Assign(&lm, nGramScore);
 			
 			// total LM score so far
