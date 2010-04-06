@@ -144,7 +144,7 @@ foreach my $step (@step_conf) {
   else {
     die ("Malformed argument to --do-steps");
   }
-  die("Only steps between 0 and 9 can be used") if ($f < 1 || $l > 9);
+  die("Only steps between 1 and 9 can be used") if ($f < 1 || $l > 9);
   die("The first step must be smaller than the last step") if ($f > $l);
 	
   for (my $i=$f; $i<=$l; $i++) {
@@ -316,7 +316,7 @@ $___REORDERING = $_REORDERING if $_REORDERING;
 my $___REORDERING_SMOOTH = 0.5;
 $___REORDERING_SMOOTH = $_REORDERING_SMOOTH if $_REORDERING_SMOOTH;
 my @REORDERING_MODELS;
-my $REORDERING_LEXICAL = 1; # flag for building lexicalized reordering models
+my $REORDERING_LEXICAL = 0; # flag for building lexicalized reordering models
 my %REORDERING_MODEL_TYPES = ();
 
 my $___MAX_LEXICAL_REORDERING = 0;
@@ -325,6 +325,10 @@ $___MAX_LEXICAL_REORDERING = 1 if $_MAX_LEXICAL_REORDERING;
 my $model_num = 0;
 
 foreach my $r (split(/\,/,$___REORDERING)) {
+
+   #Don't do anything for distance models
+   next if ($r eq "distance");
+
    #change some config string options, to be backward compatible
    $r =~ s/orientation/msd/;
    $r =~ s/unidirectional/backward/;
@@ -336,12 +340,9 @@ foreach my $r (split(/\,/,$___REORDERING)) {
 
    #handle the options set in the config string
    foreach my $reoconf (split(/\-/,$r)) {
-      if ($reoconf eq "distance") {
-        $REORDERING_LEXICAL = 0;
-        next;
-      }
       if ($reoconf =~ /^((msd)|(mslr)|(monotonicity)|(leftright))/) { 
         $REORDERING_MODELS[$model_num]{"orient"} = $reoconf;
+        $REORDERING_LEXICAL = 1;
       }
       elsif ($reoconf =~ /^((bidirectional)|(backward)|(forward))/) {
         $REORDERING_MODELS[$model_num]{"dir"} = $reoconf;
@@ -356,64 +357,65 @@ foreach my $r (split(/\,/,$___REORDERING)) {
         $REORDERING_MODELS[$model_num]{"collapse"} = $reoconf;
       }
       else {
-        print STDERR "unknown type in reordering model config string: $reoconf in $r\n";
+        print STDERR "unknown type in reordering model config string: \"$reoconf\" in $r\n";
         exit(1);
       }
   }
+
+
   #check that the required attributes are given
   if (!defined($REORDERING_MODELS[$model_num]{"type"})) {
      print STDERR "you have to give the type of the reordering models (mslr, msd, monotonicity or leftright); it is not done in $r\n";
      exit(1);
   }
-  if ($REORDERING_LEXICAL) {
-      if (!defined($REORDERING_MODELS[$model_num]{"lang"})) {
-         print STDERR "you have specify which languages to condition on (f or fe); it is not done in $r\n";
-         exit(1);
-      }
 
-      #fix the all-string
-      $REORDERING_MODELS[$model_num]{"filename"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.
-                                                   $REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"};
-      $REORDERING_MODELS[$model_num]{"config"} = $REORDERING_MODELS[$model_num]{"filename"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
+  if (!defined($REORDERING_MODELS[$model_num]{"lang"})) {
+     print STDERR "you have specify which languages to condition on for lexical reordering (f or fe); it is not done in $r\n";
+     exit(1);
+  }
 
-      # fix numfeatures
-      $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
-      $REORDERING_MODELS[$model_num]{"numfeatures"} = 2 if $REORDERING_MODELS[$model_num]{"dir"} eq "bidirectional";
-      if ($REORDERING_MODELS[$model_num]{"collapse"} ne "collapseff") {
-        if ($REORDERING_MODELS[$model_num]{"orient"} eq "msd") {
-          $REORDERING_MODELS[$model_num]{"numfeatures"} *= 3;
-        }
-        elsif ($REORDERING_MODELS[$model_num]{"orient"} eq "mslr") {
-          $REORDERING_MODELS[$model_num]{"numfeatures"} *= 4;
-        }
-        else {
-          $REORDERING_MODELS[$model_num]{"numfeatures"} *= 2;
-        }
-      }
+  #fix the all-string
+  $REORDERING_MODELS[$model_num]{"filename"} = $REORDERING_MODELS[$model_num]{"type"}."-".$REORDERING_MODELS[$model_num]{"orient"}.'-'.
+                                               $REORDERING_MODELS[$model_num]{"dir"}."-".$REORDERING_MODELS[$model_num]{"lang"};
+  $REORDERING_MODELS[$model_num]{"config"} = $REORDERING_MODELS[$model_num]{"filename"}."-".$REORDERING_MODELS[$model_num]{"collapse"};
 
-      # fix the overall model selection
-      if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
-         $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
-            $REORDERING_MODELS[$model_num]{"orient"}."-"; 
-      }
-      else  {
-         $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
-            $REORDERING_MODELS[$model_num]{"orient"};
-      }
+  # fix numfeatures
+  $REORDERING_MODELS[$model_num]{"numfeatures"} = 1;
+  $REORDERING_MODELS[$model_num]{"numfeatures"} = 2 if $REORDERING_MODELS[$model_num]{"dir"} eq "bidirectional";
+  if ($REORDERING_MODELS[$model_num]{"collapse"} ne "collapseff") {
+    if ($REORDERING_MODELS[$model_num]{"orient"} eq "msd") {
+      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 3;
+    }
+    elsif ($REORDERING_MODELS[$model_num]{"orient"} eq "mslr") {
+      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 4;
+    }
+    else {
+      $REORDERING_MODELS[$model_num]{"numfeatures"} *= 2;
+    }
+  }
+
+  # fix the overall model selection
+  if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
+     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
+        $REORDERING_MODELS[$model_num]{"orient"}."-"; 
+  }
+  else  {
+     $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
+        $REORDERING_MODELS[$model_num]{"orient"};
   }
   $model_num++;
 }
 
 # pick the overall most specific model for each reordering model type
 for my $mtype ( keys %REORDERING_MODEL_TYPES) {
-  if ($REORDERING_MODEL_TYPES{$mtype} =~ /(mslr)|(leftright)/) {
-    $REORDERING_MODEL_TYPES{$mtype} = "mslr"
-  }
-  elsif ($REORDERING_MODEL_TYPES{$mtype} =~ /msd/) {
+  if ($REORDERING_MODEL_TYPES{$mtype} =~ /msd/) {
     $REORDERING_MODEL_TYPES{$mtype} = "msd"
   }
-  else {
+  elsif ($REORDERING_MODEL_TYPES{$mtype} =~ /monotonicity/) {
     $REORDERING_MODEL_TYPES{$mtype} = "monotonicity"
+  }
+  else {
+    $REORDERING_MODEL_TYPES{$mtype} = "mslr"
   }
 }
 
@@ -1389,7 +1391,6 @@ sub score_phrase_memscore {
 sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
 
-#This @REORDERING_TABLE is now not used. Did anyone use it???
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     if ($REORDERING_LEXICAL) {
 	if ($___NOT_FACTORED) {
@@ -1656,11 +1657,11 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
  
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-	foreach my $model (@REORDERING_MODELS) {	
+	foreach my $model (@REORDERING_MODELS) {
 	    $weight_d_count += $model->{"numfeatures"};
 	    my $table_file = "$___MODEL_DIR/reordering-table";
 	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-        $table_file .= ".";
+	    $table_file .= ".";
 	    $table_file .= ".$factor" unless $___NOT_FACTORED;
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
@@ -1676,7 +1677,7 @@ print INI "\n\n\# limit on how many phrase translations e for each phrase f are 
   
   print INI "# distortion (reordering) weight\n[weight-d]\n";
   for(my $i=0;$i<$weight_d_count;$i++) { 
-    print INI "".(0.6/(scalar @REORDERING_MODELS))."\n";
+    print INI "".(0.6/(scalar @REORDERING_MODELS+1))."\n";
   }
   print INI "\n# language model weights
 [weight-l]\n";
