@@ -88,7 +88,7 @@ bool isXmlTag(const string& tag)
  *
  * \param str input string
  */
-inline vector<string> TokenizeXml(const string& str)
+vector<string> TokenizeXml(const string& str)
 {
 	string lbrack = "<";
 	string rbrack = ">";

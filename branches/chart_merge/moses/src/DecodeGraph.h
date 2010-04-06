@@ -62,7 +62,7 @@ public:
 	const_iterator begin() const { return m_steps.begin(); }
 	const_iterator end() const { return m_steps.end(); }
 	    
-	~DecodeGraph();
+	virtual ~DecodeGraph();
 
 	//! Add another decode step to the graph
 	void Add(const DecodeStep *decodeStep)
