@@ -72,8 +72,7 @@ protected:
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
-	Word m_lhsSource // not used for anything at the moment
-			, m_lhsTarget;
+	Word m_lhsTarget;
 	CountInfo m_countInfo;
 	std::string *m_debugOutput;
 
@@ -169,11 +168,6 @@ public:
 	{
 		return m_sourcePhrase;
 	}
-	
-	void SetSourceLHS(const Word &lhs)
-	{ 	m_lhsSource = lhs; }
-	const Word &GetSourceLHS() const
-	{ return m_lhsSource; }
 	
 	void SetTargetLHS(const Word &lhs)
 	{ 	m_lhsTarget = lhs; }

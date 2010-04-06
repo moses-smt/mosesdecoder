@@ -39,7 +39,6 @@ public:
 	//! transitive comparison used for adding objects into FactorCollection
 	inline bool operator<(const WordConsumed &compare) const
 	{ 
-		// TODO < on bool
 		if (IsNonTerminal() < compare.IsNonTerminal())
 			return true;
 		else if (IsNonTerminal() == compare.IsNonTerminal())

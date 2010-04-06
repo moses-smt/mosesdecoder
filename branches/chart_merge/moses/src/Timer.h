@@ -17,7 +17,7 @@ class Timer
   bool running;
   time_t start_time;
 
-	//TODO in seconds?
+	// in seconds
   double elapsed_time();
 
  public:

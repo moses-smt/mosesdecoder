@@ -218,14 +218,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 		alignmentInfo.push_back(entry);
 	}
 	ret->SetAlignmentInfo(alignmentInfo);
-	
-	// lhs
-	/* TODO - is source lhs required?
-	Moses::Word *lhs = m_headWords[0]->ConvertToMoses(Moses::Input, inputFactors, vocab);
-	ret->SetSourceLHS(*lhs);
-	delete lhs;
-	*/
-	
+		
 	Moses::Word *lhs = GetWord(GetSize() - 1).ConvertToMoses(Moses::Output, outputFactors, vocab);
 	ret->SetTargetLHS(*lhs);
 	delete lhs;

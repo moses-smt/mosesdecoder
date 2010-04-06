@@ -117,7 +117,7 @@ enum DecodeType
 
 namespace LexReorderType
 {
-	enum LexReorderType //TODO explain values
+	enum LexReorderType // explain values
 		{
 			Backward
 			,Forward

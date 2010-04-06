@@ -56,23 +56,6 @@ inline void TransformString(vector< vector<string>* > &phraseVector)
 	}
 }
 
-inline void TransformString(vector< vector<string>* > &phraseVector
-														, vector<string> &sourceLabelsStr)
-{ // for source phrase
-	for (size_t pos = 0 ; pos < phraseVector.size() ; ++pos)
-	{
-		assert(phraseVector[pos]->size() == 1);
-		
-		string &str = (*phraseVector[pos])[0];
-		if (str.substr(0, 1) == "[" && str.substr(str.size()-1, 1) == "]")
-		{ // non-term
-			string sourceLabel = str.substr(1, str.size() - 2);
-			sourceLabelsStr.push_back(sourceLabel);
-			str = "X"; // TODO
-		}
-	}
-}
-
 void CreateAlignmentInfo(list<pair<size_t,size_t> > &alignmentInfo, const string &alignString)
 {
 	vector<string> alignVec = Tokenize(alignString);
@@ -100,7 +83,7 @@ void PhraseDictionaryNewFormat::CreateSourceLabels(vector<Word> &sourceLabels
 		sourceLabels.push_back(Word());
 		Word &word = sourceLabels.back();
 		
-		// TODO
+		// TODO - no factors
 		const Factor *factor = factorCollection.AddFactor(Input, 0, sourceLabelsStr[ind]);
 		word[0] = factor;
 		word.SetIsNonTerminal(true);
@@ -202,7 +185,6 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 
 		// rest of target phrase
 		targetPhrase->SetAlignmentInfo(alignmentInfo);
-		targetPhrase->SetSourceLHS(sourceLHS);
 		targetPhrase->SetTargetLHS(targetLHS);
 		//targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 		

@@ -245,7 +245,6 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 			targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
 			targetPhrase->SetSourcePhrase(m_unksrc);
-			targetPhrase->SetSourceLHS(sourceLHS);
 			targetPhrase->SetTargetLHS(targetLHS);
 						
 			// chart rule
