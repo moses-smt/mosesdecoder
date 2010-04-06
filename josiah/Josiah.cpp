@@ -165,6 +165,7 @@ int main(int argc, char** argv) {
   bool calc_exact_posterior, filter_by_posterior;
   float evidenceSetShrinkFactor;
   bool randomShrink;
+  float log_base_factor;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -254,7 +255,8 @@ int main(int argc, char** argv) {
   ("calc-exact-post", po::value(&calc_exact_posterior)->zero_tokens()->default_value(false), "Calculate exact posterior")
   ("filter-exact-post", po::value(&filter_by_posterior)->zero_tokens()->default_value(false), "Filter sample set using exact posterior")
   ("evidence-shrink",  po::value<float>(&evidenceSetShrinkFactor)->default_value(0.9f), "Evidence set shrink factor for MBR decoding")
-  ("random-shrink",  po::value(&randomShrink)->zero_tokens()->default_value(false), "Shrink evidence set randomly, otherwise shrink by discarding low probability elements");
+  ("random-shrink",  po::value(&randomShrink)->zero_tokens()->default_value(false), "Shrink evidence set randomly, otherwise shrink by discarding low probability elements")
+          ("log-base-factor", po::value<float>(&log_base_factor)->default_value(1.0f), "Scaling factor for log probabilities in translation and language models");
  
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -309,6 +311,11 @@ int main(int argc, char** argv) {
   
   if (do_timing) {
     timer.on();
+  }
+  
+  if (log_base_factor != 1.0) {
+      cerr << "Setting log base factor to " << log_base_factor << endl;
+      SetLogBaseFactor(log_base_factor);
   }
   
    //set up moses

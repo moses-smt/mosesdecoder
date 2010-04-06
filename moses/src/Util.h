@@ -196,10 +196,14 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
 	return outstr.str();
 }
 
+//factor to convert from base e
+void SetLogBaseFactor(float factor);
+float GetLogBaseFactor();
+
 //! transform prob to natural log score
 inline float TransformScore(float prob)
 {
-	return log(prob);
+	return log(prob) * GetLogBaseFactor();
 }
 
 //! transform natural log score to prob. Not currently used 
@@ -211,12 +215,12 @@ inline float UntransformScore(float score)
 //! irst number are in log 10, transform to natural log
 inline float TransformIRSTScore(float irstScore)
 { 
-	return irstScore * 2.30258509299405f;
+    return irstScore * 2.30258509299405f * GetLogBaseFactor();
 }
 
 inline float UntransformIRSTScore(float logNScore)
 { // opposite of above
-	return logNScore / 2.30258509299405f;
+    return logNScore / (2.30258509299405f* GetLogBaseFactor());
 }
 
 //! make sure score doesn't fall below LOWEST_SCORE
@@ -228,12 +232,12 @@ inline float FloorScore(float logScore)
 //! Should SRI & IRST transform functions be merged ???
 inline float TransformSRIScore(float sriScore)
 {
-	return sriScore * 2.30258509299405f;
+	return sriScore * 2.30258509299405f * GetLogBaseFactor();
 }
 
 inline float UntransformSRIScore(float logNScore)
 { // opposite of above
-	return logNScore / 2.30258509299405f;
+    return logNScore / (2.30258509299405f*GetLogBaseFactor());
 }
 
 /** convert prob vector to log prob and calc inner product with weight vector.
