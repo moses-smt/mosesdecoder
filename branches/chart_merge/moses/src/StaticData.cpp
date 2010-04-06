@@ -908,30 +908,31 @@ void StaticData::LoadPhraseBasedParameters()
 	
 vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 {
-    vector<DecodeGraph*> decodeStepVL;
+    vector<DecodeGraph*> decodeGraphs;
 	// mapping
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
+	const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+
 	DecodeStep *prev = 0;
-	size_t previousVectorList = 0;
+	size_t prevDecodeGraphInd = 0;
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
-		size_t vectorList;
+		size_t decodeGraphInd;
 		DecodeType decodeType;
 		size_t index;
 		if (token.size() == 2) 
 		{
-		  vectorList = 0;
+		  decodeGraphInd = 0;
 			decodeType = token[0] == "T" ? Translate : Generate;
 			index = Scan<size_t>(token[1]);
 		}
-		//Smoothing
 		else if (token.size() == 3) 
-		{
-		  vectorList = Scan<size_t>(token[0]);
+		{ // For specifying multiple translation model
+		  decodeGraphInd = Scan<size_t>(token[0]);
 			//the vectorList index can only increment by one 
-			assert(vectorList == previousVectorList || vectorList == previousVectorList + 1);
-      if (vectorList > previousVectorList) 
+			assert(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
+      if (decodeGraphInd > prevDecodeGraphInd) 
       {
         prev = NULL;
       }
@@ -944,7 +945,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 			assert(false);
 		}
 		
-		DecodeStep* decodeStep = 0;
+		DecodeStep* decodeStep = NULL;
 		switch (decodeType) {
 			case Translate:
 				if(index>=m_phraseDictionary.size())
@@ -972,17 +973,30 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 				assert(!"Please implement NullFertilityInsertion.");
 			break;
 		}
+		
 		assert(decodeStep);
-		if (decodeStepVL.size() < vectorList + 1) 
+		if (decodeGraphs.size() < decodeGraphInd + 1) 
 		{
-			decodeStepVL.push_back(new DecodeGraph(decodeStepVL.size(), 999)); // TODO max chart span
+			DecodeGraph *decodeGraph;
+			if (m_searchAlgorithm == ChartDecoding)
+			{
+				size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
+				decodeGraph = new DecodeGraph(decodeGraphs.size(), maxChartSpan);
+			}
+			else
+			{
+				decodeGraph = new DecodeGraph(decodeGraphs.size());
+			}
+			
+			decodeGraphs.push_back(decodeGraph); // TODO max chart span
 		}
-		decodeStepVL[vectorList]->Add(decodeStep);
+		
+		decodeGraphs[decodeGraphInd]->Add(decodeStep);
 		prev = decodeStep;
-		previousVectorList = vectorList;
+		prevDecodeGraphInd = decodeGraphInd;
 	}
 	
-	return decodeStepVL;
+	return decodeGraphs;
 }
 
 #include "PhraseDictionary.h"

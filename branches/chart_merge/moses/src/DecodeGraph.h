@@ -23,8 +23,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_DecodeGraph_h
 #define moses_DecodeGraph_h
 
+#include <cassert>
 #include <list>
 #include <iterator>
+#include "TypeDef.h"
 
 namespace Moses
 {
@@ -36,13 +38,19 @@ class DecodeGraph
 {
 protected:
 	std::list<const DecodeStep*> m_steps;
-    size_t m_position;   
+  size_t m_position;   
 	size_t m_maxChartSpan;
 
 public:
     /**
       * position: The position of this graph within the decode sequence.
       **/
+	DecodeGraph(size_t position)
+	: m_position(position) 
+	, m_maxChartSpan(NOT_FOUND)
+	{}
+
+	// for chart decoding
 	DecodeGraph(size_t position, size_t maxChartSpan)
 	: m_position(position) 
 	, m_maxChartSpan(maxChartSpan)
@@ -66,7 +74,10 @@ public:
 	{ return m_steps.size(); }
 
 	size_t GetMaxChartSpan() const
-	{ return m_maxChartSpan; }
+	{
+		assert(m_maxChartSpan != NOT_FOUND);
+		return m_maxChartSpan; 
+	}
 
 	size_t GetPosition() const
 	{ return m_position; }   

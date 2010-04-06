@@ -60,6 +60,7 @@ const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+const size_t DEFAULT_MAX_CHART_SPAN			= 10;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;

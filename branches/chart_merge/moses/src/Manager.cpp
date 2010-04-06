@@ -86,9 +86,9 @@ void Manager::ProcessSentence()
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-    vector <DecodeGraph*>
-			decodeStepVL = staticData.GetDecodeStepVL(m_source);
-	m_transOptColl->CreateTranslationOptions(decodeStepVL);
+	vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL(m_source);
+	m_transOptColl->CreateTranslationOptions(decodeGraphs);
+	RemoveAllInColl(decodeGraphs);  
 
   // some reporting on how long this took
   clock_t gotOptions = clock();
@@ -100,7 +100,6 @@ void Manager::ProcessSentence()
 	// search for best translation with the specified algorithm
 	m_search->ProcessSentence();
 	VERBOSE(1, "Search took " << ((clock()-m_start)/(float)CLOCKS_PER_SEC) << " seconds" << endl);
-    RemoveAllInColl(decodeStepVL);  
 }
 	
 /**
