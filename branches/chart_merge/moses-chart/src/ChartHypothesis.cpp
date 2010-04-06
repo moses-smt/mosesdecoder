@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include <vector>
 #include "ChartHypothesis.h"
 #include "QueueEntry.h"

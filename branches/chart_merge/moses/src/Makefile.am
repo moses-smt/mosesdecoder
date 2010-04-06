@@ -192,6 +192,7 @@ libmoses_la_SOURCES = \
 	TranslationOptionCollectionText.cpp \
 	TranslationOptionCollectionConfusionNet.cpp \
 	TranslationOptionList.cpp \
+	TreeInput.cpp \
 	UserMessage.cpp \
 	Util.cpp \
 	WordConsumed.cpp \

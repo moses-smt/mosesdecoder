@@ -6,7 +6,7 @@
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
-
+#include <algorithm>
 #include "../../moses/src/StaticData.h"
 #include "ChartHypothesisCollection.h"
 #include "ChartHypothesis.h"
