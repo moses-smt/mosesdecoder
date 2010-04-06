@@ -55,6 +55,9 @@ class Sentence : public Phrase, public InputType
 	std::vector <bool> m_xmlCoverageMap;
 
 	LabelList m_defaultLabelList;
+	
+	void InitStartEndWord();
+
 
  public:
 	Sentence(FactorDirection direction);

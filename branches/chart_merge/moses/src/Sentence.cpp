@@ -69,6 +69,11 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	}
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 	
+	if (staticData.GetSearchAlgorithm() == ChartDecoding)
+	{
+		InitStartEndWord();
+	}
+	
 	//now that we have final word positions in phrase (from CreateFromString),
 	//we can make input phrase objects to go with our XmlOptions and create TranslationOptions
 	
@@ -142,6 +147,21 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	return 1;
 }
 
+void Sentence::InitStartEndWord()
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	Word startWord(Input);
+	const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
+	startWord.SetFactor(0, factor);
+	PrependWord(startWord);
+	
+	Word endWord(Input);
+	factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
+	endWord.SetFactor(0, factor);
+	AddWord(endWord);
+}
+	
 TranslationOptionCollection* 
 Sentence::CreateTranslationOptionCollection() const 
 {
