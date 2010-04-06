@@ -259,7 +259,7 @@ void Hypothesis::CalcLMScore()
 				}
 				else
 				{ // calc
-					lmList.CalcScore(outPhrase
+					lmList.CalcAllLMScores(outPhrase
 													, m_lmNGram
 													, (firstPhrase) ? &m_lmPrefix : NULL);
 				}
@@ -274,7 +274,7 @@ void Hypothesis::CalcLMScore()
 		} // if (!targetWord.IsNonTerminal())
 	} // for (size_t targetPhrasePos
 
-	lmList.CalcScore(outPhrase
+	lmList.CalcAllLMScores(outPhrase
 									, m_lmNGram
 									, (firstPhrase) ? &m_lmPrefix : NULL);
 

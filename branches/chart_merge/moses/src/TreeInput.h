@@ -18,9 +18,9 @@ public:
 	{}
 };
 	
-class ChartInput : public Sentence
+class TreeInput : public Sentence
 {
-	friend std::ostream& operator<<(std::ostream&, const ChartInput&);
+	friend std::ostream& operator<<(std::ostream&, const TreeInput&);
 
 protected:
 	std::vector<std::vector<LabelList> > m_sourceChart;
@@ -37,12 +37,12 @@ protected:
 	bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels);
 
 public:
-	ChartInput(FactorDirection direction)	
+	TreeInput(FactorDirection direction)	
 		: Sentence(direction)
 	{}
 
 	InputTypeEnum GetType() const
-	{	return ChartSentenceInput;}
+	{	return TreeInputType;}
 
 	//! populate this InputType with data from in stream
 	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);

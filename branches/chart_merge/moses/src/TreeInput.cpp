@@ -1,6 +1,6 @@
 // $Id$
 
-#include "ChartInput.h"
+#include "TreeInput.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "XmlOption.h"
@@ -25,7 +25,7 @@ namespace Moses
  parse because we don't have the completed source parsed until after this function
  removes all the markup from it (CreateFromString in Sentence::Read).
  */
-bool ChartInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels)
+bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels)
 {
 	//parse XML markup in translation line
 	
@@ -198,7 +198,7 @@ bool ChartInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput
 }
 
 //! populate this InputType with data from in stream
-int ChartInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
 	const StaticData &staticData = StaticData::Instance();
 
@@ -251,19 +251,19 @@ int ChartInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder
 }
 
 //! Output debugging info to stream out
-void ChartInput::Print(std::ostream &out) const
+void TreeInput::Print(std::ostream &out) const
 {
 	out << *this << "\n";
 }
 
 //! create trans options specific to this InputType
-TranslationOptionCollection* ChartInput::CreateTranslationOptionCollection() const
+TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() const
 {
 
 	return NULL;
 }
 
-void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
+void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
 															, const std::vector<FactorType>& factorOrder)
 {	
 	assert(label.IsNonTerminal());
@@ -288,7 +288,7 @@ void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
 	}
 }
 	
-	void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
+	void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
 																 , const std::vector<FactorType>& factorOrder)
 	{
 		Word word(true);
@@ -298,7 +298,7 @@ void ChartInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
 		AddChartLabel(startPos, endPos, word, factorOrder);
 	}	
 
-std::ostream& operator<<(std::ostream &out, const ChartInput &input)
+std::ostream& operator<<(std::ostream &out, const TreeInput &input)
 {	
 	out<< static_cast<Phrase const&>(input) << " ||| ";
 	

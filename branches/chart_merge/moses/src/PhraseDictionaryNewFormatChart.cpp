@@ -6,7 +6,7 @@
 #include "CellCollection.h"
 #include "DotChart.h"
 #include "StaticData.h"
-#include "ChartInput.h"
+#include "TreeInput.h"
 
 using namespace std;
 using namespace Moses;
@@ -90,8 +90,7 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 		const vector<Word> &headWords = cellColl.GetHeadwords(WordsRange(startPos, endPos));
 		
 		// go thru each source span
-		const ChartInput &chartInput = static_cast<const ChartInput&>(src);
-		const LabelList &labelList = chartInput.GetLabelList(startPos, endPos);
+		const LabelList &labelList = src.GetLabelList(startPos, endPos);
 		
 		LabelList::const_iterator iterLabelList;
 		for (iterLabelList = labelList.begin(); iterLabelList != labelList.end(); ++iterLabelList)

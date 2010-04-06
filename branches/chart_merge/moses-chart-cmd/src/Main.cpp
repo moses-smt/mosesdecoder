@@ -50,7 +50,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Sentence.h"
 #include "ConfusionNet.h"
 #include "WordLattice.h"
-#include "ChartInput.h"
+#include "TreeInput.h"
 #include "TranslationAnalysis.h"
 #include "mbr.h"
 #include "../../moses-chart/src/ChartManager.h"
@@ -76,7 +76,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
 		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
 		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
-		case ChartSentenceInput:		source = ioWrapper.GetInput(new ChartInput(Input));     break;
+		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input));break;
 		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
 	}
 	return (source ? true : false);

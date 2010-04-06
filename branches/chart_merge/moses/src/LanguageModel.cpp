@@ -88,7 +88,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
 	fullScore += ngramScore;	
 }
 
-void LanguageModel::CalcScore2(const Phrase &phrase
+void LanguageModel::CalcScoreChart(const Phrase &phrase
 								, float &beginningBitsOnly
 								, float &ngramScore) const
 { // TODO - get rid of this function

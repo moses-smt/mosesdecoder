@@ -144,10 +144,10 @@
 		1CB22CDA11676E3D0083E5A6 /* PhraseDictionaryNewFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CB22CD711676E3D0083E5A6 /* PhraseDictionaryNewFormat.h */; };
 		1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */; };
 		1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */; };
+		1CD82FB3116B336200AF05C2 /* TreeInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD82FB2116B336100AF05C2 /* TreeInput.cpp */; };
 		1CD9808B11678B5D002BE765 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9808911678B5D002BE765 /* AlignmentInfo.cpp */; };
 		1CD9808C11678B5D002BE765 /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9808A11678B5D002BE765 /* AlignmentInfo.h */; };
 		1CD9809811678B7C002BE765 /* CellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9809211678B7C002BE765 /* CellCollection.h */; };
-		1CD9809911678B7C002BE765 /* ChartInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9809311678B7C002BE765 /* ChartInput.cpp */; };
 		1CD9809A11678B7C002BE765 /* ChartRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9809411678B7C002BE765 /* ChartRule.cpp */; };
 		1CD9809B11678B7C002BE765 /* ChartRule.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9809511678B7C002BE765 /* ChartRule.h */; };
 		1CD9809C11678B7C002BE765 /* ChartRuleCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9809611678B7C002BE765 /* ChartRuleCollection.cpp */; };
@@ -337,10 +337,10 @@
 		1CB22CD711676E3D0083E5A6 /* PhraseDictionaryNewFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNewFormat.h; path = src/PhraseDictionaryNewFormat.h; sourceTree = "<group>"; };
 		1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
 		1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = src/GlobalLexicalModel.h; sourceTree = "<group>"; };
+		1CD82FB2116B336100AF05C2 /* TreeInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TreeInput.cpp; path = src/TreeInput.cpp; sourceTree = "<group>"; };
 		1CD9808911678B5D002BE765 /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1CD9808A11678B5D002BE765 /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1CD9809211678B7C002BE765 /* CellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CellCollection.h; path = src/CellCollection.h; sourceTree = "<group>"; };
-		1CD9809311678B7C002BE765 /* ChartInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartInput.cpp; path = src/ChartInput.cpp; sourceTree = "<group>"; };
 		1CD9809411678B7C002BE765 /* ChartRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRule.cpp; path = src/ChartRule.cpp; sourceTree = "<group>"; };
 		1CD9809511678B7C002BE765 /* ChartRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRule.h; path = src/ChartRule.h; sourceTree = "<group>"; };
 		1CD9809611678B7C002BE765 /* ChartRuleCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleCollection.cpp; path = src/ChartRuleCollection.cpp; sourceTree = "<group>"; };
@@ -423,7 +423,6 @@
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
 				E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */,
 				1CD9809211678B7C002BE765 /* CellCollection.h */,
-				1CD9809311678B7C002BE765 /* ChartInput.cpp */,
 				1CD9809411678B7C002BE765 /* ChartRule.cpp */,
 				1CD9809511678B7C002BE765 /* ChartRule.h */,
 				1CD9809611678B7C002BE765 /* ChartRuleCollection.cpp */,
@@ -586,6 +585,7 @@
 				1C8CFE820AD67A9700FA22E2 /* TranslationOptionCollectionText.h */,
 				B2639DE80EF199D400A67519 /* TranslationOptionList.cpp */,
 				B2639DE90EF199D400A67519 /* TranslationOptionList.h */,
+				1CD82FB2116B336100AF05C2 /* TreeInput.cpp */,
 				0396E1A00C0B189200D95CFF /* TrellisPath.cpp */,
 				0396E1A10C0B189200D95CFF /* TrellisPath.h */,
 				0396E1A20C0B189200D95CFF /* TrellisPathCollection.cpp */,
@@ -860,7 +860,6 @@
 				1C679DCC1162099C00DC3892 /* ReorderingStack.cpp in Sources */,
 				1CB22CD911676E3D0083E5A6 /* PhraseDictionaryNewFormat.cpp in Sources */,
 				1CD9808B11678B5D002BE765 /* AlignmentInfo.cpp in Sources */,
-				1CD9809911678B7C002BE765 /* ChartInput.cpp in Sources */,
 				1CD9809A11678B7C002BE765 /* ChartRule.cpp in Sources */,
 				1CD9809C11678B7C002BE765 /* ChartRuleCollection.cpp in Sources */,
 				1CD9815811679309002BE765 /* PhraseDictionaryNodeNewFormat.cpp in Sources */,
@@ -870,6 +869,7 @@
 				1CE646E811679F9200EC77CC /* DotChartOnDisk.cpp in Sources */,
 				1CE646EF11679FC700EC77CC /* PhraseDictionaryOnDiskChart.cpp in Sources */,
 				1C66276E116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp in Sources */,
+				1CD82FB3116B336200AF05C2 /* TreeInput.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

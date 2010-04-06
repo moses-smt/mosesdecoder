@@ -86,7 +86,7 @@ public:
 							, float &fullScore
 							, float &ngramScore) const;
 	
-	void CalcScore2(const Phrase &phrase
+	void CalcScoreChart(const Phrase &phrase
 									, float &beginningBitsOnly
 									, float &ngramScore) const;
 	

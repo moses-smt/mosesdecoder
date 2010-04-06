@@ -38,7 +38,7 @@ public:
 	
 	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const;
 
-	void CalcScore(const Phrase &phrase
+	void CalcAllLMScores(const Phrase &phrase
 								 , ScoreComponentCollection &nGramOnly
 								 , ScoreComponentCollection *beginningBitsOnly) const ;
 	

@@ -170,7 +170,7 @@ enum InputTypeEnum
 	SentenceInput						= 0
 	,ConfusionNetworkInput	= 1
 	,WordLatticeInput				= 2
-	,ChartSentenceInput			= 3
+	,TreeInputType					= 3
 };
 
 enum XmlInputType

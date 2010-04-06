@@ -56,7 +56,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 	}	
 }
 
-void LMList::CalcScore(const Phrase &phrase
+void LMList::CalcAllLMScores(const Phrase &phrase
 											 , ScoreComponentCollection &nGramOnly
 											 , ScoreComponentCollection *beginningBitsOnly) const
 {
@@ -72,7 +72,7 @@ void LMList::CalcScore(const Phrase &phrase
 			continue;
 		
 		float beginningScore, nGramScore;
-		lm.CalcScore2(phrase, beginningScore, nGramScore);
+		lm.CalcScoreChart(phrase, beginningScore, nGramScore);
 		
 		nGramOnly.PlusEquals(&lm, nGramScore);
 		
