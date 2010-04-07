@@ -192,9 +192,16 @@ int main(int argc, char* argv[])
                 ioWrapper->OutputLatticeMBRNBestList(solutions,source->GetTranslationId());
             } else if (staticData.UseLatticeMBR()) {
                 vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
-                OutputBestHypo(mbrBestHypo, source->GetTranslationId(), staticData.GetReportSegmentation(),
+                OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
+                               staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors(),cout);
                 IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
+            } else if (staticData.UseConsensusDecoding()) {
+                std::vector<Word> conBestHypo = doConsensusDecoding(manager,nBestList);
+                OutputBestHypo(conBestHypo, source->GetTranslationId(),
+                               staticData.GetReportSegmentation(),
+                               staticData.GetReportAllFactors(),cout);
+                IFVERBOSE(2) { PrintUserTime("finished Consensus decoding"); }
             } else {
                 std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
                 OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
