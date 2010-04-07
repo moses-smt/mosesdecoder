@@ -34,7 +34,12 @@ namespace Moses
 // static
 int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {
-	for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
+    if (targetWord.IsNonTerminal() != sourceWord.IsNonTerminal())
+    {
+	return targetWord.IsNonTerminal() ? -1 : 1;
+    }
+
+    for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
 		const Factor *targetFactor		= targetWord[factorType]
 								,*sourceFactor	= sourceWord[factorType];
