@@ -187,7 +187,6 @@ protected:
 	size_t m_cubePruningDiversity;
 	size_t m_ruleLimit;
 
-	std::string m_defaultNonTerminals;
 	// Initial = 0 = can be used when creating poss trans
 	// Other = 1 = used to calculate LM score once all steps have been processed
 	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;

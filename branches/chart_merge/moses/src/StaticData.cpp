@@ -836,30 +836,32 @@ bool StaticData::LoadPhraseTables()
 
 void StaticData::LoadNonTerminals()
 {
+	string defaultNonTerminals;
+	
 	if (m_parameter->GetParam("non-terminals").size() == 0)
 	{
-		m_defaultNonTerminals = "X";
+		defaultNonTerminals = "X";
 	}
 	else
 	{
 		vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
-		m_defaultNonTerminals = tokens[0];
+		defaultNonTerminals = tokens[0];
 	}
 	
 	FactorCollection &factorCollection = FactorCollection::Instance();
 	
 	m_inputDefaultNonTerminal.SetIsNonTerminal(true);
-	const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, m_defaultNonTerminals);
+	const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
 	m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
 	
 	m_outputDefaultNonTerminal.SetIsNonTerminal(true);
-	const Factor *targetFactor = factorCollection.AddFactor(Output, 0, m_defaultNonTerminals);
+	const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
 	m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
 	
 	// for unknwon words
 	if (m_parameter->GetParam("unknown-lhs").size() == 0)
 	{
-		UnknownLHSEntry entry(m_defaultNonTerminals, 0.0f);
+		UnknownLHSEntry entry(defaultNonTerminals, 0.0f);
 		m_unknownLHS.push_back(entry);
 	}
 	else
