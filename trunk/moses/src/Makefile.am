@@ -86,7 +86,11 @@ libmoses_la_HEADERS = \
 	WordsBitmap.h \
 	WordLattice.h \
 	WordsRange.h \
-	XmlOption.h 
+	XmlOption.h \
+	PhraseDictionaryDynSuffixArray.h \
+	DynSuffixArray.h \
+	DynSAInclude/vocab.h \
+	DynSAInclude/file.h
 
 if PROTOBUF
 libmoses_la_HEADERS += rule.pb.h hypergraph.pb.h
@@ -187,7 +191,11 @@ libmoses_la_SOURCES = \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
-	XmlOption.cpp 
+	XmlOption.cpp \
+	PhraseDictionaryDynSuffixArray.cpp \
+	DynSuffixArray.cpp \
+	DynSAInclude/vocab.cpp \
+	DynSAInclude/file.cpp
 	
 if PROTOBUF
 BUILT_SOURCES = \
