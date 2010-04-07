@@ -148,6 +148,7 @@ protected:
 
 	bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
+  bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
 	size_t m_mbrSize; //! number of translation candidates considered
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
   size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
@@ -436,7 +437,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph
+	  return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_useConsensusDecoding
 #ifdef HAVE_PROTOBUF
 	|| m_outputSearchGraphPB
 #endif
@@ -475,6 +476,7 @@ public:
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 	bool UseMBR() const { return m_mbr; }
   bool UseLatticeMBR() const { return m_useLatticeMBR ;}
+  bool UseConsensusDecoding() const {return m_useConsensusDecoding;}
   void SetUseLatticeMBR(bool flag) {m_useLatticeMBR = flag; }
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }

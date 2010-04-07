@@ -136,9 +136,12 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
 
 //Use the ngram scores to rerank the nbest list, return at most n solutions
 void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, vector<LatticeMBRSolution>& solutions, size_t n);
-void calcNgramPosteriors(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, float scale, map<Phrase, float>& finalNgramScores);
+//calculate expectated ngram counts, clipping at 1 (ie calculating posteriors) if posteriors==true.
+void calcNgramExpectations(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, float scale, map<Phrase,
+                            float>& finalNgramScores, bool posteriors);
 void GetOutputFactors(const TrellisPath &path, vector <Word> &translation);
 void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngrams);
 bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b);
 vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);
+vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
 #endif

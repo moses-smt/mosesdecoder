@@ -342,8 +342,12 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //lattice mbr
   SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
-  if (m_useLatticeMBR)
-    m_mbr = m_useLatticeMBR;
+  if (m_useLatticeMBR && m_mbr) {
+      cerr << "Errror: Cannot use both n-best mbr and lattice mbr together" << endl;
+      exit(1);
+  }
+
+  if (m_useLatticeMBR) m_mbr = true;
 
   m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
   Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
@@ -355,7 +359,14 @@ bool StaticData::LoadData(Parameter *parameter)
     Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
   m_lmbrMapWeight = (m_parameter->GetParam("lmbr-map-weight").size() >0) ?
     Scan<float>(m_parameter->GetParam("lmbr-map-weight")[0]) : 0.0f;
-    
+
+  //consensus decoding
+  SetBooleanParameter( &m_useConsensusDecoding, "consensus-decoding", false );
+  if (m_useConsensusDecoding && m_mbr) {
+      cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
+      exit(1);
+  }
+  if (m_useConsensusDecoding) m_mbr=true;  
   
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
