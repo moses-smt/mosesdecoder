@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use File::Basename;
 use File::Temp qw/tempfile/;
 use Getopt::Long "GetOptions";
 my $COLLINS = "/home/pkoehn/statmt/project/collins-parser.linux";
@@ -21,7 +22,8 @@ GetOptions(
 
 `mkdir -p $TMPDIR`;
 
-my ($TMP, $tmpfile) = tempfile("$0-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
+my ($scriptname, $directories) = fileparse($0);
+my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
 
 open(MXPOST,"$MXPOST/mxpost.unicode $MXPOST/tagger.project |");
 while(<MXPOST>) 

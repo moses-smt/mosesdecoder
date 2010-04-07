@@ -3,6 +3,7 @@
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
+use File::Basename;
 use File::Temp qw/tempfile/;
 
 my $BITPAR = "/home/pkoehn/statmt/project/bitpar/GermanParser";
@@ -20,7 +21,8 @@ GetOptions(
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
-my ($TMP, $tmpfile) = tempfile("$0-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
+my ($scriptname, $directories) = fileparse($0);
+my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
 open(INPUT,"iconv -c -f utf8 -t iso-8859-1 |");
 while(<INPUT>)
 {
