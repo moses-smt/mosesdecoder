@@ -120,7 +120,7 @@ const ChartRuleCollection *PhraseDictionaryNewFormat::GetChartRuleCollection(
 	
 	// return list of target phrases
 	ProcessedRuleColl &nodes = runningNodes.Get(relEndPos + 1);
-	DeleteDuplicates(nodes);
+	//DeleteDuplicates(nodes);
 	
 	size_t rulesLimit = StaticData::Instance().GetRuleLimit();
 	ProcessedRuleColl::const_iterator iterNode;
