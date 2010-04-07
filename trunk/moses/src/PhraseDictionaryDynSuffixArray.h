@@ -1,6 +1,8 @@
 #ifndef moses_PhraseDictionaryDynSuffixArray_h
 #define moses_PhraseDictionaryDynSuffixArray_h
 
+#include <map>
+
 #include "PhraseDictionary.h"
 #include "DynSuffixArray.h" 
 #include "DynSAInclude/vocab.h"
