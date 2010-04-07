@@ -1,5 +1,5 @@
-#ifndef moses_File_h
-#define moses_File_h
+#ifndef moses_DynSAInclude_File_h
+#define moses_DynSAInclude_File_h
 
 #include <iostream>
 #include <fstream>
@@ -13,6 +13,7 @@
 
 namespace Moses {
 typedef std::string FileExtension;
+
 
 class FileHandler: public std::fstream {
 public:
