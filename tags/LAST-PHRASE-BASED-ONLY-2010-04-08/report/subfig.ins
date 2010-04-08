@@ -1,0 +1,66 @@
+%%
+%% This is file `subfig.ins', the installation file for the  
+%% `subfig' package.   
+%%
+%% Copyright © 2003, 2004, 2005 Steven Douglas Cochran.
+%% 
+%% This work (the subfig package) may be distributed and/or modified 
+%% under the conditions of the LaTeX Project Public License, either 
+%% version 1.3 of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3 or later is part of all distributions of LaTeX
+%% version 2003/12/01 or later.
+%%
+%% This work has the LPPL maintenance status "author-maintained".
+%% 
+%% This Current Maintainer of this work is Steven Douglas Cochran.
+%%
+%% This work consists of all files listed under "MANIFEST" in the
+%% README file distributed with the subfig package.
+
+\def\batchfile{subfig.ins}
+\input docstrip.tex
+
+\keepsilent
+\generateFile{ltxdoc.cfg}{t}{\from{subfig.dtx}{ltxdoc}}
+
+\preamble
+
+Copyright © 2003, 2004, 2005 Steven Douglas Cochran.
+
+This file is NOT the source for the subfig package, because almost
+all comments have been stripped from it.  It is NOT the preferred form
+of the subfig package for making modifications to it.
+
+Therefore you can NOT redistribute and/or modify THIS file.  You can
+however redistribute the complete source package (README, Makefile,
+subfig.dtx, subfig.ins, and subfig.pdf as well as the test/example 
+files test[1-7].tex) and/or modify it under the terms of the LaTeX Project
+Public License, either version 1.3 of this license or (at your option)
+any later version. 
+The latest version of this license is in
+  http://www.latex-project.org/lppl.txt
+and version 1.3 or later is part of all distributions of LaTeX
+version 2003/12/01 or later.
+
+This work has the LPPL maintenance status "author-maintained".
+
+This Current Maintainer of this work is Steven Douglas Cochran.
+
+This work consists of all files listed under "MANIFEST" in the
+README file distributed with the subfig package.
+
+\endpreamble
+\generateFile{altsf.cfg}{t}{\from{subfig.dtx}{newconf}}
+%\generateFile{subfig.sty}{t}{\from{subfig.dtx}{package,debug}}
+\generateFile{subfig.sty}{t}{\from{subfig.dtx}{package}}
+
+\Msg{***********************************************************}
+\Msg{* To finish the installation you have to move the file}
+\Msg{* `subfig.sty' and optionally 'subfigold.cfg' into a} 
+\Msg{* directory searched by TeX.}
+\Msg{*}
+\Msg{* To produce the documentation run the file `subfig.dtx'}
+\Msg{* through LaTeX.}
+\Msg{***********************************************************}

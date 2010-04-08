@@ -1,0 +1,9 @@
+#! /bin/sh -w
+
+bin=$1; shift
+testdir=$1; shift
+cd $testdir
+
+$bin/mert --scfile data/SCORESTAT.txt --ffile data/FEATSTAT.txt --ifile data/INIT -d 14 -n 20 -r 1000 2>&1 | grep -i "^Best"
+$bin/mert --scfile data/SCORESTAT.bin --ffile data/FEATSTAT.bin --ifile data/INIT -d 14 -n 20 -r 1000 2>&1 | grep -i "^Best"
+
