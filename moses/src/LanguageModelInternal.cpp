@@ -89,11 +89,11 @@ bool LanguageModelInternal::Load(const std::string &filePath
 				lmIdMap[factorId] = rootNGram;
 				//factorCollection.SetFactorLmId(factor, rootNGram);
 
-				float score = TransformSRIScore(Scan<float>(tokens[0]));
+				float score = TransformLMScore(Scan<float>(tokens[0]));
 				nGram->SetScore( score );
 				if (tokens.size() == 3)
 				{
-					float logBackOff = TransformSRIScore(Scan<float>(tokens[2]));
+					float logBackOff = TransformLMScore(Scan<float>(tokens[2]));
 					nGram->SetLogBackOff( logBackOff );
 				}
 				else

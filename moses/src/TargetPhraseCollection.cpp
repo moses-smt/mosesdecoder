@@ -44,6 +44,21 @@ void TargetPhraseCollection::NthElement(size_t tableLimit)
   std::nth_element(m_collection.begin(), iterMiddle, m_collection.end(), CompareTargetPhrase());
 }
 
+void TargetPhraseCollection::Prune(bool adhereTableLimit, size_t tableLimit)
+{
+	NthElement(tableLimit);
+	
+	if (adhereTableLimit && m_collection.size() > tableLimit)
+	{
+		for (size_t ind = tableLimit; ind < m_collection.size(); ++ind)
+		{
+			TargetPhrase *targetPhrase = m_collection[ind];
+			delete targetPhrase;
+		}
+		m_collection.erase(m_collection.begin() + tableLimit, m_collection.end());
+	}
+}
+	
 }
 
 

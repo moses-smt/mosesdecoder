@@ -121,6 +121,14 @@ Parameter::Parameter()
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
+
+	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
+	AddParam("non-terminals", "list of non-term symbols, space separated");
+	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+	AddParam("glue-rule-type", "Left branching, or both branching. 0=left. 2=both. 1=right(not implemented). Default=0");
+	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
 }
 
 Parameter::~Parameter()
@@ -301,7 +309,7 @@ bool Parameter::Validate()
 	  ext.push_back(".gz");
 		// alternative file extension for binary phrase table format:
 		ext.push_back(".binphr.idx");
-		noErrorFlag = FilesExist("ttable-file", 3,ext);
+		noErrorFlag = FilesExist("ttable-file", 4,ext);
 	}
 	// language model
 //	if (noErrorFlag)

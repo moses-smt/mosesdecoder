@@ -98,6 +98,15 @@ bool StaticData::LoadData(Parameter *parameter)
 	m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
   }
 
+	// to cube or not to cube
+	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
+											(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+	
+	if (m_searchAlgorithm == ChartDecoding)
+		LoadChartDecodingParameters();
+	else
+		LoadPhraseBasedParameters();
+	
 	// input type has to be specified BEFORE loading the phrase tables!
 	if(m_parameter->GetParam("inputtype").size()) 
 		m_inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
@@ -125,6 +134,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
 	SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
 
+	SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
+	
 	if (!m_UseAlignmentInfo && m_PrintAlignmentInfo){
 		  TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
 		m_PrintAlignmentInfo=false;
@@ -269,20 +280,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
 
 	// score weights
-	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");	
-	m_weightDistortion				= Scan<float>(distortionWeights[0]);
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
-	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
-
 	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightWordPenalty);
 
+	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
 	m_allWeights.push_back(m_weightUnknownWord);
-
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion);
-
+	
 	// reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
 		Scan<int>(m_parameter->GetParam("distortion-limit")[0])
@@ -342,12 +347,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //lattice mbr
   SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
-  if (m_useLatticeMBR && m_mbr) {
-      cerr << "Errror: Cannot use both n-best mbr and lattice mbr together" << endl;
-      exit(1);
-  }
-
-  if (m_useLatticeMBR) m_mbr = true;
+  if (m_useLatticeMBR)
+    m_mbr = m_useLatticeMBR;
 
   m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
   Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
@@ -359,14 +360,7 @@ bool StaticData::LoadData(Parameter *parameter)
     Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
   m_lmbrMapWeight = (m_parameter->GetParam("lmbr-map-weight").size() >0) ?
     Scan<float>(m_parameter->GetParam("lmbr-map-weight")[0]) : 0.0f;
-
-  //consensus decoding
-  SetBooleanParameter( &m_useConsensusDecoding, "consensus-decoding", false );
-  if (m_useConsensusDecoding && m_mbr) {
-      cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
-      exit(1);
-  }
-  if (m_useConsensusDecoding) m_mbr=true;  
+    
   
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
@@ -407,10 +401,6 @@ bool StaticData::LoadData(Parameter *parameter)
 			}
 		}
 	}
-
-	// to cube or not to cube
-	m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
-										(SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
 
 	// use of xml in input
 	if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
@@ -470,7 +460,6 @@ StaticData::~StaticData()
 {
 	RemoveAllInColl(m_phraseDictionary);
 	RemoveAllInColl(m_generationDictionary);
-	RemoveAllInColl(m_languageModel);
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
 	
@@ -486,6 +475,8 @@ StaticData::~StaticData()
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
+
+	//delete m_parameter;
 
 	// memory pools
 	Phrase::FinalizeMemPool();
@@ -655,7 +646,7 @@ bool StaticData::LoadLanguageModels()
       	return false;
       }
 
-			m_languageModel.push_back(lm);
+			m_languageModel.Add(lm);
 		}
 	}
   // flag indicating that language models were loaded,
@@ -745,14 +736,17 @@ bool StaticData::LoadPhraseTables()
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
+			assert(token.size() == 5);
 			//characteristics of the phrase table
-			vector<FactorType>      input           = Tokenize<FactorType>(token[0], ",")
-				,output = Tokenize<FactorType>(token[1], ",");
+
+			PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+			vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
+													,output = Tokenize<FactorType>(token[2], ",");
 			m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
 			m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-			string filePath= token[3];
-			size_t numScoreComponent = Scan<size_t>(token[2]);
+			size_t numScoreComponent = Scan<size_t>(token[3]);
+			string filePath= token[4];
 
 			assert(weightAll.size() >= weightAllOffset + numScoreComponent);
 
@@ -760,7 +754,7 @@ bool StaticData::LoadPhraseTables()
 			// first InputScores (if any), then translation scores
 			vector<float> weight;
 
-			if(currDict==0 && m_inputType)
+			if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput))
 			{	// TODO. find what the assumptions made by confusion network about phrase table output which makes
 				// it only work with binrary file. This is a hack 	
 				
@@ -814,29 +808,23 @@ bool StaticData::LoadPhraseTables()
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath << endl);
-      if(token.size() < 6 ) {
+            
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-                  numScoreComponent
-                ,  (currDict==0 ? m_numInputScores : 0)
+								implementation
+								, numScoreComponent
+                , (currDict==0 ? m_numInputScores : 0)
                 , input
                 , output
                 , filePath
                 , weight
                 , maxTargetPhrase[index]);
+                
              m_phraseDictionary.push_back(pdf);
-      }
-      else {
-            PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-                  numScoreComponent
-                ,  (currDict==0 ? m_numInputScores : 0)
-                , input
-                , output
-                , filePath
-                , weight
-                , maxTargetPhrase[index]
-                , token[4], token[5]);
-             m_phraseDictionary.push_back(pdf);
-      }
+                
+                
+            
+			
+
 			index++;
 		}
 	}
@@ -846,32 +834,109 @@ bool StaticData::LoadPhraseTables()
 	return true;
 }
 
+void StaticData::LoadNonTerminals()
+{
+	string defaultNonTerminals;
+	
+	if (m_parameter->GetParam("non-terminals").size() == 0)
+	{
+		defaultNonTerminals = "X";
+	}
+	else
+	{
+		vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
+		defaultNonTerminals = tokens[0];
+	}
+	
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	m_inputDefaultNonTerminal.SetIsNonTerminal(true);
+	const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
+	m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
+	
+	m_outputDefaultNonTerminal.SetIsNonTerminal(true);
+	const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
+	m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
+	
+	// for unknwon words
+	if (m_parameter->GetParam("unknown-lhs").size() == 0)
+	{
+		UnknownLHSEntry entry(defaultNonTerminals, 0.0f);
+		m_unknownLHS.push_back(entry);
+	}
+	else
+	{
+		const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
+		
+		InputFileStream inStream(filePath);
+		string line;
+		while(getline(inStream, line))
+		{
+			vector<string> tokens = Tokenize(line);
+			assert(tokens.size() == 2);
+			UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
+			m_unknownLHS.push_back(entry);	
+		}
+		
+	}
+	
+}
+	
+void StaticData::LoadChartDecodingParameters()
+{
+	LoadNonTerminals();
+	
+	// source label overlap
+	if (m_parameter->GetParam("source-label-overlap").size() > 0) 
+	{
+		m_sourceLabelOverlap = (SourceLabelOverlap) Scan<int>(m_parameter->GetParam("source-label-overlap")[0]);
+	}
+	else
+	{
+		m_sourceLabelOverlap = SourceLabelOverlapAdd;
+	}
+		
+	m_ruleLimit = (m_parameter->GetParam("rule-limit").size() > 0)
+	? Scan<size_t>(m_parameter->GetParam("rule-limit")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
+}
+	
+void StaticData::LoadPhraseBasedParameters()
+{
+	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
+	m_weightDistortion				= Scan<float>(distortionWeights[0]);
+	
+	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
+	m_allWeights.push_back(m_weightDistortion);
+		
+}
+	
 vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 {
-    vector<DecodeGraph*> decodeStepVL;
+    vector<DecodeGraph*> decodeGraphs;
 	// mapping
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
+	const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+
 	DecodeStep *prev = 0;
-	size_t previousVectorList = 0;
+	size_t prevDecodeGraphInd = 0;
 	for(size_t i=0; i<mappingVector.size(); i++) 
 	{
 		vector<string>	token		= Tokenize(mappingVector[i]);
-		size_t vectorList;
+		size_t decodeGraphInd;
 		DecodeType decodeType;
 		size_t index;
 		if (token.size() == 2) 
 		{
-		  vectorList = 0;
+		  decodeGraphInd = 0;
 			decodeType = token[0] == "T" ? Translate : Generate;
 			index = Scan<size_t>(token[1]);
 		}
-		//Smoothing
 		else if (token.size() == 3) 
-		{
-		  vectorList = Scan<size_t>(token[0]);
+		{ // For specifying multiple translation model
+		  decodeGraphInd = Scan<size_t>(token[0]);
 			//the vectorList index can only increment by one 
-			assert(vectorList == previousVectorList || vectorList == previousVectorList + 1);
-      if (vectorList > previousVectorList) 
+			assert(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
+      if (decodeGraphInd > prevDecodeGraphInd) 
       {
         prev = NULL;
       }
@@ -884,7 +949,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 			assert(false);
 		}
 		
-		DecodeStep* decodeStep = 0;
+		DecodeStep* decodeStep = NULL;
 		switch (decodeType) {
 			case Translate:
 				if(index>=m_phraseDictionary.size())
@@ -912,21 +977,45 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 				assert(!"Please implement NullFertilityInsertion.");
 			break;
 		}
+		
 		assert(decodeStep);
-		if (decodeStepVL.size() < vectorList + 1) 
+		if (decodeGraphs.size() < decodeGraphInd + 1) 
 		{
-			decodeStepVL.push_back(new DecodeGraph(decodeStepVL.size()));
+			DecodeGraph *decodeGraph;
+			if (m_searchAlgorithm == ChartDecoding)
+			{
+				size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
+				decodeGraph = new DecodeGraph(decodeGraphs.size(), maxChartSpan);
+			}
+			else
+			{
+				decodeGraph = new DecodeGraph(decodeGraphs.size());
+			}
+			
+			decodeGraphs.push_back(decodeGraph); // TODO max chart span
 		}
-		decodeStepVL[vectorList]->Add(decodeStep);
+		
+		decodeGraphs[decodeGraphInd]->Add(decodeStep);
 		prev = decodeStep;
-		previousVectorList = vectorList;
+		prevDecodeGraphInd = decodeGraphInd;
 	}
 	
-	return decodeStepVL;
+	return decodeGraphs;
 }
 
+#include "PhraseDictionary.h"
+	
 void StaticData::CleanUpAfterSentenceProcessing() const
 {
+	
+	for(size_t i=0;i<m_phraseDictionary.size();++i)
+	{
+		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
+		PhraseDictionary &phraseDictionary = *phraseDictionaryFeature.GetDictionary();
+		phraseDictionary.CleanUp();
+
+	}
+	
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
   

@@ -61,6 +61,9 @@ class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 
+typedef std::pair<std::string, float> UnknownLHSEntry;	
+typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
+
 /** Contains global variables and contants */
 class StaticData
 {
@@ -120,6 +123,7 @@ protected:
 
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
+	bool m_outputHypoScore;
 
 	SearchAlgorithm m_searchAlgorithm;
 	InputTypeEnum m_inputType;
@@ -182,7 +186,20 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
+	size_t m_ruleLimit;
+
+	// Initial = 0 = can be used when creating poss trans
+	// Other = 1 = used to calculate LM score once all steps have been processed
+	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
+	SourceLabelOverlap m_sourceLabelOverlap;
+	UnknownLHSList m_unknownLHS;
+
+
 	StaticData();
+
+	void LoadPhraseBasedParameters();
+	void LoadChartDecodingParameters();
+	void LoadNonTerminals();
 
 	//! helper fn to set bool param from ini file/command line
 	void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
@@ -523,6 +540,26 @@ public:
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
   
   bool PrintAllDerivations() const { return m_printAllDerivations;}
+	
+	const UnknownLHSList &GetUnknownLHS() const
+	{ return m_unknownLHS; }
+
+	const Word &GetInputDefaultNonTerminal() const
+	{ return m_inputDefaultNonTerminal; }
+	const Word &GetOutputDefaultNonTerminal() const
+	{ return m_outputDefaultNonTerminal; }
+	
+	SourceLabelOverlap GetSourceLabelOverlap() const
+	{ return m_sourceLabelOverlap; }
+	
+	bool GetOutputHypoScore() const
+	{ return m_outputHypoScore; }
+	size_t GetRuleLimit() const
+	{ return m_ruleLimit; }
+	float GetRuleCountThreshold() const
+	{ return 999999; /* TODO wtf! */ }
+	
+
 };
 
 }

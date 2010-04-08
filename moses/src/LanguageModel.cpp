@@ -54,40 +54,103 @@ void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore) const
 {
+	
 	fullScore	= 0;
 	ngramScore	= 0;
-
+	
 	size_t phraseSize = phrase.GetSize();
+	
 	vector<const Word*> contextFactor;
 	contextFactor.reserve(m_nGramOrder);
+	
+	size_t currPos = 0;
+	while (currPos < phraseSize)
+	{
+		const Word &word = phrase.GetWord(currPos);
+		
+		if (word.IsNonTerminal())
+		{ // do nothing. reset ngram. needed to score targbet phrases during pt loading in chart decoding
+			contextFactor.clear();
+		}
+		else
+		{
+			ShiftOrPush(contextFactor, word);
+			assert(contextFactor.size() <= m_nGramOrder);
+			
+			if (word == GetSentenceStartArray())
+			{ // do nothing, don't include prob for <s> unigram
+				assert(currPos == 0);
+			}
+			else
+			{
+				float partScore = GetValue(contextFactor);
+				fullScore += partScore;
+				if (contextFactor.size() == m_nGramOrder)
+					ngramScore += partScore;
+			}
+		}
+		
+		currPos++;
+	}	
+}
 
-	// start of sentence
-	for (size_t currPos = 0 ; currPos < m_nGramOrder - 1 && currPos < phraseSize ; currPos++)
-	{
-		contextFactor.push_back(&phrase.GetWord(currPos));		
-		fullScore += GetValue(contextFactor);
-	}
+void LanguageModel::CalcScoreChart(const Phrase &phrase
+								, float &beginningBitsOnly
+								, float &ngramScore) const
+{ // TODO - get rid of this function
 	
-	if (phraseSize >= m_nGramOrder)
-	{
-		contextFactor.push_back(&phrase.GetWord(m_nGramOrder - 1));
-		ngramScore = GetValue(contextFactor);
-	}
+	beginningBitsOnly	= 0;
+	ngramScore	= 0;
 	
-	// main loop
-	for (size_t currPos = m_nGramOrder; currPos < phraseSize ; currPos++)
-	{ // used by hypo to speed up lm score calc
+	size_t phraseSize = phrase.GetSize();
+	
+	vector<const Word*> contextFactor;
+	contextFactor.reserve(m_nGramOrder);
+	
+	size_t currPos = 0;
+	while (currPos < phraseSize)
+	{
+		const Word &word = phrase.GetWord(currPos);
+		assert(!word.IsNonTerminal());
+		
+		ShiftOrPush(contextFactor, word);
+		assert(contextFactor.size() <= m_nGramOrder);
+		
+		if (word == GetSentenceStartArray())
+		{ // do nothing, don't include prob for <s> unigram
+			assert(currPos == 0);
+		}
+		else
+		{
+			float partScore = GetValue(contextFactor);
+			
+			if (contextFactor.size() == m_nGramOrder)
+				ngramScore += partScore;
+			else
+				beginningBitsOnly += partScore;
+		}
+		
+		currPos++;
+	}
+}
+	
+void LanguageModel::ShiftOrPush(vector<const Word*> &contextFactor, const Word &word) const
+{
+	if (contextFactor.size() < m_nGramOrder)
+	{
+		contextFactor.push_back(&word);
+	}
+	else
+	{ // shift
 		for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
 		{
 			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 		}
-		contextFactor[m_nGramOrder - 1] = &phrase.GetWord(currPos);
-		float partScore = GetValue(contextFactor);		
-		ngramScore += partScore;		
+		contextFactor[m_nGramOrder - 1] = &word;
 	}
-	fullScore += ngramScore;	
 }
-
+	
+	
 LanguageModel::State LanguageModel::GetState(const std::vector<const Word*> &contextFactor, unsigned int* len) const
 {
   State state;

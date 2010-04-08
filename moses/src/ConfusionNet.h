@@ -53,6 +53,13 @@ class ConfusionNet : public InputType {
 	const Word& GetWord(size_t pos) const;
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+	
+	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	{
+		assert(false);
+		return *(new LabelList());
+	}
+
 };
 
 std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn);

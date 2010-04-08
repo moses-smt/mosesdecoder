@@ -101,7 +101,7 @@ float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
     //std::cerr << m_lm->getWord(ngram[i]) << " ";
   }
   int found = 0;
-  float logprob = FloorScore(TransformSRIScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
+  float logprob = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
   *len = 0; // not available
   //if (finalState)
   //  std::cerr << " = " << logprob << "(" << *finalState << ", " << *len <<")"<< std::endl;

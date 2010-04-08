@@ -23,10 +23,6 @@ struct DistortionState_traditional : public FFState {
  }
 };
 
-struct DistortionState_MQ2007 : public FFState {
-  //TODO
-};
-
 const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &input) const {
    return new DistortionState_traditional(WordsRange(NOT_FOUND,NOT_FOUND), NOT_FOUND);
 }
