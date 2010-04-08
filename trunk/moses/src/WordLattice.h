@@ -29,6 +29,13 @@ public:
 	 * @note edges[1][2] means there is an edge from 1 to 2
 	 */
 	void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
+	
+	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	{
+		assert(false);
+		return *(new LabelList());
+	}
+	
 };
 
 }

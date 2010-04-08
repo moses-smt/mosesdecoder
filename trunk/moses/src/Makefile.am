@@ -9,12 +9,6 @@ libmoses_la_HEADERS = \
 	File.h \
 	FilePtr.h \
 	ObjectPool.h \
-	DynSAInclude/fdstream.h \
-	DynSAInclude/file.h \
-	DynSAInclude/types.h \
-	DynSAInclude/utils.h \
-	DynSAInclude/vocab.h \
-	BilingualDynSuffixArray.h \
 	BitmapContainer.h \
 	ConfusionNet.h \
 	DecodeGraph.h \
@@ -23,7 +17,6 @@ libmoses_la_HEADERS = \
 	DecodeStepTranslation.h \
 	Dictionary.h \
 	DummyScoreProducers.h \
-	DynSuffixArray.h \
 	Factor.h \
 	FactorCollection.h \
 	FactorTypeSet.h \
@@ -62,7 +55,6 @@ libmoses_la_HEADERS = \
 	PartialTranslOptColl.h \
 	Phrase.h \
 	PhraseDictionary.h \
-	PhraseDictionaryDynSuffixArray.h \
 	PhraseDictionaryMemory.h \
 	PhraseDictionaryNode.h \
 	PhraseDictionaryTree.h \
@@ -94,11 +86,7 @@ libmoses_la_HEADERS = \
 	WordsBitmap.h \
 	WordLattice.h \
 	WordsRange.h \
-	XmlOption.h \
-	PhraseDictionaryDynSuffixArray.h \
-	DynSuffixArray.h \
-	DynSAInclude/vocab.h \
-	DynSAInclude/file.h
+	XmlOption.h 
 
 if PROTOBUF
 libmoses_la_HEADERS += rule.pb.h hypergraph.pb.h
@@ -123,19 +111,22 @@ libmoses_la_HEADERS += LanguageModelInternal.h \
 endif
 
 libmoses_la_SOURCES = \
-	DynSAInclude/file.cpp \
-	DynSAInclude/vocab.cpp \
-	BilingualDynSuffixArray.cpp \
+	AlignmentInfo.cpp \
 	BitmapContainer.cpp \
+	TreeInput.cpp \
+	ChartRule.cpp \
+	ChartRuleCollection.cpp \
 	ConfusionNet.cpp \
 	DecodeGraph.cpp \
 	DecodeStep.cpp \
 	DecodeStepGeneration.cpp \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
+	DotChart.cpp \
+	DotChartOnDisk.cpp \
 	DummyScoreProducers.cpp \
-	DynSuffixArray.cpp \
-	Factor.cpp \
+	DynSAInclude/file.cpp \	DynSAInclude/vocab.cpp \
+	DynSuffixArray.cpp \	BilingualDynSuffixArray.cpp \	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	FeatureFunction.cpp \
@@ -172,11 +163,16 @@ libmoses_la_SOURCES = \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
-	PhraseDictionaryDynSuffixArray.cpp \
 	PhraseDictionaryMemory.cpp \
+	PhraseDictionaryNewFormat.cpp \
+	PhraseDictionaryNewFormatChart.cpp \
 	PhraseDictionaryNode.cpp \
+	PhraseDictionaryNodeNewFormat.cpp \
+	PhraseDictionaryOnDisk.cpp \
+	PhraseDictionaryOnDiskChart.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
+	PhraseDictionaryDynSuffixArray.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ReorderingStack.cpp \
@@ -198,17 +194,15 @@ libmoses_la_SOURCES = \
 	TranslationOptionCollectionText.cpp \
 	TranslationOptionCollectionConfusionNet.cpp \
 	TranslationOptionList.cpp \
+	TreeInput.cpp \
 	UserMessage.cpp \
 	Util.cpp \
+	WordConsumed.cpp \
 	Word.cpp \
 	WordsBitmap.cpp \
 	WordLattice.cpp \
 	WordsRange.cpp \
-	XmlOption.cpp \
-	PhraseDictionaryDynSuffixArray.cpp \
-	DynSuffixArray.cpp \
-	DynSAInclude/vocab.cpp \
-	DynSAInclude/file.cpp
+	XmlOption.cpp 
 	
 if PROTOBUF
 BUILT_SOURCES = \
@@ -253,4 +247,3 @@ libmoses_la_SOURCES += LanguageModelInternal.cpp \
 endif
 
 libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
-

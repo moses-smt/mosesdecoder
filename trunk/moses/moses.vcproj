@@ -284,7 +284,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\AlignmentInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BitmapContainer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRule.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleCollection.cpp"
 				>
 			</File>
 			<File
@@ -309,6 +321,14 @@
 			</File>
 			<File
 				RelativePath=".\src\Dictionary.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DotChart.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DotChartOnDisk.cpp"
 				>
 			</File>
 			<File
@@ -516,6 +536,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNewFormat.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNewFormatChart.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryNode.cpp"
 				>
 				<FileConfiguration
@@ -554,6 +582,18 @@
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNodeNewFormat.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryOnDisk.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryOnDiskChart.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryTree.cpp"
@@ -648,6 +688,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TreeInput.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TrellisPath.cpp"
 				>
 			</File>
@@ -665,6 +709,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Word.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WordConsumed.cpp"
 				>
 			</File>
 			<File
@@ -690,7 +738,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\AlignmentInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BitmapContainer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CellCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleCollection.h"
 				>
 			</File>
 			<File
@@ -715,6 +779,14 @@
 			</File>
 			<File
 				RelativePath=".\src\Dictionary.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DotChart.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DotChartOnDisk.h"
 				>
 			</File>
 			<File
@@ -886,7 +958,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PhraseDictionaryNewFormat.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PhraseDictionaryNode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryNodeNewFormat.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionaryOnDisk.h"
 				>
 			</File>
 			<File
@@ -986,6 +1070,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TreeInput.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TrellisPath.h"
 				>
 			</File>
@@ -1011,6 +1099,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Word.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WordConsumed.h"
 				>
 			</File>
 			<File

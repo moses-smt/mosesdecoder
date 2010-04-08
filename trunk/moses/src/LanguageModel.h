@@ -47,6 +47,8 @@ protected:
 	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
 																								//! Usually <s> and </s>
 
+	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
+
 	/** constructor to be called by inherited class
 	 * \param registerScore whether this LM will be directly used to score sentence. 
 	 * 						Usually true, except where LM is a component in a composite LM, eg. LanguageModelJoint
@@ -83,6 +85,11 @@ public:
 	void CalcScore(const Phrase &phrase
 							, float &fullScore
 							, float &ngramScore) const;
+	
+	void CalcScoreChart(const Phrase &phrase
+									, float &beginningBitsOnly
+									, float &ngramScore) const;
+	
 	/* get score of n-gram. n-gram should not be bigger than m_nGramOrder
 	 * Specific implementation can return State and len data to be used in hypothesis pruning
 	 * \param contextFactor n-gram to be scored

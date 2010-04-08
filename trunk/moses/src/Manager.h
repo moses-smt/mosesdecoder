@@ -88,6 +88,8 @@ protected:
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	clock_t m_start; /**< starting time, used for logging */
 	size_t interrupted_flag;
+	std::auto_ptr<SentenceStats> m_sentenceStats;
+	
   void GetConnectedGraph(
                          std::map< int, bool >* pConnected,
                          std::vector< const Hypothesis* >* pConnectedList) const;
@@ -113,7 +115,7 @@ public:
 #endif
   
 	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-    const InputType& GetSource() const {return m_source;}   
+  const InputType& GetSource() const {return m_source;}   
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
@@ -134,7 +136,6 @@ public:
   void GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
                                      std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, set < const Hypothesis* > >* pOutgoingHyps, vector< float>* pFwdBwdScores) const;
   
-  std::auto_ptr<SentenceStats> m_sentenceStats;
 };
 
 }

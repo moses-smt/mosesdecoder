@@ -64,6 +64,13 @@ public:
   virtual void InitializeForInput(InputType const&) 
     {/* Don't do anything source specific here as this object is shared between threads.*/}
 	
+	const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
+																										bool adhereTableLimit,const CellCollection &cellColl) const
+	{ 
+		assert(false);
+		return NULL;
+	}
+
 	TO_STRING();
 	
 };

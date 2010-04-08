@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -42,7 +43,13 @@ bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 //bool TargetPhrase::printalign;
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
-	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+	:Phrase(direction)
+	, m_transScore(0.0)
+	, m_ngramScore(0.0)
+	, m_fullScore(0.0)
+	, m_sourcePhrase(0)
+	, m_debugOutput(NULL)
+
 {
 		wordalignflag=StaticData::Instance().UseAlignmentInfo();
 		printalign=StaticData::Instance().PrintAlignmentInfo();
@@ -157,6 +164,64 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 	m_fullScore = m_transScore + totalFutureScore + totalFullScore
 		- (this->GetSize() * weightWP);	 // word penalty
 }
+	
+void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
+																 const Scores &scoreVector
+																 ,const vector<float> &weightT
+																 ,const LMList &languageModels
+																 ,bool calcWordPenalty)
+{
+	const StaticData &staticData = StaticData::Instance();
+	
+	assert(weightT.size() == scoreVector.size());
+	
+	// calc average score if non-best
+	m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
+	m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
+	
+	// Replicated from TranslationOptions.cpp
+	float totalNgramScore  = 0;
+	float totalFullScore   = 0;
+	
+	LMList::const_iterator lmIter;
+	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
+	{
+		const LanguageModel &lm = **lmIter;
+		
+		if (lm.Useable(*this))
+		{ // contains factors used by this LM
+			const float weightLM = lm.GetWeight();
+			float fullScore, nGramScore;
+			
+			lm.CalcScore(*this, fullScore, nGramScore);
+			fullScore = UntransformLMScore(fullScore);
+			nGramScore = UntransformLMScore(nGramScore);
+			
+			m_scoreBreakdown.Assign(&lm, nGramScore);
+			
+			// total LM score so far
+			totalNgramScore  += nGramScore * weightLM;
+			totalFullScore   += fullScore * weightLM;
+		}
+	}
+	
+	// word penalty
+	if (calcWordPenalty)
+	{
+		size_t wordCount = GetNumTerminals();
+		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482); // TODO log -> ln ??
+	}
+	
+	m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;
+}
+	
+void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
+{ // used when creating translations of unknown words (chart decoding)
+	m_scoreBreakdown.Assign(producer, scoreVector);
+	m_transScore = m_ngramScore = 0;
+	m_fullScore = m_scoreBreakdown.GetWeightedScore();
+}
+	
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
@@ -201,14 +266,18 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
-
-
-
-
-
-
-
-
+void TargetPhrase::SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
+{
+	m_alignmentInfo.AddAlignment(alignmentInfo);
+}
+	
+void TargetPhrase::CreateCountInfo(const std::string &countStr)
+{
+	vector<float> count = Moses::Tokenize<float>(countStr);
+	assert(count.size() == 2);
+	m_countInfo = Moses::CountInfo(count[1], count[0]);
+}
+	
 
 TO_STRING_BODY(TargetPhrase);
 

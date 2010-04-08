@@ -1,0 +1,360 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1C04F8E4104C4A5C0090020F /* ChartHypothesisCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C04F8E1104C4A5C0090020F /* ChartHypothesisCollection.cpp */; };
+		1C04F8E5104C4A5C0090020F /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C04F8E2104C4A5C0090020F /* ChartHypothesisCollection.h */; };
+		1C335A840F20F8A200D0D9DF /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A6E0F20F8A200D0D9DF /* ChartCell.cpp */; };
+		1C335A850F20F8A200D0D9DF /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A6F0F20F8A200D0D9DF /* ChartCell.h */; };
+		1C335A860F20F8A200D0D9DF /* ChartHypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */; };
+		1C335A870F20F8A200D0D9DF /* ChartHypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A710F20F8A200D0D9DF /* ChartHypothesis.h */; };
+		1C335A880F20F8A200D0D9DF /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A720F20F8A200D0D9DF /* ChartManager.cpp */; };
+		1C335A890F20F8A200D0D9DF /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A730F20F8A200D0D9DF /* ChartManager.h */; };
+		1C335A8A0F20F8A200D0D9DF /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A740F20F8A200D0D9DF /* ChartTranslationOption.cpp */; };
+		1C335A8B0F20F8A200D0D9DF /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A750F20F8A200D0D9DF /* ChartTranslationOption.h */; };
+		1C335A8C0F20F8A200D0D9DF /* ChartTranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A760F20F8A200D0D9DF /* ChartTranslationOptionCollection.cpp */; };
+		1C335A8D0F20F8A200D0D9DF /* ChartTranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A770F20F8A200D0D9DF /* ChartTranslationOptionCollection.h */; };
+		1C335A8E0F20F8A200D0D9DF /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A780F20F8A200D0D9DF /* ChartTranslationOptionList.cpp */; };
+		1C335A8F0F20F8A200D0D9DF /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A790F20F8A200D0D9DF /* ChartTranslationOptionList.h */; };
+		1C335A900F20F8A200D0D9DF /* ChartTrellisNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A7A0F20F8A200D0D9DF /* ChartTrellisNode.cpp */; };
+		1C335A910F20F8A200D0D9DF /* ChartTrellisNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A7B0F20F8A200D0D9DF /* ChartTrellisNode.h */; };
+		1C335A920F20F8A200D0D9DF /* ChartTrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A7C0F20F8A200D0D9DF /* ChartTrellisPath.cpp */; };
+		1C335A930F20F8A200D0D9DF /* ChartTrellisPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A7D0F20F8A200D0D9DF /* ChartTrellisPath.h */; };
+		1C335A940F20F8A200D0D9DF /* ChartTrellisPathCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A7E0F20F8A200D0D9DF /* ChartTrellisPathCollection.cpp */; };
+		1C335A950F20F8A200D0D9DF /* ChartTrellisPathCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A7F0F20F8A200D0D9DF /* ChartTrellisPathCollection.h */; };
+		1C335A960F20F8A200D0D9DF /* ChartTrellisPathList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A800F20F8A200D0D9DF /* ChartTrellisPathList.cpp */; };
+		1C335A970F20F8A200D0D9DF /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A810F20F8A200D0D9DF /* ChartTrellisPathList.h */; };
+		1C335A980F20F8A200D0D9DF /* QueueEntry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C335A820F20F8A200D0D9DF /* QueueEntry.cpp */; };
+		1C335A990F20F8A200D0D9DF /* QueueEntry.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C335A830F20F8A200D0D9DF /* QueueEntry.h */; };
+		1C500AC60FB9EC3100DFD24F /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C500AC40FB9EC3100DFD24F /* ChartCellCollection.cpp */; };
+		1C500AC70FB9EC3100DFD24F /* ChartCellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */; };
+		1C5870CC103AEA97008C67A8 /* Cube.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5870CA103AEA97008C67A8 /* Cube.h */; };
+		1C5870CD103AEA97008C67A8 /* Cube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C5870CB103AEA97008C67A8 /* Cube.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1C04F8E1104C4A5C0090020F /* ChartHypothesisCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesisCollection.cpp; path = src/ChartHypothesisCollection.cpp; sourceTree = "<group>"; };
+		1C04F8E2104C4A5C0090020F /* ChartHypothesisCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesisCollection.h; path = src/ChartHypothesisCollection.h; sourceTree = "<group>"; };
+		1C04F8E3104C4A5C0090020F /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
+		1C335A6E0F20F8A200D0D9DF /* ChartCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCell.cpp; path = src/ChartCell.cpp; sourceTree = "<group>"; };
+		1C335A6F0F20F8A200D0D9DF /* ChartCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCell.h; path = src/ChartCell.h; sourceTree = "<group>"; };
+		1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesis.cpp; path = src/ChartHypothesis.cpp; sourceTree = "<group>"; };
+		1C335A710F20F8A200D0D9DF /* ChartHypothesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesis.h; path = src/ChartHypothesis.h; sourceTree = "<group>"; };
+		1C335A720F20F8A200D0D9DF /* ChartManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartManager.cpp; path = src/ChartManager.cpp; sourceTree = "<group>"; };
+		1C335A730F20F8A200D0D9DF /* ChartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartManager.h; path = src/ChartManager.h; sourceTree = "<group>"; };
+		1C335A740F20F8A200D0D9DF /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
+		1C335A750F20F8A200D0D9DF /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
+		1C335A760F20F8A200D0D9DF /* ChartTranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionCollection.cpp; path = src/ChartTranslationOptionCollection.cpp; sourceTree = "<group>"; };
+		1C335A770F20F8A200D0D9DF /* ChartTranslationOptionCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionCollection.h; path = src/ChartTranslationOptionCollection.h; sourceTree = "<group>"; };
+		1C335A780F20F8A200D0D9DF /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
+		1C335A790F20F8A200D0D9DF /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
+		1C335A7A0F20F8A200D0D9DF /* ChartTrellisNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisNode.cpp; path = src/ChartTrellisNode.cpp; sourceTree = "<group>"; };
+		1C335A7B0F20F8A200D0D9DF /* ChartTrellisNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisNode.h; path = src/ChartTrellisNode.h; sourceTree = "<group>"; };
+		1C335A7C0F20F8A200D0D9DF /* ChartTrellisPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPath.cpp; path = src/ChartTrellisPath.cpp; sourceTree = "<group>"; };
+		1C335A7D0F20F8A200D0D9DF /* ChartTrellisPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPath.h; path = src/ChartTrellisPath.h; sourceTree = "<group>"; };
+		1C335A7E0F20F8A200D0D9DF /* ChartTrellisPathCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPathCollection.cpp; path = src/ChartTrellisPathCollection.cpp; sourceTree = "<group>"; };
+		1C335A7F0F20F8A200D0D9DF /* ChartTrellisPathCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathCollection.h; path = src/ChartTrellisPathCollection.h; sourceTree = "<group>"; };
+		1C335A800F20F8A200D0D9DF /* ChartTrellisPathList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPathList.cpp; path = src/ChartTrellisPathList.cpp; sourceTree = "<group>"; };
+		1C335A810F20F8A200D0D9DF /* ChartTrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathList.h; path = src/ChartTrellisPathList.h; sourceTree = "<group>"; };
+		1C335A820F20F8A200D0D9DF /* QueueEntry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QueueEntry.cpp; path = src/QueueEntry.cpp; sourceTree = "<group>"; };
+		1C335A830F20F8A200D0D9DF /* QueueEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QueueEntry.h; path = src/QueueEntry.h; sourceTree = "<group>"; };
+		1C335AA10F20F8F400D0D9DF /* libmoses-chart.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmoses-chart.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C500AC40FB9EC3100DFD24F /* ChartCellCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCellCollection.cpp; path = src/ChartCellCollection.cpp; sourceTree = "<group>"; };
+		1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCellCollection.h; path = src/ChartCellCollection.h; sourceTree = "<group>"; };
+		1C5870CA103AEA97008C67A8 /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Cube.h; path = src/Cube.h; sourceTree = "<group>"; };
+		1C5870CB103AEA97008C67A8 /* Cube.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Cube.cpp; path = src/Cube.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289987405E68DCB004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* moses */ = {
+			isa = PBXGroup;
+			children = (
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = moses;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				1C335A6E0F20F8A200D0D9DF /* ChartCell.cpp */,
+				1C335A6F0F20F8A200D0D9DF /* ChartCell.h */,
+				1C500AC40FB9EC3100DFD24F /* ChartCellCollection.cpp */,
+				1C500AC50FB9EC3100DFD24F /* ChartCellCollection.h */,
+				1C335A700F20F8A200D0D9DF /* ChartHypothesis.cpp */,
+				1C335A710F20F8A200D0D9DF /* ChartHypothesis.h */,
+				1C04F8E1104C4A5C0090020F /* ChartHypothesisCollection.cpp */,
+				1C04F8E2104C4A5C0090020F /* ChartHypothesisCollection.h */,
+				1C335A720F20F8A200D0D9DF /* ChartManager.cpp */,
+				1C335A730F20F8A200D0D9DF /* ChartManager.h */,
+				1C335A740F20F8A200D0D9DF /* ChartTranslationOption.cpp */,
+				1C335A750F20F8A200D0D9DF /* ChartTranslationOption.h */,
+				1C335A760F20F8A200D0D9DF /* ChartTranslationOptionCollection.cpp */,
+				1C335A770F20F8A200D0D9DF /* ChartTranslationOptionCollection.h */,
+				1C335A780F20F8A200D0D9DF /* ChartTranslationOptionList.cpp */,
+				1C335A790F20F8A200D0D9DF /* ChartTranslationOptionList.h */,
+				1C335A7A0F20F8A200D0D9DF /* ChartTrellisNode.cpp */,
+				1C335A7B0F20F8A200D0D9DF /* ChartTrellisNode.h */,
+				1C335A7C0F20F8A200D0D9DF /* ChartTrellisPath.cpp */,
+				1C335A7D0F20F8A200D0D9DF /* ChartTrellisPath.h */,
+				1C335A7E0F20F8A200D0D9DF /* ChartTrellisPathCollection.cpp */,
+				1C335A7F0F20F8A200D0D9DF /* ChartTrellisPathCollection.h */,
+				1C335A800F20F8A200D0D9DF /* ChartTrellisPathList.cpp */,
+				1C335A810F20F8A200D0D9DF /* ChartTrellisPathList.h */,
+				1C5870CB103AEA97008C67A8 /* Cube.cpp */,
+				1C5870CA103AEA97008C67A8 /* Cube.h */,
+				1C04F8E3104C4A5C0090020F /* Makefile.am */,
+				1C335A820F20F8A200D0D9DF /* QueueEntry.cpp */,
+				1C335A830F20F8A200D0D9DF /* QueueEntry.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C335AA10F20F8F400D0D9DF /* libmoses-chart.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC043055464E500DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C335A850F20F8A200D0D9DF /* ChartCell.h in Headers */,
+				1C335A870F20F8A200D0D9DF /* ChartHypothesis.h in Headers */,
+				1C335A890F20F8A200D0D9DF /* ChartManager.h in Headers */,
+				1C335A8B0F20F8A200D0D9DF /* ChartTranslationOption.h in Headers */,
+				1C335A8D0F20F8A200D0D9DF /* ChartTranslationOptionCollection.h in Headers */,
+				1C335A8F0F20F8A200D0D9DF /* ChartTranslationOptionList.h in Headers */,
+				1C335A910F20F8A200D0D9DF /* ChartTrellisNode.h in Headers */,
+				1C335A930F20F8A200D0D9DF /* ChartTrellisPath.h in Headers */,
+				1C335A950F20F8A200D0D9DF /* ChartTrellisPathCollection.h in Headers */,
+				1C335A970F20F8A200D0D9DF /* ChartTrellisPathList.h in Headers */,
+				1C335A990F20F8A200D0D9DF /* QueueEntry.h in Headers */,
+				1C500AC70FB9EC3100DFD24F /* ChartCellCollection.h in Headers */,
+				1C5870CC103AEA97008C67A8 /* Cube.h in Headers */,
+				1C04F8E5104C4A5C0090020F /* ChartHypothesisCollection.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC045055464E500DB518D /* moses-chart */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0396E18C0C0B186F00D95CFF /* Build configuration list for PBXNativeTarget "moses-chart" */;
+			buildPhases = (
+				D2AAC043055464E500DB518D /* Headers */,
+				D2AAC044055464E500DB518D /* Sources */,
+				D289987405E68DCB004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "moses-chart";
+			productName = moses;
+			productReference = 1C335AA10F20F8F400D0D9DF /* libmoses-chart.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "moses-chart" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* moses */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC045055464E500DB518D /* moses-chart */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC044055464E500DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C335A840F20F8A200D0D9DF /* ChartCell.cpp in Sources */,
+				1C335A860F20F8A200D0D9DF /* ChartHypothesis.cpp in Sources */,
+				1C335A880F20F8A200D0D9DF /* ChartManager.cpp in Sources */,
+				1C335A8A0F20F8A200D0D9DF /* ChartTranslationOption.cpp in Sources */,
+				1C335A8C0F20F8A200D0D9DF /* ChartTranslationOptionCollection.cpp in Sources */,
+				1C335A8E0F20F8A200D0D9DF /* ChartTranslationOptionList.cpp in Sources */,
+				1C335A900F20F8A200D0D9DF /* ChartTrellisNode.cpp in Sources */,
+				1C335A920F20F8A200D0D9DF /* ChartTrellisPath.cpp in Sources */,
+				1C335A940F20F8A200D0D9DF /* ChartTrellisPathCollection.cpp in Sources */,
+				1C335A960F20F8A200D0D9DF /* ChartTrellisPathList.cpp in Sources */,
+				1C335A980F20F8A200D0D9DF /* QueueEntry.cpp in Sources */,
+				1C500AC60FB9EC3100DFD24F /* ChartCellCollection.cpp in Sources */,
+				1C5870CD103AEA97008C67A8 /* Cube.cpp in Sources */,
+				1C04F8E4104C4A5C0090020F /* ChartHypothesisCollection.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0396E18D0C0B186F00D95CFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+					TRACE_ENABLE,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/misc/src,
+					../srilm/dstruct/src,
+					../srilm/include,
+					../srilm/lm/src,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				PREBINDING = NO;
+				PRODUCT_NAME = "moses-chart";
+				REZ_PREPROCESSOR_DEFINITIONS = "";
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		0396E18E0C0B186F00D95CFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+					TRACE_ENABLE,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/misc/src,
+					../srilm/dstruct/src,
+					../srilm/include,
+					../srilm/lm/src,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				PREBINDING = NO;
+				PRODUCT_NAME = "moses-chart";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		0396E18F0C0B186F00D95CFF /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				PREBINDING = NO;
+				PRODUCT_NAME = moses;
+			};
+			name = Default;
+		};
+		0396E1910C0B186F00D95CFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+				VALID_ARCHS = i386;
+			};
+			name = Debug;
+		};
+		0396E1920C0B186F00D95CFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+			};
+			name = Release;
+		};
+		0396E1930C0B186F00D95CFF /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0396E18C0C0B186F00D95CFF /* Build configuration list for PBXNativeTarget "moses-chart" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0396E18D0C0B186F00D95CFF /* Debug */,
+				0396E18E0C0B186F00D95CFF /* Release */,
+				0396E18F0C0B186F00D95CFF /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		0396E1900C0B186F00D95CFF /* Build configuration list for PBXProject "moses-chart" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0396E1910C0B186F00D95CFF /* Debug */,
+				0396E1920C0B186F00D95CFF /* Release */,
+				0396E1930C0B186F00D95CFF /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

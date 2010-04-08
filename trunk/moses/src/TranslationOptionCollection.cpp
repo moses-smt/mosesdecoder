@@ -402,7 +402,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	VERBOSE(3,"Translation Option Collection\n " << *this << endl);
 
 	ProcessUnknownWord(decodeStepVL);
-
+	
 	// Prune
 	Prune();
 

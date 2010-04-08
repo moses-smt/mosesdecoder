@@ -1,4 +1,4 @@
-// $Id: ReorderingConstraint.h 1466 2007-09-27 23:22:58Z redpony $
+// $Id: ReorderingConstraint.h 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 // vim:tabstop=2
 
 /***********************************************************************

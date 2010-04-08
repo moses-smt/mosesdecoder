@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #include <stdint.h>
 typedef uint32_t UINT32;
+typedef uint64_t UINT64;
 #endif
 
 namespace Moses
@@ -56,9 +57,10 @@ const size_t DEFAULT_CUBE_PRUNING_POP_LIMIT = 1000;
 const size_t DEFAULT_CUBE_PRUNING_DIVERSITY = 0;
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
-const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 50;
+const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+const size_t DEFAULT_MAX_CHART_SPAN			= 10;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
@@ -116,7 +118,7 @@ enum DecodeType
 
 namespace LexReorderType
 {
-	enum LexReorderType //TODO explain values
+	enum LexReorderType // explain values
 		{
 			Backward
 			,Forward
@@ -152,12 +154,24 @@ enum LMImplementation
 
 };
 
+enum PhraseTableImplementation
+{
+	Memory			= 0
+	,Binary			= 1
+	,OnDisk			= 2 
+	,GlueRule		= 3
+	,Joshua			= 4
+	,MemorySourceLabel	= 5
+	,NewFormat	= 6
+	,BerkeleyDb	= 7
+};	
 
 enum InputTypeEnum
 {
 	SentenceInput						= 0
 	,ConfusionNetworkInput	= 1
 	,WordLatticeInput				= 2
+	,TreeInputType					= 3
 };
 
 enum XmlInputType
@@ -179,8 +193,16 @@ enum SearchAlgorithm
 	Normal				= 0
 	,CubePruning	= 1
 	,CubeGrowing	= 2
+	,ChartDecoding= 3
 };
 
+enum SourceLabelOverlap
+{
+	SourceLabelOverlapAdd = 0
+	,SourceLabelOverlapReplace = 1
+	,SourceLabelOverlapDiscard = 2
+};
+	
 // typedef
 typedef size_t FactorType;
 

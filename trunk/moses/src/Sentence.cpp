@@ -28,10 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Util.h"
 
-namespace Moses
-{
 using namespace std;
 
+namespace Moses
+{
+
+Sentence::Sentence(FactorDirection direction)	
+: Phrase(direction)
+, InputType()
+{
+	assert(direction == Input);	
+	m_defaultLabelList.push_back(StaticData::Instance().GetInputDefaultNonTerminal());
+}
+	
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
@@ -59,6 +68,11 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 		}			
 	}
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
+	
+	if (staticData.GetSearchAlgorithm() == ChartDecoding)
+	{
+		InitStartEndWord();
+	}
 	
 	//now that we have final word positions in phrase (from CreateFromString),
 	//we can make input phrase objects to go with our XmlOptions and create TranslationOptions
@@ -133,6 +147,21 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	return 1;
 }
 
+void Sentence::InitStartEndWord()
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	Word startWord(Input);
+	const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
+	startWord.SetFactor(0, factor);
+	PrependWord(startWord);
+	
+	Word endWord(Input);
+	factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
+	endWord.SetFactor(0, factor);
+	AddWord(endWord);
+}
+	
 TranslationOptionCollection* 
 Sentence::CreateTranslationOptionCollection() const 
 {
@@ -167,25 +196,6 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
  			list.push_back(*iterXMLOpts);
 		}
 	}
-}
-
-
-std::string Sentence::ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName){
-	/*TODO deal with unescaping \"*/
-	string tagOpen = attributeName + "=\"";
-	size_t contentsStart = tag.find(tagOpen);
-	if (contentsStart == std::string::npos) return "";
-	contentsStart += tagOpen.size();
-	size_t contentsEnd = tag.find_first_of('"',contentsStart+1);
-	if (contentsEnd == std::string::npos) {
-		TRACE_ERR("Malformed XML attribute: "<< tag);
-		return "";	
-	}
-	size_t possibleEnd;
-	while (tag.at(contentsEnd-1) == '\\' && (possibleEnd = tag.find_first_of('"',contentsEnd+1)) != std::string::npos) {
-		contentsEnd = possibleEnd;
-	}
-	return tag.substr(contentsStart,contentsEnd-contentsStart);
 }
 
 void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder

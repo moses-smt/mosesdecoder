@@ -1,4 +1,4 @@
-// $Id:  $
+// $Id: MainMT.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
