@@ -65,5 +65,12 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	ret->NthElement(m_tableLimit); // sort the phrases for the dcoder
 	return ret;
 }
+	
+const ChartRuleCollection *PhraseDictionaryDynSuffixArray::GetChartRuleCollection(InputType const& src, WordsRange const& range,
+																													bool adhereTableLimit,const CellCollection &cellColl) const
+{
+	assert(false);
+	return NULL;
+}
 
 }// end namepsace

@@ -44,7 +44,7 @@ public:
 	virtual ~PhraseDictionaryOnDisk();
 
 	PhraseTableImplementation GetPhraseTableImplementation() const
-	{ return BerkeleyDb; }
+	{ return OnDisk; }
 
 	bool Load(const std::vector<FactorType> &input
 						, const std::vector<FactorType> &output

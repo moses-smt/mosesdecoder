@@ -160,6 +160,20 @@
 		1CD981B3116793AB002BE765 /* DotChart.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD981B1116793AB002BE765 /* DotChart.h */; };
 		1CD981DE116795D6002BE765 /* WordConsumed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD981DC116795D6002BE765 /* WordConsumed.cpp */; };
 		1CD981DF116795D6002BE765 /* WordConsumed.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD981DD116795D6002BE765 /* WordConsumed.h */; };
+		1CD9E8DE116E49F500B70B73 /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9E8DC116E49F500B70B73 /* BilingualDynSuffixArray.cpp */; };
+		1CD9E8DF116E49F500B70B73 /* BilingualDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E8DD116E49F500B70B73 /* BilingualDynSuffixArray.h */; };
+		1CD9E8E2116E4A0600B70B73 /* DynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9E8E0116E4A0600B70B73 /* DynSuffixArray.cpp */; };
+		1CD9E8E3116E4A0600B70B73 /* DynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E8E1116E4A0600B70B73 /* DynSuffixArray.h */; };
+		1CD9E8E6116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9E8E4116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.cpp */; };
+		1CD9E8E7116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E8E5116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.h */; };
+		1CD9E94D116E4EA200B70B73 /* TreeInput.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E94C116E4EA200B70B73 /* TreeInput.h */; };
+		1CD9E955116E4EB700B70B73 /* fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E94E116E4EB700B70B73 /* fdstream.h */; };
+		1CD9E956116E4EB700B70B73 /* file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9E94F116E4EB700B70B73 /* file.cpp */; };
+		1CD9E957116E4EB700B70B73 /* file.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E950116E4EB700B70B73 /* file.h */; };
+		1CD9E958116E4EB700B70B73 /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E951116E4EB700B70B73 /* types.h */; };
+		1CD9E959116E4EB700B70B73 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E952116E4EB700B70B73 /* utils.h */; };
+		1CD9E95A116E4EB700B70B73 /* vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CD9E953116E4EB700B70B73 /* vocab.cpp */; };
+		1CD9E95B116E4EB700B70B73 /* vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CD9E954116E4EB700B70B73 /* vocab.h */; };
 		1CE646AE11679D8D00EC77CC /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE646AC11679D8D00EC77CC /* PhraseDictionaryOnDisk.cpp */; };
 		1CE646AF11679D8D00EC77CC /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE646AD11679D8D00EC77CC /* PhraseDictionaryOnDisk.h */; };
 		1CE646E811679F9200EC77CC /* DotChartOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE646E611679F9200EC77CC /* DotChartOnDisk.cpp */; };
@@ -355,6 +369,20 @@
 		1CD981B1116793AB002BE765 /* DotChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChart.h; path = src/DotChart.h; sourceTree = "<group>"; };
 		1CD981DC116795D6002BE765 /* WordConsumed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordConsumed.cpp; path = src/WordConsumed.cpp; sourceTree = "<group>"; };
 		1CD981DD116795D6002BE765 /* WordConsumed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordConsumed.h; path = src/WordConsumed.h; sourceTree = "<group>"; };
+		1CD9E8DC116E49F500B70B73 /* BilingualDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BilingualDynSuffixArray.cpp; path = src/BilingualDynSuffixArray.cpp; sourceTree = "<group>"; };
+		1CD9E8DD116E49F500B70B73 /* BilingualDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BilingualDynSuffixArray.h; path = src/BilingualDynSuffixArray.h; sourceTree = "<group>"; };
+		1CD9E8E0116E4A0600B70B73 /* DynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DynSuffixArray.cpp; path = src/DynSuffixArray.cpp; sourceTree = "<group>"; };
+		1CD9E8E1116E4A0600B70B73 /* DynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DynSuffixArray.h; path = src/DynSuffixArray.h; sourceTree = "<group>"; };
+		1CD9E8E4116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryDynSuffixArray.cpp; path = src/PhraseDictionaryDynSuffixArray.cpp; sourceTree = "<group>"; };
+		1CD9E8E5116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryDynSuffixArray.h; path = src/PhraseDictionaryDynSuffixArray.h; sourceTree = "<group>"; };
+		1CD9E94C116E4EA200B70B73 /* TreeInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TreeInput.h; path = src/TreeInput.h; sourceTree = "<group>"; };
+		1CD9E94E116E4EB700B70B73 /* fdstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fdstream.h; path = src/DynSAInclude/fdstream.h; sourceTree = "<group>"; };
+		1CD9E94F116E4EB700B70B73 /* file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file.cpp; path = src/DynSAInclude/file.cpp; sourceTree = "<group>"; };
+		1CD9E950116E4EB700B70B73 /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file.h; path = src/DynSAInclude/file.h; sourceTree = "<group>"; };
+		1CD9E951116E4EB700B70B73 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = src/DynSAInclude/types.h; sourceTree = "<group>"; };
+		1CD9E952116E4EB700B70B73 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = src/DynSAInclude/utils.h; sourceTree = "<group>"; };
+		1CD9E953116E4EB700B70B73 /* vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vocab.cpp; path = src/DynSAInclude/vocab.cpp; sourceTree = "<group>"; };
+		1CD9E954116E4EB700B70B73 /* vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vocab.h; path = src/DynSAInclude/vocab.h; sourceTree = "<group>"; };
 		1CE646AC11679D8D00EC77CC /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
 		1CE646AD11679D8D00EC77CC /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
 		1CE646E611679F9200EC77CC /* DotChartOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartOnDisk.cpp; path = src/DotChartOnDisk.cpp; sourceTree = "<group>"; };
@@ -424,6 +452,8 @@
 			children = (
 				1CD9808911678B5D002BE765 /* AlignmentInfo.cpp */,
 				1CD9808A11678B5D002BE765 /* AlignmentInfo.h */,
+				1CD9E8DC116E49F500B70B73 /* BilingualDynSuffixArray.cpp */,
+				1CD9E8DD116E49F500B70B73 /* BilingualDynSuffixArray.h */,
 				E2B7C9580DDB1AEF0089EFE0 /* BitmapContainer.cpp */,
 				E2B7C8F00DDA19190089EFE0 /* BitmapContainer.h */,
 				1CD9809211678B7C002BE765 /* CellCollection.h */,
@@ -449,18 +479,23 @@
 				1CE646E711679F9200EC77CC /* DotChartOnDisk.h */,
 				1C8CFE1C0AD67A9700FA22E2 /* DummyScoreProducers.cpp */,
 				1C8CFE1D0AD67A9700FA22E2 /* DummyScoreProducers.h */,
+				1CD9E8E0116E4A0600B70B73 /* DynSuffixArray.cpp */,
+				1CD9E8E1116E4A0600B70B73 /* DynSuffixArray.h */,
 				1C8CFE1E0AD67A9700FA22E2 /* Factor.cpp */,
 				1C8CFE1F0AD67A9700FA22E2 /* Factor.h */,
 				1C8CFE200AD67A9700FA22E2 /* FactorCollection.cpp */,
 				1C8CFE210AD67A9700FA22E2 /* FactorCollection.h */,
 				1C8CFE220AD67A9700FA22E2 /* FactorTypeSet.cpp */,
 				1C8CFE230AD67A9700FA22E2 /* FactorTypeSet.h */,
+				1CD9E94E116E4EB700B70B73 /* fdstream.h */,
 				1C5009BB0FB9E09700DFD24F /* FeatureFunction.cpp */,
 				1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */,
 				1C5009BD0FB9E09700DFD24F /* FFState.cpp */,
 				1C5009BE0FB9E09700DFD24F /* FFState.h */,
+				1CD9E94F116E4EB700B70B73 /* file.cpp */,
 				D39BA8400B11FF0C0089AE6A /* File.cpp */,
 				1C8CFE240AD67A9700FA22E2 /* File.h */,
+				1CD9E950116E4EB700B70B73 /* file.h */,
 				1C8CFE250AD67A9700FA22E2 /* FilePtr.h */,
 				E2B7CA700DDB3B5C0089EFE0 /* FloydWarshall.cpp */,
 				E2B7CA710DDB3B5C0089EFE0 /* FloydWarshall.h */,
@@ -532,6 +567,8 @@
 				1C8CFE5A0AD67A9700FA22E2 /* Phrase.h */,
 				1C8CFE5B0AD67A9700FA22E2 /* PhraseDictionary.cpp */,
 				1C8CFE5C0AD67A9700FA22E2 /* PhraseDictionary.h */,
+				1CD9E8E4116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.cpp */,
+				1CD9E8E5116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.h */,
 				D39BA8290AFBB7090089AE6A /* PhraseDictionaryMemory.cpp */,
 				D39BA82A0AFBB7090089AE6A /* PhraseDictionaryMemory.h */,
 				1CB22CD611676E3D0083E5A6 /* PhraseDictionaryNewFormat.cpp */,
@@ -592,17 +629,22 @@
 				B2639DE80EF199D400A67519 /* TranslationOptionList.cpp */,
 				B2639DE90EF199D400A67519 /* TranslationOptionList.h */,
 				1CD82FB2116B336100AF05C2 /* TreeInput.cpp */,
+				1CD9E94C116E4EA200B70B73 /* TreeInput.h */,
 				0396E1A00C0B189200D95CFF /* TrellisPath.cpp */,
 				0396E1A10C0B189200D95CFF /* TrellisPath.h */,
 				0396E1A20C0B189200D95CFF /* TrellisPathCollection.cpp */,
 				0396E1A30C0B189200D95CFF /* TrellisPathCollection.h */,
 				0396E1A40C0B189200D95CFF /* TrellisPathList.h */,
 				1C8CFE830AD67A9700FA22E2 /* TypeDef.h */,
+				1CD9E951116E4EB700B70B73 /* types.h */,
 				1C8CFE840AD67A9700FA22E2 /* UniqueObject.h */,
 				1C8CFE850AD67A9700FA22E2 /* UserMessage.cpp */,
 				1C8CFE860AD67A9700FA22E2 /* UserMessage.h */,
 				1C8CFE870AD67A9700FA22E2 /* Util.cpp */,
 				1C8CFE880AD67A9700FA22E2 /* Util.h */,
+				1CD9E952116E4EB700B70B73 /* utils.h */,
+				1CD9E953116E4EB700B70B73 /* vocab.cpp */,
+				1CD9E954116E4EB700B70B73 /* vocab.h */,
 				1C8CFE890AD67A9700FA22E2 /* Word.cpp */,
 				1C8CFE8A0AD67A9700FA22E2 /* Word.h */,
 				1CD981DC116795D6002BE765 /* WordConsumed.cpp */,
@@ -740,6 +782,15 @@
 				1CE646AF11679D8D00EC77CC /* PhraseDictionaryOnDisk.h in Headers */,
 				1CE646E911679F9200EC77CC /* DotChartOnDisk.h in Headers */,
 				1CD8316A116B66FB00AF05C2 /* LanguageModelRemote.h in Headers */,
+				1CD9E8DF116E49F500B70B73 /* BilingualDynSuffixArray.h in Headers */,
+				1CD9E8E3116E4A0600B70B73 /* DynSuffixArray.h in Headers */,
+				1CD9E8E7116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.h in Headers */,
+				1CD9E94D116E4EA200B70B73 /* TreeInput.h in Headers */,
+				1CD9E955116E4EB700B70B73 /* fdstream.h in Headers */,
+				1CD9E957116E4EB700B70B73 /* file.h in Headers */,
+				1CD9E958116E4EB700B70B73 /* types.h in Headers */,
+				1CD9E959116E4EB700B70B73 /* utils.h in Headers */,
+				1CD9E95B116E4EB700B70B73 /* vocab.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -878,6 +929,11 @@
 				1C66276E116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp in Sources */,
 				1CD82FB3116B336200AF05C2 /* TreeInput.cpp in Sources */,
 				1CD83169116B66FB00AF05C2 /* LanguageModelRemote.cpp in Sources */,
+				1CD9E8DE116E49F500B70B73 /* BilingualDynSuffixArray.cpp in Sources */,
+				1CD9E8E2116E4A0600B70B73 /* DynSuffixArray.cpp in Sources */,
+				1CD9E8E6116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.cpp in Sources */,
+				1CD9E956116E4EB700B70B73 /* file.cpp in Sources */,
+				1CD9E95A116E4EB700B70B73 /* vocab.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

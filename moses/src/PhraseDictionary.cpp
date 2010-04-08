@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "PhraseDictionaryNewFormat.h"
 #include "PhraseDictionaryOnDisk.h"
+#include "PhraseDictionaryDynSuffixArray.h"
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOption.h"
@@ -45,14 +46,16 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t tableLimit):
-                            m_numScoreComponent(numScoreComponent),
-                            m_numInputScores(numInputScores),
-                            m_input(input),
-                            m_output(output),
-                            m_filePath(filePath),
-                            m_weight(weight),
-                            m_tableLimit(tableLimit)
+                            , size_t tableLimit
+														, const std::string &targetFile  // default param
+                            , const std::string &alignmentsFile) // default param
+	:m_numScoreComponent(numScoreComponent),
+	m_numInputScores(numInputScores),
+	m_input(input),
+	m_output(output),
+	m_filePath(filePath),
+	m_weight(weight),
+	m_tableLimit(tableLimit)
 {
 	const StaticData& staticData = StaticData::Instance();
 	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
@@ -132,7 +135,35 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 		assert(pdta);
 		m_phraseDictionary.reset(pdta);
 	}
-	
+	else if (implementation == Binary)
+	{   
+		//load the tree dictionary for this thread   
+		const StaticData& staticData = StaticData::Instance();
+		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
+		assert(pdta->Load(
+											m_input
+											, m_output
+											, m_filePath
+											, m_weight
+											, m_tableLimit
+											, staticData.GetAllLM()
+											, staticData.GetWeightWordPenalty()));
+		m_phraseDictionary.reset(pdta);
+	}
+	else if (implementation == SuffixArray)
+	{   
+		PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent, this); 	 
+		if(!(pd && pd->Load(filePath, targetFile, alignmentsFile 	 
+												, weight, tableLimit 	 
+												, staticData.GetAllLM() 	 
+												, staticData.GetWeightWordPenalty()))) 	 
+		{ 	 
+			std::cerr << "FAILED TO LOAD\n" << endl; 	 
+			delete pd; 	 
+		} 	 
+		m_phraseDictionary.reset(pd); 	 
+		std::cerr << "Suffix array phrase table loaded" << std::endl;
+	}
 }
   
 const PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) const

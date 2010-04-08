@@ -192,14 +192,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 		
-		if (GetPhraseTableImplementation() == GlueRule)
-		{
-			targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels, false);
-		}
-		else
-		{
-			targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels, true);
-		}
+		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels);
 		
 		// count info for backoff
 		if (tokens.size() >= 6)

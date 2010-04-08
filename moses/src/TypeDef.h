@@ -156,14 +156,15 @@ enum LMImplementation
 
 enum PhraseTableImplementation
 {
-	Memory			= 0
-	,Binary			= 1
-	,OnDisk			= 2 
-	,GlueRule		= 3
-	,Joshua			= 4
-	,MemorySourceLabel	= 5
-	,NewFormat	= 6
-	,BerkeleyDb	= 7
+	Memory				= 0
+	,Binary				= 1
+	,OnDisk				= 2 
+	//,GlueRule		= 3
+	//,Joshua			= 4
+	//,MemorySourceLabel	= 5
+	,NewFormat		= 6
+	//,BerkeleyDb	= 7
+	,SuffixArray	= 8
 };	
 
 enum InputTypeEnum

@@ -30,6 +30,10 @@ private:
 	const LMList *m_languageModels;
 	float m_weightWP;
 	
+	virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
+																														bool adhereTableLimit,const CellCollection &cellColl) const;
+	
+
 };
 
 } // end namespace
