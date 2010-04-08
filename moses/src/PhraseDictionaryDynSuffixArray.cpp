@@ -58,9 +58,8 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		TargetPhrase *targetPhrase = itr->second;
 		//std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-                //std::cerr << "scorevector.size() == " << scoreVector.size() << "\t
 		targetPhrase->SetScore(m_feature, scoreVector, m_weight, m_weightWP, *m_languageModels);
-		//cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
+		cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
 		ret->Add(targetPhrase);
 	}
 	ret->NthElement(m_tableLimit); // sort the phrases for the dcoder

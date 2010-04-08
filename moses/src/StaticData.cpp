@@ -736,7 +736,7 @@ bool StaticData::LoadPhraseTables()
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 
 		{
 			vector<string>                  token           = Tokenize(translationVector[currDict]);
-			assert(token.size() == 5);
+			assert(token.size() >= 5);
 			//characteristics of the phrase table
 
 			PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
@@ -804,7 +804,6 @@ bool StaticData::LoadPhraseTables()
 			string targetPath, alignmentsFile;
 			if (implementation == SuffixArray)
 			{
-				assert(targetPath.size() == 7);
 				targetPath		= token[5];
 				alignmentsFile= token[6];
 			}
@@ -815,7 +814,7 @@ bool StaticData::LoadPhraseTables()
 			
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
-			VERBOSE(1,"filePath: " << filePath << endl);
+			VERBOSE(1,"filePath: " << filePath <<endl);
             
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
 								implementation
