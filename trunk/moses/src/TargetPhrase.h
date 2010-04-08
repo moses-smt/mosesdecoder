@@ -122,8 +122,7 @@ public:
 	void SetScoreChart(const ScoreProducer* translationScoreProducer
 										 ,const Scores &scoreVector
 										 ,const std::vector<float> &weightT
-										 ,const LMList &languageModels
-										 ,bool calcWordPenalty);
+										 ,const LMList &languageModels);
 	
 	// used by for unknown word proc in chart decoding
 	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);

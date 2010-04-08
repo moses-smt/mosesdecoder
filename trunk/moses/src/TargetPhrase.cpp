@@ -168,8 +168,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 																 const Scores &scoreVector
 																 ,const vector<float> &weightT
-																 ,const LMList &languageModels
-																 ,bool calcWordPenalty)
+																 ,const LMList &languageModels)
 {
 	const StaticData &staticData = StaticData::Instance();
 	
@@ -206,11 +205,8 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 	}
 	
 	// word penalty
-	if (calcWordPenalty)
-	{
-		size_t wordCount = GetNumTerminals();
-		m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482); // TODO log -> ln ??
-	}
+	size_t wordCount = GetNumTerminals();
+	m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482); // TODO log -> ln ??
 	
 	m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;
 }
