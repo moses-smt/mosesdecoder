@@ -78,7 +78,6 @@ public:
 	void LoadVocabLookup();
 	void save(string);
 	void load(string);
-	const vector<float> GetWeight() const { return m_weight; }
 	void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
 	void CleanUp();
 private:
@@ -91,7 +90,6 @@ private:
 
 	Vocab* m_vocab;
 	ScoresComp* m_scoreCmp;
-	vector<float> m_weight;
 
 	vector<SentenceAlignment> m_alignments;
 	vector<vector<short> > m_rawAlignments;
