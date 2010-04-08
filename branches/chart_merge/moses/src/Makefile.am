@@ -125,7 +125,8 @@ libmoses_la_SOURCES = \
 	DotChart.cpp \
 	DotChartOnDisk.cpp \
 	DummyScoreProducers.cpp \
-	Factor.cpp \
+	DynSAInclude/file.cpp \	DynSAInclude/vocab.cpp \
+	DynSuffixArray.cpp \	BilingualDynSuffixArray.cpp \	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	FeatureFunction.cpp \
@@ -171,6 +172,7 @@ libmoses_la_SOURCES = \
 	PhraseDictionaryOnDiskChart.cpp \
 	PhraseDictionaryTree.cpp \
 	PhraseDictionaryTreeAdaptor.cpp \
+	PhraseDictionaryDynSuffixArray.cpp \
 	PrefixTreeMap.cpp \
 	ReorderingConstraint.cpp \
 	ReorderingStack.cpp \
