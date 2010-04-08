@@ -9,6 +9,12 @@ libmoses_la_HEADERS = \
 	File.h \
 	FilePtr.h \
 	ObjectPool.h \
+	DynSAInclude/fdstream.h \
+	DynSAInclude/file.h \
+	DynSAInclude/types.h \
+	DynSAInclude/utils.h \
+	DynSAInclude/vocab.h \
+	BilingualDynSuffixArray.h \
 	BitmapContainer.h \
 	ConfusionNet.h \
 	DecodeGraph.h \
@@ -17,6 +23,7 @@ libmoses_la_HEADERS = \
 	DecodeStepTranslation.h \
 	Dictionary.h \
 	DummyScoreProducers.h \
+	DynSuffixArray.h \
 	Factor.h \
 	FactorCollection.h \
 	FactorTypeSet.h \
@@ -55,6 +62,7 @@ libmoses_la_HEADERS = \
 	PartialTranslOptColl.h \
 	Phrase.h \
 	PhraseDictionary.h \
+	PhraseDictionaryDynSuffixArray.h \
 	PhraseDictionaryMemory.h \
 	PhraseDictionaryNode.h \
 	PhraseDictionaryTree.h \
@@ -115,6 +123,9 @@ libmoses_la_HEADERS += LanguageModelInternal.h \
 endif
 
 libmoses_la_SOURCES = \
+	DynSAInclude/file.cpp \
+	DynSAInclude/vocab.cpp \
+	BilingualDynSuffixArray.cpp \
 	BitmapContainer.cpp \
 	ConfusionNet.cpp \
 	DecodeGraph.cpp \
@@ -123,6 +134,7 @@ libmoses_la_SOURCES = \
 	DecodeStepTranslation.cpp \
 	Dictionary.cpp \
 	DummyScoreProducers.cpp \
+	DynSuffixArray.cpp \
 	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
@@ -160,6 +172,7 @@ libmoses_la_SOURCES = \
 	PartialTranslOptColl.cpp \
 	Phrase.cpp \
 	PhraseDictionary.cpp \
+	PhraseDictionaryDynSuffixArray.cpp \
 	PhraseDictionaryMemory.cpp \
 	PhraseDictionaryNode.cpp \
 	PhraseDictionaryTree.cpp \
@@ -240,3 +253,4 @@ libmoses_la_SOURCES += LanguageModelInternal.cpp \
 endif
 
 libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
+
