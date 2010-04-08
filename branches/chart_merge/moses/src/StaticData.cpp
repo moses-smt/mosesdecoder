@@ -476,7 +476,7 @@ StaticData::~StaticData()
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
 
-	delete m_parameter;
+	//delete m_parameter;
 
 	// memory pools
 	Phrase::FinalizeMemPool();
