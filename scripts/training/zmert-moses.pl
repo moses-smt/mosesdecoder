@@ -587,6 +587,7 @@ my (undef, \$args) = split( /:/, "$___EXTRACT_SEMPOS");
 FILE_EOF
 print DECODER_CMD <<'FILE_EOF';
 my ($form_index, $sempos_index) = split( /,/, $args, 2);
+my $max_index = ($form_index > $sempos_index) ? $form_index : $sempos_index;
 while( my $line = <NBEST_ORIG>) {
   my @array = split( /\|\|\|/, $line);
   # remove feature names from the feature scores string
@@ -595,10 +596,13 @@ while( my $line = <NBEST_ORIG>) {
   my @tokens = split( /\s/, $array[1]); # split sentence into words
   $array[1] = "";
   foreach my $token (@tokens) {
-    my @factors = split( /\|/, \$token);
-    $array[1] .= join( "|", $factors[$form_index], $factors[$sempos_index]);
+    next if $token eq "";
+    my @factors = split( /\|/, $token);
+    die "Cannot extract factors with index $form_index and $sempos_index from @factors"
+      if ($max_index > $#factors);
+    $array[1] .= join( "|", $factors[$form_index], $factors[$sempos_index])." ";
   }
-  print NBEST join( '|||', @array)."\n";
+  print NBEST join( '|||', @array);
 }
  
 FILE_EOF
@@ -634,7 +638,7 @@ close( NBEST_ORIG);
 close( NBEST_FACTORED);
 
 open( NBEST_FACTORED, "<$nbest_factored") or die "Cannot open $nbest_factored";
-my $line_count_check = 0;
+e $line_count_check = 0;
 while( my $line = <NBEST_FACTORED>) {
   chomp( $line);
   my $array_ref = shift( @out);
