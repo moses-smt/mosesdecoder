@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 
 # Usage:
 # zmert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -674,15 +674,7 @@ die "Error: Sent $line_count sentences to analyze but got only $line_count_check
 FILE_EOF
 
 } elsif ($___EXTRACT_SEMPOS eq "none") {
-print DECODER_CMD <<'FILE_EOF';
-while( my $line = <NBEST_ORIG>) {
-  my @array = split( /\|\|\|/, $line);
-  # remove feature names from the feature scores string
-  $array[2] = extractScores( $array[2]);
-  print NBEST join( '|||', @array);
-}
-FILE_EOF
-
+  # no preprocessing needed
 } else {
   die "Unknown type of factor extraction: $___EXTRACT_SEMPOS";
 }
