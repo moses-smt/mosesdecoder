@@ -638,7 +638,7 @@ close( NBEST_ORIG);
 close( NBEST_FACTORED);
 
 open( NBEST_FACTORED, "<$nbest_factored") or die "Cannot open $nbest_factored";
-e $line_count_check = 0;
+my $line_count_check = 0;
 while( my $line = <NBEST_FACTORED>) {
   chomp( $line);
   my $array_ref = shift( @out);
