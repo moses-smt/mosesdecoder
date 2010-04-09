@@ -430,11 +430,65 @@ if (defined $___JOBS) {
 }
 
 my $zmert_decoder_cmd = "$SCRIPTS_ROOTDIR/training/zmert-decoder.pl";
-my $scenario = "$SCRIPTS_ROOTDIR/training/zmert.tmt-scen";
+
+# SemPOS metric requires 2 parameters specifying position of t_lemma and sempos factor
+# e.g. for t_lemma|sempos|factor3|factor4|... the values are 0 and 1 (default setting)
+if( $___METRIC =~ /^SemPOS$/) {
+  $___METRIC .= " 0 1";
+}
+# SemPOS_BLEU metric requires 7 parameters
+# 1) weight of SemPOS 2) weight of BLEU 
+# 3) index of t_lemma for SemPOS 4) index of sempos for SemPOS
+# 5) max ngram for BLEU 6) ref length strategy for BLEU
+# 7) index of factor to compute BLEU on
+if( $___METRIC =~ /^SemPOS_BLEU$/) {
+  $___METRIC .= " 1 1 1 2 4 closest 0";
+}
+
+if( $___EXTRACT_SEMPOS =~ /tmt/) {
+  my $print_string = "";
+  if( $___METRIC =~ /SemPOS_BLEU/) {
+    $print_string = "Print::ForSemPOSBLEUMetric TMT_PARAM_PRINT_FOR_SEMPOS_BLEU_METRIC=m:form|t_lemma|gram/sempos TMT_PARAM_PRINT_FOR_SEMPOS_BLEU_METRIC_DESTINATION=factored_output";
+  } elsif( $___METRIC =~ /SemPOS/) {
+    $print_string = "Print::ForSemPOSMetric TMT_PARAM_PRINT_FOR_SEMPOS_METRIC=t_lemma|gram/sempos TMT_PARAM_PRINT_FOR_SEMPOS_METRIC_DESTINATION=factored_output";
+  } else {
+    die "Trying to get factors using tmt for unknown metric $___METRIC";
+  }
+
+  open( SCENARIO, ">$scenario_file") or die "Cannot open $scenario_file";
+  print SCENARIO << "FILE_EOF";
+SCzechW_to_SCzechM::Tokenize_joining_numbers
+SCzechW_to_SCzechM::TagMorce
+# SCzechM_to_SCzechN::Czech_named_ent_SVM_recognizer
+# SCzechM_to_SCzechN::Geo_ne_recognizer
+# SCzechM_to_SCzechN::Embed_instances
+SCzechM_to_SCzechA::McD_parser_local TMT_PARAM_MCD_CZ_MODEL=pdt20_train_autTag_golden_latin2_pruned_0.02.model
+# SCzechM_to_SCzechA::McD_parser_local TMT_PARAM_MCD_CZ_MODEL=pdt20_train_autTag_golden_latin2_pruned_0.10.model
+SCzechM_to_SCzechA::Fix_atree_after_McD
+SCzechM_to_SCzechA::Fix_is_member
+SCzechA_to_SCzechT::Mark_auxiliary_nodes
+SCzechA_to_SCzechT::Build_ttree
+SCzechA_to_SCzechT::Fill_is_member
+SCzechA_to_SCzechT::Rehang_unary_coord_conj
+SCzechA_to_SCzechT::Assign_coap_functors
+SCzechA_to_SCzechT::Fix_is_member
+SCzechA_to_SCzechT::Distrib_coord_aux
+SCzechA_to_SCzechT::Mark_clause_heads
+SCzechA_to_SCzechT::Mark_relclause_heads
+SCzechA_to_SCzechT::Mark_relclause_coref
+SCzechA_to_SCzechT::Fix_tlemmas
+SCzechA_to_SCzechT::Assign_nodetype
+SCzechA_to_SCzechT::Assign_grammatemes
+SCzechA_to_SCzechT::Detect_formeme
+SCzechA_to_SCzechT::Add_PersPron
+SCzechA_to_SCzechT::Mark_reflpron_coref
+SCzechA_to_SCzechT::TBLa2t_phaseFd
+$print_string
+FILE_EOF
+  close( SCENARIO);
+}
 
 my $feats_order = join( " ", keys %used_triples);
-
-safesystem("wiseln $scenario scenario");
 
 open( DECODER_CMD, ">$decoder_cmd_file") or die "Cannot open $decoder_cmd_file";
   print DECODER_CMD <<"FILE_EOF";
@@ -798,22 +852,21 @@ sub mergeConfigs {
   open NEW, ">$config_new" or die "Cannot open $config_new";
   my $cont = 1;
   my ($b_line, $w_line);
-  while( $b_line = <BASE> and $w_line = <WEIGHTS>) {
+  while( $cont) {
+    $b_line = <BASE>;
+    $w_line = <WEIGHTS>;
+    $cont = defined $b_line and defined $w_line;
     if( $b_line =~ /^\[weight-/) {
       if( $w_line !~ /^\[weight-/) { die "mergeConfigs: $config_base and $config_weights do not have the same format"; }
       print NEW $w_line;
-      print STDERR "NEXT LINE (za prvnim ifem):\n $w_line $b_line";
       $b_line = <BASE>; $w_line = <WEIGHTS>;
       while( $w_line =~ /\d/) {
         print NEW $w_line;
-        print STDERR "NEXT LINE (vnitrni while) :\n $w_line $b_line";
         $b_line = <BASE>; $w_line = <WEIGHTS>;
       }
       print NEW $b_line;
-      print STDERR "NEXT LINE (konec ifu):\n $b_line $w_line";
     } else {
       print NEW $b_line;
-      print STDERR "NEXT LINE (else):\n $b_line $w_line";
     }
   }
   close BASE;
@@ -827,7 +880,6 @@ sub dump_triples {
   foreach my $name (keys %$triples) {
     foreach my $triple (@{$triples->{$name}}) {
       my ($val, $min, $max) = @$triple;
-      print STDERR "Triples:  $name\t$val\t$min\t$max    ($triple)\n";
     }
   }
 }
