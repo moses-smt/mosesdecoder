@@ -448,6 +448,8 @@ if( $___METRIC =~ /^SemPOS$/) {
 # 5) max ngram for BLEU 6) ref length strategy for BLEU
 # 7) index of factor to compute BLEU on
 elsif( $___METRIC =~ /^SemPOS_BLEU$/) {
+  $___SEMPOSBLEU_WEIGHTS =~ /^.*:.*$/ or die "--semposbleu-weights is not in format <sempos_weight>:<bleu_weight>";
+  $___SEMPOSBLEU_WEIGHTS =~ s/:/ /;
   $___METRIC .= " $___SEMPOSBLEU_WEIGHTS 1 2 4 closest 0";
   $metric_num_factors = 3;
 }
