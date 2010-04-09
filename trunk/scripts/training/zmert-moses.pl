@@ -594,7 +594,7 @@ while( my $line = <NBEST_ORIG>) {
   # extract factor on position $factor_index
   my @tokens = split( /\s/, $array[1]); # split sentence into words
   $array[1] = "";
-  foreach( my $token = @tokens) {
+  foreach my $token (@tokens) {
     my @factors = split( /\|/, \$token);
     $array[1] .= join( "|", $factors[$form_index], $factors[$sempos_index]);
   }
