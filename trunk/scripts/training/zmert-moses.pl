@@ -441,8 +441,17 @@ if( $___METRIC =~ /^SemPOS$/) {
 # 3) index of t_lemma for SemPOS 4) index of sempos for SemPOS
 # 5) max ngram for BLEU 6) ref length strategy for BLEU
 # 7) index of factor to compute BLEU on
-if( $___METRIC =~ /^SemPOS_BLEU$/) {
+elsif( $___METRIC =~ /^SemPOS_BLEU$/) {
   $___METRIC .= " 1 1 1 2 4 closest 0";
+}
+elsif( $___METRIC =~ /^BLEU$/) {
+  $___METRIC .= " 4 closest";
+}
+ elsif( $___METRIC =~ /^TER$/) {
+  $___METRIC .= " nocase punc 20 50";
+}
+elsif( $___METRIC =~ /^TER-BLEU$/) {
+  $___METRIC .= " nocase punc 20 50 4 closest";
 }
 
 if( $___EXTRACT_SEMPOS =~ /tmt/) {
