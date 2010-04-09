@@ -90,6 +90,13 @@ my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 my $___PREDICTABLE_SEEDS = 0;
 my $___METRIC = "BLEU 4 shortest"; # name of metric that will be used for minimum error training, followed by metric parameters (see zmert documentation)
 my $___LAMBDAS_OUT = undef; # file where final lambdas should be written
+my $___EXTRACT_SEMPOS = "none"; # how shall we get the SemPOS factor (only for SemPOS metric)
+      # options: 1) 'none' - moses generates SemPOS factor in required format 
+      #             (<word_form>|<SemPOS>)
+      #          2) 'moses:<factor_index>' - extract SemPOS from <factor_index>
+      #              position (moses output is <word>|<factor_1>|...|<factor_n>)
+      #          3) 'tmt' - moses outputs only <word_form> and we need to 
+      #             generate SemPOS with TectoMT
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
@@ -100,12 +107,12 @@ my $___NORM = "none";
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
 
-my $mertdir = undef; # path to zmert directory
+my $mertdir = "$SCRIPTS_ROOTDIR/../zmert/";  # path to zmert directory
 my $filtercmd = undef; # path to filter-model-given-input.pl
+my $clonecmd = "$SCRIPTS_ROOTDIR/training/clone_moses_model.pl"; # executable clone_moses_model.pl
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
-my $___CONFIG_BAK = undef; # backup pathname to startup ini file
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
@@ -120,19 +127,20 @@ GetOptions(
   "refs=s" => \$___DEV_E,
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
-  "nbest=i" => \$___N_BEST_LIST_SIZE,
-  "queue-flags=s" => \$queue_flags,
+  "nbest:i" => \$___N_BEST_LIST_SIZE,
+  "queue-flags:s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
-  "decoder-flags=s" => \$___DECODER_FLAGS,
+  "decoder-flags:s" => \$___DECODER_FLAGS,
   "lambdas=s" => \$___LAMBDA,
-  "metric" => \$___METRIC,
-  "norm" => \$___NORM,
+  "metric=s" => \$___METRIC,
+  "extract-sempos=s" => \$___EXTRACT_SEMPOS,
+  "norm:s" => \$___NORM,
   "help" => \$usage,
   "verbose" => \$verbose,
   "mert-verbose" => \$___MERT_VERBOSE,
   "decoder-verbose" => \$___DECODER_VERBOSE,
-  "mertdir=s" => \$mertdir,
-  "lambdas-out=s" => \$___LAMBDAS_OUT,
+  "mertdir:s" => \$mertdir, # allow to override the default location of zmert.jar
+  "lambdas-out:s" => \$___LAMBDAS_OUT,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
@@ -219,7 +227,7 @@ if ($___INPUTTYPE == 2)
 
 if (defined $___ACTIVATE_FEATURES)
 {
-  %active_features = map {$_ => 1} split( ",", $___ACTIVATE_FEATURES);
+  %active_features = map {$_ => 1} split( /,/, $___ACTIVATE_FEATURES);
 }
 
 # Check validity of input parameters and set defaults if needed
@@ -336,10 +344,6 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
 }
 
-# as weights are normalized in the next steps (by cmert)
-# normalize initial LAMBDAs, too
-my $need_to_normalize = 1;
-
 #store current directory and create the working directory (if needed)
 my $cwd = `pawd 2>/dev/null`; 
 if(!$cwd){$cwd = `pwd`;}
@@ -367,15 +371,13 @@ if ($___FILTER_PHRASE_TABLE){
     safesystem($cmd) or die "Failed to filter the tables.";
   }
 
-  # make a backup copy of startup ini file
-  $___CONFIG_BAK = $___CONFIG;
   # the decoder should now use the filtered model
   $___CONFIG = "filtered/moses.ini";
 }
 else{
-  # do not filter phrase tables (useful if binary phrase tables are available)
-  # use the original configuration file
-  $___CONFIG_BAK = $___CONFIG;
+  # make a local clone of moses.ini
+  safesystem("$clonecmd $___CONFIG");
+  $___CONGIF = "moses.ini";
 }
 
 my $PARAMETERS;
@@ -385,10 +387,10 @@ my $nbest_file = "zmert.best$___N_BEST_LIST_SIZE.out";
 
 # Run zmert to optimize lambdas
 # We need to prepare:
-#	1) zmert configuration file (zmert_cfg.txt)
-#	2) parameters we want to optimize (params.txt)
-#	3) decoder configuration file (decoder_cfg_inter.txt)
-#	4) decoder launch script (decoder_cmd) - must be executable
+#	1) decoder launch script (decoder_cmd) - must be executable
+#	2) zmert configuration file (zmert_cfg.txt)
+#	3) parameters we want to optimize (params.txt)
+#	4) decoder configuration file (decoder_cfg_inter.txt)
 
 print "Zmert start at ".`date`;
 
@@ -398,6 +400,27 @@ my $decoder_cfg_inter = ensure_full_path("decoder_cfg_inter.txt");
 my $decoder_cmd_file = ensure_full_path("decoder_cmd");
 
 my $LAMBDAS_FILE = ensure_full_path("finalWeights.txt");
+
+# prepare script that will launch moses from template
+# it will include an update script that will adjust feature weights according to
+# the last zmert iteration (they are stored in file $decoder_cfg_inter)
+
+# prepare lauch command with all parameters
+my $decoder_cmd;
+if (defined $___JOBS) {
+  $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters '$queue_flags' -decoder-parameters '$parameters' -n-best-file $nbest_file -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
+} else {
+  $decoder_cmd = "$___DECODER $parameters -config $___CONFIG -inputtype $___INPUTTYPE -n-best-list $nbest_file $___N_BEST_LIST_SIZE -i $___DEV_F > moses.out";
+}
+
+my $zmert_decoder_cmd = "$SCRIPTS_ROOTDIR/trainng/zmert-decoder.pl";
+my $scenario = "$SCRIPTS_ROOTDIR/training/zmert.tmt-scen";
+
+safesystem("wiseln $scenario scenario");
+safesystem("wiseln $zmert_decoder_cmd $decoder_cmd_file");
+# make the decoder lauch script executable
+safesystem("chmod a+x $decoder_cmd_file");
+
 
 # prepare zmert configuration file
 open( ZMERT_CFG, ">$zmert_cfg") or die "Cannot open $zmert_cfg";
@@ -430,7 +453,7 @@ print ZMERT_CFG "-m $___METRIC\n";
 print ZMERT_CFG "-seed $___PREDICTABLE_SEEDS\n" if($___PREDICTABLE_SEEDS);	# initialize the random number generator
 
 # DECODER SPECIFICATION
-print ZMERT_CFG "-cmd $decoder_cmd_file\n";	# name of file containing commands to run the decoder
+print ZMERT_CFG "-cmd DECODER_CFG_INTER=\"$decoder_cfg_inter\" DECODER_CMD=\"$decoder_cmd\" EXTRACT_SEMPOS=\"$___EXTRACT_SEMPOS\" NBEST_FILE=\"$nbest_file\" $decoder_cmd_file\n";	# name of file containing commands to run the decoder
 print ZMERT_CFG "-decOut $nbest_file\n"	# name of the n-best file produced by the decoder
 # print ZMERT_CFG "-decExit $DECODER_EXIT_CODE\n";	# value returned by decoder after successful exit
 print ZMERT_CFG "-dcfg $decoder_cfg_inter\n";		# name of intermediate decoder configuration file
@@ -458,7 +481,7 @@ foreach my $name (keys %used_triples) {
    if( defined $___ACTIVATE_FEATURES and not $active_features{$name}) {
      $optString = "Fix";
    } 
-   print PARAMS "$name_$num \|\|\| $val $optString $min $max $minRand $maxRand\n";
+   print PARAMS "$name_$num ||| $val $optString $min $max $minRand $maxRand\n";
     ++$num;
   }
 }
@@ -474,26 +497,9 @@ foreach my $name (keys %used_triples) {
     print DEC_CFG "$name_$num $val\n";
     ++$num;
   }
+  print DEC_CFG "iteration = 1\n";
 }
 close( DEC_CFG);
-
-# prepare script that will launch moses from template
-# it will include an update script that will adjust feature weights according to
-# the last zmert iteration (they are stored in file $decoder_cfg_inter)
-
-# prepare lauch command with all parameters
-my $decoder_cmd;
-if (defined $___JOBS) {
-  $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters \\\\\"$queue_flags\\\\\" -decoder-parameters \\\\\"$parameters \$dec_params_updated\\\\\" -n-best-file $nbest_file -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
-} else {
-  $decoder_cmd = "$___DECODER $parameters -config $___CONFIG -inputtype $___INPUTTYPE \$dec_params_updated -n-best-list $nbest_file $___N_BEST_LIST_SIZE -i $___DEV_F > moses.out";
-}
-
-my $template = "$SCRIPTS_ROOTDIR/trainng/zmert-decoder.pl.template";
-
-safesystem("sed 's/___DECODER_CFG_INTER___/$decoder_cfg_inter/;s/___DECODER_CMD___/$decoder_cmd/' $template > $decoder_cmd_file");
-# make the decoder lauch script executable
-safesystem("chmod a+x $decoder_cmd_file");
 
 # launch zmert
 my $javaMaxMem = "" # -maxMem 4000" # use at most 4000MB of memory
