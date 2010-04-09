@@ -65,11 +65,11 @@ while(<INI>) {
     	    print INI_OUT $table_spec;
     	    last;
     	}
-    	my ($phrase_table_impl,$source_factor,$t,$weights,$file) = ($1,$2,$3,$4);
+    	my ($phrase_table_impl,$source_factor,$t,$weights,$file) = ($1,$2,$3,$4,$5);
 
         my $new_phrase_table_impl;
         if ($phrase_table_impl eq "0") {  # Memory
-            my $new_phrase_table_impl = 1;  # Binary
+            $new_phrase_table_impl = 1;  # Binary
         }
         else {
             # Can only filter memory-based phrase tables.
