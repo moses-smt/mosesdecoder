@@ -661,7 +661,7 @@ print ZMERT_CFG "-fin\t$___LAMBDAS_OUT\n" if(defined $___LAMBDAS_OUT);	# file wh
 
 # MERT CONFIGURATION
 print ZMERT_CFG "-m\t$___METRIC\n";	
-print ZMERT_CFG "-maxIt\t4\n"; #$MAX_MERT_ITER\n";	# maximum number of MERT iterations
+# print ZMERT_CFG "-maxIt\t$MAX_MERT_ITER\n";	# maximum number of MERT iterations
 # print ZMERT_CFG "-prevIt\t$PREV_MERT_ITER\n";	
 # number of iteration before considering an early exit
 # print ZMERT_CFG "-minIt\t$MIN_MERT_ITER\n";	
