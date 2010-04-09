@@ -594,7 +594,7 @@ FILE_EOF
 print DECODER_CMD <<'FILE_EOF';
 my @indices = split( /,/, $args);
 die "Specified only $#indices factors to extract but selected metric requires $factor_count factors" 
-  if( $#indices != $factor_count);
+  if( @indices != $factor_count);
 while( my $line = <NBEST_ORIG>) {
   my @array = split( /\|\|\|/, $line);
   # remove feature names from the feature scores string
