@@ -1,0 +1,55 @@
+#!/usr/bin/perl -w
+
+use strict;
+
+# variable is initialized from zmert-moses.pl before the launch of zmert
+my $decoder_cfg_inter = "___DECODER_CFG_INTER___";
+
+# extract feature weights from last zmert iteration (stored in $decoder_cfg_inter)
+print "Updating decoder config file from file $decoder_cfg_inter";
+
+my $dec_params_updated = "";
+open( IN, $decoder_cfg_inter) or die "Cannot open file $decoder_cfg_inter (reading updated lambdas)";
+my $lastName = "";
+while( my $line = <IN>) {
+  next if( $line ~= /^normalization/); # skip line with normalization (last line)
+  chomp($line); 
+  my ($name, $val) = split( /\s+/, $line);
+  $name =~ s/_\d+$//;      # remove index of the lambda
+  $dec_params_updated .= "-$name " if( $name !~ $lastName);
+  $dec_params_updated .= "$value ";
+}
+close(IN);
+
+# !!! $decoder_cmd must contain variable '$dec_params_updated' to pass the updated lambda values to the decoder !!!!
+my $decoder_cmd = "___DECODER_CMD___";
+
+if( $decoder_cmd !~ /$dec_params_updated/) {
+  die "Decoder command does not contain parameter with updated lambdas!
+  Command: $decoder_cmd
+  should contain: $dec_params_updated";
+}
+
+print "Executing: $decoder_cmd";
+safesystem( $decoder_cmd);
+
+# END OF BODY
+
+sub safesystem {
+  print STDERR "Executing: @_\n";
+  system(@_);
+  if ($? == -1) {
+      print STDERR "Failed to execute: @_\n  $!\n";
+      exit(1);
+  }
+  elsif ($? & 127) {
+      printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
+          ($? & 127),  ($? & 128) ? 'with' : 'without';
+      exit(1);
+  }
+  else {
+    my $exitcode = $? >> 8;
+    print STDERR "Exit code: $exitcode\n" if $exitcode;
+    return ! $exitcode;
+  }
+}
