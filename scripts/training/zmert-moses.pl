@@ -221,7 +221,12 @@ my $TMT_ROOT = $ENV{"TMT_ROOT"};
 
 my $srunblocks = "$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
 my $scenario_file = "scenario"; 
+my $qruncmd = "/home/bojar/diplomka/bin/qruncmd";
 my $srunblocks_cmd = "$srunblocks --errorlevel=FATAL $scenario_file czech_source_sentence factored_output";
+if (defined $___JOBS && $___JOBS > 1) {
+  die "Can't run $qruncmd" if ! -x $qruncmd;
+  $srunblocks_cmd = "$qruncmd --jobs=$___JOBS --join '$srunblocks_cmd'";
+}
 
 
 
@@ -629,7 +634,7 @@ FILE_EOF
 # run TectoMT to analyze sentences
 print STDERR "Analyzing candidates using $srunblocks_cmd\n"; 
 my \$nbest_factored = "$nbest_file.factored";
-open( NBEST_FACTORED, "|$srunblocks_cmd > \$nbest_factored 2>/dev/null") or die "Cannot open pipe to command $srunblocks_cmd";
+open( NBEST_FACTORED, "|$srunblocks_cmd > \$nbest_factored") or die "Cannot open pipe to command $srunblocks_cmd";
 FILE_EOF
 print DECODER_CMD <<'FILE_EOF';
 my $line_count = 0;
