@@ -149,8 +149,8 @@ GetOptions(
   "norm:s" => \$___NORM,
   "help" => \$usage,
   "verbose" => \$verbose,
-  "mert-verbose" => \$___MERT_VERBOSE,
-  "decoder-verbose" => \$___DECODER_VERBOSE,
+  "mert-verbose:i" => \$___MERT_VERBOSE,
+  "decoder-verbose:i" => \$___DECODER_VERBOSE,
   "mertdir:s" => \$mertdir, # allow to override the default location of zmert.jar
   "lambdas-out:s" => \$___LAMBDAS_OUT,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
@@ -159,7 +159,7 @@ GetOptions(
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
-  "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
+  "predictable-seeds:s" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
   "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
 ) or exit(1);
@@ -874,7 +874,7 @@ sub mergeConfigs {
   while( $cont) {
     $b_line = <BASE>;
     $w_line = <WEIGHTS>;
-    $cont = defined $b_line and defined $w_line;
+    $cont = (defined $b_line and defined $w_line);
     if( $b_line =~ /^\[weight-/) {
       if( $w_line !~ /^\[weight-/) { die "mergeConfigs: $config_base and $config_weights do not have the same format"; }
       print NEW $w_line;
