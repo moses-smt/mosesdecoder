@@ -396,8 +396,8 @@ my $nbest_file = "zmert.best$___N_BEST_LIST_SIZE.out";
 
 
 my $zmert_cfg = ensure_full_path("zmert_cfg.txt");
-my $opt_params = ensure_full_path("params.txt");
-my $decoder_cfg_inter = ensure_full_path("decoder_cfg_inter.txt");
+my $opt_params = "params.txt";
+my $decoder_cfg_inter = "decoder_cfg_inter.txt";
 my $decoder_cmd_file = ensure_full_path("decoder_cmd");
 
 my $LAMBDAS_FILE = ensure_full_path("finalWeights.txt");
@@ -591,8 +591,9 @@ safesystem("chmod a+x $decoder_cmd_file");
 open( ZMERT_CFG, ">$zmert_cfg") or die "Cannot open $zmert_cfg";
 
 # FILES
-print ZMERT_CFG "-dir\t$___WORKING_DIR\n";	# working path (relative to the lauch path)
-print ZMERT_CFG "-r\t$___DEV_E\n";	# file(s) containing references
+# print ZMERT_CFG "-dir\t$___WORKING_DIR\n";	# working path (relative to the lauch path)
+# print ZMERT_CFG "-r\t$___DEV_E\n";	# file(s) containing references
+print ZMERT_CFG "-r\t../tuning.ref.0\n";	# file(s) containing references
 print ZMERT_CFG "-rps\t".scalar(@references)."\n";	# number of references per sentence
 # print ZMERT_CFG "-txtNrm\t1\n";	# how should text be normalized
 print ZMERT_CFG "-p\t$opt_params\n";	# file containig parameter names, initial values, ranges
