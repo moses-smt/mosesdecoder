@@ -12,12 +12,21 @@
 
 # 29 Dec 2009 Derived from mert-moses-new.pl (Kamil Kos)
 
-
 use FindBin qw($Bin);
 use File::Basename;
 my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
+
+if( !defined $ENV{"TMT_ROOT"}) {
+  die "Cannot find TMT_ROOT. Is TectoMT really initialized?";
+}
+my $TMT_ROOT = $ENV{"TMT_ROOT"};
+
+my $srunblocks = "$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
+my $scenario_file = "scenario"; 
+my $srunblocks_cmd = "$srunblocks $scenario_file czech_source_sentence factored_output";
+
 
 # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
 # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
@@ -72,14 +81,14 @@ my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 my $verbose = 0;
 my $___MERT_VERBOSE = 1; # verbosity of zmert (values: 0-2)
-my $___DECODER_VERBOSE = 0; # should decoder output be included? - 0:no,1:yes
+my $___DECODER_VERBOSE = 1; # should decoder output be included? - 0:no,1:yes
 my $usage = 0; # request for --help
 my $___WORKING_DIR = "mert-work";
 my $___DEV_F = undef; # required, input text to decode
 my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
-my $___N_BEST_LIST_SIZE = 100;
+my $___N_BEST_LIST_SIZE = 3;
 my $queue_flags = "-l mem_free=0.5G -hard";  # extra parameters for parallelizer
       # the -l ws0ssmt is relevant only to JHU workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
@@ -274,6 +283,7 @@ $___DECODER = $decoder_abs;
 my $ref_abs = ensure_full_path($___DEV_E);
 # check if English dev set (reference translations) exist and store a list of all references
 my @references;
+my @references_factored;
 if (-e $ref_abs) {
   push @references, $ref_abs;
 }
@@ -396,9 +406,10 @@ my $nbest_file = "zmert.best$___N_BEST_LIST_SIZE.out";
 
 
 my $zmert_cfg = ensure_full_path("zmert_cfg.txt");
-my $opt_params = "params.txt";
-my $decoder_cfg_inter = "decoder_cfg_inter.txt";
+my $opt_params = "params.txt"; # zmert requires path relative to launch path
+my $decoder_cfg_inter = "decoder_cfg_inter.txt"; # zmert requires path relative to launch path
 my $decoder_cmd_file = ensure_full_path("decoder_cmd");
+my $iteration_file = "iteration";
 
 my $LAMBDAS_FILE = ensure_full_path("finalWeights.txt");
 
@@ -409,9 +420,9 @@ my $LAMBDAS_FILE = ensure_full_path("finalWeights.txt");
 # prepare lauch command with all parameters
 my $decoder_cmd;
 if (defined $___JOBS) {
-  $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters '$queue_flags' -decoder-parameters '$PARAMETERS' -n-best-list $nbest_file $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
+  $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters '$queue_flags' -decoder-parameters '$PARAMETERS' -n-best-list '$nbest_file $___N_BEST_LIST_SIZE' -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
 } else {
-  $decoder_cmd = "$___DECODER $PARAMETERS -config $___CONFIG -inputtype $___INPUTTYPE -n-best-list $nbest_file $___N_BEST_LIST_SIZE -i $___DEV_F > moses.out";
+  $decoder_cmd = "$___DECODER $PARAMETERS -config $___CONFIG -inputtype $___INPUTTYPE -n-best-list '$nbest_file $___N_BEST_LIST_SIZE' -i $___DEV_F > moses.out";
 }
 
 my $zmert_decoder_cmd = "$SCRIPTS_ROOTDIR/training/zmert-decoder.pl";
@@ -426,16 +437,11 @@ open( DECODER_CMD, ">$decoder_cmd_file") or die "Cannot open $decoder_cmd_file";
 
 use strict;
 
-if( !defined \$ENV{"TMT_ROOT"}) {
-  die "Cannot find TMT_ROOT. Is TectoMT really initialized?";
-}
-my \$TMT_ROOT = \$ENV{"TMT_ROOT"};
-
-my \$srunblocks = "\$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
-my \$scenario_file = "scenario"; # scenario must be in the same directory
-my \$sentence_placeholder = "_SENTENCE_PLACEHOLDER_";
-
-my \$iteration;
+my \$iteration = 0;
+open( ITERATION, "<$iteration_file") or die "Cannot open $iteration_file";
+\$iteration = <ITERATION>;
+close( ITERATION);
+chomp( \$iteration);
 
 # extract feature weights from last zmert iteration (stored in \$decoder_cfg_inter)
 print "Updating decoder config file from file $decoder_cfg_inter\n";
@@ -452,16 +458,15 @@ while( my $line = <IN>) {
   chomp($line); 
   my ($name, $val) = split( /\s+/, $line);
   $name =~ s/_\d+$//;      # remove index of the lambda
-  if( $name =~ /iteration/) {
-    $iteration = $val;
-  } else {
-    push( @{$lambdas{$name}}, $val);
-  }
+  print STDERR "decoder_cfg_inter.txt $name:$val\n";
+  push( @{$lambdas{$name}}, $val);
 }
 close(IN);
 
 
-my $moses_ini_old = "$moses_ini.run$iteration";
+my $moses_ini_old = "$moses_ini";
+$moses_ini_old =~ s/^(.*)\/([^\/]+)$/$1\/run$iteration.$2/;
+$moses_ini_old = $moses_ini.".orig" if( $iteration == 0);
 safesystem("mv $moses_ini $moses_ini_old");
 # update moses.ini
 open( INI_OLD, "<$moses_ini_old") or die "Cannot open config file $moses_ini_old";
@@ -470,8 +475,10 @@ while( my $line = <INI_OLD>) {
   if( $line =~ m/^\[weight-(.+)\]$/) {
     my $name = $1;
     print INI "$line";
+    if( $name eq "t" or $name eq "l") { $name .= "m";}
     foreach( @{$lambdas{$name}}) {
-      print INI "$_\\n";
+      print INI "$_\n";
+      print STDERR "moses.ini $_\n";
       $line = <INI_OLD>;
     }
   } else {
@@ -480,8 +487,8 @@ while( my $line = <INI_OLD>) {
 }
 close(INI_OLD);
 close(INI);
-FILE_EOF
 
+FILE_EOF
 
 print DECODER_CMD <<"FILE_EOF";
 print "Executing: $decoder_cmd";
@@ -489,94 +496,114 @@ safesystem("$decoder_cmd") or die "Failed to execute $decoder_cmd";
 
 # update iteration number in intermediate config file
 ++\$iteration;
-safesystem("sed -i 's/^iteration \\\\d+/iteration \$iteration/' $decoder_cfg_inter");
+safesystem("echo \$iteration > $iteration_file");
 
 # modify the nbest-list to conform the zmert required format
 # <i> ||| <candidate_translation> ||| featVal_1 featVal_2 ... featVal_m
 my \$nbest_file_orig = "$nbest_file".".orig";
 safesystem( "mv $nbest_file \$nbest_file_orig");
 open( NBEST_ORIG, "<\$nbest_file_orig") or die "Cannot open original nbest-list \$nbest_file_orig";
-my \$out = "";
+open( NBEST, ">$nbest_file") or die "Cannot open modified nbest-list $nbest_file";
+
 my \$line_num = 0;
-if( "$___EXTRACT_SEMPOS" =~ /tmt/) {
-  # run TectoMT to analyze sentences
-  my \$command = "|\$srunblocks \$scenario_file czech_source_sentence factored_output > $nbest_file.factored";
-  open( TMT, "\$command") or die "Cannot fork: $!";
-}
-foreach( my \$line = <NBEST_ORIG>) {
-  my \@array = split( /|||/, \$line);
+
+FILE_EOF
+
+
+if( "$___EXTRACT_SEMPOS" =~ /factors/) {
+  print DECODER_CMD <<"FILE_EOF";
+my (undef, \$args) = split( /:/, "$___EXTRACT_SEMPOS");
+FILE_EOF
+print DECODER_CMD <<'FILE_EOF';
+my ($form_index, $sempos_index) = split( /,/, $args, 2);
+while( my $line = <NBEST_ORIG>) {
+  my @array = split( /\|\|\|/, $line);
   # remove feature names from the feature scores string
-  \$array[2] = s/\\S*:\\s//g;
-  pop( \@array); # remove sentence score
-  if( "$___EXTRACT_SEMPOS" =~ /none/) {
-    # do nothing
-  } elsif( "$___EXTRACT_SEMPOS" =~ /moses/) {
-    # extract factor on position \$factor_index
-    my (undef, \$factor_index) = split( /:/, "$___EXTRACT_SEMPOS");
-    my \@tokens = split( /\\s/, \$array[1]); # split sentence into words
-    foreach( my \$token = \@tokens) {
-      my \@factors = split( /|/, \$token);
-      \$array[1] = join( " ", \$factors[0], \$factors[\$factor_index]);
-    }
-  } elsif( "$___EXTRACT_SEMPOS" =~ /tmt/) {
-    # analyze sentence via TectoMT using scenario in file \$scerario_file
-    print TMT "\$array[1]\\n";
-    \$array[1] = \$sentence_placeholder;
-    ++\$line_num;
-    # collect the results
-  } else {
-    die "Unknown type of factor extraction: $___EXTRACT_SEMPOS";
+  $array[2] =~ s/\S*:\s//g;
+  # pop( @array); # remove sentence score
+  # extract factor on position $factor_index
+  my @tokens = split( /\s/, $array[1]); # split sentence into words
+  $array[1] = "";
+  foreach( my $token = @tokens) {
+    my @factors = split( /\|/, \$token);
+    $array[1] .= join( "|", $factors[$form_index], $factors[$sempos_index]);
   }
-  \$out .= join( '|||', \@array)."\\n";
+  print NBEST join( '|||', @array)."\n";
+}
+ 
+FILE_EOF
+
+} elsif( "$___EXTRACT_SEMPOS" =~ /tmt/) {
+  print DECODER_CMD <<"FILE_EOF";
+# run TectoMT to analyze sentences
+print STDERR "Analyzing candidates using $srunblocks_cmd\n"; 
+my \$nbest_factored = "$nbest_file.factored";
+open( NBEST_FACTORED, "|$srunblocks_cmd > \$nbest_factored") or die "Cannot open pipe to command $srunblocks_cmd";
+FILE_EOF
+print DECODER_CMD <<'FILE_EOF';
+my $line_count = 0;
+my @out = ();
+while( my $line = <NBEST_ORIG>) {
+  my @array = split( /\|\|\|/, $line);
+  die "Nbest-list does not have required format (values separated by '|||')" if ($#array != 3);
+  # remove feature names from the feature scores string
+  $array[2] =~ s/\S*:\s//g;
+  pop( @array); # remove sentence score
+  push( @out, \@array); # store line with scores for output
+  # select only word forms
+  my $sentence = "";
+  foreach my $fact ( split /\s+/, $array[1]) {
+    next if( $fact eq "");
+    my @fact_array = split( /\|/, $fact);
+    $sentence .= "$fact_array[0] ";
+  }
+  # analyze sentence via TectoMT using scenario
+  print NBEST_FACTORED "$sentence\n";
+  ++$line_count;
 }
 close( NBEST_ORIG);
+close( NBEST_FACTORED);
 
-if( "$___EXTRACT_SEMPOS" =~ /tmt/) {
-  close( TMT); # we have already written all sentences
-  my \$cont = 1;
-  my \$len = 0;
-  while( \$cont && \$cont < 100) {
-    sleep(1);
-    my \$len_new = `wc -l < $nbest_file.factored`; # get the number of analyzed sentences
-    if( \$len_new == \$line_num) { 
-      \$cont = 0; # we have all sentences analyzed -> stop
-    } elsif( \$len_new > \$len) {
-      \$cont = 1; # we analyzed another sentence -> reset the counter
-      \$len = \$len_new;
-    } else {
-      ++\$cont; # still analyzing the same sentence
-    }
-  }
-  if( \$cont == 100) { die "Waiting too long for TMT analysis. Check file $nbest_file.factored";
+open( NBEST_FACTORED, "<$nbest_factored") or die "Cannot open $nbest_factored";
+my $line_count_check = 0;
+while( my $line = <NBEST_FACTORED>) {
+  chomp( $line);
+  my $array_ref = shift( @out);
+  $array_ref->[1] = $line;  
+  print NBEST join( '|||', @{$array_ref})."\n";
+  ++$line_count_check;
 }
-  # replace \$sentence_placeholder with word_form and SemPOS factor
-  
+die "Error: Sent $line_count sentences to analyze but got only $line_count_check back" 
+  if( $line_count != $line_count_check);
+
+FILE_EOF
+
+} else {
+  die "Unknown type of factor extraction: $___EXTRACT_SEMPOS";
 }
 
-
-open( NBEST, ">$nbest_file") or die "Cannot open modified nbest-list $nbest_file";
-print NBEST \$out;
+print DECODER_CMD <<'FILE_EOF';
 close( NBEST);
-
+close( NBEST_ORIG);
 
 # END OF BODY
 
 sub safesystem {
-  print STDERR "Executing: \@_\\n";
-  system(\@_);
-  if (\$? == -1) {
-      print STDERR "Failed to execute: \@_\\n  \$!\\n";
+  print STDERR "Executing: @_\n";
+  system(@_);
+  if ($? == -1) {
+      print STDERR "Failed to execute: @_\n  $!\n";
       exit(1);
   }
-  elsif (\$? & 127) {
-      printf STDERR "Execution of: \@_\\n  died with signal %d, %s coredump\\n",
-          (\$? & 127),  (\$? & 128) ? 'with' : 'without';
+  elsif ($? & 127) {
+      printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
+          ($? & 127),  ($? & 128) ? 'with' : 'without';
       exit(1);
   }
   else {
-    my \$exitcode = \$? >> 8;
-    print STDERR "Exit code: \$exitcode\\n" if \$exitcode;
-    return ! \$exitcode;
+    my $exitcode = $? >> 8;
+    print STDERR "Exit code: $exitcode\n" if $exitcode;
+    return ! $exitcode;
   }
 }
 FILE_EOF
@@ -586,6 +613,39 @@ close( DECODER_CMD);
 # make the decoder lauch script executable
 safesystem("chmod a+x $decoder_cmd_file");
 
+# analyze reference if necessary
+if( $___EXTRACT_SEMPOS =~ /tmt/) {
+  my $part = 0;
+  foreach my $ref (@references) {
+    my $line_count = 0;
+    print STDERR "Analyzing references using $srunblocks_cmd\n"; 
+    open( REF_IN, "<$ref") or die "Cannot open $ref";
+    my $ref_factored = "$ref.factored.$part";
+    push( @references_factored, $ref_factored);
+    open( REF_FACTORED, "|$srunblocks_cmd > $ref_factored");
+    while( my $line = <REF_IN>) {
+      # analyze sentence via TectoMT using scenario in file $scerario_file
+      print REF_FACTORED $line;
+      ++$line_count;
+    }
+    close( REF_IN);
+    close( REF_FACTORED);
+    my $line_count_check = 0;
+    open( REF_FACTORED, "<$ref_factored") or die "Cannot open $ref_factored";
+    ++$line_count_check while( <REF_FACTORED>);
+    die "Error: Sent $line_count sentences to analyze but got $line_count_check back"
+     if( $line_count != $line_count_check);  
+    close( REF_FACTORED);
+    ++$part;
+  }
+  print STDERR "References analyzed\n";
+} else {
+  push( @references_factored, @references);
+}
+
+my $ref_stem = $references_factored[0];
+$ref_stem =~ s/\d+$// if( $#references_factored); # get the file stem if we have more than one refs
+$ref_stem =~ s/.*\/([^\/]+)$/..\/$1/; 
 
 # prepare zmert configuration file
 open( ZMERT_CFG, ">$zmert_cfg") or die "Cannot open $zmert_cfg";
@@ -593,15 +653,15 @@ open( ZMERT_CFG, ">$zmert_cfg") or die "Cannot open $zmert_cfg";
 # FILES
 # print ZMERT_CFG "-dir\t$___WORKING_DIR\n";	# working path (relative to the lauch path)
 # print ZMERT_CFG "-r\t$___DEV_E\n";	# file(s) containing references
-print ZMERT_CFG "-r\t../tuning.ref.0\n";	# file(s) containing references
+print ZMERT_CFG "-r\t$ref_stem\n";	# file(s) containing references
 print ZMERT_CFG "-rps\t".scalar(@references)."\n";	# number of references per sentence
-# print ZMERT_CFG "-txtNrm\t1\n";	# how should text be normalized
+print ZMERT_CFG "-txtNrm\t0\n";	# we use our own text normalization
 print ZMERT_CFG "-p\t$opt_params\n";	# file containig parameter names, initial values, ranges
 print ZMERT_CFG "-fin\t$___LAMBDAS_OUT\n" if(defined $___LAMBDAS_OUT);	# file where the final weight vector is written
 
 # MERT CONFIGURATION
 print ZMERT_CFG "-m\t$___METRIC\n";	
-# print ZMERT_CFG "-maxIt\t$MAX_MERT_ITER\n";	# maximum number of MERT iterations
+print ZMERT_CFG "-maxIt\t4\n"; #$MAX_MERT_ITER\n";	# maximum number of MERT iterations
 # print ZMERT_CFG "-prevIt\t$PREV_MERT_ITER\n";	
 # number of iteration before considering an early exit
 # print ZMERT_CFG "-minIt\t$MIN_MERT_ITER\n";	
@@ -627,7 +687,7 @@ print ZMERT_CFG "-N\t$___N_BEST_LIST_SIZE\n";
 
 # OUTPUT SPECIFICATION
 print ZMERT_CFG "-v\t$___MERT_VERBOSE\n" if($___MERT_VERBOSE != 1);	# zmert verbosity level (0-2)
-print ZMERT_CFG "-decV\t$___DECODER_VERBOSE\n" if($___DECODER_VERBOSE);	# decoder output printed (1) or ignored (0)
+print ZMERT_CFG "-decV\t$___DECODER_VERBOSE\n"; # if($___DECODER_VERBOSE);	# decoder output printed (1) or ignored (0)
 
 close( ZMERT_CFG);
 
@@ -658,14 +718,17 @@ close( PARAMS);
 open( DEC_CFG, ">$decoder_cfg_inter") or die "Cannot open file $decoder_cfg_inter";
 foreach $name (keys %used_triples) {
   $num = 0;
-  foreach my $triple (@{$used_triples{$name}}) {
-    ($val, $min, $max) = @$triple;
+  foreach my $tri (@{$used_triples{$name}}) {
+    ($val, $min, $max) = @$tri;
     print DEC_CFG $name."_$num $val\n";
     ++$num;
   }
 }
-print DEC_CFG "iteration 1\n";
 close( DEC_CFG);
+
+open( ITER, ">$iteration_file") or die "Cannot open file $iteration_file";
+print ITER "1"; 
+close( ITER);
 
 # launch zmert
 my $javaMaxMem = ""; # -maxMem 4000" # use at most 4000MB of memory
@@ -673,15 +736,23 @@ my $cmd = "java -cp $zmert_classpath ZMERT $javaMaxMem $zmert_cfg";
 
 print "Zmert start at ".`date`;
 
-if (defined $___JOBS) {
+if ( 0 && defined $___JOBS) {
+  # NOT WORKING - this branch needs to init environment variables
   safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter='$queue_flags'") or die "Failed to start zmert (via qsubwrapper $qsubwrapper)";
+
 } else {
   safesystem("$cmd 2> $mert_logfile") or die "Failed to run zmert";
 }
 
 print "Zmert finished at ".`date`;
 
-#chdir back to the original directory # useless, just to remind we were not there
+# copy optimized moses.ini and original run1.moses.ini to the working directory
+safesystem("cp $___CONFIG .");
+my $config_orig = $___CONFIG;
+$config_orig =~ s/^(.*)\/([^\/]+)$/$1\/run1.$2/;
+safesystem("cp $config_orig .");
+
+# chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
 
 } # end of local scope
