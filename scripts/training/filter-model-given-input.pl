@@ -64,11 +64,16 @@ while(<INI>) {
     if (/ttable-file\]/) {
         while(1) {	       
     	my $table_spec = <INI>;
-    	if ($table_spec !~ /^([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
+    	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
     	    print INI_OUT $table_spec;
     	    last;
     	}
-    	my ($source_factor,$t,$w,$file) = ($1,$2,$3,$4);
+    	my ($phrase_table_impl,$source_factor,$t,$w,$file) = ($1,$2,$3,$4,$5);
+
+        if ($phrase_table_impl ne "0") {  # Memory
+            print INI_OUT $table_spec;
+            next;
+        }
 
     	chomp($file);
     	push @TABLE, $file;
@@ -78,7 +83,7 @@ while(<INI>) {
         $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
         $new_name .= ".$cnt";
         $new_name_used{$new_name} = 1;
-    	print INI_OUT "$source_factor $t $w $new_name\n";
+    	print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
