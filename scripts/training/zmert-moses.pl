@@ -431,10 +431,14 @@ if (defined $___JOBS) {
 
 my $zmert_decoder_cmd = "$SCRIPTS_ROOTDIR/training/zmert-decoder.pl";
 
+# number of factors that a given metric requires
+my $metric_num_factors = 1;	
+
 # SemPOS metric requires 2 parameters specifying position of t_lemma and sempos factor
 # e.g. for t_lemma|sempos|factor3|factor4|... the values are 0 and 1 (default setting)
 if( $___METRIC =~ /^SemPOS$/) {
   $___METRIC .= " 0 1";
+  $metric_num_factors = 2;
 }
 # SemPOS_BLEU metric requires 7 parameters
 # 1) weight of SemPOS 2) weight of BLEU 
@@ -443,6 +447,7 @@ if( $___METRIC =~ /^SemPOS$/) {
 # 7) index of factor to compute BLEU on
 elsif( $___METRIC =~ /^SemPOS_BLEU$/) {
   $___METRIC .= " 1 1 1 2 4 closest 0";
+  $metric_num_factors = 3;
 }
 elsif( $___METRIC =~ /^BLEU$/) {
   $___METRIC .= " 4 closest";
@@ -584,23 +589,29 @@ FILE_EOF
 if( "$___EXTRACT_SEMPOS" =~ /factors/) {
   print DECODER_CMD <<"FILE_EOF";
 my (undef, \$args) = split( /:/, "$___EXTRACT_SEMPOS");
+my \$factor_count = $metric_num_factors;
 FILE_EOF
 print DECODER_CMD <<'FILE_EOF';
-my ($form_index, $sempos_index) = split( /,/, $args, 2);
-my $max_index = ($form_index > $sempos_index) ? $form_index : $sempos_index;
+my @indices = split( /,/, $args);
+die "Specified only $#indices factors to extract but selected metric requires $factor_count factors" 
+  if( $#indices != $factor_count);
 while( my $line = <NBEST_ORIG>) {
   my @array = split( /\|\|\|/, $line);
   # remove feature names from the feature scores string
   $array[2] = extractScores( $array[2]);
-  # extract factor on position $factor_index
   my @tokens = split( /\s/, $array[1]); # split sentence into words
   $array[1] = "";
   foreach my $token (@tokens) {
     next if $token eq "";
     my @factors = split( /\|/, $token);
-    die "Cannot extract factors with index $form_index and $sempos_index from @factors"
-      if ($max_index > $#factors);
-    $array[1] .= join( "|", $factors[$form_index], $factors[$sempos_index])." ";
+    my $put_separator = 0;
+    foreach my $index (@indices) {
+      die "Cannot extract factor with index $index from '$token'" if ($index > $#factors);
+      $array[1] .= '|' if ($put_separator);	# separator between factors
+      $array[1] .= $factors[$index];
+      $put_separator = 1;
+    }
+    $array[1] .= " ";	# space between words
   }
   print NBEST join( '|||', @array);
 }
