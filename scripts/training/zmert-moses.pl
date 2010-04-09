@@ -380,6 +380,8 @@ else{
   $___CONFIG = "moses.ini";
 }
 
+$___CONFIG = ensure_full_path($___CONFIG);
+
 my $PARAMETERS;
 $PARAMETERS = $___DECODER_FLAGS;
 
@@ -407,7 +409,7 @@ my $LAMBDAS_FILE = ensure_full_path("finalWeights.txt");
 # prepare lauch command with all parameters
 my $decoder_cmd;
 if (defined $___JOBS) {
-  $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters '$queue_flags' -decoder-parameters '$PARAMETERS' -n-best-file $nbest_file -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
+  $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters '$queue_flags' -decoder-parameters '$PARAMETERS' -n-best-list $nbest_file $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
 } else {
   $decoder_cmd = "$___DECODER $PARAMETERS -config $___CONFIG -inputtype $___INPUTTYPE -n-best-list $nbest_file $___N_BEST_LIST_SIZE -i $___DEV_F > moses.out";
 }
@@ -427,13 +429,18 @@ use strict;
 if( !defined \$ENV{"TMT_ROOT"}) {
   die "Cannot find TMT_ROOT. Is TectoMT really initialized?";
 }
+my \$TMT_ROOT = \$ENV{"TMT_ROOT"};
 
 my \$srunblocks = "\$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
 my \$scenario_file = "scenario"; # scenario must be in the same directory
 my \$sentence_placeholder = "_SENTENCE_PLACEHOLDER_";
 
+my \$iteration;
+
 # extract feature weights from last zmert iteration (stored in \$decoder_cfg_inter)
-print "Updating decoder config file from file \$decoder_cfg_inter";
+print "Updating decoder config file from file $decoder_cfg_inter\n";
+
+my \$moses_ini = "$___CONFIG";
 
 open( IN, "$decoder_cfg_inter") or die "Cannot open file $decoder_cfg_inter (reading updated lambdas)";
 FILE_EOF
@@ -448,16 +455,17 @@ while( my $line = <IN>) {
   if( $name =~ /iteration/) {
     $iteration = $val;
   } else {
-    push( $val, @{$lambdas{$name}});
+    push( @{$lambdas{$name}}, $val);
   }
 }
 close(IN);
 
+
 my $moses_ini_old = "$moses_ini.run$iteration";
 safesystem("mv $moses_ini $moses_ini_old");
 # update moses.ini
-open( INI_OLD, $moses_ini_old) or die "Cannot open config file $moses_ini_old";
-open( INI, $moses_ini) or die "Cannot open config file $moses_ini";
+open( INI_OLD, "<$moses_ini_old") or die "Cannot open config file $moses_ini_old";
+open( INI, ">$moses_ini") or die "Cannot open config file $moses_ini";
 while( my $line = <INI_OLD>) {
   if( $line =~ m/^\[weight-(.+)\]$/) {
     my $name = $1;
@@ -477,11 +485,11 @@ FILE_EOF
 
 print DECODER_CMD <<"FILE_EOF";
 print "Executing: $decoder_cmd";
-safesystem("$decoder_cmd");
+safesystem("$decoder_cmd") or die "Failed to execute $decoder_cmd";
 
 # update iteration number in intermediate config file
 ++\$iteration;
-safesystem("sed -i 's/^iteration \\d+/iteration \$iteration/' $decoder_cfg_inter");
+safesystem("sed -i 's/^iteration \\\\d+/iteration \$iteration/' $decoder_cfg_inter");
 
 # modify the nbest-list to conform the zmert required format
 # <i> ||| <candidate_translation> ||| featVal_1 featVal_2 ... featVal_m
@@ -502,15 +510,15 @@ foreach( my \$line = <NBEST_ORIG>) {
   pop( \@array); # remove sentence score
   if( "$___EXTRACT_SEMPOS" =~ /none/) {
     # do nothing
-  } else if( "$___EXTRACT_SEMPOS" =~ /moses/) {
+  } elsif( "$___EXTRACT_SEMPOS" =~ /moses/) {
     # extract factor on position \$factor_index
     my (undef, \$factor_index) = split( /:/, "$___EXTRACT_SEMPOS");
     my \@tokens = split( /\\s/, \$array[1]); # split sentence into words
     foreach( my \$token = \@tokens) {
       my \@factors = split( /|/, \$token);
-      \$array[1] = join( "\\s", \$factors[0], \$factors[\$factor_index]);
+      \$array[1] = join( " ", \$factors[0], \$factors[\$factor_index]);
     }
-  } else if( "$___EXTRACT_SEMPOS" =~ /tmt/) {
+  } elsif( "$___EXTRACT_SEMPOS" =~ /tmt/) {
     # analyze sentence via TectoMT using scenario in file \$scerario_file
     print TMT "\$array[1]\\n";
     \$array[1] = \$sentence_placeholder;
@@ -532,7 +540,7 @@ if( "$___EXTRACT_SEMPOS" =~ /tmt/) {
     my \$len_new = `wc -l < $nbest_file.factored`; # get the number of analyzed sentences
     if( \$len_new == \$line_num) { 
       \$cont = 0; # we have all sentences analyzed -> stop
-    } else if( \$len_new > \$len) {
+    } elsif( \$len_new > \$len) {
       \$cont = 1; # we analyzed another sentence -> reset the counter
       \$len = \$len_new;
     } else {
@@ -583,42 +591,42 @@ safesystem("chmod a+x $decoder_cmd_file");
 open( ZMERT_CFG, ">$zmert_cfg") or die "Cannot open $zmert_cfg";
 
 # FILES
-print ZMERT_CFG "-dir $___WORKING_DIR\n";	# working path (relative to the lauch path)
-print ZMERT_CFG "-r $___DEV_E\n";	# file(s) containing references
-print ZMERT_CFG "-rps ".scalar(@references)."\n";	# number of references per sentence
-# print ZMERT_CFG "-txtNrm 1\n";	# how should text be normalized
-print ZMERT_CFG "-p $opt_params\n";	# file containig parameter names, initial values, ranges
-print ZMERT_CFG "-fin $___LAMBDAS_OUT\n" if(defined $___LAMBDAS_OUT);	# file where the final weight vector is written
+print ZMERT_CFG "-dir\t$___WORKING_DIR\n";	# working path (relative to the lauch path)
+print ZMERT_CFG "-r\t$___DEV_E\n";	# file(s) containing references
+print ZMERT_CFG "-rps\t".scalar(@references)."\n";	# number of references per sentence
+# print ZMERT_CFG "-txtNrm\t1\n";	# how should text be normalized
+print ZMERT_CFG "-p\t$opt_params\n";	# file containig parameter names, initial values, ranges
+print ZMERT_CFG "-fin\t$___LAMBDAS_OUT\n" if(defined $___LAMBDAS_OUT);	# file where the final weight vector is written
 
 # MERT CONFIGURATION
-print ZMERT_CFG "-m $___METRIC\n";	
-# print ZMERT_CFG "-maxIt $MAX_MERT_ITER\n";	# maximum number of MERT iterations
-# print ZMERT_CFG "-prevIt $PREV_MERT_ITER\n";	
+print ZMERT_CFG "-m\t$___METRIC\n";	
+# print ZMERT_CFG "-maxIt\t$MAX_MERT_ITER\n";	# maximum number of MERT iterations
+# print ZMERT_CFG "-prevIt\t$PREV_MERT_ITER\n";	
 # number of iteration before considering an early exit
-# print ZMERT_CFG "-minIt $MIN_MERT_ITER\n";	
+# print ZMERT_CFG "-minIt\t$MIN_MERT_ITER\n";	
 # number of consecutive iterations that must satisfy some early stopping 
 # criterion to cause an early exit
-# print ZMERT_CFG "-stopIt $STOP_MIN_ITER\n";	
+# print ZMERT_CFG "-stopIt\t$STOP_MIN_ITER\n";	
 # early exit criterion: no weight changes by more than $LAMBDA_CHANGE; 
 # default value: -1 (this criterion is never investigated)
-# print ZMERT_CFG "-stopSig $LAMBDA_CHANGE\n";
+# print ZMERT_CFG "-stopSig\t$LAMBDA_CHANGE\n";
 # save intermediate decoder config files (1) or decoder outputs (2) or both (3) or neither (0)
-# print ZMERT_CFG "-save $SAVE_INTER\n";
-# print ZMERT_CFG "-ipi $INITS_PER_ITER\n";	# number of intermediate initial points per iteration
-# print ZMERT_CFG "-opi $ONCE_PER_ITER\n";	# modify a parameter only once per iteration;
-# print ZMERT_CFG "-rand $RAND_INIT\n";		# choose initial points randomly
-print ZMERT_CFG "-seed $___PREDICTABLE_SEEDS\n" if($___PREDICTABLE_SEEDS);	# initialize the random number generator
+# print ZMERT_CFG "-save\t$SAVE_INTER\n";
+# print ZMERT_CFG "-ipi\t$INITS_PER_ITER\n";	# number of intermediate initial points per iteration
+# print ZMERT_CFG "-opi\t$ONCE_PER_ITER\n";	# modify a parameter only once per iteration;
+# print ZMERT_CFG "-rand\t$RAND_INIT\n";		# choose initial points randomly
+print ZMERT_CFG "-seed\t$___PREDICTABLE_SEEDS\n" if($___PREDICTABLE_SEEDS);	# initialize the random number generator
 
 # DECODER SPECIFICATION
-print ZMERT_CFG "-cmd $decoder_cmd_file\n";	# name of file containing commands to run the decoder
-print ZMERT_CFG "-decOut $nbest_file\n";	# name of the n-best file produced by the decoder
-# print ZMERT_CFG "-decExit $DECODER_EXIT_CODE\n";	# value returned by decoder after successful exit
-print ZMERT_CFG "-dcfg $decoder_cfg_inter\n";		# name of intermediate decoder configuration file
-print ZMERT_CFG "-N $___N_BEST_LIST_SIZE\n";	
+print ZMERT_CFG "-cmd\t$decoder_cmd_file\n";	# name of file containing commands to run the decoder
+print ZMERT_CFG "-decOut\t$nbest_file\n";	# name of the n-best file produced by the decoder
+# print ZMERT_CFG "-decExit\t$DECODER_EXIT_CODE\n";	# value returned by decoder after successful exit
+print ZMERT_CFG "-dcfg\t$decoder_cfg_inter\n";		# name of intermediate decoder configuration file
+print ZMERT_CFG "-N\t$___N_BEST_LIST_SIZE\n";	
 
 # OUTPUT SPECIFICATION
-print ZMERT_CFG "-v $___MERT_VERBOSE\n" if($___MERT_VERBOSE != 1);	# zmert verbosity level (0-2)
-print ZMERT_CFG "-decV $___DECODER_VERBOSE\n" if($___DECODER_VERBOSE);	# decoder output printed (1) or ignored (0)
+print ZMERT_CFG "-v\t$___MERT_VERBOSE\n" if($___MERT_VERBOSE != 1);	# zmert verbosity level (0-2)
+print ZMERT_CFG "-decV\t$___DECODER_VERBOSE\n" if($___DECODER_VERBOSE);	# decoder output printed (1) or ignored (0)
 
 close( ZMERT_CFG);
 
@@ -655,7 +663,7 @@ foreach $name (keys %used_triples) {
     ++$num;
   }
 }
-print DEC_CFG "iteration = 1\n";
+print DEC_CFG "iteration 1\n";
 close( DEC_CFG);
 
 # launch zmert
