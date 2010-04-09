@@ -653,7 +653,7 @@ while( my $line = <NBEST_ORIG>) {
   my @array = split( /\|\|\|/, $line);
   # remove feature names from the feature scores string
   $array[2] = extractScores( $array[2]);
-  print NBEST join( '|||', @array)."\n";
+  print NBEST join( '|||', @array);
 }
 FILE_EOF
 
