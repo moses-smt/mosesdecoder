@@ -18,11 +18,11 @@ while (<INI>) {
   if (/^[0-9]/) {
     if ($section eq "ttable-file" || $section eq "lmodel-file") {
       chomp;
-      my ($a, $b, $c, $fn) = split / /;
+      my ($a, $b, $c, $d, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
       die "File not found or empty: $fn (interpreted as $abs)"
         if ! -s $abs;
-      $_ = "$a $b $c $abs\n";
+      $_ = "$a $b $c $d $abs\n";
     }
     if ($section eq "generation-file") {
       chomp;

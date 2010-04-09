@@ -24,7 +24,7 @@ while (<INI>) {
   if (/^[0-9]/) {
     if ($section eq "ttable-file") {
       chomp;
-      my ($src, $tgt, $c, $fn) = split / /;
+      my ($phrase_table_impl, $src, $tgt, $c, $fn) = split / /;
       # $fn = ensure_relative_to_origin($fn, $ini);
       my $ttstats = get_ttable_stats($fn);
       print_ttable_stats($src, $tgt, $fn, $ttstats);

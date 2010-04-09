@@ -39,14 +39,14 @@ while (<INI>) {
   if (/^[0-9]/) {
     if ($section eq "ttable-file" || $section eq "lmodel-file") {
       chomp;
-      my ($a, $b, $c, $fn) = split / /;
+      my ($a, $b, $c, $d, $fn) = split / /;
       $cnt{$section}++;
       $fn = fixpath($fn);
       $fn = ensure_relative_from_origin($fn, $ini);
       $fn = ensure_exists_or_gzipped_exists($fn);
       my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
       clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
-      $_ = "$a $b $c ./$section.$cnt{$section}$suffix\n";
+      $_ = "$a $b $c $d ./$section.$cnt{$section}$suffix\n";
     }
     if ($section eq "generation-file") {
       chomp;

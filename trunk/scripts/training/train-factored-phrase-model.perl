@@ -1598,7 +1598,7 @@ sub create_ini {
      $ff =~ s/\-/ /;
      my $file = "$___MODEL_DIR/phrase-table".($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-     print INI "$ff 5 $file\n";
+     print INI "0 $ff 5 $file\n";
    }
    if ($num_of_ttables != $stepsused{"T"}) {
      print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$num_of_ttables\n";
