@@ -647,6 +647,13 @@ die "Error: Sent $line_count sentences to analyze but got only $line_count_check
 
 FILE_EOF
 
+} elsif ($___EXTRACT_SEMPOS eq "none") {
+print DECODER_CMD <<'FILE_EOF';
+  while( my $line = <NBEST_ORIG>) {
+    print NBEST $line;
+  }
+FILE_EOF
+
 } else {
   die "Unknown type of factor extraction: $___EXTRACT_SEMPOS";
 }
