@@ -18,16 +18,6 @@ my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-if( !defined $ENV{"TMT_ROOT"}) {
-  die "Cannot find TMT_ROOT. Is TectoMT really initialized?";
-}
-my $TMT_ROOT = $ENV{"TMT_ROOT"};
-
-my $srunblocks = "$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
-my $scenario_file = "scenario"; 
-my $srunblocks_cmd = "$srunblocks $scenario_file czech_source_sentence factored_output";
-
-
 # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
 # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
 # but the translation model has currently 5 features
@@ -222,6 +212,18 @@ Options:
 ";
   exit 1;
 }
+
+# ensure we know where is tectomt, if we need it
+if( !defined $ENV{"TMT_ROOT"} && $___EXTRACT_SEMPOS =~ /tmt/) {
+  die "Cannot find TMT_ROOT. Is TectoMT really initialized?";
+}
+my $TMT_ROOT = $ENV{"TMT_ROOT"};
+
+my $srunblocks = "$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
+my $scenario_file = "scenario"; 
+my $srunblocks_cmd = "$srunblocks $scenario_file czech_source_sentence factored_output";
+
+
 
 # update variables if input is confusion network
 if ($___INPUTTYPE == 1)
