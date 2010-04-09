@@ -649,9 +649,12 @@ FILE_EOF
 
 } elsif ($___EXTRACT_SEMPOS eq "none") {
 print DECODER_CMD <<'FILE_EOF';
-  while( my $line = <NBEST_ORIG>) {
-    print NBEST $line;
-  }
+while( my $line = <NBEST_ORIG>) {
+  my @array = split( /\|\|\|/, $line);
+  # remove feature names from the feature scores string
+  $array[2] = extractScores( $array[2]);
+  print NBEST join( '|||', @array)."\n";
+}
 FILE_EOF
 
 } else {
