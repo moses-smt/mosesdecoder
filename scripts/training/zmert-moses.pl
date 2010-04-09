@@ -221,7 +221,7 @@ my $TMT_ROOT = $ENV{"TMT_ROOT"};
 
 my $srunblocks = "$TMT_ROOT/tools/srunblocks_streaming/srunblocks";
 my $scenario_file = "scenario"; 
-my $srunblocks_cmd = "$srunblocks $scenario_file czech_source_sentence factored_output";
+my $srunblocks_cmd = "$srunblocks --errorlevel=FATAL $scenario_file czech_source_sentence factored_output";
 
 
 
@@ -744,7 +744,7 @@ if( $___EXTRACT_SEMPOS =~ /tmt/) {
     open( REF_IN, "<$ref") or die "Cannot open $ref";
     my $ref_factored = "$ref.factored.$part";
     push( @references_factored, $ref_factored);
-    open( REF_FACTORED, "|$srunblocks_cmd > $ref_factored 2>/dev/null");
+    open( REF_FACTORED, "|$srunblocks_cmd > $ref_factored");
     while( my $line = <REF_IN>) {
       # analyze sentence via TectoMT using scenario in file $scerario_file
       print REF_FACTORED $line;
