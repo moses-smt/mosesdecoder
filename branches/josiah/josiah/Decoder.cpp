@@ -351,7 +351,7 @@ namespace Josiah {
     return forwardScore[0];
   } 
   
-  double MosesDecoder::GetTranslationScore(const vector <const Factor *>& target) const
+  double MosesDecoder::GetTranslationScore(const vector <const Factor *>& target, bool & found) const
   {
     
    std::map< int, int > prefix;
@@ -452,11 +452,13 @@ namespace Josiah {
    const HypothesisStack &finalStack = *hypoStackColl.back();
    double targetScore = -10000;
    
+   found = false; 
    HypothesisStack::const_iterator iterHypo;
    for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo) {
      const Hypothesis *hypo = *iterHypo;
      if (isPrefix.find(hypo->GetId()) != isPrefix.end()) {
        targetScore = log_sum(targetScore, scores[hypo->GetId()]);  
+       found = true;
      }    
    }
    
