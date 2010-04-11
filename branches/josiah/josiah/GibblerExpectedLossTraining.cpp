@@ -162,7 +162,7 @@ ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vec
 }
 
 ScoreComponentCollection ExactExpectedLossCollector::getFeatureExpectations() const {
-  IFVERBOSE(2) { 
+  IFVERBOSE(0) { 
     cerr << "distribution: ";
     copy(m_exactProbs.begin(),m_exactProbs.end(),ostream_iterator<double>(cerr," "));
     cerr << endl;
@@ -170,7 +170,7 @@ ScoreComponentCollection ExactExpectedLossCollector::getFeatureExpectations() co
   //do calculation at double precision to try to maintain accuracy
   vector<double> sum(StaticData::Instance().GetTotalScoreComponents());
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
-    ScoreComponentCollection fv = m_rbFeatureVectors[i];
+    ScoreComponentCollection fv = m_featureVectors[i];
     for (size_t j = 0; j < fv.size(); ++j) {
         sum[j] += fv[j]* m_exactProbs[i];
     }
@@ -214,7 +214,7 @@ void ExactExpectedLossCollector::ShrinkByProb(size_t newSize) {
   ProbGreaterThan comparator;
   nth_element(exactProbs.begin(), exactProbs.begin() + newSize, exactProbs.end(), comparator);
   
-  IFVERBOSE(2) {
+  IFVERBOSE(0) {
     cerr << "retained derivations: ";
     for (size_t i = 0; i < newSize; ++i) {
       cerr << exactProbs[i].second << " ";
@@ -287,7 +287,7 @@ float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradi
   ScoreComponentCollection feature_expectations = getFeatureExpectations(); //
 
 
-  MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
+  MPI_VERBOSE(0,"FEXP: " << feature_expectations << endl)
   
   vector<float> w;
   GetFeatureWeights(&w);
