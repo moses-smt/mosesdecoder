@@ -91,7 +91,7 @@ class MosesDecoder : public virtual Decoder {
     virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
     void PrintNBest(std::ostream& out) const;
     double CalcZ() ;
-    double GetTranslationScore(const std::vector <const Moses::Factor *>& target) const;
+    double GetTranslationScore(const std::vector <const Moses::Factor *>& target, bool & found) const;
   protected:
     std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;

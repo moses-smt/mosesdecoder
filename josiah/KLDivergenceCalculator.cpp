@@ -47,14 +47,15 @@ namespace Josiah {
     float kl = 0;
     for (size_t i = 0; i < nbest.size(); ++i) {
       float estimatedProb = log(nbest[i].second);
-      float trueProb = m_klDecoder->GetTranslationScore(*(nbest[i].first)) - m_Z;
+      bool found = false;
+      float trueProb = m_klDecoder->GetTranslationScore(*(nbest[i].first), found) - m_Z;
       IFVERBOSE(0) {
         cerr << *(nbest[i].first) << " ||| " << nbest[i].second << " ||| " << exp(trueProb) << endl;
         cerr << "KL Cont: " <<  nbest[i].second * (estimatedProb - trueProb) << endl;
       }
-      
-      kl += nbest[i].second * (estimatedProb - trueProb);
-      
+      if (found) {
+        kl += nbest[i].second * (estimatedProb - trueProb);
+      }
     }
     return kl;
   }

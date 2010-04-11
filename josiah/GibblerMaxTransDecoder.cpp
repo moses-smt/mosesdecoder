@@ -299,7 +299,8 @@ namespace Josiah
     vector<pair<const Translation*, float> >::iterator it; 
     VERBOSE(1,"Hypothesis set: " << endl);
     for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it) {
-      float trueTransScore = exp(klDecoder->GetTranslationScore(*it->first) - trueZ);;
+      bool found;
+      float trueTransScore = exp(klDecoder->GetTranslationScore(*it->first, found) - trueZ);;
       VERBOSE(1, "translation: " <<   ToString(*it->first) << " " << (it->second) << " " << trueTransScore << endl);
       it->second = trueTransScore;
     }
@@ -489,7 +490,8 @@ namespace Josiah
     //Now calculate true p(e|f) for all translations samples
     VERBOSE(1,"Hypothesis set: " << endl);
     for (it = topNTranslations.begin(); it != topNTranslations.end(); ++it) {
-      float trueTransScore = exp(klDecoder->GetTranslationScore(*it->first) - trueZ);;
+      bool found;
+      float trueTransScore = exp(klDecoder->GetTranslationScore(*it->first, found) - trueZ);;
       VERBOSE(1, "translation: " <<   ToString(*it->first) << " " << (it->second) << " " << trueTransScore << endl);
       it->second = trueTransScore;
     }
