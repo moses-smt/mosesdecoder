@@ -4,6 +4,8 @@
 #include "InputFileStream.h"
 #include "UserMessage.h"
 
+using namespace std;
+
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const string &filePath,

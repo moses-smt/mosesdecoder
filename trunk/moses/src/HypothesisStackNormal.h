@@ -42,7 +42,7 @@ public:
 protected:
 	float m_bestScore; /**< score of the best hypothesis in collection */
 	float m_worstScore; /**< score of the worse hypothesis in collection */
-	map< WordsBitmapID, float > m_diversityWorstScore; /**< score of worst hypothesis for particular source word coverage */
+	std::map< WordsBitmapID, float > m_diversityWorstScore; /**< score of worst hypothesis for particular source word coverage */
 	float m_beamWidth; /**< minimum score due to threashold pruning */
 	size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
 	size_t m_minHypoStackDiversity; /**< minimum number of hypothesis with different source word coverage */
@@ -63,7 +63,7 @@ protected:
 public:
 	float GetWorstScoreForBitmap( WordsBitmapID id ) {
 		if (m_diversityWorstScore.find( id ) == m_diversityWorstScore.end())
-			return -numeric_limits<float>::infinity();
+			return -std::numeric_limits<float>::infinity();
 		return m_diversityWorstScore[ id ];
 	}
 	float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
