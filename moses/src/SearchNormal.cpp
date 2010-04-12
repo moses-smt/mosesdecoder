@@ -2,6 +2,8 @@
 #include "Timer.h"
 #include "SearchNormal.h"
 
+using namespace std;
+
 namespace Moses
 {
 /**

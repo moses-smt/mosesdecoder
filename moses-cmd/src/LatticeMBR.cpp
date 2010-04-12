@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <set>
 
+using namespace std;
+
 size_t bleu_order = 4;
 float UNKNGRAMLOGPROB = -20;
 void GetOutputWords(const TrellisPath &path, vector <Word> &translation){

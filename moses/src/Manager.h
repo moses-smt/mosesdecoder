@@ -134,7 +134,7 @@ public:
    *For Lattice MBR 
   */
   void GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
-                                     std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, set < const Hypothesis* > >* pOutgoingHyps, vector< float>* pFwdBwdScores) const;
+                                     std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, std::vector< float>* pFwdBwdScores) const;
   
 };
 

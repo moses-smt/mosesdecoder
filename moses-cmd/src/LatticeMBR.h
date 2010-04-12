@@ -34,9 +34,9 @@ T log_sum (T log_a, T log_b)
 class Edge;
 
 typedef std::vector< const Hypothesis *> Lattice;
-typedef vector<const Edge*> Path; 
-typedef map<Path, size_t> PathCounts;
-typedef map<Phrase, PathCounts > NgramHistory;
+typedef std::vector<const Edge*> Path; 
+typedef std::map<Path, size_t> PathCounts;
+typedef std::map<Phrase, PathCounts > NgramHistory;
 
 class Edge {
    const Hypothesis* m_tailNode;
@@ -70,9 +70,9 @@ class Edge {
     return m_targetPhrase;
   } 
   
-  friend ostream& operator<< (ostream& out, const Edge& edge); 
+  friend std::ostream& operator<< (std::ostream& out, const Edge& edge); 
   
-  const NgramHistory&  GetNgrams(  map<const Hypothesis*, vector<Edge> > & incomingEdges) ;
+  const NgramHistory&  GetNgrams(  std::map<const Hypothesis*, std::vector<Edge> > & incomingEdges) ;
   
   bool operator < (const Edge & compare) const;
   
@@ -95,13 +95,13 @@ class NgramScores {
         void addScore(const Hypothesis* node, const Phrase& ngram, float score);
         
         /** Iterate through ngrams for selected node */
-        typedef map<const Phrase*, float>::const_iterator NodeScoreIterator;
+        typedef std::map<const Phrase*, float>::const_iterator NodeScoreIterator;
         NodeScoreIterator nodeBegin(const Hypothesis* node);
         NodeScoreIterator nodeEnd(const Hypothesis* node);
         
     private:
-        set<Phrase> m_ngrams;
-        map<const Hypothesis*, map<const Phrase*, float> > m_scores;
+        std::set<Phrase> m_ngrams;
+        std::map<const Hypothesis*, std::map<const Phrase*, float> > m_scores;
 };
 
 
@@ -110,18 +110,18 @@ class LatticeMBRSolution {
     public:
         /** Read the words from the path */
         LatticeMBRSolution(const TrellisPath& path, bool isMap);
-        const vector<float>& GetNgramScores() const {return m_ngramScores;}
-        const vector<Word>& GetWords() const {return m_words;}
+        const std::vector<float>& GetNgramScores() const {return m_ngramScores;}
+        const std::vector<Word>& GetWords() const {return m_words;}
         float GetMapScore() const {return m_mapScore;}
         float GetScore() const {return m_score;}
         
         /** Initialise ngram scores */
-        void CalcScore(map<Phrase, float>& finalNgramScores, const vector<float>& thetas, float mapWeight);
+        void CalcScore(std::map<Phrase, float>& finalNgramScores, const std::vector<float>& thetas, float mapWeight);
     
     private:
-        vector<Word> m_words;
+        std::vector<Word> m_words;
         float m_mapScore;
-        vector<float> m_ngramScores;
+        std::vector<float> m_ngramScores;
         float m_score;
 };
 
@@ -131,17 +131,17 @@ struct LatticeMBRSolutionComparator {
     }
 };
 
-void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
-                    const vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity);
+void pruneLatticeFB(Lattice & connectedHyp, std::map < const Hypothesis*, std::set <const Hypothesis* > > & outgoingHyps, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges, 
+                    const std::vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity);
 
 //Use the ngram scores to rerank the nbest list, return at most n solutions
-void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, vector<LatticeMBRSolution>& solutions, size_t n);
+void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, std::vector<LatticeMBRSolution>& solutions, size_t n);
 //calculate expectated ngram counts, clipping at 1 (ie calculating posteriors) if posteriors==true.
-void calcNgramExpectations(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, float scale, map<Phrase,
+void calcNgramExpectations(Lattice & connectedHyp, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges, float scale, std::map<Phrase,
                             float>& finalNgramScores, bool posteriors);
-void GetOutputFactors(const TrellisPath &path, vector <Word> &translation);
-void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngrams);
+void GetOutputFactors(const TrellisPath &path, std::vector <Word> &translation);
+void extract_ngrams(const std::vector<Word >& sentence, std::map < Phrase, int >  & allngrams);
 bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b);
-vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);
-vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
+std::vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);
+std::vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
 #endif

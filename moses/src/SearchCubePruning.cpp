@@ -5,6 +5,8 @@
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
 
+using namespace std;
+
 namespace Moses
 {
 class BitmapContainerOrderer
