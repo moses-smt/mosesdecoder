@@ -109,7 +109,6 @@ char* fileNameExtract;
 bool orientationFlag = false;
 bool onlyOutputSpanInfo = false;
 bool noFileLimit = false;
-bool zipFiles = false;
 
 int main(int argc, char* argv[])
 {
@@ -118,7 +117,7 @@ int main(int argc, char* argv[])
   time_t starttime = time(NULL);
 
   if (argc < 6) {
-    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoFileLimit | --ProperConditioning]\n";
+    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoFileLimit]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
@@ -193,9 +192,6 @@ int main(int argc, char* argv[])
       }
 
       allModelsOutputFlag = true;
-    }
-    else if (strcmp(argv[i],"--ZipFiles") == 0) {
-      zipFiles = true;
     }
     else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
