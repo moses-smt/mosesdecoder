@@ -14,7 +14,7 @@
 
 using namespace std;
 
-vector<string> tokenize( char[] );
+extern vector<string> tokenize( const char*);
 
 typedef string WORD;
 typedef unsigned int WORD_ID;

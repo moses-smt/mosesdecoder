@@ -44,8 +44,6 @@ public:
   void load( char[] );
 };
 
-vector<string> tokenize( char [] );
-
 void processPhrasePairs( vector< PhraseAlignment > & );
 
 ofstream phraseTableFile;
