@@ -110,7 +110,6 @@ bool orientationFlag = false;
 bool onlyOutputSpanInfo = false;
 bool noFileLimit = false;
 bool zipFiles = false;
-bool properConditioning = false;
 
 int main(int argc, char* argv[])
 {
@@ -197,9 +196,6 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(argv[i],"--ZipFiles") == 0) {
       zipFiles = true;
-    }
-    else if (strcmp(argv[i],"--ProperConditioning") == 0) {
-      properConditioning = true;
     }
     else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
