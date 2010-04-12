@@ -21,6 +21,7 @@ my @tests = qw (
   lattice-distortion
   lexicalized-reordering
   lexicalized-reordering-cn
+  consensus-decoding-surface
 );
 #  xml-markup
 
