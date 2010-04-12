@@ -11,9 +11,6 @@
 
 namespace Moses {
 
-using std::vector;
-using std::pair;
-
 typedef std::vector<unsigned> vuint_t;
 
 class DynSuffixArray {

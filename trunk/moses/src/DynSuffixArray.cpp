@@ -1,6 +1,8 @@
 #include "DynSuffixArray.h"
 #include <iostream>
 
+using namespace std;
+
 namespace Moses {
 
 DynSuffixArray::DynSuffixArray() {
