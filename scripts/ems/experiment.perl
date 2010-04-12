@@ -1602,7 +1602,6 @@ sub define_training_extract_phrases {
     my ($extract, $aligned,$corpus) = &get_output_and_input($step_id);
     my $cmd = &get_training_setting(5);
     $cmd .= "-alignment-file $aligned ";
-    $cmd .= "-proper-conditioning " if &get("TRAINING:proper-conditioning");
     $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
     $cmd .= "-extract-file $extract ";
     $cmd .= "-corpus $corpus ";

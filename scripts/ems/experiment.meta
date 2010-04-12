@@ -317,7 +317,7 @@ parse-relax
 extract-phrases
 	in: word-alignment parse-relaxed-corpus
 	out: extracted-phrases
-	rerun-on-change: max-phrase-length translation-factors reordering-factors proper-conditioning hierarchical-rule-set extract-settings
+	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings
 	default-name: model/extract
 build-reordering
 	in: extracted-phrases

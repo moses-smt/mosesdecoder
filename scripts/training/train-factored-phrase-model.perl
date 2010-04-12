@@ -29,7 +29,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_FILE_LIMIT,$_CONTINUE,$_PROPER_CONDITIONING,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
+   $_FILE_LIMIT,$_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -88,7 +88,6 @@ $_HELP = 1
 		       'reordering-table=s' => \@_REORDERING_TABLE,
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
-		       'proper-conditioning' => \$_PROPER_CONDITIONING,
 		       'config=s' => \$_CONFIG,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
@@ -1166,7 +1165,6 @@ sub extract_phrase {
     }
     my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $___MAX_PHRASE_LENGTH";
     $cmd .= " --NoFileLimit" unless $_FILE_LIMIT;
-    $cmd .= " --ProperConditioning" if $_PROPER_CONDITIONING;
     $cmd .= " orientation" if $REORDERING_LEXICAL;
     $cmd .= get_extract_reordering_flags();
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
