@@ -105,10 +105,8 @@ ofstream extractFileInv;
 ofstream extractFileOrientation;
 int maxPhraseLength;
 int phraseCount = 0;
-char* fileNameExtract;
 bool orientationFlag = false;
 bool onlyOutputSpanInfo = false;
-bool noFileLimit = false;
 
 int main(int argc, char* argv[])
 {
@@ -117,21 +115,18 @@ int main(int argc, char* argv[])
   time_t starttime = time(NULL);
 
   if (argc < 6) {
-    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoFileLimit]\n";
+    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
   char* &fileNameF = argv[2];
   char* &fileNameA = argv[3];
-  fileNameExtract = argv[4];
+  string fileNameExtract = string(argv[4]);
   maxPhraseLength = atoi(argv[5]);
 
   for(int i=6;i<argc;i++) {
     if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
       onlyOutputSpanInfo = true;
-    }
-    else if (strcmp(argv[i],"--NoFileLimit") == 0) {
-      noFileLimit = true;
     }
     else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
       orientationFlag = true;
@@ -206,6 +201,7 @@ int main(int argc, char* argv[])
     wordType = REO_MSD;
   }
 
+  // open input files
   ifstream eFile;
   ifstream fFile;
   ifstream aFile;
@@ -215,6 +211,14 @@ int main(int argc, char* argv[])
   istream *eFileP = &eFile;
   istream *fFileP = &fFile;
   istream *aFileP = &aFile;
+
+  // open output files
+  string fileNameExtractInv = fileNameExtract + ".inv";
+  string fileNameExtractOrientation = fileNameExtract + ".o";
+  extractFile.open(fileNameExtract.c_str());
+  extractFileInv.open(fileNameExtractInv.c_str());
+  if (orientationFlag)
+    extractFileOrientation.open(fileNameExtractOrientation.c_str());
 
   int i=0;
   while(true) {
@@ -589,36 +593,6 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
     return;
   }
-
-  // new file every 1e7 phrases
-  if (phraseCount % 10000000 == 0 // new file every 1e7 phrases
-      && (!noFileLimit || phraseCount == 0)) { // only new partial file, if file limit
-
-    // close old file
-    if (!noFileLimit && phraseCount>0) {
-      extractFile.close();
-      extractFileInv.close();
-      if (orientationFlag) extractFileOrientation.close();
-    }
-
-    // construct file name
-    char part[10];
-    if (noFileLimit)
-      part[0] = '\0';
-    else
-      sprintf(part,".part%04d",phraseCount/10000000);
-    string fileNameExtractPart = string(fileNameExtract) + part;
-    string fileNameExtractInvPart = string(fileNameExtract) + ".inv" + part;
-    string fileNameExtractOrientationPart = string(fileNameExtract) + ".o" + part;
-
-
-    // open files
-    extractFile.open(fileNameExtractPart.c_str());
-    extractFileInv.open(fileNameExtractInvPart.c_str());
-    if (orientationFlag)
-      extractFileOrientation.open(fileNameExtractOrientationPart.c_str());
-  }
-
 
   phraseCount++;
 
