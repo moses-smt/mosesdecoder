@@ -5,6 +5,8 @@
 #include "TargetPhrase.h"
 #include <iomanip>
 
+using namespace std;
+
 namespace Moses {
 
 BilingualDynSuffixArray::BilingualDynSuffixArray():
