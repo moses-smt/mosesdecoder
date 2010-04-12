@@ -29,7 +29,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_FILE_LIMIT,$_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
+   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -52,7 +52,6 @@ $_HELP = 1
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
-		       'file-limit' => \$_FILE_LIMIT,
 		       'extract-file=s' => \$_EXTRACT_FILE,
 		       'alignment=s' => \$_ALIGNMENT,
 		       'alignment-file=s' => \$_ALIGNMENT_FILE,
@@ -1164,7 +1163,6 @@ sub extract_phrase {
      }
     }
     my $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $___MAX_PHRASE_LENGTH";
-    $cmd .= " --NoFileLimit" unless $_FILE_LIMIT;
     $cmd .= " orientation" if $REORDERING_LEXICAL;
     $cmd .= get_extract_reordering_flags();
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
@@ -1173,37 +1171,10 @@ sub extract_phrase {
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    if (! $_FILE_LIMIT) {
-      if (! $___DONT_ZIP) { 
-        safesystem("gzip $extract_file.o") if -e "$extract_file.o";
-        safesystem("gzip $extract_file.inv") or die("ERROR");
-        safesystem("gzip $extract_file") or die("ERROR");
-      }
-    }
-    else {
-      if (-e "$extract_file.o.part0001") {
-	if (! $___DONT_ZIP) {
-          safesystem("cat $extract_file.o.part* | gzip > $extract_file.o.gz") or die("ERROR");
-        }
-        else {
-	  safesystem("cat $extract_file.o.part* > $extract_file.o") or die("ERROR");
-        }
-        if (! $debug) { safesystem("rm -f $extract_file.o.part*") or die("ERROR");}
-      }
-      if (! $___DONT_ZIP) {
-        safesystem("cat $extract_file.part* | gzip > $extract_file.gz") or die("ERROR");
-      }
-      else {
-	safesystem("cat $extract_file.part* > $extract_file") or die("ERROR");
-      }
-      if (! $debug) { safesystem("rm -f $extract_file.part*") or die("ERROR");}
-      if (! $___DONT_ZIP) {
-        safesystem("cat $extract_file.inv.part* | gzip > $extract_file.inv.gz") or die("ERROR");
-      }
-      else {
-        safesystem("cat $extract_file.inv.part* > $extract_file.inv") or die("ERROR");
-      }
-      if (! $debug) { safesystem("rm -f $extract_file.inv.part*") or die("ERROR");}
+    if (! $___DONT_ZIP) { 
+      safesystem("gzip $extract_file.o") if -e "$extract_file.o";
+      safesystem("gzip $extract_file.inv") or die("ERROR");
+      safesystem("gzip $extract_file") or die("ERROR");
     }
 }
 
@@ -1268,28 +1239,10 @@ sub score_phrase_phrase_extract {
 
 	print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-	if ($_FILE_LIMIT) {
-	    # splitting
-	    my $part_count = &split_extract($extract);
-	    if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
-
-	    # processing extract -> phrase-table-half
-	    for(my $i=0;$i<$part_count;$i++) {
-		my $part = sprintf("%04d",$i);
-		my $cmd = "$PHRASE_SCORE $extract.part$part $lexical_file.$direction $ttable_file.half.$direction.part$part $inverse";
-		print $cmd."\n";
-		safesystem($cmd) or die "ERROR: Scoring of phrases failed";
-		if (! $debug) { safesystem("rm $extract.part$part") or die("ERROR");}
-	    }
-	    safesystem("cat $ttable_file.half.$direction.part* >$ttable_file.half.$direction") or die("ERROR");
-	    if (! $debug) { safesystem("rm -f $ttable_file.half.$direction.part*") or die("ERROR"); }
-	}
-	else {
-	    my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
-	    print $cmd."\n";
-	    safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
-	    if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
-	}
+        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+        print $cmd."\n";
+        safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
+        if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
     }
 
     # sorting inverse phrase-table-half to sync up with regular one
