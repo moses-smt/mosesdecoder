@@ -61,9 +61,11 @@ statscore_t Optimizer::GetStatScore(const Point& param)const{
 
 /**compute the intersection of 2 lines*/
 float intersect (float m1, float b1,float m2,float b2){
-  if(m1==m2)
-    return MAX_FLOAT;//parrallel lines
-  return((b2-b1)/(m1-m2));
+  float isect = ((b2-b1)/(m1-m2));
+  if (!isfinite(isect)) {
+      isect = MAX_FLOAT;
+  }
+  return isect;
 }
 
 map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap,float newt,pair<unsigned,unsigned> newdiff){
