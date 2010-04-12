@@ -23,8 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include "Ngram.h"
-#include "Vocab.h"
 
 #include "LanguageModelSRI.h"
 #include "TypeDef.h"
@@ -55,7 +53,7 @@ bool LanguageModelSRI::Load(const std::string &filePath
 												, float weight
 												, size_t nGramOrder)
 {
-	m_srilmVocab  = new Vocab();
+	m_srilmVocab  = new ::Vocab();
   m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
 	m_factorType 	= factorType;
 	m_weight			= weight;
