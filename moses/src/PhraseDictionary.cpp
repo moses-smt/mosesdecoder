@@ -24,7 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "PhraseDictionaryNewFormat.h"
 #include "PhraseDictionaryOnDisk.h"
+#ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
+#endif
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOption.h"
@@ -152,17 +154,21 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	}
 	else if (implementation == SuffixArray)
 	{   
-		PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent, this); 	 
-		if(!(pd && pd->Load(filePath, targetFile, alignmentsFile 	 
-												, weight, tableLimit 	 
-												, staticData.GetAllLM() 	 
-												, staticData.GetWeightWordPenalty()))) 	 
-		{ 	 
-			std::cerr << "FAILED TO LOAD\n" << endl; 	 
-			delete pd; 	 
-		} 	 
-		m_phraseDictionary.reset(pd); 	 
-		std::cerr << "Suffix array phrase table loaded" << std::endl;
+		#ifndef WIN32
+			PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent, this); 	 
+			if(!(pd && pd->Load(filePath, targetFile, alignmentsFile 	 
+													, weight, tableLimit 	 
+													, staticData.GetAllLM() 	 
+													, staticData.GetWeightWordPenalty()))) 	 
+			{ 	 
+				std::cerr << "FAILED TO LOAD\n" << endl; 	 
+				delete pd; 	 
+			} 	 
+			m_phraseDictionary.reset(pd); 	 
+			std::cerr << "Suffix array phrase table loaded" << std::endl;
+		#else
+			assert(false);
+		#endif
 	}
 }
   
