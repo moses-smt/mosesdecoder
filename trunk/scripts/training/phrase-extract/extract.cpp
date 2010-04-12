@@ -19,6 +19,10 @@
 #include <set>
 #include <vector>
 
+#include "extract.h"
+#include "SentenceAlignment.h"
+#include "tables-core.h"
+
 using namespace std;
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {			\
@@ -44,22 +48,11 @@ typedef pair<HPhraseVertex, HPhraseVertex> HPhrase;
 typedef vector < HPhrase > HPhraseVector;
 
 // SentenceVertices represents, from all extracted phrases, all vertices that have the same positioning
-// The key of the map is the English index and the value is a set of the foreign ones
+// The key of the map is the English index and the value is a set of the source ones
 typedef map <int, set<int> > HSentenceVertices;
 
 enum REO_MODEL_TYPE {REO_MSD, REO_MSLR, REO_MONO};
 enum REO_POS {LEFT, RIGHT, DLEFT, DRIGHT, UNKNOWN};
-
-class SentenceAlignment {
-public:
-  vector<string> english;
-  vector<string> foreign;
-  vector<int> alignedCountF;
-  vector< vector<int> > alignedToE;
-
-  int create( char[], char[], char[], int );
-  //  void clear() { delete(alignment); };
-};
 
 REO_POS getOrientWordModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
 			   int, int, int, int, int, int, int,
@@ -87,7 +80,6 @@ bool lt(int, int);
 void extractBase(SentenceAlignment &);
 void extract(SentenceAlignment &);
 void addPhrase(SentenceAlignment &, int, int, int, int, string &);
-vector<string> tokenize(char []);
 bool isAligned (SentenceAlignment &, int, int);
 
 bool allModelsOutputFlag = false;
@@ -103,6 +95,8 @@ REO_MODEL_TYPE hierType = REO_MSD;
 ofstream extractFile;
 ofstream extractFileInv;
 ofstream extractFileOrientation;
+std::set< std::string > targetLabelCollection, sourceLabelCollection;
+std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;
 int maxPhraseLength;
 int phraseCount = 0;
 bool orientationFlag = false;
@@ -113,6 +107,9 @@ int main(int argc, char* argv[])
   cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
 	<< "phrase extraction from an aligned parallel corpus\n";
   time_t starttime = time(NULL);
+
+  Global *global = new Global();
+  g_global = global;
 
   if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo]\n";
@@ -241,7 +238,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 
-    if (sentence.create( englishString, foreignString, alignmentString, i )) {
+    if (sentence.create( englishString, foreignString, alignmentString, i, *global)) {
       extract(sentence);
     }
     if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
@@ -258,8 +255,8 @@ int main(int argc, char* argv[])
 }
 
 void extract(SentenceAlignment &sentence) {
-  int countE = sentence.english.size();
-  int countF = sentence.foreign.size();
+  int countE = sentence.target.size();
+  int countF = sentence.source.size();
 
   HPhraseVector inboundPhrases;
 
@@ -278,7 +275,7 @@ void extract(SentenceAlignment &sentence) {
   bool relaxLimit = hierModel;
   bool buildExtraStructure = phraseModel || hierModel;
 
-  // check alignments for english phrase startE...endE
+  // check alignments for target phrase startE...endE
   // loop over extracted phrases which are compatible with the word-alignments
   for(int startE=0;startE<countE;startE++) {
     for(int endE=startE;
@@ -287,20 +284,20 @@ void extract(SentenceAlignment &sentence) {
 
       int minF = 9999;
       int maxF = -1;
-      vector< int > usedF = sentence.alignedCountF;
+      vector< int > usedF = sentence.alignedCountS;
       for(int ei=startE;ei<=endE;ei++) {
-	for(int i=0;i<sentence.alignedToE[ei].size();i++) {
-	  int fi = sentence.alignedToE[ei][i];
+	for(int i=0;i<sentence.alignedToT[ei].size();i++) {
+	  int fi = sentence.alignedToT[ei][i];
 	  if (fi<minF) { minF = fi; }
 	  if (fi>maxF) { maxF = fi; }
 	  usedF[ fi ]--;
 	}
       }
 
-      if (maxF >= 0 && // aligned to any foreign words at all
-	  (relaxLimit || maxF-minF < maxPhraseLength)) { // foreign phrase within limits
+      if (maxF >= 0 && // aligned to any source words at all
+	  (relaxLimit || maxF-minF < maxPhraseLength)) { // source phrase within limits
 
-	// check if foreign words are aligned to out of bound english words
+	// check if source words are aligned to out of bound target words
 	bool out_of_bounds = false;
 	for(int fi=minF;fi<=maxF && !out_of_bounds;fi++)
 	  if (usedF[fi]>0) {
@@ -310,17 +307,17 @@ void extract(SentenceAlignment &sentence) {
 
 	// cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n";
 	if (!out_of_bounds){
-	  // start point of foreign phrase may retreat over unaligned
+	  // start point of source phrase may retreat over unaligned
 	  for(int startF=minF;
 	      (startF>=0 &&
 	       (relaxLimit || startF>maxF-maxPhraseLength) && // within length limit
-	       (startF==minF || sentence.alignedCountF[startF]==0)); // unaligned
+	       (startF==minF || sentence.alignedCountS[startF]==0)); // unaligned
 	      startF--)
-	    // end point of foreign phrase may advance over unaligned
+	    // end point of source phrase may advance over unaligned
 	    for(int endF=maxF;
 		(endF<countF &&
 		 (relaxLimit || endF<startF+maxPhraseLength) && // within length limit
-		 (endF==maxF || sentence.alignedCountF[endF]==0)); // unaligned
+		 (endF==maxF || sentence.alignedCountS[endF]==0)); // unaligned
 		endF++){ // at this point we have extracted a phrase
 	      if(buildExtraStructure){ // phrase || hier
 		if(endE-startE < maxPhraseLength && endF-startF < maxPhraseLength){ // within limit
@@ -444,7 +441,7 @@ REO_POS getOrientPhraseModel (SentenceAlignment & sentence, REO_MODEL_TYPE model
 
   if((connectedLeftTop && !connectedRightTop) ||
      //(startE == 0 && startF == 0) ||
-     //(startE == sentence.english.size()-1 && startF == sentence.foreign.size()-1) ||
+     //(startE == sentence.target.size()-1 && startF == sentence.source.size()-1) ||
      ((it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
       it->second.find(startF-unit) != it->second.end()))
     return LEFT;
@@ -482,7 +479,7 @@ REO_POS getOrientHierModel (SentenceAlignment & sentence, REO_MODEL_TYPE modelTy
   if(phraseOrient == LEFT ||
      (connectedLeftTop && !connectedRightTop) ||
      //    (startE == 0 && startF == 0) ||
-     //(startE == sentence.english.size()-1 && startF == sentence.foreign.size()-1) ||
+     //(startE == sentence.target.size()-1 && startF == sentence.source.size()-1) ||
      ((it = inBottomRight.find(startE - unit)) != inBottomRight.end() &&
       it->second.find(startF-unit) != it->second.end()) || 
      ((it = outBottomRight.find(startE - unit)) != outBottomRight.end() &&
@@ -525,12 +522,12 @@ bool isAligned ( SentenceAlignment &sentence, int fi, int ei ){
     return true;
   if (ei <= -1 || fi <= -1)
     return false;
-  if (ei == sentence.english.size() && fi == sentence.foreign.size())
+  if (ei == sentence.target.size() && fi == sentence.source.size())
     return true;
-  if (ei >= sentence.english.size() || fi >= sentence.foreign.size())
+  if (ei >= sentence.target.size() || fi >= sentence.source.size())
     return false;
-  for(int i=0;i<sentence.alignedToE[ei].size();i++)
-    if (sentence.alignedToE[ei][i] == fi)
+  for(int i=0;i<sentence.alignedToT[ei].size();i++)
+    if (sentence.alignedToT[ei][i] == fi)
       return true;
   return false;
 }
@@ -586,7 +583,7 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType){
 }
 
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo) {
-  // foreign
+  // source
   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n";
 
   if (onlyOutputSpanInfo) {
@@ -597,31 +594,31 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   phraseCount++;
 
   for(int fi=startF;fi<=endF;fi++) {
-    extractFile << sentence.foreign[fi] << " ";
-    if (orientationFlag) extractFileOrientation << sentence.foreign[fi] << " ";
+    extractFile << sentence.source[fi] << " ";
+    if (orientationFlag) extractFileOrientation << sentence.source[fi] << " ";
   }
   extractFile << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
 
-  // english
+  // target
   for(int ei=startE;ei<=endE;ei++) {
-    extractFile << sentence.english[ei] << " ";
-    extractFileInv << sentence.english[ei] << " ";
-    if (orientationFlag) extractFileOrientation << sentence.english[ei] << " ";
+    extractFile << sentence.target[ei] << " ";
+    extractFileInv << sentence.target[ei] << " ";
+    if (orientationFlag) extractFileOrientation << sentence.target[ei] << " ";
   }
   extractFile << "|||";
   extractFileInv << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
 
-  // foreign (for inverse)
+  // source (for inverse)
   for(int fi=startF;fi<=endF;fi++)
-    extractFileInv << sentence.foreign[fi] << " ";
+    extractFileInv << sentence.source[fi] << " ";
   extractFileInv << "|||";
 
   // alignment
   for(int ei=startE;ei<=endE;ei++)
-    for(int i=0;i<sentence.alignedToE[ei].size();i++) {
-      int fi = sentence.alignedToE[ei][i];
+    for(int i=0;i<sentence.alignedToT[ei].size();i++) {
+      int fi = sentence.alignedToT[ei][i];
       extractFile << " " << fi-startF << "-" << ei-startE;
       extractFileInv << " " << ei-startE << "-" << fi-startF;
     }
@@ -634,75 +631,29 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (orientationFlag) extractFileOrientation << "\n";
 }
 
-// if proper conditioning, we need the number of times a foreign phrase occured
+// if proper conditioning, we need the number of times a source phrase occured
 void extractBase( SentenceAlignment &sentence ) {
-  int countF = sentence.foreign.size();
+  int countF = sentence.source.size();
   for(int startF=0;startF<countF;startF++) {
     for(int endF=startF;
         (endF<countF && endF<startF+maxPhraseLength);
         endF++) {
       for(int fi=startF;fi<=endF;fi++) {
-	extractFile << sentence.foreign[fi] << " ";
+	extractFile << sentence.source[fi] << " ";
       }
       extractFile << "|||" << endl;
     }
   }
 
-  int countE = sentence.english.size();
+  int countE = sentence.target.size();
   for(int startE=0;startE<countE;startE++) {
     for(int endE=startE;
         (endE<countE && endE<startE+maxPhraseLength);
         endE++) {
       for(int ei=startE;ei<=endE;ei++) {
-	extractFileInv << sentence.english[ei] << " ";
+	extractFileInv << sentence.target[ei] << " ";
       }
       extractFileInv << "|||" << endl;
     }
   }
-}
-
-int SentenceAlignment::create( char englishString[], char foreignString[], char alignmentString[], int sentenceID ) {
-  english = tokenize( englishString );
-  foreign = tokenize( foreignString );
-  //  alignment = new bool[foreign.size()*english.size()];
-  //  alignment = (bool**) calloc(english.size()*foreign.size(),sizeof(bool)); // is this right?
-
-  if (english.size() == 0 || foreign.size() == 0) {
-    cerr << "no english (" << english.size() << ") or foreign (" << foreign.size() << ") words << end insentence " << sentenceID << endl;
-    cerr << "E: " << englishString << endl << "F: " << foreignString << endl;
-    return 0;
-  }
-  // cout << "english.size = " << english.size() << endl;
-  // cout << "foreign.size = " << foreign.size() << endl;
-
-  // cout << "xxx\n";
-  for(int i=0; i<foreign.size(); i++) {
-    // cout << "i" << i << endl;
-    alignedCountF.push_back( 0 );
-  }
-  for(int i=0; i<english.size(); i++) {
-    vector< int > dummy;
-    alignedToE.push_back( dummy );
-  }
-  // cout << "\nscanning...\n";
-
-  vector<string> alignmentSequence = tokenize( alignmentString );
-  for(int i=0; i<alignmentSequence.size(); i++) {
-    int e,f;
-    // cout << "scaning " << alignmentSequence[i].c_str() << endl;
-    if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &f, &e)) {
-      cerr << "WARNING: " << alignmentSequence[i] << " is a bad alignment point in sentnce " << sentenceID << endl;
-      cerr << "E: " << englishString << endl << "F: " << foreignString << endl;
-      return 0;
-    }
-    // cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << f << ", " << e << endl;
-    if (e >= english.size() || f >= foreign.size()) {
-      cerr << "WARNING: sentence " << sentenceID << " has alignment point (" << f << ", " << e << ") out of bounds (" << foreign.size() << ", " << english.size() << ")\n";
-      cerr << "E: " << englishString << endl << "F: " << foreignString << endl;
-      return 0;
-    }
-    alignedToE[e].push_back( f );
-    alignedCountF[f]++;
-  }
-  return 1;
 }

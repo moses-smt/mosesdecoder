@@ -7,11 +7,11 @@ clean:
 .cpp.o:
 	$(CXX) -O6 -g -c $<
 
-extract: tables-core.o extract.o
-	$(CXX) tables-core.o extract.o -o extract
+extract: tables-core.o extract.o SyntaxTree.o XmlTree.o SentenceAlignment.o Global.o
+	$(CXX) $^ -o extract
 
 score: tables-core.o AlignmentPhrase.o score.o
-	$(CXX) tables-core.o AlignmentPhrase.o score.o -o score
+	$(CXX) $^ -o score
 
 statistics: tables-core.o AlignmentPhrase.o statistics.o
-	$(CXX) tables-core.o AlignmentPhrase.o statistics.o -o statistics
+	$(CXX) $^ -o statistics

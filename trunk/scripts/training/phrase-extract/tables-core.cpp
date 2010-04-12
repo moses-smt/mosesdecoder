@@ -17,7 +17,7 @@
               }
 
 // as in beamdecoder/tables.cpp
-vector<string> tokenize( char input[] ) {
+vector<string> tokenize( const char* input ) {
   vector< string > token;
   bool betweenWords = true;
   int start=0;
