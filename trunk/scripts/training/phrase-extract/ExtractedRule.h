@@ -18,26 +18,40 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef SENTENCE_ALIGNMENT_H_INCLUDED_
-#define SENTENCE_ALIGNMENT_H_INCLUDED_
+#ifndef EXTRACTEDRULE_H_INCLUDED_
+#define EXTRACTEDRULE_H_INCLUDED_
 
 #include <string>
-#include <vector>
 
-class SentenceAlignment
+// sentence-level collection of rules
+class ExtractedRule
 {
     public:
-        std::vector<std::string> target;
-        std::vector<std::string> source;
-        std::vector<int> alignedCountS;
-        std::vector<std::vector<int> > alignedToT;
+        std::string source;
+        std::string target;
+        std::string alignment;
+        std::string alignmentInv;
+        std::string orientation;
+        std::string orientationForward;
+        int startT;
+        int endT;
+        int startS;
+        int endS;
+        float count;
 
-        virtual void processTargetSentence(const char *);
-
-        virtual void processSourceSentence(const char *);
-
-        bool create(char targetString[], char sourceString[],
-                    char alignmentString[], int sentenceID);
+        ExtractedRule(int sT, int eT, int sS, int eS)
+          : source()
+          , target()
+          , alignment()
+          , alignmentInv()
+          , orientation()
+          , orientationForward()
+          , startT(sT)
+          , endT(eT)
+          , startS(sS)
+          , endS(eS)
+          , count(0)
+        {}
 };
 
 #endif
