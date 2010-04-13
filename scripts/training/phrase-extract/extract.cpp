@@ -12,14 +12,12 @@
 #include <string>
 #include <stdlib.h>
 #include <assert.h>
-#include <time.h>
 #include <cstring>
 
 #include <map>
 #include <set>
 #include <vector>
 
-#include "extract.h"
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 
@@ -95,10 +93,7 @@ REO_MODEL_TYPE hierType = REO_MSD;
 ofstream extractFile;
 ofstream extractFileInv;
 ofstream extractFileOrientation;
-std::set< std::string > targetLabelCollection, sourceLabelCollection;
-std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;
 int maxPhraseLength;
-int phraseCount = 0;
 bool orientationFlag = false;
 bool onlyOutputSpanInfo = false;
 
@@ -106,10 +101,6 @@ int main(int argc, char* argv[])
 {
   cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
 	<< "phrase extraction from an aligned parallel corpus\n";
-  time_t starttime = time(NULL);
-
-  Global *global = new Global();
-  g_global = global;
 
   if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo]\n";
@@ -238,7 +229,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 
-    if (sentence.create( englishString, foreignString, alignmentString, i, *global)) {
+    if (sentence.create( englishString, foreignString, alignmentString, i)) {
       extract(sentence);
     }
     if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
@@ -590,8 +581,6 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
     return;
   }
-
-  phraseCount++;
 
   for(int fi=startF;fi<=endF;fi++) {
     extractFile << sentence.source[fi] << " ";

@@ -17,27 +17,22 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#pragma once
-#ifndef SENTENCE_ALIGNMENT_H_INCLUDED_
-#define SENTENCE_ALIGNMENT_H_INCLUDED_
+#include "HoleCollection.h"
 
-#include <string>
-#include <vector>
+#include <algorithm>
 
-class SentenceAlignment
+void HoleCollection::SortSourceHoles()
 {
-    public:
-        std::vector<std::string> target;
-        std::vector<std::string> source;
-        std::vector<int> alignedCountS;
-        std::vector<std::vector<int> > alignedToT;
-
-        virtual void processTargetSentence(const char *);
-
-        virtual void processSourceSentence(const char *);
-
-        bool create(char targetString[], char sourceString[],
-                    char alignmentString[], int sentenceID);
-};
-
-#endif
+	assert(m_sortedSourceHoles.size() == 0);
+	
+	// add
+	HoleList::iterator iter;
+	for (iter = m_holes.begin(); iter != m_holes.end(); ++iter)
+	{
+		Hole &currHole = *iter;
+		m_sortedSourceHoles.push_back(&currHole);
+	}
+	
+	// sort
+	std::sort(m_sortedSourceHoles.begin(), m_sortedSourceHoles.end(), HoleSourceOrderer());
+}

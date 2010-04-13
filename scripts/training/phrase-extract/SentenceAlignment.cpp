@@ -1,50 +1,52 @@
-/*
- *  SentenceAlignment.cpp
- *  extract
- *
- *  Created by Hieu Hoang on 19/01/2010.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
- */
-#include <set>
-#include <map>
+/***********************************************************************
+  Moses - factored phrase-based language decoder
+  Copyright (C) 2010 University of Edinburgh
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ ***********************************************************************/
+
 #include "SentenceAlignment.h"
-#include "XmlTree.h"
+
+#include <map>
+#include <set>
+#include <string>
+
 #include "tables-core.h"
 
-using namespace std;
+void SentenceAlignment::processTargetSentence(const char * targetString)
+{
+    target = tokenize(targetString);
+}
 
-extern std::set< std::string > targetLabelCollection, sourceLabelCollection;
-extern std::map< std::string, int > targetTopLabelCollection, sourceTopLabelCollection;
+void SentenceAlignment::processSourceSentence(const char * sourceString)
+{
+    source = tokenize(sourceString);
+}
 
-int SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID, const Global &global ) {
-  // tokenizing English (and potentially extract syntax spans)
-  if (global.targetSyntax) {
-		string targetStringCPP = string(targetString);
-		ProcessAndStripXMLTags( targetStringCPP, targetTree, targetLabelCollection , targetTopLabelCollection );
-		target = tokenize( targetStringCPP.c_str() );
-		// cerr << "E: " << targetStringCPP << endl;
-  }
-  else {
-		target = tokenize( targetString );
-  }
-	
-  // tokenizing source (and potentially extract syntax spans)
-  if (global.sourceSyntax) {
-		string sourceStringCPP = string(sourceString);
-		ProcessAndStripXMLTags( sourceStringCPP, sourceTree, sourceLabelCollection , sourceTopLabelCollection );
-		source = tokenize( sourceStringCPP.c_str() );
-		// cerr << "F: " << sourceStringCPP << endl;
-  }
-  else {
-		source = tokenize( sourceString );
-  }
-	
+bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID) {
+    using namespace std;
+
+    // process sentence strings and store in target and source members.
+    processTargetSentence(targetString);
+    processSourceSentence(sourceString);
+
   // check if sentences are empty
   if (target.size() == 0 || source.size() == 0) {
     cerr << "no target (" << target.size() << ") or source (" << source.size() << ") words << end insentence " << sentenceID << endl;
     cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
-    return 0;
+    return false;
   }
 	
   // prepare data structures for alignments
@@ -64,16 +66,16 @@ int SentenceAlignment::create( char targetString[], char sourceString[], char al
     if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {
       cerr << "WARNING: " << alignmentSequence[i] << " is a bad alignment point in sentence " << sentenceID << endl; 
       cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
-      return 0;
+      return false;
     }
 		// cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << s << ", " << t << endl;
     if (t >= target.size() || s >= source.size()) { 
       cerr << "WARNING: sentence " << sentenceID << " has alignment point (" << s << ", " << t << ") out of bounds (" << source.size() << ", " << target.size() << ")\n";
       cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
-      return 0;
+      return false;
     }
     alignedToT[t].push_back( s );
     alignedCountS[s]++;
   }
-  return 1;
+  return true;
 }
