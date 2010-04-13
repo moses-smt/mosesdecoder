@@ -2,11 +2,11 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="score"
-	ProjectGUID="{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}"
-	RootNamespace="score"
+	Name="extract-rules"
+	ProjectGUID="{3C5CFAEC-6830-4491-9008-1C9E8C381C50}"
+	RootNamespace="extractrules"
 	Keyword="Win32Proj"
-	TargetFrameworkVersion="131072"
+	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
 		<Platform
@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -47,7 +47,6 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -64,8 +63,6 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -92,7 +89,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -115,11 +112,13 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -138,8 +137,6 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -174,15 +171,31 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\AlignmentPhrase.cpp"
+				RelativePath=".\extract-rules.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\score.cpp"
+				RelativePath=".\HoleCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SentenceAlignment.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SentenceAlignmentWithSyntax.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SyntaxTree.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\tables-core.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XmlTree.cpp"
 				>
 			</File>
 		</Filter>
@@ -192,11 +205,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\AlignmentPhrase.h"
+				RelativePath=".\Hole.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HoleCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SentenceAlignment.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SentenceAlignmentWithSyntax.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SyntaxTree.h"
 				>
 			</File>
 			<File
 				RelativePath=".\tables-core.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XmlTree.h"
 				>
 			</File>
 		</Filter>
