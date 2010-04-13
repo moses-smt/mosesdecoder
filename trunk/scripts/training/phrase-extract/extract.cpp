@@ -18,21 +18,12 @@
 #include <set>
 #include <vector>
 
+#include "SafeGetline.h"
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 
 using namespace std;
 
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) {			\
-    _IS.getline(_LINE, _SIZE, _DELIM);					\
-    if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear();		\
-    if (_IS.gcount() == _SIZE-1) {					\
-      cerr << "Line too long! Buffer overflow. Delete lines >="		\
-	   << _SIZE << " chars or raise LINE_MAX_LENGTH in phrase-extract/extract.cpp" \
-	   << endl;							\
-      exit(1);								\
-    }									\
-  }
 #define LINE_MAX_LENGTH 60000
 
 // HPhraseVertex represents a point in the alignment matrix
@@ -215,10 +206,10 @@ int main(int argc, char* argv[])
     char englishString[LINE_MAX_LENGTH];
     char foreignString[LINE_MAX_LENGTH];
     char alignmentString[LINE_MAX_LENGTH];
-    SAFE_GETLINE((*eFileP), englishString, LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((*eFileP), englishString, LINE_MAX_LENGTH, '\n', __FILE__);
     if (eFileP->eof()) break;
-    SAFE_GETLINE((*fFileP), foreignString, LINE_MAX_LENGTH, '\n');
-    SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((*fFileP), foreignString, LINE_MAX_LENGTH, '\n', __FILE__);
+    SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
     SentenceAlignment sentence;
     // cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line

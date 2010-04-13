@@ -39,21 +39,12 @@
 #include "Hole.h"
 #include "HoleCollection.h"
 #include "RuleExist.h"
+#include "SafeGetline.h"
 #include "SentenceAlignmentWithSyntax.h"
 #include "SyntaxTree.h"
 #include "tables-core.h"
 #include "XmlTree.h"
 
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
-                _IS.getline(_LINE, _SIZE, _DELIM); \
-                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
-                if (_IS.gcount() == _SIZE-1) { \
-                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
-                    << _SIZE << " chars or raise LINE_MAX_LENGTH in phrase-extract/extract-rules.cpp" \
-                    << endl; \
-                    exit(1); \
-                } \
-              }
 #define LINE_MAX_LENGTH 60000
 
 using namespace std;
@@ -267,10 +258,10 @@ int main(int argc, char* argv[])
         char targetString[LINE_MAX_LENGTH];
         char sourceString[LINE_MAX_LENGTH];
         char alignmentString[LINE_MAX_LENGTH];
-        SAFE_GETLINE((*tFileP), targetString, LINE_MAX_LENGTH, '\n');
+        SAFE_GETLINE((*tFileP), targetString, LINE_MAX_LENGTH, '\n', __FILE__);
         if (tFileP->eof()) break;
-        SAFE_GETLINE((*sFileP), sourceString, LINE_MAX_LENGTH, '\n');
-        SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n');
+        SAFE_GETLINE((*sFileP), sourceString, LINE_MAX_LENGTH, '\n', __FILE__);
+        SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
         SentenceAlignmentWithSyntax sentence(targetLabelCollection,
                 sourceLabelCollection,
                 targetTopLabelCollection,
