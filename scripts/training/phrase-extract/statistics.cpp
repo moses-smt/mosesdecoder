@@ -10,21 +10,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+
 #include "AlignmentPhrase.h"
+#include "SafeGetline.h"
 #include "tables-core.h"
 
 using namespace std;
 
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
-                _IS.getline(_LINE, _SIZE, _DELIM); \
-                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
-                if (_IS.gcount() == _SIZE-1) { \
-                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
-                    << _SIZE << " chars or raise LINE_MAX_LENGTH in phrase-extract/statistics.cpp" \
-                    << endl; \
-                    exit(1); \
-                } \
-              }
 #define LINE_MAX_LENGTH 10000
 
 class PhraseAlignment {
@@ -110,7 +102,7 @@ int main(int argc, char* argv[])
     if (extractFileP.eof()) break;
     if (++i % 100000 == 0) cerr << "." << flush;
     char line[LINE_MAX_LENGTH];    
-    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     //    if (fileCount>0)
     if (extractFileP.eof()) 
 			break;
@@ -326,7 +318,7 @@ void LexicalTable::load( char *fileName ) {
   while(true) {
     i++;
     if (i%100000 == 0) cerr << "." << flush;
-    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((*inFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (inFileP->eof()) break;
 
     vector<string> token = tokenize( line );

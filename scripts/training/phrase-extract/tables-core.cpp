@@ -1,20 +1,10 @@
 // $Id$
 //#include "beammain.h"
+#include "SafeGetline.h"
 #include "tables-core.h"
 
 #define TABLE_LINE_MAX_LENGTH 1000
 #define UNKNOWNSTR	"UNK"
-
-#define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
-                _IS.getline(_LINE, _SIZE, _DELIM); \
-                if(_IS.fail() && !_IS.bad() && !_IS.eof()) _IS.clear(); \
-                if (_IS.gcount() == _SIZE-1) { \
-                  cerr << "Line too long! Buffer overflow. Delete lines >=" \
-                    << _SIZE << " chars or raise TABLE_LINE_MAX_LENGTH in phrase-extract/tables-core.cpp" \
-                    << endl; \
-                    exit(1); \
-                } \
-              }
 
 // as in beamdecoder/tables.cpp
 vector<string> tokenize( const char* input ) {
@@ -95,7 +85,7 @@ void DTable::load( const string& fileName ) {
   int i=0;
   while(true) {
     i++;
-    SAFE_GETLINE((*inFileP), line, TABLE_LINE_MAX_LENGTH, '\n');
+    SAFE_GETLINE((*inFileP), line, TABLE_LINE_MAX_LENGTH, '\n', __FILE__);
     if (inFileP->eof()) break;
 
     vector<string> token = tokenize( line );
