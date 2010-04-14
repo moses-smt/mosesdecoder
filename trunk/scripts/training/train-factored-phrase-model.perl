@@ -28,6 +28,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
+   $_HIERARCHICAL,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
 
@@ -87,6 +88,7 @@ $_HELP = 1
 		       'reordering-table=s' => \@_REORDERING_TABLE,
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
+               'hierarchical' => \$_HIERARCHICAL,
 		       'config=s' => \$_CONFIG,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
@@ -178,6 +180,7 @@ my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
+my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/training/phrase-extract/consolidate";
 
 # utilities
 my $ZCAT = "gzip -cd";
@@ -1253,35 +1256,15 @@ sub score_phrase_phrase_extract {
     }
 
     # merging the two halves
+    print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    print STDERR "(6.6)  consolidating the two halves @ ".`date`;
-    open(F2E,"$ttable_file.half.f2e")
-	or die "ERROR: Can't read $ttable_file.half.f2e";
-    open(E2F,"$ttable_file.half.e2f.sorted")
-	or die "ERROR: Can't read $ttable_file.half.e2f.sorted";
-    open(TABLE,"| gzip >$ttable_file.gz")
-	or die "ERROR: Can't write $ttable_file.gz";
-    my $i=0;
-    my $mismatch = 0;
-    while(my $f2e = <F2E>) {
-	$i++;
-	my $e2f = <E2F>;
-	my ($english, $foreign , $alignEnglish,  $alignForeign,  $p) = split(/ \|\|\| /,$e2f); chop($p);
-	my ($english2,$foreign2, $alignEnglish2, $alignForeign2, $p2) = split(/ \|\|\| /,$f2e); chop($p2);
-	if ($english ne $english2 
-	    || $foreign ne $foreign2)
-	{
-	    print STDERR "mismatch line $i: ($english ne $english2 || $foreign ne $foreign2 )\n";
-            $mismatch++;
-            last if $mismatch > 10;
-	    next;
-	}
-	print TABLE "$english ||| $foreign ||| $alignEnglish2 ||| $alignForeign2 ||| $p $p2 2.718\n";
-    }
-    close(E2F);
-    close(F2E);
-    die "ERROR: There were mismatches! (printed only first 10)" if $mismatch;
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
+    $cmd .= " --Hierarchical" if $_HIERARCHICAL;
+    safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
+    if (! $___DONT_ZIP) {
+        safesystem("gzip $ttable_file") || die("ERROR: could not gzip $ttable_file");
+    }
 }
 
 sub split_extract {
