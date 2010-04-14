@@ -1,5 +1,5 @@
 
-all: extract extract-rules score statistics
+all: extract extract-rules score consolidate consolidate-direct statistics
 
 clean: 
 	rm -f *.o
@@ -15,6 +15,12 @@ extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o S
 
 score: tables-core.o AlignmentPhrase.o score.o
 	$(CXX) $^ -o score
+
+consolidate: consolidate.o
+	$(CXX) $^ -o consolidate
+
+consolidate-direct: consolidate-direct.o
+	$(CXX) $^ -o consolidate-direct
 
 statistics: tables-core.o AlignmentPhrase.o statistics.o
 	$(CXX) $^ -o statistics
