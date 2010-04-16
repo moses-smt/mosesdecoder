@@ -1,5 +1,5 @@
-
-all: extract extract-rules score consolidate consolidate-direct statistics
+all: consolidate consolidate-direct extract extract-rules relax-parse \
+     score statistics
 
 clean: 
 	rm -f *.o
@@ -21,6 +21,9 @@ consolidate: consolidate.o
 
 consolidate-direct: consolidate-direct.o
 	$(CXX) $^ -o consolidate-direct
+
+relax-parse: tables-core.o SyntaxTree.o XmlTree.o relax-parse.o
+	$(CXX) $^ -o relax-parse
 
 statistics: tables-core.o AlignmentPhrase.o statistics.o
 	$(CXX) $^ -o statistics
