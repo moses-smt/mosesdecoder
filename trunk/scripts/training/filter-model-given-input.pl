@@ -6,17 +6,38 @@
 
 # original code by Philipp Koehn
 # changes by Ondrej Bojar
+# adapted for hierarchical models by Phil Williams
 
 use strict;
 
+use FindBin qw($Bin);
+use Getopt::Long;
+
+my $SCRIPTS_ROOTDIR;
+if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
+    $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+} else {
+    $SCRIPTS_ROOTDIR = $Bin;
+    if ($SCRIPTS_ROOTDIR eq '') {
+        $SCRIPTS_ROOTDIR = dirname(__FILE__);
+    }
+    $SCRIPTS_ROOTDIR =~ s/\/training$//;
+    $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
+}
+
+my $opt_hierarchical = 0;
+
+GetOptions(
+    "Hierarchical" => \$opt_hierarchical
+) or exit(1);
+
+# consider phrases in input up to $MAX_LENGTH
+# in other words, all phrase-tables will be truncated at least to 10 words per
+# phrase.
 my $MAX_LENGTH = 10;
 
 # utilities
 my $ZCAT = "gzip -cd";
-
-# consider phrases in input up to this length
-# in other words, all phrase-tables will be truncated at least to 10 words per
-# phrase
 
 my $dir = shift; 
 my $config = shift;
@@ -70,7 +91,8 @@ while(<INI>) {
     	}
     	my ($phrase_table_impl,$source_factor,$t,$w,$file) = ($1,$2,$3,$4,$5);
 
-        if ($phrase_table_impl ne "0") {  # Memory
+        if ($phrase_table_impl ne "0" && $phrase_table_impl ne "6") {
+            # Only Memory ("0") and NewFormat ("6") can be filtered.
             print INI_OUT $table_spec;
             next;
         }
@@ -120,33 +142,53 @@ while(<INI>) {
 close(INI);
 close(INI_OUT);
 
+my %TMP_INPUT_FILENAME;
 
-# get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
-my %PHRASE_USED;
-open(INPUT,$input) or die "Can't read $input";
-while(my $line = <INPUT>) {
-    chomp($line);
-    my @WORD = split(/ +/,$line);
-    for(my $i=0;$i<=$#WORD;$i++) {
-        for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
-    	foreach (keys %CONSIDER_FACTORS) {
-    	    my @FACTOR = split(/,/);
-    	    my $phrase = "";
-    	    for(my $k=$i;$k<=$i+$j;$k++) {
-    		my @WORD_FACTOR = split(/\|/,$WORD[$k]);
-    		for(my $f=0;$f<=$#FACTOR;$f++) {
-    		    $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
-    		}
-    		chop($phrase);
-    		$phrase .= " ";
-    	    }
-    	    chop($phrase);
-    	    $PHRASE_USED{$_}{$phrase}++;
-    	}
+if ($opt_hierarchical)
+{
+    # Write a separate, temporary input file for each combination of source
+    # factors
+    foreach my $key (keys %CONSIDER_FACTORS) {
+        my $filename = "$dir/input-$key";
+        open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
+        $TMP_INPUT_FILENAME{$key} = $filename;
+        my @FACTOR = split(/,/, $key);
+        open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
+        while (my $line = <PIPE>) {
+            print FILEHANDLE $line
         }
+        close(FILEHANDLE);
     }
 }
-close(INPUT);
+
+my %PHRASE_USED;
+if (!$opt_hierarchical) {
+    # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
+    open(INPUT,$input) or die "Can't read $input";
+    while(my $line = <INPUT>) {
+        chomp($line);
+        my @WORD = split(/ +/,$line);
+        for(my $i=0;$i<=$#WORD;$i++) {
+            for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
+                foreach (keys %CONSIDER_FACTORS) {
+                    my @FACTOR = split(/,/);
+                    my $phrase = "";
+                    for(my $k=$i;$k<=$i+$j;$k++) {
+                        my @WORD_FACTOR = split(/\|/,$WORD[$k]);
+                        for(my $f=0;$f<=$#FACTOR;$f++) {
+                            $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
+                        }
+                        chop($phrase);
+                        $phrase .= " ";
+                    }
+                    chop($phrase);
+                    $PHRASE_USED{$_}{$phrase}++;
+                }
+            }
+        }
+    }
+    close(INPUT);
+}
 
 # filter files
 for(my $i=0;$i<=$#TABLE;$i++) {
@@ -161,26 +203,44 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       $openstring = "$ZCAT $file.gz |";
     } elsif ($file =~ /\.gz$/) {
       $openstring = "$ZCAT $file |";
+    } elsif ($opt_hierarchical) {
+      $openstring = "cat $file |";
     } else {
       $openstring = "< $file";
     }
 
-    open(FILE,$openstring) or die "Can't open '$openstring'";
     open(FILE_OUT,">$new_file") or die "Can't write $new_file";
 
-    while(my $entry = <FILE>) {
-        my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
-        $foreign =~ s/ $//;
-        if (defined($PHRASE_USED{$factors}{$foreign})) {
-    	print FILE_OUT $entry;
-    	$used++;
+    if ($opt_hierarchical) {
+        my $tmp_input = $TMP_INPUT_FILENAME{$factors};
+        open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $tmp_input |");
+        while (my $line = <PIPE>) {
+            print FILE_OUT $line
         }
-        $total++;
+        close(FILEHANDLE);
+    } else {
+        open(FILE,$openstring) or die "Can't open '$openstring'";
+        while(my $entry = <FILE>) {
+            my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
+            $foreign =~ s/ $//;
+            if (defined($PHRASE_USED{$factors}{$foreign})) {
+                print FILE_OUT $entry;
+                $used++;
+            }
+            $total++;
+        }
+        close(FILE);
+        die "No phrases found in $file!" if $total == 0;
+        printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
     }
-    close(FILE);
+
     close(FILE_OUT);
-    die "No phrases found in $file!" if $total == 0;
-    printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+}
+
+if ($opt_hierarchical)
+{
+    # Remove the temporary input files
+    unlink values %TMP_INPUT_FILENAME;
 }
 
 open(INFO,">$dir/info");
