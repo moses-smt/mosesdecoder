@@ -141,6 +141,19 @@
 		1C8CFF0B0AD67A9700FA22E2 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */; };
 		1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */; };
 		1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */; };
+		1CE4591E117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE4591C117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.cpp */; };
+		1CE4591F117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE4591D117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.h */; };
+		1CE45924117CBBA2004F4004 /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE45922117CBBA2004F4004 /* BilingualDynSuffixArray.cpp */; };
+		1CE45925117CBBA2004F4004 /* BilingualDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE45923117CBBA2004F4004 /* BilingualDynSuffixArray.h */; };
+		1CE45929117CBBB8004F4004 /* DynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE45927117CBBB8004F4004 /* DynSuffixArray.cpp */; };
+		1CE4592A117CBBB8004F4004 /* DynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE45928117CBBB8004F4004 /* DynSuffixArray.h */; };
+		1CE45934117CBBDA004F4004 /* fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE4592D117CBBDA004F4004 /* fdstream.h */; };
+		1CE45935117CBBDA004F4004 /* file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE4592E117CBBDA004F4004 /* file.cpp */; };
+		1CE45936117CBBDA004F4004 /* file.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE4592F117CBBDA004F4004 /* file.h */; };
+		1CE45937117CBBDA004F4004 /* types.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE45930117CBBDA004F4004 /* types.h */; };
+		1CE45938117CBBDA004F4004 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE45931117CBBDA004F4004 /* utils.h */; };
+		1CE45939117CBBDA004F4004 /* vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE45932117CBBDA004F4004 /* vocab.cpp */; };
+		1CE4593A117CBBDA004F4004 /* vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CE45933117CBBDA004F4004 /* vocab.h */; };
 		B219B8690E93836100EAB407 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8680E93836100EAB407 /* Timer.cpp */; };
 		B23821380EB73DCB007303C3 /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */; };
 		B23821390EB73DCB007303C3 /* LanguageModelIRST.h in Headers */ = {isa = PBXBuildFile; fileRef = B23821370EB73DCB007303C3 /* LanguageModelIRST.h */; };
@@ -312,6 +325,19 @@
 		1C8CFE8E0AD67A9700FA22E2 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
 		1CB459E80FD2DFEC000030BE /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
 		1CB459E90FD2DFEC000030BE /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = src/GlobalLexicalModel.h; sourceTree = "<group>"; };
+		1CE4591C117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryDynSuffixArray.cpp; path = src/PhraseDictionaryDynSuffixArray.cpp; sourceTree = "<group>"; };
+		1CE4591D117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryDynSuffixArray.h; path = src/PhraseDictionaryDynSuffixArray.h; sourceTree = "<group>"; };
+		1CE45922117CBBA2004F4004 /* BilingualDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BilingualDynSuffixArray.cpp; path = src/BilingualDynSuffixArray.cpp; sourceTree = "<group>"; };
+		1CE45923117CBBA2004F4004 /* BilingualDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BilingualDynSuffixArray.h; path = src/BilingualDynSuffixArray.h; sourceTree = "<group>"; };
+		1CE45927117CBBB8004F4004 /* DynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DynSuffixArray.cpp; path = src/DynSuffixArray.cpp; sourceTree = "<group>"; };
+		1CE45928117CBBB8004F4004 /* DynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DynSuffixArray.h; path = src/DynSuffixArray.h; sourceTree = "<group>"; };
+		1CE4592D117CBBDA004F4004 /* fdstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fdstream.h; path = src/DynSAInclude/fdstream.h; sourceTree = "<group>"; };
+		1CE4592E117CBBDA004F4004 /* file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file.cpp; path = src/DynSAInclude/file.cpp; sourceTree = "<group>"; };
+		1CE4592F117CBBDA004F4004 /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file.h; path = src/DynSAInclude/file.h; sourceTree = "<group>"; };
+		1CE45930117CBBDA004F4004 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = types.h; path = src/DynSAInclude/types.h; sourceTree = "<group>"; };
+		1CE45931117CBBDA004F4004 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = src/DynSAInclude/utils.h; sourceTree = "<group>"; };
+		1CE45932117CBBDA004F4004 /* vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vocab.cpp; path = src/DynSAInclude/vocab.cpp; sourceTree = "<group>"; };
+		1CE45933117CBBDA004F4004 /* vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vocab.h; path = src/DynSAInclude/vocab.h; sourceTree = "<group>"; };
 		B219B8680E93836100EAB407 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = src/Timer.cpp; sourceTree = "<group>"; };
 		B23821360EB73DCB007303C3 /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
 		B23821370EB73DCB007303C3 /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = src/LanguageModelIRST.h; sourceTree = "<group>"; };
@@ -374,6 +400,19 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1CE4592D117CBBDA004F4004 /* fdstream.h */,
+				1CE4592E117CBBDA004F4004 /* file.cpp */,
+				1CE4592F117CBBDA004F4004 /* file.h */,
+				1CE45930117CBBDA004F4004 /* types.h */,
+				1CE45931117CBBDA004F4004 /* utils.h */,
+				1CE45932117CBBDA004F4004 /* vocab.cpp */,
+				1CE45933117CBBDA004F4004 /* vocab.h */,
+				1CE45927117CBBB8004F4004 /* DynSuffixArray.cpp */,
+				1CE45928117CBBB8004F4004 /* DynSuffixArray.h */,
+				1CE45922117CBBA2004F4004 /* BilingualDynSuffixArray.cpp */,
+				1CE45923117CBBA2004F4004 /* BilingualDynSuffixArray.h */,
+				1CE4591C117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.cpp */,
+				1CE4591D117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.h */,
 				1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */,
 				1C679DC31162099C00DC3892 /* LexicalReorderingState.h */,
 				1C679DC61162099C00DC3892 /* ReorderingStack.cpp */,
@@ -657,6 +696,14 @@
 				1CB459EB0FD2DFEC000030BE /* GlobalLexicalModel.h in Headers */,
 				1C679DC91162099C00DC3892 /* LexicalReorderingState.h in Headers */,
 				1C679DCD1162099C00DC3892 /* ReorderingStack.h in Headers */,
+				1CE4591F117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.h in Headers */,
+				1CE45925117CBBA2004F4004 /* BilingualDynSuffixArray.h in Headers */,
+				1CE4592A117CBBB8004F4004 /* DynSuffixArray.h in Headers */,
+				1CE45934117CBBDA004F4004 /* fdstream.h in Headers */,
+				1CE45936117CBBDA004F4004 /* file.h in Headers */,
+				1CE45937117CBBDA004F4004 /* types.h in Headers */,
+				1CE45938117CBBDA004F4004 /* utils.h in Headers */,
+				1CE4593A117CBBDA004F4004 /* vocab.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -782,6 +829,11 @@
 				1CB459EA0FD2DFEC000030BE /* GlobalLexicalModel.cpp in Sources */,
 				1C679DC81162099C00DC3892 /* LexicalReorderingState.cpp in Sources */,
 				1C679DCC1162099C00DC3892 /* ReorderingStack.cpp in Sources */,
+				1CE4591E117CBB8D004F4004 /* PhraseDictionaryDynSuffixArray.cpp in Sources */,
+				1CE45924117CBBA2004F4004 /* BilingualDynSuffixArray.cpp in Sources */,
+				1CE45929117CBBB8004F4004 /* DynSuffixArray.cpp in Sources */,
+				1CE45935117CBBDA004F4004 /* file.cpp in Sources */,
+				1CE45939117CBBDA004F4004 /* vocab.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
