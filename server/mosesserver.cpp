@@ -109,6 +109,7 @@ int main(int argc, char** argv) {
     int mosesargc = 0;
     int port = 8080;
     const char* logfile = "/dev/null";
+    bool isSerial = false;
 
     for (int i = 0; i < argc; ++i) {
         if (!strcmp(argv[i],"--server-port")) {
@@ -127,6 +128,9 @@ int main(int argc, char** argv) {
             } else {
                 logfile = argv[i];
             }
+        } else if (!strcmp(argv[i], "--serial")) {
+            cerr << "Running single-threaded server" << endl;
+            isSerial = true;
         } else {
             mosesargv[mosesargc] = new char[strlen(argv[i])+1];
             strcpy(mosesargv[mosesargc],argv[i]);
@@ -156,7 +160,13 @@ int main(int argc, char** argv) {
         );
     
     cerr << "Listening on port " << port << endl;
-    myAbyssServer.run();
+    if (isSerial) {
+        while(1) {
+            myAbyssServer.runOnce();
+        }
+    } else {
+        myAbyssServer.run();
+    }
     // xmlrpc_c::serverAbyss.run() never returns
     assert(false);
     return 0;
