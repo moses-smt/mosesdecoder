@@ -143,6 +143,7 @@ then
     LDFLAGS="$LDFLAGS -L${with_srilm}/lib"
     LIBS="$LIBS -lsrilm"
   fi
+  AC_CHECK_LIB([oolm], [trigram_init], [], [AC_MSG_ERROR([Cannot find SRILM!])])
   AM_CONDITIONAL([SRI_LM], true)
 fi
 
