@@ -98,7 +98,7 @@ class Sentence : public Phrase, public InputType
 												, const std::string &phraseString
 												, const std::string &factorDelimiter);
 	
-	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+    const LabelList &GetLabelList(size_t /*startPos*/, size_t /*endPos*/) const
 	{	return m_defaultLabelList;	}
 
 };

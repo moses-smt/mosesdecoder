@@ -42,14 +42,14 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 
 PhraseDictionaryFeature::PhraseDictionaryFeature 
                             (PhraseTableImplementation implementation
-														, size_t numScoreComponent
+							, size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
                             , size_t tableLimit
-														, const std::string &targetFile  // default param
+							, const std::string &targetFile  // default param
                             , const std::string &alignmentsFile) // default param
 	:m_numScoreComponent(numScoreComponent),
 	m_numInputScores(numInputScores),
@@ -57,15 +57,26 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 	m_output(output),
 	m_filePath(filePath),
 	m_weight(weight),
-	m_tableLimit(tableLimit)
+	m_tableLimit(tableLimit),
+    m_implementation(implementation),
+    m_targetFile(targetFile),
+    m_alignmentsFile(alignmentsFile)
 {
-	const StaticData& staticData = StaticData::Instance();
+    const StaticData& staticData = StaticData::Instance();
 	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-
-	m_implementation = implementation;
-	
-	//if we're using an in-memory phrase table, then load it now, otherwise wait
-	if (implementation == Memory)
+    //Thread-safe phrase dictionaries get loaded now
+    if (implementation == Memory || implementation == NewFormat || implementation == OnDisk) {
+        m_threadSafePhraseDictionary.reset(LoadPhraseTable());
+        m_useThreadSafePhraseDictionary = true;
+    } else {
+        //Other types are lazy-loaded into thread-specific data
+        m_useThreadSafePhraseDictionary = false;
+    }
+}
+    
+PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
+        const StaticData& staticData = StaticData::Instance();
+	if (m_implementation == Memory)
 	{   // memory phrase table
 			VERBOSE(2,"using standard phrase tables" << std::endl);
 			if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
@@ -86,11 +97,10 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 													, m_tableLimit
 													, staticData.GetAllLM()
 													, staticData.GetWeightWordPenalty()));
-			m_phraseDictionary.reset(pdm);
+			return pdm;
 	}
-	else if (implementation == Binary)
-	{   
-		//load the tree dictionary for this thread   
+	else if (m_implementation == Binary)
+	{    
 		const StaticData& staticData = StaticData::Instance();
 		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
 		assert(pdta->Load(
@@ -101,9 +111,9 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 											, m_tableLimit
 											, staticData.GetAllLM()
 											, staticData.GetWeightWordPenalty()));
-		m_phraseDictionary.reset(pdta);
+        return pdta;
 	}
-	else if (implementation == NewFormat)
+	else if (m_implementation == NewFormat)
 	{   // memory phrase table
 		VERBOSE(2,"using New Format phrase tables" << std::endl);
 		if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
@@ -119,12 +129,11 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 										 , m_tableLimit
 										 , staticData.GetAllLM()
 										 , staticData.GetWeightWordPenalty()));
-		m_phraseDictionary.reset(pdm);
+        return pdm;
 	}
-	else if (implementation == OnDisk)
+	else if (m_implementation == OnDisk)
 	{   
-		//load the tree dictionary for this thread   
-		//const StaticData& staticData = StaticData::Instance();
+		
 		PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(m_numScoreComponent, this);
 		pdta->Load(
 											m_input
@@ -135,12 +144,10 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 											//, staticData.GetAllLM()
 											//, staticData.GetWeightWordPenalty()));
 		assert(pdta);
-		m_phraseDictionary.reset(pdta);
+        return pdta;
 	}
-	else if (implementation == Binary)
+	else if (m_implementation == Binary)
 	{   
-		//load the tree dictionary for this thread   
-		const StaticData& staticData = StaticData::Instance();
 		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
 		assert(pdta->Load(
 											m_input
@@ -150,35 +157,49 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 											, m_tableLimit
 											, staticData.GetAllLM()
 											, staticData.GetWeightWordPenalty()));
-		m_phraseDictionary.reset(pdta);
+        return pdta;
 	}
-	else if (implementation == SuffixArray)
+	else if (m_implementation == SuffixArray)
 	{   
 		#ifndef WIN32
-			PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(numScoreComponent, this); 	 
-			if(!(pd && pd->Load(filePath, targetFile, alignmentsFile 	 
-													, weight, tableLimit 	 
+			PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(m_numScoreComponent, this); 	 
+			if(!(pd->Load(m_filePath, m_targetFile, m_alignmentsFile 	 
+													, m_weight, m_tableLimit 	 
 													, staticData.GetAllLM() 	 
 													, staticData.GetWeightWordPenalty()))) 	 
 			{ 	 
 				std::cerr << "FAILED TO LOAD\n" << endl; 	 
-				delete pd; 	 
+                delete pd;
+                pd = NULL;
 			} 	 
-			m_phraseDictionary.reset(pd); 	 
+			 	 
 			std::cerr << "Suffix array phrase table loaded" << std::endl;
+            return pd;
 		#else
 			assert(false);
 		#endif
 	}
 }
   
-const PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source) const
+const PhraseDictionary* PhraseDictionaryFeature::GetDictionary(const InputType& source)
 {
-	PhraseDictionary* dict = m_phraseDictionary.get();
-	assert(dict);
-	
+    PhraseDictionary* dict = GetDictionary();
 	dict->InitializeForInput(source);
 	return dict;
+}
+
+PhraseDictionary* PhraseDictionaryFeature::GetDictionary() {
+    PhraseDictionary* dict;
+    if (m_useThreadSafePhraseDictionary) {
+        dict = m_threadSafePhraseDictionary.get();
+    } else {
+        if (!m_threadUnsafePhraseDictionary.get()) {
+            m_threadUnsafePhraseDictionary.reset(LoadPhraseTable());
+        }
+        dict = m_threadUnsafePhraseDictionary.get();
+    }
+    assert(dict);
+    return dict;
 }
 
 

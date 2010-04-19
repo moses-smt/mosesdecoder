@@ -54,7 +54,7 @@ class ConfusionNet : public InputType {
 
 	TranslationOptionCollection* CreateTranslationOptionCollection() const;
 	
-	const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+    const LabelList &GetLabelList(size_t /*startPos*/, size_t /*endPos*/) const
 	{
 		assert(false);
 		return *(new LabelList());
