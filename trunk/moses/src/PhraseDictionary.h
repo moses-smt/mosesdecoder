@@ -115,14 +115,15 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
 
 	size_t GetNumInputScores() const;
 
-	const PhraseDictionary* GetDictionary(const InputType& source) const;
-
-	PhraseDictionary* GetDictionary() // TODO - get rid of this, make Cleanup() const. only to be called by static data
-	{
-		return m_phraseDictionary.get();
-	}
+    
+	const PhraseDictionary* GetDictionary(const InputType& source);
+    // TODO - get rid of this, make Cleanup() const. only to be called by static data
+    PhraseDictionary* GetDictionary();
 	
  private:
+     /** Load the appropriate phrase table */
+     PhraseDictionary* LoadPhraseTable();
+     
     size_t m_numScoreComponent;
     unsigned m_numInputScores;
     std::vector<FactorType> m_input;
@@ -130,14 +131,22 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
     std::string m_filePath;
     std::vector<float> m_weight;
     size_t m_tableLimit;
-    //Only instantiate one of these
+    //We instantiate either the the thread-safe or non-thread-safe dictionary,
+    //but not both. The thread-safe one can be instantiated in the constructor and shared
+    //between threads, however the non-thread-safe one (eg PhraseDictionaryTree) must be instantiated
+    //on demand, and stored in thread-specific storage.
+    std::auto_ptr<PhraseDictionary> m_threadSafePhraseDictionary;
     #ifdef WITH_THREADS
-    boost::thread_specific_ptr<PhraseDictionary>  m_phraseDictionary;
+    boost::thread_specific_ptr<PhraseDictionary>  m_threadUnsafePhraseDictionary;
     #else
-    std::auto_ptr<PhraseDictionary> m_phraseDictionary;
+    std::auto_ptr<PhraseDictionary> m_threadUnsafePhraseDictionary;
     #endif
-
-	PhraseTableImplementation m_implementation;
+    
+    bool m_useThreadSafePhraseDictionary;
+    PhraseTableImplementation m_implementation;
+    std::string m_targetFile;
+    std::string m_alignmentsFile;
+    
 };
 
 
