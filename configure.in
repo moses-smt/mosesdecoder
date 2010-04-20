@@ -131,12 +131,12 @@ then
 
   if test "x$with_srilm_dynamic" != 'xyes'
   then
-    LIB_SRILM="-loolm -ldstruct -lmisc"
+    LIB_SRILM="-loolm -ldstruct -lmisc -lflm"
     # ROOT/lib/i686-m64/liboolm.a
     # ROOT/lib/i686-m64/libdstruct.a
     # ROOT/lib/i686-m64/libmisc.a
     MY_ARCH=`${with_srilm}/sbin/machine-type`
-    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH} -L${with_srilm}/flm/obj/${MY_ARCH}"
     LIBS="$LIBS $LIB_SRILM"
     FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
   else

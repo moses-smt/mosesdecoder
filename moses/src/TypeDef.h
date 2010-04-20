@@ -151,6 +151,7 @@ enum LMImplementation
 	,Internal	= 4
 	,RandLM 	= 5
 	,Remote 	= 6
+	,ParallelBackoff	= 7
 
 };
 
