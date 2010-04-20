@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 # Usage:
 # zmert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -95,10 +95,10 @@ my $___LAMBDAS_OUT = undef; # file where final lambdas should be written
 my $___EXTRACT_SEMPOS = "none"; # how shall we get the SemPOS factor (only for SemPOS metric)
       # options: 1) 'none' - moses generates SemPOS factor in required format 
       #             (<word_form>|<SemPOS>)
-      #          2) 'moses:<factor_index>' - extract SemPOS from <factor_index>
-      #              position (moses output is <word>|<factor_1>|...|<factor_n>)
+      #          2) 'factors:<factor_index_list>' - extract factors from decoder output on positions from <factor_index_list>
+      #              <factor_index_list> contains indices of factors separated by comma, e.g. '0,1,4'
       #          3) 'tmt' - moses outputs only <word_form> and we need to 
-      #             generate SemPOS with TectoMT
+      #             generate factors like SemPOS with TectoMT (see http://ufal.mff.cuni.cz/tectomt/)
 
 # set 1 if using with async decoder
 my $___ASYNC = 0; 
@@ -195,7 +195,19 @@ Options:
   --allow-unknown-lambdas ... keep going even if someone supplies a new lambda
          in the lambdas option (such as 'superbmodel:1,0-1'); optimize it, too
   --lambdas-out=STRING ... file where final lambdas should be written
+  --metric=STRING ... metric name for optimization with metric parameters
+         such as 'BLEU 4 closest' or 'SemPOS 0 1'. Use default parameters by specifying 'BLEU' or 'SemPOS'
+  --semposbleu-weights=STRING ... weights for SemPOS and BLEU in format 'N:M' where 'N' is SemPOS weight and 'M' BLEU weight
+         used only with SemPOS_BLEU metric
+  --extract-sempos=STRING ... none|factors:<factor_list>|tmt
+         'none' ... decoder generates all required factors for optimization metric
+         'factors:<factor_list>' ... extract factors with index in <factor_list> from decoder output
+                 e.g. 'factors:0,2,3' to extract first, third and fourth factor from decoder output
+         'tmt' ... use TectoMT (see http://ufal.mff.cuni.cz/tectomt) to generate required factors
   --norm ... Select normalization for zmert
+  --mert-verbose=N ... verbosity of zmert [0|1|2]
+  --decoder-verbose=N ... decoder verbosity [0|1] - 1=decoder output included
+  --mertdir=STRING ... directory with zmert.jar
   --filtercmd=STRING  ... path to filter-model-given-input.pl
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --mertdir=STRING ... path to zmert implementation
@@ -208,6 +220,8 @@ Options:
   --activate-features=STRING  ... comma-separated list of features to work on
                                   (if undef work on all features)
                                   # (others are fixed to the starting values)
+  --verbose ... verbosity of this script
+  --help ... print this help
 
 ";
   exit 1;
@@ -227,7 +241,6 @@ if (defined $___JOBS && $___JOBS > 1) {
   die "Can't run $qruncmd" if ! -x $qruncmd;
   $srunblocks_cmd = "$qruncmd --jobs=$___JOBS --join '$srunblocks_cmd'";
 }
-
 
 
 # update variables if input is confusion network
@@ -674,7 +687,14 @@ die "Error: Sent $line_count sentences to analyze but got only $line_count_check
 FILE_EOF
 
 } elsif ($___EXTRACT_SEMPOS eq "none") {
-  # no preprocessing needed
+print DECODER_CMD <<'FILE_EOF';
+while( my $line = <NBEST_ORIG>) {
+  my @array = split( /\|\|\|/, $line);
+  # remove feature names from the feature scores string
+  $array[2] = extractScores( $array[2]);
+  print NBEST join( '|||', @array);
+}
+FILE_EOF
 } else {
   die "Unknown type of factor extraction: $___EXTRACT_SEMPOS";
 }
