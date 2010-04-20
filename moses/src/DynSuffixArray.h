@@ -19,9 +19,9 @@ public:
   DynSuffixArray();
   DynSuffixArray(vuint_t*);
   ~DynSuffixArray();
-  bool getCorpusIndex(const vuint_t*, vuint_t*);
-  void load(FILE*);
-  void save(FILE*);
+  bool GetCorpusIndex(const vuint_t*, vuint_t*);
+  void Load(FILE*);
+  void Save(FILE*);
 
 private: 
   vuint_t* m_SA;
@@ -29,17 +29,17 @@ private:
   vuint_t* m_F;
   vuint_t* m_L;
   vuint_t* m_corpus;
-  void buildAuxArrays();
-  void qsort(int* array, int begin, int end);
-  int compare(int, int, int);
-  void reorder(unsigned, unsigned);
-  void insertFactor(vuint_t*, unsigned);  
-  void deleteFactor(unsigned, unsigned);
-  void substituteFactor(vuint_t*, unsigned);
+  void BuildAuxArrays();
+  void Qsort(int* array, int begin, int end);
+  int Compare(int, int, int);
+  void Reorder(unsigned, unsigned);
+  void InsertFactor(vuint_t*, unsigned);  
+  void DeleteFactor(unsigned, unsigned);
+  void SubstituteFactor(vuint_t*, unsigned);
   int LF(unsigned);
-  int rank(unsigned, unsigned);
+  int Rank(unsigned, unsigned);
   int F_firstIdx(unsigned);
-  void printAuxArrays() {
+  void PrintAuxArrays() {
     std::cerr << "SA\tISA\tF\tL\n";
     for(size_t i=0; i < m_SA->size(); ++i)
       std::cerr << m_SA->at(i) << "\t" << m_ISA->at(i) << "\t" << m_F->at(i) << "\t" << m_L->at(i) << std::endl;

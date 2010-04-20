@@ -4,64 +4,101 @@
 namespace Moses {
 
 	// Vocab class
-	const wordID_t Vocab::kOOVWordID;
-	const wordID_t Vocab::kBOSWordID;	
-	const word_t Vocab::kBOS = "<s>";
-	const word_t Vocab::kEOS = "</s>";
-	const word_t Vocab::kOOVWord = "<unk>";
-		
-	wordID_t Vocab::getWordID(const word_t& word) {
+	void Vocab::InitSpecialWords() 
+	{
+                m_kBOSWord = InitSpecialWord(BOS_);	// BOS_ is a string <s> (defined in ../typedef.h)
+                m_kEOSWord = InitSpecialWord(EOS_);	// EOS_ is a string </s> (defined in ../typedef.h)
+                m_kOOVWord = InitSpecialWord(UNKNOWN_FACTOR);	// UNKNOWN_FACTOR also defined in ../typedef.h
+	}
+
+	const Word Vocab::InitSpecialWord( const string& word_str)
+	{
+		FactorList factors;
+		factors.push_back( 0); // store the special word string as the first factor
+		Word word;
+		// define special word as Input word with one factor and isNonTerminal=false
+		word.CreateFromString( Input, factors, word_str, false ); // Input is enum defined in ../typedef.h
+		// TODO not sure if this will work properly:
+		// 	- word comparison can fail because the last parameter (isNonTerminal)
+		// 		in function CreateFromString may not match properly created words
+		// 	- special word is Input word but what about Output words?
+		// 		- currently Input/Output variable is not stored in class Word, but in the future???
+		return word;
+	}
+	
+	// get wordID_t index for word represented as string
+	wordID_t Vocab::GetWordID(const std::string& word_str, 
+		const FactorDirection& direction, const FactorList& factors, bool isNonTerminal)
+	{
+		// get id for factored string
+		Word word;
+		word.CreateFromString( direction, factors, word_str, isNonTerminal);		
+		return GetWordID( word);	
+	}	
+
+	wordID_t Vocab::GetWordID(const Word& word) 
+	{
 		// get id and possibly add to vocab 
-		if (words2ids_.find(word) == words2ids_.end())
-			if (!closed_) {
-				wordID_t id = words2ids_.size() + 1;
-				words2ids_[word] = id; // size() returns size AFTER insertion of word
-				ids2words_[id] = word; // so size() is the same here ... 
+		if (m_words2ids.find(word) == m_words2ids.end())
+			if (!m_closed) {
+				wordID_t id = m_words2ids.size() + 1;
+				m_ids2words[id] = word;
+				// update lookup tables
+				m_words2ids[word] = id;
 			} 
 			else {
-				return Vocab::kOOVWordID;
+				return m_kOOVWordID;
 			}
-		wordID_t id = words2ids_[word];
+		wordID_t id = m_words2ids[word];
 		return id;
 	}
 		
-	word_t Vocab::getWord(wordID_t id) {
+	Word& Vocab::GetWord(wordID_t id) 
+	{
 		// get word string given id
-		return (ids2words_.find(id) == ids2words_.end()) ? Vocab::kOOVWord : ids2words_[id];
+		return (m_ids2words.find(id) == m_ids2words.end()) ? m_kOOVWord : m_ids2words[id];
 	}
 	
-	bool Vocab::inVocab(wordID_t id) {
-		return ids2words_.find(id) != ids2words_.end();
+	bool Vocab::InVocab(wordID_t id) 
+	{
+		return m_ids2words.find(id) != m_ids2words.end();
 	}
 
-	bool Vocab::inVocab(const word_t & word) {
-		return words2ids_.find(word) != words2ids_.end();
+	bool Vocab::InVocab(const Word& word) 
+	{
+		return m_words2ids.find(word) != m_words2ids.end();
 	}
 	
-	bool Vocab::save(const std::string & vocab_path) {
+	bool Vocab::Save(const std::string & vocab_path) 
+	{
 		// save vocab as id -> word 
 		FileHandler vcbout(vocab_path, std::ios::out);
-		return save(&vcbout);
+		return Save(&vcbout);
 	}
-	bool Vocab::save(FileHandler* vcbout) {
+	
+	bool Vocab::Save(FileHandler* vcbout) 
+	{
 		// then each vcb entry
-		*vcbout << ids2words_.size() << "\n";
-		iterate(ids2words_, iter)
+		*vcbout << m_ids2words.size() << "\n";
+		iterate(m_ids2words, iter)
 			*vcbout << iter->second << "\t" << iter->first << "\n";
 		return true;
 	}
 	
-	bool Vocab::load(const std::string & vocab_path, bool closed) {
+	bool Vocab::Load(const std::string & vocab_path, const FactorDirection& direction, 
+		const FactorList& factors, bool closed) 
+	{
 		FileHandler vcbin(vocab_path, std::ios::in);
 		std::cerr << "Loading vocab from " << vocab_path << std::endl;
-		return load(&vcbin, closed);
+		return Load(&vcbin, direction, factors, closed);
 	}
-	bool Vocab::load(FileHandler* vcbin, bool closed) {
+	
+	bool Vocab::Load(FileHandler* vcbin, const FactorDirection& direction, 
+		const FactorList& factors, bool closed) {
 		// load vocab id -> word mapping 
-		words2ids_.clear();	// reset mapping
-		ids2words_.clear();
-		std::string line;
-		word_t word;
+		m_words2ids.clear();	// reset mapping
+		m_ids2words.clear();
+		std::string line, word_str;
 		wordID_t id;
 		assert(getline(*vcbin, line));
 		std::istringstream first(line.c_str());
@@ -70,23 +107,26 @@ namespace Moses {
 		uint32_t loadedsize = 0;
 		while (loadedsize++ < vcbsize && getline(*vcbin, line)) {
 			std::istringstream entry(line.c_str());
-			entry >> word;
+			entry >> word_str;
+			Word word;
+			word.CreateFromString( direction, factors, word_str, false); // TODO set correctly isNonTerminal
 			entry >> id; 
 			// may be no id (i.e. file may just be a word list)
-			if (id == 0 && word != Vocab::kOOVWord) 
-				id = ids2words_.size() + 1;	// assign ids sequentially starting from 1
-			assert(ids2words_.count(id) == 0 && words2ids_.count(word) == 0);
-			ids2words_[id] = word;
-			words2ids_[word] = id;
+			if (id == 0 && word != GetkOOVWord())  
+				id = m_ids2words.size() + 1;	// assign ids sequentially starting from 1
+			assert(m_ids2words.count(id) == 0 && m_words2ids.count(word) == 0);
+			m_ids2words[id] = word;
+			m_words2ids[word] = id;
 		}
-		closed_ = closed;	// once loaded fix vocab ?
-		std::cerr << "Loaded vocab with " << ids2words_.size() << " words." << std::endl;
+		m_closed = closed;	// once loaded fix vocab ?
+		std::cerr << "Loaded vocab with " << m_ids2words.size() << " words." << std::endl;
 		return true;
 	}
-	void Vocab::printVocab() {
-		iterate(ids2words_, iter)
+	void Vocab::PrintVocab() 
+	{
+		iterate(m_ids2words, iter)
 			std::cerr << iter->second << "\t" << iter->first << "\n";
-		iterate(words2ids_, iter)
+		iterate(m_words2ids, iter)
 			std::cerr << iter->second << "\t" << iter->first << "\n";
 	}
 

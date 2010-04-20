@@ -162,19 +162,23 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
 	else if (m_implementation == SuffixArray)
 	{   
 		#ifndef WIN32
-			PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(m_numScoreComponent, this); 	 
-			if(!(pd->Load(m_filePath, m_targetFile, m_alignmentsFile 	 
-													, m_weight, m_tableLimit 	 
-													, staticData.GetAllLM() 	 
-													, staticData.GetWeightWordPenalty()))) 	 
-			{ 	 
-				std::cerr << "FAILED TO LOAD\n" << endl; 	 
-                delete pd;
-                pd = NULL;
-			} 	 
-			 	 
-			std::cerr << "Suffix array phrase table loaded" << std::endl;
-            return pd;
+		PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(m_numScoreComponent, this); 	 
+		if(!(pd->Load(
+												m_input
+												,m_output
+												,m_filePath
+												,m_targetFile
+												, m_alignmentsFile 	 
+												, m_weight, m_tableLimit 	 
+												, staticData.GetAllLM() 	 
+												, staticData.GetWeightWordPenalty()))) 	 
+		{ 	 
+			std::cerr << "FAILED TO LOAD\n" << endl; 	 
+			delete pd;
+			pd = NULL; 	 
+		} 	 
+		std::cerr << "Suffix array phrase table loaded" << std::endl;
+		return pd;
 		#else
 			assert(false);
 		#endif

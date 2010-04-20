@@ -7,6 +7,7 @@
 #include "DynSAInclude/types.h"
 #include "DynSAInclude/utils.h"
 #include "InputFileStream.h"
+#include "FactorTypeSet.h"
 
 namespace Moses {
 
@@ -73,11 +74,10 @@ class BilingualDynSuffixArray {
 public: 
 	BilingualDynSuffixArray();
 	~BilingualDynSuffixArray();
-	bool Load(string source, string target, string alignments, 
-						const std::vector<float> &weight);
-	void LoadVocabLookup();
-	void save(string);
-	void load(string);
+	bool Load( const std::vector<FactorType>& inputFactors,
+		const std::vector<FactorType>& outputTactors,
+		std::string source, std::string target, std::string alignments, 
+		const std::vector<float> &weight);
 	void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
 	void CleanUp();
 private:
@@ -85,6 +85,9 @@ private:
 	DynSuffixArray* m_trgSA;
 	std::vector<wordID_t>* m_srcCorpus;
 	std::vector<wordID_t>* m_trgCorpus;
+	
+	FactorMask m_inputFactors;
+	FactorMask m_outputFactors;
 
 	std::vector<unsigned> m_srcSntBreaks, m_trgSntBreaks;
 
@@ -94,26 +97,24 @@ private:
 	std::vector<SentenceAlignment> m_alignments;
 	std::vector<std::vector<short> > m_rawAlignments;
 
-	std::map<const Factor *, wordID_t> m_vocabLookup;
-	std::map<wordID_t, const Factor *> m_vocabLookupRev;	
-
 	mutable std::map<std::pair<wordID_t, wordID_t>, std::pair<float, float> > m_wordPairCache; 
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
-	int loadCorpus(InputFileStream&, std::vector<wordID_t>&, std::vector<wordID_t>&);
-	int loadAlignments(InputFileStream& aligs);
-	int loadRawAlignments(InputFileStream& aligs);
+	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
+		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&);
+	int LoadAlignments(InputFileStream& aligs);
+	int LoadRawAlignments(InputFileStream& aligs);
 
-	bool extractPhrases(const int&, const int&, const int&, std::vector<PhrasePair*>&, bool=false) const;
-	SentenceAlignment getSentenceAlignment(const int, bool=false) const; 
-	std::vector<unsigned> sampleSelection(std::vector<unsigned>) const;
+	bool ExtractPhrases(const int&, const int&, const int&, std::vector<PhrasePair*>&, bool=false) const;
+	SentenceAlignment GetSentenceAlignment(const int, bool=false) const; 
+	std::vector<unsigned> SampleSelection(std::vector<unsigned>) const;
 
-	std::vector<int> getSntIndexes(std::vector<unsigned>&, const int) const;	
-	TargetPhrase* getMosesFactorIDs(const SAPhrase&) const;
-	SAPhrase trgPhraseFromSntIdx(const PhrasePair&) const;
-	bool getLocalVocabIDs(const Phrase&, SAPhrase &) const;
-	void cacheWordProbs(wordID_t) const;
-	std::pair<float, float> getLexicalWeight(const PhrasePair&) const;
+	std::vector<int> GetSntIndexes(std::vector<unsigned>&, const int) const;	
+	TargetPhrase* GetMosesFactorIDs(const SAPhrase&) const;
+	SAPhrase TrgPhraseFromSntIdx(const PhrasePair&) const;
+	bool GetLocalVocabIDs(const Phrase&, SAPhrase &) const;
+	void CacheWordProbs(wordID_t) const;
+	std::pair<float, float> GetLexicalWeight(const PhrasePair&) const;
 
 	int GetSourceSentenceSize(size_t sentenceId) const
 	{ 
