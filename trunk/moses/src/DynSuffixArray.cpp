@@ -27,18 +27,18 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   int* tmpArr = new int[size];
   for(int i=0 ; i < size; ++i) tmpArr[i] = i; 
   
-  qsort(tmpArr, 0, size-1);
+  Qsort(tmpArr, 0, size-1);
   
   m_SA = new vuint_t(tmpArr, tmpArr + size);
   //std::cerr << "printing SA " << std::endl;
   //for(int i=0; i < size; ++i) std::cerr << m_SA->at(i) << std::endl;
   delete[] tmpArr;
   std::cerr << "DYNAMIC SUFFIX ARRAY CLASS INSTANTIATED WITH SIZE " << size << std::endl;
-  buildAuxArrays();
+  BuildAuxArrays();
   //printAuxArrays();
 }
 
-void DynSuffixArray::buildAuxArrays() {
+void DynSuffixArray::BuildAuxArrays() {
   int size = m_SA->size();
   m_ISA = new vuint_t(size);
   m_F = new vuint_t(size);
@@ -52,7 +52,7 @@ void DynSuffixArray::buildAuxArrays() {
   }
 }
 
-int DynSuffixArray::rank(unsigned word, unsigned idx) {
+int DynSuffixArray::Rank(unsigned word, unsigned idx) {
 /* use Gerlach's code to make rank faster */
   // the number of word in L[0..i]
   int r(0);
@@ -75,11 +75,11 @@ int DynSuffixArray::LF(unsigned L_idx) {
   int fIdx(-1);
   unsigned word = m_L->at(L_idx);
   if((fIdx = F_firstIdx(word)) != -1) 
-    return fIdx + rank(word, L_idx);
+    return fIdx + Rank(word, L_idx);
   else return -1;
 }
 
-void DynSuffixArray::insertFactor(vuint_t* newSent, unsigned newIndex) {
+void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
   // for sentences
   //stages 1, 2, 4 stay same from 1char case
   //(use last word of new text in step 2 and save Ltmp until last insert?)
@@ -114,10 +114,10 @@ void DynSuffixArray::insertFactor(vuint_t* newSent, unsigned newIndex) {
     k = kprime;
   }
   // Begin stage 4
-  reorder(true_pos, LF(kprime)); // actual position vs computed position of cycle (newIndex-1)
+  Reorder(true_pos, LF(kprime)); // actual position vs computed position of cycle (newIndex-1)
 }
 
-void DynSuffixArray::reorder(unsigned j, unsigned jprime) {
+void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
   printf("j=%d\tj'=%d\n", j, jprime);
   while(j != jprime) {
     printf("j=%d\tj'=%d\n", j, jprime);
@@ -145,7 +145,7 @@ void DynSuffixArray::reorder(unsigned j, unsigned jprime) {
   }
 }
 
-void DynSuffixArray::deleteFactor(unsigned index, unsigned num2del) {
+void DynSuffixArray::DeleteFactor(unsigned index, unsigned num2del) {
   int ltmp = m_L->at(m_ISA->at(index));
   int true_pos = LF(m_ISA->at(index)); // track cycle shift (newIndex - 1)
   for(size_t q = 0; q < num2del; ++q) {
@@ -165,16 +165,16 @@ void DynSuffixArray::deleteFactor(unsigned index, unsigned num2del) {
       if(*itr > index) --(*itr);
   }
   m_L->at(m_ISA->at(index))= ltmp;
-  reorder(LF(m_ISA->at(index)), true_pos);
-  printAuxArrays();
+  Reorder(LF(m_ISA->at(index)), true_pos);
+  PrintAuxArrays();
 }
 
-void DynSuffixArray::substituteFactor(vuint_t* newSents, unsigned newIndex) {
+void DynSuffixArray::SubstituteFactor(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPLEMENT SUBSITITUTE FACTOR\n";
   return;
 }
 
-bool DynSuffixArray::getCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
+bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   indices->clear();
   size_t phrasesize = phrase->size();
@@ -208,15 +208,15 @@ bool DynSuffixArray::getCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
   return (indices->size() > 0);
 }
 
-void DynSuffixArray::save(FILE* fout) {
+void DynSuffixArray::Save(FILE* fout) {
   fWriteVector(fout, *m_SA);
 }
 
-void DynSuffixArray::load(FILE* fin) {
+void DynSuffixArray::Load(FILE* fin) {
   fReadVector(fin, *m_SA);
 }
 
-int DynSuffixArray::compare(int pos1, int pos2, int max) {
+int DynSuffixArray::Compare(int pos1, int pos2, int max) {
   for (size_t i = 0; i < (unsigned)max; ++i) {
     if((pos1 + i < m_corpus->size()) && (pos2 + i >= m_corpus->size()))
       return 1;
@@ -229,7 +229,7 @@ int DynSuffixArray::compare(int pos1, int pos2, int max) {
   return 0;
 }
 
-void DynSuffixArray::qsort(int* array, int begin, int end) {
+void DynSuffixArray::Qsort(int* array, int begin, int end) {
   if(end > begin) 
   {
     int index; 
@@ -242,7 +242,7 @@ void DynSuffixArray::qsort(int* array, int begin, int end) {
         array[end] = tmp;
       }
       for(int i=index=begin; i < end; ++i) {
-        if (compare(array[i], pivot, 20) <= 0) {
+        if (Compare(array[i], pivot, 20) <= 0) {
           {
             int tmp = array[index];
             array[index] = array[i];
@@ -257,8 +257,8 @@ void DynSuffixArray::qsort(int* array, int begin, int end) {
         array[end] = tmp;
       }
     }
-    qsort(array, begin, index - 1);
-    qsort(array, index + 1,  end);
+    Qsort(array, begin, index - 1);
+    Qsort(array, index + 1,  end);
   }
 }
 

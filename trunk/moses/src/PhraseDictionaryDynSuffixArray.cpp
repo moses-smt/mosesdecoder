@@ -18,7 +18,9 @@ PhraseDictionaryDynSuffixArray::~PhraseDictionaryDynSuffixArray()
 	delete m_biSA;
 }
 
-bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string alignments, 
+bool PhraseDictionaryDynSuffixArray::Load(const std::vector<FactorType>& input,
+					const std::vector<FactorType>& output,
+					string source, string target, string alignments, 
 					const std::vector<float> &weight,
 					size_t tableLimit,
 					const LMList &languageModels,
@@ -28,8 +30,8 @@ bool PhraseDictionaryDynSuffixArray::Load(string source, string target, string a
 	m_tableLimit = tableLimit;
 	m_languageModels = &languageModels;
 	m_weightWP = weightWP;
-        m_weight = weight;
-	m_biSA->Load( source, target, alignments, weight);
+
+	m_biSA->Load( input, output, source, target, alignments, weight);
 
 	return true;
 }

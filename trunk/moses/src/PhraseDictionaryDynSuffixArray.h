@@ -10,11 +10,15 @@ namespace Moses {
 
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary {
 public: 
-	PhraseDictionaryDynSuffixArray(size_t numScoreComponent, PhraseDictionaryFeature* feature);
+	PhraseDictionaryDynSuffixArray(size_t m_numScoreComponent, PhraseDictionaryFeature* feature);
 	~PhraseDictionaryDynSuffixArray();
-	bool Load(std::string source, std::string target, std::string alignments
-						, const std::vector<float> &weight
-						, size_t tableLimit
+	bool Load( const std::vector<FactorType>& m_input
+						, const std::vector<FactorType>& m_output
+						, std::string m_source
+						, std::string m_target
+						, std::string m_alignments
+						, const std::vector<float> &m_weight
+						, size_t m_tableLimit
 						, const LMList &languageModels
 						, float weightWP);
 	// functions below required by base class

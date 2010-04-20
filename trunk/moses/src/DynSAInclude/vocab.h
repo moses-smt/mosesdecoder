@@ -6,59 +6,87 @@
 #include "types.h"
 #include "file.h"
 #include "utils.h"
+#include "../TypeDef.h"
+#include "../Word.h"
 
 namespace Moses {
 // Vocab maps between strings and uint32 ids.
 
 class Vocab {
 	public:
-	typedef std::map<word_t, wordID_t> Word2Id;
-	typedef std::map<wordID_t, word_t> Id2Word;
 	
-	static const wordID_t kOOVWordID = 0;	 // out of vocabulary word id
-	static const wordID_t kBOSWordID = 1;		
-	static const word_t kBOS;	// beginning of sentence marker
-	static const word_t kEOS;	// end of sentence marker
-	static const word_t kOOVWord;	// <unk>
-	Vocab(bool sntMarkers = true):closed_(false) {
+	typedef std::map<Word, wordID_t> Word2Id;
+	typedef std::map<wordID_t, Word> Id2Word;
+	
+	Vocab(bool sntMarkers = true): 
+		m_closed(false),
+		m_kOOVWordID(0),
+		m_kBOSWordID(1)
+	{
+		InitSpecialWords();
 		if(sntMarkers) {
-			getWordID(kBOS);	// added in case not observed in corpus
-			getWordID(kEOS);
+			GetWordID(m_kBOSWord);	// added in case not observed in corpus
+			GetWordID(m_kEOSWord);
 		}
 	}	
 	// if no file then must allow new words
 	// specify whether more words can be added via 'closed'
 	// assume that if a vocab is loaded from file then it should be closed.
-	Vocab(const std::string & vocab_path, bool closed = true) {
-		assert(load(vocab_path, closed));	
+	Vocab(const std::string & vocab_path, const FactorDirection& direction, 
+		const FactorList& factors, bool closed = true):
+		m_kOOVWordID(0),
+		m_kBOSWordID(1)
+	{
+		InitSpecialWords();
+		assert( Load(vocab_path, direction, factors, closed));	
 	}
-	Vocab(FileHandler * fin, bool closed = true) {
-		assert(load(fin, closed));	
+	Vocab(FileHandler * fin, const FactorDirection& direction, 
+		const FactorList& factors, bool closed = true):
+		m_kOOVWordID(0),
+		m_kBOSWordID(1)
+	{
+		InitSpecialWords();
+		assert( Load(fin, direction, factors, closed));	
 	}
 	~Vocab() {}
-	wordID_t getWordID(const word_t & word);
-	word_t getWord(wordID_t id);
-	bool inVocab(wordID_t id);
-	bool inVocab(const word_t & word);
-	uint32_t size() { return words2ids_.size(); }
-	void makeClosed() { closed_ = true; }
-	void makeOpen() { closed_ = false; }
-	bool isClosed() { return closed_; }
-	bool save(const std::string & vocab_path);
-	bool save(FileHandler* fout);
-	bool load(const std::string & vocab_path, bool closed = true);
-	bool load(FileHandler* fin, bool closed = true);
-	void printVocab();
-	Word2Id::const_iterator vocabStart() {
-		return words2ids_.begin();
-	}
-	Word2Id::const_iterator vocabEnd() {
-		return words2ids_.end();
-	}
-private:
-	Word2Id words2ids_;	// map from strings to word ids
-	Id2Word ids2words_;	// map from ids to strings
-	bool closed_;	// can more words be added
+	// parse 'word' into factored Word and get id
+	wordID_t GetWordID(const std::string& word, const FactorDirection& direction, 
+		const FactorList& factors, bool isNonTerminal);
+	wordID_t GetWordID(const Word& word);
+	Word& GetWord(wordID_t id);
+	inline const wordID_t GetkOOVWordID() { return m_kOOVWordID; }
+	inline const wordID_t GetBOSWordID() { return m_kBOSWordID; }
+	inline const Word& GetkOOVWord() { return m_kOOVWord; }
+	inline const Word& GetkBOSWord() { return m_kBOSWord; }
+	inline const Word& GetkEOSWord() { return m_kEOSWord; }
+
+	bool InVocab(wordID_t id);
+	bool InVocab(const Word& word);
+	uint32_t Size() { return m_words2ids.size(); }
+	void MakeClosed() { m_closed = true; }
+	void MakeOpen() { m_closed = false; }
+	bool IsClosed() { return m_closed; }
+	bool Save(const std::string & vocab_path);
+	bool Save(FileHandler* fout);
+	bool Load(const std::string & vocab_path, const FactorDirection& direction, 
+		const FactorList& factors, bool closed = true);
+	bool Load(FileHandler* fin, const FactorDirection& direction, 
+		const FactorList& factors, bool closed = true);
+	void PrintVocab();
+protected:
+	bool m_closed;	// can more words be added
+	
+	const wordID_t m_kOOVWordID;	 // out of vocabulary word id
+	const wordID_t m_kBOSWordID;		
+	Word m_kBOSWord;	// beginning of sentence marker
+	Word m_kEOSWord;	// end of sentence marker
+	Word m_kOOVWord;	// <unk>
+
+	const Word InitSpecialWord( const string& type); // initialize special word like kBOS, kEOS
+	void InitSpecialWords();	
+
+	Word2Id m_words2ids;	// map from words to word ids
+	Id2Word m_ids2words;	// map from ids to words
 };
 
 }
