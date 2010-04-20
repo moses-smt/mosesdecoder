@@ -150,6 +150,7 @@ libmoses_la_SOURCES = \
 	LanguageModelRemote.cpp \
 	LanguageModelSingleFactor.cpp \
 	LanguageModelSkip.cpp \
+	LanguageModelParallelBackoff.cpp \
 	TrellisPath.cpp \
 	TrellisPathCollection.cpp \
 	LexicalReordering.cpp \
