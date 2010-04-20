@@ -16,7 +16,7 @@ while (<INI>) {
     $section = $1;
   }
   if (/^[0-9]/) {
-    if ($section eq "ttable-file" || $section eq "lmodel-file") {
+    if ($section eq "ttable-file") {
       chomp;
       my ($a, $b, $c, $d, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
@@ -24,7 +24,7 @@ while (<INI>) {
         if ! -s $abs;
       $_ = "$a $b $c $d $abs\n";
     }
-    if ($section eq "generation-file") {
+    if ($section eq "generation-file" || $section eq "lmodel-file") {
       chomp;
       my ($a, $b, $c, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
