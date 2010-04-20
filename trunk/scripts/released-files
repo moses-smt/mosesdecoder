@@ -35,6 +35,7 @@ training/filter-and-binarize-model-given-input.pl
 training/filter-rule-table.py
 training/lexical-reordering/score
 training/memscore/memscore
+training/zmert-moses.pl
 training/mert-moses.pl
 training/mert-moses-new.pl
 training/phrase-extract/extract
