@@ -146,6 +146,9 @@ int LexicalReorderingState::ComparePrevScores(const Scores *other) const {
   if(other == NULL)
     return -1;
 
+	if(m_prevScore == NULL)
+    return +1;
+
   const Scores &my = *m_prevScore;
   const Scores &their = *other;
   for(size_t i = m_offset; i < m_offset + m_configuration.GetNumberOfTypes(); i++)
