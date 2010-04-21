@@ -37,6 +37,8 @@ If the phrase translation table is already filtered, fill 1 and 0 otherwise.
 tableFilterLabel = 1 
 Directory + name of the (output) weight parameter matrix (e.g. ./data/weightMatrix).
 weightMatrixFile = 
+Need to train the weight matrix (If you have trained the weight matrix, then use 0)? 1. Yes, 0. No. 
+weightMatrixTrainLabel = 1
 Directory + name of the (output) sentence phrase options table (e.g. ./data/phraseOption).
 phraseOptionFile = 
 Directory + name of the test corpus (Used for extracting the phrase options).

@@ -108,6 +108,8 @@ int main(int argc, char *argv[])
     confFile<<"tableFilterLabel = 1 \n";
     confFile<<"Directory + name of the (output) weight parameter matrix (e.g. ./data/weightMatrix).\n";
     confFile<<"weightMatrixFile = \n";
+    confFile<<"Need to train the weight matrix (If you have trained the weight matrix, then use 0)? 1. Yes, 0. No. \n";
+    confFile<<"weightMatrixTrainLabel = 1\n";
     confFile<<"Directory + name of the (output) sentence phrase options table (e.g. ./data/phraseOption).\n";
     confFile<<"phraseOptionFile = \n";
     confFile<<"Directory + name of the test corpus (Used for extracting the phrase options).\n";
