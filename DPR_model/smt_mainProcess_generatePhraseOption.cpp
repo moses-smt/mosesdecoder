@@ -41,9 +41,10 @@ Input:
                     0: collect phrase options for one sentence and output, use less memory but slower
 19. maxTranslation --- the maximum number of translation for each source phrase, if 0, use all translations
 20. minTrainingExample --- the minimum number of training examples required
+21. weightMatrixTrainLabel -- 1: train the weigth matrix; 2. Use the existing weight matrix
 Output:
-21. fout_weightMatrix (weightMatrixFile) --- the output file for the weight matrix; 
-22. fout_phraseOptionDB (phraseOptionFile) --- the phrase option database.
+22. fout_weightMatrix (weightMatrixFile) --- the output file for the weight matrix; 
+23. fout_phraseOptionDB (phraseOptionFile) --- the phrase option database.
 ****************************************************************************************************************/
 
 #include <cstdlib>
@@ -81,6 +82,7 @@ int main(int argc, char *argv[])
     bool batchLabel;             //the batch output label
     int maxTranslations;         //the maximum number of translations
     int minTrainingExample;      //the minimum number of training examples
+    bool weightMatrixTrainLabel; //1 if need train the weight matrix, 0 otherwise
     
     
     //1.1 Process the arguments
@@ -361,7 +363,16 @@ int main(int argc, char *argv[])
                        istringstream temp(directoryName);
                        temp>>batchLabel;
                        successFlag[21]=1;
-                       }   
+                       }  
+                       
+                  //configulation 23. weightMatrixTrainLabel
+                  else if (strcmp(fileName,"weightMatrixTrainLabel")==0)
+                  {
+                       //cout<<"20\n";
+                       istringstream temp(directoryName);
+                       temp>>weightMatrixTrainLabel;
+                       successFlag[22]=1;
+                       }    
                        
                   //cout<<fileName<<'\n';
                   //cout<<directoryName<<'\n';
@@ -438,6 +449,9 @@ int main(int argc, char *argv[])
         exit(1);}
     else if (!successFlag[21])
        {cerr<<"Error in smt_mainProcess_generatePhraseOption: missing the batch output label (batchOutputLabel) for outputing the sentence phrase options.\n";
+        exit(1);}
+    else if (!successFlag[22])
+       {cerr<<"Error in smt_mainProcess_generatePhraseOption: missing the weight matrix train label (weightMatrixTrainLabel) for the DPR model.\n";
         exit(1);}
     //else check the open state of input files
     else
@@ -571,6 +585,7 @@ int main(int argc, char *argv[])
         cout<<"eTol = "<<eTol<<'\n';
         cout<<"\nFor outputing the sentence phrase options:\n";
         cout<<"batchOutputLabel = "<<batchLabel<<'\n';
+        cout<<"weightMatrixTrainLabel = "<<weightMatrixTrainLabel<<'\n';
         cout<<"----------------------------------------------------------------\n\n";
         //system("PAUSE");
         }
@@ -585,79 +600,81 @@ int main(int argc, char *argv[])
     
     //********************************************************************************************************
     //2.read the phrase pair extraction table
-    time_prev=time(NULL);
-    cout<<"Step 1. Read the phrase pair extraction table (might take a bit long time, please be patient).\n";
-    sourceReorderingTable* trainingPhraseTable = new sourceReorderingTable(phraseDBFile,classSetup,distCut);
-    time_next=time(NULL);
-    cout<<"----------------------------------------------------------------\n";
-    cout<<"Processed time: "<<time_next-time_prev<<" seconds.\n";
-    cout<<"----------------------------------------------------------------\n\n";
-    //********************************************************************************************************
-    
-    
-    
-    //********************************************************************************************************
-    //3.train the weight clusters
-    
-    time_prev=time(NULL);
-    cout<<"Step 2. train the weight clusters.\n";
-    vector<string> clusterNames = trainingPhraseTable->getClusterNames();
-    int numClusters = trainingPhraseTable->getNumCluster();
-    int processClusters=0;                               //store the number of clusters processed
-    weightMatrixW* weightMatrix = new weightMatrixW();
-    ifstream phraseTableFile(phraseDBFile,ios::binary); //re-open the phraseDBFile to get the features
-    ofstream weightMatrixFile(weightMatrixFileName,ios::out); //output the weight matrix
-    
-    for (int i=0; i<numClusters; i++)
+    weightMatrixW* weightMatrix;
+    if (weightMatrixTrainLabel)
     {
-        //3.1 For each cluster
-        string sourcePhrase=clusterNames[i];
-        int numberExample=trainingPhraseTable->getClusterMember(sourcePhrase);
-        
-        if (numberExample>=minTrainingExample)
+        time_prev=time(NULL);
+        cout<<"Step 1. Read the phrase pair extraction table (might take a bit long time, please be patient).\n";
+        sourceReorderingTable* trainingPhraseTable = new sourceReorderingTable(phraseDBFile,classSetup,distCut);
+        time_next=time(NULL);
+        cout<<"----------------------------------------------------------------\n";
+        cout<<"Processed time: "<<time_next-time_prev<<" seconds.\n";
+        cout<<"----------------------------------------------------------------\n\n";
+        //********************************************************************************************************
+    
+    
+    
+        //********************************************************************************************************
+        //3.train the weight clusters
+    
+        time_prev=time(NULL);
+        cout<<"Step 2. train the weight clusters.\n";
+        vector<string> clusterNames = trainingPhraseTable->getClusterNames();
+        int numClusters = trainingPhraseTable->getNumCluster();
+        int processClusters=0;                               //store the number of clusters processed
+        weightMatrix = new weightMatrixW();
+        ifstream phraseTableFile(phraseDBFile,ios::binary); //re-open the phraseDBFile to get the features
+        ofstream weightMatrixFile(weightMatrixFileName,ios::out); //output the weight matrix
+    
+        for (int i=0; i<numClusters; i++)
         {
-            processClusters++;
-            //3.2 Get the training examples
-            vector<vector<int> > trainingTable=trainingPhraseTable->getExamples(sourcePhrase,phraseTableFile);
+            //3.1 For each cluster
+            string sourcePhrase=clusterNames[i];
+            int numberExample=trainingPhraseTable->getClusterMember(sourcePhrase);
         
-            //3.3 Train the weight cluster
-            weightClusterW weightCluster(sourcePhrase, classSetup);
-            weightCluster.structureLearningW(trainingTable, maxRound, step, eTol);
+            if (numberExample>=minTrainingExample)
+            {
+                processClusters++;
+                //3.2 Get the training examples
+                vector<vector<int> > trainingTable=trainingPhraseTable->getExamples(sourcePhrase,phraseTableFile);
         
-            //3.4 write the weight cluster and update the weight matrix
-            unsigned long long startPos=weightCluster.writeWeightCluster(weightMatrixFile);
-            weightMatrix->insertWeightCluster(sourcePhrase,startPos);
-            }
+                //3.3 Train the weight cluster
+                weightClusterW weightCluster(sourcePhrase, classSetup);
+                weightCluster.structureLearningW(trainingTable, maxRound, step, eTol);
+        
+                //3.4 write the weight cluster and update the weight matrix
+                unsigned long long startPos=weightCluster.writeWeightCluster(weightMatrixFile);
+                weightMatrix->insertWeightCluster(sourcePhrase,startPos);
+                }
         
         
-        //3.5 Notice
-        if ((i+1)%100==0)
-        {
-            cout<<".";
-            if ((i+1)%1000==0)
-               cout<<'\n';
-            }
+            //3.5 Notice
+            if ((i+1)%100==0)
+            {
+                cout<<".";
+                if ((i+1)%1000==0)
+                   cout<<'\n';
+                   }
            
-        }
-    cout<<"\nThe number of clusters been trained: "<<processClusters<<".\n";
+            }
+            cout<<"\nThe number of clusters been trained: "<<processClusters<<".\n";
         
-    //3.5 Output the weight matrix 
+        //3.5 Output the weight matrix 
     
-    weightMatrix->writeWeightMatrix(weightMatrixFilePosName);
-    weightMatrixFile.close();
-    phraseTableFile.close();
-    delete trainingPhraseTable;
+        weightMatrix->writeWeightMatrix(weightMatrixFilePosName);
+        weightMatrixFile.close();
+        phraseTableFile.close();
+        delete trainingPhraseTable;
     
-    time_next=time(NULL);
-    cout<<'\n';
-    cout<<"----------------------------------------------------------------\n";
-    cout<<"Processed time: "<<time_next-time_prev<<" seconds.\n";
-    cout<<"----------------------------------------------------------------\n\n";
-    
-    /*
-    If the weight matrix has already trained, then can comment all the procedures in 3. but use the following*/
-    //------------------------------------------------------------------------
-    //weightMatrixW* weightMatrix = new weightMatrixW(weightMatrixFilePosName);
+        time_next=time(NULL);
+        cout<<'\n';
+        cout<<"----------------------------------------------------------------\n";
+        cout<<"Processed time: "<<time_next-time_prev<<" seconds.\n";
+        cout<<"----------------------------------------------------------------\n\n";
+        }
+    else {
+        weightMatrix = new weightMatrixW(weightMatrixFilePosName);
+        }
     //-------------------------------------------------------------------------
     
     
