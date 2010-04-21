@@ -55,6 +55,7 @@ my $default_triples = {
     # these two basic models exist even if not specified, they are
     # not associated with any model file
     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
+	"wDPR" =>[[0.5,0.0,1.5]],    #the DPR weight
 };
 
 my $additional_triples = {
@@ -80,7 +81,7 @@ my $additional_triples = {
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
 # uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex";
+my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex wDPR=wDPR";
 my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
