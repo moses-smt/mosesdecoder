@@ -30,6 +30,8 @@
 		1C5009C00FB9E09700DFD24F /* FeatureFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */; };
 		1C5009C10FB9E09700DFD24F /* FFState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C5009BD0FB9E09700DFD24F /* FFState.cpp */; };
 		1C5009C20FB9E09700DFD24F /* FFState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C5009BE0FB9E09700DFD24F /* FFState.h */; };
+		1C614C9E117F16CB00CFC93F /* LanguageModelParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C614C9C117F16CB00CFC93F /* LanguageModelParallelBackoff.cpp */; };
+		1C614C9F117F16CB00CFC93F /* LanguageModelParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C614C9D117F16CB00CFC93F /* LanguageModelParallelBackoff.h */; };
 		1C66276E116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */; };
 		1C679DC81162099C00DC3892 /* LexicalReorderingState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */; };
 		1C679DC91162099C00DC3892 /* LexicalReorderingState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C679DC31162099C00DC3892 /* LexicalReorderingState.h */; };
@@ -239,6 +241,8 @@
 		1C5009BC0FB9E09700DFD24F /* FeatureFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureFunction.h; path = src/FeatureFunction.h; sourceTree = "<group>"; };
 		1C5009BD0FB9E09700DFD24F /* FFState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFState.cpp; path = src/FFState.cpp; sourceTree = "<group>"; };
 		1C5009BE0FB9E09700DFD24F /* FFState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FFState.h; path = src/FFState.h; sourceTree = "<group>"; };
+		1C614C9C117F16CB00CFC93F /* LanguageModelParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelParallelBackoff.cpp; path = src/LanguageModelParallelBackoff.cpp; sourceTree = "<group>"; };
+		1C614C9D117F16CB00CFC93F /* LanguageModelParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelParallelBackoff.h; path = src/LanguageModelParallelBackoff.h; sourceTree = "<group>"; };
 		1C66276D116A05BF0063ACB8 /* PhraseDictionaryNewFormatChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNewFormatChart.cpp; path = src/PhraseDictionaryNewFormatChart.cpp; sourceTree = "<group>"; };
 		1C679DC21162099C00DC3892 /* LexicalReorderingState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingState.cpp; path = src/LexicalReorderingState.cpp; sourceTree = "<group>"; };
 		1C679DC31162099C00DC3892 /* LexicalReorderingState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReorderingState.h; path = src/LexicalReorderingState.h; sourceTree = "<group>"; };
@@ -530,6 +534,8 @@
 				1C8CFE3E0AD67A9700FA22E2 /* LanguageModelJoint.h */,
 				1C8CFE3F0AD67A9700FA22E2 /* LanguageModelMultiFactor.cpp */,
 				1C8CFE400AD67A9700FA22E2 /* LanguageModelMultiFactor.h */,
+				1C614C9C117F16CB00CFC93F /* LanguageModelParallelBackoff.cpp */,
+				1C614C9D117F16CB00CFC93F /* LanguageModelParallelBackoff.h */,
 				1CD83167116B66FB00AF05C2 /* LanguageModelRemote.cpp */,
 				1CD83168116B66FB00AF05C2 /* LanguageModelRemote.h */,
 				1C8CFE410AD67A9700FA22E2 /* LanguageModelSingleFactor.cpp */,
@@ -791,6 +797,7 @@
 				1CD9E958116E4EB700B70B73 /* types.h in Headers */,
 				1CD9E959116E4EB700B70B73 /* utils.h in Headers */,
 				1CD9E95B116E4EB700B70B73 /* vocab.h in Headers */,
+				1C614C9F117F16CB00CFC93F /* LanguageModelParallelBackoff.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -934,6 +941,7 @@
 				1CD9E8E6116E4A2600B70B73 /* PhraseDictionaryDynSuffixArray.cpp in Sources */,
 				1CD9E956116E4EB700B70B73 /* file.cpp in Sources */,
 				1CD9E95A116E4EB700B70B73 /* vocab.cpp in Sources */,
+				1C614C9E117F16CB00CFC93F /* LanguageModelParallelBackoff.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
