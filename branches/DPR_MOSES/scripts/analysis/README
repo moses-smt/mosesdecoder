@@ -1,0 +1,10 @@
+Put any scripts useful for human analysis of MT output here.
+
+sentence-by-sentence.pl [EVH]: show comparison of sentences in reference translation(s)/system output(s)/(truth) in colorful format
+-- show all sentences given, with non-matching words in the system output marked, BLEU scores given by sentence, and matching n-grams shown in a table
+-- requires all input files be utf8-encoded (you can convert a file with `cat FILE | perl -n -e 'binmode(STDOUT, ":utf8"); print;' > FILE.utf8`)
+
+show-phrases-used.pl [EVH]: draw colorful diagram of which source phrases map to which target phrases
+-- requires the Perl GD module, which in turn requires that gd be installed and in LD_LIBRARY_PATH
+-- show average length of source phrases used for each sentence and overall
+-- command-line options -r for reference and -s for source; lone filenames are taken to be system outputs
