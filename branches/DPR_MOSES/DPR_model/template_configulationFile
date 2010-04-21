@@ -1,0 +1,73 @@
+The information of the input source/target word corpora:
+======================================================================================
+Directory + name of the source corpus  (e.g. ./data/source.fr).
+SourceCorpusFile = 
+Directory + name of the target corpus  (e.g. ./data/target.en).
+TargetCorpusFile = 
+======================================================================================
+
+
+The information of the input source/target word class dictionaries:
+======================================================================================
+Directory + name of the source word class dictionary (e.g. ./corpus/fr.vcb.classes).
+SourceWordClassFile = 
+Directory + name of the target word class dictionary (e.g. ./corpus/en.vcb.classes).
+TargetWordClassFile = 
+======================================================================================
+
+
+For extracting the phrase pairs with their reordering distances, please define:
+======================================================================================
+Directory + name of the word alignment file (e.g. ./model/aligned.grow-diag-final-and).
+alignmentFile = 
+Directory + name of the (output) phrase pairs table (e.g. ./data/extractPhraseTrainTable).
+phraseTableFile = 
+(Optional) Directory + name of the test corpus (if filled, only extract the phrases from the training corpora that appear in this file).
+TestFileName = 
+======================================================================================
+
+
+For generating the phrase reordering probabilities with structured learning, please define:
+======================================================================================
+Directory + name of the (input) phrase translation table (recommended using filtered Moses's phrase table) (e.g. ./model/phrase-table).
+phraseTranslationTable = 
+Extract the top N translations for a source phrase (based on the probabilities by Moses's phrase table). 
+maxTranslations = 100 
+If the phrase translation table is already filtered, fill 1 and 0 otherwise.
+tableFilterLabel = 1 
+Directory + name of the (output) weight parameter matrix (e.g. ./data/weightMatrix).
+weightMatrixFile = 
+Directory + name of the (output) sentence phrase options table (e.g. ./data/phraseOption).
+phraseOptionFile = 
+Directory + name of the test corpus (Used for extracting the phrase options).
+TestFile = 
+Please define the style of outputing the sentence phrase options: If 1, store all sentence options first then output them at once, use large memory but faster; if 0, collect phrase options for one sentence and output, use less memory but slower.
+batchOutputLabel = 1 
+======================================================================================
+
+
+Please fill in the parameters for seting up the structured learning framework:
+======================================================================================
+The maximum length of the phrases extracted (e.g. 7 as used in MOSES).
+maxPhraseLength = 7
+The class setup of the structured learning framework (i.e. 3 or 5).
+classSetup = 3
+Prune the phrase pairs whose reordering distance (d) is greater than a const distance (distCut).
+distCut = 15
+The maximum length of the ngram features in the ngram dictionary (e.g. usually choose 3 or 4).
+maxNgramSize = 4
+The window size around the source phrases (for extracting the ngram features, usually choose 3 or 4).
+windowSize = 3
+Prune the ngram features that occur less than the minimum number of occurance (minPrune).
+minPrune = 1
+Prune the cluster that has examples less than the minimum number of training examples (minTrainingExample).
+minTrainingExample = 10
+The maximum iteration for the perceptron-based structured learning (please refer to Ni et al., 2009) algorithm.
+maxRound = 500
+The step size for the perceptron-based structured learning (please refer to Ni et al., 2009) algorithm.
+step = 0.05
+The error tolerance for the perceptron-based structured learning (please refer to Ni et al., 2009) algorithm.
+eTol = 0.001
+======================================================================================
+
+
