@@ -1605,8 +1605,8 @@ sub create_ini {
 	    $weight_d_count += $model->{"numfeatures"};
 	    my $table_file = "$___MODEL_DIR/reordering-table";
 	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-	    $table_file .= ".";
 	    $table_file .= ".$factor" unless $___NOT_FACTORED;
+	    $table_file .= ".";
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
 	    $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
