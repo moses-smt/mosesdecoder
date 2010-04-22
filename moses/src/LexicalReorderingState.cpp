@@ -143,11 +143,11 @@ int LexicalReorderingState::ComparePrevScores(const Scores *other) const {
   if(m_prevScore == other)
     return 0;
     
+  // The pointers are NULL if a phrase pair isn't found in the reordering table.
   if(other == NULL)
     return -1;
-
-	if(m_prevScore == NULL)
-    return +1;
+  if(m_prevScore == NULL)
+    return 1;
 
   const Scores &my = *m_prevScore;
   const Scores &their = *other;
