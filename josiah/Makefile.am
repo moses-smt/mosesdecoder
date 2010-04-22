@@ -3,6 +3,7 @@ josiah_SOURCES = Derivation.cpp \
 	AnnealingSchedule.cpp \
 	Decoder.cpp \
     Dependency.cpp \
+    DiscriminativeLMFeature.cpp \
 	InputSource.cpp \
 	TrainingSource.cpp \
 	Josiah.cpp \
@@ -41,6 +42,7 @@ corpustrainer_SOURCES = Derivation.cpp \
         AnnealingSchedule.cpp \
         Decoder.cpp \
     Dependency.cpp \
+    DiscriminativeLMFeature.cpp \
         InputSource.cpp \
         TrainingSource.cpp \
         Optimizer.cpp \
@@ -77,6 +79,7 @@ samplerank_SOURCES = Derivation.cpp \
         AnnealingSchedule.cpp \
         Decoder.cpp \
     Dependency.cpp \
+    DiscriminativeLMFeature.cpp \
         InputSource.cpp \
         GainFunction.cpp \
         Gibbler.cpp \
