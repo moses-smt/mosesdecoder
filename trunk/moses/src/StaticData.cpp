@@ -743,6 +743,17 @@ bool StaticData::LoadPhraseTables()
 		const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
 		vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
 
+		if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
+			VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
+			for(size_t i = 1; i < translationVector.size(); i++)
+				maxTargetPhrase.push_back(maxTargetPhrase[0]);
+		} else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
+			stringstream strme;
+			strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
+			UserMessage::Add(strme.str());
+			return false;
+		}
+
 		size_t index = 0;
 		size_t weightAllOffset = 0;
 		for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) 

@@ -88,7 +88,7 @@ class LexicalReorderingState : public FFState {
         m_prevScore(topt.GetCachedScores(m_configuration.GetScoreProducer())) {}
 
     inline LexicalReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset) 
-      : m_configuration(config), m_direction(dir), m_offset(offset) {}
+      : m_configuration(config), m_direction(dir), m_offset(offset), m_prevScore(NULL) {}
 
     // copy the right scores in the right places, taking into account forward/backward, offset, collapse
     void CopyScores(Scores& scores, const TranslationOption& topt, ReorderingType reoType) const;
