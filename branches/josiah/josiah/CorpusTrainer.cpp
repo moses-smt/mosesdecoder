@@ -155,6 +155,7 @@ int main(int argc, char** argv) {
   bool randomScan;
   size_t lag;
   float flip_prob, merge_split_prob, retrans_prob;
+  float log_base_factor;
   po::options_description desc("Allowed options");
   desc.add_options()
   ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -230,7 +231,8 @@ int main(int argc, char** argv) {
   ("lag", po::value<size_t>(&lag)->default_value(10), "Lag between collecting samples")
   ("flip-prob", po::value<float>(&flip_prob)->default_value(0.6f), "Probability of applying flip operator during random scan")
   ("merge-split-prob", po::value<float>(&merge_split_prob)->default_value(0.2f), "Probability of applying merge-split operator during random scan")
-  ("retrans-prob", po::value<float>(&retrans_prob)->default_value(0.2f), "Probability of applying retrans operator during random scan");
+  ("retrans-prob", po::value<float>(&retrans_prob)->default_value(0.2f), "Probability of applying retrans operator during random scan")
+    ("log-base-factor", po::value<float>(&log_base_factor)->default_value(1.0f), "Scaling factor for log probabilities in translation and language models");
   
   
   po::options_description cmdline_options;
@@ -286,7 +288,14 @@ int main(int argc, char** argv) {
   if (do_timing) {
     timer.on();
   }
+
   
+  if (log_base_factor != 1.0) {
+      cerr << "Setting log base factor to " << log_base_factor << endl;
+      SetLogBaseFactor(log_base_factor);
+  }
+ 
+ 
   //set up moses
   initMoses(mosesini,weightfile,debug);
   auto_ptr<Decoder> decoder;
