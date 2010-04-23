@@ -93,7 +93,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	const StaticData &staticData = StaticData::Instance();
+	//const StaticData &staticData = StaticData::Instance();
+	StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
 	if (!StaticData::LoadDataStatic(&parameter))
 		return EXIT_FAILURE;
 
@@ -122,14 +123,16 @@ int main(int argc, char* argv[])
 	size_t lineCount = 0;
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
 	{
-			// note: source is only valid within this while loop!
+		// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
+		lineCount++;
 
-    VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
+		VERBOSE(2,"\nTRANSLATING(" << lineCount << "): " << *source);
 
 		Manager manager(*source, staticData.GetSearchAlgorithm());
 		manager.ProcessSentence();
+
 
 		if (staticData.GetOutputWordGraph())
 			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
@@ -228,6 +231,7 @@ int main(int argc, char* argv[])
 
         manager.CalcDecoderStatistics();
 
+		staticData.SetNumberOfSentences(lineCount);
 	}
 
 	delete ioWrapper;

@@ -102,6 +102,7 @@ Parameter::Parameter()
   AddParam("lmbr-r", "ngram precision decay value for lattice mbr");
   AddParam("lmbr-map-weight", "weight given to map solution when doing lattice MBR (default 0)");
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
+	AddParam("clean-lm-cache", "clean language model caches after N translations (default N=1)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");

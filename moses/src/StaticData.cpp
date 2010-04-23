@@ -378,6 +378,10 @@ bool StaticData::LoadData(Parameter *parameter)
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
 	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
 
+
+  m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
+    Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
+
 	// Read in constraint decoding file, if provided
 	if(m_parameter->GetParam("constraint").size()) {
 	  if (m_parameter->GetParam("search-algorithm").size() > 0
@@ -1034,8 +1038,15 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 	return decodeGraphs;
 }
 
+
+bool StaticData::LMCacheCleanup() const{
+	if (m_lmcache_cleanup_threshold)
+  	if (m_sentences_done % m_lmcache_cleanup_threshold == 0)
+    	return 1;
+	return 0;
+}
+
 #include "PhraseDictionary.h"
-	
 void StaticData::CleanUpAfterSentenceProcessing() const
 {
 	
@@ -1050,12 +1061,14 @@ void StaticData::CleanUpAfterSentenceProcessing() const
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
   
-  //something LMs could do after each sentence 
-  LMList::const_iterator iterLM;
-	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
-	{
-		LanguageModel &languageModel = **iterLM;
-    languageModel.CleanUpAfterSentenceProcessing();
+	if (LMCacheCleanup()){
+		//something LMs could do after each sentence 
+		LMList::const_iterator iterLM;
+		for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
+		{
+			LanguageModel &languageModel = **iterLM;
+			languageModel.CleanUpAfterSentenceProcessing();
+		}
 	}
 }
 
