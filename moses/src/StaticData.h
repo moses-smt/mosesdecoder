@@ -164,7 +164,6 @@ protected:
   float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
   float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
     
-	size_t m_sentences_done; //! number of translations already done
 	size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
 
 	bool m_timeout; //! use timeout
@@ -477,7 +476,7 @@ public:
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
-	void CleanUpAfterSentenceProcessing() const;
+	void CleanUpAfterSentenceProcessing(size_t m_sentences_done=-1) const;
 	
 	const std::vector<float>& GetAllWeights() const
 	{
@@ -528,8 +527,7 @@ public:
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
 
-	void SetNumberOfSentences(size_t v) { m_sentences_done=v; }
-	bool LMCacheCleanup() const;
+	bool LMCacheCleanup(size_t m_sentences_done) const;
 	
 	bool GetOutputSearchGraph() const { return m_outputSearchGraph; }
 	bool GetOutputSearchGraphExtended() const { return m_outputSearchGraphExtended; }
