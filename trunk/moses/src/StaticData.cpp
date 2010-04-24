@@ -1039,7 +1039,8 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 }
 
 
-bool StaticData::LMCacheCleanup() const{
+bool StaticData::LMCacheCleanup(size_t m_sentences_done) const{
+	if (m_sentences_done==-1) return 1;
 	if (m_lmcache_cleanup_threshold)
   	if (m_sentences_done % m_lmcache_cleanup_threshold == 0)
     	return 1;
@@ -1047,7 +1048,7 @@ bool StaticData::LMCacheCleanup() const{
 }
 
 #include "PhraseDictionary.h"
-void StaticData::CleanUpAfterSentenceProcessing() const
+void StaticData::CleanUpAfterSentenceProcessing(size_t m_sentences_done) const
 {
 	
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
@@ -1061,7 +1062,7 @@ void StaticData::CleanUpAfterSentenceProcessing() const
 	for(size_t i=0;i<m_generationDictionary.size();++i)
 		m_generationDictionary[i]->CleanUp();
   
-	if (LMCacheCleanup()){
+	if (LMCacheCleanup(m_sentences_done)){
 		//something LMs could do after each sentence 
 		LMList::const_iterator iterLM;
 		for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)

@@ -145,6 +145,7 @@ int main(int argc, char* argv[])
 		//cerr << *source << endl;
 		
 		MosesChart::Manager manager(*source);
+                StaticData::Instance().InitializeBeforeSentenceProcessing(*source);
 		manager.ProcessSentence();
 
 		assert(!staticData.UseMBR());
@@ -201,7 +202,8 @@ int main(int argc, char* argv[])
 
 		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
     
-		manager.CalcDecoderStatistics();    
+		manager.CalcDecoderStatistics(); 
+                StaticData::Instance().CleanUpAfterSentenceProcessing(lineCount);
 	} // while(ReadInput
 	
 	delete ioWrapper;

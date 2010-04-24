@@ -44,13 +44,13 @@ Manager::Manager(InputType const& source)
 ,m_hypoStackColl(source, *this)
 ,m_transOptColl(source, StaticData::Instance().GetDecodeStepVL(source), m_hypoStackColl)
 {
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
+//	const StaticData &staticData = StaticData::Instance();
+//	staticData.InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager()
 {
-	StaticData::Instance().CleanUpAfterSentenceProcessing();
+//	StaticData::Instance().CleanUpAfterSentenceProcessing();
 }
 
 void Manager::ProcessSentence()

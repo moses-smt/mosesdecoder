@@ -93,8 +93,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	//const StaticData &staticData = StaticData::Instance();
-	StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
+	const StaticData &staticData = StaticData::Instance();
 	if (!StaticData::LoadDataStatic(&parameter))
 		return EXIT_FAILURE;
 
@@ -131,6 +130,7 @@ int main(int argc, char* argv[])
 		VERBOSE(2,"\nTRANSLATING(" << lineCount << "): " << *source);
 
 		Manager manager(*source, staticData.GetSearchAlgorithm());
+		StaticData::Instance().InitializeBeforeSentenceProcessing(*source);
 		manager.ProcessSentence();
 
 
@@ -230,8 +230,7 @@ int main(int argc, char* argv[])
         IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
 
         manager.CalcDecoderStatistics();
-
-		staticData.SetNumberOfSentences(lineCount);
+		StaticData::Instance().CleanUpAfterSentenceProcessing(lineCount); 
 	}
 
 	delete ioWrapper;

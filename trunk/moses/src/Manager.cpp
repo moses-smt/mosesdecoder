@@ -57,8 +57,8 @@ Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 ,m_start(clock())
 ,interrupted_flag(0)
 {
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
+//	const StaticData &staticData = StaticData::Instance();
+//	staticData.InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager() 
@@ -66,7 +66,7 @@ Manager::~Manager()
 	delete m_transOptColl;
 	delete m_search;
 
-	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+//	StaticData::Instance().CleanUpAfterSentenceProcessing();      
 
 	clock_t end = clock();
 	float et = (end - m_start);
