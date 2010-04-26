@@ -150,7 +150,6 @@ libmoses_la_SOURCES = \
 	LanguageModelRemote.cpp \
 	LanguageModelSingleFactor.cpp \
 	LanguageModelSkip.cpp \
-	LanguageModelParallelBackoff.cpp \
 	TrellisPath.cpp \
 	TrellisPathCollection.cpp \
 	LexicalReordering.cpp \
@@ -230,7 +229,9 @@ libmoses_la_SOURCES += rule.pb.cc hypergraph.pb.cc
 endif
 
 if SRI_LM
-libmoses_la_SOURCES += LanguageModelSRI.cpp
+libmoses_la_SOURCES += LanguageModelSRI.cpp \
+						LanguageModelParallelBackoff.cpp 
+
 endif
 
 if IRST_LM
