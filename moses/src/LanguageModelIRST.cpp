@@ -215,14 +215,19 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
-  TRACE_ERR( "reset caches\n");
-  m_lmtb->reset_caches(); 
+	const StaticData &staticData = StaticData::Instance();
+	static int sentenceCount = 0;
+	sentenceCount++;
+	
+	if (staticData.LMCacheCleanup(sentenceCount)){
+		TRACE_ERR( "reset caches\n");
+		m_lmtb->reset_caches(); 
 
 #ifndef WIN32
-  TRACE_ERR( "reset mmap\n");
-  m_lmtb->reset_mmap();
+		TRACE_ERR( "reset mmap\n");
+		m_lmtb->reset_mmap();
 #endif
-  
+  }
 }
 
 void LanguageModelIRST::InitializeBeforeSentenceProcessing(){
