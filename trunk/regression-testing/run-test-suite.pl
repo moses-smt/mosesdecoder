@@ -8,6 +8,8 @@ use Getopt::Long;
 
 ############################################################
 my @tests = qw (
+  chart.target-syntax
+  chart.hierarchical
   phrase.basic-surface-only
   phrase.ptable-filtering
   phrase.multi-factor
