@@ -219,7 +219,7 @@ void Hypothesis::CalcScore()
 	for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter)
 	{
 		const Hypothesis &prevHypo = **iter;
-		const ScoreComponentCollection &scoreBreakdown = prevHypo.GetScoreBreakDown();
+		const ScoreComponentCollection &scoreBreakdown = prevHypo.GetScoreBreakdown();
 
 		m_scoreBreakdown.PlusEquals(scoreBreakdown);
 	}
@@ -416,10 +416,8 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 	out << " " << hypo.GetId()
 			<< " " << hypo.m_targetPhrase
 			//<< " " << outPhrase
-			<< " " << hypo.GetCurrSourceRange()
+			<< " " << hypo.GetCurrSourceRange();
 			//<< " " << hypo.m_currSourceWordsRange
-			<< " " << hypo.GetTotalScore()
-			<< " " << hypo.GetScoreBreakDown();
 	
 	HypoList::const_iterator iter;
 	for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter)
@@ -427,6 +425,9 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 		const Hypothesis &prevHypo = **iter;
 		out << " " << prevHypo.GetId();
 	}
+
+	out << " [total=" << hypo.GetTotalScore() << "]";
+	out << " " << hypo.GetScoreBreakdown();
 
 	//out << endl;
 

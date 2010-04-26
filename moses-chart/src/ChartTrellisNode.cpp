@@ -58,8 +58,8 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
 		// scores
 		assert(scoreChange.GetWeightedScore() == 0); // should only be changing 1 node
 
-		scoreChange = replacementHypo.GetScoreBreakDown();
-		scoreChange.MinusEquals(origNode.GetHypothesis().GetScoreBreakDown());
+		scoreChange = replacementHypo.GetScoreBreakdown();
+		scoreChange.MinusEquals(origNode.GetHypothesis().GetScoreBreakdown());
 		
 		float deltaScore = scoreChange.GetWeightedScore();
 		assert(deltaScore <= 0.0005);
