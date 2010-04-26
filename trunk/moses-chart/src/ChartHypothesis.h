@@ -129,7 +129,7 @@ public:
 	void CleanupArcList();
 	void SetWinningHypo(const Hypothesis *hypo);
 
-	const Moses::ScoreComponentCollection &GetScoreBreakDown() const
+	const Moses::ScoreComponentCollection &GetScoreBreakdown() const
 	{ return m_scoreBreakdown; }
 	float GetTotalScore() const 
 	{ return m_totalScore; }

@@ -277,8 +277,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 {
 	if (hypo != NULL)
 	{
-		//cerr << *hypo << endl;
-		
+		VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);		
 		VERBOSE(3,"Best path: ");
 		Backtrack(hypo);
 		VERBOSE(3,"0" << std::endl);

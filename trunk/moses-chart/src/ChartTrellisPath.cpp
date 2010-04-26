@@ -32,7 +32,7 @@ namespace MosesChart
 
 TrellisPath::TrellisPath(const Hypothesis *hypo)
 :m_finalNode(new TrellisNode(hypo))
-,m_scoreBreakdown(hypo->GetScoreBreakDown())
+,m_scoreBreakdown(hypo->GetScoreBreakdown())
 ,m_totalScore(hypo->GetTotalScore())
 ,m_prevNodeChanged(NULL)
 ,m_prevPath(NULL)
