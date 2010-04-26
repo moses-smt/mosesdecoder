@@ -476,7 +476,7 @@ public:
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	void InitializeBeforeSentenceProcessing(InputType const&) const;
-	void CleanUpAfterSentenceProcessing(size_t m_sentences_done=-1) const;
+	void CleanUpAfterSentenceProcessing() const;
 	
 	const std::vector<float>& GetAllWeights() const
 	{
@@ -527,7 +527,8 @@ public:
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
 
-	bool LMCacheCleanup(size_t m_sentences_done) const;
+	size_t GetLMCacheCleanupThreshold() const
+	{ return m_lmcache_cleanup_threshold; }
 	
 	bool GetOutputSearchGraph() const { return m_outputSearchGraph; }
 	bool GetOutputSearchGraphExtended() const { return m_outputSearchGraphExtended; }
