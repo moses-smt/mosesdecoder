@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // include appropriate header
 #ifdef LM_SRI
 #  include "LanguageModelSRI.h"
+#include "LanguageModelParallelBackoff.h"
 #endif
 #ifdef LM_IRST
 #  include "LanguageModelIRST.h"
@@ -43,7 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
-#include "LanguageModelParallelBackoff.h"
 
 using namespace std;
 
