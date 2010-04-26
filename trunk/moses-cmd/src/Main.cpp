@@ -130,7 +130,6 @@ int main(int argc, char* argv[])
 		VERBOSE(2,"\nTRANSLATING(" << lineCount << "): " << *source);
 
 		Manager manager(*source, staticData.GetSearchAlgorithm());
-		StaticData::Instance().InitializeBeforeSentenceProcessing(*source);
 		manager.ProcessSentence();
 
 
@@ -230,7 +229,6 @@ int main(int argc, char* argv[])
         IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
 
         manager.CalcDecoderStatistics();
-		StaticData::Instance().CleanUpAfterSentenceProcessing(lineCount); 
 	}
 
 	delete ioWrapper;
