@@ -214,12 +214,25 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 }
 
 
-void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
+bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
+{
+	if (sentences_done==-1) return true;
+	if (m_lmcache_cleanup_threshold)
+		if (sentences_done % m_lmcache_cleanup_threshold == 0)
+			return true;
+	return false;
+}
+	
+
+void LanguageModelIRST::CleanUpAfterSentenceProcessing()
+{
 	const StaticData &staticData = StaticData::Instance();
 	static int sentenceCount = 0;
 	sentenceCount++;
 	
-	if (staticData.LMCacheCleanup(sentenceCount)){
+	size_t lmcache_cleanup_threshold = staticData.GetLMCacheCleanupThreshold();
+	
+	if (LMCacheCleanup(sentenceCount, lmcache_cleanup_threshold)){
 		TRACE_ERR( "reset caches\n");
 		m_lmtb->reset_caches(); 
 
