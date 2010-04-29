@@ -448,7 +448,7 @@ my $decoder_cmd;
 if (defined $___JOBS) {
   $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix zmert -queue-parameters '$queue_flags' -decoder-parameters '$PARAMETERS' -n-best-list '$nbest_file $___N_BEST_LIST_SIZE' -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > moses.out";
 } else {
-  $decoder_cmd = "$___DECODER $PARAMETERS -config $___CONFIG -inputtype $___INPUTTYPE -n-best-list '$nbest_file $___N_BEST_LIST_SIZE' -i $___DEV_F > moses.out";
+  $decoder_cmd = "$___DECODER $PARAMETERS -config $___CONFIG -inputtype $___INPUTTYPE -n-best-list $nbest_file $___N_BEST_LIST_SIZE -i $___DEV_F > moses.out";
 }
 
 my $zmert_decoder_cmd = "$SCRIPTS_ROOTDIR/training/zmert-decoder.pl";
