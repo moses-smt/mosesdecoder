@@ -55,7 +55,9 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 	, m_sourcePhrase(0)
 	, m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
 	, m_sourceInput(source)
-	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
+	, m_currSourceWordsRange(
+			m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
+			m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
 	, m_currTargetWordsRange(0, emptyTarget.GetSize()-1)
 	, m_wordDeleted(false)
 	, m_ffStates(StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions().size())
