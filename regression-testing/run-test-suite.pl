@@ -24,6 +24,7 @@ my @tests = qw (
   phrase.lexicalized-reordering
   phrase.lexicalized-reordering-cn
   phrase.consensus-decoding-surface
+  phrase.continue-partial-translation
 );
 #  xml-markup
 
