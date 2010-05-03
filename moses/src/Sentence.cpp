@@ -50,8 +50,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	if (getline(in, line, '\n').eof())	
 			return 0;
 
-	//get covered words
+	//get covered words - if continual-partial-translation is switched on, parse input
 	const StaticData &staticData = StaticData::Instance();
+	translated_words.resize(0);
 	if (staticData.ContinuePartialTranslation()){
 		string prev;
 		string score;
