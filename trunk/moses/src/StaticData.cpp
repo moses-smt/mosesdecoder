@@ -128,6 +128,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
 	}
+
+	SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );
 	
 	//word-to-word alignment
 	SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );

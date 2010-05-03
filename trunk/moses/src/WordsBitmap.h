@@ -55,7 +55,25 @@ protected:
 		}
 	}
 
+	//sets elements by vector
+	void Initialize(std::vector<bool> vector)
+	{
+		for (size_t pos = 0 ; pos < m_size ; pos++)
+		{
+			if (vector[pos] == true) m_bitmap[pos] = true;
+			else m_bitmap[pos] = false;
+		}
+	}
+
+
 public:
+	//! create WordsBitmap of length size and initialise with vector
+	WordsBitmap(size_t size, std::vector<bool> initialize_vector)
+		:m_size	(size)
+	{
+		m_bitmap = (bool*) malloc(sizeof(bool) * size);
+		Initialize(initialize_vector);
+	}
 	//! create WordsBitmap of length size and initialise
 	WordsBitmap(size_t size)
 		:m_size	(size)

@@ -221,7 +221,8 @@ protected:
 	//! load decoding steps
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
-    void ReduceTransOptCache() const;   
+    void ReduceTransOptCache() const;
+	bool m_continuePartialTranslation;
 	
 public:
 
@@ -545,7 +546,7 @@ public:
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
   
-  bool PrintAllDerivations() const { return m_printAllDerivations;}
+	bool PrintAllDerivations() const { return m_printAllDerivations;}
 	
 	const UnknownLHSList &GetUnknownLHS() const
 	{ return m_unknownLHS; }
@@ -566,6 +567,7 @@ public:
 	{ return 999999; /* TODO wtf! */ }
 	
 
+	bool ContinuePartialTranslation() const { return m_continuePartialTranslation; }
 };
 
 }

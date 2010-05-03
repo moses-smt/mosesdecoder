@@ -49,6 +49,30 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 	if (getline(in, line, '\n').eof())	
 			return 0;
+
+	//get covered words
+	const StaticData &staticData = StaticData::Instance();
+	if (staticData.ContinuePartialTranslation()){
+		string prev;
+		string score;
+		int loc1 = line.find( "|||", 0 );
+		int loc2 = line.find( "|||", loc1 + 3 );
+		if (loc1 > -1 && loc2 > -1){
+			prev = line.substr(0, loc1);
+			score = line.substr(loc1 + 3, loc2 - loc1 - 3);
+			line = line.substr(loc2 + 3);
+			score = Trim(score);
+			prev = Trim(prev);
+			translated_target = prev;
+			int len = score.size();
+			translated_words.resize(len);
+			for (int i = 0; i < len; ++i){
+				if (score.at(i) == '1') translated_words[i] = true;
+					else translated_words[i] = false;
+			}
+		}
+	}
+
 	// remove extra spaces
 	line = Trim(line);
 
@@ -57,7 +81,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
 	
 	// parse XML markup in translation line
-	const StaticData &staticData = StaticData::Instance();
+	//const StaticData &staticData = StaticData::Instance();
 	std::vector<std::vector<XmlOption*> > xmlOptionsList(0);
 	std::vector< size_t > xmlWalls;
 	if (staticData.GetXmlInputType() != XmlPassThrough) {
