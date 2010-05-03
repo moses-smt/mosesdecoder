@@ -50,8 +50,8 @@ protected:
  
 public:
 
-	std::vector<bool> translated_words;
-	std::string translated_target;
+	std::vector<bool> m_sourceCompleted;
+	std::string m_initialTargetPhrase;
 
 	InputType(long translationId = 0);
 	virtual ~InputType();
