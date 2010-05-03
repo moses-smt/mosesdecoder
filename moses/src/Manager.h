@@ -81,7 +81,7 @@ class Manager
   void operator=(Manager const&);
 protected:	
 	// data
-	InputType const& m_source; /**< source sentence to be translated */
+//	InputType const& m_source; /**< source sentence to be translated */
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	Search *m_search;
 	
@@ -99,6 +99,7 @@ protected:
   
 		
 public:
+	InputType const& m_source; /**< source sentence to be translated */
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
 	~Manager();
   

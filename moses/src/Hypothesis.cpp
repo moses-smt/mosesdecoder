@@ -53,7 +53,7 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 	: m_prevHypo(NULL)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
-	, m_sourceCompleted(source.GetSize())
+	, m_sourceCompleted(source.GetSize(), manager.m_source.translated_words)
 	, m_sourceInput(source)
 	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
 	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
