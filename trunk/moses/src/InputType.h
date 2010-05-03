@@ -50,8 +50,11 @@ protected:
  
 public:
 
+  // used in -continue-partial-translation
 	std::vector<bool> m_sourceCompleted;
 	std::string m_initialTargetPhrase;
+  size_t m_frontSpanCoveredLength;
+    // how many words from the beginning are covered
 
 	InputType(long translationId = 0);
 	virtual ~InputType();

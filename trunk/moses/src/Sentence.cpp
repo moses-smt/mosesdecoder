@@ -52,6 +52,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 	//get covered words - if continual-partial-translation is switched on, parse input
 	const StaticData &staticData = StaticData::Instance();
+	m_frontSpanCoveredLength = 0;
 	m_sourceCompleted.resize(0);
 	if (staticData.ContinuePartialTranslation()){
 		string initialTargetPhrase;
@@ -67,9 +68,19 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 			m_initialTargetPhrase = initialTargetPhrase;
 			int len = sourceCompletedStr.size();
 			m_sourceCompleted.resize(len);
+			int contiguous = 1;
 			for (int i = 0; i < len; ++i){
-				if (sourceCompletedStr.at(i) == '1') m_sourceCompleted[i] = true;
-					else m_sourceCompleted[i] = false;
+				if (sourceCompletedStr.at(i) == '1')
+				{
+					m_sourceCompleted[i] = true;
+					if (contiguous)
+						m_frontSpanCoveredLength ++;
+				}
+				else
+				{
+					m_sourceCompleted[i] = false;
+					contiguous = 0;
+				}
 			}
 		}
 	}

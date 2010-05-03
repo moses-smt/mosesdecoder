@@ -24,7 +24,17 @@ struct DistortionState_traditional : public FFState {
 };
 
 const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &input) const {
-   return new DistortionState_traditional(WordsRange(NOT_FOUND,NOT_FOUND), NOT_FOUND);
+	// fake previous translated phrase start and end
+	size_t start = NOT_FOUND;
+	size_t end = NOT_FOUND;
+	if (input.m_frontSpanCoveredLength > 0) {
+		// can happen with --continue-partial-translation
+		start = 0;
+		end = input.m_frontSpanCoveredLength -1;
+	}
+	return new DistortionState_traditional(
+		WordsRange(start, end),
+		NOT_FOUND);
 }
 
 DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)
@@ -81,11 +91,11 @@ FFState* DistortionScoreProducer::Evaluate(
     const FFState* prev_state,
     ScoreComponentCollection* out) const {
   const DistortionState_traditional* prev = static_cast<const DistortionState_traditional*>(prev_state);
-  const float distortionScore = CalculateDistortionScore(
-        hypo,
-        prev->range,
-	hypo.GetCurrSourceWordsRange(),
-	prev->first_gap);
+	const float distortionScore = CalculateDistortionScore(
+		hypo,
+		prev->range,
+		hypo.GetCurrSourceWordsRange(),
+		prev->first_gap);
   out->PlusEquals(this, distortionScore);
   DistortionState_traditional* res = new DistortionState_traditional(
     hypo.GetCurrSourceWordsRange(),
