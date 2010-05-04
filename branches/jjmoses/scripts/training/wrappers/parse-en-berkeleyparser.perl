@@ -33,7 +33,75 @@ close $PARSE or croak "could not close pipe";
 sub parens2tags {
 my ($token) = @_;
 
-if ( $token =~ /\((\w+)
+    if ( $token =~ /\(\(\)\)/xms ) {
+	return "<tree></tree>";
+}
+
+if ( $token =~ /\((
+,|
+:|
+.|
+''|
+ADJP|
+ADVP|
+CC|
+CD|
+CONJP|
+DT|
+EX|
+FRAG|
+FW|
+IN|
+INTJ|
+JJ|
+JJR|
+JJS|
+LS|
+LST|
+MD|
+NN|
+NNP|
+NNS|
+NP|
+NX|
+PDT|
+POS|
+PP|
+PRN|
+PRP|
+PRP\$|
+PRT|
+QP|
+RB|
+RBR|
+RBS|
+RP|
+S|
+SBAR|
+SBARQ|
+SINV|
+SQ|
+SYM|
+TO|
+UCP|
+UH|
+VB|
+VBD|
+VBG|
+VBN|
+VBP|
+VBZ|
+VP|
+WDT|
+WHADJP|
+WHADVP|
+WHNP|
+WHPP|
+WP|
+WP\$|
+WRB|
+X
+)
 #open paren followed by constituent 
 /xms ){
     return "<tree label=\"$1\">";
