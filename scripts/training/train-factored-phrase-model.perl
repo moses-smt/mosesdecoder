@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 
 use strict;
+use warnings;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
 use File::Spec::Functions;
 use File::Basename;
-
+use Carp;
 # Train Factored Phrase Model
 # (c) 2006-2009 Philipp Koehn
 # with contributions from other JHU WS participants
@@ -170,11 +171,11 @@ foreach my $step (@step_conf) {
 my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
 my $GIZA;
 if(!defined $_MGIZA ){
-	$GIZA = "$BINDIR/GIZA++";
+	$GIZA = "GIZA++";
 	print STDERR "Using single-thread GIZA\n";
 }
 else {
-    $GIZA = "$BINDIR/mgizapp";
+    $GIZA = "mgizapp";
 	print STDERR "Using multi-thread GIZA\n";	
     if (!defined($_MGIZA_CPUS)) {
         $_MGIZA_CPUS=4;
@@ -182,8 +183,8 @@ else {
     die("ERROR: Cannot find merge_alignment.py") unless (-x $MGIZA_MERGE_ALIGN);
 }
 
-my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
-my $MKCLS = "$BINDIR/mkcls";
+my $SNT2COOC = "snt2cooc.out"; 
+my $MKCLS = "mkcls";
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
@@ -202,8 +203,8 @@ my $BZCAT = "bzcat";
 # do a sanity check to make sure we can find the necessary binaries since
 # these are not installed by default
 # not needed if we start after step 2
-die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
-                                       (-x $GIZA && -x $SNT2COOC && -x $MKCLS));
+#die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
+#                                       (-x $GIZA && -x $SNT2COOC && -x $MKCLS));
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";
