@@ -4,39 +4,62 @@ use strict;
 use File::Basename;
 use File::Temp qw/tempfile/;
 use Getopt::Long "GetOptions";
-my $COLLINS = "/home/pkoehn/statmt/project/collins-parser.linux";
-my $MXPOST  = "/home/pkoehn/statmt/project/mxpost";
-my $TMPDIR = "tmp";
-my $DEBUG = 0;
-my $DEBUG_SPACE = "                                                       ";
 
-my $RAW = "";
+my $COLLINS = "/home/pkoehn/bin/COLLINS-PARSER";
+my $MXPOST  = "/home/pkoehn/bin/mxpost";
+my $TMPDIR = "tmp";
+my $KEEP_TMP = 0;
+my $RAW = undef;
 
 my $BASIC = 0;
 GetOptions(
     "collins=s" => \$COLLINS,
     "mxpost=s" => \$MXPOST,
     "tmpdir=s" => \$TMPDIR,
+    "keep-tmp" => \$KEEP_TMP,
     "raw=s" => \$RAW
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
 
+# parser settings
+my $MaxChar=10000;
+my $MaxWord=200;
+my $ParserBin="$COLLINS/code/parser";
+my $ParserEvn="$COLLINS/models/model2/events.gz";
+my $ParserGrm="$COLLINS/models/model2/grammar";
 my ($scriptname, $directories) = fileparse($0);
-my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
+my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>!$KEEP_TMP);
 
-open(MXPOST,"$MXPOST/mxpost.unicode $MXPOST/tagger.project |");
-while(<MXPOST>) 
-{
-    print $TMP $_;
-}
-close($TMP);
+# tag and prepare input for parser
+my $pipeline = "perl -ne 'use Encode; encode(\"iso-8859-1\", decode(\"utf8\", \$_)); print \$_;' |";
+$pipeline .= "perl -ne 'tr/\\x20-\\x7f//cd; print \$_.\"\\n\";' | ";
+$pipeline .= "$MXPOST/mxpost $MXPOST/tagger.project |";
 
-my $pipeline = "$COLLINS/parse3.pl -maxw 200 -maxc 10000 < $tmpfile |";
-if ($RAW)
-{
-    $pipeline .= "tee \"$RAW\" |";
+open(TAG,$pipeline);
+open(PARSER_IN,">$tmpfile");
+while(<TAG>) {
+  chop;
+
+  # convert tagged sequence into parser format
+  my $line = &conv_posfmt($_);
+
+   # check char length or word length
+  $line = "1 SentenceTooLong NN" if (! &check_length($line));
+
+  # put to tmpfile
+  print PARSER_IN "$line\n";
 }
+close(TAG);
+close(PARSER_IN);
+
+# parse and process output of parser
+`rm $RAW` if defined($RAW) && -e $RAW;
+$pipeline = "gunzip -c $ParserEvn | $ParserBin $tmpfile $ParserGrm 10000 1 1 1 1 |";
+$pipeline .= "tee -a \"$RAW\" |" if defined($RAW);
+
+my $DEBUG = 0;
+my $DEBUG_SPACE = "                                                       ";
 open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     next unless $line =~ /^\(/;
@@ -102,4 +125,39 @@ sub escape {
     $text =~ s/</&lt;/g;
     $text =~ s/>/&gt;/g;
     return $text;
+}
+
+sub check_length {
+    my ($line) = @_;
+    my ($ret,$numc,$numw,@words);
+
+    $numc = length($line);
+    @words = split(" ",$line);
+    $numw = ($#words+1)/2;
+
+    $ret = (($numc <= $MaxChar) && ($numw <= $MaxWord));
+    $ret;
+}
+
+sub conv_posfmt {
+    my ($line) = @_;
+    my ($sep,$ret,$w,$i,$w1,$w2,$numw);
+
+    # find the last '_' for each word, and replace it with ' '
+
+    $ret=""; $sep=""; $numw=0;
+    for $w (split(" ",$line)) {
+	$i = rindex($w,"_");
+	$w1 = substr($w,0,$i);	# before _
+	$w2 = substr($w,$i+1);	# after _
+	$ret .= "$sep$w1 $w2";
+	$sep = " "; $numw++;
+    }
+    $ret = "$numw $ret";
+
+    # also convert '()' into -LRB- and -RRB-
+    $ret =~ s/\(/-LRB-/g;
+    $ret =~ s/\)/-RRB-/g;
+
+    $ret;
 }

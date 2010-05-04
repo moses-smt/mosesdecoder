@@ -25,12 +25,6 @@ if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
     $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
 }
 
-my $opt_hierarchical = 0;
-
-GetOptions(
-    "Hierarchical" => \$opt_hierarchical
-) or exit(1);
-
 # consider phrases in input up to $MAX_LENGTH
 # in other words, all phrase-tables will be truncated at least to 10 words per
 # phrase.
@@ -39,15 +33,24 @@ my $MAX_LENGTH = 10;
 # utilities
 my $ZCAT = "gzip -cd";
 
-my $dir = shift; 
+# get optional parameters
+my $opt_hierarchical = 0;
+my $binarizer = undef;
+
+GetOptions(
+    "Hierarchical" => \$opt_hierarchical,
+    "Binarizer=s" => \$binarizer
+) or exit(1);
+
+# get command line parameters
+my $dir = shift;
 my $config = shift;
 my $input = shift;
 
 if (!defined $dir || !defined $config || !defined $input) {
-  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text\n";
+  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical]\n";
   exit 1;
 }
-
 $dir = ensure_full_path($dir);
 
 # buggy directory in place?
@@ -76,14 +79,14 @@ if (-d $dir) {
 safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
-my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS);
+my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE_WEIGHTS,%TABLE_NUMBER);
 my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
 while(<INI>) {
     print INI_OUT $_;
     if (/ttable-file\]/) {
-        while(1) {	       
+      while(1) {	       
     	my $table_spec = <INI>;
     	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
     	    print INI_OUT $table_spec;
@@ -99,8 +102,10 @@ while(<INI>) {
 
     	chomp($file);
     	push @TABLE, $file;
+	push @TABLE_WEIGHTS,$w;
+	$KNOWN_TTABLE{$#TABLE}++;
 
-    	my $new_name = "$dir/phrase-table.$source_factor-$t";
+    	my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
         my $cnt = 1;
         $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
         $new_name .= ".$cnt";
@@ -111,7 +116,7 @@ while(<INI>) {
     	$CONSIDER_FACTORS{$source_factor} = 1;
         print STDERR "Considering factor $source_factor\n";
     	push @TABLE_FACTORS, $source_factor;
-        }
+      }
     }
     elsif (/distortion-file/) {
         while(1) {
@@ -232,6 +237,22 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         close(FILE);
         die "No phrases found in $file!" if $total == 0;
         printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+    }
+
+    if(defined($binarizer)) {
+      if ($KNOWN_TTABLE{$i}) {
+        print STDERR "binarizing...";
+        my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+        print STDERR $cmd."\n";
+        print STDERR `$cmd`;
+      }
+      else {
+        print STDERR "binarizing...";
+        my $lexbin = $binarizer; $lexbin =~ s/PhraseTable/LexicalTable/;
+        my $cmd = "$lexbin -in $new_file -out $new_file";
+        print STDERR $cmd."\n";
+        print STDERR `$cmd`;
+      }
     }
 
     close(FILE_OUT);
