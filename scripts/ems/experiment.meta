@@ -89,13 +89,14 @@ train
 	template: $moses-script-dir/recaser/train-recaser.perl -train-script $TRAINING:script -dir $working-dir/recasing/model.VERSION -corpus IN -scripts-root-dir $moses-script-dir -config OUT -ngram-count $lm-training
 	default-name: recasing/moses.ini
 	ignore-unless: EVALUATION:recaser
+	error: cannot execute binary file
 
 [TRUECASER] single
 consolidate
 	in: CORPUS:clean-parsed-stem
 	out: tokenized-stem
 	default-name: truecaser/corpus
-	template: $edinburgh-script-dir/consolidate-training-data.perl $input-extension $output-extension OUT IN
+	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
         in: tokenized-stem
 	out: truecase-model
@@ -109,7 +110,7 @@ consolidate
 	out: truecased-stem
 	default-name: splitter/corpus
 	ignore-unless: input-splitter output-splitter
-	template: $edinburgh-script-dir/consolidate-training-data.perl $input-extension $output-extension OUT IN
+	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
         in: truecased-stem
 	out: splitter-model
@@ -168,6 +169,7 @@ train
 	ignore-if: rlm-training
 	rerun-on-change: lm-training order settings
 	template: $lm-training -order $order $settings -text IN -lm OUT
+	error: cannot execute binary file
 randomize
 	in: lm
 	out: rlm
@@ -195,6 +197,11 @@ binarize
 	template: $lm-binarizer IN OUT
 
 [INTERPOLATED-LM] single
+tuning-from-sgm
+	in: tuning-sgm
+	out: raw-tuning
+	default-name: lm/interpolate-tuning.txt
+	template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
 tokenize-tuning
 	in: raw-tuning
 	out: tokenized-tuning
@@ -260,7 +267,7 @@ consolidate
 	in: CORPUS:clean-split-stem
 	out: corpus
 	default-name: corpus
-	template: $edinburgh-script-dir/consolidate-training-data.perl $input-extension $output-extension OUT IN
+	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 prepare-data
 	in: corpus
 	out: prepared-data
@@ -404,6 +411,11 @@ hiero-create-config
 	template: $hiero-util-dir/generate-ini.pl IN IN1 IN2 IN3 IN4 IN5 $hiero-max-phrase-length $hiero-max-nonterminals $hiero-max-phrase-span $hiero-min-gap-length $hiero-freq-rank1 $hiero-freq-rank2 < $GENERAL:hiero-template-ini > OUT
 
 [TUNING] single
+input-from-sgm
+	in: input-sgm
+	out: raw-input
+	default-name: tuning/input.txt
+	template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
 tokenize-input
 	in: raw-input
 	out: tokenized-input
@@ -451,6 +463,11 @@ split-input
 	default-name: tuning/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+reference-from-sgm
+	in: reference-sgm input-sgm
+	out: raw-reference
+	default-name: tuning/reference.txt
+	template: $moses-script-dir/ems/support/reference-from-sgm.perl IN IN1 OUT
 tokenize-reference
 	in: raw-reference
 	out: tokenized-reference
@@ -490,7 +507,7 @@ apply-weights
 	out: config-with-reused-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.weight-reused.ini
-	template: $edinburgh-script-dir/reuse-weights.perl IN1 < IN > OUT
+	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
 hiero-tune
 	in: TRAINING:hiero-config input reference
 	out: hiero-weight-config
@@ -506,31 +523,38 @@ hiero-apply-weights
 	ignore-unless: use-hiero
 	template: $hiero-util-dir/apply-weights.pl IN/best.weights < IN1 > OUT
 
-[TESTING] multiple
-get-corpus
+[EVALUATION] multiple
+input-from-sgm
+	in: input-sgm
+	out: raw-input
+	ignore-unless: input-sgm
+	default-name: evaluation/input.txt
+	template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
+get-input
 	in: get-corpus-script
 	out: raw-input
-	default-name: evaluation/input.raw
+	ignore-if: input-sgm
+	default-name: evaluation/input.txt
 	template: IN OUT
-tokenize
+tokenize-input
 	in: raw-input
 	out: tokenized-input
 	default-name: evaluation/input.tok
 	pass-unless: input-tokenizer
 	template: $input-tokenizer < IN > OUT
-parse
+parse-input
 	in: tokenized-input
 	out: parsed-input
 	default-name: evaluation/input.parsed
 	pass-unless: input-parser
 	template: $input-parser < IN > OUT
-parse-relax
+parse-relax-input
 	in: parsed-input
 	out: parse-relaxed-input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
         template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
-factorize
+factorize-input
 	in: parse-relaxed-input
 	out: factorized-input
 	default-name: evaluation/input.factorized
@@ -538,21 +562,21 @@ factorize
 	pass-unless: TRAINING:input-factors
 	error: can't open
 	error: incompatible number of words in factor
-lowercase
+lowercase-input
 	in: factorized-input
 	out: cased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
-truecase
+truecase-input
 	in: factorized-input TRUECASER:truecase-model
 	out: cased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
-split
+split-input
 	in: cased-input SPLITTER:splitter-model
 	out: input
 	default-name: evaluation/input.split
@@ -575,22 +599,20 @@ hiero-decode
 	ignore-unless: use-hiero
 	template: $hiero-parallelizer -e OUT.edir -r -- $hiero-decoder -c IN < IN1 > OUT
 	rerun-on-change: hiero-decoder
-
-[EVALUATION] synchronous
-recase
-	in: TESTING:system-output RECASING:recase-config
+recase-output
+	in: system-output RECASING:recase-config
 	out: recased-output
 	default-name: evaluation/recased
 	pass-unless: recaser
 	ignore-if: output-truecaser
 	template: $recaser -moses $RECASING:decoder -in IN -model IN1 > OUT
-detruecase
-	in: TESTING:system-output
+detruecase-output
+	in: system-output
 	out: recased-output
 	default-name: evaluation/truecased
 	ignore-unless: output-truecaser
 	template: $detruecaser < IN > OUT
-detokenize
+detokenize-output
 	in: recased-output
 	out: detokenized-output
 	default-name: evaluation/detokenized
@@ -603,16 +625,21 @@ wrap
 	rerun-on-change: wrapping-frame use-hiero
 	template: $wrapping-script $wrapping-frame < IN > OUT
 	error: Use of uninitialized value in pattern match
+reference-from-sgm
+	in: reference-sgm input-sgm
+	out: raw-reference
+	default-name: evaluation/reference.txt
+	template: $moses-script-dir/ems/support/reference-from-sgm.perl IN IN1 OUT
 tokenize-reference
 	in: raw-reference
 	out: tokenized-reference
-	default-name: tuning/reference.tok
+	default-name: evaluation/reference.tok
 	pass-unless: output-tokenizer
 	template: $output-tokenizer < IN > OUT
 lowercase-reference
 	in: tokenized-reference
 	out: reference
-	default-name: tuning/reference
+	default-name: evaluation/reference
 	pass-unless: output-lowercaser
 	template: $output-lowercaser < IN > OUT	
 nist-bleu
@@ -671,9 +698,15 @@ meteor
 	default-name: evaluation/detokenized.sgm.METEOR
 	ignore-unless: meteor
 	rerun-on-change: meteor
+analysis
+	in: recased-output reference
+	out: analysis
+	default-name: evaluation/analysis
+	ignore-unless: analysis
+	template: $analysis IN IN1 OUT
 
-[REPORTING] consolidate
+[REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis
 	out: report
 	default-name: evaluation/report

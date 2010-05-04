@@ -36,7 +36,7 @@ while(<INPUT>)
 }
 close($TMP);
 
-my $pipeline = "cat $tmpfile | $BITPAR/bin/bitpar -ts '()' -s TOP -v $BITPAR/Tiger/grammar $BITPAR/Tiger/lexicon -u $BITPAR/Tiger/open-class-tags -w $BITPAR/Tiger/wordclass.txt |";
+my $pipeline = "cat $tmpfile | $BITPAR/BitPar/src/bitpar -ts '()' -s TOP -v $BITPAR/GermanParser/Tiger/grammar $BITPAR/GermanParser/Tiger/lexicon -u $BITPAR/GermanParser/Tiger/open-class-tags -w $BITPAR/GermanParser/Tiger/wordclass.txt |";
 if ($RAW)
 {
     $pipeline .= "tee \"$RAW\" |";
