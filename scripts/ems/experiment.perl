@@ -1802,6 +1802,7 @@ sub get_training_setting {
     my $xml = $source_syntax || $target_syntax;
 
     my $cmd = "$training_script ";
+    $cmd .= "$options " if defined($options);
     $cmd .= "-dont-zip ";
     $cmd .= "-first-step $step " if $step>1;
     $cmd .= "-last-step $step "  if $step<9;

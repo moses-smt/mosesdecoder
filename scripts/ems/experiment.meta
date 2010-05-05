@@ -271,19 +271,19 @@ consolidate
 prepare-data
 	in: corpus
 	out: prepared-data
-	rerun-on-change: alignment-factors
+	rerun-on-change: alignment-factors training-options script
 	ignore-if: use-berkeley
 	default-name: prepared
 run-giza
 	in: prepared-data
 	out: giza-alignment
 	ignore-if: use-berkeley
-	rerun-on-change: giza-settings
+	rerun-on-change: giza-settings training-options script
 	default-name: giza
 run-giza-inverse
 	in: prepared-data
 	out: giza-alignment-inverse
-	rerun-on-change: giza-settings
+	rerun-on-change: giza-settings training-options script
 	ignore-if: use-berkeley
 	default-name: giza-inverse
 run-berkeley
@@ -306,13 +306,13 @@ symmetrize-giza
 	in: giza-alignment giza-alignment-inverse
 	out: word-alignment
 	ignore-if: use-berkeley
-	rerun-on-change: alignment-symmetrization-method
+	rerun-on-change: alignment-symmetrization-method training-options script
 	default-name: model/aligned
 	error: skip=<[1-9]
 build-lex-trans
 	in: word-alignment corpus
 	out: lexical-translation-table
-	rerun-on-change: translation-factors
+	rerun-on-change: translation-factors training-options script
 	default-name: model/lex
 parse-relax
 	in: corpus
@@ -324,7 +324,7 @@ parse-relax
 extract-phrases
 	in: word-alignment parse-relaxed-corpus
 	out: extracted-phrases
-	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings
+	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script
 	default-name: model/extract
 build-reordering
 	in: extracted-phrases
@@ -335,19 +335,19 @@ build-reordering
 build-ttable
 	in: extracted-phrases lexical-translation-table
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script
 	default-name: model/phrase-table
 build-generation
 	in: corpus
 	out: generation-table
-	rerun-on-change: generation-factors generation-type
+	rerun-on-change: generation-factors generation-type training-options script
 	ignore-unless: generation-factors
 	default-name: model/generation-table
 create-config
 	in: reordering-table phrase-translation-table generation-table LM:binlm
 	out: config
 	ignore-if: use-hiero INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script
 	default-name: model/moses.ini
 	error: Unknown option
 create-config-interpolated-lm
@@ -355,7 +355,7 @@ create-config-interpolated-lm
 	out: config
 	ignore-if: use-hiero
 	ignore-unless: INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
