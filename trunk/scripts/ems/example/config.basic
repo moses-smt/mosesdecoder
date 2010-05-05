@@ -226,6 +226,10 @@ tuning-sgm = $wmt10-data/dev/news-test2008-ref.$output-extension.sgm
 # 
 script = $moses-script-dir/training/train-model.perl
 
+### general options
+#
+#training-options = ""
+
 ### factored training: specify here which factors used
 # if none specified, single factor training is assumed
 # (one translation step, surface to surface)
