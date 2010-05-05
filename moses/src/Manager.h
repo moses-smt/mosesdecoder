@@ -45,6 +45,22 @@ namespace Moses
 class TrellisPath;
 class TranslationOptionCollection;
 
+/** Used to output the search graph */
+struct SearchGraphNode {
+    const Hypothesis* hypo;
+    const Hypothesis* recombinationHypo;
+    int forward;
+    double fscore;
+
+    SearchGraphNode(const Hypothesis* theHypo, 
+                    const Hypothesis* theRecombinationHypo,
+                    int theForward,
+                    double theFscore) :
+        hypo(theHypo), recombinationHypo(theRecombinationHypo),
+            forward(theForward), fscore(theFscore) {}
+   
+};
+
 /** The Manager class implements a stack decoding algorithm.
  * Hypotheses are organized in stacks. One stack contains all hypothesis that have 
  * the same number of foreign words translated.  The data structure for hypothesis 
@@ -115,7 +131,8 @@ public:
 	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
   
-	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+	void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+    void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
   const InputType& GetSource() const {return m_source;}   
 
 	/***

@@ -415,61 +415,161 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 	} // for (iterStack 
 }
 
-void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const Hypothesis *hypo, const Hypothesis *recombinationHypo, int forward, double fscore)
+void Manager::GetSearchGraph(vector<SearchGraphNode>& searchGraph) const {
+  std::map < int, bool > connected;
+  std::map < int, int > forward;
+  std::map < int, double > forwardScore;
+
+  // *** find connected hypotheses ***
+  std::vector< const Hypothesis *> connectedList;
+  GetConnectedGraph(&connected, &connectedList);
+
+  // ** compute best forward path for each hypothesis *** //
+
+  // forward cost of hypotheses on final stack is 0
+  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
+  const HypothesisStack &finalStack = *hypoStackColl.back();
+  HypothesisStack::const_iterator iterHypo;
+  for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
+  {
+    const Hypothesis *hypo = *iterHypo;
+    forwardScore[ hypo->GetId() ] = 0.0f;
+    forward[ hypo->GetId() ] = -1;
+  }
+
+  // compete for best forward score of previous hypothesis
+  std::vector < HypothesisStack* >::const_iterator iterStack;
+  for (iterStack = --hypoStackColl.end() ; iterStack != hypoStackColl.begin() ; --iterStack)
+  {
+    const HypothesisStack &stack = **iterStack;
+    HypothesisStack::const_iterator iterHypo;
+    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+    {
+      const Hypothesis *hypo = *iterHypo;
+      if (connected.find( hypo->GetId() ) != connected.end())
+      {
+	// make a play for previous hypothesis
+	const Hypothesis *prevHypo = hypo->GetPrevHypo();
+	double fscore = forwardScore[ hypo->GetId() ] +
+	  hypo->GetScore() - prevHypo->GetScore();
+	if (forwardScore.find( prevHypo->GetId() ) == forwardScore.end()
+	    || forwardScore.find( prevHypo->GetId() )->second < fscore)
+	{
+	  forwardScore[ prevHypo->GetId() ] = fscore;
+	  forward[ prevHypo->GetId() ] = hypo->GetId();
+	}
+	// all arcs also make a play
+        const ArcList *arcList = hypo->GetArcList();
+        if (arcList != NULL)
+	{
+	  ArcList::const_iterator iterArcList;
+	  for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+	  {
+	    const Hypothesis *loserHypo = *iterArcList;
+	    // make a play
+	    const Hypothesis *loserPrevHypo = loserHypo->GetPrevHypo();
+	    double fscore = forwardScore[ hypo->GetId() ] +
+	      loserHypo->GetScore() - loserPrevHypo->GetScore();
+	    if (forwardScore.find( loserPrevHypo->GetId() ) == forwardScore.end()
+		|| forwardScore.find( loserPrevHypo->GetId() )->second < fscore)
+	    {
+	      forwardScore[ loserPrevHypo->GetId() ] = fscore;
+	      forward[ loserPrevHypo->GetId() ] = loserHypo->GetId();
+	    }
+	  } // end for arc list  
+	} // end if arc list empty
+      } // end if hypo connected
+    } // end for hypo
+  } // end for stack
+
+  // *** output all connected hypotheses *** //
+  
+  connected[ 0 ] = true;
+  for (iterStack = hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack)
+  {
+    const HypothesisStack &stack = **iterStack;
+    HypothesisStack::const_iterator iterHypo;
+    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
+    {
+      const Hypothesis *hypo = *iterHypo;
+      if (connected.find( hypo->GetId() ) != connected.end())
+      {
+        searchGraph.push_back(SearchGraphNode(hypo,NULL,forward[hypo->GetId()],
+            forwardScore[hypo->GetId()]));
+	
+	const ArcList *arcList = hypo->GetArcList();
+	if (arcList != NULL)
+	{
+	  ArcList::const_iterator iterArcList;
+	  for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
+	  {
+	    const Hypothesis *loserHypo = *iterArcList;
+        searchGraph.push_back(SearchGraphNode(loserHypo,hypo,
+            forward[hypo->GetId()], forwardScore[hypo->GetId()]));
+	  }
+	} // end if arcList empty
+      } // end if connected
+    } // end for iterHypo
+  } // end for iterStack 
+
+}
+
+void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
+    const SearchGraphNode& searchNode)
 {
 	const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	bool extendedFormat = StaticData::Instance().GetOutputSearchGraphExtended();
 	outputSearchGraphStream << translationId;
 
 	// special case: initial hypothesis
-	if ( hypo->GetId() == 0 )
+	if ( searchNode.hypo->GetId() == 0 )
 	{
 		outputSearchGraphStream << " hyp=0 stack=0";
 		if (!extendedFormat) 
 		{
-			outputSearchGraphStream << " forward=" << forward	<< " fscore=" << fscore;
+			outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore;
 		}
 		outputSearchGraphStream << endl;
 		return;
 	}
 
-  const Hypothesis *prevHypo = hypo->GetPrevHypo();
+  const Hypothesis *prevHypo = searchNode.hypo->GetPrevHypo();
 
 	// output in traditional format
 	if (!extendedFormat)
 	{
-		outputSearchGraphStream << " hyp=" << hypo->GetId()
-			<< " stack=" << hypo->GetWordsBitmap().GetNumWordsCovered()
+		outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId()
+			<< " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
 		  << " back=" << prevHypo->GetId()
-		  << " score=" << hypo->GetScore()
-			<< " transition=" << (hypo->GetScore() - prevHypo->GetScore());
+		  << " score=" << searchNode.hypo->GetScore()
+			<< " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
 
-		if (recombinationHypo != NULL)
-		  outputSearchGraphStream << " recombined=" << recombinationHypo->GetId();
+		if (searchNode.recombinationHypo != NULL)
+		  outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
 		
-		outputSearchGraphStream << " forward=" << forward	<< " fscore=" << fscore
-		  << " covered=" << hypo->GetCurrSourceWordsRange().GetStartPos() 
-			<< "-" << hypo->GetCurrSourceWordsRange().GetEndPos()
-			<< " out=" << hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
+		outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+		  << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos() 
+			<< "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos()
+			<< " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
 			<< endl;
 		return;
 	}
 	
 	// output in extended format
-	if (recombinationHypo != NULL) 
-		outputSearchGraphStream << " hyp=" << recombinationHypo->GetId();
+	if (searchNode.recombinationHypo != NULL) 
+		outputSearchGraphStream << " hyp=" << searchNode.recombinationHypo->GetId();
 	else
-		outputSearchGraphStream << " hyp=" << hypo->GetId();
+		outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
 
 	outputSearchGraphStream << " back=" << prevHypo->GetId();
 
-	ScoreComponentCollection scoreBreakdown = hypo->GetScoreBreakdown();
+	ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
 	scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
 	outputSearchGraphStream << " [ ";
 	StaticData::Instance().GetScoreIndexManager().PrintLabeledScores( outputSearchGraphStream, scoreBreakdown );
 	outputSearchGraphStream << " ]";
 
-	outputSearchGraphStream << " out=" << hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+	outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }
 
 void Manager::GetConnectedGraph(
@@ -672,101 +772,13 @@ void Manager::SerializeSearchGraphPB(
 }
 #endif
 
-void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+void Manager::OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
-  std::map < int, bool > connected;
-  std::map < int, int > forward;
-  std::map < int, double > forwardScore;
-
-  // *** find connected hypotheses ***
-  std::vector< const Hypothesis *> connectedList;
-  GetConnectedGraph(&connected, &connectedList);
-
-  // ** compute best forward path for each hypothesis *** //
-
-  // forward cost of hypotheses on final stack is 0
-  const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
-  const HypothesisStack &finalStack = *hypoStackColl.back();
-  HypothesisStack::const_iterator iterHypo;
-  for (iterHypo = finalStack.begin() ; iterHypo != finalStack.end() ; ++iterHypo)
-  {
-    const Hypothesis *hypo = *iterHypo;
-    forwardScore[ hypo->GetId() ] = 0.0f;
-    forward[ hypo->GetId() ] = -1;
-  }
-
-  // compete for best forward score of previous hypothesis
-  std::vector < HypothesisStack* >::const_iterator iterStack;
-  for (iterStack = --hypoStackColl.end() ; iterStack != hypoStackColl.begin() ; --iterStack)
-  {
-    const HypothesisStack &stack = **iterStack;
-    HypothesisStack::const_iterator iterHypo;
-    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
-    {
-      const Hypothesis *hypo = *iterHypo;
-      if (connected.find( hypo->GetId() ) != connected.end())
-      {
-	// make a play for previous hypothesis
-	const Hypothesis *prevHypo = hypo->GetPrevHypo();
-	double fscore = forwardScore[ hypo->GetId() ] +
-	  hypo->GetScore() - prevHypo->GetScore();
-	if (forwardScore.find( prevHypo->GetId() ) == forwardScore.end()
-	    || forwardScore.find( prevHypo->GetId() )->second < fscore)
-	{
-	  forwardScore[ prevHypo->GetId() ] = fscore;
-	  forward[ prevHypo->GetId() ] = hypo->GetId();
-	}
-	// all arcs also make a play
-        const ArcList *arcList = hypo->GetArcList();
-        if (arcList != NULL)
-	{
-	  ArcList::const_iterator iterArcList;
-	  for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
-	  {
-	    const Hypothesis *loserHypo = *iterArcList;
-	    // make a play
-	    const Hypothesis *loserPrevHypo = loserHypo->GetPrevHypo();
-	    double fscore = forwardScore[ hypo->GetId() ] +
-	      loserHypo->GetScore() - loserPrevHypo->GetScore();
-	    if (forwardScore.find( loserPrevHypo->GetId() ) == forwardScore.end()
-		|| forwardScore.find( loserPrevHypo->GetId() )->second < fscore)
-	    {
-	      forwardScore[ loserPrevHypo->GetId() ] = fscore;
-	      forward[ loserPrevHypo->GetId() ] = loserHypo->GetId();
-	    }
-	  } // end for arc list  
-	} // end if arc list empty
-      } // end if hypo connected
-    } // end for hypo
-  } // end for stack
-
-  // *** output all connected hypotheses *** //
-  
-  connected[ 0 ] = true;
-  for (iterStack = hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack)
-  {
-    const HypothesisStack &stack = **iterStack;
-    HypothesisStack::const_iterator iterHypo;
-    for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
-    {
-      const Hypothesis *hypo = *iterHypo;
-      if (connected.find( hypo->GetId() ) != connected.end())
-      {
-	OutputSearchGraph(translationId, outputSearchGraphStream, hypo, NULL, forward[ hypo->GetId() ], forwardScore[ hypo->GetId() ]);
-	
-	const ArcList *arcList = hypo->GetArcList();
-	if (arcList != NULL)
-	{
-	  ArcList::const_iterator iterArcList;
-	  for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
-	  {
-	    const Hypothesis *loserHypo = *iterArcList;
-	    OutputSearchGraph(translationId, outputSearchGraphStream, loserHypo, hypo, forward[ hypo->GetId() ], forwardScore[ hypo->GetId() ]);
-	  }
-	} // end if arcList empty
-      } // end if connected
-    } // end for iterHypo
-  } // end for iterStack 
+    vector<SearchGraphNode> searchGraph;
+    GetSearchGraph(searchGraph);
+    for (size_t i = 0; i < searchGraph.size(); ++i) {
+        OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[i]);
+    }
 }
 
   void Manager::GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,

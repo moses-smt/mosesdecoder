@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 			manager.GetWordGraph(source->GetTranslationId(), ioWrapper->GetOutputWordGraphStream());
 
                 if (staticData.GetOutputSearchGraph())
-		  manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
+		  manager.OutputSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
 
 #ifdef HAVE_PROTOBUF
                 if (staticData.GetOutputSearchGraphPB()) {
