@@ -121,10 +121,12 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
 																												 , lmList
 																												 , sourcePhrase);
 		
+		/*
 		// debugging output
 		stringstream strme;
 		strme << filePath << " " << *mosesPhrase;
 		mosesPhrase->SetDebugOutput(strme.str());
+		*/
 		
 		ret->Add(mosesPhrase);
 	}

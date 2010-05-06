@@ -66,6 +66,11 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 		wordalignflag=StaticData::Instance().UseAlignmentInfo();
 		printalign=StaticData::Instance().PrintAlignmentInfo();
 }
+	
+TargetPhrase::~TargetPhrase()
+{
+	delete m_debugOutput;
+}
 
 void TargetPhrase::SetScore()
 { // used when creating translations of unknown words:
