@@ -98,16 +98,15 @@ int main(int argc, char* argv[])
 	cerr.precision(3);
 
 	// load data structures
-	Parameter *parameter = new Parameter();
-	if (!parameter->LoadParam(argc, argv))
+	Parameter parameter;
+	if (!parameter.LoadParam(argc, argv))
 	{
-		parameter->Explain();
-		delete parameter;
+		parameter.Explain();
 		return EXIT_FAILURE;		
 	}
 
 	const StaticData &staticData = StaticData::Instance();
-	if (!StaticData::LoadDataStatic(parameter))
+	if (!StaticData::LoadDataStatic(&parameter))
 		return EXIT_FAILURE;
 
 	assert(staticData.GetSearchAlgorithm() == ChartDecoding);

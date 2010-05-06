@@ -74,15 +74,14 @@ protected:
 	Phrase const* m_sourcePhrase; 
 	Word m_lhsTarget;
 	CountInfo m_countInfo;
-	std::string *m_debugOutput;
 
 	static bool wordalignflag;
 	static bool printalign;
 	
 public:
-		TargetPhrase(FactorDirection direction=Output);
-		TargetPhrase(FactorDirection direction, std::string out_string);
-		~TargetPhrase();
+	TargetPhrase(FactorDirection direction=Output);
+	TargetPhrase(FactorDirection direction, std::string out_string);
+	~TargetPhrase();
 	/** used by the unknown word handler.
 		* Set alignment to 0
 		*/
@@ -191,16 +190,6 @@ public:
 	}
 
 	void CreateCountInfo(const std::string &countStr);
-
-	void SetDebugOutput(const std::string &str)
-	{
-		assert(m_debugOutput == NULL);
-		m_debugOutput = new std::string(str);
-	}
-	const std::string *GetDebugOutput() const
-	{
-		return m_debugOutput;
-	}
 	
 	TO_STRING();
 };

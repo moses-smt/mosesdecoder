@@ -26,7 +26,7 @@ namespace Moses
 
 std::ostream& operator<<(std::ostream &out, const WordConsumed &wordConsumed)
 {
-	out << wordConsumed.m_coverage;
+	out << wordConsumed.m_coverage << "=" << wordConsumed.m_sourceWord << " ";
 	if (wordConsumed.m_prevWordsConsumed)
 		out << " " << *wordConsumed.m_prevWordsConsumed;
 	
