@@ -48,7 +48,7 @@ protected:
 
 	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
 	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
-	bool ReadConfigFile( std::string filePath );
+	bool ReadConfigFile(const std::string &filePath );
 	bool FilesExist(const std::string &paramName, size_t tokenizeIndex,std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
 	bool isOption(const char* token);
 	bool Validate();
