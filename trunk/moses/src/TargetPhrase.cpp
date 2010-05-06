@@ -60,8 +60,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 	, m_ngramScore(0.0)
 	, m_fullScore(0.0)
 	, m_sourcePhrase(0)
-	, m_debugOutput(NULL)
-
 {
 		wordalignflag=StaticData::Instance().UseAlignmentInfo();
 		printalign=StaticData::Instance().PrintAlignmentInfo();
@@ -69,7 +67,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 	
 TargetPhrase::~TargetPhrase()
 {
-	delete m_debugOutput;
 }
 
 void TargetPhrase::SetScore()

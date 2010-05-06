@@ -105,6 +105,8 @@ public:
 
 	int GetId()const
 	{	return m_id;}
+	const Moses::ChartRule &GetCurrChartRule()const
+	{ return m_rule; }
 	const Moses::TargetPhrase &GetCurrTargetPhrase()const
 	{ return m_rule.GetTargetPhrase(); }
 	const Moses::WordsRange &GetCurrSourceRange()const
