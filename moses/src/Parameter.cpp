@@ -443,7 +443,7 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 
 
 /** read parameters from a configuration file */
-bool Parameter::ReadConfigFile( string filePath ) 
+bool Parameter::ReadConfigFile(const string &filePath ) 
 {
 	InputFileStream inFile(filePath);
 	string line, paramName;
