@@ -45,7 +45,7 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 #endif
 
 Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
-:m_targetPhrase(queueEntry.GetTranslationOption().GetChartRule().GetTargetPhrase())
+:m_rule(queueEntry.GetTranslationOption().GetChartRule())
 ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetChartRule().GetWordsConsumedTargetOrder())
 ,m_id(++s_HypothesesCreated)
 ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
@@ -54,10 +54,10 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
 ,m_arcList(NULL)
 ,m_manager(manager)
 {
-	assert(m_targetPhrase.GetSize() == m_wordsConsumedTargetOrder.size());
+	assert(GetCurrTargetPhrase().GetSize() == m_wordsConsumedTargetOrder.size());
 	//TRACE_ERR(m_targetPhrase << endl);
 
-	m_numTargetTerminals = m_targetPhrase.GetNumTerminals();
+	m_numTargetTerminals = GetCurrTargetPhrase().GetNumTerminals();
 
 	const std::vector<ChildEntry> &childEntries = queueEntry.GetChildEntries();
 	assert(m_prevHypos.empty());
@@ -96,9 +96,9 @@ Hypothesis::~Hypothesis()
 
 void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
-	for (size_t pos = 0; pos < m_targetPhrase.GetSize(); ++pos)
+	for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos)
 	{
-		const Word &word = m_targetPhrase.GetWord(pos);
+		const Word &word = GetCurrTargetPhrase().GetWord(pos);
 		if (word.IsNonTerminal())
 		{ // non-term. fill out with prev hypo
 			size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
@@ -121,9 +121,9 @@ Phrase Hypothesis::GetOutputPhrase() const
 
 size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
 {
-	for (size_t pos = 0; pos < m_targetPhrase.GetSize(); ++pos)
+	for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos)
 	{
-		const Word &word = m_targetPhrase.GetWord(pos);
+		const Word &word = GetCurrTargetPhrase().GetWord(pos);
 		
 		if (word.IsNonTerminal())
 		{
@@ -133,7 +133,7 @@ size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
 		}
 		else
 		{
-			ret.AddWord(m_targetPhrase.GetWord(pos));
+			ret.AddWord(GetCurrTargetPhrase().GetWord(pos));
 			size--;
 		}
 
@@ -165,9 +165,9 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 	}
 	else
 	{
-		for (int pos = (int) m_targetPhrase.GetSize() - 1; pos >= 0 ; --pos)
+		for (int pos = (int) GetCurrTargetPhrase().GetSize() - 1; pos >= 0 ; --pos)
 		{
-			const Word &word = m_targetPhrase.GetWord(pos);
+			const Word &word = GetCurrTargetPhrase().GetWord(pos);
 
 			if (word.IsNonTerminal())
 			{
@@ -177,7 +177,7 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 			}
 			else
 			{
-				ret.PrependWord(m_targetPhrase.GetWord(pos));
+				ret.PrependWord(GetCurrTargetPhrase().GetWord(pos));
 				size--;
 			}
 
@@ -225,7 +225,7 @@ void Hypothesis::CalcScore()
 	}
 
 	// translation models & word penalty
-	const ScoreComponentCollection &scoreBreakdown = m_targetPhrase.GetScoreBreakdown();
+	const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
 	m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
 	CalcLMScore();
@@ -243,9 +243,9 @@ void Hypothesis::CalcLMScore()
 	Phrase outPhrase(Output); // = GetOutputPhrase();
 	bool calcNow = false, firstPhrase = true;
 
-	for (size_t targetPhrasePos = 0; targetPhrasePos < m_targetPhrase.GetSize(); ++targetPhrasePos)
+	for (size_t targetPhrasePos = 0; targetPhrasePos < GetCurrTargetPhrase().GetSize(); ++targetPhrasePos)
 	{
-		const Word &targetWord = m_targetPhrase.GetWord(targetPhrasePos);
+		const Word &targetWord = GetCurrTargetPhrase().GetWord(targetPhrasePos);
 		if (!targetWord.IsNonTerminal())
 		{ // just a word, add to phrase for lm scoring
 			outPhrase.AddWord(targetWord);
@@ -414,7 +414,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 
 	// words bitmap
 	out << " " << hypo.GetId()
-			<< " " << hypo.m_targetPhrase
+			<< " " << hypo.GetCurrTargetPhrase()
 			//<< " " << outPhrase
 			<< " " << hypo.GetCurrSourceRange();
 			//<< " " << hypo.m_currSourceWordsRange
