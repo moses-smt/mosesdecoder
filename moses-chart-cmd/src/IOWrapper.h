@@ -39,7 +39,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TypeDef.h"
 #include "Sentence.h"
 #include "FactorTypeSet.h"
-#include "InputFileStream.h"
 #include "TrellisPathList.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
 
@@ -64,22 +63,15 @@ protected:
 	std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
-	Moses::InputFileStream				*m_inputFile;
 	bool													m_surpressSingleBestOutput;
 	
 public:
-	IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
-		, const std::vector<Moses::FactorType>			&outputFactorOrder
-				, const Moses::FactorMask							&inputFactorUsed
-				, size_t												nBestSize
-				, const std::string							&nBestFilePath);
-
 	IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
 				, const std::vector<Moses::FactorType>	&outputFactorOrder
 				, const Moses::FactorMask							&inputFactorUsed
 				, size_t												nBestSize
 				, const std::string							&nBestFilePath
-				, const std::string							&inputFilePath);
+				, const std::string							&inputFilePath="");
 	~IOWrapper();
 
 	Moses::InputType* GetInput(Moses::InputType *inputType);
