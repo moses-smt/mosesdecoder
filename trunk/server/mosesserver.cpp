@@ -124,15 +124,16 @@ public:
         retData.insert(text);
         
         if(addGraphInfo) {
-          vector<SearchGraphNode> searchGraph;
-          /*manager.GetSearchGraph(0, graphInfo);
+          /*COULD ALSO USE vector<SearchGraphNode> searchGraph;
+            manager.GetSearchGraph(0, searchGraphs);*/
+          manager.OutputSearchGraph(0, graphInfo);
           manager.getSntTranslationOptions(transCollOpts);
           pair<string, xmlrpc_c::value> 
               graphData("graph", xmlrpc_c::value_string(graphInfo.str()));
           retData.insert(graphData);
           pair<string, xmlrpc_c::value> 
               transOpts("transCollOpts", xmlrpc_c::value_string(transCollOpts.str()));
-          retData.insert(transOpts);*/
+          retData.insert(transOpts);
         }
         *retvalP = xmlrpc_c::value_struct(retData);
 
