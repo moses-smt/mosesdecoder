@@ -140,7 +140,6 @@ protected:
 	bool m_reportAllFactorsNBest;
 	bool m_isDetailedTranslationReportingEnabled;
 	bool m_onlyDistinctNBest;
-	bool m_computeLMBackoffStats;
 	bool m_UseAlignmentInfo;
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
@@ -259,10 +258,6 @@ public:
 		return m_parameter->GetParam(paramName);
 	}
 
-	bool IsComputeLMBackoffStats() const
-	{
-		return m_computeLMBackoffStats;
-	}
 	const std::vector<FactorType> &GetInputFactorOrder() const
 	{
 		return m_inputFactorOrder;

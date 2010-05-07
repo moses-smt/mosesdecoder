@@ -54,7 +54,6 @@ Parameter::Parameter()
 	AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
 	AddParam("lmodel-file", "location and properties of the language models");
 	AddParam("lmodel-dub", "dictionary upper bounds of language models");
-	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
 	AddParam("mapping", "description of decoding steps");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");

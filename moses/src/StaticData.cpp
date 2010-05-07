@@ -73,7 +73,6 @@ StaticData::StaticData()
 ,m_wpProducer(0)
 ,m_isDetailedTranslationReportingEnabled(false) 
 ,m_onlyDistinctNBest(false)
-,m_computeLMBackoffStats(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(false)
 ,m_sourceStartPosMattersForRecombination(false)
@@ -273,13 +272,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	// additional output
 	SetBooleanParameter( &m_isDetailedTranslationReportingEnabled, 
 			     "translation-details", false );
-
-	SetBooleanParameter( &m_computeLMBackoffStats, "lmstats", false );
-	if (m_computeLMBackoffStats && 
-	    ! m_isDetailedTranslationReportingEnabled) {
-	  VERBOSE(1, "-lmstats implies -translation-details, enabling" << std::endl);
-	  m_isDetailedTranslationReportingEnabled = true;
-	}
 
 	// score weights
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
