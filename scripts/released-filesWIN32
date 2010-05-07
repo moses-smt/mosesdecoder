@@ -36,7 +36,7 @@ training/phrase-extract/extract.exe
 training/phrase-extract/score.exe
 training/postprocess-lopar.perl
 training/reduce_combine.pl
-training/train-factored-phrase-model.perl
+training/train-model.perl
 training/symal/symal.exe
 training/symal/giza2bal.pl
 recaser/train-recaser.perl
