@@ -80,6 +80,7 @@ public:
 		const std::vector<float> &weight);
 	void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
 	void CleanUp();
+  void addSntPair(string& source, string& target, string& alignment);
 private:
 	DynSuffixArray* m_srcSA;
 	DynSuffixArray* m_trgSA;
