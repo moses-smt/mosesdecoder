@@ -124,19 +124,17 @@ public:
         retData.insert(text);
         
         if(addGraphInfo) {
-          /*COULD ALSO USE vector<SearchGraphNode> searchGraph;
-            manager.GetSearchGraph(0, searchGraphs);*/
           manager.OutputSearchGraph(0, graphInfo);
-          manager.getSntTranslationOptions(transCollOpts);
           pair<string, xmlrpc_c::value> 
               graphData("graph", xmlrpc_c::value_string(graphInfo.str()));
           retData.insert(graphData);
-          pair<string, xmlrpc_c::value> 
-              transOpts("transCollOpts", xmlrpc_c::value_string(transCollOpts.str()));
-          retData.insert(transOpts);
+          //manager.getSntTranslationOptions(transCollOpts);
+          //pair<string, xmlrpc_c::value> 
+              //transOpts("transCollOpts", xmlrpc_c::value_string(transCollOpts.str()));
+          //retData.insert(transOpts);
         }
+        cerr << "gets to this point\n";
         *retvalP = xmlrpc_c::value_struct(retData);
-
     }
 
     void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo) {
