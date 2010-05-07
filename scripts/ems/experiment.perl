@@ -98,6 +98,7 @@ my %RECURSIVE_RE_USE; # stores links from .INFO files that record prior re-use
 print "\nDEFINE STEPS (run with -exec if everything ok)\n" unless $EXECUTE || $CONTINUE;
 &define_step("all") unless $EXECUTE || $CONTINUE;
 &init_agenda_graph();
+&draw_agenda_graph();
 
 print "\nEXECUTE STEPS\n" if $EXECUTE;
 my (%DO,%DONE,%CRASHED);  # tracks steps that are currently processed or done
@@ -914,6 +915,9 @@ sub define_step {
         }	
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):decode$/) {
 	    &define_evaluation_decode($1,$i);
+	}
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis$/) {
+	    &define_evaluation_analysis($1,$i);
 	}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):meteor$/) {
 #	    &define_evaluation_meteor($1);
@@ -1937,6 +1941,8 @@ sub define_evaluation_decode {
     my $do_filter = &get("GENERAL:do_filter");
     my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
+    my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    $settings .= " -t" if defined($report_segmentation) && $report_segmentation eq "yes";
 
     my $qsub_filter = 0;
     if ($jobs && $CLUSTER) {
@@ -1990,6 +1996,22 @@ sub define_evaluation_decode {
 		$cmd .= " -n-best-list $system_output.best$nbest $nbest" if $nbest;
     }
 
+    &create_step($step_id,$cmd);
+}
+
+sub define_evaluation_analysis {
+    my ($set,$step_id) = @_;
+
+    my ($analysis,
+	$output,$reference,$input) = &get_output_and_input($step_id);
+    my $script = &backoff_and_get("EVALUATION:$set:analysis");
+    my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+
+    my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis";
+    if (defined($report_segmentation) && $report_segmentation eq "yes") {
+        my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
+	$cmd .= " -segmentation $segmentation_file";
+    }
     &create_step($step_id,$cmd);
 }
 

@@ -387,7 +387,7 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 ### additional decoder settings
 # switches for the Moses decoder
 #
-decoder-settings = "-mbr -mp -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
+decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
 
 ### prepare system output for scoring 
 # this may include detokenization and wrapping output in sgm 

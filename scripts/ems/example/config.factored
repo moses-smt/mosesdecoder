@@ -424,7 +424,7 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 #
 jobs = 10
 
-decoder-settings = "-mbr -mp -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
+decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
 
 
 ### prepare system output for scoring 
