@@ -17,7 +17,8 @@ function load_experiment_info() {
     }
   }
 
-  if (file_exists($dir."/steps/new")) {
+  if (file_exists($dir."/steps/new") ||
+      file_exists($dir."/steps/1")) {
     $topd = dir($dir."/steps");
     while (false !== ($run = $topd->read())) {
       if (preg_match('/^([0-9]+)$/',$run,$match) && $run>0) {
@@ -37,7 +38,8 @@ function load_experiment_info() {
 
   reset($experiment);
   while (list($id,$info) = each($experiment)) {
-    if (file_exists($dir."/steps/new")) {
+    if (file_exists($dir."/steps/new") ||
+        file_exists($dir."/steps/1")) {
       $stat = stat("$dir/steps/$id/parameter.$id");
     }
     else {
@@ -65,7 +67,8 @@ function load_experiment_info() {
 
 function load_parameter($run) {
   global $dir;
-  if (file_exists($dir."/steps/new")) {
+  if (file_exists($dir."/steps/new") ||
+      file_exists($dir."/steps/1")) {
     $file = file("$dir/steps/$run/parameter.$run");
   } 
   else {

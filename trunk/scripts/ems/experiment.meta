@@ -588,7 +588,7 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest
+	rerun-on-change: decoder decoder-settings nbest report-segmentation
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
 hiero-decode
@@ -599,15 +599,21 @@ hiero-decode
 	ignore-unless: use-hiero
 	template: $hiero-parallelizer -e OUT.edir -r -- $hiero-decoder -c IN < IN1 > OUT
 	rerun-on-change: hiero-decoder
+remove-markup
+	in: system-output
+	out: cleaned-output
+	default-name: evaluation/cleaned
+	pass-unless: report-segmentation
+	template: $moses-script-dir/ems/support/remove-segmenation-markup.perl < IN > OUT
 recase-output
-	in: system-output RECASING:recase-config
+	in: cleaned-output RECASING:recase-config
 	out: recased-output
 	default-name: evaluation/recased
 	pass-unless: recaser
 	ignore-if: output-truecaser
 	template: $recaser -moses $RECASING:decoder -in IN -model IN1 > OUT
 detruecase-output
-	in: system-output
+	in: cleaned-output
 	out: recased-output
 	default-name: evaluation/truecased
 	ignore-unless: output-truecaser
@@ -699,14 +705,19 @@ meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
 analysis
-	in: recased-output reference
+	in: recased-output reference input
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-unless: analysis
-	template: $analysis IN IN1 OUT
+analysis-coverage
+	in: input TRAINING:corpus TRAINING:phrase-translation-table
+	out: analysis-coverage
+	default-name: evaluation/analysis
+	ignore-unless: analysis analyze-coverage
+	template: $analysis -input IN -input-corpus IN1.$input-extension -ttable IN2 -dir OUT
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage
 	out: report
 	default-name: evaluation/report

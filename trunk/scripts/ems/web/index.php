@@ -24,6 +24,9 @@ if ($_POST["setup"] || $_GET["setup"]) {
     else if ($action == "bleu_show") { bleu_show(); }
     else if ($action == "ngram_precision_show") { ngram_show("precision");}
     else if ($action == "ngram_recall_show") { ngram_show("recall"); }
+    else if ($action == "CoverageSummary_show") { coverage_summary(); }
+    else if ($action == "CoverageDetails_show") { coverage_details(); }
+    else if ($action == "SegmentationSummary_show") { segmentation_summary(); }
     else { print "ERROR! $action"; }
   }
   else if ($_GET["analysis_diff_home"]) {
