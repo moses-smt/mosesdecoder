@@ -105,6 +105,7 @@ private:
 		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&);
 	int LoadAlignments(InputFileStream& aligs);
 	int LoadRawAlignments(InputFileStream& aligs);
+	int LoadRawAlignments(string& aligs);
 
 	bool ExtractPhrases(const int&, const int&, const int&, std::vector<PhrasePair*>&, bool=false) const;
 	SentenceAlignment GetSentenceAlignment(const int, bool=false) const; 
