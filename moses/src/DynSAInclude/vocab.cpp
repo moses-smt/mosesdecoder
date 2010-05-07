@@ -25,6 +25,13 @@ namespace Moses {
 		// 		- currently Input/Output variable is not stored in class Word, but in the future???
 		return word;
 	}
+	wordID_t Vocab::GetWordID(const std::string& word_str) {
+		FactorList factors;
+		factors.push_back(0); 
+		Word word;
+		word.CreateFromString(Input, factors, word_str, true); 
+    return GetWordID(word);
+  }
 	
 	// get wordID_t index for word represented as string
 	wordID_t Vocab::GetWordID(const std::string& word_str, 

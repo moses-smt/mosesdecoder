@@ -53,6 +53,7 @@ class Vocab {
 	wordID_t GetWordID(const std::string& word, const FactorDirection& direction, 
 		const FactorList& factors, bool isNonTerminal);
 	wordID_t GetWordID(const Word& word);
+	wordID_t GetWordID(const string& word);
 	Word& GetWord(wordID_t id);
 	inline const wordID_t GetkOOVWordID() { return m_kOOVWordID; }
 	inline const wordID_t GetBOSWordID() { return m_kBOSWordID; }

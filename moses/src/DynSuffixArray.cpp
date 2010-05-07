@@ -70,8 +70,8 @@ int DynSuffixArray::F_firstIdx(unsigned word) {
   else return -1;
 }
 
-/* uses rank() and c() to obtain the LF function */
-int DynSuffixArray::LF(unsigned L_idx) {
+/* uses rank() and c() to obtain the LastFirstFunc function */
+int DynSuffixArray::LastFirstFunc(unsigned L_idx) {
   int fIdx(-1);
   unsigned word = m_L->at(L_idx);
   if((fIdx = F_firstIdx(word)) != -1) 
@@ -88,12 +88,12 @@ void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
   assert(newIndex <= m_SA->size());
   int k(-1), kprime(-1);
   k = (newIndex < m_SA->size() ? m_ISA->at(newIndex) : m_ISA->at(0)); // k is now index of the cycle that starts at newindex
-  int true_pos = LF(k); // track cycle shift (newIndex - 1)
+  int true_pos = LastFirstFunc(k); // track cycle shift (newIndex - 1)
   int Ltmp = m_L->at(k);
   m_L->at(k) = (*newSent)[newSent->size()-1];  // cycle k now ends with correct word
   
   for(int j = newSent->size()-1; j > -1; --j) {
-    kprime = LF(k);  // find cycle that starts with (newindex - 1)
+    kprime = LastFirstFunc(k);  // find cycle that starts with (newindex - 1)
     //kprime += ((m_L[k] == Ltmp) && (k > isa[k]) ? 1 : 0); // yada yada
     // only terminal char can be 0 so add new vocab at end
     kprime = (kprime > 0 ? kprime : m_SA->size());  
@@ -114,7 +114,7 @@ void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
     k = kprime;
   }
   // Begin stage 4
-  Reorder(true_pos, LF(kprime)); // actual position vs computed position of cycle (newIndex-1)
+  Reorder(true_pos, LastFirstFunc(kprime)); // actual position vs computed position of cycle (newIndex-1)
 }
 
 void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
@@ -122,7 +122,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
   while(j != jprime) {
     printf("j=%d\tj'=%d\n", j, jprime);
     int tmp, isaIdx(-1);
-    int new_j = LF(j);
+    int new_j = LastFirstFunc(j);
     // for SA, L, and F, the element at pos j is moved to j'
     tmp = m_L->at(j); // L
     m_L->at(j) = m_L->at(jprime);
@@ -141,13 +141,13 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
     //isa[isaIdx] = jprime;
     m_ISA->at(isaIdx) = jprime;
     j = new_j;
-    jprime = LF(jprime);
+    jprime = LastFirstFunc(jprime);
   }
 }
 
 void DynSuffixArray::DeleteFactor(unsigned index, unsigned num2del) {
   int ltmp = m_L->at(m_ISA->at(index));
-  int true_pos = LF(m_ISA->at(index)); // track cycle shift (newIndex - 1)
+  int true_pos = LastFirstFunc(m_ISA->at(index)); // track cycle shift (newIndex - 1)
   for(size_t q = 0; q < num2del; ++q) {
     int row = m_ISA->at(index); // gives the position of index in SA and m_F
     std::cerr << "row = " << row << std::endl;
@@ -165,7 +165,7 @@ void DynSuffixArray::DeleteFactor(unsigned index, unsigned num2del) {
       if(*itr > index) --(*itr);
   }
   m_L->at(m_ISA->at(index))= ltmp;
-  Reorder(LF(m_ISA->at(index)), true_pos);
+  Reorder(LastFirstFunc(m_ISA->at(index)), true_pos);
   PrintAuxArrays();
 }
 

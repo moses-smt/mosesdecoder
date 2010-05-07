@@ -27,6 +27,8 @@ public:
 	void InitializeForInput(const InputType& i);
 	void AddEquivPhrase(const Phrase &, const TargetPhrase &){}
 	void CleanUp();
+  void insertSnt(string&, string&, string&);
+  void deleteSnt(unsigned, unsigned);
 private:
 	BilingualDynSuffixArray *m_biSA;
 	std::vector<float> m_weight;
