@@ -48,49 +48,6 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChart;
 
-IOWrapper::IOWrapper(
-				const vector<FactorType>				&inputFactorOrder
-				, const vector<FactorType>			&outputFactorOrder
-				, const FactorMask							&inputFactorUsed
-				, size_t												nBestSize
-				, const string									&nBestFilePath)
-:m_inputFactorOrder(inputFactorOrder)
-,m_outputFactorOrder(outputFactorOrder)
-,m_inputFactorUsed(inputFactorUsed)
-,m_inputFile(NULL)
-,m_inputStream(&std::cin)
-,m_nBestStream(NULL)
-,m_outputSearchGraphStream(NULL)
-{
-	const StaticData &staticData = StaticData::Instance();
-
-	m_surpressSingleBestOutput = false;
-	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		}
-		else
-		{
-			std::ofstream *nBestFile = new std::ofstream;
-			m_nBestStream = nBestFile;
-			nBestFile->open(nBestFilePath.c_str());
-		}
-	}
-	
-	// search graph output
-	if (staticData.GetOutputSearchGraph())
-	{
-	  string fileName = staticData.GetParam("output-search-graph")[0];
-	  std::ofstream *file = new std::ofstream;
-	  m_outputSearchGraphStream = file;
-	  file->open(fileName.c_str());
-	}
-	
-}
-
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 						 , const std::vector<FactorType>	&outputFactorOrder
 							, const FactorMask							&inputFactorUsed
@@ -100,15 +57,22 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 :m_inputFactorOrder(inputFactorOrder)
 ,m_outputFactorOrder(outputFactorOrder)
 ,m_inputFactorUsed(inputFactorUsed)
-,m_inputFilePath(inputFilePath)
-,m_inputFile(new InputFileStream(inputFilePath))
 ,m_nBestStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_inputFilePath(inputFilePath)
 {
 	const StaticData &staticData = StaticData::Instance();
 
+  if (m_inputFilePath.empty())
+  {
+    m_inputStream = &std::cin;
+  }
+  else
+  {
+    m_inputStream = new InputFileStream(inputFilePath);
+  }
+
 	m_surpressSingleBestOutput = false;
-	m_inputStream = m_inputFile;
 
 	if (nBestSize > 0)
 	{
@@ -138,8 +102,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 
 IOWrapper::~IOWrapper()
 {
-	if (m_inputFile != NULL)
-		delete m_inputFile;
+  if (!m_inputFilePath.empty())
+  {
+    delete m_inputStream;
+  }
 	if (m_nBestStream != NULL && !m_surpressSingleBestOutput)
 	{ // outputting n-best to file, rather than stdout. need to close file and delete obj
 		delete m_nBestStream;
