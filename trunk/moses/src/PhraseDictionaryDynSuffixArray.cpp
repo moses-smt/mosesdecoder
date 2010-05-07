@@ -74,5 +74,11 @@ const ChartRuleCollection *PhraseDictionaryDynSuffixArray::GetChartRuleCollectio
 	assert(false);
 	return NULL;
 }
+void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, string& alignment) { 
+  m_biSA->addSntPair(source, target, alignment);
+}
+void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned idx, unsigned num2Del) { 
+  // need to implement -- 
+}
 
 }// end namepsace

@@ -22,6 +22,9 @@ public:
   bool GetCorpusIndex(const vuint_t*, vuint_t*);
   void Load(FILE*);
   void Save(FILE*);
+  void InsertFactor(vuint_t*, unsigned);  
+  void DeleteFactor(unsigned, unsigned);
+  void SubstituteFactor(vuint_t*, unsigned);
 
 private: 
   vuint_t* m_SA;
@@ -33,10 +36,7 @@ private:
   void Qsort(int* array, int begin, int end);
   int Compare(int, int, int);
   void Reorder(unsigned, unsigned);
-  void InsertFactor(vuint_t*, unsigned);  
-  void DeleteFactor(unsigned, unsigned);
-  void SubstituteFactor(vuint_t*, unsigned);
-  int LF(unsigned);
+  int LastFirstFunc(unsigned);
   int Rank(unsigned, unsigned);
   int F_firstIdx(unsigned);
   void PrintAuxArrays() {

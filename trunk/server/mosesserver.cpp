@@ -9,11 +9,63 @@
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "StaticData.h"
-
+#include "PhraseDictionaryDynSuffixArray.h"
 
 using namespace Moses;
 using namespace std;
 
+typedef std::map<std::string, xmlrpc_c::value> params_t;
+
+class Updater: public xmlrpc_c::method {
+public:
+  Updater() {
+      // signature and help strings are documentation -- the client
+      // can query this information with a system.methodSignature and
+      // system.methodHelp RPC.
+      this->_signature = "S:S";
+      this->_help = "Updates stuff";
+  }
+  void
+  execute(xmlrpc_c::paramList const& paramList,
+          xmlrpc_c::value *   const  retvalP) {
+      const params_t params = paramList.getStruct(0);
+      breakOutParams(params);
+      const StaticData &staticData = StaticData::Instance();
+      InputType* dummy=0;
+      PhraseDictionaryFeature* pdf = staticData.GetPhraseDictionaries()[0];  
+      PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(*dummy); 
+      cerr << "Inserting into address " << pdsa << endl;
+      pdsa->insertSnt(source_, target_, alignment_);
+      cerr << "Done inserting\n";
+      //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy); 
+      map<string, xmlrpc_c::value> retData;
+      //*retvalP = xmlrpc_c::value_struct(retData);
+      pdf = 0; 
+      pdsa = 0;
+      *retvalP = xmlrpc_c::value_string("Phrase table updated");
+  }
+  string source_, target_, alignment_;
+  bool bounded_;
+  void breakOutParams(const params_t& params) {
+      params_t::const_iterator si = params.find("source");
+      if(si == params.end())
+        throw xmlrpc_c::fault("Missing source sentence", xmlrpc_c::fault::CODE_PARSE);
+      source_ = xmlrpc_c::value_string(si->second);
+      cerr << "source = " << source_ << endl;
+      si = params.find("target");
+      if(si == params.end())
+        throw xmlrpc_c::fault("Missing target sentence", xmlrpc_c::fault::CODE_PARSE);
+      target_ = xmlrpc_c::value_string(si->second);
+      cerr << "target = " << target_ << endl;
+      si = params.find("alignment");
+      if(si == params.end())
+        throw xmlrpc_c::fault("Missing alignment", xmlrpc_c::fault::CODE_PARSE);
+      alignment_ = xmlrpc_c::value_string(si->second);
+      cerr << "alignment = " << alignment_ << endl;
+      si = params.find("bounded");
+      bounded_ = (si != params.end());
+  }
+};
 
 class Translator : public xmlrpc_c::method {
 public:
@@ -24,8 +76,6 @@ public:
         this->_signature = "S:S";
         this->_help = "Does translation";
     }
-
-    typedef std::map<std::string, xmlrpc_c::value> params_t;
 
     void
     execute(xmlrpc_c::paramList const& paramList,
@@ -47,6 +97,10 @@ public:
         bool addAlignInfo = (si != params.end());
 
         const StaticData &staticData = StaticData::Instance();
+
+        bool addGraphInfo = staticData.GetOutputSearchGraph();
+        cerr << "addGraphInfo: " << addGraphInfo << endl;
+
         Sentence sentence(Input);
         const vector<FactorType> &inputFactorOrder = 
             staticData.GetInputFactorOrder();
@@ -57,7 +111,7 @@ public:
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
         vector<xmlrpc_c::value> alignInfo;
-        stringstream out;
+        stringstream out, graphInfo, transCollOpts;
         outputHypo(out,hypo,addAlignInfo,alignInfo);
 
         map<string, xmlrpc_c::value> retData;
@@ -69,6 +123,17 @@ public:
         }
         retData.insert(text);
         
+        if(addGraphInfo) {
+          vector<SearchGraphNode> searchGraph;
+          /*manager.GetSearchGraph(0, graphInfo);
+          manager.getSntTranslationOptions(transCollOpts);
+          pair<string, xmlrpc_c::value> 
+              graphData("graph", xmlrpc_c::value_string(graphInfo.str()));
+          retData.insert(graphData);
+          pair<string, xmlrpc_c::value> 
+              transOpts("transCollOpts", xmlrpc_c::value_string(transCollOpts.str()));
+          retData.insert(transOpts);*/
+        }
         *retvalP = xmlrpc_c::value_struct(retData);
 
     }
@@ -150,8 +215,10 @@ int main(int argc, char** argv) {
     xmlrpc_c::registry myRegistry;
 
     xmlrpc_c::methodPtr const translator(new Translator);
+    xmlrpc_c::methodPtr const updater(new Updater);
 
     myRegistry.addMethod("translate", translator);
+    myRegistry.addMethod("updater", updater);
     
     xmlrpc_c::serverAbyss myAbyssServer(
         myRegistry,
