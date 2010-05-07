@@ -408,6 +408,28 @@ std::vector<unsigned> BilingualDynSuffixArray::SampleSelection(std::vector<unsig
 	return subSample;
 }
 
+void BilingualDynSuffixArray::addSntPair(string& source, string& target, string& alignment) {
+  vuint_t srcFactor, trgFactor;
+  cerr << "source, target, alignment = " << source << ", " << target << ", " << alignment << endl;
+  std::istringstream sss(source), sst(target), ssa(alignment);
+  string word;
+  const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
+  while(sss >> word) { 
+    srcFactor.push_back(m_vocab->GetWordID(word));  // get vocab id
+    cerr << "srcFactor[" << (srcFactor.size() - 1) << "] = " << srcFactor.back() << endl;
+    m_srcCorpus->push_back(srcFactor.back()); // add word to corpus
+  }
+  m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence 
+  while(sst >> word) {
+    trgFactor.push_back(m_vocab->GetWordID(word));
+    cerr << "trgFactor[" << (trgFactor.size() - 1) << "] = " << trgFactor.back() << endl;
+    m_trgCorpus->push_back(trgFactor.back());
+  }
+  m_trgSntBreaks.push_back(oldTrgCrpSize);
+  m_srcSA->InsertFactor(&srcFactor, oldSrcCrpSize);
+  //m_trgSA->insertFactor(&trgFactor, oldTrgCrpSize);
+  //LoadRawAlignments(alignment);
+}
 SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
 	:m_sntIndex(sntIndex)
 	,numberAligned(targetSize, 0)
