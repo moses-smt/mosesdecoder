@@ -59,6 +59,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_inputFactorUsed(inputFactorUsed)
 ,m_nBestStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(0)
 ,m_inputFilePath(inputFilePath)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -97,7 +98,13 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
 	}
-	
+
+  // detailed translation reporting
+  if (staticData.IsDetailedTranslationReportingEnabled())
+  {
+    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
+    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+  }
 }
 
 IOWrapper::~IOWrapper()
@@ -115,6 +122,8 @@ IOWrapper::~IOWrapper()
 	{
 	  delete m_outputSearchGraphStream;
 	}
+
+  delete m_detailedTranslationReportingStream;
 }
 
 InputType*IOWrapper::GetInput(InputType* inputType)
@@ -222,11 +231,11 @@ void OutputInput(std::ostream& os, const MosesChart::Hypothesis* hypo)
 }
 */
 
-void OutputTranslationOptions(const MosesChart::Hypothesis *hypo, long translationId)
+void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *hypo, long translationId)
 { // recursive
 	if (hypo != NULL)
 	{
-	  cerr << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetCurrChartRule() 
+	  out << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetCurrChartRule() 
 				<< " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
 				<< endl;
 	}
@@ -236,7 +245,7 @@ void OutputTranslationOptions(const MosesChart::Hypothesis *hypo, long translati
 	for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)
 	{
 		const MosesChart::Hypothesis *prevHypo = *iter;
-		OutputTranslationOptions(prevHypo, translationId);
+		OutputTranslationOptions(out, prevHypo, translationId);
 	}
 }
 
@@ -257,7 +266,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 		
 		if (StaticData::Instance().IsDetailedTranslationReportingEnabled())
 		{
-			OutputTranslationOptions(hypo, translationId);
+			OutputTranslationOptions(*m_detailedTranslationReportingStream, hypo, translationId);
 		}
 		
 		if (!m_surpressSingleBestOutput)

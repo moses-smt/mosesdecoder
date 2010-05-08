@@ -71,7 +71,7 @@ StaticData::StaticData()
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
 ,m_wpProducer(0)
-,m_isDetailedTranslationReportingEnabled(false) 
+,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(false)
@@ -270,8 +270,19 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
 
 	// additional output
-	SetBooleanParameter( &m_isDetailedTranslationReportingEnabled, 
-			     "translation-details", false );
+  if (m_parameter->isParamSpecified("translation-details"))
+  {
+    const vector<string> &args = m_parameter->GetParam("translation-details");
+    if (args.size() == 1)
+    {
+      m_detailedTranslationReportingFilePath = args[0];
+    }
+    else
+    {
+      UserMessage::Add(string("the translation-details option requires exactly one filename argument"));
+      return false;
+    }
+  }
 
 	// score weights
 	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );

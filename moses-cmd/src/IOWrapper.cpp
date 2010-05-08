@@ -60,6 +60,7 @@ IOWrapper::IOWrapper(
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(0)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -104,6 +105,7 @@ IOWrapper::~IOWrapper()
 	{
 	  delete m_outputSearchGraphStream;
 	}
+  delete m_detailedTranslationReportingStream;
 }
 
 void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
@@ -153,6 +155,13 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
 	}
+
+  // detailed translation reporting
+  if (staticData.IsDetailedTranslationReportingEnabled())
+  {
+    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
+    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+  }
 }
 
 InputType*IOWrapper::GetInput(InputType* inputType)

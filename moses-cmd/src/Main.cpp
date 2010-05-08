@@ -223,7 +223,8 @@ int main(int argc, char* argv[])
     
 		
         if (staticData.IsDetailedTranslationReportingEnabled()) {
-            TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
+            std::ostream &out = ioWrapper->GetDetailedTranslationReportingStream();
+            TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
         }
 
         IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
