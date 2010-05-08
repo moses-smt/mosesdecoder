@@ -60,6 +60,7 @@ protected:
 	const Moses::FactorMask							&m_inputFactorUsed;
 	std::ostream 									*m_nBestStream
 																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
+  std::ostream                  *m_detailedTranslationReportingStream;
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
 	Moses::InputFileStream				*m_inputFile;
@@ -103,6 +104,11 @@ public:
 	{
 	  return *m_outputSearchGraphStream;
 	}
+
+  std::ostream &GetDetailedTranslationReportingStream()
+  {
+    return *m_detailedTranslationReportingStream;
+  } 
 };
 
 IOWrapper *GetIODevice(const Moses::StaticData &staticData);
