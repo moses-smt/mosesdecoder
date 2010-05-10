@@ -30,7 +30,7 @@ function generic_show(field,parameters) {
   var url = '?analysis=' + field + '_show'
             + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
             + '&' + parameters;
-  new Ajax.Updater(field, url, { method: 'get' });
+  new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function highlight_phrase(sentence,phrase) {
   var input = "input-"+sentence+"-"+phrase;
@@ -38,17 +38,37 @@ function highlight_phrase(sentence,phrase) {
   var output = "output-"+sentence+"-"+phrase;
   $(output).setStyle({ borderWidth: '3px', borderColor: 'red' });
 }
+function show_word_info(sentence,cc,tc,te) {
+  var info = "info-"+sentence;
+  document.getElementById(info).innerHTML = ''+cc+' occurrences in corpus, '+tc+' distinct translations, translation entropy: '+te;
+  $(info).setStyle({ opacity: 1 });
+}
 function lowlight_phrase(sentence,phrase) {
   var input = "input-"+sentence+"-"+phrase;
   $(input).setStyle({ borderWidth: '1px', borderColor: 'black' });
   var output = "output-"+sentence+"-"+phrase;
   $(output).setStyle({ borderWidth: '1px', borderColor: 'black' });
 }
+function hide_word_info(sentence) {
+  var info = "info-"+sentence;
+  $(info).setStyle({ opacity: 0 });
+}
 </script>
 </head>
 <body>
 <div id="nGramSummary"><?php ngram_summary()  ?></div>
 <div id="CoverageDetails"></div>
+<div id="PrecisionRecallDetails"></div>
+<div id="bleu">(loading...)</div>
+<script language="javascript">
+show('bleu','',5);
+</script>
+</body></html>
+<?php
+}
+
+function precision_recall_details() {
+?>
 <table width=100%>
   <tr>
     <td width=25% valign=top><div id="nGramPrecision1">(loading...)</div></td>
@@ -61,9 +81,7 @@ function lowlight_phrase(sentence,phrase) {
     <td width=25% valign=top><div id="nGramRecall3">(loading...)</div></td>
     <td width=25% valign=top><div id="nGramRecall4">(loading...)</div></td>
 </tr></table>
-<div id="bleu">(loading...)</div>
-<script>
-show('bleu','',5);
+<script language="javascript">
 ngram_show('precision',1,5,'',0);
 ngram_show('precision',2,5,'',0);
 ngram_show('precision',3,5,'',0);
@@ -73,7 +91,6 @@ ngram_show('recall',2,5,'',0);
 ngram_show('recall',3,5,'',0);
 ngram_show('recall',4,5,'',0);
 </script>
-</body></html>
 <?php
 }
 
@@ -110,7 +127,9 @@ function ngram_summary() {
   print "</table>";
   //}
 
-  print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
+  print "<A HREF=\"javascript:generic_show('PrecisionRecallDetails','')\">details</A> ";
+
+ print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
 
   $each_score = explode(" ; ",$experiment[$idx?$id2:$id]->result[$set]);
   for($i=0;$i<count($each_score);$i++) {
@@ -351,7 +370,7 @@ function bleu_show() {
     print "<A HREF=\"javascript:show('bleu','worst',$count)\">worst</A> ";
   }
 
-  print "display <A HREF=\"\">fullscreen</A> ";
+  #print "display <A HREF=\"\">fullscreen</A> ";
 
   $count = $_GET['count'];
   if ($count == 0) { $count = 5; }
@@ -362,6 +381,7 @@ function bleu_show() {
   print "</font><BR>\n";
 
   sentence_annotation();
+  print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count)\">more</A> ";
 }
 
 function sentence_annotation() {
@@ -433,6 +453,7 @@ function sentence_annotation() {
   for($i=0;$i<$count && $i<count($bleu);$i++) {
      $line = $bleu[$i]; 
      if ($input) {
+       print "<div id=\"info-$i\" style=\"border-color:black; background:#ffff80; opacity:0; width:100%; align:center; border:1px;\">8364 occ. in corpus, 56 translations, entropy: 5.54</div>\n";
        print "<font size=-2>[#".$line["id"]."]</font> ";
        input_annotation($line["id"],$input[$line["id"]],$segmentation[$line["id"]]);
        print "<font size=-2>[".$line["bleu"]."]</font> ";
@@ -441,7 +462,7 @@ function sentence_annotation() {
        print "<font size=-2>[".$line["id"].":".$line["bleu"]."]</font> ";
      }
      bleu_annotation($line["id"],$line["system"],$segmentation[$line["id"]]);
-     print "<br>".$line["reference"]."<hr>";
+     print "<br>".$line["reference"];
   }
 }
 
@@ -457,7 +478,7 @@ function input_annotation($i,$input,$segmentation) {
   $word = split(" ",$sentence);
   for($j=0;$j<count($word);$j++) {
 
-    $corpus_count = 255 - 20 * log(1 + $coverage[$j][$j]["corpus_count"]);
+    $corpus_count = 255 - 10 * log(1 + $coverage[$j][$j]["corpus_count"]);
     if ($corpus_count < 128) { $corpus_count = 128; }
     $cc_color = dechex($corpus_count / 16) . dechex($corpus_count % 16);
 
@@ -465,21 +486,21 @@ function input_annotation($i,$input,$segmentation) {
     if ($ttable_count < 128) { $ttable_count = 128; }
     $tc_color = dechex($ttable_count / 16) . dechex($ttable_count % 16);
 
-    $ttable_entropy = 255 - 16 * $coverage[$j][$j]["ttable_entropy"];
+    $ttable_entropy = 255 - 32 * $coverage[$j][$j]["ttable_entropy"];
     if ($ttable_entropy < 128) { $ttable_entropy = 128; }
     $te_color = dechex($ttable_entropy / 16) . dechex($ttable_entropy % 16);
     
-//    $color = "#". $cc_color . $te_color .  $tc_color; # pale green
-//    $color = "#". $cc_color . $tc_color .  $te_color; # pale blue
-//    $color = "#". $te_color . $cc_color .  $tc_color; # red towards purple
-//    $color = "#". $te_color . $tc_color .  $cc_color; # red with some orange
-//    $color = "#". $tc_color . $te_color .  $cc_color; // # green with some yellow
-    $color = "#". $tc_color . $cc_color .  $te_color; // # blue-purple
+    $color = "#". $cc_color . $te_color .  $tc_color; # reddish browns with some green
+//    $color = "#". $cc_color . $tc_color .  $te_color; # reddish brown with some blueish purple
+//    $color = "#". $te_color . $cc_color .  $tc_color; # pale green towards red
+//    $color = "#". $te_color . $tc_color .  $cc_color; # pale purple towards red
+//    $color = "#". $tc_color . $te_color .  $cc_color; // # blue-grey towards green
+//    $color = "#". $tc_color . $cc_color .  $te_color; // # green-grey towards blue
     if ($segmentation && $segmentation["input_start"][$j]) {
-      $id = $segmentation["input_start"][$j];
+      $id = $segmentation["input_start"][$j];  
       print "<span id=\"input-$i-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($i,$id);\" onmouseout=\"lowlight_phrase($i,$id);\">";
     }
-    print "<span style=\"background-color: $color;\">$word[$j]</span>";
+    print "<span style=\"background-color: $color;\" onmouseover=\"show_word_info($i,'$word[$j]: ".$coverage[$j][$j]["corpus_count"]."',".$coverage[$j][$j]["ttable_count"].",'".$coverage[$j][$j]["ttable_entropy"]."');\" onmouseout=\"hide_word_info($i);\">$word[$j]</span>";
     if ($segmentation && $segmentation["input_end"][$j]) {
       print "</span>";
     }
@@ -489,7 +510,8 @@ function input_annotation($i,$input,$segmentation) {
 }
 
 function bleu_annotation($i,$system,$segmentation) {
-  $color = array("#FFC0C0","#FFC0FF","#C0C0FF","#C0FFFF","#C0FFC0");
+  #$color = array("#FFC0C0","#FFC0FF","#C0C0FF","#C0FFFF","#C0FFC0");
+  $color = array("#c0c0c0","#c0c0ff","#a0a0ff","#8080ff","#4040ff");
   $word = split(" ",$system);
 
   for($j=0;$j<count($word);$j++) {
