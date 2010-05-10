@@ -55,6 +55,9 @@ function load_experiment_info() {
       foreach ($f as $line_num => $line) {
 	if (preg_match('/^(.+): (.+)/',$line,$match)) {
 	  $experiment[$id]->result[$match[1]] = $match[2];
+          if (!$evalset || !array_key_exists($match[1],$evalset)) { 
+            $evalset[$match[1]] = 0; 
+          }
 	  $evalset[$match[1]]++;
 	}
       }
@@ -111,7 +114,8 @@ function process_file_entry($dir,$entry) {
 	if ($stat2[9] > $stat[9]) { $stat = $stat2; }
 	$time = $stat[9];
 	
-	if (!$experiment[$run]->last_step_time ||
+	if (!$experiment || !array_key_exists($run,$experiment) ||
+            !property_exists($experiment[$run],"last_step_time") ||
 	    $time > $experiment[$run]->last_step_time) {
 	  $experiment[$run]->last_step_time = $time;
 	  $experiment[$run]->last_step = $step;
