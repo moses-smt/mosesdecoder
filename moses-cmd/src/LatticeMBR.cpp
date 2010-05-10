@@ -548,7 +548,7 @@ vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList) {
     return solutions.at(0).GetWords();
 }
 
-vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList) {
+const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestList) {
     static const int BLEU_ORDER = 4;
     static const float SMOOTH = 1;
     
@@ -636,9 +636,10 @@ vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList) {
         }
     }
     
-    vector<Word> bestWords;
-    GetOutputWords(**best,bestWords);
-    return bestWords;
+    return **best;
+    //vector<Word> bestWords;
+    //GetOutputWords(**best,bestWords);
+    //return bestWords;
 }
 
 

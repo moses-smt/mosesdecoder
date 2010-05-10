@@ -108,9 +108,9 @@ IOWrapper::~IOWrapper()
   delete m_detailedTranslationReportingStream;
 }
 
-void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
-														, const std::vector<FactorType>			&outputFactorOrder
-														, const FactorMask							&inputFactorUsed
+void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
+														, const std::vector<FactorType>			&/*outputFactorOrder*/
+														, const FactorMask							&/*inputFactorUsed*/
 														, size_t												nBestSize
 														, const std::string							&nBestFilePath)
 {
@@ -224,9 +224,22 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
+void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out) 
+{	
+	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
-
-
+	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+	{
+		const Hypothesis &edge = *edges[currEdge];
+		OutputSurface(out, edge.GetCurrTargetPhrase(), StaticData::Instance().GetOutputFactorOrder(), reportAllFactors);
+		if (reportSegmentation == true
+		    && edge.GetCurrTargetPhrase().GetSize() > 0) {
+			out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
+			    << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
+		}
+	}
+  out << endl;
+}
 
 void IOWrapper::Backtrack(const Hypothesis *hypo){
 
@@ -236,18 +249,7 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
-{
-	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
-	{
-		const Factor *factor = mbrBestHypo[i];
-		if (i>0) out << " ";
-			out << factor->GetString();
-	}
-	out << endl;
-}													 
-
-void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
+void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
 {
   
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)

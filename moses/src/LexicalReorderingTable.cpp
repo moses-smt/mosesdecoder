@@ -597,14 +597,14 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f){
   }
 }
 
-void LexicalReorderingTableTree::Cache(const ConfusionNet& input){
+void LexicalReorderingTableTree::Cache(const ConfusionNet& /*input*/){
   return;
 }
 
 void LexicalReorderingTableTree::Cache(const Sentence& input){
   //only works with sentences...
-  int prev_cache_size = m_Cache.size();
-  int max_phrase_length = input.GetSize();
+  size_t prev_cache_size = m_Cache.size();
+  size_t max_phrase_length = input.GetSize();
   for(size_t len = 0; len <= max_phrase_length; ++len){ 
 	for(size_t start = 0; start+len <= input.GetSize(); ++start){
 	  Phrase f    = input.GetSubString(WordsRange(start, start+len));

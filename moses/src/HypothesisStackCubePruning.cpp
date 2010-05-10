@@ -256,7 +256,7 @@ void HypothesisStackCubePruning::CleanupArcList()
 
 void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
 												, HypothesisStackCubePruning &stack
-												, const WordsRange &range
+												, const WordsRange &/*range*/
 												, BitmapContainer &bitmapContainer
 												, const SquareMatrix &futureScore
 												, const TranslationOptionList &transOptList)

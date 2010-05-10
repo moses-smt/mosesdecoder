@@ -54,7 +54,7 @@ int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRang
 	return abs(dist);
 }
 
-bool InputType::CanIGetFromAToB(size_t start, size_t end) const
+bool InputType::CanIGetFromAToB(size_t /*start*/, size_t /*end*/) const
 {
   return true;
 }

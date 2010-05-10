@@ -77,7 +77,10 @@ string TrimXml(const string& str)
  */
 bool isXmlTag(const string& tag)
 {
-	return tag[0] == '<';
+	return (tag[0] == '<' &&
+					(tag[1] == '/' ||
+					 (tag[1] >= 'a' && tag[1] <= 'z') ||
+					 (tag[1] >= 'A' && tag[1] <= 'Z')));
 }
 
 /**

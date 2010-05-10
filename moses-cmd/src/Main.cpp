@@ -174,9 +174,11 @@ int main(int argc, char* argv[])
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}
 		}
+	// output best translation using posterior methods (MBR, Lattice MBR, Consensus)
         else  {
+
+            // always need n-best list -> get it
             size_t nBestSize = staticData.GetMBRSize();
-      
             if (nBestSize <= 0)
             {
                 cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
@@ -186,26 +188,37 @@ int main(int argc, char* argv[])
             manager.CalcNBest(nBestSize, nBestList,true);
             VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
             IFVERBOSE(2) { PrintUserTime("calculated n-best list for (L)MBR decoding"); }
-            if (!staticData.GetNBestFilePath().empty()) {
+            if (!staticData.GetNBestFilePath().empty()) 
+            {
                 vector<LatticeMBRSolution> solutions;
                 size_t n  = min(nBestSize, staticData.GetNBestSize());
                 getLatticeMBRNBest(manager,nBestList,solutions,n);
                 VERBOSE(2,"WRITING " << solutions.size() << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
                 ioWrapper->OutputLatticeMBRNBestList(solutions,source->GetTranslationId());
-            } else if (staticData.UseLatticeMBR()) {
+            } 
+            // lattice MBR
+            else if (staticData.UseLatticeMBR()) 
+            {
                 vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
                 OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
                                staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors(),cout);
                 IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
-            } else if (staticData.UseConsensusDecoding()) {
-                std::vector<Word> conBestHypo = doConsensusDecoding(manager,nBestList);
+            }
+            // consensus decoding
+            else if (staticData.UseConsensusDecoding()) 
+            {
+							//std::vector<Word> conBestHypo = doConsensusDecoding(manager,nBestList);
+                const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
                 OutputBestHypo(conBestHypo, source->GetTranslationId(),
                                staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors(),cout);
                 IFVERBOSE(2) { PrintUserTime("finished Consensus decoding"); }
-            } else {
-                std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+            } 
+            // n-best MBR
+            else 
+            {
+                const TrellisPath &mbrBestHypo = doMBR(nBestList);
                 OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
                                staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors(),cout);
