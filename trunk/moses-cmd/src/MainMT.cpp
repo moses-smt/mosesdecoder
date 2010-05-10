@@ -105,7 +105,8 @@ class TranslationTask : public Task {
              m_source(source), m_lineNumber(lineNumber),
                 m_outputCollector(outputCollector), m_nbestCollector(nbestCollector) {}
 
-        void Run() {
+        void Run() 
+        {
 #if defined(BOOST_HAS_PTHREADS)
             TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << (int)pthread_self() << std::endl);
 #endif
@@ -132,9 +133,12 @@ class TranslationTask : public Task {
                         }
                     }
                     out << endl;
-                } else {
+                } 
+                else 
+                {
                     size_t nBestSize = staticData.GetMBRSize();
-                    if (nBestSize <= 0) {
+                    if (nBestSize <= 0) 
+                    {
                         cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
                         exit(1);
                     }
@@ -143,8 +147,10 @@ class TranslationTask : public Task {
                     VERBOSE(2,"size of n-best: " << nBestList.GetSize() << " (" << nBestSize << ")" << endl);
                     IFVERBOSE(2) { PrintUserTime("calculated n-best list for (L)MBR decoding"); }
                     
-                    if (staticData.UseLatticeMBR()) {
-                        if (m_nbestCollector) {
+                    if (staticData.UseLatticeMBR()) 
+                    {
+                        if (m_nbestCollector) 
+                        {
                             //lattice mbr nbest
                             vector<LatticeMBRSolution> solutions;
                             size_t n  = min(nBestSize, staticData.GetNBestSize());
@@ -152,16 +158,20 @@ class TranslationTask : public Task {
                             ostringstream out;
                             OutputLatticeMBRNBest(out, solutions,m_lineNumber);
                             m_nbestCollector->Write(m_lineNumber, out.str());
-                        } else {
+                        } 
+                        else 
+                        {
                             //Lattice MBR decoding
                             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList); 
                             OutputBestHypo(mbrBestHypo, m_lineNumber, staticData.GetReportSegmentation(),
                                         staticData.GetReportAllFactors(),out);
                             IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
                         }
-                    } else {
+                    } 
+                    else 
+                    {
                         //MBR decoding
-                        std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
+											  const Moses::TrellisPath &mbrBestHypo = doMBR(nBestList);
                         OutputBestHypo(mbrBestHypo, m_lineNumber,
                                     staticData.GetReportSegmentation(),
                                     staticData.GetReportAllFactors(),out);

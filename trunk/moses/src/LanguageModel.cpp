@@ -171,7 +171,7 @@ struct LMState : public FFState {
 	}
 };
 
-const FFState* LanguageModel::EmptyHypothesisState(const InputType &input) const {
+const FFState* LanguageModel::EmptyHypothesisState(const InputType &/*input*/) const {
 	return new LMState(NULL);
 }
 

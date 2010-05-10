@@ -82,8 +82,8 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , TranslationOptionCollection *toc
-                              , bool adhereTableLimit) const
+                              , TranslationOptionCollection * /* toc */
+                              , bool /*adhereTableLimit*/) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
     { // word deletion

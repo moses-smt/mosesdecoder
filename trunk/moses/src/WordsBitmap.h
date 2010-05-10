@@ -58,7 +58,7 @@ protected:
 	//sets elements by vector
 	void Initialize(std::vector<bool> vector)
 	{
-		int vector_size = vector.size();
+		size_t vector_size = vector.size();
 		for (size_t pos = 0 ; pos < m_size ; pos++)
 		{
 			if (pos < vector_size && vector[pos] == true) m_bitmap[pos] = true;

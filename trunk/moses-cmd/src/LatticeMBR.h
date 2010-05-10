@@ -143,5 +143,6 @@ void GetOutputFactors(const TrellisPath &path, std::vector <Word> &translation);
 void extract_ngrams(const std::vector<Word >& sentence, std::map < Phrase, int >  & allngrams);
 bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b);
 std::vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);
-std::vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
+const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
+//std::vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
 #endif

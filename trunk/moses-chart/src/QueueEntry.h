@@ -59,7 +59,7 @@ protected:
 	const HypoList *m_orderedHypos;
 
 public:
-	ChildEntry(size_t pos, const HypoList &orderedHypos, const Moses::Word &headWord)
+  ChildEntry(size_t pos, const HypoList &orderedHypos, const Moses::Word & /*headWord*/ )
 		:m_pos(pos)
 		,m_orderedHypos(&orderedHypos)
 		//,m_headWord(headWord)
