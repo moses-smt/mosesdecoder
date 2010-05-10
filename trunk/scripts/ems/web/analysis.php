@@ -131,7 +131,9 @@ function ngram_summary() {
 
  print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
 
-  $each_score = explode(" ; ",$experiment[$idx?$id2:$id]->result[$set]);
+  $each_score = explode(" ; ",$experiment[$id]->result[$set]);
+  $header = "";
+  $score_line = "";
   for($i=0;$i<count($each_score);$i++) {
     if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
         preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
@@ -164,7 +166,16 @@ function ngram_summary() {
 function coverage_details() {
   global $dir,$set,$id;
 
+  $count = array(); $token = array();
   foreach (array("ttable","corpus") as $corpus) {
+    foreach (array("token","type") as $b) {
+      for($i=0;$i<=7;$i++) {
+        foreach (array("6+","2-5","1","0") as $range) {
+          $count[$corpus][$b][$i][$range] = 0;
+        }
+        $total[$corpus][$b][$i] = 0;
+      }
+    }
     $data = file("$dir/evaluation/$set.analysis.$id/$corpus-coverage-summary");
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
@@ -254,11 +265,18 @@ function coverage_details() {
 
 function coverage_summary() {
   global $dir,$set,$id,$corpus;
-  $by = $_GET['by'];
-  if ($by == '') { $by = 'token'; }
+
+  if (array_key_exists("by",$_GET)) { $by = $_GET['by']; }
+  else { $by = 'token'; }
 
   $total = array(); $count = array();
   foreach (array("ttable","corpus") as $corpus) {
+    foreach (array("token","type") as $b) {
+      foreach (array("6+","2-5","1","0") as $c) {
+        $count[$corpus][$b][$c] = 0;
+      }
+      $total[$corpus][$b] = 0;
+    }
     $data = file("$dir/evaluation/$set.analysis.$id/$corpus-coverage-summary");
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
@@ -303,17 +321,25 @@ function coverage_summary() {
     print "<A HREF=\"javascript:generic_show('CoverageSummary','by=type')\">by type</A> ";
   }
   print " / ";
-  print "<A HREF=\"javascript:generic_show('CoverageDetails','')\">details</A> ";
+  print "<div id=\"CoverageDetailsLink\"<A HREF=\"javascript:generic_show('CoverageDetails','')\">details</A> ";
 }
-
 
 function segmentation_summary() {
   global $dir,$set,$id;
-  $by = $_GET['by'];
-  if ($by == '') { $by = 'word'; }
+
+  if (array_key_exists("by",$_GET)) { $by = $_GET['by']; }
+  else { $by = 'word'; }
+
+  $count = array();
+  for($i=0;$i<=4;$i++) {
+    $count[$i] = array();
+    for($j=0;$j<=4;$j++) {
+      $count[$i][$j] = 0;
+    }
+  }
 
   $data = file("$dir/evaluation/$set.analysis.$id/segmentation");
-  $total = 0; $count = array();
+  $total = 0; 
   for($i=0;$i<count($data);$i++) {
     list($in,$out,$c) = split("\t",$data[$i]);
     if ($by == "word") { $c *= $in; }
@@ -329,7 +355,12 @@ function segmentation_summary() {
   for($in=1;$in<=4;$in++) {
     print "<tr><td nowrap>$in".($in==4?"+":"")." to</td>";
     for($out=1;$out<=4;$out++) {
-      printf("<td align=right nowrap>%d (%.1f%s)</td>",$count[$in][$out],100*$count[$in][$out]/$total,"%");
+      if (array_key_exists($in,$count) &&
+          array_key_exists($out,$count[$in])) {
+	  $c = $count[$in][$out];
+      } 
+      else { $c = 0; }
+      printf("<td align=right nowrap>%d (%.1f%s)</td>",$c,100*$c/$total,"%");
     }
     print "</tr>";
   }
@@ -381,7 +412,12 @@ function bleu_show() {
   print "</font><BR>\n";
 
   sentence_annotation();
-  print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count)\">more</A> ";
+  print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count)\">5 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',10+$count)\">10 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',20+$count)\">20 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',50+$count)\">50 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',100+$count)\">100 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',9999)\">all</A> ";
 }
 
 function sentence_annotation() {
@@ -471,10 +507,12 @@ function input_annotation($sentence,$input,$segmentation) {
 
   # get information from line in input annotation file
   foreach (split(" ",$coverage_vector) as $item) {
-    list($from,$to,$corpus_count,$ttable_count,$ttable_entropy) = preg_split("/[\-:]/",$item);
-    $coverage[$from][$to]["corpus_count"] = $corpus_count;
-    $coverage[$from][$to]["ttable_count"] = $ttable_count;
-    $coverage[$from][$to]["ttable_entropy"] = $ttable_entropy;
+    if (preg_match("/[\-:]/",$item)) {
+      list($from,$to,$corpus_count,$ttable_count,$ttable_entropy) = preg_split("/[\-:]/",$item);
+      $coverage[$from][$to]["corpus_count"] = $corpus_count;
+      $coverage[$from][$to]["ttable_count"] = $ttable_count;
+      $coverage[$from][$to]["ttable_entropy"] = $ttable_entropy;
+    }
   }
   $word = split(" ",$words);
 
@@ -487,7 +525,9 @@ function input_annotation($sentence,$input,$segmentation) {
   for($length=1;$length<=7;$length++) {
     for($from=0;$from<count($word)-($length-1);$from++) {
       $to = $from + ($length-1);
-      if (array_key_exists("corpus_count",$coverage[$from][$to])) {
+      if (array_key_exists($from,$coverage) &&
+          array_key_exists($to,$coverage[$from]) &&
+          array_key_exists("corpus_count",$coverage[$from][$to])) {
         $level=0;
 	$available = 0;
         while(!$available) {
@@ -531,11 +571,15 @@ function input_annotation($sentence,$input,$segmentation) {
 	    else {
 		$color = coverage_color($coverage[$from][$to]);
 		$phrase = "";
+		$highlightwords = "";
+                $lowlightwords = "";
 		for($j=$from;$j<=$to;$j++) {
 		  if ($j>$from) { $phrase .= " "; }
 		  $phrase .= $word[$j];
+                  $highlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='#ffff80';";
+                  $lowlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='".coverage_color($coverage[$j][$j])."';";
 		}
-	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,'$phrase: ".$coverage[$from][$to]["corpus_count"]."',".$coverage[$from][$to]["ttable_count"].",'".$coverage[$from][$to]["ttable_entropy"]."'); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';\">";
+	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,".$coverage[$from][$to]["corpus_count"].",".$coverage[$from][$to]["ttable_count"].",".$coverage[$from][$to]["ttable_entropy"]."); this.style.backgroundColor='#ffff80';$highlightwords\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';$lowlightwords\">";
             }
             print "</div></td>";
 	    $from += $size-1;
@@ -549,13 +593,22 @@ function input_annotation($sentence,$input,$segmentation) {
       # display input words
       print "<tr><td colspan=".($sep_end-$sep_start)."><div style=\"position:relative; z-index:1;\">";
       for($j=$sep_start;$j<$sep_end;$j++) {
-        if ($segmentation && $segmentation["input_start"][$j]) {
+        if ($segmentation && array_key_exists($j,$segmentation["input_start"])) {
           $id = $segmentation["input_start"][$j];  
           print "<span id=\"input-$sentence-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($sentence,$id);\" onmouseout=\"lowlight_phrase($sentence,$id);\">";
         }
-        $color = coverage_color($coverage[$j][$j]);
-        print "<span style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,'$word[$j]: ".$coverage[$j][$j]["corpus_count"]."',".$coverage[$j][$j]["ttable_count"].",'".$coverage[$j][$j]["ttable_entropy"]."'); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\">$word[$j]</span>";
-        if ($segmentation && $segmentation["input_end"][$j]) {
+        if (array_key_exists($j,$coverage)) {
+          $color = coverage_color($coverage[$j][$j]);
+          $cc = $coverage[$j][$j]["corpus_count"];
+          $tc = $coverage[$j][$j]["ttable_count"];
+          $te = $coverage[$j][$j]["ttable_entropy"];
+        }
+        else { # unknown words
+	  $color = '#ffffff';
+          $cc = 0; $tc = 0; $te = 0;
+        }
+        print "<span id=\"inputword-$sentence-$j\" style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,$cc,$tc,$te); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\">$word[$j]</span>";
+        if ($segmentation && array_key_exists($j,$segmentation["input_end"])) {
           print "</span>";
         }
         print " ";
@@ -565,18 +618,6 @@ function input_annotation($sentence,$input,$segmentation) {
       $sep_start = $sep_end;
     }
   }
-#  for($j=0;$j<count($word);$j++) {
-#    if ($segmentation && $segmentation["input_start"][$j]) {
-#      $id = $segmentation["input_start"][$j];  
-#      print "<span id=\"input-$i-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($i,$id);\" onmouseout=\"lowlight_phrase($i,$id);\">";
-#    }
-#    $color = coverage_color($coverage[$j][$j]);
-#    print "<span style=\"background-color: $color;\" onmouseover=\"show_word_info($i,'$word[$j]: ".$coverage[$j][$j]["corpus_count"]."',".$coverage[$j][$j]["ttable_count"].",'".$coverage[$j][$j]["ttable_entropy"]."');\" onmouseout=\"hide_word_info($i);\">$word[$j]</span>";
-#    if ($segmentation && $segmentation["input_end"][$j]) {
-#      print "</span>";
-#    }
-#    print " ";
-#  }
   print "<br>";
 }
 
@@ -610,12 +651,12 @@ function bleu_annotation($i,$system,$segmentation) {
 
   for($j=0;$j<count($word);$j++) {
     list($surface,$correct) = split("\|", $word[$j]);
-    if ($segmentation && $segmentation["output_start"][$j]) {
+    if ($segmentation && array_key_exists($j,$segmentation["output_start"])) {
       $id = $segmentation["output_start"][$j];
       print "<span id=\"output-$i-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($i,$id);\" onmouseout=\"lowlight_phrase($i,$id);\">";
     }
     print "<span style=\"background-color: $color[$correct]\">$surface</span>";
-    if ($segmentation && $segmentation["output_end"][$j]) {
+    if ($segmentation && array_key_exists($j,$segmentation["output_end"])) {
       print "</span>";
     }
     print " ";
