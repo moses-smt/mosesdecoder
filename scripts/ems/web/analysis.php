@@ -145,7 +145,7 @@ function ngram_summary() {
 
   // coverage
   if (file_exists("$dir/evaluation/$set.analysis.$id/corpus-coverage-summary")) {
-    print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
+    print "</td><td valign=top align=center bgcolor=#eeeeee>";
     print "<div id=\"CoverageSummary\">";
     coverage_summary();
     print "</div>";
@@ -153,7 +153,7 @@ function ngram_summary() {
 
   // phrase segmentation
   if (file_exists("$dir/evaluation/$set.analysis.$id/segmentation")) {
-    print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
+    print "</td><td valign=top align=center bgcolor=#eeeeee>";
     print "<div id=\"SegmentationSummary\">";
     segmentation_summary();
     print "</div>";
@@ -453,7 +453,7 @@ function sentence_annotation() {
   for($i=0;$i<$count && $i<count($bleu);$i++) {
      $line = $bleu[$i]; 
      if ($input) {
-       print "<div id=\"info-$i\" style=\"border-color:black; background:#ffff80; opacity:0; width:100%; align:center; border:1px;\">8364 occ. in corpus, 56 translations, entropy: 5.54</div>\n";
+       print "<div id=\"info-$i\" style=\"border-color:black; background:#ffff80; opacity:0; width:100%; border:1px;\">8364 occ. in corpus, 56 translations, entropy: 5.54</div>\n";
        print "<font size=-2>[#".$line["id"]."]</font> ";
        input_annotation($line["id"],$input[$line["id"]],$segmentation[$line["id"]]);
        print "<font size=-2>[".$line["bleu"]."]</font> ";
@@ -462,51 +462,145 @@ function sentence_annotation() {
        print "<font size=-2>[".$line["id"].":".$line["bleu"]."]</font> ";
      }
      bleu_annotation($line["id"],$line["system"],$segmentation[$line["id"]]);
-     print "<br>".$line["reference"];
+     print "<br>".$line["reference"]."<hr>";
   }
 }
 
-function input_annotation($i,$input,$segmentation) {
-  list($sentence,$coverage_vector) = split("\t",$input);
+function input_annotation($sentence,$input,$segmentation) {
+  list($words,$coverage_vector) = split("\t",$input);
 
+  # get information from line in input annotation file
   foreach (split(" ",$coverage_vector) as $item) {
     list($from,$to,$corpus_count,$ttable_count,$ttable_entropy) = preg_split("/[\-:]/",$item);
     $coverage[$from][$to]["corpus_count"] = $corpus_count;
     $coverage[$from][$to]["ttable_count"] = $ttable_count;
     $coverage[$from][$to]["ttable_entropy"] = $ttable_entropy;
   }
-  $word = split(" ",$sentence);
+  $word = split(" ",$words);
+
+  # compute the display level for each input phrase
   for($j=0;$j<count($word);$j++) {
-
-    $corpus_count = 255 - 10 * log(1 + $coverage[$j][$j]["corpus_count"]);
-    if ($corpus_count < 128) { $corpus_count = 128; }
-    $cc_color = dechex($corpus_count / 16) . dechex($corpus_count % 16);
-
-    $ttable_count = 255 - 20 * log(1 + $coverage[$j][$j]["ttable_count"]);
-    if ($ttable_count < 128) { $ttable_count = 128; }
-    $tc_color = dechex($ttable_count / 16) . dechex($ttable_count % 16);
-
-    $ttable_entropy = 255 - 32 * $coverage[$j][$j]["ttable_entropy"];
-    if ($ttable_entropy < 128) { $ttable_entropy = 128; }
-    $te_color = dechex($ttable_entropy / 16) . dechex($ttable_entropy % 16);
-    
-    $color = "#". $cc_color . $te_color .  $tc_color; # reddish browns with some green
-//    $color = "#". $cc_color . $tc_color .  $te_color; # reddish brown with some blueish purple
-//    $color = "#". $te_color . $cc_color .  $tc_color; # pale green towards red
-//    $color = "#". $te_color . $tc_color .  $cc_color; # pale purple towards red
-//    $color = "#". $tc_color . $te_color .  $cc_color; // # blue-grey towards green
-//    $color = "#". $tc_color . $cc_color .  $te_color; // # green-grey towards blue
-    if ($segmentation && $segmentation["input_start"][$j]) {
-      $id = $segmentation["input_start"][$j];  
-      print "<span id=\"input-$i-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($i,$id);\" onmouseout=\"lowlight_phrase($i,$id);\">";
-    }
-    print "<span style=\"background-color: $color;\" onmouseover=\"show_word_info($i,'$word[$j]: ".$coverage[$j][$j]["corpus_count"]."',".$coverage[$j][$j]["ttable_count"].",'".$coverage[$j][$j]["ttable_entropy"]."');\" onmouseout=\"hide_word_info($i);\">$word[$j]</span>";
-    if ($segmentation && $segmentation["input_end"][$j]) {
-      print "</span>";
-    }
-    print " ";
+    $box[] = array();
+    $separable[] = 1;
   }
+  $max_level = 0;
+  for($length=1;$length<=7;$length++) {
+    for($from=0;$from<count($word)-($length-1);$from++) {
+      $to = $from + ($length-1);
+      if (array_key_exists("corpus_count",$coverage[$from][$to])) {
+        $level=0;
+	$available = 0;
+        while(!$available) {
+	  $available = 1;
+	  $level++;
+	  for($j=$from;$j<=$to;$j++) {
+            if (array_key_exists($level,$box) &&
+                array_key_exists($j,$box[$level])) {
+	      $available = 0;
+	    }
+          }
+        }
+	for($j=$from;$j<=$to;$j++) {
+	  $box[$level][$j] = $to;
+	}
+	$max_level = max($max_level,$level);
+	for($j=$from+1;$j<=$to;$j++) {
+	  $separable[$j] = 0;
+	}
+      }
+    }
+  }
+  $separable[count($word)] = 1;
+
+  # display input phrases
+  $sep_start = 0;
+  for($sep_end=1;$sep_end<=count($word);$sep_end++) {
+    if ($separable[$sep_end] == 1) {
+      # one table for each separable block
+      print "<table cellpadding=1 cellspacing=0 border=0 style=\"display: inline;\">";
+      for($level=$max_level;$level>=1;$level--) {
+        # rows for phrase display
+	print "<tr style=\"height:5px;\">";
+	for($from=$sep_start;$from<$sep_end;$from++) {
+	  if (array_key_exists($from,$box[$level])) {
+	    $to = $box[$level][$from];
+            $size = $to - $from + 1;
+	    if ($size == 1) {
+	      print "<td><div style=\"height:0px; opacity:0; position:relative; z-index:-9;\">".$word[$from];
+            }
+	    else {
+		$color = coverage_color($coverage[$from][$to]);
+		$phrase = "";
+		for($j=$from;$j<=$to;$j++) {
+		  if ($j>$from) { $phrase .= " "; }
+		  $phrase .= $word[$j];
+		}
+	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,'$phrase: ".$coverage[$from][$to]["corpus_count"]."',".$coverage[$from][$to]["ttable_count"].",'".$coverage[$from][$to]["ttable_entropy"]."'); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';\">";
+            }
+            print "</div></td>";
+	    $from += $size-1;
+	  }
+	  else {
+	    print "<td><div style=\"height:".($from==$to ? 0 : 3)."px;\"></div></td>";
+	  }
+	}
+	print "</tr>\n";
+      }
+      # display input words
+      print "<tr><td colspan=".($sep_end-$sep_start)."><div style=\"position:relative; z-index:1;\">";
+      for($j=$sep_start;$j<$sep_end;$j++) {
+        if ($segmentation && $segmentation["input_start"][$j]) {
+          $id = $segmentation["input_start"][$j];  
+          print "<span id=\"input-$sentence-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($sentence,$id);\" onmouseout=\"lowlight_phrase($sentence,$id);\">";
+        }
+        $color = coverage_color($coverage[$j][$j]);
+        print "<span style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,'$word[$j]: ".$coverage[$j][$j]["corpus_count"]."',".$coverage[$j][$j]["ttable_count"].",'".$coverage[$j][$j]["ttable_entropy"]."'); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\">$word[$j]</span>";
+        if ($segmentation && $segmentation["input_end"][$j]) {
+          print "</span>";
+        }
+        print " ";
+      }
+      print "</div></td></tr>\n";
+      print "</table>\n";
+      $sep_start = $sep_end;
+    }
+  }
+#  for($j=0;$j<count($word);$j++) {
+#    if ($segmentation && $segmentation["input_start"][$j]) {
+#      $id = $segmentation["input_start"][$j];  
+#      print "<span id=\"input-$i-$id\" style=\"border-color:#000000; border-style:solid; border-width:1px;\" onmouseover=\"highlight_phrase($i,$id);\" onmouseout=\"lowlight_phrase($i,$id);\">";
+#    }
+#    $color = coverage_color($coverage[$j][$j]);
+#    print "<span style=\"background-color: $color;\" onmouseover=\"show_word_info($i,'$word[$j]: ".$coverage[$j][$j]["corpus_count"]."',".$coverage[$j][$j]["ttable_count"].",'".$coverage[$j][$j]["ttable_entropy"]."');\" onmouseout=\"hide_word_info($i);\">$word[$j]</span>";
+#    if ($segmentation && $segmentation["input_end"][$j]) {
+#      print "</span>";
+#    }
+#    print " ";
+#  }
   print "<br>";
+}
+
+function coverage_color($phrase) {
+  $corpus_count = 255 - 10 * log(1 + $phrase["corpus_count"]);
+  if ($corpus_count < 128) { $corpus_count = 128; }
+  $cc_color = dechex($corpus_count / 16) . dechex($corpus_count % 16);
+
+  $ttable_count = 255 - 20 * log(1 + $phrase["ttable_count"]);
+  if ($ttable_count < 128) { $ttable_count = 128; }
+  $tc_color = dechex($ttable_count / 16) . dechex($ttable_count % 16);
+
+  $ttable_entropy = 255 - 32 * $phrase["ttable_entropy"];
+  if ($ttable_entropy < 128) { $ttable_entropy = 128; }
+  $te_color = dechex($ttable_entropy / 16) . dechex($ttable_entropy % 16);
+
+//  $color = "#". $cc_color . $te_color .  $tc_color; # reddish browns with some green
+//  $color = "#". $cc_color . $tc_color .  $te_color; # reddish brown with some blueish purple
+  $color = "#". $te_color . $cc_color .  $tc_color; # pale green towards red
+//  $color = "#". $te_color . $tc_color .  $cc_color; # pale purple towards red
+//  $color = "#". $tc_color . $te_color .  $cc_color; // # blue-grey towards green
+//  $color = "#". $tc_color . $cc_color .  $te_color; // # green-grey towards blue
+
+  return $color;
 }
 
 function bleu_annotation($i,$system,$segmentation) {
