@@ -10,13 +10,13 @@ function head($title) {
   print "<HTML><HEAD><TITLE>$title</TITLE></HEAD>\n<BODY><H2>$title</H2>\n";
 }
 
-if ($_POST["setup"] || $_GET["setup"]) {
+if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
   load_experiment_info();
   load_comment();
 
-  if ($_GET["show"]) { show(); }
-  else if ($_GET["diff"]) { diff(); }
-  else if ($_GET["analysis"]) { 
+  if (array_key_exists("show",$_GET)) { show(); }
+  else if (array_key_exists("diff",$_GET)) { diff(); }
+  else if (array_key_exists("analysis",$_GET)) { 
     $action = $_GET["analysis"];
     $set = $_GET["set"];
     $id = $_GET["id"];
@@ -25,11 +25,12 @@ if ($_POST["setup"] || $_GET["setup"]) {
     else if ($action == "ngram_precision_show") { ngram_show("precision");}
     else if ($action == "ngram_recall_show") { ngram_show("recall"); }
     else if ($action == "CoverageSummary_show") { coverage_summary(); }
+    else if ($action == "PrecisionRecallDetails_show") { precision_recall_details(); }
     else if ($action == "CoverageDetails_show") { coverage_details(); }
     else if ($action == "SegmentationSummary_show") { segmentation_summary(); }
     else { print "ERROR! $action"; }
   }
-  else if ($_GET["analysis_diff_home"]) {
+  else if (array_key_exists("analysis_diff_home",$_GET)) {
     $set = $_GET["analysis_diff_home"];
     while (list($parameter,$value) = each($_GET)) {
       if (preg_match("/analysis\-(\d+)\-(.+)/",$parameter,$match)) {
@@ -47,7 +48,7 @@ if ($_POST["setup"] || $_GET["setup"]) {
     if ($id>$id2) { $i=$id; $id=$id2; $id2=$i; }
     diff_analysis();
   }
-  else if ($_GET["analysis_diff"]) {
+  else if (array_key_exists("analysis_diff",$_GET)) {
     $action = $_GET["analysis_diff"];
     $set = $_GET["set"];
     $id = $_GET["id"];

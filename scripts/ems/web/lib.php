@@ -5,8 +5,8 @@ function load_experiment_info() {
   global $evalset;
   global $experiment;
 
-  $setup = $_POST[setup];
-  if ($_GET[setup]) { $setup= $_GET[setup]; }
+  if (array_key_exists("setup",$_POST)) { $setup = $_POST["setup"]; }
+  if (array_key_exists("setup",$_GET)) { $setup= $_GET["setup"]; }
   $all_setup = file("setup");
   while (list($id,$line) = each($all_setup)) {
     $info = explode(";",$line);
@@ -50,7 +50,7 @@ function load_experiment_info() {
   
   reset($experiment);
   while (list($id,$info) = each($experiment)) {
-    if (! file_exists($f)) {
+    if (file_exists("$dir/evaluation/report.$id")) {
       $f = file("$dir/evaluation/report.$id");
       foreach ($f as $line_num => $line) {
 	if (preg_match('/^(.+): (.+)/',$line,$match)) {
@@ -89,8 +89,8 @@ function load_comment() {
     $line = chop($line);
     $item = explode(";",$line,4);
     $comment[$item[0]]->name = $item[1];
-    $comment[$item[0]]->url = $item[2];
-    $comment[$item[0]]->description = $item[3];
+//    $comment[$item[0]]->url = $item[2];
+//    $comment[$item[0]]->description = $item[3];
   }
 }
 
