@@ -60,7 +60,7 @@ IOWrapper::IOWrapper(
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
-,m_detailedTranslationReportingStream(0)
+,m_detailedTranslationReportingStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -81,6 +81,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed

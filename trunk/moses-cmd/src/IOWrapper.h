@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ostream>
 #include <vector>
+#include <cassert>
 
 #include "TypeDef.h"
 #include "Sentence.h"
@@ -107,6 +108,7 @@ public:
 
   std::ostream &GetDetailedTranslationReportingStream()
   {
+		assert (m_detailedTranslationReportingStream);
     return *m_detailedTranslationReportingStream;
   } 
 };
