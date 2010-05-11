@@ -195,7 +195,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
 		&& (configPath = FindParam("-config", argc, argv)) == "")
 	{
 		PrintCredit();
-
+		Explain();
+		
 		UserMessage::Add("No configuration file was specified.  Use -config or -f");
 		return false;
 	}
@@ -361,7 +362,7 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 		if (tokenizeIndex >= vec.size())
 		{
 			stringstream errorMsg("");
-			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per emtry in '"
+			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per entries in '"
 							<< paramName << "', but only found "
 							<< vec.size();
 			UserMessage::Add(errorMsg.str());
@@ -477,6 +478,7 @@ bool Parameter::ReadConfigFile(const string &filePath )
 struct Credit
 {
 	string name, contact, currentPursuits, areaResponsibility;
+	int sortId;
 
 	Credit(string name, string contact, string currentPursuits, string areaResponsibility)
 	{
@@ -484,16 +486,20 @@ struct Credit
 		this->contact							= contact						;
 		this->currentPursuits			= currentPursuits		;
 		this->areaResponsibility	= areaResponsibility;
+		this->sortId							= rand() % 1000;
 	}
 
 	bool operator<(const Credit &other) const
 	{
+		/*
 		if (areaResponsibility.size() != 0 && other.areaResponsibility.size() ==0)
 			return true;
 		if (areaResponsibility.size() == 0 && other.areaResponsibility.size() !=0)
 			return false;
 
 		return name < other.name;
+		*/
+		return sortId < other.sortId;
 	}
 
 };
@@ -502,19 +508,19 @@ std::ostream& operator<<(std::ostream &os, const Credit &credit)
 {
 	os << credit.name;
 	if (credit.contact != "")
-		os << "\n   contact: " << credit.contact;
+		os << "\t   contact: " << credit.contact;
 	if (credit.currentPursuits != "")
-		os << "\n   " << credit.currentPursuits;
+		os << "   " << credit.currentPursuits;
 	if (credit.areaResponsibility != "")
-		os << "\n   I'll answer question on: " << credit.areaResponsibility;
-	os << endl;
+		os << "   I'll answer question on: " << credit.areaResponsibility;
 	return os;
 }
 
 void Parameter::PrintCredit()
 {
 	vector<Credit> everyone;
-
+	srand ( time(NULL) );
+	
 	everyone.push_back(Credit("Nicola Bertoldi"
 													, "911"
 													, ""
@@ -565,7 +571,7 @@ void Parameter::PrintCredit()
 													, "ambiguous source input, confusion networks, confusing source code"));
 	everyone.push_back(Credit("Hieu Hoang", "http://www.hoang.co.uk/hieu/"
 													, "phd student at Edinburgh Uni. Original Moses developer"
-													, "general queries/ flames on Moses. Doing stuff on async factored translation, so anything on that as well"));
+													, "general queries/ flames on Moses."));
 	
 	sort(everyone.begin(), everyone.end());
 
@@ -587,8 +593,8 @@ void Parameter::PrintCredit()
 			<< "License along with this library; if not, write to the Free Software" << endl
 			<< "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA" << endl << endl
 			<< "***********************************************************************" << endl << endl
-			<< "Built on " << __DATE__ << endl << endl
-			<< "CREDITS" << endl << endl;
+			<< "Built on " << __DATE__ << " at " __TIME__ << endl << endl
+			<< "WHO'S FAULT IS THIS GODDAM SOFTWARE:" << endl;
 
 	ostream_iterator<Credit> out(cerr, "\n");
 	copy(everyone.begin(), everyone.end(), out);

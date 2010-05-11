@@ -89,7 +89,6 @@ int main(int argc, char* argv[])
 	Parameter parameter;
 	if (!parameter.LoadParam(argc, argv))
 	{
-		parameter.Explain();
 		return EXIT_FAILURE;
 	}
 
