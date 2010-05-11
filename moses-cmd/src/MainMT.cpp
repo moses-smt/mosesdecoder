@@ -168,10 +168,17 @@ class TranslationTask : public Task {
                             IFVERBOSE(2) { PrintUserTime("finished Lattice MBR decoding"); }
                         }
                     } 
-                    else 
+                    else if (staticData.UseConsensusDecoding()) {
+                        const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
+                        OutputBestHypo(conBestHypo, m_lineNumber,
+                                       staticData.GetReportSegmentation(),
+                                       staticData.GetReportAllFactors(),out);
+                        IFVERBOSE(2) { PrintUserTime("finished Consensus decoding"); }
+                    } 
+                    else
                     {
                         //MBR decoding
-											  const Moses::TrellisPath &mbrBestHypo = doMBR(nBestList);
+					    const Moses::TrellisPath &mbrBestHypo = doMBR(nBestList);
                         OutputBestHypo(mbrBestHypo, m_lineNumber,
                                     staticData.GetReportSegmentation(),
                                     staticData.GetReportAllFactors(),out);
