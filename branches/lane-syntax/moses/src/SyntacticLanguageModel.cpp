@@ -10,7 +10,7 @@
 
 namespace Moses
 {
-
+  //  asnteousntaoheisnthaoesntih
   SyntacticLanguageModel::SyntacticLanguageModel(const std::vector<std::string>& filePath,
 						 const std::vector<float>& weights,
 						 const FactorType factorType,
@@ -19,7 +19,7 @@ namespace Moses
   : m_NumScoreComponents(weights.size())
   , m_beamWidth(beamWidth)
   , m_factorType(factorType)
-  , m_files(new SyntacticLanguageModelFiles<HModel,OModel>(filePath)) {
+  , m_files(new SyntacticLanguageModelFiles<YModel,XModel>(filePath)) {
 
     // Inform Moses score manager of this feature and its weight(s)
     const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
@@ -28,7 +28,8 @@ namespace Moses
   }
 
   SyntacticLanguageModel::~SyntacticLanguageModel() {
-    delete m_files;
+    cerr << "Destructing SyntacticLanguageModel" << std::endl;
+    //    delete m_files;
   }
 
   size_t SyntacticLanguageModel::GetNumScoreComponents() const {
@@ -45,7 +46,7 @@ namespace Moses
 
   const FFState* SyntacticLanguageModel::EmptyHypothesisState() const {
 
-    return new SyntacticLanguageModelState<HModel,OModel,S,R>(m_files,m_beamWidth);
+    return new SyntacticLanguageModelState<YModel,XModel,S,R>(m_files,m_beamWidth);
 
   }
 
@@ -54,11 +55,11 @@ namespace Moses
 		    const FFState* prev_state,
 		    ScoreComponentCollection* accumulator) const {
 
-    const SyntacticLanguageModelState<HModel,OModel,S,R>& prev =
-      static_cast<const SyntacticLanguageModelState<HModel,OModel,S,R>&>(*prev_state);
+    const SyntacticLanguageModelState<YModel,XModel,S,R>& prev =
+      static_cast<const SyntacticLanguageModelState<YModel,XModel,S,R>&>(*prev_state);
 
-    const SyntacticLanguageModelState<HModel,OModel,S,R>* currentState = &prev;
-    SyntacticLanguageModelState<HModel,OModel,S,R>* nextState = NULL;
+    const SyntacticLanguageModelState<YModel,XModel,S,R>* currentState = &prev;
+    SyntacticLanguageModelState<YModel,XModel,S,R>* nextState = NULL;
   
 
     const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
@@ -71,10 +72,10 @@ namespace Moses
       const std::string& string = factor->GetString();
       
       if (i==0) {
-	nextState = new SyntacticLanguageModelState<HModel,OModel,S,R>(&prev, string);
+	nextState = new SyntacticLanguageModelState<YModel,XModel,S,R>(&prev, string);
       } else {
 	currentState = nextState;
-	nextState = new SyntacticLanguageModelState<HModel,OModel,S,R>(currentState, string);
+	nextState = new SyntacticLanguageModelState<YModel,XModel,S,R>(currentState, string);
       }
       
       double score = nextState->getScore();

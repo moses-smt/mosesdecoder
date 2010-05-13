@@ -6,8 +6,8 @@
 #include "FeatureFunction.h"
 
 
-class HModel;
-class OModel;
+class YModel; // hidden model
+class XModel; // observed model
 
 namespace Moses
 {
@@ -38,7 +38,7 @@ namespace Moses
   private:
 
     const size_t m_NumScoreComponents;
-    SyntacticLanguageModelFiles<HModel,OModel>* m_files;
+    SyntacticLanguageModelFiles<YModel,XModel>* m_files;
     const FactorType m_factorType;
     const size_t m_beamWidth;
 
