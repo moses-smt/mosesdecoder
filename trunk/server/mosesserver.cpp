@@ -128,12 +128,11 @@ public:
           pair<string, xmlrpc_c::value> 
               graphData("graph", xmlrpc_c::value_string(graphInfo.str()));
           retData.insert(graphData);
-          //manager.getSntTranslationOptions(transCollOpts);
-          //pair<string, xmlrpc_c::value> 
-              //transOpts("transCollOpts", xmlrpc_c::value_string(transCollOpts.str()));
-          //retData.insert(transOpts);
+          manager.getSntTranslationOptions(transCollOpts);
+          pair<string, xmlrpc_c::value> 
+              transOpts("transCollOpts", xmlrpc_c::value_string(transCollOpts.str()));
+          retData.insert(transOpts);
         }
-        cerr << "gets to this point\n";
         *retvalP = xmlrpc_c::value_struct(retData);
     }
 
