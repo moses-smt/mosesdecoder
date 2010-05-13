@@ -311,7 +311,9 @@ bool Parameter::Validate()
 	  ext.push_back(".gz");
 		// alternative file extension for binary phrase table format:
 		ext.push_back(".binphr.idx");
-		noErrorFlag = FilesExist("ttable-file", 4,ext);
+		// the number of fields of this config line has varied over time, but
+		// the model file always came last
+		noErrorFlag = FilesExist("ttable-file", -1, ext);
 	}
 	// language model
 //	if (noErrorFlag)
@@ -345,7 +347,7 @@ bool Parameter::Validate()
 }
 
 /** check whether a file exists */
-bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::vector<std::string> const& extensions)
+bool Parameter::FilesExist(const string &paramName, int fieldNo, std::vector<std::string> const& extensions)
 {
 	typedef std::vector<std::string> StringVec;
 	StringVec::const_iterator iter;
@@ -359,10 +361,17 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 	for (iter = pathVec.begin() ; iter != pathVec.end() ; ++iter)
 	{
 		StringVec vec = Tokenize(*iter);
+
+		size_t tokenizeIndex;
+		if (fieldNo == -1)
+			tokenizeIndex = vec.size() - 1;
+		else
+			tokenizeIndex = static_cast<size_t>(fieldNo);
+
 		if (tokenizeIndex >= vec.size())
 		{
 			stringstream errorMsg("");
-			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per entries in '"
+			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per entry in '"
 							<< paramName << "', but only found "
 							<< vec.size();
 			UserMessage::Add(errorMsg.str());
