@@ -159,7 +159,7 @@ TO_STRING_BODY(TranslationOption);
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
 	out << possibleTranslation.GetTargetPhrase() 
-			<< "c=" << possibleTranslation.GetFutureScore()
+			<< " c=" << possibleTranslation.GetFutureScore()
 			<< " [" << possibleTranslation.GetSourceWordsRange() << "]"
 			<< possibleTranslation.GetScoreBreakdown();
 	return out;
