@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+class SentenceStats;
 class TrellisPath;
 class TranslationOptionCollection;
 
@@ -105,6 +106,7 @@ protected:
 	clock_t m_start; /**< starting time, used for logging */
 	size_t interrupted_flag;
 	std::auto_ptr<SentenceStats> m_sentenceStats;
+    int m_hypoId; //used to number the hypos as they are created.
 	
   void GetConnectedGraph(
                          std::map< int, bool >* pConnected,
@@ -128,6 +130,7 @@ public:
   void printDivergentHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase*> & remainingPhrases, float remainingScore  ) const;
   void printThisHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase* > & remainingPhrases, float remainingScore  ) const;
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
+    int GetNextHypoId();
 #ifdef HAVE_PROTOBUF
 	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
@@ -140,14 +143,8 @@ public:
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
 	 */
 	void CalcDecoderStatistics() const;
-  void ResetSentenceStats(const InputType& source)
-  {
-    m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
-  }
-  SentenceStats& GetSentenceStats() const
-  {
-    return *m_sentenceStats;
-  }
+  void ResetSentenceStats(const InputType& source);
+  SentenceStats& GetSentenceStats() const;
   
   /***
    *For Lattice MBR 

@@ -56,6 +56,7 @@ Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
 ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
 ,m_start(clock())
 ,interrupted_flag(0)
+,m_hypoId(0)
 {
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
@@ -873,5 +874,19 @@ const Hypothesis *Manager::GetBestHypothesis() const
 	return m_search->GetBestHypothesis();
 }
 
+int Manager::GetNextHypoId()
+{
+    return m_hypoId++;
 }
 
+void Manager::ResetSentenceStats(const InputType& source)
+{
+    m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
+}
+SentenceStats& Manager::GetSentenceStats() const
+{
+    return *m_sentenceStats;
+
+}
+
+}

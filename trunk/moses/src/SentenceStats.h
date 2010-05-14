@@ -58,6 +58,7 @@ class SentenceStats
 		SentenceStats(const InputType& source) {Initialize(source);}
 		void Initialize(const InputType& source)
 		{
+            m_numHyposCreated = 0;
 			m_numHyposPruned = 0;
 			m_numHyposDiscarded = 0;
 			m_numHyposEarlyDiscarded = 0;
@@ -79,7 +80,7 @@ class SentenceStats
 		 */
 		void CalcFinalStats(const Hypothesis& bestHypo);
 		
-		unsigned int GetTotalHypos() const {return Hypothesis::GetHypothesesCreated() + m_numHyposNotBuilt; }
+		unsigned int GetTotalHypos() const {return m_numHyposCreated + m_numHyposNotBuilt; }
 		size_t GetNumHyposRecombined() const {return m_recombinationInfos.size();}
 		unsigned int GetNumHyposPruned() const {return m_numHyposPruned;}
 		unsigned int GetNumHyposDiscarded() const {return m_numHyposDiscarded;}
@@ -103,6 +104,7 @@ class SentenceStats
 			m_recombinationInfos.push_back(RecombinationInfo(worseHypo.GetWordsBitmap().GetNumWordsCovered(), 
 													betterHypo.GetTotalScore(), worseHypo.GetTotalScore()));
 		}
+        void AddCreated() {m_numHyposCreated++;}
 		void AddPruning() {m_numHyposPruned++;}
 		void AddEarlyDiscarded() {m_numHyposEarlyDiscarded++;}
 		void AddNotBuilt() {m_numHyposNotBuilt++;}
@@ -125,6 +127,7 @@ class SentenceStats
 	
 		//hypotheses
 		std::vector<RecombinationInfo> m_recombinationInfos;
+		unsigned int m_numHyposCreated;
 		unsigned int m_numHyposPruned;
 		unsigned int m_numHyposDiscarded;
 		unsigned int m_numHyposEarlyDiscarded;
