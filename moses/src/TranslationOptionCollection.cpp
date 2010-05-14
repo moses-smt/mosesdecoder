@@ -651,6 +651,25 @@ void TranslationOptionCollection::CacheLexReordering()
 		}
 	}
 }
+//! list of trans opt for a particular span
+	TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
+	{
+		size_t maxSize = endPos - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		assert(maxSize < m_collection[startPos].size());
+		return m_collection[startPos][maxSize];
+	}
+	const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
+	{
+		size_t maxSize = endPos - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		assert(maxSize < m_collection[startPos].size());
+	 	return m_collection[startPos][maxSize];
+	}
 
 }
 

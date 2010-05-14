@@ -87,7 +87,6 @@ protected:
   Manager& m_manager;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
-	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
 	/*! used by initial seeding of the translation process */
 	Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
@@ -268,11 +267,6 @@ public:
 	size_t GetNextStartPos(const TranslationOption &transOpt) const;
 	
 	std::vector<std::vector<unsigned int> > *GetLMStats() const { return NULL; }
-
-	static unsigned int GetHypothesesCreated()
-	{
-		return s_HypothesesCreated;
-	}
 
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }

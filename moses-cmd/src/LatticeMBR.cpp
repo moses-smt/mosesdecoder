@@ -565,9 +565,12 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
     calcNgramExpectations(connectedList, incomingEdges, staticData.GetMBRScale(), ngramExpectations,false);
     
     //expected length is sum of expected unigram counts
+    //cerr << "Thread " << pthread_self() <<  " Ngram expectations size: " << ngramExpectations.size() << endl;
     float ref_length = 0.0f;
     for (map<Phrase,float>::const_iterator ref_iter = ngramExpectations.begin(); 
          ref_iter != ngramExpectations.end(); ++ref_iter) {
+        //cerr << "Ngram: " << ref_iter->first << " score: " << 
+        //    ref_iter->second << endl;
         if (ref_iter->first.GetSize() == 1) {
             ref_length += exp(ref_iter->second);
             //cerr << "Expected for " << ref_iter->first << " is " << exp(ref_iter->second) << endl;
@@ -580,12 +583,18 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
     TrellisPathList::const_iterator iter;
     TrellisPathList::const_iterator best = nBestList.end();
     float bestScore = -100000;
+    //cerr << "nbest list size: " << nBestList.GetSize() << endl;
     for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
     {
         const TrellisPath &path = **iter;
         vector<Word> words;
         map<Phrase,int> ngrams;
         GetOutputWords(path,words);
+        /*for (size_t i = 0; i < words.size(); ++i) {
+            cerr << words[i].GetFactor(0)->GetString() << " ";
+        }
+        cerr << endl;
+        */
         extract_ngrams(words,ngrams);
         
         vector<float> comps(2*BLEU_ORDER+1);
@@ -606,25 +615,31 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
             
         }
         comps[comps.size()-1] = ref_length; 
-        
-        if (comps[0] == 0) {
-            continue;
+        /*for (size_t i = 0; i < comps.size(); ++i) {
+            cerr << comps[i] << " ";
         }
-        for (int i=0; i<BLEU_ORDER; i++)
-        {
-            if ( i > 0 ) {
-                logbleu += log((float)comps[2*i]+SMOOTH)-log((float)comps[2*i+1]+SMOOTH);
-            } else {
-                logbleu += log((float)comps[2*i])-log((float)comps[2*i+1]);
+        cerr << endl;
+        */
+        
+        float score = 0.0f;
+        if (comps[0] != 0) {
+            for (int i=0; i<BLEU_ORDER; i++)
+            {
+                if ( i > 0 ) {
+                    logbleu += log((float)comps[2*i]+SMOOTH)-log((float)comps[2*i+1]+SMOOTH);
+                } else {
+                    logbleu += log((float)comps[2*i])-log((float)comps[2*i+1]);
+                }
             }
+            logbleu /= BLEU_ORDER;
+            brevity = 1.0-(float)comps[comps.size()-1]/comps[1]; // comps[comps_n-1] is the ref length, comps[1] is the test length
+            if (brevity < 0.0) {
+                logbleu += brevity;
+            }
+            score =  exp(logbleu);
         }
-        logbleu /= BLEU_ORDER;
-        brevity = 1.0-(float)comps[comps.size()-1]/comps[1]; // comps[comps_n-1] is the ref length, comps[1] is the test length
-        if (brevity < 0.0) {
-            logbleu += brevity;
-        }
-        float score =  exp(logbleu);
         
+        //cerr << "score: " << score << " bestScore: " << bestScore <<  endl;
         if (score > bestScore) {
             bestScore = score;
             best = iter;
@@ -636,6 +651,7 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
         }
     }
     
+    assert (best != nBestList.end());
     return **best;
     //vector<Word> bestWords;
     //GetOutputWords(**best,bestWords);

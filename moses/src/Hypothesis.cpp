@@ -43,7 +43,6 @@ using namespace std;
 
 namespace Moses
 {
-unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 #ifdef USE_HYPO_POOL
 	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
@@ -65,15 +64,16 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   , m_transOpt(NULL)
   , m_manager(manager)
 
-  , m_id(0)
+  , m_id(m_manager.GetNextHypoId())
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
-	s_HypothesesCreated = 1;
+	//s_HypothesesCreated = 1;
 	ResetScore();
 	const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions();
 	for (unsigned i = 0; i < ffs.size(); ++i)
 	  m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
+    m_manager.GetSentenceStats().AddCreated();
 }
 
 /***
@@ -96,7 +96,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
   , m_transOpt(&transOpt)
   , m_manager(prevHypo.GetManager())
-	, m_id(s_HypothesesCreated++)
+	, m_id(m_manager.GetNextHypoId())
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -105,6 +105,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	//_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
+    m_manager.GetSentenceStats().AddCreated();
 }
 
 Hypothesis::~Hypothesis()
