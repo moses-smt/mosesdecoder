@@ -77,7 +77,7 @@ template <class MY, class MX, class YS, class B>
   //score = l.toDouble();
   setScore(l.toDouble());
   //  MY::F_ROOT_OBS = true;
-  this->modelData->getHiddenModel()->setRootObs(true);
+ // this->modelData->getHiddenModel()->setRootObs(true);
   
   
 }
@@ -118,13 +118,16 @@ template <class MY, class MX, class YS, class B>
   //  typename MX::RandVarType ov;
   //  ov.set(word.c_str(),mO);
   //  MY::WORD = ov.getW();
-  X ov(word.c_str());
-  mH.setWord(ov);
+	  bool endOfSentence = false; 
+	typename MX::RandVarType x(word.c_str()); 
+	hmm.updateRanked(x, endOfSentence);
+//  X ov(word.c_str());
+  //mH.setWord(ov);
   // MY::WORD = ov;//ov.getW();
 
   // Update HHMM based on observed variable
-  hmm.updateRanked(ov);
-  mH.setRootObs(true);
+  //hmm.updateRanked(ov);
+  //mH.setRootObs(true);
   //MY::F_ROOT_OBS = false;
 
   // Get the current score

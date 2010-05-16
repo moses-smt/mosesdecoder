@@ -13,6 +13,7 @@
 		1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF460AD68D3600FA22E2 /* Main.h */; };
 		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
+		3DCBA8F511A0929D00A4C1C7 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DCBA8F111A0929D00A4C1C7 /* ThreadPool.cpp */; };
 		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
 		B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */; };
@@ -58,6 +59,8 @@
 		1C8CFF460AD68D3600FA22E2 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
 		1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
 		1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
+		3DCBA8F111A0929D00A4C1C7 /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadPool.cpp; path = src/ThreadPool.cpp; sourceTree = "<group>"; };
+		3DCBA8F211A0929D00A4C1C7 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = src/ThreadPool.h; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* moses-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
 		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
@@ -100,13 +103,15 @@
 			isa = PBXGroup;
 			children = (
 				B28B1ED4110F52C600AAD188 /* LatticeMBR.h */,
-				B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */,
 				B219B8560E9381AC00EAB407 /* IOWrapper.cpp */,
 				B219B8570E9381AC00EAB407 /* IOWrapper.h */,
+				B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */,
 				03306D800C0B249A00CA1311 /* mbr.cpp */,
 				03306D810C0B249A00CA1311 /* mbr.h */,
 				1C8CFF450AD68D3600FA22E2 /* Main.cpp */,
 				1C8CFF460AD68D3600FA22E2 /* Main.h */,
+				3DCBA8F111A0929D00A4C1C7 /* ThreadPool.cpp */,
+				3DCBA8F211A0929D00A4C1C7 /* ThreadPool.h */,
 				1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */,
 				1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */,
 			);
@@ -193,6 +198,7 @@
 				03306D820C0B249A00CA1311 /* mbr.cpp in Sources */,
 				B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */,
 				B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */,
+				3DCBA8F511A0929D00A4C1C7 /* ThreadPool.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +216,8 @@
 		03306D3C0C0B23F200CA1311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1 = x86_64;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -230,10 +238,14 @@
 					../srilm/include,
 					../irstlm/include,
 					../srilm/lm/src,
+					../modelblocks/rvtl/include,
+					../modelblocks/wsjparse/include,
+					../boost,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
+					/sw/lib,
+					"../irstlm/lib/x86_64-apple-darwin10.0",
 					"../moses/build//**",
 					../srilm/lib/macosx,
 				);
@@ -244,9 +256,12 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lboost_thread-mt",
+					"-lm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
+				VALID_ARCHS = "x86_64 i386";
 				ZERO_LINK = NO;
 			};
 			name = Debug;

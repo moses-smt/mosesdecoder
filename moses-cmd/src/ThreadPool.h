@@ -99,9 +99,9 @@ class TestTask : public Task {
         TestTask(int id) : m_id(id) {}
         virtual void Run() {
 #if defined(BOOST_HAS_PTHREADS)
-            int tid = (int)pthread_self();
+            pthread_t tid = pthread_self();
 #else
-            int tid = 0;
+            pthread_t tid = 0;
 #endif
             std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;
         }
