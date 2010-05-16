@@ -22,7 +22,6 @@
 #include "LVoc.h"
 #include "TypeDef.h"
 #include "Util.h"
-#include "StaticData.h"
 
 namespace Moses
 {
