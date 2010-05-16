@@ -192,7 +192,7 @@ fi
 if test "x$with_synlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS" 
-  CPPFLAGS="$CPPFLAGS -I${with_synlm}/rvtl/include -I${with_synlm}/wsjparse/include -lboost_thread -lm"
+  CPPFLAGS="$CPPFLAGS -DWITH_THREADS -I${with_synlm}/rvtl/include -I${with_synlm}/wsjparse/include -lm"
 
   AX_BOOST_BASE([1.35.0])
   AX_BOOST_THREAD
