@@ -108,7 +108,7 @@ class TranslationTask : public Task {
         void Run() 
         {
 #if defined(BOOST_HAS_PTHREADS)
-            TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << (int)pthread_self() << std::endl);
+            TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
             const StaticData &staticData = StaticData::Instance();
             Sentence sentence(Input);
