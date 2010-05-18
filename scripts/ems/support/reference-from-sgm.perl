@@ -37,7 +37,7 @@ foreach my $system (keys %DOC) {
     my $outfile = $txt;
     if (scalar keys %DOC > 1) {
 	if ($outfile =~ /\.\d+$/) {
-	    $outfile =~ s/(\.\d+)$/$i$1/;
+	    $outfile .= ".ref$i";
 	}
 	else {
 	    $outfile .= $i;
@@ -51,4 +51,5 @@ foreach my $system (keys %DOC) {
 	}
     }
     close(TXT);
+    $i++;
 }

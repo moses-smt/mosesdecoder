@@ -10,6 +10,8 @@ if (!defined $stem) {
   exit(1);
 }
 
+$stem .= ".ref" if !-e $stem && !-e $stem."0" && -e $stem.".ref0";
+
 my @REF;
 my $ref=0;
 while(-e "$stem$ref") {

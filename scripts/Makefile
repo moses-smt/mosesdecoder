@@ -9,9 +9,9 @@ DS?=$(shell date '+%Y%m%d')
 # to.
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
 # The values here are just the defaults in case your environment does not set
-# them. (For this to work, use ?=, not = in the Makefile.)
-TARGETDIR?=/home/s0674000/projects/moses/bin
-BINDIR?=/home/s0674000/projects/giza-pp/bin
+# them.
+TARGETDIR=/home/pkoehn/statmt/bin
+BINDIR=/home/pkoehn/statmt/bin
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)

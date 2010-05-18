@@ -54,6 +54,7 @@ my (@MODULE,
     %QSUB_SCRIPT,     # flag if script contains qsub's when run on cluster
     %QSUB_STEP,       # flag if step contains qsub's when run on cluster
     %RERUN_ON_CHANGE, # config parameter whose change invalidates old runs
+    %MULTIREF,	      # flag if step may be run on multiple sets (reference translations)
     %TEMPLATE,        # template if step follows a simple pattern
     %TEMPLATE_IF,     # part of template that is conditionally executed
     %ONLY_FACTOR_0,   # only run on a corpus that includes surface word
@@ -218,6 +219,9 @@ sub read_meta {
 	    }
 	    elsif ($1 eq "rerun-on-change") {
 		push @{$RERUN_ON_CHANGE{"$module:$step"}}, split(/\s+/,$2);
+	    }
+	    elsif ($1 eq "multiref") {
+		$MULTIREF{"$module:$step"} = $2;
 	    }
 	    elsif ($1 eq "template") {
 		$TEMPLATE{"$module:$step"} = $2;
@@ -434,7 +438,12 @@ sub find_steps_for_module {
 	# not needed, if optional and not specified
 	if (defined($STEP_IGNORE{$defined_step})) {
 	    my $next = 0;
+	    my $and = 0;
 	    my @IGNORE = split(/ /,$STEP_IGNORE{$defined_step});
+            if ($IGNORE[0] eq "AND") {
+              $and = 1;
+              shift @IGNORE;
+            }
 	    foreach my $ignore (@IGNORE) {
 		my $extended_name = &extend_local_name($module,$set,$ignore);
 		if (! &backoff_and_get($extended_name)) {
@@ -442,7 +451,8 @@ sub find_steps_for_module {
 		    $next++;
 		}
 	    }
-	    next if $next == scalar @IGNORE;
+            next if !$and && ($next == scalar @IGNORE); # OR: all parameters have to be missing
+            next if  $and && $next; # AND: any parameter has to be missing
 	    print "\t\t=> not all non-existant, not ignored" if $next && $VERBOSE;
 	}
 
@@ -918,6 +928,9 @@ sub define_step {
 	}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis$/) {
 	    &define_evaluation_analysis($1,$i);
+	}
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis-coverage$/) {
+	    &define_evaluation_analysis_coverage($1,$i);
 	}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):meteor$/) {
 #	    &define_evaluation_meteor($1);
@@ -2015,6 +2028,41 @@ sub define_evaluation_analysis {
     &create_step($step_id,$cmd);
 }
 
+sub define_evaluation_analysis_coverage {
+    my ($set,$step_id) = @_;
+
+    my ($analysis,
+	$input,$corpus,$ttable) = &get_output_and_input($step_id);
+    my $script = &backoff_and_get("EVALUATION:$set:analysis");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+
+    # translation table name
+    if (&backoff_and_get("TRAINING:input-factors")) {
+      my %IN = &get_factor_id("input");
+      my %OUT = &get_factor_id("output");
+      my $factors = &encode_factor_definition("translation-factors",\%IN,\%OUT);
+      my @FACTOR = split(/\+/,$factors);
+      my @SPECIFIED_NAME;
+      if (&backoff_and_get("TRAINING:phrase-translation-table")) {
+        @SPECIFIED_NAME = @{$CONFIG{"TRAINING:phrase-translation-table"}};
+      }
+      for(my $i=0;$i<scalar(@FACTOR);$i++) {
+	if ($FACTOR[$i] =~ /^0-/) {
+	  if (scalar(@SPECIFIED_NAME) > $i) {
+            $ttable = $SPECIFIED_NAME[$i];
+	  }
+	  else {
+	    $ttable .= ".".$FACTOR[$i];
+	  }
+	  last;
+	}
+      }
+    }
+
+    my $cmd = "$script -input $input -input-corpus $corpus.$input_extension -ttable $ttable -dir $analysis";
+    &create_step($step_id,$cmd);
+}
+
 sub define_reporting_report {
     my ($step_id) = @_;
 
@@ -2101,6 +2149,12 @@ sub define_template {
 
     my ($module,$set,$stepname) = &deconstruct_name($step);
 
+    my $multiref = undef;
+    if ($MULTIREF{$defined_step} &&  # step needs to be run differently if multiple ref
+        &backoff_and_get(&extend_local_name($module,$set,"multiref"))) { # there are multiple ref
+      $multiref = $MULTIREF{$defined_step};
+    }
+
     my ($output,@INPUT) = &get_output_and_input($step_id);
 
     my $cmd;
@@ -2162,6 +2216,13 @@ sub define_template {
 	$cmd = $new_cmd;
 	$QSUB_STEP{$step_id}++;
     }
+
+    # command to be run on multiple reference translations
+    if (defined($multiref)) {
+      $cmd =~ s/^(.+)IN (.+)OUT(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' IN OUT/;
+      $cmd =~ s/^(.+)OUT(.+)IN (.*)$/$multiref '$1 mref-output-file $2 mref-input-file $3' IN OUT/;
+    }
+
     # input is array, but just specified as IN
     if ($cmd !~ /IN1/ && (scalar @INPUT) > 1 ) {
 	my $in = join(" ",@INPUT);

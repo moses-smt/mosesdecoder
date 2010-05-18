@@ -402,10 +402,16 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 
 ### number of jobs (if parallel execution on cluster)
 #
-jobs = 10
+#jobs = 10
 
+### additional decoder settings
+# switches for the Moses decoder
+#
 decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
 
+### multiple reference translations
+#
+multiref = yes
 
 ### prepare system output for scoring 
 # this may include detokenization and wrapping output in sgm 
@@ -436,6 +442,12 @@ nist-bleu-c = "$moses-script-dir/generic/mteval-v12.pl -c"
 ### Analysis: carry out various forms of analysis on the output
 #
 analysis = $moses-script-dir/ems/support/analysis.perl
+#
+# also report on input coverage
+analyze-coverage = yes
+#
+# also report on phrase mappings used
+report-segmentation = yes
 
 [EVALUATION:newstest2009]
 
