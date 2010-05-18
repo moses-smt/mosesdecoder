@@ -473,6 +473,7 @@ tokenize-reference
 	out: tokenized-reference
 	default-name: tuning/reference.tok
 	pass-unless: output-tokenizer
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
 lowercase-reference
 	in: tokenized-reference
@@ -480,6 +481,7 @@ lowercase-reference
 	default-name: tuning/reference.lc
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 truecase-reference
 	in: tokenized-reference TRUECASER:truecase-model
@@ -487,12 +489,14 @@ truecase-reference
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.tc
 	ignore-unless: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
 	in: cased-reference SPLITTER:splitter-model
 	out: reference
 	default-name: tuning/reference.split
 	pass-unless: output-splitter
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 tune
 	in: TRAINING:config input reference
@@ -641,12 +645,14 @@ tokenize-reference
 	out: tokenized-reference
 	default-name: evaluation/reference.tok
 	pass-unless: output-tokenizer
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
 lowercase-reference
 	in: tokenized-reference
 	out: reference
 	default-name: evaluation/reference
 	pass-unless: output-lowercaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 nist-bleu
 	in: wrapped-output reference-sgm
@@ -713,8 +719,7 @@ analysis-coverage
 	in: input TRAINING:corpus TRAINING:phrase-translation-table
 	out: analysis-coverage
 	default-name: evaluation/analysis
-	ignore-unless: analysis analyze-coverage
-	template: $analysis -input IN -input-corpus IN1.$input-extension -ttable IN2 -dir OUT
+	ignore-unless: AND analysis analyze-coverage
 
 [REPORTING] single
 report

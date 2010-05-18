@@ -37,10 +37,10 @@ foreach my $lm (@LM) {
   my $lm_order;
   $lm .= ".gz" if (! -e $lm && -e "$lm.gz");
   if ($lm =~ /gz$/) {
-    open(LM,"zcat $lm|") || die("could not find language model file '$lm'");
+    open(LM,"zcat $lm|") || die("ERROR: could not find language model file '$lm'");
   }
   else {
-    open(LM,$lm) || die("could not find language model file '$lm'");
+    open(LM,$lm) || die("ERROR: could not find language model file '$lm'");
   }
   while(<LM>) {
     $lm_order = $1 if /ngram (\d+)/;
@@ -73,7 +73,7 @@ my ($mixout, $mixerr, $mixexitcode) = saferun3($cmd);
 die "Failed to mix models: $mixerr" if $mixexitcode != 0;
 my $mix = $mixout;
 `rm $tmp/iplm.$$.*`;
-$mix =~ /best lambda \(([\d\. ]+)\)/ || die("computing lambdas failed: $mix");
+$mix =~ /best lambda \(([\d\. ]+)\)/ || die("ERROR: computing lambdas failed: $mix");
 my @LAMBDA = split(/ /,$1);
 
 # create new language models

@@ -179,7 +179,7 @@ else {
     if (!defined($_MGIZA_CPUS)) {
         $_MGIZA_CPUS=4;
     }
-    die("ERROR: Cannot find merge_alignment.py") unless (-x $MGIZA_MERGE_ALIGN);
+    die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
 }
 
 my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
