@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     
     //Print all derivations in search graph
     if (staticData.PrintAllDerivations()) {
-      manager.PrintAllDerivations(source->GetTranslationId());
+    manager.PrintAllDerivations(source->GetTranslationId(), std::cerr);
     }
 
 		// pick best translation (maximum a posteriori decoding)

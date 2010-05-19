@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "ThreadPool.h"
 
+#ifdef WITH_THREADS
+
 using namespace std;
 using namespace Moses;
 
@@ -54,7 +56,7 @@ void Moses::ThreadPool::Execute()
         }
         m_threadAvailable.notify_all();
     } while (!m_stopped);
-#if defined(BOOST_HAS_PTHREADS)
+#ifdef BOOST_HAS_PTHREADS
     TRACE_ERR("Thread " << pthread_self() << " exiting" << endl);
 #endif
 }
@@ -92,6 +94,7 @@ void Moses::ThreadPool::Stop(bool processRemainingJobs)
     }
     m_threadNeeded.notify_all();
     
-    cerr << m_threads.size() << endl;
+    
     m_threads.join_all();
 }
+#endif //WITH_THREADS

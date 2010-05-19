@@ -121,5 +121,6 @@ void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSoluti
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/, 
                         bool reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out);
+void OutputInput(std::ostream& os, const Hypothesis* hypo);
 
 #endif

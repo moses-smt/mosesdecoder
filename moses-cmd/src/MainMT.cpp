@@ -20,30 +20,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 /**
- * Main for multithreaded moses.
+ * Moses main, for single-threaded and multi-threaded.
  **/
 
+#include <fstream>
 #include <sstream>
 #include <vector>
 
-#include <boost/thread/mutex.hpp>
-
-#if defined(BOOST_HAS_PTHREADS)
-#include <pthread.h>
+#ifdef WIN32
+// Include Visual Leak Detector
+#include <vld.h>
 #endif
 
+#ifdef WITH_THREADS
+#include <boost/thread/mutex.hpp>
+#endif
+
+#ifdef BOOST_HAS_PTHREADS
+#include <pthread.h>
+#endif
 
 #include "Hypothesis.h"
 #include "IOWrapper.h"
 #include "LatticeMBR.h"
 #include "Manager.h"
 #include "StaticData.h"
-#include "ThreadPool.h"
 #include "Util.h"
 #include "mbr.h"
+#include "ThreadPool.h"
+#include "TranslationAnalysis.h"
+
+#ifdef HAVE_PROTOBUF
+#include "hypergraph.pb.h"
+#endif
 
 using namespace std;
 using namespace Moses;
+
+/** Enforce rounding */
+void fix(std::ostream& stream) {
+    stream.setf(std::ios::fixed);
+    stream.precision(3);
+}
 
 
 /**
@@ -59,21 +77,23 @@ class OutputCollector {
           * Write or cache the output, as appropriate.
           **/
         void Write(int sourceId,const string& output,const string& debug="") {
+#ifdef WITH_THREADS
             boost::mutex::scoped_lock lock(m_mutex);
+#endif
             if (sourceId == m_nextOutput) {
                 //This is the one we were expecting
-                *m_outStream << output;
-                *m_debugStream << debug;
+                *m_outStream << output << flush;
+                *m_debugStream << debug << flush;
                 ++m_nextOutput;
                 //see if there's any more
                 map<int,string>::iterator iter;
                 while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
-                    *m_outStream << iter->second;
+                    *m_outStream << iter->second << flush;
                     m_outputs.erase(iter);
                     ++m_nextOutput;
                     map<int,string>::iterator debugIter = m_debugs.find(iter->first);
                     if (debugIter != m_debugs.end()) {
-                      *m_debugStream << debugIter->second;
+                      *m_debugStream << debugIter->second << flush;
                       m_debugs.erase(debugIter);
                     }
                 }
@@ -90,7 +110,9 @@ class OutputCollector {
         int m_nextOutput;
         ostream* m_outStream;
         ostream* m_debugStream;
+#ifdef WITH_THREADS
         boost::mutex m_mutex;
+#endif
 };
 
 /**
@@ -101,27 +123,72 @@ class TranslationTask : public Task {
     public:
 
         TranslationTask(size_t lineNumber,
-             InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector) :
+             InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
+                       OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
+                       OutputCollector* detailedTranslationCollector) :
              m_source(source), m_lineNumber(lineNumber),
-                m_outputCollector(outputCollector), m_nbestCollector(nbestCollector) {}
+                m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
+                m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
+                m_detailedTranslationCollector(detailedTranslationCollector) {}
 
         void Run() 
         {
-#if defined(BOOST_HAS_PTHREADS)
+#ifdef BOOST_HAS_PTHREADS
             TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
             const StaticData &staticData = StaticData::Instance();
             Sentence sentence(Input);
             Manager manager(*m_source,staticData.GetSearchAlgorithm());
             manager.ProcessSentence();
+                        
+            //Word Graph
+            if (m_wordGraphCollector) {
+                ostringstream out;
+                fix(out);
+                manager.GetWordGraph(m_lineNumber, out);
+                m_wordGraphCollector->Write(m_lineNumber, out.str());
+            }
+            
+            //Search Graph
+            if (m_searchGraphCollector) {
+                ostringstream out;
+                fix(out);
+                manager.OutputSearchGraph(m_lineNumber, out);
+                m_searchGraphCollector->Write(m_lineNumber, out.str());
+
+#ifdef HAVE_PROTOBUF
+                if (staticData.GetOutputSearchGraphPB()) {
+                    ostringstream sfn;
+                    sfn << staticData.GetParam("output-search-graph-pb")[0] << '/' << m_lineNumber << ".pb" << ends;
+                    string fn = sfn.str();
+                    VERBOSE(2, "Writing search graph to " << fn << endl);
+                    fstream output(fn.c_str(), ios::trunc | ios::binary | ios::out);
+                    manager.SerializeSearchGraphPB(m_lineNumber, output);
+                }
+#endif
+            }
+            
+            
             
             if (m_outputCollector) {
                 ostringstream out;
                 ostringstream debug;
+                fix(debug);
+                
+                //All derivations - send them to debug stream
+                if (staticData.PrintAllDerivations()) {
+                    manager.PrintAllDerivations(m_lineNumber, debug);
+                }
+                
+                //Best hypothesis
                 const Hypothesis* bestHypo = NULL;
                 if (!staticData.UseMBR()) {
                     bestHypo = manager.GetBestHypothesis();
                     if (bestHypo) {
+                        if (staticData.IsPathRecoveryEnabled()) {
+                            OutputInput(out, bestHypo);
+                            out << "||| ";
+                        }
                         OutputSurface(
                                 out,
                                 bestHypo,
@@ -195,6 +262,18 @@ class TranslationTask : public Task {
                 OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), m_lineNumber);
                 m_nbestCollector->Write(m_lineNumber, out.str());
             }
+            
+            //detailed translation reporting
+            if (m_detailedTranslationCollector) {
+                ostringstream out;
+                fix(out);
+                TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
+                m_detailedTranslationCollector->Write(m_lineNumber,out.str());
+            }
+
+            IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
+
+            manager.CalcDecoderStatistics();
         }
 
         ~TranslationTask() {delete m_source;}
@@ -204,51 +283,81 @@ class TranslationTask : public Task {
         size_t m_lineNumber;
         OutputCollector* m_outputCollector;
         OutputCollector* m_nbestCollector;
+        OutputCollector* m_wordGraphCollector;
+        OutputCollector* m_searchGraphCollector;
+        OutputCollector* m_detailedTranslationCollector;
+        
 
 };
 
 int main(int argc, char** argv) {
-    //extract pool-size args, send others to moses
-    char** mosesargv = new char*[argc+2];
-    int mosesargc = 0;
-    int threadcount = 10;
-    for (int i = 0; i < argc; ++i) {
-        if (!strcmp(argv[i], "-threads")) {
-            ++i;
-            if (i >= argc) {
-                cerr << "Error: Missing argument to -threads" << endl;
-                exit(1);
-            } else {
-                threadcount = atoi(argv[i]);
-            }
-        } else {
-            mosesargv[mosesargc] = new char[strlen(argv[i])+1];
-            strcpy(mosesargv[mosesargc],argv[i]);
-            ++mosesargc;
-        }
-    }
-    if (threadcount <= 0) {
-        cerr << "Error: Must specify a positive number of threads" << endl;
-        exit(1);
+    
+#ifdef HAVE_PROTOBUF
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+#endif
+    IFVERBOSE(1)
+    {
+        TRACE_ERR("command: ");
+        for(int i=0;i<argc;++i) TRACE_ERR(argv[i]<<" ");
+        TRACE_ERR(endl);
     }
 
+    fix(cout);
+    fix(cerr);
+
+
     Parameter* params = new Parameter();
-    if (!params->LoadParam(mosesargc,mosesargv)) {
+    if (!params->LoadParam(argc,argv)) {
         params->Explain();
         exit(1);
     }
+    
+    //create threadpool, if necessary
+    int threadcount = (params->GetParam("threads").size() > 0) ?
+            Scan<size_t>(params->GetParam("threads")[0]) : 1;
+    
+#ifdef WITH_THREADS
+    if (threadcount < 1) {
+        cerr << "Error: Need to specify a positive number of threads" << endl;
+        exit(1);
+    }
+    ThreadPool pool(threadcount);
+#else
+    if (threadcount > 1) {
+        cerr << "Error: Thread count of " << threadcount << " but moses not built with thread support" << endl;
+        exit(1);
+    }
+#endif
+
+    
     if (!StaticData::LoadDataStatic(params)) {
         exit(1);
     }
 
     const StaticData& staticData = StaticData::Instance();
+    // set up read/writing class
     IOWrapper* ioWrapper = GetIODevice(staticData);
 
     if (!ioWrapper) {
         cerr << "Error; Failed to create IO object" << endl;
         exit(1);
     }
-    ThreadPool pool(threadcount);
+    
+    // check on weights
+    vector<float> weights = staticData.GetAllWeights();
+    IFVERBOSE(2) {
+        TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
+        TRACE_ERR("The global weight vector looks like this:");
+        for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+        TRACE_ERR("\n");
+    }
+    // every score must have a weight!  check that here:
+    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
+        TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
+        exit(1);
+    }
+    
+
     InputType* source = NULL;
     size_t lineCount = 0;
     auto_ptr<OutputCollector> outputCollector;//for translations
@@ -257,9 +366,8 @@ int main(int argc, char** argv) {
     size_t nbestSize = staticData.GetNBestSize();
     string nbestFile = staticData.GetNBestFilePath();
     if (nbestSize) {
-        if (nbestFile == "-") {
+        if (nbestFile == "-" || nbestFile == "/dev/stdout") {
             //nbest to stdout, no 1-best
-            //FIXME: Moses doesn't actually let you pass a '-' on the command line.
             nbestCollector.reset(new OutputCollector());
         } else {
             //nbest to file, 1-best to stdout
@@ -272,22 +380,47 @@ int main(int argc, char** argv) {
         outputCollector.reset(new OutputCollector());
     }
     
+    auto_ptr<OutputCollector> wordGraphCollector;
+    if (staticData.GetOutputWordGraph()) {
+        wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
+    }
+    
+    auto_ptr<OutputCollector> searchGraphCollector;
+    if (staticData.GetOutputSearchGraph()) {
+        searchGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputSearchGraphStream())));
+    }
+    
+    auto_ptr<OutputCollector> detailedTranslationCollector;
+    if (staticData.IsDetailedTranslationReportingEnabled()) {
+        detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
+    }
+    
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+        IFVERBOSE(1) {
+                ResetUserTime();
+        }
         TranslationTask* task = 
-            new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get());
+                new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get(), wordGraphCollector.get(),
+                                    searchGraphCollector.get(), detailedTranslationCollector.get());
+#ifdef WITH_THREADS
         pool.Submit(task);
+
+#else
+        task->Run();
+#endif
         source = NULL; //make sure it doesn't get deleted
         ++lineCount;
     }
-
+#ifdef WITH_THREADS
     pool.Stop(true); //flush remaining jobs
+#endif
 
-	#ifndef EXIT_RETURN
-		//This avoids that detructors are called (it can take a long time)
+#ifndef EXIT_RETURN
+		//This avoids that destructors are called (it can take a long time)
 		exit(EXIT_SUCCESS);
-	#else
+#else
 		return EXIT_SUCCESS;
-	#endif
+#endif
 }
 
 
