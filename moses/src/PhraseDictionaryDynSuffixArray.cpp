@@ -29,6 +29,7 @@ bool PhraseDictionaryDynSuffixArray::Load(const std::vector<FactorType>& input,
 
 	m_tableLimit = tableLimit;
 	m_languageModels = &languageModels;
+  m_weight = weight;
 	m_weightWP = weightWP;
 
 	m_biSA->Load( input, output, source, target, alignments, weight);
@@ -61,7 +62,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 		//std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 		targetPhrase->SetScore(m_feature, scoreVector, m_weight, m_weightWP, *m_languageModels);
-		cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
+		//cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
 		ret->Add(targetPhrase);
 	}
 	ret->NthElement(m_tableLimit); // sort the phrases for the dcoder
