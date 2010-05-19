@@ -68,6 +68,7 @@ Parameter::Parameter()
 	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 	AddParam("stack", "s", "maximum stack size for histogram pruning");
 	AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
+    AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
 	AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
 	AddParam("ttable-file", "location and properties of the translation tables");
 	AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");

@@ -108,7 +108,7 @@ void Manager::ProcessSentence()
  *
  */
 
-void Manager::PrintAllDerivations(long translationId ) const
+void Manager::PrintAllDerivations(long translationId, ostream& outputStream) const
 {
 	const std::vector < HypothesisStack* > &hypoStackColl = m_search->GetHypothesisStacks();
 
@@ -126,14 +126,14 @@ void Manager::PrintAllDerivations(long translationId ) const
 			; iterBestHypo != sortedPureHypo.end()
 			; ++iterBestHypo)
 	{
-		printThisHypothesis(translationId, *iterBestHypo, remainingPhrases, remainingScore); 
-    printDivergentHypothesis(translationId, *iterBestHypo, remainingPhrases, remainingScore);
+		printThisHypothesis(translationId, *iterBestHypo, remainingPhrases, remainingScore, outputStream); 
+    printDivergentHypothesis(translationId, *iterBestHypo, remainingPhrases, remainingScore, outputStream);
   }
 }
 
 void Manager::getSntTranslationOptions(std::ostream& outStr) { outStr << *m_transOptColl; }
 
-void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore  ) const
+void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore , ostream& outputStream ) const
 {
    //Backtrack from the predecessor
    if (hypo->GetId()  > 0) {
@@ -141,7 +141,7 @@ void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hyp
      followingPhrases.push_back(& (hypo->GetCurrTargetPhrase()));
      ///((Phrase) hypo->GetPrevHypo()->GetTargetPhrase());
      followingPhrases.insert(followingPhrases.end()--, remainingPhrases.begin(), remainingPhrases.end());
-     printDivergentHypothesis(translationId, hypo->GetPrevHypo(), followingPhrases , remainingScore + hypo->GetScore() - hypo->GetPrevHypo()->GetScore());
+     printDivergentHypothesis(translationId, hypo->GetPrevHypo(), followingPhrases , remainingScore + hypo->GetScore() - hypo->GetPrevHypo()->GetScore(), outputStream);
    }
   
    //Process the arcs
@@ -158,33 +158,33 @@ void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hyp
         vector <const TargetPhrase* > followingPhrases;
         followingPhrases.push_back(&(loserHypo->GetCurrTargetPhrase()));
         followingPhrases.insert(followingPhrases.end()--, remainingPhrases.begin(), remainingPhrases.end());
-        printThisHypothesis(translationId, loserPrevHypo, followingPhrases, remainingScore + arcScore);
-        printDivergentHypothesis(translationId, loserPrevHypo, followingPhrases, remainingScore + arcScore);
+        printThisHypothesis(translationId, loserPrevHypo, followingPhrases, remainingScore + arcScore, outputStream);
+        printDivergentHypothesis(translationId, loserPrevHypo, followingPhrases, remainingScore + arcScore, outputStream);
      }
    }
 }
 
 
-void Manager::printThisHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore  ) const
+void Manager::printThisHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore, ostream& outputStream) const
 {
 
-  cerr << translationId << " ||| ";
+    outputStream << translationId << " ||| ";
   
   //Yield of this hypothesis
-  hypo->ToStream(cerr);
+    hypo->ToStream(outputStream);
   for (size_t p = 0; p < remainingPhrases.size(); ++p) {
     const TargetPhrase * phrase = remainingPhrases[p];
     size_t size = phrase->GetSize();
     for (size_t pos = 0 ; pos < size ; pos++)
     {
 		  const Factor *factor = phrase->GetFactor(pos, 0);
-			cerr << *factor;
-      cerr << " ";
+          outputStream << *factor;
+          outputStream << " ";
     }
   }
   
-  cerr << "||| " << hypo->GetScore() + remainingScore;
-  cerr << endl;
+  outputStream << "||| " << hypo->GetScore() + remainingScore;
+  outputStream << endl;
 }
 
   

@@ -162,6 +162,7 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
   {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+    assert(m_detailedTranslationReportingStream->good());
   }
 }
 
