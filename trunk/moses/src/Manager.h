@@ -120,7 +120,7 @@ public:
 	InputType const& m_source; /**< source sentence to be translated */
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
 	~Manager();
-  void getSntTranslationOptions(std::ostream& outStr); 
+    const  TranslationOptionCollection* getSntTranslationOptions(); 
   
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;

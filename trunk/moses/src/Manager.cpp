@@ -131,7 +131,7 @@ void Manager::PrintAllDerivations(long translationId, ostream& outputStream) con
   }
 }
 
-void Manager::getSntTranslationOptions(std::ostream& outStr) { outStr << *m_transOptColl; }
+const TranslationOptionCollection* Manager::getSntTranslationOptions() { return m_transOptColl; }
 
 void Manager::printDivergentHypothesis(long translationId, const Hypothesis* hypo, const vector <const TargetPhrase*> & remainingPhrases, float remainingScore , ostream& outputStream ) const
 {

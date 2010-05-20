@@ -531,6 +531,7 @@ public:
 	{ return m_lmcache_cleanup_threshold; }
 	
 	bool GetOutputSearchGraph() const { return m_outputSearchGraph; }
+    void SetOutputSearchGraph(bool outputSearchGraph) {m_outputSearchGraph = outputSearchGraph;}
 	bool GetOutputSearchGraphExtended() const { return m_outputSearchGraphExtended; }
 #ifdef HAVE_PROTOBUF
 	bool GetOutputSearchGraphPB() const { return m_outputSearchGraphPB; }
