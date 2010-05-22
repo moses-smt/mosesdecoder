@@ -33,6 +33,11 @@ fi
 if [ -z "$LIBTOOLIZE" ]
 then
     LIBTOOLIZE=`which libtoolize`
+    
+    if [ -z "$LIBTOOLIZE" ]
+    then
+        LIBTOOLIZE=`which glibtoolize`
+    fi
 fi
 
 
