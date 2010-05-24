@@ -25,7 +25,6 @@ ems/support/remove-segmenation-markup.perl
 ems/support/report-experiment-scores.perl
 ems/support/reuse-weights.perl
 ems/support/run-command-on-multiple-refsets.perl
-ems/support/run-command-on-multiple-refsets.perl~
 ems/support/wrap-xml.perl
 ems/web/analysis.php
 ems/web/analysis_diff.php
