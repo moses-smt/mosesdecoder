@@ -283,10 +283,7 @@ void ApproximateModel1::clear_cache(const Sample& s) {
 
 }
   
-float ApproximateModel1::getImportanceWeight() {
-  //since the "approximation" is to return 0, this is just the true score
-  return model1::computeScore() - computeScore();
-}
+
   
   
 float ApproximateModel1::computeScore() {
@@ -351,10 +348,6 @@ float ApproximateModel1::getDiscontiguousPairedUpdateScore(const TranslationOpti
 ApproximateModel1Inverse::ApproximateModel1Inverse(model1_table_handle table, vocab_mapper_handle fmap, vocab_mapper_handle emap):
     model1_inverse(table,fmap,emap){}
     
-float ApproximateModel1Inverse::getImportanceWeight() {
-  //since the "approximation" is to return 0, this is just the true score
-  return model1_inverse::computeScore();
-}
 
   
   

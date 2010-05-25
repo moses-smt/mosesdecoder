@@ -124,9 +124,6 @@ void ParenthesisFeature::updateTarget() {
     }
 }
 
-void ParenthesisFeature::assignImportanceScore(ScoreComponentCollection& scores) {
-    scores.Assign(&getScoreProducer(), m_defaultImportanceWeights);
-}
 
 void ParenthesisFeature::assignScore(ScoreComponentCollection& scores) {
     //count number of mismatches of each type

@@ -257,20 +257,20 @@ namespace Josiah {
 
 		//the score for the input features (could also be calculated by m_features * current weights)
 		float scoreDiff = target->getScore() - curr->getScore();
-		VERBOSE(0, "ScoreDiff: " << scoreDiff << endl)
+		VERBOSE(1, "ScoreDiff: " << scoreDiff << endl)
 		
 		//what is the actual gain of target vs current (the gold gain)
 		float gainDiff = target->getGain() - curr->getGain(); 
-		VERBOSE(0, "GainDiff: " << gainDiff << endl)
+		VERBOSE(1, "GainDiff: " << gainDiff << endl)
 		
 		//the gold 1/-1 label
 		float y = gainDiff > 0 ? 1.0 : -1.0;
-		VERBOSE(0, "Label: " << y << endl)
+		VERBOSE(1, "Label: " << y << endl)
 
 		
 		//the mean of margin for this task is y * score
 		float marginMean = y * scoreDiff;	
-		VERBOSE(0, "marginMean: " << marginMean << endl)
+		VERBOSE(1, "marginMean: " << marginMean << endl)
 
 		//only update at error
 		if (marginMean < 0) {
@@ -280,25 +280,25 @@ namespace Josiah {
 			m_features.PlusEquals(target->getScores());
 			m_features.MinusEquals(curr->getScores());
 
-			VERBOSE(0, "feature delta: " << m_features << endl)
+			VERBOSE(1, "feature delta: " << m_features << endl)
 			
 			//the variance is based on the input features
 			float marginVariance = calculateMarginVariance(m_features);
-			VERBOSE(0, "marginVariance: " << marginVariance << endl)
+			VERBOSE(1, "marginVariance: " << marginVariance << endl)
 		
 			//get the kkt multiplier
 			float alpha = kkt(marginMean,marginVariance);
-			VERBOSE(0, "alpha: " << alpha << endl)
+			VERBOSE(1, "alpha: " << alpha << endl)
 			
 			//update the mean parameters
 			updateMean(alpha,	y);
 
-			VERBOSE(0, "new weights: " << m_currWeights << endl)
+			VERBOSE(1, "new weights: " << m_currWeights << endl)
 			
 			//update the variance parameters
 			updateVariance(alpha);
 			
-			VERBOSE(0, "new variance: " << m_currSigmaDiag << endl)
+			VERBOSE(1, "new variance: " << m_currSigmaDiag << endl)
 
 			
 			//remember that we made an update

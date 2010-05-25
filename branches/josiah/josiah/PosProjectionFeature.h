@@ -35,7 +35,6 @@ class PosProjectionFeature: public FeatureFunction {
         PosProjectionFeature(const string& name,
              Moses::FactorType sourceFactorType, size_t numValues)
             : FeatureFunction(name,numValues),
-              m_defaultImportanceWeights(numValues),
               m_sample(NULL),
               m_sourceFactorType(sourceFactorType),
               m_numValues(numValues) {}
@@ -45,9 +44,6 @@ class PosProjectionFeature: public FeatureFunction {
         virtual void init(const Sample& sample) {m_sample = &sample;}
         /** Update the target words.*/
         virtual void updateTarget();
-        virtual void assignImportanceScore(ScoreComponentCollection& scores) {
-            scores.Assign(&getScoreProducer(), m_defaultImportanceWeights);
-        }
         virtual ~PosProjectionFeature() {}
     
     protected:
@@ -59,7 +55,6 @@ class PosProjectionFeature: public FeatureFunction {
         Moses::FactorType sourceFactorType() const {return m_sourceFactorType;}
 
     private:
-       std::vector<float> m_defaultImportanceWeights;
        const Sample* m_sample; 
        Moses::FactorType m_sourceFactorType;
        size_t m_numValues;

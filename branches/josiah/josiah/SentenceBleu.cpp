@@ -30,7 +30,7 @@ SentenceBLEU::SentenceBLEU(int n, const std::vector<std::string>& refs, const st
 }
 
 SentenceBLEU::SentenceBLEU(int n, const vector<const Factor*> & ref, int src_len, float bp_scale, bool denum_hack) :
-  n_(n) , m_src_len(src_len), _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack) {
+        n_(n) ,  _bp_scale(bp_scale),  _use_bp_denum_hack(denum_hack), m_src_len(src_len) {
   lengths_.push_back(ref.size());
   CountRef(ref, ngrams_);
     

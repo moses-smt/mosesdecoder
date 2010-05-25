@@ -26,8 +26,8 @@ namespace Josiah {
   class Derivation;  
   class CorpusSamplerCollector : public ExpectedLossCollector {
   public:
-    CorpusSamplerCollector(int samples, Sampler &sampler) 
-    :  m_samples(samples), m_numSents(0), ExpectedLossCollector() {
+      CorpusSamplerCollector(int samples, Sampler &sampler):  ExpectedLossCollector(),
+          m_samples(samples), m_numSents(0)  {
       sampler.AddCollector(&m_derivationCollector);
       m_featureVectors.resize(m_samples);
       m_lengths.resize(m_samples);
@@ -55,7 +55,7 @@ namespace Josiah {
     
     DerivationCollector m_derivationCollector;
     const int m_samples;
-    ScoreComponentCollection getFeatureExpectations(const vector<double>& importanceWeights) const;
+    ScoreComponentCollection getFeatureExpectations() const;
     int m_numSents;
     int GetNumSents() { return m_numSents;}
   protected:   

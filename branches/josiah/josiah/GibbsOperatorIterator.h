@@ -44,7 +44,7 @@ namespace Josiah {
   
   class SwapIterator : public GibbsOperatorIterator {
   public:
-    SwapIterator() : m_curPos(NOT_FOUND), m_nextHypo(NULL), GibbsOperatorIterator() {}
+      SwapIterator() : GibbsOperatorIterator(), m_curPos(NOT_FOUND), m_nextHypo(NULL) {}
     virtual ~SwapIterator() {}
     virtual bool isStartScan() { return (m_curPos == NOT_FOUND && m_size == NOT_FOUND); } 
     virtual void next() { m_curPos = m_nextHypo->GetCurrSourceWordsRange().GetStartPos();}
@@ -68,7 +68,7 @@ namespace Josiah {
   
   class MergeSplitIterator : public GibbsOperatorIterator {
   public:
-    MergeSplitIterator() : m_curPos(NOT_FOUND), GibbsOperatorIterator() {}
+      MergeSplitIterator() : GibbsOperatorIterator(), m_curPos(NOT_FOUND) {}
     virtual ~MergeSplitIterator() {}
     virtual bool isStartScan() { return (m_curPos == NOT_FOUND && m_size == NOT_FOUND); } 
     virtual void next() { m_curPos++;}
@@ -89,7 +89,7 @@ namespace Josiah {
   
   class FlipIterator : public GibbsOperatorIterator {
   public:
-    FlipIterator(FlipOperator* op) : m_thisPos(NOT_FOUND), m_thatPos(NOT_FOUND), m_operator(op), m_direction(1), GibbsOperatorIterator() {}
+      FlipIterator(FlipOperator* op) : GibbsOperatorIterator(),m_thisPos(NOT_FOUND), m_thatPos(NOT_FOUND), m_direction(1),m_operator(op)  {}
     virtual ~FlipIterator() {}
     virtual bool isStartScan() { return (m_thisPos == NOT_FOUND && m_thatPos == NOT_FOUND && m_size == NOT_FOUND); } 
     virtual void next() ;         

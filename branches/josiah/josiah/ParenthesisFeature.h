@@ -66,7 +66,7 @@ class ParenthesisCounts {
 class ParenthesisFeature: public virtual FeatureFunction {
     public:
         ParenthesisFeature(const std::string lefts, const std::string rights) 
-    : FeatureFunction("parenthesis",lefts.size()), m_defaultImportanceWeights(lefts.size()),
+    : FeatureFunction("parenthesis",lefts.size()),
         m_sample(NULL),
         m_numValues(lefts.size()), m_lefts(lefts), m_rights(rights),
         m_counts(m_numValues), m_leftSegmentCounts(m_numValues), m_rightSegmentCounts(m_numValues),
@@ -76,9 +76,6 @@ class ParenthesisFeature: public virtual FeatureFunction {
         virtual void init(const Sample& sample);
         /** Update the target words.*/
         virtual void updateTarget();
-        /** Insert the log of the importance weight. This is log(true score) - log (approximate score). The assignScore()
-          *  method inserts the approximate, as do all the doXXXUpdate() methods. **/
-        virtual void assignImportanceScore(ScoreComponentCollection& scores);
     
         /** Assign the total score of this feature on the current hypo */
         virtual void assignScore(ScoreComponentCollection& scores);
@@ -111,7 +108,6 @@ class ParenthesisFeature: public virtual FeatureFunction {
         void scoreUpdate(const Moses::Phrase& phrase, const Moses::WordsRange& segment, Moses::ScoreComponentCollection& scores);
                            
         
-        std::vector<float> m_defaultImportanceWeights;
         const Sample* m_sample;
         size_t m_numValues;
         
