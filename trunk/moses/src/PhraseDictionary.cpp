@@ -65,7 +65,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
     const StaticData& staticData = StaticData::Instance();
 	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
     //Thread-safe phrase dictionaries get loaded now
-    if (implementation == Memory || implementation == NewFormat || implementation == OnDisk) {
+    if (implementation == Memory || implementation == NewFormat || implementation == OnDisk || implementation == SuffixArray) {
         m_threadSafePhraseDictionary.reset(LoadPhraseTable());
         m_useThreadSafePhraseDictionary = true;
     } else {

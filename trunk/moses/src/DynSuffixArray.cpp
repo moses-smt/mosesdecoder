@@ -66,17 +66,28 @@ int DynSuffixArray::Rank(unsigned word, unsigned idx) {
 int DynSuffixArray::F_firstIdx(unsigned word) {
   // return index of first row where word is found in m_F
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
-  if(m_F->at(low) == word) return low;
-  else return -1;
+  cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
+  if((low >= m_F->size()) || (m_F->at(low) < word))
+    return -1; 
+  else 
+    return low;
+  //if(m_F->at(low) == word) return low;
+  //else return -1;
 }
 
 /* uses rank() and c() to obtain the LastFirstFunc function */
 int DynSuffixArray::LastFirstFunc(unsigned L_idx) {
   int fIdx(-1);
+  //cerr << "in LastFirstFcn() with L_idx = " << L_idx << endl;
   unsigned word = m_L->at(L_idx);
-  if((fIdx = F_firstIdx(word)) != -1) 
+  if((fIdx = F_firstIdx(word)) != -1) { 
+    //cerr << "fidx + Rank(" << word << "," << L_idx << ") = " << fIdx << "+" << Rank(word, L_idx) << endl;
     return fIdx + Rank(word, L_idx);
-  else return -1;
+  }
+  else {
+    //cerr << "returning -1\n";
+    return -1;
+  }
 }
 
 void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
@@ -85,13 +96,13 @@ void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
   //(use last word of new text in step 2 and save Ltmp until last insert?)
   //stage 3...all words of new sentence are inserted backwards
   // stage 2: k=ISA[newIndex], tmp= L[k], L[k]  = newChar
+  //PrintAuxArrays();
   assert(newIndex <= m_SA->size());
   int k(-1), kprime(-1);
   k = (newIndex < m_SA->size() ? m_ISA->at(newIndex) : m_ISA->at(0)); // k is now index of the cycle that starts at newindex
   int true_pos = LastFirstFunc(k); // track cycle shift (newIndex - 1)
   int Ltmp = m_L->at(k);
-  m_L->at(k) = (*newSent)[newSent->size()-1];  // cycle k now ends with correct word
-  
+  m_L->at(k) = newSent->at(newSent->size()-1);  // cycle k now ends with correct word
   for(int j = newSent->size()-1; j > -1; --j) {
     kprime = LastFirstFunc(k);  // find cycle that starts with (newindex - 1)
     //kprime += ((m_L[k] == Ltmp) && (k > isa[k]) ? 1 : 0); // yada yada
@@ -99,8 +110,8 @@ void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
     kprime = (kprime > 0 ? kprime : m_SA->size());  
     true_pos += (kprime <= true_pos ? 1 : 0); // track changes
     // insert everything
-    m_F->insert(m_F->begin() + kprime, (*newSent)[j]);
-    int theLWord = (j == 0 ? Ltmp : (*newSent)[j-1]);
+    m_F->insert(m_F->begin() + kprime, newSent->at(j));
+    int theLWord = (j == 0 ? Ltmp : newSent->at(j-1));
   
     m_L->insert(m_L->begin() + kprime, theLWord);
     piterate(m_SA, itr) 
@@ -112,15 +123,16 @@ void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
   
     m_ISA->insert(m_ISA->begin() + newIndex, kprime);
     k = kprime;
+    //PrintAuxArrays();
   }
   // Begin stage 4
   Reorder(true_pos, LastFirstFunc(kprime)); // actual position vs computed position of cycle (newIndex-1)
 }
 
 void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
-  printf("j=%d\tj'=%d\n", j, jprime);
+  //cerr << "j=" << j << "\tj'=" << jprime << endl; 
   while(j != jprime) {
-    printf("j=%d\tj'=%d\n", j, jprime);
+    //cerr << "j=" << j << "\tj'=" << jprime << endl; 
     int tmp, isaIdx(-1);
     int new_j = LastFirstFunc(j);
     // for SA, L, and F, the element at pos j is moved to j'
