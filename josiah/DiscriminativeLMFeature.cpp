@@ -26,7 +26,6 @@ namespace Josiah {
 
 DiscriminativeLMBigramFeature::DiscriminativeLMBigramFeature(const vector<string>& bigrams):
         FeatureFunction("DiscriminativeLMBigram",bigrams.size()),
-        m_defaultImportanceWeights(bigrams.size()),
         m_sample(NULL),
         m_scores(bigrams.size()),
         m_numValues(bigrams.size())

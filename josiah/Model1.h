@@ -162,7 +162,7 @@ private:
 };
 
 /**
-  * Approximation of model1 for importance sampling.
+  * Approximation of model1 .
  **/
 class ApproximateModel1 : public model1 {
   public:
@@ -170,8 +170,7 @@ class ApproximateModel1 : public model1 {
     virtual void init(const Sample& sample);
     /** Compute full score of a sample from scratch **/
   virtual float computeScore();
-    /** Change in score when updating one segment */
-    virtual float getImportanceWeight();
+    
   virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap);
     /** Change in score when updating two segments **/
     virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
@@ -243,7 +242,7 @@ private:
 };
 
 /**
- * Approximation of model1inverse for importance sampling.
+ * Approximation of model1inverse.
  **/
 class ApproximateModel1Inverse : public model1_inverse {
   public:
@@ -251,7 +250,6 @@ class ApproximateModel1Inverse : public model1_inverse {
     /** Compute full score of a sample from scratch **/
     virtual float computeScore() {return 0;}
     /** Change in score when updating one segment */
-    virtual float getImportanceWeight();
     virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {return 0;}
     /** Change in score when updating two segments **/
     virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption, 

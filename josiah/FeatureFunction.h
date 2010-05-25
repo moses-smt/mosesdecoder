@@ -95,9 +95,6 @@ class FeatureFunction {
     virtual void init(const Sample& sample) {/* do nothing */};
     /** Update the target words.*/
     virtual void updateTarget(){/*do nothing*/}
-    /** Insert the log of the importance weight. This is log(true score) - log (approximate score). The assignScore()
-     *  method inserts the approximate, as do all the doXXXUpdate() methods. **/
-    virtual void assignImportanceScore(ScoreComponentCollection& scores) = 0;
     
     /** Assign the total score of this feature on the current hypo */
     virtual void assignScore(ScoreComponentCollection& scores) = 0;
@@ -131,8 +128,6 @@ class SingleValuedFeatureFunction: public FeatureFunction {
   public:
     SingleValuedFeatureFunction(const std::string& name) :
       FeatureFunction(name) {}
-    virtual void assignImportanceScore(ScoreComponentCollection& scores)
-      {scores.Assign(&getScoreProducer(),getImportanceWeight());}
     virtual void assignScore(ScoreComponentCollection& scores)
       {scores.Assign(&getScoreProducer(), computeScore());}
     virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores)
@@ -152,7 +147,6 @@ class SingleValuedFeatureFunction: public FeatureFunction {
       * Actual feature functions need to implement these methods.
     **/
   protected:
-    virtual float getImportanceWeight() {return 0;}
     virtual float computeScore() = 0;
     /** Score due to one segment */
     virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) = 0;
@@ -170,27 +164,6 @@ class SingleValuedFeatureFunction: public FeatureFunction {
   
     
 };
-
-/**
-  * A feature function with multiple values.
-  **/
-/*class MultipleValuedFeatureFunction : public FeatureFunction {
-  public:
-    MultipleValuedFeatureFunction(const std::string& name, size_t numValues) 
-    : FeatureFunction(name,numValues),m_defaultImportanceWeights(numValues) {}
-    
-  
-  protected:
-      virtual void assignImportanceScore(ScoreComponentCollection& scores)
-        {scores.Assign(&getScoreProducer(), m_defaultImportanceWeights);}
-      
-      
-  private:
-      std::vector<float>  m_defaultImportanceWeights;
-};*/
-
-
-
 
 
 typedef boost::shared_ptr<FeatureFunction> feature_handle;

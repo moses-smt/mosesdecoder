@@ -32,7 +32,6 @@ class ExpectedLossCollector : public SampleCollector {
     double getExpectedGain() const;
     
   protected:
-    ScoreComponentCollection getFeatureExpectations(const vector<double>& importanceWeights) const;
     /** Hooks for adding, eg, entropy regularisation. The first is added in to the gradient, the second to the objective.*/
     virtual float getRegularisationGradientFactor(size_t i) {return 0;}
     virtual float getRegularisation() {return 0;}
@@ -51,7 +50,7 @@ class ExpectedLossCollector : public SampleCollector {
 class ExactExpectedLossCollector : public ExpectedLossCollector {
  public:
    ExactExpectedLossCollector(const std::string& src, float shrinkFactor, bool randomShrink, const GainFunction*  f) : 
-                          m_srcLine(src), m_shrinkFactor(shrinkFactor), m_randomShrink(randomShrink), ExpectedLossCollector(f) {}
+       ExpectedLossCollector(f), m_srcLine(src), m_shrinkFactor(shrinkFactor), m_randomShrink(randomShrink){}
    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain, float *scaling_gradient);
    virtual ~ExactExpectedLossCollector() {}
    virtual ScoreComponentCollection getFeatureExpectations() const;

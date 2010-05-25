@@ -18,7 +18,7 @@ namespace Josiah {
     }  
     
     size_t new_thatPos = m_thatPos + m_direction;
-    if (new_thatPos != NOT_FOUND && new_thatPos >= 0 && new_thatPos < m_operator->GetSplitPoints().size()) {
+    if (new_thatPos != NOT_FOUND &&  new_thatPos < m_operator->GetSplitPoints().size()) {
       m_thatPos = new_thatPos;
       return;
     }

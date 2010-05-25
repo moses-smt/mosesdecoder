@@ -31,9 +31,8 @@ void ExpectedLossCollector::collect(Sample& s) {
 float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain, float *scaling_gradient) {
   
 
-  const vector<double>& importanceWeights =  getImportanceWeights();
   
-  ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
+  ScoreComponentCollection feature_expectations = getFeatureExpectations();
 
   MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
   
@@ -52,15 +51,14 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
     fv.MinusEquals(feature_expectations);
     MPI_VERBOSE(2,"DIFF: " << fv)
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
-    MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) << " IF: " << importanceWeights[i] << endl)
-    exp_gain += gain*importanceWeights[i];
-    //VERBOSE(0, "Sample=" << m_samples[i] << ", gain: " << gain << ", imp weights: " << importanceWeights[i] << endl);
-    fv.MultiplyEquals(importanceWeights[i]);
+    MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) <<  endl);
+    exp_gain += gain/N();
+    fv.DivideEquals(N());
     MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
     if (ComputeScaleGradient()) {
-      *scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score) * importanceWeights[i] ;
+        *scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score)/N();
     }
       
   }
@@ -78,8 +76,9 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   if (exp_len) {
     *exp_len = 0;
     for (size_t i = 0; i < N(); ++i) {
-      *exp_len += importanceWeights[i] * m_lengths[i];
+        *exp_len += m_lengths[i];
     }
+    *exp_len /= N();
   }
 
   return exp_gain;
@@ -88,8 +87,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 
 void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {
     //FIXME: This probably does not handle Rao-Blackwellisation correctly.
-  const vector<double>& importanceWeights =  getImportanceWeights();
-  ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
+  ScoreComponentCollection feature_expectations = getFeatureExpectations();
 
   float expectedVF = 0;
   ScoreComponentCollection expected_FVF = feature_expectations;
@@ -98,7 +96,7 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
   //Calculate the expectation of v * f
   for (size_t i = 0; i < N(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
-    fv.MultiplyEquals(importanceWeights[i]);
+    fv.DivideEquals(N());
     expectedVF += fv.InnerProduct(v);
   }
   
@@ -108,7 +106,7 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
     float vf = fv.InnerProduct(v);
     vf -=expectedVF;
     fv.MultiplyEquals(vf);
-    fv.MultiplyEquals(importanceWeights[i]);
+    fv.DivideEquals(N());
     expected_FVF.PlusEquals(fv);   
   }
   
@@ -122,33 +120,30 @@ void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hess
     vf -= expectedVF;
     fv.MultiplyEquals(vf);
     fv.MinusEquals(expected_FVF);
-    fv.MultiplyEquals(importanceWeights[i]);
+    fv.DivideEquals(N());
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
     hessian->PlusEquals(fv);
   }
 
 }
  
-ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations() const {
-    const vector<double>& importanceWeights =  getImportanceWeights();
-    return getFeatureExpectations(importanceWeights);
-}
+
 double ExpectedLossCollector::getExpectedGain() const {
-    const vector<double>& importanceWeights =  getImportanceWeights();
     double exp_gain = 0;
     for (size_t i = 0; i < N(); ++i) {
-        exp_gain += importanceWeights[i]*m_gains[i];
+        exp_gain += m_gains[i];
     }
+    exp_gain /= N();
     return exp_gain;
 }
   
-ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations(const vector<double>& importanceWeights) const {
+ScoreComponentCollection ExpectedLossCollector::getFeatureExpectations() const {
   //do calculation at double precision to try to maintain accuracy
   vector<double> sum(StaticData::Instance().GetTotalScoreComponents());
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
     ScoreComponentCollection fv = m_rbFeatureVectors[i];
     for (size_t j = 0; j < fv.size(); ++j) {
-        sum[j] += fv[j]*importanceWeights[i];
+        sum[j] += fv[j]/m_featureVectors.size();
     }
     //cerr << "fexp: ";// << feature_expectations << endl;
     //copy(sum.begin(),sum.end(),ostream_iterator<double>(cerr," "));
@@ -184,7 +179,7 @@ ScoreComponentCollection ExactExpectedLossCollector::getFeatureExpectations() co
 
 void ExactExpectedLossCollector::ShrinkAndCalcTrueDistribution() {
   //Now shrink
-  size_t newSize = N() * m_shrinkFactor;
+    size_t newSize = (size_t)(N() * m_shrinkFactor);
   if (m_randomShrink) {
     ShrinkRandom(newSize);  
   }
@@ -306,7 +301,6 @@ float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradi
     fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
     MPI_VERBOSE(2,"GAIN: " << gain << " RF: " << getRegularisationGradientFactor(i) << " IF: " << m_exactProbs[i] << endl)
     exp_gain += gain*m_exactProbs[i];
-    //VERBOSE(0, "Sample=" << m_samples[i] << ", gain: " << gain << ", imp weights: " << importanceWeights[i] << endl);
     fv.MultiplyEquals(m_exactProbs[i]);
     MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);

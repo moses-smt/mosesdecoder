@@ -28,13 +28,11 @@ namespace Josiah
   template<class M>
   void MaxCollector<M>::getDistribution(map<const M*,double>& p) const
   {
-    const vector<double>& importanceWeights =  getImportanceWeights();
+      double pevent = 1.0/N();
     
     for (typename map<M,vector<size_t> >::const_iterator i = m_samples.begin(); i != m_samples.end(); ++i) {
       const M* sample = &(i->first);
-      for (vector<size_t>::const_iterator j = i->second.begin(); j != i->second.end(); ++j) {
-        p[sample] += importanceWeights[*j];
-      }
+      p[sample] = i->second.size()*pevent;
     }
     IFVERBOSE(2) {
       float total = 0;
@@ -197,7 +195,7 @@ namespace Josiah
     vector<float> mbrLoss;
     int minMBRLossIdx(-1);
     mbrSize = min(mbrSize,  topNTranslations.size());
-    VERBOSE(0, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
+    VERBOSE(1, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
   
   //Outer loop using only the top #mbrSize samples 
     for(size_t i = 0; i < mbrSize; ++i) {
@@ -252,7 +250,7 @@ namespace Josiah
     vector<float> mbrLoss;
     int minMBRLossIdx(-1);
     size_t mbrSize = translations.size();
-    VERBOSE(0, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
+    VERBOSE(1, "MBR SIZE " << mbrSize << ", all Translations Size " << topNTranslations.size() << endl);
     
     //Outer loop using only the top #mbrSize samples 
     for(size_t i = 0; i < mbrSize; ++i) {
@@ -306,7 +304,7 @@ namespace Josiah
     }
     
     topNsize = topNTranslations.size(); //size of full evidence set
-    size_t evidenceSize = topNsize * shrinkEvidenceRatio; //New size of evidence set
+    size_t evidenceSize = topNsize * (size_t)shrinkEvidenceRatio; //New size of evidence set
     evidenceSize = max(static_cast<size_t>(1), evidenceSize);
     mbrSize = min(mbrSize,  evidenceSize);
 
@@ -331,7 +329,7 @@ namespace Josiah
     //Main random evidence set MBR computation done here
     float bleu(0.0), weightedLoss(0.0), weightedLossCumul(0.0), minMBRLoss(100000);
     int minMBRLossIdx(-1);
-    VERBOSE(0, "MBR SIZE " << mbrSize << ", evidence Size " << evidenceSize << endl);
+    VERBOSE(1, "MBR SIZE " << mbrSize << ", evidence Size " << evidenceSize << endl);
   
     //Outer loop using only the top #mbrSize samples 
     for(size_t i = 0; i < mbrSize; ++i) {
@@ -422,7 +420,7 @@ namespace Josiah
     getNbest(topNTranslations,topNsize);
     
     topNsize = topNTranslations.size(); //size of full evidence set
-    size_t evidenceSize = topNsize * shrinkEvidenceRatio; //New size of evidence set
+    size_t evidenceSize = topNsize * (size_t)shrinkEvidenceRatio; //New size of evidence set
     evidenceSize = max(static_cast<size_t>(1), evidenceSize);
     mbrSize = min(mbrSize,  evidenceSize);
 
@@ -447,7 +445,7 @@ namespace Josiah
     //Main random evidence set MBR computation done here
     float bleu(0.0), weightedLoss(0.0), weightedLossCumul(0.0), minMBRLoss(100000);
     int minMBRLossIdx(-1);
-    VERBOSE(0, "MBR SIZE " << mbrSize << ", evidence Size " << evidenceSize << endl);
+    VERBOSE(1, "MBR SIZE " << mbrSize << ", evidence Size " << evidenceSize << endl);
   
     //Outer loop using only the top #mbrSize samples 
     for(size_t i = 0; i < mbrSize; ++i) {

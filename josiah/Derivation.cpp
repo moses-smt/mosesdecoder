@@ -64,7 +64,9 @@ namespace Josiah {
   }
   
   int Derivation::getTargetSentenceSize() const { //shortcut, extract tgt size from feature vector
-    return - m_featureValues.GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer());
+      std::vector<std::string> words;
+      getTargetSentence(words);
+      return words.size();
   }
 
   void Derivation::getTargetSentence(std::vector<std::string>& targetWords ) const {

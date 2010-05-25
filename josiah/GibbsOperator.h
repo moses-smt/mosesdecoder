@@ -93,6 +93,7 @@ namespace Josiah {
           else 
             return i;
         }
+        assert(0);
       }
       
     private:
@@ -107,7 +108,7 @@ namespace Josiah {
   /** Abstract base class for gibbs operators **/
   class GibbsOperator {
     public:
-        GibbsOperator(const std::string& name, float prob) : m_name(name), T(1), m_gf(NULL), m_useApproxDocBleu(false), m_OpIterator(NULL), m_prob(prob), m_acceptor(NULL), m_mhacceptor(NULL) {}
+        GibbsOperator(const std::string& name, float prob) : m_name(name), T(1),m_OpIterator(NULL),   m_prob(prob),m_gf(NULL), m_acceptor(NULL), m_mhacceptor(NULL), m_useApproxDocBleu(false) {}
         /**
           * Run an iteration of the Gibbs sampler, updating the hypothesis.
           **/

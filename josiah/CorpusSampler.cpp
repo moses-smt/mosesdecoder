@@ -189,8 +189,7 @@ void CorpusSamplerCollector::AggregateSuffStats(int rank) {
 #endif
   
 float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain, float *scaling_gradient) {
-  vector<double> importanceWeights(m_featureVectors.size(), 1.0/m_featureVectors.size());
-  ScoreComponentCollection feature_expectations = getFeatureExpectations(importanceWeights);
+  ScoreComponentCollection feature_expectations = getFeatureExpectations();
     
   MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
   *scaling_gradient = 0.0;
@@ -199,6 +198,7 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   ScoreComponentCollection grad;
   double exp_gain = 0;
   float gain = 0.0;
+  double iweight = 1.0 / m_featureVectors.size();
   for (size_t i = 0; i < m_featureVectors.size() ; ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
     MPI_VERBOSE(2,"FV: " << fv)
@@ -207,8 +207,8 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
     MPI_VERBOSE(2,"DIFF: " << fv)
     fv.MultiplyEquals(gain);
     MPI_VERBOSE(2,"GAIN: " << gain  << endl)
-    exp_gain += gain*importanceWeights[i];
-    fv.MultiplyEquals(importanceWeights[i]);
+    exp_gain += gain*iweight;
+    fv.MultiplyEquals(iweight);
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
   }
@@ -239,13 +239,14 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   return exp_gain;
 }
   
-ScoreComponentCollection CorpusSamplerCollector::getFeatureExpectations(const vector<double>& importanceWeights) const {
+ScoreComponentCollection CorpusSamplerCollector::getFeatureExpectations() const {
   //do calculation at double precision to try to maintain accuracy
   vector<double> sum(StaticData::Instance().GetTotalScoreComponents());
+  double iweight = 1.0/m_featureVectors.size();
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
     ScoreComponentCollection fv = m_featureVectors[i];
     for (size_t j = 0; j < fv.size(); ++j) {
-      sum[j] += fv[j]*importanceWeights[i];
+      sum[j] += fv[j]*iweight;
     }
   }
   vector<float> truncatedSum(sum.size());

@@ -242,27 +242,10 @@ namespace Josiah {
   }
   
   void Sampler::collectSample(Sample& sample) {
-    //currently feature_values contains the approx scores. The true score = imp score + approx score
-    //importance weight
-    ScoreComponentCollection importanceScores;
-    for (Josiah::feature_vector::const_iterator j = sample.extra_features().begin(); j != sample.extra_features().end(); ++j) {
-      (*j)->assignImportanceScore(importanceScores);
-    }
-    const vector<float> & weights = StaticData::Instance().GetAllWeights();
-    //copy(weights.begin(), weights.end(), ostream_iterator<float>(cerr," "));
-    //cerr << endl;
-    float importanceWeight  = importanceScores.InnerProduct(weights);
-    VERBOSE(2, "Importance scores: " << importanceScores << endl);
-    VERBOSE(2, "Total importance weight: " << importanceWeight << endl);
-    
-    sample.UpdateFeatureValues(importanceScores);
     for (size_t j = 0; j < m_collectors.size(); ++j) {
-      m_collectors[j]->addSample(sample,importanceWeight);
+      m_collectors[j]->addSample(sample);
     }
-    //set sample back to be the approx score
-    ScoreComponentCollection minusDeltaFV;
-    minusDeltaFV.MinusEquals(importanceScores);
-    sample.UpdateFeatureValues(minusDeltaFV);
-    sample.ResetConditionalFeatureValues();
+    
+    sample.ResetConditionalFeatureValues(); //for Rao-Blackellisation
   }
 }

@@ -40,9 +40,6 @@ class DiscriminativeLMBigramFeature : public FeatureFunction {
         virtual void init(const Sample& sample); 
         /** Update the target words.*/
         virtual void updateTarget();
-        virtual void assignImportanceScore(ScoreComponentCollection& scores) {
-            scores.Assign(&getScoreProducer(), m_defaultImportanceWeights);
-        }
         
         /** Assign the total score of this feature on the current hypo */
         virtual void assignScore(ScoreComponentCollection& scores);
@@ -65,7 +62,6 @@ class DiscriminativeLMBigramFeature : public FeatureFunction {
         /** Score change due to filling in the gapPhrase in the gap.*/
         void doUpdate(const Phrase& gapPhrase, const TargetGap& gap);
         
-        std::vector<float> m_defaultImportanceWeights;
         std::map<std::string, std::map<std::string, size_t> > m_bigrams;
         const Sample* m_sample;
         std::vector<Word> m_targetWords;

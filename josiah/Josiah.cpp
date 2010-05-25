@@ -708,8 +708,8 @@ int main(int argc, char** argv) {
     sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer,raoBlackwell);  
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     if (doMH) {
-      VERBOSE(0, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 
-      VERBOSE(0, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 
+      VERBOSE(1, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 
+      VERBOSE(1, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 
     }
     
     timer.check("Outputting results");
@@ -769,7 +769,7 @@ int main(int argc, char** argv) {
         pair<const Derivation*, float> map_soln = derivationCollector->getMAP();
         vector<string> sentence;
         map_soln.first->getTargetSentence(sentence);
-        VERBOSE(0, "MAP Soln, model score [" << map_soln.second << "]" << endl)
+        VERBOSE(1, "MAP Soln, model score [" << map_soln.second << "]" << endl)
         copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
         (*out) << endl << flush;
       }

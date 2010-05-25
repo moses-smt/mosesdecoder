@@ -610,8 +610,8 @@ int main(int argc, char** argv) {
     }
     sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer);  
     if (doMH) {
-      VERBOSE(0, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 
-      VERBOSE(0, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 
+      VERBOSE(1, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 
+      VERBOSE(1, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 
     }
     
     VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
