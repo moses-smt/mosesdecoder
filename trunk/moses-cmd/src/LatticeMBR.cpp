@@ -129,7 +129,7 @@ void LatticeMBRSolution::CalcScore(map<Phrase, float>& finalNgramScores, const v
 
 
 void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const Hypothesis* > > & outgoingHyps, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
-                    const vector< float> & estimatedScores, const Hypothesis* bestHypo, size_t edgeDensity) {
+                    const vector< float> & estimatedScores, const Hypothesis* bestHypo, size_t edgeDensity, float scale) {
   
   //Need hyp 0 in connectedHyp - Find empty hypothesis
   VERBOSE(2,"Pruning lattice to edge density " << edgeDensity << endl);
@@ -191,7 +191,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
     // is its best predecessor already included ?
     if (survivingHyps.find(currHyp->GetPrevHypo()) != survivingHyps.end()) { //yes, then add an edge
       vector <Edge>& edges = incomingEdges[currHyp];
-      Edge winningEdge(currHyp->GetPrevHypo(),currHyp,currHyp->GetScore() - currHyp->GetPrevHypo()->GetScore(),currHyp->GetTargetPhrase());
+      Edge winningEdge(currHyp->GetPrevHypo(),currHyp,scale*(currHyp->GetScore() - currHyp->GetPrevHypo()->GetScore()),currHyp->GetTargetPhrase());
       edges.push_back(winningEdge);
       ++numEdgesCreated;
     }
@@ -205,7 +205,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         const Hypothesis* loserPrevHypo = loserHypo->GetPrevHypo();
         if (survivingHyps.find(loserPrevHypo) != survivingHyps.end()) { //found it, add edge
           double arcScore = loserHypo->GetScore() - loserPrevHypo->GetScore(); 
-          Edge losingEdge(loserPrevHypo, currHyp, arcScore, loserHypo->GetTargetPhrase());
+          Edge losingEdge(loserPrevHypo, currHyp, arcScore*scale, loserHypo->GetTargetPhrase());
           vector <Edge>& edges = incomingEdges[currHyp];
           edges.push_back(losingEdge);  
           ++numEdgesCreated;
@@ -227,7 +227,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         //Curr Hyp can be : a) the best predecessor  of succ b) or an arc attached to succ
         if (succHyp->GetPrevHypo() == currHyp) { //best predecessor
           vector <Edge>& succEdges = incomingEdges[succHyp];
-          Edge succWinningEdge(currHyp, succHyp, succHyp->GetScore() - currHyp->GetScore(), succHyp->GetTargetPhrase());
+          Edge succWinningEdge(currHyp, succHyp, scale*(succHyp->GetScore() - currHyp->GetScore()), succHyp->GetTargetPhrase());
           succEdges.push_back(succWinningEdge);
           survivingHyps.insert(succHyp);
           ++numEdgesCreated;
@@ -243,7 +243,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
             if (loserPrevHypo == currHyp) { //found it
               vector <Edge>& succEdges = incomingEdges[succHyp];
               double arcScore = loserHypo->GetScore() - currHyp->GetScore(); 
-              Edge losingEdge(currHyp, succHyp, arcScore, loserHypo->GetTargetPhrase());
+              Edge losingEdge(currHyp, succHyp,scale* arcScore, loserHypo->GetTargetPhrase());
               succEdges.push_back(losingEdge);  
               ++numEdgesCreated;
             }
@@ -272,7 +272,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
 }
     
 void calcNgramExpectations(Lattice & connectedHyp, map<const Hypothesis*, vector<Edge> >& incomingEdges, 
-                         float scale, map<Phrase, float>& finalNgramScores, bool posteriors) {
+                         map<Phrase, float>& finalNgramScores, bool posteriors) {
   
   sort(connectedHyp.begin(),connectedHyp.end(),ascendingCoverageCmp); //sort by increasing source word cov
   
@@ -382,10 +382,10 @@ void calcNgramExpectations(Lattice & connectedHyp, map<const Hypothesis*, vector
     }
   }
   
-  Z *= scale;  //scale the score
+  //Z *= scale;  //scale the score
   
   for (map<Phrase, float>::iterator finalScoresIt = finalNgramScores.begin();  finalScoresIt != finalNgramScores.end(); ++finalScoresIt) {
-    finalScoresIt->second =  finalScoresIt->second * scale - Z;
+    finalScoresIt->second =  finalScoresIt->second - Z;
     IFVERBOSE(2) {
       VERBOSE(2,finalScoresIt->first << " [" << finalScoresIt->second << "]" << endl);
     }
@@ -504,8 +504,8 @@ void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList,
     map<const Hypothesis*, vector<Edge> > incomingEdges;
     vector< float> estimatedScores;
     manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor());
-    calcNgramExpectations(connectedList, incomingEdges, staticData.GetMBRScale(), ngramPosteriors,true);
+    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor(),staticData.GetMBRScale());
+    calcNgramExpectations(connectedList, incomingEdges, ngramPosteriors,true);
     
     vector<float> mbrThetas = staticData.GetLatticeMBRThetas();
     float p = staticData.GetLatticeMBRPrecision();
@@ -561,8 +561,8 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
     map<const Hypothesis*, vector<Edge> > incomingEdges;
     vector< float> estimatedScores;
     manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor());
-    calcNgramExpectations(connectedList, incomingEdges, staticData.GetMBRScale(), ngramExpectations,false);
+    pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores, manager.GetBestHypothesis(), staticData.GetLatticeMBRPruningFactor(),staticData.GetMBRScale());
+    calcNgramExpectations(connectedList, incomingEdges, ngramExpectations,false);
     
     //expected length is sum of expected unigram counts
     //cerr << "Thread " << pthread_self() <<  " Ngram expectations size: " << ngramExpectations.size() << endl;
@@ -573,7 +573,7 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
         //    ref_iter->second << endl;
         if (ref_iter->first.GetSize() == 1) {
             ref_length += exp(ref_iter->second);
-            //cerr << "Expected for " << ref_iter->first << " is " << exp(ref_iter->second) << endl;
+        //    cerr << "Expected for " << ref_iter->first << " is " << exp(ref_iter->second) << endl;
         }
     }
     
