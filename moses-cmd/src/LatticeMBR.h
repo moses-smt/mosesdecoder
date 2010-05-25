@@ -132,12 +132,12 @@ struct LatticeMBRSolutionComparator {
 };
 
 void pruneLatticeFB(Lattice & connectedHyp, std::map < const Hypothesis*, std::set <const Hypothesis* > > & outgoingHyps, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges, 
-                    const std::vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity);
+                    const std::vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity,float scale);
 
 //Use the ngram scores to rerank the nbest list, return at most n solutions
 void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, std::vector<LatticeMBRSolution>& solutions, size_t n);
 //calculate expectated ngram counts, clipping at 1 (ie calculating posteriors) if posteriors==true.
-void calcNgramExpectations(Lattice & connectedHyp, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges, float scale, std::map<Phrase,
+void calcNgramExpectations(Lattice & connectedHyp, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges, std::map<Phrase,
                             float>& finalNgramScores, bool posteriors);
 void GetOutputFactors(const TrellisPath &path, std::vector <Word> &translation);
 void extract_ngrams(const std::vector<Word >& sentence, std::map < Phrase, int >  & allngrams);
