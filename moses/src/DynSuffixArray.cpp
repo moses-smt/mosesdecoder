@@ -66,7 +66,7 @@ int DynSuffixArray::Rank(unsigned word, unsigned idx) {
 int DynSuffixArray::F_firstIdx(unsigned word) {
   // return index of first row where word is found in m_F
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
-  cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
+  //cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
   if((low >= m_F->size()) || (m_F->at(low) < word))
     return -1; 
   else 
