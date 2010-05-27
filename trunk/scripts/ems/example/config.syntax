@@ -288,6 +288,12 @@ hierarchical-rule-set = true
 #
 extract-settings = "--MinHoleSource 1 --NonTermConsecSource"
 
+### unknown word labels (target syntax only)
+# enables use of unknown word labels during decoding
+# label file is generated during rule extraction
+#
+#use-unknown-word-labels = true
+
 ### if phrase extraction should be skipped,
 # point to stem for extract files
 #
