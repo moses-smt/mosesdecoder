@@ -270,8 +270,6 @@ my $___EXTRACT_FILE = $___MODEL_DIR."/extract";
 $___EXTRACT_FILE = $_EXTRACT_FILE if $_EXTRACT_FILE;
 my $___GLUE_GRAMMAR_FILE = $___MODEL_DIR."/glue-grammar";
 $___GLUE_GRAMMAR_FILE = $_GLUE_GRAMMAR_FILE if $_GLUE_GRAMMAR_FILE;
-my $___UNKNOWN_WORD_LABEL_FILE = $___MODEL_DIR."/unknown-word-label";
-$___UNKNOWN_WORD_LABEL_FILE = $_UNKNOWN_WORD_LABEL_FILE if $_UNKNOWN_WORD_LABEL_FILE;
 
 my $___CONFIG = $___MODEL_DIR."/moses.ini";
 $___CONFIG = $_CONFIG if $_CONFIG;
@@ -1193,7 +1191,7 @@ sub extract_phrase {
     {
         $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
-        $cmd .= " --UnknownWordLabel $___UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX;
+        $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
         $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
         $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
@@ -1652,6 +1650,7 @@ sub create_ini {
   print INI "\n# word penalty\n[weight-w]\n-1\n\n";
 
   if ($_HIERARCHICAL) {
+    print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
     print INI "[cube-pruning-pop-limit]\n1000\n\n";
     print INI "[glue-rule-type]\n0\n\n";
     print INI "[non-terminals]\nX\n\n";

@@ -1613,14 +1613,11 @@ sub define_training_extract_phrases {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
 
-      if (&get("GENERAL:output-parser"))
-      {
-	  my $unknown_word_label = &get("TRAINING:unknown-word-label");
-	  $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model","")) 
-	      unless $unknown_word_label;
+      if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
 	  $cmd .= "-unknown-word-label $unknown_word_label ";
       }
-    }    
+    }
 
     my $extract_settings = &get("TRAINING:extract-settings");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
@@ -1696,12 +1693,9 @@ sub define_training_create_config {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
-    
-    if (&get("GENERAL:output-parser"))
-    {
-	my $unknown_word_label = &get("TRAINING:unknown-word-label");
-	$unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version) 
-	    unless $unknown_word_label;
+
+    if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
     }
 
