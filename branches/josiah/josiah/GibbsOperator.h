@@ -116,7 +116,6 @@ namespace Josiah {
         virtual void scan(Sample& sample, const TranslationOptionCollection& toc) = 0;
         const std::string& name() const {return m_name;}
         void SetAnnealingTemperature(const double t);
-        void Quench() ;
         void SetGainFunction(const GainFunction *gf) {m_gf = gf;}
         const GainFunction* GetGainFunction() {return m_gf;}
         int chooseTargetAssignment(const std::vector<TranslationDelta*>& deltas);

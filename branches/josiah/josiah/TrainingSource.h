@@ -37,25 +37,14 @@ class ExpectedBleuTrainer : public InputSource {
        const float exp_gain,
        const float unreg_exp_gain,
        const Moses::ScoreComponentCollection& grad,
-       Decoder* decoder, const float scaling_gradient);
-  void IncorporateGradient(
-                           const float trans_len,
-                           const float ref_len,
-                           const float exp_gain,
-                           const float unreg_exp_gain,
-                           const Moses::ScoreComponentCollection& grad,
-                           Decoder* decoder, 
-                           const Moses::ScoreComponentCollection& hessianV,
-                           const float scaling_gradient);
+       Decoder* decoder);
   void IncorporateCorpusGradient(
                                                       const float trans_len,
                                  const float ref_len,
                                                       const float exp_gain,
                                                       const float unreg_exp_gain,
                                  const Moses::ScoreComponentCollection& grad,
-                                 Decoder* decoder, const float scaling_gradient) ;
-  void SetComputeScaleGradient(bool scale_gradient) {compute_scale_gradient = scale_gradient;}
-  float GetCurrQuenchingTemp() {return quenching_temp;}
+                                 Decoder* decoder) ;
   int GetCurr() { return cur;}
   int GetCurrEnd() { return cur_end;}
 
@@ -67,7 +56,6 @@ class ExpectedBleuTrainer : public InputSource {
   std::vector<std::string> corpus;
   bool keep_going;
   Moses::ScoreComponentCollection gradient;
-  Moses::ScoreComponentCollection hessianV_;
   
   std::vector<int> order;
   boost::mt19937 rng;
@@ -79,12 +67,8 @@ class ExpectedBleuTrainer : public InputSource {
   float total_exp_len;
   float total_exp_gain;
   float total_unreg_exp_gain;
-  float total_scaling_gradient;
-  float total_scaling_hessianV;
   
   int tlc;
-  bool compute_scale_gradient;
-  float quenching_temp;
   int weight_dump_freq;
   std::string weight_dump_stem;
 };

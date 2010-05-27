@@ -68,11 +68,6 @@ GibbsOperator::~GibbsOperator() {
 void GibbsOperator::SetAnnealingTemperature(const double t) {
   m_acceptor = new FixedTempAcceptor(t);    
 }  
-
-void GibbsOperator::Quench() {
-  delete m_acceptor;
-  m_acceptor = NULL;    
-}  
   
   
 void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta* noChangeDelta, Sample& sample) {

@@ -25,8 +25,7 @@ class ExpectedLossCollector : public SampleCollector {
     virtual ~ExpectedLossCollector() {}
     virtual void collect(Sample& sample);
     // returns the expected gain and expected sentence length
-    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain, float *scaling_gradient);
-    virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v);
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain);
     void addGainFunction (const GainFunction* f) {g.push_back(f);}
     virtual ScoreComponentCollection getFeatureExpectations() const;
     double getExpectedGain() const;
@@ -51,7 +50,7 @@ class ExactExpectedLossCollector : public ExpectedLossCollector {
  public:
    ExactExpectedLossCollector(const std::string& src, float shrinkFactor, bool randomShrink, const GainFunction*  f) : 
        ExpectedLossCollector(f), m_srcLine(src), m_shrinkFactor(shrinkFactor), m_randomShrink(randomShrink){}
-   virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain, float *scaling_gradient);
+   virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float* unreg_gain);
    virtual ~ExactExpectedLossCollector() {}
    virtual ScoreComponentCollection getFeatureExpectations() const;
  private:

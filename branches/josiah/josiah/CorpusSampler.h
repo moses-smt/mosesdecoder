@@ -36,8 +36,7 @@ namespace Josiah {
     virtual ~CorpusSamplerCollector() {}
     virtual void collect(Sample& sample);
     virtual void resample(int);
-    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float * unreg_exp_gain, float *scaling_gradient);
-    virtual void UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {}
+    virtual float UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float * unreg_exp_gain);
 #ifdef MPI_ENABLED  
     virtual void AggregateSamples(int);
 #endif

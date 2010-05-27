@@ -77,10 +77,7 @@ namespace Josiah {
         }
       }
       if (f) VERBOSE(1,endl);
-      if (m_as) {
-        for (size_t j = 0; j < m_operators.size(); ++j)
-          m_operators[j]->Quench();
-      }
+      
       
       for (size_t j = 0; j < m_operators.size(); ++j) {
         m_operators[j]->addSampleAcceptor(acceptor);
@@ -190,10 +187,7 @@ namespace Josiah {
       
       //Done with burn-in, let's get ready for proper sampling
       if (f) VERBOSE(1,endl);
-      if (m_as) {
-        for (size_t j = 0; j < m_operators.size(); ++j)
-          m_operators[j]->Quench();
-      }
+      
       
       for (size_t j = 0; j < m_operators.size(); ++j) {
         m_operators[j]->addSampleAcceptor(acceptor);
