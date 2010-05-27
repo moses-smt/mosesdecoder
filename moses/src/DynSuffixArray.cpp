@@ -67,12 +67,10 @@ int DynSuffixArray::F_firstIdx(unsigned word) {
   // return index of first row where word is found in m_F
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
   //cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
-  if((low >= m_F->size()) || (m_F->at(low) < word))
+  if(low >= m_F->size())
     return -1; 
   else 
     return low;
-  //if(m_F->at(low) == word) return low;
-  //else return -1;
 }
 
 /* uses rank() and c() to obtain the LastFirstFunc function */
@@ -82,12 +80,9 @@ int DynSuffixArray::LastFirstFunc(unsigned L_idx) {
   unsigned word = m_L->at(L_idx);
   if((fIdx = F_firstIdx(word)) != -1) { 
     //cerr << "fidx + Rank(" << word << "," << L_idx << ") = " << fIdx << "+" << Rank(word, L_idx) << endl;
-    return fIdx + Rank(word, L_idx);
+    fIdx += Rank(word, L_idx);
   }
-  else {
-    //cerr << "returning -1\n";
-    return -1;
-  }
+  return fIdx;
 }
 
 void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {

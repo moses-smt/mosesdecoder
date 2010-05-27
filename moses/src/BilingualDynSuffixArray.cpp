@@ -348,7 +348,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		int sntIndex = sntIndexes.at(snt); // get corpus index for sentence
 		if(sntIndex == -1) continue;	// bad flag set by GetSntIndexes()
 		ExtractPhrases(sntIndex, wrdIndices[snt], sourceSize, phrasePairs); 
-		//cerr << "extracted " << phrasePairs.size() << endl;
+		cerr << "extracted " << phrasePairs.size() << endl;
 		totalTrgPhrases += phrasePairs.size(); // keep track of count of each extracted phrase pair		
 		std::vector<PhrasePair*>::iterator iterPhrasePair;
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair) {
@@ -383,6 +383,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	for(ritr = phraseScores.rbegin(); ritr != phraseScores.rend(); ++ritr) {
 		Scores scoreVector = ritr->first;
 		TargetPhrase *targetPhrase = GetMosesFactorIDs(*ritr->second);
+    cerr << *targetPhrase << endl;
 		target.push_back( make_pair( scoreVector, targetPhrase));
 
 		if(target.size() == maxReturn) break;
@@ -424,6 +425,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   std::istringstream sss(source), sst(target), ssa(alignment);
   string word;
   const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
+  cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
   m_vocab->MakeOpen();
   while(sss >> word) { 
     srcFactor.push_back(m_vocab->GetWordID(word));  // get vocab id
