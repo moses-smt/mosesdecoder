@@ -14,7 +14,7 @@ namespace Moses {
 	const Word Vocab::InitSpecialWord( const string& word_str)
 	{
 		FactorList factors;
-		factors.push_back( 0); // store the special word string as the first factor
+		factors.push_back(0); // store the special word string as the first factor
 		Word word;
 		// define special word as Input word with one factor and isNonTerminal=false
 		word.CreateFromString( Input, factors, word_str, false ); // Input is enum defined in ../typedef.h
@@ -29,7 +29,7 @@ namespace Moses {
 		FactorList factors;
 		factors.push_back(0); 
 		Word word;
-		word.CreateFromString(Input, factors, word_str, true); 
+		word.CreateFromString(Input, factors, word_str, false); 
     return GetWordID(word);
   }
 	
@@ -46,7 +46,7 @@ namespace Moses {
 	wordID_t Vocab::GetWordID(const Word& word) 
 	{
 		// get id and possibly add to vocab 
-		if (m_words2ids.find(word) == m_words2ids.end())
+		if(m_words2ids.find(word) == m_words2ids.end()) {
 			if (!m_closed) {
 				wordID_t id = m_words2ids.size() + 1;
 				m_ids2words[id] = word;
@@ -56,9 +56,10 @@ namespace Moses {
 			else {
 				return m_kOOVWordID;
 			}
+	  }
 		wordID_t id = m_words2ids[word];
 		return id;
-	}
+  }
 		
 	Word& Vocab::GetWord(wordID_t id) 
 	{
