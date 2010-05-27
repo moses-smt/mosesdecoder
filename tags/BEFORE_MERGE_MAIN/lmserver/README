@@ -1,0 +1,31 @@
+This software is based on pieces of the memcached server.
+
+To start an LM server:
+
+  ./lmserver -x /tmp/moses-reg-test-data-2/lm/europarl.en.srilm.gz -o 3
+
+-o specifies the order, -x specifies the file.
+
+
+The following was taken from the memcached README:
+
+Dependencies:
+
+   -- libevent, http://www.monkey.org/~provos/libevent/ (libevent-dev)
+
+If using Linux, you need a kernel with epoll.  Sure, libevent will
+work with normal select, but it sucks.
+
+epoll isn't in Linux 2.4 yet, but there's a backport at:
+
+    http://www.xmailserver.org/linux-patches/nio-improve.html
+     
+You want the epoll-lt patch (level-triggered).
+
+If you're using MacOS, you'll want libevent 1.1 or higher to deal with 
+a kqueue bug.
+
+The memcached website is at:
+
+    http://www.danga.com/memcached/
+

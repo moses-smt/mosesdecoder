@@ -1,0 +1,371 @@
+\RequirePackage{pstricks}
+\RequirePackage{pst-node}
+\RequirePackage{pst-tree}
+\RequirePackage{pst-coil}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% DEPENDENCY TREES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\dtree@nodes}{}
+\newcommand{\dtree@edges}{}
+\newcommand{\dtree@arcs}{}
+\newcommand{\dtree@colseps}{}
+
+\newcommand{\dtree@mappend}[2]{%
+  \expandafter\def\expandafter#1\expandafter{#1#2}}
+
+%% \dtreeNode{COL}{ROW}{WORD}{BOX}{LABEL}
+\newcommand{\dtreeNode}[5]{%
+  \dtree@mappend{\dtree@nodes}{\dtree@lookup{#1}{#2}{#3}{#4}{#5}}\ignorespaces}
+
+%% \dtreeEdge{COL1}{COL2}{LABEL}
+\newcommand{\dtreeEdge}[3]{%
+  \ifnum#1>#2\relax
+    \dtree@mappend{\dtree@edges}{\dtree@lookup{#2}{#1}{#3}}%
+  \else
+    \dtree@mappend{\dtree@edges}{\dtree@lookup{#1}{#2}{#3}}%
+  \fi\ignorespaces}
+
+%% \dtreeArc{COL1}{COL2}
+\newcommand{\dtreeArc}[2]{%
+  \ifnum#1>#2\relax
+    \dtree@mappend{\dtree@arcs}{\dtree@lookup{#1}{#2}{240}}%
+  \else
+    \dtree@mappend{\dtree@arcs}{\dtree@lookup{#1}{#2}{60}}%
+  \fi\ignorespaces}
+
+%% \dtreeColsep{COL}{LEN}
+%% \dtreeExtraColsep{COL}{LEN}
+\newcommand{\dtreeColsep}[2]{%
+  \@tempcnta=#1\relax
+  \@tempdimb=#2\relax
+  \edef\@temp{\noexpand\dtree@mappend{\noexpand
+    \dtree@colseps}{\noexpand\dtree@lookup
+      {\the\@tempcnta}{\the\@tempdimb}}}%
+  \@temp\ignorespaces}
+\newcommand{\dtreeExtraColsep}[2]{%
+  \@tempcnta=#1\relax
+  \@tempdimb=#2\relax
+  \advance\@tempdimb\dtreeColsep
+  \edef\@temp{\noexpand\dtree@mappend{\noexpand
+    \dtree@colseps}{\noexpand\dtree@lookup
+      {\the\@tempcnta}{\the\@tempdimb}}}%
+  \@temp\ignorespaces}
+
+\newcount\dtree@nrows \newcount\dtree@row
+\newcount\dtree@ncols \newcount\dtree@col
+\newcount\dtree@count \dtree@count=\z@
+
+\newtoks\dtree@toks
+\newcommand{\dtree@save}[1]{%
+  \expandafter\dtree@toks\expandafter{%
+  \the\dtree@toks#1}}
+
+\newif\ifdtreeframed \dtreeframedfalse
+
+\newenvironment{dtree}{%
+  \def\dtree@nodes{}%
+  \def\dtree@edges{}%
+  \def\dtree@arcs{}%
+}{%
+  %% determine the number of rows and columns
+  \dtree@nrows\z@
+  \dtree@ncols\z@
+  \let\dtree@lookup\dtree@countRowsAndCols
+  \dtree@nodes
+  %% the dtree prefix is for unique pstricks labels
+  \global\advance\dtree@count\@ne
+  \edef\dtree@prefix{DTREE\the\dtree@count}%
+  %% construct the tabular preamble
+  \def\dtree@sep{@{}}%
+  \dtree@toks{}\ifdtreeframed\dtree@save{|@{\hspace{\arraycolsep}}}\fi
+  \dtree@col\z@
+  \@whilenum\dtree@col<\dtree@ncols\do{%
+    \advance\dtree@col\@ne
+    \expandafter\dtree@save\expandafter{\dtree@sep c}%
+    %% compute the next \dtree@sep
+    \def\dtree@sep{@{\hskip\dtreeColsep}}%
+    \let\dtree@lookup\dtree@getColsep
+    \dtree@colseps
+  }%
+  \ifdtreeframed\dtree@save{@{\hspace{\arraycolsep}}|}\fi
+  \dtree@save{@{}}%
+  %% start the tabular env
+  \edef\@temp{\noexpand\begin{tabular}{\the\dtree@toks}%
+    \ifdtreeframed\noexpand\hline\fi}%
+  \@temp
+  %% for each row insert the appropriate boxes
+  \global\dtree@row\z@
+  \@whilenum\dtree@row<\dtree@nrows\do{%
+    %% the user numbers rows from 1 (not 0)
+    \global\advance\dtree@row\@ne
+    %% for each col, check if we need to insert a box
+    \global\dtree@col\z@
+    \@whilenum\dtree@col<\dtree@ncols\do{%
+      %% cols also numbered from 1
+      \global\advance\dtree@col\@ne
+      %% find the entry for this (col,row)
+      \def\dtree@gotWord{}%
+      \def\dtree@gotBox{}%
+      \@dtree@foundfalse
+      \let\dtree@lookup\dtree@getBox
+      \dtree@nodes
+      \if@dtree@found
+        \ifx\dtree@gotBox\@empty
+          \edef\@temp{\noexpand\@dtreeEmptyBox
+            {\dtree@prefix}{\the\dtree@col}}%
+        \else
+          \expandafter\@temptokena\expandafter{\dtree@gotBox}%
+          \edef\@temp{\noexpand\@dtreeBox
+            {\dtree@prefix}{\the\dtree@col}{\the\@temptokena}}%
+        \fi
+      \else
+        \def\@temp{\dtree@maybeamp{\dtree@col}}%
+      \fi
+      \@temp
+    }%
+    \vrule height\dtreeRowHeight width0pt\relax\\% end of row
+  }%
+  %% add the last row of words
+  \global\dtree@col\z@
+  \@whilenum\dtree@col<\dtree@ncols\do{%
+    \global\advance\dtree@col\@ne
+    \@dtree@foundfalse
+    \def\dtree@gotWord{}%
+    \def\dtree@gotBox{}%
+    \let\dtree@lookup\dtree@getCol
+    \dtree@nodes
+    \expandafter\@temptokena\expandafter{\dtree@gotWord}%
+    \edef\@temp{\noexpand\@dtreeWord
+      {\dtree@prefix}{\the\dtree@col}{\the\@temptokena}}%
+    \@temp
+  }%
+
+%%
+  %% add the row of node indices
+%  \\% end of row
+%  \global\dtree@col\z@
+%  \@whilenum\dtree@col<\dtree@ncols\do{%
+%    \global\advance\dtree@col\@ne
+%    \@dtree@foundfalse
+%    \def\dtree@gotWord{}%
+%    \def\dtree@gotBox{}%
+%    \let\dtree@lookup\dtree@getCol
+%    \dtree@nodes
+%    \expandafter\@temptokena\expandafter{\dtree@gotWord}%
+%    \edef\@temp{\noexpand\@dtreeNodeIndex
+%      {\the\dtree@count}{\the\dtree@col}}%
+%    \@temp
+%  }%
+%%
+
+  %% end the tabular environment
+  \vrule height\dtreeBottomRowHeight width0pt\relax
+  \ifdtreeframed\def\@temp{\\\hline}\expandafter\@temp\fi
+  \end{tabular}%
+  %% draw vertical edges
+  \global\dtree@col\z@
+  \@whilenum\dtree@col<\dtree@ncols\do{%
+    \global\advance\dtree@col\@ne
+    \@dtree@foundfalse
+    \def\dtree@gotRow{}%
+    \def\dtree@gotLabel{}%
+    \let\dtree@lookup\dtree@getCol
+    \dtree@nodes
+    \ifx\dtree@gotRow\@empty\else
+      \expandafter\@temptokena\expandafter{\dtree@gotLabel}%
+      \edef\@temp{\noexpand\dtreeDrawVedge
+        {\dtree@prefix B\the\dtree@col}%
+        {\dtree@prefix W\the\dtree@col}%
+        {\the\@temptokena}%
+      }%
+      \@temp
+    \fi
+  }%
+  %% draw other edges
+  \let\dtree@lookup\dtree@draw@edge
+  \dtree@edges
+  \ignorespaces
+  %% draw arcs
+  \let\dtree@lookup\dtree@draw@arc
+  \dtree@arcs
+  \ignorespaces
+}
+
+\newdimen\dtreeRowHeight \dtreeRowHeight=14pt\relax
+\newdimen\dtreeBottomRowHeight \dtreeBottomRowHeight=40pt\relax
+\newdimen\dtreeColsep \dtreeColsep=10pt\relax
+
+\newcommand{\dtree@countRowsAndCols}[5]{%
+  \ifnum0#1>\dtree@ncols \dtree@ncols=#1\relax\fi
+  \ifnum0#2>\dtree@nrows \dtree@nrows=#2\relax\fi}
+
+\newif\if@dtree@found
+
+\newcommand{\dtree@getBox}[5]{%
+  \ifnum#1=\dtree@col
+    \ifnum0#2=\dtree@row
+      \@dtree@foundtrue
+      \def\dtree@gotWord{#3}%
+      \def\dtree@gotBox{#4}%
+    \fi
+  \fi}
+
+\newcommand{\dtree@getCol}[5]{%
+  \ifnum#1=\dtree@col
+    \@dtree@foundtrue
+    \def\dtree@gotRow{#2}%
+    \def\dtree@gotWord{#3}%
+    \def\dtree@gotBox{#4}%
+    \def\dtree@gotLabel{#5}%
+  \fi}
+
+\newcommand{\dtree@getColsep}[2]{
+  \ifnum#1=\dtree@col
+    \def\dtree@sep{@{\hskip#2}}%
+  \fi}
+
+\def\dtree@amp{&}
+\newcommand{\dtree@maybeamp}[1]{%
+  \ifnum#1>\@ne\expandafter\dtree@amp\fi}
+
+%% \@dtreeEmptyBox{PREFIX}{COL}
+\newcommand{\@dtreeEmptyBox}[3]{%
+  \dtree@maybeamp{#2}%
+  \dtreeEmptyBox{#1B#2}{#2}}
+
+%% \dtreeEmptyBox{NAME}{COL}
+\newcommand{\dtreeEmptyBox}[2]{\fnode[framesize=7pt]{#1}}
+
+%% \@dtreeBox{PREFIX}{COL}{TEXT}
+\newcommand{\@dtreeBox}[3]{%
+  \dtree@maybeamp{#2}%
+  \dtreeBox{#1B#2}{#2}{#3}
+}
+
+%% \dtreeBox{NAME}{COL}{TEXT}
+\newcommand{\dtreeBox}[3]{%
+  \rnode{#1}{\psframebox{\dtreeBoxFormat{#3}}}}
+
+\newcommand{\dtreeBoxFormat}[1]{#1}
+
+%% \@dtreeWord{PREFIX}{COL}{TEXT}
+\newcommand{\@dtreeWord}[3]{%
+  \dtree@maybeamp{#2}%
+  \dtreeWord{#1W#2}{#2}{#3}}
+
+%% \@dtreeNodeIndex{TREEINDEX}{NODEINDEX}
+\newcommand{\@dtreeNodeIndex}[2]{%
+  \dtree@maybeamp{#2}%
+  \small{#1B#2}}
+
+%% \dtreeWord{NAME}{COL}{TEXT}
+\newcommand{\dtreeWord}[3]{%
+  \Rnode{#1}{\dtreeWordFormat{#3}}}
+
+\newcommand{\dtreeWordFormat}[1]{#1}
+
+%% \dtreeDrawVedge{NAME1}{NAME2}{TEXT}
+\newcommand{\dtreeDrawVedge}[3]{%
+  \dtreeDrawVedgeLine{#1}{#2}%
+  \def\@temp{#3}%
+  \ifx\@temp\@empty\else\dtreeDrawVedgeLabel{\dtreeDrawVedgeLabelFormat{#3}}\fi
+}
+
+\newcommand{\dtreeDrawVedgeLine}{\ncline}
+\newcommand{\dtreeDrawVedgeLabel}{\ncput*[framesep=1pt]}
+\newcommand{\dtreeDrawVedgeLabelFormat}[1]{#1}
+
+%% \dtree@draw@edge{COL1}{COL2}{LABEL}
+\newcommand{\dtree@draw@edge}[3]{%
+  \edef\@temp{\noexpand\dtree@draw@edge@
+    {\dtree@prefix B#1}{\dtree@prefix B#2}}
+  \@temp{#3}}
+
+\newcommand{\dtree@draw@edge@}[3]{%
+  \dtreeDrawEdgeLine{#1}{#2}%
+  \def\@temp{#3}%
+  \ifx\@temp\@empty\else\dtreeDrawEdgeLabel{\dtreeDrawEdgeLabelFormat{#3}}\fi}
+
+\newcommand{\dtreeDrawEdgeLine}{\ncline}
+\newcommand{\dtreeDrawEdgeLabel}{\ncput*[nrot=:U,framesep=1pt]}
+\newcommand{\dtreeDrawEdgeLabelFormat}[1]{#1}
+
+%% \dtree@draw@arc{COL1}{COL2}{ARCANGLE}
+\newcommand{\dtree@draw@arc}[3]{%
+  \edef\@temp{\noexpand\dtreeDrawArc
+    {\dtree@prefix B#1}{\dtree@prefix B#2}{#3}}
+  \@temp{}}
+
+\newcommand{\dtreeDrawArc}[3]{%
+  \ncarc[arcangle=#3,linestyle=dashed]{->}{#1}{#2}}
+
+%% idtree and lptree
+
+\newenvironment{idtree}{%
+  \def\node##1##2##3{\dtreeNode{##1}{##2}{##3}{}{}}%
+  \def\edge##1##2##3{\dtreeEdge{##1}{##2}{##3}}%
+  \def\arc##1##2{\dtreeArc{##1}{##2}}%
+  \def\dtreeDrawVedgeLine{\ncline[linestyle=dotted,linecolor=gray]}%
+  \def\dtreeDrawEdgeLabelFormat##1{\textsf{\footnotesize##1}}%
+  \begin{dtree}}{\end{dtree}}
+
+\newenvironment{lptree}{%
+  \def\node##1##2##3##4{\dtreeNode{##1}{##2}{##3}{}{##4}}%
+  \def\edge##1##2##3{\dtreeEdge{##1}{##2}{##3}}%
+  \def\arc##1##2{\dtreeArc{##1}{##2}}%
+  \def\dtreeDrawVedgeLine{\ncline[linestyle=dotted,linecolor=gray]}% CHANGE!!!
+  \def\dtreeDrawVedgeLabelFormat##1{\textsf{\footnotesize##1}}%
+  \def\dtreeDrawEdgeLabelFormat##1{\textsf{\footnotesize##1}}%
+  \begin{dtree}}{\end{dtree}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PHRASE STRUCTURE TREES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\syntreePcat}{\textsc}
+\newcommand{\syntreeWord}{\textrm}
+
+%%% \synNT[SKIPLEVELS]{TEXT}{SUBTREES}
+\newcommand{\synNT}[3][]{%
+  \def\temp{#1}%
+  \ifx\temp\empty
+    \def\temp{\pstree{\TR{#2}}{#3}}%
+  \else
+    \def\temp{\skiplevels{#1}\pstree{\TR{#2}}{#3}\endskiplevels}%
+  \fi
+  \temp}
+
+%%% \synT[SKIPLEVELS]{TEXT}
+\newcommand{\synT}[2][]{%
+  \def\temp{#1}%
+  \ifx\temp\empty
+    \def\temp{\TR{\textrm{#2}}}%
+  \else
+    \def\temp{\skiplevels{#1}\TR{#2}\endskiplevels}%
+  \fi
+  \temp}
+
+%%% \synC[SKIPLEVELS]{TEXT}[EXTRATEXT]{SUBTREES}
+%%% just like \synNT except:
+%%% TEXT is formated using \syntreePcat
+%%% EXTRATEXT is left as is
+\newcommand{\synC}[2][]{%
+  \def\temp##1{\synNT[#1]{\syntreePcat{#2}##1}}\synCX}
+\newcommand{\synCX}[1][]{%
+  \temp{#1}}
+
+%%% \synW[SKIPLEVELS]{TEXT}
+%%% just like \synT except TEXT is formated using \syntreeWord
+\newcommand{\synW}[2][]{\synT[#1]{\syntreeWord{#2}}}
+\newenvironment{syntree}
+  {\psset{nodesep=\syntreeNodesep}%
+   \psset{levelsep=\syntreeLevelsep}%
+   \psset{treesep=\syntreeTreesep}%
+   \let\NT\synNT\let\T\synT\let\W\synW\let\C\synC}
+  {}
+
+\newcommand{\syntreeNodesep}{2pt}
+\newcommand{\syntreeLevelsep}{17pt}
+\newcommand{\syntreeTreesep}{5pt}

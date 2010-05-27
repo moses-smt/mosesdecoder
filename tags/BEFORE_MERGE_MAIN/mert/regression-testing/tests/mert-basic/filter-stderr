@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+
+$x=0;
+while (<>) {
+  chomp;
+  next if !/savetxt/;
+  s/.+?(ngram)/$1/i;
+  $x++;
+  print "STDERR_$x=$_\n";
+}
