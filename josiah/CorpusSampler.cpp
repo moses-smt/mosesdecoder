@@ -188,11 +188,10 @@ void CorpusSamplerCollector::AggregateSuffStats(int rank) {
 }
 #endif
   
-float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain, float *scaling_gradient) {
+float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain) {
   ScoreComponentCollection feature_expectations = getFeatureExpectations();
     
   MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
-  *scaling_gradient = 0.0;
     
   //gradient computation
   ScoreComponentCollection grad;

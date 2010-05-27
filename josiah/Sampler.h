@@ -33,7 +33,6 @@ private:
   size_t m_burninIts;
   size_t m_reheatings;
   const AnnealingSchedule* m_as;
-  float m_quenchTemp;
   StopStrategy* m_stopper;
   OnlineLearner* m_onlineLearner;
   BleuSufficientStats m_suffStats;
@@ -44,7 +43,7 @@ private:
   bool m_runRandom;
   size_t m_lag;
 public:
-  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL), m_quenchTemp(1.0){}
+  Sampler(): m_iterations(10), m_reheatings(1), m_as(NULL) {}
   void Run(Hypothesis* starting, const TranslationOptionCollection* options, 
            const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor*, bool collectAll = false, bool defaultCtrIncrementer = true, bool raoBlackwell = false) ;
   void RunSequential(Hypothesis* starting, const TranslationOptionCollection* options, const std::vector<Word>& source, const feature_vector& extra_fv, SampleAcceptor* acceptor, bool collectAllSamples, bool defaultCtrIncrementer, bool raoBlackwell) ;
@@ -52,7 +51,6 @@ public:
   void AddOperator(GibbsOperator* o);
   void AddCollector(SampleCollector* c) {m_collectors.push_back(c);}
   void SetAnnealingSchedule(const AnnealingSchedule* as) {m_as = as;}
-  void SetQuenchingTemperature(float temp) {std::cerr << "Setting quench temp to " << temp << std::endl; m_quenchTemp = temp;}
   void SetIterations(size_t iterations) {m_iterations = iterations;}
   void SetStopper(StopStrategy* stopper) {m_stopper = stopper;}
   void SetReheatings(size_t r) {m_reheatings = r;}

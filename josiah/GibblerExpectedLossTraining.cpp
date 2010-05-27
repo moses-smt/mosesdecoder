@@ -28,7 +28,7 @@ void ExpectedLossCollector::collect(Sample& s) {
   MPI_VERBOSE(2,"Sample: " << Derivation(s) << endl) 
 }
 
-float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain, float *scaling_gradient) {
+float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain) {
   
 
   
@@ -39,7 +39,6 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
   vector<float> w;
   GetFeatureWeights(&w);
   float exp_score = feature_expectations.InnerProduct(w);
-  *scaling_gradient = 0.0;
   
   //gradient computation
   ScoreComponentCollection grad;
@@ -57,9 +56,6 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
     MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
-    if (ComputeScaleGradient()) {
-        *scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score)/N();
-    }
       
   }
   cerr << "Exp gain without reg term :  " << exp_gain << endl;
@@ -85,47 +81,7 @@ float ExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,f
 }
 
 
-void ExpectedLossCollector::UpdateHessianVProduct(ScoreComponentCollection* hessian, const ScoreComponentCollection& v) {
-    //FIXME: This probably does not handle Rao-Blackwellisation correctly.
-  ScoreComponentCollection feature_expectations = getFeatureExpectations();
 
-  float expectedVF = 0;
-  ScoreComponentCollection expected_FVF = feature_expectations;
-  expected_FVF.ZeroAll();
-  
-  //Calculate the expectation of v * f
-  for (size_t i = 0; i < N(); ++i) {
-    ScoreComponentCollection fv = m_featureVectors[i];
-    fv.DivideEquals(N());
-    expectedVF += fv.InnerProduct(v);
-  }
-  
-  //Calculate the expectation of f [vf  -E[vf]]
-  for (size_t i = 0; i < N(); ++i) {
-    ScoreComponentCollection fv = m_featureVectors[i];
-    float vf = fv.InnerProduct(v);
-    vf -=expectedVF;
-    fv.MultiplyEquals(vf);
-    fv.DivideEquals(N());
-    expected_FVF.PlusEquals(fv);   
-  }
-  
-  //Now for the Hessian * v calc
-  for (size_t i = 0; i < N(); ++i) {
-    const ScoreComponentCollection& featureVector = m_featureVectors[i];
-    const float gain = m_gains[i];
-    ScoreComponentCollection fv = featureVector;
-    fv.MinusEquals(feature_expectations);
-    float vf = v.InnerProduct(featureVector);
-    vf -= expectedVF;
-    fv.MultiplyEquals(vf);
-    fv.MinusEquals(expected_FVF);
-    fv.DivideEquals(N());
-    fv.MultiplyEquals(gain + getRegularisationGradientFactor(i));
-    hessian->PlusEquals(fv);
-  }
-
-}
  
 
 double ExpectedLossCollector::getExpectedGain() const {
@@ -275,7 +231,7 @@ void ExactExpectedLossCollector::ShrinkRandom(size_t newSize) {
   m_lengths.swap(lengths);
 }
 
-float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain, float *scaling_gradient) {
+float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain) {
 
   ShrinkAndCalcTrueDistribution();
 
@@ -287,7 +243,6 @@ float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradi
   vector<float> w;
   GetFeatureWeights(&w);
   float exp_score = feature_expectations.InnerProduct(w);
-  *scaling_gradient = 0.0;
   
   //gradient computation
   ScoreComponentCollection grad;
@@ -305,9 +260,6 @@ float ExactExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradi
     MPI_VERBOSE(2,"WEIGHTED: " << fv << endl)
     grad.PlusEquals(fv);
     MPI_VERBOSE(2,"grad: " << grad << endl)
-    if (ComputeScaleGradient()) {
-      *scaling_gradient +=  (gain + getRegularisationGradientFactor(i)) * (m_featureVectors[i].InnerProduct(w) - exp_score) * m_exactProbs[i] ;
-    }
       
   }
   cerr << "Exp gain without reg term :  " << exp_gain << endl;

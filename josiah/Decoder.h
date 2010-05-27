@@ -50,11 +50,9 @@ void initMoses(const std::string& inifile, const std::string& weightfile, int de
 //Convenience methods for accessing the moses global data structures
 void GetFeatureNames(std::vector<std::string>* featureNames);
 void GetFeatureWeights(std::vector<float>* weights);
-void SetFeatureWeights(const std::vector<float>& weights, bool compute_scale_gradient = false);
+void SetFeatureWeights(const std::vector<float>& weights);
 void OutputWeights(std::ostream& out);
 void OutputWeights(const std::vector<float>& weights, std::ostream& out);
-//inline float GetCurrQuenchingTemp() { return quenching_temp;}
-//void SetQuenchingTemp(const std::vector<float>& weights);
 
 //comparison method for sorting container of hyps
 bool hypCompare(const Moses::Hypothesis* a, const Moses::Hypothesis* b);

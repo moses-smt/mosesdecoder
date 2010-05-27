@@ -557,15 +557,8 @@ namespace Josiah {
     *weights = staticData.GetAllWeights();  
   }
 
-  void SetFeatureWeights(const std::vector<float>& weights, bool computeScaleGradient ) {
-    if (computeScaleGradient) {
-      vector<float> featWeights(weights.size() -1);
-      copy(weights.begin(), weights.end() - 1, featWeights.begin()); 
-      const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(featWeights);   
-    }
-    else {
-      const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);  
-    }
+  void SetFeatureWeights(const std::vector<float>& weights) {
+        const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
   }
   
   void OutputWeights(std::ostream& out) {

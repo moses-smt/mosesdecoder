@@ -32,7 +32,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include "AnnealingSchedule.h"
-#include "QuenchingSchedule.h"
 #include "Decoder.h"
 #include "Derivation.h"
 #include "Gibbler.h"
@@ -51,17 +50,7 @@
 #include "TranslationDelta.h"
 #include "Utils.h"
 
-#if 0
-vector<string> refs;
-refs.push_back("export of high-tech products in guangdong in first two months this year reached 3.76 billion us dollars");
-refs.push_back("guangdong's export of new high technology products amounts to us $ 3.76 billion in first two months of this year");
-refs.push_back("guangdong exports us $ 3.76 billion worth of high technology products in the first two months of this year");
-refs.push_back("in the first 2 months this year , the export volume of new hi-tech products in guangdong province reached 3.76 billion us dollars .");
-SentenceBLEU sb(4, refs);
-vector<const Factor*> fv;
-GainFunction::ConvertStringToFactorArray("guangdong's new high export technology comes near on $ 3.76 million in two months of this year first", &fv);
-cerr << sb.ComputeGain(fv) << endl;
-#endif
+
 using namespace std;
 using namespace Josiah;
 using namespace Moses;
@@ -131,18 +120,13 @@ int main(int argc, char** argv) {
   vector<float> prior_mean;
   vector<float> prev_gradient;
   bool expected_cbleu_da;
-  float start_temp_quench; 
-  float stop_temp_quench;
   float start_temp_expda;
   float stop_temp_expda;  
   float floor_temp_expda;  
-  float quenching_ratio;
   float anneal_ratio_da;
   float gamma;
-  float lambda;
   bool use_metanormalized_egd;
   int optimizerFreq; 
-  bool SMD;
   float brev_penalty_scaling_factor;
   bool hack_bp_denum;
   int weight_dump_freq;
@@ -202,16 +186,11 @@ int main(int argc, char** argv) {
   ("prev-gradient", po::value<vector<float> >(&prev_gradient), "Previous gradient for restarting SGD/EGD")
   ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
   ("gamma", po::value<float>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
-  ("lambda", po::value<float>(&lambda)->default_value(1.0f), "Smoothing parameter for SMD ")
   ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
   ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
   ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
-  ("use-SMD", po::value(&SMD)->zero_tokens()->default_value(false), "Train using SMD") 
   ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_cbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected corpus BLEU using deterministic annealing")   
   ("optimizer-freq", po::value<int>(&optimizerFreq)->default_value(1),"Number of optimization to perform at given temperature")
-  ("initial-quenching-temp", po::value<float>(&start_temp_quench)->default_value(1.0f), "Initial quenching temperature")
-  ("final-quenching-temp", po::value<float>(&stop_temp_quench)->default_value(200.0f), "Final quenching temperature")
-  ("quenching-ratio,Q", po::value<float>(&quenching_ratio)->default_value(2.0f), "Quenching ratio")
   ("initial-det-anneal-temp", po::value<float>(&start_temp_expda)->default_value(1000.0f), "Initial deterministic annealing entropy temperature")
   ("final-det-anneal-temp", po::value<float>(&stop_temp_expda)->default_value(0.001f), "Final deterministic annealing entropy temperature")
   ("floor-temp", po::value<float>(&floor_temp_expda)->default_value(0.0f), "Floor temperature for det annealing")
@@ -420,17 +399,7 @@ int main(int argc, char** argv) {
                                                                    gamma,                                       
                                                                    max_training_iterations,
                                                                    ScoreComponentCollection(prev_gradient)));
-  }
-  else if (SMD) {
-    optimizer.reset(new StochasticMetaDescent(
-                                              ScoreComponentCollection(eta),
-                                              mu,
-                                              0.5f,   // minimal step scaling factor
-                                              lambda,                                       
-                                              max_training_iterations,
-                                              ScoreComponentCollection(prev_gradient)));
-  }
-  else {
+  } else {
     optimizer.reset(new ExponentiatedGradientDescent(
                                                      ScoreComponentCollection(eta),
                                                      mu,
@@ -465,7 +434,6 @@ int main(int argc, char** argv) {
   VERBOSE(1, "Batch size: " << training_batch_size << endl);
   trainer = new ExpectedBleuTrainer(rank, size, training_batch_size, &input_lines, seed, randomize, optimizer.get(),     
                                       init_iteration_number,weight_dump_freq, weight_dump_stem);
-  trainer->SetComputeScaleGradient(false);
 
   input.reset(trainer);
   
@@ -474,14 +442,10 @@ int main(int argc, char** argv) {
     annealingSchedule.reset(new LinearAnnealingSchedule(burning_its, max_temp));  
   }
   
-  auto_ptr<QuenchingSchedule> quenchingSchedule;
   auto_ptr<AnnealingSchedule> detAnnealingSchedule;
   if (expected_cbleu_da) {
-    quenchingSchedule.reset(new ExponentialQuenchingSchedule(start_temp_quench, stop_temp_quench, quenching_ratio));
     detAnnealingSchedule.reset(new ExponentialAnnealingSchedule(start_temp_expda, stop_temp_expda, floor_temp_expda, anneal_ratio_da));
   }
-  
-  int initialQuenchingIteration = -1;
   
   
   auto_ptr<CorpusSamplerCollector> elCollector;
@@ -570,27 +534,9 @@ int main(int argc, char** argv) {
       annealedELCollector->SetTemperature(temp);
       cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
       
-      if (optimizer->GetIteration() == 0 ) {
-        sampler.SetQuenchingTemperature(start_temp_quench);  
-      }
       
-      if (temp == (static_cast<ExponentialAnnealingSchedule*>(detAnnealingSchedule.get()))->GetFloorTemp()) {//Time to start quenching
-        if (initialQuenchingIteration == -1) {//The iteration from which we start quenching          
-          initialQuenchingIteration = it;
-          //Do not optimize quenching temp when quenching
-          trainer->SetComputeScaleGradient(false);
-        } 
-        
-        float quenchTemp = start_temp_quench;
-          
-        assert (quenchTemp > 0);
-        
-        quenchTemp *= quenchingSchedule->GetTemperatureAtTime(it - initialQuenchingIteration) ;
-        sampler.SetQuenchingTemperature(quenchTemp);
-        if (quenchTemp >= stop_temp_quench) {
-          break;
-        }
-      }
+      
+      
     }
     
     Hypothesis* hypothesis;
@@ -628,15 +574,14 @@ int main(int argc, char** argv) {
       ScoreComponentCollection gradient;
       float exp_trans_len = 0;
       float unreg_exp_gain = 0;
-      float scaling_gradient = 0;
       float exp_gain = 0;
 
 #ifdef MPI_ENABLED  
       if (rank == 0) {
-        exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain, &scaling_gradient);  
+        exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain);  
       }
 #else
-      exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain, &scaling_gradient);
+      exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain);
 #endif
       if (trainer)
         
@@ -646,8 +591,7 @@ int main(int argc, char** argv) {
                                            exp_gain,
                                            unreg_exp_gain,
                                            gradient,
-                                           decoder.get(), 
-                                           scaling_gradient);
+                                           decoder.get());
       elCollector->reset();
     }
 

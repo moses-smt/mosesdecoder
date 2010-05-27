@@ -24,7 +24,6 @@ josiah_SOURCES = Derivation.cpp \
 	SentenceBleu.cpp \
     FeatureFunction.cpp \
     SearchRandom.cpp \
-    QuenchingSchedule.cpp \
     SampleAcceptor.cpp \
     OnlineLearner.cpp \
     Sampler.cpp \
@@ -62,7 +61,6 @@ corpustrainer_SOURCES = Derivation.cpp \
     SearchRandom.cpp \
     ParenthesisFeature.cpp \
     PosProjectionFeature.cpp \
-    QuenchingSchedule.cpp \
     CorpusSampler.cpp \
     CorpusSamplerAnnealed.cpp \
     SampleAcceptor.cpp \
@@ -96,7 +94,6 @@ samplerank_SOURCES = Derivation.cpp \
         SentenceBleu.cpp \
     FeatureFunction.cpp \
     SearchRandom.cpp \
-    QuenchingSchedule.cpp \
     SampleRank.cpp \
     OnlineLearner.cpp \
       Sampler.cpp \
