@@ -87,6 +87,18 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
 
 /**
   * Base class for Gibbler feature functions.
+   * The FeatureFunction operations are called as folloews:
+   *  1. When Gibbler starts up, and initialises feature functions:
+   *      - constructor
+   *  2. When a new Sample() object is created to begin sampling on a new sentence:
+   *     - init() - with the new sample
+   *     - updateTarget() - to indicate to the FeatureFunction that the target words have changed
+   *     - assignScore() -  to tell the FeatureFunction to calculate its initial score
+   *  3. When scoring possible transitions.
+   *     -  doXXX() - to calculate the score deltas.
+   *  4. When performing a transition.
+   *    - updateTarget() - called with new target words. For paired updates, this is called twice, and after the first 
+   *                        call the feature_vector (in the sample) will be inconsistent with the target words
  **/
 class FeatureFunction {
   public:
