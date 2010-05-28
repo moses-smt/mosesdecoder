@@ -77,6 +77,9 @@ class Sample {
     return _extra_features; 
   }
   
+  /** Check that the feature values are correct */
+  void CheckFeatureConsistency() const;
+  
   void FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) ;
   void FlipNodes(const TranslationOption& , const TranslationOption&, Hypothesis* , Hypothesis* , const ScoreComponentCollection& deltaFV);
   void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 

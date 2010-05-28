@@ -134,6 +134,8 @@ namespace Josiah {
         void setGibbsLMInfo(const std::map <LanguageModel*, int> & lms) { m_LMInfo = lms;}
         std::map <LanguageModel*, int> & getGibbsLMInfo() {return m_LMInfo;}
         float GetScanProb() const {return m_prob;}
+        
+        static bool CheckFeatures;
      protected:
         /**
           * Randomly select and apply one of the translation deltas.

@@ -59,6 +59,10 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
   }
   return - (float) abs(dist);
 }
+
+
+bool GibbsOperator::CheckFeatures = false;
+
  
 GibbsOperator::~GibbsOperator() {
   delete m_OpIterator;
@@ -108,6 +112,9 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
     chosenDelta->apply(*noChangeDelta);
   }
   //cout << "Sample fv: " << sample.GetFeatureValues() << endl;
+  if (CheckFeatures) {
+    sample.CheckFeatureConsistency();
+  }
   
 }
 
