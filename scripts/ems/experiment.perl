@@ -1133,8 +1133,14 @@ sub check_info {
           return 0;
         }
 	print "\tcheck '$VALUE{$parameter}' eq '$INFO{$parameter}' -> " if $VERBOSE;
-        if (&match_info_strings($VALUE{$parameter},$INFO{$parameter})) { print "ok\n" if $VERBOSE; }
-        else { print "mismatch\n" if $VERBOSE; return 0; }
+        if (defined($INFO{$parameter})
+            && &match_info_strings($VALUE{$parameter},$INFO{$parameter})) { 
+            print "ok\n" if $VERBOSE; 
+        }
+        else { 
+            print "mismatch\n" if $VERBOSE;
+            return 0; 
+        }
     }
     print "\tall parameters match\n" if $VERBOSE;
     return 1;
@@ -1500,7 +1506,7 @@ sub define_tuning_tune {
     $tuning_settings = "" unless $tuning_settings;
 
     my $filter = "$scripts/training/filter-model-given-input.pl";
-    $filter .= " -Binarizer $binarizer" if $binarizer;
+    $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$filter .= " --Hierarchical";
 	#$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
@@ -1961,7 +1967,7 @@ sub define_evaluation_decode {
 
     my $filter = "$scripts/training/filter-model-given-input.pl";
     $filter .= " $dir/evaluation/filtered.$set.$VERSION $config $input_filter";
-    $filter .= " -Binarizer $binarizer" if $binarizer;
+    $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
 
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$filter .= " --Hierarchical";

@@ -26,15 +26,34 @@ my (%PRECISION_CORRECT,%PRECISION_TOTAL,
 if (defined($system) || defined($reference)) {
   die("you need to you specify both system and reference, not just either")
     unless defined($system) && defined($reference);
+
   die("can't open system file $system") if ! -e $system;
-  die("can't open system file $reference") if ! -e $reference;
   @SYSTEM = `cat $system`;
-  @REFERENCE = `cat $reference`;
   chop(@SYSTEM);
-  chop(@REFERENCE);
+
+  if (! -e $reference && -e $reference.".ref0") {
+      for(my $i=0;-e $reference.".ref".$i;$i++) {
+	  my @REF = `cat $reference.ref$i`;
+	  chop(@REF);
+	  for(my $j=0;$j<scalar(@REF);$j++) {
+	      push @{$REFERENCE[$j]}, $REF[$j];
+	  }
+      }
+  }
+  else {
+      die("can't open system file $reference") if ! -e $reference;
+      @REFERENCE = `cat $reference`;
+      chop(@REFERENCE);
+  }
+
+  for(my $i=0;$i<scalar @SYSTEM;$i++) {
+    &add_match($SYSTEM[$i],$REFERENCE[$i],
+	       \%PRECISION_CORRECT,\%PRECISION_TOTAL);
+    &add_match($REFERENCE[$i],$SYSTEM[$i],
+	       \%RECALL_CORRECT,\%RECALL_TOTAL);
+  }
 
   open(SUMMARY,">$dir/summary");
-  &create_n_gram_stats();
   &best_matches(\%PRECISION_CORRECT,\%PRECISION_TOTAL,"$dir/n-gram-precision");
   &best_matches(\%RECALL_CORRECT,\%RECALL_TOTAL,"$dir/n-gram-recall");
   &bleu_annotation();
@@ -57,15 +76,6 @@ if (defined($ttable) || defined($corpus)) {
   &ttable_coverage() if defined($ttable);
   &corpus_coverage() if defined($corpus);
   &input_annotation();
-}
-
-sub create_n_gram_stats {
-    for(my $i=0;$i<scalar @SYSTEM;$i++) {
-	&add_match($SYSTEM[$i],$REFERENCE[$i],
-		   \%PRECISION_CORRECT,\%PRECISION_TOTAL);
-	&add_match($REFERENCE[$i],$SYSTEM[$i],
-		   \%RECALL_CORRECT,\%RECALL_TOTAL);
-    }
 }
 
 sub best_matches {
@@ -91,6 +101,7 @@ sub best_matches {
 sub input_phrases {
   open(INPUT,$input) or die "Can't read input $input";
   while(my $line = <INPUT>) {
+    $line =~ s/\|\S+//g;
     &extract_n_grams($line,\%INPUT_PHRASE);
   }
   close(INPUT);  
@@ -105,7 +116,7 @@ sub bleu_annotation {
 	$system =~ s/ $//;
 	my (%SYS_NGRAM,%REF_NGRAM);
 	&extract_n_grams( $system, \%SYS_NGRAM );
-	&extract_n_grams( $REFERENCE[$i], \%REF_NGRAM );
+	&extract_n_grams_arrayopt( $REFERENCE[$i], \%REF_NGRAM, "max" );
 
  	my @WORD = split(/ /,$system);
 	my @MATCH;
@@ -133,9 +144,20 @@ sub bleu_annotation {
 	    $bleu *= ($ngram_correct/(scalar(@WORD)-$length+2));
 	}
 	$bleu = $bleu ** (1/4);
-	my @RW = split(/ /,$REFERENCE[$i]);
-	my $ref_length = scalar(@RW);
-	if (scalar(@WORD) < $ref_length) {
+
+	my $ref_length = 9999;
+	if (ref($REFERENCE[$i]) eq 'ARRAY') {
+	    foreach my $ref (@{$REFERENCE[$i]}) {
+		my @RW = split(/ /,$ref);
+		$ref_length = scalar(@RW) if scalar(@RW) < $ref_length;
+	    }
+	}
+	else {
+	    my @RW = split(/ /,$REFERENCE[$i]);
+	    $ref_length = scalar(@RW);
+	}
+
+	if (scalar(@WORD) < $ref_length && scalar(@WORD)>0) {
 	    $bleu *= exp(1-$ref_length/scalar(@WORD));
 	}
 
@@ -144,7 +166,15 @@ sub bleu_annotation {
 	    print OUT " " if $i;
 	    print OUT "$WORD[$i]|$MATCH[$i]";
 	}
-	print OUT "\t".$REFERENCE[$i]."\n";
+	if (ref($REFERENCE[$i]) eq 'ARRAY') {
+	    foreach my $ref (@{$REFERENCE[$i]}) {
+		print OUT "\t".$ref;	
+	    }
+	}
+	else {
+	  print OUT "\t".$REFERENCE[$i]  
+	}
+	print OUT "\n";
     }
     close(OUT);
 }
@@ -152,8 +182,8 @@ sub bleu_annotation {
 sub add_match {
     my ($system,$reference,$CORRECT,$TOTAL) = @_;
     my (%SYS_NGRAM,%REF_NGRAM);
-    &extract_n_grams( $system, \%SYS_NGRAM );
-    &extract_n_grams( $reference, \%REF_NGRAM );
+    &extract_n_grams_arrayopt( $system, \%SYS_NGRAM, "min" );
+    &extract_n_grams_arrayopt( $reference, \%REF_NGRAM, "max" );
     foreach my $length (keys %SYS_NGRAM) {
 	foreach my $ngram (keys %{$SYS_NGRAM{$length}}) {
 	    my $sys_count = $SYS_NGRAM{$length}{$ngram};
@@ -176,7 +206,8 @@ sub ttable_coverage {
     open(TTABLE,$ttable) or die "Can't read ttable $ttable";
   }
   open(REPORT,">$dir/ttable-coverage-by-phrase");
-  my ($last_in,$last_size,$entropy,$size) = ("",0,0);
+  my ($last_in,$last_size,$size) = ("",0);
+  my @DISTRIBUTION = ();
   while(<TTABLE>) {
     chop;
     my ($in,$out,$scores) = split(/ \|\|\| /);	
@@ -185,30 +216,44 @@ sub ttable_coverage {
     next unless defined($INPUT_PHRASE{$size}{$in});
     $TTABLE_COVERED{$size}{$in}++;
     my @SCORE = split(/ /,$scores);
-    my $p = $SCORE[2]; # forward probability
     if ($in ne $last_in) {
       if ($last_in ne "") {
+        my $entropy = &compute_entropy(@DISTRIBUTION);
         printf REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
 	$TTABLE_ENTROPY{$last_size}{$last_in} = $entropy;
-        $entropy = 0;
+        @DISTRIBUTION = ();
       }
       $last_in = $in;
       $last_size = $size;
     }
-    # TODO: normalized entropy?
-    $entropy -= $p*log($p)/log(2);
+    push @DISTRIBUTION, $SCORE[2]; # forward probability
   }
+  my $entropy = &compute_entropy(@DISTRIBUTION);
   print REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
+  $TTABLE_ENTROPY{$last_size}{$last_in} = $entropy;
   close(REPORT);
   close(TTABLE);
 
   &additional_coverage_reports("ttable",\%TTABLE_COVERED);
 }
 
+sub compute_entropy {
+  my $z = 0; # normalization
+  foreach my $p (@_) {
+    $z += $p;
+  }
+  my $entropy = 0;
+  foreach my $p (@_) {
+    $entropy -= ($p/$z)*log($p/$z)/log(2);
+  }
+  return $entropy;
+}
+
 sub corpus_coverage {
   # compute how often input phrases occur in the corpus
   open(CORPUS,$corpus) or die "Can't read corpus $corpus";
   while(<CORPUS>) {
+    s/\|\S+//g;
     my @WORD = split;
     my $sentence_length = scalar @WORD;
     for(my $start=0;$start < $sentence_length;$start++) {
@@ -269,6 +314,7 @@ sub input_annotation {
   open(INPUT,$input) or die "Can't read input $input";
   while(<INPUT>) {
     chop;
+    s/\|\S+//g;
     print OUT $_."\t";
     my @WORD = split;
     my $sentence_length = scalar @WORD;
@@ -287,7 +333,7 @@ sub input_annotation {
 	$corpus_covered = 0 unless defined($corpus_covered);
 	
 	if (defined($TTABLE_COVERED{$length}{$phrase})) {
-	  printf OUT "%d-%d:%d:%d:%.5f ",$start,$start+$length-1,$corpus_covered,$ttable_covered,$ttable_entropy
+	  printf OUT "%d-%d:%d:%d:%.5f ",$start,$start+$length-1,$corpus_covered,$ttable_covered,$ttable_entropy;
 	}
       }
     }
@@ -297,8 +343,49 @@ sub input_annotation {
   close(OUT);
 }
 
+sub extract_n_grams_arrayopt {
+    my ($sentence,$NGRAM,$minmax) = @_;
+    if (ref($sentence) eq 'ARRAY') {
+	my %MINMAX_NGRAM;
+	&extract_n_grams($$sentence[0],\%MINMAX_NGRAM);
+	for(my $i=1;$i<scalar(@{$sentence});$i++) {
+	    my %SET_NGRAM;
+	    &extract_n_grams($$sentence[$i],\%SET_NGRAM);
+	    for(my $length=1;$length<=$MAX_LENGTH;$length++) {
+		if ($minmax eq "min") {
+		    foreach my $ngram (keys %{$MINMAX_NGRAM{$length}}) {
+			if (!defined($SET_NGRAM{$length}{$ngram})) {
+			    delete( $MINMAX_NGRAM{$length}{$ngram} );
+			}
+			elsif($MINMAX_NGRAM{$length}{$ngram} > $SET_NGRAM{$length}{$ngram}) {
+			    $MINMAX_NGRAM{$length}{$ngram} = $SET_NGRAM{$length}{$ngram};
+			}
+		    }
+		}
+		else {
+		    foreach my $ngram (keys %{$SET_NGRAM{$length}}) {
+			if (!defined($MINMAX_NGRAM{$length}{$ngram}) ||
+			    $SET_NGRAM{$length}{$ngram} > $MINMAX_NGRAM{$length}{$ngram}) {
+			    $MINMAX_NGRAM{$length}{$ngram} = $SET_NGRAM{$length}{$ngram};
+			}
+		    }
+		}
+	    }
+	}
+	for(my $length=1;$length<=$MAX_LENGTH;$length++) {
+	    foreach my $ngram (keys %{$MINMAX_NGRAM{$length}}) {
+		$$NGRAM{$length}{$ngram} += $MINMAX_NGRAM{$length}{$ngram};
+	    }
+	}
+    }
+    else {
+	&extract_n_grams($sentence,$NGRAM);
+    }
+}
+
 sub extract_n_grams {
     my ($sentence,$NGRAM) = @_;
+
     $sentence =~ s/\s+/ /g;
     $sentence =~ s/^ //;
     $sentence =~ s/ $//;

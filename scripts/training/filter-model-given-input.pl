@@ -94,7 +94,7 @@ while(<INI>) {
     	}
     	my ($phrase_table_impl,$source_factor,$t,$w,$file) = ($1,$2,$3,$4,$5);
 
-        if ($phrase_table_impl ne "0" && $phrase_table_impl ne "6") {
+        if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
             # Only Memory ("0") and NewFormat ("6") can be filtered.
             print INI_OUT $table_spec;
             next;
@@ -110,7 +110,12 @@ while(<INI>) {
         $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
         $new_name .= ".$cnt";
         $new_name_used{$new_name} = 1;
-    	print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
+	if ($binarizer && $phrase_table_impl == 6) {
+    	  print INI_OUT "2 $source_factor $t $w $new_name.bin\n";
+        }
+        else {
+    	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
+        }
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
@@ -240,14 +245,24 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     }
 
     if(defined($binarizer)) {
+      print STDERR "binarizing...";
+      # translation model
       if ($KNOWN_TTABLE{$i}) {
-        print STDERR "binarizing...";
-        my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
-        print STDERR $cmd."\n";
-        print STDERR `$cmd`;
+        # ... hierarchical translation model
+        if ($opt_hierarchical) {
+          my $cmd = "$binarizer $new_file $new_file.bin";
+	  print STDERR $cmd."\n";
+	  print STDERR `$cmd`;
+        }
+        # ... phrase translation model
+        else { 
+          my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
+        }
       }
+      # reordering model
       else {
-        print STDERR "binarizing...";
         my $lexbin = $binarizer; $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd = "$lexbin -in $new_file -out $new_file";
         print STDERR $cmd."\n";

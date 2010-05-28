@@ -32,14 +32,17 @@ wmt10-data = $working-dir/data
 # moses decoder
 decoder = $moses-src-dir/moses-cmd/src/moses
 
-# conversion of phrase table into binary format
+# conversion of phrase table into binary on-disk format
 ttable-binarizer = $moses-src-dir/misc/processPhraseTable
 
-# tokenizers
+# conversion of rule table into binary on-disk format
+#ttable-binarizer = "$moses-src-dir/CreateOnDisk/src/CreateOnDiskPt 1 1 5 100 2"
+
+# tokenizers - comment out if all your data is already tokenized
 input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
 output-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $output-extension"
 
-# truecasers
+# truecasers - comment out if you do not use the truecaser
 input-truecaser = $moses-script-dir/recaser/truecase.perl
 output-truecaser = $moses-script-dir/recaser/truecase.perl
 detruecaser = $moses-script-dir/recaser/detruecase.perl

@@ -29,16 +29,14 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
-   $_PHRASE_WORD_ALIGNMENT,
+   $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="";
-
-my $force_factored_filenames = 0;
+my $BINDIR="/home/pkoehn/statmt/bin";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -62,6 +60,7 @@ $_HELP = 1
 		       'first-step=i' => \$_FIRST_STEP,
 		       'last-step=i' => \$_LAST_STEP,
 		       'giza-option=s' => \$_GIZA_OPTION,
+		       'giza-extension=s' => \$_GIZA_EXTENSION,
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
@@ -103,7 +102,7 @@ $_HELP = 1
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
-               'force-factored-filenames' => \$force_factored_filenames,
+		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
                );
 
 if ($_HELP) {
@@ -436,7 +435,7 @@ for my $mtype ( keys %REORDERING_MODEL_TYPES) {
 }
 
 ### Factored translation models
-my $___NOT_FACTORED = !$force_factored_filenames;
+my $___NOT_FACTORED = !$_FORCE_FACTORED_FILENAMES;
 my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("ERROR: format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
@@ -1602,8 +1601,8 @@ sub create_ini {
 	foreach my $model (@REORDERING_MODELS) {
 	    $weight_d_count += $model->{"numfeatures"};
 	    my $table_file = "$___MODEL_DIR/reordering-table";
-	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    $table_file .= ".$factor" unless $___NOT_FACTORED;
+	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    $table_file .= ".";
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
