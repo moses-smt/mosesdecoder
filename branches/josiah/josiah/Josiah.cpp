@@ -200,6 +200,7 @@ int main(int argc, char** argv) {
         ("topn-size", po::value<int>(&topNsize)->default_value(0),"Number of samples to use for inner loop of MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
         ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
+        ("check-features", po::value<bool>(&GibbsOperator::CheckFeatures)->zero_tokens()->default_value(false), "Check features for consistency after every update")
         ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
         ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_sbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU using deterministic annealing")   
         ("optimizer-freq", po::value<int>(&optimizerFreq)->default_value(1),"Number of optimization to perform at given temperature")

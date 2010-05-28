@@ -376,7 +376,13 @@ void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
   
 void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
   feature_values.PlusEquals(deltaFV);
-}  
+}
+
+void Sample::CheckFeatureConsistency() const {
+  for (size_t i = 0; i < _extra_features.size(); ++i) {
+    assert(_extra_features[i]->isConsistent(feature_values));
+  }
+}
 
 //update  the bitmap of the predecessor
 void Sample::UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& option) {

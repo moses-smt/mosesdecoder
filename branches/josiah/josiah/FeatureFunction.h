@@ -123,6 +123,10 @@ class FeatureFunction {
     virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
                                      const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) = 0;
     
+    /** Checks the internal consistency of the FeatureFunction by computing the scores from scratch and comparing with the 
+     given scores. */
+    bool isConsistent(const ScoreComponentCollection& featureValues);
+    
     virtual ~FeatureFunction() = 0;
     
   protected:
