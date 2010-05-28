@@ -1,4 +1,4 @@
-bin_PROGRAMS = josiah m1 corpustrainer samplerank
+bin_PROGRAMS = josiah corpustrainer samplerank fv
 josiah_SOURCES = Derivation.cpp \
 	AnnealingSchedule.cpp \
 	Decoder.cpp \
@@ -23,6 +23,7 @@ josiah_SOURCES = Derivation.cpp \
 	TranslationDelta.cpp \
 	SentenceBleu.cpp \
     FeatureFunction.cpp \
+    FeatureVector.cpp \
     SearchRandom.cpp \
     SampleAcceptor.cpp \
     OnlineLearner.cpp \
@@ -35,7 +36,7 @@ josiah_SOURCES = Derivation.cpp \
     KLDivergenceCalculator.cpp
 
 
-m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
+#m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
 
 corpustrainer_SOURCES = Derivation.cpp \
         AnnealingSchedule.cpp \
@@ -57,6 +58,7 @@ corpustrainer_SOURCES = Derivation.cpp \
     SourceToTargetRatio.cpp \
         TranslationDelta.cpp \
         SentenceBleu.cpp \
+    FeatureVector.cpp \
     FeatureFunction.cpp \
     SearchRandom.cpp \
     ParenthesisFeature.cpp \
@@ -93,6 +95,7 @@ samplerank_SOURCES = Derivation.cpp \
         TranslationDelta.cpp \
         SentenceBleu.cpp \
     FeatureFunction.cpp \
+    FeatureVector.cpp \
     SearchRandom.cpp \
     SampleRank.cpp \
     OnlineLearner.cpp \
@@ -104,14 +107,18 @@ samplerank_SOURCES = Derivation.cpp \
     GibbsOperatorIterator.cpp \
     OnlineLearnerTrainer.cpp 
    
+fv_SOURCES = FeatureVector.cpp FV.cpp
+
 
 AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src $(BOOST_CPPFLAGS)
+
+fv_LDADD = $(BOOST_LDFLAGS)  $(BOOST_SERIALIZATION_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
 
 josiah_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_LDFLAGS)  $(BOOST_SERIALIZATION_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
 josiah_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a
 
-m1_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_LDFLAGS) $(BOOST_SERIALIZATION_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
-m1_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a
+#m1_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_LDFLAGS) $(BOOST_SERIALIZATION_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
+#m1_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a
 
 corpustrainer_LDADD = -L$(top_srcdir)/moses/src -lmoses $(BOOST_LDFLAGS)  $(BOOST_SERIALIZATION_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
 corpustrainer_DEPENDENCIES = $(top_srcdir)/moses/src/libmoses.a
