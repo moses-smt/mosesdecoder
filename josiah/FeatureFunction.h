@@ -38,14 +38,6 @@ namespace Moses {
 namespace Josiah {
 
   class Sample;
-/**
-  * Base class for any state information required by a FeatureFunction.
-  * For sampling, state is any information that the FeatureFunction deems
-  * useful for computing updates efficiently. 
-  * Since the Sample never actually needs to know anything about the 
-  * FeatureState, it contains no useful members.
- **/
-class FeatureState {};
 
 
 /**
