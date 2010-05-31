@@ -1,6 +1,0 @@
-das
-keep ||| 00000 ||| das
-keep ||| 10000 ||| behalten das
-test ||| 0000 ||| raz dva tri ctyri
-two ||| 0100 ||| raz dva tri ctyri
-three ||| 0010 ||| raz dva tri ctyri

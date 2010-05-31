@@ -1,6 +1,0 @@
-#corpus name, factors given (/\s+/-delimited)
-#(the given factors should be present in all target-language files for the given corpus)
-devtest2006.de-en					surf pos lemma
-devtest2006.de-en.top100		surf pos lemma
-#pstem: lemmas come from the Porter stemmer (and so are really a mix of stems and lemmas)
-pstem_devtest2006.de-en			surf pos lemma

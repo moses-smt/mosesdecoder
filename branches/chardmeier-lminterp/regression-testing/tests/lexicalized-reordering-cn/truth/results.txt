@@ -1,9 +1,0 @@
-TRANSLATION_1=mr president , what we devrons but also to to biarritz , this is regarder a little more loin . 
-TRANSLATION_2=the élus that we are have the with difference the us of the encourager to progresser , in dépit of the adversité , that of relayer the messages that we recevons of the opinion all in each of our countries . 
-TRANSLATION_3=the prerequisites for the événements of these derniers time , the issue of the sufficiently of the essence to it also in remarquable . 
-LMLOAD_TIME ~ 1.000
-PTLOAD_TIME ~ 1.000
-SCORE_1 = -621.292
-SCORE_2 = -1402.951
-SCORE_3 = -636.351
-TOTAL_WALLTIME ~ 21

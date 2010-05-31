@@ -1,7 +1,0 @@
-TRANSLATION_0=there are various different opinions . 
-LMLOAD_TIME ~ 11.00
-PTLOAD_TIME ~ 23.00
-SCORE_0= -113.734
-TRANSLATION_0_NBEST_1=there are various different opinions . ||| d: 0 lm: -21.6664 tm: -3.46226 -10.822 -2.82666 -9.32004 2.99969 -2.44147 -4.91188 -6.12017 -10.5033 2.99969 w: -6 g: -0.0625204 -18.098
-TRANSLATION_0_NBEST_2=there are various other opinions . ||| d: 0 lm: -25.3276 tm: -1.94591 -10.3833 -0.693147 -7.77959 1.99979 -0.924822 -4.91188 -3.33314 -10.5033 1.99979 w: -6 g: -0.149241 -16.9924
-TOTAL_WALLTIME ~ 23
