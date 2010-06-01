@@ -32,7 +32,8 @@ josiah_SOURCES = Derivation.cpp \
     Utils.cpp \
     SufficientStats.cpp \
     GibbsOperatorIterator.cpp \
-    GibblerAnnealedExpectedLossTrainer.cpp
+    GibblerAnnealedExpectedLossTrainer.cpp \
+    WeightManager.cpp
 
 
 #m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
@@ -71,7 +72,8 @@ corpustrainer_SOURCES = Derivation.cpp \
     SufficientStats.cpp \
     OnlineLearner.cpp \
     GibbsOperatorIterator.cpp \
-    CorpusTrainer.cpp 
+    CorpusTrainer.cpp  \
+    WeightManager.cpp
    
 
 samplerank_SOURCES = Derivation.cpp \
@@ -104,7 +106,8 @@ samplerank_SOURCES = Derivation.cpp \
     SufficientStats.cpp \
    SampleAcceptor.cpp \
     GibbsOperatorIterator.cpp \
-    OnlineLearnerTrainer.cpp 
+    OnlineLearnerTrainer.cpp  \
+    WeightManager.cpp
    
 fv_SOURCES = FeatureVector.cpp FV.cpp
 

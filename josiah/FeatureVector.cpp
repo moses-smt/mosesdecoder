@@ -63,9 +63,25 @@ namespace Josiah {
          root = namestring;
        }
        FName fname(root,name);
-       cerr << fname << " " << value << endl;
        set(fname,value);
      }
+  }
+  
+  void FVector::save(const string& filename) const {
+    ofstream out(filename.c_str());
+    if (!out) {
+      ostringstream msg;
+      msg << "Unable to open " << filename;
+      throw runtime_error(msg.str());
+    }
+    write(out);
+    out.close();
+  }
+  
+  void FVector::write(ostream& out) const {
+    for (const_iterator i = begin(); i != end(); ++i) {
+      out << i->first << " " << i->second << endl;
+    }
   }
    
    FValue FVector::DEFAULT = 0.0;
@@ -87,7 +103,7 @@ namespace Josiah {
    
   ostream& FVector::print(ostream& out) const {
     out << "{";  
-    for (map<FName,FValue>::const_iterator i = m_features.begin(); i != m_features.end(); ++i) {
+    for (const_iterator i = begin(); i != end(); ++i) {
       out << i->first << ":" << i->second << ",";
     }
     out << "}";

@@ -48,6 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Optimizer.h"
 #include "SampleAcceptor.h"
 #include "Utils.h"
+#include "WeightManager.h"
 
 
 using namespace std;
@@ -96,7 +97,6 @@ int main(int argc, char** argv) {
   unsigned training_batch_size;
   bool mbr_decoding;
   bool do_timing;
-  bool show_features;
   int max_training_iterations;
   uint32_t seed;
   int lineno;
@@ -158,7 +158,6 @@ int main(int argc, char** argv) {
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
-	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
 	("weights,w",po::value<string>(&weightfile),"Weight file")
         ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
         ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
@@ -239,6 +238,14 @@ int main(int argc, char** argv) {
       std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
       std::cout << desc << std::endl;
       return 0;
+  }
+  
+  if (weightfile.empty()) {
+    std::cerr << "Setting all feature weights to zero" << std::endl;
+    WeightManager::init();
+  } else {
+    std::cerr << "Loading feature weights from " << weightfile <<  std::endl;
+    WeightManager::init(weightfile);
   }
 
   if (expected_sbleu_training && expected_sbleu_da) {
@@ -330,23 +337,12 @@ int main(int argc, char** argv) {
   
   
   
-  // may be invoked just to get a features list
-  if (show_features) {
-    OutputWeights(cout);
-#ifdef MPI_ENABLED
-    MPI_Finalize();
-#endif
-    return 0;
-  }
-  
   
   
   
   
   //scale model weights
-  vector<float> weights = StaticData::Instance().GetAllWeights();
-  transform(weights.begin(),weights.end(),weights.begin(),bind2nd(multiplies<float>(),scalefactor));
-  const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
+  WeightManager::instance().scale(scalefactor);
   VERBOSE(1,"Scaled weights by factor of " << scalefactor << endl);
   
   
@@ -370,11 +366,12 @@ int main(int argc, char** argv) {
   auto_ptr<InputSource> input;
   
   auto_ptr<Optimizer> optimizer;
-   eta.resize(weights.size());   
+  //TODO:
+  //eta.resize(weights.size());   
 
   
-  
-  prev_gradient.resize(weights.size());
+  //TODO:
+  //prev_gradient.resize(weights.size());
 
   if (use_metanormalized_egd) {
     optimizer.reset(new MetaNormalizedExponentiatedGradientDescent(

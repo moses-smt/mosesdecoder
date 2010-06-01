@@ -65,6 +65,8 @@ class FVector
     
     /** Load from file - each line should be 'root[_name] value' */
     void load(const std::string& filename);
+    void save(const std::string& filename) const;
+    void write(std::ostream& out) const ;
     
     /** Element access */
     ProxyFVector operator[](const FName& name);
