@@ -131,7 +131,6 @@ int main(int argc, char** argv) {
   bool greedy, fixedTemp;
   float fixed_temperature;
   bool collectAll, sampleCtrAll;
-  bool mapdecode;
   vector<string> ngramorders;
   bool raoBlackwell;
   bool use_moses_kbesthyposet;
@@ -209,7 +208,6 @@ int main(int argc, char** argv) {
   ("collect-all", po::value(&collectAll)->zero_tokens()->default_value(false), "Collect all samples generated")
   ("sample-ctr-all", po::value(&sampleCtrAll)->zero_tokens()->default_value(false), "When in CollectAllSamples model, increment collection ctr after each sample has been collected")
           ("rao-blackwell", po::value(&raoBlackwell)->zero_tokens()->default_value(false), "Do Rao-Blackwellisation (aka conditional estimation")
-  ("mapdecode", po::value(&mapdecode)->zero_tokens()->default_value(false), "MAP decoding")
   ("mh.ngramorders", po::value< vector <string> >(&ngramorders), "Indicate LMs and ngram orders to be used during MH/Gibbs")
   ("use-moses-kbesthyposet", po::value(&use_moses_kbesthyposet)->zero_tokens()->default_value(false), "Use Moses to generate kbest hypothesis set")
   ("print-moseskbest", po::value(&print_moseskbest)->zero_tokens()->default_value(false), "Print Moses kbest")
@@ -481,7 +479,7 @@ int main(int argc, char** argv) {
       annealedELCollector->SetTemperature(temp);
       cerr << "Annealing temperature " << annealedELCollector->GetTemperature() << endl;
     }
-    if (mapdecode || decode || topn > 0 || periodic_decode > 0) {
+    if (decode || topn > 0 || periodic_decode > 0) {
       DerivationCollector* collector = new DerivationCollector();
       collector->setPeriodicDecode(periodic_decode);
       collector->setCollectDerivationsByTranslation(collect_dbyt);
@@ -638,14 +636,6 @@ int main(int argc, char** argv) {
         cerr << "NBEST: " << lineno << " ";
         derivationCollector->outputDerivationProbability(nbest[i],derivationCollector->N(),cerr);
         cerr << endl;
-      }
-      if (mapdecode) {
-        pair<const Derivation*, float> map_soln = derivationCollector->getMAP();
-        vector<string> sentence;
-        map_soln.first->getTargetSentence(sentence);
-        VERBOSE(1, "MAP Soln, model score [" << map_soln.second << "]" << endl)
-        copy(sentence.begin(),sentence.end(),ostream_iterator<string>(*out," "));
-        (*out) << endl << flush;
       }
       if (decode) {
         pair<const Derivation*, float> max = derivationCollector->getMax();
