@@ -45,7 +45,7 @@ typedef std::vector<const Moses::Factor*> Translation;
  * other command line arguments. This must be called, even if the moses decoder is not being used, as the
  * sampler requires the moses tables.
  **/
-void initMoses(const std::string& inifile, const std::string& weightfile, int debuglevel, bool l1normalize = false, int argc=0, char** argv=NULL );
+void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** argv=NULL );
 
 //Convenience methods for accessing the moses global data structures
 void GetFeatureNames(std::vector<std::string>* featureNames);
@@ -63,7 +63,7 @@ bool hypCompare(const Moses::Hypothesis* a, const Moses::Hypothesis* b);
   **/
 class Decoder {
   public:
-    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent, size_t nBestSize = 0) = 0;
+    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent) = 0;
     virtual ~Decoder();
 };
 /**
@@ -73,34 +73,17 @@ class MosesDecoder : public virtual Decoder {
   public:
     MosesDecoder()  {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc,  
-                        std::vector<Moses::Word>& sent, size_t nBestSize = 0);
-    const std::vector<std::pair<Translation, float> > & GetNbestTranslations() {return m_translations;}
+                        std::vector<Moses::Word>& sent);
     virtual Moses::Search* createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc);
-    void PrintNBest(std::ostream& out) const;
-    double CalcZ() ;
-    double GetTranslationScore(const std::vector <const Moses::Factor *>& target, bool & found) const;
   protected:
     std::auto_ptr<Moses::Search> m_searcher;
     std::auto_ptr<Moses::TranslationOptionCollection> m_toc;
     std::vector<std::pair<Translation,float> > m_translations;
-    void CalcNBest(size_t count, Moses::TrellisPathList &ret,bool onlyDistinct = true) const; 
-    void TrellisToTranslations(const Moses::TrellisPathList &ret, std::vector<std::pair<Translation,float> > &);
-    void GetWinnerConnectedGraph( std::map< int, bool >* pConnected, std::vector< const Moses::Hypothesis* >* pConnectedList) const ;
   private:
     std::map < int, bool > connected;
     std::vector< const Moses::Hypothesis *> connectedList;    
 };
 
-/**
-  * Wraps moses decoder to calculate KL
- **/
-class KLDecoder : public  MosesDecoder {
-  public:
-    KLDecoder() : MosesDecoder() {}
-    virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc,  
-                        std::vector<Moses::Word>& sent, size_t nBestSize = 0);
-    double GetZ(const std::string& source); //only makes sense to ask for Z for KL decoder since other decoders do pruning
-};
 
 
 

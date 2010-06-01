@@ -63,6 +63,9 @@ class FVector
     /** Empty feature vector */
     FVector();
     
+    /** Load from file - each line should be 'root[_name] value' */
+    void load(const std::string& filename);
+    
     /** Element access */
     ProxyFVector operator[](const FName& name);
     const FValue& operator[](const FName& name) const;
@@ -97,6 +100,7 @@ class FVector
     void set(const FName& name, const FValue& value);
     
     static FValue DEFAULT;
+
     
     std::map<FName,FValue,FNameComparator> m_features;
     

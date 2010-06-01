@@ -268,7 +268,7 @@ int main(int argc, char** argv) {
  
  
   //set up moses
-  initMoses(mosesini,weightfile,debug);
+  initMoses(mosesini,debug);
   auto_ptr<Decoder> decoder(new RandomDecoder());
   
   

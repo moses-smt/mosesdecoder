@@ -32,8 +32,7 @@ josiah_SOURCES = Derivation.cpp \
     Utils.cpp \
     SufficientStats.cpp \
     GibbsOperatorIterator.cpp \
-    GibblerAnnealedExpectedLossTrainer.cpp \
-    KLDivergenceCalculator.cpp
+    GibblerAnnealedExpectedLossTrainer.cpp
 
 
 #m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp

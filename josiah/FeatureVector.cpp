@@ -19,23 +19,54 @@
 
 */
 
-#include <algorithm>
-#include <functional>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
 
 #include "FeatureVector.h"
 
 using namespace std;
 
 
-
 namespace Josiah {
   
+  static const string SEP = "_";
+  
   std::ostream& operator<<( std::ostream& out, const FName& name) {
-    out << name.root << ":" << name.name;
+    out << name.root << SEP << name.name;
     return out;
   }
   
    FVector::FVector() {}
+   
+   void FVector::load(const std::string& filename) {
+     ifstream in (filename.c_str());
+     if (!in) {
+       ostringstream msg;
+       msg << "Unable to open " << filename;
+       throw runtime_error(msg.str());
+     }
+     string line;
+     while(getline(in,line)) {
+       if (line[0] == '#') continue;
+       istringstream linestream(line);
+       string namestring;
+       FValue value;
+       linestream >> namestring;
+       linestream >> value;
+       size_t sep = namestring.find(SEP);
+       string root,name;
+       if (sep != string::npos) {
+         root = namestring.substr(0,sep);
+         name = namestring.substr(sep+1);
+       } else {
+         root = namestring;
+       }
+       FName fname(root,name);
+       cerr << fname << " " << value << endl;
+       set(fname,value);
+     }
+  }
    
    FValue FVector::DEFAULT = 0.0;
    

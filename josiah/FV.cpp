@@ -56,6 +56,10 @@ int main() {
   cerr << "fvprod.fv=" <<  (fvprod*fv) << endl;
   //fv2[g4] = 3.1; //error
   
+  FVector loaded;
+  loaded.load("weights.txt");
+  cerr << "loaded=" << loaded << endl;
+  
 
   return 0;
 }
