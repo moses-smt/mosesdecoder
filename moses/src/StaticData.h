@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_StaticData_h
 #define moses_StaticData_h
 
+#include <stdexcept>
 #include <limits>
 #include <list>
 #include <vector>
@@ -42,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
+#include "TranslationSystem.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -60,6 +62,7 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;	
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
@@ -83,6 +86,7 @@ protected:
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
+    std::map<std::string, TranslationSystem> m_translationSystems;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -220,6 +224,7 @@ protected:
 	//! load decoding steps
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
+    void AddTranslationSystem(const TranslationSystem& system);
     void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
 	
@@ -400,6 +405,21 @@ public:
 	{
 		return m_generationDictionary;
 	}
+    const TranslationSystem& GetTranslationSystem(std::string id) const {
+        std::map<std::string, TranslationSystem>::const_iterator iter = 
+                m_translationSystems.find(id);
+        VERBOSE(2, "Looking for translation system id " << id << std::endl);
+        if (iter == m_translationSystems.end()) {
+            throw std::runtime_error("Unknown translation system id");
+        } else {
+            return iter->second;
+        }
+    }
+    
+    size_t GetTranslationSystemCount() const {
+        return m_translationSystems.size();
+    }
+    
 	size_t GetGenerationDictionarySize() const
 	{
 		return m_generationDictionary.size();

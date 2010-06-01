@@ -121,7 +121,14 @@ bool StaticData::LoadData(Parameter *parameter)
 			m_recoverPath = false;
 		}
 	}
-
+    
+    //option to specify multiple translation systems.
+    size_t translationSystemsCount = m_parameter->GetParam("translation-systems").size();
+    if (translationSystemsCount) {
+        for (size_t i = 0; i < translationSystemsCount; ++i) {
+            AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
+        }
+    }
 
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
@@ -441,16 +448,6 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGlobalLexicalModel()) return false;
 
 	m_scoreIndexManager.InitFeatureNames();
-	if (m_parameter->GetParam("weight-file").size() > 0) {
-    UserMessage::Add("ERROR: weight-file option is broken\n");
-    abort();
-//		if (m_parameter->GetParam("weight-file").size() != 1) {
-//			UserMessage::Add(string("ERROR: weight-file takes a single parameter"));
-//			return false;
-//		}
-//		string fnam = m_parameter->GetParam("weight-file")[0];
-//		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
-	}
 
 	return true;
 }
@@ -1109,6 +1106,10 @@ void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
 		LanguageModel &languageModel = **iterLM;
 		languageModel.InitializeBeforeSentenceProcessing();
 	}
+}
+
+void StaticData::AddTranslationSystem(const TranslationSystem& system) {
+    m_translationSystems.insert(std::pair<std::string, TranslationSystem>(system.GetId(),system));
 }
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
