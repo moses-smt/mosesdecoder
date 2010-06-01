@@ -63,19 +63,8 @@ bool hypCompare(const Moses::Hypothesis* a, const Moses::Hypothesis* b);
   **/
 class Decoder {
   public:
-    Decoder(): m_isMonotone(false), m_useNoLM(false), m_useZeroWeights(false) {}
     virtual void decode(const std::string& source, Moses::Hypothesis*& bestHypo, Moses::TranslationOptionCollection*& toc, std::vector<Moses::Word>& sent, size_t nBestSize = 0) = 0;
-    virtual void SetMonotone(bool isMonotone) {m_isMonotone = isMonotone;}
-    virtual void SetNoLM(bool useNoLM) {m_useNoLM = useNoLM;}
-    virtual void SetZeroWeights(bool useZeroWeights) {m_useZeroWeights = useZeroWeights;}
     virtual ~Decoder();
-    
-  
-  protected:
-    bool m_isMonotone;
-    bool m_useNoLM;
-    bool m_useZeroWeights;
-
 };
 /**
   * Wraps moses decoder.

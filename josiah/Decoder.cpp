@@ -71,36 +71,12 @@ namespace Josiah {
       //clean up previous sentence
       staticData.CleanUpAfterSentenceProcessing();
       
-      //maybe ignore lm
-      const LMList& languageModels = StaticData::Instance().GetAllLM();
-      vector<float> prevFeatureWeights;
-      GetFeatureWeights(&prevFeatureWeights);
-      if (m_useZeroWeights) {
-        vector<float> newFeatureWeights = prevFeatureWeights; //copy
-        fill(newFeatureWeights.begin(),newFeatureWeights.end(),0);
-        SetFeatureWeights(newFeatureWeights);
-      } else if (m_useNoLM) {
-        vector<float> newFeatureWeights = prevFeatureWeights; //copy
-        for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-          LanguageModel* lm = *i;
-          const ScoreIndexManager& siManager = StaticData::Instance().GetScoreIndexManager();
-          size_t lmindex = siManager.GetBeginIndex(lm->GetScoreBookkeepingID());
-          newFeatureWeights[lmindex] = 0;
-        }
-        SetFeatureWeights(newFeatureWeights);
-      }
-  
       //the sentence
       Sentence sentence(Input);
       stringstream in(source + "\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
       sentence.Read(in,inputFactorOrder);
       for (size_t i=0; i<sentence.GetSize(); ++i){ sent_vector.push_back(sentence.GetWord(i)); } 
-      //monotone
-      int distortionLimit = staticData.GetMaxDistortion();
-      if (m_isMonotone) {
-        const_cast<StaticData&>(staticData).SetMaxDistortion(0);
-      }
   
       //the searcher
       staticData.ResetSentenceStats(sentence);
@@ -129,8 +105,6 @@ namespace Josiah {
         TrellisToTranslations(nBestList, m_translations);
       }
       
-      const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
-      SetFeatureWeights(prevFeatureWeights);
       if (nBestSize > 0)
         const_cast<StaticData&>(staticData).SetOutputSearchGraph(false);
     
@@ -484,24 +458,7 @@ namespace Josiah {
       //clean up previous sentence
       staticData.CleanUpAfterSentenceProcessing();
       
-      //maybe ignore lm
-      const LMList& languageModels = StaticData::Instance().GetAllLM();
-      vector<float> prevFeatureWeights;
-      GetFeatureWeights(&prevFeatureWeights);
-      if (m_useZeroWeights) {
-        vector<float> newFeatureWeights = prevFeatureWeights; //copy
-        fill(newFeatureWeights.begin(),newFeatureWeights.end(),0);
-        SetFeatureWeights(newFeatureWeights);
-      } else if (m_useNoLM) {
-        vector<float> newFeatureWeights = prevFeatureWeights; //copy
-        for (LMList::const_iterator i = languageModels.begin(); i != languageModels.end(); ++i) {
-          LanguageModel* lm = *i;
-          const ScoreIndexManager& siManager = StaticData::Instance().GetScoreIndexManager();
-          size_t lmindex = siManager.GetBeginIndex(lm->GetScoreBookkeepingID());
-          newFeatureWeights[lmindex] = 0;
-        }
-        SetFeatureWeights(newFeatureWeights);
-      }
+      
   
       //the sentence
       Sentence sentence(Input);
@@ -509,11 +466,7 @@ namespace Josiah {
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
       sentence.Read(in,inputFactorOrder);
       
-      //monotone
-      int distortionLimit = staticData.GetMaxDistortion();
-      if (m_isMonotone) {
-        const_cast<StaticData&>(staticData).SetMaxDistortion(0);
-      }
+      
   
       //pruning parameters
       size_t prevStackSize = staticData.GetMaxHypoStackSize();
@@ -535,8 +488,6 @@ namespace Josiah {
       m_searcher->ProcessSentence();
   
       //Restore settings
-      const_cast<StaticData&>(staticData).SetMaxDistortion(distortionLimit);
-      SetFeatureWeights(prevFeatureWeights);
       const_cast<StaticData&>(staticData).SetOutputSearchGraph(false);
       const_cast<StaticData&>(staticData).SetDisableDiscarding(false);
       const_cast<StaticData&>(staticData).SetMaxHypoStackSize(prevStackSize); //this should be big enough for most sentences

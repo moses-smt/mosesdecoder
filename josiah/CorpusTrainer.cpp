@@ -106,10 +106,6 @@ int main(int argc, char** argv) {
   float mu;
   string weightfile;
   vector<string> ref_files;
-  bool decode_monotone;
-  bool decode_zero_weights;
-  bool decode_nolm;
-  bool decode_random;
   int periodic_decode;
   bool collect_dbyt;
   bool output_max_change;
@@ -154,10 +150,6 @@ int main(int argc, char** argv) {
   ("samples,s", po::value<int>(&num_samples)->default_value(5), "Number of samples used for training")
   ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
   ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
-  ("decode-monotone", po::value(&decode_monotone)->zero_tokens()->default_value(false), "Run the initial decoding monotone.")
-  ("decode-nolm", po::value(&decode_nolm)->zero_tokens()->default_value(false), "Run the initial decoding without an lm.")
-  ("decode-zero-weights", po::value(&decode_zero_weights)->zero_tokens()->default_value(false), "Run the initial decoding with weights set to zero.")
-  ("decode-random", po::value(&decode_random)->zero_tokens()->default_value(false), "Use the random decoder.")
   ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
   ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
   ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
@@ -277,19 +269,7 @@ int main(int argc, char** argv) {
  
   //set up moses
   initMoses(mosesini,weightfile,debug);
-  auto_ptr<Decoder> decoder;
-  if (decode_random) {
-    if (decode_monotone || decode_zero_weights || decode_nolm) {
-      cerr << "Error:: Random decoder cannot be used with any other options." << endl;
-#ifdef MPI_ENABLED
-      MPI_Finalize();
-#endif
-      return -1;
-    }
-    decoder.reset(new RandomDecoder());
-  } else {
-    decoder.reset(new MosesDecoder());
-  }
+  auto_ptr<Decoder> decoder(new RandomDecoder());
   
   
   auto_ptr<MHAcceptor> mhAcceptor;
@@ -345,17 +325,7 @@ int main(int argc, char** argv) {
   
   
   
-  if (decode_monotone) {
-    decoder->SetMonotone(true);
-  }
   
-  if (decode_zero_weights) {
-    decoder->SetZeroWeights(true);
-  }
-  
-  if (decode_nolm) {
-    decoder->SetNoLM(true);
-  }
   
   //scale model weights
   vector<float> weights = StaticData::Instance().GetAllWeights();
