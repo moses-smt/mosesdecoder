@@ -30,15 +30,11 @@ namespace Moses
 {
 using namespace std;
 
-DecodeStepGeneration::DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev)
+DecodeStepGeneration::DecodeStepGeneration(const GenerationDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
 {
 }
 
-const GenerationDictionary &DecodeStepGeneration::GetGenerationDictionary() const
-{
-  return *static_cast<const GenerationDictionary*>(m_ptr);
-}
 
 TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
                                   , const ScoreComponentCollection& generationScore) const
@@ -95,7 +91,7 @@ void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOp
     }
 
   // normal generation step
-  const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionary();
+  const GenerationDictionary &generationDictionary  = decodeStep.GetGenerationDictionaryFeature();
 //  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();

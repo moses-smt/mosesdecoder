@@ -140,10 +140,11 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	const WordsRange &wordsRange = GetTranslationOptionList(startPos, endPos).GetSourceRange();
 
 	TranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
-	const PhraseDictionary &phraseDictionary = decodeStep.GetPhraseDictionary();
+    const PhraseDictionary* phraseDictionary =
+        decodeStep.GetPhraseDictionaryFeature().GetDictionary();
 	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
 	
-	const ChartRuleCollection *chartRuleCollection = phraseDictionary.GetChartRuleCollection(
+	const ChartRuleCollection *chartRuleCollection = phraseDictionary->GetChartRuleCollection(
 																															m_source
 																															, wordsRange
 																															, adhereTableLimit

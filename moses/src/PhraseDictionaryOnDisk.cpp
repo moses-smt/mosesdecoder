@@ -42,8 +42,6 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 {
   m_filePath = filePath;
 	m_tableLimit = tableLimit;
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
 	m_inputFactorsVec		= input;
 	m_outputFactorsVec	= output;
 	

@@ -33,25 +33,20 @@ using namespace std;
 
 namespace Moses
 {
-GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager)
-  : Dictionary(numFeatures)
+  GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager,
+                                             const std::vector<FactorType> &input,
+                                             const std::vector<FactorType> &output)
+  : Dictionary(numFeatures), DecodeFeature(input,output)
 {
 	scoreIndexManager.AddScoreProducer(this);
 }
 
-bool GenerationDictionary::Load(const std::vector<FactorType> &input
-																			, const std::vector<FactorType> &output
-																			, const std::string &filePath
-																			, FactorDirection direction)
+bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {	
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
 
-	//factors	
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
-	VERBOSE(2,"GenerationDictionary: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 	
 	// data from file
 	InputFileStream inFile(filePath);
@@ -76,17 +71,17 @@ bool GenerationDictionary::Load(const std::vector<FactorType> &input
 
 		// inputs
 		vector<string> factorString = Tokenize( token[0], "|" );
-		for (size_t i = 0 ; i < input.size() ; i++)
+        for (size_t i = 0 ; i < GetInput().size() ; i++)
 		{
-			FactorType factorType = input[i];
+            FactorType factorType = GetInput()[i];
 			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
 			inputWord->SetFactor(factorType, factor);
 		}
 
 		factorString = Tokenize( token[1], "|" );
-		for (size_t i = 0 ; i < output.size() ; i++)
+        for (size_t i = 0 ; i < GetOutput().size() ; i++)
 		{
-			FactorType factorType = output[i];
+            FactorType factorType = GetOutput()[i];
 			
 			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
 			outputWord.SetFactor(factorType, factor);

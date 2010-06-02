@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class PhraseDictionary;
+class PhraseDictionaryFeature;
 class TargetPhrase;
 
 //! subclass of DecodeStep for translation step
@@ -36,16 +36,17 @@ class DecodeStepTranslation : public DecodeStep
 {
 public:
 	DecodeStepTranslation(); //! not implemented
-	DecodeStepTranslation(const PhraseDictionary* dict, const DecodeStep* prev);
+	DecodeStepTranslation(const PhraseDictionaryFeature* phraseFeature, const DecodeStep* prev);
 
-  //! returns phrase table (dictionary) for translation step 
-  const PhraseDictionary &GetPhraseDictionary() const;
 
   virtual void Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
+  
+  /** Do any sentence specific initialisation */
+  virtual void InitializeBeforeSentenceProcessing(InputType const& in) const;
 
 	/*! initialize list of partial translation options by applying the first translation step 
 	* Ideally, this function should be in DecodeStepTranslation class
@@ -54,6 +55,7 @@ public:
 															const InputType &source
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit) const;
+    
 private:
 	/*! create new TranslationOption from merging oldTO with mergePhrase
 		This function runs IsCompatible() to ensure the two can be merged

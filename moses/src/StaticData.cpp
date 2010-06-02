@@ -126,7 +126,8 @@ bool StaticData::LoadData(Parameter *parameter)
     size_t translationSystemsCount = m_parameter->GetParam("translation-systems").size();
     if (translationSystemsCount) {
         for (size_t i = 0; i < translationSystemsCount; ++i) {
-            AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
+          //TODO: Config of translation systems  
+          //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
         }
     }
 
@@ -711,12 +712,9 @@ bool StaticData::LoadGenerationTables()
 
 			VERBOSE(1, filePath << endl);
 
-			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager));
+			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager, input,output));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
-			if (!m_generationDictionary.back()->Load(input
-																		, output
-																		, filePath
-																		, Output))
+			if (!m_generationDictionary.back()->Load(filePath, Output))
 			{
 				delete m_generationDictionary.back();
 				return false;
@@ -972,7 +970,7 @@ void StaticData::LoadPhraseBasedParameters()
 		
 }
 	
-vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
+vector<DecodeGraph*> StaticData::GetDecodeStepVL() const
 {
     vector<DecodeGraph*> decodeGraphs;
 	// mapping
@@ -1022,7 +1020,7 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL(const InputType& source) const
 						UserMessage::Add(strme.str());
 						assert(false);
 					}
-				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index]->GetDictionary(source), prev);
+				decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
 			break;
 			case Generate:
 				if(index>=m_generationDictionary.size())
@@ -1071,8 +1069,8 @@ void StaticData::CleanUpAfterSentenceProcessing() const
 	for(size_t i=0;i<m_phraseDictionary.size();++i)
 	{
 		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
-		PhraseDictionary &phraseDictionary = *phraseDictionaryFeature.GetDictionary();
-		phraseDictionary.CleanUp();
+        PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
+		phraseDictionary->CleanUp();
 
 	}
 	

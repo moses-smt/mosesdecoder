@@ -50,10 +50,6 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 		return false;
 	}
 
-	// set Dictionary members
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
-	VERBOSE(2,"PhraseDictionaryTreeAdaptor: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 
 	// set PhraseDictionary members
 	m_tableLimit=tableLimit;

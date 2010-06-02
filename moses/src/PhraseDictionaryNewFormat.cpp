@@ -101,9 +101,6 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 	m_filePath = filePath;
 	m_tableLimit = tableLimit;
 	
-	//factors
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
 	
 	// data from file
 	InputFileStream inFile(filePath);
@@ -125,7 +122,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 	const StaticData &staticData = StaticData::Instance();
 	const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 	
-	VERBOSE(2,"PhraseDictionaryNewFormat: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
+	
 	
 	string line;
 	size_t count = 0;

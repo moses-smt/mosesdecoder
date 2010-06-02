@@ -50,13 +50,14 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
-:m_source(source)
-,m_transOptColl(source.CreateTranslationOptionCollection())
+  Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
+  :m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
 ,m_start(clock())
 ,interrupted_flag(0)
 ,m_hypoId(0)
+,m_system(system)
+    ,m_source(source)
 {
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
@@ -87,7 +88,12 @@ void Manager::ProcessSentence()
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-	vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL(m_source);
+	vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL();
+    for (vector <DecodeGraph*>::iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
+      for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
+        (*j)->InitializeBeforeSentenceProcessing(m_source);
+      }
+    }
 	m_transOptColl->CreateTranslationOptions(decodeGraphs);
 	RemoveAllInColl(decodeGraphs);  
 

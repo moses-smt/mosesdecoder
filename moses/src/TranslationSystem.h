@@ -25,7 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 
+#include "LMList.h"
+
 namespace Moses {
+
+  class DecodeGraph;
+  class LexicalReordering;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -33,25 +38,26 @@ namespace Moses {
 class TranslationSystem {
 
     public:
-        TranslationSystem(const std::string& config);
+      TranslationSystem(const std::string& config,
+                        const std::vector<DecodeGraph*>& allDecoderGraphs,
+                        const std::vector<LexicalReordering*>& allReorderingTables,
+                        const LMList& allLMs);
         
         const std::string& GetId() const {return m_id;}
         
-        //list of identifiers to indicate which tables should be used.
-        const std::vector<size_t>& GetReorderingTableIds() const {return m_reorderingTableIds;}
-        const std::vector<size_t>& GetPhraseTableIds() const {return m_phraseTableIds;}
-        const std::vector<size_t>& GetGenerationTableIds() const {return m_generationTableIds;}
-        const std::vector<size_t>& GetLanguageModelIds() const {return m_languageModelIds;}
+        //Lists of tables relevant to this system.
+        const std::vector<LexicalReordering*>& GetReorderingTables() const {return m_reorderingTables;}
+        const std::vector<DecodeGraph*>& GetDecoderGraphs() const {return m_decoderGraphs;}
+        const LMList& GetLanguageModels() const {return m_languageModels;}
 
         
         
         
     private:
         std::string m_id;
-        std::vector<size_t> m_reorderingTableIds;
-        std::vector<size_t> m_phraseTableIds;
-        std::vector<size_t> m_generationTableIds;
-        std::vector<size_t> m_languageModelIds;
+        std::vector<LexicalReordering*> m_reorderingTables;
+        std::vector<DecodeGraph*> m_decoderGraphs;
+        LMList m_languageModels;
 };
 
 

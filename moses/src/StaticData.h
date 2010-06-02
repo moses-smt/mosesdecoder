@@ -272,7 +272,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::vector<DecodeGraph*> GetDecodeStepVL(const InputType& source) const;
+	std::vector<DecodeGraph*> GetDecodeStepVL() const;
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
 	{ 

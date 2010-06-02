@@ -107,6 +107,7 @@ protected:
 	size_t interrupted_flag;
 	std::auto_ptr<SentenceStats> m_sentenceStats;
     int m_hypoId; //used to number the hypos as they are created.
+    const TranslationSystem* m_system;
 	
   void GetConnectedGraph(
                          std::map< int, bool >* pConnected,
@@ -118,7 +119,7 @@ protected:
 		
 public:
 	InputType const& m_source; /**< source sentence to be translated */
-	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
+	Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system=NULL);
 	~Manager();
     const  TranslationOptionCollection* getSntTranslationOptions(); 
   

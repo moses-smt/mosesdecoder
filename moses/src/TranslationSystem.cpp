@@ -30,7 +30,10 @@ using namespace std;
 
 namespace Moses {
 
-    TranslationSystem::TranslationSystem(const std::string& config) {
+    TranslationSystem::TranslationSystem(const string& config,
+                                        const vector<DecodeGraph*>& allDecoderGraphs,
+                                        const vector<LexicalReordering*>& allReorderingTables,
+                                        const LMList& allLMs) {
         VERBOSE(2,"Creating translation system " << config << endl);
         vector<string> fields;
         Tokenize(fields,config);
@@ -43,13 +46,14 @@ namespace Moses {
             vector<size_t> indexes;
             Tokenize<size_t>(fields[i+1],",");
             if (key == "L") {
-                m_languageModelIds = indexes;
-            } else if (key == "T") {
-                m_phraseTableIds = indexes;
+              //LMs
+               
+            } else if (key == "D") {
+              //decoding graphs
+                
             } else if (key == "R") {
-                m_reorderingTableIds = indexes;
-            } else if (key == "G") {
-                m_generationTableIds = indexes;
+              //reordering tables
+                
             } else {
                 throw runtime_error("Unknown table id in translation systems config");
             }
