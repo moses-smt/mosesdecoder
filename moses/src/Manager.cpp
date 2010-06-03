@@ -88,14 +88,14 @@ void Manager::ProcessSentence()
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-	vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL();
-    for (vector <DecodeGraph*>::iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
+	const vector <DecodeGraph*>& decodeGraphs = staticData.GetDecodeGraphs();
+    //TODO: Move this init into TranslationSystem
+    for (vector <DecodeGraph*>::const_iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
       for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
         (*j)->InitializeBeforeSentenceProcessing(m_source);
       }
     }
 	m_transOptColl->CreateTranslationOptions(decodeGraphs);
-	RemoveAllInColl(decodeGraphs);  
 
   // some reporting on how long this took
   clock_t gotOptions = clock();

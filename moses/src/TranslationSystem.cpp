@@ -29,9 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 
 namespace Moses {
+  
+  const string TranslationSystem::DEFAULT = "default";
 
     TranslationSystem::TranslationSystem(const string& config,
-                                        const vector<DecodeGraph*>& allDecoderGraphs,
+                                        const vector<DecodeGraph*>& allDecodeGraphs,
                                         const vector<LexicalReordering*>& allReorderingTables,
                                         const LMList& allLMs) {
         VERBOSE(2,"Creating translation system " << config << endl);
@@ -59,5 +61,13 @@ namespace Moses {
             }
         }
     }
+    
+    TranslationSystem::TranslationSystem(const vector<DecodeGraph*>& allDecodeGraphs,
+                                         const vector<LexicalReordering*>& allReorderingTables,
+                                         const LMList& allLMs) :
+        m_id(DEFAULT),
+    m_decodeGraphs(allDecodeGraphs),
+    m_reorderingTables(allReorderingTables),
+    m_languageModels(allLMs) {}
 
 };

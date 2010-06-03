@@ -38,8 +38,14 @@ namespace Moses {
 class TranslationSystem {
 
     public:
+      /** Creates a system with the given configuration */
       TranslationSystem(const std::string& config,
                         const std::vector<DecodeGraph*>& allDecoderGraphs,
+                        const std::vector<LexicalReordering*>& allReorderingTables,
+                        const LMList& allLMs);
+      
+      /** Creates a default system */
+      TranslationSystem(const std::vector<DecodeGraph*>& allDecoderGraphs,
                         const std::vector<LexicalReordering*>& allReorderingTables,
                         const LMList& allLMs);
         
@@ -47,16 +53,18 @@ class TranslationSystem {
         
         //Lists of tables relevant to this system.
         const std::vector<LexicalReordering*>& GetReorderingTables() const {return m_reorderingTables;}
-        const std::vector<DecodeGraph*>& GetDecoderGraphs() const {return m_decoderGraphs;}
+        const std::vector<DecodeGraph*>& GetDecoderGraphs() const {return m_decodeGraphs;}
         const LMList& GetLanguageModels() const {return m_languageModels;}
+        
+        static const  std::string DEFAULT;
 
         
         
         
     private:
         std::string m_id;
+        std::vector<DecodeGraph*> m_decodeGraphs;
         std::vector<LexicalReordering*> m_reorderingTables;
-        std::vector<DecodeGraph*> m_decoderGraphs;
         LMList m_languageModels;
 };
 

@@ -124,12 +124,7 @@ bool StaticData::LoadData(Parameter *parameter)
     
     //option to specify multiple translation systems.
     size_t translationSystemsCount = m_parameter->GetParam("translation-systems").size();
-    if (translationSystemsCount) {
-        for (size_t i = 0; i < translationSystemsCount; ++i) {
-          //TODO: Config of translation systems  
-          //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
-        }
-    }
+    
 
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
@@ -447,6 +442,20 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadGlobalLexicalModel()) return false;
+    if (!LoadDecodeGraphs()) return false;
+    
+
+    
+    //configure the translation systems with these tables
+    if (translationSystemsCount) {
+      for (size_t i = 0; i < translationSystemsCount; ++i) {
+          //TODO: Config of translation systems  
+          //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
+      }
+    } else {
+      //Create the default translation system
+      AddTranslationSystem(TranslationSystem(m_decodeGraphs, m_reorderModels, m_languageModel));
+    }
 
 	m_scoreIndexManager.InitFeatureNames();
 
@@ -481,6 +490,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
+    RemoveAllInColl(m_decodeGraphs);
 	
 	// delete trans opt
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
@@ -970,10 +980,12 @@ void StaticData::LoadPhraseBasedParameters()
 		
 }
 	
-vector<DecodeGraph*> StaticData::GetDecodeStepVL() const
+const vector<DecodeGraph*>& StaticData::GetDecodeGraphs() const
 {
-    vector<DecodeGraph*> decodeGraphs;
-	// mapping
+  return m_decodeGraphs; 
+}
+
+bool StaticData::LoadDecodeGraphs() {
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");
 	const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
 
@@ -1039,28 +1051,28 @@ vector<DecodeGraph*> StaticData::GetDecodeStepVL() const
 		}
 		
 		assert(decodeStep);
-		if (decodeGraphs.size() < decodeGraphInd + 1) 
+		if (m_decodeGraphs.size() < decodeGraphInd + 1) 
 		{
 			DecodeGraph *decodeGraph;
 			if (m_searchAlgorithm == ChartDecoding)
 			{
 				size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-				decodeGraph = new DecodeGraph(decodeGraphs.size(), maxChartSpan);
+				decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
 			}
 			else
 			{
-				decodeGraph = new DecodeGraph(decodeGraphs.size());
+				decodeGraph = new DecodeGraph(m_decodeGraphs.size());
 			}
 			
-			decodeGraphs.push_back(decodeGraph); // TODO max chart span
+			m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
 		}
 		
-		decodeGraphs[decodeGraphInd]->Add(decodeStep);
+		m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
 		prev = decodeStep;
 		prevDecodeGraphInd = decodeGraphInd;
 	}
 	
-	return decodeGraphs;
+    return true;
 }
 
 void StaticData::CleanUpAfterSentenceProcessing() const

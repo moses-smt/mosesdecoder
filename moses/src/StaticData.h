@@ -84,6 +84,7 @@ protected:
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+    std::vector<DecodeGraph*> m_decodeGraphs;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
     std::map<std::string, TranslationSystem> m_translationSystems;
@@ -222,6 +223,7 @@ protected:
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
+    bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
     void AddTranslationSystem(const TranslationSystem& system);
@@ -272,7 +274,7 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::vector<DecodeGraph*> GetDecodeStepVL() const;
+	const std::vector<DecodeGraph*>& GetDecodeGraphs() const;
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
 	{ 

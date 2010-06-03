@@ -43,14 +43,14 @@ namespace MosesChart
 Manager::Manager(InputType const& source)
 :m_source(source)
 ,m_hypoStackColl(source, *this)
-,m_transOptColl(source, StaticData::Instance().GetDecodeStepVL(), m_hypoStackColl)
+    ,m_transOptColl(source, StaticData::Instance().GetDecodeGraphs(), m_hypoStackColl)
 {
     
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
     
-    vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL();
-    for (vector <DecodeGraph*>::iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
+    const vector <DecodeGraph*>& decodeGraphs = staticData.GetDecodeGraphs();
+    for (vector <DecodeGraph*>::const_iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
       for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
         (*j)->InitializeBeforeSentenceProcessing(m_source);
       }
