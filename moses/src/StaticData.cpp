@@ -491,6 +491,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
     RemoveAllInColl(m_decodeGraphs);
+    m_languageModel.CleanUp();
 	
 	// delete trans opt
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;

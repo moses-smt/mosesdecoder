@@ -62,7 +62,6 @@ TranslationOptionCollection::~TranslationOptionCollection()
 	RemoveAllInColl(m_unksrcs);
 	RemoveAllInColl(m_cacheChartRule);
 	RemoveAllInColl(m_cacheTargetPhrase);
-	RemoveAllInColl(m_decodeGraphList);
 
 	std::list<std::vector<Moses::WordConsumed*>* >::iterator iterOuter;
 	for (iterOuter = m_cachedWordsConsumed.begin(); iterOuter != m_cachedWordsConsumed.end(); ++iterOuter)

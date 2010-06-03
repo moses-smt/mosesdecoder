@@ -31,6 +31,10 @@ namespace Moses
 {
 LMList::~LMList()
 {
+}
+
+void LMList::CleanUp() 
+{
 	RemoveAllInColl(m_coll);
 }
 	
