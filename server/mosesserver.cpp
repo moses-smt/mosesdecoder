@@ -10,6 +10,7 @@
 #include "Manager.h"
 #include "StaticData.h"
 #include "PhraseDictionaryDynSuffixArray.h"
+#include "TranslationSystem.h"
 
 using namespace Moses;
 using namespace std;
@@ -31,9 +32,8 @@ public:
       const params_t params = paramList.getStruct(0);
       breakOutParams(params);
       const StaticData &staticData = StaticData::Instance();
-      InputType* dummy=0;
       PhraseDictionaryFeature* pdf = staticData.GetPhraseDictionaries()[0];  
-      PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(*dummy); 
+      PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(); 
       cerr << "Inserting into address " << pdsa << endl;
       pdsa->insertSnt(source_, target_, alignment_);
       cerr << "Done inserting\n";
@@ -105,13 +105,16 @@ public:
         if (addGraphInfo) {
             (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
         }
-
+        
+        //TODO: Get from xml
+        const TranslationSystem& system = staticData.GetTranslationSystem("de");
+        
         Sentence sentence(Input);
         const vector<FactorType> &inputFactorOrder = 
             staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence,staticData.GetSearchAlgorithm());
+        Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
