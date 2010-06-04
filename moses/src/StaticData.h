@@ -274,7 +274,6 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	const std::vector<DecodeGraph*>& GetDecodeGraphs() const;
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
 	{ 
@@ -313,10 +312,10 @@ public:
 	{ 
 		return m_maxPhraseLength;
 	}
-	const std::vector<LexicalReordering*> &GetReorderModels() const
+	/*const std::vector<LexicalReordering*> &GetReorderModels() const
 	{
 		return m_reorderModels;
-	}
+    }*/
 	float GetWeightDistortion() const
 	{
 		return m_weightDistortion;
@@ -412,9 +411,10 @@ public:
                 m_translationSystems.find(id);
         VERBOSE(2, "Looking for translation system id " << id << std::endl);
         if (iter == m_translationSystems.end()) {
+          VERBOSE(1, "Translation system not found " << id << std::endl);
             throw std::runtime_error("Unknown translation system id");
         } else {
-            return iter->second;
+          return iter->second;
         }
     }
     

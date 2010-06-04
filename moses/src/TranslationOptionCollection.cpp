@@ -375,12 +375,14 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeGraph*> &decodeStepVL)
+void TranslationOptionCollection::CreateTranslationOptions(const TranslationSystem* system)
 {
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
+  
+    const vector <DecodeGraph*> &decodeStepVL = system->GetDecodeGraphs();
 
 	size_t size = m_source.GetSize();
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
@@ -412,7 +414,7 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 	CalcFutureScore();
 
 	// Cached lex reodering costs
-	CacheLexReordering();
+	CacheLexReordering(system->GetReorderModels());
 }
 
 void TranslationOptionCollection::Sort()
@@ -613,9 +615,8 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
 	return out;
 }
 
-void TranslationOptionCollection::CacheLexReordering()
+void TranslationOptionCollection::CacheLexReordering(const vector<LexicalReordering*> &lexReorderingModels)
 {
-	const std::vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetReorderModels();
 
 	std::vector<LexicalReordering*>::const_iterator iterLexreordering;
 

@@ -142,7 +142,8 @@ int main(int argc, char* argv[])
     VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
 		//cerr << *source << endl;
 		
-		MosesChart::Manager manager(*source);
+    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+		MosesChart::Manager manager(*source, &system);
 		manager.ProcessSentence();
 
 		assert(!staticData.UseMBR());

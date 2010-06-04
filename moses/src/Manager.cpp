@@ -51,12 +51,12 @@ using namespace std;
 namespace Moses
 {
   Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
-  :m_transOptColl(source.CreateTranslationOptionCollection())
+  :m_system(system)
+,m_transOptColl(source.CreateTranslationOptionCollection())
 ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
 ,m_start(clock())
 ,interrupted_flag(0)
 ,m_hypoId(0)
-,m_system(system)
     ,m_source(source)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -84,18 +84,17 @@ Manager::~Manager()
 void Manager::ProcessSentence()
 {
 	// reset statistics
-	const StaticData &staticData = StaticData::Instance();
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-	const vector <DecodeGraph*>& decodeGraphs = staticData.GetDecodeGraphs();
+	const vector <DecodeGraph*>& decodeGraphs = m_system->GetDecodeGraphs();
     //TODO: Move this init into TranslationSystem
     for (vector <DecodeGraph*>::const_iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
       for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
         (*j)->InitializeBeforeSentenceProcessing(m_source);
       }
     }
-	m_transOptColl->CreateTranslationOptions(decodeGraphs);
+	m_transOptColl->CreateTranslationOptions(m_system);
 
   // some reporting on how long this took
   clock_t gotOptions = clock();
@@ -311,7 +310,7 @@ void Manager::CalcDecoderStatistics() const
   }
 }
 
-void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId)
+void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId, const TranslationSystem* system)
 {
 	const StaticData &staticData = StaticData::Instance();
 
@@ -362,7 +361,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
 
 			// lexicalised re-ordering
-			const std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
+			const std::vector<LexicalReordering*> &lexOrderings = system->GetReorderModels();
 			std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
 			for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering)
 			{
@@ -404,7 +403,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 		for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
 		{
 			const Hypothesis *hypo = *iterHypo;
-			OutputWordGraph(outputWordGraphStream, hypo, linkId);
+			OutputWordGraph(outputWordGraphStream, hypo, linkId, m_system);
 			
 			if (outputNBest)
 			{
@@ -415,7 +414,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 					for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
 					{
 						const Hypothesis *loserHypo = *iterArcList;
-						OutputWordGraph(outputWordGraphStream, loserHypo, linkId);
+						OutputWordGraph(outputWordGraphStream, loserHypo, linkId,m_system);
 					}
 				}
 			} //if (outputNBest)

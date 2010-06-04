@@ -52,8 +52,8 @@ class TranslationSystem {
         const std::string& GetId() const {return m_id;}
         
         //Lists of tables relevant to this system.
-        const std::vector<LexicalReordering*>& GetReorderingTables() const {return m_reorderingTables;}
-        const std::vector<DecodeGraph*>& GetDecoderGraphs() const {return m_decodeGraphs;}
+        const std::vector<LexicalReordering*>& GetReorderModels() const {return m_reorderingTables;}
+        const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
         const LMList& GetLanguageModels() const {return m_languageModels;}
         
         static const  std::string DEFAULT;

@@ -138,7 +138,8 @@ class TranslationTask : public Task {
 #endif
             const StaticData &staticData = StaticData::Instance();
             Sentence sentence(Input);
-            Manager manager(*m_source,staticData.GetSearchAlgorithm());
+            const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+            Manager manager(*m_source,staticData.GetSearchAlgorithm(), &system);
             manager.ProcessSentence();
                         
             //Word Graph

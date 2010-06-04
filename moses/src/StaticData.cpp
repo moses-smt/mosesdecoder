@@ -980,11 +980,6 @@ void StaticData::LoadPhraseBasedParameters()
 	m_allWeights.push_back(m_weightDistortion);
 		
 }
-	
-const vector<DecodeGraph*>& StaticData::GetDecodeGraphs() const
-{
-  return m_decodeGraphs; 
-}
 
 bool StaticData::LoadDecodeGraphs() {
 	const vector<string> &mappingVector = m_parameter->GetParam("mapping");

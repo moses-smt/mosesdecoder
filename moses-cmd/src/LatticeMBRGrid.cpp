@@ -171,7 +171,8 @@ int main(int argc, char* argv[]) {
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
         ++lineCount;
         Sentence sentence(Input);
-        Manager manager(*source,staticData.GetSearchAlgorithm());
+        const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+        Manager manager(*source,staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         TrellisPathList nBestList;
         manager.CalcNBest(nBestSize, nBestList,true);

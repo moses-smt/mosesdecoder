@@ -92,7 +92,7 @@ protected:
 
 	//! implemented by inherited class, called by this class
 	virtual void ProcessUnknownWord(size_t sourcePos)=0;
-	void CacheLexReordering();
+    void CacheLexReordering(const std::vector<LexicalReordering*> &lexReorderingModels);
 
 public:
   virtual ~TranslationOptionCollection();
@@ -104,7 +104,7 @@ public:
 	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector <DecodeGraph*> &decodeStepVL);
+    virtual void CreateTranslationOptions(const TranslationSystem* system);
 	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
 																			, size_t startPosition

@@ -29,6 +29,7 @@
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/TrellisPathList.h"
 #include "../../moses/src/SentenceStats.h"
+#include "../../moses/src/TranslationSystem.h"
 
 namespace MosesChart
 {
@@ -43,9 +44,10 @@ protected:
 	ChartCellCollection m_hypoStackColl;
 	TranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   std::auto_ptr<Moses::SentenceStats> m_sentenceStats;
+  const Moses::TranslationSystem* m_system;
 
 public:
-	Manager(Moses::InputType const& source);
+  Manager(Moses::InputType const& source, const Moses::TranslationSystem* system);
 	~Manager();
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
