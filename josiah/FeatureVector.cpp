@@ -19,6 +19,8 @@
 
 */
 
+#include <algorithm>
+#include <cassert>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -32,12 +34,38 @@ namespace Josiah {
   
   static const string SEP = "_";
   
+  FName::FName(const std::string& namestring) {
+    size_t sep = namestring.find(SEP);
+    if (sep != string::npos) {
+      root = namestring.substr(0,sep);
+      name = namestring.substr(sep+1);
+    } else {
+      root = namestring;
+      name = "";
+    }
+  }
+  
   std::ostream& operator<<( std::ostream& out, const FName& name) {
     out << name.root << SEP << name.name;
     return out;
   }
   
-   FVector::FVector() {}
+  bool FName::operator==(const FName& rhs) const {
+    return root == rhs.root && name == rhs.name;
+  }
+  
+  bool FName::operator!=(const FName& rhs) const {
+    return ! (*this == rhs);
+  }
+  
+   FVector::FVector(FValue defaultValue)  {
+    m_features[DEFAULT_NAME] = defaultValue;
+   }
+   
+   void FVector::clear() {
+    m_features.clear();
+    m_features[DEFAULT_NAME] = DEFAULT;
+   }
    
    void FVector::load(const std::string& filename) {
      ifstream in (filename.c_str());
@@ -54,15 +82,7 @@ namespace Josiah {
        FValue value;
        linestream >> namestring;
        linestream >> value;
-       size_t sep = namestring.find(SEP);
-       string root,name;
-       if (sep != string::npos) {
-         root = namestring.substr(0,sep);
-         name = namestring.substr(sep+1);
-       } else {
-         root = namestring;
-       }
-       FName fname(root,name);
+       FName fname(namestring);
        set(fname,value);
      }
   }
@@ -84,7 +104,8 @@ namespace Josiah {
     }
   }
    
-   FValue FVector::DEFAULT = 0.0;
+   FName FVector::DEFAULT_NAME("DEFAULT","");
+   const FValue FVector::DEFAULT = 0;
    
    ProxyFVector FVector::operator[](const FName& name) {
       // At this point, we don't know whether operator[] was called, so we return
@@ -93,18 +114,22 @@ namespace Josiah {
 
    }
    
-   const FValue& FVector::operator[](const FName& name) const {
-     return get(name);
+   FValue FVector::operator[](const FName& name) const {
+     return get(name) + get(DEFAULT_NAME);
    }
    
-   bool FVector::hasValue(const FName& name) const {
-    return m_features.find(name) != m_features.end();
-   }
+   
    
   ostream& FVector::print(ostream& out) const {
-    out << "{";  
+    out << "{";
     for (const_iterator i = begin(); i != end(); ++i) {
-      out << i->first << ":" << i->second << ",";
+      FValue value = i->second;
+      if (i->first != DEFAULT_NAME) {
+        value += get(DEFAULT_NAME);
+      }
+      if (i->first != DEFAULT_NAME || i->second != 0.0) {
+        out << i->first << "=" << value << ", ";
+      }
     }
     out << "}";
     return out;
@@ -128,11 +153,12 @@ namespace Josiah {
   }
   
   FVector& FVector::operator+= (const FVector& rhs) {
+    //default value will take care of itself here.
     for (iterator i = begin(); i != end(); ++i) {
-      set(i->first,i->second + rhs[i->first]);
+      set(i->first,i->second + rhs.get(i->first));
     }
     for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
-      if (!hasValue(i->first)) {
+      if (!hasNonDefaultValue(i->first)) {
         set(i->first,i->second);
       }
     }
@@ -141,18 +167,103 @@ namespace Josiah {
   
   FVector& FVector::operator-= (const FVector& rhs) {
     for (iterator i = begin(); i != end(); ++i) {
-      set(i->first,i->second - rhs[i->first]);
+      set(i->first,i->second - rhs.get(i->first));
     }
     for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
-      if (!hasValue(i->first)) {
+      if (!hasNonDefaultValue(i->first)) {
         set(i->first,-(i->second));
       }
     }
     return *this;
   }
   
+  FVector& FVector::operator*= (const FVector& rhs) {
+    FValue lhsDefault = get(DEFAULT_NAME);
+    FValue rhsDefault = rhs.get(DEFAULT_NAME);
+    for (iterator i = begin(); i != end(); ++i) {
+      if (i->first == DEFAULT_NAME) {
+        set(i->first,lhsDefault*rhsDefault);
+      } else {
+        FValue lhsValue = i->second;
+        FValue rhsValue = rhs.get(i->first);
+        set(i->first, lhsValue*rhsDefault + rhsValue*lhsDefault + lhsValue*rhsValue);
+      }
+    }
+    if (lhsDefault) {
+      //Features that have the default value in the lhs
+      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+        if (!hasNonDefaultValue(i->first)) {
+          set(i->first, lhsDefault*i->second);
+        }
+      }
+    }
+    return *this;
+  }
+  
+  FVector& FVector::operator/= (const FVector& rhs) {
+    FValue lhsDefault = get(DEFAULT_NAME);
+    FValue rhsDefault = rhs.get(DEFAULT_NAME);
+    if (lhsDefault && !rhsDefault) {
+      throw runtime_error("Attempt to divide feature vectors where lhs has default and rhs does not");
+    }
+    FValue quotientDefault = 0;
+    if (rhsDefault) {
+      quotientDefault = lhsDefault / rhsDefault;
+    }
+    for (iterator i = begin(); i != end(); ++i) {
+      if (i->first == DEFAULT_NAME) {
+        set(i->first, quotientDefault);
+      } else {
+        FValue lhsValue = i->second;
+        FValue rhsValue = rhs.get(i->first);
+        set(i->first, (lhsValue + lhsDefault) / (rhsValue + rhsDefault) - quotientDefault);
+      }
+    }
+    if (lhsDefault) {
+      //Features that have the default value in the lhs
+      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+        if (!hasNonDefaultValue(i->first)) {
+          set(i->first, lhsDefault / (i->second + rhsDefault) - quotientDefault);
+        }
+      }
+    }
+    return *this;
+  }
+  
+    FVector& FVector::max_equals(const FVector& rhs) {
+      FValue lhsDefault = get(DEFAULT_NAME);
+      FValue rhsDefault = rhs.get(DEFAULT_NAME);
+      FValue maxDefault = max(lhsDefault,rhsDefault);
+      for (iterator i = begin(); i != end(); ++i) {
+        if (i->first == DEFAULT_NAME) {
+          set(i->first, maxDefault);
+        } else {
+          set(i->first, max(i->second + lhsDefault, rhs.get(i->first) + rhsDefault) - maxDefault);
+        }
+      }
+      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+        if (!hasNonDefaultValue(i->first)) {
+          set(i->first, max(lhsDefault, (i->second + rhsDefault)) - maxDefault);
+        }
+      }
+      
+      
+      return *this;
+    }
+  
+  FVector& FVector::operator+= (const FValue& rhs) {
+    set(DEFAULT_NAME, get(DEFAULT_NAME) + rhs);
+    return *this;
+  }
+  
+  FVector& FVector::operator-= (const FValue& rhs) {
+    set(DEFAULT_NAME, get(DEFAULT_NAME) - rhs);
+    return *this;
+  }
+  
   FVector& FVector::operator*= (const FValue& rhs) {
     //NB Could do this with boost::bind ?
+    //This multiplies the default value, which is what we want
     for (iterator i = begin(); i != end(); ++i) {
       i->second *= rhs;
     }
@@ -161,17 +272,61 @@ namespace Josiah {
   
   
   FVector& FVector::operator/= (const FValue& rhs) {
+     //This dividess the default value, which is what we want
     for (iterator i = begin(); i != end(); ++i) {
       i->second /= rhs;
     }
     return *this;
   }
   
+
+  
+  FValue FVector::inner_product(const FVector& rhs) const {
+    FValue lhsDefault = get(DEFAULT_NAME);
+    FValue rhsDefault = rhs.get(DEFAULT_NAME);
+    if (lhsDefault && rhsDefault) {
+      throw runtime_error("Cannot take inner product if both lhs and rhs have default values");
+    }
+    FValue product = 0.0;
+    for (const_iterator i = begin(); i != end(); ++i) {
+      if (i->first != DEFAULT_NAME) {
+        product += (i->second + lhsDefault)*(rhs.get(i->first) + rhsDefault);
+      }
+    }
+    
+    if (lhsDefault) {
+      //Features that have the default value in the rhs
+      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+        if (!hasNonDefaultValue(i->first)) {
+          product += (i->second + rhsDefault)*lhsDefault;
+        }
+      }
+    }
+    return product;
+  }
+  
+  
   const FVector operator+(const FVector& lhs, const FVector& rhs) {
     return FVector(lhs) += rhs;
   }
   
   const FVector operator-(const FVector& lhs, const FVector& rhs) {
+    return FVector(lhs) -= rhs;
+  }
+  
+   const FVector operator*(const FVector& lhs, const FVector& rhs) {
+    return FVector(lhs) *= rhs;
+  }
+  
+  const FVector operator/(const FVector& lhs, const FVector& rhs) {
+    return FVector(lhs) /= rhs;
+  }
+  
+  const FVector operator+(const FVector& lhs, const FValue& rhs) {
+    return FVector(lhs) += rhs;
+  }
+  
+  const FVector operator-(const FVector& lhs, const FValue& rhs) {
     return FVector(lhs) -= rhs;
   }
   
@@ -183,15 +338,15 @@ namespace Josiah {
     return FVector(lhs) /= rhs;
   }
   
-  FValue operator*(const FVector& lhs, const FVector& rhs) {
+  const FVector fvmax(const FVector& lhs, const FVector& rhs) {
+    return FVector(lhs).max_equals(rhs);
+  }
+  
+  FValue inner_product(const FVector& lhs, const FVector& rhs) {
     if (lhs.size() >= rhs.size()) {
-      FValue prod = 0;
-      for (FVector::const_iterator i = lhs.begin(); i != lhs.end(); ++i) {
-        prod += i->second * rhs[i->first];
-      }
-      return prod;
+      return rhs.inner_product(lhs);
     } else {
-      return rhs*lhs;
+      return lhs.inner_product(rhs);
     }
   }
 

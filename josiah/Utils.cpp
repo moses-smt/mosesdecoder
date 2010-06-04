@@ -8,8 +8,10 @@
 #include "Dependency.h"
 #include "DiscriminativeLMFeature.h"
 #include "ParenthesisFeature.h"
+#include "Phrasefeature.h"
 #include "PosProjectionFeature.h"
 #include "SourceToTargetRatio.h"
+#include "WordPenaltyFeature.h"
 
 namespace po = boost::program_options;
 
@@ -50,6 +52,11 @@ namespace Josiah {
 
   
   void configure_features_from_file(const std::string& filename, feature_vector& fv){
+    //Core features
+    fv.push_back(feature_handle(new WordPenaltyFeature()));
+    fv.push_back(feature_handle(new PhraseFeature()));
+    
+    
     std::cerr << "Reading extra features from " << filename << std::endl;
     std::ifstream in(filename.c_str());
     if (!in) {

@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 
-#include "ScoreComponentCollection.h"
+#include "FeatureVector.h"
 #include "WordsRange.h"
 #include "Phrase.h"
 #include "Factor.h"
@@ -45,7 +45,7 @@ class Sample;
       Derivation(const Sample& sample);
       void getTargetSentence(std::vector<std::string>&) const;
       int getTargetSentenceSize() const;
-      const ScoreComponentCollection& getFeatureValues() const {return m_featureValues;}
+      const FVector& getFeatureValues() const {return m_featureValues;}
       float getScore() const {return m_score;}
       void getTargetFactors(std::vector<const Factor*>& sentence) const;
       bool operator<(const Derivation& other) const;
@@ -64,8 +64,8 @@ class Sample;
       
     private:
       std::vector<PhraseAlignment> m_alignments; //in target order
-      ScoreComponentCollection m_featureValues;
-      float m_score;
+      FVector m_featureValues;
+      FValue m_score;
       //std::vector<std::string> m_targetWords;
   };
   

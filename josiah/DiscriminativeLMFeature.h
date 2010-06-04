@@ -42,31 +42,32 @@ class DiscriminativeLMBigramFeature : public FeatureFunction {
         virtual void updateTarget();
         
         /** Assign the total score of this feature on the current hypo */
-        virtual void assignScore(ScoreComponentCollection& scores);
+        virtual void assignScore(FVector& scores);
     
         /** Score due to one segment */
-        virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores);
+        virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores);
         /** Score due to two segments. The left and right refer to the target positions.**/
         virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                              const TargetGap& gap, ScoreComponentCollection& scores);
+                                              const TargetGap& gap, FVector& scores);
         virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores);
+                const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores);
     
         /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
         virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                  const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) ;
+                                  const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) ;
         
         
     private:
-        void scoreBigram(const Word& word1, const Word& word2, std::vector<float>& scores);
+        void scoreBigram(const Word& word1, const Word& word2, FVector& scores);
         /** Score change due to filling in the gapPhrase in the gap.*/
-        void doUpdate(const Phrase& gapPhrase, const TargetGap& gap);
+        void doUpdate(const Phrase& gapPhrase, const TargetGap& gap, FVector& scores);
         
         std::map<std::string, std::map<std::string, size_t> > m_bigrams;
         const Sample* m_sample;
         std::vector<Word> m_targetWords;
-        std::vector<float> m_scores;
         size_t m_numValues;
+        
+        static const std::string ROOTNAME;
 };
 
 

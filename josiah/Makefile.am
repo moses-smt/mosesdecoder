@@ -33,7 +33,9 @@ josiah_SOURCES = Derivation.cpp \
     SufficientStats.cpp \
     GibbsOperatorIterator.cpp \
     GibblerAnnealedExpectedLossTrainer.cpp \
-    WeightManager.cpp
+    WeightManager.cpp \
+    WordPenaltyFeature.cpp \
+    PhraseFeature.cpp
 
 
 #m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
@@ -73,7 +75,9 @@ corpustrainer_SOURCES = Derivation.cpp \
     OnlineLearner.cpp \
     GibbsOperatorIterator.cpp \
     CorpusTrainer.cpp  \
-    WeightManager.cpp
+    WeightManager.cpp \
+    WordPenaltyFeature.cpp \
+    PhraseFeature.cpp
    
 
 samplerank_SOURCES = Derivation.cpp \
@@ -107,7 +111,9 @@ samplerank_SOURCES = Derivation.cpp \
    SampleAcceptor.cpp \
     GibbsOperatorIterator.cpp \
     OnlineLearnerTrainer.cpp  \
-    WeightManager.cpp
+    WeightManager.cpp \
+    WordPenaltyFeature.cpp \
+    PhraseFeature.cpp
    
 fv_SOURCES = FeatureVector.cpp FV.cpp
 

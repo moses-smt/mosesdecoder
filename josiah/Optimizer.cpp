@@ -2,10 +2,8 @@
 
 #include <iostream>
 
-#include "ScoreComponentCollection.h"
 
 using namespace std;
-using namespace Moses;
 
 namespace Josiah {
 
@@ -14,20 +12,16 @@ Optimizer::~Optimizer() {}
   
 
 void Optimizer::Optimize(
-     float f,
-     const ScoreComponentCollection x,
-     const ScoreComponentCollection& gr,
-     ScoreComponentCollection* new_x
+     FValue f,
+     const FVector x,
+     const FVector& gr,
+     FVector* new_x
      ) {
-  assert(new_x);
-  assert(x.size() == gr.size());
-  assert(x.size() == new_x->size());
   ++iteration_;
-  ScoreComponentCollection gradient = gr;
+  FVector gradient = gr;
   if (use_gaussian_prior_) {
-    assert(means_.size() == gradient.size());
-    for (size_t i = 0; i < gradient.size(); ++i)
-      gradient[i] -= (x[i] - means_[i]) / variance_;
+    gradient -= mean_;
+    gradient /= variance_;
   }
   cerr << "OPTIMIZER ITERATION #" << iteration_ << endl;
   cerr << "  CURR VALUES: " << x << endl;
@@ -45,59 +39,57 @@ void Optimizer::Optimize(
 }
 
 void DumbStochasticGradientDescent::OptimizeImpl(
-     float f,
-     const ScoreComponentCollection& x,
-     const ScoreComponentCollection& gradient,
-     ScoreComponentCollection* new_x) {
-  (void) f;  // don't care about the function value!
-  ScoreComponentCollection g = gradient;
-  g.MultiplyEquals(eta_);
+     FValue f,
+     const FVector& x,
+     const FVector& gradient,
+     FVector* new_x) {
+  FVector g = gradient;
+  g *= eta_;
   *new_x = x;
-  new_x->PlusEquals(g);
+  *new_x += g;
 }
 
 void ExponentiatedGradientDescent::OptimizeImpl(
-     float f,
-     const ScoreComponentCollection& x,
-     const ScoreComponentCollection& gradient,
-     ScoreComponentCollection* new_x) {
-  (void) f;
-  assert(x.size() == eta_.size());
-  for (unsigned i = 0; i < eta_.size(); ++i) {
-    eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + mu_ * gradient[i] * (eta_[i] * prev_g_[i]));
-  }
+     FValue,
+     const FVector& x,
+     const FVector& gradient,
+     FVector* new_x) {
+  //for (unsigned i = 0; i < eta_.size(); ++i) {
+    //eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + mu_ * gradient[i] * (eta_[i] * prev_g_[i]));
+    eta_ *= fvmax(min_multiplier_, 1.0 + mu_ * gradient * eta_ * prev_g_);
+  //}
   cerr << "ETA: " << eta_ << endl;
   *new_x = gradient;
-  new_x->MultiplyEquals(eta_);
-  new_x->PlusEquals(x);
+  *new_x *= eta_;
+  *new_x += x;
   cerr << "New x: " << *new_x << endl;
   prev_g_ = gradient;
 }
   
 void MetaNormalizedExponentiatedGradientDescent::OptimizeImpl(
-     float f,
-     const ScoreComponentCollection& x,
-     const ScoreComponentCollection& gradient,
-     ScoreComponentCollection* new_x) {
+     FValue,
+     const FVector& x,
+     const FVector& gradient,
+     FVector* new_x) {
   
-  (void) f;
-  assert(x.size() == eta_.size());
-  assert(x.size() == v_.size());
+
     
   cerr << "Curr x: " << x << endl;
-  for (unsigned i = 0; i < v_.size(); ++i) {
-    v_[i] = gamma_ * v_[i] + ((1 - gamma_) * gradient[i] * gradient[i]);  
-  }
+  //for (unsigned i = 0; i < v_.size(); ++i) {
+    //v_[i] = gamma_ * v_[i] + ((1 - gamma_) * gradient[i] * gradient[i]);
+    v_ = gamma_ * v_ + ((1-gamma_) * gradient * gradient);
+  //}
     
-  for (unsigned i = 0; i < eta_.size(); ++i) {
-    eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + ((mu_ * gradient[i] *  prev_g_[i])/ v_[i]));
-  }
+  //for (unsigned i = 0; i < eta_.size(); ++i) {
+    //eta_[i] = eta_[i] * max(min_multiplier_, 1.0f + ((mu_ * gradient[i] *  prev_g_[i])/ v_[i]));
+    eta_ = eta_ * fvmax(min_multiplier_, 1 + ((mu_ * gradient * prev_g_) / v_));
+  //}
   
   cerr << "ETA: " << eta_ << endl;
   *new_x = gradient;
-  new_x->MultiplyEquals(eta_);
+  *new_x *= eta_;
   cerr << "Gradient * ETA: " << *new_x << endl;
-  new_x->PlusEquals(x);
+  *new_x += x;
   cerr << "New x: " << *new_x << endl;
   prev_g_ = gradient;
 }

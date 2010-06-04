@@ -7,7 +7,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_smallint.hpp>
 
-#include "ScoreComponentCollection.h"
+#include "FeatureVector.h"
 #include "InputSource.h"
 
 namespace Josiah {
@@ -32,19 +32,19 @@ class ExpectedBleuTrainer : public InputSource {
   virtual bool HasMore() const;
   virtual void GetSentence(std::string* sentence, int* lineno);
   void IncorporateGradient(
-       const float trans_len,
-       const float ref_len,
-       const float exp_gain,
-       const float unreg_exp_gain,
-       const Moses::ScoreComponentCollection& grad,
+       const FValue trans_len,
+       const FValue ref_len,
+       const FValue exp_gain,
+       const FValue unreg_exp_gain,
+       const FVector& grad,
        Decoder* decoder);
   void IncorporateCorpusGradient(
-                                                      const float trans_len,
-                                 const float ref_len,
-                                                      const float exp_gain,
-                                                      const float unreg_exp_gain,
-                                 const Moses::ScoreComponentCollection& grad,
-                                 Decoder* decoder) ;
+      const FValue trans_len,
+      const FValue ref_len,
+      const FValue exp_gain,
+      const FValue unreg_exp_gain,
+      const FVector& grad,
+      Decoder* decoder) ;
   int GetCurr() { return cur;}
   int GetCurrEnd() { return cur_end;}
 
@@ -55,7 +55,7 @@ class ExpectedBleuTrainer : public InputSource {
   int cur_end;
   std::vector<std::string> corpus;
   bool keep_going;
-  Moses::ScoreComponentCollection gradient;
+  FVector gradient;
   
   std::vector<int> order;
   boost::mt19937 rng;
@@ -63,10 +63,10 @@ class ExpectedBleuTrainer : public InputSource {
   boost::variate_generator<boost::mt19937, boost::uniform_smallint<int> > draw;
   bool randomize_batches;
   Optimizer* optimizer;
-  float total_ref_len;
-  float total_exp_len;
-  float total_exp_gain;
-  float total_unreg_exp_gain;
+  FValue total_ref_len;
+  FValue total_exp_len;
+  FValue total_exp_gain;
+  FValue total_unreg_exp_gain;
   
   int tlc;
   int weight_dump_freq;

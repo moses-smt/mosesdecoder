@@ -24,6 +24,7 @@
 
 #include "FeatureVector.h"
 
+
 namespace Josiah {
 
 /**
@@ -48,5 +49,7 @@ class WeightManager {
     FVector m_weights;
 
 };
+
+FName GetWordPenaltyName();
 
 }

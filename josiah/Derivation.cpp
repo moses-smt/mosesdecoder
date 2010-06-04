@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Derivation.h"
 #include "Gibbler.h"
 #include "DummyScoreProducers.h"
+#include "WeightManager.h"
 
 using namespace std;
 using namespace Moses;
@@ -43,8 +44,8 @@ namespace Josiah {
         PhraseAlignment(currHypo->GetCurrSourceWordsRange(), Phrase(targetPhrase)));
     }
     
-    const vector<float> & weights = StaticData::Instance().GetAllWeights();
-    m_score = m_featureValues.InnerProduct(weights);
+    const FVector& weights = WeightManager::instance().get();
+    m_score = inner_product(m_featureValues, weights);
   }
   
 

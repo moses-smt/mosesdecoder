@@ -31,38 +31,6 @@ using namespace std;
 
 namespace Josiah {
   
-#ifdef LM_CACHE  
-  std::map<LanguageModel*,LanguageModelCache> TranslationDelta::m_cache;
-  
-  float LanguageModelCache::GetValue(const std::vector<const Word*>& ngram) {
-    EntryListIterator* entryListIter = m_listPointers[ngram];
-    float score;
-    if (!entryListIter) {
-      //cache miss
-      if ((int)m_listPointers.size() >= m_maxSize) {
-        //too many entries
-        Entry lruEntry = m_entries.back();
-        m_entries.pop_back();
-        delete m_listPointers[lruEntry.first];
-        m_listPointers.erase(lruEntry.first);
-      }
-      score = m_languageModel->GetValue(ngram);
-      m_entries.push_front(Entry(ngram,score));
-      entryListIter = new EntryListIterator();
-      *entryListIter = m_entries.begin();
-      m_listPointers[ngram] = entryListIter;
-    } else {
-      //cache hit
-      Entry entry  = *(*entryListIter);
-      m_entries.erase(*entryListIter);
-      m_entries.push_front(entry);
-      *entryListIter = m_entries.begin();
-      score = entry.second;
-    } 
-    return score;
-  }
-#endif
-
 long TranslationDelta::lmcalls = 0;
   
 void TranslationDelta::calcSufficientStatsAndGain(const vector<const Factor*> & sentence){
@@ -213,14 +181,8 @@ void  TranslationDelta::addSingleOptionLanguageModelScore(const TranslationOptio
 }
   
 void TranslationDelta::initScoresSingleUpdate(const Sample& s, const TranslationOption* option, const TargetGap& gap) {
-  //translation scores
-  m_scores.PlusEquals(option->GetScoreBreakdown());
-        
   //don't worry about reordering because they don't change
         
-  //word penalty
-  float penalty = -((int)option->GetTargetPhrase().GetSize());
-  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
         
   addSingleOptionLanguageModelScore(option, gap.segment); //let's do this here itself for now
   
@@ -230,9 +192,7 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
     (*i)->doSingleUpdate(option,gap,m_scores);
   }
 
-  //weight the scores
-  const vector<float> & weights = StaticData::Instance().GetAllWeights();
-  m_score = m_scores.InnerProduct(weights);
+  UpdateWeightedScore();
   
   VERBOSE(2, "Single Update: Scores " << m_scores << endl);
   VERBOSE(2,"Single Update: Total score is  " << m_score << endl);  
@@ -242,15 +202,10 @@ void TranslationDelta::initScoresSingleUpdate(const Sample& s, const Translation
 //Note that left and right refer to the target order.
 void TranslationDelta::initScoresContiguousPairedUpdate(const Sample& s, const TranslationOption* leftOption,
                                               const TranslationOption* rightOption, const TargetGap& gap) {
-  //translation scores
-  m_scores.PlusEquals(leftOption->GetScoreBreakdown());
-  m_scores.PlusEquals(rightOption->GetScoreBreakdown());
+  
     
   //don't worry about reordering because they don't change
     
-  //word penalty
-  float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
-  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
     
     
   // extra features
@@ -264,15 +219,10 @@ void TranslationDelta::initScoresDiscontiguousPairedUpdate(const Sample& s, cons
                                               const TranslationOption* rightOption, const TargetGap& leftGap,
                                               const TargetGap& rightGap) {
  
-  //translation scores
-  m_scores.PlusEquals(leftOption->GetScoreBreakdown());
-  m_scores.PlusEquals(rightOption->GetScoreBreakdown());
+  
   
   //don't worry about reordering because they don't change
 
-  //word penalty
-  float penalty = -((int)leftOption->GetTargetPhrase().GetSize()) -((int)rightOption->GetTargetPhrase().GetSize());
-  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
   
    // extra features
   typedef Josiah::feature_vector fv;
@@ -729,8 +679,7 @@ void TranslationDelta::initScoresDiscontiguousPairedUpdate(const Sample& s, cons
   
 void TranslationDelta::updateWeightedScore() {
   //weight the scores
-  const vector<float> & weights = StaticData::Instance().GetAllWeights();
-  m_score = m_scores.InnerProduct(weights);
+  m_score = inner_product(m_scores, WeightManager::instance().get());
     
   VERBOSE(2, "Scores " << m_scores << endl);
   VERBOSE(2,"Total score is  " << m_score << endl);      
@@ -744,7 +693,7 @@ TranslationUpdateDelta::TranslationUpdateDelta(GibbsOperator* g_operator, Sample
 
 void TranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
   VERBOSE(3, "Applying Translation Update Delta" << endl);
-  m_scores.MinusEquals(noChangeDelta.getScores());
+  m_scores -= noChangeDelta.getScores();
   getSample().ChangeTarget(*m_option,m_scores);
 }
 
@@ -759,7 +708,7 @@ MergeDelta::MergeDelta(GibbsOperator* g_operator, Sample& sample, const Translat
 
 void MergeDelta::apply(const TranslationDelta& noChangeDelta) {
   VERBOSE(3, "Applying MergeDelta" << endl);
-  m_scores.MinusEquals(noChangeDelta.getScores());
+  m_scores -= noChangeDelta.getScores();
   getSample().MergeTarget(*m_option,m_scores);
 }
 
@@ -803,9 +752,9 @@ PairedTranslationUpdateDelta* PairedTranslationUpdateDelta::Create() const {
 
 void PairedTranslationUpdateDelta::apply(const TranslationDelta& noChangeDelta) {
   VERBOSE(3, "Applying Paired  Translation Update Delta" << endl);
-  m_scores.MinusEquals(noChangeDelta.getScores());
+  m_scores -= noChangeDelta.getScores();
   getSample().ChangeTarget(*m_leftOption,m_scores);
-  ScoreComponentCollection emptyScores;
+  FVector emptyScores;
   getSample().ChangeTarget(*m_rightOption,emptyScores);
 }
 
@@ -827,13 +776,13 @@ SplitDelta* SplitDelta::Create() const {
 }
   
 void SplitDelta::apply(const TranslationDelta& noChangeDelta) {
-  m_scores.MinusEquals(noChangeDelta.getScores());
+  m_scores -= noChangeDelta.getScores();
   getSample().SplitTarget(*m_leftOption,*m_rightOption,m_scores);
 }
   
 void FlipDelta::apply(const TranslationDelta& noChangeDelta) {
   VERBOSE(3, "Applying Flip Delta" << endl);
-  m_scores.MinusEquals(noChangeDelta.getScores());
+  m_scores  -= noChangeDelta.getScores();
   getSample().FlipNodes(*m_leftTgtOption, *m_rightTgtOption, m_prevTgtHypo, m_nextTgtHypo, m_scores);
 }
 
@@ -845,14 +794,7 @@ FlipDelta::FlipDelta(GibbsOperator* g_operator, Sample& sample,
       m_prevTgtHypo(const_cast<Hypothesis*> (leftGap.leftHypo)), m_nextTgtHypo(const_cast<Hypothesis*> (rightGap.rightHypo))
         {
     
-  //translation scores
-  m_scores.PlusEquals(m_leftTgtOption->GetScoreBreakdown());
-  m_scores.PlusEquals(m_rightTgtOption->GetScoreBreakdown());
     
-  //word penalty
-  float penalty = -((int) m_leftTgtOption->GetTargetPhrase().GetSize() + (int) 
-    m_rightTgtOption->GetTargetPhrase().GetSize());
-  m_scores.Assign(StaticData::Instance().GetWordPenaltyProducer(),penalty);
     
   addPairedOptionLanguageModelScore(m_leftTgtOption, m_rightTgtOption, leftGap.segment, rightGap.segment);
     
@@ -866,9 +808,7 @@ FlipDelta::FlipDelta(GibbsOperator* g_operator, Sample& sample,
     (*i)->doFlipUpdate(leftTgtOption, rightTgtOption, leftGap, rightGap,m_scores);
   }
     
-  //weight the scores
-  const vector<float> & weights = StaticData::Instance().GetAllWeights();
-  m_score = m_scores.InnerProduct(weights);
+  UpdateWeightScore();
     
   VERBOSE(2, "Flip delta: Scores " << m_scores << endl);
   VERBOSE(2,"Flip delta: Total score is  " << m_score << endl);  

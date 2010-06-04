@@ -35,8 +35,13 @@ typedef float FValue;
 struct FName {
   FName(const std::string theRoot, const std::string theName) 
       : root(theRoot), name(theName) {}
-  const std::string root;
-  const std::string name;
+  //Initialise by parsing name
+  FName(const std::string& name);
+  std::string root;
+  std::string name;
+  
+  bool operator==(const FName& rhs) const ;
+  bool operator!=(const FName& rhs) const ;
 };
 
 std::ostream& operator<<(std::ostream& out,const FName& name);
@@ -60,8 +65,13 @@ class ProxyFVector;
 class FVector
 {
   public:
-    /** Empty feature vector */
-    FVector();
+    /** Empty feature vector, possibly with default value */
+    FVector(FValue defaultValue = DEFAULT);
+    
+    void clear();
+    
+    
+     bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
     
     /** Load from file - each line should be 'root[_name] value' */
     void load(const std::string& filename);
@@ -70,11 +80,41 @@ class FVector
     
     /** Element access */
     ProxyFVector operator[](const FName& name);
-    const FValue& operator[](const FName& name) const;
-    bool hasValue(const FName& name) const;
+    FValue operator[](const FName& name) const;
     
     /** Size */
     size_t size() const {return m_features.size();}
+    
+    
+    
+    friend class ProxyFVector;
+    
+    /**arithmetic */
+    //Element-wise
+    FVector& operator+= (const FVector& rhs);
+    FVector& operator-= (const FVector& rhs);
+    FVector& operator*= (const FVector& rhs);
+    FVector& operator/= (const FVector& rhs);
+    //Scalar
+    FVector& operator+= (const FValue& rhs);
+    FVector& operator-= (const FValue& rhs);
+    FVector& operator*= (const FValue& rhs);
+    FVector& operator/= (const FValue& rhs);
+    
+    FValue inner_product(const FVector& rhs) const;
+    
+    FVector& max_equals(const FVector& rhs);
+    
+    /** printing */
+    std::ostream& print(std::ostream& out) const;
+    
+    
+    
+  private:
+    /** Internal get and set. Note that the get() doesn't include the
+     default value */
+    const FValue& get(const FName& name) const;
+    void set(const FName& name, const FValue& value);
     
     /** Iterators */
     typedef std::map<FName,FValue>::iterator iterator;
@@ -83,25 +123,12 @@ class FVector
     iterator end() {return m_features.end();}
     const_iterator begin() const {return m_features.begin();}
     const_iterator end() const {return m_features.end();}
+
+
+
     
-    friend class ProxyFVector;
-    
-    /**arithmetic */
-    FVector& operator+= (const FVector& rhs);
-    FVector& operator-= (const FVector& rhs);
-    FVector& operator*= (const FValue& rhs);
-    FVector& operator/= (const FValue& rhs);
-    
-    /** printing */
-    std::ostream& print(std::ostream& out) const;
-    
-    
-    
-  private:
-    const FValue& get(const FName& name) const;
-    void set(const FName& name, const FValue& value);
-    
-    static FValue DEFAULT;
+    static FName DEFAULT_NAME;
+    static const FValue DEFAULT;
 
     
     std::map<FName,FValue,FNameComparator> m_features;
@@ -109,12 +136,23 @@ class FVector
 };
 
 std::ostream& operator<<( std::ostream& out, const FVector& fv);
+//Element-wise operations
 const FVector operator+(const FVector& lhs, const FVector& rhs);
 const FVector operator-(const FVector& lhs, const FVector& rhs);
+const FVector operator*(const FVector& lhs, const FVector& rhs);
+const FVector operator/(const FVector& lhs, const FVector& rhs);
+
+//Scalar operations
+const FVector operator+(const FVector& lhs, const FValue& rhs);
+const FVector operator-(const FVector& lhs, const FValue& rhs);
 const FVector operator*(const FVector& lhs, const FValue& rhs);
 const FVector operator/(const FVector& lhs, const FValue& rhs);
-//inner product.
-FValue operator*(const FVector& lhs, const FVector& rhs);
+
+const FVector fvmax(const FVector& lhs, const FVector& rhs);
+
+
+
+FValue inner_product(const FVector& lhs, const FVector& rhs);
 
 /**
   * Used to help with subscript operator overloading.
@@ -127,7 +165,7 @@ class ProxyFVector {
       // If we get here, we know that operator[] was called to perform a write access,
       // so we can insert an item in the vector if needed
       //std::cerr << "Inserting " << value << " into " << m_name << std::endl;
-      m_fv->set(m_name,value);
+      m_fv->set(m_name,value-m_fv->get(FVector::DEFAULT_NAME));
       return *this;
       
     }
@@ -135,7 +173,7 @@ class ProxyFVector {
     operator FValue() {
       // If we get here, we know that operator[] was called to perform a read access,
       // so we can simply return the value from the vector
-      return m_fv->get(m_name);
+      return m_fv->get(m_name) + m_fv->get(FVector::DEFAULT_NAME);
     }
   private:
     FVector* m_fv;

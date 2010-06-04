@@ -15,8 +15,9 @@ namespace Josiah {
 
 
 Sample::Sample(Hypothesis* target_head, const std::vector<Word>& source, const Josiah::feature_vector& extra_features, bool doRaoBlackwell) : 
-        m_sourceWords(source), feature_values(target_head->GetScoreBreakdown()),  _extra_features(extra_features), m_doRaoBlackwell(doRaoBlackwell), m_updates(0) { 
+        m_sourceWords(source),  _extra_features(extra_features), m_doRaoBlackwell(doRaoBlackwell), m_updates(0) { 
   
+  InitFeatureVector(target_head->GetScoreBreakdown());
   std::map<int, Hypothesis*> source_order;
   this->target_head = target_head;
   Hypothesis* next = NULL;
@@ -165,7 +166,7 @@ void Sample::SetSrcPrevHypo(Hypothesis* newHyp, Hypothesis* srcPrevHypo) {
   }
 }  
   
-void Sample::FlipNodes(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption, Hypothesis* m_prevTgtHypo, Hypothesis* m_nextTgtHypo, const ScoreComponentCollection& deltaFV) {
+void Sample::FlipNodes(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption, Hypothesis* m_prevTgtHypo, Hypothesis* m_nextTgtHypo, const FVector& deltaFV) {
   bool tgtSideContiguous = false; 
   Hypothesis *oldRightHypo = GetHypAtSourceIndex(leftTgtOption.GetSourceWordsRange().GetStartPos()); //this one used to be on the right
   Hypothesis *oldLeftHypo = GetHypAtSourceIndex(rightTgtOption.GetSourceWordsRange().GetStartPos());//this one used to be on the left
@@ -253,7 +254,7 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
     return - (float) abs(dist);
   }  
   
-void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
+void Sample::ChangeTarget(const TranslationOption& option, const FVector& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   Hypothesis& prevHyp = *(const_cast<Hypothesis*>(currHyp->GetPrevHypo()));
@@ -277,7 +278,7 @@ void Sample::ChangeTarget(const TranslationOption& option, const ScoreComponentC
   UpdateTargetWords();
 }  
 
-void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV)  {
+void Sample::MergeTarget(const TranslationOption& option, const FVector& deltaFV)  {
   size_t optionStartPos = option.GetSourceWordsRange().GetStartPos();
   size_t optionEndPos = option.GetSourceWordsRange().GetEndPos();
   
@@ -325,7 +326,7 @@ void Sample::MergeTarget(const TranslationOption& option, const ScoreComponentCo
   UpdateTargetWords();
 }
   
-void Sample::SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV) {
+void Sample::SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const FVector& deltaFV) {
   size_t optionStartPos = leftTgtOption.GetSourceWordsRange().GetStartPos();
   Hypothesis *currHyp = GetHypAtSourceIndex(optionStartPos);
   
@@ -374,8 +375,8 @@ void Sample::UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange) {
   }
 }  
   
-void Sample::UpdateFeatureValues(const ScoreComponentCollection& deltaFV) {
-  feature_values.PlusEquals(deltaFV);
+void Sample::UpdateFeatureValues(const FVector& deltaFV) {
+  feature_values +=deltaFV;
 }
 
 void Sample::CheckFeatureConsistency() const {
@@ -407,15 +408,15 @@ bool Sample::DoRaoBlackwell() const {
     return m_doRaoBlackwell;
 }
 
-void Sample::AddConditionalFeatureValues( const ScoreComponentCollection & fv ) {
-    m_conditionalFeatureValues.PlusEquals(fv);
+void Sample::AddConditionalFeatureValues( const FVector & fv ) {
+    m_conditionalFeatureValues += fv;
     ++m_updates;
 }
 
-const ScoreComponentCollection Sample::GetConditionalFeatureValues( ) const {
+const FVector Sample::GetConditionalFeatureValues( ) const {
     if (m_doRaoBlackwell) {
-        ScoreComponentCollection fv(m_conditionalFeatureValues);
-        fv.DivideEquals(m_updates);
+        FVector fv(m_conditionalFeatureValues);
+        fv /= m_updates;
         return fv;
     } else {
         return GetFeatureValues();
@@ -424,7 +425,17 @@ const ScoreComponentCollection Sample::GetConditionalFeatureValues( ) const {
 
 void Sample::ResetConditionalFeatureValues(){
     m_updates = 0;
-    m_conditionalFeatureValues.ZeroAll();
+    m_conditionalFeatureValues.clear();
+}
+
+void Sample::InitFeatureVector(const ScoreComponentCollection& mosesScores) {
+  const Moses::ScoreIndexManager& indexManager = StaticData::Instance().GetScoreIndexManager();
+  size_t numScores = indexManager.GetTotalNumberOfScores();
+  for (size_t i = 0; i < numScores; ++i) {
+    string name = indexManager.GetFeatureName(i);
+    feature_values[FName(name)] = mosesScores[i];
+  }
+  VERBOSE(1,"Features from moses: " << feature_values << endl);
 }
 
 

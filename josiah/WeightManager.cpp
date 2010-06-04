@@ -20,6 +20,7 @@
 #include <cassert>
 #include <stdexcept>
 
+#include "StaticData.h"
 #include "WeightManager.h"
 
 using namespace std;
@@ -55,6 +56,8 @@ namespace Josiah {
     throw runtime_error("Not implemented");
   }
   
-
+FName GetWordPenaltyName() {
+  return FName(StaticData::Instance().GetWordPenaltyProducer()->GetScoreProducerDescription();
+}
 
 }

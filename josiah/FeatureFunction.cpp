@@ -18,6 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <fstream>
+#include <stdexcept>
+
 #include "FeatureFunction.h"
 
 namespace Josiah {
@@ -27,27 +29,8 @@ FeatureFunction::~FeatureFunction(){} // n.b. is pure virtual, must be empty
 
 
 
-
-FeatureFunctionScoreProducer::FeatureFunctionScoreProducer(const std::string & name, size_t numValues)
-        :m_name(name), m_numValues(numValues) {
-  StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
-  const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-  vector<float> w(m_numValues); //default weight of 0
-  staticData.SetWeightsForScoreProducer(this,w);
-}
-
-
-
-size_t FeatureFunctionScoreProducer::GetNumScoreComponents() const {
-  return m_numValues;
-}
-
-string FeatureFunctionScoreProducer::GetScoreProducerDescription() const {
-  return m_name;
-} 
-
-bool FeatureFunction::isConsistent(const ScoreComponentCollection& featureValues){
-  ScoreComponentCollection expectedFeatureValues;
+bool FeatureFunction::isConsistent(const FVector& featureValues){
+  /*FVector expectedFeatureValues;
   assignScore(expectedFeatureValues);
   vector<float> expectedVector = expectedFeatureValues.GetScoresForProducer(&getScoreProducer());
   vector<float> actualVector = featureValues.GetScoresForProducer(&getScoreProducer());
@@ -75,7 +58,8 @@ bool FeatureFunction::isConsistent(const ScoreComponentCollection& featureValues
         " " << getScoreProducer().GetScoreProducerDescription() << endl);
       return false;
     }
-  }
+  }*/
+  throw runtime_error("isConsistent() not yet implemented");
   return true;
 }
 

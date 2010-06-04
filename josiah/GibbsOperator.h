@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
-
+#include "FeatureVector.h"
 #include "TranslationDelta.h"
 #include "GibbsOperatorIterator.h"
 #include "TypeDef.h"

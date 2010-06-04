@@ -89,8 +89,8 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
   
   //do Conditional Estimation (Rao-Blackwellisation)
   if (sample.DoRaoBlackwell()) {
-      ScoreComponentCollection fv(sample.GetFeatureValues());
-      fv.MinusEquals(noChangeDelta->getScores());
+      FVector fv(sample.GetFeatureValues());
+      fv -= noChangeDelta->getScores();
       //Add FV(d)*p(d) for each delta.
       vector<double> scores;
       m_acceptor->getNormalisedScores(deltas,scores);
@@ -98,9 +98,9 @@ void GibbsOperator::doSample(vector<TranslationDelta*>& deltas, TranslationDelta
       assert(scores.size() == deltas.size());
       for (size_t i = 0; i < deltas.size(); ++i) {
           if (scores[i] < -30) continue; //floor
-          ScoreComponentCollection deltaFv = deltas[i]->getScores();
-          deltaFv.MultiplyEquals(exp(scores[i]));
-          fv.PlusEquals(deltaFv);
+          FVector deltaFv = deltas[i]->getScores();
+          deltaFv *= exp(scores[i]);
+          fv +=deltaFv;
       }
       //cout << "Rao-Blackwellised fv: " << fv << endl;
       sample.AddConditionalFeatureValues(fv);
@@ -160,8 +160,8 @@ void GibbsOperator::doOnlineLearning(vector<TranslationDelta*>& deltas, Translat
   float targetScore = deltas[target]->getScore();
   float targetGain = deltas[target]->getGain();
   
-  if (chosenScore > targetScore && chosenGain < targetGain  ||
-        chosenScore < targetScore && chosenGain > targetGain ) {
+  if ((chosenScore > targetScore && chosenGain < targetGain)  ||
+        (chosenScore < targetScore && chosenGain > targetGain) ) {
     error = true;
     IFVERBOSE(1) {
       cerr << "In " << m_name << ", there is an error because chosen sol has model score" << chosenScore << " and gain " << chosenGain << endl;

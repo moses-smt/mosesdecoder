@@ -1,7 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "ScoreComponentCollection.h"
+
+#include "FeatureVector.h"
 
 namespace Josiah {
 
@@ -13,18 +14,18 @@ struct Optimizer {
       use_gaussian_prior_(false) {}
   virtual ~Optimizer();
 
-  void SetUseGaussianPrior(const std::vector<float>& means,
-                           const float variance) {
+  void SetUseGaussianPrior(const FValue mean,
+                           const FValue variance) {
     use_gaussian_prior_ = true;
-    means_ = means;
+    mean_ = mean;
     variance_ = variance;
   }
 
   void Optimize(
-     float f, // if known
-     const Moses::ScoreComponentCollection x,  // not ref! don't change!
-     const Moses::ScoreComponentCollection& gradient,
-     Moses::ScoreComponentCollection* new_x);
+     FValue f, // if known
+     const FVector x,  // not ref! don't change!
+     const FVector& gradient,
+     FVector* new_x);
 
   bool HasConverged() const {
     return converged_;
@@ -42,9 +43,9 @@ struct Optimizer {
   
   virtual void OptimizeImpl(
      float f, // if known
-     const Moses::ScoreComponentCollection& x,
-     const Moses::ScoreComponentCollection& gradient,
-     Moses::ScoreComponentCollection* new_x) = 0;
+     const FVector& x,
+     const FVector& gradient,
+     FVector* new_x) = 0;
   
   
   void SetHasConverged(bool converged = true) {
@@ -56,24 +57,24 @@ struct Optimizer {
   bool converged_;
   int max_iterations_;
   bool use_gaussian_prior_;
-  std::vector<float> means_;      // for gaussian prior
-  float variance_;                // for gaussian prior
+  FValue mean_;      // for gaussian prior
+  FValue variance_;                // for gaussian prior
   
 };
 
 class DumbStochasticGradientDescent : public Optimizer {
  public:
-  DumbStochasticGradientDescent(float eta, int max_iters) :
+  DumbStochasticGradientDescent(FValue eta, int max_iters) :
     Optimizer(max_iters), eta_(eta) {}
 
   virtual void OptimizeImpl(
      float f,
-     const Moses::ScoreComponentCollection& x,
-     const Moses::ScoreComponentCollection& gradient,
-     Moses::ScoreComponentCollection* new_x);
+     const FVector& x,
+     const FVector& gradient,
+     FVector* new_x);
 
  private:
-  float eta_;
+  FValue eta_;
 };
 
 // see N. Schraudolph (1999) Local Gain Adaptation in Stochastic Gradient
@@ -81,65 +82,52 @@ class DumbStochasticGradientDescent : public Optimizer {
 // No, this isn't stochastic metadescent, but EGD is described there too
 class ExponentiatedGradientDescent : public Optimizer {
  public:
-  ExponentiatedGradientDescent(const Moses::ScoreComponentCollection& eta,
-      float mu, float min_multiplier, int max_iters, const Moses::ScoreComponentCollection& prev_gradient) :
+  ExponentiatedGradientDescent(const FVector& eta,
+      FValue mu, FValue min_multiplier, int max_iters, const FVector& prev_gradient) :
     Optimizer(max_iters), eta_(eta), mu_(mu), min_multiplier_(min_multiplier), prev_g_(prev_gradient) { 
-     std::cerr << "Eta : " << eta_ << std::endl;
-     std::cerr << "Prev gradient : " << prev_g_ << std::endl;
+     //std::cerr << "Eta : " << eta_ << std::endl;
+     //std::cerr << "Prev gradient : " << prev_g_ << std::endl;
    }
 
-  void SetPreviousGradient(const Moses::ScoreComponentCollection& prev_g) { prev_g_ = prev_g;}
-  void SetEta(const Moses::ScoreComponentCollection& eta) { eta_ = eta;}
+  void SetPreviousGradient(const FVector& prev_g) { prev_g_ = prev_g;}
+  void SetEta(const FVector& eta) { eta_ = eta;}
   
-  void ResizePreviousGradient() { 
-    std::vector<float> grad(prev_g_.size() -1);
-    std::copy(prev_g_.data().begin(),prev_g_.data().end()-1, grad.begin());
-    Moses::ScoreComponentCollection prev_g(grad);
-    prev_g_ = prev_g;
-  }
   
-  void ResizeEta() { 
-    std::vector<float> eta(eta_.size() -1);
-    std::copy(eta_.data().begin(), eta_.data().end()-1, eta.begin());
-    Moses::ScoreComponentCollection _eta(eta);
-    eta_ = _eta;
-  }
   
   virtual void OptimizeImpl(
-                            float f,
-                            const Moses::ScoreComponentCollection& x,
-                            const Moses::ScoreComponentCollection& gradient,
-                            Moses::ScoreComponentCollection* new_x);
+                            float FValue,
+                            const FVector& x,
+                            const FVector& gradient,
+                            FVector* new_x);
   
  
   
  protected:
-  Moses::ScoreComponentCollection eta_;
-  const float mu_;
-  const float min_multiplier_;
-  Moses::ScoreComponentCollection prev_g_;
+  FVector eta_;
+  const FValue mu_;
+  const FValue min_multiplier_;
+  FVector prev_g_;
 };
 
 class MetaNormalizedExponentiatedGradientDescent : public ExponentiatedGradientDescent {
  public:
-  MetaNormalizedExponentiatedGradientDescent(const Moses::ScoreComponentCollection& eta,
-                                 float mu, float min_multiplier, float gamma, int max_iters, const Moses::ScoreComponentCollection& prev_gradient) :
+  MetaNormalizedExponentiatedGradientDescent(const FVector& eta,
+                                 FValue mu, FValue min_multiplier, FValue gamma, int max_iters, const FVector& prev_gradient) :
   ExponentiatedGradientDescent(eta, mu, min_multiplier, max_iters, prev_gradient), v_(eta), gamma_(gamma) {
     std::cerr << " MetaNormalizedExponentiatedGradientDescent, gamma : " << gamma << std::endl;
-    v_.ZeroAll();
   }
     
     
   virtual void OptimizeImpl(
-                            float f,
-                            const Moses::ScoreComponentCollection& x,
-                            const Moses::ScoreComponentCollection& gradient,
-                            Moses::ScoreComponentCollection* new_x);
+                            FValue f,
+                            const FVector& x,
+                            const FVector& gradient,
+                            FVector* new_x);
   
     
   private:
-    Moses::ScoreComponentCollection v_;
-    float gamma_;
+    FVector v_;
+    FValue gamma_;
   };
   
   

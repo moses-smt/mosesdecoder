@@ -28,9 +28,9 @@ using namespace std;
 
 int main() {
   FVector fv;
-  FName g3("LM", "3gram");
-  FName g4("LM", "4gram");
-  FName t1("TM", "pef");
+  FName g3("L", "1");
+  FName g4("L", "2");
+  FName t1("T", "1");
   
   fv[g3] = 2.0;
   fv[g4] = 1.3;
@@ -52,9 +52,32 @@ int main() {
   cerr << "fvdiff=" << fvdiff << endl;
   cerr << "fvprod=" << fvprod << endl;
   cerr << "fvdiv=" << fvdiv << endl;
-  cerr << "fv.fvprod=" <<  (fv*fvprod) << endl;
-  cerr << "fvprod.fv=" <<  (fvprod*fv) << endl;
+  cerr << "fv.fvprod=" <<  inner_product(fv,fvprod) << endl;
+  cerr << "fvprod.fv=" <<  inner_product(fvprod,fv) << endl;
+  
+  cerr << "fv * fv2 = " << (fv*fv2) << endl;
+  cerr << "fv / fv2 = " << (fv/fv2) << endl;
+  
+  FVector fvp2 = fv + 2.0;
+  cerr << "fv + 2 = " << fvp2 << endl;
+  //cerr << "(fv+2)[" << g3 << "] = " << fvp2[g3] << " (fv+2)[" << g4 << "] = " << fvp2[g4] << " (fv+2)[" << t1 << "] = " << fvp2[t1] <<  endl;
+  
+  FVector fv2m1 = fv2 - 1.0;
+  cerr << "(fv + 2) + (fv2 -1) = " << (fvp2 + fv2m1) << endl;
+  cerr << "(fv + 2) - (fv2 -1) = " << (fvp2 - fv2m1) << endl;
+  cerr << "(fv + 2) * (fv2 -1) = " << (fvp2 * fv2m1) << endl;
+  cerr << "(fv + 2) / (fv2 -1) = " << (fvp2 / fv2m1) << endl;
+  cerr << "max((fv + 2),(fv2 -1)) = " << maxv(fvp2,fv2m1) << endl;
+  
+  cerr << "(fv + 2) + (fv2) = " << (fvp2 + fv2) << endl;
+  cerr << "(fv + 2) - (fv2) = " << (fvp2 - fv2) << endl;
+  cerr << "(fv + 2) * (fv2) = " << (fvp2 * fv2) << endl;
+  cerr << "fv2 / (fv + 2) = " << (fv2 / fvp2) << endl;
+  cerr << "max((fv + 2),(fv2)) = " << maxv(fv2,fvp2) << endl;
   //fv2[g4] = 3.1; //error
+  
+  cerr << "fv2 . (fv + 2) = " << inner_product(fv2,fv+2) << endl;
+  cerr << "(fv2-1) . (fv) = " << inner_product(fv2-1,fv) << endl;
   
   FVector loaded;
   loaded.load("weights.txt");

@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AnnealingSchedule.h"
 #include "Decoder.h"
 #include "Derivation.h"
+#include "FeatureVector.h"
 #include "Gibbler.h"
 #include "InputSource.h"
 #include "TrainingSource.h"
@@ -101,9 +102,9 @@ int main(int argc, char** argv) {
   uint32_t seed;
   int lineno;
   bool randomize;
-  float scalefactor;
-  vector<float> eta;
-  float mu;
+  FValue scalefactor;
+  FValue eta;
+  FValue mu;
   string weightfile;
   vector<string> ref_files;
   int periodic_decode;
@@ -112,9 +113,9 @@ int main(int argc, char** argv) {
   bool anneal;
   unsigned int reheatings;
   float max_temp;
-  float prior_variance;
-  vector<float> prior_mean;
-  vector<float> prev_gradient;
+  FValue prior_variance;
+  FValue prior_mean;
+  string prev_gradient_file;
   bool expected_sbleu_da;
   float start_temp_expda;
   float stop_temp_expda;
@@ -154,7 +155,7 @@ int main(int argc, char** argv) {
       ("iterations,s", po::value<string>(&stopperConfig)->default_value("5"), 
        "Sampler stopping criterion (eg number of iterations)")
         ("burn-in,b", po::value<int>(&burning_its)->default_value(1), "Duration (in sampling iterations) of burn-in period")
-        ("scale-factor,c", po::value<float>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
+        ("scale-factor,c", po::value<FValue>(&scalefactor)->default_value(1.0), "Scale factor for model weights.")
         ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
         ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
         ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
@@ -170,8 +171,8 @@ int main(int argc, char** argv) {
         ("xbleu,x", po::value(&expected_sbleu)->zero_tokens()->default_value(false), "Compute the expected sentence BLEU")
         ("gradient,g", po::value(&expected_sbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected sentence BLEU")
         ("randomize-batches,R", po::value(&randomize)->zero_tokens()->default_value(false), "Randomize training batches")
-        ("gaussian-prior-variance", po::value<float>(&prior_variance)->default_value(0.0f), "Gaussian prior variance (0 for no prior)")
-        ("gaussian-prior-mean,P", po::value<vector<float> >(&prior_mean), "Gaussian prior means")
+        ("gaussian-prior-variance", po::value<FValue>(&prior_variance)->default_value(0.0f), "Gaussian prior variance (0 for no prior)")
+        ("gaussian-prior-mean,P", po::value<FValue>(&prior_mean)->default_value(0.0f), "Gaussian prior mean")
         ("expected-bleu-training,T", po::value(&expected_sbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU")
           ("output-expected-sbleu", po::value(&output_expected_sbleu)->zero_tokens()->default_value(false), "Output expected bleu and feature expectations at end of sampling")
         ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
@@ -179,8 +180,8 @@ int main(int argc, char** argv) {
 	("reheatings", po::value<unsigned int>(&reheatings)->default_value(1), "Number of times to reheat the sampler")
 	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
 	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
-        ("eta", po::value<vector<float> >(&eta), "Default learning rate for SGD/EGD")
-        ("prev-gradient", po::value<vector<float> >(&prev_gradient), "Previous gradient for restarting SGD/EGD")
+        ("eta", po::value<FValue>(&eta), "Default learning rate for SGD/EGD")
+        ("prev-gradient", po::value<string>(&prev_gradient_file), "File containing previous gradient for restarting SGD/EGD")
         ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
         ("gamma", po::value<float>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
         ("mbr", po::value(&mbr_decoding)->zero_tokens()->default_value(false), "Minimum Bayes Risk Decoding")
@@ -366,37 +367,37 @@ int main(int argc, char** argv) {
   auto_ptr<InputSource> input;
   
   auto_ptr<Optimizer> optimizer;
-  //TODO:
-  //eta.resize(weights.size());   
+  FVector etaVector(eta);
+
 
   
-  //TODO:
-  //prev_gradient.resize(weights.size());
+  FVector prev_gradient;
+  if (!prev_gradient_file.empty()) {
+    prev_gradient.load(prev_gradient_file);
+  }
 
   if (use_metanormalized_egd) {
     optimizer.reset(new MetaNormalizedExponentiatedGradientDescent(
-                                                             ScoreComponentCollection(eta),
+                                                             etaVector,
                                                              mu,
-                                                             0.1f,   // minimal step scaling factor
+                                                             0.1,   // minimal step scaling factor
                                                              gamma,                                       
                                                              max_training_iterations,
-                                                             ScoreComponentCollection(prev_gradient)));
+                                                             prev_gradient));
   } else {
     optimizer.reset(new ExponentiatedGradientDescent(
-                                                                   ScoreComponentCollection(eta),
+                                                                   etaVector,
                                                                    mu,
                                                                    0.1f,   // minimal step scaling factor
                                                                    max_training_iterations,
-                                                                   ScoreComponentCollection(prev_gradient)));
+                                                                   prev_gradient));
   }
   if (optimizer.get()) {
       optimizer->SetIteration(init_iteration_number);
   }
   if (prior_variance != 0.0f) {
     assert(prior_variance > 0);
-    std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance << endl;
-    for (size_t i = 0; i < prior_mean.size(); ++i)
-      std::cerr << "  \\mu_" << i << " = " << prior_mean[i] << endl;
+    std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance << " \\mu=" << prior_mean <<  endl;
     optimizer->SetUseGaussianPrior(prior_mean, prior_variance);
   }
   ExpectedBleuTrainer* trainer = NULL;
@@ -457,12 +458,7 @@ int main(int argc, char** argv) {
     auto_ptr<ExpectedLossCollector> elCollector;
     auto_ptr<GibblerMaxTransDecoder> transCollector;
     if (expected_sbleu || output_expected_sbleu) {
-      if (calc_exact_posterior) {
-        elCollector.reset(new ExactExpectedLossCollector(line, evidenceSetShrinkFactor, randomShrink, &(g[lineno])));
-      }
-      else { 
-        elCollector.reset(new ExpectedLossCollector(&(g[lineno])));
-      }
+      elCollector.reset(new ExpectedLossCollector(&(g[lineno])));
       sampler.AddCollector(elCollector.get());
     }
     else if (expected_sbleu_da) {
@@ -596,9 +592,9 @@ int main(int argc, char** argv) {
 
     if (expected_sbleu || expected_sbleu_da) {
       
-      ScoreComponentCollection gradient;
-      float exp_trans_len = 0;
-      float unreg_exp_gain = 0;
+      FVector gradient;
+      FValue exp_trans_len = 0;
+      FValue unreg_exp_gain = 0;
       const float exp_gain = elCollector->UpdateGradient(&gradient, &exp_trans_len, &unreg_exp_gain);
       
       (*out) << '(' << lineno << ") Expected sentence BLEU: " << exp_gain 
@@ -615,11 +611,8 @@ int main(int argc, char** argv) {
     if (output_expected_sbleu) {
         (*out) << "ESBLEU: " <<  lineno << " " << elCollector->getExpectedGain() << endl;
         (*out) << "EFVs: " << lineno;
-        ScoreComponentCollection scores = elCollector->getFeatureExpectations();
-        for (size_t i = 0; i < scores.size(); ++i) {
-            (*out) << " " << scores[i];
-        }
-        (*out) << endl;
+        FVector scores = elCollector->getFeatureExpectations();
+        (*out) << scores << endl;
     }
     
    

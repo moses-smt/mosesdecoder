@@ -8,6 +8,7 @@
 
 #include "Optimizer.h"
 #include "Decoder.h"
+#include "WeightManager.h"
 
 using namespace std;
 using namespace Moses;
@@ -89,28 +90,25 @@ void ExpectedBleuTrainer::GetSentence(string* sentence, int* lineno) {
   
   
 void ExpectedBleuTrainer::IncorporateGradient(
-       const float trans_len,
-       const float ref_len,
-       const float exp_gain,
-       const float unreg_exp_gain,
-       const ScoreComponentCollection& grad,
+       const FValue trans_len,
+       const FValue ref_len,
+       const FValue exp_gain,
+       const FValue unreg_exp_gain,
+       const FVector& grad,
        Decoder* decoder) {
 
-  gradient.PlusEquals(grad);
+  gradient += grad;
   total_exp_gain += exp_gain;
   total_unreg_exp_gain += unreg_exp_gain;
   total_ref_len += ref_len;
   total_exp_len += trans_len;
   
   if (cur == cur_end) {
-    vector<float> w;
-    GetFeatureWeights(&w);
-    
-    vector<float> rcv_grad(w.size());
-    assert(gradient.data().size() == w.size());
+    FVector& w = WeightManager::instance().get();
+
     
     
-    float tg = 0, trl = 0, tel = 0, tgunreg = 0;
+    FValue tg = 0, trl = 0, tel = 0, tgunreg = 0;
 #ifdef MPI_ENABLED
     if (MPI_SUCCESS != MPI_Reduce(const_cast<float*>(&gradient.data()[0]), &rcv_grad[0], w.size(), MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     if (MPI_SUCCESS != MPI_Reduce(&total_exp_gain, &tg, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
@@ -119,24 +117,23 @@ void ExpectedBleuTrainer::IncorporateGradient(
     if (MPI_SUCCESS != MPI_Reduce(&total_exp_len, &tel, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD)) MPI_Abort(MPI_COMM_WORLD,1);
     
 #else
-    rcv_grad = gradient.data();
+    //rcv_grad = gradient.data();
     tg = total_exp_gain;
     tgunreg = total_exp_gain;
     trl = total_ref_len;
     tel = total_exp_len;
 #endif
 
-    ScoreComponentCollection weights(w);
-    ScoreComponentCollection g(rcv_grad);
+    FVector g = gradient;
     
     if (rank == 0) {
       tg /= batch_size;
       tgunreg /= batch_size;
-      g.DivideEquals(batch_size);
+      g /=batch_size;
       cerr << "TOTAL EXPECTED GAIN: " << tg << " (batch size = " << batch_size << ")\n";
       cerr << "TOTAL UNREGULARIZED EXPECTED GAIN: " << tgunreg << " (batch size = " << batch_size << ")\n";
       cerr << "EXPECTED LENGTH / REF LENGTH: " << tel << '/' << trl << " (" << (tel / trl) << ")\n";
-      optimizer->Optimize(tg, weights, g,  &weights);
+      optimizer->Optimize(tg, w, g,  &w);
       if (optimizer->HasConverged()) keep_going = false;
     }
 #ifdef MPI_ENABLED
@@ -151,10 +148,10 @@ void ExpectedBleuTrainer::IncorporateGradient(
     keep_going = kg;
     optimizer->SetIteration(iteration);
 #endif
-    SetFeatureWeights(weights.data());
+
     
     cur = cur_start;
-    gradient.ZeroAll();
+    gradient.clear();
     total_exp_gain = 0;
     total_unreg_exp_gain = 0;
     total_exp_len = 0;
@@ -167,31 +164,22 @@ void ExpectedBleuTrainer::IncorporateGradient(
       s << iteration;
       string weight_file = s.str();
       cerr << "Dumping weights to  " << weight_file << endl;
-      ofstream out(weight_file.c_str());
-      if (out) {
-        OutputWeights(out);
-        out.close();
-      }  else {
-        cerr << "Failed to dump weights" << endl;
-      }
+      WeightManager::instance().dump(weight_file);
     }
     
   }
 }
 
 void ExpectedBleuTrainer::IncorporateCorpusGradient(
-                                                const float trans_len,
-                                                const float ref_len,      
-                                                const float exp_gain,
-                                                const float unreg_exp_gain,
-                                                const ScoreComponentCollection& grad,
+                                                const FValue trans_len,
+                                                const FValue ref_len,      
+                                                const FValue exp_gain,
+                                                const FValue unreg_exp_gain,
+                                                const FVector& grad,
                                                 Decoder* decoder) {
     
     if (cur == cur_end) {
-      vector<float> w;
-      GetFeatureWeights(&w);
-   
-      ScoreComponentCollection weights(w);
+      FVector& weights = WeightManager::instance().get();
       
       if (rank == 0) {
         cerr << "TOTAL EXPECTED GAIN: " << exp_gain << " (batch size = " << batch_size << ")\n";
@@ -212,7 +200,6 @@ void ExpectedBleuTrainer::IncorporateCorpusGradient(
       keep_going = kg;
       optimizer->SetIteration(iteration);
 #endif
-      SetFeatureWeights(weights.data());
       
       
       cur = cur_start;
@@ -223,14 +210,7 @@ void ExpectedBleuTrainer::IncorporateCorpusGradient(
         s << "_";
         s << iteration;
         string weight_file = s.str();
-        cerr << "Dumping weights to  " << weight_file << endl;
-        ofstream out(weight_file.c_str());
-        if (out) {
-          OutputWeights(out);
-          out.close();
-        }  else {
-          cerr << "Failed to dump weights" << endl;
-        }
+        WeightManager::instance().dump(weight_file);
       }
       
     }

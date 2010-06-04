@@ -3,13 +3,13 @@
 #include <map>
 #include <vector>
 #include "FeatureFunction.h"
+#include "FeatureVector.h"
 
 namespace Moses {
 class Hypothesis;
 class TranslationOptionCollection;
 class TranslationOption;
 class Word;
-class ScoreComponentCollection;
 }
 
 using namespace Moses;
@@ -32,7 +32,7 @@ class Sample {
   Hypothesis* source_head;
   Hypothesis* source_tail;
 
-  ScoreComponentCollection feature_values;
+  FVector feature_values;
   feature_vector _extra_features;
 
   std::set<Hypothesis*> cachedSampledHyps;
@@ -41,11 +41,11 @@ class Sample {
   
   //Used for conditional estimation (aka Rao-Blackwellisation)
   bool m_doRaoBlackwell;
-  ScoreComponentCollection m_conditionalFeatureValues;
+  FVector m_conditionalFeatureValues;
   size_t m_updates;
   
   void SetSourceIndexedHyps(Hypothesis* h);
-  void UpdateFeatureValues(const ScoreComponentCollection& deltaFV);
+  void UpdateFeatureValues(const FVector& deltaFV);
   void UpdateTargetWordRange(Hypothesis* hyp, int tgtSizeChange);   
   void UpdateHead(Hypothesis* currHyp, Hypothesis* newHyp, Hypothesis *&head);
   void UpdateCoverageVector(Hypothesis& hyp, const TranslationOption& option) ;  
@@ -56,6 +56,8 @@ class Sample {
   void UpdateTargetWords();
   void DeleteFromCache(Hypothesis *hyp);
   float ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) ;
+  void InitFeatureVector(const ScoreComponentCollection& mosesScores);
+  
  public:
   Sample(Hypothesis* target_head, const std::vector<Word>& source, const feature_vector& extra_features, bool raoBlackwell);
   ~Sample();
@@ -69,7 +71,7 @@ class Sample {
     return target_tail;
   }
   
-  const ScoreComponentCollection& GetFeatureValues() const {
+  const FVector& GetFeatureValues() const {
     return feature_values;
   }
   
@@ -80,11 +82,11 @@ class Sample {
   /** Check that the feature values are correct */
   void CheckFeatureConsistency() const;
   
-  void FlipNodes(size_t x, size_t y, const ScoreComponentCollection& deltaFV) ;
-  void FlipNodes(const TranslationOption& , const TranslationOption&, Hypothesis* , Hypothesis* , const ScoreComponentCollection& deltaFV);
-  void ChangeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV); 
-  void MergeTarget(const TranslationOption& option, const ScoreComponentCollection& deltaFV);
-  void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const ScoreComponentCollection& deltaFV);
+  void FlipNodes(size_t x, size_t y, const FVector& deltaFV) ;
+  void FlipNodes(const TranslationOption& , const TranslationOption&, Hypothesis* , Hypothesis* , const FVector& deltaFV);
+  void ChangeTarget(const TranslationOption& option, const FVector& deltaFV); 
+  void MergeTarget(const TranslationOption& option, const FVector& deltaFV);
+  void SplitTarget(const TranslationOption& leftTgtOption, const TranslationOption& rightTgtOption,  const FVector& deltaFV);
   /** Words in the current target */
   const std::vector<Word>& GetTargetWords() const { return m_targetWords; }
   const std::vector<Word>& GetSourceWords() const { return m_sourceWords; } 
@@ -93,9 +95,9 @@ class Sample {
   
   //Used for conditional estimation (aka Rao-Blackwellisation)
   bool DoRaoBlackwell() const;
-  void AddConditionalFeatureValues(const ScoreComponentCollection& fv);
+  void AddConditionalFeatureValues(const FVector& fv);
   void ResetConditionalFeatureValues();
-  const ScoreComponentCollection GetConditionalFeatureValues() const;
+  const FVector GetConditionalFeatureValues() const;
   
   friend class Sampler;
   friend class GibbsOperator;

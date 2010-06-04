@@ -24,28 +24,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdlib>
 #include <utility>
 
-#ifdef LM_CACHE
-#include <ext/hash_map>
-#endif
 
-//#include "DummyScoreProducers.h"
+#include "FeatureVector.h"
+#include "DummyScoreProducers.h"
 #include "SufficientStats.h"
-#include "ScoreComponentCollection.h"
+#include "WeightManager.h"
 
 
-#ifdef LM_CACHE
-namespace __gnu_cxx {
-  template<> struct hash<std::vector<const Moses::Word*> > {
-    inline size_t operator()(const std::vector<const Moses::Word*>& p) const {
-      static const int primes[] = {8933, 8941, 8951, 8963, 8969, 8971, 8999, 9001, 9007, 9011};
-      size_t h = 0;
-      for (unsigned i = 0; i < p.size(); ++i)
-        h += reinterpret_cast<size_t>(p[i]) * primes[i % 10];
-      return h;
-    }
-  };
-}
-#endif
 
 namespace Moses {
   class TranslationOption;
@@ -113,16 +98,16 @@ class TranslationDelta {
     Sample& getSample() const {return m_sample;}
     virtual ~TranslationDelta() {}
     void updateWeightedScore();
-    const ScoreComponentCollection& getScores() const { return m_scores;}
+    const FVector& getScores() const { return m_scores;}
     const BleuSufficientStats & getGainSufficientStats() {return m_sufficientStats;}
     GibbsOperator* getOperator()  const {return m_operator;} 
     const GainFunction* getGainFunction() const {return m_gf; }
     virtual TranslationDelta* Create() const = 0;
-    void setScores(const ScoreComponentCollection& scores)  { m_scores = scores;}
+    void setScores(const FVector& scores)  { m_scores = scores;}
   protected:
     
-  Moses::ScoreComponentCollection m_scores;
-    double m_score;
+    FVector m_scores;
+    FValue m_score;
     double m_gain;
     GibbsOperator* m_operator;
     Sample& m_sample;

@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
+
+#include "FeatureVector.h"
 #include "Hypothesis.h"
 #include "ScoreProducer.h"
 #include "TranslationOptionCollection.h"
@@ -58,24 +60,6 @@ struct TargetGap {
   WordsRange segment;
 };
 
-/**
- * Used to  get moses to manage our feature functions.
- **/
-class FeatureFunctionScoreProducer : public ScoreProducer {
-  
-  public:
-  
-    FeatureFunctionScoreProducer(const std::string& name, size_t numValues);
-    
-  
-    size_t GetNumScoreComponents() const;
-    std::string GetScoreProducerDescription() const;
-  
-  private:
-    std::string m_name;
-    size_t m_numValues;
-  
-};
 
 /**
   * Base class for Gibbler feature functions.
@@ -94,38 +78,32 @@ class FeatureFunctionScoreProducer : public ScoreProducer {
  **/
 class FeatureFunction {
   public:
-    FeatureFunction(const string& name, size_t numValues=1) : m_scoreProducer(name,numValues) {}
+    FeatureFunction() {}
     /** Initialise with new sample */
     virtual void init(const Sample& sample) {/* do nothing */};
     /** Update the target words.*/
     virtual void updateTarget(){/*do nothing*/}
     
     /** Assign the total score of this feature on the current hypo */
-    virtual void assignScore(ScoreComponentCollection& scores) = 0;
+    virtual void assignScore(FVector& scores) = 0;
     
     /** Score due to one segment */
-    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores) = 0;
+    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores) = 0;
     /** Score due to two segments. The left and right refer to the target positions.**/
     virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-        const TargetGap& gap, ScoreComponentCollection& scores) = 0;
+        const TargetGap& gap, FVector& scores) = 0;
     virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-        const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) = 0;
+        const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) = 0;
     
     /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
     virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                     const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) = 0;
+                                     const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) = 0;
     
     /** Checks the internal consistency of the FeatureFunction by computing the scores from scratch and comparing with the 
      given scores. */
-    bool isConsistent(const ScoreComponentCollection& featureValues);
+    bool isConsistent(const FVector& featureValues);
     
     virtual ~FeatureFunction() = 0;
-    
-  protected:
-    const Moses::ScoreProducer& getScoreProducer() const {return m_scoreProducer;}
-    
-  private:
-    FeatureFunctionScoreProducer m_scoreProducer;
     
 };
 
@@ -134,41 +112,44 @@ class FeatureFunction {
   **/
 class SingleValuedFeatureFunction: public FeatureFunction {
   public:
-    SingleValuedFeatureFunction(const std::string& name) :
-      FeatureFunction(name) {}
-    virtual void assignScore(ScoreComponentCollection& scores)
-      {scores.Assign(&getScoreProducer(), computeScore());}
-    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores)
-      {scores.Assign(&getScoreProducer(), getSingleUpdateScore(option,gap));}
+    SingleValuedFeatureFunction(const std::string& rootName) :
+      m_name(rootName,"") {}
+    virtual void assignScore(FVector& scores)
+      {scores[m_name] = computeScore();}
+    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores)
+      {scores[m_name] =  getSingleUpdateScore(option,gap);}
     virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                          const TargetGap& gap, ScoreComponentCollection& scores)
-    {scores.Assign(&getScoreProducer(), getContiguousPairedUpdateScore(leftOption,rightOption,gap));}
+                                          const TargetGap& gap, FVector& scores)
+    {scores[m_name] = getContiguousPairedUpdateScore(leftOption,rightOption,gap);}
     virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                             const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores)
-    {scores.Assign(&getScoreProducer(), getDiscontiguousPairedUpdateScore(leftOption,rightOption,leftGap,rightGap));}
+                                             const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores)
+    {scores[m_name] = getDiscontiguousPairedUpdateScore(leftOption,rightOption,leftGap,rightGap);}
     /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
     virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                              const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores)
-    {scores.Assign(&getScoreProducer(), getFlipUpdateScore(leftOption,rightOption,leftGap,rightGap));}
+                              const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores)
+    {scores[m_name] = getFlipUpdateScore(leftOption,rightOption,leftGap,rightGap);}
     
     /**
       * Actual feature functions need to implement these methods.
     **/
   protected:
-    virtual float computeScore() = 0;
+    virtual FValue computeScore() = 0;
     /** Score due to one segment */
-    virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) = 0;
+    virtual FValue getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) = 0;
     /** Score due to two segments. The left and right refer to the target positions.**/
-    virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    virtual FValue getContiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
        const TargetGap& gap) = 0;
-    virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    virtual FValue getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
         const TargetGap& leftGap, const TargetGap& rightGap) = 0;
     
     /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
-    virtual float getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    virtual FValue getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
                                      const TargetGap& leftGap, const TargetGap& rightGap) = 0;
     
     virtual ~SingleValuedFeatureFunction() {}
+    
+  private:
+    FName m_name;
   
     
 };
