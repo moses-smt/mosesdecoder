@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zdll.lib"
+				AdditionalDependencies="zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zdll.lib"
+				AdditionalDependencies="zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -213,7 +213,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FORCE:MULTIPLE"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zdll.lib"
+				AdditionalDependencies="zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot;"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -292,7 +292,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FORCE:MULTIPLE"
-				AdditionalDependencies="&quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot; zdll.lib"
+				AdditionalDependencies="zlib.lib &quot;$(SolutionDir)$(ConfigurationName)\moses.lib&quot;"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"

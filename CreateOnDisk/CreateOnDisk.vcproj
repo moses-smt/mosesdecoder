@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)\moses.lib&quot; &quot;$(OutDir)\OnDiskPt.lib&quot; zdll.lib $(NOINHERIT)"
+				AdditionalDependencies="zlib.lib &quot;$(OutDir)\moses.lib&quot; &quot;$(OutDir)\OnDiskPt.lib&quot; $(NOINHERIT)"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -133,7 +133,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)\moses.lib&quot; &quot;$(OutDir)\OnDiskPt.lib&quot; zdll.lib $(NOINHERIT)"
+				AdditionalDependencies="zlib.lib &quot;$(OutDir)\moses.lib&quot; &quot;$(OutDir)\OnDiskPt.lib&quot; $(NOINHERIT)"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
