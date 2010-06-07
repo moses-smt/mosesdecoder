@@ -31,8 +31,10 @@ public:
           xmlrpc_c::value *   const  retvalP) {
       const params_t params = paramList.getStruct(0);
       breakOutParams(params);
+      //TODO: Get from xml
       const StaticData &staticData = StaticData::Instance();
-      PhraseDictionaryFeature* pdf = staticData.GetPhraseDictionaries()[0];  
+      const TranslationSystem& system = staticData.GetTranslationSystem("de");
+      const PhraseDictionaryFeature* pdf = system.GetPhraseDictionaries()[0];  
       PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(); 
       cerr << "Inserting into address " << pdsa << endl;
       pdsa->insertSnt(source_, target_, alignment_);
