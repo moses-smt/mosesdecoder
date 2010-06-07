@@ -303,23 +303,7 @@ bool Parameter::Validate()
 	}
 
   // do files exist?
-	// phrase tables
-	if (noErrorFlag) 
-	{
-		std::vector<std::string> ext;
-		// standard phrase table extension (i.e. full name has to be specified)
-		// raw tables in either un compressed or compressed form
-		ext.push_back("");
-	  ext.push_back(".gz");
-		// alternative file extension for binary phrase table format:
-		ext.push_back(".binphr.idx");
-		// the number of fields of this config line has varied over time, but
-		// the model file always came last
-		noErrorFlag = FilesExist("ttable-file", -1, ext);
-	}
-	// language model
-//	if (noErrorFlag)
-//		noErrorFlag = FilesExist("lmodel-file", 3);
+
 	// input file
 	if (noErrorFlag && m_setting["input-file"].size() == 1)
 	{
