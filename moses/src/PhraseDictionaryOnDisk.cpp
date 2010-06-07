@@ -38,8 +38,12 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 					, const std::vector<FactorType> &output
 					, const std::string &filePath
 					, const std::vector<float> &weight
-					, size_t tableLimit)
+					, size_t tableLimit
+                    , const LMList& languageModels
+                    , float wordPenaltyWeight)
 {
+  m_languageModels = &(languageModels);
+  m_wordPenaltyWeight = wordPenaltyWeight;
   m_filePath = filePath;
 	m_tableLimit = tableLimit;
 	m_inputFactorsVec		= input;

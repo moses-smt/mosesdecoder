@@ -37,6 +37,7 @@ class TranslationOptionCollection;
 class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
+class TranslationSystem;
 
 /*! Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
@@ -93,14 +94,15 @@ public:
 	}
 
 	/*! returns phrase table feature for translation step */
-	const PhraseDictionaryFeature &GetPhraseDictionaryFeature() const;
+	const PhraseDictionaryFeature* GetPhraseDictionaryFeature() const;
 
 	/*! returns generation table feature for generation step */
-	const GenerationDictionary &GetGenerationDictionaryFeature() const;
+	const GenerationDictionary* GetGenerationDictionaryFeature() const;
 
 
 	/*! Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
-  virtual void Process(const TranslationOption &inputPartialTranslOpt
+  virtual void Process(const TranslationSystem* system,
+                       const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                       				, TranslationOptionCollection *toc

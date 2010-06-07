@@ -63,17 +63,14 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 {
     const StaticData& staticData = StaticData::Instance();
 	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-    //Thread-safe phrase dictionaries get loaded now
     if (implementation == Memory || implementation == NewFormat || implementation == OnDisk || implementation == SuffixArray) {
-        m_threadSafePhraseDictionary.reset(LoadPhraseTable());
         m_useThreadSafePhraseDictionary = true;
     } else {
-        //Other types are lazy-loaded into thread-specific data
         m_useThreadSafePhraseDictionary = false;
     }
 }
     
-PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
+PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system) {
         const StaticData& staticData = StaticData::Instance();
 	if (m_implementation == Memory)
 	{   // memory phrase table
@@ -93,21 +90,20 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
 													, m_filePath
 													, m_weight
 													, m_tableLimit
-													, staticData.GetAllLM()
-													, staticData.GetWeightWordPenalty()));
+                                                    , system->GetLanguageModels()
+													, system->GetWeightWordPenalty()));
 			return pdm;
 	}
 	else if (m_implementation == Binary)
 	{    
-		const StaticData& staticData = StaticData::Instance();
 		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
 		assert(pdta->Load(                    GetInput()
                                             , GetOutput()
 											, m_filePath
 											, m_weight
 											, m_tableLimit
-											, staticData.GetAllLM()
-											, staticData.GetWeightWordPenalty()));
+											, system->GetLanguageModels()
+											, system->GetWeightWordPenalty()));
         return pdta;
 	}
 	else if (m_implementation == NewFormat)
@@ -124,8 +120,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
 										 , m_filePath
 										 , m_weight
 										 , m_tableLimit
-										 , staticData.GetAllLM()
-										 , staticData.GetWeightWordPenalty()));
+										 , system->GetLanguageModels()
+										 , system->GetWeightWordPenalty()));
         return pdm;
 	}
 	else if (m_implementation == OnDisk)
@@ -137,9 +133,9 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
                                             , GetOutput()
 											, m_filePath
 											, m_weight
-											, m_tableLimit);
-											//, staticData.GetAllLM()
-											//, staticData.GetWeightWordPenalty()));
+											, m_tableLimit
+                                            , system->GetLanguageModels()
+                                            , system->GetWeightWordPenalty());
 		assert(pdta);
         return pdta;
 	}
@@ -152,8 +148,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
 											, m_filePath
 											, m_weight
 											, m_tableLimit
-											, staticData.GetAllLM()
-											, staticData.GetWeightWordPenalty()));
+											, system->GetLanguageModels()
+											, system->GetWeightWordPenalty()));
         return pdta;
 	}
 	else if (m_implementation == SuffixArray)
@@ -167,8 +163,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
 												,m_targetFile
 												, m_alignmentsFile 	 
 												, m_weight, m_tableLimit 	 
-												, staticData.GetAllLM() 	 
-												, staticData.GetWeightWordPenalty()))) 	 
+												, system->GetLanguageModels() 	 
+												, system->GetWeightWordPenalty()))) 	 
 		{ 	 
 			std::cerr << "FAILED TO LOAD\n" << endl; 	 
 			delete pd;
@@ -184,15 +180,24 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable() {
           assert(false);
     }
 }
+
+void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system) 
+{
+  //Thread-safe phrase dictionaries get loaded now
+  if (m_useThreadSafePhraseDictionary && !m_threadSafePhraseDictionary.get()) {
+    m_threadSafePhraseDictionary.reset(LoadPhraseTable(system));
+  }
+  //Other types will be lazy loaded
+}
   
-void PhraseDictionaryFeature::InitDictionary(const InputType& source)
+void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system, const InputType& source)
 {
   PhraseDictionary* dict;
   if (m_useThreadSafePhraseDictionary) {
     dict = m_threadSafePhraseDictionary.get();
   } else {
     if (!m_threadUnsafePhraseDictionary.get()) {
-      m_threadUnsafePhraseDictionary.reset(LoadPhraseTable());
+      m_threadUnsafePhraseDictionary.reset(LoadPhraseTable(system));
     }
     dict = m_threadUnsafePhraseDictionary.get();
   }

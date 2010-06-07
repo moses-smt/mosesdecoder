@@ -260,7 +260,7 @@ class TranslationTask : public Task {
                 TrellisPathList nBestList;
                 ostringstream out;
                 manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-                OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), m_lineNumber);
+                OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber);
                 m_nbestCollector->Write(m_lineNumber, out.str());
             }
             
@@ -268,7 +268,7 @@ class TranslationTask : public Task {
             if (m_detailedTranslationCollector) {
                 ostringstream out;
                 fix(out);
-                TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
+                TranslationAnalysis::PrintTranslationAnalysis(manager.GetTranslationSystem(), out, manager.GetBestHypothesis());
                 m_detailedTranslationCollector->Write(m_lineNumber,out.str());
             }
 

@@ -55,7 +55,8 @@ public:
 
 	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 
-	const Moses::InputType& GetSource() const {return m_source;}   
+	const Moses::InputType& GetSource() const {return m_source;}
+    const Moses::TranslationSystem* GetTranslationSystem() const {return m_system;} 
 	
 	Moses::SentenceStats& GetSentenceStats() const
   {

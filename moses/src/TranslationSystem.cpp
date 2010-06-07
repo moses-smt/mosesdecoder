@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdexcept>
 #include <iostream>
 
+#include "DecodeGraph.h"
+#include "DecodeStep.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
 #include "Util.h"
@@ -68,6 +70,33 @@ namespace Moses {
         m_id(DEFAULT),
     m_decodeGraphs(allDecodeGraphs),
     m_reorderingTables(allReorderingTables),
-    m_languageModels(allLMs) {}
+    m_languageModels(allLMs) 
+    {
+      configureDictionaries();
+    }
+    
+    void TranslationSystem::configureDictionaries() {
+      for (vector<DecodeGraph*>::iterator i = m_decodeGraphs.begin(); i != m_decodeGraphs.end() ; ++i) {
+        for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
+          const DecodeStep* step = *j;
+          const PhraseDictionaryFeature* pdict = step->GetPhraseDictionaryFeature();
+          if (pdict) {
+            m_phraseDictionaries.push_back(pdict);
+            const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
+          }
+          const GenerationDictionary* gdict = step->GetGenerationDictionaryFeature();
+          if (gdict) {
+            m_generationDictionaries.push_back(gdict);
+          }
+        }
+      }
+    }
+    
+    void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& source) const {
+      for (vector<const PhraseDictionaryFeature*>::const_iterator i = m_phraseDictionaries.begin();
+           i != m_phraseDictionaries.end(); ++i) {
+             const_cast<PhraseDictionaryFeature*>(*i)->InitDictionary(this,source);
+           }
+    }
 
 };

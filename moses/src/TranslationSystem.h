@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TranslationSystem_h
 #define moses_TranslationSystem_h
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -31,6 +32,8 @@ namespace Moses {
 
   class DecodeGraph;
   class LexicalReordering;
+  class PhraseDictionaryFeature;
+  class GenerationDictionary;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -55,6 +58,14 @@ class TranslationSystem {
         const std::vector<LexicalReordering*>& GetReorderModels() const {return m_reorderingTables;}
         const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
         const LMList& GetLanguageModels() const {return m_languageModels;}
+        const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
+        const std::vector<const PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
+        float GetWeightWordPenalty() const {throw std::runtime_error("Not implemented");}
+        
+        //sentence (and thread) specific initialisation
+        void InitializeBeforeSentenceProcessing(const InputType& source) const;
+        
+        
         
         static const  std::string DEFAULT;
 
@@ -62,9 +73,14 @@ class TranslationSystem {
         
         
     private:
+        //checks what dictionaries are required, and initialises them if necessary 
+        void configureDictionaries();
+      
         std::string m_id;
         std::vector<DecodeGraph*> m_decodeGraphs;
         std::vector<LexicalReordering*> m_reorderingTables;
+        std::vector<const PhraseDictionaryFeature*> m_phraseDictionaries;
+        std::vector<const GenerationDictionary*> m_generationDictionaries;
         LMList m_languageModels;
 };
 

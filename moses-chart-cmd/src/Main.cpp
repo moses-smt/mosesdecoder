@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
 			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					MosesChart::TrellisPathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioWrapper->OutputNBestList(nBestList, source->GetTranslationId());
+					ioWrapper->OutputNBestList(nBestList, &system, source->GetTranslationId());
 			
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}

@@ -39,20 +39,19 @@ public:
 	DecodeStepTranslation(const PhraseDictionaryFeature* phraseFeature, const DecodeStep* prev);
 
 
-  virtual void Process(const TranslationOption &inputPartialTranslOpt
+    virtual void Process(const TranslationSystem* system
+        , const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc
                               , bool adhereTableLimit) const;
   
-  /** Do any sentence specific initialisation */
-  virtual void InitializeBeforeSentenceProcessing(InputType const& in) const;
 
 	/*! initialize list of partial translation options by applying the first translation step 
 	* Ideally, this function should be in DecodeStepTranslation class
 	*/
-	void ProcessInitialTranslation(
-															const InputType &source
+    void ProcessInitialTranslation(const TranslationSystem* system
+                                                            , const InputType &source
 															, PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit) const;
     

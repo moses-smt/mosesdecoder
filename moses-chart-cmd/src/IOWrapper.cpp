@@ -304,7 +304,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 	}
 }
 
-void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, long translationId)
+void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, const TranslationSystem* system, long translationId)
 {
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	//bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
@@ -332,7 +332,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
     // MERT script relies on this
 
 		// lm
-		const LMList& lml = StaticData::Instance().GetAllLM();
+		const LMList& lml = system->GetLanguageModels();
     if (lml.size() > 0) {
 			if (labeledOutput)
 	      *m_nBestStream << "lm: ";
@@ -345,11 +345,11 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){
 			// translation components	for text input
-			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<const PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					*m_nBestStream << "tm: ";
-				vector<PhraseDictionaryFeature*>::iterator iter;
+				vector<const PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j)
@@ -361,9 +361,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<const PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
-				vector<PhraseDictionaryFeature*>::iterator iter;
+				vector<const PhraseDictionaryFeature*>::iterator iter;
 
 				iter = pds.begin();
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
@@ -401,11 +401,11 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
 
 		// generation
-		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
+		const vector<const GenerationDictionary*> gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
 			if (labeledOutput)
 	      *m_nBestStream << "g: ";
-		  vector<GenerationDictionary*>::iterator iter;
+		  vector<const GenerationDictionary*>::const_iterator iter;
 		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); j++) {

@@ -121,7 +121,8 @@ public:
 	InputType const& m_source; /**< source sentence to be translated */
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system);
 	~Manager();
-    const  TranslationOptionCollection* getSntTranslationOptions(); 
+    const  TranslationOptionCollection* getSntTranslationOptions();
+    const TranslationSystem* GetTranslationSystem() {return m_system;}
   
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;

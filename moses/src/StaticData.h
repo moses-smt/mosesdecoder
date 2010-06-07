@@ -386,26 +386,6 @@ public:
 		return m_scoreIndexManager;
 	}
 
-	size_t GetLMSize() const
-	{
-		return m_languageModel.size();
-	}
-	const LMList &GetAllLM() const
-	{
-		return m_languageModel;
-	}
-	size_t GetPhraseDictionarySize() const
-	{
-		return m_phraseDictionary.size();
-	}
-	const std::vector<PhraseDictionaryFeature*> &GetPhraseDictionaries() const
-	{
-		return m_phraseDictionary;
-	}
-	const std::vector<GenerationDictionary*> &GetGenerationDictionaries() const
-	{
-		return m_generationDictionary;
-	}
     const TranslationSystem& GetTranslationSystem(std::string id) const {
         std::map<std::string, TranslationSystem>::const_iterator iter = 
                 m_translationSystems.find(id);
@@ -417,15 +397,6 @@ public:
           return iter->second;
         }
     }
-    
-    size_t GetTranslationSystemCount() const {
-        return m_translationSystems.size();
-    }
-    
-	size_t GetGenerationDictionarySize() const
-	{
-		return m_generationDictionary.size();
-	}
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;

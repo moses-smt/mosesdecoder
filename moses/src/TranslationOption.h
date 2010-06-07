@@ -186,7 +186,7 @@ public:
 	}
 
 	/** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
-	void CalcScore();
+	void CalcScore(const TranslationSystem* system);
 	
 	void CacheScores(const ScoreProducer &scoreProducer, const Scores &score);
 

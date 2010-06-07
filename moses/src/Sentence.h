@@ -92,7 +92,7 @@ class Sentence : public Phrase, public InputType
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 	void Print(std::ostream& out) const;
 
-	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+    TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const;
 	
 	void CreateFromString(const std::vector<FactorType> &factorOrder
 												, const std::string &phraseString

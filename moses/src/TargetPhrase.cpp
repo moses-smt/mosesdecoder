@@ -89,7 +89,9 @@ void TargetPhrase::SetScore(float score)
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
 	//TODO: is this a good idea?
-	ScoreProducer* prod = StaticData::Instance().GetPhraseDictionaries()[0];
+    // Assume the default system.
+    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+	const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
 	
 	//get the weight list
 	unsigned int id = prod->GetScoreBookkeepingID();
@@ -110,7 +112,7 @@ void TargetPhrase::SetScore(float score)
 	vector <float> scoreVector(numScores,score/numScores);
 	
 	//Now we have what we need to call the full SetScore method
-	SetScore(prod,scoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
+	SetScore(prod,scoreVector,weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
 }
 
 /**
@@ -120,7 +122,9 @@ void TargetPhrase::SetScore(float score)
 void TargetPhrase::SetScore(const Scores &scoreVector) 
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
-	ScoreProducer* prod = StaticData::Instance().GetPhraseDictionaries()[0];
+	// Assume the default system.
+    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+    const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
 
 	//get the weight list
 	unsigned int id = prod->GetScoreBookkeepingID();
@@ -135,7 +139,7 @@ void TargetPhrase::SetScore(const Scores &scoreVector)
 	Scores sizedScoreVector = scoreVector;
 	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-	SetScore(prod,sizedScoreVector,weights,StaticData::Instance().GetWeightWordPenalty(),StaticData::Instance().GetAllLM());
+	SetScore(prod,sizedScoreVector,weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,

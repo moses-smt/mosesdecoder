@@ -52,7 +52,7 @@ namespace Moses
 {
   Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
   :m_system(system)
-,m_transOptColl(source.CreateTranslationOptionCollection())
+,m_transOptColl(source.CreateTranslationOptionCollection(system))
 ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
 ,m_start(clock())
 ,interrupted_flag(0)
@@ -87,14 +87,8 @@ void Manager::ProcessSentence()
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-	const vector <DecodeGraph*>& decodeGraphs = m_system->GetDecodeGraphs();
-    //TODO: Move this init into TranslationSystem
-    for (vector <DecodeGraph*>::const_iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
-      for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
-        (*j)->InitializeBeforeSentenceProcessing(m_source);
-      }
-    }
-	m_transOptColl->CreateTranslationOptions(m_system);
+    m_system->InitializeBeforeSentenceProcessing(m_source);
+	m_transOptColl->CreateTranslationOptions();
 
   // some reporting on how long this took
   clock_t gotOptions = clock();
@@ -323,8 +317,8 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 		<< "\ta=";
 
 	// phrase table scores
-	const std::vector<PhraseDictionaryFeature*> &phraseTables = staticData.GetPhraseDictionaries();
-	std::vector<PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
+	const std::vector<const PhraseDictionaryFeature*> &phraseTables = system->GetPhraseDictionaries();
+	std::vector<const PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
 	for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
 	{
 				const PhraseDictionaryFeature *phraseTable = *iterPhraseTable;
@@ -340,7 +334,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
 			// language model scores
 			outputWordGraphStream << "\tl=";
-			const LMList &lmList = staticData.GetAllLM();
+			const LMList &lmList = system->GetLanguageModels();
 			LMList::const_iterator iterLM;
 			for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM)
 			{

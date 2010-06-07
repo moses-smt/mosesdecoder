@@ -199,11 +199,11 @@ void Sentence::InitStartEndWord()
 }
 	
 TranslationOptionCollection* 
-Sentence::CreateTranslationOptionCollection() const 
+    Sentence::CreateTranslationOptionCollection(const TranslationSystem* system) const 
 {
 	size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
 	float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-	TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
+	TranslationOptionCollection *rv= new TranslationOptionCollectionText(system, *this, maxNoTransOptPerCoverage, transOptThreshold);
 	assert(rv);
 	return rv;
 }

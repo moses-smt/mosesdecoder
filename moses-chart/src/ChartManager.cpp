@@ -50,12 +50,7 @@ Manager::Manager(InputType const& source, const TranslationSystem* system)
 	const StaticData &staticData = StaticData::Instance();
 	staticData.InitializeBeforeSentenceProcessing(source);
     
-    const vector <DecodeGraph*>& decodeGraphs = m_system->GetDecodeGraphs();
-    for (vector <DecodeGraph*>::const_iterator i = decodeGraphs.begin(); i != decodeGraphs.end(); ++i) {
-      for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
-        (*j)->InitializeBeforeSentenceProcessing(m_source);
-      }
-    }
+    m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager()

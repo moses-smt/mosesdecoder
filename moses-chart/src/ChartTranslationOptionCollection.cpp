@@ -140,7 +140,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 	TranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
     const PhraseDictionary* phraseDictionary =
-        decodeStep.GetPhraseDictionaryFeature().GetDictionary();
+        decodeStep.GetPhraseDictionaryFeature()->GetDictionary();
 	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
 	
 	const ChartRuleCollection *chartRuleCollection = phraseDictionary->GetChartRuleCollection(

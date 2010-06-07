@@ -47,6 +47,7 @@ class InputType;
 class WordsRange;
 class ChartRuleCollection;
 class CellCollection;
+class TranslationSystem;
 
 class PhraseDictionaryFeature;
 /**
@@ -114,16 +115,19 @@ class PhraseDictionaryFeature :  public DecodeFeature
 	size_t GetNumScoreComponents() const;
 
 	size_t GetNumInputScores() const;
+    
+    //Initialises the dictionary (may involve loading from file)
+    void InitDictionary(const TranslationSystem* system);
 
     //Initialise the dictionary for this source (in this thread)
-	void InitDictionary(const InputType& source);
+    void InitDictionary(const TranslationSystem* system,const InputType& source);
     
     //Get the dictionary. Be sure to initialise it first.
     const PhraseDictionary* GetDictionary() const;
 	
  private:
      /** Load the appropriate phrase table */
-     PhraseDictionary* LoadPhraseTable();
+    PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
      
     size_t m_numScoreComponent;
     unsigned m_numInputScores;

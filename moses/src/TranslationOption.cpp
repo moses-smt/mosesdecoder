@@ -137,20 +137,21 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 	return bitmap.Overlap(GetSourceWordsRange());
 }
 
-void TranslationOption::CalcScore()
+void TranslationOption::CalcScore(const TranslationSystem* system)
 {
 	// LM scores
 	float ngramScore = 0;
 	float retFullScore = 0;
 
-	const LMList &allLM = StaticData::Instance().GetAllLM();
+    const LMList &allLM = system->GetLanguageModels();
 
 	allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, &m_scoreBreakdown);
 
 	size_t phraseSize = GetTargetPhrase().GetSize();
 	// future score
 	m_futureScore = retFullScore - ngramScore
-								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
+								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize *
+        system->GetWeightWordPenalty();
 }
 
 TO_STRING_BODY(TranslationOption);
