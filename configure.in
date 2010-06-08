@@ -34,6 +34,13 @@ AC_ARG_WITH(srilm-dynamic,
             [with_srilm_dynamic=no]
             )
 
+AC_ARG_WITH(srilm-arch,
+            [AC_HELP_STRING([--with-srilm-arch=ARCH], [(optional) architecture for which SRILM was built])],
+            [with_srilm_arch=$withval],
+            [with_srilm_arch=no]
+           )
+
+
 AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
@@ -142,7 +149,12 @@ then
     # ROOT/lib/i686-m64/liboolm.a
     # ROOT/lib/i686-m64/libdstruct.a
     # ROOT/lib/i686-m64/libmisc.a
-    MY_ARCH=`${with_srilm}/sbin/machine-type`
+    if test "x$with_srilm_arch" != 'xno'
+    then
+	MY_ARCH=${with_srilm_arch}    
+    else
+        MY_ARCH=`${with_srilm}/sbin/machine-type`
+    fi
     LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
     LIBS="$LIBS $LIB_SRILM"
     FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
