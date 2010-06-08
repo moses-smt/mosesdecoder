@@ -19,45 +19,43 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <vector>
+#include "LanguageModel.h"
 
 #include "FeatureFunction.h"
-#include "PhraseDictionary.h"
 
 namespace Josiah {
+
+class LanguageModelFeature : public SingleValuedFeatureFunction {
   
-  
-  
-  /** The Moses phrase features. */
-  class PhraseFeature : public FeatureFunction {
-    
   public:
+    LanguageModelFeature(const Moses::LanguageModel* lmodel);
     
-    PhraseFeature();
+    /** Initialise with new sample */
+    virtual void init(const Sample& sample);
     
-    void init(const Sample& sample) {m_sample = &sample;}
-   
-    /** Assign the total score of this feature on the current hypo */
-    virtual void assignScore(FVector& scores);
+    virtual FValue computeScore();
     
     /** Score due to one segment */
-    virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores);
+    virtual FValue getSingleUpdateScore(const Moses::TranslationOption* option, const TargetGap& gap);
+    
+    
     /** Score due to two segments. The left and right refer to the target positions.**/
-    virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-        const TargetGap& gap, FVector& scores);
-    virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-        const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores);
+    virtual FValue getContiguousPairedUpdateScore(const Moses::TranslationOption* leftOption,const Moses::TranslationOption* rightOption, 
+        const TargetGap& gap);
+    
+    virtual FValue getDiscontiguousPairedUpdateScore(const Moses::TranslationOption* leftOption,const Moses::TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap);
     
     /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
-    virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                     const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores);
-    private:
-      void assign(const TranslationOption* option, FVector& scores);
-      Moses::PhraseDictionary* m_phraseDictionary;
-      std::vector<FName> m_featureNames;
-      const Sample* m_sample;
-
-  };
+    virtual FValue getFlipUpdateScore(const Moses::TranslationOption* leftOption,const Moses::TranslationOption* rightOption, 
+                                      const TargetGap& leftGap, const TargetGap& rightGap);
+    
+    
+    
+  private:
+    const Moses::LanguageModel* m_lmodel;
+    const Sample* m_sample;
   
-}
+};
 
+}

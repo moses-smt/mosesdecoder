@@ -35,7 +35,9 @@ josiah_SOURCES = Derivation.cpp \
     GibblerAnnealedExpectedLossTrainer.cpp \
     WeightManager.cpp \
     WordPenaltyFeature.cpp \
-    PhraseFeature.cpp
+    PhraseFeature.cpp \
+    LanguageModelFeature.cpp \
+    DistortionPenaltyFeature.cpp
 
 
 #m1_SOURCES = Model1.cpp FeatureFunction.cpp m1.cpp
@@ -77,7 +79,9 @@ corpustrainer_SOURCES = Derivation.cpp \
     CorpusTrainer.cpp  \
     WeightManager.cpp \
     WordPenaltyFeature.cpp \
-    PhraseFeature.cpp
+    PhraseFeature.cpp \
+    LanguageModelFeature.cpp \
+    DistortionPenaltyFeature.cpp
    
 
 samplerank_SOURCES = Derivation.cpp \
@@ -113,7 +117,9 @@ samplerank_SOURCES = Derivation.cpp \
     OnlineLearnerTrainer.cpp  \
     WeightManager.cpp \
     WordPenaltyFeature.cpp \
-    PhraseFeature.cpp
+    PhraseFeature.cpp \
+    LanguageModelFeature.cpp \
+    DistortionPenaltyFeature.cpp
    
 fv_SOURCES = FeatureVector.cpp FV.cpp
 

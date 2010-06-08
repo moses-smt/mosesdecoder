@@ -73,7 +73,7 @@ void CorpusSamplerCollector::resample(int sent) {
     MPI_VERBOSE(2, "Chosen deriv " << *chosenDeriv << endl)
     MPI_VERBOSE(2, "Chosen deriv size" << chosenDeriv->getTargetSentenceSize() << endl)
     
-    m_featureVectors.at(j).PlusEquals(chosenDeriv->getFeatureValues());
+    m_featureVectors.at(j) += chosenDeriv->getFeatureValues();
     MPI_VERBOSE(2, "Feature vector : " << m_featureVectors.at(j) << endl)
     m_lengths[j] += chosenDeriv->getTargetSentenceSize();
     MPI_VERBOSE(2, "Lengths : " << m_lengths.at(j) << endl)
@@ -188,34 +188,34 @@ void CorpusSamplerCollector::AggregateSuffStats(int rank) {
 }
 #endif
   
-float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,float *exp_len, float *unreg_exp_gain) {
-  ScoreComponentCollection feature_expectations = getFeatureExpectations();
+float CorpusSamplerCollector::UpdateGradient(FVector* gradient,FValue *exp_len, FValue *unreg_exp_gain) {
+  FVector feature_expectations = getFeatureExpectations();
     
   MPI_VERBOSE(1,"FEXP: " << feature_expectations << endl)
     
   //gradient computation
-  ScoreComponentCollection grad;
-  double exp_gain = 0;
-  float gain = 0.0;
-  double iweight = 1.0 / m_featureVectors.size();
+  FVector grad;
+  FValue exp_gain = 0;
+  FValue gain = 0.0;
   for (size_t i = 0; i < m_featureVectors.size() ; ++i) {
-    ScoreComponentCollection fv = m_featureVectors[i];
+    FVector fv = m_featureVectors[i];
     MPI_VERBOSE(2,"FV: " << fv)
     gain = SentenceBLEU::CalcBleu(m_sufficientStats[i], false);
-    fv.MinusEquals(feature_expectations);
+    fv -= feature_expectations;
     MPI_VERBOSE(2,"DIFF: " << fv)
-    fv.MultiplyEquals(gain);
-    MPI_VERBOSE(2,"GAIN: " << gain  << endl)
-    exp_gain += gain*iweight;
-    fv.MultiplyEquals(iweight);
-    grad.PlusEquals(fv);
-    MPI_VERBOSE(2,"grad: " << grad << endl)
+    fv *= gain;
+    MPI_VERBOSE(2,"GAIN: " << gain  << endl);
+    exp_gain += gain;
+    grad += fv;
+    MPI_VERBOSE(2,"grad: " << grad << endl);
   }
+  grad /= m_featureVectors.size();
+  exp_gain /= m_featureVectors.size();
   
   cerr << "Gradient without reg " << grad << endl;
-  ScoreComponentCollection regularizationGrad = getRegularisationGradientFactor();
-  regularizationGrad.DivideEquals(GetNumSents());
-  grad.PlusEquals(regularizationGrad);
+  FVector regularizationGrad = getRegularisationGradientFactor();
+  regularizationGrad /= GetNumSents();
+  grad += regularizationGrad;
   
   
   cerr << "Exp gain without reg term :  " << exp_gain << endl;
@@ -223,7 +223,7 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   exp_gain += getRegularisation()/GetNumSents();
   cerr << "Exp gain with reg term:  " << exp_gain << endl;
   
-  gradient->PlusEquals(grad);
+  *gradient += grad;
   MPI_VERBOSE(1,"Gradient: " << grad << endl)
   
   cerr << "Gradient: " << grad << endl;
@@ -238,21 +238,12 @@ float CorpusSamplerCollector::UpdateGradient(ScoreComponentCollection* gradient,
   return exp_gain;
 }
   
-ScoreComponentCollection CorpusSamplerCollector::getFeatureExpectations() const {
-  //do calculation at double precision to try to maintain accuracy
-  vector<double> sum(StaticData::Instance().GetTotalScoreComponents());
-  double iweight = 1.0/m_featureVectors.size();
+FVector CorpusSamplerCollector::getFeatureExpectations() const {
+  FVector sum;
   for (size_t i = 0; i < m_featureVectors.size(); ++i) {
-    ScoreComponentCollection fv = m_featureVectors[i];
-    for (size_t j = 0; j < fv.size(); ++j) {
-      sum[j] += fv[j]*iweight;
-    }
+    sum += m_featureVectors[i];
   }
-  vector<float> truncatedSum(sum.size());
-  for (size_t i = 0; i < sum.size(); ++i) {
-    truncatedSum[i] = static_cast<float>(sum[i]);
-  }
-  return ScoreComponentCollection(truncatedSum);
+  return sum;
 }
   
 void CorpusSamplerCollector::reset() {

@@ -11,29 +11,27 @@ using namespace std;
 
 namespace Josiah {
   
-  ScoreComponentCollection CorpusSamplerAnnealedCollector::getExpectedFeatureValue(std::map<const Derivation*,double>& m_p) {
-    ScoreComponentCollection expFV;
+  FVector CorpusSamplerAnnealedCollector::getExpectedFeatureValue(std::map<const Derivation*,double>& m_p) {
+    FVector expFV;
     for (std::map<const Derivation*,double>::const_iterator it = m_p.begin(); it != m_p.end(); ++it) {
      const Derivation* deriv = it->first;
-      ScoreComponentCollection fv = deriv->getFeatureValues();  
-      fv.MultiplyEquals(it->second);
-      expFV.PlusEquals(fv);
+      expFV += (deriv->getFeatureValues() * (it->second));
     }
     return expFV;
   }
   
   void CorpusSamplerAnnealedCollector::setRegularisationGradientFactor(std::map<const Derivation*,double>& m_p) {
     double temperature = GetTemperature();
-    ScoreComponentCollection expFV = getExpectedFeatureValue(m_p);
+    FVector expFV = getExpectedFeatureValue(m_p);
     //cerr << "Expected FV " << expFV << endl;
     float entropy_factor;
     for (std::map<const Derivation*,double>::const_iterator it = m_p.begin(); it != m_p.end(); ++it) {
       entropy_factor = -temperature * it->second * (log (it->second)+1);
       //cerr << "Entropy factor " << entropy_factor << endl;
-      ScoreComponentCollection fv = it->first->getFeatureValues();  
-      fv.MinusEquals(expFV);
-      fv.MultiplyEquals(entropy_factor);
-      m_gradient.PlusEquals(fv);
+      FVector fv = it->first->getFeatureValues();  
+      fv -= expFV;
+      fv *= entropy_factor;
+      m_gradient += fv;
     }
     //cerr << "Gradient regularization " << m_gradient << endl;
   }

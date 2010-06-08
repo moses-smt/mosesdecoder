@@ -414,20 +414,20 @@ void FlipOperator::scan(
       newRightPrevHypo = const_cast<Hypothesis*>(followingHyp->GetPrevHypo());
     }
     
-    bool isValidSwap = CheckValidReordering(followingHyp, hypothesis, hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
+    bool isValidSwap = CheckValidReordering(followingHyp->GetCurrSourceWordsRange(), hypothesis->GetCurrSourceWordsRange(), hypothesis->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, followingHyp->GetNextHypo(), totalDistortion);
     if (isValidSwap) {//yes
       leftGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment));
       rightGap.reset(new TargetGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment));
       TranslationDelta* delta = new FlipDelta(this, sample, &(followingHyp->GetTranslationOption()), 
                                               &(hypothesis->GetTranslationOption()), 
-                                              *(leftGap.get()), *(rightGap.get()), totalDistortion, GetGainFunction());
+                                              *(leftGap.get()), *(rightGap.get()),  GetGainFunction());
       deltas.push_back(delta);
       
-      CheckValidReordering(hypothesis, followingHyp, hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
+      CheckValidReordering(hypothesis->GetCurrSourceWordsRange(), followingHyp->GetCurrSourceWordsRange(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), followingHyp->GetPrevHypo(),  followingHyp->GetNextHypo(), totalDistortion); 
       
       noChangeDelta = new   FlipDelta(this, sample, &(hypothesis->GetTranslationOption()), 
                                       &(followingHyp->GetTranslationOption()), *(leftGap.get()), *(rightGap.get()),
-                                      totalDistortion, GetGainFunction()); 
+                                       GetGainFunction()); 
       deltas.push_back(noChangeDelta);   
       
     }  
@@ -446,7 +446,7 @@ void FlipOperator::scan(
       newLeftNextHypo = const_cast<Hypothesis*>(followingHyp->GetNextHypo());
       newRightPrevHypo = const_cast<Hypothesis*>(hypothesis->GetPrevHypo());
     }
-    bool isValidSwap = CheckValidReordering(hypothesis, followingHyp, followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
+    bool isValidSwap = CheckValidReordering(hypothesis->GetCurrSourceWordsRange(), followingHyp->GetCurrSourceWordsRange(), followingHyp->GetPrevHypo(), newLeftNextHypo, newRightPrevHypo, hypothesis->GetNextHypo(), totalDistortion);        
     if (isValidSwap) {//yes
       leftGap.reset(new TargetGap(followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), followingTargetSegment));
       rightGap.reset(new TargetGap(hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), thisTargetSegment));
@@ -454,13 +454,13 @@ void FlipOperator::scan(
       
       TranslationDelta* delta = new FlipDelta(this, sample, &(hypothesis->GetTranslationOption()), 
                                               &(followingHyp->GetTranslationOption()),  *(leftGap.get()), *(rightGap.get()),
-                                              totalDistortion, GetGainFunction());
+                                               GetGainFunction());
       deltas.push_back(delta);
       
       
-      CheckValidReordering(followingHyp,hypothesis, followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
+      CheckValidReordering(followingHyp->GetCurrSourceWordsRange(),hypothesis->GetCurrSourceWordsRange(), followingHyp->GetPrevHypo(), followingHyp->GetNextHypo(), hypothesis->GetPrevHypo(), hypothesis->GetNextHypo(), totalDistortion);        
       noChangeDelta = new FlipDelta(this, sample,&(followingHyp->GetTranslationOption()), 
-                                    &(hypothesis->GetTranslationOption()), *(leftGap.get()), *(rightGap.get()), totalDistortion, GetGainFunction());
+                                    &(hypothesis->GetTranslationOption()), *(leftGap.get()), *(rightGap.get()),  GetGainFunction());
       deltas.push_back(noChangeDelta); 
     }  
   }
@@ -474,7 +474,7 @@ void FlipOperator::scan(
 
 } 
 
-  bool FlipOperator::CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion){
+  bool CheckValidReordering(const WordsRange& leftSourceSegment, const WordsRange& rightSourceSegment, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion){
     totalDistortion = 0;
     //linear distortion
     //const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
@@ -487,7 +487,7 @@ void FlipOperator::scan(
     if (leftTgtPrevHypo) {
       distortionScore = ComputeDistortionDistance(
                                                   leftTgtPrevHypo->GetCurrSourceWordsRange(),
-                                                  leftTgtHypo->GetCurrSourceWordsRange()
+                                                  leftSourceSegment
                                                   );
       
       if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
@@ -501,7 +501,7 @@ void FlipOperator::scan(
     if (leftTgtNextHypo) {  
       //Calculate distortion from leftmost target to right target
       distortionScore = ComputeDistortionDistance(
-                                                  leftTgtHypo->GetCurrSourceWordsRange(),
+                                                  leftSourceSegment,
                                                   leftTgtNextHypo->GetCurrSourceWordsRange()
                                                   ); 
       
@@ -515,10 +515,10 @@ void FlipOperator::scan(
     //Calculate distortion from rightmost target to its successor
     //Hypothesis *rightNextHypo = const_cast<Hypothesis*> (leftTgtHypo->GetNextHypo());  
     
-    if (rightTgtPrevHypo  && rightTgtPrevHypo != leftTgtHypo) {  
+    if (rightTgtPrevHypo  && rightTgtPrevHypo->GetCurrSourceWordsRange() != leftSourceSegment) {  
       distortionScore = ComputeDistortionDistance(
                                                   rightTgtPrevHypo->GetCurrSourceWordsRange(),
-                                                  rightTgtHypo->GetCurrSourceWordsRange()
+                                                  rightSourceSegment
                                                   );
       
       if (abs(distortionScore) > StaticData::Instance().GetMaxDistortion()) {
@@ -531,7 +531,7 @@ void FlipOperator::scan(
     if (rightTgtNextHypo) {  
       //Calculate distortion from leftmost target to right target
       distortionScore = ComputeDistortionDistance(
-                                                  rightTgtHypo->GetCurrSourceWordsRange(),
+                                                  rightSourceSegment,
                                                   rightTgtNextHypo->GetCurrSourceWordsRange()
                                                   ); 
       

@@ -65,12 +65,14 @@ class ParenthesisCounts {
 **/
 class ParenthesisFeature: public virtual FeatureFunction {
     public:
-        ParenthesisFeature(const std::string lefts, const std::string rights) 
-    : FeatureFunction("parenthesis",lefts.size()),
+        ParenthesisFeature(const std::string lefts, const std::string rights) : 
         m_sample(NULL),
         m_numValues(lefts.size()), m_lefts(lefts), m_rights(rights),
-        m_counts(m_numValues), m_leftSegmentCounts(m_numValues), m_rightSegmentCounts(m_numValues),
-        m_violations(m_numValues) {}
+        m_counts(m_numValues), m_leftSegmentCounts(m_numValues), m_rightSegmentCounts(m_numValues) {
+          for (size_t i = 0; i < lefts.size(); ++i) {
+            m_names.push_back(FName("par",lefts.substr(i,1)));
+          }
+        }
         
         /** Initialise with a new sample */
         virtual void init(const Sample& sample);
@@ -78,34 +80,34 @@ class ParenthesisFeature: public virtual FeatureFunction {
         virtual void updateTarget();
     
         /** Assign the total score of this feature on the current hypo */
-        virtual void assignScore(ScoreComponentCollection& scores);
+        virtual void assignScore(FVector& scores);
     
         /** Score due to one segment */
-        virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores);
+        virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores);
         /** Score due to two segments. The left and right refer to the target positions.**/
         virtual void doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                              const TargetGap& gap, ScoreComponentCollection& scores);
+                                              const TargetGap& gap, FVector& scores);
         virtual void doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores);
+                const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores);
     
         /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
         virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                  const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) ;
+                                  const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) ;
     
         virtual ~ParenthesisFeature() {}
     
     private:
         /** Violations from a segment, with optional outside counts. If outside counts and segment are missing, then 
         it is assumed that we are */
-        void getViolations(const ParenthesisCounts& counts, std::vector<float>& violations, 
+        void getViolations(const ParenthesisCounts& counts, FVector& violations, 
                            const ParenthesisCounts* outsideCounts=NULL, const WordsRange* segment=NULL);
         
         /** Violations from a pair of segments, with outside counts */
         void getViolations(const ParenthesisCounts& leftSegmentCounts, const ParenthesisCounts& rightSegmentCounts,
                            const WordsRange& leftSegment, const WordsRange& rightSegment,
-                           const ParenthesisCounts& outsideCounts, std::vector<float>& violations);
+                           const ParenthesisCounts& outsideCounts, FVector& scores);
         
-        void scoreUpdate(const Moses::Phrase& phrase, const Moses::WordsRange& segment, Moses::ScoreComponentCollection& scores);
+        void scoreUpdate(const Moses::Phrase& phrase, const Moses::WordsRange& segment, FVector& scores);
                            
         
         const Sample* m_sample;
@@ -122,7 +124,7 @@ class ParenthesisFeature: public virtual FeatureFunction {
         ParenthesisCounts m_leftSegmentCounts;
         ParenthesisCounts m_rightSegmentCounts;
         
-        std::vector<float> m_violations;
+        std::vector<FName> m_names;
         
         
         

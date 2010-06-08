@@ -38,8 +38,8 @@ private:
   BleuSufficientStats m_suffStats;
   BleuSufficientStats m_averageSuffStats;
   size_t m_numSuffStats;
-  ScoreComponentCollection m_GainOptimalSol;
-  float m_optimalGain;
+  FVector m_GainOptimalSol;
+  FValue m_optimalGain;
   bool m_runRandom;
   size_t m_lag;
 public:
@@ -65,7 +65,7 @@ public:
   void SetOptimalGain(float gain) { m_optimalGain = gain;}
   float GetOptimalGain() {return m_optimalGain;}
   void SetOptimalGainSol(TranslationDelta*, TranslationDelta*);
-  const ScoreComponentCollection & GetOptimalGainSol() { return m_GainOptimalSol;}
+  const FVector & GetOptimalGainSol() { return m_GainOptimalSol;}
   void collectSample(Sample& sample);
   GibbsOperator* SampleNextOperator(const std::vector<GibbsOperator*>& );
 };

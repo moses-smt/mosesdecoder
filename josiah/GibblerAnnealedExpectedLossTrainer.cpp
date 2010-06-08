@@ -8,7 +8,7 @@ using namespace std;
 
 namespace Josiah {
   
-float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollection* gradient, float* exp_len, float *unreg_exp_gain) {
+float GibblerAnnealedExpectedLossCollector::UpdateGradient(FVector* gradient, FValue* exp_len, FValue *unreg_exp_gain) {
   //the distribution is fetched here so that it only has to be done once during gradient calculation
   m_p.clear();
   m_derivationCollector.getDistribution(m_p);
@@ -16,9 +16,9 @@ float GibblerAnnealedExpectedLossCollector::UpdateGradient(ScoreComponentCollect
 }
 
 float GibblerAnnealedExpectedLossCollector::getRegularisationGradientFactor(size_t i) {
-  double temperature = GetTemperature();
+  FValue temperature = GetTemperature();
   const Derivation* d = m_derivationCollector.getSample(i);
-  float prob =  m_p[d];
+  FValue prob =  m_p[d];
   return -temperature * log (N()*prob) ;
 }
 

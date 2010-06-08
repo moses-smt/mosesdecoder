@@ -103,7 +103,7 @@ namespace Josiah {
   
   
 
-  void GetFeatureNames(std::vector<std::string>* featureNames) {
+  void GetMosesFeatureNames(std::vector<std::string>* featureNames) {
     const StaticData &staticData = StaticData::Instance();
     const ScoreIndexManager& sim = staticData.GetScoreIndexManager();
     featureNames->resize(sim.GetTotalNumberOfScores());
@@ -111,34 +111,12 @@ namespace Josiah {
       (*featureNames)[i] = sim.GetFeatureName(i);
   }
 
-  void GetFeatureWeights(std::vector<float>* weights){
+  void GetMosesFeatureWeights(std::vector<float>* weights){
     const StaticData &staticData = StaticData::Instance();
     *weights = staticData.GetAllWeights();  
   }
 
-  void SetFeatureWeights(const std::vector<float>& weights) {
-        const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(weights);
-  }
   
-  void OutputWeights(std::ostream& out) {
-    vector<string> names;
-    GetFeatureNames(&names);
-    vector<float> weights;
-    GetFeatureWeights(&weights);
-    assert(names.size() == weights.size());
-    for (size_t i = 0; i < weights.size(); ++i) {
-      out << names[i] << " " << weights[i] << endl;
-    }
-  }
-  
-  void OutputWeights(const std::vector<float>& weights, std::ostream& out) {
-    vector<string> names;
-    GetFeatureNames(&names);
-    assert(names.size() == weights.size());
-    for (size_t i = 0; i < weights.size(); ++i) {
-      out << names[i] << " " << weights[i] << endl;
-    }
-  }
 
   Search* RandomDecoder::createSearch(Moses::Sentence& sentence, Moses::TranslationOptionCollection& toc) {
     return new SearchRandom(sentence,toc);

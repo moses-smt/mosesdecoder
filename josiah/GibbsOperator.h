@@ -208,10 +208,11 @@ namespace Josiah {
       return m_splitPoints;
     }
   private:
-    bool CheckValidReordering(const Hypothesis* leftTgtHypo, const Hypothesis *rightTgtHypo, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion);
     void CollectAllSplitPoints(Sample& sample);
     vector<size_t> m_splitPoints;
   };
+  
+  bool CheckValidReordering(const WordsRange& leftSourceSegment, const WordsRange& rightSourceSegment, const Hypothesis* leftTgtPrevHypo, const Hypothesis* leftTgtNextHypo, const Hypothesis* rightTgtPrevHypo, const Hypothesis* rightTgtNextHypo, float & totalDistortion);
   
   
 }

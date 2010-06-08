@@ -105,6 +105,11 @@ class FVector
     
     FVector& max_equals(const FVector& rhs);
     
+    /** norms and sums */
+    FValue l1norm() const;
+    FValue l2norm() const;
+    FValue sum() const;
+    
     /** printing */
     std::ostream& print(std::ostream& out) const;
     

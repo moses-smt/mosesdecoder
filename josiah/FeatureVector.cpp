@@ -21,9 +21,11 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+
 
 #include "FeatureVector.h"
 
@@ -279,13 +281,39 @@ namespace Josiah {
     return *this;
   }
   
+  FValue FVector::l1norm() const {
+    FValue norm = 0;
+    for (const_iterator i = begin(); i != end(); ++i) {
+      if (!(i->second) && i->first == DEFAULT_NAME) {
+        throw runtime_error("Cannot take l1norm with non-zero default values");
+      }
+      norm += abs(i->second);
+    }
+    return norm;
+  }
+  
+  FValue FVector::sum() const {
+    FValue sum = 0;
+    for (const_iterator i = begin(); i != end(); ++i) {
+      if (!(i->second) && i->first == DEFAULT_NAME) {
+        throw runtime_error("Cannot take sum with non-zero default values");
+      }
+      sum += i->second;
+    }
+    return sum;
+  }
+  
+  FValue FVector::l2norm() const {
+    return sqrt(inner_product(*this));
+  }
+  
 
   
   FValue FVector::inner_product(const FVector& rhs) const {
     FValue lhsDefault = get(DEFAULT_NAME);
     FValue rhsDefault = rhs.get(DEFAULT_NAME);
     if (lhsDefault && rhsDefault) {
-      throw runtime_error("Cannot take inner product if both lhs and rhs have default values");
+      throw runtime_error("Cannot take inner product if both lhs and rhs have non-zero default values");
     }
     FValue product = 0.0;
     for (const_iterator i = begin(); i != end(); ++i) {

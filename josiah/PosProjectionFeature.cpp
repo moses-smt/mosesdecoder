@@ -25,9 +25,6 @@ using namespace Moses;
 namespace Josiah {
     void PosProjectionFeature::updateTarget() {
         m_tagProjection.clear();
-        //step through the hypotheses in target order,
-        //extracting the pos tags from the source
-        //cerr << "PPF update:";
         for (const Hypothesis* currHypo = m_sample->GetTargetTail()->GetNextHypo();
                 currHypo != NULL; currHypo = currHypo->GetNextHypo()) {
             const Phrase* sourcePhrase = currHypo->GetSourcePhrase();
@@ -37,29 +34,11 @@ namespace Josiah {
                 //cerr << " " << i->GetFactor(0)->GetString();
             }
         }
-        //cerr << endl;
-        //error checking
-        /*
-        ScoreComponentCollection expectedScores;
-        assignScore(expectedScores);
-        ScoreComponentCollection actualScores = 
-            m_sample->GetFeatureValues();
-        bool error = false;
-        for (size_t i = 0; i < m_numValues; ++i) {
-            if (actualScores[i] != expectedScores[i]) {
-                error = true;
-                break;
-            }
-        }
-        if (error) {
-            cerr << "ERROR" << endl;
-            cerr << "EXPECTED: " << expectedScores << endl;
-            cerr << "ACTUAL: " << actualScores << endl;
-        }*/
+        
     }
 
     void PosProjectionBigramFeature::countBigrams
-        (const TagSequence& tagSequence, std::vector<float>& counts) {
+        (const TagSequence& tagSequence, FVector& counts) {
         //cerr << "Tag bigrams ";
         for (TagSequence::const_iterator tagIter = tagSequence.begin();
             tagIter+1 != tagSequence.end(); ++tagIter) {
@@ -73,42 +52,39 @@ namespace Josiah {
             if (nextTagId == m_tags.end()) continue;
             //cerr << currTag << "-" << nextTag << " ";
             size_t index = m_tags.size() * currTagId->second + nextTagId->second;
-            ++counts[index];
+            counts[m_names[index]] = counts[m_names[index]] + 1;
         }
         //cerr << endl;
     }
 
     /** Assign the total score of this feature on the current hypo */
-    void PosProjectionBigramFeature::assignScore(ScoreComponentCollection& scores) {
-        m_scores.assign(numValues(),0);
-        countBigrams(getCurrentTagProjection(),m_scores);
-        scores.Assign(&getScoreProducer(), m_scores);
+    void PosProjectionBigramFeature::assignScore(FVector& scores) {
+        countBigrams(getCurrentTagProjection(),scores);
     }
 
     /** Score due to one segment */
-    void PosProjectionBigramFeature::doSingleUpdate(const TranslationOption* option, const TargetGap& gap, ScoreComponentCollection& scores) 
+    void PosProjectionBigramFeature::doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores) 
     {
         //no change
     }
     /** Score due to two segments. The left and right refer to the target positions.**/
     void PosProjectionBigramFeature::doContiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                          const TargetGap& gap, ScoreComponentCollection& scores) 
+                                          const TargetGap& gap, FVector& scores) 
     {
         //no change
     }
 
     void PosProjectionBigramFeature::doDiscontiguousPairedUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-            const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) 
+            const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) 
     {
         //no change
     }
 
     /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
     void PosProjectionBigramFeature::doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                              const TargetGap& leftGap, const TargetGap& rightGap, ScoreComponentCollection& scores) 
+                              const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) 
     { 
         bool contiguous = (leftGap.segment.GetEndPos()+1 == rightGap.segment.GetStartPos());
-        m_scores.assign(numValues(),0);
         //changes the projection, so recalculate
         TagSequence tagProjection;
         if (leftGap.leftHypo->GetPrevHypo()) {
@@ -137,7 +113,7 @@ namespace Josiah {
             const Phrase* rightPhrase = leftGap.rightHypo->GetSourcePhrase();
             tagProjection.push_back(rightPhrase->GetWord(0).GetFactor(sourceFactorType()));
         }
-        countBigrams(tagProjection,m_scores);
+        countBigrams(tagProjection,scores);
         if (!contiguous) {
             //right gap
             tagProjection.clear();
@@ -153,9 +129,8 @@ namespace Josiah {
                 const Phrase* rightPhrase = rightGap.rightHypo->GetSourcePhrase();
                 tagProjection.push_back(rightPhrase->GetWord(0).GetFactor(sourceFactorType()));
             }
-            countBigrams(tagProjection,m_scores);
+            countBigrams(tagProjection,scores);
         }
-        scores.Assign(&getScoreProducer(),m_scores);
     }
 
 

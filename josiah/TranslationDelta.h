@@ -50,37 +50,12 @@ class GainFunction;
 class GibbsOperator;  
 struct TargetGap;  
 
-#ifdef LM_CACHE
-/* 
- * An MRU cache
-**/
-class LanguageModelCache {
-  public:
-    LanguageModelCache(LanguageModel* languageModel, int maxSize=100000) :
-      m_languageModel(languageModel), m_maxSize(maxSize) {}
-    float GetValue(const std::vector<const Word*>& ngram);
-    
-  private:
-    LanguageModel* m_languageModel;
-    int m_maxSize;
-    //current entries
-    typedef std::pair<std::vector<const Word*>,float> Entry;
-    typedef std::list<Entry> EntryList;
-    typedef EntryList::iterator EntryListIterator;
-    std::list<Entry> m_entries;
-    //pointers into the entry list
-    typedef __gnu_cxx::hash_map<vector<const Word*>, EntryListIterator*> ListPointerMap;
-    ListPointerMap m_listPointers;
-};
-#endif
-
 /**
   * This class hierarchy represents the possible changes in the translation effected
   * by the gibbs operators.
   **/
 class TranslationDelta {
   public:
-    static long lmcalls;
     TranslationDelta(GibbsOperator* g_operator, Sample& sample, const GainFunction* gf): m_score(-1e6), m_gain(-1.0), m_operator(g_operator), m_sample(sample), m_gf(gf) {}
     /**
       Get the absolute score of this delta
@@ -240,7 +215,7 @@ class FlipDelta : public virtual TranslationDelta {
   public: 
     /**  Options and gaps in target order */
     FlipDelta(GibbsOperator* g_operator, Sample& sample, const TranslationOption* leftTgtOption, const TranslationOption* rightTgtOption, 
-              const TargetGap& leftGap, const TargetGap& rightGap, float distortion, const GainFunction* gf);
+              const TargetGap& leftGap, const TargetGap& rightGap,  const GainFunction* gf);
     
     virtual void apply(const TranslationDelta& noChangeDelta);
     FlipDelta* Create() const;
@@ -248,13 +223,11 @@ class FlipDelta : public virtual TranslationDelta {
   const TranslationOption* getRightOption()  const {return m_rightTgtOption;}  
   const TargetGap& getLeftGap() const  { return m_leftGap;} 
   const TargetGap& getRightGap()  const { return m_rightGap;}
-  float getTotalDistortion()  const { return m_totalDistortion;}
   private:
     const TranslationOption* m_leftTgtOption;
     const TranslationOption* m_rightTgtOption;
     const TargetGap& m_leftGap;
     const TargetGap& m_rightGap;
-    float m_totalDistortion;
     Hypothesis* m_prevTgtHypo;
     Hypothesis* m_nextTgtHypo;
 };

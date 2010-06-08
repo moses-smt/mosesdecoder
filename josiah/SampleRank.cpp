@@ -94,7 +94,6 @@ int main(int argc, char** argv) {
   unsigned training_batch_size;
   
   bool do_timing;
-  bool show_features;
   uint32_t seed;
   int lineno;
   bool randomize;
@@ -107,7 +106,6 @@ int main(int argc, char** argv) {
   bool anneal;
   unsigned int reheatings;
   float max_temp;
-  vector<float> prev_gradient;
   float brev_penalty_scaling_factor;
   bool hack_bp_denum;
   int weight_dump_freq;
@@ -142,7 +140,6 @@ int main(int argc, char** argv) {
   ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
   ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
   ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
-	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
 	("weights,w",po::value<string>(&weightfile),"Weight file")
   ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
   ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
@@ -207,6 +204,14 @@ int main(int argc, char** argv) {
     return 0;
   }
   
+  if (weightfile.empty()) {
+    std::cerr << "Setting all feature weights to zero" << std::endl;
+    WeightManager::init();
+  } else {
+    std::cerr << "Loading feature weights from " << weightfile <<  std::endl;
+    WeightManager::init(weightfile);
+  }
+  
   if (translation_distro) translate = true;
   if (derivation_distro) decode = true;
   
@@ -240,14 +245,7 @@ int main(int argc, char** argv) {
   auto_ptr<Decoder> decoder(new RandomDecoder());
   
   
-  // may be invoked just to get a features list
-  if (show_features) {
-    OutputWeights(cout);
-#ifdef MPI_ENABLED
-    MPI_Finalize();
-#endif
-    return 0;
-  }
+  
   
   
   
@@ -342,16 +340,16 @@ int main(int argc, char** argv) {
   }
   
   if (perceptron) {
-    onlineLearner.reset(new PerceptronLearner(StaticData::Instance().GetWeights(), "PERCEPTRON", perceptron_lr));
+    onlineLearner.reset(new PerceptronLearner(WeightManager::instance().get(), "PERCEPTRON", perceptron_lr));
   }
   else if (mira) {
-    onlineLearner.reset(new MiraLearner(StaticData::Instance().GetWeights(), "MIRA", fix_margin, margin, slack, scale_margin, weightNormalizer.get()));
+    onlineLearner.reset(new MiraLearner(WeightManager::instance().get(), "MIRA", fix_margin, margin, slack, scale_margin, weightNormalizer.get()));
   }
   else if (mira_plus) {
-    onlineLearner.reset(new MiraPlusLearner(StaticData::Instance().GetWeights(), "MIRA++", fix_margin, margin, slack, scale_margin, weightNormalizer.get()));
+    onlineLearner.reset(new MiraPlusLearner(WeightManager::instance().get(), "MIRA++", fix_margin, margin, slack, scale_margin, weightNormalizer.get()));
   }
   else if (cw) {
-    onlineLearner.reset(new CWLearner(StaticData::Instance().GetWeights(), "CW", cwConfidence, cwInitialVariance));
+    onlineLearner.reset(new CWLearner(WeightManager::instance().get(), "CW", cwConfidence, cwInitialVariance));
   }
 	
 	
@@ -414,7 +412,6 @@ int main(int argc, char** argv) {
     decoder->decode(line,hypothesis,toc,source);
     timer.check("Running sampler");
     
-    TranslationDelta::lmcalls = 0;
 
     if (sampleRank) {
       if (approxDocBleu && ctr > 0) {
@@ -429,7 +426,6 @@ int main(int argc, char** argv) {
     //Reset the online learner stats
     sampler.GetOnlineLearner()->reset();
     sampler.Run(hypothesis,toc,source,extra_features,acceptor.get(), collectAll, defaultCtrIncrementer);
-    VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
     cerr << "Performed " << sampler.GetOnlineLearner()->GetNumUpdates() << " updates for this sentence" << endl;
     cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
@@ -446,21 +442,14 @@ int main(int argc, char** argv) {
     }
   } 
   
-  ScoreComponentCollection finalAvgWeights = onlineLearner->GetAveragedWeights();
+  FVector finalAvgWeights = onlineLearner->GetAveragedWeights();
   //cerr << "Final Weights: " << finalAvgWeights << endl;
   stringstream s;
   s << weight_dump_stem;
   s << "_final";
   string weight_file = s.str();
   cerr << "Dumping final weights to  " << weight_file << endl;
-  ofstream f_out(weight_file.c_str());
-  
-  if (f_out) {
-    OutputWeights(finalAvgWeights.data(), f_out);
-    f_out.close();
-  }  else {
-    cerr << "Failed to dump weights" << endl;
-  }
+  finalAvgWeights.save(weight_file);
   
 #ifdef MPI_ENABLED
   MPI_Finalize();

@@ -56,4 +56,45 @@ FValue WordPenaltyFeature::getFlipUpdateScore(const TranslationOption* leftOptio
                                   const TargetGap& leftGap, const TargetGap& rightGap) {
    return -(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
 }
+
+UnknownWordPenaltyFeature::UnknownWordPenaltyFeature() :
+    SingleValuedFeatureFunction(StaticData::Instance().GetUnknownWordPenaltyProducer()->GetScoreProducerDescription()),
+    m_producer(StaticData::Instance().GetUnknownWordPenaltyProducer()){}
+  
+FValue UnknownWordPenaltyFeature::computeScore() {
+      FValue score = 0;
+      const Hypothesis* currHypo = m_sample->GetTargetTail();
+      while ((currHypo = (currHypo->GetNextHypo()))) {
+        score += currHypo->GetTranslationOption().GetScoreBreakdown().GetScoreForProducer(m_producer);
+      }
+      return score;
+}
+
+/** Score due to one segment */
+FValue UnknownWordPenaltyFeature::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
+  return option->GetScoreBreakdown().GetScoreForProducer(m_producer);
+}
+
+/** Score due to two segments. The left and right refer to the target positions.**/
+FValue UnknownWordPenaltyFeature::getContiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+    const TargetGap& gap) {
+      return leftOption->GetScoreBreakdown().GetScoreForProducer(m_producer) +
+          rightOption->GetScoreBreakdown().GetScoreForProducer(m_producer);
+  
+}
+
+FValue UnknownWordPenaltyFeature::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+const TargetGap& leftGap, const TargetGap& rightGap) {
+  return leftOption->GetScoreBreakdown().GetScoreForProducer(m_producer) +
+      rightOption->GetScoreBreakdown().GetScoreForProducer(m_producer);
+}
+
+
+        /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
+FValue UnknownWordPenaltyFeature::getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
+const TargetGap& leftGap, const TargetGap& rightGap) {
+  return 0;
+}
+
+
 }//namespace

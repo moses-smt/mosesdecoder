@@ -574,7 +574,6 @@ int main(int argc, char** argv) {
     decoder->decode(line,hypothesis,toc,source);
     timer.check("Running sampler");
 
-    TranslationDelta::lmcalls = 0;
     
     if (doMH) {
       MHAcceptor::mhtotal = 0;  
@@ -582,7 +581,6 @@ int main(int argc, char** argv) {
     }
     
     sampler.Run(hypothesis,toc,source,extra_features, acceptor.get(), collectAll, defaultCtrIncrementer,raoBlackwell);  
-    VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     if (doMH) {
       VERBOSE(1, "Total number of Metropolis-Hastings Steps :" << MHAcceptor::mhtotal << endl) 
       VERBOSE(1, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 

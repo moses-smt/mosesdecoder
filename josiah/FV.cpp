@@ -67,13 +67,13 @@ int main() {
   cerr << "(fv + 2) - (fv2 -1) = " << (fvp2 - fv2m1) << endl;
   cerr << "(fv + 2) * (fv2 -1) = " << (fvp2 * fv2m1) << endl;
   cerr << "(fv + 2) / (fv2 -1) = " << (fvp2 / fv2m1) << endl;
-  cerr << "max((fv + 2),(fv2 -1)) = " << maxv(fvp2,fv2m1) << endl;
+  cerr << "max((fv + 2),(fv2 -1)) = " << fvmax(fvp2,fv2m1) << endl;
   
   cerr << "(fv + 2) + (fv2) = " << (fvp2 + fv2) << endl;
   cerr << "(fv + 2) - (fv2) = " << (fvp2 - fv2) << endl;
   cerr << "(fv + 2) * (fv2) = " << (fvp2 * fv2) << endl;
   cerr << "fv2 / (fv + 2) = " << (fv2 / fvp2) << endl;
-  cerr << "max((fv + 2),(fv2)) = " << maxv(fv2,fvp2) << endl;
+  cerr << "max((fv + 2),(fv2)) = " << fvmax(fv2,fvp2) << endl;
   //fv2[g4] = 3.1; //error
   
   cerr << "fv2 . (fv + 2) = " << inner_product(fv2,fv+2) << endl;

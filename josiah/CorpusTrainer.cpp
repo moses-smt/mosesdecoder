@@ -37,6 +37,7 @@
 #include "Gibbler.h"
 #include "InputSource.h"
 #include "TrainingSource.h"
+#include "FeatureVector.h"
 #include "GibbsOperator.h"
 #include "SentenceBleu.h"
 #include "GainFunction.h"
@@ -95,15 +96,14 @@ int main(int argc, char** argv) {
   unsigned training_batch_size;
   bool mbr_decoding;
   bool do_timing;
-  bool show_features;
   int max_training_iterations;
   int num_samples;
   uint32_t seed;
   int lineno;
   bool randomize;
-  float scalefactor;
-  vector<float> eta;
-  float mu;
+  FValue scalefactor;
+  FValue eta;
+  FValue mu;
   string weightfile;
   vector<string> ref_files;
   int periodic_decode;
@@ -113,8 +113,8 @@ int main(int argc, char** argv) {
   unsigned int reheatings;
   float max_temp;
   float prior_variance;
-  vector<float> prior_mean;
-  vector<float> prev_gradient;
+  float prior_mean;
+  string prev_gradient_file;
   bool expected_cbleu_da;
   float start_temp_expda;
   float stop_temp_expda;  
@@ -153,7 +153,6 @@ int main(int argc, char** argv) {
   ("input-file,i",po::value<string>(&inputfile),"Input file containing tokenised source")
   ("output-file-prefix,o",po::value<string>(&outputfile),"Output file prefix for translations, MBR output, etc")
   ("nbest-drv,n",po::value<unsigned int>(&topn)->default_value(0),"Write the top n derivations to stdout")
-	("show-features,F",po::value<bool>(&show_features)->zero_tokens()->default_value(false),"Show features and then exit")
 	("weights,w",po::value<string>(&weightfile),"Weight file")
   ("decode-derivation,d",po::value( &decode)->zero_tokens()->default_value(false),"Write the most likely derivation to stdout")
   ("decode-translation,t",po::value(&translate)->zero_tokens()->default_value(false),"Write the most likely translation to stdout")
@@ -167,17 +166,17 @@ int main(int argc, char** argv) {
   ("gradient,g", po::value(&expected_cbleu_gradient)->zero_tokens()->default_value(false), "Compute the gradient with respect to expected corpus BLEU")
   ("randomize-batches,R", po::value(&randomize)->zero_tokens()->default_value(false), "Randomize training batches")
   ("gaussian-prior-variance", po::value<float>(&prior_variance)->default_value(0.0f), "Gaussian prior variance (0 for no prior)")
-  ("gaussian-prior-mean,P", po::value<vector<float> >(&prior_mean), "Gaussian prior means")
+  ("gaussian-prior-mean,P", po::value<float>(&prior_mean), "Gaussian prior mean")
   ("expected-bleu-training,T", po::value(&expected_cbleu_training)->zero_tokens()->default_value(false), "Train to maximize expected corpus BLEU")
   ("max-training-iterations,M", po::value(&max_training_iterations)->default_value(30), "Maximum training iterations")
   ("training-batch-size,S", po::value(&training_batch_size)->default_value(0), "Batch size to use during xpected bleu training, 0 = full corpus")
 	("reheatings", po::value<unsigned int>(&reheatings)->default_value(1), "Number of times to reheat the sampler")
 	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
 	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
-  ("eta", po::value<vector<float> >(&eta), "Default learning rate for SGD/EGD")
-  ("prev-gradient", po::value<vector<float> >(&prev_gradient), "Previous gradient for restarting SGD/EGD")
-  ("mu", po::value<float>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
-  ("gamma", po::value<float>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
+      ("eta", po::value<FValue>(&eta)->default_value(0.0), "Default learning rate for SGD/EGD")
+  ("prev-gradient", po::value<string>(&prev_gradient_file), "File containing previous gradient for restarting SGD/EGD")
+  ("mu", po::value<FValue>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
+  ("gamma", po::value<FValue>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
   ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
   ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
   ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
@@ -223,6 +222,14 @@ int main(int argc, char** argv) {
     std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
     std::cout << desc << std::endl;
     return 0;
+  }
+  
+  if (weightfile.empty()) {
+    std::cerr << "Setting all feature weights to zero" << std::endl;
+    WeightManager::init();
+  } else {
+    std::cerr << "Loading feature weights from " << weightfile <<  std::endl;
+    WeightManager::init(weightfile);
   }
   
   if (expected_cbleu_training && expected_cbleu_da) {
@@ -313,15 +320,7 @@ int main(int argc, char** argv) {
       mhAcceptor.get()->setProposalLMInfo(proposalLMInfo);  
     } 
   }
-  
-  // may be invoked just to get a features list
-  if (show_features) {
-    OutputWeights(cout);
-#ifdef MPI_ENABLED
-    MPI_Finalize();
-#endif
-    return 0;
-  }
+
   
   
   
@@ -355,36 +354,37 @@ int main(int argc, char** argv) {
   
   auto_ptr<Optimizer> optimizer;
   
-  eta.resize(weights.size());   
+  FVector etaVector(eta);
   
   
   
-  prev_gradient.resize(weights.size());
+  FVector prev_gradient;
+  if (!prev_gradient_file.empty()) {
+    prev_gradient.load(prev_gradient_file);
+  }
   
   if (use_metanormalized_egd) {
     optimizer.reset(new MetaNormalizedExponentiatedGradientDescent(
-                                                                   ScoreComponentCollection(eta),
+                                                                   etaVector,
                                                                    mu,
                                                                    0.1f,   // minimal step scaling factor
                                                                    gamma,                                       
                                                                    max_training_iterations,
-                                                                   ScoreComponentCollection(prev_gradient)));
+                                                                   prev_gradient));
   } else {
     optimizer.reset(new ExponentiatedGradientDescent(
-                                                     ScoreComponentCollection(eta),
+                                                     etaVector,
                                                      mu,
                                                      0.1f,   // minimal step scaling factor
                                                      max_training_iterations,
-                                                     ScoreComponentCollection(prev_gradient)));
+                                                     prev_gradient));
   }
   if (optimizer.get()) {
       optimizer->SetIteration(init_iteration_number);
   }
   if (prior_variance != 0.0f) {
     assert(prior_variance > 0);
-    std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance << endl;
-    for (size_t i = 0; i < prior_mean.size(); ++i)
-      std::cerr << "  \\mu_" << i << " = " << prior_mean[i] << endl;
+    std::cerr << "Using Gaussian prior: \\sigma^2=" << prior_variance <<  " \\mu=" << prior_mean << endl;
     optimizer->SetUseGaussianPrior(prior_mean, prior_variance);
   }
   ExpectedBleuTrainer* trainer = NULL;
@@ -519,7 +519,6 @@ int main(int argc, char** argv) {
     decoder->decode(line,hypothesis,toc,source);
     timer.check("Running sampler");
     
-    TranslationDelta::lmcalls = 0;
     if (doMH) {
       MHAcceptor::mhtotal = 0;  
       MHAcceptor::acceptanceCtr = 0;  
@@ -530,7 +529,6 @@ int main(int argc, char** argv) {
       VERBOSE(1, "Total number of accepted Metropolis-Hastings Steps :" <<  MHAcceptor::acceptanceCtr << endl) 
     }
     
-    VERBOSE(1, "Language model calls: " << TranslationDelta::lmcalls << endl);
     timer.check("Outputting results");
     
     //Now resample
@@ -541,7 +539,7 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLED  
       elCollector->AggregateSamples(rank);    
 #endif      
-      ScoreComponentCollection gradient;
+      FVector gradient;
       float exp_trans_len = 0;
       float unreg_exp_gain = 0;
       float exp_gain = 0;

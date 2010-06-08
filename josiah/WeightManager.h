@@ -50,6 +50,4 @@ class WeightManager {
 
 };
 
-FName GetWordPenaltyName();
-
 }

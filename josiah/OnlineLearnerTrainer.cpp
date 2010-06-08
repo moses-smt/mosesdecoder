@@ -74,7 +74,7 @@ namespace Josiah {
       MPI_Abort(MPI_COMM_WORLD,1);
 #endif
 
-    ScoreComponentCollection avgWeights = m_learner->GetAveragedWeights();
+    FVector avgWeights = m_learner->GetAveragedWeights();
 #ifdef MPI_ENABLED
     MPI_VERBOSE(1, "for rank " << rank << ", avg weights " << avgWeights << endl)
     vector <float> avgWeightsVec(avgWeights.size());
@@ -96,14 +96,7 @@ namespace Josiah {
       s << batch_ctr;
       string weight_file = s.str();
       cerr << "Dumping weights to  " << weight_file << endl;
-      ofstream out(weight_file.c_str());
-      
-      if (out) {
-        OutputWeights(avgWeights.data(), out);
-        out.close();
-      }  else {
-        cerr << "Failed to dump weights" << endl;
-      }
+      avgWeights.save(weight_file);
     }
    
     if (rank == 0) {

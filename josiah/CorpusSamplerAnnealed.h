@@ -4,7 +4,7 @@
 #include <utility>
 #include <ext/hash_map>
 
-#include "ScoreComponentCollection.h"
+#include "FeatureVector.h"
 #include "CorpusSampler.h"
 #include "Phrase.h"
 #ifdef MPI_ENABLED
@@ -27,7 +27,7 @@ namespace Josiah {
     
     float GetTemperature() { return m_temp;}
     void SetTemperature(float temp) {m_temp = temp;} 
-    virtual ScoreComponentCollection getRegularisationGradientFactor() {
+    virtual FVector getRegularisationGradientFactor() {
       return m_gradient;
     }
     virtual float getRegularisation() {
@@ -36,7 +36,7 @@ namespace Josiah {
     virtual void reset() {
       CorpusSamplerCollector::reset();
       m_regularisation = 0.0;
-      m_gradient.ZeroAll();
+      m_gradient.clear();
     }
     virtual void setRegularisationGradientFactor(std::map<const Derivation*,double>& m_p);
     virtual void setRegularisation(std::map<const Derivation*,double>& m_p);
@@ -44,9 +44,9 @@ namespace Josiah {
     virtual void AggregateSamples(int rank);
 #endif
   private:
-    float m_temp, m_regularisation;
-    ScoreComponentCollection m_gradient;
-    ScoreComponentCollection getExpectedFeatureValue(std::map<const Derivation*,double>& m_p);
+    FValue m_temp, m_regularisation;
+    FVector m_gradient;
+    FVector getExpectedFeatureValue(std::map<const Derivation*,double>& m_p);
 #ifdef MPI_ENABLED
     void AggregateRegularisationStats(int rank);
 #endif

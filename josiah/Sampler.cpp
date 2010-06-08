@@ -28,13 +28,13 @@ namespace Josiah {
     m_suffStats.Zero();
     m_numSuffStats = 0;
     m_optimalGain = 0;
-    m_GainOptimalSol.ZeroAll();
+    m_GainOptimalSol.clear();
   }
   
   void Sampler::SetOptimalGainSol(TranslationDelta* chosen, TranslationDelta* noChangeDelta) {
     m_GainOptimalSol = chosen->getSample().GetFeatureValues();
-    m_GainOptimalSol.PlusEquals(chosen->getScores());
-    m_GainOptimalSol.MinusEquals(noChangeDelta->getScores());
+    m_GainOptimalSol += chosen->getScores();
+    m_GainOptimalSol -= noChangeDelta->getScores();
     
   }
   

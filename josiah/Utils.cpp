@@ -7,8 +7,10 @@
 #include "Pos.h"
 #include "Dependency.h"
 #include "DiscriminativeLMFeature.h"
+#include "DistortionPenaltyFeature.h"
+#include "LanguageModelFeature.h"
 #include "ParenthesisFeature.h"
-#include "Phrasefeature.h"
+#include "PhraseFeature.h"
 #include "PosProjectionFeature.h"
 #include "SourceToTargetRatio.h"
 #include "WordPenaltyFeature.h"
@@ -54,7 +56,13 @@ namespace Josiah {
   void configure_features_from_file(const std::string& filename, feature_vector& fv){
     //Core features
     fv.push_back(feature_handle(new WordPenaltyFeature()));
+    fv.push_back(feature_handle(new UnknownWordPenaltyFeature()));
     fv.push_back(feature_handle(new PhraseFeature()));
+    const LMList& lms = StaticData::Instance().GetAllLM();
+    for (LMList::const_iterator i = lms.begin(); i != lms.end(); ++i) {
+      fv.push_back(feature_handle(new LanguageModelFeature(*i)));
+    }
+    fv.push_back(feature_handle(new DistortionPenaltyFeature()));
     
     
     std::cerr << "Reading extra features from " << filename << std::endl;

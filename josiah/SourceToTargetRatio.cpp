@@ -29,27 +29,27 @@ namespace Josiah {
     m_sample = &sample;
     m_src_len = m_sample->GetSourceSize();
   }
-  float Josiah::SourceToTargetRatio::computeScore() {
+  FValue Josiah::SourceToTargetRatio::computeScore() {
     return 1.0 - ((float) m_src_len /(float) m_sample->GetTargetWords().size());
   }
   /** Score due to  one segment */
-  float Josiah::SourceToTargetRatio::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
+  FValue Josiah::SourceToTargetRatio::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
     return 1.0 - ((float) m_src_len / (float) (m_sample->GetTargetWords().size() + option->GetTargetPhrase().GetSize() - gap.segment.GetNumWordsCovered()));
   }
   /** Score due to two segments **/
-  float Josiah::SourceToTargetRatio::getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+  FValue Josiah::SourceToTargetRatio::getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                                const TargetGap& gap) {
     return 1.0 - ((float) m_src_len /(float)  (m_sample->GetTargetWords().size() + leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize() - gap.segment.GetNumWordsCovered()));
   }
   
-  float Josiah::SourceToTargetRatio::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+  FValue Josiah::SourceToTargetRatio::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                                   const TargetGap& leftGap, const TargetGap& rightGap) {
     return 1.0 - ((float) m_src_len /(float)  (m_sample->GetTargetWords().size() + leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize() -
                         (leftGap.segment.GetNumWordsCovered() + rightGap.segment.GetNumWordsCovered() )) ) ;
   }
   
   /** Score due to flip */
-  float Josiah::SourceToTargetRatio::getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+  FValue Josiah::SourceToTargetRatio::getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                    const TargetGap& leftGap, const TargetGap& rightGap) {
     return computeScore();
   }  

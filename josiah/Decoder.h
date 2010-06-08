@@ -48,11 +48,9 @@ typedef std::vector<const Moses::Factor*> Translation;
 void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** argv=NULL );
 
 //Convenience methods for accessing the moses global data structures
-void GetFeatureNames(std::vector<std::string>* featureNames);
-void GetFeatureWeights(std::vector<float>* weights);
-void SetFeatureWeights(const std::vector<float>& weights);
-void OutputWeights(std::ostream& out);
-void OutputWeights(const std::vector<float>& weights, std::ostream& out);
+void GetMosesFeatureNames(std::vector<std::string>* featureNames);
+void GetMosesFeatureWeights(std::vector<float>* weights);
+
 
 //comparison method for sorting container of hyps
 bool hypCompare(const Moses::Hypothesis* a, const Moses::Hypothesis* b);

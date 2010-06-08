@@ -56,8 +56,5 @@ namespace Josiah {
     throw runtime_error("Not implemented");
   }
   
-FName GetWordPenaltyName() {
-  return FName(StaticData::Instance().GetWordPenaltyProducer()->GetScoreProducerDescription();
-}
 
 }

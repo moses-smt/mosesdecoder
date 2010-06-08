@@ -37,18 +37,18 @@ public:
   SourceToTargetRatio() : SingleValuedFeatureFunction("SourceToTargetRatio") {}
   /** Initialise with new sample */
   virtual void init(const Sample& sample);      
-  virtual float computeScore();
+  virtual FValue computeScore();
   /** Score due to  one segment */
-  virtual float getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) ;
+  virtual FValue getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) ;
   /** Score due to two segments **/
-  virtual float getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+  virtual FValue getContiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                                const TargetGap& gap) ;
   
-  virtual float getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+  virtual FValue getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                                   const TargetGap& leftGap, const TargetGap& rightGap);
   
   /** Score due to flip */
-  virtual float getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
+  virtual FValue getFlipUpdateScore(const TranslationOption* leftOption, const TranslationOption* rightOption,
                                    const TargetGap& leftGap, const TargetGap& rightGap) ;
   
   virtual ~SourceToTargetRatio() {}

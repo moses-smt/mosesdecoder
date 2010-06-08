@@ -25,6 +25,9 @@ namespace Josiah {
 
 /** The word penalty feature. */
 class WordPenaltyFeature : public SingleValuedFeatureFunction {
+  public:
+    
+  WordPenaltyFeature();
   
   void init(const Sample& sample) {
     m_sample = &sample;
@@ -32,7 +35,7 @@ class WordPenaltyFeature : public SingleValuedFeatureFunction {
 
 protected:
   
-    WordPenaltyFeature();
+
   
     virtual FValue computeScore();
     /** Score due to one segment */
@@ -52,6 +55,39 @@ protected:
 };                                   
 
 
+/** Unknown Word Penalty */
+class UnknownWordPenaltyFeature : public SingleValuedFeatureFunction {
+
+  public:
+    
+    UnknownWordPenaltyFeature();
+  
+    void init(const Sample& sample) {
+      m_sample = &sample;
+    }
+
+  protected:
+  
+    virtual FValue computeScore();
+    /** Score due to one segment */
+    virtual FValue getSingleUpdateScore(const Moses::TranslationOption* option, const TargetGap& gap);
+    /** Score due to two segments. The left and right refer to the target positions.**/
+    virtual FValue getContiguousPairedUpdateScore(const Moses::TranslationOption* leftOption,const Moses::TranslationOption* rightOption, 
+        const TargetGap& gap);
+    virtual FValue getDiscontiguousPairedUpdateScore(const Moses::TranslationOption* leftOption,const Moses::TranslationOption* rightOption, 
+        const TargetGap& leftGap, const TargetGap& rightGap);
+    
+    /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
+    virtual FValue getFlipUpdateScore(const Moses::TranslationOption* leftOption,const Moses::TranslationOption* rightOption, 
+                                      const TargetGap& leftGap, const TargetGap& rightGap);
+                                     
+  private:
+    const Sample* m_sample;
+    const ScoreProducer* m_producer;
+
+};
+
 
 
 }
+

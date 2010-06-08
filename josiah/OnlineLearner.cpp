@@ -12,6 +12,7 @@
 #include "StaticData.h"
 #include "Sampler.h"
 #include "Gibbler.h"
+#include "WeightManager.h"
 #ifdef MPI_ENABLED
 #include <mpi.h>
 #include "MpiDebug.h"
@@ -19,14 +20,12 @@
 
 namespace Josiah {
   
-  ScoreComponentCollection OnlineLearner::GetAveragedWeights() { 
-    ScoreComponentCollection averagedWgts(m_cumulWeights);
-    averagedWgts.DivideEquals(m_iteration);
-    return averagedWgts; 
+  FVector OnlineLearner::GetAveragedWeights() { 
+    return m_cumulWeights / m_iteration;
   }
   
   void OnlineLearner::UpdateCumul() { 
-    m_cumulWeights.PlusEquals(m_currWeights);
+    m_cumulWeights += m_currWeights;
     m_iteration++;
   }
 #ifdef MPI_ENABLED  
@@ -57,16 +56,16 @@ namespace Josiah {
   }
 #endif  
 
-  vector<float> OnlineLearner::hildreth (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
+  vector<FValue> OnlineLearner::hildreth (const vector<FVector>& a, const vector<FValue>& b) {
     
     size_t i;
     int max_iter = 10000;
     float eps = 0.00000001;
     float zero = 0.000000000001;
     
-    vector<float> alpha ( b.size() );
-    vector<float> F ( b.size() );
-    vector<float> kkt ( b.size() );
+    vector<FValue> alpha ( b.size() );
+    vector<FValue> F ( b.size() );
+    vector<FValue> kkt ( b.size() );
     
     float max_kkt = -1e100;
     
@@ -76,7 +75,7 @@ namespace Josiah {
     bool is_computed[K];
     for ( i = 0; i < K; i++ )
     {
-      A[i][i] = a[i].InnerProduct ( a[i]);
+      A[i][i] = a[i].inner_product( a[i]);
       is_computed[i] = false;
     }
     
@@ -95,9 +94,9 @@ namespace Josiah {
     }
     
     int iter = 0;
-    float diff_alpha;
-    float try_alpha;
-    float add_alpha;
+    FValue diff_alpha;
+    FValue try_alpha;
+    FValue add_alpha;
     
     while ( max_kkt >= eps && iter < max_iter )
     {
@@ -117,7 +116,7 @@ namespace Josiah {
       {
         for ( i = 0; i < K; i++ )
         {
-          A[i][max_kkt_i] = a[i].InnerProduct (a[max_kkt_i] ); // for version 1
+          A[i][max_kkt_i] = a[i].inner_product(a[max_kkt_i] ); // for version 1
           //A[i][max_kkt_i] = 0; // for version 1
           is_computed[max_kkt_i] = true;
         }
@@ -145,16 +144,16 @@ namespace Josiah {
     return alpha;
   }
   
-  vector<float> OnlineLearner::hildreth (const vector<ScoreComponentCollection>& a, const vector<float>& b, float C) {
+  vector<float> OnlineLearner::hildreth (const vector<FVector>& a, const vector<FValue>& b, FValue C) {
     
     size_t i;
     int max_iter = 10000;
-    float eps = 0.00000001;
-    float zero = 0.000000000001;
+    FValue eps = 0.00000001;
+    FValue zero = 0.000000000001;
     
-    vector<float> alpha ( b.size() );
-    vector<float> F ( b.size() );
-    vector<float> kkt ( b.size() );
+    vector<FValue> alpha ( b.size() );
+    vector<FValue> F ( b.size() );
+    vector<FValue> kkt ( b.size() );
     
     float max_kkt = -1e100;
     
@@ -164,7 +163,7 @@ namespace Josiah {
     bool is_computed[K];
     for ( i = 0; i < K; i++ )
     {
-      A[i][i] = a[i].InnerProduct ( a[i]);
+      A[i][i] = a[i].inner_product( a[i]);
       is_computed[i] = false;
     }
     
@@ -183,9 +182,9 @@ namespace Josiah {
     }
     
     int iter = 0;
-    float diff_alpha;
-    float try_alpha;
-    float add_alpha;
+    FValue diff_alpha;
+    FValue try_alpha;
+    FValue add_alpha;
     
     while ( max_kkt >= eps && iter < max_iter )
     {
@@ -207,7 +206,7 @@ namespace Josiah {
       {
         for ( i = 0; i < K; i++ )
         {
-          A[i][max_kkt_i] = a[i].InnerProduct (a[max_kkt_i] ); // for version 1
+          A[i][max_kkt_i] = a[i].inner_product(a[max_kkt_i] ); // for version 1
           //A[i][max_kkt_i] = 0; // for version 1
           is_computed[max_kkt_i] = true;
         }
@@ -242,14 +241,17 @@ namespace Josiah {
   void PerceptronLearner::doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler) {
     //Do update if target gain is better than curr gain
     if (target->getGain() > curr->getGain()) {
-      m_currWeights.MinusEquals(curr->getScores());
-      m_currWeights.PlusEquals(target->getScores());  
+      m_currWeights -= curr->getScores();
+      m_currWeights -= target->getScores();  
       m_numUpdates++;
     }
      
     UpdateCumul();
     //cerr << "Curr Weights : " << m_currWeights << endl;
-    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
+    //const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
+    FVector& currWeights = WeightManager::instance().get();
+    currWeights.clear();
+    currWeights += m_currWeights;
   }
 	
   void CWLearner::doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler) {
@@ -276,9 +278,9 @@ namespace Josiah {
 		if (marginMean < 0) {
 		
 			//the input feature vector to this task is (f(target) - f(curr)) 
-			m_features.ZeroAll();
-			m_features.PlusEquals(target->getScores());
-			m_features.MinusEquals(curr->getScores());
+            m_features.clear();
+			m_features += target->getScores();
+			m_features += curr->getScores();
 
 			VERBOSE(1, "feature delta: " << m_features << endl)
 			
@@ -306,8 +308,9 @@ namespace Josiah {
 
 		}
 		UpdateCumul();
-    //cerr << "Curr Weights : " << m_currWeights << endl;
-    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
+        FVector& currWeights = WeightManager::instance().get();
+        currWeights.clear();
+        currWeights += m_currWeights;
 		
 		
 		
@@ -334,9 +337,9 @@ namespace Josiah {
     if (scoreDiff < gainDiff) { //MIRA Constraints not satisfied, run MIRA
       doMira = true;
       b.push_back( gainDiff - scoreDiff);  
-      vector<ScoreComponentCollection> distance;
-      ScoreComponentCollection dist(target->getScores());
-      dist.MinusEquals(curr->getScores());
+      vector<FVector> distance;
+      FVector dist(target->getScores());
+      dist -= curr->getScores();
       distance.push_back(dist);    
       
       vector<float> alpha;
@@ -346,14 +349,14 @@ namespace Josiah {
       else
         alpha = hildreth(distance,b, m_slack);
       
-      ScoreComponentCollection update;
+      FVector update;
       for (size_t k = 0; k < alpha.size(); k++) {
         IFVERBOSE(1) { 
           cerr << "alpha " << alpha[k] << endl;
         }  
-        ScoreComponentCollection dist = distance[k];
-        dist.MultiplyEquals(alpha[k]);
-        update.PlusEquals(dist);
+        FVector dist = distance[k];
+        dist *= alpha[k];
+        update += dist;
         m_numUpdates++;
       }
       
@@ -374,7 +377,9 @@ namespace Josiah {
     }
     
     UpdateCumul();
-    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
+    FVector& currWeights = WeightManager::instance().get();
+    currWeights.clear();
+    currWeights += m_currWeights;
    
     IFVERBOSE(1) { 
     if (doMira) {
@@ -396,18 +401,18 @@ namespace Josiah {
   */
   void MiraPlusLearner::doUpdate(TranslationDelta* curr, TranslationDelta* target, TranslationDelta* noChangeDelta, Sampler& sampler) {
     
-    ScoreComponentCollection currFV = curr->getScores();
-    currFV.MinusEquals(noChangeDelta->getScores());
-    currFV.PlusEquals(curr->getSample().GetFeatureValues());
-    float currScore = currFV.InnerProduct(StaticData::Instance().GetAllWeights());
+    FVector currFV = curr->getScores();
+    currFV -= noChangeDelta->getScores();
+    currFV += curr->getSample().GetFeatureValues();
+    FValue currScore = currFV.inner_product(WeightManager::instance().get());
     
-    ScoreComponentCollection targetFV = target->getScores();
-    targetFV.MinusEquals(noChangeDelta->getScores());
-    targetFV.PlusEquals(target->getSample().GetFeatureValues());
-    float targetScore = targetFV.InnerProduct(StaticData::Instance().GetAllWeights());
+    FVector targetFV = target->getScores();
+    targetFV -= noChangeDelta->getScores();
+    targetFV += target->getSample().GetFeatureValues();
+    FValue targetScore = targetFV.inner_product(WeightManager::instance().get());
     
-    const ScoreComponentCollection & OptimalGainFV = sampler.GetOptimalGainSol();
-    float optimalGainScore = OptimalGainFV.InnerProduct(StaticData::Instance().GetAllWeights());
+    const FVector & OptimalGainFV = sampler.GetOptimalGainSol();
+    FValue optimalGainScore = OptimalGainFV.inner_product(WeightManager::instance().get());
     
     IFVERBOSE(1) {
       cerr << "Optimal deriv has (scaled) gain " << m_marginScaleFactor * sampler.GetOptimalGain() << " , fv : " << OptimalGainFV << " [ " << optimalGainScore << " ]" << endl;
@@ -416,7 +421,7 @@ namespace Josiah {
     }
     
     vector<float> b;
-    vector<ScoreComponentCollection> distance;
+    vector<FVector> distance;
     
     float tgtcurrmargin = m_marginScaleFactor * (target->getGain() - curr->getGain());
     float opttgtmargin = m_marginScaleFactor * (sampler.GetOptimalGain() - target->getGain());
@@ -431,8 +436,8 @@ namespace Josiah {
     
     //Score of target - Score of curr >= 1
     b.push_back(tgtcurrmargin - (targetScore - currScore));
-    ScoreComponentCollection dist(targetFV);
-    dist.MinusEquals(currFV);
+    FVector dist(targetFV);
+    dist -= currFV;
     distance.push_back(dist);    
     
     
@@ -440,13 +445,13 @@ namespace Josiah {
       //Score of optimal - Score of Target > 1
       b.push_back(opttgtmargin - (optimalGainScore - targetScore));
       dist = OptimalGainFV;
-      dist.MinusEquals(targetFV);
+      dist -= targetFV;
       distance.push_back(dist);    
       
       //Score of optimal - Score of curr > 1 
       b.push_back(optcurrmargin - (optimalGainScore - currScore));
       dist = OptimalGainFV;
-      dist.MinusEquals(currFV);
+      dist -= currFV;
       distance.push_back(dist);      
     }
     
@@ -457,11 +462,11 @@ namespace Josiah {
     else
       alpha = hildreth(distance,b, m_slack);
     
-    ScoreComponentCollection update;
+    FVector update;
     for (size_t k = 0; k < alpha.size(); k++) {
-      ScoreComponentCollection dist = distance[k];
-      dist.MultiplyEquals(alpha[k]);
-      update.PlusEquals(dist);
+      FVector dist = distance[k];
+      dist *= alpha[k];
+      update += dist;
       IFVERBOSE(1) {
         cerr << "alpha " << alpha[k] << endl;
         cerr << "dist " << dist << endl;
@@ -471,22 +476,24 @@ namespace Josiah {
     //Normalize
     if (m_normalizer)
       m_normalizer->Normalize(update);
-    m_currWeights.PlusEquals(update);
+    m_currWeights += update;
     IFVERBOSE(1) {
       cerr << "Curr Weights " << m_currWeights << endl;
     }
     
     m_numUpdates++;
     UpdateCumul();
-    const_cast<StaticData&>(StaticData::Instance()).SetAllWeights(m_currWeights.data());
+    FVector& currWeights = WeightManager::instance().get();
+    currWeights.clear();
+    currWeights += m_currWeights;
     
     IFVERBOSE(1) { 
       //Sanity check
-      currScore = currFV.InnerProduct(StaticData::Instance().GetAllWeights());
-      targetScore = targetFV.InnerProduct(StaticData::Instance().GetAllWeights());
-      optimalGainScore = OptimalGainFV.InnerProduct(StaticData::Instance().GetAllWeights());
+      currScore = currFV.inner_product(WeightManager::instance().get());
+      targetScore = targetFV.inner_product(WeightManager::instance().get());
+      optimalGainScore = OptimalGainFV.inner_product(WeightManager::instance().get());
       
-      cerr << "Curr Weights : " << StaticData::Instance().GetWeights() << endl;
+      cerr << "Curr Weights : " << WeightManager::instance().get() << endl;
       
       cerr << "Target score - curr score " << targetScore - currScore << endl;
       cerr << "Target gain - curr gain " << m_marginScaleFactor * (target->getGain() - curr->getGain()) << endl;
