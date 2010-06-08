@@ -7,42 +7,45 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1C62013310F0105300146F11 /* OnDiskWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012310F0105300146F11 /* OnDiskWrapper.cpp */; };
-		1C62013410F0105300146F11 /* OnDiskWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62012410F0105300146F11 /* OnDiskWrapper.h */; };
-		1C62013510F0105300146F11 /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012510F0105300146F11 /* Phrase.cpp */; };
-		1C62013610F0105300146F11 /* Phrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62012610F0105300146F11 /* Phrase.h */; };
-		1C62013710F0105300146F11 /* PhraseNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012710F0105300146F11 /* PhraseNode.cpp */; };
-		1C62013810F0105300146F11 /* PhraseNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62012810F0105300146F11 /* PhraseNode.h */; };
-		1C62013910F0105300146F11 /* SourcePhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012910F0105300146F11 /* SourcePhrase.cpp */; };
-		1C62013A10F0105300146F11 /* SourcePhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62012A10F0105300146F11 /* SourcePhrase.h */; };
-		1C62013B10F0105300146F11 /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012B10F0105300146F11 /* TargetPhrase.cpp */; };
-		1C62013C10F0105300146F11 /* TargetPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62012C10F0105300146F11 /* TargetPhrase.h */; };
-		1C62013D10F0105300146F11 /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012D10F0105300146F11 /* TargetPhraseCollection.cpp */; };
-		1C62013E10F0105300146F11 /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62012E10F0105300146F11 /* TargetPhraseCollection.h */; };
-		1C62013F10F0105300146F11 /* Vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62012F10F0105300146F11 /* Vocab.cpp */; };
-		1C62014010F0105300146F11 /* Vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62013010F0105300146F11 /* Vocab.h */; };
-		1C62014110F0105300146F11 /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C62013110F0105300146F11 /* Word.cpp */; };
-		1C62014210F0105300146F11 /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 1C62013210F0105300146F11 /* Word.h */; };
+		1ED4FB1811BDBA2B004E826A /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0511BDBA2B004E826A /* Makefile */; };
+		1ED4FB1911BDBA2B004E826A /* OnDiskWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0811BDBA2B004E826A /* OnDiskWrapper.cpp */; };
+		1ED4FB1A11BDBA2B004E826A /* OnDiskWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB0911BDBA2B004E826A /* OnDiskWrapper.h */; };
+		1ED4FB1B11BDBA2B004E826A /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0A11BDBA2B004E826A /* Phrase.cpp */; };
+		1ED4FB1C11BDBA2B004E826A /* Phrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB0B11BDBA2B004E826A /* Phrase.h */; };
+		1ED4FB1D11BDBA2B004E826A /* PhraseNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0C11BDBA2B004E826A /* PhraseNode.cpp */; };
+		1ED4FB1E11BDBA2B004E826A /* PhraseNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB0D11BDBA2B004E826A /* PhraseNode.h */; };
+		1ED4FB1F11BDBA2B004E826A /* SourcePhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0E11BDBA2B004E826A /* SourcePhrase.cpp */; };
+		1ED4FB2011BDBA2B004E826A /* SourcePhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB0F11BDBA2B004E826A /* SourcePhrase.h */; };
+		1ED4FB2111BDBA2B004E826A /* TargetPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB1011BDBA2B004E826A /* TargetPhrase.cpp */; };
+		1ED4FB2211BDBA2B004E826A /* TargetPhrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB1111BDBA2B004E826A /* TargetPhrase.h */; };
+		1ED4FB2311BDBA2B004E826A /* TargetPhraseCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB1211BDBA2B004E826A /* TargetPhraseCollection.cpp */; };
+		1ED4FB2411BDBA2B004E826A /* TargetPhraseCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB1311BDBA2B004E826A /* TargetPhraseCollection.h */; };
+		1ED4FB2511BDBA2B004E826A /* Vocab.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB1411BDBA2B004E826A /* Vocab.cpp */; };
+		1ED4FB2611BDBA2B004E826A /* Vocab.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB1511BDBA2B004E826A /* Vocab.h */; };
+		1ED4FB2711BDBA2B004E826A /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB1611BDBA2B004E826A /* Word.cpp */; };
+		1ED4FB2811BDBA2B004E826A /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB1711BDBA2B004E826A /* Word.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1C62012210F0105300146F11 /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
-		1C62012310F0105300146F11 /* OnDiskWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnDiskWrapper.cpp; path = src/OnDiskWrapper.cpp; sourceTree = "<group>"; };
-		1C62012410F0105300146F11 /* OnDiskWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnDiskWrapper.h; path = src/OnDiskWrapper.h; sourceTree = "<group>"; };
-		1C62012510F0105300146F11 /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
-		1C62012610F0105300146F11 /* Phrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Phrase.h; path = src/Phrase.h; sourceTree = "<group>"; };
-		1C62012710F0105300146F11 /* PhraseNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseNode.cpp; path = src/PhraseNode.cpp; sourceTree = "<group>"; };
-		1C62012810F0105300146F11 /* PhraseNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseNode.h; path = src/PhraseNode.h; sourceTree = "<group>"; };
-		1C62012910F0105300146F11 /* SourcePhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhrase.cpp; path = src/SourcePhrase.cpp; sourceTree = "<group>"; };
-		1C62012A10F0105300146F11 /* SourcePhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhrase.h; path = src/SourcePhrase.h; sourceTree = "<group>"; };
-		1C62012B10F0105300146F11 /* TargetPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhrase.cpp; path = src/TargetPhrase.cpp; sourceTree = "<group>"; };
-		1C62012C10F0105300146F11 /* TargetPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhrase.h; path = src/TargetPhrase.h; sourceTree = "<group>"; };
-		1C62012D10F0105300146F11 /* TargetPhraseCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhraseCollection.cpp; path = src/TargetPhraseCollection.cpp; sourceTree = "<group>"; };
-		1C62012E10F0105300146F11 /* TargetPhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseCollection.h; path = src/TargetPhraseCollection.h; sourceTree = "<group>"; };
-		1C62012F10F0105300146F11 /* Vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocab.cpp; path = src/Vocab.cpp; sourceTree = "<group>"; };
-		1C62013010F0105300146F11 /* Vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocab.h; path = src/Vocab.h; sourceTree = "<group>"; };
-		1C62013110F0105300146F11 /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
-		1C62013210F0105300146F11 /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
+		1ED4FB0511BDBA2B004E826A /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = src/Makefile; sourceTree = "<group>"; };
+		1ED4FB0611BDBA2B004E826A /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
+		1ED4FB0711BDBA2B004E826A /* Makefile.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.in; path = src/Makefile.in; sourceTree = "<group>"; };
+		1ED4FB0811BDBA2B004E826A /* OnDiskWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnDiskWrapper.cpp; path = src/OnDiskWrapper.cpp; sourceTree = "<group>"; };
+		1ED4FB0911BDBA2B004E826A /* OnDiskWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnDiskWrapper.h; path = src/OnDiskWrapper.h; sourceTree = "<group>"; };
+		1ED4FB0A11BDBA2B004E826A /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
+		1ED4FB0B11BDBA2B004E826A /* Phrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Phrase.h; path = src/Phrase.h; sourceTree = "<group>"; };
+		1ED4FB0C11BDBA2B004E826A /* PhraseNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseNode.cpp; path = src/PhraseNode.cpp; sourceTree = "<group>"; };
+		1ED4FB0D11BDBA2B004E826A /* PhraseNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseNode.h; path = src/PhraseNode.h; sourceTree = "<group>"; };
+		1ED4FB0E11BDBA2B004E826A /* SourcePhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourcePhrase.cpp; path = src/SourcePhrase.cpp; sourceTree = "<group>"; };
+		1ED4FB0F11BDBA2B004E826A /* SourcePhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourcePhrase.h; path = src/SourcePhrase.h; sourceTree = "<group>"; };
+		1ED4FB1011BDBA2B004E826A /* TargetPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhrase.cpp; path = src/TargetPhrase.cpp; sourceTree = "<group>"; };
+		1ED4FB1111BDBA2B004E826A /* TargetPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhrase.h; path = src/TargetPhrase.h; sourceTree = "<group>"; };
+		1ED4FB1211BDBA2B004E826A /* TargetPhraseCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetPhraseCollection.cpp; path = src/TargetPhraseCollection.cpp; sourceTree = "<group>"; };
+		1ED4FB1311BDBA2B004E826A /* TargetPhraseCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetPhraseCollection.h; path = src/TargetPhraseCollection.h; sourceTree = "<group>"; };
+		1ED4FB1411BDBA2B004E826A /* Vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocab.cpp; path = src/Vocab.cpp; sourceTree = "<group>"; };
+		1ED4FB1511BDBA2B004E826A /* Vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocab.h; path = src/Vocab.h; sourceTree = "<group>"; };
+		1ED4FB1611BDBA2B004E826A /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
+		1ED4FB1711BDBA2B004E826A /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libOnDiskPt.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOnDiskPt.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -70,23 +73,25 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1C62012210F0105300146F11 /* Makefile.am */,
-				1C62012310F0105300146F11 /* OnDiskWrapper.cpp */,
-				1C62012410F0105300146F11 /* OnDiskWrapper.h */,
-				1C62012510F0105300146F11 /* Phrase.cpp */,
-				1C62012610F0105300146F11 /* Phrase.h */,
-				1C62012710F0105300146F11 /* PhraseNode.cpp */,
-				1C62012810F0105300146F11 /* PhraseNode.h */,
-				1C62012910F0105300146F11 /* SourcePhrase.cpp */,
-				1C62012A10F0105300146F11 /* SourcePhrase.h */,
-				1C62012B10F0105300146F11 /* TargetPhrase.cpp */,
-				1C62012C10F0105300146F11 /* TargetPhrase.h */,
-				1C62012D10F0105300146F11 /* TargetPhraseCollection.cpp */,
-				1C62012E10F0105300146F11 /* TargetPhraseCollection.h */,
-				1C62012F10F0105300146F11 /* Vocab.cpp */,
-				1C62013010F0105300146F11 /* Vocab.h */,
-				1C62013110F0105300146F11 /* Word.cpp */,
-				1C62013210F0105300146F11 /* Word.h */,
+				1ED4FB0511BDBA2B004E826A /* Makefile */,
+				1ED4FB0611BDBA2B004E826A /* Makefile.am */,
+				1ED4FB0711BDBA2B004E826A /* Makefile.in */,
+				1ED4FB0811BDBA2B004E826A /* OnDiskWrapper.cpp */,
+				1ED4FB0911BDBA2B004E826A /* OnDiskWrapper.h */,
+				1ED4FB0A11BDBA2B004E826A /* Phrase.cpp */,
+				1ED4FB0B11BDBA2B004E826A /* Phrase.h */,
+				1ED4FB0C11BDBA2B004E826A /* PhraseNode.cpp */,
+				1ED4FB0D11BDBA2B004E826A /* PhraseNode.h */,
+				1ED4FB0E11BDBA2B004E826A /* SourcePhrase.cpp */,
+				1ED4FB0F11BDBA2B004E826A /* SourcePhrase.h */,
+				1ED4FB1011BDBA2B004E826A /* TargetPhrase.cpp */,
+				1ED4FB1111BDBA2B004E826A /* TargetPhrase.h */,
+				1ED4FB1211BDBA2B004E826A /* TargetPhraseCollection.cpp */,
+				1ED4FB1311BDBA2B004E826A /* TargetPhraseCollection.h */,
+				1ED4FB1411BDBA2B004E826A /* Vocab.cpp */,
+				1ED4FB1511BDBA2B004E826A /* Vocab.h */,
+				1ED4FB1611BDBA2B004E826A /* Word.cpp */,
+				1ED4FB1711BDBA2B004E826A /* Word.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -113,14 +118,14 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C62013410F0105300146F11 /* OnDiskWrapper.h in Headers */,
-				1C62013610F0105300146F11 /* Phrase.h in Headers */,
-				1C62013810F0105300146F11 /* PhraseNode.h in Headers */,
-				1C62013A10F0105300146F11 /* SourcePhrase.h in Headers */,
-				1C62013C10F0105300146F11 /* TargetPhrase.h in Headers */,
-				1C62013E10F0105300146F11 /* TargetPhraseCollection.h in Headers */,
-				1C62014010F0105300146F11 /* Vocab.h in Headers */,
-				1C62014210F0105300146F11 /* Word.h in Headers */,
+				1ED4FB1A11BDBA2B004E826A /* OnDiskWrapper.h in Headers */,
+				1ED4FB1C11BDBA2B004E826A /* Phrase.h in Headers */,
+				1ED4FB1E11BDBA2B004E826A /* PhraseNode.h in Headers */,
+				1ED4FB2011BDBA2B004E826A /* SourcePhrase.h in Headers */,
+				1ED4FB2211BDBA2B004E826A /* TargetPhrase.h in Headers */,
+				1ED4FB2411BDBA2B004E826A /* TargetPhraseCollection.h in Headers */,
+				1ED4FB2611BDBA2B004E826A /* Vocab.h in Headers */,
+				1ED4FB2811BDBA2B004E826A /* Word.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -166,14 +171,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C62013310F0105300146F11 /* OnDiskWrapper.cpp in Sources */,
-				1C62013510F0105300146F11 /* Phrase.cpp in Sources */,
-				1C62013710F0105300146F11 /* PhraseNode.cpp in Sources */,
-				1C62013910F0105300146F11 /* SourcePhrase.cpp in Sources */,
-				1C62013B10F0105300146F11 /* TargetPhrase.cpp in Sources */,
-				1C62013D10F0105300146F11 /* TargetPhraseCollection.cpp in Sources */,
-				1C62013F10F0105300146F11 /* Vocab.cpp in Sources */,
-				1C62014110F0105300146F11 /* Word.cpp in Sources */,
+				1ED4FB1811BDBA2B004E826A /* Makefile in Sources */,
+				1ED4FB1911BDBA2B004E826A /* OnDiskWrapper.cpp in Sources */,
+				1ED4FB1B11BDBA2B004E826A /* Phrase.cpp in Sources */,
+				1ED4FB1D11BDBA2B004E826A /* PhraseNode.cpp in Sources */,
+				1ED4FB1F11BDBA2B004E826A /* SourcePhrase.cpp in Sources */,
+				1ED4FB2111BDBA2B004E826A /* TargetPhrase.cpp in Sources */,
+				1ED4FB2311BDBA2B004E826A /* TargetPhraseCollection.cpp in Sources */,
+				1ED4FB2511BDBA2B004E826A /* Vocab.cpp in Sources */,
+				1ED4FB2711BDBA2B004E826A /* Word.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,26 +214,26 @@
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_C_LANGUAGE_STANDARD = c99;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_C_LANGUAGE_STANDARD = c99;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};

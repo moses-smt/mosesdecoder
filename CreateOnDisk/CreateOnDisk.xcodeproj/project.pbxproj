@@ -7,39 +7,40 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1C62016010F010C700146F11 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C62015E10F0108600146F11 /* libOnDiskPt.a */; };
-		1CCE342810ECC24800F81933 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CCE342710ECC24800F81933 /* Main.cpp */; };
-		1CCE352210ECD44F00F81933 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CCE351D10ECD3E300F81933 /* libmoses.a */; };
+		1ED4FB4B11BDBAA7004E826A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB4911BDBAA7004E826A /* Main.cpp */; };
+		1ED4FB6011BDBAFB004E826A /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */; };
+		1ED4FB6111BDBB00004E826A /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ED4FB5611BDBAD7004E826A /* libmoses.a */; };
+		8DD76F6A0486A84900D96B5E /* CreateOnDisk.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* CreateOnDisk.1 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1C06EB2810F0C83700192BAB /* PBXContainerItemProxy */ = {
+		1ED4FB5511BDBAD7004E826A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = OnDiskPt;
-		};
-		1C62015D10F0108600146F11 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D;
-			remoteInfo = OnDiskPt;
-		};
-		1CCE351C10ECD3E300F81933 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1CCE351810ECD3E300F81933 /* moses.xcodeproj */;
+			containerPortal = 1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = moses;
 		};
-		1CCE351E10ECD40B00F81933 /* PBXContainerItemProxy */ = {
+		1ED4FB5E11BDBAE6004E826A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1CCE351810ECD3E300F81933 /* moses.xcodeproj */;
+			containerPortal = 1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+		1ED4FB7211BDBC05004E826A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
+		};
+		1ED4FB7411BDBC09004E826A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = OnDiskPt;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -50,17 +51,19 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
+				8DD76F6A0486A84900D96B5E /* CreateOnDisk.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
-		1C9536D910EE1EB200BFA19C /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
-		1CCE342610ECC24800F81933 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
-		1CCE342710ECC24800F81933 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
-		1CCE351810ECD3E300F81933 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1ED4FB4911BDBAA7004E826A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
+		1ED4FB4A11BDBAA7004E826A /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
+		1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		8DD76F6C0486A84900D96B5E /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6859E8B029090EE04C91782 /* CreateOnDisk.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = CreateOnDisk.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +71,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C62016010F010C700146F11 /* libOnDiskPt.a in Frameworks */,
-				1CCE352210ECD44F00F81933 /* libmoses.a in Frameworks */,
+				1ED4FB6111BDBB00004E826A /* libmoses.a in Frameworks */,
+				1ED4FB6011BDBAFB004E826A /* libOnDiskPt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,8 +82,8 @@
 		08FB7794FE84155DC02AAC07 /* CreateOnDisk */ = {
 			isa = PBXGroup;
 			children = (
-				1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */,
-				1CCE351810ECD3E300F81933 /* moses.xcodeproj */,
+				1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */,
+				1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -91,8 +94,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1CCE342710ECC24800F81933 /* Main.cpp */,
-				1CCE342610ECC24800F81933 /* Main.h */,
+				1ED4FB4911BDBAA7004E826A /* Main.cpp */,
+				1ED4FB4A11BDBAA7004E826A /* Main.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -100,23 +103,23 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1C9536D910EE1EB200BFA19C /* CreateOnDisk */,
+				8DD76F6C0486A84900D96B5E /* CreateOnDisk */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1C62015A10F0108600146F11 /* Products */ = {
+		1ED4FB4F11BDBAD7004E826A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1C62015E10F0108600146F11 /* libOnDiskPt.a */,
+				1ED4FB5611BDBAD7004E826A /* libmoses.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1CCE351910ECD3E300F81933 /* Products */ = {
+		1ED4FB5811BDBAE6004E826A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1CCE351D10ECD3E300F81933 /* libmoses.a */,
+				1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -124,6 +127,7 @@
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
+				C6859E8B029090EE04C91782 /* CreateOnDisk.1 */,
 			);
 			name = Documentation;
 			sourceTree = "<group>";
@@ -142,13 +146,13 @@
 			buildRules = (
 			);
 			dependencies = (
-				1CCE351F10ECD40B00F81933 /* PBXTargetDependency */,
-				1C06EB2910F0C83700192BAB /* PBXTargetDependency */,
+				1ED4FB7311BDBC05004E826A /* PBXTargetDependency */,
+				1ED4FB7511BDBC09004E826A /* PBXTargetDependency */,
 			);
 			name = CreateOnDisk;
 			productInstallPath = "$(HOME)/bin";
 			productName = CreateOnDisk;
-			productReference = 1C9536D910EE1EB200BFA19C /* CreateOnDisk */;
+			productReference = 8DD76F6C0486A84900D96B5E /* CreateOnDisk */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -163,12 +167,12 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 1CCE351910ECD3E300F81933 /* Products */;
-					ProjectRef = 1CCE351810ECD3E300F81933 /* moses.xcodeproj */;
+					ProductGroup = 1ED4FB4F11BDBAD7004E826A /* Products */;
+					ProjectRef = 1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */;
 				},
 				{
-					ProductGroup = 1C62015A10F0108600146F11 /* Products */;
-					ProjectRef = 1C62015910F0108600146F11 /* OnDiskPt.xcodeproj */;
+					ProductGroup = 1ED4FB5811BDBAE6004E826A /* Products */;
+					ProjectRef = 1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -179,18 +183,18 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		1C62015E10F0108600146F11 /* libOnDiskPt.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libOnDiskPt.a;
-			remoteRef = 1C62015D10F0108600146F11 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1CCE351D10ECD3E300F81933 /* libmoses.a */ = {
+		1ED4FB5611BDBAD7004E826A /* libmoses.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libmoses.a;
-			remoteRef = 1CCE351C10ECD3E300F81933 /* PBXContainerItemProxy */;
+			remoteRef = 1ED4FB5511BDBAD7004E826A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOnDiskPt.a;
+			remoteRef = 1ED4FB5E11BDBAE6004E826A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -200,22 +204,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1CCE342810ECC24800F81933 /* Main.cpp in Sources */,
+				1ED4FB4B11BDBAA7004E826A /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		1C06EB2910F0C83700192BAB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OnDiskPt;
-			targetProxy = 1C06EB2810F0C83700192BAB /* PBXContainerItemProxy */;
-		};
-		1CCE351F10ECD40B00F81933 /* PBXTargetDependency */ = {
+		1ED4FB7311BDBC05004E826A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = moses;
-			targetProxy = 1CCE351E10ECD40B00F81933 /* PBXContainerItemProxy */;
+			targetProxy = 1ED4FB7211BDBC05004E826A /* PBXContainerItemProxy */;
+		};
+		1ED4FB7511BDBC09004E826A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1ED4FB7411BDBC09004E826A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -229,28 +233,19 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_GLIBCXX_DEBUG=1",
-					"_GLIBCXX_DEBUG_PEDANTIC=1",
-				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
-					"../moses/build//**",
+					../irstlm/src,
 					../srilm/lib/macosx,
-					/usr/local/BerkeleyDB.4.7/lib,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-ldb_cxx",
-					"-ldb",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};
@@ -264,22 +259,17 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
-					"../moses/build//**",
+					../irstlm/src,
 					../srilm/lib/macosx,
-					/usr/local/BerkeleyDB.4.7/lib,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-ldb_cxx",
-					"-ldb",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};
@@ -288,28 +278,27 @@
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				GCC_C_LANGUAGE_STANDARD = c99;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
 		1DEB923708733DC60010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				GCC_C_LANGUAGE_STANDARD = c99;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OTHER_LDFLAGS = "-lz";
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};

@@ -3,64 +3,62 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		03306D820C0B249A00CA1311 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03306D800C0B249A00CA1311 /* mbr.cpp */; };
-		03306D830C0B249A00CA1311 /* mbr.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03306D810C0B249A00CA1311 /* mbr.h */; };
-		1C8CFF4D0AD68D3600FA22E2 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF450AD68D3600FA22E2 /* Main.cpp */; };
-		1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF460AD68D3600FA22E2 /* Main.h */; };
-		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
-		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
-		1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
-		1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */; };
-		1CF71F8B1110574A00CF2DA4 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C32916B110F40B400E9F5E1 /* libOnDiskPt.a */; };
-		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
+		1E87F09311BDCD2E0033951C /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E87F08D11BDCD1B0033951C /* libmoses.a */; };
+		1E9DA31511BDC84A00F4DBD1 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA30A11BDC84A00F4DBD1 /* IOWrapper.cpp */; };
+		1E9DA31611BDC84A00F4DBD1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA30C11BDC84A00F4DBD1 /* Main.cpp */; };
+		1E9DA31811BDC84A00F4DBD1 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA31111BDC84A00F4DBD1 /* mbr.cpp */; };
+		1E9DA31911BDC84A00F4DBD1 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA31311BDC84A00F4DBD1 /* TranslationAnalysis.cpp */; };
+		1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */; };
+		1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */; };
+		8DD76F6A0486A84900D96B5E /* moses-chart-cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		03306D660C0B240B00CA1311 /* PBXContainerItemProxy */ = {
+		1E87F08C11BDCD1B0033951C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
+			containerPortal = 1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses.a */;
 			remoteInfo = moses;
 		};
-		1C32916A110F40B400E9F5E1 /* PBXContainerItemProxy */ = {
+		1E87F09411BDCD390033951C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */;
+			containerPortal = 1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses */;
+			remoteInfo = moses;
+		};
+		1E9DA34011BDC8CA00F4DBD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = "moses-chart";
+		};
+		1E9DA34E11BDC96A00F4DBD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
-		1C335ABA0F20F9EA00D0D9DF /* PBXContainerItemProxy */ = {
+		1E9DA36311BDC9B200F4DBD1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 1C335AA10F20F8F400D0D9DF;
-			remoteInfo = "moses-chart";
-		};
-		1C6689C4100D3A3900A606B2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = "moses-chart";
-		};
-		1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = moses;
-		};
-		1CF9A7EB11105A1A00071293 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */;
+			containerPortal = 1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = OnDiskPt;
+		};
+		1E9DA36711BDC9B200F4DBD1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = "moses-chart";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -71,27 +69,26 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */,
-				1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */,
-				03306D830C0B249A00CA1311 /* mbr.h in CopyFiles */,
+				8DD76F6A0486A84900D96B5E /* moses-chart-cmd.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		03306D5F0C0B240B00CA1311 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
-		03306D800C0B249A00CA1311 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mbr.cpp; path = src/mbr.cpp; sourceTree = "<group>"; };
-		03306D810C0B249A00CA1311 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mbr.h; path = src/mbr.h; sourceTree = "<group>"; };
-		1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
-		1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		1C8CFF450AD68D3600FA22E2 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
-		1C8CFF460AD68D3600FA22E2 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
-		1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
-		1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
+		1E9DA30A11BDC84A00F4DBD1 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
+		1E9DA30B11BDC84A00F4DBD1 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
+		1E9DA30C11BDC84A00F4DBD1 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
+		1E9DA30D11BDC84A00F4DBD1 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
+		1E9DA31111BDC84A00F4DBD1 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mbr.cpp; path = src/mbr.cpp; sourceTree = "<group>"; };
+		1E9DA31211BDC84A00F4DBD1 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mbr.h; path = src/mbr.h; sourceTree = "<group>"; };
+		1E9DA31311BDC84A00F4DBD1 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
+		1E9DA31411BDC84A00F4DBD1 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
+		1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* moses-chart-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-chart-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
-		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
+		C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = "moses-chart-cmd.1"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,47 +96,39 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1CF71F8B1110574A00CF2DA4 /* libOnDiskPt.a in Frameworks */,
-				1CCBE93A1003C17200EA897E /* libmoses-chart.a in Frameworks */,
-				1CCBE9381003C16700EA897E /* libmoses.a in Frameworks */,
+				1E87F09311BDCD2E0033951C /* libmoses.a in Frameworks */,
+				1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */,
+				1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		03306D600C0B240B00CA1311 /* Products */ = {
+		08FB7794FE84155DC02AAC07 /* moses-chart-cmd */ = {
 			isa = PBXGroup;
 			children = (
-				03306D670C0B240B00CA1311 /* libmoses.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
-			isa = PBXGroup;
-			children = (
-				1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */,
-				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
-				1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */,
+				1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */,
+				1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */,
+				1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 			);
-			name = "moses-cmd";
+			name = "moses-chart-cmd";
 			sourceTree = "<group>";
 		};
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				B219B8560E9381AC00EAB407 /* IOWrapper.cpp */,
-				B219B8570E9381AC00EAB407 /* IOWrapper.h */,
-				03306D800C0B249A00CA1311 /* mbr.cpp */,
-				03306D810C0B249A00CA1311 /* mbr.h */,
-				1C8CFF450AD68D3600FA22E2 /* Main.cpp */,
-				1C8CFF460AD68D3600FA22E2 /* Main.h */,
-				1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */,
-				1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */,
+				1E9DA30A11BDC84A00F4DBD1 /* IOWrapper.cpp */,
+				1E9DA30B11BDC84A00F4DBD1 /* IOWrapper.h */,
+				1E9DA30C11BDC84A00F4DBD1 /* Main.cpp */,
+				1E9DA30D11BDC84A00F4DBD1 /* Main.h */,
+				1E9DA31111BDC84A00F4DBD1 /* mbr.cpp */,
+				1E9DA31211BDC84A00F4DBD1 /* mbr.h */,
+				1E9DA31311BDC84A00F4DBD1 /* TranslationAnalysis.cpp */,
+				1E9DA31411BDC84A00F4DBD1 /* TranslationAnalysis.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -152,18 +141,26 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1C329164110F40B400E9F5E1 /* Products */ = {
+		1E9DA33411BDC8BB00F4DBD1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1C32916B110F40B400E9F5E1 /* libOnDiskPt.a */,
+				1E87F08D11BDCD1B0033951C /* libmoses.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1C335AB40F20F9EA00D0D9DF /* Products */ = {
+		1E9DA33A11BDC8CA00F4DBD1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */,
+				1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E9DA34B11BDC96A00F4DBD1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -171,6 +168,7 @@
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
+				C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */,
 			);
 			name = Documentation;
 			sourceTree = "<group>";
@@ -180,7 +178,7 @@
 /* Begin PBXNativeTarget section */
 		8DD76F620486A84900D96B5E /* moses-chart-cmd */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 03306D3B0C0B23F200CA1311 /* Build configuration list for PBXNativeTarget "moses-chart-cmd" */;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "moses-chart-cmd" */;
 			buildPhases = (
 				8DD76F640486A84900D96B5E /* Sources */,
 				8DD76F660486A84900D96B5E /* Frameworks */,
@@ -189,13 +187,13 @@
 			buildRules = (
 			);
 			dependencies = (
-				1C6689C5100D3A3900A606B2 /* PBXTargetDependency */,
-				1C6689C9100D3A4200A606B2 /* PBXTargetDependency */,
-				1CF9A7EC11105A1A00071293 /* PBXTargetDependency */,
+				1E9DA36411BDC9B200F4DBD1 /* PBXTargetDependency */,
+				1E9DA36811BDC9B200F4DBD1 /* PBXTargetDependency */,
+				1E87F09511BDCD390033951C /* PBXTargetDependency */,
 			);
 			name = "moses-chart-cmd";
 			productInstallPath = "$(HOME)/bin";
-			productName = "moses-cmd";
+			productName = "moses-chart-cmd";
 			productReference = 8DD76F6C0486A84900D96B5E /* moses-chart-cmd */;
 			productType = "com.apple.product-type.tool";
 		};
@@ -204,23 +202,23 @@
 /* Begin PBXProject section */
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = 03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-chart-cmd" */;
-			compatibilityVersion = "Xcode 2.4";
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "moses-chart-cmd" */;
+			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 1;
-			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-cmd */;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-chart-cmd */;
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 1C335AB40F20F9EA00D0D9DF /* Products */;
-					ProjectRef = 1C335AB30F20F9EA00D0D9DF /* moses-chart.xcodeproj */;
+					ProductGroup = 1E9DA33A11BDC8CA00F4DBD1 /* Products */;
+					ProjectRef = 1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */;
 				},
 				{
-					ProductGroup = 03306D600C0B240B00CA1311 /* Products */;
-					ProjectRef = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
+					ProductGroup = 1E9DA33411BDC8BB00F4DBD1 /* Products */;
+					ProjectRef = 1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */;
 				},
 				{
-					ProductGroup = 1C329164110F40B400E9F5E1 /* Products */;
-					ProjectRef = 1C329163110F40B400E9F5E1 /* OnDiskPt.xcodeproj */;
+					ProductGroup = 1E9DA34B11BDC96A00F4DBD1 /* Products */;
+					ProjectRef = 1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -231,25 +229,25 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		03306D670C0B240B00CA1311 /* libmoses.a */ = {
+		1E87F08D11BDCD1B0033951C /* libmoses.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libmoses.a;
-			remoteRef = 03306D660C0B240B00CA1311 /* PBXContainerItemProxy */;
+			remoteRef = 1E87F08C11BDCD1B0033951C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		1C32916B110F40B400E9F5E1 /* libOnDiskPt.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libOnDiskPt.a;
-			remoteRef = 1C32916A110F40B400E9F5E1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1C335ABB0F20F9EA00D0D9DF /* libmoses-chart.a */ = {
+		1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = "libmoses-chart.a";
-			remoteRef = 1C335ABA0F20F9EA00D0D9DF /* PBXContainerItemProxy */;
+			remoteRef = 1E9DA34011BDC8CA00F4DBD1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOnDiskPt.a;
+			remoteRef = 1E9DA34E11BDC96A00F4DBD1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -259,197 +257,134 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C8CFF4D0AD68D3600FA22E2 /* Main.cpp in Sources */,
-				1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */,
-				03306D820C0B249A00CA1311 /* mbr.cpp in Sources */,
-				B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */,
+				1E9DA31511BDC84A00F4DBD1 /* IOWrapper.cpp in Sources */,
+				1E9DA31611BDC84A00F4DBD1 /* Main.cpp in Sources */,
+				1E9DA31811BDC84A00F4DBD1 /* mbr.cpp in Sources */,
+				1E9DA31911BDC84A00F4DBD1 /* TranslationAnalysis.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		1C6689C5100D3A3900A606B2 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "moses-chart";
-			targetProxy = 1C6689C4100D3A3900A606B2 /* PBXContainerItemProxy */;
-		};
-		1C6689C9100D3A4200A606B2 /* PBXTargetDependency */ = {
+		1E87F09511BDCD390033951C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = moses;
-			targetProxy = 1C6689C8100D3A4200A606B2 /* PBXContainerItemProxy */;
+			targetProxy = 1E87F09411BDCD390033951C /* PBXContainerItemProxy */;
 		};
-		1CF9A7EC11105A1A00071293 /* PBXTargetDependency */ = {
+		1E9DA36411BDC9B200F4DBD1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = OnDiskPt;
-			targetProxy = 1CF9A7EB11105A1A00071293 /* PBXContainerItemProxy */;
+			targetProxy = 1E9DA36311BDC9B200F4DBD1 /* PBXContainerItemProxy */;
+		};
+		1E9DA36811BDC9B200F4DBD1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "moses-chart";
+			targetProxy = 1E9DA36711BDC9B200F4DBD1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		03306D3C0C0B23F200CA1311 /* Debug */ = {
+		1DEB923208733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					LM_SRI,
-					LM_IRST,
-					TRACE_ENABLE,
-				);
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../moses/src,
-					../srilm/misc/src,
-					../srilm/dstruct/src,
-					../srilm/include,
-					../irstlm/include,
-					../srilm/lm/src,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
+				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
-					"../moses/build//**",
+					../irstlm/src,
 					../srilm/lib/macosx,
-					/usr/local/BerkeleyDB.4.7/lib,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../on-disk-phrase-dict/build/Deployment\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../moses-chart/build/Development\"";
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-ldb_cxx",
-					"-ldb",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = "moses-chart-cmd";
-				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
-		03306D3D0C0B23F200CA1311 /* Release */ = {
+		1DEB923308733DC60010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					LM_IRST,
-					LM_SRI,
-					TRACE_ENABLE,
-				);
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../moses/src,
-					../srilm/misc/src,
-					../srilm/dstruct/src,
-					../srilm/include,
-					../srilm/lm/src,
-					../irstlm/include,
-				);
-				INSTALL_PATH = "$(HOME)/bin";
+				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
-					"../moses/build//**",
+					../irstlm/src,
 					../srilm/lib/macosx,
-					"/usr/local/BerkeleyDB.4.7/lib/**",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 				);
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../on-disk-phrase-dict/build/Deployment\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../moses-chart/build/Development\"";
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-ldb",
-					"-ldb_cxx",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = "moses-chart-cmd";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
-		03306D3E0C0B23F200CA1311 /* Default */ = {
+		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INSTALL_PATH = "$(HOME)/bin";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_2)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/../on-disk-phrase-dict/build/Deployment\"";
-				LIBRARY_SEARCH_PATHS_QUOTED_2 = "\"$(SRCROOT)/../moses-chart/build/Development\"";
-				OTHER_LDFLAGS = "";
+				HEADER_SEARCH_PATHS = ../moses/src;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				PRODUCT_NAME = "moses-cmd";
-			};
-			name = Default;
-		};
-		03306D400C0B23F200CA1311 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				VALID_ARCHS = i386;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
-		03306D410C0B23F200CA1311 /* Release */ = {
+		1DEB923708733DC60010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../moses/src;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
-		};
-		03306D420C0B23F200CA1311 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-			};
-			name = Default;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		03306D3B0C0B23F200CA1311 /* Build configuration list for PBXNativeTarget "moses-chart-cmd" */ = {
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "moses-chart-cmd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03306D3C0C0B23F200CA1311 /* Debug */,
-				03306D3D0C0B23F200CA1311 /* Release */,
-				03306D3E0C0B23F200CA1311 /* Default */,
+				1DEB923208733DC60010E9CD /* Debug */,
+				1DEB923308733DC60010E9CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Release;
 		};
-		03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-chart-cmd" */ = {
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "moses-chart-cmd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				03306D400C0B23F200CA1311 /* Debug */,
-				03306D410C0B23F200CA1311 /* Release */,
-				03306D420C0B23F200CA1311 /* Default */,
+				1DEB923608733DC60010E9CD /* Debug */,
+				1DEB923708733DC60010E9CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
