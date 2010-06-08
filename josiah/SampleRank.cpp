@@ -77,6 +77,7 @@ int main(int argc, char** argv) {
   GibbsTimer timer;
   string stopperConfig;
   unsigned int topn;
+  string feature_file;
   int debug;
   int mpidebug;
   string mpidebugfile;
@@ -155,7 +156,7 @@ int main(int argc, char** argv) {
 	("anneal,a", po::value(&anneal)->default_value(false)->zero_tokens(), "Use annealing during the burn in period")
 	("max-temp", po::value<float>(&max_temp)->default_value(4.0), "Annealing maximum temperature")
   ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
-  ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
+  ("extra-feature-config,X", po::value<string>(&feature_file), "Configuration file for extra (non-Moses) features")
   ("hack-bp-denum,H", po::value(&hack_bp_denum)->default_value(false), "Use a predefined scalar as denum in BP computation")
   ("bp-scale,B", po::value<float>(&brev_penalty_scaling_factor)->default_value(1.0f), "Scaling factor for sent level brevity penalty for BLEU - default is 1.0")
   ("weight-dump-freq", po::value<int>(&weight_dump_freq)->default_value(0), "Frequency to dump weight files during training")
@@ -192,11 +193,7 @@ int main(int argc, char** argv) {
             options(cmdline_options).run(), vm);
   po::notify(vm);
   
-  feature_vector extra_features; 
-  if (!vm["extra-feature-config"].empty()){
-    configure_features_from_file(vm["extra-feature-config"].as<std::string>(), extra_features);
-  }
-  std::cerr << "Using " << extra_features.size() << " extra features" << std::endl;
+  
   
   if (help) {
     std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
@@ -243,6 +240,10 @@ int main(int argc, char** argv) {
   //set up moses
   initMoses(mosesini,debug);
   auto_ptr<Decoder> decoder(new RandomDecoder());
+  
+  feature_vector extra_features; 
+  configure_features_from_file(feature_file, extra_features);
+  std::cerr << "Using " << extra_features.size() << " features" << std::endl;
   
   
   

@@ -64,7 +64,7 @@ namespace Josiah {
     }
     fv.push_back(feature_handle(new DistortionPenaltyFeature()));
     
-    
+    if (filename.empty()) return;
     std::cerr << "Reading extra features from " << filename << std::endl;
     std::ifstream in(filename.c_str());
     if (!in) {

@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
   int debug;
   int mpidebug;
   string mpidebugfile;
+  string feature_file;
   int burning_its;
   int mbr_size;
   string inputfile;
@@ -178,7 +179,7 @@ int main(int argc, char** argv) {
   ("mu", po::value<FValue>(&mu)->default_value(1.0f), "Metalearning rate for EGD")
   ("gamma", po::value<FValue>(&gamma)->default_value(0.9f), "Smoothing parameter for Metanormalized EGD ")
   ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
-  ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
+      ("extra-feature-config,X", po::value<string>(&feature_file), "Configuration file for extra (non-Moses) features")
   ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
   ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_cbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected corpus BLEU using deterministic annealing")   
   ("optimizer-freq", po::value<int>(&optimizerFreq)->default_value(1),"Number of optimization to perform at given temperature")
@@ -212,11 +213,7 @@ int main(int argc, char** argv) {
             options(cmdline_options).run(), vm);
   po::notify(vm);
   
-  feature_vector extra_features; 
-  if (!vm["extra-feature-config"].empty()){
-    configure_features_from_file(vm["extra-feature-config"].as<std::string>(), extra_features);
-  }
-  std::cerr << "Using " << extra_features.size() << " extra features" << std::endl;
+  
   
   if (help) {
     std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
@@ -257,6 +254,8 @@ int main(int argc, char** argv) {
     return 1;
   }
   
+  
+  
   if (mpidebugfile.length()) {
     MpiDebug::init(mpidebugfile,rank);
   }
@@ -277,6 +276,10 @@ int main(int argc, char** argv) {
   //set up moses
   initMoses(mosesini,debug);
   auto_ptr<Decoder> decoder(new RandomDecoder());
+  
+  feature_vector extra_features; 
+  configure_features_from_file(feature_file, extra_features);
+  std::cerr << "Using " << extra_features.size() << " features" << std::endl;
   
   
   auto_ptr<MHAcceptor> mhAcceptor;

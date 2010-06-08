@@ -81,6 +81,7 @@ int main(int argc, char** argv) {
   int debug;
   int mpidebug;
   string mpidebugfile;
+  string feature_file;
   int burning_its;
   int mbr_size, topNsize;
   string inputfile;
@@ -188,7 +189,7 @@ int main(int argc, char** argv) {
         ("mbr-size", po::value<int>(&mbr_size)->default_value(200),"Number of samples to use for MBR decoding")
         ("topn-size", po::value<int>(&topNsize)->default_value(0),"Number of samples to use for inner loop of MBR decoding")
         ("ref,r", po::value<vector<string> >(&ref_files), "Reference translation files for training")
-        ("extra-feature-config,X", po::value<string>(), "Configuration file for extra (non-Moses) features")
+      ("extra-feature-config,X", po::value<string>(&feature_file), "Configuration file for extra (non-Moses) features")
         ("check-features", po::value<bool>(&GibbsOperator::CheckFeatures)->zero_tokens()->default_value(false), "Check features for consistency after every update")
         ("use-metanormalized-egd,N", po::value(&use_metanormalized_egd)->zero_tokens()->default_value(false), "Use metanormalized EGD")
         ("expected-bleu-deterministic-annealing-training,D", po::value(&expected_sbleu_da)->zero_tokens()->default_value(false), "Train to maximize expected sentence BLEU using deterministic annealing")   
@@ -229,11 +230,7 @@ int main(int argc, char** argv) {
             options(cmdline_options).run(), vm);
   po::notify(vm);
 
-  feature_vector extra_features; 
-  if (!vm["extra-feature-config"].empty()){
-    configure_features_from_file(vm["extra-feature-config"].as<std::string>(), extra_features);
-  }
-  std::cerr << "Using " << extra_features.size() << " extra features" << std::endl;
+  
 
   if (help) {
       std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
@@ -293,6 +290,10 @@ int main(int argc, char** argv) {
    //set up moses
   initMoses(mosesini,debug);
   auto_ptr<Decoder> decoder(new RandomDecoder());
+  
+  feature_vector extra_features; 
+  configure_features_from_file(feature_file, extra_features);
+  std::cerr << "Using " << extra_features.size() << " features" << std::endl;
   
   auto_ptr<MHAcceptor> mhAcceptor;
   bool doMH = false;

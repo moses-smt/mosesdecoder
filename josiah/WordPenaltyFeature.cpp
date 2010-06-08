@@ -30,31 +30,32 @@ WordPenaltyFeature::WordPenaltyFeature() :
   SingleValuedFeatureFunction(StaticData::Instance().GetWordPenaltyProducer()->GetScoreProducerDescription()) {}
   
 FValue WordPenaltyFeature::computeScore() {
-  return -m_sample->GetTargetWords().size();
+  return -(FValue)(m_sample->GetTargetWords().size());
 }
 
 /** Score due to one segment */
 FValue WordPenaltyFeature::getSingleUpdateScore(const TranslationOption* option, const TargetGap& gap) {
-  return -(option->GetTargetPhrase().GetSize());
+  return -(FValue)(option->GetTargetPhrase().GetSize());
 }
 
 /** Score due to two segments. The left and right refer to the target positions.**/
 FValue WordPenaltyFeature::getContiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
     const TargetGap& gap) {
-  return -(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
+      return -(FValue)(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
   
 }
 
 FValue WordPenaltyFeature::getDiscontiguousPairedUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
     const TargetGap& leftGap, const TargetGap& rightGap) {
-      return -(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
+      return -(FValue)(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
 }
 
 
 /** Score due to flip. Again, left and right refer to order on the <emph>target</emph> side. */
 FValue WordPenaltyFeature::getFlipUpdateScore(const TranslationOption* leftOption,const TranslationOption* rightOption, 
-                                  const TargetGap& leftGap, const TargetGap& rightGap) {
-   return -(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
+                                  const TargetGap& leftGap, const TargetGap& rightGap)
+{
+  return -(FValue)(leftOption->GetTargetPhrase().GetSize() + rightOption->GetTargetPhrase().GetSize());
 }
 
 UnknownWordPenaltyFeature::UnknownWordPenaltyFeature() :
