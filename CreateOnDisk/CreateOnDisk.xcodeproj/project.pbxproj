@@ -235,7 +235,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/src,
+					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 				);
 				OTHER_LDFLAGS = (
@@ -259,7 +259,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/src,
+					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 				);
 				OTHER_LDFLAGS = (

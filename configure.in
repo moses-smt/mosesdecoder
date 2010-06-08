@@ -150,7 +150,7 @@ fi
 if test "x$with_irstlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_irstlm}/src"
+  CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
 
   AC_CHECK_HEADER(n_gram.h,
                  [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
@@ -158,7 +158,7 @@ then
 
   MY_ARCH=`uname -m`
   LIB_IRSTLM="-lirstlm"
-  LDFLAGS="$LDFLAGS -L${with_irstlm}/src"
+  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib/${MY_ARCH}"
   LIBS="$LIBS $LIB_IRSTLM"
   FMTLIBS="$FMTLIBS libirstlm.a"
   AM_CONDITIONAL([IRST_LM], true)

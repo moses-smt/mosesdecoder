@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1ED4FB1811BDBA2B004E826A /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0511BDBA2B004E826A /* Makefile */; };
 		1ED4FB1911BDBA2B004E826A /* OnDiskWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0811BDBA2B004E826A /* OnDiskWrapper.cpp */; };
 		1ED4FB1A11BDBA2B004E826A /* OnDiskWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB0911BDBA2B004E826A /* OnDiskWrapper.h */; };
 		1ED4FB1B11BDBA2B004E826A /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB0A11BDBA2B004E826A /* Phrase.cpp */; };
@@ -27,9 +26,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1ED4FB0511BDBA2B004E826A /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = src/Makefile; sourceTree = "<group>"; };
-		1ED4FB0611BDBA2B004E826A /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
-		1ED4FB0711BDBA2B004E826A /* Makefile.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.in; path = src/Makefile.in; sourceTree = "<group>"; };
 		1ED4FB0811BDBA2B004E826A /* OnDiskWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnDiskWrapper.cpp; path = src/OnDiskWrapper.cpp; sourceTree = "<group>"; };
 		1ED4FB0911BDBA2B004E826A /* OnDiskWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnDiskWrapper.h; path = src/OnDiskWrapper.h; sourceTree = "<group>"; };
 		1ED4FB0A11BDBA2B004E826A /* Phrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Phrase.cpp; path = src/Phrase.cpp; sourceTree = "<group>"; };
@@ -73,9 +69,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1ED4FB0511BDBA2B004E826A /* Makefile */,
-				1ED4FB0611BDBA2B004E826A /* Makefile.am */,
-				1ED4FB0711BDBA2B004E826A /* Makefile.in */,
 				1ED4FB0811BDBA2B004E826A /* OnDiskWrapper.cpp */,
 				1ED4FB0911BDBA2B004E826A /* OnDiskWrapper.h */,
 				1ED4FB0A11BDBA2B004E826A /* Phrase.cpp */,
@@ -171,7 +164,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1ED4FB1811BDBA2B004E826A /* Makefile in Sources */,
 				1ED4FB1911BDBA2B004E826A /* OnDiskWrapper.cpp in Sources */,
 				1ED4FB1B11BDBA2B004E826A /* Phrase.cpp in Sources */,
 				1ED4FB1D11BDBA2B004E826A /* PhraseNode.cpp in Sources */,
