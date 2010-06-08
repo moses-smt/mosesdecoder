@@ -223,7 +223,7 @@ namespace Moses
 						if (iterCache == m_cache.end())
 						{ // not in case							
 							overThreshold = node->GetCount(0) > staticData.GetRuleCountThreshold();
-							cerr << node->GetCount(0) << " ";
+							//cerr << node->GetCount(0) << " ";
 							
 							const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(GetTableLimit(), m_dbWrapper);
 							
@@ -261,7 +261,7 @@ namespace Moses
 		
 		ret->CreateChartRules(rulesLimit);
 
-		cerr << numDerivations << " ";
+		//cerr << numDerivations << " ";
 		
 		return ret;
 	}

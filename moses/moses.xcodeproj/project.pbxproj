@@ -111,7 +111,6 @@
 		1ED4FD9E11BDC0D2004E826A /* LMList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FCC811BDC0D2004E826A /* LMList.h */; };
 		1ED4FD9F11BDC0D2004E826A /* LVoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FCC911BDC0D2004E826A /* LVoc.cpp */; };
 		1ED4FDA011BDC0D2004E826A /* LVoc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FCCA11BDC0D2004E826A /* LVoc.h */; };
-		1ED4FDA111BDC0D2004E826A /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FCCB11BDC0D2004E826A /* Makefile */; };
 		1ED4FDA211BDC0D2004E826A /* Manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FCCE11BDC0D2004E826A /* Manager.cpp */; };
 		1ED4FDA311BDC0D2004E826A /* Manager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FCCF11BDC0D2004E826A /* Manager.h */; };
 		1ED4FDA411BDC0D2004E826A /* NGramCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FCD011BDC0D2004E826A /* NGramCollection.cpp */; };
@@ -324,9 +323,6 @@
 		1ED4FCC811BDC0D2004E826A /* LMList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LMList.h; path = src/LMList.h; sourceTree = "<group>"; };
 		1ED4FCC911BDC0D2004E826A /* LVoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LVoc.cpp; path = src/LVoc.cpp; sourceTree = "<group>"; };
 		1ED4FCCA11BDC0D2004E826A /* LVoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LVoc.h; path = src/LVoc.h; sourceTree = "<group>"; };
-		1ED4FCCB11BDC0D2004E826A /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = src/Makefile; sourceTree = "<group>"; };
-		1ED4FCCC11BDC0D2004E826A /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
-		1ED4FCCD11BDC0D2004E826A /* Makefile.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.in; path = src/Makefile.in; sourceTree = "<group>"; };
 		1ED4FCCE11BDC0D2004E826A /* Manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Manager.cpp; path = src/Manager.cpp; sourceTree = "<group>"; };
 		1ED4FCCF11BDC0D2004E826A /* Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Manager.h; path = src/Manager.h; sourceTree = "<group>"; };
 		1ED4FCD011BDC0D2004E826A /* NGramCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NGramCollection.cpp; path = src/NGramCollection.cpp; sourceTree = "<group>"; };
@@ -558,9 +554,6 @@
 				1ED4FCC811BDC0D2004E826A /* LMList.h */,
 				1ED4FCC911BDC0D2004E826A /* LVoc.cpp */,
 				1ED4FCCA11BDC0D2004E826A /* LVoc.h */,
-				1ED4FCCB11BDC0D2004E826A /* Makefile */,
-				1ED4FCCC11BDC0D2004E826A /* Makefile.am */,
-				1ED4FCCD11BDC0D2004E826A /* Makefile.in */,
 				1ED4FCCE11BDC0D2004E826A /* Manager.cpp */,
 				1ED4FCCF11BDC0D2004E826A /* Manager.h */,
 				1ED4FCD011BDC0D2004E826A /* NGramCollection.cpp */,
@@ -910,7 +903,6 @@
 				1ED4FD9B11BDC0D2004E826A /* LexicalReorderingTable.cpp in Sources */,
 				1ED4FD9D11BDC0D2004E826A /* LMList.cpp in Sources */,
 				1ED4FD9F11BDC0D2004E826A /* LVoc.cpp in Sources */,
-				1ED4FDA111BDC0D2004E826A /* Makefile in Sources */,
 				1ED4FDA211BDC0D2004E826A /* Manager.cpp in Sources */,
 				1ED4FDA411BDC0D2004E826A /* NGramCollection.cpp in Sources */,
 				1ED4FDA611BDC0D2004E826A /* NGramNode.cpp in Sources */,
@@ -999,6 +991,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
 					LM_SRI,
 					LM_IRST,
 					LM_INTERNAL,
@@ -1021,6 +1014,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
 					LM_SRI,
 					LM_IRST,
 					LM_INTERNAL,
