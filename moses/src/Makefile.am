@@ -1,9 +1,9 @@
-lib_LTLIBRARIES = libmoses.la
+lib_LIBRARIES = libmoses.a
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES $(BOOST_CPPFLAGS)
 
-libmoses_ladir = ${includedir}
+libmoses_adir = ${includedir}
 
-libmoses_la_HEADERS = \
+libmoses_a_HEADERS = \
 	TypeDef.h \
 	PrefixTree.h \
 	File.h \
@@ -89,28 +89,29 @@ libmoses_la_HEADERS = \
 	XmlOption.h 
 
 if PROTOBUF
-libmoses_la_HEADERS += rule.pb.h hypergraph.pb.h
+libmoses_a_HEADERS += rule.pb.h hypergraph.pb.h
 endif
 
 if SRI_LM
-libmoses_la_HEADERS += LanguageModelSRI.h
+libmoses_a_HEADERS += LanguageModelSRI.h \
+                      LanguageModelParallelBackoff.h
 endif
 
 if IRST_LM
-libmoses_la_HEADERS += LanguageModelIRST.h
+libmoses_a_HEADERS += LanguageModelIRST.h
 endif
 
 if RAND_LM
-libmoses_la_HEADERS += LanguageModelRandLM.h
+libmoses_a_HEADERS += LanguageModelRandLM.h
 endif
 
 if INTERNAL_LM
-libmoses_la_HEADERS += LanguageModelInternal.h \
+libmoses_a_HEADERS += LanguageModelInternal.h \
 		      NGramCollection.h \
 		      NGramNode.h
 endif
 
-libmoses_la_SOURCES = \
+libmoses_a_SOURCES = \
 	AlignmentInfo.cpp \
 	BitmapContainer.cpp \
 	TreeInput.cpp \
@@ -125,8 +126,11 @@ libmoses_la_SOURCES = \
 	DotChart.cpp \
 	DotChartOnDisk.cpp \
 	DummyScoreProducers.cpp \
-	DynSAInclude/file.cpp \	DynSAInclude/vocab.cpp \
-	DynSuffixArray.cpp \	BilingualDynSuffixArray.cpp \	Factor.cpp \
+	DynSAInclude/file.cpp \
+	DynSAInclude/vocab.cpp \
+	DynSuffixArray.cpp \
+	BilingualDynSuffixArray.cpp \
+	Factor.cpp \
 	FactorCollection.cpp \
 	FactorTypeSet.cpp \
 	FeatureFunction.cpp \
@@ -224,28 +228,27 @@ hypergraph.pb.cc: hypergraph.proto
 hypergraph.pb.h: hypergraph.proto
 	@PROTOC@ --cpp_out=. $<			
 
-libmoses_la_SOURCES += rule.pb.cc hypergraph.pb.cc
+libmoses_a_SOURCES += rule.pb.cc hypergraph.pb.cc
 
 endif
 
 if SRI_LM
-libmoses_la_SOURCES += LanguageModelSRI.cpp \
-						LanguageModelParallelBackoff.cpp 
-
+libmoses_a_SOURCES += LanguageModelSRI.cpp \
+                      LanguageModelParallelBackoff.cpp
 endif
 
 if IRST_LM
-libmoses_la_SOURCES += LanguageModelIRST.cpp
+libmoses_a_SOURCES += LanguageModelIRST.cpp
 endif
 
 if RAND_LM
-libmoses_la_SOURCES += LanguageModelRandLM.cpp
+libmoses_a_SOURCES += LanguageModelRandLM.cpp
 endif
 
 if INTERNAL_LM
-libmoses_la_SOURCES += LanguageModelInternal.cpp \
+libmoses_a_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
 endif
 
-libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
+libmoses_a_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
