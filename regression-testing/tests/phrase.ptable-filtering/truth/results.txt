@@ -8,8 +8,8 @@ TRANSLATION_OPTION_7=providing :: pC=-0.536, c=-0.866
 TRANSLATION_OPTION_8=remittance :: pC=-0.059, c=-0.627
 TRANSLATION_OPTION_9=remittance of :: pC=-0.154, c=-0.726
 TRANSLATION_OPTION_10=remittances , :: pC=-0.202, c=-0.793
-TRANSLATION_OPTION_11=remittances :: pC=-0.043, c=-0.611
-TRANSLATION_OPTION_12=remittances :: to :: pC=-0.161, c=-0.864
+TRANSLATION_OPTION_11=remittances , to :: pC=-0.161, c=-0.864
+TRANSLATION_OPTION_12=remittances :: pC=-0.043, c=-0.611
 TRANSLATION_OPTION_13=remittances from :: pC=-0.154, c=-0.753
 TRANSLATION_OPTION_14=represents :: pC=-0.551, c=-0.852
 TRANSLATION_OPTION_15=sending money :: pC=-0.333, c=-0.835
