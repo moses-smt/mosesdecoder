@@ -1025,6 +1025,7 @@
 					../irstlm/include,
 					../srilm/include,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
 			};
