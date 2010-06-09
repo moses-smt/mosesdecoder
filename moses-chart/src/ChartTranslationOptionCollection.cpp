@@ -38,10 +38,11 @@ namespace MosesChart
 {
 
 TranslationOptionCollection::TranslationOptionCollection(InputType const& source
-																											, const std::vector<DecodeGraph*> &decodeGraphList
+																											, const Moses::TranslationSystem* system
 																											, const ChartCellCollection &hypoStackColl)
 :m_source(source)
-,m_decodeGraphList(decodeGraphList)
+,m_system(system)
+,m_decodeGraphList(system->GetDecodeGraphs())
 ,m_hypoStackColl(hypoStackColl)
 ,m_collection(source.GetSize())
 {
@@ -201,13 +202,11 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos)
 }
 
 //! special handling of ONE unknown words.
-void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord
-																	 , size_t sourcePos, size_t length)
+void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord, size_t sourcePos, size_t length)
 {
 	// unknown word, add as trans opt
 	const StaticData &staticData = StaticData::Instance();
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
-	const WordPenaltyProducer *wordPenaltyProducer = staticData.GetWordPenaltyProducer();
 	vector<float> wordPenaltyScore(1, -0.434294482);
 
 	size_t isDigit = 0;
@@ -265,7 +264,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 
 			//targetPhrase->SetScore();
 			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-			targetPhrase->SetScore(wordPenaltyProducer, wordPenaltyScore);
+			targetPhrase->SetScore(m_system->GetWordPenaltyProducer(), wordPenaltyScore);
 			targetPhrase->SetSourcePhrase(m_unksrc);
 			targetPhrase->SetTargetLHS(targetLHS);
 						

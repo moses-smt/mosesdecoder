@@ -101,7 +101,7 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
 																							, const std::vector<Moses::FactorType> &outputFactors
 																							, const Moses::PhraseDictionary &phraseDict
 																							, const std::vector<float> &weightT
-																							, float weightWP
+																							, const Moses::WordPenaltyProducer* wpProducer
 																							, const Moses::LMList &lmList
 																							, const Moses::Phrase &sourcePhrase
 																							, const std::string &filePath
@@ -117,7 +117,7 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
 																												 , vocab
 																												 , phraseDict
 																												 , weightT
-																												 , weightWP
+																												 , wpProducer
 																												 , lmList
 																												 , sourcePhrase);
 		

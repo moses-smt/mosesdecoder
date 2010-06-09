@@ -348,7 +348,8 @@ void Hypothesis::CalcRemainingScore()
 	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
 	// WORD PENALTY
-	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
+	m_scoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
+  , - (float)m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;

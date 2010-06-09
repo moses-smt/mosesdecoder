@@ -35,6 +35,7 @@ namespace Moses
 class TargetPhraseCollection;
 class ProcessedRuleStackOnDisk;
 class CellCollection;
+class WordPenaltyProducer;
 
 class PhraseDictionaryOnDisk : public PhraseDictionary
 {
@@ -43,7 +44,7 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 	
 protected:
     const LMList* m_languageModels;
-    float m_wordPenaltyWeight;
+    const WordPenaltyProducer* m_wpProducer;;
 	std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 	std::vector<float> m_weight;
 	std::string m_filePath;
@@ -74,7 +75,7 @@ public:
 						, const std::vector<float> &weight
 						, size_t tableLimit,
                           const LMList& languageModels,
-                          float wordPenaltyWeight);
+                          const WordPenaltyProducer* wpProducer);
 	
 	std::string GetScoreProducerDescription() const
 	{ return "BerkeleyPt"; }

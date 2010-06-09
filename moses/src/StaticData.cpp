@@ -70,7 +70,6 @@ StaticData::StaticData()
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
 ,m_distortionScoreProducer(0)
-,m_wpProducer(0)
 ,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
@@ -288,9 +287,13 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
 	// score weights
-	m_weightWordPenalty				= Scan<float>( m_parameter->GetParam("weight-w")[0] );
-	m_wpProducer = new WordPenaltyProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightWordPenalty);
+  vector<float> wordPenaltiesWeights;
+  for (size_t i = 0; i < m_parameter->GetParam("weight-w").size(); ++i) {
+    float weightWordPenalty       = Scan<float>( m_parameter->GetParam("weight-w")[i] );
+    m_wordPenaltyProducers.push_back(new WordPenaltyProducer(m_scoreIndexManager));
+    m_allWeights.push_back(weightWordPenalty);
+  }
+	
 
 	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
@@ -449,12 +452,13 @@ bool StaticData::LoadData(Parameter *parameter)
     //configure the translation systems with these tables
     if (translationSystemsCount) {
       for (size_t i = 0; i < translationSystemsCount; ++i) {
+          assert(0); //not yet implemented
           //TODO: Config of translation systems  
           //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
       }
     } else {
       //Create the default translation system
-      AddTranslationSystem(TranslationSystem(m_decodeGraphs, m_reorderModels, m_languageModel));
+      AddTranslationSystem(TranslationSystem(m_decodeGraphs, m_reorderModels, m_languageModel, m_wordPenaltyProducers));
     }
 
 	m_scoreIndexManager.InitFeatureNames();
@@ -491,6 +495,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
     RemoveAllInColl(m_decodeGraphs);
+    RemoveAllInColl(m_wordPenaltyProducers);
     m_languageModel.CleanUp();
 	
 	// delete trans opt
@@ -503,7 +508,6 @@ StaticData::~StaticData()
 
 	// small score producers
 	delete m_distortionScoreProducer;
-	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
 
 	//delete m_parameter;
@@ -782,7 +786,7 @@ bool StaticData::LoadPhraseTables()
 				oldFileFormat = true;
 			}
 
-			if(!oldFileFormat && token.size() < 5 || oldFileFormat && token.size() != 4)
+			if((!oldFileFormat && token.size() < 5) || (oldFileFormat && token.size() != 4))
 			{
 				UserMessage::Add("invalid phrase table specification");
 				return false;

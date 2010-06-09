@@ -398,7 +398,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 		// word penalty
 		if (labeledOutput)
 	    *m_nBestStream << "w: ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetWordPenaltyProducer()) << " ";
+		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
 
 		// generation
 		const vector<const GenerationDictionary*> gds = system->GetGenerationDictionaries();

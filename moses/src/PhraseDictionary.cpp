@@ -121,7 +121,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 										 , m_weight
 										 , m_tableLimit
 										 , system->GetLanguageModels()
-										 , system->GetWeightWordPenalty()));
+										 , system->GetWordPenaltyProducer()));
         return pdm;
 	}
 	else if (m_implementation == OnDisk)
@@ -135,7 +135,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 											, m_weight
 											, m_tableLimit
                                             , system->GetLanguageModels()
-                                            , system->GetWeightWordPenalty());
+                                            , system->GetWordPenaltyProducer());
 		assert(pdta);
         return pdta;
 	}

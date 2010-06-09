@@ -230,7 +230,7 @@ namespace Moses
 																								 ,m_outputFactorsVec
 																								 ,*this
 																								 ,m_weight
-																								 ,m_wordPenaltyWeight
+																								 ,m_wpProducer
 																								 ,*m_languageModels
 																								 ,*cachedSource
 																								 ,m_filePath

@@ -96,7 +96,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 																			 , const vector<float> &weight
 																			 , size_t tableLimit
 																			 , const LMList &languageModels
-																			 , float weightWP)
+																			 , const WordPenaltyProducer* wpProducer)
 {
 	m_filePath = filePath;
 	m_tableLimit = tableLimit;
@@ -105,7 +105,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 	// data from file
 	InputFileStream inFile(filePath);
 			
-	bool ret = Load(input, output, inFile, weight, tableLimit, languageModels, weightWP);		
+	bool ret = Load(input, output, inFile, weight, tableLimit, languageModels, wpProducer);		
 	return ret;
 }
 
@@ -115,7 +115,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 																			 , const std::vector<float> &weight
 																			 , size_t tableLimit
 																			 , const LMList &languageModels
-																			 , float weightWP)
+																			 , const WordPenaltyProducer* wpProducer)
 {
 	PrintUserTime("Start loading new format pt model");
 	
@@ -189,7 +189,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 		
-		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels);
+		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels, wpProducer);
 		
 		// count info for backoff
 		if (tokens.size() >= 6)

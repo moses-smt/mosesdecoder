@@ -243,9 +243,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	TargetPhrase targetPhrase(Output);
 	targetPhrase.SetSourcePhrase(m_unksrc);
 	if (inputScores != NULL) {
-		targetPhrase.SetScore(*inputScores);
+		targetPhrase.SetScore(m_system,*inputScores);
 	} else {
-		targetPhrase.SetScore();
+		targetPhrase.SetScore(m_system);
 	}
 	
 	if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit)

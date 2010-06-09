@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "DecodeGraph.h"
 #include "DecodeStep.h"
+#include "DummyScoreProducers.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
 #include "Util.h"
@@ -37,7 +38,8 @@ namespace Moses {
     TranslationSystem::TranslationSystem(const string& config,
                                         const vector<DecodeGraph*>& allDecodeGraphs,
                                         const vector<LexicalReordering*>& allReorderingTables,
-                                        const LMList& allLMs) {
+                                        const LMList& allLMs,
+                                         const vector<WordPenaltyProducer*>& allWordPenalties) {
         VERBOSE(2,"Creating translation system " << config << endl);
         vector<string> fields;
         Tokenize(fields,config);
@@ -66,11 +68,13 @@ namespace Moses {
     
     TranslationSystem::TranslationSystem(const vector<DecodeGraph*>& allDecodeGraphs,
                                          const vector<LexicalReordering*>& allReorderingTables,
-                                         const LMList& allLMs) :
+                                         const LMList& allLMs,
+                                         const vector<WordPenaltyProducer*>& allWordPenalties) :
         m_id(DEFAULT),
     m_decodeGraphs(allDecodeGraphs),
     m_reorderingTables(allReorderingTables),
-    m_languageModels(allLMs) 
+    m_languageModels(allLMs),
+    m_wpProducer(allWordPenalties.at(0))
     {
       configureDictionaries();
     }
@@ -97,6 +101,12 @@ namespace Moses {
            i != m_phraseDictionaries.end(); ++i) {
              const_cast<PhraseDictionaryFeature*>(*i)->InitDictionary(this,source);
            }
+    }
+    
+    float TranslationSystem::GetWeightWordPenalty() const {
+      //const ScoreComponentCollection weights = StaticData::Instance().GetAllWeights();
+      size_t wpIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(m_wpProducer->GetScoreBookkeepingID());
+      return StaticData::Instance().GetAllWeights()[wpIndex];
     }
 
 };

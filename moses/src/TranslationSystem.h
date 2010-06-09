@@ -34,6 +34,7 @@ namespace Moses {
   class LexicalReordering;
   class PhraseDictionaryFeature;
   class GenerationDictionary;
+  class WordPenaltyProducer;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -45,12 +46,14 @@ class TranslationSystem {
       TranslationSystem(const std::string& config,
                         const std::vector<DecodeGraph*>& allDecoderGraphs,
                         const std::vector<LexicalReordering*>& allReorderingTables,
-                        const LMList& allLMs);
+                        const LMList& allLMs,
+                        const std::vector<WordPenaltyProducer*>& allWordPenalties);
       
       /** Creates a default system */
       TranslationSystem(const std::vector<DecodeGraph*>& allDecoderGraphs,
                         const std::vector<LexicalReordering*>& allReorderingTables,
-                        const LMList& allLMs);
+                        const LMList& allLMs,
+                        const std::vector<WordPenaltyProducer*>& allWordPenalties);
         
         const std::string& GetId() const {return m_id;}
         
@@ -60,7 +63,9 @@ class TranslationSystem {
         const LMList& GetLanguageModels() const {return m_languageModels;}
         const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
         const std::vector<const PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
-        float GetWeightWordPenalty() const {throw std::runtime_error("Not implemented");}
+        const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
+        
+        float GetWeightWordPenalty() const;
         
         //sentence (and thread) specific initialisation
         void InitializeBeforeSentenceProcessing(const InputType& source) const;
@@ -82,6 +87,7 @@ class TranslationSystem {
         std::vector<const PhraseDictionaryFeature*> m_phraseDictionaries;
         std::vector<const GenerationDictionary*> m_generationDictionaries;
         LMList m_languageModels;
+        WordPenaltyProducer* m_wpProducer;
 };
 
 

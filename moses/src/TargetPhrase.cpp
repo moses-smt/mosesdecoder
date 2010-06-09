@@ -69,10 +69,10 @@ TargetPhrase::~TargetPhrase()
 {
 }
 
-void TargetPhrase::SetScore()
+void TargetPhrase::SetScore(const TranslationSystem* system)
 { // used when creating translations of unknown words:
 	m_transScore = m_ngramScore = 0;	
-	m_fullScore = - StaticData::Instance().GetWeightWordPenalty();	
+	m_fullScore = - system->GetWeightWordPenalty();	
 }
 
 #ifdef HAVE_PROTOBUF
@@ -119,12 +119,11 @@ void TargetPhrase::SetScore(float score)
  * used for setting scores for unknown words with input link features (lattice/conf. nets)
  * \param scoreVector input scores 
  */
-void TargetPhrase::SetScore(const Scores &scoreVector) 
+void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &scoreVector) 
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
-	// Assume the default system.
-    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
+
+    const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
 
 	//get the weight list
 	unsigned int id = prod->GetScoreBookkeepingID();
@@ -139,7 +138,7 @@ void TargetPhrase::SetScore(const Scores &scoreVector)
 	Scores sizedScoreVector = scoreVector;
 	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-	SetScore(prod,sizedScoreVector,weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
+	SetScore(prod,sizedScoreVector,weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
@@ -186,9 +185,9 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 																 const Scores &scoreVector
 																 ,const vector<float> &weightT
-																 ,const LMList &languageModels)
+																 ,const LMList &languageModels
+                                 ,const WordPenaltyProducer* wpProducer)
 {
-	const StaticData &staticData = StaticData::Instance();
 	
 	assert(weightT.size() == scoreVector.size());
 	
@@ -224,7 +223,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
 	
 	// word penalty
 	size_t wordCount = GetNumTerminals();
-	m_scoreBreakdown.Assign(staticData.GetWordPenaltyProducer(), - (float) wordCount * 0.434294482); // TODO log -> ln ??
+	m_scoreBreakdown.Assign(wpProducer, - (float) wordCount * 0.434294482); // TODO log -> ln ??
 	
 	m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;
 }

@@ -43,7 +43,7 @@ namespace MosesChart
 Manager::Manager(InputType const& source, const TranslationSystem* system)
 :m_source(source)
 ,m_hypoStackColl(source, *this)
-    ,m_transOptColl(source, system->GetDecodeGraphs(), m_hypoStackColl),
+    ,m_transOptColl(source, system, m_hypoStackColl),
     m_system(system)
 {
     

@@ -59,7 +59,6 @@ class GlobalLexicalModel;
 class PhraseDictionaryFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
-class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class TranslationSystem;
@@ -93,7 +92,6 @@ protected:
 		m_earlyDiscardingThreshold,
 		m_translationOptionThreshold,
 		m_weightDistortion, 
-		m_weightWordPenalty, 
 		m_wordDeletionWeight,
 		m_weightUnknownWord;
 
@@ -137,8 +135,8 @@ protected:
 	size_t m_numInputScores;
 
 	mutable size_t m_verboseLevel;
+  std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
 	DistortionScoreProducer *m_distortionScoreProducer;
-	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
@@ -320,10 +318,6 @@ public:
 	{
 		return m_weightDistortion;
 	}
-	float GetWeightWordPenalty() const
-	{
-		return m_weightWordPenalty;
-	}
 	float GetWeightUnknownWord() const
 	{
 		return m_weightUnknownWord;
@@ -476,7 +470,6 @@ public:
 		return m_allWeights;
 	}
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
-	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
