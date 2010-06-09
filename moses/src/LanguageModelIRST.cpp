@@ -50,6 +50,12 @@ LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scor
 
 LanguageModelIRST::~LanguageModelIRST()
 {
+
+#ifndef WIN32
+  TRACE_ERR( "reset mmap\n");
+  m_lmtb->reset_mmap();
+#endif
+
   delete m_lmtb;
   delete m_lmtb_ng;
 }
@@ -235,12 +241,7 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing()
 	if (LMCacheCleanup(sentenceCount, lmcache_cleanup_threshold)){
 		TRACE_ERR( "reset caches\n");
 		m_lmtb->reset_caches(); 
-
-#ifndef WIN32
-		TRACE_ERR( "reset mmap\n");
-		m_lmtb->reset_mmap();
-#endif
-  }
+	}
 }
 
 void LanguageModelIRST::InitializeBeforeSentenceProcessing(){

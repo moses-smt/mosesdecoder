@@ -266,18 +266,10 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../moses/src,
-					../srilm/misc/src,
-					../srilm/dstruct/src,
-					../srilm/include,
-					../irstlm/include,
-					../srilm/lm/src,
-				);
+				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
-					"../moses/build//**",
+					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 				);
 				OTHER_LDFLAGS = (
@@ -309,18 +301,10 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					../moses/src,
-					../srilm/misc/src,
-					../srilm/dstruct/src,
-					../srilm/include,
-					../srilm/lm/src,
-					../irstlm/include,
-				);
+				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					"../irstlm/lib/i386-apple-darwin9.0/",
-					"../moses/build//**",
+					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 				);
 				OTHER_LDFLAGS = (
@@ -344,9 +328,20 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib/i386,
+					../srilm/lib/macosx,
+				);
+				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
 			};
@@ -355,20 +350,30 @@
 		03306D400C0B23F200CA1311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH)";
-				VALID_ARCHS = i386;
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
 			};
 			name = Debug;
 		};
 		03306D410C0B23F200CA1311 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
 			};
 			name = Release;
 		};
 		03306D420C0B23F200CA1311 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
 			};
 			name = Default;
 		};
