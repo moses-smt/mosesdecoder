@@ -1,8 +1,8 @@
-TRANSLATION_1=Prag Stock Market zu Ende das Devisen Tag 
-TRANSLATION_2=nach scharfen morgens , Prager Stock Market korrigiert . 
-TRANSLATION_3=Transaktionen mit Aktien des Tschechischen Energy Enterprise ČEZ halb der regelmäßigen täglichen . 
-TRANSLATION_4=Prag Stock Market sofort ihren der Montag Anfang gehandelt entgegenwirkt Tuesday inflationsgerichtete beinahe sechs Prozent . 
-TRANSLATION_5=diesmal der Abnahme der Aktien fallen . 
+TRANSLATION_1=Prag Stock Market zu Ende das Devisen Tag
+TRANSLATION_2=nach scharfen morgens , Prager Stock Market korrigiert .
+TRANSLATION_3=Transaktionen mit Aktien des Tschechischen Energy Enterprise ČEZ halb der regelmäßigen täglichen .
+TRANSLATION_4=Prag Stock Market sofort ihren der Montag Anfang gehandelt entgegenwirkt Tuesday inflationsgerichtete beinahe sechs Prozent .
+TRANSLATION_5=diesmal der Abnahme der Aktien fallen .
 LMLOAD_TIME ~ 1
 PTLOAD_TIME ~ 93
 SCORE_1 = -110.463

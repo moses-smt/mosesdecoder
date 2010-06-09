@@ -22,14 +22,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = moses;
 		};
 		1E87F09411BDCD390033951C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
 		1E9DA34011BDC8CA00F4DBD1 /* PBXContainerItemProxy */ = {
@@ -294,6 +294,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
@@ -318,6 +319,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,

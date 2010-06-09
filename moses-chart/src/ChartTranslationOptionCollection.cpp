@@ -278,6 +278,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			transOpt = new TranslationOption(wc->GetWordsRange(), *chartRule);
 			//transOpt->CalcScore();
 			Add(transOpt, sourcePos);
+			
 		} // for (iterLHS 
 	}
 	else
@@ -285,29 +286,42 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 		vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
 
 		TargetPhrase *targetPhrase = new TargetPhrase(Output);
-		m_cacheTargetPhrase.push_back(targetPhrase);
-		targetPhrase->SetSourcePhrase(m_unksrc);
-		targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
+		// loop
+		const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
+		UnknownLHSList::const_iterator iterLHS; 
+		for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS)
+		{
+			const string &targetLHSStr = iterLHS->first;
+			float prob = iterLHS->second;
+			
+			Word targetLHS(true);
+			targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+			assert(targetLHS.GetFactor(0) != NULL);
 
-		// words consumed
-		std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>;
-		m_cachedWordsConsumed.push_back(wordsConsumed);
-		wordsConsumed->push_back(new WordConsumed(sourcePos, sourcePos, sourceWord, NULL));
+			m_cacheTargetPhrase.push_back(targetPhrase);
+			targetPhrase->SetSourcePhrase(m_unksrc);
+			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
+			targetPhrase->SetTargetLHS(targetLHS);
 
-		// chart rule
-		assert(wordsConsumed->size());
-		ChartRule *chartRule = new ChartRule(*targetPhrase
-																				, *wordsConsumed->back());
-		chartRule->CreateNonTermIndex();
-		m_cacheChartRule.push_back(chartRule);
+			// words consumed
+			std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>;
+			m_cachedWordsConsumed.push_back(wordsConsumed);
+			wordsConsumed->push_back(new WordConsumed(sourcePos, sourcePos, sourceWord, NULL));
 
-		transOpt = new TranslationOption(Moses::WordsRange(sourcePos, sourcePos)
-															, *chartRule);
-		//transOpt->CalcScore();
-		Add(transOpt, sourcePos);
+			// chart rule
+			assert(wordsConsumed->size());
+			ChartRule *chartRule = new ChartRule(*targetPhrase
+																					, *wordsConsumed->back());
+			chartRule->CreateNonTermIndex();
+			m_cacheChartRule.push_back(chartRule);
+
+			transOpt = new TranslationOption(Moses::WordsRange(sourcePos, sourcePos)
+																, *chartRule);
+			//transOpt->CalcScore();
+			Add(transOpt, sourcePos);
+			cerr << *transOpt << endl;
+		}
 	}
-
-
 }
 
 void TranslationOptionCollection::Add(TranslationOption *transOpt, size_t pos)
