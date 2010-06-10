@@ -1,212 +1,230 @@
-lib_LIBRARIES = libmoses.a
+lib_LTLIBRARIES = libmoses.la
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES $(BOOST_CPPFLAGS)
 
-libmoses_adir = ${includedir}
+libmoses_ladir = ${includedir}
 
-libmoses_a_HEADERS = \
-	TypeDef.h \
-	PrefixTree.h \
-	File.h \
-	FilePtr.h \
-	ObjectPool.h \
-	BitmapContainer.h \
-	ConfusionNet.h \
-	DecodeGraph.h \
-	DecodeStep.h \
-	DecodeStepGeneration.h \
-	DecodeStepTranslation.h \
-	Dictionary.h \
-	DummyScoreProducers.h \
-	Factor.h \
-	FactorCollection.h \
-	FactorTypeSet.h \
-	FeatureFunction.h \
-	FFState.h \
-	FloydWarshall.h \
-	GenerationDictionary.h \
-	GlobalLexicalModel.h \
-	hash.h \
-	Hypothesis.h \
-	HypothesisStack.h \
-	HypothesisStackCubePruning.h \
-	HypothesisStackNormal.h \
-	InputType.h \
-	InputFileStream.h \
-	LMList.h \
-	LVoc.h \
-	LanguageModel.h \
-	LanguageModelFactory.h \
-	LanguageModelInternal.h \
-	LanguageModelMultiFactor.h \
-	LanguageModelRemote.h \
-	LanguageModelSingleFactor.h \
-	LanguageModelSkip.h \
-	TrellisPath.h \
-	TrellisPathList.h \
-	TrellisPathCollection.h \
-	LexicalReordering.h \
-	LexicalReorderingState.h \
-	LexicalReorderingTable.h \
-	Manager.h \
-	NGramCollection.h \
-	NGramNode.h \
-	PCNTools.h \
-	Parameter.h \
-	PartialTranslOptColl.h \
-	Phrase.h \
-	PhraseDictionary.h \
-	PhraseDictionaryMemory.h \
-	PhraseDictionaryNode.h \
-	PhraseDictionaryTree.h \
-	PhraseDictionaryTreeAdaptor.h \
-	PrefixTreeMap.h \
-	ReorderingConstraint.h \
-	ReorderingStack.h \
-	ScoreComponentCollection.h \
-	ScoreIndexManager.h \
-	ScoreProducer.h \
-	Search.h \
-	SearchCubePruning.h \
-	SearchNormal.h \
-	Sentence.h \
-	SentenceStats.h \
-	SquareMatrix.h \
-	StaticData.h \
-	TargetPhrase.h \
-	TargetPhraseCollection.h \
-	Timer.h \
-	TranslationOption.h \
-	TranslationOptionCollection.h \
-	TranslationOptionCollectionText.h \
-	TranslationOptionCollectionConfusionNet.h \
-	TranslationOptionList.h \
-	UserMessage.h \
-	Util.h \
-	Word.h \
-	WordsBitmap.h \
-	WordLattice.h \
-	WordsRange.h \
-	XmlOption.h 
+libmoses_la_HEADERS = \
+        AlignmentInfo.h \
+        BilingualDynSuffixArray.h \
+        BitmapContainer.h \
+        CellCollection.h \
+        ChartRule.h \
+        ChartRuleCollection.h \
+        ConfusionNet.h \
+        DecodeGraph.h \
+        DecodeStep.h \
+        DecodeStepGeneration.h \
+        DecodeStepTranslation.h \
+        Dictionary.h \
+        DotChart.h \
+        DotChartOnDisk.h \
+        DummyScoreProducers.h \
+	DynSAInclude/file.h \
+	DynSAInclude/vocab.h \
+        DynSuffixArray.h \
+        FFState.h \
+        Factor.h \
+        FactorCollection.h \
+        FactorTypeSet.h \
+        FeatureFunction.h \
+        File.h \
+        FilePtr.h \
+        FloydWarshall.h \
+        GenerationDictionary.h \
+        GlobalLexicalModel.h \
+        gzfilebuf.h \
+        hash.h \
+        Hypothesis.h \
+        HypothesisStack.h \
+        HypothesisStackCubePruning.h \
+        HypothesisStackNormal.h \
+        InputFileStream.h \
+        InputType.h \
+        LMList.h \
+        LVoc.h \
+        LanguageModel.h \
+        LanguageModelJoint.h \
+        LanguageModelFactory.h \
+        LanguageModelInternal.h \
+        LanguageModelMultiFactor.h \
+        LanguageModelRemote.h \
+        LanguageModelSingleFactor.h \
+        LanguageModelSkip.h \
+        LexicalReordering.h \
+        LexicalReorderingState.h \
+        LexicalReorderingTable.h \
+        Manager.h \
+        ObjectPool.h \
+        PCNTools.h \
+        PDTAimp.h \
+        Parameter.h \
+        PartialTranslOptColl.h \
+        Phrase.h \
+        PhraseDictionary.h \
+        PhraseDictionaryDynSuffixArray.h \
+        PhraseDictionaryMemory.h \
+        PhraseDictionaryNewFormat.h \
+        PhraseDictionaryNode.h \
+        PhraseDictionaryNodeNewFormat.h \
+        PhraseDictionaryOnDisk.h \
+        PhraseDictionaryTree.h \
+        PhraseDictionaryTreeAdaptor.h \
+        PrefixTree.h \
+        PrefixTreeMap.h \
+        ReorderingConstraint.h \
+        ReorderingStack.h \
+        ScoreComponentCollection.h \
+        ScoreIndexManager.h \
+        ScoreProducer.h \
+        Search.h \
+        SearchCubePruning.h \
+        SearchNormal.h \
+        Sentence.h \
+        SentenceStats.h \
+        SquareMatrix.h \
+        StaticData.h \
+        TargetPhrase.h \
+        TargetPhraseCollection.h \
+        Timer.h \
+        TranslationOption.h \
+        TranslationOptionCollection.h \
+        TranslationOptionCollectionConfusionNet.h \
+        TranslationOptionCollectionText.h \
+        TranslationOptionList.h \
+        TreeInput.h \
+        TrellisPath.h \
+        TrellisPathCollection.h \
+        TrellisPathList.h \
+        TypeDef.h \
+        UniqueObject.h \
+        UserMessage.h \
+        Util.h \
+        Word.h \
+        WordConsumed.h \
+        WordLattice.h \
+        WordsBitmap.h \
+        WordsRange.h \
+        XmlOption.h
 
 if PROTOBUF
-libmoses_a_HEADERS += rule.pb.h hypergraph.pb.h
+libmoses_la_HEADERS += rule.pb.h hypergraph.pb.h
 endif
 
 if SRI_LM
-libmoses_a_HEADERS += LanguageModelSRI.h \
-                      LanguageModelParallelBackoff.h
+libmoses_la_HEADERS += LanguageModelSRI.h \
+                      LanguageModelParallelBackoff.h 
 endif
 
 if IRST_LM
-libmoses_a_HEADERS += LanguageModelIRST.h
+libmoses_la_HEADERS += LanguageModelIRST.h
 endif
 
 if RAND_LM
-libmoses_a_HEADERS += LanguageModelRandLM.h
+libmoses_la_HEADERS += LanguageModelRandLM.h
 endif
 
 if INTERNAL_LM
-libmoses_a_HEADERS += LanguageModelInternal.h \
+libmoses_la_HEADERS += LanguageModelInternal.h \
 		      NGramCollection.h \
 		      NGramNode.h
 endif
 
-libmoses_a_SOURCES = \
-	AlignmentInfo.cpp \
-	BitmapContainer.cpp \
-	TreeInput.cpp \
-	ChartRule.cpp \
-	ChartRuleCollection.cpp \
-	ConfusionNet.cpp \
-	DecodeGraph.cpp \
-	DecodeStep.cpp \
-	DecodeStepGeneration.cpp \
-	DecodeStepTranslation.cpp \
-	Dictionary.cpp \
-	DotChart.cpp \
-	DotChartOnDisk.cpp \
-	DummyScoreProducers.cpp \
+libmoses_la_SOURCES = \
+        AlignmentInfo.cpp \
+        BilingualDynSuffixArray.cpp \
+        BitmapContainer.cpp \
+        ChartRule.cpp \
+        ChartRuleCollection.cpp \
+        ConfusionNet.cpp \
+        DecodeGraph.cpp \
+        DecodeStep.cpp \
+        DecodeStepGeneration.cpp \
+        DecodeStepTranslation.cpp \
+        Dictionary.cpp \
+        DotChart.cpp \
+        DotChartOnDisk.cpp \
+        DummyScoreProducers.cpp \
 	DynSAInclude/file.cpp \
 	DynSAInclude/vocab.cpp \
-	DynSuffixArray.cpp \
-	BilingualDynSuffixArray.cpp \
-	Factor.cpp \
-	FactorCollection.cpp \
-	FactorTypeSet.cpp \
-	FeatureFunction.cpp \
-	FFState.cpp \
-	FloydWarshall.cpp \
-	GenerationDictionary.cpp \
-	GlobalLexicalModel.cpp \
-	hash.cpp \
-	Hypothesis.cpp \
-	HypothesisStack.cpp \
-	HypothesisStackCubePruning.cpp \
-	HypothesisStackNormal.cpp \
-	InputType.cpp \
-	InputFileStream.cpp \
-	LMList.cpp \
-	LVoc.cpp \
-	LanguageModel.cpp \
-	LanguageModelFactory.cpp \
-	LanguageModelInternal.cpp \
-	LanguageModelMultiFactor.cpp \
-	LanguageModelRemote.cpp \
-	LanguageModelSingleFactor.cpp \
-	LanguageModelSkip.cpp \
-	TrellisPath.cpp \
-	TrellisPathCollection.cpp \
-	LexicalReordering.cpp \
-	LexicalReorderingState.cpp \
-	LexicalReorderingTable.cpp \
-	Manager.cpp \
-	NGramCollection.cpp \
-	NGramNode.cpp \
-	PCNTools.cpp \
-	Parameter.cpp \
-	PartialTranslOptColl.cpp \
-	Phrase.cpp \
-	PhraseDictionary.cpp \
-	PhraseDictionaryMemory.cpp \
-	PhraseDictionaryNewFormat.cpp \
-	PhraseDictionaryNewFormatChart.cpp \
-	PhraseDictionaryNode.cpp \
-	PhraseDictionaryNodeNewFormat.cpp \
-	PhraseDictionaryOnDisk.cpp \
-	PhraseDictionaryOnDiskChart.cpp \
-	PhraseDictionaryTree.cpp \
-	PhraseDictionaryTreeAdaptor.cpp \
-	PhraseDictionaryDynSuffixArray.cpp \
-	PrefixTreeMap.cpp \
-	ReorderingConstraint.cpp \
-	ReorderingStack.cpp \
-	ScoreComponentCollection.cpp \
-	ScoreIndexManager.cpp \
-	ScoreProducer.cpp \
-	Search.cpp \
-	SearchCubePruning.cpp \
-	SearchNormal.cpp \
-	Sentence.cpp \
-	SentenceStats.cpp \
-	SquareMatrix.cpp \
-	StaticData.cpp \
-	TargetPhrase.cpp \
-	TargetPhraseCollection.cpp \
-	Timer.cpp \
-	TranslationOption.cpp \
-	TranslationOptionCollection.cpp \
-	TranslationOptionCollectionText.cpp \
-	TranslationOptionCollectionConfusionNet.cpp \
-	TranslationOptionList.cpp \
-	TreeInput.cpp \
-	UserMessage.cpp \
-	Util.cpp \
-	WordConsumed.cpp \
-	Word.cpp \
-	WordsBitmap.cpp \
-	WordLattice.cpp \
-	WordsRange.cpp \
-	XmlOption.cpp 
+        DynSuffixArray.cpp \
+        FFState.cpp \
+        Factor.cpp \
+        FactorCollection.cpp \
+        FactorTypeSet.cpp \
+        FeatureFunction.cpp \
+        FloydWarshall.cpp \
+        GenerationDictionary.cpp \
+        GlobalLexicalModel.cpp \
+        hash.cpp \
+        Hypothesis.cpp \
+        HypothesisStack.cpp \
+        HypothesisStackCubePruning.cpp \
+        HypothesisStackNormal.cpp \
+        InputFileStream.cpp \
+        InputType.cpp \
+        LMList.cpp \
+        LVoc.cpp \
+        LanguageModel.cpp \
+        LanguageModelFactory.cpp \
+        LanguageModelInternal.cpp \
+        LanguageModelJoint.cpp \
+        LanguageModelMultiFactor.cpp \
+        LanguageModelRemote.cpp \
+        LanguageModelSingleFactor.cpp \
+        LanguageModelSkip.cpp \
+        LexicalReordering.cpp \
+        LexicalReorderingState.cpp \
+        LexicalReorderingTable.cpp \
+        Manager.cpp \
+        NGramCollection.cpp \
+        NGramNode.cpp \
+        PCNTools.cpp \
+        Parameter.cpp \
+        PartialTranslOptColl.cpp \
+        Phrase.cpp \
+        PhraseDictionary.cpp \
+        PhraseDictionaryDynSuffixArray.cpp \
+        PhraseDictionaryMemory.cpp \
+        PhraseDictionaryNewFormat.cpp \
+        PhraseDictionaryNewFormatChart.cpp \
+        PhraseDictionaryNode.cpp \
+        PhraseDictionaryNodeNewFormat.cpp \
+        PhraseDictionaryOnDisk.cpp \
+        PhraseDictionaryOnDiskChart.cpp \
+        PhraseDictionaryTree.cpp \
+        PhraseDictionaryTreeAdaptor.cpp \
+        PrefixTreeMap.cpp \
+        ReorderingConstraint.cpp \
+        ReorderingStack.cpp \
+        ScoreComponentCollection.cpp \
+        ScoreIndexManager.cpp \
+        ScoreProducer.cpp \
+        Search.cpp \
+        SearchCubePruning.cpp \
+        SearchNormal.cpp \
+        Sentence.cpp \
+        SentenceStats.cpp \
+        SquareMatrix.cpp \
+        StaticData.cpp \
+        TargetPhrase.cpp \
+        TargetPhraseCollection.cpp \
+        Timer.cpp \
+        TranslationOption.cpp \
+        TranslationOptionCollection.cpp \
+        TranslationOptionCollectionConfusionNet.cpp \
+        TranslationOptionCollectionText.cpp \
+        TranslationOptionList.cpp \
+        TreeInput.cpp \
+        TrellisPath.cpp \
+        TrellisPathCollection.cpp \
+        UserMessage.cpp \
+        Util.cpp \
+        Word.cpp \
+        WordConsumed.cpp \
+        WordLattice.cpp \
+        WordsBitmap.cpp \
+        WordsRange.cpp \
+        XmlOption.cpp
 	
 if PROTOBUF
 BUILT_SOURCES = \
@@ -228,27 +246,28 @@ hypergraph.pb.cc: hypergraph.proto
 hypergraph.pb.h: hypergraph.proto
 	@PROTOC@ --cpp_out=. $<			
 
-libmoses_a_SOURCES += rule.pb.cc hypergraph.pb.cc
+libmoses_la_SOURCES += rule.pb.cc hypergraph.pb.cc
 
 endif
 
 if SRI_LM
-libmoses_a_SOURCES += LanguageModelSRI.cpp \
-                      LanguageModelParallelBackoff.cpp
+libmoses_la_SOURCES += LanguageModelSRI.cpp \
+                      LanguageModelParallelBackoff.cpp 
+
 endif
 
 if IRST_LM
-libmoses_a_SOURCES += LanguageModelIRST.cpp
+libmoses_la_SOURCES += LanguageModelIRST.cpp
 endif
 
 if RAND_LM
-libmoses_a_SOURCES += LanguageModelRandLM.cpp
+libmoses_la_SOURCES += LanguageModelRandLM.cpp
 endif
 
 if INTERNAL_LM
-libmoses_a_SOURCES += LanguageModelInternal.cpp \
+libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
 endif
 
-libmoses_a_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
+libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
