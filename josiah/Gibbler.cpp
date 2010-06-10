@@ -219,7 +219,7 @@ void Sample::FlipNodes(const TranslationOption& leftTgtOption, const Translation
   UpdateHead(oldLeftHypo, newRightHypo, source_head);
   UpdateHead(oldRightHypo, newRightHypo, target_head);
   UpdateHead(oldLeftHypo, newRightHypo, target_head);
-  
+ 
   UpdateFeatureValues(deltaFV);
   UpdateTargetWords();
   
@@ -380,8 +380,16 @@ void Sample::UpdateFeatureValues(const FVector& deltaFV) {
 }
 
 void Sample::CheckFeatureConsistency() const {
+  FVector expected;
   for (size_t i = 0; i < _extra_features.size(); ++i) {
-    assert(_extra_features[i]->isConsistent(feature_values));
+    _extra_features[i]->assignScore(expected);
+  }
+  if (expected != feature_values) {
+    VERBOSE(1, "Expected: " << expected << endl);
+    VERBOSE(1, "Actual: " << feature_values << endl);
+    ostringstream msg;
+    msg << "Score mismatch: e-a = " << (expected-feature_values);
+    throw runtime_error(msg.str());
   }
 }
 

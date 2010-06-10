@@ -69,7 +69,7 @@ struct TargetGap {
    *  2. When a new Sample() object is created to begin sampling on a new sentence:
    *     - init() - with the new sample
    *     - updateTarget() - to indicate to the FeatureFunction that the target words have changed
-   *     - assignScore() -  to tell the FeatureFunction to calculate its initial score
+   *     - assignScore() -  to tell the FeatureFunction to set its initial score.
    *  3. When scoring possible transitions.
    *     -  doXXX() - to calculate the score deltas.
    *  4. When performing a transition.
@@ -99,9 +99,6 @@ class FeatureFunction {
     virtual void doFlipUpdate(const TranslationOption* leftOption,const TranslationOption* rightOption, 
                                      const TargetGap& leftGap, const TargetGap& rightGap, FVector& scores) = 0;
     
-    /** Checks the internal consistency of the FeatureFunction by computing the scores from scratch and comparing with the 
-     given scores. */
-    bool isConsistent(const FVector& featureValues);
     
     virtual ~FeatureFunction() = 0;
     

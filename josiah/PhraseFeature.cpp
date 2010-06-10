@@ -48,6 +48,9 @@ namespace Josiah {
   
     /** Assign the total score of this feature on the current hypo */
     void PhraseFeature::assignScore(FVector& scores) {
+      for (size_t i = 0; i < m_featureNames.size(); ++i) {
+        scores[m_featureNames[i]] = 0;
+      }
       const Hypothesis* currHypo = m_sample->GetTargetTail();
       while ((currHypo = (currHypo->GetNextHypo()))) {
         assign(&(currHypo->GetTranslationOption()), scores);

@@ -68,6 +68,11 @@ class FVector
     /** Empty feature vector, possibly with default value */
     FVector(FValue defaultValue = DEFAULT);
     
+    //defaults
+    static FName DEFAULT_NAME;
+    static const FValue DEFAULT;
+    
+    
     void clear();
     
     
@@ -84,6 +89,10 @@ class FVector
     
     /** Size */
     size_t size() const {return m_features.size();}
+    
+    /** Equality */
+    bool operator== (const FVector& rhs) const;
+    bool operator!= (const FVector& rhs) const;
     
     
     
@@ -132,8 +141,7 @@ class FVector
 
 
     
-    static FName DEFAULT_NAME;
-    static const FValue DEFAULT;
+    
 
     
     std::map<FName,FValue,FNameComparator> m_features;

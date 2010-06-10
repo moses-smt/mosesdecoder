@@ -29,39 +29,6 @@ FeatureFunction::~FeatureFunction(){} // n.b. is pure virtual, must be empty
 
 
 
-bool FeatureFunction::isConsistent(const FVector& featureValues){
-  /*FVector expectedFeatureValues;
-  assignScore(expectedFeatureValues);
-  vector<float> expectedVector = expectedFeatureValues.GetScoresForProducer(&getScoreProducer());
-  vector<float> actualVector = featureValues.GetScoresForProducer(&getScoreProducer());
-  VERBOSE(2, "Checking Feature " << getScoreProducer().GetScoreProducerDescription() << endl);
-  IFVERBOSE(2) {
-    VERBOSE(2, "Expected: ");
-    for (size_t i = 0; i < expectedVector.size(); ++i) {
-      VERBOSE(2, expectedVector[i] << ",");
-    }
-    VERBOSE(2,endl);
-    VERBOSE(2, "Actual: ");
-    for (size_t i = 0; i < actualVector.size(); ++i) {
-      VERBOSE(2, actualVector[i] << ",");
-    }
-    VERBOSE(2,endl);
-  }
-  
-  if (expectedVector.size() != actualVector.size())  {
-    VERBOSE(1, "FF Mismatch: Feature vectors were of different size: "<< getScoreProducer().GetScoreProducerDescription() << endl);
-    return false;
-  }
-  for (size_t i = 0; i < expectedVector.size(); ++i) {
-    if (expectedVector[i] != actualVector[i]) {
-      VERBOSE(1, "FF Mismatch: Expected[" << i << "] = " << expectedVector[i] << " Actual[" << i << "] = " << actualVector[i] << 
-        " " << getScoreProducer().GetScoreProducerDescription() << endl);
-      return false;
-    }
-  }*/
-  throw runtime_error("isConsistent() not yet implemented");
-  return true;
-}
 
  
 }//namespace

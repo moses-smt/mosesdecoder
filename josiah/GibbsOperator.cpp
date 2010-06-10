@@ -57,6 +57,7 @@ static float ComputeDistortionDistance(const WordsRange& prev, const WordsRange&
   } else {
     dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
   }
+  //cerr << "Computing dist " << prev << " " << current << " " << -abs(dist) << endl;
   return - (float) abs(dist);
 }
 

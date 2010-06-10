@@ -21,18 +21,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DistortionPenaltyFeature.h"
 #include "DummyScoreProducers.h"
 
+#include "Derivation.h"
 #include "Gibbler.h"
 #include "GibbsOperator.h"
+
 
 namespace Josiah {
 
 FValue DistortionPenaltyFeature::computeScore() {
-  //FIXME: To be useful for consistency checking, this needs to be computed
-  //from scratch each time.
-  const Hypothesis* sampleHypo = m_sample->GetSampleHypothesis();
-  const ScoreComponentCollection& mosesScores = sampleHypo->GetScoreBreakdown();
-  const ScoreProducer* distortionProducer = StaticData::Instance().GetDistortionScoreProducer();
-  return mosesScores.GetScoreForProducer(distortionProducer);
+  FValue distortion = 0;
+  //cerr << Derivation(*m_sample) << endl;
+  const Hypothesis* currHypo = m_sample->GetTargetTail(); //target tail
+  
+  //step through in target order
+  int lastSrcEnd = -1;
+  while ((currHypo = (currHypo->GetNextHypo()))) {
+    int srcStart = currHypo->GetCurrSourceWordsRange().GetStartPos();
+    distortion -= abs(srcStart - (lastSrcEnd+1));
+    lastSrcEnd = currHypo->GetCurrSourceWordsRange().GetEndPos();
+  }
+  //cerr << "distortion " << distortion << endl;
+  return distortion;
 }
 
 
@@ -40,9 +49,22 @@ FValue DistortionPenaltyFeature::getFlipUpdateScore(const TranslationOption* lef
                                   const TargetGap& leftGap, const TargetGap& rightGap) 
 {
   FValue distortion;
+  const Hypothesis* leftTgtNextHypo = leftGap.rightHypo;
+  const Hypothesis* rightTgtPrevHypo = rightGap.leftHypo;
+  //if the segments are contiguous and we're swapping, then these hypos have to be swapped so 
+  //that they're in the order they'd appear in in the proposed target
+  if (leftGap.segment.GetEndPos()+1 == rightGap.segment.GetStartPos()) {
+    if (leftTgtNextHypo->GetCurrSourceWordsRange() != rightOption->GetSourceWordsRange()) {
+      const Hypothesis* tmp = leftTgtNextHypo;
+      leftTgtNextHypo = rightTgtPrevHypo;
+      rightTgtPrevHypo = tmp;
+    }
+  }
   CheckValidReordering(leftOption->GetSourceWordsRange(), rightOption->GetSourceWordsRange(), 
-                       leftGap.leftHypo, leftGap.rightHypo, 
-                       rightGap.leftHypo, rightGap.rightHypo, distortion);
+                       leftGap.leftHypo, leftTgtNextHypo, 
+                       rightTgtPrevHypo, rightGap.rightHypo, distortion);
+  //cerr << leftOption->GetSourceWordsRange() << " " << rightOption->GetSourceWordsRange() << " " << distortion << endl;
+  //cerr << "lg.rh" << leftTgtNextHypo->GetCurrSourceWordsRange() << " rg.lh" << rightTgtPrevHypo->GetCurrSourceWordsRange() << endl;
   return distortion;
   
 }

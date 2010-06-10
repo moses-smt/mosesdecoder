@@ -105,9 +105,40 @@ namespace Josiah {
       out << i->first << " " << i->second << endl;
     }
   }
+  
+  FName FVector::DEFAULT_NAME("DEFAULT","");
+  const FValue FVector::DEFAULT = 0;
+  
+  
+  static bool equalsTolerance(FValue lhs, FValue rhs) {
+    if (lhs == rhs) return true;
+    static const FValue TOLERANCE = 1e-4;
+    FValue diff = abs(lhs-rhs);
+    FValue mean = (abs(lhs)+abs(rhs))/2;
+    //cerr << "ET " << lhs << " " << rhs << " " << diff << " " << mean << " " << endl;
+    return diff/mean < TOLERANCE ;
+  }
+  
+  bool FVector::operator== (const FVector& rhs) const {
+    if (this == &rhs) {
+      return true;
+    }
+    if (get(DEFAULT_NAME) != rhs.get(DEFAULT_NAME)) return false;
+    for (const_iterator i  = begin(); i != end(); ++i) {
+      if (!equalsTolerance(i->second,rhs.get(i->first))) return false;
+    }
+    for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+      if (!equalsTolerance(i->second, get(i->first))) return false;
+    }
+    return true;
+  }
+  
+  
+  bool FVector::operator!= (const FVector& rhs) const {
+    return ! (*this == rhs);
+  }
    
-   FName FVector::DEFAULT_NAME("DEFAULT","");
-   const FValue FVector::DEFAULT = 0;
+
    
    ProxyFVector FVector::operator[](const FName& name) {
       // At this point, we don't know whether operator[] was called, so we return
@@ -318,7 +349,7 @@ namespace Josiah {
     FValue product = 0.0;
     for (const_iterator i = begin(); i != end(); ++i) {
       if (i->first != DEFAULT_NAME) {
-        product += (i->second + lhsDefault)*(rhs.get(i->first) + rhsDefault);
+        product += ((i->second + lhsDefault)*(rhs.get(i->first) + rhsDefault));
       }
     }
     
