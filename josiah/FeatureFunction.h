@@ -112,8 +112,8 @@ class FeatureFunction {
   **/
 class SingleValuedFeatureFunction: public FeatureFunction {
   public:
-    SingleValuedFeatureFunction(const std::string& rootName) :
-      m_name(rootName,"") {}
+    SingleValuedFeatureFunction(const std::string& name) :
+      m_name(name) {}
     virtual void assignScore(FVector& scores)
       {scores[m_name] = computeScore();}
     virtual void doSingleUpdate(const TranslationOption* option, const TargetGap& gap, FVector& scores)

@@ -38,7 +38,7 @@ namespace Josiah {
       //pre-calculate the feature names
       const string& root = m_phraseDictionary->GetScoreProducerDescription();
       size_t featureCount = m_phraseDictionary->GetNumScoreComponents();
-      for (size_t i = 0; i < featureCount; ++i) {
+      for (size_t i = 1; i <= featureCount; ++i) {
         ostringstream namestream;
         namestream << i;
         m_featureNames.push_back(FName(root,namestream.str()));
