@@ -1,3 +1,6 @@
+#ifndef moses_TreeInput_h
+#define moses_TreeInput_h
+
 
 #pragma once
 
@@ -60,3 +63,4 @@ public:
 
 }
 
+#endif
