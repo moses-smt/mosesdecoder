@@ -2,8 +2,6 @@
 #define moses_TreeInput_h
 
 
-#pragma once
-
 #include <vector>
 #include "Sentence.h"
 
