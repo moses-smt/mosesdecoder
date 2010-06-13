@@ -46,6 +46,7 @@ libmoses_la_HEADERS = \
         LanguageModelJoint.h \
         LanguageModelFactory.h \
         LanguageModelInternal.h \
+        LanguageModelInterpolated.h \
         LanguageModelMultiFactor.h \
         LanguageModelRemote.h \
         LanguageModelSingleFactor.h \
@@ -167,6 +168,7 @@ libmoses_la_SOURCES = \
         LanguageModel.cpp \
         LanguageModelFactory.cpp \
         LanguageModelInternal.cpp \
+        LanguageModelInterpolated.cpp \
         LanguageModelJoint.cpp \
         LanguageModelMultiFactor.cpp \
         LanguageModelRemote.cpp \

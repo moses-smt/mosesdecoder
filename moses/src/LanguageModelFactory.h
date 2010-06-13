@@ -25,7 +25,8 @@ namespace LanguageModelFactory {
 																		, const std::string &languageModelFile
 																		, float weight
 																		, ScoreIndexManager &scoreIndexManager
-																		, int dub);
+																		, int dub
+																		, bool registerLM = true);
 	 
 };
 

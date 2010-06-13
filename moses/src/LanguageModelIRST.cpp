@@ -207,11 +207,8 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	  m_lmtb_ng->pushc(lmId);
 	}
   
-	if (finalState){        
-		*finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);	
-		// back off stats not currently available
-		*len = 0;	
-	}
+	if (finalState)
+		*finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng, len);	
 
 	float prob = m_lmtb->clprob(*m_lmtb_ng);
   

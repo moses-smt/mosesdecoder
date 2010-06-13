@@ -152,7 +152,7 @@ enum LMImplementation
 	,RandLM 	= 5
 	,Remote 	= 6
 	,ParallelBackoff	= 7
-
+	,Interpolated	= 8
 };
 
 enum PhraseTableImplementation
