@@ -175,7 +175,7 @@ const FFState* LanguageModel::EmptyHypothesisState(const InputType &/*input*/) c
 	return new LMState(NULL);
 }
 
-FFState* LanguageModel::Evaluate(
+const FFState* LanguageModel::Evaluate(
     const Hypothesis& hypo,
     const FFState* ps,
     ScoreComponentCollection* out) const {

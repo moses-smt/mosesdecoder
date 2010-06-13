@@ -86,7 +86,7 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
 
 size_t DistortionScoreProducer::GetNumInputScores() const { return 0;}
 
-FFState* DistortionScoreProducer::Evaluate(
+const FFState* DistortionScoreProducer::Evaluate(
     const Hypothesis& hypo,
     const FFState* prev_state,
     ScoreComponentCollection* out) const {

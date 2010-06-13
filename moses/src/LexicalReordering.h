@@ -35,7 +35,7 @@ public:
         return m_configuration.GetNumScoreComponents(); 
     }
     
-    virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+    virtual const FFState* Evaluate(const Hypothesis& cur_hypo,
                               const FFState* prev_state,
                               ScoreComponentCollection* accumulator) const;
     

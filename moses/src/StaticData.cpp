@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelFactory.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
+#include "WordDependencyModel.h"
 #include "SentenceStats.h"
 #include "PhraseDictionary.h"
 #include "UserMessage.h"
@@ -439,7 +440,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadGlobalLexicalModel()) return false;
-
+	if (!LoadWordDependencyModel()) return false;
+	
 	m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
     UserMessage::Add("ERROR: weight-file option is broken\n");
@@ -732,6 +734,38 @@ bool StaticData::LoadGenerationTables()
 		if (currWeightNum != weight.size()) {
 			TRACE_ERR( "  [WARNING] config file has " << weight.size() << " generation weights listed, but the configuration for generation files indicates there should be " << currWeightNum << "!\n");
 		}
+	}
+	
+	return true;
+}
+
+bool StaticData::LoadWordDependencyModel()
+{
+	const size_t dub = 10000000;
+	const vector<string> &models = m_parameter->GetParam("word-dependency-model");
+	const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-wd"));
+	vector<float>::const_iterator weight_it = weights.begin();
+		
+	for(size_t currModel = 0; currModel < models.size(); currModel++)
+	{
+		vector<string> token = Tokenize(models[currModel]);
+		FactorType linkFactor = Scan<FactorType>(token[0]);
+		vector<FactorType> e_factors = Tokenize<FactorType>(token[1], ",");
+		LMImplementation lmtype = static_cast<LMImplementation>(Scan<int>(token[2]));
+		std::string filePath = token[3];
+		
+		assert(weight_it != weights.end());
+		vector<float> currWeights(weight_it, weight_it + 1);
+		++weight_it;
+		
+		LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmtype, e_factors, 2, filePath,
+																		currWeights[0], m_scoreIndexManager, dub, false);
+		if(!lm) return false;
+		
+		WordDependencyModel *wdm = new WordDependencyModel(linkFactor, e_factors, lm);
+		m_allWeights.insert(m_allWeights.end(), currWeights.begin(), currWeights.end());
+		m_scoreIndexManager.AddScoreProducer(wdm);
+		SetWeightsForScoreProducer(wdm, currWeights);
 	}
 	
 	return true;

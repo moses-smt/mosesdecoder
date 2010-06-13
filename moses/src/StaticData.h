@@ -220,6 +220,7 @@ protected:
 	//! load decoding steps
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
+	bool LoadWordDependencyModel();
     void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
 	

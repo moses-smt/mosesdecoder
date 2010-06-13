@@ -215,6 +215,8 @@
 		1ED4FE0711BDC0D2004E826A /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FD3411BDC0D2004E826A /* WordsRange.h */; };
 		1ED4FE0811BDC0D2004E826A /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FD3511BDC0D2004E826A /* XmlOption.cpp */; };
 		1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FD3611BDC0D2004E826A /* XmlOption.h */; };
+		E2D931BD11C41A160082A090 /* WordDependencyModel.h in Headers */ = {isa = PBXBuildFile; fileRef = E2D931BC11C41A160082A090 /* WordDependencyModel.h */; };
+		E2D931C311C41AF00082A090 /* WordDependencyModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2D931C211C41AF00082A090 /* WordDependencyModel.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -429,6 +431,8 @@
 		1ED4FD3511BDC0D2004E826A /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = src/XmlOption.cpp; sourceTree = "<group>"; };
 		1ED4FD3611BDC0D2004E826A /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2D931BC11C41A160082A090 /* WordDependencyModel.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = WordDependencyModel.h; path = src/WordDependencyModel.h; sourceTree = "<group>"; };
+		E2D931C211C41AF00082A090 /* WordDependencyModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordDependencyModel.cpp; path = src/WordDependencyModel.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -651,6 +655,8 @@
 				1ED4FD2C11BDC0D2004E826A /* Word.h */,
 				1ED4FD2D11BDC0D2004E826A /* WordConsumed.cpp */,
 				1ED4FD2E11BDC0D2004E826A /* WordConsumed.h */,
+				E2D931C211C41AF00082A090 /* WordDependencyModel.cpp */,
+				E2D931BC11C41A160082A090 /* WordDependencyModel.h */,
 				1ED4FD2F11BDC0D2004E826A /* WordLattice.cpp */,
 				1ED4FD3011BDC0D2004E826A /* WordLattice.h */,
 				1ED4FD3111BDC0D2004E826A /* WordsBitmap.cpp */,
@@ -809,6 +815,7 @@
 				1ED4FE0511BDC0D2004E826A /* WordsBitmap.h in Headers */,
 				1ED4FE0711BDC0D2004E826A /* WordsRange.h in Headers */,
 				1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */,
+				E2D931BD11C41A160082A090 /* WordDependencyModel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -953,6 +960,7 @@
 				1ED4FE0411BDC0D2004E826A /* WordsBitmap.cpp in Sources */,
 				1ED4FE0611BDC0D2004E826A /* WordsRange.cpp in Sources */,
 				1ED4FE0811BDC0D2004E826A /* XmlOption.cpp in Sources */,
+				E2D931C311C41AF00082A090 /* WordDependencyModel.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
