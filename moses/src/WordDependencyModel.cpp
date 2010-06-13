@@ -101,7 +101,7 @@ const Scores WordDependencyState::ProcessAntecedent(size_t linkNo, const std::st
 	
 	LinkMap::iterator it = m_openLinks.find(linkNo);
 	if(it == m_openLinks.end())
-		m_openLinks[linkNo] = std::make_pair(word, "");
+		m_openLinks[linkNo] = std::pair<const std::string,const std::string>(word, "");
 	else
 	{
 		assert(it->second.first == "" && it->second.second != "");
@@ -136,6 +136,8 @@ int WordDependencyState::Compare(const FFState &other) const
 	if(&o == this)
 		return 0;
 
+	assert(m_model == o.m_model);
+	
 	if(m_openLinks.size() < o.m_openLinks.size())
 		return -1;
 	else if(m_openLinks.size() > o.m_openLinks.size())
