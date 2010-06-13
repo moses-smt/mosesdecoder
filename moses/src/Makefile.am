@@ -102,6 +102,7 @@ libmoses_la_HEADERS = \
         Util.h \
         Word.h \
         WordConsumed.h \
+        WordDependencyModel.h \
         WordLattice.h \
         WordsBitmap.h \
         WordsRange.h \
@@ -223,6 +224,7 @@ libmoses_la_SOURCES = \
         Util.cpp \
         Word.cpp \
         WordConsumed.cpp \
+        WordDependencyModel.cpp \
         WordLattice.cpp \
         WordsBitmap.cpp \
         WordsRange.cpp \
