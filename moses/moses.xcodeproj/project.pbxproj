@@ -217,6 +217,8 @@
 		1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FD3611BDC0D2004E826A /* XmlOption.h */; };
 		E2D931BD11C41A160082A090 /* WordDependencyModel.h in Headers */ = {isa = PBXBuildFile; fileRef = E2D931BC11C41A160082A090 /* WordDependencyModel.h */; };
 		E2D931C311C41AF00082A090 /* WordDependencyModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2D931C211C41AF00082A090 /* WordDependencyModel.cpp */; };
+		E2D932AE11C5861E0082A090 /* LanguageModelInterpolated.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E2D932AC11C5861E0082A090 /* LanguageModelInterpolated.cpp */; };
+		E2D932AF11C5861E0082A090 /* LanguageModelInterpolated.h in Headers */ = {isa = PBXBuildFile; fileRef = E2D932AD11C5861E0082A090 /* LanguageModelInterpolated.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -433,6 +435,8 @@
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2D931BC11C41A160082A090 /* WordDependencyModel.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = WordDependencyModel.h; path = src/WordDependencyModel.h; sourceTree = "<group>"; };
 		E2D931C211C41AF00082A090 /* WordDependencyModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordDependencyModel.cpp; path = src/WordDependencyModel.cpp; sourceTree = "<group>"; };
+		E2D932AC11C5861E0082A090 /* LanguageModelInterpolated.cpp */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelInterpolated.cpp; path = src/LanguageModelInterpolated.cpp; sourceTree = "<group>"; };
+		E2D932AD11C5861E0082A090 /* LanguageModelInterpolated.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = LanguageModelInterpolated.h; path = src/LanguageModelInterpolated.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -459,6 +463,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				E2D932AC11C5861E0082A090 /* LanguageModelInterpolated.cpp */,
+				E2D932AD11C5861E0082A090 /* LanguageModelInterpolated.h */,
 				1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */,
 				1ED4FC6011BDC0D2004E826A /* AlignmentInfo.h */,
 				1ED4FC6111BDC0D2004E826A /* BilingualDynSuffixArray.cpp */,
@@ -816,6 +822,7 @@
 				1ED4FE0711BDC0D2004E826A /* WordsRange.h in Headers */,
 				1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */,
 				E2D931BD11C41A160082A090 /* WordDependencyModel.h in Headers */,
+				E2D932AF11C5861E0082A090 /* LanguageModelInterpolated.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -961,6 +968,7 @@
 				1ED4FE0611BDC0D2004E826A /* WordsRange.cpp in Sources */,
 				1ED4FE0811BDC0D2004E826A /* XmlOption.cpp in Sources */,
 				E2D931C311C41AF00082A090 /* WordDependencyModel.cpp in Sources */,
+				E2D932AE11C5861E0082A090 /* LanguageModelInterpolated.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

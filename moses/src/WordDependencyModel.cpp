@@ -18,7 +18,7 @@ namespace Moses
 class WordDependencyState : public FFState
 {
 private:
-	typedef std::map<size_t, std::pair<const std::string,const std::string> > LinkMap;
+	typedef std::map<size_t, std::pair<std::string,std::string> > LinkMap;
 	
 	LinkMap m_openLinks;
 	const WordDependencyModel *m_model;
@@ -101,7 +101,7 @@ const Scores WordDependencyState::ProcessAntecedent(size_t linkNo, const std::st
 	
 	LinkMap::iterator it = m_openLinks.find(linkNo);
 	if(it == m_openLinks.end())
-		m_openLinks[linkNo] = std::pair<const std::string,const std::string>(word, "");
+		m_openLinks[linkNo] = std::make_pair(word, "");
 	else
 	{
 		assert(it->second.first == "" && it->second.second != "");
