@@ -3,6 +3,8 @@
 #include "Util.h"
 #include "TranslationOption.h"
 
+using namespace std;
+
 namespace Moses
 {
 
@@ -22,5 +24,18 @@ TranslationOptionList::~TranslationOptionList()
 	RemoveAllInColl(m_coll);
 }
 
+TO_STRING_BODY(TranslationOptionList);
+
+std::ostream& operator<<(std::ostream& out, const TranslationOptionList& coll)
+{
+	TranslationOptionList::const_iterator iter;
+	for (iter = coll.begin(); iter != coll.end(); ++iter)
+	{
+		const TranslationOption &transOpt = **iter;
+		out << transOpt << endl;
+	}
+	
+	return out;
 }
 
+} // namespace
