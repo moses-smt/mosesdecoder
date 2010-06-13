@@ -109,7 +109,7 @@ namespace LanguageModelFactory
 				break;
 			case ParallelBackoff:
 				#ifdef LM_SRI
-					lm = new LanguageModelParallelBackoff(true, scoreIndexManager);
+					lm = new LanguageModelParallelBackoff(registerLM, scoreIndexManager);
 				#endif
 					break;
 	  	case Internal:
