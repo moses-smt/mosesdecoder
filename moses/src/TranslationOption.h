@@ -86,7 +86,7 @@ public:
 	TranslationOption(const WordsRange &wordsRange
 									, const TargetPhrase &targetPhrase
 									, const InputType &inputType
-									, int);
+									, const UnknownWordPenaltyProducer* uwpProducer);
 	/** copy constructor */
 	TranslationOption(const TranslationOption &copy);
 

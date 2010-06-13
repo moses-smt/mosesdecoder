@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStackCubePruning.h"
 #include "DummyScoreProducers.h"
 #include "TranslationOptionList.h"
+#include "TranslationSystem.h"
 
 namespace Moses
 {
@@ -57,17 +58,18 @@ class HypothesisScoreOrdererNoDistortion
 class HypothesisScoreOrdererWithDistortion
 {
 	public:
-        HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
-            m_transOptRange(transOptRange) {}
+        HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange, const TranslationSystem* system) :
+            m_transOptRange(transOptRange), m_system(system) {}
 
-		const WordsRange* m_transOptRange; 
+		const WordsRange* m_transOptRange;
+    const TranslationSystem* m_system;
 
 		bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 		{
 			assert (m_transOptRange != NULL);
 
-			const float weightDistortion = StaticData::Instance().GetWeightDistortion();
-			const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionScoreProducer();
+			const float weightDistortion = m_system->GetWeightDistortion();
+			const DistortionScoreProducer *dsp = m_system->GetDistortionProducer();
 			const float distortionScoreA = dsp->CalculateDistortionScore(
                     *hypoA,
 										hypoA->GetCurrSourceWordsRange(),
@@ -108,7 +110,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 							 , BitmapContainer &parent
 							 , const TranslationOptionList &translations
 							 , const SquareMatrix &futureScore,
-                                const InputType& itype)
+                 const InputType& itype,
+                 const TranslationSystem* system)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
@@ -172,7 +175,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		assert(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
 	}	
 
-	HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
+	HypothesisScoreOrdererWithDistortion orderer (&transOptRange, system);
 	std::sort(m_hypotheses.begin(), m_hypotheses.end(), orderer);
 
 	// std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());

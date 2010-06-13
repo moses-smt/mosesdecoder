@@ -345,11 +345,11 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){
 			// translation components	for text input
-			vector<const PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					*m_nBestStream << "tm: ";
-				vector<const PhraseDictionaryFeature*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j)
@@ -361,9 +361,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<const PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
-				vector<const PhraseDictionaryFeature*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 
 				iter = pds.begin();
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
@@ -401,11 +401,11 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
 
 		// generation
-		const vector<const GenerationDictionary*> gds = system->GetGenerationDictionaries();
+		const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
 			if (labeledOutput)
 	      *m_nBestStream << "g: ";
-		  vector<const GenerationDictionary*>::const_iterator iter;
+		  vector<GenerationDictionary*>::const_iterator iter;
 		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); j++) {

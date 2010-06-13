@@ -47,15 +47,14 @@ Manager::Manager(InputType const& source, const TranslationSystem* system)
     m_system(system)
 {
     
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
+	m_system->InitializeBeforeSentenceProcessing(source);
     
     m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager()
 {
-	StaticData::Instance().CleanUpAfterSentenceProcessing();
+	m_system->CleanUpAfterSentenceProcessing();
 }
 
 void Manager::ProcessSentence()

@@ -66,16 +66,15 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-:m_fLMsLoaded(false)
+:m_numLinkParams(1)
+,m_fLMsLoaded(false)
+,m_sourceStartPosMattersForRecombination(false)
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
-,m_distortionScoreProducer(0)
 ,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(false)
-,m_sourceStartPosMattersForRecombination(false)
-,m_numLinkParams(1)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -121,8 +120,7 @@ bool StaticData::LoadData(Parameter *parameter)
 		}
 	}
     
-    //option to specify multiple translation systems.
-    size_t translationSystemsCount = m_parameter->GetParam("translation-systems").size();
+    
     
 
 	// factor delimiter
@@ -286,8 +284,7 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-	// score weights
-  vector<float> wordPenaltiesWeights;
+	// word penalties
   for (size_t i = 0; i < m_parameter->GetParam("weight-w").size(); ++i) {
     float weightWordPenalty       = Scan<float>( m_parameter->GetParam("weight-w")[i] );
     m_wordPenaltyProducers.push_back(new WordPenaltyProducer(m_scoreIndexManager));
@@ -295,9 +292,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 	
 
-	m_weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
+	float weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightUnknownWord);
+	m_allWeights.push_back(weightUnknownWord);
 	
 	// reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
@@ -387,7 +384,7 @@ bool StaticData::LoadData(Parameter *parameter)
   
 	m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
 	  Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
-	m_timeout = (GetTimeoutThreshold() == -1) ? false : true;
+	m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
 
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
@@ -448,18 +445,90 @@ bool StaticData::LoadData(Parameter *parameter)
     if (!LoadDecodeGraphs()) return false;
     
 
-    
-    //configure the translation systems with these tables
-    if (translationSystemsCount) {
-      for (size_t i = 0; i < translationSystemsCount; ++i) {
-          assert(0); //not yet implemented
-          //TODO: Config of translation systems  
-          //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
-      }
-    } else {
-      //Create the default translation system
-      AddTranslationSystem(TranslationSystem(m_decodeGraphs, m_reorderModels, m_languageModel, m_wordPenaltyProducers));
+  //configure the translation systems with these tables
+  vector<string> tsConfig = m_parameter->GetParam("translation-systems");
+  /*if (translationSystemsCount) {
+    for (size_t i = 0; i < translationSystemsCount; ++i) {
+        assert(0); //not yet implemented
+        //TODO: Config of translation systems  
+        //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
     }
+  } else {
+    //Create the default translation system
+    assert(m_wordPenaltyProducers.size() == 1);
+    assert(m_distortionScoreProducers.size() == 1);
+    AddTranslationSystem(TranslationSystem(m_decodeGraphs, m_reorderModels, m_languageModel, m_globalLexicalModels,
+                                            m_wordPenaltyProducers[0], m_unknownWordPenaltyProducer, 
+                                            m_distortionScoreProducers[0]));
+  }*/
+  if (!tsConfig.size()) {
+    //use all models in default system.
+    tsConfig.push_back(TranslationSystem::DEFAULT + " D * L * R * G *");
+  }
+  
+  if (m_wordPenaltyProducers.size() != tsConfig.size()) {
+    UserMessage::Add(string("Mismatch between number of word penalties and number of translation systems"));
+    return false;
+  }
+  
+  if (m_distortionScoreProducers.size() != tsConfig.size()) {
+    UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems"));
+    return false;
+  }
+  
+  for (size_t i = 0; i < tsConfig.size(); ++i) {
+    vector<string> config = Tokenize(tsConfig[i]);
+    if (config.size() % 2 != 1) {
+      UserMessage::Add(string("Incorrect number of fields in Translation System config. Should be an odd number"));
+    }
+    m_translationSystems.insert(pair<string, TranslationSystem>(config[0],
+         TranslationSystem(config[0],m_wordPenaltyProducers[i],m_unknownWordPenaltyProducer,m_distortionScoreProducers[i])));
+    for (size_t j = 1; j < config.size(); j += 2) {
+      const string& id = config[j];
+      const string& tables = config[j+1];
+      set<size_t> tableIds;
+      if (tables != "*") {
+        //selected tables
+        vector<string> tableIdStrings = Tokenize(tables,",");
+        vector<size_t> tableIdList;
+        Scan<size_t>(tableIdList, tableIdStrings);
+        copy(tableIdList.begin(), tableIdList.end(), inserter(tableIds,tableIds.end()));
+      }
+      if (id == "D") {
+        for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
+          if (!tableIds.size() || tableIds.find(k) == tableIds.end()) {
+            m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k]);
+          }
+        }
+      } else if (id == "R") {
+        for (size_t k = 0; k < m_reorderModels.size(); ++k) {
+          if (!tableIds.size() || tableIds.find(k) == tableIds.end()) {
+            m_translationSystems.find(config[0])->second.AddReorderModel(m_reorderModels[k]);
+          }
+        }
+      } else if (id == "G") {
+        for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
+          if (!tableIds.size() || tableIds.find(k) == tableIds.end()) {
+            m_translationSystems.find(config[0])->second.AddGlobalLexicalModel(m_globalLexicalModels[k]);
+          }
+        }
+      } else if (id == "L") {
+        size_t lmid = 0;
+        for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
+          if (!tableIds.size() || tableIds.find(lmid) == tableIds.end()) {
+            m_translationSystems.find(config[0])->second.AddLanguageModel(*k);
+          }
+        }
+      } else {
+        UserMessage::Add(string("Incorrect translation system identifier: ") + id);
+        return false;
+      }
+    }
+    
+    //Add any other features here.
+    
+  }
+  
 
 	m_scoreIndexManager.InitFeatureNames();
 
@@ -496,6 +565,7 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_globalLexicalModels);
     RemoveAllInColl(m_decodeGraphs);
     RemoveAllInColl(m_wordPenaltyProducers);
+    RemoveAllInColl(m_distortionScoreProducers);
     m_languageModel.CleanUp();
 	
 	// delete trans opt
@@ -507,7 +577,6 @@ StaticData::~StaticData()
 	}
 
 	// small score producers
-	delete m_distortionScoreProducer;
 	delete m_unknownWordPenaltyProducer;
 
 	//delete m_parameter;
@@ -521,10 +590,19 @@ bool StaticData::LoadLexicalReorderingModel()
 {
     VERBOSE(1, "Loading lexical distortion models...");
     const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
-    const vector<string> weightsStr = m_parameter->GetParam("weight-d");
+    bool hasWeightlr = (m_parameter->GetParam("weight-lr").size() != 0);
+    vector<string> weightsStr;
+    if (hasWeightlr) {
+      weightsStr = m_parameter->GetParam("weight-lr");
+    } else {
+      weightsStr = m_parameter->GetParam("weight-d");
+    }
     
     std::vector<float>   weights;
     size_t w = 1; //cur weight
+    if (hasWeightlr) {
+      w = 0; // if reading from weight-lr, don't have to count first as distortion penalty
+    }
     size_t f = 0; //cur file
     //get weights values
     VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
@@ -978,11 +1056,15 @@ void StaticData::LoadChartDecodingParameters()
 void StaticData::LoadPhraseBasedParameters()
 {
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
-	m_weightDistortion				= Scan<float>(distortionWeights[0]);
-	
-	m_distortionScoreProducer = new DistortionScoreProducer(m_scoreIndexManager);
-	m_allWeights.push_back(m_weightDistortion);
-		
+  size_t distortionWeightCount = distortionWeights.size();
+  if (!m_parameter->GetParam("weight-lr").size()) {
+    distortionWeightCount = 1;
+  }
+  for (size_t i = 0; i < distortionWeightCount; ++i) {
+    float weightDistortion = Scan<float>(distortionWeights[i]);
+    m_distortionScoreProducers.push_back(new DistortionScoreProducer(m_scoreIndexManager));
+    m_allWeights.push_back(weightDistortion);
+  }
 }
 
 bool StaticData::LoadDecodeGraphs() {
@@ -1075,52 +1157,6 @@ bool StaticData::LoadDecodeGraphs() {
     return true;
 }
 
-void StaticData::CleanUpAfterSentenceProcessing() const
-{
-	
-	for(size_t i=0;i<m_phraseDictionary.size();++i)
-	{
-		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
-        PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
-		phraseDictionary->CleanUp();
-
-	}
-	
-	for(size_t i=0;i<m_generationDictionary.size();++i)
-		m_generationDictionary[i]->CleanUp();
-  
-	//something LMs could do after each sentence 
-	LMList::const_iterator iterLM;
-	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
-	{
-		LanguageModel &languageModel = **iterLM;
-		languageModel.CleanUpAfterSentenceProcessing();
-	}
-}
-
-/** initialize the translation and language models for this sentence 
-    (includes loading of translation table entries on demand, if
-    binary format is used) */
-void StaticData::InitializeBeforeSentenceProcessing(InputType const& in) const
-{
-	for(size_t i=0;i<m_reorderModels.size();++i) {
-		m_reorderModels[i]->InitializeForInput(in);
-	}
-	for(size_t i=0;i<m_globalLexicalModels.size();++i) {
-		m_globalLexicalModels[i]->InitializeForInput((Sentence const&)in);
-	}
-	//something LMs could do before translating a sentence
-	LMList::const_iterator iterLM;
-	for (iterLM = m_languageModel.begin() ; iterLM != m_languageModel.end() ; ++iterLM)
-	{
-		LanguageModel &languageModel = **iterLM;
-		languageModel.InitializeBeforeSentenceProcessing();
-	}
-}
-
-void StaticData::AddTranslationSystem(const TranslationSystem& system) {
-    m_translationSystems.insert(std::pair<std::string, TranslationSystem>(system.GetId(),system));
-}
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
 {

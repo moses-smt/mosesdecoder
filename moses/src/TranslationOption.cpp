@@ -59,12 +59,11 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 TranslationOption::TranslationOption(const WordsRange &wordsRange
 																		 , const TargetPhrase &targetPhrase
 																		 , const InputType &inputType
-																		 , int /*whatever*/)
+																		 , const UnknownWordPenaltyProducer* up)
 : m_targetPhrase(targetPhrase)
 , m_sourceWordsRange	(wordsRange)
 , m_futureScore(0)
 {
-	const UnknownWordPenaltyProducer *up = StaticData::Instance().GetUnknownWordPenaltyProducer();
   if (up) {
 		const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
 		vector<float> score(1);

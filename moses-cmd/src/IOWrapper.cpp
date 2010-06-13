@@ -338,7 +338,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 		std::string lastName = "";
 		const vector<const StatefulFeatureFunction*>& sff =
-			staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+			system->GetStatefulFeatureFunctions();
 		for( size_t i=0; i<sff.size(); i++ )
 		{
 			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
@@ -354,7 +354,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 
 		const vector<const StatelessFeatureFunction*>& slf =
-			staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+			system->GetStatelessFeatureFunctions();
 		for( size_t i=0; i<slf.size(); i++ )
 		{
 			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
@@ -372,11 +372,11 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
-			vector<const PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					out << " tm:";
-				vector<const PhraseDictionaryFeature*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j) 
@@ -388,9 +388,9 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<const PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
-				vector<const PhraseDictionaryFeature*>::iterator iter;
+				vector<PhraseDictionaryFeature*>::iterator iter;
 				
 				iter = pds.begin();
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
@@ -421,11 +421,11 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 		
 		// generation
-		const vector<const GenerationDictionary*> gds = system->GetGenerationDictionaries();
+		const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
 		if (gds.size() > 0) {
 			if (labeledOutput)
 				out << " g: ";
-			vector<const GenerationDictionary*>::const_iterator iter;
+			vector<GenerationDictionary*>::const_iterator iter;
 			for (iter = gds.begin(); iter != gds.end(); ++iter) {
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 				for (size_t j = 0; j<scores.size(); j++) {

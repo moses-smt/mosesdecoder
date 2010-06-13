@@ -59,8 +59,7 @@ namespace Moses
 ,m_hypoId(0)
     ,m_source(source)
 {
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
+	m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager() 
@@ -68,7 +67,7 @@ Manager::~Manager()
 	delete m_transOptColl;
 	delete m_search;
 
-	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+	m_system->CleanUpAfterSentenceProcessing();      
 
 	clock_t end = clock();
 	float et = (end - m_start);
@@ -306,7 +305,6 @@ void Manager::CalcDecoderStatistics() const
 
 void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId, const TranslationSystem* system)
 {
-	const StaticData &staticData = StaticData::Instance();
 
 	const Hypothesis *prevHypo = hypo->GetPrevHypo();
 
@@ -317,8 +315,8 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 		<< "\ta=";
 
 	// phrase table scores
-	const std::vector<const PhraseDictionaryFeature*> &phraseTables = system->GetPhraseDictionaries();
-	std::vector<const PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
+	const std::vector<PhraseDictionaryFeature*> &phraseTables = system->GetPhraseDictionaries();
+	std::vector<PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
 	for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
 	{
 				const PhraseDictionaryFeature *phraseTable = *iterPhraseTable;
@@ -352,7 +350,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 			// re-ordering
 			outputWordGraphStream << "\tr=";
 
-			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
+			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(system->GetDistortionProducer());
 
 			// lexicalised re-ordering
 			const std::vector<LexicalReordering*> &lexOrderings = system->GetReorderModels();

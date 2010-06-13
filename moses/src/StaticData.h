@@ -91,9 +91,7 @@ protected:
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
 		m_translationOptionThreshold,
-		m_weightDistortion, 
-		m_wordDeletionWeight,
-		m_weightUnknownWord;
+		m_wordDeletionWeight;
 
 	// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int				m_maxDistortion;
@@ -136,7 +134,7 @@ protected:
 
 	mutable size_t m_verboseLevel;
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
-	DistortionScoreProducer *m_distortionScoreProducer;
+	std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
@@ -224,7 +222,6 @@ protected:
     bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
-    void AddTranslationSystem(const TranslationSystem& system);
     void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
 	
@@ -309,18 +306,6 @@ public:
 	inline size_t GetMaxPhraseLength() const 
 	{ 
 		return m_maxPhraseLength;
-	}
-	/*const std::vector<LexicalReordering*> &GetReorderModels() const
-	{
-		return m_reorderModels;
-    }*/
-	float GetWeightDistortion() const
-	{
-		return m_weightDistortion;
-	}
-	float GetWeightUnknownWord() const
-	{
-		return m_weightUnknownWord;
 	}
 	bool IsWordDeletionEnabled() const
 	{
@@ -462,15 +447,11 @@ public:
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
-	void InitializeBeforeSentenceProcessing(InputType const&) const;
-	void CleanUpAfterSentenceProcessing() const;
 	
 	const std::vector<float>& GetAllWeights() const
 	{
 		return m_allWeights;
 	}
-	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
-	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };

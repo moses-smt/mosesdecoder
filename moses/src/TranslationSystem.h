@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 
+#include "FeatureFunction.h"
 #include "LMList.h"
 
 namespace Moses {
@@ -35,6 +36,9 @@ namespace Moses {
   class PhraseDictionaryFeature;
   class GenerationDictionary;
   class WordPenaltyProducer;
+  class DistortionScoreProducer;
+  class UnknownWordPenaltyProducer;
+  class GlobalLexicalModel;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -42,52 +46,72 @@ namespace Moses {
 class TranslationSystem {
 
     public:
-      /** Creates a system with the given configuration */
-      TranslationSystem(const std::string& config,
-                        const std::vector<DecodeGraph*>& allDecoderGraphs,
-                        const std::vector<LexicalReordering*>& allReorderingTables,
-                        const LMList& allLMs,
-                        const std::vector<WordPenaltyProducer*>& allWordPenalties);
+      /** Creates a system with the given id */
+      TranslationSystem(const std::string& id, 
+                        const WordPenaltyProducer* wpProducer,
+                        const UnknownWordPenaltyProducer* uwpProducer,
+                        const DistortionScoreProducer* distortionProducer);
       
-      /** Creates a default system */
-      TranslationSystem(const std::vector<DecodeGraph*>& allDecoderGraphs,
-                        const std::vector<LexicalReordering*>& allReorderingTables,
-                        const LMList& allLMs,
-                        const std::vector<WordPenaltyProducer*>& allWordPenalties);
+      //Insert core 'big' features
+      void AddLanguageModel(LanguageModel* languageModel);
+      void AddDecodeGraph(DecodeGraph* decodeGraph);
+      void AddReorderModel(LexicalReordering* reorderModel);
+      void AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel);
+      
+      //Insert non-core feature function
+      void AddFeatureFunction(const FeatureFunction* featureFunction);
+      
+      
         
-        const std::string& GetId() const {return m_id;}
+      const std::string& GetId() const {return m_id;}
+      
+      //Lists of tables relevant to this system.
+      const std::vector<LexicalReordering*>& GetReorderModels() const {return m_reorderingTables;}
+      const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
+      const LMList& GetLanguageModels() const {return m_languageModels;}
+      const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
+      const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
+      
+      const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const {return m_statefulFFs;}
+      const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const {return m_statelessFFs;}
+      
+      const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
+      const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
+      const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
+      
+      float GetWeightWordPenalty() const;
+      float GetWeightUnknownWordPenalty() const;
+      float GetWeightDistortion() const;
+      
+      //sentence (and thread) specific initialisationn and cleanup
+      void InitializeBeforeSentenceProcessing(const InputType& source) const;
+      void CleanUpAfterSentenceProcessing() const;
+      
+      
         
-        //Lists of tables relevant to this system.
-        const std::vector<LexicalReordering*>& GetReorderModels() const {return m_reorderingTables;}
-        const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
-        const LMList& GetLanguageModels() const {return m_languageModels;}
-        const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
-        const std::vector<const PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
-        const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
-        
-        float GetWeightWordPenalty() const;
-        
-        //sentence (and thread) specific initialisation
-        void InitializeBeforeSentenceProcessing(const InputType& source) const;
-        
-        
-        
-        static const  std::string DEFAULT;
+      static const  std::string DEFAULT;
 
         
         
         
     private:
-        //checks what dictionaries are required, and initialises them if necessary 
-        void configureDictionaries();
-      
         std::string m_id;
+        
         std::vector<DecodeGraph*> m_decodeGraphs;
         std::vector<LexicalReordering*> m_reorderingTables;
-        std::vector<const PhraseDictionaryFeature*> m_phraseDictionaries;
-        std::vector<const GenerationDictionary*> m_generationDictionaries;
+        std::vector<PhraseDictionaryFeature*> m_phraseDictionaries;
+        std::vector<GenerationDictionary*> m_generationDictionaries;
         LMList m_languageModels;
-        WordPenaltyProducer* m_wpProducer;
+        std::vector<GlobalLexicalModel*> m_globalLexicalModels;
+        
+        //All stateless FFs, except those that cache scores in T-Option
+        std::vector<const StatelessFeatureFunction*> m_statelessFFs;
+        //All statefull FFs
+        std::vector<const StatefulFeatureFunction*> m_statefulFFs;
+        
+        const WordPenaltyProducer* m_wpProducer;
+        const UnknownWordPenaltyProducer* m_unknownWpProducer;
+        const DistortionScoreProducer* m_distortionScoreProducer;
 };
 
 

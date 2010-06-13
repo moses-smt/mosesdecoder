@@ -206,7 +206,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 {
 	// unknown word, add as trans opt
 	const StaticData &staticData = StaticData::Instance();
-	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
 	vector<float> wordPenaltyScore(1, -0.434294482);
 
 	size_t isDigit = 0;

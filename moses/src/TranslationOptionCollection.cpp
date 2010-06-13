@@ -278,7 +278,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		//targetPhrase.SetAlignment();
 
 	}
-	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
+	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
+  , m_system->GetUnknownWordPenaltyProducer());	
 	transOpt->CalcScore(m_system);
 	Add(transOpt);
 }

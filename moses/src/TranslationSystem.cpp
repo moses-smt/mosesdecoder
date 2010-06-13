@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
+#include "GlobalLexicalModel.h"
+#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
 #include "Util.h"
@@ -35,78 +37,128 @@ namespace Moses {
   
   const string TranslationSystem::DEFAULT = "default";
 
-    TranslationSystem::TranslationSystem(const string& config,
-                                        const vector<DecodeGraph*>& allDecodeGraphs,
-                                        const vector<LexicalReordering*>& allReorderingTables,
-                                        const LMList& allLMs,
-                                         const vector<WordPenaltyProducer*>& allWordPenalties) {
-        VERBOSE(2,"Creating translation system " << config << endl);
-        vector<string> fields;
-        Tokenize(fields,config);
-        if (fields.size() % 2 != 1) {
-            throw runtime_error("Incorrect number of fields in translation system config");
-        }
-        m_id = fields[0];
-        for (size_t i = 1; i < fields.size(); i += 2) {
-            const string& key = fields[i];
-            vector<size_t> indexes;
-            Tokenize<size_t>(fields[i+1],",");
-            if (key == "L") {
-              //LMs
-               
-            } else if (key == "D") {
-              //decoding graphs
-                
-            } else if (key == "R") {
-              //reordering tables
-                
-            } else {
-                throw runtime_error("Unknown table id in translation systems config");
-            }
-        }
-    }
-    
-    TranslationSystem::TranslationSystem(const vector<DecodeGraph*>& allDecodeGraphs,
-                                         const vector<LexicalReordering*>& allReorderingTables,
-                                         const LMList& allLMs,
-                                         const vector<WordPenaltyProducer*>& allWordPenalties) :
-        m_id(DEFAULT),
-    m_decodeGraphs(allDecodeGraphs),
-    m_reorderingTables(allReorderingTables),
-    m_languageModels(allLMs),
-    m_wpProducer(allWordPenalties.at(0))
+    TranslationSystem::TranslationSystem(const std::string& id, 
+                      const WordPenaltyProducer* wpProducer,
+                      const UnknownWordPenaltyProducer* uwpProducer,
+                      const DistortionScoreProducer* distortionProducer)
+    : m_id(id), m_wpProducer(wpProducer), m_unknownWpProducer(uwpProducer), m_distortionScoreProducer(distortionProducer)
     {
-      configureDictionaries();
+      AddFeatureFunction(wpProducer);
+      AddFeatureFunction(uwpProducer);
+      AddFeatureFunction(distortionProducer);
     }
     
-    void TranslationSystem::configureDictionaries() {
-      for (vector<DecodeGraph*>::iterator i = m_decodeGraphs.begin(); i != m_decodeGraphs.end() ; ++i) {
-        for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
-          const DecodeStep* step = *j;
-          const PhraseDictionaryFeature* pdict = step->GetPhraseDictionaryFeature();
-          if (pdict) {
-            m_phraseDictionaries.push_back(pdict);
-            const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
-          }
-          const GenerationDictionary* gdict = step->GetGenerationDictionaryFeature();
-          if (gdict) {
-            m_generationDictionaries.push_back(gdict);
-          }
+    //Insert core 'big' features
+    void TranslationSystem::AddLanguageModel(LanguageModel* languageModel) {
+      m_languageModels.Add(languageModel);
+      AddFeatureFunction(languageModel);
+    }
+    
+    
+    void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph) {
+      m_decodeGraphs.push_back(decodeGraph);
+      //configure the dictionaries
+      for (DecodeGraph::const_iterator j = decodeGraph->begin(); j != decodeGraph->end(); ++j) {
+        const DecodeStep* step = *j;
+        PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
+        if (pdict) {
+          m_phraseDictionaries.push_back(pdict);
+          AddFeatureFunction(pdict);
+          const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
+        }
+        GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
+        if (gdict) {
+          m_generationDictionaries.push_back(gdict);
+          AddFeatureFunction(gdict);
         }
       }
     }
     
-    void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& source) const {
-      for (vector<const PhraseDictionaryFeature*>::const_iterator i = m_phraseDictionaries.begin();
-           i != m_phraseDictionaries.end(); ++i) {
-             const_cast<PhraseDictionaryFeature*>(*i)->InitDictionary(this,source);
-           }
+    
+    void TranslationSystem::AddReorderModel(LexicalReordering* reorderModel) {
+      m_reorderingTables.push_back(reorderModel);
+      AddFeatureFunction(reorderModel);
     }
+    
+    
+    void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel) {
+      m_globalLexicalModels.push_back(globalLexicalModel);
+      AddFeatureFunction(globalLexicalModel);
+    }
+    
+    
+    
+    
+    void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff) {
+      if (ff->IsStateless()) {
+        const StatelessFeatureFunction* statelessFF = static_cast<const StatelessFeatureFunction*>(ff);
+        if (!statelessFF->ComputeValueInTranslationOption()) {
+            m_statelessFFs.push_back(statelessFF);
+        }
+      } else {
+        m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
+      }
+    }
+    
+    void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& source) const {
+      for (vector<PhraseDictionaryFeature*>::const_iterator i = m_phraseDictionaries.begin();
+           i != m_phraseDictionaries.end(); ++i) {
+             (*i)->InitDictionary(this,source);
+           }
+           
+      for(size_t i=0;i<m_reorderingTables.size();++i) {
+        m_reorderingTables[i]->InitializeForInput(source);
+      }
+      for(size_t i=0;i<m_globalLexicalModels.size();++i) {
+        m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
+      }
+  
+      LMList::const_iterator iterLM;
+      for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
+      {
+        LanguageModel &languageModel = **iterLM;
+        languageModel.InitializeBeforeSentenceProcessing();
+      }
+    }
+    
+     void TranslationSystem::CleanUpAfterSentenceProcessing() const {
+        
+        for(size_t i=0;i<m_phraseDictionaries.size();++i)
+        {
+          PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionaries[i];
+          PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
+          phraseDictionary->CleanUp();
+
+        }
+  
+        for(size_t i=0;i<m_generationDictionaries.size();++i)
+            m_generationDictionaries[i]->CleanUp();
+  
+        //something LMs could do after each sentence 
+        LMList::const_iterator iterLM;
+        for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
+        {
+          LanguageModel &languageModel = **iterLM;
+          languageModel.CleanUpAfterSentenceProcessing();
+        }
+     }
     
     float TranslationSystem::GetWeightWordPenalty() const {
       //const ScoreComponentCollection weights = StaticData::Instance().GetAllWeights();
       size_t wpIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(m_wpProducer->GetScoreBookkeepingID());
       return StaticData::Instance().GetAllWeights()[wpIndex];
+    }
+    
+    float TranslationSystem::GetWeightUnknownWordPenalty() const {
+      size_t uwpIndex = StaticData::Instance().GetScoreIndexManager().
+              GetBeginIndex(m_unknownWpProducer->GetScoreBookkeepingID());
+      return StaticData::Instance().GetAllWeights()[uwpIndex];
+    }
+    
+    float TranslationSystem::GetWeightDistortion() const {
+      size_t distIndex = StaticData::Instance().GetScoreIndexManager().
+              GetBeginIndex(m_distortionScoreProducer->GetScoreBookkeepingID());
+      return StaticData::Instance().GetAllWeights()[distIndex];
     }
 
 };

@@ -77,6 +77,7 @@ Parameter::Parameter()
 	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
 	AddParam("verbose", "v", "verbosity level of the logging");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+  AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
