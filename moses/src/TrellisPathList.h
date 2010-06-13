@@ -55,11 +55,30 @@ public:
 	{
 		m_collection.push_back(trellisPath);
 	}
+  
+  const TrellisPath *pop()
+	{
+		const TrellisPath *top = m_collection.front();
+
+		// Detach
+		m_collection.pop_front();
+		return top;
+	}
 
 	size_t GetSize() const
 	{
 		return m_collection.size();
 	}
+
+  const TrellisPath at(size_t position) const
+  {
+    const_iterator iter = m_collection.begin();
+    for(size_t i = position; i>0; i--) 
+    {
+      iter++;
+    }
+    return **iter;
+  }
 };
 
 }

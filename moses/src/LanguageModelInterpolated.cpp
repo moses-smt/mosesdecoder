@@ -31,7 +31,7 @@ bool LanguageModelInterpolated::Load(const std::string &filePath, FactorType fac
 	while(getline(lmConf, line)) {
                 // comments
                 size_t comPos = line.find_first_of("#");
-                if (comPos != string::npos)
+                if (comPos != std::string::npos)
                         line = line.substr(0, comPos);
                 // trim leading and trailing spaces/tabs
                 line = Trim(line);

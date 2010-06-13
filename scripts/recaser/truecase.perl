@@ -30,12 +30,13 @@ my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1);
 
 while(<STDIN>) {
   chop;
-  my @WORD = split;
+  my ($WORD,$MARKUP) = split_xml($_);
   my $sentence_start = 1;
-  for(my $i=0;$i<=$#WORD;$i++) {
+  for(my $i=0;$i<=$#$WORD;$i++) {
     print " " if $i;
+    print $$MARKUP[$i];
 
-    $WORD[$i] =~ /^([^\|]+)(.*)/;
+    $$WORD[$i] =~ /^([^\|]+)(.*)/;
     my $word = $1;
     my $otherfactors = $2;
 
@@ -56,5 +57,30 @@ while(<STDIN>) {
     if    ( defined($SENTENCE_END{ $word }))           { $sentence_start = 1; }
     elsif (!defined($DELAYED_SENTENCE_START{ $word })) { $sentence_start = 0; }
   }
+  print " ".$$MARKUP[$#$MARKUP];
   print "\n";
+}
+
+# store away xml markup
+sub split_xml {
+  my ($line) = @_;
+  my (@WORD,@MARKUP);
+  my $i = 0;
+  $MARKUP[0] = "";
+  while($line =~ /\S/) {
+    if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
+      $MARKUP[$i] .= $1." ";
+      $line = $2;
+    }
+    elsif ($line =~ /^\s*(\S+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+    }
+    else {
+      die("ERROR: huh? $line\n");
+    }
+  }
+  chop($MARKUP[$#MARKUP]);
+  return (\@WORD,\@MARKUP);
 }

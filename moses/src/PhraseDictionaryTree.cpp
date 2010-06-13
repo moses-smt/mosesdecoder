@@ -270,11 +270,10 @@ struct PDTimp {
 
 int PDTimp::Read(const std::string& fn) 
 {
-	const StaticData &staticData = StaticData::Instance();
-	
 	std::string ifs, ift, ifi, ifsv, iftv;
 
-	if (staticData.UseAlignmentInfo()){//asking for word-to-word alignment
+	if (UseWordAlignment()) //asking for word-to-word alignment
+	{
 		if (!FileExists(fn+".binphr.srctree.wa") || !FileExists(fn+".binphr.tgtdata.wa")){
 			//		ERROR
 			std::stringstream strme;
@@ -287,9 +286,9 @@ int PDTimp::Read(const std::string& fn)
 		ifi=fn+".binphr.idx";
 		ifsv=fn+".binphr.srcvoc";
 		iftv=fn+".binphr.tgtvoc";
-		UseWordAlignment(true);
 	}
-	else{
+	else
+	{
 		if (!FileExists(fn+".binphr.srctree") || !FileExists(fn+".binphr.tgtdata")){
 			//		ERROR
 			std::stringstream strme;
@@ -303,8 +302,6 @@ int PDTimp::Read(const std::string& fn)
 		ifi=fn+".binphr.idx";
 		ifsv=fn+".binphr.srcvoc";
 		iftv=fn+".binphr.tgtvoc";
-		
-		UseWordAlignment(false);
 	}
 
 	FILE *ii=fOpen(ifi.c_str(),"rb");

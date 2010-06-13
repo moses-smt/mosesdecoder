@@ -34,7 +34,12 @@ namespace Moses
 // static
 int Word::Compare(const Word &targetWord, const Word &sourceWord)
 {
-	for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
+    if (targetWord.IsNonTerminal() != sourceWord.IsNonTerminal())
+    {
+	return targetWord.IsNonTerminal() ? -1 : 1;
+    }
+
+    for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++)
 	{
 		const Factor *targetFactor		= targetWord[factorType]
 								,*sourceFactor	= sourceWord[factorType];
@@ -82,6 +87,46 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
 	return strme.str();
 }
 
+void Word::CreateFromString(FactorDirection direction
+														, const std::vector<FactorType> &factorOrder
+														, const std::string &str
+														, bool isNonTerminal)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	vector<string> wordVec;
+	Tokenize(wordVec, str, "|");
+	assert(wordVec.size() == factorOrder.size());
+	
+	const Factor *factor;
+	for (size_t ind = 0; ind < wordVec.size(); ++ind)
+	{
+		FactorType factorType = factorOrder[ind];
+		factor = factorCollection.AddFactor(direction, factorType, wordVec[ind]); 
+		m_factorArray[factorType] = factor;
+	}
+	
+	// assume term/non-term same for all factors
+	m_isNonTerminal = isNonTerminal;
+}
+
+void Word::CreateUnknownWord(const Word &sourceWord)
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+	{
+		FactorType factorType = static_cast<FactorType>(currFactor);
+		
+		const Factor *sourceFactor = sourceWord[currFactor];
+		if (sourceFactor == NULL)
+			SetFactor(factorType, factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR));
+		else
+			SetFactor(factorType, factorCollection.AddFactor(Output, factorType, sourceFactor->GetString()));		
+	}	
+	m_isNonTerminal = sourceWord.IsNonTerminal();
+}
+	
 TO_STRING_BODY(Word);
 
 // friend

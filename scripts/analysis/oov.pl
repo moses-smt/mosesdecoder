@@ -13,9 +13,11 @@ binmode(STDERR, ":utf8");
 
 my $verbose = 0;
 my $n = 1;
+my $srcfile = undef;
 GetOptions(
   "n=i" => \$n,  # the n-grams to search for (default: unigrams)
   "verbose" => \$verbose, # emit the list of oov words
+  "src=s" => \$srcfile, # use this source file
 ) or exit 1;
 
 my $testf = shift;
@@ -24,6 +26,9 @@ if (!defined $testf) {
 Options:
   --n=1  ... use phrases of n words as the unit
   --verbose  ... emit OOV phrases at the end
+  --src=test-src ... a word in the test-corpus not deemed OOV if present in the
+                     corresponding source sentence in test-src.
+                     The files test-corpus and test-src must be of equal length.
 Synopsis:
   Check OOV of a training corpus against a test set:
     cat corpus.src.txt | $0 testset.txt
@@ -34,10 +39,35 @@ Synopsis:
   exit 1;
 }
 
+# load source file to accept ngrams from source
+my $source_confirms = undef;
+my $srcfilelen = undef;
+if (defined $srcfile) {
+  my $fh = my_open($srcfile);
+  my $nr = 0;
+  my $srctokens = 0;
+  while (<$fh>) {
+    $nr++;
+    chomp;
+    s/^\s+//;
+    s/\s+$//;
+    my $ngrams = ngrams($n, [ split /\s+/, $_ ]);
+    foreach my $ngr (keys %$ngrams) {
+      $source_confirms->[$nr]->{$ngr} += $ngrams->{$ngr};
+      $srctokens += $ngrams->{$ngr};
+    }
+  }
+  close $fh;
+  print "Source set sents\t$nr\n";
+  print "Source set running $n-grams\t$srctokens\n";
+  $srcfilelen = $nr;
+}
+
 my %needed = ();
 my $fh = my_open($testf);
 my $nr = 0;
 my $testtokens = 0;
+my %testtypes = ();
 while (<$fh>) {
   $nr++;
   chomp;
@@ -45,12 +75,22 @@ while (<$fh>) {
   s/\s+$//;
   my $ngrams = ngrams($n, [ split /\s+/, $_ ]);
   foreach my $ngr (keys %$ngrams) {
-    $needed{$ngr} += $ngrams->{$ngr};
+    $needed{$ngr} += $ngrams->{$ngr}
+      unless $source_confirms->[$nr]->{$ngr};
     $testtokens += $ngrams->{$ngr};
+    $testtypes{$ngr} = 1;
   }
 }
-my $testtypes = scalar(keys(%needed));
-print STDERR "Test set: $nr sents, $testtypes unique $n-grams, $testtokens total $n-grams\n";
+close $fh;
+my $testtypesneeded = scalar(keys(%needed));
+my $testtypes = scalar(keys(%testtypes));
+print "Test set sents\t$nr\n";
+print "Test set running $n-grams\t$testtokens\n";
+print "Test set unique $n-grams needed\t$testtypesneeded\n";
+print "Test set unique $n-grams\t$testtypes\n";
+
+die "Mismatching sent count: $srcfile and $testf ($srcfilelen vs. $nr)"
+  if defined $srcfile && $srcfilelen != $nr;
 
 my %seen;
 $nr = 0;
@@ -73,7 +113,9 @@ foreach my $ngr (keys %needed) {
 }
 print STDERR "Done.\n";
 my $traintypes = scalar(keys(%seen));
-print STDERR "Training set: $nr sents, $traintypes unique $n-grams, $traintokens total $n-grams\n";
+print "Training set sents\t$nr\n";
+print "Training set running $n-grams\t$traintokens\n";
+print "Training set unique $n-grams\t$traintypes\n";
 
 
 my $oovtypes = scalar(keys(%needed));

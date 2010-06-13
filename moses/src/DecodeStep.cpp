@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStep::DecodeStep(Dictionary *ptr, const DecodeStep* prev)
+DecodeStep::DecodeStep(const Dictionary *ptr, const DecodeStep* prev)
 :m_ptr(ptr)
 {
 	FactorMask prevOutputFactors;

@@ -69,6 +69,8 @@ public:
 		m_collection.push_back(targetPhrase);
 	}
 	
+	void Prune(bool adhereTableLimit, size_t tableLimit);
+
 };
 
 }

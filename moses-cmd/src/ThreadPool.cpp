@@ -1,4 +1,4 @@
-// $Id:  $
+// $Id: ThreadPool.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include "ThreadPool.h"
+
+#ifdef WITH_THREADS
 
 using namespace std;
 using namespace Moses;
@@ -54,8 +56,8 @@ void Moses::ThreadPool::Execute()
         }
         m_threadAvailable.notify_all();
     } while (!m_stopped);
-#if defined(BOOST_HAS_PTHREADS)
-    TRACE_ERR("Thread " << (int)pthread_self() << " exiting" << endl);
+#ifdef BOOST_HAS_PTHREADS
+    TRACE_ERR("Thread " << pthread_self() << " exiting" << endl);
 #endif
 }
 
@@ -92,6 +94,7 @@ void Moses::ThreadPool::Stop(bool processRemainingJobs)
     }
     m_threadNeeded.notify_all();
     
-    cerr << m_threads.size() << endl;
+    
     m_threads.join_all();
 }
+#endif //WITH_THREADS

@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+using namespace std;
 
 bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType, float weight,
 			       size_t nGramOrder) {
@@ -98,7 +99,7 @@ float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
     //std::cerr << m_lm->getWord(ngram[i]) << " ";
   }
   int found = 0;
-  float logprob = FloorScore(TransformSRIScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
+  float logprob = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
   if(len)
 	*len = found;
   //if (finalState)

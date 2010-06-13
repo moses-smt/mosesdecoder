@@ -203,6 +203,12 @@ sub translate_batch {
     return undef;
   }
 
+  # unescape what google escapes
+  @outlines = map { s/&quot;/"/g; s/&#39;/'/g;
+                    s/&lt;/</g; s/&gt;/>/g;
+                    s/&amp;/&/g;
+                    $_ } @outlines;
+
   return \@outlines;
 }
 

@@ -131,18 +131,19 @@ then
 
   if test "x$with_srilm_dynamic" != 'xyes'
   then
-    LIB_SRILM="-loolm -ldstruct -lmisc"
+    LIB_SRILM="-loolm -ldstruct -lmisc -lflm"
     # ROOT/lib/i686-m64/liboolm.a
     # ROOT/lib/i686-m64/libdstruct.a
     # ROOT/lib/i686-m64/libmisc.a
     MY_ARCH=`${with_srilm}/sbin/machine-type`
-    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH}"
+    LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH} -L${with_srilm}/flm/obj/${MY_ARCH}"
     LIBS="$LIBS $LIB_SRILM"
     FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
   else
     LDFLAGS="$LDFLAGS -L${with_srilm}/lib"
     LIBS="$LIBS -lsrilm"
   fi
+  AC_CHECK_LIB([oolm], [trigram_init], [], [AC_MSG_ERROR([Cannot find SRILM's library in ${with_srilm}/lib/${MY_ARCH} ])])
   AM_CONDITIONAL([SRI_LM], true)
 fi
 
@@ -153,7 +154,7 @@ then
 
   AC_CHECK_HEADER(n_gram.h,
                  [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
-                 [AC_MSG_ERROR([Cannot find IRST-LM!])])
+                 [AC_MSG_ERROR([Cannot find IRST-LM in ${with_irstlm}])])
 
   MY_ARCH=`uname -m`
   LIB_IRSTLM="-lirstlm"
@@ -204,6 +205,6 @@ fi
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile moses/src/Makefile moses-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile)
 
 AC_OUTPUT()

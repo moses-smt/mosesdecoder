@@ -13,6 +13,8 @@
 
 namespace Moses
 {
+using namespace std;
+
 void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 {
 	// Producers must be inserted in the order they are created

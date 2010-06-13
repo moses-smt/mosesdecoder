@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_BitmapContainer_h
 #define moses_BitmapContainer_h
 
+#include <queue>
 #include <set>
 #include <vector>
 

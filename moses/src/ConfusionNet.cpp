@@ -80,7 +80,7 @@ bool ConfusionNet::ReadF(std::istream& in,
 		case 0: return ReadFormat0(in,factorOrder);
 		case 1: return ReadFormat1(in,factorOrder);
 		default: 
-			stringstream strme;
+            std::stringstream strme;
 			strme << "ERROR: unknown format '"<<format
 							 <<"' in ConfusionNet::Read";
 			UserMessage::Add(strme.str());
@@ -211,7 +211,7 @@ Phrase ConfusionNet::GetSubString(const WordsRange&) const {
 	//return Phrase(Input);
 }
 
-std::string ConfusionNet::GetStringRep(const vector<FactorType> factorsToPrint) const{ //not well defined yet
+std::string ConfusionNet::GetStringRep(const std::vector<FactorType> factorsToPrint) const{ //not well defined yet
 	TRACE_ERR("ERROR: call to ConfusionNet::GeStringRep\n");
 	return "";
 }

@@ -1,4 +1,4 @@
-// $Id: $
+// $Id: ThreadPool.h 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -26,11 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <vector>
 
-
+#ifdef WITH_THREADS
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#endif
 
-#if defined(BOOST_HAS_PTHREADS)
+#ifdef BOOST_HAS_PTHREADS
 #include <pthread.h>
 #endif
 
@@ -52,7 +53,9 @@ class Task {
     public:
         virtual void Run() = 0;
         virtual ~Task() {}
-}; 
+};
+
+#ifdef WITH_THREADS
 
 class ThreadPool {
     public:
@@ -98,10 +101,10 @@ class TestTask : public Task {
     public:
         TestTask(int id) : m_id(id) {}
         virtual void Run() {
-#if defined(BOOST_HAS_PTHREADS)
-            int tid = (int)pthread_self();
+#ifdef BOOST_HAS_PTHREADS
+            pthread_t tid = pthread_self();
 #else
-            int tid = 0;
+            pthread_t tid = 0;
 #endif
             std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;
         }
@@ -112,7 +115,7 @@ class TestTask : public Task {
         int m_id;
 };
 
-
+#endif //WITH_THREADS
 
 }
 #endif

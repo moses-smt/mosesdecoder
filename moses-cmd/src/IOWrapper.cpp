@@ -60,6 +60,7 @@ IOWrapper::IOWrapper(
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -80,6 +81,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -104,11 +106,12 @@ IOWrapper::~IOWrapper()
 	{
 	  delete m_outputSearchGraphStream;
 	}
+  delete m_detailedTranslationReportingStream;
 }
 
-void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
-														, const std::vector<FactorType>			&outputFactorOrder
-														, const FactorMask							&inputFactorUsed
+void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
+														, const std::vector<FactorType>			&/*outputFactorOrder*/
+														, const FactorMask							&/*inputFactorUsed*/
 														, size_t												nBestSize
 														, const std::string							&nBestFilePath)
 {
@@ -153,6 +156,14 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
 	}
+
+  // detailed translation reporting
+  if (staticData.IsDetailedTranslationReportingEnabled())
+  {
+    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
+    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+    assert(m_detailedTranslationReportingStream->good());
+  }
 }
 
 InputType*IOWrapper::GetInput(InputType* inputType)
@@ -215,9 +226,22 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
+void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out) 
+{	
+	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
-
-
+	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+	{
+		const Hypothesis &edge = *edges[currEdge];
+		OutputSurface(out, edge.GetCurrTargetPhrase(), StaticData::Instance().GetOutputFactorOrder(), reportAllFactors);
+		if (reportSegmentation == true
+		    && edge.GetCurrTargetPhrase().GetSize() > 0) {
+			out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
+			    << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
+		}
+	}
+  out << endl;
+}
 
 void IOWrapper::Backtrack(const Hypothesis *hypo){
 
@@ -227,18 +251,7 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
-{
-	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
-	{
-		const Factor *factor = mbrBestHypo[i];
-		if (i>0) out << " ";
-			out << factor->GetString();
-	}
-	out << endl;
-}													 
-
-void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
+void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
 {
   
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
@@ -306,7 +319,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	bool labeledOutput = staticData.IsLabeledNBestList();
 	bool reportAllFactors = staticData.GetReportAllFactorsNBest();
 	bool includeAlignment = staticData.NBestIncludesAlignment();
-	bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
+	//bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 	
 	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -356,41 +369,6 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 			}
 		}
 
-		// print the scores in a hardwired order
-    // before each model type, the corresponding command-line-like name must be emitted
-    // MERT script relies on this
-
-		// basic distortion
-//		if (labeledOutput)
-//	    *m_nBestStream << "d: ";
-//		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionScoreProducer()) << " ";
-
-//		reordering
-//		vector<LexicalReordering*> rms = StaticData::Instance().GetReorderModels();
-//		if(rms.size() > 0)
-//		{
-//				vector<LexicalReordering*>::iterator iter;
-//				for(iter = rms.begin(); iter != rms.end(); ++iter)
-//				{
-//					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-//					for (size_t j = 0; j<scores.size(); ++j) 
-//					{
-//				  		*m_nBestStream << scores[j] << " ";
-//					}
-//				}
-//		}
-//			
-//		// lm
-//		const LMList& lml = StaticData::Instance().GetAllLM();
-//		if (lml.size() > 0) {
-//			if (labeledOutput)
-//				*m_nBestStream << "lm: ";
-//		  LMList::const_iterator lmi = lml.begin();
-//		  for (; lmi != lml.end(); ++lmi) {
-//			  *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
-//		  }
-//		}
-//
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
@@ -490,8 +468,37 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	out <<std::flush;
 }
 
+void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) {
+    for (vector<LatticeMBRSolution>::const_iterator si = solutions.begin(); si != solutions.end(); ++si) {
+        out << translationId;
+        out << " ||| ";
+        const vector<Word> mbrHypo = si->GetWords();
+        for (size_t i = 0 ; i < mbrHypo.size() ; i++)
+        {
+            const Factor *factor = mbrHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+            if (i>0) out << " ";
+            out << *factor;
+        }
+        out << " ||| ";
+        out << "map: " << si->GetMapScore();
+        out << " w: " << mbrHypo.size();
+        const vector<float>& ngramScores = si->GetNgramScores();
+        for (size_t i = 0; i < ngramScores.size(); ++i) {
+            out << " " << ngramScores[i];
+        }
+        out << " ||| ";
+        out << si->GetScore();
+        
+        out << endl;
+    }
+}
+
 void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
     OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
+}
+
+void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId) {
+    OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);
 }
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)

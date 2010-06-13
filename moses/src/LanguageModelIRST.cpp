@@ -50,6 +50,12 @@ LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scor
 
 LanguageModelIRST::~LanguageModelIRST()
 {
+
+#ifndef WIN32
+  TRACE_ERR( "reset mmap\n");
+  m_lmtb->reset_mmap();
+#endif
+
   delete m_lmtb;
   delete m_lmtb_ng;
 }
@@ -60,7 +66,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 			     float weight,
 			     size_t nGramOrder)
 {
-  char *SepString = " \t\n";
+  const char *SepString = " \t\n";
   cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
 
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -207,19 +213,32 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	float prob = m_lmtb->clprob(*m_lmtb_ng);
   
   
-	return TransformIRSTScore(prob);
+	return TransformLMScore(prob);
 }
 
 
-void LanguageModelIRST::CleanUpAfterSentenceProcessing(){
-  TRACE_ERR( "reset caches\n");
-  m_lmtb->reset_caches(); 
+bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
+{
+	if (sentences_done==-1) return true;
+	if (m_lmcache_cleanup_threshold)
+		if (sentences_done % m_lmcache_cleanup_threshold == 0)
+			return true;
+	return false;
+}
+	
 
-#ifndef WIN32
-  TRACE_ERR( "reset mmap\n");
-  m_lmtb->reset_mmap();
-#endif
-  
+void LanguageModelIRST::CleanUpAfterSentenceProcessing()
+{
+	const StaticData &staticData = StaticData::Instance();
+	static int sentenceCount = 0;
+	sentenceCount++;
+	
+	size_t lmcache_cleanup_threshold = staticData.GetLMCacheCleanupThreshold();
+	
+	if (LMCacheCleanup(sentenceCount, lmcache_cleanup_threshold)){
+		TRACE_ERR( "reset caches\n");
+		m_lmtb->reset_caches(); 
+	}
 }
 
 void LanguageModelIRST::InitializeBeforeSentenceProcessing(){

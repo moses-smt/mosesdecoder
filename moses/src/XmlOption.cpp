@@ -31,6 +31,7 @@
 
 namespace Moses 
 {
+using namespace std;
 
 string ParseXmlTagAttribute(const string& tag,const string& attributeName){
 	/*TODO deal with unescaping \"*/
@@ -76,7 +77,10 @@ string TrimXml(const string& str)
  */
 bool isXmlTag(const string& tag)
 {
-	return tag[0] == '<';
+	return (tag[0] == '<' &&
+					(tag[1] == '/' ||
+					 (tag[1] >= 'a' && tag[1] <= 'z') ||
+					 (tag[1] >= 'A' && tag[1] <= 'Z')));
 }
 
 /**
@@ -87,7 +91,7 @@ bool isXmlTag(const string& tag)
  *
  * \param str input string
  */
-inline vector<string> TokenizeXml(const string& str)
+vector<string> TokenizeXml(const string& str)
 {
 	string lbrack = "<";
 	string rbrack = ">";

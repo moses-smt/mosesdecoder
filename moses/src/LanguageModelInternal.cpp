@@ -4,6 +4,7 @@
 #include "NGramNode.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -88,11 +89,11 @@ bool LanguageModelInternal::Load(const std::string &filePath
 				lmIdMap[factorId] = rootNGram;
 				//factorCollection.SetFactorLmId(factor, rootNGram);
 
-				float score = TransformSRIScore(Scan<float>(tokens[0]));
+				float score = TransformLMScore(Scan<float>(tokens[0]));
 				nGram->SetScore( score );
 				if (tokens.size() == 3)
 				{
-					float logBackOff = TransformSRIScore(Scan<float>(tokens[2]));
+					float logBackOff = TransformLMScore(Scan<float>(tokens[2]));
 					nGram->SetLogBackOff( logBackOff );
 				}
 				else
@@ -118,7 +119,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 
 float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor
 												, State* finalState
-												, unsigned int* len) const
+												, unsigned int* /*len*/) const
 {
 	const size_t ngram = contextFactor.size();
 	switch (ngram)

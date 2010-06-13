@@ -11,6 +11,7 @@
 #include "ScoreProducer.h"
 #include "FeatureFunction.h"
 
+#include "LexicalReorderingState.h"
 #include "LexicalReorderingTable.h"
 
 namespace Moses
@@ -21,139 +22,56 @@ class Phrase;
 class Hypothesis;
 class InputType;
 
-using namespace std;
-
 class LexicalReordering : public StatefulFeatureFunction {
- public: //types & consts
-  typedef int OrientationType; 
-  enum Direction {Forward, Backward, Bidirectional, Unidirectional = Backward};
-  enum Condition {F,E,C,FE,FEC};
- public: //con- & destructors 
-  LexicalReordering(const std::string &filePath, 
-		    const std::vector<float>& weights, 
-		    Direction direction, 
-		    Condition condition, 
-		    std::vector< FactorType >& f_factors, 
-		    std::vector< FactorType >& e_factors);
-  virtual ~LexicalReordering();
- public: //interface
-  //inherited
-  virtual size_t GetNumScoreComponents() const {
-    return m_NumScoreComponents; 
-  };
+public:   
+    LexicalReordering(std::vector<FactorType>& f_factors, 
+                      std::vector<FactorType>& e_factors,
+                      const std::string &modelType,
+                      const std::string &filePath, 
+                      const std::vector<float>& weights);
+    virtual ~LexicalReordering();
+    
+    virtual size_t GetNumScoreComponents() const {
+        return m_configuration.GetNumScoreComponents(); 
+    }
+    
+    virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+                              const FFState* prev_state,
+                              ScoreComponentCollection* accumulator) const;
+    
+    virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+    
+    virtual std::string GetScoreProducerDescription() const {
+        return "LexicalReordering_" + m_modelTypeString;
+    }
+    
+    std::string GetScoreProducerWeightShortName() const {
+        return "d";
+    };
+    
+    void InitializeForInput(const InputType& i){
+        m_table->InitializeForInput(i);
+    }
+    
+    Scores GetProb(const Phrase& f, const Phrase& e) const;
+    
+private:
+    bool DecodeCondition(std::string s);
+    bool DecodeDirection(std::string s);
+    bool DecodeNumFeatureFunctions(std::string s);
 
-  virtual FFState* Evaluate(
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const;
-
-  const FFState* EmptyHypothesisState() const;
-
-  virtual std::string GetScoreProducerDescription() const {
-    return "Generic Lexical Reordering Model... overwrite in subclass.";
-  };
-
-  std::string GetScoreProducerWeightShortName() const {
-	return "d";
-  };
-
-  //new 
-  virtual int             GetNumOrientationTypes() const = 0;
-  virtual OrientationType GetOrientationType(Hypothesis*) const = 0;
-  
-  std::vector<float> CalcScore(Hypothesis* hypothesis) const;
-  void InitializeForInput(const InputType& i){
-    m_Table->InitializeForInput(i);
-  }
-
-  Score GetProb(const Phrase& f, const Phrase& e) const;
-  //helpers
-  static std::vector<Condition> DecodeCondition(Condition c);
-  static std::vector<Direction> DecodeDirection(Direction d);
- private:
-  Phrase auxGetContext(const Hypothesis* hypothesis) const;
- private:
-  LexicalReorderingTable* m_Table;
-  size_t m_NumScoreComponents;
-  std::vector< Direction > m_Direction;
-  std::vector< Condition > m_Condition;
-  bool m_OneScorePerDirection;
-  std::vector< FactorType > m_FactorsE, m_FactorsF, m_FactorsC;
-  int m_MaxContextLength;
+    LexicalReorderingConfiguration m_configuration;
+    std::string m_modelTypeString;
+    std::vector<std::string> m_modelType;
+    LexicalReorderingTable* m_table;
+    size_t m_numScoreComponents;
+    //std::vector<Direction> m_direction;
+    std::vector<LexicalReorderingConfiguration::Condition> m_condition;
+    //std::vector<size_t> m_scoreOffset;
+    //bool m_oneScorePerDirection;
+    std::vector<FactorType> m_factorsE, m_factorsF;
 };
-
-
-class LexicalMonotonicReordering : public LexicalReordering {
- private:
-  enum {Monotone = 0, NonMonotone = 1};
- public:
-  LexicalMonotonicReordering(const std::string &filePath, 
-			     const std::vector<float>& w, 
-			     Direction direction, 
-			     Condition condition, 
-			     std::vector< FactorType >& f_factors, 
-			     std::vector< FactorType >& e_factors)
-    : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors){
-	std::cerr << "Created lexical monotonic reordering\n";
-  }
- public:
-  virtual int GetNumOrientationTypes() const {
-    return 2; 
-  };
-  virtual std::string GetScoreProducerDescription() const {
-    return "MonotonicLexicalReorderingModel";
-  };
-  virtual int GetOrientationType(Hypothesis* currHypothesis) const;
-};
-
-class LexicalOrientationReordering : public LexicalReordering {
- private:
-  enum {Monotone = 0, Swap = 1, Discontinuous = 2};
- public:
-    LexicalOrientationReordering(const std::string &filePath, 
-			     const std::vector<float>& w, 
-			     Direction direction, 
-			     Condition condition, 
-			     std::vector< FactorType >& f_factors, 
-			     std::vector< FactorType >& e_factors)
-      : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors){
-	  std::cerr << "Created lexical orientation reordering\n";
-  }
- public:
-  virtual int GetNumOrientationTypes() const {
-    return 3; 
-  }
-  virtual std::string GetScoreProducerDescription() const {
-    return "OrientationLexicalReorderingModel";
-  };
-  virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
-};
-
-class LexicalDirectionalReordering : public LexicalReordering {
- private:
-  enum {Left = 0, Right = 1};
- public:
- LexicalDirectionalReordering(const std::string &filePath, 
-							  const std::vector<float>& w, 
-							  Direction direction, 
-							  Condition condition, 
-							  std::vector< FactorType >& f_factors, 
-							  std::vector< FactorType >& e_factors)
-   : LexicalReordering(filePath, w, direction, condition, f_factors, e_factors){
-   std::cerr << "Created lexical directional Reordering\n";
-  }
- public:
-  virtual int GetNumOrientationTypes() const {
-    return 2; 
-  };
-  virtual std::string GetScoreProducerDescription() const {
-    return "DirectionalLexicalReorderingModel";
-  };
-  virtual OrientationType GetOrientationType(Hypothesis* currHypothesis) const;
-};
-
 
 }
 
 #endif
-

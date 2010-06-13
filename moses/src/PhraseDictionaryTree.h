@@ -18,10 +18,10 @@
 #include "PrefixTree.h"
 #include "File.h"
 #include "ObjectPool.h"
+#include "LexicalReorderingTable.h"
 #include "LVoc.h"
 #include "TypeDef.h"
 #include "Util.h"
-#include "StaticData.h"
 
 namespace Moses
 {
@@ -29,12 +29,9 @@ namespace Moses
 class Phrase;
 class Word;
 class ConfusionNet;
-
+class PDTimp;
 
 typedef PrefixTreeF<LabelId,OFF_T> PTF;
-
-class PDTimp;
-class PPimp;
 
 class PhraseDictionaryTree : public Dictionary {
 	PDTimp *imp; //implementation

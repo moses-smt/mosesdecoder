@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+using namespace std;
+
 DecodeStepGeneration::DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev)
 : DecodeStep(dict, prev)
 {
@@ -80,8 +82,8 @@ inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
 void DecodeStepGeneration::Process(const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
-                              , TranslationOptionCollection *toc
-                              , bool adhereTableLimit) const
+                              , TranslationOptionCollection * /* toc */
+                              , bool /*adhereTableLimit*/) const
 {
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
     { // word deletion

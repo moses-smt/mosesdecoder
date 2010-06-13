@@ -1127,7 +1127,7 @@ sub scan_config {
 
   # in which field (counting from zero) is the filename to check?
   my %where_is_filename = (
-    "ttable-file" => 3,
+    "ttable-file" => 4,
     "generation-file" => 3,
     "lmodel-file" => 3,
     "distortion-file" => 3,
@@ -1136,7 +1136,7 @@ sub scan_config {
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
   my %where_is_lambda_count = (
-    "ttable-file" => 2,
+    "ttable-file" => 3,
     "generation-file" => 2,
     "distortion-file" => 2,
   );

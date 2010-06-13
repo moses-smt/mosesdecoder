@@ -147,7 +147,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
 		// initial position is not further into the sentence than the distortion limit.
 		if (hypo.GetWordsBitmap().GetNumWordsCovered() == 0)
 			{
-				if (transOptRange.GetStartPos() <= maxDistortion)
+				if ((int)transOptRange.GetStartPos() <= maxDistortion)
 					m_hypotheses.push_back(&hypo);
 			}
 		else

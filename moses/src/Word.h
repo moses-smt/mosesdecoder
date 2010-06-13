@@ -47,16 +47,21 @@ protected:
 	typedef const Factor * FactorArray[MAX_NUM_FACTORS];
 
 	FactorArray m_factorArray; /**< set of factors */
+	bool m_isNonTerminal;
 
 public:
 	/** deep copy */
-	Word(const Word &copy) {
+	Word(const Word &copy)
+	:m_isNonTerminal(copy.m_isNonTerminal)
+	{
 		std::memcpy(m_factorArray, copy.m_factorArray, sizeof(FactorArray));
 	}
 
 	/** empty word */
-	Word() {
+	explicit Word(bool isNonTerminal = false)
+	{
 		std::memset(m_factorArray, 0, sizeof(FactorArray));
+		m_isNonTerminal = isNonTerminal;
 	}
 
 	~Word() {}
@@ -79,10 +84,15 @@ public:
 		m_factorArray[factorType] = factor;
 	}
 
+	inline bool IsNonTerminal() const 
+	{	return m_isNonTerminal;	}
+	inline void SetIsNonTerminal(bool val)
+	{	m_isNonTerminal = val;	}
+	
 	/** add the factors from sourceWord into this representation,
 	 * NULL elements in sourceWord will be skipped */
 	void Merge(const Word &sourceWord);
-
+	
 	/** get string representation of list of factors. Used by PDTimp so supposed 
 	* to be invariant to changes in format of debuggin output, therefore, doesn't 
 	* use streaming output or ToString() from any class so not dependant on 
@@ -94,11 +104,23 @@ public:
 	//! transitive comparison of Word objects
   inline bool operator< (const Word &compare) const
   { // needed to store word in GenerationDictionary map
-          // uses comparison of FactorKey
-          // 'proper' comparison, not address/id comparison
-          return Compare(*this, compare) < 0;
+		// uses comparison of FactorKey
+		// 'proper' comparison, not address/id comparison
+		return Compare(*this, compare) < 0;
   }
-
+		
+  inline bool operator== (const Word &compare) const
+  { // needed to store word in GenerationDictionary map
+		// uses comparison of FactorKey
+		// 'proper' comparison, not address/id comparison
+		return Compare(*this, compare) == 0;
+  }
+	
+	inline bool operator!= (const Word &compare) const
+	{
+		return Compare(*this, compare) != 0;
+	}
+	
 	/* static functions */
 	
 	/** transitive comparison of 2 word objects. Used by operator<. 
@@ -106,7 +128,14 @@ public:
 	*	Should make it non-static
 	*/
 	static int Compare(const Word &targetWord, const Word &sourceWord);
+	
+	void CreateFromString(FactorDirection direction
+												, const std::vector<FactorType> &factorOrder
+												, const std::string &str
+												, bool isNonTerminal);	
 
+	void CreateUnknownWord(const Word &sourceWord);
+	
 };
 
 struct WordComparer

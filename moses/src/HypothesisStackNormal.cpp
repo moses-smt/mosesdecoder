@@ -1,4 +1,4 @@
-// $Id: HypothesisStackNormal.cpp 1511 2007-11-12 20:21:44Z hieuhoang1972 $
+// $Id: HypothesisStackNormal.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -94,7 +94,8 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
 bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
 { 
 	// too bad for stack. don't bother adding hypo into collection
-	if (hypo->GetTotalScore() < m_worstScore
+	if (!StaticData::Instance().GetDisableDiscarding() &&
+      hypo->GetTotalScore() < m_worstScore
 	    && ! ( m_minHypoStackDiversity > 0
 	           && hypo->GetTotalScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) )
 	{

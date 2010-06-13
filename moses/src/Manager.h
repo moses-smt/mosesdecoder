@@ -42,8 +42,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+class SentenceStats;
 class TrellisPath;
 class TranslationOptionCollection;
+
+/** Used to output the search graph */
+struct SearchGraphNode {
+    const Hypothesis* hypo;
+    const Hypothesis* recombinationHypo;
+    int forward;
+    double fscore;
+
+    SearchGraphNode(const Hypothesis* theHypo, 
+                    const Hypothesis* theRecombinationHypo,
+                    int theForward,
+                    double theFscore) :
+        hypo(theHypo), recombinationHypo(theRecombinationHypo),
+            forward(theForward), fscore(theFscore) {}
+   
+};
 
 /** The Manager class implements a stack decoding algorithm.
  * Hypotheses are organized in stacks. One stack contains all hypothesis that have 
@@ -81,13 +98,16 @@ class Manager
   void operator=(Manager const&);
 protected:	
 	// data
-	InputType const& m_source; /**< source sentence to be translated */
+//	InputType const& m_source; /**< source sentence to be translated */
 	TranslationOptionCollection *m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
 	Search *m_search;
 	
 	HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/ 
 	clock_t m_start; /**< starting time, used for logging */
 	size_t interrupted_flag;
+	std::auto_ptr<SentenceStats> m_sentenceStats;
+    int m_hypoId; //used to number the hypos as they are created.
+	
   void GetConnectedGraph(
                          std::map< int, bool >* pConnected,
                          std::vector< const Hypothesis* >* pConnectedList) const;
@@ -97,41 +117,41 @@ protected:
   
 		
 public:
+	InputType const& m_source; /**< source sentence to be translated */
 	Manager(InputType const& source, SearchAlgorithm searchAlgorithm);
 	~Manager();
+    const  TranslationOptionCollection* getSntTranslationOptions(); 
   
 	void ProcessSentence();
 	const Hypothesis *GetBestHypothesis() const;
 	const Hypothesis *GetActualBestHypothesis() const;
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
+    void PrintAllDerivations(long translationId, std::ostream& outputStream) const;
+    void printDivergentHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase*> & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
+    void printThisHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase* > & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
 	void GetWordGraph(long translationId, std::ostream &outputWordGraphStream) const;
+    int GetNextHypoId();
 #ifdef HAVE_PROTOBUF
 	void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
 #endif
   
-	void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-    const InputType& GetSource() const {return m_source;}   
+	void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+    void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
+  const InputType& GetSource() const {return m_source;}   
 
 	/***
 	 * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
 	 */
 	void CalcDecoderStatistics() const;
-  void ResetSentenceStats(const InputType& source)
-  {
-    m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
-  }
-  SentenceStats& GetSentenceStats() const
-  {
-    return *m_sentenceStats;
-  }
+  void ResetSentenceStats(const InputType& source);
+  SentenceStats& GetSentenceStats() const;
   
   /***
    *For Lattice MBR 
   */
   void GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
-                                     std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, set < const Hypothesis* > >* pOutgoingHyps, vector< float>* pFwdBwdScores) const;
+                                     std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, std::vector< float>* pFwdBwdScores) const;
   
-  std::auto_ptr<SentenceStats> m_sentenceStats;
 };
 
 }

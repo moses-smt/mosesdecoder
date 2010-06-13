@@ -36,6 +36,8 @@ class WordsRange;
 class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
+	
+typedef std::vector<Word> LabelList;
 
 //! base class for sentences and confusion networks
 class InputType 
@@ -47,6 +49,12 @@ protected:
 	ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
  
 public:
+
+  // used in -continue-partial-translation
+	std::vector<bool> m_sourceCompleted;
+	std::string m_initialTargetPhrase;
+  size_t m_frontSpanCoveredLength;
+    // how many words from the beginning are covered
 
 	InputType(long translationId = 0);
 	virtual ~InputType();
@@ -120,6 +128,8 @@ public:
 	{
 		return m_reorderingConstraint;
 	};
+
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const = 0;
 
 	TO_STRING();
 	

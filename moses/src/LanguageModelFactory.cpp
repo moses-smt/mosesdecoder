@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // include appropriate header
 #ifdef LM_SRI
 #  include "LanguageModelSRI.h"
+#include "LanguageModelParallelBackoff.h"
 #endif
 #ifdef LM_IRST
 #  include "LanguageModelIRST.h"
@@ -106,6 +107,11 @@ namespace LanguageModelFactory
 				registerLM, scoreIndexManager);
 				#endif
 				break;
+			case ParallelBackoff:
+				#ifdef LM_SRI
+					lm = new LanguageModelParallelBackoff(true, scoreIndexManager);
+				#endif
+					break;
 	  	case Internal:
 				#ifdef LM_INTERNAL
 					lm = new LanguageModelInternal(registerLM, scoreIndexManager);

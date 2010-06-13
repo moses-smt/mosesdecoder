@@ -43,11 +43,6 @@ class FactorCollection;
  * corresponding to French or English), a type (surface form,
  * POS, stem, etc), and the value of the factor.
  *
- * @TODO I find this design problematic- essentially, a factor should
- * just be a value type and the factor type and "direction"
- * should be the keys in a larger identification system that
- * find instances of specific factors.
- *
  */
 class Factor
 {

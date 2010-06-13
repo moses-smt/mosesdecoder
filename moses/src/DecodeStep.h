@@ -53,7 +53,7 @@ protected:
 
 public:
 	DecodeStep(); //! not implemented
-	DecodeStep(Dictionary *ptr, const DecodeStep* prevDecodeStep);
+	DecodeStep(const Dictionary *ptr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
 
 	//! mask of factors that are present after this decode step

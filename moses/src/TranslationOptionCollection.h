@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "TypeDef.h"
 #include "TranslationOption.h"
+#include "TranslationOptionList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
@@ -85,24 +86,8 @@ protected:
 	void Sort();
 
 	//! list of trans opt for a particular span
-	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
-	{
-		size_t maxSize = endPos - startPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
-
-		assert(maxSize < m_collection[startPos].size());
-		return m_collection[startPos][maxSize];
-	}
-	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
-	{
-		size_t maxSize = endPos - startPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
-
-		assert(maxSize < m_collection[startPos].size());
-	 	return m_collection[startPos][maxSize];
-	}
+	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
+	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 	void Add(TranslationOption *translationOption);
 
 	//! implemented by inherited class, called by this class

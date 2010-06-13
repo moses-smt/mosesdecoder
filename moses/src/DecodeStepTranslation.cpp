@@ -28,8 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(PhraseDictionary* dict, const DecodeStep* prev)
-: DecodeStep(dict, prev), m_phraseDictionary(dict)
+DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* dict, const DecodeStep* prev)
+: DecodeStep(dict, prev)
 {
 }
 
@@ -102,10 +102,11 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 															,PartialTranslOptColl &outputPartialTranslOptColl
 															, size_t startPos, size_t endPos, bool adhereTableLimit) const
 {
-	const size_t tableLimit = m_phraseDictionary->GetTableLimit();
+	const PhraseDictionary &phraseDictionary = *static_cast<const PhraseDictionary*>(m_ptr);
+	const size_t tableLimit = phraseDictionary.GetTableLimit();
 
 	const WordsRange wordsRange(startPos, endPos);
-	const TargetPhraseCollection *phraseColl =	m_phraseDictionary->GetTargetPhraseCollection(source,wordsRange); 
+	const TargetPhraseCollection *phraseColl =	phraseDictionary.GetTargetPhraseCollection(source,wordsRange); 
 
 	if (phraseColl != NULL)
 	{
@@ -126,7 +127,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(
 			
 			VERBOSE(3,"\t" << targetPhrase << "\n");
 		}
-		VERBOSE(3,endl);
+		VERBOSE(3,std::endl);
 	}
 }
 

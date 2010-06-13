@@ -8,19 +8,23 @@ use Getopt::Long;
 
 ############################################################
 my @tests = qw (
-  basic-surface-only
-  ptable-filtering
-  multi-factor
-  multi-factor-drop
-  confusionNet-surface-only
-  confusionNet-multi-factor
-  basic-surface-binptable
-  multi-factor-binptable
-  nbest-multi-factor
-  lattice-surface
-  lattice-distortion
-  lexicalized-reordering
-  lexicalized-reordering-cn
+  chart.target-syntax
+  chart.hierarchical
+  phrase.basic-surface-only
+  phrase.ptable-filtering
+  phrase.multi-factor
+  phrase.multi-factor-drop
+  phrase.confusionNet-surface-only
+  phrase.confusionNet-multi-factor
+  phrase.basic-surface-binptable
+  phrase.multi-factor-binptable
+  phrase.nbest-multi-factor
+  phrase.lattice-surface
+  phrase.lattice-distortion
+  phrase.lexicalized-reordering
+  phrase.lexicalized-reordering-cn
+  phrase.consensus-decoding-surface
+  phrase.continue-partial-translation
 );
 #  xml-markup
 
@@ -29,13 +33,15 @@ use MosesRegressionTesting;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );
 
-my $decoder;
+my $decoderPhrase;
+my $decoderChart;
 my $test_dir;
 my $BIN_TEST = $script_dir;
 my $data_dir;
 
-GetOptions("decoder=s" => \$decoder,
-           "data-dir=s" => \$data_dir,
+GetOptions(	"decoder-phrase=s" => \$decoderPhrase,
+			"decoder-chart=s" => \$decoderChart,
+           	"data-dir=s" => \$data_dir,
           ) or exit 1;
 
 $data_dir = MosesRegressionTesting::find_data_directory($BIN_TEST, $data_dir);
@@ -46,11 +52,9 @@ $test_run .= " --test-dir=$test_dir" if $test_dir;
 
 print "Data directory: $data_dir\n";
 
-die "Please specify a decoder to test with --decoder\n" unless $decoder;
+die "Please specify the phrase-base & chart decoder to test with --decoder-phrase=[path] --decoder-chart=[path] \n" unless ($decoderPhrase and $decoderChart);
 
-die "Cannot locate executable called $decoder\n" unless (-x $decoder);
-
-$test_run .= " --decoder=$decoder";
+die "Cannot locate executable called $decoderPhrase\n" unless (-x $decoderPhrase);
 
 print "Running tests: @tests\n\n";
 
@@ -60,8 +64,25 @@ print $lb;
 
 my $fail = 0;
 my @failed;
-foreach my $test (@tests) {
-  my $cmd = "$test_run --test=$test";
+foreach my $test (@tests) 
+{
+  my $cmd;
+  my $model_type = substr($test, $[, 6);
+
+  if ($model_type eq 'phrase')
+  {
+  	$cmd .= "$test_run --decoder=$decoderPhrase";
+  }
+  elsif ($model_type eq 'chart.')
+  {
+  	$cmd .= "$test_run --decoder=$decoderChart";
+  }
+  else 
+  {
+  	print "FAIL";	
+  }
+  
+  $cmd .= " --test=$test";
   my ($res, $output, $results_path) = do_test($cmd);
   format STDOUT =
 @<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

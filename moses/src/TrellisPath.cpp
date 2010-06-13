@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "TrellisPath.h"
+#include "TrellisPathList.h"
 #include "TrellisPathCollection.h"
 #include "StaticData.h"
 
@@ -80,6 +81,49 @@ TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypoth
 }
 
 void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl) const
+{
+	const size_t sizePath = m_path.size();
+
+	if (m_prevEdgeChanged == NOT_FOUND)
+	{ // initial enumration from a pure hypo
+		for (size_t currEdge = 0 ; currEdge < sizePath ; currEdge++)
+		{
+			const Hypothesis	*hypo		= static_cast<const Hypothesis*>(m_path[currEdge]);
+			const ArcList *pAL = hypo->GetArcList();
+      if (!pAL) continue;
+			const ArcList &arcList = *pAL;
+
+			// every possible Arc to replace this edge
+			ArcList::const_iterator iterArc;
+			for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
+			{
+				const Hypothesis *arc = *iterArc;
+				TrellisPath *deviantPath = new TrellisPath(*this, currEdge, arc);
+				pathColl.Add(deviantPath);
+			}
+		}
+	}
+	else
+	{	// wiggle 1 of the edges only
+		for (size_t currEdge = m_prevEdgeChanged + 1 ; currEdge < sizePath ; currEdge++)
+		{
+			const ArcList *pAL = m_path[currEdge]->GetArcList();
+    	if (!pAL) continue;
+			const ArcList &arcList = *pAL;
+			ArcList::const_iterator iterArc;
+
+			for (iterArc = arcList.begin() ; iterArc != arcList.end() ; ++iterArc)
+			{	// copy this Path & change 1 edge
+				const Hypothesis *arcReplace = *iterArc;
+
+				TrellisPath *deviantPath = new TrellisPath(*this, currEdge, arcReplace);
+				pathColl.Add(deviantPath);						
+			} // for (iterArc...
+		} // for (currEdge = 0 ...
+	}
+}
+
+void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
 {
 	const size_t sizePath = m_path.size();
 

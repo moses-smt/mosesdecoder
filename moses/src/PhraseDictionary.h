@@ -45,6 +45,8 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
+class ChartRuleCollection;
+class CellCollection;
 
 class PhraseDictionaryFeature;
 /**
@@ -71,7 +73,9 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-    
+		virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
+																															bool adhereTableLimit,const CellCollection &cellColl) const=0;
+
   protected:
     size_t m_tableLimit;
     const PhraseDictionaryFeature* m_feature;
@@ -86,13 +90,17 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
  
 
  public:
-	PhraseDictionaryFeature(  size_t numScoreComponent
+	PhraseDictionaryFeature(  PhraseTableImplementation implementation
+														, size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t tableLimit);
+                            , size_t tableLimit
+														, const std::string &targetFile  
+														, const std::string &alignmentsFile);
+
                             
 	virtual ~PhraseDictionaryFeature();
 	
@@ -107,9 +115,15 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
 
 	size_t GetNumInputScores() const;
 
-	PhraseDictionary* GetDictionary(const InputType& source);
     
+	const PhraseDictionary* GetDictionary(const InputType& source);
+    // TODO - get rid of this, make Cleanup() const. only to be called by static data
+    PhraseDictionary* GetDictionary();
+	
  private:
+     /** Load the appropriate phrase table */
+     PhraseDictionary* LoadPhraseTable();
+     
     size_t m_numScoreComponent;
     unsigned m_numInputScores;
     std::vector<FactorType> m_input;
@@ -117,14 +131,22 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
     std::string m_filePath;
     std::vector<float> m_weight;
     size_t m_tableLimit;
-    //Only instantiate one of these
-    std::auto_ptr<PhraseDictionary> m_memoryDictionary;
+    //We instantiate either the the thread-safe or non-thread-safe dictionary,
+    //but not both. The thread-safe one can be instantiated in the constructor and shared
+    //between threads, however the non-thread-safe one (eg PhraseDictionaryTree) must be instantiated
+    //on demand, and stored in thread-specific storage.
+    std::auto_ptr<PhraseDictionary> m_threadSafePhraseDictionary;
     #ifdef WITH_THREADS
-    boost::thread_specific_ptr<PhraseDictionary>  m_treeDictionary;
+    boost::thread_specific_ptr<PhraseDictionary>  m_threadUnsafePhraseDictionary;
     #else
-    std::auto_ptr<PhraseDictionary> m_treeDictionary;
+    std::auto_ptr<PhraseDictionary> m_threadUnsafePhraseDictionary;
     #endif
-
+    
+    bool m_useThreadSafePhraseDictionary;
+    PhraseTableImplementation m_implementation;
+    std::string m_targetFile;
+    std::string m_alignmentsFile;
+    
 };
 
 

@@ -141,6 +141,11 @@ public:
 		}  
 	}
 
+	void Assign(const ScoreComponentCollection &copy)
+	{
+		m_scores =  copy.m_scores;
+	}
+	
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value
@@ -191,6 +196,11 @@ public:
 #endif
 		return m_scores[begin];
 	}
+
+	float GetWeightedScore() const;
+
+	void ZeroAllLM();
+	void PlusEqualsAllLM(const ScoreComponentCollection& rhs);
 
 };
 

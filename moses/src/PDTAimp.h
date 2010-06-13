@@ -8,6 +8,7 @@
 
 namespace Moses
 {
+using namespace std;
 
 inline bool existsFile(const char* filePath) {
   struct stat mystat;
@@ -229,7 +230,8 @@ public:
 		m_weightWP=weightWP;
 		m_weights=weight;
 
-
+		const StaticData &staticData = StaticData::Instance();
+		m_dict->UseWordAlignment(staticData.UseAlignmentInfo());
 
 		std::string binFname=filePath+".binphr.idx";
 		if(!existsFile(binFname.c_str())) {
