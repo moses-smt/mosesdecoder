@@ -751,8 +751,9 @@ bool StaticData::LoadWordDependencyModel()
 		vector<string> token = Tokenize(models[currModel]);
 		FactorType linkFactor = Scan<FactorType>(token[0]);
 		vector<FactorType> e_factors = Tokenize<FactorType>(token[1], ",");
-		LMImplementation lmtype = static_cast<LMImplementation>(Scan<int>(token[2]));
-		std::string filePath = token[3];
+		FactorType alignmentFactor = Scan<FactorType>(token[2]);
+		LMImplementation lmtype = static_cast<LMImplementation>(Scan<int>(token[3]));
+		std::string filePath = token[4];
 		
 		assert(weight_it != weights.end());
 		vector<float> currWeights(weight_it, weight_it + 1);
@@ -762,7 +763,7 @@ bool StaticData::LoadWordDependencyModel()
 																		currWeights[0], m_scoreIndexManager, dub, false);
 		if(!lm) return false;
 		
-		WordDependencyModel *wdm = new WordDependencyModel(linkFactor, e_factors, lm);
+		WordDependencyModel *wdm = new WordDependencyModel(linkFactor, e_factors, alignmentFactor, lm);
 		m_allWeights.insert(m_allWeights.end(), currWeights.begin(), currWeights.end());
 		m_scoreIndexManager.AddScoreProducer(wdm);
 		SetWeightsForScoreProducer(wdm, currWeights);

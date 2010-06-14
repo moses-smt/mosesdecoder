@@ -1,3 +1,4 @@
+// vi:ts=2:
 #include <cassert>
 #include <map>
 #include <numeric>
@@ -18,7 +19,7 @@ namespace Moses
 class WordDependencyState : public FFState
 {
 private:
-	typedef std::map<size_t, std::pair<std::string,std::string> > LinkMap;
+	typedef std::map<size_t, std::pair<std::vector<std::string>,std::vector<std::string> > > LinkMap;
 	
 	LinkMap m_openLinks;
 	const WordDependencyModel *m_model;
@@ -27,8 +28,8 @@ public:
 	WordDependencyState(const WordDependencyModel	*model) : m_model(model) {}
 
 	WordDependencyState *Clone() const;
-	const Scores ProcessAntecedent(size_t linkNo, const std::string &word);
-	const Scores ProcessReferent(size_t linkNo, const std::string &word);
+	const std::vector<std::string> ProcessAntecedent(size_t linkNo, const std::vector<std::string> &word);
+	const std::vector<std::string> ProcessReferent(size_t linkNo, const std::vector<std::string> &word);
 	virtual int Compare(const FFState &other) const;
 };
 
@@ -37,37 +38,48 @@ const FFState* WordDependencyModel::Evaluate(const Hypothesis& cur_hypo,
 														ScoreComponentCollection* accumulator) const
 {
 	const WordDependencyState *state = dynamic_cast<const WordDependencyState *>(prev_state);
-	WordDependencyState *new_state = NULL;
+	WordDependencyState *new_state = state->Clone();
 	
-	for(size_t i = 0; i < cur_hypo.GetCurrTargetLength(); i++)
+	for(size_t i = 0; i < cur_hypo.GetCurrSourceWordsRange().GetNumWordsCovered(); i++)
 	{
 		const std::string &link = cur_hypo.GetSourcePhrase()->GetFactor(i, m_linkFactor)->GetString();
 		
-		std::vector<std::string> linkPart = Tokenize(link, "-");
-		assert(linkPart.size() == 2);
+		size_t del = link.find_first_of('-');
+		assert(del != std::string::npos);
+		std::string ant = link.substr(0, del);
+		std::string ref = link.substr(del + 1, std::string::npos);
+		assert(ant != "" && ref != "");
 		
-		if(linkPart[0] != "*")
+		if(ant != "*")
 		{
-			if(!new_state)
-				new_state = state->Clone();
-			
-			size_t linkNo = Scan<size_t>(linkPart[0]);
-			const std::string word = cur_hypo.GetTargetPhraseStringRep(m_eFactors);
-			accumulator->PlusEquals(this, new_state->ProcessAntecedent(linkNo, word));
+			size_t linkNo = Scan<size_t>(ant);
+			const std::vector<std::string> antwords = GetAlignedTargetWords(cur_hypo, i);
+			const std::vector<std::string> refwords = new_state->ProcessAntecedent(linkNo, refwords);
+			if(antwords.size() > 0)
+				accumulator->PlusEquals(this, LookupScores(antwords, refwords));
 		}
 
-		if(linkPart[1] != "*")
+		if(ref != "*")
 		{
-			if(!new_state)
-				new_state = state->Clone();
-			
-			size_t linkNo = Scan<size_t>(linkPart[1]);
-			const std::string word = cur_hypo.GetTargetPhraseStringRep(m_eFactors);
-			accumulator->PlusEquals(this, new_state->ProcessReferent(linkNo, word));
+			if(ref[0] != '>')
+			{
+				size_t linkNo = Scan<size_t>(ref);
+				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i);
+				const std::vector<std::string> antwords = new_state->ProcessReferent(linkNo, antwords);
+				if(refwords.size() > 0)
+					accumulator->PlusEquals(this, LookupScores(antwords, refwords));
+			}
+			else
+			{
+				const std::vector<std::string> antwords(1, ref.substr(1));
+				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i);
+				assert(antwords.size() > 0);
+				accumulator->PlusEquals(this, LookupScores(antwords, refwords));
+			}
 		}
 	}
 	
-	return new_state ? new_state : prev_state;
+	return new_state;
 }
 
 const FFState* WordDependencyModel::EmptyHypothesisState(const InputType &input) const
@@ -75,19 +87,43 @@ const FFState* WordDependencyModel::EmptyHypothesisState(const InputType &input)
 	return new WordDependencyState(this);
 }
 
-const Scores WordDependencyModel::LookupScores(const std::string &antecedent, const std::string &referent) const
+const Scores WordDependencyModel::LookupScores(const std::vector<std::string> &antecedent, const std::vector<std::string> &referent) const
 {
 	Scores s(1);
 	Word antw, refw;
 	std::vector<const Word *> bigram(2);
 	
-	antw.CreateFromString(Output, m_eFactors, antecedent, false);
-	refw.CreateFromString(Output, m_eFactors, referent, false);
 	bigram[0] = &antw;
 	bigram[1] = &refw;
-	s[0] = m_lm->GetValue(bigram);
+
+	for(size_t i = 0; i < antecedent.size(); i++) {
+		antw.CreateFromString(Output, m_eFactors, antecedent[i], false);
+		for(size_t j = 0; j < referent.size(); j++) {
+			refw.CreateFromString(Output, m_eFactors, referent[j], false);
+			float score = m_lm->GetValue(bigram);
+			if(score > s[0])
+				s[0] = score;
+		}
+	}
 	
 	return s;
+}
+
+std::vector<std::string> WordDependencyModel::GetAlignedTargetWords(const Hypothesis &hypo, size_t pos) const
+{
+	std::vector<std::string> ret;
+	const TargetPhrase tp = hypo.GetTargetPhrase();
+	for(unsigned i = 0; i < tp.GetSize(); i++)
+	{
+		std::string alig = tp.GetFactor(i, m_alignmentFactor)->GetString();
+		if(alig == "-")
+			continue;
+		std::vector<unsigned> apos = Tokenize<unsigned>(alig, ",");
+		for(unsigned j = 0; j < apos.size(); j++)
+			if(j == pos)
+				ret.push_back(tp.GetWord(j).GetString(m_eFactors, false));
+	}
+	return ret;
 }
 
 WordDependencyState *WordDependencyState::Clone() const
@@ -95,38 +131,38 @@ WordDependencyState *WordDependencyState::Clone() const
 	return new WordDependencyState(*this);
 }
 
-const Scores WordDependencyState::ProcessAntecedent(size_t linkNo, const std::string &word)
+const std::vector<std::string> WordDependencyState::ProcessAntecedent(size_t linkNo, const std::vector<std::string> &words)
 {
-	Scores scores(m_model->GetNumScoreComponents(), .0f);
+	std::vector<std::string> s;
 	
 	LinkMap::iterator it = m_openLinks.find(linkNo);
 	if(it == m_openLinks.end())
-		m_openLinks[linkNo] = std::make_pair(word, "");
+		m_openLinks[linkNo] = std::make_pair(words, std::vector<std::string>());
 	else
 	{
-		assert(it->second.first == "" && it->second.second != "");
-		scores = m_model->LookupScores(word, it->second.second);
+		assert(it->second.first.size() == 0 && it->second.second.size() > 0);
+		s = it->second.second;
 		m_openLinks.erase(it);
 	}
 	
-	return scores;
+	return s;
 }
 
-const Scores WordDependencyState::ProcessReferent(size_t linkNo, const std::string &word)
+const std::vector<std::string> WordDependencyState::ProcessReferent(size_t linkNo, const std::vector<std::string> &words)
 {
-	Scores scores(m_model->GetNumScoreComponents(), .0f);
+	std::vector<std::string> s;
 	
 	LinkMap::iterator it = m_openLinks.find(linkNo);
 	if(it == m_openLinks.end())
-		m_openLinks[linkNo] = std::make_pair("", word);
+		m_openLinks[linkNo] = std::make_pair(std::vector<std::string>(), words);
 	else
 	{
-		assert(it->second.first != "" && it->second.second == "");
-		scores = m_model->LookupScores(it->second.first, word);
+		assert(it->second.first.size() > 0 && it->second.second.size() == 0);
+		s = it->second.first;
 		m_openLinks.erase(it);
 	}
 	
-	return scores;
+	return s;
 }
 
 int WordDependencyState::Compare(const FFState &other) const

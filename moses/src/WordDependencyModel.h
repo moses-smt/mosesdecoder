@@ -16,8 +16,9 @@ class WordDependencyModel : public StatefulFeatureFunction {
 public:
 	WordDependencyModel(FactorType linkFactor, 
 										const std::vector<FactorType>& e_factors, 
+										FactorType alignmentFactor, 
 										const LanguageModel *lm)
-				: m_linkFactor(linkFactor), m_eFactors(e_factors), m_lm(lm) {}
+				: m_linkFactor(linkFactor), m_alignmentFactor(alignmentFactor), m_eFactors(e_factors), m_lm(lm) {}
 
 	virtual ~WordDependencyModel() {
 		delete m_lm;
@@ -43,10 +44,12 @@ public:
     
 private:
 	const FactorType m_linkFactor;
+	const FactorType m_alignmentFactor;
 	const std::vector<FactorType> m_eFactors;
 	const LanguageModel *m_lm;
 	
-	const Scores LookupScores(const std::string &antecedent, const std::string &referent) const;
+	const Scores LookupScores(const std::vector<std::string> &antecedent, const std::vector<std::string> &referent) const;
+	std::vector<std::string> GetAlignedTargetWords(const Hypothesis &hypo, size_t pos) const;
 	
 	friend class WordDependencyState;
 };
