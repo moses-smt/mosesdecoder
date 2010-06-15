@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#include <set>
 
 #include "StaticData.h"
 #include "LMList.h"
@@ -35,7 +36,9 @@ LMList::~LMList()
 
 void LMList::CleanUp() 
 {
-	RemoveAllInColl(m_coll);
+  set<LanguageModel*> lms;
+  copy(m_coll.begin(), m_coll.end(), inserter(lms,lms.end()));
+	RemoveAllInColl(lms);
 }
 	
 void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const

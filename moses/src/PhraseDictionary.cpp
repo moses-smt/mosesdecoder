@@ -185,7 +185,11 @@ void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system)
 {
   //Thread-safe phrase dictionaries get loaded now
   if (m_useThreadSafePhraseDictionary && !m_threadSafePhraseDictionary.get()) {
+    IFVERBOSE(1)
+      PrintUserTime("Start loading phrase table from " +  m_filePath);
     m_threadSafePhraseDictionary.reset(LoadPhraseTable(system));
+    IFVERBOSE(1)
+      PrintUserTime("Finished loading phrase table");
   }
   //Other types will be lazy loaded
 }

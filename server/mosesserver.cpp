@@ -17,6 +17,17 @@ using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
 
+/** Find out which translation system to use */
+const TranslationSystem& getTranslationSystem(params_t params) {
+    string system_id = TranslationSystem::DEFAULT;
+    params_t::const_iterator pi = params.find("system");
+    if (pi != params.end()) {
+        system_id = xmlrpc_c::value_string(pi->second);
+    }
+    VERBOSE(1, "Using translation system " << system_id << endl;)
+    return StaticData::Instance().GetTranslationSystem(system_id);
+}
+
 class Updater: public xmlrpc_c::method {
 public:
   Updater() {
@@ -31,9 +42,7 @@ public:
           xmlrpc_c::value *   const  retvalP) {
       const params_t params = paramList.getStruct(0);
       breakOutParams(params);
-      //TODO: Get from xml
-      const StaticData &staticData = StaticData::Instance();
-      const TranslationSystem& system = staticData.GetTranslationSystem("de");
+      const TranslationSystem& system = getTranslationSystem(params);
       const PhraseDictionaryFeature* pdf = system.GetPhraseDictionaries()[0];  
       PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(); 
       cerr << "Inserting into address " << pdsa << endl;
@@ -108,8 +117,7 @@ public:
             (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
         }
         
-        //TODO: Get from xml
-        const TranslationSystem& system = staticData.GetTranslationSystem("de");
+        const TranslationSystem& system = getTranslationSystem(params);
         
         Sentence sentence(Input);
         const vector<FactorType> &inputFactorOrder = 

@@ -487,26 +487,26 @@ bool StaticData::LoadData(Parameter *parameter)
       }
       if (id == "D") {
         for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
-          if (!tableIds.size() || tableIds.find(k) == tableIds.end()) {
+          if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k]);
           }
         }
       } else if (id == "R") {
         for (size_t k = 0; k < m_reorderModels.size(); ++k) {
-          if (!tableIds.size() || tableIds.find(k) == tableIds.end()) {
+          if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddReorderModel(m_reorderModels[k]);
           }
         }
       } else if (id == "G") {
         for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
-          if (!tableIds.size() || tableIds.find(k) == tableIds.end()) {
+          if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddGlobalLexicalModel(m_globalLexicalModels[k]);
           }
         }
       } else if (id == "L") {
         size_t lmid = 0;
         for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
-          if (!tableIds.size() || tableIds.find(lmid) == tableIds.end()) {
+          if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddLanguageModel(*k);
           }
         }
@@ -709,48 +709,56 @@ bool StaticData::LoadLanguageModels()
 
 	  // initialize n-gram order for each factor. populated only by factored lm
 		const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
+        //prevent language models from being loaded twice
+        map<string,LanguageModel*> languageModelsLoaded;
 
 		for(size_t i=0; i<lmVector.size(); i++) 
 		{
-			vector<string>	token		= Tokenize(lmVector[i]);
-			if (token.size() != 4 && token.size() != 5 )
-			{
-				UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-				return false;
-			}
-			// type = implementation, SRI, IRST etc
-			LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
-			
-			// factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
-			vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-			
-			// nGramOrder = 2 = bigram, 3 = trigram, etc
-			size_t nGramOrder = Scan<int>(token[2]);
-			
-			string &languageModelFile = token[3];
-			if (token.size() == 5){
-			  if (lmImplementation==IRST)
-			    languageModelFile += " " + token[4];
-			  else {
-			    UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-			    return false;
-			  }
-		}
-		IFVERBOSE(1)
-				PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
-			
-			LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(
-																									lmImplementation
-																									, factorTypes     
-                                   								, nGramOrder
-																									, languageModelFile
-																									, weightAll[i]
-																									, m_scoreIndexManager
-																									, LMdub[i]);
-      if (lm == NULL) 
-      {
-      	UserMessage::Add("no LM created. We probably don't have it compiled");
-      	return false;
+        LanguageModel* lm = NULL;
+        if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
+            lm = languageModelsLoaded[lmVector[i]];
+        } else {
+            vector<string>	token		= Tokenize(lmVector[i]);
+            if (token.size() != 4 && token.size() != 5 )
+            {
+                UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
+                return false;
+            }
+            // type = implementation, SRI, IRST etc
+            LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
+            
+            // factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
+            vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
+            
+            // nGramOrder = 2 = bigram, 3 = trigram, etc
+            size_t nGramOrder = Scan<int>(token[2]);
+            
+            string &languageModelFile = token[3];
+            if (token.size() == 5){
+              if (lmImplementation==IRST)
+                languageModelFile += " " + token[4];
+              else {
+                UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
+                return false;
+              }
+        }
+        IFVERBOSE(1)
+                PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
+            
+            lm = LanguageModelFactory::CreateLanguageModel(
+                                                                                                    lmImplementation
+                                                                                                    , factorTypes     
+                                                                , nGramOrder
+                                                                                                    , languageModelFile
+                                                                                                    , weightAll[i]
+                                                                                                    , m_scoreIndexManager
+                                                                                                    , LMdub[i]);
+          if (lm == NULL) 
+          {
+            UserMessage::Add("no LM created. We probably don't have it compiled");
+            return false;
+          }
+          languageModelsLoaded[lmVector[i]] = lm;
       }
 
 			m_languageModel.Add(lm);
@@ -820,9 +828,10 @@ bool StaticData::LoadGenerationTables()
 	return true;
 }
 
+/* Doesn't load phrase tables any more. Just creates the features. */
 bool StaticData::LoadPhraseTables()
 {
-	VERBOSE(2,"About to LoadPhraseTables" << endl);
+	VERBOSE(2,"Creating phrase table features" << endl);
 
 	// language models must be loaded prior to loading phrase tables
 	assert(m_fLMsLoaded);
@@ -952,8 +961,6 @@ bool StaticData::LoadPhraseTables()
 
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
 			
-			IFVERBOSE(1)
-				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath <<endl);
             
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
@@ -977,8 +984,6 @@ bool StaticData::LoadPhraseTables()
 		}
 	}
 	
-	IFVERBOSE(1)
-		PrintUserTime("Finished loading phrase tables");
 	return true;
 }
 
