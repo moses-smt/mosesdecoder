@@ -45,7 +45,9 @@ namespace Moses {
     {
       AddFeatureFunction(wpProducer);
       AddFeatureFunction(uwpProducer);
-      AddFeatureFunction(distortionProducer);
+      if (distortionProducer) {
+        AddFeatureFunction(distortionProducer);
+      }
     }
     
     //Insert core 'big' features
@@ -57,22 +59,7 @@ namespace Moses {
     
     void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph) {
       m_decodeGraphs.push_back(decodeGraph);
-      //configure the dictionaries
-      for (DecodeGraph::const_iterator j = decodeGraph->begin(); j != decodeGraph->end(); ++j) {
-        const DecodeStep* step = *j;
-        PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
-        if (pdict) {
-          m_phraseDictionaries.push_back(pdict);
-          AddFeatureFunction(pdict);
-          const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
         }
-        GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
-        if (gdict) {
-          m_generationDictionaries.push_back(gdict);
-          AddFeatureFunction(gdict);
-        }
-      }
-    }
     
     
     void TranslationSystem::AddReorderModel(LexicalReordering* reorderModel) {
@@ -97,6 +84,26 @@ namespace Moses {
         }
       } else {
         m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
+      }
+    }
+
+    void TranslationSystem::ConfigDictionaries() {
+      for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
+        i != m_decodeGraphs.end(); ++i) {
+          for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
+            const DecodeStep* step = *j;
+            PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
+            if (pdict) {
+              m_phraseDictionaries.push_back(pdict);
+              AddFeatureFunction(pdict);
+              const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
+            }
+            GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
+            if (gdict) {
+              m_generationDictionaries.push_back(gdict);
+              AddFeatureFunction(gdict);
+            }
+          }
       }
     }
     
@@ -156,6 +163,7 @@ namespace Moses {
     }
     
     float TranslationSystem::GetWeightDistortion() const {
+      assert(m_distortionScoreProducer);
       size_t distIndex = StaticData::Instance().GetScoreIndexManager().
               GetBeginIndex(m_distortionScoreProducer->GetScoreBookkeepingID());
       return StaticData::Instance().GetAllWeights()[distIndex];

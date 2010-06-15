@@ -61,6 +61,8 @@ class TranslationSystem {
       //Insert non-core feature function
       void AddFeatureFunction(const FeatureFunction* featureFunction);
       
+      //Called after adding the tables in order to set up the dictionaries
+      void ConfigDictionaries();
       
         
       const std::string& GetId() const {return m_id;}

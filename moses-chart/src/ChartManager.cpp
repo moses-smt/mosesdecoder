@@ -46,10 +46,7 @@ Manager::Manager(InputType const& source, const TranslationSystem* system)
     ,m_transOptColl(source, system, m_hypoStackColl),
     m_system(system)
 {
-    
 	m_system->InitializeBeforeSentenceProcessing(source);
-    
-    m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager()

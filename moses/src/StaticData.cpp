@@ -447,20 +447,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
-  /*if (translationSystemsCount) {
-    for (size_t i = 0; i < translationSystemsCount; ++i) {
-        assert(0); //not yet implemented
-        //TODO: Config of translation systems  
-        //AddTranslationSystem(TranslationSystem(m_parameter->GetParam("translation-systems")[i]));
-    }
-  } else {
-    //Create the default translation system
-    assert(m_wordPenaltyProducers.size() == 1);
-    assert(m_distortionScoreProducers.size() == 1);
-    AddTranslationSystem(TranslationSystem(m_decodeGraphs, m_reorderModels, m_languageModel, m_globalLexicalModels,
-                                            m_wordPenaltyProducers[0], m_unknownWordPenaltyProducer, 
-                                            m_distortionScoreProducers[0]));
-  }*/
   if (!tsConfig.size()) {
     //use all models in default system.
     tsConfig.push_back(TranslationSystem::DEFAULT + " D * L * R * G *");
@@ -471,11 +457,16 @@ bool StaticData::LoadData(Parameter *parameter)
     return false;
   }
   
-  if (m_distortionScoreProducers.size() != tsConfig.size()) {
-    UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems"));
-    return false;
-  }
-  
+	if (m_searchAlgorithm == ChartDecoding) {
+        //insert some null distortion score producers
+        m_distortionScoreProducers.assign(tsConfig.size(), NULL);
+    } else {
+      if (m_distortionScoreProducers.size() != tsConfig.size()) {
+        UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems"));
+        return false;
+      }
+    }
+      
   for (size_t i = 0; i < tsConfig.size(); ++i) {
     vector<string> config = Tokenize(tsConfig[i]);
     if (config.size() % 2 != 1) {
@@ -524,6 +515,10 @@ bool StaticData::LoadData(Parameter *parameter)
         return false;
       }
     }
+    //Instigate dictionary loading
+    m_translationSystems.find(config[0])->second.ConfigDictionaries();
+
+
     
     //Add any other features here.
     
