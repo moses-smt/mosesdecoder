@@ -10,6 +10,7 @@
 #include "LanguageModel.h"
 #include "Word.h"
 #include "WordDependencyModel.h"
+#include "StaticData.h"
 #include "TypeDef.h"
 #include "Util.h"
 
@@ -19,16 +20,20 @@ namespace Moses
 class WordDependencyState : public FFState
 {
 private:
-	typedef std::map<size_t, std::pair<std::vector<std::string>,std::vector<std::string> > > LinkMap;
+	//typedef std::map<size_t, std::pair<std::vector<std::string>,std::vector<std::string> > > LinkMap;
+	typedef std::map<size_t, std::vector<std::string> > AntecedentMap;
+	typedef std::multimap<size_t, std::vector<std::string> > ReferentMap;
 	
-	LinkMap m_openLinks;
+	//LinkMap m_openLinks;
+	AntecedentMap m_antecedents;
+	ReferentMap m_openReferents;
 	const WordDependencyModel *m_model;
 
 public:
 	WordDependencyState(const WordDependencyModel	*model) : m_model(model) {}
 
 	WordDependencyState *Clone() const;
-	const std::vector<std::string> ProcessAntecedent(size_t linkNo, const std::vector<std::string> &word);
+	const std::vector<std::vector<std::string> > ProcessAntecedent(size_t linkNo, const std::vector<std::string> &word);
 	const std::vector<std::string> ProcessReferent(size_t linkNo, const std::vector<std::string> &word);
 	virtual int Compare(const FFState &other) const;
 };
@@ -54,9 +59,9 @@ const FFState* WordDependencyModel::Evaluate(const Hypothesis& cur_hypo,
 		{
 			size_t linkNo = Scan<size_t>(ant);
 			const std::vector<std::string> antwords = GetAlignedTargetWords(cur_hypo, i);
-			const std::vector<std::string> refwords = new_state->ProcessAntecedent(linkNo, refwords);
-			if(antwords.size() > 0)
-				accumulator->PlusEquals(this, LookupScores(antwords, refwords));
+			const std::vector<std::vector<std::string> > refwords = new_state->ProcessAntecedent(linkNo, antwords);
+			for(size_t j = 0; j < refwords.size(); j++)
+				accumulator->PlusEquals(this, LookupScores(antwords, refwords[j]));
 		}
 
 		if(ref != "*")
@@ -65,13 +70,13 @@ const FFState* WordDependencyModel::Evaluate(const Hypothesis& cur_hypo,
 			{
 				size_t linkNo = Scan<size_t>(ref);
 				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i);
-				const std::vector<std::string> antwords = new_state->ProcessReferent(linkNo, antwords);
-				if(refwords.size() > 0)
+				const std::vector<std::string> antwords = new_state->ProcessReferent(linkNo, refwords);
+				if(antwords.size() > 0)
 					accumulator->PlusEquals(this, LookupScores(antwords, refwords));
 			}
 			else
 			{
-				const std::vector<std::string> antwords(1, ref.substr(1));
+				const std::vector<std::string> antwords = Tokenize(ref.substr(1), "~");
 				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i);
 				assert(antwords.size() > 0);
 				accumulator->PlusEquals(this, LookupScores(antwords, refwords));
@@ -89,7 +94,14 @@ const FFState* WordDependencyModel::EmptyHypothesisState(const InputType &input)
 
 const Scores WordDependencyModel::LookupScores(const std::vector<std::string> &antecedent, const std::vector<std::string> &referent) const
 {
-	Scores s(1);
+	Scores s(1, LOWEST_SCORE);
+
+	if(antecedent.size() == 0 || referent.size() == 0)
+	{
+		VERBOSE(2, "Unaligned trigger word for word dependency model." << std::endl);
+		return s;
+	}
+
 	Word antw, refw;
 	std::vector<const Word *> bigram(2);
 	
@@ -101,10 +113,12 @@ const Scores WordDependencyModel::LookupScores(const std::vector<std::string> &a
 		for(size_t j = 0; j < referent.size(); j++) {
 			refw.CreateFromString(Output, m_eFactors, referent[j], false);
 			float score = m_lm->GetValue(bigram);
+			std::cerr << "Word dependency score for antecedent " << antecedent[i] << " and referent " << referent[j] << ": " << score << std::endl;
 			if(score > s[0])
 				s[0] = score;
 		}
 	}
+	std::cerr << "Maximum score: " << s[0] << std::endl;
 	
 	return s;
 }
@@ -120,8 +134,8 @@ std::vector<std::string> WordDependencyModel::GetAlignedTargetWords(const Hypoth
 			continue;
 		std::vector<unsigned> apos = Tokenize<unsigned>(alig, ",");
 		for(unsigned j = 0; j < apos.size(); j++)
-			if(j == pos)
-				ret.push_back(tp.GetWord(j).GetString(m_eFactors, false));
+			if(apos[j] == pos)
+				ret.push_back(tp.GetWord(i).GetString(m_eFactors, false));
 	}
 	return ret;
 }
@@ -131,20 +145,18 @@ WordDependencyState *WordDependencyState::Clone() const
 	return new WordDependencyState(*this);
 }
 
-const std::vector<std::string> WordDependencyState::ProcessAntecedent(size_t linkNo, const std::vector<std::string> &words)
+const std::vector<std::vector<std::string> > WordDependencyState::ProcessAntecedent(size_t linkNo, const std::vector<std::string> &words)
 {
-	std::vector<std::string> s;
+	std::vector<std::vector<std::string> > s;
 	
-	LinkMap::iterator it = m_openLinks.find(linkNo);
-	if(it == m_openLinks.end())
-		m_openLinks[linkNo] = std::make_pair(words, std::vector<std::string>());
-	else
-	{
-		assert(it->second.first.size() == 0 && it->second.second.size() > 0);
-		s = it->second.second;
-		m_openLinks.erase(it);
-	}
-	
+	m_antecedents.insert(std::make_pair(linkNo, words));
+
+	std::pair<ReferentMap::iterator,ReferentMap::iterator> range = m_openReferents.equal_range(linkNo);
+	for(ReferentMap::iterator it = range.first; it != range.second; ++it)
+		s.push_back(it->second);
+
+	m_openReferents.erase(range.first, range.second);
+
 	return s;
 }
 
@@ -152,15 +164,11 @@ const std::vector<std::string> WordDependencyState::ProcessReferent(size_t linkN
 {
 	std::vector<std::string> s;
 	
-	LinkMap::iterator it = m_openLinks.find(linkNo);
-	if(it == m_openLinks.end())
-		m_openLinks[linkNo] = std::make_pair(std::vector<std::string>(), words);
+	AntecedentMap::iterator it = m_antecedents.find(linkNo);
+	if(it == m_antecedents.end())
+		m_openReferents.insert(std::make_pair(linkNo, words));
 	else
-	{
-		assert(it->second.first.size() > 0 && it->second.second.size() == 0);
-		s = it->second.first;
-		m_openLinks.erase(it);
-	}
+		s = it->second;
 	
 	return s;
 }
@@ -174,16 +182,28 @@ int WordDependencyState::Compare(const FFState &other) const
 
 	assert(m_model == o.m_model);
 	
-	if(m_openLinks.size() < o.m_openLinks.size())
+	if(m_antecedents.size() < o.m_antecedents.size())
 		return -1;
-	else if(m_openLinks.size() > o.m_openLinks.size())
+	else if(m_antecedents.size() > o.m_antecedents.size())
 		return 1;
 	
-	LinkMap::const_iterator i, j;
-	for(i = m_openLinks.begin(), j = o.m_openLinks.begin(); i != m_openLinks.end(); ++i, ++j)
+	if(m_openReferents.size() < o.m_openReferents.size())
+		return -1;
+	else if(m_openReferents.size() > o.m_openReferents.size())
+		return 1;
+	
+	AntecedentMap::const_iterator i, j;
+	for(i = m_antecedents.begin(), j = o.m_antecedents.begin(); i != m_antecedents.end(); ++i, ++j)
 		if(*i < *j)
 			return -1;
 		else if(*i > *j)
+			return 1;
+	
+	ReferentMap::const_iterator k, l;
+	for(k = m_openReferents.begin(), l = o.m_openReferents.begin(); k != m_openReferents.end(); ++k, ++l)
+		if(*k < *l)
+			return -1;
+		else if(*k > *l)
 			return 1;
 	
 	return 0;
