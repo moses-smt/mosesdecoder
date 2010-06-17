@@ -46,7 +46,6 @@ public:
 	virtual ~LanguageModelSingleFactor();
 	virtual bool Load(const std::string &filePath
 					, FactorType factorType
-					, float weight
 					, size_t nGramOrder) = 0;
 
 	LMType GetLMType() const
@@ -70,14 +69,6 @@ public:
 	FactorType GetFactorType() const
 	{
 		return m_factorType;
-	}
-	float GetWeight() const
-	{
-		return m_weight;
-	}
-	void SetWeight(float weight)
-	{
-		m_weight = weight;
 	}
 	std::string GetScoreProducerDescription() const;
 };

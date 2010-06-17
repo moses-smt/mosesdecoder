@@ -45,7 +45,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 	for (lmIter = begin(); lmIter != end(); ++lmIter)
 	{
 		const LanguageModel &lm = **lmIter;
-		const float weightLM = lm.GetWeight();
+        const float weightLM = lm.GetWeight();
 
 		float fullScore, nGramScore;
 

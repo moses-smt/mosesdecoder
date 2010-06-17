@@ -83,7 +83,7 @@ public:
 	
 	~LanguageModelParallelBackoff();
 
-	bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, float weight, size_t nGramOrder);
+	bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
 
 VocabIndex GetLmID( const std::string &str ) const;
 

@@ -63,7 +63,6 @@ LanguageModelIRST::~LanguageModelIRST()
 
 bool LanguageModelIRST::Load(const std::string &filePath, 
 			     FactorType factorType, 
-			     float weight,
 			     size_t nGramOrder)
 {
   const char *SepString = " \t\n";
@@ -72,7 +71,6 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_factorType 	 = factorType;
-  m_weight			 = weight;
   m_nGramOrder	 = nGramOrder;
 
   // get name of LM file and, if any, of the micro-macro map file

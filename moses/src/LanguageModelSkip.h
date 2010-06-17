@@ -58,11 +58,9 @@ public:
 	}
 	bool Load(const std::string &filePath
 					, FactorType factorType
-					, float weight
 					, size_t nGramOrder)
 	{
 		m_factorType 				= factorType;
-		m_weight 						= weight;
 		m_filePath 					= filePath;
 		m_nGramOrder 				= nGramOrder;
 		
@@ -73,7 +71,7 @@ public:
 		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		return m_lmImpl->Load(filePath, m_factorType, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, m_factorType, nGramOrder);
 	}
 			
 	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const

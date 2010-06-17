@@ -47,7 +47,7 @@ namespace Moses
 	}
 
 
-bool LanguageModelParallelBackoff::Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, float weight, size_t nGramOrder)
+bool LanguageModelParallelBackoff::Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder)
 	{
 
     cerr << "Loading Language Model Parallel Backoff!!!\n";
@@ -99,7 +99,6 @@ bool LanguageModelParallelBackoff::Load(const std::string &filePath, const std::
 
 		cerr << "fngramLM reads!\n";
 
-		m_weight = weight;
 		m_filePath = filePath;
 		m_nGramOrder= nGramOrder;
 	

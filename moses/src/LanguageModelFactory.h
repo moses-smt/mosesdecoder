@@ -23,7 +23,6 @@ namespace LanguageModelFactory {
 																		, const std::vector<FactorType> &factorTypes     
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
-																		, float weight
 																		, ScoreIndexManager &scoreIndexManager
 																		, int dub);
 	 

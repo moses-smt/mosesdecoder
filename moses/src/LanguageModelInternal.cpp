@@ -17,7 +17,6 @@ LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManag
 
 bool LanguageModelInternal::Load(const std::string &filePath
 																, FactorType factorType
-																, float weight
 																, size_t nGramOrder)
 {
 	assert(nGramOrder <= 3);
@@ -33,7 +32,6 @@ bool LanguageModelInternal::Load(const std::string &filePath
 
 	m_filePath		= filePath;
 	m_factorType	= factorType;
-	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
 
 	// make sure start & end tags in factor collection

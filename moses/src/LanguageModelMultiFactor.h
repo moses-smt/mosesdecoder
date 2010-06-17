@@ -44,7 +44,6 @@ protected:
 public:
 	virtual bool Load(const std::string &filePath
 					, const std::vector<FactorType> &factorTypes
-					, float weight
 					, size_t nGramOrder) = 0;
 
 	LMType GetLMType() const

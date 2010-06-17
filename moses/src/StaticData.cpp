@@ -752,7 +752,6 @@ bool StaticData::LoadLanguageModels()
                                                                                                     , factorTypes     
                                                                 , nGramOrder
                                                                                                     , languageModelFile
-                                                                                                    , weightAll[i]
                                                                                                     , m_scoreIndexManager
                                                                                                     , LMdub[i]);
           if (lm == NULL) 

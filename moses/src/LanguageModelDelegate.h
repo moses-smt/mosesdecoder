@@ -35,13 +35,16 @@ class LanguageModelDelegate: public LanguageModelSingleFactor {
       LanguageModelSingleFactor(registerScore, scoreIndexManager), m_delegate(delegate)
       {
         m_nGramOrder = m_delegate->GetNGramOrder();
-        m_weight = m_delegate->GetWeight();
         m_factorType = m_delegate->GetFactorType();
+        m_sentenceStart = m_delegate->GetSentenceStart();
+        m_sentenceEnd = m_delegate->GetSentenceEnd();
+        m_sentenceStartArray = m_delegate->GetSentenceStartArray();
+        m_sentenceEndArray = m_delegate->GetSentenceEndArray();
+
       }
       
     virtual bool Load(const std::string &
           , FactorType
-          , float
           , size_t)
     { 
       /* do nothing */
