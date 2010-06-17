@@ -20,11 +20,9 @@ namespace Moses
 class WordDependencyState : public FFState
 {
 private:
-	//typedef std::map<size_t, std::pair<std::vector<std::string>,std::vector<std::string> > > LinkMap;
 	typedef std::map<size_t, std::vector<std::string> > AntecedentMap;
 	typedef std::multimap<size_t, std::vector<std::string> > ReferentMap;
 	
-	//LinkMap m_openLinks;
 	AntecedentMap m_antecedents;
 	ReferentMap m_openReferents;
 	const WordDependencyModel *m_model;
@@ -58,7 +56,7 @@ const FFState* WordDependencyModel::Evaluate(const Hypothesis& cur_hypo,
 		if(ant != "*")
 		{
 			size_t linkNo = Scan<size_t>(ant);
-			const std::vector<std::string> antwords = GetAlignedTargetWords(cur_hypo, i);
+			const std::vector<std::string> antwords = GetAlignedTargetWords(cur_hypo, i, false);
 			const std::vector<std::vector<std::string> > refwords = new_state->ProcessAntecedent(linkNo, antwords);
 			for(size_t j = 0; j < refwords.size(); j++)
 				accumulator->PlusEquals(this, LookupScores(antwords, refwords[j]));
@@ -69,7 +67,7 @@ const FFState* WordDependencyModel::Evaluate(const Hypothesis& cur_hypo,
 			if(ref[0] != '>')
 			{
 				size_t linkNo = Scan<size_t>(ref);
-				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i);
+				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i, true);
 				const std::vector<std::string> antwords = new_state->ProcessReferent(linkNo, refwords);
 				if(antwords.size() > 0)
 					accumulator->PlusEquals(this, LookupScores(antwords, refwords));
@@ -77,7 +75,7 @@ const FFState* WordDependencyModel::Evaluate(const Hypothesis& cur_hypo,
 			else
 			{
 				const std::vector<std::string> antwords = Tokenize(ref.substr(1), "~");
-				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i);
+				const std::vector<std::string> refwords = GetAlignedTargetWords(cur_hypo, i, true);
 				assert(antwords.size() > 0);
 				accumulator->PlusEquals(this, LookupScores(antwords, refwords));
 			}
@@ -104,14 +102,15 @@ const Scores WordDependencyModel::LookupScores(const std::vector<std::string> &a
 
 	Word antw, refw;
 	std::vector<const Word *> bigram(2);
+	const std::vector<FactorType> singleFactor(1, 0);
 	
 	bigram[0] = &antw;
 	bigram[1] = &refw;
 
 	for(size_t i = 0; i < antecedent.size(); i++) {
-		antw.CreateFromString(Output, m_eFactors, antecedent[i], false);
+		antw.CreateFromString(Output, singleFactor, antecedent[i], false);
 		for(size_t j = 0; j < referent.size(); j++) {
-			refw.CreateFromString(Output, m_eFactors, referent[j], false);
+			refw.CreateFromString(Output, singleFactor, referent[j], false);
 			float score = m_lm->GetValue(bigram);
 			std::cerr << "Word dependency score for antecedent " << antecedent[i] << " and referent " << referent[j] << ": " << score << std::endl;
 			if(score > s[0])
@@ -123,8 +122,9 @@ const Scores WordDependencyModel::LookupScores(const std::vector<std::string> &a
 	return s;
 }
 
-std::vector<std::string> WordDependencyModel::GetAlignedTargetWords(const Hypothesis &hypo, size_t pos) const
+std::vector<std::string> WordDependencyModel::GetAlignedTargetWords(const Hypothesis &hypo, size_t pos, bool referent) const
 {
+	const std::vector<FactorType> &eFactors = referent ? m_eFactorsReferent : m_eFactorsAntecedent;
 	std::vector<std::string> ret;
 	const TargetPhrase tp = hypo.GetTargetPhrase();
 	for(unsigned i = 0; i < tp.GetSize(); i++)
@@ -135,7 +135,7 @@ std::vector<std::string> WordDependencyModel::GetAlignedTargetWords(const Hypoth
 		std::vector<unsigned> apos = Tokenize<unsigned>(alig, ",");
 		for(unsigned j = 0; j < apos.size(); j++)
 			if(apos[j] == pos)
-				ret.push_back(tp.GetWord(i).GetString(m_eFactors, false));
+				ret.push_back(tp.GetWord(i).GetString(eFactors, false));
 	}
 	return ret;
 }

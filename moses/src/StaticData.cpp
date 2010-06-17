@@ -750,20 +750,23 @@ bool StaticData::LoadWordDependencyModel()
 	{
 		vector<string> token = Tokenize(models[currModel]);
 		FactorType linkFactor = Scan<FactorType>(token[0]);
-		vector<FactorType> e_factors = Tokenize<FactorType>(token[1], ",");
-		FactorType alignmentFactor = Scan<FactorType>(token[2]);
-		LMImplementation lmtype = static_cast<LMImplementation>(Scan<int>(token[3]));
-		std::string filePath = token[4];
+		vector<FactorType> e_factors_ant = Tokenize<FactorType>(token[1], ",");
+		vector<FactorType> e_factors_ref = Tokenize<FactorType>(token[2], ",");
+		FactorType alignmentFactor = Scan<FactorType>(token[3]);
+		LMImplementation lmtype = static_cast<LMImplementation>(Scan<int>(token[4]));
+		std::string filePath = token[5];
 		
 		assert(weight_it != weights.end());
 		vector<float> currWeights(weight_it, weight_it + 1);
 		++weight_it;
 		
-		LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmtype, e_factors, 2, filePath,
+		const std::vector<FactorType> singleFactor(1, 0);
+
+		LanguageModel *lm = LanguageModelFactory::CreateLanguageModel(lmtype, singleFactor, 2, filePath,
 																		currWeights[0], m_scoreIndexManager, dub, false);
 		if(!lm) return false;
 		
-		WordDependencyModel *wdm = new WordDependencyModel(linkFactor, e_factors, alignmentFactor, lm);
+		WordDependencyModel *wdm = new WordDependencyModel(linkFactor, e_factors_ant, e_factors_ref, alignmentFactor, lm);
 		m_allWeights.insert(m_allWeights.end(), currWeights.begin(), currWeights.end());
 		m_scoreIndexManager.AddScoreProducer(wdm);
 		SetWeightsForScoreProducer(wdm, currWeights);
