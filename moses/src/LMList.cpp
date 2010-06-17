@@ -36,9 +36,7 @@ LMList::~LMList()
 
 void LMList::CleanUp() 
 {
-  set<LanguageModel*> lms;
-  copy(m_coll.begin(), m_coll.end(), inserter(lms,lms.end()));
-	RemoveAllInColl(lms);
+	RemoveAllInColl(m_coll);
 }
 	
 void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const
