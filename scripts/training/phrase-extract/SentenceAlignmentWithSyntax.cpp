@@ -24,32 +24,49 @@
 #include <string>
 
 #include "tables-core.h"
+#include "XmlException.h"
 #include "XmlTree.h"
 
-void SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString)
+bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID)
 {
-    // tokenizing target (and potentially extract syntax spans)
-    if (m_options.targetSyntax) {
-        string targetStringCPP = string(targetString);
-        ProcessAndStripXMLTags(targetStringCPP, targetTree, m_targetLabelCollection ,
+    if (!m_options.targetSyntax) {
+        return SentenceAlignment::processTargetSentence(targetString, sentenceID);
+    }
+
+    string targetStringCPP(targetString);
+    try {
+        ProcessAndStripXMLTags(targetStringCPP, targetTree,
+                               m_targetLabelCollection,
                                m_targetTopLabelCollection);
-        target = tokenize(targetStringCPP.c_str());
     }
-    else {
-        target = tokenize(targetString);
+    catch (const XmlException & e)
+    {
+        std::cerr << "WARNING: failed to process target sentence at line "
+                  << sentenceID << ": " << e.getMsg() << std::endl;
+        return false;
     }
+    target = tokenize(targetStringCPP.c_str());
+    return true;
 }
 
-void SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString)
+bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID)
 {
-    // tokenizing source (and potentially extract syntax spans)
-    if (m_options.sourceSyntax) {
-        string sourceStringCPP = string(sourceString);
-        ProcessAndStripXMLTags(sourceStringCPP, sourceTree, m_sourceLabelCollection ,
+    if (!m_options.sourceSyntax) {
+        return SentenceAlignment::processSourceSentence(sourceString, sentenceID);
+    }
+
+    string sourceStringCPP(sourceString);
+    try {
+        ProcessAndStripXMLTags(sourceStringCPP, sourceTree,
+                               m_sourceLabelCollection ,
                                m_sourceTopLabelCollection);
-        source = tokenize(sourceStringCPP.c_str());
     }
-    else {
-        source = tokenize(sourceString);
+    catch (const XmlException & e)
+    {
+        std::cerr << "WARNING: failed to process source sentence at line "
+                  << sentenceID << ": " << e.getMsg() << std::endl;
+        return false;
     }
+    source = tokenize(sourceStringCPP.c_str());
+    return true;
 }

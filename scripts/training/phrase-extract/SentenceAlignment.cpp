@@ -25,22 +25,30 @@
 
 #include "tables-core.h"
 
-void SentenceAlignment::processTargetSentence(const char * targetString)
+bool SentenceAlignment::processTargetSentence(const char * targetString, int)
 {
     target = tokenize(targetString);
+    return true;
 }
 
-void SentenceAlignment::processSourceSentence(const char * sourceString)
+bool SentenceAlignment::processSourceSentence(const char * sourceString, int)
 {
     source = tokenize(sourceString);
+    return true;
 }
 
 bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID) {
     using namespace std;
 
     // process sentence strings and store in target and source members.
-    processTargetSentence(targetString);
-    processSourceSentence(sourceString);
+    if (!processTargetSentence(targetString, sentenceID))
+    {
+        return false;
+    }
+    if (!processSourceSentence(sourceString, sentenceID))
+    {
+        return false;
+    }
 
   // check if sentences are empty
   if (target.size() == 0 || source.size() == 0) {

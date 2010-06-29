@@ -16,28 +16,24 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
-
 #pragma once
-#ifndef SENTENCE_ALIGNMENT_H_INCLUDED_
-#define SENTENCE_ALIGNMENT_H_INCLUDED_
+#ifndef XMLEXCEPTION_H_INCLUDED_
+#define XMLEXCEPTION_H_INCLUDED_
 
 #include <string>
-#include <vector>
 
-class SentenceAlignment
+class XmlException
 {
     public:
-        std::vector<std::string> target;
-        std::vector<std::string> source;
-        std::vector<int> alignedCountS;
-        std::vector<std::vector<int> > alignedToT;
+        XmlException(const std::string & msg)
+          : m_msg(msg)
+        {}
 
-        virtual bool processTargetSentence(const char *, int);
+        const std::string &
+        getMsg() const { return m_msg; }
 
-        virtual bool processSourceSentence(const char *, int);
-
-        bool create(char targetString[], char sourceString[],
-                    char alignmentString[], int sentenceID);
+    private:
+        std::string m_msg;
 };
 
 #endif

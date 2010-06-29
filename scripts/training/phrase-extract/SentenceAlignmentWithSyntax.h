@@ -53,11 +53,11 @@ class SentenceAlignmentWithSyntax : public SentenceAlignment
           , m_options(options)
         {}
 
-        void
-        processTargetSentence(const char *);
+        bool
+        processTargetSentence(const char *, int);
 
-        void
-        processSourceSentence(const char *);
+        bool
+        processSourceSentence(const char *, int);
 };
 
 #endif
