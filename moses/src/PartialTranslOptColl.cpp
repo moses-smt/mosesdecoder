@@ -21,6 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PartialTranslOptColl.h"
 #include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 namespace Moses
 {
@@ -88,6 +91,9 @@ void PartialTranslOptColl::Prune()
 							m_list.end(), 
 							ComparePartialTranslationOption);
 	
+	//cerr << **m_list.begin() << endl;
+	//cerr << **(m_list.begin() + m_maxSize + 1) << endl;
+	
 	m_worstScore = m_list[ m_maxSize-1 ]->GetFutureScore();
 	// delete the rest
 	for (size_t i = m_maxSize ; i < m_list.size() ; ++i)
@@ -98,6 +104,20 @@ void PartialTranslOptColl::Prune()
 	m_list.resize(m_maxSize);
 	//	TRACE_ERR( "pruned to size " << m_list.size() << ", total pruned: " << m_totalPruned << std::endl);
 }
+
+
+std::ostream& operator<<(std::ostream& out, const PartialTranslOptColl& coll)
+{
+	std::vector<TranslationOption*>::const_iterator iter;
+	for (iter = coll.GetList().begin(); iter != coll.GetList().end(); ++iter)
+	{
+		const TranslationOption &transOpt = **iter;
+		out << transOpt << endl;
+	}
+	
+	return out;
+}
+	
 
 }
 

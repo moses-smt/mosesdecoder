@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "Phrase.h"
 
 using namespace std;
 
@@ -432,6 +433,22 @@ void TranslationOptionCollection::Sort()
 	}
 }
 
+void OutputPartialTransOpt(long sentenceId
+													 , size_t indDecodeStep
+													 , size_t startPos
+													 , size_t endPos
+													 , const PartialTranslOptColl &coll)
+{
+	std::vector<TranslationOption*>::const_iterator iter;
+	for (iter = coll.GetList().begin(); iter != coll.GetList().end(); ++iter)
+	{
+		const TranslationOption &transOpt = **iter;
+		cerr << "TRANS OPT " << sentenceId << " " << indDecodeStep << " "
+					<< startPos << " " << endPos << " "
+					<< static_cast<const Phrase&> (transOpt.GetTargetPhrase()) << endl;
+	}
+	
+}
 
 /** create translation options that exactly cover a specific input span.
  * Called by CreateTranslationOptions() and ProcessUnknownWord()
@@ -447,6 +464,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																													 , size_t endPos
 																													 , bool adhereTableLimit)
 {
+	long sentenceId = m_source.GetTranslationId();
+	
 	if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 	{
 	  Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
@@ -473,7 +492,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 		} // useCache
 
 		if (!skipTransOptCreation)
-		{
+		{ 
 			// partial trans opt stored in here
 			PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
 			size_t totalEarlyPruned = 0;
@@ -487,7 +506,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																, startPos, endPos, adhereTableLimit );
 
 			// do rest of decode steps
-			int indexStep = 0;
+			const WordsRange wordsRange(startPos, endPos);
+			//cerr << m_source.GetSubString(wordsRange) << " ";
+			
+			OutputPartialTransOpt(sentenceId, 0, startPos, endPos, *oldPtoc);
+			
+			int ind = 1;
 			for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep)
 			{
 				const DecodeStep &decodeStep = **iterStep;
@@ -505,13 +529,16 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																		 , this
 																		 , adhereTableLimit);
 				}
+
+				OutputPartialTransOpt(sentenceId, ind, startPos, endPos, *newPtoc);
+
 				// last but 1 partial trans not required anymore
 				totalEarlyPruned += newPtoc->GetPrunedCount();
 				delete oldPtoc;
 				oldPtoc = newPtoc;
-				indexStep++;
+				ind++;
 			} // for (++iterStep
-
+			
 				// add to fully formed translation option list
 			PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
 			const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
@@ -597,6 +624,8 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
 		{
 			const TranslationOptionList& fullList = coll.GetTranslationOptionList(startPos, endPos);
 			size_t sizeFull = fullList.size();
+			out << "[" << startPos << ".." << endPos << "]=" << sizeFull << endl;
+			
 		  for (size_t i = 0; i < sizeFull; i++)
 			{
 			  out << *fullList.Get(i) << std::endl;

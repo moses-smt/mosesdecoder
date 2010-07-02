@@ -452,6 +452,16 @@ bool StaticData::LoadData(Parameter *parameter)
 //		m_scoreIndexManager.InitWeightVectorFromFile(fnam, &m_allWeights);
 	}
 
+	std::vector<const ScoreProducer*>::const_iterator iterProducer;
+	for (iterProducer = m_scoreIndexManager.GetFeatureFunctions().begin(); iterProducer != m_scoreIndexManager.GetFeatureFunctions().end(); ++iterProducer)
+	{
+		const ScoreProducer &producer = **iterProducer;
+		unsigned int bookKeepingId = producer.GetScoreBookkeepingID(); 
+		cerr << producer.GetScoreProducerDescription() << " " << bookKeepingId << " " 
+					<< m_scoreIndexManager.GetBeginIndex(bookKeepingId) << " "
+					<< m_scoreIndexManager.GetEndIndex(bookKeepingId) << endl;
+	}
+	
 	return true;
 }
 

@@ -90,7 +90,8 @@ void Manager::ProcessSentence()
 	vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL(m_source);
 	m_transOptColl->CreateTranslationOptions(decodeGraphs);
 	RemoveAllInColl(decodeGraphs);  
-
+	cerr << *m_transOptColl;
+	
   // some reporting on how long this took
   clock_t gotOptions = clock();
   float et = (gotOptions - m_start);
