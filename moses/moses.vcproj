@@ -536,14 +536,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryNewFormat.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PhraseDictionaryNewFormatChart.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PhraseDictionaryNode.cpp"
 				>
 				<FileConfiguration
@@ -584,7 +576,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryNodeNewFormat.cpp"
+				RelativePath=".\src\PhraseDictionaryNodeSCFG.cpp"
 				>
 			</File>
 			<File
@@ -593,6 +585,14 @@
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryOnDiskChart.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionarySCFG.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionarySCFGChart.cpp"
 				>
 			</File>
 			<File
@@ -954,11 +954,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryMemory.h"
+				RelativePath=".\src\PhraseDictionaryDynSuffixArray.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryNewFormat.h"
+				RelativePath=".\src\PhraseDictionaryMemory.h"
 				>
 			</File>
 			<File
@@ -966,11 +966,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryNodeNewFormat.h"
+				RelativePath=".\src\PhraseDictionaryNodeSCFG.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\PhraseDictionaryOnDisk.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PhraseDictionarySCFG.h"
 				>
 			</File>
 			<File
