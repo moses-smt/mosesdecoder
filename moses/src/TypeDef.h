@@ -163,7 +163,7 @@ enum PhraseTableImplementation
 	//,GlueRule		= 3
 	//,Joshua			= 4
 	//,MemorySourceLabel	= 5
-	,NewFormat		= 6
+	,SCFG					= 6
 	//,BerkeleyDb	= 7
 	,SuffixArray	= 8
 };	

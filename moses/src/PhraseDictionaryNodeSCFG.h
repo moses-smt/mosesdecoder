@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNodeNewFormat.h 3049 2010-04-05 18:34:09Z hieuhoang1972 $
+// $Id: PhraseDictionaryNodeSCFG.h 3049 2010-04-05 18:34:09Z hieuhoang1972 $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -41,18 +41,18 @@ class InputType;
 	
 /** One node of the PhraseDictionaryMemory structure
 */
-class PhraseDictionaryNodeNewFormat : public PhraseDictionaryNode
+class PhraseDictionaryNodeSCFG : public PhraseDictionaryNode
 {
-	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryNodeNewFormat&);
+	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryNodeSCFG&);
 	
-	typedef std::map<Word, PhraseDictionaryNodeNewFormat> InnerNodeMap;
+	typedef std::map<Word, PhraseDictionaryNodeSCFG> InnerNodeMap;
 	typedef std::map<Word, InnerNodeMap> NodeMap;
 		// 1st word = source side non-term, or the word if term
 		// 2nd word = target side non term, or the word if term
 
 	// only these classes are allowed to instantiate this class
-	friend class PhraseDictionaryNewFormat;
-	friend class std::map<Word, PhraseDictionaryNodeNewFormat>;
+	friend class PhraseDictionarySCFG;
+	friend class std::map<Word, PhraseDictionaryNodeSCFG>;
 	
 protected:
 	static size_t s_id;
@@ -62,18 +62,18 @@ protected:
 	const Word *m_sourceWord;
 	float m_entropy;
 	
-	PhraseDictionaryNodeNewFormat()
+	PhraseDictionaryNodeSCFG()
 		:m_id(s_id++)
 		,m_targetPhraseCollection(NULL)
 		,m_sourceWord(NULL)
 	{}
 public:
-	virtual ~PhraseDictionaryNodeNewFormat();
+	virtual ~PhraseDictionaryNodeSCFG();
 
 	void CleanUp();
 	void Sort(size_t tableLimit);
-	PhraseDictionaryNodeNewFormat *GetOrCreateChild(const Word &word, const Word &sourcelabel);
-	const PhraseDictionaryNodeNewFormat *GetChild(const Word &word, const Word &sourcelabel) const;
+	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &word, const Word &sourcelabel);
+	const PhraseDictionaryNodeSCFG *GetChild(const Word &word, const Word &sourcelabel) const;
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection() const
 	{	return m_targetPhraseCollection; }

@@ -487,19 +487,18 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			abort();
 		}
 		
-		std::string sourcePhraseString, targetPhraseString;
-		std::string scoreString;
+		std::string *scoreString;
 		std::string sourceAlignString, targetAlignString;
 		
-		sourcePhraseString=tokens[0];
-		targetPhraseString=tokens[1];
+		const std::string &sourcePhraseString=tokens[0]
+											,&targetPhraseString=tokens[1];
 		if (numElement==3){
-			scoreString=tokens[2];
+			scoreString = &tokens[2];
 		}
 		else{
 			sourceAlignString=tokens[2];
 			targetAlignString=tokens[3];
-			scoreString=tokens[4];
+			scoreString = &tokens[3];
 		}
 		
 				
@@ -540,13 +539,12 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			
 		//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
 		// Mauro: to handle 0 probs in phrase tables
-		std::vector<float> scoreVector = Tokenize<float>(scoreString);
+		std::vector<float> scoreVector = Tokenize<float>(*scoreString);
 		for (size_t i = 0 ; i < scoreVector.size() ; ++i)
 		{
 			float tmp = scoreVector[i];
 			sc.push_back(((tmp>0.0)?tmp:(float)1.0e-38));
 		}
-		
 			
 		if(f.empty())
 		{

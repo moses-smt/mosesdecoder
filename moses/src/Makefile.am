@@ -63,9 +63,9 @@ libmoses_la_HEADERS = \
         PhraseDictionary.h \
         PhraseDictionaryDynSuffixArray.h \
         PhraseDictionaryMemory.h \
-        PhraseDictionaryNewFormat.h \
+        PhraseDictionarySCFG.h \
         PhraseDictionaryNode.h \
-        PhraseDictionaryNodeNewFormat.h \
+        PhraseDictionaryNodeSCFG.h \
         PhraseDictionaryOnDisk.h \
         PhraseDictionaryTree.h \
         PhraseDictionaryTreeAdaptor.h \
@@ -185,10 +185,10 @@ libmoses_la_SOURCES = \
         PhraseDictionary.cpp \
         PhraseDictionaryDynSuffixArray.cpp \
         PhraseDictionaryMemory.cpp \
-        PhraseDictionaryNewFormat.cpp \
-        PhraseDictionaryNewFormatChart.cpp \
+        PhraseDictionarySCFG.cpp \
+        PhraseDictionarySCFGChart.cpp \
         PhraseDictionaryNode.cpp \
-        PhraseDictionaryNodeNewFormat.cpp \
+        PhraseDictionaryNodeSCFG.cpp \
         PhraseDictionaryOnDisk.cpp \
         PhraseDictionaryOnDiskChart.cpp \
         PhraseDictionaryTree.cpp \

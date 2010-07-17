@@ -440,17 +440,24 @@ void Hypothesis::CleanupArcList()
 TO_STRING_BODY(Hypothesis)
  
 // friend
-ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
+ostream& operator<<(ostream& out, const Hypothesis& hypo)
 {	
-	hypothesis.ToStream(out);
+	hypo.ToStream(out);
 	// words bitmap
-	out << "[" << hypothesis.m_sourceCompleted << "] ";
+	out << "[" << hypo.m_sourceCompleted << "] ";
 	
 	// scores
-	out << " [total=" << hypothesis.GetTotalScore() << "]";
-	out << " " << hypothesis.GetScoreBreakdown();
+	out << " [total=" << hypo.GetTotalScore() << "]";
+	out << " " << hypo.GetScoreBreakdown();
 	
 	// alignment
+	out << " " << hypo.GetCurrTargetPhrase().GetAlignmentInfo();
+	
+	/*
+	const Hypothesis *prevHypo = hypo.GetPrevHypo();
+	if (prevHypo)
+		out << endl << *prevHypo;
+	*/
 	
 	return out;
 }

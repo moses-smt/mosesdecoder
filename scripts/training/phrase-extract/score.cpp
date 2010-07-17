@@ -444,19 +444,35 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	}
 	
 	// alignment info for non-terminals
-	if (! inverseFlag && hierarchicalFlag) 
+	if (! inverseFlag)
 	{
-    assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
-		for(int j = 0; j < phraseT.size() - 1; j++)
-		{
-			if (isNonTerminal(vcbT.getWord( phraseT[j] )))
+		if (hierarchicalFlag) 
+		{ // always output alignment if hiero style, but only for non-terms
+			assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
+			for(int j = 0; j < phraseT.size() - 1; j++)
 			{
-        assert(bestAlignment->alignedToT[ j ].size() == 1);
-				int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
-				phraseTableFile << sourcePos << "-" << j << " ";
+				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
+				{
+					assert(bestAlignment->alignedToT[ j ].size() == 1);
+					int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
+					phraseTableFile << sourcePos << "-" << j << " ";
+				}
 			}
+			phraseTableFile << "||| ";
 		}
-		phraseTableFile << "||| ";
+		else if (wordAlignmentFlag)
+		{ // alignment info in pb model
+			for(int j=0;j<bestAlignment->alignedToT.size();j++)
+			{
+				const set< size_t > &aligned = bestAlignment->alignedToT[j];
+				for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p)
+				{
+					phraseTableFile << *p << "-" << j << " ";
+				}
+			}
+			phraseTableFile << "||| ";
+			
+		}
 	}
 
 	// phrase translation probability

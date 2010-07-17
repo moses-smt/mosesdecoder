@@ -77,6 +77,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		{ // init numElement
 			numElement = tokens.size();
 			assert(numElement == 3 || numElement == 5);
+			// Pharoah style: source ||| target ||| scores
+			// New moses style: source ||| target ||| alignment ||| scores ||| count
 		}
 			 
 		if (tokens.size() != numElement)
@@ -87,19 +89,16 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			abort();
 		}
 
-		string sourcePhraseString, targetPhraseString;
-		string scoreString;
-		string sourceAlignString, targetAlignString;
+		const string *scoreString;
 
-		sourcePhraseString=tokens[0];
-		targetPhraseString=tokens[1];
+		const string &sourcePhraseString=tokens[0]
+								,&targetPhraseString=tokens[1];
+
 		if (numElement==3){
-			scoreString=tokens[2];
+			scoreString = &tokens[2];
 		}
 		else{
-			sourceAlignString=tokens[2];
-			targetAlignString=tokens[3];
-			scoreString=tokens[4];
+			scoreString = &tokens[3];
 		}
 		
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
@@ -112,7 +111,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (sourcePhraseString != prevSourcePhrase)
 			phraseVector = Phrase::Parse(sourcePhraseString, input, factorDelimiter);
 
-		vector<float> scoreVector = Tokenize<float>(scoreString);
+		vector<float> scoreVector = Tokenize<float>(*scoreString);
 		if (scoreVector.size() != m_numScoreComponent) 
 		{
 			stringstream strme;
@@ -120,7 +119,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			UserMessage::Add(strme.str());
 			abort();
 		}
-//		assert(scoreVector.size() == m_numScoreComponent);
 			
 		// source
 		Phrase sourcePhrase(Input);
@@ -129,8 +127,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
-		
-		
+		if (numElement == 5)
+			targetPhrase.SetAlignmentInfo(tokens[2]);
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

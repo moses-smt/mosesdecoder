@@ -276,6 +276,26 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 	return clone;
 }
 
+void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
+{
+	list<pair<size_t,size_t> > alignmentInfo;
+	vector<string> alignVec = Tokenize(alignString);
+	
+	vector<string>::const_iterator iter;
+	for (iter = alignVec.begin(); iter != alignVec.end(); ++iter)
+	{
+		const string &align1 = *iter;
+		vector<size_t> alignPos = Tokenize<size_t>(align1, "-");
+		assert(alignPos.size() == 2);
+		size_t &sourcePos	= alignPos[0]
+		,&targetPos	= alignPos[1];
+		
+		alignmentInfo.push_back(pair<size_t,size_t>(sourcePos, targetPos));
+	}
+	
+	SetAlignmentInfo(alignmentInfo);
+}
+
 void TargetPhrase::SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
 {
 	m_alignmentInfo.AddAlignment(alignmentInfo);

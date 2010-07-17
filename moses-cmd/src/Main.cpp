@@ -265,7 +265,7 @@ class TranslationTask : public Task {
             
             //detailed translation reporting
             if (m_detailedTranslationCollector) {
-                ostringstream out;
+								ostringstream out;
                 fix(out);
                 TranslationAnalysis::PrintTranslationAnalysis(out, manager.GetBestHypothesis());
                 m_detailedTranslationCollector->Write(m_lineNumber,out.str());

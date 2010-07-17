@@ -19,7 +19,6 @@
  ***********************************************************************/
 #include "DotChart.h"
 #include "Util.h"
-#include "PhraseDictionaryNodeNewFormat.h"
 
 using namespace std;
 
@@ -42,7 +41,7 @@ ProcessedRuleStack::~ProcessedRuleStack()
 
 std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
 {
-	const PhraseDictionaryNode &node = rule.GetLastNode();
+	//const PhraseDictionaryNode &node = rule.GetLastNode();
 	//out << node;
 	
 	return out;

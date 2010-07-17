@@ -169,6 +169,7 @@ public:
 	const Word &GetTargetLHS() const
 	{ return m_lhsTarget; }
 	
+	void SetAlignmentInfo(const std::string &alignString);
 	void SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
 	
 	AlignmentInfo &GetAlignmentInfo()
