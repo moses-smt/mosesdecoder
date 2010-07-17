@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNodeSCFG.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

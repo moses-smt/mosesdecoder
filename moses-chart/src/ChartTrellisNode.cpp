@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNewFormat.h 3045 2010-04-05 13:07:29Z hieuhoang1972 $
+// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
