@@ -78,7 +78,6 @@ void outputPhrasePair( vector< PhraseAlignment * > &, float );
 double computeLexicalTranslation( PHRASE &, PHRASE &, PhraseAlignment * );
 
 ofstream phraseTableFile;
-ofstream wordAlignmentFile;
 
 LexicalTable lexTable;
 PhraseTable phraseTableT;
@@ -107,7 +106,6 @@ int main(int argc, char* argv[])
 	char* fileNameExtract = argv[1];
 	char* fileNameLex = argv[2];
 	char* fileNamePhraseTable = argv[3];
-	char* fileNameWordAlignment;
 
 	for(int i=4;i<argc;i++) {
 		if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
@@ -124,8 +122,7 @@ int main(int argc, char* argv[])
 		}
 		else if (strcmp(argv[i],"--WordAlignment") == 0) {
 			wordAlignmentFlag = true;
-			fileNameWordAlignment = argv[++i];
-			cerr << "outputing word alignment in file " << fileNameWordAlignment << endl;
+			cerr << "outputing word alignment" << endl;
 		}
 		else if (strcmp(argv[i],"--NoLex") == 0) {
 			lexFlag = false;
@@ -174,18 +171,6 @@ int main(int argc, char* argv[])
 		cerr << "ERROR: could not open file phrase table file " 
 		     << fileNamePhraseTable << endl;
 		exit(1);
-	}
-
-	// output word alignment file
-	if (! inverseFlag && wordAlignmentFlag)
-	{
-		wordAlignmentFile.open(fileNameWordAlignment);
-		if (wordAlignmentFile.fail())
-		{
-			cerr << "ERROR: could not open word alignment file "
-			     << fileNameWordAlignment << endl;
-			exit(1);
-		}
 	}
   
   // loop through all extracted phrase translations
@@ -241,8 +226,6 @@ int main(int argc, char* argv[])
 	}
 	processPhrasePairs( phrasePairsWithSameF );
 	phraseTableFile.close();
-	if (! inverseFlag && wordAlignmentFlag)
-		wordAlignmentFile.close();
 }
 
 void computeCountOfCounts( char* fileNameExtract )
@@ -490,35 +473,6 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 
 	phraseTableFile << " ||| " << totalCount;
 	phraseTableFile << endl;
-
-	// optional output of word alignments
-	if (! inverseFlag && wordAlignmentFlag)
-	{
-		// source phrase
-		for(int j=0;j<phraseS.size();j++)
-		{
-			wordAlignmentFile << vcbS.getWord( phraseS[j] ) << " ";
-		}
-		wordAlignmentFile << "||| ";
-	
-		// target phrase
-		for(int j=0;j<phraseT.size();j++)
-		{
-			wordAlignmentFile << vcbT.getWord( phraseT[j] ) << " ";
-		}
-		wordAlignmentFile << "|||";
-
-		// alignment
-		for(int j=0;j<bestAlignment->alignedToT.size();j++)
-		{
-			const set< size_t > &aligned = bestAlignment->alignedToT[j];
-      for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p)
-			{
-				wordAlignmentFile << " " << *p << "-" << j;
-			}
-		}
-		wordAlignmentFile << endl;
-	}
 }
 
 double computeLexicalTranslation( PHRASE &phraseS, PHRASE &phraseT, PhraseAlignment *alignment ) {
