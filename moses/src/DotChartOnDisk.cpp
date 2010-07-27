@@ -1,4 +1,4 @@
-// $Id: DotChartOnDisk.cpp 3048 2010-04-05 17:25:26Z hieuhoang1972 $
+// $Id$
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -20,7 +20,6 @@
 #include <algorithm>
 #include "DotChartOnDisk.h"
 #include "Util.h"
-#include "PhraseDictionaryNodeNewFormat.h"
 #include "../../OnDiskPt/src/PhraseNode.h"
 
 using namespace std;

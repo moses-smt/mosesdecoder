@@ -1,4 +1,4 @@
-// $Id: Main.cpp 2615 2009-11-12 13:18:20Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

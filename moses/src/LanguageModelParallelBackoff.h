@@ -1,4 +1,4 @@
-// $Id: LanguageModelJoint.h 1897 2008-10-08 23:51:26Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

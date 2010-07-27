@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNewFormat.cpp 3056 2010-04-06 13:40:24Z hieuhoang1972 $
+// $Id$
 // vim:tabstop=2
 
 /***********************************************************************
@@ -25,7 +25,7 @@
 #include <iterator>
 #include <algorithm>
 #include <sys/stat.h>
-#include "PhraseDictionaryNewFormat.h"
+#include "PhraseDictionarySCFG.h"
 #include "FactorCollection.h"
 #include "Word.h"
 #include "Util.h"
@@ -55,25 +55,8 @@ inline void TransformString(vector< vector<string>* > &phraseVector)
 		}
 	}
 }
-
-void CreateAlignmentInfo(list<pair<size_t,size_t> > &alignmentInfo, const string &alignString)
-{
-	vector<string> alignVec = Tokenize(alignString);
 	
-	vector<string>::const_iterator iter;
-	for (iter = alignVec.begin(); iter != alignVec.end(); ++iter)
-	{
-		const string &align1 = *iter;
-		vector<size_t> alignPos = Tokenize<size_t>(align1, "-");
-		assert(alignPos.size() == 2);
-		size_t &sourcePos	= alignPos[0]
-					,&targetPos	= alignPos[1];
-		
-		alignmentInfo.push_back(pair<size_t,size_t>(sourcePos, targetPos));
-	}
-}
-	
-void PhraseDictionaryNewFormat::CreateSourceLabels(vector<Word> &sourceLabels
+void PhraseDictionarySCFG::CreateSourceLabels(vector<Word> &sourceLabels
 																										 , const vector<string> &sourceLabelsStr) const
 {
 	FactorCollection &factorCollection = FactorCollection::Instance();
@@ -90,7 +73,7 @@ void PhraseDictionaryNewFormat::CreateSourceLabels(vector<Word> &sourceLabels
 	}
 }
 
-bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
+bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 																			 , const std::vector<FactorType> &output
 																			 , const string &filePath
 																			 , const vector<float> &weight
@@ -109,7 +92,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 	return ret;
 }
 
-bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
+bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 																			 , const std::vector<FactorType> &output
 																			 , std::istream &inStream
 																			 , const std::vector<float> &weight
@@ -121,7 +104,6 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 	
 	const StaticData &staticData = StaticData::Instance();
 	const std::string& factorDelimiter = staticData.GetFactorDelimiter();
-	
 	
 	
 	string line;
@@ -176,12 +158,8 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 		TargetPhrase *targetPhrase = new TargetPhrase(Output);
 		targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
 		
-		// alignment
-		list<pair<size_t,size_t> > alignmentInfo;
-		CreateAlignmentInfo(alignmentInfo, alignString);
-
 		// rest of target phrase
-		targetPhrase->SetAlignmentInfo(alignmentInfo);
+		targetPhrase->SetAlignmentInfo(alignString);
 		targetPhrase->SetTargetLHS(targetLHS);
 		//targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 		
@@ -189,7 +167,7 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 		
-		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels, wpProducer);
+		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels,wpProducer);
 		
 		// count info for backoff
 		if (tokens.size() >= 6)
@@ -209,20 +187,20 @@ bool PhraseDictionaryNewFormat::Load(const std::vector<FactorType> &input
 	return true;
 }
 	
-TargetPhraseCollection &PhraseDictionaryNewFormat::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target)
+TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target)
 {
-	PhraseDictionaryNodeNewFormat &currNode = GetOrCreateNode(source, target);
+	PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target);
 	return currNode.GetOrCreateTargetPhraseCollection();
 }
 
-PhraseDictionaryNodeNewFormat &PhraseDictionaryNewFormat::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
+PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
 {
 	const size_t size = source.GetSize();
 	
 			const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
 			AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
 
-	PhraseDictionaryNodeNewFormat *currNode = &m_collection;
+	PhraseDictionaryNodeSCFG *currNode = &m_collection;
 	for (size_t pos = 0 ; pos < size ; ++pos)
 	{
 		const Word& word = source.GetWord(pos);
@@ -250,25 +228,25 @@ PhraseDictionaryNodeNewFormat &PhraseDictionaryNewFormat::GetOrCreateNode(const 
 	return *currNode;
 }
 
-void PhraseDictionaryNewFormat::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionarySCFG::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
 	assert(false); // TODO
 }
 
-void PhraseDictionaryNewFormat::AddEquivPhrase(TargetPhraseCollection	&targetPhraseColl, TargetPhrase *targetPhrase)
+void PhraseDictionarySCFG::AddEquivPhrase(TargetPhraseCollection	&targetPhraseColl, TargetPhrase *targetPhrase)
 {
 	targetPhraseColl.Add(targetPhrase);
 }
 
 
-const TargetPhraseCollection *PhraseDictionaryNewFormat::GetTargetPhraseCollection(const Phrase &source) const
+const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase &source) const
 { // exactly like CreateTargetPhraseCollection, but don't create
 	assert(false);
 	return NULL;
 	/*
 	 const size_t size = source.GetSize();
 	 
-	 const PhraseDictionaryNodeNewFormat *currNode = &m_collection;
+	 const PhraseDictionaryNodeSCFG *currNode = &m_collection;
 	 for (size_t pos = 0 ; pos < size ; ++pos)
 	 {
 	 const Word& word = source.GetWord(pos);
@@ -281,7 +259,7 @@ const TargetPhraseCollection *PhraseDictionaryNewFormat::GetTargetPhraseCollecti
 	 */
 }
 
-void PhraseDictionaryNewFormat::InitializeForInput(const InputType& input)
+void PhraseDictionarySCFG::InitializeForInput(const InputType& input)
 {
 	assert(m_runningNodesVec.size() == 0);
 	size_t sourceSize = input.GetSize();
@@ -298,29 +276,29 @@ void PhraseDictionaryNewFormat::InitializeForInput(const InputType& input)
 	}
 }
 
-PhraseDictionaryNewFormat::~PhraseDictionaryNewFormat()
+PhraseDictionarySCFG::~PhraseDictionarySCFG()
 {
 	CleanUp();
 }
 
-void PhraseDictionaryNewFormat::SetWeightTransModel(const vector<float> &weightT)
+void PhraseDictionarySCFG::SetWeightTransModel(const vector<float> &weightT)
 {
-	PhraseDictionaryNodeNewFormat::iterator iterDict;
+	PhraseDictionaryNodeSCFG::iterator iterDict;
 	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
 	{
-		PhraseDictionaryNodeNewFormat::InnerNodeMap &innerNode = iterDict->second;
-		PhraseDictionaryNodeNewFormat::InnerNodeMap::iterator iterInner;
+		PhraseDictionaryNodeSCFG::InnerNodeMap &innerNode = iterDict->second;
+		PhraseDictionaryNodeSCFG::InnerNodeMap::iterator iterInner;
 		for (iterInner = innerNode.begin() ; iterInner != innerNode.end() ; ++iterInner)
 		{
 			// recursively set weights in nodes
-			PhraseDictionaryNodeNewFormat &node = iterInner->second;
+			PhraseDictionaryNodeSCFG &node = iterInner->second;
 			node.SetWeightTransModel(this, weightT);
 		}
 	}
 }
 
 
-void PhraseDictionaryNewFormat::CleanUp()
+void PhraseDictionarySCFG::CleanUp()
 {
 	//RemoveAllInColl(m_chartTargetPhraseColl);
 	std::vector<ChartRuleCollection*>::iterator iter;
@@ -334,13 +312,13 @@ void PhraseDictionaryNewFormat::CleanUp()
 	RemoveAllInColl(m_runningNodesVec);
 }
 
-TO_STRING_BODY(PhraseDictionaryNewFormat);
+TO_STRING_BODY(PhraseDictionarySCFG);
 
 // friend
-ostream& operator<<(ostream& out, const PhraseDictionaryNewFormat& phraseDict)
+ostream& operator<<(ostream& out, const PhraseDictionarySCFG& phraseDict)
 {
-	const PhraseDictionaryNodeNewFormat &coll = phraseDict.m_collection;
-	PhraseDictionaryNodeNewFormat::const_iterator iter;
+	const PhraseDictionaryNodeSCFG &coll = phraseDict.m_collection;
+	PhraseDictionaryNodeSCFG::const_iterator iter;
 	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
 	{
 		const Word &word = (*iter).first;

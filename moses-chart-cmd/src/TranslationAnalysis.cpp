@@ -1,4 +1,4 @@
-// $Id: TranslationAnalysis.cpp 2474 2009-08-06 17:32:28Z hieuhoang1972 $
+// $Id$
 
 #include <iostream>
 #include <sstream>

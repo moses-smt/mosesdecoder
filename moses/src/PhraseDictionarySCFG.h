@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNewFormat.h 3045 2010-04-05 13:07:29Z hieuhoang1972 $
+// $Id$
 // vim:tabstop=2
 
 /***********************************************************************
@@ -23,7 +23,7 @@
 #pragma once
 
 #include "PhraseDictionary.h"
-#include "PhraseDictionaryNodeNewFormat.h"
+#include "PhraseDictionaryNodeSCFG.h"
 #include "ChartRuleCollection.h"
 #include "CellCollection.h"
 
@@ -35,13 +35,13 @@ namespace Moses
 	/*** Implementation of a phrase table in a trie.  Looking up a phrase of
 	 * length n words requires n look-ups to find the TargetPhraseCollection.
 	 */
-	class PhraseDictionaryNewFormat : public PhraseDictionary
+	class PhraseDictionarySCFG : public PhraseDictionary
 		{
 			typedef PhraseDictionary MyBase;
-			friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryNewFormat&);
+			friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
 			
 		protected:
-			PhraseDictionaryNodeNewFormat m_collection;
+			PhraseDictionaryNodeSCFG m_collection;
 			mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 			mutable std::vector<ProcessedRuleStack*>	m_runningNodesVec;
 			
@@ -51,7 +51,7 @@ namespace Moses
 			std::string m_filePath; 
 			
 			TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target);
-			PhraseDictionaryNodeNewFormat &GetOrCreateNode(const Phrase &source, const TargetPhrase &target);
+			PhraseDictionaryNodeSCFG &GetOrCreateNode(const Phrase &source, const TargetPhrase &target);
 			
 			bool Load(const std::vector<FactorType> &input
 								, const std::vector<FactorType> &output
@@ -68,13 +68,13 @@ namespace Moses
 			Word CreateCoveredWord(const Word &origSourceLabel, const InputType &src, const WordsRange &range) const;
 			
 		public:
-			PhraseDictionaryNewFormat(size_t numScoreComponent, PhraseDictionaryFeature* feature)
+			PhraseDictionarySCFG(size_t numScoreComponent, PhraseDictionaryFeature* feature)
 			: MyBase(numScoreComponent, feature)
 			, m_prevSource(Input)
 			, m_prevPhraseColl(NULL)
 			{
 			}
-			virtual ~PhraseDictionaryNewFormat();
+			virtual ~PhraseDictionarySCFG();
 			
 			std::string GetScoreProducerDescription() const
 			{ return "Hieu's Reordering Model"; }

@@ -112,6 +112,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // indirect: source target probabilities
 
     // consistency checks
+		/*
     size_t expectedSize = (hierarchicalFlag ? 5 : 4);
     if (itemDirect.size() != expectedSize)
     {
@@ -126,7 +127,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
         << fileNameIndirect << ", line " << i << endl;
       exit(1);
     }
-
+		*/
+		
     if (itemDirect[0].compare( itemIndirect[0] ) != 0)
     {
       cerr << "ERROR: target phrase does not match in line " << i << ": '" 
@@ -142,22 +144,19 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     }
 
     // output hierarchical phrase pair (with separated labels)
-    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
+    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1];
 
-    // output alignment and probabilities
-    if (hierarchicalFlag) 
-      fileConsolidated << itemDirect[2]   << " ||| " // alignment
-        << itemIndirect[2]      // prob indirect
-        << " " << itemDirect[3]; // prob direct
-    else
-      fileConsolidated << itemIndirect[2]      // prob indirect
-        << " " << itemDirect[2]; // prob direct
-    fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
+		// probs
+		fileConsolidated	<< " ||| " << itemIndirect[2]      // prob indirect
+											<< " " << itemDirect[2] // prob direct
+											<< " " << (logProbFlag ? 1 : 2.718); // phrase count feature
+		
+    // alignment 
+		fileConsolidated << " ||| " << itemDirect[3];
 
-    // counts
-    if (itemIndirect.size() == 4 && itemDirect.size() == 5)
-      fileConsolidated << " ||| " << itemIndirect[3] << " " // indirect
-        << itemDirect[4]; // direct
+    // counts, for debugging
+    fileConsolidated << "||| " << itemIndirect[4] << " " // indirect
+																	<< itemDirect[4]; // direct
 
     fileConsolidated << endl;
   }

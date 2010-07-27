@@ -1,4 +1,4 @@
-// $Id: IOWrapper.cpp 2675 2010-01-26 18:37:42Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

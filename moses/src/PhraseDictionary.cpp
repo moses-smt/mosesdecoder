@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryTreeAdaptor.h"
-#include "PhraseDictionaryNewFormat.h"
+#include "PhraseDictionarySCFG.h"
 #include "PhraseDictionaryOnDisk.h"
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
@@ -63,7 +63,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 {
     const StaticData& staticData = StaticData::Instance();
 	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-    if (implementation == Memory || implementation == NewFormat || implementation == OnDisk || implementation == SuffixArray) {
+    if (implementation == Memory || implementation == SCFG || implementation == OnDisk || implementation == SuffixArray) {
         m_useThreadSafePhraseDictionary = true;
     } else {
         m_useThreadSafePhraseDictionary = false;
@@ -106,7 +106,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 											, system->GetWeightWordPenalty()));
         return pdta;
 	}
-	else if (m_implementation == NewFormat)
+	else if (m_implementation == SCFG)
 	{   // memory phrase table
 		VERBOSE(2,"using New Format phrase tables" << std::endl);
 		if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
@@ -114,7 +114,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 			VERBOSE(2,"Using gzipped file" << std::endl);
 		}
 		
-		PhraseDictionaryNewFormat* pdm  = new PhraseDictionaryNewFormat(m_numScoreComponent,this);
+		PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(m_numScoreComponent,this);
         assert(pdm->Load(GetInput()
                                          , GetOutput()
 										 , m_filePath

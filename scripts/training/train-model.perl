@@ -82,7 +82,7 @@ $_HELP = 1
 		       'generation-factors=s' => \$_GENERATION_FACTORS,
 		       'decoding-steps=s' => \$_DECODING_STEPS,
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
-                       'factor-delimiter=s' => \$_FACTOR_DELIMITER,
+		       'factor-delimiter=s' => \$_FACTOR_DELIMITER,
 		       'phrase-translation-table=s' => \@_PHRASE_TABLE,
 		       'generation-table=s' => \@_GENERATION_TABLE,
 		       'reordering-table=s' => \@_REORDERING_TABLE,
@@ -97,7 +97,7 @@ $_HELP = 1
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
 		       'xml' => \$_XML,
-		       'phrase-word-alignment=s' => \$_PHRASE_WORD_ALIGNMENT,
+		       'phrase-word-alignment' => \$_PHRASE_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
@@ -1277,7 +1277,7 @@ sub score_phrase_phrase_extract {
 
         my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
-        $cmd .= " --WordAlignment $_PHRASE_WORD_ALIGNMENT" if $_PHRASE_WORD_ALIGNMENT;
+        $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " $_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    

@@ -1,5 +1,6 @@
+#ifndef moses_TreeInput_h
+#define moses_TreeInput_h
 
-#pragma once
 
 #include <vector>
 #include "Sentence.h"
@@ -60,3 +61,4 @@ public:
 
 }
 
+#endif

@@ -1,4 +1,4 @@
-// $Id: DotChart.cpp 3048 2010-04-05 17:25:26Z hieuhoang1972 $
+// $Id$
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -19,7 +19,6 @@
  ***********************************************************************/
 #include "DotChart.h"
 #include "Util.h"
-#include "PhraseDictionaryNodeNewFormat.h"
 
 using namespace std;
 
@@ -42,7 +41,7 @@ ProcessedRuleStack::~ProcessedRuleStack()
 
 std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
 {
-	const PhraseDictionaryNode &node = rule.GetLastNode();
+	//const PhraseDictionaryNode &node = rule.GetLastNode();
 	//out << node;
 	
 	return out;

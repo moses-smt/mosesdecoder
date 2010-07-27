@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryNodeNewFormat.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
+// $Id$
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -19,27 +19,27 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "PhraseDictionaryNodeNewFormat.h"
+#include "PhraseDictionaryNodeSCFG.h"
 #include "TargetPhrase.h"
 #include "PhraseDictionaryMemory.h"
 
 namespace Moses
 {
-size_t	PhraseDictionaryNodeNewFormat::s_id = 0;
+size_t	PhraseDictionaryNodeSCFG::s_id = 0;
 	
-PhraseDictionaryNodeNewFormat::~PhraseDictionaryNodeNewFormat()
+PhraseDictionaryNodeSCFG::~PhraseDictionaryNodeSCFG()
 {
 	delete m_targetPhraseCollection;
 }
 
-void PhraseDictionaryNodeNewFormat::CleanUp()
+void PhraseDictionaryNodeSCFG::CleanUp()
 {
 	delete m_targetPhraseCollection;
 	m_targetPhraseCollection = NULL;
 	m_map.clear();
 }
 
-void PhraseDictionaryNodeNewFormat::Sort(size_t tableLimit)
+void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
 {
 	// recusively sort
 	NodeMap::iterator iter;
@@ -58,7 +58,7 @@ void PhraseDictionaryNodeNewFormat::Sort(size_t tableLimit)
 		m_targetPhraseCollection->NthElement(tableLimit);
 }
 
-PhraseDictionaryNodeNewFormat *PhraseDictionaryNodeNewFormat::GetOrCreateChild(const Word &word, const Word &sourcelabel)
+PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word &word, const Word &sourcelabel)
 {
 	InnerNodeMap *innerNodeMap;
 	innerNodeMap = &m_map[sourcelabel];
@@ -69,17 +69,17 @@ PhraseDictionaryNodeNewFormat *PhraseDictionaryNodeNewFormat::GetOrCreateChild(c
 
 	// can't find node. create a new 1
 	std::pair <InnerNodeMap::iterator,bool> insResult; 
-	insResult = innerNodeMap->insert( std::make_pair(word, PhraseDictionaryNodeNewFormat()) );
+	insResult = innerNodeMap->insert( std::make_pair(word, PhraseDictionaryNodeSCFG()) );
 	assert(insResult.second);
 
 	iter = insResult.first;
-	PhraseDictionaryNodeNewFormat &ret = iter->second;
+	PhraseDictionaryNodeSCFG &ret = iter->second;
 	ret.SetSourceWord(iter->first);
 	//ret.SetSourceWord(word);
 	return &ret;
 }
 	
-const PhraseDictionaryNodeNewFormat *PhraseDictionaryNodeNewFormat::GetChild(const Word &word, const Word &sourcelabel) const
+const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &word, const Word &sourcelabel) const
 {
 	NodeMap::const_iterator iterOuter = m_map.find(sourcelabel);
 	if (iterOuter == m_map.end())
@@ -95,7 +95,7 @@ const PhraseDictionaryNodeNewFormat *PhraseDictionaryNodeNewFormat::GetChild(con
 }
 
 
-void PhraseDictionaryNodeNewFormat::SetWeightTransModel(const PhraseDictionary *phraseDictionary
+void PhraseDictionaryNodeSCFG::SetWeightTransModel(const PhraseDictionary *phraseDictionary
 																							 , const std::vector<float> &weightT)
 {
 	// recursively set weights
@@ -125,13 +125,13 @@ void PhraseDictionaryNodeNewFormat::SetWeightTransModel(const PhraseDictionary *
 
 }
 
-std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeNewFormat &node)
+std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeSCFG &node)
 {
 	out << node.GetTargetPhraseCollection();
 	return out;
 }
 
-TO_STRING_BODY(PhraseDictionaryNodeNewFormat)
+TO_STRING_BODY(PhraseDictionaryNodeSCFG)
 	
 }
 

@@ -1,4 +1,4 @@
-// $Id: DotChart.h 3048 2010-04-05 17:25:26Z hieuhoang1972 $
+// $Id$
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang

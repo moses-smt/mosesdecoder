@@ -67,22 +67,22 @@
 		1C05B9E91174CC24003585B2 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
 		1C05B9EA1174CC24003585B2 /* SyntaxTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SyntaxTree.cpp; sourceTree = "<group>"; };
 		1C05B9EB1174CC24003585B2 /* SyntaxTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SyntaxTree.h; sourceTree = "<group>"; };
-		1C05B9F71174CE51003585B2 /* extract-rules */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "extract-rules"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C05BA1F1174CEE8003585B2 /* XmlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XmlTree.cpp; sourceTree = "<group>"; };
 		1C05BA201174CEE8003585B2 /* XmlTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XmlTree.h; sourceTree = "<group>"; };
-		1C05BA2E1174CF6C003585B2 /* statistics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = statistics; sourceTree = BUILT_PRODUCTS_DIR; };
-		1C47578F102B78AD00AB74DB /* score */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = score; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C475794102B78DD00AB74DB /* score.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = score.cpp; sourceTree = "<group>"; };
-		1C4757C4102B7EAA00AB74DB /* consolidate */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = consolidate; sourceTree = BUILT_PRODUCTS_DIR; };
-		1C5C088A0FFE54F400B00995 /* extract */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = extract; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C6A83031111F5A300059E7F /* AlignmentPhrase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AlignmentPhrase.cpp; sourceTree = "<group>"; };
 		1C6A83041111F5A300059E7F /* AlignmentPhrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlignmentPhrase.h; sourceTree = "<group>"; };
 		1CE8CE2C0FC6EA0200924FEA /* extract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = extract.cpp; sourceTree = "<group>"; };
 		1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "tables-core.cpp"; sourceTree = "<group>"; };
 		1CE8CE4C0FC6EAA200924FEA /* tables-core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "tables-core.h"; sourceTree = "<group>"; };
-		1CF9F71A108C9FE700EABCE5 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "consolidate-direct"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1CFE962311762A20006FF13B /* consolidate-direct.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "consolidate-direct.cpp"; sourceTree = "<group>"; };
 		1CFE962411762A20006FF13B /* consolidate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consolidate.cpp; sourceTree = "<group>"; };
+		1E7C2CF611F1146200213451 /* extract */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = extract; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E7C2CF811F1146200213451 /* score */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = score; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E7C2CFA11F1146300213451 /* consolidate */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = consolidate; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E7C2CFC11F1146300213451 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "consolidate-direct"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E7C2CFE11F1146300213451 /* extract-rules */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "extract-rules"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E7C2D0011F1146300213451 /* statistics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = statistics; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,12 +176,12 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1C5C088A0FFE54F400B00995 /* extract */,
-				1C47578F102B78AD00AB74DB /* score */,
-				1C4757C4102B7EAA00AB74DB /* consolidate */,
-				1CF9F71A108C9FE700EABCE5 /* consolidate-direct */,
-				1C05B9F71174CE51003585B2 /* extract-rules */,
-				1C05BA2E1174CF6C003585B2 /* statistics */,
+				1E7C2CF611F1146200213451 /* extract */,
+				1E7C2CF811F1146200213451 /* score */,
+				1E7C2CFA11F1146300213451 /* consolidate */,
+				1E7C2CFC11F1146300213451 /* consolidate-direct */,
+				1E7C2CFE11F1146300213451 /* extract-rules */,
+				1E7C2D0011F1146300213451 /* statistics */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -209,7 +209,7 @@
 			);
 			name = "extract-rules";
 			productName = "extract-rules";
-			productReference = 1C05B9F71174CE51003585B2 /* extract-rules */;
+			productReference = 1E7C2CFE11F1146300213451 /* extract-rules */;
 			productType = "com.apple.product-type.tool";
 		};
 		1C05BA2D1174CF6C003585B2 /* statistics */ = {
@@ -225,7 +225,7 @@
 			);
 			name = statistics;
 			productName = statistics;
-			productReference = 1C05BA2E1174CF6C003585B2 /* statistics */;
+			productReference = 1E7C2D0011F1146300213451 /* statistics */;
 			productType = "com.apple.product-type.tool";
 		};
 		1C47578E102B78AD00AB74DB /* score */ = {
@@ -241,7 +241,7 @@
 			);
 			name = score;
 			productName = score;
-			productReference = 1C47578F102B78AD00AB74DB /* score */;
+			productReference = 1E7C2CF811F1146200213451 /* score */;
 			productType = "com.apple.product-type.tool";
 		};
 		1C4757C3102B7EAA00AB74DB /* consolidate */ = {
@@ -257,7 +257,7 @@
 			);
 			name = consolidate;
 			productName = consolidate;
-			productReference = 1C4757C4102B7EAA00AB74DB /* consolidate */;
+			productReference = 1E7C2CFA11F1146300213451 /* consolidate */;
 			productType = "com.apple.product-type.tool";
 		};
 		1CF9F719108C9FE700EABCE5 /* consolidate-direct */ = {
@@ -273,7 +273,7 @@
 			);
 			name = "consolidate-direct";
 			productName = "consolidate-direct";
-			productReference = 1CF9F71A108C9FE700EABCE5 /* consolidate-direct */;
+			productReference = 1E7C2CFC11F1146300213451 /* consolidate-direct */;
 			productType = "com.apple.product-type.tool";
 		};
 		8DD76F620486A84900D96B5E /* extract */ = {
@@ -291,7 +291,7 @@
 			name = extract;
 			productInstallPath = "$(HOME)/bin";
 			productName = extract;
-			productReference = 1C5C088A0FFE54F400B00995 /* extract */;
+			productReference = 1E7C2CF611F1146200213451 /* extract */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */

@@ -1,4 +1,4 @@
-// $Id: AlignmentInfo.cpp 3048 2010-04-05 17:25:26Z hieuhoang1972 $
+// $Id$
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream &out, const AlignmentInfo &alignmentInfo)
 	AlignmentInfo::const_iterator iter;
 	for (iter = alignmentInfo.begin(); iter != alignmentInfo.end(); ++iter)
 	{
-		out << "(" << iter->first << "," << iter->second << ") ";
+		out << iter->first << "-" << iter->second << " ";
 	}
 	return out;
 }
