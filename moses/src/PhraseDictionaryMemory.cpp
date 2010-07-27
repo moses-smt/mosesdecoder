@@ -76,9 +76,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (numElement == NOT_FOUND) 
 		{ // init numElement
 			numElement = tokens.size();
-			assert(numElement == 3 || numElement == 5);
-			// Pharoah style: source ||| target ||| scores
-			// New moses style: source ||| target ||| alignment ||| scores ||| count
+			assert(numElement >= 3);
+			// extended style: source ||| target ||| scores ||| [alignment] ||| [counts]
 		}
 			 
 		if (tokens.size() != numElement)
@@ -89,17 +88,9 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			abort();
 		}
 
-		const string *scoreString;
-
 		const string &sourcePhraseString=tokens[0]
-								,&targetPhraseString=tokens[1];
-
-		if (numElement==3){
-			scoreString = &tokens[2];
-		}
-		else{
-			scoreString = &tokens[3];
-		}
+								,&targetPhraseString=tokens[1]
+								,&scoreString = tokens[2];
 		
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -111,7 +102,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (sourcePhraseString != prevSourcePhrase)
 			phraseVector = Phrase::Parse(sourcePhraseString, input, factorDelimiter);
 
-		vector<float> scoreVector = Tokenize<float>(*scoreString);
+		vector<float> scoreVector = Tokenize<float>(scoreString);
 		if (scoreVector.size() != m_numScoreComponent) 
 		{
 			stringstream strme;
@@ -127,8 +118,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
-		if (numElement == 5)
-			targetPhrase.SetAlignmentInfo(tokens[2]);
+
+		targetPhrase.SetAlignmentInfo(tokens[3]);
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
