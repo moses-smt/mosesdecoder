@@ -425,7 +425,22 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		}
 		phraseTableFile << "||| ";
 	}
+
+	// phrase translation probability
+	if (goodTuringFlag && count<GT_MAX)
+		count *= discountFactor[(int)(count+0.99999)];
+	double condScore = count / totalCount;	
+	phraseTableFile << ( logProbFlag ? negLogProb*log(condScore) : condScore );
 	
+	// lexical translation probability
+	if (lexFlag)
+	{
+		double lexScore = computeLexicalTranslation( phraseS, phraseT, bestAlignment);
+		phraseTableFile << " " << ( logProbFlag ? negLogProb*log(lexScore) : lexScore );
+	}
+	
+	phraseTableFile << " ||| ";
+
 	// alignment info for non-terminals
 	if (! inverseFlag)
 	{
@@ -441,7 +456,6 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 					phraseTableFile << sourcePos << "-" << j << " ";
 				}
 			}
-			phraseTableFile << "||| ";
 		}
 		else if (wordAlignmentFlag)
 		{ // alignment info in pb model
@@ -453,22 +467,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 					phraseTableFile << *p << "-" << j << " ";
 				}
 			}
-			phraseTableFile << "||| ";
-			
 		}
-	}
-
-	// phrase translation probability
-	if (goodTuringFlag && count<GT_MAX)
-		count *= discountFactor[(int)(count+0.99999)];
-	double condScore = count / totalCount;	
-	phraseTableFile << ( logProbFlag ? negLogProb*log(condScore) : condScore );
-	
-	// lexical translation probability
-	if (lexFlag)
-	{
-		double lexScore = computeLexicalTranslation( phraseS, phraseT, bestAlignment);
-		phraseTableFile << " " << ( logProbFlag ? negLogProb*log(lexScore) : lexScore );
 	}
 
 	phraseTableFile << " ||| " << totalCount;
