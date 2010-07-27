@@ -487,20 +487,9 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			abort();
 		}
 		
-		std::string *scoreString;
-		std::string sourceAlignString, targetAlignString;
-		
-		const std::string &sourcePhraseString=tokens[0]
-											,&targetPhraseString=tokens[1];
-		if (numElement==3){
-			scoreString = &tokens[2];
-		}
-		else{
-			sourceAlignString=tokens[2];
-			targetAlignString=tokens[3];
-			scoreString = &tokens[3];
-		}
-		
+		const std::string &sourcePhraseString	=tokens[0]
+											,&targetPhraseString=tokens[1]
+											,&scoreString				= tokens[2];		
 				
 		IPhrase f,e;
 		Scores sc;
@@ -513,33 +502,10 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 		wordVec = Tokenize(targetPhraseString);
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
 			e.push_back(imp->tv->add(wordVec[i]));
-		
-		
-		
-		//change "()" into "(-1)" for both source and target word-to-word alignments
-		std::string emtpyAlignStr="()";
-		std::string replaceAlignStr="(-1)";
-		sourceAlignString=Replace(sourceAlignString,emtpyAlignStr,replaceAlignStr);
-		targetAlignString=Replace(targetAlignString,emtpyAlignStr,replaceAlignStr);
-
-		//remove all "(" from both source and target word-to-word alignments
-		emtpyAlignStr="(";
-		replaceAlignStr="";
-		sourceAlignString=Replace(sourceAlignString,emtpyAlignStr,replaceAlignStr);
-		targetAlignString=Replace(targetAlignString,emtpyAlignStr,replaceAlignStr);
-		
-		//remove all ")" from both source and target word-to-word alignments
-		emtpyAlignStr=")";
-		replaceAlignStr="";
-		sourceAlignString=Replace(sourceAlignString,emtpyAlignStr,replaceAlignStr);
-		targetAlignString=Replace(targetAlignString,emtpyAlignStr,replaceAlignStr);
-		
-		sourceAlignment = Tokenize(sourceAlignString);
-		targetAlignment = Tokenize(targetAlignString);
-			
+					
 		//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
 		// Mauro: to handle 0 probs in phrase tables
-		std::vector<float> scoreVector = Tokenize<float>(*scoreString);
+		std::vector<float> scoreVector = Tokenize<float>(scoreString);
 		for (size_t i = 0 ; i < scoreVector.size() ; ++i)
 		{
 			float tmp = scoreVector[i];
