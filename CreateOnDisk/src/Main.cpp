@@ -93,8 +93,8 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 	size_t stage = 0;
 	/*	0 = source phrase
 	 1 = target phrase
-	 2 = align
-	 3 = scores
+	 2 = scores
+	 3 = align
 	 4 = count
 	 */
 	char *tok = strtok (line," ");
@@ -120,14 +120,14 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 				}
 				case 2:
 				{
-					targetPhrase.Create1AlignFromString(tok);
+					float score = Moses::Scan<float>(tok);
+					targetPhrase.SetScore(score, scoreInd);
+					++scoreInd;
 					break;
 				}
 				case 3:
 				{
-					float score = Moses::Scan<float>(tok);
-					targetPhrase.SetScore(score, scoreInd);
-					++scoreInd;
+					targetPhrase.Create1AlignFromString(tok);
 					break;
 				}
 				case 4:
