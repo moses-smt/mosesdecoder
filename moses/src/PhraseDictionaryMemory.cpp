@@ -119,7 +119,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
 
-		targetPhrase.SetAlignmentInfo(tokens[3]);
+		//targetPhrase.SetAlignmentInfo(tokens[3]);
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());

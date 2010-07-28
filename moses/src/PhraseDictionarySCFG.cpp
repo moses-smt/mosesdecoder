@@ -130,8 +130,8 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 		
 		const string &sourcePhraseString	= tokens[0]
 								, &targetPhraseString	= tokens[1]
-								, &alignString				= tokens[2]
-								, &scoreString				= tokens[3];
+								, &scoreString				= tokens[2]
+								, &alignString				= tokens[3];
 
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
