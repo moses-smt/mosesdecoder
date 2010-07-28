@@ -13,8 +13,10 @@
 // data structure for a single phrase pair
 class PhraseAlignment 
 {
-public:
+protected:
 	int target, source;
+
+public:
 	float count;
 	std::vector< std::set<size_t> > alignedToT;
 	std::vector< std::set<size_t> > alignedToS;
@@ -24,4 +26,10 @@ public:
 	void clear();
 	bool equals( const PhraseAlignment& );
 	bool match( const PhraseAlignment& );
+	
+	int GetTarget() const
+	{ return target; }
+	int GetSource() const
+	{ return source; }
+	
 };
