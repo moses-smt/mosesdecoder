@@ -14,13 +14,16 @@
 class PhraseAlignment 
 {
 protected:
-	int target, source;
+	int targetPhraseId, sourcePhraseId;
 
+	void createAlignVec(size_t sourceSize, size_t targetSize);
 public:
 	float count;
 	std::vector< std::set<size_t> > alignedToT;
 	std::vector< std::set<size_t> > alignedToS;
   
+	PhraseAlignment();
+	
 	void create( char*, int );
 	void addToCount( char* );
 	void clear();
@@ -28,8 +31,8 @@ public:
 	bool match( const PhraseAlignment& );
 	
 	int GetTarget() const
-	{ return target; }
+	{ return targetPhraseId; }
 	int GetSource() const
-	{ return source; }
+	{ return sourcePhraseId; }
 	
 };

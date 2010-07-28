@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
     if (++i % 100000 == 0) cerr << "." << flush;
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extractFileP.eof())	break;
-		
+				
 		// identical to last line? just add count
 		if (lastSource > 0 && strcmp(line,lastLine) == 0)
 		{
@@ -237,8 +237,6 @@ void computeCountOfCounts( char* fileNameExtract )
 		SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
 		if (extractFileP.eof())	break;
 		
-		cerr << line << endl;
-		
 		// identical to last line? just add count
 		if (strcmp(line,lastLine) == 0)
 		{
@@ -283,6 +281,8 @@ void computeCountOfCounts( char* fileNameExtract )
 		delete( lastPhrasePair );
 		lastPhrasePair = phrasePair;
 	}
+	
+	delete lastPhrasePair;
 
 	discountFactor[0] = 0.01; // floor
 	cerr << "\n";
