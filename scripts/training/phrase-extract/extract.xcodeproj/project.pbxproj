@@ -37,6 +37,7 @@
 		1CFE962611762A20006FF13B /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962411762A20006FF13B /* consolidate.cpp */; };
 		1CFE962711762A2A006FF13B /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962411762A20006FF13B /* consolidate.cpp */; };
 		1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
+		1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -83,6 +84,9 @@
 		1E7C2CFC11F1146300213451 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "consolidate-direct"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E7C2CFE11F1146300213451 /* extract-rules */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "extract-rules"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E7C2D0011F1146300213451 /* statistics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = statistics; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EB1C8301200D5C00079FCBB /* PhraseAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhraseAlignment.h; sourceTree = "<group>"; };
+		1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhraseAlignment.cpp; sourceTree = "<group>"; };
+		1EB1C8491200D77E0079FCBB /* score.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = score.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +173,9 @@
 				1CE8CE4C0FC6EAA200924FEA /* tables-core.h */,
 				1C05BA1F1174CEE8003585B2 /* XmlTree.cpp */,
 				1C05BA201174CEE8003585B2 /* XmlTree.h */,
+				1EB1C8301200D5C00079FCBB /* PhraseAlignment.h */,
+				1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */,
+				1EB1C8491200D77E0079FCBB /* score.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -360,6 +367,7 @@
 				1C4757A9102B797900AB74DB /* tables-core.h in Sources */,
 				1C475795102B78DD00AB74DB /* score.cpp in Sources */,
 				1C6A83051111F5A300059E7F /* AlignmentPhrase.cpp in Sources */,
+				1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

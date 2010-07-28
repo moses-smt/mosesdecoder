@@ -962,6 +962,10 @@ bool StaticData::LoadPhraseTables()
 
 			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
 			
+            //This is needed for regression testing, but the phrase table
+            //might not really be loading here
+			IFVERBOSE(1)
+				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath <<endl);
             
             PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
@@ -985,6 +989,8 @@ bool StaticData::LoadPhraseTables()
 		}
 	}
 	
+	IFVERBOSE(1)
+		PrintUserTime("Finished loading phrase tables");
 	return true;
 }
 
