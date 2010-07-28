@@ -13,7 +13,7 @@ extract: tables-core.o SentenceAlignment.o extract.o
 extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o SyntaxTree.o XmlTree.o HoleCollection.o extract-rules.o 
 	$(CXX) $^ -o extract-rules
 
-score: tables-core.o AlignmentPhrase.o score.o
+score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o
 	$(CXX) $^ -o score
 
 consolidate: consolidate.o
