@@ -73,8 +73,6 @@ bool getLine( istream &fileP, vector< string > &item )
 int main(int argc, char* argv[]) 
 {
   cerr << "Starting..." << endl;
-
-	bool hierarchicalFlag = true;
 	
 	char* &fileNameDirect = argv[1];
 	ifstream fileDirect;
@@ -109,14 +107,12 @@ int main(int argc, char* argv[])
 		fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
 		
 		// output alignment and probabilities
-		if (hierarchicalFlag) 
-			fileConsolidated << itemDirect[2]							// alignment
-											<< " ||| " << itemDirect[3];	// prob direct
+		fileConsolidated	<< itemDirect[2]						// prob direct 	
+											<< " 2.718" // phrase count feature
+											<< " ||| " << itemDirect[3];	// alignment
 
-		fileConsolidated << " 2.718"; // phrase count feature
-		
 		// counts
-		fileConsolidated << " ||| 0 " << itemDirect[4]; // indirect
+		fileConsolidated << "||| 0 " << itemDirect[4]; // indirect
 		fileConsolidated << endl;
 		
 	}
