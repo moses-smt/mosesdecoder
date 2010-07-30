@@ -31,13 +31,13 @@ namespace Moses
 void ReorderingConstraint::InitializeWalls(size_t size)
 {
 	m_size = size;
-	m_wall      = (bool*) malloc(sizeof(bool) * size);
-	m_localWall = (bool*) malloc(sizeof(bool) * size);
+	m_wall      = (bool*)   malloc(sizeof(bool) * size);
+	m_localWall = (size_t*) malloc(sizeof(size_t) * size);
 
 	for (size_t pos = 0 ; pos < m_size ; pos++)
 	{
 		m_wall[pos] = false;
-		m_localWall[pos] = false;
+		m_localWall[pos] = NOT_A_ZONE;
 	}
 }
 
@@ -61,9 +61,17 @@ void ReorderingConstraint::FinalizeWalls()
 		{
 			if (m_wall[ pos ])
 			{
-				m_localWall[ pos ] = true;
+				m_localWall[ pos ] = z;
 				m_wall[ pos ] = false;
 	      VERBOSE(3,"SETTING local wall " << pos << std::endl);
+			}
+			// enforce that local walls only apply to innermost zone
+			else if (m_localWall[ pos ] != NOT_A_ZONE) {
+				size_t assigned_z = m_localWall[ pos ];
+				if ((m_zone[assigned_z][0] < startZone) ||
+				    (m_zone[assigned_z][1] > endZone)) {
+					m_localWall[ pos ] = z;
+				}
 			}
 		}
 	}
@@ -231,7 +239,7 @@ bool ReorderingConstraint::Check( const WordsBitmap &bitmap, size_t startPos, si
 			{
 				seenUntranslatedBeforeStartPos = true;
 			}
-			if( seenUntranslatedBeforeStartPos && GetLocalWall( pos ) )
+			if( seenUntranslatedBeforeStartPos && GetLocalWall( pos, z ) )
 			{
 				VERBOSE(3," local wall violation" << std::endl);
 				return false;

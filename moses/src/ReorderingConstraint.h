@@ -38,6 +38,7 @@ namespace Moses
 
 class InputType;
 
+#define NOT_A_ZONE 999999999
 /** vector of boolean used to represent whether a word has been translated or not */
 class ReorderingConstraint 
 {
@@ -45,8 +46,8 @@ class ReorderingConstraint
 protected:
 	// const size_t m_size; /**< number of words in sentence */
 	size_t m_size; /**< number of words in sentence */
-	bool	*m_wall;	/**< flag for each word if it is a wall */
-	bool	*m_localWall;	/**< flag for each word if it is a local wall */
+	bool *m_wall;	/**< flag for each word if it is a wall */
+	size_t *m_localWall;	/**< flag for each word if it is a local wall */
 	std::vector< std::vector< size_t > > m_zone; /** zones that limit reordering */
 	bool   m_active; /**< flag indicating, if there are any active constraints */
 
@@ -75,7 +76,7 @@ public:
 	bool GetWall(size_t pos) const { return m_wall[pos]; }
 
 	//! whether a word has been translated at a particular position
-	bool GetLocalWall(size_t pos) const { return m_localWall[pos]; }
+	bool GetLocalWall(size_t pos, size_t zone ) const { return (m_localWall[pos] == zone); }
 
 	//! set a zone
 	void SetZone( size_t startPos, size_t endPos );
