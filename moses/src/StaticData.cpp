@@ -489,6 +489,7 @@ bool StaticData::LoadData(Parameter *parameter)
       if (id == "D") {
         for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
           if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
+            VERBOSE(2,"Adding decoder graph " << k << " to translation system " << config[0] << endl);
             m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k]);
           }
         }
@@ -496,12 +497,14 @@ bool StaticData::LoadData(Parameter *parameter)
         for (size_t k = 0; k < m_reorderModels.size(); ++k) {
           if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddReorderModel(m_reorderModels[k]);
+            VERBOSE(2,"Adding reorder table " << k << " to translation system " << config[0] << endl);
           }
         }
       } else if (id == "G") {
         for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
           if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddGlobalLexicalModel(m_globalLexicalModels[k]);
+            VERBOSE(2,"Adding global lexical model " << k << " to translation system " << config[0] << endl);
           }
         }
       } else if (id == "L") {
@@ -509,6 +512,7 @@ bool StaticData::LoadData(Parameter *parameter)
         for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
           if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
             m_translationSystems.find(config[0])->second.AddLanguageModel(*k);
+            VERBOSE(2,"Adding language model " << lmid << " to translation system " << config[0] << endl);
           }
         }
       } else {
@@ -1064,7 +1068,9 @@ void StaticData::LoadPhraseBasedParameters()
 {
 	const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
   size_t distortionWeightCount = distortionWeights.size();
-  if (!m_parameter->GetParam("weight-lr").size()) {
+  //if there's a lex-reordering model, and no separate weight set, then 
+  //take just one of these weights for linear distortion
+  if (!m_parameter->GetParam("weight-lr").size() && m_parameter->GetParam("distortion-file").size()) {
     distortionWeightCount = 1;
   }
   for (size_t i = 0; i < distortionWeightCount; ++i) {
