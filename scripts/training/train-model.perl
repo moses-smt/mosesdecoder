@@ -1529,7 +1529,10 @@ sub create_ini {
    }
    print INI "1 T 1\n" if $_GLUE_GRAMMAR;;
 
-   print INI "\n# translation tables: source-factors, target-factors, number of scores, file 
+   print INI "\n# translation tables: table type (hierarchical(0), textual (0), binary (1)), source-factors, target-factors, number of scores, file 
+# OLD FORMAT is still handled for back-compatibility
+# OLD FORMAT translation tables: source-factors, target-factors, number of scores, file 
+# OLD FORMAT a binary table type (1) is assumed 
 [ttable-file]\n";
    my $num_of_ttables = 0;
    my @SPECIFIED_TABLE = @_PHRASE_TABLE;
