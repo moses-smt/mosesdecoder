@@ -21,6 +21,11 @@ extern PhraseTable phraseTableT;
 extern PhraseTable phraseTableS;
 extern bool hierarchicalFlag;
 
+PhraseAlignment::PhraseAlignment()
+:sourcePhraseId(999999)
+,targetPhraseId(999999)
+{}
+
 void PhraseAlignment::addToCount( char line[] ) 
 {
 	vector< string > token = tokenize( line );
@@ -72,16 +77,8 @@ void PhraseAlignment::create( char line[], int lineID )
 			else 
 			{
 				// first alignment point? -> initialize
-				if (alignedToT.size() == 0) 
-				{
-          assert(alignedToS.size() == 0);
-          size_t numTgtSymbols = (hierarchicalFlag ? phraseT.size()-1 : phraseT.size());
-          alignedToT.resize(numTgtSymbols);
-          size_t numSrcSymbols = (hierarchicalFlag ? phraseS.size()-1 : phraseS.size());
-          alignedToS.resize(numSrcSymbols);
-					source = phraseTableS.storeIfNew( phraseS );
-					target = phraseTableT.storeIfNew( phraseT );
-				}
+				createAlignVec(phraseS.size(), phraseT.size());
+
 				// add alignment point
 				alignedToT[t].insert( s );
 				alignedToS[s].insert( t );
@@ -92,6 +89,14 @@ void PhraseAlignment::create( char line[], int lineID )
 			sscanf(token[j].c_str(), "%f", &count);
 		}
 	}
+
+	createAlignVec(phraseS.size(), phraseT.size());
+	
+	assert(sourcePhraseId == 999999);
+	assert(targetPhraseId == 999999);
+	sourcePhraseId = phraseTableS.storeIfNew( phraseS );
+	targetPhraseId = phraseTableT.storeIfNew( phraseT );
+
 	if (item == 3)
 	{
 		count = 1.0;
@@ -102,7 +107,27 @@ void PhraseAlignment::create( char line[], int lineID )
 	}
 }
 
-void PhraseAlignment::clear() {
+void PhraseAlignment::createAlignVec(size_t sourceSize, size_t targetSize)
+{
+	// in case of no align info. always need align info, even if blank
+	if (alignedToT.size() == 0)
+	{
+		size_t numTgtSymbols = (hierarchicalFlag ? targetSize-1 : targetSize);
+		alignedToT.resize(numTgtSymbols);		
+	}
+	
+	if (alignedToS.size() == 0)
+	{
+		size_t numSrcSymbols = (hierarchicalFlag ? sourceSize-1 : sourceSize);
+		alignedToS.resize(numSrcSymbols);
+	}	
+}
+
+void PhraseAlignment::clear() 
+{
+	sourcePhraseId = 999999;
+	targetPhraseId = 999999;
+
   alignedToT.clear();
   alignedToS.clear();
 }
@@ -111,8 +136,8 @@ void PhraseAlignment::clear() {
 bool PhraseAlignment::equals( const PhraseAlignment& other ) 
 {
 	if (this == &other) return true;
-	if (other.target != target) return false;
-	if (other.source != source) return false;
+	if (other.GetTarget() != GetTarget()) return false;
+	if (other.GetSource() != GetSource()) return false;
 	if (other.alignedToT != alignedToT) return false;
 	if (other.alignedToS != alignedToS) return false;
 	return true;
@@ -123,11 +148,11 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
 bool PhraseAlignment::match( const PhraseAlignment& other )
 {
 	if (this == &other) return true;
-	if (other.target != target) return false;
-	if (other.source != source) return false;
+	if (other.GetTarget() != GetTarget()) return false;
+	if (other.GetSource() != GetSource()) return false;
 	if (!hierarchicalFlag) return true;
 	
-	PHRASE phraseT = phraseTableT.getPhrase( target );
+	PHRASE phraseT = phraseTableT.getPhrase( GetTarget() );
 	
   assert(phraseT.size() == alignedToT.size() + 1);
   assert(alignedToT.size() == other.alignedToT.size());

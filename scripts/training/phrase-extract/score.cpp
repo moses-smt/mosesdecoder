@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
     if (++i % 100000 == 0) cerr << "." << flush;
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extractFileP.eof())	break;
-		
+				
 		// identical to last line? just add count
 		if (lastSource > 0 && strcmp(line,lastLine) == 0)
 		{
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
 		}
 		
 		// if new source phrase, process last batch
-		if (lastSource >= 0 && lastSource != phrasePair.source) {
+		if (lastSource >= 0 && lastSource != phrasePair.GetSource()) {
 			processPhrasePairs( phrasePairsWithSameF );
 			for(int j=0;j<phrasePairsWithSameF.size();j++)
 				phrasePairsWithSameF[j].clear();
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
 		}
 		
 		// add phrase pairs to list, it's now the last one
-		lastSource = phrasePair.source;
+		lastSource = phrasePair.GetSource();
 		phrasePairsWithSameF.push_back( phrasePair );
 		lastPhrasePair = &phrasePairsWithSameF[phrasePairsWithSameF.size()-1];
 	}
@@ -265,7 +265,7 @@ void computeCountOfCounts( char* fileNameExtract )
 		}
 
 		// periodically house cleaning
-		if (phrasePair->source != lastPhrasePair->source)
+		if (phrasePair->GetSource() != lastPhrasePair->GetSource())
 		{
 			phraseTableT.clear(); // these would get too big
 			phraseTableS.clear(); // these would get too big
@@ -281,6 +281,8 @@ void computeCountOfCounts( char* fileNameExtract )
 		delete( lastPhrasePair );
 		lastPhrasePair = phrasePair;
 	}
+	
+	delete lastPhrasePair;
 
 	discountFactor[0] = 0.01; // floor
 	cerr << "\n";
@@ -369,8 +371,8 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		count += phrasePair[i]->count;
 	}
 
-	PHRASE phraseS = phraseTableS.getPhrase( phrasePair[0]->source );
-	PHRASE phraseT = phraseTableT.getPhrase( phrasePair[0]->target );
+	PHRASE phraseS = phraseTableS.getPhrase( phrasePair[0]->GetSource() );
+	PHRASE phraseT = phraseTableT.getPhrase( phrasePair[0]->GetTarget() );
 
 	// labels (if hierarchical)
 
