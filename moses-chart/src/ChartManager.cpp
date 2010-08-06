@@ -86,7 +86,7 @@ void Manager::ProcessSentence()
 			cell.CleanupArcList();
 			cell.SortHypotheses();
 			
-			cerr << cell.GetSize();
+			//cerr << cell.GetSize();
 			//cerr << cell << endl;
 			//cell.OutputSizes(cerr);
 		}
