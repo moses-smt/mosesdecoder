@@ -945,23 +945,23 @@ void writeGlueGrammar( const string & fileName )
             }
         }
         // basic rules
-        grammarFile << "<s> [X] ||| <s> [" << topLabel << "] |||  ||| 1" << endl
-            << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 0-0 ||| 1" << endl;
+        grammarFile << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| " << endl
+            << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 " << endl;
 
         // top rules
         for( map<string,int>::const_iterator i =  targetTopLabelCollection.begin();
                 i !=  targetTopLabelCollection.end(); i++ )
         {
-            grammarFile << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1-1 ||| 1" << endl;
+            grammarFile << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << endl;
         }
 
         // glue rules
         for( set<string>::const_iterator i =  targetLabelCollection.begin();
                 i !=  targetLabelCollection.end(); i++ )
         {
-            grammarFile << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 0-0 1-1 ||| 2.718" << endl;
+            grammarFile << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1" << endl;
         }
-        grammarFile << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 0-0 1-1 ||| 2.718" << endl; // glue rule for unknown word...
+        grammarFile << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << endl; // glue rule for unknown word...
     }
     grammarFile.close();
 }
