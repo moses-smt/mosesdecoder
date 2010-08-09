@@ -70,7 +70,7 @@ void Manager::ProcessSentence()
 		{
 			size_t endPos = startPos + width - 1;
 			WordsRange range(startPos, endPos);
-			TRACE_ERR(" " << range << "=");
+			//TRACE_ERR(" " << range << "=");
 				
 			// create trans opt
 			m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
