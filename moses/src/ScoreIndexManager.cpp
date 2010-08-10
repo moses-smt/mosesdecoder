@@ -22,13 +22,6 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
 
 	m_producers.push_back(sp);
-	if (sp->IsStateless()) {
-		const StatelessFeatureFunction* ff = static_cast<const StatelessFeatureFunction*>(sp);
-		if (!ff->ComputeValueInTranslationOption())
-			m_stateless.push_back(ff);
-	} else {
-		m_stateful.push_back(static_cast<const StatefulFeatureFunction*>(sp));
-	}
 
 	m_begins.push_back(m_last);
 	size_t numScoreCompsProduced = sp->GetNumScoreComponents();
@@ -142,7 +135,7 @@ std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 	for (size_t i = 0; i < sim.m_featureNames.size(); ++i) {
 		os << sim.m_featureNames[i] << endl;
 	}
-	os << "Stateless: " << sim.m_stateless.size() << "\tStateful: " << sim.m_stateful.size() << endl;
+	os  << endl;
 	return os;
 }
 

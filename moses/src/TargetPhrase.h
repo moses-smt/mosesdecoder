@@ -42,6 +42,8 @@ class LMList;
 class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
+class TranslationSystem;
+class WordPenaltyProducer;
 
 class CountInfo
 	{
@@ -89,13 +91,13 @@ public:
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
-	void SetScore();
+	void SetScore(const TranslationSystem* system);
 	
 	//!Set score for Sentence XML target options
 	void SetScore(float score);
 	
 	//! Set score for unknown words with input weights
-	void SetScore(const Scores &scoreVector); 
+	void SetScore(const TranslationSystem* system, const Scores &scoreVector); 
 
 	
 	/*** Called immediately after creation to initialize scores.
@@ -118,7 +120,8 @@ public:
 	void SetScoreChart(const ScoreProducer* translationScoreProducer
 										 ,const Scores &scoreVector
 										 ,const std::vector<float> &weightT
-										 ,const LMList &languageModels);
+										 ,const LMList &languageModels
+                     ,const WordPenaltyProducer* wpProducer);
 	
 	// used by for unknown word proc in chart decoding
 	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);

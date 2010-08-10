@@ -32,6 +32,7 @@ namespace Moses
 	class Word;
 	class ChartRule;
 	class WordConsumed;
+  class WordPenaltyProducer;
 };
 
 namespace MosesChart
@@ -43,7 +44,8 @@ class TranslationOptionCollection
 	friend std::ostream& operator<<(std::ostream&, const TranslationOptionCollection&);
 protected:
 	const Moses::InputType		&m_source;
-	std::vector<Moses::DecodeGraph*> m_decodeGraphList;
+	const Moses::TranslationSystem* m_system;
+  std::vector <Moses::DecodeGraph*> m_decodeGraphList;
 	const ChartCellCollection &m_hypoStackColl;
 
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
@@ -52,8 +54,8 @@ protected:
 	std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
 	std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
 
-	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph &decodeStepList
-																			, size_t startPosition
+	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph& decodeGraph,
+                                        size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
 	void Add(TranslationOptionList &translationOptionList);
@@ -81,7 +83,7 @@ protected:
 
 public:
 	TranslationOptionCollection(Moses::InputType const& source
-														, const std::vector<Moses::DecodeGraph*> &decodeGraphList
+														, const Moses::TranslationSystem* system
 														, const ChartCellCollection &hypoStackColl);
 	virtual ~TranslationOptionCollection();
 	//virtual void CreateTranslationOptions(const std::vector <Moses::DecodeGraph*> &decodeGraphList);

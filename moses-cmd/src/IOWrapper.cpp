@@ -313,7 +313,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 
 
 
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder,long translationId)
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder, const TranslationSystem* system, long translationId)
 {
 	const StaticData &staticData = StaticData::Instance();
 	bool labeledOutput = staticData.IsLabeledNBestList();
@@ -338,7 +338,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 		std::string lastName = "";
 		const vector<const StatefulFeatureFunction*>& sff =
-			staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+			system->GetStatefulFeatureFunctions();
 		for( size_t i=0; i<sff.size(); i++ )
 		{
 			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
@@ -354,7 +354,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 
 		const vector<const StatelessFeatureFunction*>& slf =
-			staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+			system->GetStatelessFeatureFunctions();
 		for( size_t i=0; i<slf.size(); i++ )
 		{
 			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
@@ -372,7 +372,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
-			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					out << " tm:";
@@ -388,7 +388,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				vector<PhraseDictionaryFeature*>::iterator iter;
 				
@@ -421,11 +421,11 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 		
 		// generation
-		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
+		const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
 		if (gds.size() > 0) {
 			if (labeledOutput)
 				out << " g: ";
-			vector<GenerationDictionary*>::iterator iter;
+			vector<GenerationDictionary*>::const_iterator iter;
 			for (iter = gds.begin(); iter != gds.end(); ++iter) {
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 				for (size_t j = 0; j<scores.size(); j++) {
@@ -493,9 +493,6 @@ void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& 
     }
 }
 
-void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
-    OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
-}
 
 void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId) {
     OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);

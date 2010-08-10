@@ -10,11 +10,23 @@
 #include "Manager.h"
 #include "StaticData.h"
 #include "PhraseDictionaryDynSuffixArray.h"
+#include "TranslationSystem.h"
 
 using namespace Moses;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
+
+/** Find out which translation system to use */
+const TranslationSystem& getTranslationSystem(params_t params) {
+    string system_id = TranslationSystem::DEFAULT;
+    params_t::const_iterator pi = params.find("system");
+    if (pi != params.end()) {
+        system_id = xmlrpc_c::value_string(pi->second);
+    }
+    VERBOSE(1, "Using translation system " << system_id << endl;)
+    return StaticData::Instance().GetTranslationSystem(system_id);
+}
 
 class Updater: public xmlrpc_c::method {
 public:
@@ -30,10 +42,9 @@ public:
           xmlrpc_c::value *   const  retvalP) {
       const params_t params = paramList.getStruct(0);
       breakOutParams(params);
-      const StaticData &staticData = StaticData::Instance();
-      InputType* dummy=0;
-      PhraseDictionaryFeature* pdf = staticData.GetPhraseDictionaries()[0];  
-      PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(*dummy); 
+      const TranslationSystem& system = getTranslationSystem(params);
+      const PhraseDictionaryFeature* pdf = system.GetPhraseDictionaries()[0];  
+      PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary(); 
       cerr << "Inserting into address " << pdsa << endl;
       pdsa->insertSnt(source_, target_, alignment_);
       cerr << "Done inserting\n";
@@ -105,13 +116,15 @@ public:
         if (addGraphInfo) {
             (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
         }
-
+        
+        const TranslationSystem& system = getTranslationSystem(params);
+        
         Sentence sentence(Input);
         const vector<FactorType> &inputFactorOrder = 
             staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence,staticData.GetSearchAlgorithm());
+        Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 

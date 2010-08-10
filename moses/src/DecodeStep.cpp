@@ -26,14 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStep::DecodeStep(const Dictionary *ptr, const DecodeStep* prev)
-:m_ptr(ptr)
+DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* prev) :
+    m_decodeFeature(decodeFeature)
 {
 	FactorMask prevOutputFactors;
 	if (prev) prevOutputFactors = prev->m_outputFactors;
 	m_outputFactors = prevOutputFactors;
-	FactorMask conflictMask = (m_outputFactors & ptr->GetOutputFactorMask());
-	m_outputFactors |= ptr->GetOutputFactorMask();
+	FactorMask conflictMask = (m_outputFactors & decodeFeature->GetOutputFactorMask());
+	m_outputFactors |= decodeFeature->GetOutputFactorMask();
 	FactorMask newOutputFactorMask = m_outputFactors ^ prevOutputFactors;  //xor
   m_newOutputFactors.resize(newOutputFactorMask.count());
 	m_conflictFactors.resize(conflictMask.count());
@@ -49,16 +49,16 @@ DecodeStep::DecodeStep(const Dictionary *ptr, const DecodeStep* prev)
 
 DecodeStep::~DecodeStep() {}
 
-/** returns phrase table (dictionary) for translation step */
-const PhraseDictionary &DecodeStep::GetPhraseDictionary() const
+/** returns phrase feature (dictionary) for translation step */
+const PhraseDictionaryFeature* DecodeStep::GetPhraseDictionaryFeature() const
 {
-  return *static_cast<const PhraseDictionary*>(m_ptr);
+  return dynamic_cast<const PhraseDictionaryFeature*>(m_decodeFeature);
 }
 
-/** returns generation table (dictionary) for generation step */
-const GenerationDictionary &DecodeStep::GetGenerationDictionary() const
+/** returns generation feature (dictionary) for generation step */
+const GenerationDictionary* DecodeStep::GetGenerationDictionaryFeature() const
 {
-  return *static_cast<const GenerationDictionary*>(m_ptr);
+  return dynamic_cast<const GenerationDictionary*>(m_decodeFeature);
 }
 
 }

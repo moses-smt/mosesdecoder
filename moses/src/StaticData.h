@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_StaticData_h
 #define moses_StaticData_h
 
+#include <stdexcept>
 #include <limits>
 #include <list>
 #include <vector>
@@ -42,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
+#include "TranslationSystem.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -57,9 +59,9 @@ class GlobalLexicalModel;
 class PhraseDictionaryFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
-class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;	
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
@@ -81,16 +83,15 @@ protected:
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+    std::vector<DecodeGraph*> m_decodeGraphs;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
+    std::map<std::string, TranslationSystem> m_translationSystems;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
 		m_translationOptionThreshold,
-		m_weightDistortion, 
-		m_weightWordPenalty, 
-		m_wordDeletionWeight,
-		m_weightUnknownWord;
+		m_wordDeletionWeight;
 
 	// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int				m_maxDistortion;
@@ -132,8 +133,8 @@ protected:
 	size_t m_numInputScores;
 
 	mutable size_t m_verboseLevel;
-	DistortionScoreProducer *m_distortionScoreProducer;
-	WordPenaltyProducer *m_wpProducer;
+  std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
+	std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
@@ -218,6 +219,7 @@ protected:
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
+    bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
     void ReduceTransOptCache() const;
@@ -267,7 +269,6 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::vector<DecodeGraph*> GetDecodeStepVL(const InputType& source) const;
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
 	{ 
@@ -305,22 +306,6 @@ public:
 	inline size_t GetMaxPhraseLength() const 
 	{ 
 		return m_maxPhraseLength;
-	}
-	const std::vector<LexicalReordering*> &GetReorderModels() const
-	{
-		return m_reorderModels;
-	}
-	float GetWeightDistortion() const
-	{
-		return m_weightDistortion;
-	}
-	float GetWeightWordPenalty() const
-	{
-		return m_weightWordPenalty;
-	}
-	float GetWeightUnknownWord() const
-	{
-		return m_weightUnknownWord;
 	}
 	bool IsWordDeletionEnabled() const
 	{
@@ -380,30 +365,17 @@ public:
 		return m_scoreIndexManager;
 	}
 
-	size_t GetLMSize() const
-	{
-		return m_languageModel.size();
-	}
-	const LMList &GetAllLM() const
-	{
-		return m_languageModel;
-	}
-	size_t GetPhraseDictionarySize() const
-	{
-		return m_phraseDictionary.size();
-	}
-	const std::vector<PhraseDictionaryFeature*> &GetPhraseDictionaries() const
-	{
-		return m_phraseDictionary;
-	}
-	const std::vector<GenerationDictionary*> &GetGenerationDictionaries() const
-	{
-		return m_generationDictionary;
-	}
-	size_t GetGenerationDictionarySize() const
-	{
-		return m_generationDictionary.size();
-	}
+    const TranslationSystem& GetTranslationSystem(std::string id) const {
+        std::map<std::string, TranslationSystem>::const_iterator iter = 
+                m_translationSystems.find(id);
+        VERBOSE(2, "Looking for translation system id " << id << std::endl);
+        if (iter == m_translationSystems.end()) {
+          VERBOSE(1, "Translation system not found " << id << std::endl);
+            throw std::runtime_error("Unknown translation system id");
+        } else {
+          return iter->second;
+        }
+    }
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
@@ -475,16 +447,11 @@ public:
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
-	void InitializeBeforeSentenceProcessing(InputType const&) const;
-	void CleanUpAfterSentenceProcessing() const;
 	
 	const std::vector<float>& GetAllWeights() const
 	{
 		return m_allWeights;
 	}
-	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
-	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
-	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };

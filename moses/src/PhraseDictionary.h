@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "Dictionary.h"
 #include "TargetPhraseCollection.h"
-#include "FeatureFunction.h"
+#include "DecodeFeature.h"
 
 namespace Moses
 {
@@ -47,6 +47,7 @@ class InputType;
 class WordsRange;
 class ChartRuleCollection;
 class CellCollection;
+class TranslationSystem;
 
 class PhraseDictionaryFeature;
 /**
@@ -85,7 +86,7 @@ class PhraseDictionary: public Dictionary {
 /**
  * Represents a feature derived from a phrase table.
  */
-class PhraseDictionaryFeature :  public StatelessFeatureFunction
+class PhraseDictionaryFeature :  public DecodeFeature
 {
  
 
@@ -114,20 +115,22 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
 	size_t GetNumScoreComponents() const;
 
 	size_t GetNumInputScores() const;
-
     
-	const PhraseDictionary* GetDictionary(const InputType& source);
-    // TODO - get rid of this, make Cleanup() const. only to be called by static data
-    PhraseDictionary* GetDictionary();
+    //Initialises the dictionary (may involve loading from file)
+    void InitDictionary(const TranslationSystem* system);
+
+    //Initialise the dictionary for this source (in this thread)
+    void InitDictionary(const TranslationSystem* system,const InputType& source);
+    
+    //Get the dictionary. Be sure to initialise it first.
+    const PhraseDictionary* GetDictionary() const;
 	
  private:
      /** Load the appropriate phrase table */
-     PhraseDictionary* LoadPhraseTable();
+    PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
      
     size_t m_numScoreComponent;
     unsigned m_numInputScores;
-    std::vector<FactorType> m_input;
-    std::vector<FactorType> m_output;
     std::string m_filePath;
     std::vector<float> m_weight;
     size_t m_tableLimit;

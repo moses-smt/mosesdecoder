@@ -11,6 +11,7 @@
 #include "../../moses/src/Util.h"
 #include "../../moses/src/TargetPhrase.h"
 #include "../../moses/src/PhraseDictionary.h"
+#include "../../moses/src/DummyScoreProducers.h"
 #include "TargetPhrase.h"
 #include "OnDiskWrapper.h"
 
@@ -186,7 +187,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 																		, const Vocab &vocab
 																		, const Moses::PhraseDictionary &phraseDict
 																		, const std::vector<float> &weightT
-																		, float weightWP
+																		, const Moses::WordPenaltyProducer* wpProducer
 																		, const Moses::LMList &lmList
 																		, const Moses::Phrase &sourcePhrase) const
 {
@@ -208,7 +209,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 	}
 	
 	// scores
-	ret->SetScoreChart(phraseDict.GetFeature(), m_scores, weightT, lmList);
+	ret->SetScoreChart(phraseDict.GetFeature(), m_scores, weightT, lmList, wpProducer);
 	
 	// alignments
 	std::list<std::pair<size_t, size_t> > alignmentInfo;

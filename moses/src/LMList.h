@@ -34,6 +34,7 @@ public:
 	,m_minInd(std::numeric_limits<size_t>::max())
 	,m_maxInd(0)
 	{}
+    void CleanUp();
 	~LMList();
 	
 	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const;

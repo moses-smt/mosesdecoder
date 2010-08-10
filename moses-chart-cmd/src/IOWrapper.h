@@ -39,6 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TypeDef.h"
 #include "Sentence.h"
 #include "FactorTypeSet.h"
+#include "TranslationSystem.h"
 #include "TrellisPathList.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
 
@@ -78,7 +79,7 @@ public:
 	Moses::InputType* GetInput(Moses::InputType *inputType);
 	void OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputNBestList(const MosesChart::TrellisPathList &nBestList, long translationId);
+    void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
 	void Backtrack(const MosesChart::Hypothesis *hypo);
 
 	void ResetTranslationId() { m_translationId = 0; }

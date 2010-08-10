@@ -32,13 +32,12 @@ namespace Moses
 {
 using namespace std;
 
-bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType, float weight,
+bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType, 
 			       size_t nGramOrder) {
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_filePath = filePath;
   m_factorType = factorType;
-  m_weight = weight;
   m_nGramOrder = nGramOrder;
   int cache_MB = 50; // increase cache size
   m_lm = randlm::RandLM::initRandLM(filePath, nGramOrder, cache_MB);

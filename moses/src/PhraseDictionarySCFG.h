@@ -59,7 +59,7 @@ namespace Moses
 								, const std::vector<float> &weight
 								, size_t tableLimit
 								, const LMList &languageModels
-								, float weightWP);
+								, const WordPenaltyProducer* wpProducer);
 						
 			void 	DeleteDuplicates(ProcessedRuleColl &nodes) const; // keep only backoff, if it exists
 			
@@ -88,7 +88,7 @@ namespace Moses
 								, const std::vector<float> &weight
 								, size_t tableLimit
 								, const LMList &languageModels
-						    , float weightWP);
+						    , const WordPenaltyProducer* wpProducer);
 			
 			const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 			

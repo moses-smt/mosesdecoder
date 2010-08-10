@@ -14,6 +14,7 @@ namespace Moses
 class FactorCollection;
 class TranslationOptionCollection;
 class Sentence;
+class TranslationSystem;
 
 class ConfusionNet : public InputType {
  public: 
@@ -52,7 +53,7 @@ class ConfusionNet : public InputType {
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; //TODO not defined
 	const Word& GetWord(size_t pos) const;
 
-	TranslationOptionCollection* CreateTranslationOptionCollection() const;
+	TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const;
 	
     const LabelList &GetLabelList(size_t /*startPos*/, size_t /*endPos*/) const
 	{

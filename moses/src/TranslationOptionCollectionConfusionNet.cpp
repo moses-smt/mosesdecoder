@@ -10,18 +10,18 @@
 
 namespace Moses
 {
+  
 /** constructor; just initialize the base class */
-TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(
+  TranslationOptionCollectionConfusionNet::TranslationOptionCollectionConfusionNet(const TranslationSystem* system, 
 											const ConfusionNet &input
 											, size_t maxNoTransOptPerCoverage, float translationOptionThreshold) 
-: TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+: TranslationOptionCollection(system, input, maxNoTransOptPerCoverage, translationOptionThreshold) {}
 
 /* forcibly create translation option for a particular source word.
 	* call the base class' ProcessOneUnknownWord() for each possible word in the confusion network 
 	* at a particular source position
 */
-void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(		
-											size_t sourcePos) 
+void TranslationOptionCollectionConfusionNet::ProcessUnknownWord(size_t sourcePos) 
 {
 	ConfusionNet const& source=dynamic_cast<ConfusionNet const&>(m_source);
 

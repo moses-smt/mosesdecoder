@@ -188,7 +188,8 @@ class BackwardsEdge
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
 									, const SquareMatrix &futureScore,
-                                      const InputType& source);
+                    const InputType& source,
+                    const TranslationSystem* system);
 		~BackwardsEdge();
 
 		bool GetInitialized();

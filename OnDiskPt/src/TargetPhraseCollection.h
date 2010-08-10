@@ -8,6 +8,7 @@ namespace Moses
 	class TargetPhraseCollection;
 	class PhraseDictionary;
 	class LMList;
+  class WordPenaltyProducer;
 }
 
 namespace OnDiskPt
@@ -50,7 +51,7 @@ public:
 																										, const std::vector<Moses::FactorType> &outputFactors
 																										, const Moses::PhraseDictionary &phraseDict
 																										, const std::vector<float> &weightT
-																										, float weightWP
+																										, const Moses::WordPenaltyProducer* wpProducer
 																										, const Moses::LMList &lmList
 																										, const Moses::Phrase &sourcePhrase
 																										, const std::string &filePath

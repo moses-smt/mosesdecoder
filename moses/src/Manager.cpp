@@ -50,16 +50,16 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm)
-:m_source(source)
-,m_transOptColl(source.CreateTranslationOptionCollection())
+  Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
+  :m_system(system)
+,m_transOptColl(source.CreateTranslationOptionCollection(system))
 ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
 ,m_start(clock())
 ,interrupted_flag(0)
 ,m_hypoId(0)
+    ,m_source(source)
 {
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
+	m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager() 
@@ -67,7 +67,7 @@ Manager::~Manager()
 	delete m_transOptColl;
 	delete m_search;
 
-	StaticData::Instance().CleanUpAfterSentenceProcessing();      
+	m_system->CleanUpAfterSentenceProcessing();      
 
 	clock_t end = clock();
 	float et = (end - m_start);
@@ -83,13 +83,11 @@ Manager::~Manager()
 void Manager::ProcessSentence()
 {
 	// reset statistics
-	const StaticData &staticData = StaticData::Instance();
 	ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-	vector <DecodeGraph*> decodeGraphs = staticData.GetDecodeStepVL(m_source);
-	m_transOptColl->CreateTranslationOptions(decodeGraphs);
-	RemoveAllInColl(decodeGraphs);  
+    m_system->InitializeBeforeSentenceProcessing(m_source);
+	m_transOptColl->CreateTranslationOptions();
 
   // some reporting on how long this took
   clock_t gotOptions = clock();
@@ -305,9 +303,8 @@ void Manager::CalcDecoderStatistics() const
   }
 }
 
-void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId)
+void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId, const TranslationSystem* system)
 {
-	const StaticData &staticData = StaticData::Instance();
 
 	const Hypothesis *prevHypo = hypo->GetPrevHypo();
 
@@ -318,7 +315,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 		<< "\ta=";
 
 	// phrase table scores
-	const std::vector<PhraseDictionaryFeature*> &phraseTables = staticData.GetPhraseDictionaries();
+	const std::vector<PhraseDictionaryFeature*> &phraseTables = system->GetPhraseDictionaries();
 	std::vector<PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
 	for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable)
 	{
@@ -335,7 +332,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
 			// language model scores
 			outputWordGraphStream << "\tl=";
-			const LMList &lmList = staticData.GetAllLM();
+			const LMList &lmList = system->GetLanguageModels();
 			LMList::const_iterator iterLM;
 			for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM)
 			{
@@ -353,10 +350,10 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 			// re-ordering
 			outputWordGraphStream << "\tr=";
 
-			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(staticData.GetDistortionScoreProducer());
+			outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(system->GetDistortionProducer());
 
 			// lexicalised re-ordering
-			const std::vector<LexicalReordering*> &lexOrderings = staticData.GetReorderModels();
+			const std::vector<LexicalReordering*> &lexOrderings = system->GetReorderModels();
 			std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
 			for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering)
 			{
@@ -398,7 +395,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 		for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo)
 		{
 			const Hypothesis *hypo = *iterHypo;
-			OutputWordGraph(outputWordGraphStream, hypo, linkId);
+			OutputWordGraph(outputWordGraphStream, hypo, linkId, m_system);
 			
 			if (outputNBest)
 			{
@@ -409,7 +406,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
 					for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList)
 					{
 						const Hypothesis *loserHypo = *iterArcList;
-						OutputWordGraph(outputWordGraphStream, loserHypo, linkId);
+						OutputWordGraph(outputWordGraphStream, loserHypo, linkId,m_system);
 					}
 				}
 			} //if (outputNBest)

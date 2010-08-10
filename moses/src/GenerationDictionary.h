@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TypeDef.h"
 #include "Dictionary.h"
-#include "FeatureFunction.h"
+#include "DecodeFeature.h"
 
 namespace Moses
 {
@@ -42,7 +42,7 @@ typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
 
 /** Implementation of a generation table in a trie.  
  */
-class GenerationDictionary : public Dictionary, public StatelessFeatureFunction
+class GenerationDictionary : public Dictionary, public DecodeFeature
 {
 	typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
@@ -55,7 +55,11 @@ public:
 	/** constructor.
 	* \param numFeatures number of score components, as specified in ini file
 	*/
-	GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager);
+  GenerationDictionary(
+        size_t numFeatures, 
+        ScoreIndexManager &scoreIndexManager,
+        const std::vector<FactorType> &input,
+        const std::vector<FactorType> &output);
 	virtual ~GenerationDictionary();
 
 	// returns Generate
@@ -65,10 +69,7 @@ public:
 	}
 	
 	//! load data file
-	bool Load(const std::vector<FactorType> &input
-									, const std::vector<FactorType> &output
-									, const std::string &filePath
-									, FactorDirection direction);
+	bool Load(const std::string &filePath, FactorDirection direction);
 
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;

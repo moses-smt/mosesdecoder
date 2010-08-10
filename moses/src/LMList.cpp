@@ -18,6 +18,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#include <set>
 
 #include "StaticData.h"
 #include "LMList.h"
@@ -31,6 +32,10 @@ namespace Moses
 {
 LMList::~LMList()
 {
+}
+
+void LMList::CleanUp() 
+{
 	RemoveAllInColl(m_coll);
 }
 	
@@ -40,7 +45,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 	for (lmIter = begin(); lmIter != end(); ++lmIter)
 	{
 		const LanguageModel &lm = **lmIter;
-		const float weightLM = lm.GetWeight();
+        const float weightLM = lm.GetWeight();
 
 		float fullScore, nGramScore;
 

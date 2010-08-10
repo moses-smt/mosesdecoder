@@ -27,6 +27,7 @@
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPathCollection.h"
 #include "../../moses/src/StaticData.h"
+#include "../../moses/src/DecodeStep.h"
 
 using namespace std;
 using namespace Moses;
@@ -39,18 +40,18 @@ namespace Moses
 namespace MosesChart
 {
 
-Manager::Manager(InputType const& source)
+Manager::Manager(InputType const& source, const TranslationSystem* system)
 :m_source(source)
 ,m_hypoStackColl(source, *this)
-,m_transOptColl(source, StaticData::Instance().GetDecodeStepVL(source), m_hypoStackColl)
+    ,m_transOptColl(source, system, m_hypoStackColl),
+    m_system(system)
 {
-	const StaticData &staticData = StaticData::Instance();
-	staticData.InitializeBeforeSentenceProcessing(source);
+	m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager()
 {
-	StaticData::Instance().CleanUpAfterSentenceProcessing();
+	m_system->CleanUpAfterSentenceProcessing();
 }
 
 void Manager::ProcessSentence()

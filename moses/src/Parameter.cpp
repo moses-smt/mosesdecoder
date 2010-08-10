@@ -77,6 +77,7 @@ Parameter::Parameter()
 	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
 	AddParam("verbose", "v", "verbosity level of the logging");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+  AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
@@ -85,7 +86,6 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
-	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
@@ -132,6 +132,7 @@ Parameter::Parameter()
 	AddParam("glue-rule-type", "Left branching, or both branching. 0=left. 2=both. 1=right(not implemented). Default=0");
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
+    AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
 }
 
 Parameter::~Parameter()

@@ -33,8 +33,8 @@ using namespace std;
 namespace Moses
 {
 /** constructor; just initialize the base class */
-TranslationOptionCollectionText::TranslationOptionCollectionText(Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold) 
-	: TranslationOptionCollection(inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+  TranslationOptionCollectionText::TranslationOptionCollectionText(const TranslationSystem* system, Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold) 
+	: TranslationOptionCollection(system, inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
 
 /* forcibly create translation option for a particular source word.
 	* For text, this function is easy, just call the base class' ProcessOneUnknownWord()
@@ -65,7 +65,7 @@ void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosit
 
 	//get vector of TranslationOptions from Sentence
 	for(size_t i=0;i<xmlOptions.size();i++) {
-		xmlOptions[i]->CalcScore();
+		xmlOptions[i]->CalcScore(m_system);
 		Add(xmlOptions[i]);
 	}
 

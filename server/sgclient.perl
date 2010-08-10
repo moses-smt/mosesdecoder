@@ -8,7 +8,7 @@ use Encode;
 use XMLRPC::Lite;
 use utf8;
 
-$url = "http://localhost:8080/RPC2";
+$url = "http://localhost:8086/RPC2";
 $proxy = XMLRPC::Lite->proxy($url);
 
 $text = "il a souhaité que la présidence trace à nice le chemin pour l' avenir .";
@@ -22,6 +22,8 @@ my %param = ("text" => $encoded , "sg" => "true", "topt" => "true");
 #my %param = ("text" => $encoded , "topt" => "true");
 die "translation failed" unless $result = $proxy->call("translate",\%param)->result;
 print $result->{'text'} . "\n";
+exit;
+
 if ($result->{'sg'}) {
     print "Search graph: \n";
     $sg = $result->{'sg'};

@@ -118,17 +118,9 @@ public:
 		return m_sentenceEndArray;
 	}
 	
-	//! scoring weight. Shouldn't this now be superceded by ScoreProducer???
-	float GetWeight() const
-	{
-		return m_weight;
-	}
-	void SetWeight(float weight)
-	{
-		m_weight = weight;
-	}
-	
 	virtual std::string GetScoreProducerDescription() const = 0;
+
+    float GetWeight() const;
 
 	std::string GetScoreProducerWeightShortName() const 
 	{ 

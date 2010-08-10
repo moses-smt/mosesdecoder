@@ -48,17 +48,12 @@ public:
 	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
 #endif
 	void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights) const;
-	const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
-	const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const { return m_stateful; }
-	const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const { return m_stateless; }
 private:
 	ScoreIndexManager(const ScoreIndexManager&); // don't implement
 
 	std::vector<size_t> m_begins;
 	std::vector<size_t> m_ends;
 	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
-	std::vector<const StatefulFeatureFunction*> m_stateful; /**< all the score producers in this run */
-	std::vector<const StatelessFeatureFunction*> m_stateless; /**< all the score producers in this run */
 	std::vector<std::string> m_featureNames;
 	std::vector<std::string> m_featureShortNames;
 	size_t m_last;

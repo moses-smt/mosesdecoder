@@ -34,8 +34,6 @@ namespace Moses
 																																						bool adhereTableLimit,const CellCollection &cellColl) const
 	{
 		const StaticData &staticData = StaticData::Instance();
-		float weightWP = staticData.GetWeightWordPenalty();
-		const LMList &lmList = staticData.GetAllLM();
 		size_t rulesLimit = StaticData::Instance().GetRuleLimit();
 
 		// source phrase
@@ -232,8 +230,8 @@ namespace Moses
 																								 ,m_outputFactorsVec
 																								 ,*this
 																								 ,m_weight
-																								 ,weightWP
-																								 ,lmList
+																								 ,m_wpProducer
+																								 ,*m_languageModels
 																								 ,*cachedSource
 																								 ,m_filePath
 																								 , m_dbWrapper.GetVocab());

@@ -29,7 +29,6 @@ public:
 	LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	bool Load(const std::string &filePath
 					, FactorType factorType
-					, float weight
 					, size_t nGramOrder);
 	float GetValue(const std::vector<const Word*> &contextFactor
 												, State* finalState = 0

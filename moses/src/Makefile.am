@@ -11,6 +11,7 @@ libmoses_la_HEADERS = \
         ChartRule.h \
         ChartRuleCollection.h \
         ConfusionNet.h \
+        DecodeFeature.h \
         DecodeGraph.h \
         DecodeStep.h \
         DecodeStepGeneration.h \
@@ -91,6 +92,7 @@ libmoses_la_HEADERS = \
         TranslationOptionCollectionConfusionNet.h \
         TranslationOptionCollectionText.h \
         TranslationOptionList.h \
+        TranslationSystem.h \
         TreeInput.h \
         TrellisPath.h \
         TrellisPathCollection.h \
@@ -136,6 +138,7 @@ libmoses_la_SOURCES = \
         ChartRule.cpp \
         ChartRuleCollection.cpp \
         ConfusionNet.cpp \
+        DecodeFeature.cpp \
         DecodeGraph.cpp \
         DecodeStep.cpp \
         DecodeStepGeneration.cpp \
@@ -214,6 +217,7 @@ libmoses_la_SOURCES = \
         TranslationOptionCollectionConfusionNet.cpp \
         TranslationOptionCollectionText.cpp \
         TranslationOptionList.cpp \
+        TranslationSystem.cpp \
         TreeInput.cpp \
         TrellisPath.cpp \
         TrellisPathCollection.cpp \

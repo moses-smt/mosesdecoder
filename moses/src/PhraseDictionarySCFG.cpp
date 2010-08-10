@@ -79,19 +79,16 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 																			 , const vector<float> &weight
 																			 , size_t tableLimit
 																			 , const LMList &languageModels
-																			 , float weightWP)
+																			 , const WordPenaltyProducer* wpProducer)
 {
 	m_filePath = filePath;
 	m_tableLimit = tableLimit;
 	
-	//factors
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
 	
 	// data from file
 	InputFileStream inFile(filePath);
 			
-	bool ret = Load(input, output, inFile, weight, tableLimit, languageModels, weightWP);		
+	bool ret = Load(input, output, inFile, weight, tableLimit, languageModels, wpProducer);		
 	return ret;
 }
 
@@ -101,14 +98,13 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 																			 , const std::vector<float> &weight
 																			 , size_t tableLimit
 																			 , const LMList &languageModels
-																			 , float weightWP)
+																			 , const WordPenaltyProducer* wpProducer)
 {
 	PrintUserTime("Start loading new format pt model");
 	
 	const StaticData &staticData = StaticData::Instance();
 	const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 	
-	VERBOSE(2,"PhraseDictionarySCFG: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 	
 	string line;
 	size_t count = 0;
@@ -171,7 +167,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
 		std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 		
-		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels);
+		targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels,wpProducer);
 		
 		// count info for backoff
 		if (tokens.size() >= 6)

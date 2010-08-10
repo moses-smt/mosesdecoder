@@ -27,6 +27,7 @@
 
 using namespace std;
 
+
 namespace Moses
 {
 PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
@@ -38,12 +39,14 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 					, const std::vector<FactorType> &output
 					, const std::string &filePath
 					, const std::vector<float> &weight
-					, size_t tableLimit)
+					, size_t tableLimit
+                    , const LMList& languageModels
+                    , const WordPenaltyProducer* wpProducer)
 {
+  m_languageModels = &(languageModels);
+  m_wpProducer = wpProducer;
   m_filePath = filePath;
 	m_tableLimit = tableLimit;
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
 	m_inputFactorsVec		= input;
 	m_outputFactorsVec	= output;
 	

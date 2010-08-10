@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <numeric>
 #include <cassert>
+
+#include "LMList.h"
 #include "ScoreProducer.h"
 #include "ScoreIndexManager.h"
 #include "TypeDef.h"
@@ -199,8 +201,8 @@ public:
 
 	float GetWeightedScore() const;
 
-	void ZeroAllLM();
-	void PlusEqualsAllLM(const ScoreComponentCollection& rhs);
+    void ZeroAllLM(const LMList& lmList);
+    void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
 
 };
 

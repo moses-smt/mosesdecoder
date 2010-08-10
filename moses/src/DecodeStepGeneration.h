@@ -35,12 +35,11 @@ class ScoreComponentCollection;
 class DecodeStepGeneration : public DecodeStep
 {
 public:
-	DecodeStepGeneration(GenerationDictionary* dict, const DecodeStep* prev);
+	DecodeStepGeneration(const GenerationDictionary* dict, const DecodeStep* prev);
 
-  //! returns phrase table (dictionary) for translation step 
-  const GenerationDictionary &GetGenerationDictionary() const;
 
-  virtual void Process(const TranslationOption &inputPartialTranslOpt
+    virtual void Process(const TranslationSystem* system
+        , const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                               , TranslationOptionCollection *toc

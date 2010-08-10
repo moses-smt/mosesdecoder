@@ -29,31 +29,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class PhraseDictionary;
+class DecodeFeature;
+class PhraseDictionaryFeature;
 class GenerationDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
 class PartialTranslOptColl;
 class FactorCollection;
 class InputType;
+class TranslationSystem;
 
 /*! Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
  * steps, which consult a Dictionary of phrase translations or word
  * generations. This class implements the specification for one of these
- * steps, both the DecodeType and a pointer to the Dictionary
+ * steps, both the DecodeType and a pointer to the Translation or Generation Feature
  **/
 class DecodeStep 
 {
 protected:
-	const Dictionary *m_ptr; //! pointer to translation/generation table 
 	FactorMask m_outputFactors; //! mask of what factors exist on the output side after this decode step 
 	std::vector<FactorType> m_conflictFactors; //! list of the factors that may conflict during this step
 	std::vector<FactorType> m_newOutputFactors; //! list of the factors that are new in this step, may be empty
+    const DecodeFeature* m_decodeFeature;
 
 public:
 	DecodeStep(); //! not implemented
-	DecodeStep(const Dictionary *ptr, const DecodeStep* prevDecodeStep);
+	DecodeStep(const DecodeFeature *featurePtr, const DecodeStep* prevDecodeStep);
 	virtual ~DecodeStep();
 
 	//! mask of factors that are present after this decode step
@@ -91,21 +93,23 @@ public:
 		return m_conflictFactors;
 	}
 
-	/*! returns phrase table (dictionary) for translation step */
-	const PhraseDictionary &GetPhraseDictionary() const;
+	/*! returns phrase table feature for translation step */
+	const PhraseDictionaryFeature* GetPhraseDictionaryFeature() const;
 
-	/*! returns generation table (dictionary) for generation step */
-	const GenerationDictionary &GetGenerationDictionary() const;
+	/*! returns generation table feature for generation step */
+	const GenerationDictionary* GetGenerationDictionaryFeature() const;
 
-	/*! returns dictionary in abstract class */
-	const Dictionary* GetDictionaryPtr() const {return m_ptr;}
 
 	/*! Given an input TranslationOption, extend it in some way (put results in outputPartialTranslOptColl) */
-  virtual void Process(const TranslationOption &inputPartialTranslOpt
+  virtual void Process(const TranslationSystem* system,
+                       const TranslationOption &inputPartialTranslOpt
                               , const DecodeStep &decodeStep
                               , PartialTranslOptColl &outputPartialTranslOptColl
                       				, TranslationOptionCollection *toc
 															, bool adhereTableLimit) const = 0;
+  
+  /** Do any sentence specific initialisation */
+  virtual void InitializeBeforeSentenceProcessing(InputType const&) const {}
 
 };
 

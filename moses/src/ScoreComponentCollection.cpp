@@ -16,9 +16,8 @@ float ScoreComponentCollection::GetWeightedScore() const
 	return ret;
 }
 		
-void ScoreComponentCollection::ZeroAllLM()
+void ScoreComponentCollection::ZeroAllLM(const LMList& lmList)
 {
-	const LMList &lmList = StaticData::Instance().GetAllLM();
 	
 	for (size_t ind = lmList.GetMinIndex(); ind <= lmList.GetMaxIndex(); ++ind)
 	{
@@ -26,9 +25,8 @@ void ScoreComponentCollection::ZeroAllLM()
 	}
 }
 
-void ScoreComponentCollection::PlusEqualsAllLM(const ScoreComponentCollection& rhs)
+void ScoreComponentCollection::PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs)
 {
-	const LMList &lmList = StaticData::Instance().GetAllLM();
 	
 	for (size_t ind = lmList.GetMinIndex(); ind <= lmList.GetMaxIndex(); ++ind)
 	{

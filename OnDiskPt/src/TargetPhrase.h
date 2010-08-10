@@ -19,6 +19,7 @@ namespace Moses
 	class TargetPhrase;
 	class LMList;
 	class Phrase;
+  class WordPenaltyProducer;
 }
 
 namespace OnDiskPt
@@ -70,7 +71,7 @@ public:
 																			, const Vocab &vocab
 																			, const Moses::PhraseDictionary &phraseDict
 																			, const std::vector<float> &weightT
-																			, float weightWP
+																			, const Moses::WordPenaltyProducer* wpProducer
 																			, const Moses::LMList &lmList
 																			, const Moses::Phrase &sourcePhrase) const;
 	UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
