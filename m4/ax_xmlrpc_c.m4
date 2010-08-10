@@ -2,7 +2,7 @@ AC_DEFUN([AX_XMLRPC_C], [
   AC_MSG_CHECKING(for XMLRPC-C)
 
   AC_ARG_WITH(xmlrpc-c,
-  [  --with-xmlrpc-c=PATH     Enable XMLRPC-C support.],
+  [  --with-xmlrpc-c=PATH     Enable XMLRPC-C support. Setting the PATH to yes will search for xmlrpc-c-config on the shell PATH,],
   [
     if test "$withval" = "no"; then
       AC_MSG_RESULT(no)

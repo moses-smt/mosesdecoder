@@ -113,7 +113,9 @@ while(<INI>) {
 	if ($binarizer && $phrase_table_impl == 6) {
     	  print INI_OUT "2 $source_factor $t $w $new_name.bin\n";
         }
-        else {
+        elsif ($binarizer && $phrase_table_impl == 0) {
+    	  print INI_OUT "1 $source_factor $t $w $new_name\n";
+        } else {
     	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
         }
     	push @TABLE_NEW_NAME,$new_name;

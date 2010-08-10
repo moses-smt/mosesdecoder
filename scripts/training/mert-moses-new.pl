@@ -117,8 +117,6 @@ my $skip_decoder = 0; # and should we skip the first decoder run (assuming we go
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 my $___PREDICTABLE_SEEDS = 0;
 
-# set 1 if using with async decoder
-my $___ASYNC = 0; 
 
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
@@ -139,23 +137,17 @@ my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
-
-
-my $allow_unknown_lambdas = 0;
-my $allow_skipping_lambdas = 0;
+#input weights for CNs and Lattices: don't have a direct ini file counter, so specified here
+my $___INPUTWEIGHTS = 1;
 
 
 my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert
-my $pythonpath = undef; # path to python libraries needed by cmert
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
-my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_BAK = undef; # backup pathname to startup ini file
-my $obo_scorenbest = undef; # set to pathname to a Ondrej Bojar's scorer (not included
-                            # in scripts distribution)
 my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient scoring of nbest lists
                                   # (this method is more memory-consumptive)
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
@@ -173,6 +165,7 @@ GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
   "input=s" => \$___DEV_F,
   "inputtype=i" => \$___INPUTTYPE,
+  "inputweights=i" => \$___INPUTWEIGHTS,
   "refs=s" => \$___DEV_E,
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
@@ -189,23 +182,17 @@ GetOptions(
   "nocase" => \$___NOCASE,
   "nonorm" => \$___NONORM,
   "help" => \$usage,
-  "allow-unknown-lambdas" => \$allow_unknown_lambdas,
-  "allow-skipping-lambdas" => \$allow_skipping_lambdas,
   "verbose" => \$verbose,
   "mertdir=s" => \$mertdir,
   "mertargs=s" => \$mertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
-  "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
-  "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
   "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
-  "obo-scorenbest=s" => \$obo_scorenbest, # see above
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
-  "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
 ) or exit(1);
@@ -220,11 +207,6 @@ if (scalar @ARGV == 4) {
   $___DEV_E = shift;
   $___DECODER = shift;
   $___CONFIG = shift;
-}
-
-if ($___ASYNC) {
-	delete $default_triples->{"w"};
-	$additional_triples->{"w"} = [ [ 0.0, -1.0, 1.0 ] ];
 }
 
 print STDERR "After default: $queue_flags\n";
@@ -258,10 +240,10 @@ Options:
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --mertdir=STRING ... path to new mert implementation
   --mertargs=STRING ... extra args for mert, eg to specify scorer
-  --pythonpath=STRING  ... where is python executable
   --scorenbestcmd=STRING  ... path to score-nbest.py
-  --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
   --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
+  --inputweights=N ... For confusion networks and lattices, number of weights to optimize for weight-i 
+                       (must supply -link-param-count N to decoder-flags if N != 1 for decoder to deal with this correctly)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
   --predictable-seeds ... provide predictable seeds to mert so that random restarts are the same on every run
@@ -280,22 +262,23 @@ Options:
   exit 1;
 }
 
-# update variables if input is confusion network
-if ($___INPUTTYPE == 1)
+# update default variables if input is confusion network or lattice
+if ($___INPUTTYPE == 1 || $___INPUTTYPE == 2)
 {
   $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
   %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
   %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
-
-  push @{$default_triples -> {"I"}}, [ 1.0, 0.0, 2.0 ];
-  #$extra_lambdas_for_model -> {"I"} = 1; #Confusion network posterior
+  
+  my @my_array;
+  
+  for(my $i=0 ; $i < $___INPUTWEIGHTS ; $i++) 
+	{
+		push @my_array, [ 1.0, 0.0, 2.0 ];
+	}
+	push @{$default_triples -> {"I"}}, @my_array;
+	
 }
 
-# update variables if input is lattice
-if ($___INPUTTYPE == 2)
-{
-# TODO
-}
 
 # Check validity of input parameters and set defaults if needed
 
@@ -368,21 +351,12 @@ die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_par
 die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
 
-if (defined $obo_scorenbest) {
-  die "Not executable: $obo_scorenbest" if ! -x $___DECODER;
-  die "Ondrej's scorenbest supports only closest ref length"
-    if $___AVERAGE;
-}
-
 
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
   if ! -e $input_abs;
 $___DEV_F = $input_abs;
 
-
-# Option to pass to qsubwrapper and moses-parallel
-my $pass_old_sge = $old_sge ? "-old-sge" : "";
 
 my $decoder_abs = ensure_full_path($___DECODER);
 die "File not found: $___DECODER (interpreted as $decoder_abs)."
@@ -600,7 +574,7 @@ if ($___FILTER_PHRASE_TABLE){
   print "filtering the phrase tables... ".`date`;
   my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
+    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
       or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
   } else {
     safesystem($cmd) or die "Failed to filter the tables.";
@@ -672,7 +646,7 @@ while(1) {
   $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
+    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
       or die "Failed to submit extraction to queue (via $qsubwrapper)";
   } else {
     safesystem("$cmd > extract.out 2> extract.err") or die "Failed to do extraction of statistics.";
@@ -747,7 +721,7 @@ while(1) {
   $cmd = $cmd." --ifile run$run.$weights_in_file";
 
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
+    safesystem("$qsubwrapper -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd 2> $mert_logfile") or die "Failed to run mert";
   }
@@ -926,7 +900,7 @@ sub run_decoder {
     my $decoder_cmd;
 
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file $filename -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file \"$filename\" -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
@@ -1217,40 +1191,8 @@ sub scan_config {
     }
   }
 
-	# distance-based distortion
-  if ($___ASYNC == 1)
-  {
-		print STDERR "ASYNC distortion & word penalty";
-
-		my @my_array;
-	    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
-		{
-		    push @my_array, [ 1.0, 0.0, 2.0 ];
-		}
-		push @{$used_triples{"d"}}, @my_array;
-
-		@my_array = ();
-	    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
-		{
-		    push @my_array, [ 0.5, -1.0, 1.0 ];
-		}
-		push @{$used_triples{"w"}}, @my_array;
-
-		# debug print
-		print "distortion:";
-		my $refarray=$used_triples{"d"};
-		my @vector=@$refarray;
-		foreach my $subarray (@vector) {
-			my @toto=@$subarray;
-			print @toto,"\n";
-		}
-		#exit 1;
-  }
-  else
-  { 
-	print STDERR "SYNC distortion";
-    push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
-  }
+  #print STDERR "SYNC distortion";
+  push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
 
 
   exit(1) if $error;
