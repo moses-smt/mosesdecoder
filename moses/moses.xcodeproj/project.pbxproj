@@ -214,6 +214,11 @@
 		1ED4FE0711BDC0D2004E826A /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FD3411BDC0D2004E826A /* WordsRange.h */; };
 		1ED4FE0811BDC0D2004E826A /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FD3511BDC0D2004E826A /* XmlOption.cpp */; };
 		1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FD3611BDC0D2004E826A /* XmlOption.h */; };
+		1EF549B112118A0C00C481EB /* DecodeFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF549AF12118A0B00C481EB /* DecodeFeature.cpp */; };
+		1EF549B212118A0C00C481EB /* DecodeFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF549B012118A0C00C481EB /* DecodeFeature.h */; };
+		1EF549B612118A4A00C481EB /* LanguageModelDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF549B512118A4A00C481EB /* LanguageModelDelegate.h */; };
+		1EF549B912118A5D00C481EB /* TranslationSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF549B712118A5D00C481EB /* TranslationSystem.cpp */; };
+		1EF549BA12118A5D00C481EB /* TranslationSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF549B812118A5D00C481EB /* TranslationSystem.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -426,6 +431,11 @@
 		1ED4FD3411BDC0D2004E826A /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = src/WordsRange.h; sourceTree = "<group>"; };
 		1ED4FD3511BDC0D2004E826A /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = src/XmlOption.cpp; sourceTree = "<group>"; };
 		1ED4FD3611BDC0D2004E826A /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
+		1EF549AF12118A0B00C481EB /* DecodeFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeFeature.cpp; path = src/DecodeFeature.cpp; sourceTree = "<group>"; };
+		1EF549B012118A0C00C481EB /* DecodeFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeFeature.h; path = src/DecodeFeature.h; sourceTree = "<group>"; };
+		1EF549B512118A4A00C481EB /* LanguageModelDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelDelegate.h; path = src/LanguageModelDelegate.h; sourceTree = "<group>"; };
+		1EF549B712118A5D00C481EB /* TranslationSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationSystem.cpp; path = src/TranslationSystem.cpp; sourceTree = "<group>"; };
+		1EF549B812118A5D00C481EB /* TranslationSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationSystem.h; path = src/TranslationSystem.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -453,6 +463,11 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EF549B712118A5D00C481EB /* TranslationSystem.cpp */,
+				1EF549B812118A5D00C481EB /* TranslationSystem.h */,
+				1EF549B512118A4A00C481EB /* LanguageModelDelegate.h */,
+				1EF549AF12118A0B00C481EB /* DecodeFeature.cpp */,
+				1EF549B012118A0C00C481EB /* DecodeFeature.h */,
 				1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */,
 				1ED4FC6011BDC0D2004E826A /* AlignmentInfo.h */,
 				1ED4FC6111BDC0D2004E826A /* BilingualDynSuffixArray.cpp */,
@@ -805,6 +820,9 @@
 				1ED4FE0711BDC0D2004E826A /* WordsRange.h in Headers */,
 				1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */,
 				1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */,
+				1EF549B212118A0C00C481EB /* DecodeFeature.h in Headers */,
+				1EF549B612118A4A00C481EB /* LanguageModelDelegate.h in Headers */,
+				1EF549BA12118A5D00C481EB /* TranslationSystem.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -949,6 +967,8 @@
 				1E5D8E0411F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp in Sources */,
 				1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */,
 				1E5D8E0911F25F2F000F027F /* PhraseDictionarySCFGChart.cpp in Sources */,
+				1EF549B112118A0C00C481EB /* DecodeFeature.cpp in Sources */,
+				1EF549B912118A5D00C481EB /* TranslationSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
