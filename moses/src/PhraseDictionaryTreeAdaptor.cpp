@@ -43,7 +43,7 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , float weightWP)
 {
 	if(m_numScoreComponent!=weight.size()) {
-		stringstream strme;
+		std::stringstream strme;
 		strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
 						 <<" "<<m_numScoreComponent<<"\n";
 		UserMessage::Add(strme.str());

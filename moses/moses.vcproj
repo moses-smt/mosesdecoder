@@ -304,6 +304,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DecodeFeature.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DecodeGraph.cpp"
 				>
 			</File>
@@ -688,6 +692,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TranslationSystem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TreeInput.cpp"
 				>
 			</File>
@@ -759,6 +767,10 @@
 			</File>
 			<File
 				RelativePath=".\src\ConfusionNet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\DecodeFeature.h"
 				>
 			</File>
 			<File
@@ -863,6 +875,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelDelegate.h"
 				>
 			</File>
 			<File
@@ -1071,6 +1087,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TranslationOptionList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TranslationSystem.h"
 				>
 			</File>
 			<File

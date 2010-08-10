@@ -8,8 +8,6 @@
 
 namespace Moses
 {
-using namespace std;
-
 inline bool existsFile(const char* filePath) {
   struct stat mystat;
   return  (stat(filePath,&mystat)==0);
@@ -118,7 +116,7 @@ public:
 
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 	{
-		cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << endl;
+		std::cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << std::endl;
 		assert(GetTargetPhraseCollection(source)==0);
 		
 		VERBOSE(2, "adding unk source phrase "<<source<<"\n");
@@ -243,7 +241,7 @@ public:
 //		m_dict->Read(filePath);
 		bool res=m_dict->Read(filePath);
 		if (!res) {
-			stringstream strme;
+			std::stringstream strme;
 			strme << "bin ttable was read in a wrong way\n";
 			UserMessage::Add(strme.str());
 			exit(1);
