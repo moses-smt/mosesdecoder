@@ -267,8 +267,9 @@ pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& p
 void BilingualDynSuffixArray::CacheWordProbs(wordID_t srcWord) const 
 {
 	std::map<wordID_t, int> counts;
-	std::vector<wordID_t> vword(1, srcWord), wrdIndices;	
-	assert(m_srcSA->GetCorpusIndex(&vword, &wrdIndices));
+	std::vector<wordID_t> vword(1, srcWord), wrdIndices;
+	bool ret = m_srcSA->GetCorpusIndex(&vword, &wrdIndices);
+	assert(ret);
 	std::vector<int> sntIndexes = GetSntIndexes(wrdIndices, 1);	
 	float denom(0);
 	// for each occurrence of this word 

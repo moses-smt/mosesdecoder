@@ -38,7 +38,8 @@ class Vocab {
 		m_kBOSWordID(1)
 	{
 		InitSpecialWords();
-		assert( Load(vocab_path, direction, factors, closed));	
+		bool ret = Load(vocab_path, direction, factors, closed);
+		assert(ret);	
 	}
 	Vocab(FileHandler * fin, const FactorDirection& direction, 
 		const FactorList& factors, bool closed = true):
@@ -46,7 +47,8 @@ class Vocab {
 		m_kBOSWordID(1)
 	{
 		InitSpecialWords();
-		assert( Load(fin, direction, factors, closed));	
+		bool ret = Load(fin, direction, factors, closed);
+		assert(ret);	
 	}
 	~Vocab() {}
 	// parse 'word' into factored Word and get id

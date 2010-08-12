@@ -205,7 +205,8 @@ PPimp* PrefixTreeMap::Extend(PPimp* p, LabelId wi) {
 	
   } else if(p->isRoot()) {
 	if(wi < m_Data.size() && m_Data[wi]){
-	  assert(m_Data[wi]->findKeyPtr(wi));
+		const void* ptr = m_Data[wi]->findKeyPtr(wi);
+		assert(ptr);
 	  return m_PtrPool.get(PPimp(m_Data[wi],m_Data[wi]->findKey(wi),0));
 	}
   } else if(PTF const* nextP = p->ptr()->getPtr(p->idx)) {

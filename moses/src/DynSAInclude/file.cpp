@@ -22,7 +22,10 @@ namespace Moses {
 			exit(EXIT_FAILURE);
 		}
 		else
-			assert(setStreamBuffer(flags & std::ios::in));
+		{
+			bool ret = setStreamBuffer(flags & std::ios::in);
+			assert(ret);
+		}
 		this->precision(32);
 	}
 

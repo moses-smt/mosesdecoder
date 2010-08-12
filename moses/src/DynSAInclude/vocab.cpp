@@ -108,7 +108,9 @@ namespace Moses {
 		m_ids2words.clear();
 		std::string line, word_str;
 		wordID_t id;
-		assert(getline(*vcbin, line));
+		
+		void *ret = getline(*vcbin, line);
+		assert(ret);
 		std::istringstream first(line.c_str());
 		uint32_t vcbsize(0);
 		first >> vcbsize;

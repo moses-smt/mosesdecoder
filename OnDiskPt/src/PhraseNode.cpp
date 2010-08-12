@@ -113,7 +113,6 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 		const Word &childWord = iter->first;
 		PhraseNode &childNode = iter->second;
 
-		//assert(childNode.Saved());
 		// recursive
 		if (!childNode.Saved())
 			childNode.Save(onDiskWrapper, pos + 1, tableLimit);

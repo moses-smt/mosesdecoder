@@ -76,37 +76,39 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
         const StaticData& staticData = StaticData::Instance();
 	if (m_implementation == Memory)
 	{   // memory phrase table
-			VERBOSE(2,"using standard phrase tables" << std::endl);
-			if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-					m_filePath += ".gz";
-					VERBOSE(2,"Using gzipped file" << std::endl);
-			}
-			if (staticData.GetInputType() != SentenceInput)
-			{
-					UserMessage::Add("Must use binary phrase table for this input type");
-					assert(false);
-			}
-			
-			PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
-            assert(pdm->Load(GetInput(), GetOutput()
-													, m_filePath
-													, m_weight
-													, m_tableLimit
-                                                    , system->GetLanguageModels()
-													, system->GetWeightWordPenalty()));
-			return pdm;
+		VERBOSE(2,"using standard phrase tables" << std::endl);
+		if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+				m_filePath += ".gz";
+				VERBOSE(2,"Using gzipped file" << std::endl);
+		}
+		if (staticData.GetInputType() != SentenceInput)
+		{
+				UserMessage::Add("Must use binary phrase table for this input type");
+				assert(false);
+		}
+		
+		PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
+		bool ret = pdm->Load(GetInput(), GetOutput()
+												, m_filePath
+												, m_weight
+												, m_tableLimit
+																									, system->GetLanguageModels()
+												, system->GetWeightWordPenalty());
+		assert(ret);
+		return pdm;
 	}
 	else if (m_implementation == Binary)
 	{    
 		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
-		assert(pdta->Load(                    GetInput()
+		bool ret = pdta->Load(                    GetInput()
                                             , GetOutput()
 											, m_filePath
 											, m_weight
 											, m_tableLimit
 											, system->GetLanguageModels()
-											, system->GetWeightWordPenalty()));
-        return pdta;
+											, system->GetWeightWordPenalty());
+		assert(ret);
+    return pdta;
 	}
 	else if (m_implementation == SCFG)
 	{   // memory phrase table
@@ -117,42 +119,42 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 		}
 		
 		PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(m_numScoreComponent,this);
-        assert(pdm->Load(GetInput()
-                                         , GetOutput()
-										 , m_filePath
-										 , m_weight
-										 , m_tableLimit
-										 , system->GetLanguageModels()
-										 , system->GetWordPenaltyProducer()));
-        return pdm;
+		bool ret = pdm->Load(GetInput()
+																		 , GetOutput()
+								 , m_filePath
+								 , m_weight
+								 , m_tableLimit
+								 , system->GetLanguageModels()
+								 , system->GetWordPenaltyProducer());
+		assert(ret);
+		return pdm;
 	}
 	else if (m_implementation == OnDisk)
 	{   
 		
 		PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(m_numScoreComponent, this);
-		pdta->Load(
-                                              GetInput()
-                                            , GetOutput()
-											, m_filePath
-											, m_weight
-											, m_tableLimit
-                                            , system->GetLanguageModels()
-                                            , system->GetWordPenaltyProducer());
-		assert(pdta);
-        return pdta;
+		bool ret = pdta->Load(GetInput()
+              , GetOutput()
+							, m_filePath
+							, m_weight
+							, m_tableLimit
+              , system->GetLanguageModels()
+              , system->GetWordPenaltyProducer());
+		assert(ret);
+		return pdta;
 	}
 	else if (m_implementation == Binary)
 	{   
 		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
-		assert(pdta->Load(
-                                              GetInput()
-                                            , GetOutput()
-											, m_filePath
-											, m_weight
-											, m_tableLimit
-											, system->GetLanguageModels()
-											, system->GetWeightWordPenalty()));
-        return pdta;
+		bool ret = pdta->Load(GetInput()
+								, GetOutput()
+								, m_filePath
+								, m_weight
+								, m_tableLimit
+								, system->GetLanguageModels()
+								, system->GetWeightWordPenalty());
+		assert(ret);
+    return pdta;
 	}
 	else if (m_implementation == SuffixArray)
 	{   

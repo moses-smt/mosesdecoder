@@ -136,7 +136,8 @@ bool OnDiskWrapper::BeginSave(const std::string &filePath
 
 void OnDiskWrapper::EndSave()
 {
-	assert(m_rootSourceNode->Saved());
+	bool ret = m_rootSourceNode->Saved();
+	assert(ret);
 
 	GetVocab().Save(*this);
 	

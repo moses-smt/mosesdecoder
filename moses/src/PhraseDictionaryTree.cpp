@@ -247,10 +247,11 @@ struct PDTimp {
 		else if(p.imp->isRoot()) 
 			{
 				if(wi<data.size() && data[wi])
-					{
-						assert(data[wi]->findKeyPtr(wi));
-						return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
-					}
+				{
+					const void* ptr = data[wi]->findKeyPtr(wi);
+					assert(ptr);
+					return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
+				}
 			}
 		else if(PTF const* nextP=p.imp->ptr()->getPtr(p.imp->idx)) 
 		{
