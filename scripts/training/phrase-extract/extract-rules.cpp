@@ -928,9 +928,9 @@ void writeGlueGrammar( const string & fileName )
     grammarFile.open(fileName.c_str());
     if (!options.targetSyntax)
     {
-        grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| Ø-Ø ||| Ø" << endl
-            << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 ||| Ø" << endl
-            << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| Ø" << endl;
+        grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << endl
+            << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 ||| 0" << endl
+            << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << endl;
     }
     else
     {
