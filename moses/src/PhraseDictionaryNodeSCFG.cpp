@@ -25,18 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-size_t	PhraseDictionaryNodeSCFG::s_id = 0;
 	
 PhraseDictionaryNodeSCFG::~PhraseDictionaryNodeSCFG()
 {
 	delete m_targetPhraseCollection;
-}
-
-void PhraseDictionaryNodeSCFG::CleanUp()
-{
-	delete m_targetPhraseCollection;
-	m_targetPhraseCollection = NULL;
-	m_map.clear();
 }
 
 void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
@@ -74,8 +66,6 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
 
 	iter = insResult.first;
 	PhraseDictionaryNodeSCFG &ret = iter->second;
-	ret.SetSourceWord(iter->first);
-	//ret.SetSourceWord(word);
 	return &ret;
 }
 	

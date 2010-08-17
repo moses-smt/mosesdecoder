@@ -61,8 +61,6 @@ namespace Moses
 								, const LMList &languageModels
 								, const WordPenaltyProducer* wpProducer);
 						
-			void 	DeleteDuplicates(ProcessedRuleColl &nodes) const; // keep only backoff, if it exists
-			
 			void CreateSourceLabels(std::vector<Word> &sourceLabels
 															, const std::vector<std::string> &sourceLabelsStr) const;
 			Word CreateCoveredWord(const Word &origSourceLabel, const InputType &src, const WordsRange &range) const;

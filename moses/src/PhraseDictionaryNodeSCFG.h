@@ -27,24 +27,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iterator>
 #include "Word.h"
 #include "TargetPhraseCollection.h"
-#include "PhraseDictionaryNode.h"
 
 namespace Moses
 {
 
-class PhraseDictionaryMemory;
-class PhraseDictionaryNewFormat;
-class ChartRuleCollection;
-class CellCollection;
-class InputType;
-
-	
-/** One node of the PhraseDictionaryMemory structure
+/** One node of the PhraseDictionarySCFG structure
 */
-class PhraseDictionaryNodeSCFG : public PhraseDictionaryNode
+class PhraseDictionaryNodeSCFG
 {
-	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryNodeSCFG&);
-	
 	typedef std::map<Word, PhraseDictionaryNodeSCFG> InnerNodeMap;
 	typedef std::map<Word, InnerNodeMap> NodeMap;
 		// 1st word = source side non-term, or the word if term
@@ -55,22 +45,15 @@ class PhraseDictionaryNodeSCFG : public PhraseDictionaryNode
 	friend class std::map<Word, PhraseDictionaryNodeSCFG>;
 	
 protected:
-	static size_t s_id;
-	size_t m_id; // used for backoff	
 	NodeMap m_map;
 	mutable TargetPhraseCollection *m_targetPhraseCollection;
-	const Word *m_sourceWord;
-	float m_entropy;
 	
 	PhraseDictionaryNodeSCFG()
-		:m_id(s_id++)
-		,m_targetPhraseCollection(NULL)
-		,m_sourceWord(NULL)
+		:m_targetPhraseCollection(NULL)
 	{}
 public:
 	virtual ~PhraseDictionaryNodeSCFG();
 
-	void CleanUp();
 	void Sort(size_t tableLimit);
 	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &word, const Word &sourcelabel);
 	const PhraseDictionaryNodeSCFG *GetChild(const Word &word, const Word &sourcelabel) const;
@@ -83,25 +66,10 @@ public:
 			m_targetPhraseCollection = new TargetPhraseCollection();
 		return *m_targetPhraseCollection;
 	}
-	size_t GetSize() const
-	{ return m_map.size(); }
-	size_t GetId() const
-	{ return m_id; }
-	void SetId(size_t id)
-	{ m_id = id; }
-	float GetEntropy() const
-	{ return m_entropy; }
-	void SetEntropy(float entropy)
-	{ m_entropy = entropy; }
 
 	// for mert
 	void SetWeightTransModel(const PhraseDictionary *phraseDictionary
 													, const std::vector<float> &weightT);
-
-	const Word &GetSourceWord() const
-	{ return *m_sourceWord; }
-	void SetSourceWord(const Word &sourceWord)
-	{ m_sourceWord = &sourceWord; }
 
 	// iterators
 	typedef NodeMap::iterator iterator;
@@ -113,5 +81,7 @@ public:
 		
 	TO_STRING();
 };
+
+std::ostream& operator<<(std::ostream&, const PhraseDictionaryNodeSCFG&);
 
 }

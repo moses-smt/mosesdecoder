@@ -21,7 +21,7 @@
 
 #include <vector>
 #include <cassert>
-#include "PhraseDictionaryNode.h"
+#include "PhraseDictionaryNodeSCFG.h"
 #include "ChartRule.h"
 #include "WordConsumed.h"
 
@@ -33,15 +33,15 @@ class ProcessedRule
 	friend std::ostream& operator<<(std::ostream&, const ProcessedRule&);
 
 protected:
-	const PhraseDictionaryNode &m_lastNode;
+	const PhraseDictionaryNodeSCFG &m_lastNode;
 	const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
 public:
 	// used only to init dot stack.
-	explicit ProcessedRule(const PhraseDictionaryNode &lastNode)
+	explicit ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode)
 		:m_lastNode(lastNode)
 		,m_wordsConsumed(NULL)
 	{}
-	ProcessedRule(const PhraseDictionaryNode &lastNode, const WordConsumed *wordsConsumed)
+	ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
 		:m_lastNode(lastNode)
 		,m_wordsConsumed(wordsConsumed)
 	{}
@@ -49,7 +49,7 @@ public:
 	{
 		delete m_wordsConsumed;
 	}
-	const PhraseDictionaryNode &GetLastNode() const
+	const PhraseDictionaryNodeSCFG &GetLastNode() const
 	{ return m_lastNode; }
 	const WordConsumed *GetLastWordConsumed() const
 	{
