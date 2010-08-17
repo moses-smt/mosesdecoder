@@ -25,27 +25,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include <iterator>
+#include <utility>
+#include <ostream>
 #include "Word.h"
 #include "TargetPhraseCollection.h"
 
 namespace Moses
 {
 
+class PhraseDictionarySCFG;
+
 /** One node of the PhraseDictionarySCFG structure
 */
 class PhraseDictionaryNodeSCFG
 {
-	typedef std::map<Word, PhraseDictionaryNodeSCFG> InnerNodeMap;
-	typedef std::map<Word, InnerNodeMap> NodeMap;
-		// 1st word = source side non-term, or the word if term
-		// 2nd word = target side non term, or the word if term
+	typedef std::map<Word, PhraseDictionaryNodeSCFG> TerminalMap;
+	typedef std::pair<Word, Word> NonTerminalMapKey;
+	typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeSCFG> NonTerminalMap;
+
+    friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
 
 	// only these classes are allowed to instantiate this class
 	friend class PhraseDictionarySCFG;
 	friend class std::map<Word, PhraseDictionaryNodeSCFG>;
 	
 protected:
-	NodeMap m_map;
+	TerminalMap m_sourceTermMap;
+	NonTerminalMap m_nonTermMap;
 	mutable TargetPhraseCollection *m_targetPhraseCollection;
 	
 	PhraseDictionaryNodeSCFG()
@@ -55,8 +61,10 @@ public:
 	virtual ~PhraseDictionaryNodeSCFG();
 
 	void Sort(size_t tableLimit);
-	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &word, const Word &sourcelabel);
-	const PhraseDictionaryNodeSCFG *GetChild(const Word &word, const Word &sourcelabel) const;
+	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &sourceTerm);
+	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm);
+	const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceTerm) const;
+	const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 	
 	const TargetPhraseCollection *GetTargetPhraseCollection() const
 	{	return m_targetPhraseCollection; }
@@ -71,14 +79,6 @@ public:
 	void SetWeightTransModel(const PhraseDictionary *phraseDictionary
 													, const std::vector<float> &weightT);
 
-	// iterators
-	typedef NodeMap::iterator iterator;
-	typedef NodeMap::const_iterator const_iterator;
-	const_iterator begin() const { return m_map.begin(); }
-	const_iterator end() const { return m_map.end(); }
-	iterator begin() { return m_map.begin(); }
-	iterator end() { return m_map.end(); }
-		
 	TO_STRING();
 };
 

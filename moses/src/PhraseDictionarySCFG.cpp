@@ -215,11 +215,11 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
 			++iterAlign;
 			const Word &targetNonTerm = target.GetWord(targetNonTermInd);
 
-			currNode = currNode->GetOrCreateChild(targetNonTerm, sourceNonTerm);
+			currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
 		}
 		else
 		{
-			currNode = currNode->GetOrCreateChild(word, word);
+			currNode = currNode->GetOrCreateChild(word);
 		}
 		
 		assert(currNode != NULL);
@@ -283,18 +283,7 @@ PhraseDictionarySCFG::~PhraseDictionarySCFG()
 
 void PhraseDictionarySCFG::SetWeightTransModel(const vector<float> &weightT)
 {
-	PhraseDictionaryNodeSCFG::iterator iterDict;
-	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
-	{
-		PhraseDictionaryNodeSCFG::InnerNodeMap &innerNode = iterDict->second;
-		PhraseDictionaryNodeSCFG::InnerNodeMap::iterator iterInner;
-		for (iterInner = innerNode.begin() ; iterInner != innerNode.end() ; ++iterInner)
-		{
-			// recursively set weights in nodes
-			PhraseDictionaryNodeSCFG &node = iterInner->second;
-			node.SetWeightTransModel(this, weightT);
-		}
-	}
+	m_collection.SetWeightTransModel(this, weightT);
 }
 
 
@@ -317,12 +306,19 @@ TO_STRING_BODY(PhraseDictionarySCFG);
 // friend
 ostream& operator<<(ostream& out, const PhraseDictionarySCFG& phraseDict)
 {
+	typedef PhraseDictionaryNodeSCFG::TerminalMap TermMap;
+	typedef PhraseDictionaryNodeSCFG::NonTerminalMap NonTermMap;
+
 	const PhraseDictionaryNodeSCFG &coll = phraseDict.m_collection;
-	PhraseDictionaryNodeSCFG::const_iterator iter;
-	for (iter = coll.begin() ; iter != coll.end() ; ++iter)
+	for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p)
 	{
-		const Word &word = (*iter).first;
-		out << word;
+		const Word &sourceNonTerm = p->first.first;
+		out << sourceNonTerm;
+	}
+	for (TermMap::const_iterator p = coll.m_sourceTermMap.begin(); p != coll.m_sourceTermMap.end(); ++p)
+	{
+		const Word &sourceTerm = p->first;
+		out << sourceTerm;
 	}
 	return out;
 }

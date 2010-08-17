@@ -79,7 +79,7 @@ const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 		if (startPos == absEndPos)
 		{
 			const Word &sourceWord = src.GetWord(absEndPos);
-			const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord, sourceWord);
+			const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord);
 			if (node != NULL)
 			{
 				WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos
@@ -122,7 +122,7 @@ const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 			{
 				const Word &headWord = *iterHeadWords;
 				
-				const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(headWord, sourceLabel);
+				const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceLabel, headWord);
 				if (node != NULL)
 				{
 					WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
