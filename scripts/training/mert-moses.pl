@@ -159,6 +159,8 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                   # and so on 
 
+my $maximum_iterations = 0;
+
 use strict;
 use Getopt::Long;
 GetOptions(
@@ -195,6 +197,7 @@ GetOptions(
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
+  "maximum-iterations=i" => \$maximum_iterations,
 ) or exit(1);
 
 print "Predict $___PREDICTABLE_SEEDS\n";
@@ -258,6 +261,7 @@ Options:
                                       1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                       and so on 
 
+  --maximum-iterations=ITERS    Maximum number of iterations to run tuning for.
 ";
   exit 1;
 }
@@ -606,6 +610,10 @@ my $nbest_file=undef;
 
 while(1) {
   $run++;
+  if ($maximum_iterations && $run > $maximum_iterations) {
+      print "Maximum number of iterations exceeded - stopping\n";
+      last;
+  }
   # run beamdecoder with option to output nbestlists
   # the end result should be (1) @NBEST_LIST, a list of lists; (2) @SCORE, a list of lists of lists
 
