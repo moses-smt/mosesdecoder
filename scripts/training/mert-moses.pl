@@ -159,7 +159,7 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                   # and so on 
 
-my $maximum_iterations = 0;
+my $maximum_iterations = 25;
 
 use strict;
 use Getopt::Long;
