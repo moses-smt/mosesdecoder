@@ -1528,7 +1528,7 @@ sub define_tuning_tune {
     $cmd .= " --filterfile $tune_inputfilter" if $tune_inputfilter;
 
     my $qsub_args = &get_qsub_args("TUNING");
-    $cmd .= " --queue-flags=\"$qsub_args\"" if $CLUSTER;
+    $cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
     $cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
     
     my $tuning_dir = $tuned_config;
@@ -1999,7 +1999,7 @@ sub define_evaluation_decode {
 	    $cmd .= "$scripts/generic/moses-parallel.pl";
 	}
 	my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
-	$cmd .= " -queue-parameters \"$qsub_args\"" if $CLUSTER;
+	$cmd .= " -queue-parameters \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 	$cmd .= " -decoder $decoder -config $dir/evaluation/filtered.$set.$VERSION/moses.ini -input-file $input --jobs $jobs  -decoder-parameters \"$settings\" > $system_output";
 	
 	$cmd .= " -n-best-file $system_output.best$nbest -n-best-size $nbest" if $nbest;
@@ -2204,7 +2204,7 @@ sub define_template {
 		if ($CLUSTER) {
 		    my $qflags = "";
 		    my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
-		    $qflags="--queue-flags \"$qsub_args\"" if $CLUSTER;
+		    $qflags="--queue-flags \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 		    $new_cmd .= "$parallelizer $qflags -in $in -out $out -cmd '$single_cmd' -jobs ".&get("$module:jobs")." -tmpdir $dir/$tmp_dir\n";
 		}	
 		if ($MULTICORE) {
