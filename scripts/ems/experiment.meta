@@ -240,7 +240,8 @@ split-tuning
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 interpolate
-	in: script srilm-dir split-tuning LM:lm
+	in: script split-tuning LM:lm
+	rerun-on-change: srilm-dir
 	out: lm
 	default-name: lm/interpolated-lm
 randomize

@@ -1764,9 +1764,10 @@ sub define_training_interpolated_lm_interpolate {
     my ($step_id) = @_;
 
     my ($interpolated_lm,
-	$interpolation_script, $srilm_dir, $tuning, @LM) 
+	$interpolation_script, $tuning, @LM) 
 	= &get_output_and_input($step_id);
-    
+    my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
+
     my $lm_list = "";
     foreach (@LM) {
 	$lm_list .= $_.",";
