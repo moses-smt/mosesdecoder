@@ -7,7 +7,7 @@ use strict;
 #Default parameters 
 #parameters for submiiting processes through SGE
 #NOTE: group name is ws06ossmt (with 2 's') and not ws06osmt (with 1 's')
-my $queueparameters="-l ws06ossmt=true -l mem_free=0.5G";
+my $queueparameters="";
 
 # look for the correct pwdcmd 
 my $pwdcmd = getPwdCmd();
