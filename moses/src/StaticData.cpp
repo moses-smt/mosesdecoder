@@ -450,7 +450,7 @@ bool StaticData::LoadData(Parameter *parameter)
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
   if (!tsConfig.size()) {
     //use all models in default system.
-    tsConfig.push_back(TranslationSystem::DEFAULT + " D * L * R * G *");
+    tsConfig.push_back(TranslationSystem::DEFAULT + " R * D * L * G *");
   }
   
   if (m_wordPenaltyProducers.size() != tsConfig.size()) {
