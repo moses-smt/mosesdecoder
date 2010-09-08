@@ -667,39 +667,29 @@ while(1) {
   # We need to prepare the files and **the order of the lambdas must
   # correspond to the order @order_of_lambdas_from_decoder
 
-  # NB: This code is copied from the old version of mert-moses.pl,
-  # even though the max,min and name are not yet used in the new
-  # version.
-
   my @MIN = ();   # lower bounds
   my @MAX = ();   # upper bounds
   my @CURR = ();   # the starting values
   my @NAME = ();  # to which model does the lambda belong
   
-  # walk in order of @order_of_lambdas_from_decoder and collect the min,max,val
   my %visited = ();
   foreach my $name (@order_of_lambdas_from_decoder) {
-    next if $visited{$name};
-    $visited{$name} = 1;
-	if (!defined $used_triples{$name})
-	{
-    	die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n";
-	}
-      
-		my $count = 0;
-    foreach my $feature (@{$used_triples{$name}}) {
-			$count++;
-      my ($val, $min, $max) = @$feature;
+      if (!defined $visited{$name}) {
+          $visited{$name} = 0;
+      } else {
+          $visited{$name}++;
+      }
+      my ($val, $min, $max) = @{$used_triples{$name}->[$visited{$name}]};
       push @CURR, $val;
       push @MIN, $min;
       push @MAX, $max;
-      push @NAME, $name;
-    }
+      push @NAME, $name;        
   }
 
   open(OUT,"> $weights_in_file") or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
   print OUT join(" ", @CURR)."\n";
   close(OUT);
+  print join(" ", @NAME)."\n";
   
   # make a backup copy labelled with this run number
   safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
