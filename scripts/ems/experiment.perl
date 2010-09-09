@@ -1213,6 +1213,15 @@ sub check_if_crashed {
     my ($i,$version) = @_;
     $version = $VERSION unless $version; # default: current version
 
+    # while running, sometimes the STDERR file is slow in appearing - wait a bit just in case
+    if ($version == $VERSION) {
+      my $j = 0;
+      while (! -e &versionize(&step_file($i),$version).".STDERR" && $j < 100) {
+        sleep(5);
+        $j++;
+      }
+    }
+
     #print "checking if $DO_STEP[$i]($version) crashed...\n";
     return 1 if ! -e &versionize(&step_file($i),$version).".STDERR";
 

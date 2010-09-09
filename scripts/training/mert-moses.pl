@@ -144,9 +144,11 @@ my $___INPUTWEIGHTS = 1;
 my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert
 my $filtercmd = undef; # path to filter-model-given-input.pl
+my $filterfile = undef;
 my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
+my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_BAK = undef; # backup pathname to startup ini file
 my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient scoring of nbest lists
                                   # (this method is more memory-consumptive)
@@ -189,9 +191,11 @@ GetOptions(
   "mertargs=s" => \$mertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
+  "filterfile=s" => \$filterfile, # input to filtering script (useful for lattices/confnets)
   "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
+  "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
   "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
@@ -240,10 +244,12 @@ Options:
   --nocase ... Do not preserve case information; i.e. case-insensitive evaluation (default is false)
   --nonorm ... Do not use text normalization (flag is not active, i.e. text is NOT normalized)
   --filtercmd=STRING  ... path to filter-model-given-input.pl
+  --filterfile=STRING  ... path to alternative to input-text for filtering model. useful for lattice decoding
   --rootdir=STRING  ... where do helpers reside (if not given explicitly)
   --mertdir=STRING ... path to new mert implementation
   --mertargs=STRING ... extra args for mert, eg to specify scorer
   --scorenbestcmd=STRING  ... path to score-nbest.py
+  --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
   --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
   --inputweights=N ... For confusion networks and lattices, number of weights to optimize for weight-i 
                        (must supply -link-param-count N to decoder-flags if N != 1 for decoder to deal with this correctly)
@@ -361,6 +367,9 @@ die "File not found: $___DEV_F (interpreted as $input_abs)."
   if ! -e $input_abs;
 $___DEV_F = $input_abs;
 
+
+# Option to pass to qsubwrapper and moses-parallel
+my $pass_old_sge = $old_sge ? "-old-sge" : "";
 
 my $decoder_abs = ensure_full_path($___DECODER);
 die "File not found: $___DECODER (interpreted as $decoder_abs)."
@@ -576,9 +585,11 @@ if ($continue) {
 if ($___FILTER_PHRASE_TABLE){
   # filter the phrase tables wih respect to input, use --decoder-flags
   print "filtering the phrase tables... ".`date`;
-  my $cmd = "$filtercmd ./filtered $___CONFIG $___DEV_F";
+  my $___FILTER_F  = $___DEV_F;
+  $___FILTER_F = $filterfile if (defined $filterfile);
+  my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
       or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
   } else {
     safesystem($cmd) or die "Failed to filter the tables.";
@@ -654,7 +665,7 @@ while(1) {
   $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
       or die "Failed to submit extraction to queue (via $qsubwrapper)";
   } else {
     safesystem("$cmd > extract.out 2> extract.err") or die "Failed to do extraction of statistics.";
@@ -719,7 +730,7 @@ while(1) {
   $cmd = $cmd." --ifile run$run.$weights_in_file";
 
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd 2> $mert_logfile") or die "Failed to run mert";
   }
@@ -898,7 +909,7 @@ sub run_decoder {
     my $decoder_cmd;
 
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file \"$filename\" -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file \"$filename\" -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
