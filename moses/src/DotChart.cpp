@@ -20,23 +20,15 @@
 #include "DotChart.h"
 #include "Util.h"
 
+#include <algorithm>
+
 using namespace std;
 
 namespace Moses
 {
-ProcessedRuleStack::ProcessedRuleStack(size_t size)
-:m_coll(size)
+ProcessedRuleColl::~ProcessedRuleColl()
 {
-	for (size_t ind = 0; ind < size; ++ind)
-	{
-		m_coll[ind] = new ProcessedRuleColl();
-	}
-}
-
-ProcessedRuleStack::~ProcessedRuleStack()
-{
-	RemoveAllInColl(m_coll);
-	RemoveAllInColl(m_savedNode);
+    std::for_each(m_coll.begin(), m_coll.end(), RemoveAllInColl<CollType::value_type>);
 }
 
 std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
@@ -47,9 +39,9 @@ std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
 	return out;
 }
 
-std::ostream& operator<<(std::ostream &out, const ProcessedRuleColl &coll)
+std::ostream& operator<<(std::ostream &out, const ProcessedRuleList &coll)
 {
-	ProcessedRuleColl::CollType::const_iterator iter;
+	ProcessedRuleList::const_iterator iter;
 	for (iter = coll.begin(); iter != coll.end(); ++iter)
 	{
 		const ProcessedRule &rule = **iter;

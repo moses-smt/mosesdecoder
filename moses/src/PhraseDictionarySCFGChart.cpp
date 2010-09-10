@@ -64,13 +64,13 @@ const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 	size_t absEndPos = range.GetEndPos();
 	
 	// MAIN LOOP. create list of nodes of target phrases
-	ProcessedRuleStack &runningNodes = *m_runningNodesVec[range.GetStartPos()];
-	
-	const ProcessedRuleStack::SavedNodeColl &savedNodeColl = runningNodes.GetSavedNodeColl();
-	for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
+
+	ProcessedRuleColl &processedRuleCol = *m_processedRuleColls[range.GetStartPos()];
+	const ProcessedRuleList &runningNodes = processedRuleCol.GetRunningNodes();
+    // Note that runningNodes can be expanded as the loop runs (through calls to processedRuleCol::Add())
+	for (size_t ind = 0; ind < runningNodes.size(); ++ind)
 	{
-		const SavedNode &savedNode = *savedNodeColl[ind];
-		const ProcessedRule &prevProcessedRule = savedNode.GetProcessedRule();
+		const ProcessedRule &prevProcessedRule = *runningNodes[ind];
 		const PhraseDictionaryNodeSCFG &prevNode = prevProcessedRule.GetLastNode();
 		const WordConsumed *prevWordConsumed = prevProcessedRule.GetLastWordConsumed();
 		size_t startPos = (prevWordConsumed == NULL) ? range.GetStartPos() : prevWordConsumed->GetWordsRange().GetEndPos() + 1;
@@ -86,7 +86,7 @@ const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 																												 , sourceWord
 																												 , prevWordConsumed);
 				ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
-				runningNodes.Add(relEndPos+1, processedRule);
+				processedRuleCol.Add(relEndPos+1, processedRule);
 			}
 		}
 		
@@ -130,17 +130,17 @@ const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 																													 , prevWordConsumed);
 					
 					ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
-					runningNodes.Add(stackInd, processedRule);
+					processedRuleCol.Add(stackInd, processedRule);
 				}
 			} // for (iterHeadWords
 		} // for (iterLabelList 
 	}
 	
 	// return list of target phrases
-	ProcessedRuleColl &nodes = runningNodes.Get(relEndPos + 1);
+	ProcessedRuleList &nodes = processedRuleCol.Get(relEndPos + 1);
 	
 	size_t rulesLimit = StaticData::Instance().GetRuleLimit();
-	ProcessedRuleColl::const_iterator iterNode;
+	ProcessedRuleList::const_iterator iterNode;
 	for (iterNode = nodes.begin(); iterNode != nodes.end(); ++iterNode)
 	{
 		const ProcessedRule &processedRule = **iterNode;

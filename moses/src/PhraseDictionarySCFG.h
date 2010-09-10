@@ -43,7 +43,7 @@ namespace Moses
 		protected:
 			PhraseDictionaryNodeSCFG m_collection;
 			mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
-			mutable std::vector<ProcessedRuleStack*>	m_runningNodesVec;
+			mutable std::vector<ProcessedRuleColl*>	m_processedRuleColls;
 			
 			Phrase									m_prevSource;
 			TargetPhraseCollection	*m_prevPhraseColl;

@@ -261,18 +261,18 @@ const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(co
 
 void PhraseDictionarySCFG::InitializeForInput(const InputType& input)
 {
-	assert(m_runningNodesVec.size() == 0);
+	assert(m_processedRuleColls.size() == 0);
 	size_t sourceSize = input.GetSize();
-	m_runningNodesVec.resize(sourceSize);
+	m_processedRuleColls.resize(sourceSize);
 	
-	for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind)
+	for (size_t ind = 0; ind < m_processedRuleColls.size(); ++ind)
 	{
 		ProcessedRule *initProcessedRule = new ProcessedRule(m_collection);
 		
-		ProcessedRuleStack *processedStack = new ProcessedRuleStack(sourceSize - ind + 1);
-		processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
+		ProcessedRuleColl *processedRuleColl = new ProcessedRuleColl(sourceSize - ind + 1);
+		processedRuleColl->Add(0, initProcessedRule); // init rule. stores the top node in tree
 		
-		m_runningNodesVec[ind] = processedStack;
+		m_processedRuleColls[ind] = processedRuleColl;
 	}
 }
 
@@ -298,7 +298,7 @@ void PhraseDictionarySCFG::CleanUp()
 	}
 	m_chartTargetPhraseColl.clear();
 	
-	RemoveAllInColl(m_runningNodesVec);
+	RemoveAllInColl(m_processedRuleColls);
 }
 
 TO_STRING_BODY(PhraseDictionarySCFG);

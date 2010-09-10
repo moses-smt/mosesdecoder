@@ -55,37 +55,20 @@ public:
 	{
 		return m_wordsConsumed;
 	}
-
-	bool IsCurrNonTerminal() const
-	{
-		assert(m_wordsConsumed);
-		return m_wordsConsumed->IsNonTerminal();
-	}
-	
-/*
-	inline int Compare(const ProcessedRule &compare) const
-	{
-		if (m_lastNode < compare.m_lastNode)
-			return -1;
-		if (m_lastNode > compare.m_lastNode)
-			return 1;
-
-		return m_wordsConsumed < compare.m_wordsConsumed;
-	}
-	inline bool operator<(const ProcessedRule &compare) const
-	{
-		return Compare(compare) < 0;
-	}
-*/
 };
 
+typedef std::vector<const ProcessedRule*> ProcessedRuleList;
+
+// Collection of all ProcessedRules that share a common start point,
+// grouped by end point.  Additionally, maintains a list of all
+// ProcessedRules that could be expanded further, i.e. for which the
+// corresponding PhraseDictionaryNodeSCFG is not a leaf.
 class ProcessedRuleColl
 {
-	friend std::ostream& operator<<(std::ostream&, const ProcessedRuleColl&);
-
 protected:
-	typedef std::vector<const ProcessedRule*> CollType;
+	typedef std::vector<ProcessedRuleList> CollType;
 	CollType m_coll;
+    ProcessedRuleList m_runningNodes;
 
 public:
 	typedef CollType::iterator iterator;
@@ -96,85 +79,29 @@ public:
 	iterator begin() { return m_coll.begin(); }
 	iterator end() { return m_coll.end(); }
 
-	const ProcessedRule &Get(size_t ind) const
-	{ return *m_coll[ind]; }
+	ProcessedRuleColl(size_t size)
+      : m_coll(size)
+    {}
 
-	void Add(const ProcessedRule *processedRule)
-	{
-		m_coll.push_back(processedRule);
-	}
-	void Delete(size_t ind)
-	{
-		//delete m_coll[ind];
-		m_coll.erase(m_coll.begin() + ind);
-	}
-	
-	size_t GetSize() const
-	{ return m_coll.size(); }
-	
-};
+	~ProcessedRuleColl();
 
-class SavedNode
-{
-	const ProcessedRule *m_processedRule;
-
-public:
-	SavedNode(const ProcessedRule *processedRule)
-		:m_processedRule(processedRule)
-	{
-		assert(m_processedRule);
-	}
-
-	~SavedNode()
-	{
-		delete m_processedRule;
-	}
-
-	const ProcessedRule &GetProcessedRule() const
-	{ return *m_processedRule; }
-};
-
-class ProcessedRuleStack
-{ // coll of coll of processed rules
-public:
-	typedef std::vector<SavedNode*> SavedNodeColl;
-
-protected:
-	typedef std::vector<ProcessedRuleColl*> CollType;
-	CollType m_coll;
-
-	SavedNodeColl m_savedNode;
-
-public:
-	typedef CollType::iterator iterator;
-	typedef CollType::const_iterator const_iterator;
-
-	const_iterator begin() const { return m_coll.begin(); }
-	const_iterator end() const { return m_coll.end(); }
-	iterator begin() { return m_coll.begin(); }
-	iterator end() { return m_coll.end(); }
-
-	ProcessedRuleStack(size_t size);
-	~ProcessedRuleStack();
-
-	const ProcessedRuleColl &Get(size_t pos) const
-	{ return *m_coll[pos]; }
-	ProcessedRuleColl &Get(size_t pos)
-	{ return *m_coll[pos]; }
-
-	const ProcessedRuleColl &back() const
-	{ return *m_coll.back(); }
+	const ProcessedRuleList &Get(size_t pos) const
+	{ return m_coll[pos]; }
+	ProcessedRuleList &Get(size_t pos)
+	{ return m_coll[pos]; }
 
 	void Add(size_t pos, const ProcessedRule *processedRule)
 	{
 		assert(processedRule);
-
-		m_coll[pos]->Add(processedRule);
-		m_savedNode.push_back(new SavedNode(processedRule));
+		m_coll[pos].push_back(processedRule);
+        if (!processedRule->GetLastNode().IsLeaf())
+        {
+		    m_runningNodes.push_back(processedRule);
+        }
 	}
 
-	const SavedNodeColl &GetSavedNodeColl() const
-	{ return m_savedNode; }
+	const ProcessedRuleList &GetRunningNodes() const
+	{ return m_runningNodes; }
 
 };
 
