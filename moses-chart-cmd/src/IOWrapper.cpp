@@ -126,9 +126,22 @@ IOWrapper::~IOWrapper()
   delete m_detailedTranslationReportingStream;
 }
 
-InputType*IOWrapper::GetInput(InputType* inputType)
+std::string IOWrapper::GetInput()
 {
-	if(inputType->Read(*m_inputStream, m_inputFactorOrder))
+	assert(m_inputStream);
+	string line;
+	if (getline(*m_inputStream, line, '\n').eof())	
+	{
+		assert(line == "");
+	}
+	
+	return line;
+}
+
+InputType*IOWrapper::GetInput(InputType* inputType, const string &line)
+{
+	stringstream strme(line);
+	if(inputType->Read(strme, m_inputFactorOrder))
 	{
 		if (long x = inputType->GetTranslationId()) { if (x>=m_translationId) m_translationId = x+1; }
 		else inputType->SetTranslationId(m_translationId++);

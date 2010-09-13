@@ -76,7 +76,8 @@ public:
 				, const std::string							&inputFilePath="");
 	~IOWrapper();
 
-	Moses::InputType* GetInput(Moses::InputType *inputType);
+	std::string GetInput();
+	Moses::InputType* GetInput(Moses::InputType *inputType, const std::string &line);
 	void OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
     void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
