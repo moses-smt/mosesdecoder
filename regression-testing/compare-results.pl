@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id$
+# $Id: compare-results.pl 1344 2007-04-06 17:07:54Z hieuhoang1972 $
 
 use strict;
 my ($results, $truth) = @ARGV;

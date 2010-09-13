@@ -1,0 +1,8 @@
+#!/bin/sh
+
+unset LANG
+export PATH=$PATH:/group/project/statmt/pkoehn/user/abhishek:/group/project/statmt/pkoehn/user/abhishek/cmert-0.5
+export EVAL=/group/project/statmt/pkoehn/user/abhishek/WST05/fr-en-train/dev
+
+mert-driver cmert-work $EVAL/low.test400.fr.rest $EVAL/low.test400.en 100 pharaoh.2005-07-21 "-config /group/project/statmt/pkoehn/user/abhishek/WST05/fr-en-train/model/pharaoh.ini -dl 4 -b 0.1 -ttable-limit 100" "0.2,0-1;0.2,0.2-0.2;0.2,0-1;0.2,0-1;0.2,0-1;0.2,0-1;0.2,-1-1;0.2,-1-1"
+
