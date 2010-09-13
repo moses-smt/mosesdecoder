@@ -1,0 +1,17 @@
+STDOUT_1=weights_1: 0.0836727 0.135627 0.0602366 0.0263658 0.043897 0.0146552 0.0770568 0.112996 0.0437857 0.0206718 0.133082 0.0821608 -0.101029 -0.0647629 
+STDOUT_2=weights_2: 0.0662178 0.138211 0.0613841 0.0268681 0.0447332 0.0149344 0.0785247 0.115149 0.0446198 0.0210656 0.135617 0.0837259 -0.102954 -0.0659966 
+STDOUT_3=weights_3: 0.0662177 0.138211 0.061384 0.0268681 0.0447331 0.0149344 0.0785246 0.115149 0.0446197 0.0210656 0.135617 0.0837258 -0.102954 -0.0659965 
+STDOUT_4=best_1:  0.408975
+STDOUT_5=best_2:  0.410349
+STDOUT_6=best_3:  0.410349
+STDOUT_7=translation_1: till Tuesday Almeno stable and mostly sunny weather with rising temperatures , especially in maxima values . 
+STDOUT_8=translation_2: A possible worsening is expected in the second half of the week . 
+STDOUT_9=translation_3: A moist and temporary flow will affect the Alps in the next days determining mostly changeable cloudiness , and scattered southern sectors , with light precipitation towards the half of next week . 
+STDOUT_10=translation_4: Con today evening , Thursday , a disturbance is expected , bringing widespread rains into clearing on Friday and snowfalls to 600 of m 2000 m . 
+STDOUT_11=translation_5: For the weekend clear or clear sky cloudy with temperature lowering minimum temperatures . 
+STDOUT_12=translation_6: till Tuesday Almeno stable and mostly sunny weather with rising temperatures , especially in maxima values . 
+STDOUT_13=translation_7: A possible worsening is expected in the second half of the week . 
+STDOUT_14=translation_8: A moist and temporary flow will affect the Alpine area for the next days will determine changeable cloudiness , will probably southern sectors , and with light precipitation is expected for the half of the week . 
+STDOUT_15=translation_9: Con evening today , Thursday , a disturbance is expected , bringing widespread rains into clearing on Friday and snowfalls to 600 of m 2000 m . 
+STDOUT_16=translation_10: For the weekend clear or clear sky cloudy with dropping of minimum temperatures . 
+TOTAL_WALLTIME ~ 10

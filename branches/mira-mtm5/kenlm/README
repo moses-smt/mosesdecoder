@@ -1,0 +1,11 @@
+This is a language model under active development.  However, the API is mostly stable.  
+
+Currently, it loads an ARPA file in 2/3 the time SRI takes and uses 6.5 GB when SRI takes 11 GB.  I'm working on optimizing this even further.  
+
+Binary format is coming soon now.  It's already using mmap; the only change is to pass an fd to this mmap call.  
+
+Currently it depends on Boost (mostly lexical_cast) and ICU (only StringPiece).  I am actively working on removing these dependencies.  My normal build system is Boost Jam.  I've stripped this out and simplified to a shell script ./compile.sh for you.  
+
+I recommend copying the code and distributing it with your decoder.  However, please send improvements to me so that they can be integrated into the core package.  
+
+Also included is a wrapper to SRI with the same interface.  
