@@ -232,9 +232,13 @@ public:
 	}
 	//! destructor
 	~StaticData();
+
 	//! return static instance for use like global variable
 	static const StaticData& Instance() { return s_instance; }
-	
+
+	//! do NOT call unless you know what you're doing
+	static StaticData& InstanceNonConst() { return s_instance; }
+
 	/** delete current static instance and replace with another. 
 		* Used by gui front end
 		*/
