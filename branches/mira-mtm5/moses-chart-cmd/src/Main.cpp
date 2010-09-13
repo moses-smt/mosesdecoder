@@ -68,15 +68,15 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChart;
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source, const string &line) 
 {
 	delete source;
 	switch(inputType)
 	{
-		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
-		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
-		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
-		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input));break;
+		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input), line); break;
+		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet, line);    break;
+		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice, line);     break;
+		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input), line);break;
 		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
 	}
 	return (source ? true : false);
@@ -133,9 +133,14 @@ int main(int argc, char* argv[])
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
-	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
+	
+	string line;	
+	while((line = ioWrapper->GetInput()) != "")
 	{
-			// note: source is only valid within this while loop!
+		line += "\n";
+		ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
+		
+		// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
 			
