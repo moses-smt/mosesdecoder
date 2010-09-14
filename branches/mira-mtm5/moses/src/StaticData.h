@@ -127,6 +127,7 @@ protected:
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
 	bool m_outputHypoScore;
+	bool m_enableOnlineCommand; //! flag indicating whether online commands to change some decoder parameters are enable; if yes, the persistent translation option cache is disabled
 
 	SearchAlgorithm m_searchAlgorithm;
 	InputTypeEnum m_inputType;
