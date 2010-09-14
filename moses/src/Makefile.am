@@ -7,6 +7,7 @@ libmoses_la_HEADERS = \
         AlignmentInfo.h \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
+	BleuScoreFeature.h \
         CellCollection.h \
         ChartRule.h \
         ChartRuleCollection.h \
@@ -137,6 +138,7 @@ libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
+	BleuScoreFeature.cpp \
         ChartRule.cpp \
         ChartRuleCollection.cpp \
         ConfusionNet.cpp \
