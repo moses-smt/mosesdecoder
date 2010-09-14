@@ -57,6 +57,7 @@ libmoses_la_HEADERS = \
         LexicalReorderingTable.h \
         Manager.h \
         ObjectPool.h \
+        OnlineCommand.h \
         PCNTools.h \
         PDTAimp.h \
         Parameter.h \
@@ -183,6 +184,7 @@ libmoses_la_SOURCES = \
         Manager.cpp \
         NGramCollection.cpp \
         NGramNode.cpp \
+        OnlineCommand.cpp \
         PCNTools.cpp \
         Parameter.cpp \
         PartialTranslOptColl.cpp \
