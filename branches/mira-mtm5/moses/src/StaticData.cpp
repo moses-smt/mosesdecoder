@@ -72,10 +72,12 @@ StaticData::StaticData()
 ,m_sourceStartPosMattersForRecombination(false)
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
+,m_bleuScoreFeature(NULL)
 ,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(false)
+
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -1187,6 +1189,9 @@ bool StaticData::LoadReferences() {
   if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) { 
     UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
     return false;
+  }
+  if (!referenceFiles.size()) {
+    return true;
   }
   if (bleuWeightStr.size() > 1) {
     UserMessage::Add("Can only specify one weight for the bleu feature");
