@@ -138,17 +138,17 @@ int main(int argc, char* argv[])
 	string line;	
 	while((line = ioWrapper->GetInput()) != "")
 	{
-		line += "\n";
-        OnlineCommand oc;
-		ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
+		OnlineCommand oc;
 		if (oc.Parse(line)){//an online command
 			oc.Execute();
 			oc.Clean();
-        }
+			continue;
+    }
+		else {
+			line += "\n";
+			ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
+		}
 		
-		StaticData &ss = StaticData::InstanceNonConst();
-		//ss.ChangeWeights( "lm", 8989);
-		// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
 			
