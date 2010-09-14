@@ -542,7 +542,11 @@ public:
 	bool ContinuePartialTranslation() const { return m_continuePartialTranslation; }
 	
 	void ReLoadParameter();
-
+	Parameter* GetParameter()
+	{
+		return m_parameter;
+	}
+	
 };
 
 }
