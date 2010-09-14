@@ -1269,24 +1269,43 @@ void StaticData::ReLoadParameter()
 	//loop over all ScoreProducer to update weights
 	const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
 	
+	map<string, size_t> index;
 	std::vector<const ScoreProducer*>::const_iterator iterSP;
 	for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP)
 	{
-		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
-		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
+		const ScoreProducer &scoreProducer = **iterSP;
+
+		std::string paramShortName = scoreProducer.GetScoreProducerWeightShortName();
+		vector<float> weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
+		size_t numScores = scoreProducer.GetNumScoreComponents();
+		
 		cerr << paramShortName << endl;
 		
+		map<string, size_t>::const_iterator iterIndex;
+		iterIndex = index.find(paramShortName);
+		if (iterIndex != index.end())
+		{
+			index[paramShortName] = 0;
+		}
+		size_t startIndex = index[paramShortName];
+		
+		vector<float> weightsForProducer;
+		for (size_t ind = startIndex; ind < startIndex + numScores; ++ind)
+			weightsForProducer.push_back(weights[ind]);
+		index[paramShortName] += numScores;
+		
 		if (paramShortName == "d"){ //basic distortion model takes the first weight
-			if ((*iterSP)->GetScoreProducerDescription() == "Distortion"){
-				Weights.resize(1); //take only the first element
+			if (scoreProducer.GetScoreProducerDescription() == "Distortion"){
+				weightsForProducer.resize(1); //take only the first element
 			}else{ //lexicalized reordering model takes the other 
-				Weights.erase(Weights.begin()); //remove the first element
+				weightsForProducer.erase(weightsForProducer.begin()); //remove the first element
 			}
 			//			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
 			//			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
-			SetWeightsForScoreProducer(*iterSP, Weights);
 			//  	std::cerr << Weights << std::endl;
 		}
+	
+		SetWeightsForScoreProducer(*iterSP, weightsForProducer);
 	}
 	
 	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
