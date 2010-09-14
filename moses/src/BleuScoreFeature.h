@@ -50,7 +50,9 @@ public:
     FFState* Evaluate( const Hypothesis& cur_hypo, 
                        const FFState* prev_state, 
                        ScoreComponentCollection* accumulator) const;
-    const FFState* EmptyHypothesisState(const InputType &input) const;
+    float CalculateBleu() const;
+    const FFState* EmptyHypothesisState(const InputType&) const;
+
 };
 
 } // Namespace.
