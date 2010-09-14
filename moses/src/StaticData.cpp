@@ -72,10 +72,12 @@ StaticData::StaticData()
 ,m_sourceStartPosMattersForRecombination(false)
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
+,m_bleuScoreFeature(NULL)
 ,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
 ,m_isAlwaysCreateDirectTranslationOption(false)
+
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -450,7 +452,8 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadGlobalLexicalModel()) return false;
-    if (!LoadDecodeGraphs()) return false;
+  if (!LoadDecodeGraphs()) return false;
+  if (!LoadReferences()) return  false;
     
 
   //configure the translation systems with these tables
@@ -533,6 +536,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
     
     //Add any other features here.
+    if (m_bleuScoreFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_bleuScoreFeature);
+    }
     
   }
   
@@ -1177,6 +1183,50 @@ bool StaticData::LoadDecodeGraphs() {
     return true;
 }
 
+bool StaticData::LoadReferences() {
+  vector<string> bleuWeightStr = m_parameter->GetParam("weight-b");
+  vector<string> referenceFiles = m_parameter->GetParam("references");
+  if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) { 
+    UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
+    return false;
+  }
+  if (!referenceFiles.size()) {
+    return true;
+  }
+  if (bleuWeightStr.size() > 1) {
+    UserMessage::Add("Can only specify one weight for the bleu feature");
+    return false;
+  }
+  float bleuWeight = Scan<float>(bleuWeightStr[0]);
+  m_bleuScoreFeature = new BleuScoreFeature();
+  m_allWeights.push_back(bleuWeight);
+  
+  vector<vector<string> > references(referenceFiles.size());
+  for (size_t i =0; i < referenceFiles.size(); ++i) {
+    ifstream in(referenceFiles[i].c_str());
+    if (!in) {
+      stringstream strme;
+      strme << "Unable to load references from " << referenceFiles[i];
+      UserMessage::Add(strme.str());
+      return false;
+    }
+    string line;
+    while (getline(in,line)) {
+      references.back().push_back(line);
+    }
+    if (i > 0) {
+      if (references[i].size() != references[i-1].size()) {
+        UserMessage::Add("Reference files are of different lengths");
+        return false;
+      }
+    }
+    in.close();
+  }
+  //TODO: Set the references in the bleu feature
+  
+  return true;
+}
+
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
 {
@@ -1269,43 +1319,24 @@ void StaticData::ReLoadParameter()
 	//loop over all ScoreProducer to update weights
 	const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
 	
-	map<string, size_t> index;
 	std::vector<const ScoreProducer*>::const_iterator iterSP;
 	for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP)
 	{
-		const ScoreProducer &scoreProducer = **iterSP;
-
-		std::string paramShortName = scoreProducer.GetScoreProducerWeightShortName();
-		vector<float> weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
-		size_t numScores = scoreProducer.GetNumScoreComponents();
-		
+		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
+		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
 		cerr << paramShortName << endl;
 		
-		map<string, size_t>::const_iterator iterIndex;
-		iterIndex = index.find(paramShortName);
-		if (iterIndex != index.end())
-		{
-			index[paramShortName] = 0;
-		}
-		size_t startIndex = index[paramShortName];
-		
-		vector<float> weightsForProducer;
-		for (size_t ind = startIndex; ind < startIndex + numScores; ++ind)
-			weightsForProducer.push_back(weights[ind]);
-		index[paramShortName] += numScores;
-		
 		if (paramShortName == "d"){ //basic distortion model takes the first weight
-			if (scoreProducer.GetScoreProducerDescription() == "Distortion"){
-				weightsForProducer.resize(1); //take only the first element
+			if ((*iterSP)->GetScoreProducerDescription() == "Distortion"){
+				Weights.resize(1); //take only the first element
 			}else{ //lexicalized reordering model takes the other 
-				weightsForProducer.erase(weightsForProducer.begin()); //remove the first element
+				Weights.erase(Weights.begin()); //remove the first element
 			}
 			//			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
 			//			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
+			SetWeightsForScoreProducer(*iterSP, Weights);
 			//  	std::cerr << Weights << std::endl;
 		}
-	
-		SetWeightsForScoreProducer(*iterSP, weightsForProducer);
 	}
 	
 	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
