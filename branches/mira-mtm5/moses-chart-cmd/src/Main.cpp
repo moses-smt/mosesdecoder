@@ -52,6 +52,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordLattice.h"
 #include "TreeInput.h"
 #include "TranslationAnalysis.h"
+#include "OnlineCommand.h"
 #include "mbr.h"
 #include "../../moses-chart/src/ChartManager.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
@@ -138,12 +139,12 @@ int main(int argc, char* argv[])
 	while((line = ioWrapper->GetInput()) != "")
 	{
 		line += "\n";
-		//if ()
-		{
-			
-		}
-		
+        OnlineCommand oc;
 		ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
+		if (oc.Parse(line)){//an online command
+			oc.Execute();
+			oc.Clean();
+        }
 		
 		StaticData &ss = StaticData::InstanceNonConst();
 		//ss.ChangeWeights( "lm", 8989);
