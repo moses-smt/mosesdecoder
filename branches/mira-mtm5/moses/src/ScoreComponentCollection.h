@@ -56,7 +56,7 @@ class ScoreComponentCollection {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
 	friend class ScoreIndexManager;
 private:
-	std::vector<float> m_scores;
+	FVector m_scores;
 	const ScoreIndexManager* m_sim;
 
 public:
@@ -75,24 +75,19 @@ public:
   //! Set all values to 0.0
 	void ZeroAll()
 	{
-		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
-			*i = 0.0f;
+	  m_scores.clear();
 	}
 
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
 	{
-		assert(m_scores.size() >= rhs.m_scores.size());
-		const size_t l = rhs.m_scores.size();
-		for (size_t i=0; i<l; i++) { m_scores[i] += rhs.m_scores[i]; }  
+	  m_scores += rhs.m_scores;
 	}
 
   //! subtract the score in rhs
 	void MinusEquals(const ScoreComponentCollection& rhs)
 	{
-		assert(m_scores.size() >= rhs.m_scores.size());
-		const size_t l = rhs.m_scores.size();
-		for (size_t i=0; i<l; i++) { m_scores[i] -= rhs.m_scores[i]; }  
+	  m_scores -= rhs.m_scores;
 	}
 
 	//! Add scores from a single ScoreProducer only
