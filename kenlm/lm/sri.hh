@@ -2,12 +2,11 @@
 #define LM_SRI__
 
 #include "lm/facade.hh"
-
-#include <boost/functional/hash/hash.hpp>
-#include <boost/scoped_ptr.hpp>
+#include "util/murmur_hash.hh"
 
 #include <cmath>
 #include <exception>
+#include <memory>
 
 class Ngram;
 class Vocab;
@@ -33,8 +32,10 @@ typedef unsigned int SRIVocabIndex;
 
 class State {
   public:
-    unsigned char valid_length_;
+    // You shouldn't need to touch these, but they're public so State will be a POD.
+    // If valid_length_ < kMaxOrder - 1 then history_[valid_length_] == Vocab_None.
     SRIVocabIndex history_[kMaxOrder - 1];
+    unsigned char valid_length_;
 };
 
 inline bool operator==(const State &left, const State &right) {
@@ -50,7 +51,7 @@ inline bool operator==(const State &left, const State &right) {
 }
 
 inline size_t hash_value(const State &state) {
-  return boost::hash_range(state.history_, state.history_ + state.valid_length_);
+  return util::MurmurHashNative(&state.history_, sizeof(SRIVocabIndex) * state.valid_length_);
 }
 
 class Vocabulary : public base::Vocabulary {
@@ -74,7 +75,9 @@ class Vocabulary : public base::Vocabulary {
     friend class Model;
     void FinishedLoading();
 
-    mutable boost::scoped_ptr<Vocab> sri_;
+    // The parent class isn't copyable so auto_ptr is the same as scoped_ptr
+    // but without the boost dependence.  
+    mutable std::auto_ptr<Vocab> sri_;
 };
 
 class Model : public base::ModelFacade<Model, State, Vocabulary> {
@@ -88,7 +91,7 @@ class Model : public base::ModelFacade<Model, State, Vocabulary> {
   private:
     Vocabulary vocab_;
 
-    mutable boost::scoped_ptr<Ngram> sri_;
+    mutable std::auto_ptr<Ngram> sri_;
 
     WordIndex not_found_;
 };

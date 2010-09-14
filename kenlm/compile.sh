@@ -1,2 +1,11 @@
 #!/bin/bash
-g++ -O3 -I. -licui18n lm/arpa_io.cc lm/exception.cc lm/ngram.cc lm/query.cc lm/virtual_interface.cc util/errno_exception.cc util/file_piece.cc util/murmur_hash.cc util/scoped.cc util/string_piece.cc -o query -licutu -licutu -licudata -licuio -licule -liculx -licuuc
+#This is just an example compilation.  You should integrate these files into your build system.  I can provide boost jam if you want.  
+#If your code uses ICU, edit util/string_piece.hh and uncomment #define USE_ICU
+
+set -e
+
+for i in util/{ersatz_progress,exception,file_piece,murmur_hash,scoped,string_piece} lm/{exception,virtual_interface,ngram}; do
+  g++ -I. -O3 -c $i.cc -o $i.o
+done
+g++ -I. -O3 lm/ngram_build_binary.cc {lm,util}/*.o -o build_binary
+g++ -I. -O3 lm/ngram_query.cc {lm,util}/*.o -o query

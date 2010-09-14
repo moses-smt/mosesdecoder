@@ -1,12 +1,12 @@
-#include "lm/ngram.hh"
+#include "lm/sri.hh"
 
 #include <stdlib.h>
 
-#define BOOST_TEST_MODULE NGramTest
+#define BOOST_TEST_MODULE SRITest
 #include <boost/test/unit_test.hpp>
 
 namespace lm {
-namespace ngram {
+namespace sri {
 namespace {
 
 #define StartTest(word, ngram, score) \
@@ -57,35 +57,9 @@ template <class M> void Continuation(M &model) {
   AppendTest("loin", 5, -0.0432557);
 }
 
-BOOST_AUTO_TEST_CASE(starters_probing) { Model m("test.arpa"); Starters(m); }
-BOOST_AUTO_TEST_CASE(continuation_probing) { Model m("test.arpa"); Continuation(m); }
-BOOST_AUTO_TEST_CASE(starters_sorted) { SortedModel m("test.arpa"); Starters(m); }
-BOOST_AUTO_TEST_CASE(continuation_sorted) { SortedModel m("test.arpa"); Continuation(m); }
-
-BOOST_AUTO_TEST_CASE(write_and_read_probing) {
-  Config config;
-  config.write_mmap = "test.binary";
-  {
-    Model copy_model("test.arpa", config);
-  }
-  Model binary("test.binary");
-  Starters(binary);
-  Continuation(binary);
-}
-
-BOOST_AUTO_TEST_CASE(write_and_read_sorted) {
-  Config config;
-  config.write_mmap = "test.binary";
-  config.prefault = true;
-  {
-    SortedModel copy_model("test.arpa", config);
-  }
-  SortedModel binary("test.binary");
-  Starters(binary);
-  Continuation(binary);
-}
-
+BOOST_AUTO_TEST_CASE(starters) { Model m("test.arpa", 5); Starters(m); }
+BOOST_AUTO_TEST_CASE(continuation) { Model m("test.arpa", 5); Continuation(m); }
 
 } // namespace
-} // namespace ngram
+} // namespace sri
 } // namespace lm

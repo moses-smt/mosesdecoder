@@ -1,12 +1,9 @@
-#include "util/tokenize_piece.hh"
 #include "lm/ngram.hh"
 
-#include <boost/lexical_cast.hpp>
-
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -37,19 +34,26 @@ void PrintUsage(const char *message) {
 
 template <class Model> void Query(const Model &model) {
   PrintUsage("Loading statistics:\n");
-  std::string line;
-  typename Model::State state;
-  while (std::getline(std::cin, line)) {
+  typename Model::State state, out;
+  lm::FullScoreReturn ret;
+  std::string word;
+
+  while (std::cin) {
     state = model.BeginSentenceState();
     float total = 0.0;
-    for (util::PieceIterator<' '> it(line); it; ++it) {
-      LMWordIndex index = model.GetVocabulary().Index(*it);
-      typename Model::State out;
-      lm::FullScoreReturn ret = model.FullScore(state, index, out);
+    bool got = false;
+    while (std::cin >> word) {
+      got = true;
+      ret = model.FullScore(state, model.GetVocabulary().Index(word), out);
       total += ret.prob;
+      std::cout << word << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << ' ';
       state = out;
-      std::cout << *it << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << ' ';
+      if (std::cin.get() == '\n') break;
     }
+    if (!got && !std::cin) break;
+    ret = model.FullScore(state, model.GetVocabulary().EndSentence(), out);
+    total += ret.prob;
+    std::cout << "</s> " << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << ' ';
     std::cout << "Total: " << total << '\n';
   }
   PrintUsage("After queries:\n");
@@ -57,10 +61,12 @@ template <class Model> void Query(const Model &model) {
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cerr << "Pass language model APRA file." << std::endl;
+    std::cerr << "Pass language model name." << std::endl;
     return 0;
   }
-  lm::ngram::Model ngram(argv[1], 1.5);
-  Query(ngram);
+  {
+    lm::ngram::Model ngram(argv[1]);
+    Query(ngram);
+  }
   PrintUsage("Total time including destruction:\n");
 }
