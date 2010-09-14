@@ -50,13 +50,6 @@ size_t LanguageModel::GetNumScoreComponents() const
 	return 1;
 }
 
-
-float LanguageModel::GetWeight() const {
-    size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
-          GetBeginIndex(GetScoreBookkeepingID());
-    return StaticData::Instance().GetAllWeights()[lmIndex];
-}
-
 void LanguageModel::CalcScore(const Phrase &phrase
 														, float &fullScore
 														, float &ngramScore) const
