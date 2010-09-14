@@ -138,6 +138,11 @@ int main(int argc, char* argv[])
 	while((line = ioWrapper->GetInput()) != "")
 	{
 		line += "\n";
+		//if ()
+		{
+			
+		}
+		
 		ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
 		
 		StaticData &ss = StaticData::InstanceNonConst();

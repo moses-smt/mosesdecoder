@@ -82,7 +82,8 @@ void OnlineCommand::Execute() const
 {
 	std::cerr << "void OnlineCommand::Execute() const" << std::endl;
 	VERBOSE(3,"OnlineCommand::Execute() const" << std::endl);
-	StaticData &staticData = (StaticData&) StaticData::Instance();
+	
+	StaticData &staticData = StaticData::InstanceNonConst();
 
 	VERBOSE(1,"Handling online command: " << COMMAND_KEYWORD << " " << command_type << " " << command_value << std::endl);
   // weights
