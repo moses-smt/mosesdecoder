@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
+#include "BleuScoreFeature.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -137,6 +138,7 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
 	std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  BleuScoreFeature* m_bleuScoreFeature;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_reportAllFactorsNBest;
@@ -223,6 +225,9 @@ protected:
     bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
+  //References used for scoring feature (eg BleuScoreFeature) for online training
+  bool LoadReferences();
+  
     void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
 	

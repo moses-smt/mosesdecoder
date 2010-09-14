@@ -77,6 +77,8 @@ Parameter::Parameter()
 	AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
 	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
 	AddParam("verbose", "v", "verbosity level of the logging");
+  AddParam("references", "Reference file(s) - used for bleu score feature");
+  AddParam("weight-b", "weight for bleu score feature");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
   AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
 	AddParam("weight-generation", "g", "weight(s) for generation components");

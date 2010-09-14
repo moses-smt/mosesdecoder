@@ -61,9 +61,9 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     return NULL;
 }
 
-const FFState* BleuScoreFeature::EmptyHypothesisState() const
+const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType &input) const
 {
-    return NULL;
+    return new BleuScoreState();
 }
 
 
