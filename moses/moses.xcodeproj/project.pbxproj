@@ -1025,6 +1025,7 @@
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,
 					../srilm/include,
+					/usr/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
@@ -1048,6 +1049,7 @@
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,
 					../srilm/include,
+					/usr/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;

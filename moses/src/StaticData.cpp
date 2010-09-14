@@ -1242,6 +1242,86 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 	ReduceTransOptCache();
 }
 
+void StaticData::ReLoadParameter()
+{
+	m_verboseLevel = 1;
+	if (m_parameter->GetParam("verbose").size() == 1)
+	{
+		m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
+	}
+	
+	// check whether "weight-u" is already set
+	if (m_parameter->isParamShortNameSpecified("u"))
+	{
+		if (m_parameter->GetParamShortName("u").size() < 1 ){
+			PARAM_VEC w(1,"1.0");
+			m_parameter->OverwriteParamShortName("u", w);
+		}
+	}
+	
+	//loop over all ScoreProducer to update weights
+	std::vector<const ScoreProducer*>::const_iterator iterSP;
+	for (iterSP = GetScoreIndexManager().GetFeatureFunctions().begin() ; iterSP != GetScoreIndexManager().GetFeatureFunctions().end() ; ++iterSP)
+	{
+		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
+		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
+		
+		if (paramShortName == "d"){ //basic distortion model takes the first weight
+			if ((*iterSP)->GetScoreProducerDescription() == "Distortion"){
+				Weights.resize(1); //take only the first element
+			}else{ //lexicalized reordering model takes the other 
+				Weights.erase(Weights.begin()); //remove the first element
+			}
+			//			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
+			//			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
+		}
+		SetWeightsForScoreProducer(*iterSP, Weights);
+		//  	std::cerr << Weights << std::endl;
+	}
+	
+	m_weightWordPenalty = Scan<float>(m_parameter->GetParamShortName("w")[0]);
+	m_weightUnknownWord = Scan<float>(m_parameter->GetParamShortName("u")[0]);
+	m_weightDistortion  = Scan<float>(m_parameter->GetParamShortName("d")[0]);
+	
+	
+	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
+	
+	const float weightWP = Scan<float>(m_parameter->GetParamShortName("w"))[0];
+	const vector<float> WeightsTM = Scan<float>(m_parameter->GetParamShortName("tm"));
+	//  std::cerr << "WeightsTM: " << WeightsTM << std::endl;
+	
+	const vector<float> WeightsLM = Scan<float>(m_parameter->GetParamShortName("lm"));
+	//  std::cerr << "WeightsLM: " << WeightsLM << std::endl;
+	
+	size_t index_WeightTM = 0;
+	for(size_t i=0;i<m_phraseDictionary.size();++i)
+	{
+		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
+		PhraseDictionary &phraseDictionary = *phraseDictionaryFeature.GetDictionary();
+		
+		//		std::cerr << "phraseDictionaryFeature.GetNumScoreComponents():" << phraseDictionaryFeature.GetNumScoreComponents() << std::endl;
+		//		std::cerr << "phraseDictionaryFeature.GetNumInputScores():" << phraseDictionaryFeature.GetNumInputScores() << std::endl;
+		
+		vector<float> tmp_weights;
+		for(size_t j=0;j<phraseDictionaryFeature.GetNumScoreComponents();++j)
+			tmp_weights.push_back(WeightsTM[index_WeightTM++]);
+		
+		//  std::cerr << tmp_weights << std::endl;
+		
+		phraseDictionary.SetWeightTransModel(tmp_weights);
+	}
+	
+	const LMList &languageModels = GetAllLM();
+	LMList::const_iterator lmIter;
+	size_t index_WeightLM = 0;
+	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
+	{
+		LanguageModel &lm = **lmIter;
+		
+		lm.SetWeight(WeightsLM[index_WeightLM++]);
+	}
+}
+	
 }
 
 

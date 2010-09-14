@@ -539,6 +539,9 @@ public:
 	
 
 	bool ContinuePartialTranslation() const { return m_continuePartialTranslation; }
+	
+	void ReLoadParameter();
+
 };
 
 }

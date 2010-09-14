@@ -140,6 +140,8 @@ int main(int argc, char* argv[])
 		line += "\n";
 		ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
 		
+		StaticData &ss = StaticData::InstanceNonConst();
+		//ss.ChangeWeights( "lm", 8989);
 		// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();

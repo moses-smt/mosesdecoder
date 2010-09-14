@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "UserMessage.h"
+#include "StaticData.h"
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -152,6 +153,7 @@ void Parameter::AddParam(const string &paramName, const string &abbrevName, cons
 	m_valid[paramName] = true;
 	m_valid[abbrevName] = true;
 	m_abbreviation[paramName] = abbrevName;
+	m_fullname[abbrevName] = paramName;
 	m_description[paramName] = description;
 }
 
@@ -597,6 +599,30 @@ void Parameter::PrintCredit()
 	cerr <<  endl << endl;
 }
 
+/** update parameter settings with command line switches
+ * \param paramName full name of parameter
+ * \param values inew values for paramName */
+void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
+{
+	VERBOSE(2,"Overwriting parameter " << paramName);
+	
+	m_setting[paramName]; // defines the parameter, important for boolean switches
+	if (m_setting[paramName].size() > 1){
+		VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
+		assert(m_setting[paramName].size() == values.size());
+	}else{
+		VERBOSE(2," (the parameter does not have previous values)");
+		m_setting[paramName].resize(values.size());
+	}
+	VERBOSE(2," with the following values:");
+	int i=0;
+	for (PARAM_VEC::iterator iter = values.begin(); iter != values.end() ; iter++, i++){
+		m_setting[paramName][i] = *iter;
+		VERBOSE(2, " " << *iter);
+	}
+	VERBOSE(2, std::endl);
+}
+	
 }
 
 
