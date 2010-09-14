@@ -69,7 +69,8 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 // for mert
 void PhraseDictionaryOnDisk::SetWeightTransModel(const std::vector<float> &weightT)
 {
-	assert(false);
+	assert(m_weight.size() == weightT.size());
+	m_weight = weightT;
 }
 
 //! find list of translations that can translates src. Only for phrase input
