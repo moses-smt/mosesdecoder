@@ -11,8 +11,8 @@
 		1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */; };
 		1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */; };
 		1E5D8E0911F25F2F000F027F /* PhraseDictionarySCFGChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0711F25F2F000F027F /* PhraseDictionarySCFGChart.cpp */; };
-		1E7739C2123F619500B88EB7 /* FeatureVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E7739C0123F619500B88EB7 /* FeatureVector.h */; };
-		1E7739C3123F619500B88EB7 /* FeatureVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E7739C1123F619500B88EB7 /* FeatureVector.cpp */; };
+		1E7739D0123F646800B88EB7 /* FeatureVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E7739CE123F646800B88EB7 /* FeatureVector.cpp */; };
+		1E7739D1123F646800B88EB7 /* FeatureVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E7739CF123F646800B88EB7 /* FeatureVector.h */; };
 		1ED4FD3711BDC0D2004E826A /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */; };
 		1ED4FD3811BDC0D2004E826A /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FC6011BDC0D2004E826A /* AlignmentInfo.h */; };
 		1ED4FD3911BDC0D2004E826A /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FC6111BDC0D2004E826A /* BilingualDynSuffixArray.cpp */; };
@@ -228,8 +228,8 @@
 		1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
 		1E5D8E0711F25F2F000F027F /* PhraseDictionarySCFGChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFGChart.cpp; path = src/PhraseDictionarySCFGChart.cpp; sourceTree = "<group>"; };
-		1E7739C0123F619500B88EB7 /* FeatureVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeatureVector.h; sourceTree = "<group>"; };
-		1E7739C1123F619500B88EB7 /* FeatureVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FeatureVector.cpp; sourceTree = "<group>"; };
+		1E7739CE123F646800B88EB7 /* FeatureVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureVector.cpp; path = src/FeatureVector.cpp; sourceTree = "<group>"; };
+		1E7739CF123F646800B88EB7 /* FeatureVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureVector.h; path = src/FeatureVector.h; sourceTree = "<group>"; };
 		1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1ED4FC6011BDC0D2004E826A /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1ED4FC6111BDC0D2004E826A /* BilingualDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BilingualDynSuffixArray.cpp; path = src/BilingualDynSuffixArray.cpp; sourceTree = "<group>"; };
@@ -467,6 +467,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E7739CE123F646800B88EB7 /* FeatureVector.cpp */,
+				1E7739CF123F646800B88EB7 /* FeatureVector.h */,
 				1EF549B712118A5D00C481EB /* TranslationSystem.cpp */,
 				1EF549B812118A5D00C481EB /* TranslationSystem.h */,
 				1EF549B512118A4A00C481EB /* LanguageModelDelegate.h */,
@@ -675,8 +677,6 @@
 				1ED4FD3411BDC0D2004E826A /* WordsRange.h */,
 				1ED4FD3511BDC0D2004E826A /* XmlOption.cpp */,
 				1ED4FD3611BDC0D2004E826A /* XmlOption.h */,
-				1E7739C0123F619500B88EB7 /* FeatureVector.h */,
-				1E7739C1123F619500B88EB7 /* FeatureVector.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -829,7 +829,7 @@
 				1EF549B212118A0C00C481EB /* DecodeFeature.h in Headers */,
 				1EF549B612118A4A00C481EB /* LanguageModelDelegate.h in Headers */,
 				1EF549BA12118A5D00C481EB /* TranslationSystem.h in Headers */,
-				1E7739C2123F619500B88EB7 /* FeatureVector.h in Headers */,
+				1E7739D1123F646800B88EB7 /* FeatureVector.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -976,7 +976,7 @@
 				1E5D8E0911F25F2F000F027F /* PhraseDictionarySCFGChart.cpp in Sources */,
 				1EF549B112118A0C00C481EB /* DecodeFeature.cpp in Sources */,
 				1EF549B912118A5D00C481EB /* TranslationSystem.cpp in Sources */,
-				1E7739C3123F619500B88EB7 /* FeatureVector.cpp in Sources */,
+				1E7739D0123F646800B88EB7 /* FeatureVector.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
