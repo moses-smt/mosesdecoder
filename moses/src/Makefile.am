@@ -28,6 +28,7 @@ libmoses_la_HEADERS = \
         FactorCollection.h \
         FactorTypeSet.h \
         FeatureFunction.h \
+        FeatureVector.h \
         File.h \
         FilePtr.h \
         FloydWarshall.h \
@@ -155,6 +156,7 @@ libmoses_la_SOURCES = \
         FactorCollection.cpp \
         FactorTypeSet.cpp \
         FeatureFunction.cpp \
+        FeatureVector.cpp \
         FloydWarshall.cpp \
         GenerationDictionary.cpp \
         GlobalLexicalModel.cpp \
