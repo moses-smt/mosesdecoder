@@ -1274,6 +1274,7 @@ void StaticData::ReLoadParameter()
 	{
 		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
 		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
+		cerr << paramShortName << endl;
 		
 		if (paramShortName == "d"){ //basic distortion model takes the first weight
 			if ((*iterSP)->GetScoreProducerDescription() == "Distortion"){
@@ -1283,9 +1284,9 @@ void StaticData::ReLoadParameter()
 			}
 			//			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
 			//			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
+			SetWeightsForScoreProducer(*iterSP, Weights);
+			//  	std::cerr << Weights << std::endl;
 		}
-		SetWeightsForScoreProducer(*iterSP, Weights);
-		//  	std::cerr << Weights << std::endl;
 	}
 	
 	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
