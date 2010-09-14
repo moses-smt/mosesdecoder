@@ -124,6 +124,7 @@ class PhraseDictionaryFeature :  public DecodeFeature
     
     //Get the dictionary. Be sure to initialise it first.
     const PhraseDictionary* GetDictionary() const;
+		PhraseDictionary* GetDictionary();
 	
  private:
      /** Load the appropriate phrase table */

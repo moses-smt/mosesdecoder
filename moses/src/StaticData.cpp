@@ -1260,8 +1260,10 @@ void StaticData::ReLoadParameter()
 	}
 	
 	//loop over all ScoreProducer to update weights
+	const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
+	
 	std::vector<const ScoreProducer*>::const_iterator iterSP;
-	for (iterSP = GetScoreIndexManager().GetFeatureFunctions().begin() ; iterSP != GetScoreIndexManager().GetFeatureFunctions().end() ; ++iterSP)
+	for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP)
 	{
 		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
 		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
@@ -1279,14 +1281,8 @@ void StaticData::ReLoadParameter()
 		//  	std::cerr << Weights << std::endl;
 	}
 	
-	m_weightWordPenalty = Scan<float>(m_parameter->GetParamShortName("w")[0]);
-	m_weightUnknownWord = Scan<float>(m_parameter->GetParamShortName("u")[0]);
-	m_weightDistortion  = Scan<float>(m_parameter->GetParamShortName("d")[0]);
-	
-	
 	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
 	
-	const float weightWP = Scan<float>(m_parameter->GetParamShortName("w"))[0];
 	const vector<float> WeightsTM = Scan<float>(m_parameter->GetParamShortName("tm"));
 	//  std::cerr << "WeightsTM: " << WeightsTM << std::endl;
 	
@@ -1294,7 +1290,7 @@ void StaticData::ReLoadParameter()
 	//  std::cerr << "WeightsLM: " << WeightsLM << std::endl;
 	
 	size_t index_WeightTM = 0;
-	for(size_t i=0;i<m_phraseDictionary.size();++i)
+	for(size_t i=0;i<transSystem.GetPhraseDictionaries().size();++i)
 	{
 		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
 		PhraseDictionary &phraseDictionary = *phraseDictionaryFeature.GetDictionary();
@@ -1311,7 +1307,7 @@ void StaticData::ReLoadParameter()
 		phraseDictionary.SetWeightTransModel(tmp_weights);
 	}
 	
-	const LMList &languageModels = GetAllLM();
+	const LMList &languageModels = transSystem.GetLanguageModels();
 	LMList::const_iterator lmIter;
 	size_t index_WeightLM = 0;
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
