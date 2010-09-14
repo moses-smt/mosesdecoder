@@ -120,10 +120,18 @@ public:
 	
 	virtual std::string GetScoreProducerDescription() const = 0;
 
-    float GetWeight() const;
+	//! scoring weight. Shouldn't this now be superceded by ScoreProducer???
+	float GetWeight() const
+	{
+		return m_weight;
+	}
+	void SetWeight(float weight)
+	{
+		m_weight = weight;
+    }
 
 	std::string GetScoreProducerWeightShortName() const 
-	{ 
+    {
 		return "lm";
 	}
   
