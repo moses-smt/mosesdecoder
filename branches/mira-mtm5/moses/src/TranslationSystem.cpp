@@ -77,6 +77,8 @@ namespace Moses {
     
     
     void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff) {
+			m_producers.push_back(ff);
+
       if (ff->IsStateless()) {
         const StatelessFeatureFunction* statelessFF = static_cast<const StatelessFeatureFunction*>(ff);
         if (!statelessFF->ComputeValueInTranslationOption()) {

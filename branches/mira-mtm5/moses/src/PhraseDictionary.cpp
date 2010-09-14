@@ -227,7 +227,17 @@ const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const {
   return dict;
 }
 
-
+PhraseDictionary* PhraseDictionaryFeature::GetDictionary() {
+	PhraseDictionary* dict;
+	if (m_useThreadSafePhraseDictionary) {
+		dict = m_threadSafePhraseDictionary.get();
+	} else {
+		dict = m_threadUnsafePhraseDictionary.get();
+	}
+	assert(dict);
+	return dict;
+}
+	
 
 PhraseDictionaryFeature::~PhraseDictionaryFeature() 
 {}
