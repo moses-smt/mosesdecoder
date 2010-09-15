@@ -1365,15 +1365,6 @@ void StaticData::ReLoadParameter()
 		phraseDictionary.SetWeightTransModel(tmp_weights);
 	}
 	
-	const LMList &languageModels = transSystem.GetLanguageModels();
-	LMList::const_iterator lmIter;
-	size_t index_WeightLM = 0;
-	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
-	{
-		LanguageModel &lm = **lmIter;
-		
-		lm.SetWeight(WeightsLM[index_WeightLM++]);
-	}
 }
 	
 }

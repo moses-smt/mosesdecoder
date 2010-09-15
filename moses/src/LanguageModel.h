@@ -41,7 +41,6 @@ class Phrase;
 class LanguageModel : public StatefulFeatureFunction
 {
 protected:	
-	float				m_weight; //! scoring weight. Shouldn't this now be superceded by ScoreProducer???
 	std::string	m_filePath; //! for debugging purposes
 	size_t			m_nGramOrder; //! max n-gram length contained in this LM
 	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
@@ -107,7 +106,8 @@ public:
 	{
 		return m_nGramOrder;
 	}
-	
+	float GetWeight() const;
+
 	//! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
 	const Word &GetSentenceStartArray() const
 	{
@@ -119,16 +119,6 @@ public:
 	}
 	
 	virtual std::string GetScoreProducerDescription() const = 0;
-
-	//! scoring weight. Shouldn't this now be superceded by ScoreProducer???
-	float GetWeight() const
-	{
-		return m_weight;
-	}
-	void SetWeight(float weight)
-	{
-		m_weight = weight;
-    }
 
 	std::string GetScoreProducerWeightShortName() const 
     {

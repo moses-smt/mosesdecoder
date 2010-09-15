@@ -251,4 +251,10 @@ FFState* LanguageModel::Evaluate(
 	return res;
 }
 
+float LanguageModel::GetWeight() const {
+	size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
+	GetBeginIndex(GetScoreBookkeepingID());
+	return StaticData::Instance().GetAllWeights()[lmIndex];
+}
+	
 }
