@@ -57,8 +57,8 @@ class Vocab {
 	wordID_t GetWordID(const Word& word);
 	wordID_t GetWordID(const string& word);
 	Word& GetWord(wordID_t id);
-	inline const wordID_t GetkOOVWordID() { return m_kOOVWordID; }
-	inline const wordID_t GetBOSWordID() { return m_kBOSWordID; }
+	inline wordID_t GetkOOVWordID() { return m_kOOVWordID; }
+	inline wordID_t GetBOSWordID() { return m_kBOSWordID; }
 	inline const Word& GetkOOVWord() { return m_kOOVWord; }
 	inline const Word& GetkBOSWord() { return m_kBOSWord; }
 	inline const Word& GetkEOSWord() { return m_kEOSWord; }
