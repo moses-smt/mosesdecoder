@@ -1,6 +1,6 @@
 /***********************************************************************
 Moses - factored phrase-based language decoder
-Copyright (C) 2009 University of Edinburgh
+Copyright (C) 2010 University of Edinburgh
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -16,7 +16,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
-#pragma once
+#ifndef _MIRA_DECODER_H_
+#define _MIRA_DECODER_H_
 
 #include <iostream>
 #include <cstring>
@@ -48,22 +49,23 @@ void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** a
 
 
 /**
-  * Wrapper around any decoder. Notice the moses specific return values!
+  * Wrapper around any decoder.
   **/
 class Decoder {
   public:
-    virtual void getNBest(const std::string& source) = 0;
+    virtual void getNBest(const std::string& source, size_t count, Moses::TrellisPathList& sentences) = 0;
     virtual ~Decoder();
 };
 /**
   * Wraps moses decoder.
  **/
-class MosesDecoder : public virtual Decoder {
+class MosesDecoder : public Decoder {
   public:
     MosesDecoder()  {}
-    virtual void getNBest(const std::string& source);
+    virtual void getNBest(const std::string& source, size_t count, Moses::TrellisPathList& sentences);
 };
 
 
 } //namespace
 
+#endif
