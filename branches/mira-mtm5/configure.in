@@ -16,6 +16,9 @@ AC_PROG_LIBTOOL
 
 AX_XMLRPC_C
 
+AX_BOOST_BASE([1.37.0])
+AX_BOOST_PROGRAM_OPTIONS
+
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
             [with_protobuf=$withval],
@@ -205,6 +208,6 @@ fi
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile mira/Makefile server/Makefile CreateOnDisk/src/Makefile)
 
 AC_OUTPUT()
