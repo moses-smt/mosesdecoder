@@ -386,13 +386,14 @@ namespace Moses {
       const ScoreIndexManager &sim = StaticData::Instance().GetScoreIndexManager;
       FValue product = 0;
       if (get(DEFAULT_NAME) == 0) {
-	  for (const_iterator i = cbegin(); i != cend(); i++) {
-	      FValue rv = rhs[ sim.GetFeatureIndex(i->first) ];
-	      product += *i * rv;
-      } else {
-	  for (size_t i = 0; i < rhs.size(); i++) {
-	      product += rhs[i] * get(sim.GetFeatureName(i));
-	  }
+	  	  for (const_iterator i = cbegin(); i != cend(); i++) {
+	      	  FValue rv = rhs[ sim.GetFeatureIndex(i->first) ];
+	      	  product += i->second * rv;
+      	  }
+	  } else {
+		  for (size_t i = 0; i < rhs.size(); i++) {
+		      product += rhs[i] * get(sim.GetFeatureName(i));
+		  }
       }
       return product;
   }
