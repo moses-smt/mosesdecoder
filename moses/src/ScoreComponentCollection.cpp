@@ -6,7 +6,7 @@
 namespace Moses
 {
 ScoreComponentCollection::ScoreComponentCollection()
-  : m_scores(StaticData::Instance().GetTotalScoreComponents(), 0.0f)
+  : m_scores(0.0f)
   , m_sim(&StaticData::Instance().GetScoreIndexManager())
 {}
 
@@ -21,7 +21,7 @@ void ScoreComponentCollection::ZeroAllLM(const LMList& lmList)
 	
 	for (size_t ind = lmList.GetMinIndex(); ind <= lmList.GetMaxIndex(); ++ind)
 	{
-		m_scores[ind] = 0;
+		m_scores[m_sim->GetFeatureName(ind)] = 0;
 	}
 }
 
@@ -30,7 +30,7 @@ void ScoreComponentCollection::PlusEqualsAllLM(const LMList& lmList, const Score
 	
 	for (size_t ind = lmList.GetMinIndex(); ind <= lmList.GetMaxIndex(); ++ind)
 	{
-		m_scores[ind] += rhs.m_scores[ind];
+		m_scores[m_sim->GetFeatureName(ind)] += rhs.m_scores[m_sim->GetFeatureName(ind)];
 	}
 	
 }

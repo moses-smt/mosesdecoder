@@ -1371,8 +1371,6 @@ void StaticData::ReLoadParameter()
 	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
 	{
 		LanguageModel &lm = **lmIter;
-		
-		lm.SetWeight(WeightsLM[index_WeightLM++]);
 	}
 }
 	
