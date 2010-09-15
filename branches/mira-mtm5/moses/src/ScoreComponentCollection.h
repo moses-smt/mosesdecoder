@@ -71,7 +71,7 @@ public:
 	{}
 
 	inline size_t size() const { return m_scores.size(); }
-	const float& operator[](size_t x) const { return m_scores[x]; }
+	const float& operator[](size_t x) const { return m_scores[m_sim.getFeatureName(x)]; }
 
   //! Set all values to 0.0
 	void ZeroAll()
