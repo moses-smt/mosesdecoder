@@ -117,22 +117,25 @@ int main(int argc, char** argv) {
 
   //Main loop:
   srand(time(NULL));
-  bool converged = false;
   Decoder* decoder = new MosesDecoder();
   Optimiser* optimiser = new DummyOptimiser();
+  size_t epochs = 1;
   
-  while (!converged) {
-    //pick sentence (TODO: batch)
-    int sentenceId = rand() % inputSentences.size();
-    const string& input = inputSentences[sentenceId];
-    const vector<string>& refs = referenceSentences[sentenceId];
+  for (size_t epoch = 0; epoch < epochs; ++epoch) {
+    //TODO: batch
+    for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
+      const string& input = inputSentences[sid];
+      const vector<string>& refs = referenceSentences[sid];
 
-    //run decoder (TODO: hope & fear)
-    TrellisPathList sentences;
-    decoder->getNBest(input, 100, sentences);
-    //run optimiser
+      //run decoder (TODO: hope & fear)
+      TrellisPathList sentences;
+      decoder->getNBest(input, 100, sentences);
+      //extract scores from nbest + oracle
 
-    //update moses weights
+      //run optimiser
+
+      //update moses weights
+    }
   }
   
 

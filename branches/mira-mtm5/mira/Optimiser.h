@@ -30,7 +30,7 @@ namespace Mira {
     public:
       virtual void updateWeights(const Moses::ScoreComponentCollection& currWeights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
-                         const std::vector<float>& losses,
+                         const std::vector<std::vector<float> >& losses,
                          const Moses::ScoreComponentCollection oracleScores,
                          Moses::ScoreComponentCollection& newWeights) = 0;
   };
@@ -39,9 +39,9 @@ namespace Mira {
     public:
       virtual void updateWeights(const Moses::ScoreComponentCollection& currWeights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
-                         const std::vector<float>& losses,
+                         const std::vector<std::vector<float> >& losses,
                          const Moses::ScoreComponentCollection oracleScores,
-                         Moses::ScoreComponentCollection& newWeights) {/* do nothing */}
+                         Moses::ScoreComponentCollection& newWeights) {newWeights = currWeights;}
   };
 
 }
