@@ -40,7 +40,7 @@ namespace Mira {
     
   
   void initMoses(const string& inifile, int debuglevel,  int argc, char** argv) {
-    static int BASE_ARGC = 4;
+    static int BASE_ARGC = 5;
     Parameter* params = new Parameter();
     char ** mosesargv = new char*[BASE_ARGC + argc];
     mosesargv[0] = strToChar("-f");
@@ -49,6 +49,7 @@ namespace Mira {
     stringstream dbgin;
     dbgin << debuglevel;
     mosesargv[3] = strToChar(dbgin.str());
+    mosesargv[4] = strToChar("-mbr"); //so we can do nbest
     
     for (int i = 0; i < argc; ++i) {
       mosesargv[BASE_ARGC + i] = argv[i];
@@ -61,17 +62,17 @@ namespace Mira {
     delete[] mosesargv;
   }
   
-    void MosesDecoder::getNBest(const std::string& source) {
-     
-      const StaticData &staticData = StaticData::Instance();
-      Sentence sentence(Input);
-      stringstream in(source + "\n");
-      const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      sentence.Read(in,inputFactorOrder);
-      const TranslationSystem& system = staticData.GetTranslationSystem
-          (TranslationSystem::DEFAULT);
-      Manager manager(sentence, staticData.GetSearchAlgorithm(), &system); 
-      manager.ProcessSentence();
+  void MosesDecoder::getNBest(const std::string& source, size_t count, TrellisPathList& sentences) {
+    const StaticData &staticData = StaticData::Instance();
+    Sentence sentence(Input);
+    stringstream in(source + "\n");
+    const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+    sentence.Read(in,inputFactorOrder);
+    const TranslationSystem& system = staticData.GetTranslationSystem
+        (TranslationSystem::DEFAULT);
+    Manager manager(sentence, staticData.GetSearchAlgorithm(), &system); 
+    manager.ProcessSentence();
+    manager.CalcNBest(count,sentences);
   }
   
 } 

@@ -17,19 +17,34 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <cstdlib>
+#include <ctime>
 #include <string>
 #include <vector>
 
 #include <boost/program_options.hpp>
 
+#include "FeatureVector.h"
 #include "StaticData.h"
+#include "TrellisPathList.h"
 
 #include "Decoder.h"
+#include "Optimiser.h"
 
 using namespace Mira;
 using namespace std;
 using namespace Moses;
 namespace po = boost::program_options;
+
+bool loadSentences(const string& filename, vector<string>& sentences) {
+  ifstream in(filename.c_str());
+  if (!in) return false;
+  string line;
+  while(getline(in,line)) {
+    sentences.push_back(line);
+  }
+  return true;
+}
 
 int main(int argc, char** argv) {
   bool help;
@@ -55,7 +70,7 @@ int main(int argc, char** argv) {
   
 
   if (help) {
-    std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file [options]" << std::endl;
+    std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file -i input-file -r reference-file(s) [options]" << std::endl;
     std::cout << desc << std::endl;
     return 0;
   }
@@ -76,18 +91,51 @@ int main(int argc, char** argv) {
   }
 
 
+
+  //load input and references 
+  vector<string> inputSentences;
+  if (!loadSentences(inputFile, inputSentences)) {
+    cerr << "Error: Failed to load input sentences from " << inputFile << endl;
+    return 1;
+  }
+
+  vector< vector<string> > referenceSentences(referenceFiles.size());
+  for (size_t i = 0; i < referenceFiles.size(); ++i) {
+    if (!loadSentences(referenceFiles[i], referenceSentences[i])) {
+      cerr << "Error: Failed to load reference sentences from " << referenceFiles[i] << endl;
+      return 1;
+    }
+    if (referenceSentences[i].size() != inputSentences.size()) {
+      cerr << "Error: Input file length (" << inputSentences.size() <<
+        ") != (" << referenceSentences[i].size() << ") length of reference file " << i  <<
+          endl;
+      return 1;
+    }
+  }
   //initialise moses
   initMoses(mosesConfigFile, verbosity, argc, argv);
 
-  //load input and references 
-
   //Main loop:
-    //pick sentence
-    //run decoder
+  srand(time(NULL));
+  bool converged = false;
+  Decoder* decoder = new MosesDecoder();
+  Optimiser* optimiser = new DummyOptimiser();
+  
+  while (!converged) {
+    //pick sentence (TODO: batch)
+    int sentenceId = rand() % inputSentences.size();
+    const string& input = inputSentences[sentenceId];
+    const vector<string>& refs = referenceSentences[sentenceId];
+
+    //run decoder (TODO: hope & fear)
+    TrellisPathList sentences;
+    decoder->getNBest(input, 100, sentences);
     //run optimiser
+
     //update moses weights
+  }
   
 
 
-    return 0;
+  exit(0);
 }
