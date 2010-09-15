@@ -146,6 +146,7 @@ namespace Moses {
     bool operator!= (const FVector& rhs) const;
 
     FValue inner_product(const std::vector<FValue>& rhs) const;
+    FValue inner_product(const FVector& rhs) const;
     
     
     
