@@ -144,6 +144,8 @@ namespace Moses {
     /** Equality */
     bool operator== (const FVector& rhs) const;
     bool operator!= (const FVector& rhs) const;
+
+    FValue inner_product(const std::vector<FValue>& rhs) const;
     
     
     
@@ -160,8 +162,6 @@ namespace Moses {
     FVector& operator-= (const FValue& rhs);
     FVector& operator*= (const FValue& rhs);
     FVector& operator/= (const FValue& rhs);
-    
-    FValue inner_product(const FVector& rhs) const;
     
     FVector& max_equals(const FVector& rhs);
     
@@ -220,7 +220,6 @@ namespace Moses {
 		
 #endif
     
-	FValue inner_product(const std::vector<FValue>& rhs) const;
 	};
 	
 	std::ostream& operator<<( std::ostream& out, const FVector& fv);
