@@ -107,8 +107,12 @@ namespace Moses {
 	class FVector
 	{
   public:
+    // do not implement
+    FVector();
+    bool operator=(const FName& rhs);
+
     /** Empty feature vector, possibly with default value */
-    FVector(FValue defaultValue = DEFAULT);
+    FVector(size_t size, FValue defaultValue = DEFAULT);
     
     typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     /** Iterators */
@@ -139,7 +143,7 @@ namespace Moses {
     FValue operator[](const FName& name) const;
     
     /** Size */
-    size_t size() const {return m_features.size();}
+    size_t size() const {return m_size;}
     
     /** Equality */
     bool operator== (const FVector& rhs) const;
@@ -187,6 +191,7 @@ namespace Moses {
     
 		
     FNVmap m_features;
+		size_t m_size;
 		
 #ifdef MPI_ENABLED
     //serialization
