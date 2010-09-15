@@ -6,7 +6,7 @@
 namespace Moses
 {
 ScoreComponentCollection::ScoreComponentCollection()
-  : m_scores(0.0f)
+  : m_scores(StaticData::Instance().GetTotalScoreComponents(), 0.0f)
   , m_sim(&StaticData::Instance().GetScoreIndexManager())
 {}
 

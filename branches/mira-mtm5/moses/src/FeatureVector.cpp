@@ -76,7 +76,10 @@ namespace Moses {
     return ! (*this == rhs);
   }
   
-	FVector::FVector(FValue defaultValue)  {
+	FVector::FVector(size_t size, FValue defaultValue)  
+	:m_size(size)
+	{
+		cerr << "start " << size << endl;
     m_features[DEFAULT_NAME] = defaultValue;
 	}
 	
@@ -380,7 +383,7 @@ namespace Moses {
     return product;
   }
 
-  FValue FVector::inner_product(const std::vector<FValue>& rhs) const {
+  FValue FVector::inner_product(const std::vector<FValue>& rhs) const {		
       assert(size() == rhs.size());
       const ScoreIndexManager &sim = StaticData::Instance().GetScoreIndexManager();
       FValue product = 0;
