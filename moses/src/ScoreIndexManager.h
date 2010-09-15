@@ -44,6 +44,8 @@ public:
 	void PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
 	//! print weighted scores of each ScoreManager to stream os
 	void PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const;
+	//! get the name of a feature by index
+	const string &getFeatureName(size_t fIndex) const { return m_featureNames[fIndex]; }
 	//! get the index of a feature by name
 	size_t getFeatureIndex(const string& fName) const { return m_featureIndexes[fName]; }
 
