@@ -110,7 +110,7 @@ float BleuScoreFeature::CalculateBleu() const {
     return 0.0;
 }
 
-const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
+const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& /*input*/) const
 {
     return new BleuScoreState();
 }
