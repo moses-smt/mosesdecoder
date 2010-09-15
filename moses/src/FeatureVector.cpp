@@ -25,6 +25,8 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include "StaticData.h"
+
 
 
 #include "FeatureVector.h"
@@ -377,6 +379,22 @@ namespace Moses {
       }
     }
     return product;
+  }
+
+  FValue FVector::inner_product(const std::vector<FValue>& rhs) const {
+      assert(size() == rhs.size());
+      const ScoreIndexManager &sim = StaticData::Instance().GetScoreIndexManager;
+      FValue product = 0;
+      if (get(DEFAULT_NAME) == 0) {
+	  for (const_iterator i = cbegin(); i != cend(); i++)
+	      FValue rv = rhs[ sim.GetFeatureIndex(i->first) ];
+	      product += *i * rv;
+      } else {
+	  for (size_t i = 0; i < rhs.size(); i++) {
+	      product += rhs[i] * get(sim.GetFeatureName(i));
+	  }
+      }
+      return product;
   }
   
   

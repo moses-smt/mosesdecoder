@@ -220,6 +220,7 @@ namespace Moses {
 		
 #endif
     
+	FValue inner_product(const std::vector<FValue>& rhs) const;
 	};
 	
 	std::ostream& operator<<( std::ostream& out, const FVector& fv);
