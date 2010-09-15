@@ -158,7 +158,7 @@ public:
   //! of the same length as the number of scores.
 	float InnerProduct(const std::vector<float>& rhs) const
 	{
-		return std::inner_product(m_scores.cbegin(), m_scores.cend(), rhs.begin(), 0.0f);
+		return m_scores.inner_product(rhs);
 	}
 	
 	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
