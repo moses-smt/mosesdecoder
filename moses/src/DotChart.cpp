@@ -31,7 +31,7 @@ ProcessedRuleColl::~ProcessedRuleColl()
     std::for_each(m_coll.begin(), m_coll.end(), RemoveAllInColl<CollType::value_type>);
 }
 
-std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
+std::ostream& operator<<(std::ostream &out, const ProcessedRule &/*rule*/)
 {
 	//const PhraseDictionaryNode &node = rule.GetLastNode();
 	//out << node;
