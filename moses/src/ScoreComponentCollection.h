@@ -71,7 +71,7 @@ public:
 	{}
 
 	inline size_t size() const { return m_scores.size(); }
-	const float& operator[](size_t x) const { return m_scores[m_sim->getFeatureName(x)]; }
+	const float& operator[](size_t x) const { return m_scores[m_sim->GetFeatureName(x)]; }
 
   //! Set all values to 0.0
 	void ZeroAll()
@@ -101,7 +101,7 @@ public:
 		for (std::vector<float>::const_iterator vi = scores.begin();
 		     vi != scores.end(); ++vi)
 		{
-			m_scores[m_sim->getFeatureName(i++)] += *vi;
+			m_scores[m_sim->GetFeatureName(i++)] += *vi;
 		}  
 	}
 
@@ -114,7 +114,7 @@ public:
 		const size_t end = m_sim->GetEndIndex(sp->GetScoreBookkeepingID());
 		for (; i < end; ++i)
 		{
-			m_scores[m_sim->getFeatureName(i)] += scores.m_scores[m_sim->getFeatureName(i)];
+			m_scores[m_sim->GetFeatureName(i)] += scores.m_scores[m_sim->GetFeatureName(i)];
 		}  
 	}
 
@@ -125,7 +125,7 @@ public:
 	{
 		assert(1 == sp->GetNumScoreComponents());
 		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		m_scores[m_sim->getFeatureName(i)] += score;
+		m_scores[m_sim->GetFeatureName(i)] += score;
 	}
 
 	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
@@ -135,7 +135,7 @@ public:
 		for (std::vector<float>::const_iterator vi = scores.begin();
 		     vi != scores.end(); ++vi)
 		{
-			m_scores[m_sim->getFeatureName(i++)] = *vi;
+			m_scores[m_sim->GetFeatureName(i++)] = *vi;
 		}  
 	}
 
@@ -151,7 +151,7 @@ public:
 	{
 		assert(1 == sp->GetNumScoreComponents());
 		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		m_scores[m_sim->getFeatureName(i)] = score;
+		m_scores[m_sim->GetFeatureName(i)] = score;
 	}
 
   //! Used to find the weighted total of scores.  rhs should contain a vector of weights
@@ -177,7 +177,7 @@ public:
 		std::vector<float> res(end-begin);
 		size_t j = 0;
 		for (size_t i = begin; i < end; i++) {
-			res[j++] = m_scores[m_sim->getFeatureName(i)];
+			res[j++] = m_scores[m_sim->GetFeatureName(i)];
 		}
 		return res;  
 	}
@@ -192,7 +192,7 @@ public:
 		const size_t end = m_sim->GetEndIndex(id);
 		assert(end-begin == 1);
 #endif
-		return m_scores[m_sim->getFeatureName(begin)];
+		return m_scores[m_sim->GetFeatureName(begin)];
 	}
 
 	float GetWeightedScore() const;
@@ -204,9 +204,9 @@ public:
 
 inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
-  os << "<<" << rhs.m_scores[rhs.m_sim->getFeatureName(0)];
+  os << "<<" << rhs.m_scores[rhs.m_sim->GetFeatureName(0)];
   for (size_t i=1; i<rhs.m_scores.size(); i++)
-    os << ", " << rhs.m_scores[rhs.m_sim->getFeatureName(i)];
+    os << ", " << rhs.m_scores[rhs.m_sim->GetFeatureName(i)];
   return os << ">>";
 }
 
