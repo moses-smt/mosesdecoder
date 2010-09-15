@@ -118,7 +118,7 @@ namespace Moses {
   }
   
   void FVector::write(ostream& out) const {
-    for (const_iterator i = begin(); i != end(); ++i) {
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
       out << i->first << " " << i->second << endl;
     }
   }
@@ -141,10 +141,10 @@ namespace Moses {
       return true;
     }
     if (get(DEFAULT_NAME) != rhs.get(DEFAULT_NAME)) return false;
-    for (const_iterator i  = begin(); i != end(); ++i) {
+    for (const_iterator i  = cbegin(); i != cend(); ++i) {
       if (!equalsTolerance(i->second,rhs.get(i->first))) return false;
     }
-    for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
       if (!equalsTolerance(i->second, get(i->first))) return false;
     }
     return true;
@@ -172,7 +172,7 @@ namespace Moses {
 	
   ostream& FVector::print(ostream& out) const {
     out << "{";
-    for (const_iterator i = begin(); i != end(); ++i) {
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
       FValue value = i->second;
       if (i->first != DEFAULT_NAME) {
         value += get(DEFAULT_NAME);
@@ -207,7 +207,7 @@ namespace Moses {
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second + rhs.get(i->first));
     }
-    for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
       if (!hasNonDefaultValue(i->first)) {
         set(i->first,i->second);
       }
@@ -219,7 +219,7 @@ namespace Moses {
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second - rhs.get(i->first));
     }
-    for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
       if (!hasNonDefaultValue(i->first)) {
         set(i->first,-(i->second));
       }
@@ -241,7 +241,7 @@ namespace Moses {
     }
     if (lhsDefault) {
       //Features that have the default value in the lhs
-      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+      for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
         if (!hasNonDefaultValue(i->first)) {
           set(i->first, lhsDefault*i->second);
         }
@@ -271,7 +271,7 @@ namespace Moses {
     }
     if (lhsDefault) {
       //Features that have the default value in the lhs
-      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+      for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
         if (!hasNonDefaultValue(i->first)) {
           set(i->first, lhsDefault / (i->second + rhsDefault) - quotientDefault);
         }
@@ -291,7 +291,7 @@ namespace Moses {
 				set(i->first, max(i->second + lhsDefault, rhs.get(i->first) + rhsDefault) - maxDefault);
 			}
 		}
-		for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+		for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
 			if (!hasNonDefaultValue(i->first)) {
 				set(i->first, max(lhsDefault, (i->second + rhsDefault)) - maxDefault);
 			}
@@ -331,7 +331,7 @@ namespace Moses {
   
   FValue FVector::l1norm() const {
     FValue norm = 0;
-    for (const_iterator i = begin(); i != end(); ++i) {
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
       if (!(i->second) && i->first == DEFAULT_NAME) {
         throw runtime_error("Cannot take l1norm with non-zero default values");
       }
@@ -342,7 +342,7 @@ namespace Moses {
   
   FValue FVector::sum() const {
     FValue sum = 0;
-    for (const_iterator i = begin(); i != end(); ++i) {
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
       if (!(i->second) && i->first == DEFAULT_NAME) {
         throw runtime_error("Cannot take sum with non-zero default values");
       }
@@ -364,7 +364,7 @@ namespace Moses {
       throw runtime_error("Cannot take inner product if both lhs and rhs have non-zero default values");
     }
     FValue product = 0.0;
-    for (const_iterator i = begin(); i != end(); ++i) {
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
       if (i->first != DEFAULT_NAME) {
         product += ((i->second + lhsDefault)*(rhs.get(i->first) + rhsDefault));
       }
@@ -372,7 +372,7 @@ namespace Moses {
     
     if (lhsDefault) {
       //Features that have the default value in the rhs
-      for (const_iterator i = rhs.begin(); i != rhs.end(); ++i) {
+      for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
         if (!hasNonDefaultValue(i->first)) {
           product += (i->second + rhsDefault)*lhsDefault;
         }
