@@ -44,6 +44,9 @@ public:
 	void PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scc) const;
 	//! print weighted scores of each ScoreManager to stream os
 	void PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scc, const std::vector<float>& weights) const;
+	//! get the index of a feature by name
+	size_t getFeatureIndex(const string& fName) const { return m_featureIndexes[fName]; }
+
 #ifdef HAVE_PROTOBUF
 	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
 #endif
@@ -55,6 +58,7 @@ private:
 	std::vector<size_t> m_ends;
 	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
 	std::vector<std::string> m_featureNames;
+	std::map<std::string, size_t> m_featureIndexes;
 	std::vector<std::string> m_featureShortNames;
 	size_t m_last;
 };
