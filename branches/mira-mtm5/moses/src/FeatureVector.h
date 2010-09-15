@@ -110,6 +110,15 @@ namespace Moses {
     /** Empty feature vector, possibly with default value */
     FVector(FValue defaultValue = DEFAULT);
     
+    typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
+    /** Iterators */
+    typedef FNVmap::iterator iterator;
+    typedef FNVmap::const_iterator const_iterator;
+    iterator begin() {return m_features.begin();}
+    iterator end() {return m_features.end();}
+    const_iterator cbegin() const {return m_features.cbegin();}
+    const_iterator cend() const {return m_features.cend();}
+		
     //defaults
     static FName DEFAULT_NAME;
     static const FValue DEFAULT;
@@ -127,7 +136,7 @@ namespace Moses {
     
     /** Element access */
     ProxyFVector operator[](const FName& name);
-    FValue operator[](const FName& name) const;
+    FValue &operator[](const FName& name) const;
     
     /** Size */
     size_t size() const {return m_features.size();}
@@ -169,21 +178,12 @@ namespace Moses {
 #endif  
     
   private:
-    typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     
     /** Internal get and set. Note that the get() doesn't include the
      default value */
     const FValue& get(const FName& name) const;
     void set(const FName& name, const FValue& value);
     
-    /** Iterators */
-    typedef FNVmap::iterator iterator;
-    typedef FNVmap::const_iterator const_iterator;
-    iterator begin() {return m_features.begin();}
-    iterator end() {return m_features.end();}
-    const_iterator begin() const {return m_features.begin();}
-    const_iterator end() const {return m_features.end();}
-		
 		
     FNVmap m_features;
 		
