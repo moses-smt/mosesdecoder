@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E0597B5123F764900ECBDAA /* OnlineCommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E0597B3123F764900ECBDAA /* OnlineCommand.cpp */; };
+		1E0597B6123F764900ECBDAA /* OnlineCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E0597B4123F764900ECBDAA /* OnlineCommand.h */; };
 		1E5D8E0411F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0211F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp */; };
 		1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */; };
 		1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */; };
@@ -217,6 +219,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E0597B3123F764900ECBDAA /* OnlineCommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnlineCommand.cpp; path = src/OnlineCommand.cpp; sourceTree = "<group>"; };
+		1E0597B4123F764900ECBDAA /* OnlineCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnlineCommand.h; path = src/OnlineCommand.h; sourceTree = "<group>"; };
 		1E5D8E0211F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSCFG.cpp; path = src/PhraseDictionaryNodeSCFG.cpp; sourceTree = "<group>"; };
 		1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
@@ -453,6 +457,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E0597B3123F764900ECBDAA /* OnlineCommand.cpp */,
+				1E0597B4123F764900ECBDAA /* OnlineCommand.h */,
 				1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */,
 				1ED4FC6011BDC0D2004E826A /* AlignmentInfo.h */,
 				1ED4FC6111BDC0D2004E826A /* BilingualDynSuffixArray.cpp */,
@@ -805,6 +811,7 @@
 				1ED4FE0711BDC0D2004E826A /* WordsRange.h in Headers */,
 				1ED4FE0911BDC0D2004E826A /* XmlOption.h in Headers */,
 				1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */,
+				1E0597B6123F764900ECBDAA /* OnlineCommand.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -949,6 +956,7 @@
 				1E5D8E0411F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp in Sources */,
 				1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */,
 				1E5D8E0911F25F2F000F027F /* PhraseDictionarySCFGChart.cpp in Sources */,
+				1E0597B5123F764900ECBDAA /* OnlineCommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
