@@ -163,7 +163,7 @@ namespace Moses {
 		
 	}
 	
-	FValue &FVector::operator[](const FName& name) const {
+	FValue FVector::operator[](const FName& name) const {
 		return get(name) + get(DEFAULT_NAME);
 	}
 	

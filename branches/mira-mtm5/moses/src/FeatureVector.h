@@ -136,7 +136,7 @@ namespace Moses {
     
     /** Element access */
     ProxyFVector operator[](const FName& name);
-    FValue &operator[](const FName& name) const;
+    FValue operator[](const FName& name) const;
     
     /** Size */
     size_t size() const {return m_features.size();}
