@@ -281,12 +281,6 @@ PhraseDictionarySCFG::~PhraseDictionarySCFG()
 	CleanUp();
 }
 
-void PhraseDictionarySCFG::SetWeightTransModel(const vector<float> &weightT)
-{
-	m_collection.SetWeightTransModel(this, weightT);
-}
-
-
 void PhraseDictionarySCFG::CleanUp()
 {
 	//RemoveAllInColl(m_chartTargetPhraseColl);

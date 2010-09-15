@@ -81,8 +81,6 @@ public:
 	{ return "BerkeleyPt"; }
 
 	// PhraseDictionary impl
-	// for mert
-	void SetWeightTransModel(const std::vector<float> &weightT);
 	//! find list of translations that can translates src. Only for phrase input
 	virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
 

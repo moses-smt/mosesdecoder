@@ -22,7 +22,6 @@ public:
 						, const LMList &languageModels
 						, float weightWP);
 	// functions below required by base class
-	void SetWeightTransModel(const std::vector<float, std::allocator<float> >&);
 	const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
 	void InitializeForInput(const InputType& i);
 	void AddEquivPhrase(const Phrase &, const TargetPhrase &){}

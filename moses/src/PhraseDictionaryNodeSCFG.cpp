@@ -90,34 +90,6 @@ const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &s
 	return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-void PhraseDictionaryNodeSCFG::SetWeightTransModel(const PhraseDictionary *phraseDictionary
-																							 , const std::vector<float> &weightT)
-{
-	// recursively set weights
-	for (TerminalMap::iterator p = m_sourceTermMap.begin(); p != m_sourceTermMap.end(); ++p)
-	{
-		p->second.SetWeightTransModel(phraseDictionary, weightT);
-	}
-	for (NonTerminalMap::iterator p = m_nonTermMap.begin(); p != m_nonTermMap.end(); ++p)
-	{
-		p->second.SetWeightTransModel(phraseDictionary, weightT);
-	}
-
-	// set weights for this target phrase
-	if (m_targetPhraseCollection == NULL)
-		return;
-
-	TargetPhraseCollection::iterator iterTargetPhrase;
-	for (iterTargetPhrase = m_targetPhraseCollection->begin();
-				iterTargetPhrase != m_targetPhraseCollection->end();
-				++iterTargetPhrase)
-	{
-		TargetPhrase &targetPhrase = **iterTargetPhrase;
-		targetPhrase.SetWeights(phraseDictionary->GetFeature(), weightT);
-	}
-
-}
-
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeSCFG &node)
 {
 	out << node.GetTargetPhraseCollection();

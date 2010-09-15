@@ -45,9 +45,6 @@ void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
 void PhraseDictionaryDynSuffixArray::CleanUp() {
 	m_biSA->CleanUp();
 }
-void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float, std::allocator<float> >&) {
-	return;
-}
 
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	TargetPhraseCollection *ret = new TargetPhraseCollection();

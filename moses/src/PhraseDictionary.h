@@ -61,10 +61,6 @@ class PhraseDictionary: public Dictionary {
     size_t GetTableLimit() const { return m_tableLimit; }
     DecodeType GetDecodeType() const    {   return Translate;   }
     const PhraseDictionaryFeature* GetFeature() const;
-    /** set/change translation weights and recalc weighted score for each translation. 
-        * TODO This may be redundant now we use ScoreCollection
-    */
-    virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 
     //! find list of translations that can translates src. Only for phrase input
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;

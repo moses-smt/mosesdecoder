@@ -56,10 +56,6 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
 
-
-	// change model scaling factors
-	void SetWeightTransModel(const std::vector<float> &weightT);
-
 	// this function can be only used for UNKNOWN source phrases
 	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 		

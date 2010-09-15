@@ -78,10 +78,6 @@ public:
 		return *m_targetPhraseCollection;
 	}
 
-	// for mert
-	void SetWeightTransModel(const PhraseDictionary *phraseDictionary
-													, const std::vector<float> &weightT);
-
 	TO_STRING();
 };
 
