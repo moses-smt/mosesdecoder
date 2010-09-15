@@ -61,6 +61,7 @@ void ScoreIndexManager::PrintLabeledWeightedScores(std::ostream& os, const Score
 
 void ScoreIndexManager::InitFeatureNames() {
 	m_featureNames.clear();
+	m_featureIndexes.clear();
 	m_featureShortNames.clear();
 	size_t cur_i = 0;
 	size_t cur_scoreType = 0;
@@ -72,7 +73,9 @@ void ScoreIndexManager::InitFeatureNames() {
 			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
 			if (add_idx)
 				os << '_' << (nis_idx+1);
-			m_featureNames.push_back(os.str());
+			const string &featureName = os.str();
+			m_featureNames.push_back(featureName);
+			m_featureIndexes[featureName] = m_featureNames.size() - 1;
 			nis_idx++;
 			cur_i++;
 		}
@@ -84,7 +87,9 @@ void ScoreIndexManager::InitFeatureNames() {
 			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
 			if (add_idx)
 				os << '_' << ind;
-			m_featureNames.push_back(os.str());
+			const string &featureName = os.str();
+			m_featureNames.push_back(featureName);
+			m_featureIndexes[featureName] = m_featureNames.size() - 1;
 			m_featureShortNames.push_back( m_producers[cur_scoreType]->GetScoreProducerWeightShortName() );
 			++cur_i;
 			++ind;
