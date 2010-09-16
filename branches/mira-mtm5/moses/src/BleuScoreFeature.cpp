@@ -19,14 +19,19 @@ int BleuScoreState::Compare(const FFState& o) const
 
     const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
 
-    if (m_target_length < other.m_target_length)
+    if (m_num_new_words < other.m_num_new_words)
         return -1;
-    if (m_target_length > other.m_target_length)
+    if (m_num_new_words > other.m_num_new_words)
         return 1;
 
-    if (m_ref_length < other.m_ref_length)
+    if (m_source_length < other.m_source_length)
         return -1;
-    if (m_ref_length > other.m_ref_length)
+    if (m_source_length > other.m_source_length)
+        return 1;
+
+    if (m_scaled_ref_length < other.m_scaled_ref_length)
+        return -1;
+    if (m_scaled_ref_length > other.m_scaled_ref_length)
         return 1;
 
     int c = m_words.Compare(other.m_words);
@@ -54,13 +59,13 @@ BleuScoreFeature::BleuScoreFeature() {
 
 }
 
-void BleuScoreFeature::LoadReferences(const std::vector<
-                                      std::vector< std::string > > &refs)
+void BleuScoreFeature::LoadReferences(std::vector<
+                                      std::vector< std::string > >refs)
 {
     FactorCollection& fc = FactorCollection::Instance();
     for (size_t ref_id = 0; ref_id < refs.size(); ref_id++) {
-        const std::vector< std::string >& ref = refs[ref_id];
-        std::pair< size_t, NGrams > ref_pair;
+        std::vector< std::string >& ref = refs[ref_id];
+        std::pair< size_t, std::map< Phrase, size_t > > ref_pair;
         ref_pair.first = ref.size();
         for (size_t order = 1; order < BleuScoreState::bleu_order; order++) {
             for (size_t end_idx = order; end_idx < ref.size(); end_idx++) {
@@ -87,7 +92,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
                                     const FFState* prev_state, 
                                     ScoreComponentCollection* accumulator) const
 {
-    NGrams::const_iterator reference_ngrams_iter;
+    std::map< Phrase, size_t >::const_iterator reference_ngrams_iter;
     const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
     BleuScoreState* new_state = new BleuScoreState(ps);
 
@@ -106,7 +111,13 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     for (size_t i = 0; i < num_new_words; i++) {
         for (size_t n = 0; n < BleuScoreState::bleu_order; n++) {
             ngram_end_idx = new_words.GetSize() - i;
+
+            // Break if we don't have enough context to do ngrams of order n.
+            if (ngram_end_idx < n)
+                break;
+
             ngram_start_idx = ngram_end_idx - n;
+
             Phrase ngram = new_words.GetSubString(WordsRange(ngram_start_idx,
                                                              ngram_end_idx));
 
@@ -125,9 +136,10 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     ctx_start_idx = ctx_end_idx - (BleuScoreState::bleu_order - 1);
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_start_idx));
-    new_state->m_target_length = cur_hypo.GetSize();
-    new_state->m_ref_length = cur_hypo.GetWordsBitmap().GetNumWordsCovered() /
-                              m_cur_ref_length;
+    new_state->m_num_new_words = new_words.GetSize();
+    new_state->m_source_length = cur_hypo.GetSourcePhrase()->GetSize();
+    new_state->m_scaled_ref_length = m_cur_ref_length * (
+                    new_state->m_num_new_words / new_state->m_source_length);
 
     // Calculate new bleu.
     new_bleu = CalculateBleu(new_state);
@@ -146,8 +158,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
         precision *= state->m_ngram_matches[i] / state->m_ngram_counts[i];
 
     // Apply brevity penalty if applicable.
-    if (state->m_target_length < state->m_ref_length)
-        precision *= exp(1 - state->m_ref_length / state->m_target_length);
+    if (state->m_num_new_words < state->m_scaled_ref_length)
+        precision *= exp(1 - state->m_scaled_ref_length /
+                         state->m_num_new_words);
 
     return precision;
 }
