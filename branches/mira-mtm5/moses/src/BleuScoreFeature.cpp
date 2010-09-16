@@ -9,6 +9,9 @@ namespace Moses {
 size_t BleuScoreState::bleu_order = 4;
 
 BleuScoreState::BleuScoreState(): m_words(Output),
+                                  m_num_new_words(0),
+                                  m_source_length(0),
+                                  m_scaled_ref_length(0),
                                   m_ngram_counts(bleu_order),
                                   m_ngram_matches(bleu_order)
 {
@@ -60,7 +63,7 @@ std::ostream& operator<<(std::ostream& out, const BleuScoreState& state) {
 
 void BleuScoreState::print(std::ostream& out) const {
   out << "nw=" << m_num_new_words << ";ref=" << m_scaled_ref_length << 
-    "source= " << m_source_length << ";counts=";
+    ";source=" << m_source_length << ";counts=";
   for (size_t i = 0; i < bleu_order; ++i) {
     out << m_ngram_matches[i] << "/" << m_ngram_counts[i] << ",";
   }
@@ -77,23 +80,28 @@ BleuScoreFeature::BleuScoreFeature() {
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
     FactorCollection& fc = FactorCollection::Instance();
-    for (size_t ref_id = 0; ref_id < refs.size(); ref_id++) {
-        const std::vector< std::string >& ref = refs[ref_id];
-        std::pair< size_t, std::map< Phrase, size_t > > ref_pair;
-        ref_pair.first = ref.size();
-        for (size_t order = 1; order < BleuScoreState::bleu_order; order++) {
-            for (size_t end_idx = order; end_idx < ref.size(); end_idx++) {
-                Phrase ngram(Output);
-                for (size_t s_idx = end_idx - order; s_idx < end_idx; s_idx++) {
-                    const Factor* f = fc.AddFactor(Output, 0, ref[s_idx]);
-                    Word w;
-                    w.SetFactor(0, f);
-                    ngram.AddWord(w);
-                }
-                ref_pair.second[ngram] += 1;
-            }
-        }
-        m_refs[ref_id] = ref_pair;
+    for (size_t file_id = 0; file_id < refs.size(); file_id++) {
+      for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
+          const string& ref = refs[file_id][ref_id];
+          vector<string> refTokens  = Tokenize(ref);
+          std::pair< size_t, std::map< Phrase, size_t > > ref_pair;
+          ref_pair.first = refTokens.size();
+          for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {
+              for (size_t end_idx = order; end_idx <= refTokens.size(); end_idx++) {
+                  Phrase ngram(Output);
+                  //cerr << "start: " << end_idx-order << " end: " << end_idx << endl;
+                  for (size_t s_idx = end_idx - order; s_idx < end_idx; s_idx++) {
+                      const Factor* f = fc.AddFactor(Output, 0, refTokens[s_idx]);
+                      Word w;
+                      w.SetFactor(0, f);
+                      ngram.AddWord(w);
+                  }
+                  //cerr << "Ref: " << ngram << endl;
+                  ref_pair.second[ngram] += 1;
+              }
+          }
+          m_refs[ref_id] = ref_pair;
+      }
     }
 }
 
@@ -109,7 +117,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     std::map< Phrase, size_t >::const_iterator reference_ngrams_iter;
     const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
     BleuScoreState* new_state = new BleuScoreState(ps);
-//    cerr << "PS: " << ps << endl;
+    //cerr << "PS: " << ps << endl;
 
     float old_bleu, new_bleu;
     size_t num_new_words, ctx_start_idx, ctx_end_idx, ngram_start_idx,
@@ -122,27 +130,31 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     num_new_words = cur_hypo.GetTargetPhrase().GetSize();
     Phrase new_words = ps.m_words;
     new_words.Append(cur_hypo.GetTargetPhrase());
+    //cerr << "NW: " << new_words << endl;
 
     for (size_t i = 0; i < num_new_words; i++) {
-        for (size_t n = 0; n < BleuScoreState::bleu_order; n++) {
-            ngram_end_idx = new_words.GetSize() - i;
-
+        for (size_t n = 1; n <= BleuScoreState::bleu_order; n++) {
             // Break if we don't have enough context to do ngrams of order n.
-            if (ngram_end_idx < n)
-                break;
+            if (new_words.GetSize() - i < n) break;
 
-            ngram_start_idx = ngram_end_idx - n;
+            ngram_end_idx = new_words.GetSize() - i - 1;
+            ngram_start_idx = ngram_end_idx - (n-1);
 
             Phrase ngram = new_words.GetSubString(WordsRange(ngram_start_idx,
                                                              ngram_end_idx));
 
             // Update count of ngram order.
-            new_state->m_ngram_counts[n]++;
+            new_state->m_ngram_counts[n-1]++;
 
             // Find out if this ngram is in the reference.
             reference_ngrams_iter = m_cur_ref_ngrams.find(ngram);
-            if (reference_ngrams_iter != m_cur_ref_ngrams.end())
-                new_state->m_ngram_matches[n]++;
+            //cerr << "Searching for " << ngram << " ... ";
+            if (reference_ngrams_iter != m_cur_ref_ngrams.end()) {
+                new_state->m_ngram_matches[n-1]++;
+                //cerr << "FOUND" << endl;
+            } else {
+              //cerr << "NOT FOUND" << endl;
+            }
         }
     }
 
@@ -163,6 +175,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
     // Calculate new bleu.
     new_bleu = CalculateBleu(new_state);
+    //cerr << "NS: " << *new_state << " NB " << new_bleu << endl;
 
     // Set score to difference in bleu scores.
     accumulator->PlusEquals(this, new_bleu - old_bleu);
@@ -175,9 +188,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     float precision = 1.0;
 
     // Calculate ngram precisions.
-    for (size_t i = 1; i < BleuScoreState::bleu_order; i++)
+    for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
         if (state->m_ngram_counts[i]) {
-          precision *= state->m_ngram_matches[i] / state->m_ngram_counts[i];
+          precision *= (float)(state->m_ngram_matches[i]) / state->m_ngram_counts[i];
         }
 
     // Apply brevity penalty if applicable.
