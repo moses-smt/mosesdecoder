@@ -26,8 +26,10 @@ public:
 private:
     Phrase m_words;
 
-    size_t m_target_length;
-    float m_ref_length;
+    size_t m_num_new_words;
+    size_t m_source_length;
+    float m_scaled_ref_length;
+
     std::vector< size_t > m_ngram_counts;
     std::vector< size_t > m_ngram_matches;
 };
