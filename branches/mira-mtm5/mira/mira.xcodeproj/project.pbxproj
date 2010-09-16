@@ -60,6 +60,7 @@
 		1E9DC6C6124268270059001A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1E9DC6CC124268310059001A /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1E9DC76712426FC60059001A /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Main.h; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* mira */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mira; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* mira.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = mira.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -98,6 +99,7 @@
 				1E9DC6391242602F0059001A /* Decoder.cpp */,
 				1E9DC63A1242602F0059001A /* Decoder.h */,
 				1E9DC63B1242602F0059001A /* Main.cpp */,
+				1E9DC76712426FC60059001A /* Main.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -294,6 +296,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include,
+					"../moses-chart/src",
 					../moses/src,
 					../irstlm/include,
 				);
@@ -312,6 +315,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include,
+					"../moses-chart/src",
 					../moses/src,
 					../irstlm/include,
 				);

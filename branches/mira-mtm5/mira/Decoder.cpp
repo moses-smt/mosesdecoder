@@ -20,6 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Decoder.h"
 #include "Manager.h"
 #include "TranslationSystem.h"
+#include "Phrase.h"
+#include "ChartTrellisPath.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 using namespace Moses;
@@ -37,8 +40,7 @@ namespace Mira {
     strcpy(c,s.c_str());
     return c;
   }
-    
-  
+      
   void initMoses(const string& inifile, int debuglevel,  int argc, char** argv) {
     static int BASE_ARGC = 5;
     Parameter* params = new Parameter();
@@ -62,17 +64,35 @@ namespace Mira {
     delete[] mosesargv;
   }
   
-  void MosesDecoder::getNBest(const std::string& source, size_t count, TrellisPathList& sentences) {
+	void MosesDecoder::cleanup()
+	{
+		delete m_manager;
+		delete m_sentence;
+	}
+	
+  void MosesDecoder::getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences) {
     const StaticData &staticData = StaticData::Instance();
-    Sentence sentence(Input);
+
+		m_sentence = new Sentence(Input);
     stringstream in(source + "\n");
     const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-    sentence.Read(in,inputFactorOrder);
+    m_sentence->Read(in,inputFactorOrder);
     const TranslationSystem& system = staticData.GetTranslationSystem
         (TranslationSystem::DEFAULT);
-    Manager manager(sentence, staticData.GetSearchAlgorithm(), &system); 
-    manager.ProcessSentence();
-    manager.CalcNBest(count,sentences);
+
+    m_manager = new MosesChart::Manager(*m_sentence, &system); 
+    m_manager->ProcessSentence();
+    m_manager->CalcNBest(count,sentences);
+				
+		MosesChart::TrellisPathList::const_iterator iter;
+		for (iter = sentences.begin() ; iter != sentences.end() ; ++iter)
+		{
+			const MosesChart::TrellisPath &path = **iter;
+			cerr << path << endl << endl;
+		}
+		
+		cerr << std::flush;
+		
   }
-  
+	
 } 
