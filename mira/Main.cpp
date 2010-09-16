@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
     }
   }
   //initialise moses
-  initMoses(mosesConfigFile, verbosity, argc, argv);
+  initMoses(mosesConfigFile, verbosity);//, argc, argv);
 
   //Main loop:
   srand(time(NULL));
