@@ -783,6 +783,7 @@ bool StaticData::LoadLanguageModels()
 			m_languageModel.Add(lm);
 		}
 	}
+	m_scoreIndexManager.InitFeatureNames();
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
   m_fLMsLoaded = true;

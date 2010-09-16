@@ -28,7 +28,6 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
-	InitFeatureNames();
 	/*VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
 						<< " " << sp->GetScoreProducerDescription()
 						<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
@@ -68,7 +67,7 @@ void ScoreIndexManager::InitFeatureNames() {
 	vector<const ScoreProducer *>::const_iterator it;
 	for (it = m_producers.begin(); it != m_producers.end(); ++it) {
 		ostringstream oStream;
-		oStream << /* (*it)->GetScoreProducerDescription() << "_" << */ globalIndex;
+		oStream << (*it)->GetScoreProducerDescription() << "_" << globalIndex;
 		m_featureNames.push_back(oStream.str());
 		m_featureIndexes[oStream.str()] = globalIndex;
 		++globalIndex;
