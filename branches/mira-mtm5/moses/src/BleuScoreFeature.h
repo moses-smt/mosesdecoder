@@ -36,6 +36,8 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state);
 
+typedef std::map< Phrase, size_t > NGrams;
+
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
     BleuScoreFeature();
@@ -57,6 +59,12 @@ public:
 
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentReference(size_t);
+    void UpdateHistory(std::vector< Word >&);
+    void GetNgramMatchCounts(Phrase&,
+                             const NGrams&,
+                             std::vector< size_t >&,
+                             std::vector< size_t >&,
+                             size_t) const;
 
     FFState* Evaluate( const Hypothesis& cur_hypo, 
                        const FFState* prev_state, 
@@ -65,11 +73,10 @@ public:
     const FFState* EmptyHypothesisState(const InputType&) const;
 
 private:
-	typedef std::map< Phrase, size_t > NGrams;
     std::map< size_t, std::pair< size_t, NGrams > > m_refs;
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
-
+    std::vector< float > m_count_history;
 };
 
 } // Namespace.

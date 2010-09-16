@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "BleuScoreFeature.h"
 
 #include "StaticData.h"
@@ -104,6 +106,39 @@ void BleuScoreFeature::SetCurrentReference(size_t ref_id) {
     m_cur_ref_ngrams = m_refs[ref_id].second;
 }
 
+void BleuScoreFeature::UpdateHistory(vector< Word >& old_hypo) {
+}
+
+void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
+                                           const NGrams& ref_ngram_counts,
+                                           std::vector< size_t >& ret_counts,
+                                           std::vector< size_t >& ret_matches,
+                                           size_t skip_first = 0) const
+{
+    std::map< Phrase, size_t >::const_iterator ref_ngram_counts_iter;
+    size_t ngram_start_idx, ngram_end_idx;
+
+    for (size_t end_idx = skip_first; end_idx < phrase.GetSize(); end_idx++) {
+        for (size_t order = 0; order < BleuScoreState::bleu_order; order++) {
+            if (order > end_idx) break;
+
+            ngram_end_idx = end_idx;
+            ngram_start_idx = end_idx - order;
+
+            Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx,
+                                                          ngram_end_idx));
+
+            ret_counts[order]++;
+
+            ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
+            if (ref_ngram_counts_iter != ref_ngram_counts.end())
+                ret_matches[order]++;
+        }
+    }
+}
+
+
+
 FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo, 
                                     const FFState* prev_state, 
                                     ScoreComponentCollection* accumulator) const
@@ -114,8 +149,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     //cerr << "PS: " << ps << endl;
 
     float old_bleu, new_bleu;
-    size_t num_new_words, ctx_start_idx, ctx_end_idx, ngram_start_idx,
-           ngram_end_idx;
+    size_t num_new_words, ctx_start_idx, ctx_end_idx;
 
     // Calculate old bleu;
     old_bleu = CalculateBleu(new_state);
@@ -126,31 +160,11 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     new_words.Append(cur_hypo.GetTargetPhrase());
     //cerr << "NW: " << new_words << endl;
 
-    for (size_t i = 0; i < num_new_words; i++) {
-        for (size_t n = 1; n <= BleuScoreState::bleu_order; n++) {
-            // Break if we don't have enough context to do ngrams of order n.
-            if (new_words.GetSize() - i < n) break;
-
-            ngram_end_idx = new_words.GetSize() - i - 1;
-            ngram_start_idx = ngram_end_idx - (n-1);
-
-            Phrase ngram = new_words.GetSubString(WordsRange(ngram_start_idx,
-                                                             ngram_end_idx));
-
-            // Update count of ngram order.
-            new_state->m_ngram_counts[n-1]++;
-
-            // Find out if this ngram is in the reference.
-            reference_ngrams_iter = m_cur_ref_ngrams.find(ngram);
-            //cerr << "Searching for " << ngram << " ... ";
-            if (reference_ngrams_iter != m_cur_ref_ngrams.end()) {
-                new_state->m_ngram_matches[n-1]++;
-                //cerr << "FOUND" << endl;
-            } else {
-              //cerr << "NOT FOUND" << endl;
-            }
-        }
-    }
+    GetNgramMatchCounts(new_words,
+                        m_cur_ref_ngrams,
+                        new_state->m_ngram_counts,
+                        new_state->m_ngram_matches,
+                        new_state->m_words.GetSize());
 
     // Update state.
     ctx_end_idx = new_words.GetSize()-1;
