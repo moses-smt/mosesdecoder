@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "BleuScoreFeature.h"
 
 #include "StaticData.h"
@@ -67,10 +65,14 @@ void BleuScoreState::print(std::ostream& out) const {
     
 }
 
-BleuScoreFeature::BleuScoreFeature() {
+BleuScoreFeature::BleuScoreFeature():
+                                 m_count_history(BleuScoreState::bleu_order),
+                                 m_match_history(BleuScoreState::bleu_order),
+                                 m_target_length_history(0),
+                                 m_ref_length_history(0)
+{
     const_cast<ScoreIndexManager&>
         (StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-
 }
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
@@ -106,14 +108,24 @@ void BleuScoreFeature::SetCurrentReference(size_t ref_id) {
     m_cur_ref_ngrams = m_refs[ref_id].second;
 }
 
-void BleuScoreFeature::UpdateHistory(vector< Word >& old_hypo) {
+void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
+    Phrase phrase(Output, hypo);
+    std::vector< size_t > ngram_counts(BleuScoreState::bleu_order);
+    std::vector< size_t > ngram_matches(BleuScoreState::bleu_order);
+    GetNgramMatchCounts(phrase, m_cur_ref_ngrams, ngram_counts, ngram_matches, 0);
+    for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
+        m_count_history[i] = 0.9 * (m_count_history[i] + ngram_counts[i]);
+        m_match_history[i] = 0.9 * (m_match_history[i] + ngram_matches[i]);
+    }
+    m_target_length_history = 0.9 * (m_target_length_history + hypo.size());
+    m_ref_length_history = 0.9 * (m_ref_length_history + m_cur_ref_length);
 }
 
 void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
                                            const NGrams& ref_ngram_counts,
                                            std::vector< size_t >& ret_counts,
                                            std::vector< size_t >& ret_matches,
-                                           size_t skip_first = 0) const
+                                           size_t skip_first) const
 {
     std::map< Phrase, size_t >::const_iterator ref_ngram_counts_iter;
     size_t ngram_start_idx, ngram_end_idx;
@@ -136,8 +148,6 @@ void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
         }
     }
 }
-
-
 
 FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo, 
                                     const FFState* prev_state, 
@@ -196,17 +206,24 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     if (!state->m_ngram_counts[0]) return 0;
     float precision = 1.0;
+    float smoothed_count, smoothed_matches;
+    float smoothed_ref_length = m_ref_length_history +
+                                state->m_scaled_ref_length;
+    float smoothed_target_length = m_target_length_history + 
+                                   state->m_source_length;
 
     // Calculate ngram precisions.
     for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
         if (state->m_ngram_counts[i]) {
-          precision *= (float)(state->m_ngram_matches[i]) / state->m_ngram_counts[i];
+            smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
+            smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
+            precision *= smoothed_matches / smoothed_count;
         }
 
     // Apply brevity penalty if applicable.
-    if (state->m_source_length < state->m_scaled_ref_length)
-        precision *= exp(1 - state->m_scaled_ref_length /
-                         state->m_source_length);
+    if (state->m_source_length < state->m_scaled_ref_length) {
+        precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
+    }
 
     return precision;
 }

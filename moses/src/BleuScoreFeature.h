@@ -59,12 +59,12 @@ public:
 
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentReference(size_t);
-    void UpdateHistory(std::vector< Word >&);
+    void UpdateHistory(const std::vector< const Word* >&);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,
                              std::vector< size_t >&,
-                             size_t) const;
+                             size_t skip = 0) const;
 
     FFState* Evaluate( const Hypothesis& cur_hypo, 
                        const FFState* prev_state, 
@@ -77,6 +77,9 @@ private:
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
     std::vector< float > m_count_history;
+    std::vector< float > m_match_history;
+    float m_target_length_history;
+    float m_ref_length_history;
 };
 
 } // Namespace.
