@@ -27,7 +27,6 @@ public:
 private:
     Phrase m_words;
 
-    size_t m_num_new_words;
     size_t m_source_length;
     float m_scaled_ref_length;
 

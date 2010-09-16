@@ -9,7 +9,6 @@ namespace Moses {
 size_t BleuScoreState::bleu_order = 4;
 
 BleuScoreState::BleuScoreState(): m_words(Output),
-                                  m_num_new_words(0),
                                   m_source_length(0),
                                   m_scaled_ref_length(0),
                                   m_ngram_counts(bleu_order),
@@ -23,11 +22,6 @@ int BleuScoreState::Compare(const FFState& o) const
         return 0;
 
     const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
-
-    if (m_num_new_words < other.m_num_new_words)
-        return -1;
-    if (m_num_new_words > other.m_num_new_words)
-        return 1;
 
     if (m_source_length < other.m_source_length)
         return -1;
@@ -62,7 +56,7 @@ std::ostream& operator<<(std::ostream& out, const BleuScoreState& state) {
 }
 
 void BleuScoreState::print(std::ostream& out) const {
-  out << "nw=" << m_num_new_words << ";ref=" << m_scaled_ref_length << 
+  out << "ref=" << m_scaled_ref_length << 
     ";source=" << m_source_length << ";counts=";
   for (size_t i = 0; i < bleu_order; ++i) {
     out << m_ngram_matches[i] << "/" << m_ngram_counts[i] << ",";
@@ -168,10 +162,12 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     }
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_end_idx));
-    new_state->m_num_new_words = new_words.GetSize();
-    new_state->m_source_length = cur_hypo.GetSourcePhrase()->GetSize();
-    new_state->m_scaled_ref_length = m_cur_ref_length * (
-                    new_state->m_num_new_words / new_state->m_source_length);
+
+    new_state->m_source_length += cur_hypo.GetSourcePhrase()->GetSize();
+    WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
+    new_state->m_scaled_ref_length = m_cur_ref_length * 
+        ((float)coverageVector.GetNumWordsCovered() / coverageVector.GetSize());
+      
 
     // Calculate new bleu.
     new_bleu = CalculateBleu(new_state);
@@ -194,9 +190,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
         }
 
     // Apply brevity penalty if applicable.
-    if (state->m_num_new_words < state->m_scaled_ref_length)
+    if (state->m_source_length < state->m_scaled_ref_length)
         precision *= exp(1 - state->m_scaled_ref_length /
-                         state->m_num_new_words);
+                         state->m_source_length);
 
     return precision;
 }
