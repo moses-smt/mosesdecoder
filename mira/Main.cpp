@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureVector.h"
 #include "StaticData.h"
-#include "TrellisPathList.h"
+#include "ChartTrellisPathList.h"
 
 #include "Decoder.h"
 #include "Optimiser.h"
@@ -35,6 +35,8 @@ using namespace Mira;
 using namespace std;
 using namespace Moses;
 namespace po = boost::program_options;
+
+void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const TranslationSystem* system, long translationId);
 
 bool loadSentences(const string& filename, vector<string>& sentences) {
   ifstream in(filename.c_str());
@@ -117,7 +119,7 @@ int main(int argc, char** argv) {
 
   //Main loop:
   srand(time(NULL));
-  Decoder* decoder = new MosesDecoder();
+  MosesDecoder decoder;
   Optimiser* optimiser = new DummyOptimiser();
   size_t epochs = 1;
   
@@ -128,13 +130,17 @@ int main(int argc, char** argv) {
       const vector<string>& refs = referenceSentences[sid];
 
       //run decoder (TODO: hope & fear)
-      TrellisPathList sentences;
-      decoder->getNBest(input, 100, sentences);
+			MosesChart::TrellisPathList sentences;
+      decoder.getNBest(input, 100, sentences);
+
       //extract scores from nbest + oracle
 
+			
       //run optimiser
 
       //update moses weights
+			
+			decoder.cleanup();
     }
   }
   
@@ -142,3 +148,4 @@ int main(int argc, char** argv) {
 
   exit(0);
 }
+

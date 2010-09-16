@@ -29,8 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "SearchNormal.h"
 #include "StaticData.h"
-#include "TrellisPathList.h"
+#include "ChartTrellisPathList.h"
 #include "TranslationOptionCollectionText.h"
+#include "ChartManager.h"
 
 //
 // Wrapper functions and objects for the decoder.
@@ -53,7 +54,7 @@ void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** a
   **/
 class Decoder {
   public:
-    virtual void getNBest(const std::string& source, size_t count, Moses::TrellisPathList& sentences) = 0;
+    virtual void getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences) = 0;
     virtual ~Decoder();
 };
 /**
@@ -61,8 +62,19 @@ class Decoder {
  **/
 class MosesDecoder : public Decoder {
   public:
-    MosesDecoder()  {}
-    virtual void getNBest(const std::string& source, size_t count, Moses::TrellisPathList& sentences);
+    MosesDecoder()
+		: m_manager(NULL)
+		{}
+	
+    virtual void getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences);
+		void cleanup();
+		
+	private:
+		MosesChart::Manager *m_manager;
+		Moses::Sentence *m_sentence;
+	
+		void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
+
 };
 
 
