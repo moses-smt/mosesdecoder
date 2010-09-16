@@ -13,6 +13,8 @@
 		1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */; };
 		1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */; };
 		1E5D8E0911F25F2F000F027F /* PhraseDictionarySCFGChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0711F25F2F000F027F /* PhraseDictionarySCFGChart.cpp */; };
+		1E6C3CC81241D79C005697BC /* BleuScoreFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6C3CC61241D79C005697BC /* BleuScoreFeature.cpp */; };
+		1E6C3CC91241D79C005697BC /* BleuScoreFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6C3CC71241D79C005697BC /* BleuScoreFeature.h */; };
 		1E7739D0123F646800B88EB7 /* FeatureVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E7739CE123F646800B88EB7 /* FeatureVector.cpp */; };
 		1E7739D1123F646800B88EB7 /* FeatureVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E7739CF123F646800B88EB7 /* FeatureVector.h */; };
 		1ED4FD3711BDC0D2004E826A /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */; };
@@ -232,6 +234,8 @@
 		1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
 		1E5D8E0711F25F2F000F027F /* PhraseDictionarySCFGChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFGChart.cpp; path = src/PhraseDictionarySCFGChart.cpp; sourceTree = "<group>"; };
+		1E6C3CC61241D79C005697BC /* BleuScoreFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BleuScoreFeature.cpp; path = src/BleuScoreFeature.cpp; sourceTree = "<group>"; };
+		1E6C3CC71241D79C005697BC /* BleuScoreFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BleuScoreFeature.h; path = src/BleuScoreFeature.h; sourceTree = "<group>"; };
 		1E7739CE123F646800B88EB7 /* FeatureVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureVector.cpp; path = src/FeatureVector.cpp; sourceTree = "<group>"; };
 		1E7739CF123F646800B88EB7 /* FeatureVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureVector.h; path = src/FeatureVector.h; sourceTree = "<group>"; };
 		1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
@@ -471,6 +475,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E6C3CC61241D79C005697BC /* BleuScoreFeature.cpp */,
+				1E6C3CC71241D79C005697BC /* BleuScoreFeature.h */,
 				1E059675123FB1E900D39289 /* OnlineCommand.cpp */,
 				1E059676123FB1E900D39289 /* OnlineCommand.h */,
 				1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */,
@@ -837,6 +843,7 @@
 				1EF549BA12118A5D00C481EB /* TranslationSystem.h in Headers */,
 				1E7739D1123F646800B88EB7 /* FeatureVector.h in Headers */,
 				1E059678123FB1E900D39289 /* OnlineCommand.h in Headers */,
+				1E6C3CC91241D79C005697BC /* BleuScoreFeature.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -985,6 +992,7 @@
 				1EF549B912118A5D00C481EB /* TranslationSystem.cpp in Sources */,
 				1E7739D0123F646800B88EB7 /* FeatureVector.cpp in Sources */,
 				1E059677123FB1E900D39289 /* OnlineCommand.cpp in Sources */,
+				1E6C3CC81241D79C005697BC /* BleuScoreFeature.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1019,7 +1027,7 @@
 		1DEB91F008733DB70010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1044,7 +1052,7 @@
 		1DEB91F108733DB70010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					TRACE_ENABLE,
