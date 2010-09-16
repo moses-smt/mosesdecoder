@@ -4,7 +4,7 @@
 
 set -e
 
-for i in util/{ersatz_progress,exception,file_piece,murmur_hash,scoped,string_piece} lm/{exception,virtual_interface,ngram}; do
+for i in util/{ersatz_progress,exception,file_piece,murmur_hash,scoped,string_piece,mmap} lm/{exception,virtual_interface,ngram}; do
   g++ -I. -O3 -c $i.cc -o $i.o
 done
 g++ -I. -O3 lm/ngram_build_binary.cc {lm,util}/*.o -o build_binary
