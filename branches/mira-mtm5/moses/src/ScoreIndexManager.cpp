@@ -144,5 +144,15 @@ std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim)
 	return os;
 }
 
+const std::string &ScoreIndexManager::GetFeatureName(size_t fIndex) const
+{
+	assert(m_featureNames.size() > fIndex);
+	return m_featureNames[fIndex];
+}
+//! get the index of a feature by name
+size_t ScoreIndexManager::GetFeatureIndex(const std::string& fName) const
+{
+	return m_featureIndexes.find(fName)->second;
 }
 
+}

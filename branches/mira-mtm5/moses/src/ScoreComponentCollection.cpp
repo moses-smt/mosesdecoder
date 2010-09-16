@@ -47,7 +47,6 @@ void ScoreComponentCollection::PlusEquals(const ScoreProducer* sp, const std::ve
 	}  
 }
 	
-	
 std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
 	os << "<<" << rhs.m_scores[rhs.m_sim->GetFeatureName(0)];
