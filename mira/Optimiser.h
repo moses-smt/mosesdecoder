@@ -28,22 +28,42 @@ namespace Mira {
   
   class Optimiser {
     public:
-      virtual void updateWeights(const Moses::ScoreComponentCollection& currWeights,
-                         const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
-                         const std::vector<std::vector<float> >& losses,
+      Optimiser() {}
+      virtual float updateWeights(const std::vector<float>& currWeights,
+                         const std::vector<Moses::ScoreComponentCollection>& scores,
+                         const std::vector<float>& losses,
                          const Moses::ScoreComponentCollection oracleScores,
-                         Moses::ScoreComponentCollection& newWeights) = 0;
+                         std::vector<float>& newWeights) = 0;
   };
  
   class DummyOptimiser : public Optimiser {
     public:
-      virtual void updateWeights(const Moses::ScoreComponentCollection& currWeights,
-                         const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
-                         const std::vector<std::vector<float> >& losses,
+      virtual float updateWeights(const std::vector<float>& currWeights,
+                         const std::vector<Moses::ScoreComponentCollection>& scores,
+                         const std::vector<float>& losses,
                          const Moses::ScoreComponentCollection oracleScores,
-                         Moses::ScoreComponentCollection& newWeights) {newWeights = currWeights;}
+                         std::vector<float>& newWeights) {newWeights = currWeights; return 0.0; }
   };
 
+  class MiraOptimiser : public Optimiser {
+   public:
+     MiraOptimiser(float lowerBound, float upperBound) :
+       Optimiser(),
+       lowerBound_(lowerBound),
+       upperBound_(upperBound) { maxTranslation_ = 0.0; }
+
+     ~MiraOptimiser() {} 
+     
+    virtual float updateWeights(const std::vector<float>& currWeights,
+                         const std::vector<Moses::ScoreComponentCollection>& scores,
+                         const std::vector<float>& losses,
+                         const Moses::ScoreComponentCollection oracleScores,
+                         std::vector<float>& newWeights);
+   private:
+     float lowerBound_;
+     float upperBound_;
+     float maxTranslation_;
+  };
 }
 
 #endif
