@@ -94,16 +94,7 @@ public:
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components
 	//! produced by sp
-	void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
-	{
-		assert(scores.size() == sp->GetNumScoreComponents());
-		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		for (std::vector<float>::const_iterator vi = scores.begin();
-		     vi != scores.end(); ++vi)
-		{
-			m_scores[m_sim->GetFeatureName(i++)] += *vi;
-		}  
-	}
+	void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores);
 
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components

@@ -54,13 +54,13 @@ BleuScoreFeature::BleuScoreFeature() {
 
 }
 
-void BleuScoreFeature::LoadReferences(std::vector<
-                                      std::vector< std::string > >refs)
+void BleuScoreFeature::LoadReferences(const std::vector<
+                                      std::vector< std::string > > &refs)
 {
     FactorCollection& fc = FactorCollection::Instance();
     for (size_t ref_id = 0; ref_id < refs.size(); ref_id++) {
-        std::vector< std::string >& ref = refs[ref_id];
-        std::pair< size_t, std::map< Phrase, size_t > > ref_pair;
+        const std::vector< std::string >& ref = refs[ref_id];
+        std::pair< size_t, NGrams > ref_pair;
         ref_pair.first = ref.size();
         for (size_t order = 1; order < BleuScoreState::bleu_order; order++) {
             for (size_t end_idx = order; end_idx < ref.size(); end_idx++) {
@@ -87,7 +87,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
                                     const FFState* prev_state, 
                                     ScoreComponentCollection* accumulator) const
 {
-    std::map< Phrase, size_t >::const_iterator reference_ngrams_iter;
+    NGrams::const_iterator reference_ngrams_iter;
     const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
     BleuScoreState* new_state = new BleuScoreState(ps);
 
