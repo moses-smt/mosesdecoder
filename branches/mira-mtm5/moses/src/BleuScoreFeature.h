@@ -22,6 +22,7 @@ public:
 
     BleuScoreState();
     virtual int Compare(const FFState& other) const;
+    void print(std::ostream& out) const;
 
 private:
     Phrase m_words;
@@ -33,6 +34,8 @@ private:
     std::vector< size_t > m_ngram_counts;
     std::vector< size_t > m_ngram_matches;
 };
+
+std::ostream& operator<<(std::ostream& out, const BleuScoreState& state);
 
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
