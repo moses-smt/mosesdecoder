@@ -28,6 +28,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
+	InitFeatureNames();
 	/*VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
 						<< " " << sp->GetScoreProducerDescription()
 						<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
@@ -70,9 +71,10 @@ void ScoreIndexManager::InitFeatureNames() {
 		bool add_idx = (m_producers[cur_scoreType]->GetNumInputScores() > 1);
 		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
 			ostringstream os;
-			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
-			if (add_idx)
-				os << '_' << (nis_idx+1);
+			//os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+			//if (add_idx)
+				//os << '_' << (nis_idx+1);
+			os << cur_i;
 			const string &featureName = os.str();
 			m_featureNames.push_back(featureName);
 			m_featureIndexes[featureName] = m_featureNames.size() - 1;
@@ -84,9 +86,10 @@ void ScoreIndexManager::InitFeatureNames() {
 		add_idx = (m_ends[cur_scoreType] - cur_i > 1);
 		while (cur_i < m_ends[cur_scoreType]) {
 			ostringstream os;
-			os << m_producers[cur_scoreType]->GetScoreProducerDescription();
-			if (add_idx)
-				os << '_' << ind;
+			//os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+			//if (add_idx)
+				//os << '_' << ind;
+			os << cur_i;
 			const string &featureName = os.str();
 			m_featureNames.push_back(featureName);
 			m_featureIndexes[featureName] = m_featureNames.size() - 1;
