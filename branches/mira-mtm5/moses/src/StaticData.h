@@ -44,7 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
-#include "BleuScoreFeature.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -58,6 +57,7 @@ class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseDictionaryFeature;
+class BleuScoreFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
