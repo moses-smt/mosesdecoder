@@ -51,7 +51,7 @@ public:
 		return MultiFactor;
 	}
 
-	std::string GetScoreProducerDescription() const;	
+	virtual std::string GetScoreProducerDescription() const;	
 	bool Useable(const Phrase &phrase) const;	
 };
 
