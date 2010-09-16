@@ -64,40 +64,14 @@ void ScoreIndexManager::InitFeatureNames() {
 	m_featureNames.clear();
 	m_featureIndexes.clear();
 	m_featureShortNames.clear();
-	size_t cur_i = 0;
-	size_t cur_scoreType = 0;
-	while (cur_i < m_last) {
-		size_t nis_idx = 0;
-		bool add_idx = (m_producers[cur_scoreType]->GetNumInputScores() > 1);
-		while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()){
-			ostringstream os;
-			//os << m_producers[cur_scoreType]->GetScoreProducerDescription();
-			//if (add_idx)
-				//os << '_' << (nis_idx+1);
-			os << cur_i;
-			const string &featureName = os.str();
-			m_featureNames.push_back(featureName);
-			m_featureIndexes[featureName] = m_featureNames.size() - 1;
-			nis_idx++;
-			cur_i++;
-		}
-
-		int ind = 1;
-		add_idx = (m_ends[cur_scoreType] - cur_i > 1);
-		while (cur_i < m_ends[cur_scoreType]) {
-			ostringstream os;
-			//os << m_producers[cur_scoreType]->GetScoreProducerDescription();
-			//if (add_idx)
-				//os << '_' << ind;
-			os << cur_i;
-			const string &featureName = os.str();
-			m_featureNames.push_back(featureName);
-			m_featureIndexes[featureName] = m_featureNames.size() - 1;
-			m_featureShortNames.push_back( m_producers[cur_scoreType]->GetScoreProducerWeightShortName() );
-			++cur_i;
-			++ind;
-		}
-		cur_scoreType++;
+	size_t globalIndex = 0;
+	vector<const ScoreProducer *>::const_iterator it;
+	for (it = m_producers.begin(); it != m_producers.end(); ++it) {
+		ostringstream oStream;
+		oStream << (*it)->GetScoreProducerDescription() << "_" << globalIndex;
+		m_featureNames.push_back(oStream.str());
+		m_featureIndexes[oStream.str()] = globalIndex;
+		++globalIndex;
 	}
 }
 
