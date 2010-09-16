@@ -51,7 +51,7 @@ public:
         return 1;
     }
 
-    void LoadReferences(std::vector< std::vector< std::string > >);
+    void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentReference(size_t);
 
     FFState* Evaluate( const Hypothesis& cur_hypo, 
@@ -61,8 +61,9 @@ public:
     const FFState* EmptyHypothesisState(const InputType&) const;
 
 private:
-    std::map< size_t, std::pair< size_t, std::map< Phrase, size_t > > > m_refs;
-    std::map< Phrase, size_t > m_cur_ref_ngrams;
+	typedef std::map< Phrase, size_t > NGrams;
+    std::map< size_t, std::pair< size_t, NGrams > > m_refs;
+    NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
 
 };
