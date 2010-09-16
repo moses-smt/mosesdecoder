@@ -1222,7 +1222,9 @@ bool StaticData::LoadReferences() {
     }
     in.close();
   }
-  //TODO: Set the references in the bleu feature
+  //Set the references in the bleu feature
+  m_bleuScoreFeature->LoadReferences(references);
+  m_bleuScoreFeature->SetCurrentReference(0); //TODO: Temporary, for testing
   
   return true;
 }
