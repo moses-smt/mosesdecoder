@@ -68,7 +68,7 @@ void ScoreIndexManager::InitFeatureNames() {
 	vector<const ScoreProducer *>::const_iterator it;
 	for (it = m_producers.begin(); it != m_producers.end(); ++it) {
 		ostringstream oStream;
-		oStream << (*it)->GetScoreProducerDescription() << "_" << globalIndex;
+		oStream << /* (*it)->GetScoreProducerDescription() << "_" << */ globalIndex;
 		m_featureNames.push_back(oStream.str());
 		m_featureIndexes[oStream.str()] = globalIndex;
 		++globalIndex;
