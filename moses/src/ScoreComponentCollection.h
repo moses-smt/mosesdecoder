@@ -202,14 +202,5 @@ public:
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
-{
-  os << "<<" << rhs.m_scores[rhs.m_sim->GetFeatureName(0)];
-  for (size_t i=1; i<rhs.m_scores.size(); i++)
-    os << ", " << rhs.m_scores[rhs.m_sim->GetFeatureName(i)];
-  return os << ">>";
-}
-
-
 }
 #endif

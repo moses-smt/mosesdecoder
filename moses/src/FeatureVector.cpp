@@ -79,7 +79,6 @@ namespace Moses {
 	FVector::FVector(size_t size, FValue defaultValue)  
 	:m_size(size)
 	{
-		cerr << "start " << size << endl;
     m_features[DEFAULT_NAME] = defaultValue;
 	}
 	
@@ -389,9 +388,16 @@ namespace Moses {
       FValue product = 0;
       if (get(DEFAULT_NAME) == 0) {
 	  	  for (const_iterator i = cbegin(); i != cend(); i++) {
-	      	  FValue rv = rhs[ sim.GetFeatureIndex(i->first.name()) ];
-	      	  product += i->second * rv;
-      	  }
+					const FName &fname = i->first;
+					if (fname != DEFAULT_NAME) {
+						const std::string &name = fname.name();
+						size_t index = sim.GetFeatureIndex(name);
+						assert(rhs.size() > index);
+						
+						FValue rv = rhs[ index ];
+						product += i->second * rv;
+					}
+     	  }
 	  } else {
 		  for (size_t i = 0; i < rhs.size(); i++) {
 		      product += rhs[i] * get(sim.GetFeatureName(i));
