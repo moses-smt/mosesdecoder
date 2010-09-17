@@ -32,11 +32,13 @@ class PerScorer: public StatisticsBasedScorer {
 			cerr << "I AM PerScorer" << std::endl;
 		}
 		
-		size_t NumberOfScores(){ cerr << "PerScorer: 3" << endl; return 3; };
+		size_t NumberOfScores() const { cerr << "PerScorer: 3" << endl; return 3; };
+		bool useAlignment() const {return false;};
+
 		
     protected:
         
-        virtual float calculateScore(const vector<int>& comps) ;
+        virtual float calculateScore(const vector<float>& comps) ;
 		
 	private:
         

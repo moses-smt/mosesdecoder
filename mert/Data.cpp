@@ -38,6 +38,8 @@ void Data::loadnbest(const std::string &file)
 
 	std::string substring, subsubstring, stringBuf;
 	std::string theSentence;
+	std::string theFeatures;
+	std::string theAlignment;
 	std::string::size_type loc;
 
 
@@ -57,14 +59,32 @@ void Data::loadnbest(const std::string &file)
 		scoreentry.clear();
 
 
-   	theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+
+		getNextPound(stringBuf, substring, "|||"); //third field
+		theFeatures = substring;
+
+		if (stringBuf.length() > 0) {
+		  getNextPound(stringBuf, substring, "|||"); //fourth field sentence score
+		  if (stringBuf.length() > 0) {
+		    	getNextPound(stringBuf, substring, "|||"); //fourth field only there if alignment scorer
+		      theAlignment = substring;
+			}
+		}
+		//TODO check alignment exists if scorers need it
+
+		if (!theScorer->useAlignment()) {
+   	  theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+		} else {
+			//an interpolated score would need both sentence and alignment
+		  theSentence += "|||";
+			theSentence += theAlignment;
+			theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+		}
 
 		scoredata->add(scoreentry, sentence_index);
 
-		getNextPound(stringBuf, substring, "|||"); //third field
-
 		if (!existsFeatureNames()){
-			std::string stringsupport=substring;
+			std::string stringsupport=theFeatures;
 			// adding feature names
 			std::string features="";
 			std::string tmpname="";
@@ -89,9 +109,9 @@ void Data::loadnbest(const std::string &file)
 		}
 		
 // adding features
-		while (!substring.empty()){
-//			TRACE_ERR("Decompounding: " << substring << std::endl); 
-			getNextPound(substring, subsubstring);
+		while (!theFeatures.empty()){
+//			TRACE_ERR("Decompounding: " << theFeatures << std::endl); 
+			getNextPound(theFeatures, subsubstring);
 
 // string ending with ":" are skipped, because they are the names of the features
       if ((loc = subsubstring.find(":")) != subsubstring.length()-1){

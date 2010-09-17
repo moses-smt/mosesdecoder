@@ -1,14 +1,18 @@
-bin_PROGRAMS = mert extractor
+bin_PROGRAMS = mert extractor 
+
 mert_SOURCES = Util.cpp \
      Timer.cpp \
 ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
 FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
 Data.cpp \
 BleuScorer.cpp \
+PermutationScorer.cpp \
+Permutation.cpp \
 Point.cpp \
 PerScorer.cpp \
 Scorer.cpp \
 Optimizer.cpp \
+InterpolatedScorer.cpp \
 mert.cpp
 
 extractor_SOURCES = Util.cpp \
@@ -17,10 +21,13 @@ ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
 FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
 Data.cpp \
 BleuScorer.cpp \
+PermutationScorer.cpp \
+Permutation.cpp \
 Point.cpp \
 PerScorer.cpp \
 Scorer.cpp \
 Optimizer.cpp \
+InterpolatedScorer.cpp \
 extractor.cpp
 
 

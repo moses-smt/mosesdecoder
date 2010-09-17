@@ -1,6 +1,30 @@
 #include "BleuScorer.h"
 
-const int BleuScorer::LENGTH = 4;
+BleuScorer::BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_CLOSEST) {
+    //configure regularisation
+    static string KEY_REFLEN = "reflen";
+    static string REFLEN_AVERAGE = "average";
+    static string REFLEN_SHORTEST = "shortest";
+    static string REFLEN_CLOSEST = "closest";
+
+
+    string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
+    if (reflen == REFLEN_AVERAGE) {
+        _refLengthStrategy = BLEU_AVERAGE;
+    } else if (reflen == REFLEN_SHORTEST) {
+        _refLengthStrategy = BLEU_SHORTEST;
+    } else if (reflen == REFLEN_CLOSEST) {
+        _refLengthStrategy = BLEU_CLOSEST;
+    } else {
+        throw runtime_error("Unknown reference length strategy: " + reflen);
+    }
+    cerr << "Using reference length strategy: " << reflen << endl;
+
+    static string KEY_NGRAMS = "ngramlen";
+    string ngramlen = getConfig(KEY_NGRAMS,"4");
+
+    LENGTH = strtol(ngramlen.c_str(), NULL, 10);
+}
 
 
 /**
@@ -84,6 +108,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles) {
 			}
 			++sid;
 		}
+		refin.close();
 		TRACE_ERR(endl);
 	}
 }
@@ -153,7 +178,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 		entry.set(stats_str);
 }
 
-float BleuScorer::calculateScore(const vector<int>& comps) {
+float BleuScorer::calculateScore(const vector<float>& comps) {
     //cerr << "BLEU: ";
     //copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
 	float logbleu = 0.0;
@@ -172,4 +197,3 @@ float BleuScorer::calculateScore(const vector<int>& comps) {
     //cerr << " " << exp(logbleu) << endl;
 	return exp(logbleu);
 }
-

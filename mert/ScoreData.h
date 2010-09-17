@@ -81,6 +81,8 @@ public:
 			throw runtime_error("there is no entry at index " + idx);
 		return i->second;
 	}
+
+	void dump();
 };
 
 

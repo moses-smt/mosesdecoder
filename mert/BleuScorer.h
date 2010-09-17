@@ -25,35 +25,24 @@ enum BleuReferenceLengthStrategy { BLEU_AVERAGE, BLEU_SHORTEST, BLEU_CLOSEST };
  **/
 class BleuScorer: public StatisticsBasedScorer {
 	public:
-		BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_CLOSEST) {
-    //configure regularisation
-    static string KEY_REFLEN = "reflen";
-    static string REFLEN_AVERAGE = "average";
-    static string REFLEN_SHORTEST = "shortest";
-    static string REFLEN_CLOSEST = "closest";
-    
-    
-    string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
-    if (reflen == REFLEN_AVERAGE) {
-        _refLengthStrategy = BLEU_AVERAGE;
-    } else if (reflen == REFLEN_SHORTEST) {
-        _refLengthStrategy = BLEU_SHORTEST;
-    } else if (reflen == REFLEN_CLOSEST) {
-        _refLengthStrategy = BLEU_CLOSEST;
-    } else {
-        throw runtime_error("Unknown reference length strategy: " + reflen);
-    }
-    cerr << "Using reference length strategy: " << reflen << endl;
-}
+		BleuScorer(const string& config);
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-		static const int LENGTH;	
+		int LENGTH;	
 				
-		size_t NumberOfScores(){ cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl; return (2 * LENGTH + 1); };
+		size_t NumberOfScores() const { 
+		    //cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl; 
+				return (2 * LENGTH + 1); 
+		};
+		bool useAlignment() const {
+		    //cout << "BleuScorer::useAlignment returning false" << endl;
+		    return false;
+		};
+
 		
 		
     protected:
-        float calculateScore(const vector<int>& comps);
+        float calculateScore(const vector<float>& comps);
 		
 	private:
 		//no copy
@@ -90,9 +79,9 @@ class BleuScorer: public StatisticsBasedScorer {
 
 		void dump_counts(counts_t& counts) {
 			for (counts_it i = counts.begin(); i != counts.end(); ++i) {
-				cerr << "(";
-				copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
-				cerr << ") " << i->second << ", ";
+				  cerr << "(";
+				  copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
+				  cerr << ") " << i->second << ", ";
 			}
 			cerr << endl;
 		} 

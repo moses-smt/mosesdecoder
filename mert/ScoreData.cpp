@@ -16,10 +16,26 @@ ScoreData::ScoreData(Scorer& ptr):
 theScorer(&ptr)
 {
 	score_type = theScorer->getName();
-	theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData 	
+	//theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData 	
 	number_of_scores = theScorer->NumberOfScores();
 	TRACE_ERR("ScoreData: number_of_scores: " << number_of_scores << std::endl);  
 };
+
+void ScoreData::dump() 
+{
+  for (vector<ScoreArray>::iterator it = array_.begin(); it !=array_.end(); it++){
+	  cout << "scorearray: " << endl;
+		for (size_t i = 0; i < (*it).size(); i++) {
+		  ScoreStats scoreStats = (*it).get(i);
+		  cout << "scorestats: " ;
+			for (size_t j = 0; j < scoreStats.size(); j ++ ){
+			  ScoreStatsType scoreStatsType = scoreStats.get(j);
+			  cout << scoreStatsType << " " ;
+			}
+			cout << endl;
+		}
+	}
+}
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
 {
@@ -60,6 +76,7 @@ void ScoreData::load(ifstream& inFile)
 		}
 		add(entry);
 	}
+	theScorer->setScoreData(this);
 }
 
 

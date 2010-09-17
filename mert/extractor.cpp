@@ -20,7 +20,7 @@ using namespace std;
 
 void usage() {
   cerr<<"usage: extractor [options])"<<endl;
-  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--sctype|-s] the scorer type (default BLEU), possibly comma separated list of interpolated types"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc "<<endl;
   cerr<<"[--reference|-r] comma separated list of reference files"<<endl;
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
     bool binmode = false;
     int verbosity = 0;
     int c;
-    while ((c=getopt_long (argc,argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
+    while ((c=getopt_long (argc,argv, "s:w:r:a:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
         switch(c) {
             case 's':
                 scorerType = string(optarg);
@@ -173,6 +173,7 @@ int main(int argc, char** argv) {
 		if (binmode) cerr << "Binary write mode is selected" << endl;
 		else cerr << "Binary write mode is NOT selected" << endl;
 			
+		//TODO is comma separated list? split and create a scorer with multiple parts
 		TRACE_ERR("Scorer type: " << scorerType << endl);
 		ScorerFactory sfactory;
 		Scorer* scorer = sfactory.getScorer(scorerType,scorerConfig);

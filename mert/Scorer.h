@@ -58,7 +58,7 @@ class Scorer {
         /**
             * returns the number of statistics needed for the computation of the score
             **/
-        virtual size_t NumberOfScores(){ cerr << "Scorer: 0" << endl; return 0; };
+        virtual size_t NumberOfScores() const { cerr << "Scorer: 0" << endl; return 0; };
         
         /**
           * set the reference files. This must be called before prepareStats.
@@ -123,9 +123,19 @@ class Scorer {
         /**
           * Set the score data, prior to scoring.
           **/
-        void setScoreData(ScoreData* data) {
+        virtual void setScoreData(ScoreData* data) {
             _scoreData = data;
         }
+        /**
+          * The scorer returns if it uses the reference alignment data
+          * for permutation distance scores
+          **/
+        virtual bool useAlignment() const {
+				    //cout << "Scorer::useAlignment returning false " << endl;
+				    return false;
+				};
+        //calculate the actual score
+        virtual statscore_t calculateScore(const vector<statscore_t>& totals){return 0;};
 
         protected:
       typedef map<string,int> encodings_t;
@@ -233,10 +243,70 @@ class StatisticsBasedScorer : public Scorer {
     ~StatisticsBasedScorer(){};
     virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                 statscores_t& scores);
+        //calculate the actual score
+        virtual statscore_t calculateScore(const vector<statscore_t>& totals){return 0;};
 
     protected:
+
+        //regularisation
+        ScorerRegularisationStrategy _regularisationStrategy;
+        size_t  _regularisationWindow;
+
+};
+
+/**
+  * Abstract base class for scorers that work by using sentence level
+  * statistics eg. permutation distance metrics **/
+class SentenceLevelScorer : public Scorer {
+
+    public:
+      SentenceLevelScorer(const string& name, const string& config): Scorer(name,config) {
+        //configure regularisation
+        static string KEY_TYPE = "regtype";
+        static string KEY_WINDOW = "regwin";
+        static string KEY_CASE = "case";
+        static string TYPE_NONE = "none";
+        static string TYPE_AVERAGE = "average";
+        static string TYPE_MINIMUM = "min";
+        static string TRUE = "true";
+        static string FALSE = "false";
+        
+        string type = getConfig(KEY_TYPE,TYPE_NONE);
+        if (type == TYPE_NONE) {
+            _regularisationStrategy = REG_NONE;
+        } else if (type == TYPE_AVERAGE) {
+            _regularisationStrategy = REG_AVERAGE;
+        } else if (type == TYPE_MINIMUM) {
+            _regularisationStrategy = REG_MINIMUM;
+        } else {
+            throw runtime_error("Unknown scorer regularisation strategy: " + type);
+        }
+        cerr << "Using scorer regularisation strategy: " << type << endl;
+
+        string window = getConfig(KEY_WINDOW,"0");
+        _regularisationWindow = atoi(window.c_str());
+        cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
+        
+        string preservecase = getConfig(KEY_CASE,TRUE);
+        if (preservecase == TRUE) {
+            _preserveCase = true;
+        }else if (preservecase == FALSE) {
+            _preserveCase = false;
+        }
+        cerr << "Using case preservation: " << _preserveCase << endl;
+
+
+      }
+      ~SentenceLevelScorer(){};
+      virtual void score(const candidates_t& candidates, const diffs_t& diffs,
+                  statscores_t& scores);
+
         //calculate the actual score
-        virtual statscore_t calculateScore(const vector<int>& totals) = 0;
+        virtual statscore_t calculateScore(const vector<statscore_t>& totals){return 0;};
+
+
+
+    protected:
 
         //regularisation
         ScorerRegularisationStrategy _regularisationStrategy;
