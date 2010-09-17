@@ -10,6 +10,10 @@ namespace Mira {
                          	const Moses::ScoreComponentCollection& oracleScores) {
 
 	for(unsigned batch = 0; batch < scores.size(); batch++) {
+
+	  Moses::ScoreComponentCollection oldWeights(weights);
+	  float maxTranslation = -1000.0; //what wrong with FLT_MIN ?!
+
 	  for(unsigned analyseSentence = 0; analyseSentence < scores[batch].size(); analyseSentence++) {
 
             /* do this:
@@ -48,7 +52,10 @@ namespace Mira {
             tempColl.MinusEquals(scores[batch][analyseSentence]);
 	    tempColl.MultiplyEquals(delta);
 	    weights.MinusEquals(tempColl);
-			
+
+	    float tmp = losses[batch][analyseSentence] - oracleScores.InnerProduct(weights);
+	    if(tmp > maxTranslation)
+		maxTranslation = tmp;	
 			
             //calculate max. for criterion
             /*
@@ -62,6 +69,9 @@ namespace Mira {
 	    } 
 	    */
           }
+	  oldWeights.MinusEquals(weights);
+	  float criterion = 0.5*oldWeights.InnerProduct(oldWeights) + 0.01*maxTranslation;
+	  cout << "criterion: " << criterion << endl;
 	}
   }
 }
