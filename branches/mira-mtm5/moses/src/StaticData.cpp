@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionary.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
+#include "TargetBigramFeature.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "BleuScoreFeature.h"
@@ -455,6 +456,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGlobalLexicalModel()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
+  	if (!LoadTargetBigramFeature()) return false;
     
 
   //configure the translation systems with these tables
@@ -592,6 +594,7 @@ StaticData::~StaticData()
 
 	// small score producers
 	delete m_unknownWordPenaltyProducer;
+	delete m_targetBigramFeature;
 
 	//delete m_parameter;
 
@@ -1231,6 +1234,21 @@ bool StaticData::LoadReferences() {
   return true;
 }
 
+bool StaticData::LoadTargetBigramFeature()
+{
+	const vector<string> &wordFile = m_parameter->GetParam("target-bigram-feature-wordlist");
+	if (wordFile.size() != 1) {
+		UserMessage::Add("Wrong number of arguments for target-bigram-feature-wordlist (expected 1).");
+		return false;
+	}
+	m_targetBigramFeature = new TargetBigramFeature()
+	if (!m_targetBigramFeature->Load(wordFile[0])) {
+		UserMessage::Add("Unable to load word list from file " + wordFile[0]);
+		return false;
+	}
+
+	return true;
+}
 
 void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
 {

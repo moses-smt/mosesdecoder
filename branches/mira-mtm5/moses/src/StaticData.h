@@ -62,6 +62,7 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class TargetBigramFeature;
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;	
@@ -227,6 +228,7 @@ protected:
 	bool LoadGlobalLexicalModel();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
+	bool LoadTargetBigramFeature();
   
     void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
