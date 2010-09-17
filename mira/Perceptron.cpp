@@ -25,14 +25,14 @@ using namespace std;
 namespace Mira {
 
 void Perceptron::updateWeights(ScoreComponentCollection& currWeights,
-                   const vector< vector<const ScoreComponentCollection*> >& scores,
+                   const vector< vector<ScoreComponentCollection> >& scores,
                    const vector<vector<float> >& losses,
                    const ScoreComponentCollection& oracleScores)
 {
   for (size_t i = 0; i < scores.size(); ++i) {
     for (size_t j = 0; j < scores[i].size(); ++j) {
       if (losses[i][j] > 0) {
-        currWeights.MinusEquals(*scores[i][j]);
+        currWeights.MinusEquals(scores[i][j]);
         currWeights.PlusEquals(oracleScores);      
       }
     }

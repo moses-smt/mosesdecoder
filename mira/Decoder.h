@@ -52,12 +52,15 @@ class MosesDecoder {
   public:
     MosesDecoder();
 	
-    virtual void getNBest(const std::string& source,
+    void getNBest(const std::string& source,
                           size_t count,
                           std::vector<const Moses::ScoreComponentCollection*>& featureScores,
                           std::vector<float>& totalScores  );
-    virtual float getBleuScore(const Moses::ScoreComponentCollection& scores);
-		virtual void cleanup();
+    float getBleuScore(const Moses::ScoreComponentCollection& scores);
+    void setBleuScore(Moses::ScoreComponentCollection& scores, float bleu);
+    Moses::ScoreComponentCollection getWeights();
+    void setWeights(const Moses::ScoreComponentCollection& weights);
+		void cleanup();
 		
 	private:
 		Moses::Manager *m_manager;

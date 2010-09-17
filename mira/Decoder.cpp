@@ -122,6 +122,20 @@ namespace Mira {
   float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
     return scores.GetScoreForProducer(m_bleuScoreFeature);
   }
+
+  void MosesDecoder::setBleuScore(ScoreComponentCollection& scores, float bleu) {
+    scores.Assign(m_bleuScoreFeature,bleu);
+  }
+
+  ScoreComponentCollection MosesDecoder::getWeights() {
+    cerr << "TODO: Provide access to moses weights" << endl;
+    return ScoreComponentCollection();//StaticData::Instance().GetAllWeights());
+  }
+
+  void MosesDecoder::setWeights(const ScoreComponentCollection& weights) {
+    cerr << "New weights: " << weights << endl;
+    cerr << "Updating: TODO " << endl;
+  }
 	
 } 
 
