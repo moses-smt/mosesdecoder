@@ -47,6 +47,9 @@ public:
 	const std::string &GetFeatureName(size_t fIndex) const;
 	//! get the index of a feature by name
 	size_t GetFeatureIndex(const std::string& fName) const;
+	
+	const std::vector<const ScoreProducer*> &GetProducers() const
+	{ return m_producers; }
 
 #ifdef HAVE_PROTOBUF
 	void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
