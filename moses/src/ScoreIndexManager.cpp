@@ -101,6 +101,7 @@ void ScoreIndexManager::InitFeatureNames() {
 	}
 }
 
+#if 0
 void ScoreIndexManager::InitFeatureNamesAles() {
 	m_featureNames.clear();
 	m_featureIndexes.clear();
@@ -119,6 +120,7 @@ void ScoreIndexManager::InitFeatureNamesAles() {
 		}
 	}
 }
+#endif
 
 #ifdef HAVE_PROTOBUF
 void ScoreIndexManager::SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const {
