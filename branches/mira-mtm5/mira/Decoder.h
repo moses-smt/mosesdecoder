@@ -24,14 +24,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 
 
+#include "BleuScoreFeature.h"
+#include "ChartTrellisPathList.h"
 #include "Hypothesis.h"
 #include "Parameter.h"
-#include "Sentence.h"
 #include "SearchNormal.h"
+#include "Sentence.h"
 #include "StaticData.h"
-#include "ChartTrellisPathList.h"
-#include "TranslationOptionCollectionText.h"
-#include "ChartManager.h"
 
 //
 // Wrapper functions and objects for the decoder.
@@ -39,38 +38,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Mira {
   
-typedef std::vector<const Moses::Factor*> Translation;
-
 /**
  * Initialise moses (including StaticData) using the given ini file and debuglevel, passing through any 
- * other command line arguments. This must be called, even if the moses decoder is not being used, as the
- * sampler requires the moses tables.
+ * other command line arguments. 
  **/
 void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** argv=NULL );
 
 
 /**
-  * Wrapper around any decoder.
-  **/
-class Decoder {
-  public:
-    virtual void getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences) = 0;
-    virtual ~Decoder();
-};
-/**
   * Wraps moses decoder.
  **/
-class MosesDecoder : public Decoder {
+class MosesDecoder {
   public:
     MosesDecoder();
 	
-    virtual void getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences);
-		void cleanup();
-		void OutputNBestList(const MosesChart::TrellisPathList &sentences, std::vector<const Moses::ScoreComponentCollection*> &out);
+    virtual void getNBest(const std::string& source,
+                          size_t count,
+                          std::vector<const Moses::ScoreComponentCollection*>& featureScores,
+                          std::vector<float>& totalScores  );
+    virtual float getBleuScore(const Moses::ScoreComponentCollection& scores);
+		virtual void cleanup();
 		
 	private:
-		MosesChart::Manager *m_manager;
+		Moses::Manager *m_manager;
 		Moses::Sentence *m_sentence;
+    Moses::BleuScoreFeature *m_bleuScoreFeature;
 	
 
 };
