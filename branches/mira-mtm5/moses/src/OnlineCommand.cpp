@@ -47,6 +47,7 @@ OnlineCommand::OnlineCommand()
 	accepted_commands.push_back("-weight-w"); // weight for word penalty
 	accepted_commands.push_back("-weight-u"); // weight for unknown words penalty
 	accepted_commands.push_back("-weight-g"); // weight(s) for global lexical model components
+	accepted_commands.push_back("-weight-b"); // weight(s) for global lexical model components
 	accepted_commands.push_back("-verbose"); // weights for translation model components
 }
 	
