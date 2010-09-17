@@ -39,6 +39,27 @@
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
+		1EF4E84C12440612006233A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6C6124268270059001A /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses */;
+			remoteInfo = moses;
+		};
+		1EF4E84E12440612006233A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6CC124268310059001A /* moses-chart.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses-chart */;
+			remoteInfo = "moses-chart";
+		};
+		1EF4E85012440612006233A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* OnDiskPt */;
+			remoteInfo = OnDiskPt;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -164,6 +185,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				1EF4E84D12440612006233A0 /* PBXTargetDependency */,
+				1EF4E84F12440612006233A0 /* PBXTargetDependency */,
+				1EF4E85112440612006233A0 /* PBXTargetDependency */,
 			);
 			name = mira;
 			productInstallPath = "$(HOME)/bin";
@@ -239,6 +263,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1EF4E84D12440612006233A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 1EF4E84C12440612006233A0 /* PBXContainerItemProxy */;
+		};
+		1EF4E84F12440612006233A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "moses-chart";
+			targetProxy = 1EF4E84E12440612006233A0 /* PBXContainerItemProxy */;
+		};
+		1EF4E85112440612006233A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1EF4E85012440612006233A0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB923208733DC60010E9CD /* Debug */ = {

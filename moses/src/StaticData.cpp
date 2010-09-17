@@ -1350,7 +1350,6 @@ void StaticData::ReLoadParameter()
 	{
 		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
 		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
-		cerr << paramShortName << endl;
 		
 		if (paramShortName == "d"){ //basic distortion model takes the first weight
 			if ((*iterSP)->GetScoreProducerDescription() == "Distortion"){
