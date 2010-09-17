@@ -1,4 +1,5 @@
 #include "TargetBigramFeature.h"
+#include "InputFileStream.h"
 
 namespace Moses {
 
@@ -7,6 +8,25 @@ using namespace std;
 TargetBigramFeature::TargetBigramFeature(ScoreIndexManager &scoreIndexManager)
 {
 }
+
+bool TargetBigramFeature::Load(const std::string &filePath) 
+{
+  InputFileStream inFile(filePath);
+  if (!inFile)
+      return false;
+
+  std::string line;
+  while (getline(inFile, line)) {
+      m_wordSet.insert(line);
+  }
+
+  inFile.Close();
+}
+
+//static size_t TargetBigramFeature::GetWordIndex(const std::string &word) const
+//{
+ // m_wordSet.find(word);
+//}
 
 size_t TargetBigramFeature::GetNumScoreComponents() const
 {

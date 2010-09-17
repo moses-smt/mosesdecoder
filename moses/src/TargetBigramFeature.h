@@ -4,6 +4,7 @@
 #include "FeatureFunction.h"
 #include "FFState.h"
 #include <string>
+#include <set>
 
 namespace Moses
 {
@@ -14,6 +15,8 @@ class TargetBigramFeature : public StatefulFeatureFunction {
 public:
 	TargetBigramFeature(ScoreIndexManager &scoreIndexManager);
 
+	bool Load(const std::string &filePath);
+
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const;
@@ -23,6 +26,8 @@ public:
 
 	virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
 	                          ScoreComponentCollection* accumulator) const;
+private:
+	std::set<std::string> m_wordSet;
 };
 
 }
