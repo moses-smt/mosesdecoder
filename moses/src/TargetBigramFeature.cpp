@@ -9,7 +9,7 @@ namespace Moses {
 
 using namespace std;
 
-TargetBigramFeature::TargetBigramFeature(ScoreIndexManager &scoreIndexManager)
+TargetBigramFeature::TargetBigramFeature(ScoreIndexManager &/*scoreIndexManager*/)
 {
 }
 
@@ -19,22 +19,18 @@ bool TargetBigramFeature::Load(const std::string &filePath)
   if (!inFile)
       return false;
 
+  size_t lineNo = 0;
   std::string line;
   while (getline(inFile, line)) {
-      m_wordSet.insert(line);
+      m_wordMap[line] = lineNo++;
   }
 
   inFile.Close();
 }
 
-//static size_t TargetBigramFeature::GetWordIndex(const std::string &word) const
-//{
- // m_wordSet.find(word);
-//}
-
 size_t TargetBigramFeature::GetNumScoreComponents() const
 {
-	return m_wordSet.size() * m_wordSet.size();
+	return m_wordMap.size() * m_wordMap.size();
 }
 
 string TargetBigramFeature::GetScoreProducerDescription() const
@@ -53,7 +49,7 @@ size_t TargetBigramFeature::GetNumInputScores() const
 }
 
 
-const FFState* TargetBigramFeature::EmptyHypothesisState(const InputType &input) const
+const FFState* TargetBigramFeature::EmptyHypothesisState(const InputType &/*input*/) const
 {
 	return NULL;
 }

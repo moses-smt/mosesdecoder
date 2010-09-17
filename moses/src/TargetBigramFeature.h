@@ -4,7 +4,7 @@
 #include "FeatureFunction.h"
 #include "FFState.h"
 #include <string>
-#include <set>
+#include <map>
 
 namespace Moses
 {
@@ -27,7 +27,7 @@ public:
 	virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
 	                          ScoreComponentCollection* accumulator) const;
 private:
-	std::set<std::string> m_wordSet;
+	std::map<std::string, size_t> m_wordMap;
 };
 
 }
