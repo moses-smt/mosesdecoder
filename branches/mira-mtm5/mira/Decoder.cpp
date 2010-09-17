@@ -151,17 +151,13 @@ namespace Mira {
     vector<const Word*> best;
 		assert(sentences.GetSize() > 0);
 		const TrellisPath &path = sentences.at(0);
-    const std::vector<const Hypothesis *> &edges = sentences.at(0).GetEdges();
-
-    for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+		Phrase bestPhrase = path.GetTargetPhrase();
+		
+    for (int pos = 0; pos < bestPhrase.GetSize(); ++pos)
     {
-      const Hypothesis &edge = *edges[currEdge];
-      const Phrase &phrase = edge.GetCurrTargetPhrase();
-      size_t size = phrase.GetSize();
-      for (size_t pos = 0 ; pos < size ; pos++)
-      {
-        best.push_back(&phrase.GetWord(pos));
-      }
+			const Word &word = bestPhrase.GetWord(pos);
+			Word *newWord = new Word(word);
+			best.push_back(newWord);
     }
 
 
