@@ -62,9 +62,7 @@ class Decoder {
  **/
 class MosesDecoder : public Decoder {
   public:
-    MosesDecoder()
-		: m_manager(NULL)
-		{}
+    MosesDecoder();
 	
     virtual void getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences);
 		void cleanup();
