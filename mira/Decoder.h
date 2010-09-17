@@ -54,15 +54,17 @@ class MosesDecoder {
 	
     void getNBest(const std::string& source,
                           size_t count,
-                          std::vector<const Moses::ScoreComponentCollection*>& featureScores,
-                          std::vector<float>& totalScores  );
-    float getBleuScore(const Moses::ScoreComponentCollection& scores);
-    void setBleuScore(Moses::ScoreComponentCollection& scores, float bleu);
+                          float bleuObjectiveweight, //weight of bleu in objective
+                          float bleuScoreWeight, //weight of bleu in score
+                          std::vector<Moses::ScoreComponentCollection>& featureValues,
+                          std::vector<float>& scores );
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
 		void cleanup();
 		
 	private:
+    float getBleuScore(const Moses::ScoreComponentCollection& scores);
+    void setBleuScore(Moses::ScoreComponentCollection& scores, float bleu);
 		Moses::Manager *m_manager;
 		Moses::Sentence *m_sentence;
     Moses::BleuScoreFeature *m_bleuScoreFeature;
