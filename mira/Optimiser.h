@@ -30,7 +30,7 @@ namespace Mira {
     public:
       Optimiser() {}
       virtual float updateWeights(const std::vector<float>& currWeights,
-                         const std::vector<Moses::ScoreComponentCollection>& scores,
+                         const std::vector<const Moses::ScoreComponentCollection*>& scores,
                          const std::vector<float>& losses,
                          const Moses::ScoreComponentCollection oracleScores,
                          std::vector<float>& newWeights) = 0;
@@ -39,7 +39,7 @@ namespace Mira {
   class DummyOptimiser : public Optimiser {
     public:
       virtual float updateWeights(const std::vector<float>& currWeights,
-                         const std::vector<Moses::ScoreComponentCollection>& scores,
+                         const std::vector<const Moses::ScoreComponentCollection*>& scores,
                          const std::vector<float>& losses,
                          const Moses::ScoreComponentCollection oracleScores,
                          std::vector<float>& newWeights) {newWeights = currWeights; return 0.0; }
@@ -55,7 +55,7 @@ namespace Mira {
      ~MiraOptimiser() {} 
      
     virtual float updateWeights(const std::vector<float>& currWeights,
-                         const std::vector<Moses::ScoreComponentCollection>& scores,
+                         const std::vector<const Moses::ScoreComponentCollection*>& scores,
                          const std::vector<float>& losses,
                          const Moses::ScoreComponentCollection oracleScores,
                          std::vector<float>& newWeights);

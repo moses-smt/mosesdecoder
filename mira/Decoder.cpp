@@ -83,16 +83,22 @@ namespace Mira {
     m_manager = new MosesChart::Manager(*m_sentence, &system); 
     m_manager->ProcessSentence();
     m_manager->CalcNBest(count,sentences);
-				
+						
+  }
+
+	void MosesDecoder::OutputNBestList(const MosesChart::TrellisPathList &sentences, std::vector<const Moses::ScoreComponentCollection*> &out)
+	{
 		MosesChart::TrellisPathList::const_iterator iter;
 		for (iter = sentences.begin() ; iter != sentences.end() ; ++iter)
 		{
 			const MosesChart::TrellisPath &path = **iter;
 			cerr << path << endl << endl;
+			
+			const Moses::ScoreComponentCollection &scoreBreakdown = path.GetScoreBreakdown();
+			out.push_back(&scoreBreakdown);
 		}
-		
-		cerr << std::flush;
-		
-  }
+			
+	}
 	
 } 
+

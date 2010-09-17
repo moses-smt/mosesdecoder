@@ -27,7 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureVector.h"
 #include "StaticData.h"
 #include "ChartTrellisPathList.h"
-
+#include "ChartTrellisPath.h"
+#include "ScoreComponentCollection.h"
 #include "Decoder.h"
 #include "Optimiser.h"
 
@@ -120,9 +121,11 @@ int main(int argc, char** argv) {
   //Main loop:
   srand(time(NULL));
   MosesDecoder decoder;
-  Optimiser* optimiser = new DummyOptimiser();
+  DummyOptimiser optimiser;
   size_t epochs = 1;
   
+	std::vector<float> currWeights, newWeights, losses;
+	
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
     //TODO: batch
     for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
@@ -130,14 +133,46 @@ int main(int argc, char** argv) {
       const vector<string>& refs = referenceSentences[sid];
 
       //run decoder (TODO: hope & fear)
-			MosesChart::TrellisPathList sentences;
-      decoder.getNBest(input, 100, sentences);
+			MosesChart::TrellisPathList models, hopes, fears;
+			
+			vector<const Moses::ScoreComponentCollection*> scores;
 
+			StaticData &staticNonConst = StaticData::InstanceNonConst();
+
+			// MODEL
+			PARAM_VEC bleuWeight(1, "0");
+			
+			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
+			staticNonConst.ReLoadParameter();
+      decoder.getNBest(input, 100, models);
+			decoder.OutputNBestList(models, scores);
+
+			// HOPE
+			bleuWeight[0] = "+1";
+			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
+			staticNonConst.ReLoadParameter();
+			decoder.getNBest(input, 100, hopes);
+			decoder.OutputNBestList(hopes, scores);
+			
+			// FEAR
+			bleuWeight[0] = "-1";
+			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
+			staticNonConst.ReLoadParameter();
+			decoder.getNBest(input, 100, fears);
+			decoder.OutputNBestList(fears, scores);
+						
       //extract scores from nbest + oracle
-
 			
       //run optimiser
-
+			const MosesChart::TrellisPath &pathOracle = hopes.Get(0);
+			const Moses::ScoreComponentCollection &oracle = pathOracle.GetScoreBreakdown();
+			
+			optimiser.updateWeights(currWeights
+															, scores
+															, losses
+															, oracle
+															, newWeights);
+			
       //update moses weights
 			
 			decoder.cleanup();
