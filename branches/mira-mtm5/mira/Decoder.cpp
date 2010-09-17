@@ -70,9 +70,9 @@ namespace Mira {
 		{
       //force initialisation of the phrase dictionary
       string source("hello");
-      vector<const ScoreComponentCollection*> featureScores;
+      vector<ScoreComponentCollection> featureScores;
       vector<float> totalScores;
-      getNBest(source,1,featureScores,totalScores);
+      getNBest(source,(size_t)1,0.0f,0.0f,featureScores,totalScores);
 
       //Add the bleu feature
       m_bleuScoreFeature = new BleuScoreFeature();
@@ -89,11 +89,13 @@ namespace Mira {
 	
   void MosesDecoder::getNBest(const std::string& source,
                               size_t count,
-                              vector<const ScoreComponentCollection*>& featureScores,
-                              std::vector<float>& totalScores  )
+                              float bleuObjectiveWeight, 
+                              float bleuScoreWeight, 
+                              vector<ScoreComponentCollection>& featureValues,
+                              std::vector<float>& scores  )
   {
 
-    const StaticData &staticData = StaticData::Instance();
+    StaticData &staticData = StaticData::InstanceNonConst();
 
 		m_sentence = new Sentence(Input);
     stringstream in(source + "\n");
@@ -102,19 +104,35 @@ namespace Mira {
     const TranslationSystem& system = staticData.GetTranslationSystem
         (TranslationSystem::DEFAULT);
 
+    //set the weight for the bleu feature
+    ostringstream bleuWeightStr;
+    bleuWeightStr << bleuObjectiveWeight;
+    PARAM_VEC bleuWeight(1,bleuWeightStr.str());
+    staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
+    staticData.ReLoadParameter();
+
+    //run the decoder
     m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
     m_manager->ProcessSentence();
     TrellisPathList sentences;
     m_manager->CalcNBest(count,sentences);
 						
+    //read off the scores
 		Moses::TrellisPathList::const_iterator iter;
 		for (iter = sentences.begin() ; iter != sentences.end() ; ++iter)
 		{
 			const Moses::TrellisPath &path = **iter;
-			cerr << path << endl << endl;
 			
-			featureScores.push_back(&path.GetScoreBreakdown());
-      totalScores.push_back(path.GetTotalScore());
+			featureValues.push_back(path.GetScoreBreakdown());
+      //make sure bleu is correctly weighted in the final objective
+      float totalScore = path.GetTotalScore();
+      float bleuScore = getBleuScore(featureValues.back());
+      totalScore -= bleuScore*bleuObjectiveWeight;
+      totalScore += bleuScore*bleuScoreWeight;
+      scores.push_back(totalScore);
+
+      //set bleu score to zero in the feature vector
+      setBleuScore(featureValues.back(),0);
 		}
 			
 	}

@@ -139,64 +139,50 @@ int main(int argc, char** argv) {
       vector<vector<ScoreComponentCollection > > allScores(1);
       vector<vector<float> > allLosses(1);
 
-			vector<const Moses::ScoreComponentCollection*> scores;
-      vector<float> totalScores;
-
-			StaticData &staticNonConst = StaticData::InstanceNonConst();
 
 			// MODEL
-			PARAM_VEC bleuWeight(1, "0");
-			staticNonConst.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
-			staticNonConst.ReLoadParameter();
-      scores.clear(); totalScores.clear();
-      decoder->getNBest(input, modelHypoCount, scores, totalScores);
-      for (size_t i = 0; i < scores.size(); ++i) {
-        allScores[0].push_back(*scores[i]);
-        allLosses[0].push_back(totalScores[i] + decoder->getBleuScore(*scores[i]));
-      }
+      decoder->getNBest(input,
+                        modelHypoCount,
+                        0.0,
+                        1.0,
+                        allScores[0],
+                        allLosses[0]);
+
 
 			// HOPE
-			bleuWeight[0] = "+1";
-			staticNonConst.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
-			staticNonConst.ReLoadParameter();
-      scores.clear(); totalScores.clear();
-			decoder->getNBest(input, hopeHypoCount, scores, totalScores);
-      for (size_t i = 0; i < scores.size(); ++i) {
-        allScores[0].push_back(*scores[i]);
-        allLosses[0].push_back(totalScores[i]);
-      }
-      assert(scores.size());
-      const ScoreComponentCollection* oracleScores = scores[0];
-      float oracleLoss = totalScores[0];
+      size_t oraclePos = allScores.size();
+      decoder->getNBest(input,
+                        modelHypoCount,
+                        1.0,
+                        1.0,
+                        allScores[0],
+                        allLosses[0]);
+
+      ScoreComponentCollection oracleScores = allScores[0][oraclePos];
+      float oracleLoss = allLosses[0][oraclePos];
 			
 			// FEAR
-			bleuWeight[0] = "-1";
-			staticNonConst.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
-			staticNonConst.ReLoadParameter();
-      scores.clear(); totalScores.clear();
-			decoder->getNBest(input, fearHypoCount, scores, totalScores);
-      for (size_t i = 0; i < scores.size(); ++i) {
-        allScores[0].push_back(*scores[i]);
-        allLosses[0].push_back(totalScores[i] + 2*decoder->getBleuScore(*scores[i])); 
-      }
+      decoder->getNBest(input,
+                        modelHypoCount,
+                        -1.0,
+                        1.0,
+                        allScores[0],
+                        allLosses[0]);
 
-      //set bleu score to zero in allScores
       //set loss for each sentence ss oracleloss - rawsentenceloss
       for (size_t i = 0; i < allScores.size(); ++i) {
         for (size_t j = 0; j < allScores[i].size(); ++j) {
-          decoder->setBleuScore(allScores[i][j],0);
           allLosses[i][j] = oracleLoss - allLosses[i][j];
         }
       }
 
-						
 			
       //run optimiser
 		  ScoreComponentCollection mosesWeights = decoder->getWeights();	
 			optimiser->updateWeights(mosesWeights
 															, allScores
 															, allLosses
-															, *oracleScores);
+															, oracleScores);
 			
       //update moses weights
       decoder->setWeights(mosesWeights);
