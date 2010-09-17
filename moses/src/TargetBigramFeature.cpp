@@ -9,8 +9,9 @@ namespace Moses {
 
 using namespace std;
 
-TargetBigramFeature::TargetBigramFeature(ScoreIndexManager &/*scoreIndexManager*/)
+TargetBigramFeature::TargetBigramFeature(ScoreIndexManager &scoreIndexManager)
 {
+  scoreIndexManager.AddScoreProducer(this);
 }
 
 bool TargetBigramFeature::Load(const std::string &filePath) 
