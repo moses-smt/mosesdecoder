@@ -119,22 +119,27 @@ int main(int argc, char** argv) {
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
 
   //Main loop:
-  MosesDecoder decoder;
-  Perceptron optimiser;
+  ScoreComponentCollection cumulativeWeights;
+  MosesDecoder* decoder = new MosesDecoder() ;
+  Optimiser* optimiser = new Perceptron();
   size_t epochs = 1;
+  size_t modelHypoCount = 10;
+  size_t hopeHypoCount = 10;
+  size_t fearHypoCount = 10;
+  size_t iterations;
   
 	
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
     //TODO: batch
     for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
+      ++iterations;
       const string& input = inputSentences[sid];
       const vector<string>& refs = referenceSentences[sid];
 
-      vector<vector<const ScoreComponentCollection* > > allScores;
-      vector<vector<float> > allLosses;
+      vector<vector<ScoreComponentCollection > > allScores(1);
+      vector<vector<float> > allLosses(1);
 
 			vector<const Moses::ScoreComponentCollection*> scores;
-	    vector<float> losses;
       vector<float> totalScores;
 
 			StaticData &staticNonConst = StaticData::InstanceNonConst();
@@ -143,36 +148,61 @@ int main(int argc, char** argv) {
 			PARAM_VEC bleuWeight(1, "0");
 			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
 			staticNonConst.ReLoadParameter();
-      decoder.getNBest(input, 100, scores, totalScores);
+      scores.clear(); totalScores.clear();
+      decoder->getNBest(input, modelHypoCount, scores, totalScores);
+      for (size_t i = 0; i < scores.size(); ++i) {
+        allScores[0].push_back(*scores[i]);
+        allLosses[0].push_back(totalScores[i] + decoder->getBleuScore(*scores[i]));
+      }
 
 			// HOPE
 			bleuWeight[0] = "+1";
 			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
 			staticNonConst.ReLoadParameter();
-			decoder.getNBest(input, 100, scores, totalScores);
+      scores.clear(); totalScores.clear();
+			decoder->getNBest(input, hopeHypoCount, scores, totalScores);
+      for (size_t i = 0; i < scores.size(); ++i) {
+        allScores[0].push_back(*scores[i]);
+        allLosses[0].push_back(totalScores[i]);
+      }
+      assert(scores.size());
+      const ScoreComponentCollection* oracleScores = scores[0];
 			
 			// FEAR
 			bleuWeight[0] = "-1";
 			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
 			staticNonConst.ReLoadParameter();
-			decoder.getNBest(input, 100, scores, totalScores);
+      scores.clear(); totalScores.clear();
+			decoder->getNBest(input, fearHypoCount, scores, totalScores);
+      for (size_t i = 0; i < scores.size(); ++i) {
+        allScores[0].push_back(*scores[i]);
+        allLosses[0].push_back(totalScores[i] + 2*decoder->getBleuScore(*scores[i])); 
+      }
+
+      //set bleu score to zero in allScores
+      for (size_t i = 0; i < allScores.size(); ++i) {
+        for (size_t j = 0; j < allScores[i].size(); ++j) {
+          decoder->setBleuScore(allScores[i][j],0);
+        }
+      }
 						
-      //extract scores from nbest + oracle
 			
       //run optimiser
-			const Moses::ScoreComponentCollection oracle;
-			
-      ScoreComponentCollection mosesWeights; //TODO
-      allScores.push_back(scores);
-      allLosses.push_back(losses);
-			optimiser.updateWeights(mosesWeights
+		  ScoreComponentCollection mosesWeights = decoder->getWeights();	
+			optimiser->updateWeights(mosesWeights
 															, allScores
 															, allLosses
-															, oracle);
+															, *oracleScores);
 			
       //update moses weights
+      decoder->setWeights(mosesWeights);
+
+      cumulativeWeights.PlusEquals(mosesWeights);
+      cerr << "Cumulative weights: " << cumulativeWeights << endl;
+      cerr << "Averaging: TODO " << endl;
+
 			
-			decoder.cleanup();
+			decoder->cleanup();
     }
   }
   
