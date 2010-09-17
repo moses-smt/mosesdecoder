@@ -119,12 +119,10 @@ int main(int argc, char** argv) {
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
 
   //Main loop:
-  srand(time(NULL));
   MosesDecoder decoder;
   Perceptron optimiser;
   size_t epochs = 1;
   
-	std::vector<float> losses;
 	
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
     //TODO: batch
@@ -132,44 +130,39 @@ int main(int argc, char** argv) {
       const string& input = inputSentences[sid];
       const vector<string>& refs = referenceSentences[sid];
 
-      //run decoder (TODO: hope & fear)
-			MosesChart::TrellisPathList models, hopes, fears;
-			
+      vector<vector<const ScoreComponentCollection* > > allScores;
+      vector<vector<float> > allLosses;
+
 			vector<const Moses::ScoreComponentCollection*> scores;
+	    vector<float> losses;
+      vector<float> totalScores;
 
 			StaticData &staticNonConst = StaticData::InstanceNonConst();
 
 			// MODEL
 			PARAM_VEC bleuWeight(1, "0");
-			
 			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
 			staticNonConst.ReLoadParameter();
-      decoder.getNBest(input, 100, models);
-			decoder.OutputNBestList(models, scores);
+      decoder.getNBest(input, 100, scores, totalScores);
 
 			// HOPE
 			bleuWeight[0] = "+1";
 			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
 			staticNonConst.ReLoadParameter();
-			decoder.getNBest(input, 100, hopes);
-			decoder.OutputNBestList(hopes, scores);
+			decoder.getNBest(input, 100, scores, totalScores);
 			
 			// FEAR
 			bleuWeight[0] = "-1";
 			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
 			staticNonConst.ReLoadParameter();
-			decoder.getNBest(input, 100, fears);
-			decoder.OutputNBestList(fears, scores);
+			decoder.getNBest(input, 100, scores, totalScores);
 						
       //extract scores from nbest + oracle
 			
       //run optimiser
-			const MosesChart::TrellisPath &pathOracle = hopes.Get(0);
-			const Moses::ScoreComponentCollection &oracle = pathOracle.GetScoreBreakdown();
+			const Moses::ScoreComponentCollection oracle;
 			
       ScoreComponentCollection mosesWeights; //TODO
-      vector<vector<const ScoreComponentCollection* > > allScores;
-      vector<vector<float> > allLosses;
       allScores.push_back(scores);
       allLosses.push_back(losses);
 			optimiser.updateWeights(mosesWeights

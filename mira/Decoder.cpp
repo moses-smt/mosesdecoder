@@ -19,9 +19,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Decoder.h"
 #include "Manager.h"
+#include "Sentence.h"
 #include "TranslationSystem.h"
 #include "Phrase.h"
-#include "ChartTrellisPath.h"
+#include "TrellisPathList.h"
 #include "DummyScoreProducers.h"
 
 using namespace std;
@@ -30,7 +31,7 @@ using namespace Moses;
 
 namespace Mira {
 
-  Decoder::~Decoder() {}
+  //Decoder::~Decoder() {}
 
   /**
     * Allocates a char* and copies string into it.
@@ -69,8 +70,15 @@ namespace Mira {
 		{
       //force initialisation of the phrase dictionary
       string source("hello");
-      MosesChart::TrellisPathList sentences;
-      getNBest(source,1,sentences);
+      vector<const ScoreComponentCollection*> featureScores;
+      vector<float> totalScores;
+      getNBest(source,1,featureScores,totalScores);
+
+      //Add the bleu feature
+      m_bleuScoreFeature = new BleuScoreFeature();
+      const TranslationSystem& system = StaticData::Instance().GetTranslationSystem
+          (TranslationSystem::DEFAULT);
+      (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
     }
   
 	void MosesDecoder::cleanup()
@@ -79,7 +87,12 @@ namespace Mira {
 		delete m_sentence;
 	}
 	
-  void MosesDecoder::getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences) {
+  void MosesDecoder::getNBest(const std::string& source,
+                              size_t count,
+                              vector<const ScoreComponentCollection*>& featureScores,
+                              std::vector<float>& totalScores  )
+  {
+
     const StaticData &staticData = StaticData::Instance();
 
 		m_sentence = new Sentence(Input);
@@ -89,25 +102,26 @@ namespace Mira {
     const TranslationSystem& system = staticData.GetTranslationSystem
         (TranslationSystem::DEFAULT);
 
-    m_manager = new MosesChart::Manager(*m_sentence, &system); 
+    m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
     m_manager->ProcessSentence();
+    TrellisPathList sentences;
     m_manager->CalcNBest(count,sentences);
 						
-  }
-
-	void MosesDecoder::OutputNBestList(const MosesChart::TrellisPathList &sentences, std::vector<const Moses::ScoreComponentCollection*> &out)
-	{
-		MosesChart::TrellisPathList::const_iterator iter;
+		Moses::TrellisPathList::const_iterator iter;
 		for (iter = sentences.begin() ; iter != sentences.end() ; ++iter)
 		{
-			const MosesChart::TrellisPath &path = **iter;
+			const Moses::TrellisPath &path = **iter;
 			cerr << path << endl << endl;
 			
-			const Moses::ScoreComponentCollection &scoreBreakdown = path.GetScoreBreakdown();
-			out.push_back(&scoreBreakdown);
+			featureScores.push_back(&path.GetScoreBreakdown());
+      totalScores.push_back(path.GetTotalScore());
 		}
 			
 	}
+
+  float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
+    return scores.GetScoreForProducer(m_bleuScoreFeature);
+  }
 	
 } 
 
