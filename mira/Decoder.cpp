@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Decoder.h"
 #include "Manager.h"
 #include "Sentence.h"
+#include "InputType.h"
 #include "TranslationSystem.h"
 #include "Phrase.h"
 #include "TrellisPathList.h"
@@ -70,13 +71,16 @@ namespace Mira {
 		{
       //force initialisation of the phrase dictionary
       const StaticData &staticData = StaticData::Instance();
-      Sentence sentence(Input);
+      m_sentence = new Sentence(Input);
       stringstream in("hello\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      sentence.Read(in,inputFactorOrder);
+      m_sentence->Read(in,inputFactorOrder);
+			
+			std::cerr << ((InputType&) *m_sentence).ToString() << std::endl;
+			
       const TranslationSystem& system = staticData.GetTranslationSystem
           (TranslationSystem::DEFAULT);
-      Manager manager(sentence, staticData.GetSearchAlgorithm(), &system); 
+      m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
       m_manager->ProcessSentence();
 
       //Add the bleu feature
