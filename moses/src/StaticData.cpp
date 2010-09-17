@@ -1338,10 +1338,14 @@ void StaticData::ReLoadParameter()
 			}
 			//			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
 			//			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
-			SetWeightsForScoreProducer(*iterSP, Weights);
 			//  	std::cerr << Weights << std::endl;
 		}
-	}
+		else if (paramShortName == "tm")
+		{
+			continue;
+		}
+		SetWeightsForScoreProducer(*iterSP, Weights);
+}
 	
 	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
 	
@@ -1367,15 +1371,9 @@ void StaticData::ReLoadParameter()
 		//  std::cerr << tmp_weights << std::endl;
 		
 		phraseDictionary.SetWeightTransModel(tmp_weights);
+		SetWeightsForScoreProducer(&phraseDictionaryFeature, tmp_weights);
 	}
 	
-	const LMList &languageModels = transSystem.GetLanguageModels();
-	LMList::const_iterator lmIter;
-	size_t index_WeightLM = 0;
-	for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter)
-	{
-		LanguageModel &lm = **lmIter;
-	}
 }
 	
 }
