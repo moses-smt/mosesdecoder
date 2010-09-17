@@ -79,6 +79,8 @@ public:
 	  m_scores.clear();
 	}
 
+	void MultiplyEquals(float scalar);
+
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
 	{

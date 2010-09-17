@@ -36,10 +36,14 @@ namespace Mira {
             else if(delta < lowerBound_)
               delta = lowerBound_;
 
-    	    for(unsigned score = 0; score < scores[analyseSentence].size(); score++) {
-	      weights[score] += (delta * (oracleScores[score] - scores[batch][analyseSentence][score]) ); 
-	    }
-  	    StaticData::GetInstanceNonConst().SetWeightsScoreComponentCollection(weights);	
+						// do this:	weights += delta * (oracleScores - scores[batch][analyseSentence]);
+						Moses::ScoreComponentCollection tempColl = oracleScores;
+						tempColl.MinusEquals(scores[batch][analyseSentence]);
+						tempColl.MultiplyEquals(delta);
+						weights.MinusEquals(tempColl);
+			
+			
+					//StaticData::GetInstanceNonConst().SetWeightsScoreComponentCollection(weights);	
             //calculate max. for criterion
             /*
  	    float sumWeightedFeatures = 0.0;
