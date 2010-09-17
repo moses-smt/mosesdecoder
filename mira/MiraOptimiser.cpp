@@ -22,25 +22,28 @@ namespace Mira {
             Moses::ScoreComponentCollection currentScoreColl = oracleScores;
             currentScoreColl.MinusEquals(scores[batch][analyseSentence]);
 	    currentScoreColl.MultiplyEquals(weights);
-	    float scoreChange = currentScoreChange.InnerProduct(weights);
-	    float norm = currentScoreChange.InnerProduct(currentScoreChange);	     
+	    float scoreChange = currentScoreColl.InnerProduct(weights);
+	    float norm = currentScoreColl.InnerProduct(currentScoreColl);	     
 
             float delta;
             if(norm == 0.0) //just in case... :-)
               delta = 0.0;
             else {
+              
               delta = (losses[batch][analyseSentence] - scoreChange) / norm;
+
+	      //now get in shape
+              if(delta > upperBound_)
+                delta = upperBound_;
+              else if(delta < lowerBound_)
+                delta = lowerBound_;
+	
               cout << "scoreChange: " << scoreChange
                    << "\ndelta: " << delta
                    << "\nloss: " << losses[batch][analyseSentence] << endl;
             }
-            //now get in shape
-            if(delta > upperBound_)
-              delta = upperBound_;
-            else if(delta < lowerBound_)
-              delta = lowerBound_;
-
-	    // do this:	weights += delta * (oracleScores - scores[batch][analyseSentence])
+           
+ 	    // do this:	weights += delta * (oracleScores - scores[batch][analyseSentence])
             Moses::ScoreComponentCollection tempColl = oracleScores;
             tempColl.MinusEquals(scores[batch][analyseSentence]);
 	    tempColl.MultiplyEquals(delta);
