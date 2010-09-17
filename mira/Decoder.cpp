@@ -63,6 +63,15 @@ namespace Mira {
     }
     delete[] mosesargv;
   }
+ 
+  MosesDecoder::MosesDecoder() 
+		: m_manager(NULL)
+		{
+      //force initialisation of the phrase dictionary
+      string source("hello");
+      MosesChart::TrellisPathList sentences;
+      getNBest(source,1,sentences);
+    }
   
 	void MosesDecoder::cleanup()
 	{
