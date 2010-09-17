@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
 			// MODEL
 			PARAM_VEC bleuWeight(1, "0");
-			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
+			staticNonConst.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
 			staticNonConst.ReLoadParameter();
       scores.clear(); totalScores.clear();
       decoder->getNBest(input, modelHypoCount, scores, totalScores);
@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
 
 			// HOPE
 			bleuWeight[0] = "+1";
-			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
+			staticNonConst.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
 			staticNonConst.ReLoadParameter();
       scores.clear(); totalScores.clear();
 			decoder->getNBest(input, hopeHypoCount, scores, totalScores);
@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
 			
 			// FEAR
 			bleuWeight[0] = "-1";
-			staticNonConst.GetParameter()->OverwriteParam("-weight-b", bleuWeight);
+			staticNonConst.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
 			staticNonConst.ReLoadParameter();
       scores.clear(); totalScores.clear();
 			decoder->getNBest(input, fearHypoCount, scores, totalScores);
