@@ -22,7 +22,7 @@ bool TargetBigramFeature::Load(const std::string &filePath)
   size_t lineNo = 0;
   std::string line;
   while (getline(inFile, line)) {
-      m_wordMap[line] = lineNo++;
+  m_wordMap[line] = lineNo++;
   }
 
   inFile.Close();
@@ -58,20 +58,24 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        const FFState* prev_state,
                                        ScoreComponentCollection* accumulator) const
 {
-	vector<const string &> words;
-	if (cur_hypo.m_prevHypo != NULL) {
-		size_t prevPhraseSize = cur_hypo.m_prevHypo->GetCurrTargetPhrase().GetSize();
+	vector<string> words;
+	if (cur_hypo.GetPrevHypo() != NULL) {
+		size_t prevPhraseSize = cur_hypo.GetPrevHypo()->GetCurrTargetPhrase().GetSize();
 		if (prevPhraseSize > 0) {
-			words.push_back(cur_hypo.m_prevHypo->GetCurrTargetPhrase().GetWord(prevPhraseSize - 1));
+			words.push_back(cur_hypo.GetPrevHypo()->GetCurrTargetPhrase().GetWord(prevPhraseSize - 1).ToString());
 		}
 	}
 	size_t currPhraseSize = cur_hypo.GetCurrTargetPhrase().GetSize();
 	for (size_t i = 0; i < currPhraseSize; ++i) {
-		words.push_back(cur_hypo.GetCurrTargetPhrase().GetWord(i));
+		words.push_back(cur_hypo.GetCurrTargetPhrase().GetWord(i).ToString());
 	}
 	
 	for (size_t i = 1; i < words.size(); ++i) {
-		if 
+		map<string,size_t>::const_iterator first, second;
+		if ((first = m_wordMap.find(words[i-1])) != m_wordMap.end() &&
+			(second = m_wordMap.find(words[i])) != m_wordMap.end()) {
+			accumulator->Assign(first->second * second->second, 1);
+		}
 	}
 
 	return NULL;
