@@ -2,6 +2,7 @@ bin_PROGRAMS = mira
 mira_SOURCES = \
     Decoder.cpp \
     Main.cpp  \
+    MiraOptimiser.cpp \
     Perceptron.cpp
 
 

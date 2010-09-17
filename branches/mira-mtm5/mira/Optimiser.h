@@ -29,21 +29,31 @@ namespace Mira {
   class Optimiser {
     public:
       Optimiser() {}
-      virtual float updateWeights(const std::vector<float>& currWeights,
-                         const std::vector<const Moses::ScoreComponentCollection*>& scores,
-                         const std::vector<float>& losses,
-                         const Moses::ScoreComponentCollection oracleScores,
-                         std::vector<float>& newWeights) = 0;
+      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+                         const std::vector<std::vector<const Moses::ScoreComponentCollection*> >& scores,
+                         const std::vector<std::vector<float> >& losses,
+                         const Moses::ScoreComponentCollection& oracleScores) = 0;
   };
  
   class DummyOptimiser : public Optimiser {
     public:
-      virtual float updateWeights(const std::vector<float>& currWeights,
-                         const std::vector<const Moses::ScoreComponentCollection*>& scores,
-                         const std::vector<float>& losses,
-                         const Moses::ScoreComponentCollection oracleScores,
-                         std::vector<float>& newWeights) {newWeights = currWeights; return 0.0; }
+      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+                         const std::vector< std::vector<const Moses::ScoreComponentCollection*> >& scores,
+                         const std::vector< std::vector<float> >& losses,
+                         const Moses::ScoreComponentCollection& oracleScores) 
+                         {/* do nothing */}
   };
+ 
+  class Perceptron : public Optimiser {
+    public:
+       
+
+      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+                         const std::vector< std::vector<const Moses::ScoreComponentCollection*> >& scores,
+                         const std::vector<std::vector<float> >& losses,
+                         const Moses::ScoreComponentCollection& oracleScores);
+  };
+
 
   class MiraOptimiser : public Optimiser {
    public:
@@ -54,11 +64,11 @@ namespace Mira {
 
      ~MiraOptimiser() {} 
      
-    virtual float updateWeights(const std::vector<float>& currWeights,
-                         const std::vector<const Moses::ScoreComponentCollection*>& scores,
-                         const std::vector<float>& losses,
-                         const Moses::ScoreComponentCollection oracleScores,
-                         std::vector<float>& newWeights);
+  float updateWeights(const std::vector<float>& currWeights,
+			  const std::vector<const Moses::ScoreComponentCollection*>& scores,
+			  const std::vector<float>& losses,
+			  const Moses::ScoreComponentCollection oracleScores,
+			  std::vector<float>& newWeights);
    private:
      float lowerBound_;
      float upperBound_;

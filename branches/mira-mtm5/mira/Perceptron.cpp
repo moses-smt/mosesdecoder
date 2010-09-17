@@ -17,25 +17,23 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "Perceptron.h"
+#include "Optimiser.h"
 
 using namespace Moses;
 using namespace std;
 
 namespace Mira {
 
-void Perceptron::updateWeights(const ScoreComponentCollection& currWeights,
-                   const vector< vector<ScoreComponentCollection> >& scores,
+void Perceptron::updateWeights(ScoreComponentCollection& currWeights,
+                   const vector< vector<const ScoreComponentCollection*> >& scores,
                    const vector<vector<float> >& losses,
-                   const ScoreComponentCollection oracleScores,
-                   ScoreComponentCollection& newWeights) 
+                   const ScoreComponentCollection& oracleScores)
 {
-  newWeights = currWeights;
   for (size_t i = 0; i < scores.size(); ++i) {
     for (size_t j = 0; j < scores[i].size(); ++j) {
       if (losses[i][j] > 0) {
-        newWeights.MinusEquals(scores[i][j]);
-        newWeights.PlusEquals(oracleScores);      
+        currWeights.MinusEquals(*scores[i][j]);
+        currWeights.PlusEquals(oracleScores);      
       }
     }
   }
