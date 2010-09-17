@@ -145,6 +145,11 @@ public:
 		m_scores[m_sim->GetFeatureName(i)] = score;
 	}
 
+	void Assign(size_t index, float score)
+	{
+		m_scores[m_sim->GetFeatureName(index)] = score;
+	}
+
   //! Used to find the weighted total of scores.  rhs should contain a vector of weights
   //! of the same length as the number of scores.
 	float InnerProduct(const std::vector<float>& rhs) const
