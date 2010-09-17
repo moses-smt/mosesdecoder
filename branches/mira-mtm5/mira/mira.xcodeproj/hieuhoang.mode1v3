@@ -197,88 +197,7 @@
 	<key>Notifications</key>
 	<array/>
 	<key>OpenEditors</key>
-	<array>
-		<dict>
-			<key>Content</key>
-			<dict>
-				<key>PBXProjectModuleGUID</key>
-				<string>1E56EC1D1243BD9C00E8315C</string>
-				<key>PBXProjectModuleLabel</key>
-				<string>MiraOptimiser.cpp</string>
-				<key>PBXSplitModuleInNavigatorKey</key>
-				<dict>
-					<key>Split0</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>1E56EC1E1243BD9C00E8315C</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>MiraOptimiser.cpp</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>1E56EC1F1243BD9C00E8315C</string>
-						<key>history</key>
-						<array>
-							<string>1E56EC171243BD8300E8315C</string>
-						</array>
-					</dict>
-					<key>SplitCount</key>
-					<string>1</string>
-				</dict>
-				<key>StatusBarVisibility</key>
-				<true/>
-			</dict>
-			<key>Geometry</key>
-			<dict>
-				<key>Frame</key>
-				<string>{{0, 20}, {1119, 626}}</string>
-				<key>PBXModuleWindowStatusBarHidden2</key>
-				<false/>
-				<key>RubberWindowFrame</key>
-				<string>15 111 1119 667 0 0 1280 778 </string>
-			</dict>
-		</dict>
-		<dict>
-			<key>Content</key>
-			<dict>
-				<key>PBXProjectModuleGUID</key>
-				<string>1E56EC201243BD9C00E8315C</string>
-				<key>PBXProjectModuleLabel</key>
-				<string>Optimiser.h</string>
-				<key>PBXSplitModuleInNavigatorKey</key>
-				<dict>
-					<key>Split0</key>
-					<dict>
-						<key>PBXProjectModuleGUID</key>
-						<string>1E56EC211243BD9C00E8315C</string>
-						<key>PBXProjectModuleLabel</key>
-						<string>Optimiser.h</string>
-						<key>_historyCapacity</key>
-						<integer>0</integer>
-						<key>bookmark</key>
-						<string>1E56EC221243BD9C00E8315C</string>
-						<key>history</key>
-						<array>
-							<string>1E56EC181243BD8C00E8315C</string>
-						</array>
-					</dict>
-					<key>SplitCount</key>
-					<string>1</string>
-				</dict>
-				<key>StatusBarVisibility</key>
-				<true/>
-			</dict>
-			<key>Geometry</key>
-			<dict>
-				<key>Frame</key>
-				<string>{{0, 20}, {1119, 626}}</string>
-				<key>PBXModuleWindowStatusBarHidden2</key>
-				<false/>
-				<key>RubberWindowFrame</key>
-				<string>161 111 1119 667 0 0 1280 778 </string>
-			</dict>
-		</dict>
-	</array>
+	<array/>
 	<key>PerspectiveWidths</key>
 	<array>
 		<integer>-1</integer>
@@ -411,7 +330,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>1E56EC1A1243BD9C00E8315C</string>
+										<string>1E56EC2E1243BFFE00E8315C</string>
 										<key>history</key>
 										<array>
 											<string>1E9DC77C124270D90059001A</string>
@@ -620,8 +539,6 @@
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>1E5ADDB112425FB5005C8D71</string>
 		<string>/Users/hieuhoang/Documents/unison/workspace/Projects/sourceforge/branches/mira-mtm5/mira/mira.xcodeproj</string>
-		<string>1E56EC201243BD9C00E8315C</string>
-		<string>1E56EC1D1243BD9C00E8315C</string>
 	</array>
 	<key>WindowString</key>
 	<string>54 249 788 504 0 0 1280 778 </string>

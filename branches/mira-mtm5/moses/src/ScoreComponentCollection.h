@@ -80,6 +80,7 @@ public:
 	}
 
 	void MultiplyEquals(float scalar);
+	void MultiplyEquals(const ScoreComponentCollection& rhs);	
 
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
