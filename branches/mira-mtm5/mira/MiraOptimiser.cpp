@@ -12,15 +12,19 @@ namespace Mira {
 	for(unsigned batch = 0; batch < scores.size(); batch++) {
 	  for(unsigned analyseSentence = 0; analyseSentence < scores[batch].size(); analyseSentence++) {
 
-            float scoreChange = 0.0;
-            float norm = 0.0;
-          
+            /* do this:
             for(unsigned score = 0; score < scores[batch][analyseSentence].size(); score++) {
               float currentScoreChange = oracleScores[score] - scores[batch][analyseSentence][score];
               scoreChange += currentScoreChange * weights[score];
               norm += currentScoreChange * currentScoreChange;
             }
-        
+            */ 
+            Moses::ScoreComponentCollection currentScoreColl = oracleScores;
+            currentScoreColl.MinusEquals(scores[batch][analyseSentence]);
+	    currentScoreColl.MultiplyEquals(weights);
+	    float scoreChange = currentScoreChange.InnerProduct(weights);
+	    float norm = currentScoreChange.InnerProduct(currentScoreChange);	     
+
             float delta;
             if(norm == 0.0) //just in case... :-)
               delta = 0.0;
@@ -36,14 +40,13 @@ namespace Mira {
             else if(delta < lowerBound_)
               delta = lowerBound_;
 
-						// do this:	weights += delta * (oracleScores - scores[batch][analyseSentence]);
-						Moses::ScoreComponentCollection tempColl = oracleScores;
-						tempColl.MinusEquals(scores[batch][analyseSentence]);
-						tempColl.MultiplyEquals(delta);
-						weights.MinusEquals(tempColl);
+	    // do this:	weights += delta * (oracleScores - scores[batch][analyseSentence])
+            Moses::ScoreComponentCollection tempColl = oracleScores;
+            tempColl.MinusEquals(scores[batch][analyseSentence]);
+	    tempColl.MultiplyEquals(delta);
+	    weights.MinusEquals(tempColl);
 			
 			
-					//StaticData::GetInstanceNonConst().SetWeightsScoreComponentCollection(weights);	
             //calculate max. for criterion
             /*
  	    float sumWeightedFeatures = 0.0;
