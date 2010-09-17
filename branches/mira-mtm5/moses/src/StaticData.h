@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
+#include "ScoreComponentCollection.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -465,7 +466,8 @@ public:
 	{
 		return m_allWeights;
 	}
-
+	ScoreComponentCollection GetAllWeightsScoreComponentCollection() const;
+	
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };
 	bool PrintAlignmentInfo() const { return m_PrintAlignmentInfo; }

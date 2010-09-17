@@ -1,5 +1,5 @@
 // $Id$
-
+#include <vector>
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 
@@ -53,6 +53,33 @@ std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 	for (size_t i=1; i<rhs.m_scores.size(); i++)
 		os << ", " << rhs.m_scores[rhs.m_sim->GetFeatureName(i)];
 	return os << ">>";
+}
+	
+ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() const
+{
+	Moses::ScoreComponentCollection ret;
+	ret.ZeroAll();
+	
+	const std::vector<const ScoreProducer*> &producers = m_scoreIndexManager.GetProducers();
+	std::vector<const ScoreProducer*>::const_iterator iter;
+	
+	for (iter = producers.begin(); iter != producers.end(); ++iter)
+	{
+		const ScoreProducer *producer = *iter;
+		unsigned int bookId = producer->GetScoreBookkeepingID();
+		size_t startInd = m_scoreIndexManager.GetBeginIndex(bookId);
+		size_t endInd = m_scoreIndexManager.GetEndIndex(bookId);
+		
+		std::cerr << producer->GetScoreProducerDescription();
+		
+		std::vector<float> weights;
+		copy(m_allWeights.begin() + startInd, m_allWeights.begin() + endInd, inserter(weights,weights.end()));
+		
+		ret.Assign(producer, weights);
+		
+	}
+	
+	return ret;
 }
 	
 }

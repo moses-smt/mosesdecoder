@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
 	  return EXIT_FAILURE;
 	}
-
+	
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 
