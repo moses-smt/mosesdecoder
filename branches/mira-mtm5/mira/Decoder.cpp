@@ -149,7 +149,10 @@ namespace Mira {
 
     //get the best
     vector<const Word*> best;
+		assert(sentences.GetSize() > 0);
+		const TrellisPath &path = sentences.at(0);
     const std::vector<const Hypothesis *> &edges = sentences.at(0).GetEdges();
+
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
     {
       const Hypothesis &edge = *edges[currEdge];

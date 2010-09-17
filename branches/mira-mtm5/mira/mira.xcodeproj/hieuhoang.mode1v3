@@ -202,7 +202,7 @@
 			<key>Content</key>
 			<dict>
 				<key>PBXProjectModuleGUID</key>
-				<string>1E7BABCF1243DC0E005CC778</string>
+				<string>1E7BAC101243DEFD005CC778</string>
 				<key>PBXProjectModuleLabel</key>
 				<string>Decoder.cpp</string>
 				<key>PBXSplitModuleInNavigatorKey</key>
@@ -210,17 +210,16 @@
 					<key>Split0</key>
 					<dict>
 						<key>PBXProjectModuleGUID</key>
-						<string>1E7BABD01243DC0E005CC778</string>
+						<string>1E7BAC111243DEFD005CC778</string>
 						<key>PBXProjectModuleLabel</key>
 						<string>Decoder.cpp</string>
 						<key>_historyCapacity</key>
 						<integer>0</integer>
 						<key>bookmark</key>
-						<string>1E7BABD31243DC0E005CC778</string>
+						<string>1E7BAC131243DEFD005CC778</string>
 						<key>history</key>
 						<array>
-							<string>1E7BABD11243DC0E005CC778</string>
-							<string>1E7BABD21243DC0E005CC778</string>
+							<string>1E7BAC121243DEFD005CC778</string>
 						</array>
 					</dict>
 					<key>SplitCount</key>
@@ -319,8 +318,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>5</integer>
-									<integer>0</integer>
+									<integer>20</integer>
+									<integer>19</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -371,7 +370,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>1E7BABCD1243DC0E005CC778</string>
+										<string>1E7BAC0E1243DEFD005CC778</string>
 										<key>history</key>
 										<array>
 											<string>1E9DC77C124270D90059001A</string>
@@ -577,14 +576,13 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>1E7BABD41243DC0E005CC778</string>
 		<string>1E7BAB6C1243D837005CC778</string>
 		<string>1E7BAB6D1243D837005CC778</string>
 		<string>1E5ADDB112425FB5005C8D71</string>
 		<string>/Users/hieuhoang/Documents/unison/workspace/Projects/sourceforge/branches/mira-mtm5/mira/mira.xcodeproj</string>
 		<string>1C78EAAD065D492600B07095</string>
-		<string>1E7BABCF1243DC0E005CC778</string>
 		<string>1CD10A99069EF8BA00B06720</string>
+		<string>1E7BAC101243DEFD005CC778</string>
 	</array>
 	<key>WindowString</key>
 	<string>309 244 788 504 0 0 1280 778 </string>
