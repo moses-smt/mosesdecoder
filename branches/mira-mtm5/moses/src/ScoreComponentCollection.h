@@ -159,6 +159,11 @@ public:
 	{
 		return m_scores.inner_product(rhs);
 	}
+
+	float InnerProduct(const ScoreComponentCollection& rhs) const
+	{
+		return m_scores.inner_product(rhs.m_scores);
+	}
 	
 	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
 	{
