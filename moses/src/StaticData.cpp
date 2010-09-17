@@ -1241,7 +1241,7 @@ bool StaticData::LoadTargetBigramFeature()
 		UserMessage::Add("Wrong number of arguments for target-bigram-feature-wordlist (expected 1).");
 		return false;
 	}
-	m_targetBigramFeature = new TargetBigramFeature()
+	m_targetBigramFeature = new TargetBigramFeature(m_scoreIndexManager);
 	if (!m_targetBigramFeature->Load(wordFile[0])) {
 		UserMessage::Add("Unable to load word list from file " + wordFile[0]);
 		return false;

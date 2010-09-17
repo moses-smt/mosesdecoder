@@ -89,6 +89,7 @@ protected:
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
     std::map<std::string, TranslationSystem> m_translationSystems;
+	TargetBigramFeature *m_targetBigramFeature;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
