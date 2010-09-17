@@ -6,7 +6,7 @@ using namespace std;
 namespace Mira {
 
   float MiraOptimiser::updateWeights(const std::vector<float>& currWeights,
-			  const std::vector<Moses::ScoreComponentCollection>& scores,
+			  const std::vector<const Moses::ScoreComponentCollection*>& scores,
 			  const std::vector<float>& losses,
 			  const Moses::ScoreComponentCollection oracleScores,
 			  std::vector<float>& newWeights) {
@@ -18,8 +18,8 @@ namespace Mira {
           float scoreChange = 0.0;
           float norm = 0.0;
           
-          for(unsigned score = 0; score < scores[analyseSentence].size(); score++) {
-            float currentScoreChange = oracleScores[score] - scores[analyseSentence][score];
+          for(unsigned score = 0; score < scores[analyseSentence]->size(); score++) {
+            float currentScoreChange = oracleScores[score] - (*scores[analyseSentence])[score];
             scoreChange += currentScoreChange * newWeights[score];
             norm += currentScoreChange * currentScoreChange;
           }
@@ -39,13 +39,13 @@ namespace Mira {
           else if(delta < lowerBound_)
             delta = lowerBound_;
 
-	  for(unsigned score = 0; score < scores[analyseSentence].size(); score++) {
-	    newWeights[score] += (delta * (oracleScores[score] - scores[analyseSentence][score] ) ); 
+	  for(unsigned score = 0; score < scores[analyseSentence]->size(); score++) {
+	    newWeights[score] += (delta * (oracleScores[score] - (*scores[analyseSentence])[score] ) ); 
 	  }
 
           //calculate max. for criterioin
  	  float sumWeightedFeatures = 0.0;
-          for(unsigned score = 0; score < scores[analyseSentence].size(); score++) {
+          for(unsigned score = 0; score < scores[analyseSentence]->size(); score++) {
             sumWeightedFeatures += oracleScores[score]*newWeights[score];
           }
 

@@ -68,12 +68,12 @@ class MosesDecoder : public Decoder {
 	
     virtual void getNBest(const std::string& source, size_t count, MosesChart::TrellisPathList& sentences);
 		void cleanup();
+		void OutputNBestList(const MosesChart::TrellisPathList &sentences, std::vector<const Moses::ScoreComponentCollection*> &out);
 		
 	private:
 		MosesChart::Manager *m_manager;
 		Moses::Sentence *m_sentence;
 	
-		void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
 
 };
 

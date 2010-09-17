@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E14194512434AE900123194 /* Optimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E14194412434AE900123194 /* Optimiser.cpp */; };
 		1E9DC63C1242602F0059001A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DC6391242602F0059001A /* Decoder.cpp */; };
 		1E9DC63D1242602F0059001A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DC63B1242602F0059001A /* Main.cpp */; };
 		1E9DC6DA1242684C0059001A /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DC6D1124268310059001A /* libmoses-chart.a */; };
@@ -20,21 +21,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E9DC6C6124268270059001A /* moses.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = moses;
 		};
 		1E9DC6D0124268310059001A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E9DC6CC124268310059001A /* moses-chart.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses-chart.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = "moses-chart";
 		};
 		1E9DC6D8124268440059001A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libOnDiskPt.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
 /* End PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1E14194412434AE900123194 /* Optimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Optimiser.cpp; sourceTree = "<group>"; };
 		1E9DC6391242602F0059001A /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
 		1E9DC63A1242602F0059001A /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
 		1E9DC63B1242602F0059001A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
@@ -95,6 +97,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E14194412434AE900123194 /* Optimiser.cpp */,
 				1E9DC63E124260370059001A /* Optimiser.h */,
 				1E9DC6391242602F0059001A /* Decoder.cpp */,
 				1E9DC63A1242602F0059001A /* Decoder.h */,
@@ -227,6 +230,7 @@
 			files = (
 				1E9DC63C1242602F0059001A /* Decoder.cpp in Sources */,
 				1E9DC63D1242602F0059001A /* Main.cpp in Sources */,
+				1E14194512434AE900123194 /* Optimiser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
