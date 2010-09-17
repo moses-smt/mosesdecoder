@@ -1,5 +1,9 @@
 #include "TargetBigramFeature.h"
 #include "InputFileStream.h"
+#include "Phrase.h"
+#include "TargetPhrase.h"
+#include "Hypothesis.h"
+#include "ScoreComponentCollection.h"
 
 namespace Moses {
 
@@ -58,6 +62,22 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        const FFState* prev_state,
                                        ScoreComponentCollection* accumulator) const
 {
+	vector<const string &> words;
+	if (cur_hypo.m_prevHypo != NULL) {
+		size_t prevPhraseSize = cur_hypo.m_prevHypo->GetCurrTargetPhrase().GetSize();
+		if (prevPhraseSize > 0) {
+			words.push_back(cur_hypo.m_prevHypo->GetCurrTargetPhrase().GetWord(prevPhraseSize - 1));
+		}
+	}
+	size_t currPhraseSize = cur_hypo.GetCurrTargetPhrase().GetSize();
+	for (size_t i = 0; i < currPhraseSize; ++i) {
+		words.push_back(cur_hypo.GetCurrTargetPhrase().GetWord(i));
+	}
+	
+	for (size_t i = 1; i < words.size(); ++i) {
+		if 
+	}
+
 	return NULL;
 }
 
