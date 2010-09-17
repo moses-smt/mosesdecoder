@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
                         allScores[0],
                         allLosses[0]);
 
-      //set loss for each sentence ss oracleloss - rawsentenceloss
+      //set loss for each sentence as oracleloss - rawsentenceloss
       for (size_t i = 0; i < allScores.size(); ++i) {
         for (size_t j = 0; j < allScores[i].size(); ++j) {
           allLosses[i][j] = oracleLoss - allLosses[i][j];
@@ -191,6 +191,9 @@ int main(int argc, char** argv) {
 			
       //update moses weights
       decoder->setWeights(mosesWeights);
+  
+      //history (for approx doc bleu)
+      decoder->updateHistory(oracle);
 
       cumulativeWeights.PlusEquals(mosesWeights);
       cerr << "Cumulative weights: " << cumulativeWeights << endl;
