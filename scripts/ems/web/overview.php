@@ -11,7 +11,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit /disk4/html/experiment/setup on thor";
+  print "<P>To add experiment, edit /fs/thor4/html/experiment/setup";
 }
 
 function overview() {
@@ -20,6 +20,7 @@ function overview() {
   global $task,$user,$setup;
   global $dir;
   global $has_analysis;
+  $has_analysis = array();
 
   head("Task: $task ($user)");
   print "<a href=\"http://www.statmt.org/wiki/?n=Experiment.$setup\">Wiki Notes</a>";
@@ -33,6 +34,9 @@ function overview() {
     while (list($set,$dummy) = each($evalset)) {
       $analysis = "$dir/evaluation/$set.analysis.$id";
       if (file_exists($analysis)) {
+	if (!array_key_exists($set,$has_analysis)) { 
+	  $has_analysis[$set] = 0;
+        }
         $has_analysis[$set]++;
       }
     }
@@ -47,7 +51,7 @@ function overview() {
   reset($evalset);
 
   while (list($set,$dummy) = each($evalset)) {
-    if ($has_analysis[$set]) {
+    if (array_key_exists($set,$has_analysis)) {
       print "<td align=center colspan=2>";
       if ($has_analysis[$set]>=2) {
         print " <input type=submit name=\"analysis_diff_home\" value=\"$set\">";
@@ -64,8 +68,8 @@ function overview() {
   print "</tr>\n";
   while (list($id,$info) = each($experiment)) {
     $state = return_state_for_link();
-    print "<tr><td><input type=checkbox name=run[] value=$id><a href=\"?$state&show=config.$id\">cfg</a>|<a href=\"?$state&show=parameter.$id\">par</a>|<a href=\"?$state&show=graph.$id.png\">img</a></td><td><span id=run-$setup-$id><a href='javascript:createCommentBox(\"$setup-$id\");'>[$setup-$id]</a>";
-    if ($comment["$setup-$id"]) {
+    print "<tr id=\"row-$id\" onMouseOver=\"highlightLine($id);\" onMouseOut=\"highlightBest();\"><td><input type=checkbox name=run[] value=$id><a href=\"?$state&show=config.$id\">cfg</a>|<a href=\"?$state&show=parameter.$id\">par</a>|<a href=\"?$state&show=graph.$id.png\">img</a></td><td><span id=run-$setup-$id><a href='javascript:createCommentBox(\"$setup-$id\");'>[$setup-$id]</a>";
+    if (array_key_exists("$setup-$id",$comment)) {
       print " ".$comment["$setup-$id"]->name;
     }
     print "</span></td><td align=center>".mytime($info->start,0)."</td><td align=center>";
@@ -76,7 +80,7 @@ function overview() {
         print "<BR>".tune_status($id);
       }
     }
-    else if ($info->result) {
+    else if (property_exists($info,"result")) {
       print mytime($info->end,1);
 
       print "<br><font size=-2>";
@@ -97,9 +101,34 @@ function overview() {
   print "var currentComment = new Array();\n";
   reset($experiment);
   while (list($id,$info) = each($experiment)) {
-    if ($comment["$setup-$id"]) {
+    if (array_key_exists("$setup-$id",$comment)) {
       print "currentComment[\"$setup-$id\"] = \"".$comment["$setup-$id"]->name."\";\n";
     }
+  }
+  reset($experiment);
+  $best = array();
+  print "var score = [];\n";
+  while (list($id,$info) = each($experiment)) {
+      reset($evalset);
+      print "score[$id] = [];\n";
+      while (list($set,$dummy) = each($evalset)) {
+	  if (property_exists($info,"result") &&
+	      array_key_exists($set,$info->result)) {
+	      list($score) = sscanf($info->result[$set],"%f%s");
+	      if ($score > 0) {
+	        print "score[$id][\"$set\"] = $score;\n";
+		if ($score > $best[$set]) {
+		    $best[$set] = $score;
+		}
+	      }
+	  }
+	  else { $score = ""; }  
+      }
+  }
+  print "var best_score = [];\n";
+  reset($evalset);
+  while (list($set,$dummy) = each($evalset)) {
+      print "best_score[\"$set\"] = ".$best[$set].";\n";
   }
 ?>
 
@@ -143,6 +172,72 @@ function setComment() {
   }
 }
 
+function highlightBest() {
+    lowlightAll();
+    for (set in best_score) {
+	for (run in score) {
+	    var column = "score-"+run+"-"+set;
+	    if ($(column)) {
+	        if (score[run][set] == best_score[set]) {		
+		   $(column).setStyle({ backgroundColor: '#a0ffa0'});
+		}
+	        else if (score[run][set]+1 >= best_score[set]) {
+		   $(column).setStyle({ backgroundColor: '#e0ffe0'});
+		}
+	    }
+	}
+    }
+}
+
+function highlightLine( id ) {
+  lowlightAll();
+  var row = "row-"+id;
+  $(row).setStyle({ backgroundColor: '#f0f0f0'});
+  for (set in score[id]) {
+    for (run in score) {
+      var column = "score-"+run+"-"+set;
+      if ($(column)) {
+        if (run == id) {
+          $(column).setStyle({ backgroundColor: '#ffffff'});
+        }
+        else {
+	  if (score[run][set] < score[id][set]-1) {		
+	    $(column).setStyle({ backgroundColor: '#ffa0a0'});
+	  }
+	  else if (score[run][set] < score[id][set]) {
+	    $(column).setStyle({ backgroundColor: '#ffe0e0'});
+	  }
+          else if (score[run][set] > score[id][set]+1) {
+	    $(column).setStyle({ backgroundColor: '#a0ffa0'});
+	  }
+          else if (score[run][set] > score[id][set]) {
+	    $(column).setStyle({ backgroundColor: '#e0ffe0'});
+	  }
+	}
+      }
+    }
+  }   
+}
+function lowlightAll() {
+  for (run in score) {
+    var row = "row-"+run
+    if ($(row)) {
+      $(row).setStyle({ backgroundColor: 'transparent' });
+    }
+    for (set in best_score) {
+      var column = "score-"+run+"-"+set;
+      if ($(column)) {
+	$(column).setStyle({ backgroundColor: 'transparent' });
+      }
+    }
+  }
+}
+
+function highlightScore() {
+    
+}
+
+highlightBest();
 //-->
 </script>
 <?php
@@ -165,12 +260,17 @@ function output_score($id,$info) {
   global $evalset;
   global $has_analysis;
   global $setup;
+  global $dir;
   reset($evalset);
   $state = return_state_for_link();
 
   while (list($set,$dummy) = each($evalset)) {
-    $score = $info->result[$set];
-    print "<td align=center>";
+    if (property_exists($info,"result") &&
+        array_key_exists($set,$info->result)) {
+      $score = $info->result[$set];
+    }
+    else { $score = ""; }
+    print "<td align=center id=\"score-$id-$set\">";
 
     // print "<table><tr><td>";
 
@@ -179,10 +279,20 @@ function output_score($id,$info) {
       if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
           preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
         if ($i>0) { print "<BR>"; }
-        if ($set != "avg") { print "<a href=\"?$state&show=evaluation/$set.output.$id\">"; }
+	$opened_a_tag = 0;
+        if ($set != "avg") { 
+	  if (file_exists("$dir/evaluation/$set.cleaned.$id")) {
+	    print "<a href=\"?$state&show=evaluation/$set.cleaned.$id\">"; 
+            $opened_a_tag = 1;
+	  }
+          else if (file_exists("$dir/evaluation/$set.output.$id")) {
+            print "<a href=\"?$state&show=evaluation/$set.output.$id\">"; 
+	    $opened_a_tag = 1;
+          }
+        }
         if ($set == "avg" && count($each_score)>1) { print $match[2].": "; }
         print $match[1];
-        if ($set != "avg") { print "</a>"; }
+        if ($opened_a_tag) { print "</a>"; }
       }
       else {
         print "-";
@@ -190,12 +300,12 @@ function output_score($id,$info) {
     }
 
     print "</td>";
-    if ($has_analysis[$set]) {
+    if ($has_analysis && array_key_exists($set,$has_analysis)) {
       print "<td align=center>";
       global $dir;
       $analysis = "$dir/evaluation/$set.analysis.$id";
       if (file_exists($analysis)) {
-        print "<a href=\"?analysis=show&setup=$setup&set=$set&id=$id\">analysis</a><br><input type=checkbox name=analysis-$id-$set value=1>";
+        print "<a href=\"?analysis=show&setup=$setup&set=$set&id=$id\">&#x24B6;</a> <input type=checkbox name=analysis-$id-$set value=1>";
       }
       print "</td>";
     }
@@ -217,7 +327,10 @@ function tune_status($id) {
 }
 
 function dev_score($moses_ini) {
+  if (! file_exists($moses_ini)) { return ""; }
   $moses_ini = file($moses_ini);
+  $last_iter = -1;
+  $info = "";
   while (list($id,$line) = each($moses_ini)) {
     if (preg_match('/# BLEU ([\d\. \-\>]+)/',$line,$match)) {
       $info = $match[1];
@@ -226,7 +339,7 @@ function dev_score($moses_ini) {
       $last_iter = $match[1];
     }
   }
-  if ($last_iter) { $info = "$last_iter: $info"; };
+  if ($last_iter>=0) { $info = "$last_iter: $info"; };
   return $info;
 }
 
@@ -243,13 +356,16 @@ function return_state_for_link() {
 function show() {
   global $dir;
   $extra = "";
-  if (file_exists($dir."/steps/new") && preg_match("/\.(\d+)/",$_GET[show],$match)) {
-    $extra = "$match[1]/";
+  if (preg_match("/\.(\d+)/",$_GET["show"],$match)) {
+    $run = $match[1];
+    if (file_exists($dir."/steps/new") || file_exists($dir."/steps/$run")) {
+      $extra = "$run/";
+    }
   }
 
-  $fullname = $dir."/steps/".$extra.$_GET[show];
-  if (preg_match("/\//",$_GET[show])) { 
-    $fullname = $dir."/".$_GET[show];
+  $fullname = $dir."/steps/".$extra.$_GET["show"];
+  if (preg_match("/\//",$_GET["show"])) { 
+    $fullname = $dir."/".$_GET["show"];
   }
   if (preg_match("/graph/",$fullname)) {
     header("Content-type: image/png");
