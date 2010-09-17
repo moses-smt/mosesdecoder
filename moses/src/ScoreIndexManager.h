@@ -28,7 +28,7 @@ class ScoreIndexManager
 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim);
 public:
-	ScoreIndexManager() : m_last(0) {}
+	ScoreIndexManager() : m_last(0), m_featureNamesDirty(true) {}
 
 	//! new score producer to manage. Producers must be inserted in the order they are created
 	void AddScoreProducer(const ScoreProducer* producer);
@@ -63,6 +63,7 @@ private:
 	std::map<std::string, size_t> m_featureIndexes;
 	std::vector<std::string> m_featureShortNames;
 	size_t m_last;
+	bool m_featureNamesDirty;
 };
 
 

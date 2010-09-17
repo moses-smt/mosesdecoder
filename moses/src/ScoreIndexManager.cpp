@@ -28,6 +28,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 	assert(numScoreCompsProduced > 0);
 	m_last += numScoreCompsProduced;
 	m_ends.push_back(m_last);
+	m_featureNamesDirty = true;
 	InitFeatureNames();
 	/*VERBOSE(1,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
 						<< " " << sp->GetScoreProducerDescription()
@@ -61,6 +62,8 @@ void ScoreIndexManager::PrintLabeledWeightedScores(std::ostream& os, const Score
 }
 
 void ScoreIndexManager::InitFeatureNames() {
+    if (!m_featureNamesDirty)
+	return;
 	m_featureNames.clear();
 	m_featureIndexes.clear();
 	m_featureShortNames.clear();
@@ -77,6 +80,7 @@ void ScoreIndexManager::InitFeatureNames() {
 			++globalIndex;
 		}
 	}
+	m_featureNamesDirty = false;
 }
 
 #ifdef HAVE_PROTOBUF
