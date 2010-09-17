@@ -1238,6 +1238,9 @@ bool StaticData::LoadReferences() {
 bool StaticData::LoadTargetBigramFeature()
 {
 	const vector<string> &wordFile = m_parameter->GetParam("target-bigram-feature-wordlist");
+	if (wordFile.empty())
+		return true;
+
 	if (wordFile.size() != 1) {
 		UserMessage::Add("Wrong number of arguments for target-bigram-feature-wordlist (expected 1).");
 		return false;
