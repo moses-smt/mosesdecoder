@@ -556,7 +556,8 @@ public:
 	{
 		return m_parameter;
 	}
-	
+	void SetAllWeightsScoreComponentCollection(const ScoreComponentCollection &weightsScoreComponentCollection);
+
 };
 
 }

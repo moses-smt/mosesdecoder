@@ -58,7 +58,6 @@ std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() const
 {
 	Moses::ScoreComponentCollection ret;
-	ret.ZeroAll();
 	
 	const std::vector<const ScoreProducer*> &producers = m_scoreIndexManager.GetProducers();
 	std::vector<const ScoreProducer*>::const_iterator iter;
@@ -82,6 +81,33 @@ ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() con
 	return ret;
 }
 	
+void StaticData::SetAllWeightsScoreComponentCollection(const ScoreComponentCollection &weightsScoreComponentCollection)
+{	
+	const std::vector<const ScoreProducer*> &producers = m_scoreIndexManager.GetProducers();
+	std::vector<const ScoreProducer*>::const_iterator iter;
+	
+	for (iter = producers.begin(); iter != producers.end(); ++iter)
+	{
+		const ScoreProducer *producer = *iter;
+		unsigned int bookId = producer->GetScoreBookkeepingID();
+		size_t startInd = m_scoreIndexManager.GetBeginIndex(bookId);
+		size_t endInd = m_scoreIndexManager.GetEndIndex(bookId);
+		
+		std::cerr << producer->GetScoreProducerDescription();
+		
+		std::vector<float> weights = weightsScoreComponentCollection.GetScoresForProducer(producer);
+
+		size_t allInd = startInd;
+		for (size_t ind = 0; ind < weights.size(); ++ind)
+		{
+			m_allWeights[allInd] = weights[ind];
+			allInd++;
+		}
+		assert(allInd == endInd);
+	}
+	
+}
+
 }
 
 

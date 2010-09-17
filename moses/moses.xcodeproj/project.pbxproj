@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1E059677123FB1E900D39289 /* OnlineCommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E059675123FB1E900D39289 /* OnlineCommand.cpp */; };
 		1E059678123FB1E900D39289 /* OnlineCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E059676123FB1E900D39289 /* OnlineCommand.h */; };
+		1E56EB8F1243B44300E8315C /* TargetBigramFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E56EB8D1243B44300E8315C /* TargetBigramFeature.cpp */; };
+		1E56EB901243B44300E8315C /* TargetBigramFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E56EB8E1243B44300E8315C /* TargetBigramFeature.h */; };
 		1E5D8E0411F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0211F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp */; };
 		1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */; };
 		1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */; };
@@ -230,6 +232,8 @@
 /* Begin PBXFileReference section */
 		1E059675123FB1E900D39289 /* OnlineCommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnlineCommand.cpp; path = src/OnlineCommand.cpp; sourceTree = "<group>"; };
 		1E059676123FB1E900D39289 /* OnlineCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OnlineCommand.h; path = src/OnlineCommand.h; sourceTree = "<group>"; };
+		1E56EB8D1243B44300E8315C /* TargetBigramFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetBigramFeature.cpp; path = src/TargetBigramFeature.cpp; sourceTree = "<group>"; };
+		1E56EB8E1243B44300E8315C /* TargetBigramFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetBigramFeature.h; path = src/TargetBigramFeature.h; sourceTree = "<group>"; };
 		1E5D8E0211F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSCFG.cpp; path = src/PhraseDictionaryNodeSCFG.cpp; sourceTree = "<group>"; };
 		1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
@@ -475,6 +479,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E56EB8D1243B44300E8315C /* TargetBigramFeature.cpp */,
+				1E56EB8E1243B44300E8315C /* TargetBigramFeature.h */,
 				1E6C3CC61241D79C005697BC /* BleuScoreFeature.cpp */,
 				1E6C3CC71241D79C005697BC /* BleuScoreFeature.h */,
 				1E059675123FB1E900D39289 /* OnlineCommand.cpp */,
@@ -844,6 +850,7 @@
 				1E7739D1123F646800B88EB7 /* FeatureVector.h in Headers */,
 				1E059678123FB1E900D39289 /* OnlineCommand.h in Headers */,
 				1E6C3CC91241D79C005697BC /* BleuScoreFeature.h in Headers */,
+				1E56EB901243B44300E8315C /* TargetBigramFeature.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -993,6 +1000,7 @@
 				1E7739D0123F646800B88EB7 /* FeatureVector.cpp in Sources */,
 				1E059677123FB1E900D39289 /* OnlineCommand.cpp in Sources */,
 				1E6C3CC81241D79C005697BC /* BleuScoreFeature.cpp in Sources */,
+				1E56EB8F1243B44300E8315C /* TargetBigramFeature.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
