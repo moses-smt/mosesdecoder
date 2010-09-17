@@ -50,14 +50,17 @@ void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** a
  **/
 class MosesDecoder {
   public:
-    MosesDecoder();
+    MosesDecoder(const std::vector<std::vector<std::string> >& refs);
 	
-    void getNBest(const std::string& source,
+    //returns the best sentence
+    std::vector<const Moses::Word*> getNBest(const std::string& source,
+                          size_t sentenceid,
                           size_t count,
                           float bleuObjectiveweight, //weight of bleu in objective
                           float bleuScoreWeight, //weight of bleu in score
                           std::vector<Moses::ScoreComponentCollection>& featureValues,
                           std::vector<float>& scores );
+    void updateHistory(const std::vector<const Moses::Word*>& words);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
 		void cleanup();
