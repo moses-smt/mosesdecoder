@@ -50,7 +50,7 @@ namespace Mira {
 
       virtual void updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
-                         const std::vector<std::vector<float> >& losses,
+                         const std::vector< std::vector<float> >& losses,
                          const Moses::ScoreComponentCollection& oracleScores);
   };
 
@@ -63,12 +63,12 @@ namespace Mira {
        upperBound_(upperBound) { maxTranslation_ = 0.0; }
 
      ~MiraOptimiser() {} 
-     
-  float updateWeights(const std::vector<float>& currWeights,
-			  const std::vector<const Moses::ScoreComponentCollection*>& scores,
-			  const std::vector<float>& losses,
-			  const Moses::ScoreComponentCollection oracleScores,
-			  std::vector<float>& newWeights);
+   
+      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+                         const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
+                         const std::vector< std::vector<float> >& losses,
+                         const Moses::ScoreComponentCollection& oracleScores);
+  
    private:
      float lowerBound_;
      float upperBound_;
