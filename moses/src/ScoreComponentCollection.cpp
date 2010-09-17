@@ -53,6 +53,11 @@ void ScoreComponentCollection::MultiplyEquals(float scalar)
 	m_scores *= scalar;
 }
 	
+void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rhs)
+{
+	m_scores *= rhs.m_scores;
+}
+
 std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
 	os << "<<" << rhs.m_scores[rhs.m_sim->GetFeatureName(0)];
