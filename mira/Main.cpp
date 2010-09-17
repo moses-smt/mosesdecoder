@@ -167,6 +167,7 @@ int main(int argc, char** argv) {
       }
       assert(scores.size());
       const ScoreComponentCollection* oracleScores = scores[0];
+      float oracleLoss = totalScores[0];
 			
 			// FEAR
 			bleuWeight[0] = "-1";
@@ -180,11 +181,14 @@ int main(int argc, char** argv) {
       }
 
       //set bleu score to zero in allScores
+      //set loss for each sentence ss oracleloss - rawsentenceloss
       for (size_t i = 0; i < allScores.size(); ++i) {
         for (size_t j = 0; j < allScores[i].size(); ++j) {
           decoder->setBleuScore(allScores[i][j],0);
+          allLosses[i][j] = oracleLoss - allLosses[i][j];
         }
       }
+
 						
 			
       //run optimiser
