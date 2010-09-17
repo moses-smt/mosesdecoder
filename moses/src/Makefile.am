@@ -88,6 +88,7 @@ libmoses_la_HEADERS = \
         SquareMatrix.h \
         StaticData.h \
         TargetPhrase.h \
+		TargetBigramFeature.h \
         TargetPhraseCollection.h \
         Timer.h \
         TranslationOption.h \
@@ -215,6 +216,7 @@ libmoses_la_SOURCES = \
         SentenceStats.cpp \
         SquareMatrix.cpp \
         StaticData.cpp \
+		TargetBigramFeature.cpp \
         TargetPhrase.cpp \
         TargetPhraseCollection.cpp \
         Timer.cpp \
