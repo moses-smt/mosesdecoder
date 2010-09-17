@@ -60,7 +60,7 @@ namespace Mira {
      MiraOptimiser(float lowerBound, float upperBound) :
        Optimiser(),
        lowerBound_(lowerBound),
-       upperBound_(upperBound) { maxTranslation_ = 0.0; }
+       upperBound_(upperBound) { }
 
      ~MiraOptimiser() {} 
    
@@ -72,7 +72,6 @@ namespace Mira {
    private:
      float lowerBound_;
      float upperBound_;
-     float maxTranslation_;
   };
 }
 
