@@ -143,8 +143,8 @@ int main(int argc, char** argv) {
 
 			// MODEL
       decoder->getNBest(input,
-                        modelHypoCount,
                         sid,
+                        modelHypoCount,
                         0.0,
                         1.0,
                         allScores[0],
@@ -155,8 +155,8 @@ int main(int argc, char** argv) {
       size_t oraclePos = allScores.size();
       vector<const Word*> oracle =
          decoder->getNBest(input,
-                        modelHypoCount,
-                        sid,
+											 sid,
+												modelHypoCount,
                         1.0,
                         1.0,
                         allScores[0],
@@ -167,8 +167,8 @@ int main(int argc, char** argv) {
 			
 			// FEAR
       decoder->getNBest(input,
-                        modelHypoCount,
                         sid,
+                        modelHypoCount,
                         -1.0,
                         1.0,
                         allScores[0],
