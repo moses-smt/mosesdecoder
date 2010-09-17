@@ -121,10 +121,10 @@ int main(int argc, char** argv) {
   //Main loop:
   srand(time(NULL));
   MosesDecoder decoder;
-  DummyOptimiser optimiser;
+  Perceptron optimiser;
   size_t epochs = 1;
   
-	std::vector<float> currWeights, newWeights, losses;
+	std::vector<float> losses;
 	
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
     //TODO: batch
@@ -167,11 +167,15 @@ int main(int argc, char** argv) {
 			const MosesChart::TrellisPath &pathOracle = hopes.Get(0);
 			const Moses::ScoreComponentCollection &oracle = pathOracle.GetScoreBreakdown();
 			
-			optimiser.updateWeights(currWeights
-															, scores
-															, losses
-															, oracle
-															, newWeights);
+      ScoreComponentCollection mosesWeights; //TODO
+      vector<vector<const ScoreComponentCollection* > > allScores;
+      vector<vector<float> > allLosses;
+      allScores.push_back(scores);
+      allLosses.push_back(losses);
+			optimiser.updateWeights(mosesWeights
+															, allScores
+															, allLosses
+															, oracle);
 			
       //update moses weights
 			
