@@ -146,8 +146,7 @@ namespace Mira {
   }
 
   ScoreComponentCollection MosesDecoder::getWeights() {
-    cerr << "TODO: Provide access to moses weights" << endl;
-    return ScoreComponentCollection();//StaticData::Instance().GetAllWeights());
+    return StaticData::Instance().GetAllWeightsScoreComponentCollection();
   }
 
   void MosesDecoder::setWeights(const ScoreComponentCollection& weights) {
