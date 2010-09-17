@@ -138,6 +138,7 @@ Parameter::Parameter()
   AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
 
 	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
+	AddParam("target-bigram-feature-wordlist", "Use the target bigram feature. Load the wordlist from given file.");
 
 }
 
