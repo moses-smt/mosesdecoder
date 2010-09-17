@@ -1,8 +1,12 @@
 #ifndef moses_TargetBigramFeature_h
 #define moses_TargetBigramFeature_h
+
+#include "FeatureFunction.h"
+#include "FFState.h"
+#include <string>
+
 namespace Moses
 {
-
 
 /** Sets the features of observed bigrams.
  */
