@@ -65,20 +65,24 @@ namespace Mira {
     delete[] mosesargv;
   }
  
-  MosesDecoder::MosesDecoder() 
+  MosesDecoder::MosesDecoder(const vector<vector<string> >& refs)
 		: m_manager(NULL)
 		{
       //force initialisation of the phrase dictionary
-      string source("hello");
-      vector<ScoreComponentCollection> featureScores;
-      vector<float> totalScores;
-      getNBest(source,(size_t)1,0.0f,0.0f,featureScores,totalScores);
+      const StaticData &staticData = StaticData::Instance();
+      Sentence sentence(Input);
+      stringstream in("hello\n");
+      const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+      sentence.Read(in,inputFactorOrder);
+      const TranslationSystem& system = staticData.GetTranslationSystem
+          (TranslationSystem::DEFAULT);
+      Manager manager(sentence, staticData.GetSearchAlgorithm(), &system); 
+      m_manager->ProcessSentence();
 
       //Add the bleu feature
       m_bleuScoreFeature = new BleuScoreFeature();
-      const TranslationSystem& system = StaticData::Instance().GetTranslationSystem
-          (TranslationSystem::DEFAULT);
       (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
+      m_bleuScoreFeature->LoadReferences(refs);
     }
   
 	void MosesDecoder::cleanup()
@@ -87,10 +91,11 @@ namespace Mira {
 		delete m_sentence;
 	}
 	
-  void MosesDecoder::getNBest(const std::string& source,
+  vector<const Word*> MosesDecoder::getNBest(const std::string& source,
+                              size_t sentenceid,
                               size_t count,
                               float bleuObjectiveWeight, 
-                              float bleuScoreWeight, 
+                              float bleuScoreWeight,
                               vector<ScoreComponentCollection>& featureValues,
                               std::vector<float>& scores  )
   {
@@ -110,6 +115,8 @@ namespace Mira {
     PARAM_VEC bleuWeight(1,bleuWeightStr.str());
     staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
     staticData.ReLoadParameter();
+
+    m_bleuScoreFeature->SetCurrentReference(sentenceid);
 
     //run the decoder
     m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
@@ -133,9 +140,28 @@ namespace Mira {
 
       //set bleu score to zero in the feature vector
       setBleuScore(featureValues.back(),0);
+
 		}
+
+    //get the best
+    vector<const Word*> best;
+    const std::vector<const Hypothesis *> &edges = sentences.at(0).GetEdges();
+    for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+    {
+      const Hypothesis &edge = *edges[currEdge];
+      const Phrase &phrase = edge.GetCurrTargetPhrase();
+      size_t size = phrase.GetSize();
+      for (size_t pos = 0 ; pos < size ; pos++)
+      {
+        best.push_back(&phrase.GetWord(pos));
+      }
+    }
+
+
+    return best;
 			
 	}
+
 
   float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
     return scores.GetScoreForProducer(m_bleuScoreFeature);
@@ -151,7 +177,11 @@ namespace Mira {
 
   void MosesDecoder::setWeights(const ScoreComponentCollection& weights) {
     cerr << "New weights: " << weights << endl;
-    cerr << "Updating: TODO " << endl;
+    StaticData::InstanceNonConst().SetAllWeightsScoreComponentCollection(weights);
+  }
+
+  void MosesDecoder::updateHistory(const vector<const Word*>& words) {
+    m_bleuScoreFeature->UpdateHistory(words);
   }
 	
 } 

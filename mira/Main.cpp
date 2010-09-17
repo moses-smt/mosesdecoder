@@ -117,10 +117,11 @@ int main(int argc, char** argv) {
   }
   //initialise moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
+  MosesDecoder* decoder = new MosesDecoder(referenceSentences) ;
+  
 
   //Main loop:
   ScoreComponentCollection cumulativeWeights;
-  MosesDecoder* decoder = new MosesDecoder() ;
   Optimiser* optimiser = new Perceptron();
   size_t epochs = 1;
   size_t modelHypoCount = 10;
@@ -143,6 +144,7 @@ int main(int argc, char** argv) {
 			// MODEL
       decoder->getNBest(input,
                         modelHypoCount,
+                        sid,
                         0.0,
                         1.0,
                         allScores[0],
@@ -151,8 +153,10 @@ int main(int argc, char** argv) {
 
 			// HOPE
       size_t oraclePos = allScores.size();
-      decoder->getNBest(input,
+      vector<const Word*> oracle =
+         decoder->getNBest(input,
                         modelHypoCount,
+                        sid,
                         1.0,
                         1.0,
                         allScores[0],
@@ -164,6 +168,7 @@ int main(int argc, char** argv) {
 			// FEAR
       decoder->getNBest(input,
                         modelHypoCount,
+                        sid,
                         -1.0,
                         1.0,
                         allScores[0],
