@@ -65,12 +65,16 @@ void ScoreIndexManager::InitFeatureNames() {
 	m_featureShortNames.clear();
 	size_t globalIndex = 0;
 	vector<const ScoreProducer *>::const_iterator it;
+
 	for (it = m_producers.begin(); it != m_producers.end(); ++it) {
-		ostringstream oStream;
-		oStream << (*it)->GetScoreProducerDescription() << "_" << globalIndex;
-		m_featureNames.push_back(oStream.str());
-		m_featureIndexes[oStream.str()] = globalIndex;
-		++globalIndex;
+		size_t scoreCount = (*it)->GetNumInputScores();
+		for (size_t i = 0; i < scoreCount; ++i) {
+			ostringstream oStream;
+			oStream << (*it)->GetScoreProducerDescription() << "_" << globalIndex;
+			m_featureNames.push_back(oStream.str());
+			m_featureIndexes[oStream.str()] = globalIndex;
+			++globalIndex;
+		}
 	}
 }
 
