@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E14194512434AE900123194 /* Optimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E14194412434AE900123194 /* Optimiser.cpp */; };
 		1E141A311243527800123194 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E141A2F1243527800123194 /* Perceptron.cpp */; };
+		1E56EBF51243B91600E8315C /* MiraOptimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */; };
 		1E9DC63C1242602F0059001A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DC6391242602F0059001A /* Decoder.cpp */; };
 		1E9DC63D1242602F0059001A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DC63B1242602F0059001A /* Main.cpp */; };
 		1E9DC6DA1242684C0059001A /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DC6D1124268310059001A /* libmoses-chart.a */; };
@@ -55,9 +55,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1E14194412434AE900123194 /* Optimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Optimiser.cpp; sourceTree = "<group>"; };
 		1E141A2F1243527800123194 /* Perceptron.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Perceptron.cpp; sourceTree = "<group>"; };
-		1E141A301243527800123194 /* Perceptron.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Perceptron.h; sourceTree = "<group>"; };
+		1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MiraOptimiser.cpp; sourceTree = "<group>"; };
 		1E9DC6391242602F0059001A /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
 		1E9DC63A1242602F0059001A /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
 		1E9DC63B1242602F0059001A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
@@ -100,9 +99,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */,
 				1E141A2F1243527800123194 /* Perceptron.cpp */,
-				1E141A301243527800123194 /* Perceptron.h */,
-				1E14194412434AE900123194 /* Optimiser.cpp */,
 				1E9DC63E124260370059001A /* Optimiser.h */,
 				1E9DC6391242602F0059001A /* Decoder.cpp */,
 				1E9DC63A1242602F0059001A /* Decoder.h */,
@@ -235,8 +233,8 @@
 			files = (
 				1E9DC63C1242602F0059001A /* Decoder.cpp in Sources */,
 				1E9DC63D1242602F0059001A /* Main.cpp in Sources */,
-				1E14194512434AE900123194 /* Optimiser.cpp in Sources */,
 				1E141A311243527800123194 /* Perceptron.cpp in Sources */,
+				1E56EBF51243B91600E8315C /* MiraOptimiser.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

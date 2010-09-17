@@ -97,30 +97,28 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 306401900;
-			PBXWorkspaceStateSaveDate = 306401900;
+			PBXPerProjectTemplateStateSaveDate = 306428143;
+			PBXWorkspaceStateSaveDate = 306428143;
 		};
 		perUserProjectItems = {
 			1E14199112434D6600123194 = 1E14199112434D6600123194 /* PBXTextBookmark */;
 			1E1419E51243516B00123194 = 1E1419E51243516B00123194 /* PBXTextBookmark */;
 			1E1419ED124351E300123194 = 1E1419ED124351E300123194 /* PBXTextBookmark */;
-			1E141A37124352A900123194 /* PBXTextBookmark */ = 1E141A37124352A900123194 /* PBXTextBookmark */;
-			1E141A38124352A900123194 /* PBXBookmark */ = 1E141A38124352A900123194 /* PBXBookmark */;
-			1E141A39124352A900123194 /* PBXTextBookmark */ = 1E141A39124352A900123194 /* PBXTextBookmark */;
+			1E141A37124352A900123194 = 1E141A37124352A900123194 /* PBXTextBookmark */;
+			1E141A38124352A900123194 = 1E141A38124352A900123194 /* PBXBookmark */;
+			1E141A39124352A900123194 = 1E141A39124352A900123194 /* PBXTextBookmark */;
+			1E56EC171243BD8300E8315C /* XCBuildMessageTextBookmark */ = 1E56EC171243BD8300E8315C /* XCBuildMessageTextBookmark */;
+			1E56EC181243BD8C00E8315C /* PBXBookmark */ = 1E56EC181243BD8C00E8315C /* PBXBookmark */;
+			1E56EC191243BD9C00E8315C /* XCBuildMessageTextBookmark */ = 1E56EC191243BD9C00E8315C /* XCBuildMessageTextBookmark */;
+			1E56EC1A1243BD9C00E8315C /* PBXTextBookmark */ = 1E56EC1A1243BD9C00E8315C /* PBXTextBookmark */;
+			1E56EC1F1243BD9C00E8315C /* PBXTextBookmark */ = 1E56EC1F1243BD9C00E8315C /* PBXTextBookmark */;
+			1E56EC221243BD9C00E8315C /* PBXTextBookmark */ = 1E56EC221243BD9C00E8315C /* PBXTextBookmark */;
 			1E9DC77C124270D90059001A = 1E9DC77C124270D90059001A /* PBXTextBookmark */;
 			1E9DC9B6124289920059001A = 1E9DC9B6124289920059001A /* PBXTextBookmark */;
 			1E9DC9B7124289920059001A = 1E9DC9B7124289920059001A /* PBXTextBookmark */;
 		};
 		sourceControlManager = 1E5ADDB312425FB5005C8D71 /* Source Control */;
 		userBuildSettings = {
-		};
-	};
-	1E14194412434AE900123194 /* Optimiser.cpp */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1060, 1209}}";
-			sepNavSelRange = "{170, 0}";
-			sepNavVisRange = "{1655, 1751}";
-			sepNavWindowFrame = "{{599, 55}, {1119, 723}}";
 		};
 	};
 	1E14199112434D6600123194 /* PBXTextBookmark */ = {
@@ -151,6 +149,12 @@
 		vrLoc = 1107;
 	};
 	1E141A301243527800123194 /* Perceptron.h */ = {
+		isa = PBXFileReference;
+		fileEncoding = 4;
+		lastKnownFileType = sourcecode.c.h;
+		name = Perceptron.h;
+		path = "/Users/hieuhoang/Documents/unison/workspace/Projects/sourceforge/branches/mira-mtm5/mira/Perceptron.h";
+		sourceTree = "<absolute>";
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {558, 468}}";
 			sepNavSelRange = "{0, 0}";
@@ -180,6 +184,65 @@
 		rType = 0;
 		vrLen = 655;
 		vrLoc = 0;
+	};
+	1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1060, 793}}";
+			sepNavSelRange = "{918, 0}";
+			sepNavVisRange = "{420, 1975}";
+		};
+	};
+	1E56EC171243BD8300E8315C /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Prototype for 'void Mira::MiraOptimiser::updateWeights(Moses::ScoreComponentCollection&, const std::vector<std::vector<Moses::ScoreComponentCollection, std::allocator<Moses::ScoreComponentCollection> >, std::allocator<std::vector<Moses::ScoreComponentCollection, std::allocator<Moses::ScoreComponentCollection> > > >&, const std::vector<std::vector<float, std::allocator<float> >, std::allocator<std::vector<float, std::allocator<float> > > >&, const Moses::ScoreComponentCollection&)' does not match any in class 'Mira::MiraOptimiser'";
+		fRef = 1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 9;
+		rType = 1;
+	};
+	1E56EC181243BD8C00E8315C /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 1E9DC63E124260370059001A /* Optimiser.h */;
+	};
+	1E56EC191243BD9C00E8315C /* XCBuildMessageTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "Prototype for 'void Mira::MiraOptimiser::updateWeights(Moses::ScoreComponentCollection&, const std::vector<std::vector<Moses::ScoreComponentCollection, std::allocator<Moses::ScoreComponentCollection> >, std::allocator<std::vector<Moses::ScoreComponentCollection, std::allocator<Moses::ScoreComponentCollection> > > >&, const std::vector<std::vector<float, std::allocator<float> >, std::allocator<std::vector<float, std::allocator<float> > > >&, const Moses::ScoreComponentCollection&)' does not match any in class 'Mira::MiraOptimiser'";
+		fRef = 1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */;
+		fallbackIsa = XCBuildMessageTextBookmark;
+		rLen = 1;
+		rLoc = 9;
+		rType = 1;
+	};
+	1E56EC1A1243BD9C00E8315C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */;
+		name = "MiraOptimiser.cpp: 10";
+		rLen = 0;
+		rLoc = 339;
+		rType = 0;
+		vrLen = 579;
+		vrLoc = 0;
+	};
+	1E56EC1F1243BD9C00E8315C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */;
+		name = "MiraOptimiser.cpp: 20";
+		rLen = 0;
+		rLoc = 918;
+		rType = 0;
+		vrLen = 1975;
+		vrLoc = 420;
+	};
+	1E56EC221243BD9C00E8315C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1E9DC63E124260370059001A /* Optimiser.h */;
+		name = "Optimiser.h: 49";
+		rLen = 1;
+		rLoc = 1958;
+		rType = 0;
+		vrLen = 1649;
+		vrLoc = 868;
 	};
 	1E5ADDA812425FAF005C8D71 /* mira */ = {
 		isa = PBXExecutable;
@@ -271,9 +334,9 @@
 	};
 	1E9DC63E124260370059001A /* Optimiser.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {691, 871}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1060, 1040}}";
 			sepNavSelRange = "{1958, 1}";
-			sepNavVisRange = "{1128, 830}";
+			sepNavVisRange = "{868, 1649}";
 			sepNavWindowFrame = "{{368, 55}, {1119, 723}}";
 		};
 	};
