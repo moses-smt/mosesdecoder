@@ -32,7 +32,6 @@ public:
 
 	//! new score producer to manage. Producers must be inserted in the order they are created
 	void AddScoreProducer(const ScoreProducer* producer);
-	void InitFeatureNames();
 
 	//! starting score index for a particular score producer with scoreBookkeepingID
 	size_t GetBeginIndex(size_t scoreBookkeepingID) const { return m_begins[scoreBookkeepingID]; }
@@ -55,6 +54,7 @@ public:
 	void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights) const;
 private:
 	ScoreIndexManager(const ScoreIndexManager&); // don't implement
+	void InitFeatureNames();
 
 	std::vector<size_t> m_begins;
 	std::vector<size_t> m_ends;
