@@ -30,41 +30,35 @@ bool TargetBigramFeature::Load(const std::string &filePath)
 
 size_t TargetBigramFeature::GetNumScoreComponents() const
 {
-	// TODO
-	return 0;
+	return m_wordSet.size() * m_wordSet.size();
 }
 
 string TargetBigramFeature::GetScoreProducerDescription() const
 {
-	// TODO
-	return "";
+	return "TargetBigramFeature";
 }
 
 string TargetBigramFeature::GetScoreProducerWeightShortName() const
 {
-	// TODO
-	return "";
+	return "tbf";
 }
 
 size_t TargetBigramFeature::GetNumInputScores() const
 {
-	// TODO
 	return 0;
 }
 
 
 const FFState* TargetBigramFeature::EmptyHypothesisState(const InputType &input) const
 {
-	// TODO
-	return 0;
+	return NULL;
 }
 
 FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        const FFState* prev_state,
                                        ScoreComponentCollection* accumulator) const
 {
-	// TODO
-	return 0;
+	return NULL;
 }
 
 }
