@@ -1,8 +1,8 @@
 #ifndef LM_VIRTUAL_INTERFACE__
 #define LM_VIRTUAL_INTERFACE__
 
-#include "lm/word_index.hh"
-#include "util/string_piece.hh"
+#include "word_index.hh"
+#include "../util/string_piece.hh"
 
 #include <string>
 

@@ -1,5 +1,5 @@
-#include "lm/exception.hh"
-#include "lm/sri.hh"
+#include "exception.hh"
+#include "sri.hh"
 
 #include <Ngram.h>
 #include <Vocab.h>

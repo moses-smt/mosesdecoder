@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E54C6A3124966CA00E23185 /* LanguageModelKen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E54C6A1124966CA00E23185 /* LanguageModelKen.cpp */; };
+		1E54C6A4124966CA00E23185 /* LanguageModelKen.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E54C6A2124966CA00E23185 /* LanguageModelKen.h */; };
 		1E5D8E0411F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0211F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp */; };
 		1E5D8E0511F25F03000F027F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */; };
 		1E5D8E0811F25F2F000F027F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */; };
@@ -222,6 +224,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E54C6A1124966CA00E23185 /* LanguageModelKen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelKen.cpp; path = src/LanguageModelKen.cpp; sourceTree = "<group>"; };
+		1E54C6A2124966CA00E23185 /* LanguageModelKen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelKen.h; path = src/LanguageModelKen.h; sourceTree = "<group>"; };
 		1E5D8E0211F25F03000F027F /* PhraseDictionaryNodeSCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSCFG.cpp; path = src/PhraseDictionaryNodeSCFG.cpp; sourceTree = "<group>"; };
 		1E5D8E0311F25F03000F027F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1E5D8E0611F25F2F000F027F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
@@ -463,11 +467,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1EF549B712118A5D00C481EB /* TranslationSystem.cpp */,
-				1EF549B812118A5D00C481EB /* TranslationSystem.h */,
-				1EF549B512118A4A00C481EB /* LanguageModelDelegate.h */,
-				1EF549AF12118A0B00C481EB /* DecodeFeature.cpp */,
-				1EF549B012118A0C00C481EB /* DecodeFeature.h */,
 				1ED4FC5F11BDC0D2004E826A /* AlignmentInfo.cpp */,
 				1ED4FC6011BDC0D2004E826A /* AlignmentInfo.h */,
 				1ED4FC6111BDC0D2004E826A /* BilingualDynSuffixArray.cpp */,
@@ -481,6 +480,8 @@
 				1ED4FC6911BDC0D2004E826A /* ChartRuleCollection.h */,
 				1ED4FC6A11BDC0D2004E826A /* ConfusionNet.cpp */,
 				1ED4FC6B11BDC0D2004E826A /* ConfusionNet.h */,
+				1EF549AF12118A0B00C481EB /* DecodeFeature.cpp */,
+				1EF549B012118A0C00C481EB /* DecodeFeature.h */,
 				1ED4FC6C11BDC0D2004E826A /* DecodeGraph.cpp */,
 				1ED4FC6D11BDC0D2004E826A /* DecodeGraph.h */,
 				1ED4FC6E11BDC0D2004E826A /* DecodeStep.cpp */,
@@ -537,6 +538,7 @@
 				1ED4FCA811BDC0D2004E826A /* InputType.h */,
 				1ED4FCA911BDC0D2004E826A /* LanguageModel.cpp */,
 				1ED4FCAA11BDC0D2004E826A /* LanguageModel.h */,
+				1EF549B512118A4A00C481EB /* LanguageModelDelegate.h */,
 				1ED4FCAB11BDC0D2004E826A /* LanguageModelFactory.cpp */,
 				1ED4FCAC11BDC0D2004E826A /* LanguageModelFactory.h */,
 				1ED4FCAD11BDC0D2004E826A /* LanguageModelInternal.cpp */,
@@ -545,6 +547,8 @@
 				1ED4FCB011BDC0D2004E826A /* LanguageModelIRST.h */,
 				1ED4FCB111BDC0D2004E826A /* LanguageModelJoint.cpp */,
 				1ED4FCB211BDC0D2004E826A /* LanguageModelJoint.h */,
+				1E54C6A1124966CA00E23185 /* LanguageModelKen.cpp */,
+				1E54C6A2124966CA00E23185 /* LanguageModelKen.h */,
 				1ED4FCB311BDC0D2004E826A /* LanguageModelMultiFactor.cpp */,
 				1ED4FCB411BDC0D2004E826A /* LanguageModelMultiFactor.h */,
 				1ED4FCB511BDC0D2004E826A /* LanguageModelParallelBackoff.cpp */,
@@ -646,6 +650,8 @@
 				1ED4FD1B11BDC0D2004E826A /* TranslationOptionCollectionText.h */,
 				1ED4FD1C11BDC0D2004E826A /* TranslationOptionList.cpp */,
 				1ED4FD1D11BDC0D2004E826A /* TranslationOptionList.h */,
+				1EF549B712118A5D00C481EB /* TranslationSystem.cpp */,
+				1EF549B812118A5D00C481EB /* TranslationSystem.h */,
 				1ED4FD1E11BDC0D2004E826A /* TreeInput.cpp */,
 				1ED4FD1F11BDC0D2004E826A /* TreeInput.h */,
 				1ED4FD2011BDC0D2004E826A /* TrellisPath.cpp */,
@@ -823,6 +829,7 @@
 				1EF549B212118A0C00C481EB /* DecodeFeature.h in Headers */,
 				1EF549B612118A4A00C481EB /* LanguageModelDelegate.h in Headers */,
 				1EF549BA12118A5D00C481EB /* TranslationSystem.h in Headers */,
+				1E54C6A4124966CA00E23185 /* LanguageModelKen.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -969,6 +976,7 @@
 				1E5D8E0911F25F2F000F027F /* PhraseDictionarySCFGChart.cpp in Sources */,
 				1EF549B112118A0C00C481EB /* DecodeFeature.cpp in Sources */,
 				1EF549B912118A5D00C481EB /* TranslationSystem.cpp in Sources */,
+				1E54C6A3124966CA00E23185 /* LanguageModelKen.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1011,6 +1019,7 @@
 					LM_SRI,
 					LM_IRST,
 					LM_INTERNAL,
+					LM_KEN,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -1034,6 +1043,7 @@
 					LM_SRI,
 					LM_IRST,
 					LM_INTERNAL,
+					LM_KEN,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;

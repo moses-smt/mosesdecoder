@@ -40,6 +40,12 @@ AC_ARG_WITH(irstlm,
             [with_irstlm=no]
            )
 
+AC_ARG_WITH(kenlm,
+            [AC_HELP_STRING([--with-kenlm=PATH], [(optional) path to Ken's LM toolkit])],
+            [with_kenlm=$withval],
+            [with_kenlm=no]
+           )
+
 AC_ARG_WITH(randlm,
             [AC_HELP_STRING([--with-randlm=PATH], [(optional) path to RandLM toolkit])],
             [with_randlm=$withval],
@@ -78,6 +84,7 @@ AC_ARG_WITH(zlib,
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
+AM_CONDITIONAL([KEN_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
@@ -164,6 +171,22 @@ then
   AM_CONDITIONAL([IRST_LM], true)
 fi
 
+if test "x$with_kenlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_kenlm}/lm"
+
+  AC_CHECK_HEADER(n_gram.h,
+                 [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
+                 [AC_MSG_ERROR([Cannot find KEN-LM in ${with_kenlm}])])
+
+  LIB_IRSTLM="-lkenlm"
+  LDFLAGS="$LDFLAGS -L${with_kenlm}/lm"
+  LIBS="$LIBS $LIB_KENLM"
+  FMTLIBS="$FMTLIBS libkenlm.a"
+  AM_CONDITIONAL([KEN_LM], true)
+fi
+
 if test "x$with_randlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
@@ -205,6 +228,6 @@ fi
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile kenlm/lm/Makefile)
 
 AC_OUTPUT()

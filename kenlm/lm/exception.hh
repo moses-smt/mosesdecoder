@@ -1,8 +1,8 @@
 #ifndef LM_EXCEPTION__
 #define LM_EXCEPTION__
 
-#include "util/exception.hh"
-#include "util/string_piece.hh"
+#include "../util/exception.hh"
+#include "../util/string_piece.hh"
 
 #include <exception>
 #include <string>

@@ -1,14 +1,14 @@
 #ifndef LM_NGRAM__
 #define LM_NGRAM__
 
-#include "lm/facade.hh"
-#include "lm/ngram_config.hh"
-#include "util/key_value_packing.hh"
-#include "util/mmap.hh"
-#include "util/probing_hash_table.hh"
-#include "util/scoped.hh"
-#include "util/sorted_uniform.hh"
-#include "util/string_piece.hh"
+#include "facade.hh"
+#include "ngram_config.hh"
+#include "../util/key_value_packing.hh"
+#include "../util/mmap.hh"
+#include "../util/probing_hash_table.hh"
+#include "../util/scoped.hh"
+#include "../util/sorted_uniform.hh"
+#include "../util/string_piece.hh"
 
 #include <algorithm>
 #include <memory>

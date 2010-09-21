@@ -1,6 +1,6 @@
-#include "util/file_piece.hh"
+#include "file_piece.hh"
 
-#include "util/exception.hh"
+#include "exception.hh"
 
 #include <iostream>
 #include <string>

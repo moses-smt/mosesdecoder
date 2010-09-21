@@ -40,6 +40,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_REMOTE
 #	include "LanguageModelRemote.h"
 #endif
+#ifdef LM_KEN
+#	include "LanguageModelKen.h"
+#endif
 
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
@@ -96,6 +99,11 @@ namespace LanguageModelFactory
      			lm = new LanguageModelSkip(new LanguageModelInternal(false, scoreIndexManager)
 																		, true
 																		, scoreIndexManager);
+				#endif
+				break;
+			case Ken:
+				#ifdef LM_KEN
+					lm = new LanguageModelKen(true, scoreIndexManager, dub);
 				#endif
 				break;
 			case Joint:
