@@ -180,7 +180,7 @@ then
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${with_kenlm}])])
 
-  LIB_IRSTLM="-lkenlm"
+  LIB_KENLM="-lkenlm"
   LDFLAGS="$LDFLAGS -L${with_kenlm}/lm"
   LIBS="$LIBS $LIB_KENLM"
   FMTLIBS="$FMTLIBS libkenlm.a"

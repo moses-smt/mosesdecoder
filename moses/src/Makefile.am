@@ -274,4 +274,8 @@ libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramNode.cpp
 endif
 
+if KEN_LM
+libmoses_la_SOURCES += LanguageModelKen.cpp
+endif
+
 libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
