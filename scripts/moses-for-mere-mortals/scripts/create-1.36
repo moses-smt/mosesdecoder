@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# create-1.35
+# create-1.36
 # copyright 2009,2010 João L. A. C. Rosas
 # date: 11/09/2010
 # licenced under the GPL licence, version 3
@@ -64,7 +64,7 @@ if [ ! -d $mosesdir ]; then
 fi
 
 # Directory with files used for corpus training, language model building, tuning, testing and recasing
-if [ ! -d $mosesdir/corpora_for_training ]; then mkdir -p $mosesdir/corpora_for_training; fi
+#if [ ! -d $mosesdir/corpora_for_training ]; then mkdir -p $mosesdir/corpora_for_training; fi
 
 # Directory with the tools used (Moses, IRSTLM, RandLM, giza-pp, MGIZA, ...)
 if [ ! -d $toolsdir ]; then mkdir -p $toolsdir; fi
@@ -73,10 +73,10 @@ if [ ! -d $toolsdir ]; then mkdir -p $toolsdir; fi
 if [ ! -d $toolsdir/modified-scripts ]; then mkdir -p $toolsdir/modified-scripts; fi
 
 # Directory with the reference (human-made) translation files
-if [ ! -d $mosesdir/translation_reference ]; then mkdir -p $mosesdir/translation_reference; fi
+#if [ ! -d $mosesdir/translation_reference ]; then mkdir -p $mosesdir/translation_reference; fi
 
 # Directory with the files that need to be translated by Moses
-if [ ! -d $mosesdir/translation_input ]; then mkdir -p $mosesdir/translation_input; fi
+#if [ ! -d $mosesdir/translation_input ]; then mkdir -p $mosesdir/translation_input; fi
 
 
 #Addresses of packages used (*pack = name of package; *url = url of package; *dir = directory base name of decompressed, non-compiled package on disk; *newdir = base directory of compiled package on disk)
@@ -106,6 +106,22 @@ scriptsdir=scripts
 scriptsnewdir=scripts
 scorerpack=mteval-v11b.pl
 scorerurl=ftp://jaguar.ncsl.nist.gov/mt/resources/$scorerpack
+datapack=data-files.tar.gz
+dataurl="http://moses-for-mere-mortals.googlecode.com/files/$datapack"
+
+cd $PWD
+cd ..
+wget $dataurl
+tar -xzvf $datapack
+cp -r data-files/corpora_for_training $mosesdir
+cp -r data-files/translation_input $mosesdir
+cp -r data-files/translation_reference $mosesdir
+rm -f $datapack
+if [ ! -f $mosesdir/corpora_for_training/300000.en ]; then
+    echo "Data files not correctly created. Exiting..."
+    exit 0
+fi
+cd $toolsdir
 
 
 cd $toolsdir
@@ -213,6 +229,7 @@ else
 		wget $scorerurl
 	fi
 fi
+
 
 if [ -f $mosesdir/create.moses.log ]; then
 	. $mosesdir/create.moses.log
@@ -527,6 +544,10 @@ echo ""
 echo "!!! Successful end of Moses installation. !!!"
 echo "Moses base directory located in $mosesdir"
 
+#*************************************************************************************************
+# Changes in version 1.36
+#*************************************************************************************************
+#Changed the data files (containing namely the demo corpus) to another location
 #*************************************************************************************************
 # Changes in version 1.35
 #*************************************************************************************************
