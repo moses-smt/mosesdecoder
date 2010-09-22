@@ -1,0 +1,509 @@
+#!/usr/bin/env bash
+# score-0.85
+# copyright 2010, João L. A. C. Rosas
+# licenced under the GPL licence, version 3
+# date: 02/09/2010
+# Special thanks to Hilário Leal Fontes and Maria José Machado who made research about this script, sent me experimental results, helped to test it and made very helpful suggestions
+
+# ***Purpose***: This script processes all the Moses translation files present in the $mosesdir/translation_files_for_tmx, if you want to prepare a translation to be used with a translation memory, or in the $mosesdir/translation_output directory, if you want to have a plain translation. For each Moses translation present there, it extracts from its name the names of the abbreviations of the source and target languages and of the scorebasename (which must not included the "." sign). With this information, it reconstructs the full name of the source file and reference translation file. For a set of source file, its Moses translation file and its reference (human-made) translation file, this script creates a report presenting, depending on the parameters set by the user, either 1) a score of the whole Moses translation or 2) a score of each segment of the Moses translation. In this latter case, each line of the file consists of the a) BLEU score and b) NIST score of the Moses translation ***of that segment***, c) the number of the segment in the source document, d) the source, e) reference and f) Moses translation segments, in that order. These 6 fields are separated by the "|" character. The lines are sorted by ascending order of BLEU score.
+
+###########################################################################################################################################################
+#THIS SCRIPT ASSUMES THAT A IRSTLM AND RANDLM ENABLED MOSES HAS ALREADY BEEN INSTALLED WITH THE create script IN $mosesdir (BY DEFAULT $HOME/moses-irstlm-randlm), THAT A CORPUS HAS BEEN TRAINED WITH THE train script AND THAT A TRANSLATION HAS ALREADY BEEN MADE WITH THE translate script.
+# IT ALSO ASSUMES THAT THE PACKAGES UPON WHICH IT DEPENDS, INDICATED IN THE create script, HAVE BEEN INSTALLED
+###########################################################################################################################################################
+
+##########################################################################################################################################################
+#                             The values of the variables that follow should be filled according to your needs:                                          # ##########################################################################################################################################################
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# !!! THIS SCRIPT SHOULD NOT BE USED WITH DOCUMENTS TRANSLATED WITH THE translate script WITH ITS $translate_for_tmx PARAMETER SET TO 1 ***UNLESS*** the $othercleanings, $improvesegmentation and $ removeduplicates parameters of that script were all set to 0 and $minseglen was set to -1 (this processing changes the order of the segments and can also make the source document have a number of segments that is different from the number of segments of the reference translation, namely because it can delete some segments and/or add some new ones) !!!
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# !!! The names of the source and target reference translation files used for scoring should not include spaces !!!
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# The source file name and the reference translation file MUST observe the following conventions:
+#		Source file               : <basename>.<abbreviation of source language>      (ex: 100.en)
+#		Reference translation file: <basename>.<abbreviation of target language>.ref  (ex: 100.pt.ref)
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Base directory of your Moses installation (made with the create script)
+mosesdir=$HOME/moses-irstlm-randlm
+#Scores documents prepared for TMX translation memories. If this parameter is set to 1, the script will look for the documents $s and $m in the $mosesdir/translation_files_for_tmx directory; if not set to 1, it will look for the $s document in the mosesdir/translation_input directory and for the $m document in $mosesdir/translation_output; in both cases, it will look for the $r document in $mosesdir/translation_reference
+scoreTMXdocuments=0
+#This is an arbitrary commentary that you can use if you want to register something (a parameter used, whatever) in the name of the scorefile. Like this, you might not have to open several files before discovering the one you are really looking for (if you do many scores of the same document translated with different parameters); more useful while you are trying to discover the right combination of parameters for your specific situation; !!!Remember, however, that most Linux systems have a maximum file name length of 255 characters; if the name of the document to translate is already long, you might exceed that limit !!! Example of a note:"12-07-2010" (date of the batch score)
+batch_user_note="12-07-2010"
+#Create a report where each segment gets its own score; 0 = score the whole document; 1 = score each segment
+score_line_by_line=0
+#Remove moses translation segments that are equal to reference translation segments and whose BLEU score is zero (!!! Only active if score_line_by_line=1 !!!)
+remove_equal=1
+#Tokenize the source document and the reference and the Moses translation
+tokenize=1
+#Lowercase the source document and the reference and the Moses translation
+lowercase=1
+##########################################################################################################################################################
+#                               DO NOT CHANGE THE LINES THAT FOLLOW ... unless you know what you are doing!                                              #
+##########################################################################################################################################################
+#Directory where Moses translation tools are located
+toolsdir=$mosesdir/tools
+if [ "$scoreTMXdocuments" = "1" ]; then
+	sourcelanguagedir=$mosesdir/translation_files_for_tmx
+	mosestranslationdir=$mosesdir/translation_files_for_tmx
+else
+	sourcelanguagedir=$mosesdir/translation_input
+	mosestranslationdir=$mosesdir/translation_output
+fi
+reftranslationdir=$mosesdir/translation_reference
+
+#Directory where the output of the present script, the translation scoring document, will be created
+scoredir=$mosesdir/translation_scoring
+
+# Create the input directories, if they do not yet exist; later steps will confirm that the input files do not yet exist (this saves time to the user, who will not have to also create these directories)
+if [ ! -d $sourcelanguagedir ] ; then mkdir -p $sourcelanguagedir ; fi
+if [ ! -d $reftranslationdir ] ; then mkdir -p $reftranslationdir ; fi
+if [ ! -d $mosestranslationdir ] ; then mkdir -p $mosestranslationdir ; fi
+if [ ! -d $scoredir ] ; then mkdir -p $scoredir ; fi
+
+# Define functions
+remove_garbage() {
+	if [ -f $scoredir/$s ]; then
+		rm $scoredir/$s
+	fi
+	if [ -f $scoredir/$r ]; then
+		rm $scoredir/$r
+	fi
+	if [ -f $scoredir/$m ]; then
+		rm $scoredir/$m
+	fi
+	if [ -f $scoredir/$scorebasename-src.$lang1.sgm ]; then
+		rm $scoredir/$scorebasename-src.$lang1.sgm
+	fi
+	if [ -f $scoredir/$scorebasename-ref.$lang2.sgm ]; then
+		rm $scoredir/$scorebasename-ref.$lang2.sgm
+	fi
+	if [ -f $scoredir/$scorebasename.moses.sgm ]; then
+		rm $scoredir/$scorebasename.moses.sgm
+	fi
+}
+log_wrong_file() {
+	if [ ! -f $scoredir/$tmp ]; then
+		echo "LIST OF NOT SCORED FILES (in the $mosestranslationdir directory):" > $scoredir/$tmp
+		echo "==============================================================================================" >> $scoredir/$tmp
+		echo "" >> $scoredir/$tmp
+		echo "==============================================================================================" >> $scoredir/$tmp
+	fi
+	echo -e "***$filename*** file:" >> $scoredir/$tmp
+	echo "----------------------------------------------------------------------------------------------" >> $scoredir/$tmp
+	echo -e "\t$error_msg" >> $scoredir/$tmp
+	echo "==============================================================================================" >> $scoredir/$tmp
+}
+#-----------------------------------------------------------------------------------------------------------------------------------------
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
+tmp="!!!SCORES-NOT-DONE!!!"
+if [ -f $scoredir/$tmp ]; then
+	rm $scoredir/$tmp
+fi
+
+i=0
+for filetoscore in $mosestranslationdir/*; do
+	if [ ! -d $filetoscore ]; then
+		error_msg=""
+		filename=${filetoscore##*/}
+		tempbasename=${filename%.*}
+		tempbasename1=${tempbasename%.*}
+		scorebasename=${tempbasename1%.*}
+		temp=${filename%.*}
+		temp1=${temp%.*}
+		lang1=${temp1##*.}
+		lang2=${temp##*.}
+		s=$scorebasename.$lang1
+		m=$filename
+		r=$scorebasename.$lang2.ref
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		#Define report name
+		if [ "$lang1" = "$filename" -a "$lang2" = "$filename" ]; then
+			lang1t=""
+			lang2t=""
+		else
+			lang1t=$lang1
+			lang2t=$lang2
+		fi
+		if [ "$score_line_by_line" = "1" ]; then
+			scorefile=$scorebasename.$batch_user_note.$lang1t-$lang2t.F-$scoreTMXdocuments-R-$remove_equal-T-$tokenize.L-$lowercase.line-by-line
+		else
+			scorefile=$scorebasename-$batch_user_note-$lang1t-$lang2t.F-$scoreTMXdocuments-R-$remove_equal-T-$tokenize.L-$lowercase.whole-doc
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		scorefile_name_len=${#scorefile}
+		if [ "${filetoscore##*.}" = "moses" ]; then
+			echo "--------------------------------------------------------------------"
+			echo "MOSES TRANSLATION: $filename (in the $mosestranslationdir directory)"
+			let i=$i+1
+			if [ "$scorefile_name_len" -gt "229" -a "$score_line_by_line" != "1" ]; then
+				     echo "==============================================================================================" >> $scoredir/$tmp
+				error_msg="The translated file name and/or the \$batch_user_note parameter would result in a scorefile name that exceeds the maximal limit of 255 characters. Please try to use translation files and user notes that do not lead to files names exceeding the maximal allowable length."
+				echo -e "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				scorefile=$(echo $scorefile | cut -c1-229)
+				continue
+			fi 
+			if [ "$scorefile_name_len" -gt "242" -a "$score_line_by_line" = "1" ]; then
+				error_msg="The translated file name and/or the \$batch_user_note parameter would result in a scorefile name that exceeds the maximal limit of 255 characters. Please try to use translation files and user notes that do not lead to files with names exceeding their maximal allowable length."
+				echo -e "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				scorefile=$(echo $scorefile | cut -c1-242)
+				continue
+			fi 
+			#-----------------------------------------------------------------------------------------------------------------------------------------
+			if [ "$lang1" = "$lang2" ]; then
+				error_msg="You did not respect the Moses for Mere Mortals conventions for naming the source and or the reference files.\n\tSource file\t\t\t: <scorebasename>.<source language abbreviation> (ex: 100.pt)\n\tReference translation file\t: <scorebasename>.<target language abbreviation> (ex: 100.en.ref)\nPlease correct the name of the files and then run this script again."
+				echo -e "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				continue
+			fi 
+			#-----------------------------------------------------------------------------------------------------------------------------------------
+			#Get number of segments for each input file (source, reference and Moses translation)
+			#avoid wc error messages when the file does not exist
+			exec 3> /dev/stderr 2> /dev/null
+			lines_s=`wc -l "$sourcelanguagedir/$s" | awk '{print $1'}` 
+			if [ "$lines_s" ]; then 
+				echo "Source file      : $lines_s lines"
+			else
+				echo "Source file      : doesn't exist"
+			fi
+			lines=`wc -l "$mosestranslationdir/$m" | awk '{print $1'}`
+			if [ "$lines" ]; then 
+				echo "Moses translation: $lines lines"
+			else
+				echo "Moses translation: doesn't exist"
+			fi
+			lines_r=`wc -l "$reftranslationdir/$r" | awk '{print $1'}`
+			if [ "$lines_r" ]; then 
+				echo "Reference file   : $lines_r lines"
+			else
+				echo "Reference file   : doesn't exist"
+			fi
+			exec 2>&3
+
+			#Check that source, reference and Moses translation files have the same number of segments
+			if [ "$lines_s" != "$lines_r" ]; then
+				if [ "$lines_s" = "" ]; then
+					lines_s=0
+				fi
+				if [ "$lines_r" = "" ]; then
+					lines_r=0
+				fi
+				error_msg="Source and reference files do not have the same number of lines (source = $lines_s and reference = $lines_r lines) or one or both of them might not exist. If you verify manually that they do have the same number of segments, then wc (a Linux command) is interpreting at least one of the characters of one of the files as something it isn't. If that is the case, you will have to isolate the line(s) that is (are) causing problems and to substitute the character in question by some other character."
+				echo "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				remove_garbage 
+				continue
+			fi
+			if [ "$lines" != "$lines_r" ]; then
+				if [ "$lines" = "" ]; then
+					lines=0
+				fi
+				if [ "$lines_r" = "" ]; then
+					lines_r=0
+				fi
+				error_msg="Reference and moses translation files do not have the same number of lines (reference = $lines_r lines and moses translation = $lines) or one  or both of them might not exist. If you verify manually that they do have the same number of segments, then wc (a Linux command) is interpreting at least one of the characters of one of the files as something it isn't. If that is the case, you will have to isolate the line(s) that is (are) causing problems and to substitute the character in question by some other character."
+				echo "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				remove_garbage 
+				continue
+			fi
+			#-----------------------------------------------------------------------------------------------------------------------------------------
+			#Check that $s, $r and $m exist
+			if [ ! -f $sourcelanguagedir/$s ] ; then 
+				error_msg="The expected source language file ($sourcelanguagedir/$s) needed for scoring the Moses translation ($mosestranslationdir/$m) does not exist. Did you respect the file naming conventions described at the top of the score-0.85 script or did you use the wrong language pair for translating?"
+				echo "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				continue
+			else
+				cp $sourcelanguagedir/$s $scoredir
+				if [ "$tokenize" = "1" -a "$lowercase" = "1" ]; then
+					$toolsdir/scripts/tokenizer.perl -l $lang1 < $scoredir/$s > $scoredir/$s.tok
+					$toolsdir/scripts/lowercase.perl < $scoredir/$s.tok > $scoredir/$s
+					rm -f $scoredir/$s.tok
+				elif [ "$tokenize" = "1" ]; then
+					$toolsdir/scripts/tokenizer.perl -l $lang1 < $scoredir/$s > $scoredir/$s.tok
+					mv -f $scoredir/$s.tok $scoredir/$s
+				elif [ "$lowercase" = "1" ]; then
+					$toolsdir/scripts/lowercase.perl < $scoredir/$s > $scoredir/$s.lower
+					mv -f $scoredir/$s.lower $scoredir/$s
+				fi
+				sed 's/\\$/\\ /g' < $scoredir/$s > $scoredir/$s.clean
+				mv -f $scoredir/$s.clean $scoredir/$s
+			fi
+			if [ ! -f $reftranslationdir/$r ] ; then 
+				error_msg="The expected reference (human-made) file ($reftranslationdir/$r) needed for scoring the Moses translation ($mosestranslationdir/$m) does not exist."
+				echo "$error_msg Analysing now next Moses translation. Did you respect the file naming conventions described at the top of the score-0.21 script or did you use the wrong language pair for translating?"
+				log_wrong_file
+				continue
+			else
+				cp $reftranslationdir/$r $scoredir
+				if [ "$tokenize" = "1" -a "$lowercase" = "1" ]; then
+					$toolsdir/scripts/tokenizer.perl -l $lang2 < $scoredir/$r > $scoredir/$r.tok
+					$toolsdir/scripts/lowercase.perl < $scoredir/$r.tok > $scoredir/$r
+					rm -f $scoredir/$r.tok
+				elif [ "$tokenize" = "1" ]; then
+					$toolsdir/scripts/tokenizer.perl -l $lang2 < $scoredir/$r > $scoredir/$r.tok
+					mv -f $scoredir/$r.tok $scoredir/$r
+				elif [ "$lowercase" = "1" ]; then
+					$toolsdir/scripts/lowercase.perl < $scoredir/$r > $scoredir/$r.lower
+					mv -f $scoredir/$r.lower $scoredir/$r
+				fi
+				sed 's/\\$/\\ /g' < $scoredir/$r > $scoredir/$r.clean
+				mv -f $scoredir/$r.clean $scoredir/$r
+			fi
+			if [ ! -f $mosestranslationdir/$m ] ; then 
+				error_msg="The Moses translation file ($mosestranslationdir/$m) file does not exist. Did you respect the file naming conventions described at the top of the score-0.80 script?"
+				echo "$error_msg Analysing now next Moses translation."
+				log_wrong_file
+				continue
+			else
+				cp $mosestranslationdir/$m $scoredir
+				if [ "$tokenize" = "1" -a "$lowercase" = "1" ]; then
+					$toolsdir/scripts/tokenizer.perl -l $lang2 < $scoredir/$m > $scoredir/$m.tok
+					$toolsdir/scripts/lowercase.perl < $scoredir/$m.tok > $scoredir/$m
+					rm -f $scoredir/$m.tok
+				elif [ "$tokenize" = "1" ]; then
+					$toolsdir/scripts/tokenizer.perl -l $lang2 < $scoredir/$m > $scoredir/$m.tok
+					mv -f $scoredir/$m.tok $scoredir/$m
+				elif [ "$lowercase" = "1" ]; then
+					$toolsdir/scripts/lowercase.perl < $scoredir/$m > $scoredir/$m.lower
+					mv -f $scoredir/$m.lower $scoredir/$m
+				fi
+				sed 's/\\$/\\ /g' < $scoredir/$m > $scoredir/$m.clean
+				mv -f $scoredir/$m.clean $scoredir/$m
+			fi
+
+			echo "===================================================================================" > $scoredir/temp
+			echo "*** Script version ***: score-0.85" >> $scoredir/temp
+			echo "===================================================================================" >> $scoredir/temp
+			echo "===================================================================================" >> $scoredir/temp
+			echo "Extracted file names and other data  (extracted automatically; errors are possible):" >> $scoredir/temp
+			echo "===================================================================================" >> $scoredir/temp
+			echo "source language    : $lang1" >> $scoredir/temp
+			echo "target language    : $lang2" >> $scoredir/temp
+			echo "-----------------------------------------------------------------------------------" >> $scoredir/temp
+			echo "source file        : $sourcelanguagedir/$s" >> $scoredir/temp
+			echo "moses translation  : $mosestranslationdir/$m" >> $scoredir/temp
+			echo "reference file     : $reftranslationdir/$r" >> $scoredir/temp
+			echo "-----------------------------------------------------------------------------------" >> $scoredir/temp
+			echo "batch_user_note    : $batch_user_note" >> $scoredir/temp
+			echo "===================================================================================" >> $scoredir/temp
+			echo "score_line_by_line : $score_line_by_line" >> $scoredir/temp
+			if [ "$score_line_by_line" = "1" ]; then
+				echo "tokenize           : $tokenize" >> $scoredir/temp
+				echo "lowercase          : $lowercase" >> $scoredir/temp
+				echo "remove_equal       : $remove_equal" >> $scoredir/temp
+			fi
+			echo "===================================================================================" >> $scoredir/temp
+			#=========================================================================================================================================================
+				#1. SCORE LINE BY LINE
+			#=========================================================================================================================================================
+			if [ "$score_line_by_line" = "1" ]; then
+				if [ -f $scoredir/$scorefile ]; then
+					rm -f $scoredir/$scorefile
+				fi
+				echo "************************** Score line by line"
+				counter=0
+				echo "BLEU|NIST|<segnum>|source seg|ref seg|Moses seg" >> $scoredir/temp
+				echo "" >> $scoredir/temp
+
+				sed -e 's#\& #\&amp\; #g' -e 's#<#\&lt\;#g' $scoredir/$s > $scoredir/$s.tmp
+				mv $scoredir/$s.tmp $scoredir/$s
+				sed -e 's#\& #\&amp\; #g' -e 's#<#\&lt\;#g' $scoredir/$r > $scoredir/$r.tmp
+				mv $scoredir/$r.tmp $scoredir/$r
+				sed -e 's#\& #\&amp\; #g' -e 's#<#\&lt\;#g' $scoredir/$m > $scoredir/$m.tmp
+				mv $scoredir/$m.tmp $scoredir/$m
+				echo "***** Score each segment:"
+				while [ "$counter" -lt "$lines" ]; do
+					let "counter += 1"
+					echo "Segment $counter"
+					source_sentence=`awk "NR==$counter{print;exit}" $scoredir/$s`
+					ref_sentence=`awk "NR==$counter{print;exit}" $scoredir/$r`
+					moses_sentence=`awk "NR==$counter{print;exit}" $scoredir/$m`
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+					# ******** wrap source file
+					if [ "$source_sentence" != "" ]; then
+						echo '<srcset setid="'$scorebasename'" srclang="'$lang1'">' > $scoredir/$scorebasename-src.$lang1.sgm
+						echo '<DOC docid="'$scorebasename'">' >> $scoredir/$scorebasename-src.$lang1.sgm
+					   	echo "<seg id=$counter>"$source_sentence"</seg>" >> $scoredir/$scorebasename-src.$lang1.sgm
+						echo "</DOC>" >> $scoredir/$scorebasename-src.$lang1.sgm
+						echo "</srcset>" >> $scoredir/$scorebasename-src.$lang1.sgm
+					fi
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+					# ******** wrap reference (human-made) translation
+					if [ "$ref_sentence" != "" ]; then
+						echo '<refset setid="'$scorebasename'" srclang="'$lang1'" trglang="'$lang2'">' > $scoredir/$scorebasename-ref.$lang2.sgm
+						echo '<DOC docid="'$scorebasename'" sysid="ref">' >> $scoredir/$scorebasename-ref.$lang2.sgm
+					   	echo "<seg id=$counter>"$ref_sentence"</seg>" >> $scoredir/$scorebasename-ref.$lang2.sgm
+						echo "</DOC>" >> $scoredir/$scorebasename-ref.$lang2.sgm
+						echo "</refset>" >> $scoredir/$scorebasename-ref.$lang2.sgm
+					fi
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+					# ******** wrap Moses translation
+					if [ "$moses_sentence" != "" ]; then
+						echo '<tstset setid="'$scorebasename'" srclang="'$lang1'" trglang="'$lang2'">' > $scoredir/$scorebasename.moses.sgm
+						echo '<DOC docid="'$scorebasename'" sysid="moses">' >> $scoredir/$scorebasename.moses.sgm
+					   	echo "<seg id=$counter>"$moses_sentence"</seg>" >> $scoredir/$scorebasename.moses.sgm
+						echo "</DOC>" >> $scoredir/$scorebasename.moses.sgm
+						echo "</tstset>" >> $scoredir/$scorebasename.moses.sgm
+					fi
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+					sed -e 's/\x1E/\-/g' $scoredir/$scorebasename-src.$lang1.sgm > $scoredir/temp2
+					mv $scoredir/temp2 $scoredir/$scorebasename-src.$lang1.sgm
+					sed -e 's/\x1E/\-/g' $scoredir/$scorebasename-ref.$lang2.sgm > $scoredir/temp2
+					mv $scoredir/temp2 $scoredir/$scorebasename-ref.$lang2.sgm
+					sed -e 's/\x1E/\-/g' $scoredir/$scorebasename.moses.sgm > $scoredir/temp2
+					mv $scoredir/temp2 $scoredir/$scorebasename.moses.sgm
+
+					# ******** get segment score"
+					#in our experience, the mteval-v13a and the mteval-v12 (more recent scorers) stopped with errors (and no score) with strings like " & " and U+001E
+					score=`$toolsdir/mteval-v11b.pl -s $scoredir/$scorebasename-src.$lang1.sgm -r $scoredir/$scorebasename-ref.$lang2.sgm -t $scoredir/$scorebasename.moses.sgm -c`
+					scoretemp=${score%% for system *}
+					scoretemp1=${scoretemp#*NIST score = }
+					NIST=${scoretemp1%% *}
+					BLEUtemp=${scoretemp1#*BLEU score = }
+					BLEU=${BLEUtemp%% *}
+					set -f
+					BLEUcorr=$(echo "scale=0; $BLEU*10000" | bc)
+					set +f
+					if [ "$remove_equal" = "1" ]; then
+						if [ "$ref_sentence" != "$moses_sentence" ]; then
+							echo "$BLEU|$NIST|<$counter>|<seg>$source_sentence</seg>|<seg>$ref_sentence</seg>|<seg>$moses_sentence</seg>" >> $scoredir/$scorefile
+						elif [ "$BLEUcorr" = "0" ]; then
+							: #do nothing
+						else
+							echo "$BLEU|$NIST|<$counter>|<seg>$source_sentence</seg>|<seg>$ref_sentence</seg>|<seg>$moses_sentence</seg>" >> $scoredir/$scorefile
+						fi
+					else
+						echo "$BLEU|$NIST|<$counter>|<seg>$source_sentence</seg>|<seg>$ref_sentence</seg>|<seg>$moses_sentence</seg>" >> $scoredir/$scorefile
+					fi
+				done
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+				#Sort the output file by score
+				sort -g $scoredir/$scorefile -o $scoredir/$scorefile
+				echo "===========================================================================" >> $scoredir/temp
+				cat $scoredir/$scorefile >> $scoredir/temp
+				mv $scoredir/temp $scoredir/$scorefile
+				remove_garbage 
+			else
+			#=========================================================================================================================================================
+				#2. SCORE WHOLE DOCUMENT
+			#=========================================================================================================================================================
+				if [ -f $scoredir/$scorefile ]; then
+					rm -f $scoredir/$scorefile
+				fi
+				echo "************************** Score whole document"
+				sed -e 's#\& #\&amp\; #g' -e 's#<#\&lt\;#g' $scoredir/$s > $scoredir/$s.tmp
+				mv $scoredir/$s.tmp $scoredir/$s
+				sed -e 's#\& #\&amp\; #g' -e 's#<#\&lt\;#g' $scoredir/$r > $scoredir/$r.tmp
+				mv $scoredir/$r.tmp $scoredir/$r
+				sed -e 's#\& #\&amp\; #g' -e 's#<#\&lt\;#g' $scoredir/$m > $scoredir/$m.tmp
+				mv $scoredir/$m.tmp $scoredir/$m
+				echo "***************** wrap test result in SGM"
+				echo "******** wrap source file"
+				exec<$scoredir/$s
+				echo '<srcset setid="'$scorebasename'" srclang="'$lang1'">' > $scoredir/$scorebasename-src.$lang1.sgm
+				echo '<DOC docid="'$scorebasename'">' >> $scoredir/$scorebasename-src.$lang1.sgm
+				numseg=0
+				while read line
+				   do
+					numseg=$(($numseg+1))
+				   	echo "<seg id=$numseg>"$line"</seg>" >> $scoredir/$scorebasename-src.$lang1.sgm
+				   done
+				echo "</DOC>" >> $scoredir/$scorebasename-src.$lang1.sgm
+				echo "</srcset>" >> $scoredir/$scorebasename-src.$lang1.sgm
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+				echo "******** wrap reference (human-made) translation"
+				exec<$scoredir/$r
+				echo '<refset setid="'$scorebasename'" srclang="'$lang1'" trglang="'$lang2'">' > $scoredir/$scorebasename-ref.$lang2.sgm
+				echo '<DOC docid="'$scorebasename'" sysid="ref">' >> $scoredir/$scorebasename-ref.$lang2.sgm
+				numseg=0
+				while read line
+				   do
+					numseg=$(($numseg+1))
+				   	echo "<seg id=$numseg>"$line"</seg>" >> $scoredir/$scorebasename-ref.$lang2.sgm
+				   done
+				echo "</DOC>" >> $scoredir/$scorebasename-ref.$lang2.sgm
+				echo "</refset>" >> $scoredir/$scorebasename-ref.$lang2.sgm
+				#-----------------------------------------------------------------------------------------------------------------------------------------
+				echo "******** wrap Moses translation"
+				exec<$scoredir/$m
+				echo '<tstset setid="'$scorebasename'" srclang="'$lang1'" trglang="'$lang2'">' > $scoredir/$scorebasename.moses.sgm
+				echo '<DOC docid="'$scorebasename'" sysid="moses">' >> $scoredir/$scorebasename.moses.sgm
+				numseg=0
+				while read line
+				   do
+					numseg=$(($numseg+1))
+				   	echo "<seg id=$numseg>"$line"</seg>" >> $scoredir/$scorebasename.moses.sgm
+				   done
+				echo "</DOC>" >> $scoredir/$scorebasename.moses.sgm
+				echo "</tstset>" >> $scoredir/$scorebasename.moses.sgm
+
+				sed -e 's/\x1E/\-/g' $scoredir/$scorebasename-src.$lang1.sgm > $scoredir/temp2
+				mv $scoredir/temp2 $scoredir/$scorebasename-src.$lang1.sgm
+				sed -e 's/\x1E/\-/g' $scoredir/$scorebasename-ref.$lang2.sgm > $scoredir/temp2
+				mv $scoredir/temp2 $scoredir/$scorebasename-ref.$lang2.sgm
+				sed -e 's/\x1E/\-/g' $scoredir/$scorebasename.moses.sgm > $scoredir/temp2
+				mv $scoredir/temp2 $scoredir/$scorebasename.moses.sgm
+
+				if [ ! -f $scoredir/$scorebasename-src.$lang1.sgm -o ! -f $scoredir/$scorebasename-ref.$lang2.sgm -o ! -f $scoredir/$scorebasename.moses.sgm ]; then
+					echo "There was a problem creating the files used by the scorer. Exiting..."
+					IFS=$SAVEIFS
+					exit 0
+				else
+					#-----------------------------------------------------------------------------------------------------------------------------------------
+					echo "***************** scoring"
+					startscoringdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+					#in our experience, the mteval-v13a and the mteval-v12 (more recent scorers) stopped with errors (and no score) with strings like " & " and U+001E
+					score=`$toolsdir/mteval-v11b.pl -s $scoredir/$scorebasename-src.$lang1.sgm -r $scoredir/$scorebasename-ref.$lang2.sgm -t $scoredir/$scorebasename.moses.sgm -c`
+					scoretemp=${score%% for system *}
+					scoretemp1=${scoretemp#*NIST score = }
+					NIST=${scoretemp1%% *}
+					BLEUtemp=${scoretemp1#*BLEU score = }
+					BLEU=${BLEUtemp%% *}
+					echo $score
+					scoretemp2=${score#*NIST score =}
+					echo "NIST score = $scoretemp2" > $scoredir/$scorefile
+					newscorefile=$scorebasename-BLEU-$BLEU-NIST-$NIST-$batch_user_note-$lang1-$lang2.F-$scoreTMXdocuments-R-$remove_equal-T-$tokenize.L-$lowercase.whole-doc
+					echo "===================================================================================" >> $scoredir/$scorefile
+					mv -f $scoredir/$scorefile $scoredir/$newscorefile
+					#-----------------------------------------------------------------------------------------------------------------------------------------
+				fi
+				cat $scoredir/$newscorefile >> $scoredir/temp
+				mv $scoredir/temp $scoredir/$newscorefile
+				remove_garbage 
+			fi
+		else
+			filename=${filetoscore##*/}
+			if [ "$filename" != "*" ]; then
+				let i=$i+1
+				echo "--------------------------------------------------------------------"
+				echo -e "$filename file (in the $mosestranslationdir directory):\n\tName of moses translation file is illegal (doesn't end in '.moses' or includes spaces)."
+				error_msg="Name of moses translation file is illegal (doesn't end in '.moses' or includes spaces)."
+				log_wrong_file
+				continue
+			fi
+		fi
+	fi
+done
+IFS=$SAVEIFS
+
+echo "--------------------------------------------------------------------"
+echo -e "Score finished.\n$i files treated.\nResults directory:\n\t$scoredir"
+#=================================================================================================================================================
+# Changes in version 0.85
+#=================================================================================================================================================
+# Allows batch processing of the whole $mosesdir/$translation_output directory
+# Extracts automatically the source language and target language, the names of the source file, moses translation file and reference translation file and the batch_user_note
+# Checks for more file naming errors and informs about them
+# More informative report, even in case of error
+# Creation of a new file that lists the translations that could not be scored and the reason why
+# Corrects a bug that made it fail when the scorer files included the word "for" in their name
+# Maintains SGM scorer because newer scorers have caused us more problems with characters that crashed them (ex: " & " and U+001E)
+#=================================================================================================================================================
+
