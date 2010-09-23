@@ -51,7 +51,7 @@ protected:
 	static unsigned int s_HypothesesCreated;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
-	const MosesChart::TranslationOption &m_transOpt;
+	const Moses::ChartRule &m_transOpt;
 
 	Moses::Phrase m_contextPrefix, m_contextSuffix;
 	const std::vector<size_t> &m_wordsConsumedTargetOrder; // same size as target phrase ?
@@ -106,7 +106,7 @@ public:
 
 	int GetId()const
 	{	return m_id;}
-	const MosesChart::TranslationOption &GetTranslationOption()const
+	const Moses::ChartRule &GetTranslationOption()const
 	{ return m_transOpt; }
 	const Moses::TargetPhrase &GetCurrTargetPhrase()const
 	{ return m_transOpt.GetTargetPhrase(); }

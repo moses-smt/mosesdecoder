@@ -88,7 +88,7 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 		const TranslationOption &transOpt = **iterList;
 
 		bool isOK;
-		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells, isOK);
+		QueueEntry *queueEntry = new QueueEntry(transOpt.GetChartRule(), allChartCells, isOK);
 
 		if (isOK)
 			cube.Add(queueEntry);

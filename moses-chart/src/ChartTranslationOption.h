@@ -42,6 +42,9 @@ public:
 
 	~TranslationOption();
 
+	const Moses::ChartRule &GetChartRule() const
+	{ return m_rule; }
+
 	const Moses::TargetPhrase &GetTargetPhrase() const
 	{ return m_rule.GetTargetPhrase(); }
 

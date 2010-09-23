@@ -78,6 +78,9 @@ public:
 	const Moses::WordsRange &GetSourceWordsRange() const
 	{ return *m_wordsRange; }
 
+	inline float GetTotalScore() const 	 
+	{ return m_targetPhrase.GetFutureScore(); }
+	
 };
 
 }

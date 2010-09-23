@@ -37,7 +37,7 @@ using namespace Moses;
 namespace MosesChart
 {
 
-QueueEntry::QueueEntry(const TranslationOption &transOpt
+QueueEntry::QueueEntry(const Moses::ChartRule &transOpt
 											 , const ChartCellCollection &allChartCells
 											 , bool &isOK)
 :m_transOpt(transOpt)
