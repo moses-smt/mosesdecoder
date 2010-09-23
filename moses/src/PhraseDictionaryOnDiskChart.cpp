@@ -40,7 +40,7 @@ namespace Moses
 		Phrase *cachedSource = new Phrase(src.GetSubString(range));
 		m_sourcePhrase.push_back(cachedSource);
 		
-		ChartRuleCollection *ret = new ChartRuleCollection();
+		ChartRuleCollection *ret = new ChartRuleCollection(range);
 		m_chartTargetPhraseColl.push_back(ret);
 		
 		size_t relEndPos = range.GetEndPos() - range.GetStartPos();

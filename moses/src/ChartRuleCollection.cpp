@@ -32,7 +32,8 @@ namespace Moses
 	ObjectPool<ChartRuleCollection> ChartRuleCollection::s_objectPool("ChartRuleCollection", 3000);
 #endif
 
-ChartRuleCollection::ChartRuleCollection()
+ChartRuleCollection::ChartRuleCollection(const WordsRange &range)
+	:m_range(range)
 {
 	m_collection.reserve(200);
 	m_scoreThreshold = std::numeric_limits<float>::infinity();
@@ -69,12 +70,12 @@ void ChartRuleCollection::Add(const TargetPhraseCollection &targetPhraseCollecti
 
 		if (m_collection.size() < ruleLimit)
 		{ // not yet filled out quota. add everything
-			m_collection.push_back(new ChartRule(targetPhrase, wordConsumed));
+			m_collection.push_back(new ChartRule(targetPhrase, wordConsumed, m_range));
 			m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
 		}
 		else if (score > m_scoreThreshold)
 		{ // full but not bursting. add if better than worst score
-			m_collection.push_back(new ChartRule(targetPhrase, wordConsumed));
+			m_collection.push_back(new ChartRule(targetPhrase, wordConsumed, m_range));
 		}
 
 		// prune if bursting

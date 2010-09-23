@@ -209,6 +209,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
 	vector<float> wordPenaltyScore(1, -0.434294482);
 
+	m_cacheRange.push_back(WordsRange(sourcePos, sourcePos));
+	const WordsRange &range = m_cacheRange.back();
+	
 	size_t isDigit = 0;
 	if (staticData.GetDropUnknown())
 	{
@@ -270,7 +273,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 						
 			// chart rule
 			ChartRule *chartRule = new ChartRule(*targetPhrase
-																					, *wordsConsumed->back());
+																					, *wordsConsumed->back()
+																					, range);
 			chartRule->CreateNonTermIndex();
 			m_cacheChartRule.push_back(chartRule);
 
@@ -310,7 +314,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			// chart rule
 			assert(wordsConsumed->size());
 			ChartRule *chartRule = new ChartRule(*targetPhrase
-																					, *wordsConsumed->back());
+																					, *wordsConsumed->back()
+																					, range);
 			chartRule->CreateNonTermIndex();
 			m_cacheChartRule.push_back(chartRule);
 

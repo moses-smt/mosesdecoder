@@ -52,6 +52,7 @@ protected:
 	std::vector<Moses::Phrase*> m_unksrcs;
 	std::list<Moses::ChartRule*> m_cacheChartRule;
 	std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
+	std::list<Moses::WordsRange> m_cacheRange;
 	std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
 
 	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph& decodeGraph,

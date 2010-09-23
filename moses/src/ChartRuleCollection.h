@@ -44,6 +44,8 @@ protected:
 #endif
 	std::vector<ChartRule*> m_collection;
 	float m_scoreThreshold;
+	Moses::WordsRange m_range;
+
 public:	
 	// iters
 	typedef std::vector<ChartRule*>::iterator iterator;
@@ -72,7 +74,7 @@ public:
 	}
 #endif
 
-	ChartRuleCollection();
+	ChartRuleCollection(const WordsRange &range);
 	~ChartRuleCollection();
 
 	const ChartRule &Get(size_t ind) const

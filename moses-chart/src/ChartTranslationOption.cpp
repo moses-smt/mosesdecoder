@@ -36,9 +36,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 :m_rule(rule)
 {
 	//assert(wordsRange.GetStartPos() == rule.GetWordsConsumed().front()->GetWordsRange().GetStartPos());
-	assert(wordsRange.GetEndPos() == rule.GetLastWordConsumed().GetWordsRange().GetEndPos());
-	
-	rule.SetWordsRange(wordsRange);
+	assert(wordsRange.GetEndPos() == rule.GetLastWordConsumed().GetWordsRange().GetEndPos());	
 }
 
 TranslationOption::~TranslationOption()
