@@ -70,8 +70,11 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-		virtual ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																															bool adhereTableLimit,const CellCollection &cellColl) const=0;
+		virtual void GetChartRuleCollection(ChartRuleCollection &outColl
+																				, InputType const& src
+																				, WordsRange const& range
+																				, bool adhereTableLimit
+																				, const CellCollection &cellColl) const=0;
 
   protected:
     size_t m_tableLimit;

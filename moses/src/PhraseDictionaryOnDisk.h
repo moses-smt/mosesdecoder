@@ -53,7 +53,6 @@ protected:
 
 	mutable std::map<UINT64, const TargetPhraseCollection*> m_cache;
 	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
-	mutable std::list<Phrase*> m_sourcePhrase;
 	mutable std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
 
 	mutable std::vector<ProcessedRuleStackOnDisk*>	m_runningNodesVec;
@@ -89,8 +88,11 @@ public:
 	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
 	
-	virtual ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																														bool adhereTableLimit,const CellCollection &cellColl) const;
+	virtual void GetChartRuleCollection(ChartRuleCollection &outColl
+																			,InputType const& src
+																			,WordsRange const& range
+																			,bool adhereTableLimit
+																			,const CellCollection &cellColl) const;
 	
 	void InitializeForInput(const InputType& input);
 	void CleanUp();

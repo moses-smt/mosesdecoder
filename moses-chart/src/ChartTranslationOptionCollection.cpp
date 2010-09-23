@@ -144,11 +144,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         decodeStep.GetPhraseDictionaryFeature()->GetDictionary();
 	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
 	
-	ChartRuleCollection *chartRuleCollection = phraseDictionary->GetChartRuleCollection(
-																															m_source
-																															, wordsRange
-																															, adhereTableLimit
-																															, m_hypoStackColl);
+	ChartRuleCollection *chartRuleCollection = new ChartRuleCollection(wordsRange);
+	phraseDictionary->GetChartRuleCollection(*chartRuleCollection
+																					, m_source
+																					, wordsRange
+																					, adhereTableLimit
+																					, m_hypoStackColl);
 	assert(chartRuleCollection != NULL);
 	//cerr << "chartRuleCollection size=" << chartRuleCollection->GetSize();
 	

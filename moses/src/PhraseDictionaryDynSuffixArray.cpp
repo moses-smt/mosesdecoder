@@ -66,11 +66,13 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	return ret;
 }
 	
-ChartRuleCollection *PhraseDictionaryDynSuffixArray::GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																													bool adhereTableLimit,const CellCollection &cellColl) const
+void PhraseDictionaryDynSuffixArray::GetChartRuleCollection(ChartRuleCollection &outColl
+																														,InputType const& src
+																														,WordsRange const& range
+																														,bool adhereTableLimit
+																														,const CellCollection &cellColl) const
 {
 	assert(false);
-	return NULL;
 }
 void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, string& alignment) { 
   m_biSA->addSntPair(source, target, alignment);

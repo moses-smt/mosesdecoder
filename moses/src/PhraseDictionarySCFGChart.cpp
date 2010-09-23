@@ -51,14 +51,13 @@ Word PhraseDictionarySCFG::CreateCoveredWord(const Word &origSourceLabel, const 
 	return ret;
 }
 
-ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
-																																							 InputType const& src
-																																							 ,WordsRange const& range
-																																							 ,bool adhereTableLimit
-																																							 ,const CellCollection &cellColl) const
+void PhraseDictionarySCFG::GetChartRuleCollection(ChartRuleCollection &outColl
+																								 ,InputType const& src
+																								 ,WordsRange const& range
+																								 ,bool adhereTableLimit
+																								 ,const CellCollection &cellColl) const
 {
-	ChartRuleCollection *ret = new ChartRuleCollection(range);
-	m_chartTargetPhraseColl.push_back(ret);
+	m_chartTargetPhraseColl.push_back(&outColl);
 	
 	size_t relEndPos = range.GetEndPos() - range.GetStartPos();
 	size_t absEndPos = range.GetEndPos();
@@ -152,10 +151,8 @@ ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 		
 		if (targetPhraseCollection != NULL)
 		{
-			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+			outColl.Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
 		}
 	}
-	ret->CreateChartRules(rulesLimit);
-	
-	return ret;
+	outColl.CreateChartRules(rulesLimit);	
 }

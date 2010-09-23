@@ -70,49 +70,6 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
 {
 	assert(false);
 	return NULL;
-
-	/*
-	const StaticData &staticData = StaticData::Instance();
-	
-	TargetPhraseCollection *ret = new TargetPhraseCollection();
-	m_cache.push_back(ret);
-	Phrase *cachedSource = new Phrase(src);
-	m_sourcePhrase.push_back(cachedSource);
-	
-	const MosesBerkeleyPt::SourcePhraseNode *nodeOld = new MosesBerkeleyPt::SourcePhraseNode(m_dbWrapper.GetInitNode());
-	
-	// find target phrases from tree
-	size_t size = src.GetSize();
-	for (size_t pos = 0; pos < size; ++pos)
-	{
-		// create on disk word from moses word
-		const Word &origWord = src.GetWord(pos);
-
-		const MosesBerkeleyPt::SourcePhraseNode *nodeNew;
-
-		MosesBerkeleyPt::Word *searchWord = m_dbWrapper.ConvertFromMosesSource(m_inputFactorsVec, origWord);
-		if (searchWord == NULL)
-		{ // a vocab wasn't in there. definately can't find word in pt
-			nodeNew = NULL;
-		}
-		else
-		{	// search for word in node map
-			nodeNew = m_dbWrapper.GetChild(*nodeOld, *searchWord);
-		}
-		
-		delete nodeOld;
-		nodeOld = nodeNew;
-		
-		if (nodeNew == NULL)
-		{ // nothing found. end
-			break;
-		}
-	} // for (size_t pos
-	
-	delete nodeOld;
-	
-	return ret;
-	*/	
 }
 	
 void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
@@ -153,7 +110,6 @@ void PhraseDictionaryOnDisk::CleanUp()
 	}
 	m_cache.clear();
 	
-	RemoveAllInColl(m_sourcePhrase);
 	RemoveAllInColl(m_chartTargetPhraseColl);
 	RemoveAllInColl(m_runningNodesVec);
 	RemoveAllInColl(m_sourcePhraseNode);	
