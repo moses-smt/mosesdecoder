@@ -22,7 +22,6 @@
 #pragma once
 
 #include <vector>
-#include "ChartTranslationOptionList.h"
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/DecodeGraph.h"
 #include "../../moses/src/ChartRuleCollection.h"
@@ -58,7 +57,6 @@ protected:
                                         size_t startPosition
 																			, size_t endPosition
 																			, bool adhereTableLimit);
-	void Add(TranslationOptionList &translationOptionList);
 
 	// for adding 1 trans opt in unknown word proc
 	void Add(Moses::ChartRule *transOpt, size_t pos);

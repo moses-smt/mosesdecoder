@@ -24,7 +24,6 @@
 #include "ChartHypothesis.h"
 #include "QueueEntry.h"
 #include "ChartCell.h"
-#include "ChartTranslationOption.h"
 #include "ChartManager.h"
 #include "../../moses/src/TargetPhrase.h"
 #include "../../moses/src/Phrase.h"

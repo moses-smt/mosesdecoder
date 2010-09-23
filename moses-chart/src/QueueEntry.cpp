@@ -21,8 +21,6 @@
 
 #include "QueueEntry.h"
 #include "ChartCell.h"
-#include "ChartTranslationOption.h"
-#include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "Cube.h"

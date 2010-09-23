@@ -21,7 +21,6 @@
 
 #include <cassert>
 #include "ChartTranslationOptionCollection.h"
-#include "ChartTranslationOption.h"
 #include "ChartCellCollection.h"
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/StaticData.h"

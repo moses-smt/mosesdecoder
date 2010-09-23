@@ -28,7 +28,6 @@
 #include "../../moses/src/Phrase.h"
 #include "../../moses/src/ChartRule.h"
 #include "../../moses/src/ObjectPool.h"
-#include "ChartTranslationOption.h"
 
 namespace MosesChart
 {

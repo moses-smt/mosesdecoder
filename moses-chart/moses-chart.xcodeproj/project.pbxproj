@@ -17,12 +17,8 @@
 		1ED4FBBC11BDBC9F004E826A /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB9D11BDBC9F004E826A /* ChartHypothesisCollection.h */; };
 		1ED4FBBD11BDBC9F004E826A /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB9E11BDBC9F004E826A /* ChartManager.cpp */; };
 		1ED4FBBE11BDBC9F004E826A /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FB9F11BDBC9F004E826A /* ChartManager.h */; };
-		1ED4FBBF11BDBC9F004E826A /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBA011BDBC9F004E826A /* ChartTranslationOption.cpp */; };
-		1ED4FBC011BDBC9F004E826A /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBA111BDBC9F004E826A /* ChartTranslationOption.h */; };
 		1ED4FBC111BDBC9F004E826A /* ChartTranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBA211BDBC9F004E826A /* ChartTranslationOptionCollection.cpp */; };
 		1ED4FBC211BDBC9F004E826A /* ChartTranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBA311BDBC9F004E826A /* ChartTranslationOptionCollection.h */; };
-		1ED4FBC311BDBC9F004E826A /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBA411BDBC9F004E826A /* ChartTranslationOptionList.cpp */; };
-		1ED4FBC411BDBC9F004E826A /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBA511BDBC9F004E826A /* ChartTranslationOptionList.h */; };
 		1ED4FBC511BDBC9F004E826A /* ChartTrellisNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBA611BDBC9F004E826A /* ChartTrellisNode.cpp */; };
 		1ED4FBC611BDBC9F004E826A /* ChartTrellisNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBA711BDBC9F004E826A /* ChartTrellisNode.h */; };
 		1ED4FBC711BDBC9F004E826A /* ChartTrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBA811BDBC9F004E826A /* ChartTrellisPath.cpp */; };
@@ -49,12 +45,8 @@
 		1ED4FB9D11BDBC9F004E826A /* ChartHypothesisCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesisCollection.h; path = src/ChartHypothesisCollection.h; sourceTree = "<group>"; };
 		1ED4FB9E11BDBC9F004E826A /* ChartManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartManager.cpp; path = src/ChartManager.cpp; sourceTree = "<group>"; };
 		1ED4FB9F11BDBC9F004E826A /* ChartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartManager.h; path = src/ChartManager.h; sourceTree = "<group>"; };
-		1ED4FBA011BDBC9F004E826A /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
-		1ED4FBA111BDBC9F004E826A /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
 		1ED4FBA211BDBC9F004E826A /* ChartTranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionCollection.cpp; path = src/ChartTranslationOptionCollection.cpp; sourceTree = "<group>"; };
 		1ED4FBA311BDBC9F004E826A /* ChartTranslationOptionCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionCollection.h; path = src/ChartTranslationOptionCollection.h; sourceTree = "<group>"; };
-		1ED4FBA411BDBC9F004E826A /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
-		1ED4FBA511BDBC9F004E826A /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
 		1ED4FBA611BDBC9F004E826A /* ChartTrellisNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisNode.cpp; path = src/ChartTrellisNode.cpp; sourceTree = "<group>"; };
 		1ED4FBA711BDBC9F004E826A /* ChartTrellisNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisNode.h; path = src/ChartTrellisNode.h; sourceTree = "<group>"; };
 		1ED4FBA811BDBC9F004E826A /* ChartTrellisPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPath.cpp; path = src/ChartTrellisPath.cpp; sourceTree = "<group>"; };
@@ -107,12 +99,8 @@
 				1ED4FB9D11BDBC9F004E826A /* ChartHypothesisCollection.h */,
 				1ED4FB9E11BDBC9F004E826A /* ChartManager.cpp */,
 				1ED4FB9F11BDBC9F004E826A /* ChartManager.h */,
-				1ED4FBA011BDBC9F004E826A /* ChartTranslationOption.cpp */,
-				1ED4FBA111BDBC9F004E826A /* ChartTranslationOption.h */,
 				1ED4FBA211BDBC9F004E826A /* ChartTranslationOptionCollection.cpp */,
 				1ED4FBA311BDBC9F004E826A /* ChartTranslationOptionCollection.h */,
-				1ED4FBA411BDBC9F004E826A /* ChartTranslationOptionList.cpp */,
-				1ED4FBA511BDBC9F004E826A /* ChartTranslationOptionList.h */,
 				1ED4FBA611BDBC9F004E826A /* ChartTrellisNode.cpp */,
 				1ED4FBA711BDBC9F004E826A /* ChartTrellisNode.h */,
 				1ED4FBA811BDBC9F004E826A /* ChartTrellisPath.cpp */,
@@ -159,9 +147,7 @@
 				1ED4FBBA11BDBC9F004E826A /* ChartHypothesis.h in Headers */,
 				1ED4FBBC11BDBC9F004E826A /* ChartHypothesisCollection.h in Headers */,
 				1ED4FBBE11BDBC9F004E826A /* ChartManager.h in Headers */,
-				1ED4FBC011BDBC9F004E826A /* ChartTranslationOption.h in Headers */,
 				1ED4FBC211BDBC9F004E826A /* ChartTranslationOptionCollection.h in Headers */,
-				1ED4FBC411BDBC9F004E826A /* ChartTranslationOptionList.h in Headers */,
 				1ED4FBC611BDBC9F004E826A /* ChartTrellisNode.h in Headers */,
 				1ED4FBC811BDBC9F004E826A /* ChartTrellisPath.h in Headers */,
 				1ED4FBCA11BDBC9F004E826A /* ChartTrellisPathCollection.h in Headers */,
@@ -218,9 +204,7 @@
 				1ED4FBB911BDBC9F004E826A /* ChartHypothesis.cpp in Sources */,
 				1ED4FBBB11BDBC9F004E826A /* ChartHypothesisCollection.cpp in Sources */,
 				1ED4FBBD11BDBC9F004E826A /* ChartManager.cpp in Sources */,
-				1ED4FBBF11BDBC9F004E826A /* ChartTranslationOption.cpp in Sources */,
 				1ED4FBC111BDBC9F004E826A /* ChartTranslationOptionCollection.cpp in Sources */,
-				1ED4FBC311BDBC9F004E826A /* ChartTranslationOptionList.cpp in Sources */,
 				1ED4FBC511BDBC9F004E826A /* ChartTrellisNode.cpp in Sources */,
 				1ED4FBC711BDBC9F004E826A /* ChartTrellisPath.cpp in Sources */,
 				1ED4FBC911BDBC9F004E826A /* ChartTrellisPathCollection.cpp in Sources */,

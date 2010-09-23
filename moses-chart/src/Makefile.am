@@ -6,9 +6,7 @@ libmoses_chart_a_SOURCES = \
 	ChartHypothesis.cpp \
 	ChartHypothesisCollection.cpp \
 	ChartManager.cpp \
-	ChartTranslationOption.cpp \
 	ChartTranslationOptionCollection.cpp \
-	ChartTranslationOptionList.cpp \
 	ChartTrellisNode.cpp \
 	ChartTrellisPath.cpp \
 	ChartTrellisPathCollection.cpp \
