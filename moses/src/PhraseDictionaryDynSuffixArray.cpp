@@ -66,7 +66,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	return ret;
 }
 	
-const ChartRuleCollection *PhraseDictionaryDynSuffixArray::GetChartRuleCollection(InputType const& src, WordsRange const& range,
+ChartRuleCollection *PhraseDictionaryDynSuffixArray::GetChartRuleCollection(InputType const& src, WordsRange const& range,
 																													bool adhereTableLimit,const CellCollection &cellColl) const
 {
 	assert(false);

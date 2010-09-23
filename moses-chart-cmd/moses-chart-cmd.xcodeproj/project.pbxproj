@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E60D2A512496B3200D15873 /* libkenlm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E60D2A212496B1900D15873 /* libkenlm.a */; };
 		1E87F09311BDCD2E0033951C /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E87F08D11BDCD1B0033951C /* libmoses.a */; };
 		1E9DA31511BDC84A00F4DBD1 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA30A11BDC84A00F4DBD1 /* IOWrapper.cpp */; };
 		1E9DA31611BDC84A00F4DBD1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA30C11BDC84A00F4DBD1 /* Main.cpp */; };
@@ -15,6 +14,7 @@
 		1E9DA31911BDC84A00F4DBD1 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA31311BDC84A00F4DBD1 /* TranslationAnalysis.cpp */; };
 		1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */; };
 		1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */; };
+		1ED8B842124B98A60030CCF4 /* libkenlm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E60D2A212496B1900D15873 /* libkenlm.a */; };
 		8DD76F6A0486A84900D96B5E /* moses-chart-cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */; };
 /* End PBXBuildFile section */
 
@@ -112,7 +112,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E60D2A512496B3200D15873 /* libkenlm.a in Frameworks */,
+				1ED8B842124B98A60030CCF4 /* libkenlm.a in Frameworks */,
 				1E87F09311BDCD2E0033951C /* libmoses.a in Frameworks */,
 				1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */,
 				1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */,

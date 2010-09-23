@@ -51,7 +51,7 @@ Word PhraseDictionarySCFG::CreateCoveredWord(const Word &origSourceLabel, const 
 	return ret;
 }
 
-const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
+ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 																																							 InputType const& src
 																																							 ,WordsRange const& range
 																																							 ,bool adhereTableLimit

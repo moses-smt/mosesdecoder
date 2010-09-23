@@ -30,7 +30,7 @@ using namespace std;
 
 namespace Moses
 {
-	const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(InputType const& src, WordsRange const& range,
+	ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(InputType const& src, WordsRange const& range,
 																																						bool adhereTableLimit,const CellCollection &cellColl) const
 	{
 		const StaticData &staticData = StaticData::Instance();

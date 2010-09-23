@@ -70,7 +70,7 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-		virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
+		virtual ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
 																															bool adhereTableLimit,const CellCollection &cellColl) const=0;
 
   protected:

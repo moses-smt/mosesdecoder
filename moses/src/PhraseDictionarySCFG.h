@@ -101,7 +101,7 @@ namespace Moses
 			
 			void InitializeForInput(const InputType& i);
 			
-			const ChartRuleCollection *GetChartRuleCollection(
+			ChartRuleCollection *GetChartRuleCollection(
 																												InputType const& src
 																												,WordsRange const& range
 																												,bool adhereTableLimit

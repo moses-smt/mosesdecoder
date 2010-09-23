@@ -144,7 +144,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         decodeStep.GetPhraseDictionaryFeature()->GetDictionary();
 	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
 	
-	const ChartRuleCollection *chartRuleCollection = phraseDictionary->GetChartRuleCollection(
+	ChartRuleCollection *chartRuleCollection = phraseDictionary->GetChartRuleCollection(
 																															m_source
 																															, wordsRange
 																															, adhereTableLimit
