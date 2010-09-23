@@ -23,14 +23,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E60D29A12496B1900D15873 /* kenlm.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libkenlm.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = kenlm;
 		};
 		1E60D2A812496B4F00D15873 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E60D29A12496B1900D15873 /* kenlm.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* kenlm */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = kenlm;
 		};
 		1E87F08C11BDCD1B0033951C /* PBXContainerItemProxy */ = {
