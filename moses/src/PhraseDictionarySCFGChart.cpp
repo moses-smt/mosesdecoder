@@ -22,7 +22,7 @@
 #include "PhraseDictionarySCFG.h"
 #include "FactorCollection.h"
 #include "InputType.h"
-#include "ChartRuleCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "CellCollection.h"
 #include "DotChart.h"
 #include "StaticData.h"
@@ -51,7 +51,7 @@ Word PhraseDictionarySCFG::CreateCoveredWord(const Word &origSourceLabel, const 
 	return ret;
 }
 
-void PhraseDictionarySCFG::GetChartRuleCollection(ChartRuleCollection &outColl
+void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &outColl
 																								 ,InputType const& src
 																								 ,WordsRange const& range
 																								 ,bool adhereTableLimit

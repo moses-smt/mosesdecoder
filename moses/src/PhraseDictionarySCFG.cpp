@@ -33,7 +33,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "ChartRuleCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "DotChart.h"
 #include "FactorCollection.h"
 

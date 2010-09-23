@@ -33,7 +33,7 @@
 
 namespace Moses
 {
-class ChartRuleCollection;	
+class ChartTranslationOptionList;	
 }
 
 namespace MosesChart
@@ -62,7 +62,7 @@ protected:
 public:
 	ChartCell(size_t startPos, size_t endPos, Manager &manager);
 
-	void ProcessSentence(const Moses::ChartRuleCollection &transOptList
+	void ProcessSentence(const Moses::ChartTranslationOptionList &transOptList
 											,const ChartCellCollection &allChartCells);
 
 	const HypoList &GetSortedHypotheses(const Moses::Word &headWord) const;

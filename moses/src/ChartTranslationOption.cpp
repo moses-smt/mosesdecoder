@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "ChartRule.h"
+#include "ChartTranslationOption.h"
 #include "TargetPhrase.h"
 #include "AlignmentInfo.h"
 #include "WordConsumed.h"
@@ -28,7 +28,7 @@ using namespace std;
 namespace Moses
 {
 
-void ChartRule::CreateNonTermIndex()
+void ChartTranslationOption::CreateNonTermIndex()
 {
 	m_wordsConsumedTargetOrder.resize(m_targetPhrase.GetSize(), NOT_FOUND);
 	const AlignmentInfo &alignInfo = m_targetPhrase.GetAlignmentInfo();
@@ -52,7 +52,7 @@ void ChartRule::CreateNonTermIndex()
 	}
 }
 
-std::ostream& operator<<(std::ostream &out, const ChartRule &rule)
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOption &rule)
 {
 	out << rule.m_lastWordConsumed << ": " << rule.m_targetPhrase.GetTargetLHS() << "->" << rule.m_targetPhrase;
 	return out;

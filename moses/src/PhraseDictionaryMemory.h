@@ -63,7 +63,7 @@ public:
   virtual void InitializeForInput(InputType const&) 
     {/* Don't do anything source specific here as this object is shared between threads.*/}
 	
-  void GetChartRuleCollection(ChartRuleCollection &outColl
+  void GetChartRuleCollection(ChartTranslationOptionList &outColl
 															,InputType const& /*src*/
 															, WordsRange const& /*range*/
 															, bool /*adhereTableLimit*/

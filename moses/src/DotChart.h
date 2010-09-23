@@ -22,7 +22,7 @@
 #include <vector>
 #include <cassert>
 #include "PhraseDictionaryNodeSCFG.h"
-#include "ChartRule.h"
+#include "ChartTranslationOption.h"
 #include "WordConsumed.h"
 
 namespace Moses

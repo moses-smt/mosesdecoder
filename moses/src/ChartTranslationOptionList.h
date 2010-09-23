@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <list>
 #include <set>
-#include "ChartRule.h"
+#include "ChartTranslationOption.h"
 #include "TargetPhrase.h"
 #include "Util.h"
 #include "TargetPhraseCollection.h"
@@ -34,15 +34,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 //! a list of target phrases that is trsnalated from the same source phrase
-class ChartRuleCollection
+class ChartTranslationOptionList
 {
-	friend std::ostream& operator<<(std::ostream&, const ChartRuleCollection&);
+	friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionList&);
 
 protected:
 #ifdef USE_HYPO_POOL
-		static ObjectPool<ChartRuleCollection> s_objectPool;
+		static ObjectPool<ChartTranslationOptionList> s_objectPool;
 #endif
-	typedef std::vector<ChartRule*> CollType;
+	typedef std::vector<ChartTranslationOption*> CollType;
 	CollType m_collection;
 	float m_scoreThreshold;
 	Moses::WordsRange m_range;
@@ -64,21 +64,21 @@ public:
 		return ptr;
 	}
 
-	static void Delete(ChartRuleCollection *obj)
+	static void Delete(ChartTranslationOptionList *obj)
 	{
 		s_objectPool.freeObject(obj);
 	}
 #else
-	static void Delete(ChartRuleCollection *obj)
+	static void Delete(ChartTranslationOptionList *obj)
 	{
 		delete obj;
 	}
 #endif
 
-	ChartRuleCollection(const WordsRange &range);
-	~ChartRuleCollection();
+	ChartTranslationOptionList(const WordsRange &range);
+	~ChartTranslationOptionList();
 
-	const ChartRule &Get(size_t ind) const
+	const ChartTranslationOption &Get(size_t ind) const
 	{
 		return *m_collection[ind];
 	}
@@ -101,7 +101,7 @@ public:
 					, const WordConsumed &wordConsumed
 					, bool ruleLimit
 					, size_t tableLimit);
-	void Add(ChartRule *transOpt);
+	void Add(ChartTranslationOption *transOpt);
 
 	void CreateChartRules(size_t ruleLimit);
 	

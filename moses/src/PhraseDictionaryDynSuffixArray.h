@@ -35,7 +35,7 @@ private:
 	const LMList *m_languageModels;
 	float m_weightWP;
 	
-	virtual void GetChartRuleCollection(ChartRuleCollection &outColl
+	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
 																			,InputType const& src
 																			,WordsRange const& range
 																			,bool adhereTableLimit

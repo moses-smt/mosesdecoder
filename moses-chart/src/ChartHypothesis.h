@@ -26,7 +26,7 @@
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/ScoreComponentCollection.h"
 #include "../../moses/src/Phrase.h"
-#include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartTranslationOption.h"
 #include "../../moses/src/ObjectPool.h"
 
 namespace MosesChart
@@ -50,7 +50,7 @@ protected:
 	static unsigned int s_HypothesesCreated;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
-	const Moses::ChartRule &m_transOpt;
+	const Moses::ChartTranslationOption &m_transOpt;
 
 	Moses::Phrase m_contextPrefix, m_contextSuffix;
 	const std::vector<size_t> &m_wordsConsumedTargetOrder; // same size as target phrase ?
@@ -105,7 +105,7 @@ public:
 
 	int GetId()const
 	{	return m_id;}
-	const Moses::ChartRule &GetTranslationOption()const
+	const Moses::ChartTranslationOption &GetTranslationOption()const
 	{ return m_transOpt; }
 	const Moses::TargetPhrase &GetCurrTargetPhrase()const
 	{ return m_transOpt.GetTargetPhrase(); }

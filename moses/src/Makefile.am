@@ -8,8 +8,8 @@ libmoses_la_HEADERS = \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
         CellCollection.h \
-        ChartRule.h \
-        ChartRuleCollection.h \
+        ChartTranslationOption.h \
+        ChartTranslationOptionList.h \
         ConfusionNet.h \
         DecodeFeature.h \
         DecodeGraph.h \
@@ -135,8 +135,8 @@ libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
-        ChartRule.cpp \
-        ChartRuleCollection.cpp \
+        ChartTranslationOption.cpp \
+        ChartTranslationOptionList.cpp \
         ConfusionNet.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \

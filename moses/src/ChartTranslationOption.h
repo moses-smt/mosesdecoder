@@ -31,9 +31,9 @@ namespace Moses
 class WordConsumed;
 
 // basically a phrase translation and the vector of words consumed to map each word
-class ChartRule
+class ChartTranslationOption
 {
-	friend std::ostream& operator<<(std::ostream&, const ChartRule&);
+	friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
 
 protected:
 	const Moses::TargetPhrase &m_targetPhrase;
@@ -49,15 +49,15 @@ protected:
 		*/
 	const WordsRange	&m_wordsRange;
 
-	ChartRule(const ChartRule &copy); // not implmenented
+	ChartTranslationOption(const ChartTranslationOption &copy); // not implmenented
 
 public:
-	ChartRule(const TargetPhrase &targetPhrase, const WordConsumed &lastWordConsumed, const WordsRange	&wordsRange)
+	ChartTranslationOption(const TargetPhrase &targetPhrase, const WordConsumed &lastWordConsumed, const WordsRange	&wordsRange)
 	:m_targetPhrase(targetPhrase)
 	,m_lastWordConsumed(lastWordConsumed)
 	,m_wordsRange(wordsRange)
 	{}
-	~ChartRule()
+	~ChartTranslationOption()
 	{}
 
 	const TargetPhrase &GetTargetPhrase() const

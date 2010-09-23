@@ -24,13 +24,14 @@
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
 #include "CellCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "../../OnDiskPt/src/TargetPhraseCollection.h"
 
 using namespace std;
 
 namespace Moses
 {
-	void PhraseDictionaryOnDisk::GetChartRuleCollection(ChartRuleCollection &outColl
+	void PhraseDictionaryOnDisk::GetChartRuleCollection(ChartTranslationOptionList &outColl
 																											,InputType const& src
 																											, WordsRange const& range
 																											,bool adhereTableLimit

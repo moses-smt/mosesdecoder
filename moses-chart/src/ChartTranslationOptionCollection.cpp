@@ -51,7 +51,7 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& source
 		m_collection[startPos].reserve(size-startPos);
 		for (size_t endPos = startPos ; endPos < size ; ++endPos)
 		{
-			m_collection[startPos].push_back( ChartRuleCollection(WordsRange(startPos, endPos)) );
+			m_collection[startPos].push_back( ChartTranslationOptionList(WordsRange(startPos, endPos)) );
 		}
 	}
 }
@@ -103,7 +103,7 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t end
 		return;
 	}
 
-	ChartRuleCollection &fullList = GetTranslationOptionList(startPos, startPos);
+	ChartTranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
 
 	// try to translation for coverage with no trans by expanding table limit
 	std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
@@ -136,12 +136,12 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	// get wordsrange that doesn't go away until after sentence processing
 	const WordsRange &wordsRange = GetTranslationOptionList(startPos, endPos).GetSourceRange();
 
-	ChartRuleCollection &translationOptionList = GetTranslationOptionList(startPos, endPos);
+	ChartTranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
     const PhraseDictionary* phraseDictionary =
         decodeStep.GetPhraseDictionaryFeature()->GetDictionary();
 	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
 	
-	ChartRuleCollection &chartRuleCollection = GetTranslationOptionList(startPos, endPos);
+	ChartTranslationOptionList &chartRuleCollection = GetTranslationOptionList(startPos, endPos);
 
 	phraseDictionary->GetChartRuleCollection(chartRuleCollection
 																					, m_source
@@ -151,13 +151,13 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 	//cerr << "chartRuleCollection size=" << chartRuleCollection->GetSize();	
 }
 
-ChartRuleCollection &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
+ChartTranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {
 	size_t sizeVec = m_collection[startPos].size();
 	assert(endPos-startPos < sizeVec);
 	return m_collection[startPos][endPos - startPos];
 }
-const ChartRuleCollection &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
+const ChartTranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
 {
 	size_t sizeVec = m_collection[startPos].size();
 	assert(endPos-startPos < sizeVec);
@@ -166,15 +166,15 @@ const ChartRuleCollection &TranslationOptionCollection::GetTranslationOptionList
 
 std::ostream& operator<<(std::ostream &out, const TranslationOptionCollection &coll)
 {
-  std::vector< std::vector< ChartRuleCollection > >::const_iterator iterOuter;
+  std::vector< std::vector< ChartTranslationOptionList > >::const_iterator iterOuter;
   for (iterOuter = coll.m_collection.begin(); iterOuter != coll.m_collection.end(); ++iterOuter)
   {
-	  const std::vector< ChartRuleCollection > &vecInner = *iterOuter;
-	  std::vector< ChartRuleCollection >::const_iterator iterInner;
+	  const std::vector< ChartTranslationOptionList > &vecInner = *iterOuter;
+	  std::vector< ChartTranslationOptionList >::const_iterator iterInner;
 
 	  for (iterInner = vecInner.begin(); iterInner != vecInner.end(); ++iterInner)
 	  {
-		  const ChartRuleCollection &list = *iterInner;
+		  const ChartTranslationOptionList &list = *iterInner;
 		  out << list.GetSourceRange() << " = " << list.GetSize() << std::endl;
 	  }
   }
@@ -198,7 +198,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
 	vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
 
-	Moses::ChartRuleCollection &transOptColl = GetTranslationOptionList(sourcePos, sourcePos);
+	Moses::ChartTranslationOptionList &transOptColl = GetTranslationOptionList(sourcePos, sourcePos);
 	const WordsRange &range = transOptColl.GetSourceRange();
 	
 	size_t isDigit = 0;
@@ -261,7 +261,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			targetPhrase->SetTargetLHS(targetLHS);
 						
 			// chart rule
-			ChartRule *chartRule = new ChartRule(*targetPhrase
+			ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
 																					, *wordsConsumed->back()
 																					, range);
 			chartRule->CreateNonTermIndex();
@@ -297,7 +297,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 
 			// chart rule
 			assert(wordsConsumed->size());
-			ChartRule *chartRule = new ChartRule(*targetPhrase
+			ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
 																					, *wordsConsumed->back()
 																					, range);
 			chartRule->CreateNonTermIndex();
@@ -306,9 +306,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 	}
 }
 
-void TranslationOptionCollection::Add(ChartRule *transOpt, size_t pos)
+void TranslationOptionCollection::Add(ChartTranslationOption *transOpt, size_t pos)
 {
-	ChartRuleCollection &transOptList = GetTranslationOptionList(pos, pos);
+	ChartTranslationOptionList &transOptList = GetTranslationOptionList(pos, pos);
 	transOptList.Add(transOpt);
 }
 
@@ -321,7 +321,7 @@ void TranslationOptionCollection::Prune(size_t startPos, size_t endPos)
 //! sort all trans opt in each list for cube pruning */
 void TranslationOptionCollection::Sort(size_t startPos, size_t endPos)
 {
-	ChartRuleCollection &list = GetTranslationOptionList(startPos, endPos);
+	ChartTranslationOptionList &list = GetTranslationOptionList(startPos, endPos);
 	list.Sort();
 }
 

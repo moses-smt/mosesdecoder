@@ -66,7 +66,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	return ret;
 }
 	
-void PhraseDictionaryDynSuffixArray::GetChartRuleCollection(ChartRuleCollection &outColl
+void PhraseDictionaryDynSuffixArray::GetChartRuleCollection(ChartTranslationOptionList &outColl
 																														,InputType const& src
 																														,WordsRange const& range
 																														,bool adhereTableLimit

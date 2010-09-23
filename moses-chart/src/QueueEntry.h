@@ -33,7 +33,7 @@
 namespace Moses
 {
 	class WordConsumed;
-	class ChartRule;
+	class ChartTranslationOption;
 	extern bool g_debug;
 };
 
@@ -93,7 +93,7 @@ class QueueEntry
 {
 	friend std::ostream& operator<<(std::ostream&, const QueueEntry&);
 protected:
-	const Moses::ChartRule &m_transOpt;
+	const Moses::ChartTranslationOption &m_transOpt;
 	std::vector<ChildEntry> m_childEntries;
 
 	float m_combinedScore;
@@ -104,12 +104,12 @@ protected:
 	void CalcScore();
 
 public:
-	QueueEntry(const Moses::ChartRule &transOpt
+	QueueEntry(const Moses::ChartTranslationOption &transOpt
 						, const ChartCellCollection &allChartCells
 						, bool &isOK);
 	~QueueEntry();
 
-	const Moses::ChartRule &GetTranslationOption() const
+	const Moses::ChartTranslationOption &GetTranslationOption() const
 	{ return m_transOpt; }
 	const std::vector<ChildEntry> &GetChildEntries() const
 	{ return m_childEntries; }

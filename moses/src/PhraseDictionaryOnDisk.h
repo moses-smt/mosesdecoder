@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 #include "PhraseDictionary.h"
-#include "ChartRuleCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "../../OnDiskPt/src/OnDiskWrapper.h"
 #include "../../OnDiskPt/src/Word.h"
 #include "../../OnDiskPt/src/PhraseNode.h"
@@ -52,7 +52,7 @@ protected:
 	mutable OnDiskPt::OnDiskWrapper m_dbWrapper;
 
 	mutable std::map<UINT64, const TargetPhraseCollection*> m_cache;
-	mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
+	mutable std::vector<ChartTranslationOptionList*> m_chartTargetPhraseColl;
 	mutable std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
 
 	mutable std::vector<ProcessedRuleStackOnDisk*>	m_runningNodesVec;
@@ -88,7 +88,7 @@ public:
 	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
 	
-	virtual void GetChartRuleCollection(ChartRuleCollection &outColl
+	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
 																			,InputType const& src
 																			,WordsRange const& range
 																			,bool adhereTableLimit

@@ -25,7 +25,7 @@
 #include "ChartCellCollection.h"
 #include "Cube.h"
 #include "../../moses/src/WordsRange.h"
-#include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartTranslationOption.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/WordConsumed.h"
 
@@ -35,7 +35,7 @@ using namespace Moses;
 namespace MosesChart
 {
 
-QueueEntry::QueueEntry(const Moses::ChartRule &transOpt
+QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
 											 , const ChartCellCollection &allChartCells
 											 , bool &isOK)
 :m_transOpt(transOpt)

@@ -30,7 +30,7 @@
 #include "../../moses/src/StaticData.h"
 #include "../../moses/src/DummyScoreProducers.h"
 #include "../../moses/src/LMList.h"
-#include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartTranslationOption.h"
 
 using namespace std;
 using namespace Moses;

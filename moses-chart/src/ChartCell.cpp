@@ -28,8 +28,8 @@
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/StaticData.h"
-#include "../../moses/src/ChartRule.h"
-#include "../../moses/src/ChartRuleCollection.h"
+#include "../../moses/src/ChartTranslationOption.h"
+#include "../../moses/src/ChartTranslationOptionList.h"
 
 using namespace std;
 using namespace Moses;
@@ -74,7 +74,7 @@ void ChartCell::PruneToSize()
 	}
 }
 
-void ChartCell::ProcessSentence(const ChartRuleCollection &transOptList
+void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 																, const ChartCellCollection &allChartCells)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -82,10 +82,10 @@ void ChartCell::ProcessSentence(const ChartRuleCollection &transOptList
 	Cube cube;
 
 	// add all trans opt into queue. using only 1st child node.
-	ChartRuleCollection::const_iterator iterList;
+	ChartTranslationOptionList::const_iterator iterList;
 	for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList)
 	{
-		const ChartRule &transOpt = **iterList;
+		const ChartTranslationOption &transOpt = **iterList;
 
 		bool isOK;
 		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells, isOK);

@@ -45,7 +45,7 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
-class ChartRuleCollection;
+class ChartTranslationOptionList;
 class CellCollection;
 class TranslationSystem;
 
@@ -70,7 +70,7 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-		virtual void GetChartRuleCollection(ChartRuleCollection &outColl
+		virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
 																				, InputType const& src
 																				, WordsRange const& range
 																				, bool adhereTableLimit
