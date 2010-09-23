@@ -47,6 +47,7 @@ protected:
 			Usually filled with NOT_KNOWN, unless the pos is a non-term, in which case its filled
 			with its index 
 		*/
+	mutable const WordsRange	*m_wordsRange;
 
 	ChartRule(const ChartRule &copy); // not implmenented
 
@@ -69,6 +70,14 @@ public:
 	{	return m_wordsConsumedTargetOrder; }
 
 	void CreateNonTermIndex();
+	
+	// used inside chart decoder. must make words range mutable. hack
+	void SetWordsRange(const WordsRange &range) const
+	{ m_wordsRange = &range; }
+	
+	const Moses::WordsRange &GetSourceWordsRange() const
+	{ return *m_wordsRange; }
+
 };
 
 }

@@ -34,10 +34,11 @@ namespace MosesChart
 TranslationOption::TranslationOption(const WordsRange &wordsRange
 								, const ChartRule &rule)
 :m_rule(rule)
-,m_wordsRange(wordsRange)
 {
 	//assert(wordsRange.GetStartPos() == rule.GetWordsConsumed().front()->GetWordsRange().GetStartPos());
 	assert(wordsRange.GetEndPos() == rule.GetLastWordConsumed().GetWordsRange().GetEndPos());
+	
+	rule.SetWordsRange(wordsRange);
 }
 
 TranslationOption::~TranslationOption()
