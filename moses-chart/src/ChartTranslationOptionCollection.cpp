@@ -26,7 +26,6 @@
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/StaticData.h"
 #include "../../moses/src/DecodeStep.h"
-#include "../../moses/src/ChartRuleCollection.h"
 #include "../../moses/src/DummyScoreProducers.h"
 #include "../../moses/src/WordConsumed.h"
 #include "../../moses/src/Util.h"
@@ -144,18 +143,19 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         decodeStep.GetPhraseDictionaryFeature()->GetDictionary();
 	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
 	
-	ChartRuleCollection *chartRuleCollection = new ChartRuleCollection(wordsRange);
-	phraseDictionary->GetChartRuleCollection(*chartRuleCollection
+	m_chartRuleCollection.push_back(ChartRuleCollection(wordsRange));
+	ChartRuleCollection &chartRuleCollection = m_chartRuleCollection.back();
+
+	phraseDictionary->GetChartRuleCollection(chartRuleCollection
 																					, m_source
 																					, wordsRange
 																					, adhereTableLimit
 																					, m_hypoStackColl);
-	assert(chartRuleCollection != NULL);
 	//cerr << "chartRuleCollection size=" << chartRuleCollection->GetSize();
 	
-	translationOptionList.Reserve(translationOptionList.GetSize()+chartRuleCollection->GetSize());
+	translationOptionList.Reserve(translationOptionList.GetSize()+chartRuleCollection.GetSize());
 	ChartRuleCollection::const_iterator iterTargetPhrase;
-	for (iterTargetPhrase = chartRuleCollection->begin(); iterTargetPhrase != chartRuleCollection->end(); ++iterTargetPhrase)
+	for (iterTargetPhrase = chartRuleCollection.begin(); iterTargetPhrase != chartRuleCollection.end(); ++iterTargetPhrase)
 	{
 		const ChartRule &rule = **iterTargetPhrase;
 		TranslationOption *transOpt = new TranslationOption(wordsRange, rule);

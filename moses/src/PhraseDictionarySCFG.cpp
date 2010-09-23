@@ -282,16 +282,7 @@ PhraseDictionarySCFG::~PhraseDictionarySCFG()
 }
 
 void PhraseDictionarySCFG::CleanUp()
-{
-	//RemoveAllInColl(m_chartTargetPhraseColl);
-	std::vector<ChartRuleCollection*>::iterator iter;
-	for (iter = m_chartTargetPhraseColl.begin(); iter != m_chartTargetPhraseColl.end(); ++iter)
-	{
-		ChartRuleCollection *item = *iter;
-		ChartRuleCollection::Delete(item);
-	}
-	m_chartTargetPhraseColl.clear();
-	
+{	
 	RemoveAllInColl(m_processedRuleColls);
 }
 

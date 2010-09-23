@@ -25,6 +25,7 @@
 #include "ChartTranslationOptionList.h"
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/DecodeGraph.h"
+#include "../../moses/src/ChartRuleCollection.h"
 
 namespace Moses
 {
@@ -54,7 +55,8 @@ protected:
 	std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
 	std::list<Moses::WordsRange> m_cacheRange;
 	std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
-
+	std::list<Moses::ChartRuleCollection> m_chartRuleCollection;
+	
 	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph& decodeGraph,
                                         size_t startPosition
 																			, size_t endPosition

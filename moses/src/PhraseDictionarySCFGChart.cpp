@@ -56,9 +56,7 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartRuleCollection &outColl
 																								 ,WordsRange const& range
 																								 ,bool adhereTableLimit
 																								 ,const CellCollection &cellColl) const
-{
-	m_chartTargetPhraseColl.push_back(&outColl);
-	
+{	
 	size_t relEndPos = range.GetEndPos() - range.GetStartPos();
 	size_t absEndPos = range.GetEndPos();
 	
