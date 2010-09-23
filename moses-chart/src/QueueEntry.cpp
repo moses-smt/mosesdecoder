@@ -44,7 +44,7 @@ QueueEntry::QueueEntry(const TranslationOption &transOpt
 {
 	isOK = false;
 
-	const WordConsumed *wordsConsumed = &transOpt.GetChartRule().GetLastWordConsumed();
+	const WordConsumed *wordsConsumed = &transOpt.GetLastWordConsumed();
 	isOK = CreateChildEntry(wordsConsumed, allChartCells);
 
 	if (isOK)

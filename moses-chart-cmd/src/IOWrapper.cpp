@@ -235,7 +235,7 @@ void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *h
 { // recursive
 	if (hypo != NULL)
 	{
-	  out << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetCurrChartRule() 
+	  out << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetTranslationOption() 
 				<< " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
 				<< endl;
 	}

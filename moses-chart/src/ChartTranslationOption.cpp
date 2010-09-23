@@ -49,8 +49,8 @@ TranslationOption::~TranslationOption()
 ostream& operator<<(ostream& out, const TranslationOption& transOpt)
 {
 	out << transOpt.GetTotalScore()
-			<< " " << transOpt.GetChartRule().GetTargetPhrase()
-			<< " " << transOpt.GetChartRule().GetTargetPhrase().GetScoreBreakdown()
+			<< " " << transOpt.GetTargetPhrase()
+			<< " " << transOpt.GetTargetPhrase().GetScoreBreakdown()
 			<< " " << transOpt.m_rule;
 	
 	return out;

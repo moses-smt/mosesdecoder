@@ -43,8 +43,15 @@ public:
 
 	~TranslationOption();
 
-	const Moses::ChartRule &GetChartRule() const
-	{ return m_rule; }
+	const Moses::TargetPhrase &GetTargetPhrase() const
+	{ return m_rule.GetTargetPhrase(); }
+
+	const std::vector<size_t> &GetWordsConsumedTargetOrder() const
+	{	return m_rule.GetWordsConsumedTargetOrder(); }
+
+	const Moses::WordConsumed &GetLastWordConsumed() const
+	{ return m_rule.GetLastWordConsumed(); }
+		
 	const Moses::WordsRange &GetSourceWordsRange() const
 	{ return m_wordsRange; }
 

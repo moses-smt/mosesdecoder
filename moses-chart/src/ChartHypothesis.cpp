@@ -45,8 +45,8 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 #endif
 
 Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
-:m_rule(queueEntry.GetTranslationOption().GetChartRule())
-,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetChartRule().GetWordsConsumedTargetOrder())
+:m_transOpt(queueEntry.GetTranslationOption())
+,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
 ,m_id(++s_HypothesesCreated)
 ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
 ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())

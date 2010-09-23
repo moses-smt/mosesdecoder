@@ -28,6 +28,7 @@
 #include "../../moses/src/Phrase.h"
 #include "../../moses/src/ChartRule.h"
 #include "../../moses/src/ObjectPool.h"
+#include "ChartTranslationOption.h"
 
 namespace MosesChart
 {
@@ -50,7 +51,7 @@ protected:
 	static unsigned int s_HypothesesCreated;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
-	const Moses::ChartRule &m_rule;
+	const MosesChart::TranslationOption &m_transOpt;
 
 	Moses::Phrase m_contextPrefix, m_contextSuffix;
 	const std::vector<size_t> &m_wordsConsumedTargetOrder; // same size as target phrase ?
@@ -105,10 +106,10 @@ public:
 
 	int GetId()const
 	{	return m_id;}
-	const Moses::ChartRule &GetCurrChartRule()const
-	{ return m_rule; }
+	const MosesChart::TranslationOption &GetTranslationOption()const
+	{ return m_transOpt; }
 	const Moses::TargetPhrase &GetCurrTargetPhrase()const
-	{ return m_rule.GetTargetPhrase(); }
+	{ return m_transOpt.GetTargetPhrase(); }
 	const Moses::WordsRange &GetCurrSourceRange()const
 	{ return m_currSourceWordsRange; }
 	inline const ArcList* GetArcList() const
