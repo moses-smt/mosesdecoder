@@ -31,6 +31,11 @@
 #include "ChartHypothesisCollection.h"
 #include "QueueEntry.h"
 
+namespace Moses
+{
+class ChartRuleCollection;	
+}
+
 namespace MosesChart
 {
 
@@ -57,7 +62,7 @@ protected:
 public:
 	ChartCell(size_t startPos, size_t endPos, Manager &manager);
 
-	void ProcessSentence(const TranslationOptionList &transOptList
+	void ProcessSentence(const Moses::ChartRuleCollection &transOptList
 											,const ChartCellCollection &allChartCells);
 
 	const HypoList &GetSortedHypotheses(const Moses::Word &headWord) const;

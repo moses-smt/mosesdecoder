@@ -42,14 +42,15 @@ protected:
 #ifdef USE_HYPO_POOL
 		static ObjectPool<ChartRuleCollection> s_objectPool;
 #endif
-	std::vector<ChartRule*> m_collection;
+	typedef std::vector<ChartRule*> CollType;
+	CollType m_collection;
 	float m_scoreThreshold;
 	Moses::WordsRange m_range;
 
 public:	
 	// iters
-	typedef std::vector<ChartRule*>::iterator iterator;
-	typedef std::vector<ChartRule*>::const_iterator const_iterator;
+	typedef CollType::iterator iterator;
+	typedef CollType::const_iterator const_iterator;
 	
 	iterator begin() { return m_collection.begin(); }
 	iterator end() { return m_collection.end(); }
@@ -100,8 +101,16 @@ public:
 					, const WordConsumed &wordConsumed
 					, bool ruleLimit
 					, size_t tableLimit);
-	
+	void Add(ChartRule *transOpt);
+
 	void CreateChartRules(size_t ruleLimit);
+	
+	const Moses::WordsRange &GetSourceRange() const
+	{ return m_range;	}
+	
+	void Sort();
+
+
 };
 
 }

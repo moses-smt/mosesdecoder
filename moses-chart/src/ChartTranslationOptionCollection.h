@@ -49,13 +49,10 @@ protected:
   std::vector <Moses::DecodeGraph*> m_decodeGraphList;
 	const ChartCellCollection &m_hypoStackColl;
 
-	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
+	std::vector< std::vector< Moses::ChartRuleCollection > >	m_collection; /*< contains translation options */
 	std::vector<Moses::Phrase*> m_unksrcs;
-	std::list<Moses::ChartRule*> m_cacheChartRule;
 	std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
-	std::list<Moses::WordsRange> m_cacheRange;
 	std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
-	std::list<Moses::ChartRuleCollection> m_chartRuleCollection;
 	
 	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph& decodeGraph,
                                         size_t startPosition
@@ -64,10 +61,10 @@ protected:
 	void Add(TranslationOptionList &translationOptionList);
 
 	// for adding 1 trans opt in unknown word proc
-	void Add(TranslationOption *transOpt, size_t pos);
+	void Add(Moses::ChartRule *transOpt, size_t pos);
 
-	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
-	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
+	Moses::ChartRuleCollection &GetTranslationOptionList(size_t startPos, size_t endPos);
+	const Moses::ChartRuleCollection &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 
 	void ProcessUnknownWord(size_t startPos, size_t endPos);
 
@@ -93,7 +90,7 @@ public:
 	void CreateTranslationOptionsForRange(size_t startPos
 																			, size_t endPos);
 
-	const TranslationOptionList &GetTranslationOptionList(const Moses::WordsRange &range) const
+	const Moses::ChartRuleCollection &GetTranslationOptionList(const Moses::WordsRange &range) const
 	{
 		return GetTranslationOptionList(range.GetStartPos(), range.GetEndPos());
 	}

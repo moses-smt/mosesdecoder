@@ -19,6 +19,7 @@
  ***********************************************************************/
 
 #include <algorithm>
+#include "../../moses/src/StaticData.h"
 #include "ChartRuleCollection.h"
 #include "ChartRule.h"
 #include "WordsRange.h"
@@ -100,6 +101,12 @@ void ChartRuleCollection::Add(const TargetPhraseCollection &targetPhraseCollecti
 	}
 }
 
+void ChartRuleCollection::Add(ChartRule *transOpt)
+{
+	assert(transOpt);
+	m_collection.push_back(transOpt);
+}
+
 void ChartRuleCollection::CreateChartRules(size_t ruleLimit)
 {
 	if (m_collection.size() > ruleLimit)
@@ -123,6 +130,56 @@ void ChartRuleCollection::CreateChartRules(size_t ruleLimit)
 		ChartRule &rule = *m_collection[ind];
 		rule.CreateNonTermIndex();
 	}
+}
+
+// helper class
+class ChartTranslationOptionOrderer
+{
+public:
+	bool operator()(const ChartRule* transOptA, const ChartRule* transOptB) const
+	{
+		/*
+		 if (transOptA->GetArity() != transOptB->GetArity())
+		 {
+		 return transOptA->GetArity() < transOptB->GetArity();
+		 }
+		 */
+		return transOptA->GetTotalScore() > transOptB->GetTotalScore();
+	}
+};
+
+
+void ChartRuleCollection::Sort()
+{
+	// keep only those over best + threshold
+	
+	float scoreThreshold = -std::numeric_limits<float>::infinity();
+	CollType::const_iterator iter;
+	for (iter = m_collection.begin(); iter != m_collection.end(); ++iter)
+	{
+		const ChartRule *transOpt = *iter;
+		float score = transOpt->GetTotalScore();
+		scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
+	}
+	
+	scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
+	
+	size_t ind = 0;
+	while (ind < m_collection.size())
+	{
+		const ChartRule *transOpt = m_collection[ind];
+		if (transOpt->GetTotalScore() < scoreThreshold)
+		{
+			delete transOpt;
+			m_collection.erase(m_collection.begin() + ind);
+		}
+		else
+		{
+			ind++;
+		}
+	}
+	
+	std::sort(m_collection.begin(), m_collection.end(), ChartTranslationOptionOrderer());
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartRuleCollection &coll)

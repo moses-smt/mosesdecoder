@@ -30,6 +30,7 @@
 #include "../../moses/src/Util.h"
 #include "../../moses/src/StaticData.h"
 #include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartRuleCollection.h"
 
 using namespace std;
 using namespace Moses;
@@ -74,7 +75,7 @@ void ChartCell::PruneToSize()
 	}
 }
 
-void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
+void ChartCell::ProcessSentence(const ChartRuleCollection &transOptList
 																, const ChartCellCollection &allChartCells)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -82,13 +83,13 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	Cube cube;
 
 	// add all trans opt into queue. using only 1st child node.
-	TranslationOptionList::const_iterator iterList;
+	ChartRuleCollection::const_iterator iterList;
 	for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList)
 	{
-		const TranslationOption &transOpt = **iterList;
+		const ChartRule &transOpt = **iterList;
 
 		bool isOK;
-		QueueEntry *queueEntry = new QueueEntry(transOpt.GetChartRule(), allChartCells, isOK);
+		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells, isOK);
 
 		if (isOK)
 			cube.Add(queueEntry);
