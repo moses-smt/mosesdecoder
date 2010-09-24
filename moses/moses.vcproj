@@ -292,11 +292,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ChartRule.cpp"
+				RelativePath=".\src\ChartTranslationOption.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ChartRuleCollection.cpp"
+				RelativePath=".\src\ChartTranslationOptionList.cpp"
 				>
 			</File>
 			<File
@@ -758,11 +758,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ChartRule.h"
+				RelativePath=".\src\ChartTranslationOption.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ChartRuleCollection.h"
+				RelativePath=".\src\ChartTranslationOptionList.h"
 				>
 			</File>
 			<File
