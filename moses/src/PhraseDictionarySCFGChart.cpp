@@ -31,26 +31,6 @@
 using namespace std;
 using namespace Moses;
 
-Word PhraseDictionarySCFG::CreateCoveredWord(const Word &origSourceLabel, const InputType &src, const WordsRange &range) const
-{
-	string coveredWordsString = origSourceLabel.GetFactor(0)->GetString();
-	
-	for (size_t pos = range.GetStartPos(); pos <= range.GetEndPos(); ++pos)
-	{
-		const Word &word = src.GetWord(pos);
-		coveredWordsString += "_" + word.GetFactor(0)->GetString();
-	}
-	
-	FactorCollection &factorCollection = FactorCollection::Instance();
-	
-	Word ret;
-	
-	const Factor *factor = factorCollection.AddFactor(Input, 0, coveredWordsString);
-	ret.SetFactor(0, factor);
-	
-	return ret;
-}
-
 void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &outColl
 																								 ,InputType const& src
 																								 ,WordsRange const& range
