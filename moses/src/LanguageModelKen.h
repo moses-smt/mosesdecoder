@@ -28,43 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "LanguageModelSingleFactor.h"
-
-class lmtable;  // Ken lm table
-class lmmacro;  // Ken lm for macro tags
-class ngram;
+#include "../../kenlm/lm/ngram.hh"
 
 namespace Moses
 {
 class Phrase;
 	
 /** Implementation of single factor LM using Ken's code.
-* This is the default LM for Moses and is available from the same sourceforge repository
 */
 class LanguageModelKen : public LanguageModelSingleFactor
 {
 protected:
-	std::vector<int> m_lmIdLookup;
-	lmtable* m_lmtb;
-	ngram* m_lmtb_ng;
+  lm::ngram::Model *m_ngram;
 	
-	int	m_unknownId;
-	int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
-	int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with 
-	int m_lmtb_size;          //max ngram stored in the table
-	int m_lmtb_dub;           //dictionary upperboud
-
-	std::string m_mapFilePath;
-  
-//	float GetValue(LmId wordId, ngram *context) const;
-
-	void CreateFactors(FactorCollection &factorCollection);
-	int GetLmID( const std::string &str ) const;
-
-	int GetLmID( const Factor *factor ) const{
-	  size_t factorId = factor->GetId();
-	  return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];        
-	};
-  
 public:
 	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub);
 	~LanguageModelKen();
@@ -74,14 +50,11 @@ public:
 
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
 
-  void CleanUpAfterSentenceProcessing();
-  void InitializeBeforeSentenceProcessing();
+  void CleanUpAfterSentenceProcessing() {}
+  void InitializeBeforeSentenceProcessing() {}
 
-  void set_dictionary_upperbound(int dub){ m_lmtb_size=dub ; 
-//m_lmtb->set_dictionary_upperbound(dub);
 };
 };
 
-}
 
 #endif

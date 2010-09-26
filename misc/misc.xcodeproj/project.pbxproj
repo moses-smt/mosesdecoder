@@ -17,28 +17,28 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EF455C81227C4D60022403A /* moses.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libmoses.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = moses;
 		};
 		1EF455D71227C50C0022403A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libOnDiskPt.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
 		1EF456211227C8A30022403A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EF455C81227C4D60022403A /* moses.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
 		1EF456231227C8A80022403A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* OnDiskPt */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
 /* End PBXContainerItemProxy section */
@@ -246,6 +246,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -254,6 +255,7 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lkenlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = processLexicalTable;
@@ -273,6 +275,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -281,6 +284,7 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lkenlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = processLexicalTable;

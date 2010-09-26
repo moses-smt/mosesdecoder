@@ -342,6 +342,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -351,6 +352,7 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
+					"-lkenlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 			};
@@ -367,6 +369,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -376,6 +379,7 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
+					"-lkenlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 			};

@@ -271,6 +271,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -279,6 +280,7 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lkenlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -306,6 +308,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -314,6 +317,7 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lkenlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -333,6 +337,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -341,6 +346,7 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lkenlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
