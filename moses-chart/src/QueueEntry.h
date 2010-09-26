@@ -99,14 +99,13 @@ protected:
 	float m_combinedScore;
 
 	QueueEntry(const QueueEntry &copy, size_t childEntryIncr);
-	bool CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells);
+	void CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells);
 
 	void CalcScore();
 
 public:
 	QueueEntry(const Moses::ChartTranslationOption &transOpt
-						, const ChartCellCollection &allChartCells
-						, bool &isOK);
+						, const ChartCellCollection &allChartCells);
 	~QueueEntry();
 
 	const Moses::ChartTranslationOption &GetTranslationOption() const

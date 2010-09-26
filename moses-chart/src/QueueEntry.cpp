@@ -36,47 +36,34 @@ namespace MosesChart
 {
 
 QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
-											 , const ChartCellCollection &allChartCells
-											 , bool &isOK)
+											 , const ChartCellCollection &allChartCells)
 :m_transOpt(transOpt)
 {
-	isOK = false;
-
 	const WordConsumed *wordsConsumed = &transOpt.GetLastWordConsumed();
-	isOK = CreateChildEntry(wordsConsumed, allChartCells);
-
-	if (isOK)
-		CalcScore();
+	CreateChildEntry(wordsConsumed, allChartCells);
+	CalcScore();
 }
 
-bool QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
+void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
 {
-	bool ret;
 	// recursvile do the 1st first
 	const WordConsumed *prevWordsConsumed = wordsConsumed->GetPrevWordsConsumed();
 	if (prevWordsConsumed)
-		ret = CreateChildEntry(prevWordsConsumed, allChartCells);
-	else
-		ret = true;
+		CreateChildEntry(prevWordsConsumed, allChartCells);
 
-	if (ret && wordsConsumed->IsNonTerminal())
+	if (wordsConsumed->IsNonTerminal())
 	{ // non-term
 		const WordsRange &childRange = wordsConsumed->GetWordsRange();
 		const ChartCell &childCell = allChartCells.Get(childRange);
 		const Word &headWord = wordsConsumed->GetSourceWord();
 
-		if (childCell.GetSortedHypotheses(headWord).size() == 0)
-		{ // can't create hypo out of this. child cell is empty
-			return false;
-		}
+		assert(!childCell.GetSortedHypotheses(headWord).empty());
 
 		const Moses::Word &nonTerm = wordsConsumed->GetSourceWord();
 		assert(nonTerm.IsNonTerminal());
 		ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
 		m_childEntries.push_back(childEntry);
 	}
-
-	return ret;
 }
 
 QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)

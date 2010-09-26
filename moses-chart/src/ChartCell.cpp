@@ -86,14 +86,8 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 	for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList)
 	{
 		const ChartTranslationOption &transOpt = **iterList;
-
-		bool isOK;
-		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells, isOK);
-
-		if (isOK)
-			cube.Add(queueEntry);
-		else
-			delete queueEntry;
+		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells);
+		cube.Add(queueEntry);
 	}
 	
 	// pluck things out of queue and add to hypo collection
