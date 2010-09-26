@@ -1,7 +1,7 @@
 #ifndef LM_EXCEPTION__
 #define LM_EXCEPTION__
 
-#include "../util/exception.hh"
+#include "../util/exception_util.hh"
 #include "../util/string_piece.hh"
 
 #include <exception>
