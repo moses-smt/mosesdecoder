@@ -31,21 +31,21 @@ PhraseDictionaryNodeSCFG::~PhraseDictionaryNodeSCFG()
 	delete m_targetPhraseCollection;
 }
 
-void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
+void PhraseDictionaryNodeSCFG::Prune(size_t tableLimit)
 {
-	// recusively sort
+	// recusively prune
 	for (TerminalMap::iterator p = m_sourceTermMap.begin(); p != m_sourceTermMap.end(); ++p)
 	{
-		p->second.Sort(tableLimit);
+		p->second.Prune(tableLimit);
 	}
 	for (NonTerminalMap::iterator p = m_nonTermMap.begin(); p != m_nonTermMap.end(); ++p)
 	{
-		p->second.Sort(tableLimit);
+		p->second.Prune(tableLimit);
 	}
 	
-	// sort TargetPhraseCollection in this node
+	// prune TargetPhraseCollection in this node
 	if (m_targetPhraseCollection != NULL)
-		m_targetPhraseCollection->NthElement(tableLimit);
+		m_targetPhraseCollection->Prune(true, tableLimit);
 }
 
 PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word &sourceTerm)

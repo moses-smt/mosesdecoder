@@ -63,7 +63,7 @@ public:
 	bool IsLeaf() const
 	{ return m_sourceTermMap.empty() && m_nonTermMap.empty(); }
 
-	void Sort(size_t tableLimit);
+	void Prune(size_t tableLimit);
 	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &sourceTerm);
 	PhraseDictionaryNodeSCFG *GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm);
 	const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceTerm) const;
