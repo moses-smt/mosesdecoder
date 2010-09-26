@@ -60,9 +60,8 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseC
 															, bool adhereTableLimit
 															, size_t ruleLimit)
 {
-	TargetPhraseCollection::const_iterator iter, iterEnd;
-	iterEnd = (!adhereTableLimit || ruleLimit == 0 || targetPhraseCollection.GetSize() < ruleLimit)
-								? targetPhraseCollection.end() : targetPhraseCollection.begin() + ruleLimit;
+	TargetPhraseCollection::const_iterator iter;
+	TargetPhraseCollection::const_iterator iterEnd = targetPhraseCollection.end();
 
 	for (iter = targetPhraseCollection.begin(); iter != iterEnd; ++iter)
 	{
