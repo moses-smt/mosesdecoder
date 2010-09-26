@@ -9,17 +9,13 @@ libkenlm_a_SOURCES = \
 	exception.cc \
 	../util/string_piece.cc \
 	../util/scoped.cc \
-	../util/probing_hash_table_test.cc   \
 	../util/murmur_hash.cc   \
 	../util/mmap.cc   \
-	../util/key_value_packing_test.cc   \
-	../util/joint_sort_test.cc   \
-	../util/file_piece_test.cc   \
 	../util/file_piece.cc   \
 	../util/ersatz_progress.cc   \
 	../util/exception_util.cc   \
 	../util/string_piece.cc
-	
+
 query_SOURCES = ngram_query.cc
 query_LDADD = -L$(top_srcdir)/kenlm/lm -lkenlm
 
