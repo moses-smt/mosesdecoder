@@ -1,6 +1,7 @@
 #include "ngram.hh"
 
 #include "exception.hh"
+#include "read_arpa.hh"
 #include "../util/file_piece.hh"
 #include "../util/joint_sort.hh"
 #include "../util/murmur_hash.hh"
@@ -28,97 +29,7 @@ size_t hash_value(const State &state) {
   return util::MurmurHashNative(state.history_, sizeof(WordIndex) * state.valid_length_);
 }
 
-namespace detail {
-uint64_t HashForVocab(const char *str, std::size_t len) {
-  // This proved faster than Boost's hash in speed trials: total load time Murmur 67090000, Boost 72210000
-  // Chose to use 64A instead of native so binary format will be portable across 64 and 32 bit.  
-  return util::MurmurHash64A(str, len, 0);
-}
- 
-void Prob::SetBackoff(float to) {
-  UTIL_THROW(FormatLoadException, "Attempt to set backoff " << to << " for the highest order n-gram");
-}
-
-// Normally static initialization is a bad idea but MurmurHash is pure arithmetic, so this is ok.  
-const uint64_t kUnknownHash = HashForVocab("<unk>", 5);
-// Sadly some LMs have <UNK>.  
-const uint64_t kUnknownCapHash = HashForVocab("<UNK>", 5);
-
-} // namespace detail
-
-SortedVocabulary::SortedVocabulary() : begin_(NULL), end_(NULL) {}
-
-std::size_t SortedVocabulary::Size(std::size_t entries, float /*ignored*/) {
-  // Lead with the number of entries.  
-  return sizeof(uint64_t) + sizeof(Entry) * entries;
-}
-
-void SortedVocabulary::Init(void *start, std::size_t allocated, std::size_t entries) {
-  assert(allocated >= Size(entries));
-  // Leave space for number of entries.  
-  begin_ = reinterpret_cast<Entry*>(reinterpret_cast<uint64_t*>(start) + 1);
-  end_ = begin_;
-  saw_unk_ = false;
-}
-
-WordIndex SortedVocabulary::Insert(const StringPiece &str) {
-  uint64_t hashed = detail::HashForVocab(str);
-  if (hashed == detail::kUnknownHash || hashed == detail::kUnknownCapHash) {
-    saw_unk_ = true;
-    return 0;
-  }
-  end_->key = hashed;
-  ++end_;
-  // This is 1 + the offset where it was inserted to make room for unk.  
-  return end_ - begin_;
-}
-
-bool SortedVocabulary::FinishedLoading(detail::ProbBackoff *reorder_vocab) {
-  util::JointSort(begin_, end_, reorder_vocab + 1);
-  SetSpecial(Index("<s>"), Index("</s>"), 0, end_ - begin_ + 1);
-  // Save size.  
-  *(reinterpret_cast<uint64_t*>(begin_) - 1) = end_ - begin_;
-  return saw_unk_;
-}
-
-void SortedVocabulary::LoadedBinary() {
-  end_ = begin_ + *(reinterpret_cast<const uint64_t*>(begin_) - 1);
-  SetSpecial(Index("<s>"), Index("</s>"), 0, end_ - begin_ + 1);
-}
-
-namespace detail {
-
-template <class Search> MapVocabulary<Search>::MapVocabulary() {}
-
-template <class Search> void MapVocabulary<Search>::Init(void *start, std::size_t allocated, std::size_t /*entries*/) {
-  lookup_ = Lookup(start, allocated);
-  available_ = 1;
-  // Later if available_ != expected_available_ then we can throw UnknownMissingException.
-  saw_unk_ = false;
-}
-
-template <class Search> WordIndex MapVocabulary<Search>::Insert(const StringPiece &str) {
-  uint64_t hashed = HashForVocab(str);
-  // Prevent unknown from going into the table.  
-  if (hashed == kUnknownHash || hashed == kUnknownCapHash) {
-    saw_unk_ = true;
-    return 0;
-  } else {
-    lookup_.Insert(Lookup::Packing::Make(hashed, available_));
-    return available_++;
-  }
-}
-
-template <class Search> bool MapVocabulary<Search>::FinishedLoading(ProbBackoff * /*reorder_vocab*/) {
-  lookup_.FinishedInserting();
-  SetSpecial(Index("<s>"), Index("</s>"), 0, available_);
-  return saw_unk_;
-}
-
-template <class Search> void MapVocabulary<Search>::LoadedBinary() {
-  lookup_.LoadedBinary();
-  SetSpecial(Index("<s>"), Index("</s>"), 0, available_);
-}
+namespace {
 
 /* All of the entropy is in low order bits and boost::hash does poorly with
  * these.  Odd numbers near 2^64 chosen by mashing on the keyboard.  There is a
@@ -138,71 +49,6 @@ uint64_t ChainedWordHash(const WordIndex *word, const WordIndex *word_end) {
   return current;
 }
 
-bool IsEntirelyWhiteSpace(const StringPiece &line) {
-  for (size_t i = 0; i < static_cast<size_t>(line.size()); ++i) {
-    if (!isspace(line.data()[i])) return false;
-  }
-  return true;
-}
-
-void ReadARPACounts(util::FilePiece &in, std::vector<size_t> &number) {
-  number.clear();
-  StringPiece line;
-  if (!IsEntirelyWhiteSpace(line = in.ReadLine())) UTIL_THROW(FormatLoadException, "First line was \"" << line << "\" not blank");
-  if ((line = in.ReadLine()) != "\\data\\") UTIL_THROW(FormatLoadException, "second line was \"" << line << "\" not \\data\\.");
-  while (!IsEntirelyWhiteSpace(line = in.ReadLine())) {
-    if (line.size() < 6 || strncmp(line.data(), "ngram ", 6)) UTIL_THROW(FormatLoadException, "count line \"" << line << "\"doesn't begin with \"ngram \"");
-    // So strtol doesn't go off the end of line.  
-    std::string remaining(line.data() + 6, line.size() - 6);
-    char *end_ptr;
-    unsigned long int length = std::strtol(remaining.c_str(), &end_ptr, 10);
-    if ((end_ptr == remaining.c_str()) || (length - 1 != number.size())) UTIL_THROW(FormatLoadException, "ngram count lengths should be consecutive starting with 1: " << line);
-    if (*end_ptr != '=') UTIL_THROW(FormatLoadException, "Expected = immediately following the first number in the count line " << line);
-    ++end_ptr;
-    const char *start = end_ptr;
-    long int count = std::strtol(start, &end_ptr, 10);
-    if (count < 0) UTIL_THROW(FormatLoadException, "Negative n-gram count " << count);
-    if (start == end_ptr) UTIL_THROW(FormatLoadException, "Couldn't parse n-gram count from " << line);
-    number.push_back(count);
-  }
-}
-
-void ReadNGramHeader(util::FilePiece &in, unsigned int length) {
-  StringPiece line;
-  while (IsEntirelyWhiteSpace(line = in.ReadLine())) {}
-  std::stringstream expected;
-  expected << '\\' << length << "-grams:";
-  if (line != expected.str()) UTIL_THROW(FormatLoadException, "Was expecting n-gram header " << expected.str() << " but got " << line << " instead.");
-}
-
-// Special unigram reader because unigram's data structure is different and because we're inserting vocab words.
-template <class Voc> void Read1Grams(util::FilePiece &f, const size_t count, Voc &vocab, ProbBackoff *unigrams) {
-  ReadNGramHeader(f, 1);
-  for (size_t i = 0; i < count; ++i) {
-    try {
-      float prob = f.ReadFloat();
-      if (f.get() != '\t') UTIL_THROW(FormatLoadException, "Expected tab after probability");
-      ProbBackoff &value = unigrams[vocab.Insert(f.ReadDelimited())];
-      value.prob = prob;
-      switch (f.get()) {
-        case '\t':
-          value.SetBackoff(f.ReadFloat());
-          if ((f.get() != '\n')) UTIL_THROW(FormatLoadException, "Expected newline after backoff");
-          break;
-        case '\n':
-          value.ZeroBackoff();
-          break;
-        default:
-          UTIL_THROW(FormatLoadException, "Expected tab or newline after unigram");
-      }
-     } catch(util::Exception &e) {
-      e << " in the " << i << "th 1-gram at byte " << f.Offset();
-      throw;
-    }
-  }
-  if (f.ReadLine().size()) UTIL_THROW(FormatLoadException, "Expected blank line after unigrams at byte " << f.Offset());
-}
-
 template <class Voc, class Store> void ReadNGrams(util::FilePiece &f, const unsigned int n, const size_t count, const Voc &vocab, Store &store) {
   ReadNGramHeader(f, n);
 
@@ -210,34 +56,17 @@ template <class Voc, class Store> void ReadNGrams(util::FilePiece &f, const unsi
   WordIndex vocab_ids[n];
   typename Store::Packing::Value value;
   for (size_t i = 0; i < count; ++i) {
-    try {
-      value.prob = f.ReadFloat();
-      for (WordIndex *vocab_out = &vocab_ids[n-1]; vocab_out >= vocab_ids; --vocab_out) {
-        *vocab_out = vocab.Index(f.ReadDelimited());
-      }
-      uint64_t key = ChainedWordHash(vocab_ids, vocab_ids + n);
-
-      switch (f.get()) {
-        case '\t':
-          value.SetBackoff(f.ReadFloat());
-          if ((f.get() != '\n')) UTIL_THROW(FormatLoadException, "Expected newline after backoff");
-          break;
-        case '\n':
-          value.ZeroBackoff();
-          break;
-        default:
-          UTIL_THROW(FormatLoadException, "Expected tab or newline after n-gram");
-      }
-      store.Insert(Store::Packing::Make(key, value));
-    } catch(util::Exception &e) {
-      e << " in the " << i << "th " << n << "-gram at byte " << f.Offset();
-      throw;
-    }
+    ReadNGram(f, n, vocab, vocab_ids, value);
+    uint64_t key = ChainedWordHash(vocab_ids, vocab_ids + n);
+    store.Insert(Store::Packing::Make(key, value));
   }
 
   if (f.ReadLine().size()) UTIL_THROW(FormatLoadException, "Expected blank line after " << n << "-grams at byte " << f.Offset());
   store.FinishedInserting();
 }
+
+} // namespace
+namespace detail {
 
 template <class Search, class VocabularyT> size_t GenericModel<Search, VocabularyT>::Size(const std::vector<size_t> &counts, const Config &config) {
   if (counts.size() > kMaxOrder) UTIL_THROW(FormatLoadException, "This model has order " << counts.size() << ".  Edit ngram.hh's kMaxOrder to at least this value and recompile.");
@@ -402,7 +231,7 @@ template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::Ge
 template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts, const Config &config) {
   // Read the unigrams.
   Read1Grams(f, counts[0], vocab_, unigram_);
-  bool saw_unk = vocab_.FinishedLoading(unigram_);
+  bool saw_unk = vocab_.SawUnk();
   if (!saw_unk) {
     switch(config.unknown_missing) {
       case Config::THROW_UP:
@@ -443,7 +272,6 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
     State &out_state) const {
 
   FullScoreReturn ret;
-  // This is end pointer passed to SumBackoffs.
   const ProbBackoff &unigram = unigram_[new_word];
   if (new_word == 0) {
     ret.ngram_length = out_state.valid_length_ = 0;
@@ -515,7 +343,95 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
   return ret;
 }
 
-template class GenericModel<ProbingSearch, MapVocabulary<ProbingSearch> >;
+/* Until somebody implements stateful language models in Moses, here's a slower stateless version.  It also provides a mostly meaningless void * value that can be used for pruning. */
+template <class Search, class VocabularyT> HieuShouldRefactorMoses GenericModel<Search, VocabularyT>::SlowStatelessScore(
+    const WordIndex *begin, const WordIndex *end) const {
+  begin = std::max(begin, end - P::Order());
+
+  HieuShouldRefactorMoses ret;
+  // This is end pointer passed to SumBackoffs.
+  const ProbBackoff &unigram = unigram_[*(end - 1)];
+  if (!*(end - 1)) {
+    ret.ngram_length = 0;
+    // all of backoff.
+    ret.prob = unigram.prob + SlowBackoffLookup(begin, end - 1, 1);
+    ret.meaningless_unique_state = 0;
+    return ret;
+  }
+  ret.prob = unigram.prob;
+  if (begin == end - 1) {
+    ret.ngram_length = 1;
+    ret.meaningless_unique_state = reinterpret_cast<void*>(*(end - 1));
+    // No backoff because the context is empty.  
+    return ret;
+  }
+
+  // Ok now we now that the bigram contains known words.  Start by looking it up.
+
+  uint64_t lookup_hash = static_cast<uint64_t>(*(end - 1));
+  const WordIndex *hist_iter = end - 2;
+  const WordIndex *const hist_none = begin - 1;
+  typename std::vector<Middle>::const_iterator mid_iter = middle_.begin();
+  for (; ; ++mid_iter, --hist_iter) {
+    if (hist_iter == hist_none) {
+      // Ran out.  No backoff.  
+      ret.ngram_length = end - begin;
+      // ret.prob was already set.
+      ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 1);
+      return ret;
+    }
+    lookup_hash = CombineWordHash(lookup_hash, *hist_iter);
+    if (mid_iter == middle_.end()) break;
+    typename Middle::ConstIterator found;
+    if (!mid_iter->Find(lookup_hash, found)) {
+      // Didn't find an ngram using hist_iter.  
+      ret.ngram_length = end - 1 - hist_iter;
+      ret.prob += SlowBackoffLookup(begin, end - 1, mid_iter - middle_.begin() + 1);
+      ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 2);
+      return ret;
+    }
+    ret.prob = found->GetValue().prob;
+  }
+  
+  typename Longest::ConstIterator found;
+  if (!longest_.Find(lookup_hash, found)) {
+    // It's an (P::Order()-1)-gram
+    ret.ngram_length = P::Order() - 1;
+    ret.prob += SlowBackoffLookup(begin, end - 1, P::Order() - 1);
+    ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 3);
+    return ret;
+  }
+  // It's an P::Order()-gram
+  ret.ngram_length = P::Order();
+  ret.prob = found->GetValue().prob;
+  ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 4);
+  return ret;
+}
+
+template <class Search, class VocabularyT> float GenericModel<Search, VocabularyT>::SlowBackoffLookup(
+    const WordIndex *const begin, const WordIndex *const end, unsigned char start) const {
+  // Add the backoff weights for n-grams of order start to (end - begin).  
+  if (end - begin < static_cast<std::ptrdiff_t>(start)) return 0.0;
+  float ret = 0.0;
+  if (start == 1) {
+    ret += unigram_[*(end - 1)].backoff;
+    start = 2;
+  }
+  uint64_t lookup_hash = static_cast<uint64_t>(*(end - 1));
+  for (unsigned char i = 2; i < start; ++i) {
+    lookup_hash = CombineWordHash(lookup_hash, *(end - i));
+  }
+  typename Middle::ConstIterator found;
+  // i is the order of the backoff we're looking for.
+  for (unsigned char i = start; i <= static_cast<unsigned char>(end - begin); ++i) {
+    lookup_hash = CombineWordHash(lookup_hash, *(end - i));
+    if (!middle_[i - 2].Find(lookup_hash, found)) break;
+    ret += found->GetValue().backoff;
+  }
+  return ret;
+}
+
+template class GenericModel<ProbingSearch, ProbingVocabulary>;
 template class GenericModel<SortedUniformSearch, SortedVocabulary>;
 } // namespace detail
 } // namespace ngram

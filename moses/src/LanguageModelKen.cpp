@@ -87,13 +87,22 @@ float LanguageModelKen::GetValue(const vector<const Word*> &contextFactor, State
 		const Factor *factor = contextFactor[i]->GetFactor(factorType);
 		const string &word = factor->GetString();
 		
-		//ngramId[i] = StringToId(word); FOR_KEN
+    // TODO(hieuhoang1972): precompute this.   
+		ngramId[i] = m_ngram->GetVocabulary().Index(word);
 	}
 
-	float prob;
-	//prob = m_ngram.GetScore(ngramId); FOR_KEN
+  // TODO(hieuhoang1972): use my stateful interface instead of this stateless one you asked heafield to kludge for you.  
+  lm::ngram::HieuShouldRefactorMoses ret(m_ngram->SlowStatelessScore(&*ngramId.begin(), &*ngramId.end()));
+  if (finalState)
+  {
+    *finalState = ret.meaningless_unique_state;
+  }
+  if (len)
+  {
+    *len = ret.ngram_length;
+  }
   
-	return TransformLMScore(prob);
+	return TransformLMScore(ret.prob);
 }
 
 

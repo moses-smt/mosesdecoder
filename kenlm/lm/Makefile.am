@@ -6,6 +6,8 @@ libkenlm_a_SOURCES = \
 	virtual_interface.cc \
 	ngram.cc \
 	exception.cc \
+	read_arpa.cc \
+	vocab.cc \
 	../util/string_piece.cc \
 	../util/scoped.cc \
 	../util/murmur_hash.cc   \

@@ -3,6 +3,8 @@
 
 #include "facade.hh"
 #include "ngram_config.hh"
+#include "vocab.hh"
+#include "weights.hh"
 #include "../util/key_value_packing.hh"
 #include "../util/mmap.hh"
 #include "../util/probing_hash_table.hh"
@@ -11,7 +13,6 @@
 #include "../util/string_piece.hh"
 
 #include <algorithm>
-#include <memory>
 #include <vector>
 
 namespace util { class FilePiece; }
@@ -48,103 +49,14 @@ class State {
 
 size_t hash_value(const State &state);
 
-namespace detail {
-
-uint64_t HashForVocab(const char *str, std::size_t len);
-inline uint64_t HashForVocab(const StringPiece &str) {
-  return HashForVocab(str.data(), str.length());
-}
-
-struct Prob {
+// TODO(hieuhoang1972): refactor language models to keep arbitrary state, not a void* pointer.  Then use FullScore like good people do.  For now, you get a stateless interface.  
+struct HieuShouldRefactorMoses {
   float prob;
-  void SetBackoff(float to);
-  void ZeroBackoff() {}
-};
-// No inheritance so this will be a POD.  
-struct ProbBackoff {
-  float prob;
-  float backoff;
-  void SetBackoff(float to) { backoff = to; }
-  void ZeroBackoff() { backoff = 0.0; }
-};
-
-} // namespace detail
-
-// Vocabulary based on sorted uniform find storing only uint64_t values and using their offsets as indices.  
-class SortedVocabulary : public base::Vocabulary {
-  private:
-    // Sorted uniform requires a GetKey function.  
-    struct Entry {
-      uint64_t GetKey() const { return key; }
-      uint64_t key;
-      bool operator<(const Entry &other) const {
-        return key < other.key;
-      }
-    };
-
-  public:
-    SortedVocabulary();
-
-    WordIndex Index(const StringPiece &str) const {
-      const Entry *found;
-      if (util::SortedUniformFind<const Entry *, uint64_t>(begin_, end_, detail::HashForVocab(str), found)) {
-        return found - begin_ + 1; // +1 because <unk> is 0 and does not appear in the lookup table.
-      } else {
-        return 0;
-      }
-    }
-
-    // Ignores second argument for consistency with probing hash which has a float here.  
-    static size_t Size(std::size_t entries, float ignored = 0.0);
-
-    // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
-    void Init(void *start, std::size_t allocated, std::size_t entries);
-
-    WordIndex Insert(const StringPiece &str);
-
-    // Returns true if unknown was seen.  Reorders reorder_vocab so that the IDs are sorted.  
-    bool FinishedLoading(detail::ProbBackoff *reorder_vocab);
-
-    void LoadedBinary();
-
-  private:
-    Entry *begin_, *end_;
-
-    bool saw_unk_;
+  unsigned char ngram_length;
+  void *meaningless_unique_state;
 };
 
 namespace detail {
-
-// Vocabulary storing a map from uint64_t to WordIndex.  
-template <class Search> class MapVocabulary : public base::Vocabulary {
-  public:
-    MapVocabulary();
-
-    WordIndex Index(const StringPiece &str) const {
-      typename Lookup::ConstIterator i;
-      return lookup_.Find(HashForVocab(str), i) ? i->GetValue() : 0;
-    }
-
-    static size_t Size(std::size_t entries, float probing_multiplier) {
-      return Lookup::Size(entries, probing_multiplier);
-    }
-
-    // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
-    void Init(void *start, std::size_t allocated, std::size_t entries);
-
-    WordIndex Insert(const StringPiece &str);
-
-    // Returns true if unknown was seen.  Does nothing with reorder_vocab.  
-    bool FinishedLoading(ProbBackoff *reorder_vocab);
-
-    void LoadedBinary();
-
-  private:
-    typedef typename Search::template Table<WordIndex>::T Lookup;
-    Lookup lookup_;
-
-    bool saw_unk_;
-};
 
 // std::identity is an SGI extension :-(
 struct IdentityHash : public std::unary_function<uint64_t, size_t> {
@@ -166,8 +78,18 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
 
     FullScoreReturn FullScore(const State &in_state, const WordIndex new_word, State &out_state) const;
 
+    /* Slower but stateless call.  Don't use this if you can avoid it.  This
+     * is mostly a hack for Hieu to integrate it into Moses which is currently
+     * unable to handle arbitrary LM state.  Sigh. 
+     * The word indices should be in an array.  *begin is the earliest word of context.
+     * *(end-1) is the word being appended.  
+     */
+    HieuShouldRefactorMoses SlowStatelessScore(const WordIndex *begin, const WordIndex *end) const;
+
   private:
-    // Appears after Size in the cc.  
+    float SlowBackoffLookup(const WordIndex *const begin, const WordIndex *const end, unsigned char start) const;
+
+    // Appears after Size in the cc file.
     void SetupMemory(char *start, const std::vector<size_t> &counts, const Config &config);
 
     void LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts, const Config &config);
@@ -214,10 +136,10 @@ struct SortedUniformSearch {
 } // namespace detail
 
 // These must also be instantiated in the cc file.  
-typedef detail::MapVocabulary<detail::ProbingSearch> Vocabulary;
+typedef ::lm::ProbingVocabulary Vocabulary;
 typedef detail::GenericModel<detail::ProbingSearch, Vocabulary> Model;
 
-// SortedVocabulary was defined above.  
+typedef ::lm::SortedVocabulary SortedVocabulary;
 typedef detail::GenericModel<detail::SortedUniformSearch, SortedVocabulary> SortedModel;
 
 } // namespace ngram
