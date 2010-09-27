@@ -48,7 +48,7 @@ const uint64_t kUnknownCapHash = HashForVocab("<UNK>", 5);
 
 SortedVocabulary::SortedVocabulary() : begin_(NULL), end_(NULL) {}
 
-std::size_t SortedVocabulary::Size(std::size_t entries, float ignored) {
+std::size_t SortedVocabulary::Size(std::size_t entries, float /*ignored*/) {
   // Lead with the number of entries.  
   return sizeof(uint64_t) + sizeof(Entry) * entries;
 }
@@ -90,7 +90,7 @@ namespace detail {
 
 template <class Search> MapVocabulary<Search>::MapVocabulary() {}
 
-template <class Search> void MapVocabulary<Search>::Init(void *start, std::size_t allocated, std::size_t entries) {
+template <class Search> void MapVocabulary<Search>::Init(void *start, std::size_t allocated, std::size_t /*entries*/) {
   lookup_ = Lookup(start, allocated);
   available_ = 1;
   // Later if available_ != expected_available_ then we can throw UnknownMissingException.
@@ -109,7 +109,7 @@ template <class Search> WordIndex MapVocabulary<Search>::Insert(const StringPiec
   }
 }
 
-template <class Search> bool MapVocabulary<Search>::FinishedLoading(ProbBackoff *reorder_vocab) {
+template <class Search> bool MapVocabulary<Search>::FinishedLoading(ProbBackoff * /*reorder_vocab*/) {
   lookup_.FinishedInserting();
   SetSpecial(Index("<s>"), Index("</s>"), 0, available_);
   return saw_unk_;
