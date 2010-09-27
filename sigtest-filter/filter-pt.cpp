@@ -87,12 +87,19 @@ PTEntry::PTEntry(const std::string& str, int index) :
 {
     size_t pos = 0;
     std::string::size_type nextPos = str.find(SEPARATOR, pos);
-    this->f_phrase = str.substr(pos,nextPos); pos = nextPos + SEPARATOR.size();
+    this->f_phrase = str.substr(pos,nextPos); 
+    
+    pos = nextPos + SEPARATOR.size();
     nextPos = str.find(SEPARATOR, pos);
-    this->e_phrase = str.substr(pos,nextPos-pos); pos = nextPos + SEPARATOR.size();
-    nextPos = str.rfind(SEPARATOR);
-    this->extra = str.substr(pos, ((nextPos > pos)?(nextPos-pos):0));
-    this->scores = str.substr(nextPos + SEPARATOR.size(),std::string::npos);
+    this->e_phrase = str.substr(pos,nextPos-pos); 
+
+    pos = nextPos + SEPARATOR.size();
+    nextPos = str.find(SEPARATOR, pos);
+    this->scores = str.substr(pos,nextPos-pos); 
+    
+    pos = nextPos + SEPARATOR.size();
+    this->extra = str.substr(pos);
+
     int c = 0;
     std::string::iterator i=scores.begin();
     if (index > 0) {
@@ -103,7 +110,9 @@ PTEntry::PTEntry(const std::string& str, int index) :
             }
         }
     }
-    ++i;
+    if (i != scores.end()) {
+        ++i;
+    }
     char f[24];
     char *fp=f;
     while (i != scores.end() && *i != ' ') {
@@ -111,7 +120,7 @@ PTEntry::PTEntry(const std::string& str, int index) :
     }
     *fp++=0;
     
-		this->pfe = atof(f);
+    this->pfe = atof(f);
 
     // std::cerr << "L: " << f_phrase << " ::: " << e_phrase << " ::: " << scores << " ::: " << pfe << std::endl;
     // std::cerr << "X: " << extra << "\n"; 
@@ -130,8 +139,8 @@ struct NlogSigThresholder {
 std::ostream& operator << (std::ostream& os, const PTEntry& pp)
 {
   os << pp.f_phrase << " ||| " << pp.e_phrase;
-  if (pp.extra.size()>0) os << " ||| " << pp.extra;
   os << " ||| " << pp.scores;
+  if (pp.extra.size()>0) os << " ||| " << pp.extra;
   if (print_cooc_counts) os << " ||| " << pp.cfe << " " << pp.cf << " " << pp.ce;
   if (print_neglog_significance) os << " ||| " << pp.nlog_pte;
   return os;
