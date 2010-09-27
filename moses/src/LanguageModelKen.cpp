@@ -38,7 +38,7 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelKen::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
+LanguageModelKen::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL)
 {
 }
@@ -53,7 +53,7 @@ bool LanguageModelKen::Load(const std::string &filePath,
 			     FactorType factorType, 
 			     size_t nGramOrder)
 {
-  cerr << "In LanguageModelKen::Load: nGramOrder = " << nGramOrder << "\n";
+	cerr << "In LanguageModelKen::Load: nGramOrder = " << nGramOrder << " will be ignored.  Using whatever the file has.\n";
 	m_ngram = new lm::ngram::Model(filePath.c_str());
 	return true;
 }
@@ -67,7 +67,7 @@ bool LanguageModelKen::Load(const std::string &filePath,
 float LanguageModelKen::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const
 {
 
-	FactorType	factorType = GetFactorType();
+	FactorType factorType = GetFactorType();
 	size_t count = contextFactor.size();
 	assert(count <= GetNGramOrder());
 	if (count == 0)
@@ -83,21 +83,20 @@ float LanguageModelKen::GetValue(const vector<const Word*> &contextFactor, State
 		const Factor *factor = contextFactor[i]->GetFactor(factorType);
 		const string &word = factor->GetString();
 		
-    // TODO(hieuhoang1972): precompute this.   
+		// TODO(hieuhoang1972): precompute this.   
 		ngramId[i] = m_ngram->GetVocabulary().Index(word);
 	}
 
-  // TODO(hieuhoang1972): use my stateful interface instead of this stateless one you asked heafield to kludge for you.  
-  lm::ngram::HieuShouldRefactorMoses ret(m_ngram->SlowStatelessScore(&*ngramId.begin(), &*ngramId.end()));
-  if (finalState)
-  {
-    *finalState = ret.meaningless_unique_state;
-  }
-  if (len)
-  {
-    *len = ret.ngram_length;
-  }
-  
+	// TODO(hieuhoang1972): use my stateful interface instead of this stateless one you asked heafield to kludge for you.  
+	lm::ngram::HieuShouldRefactorMoses ret(m_ngram->SlowStatelessScore(&*ngramId.begin(), &*ngramId.end()));
+	if (finalState)
+	{
+		*finalState = ret.meaningless_unique_state;
+	}
+	if (len)
+	{
+		*len = ret.ngram_length;
+	}
 	return TransformLMScore(ret.prob);
 }
 

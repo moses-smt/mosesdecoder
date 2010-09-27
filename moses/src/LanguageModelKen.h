@@ -42,7 +42,7 @@ protected:
   lm::ngram::Model *m_ngram;
 	
 public:
-	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub);
+	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	~LanguageModelKen();
 	bool Load(const std::string &filePath
 					, FactorType factorType
