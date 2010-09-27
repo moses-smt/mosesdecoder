@@ -176,7 +176,7 @@ then
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS -I${with_kenlm}/lm"
 
-  AC_CHECK_HEADER(n_gram.h,
+  AC_CHECK_HEADER(ngram.hh,
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${with_kenlm}])])
 

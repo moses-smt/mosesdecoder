@@ -23,11 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include "dictionary.h"
-#include "n_gram.h"
-#include "lmtable.h"
-#include "lmmacro.h"
-
+#include "ngram.hh"
 
 #include "LanguageModelKen.h"
 #include "TypeDef.h"
@@ -43,7 +39,7 @@ namespace Moses
 {
 
 LanguageModelKen::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
+:LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL)
 {
 }
 
