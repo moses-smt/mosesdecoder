@@ -81,7 +81,7 @@ float LanguageModelKen::GetValue(const vector<const Word*> &contextFactor, State
 	}
 	
 	// set up context
-	const vector<int> ngramId(count);
+	vector<lm::WordIndex> ngramId(count);
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
 		const Factor *factor = contextFactor[i]->GetFactor(factorType);
