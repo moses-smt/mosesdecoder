@@ -55,6 +55,16 @@ bool LanguageModelKen::Load(const std::string &filePath,
 {
 	cerr << "In LanguageModelKen::Load: nGramOrder = " << nGramOrder << " will be ignored.  Using whatever the file has.\n";
 	m_ngram = new lm::ngram::Model(filePath.c_str());
+
+	m_factorType  = factorType;
+	m_nGramOrder  = m_ngram->Order();
+	m_filePath    = filePath;
+
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
+	m_sentenceStartArray[m_factorType] = m_sentenceStart;
+	m_sentenceEnd = factorCollection.AddFactor(Output, m_factorType, EOS_);
+	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 	return true;
 }
 
@@ -66,7 +76,6 @@ bool LanguageModelKen::Load(const std::string &filePath,
 	 */	
 float LanguageModelKen::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const
 {
-
 	FactorType factorType = GetFactorType();
 	size_t count = contextFactor.size();
 	assert(count <= GetNGramOrder());
