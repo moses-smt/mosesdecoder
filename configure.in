@@ -41,9 +41,9 @@ AC_ARG_WITH(irstlm,
            )
 
 AC_ARG_WITH(kenlm,
-            [AC_HELP_STRING([--with-kenlm=PATH], [(optional) path to Ken's LM toolkit])],
+            [AC_HELP_STRING([--with-kenlm], [(optional) Include Ken's LM toolkit; default is yes])],
             [with_kenlm=$withval],
-            [with_kenlm=no]
+            [with_kenlm=yes]
            )
 
 AC_ARG_WITH(randlm,
@@ -174,14 +174,14 @@ fi
 if test "x$with_kenlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_kenlm}"
+  CPPFLAGS="$CPPFLAGS -I${PWD}/kenlm"
 
   AC_CHECK_HEADER(lm/ngram.hh,
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${with_kenlm}])])
 
   LIB_KENLM="-lkenlm"
-  LDFLAGS="$LDFLAGS -L${with_kenlm}"
+  LDFLAGS="$LDFLAGS -L${PWD}/kenlm"
   LIBS="$LIBS $LIB_KENLM"
   FMTLIBS="$FMTLIBS libkenlm.a"
   AM_CONDITIONAL([KEN_LM], true)
