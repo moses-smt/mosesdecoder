@@ -333,7 +333,7 @@ namespace Moses {
   FValue FVector::l1norm() const {
     FValue norm = 0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-      if (!(i->second) && i->first == DEFAULT_NAME) {
+      if ((i->second) && i->first == DEFAULT_NAME) {
         throw runtime_error("Cannot take l1norm with non-zero default values");
       }
       norm += abs(i->second);
@@ -344,7 +344,7 @@ namespace Moses {
   FValue FVector::sum() const {
     FValue sum = 0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-      if (!(i->second) && i->first == DEFAULT_NAME) {
+      if ((i->second) && i->first == DEFAULT_NAME) {
         throw runtime_error("Cannot take sum with non-zero default values");
       }
       sum += i->second;

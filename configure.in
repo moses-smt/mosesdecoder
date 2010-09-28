@@ -19,6 +19,25 @@ AX_XMLRPC_C
 AX_BOOST_BASE([1.37.0])
 AX_BOOST_PROGRAM_OPTIONS
 
+ac_have_mpi=no
+AC_ARG_WITH(mpi,
+            AC_HELP_STRING([--with-mpi],
+                       [Force compilation with MPI]),
+        [ if test $withval != no ; then
+            ac_have_mpi=yes
+          fi ] )
+if test $ac_have_mpi = yes ; then
+  AC_PATH_PROG(CXX, mpic++, none)
+  if test  $CXX = none ; then
+    AC_MSG_ERROR([Cannot locate MPI compiler drivers])
+  fi
+  AX_BOOST_SERIALIZATION
+  AX_BOOST_MPI
+  AC_DEFINE(MPI_ENABLED,1,[Define if compiling with MPI.])
+  CPPFLAGS="$CPPFLAGS -DMPI_ENABLE=1"
+fi
+
+
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
             [with_protobuf=$withval],

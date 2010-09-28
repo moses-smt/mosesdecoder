@@ -10,6 +10,10 @@ ScoreComponentCollection::ScoreComponentCollection()
   , m_sim(&StaticData::Instance().GetScoreIndexManager())
 {}
 
+const ScoreIndexManager* ScoreComponentCollection::GetSim() {
+  return &(StaticData::Instance().GetScoreIndexManager());
+}
+
 float ScoreComponentCollection::GetWeightedScore() const
 {
 	float ret = InnerProduct(StaticData::Instance().GetAllWeights());
@@ -117,6 +121,10 @@ void StaticData::SetAllWeightsScoreComponentCollection(const ScoreComponentColle
 		assert(allInd == endInd);
 	}
 	
+}
+
+void ScoreComponentCollection::L1Normalise() {
+  m_scores /= m_scores.l1norm();
 }
 
 }

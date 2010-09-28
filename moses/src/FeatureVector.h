@@ -31,7 +31,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 
-#ifdef MPI_ENABLED
+#ifdef MPI_ENABLE
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/string.hpp>
@@ -179,7 +179,7 @@ namespace Moses {
     /** printing */
     std::ostream& print(std::ostream& out) const;
 		
-#ifdef MPI_ENABLED
+#ifdef MPI_ENABLE
     friend class boost::serialization::access;
 #endif  
     
@@ -194,13 +194,13 @@ namespace Moses {
     FNVmap m_features;
 		size_t m_size;
 		
-#ifdef MPI_ENABLED
+#ifdef MPI_ENABLE
     //serialization
     template<class Archive>
     void save(Archive &ar, const unsigned int version) const {
 			std::vector<std::string> names;
 			std::vector<FValue> values;
-			for (const_iterator i = begin(); i != end(); ++i) {
+			for (const_iterator i = cbegin(); i != cend(); ++i) {
 				std::ostringstream ostr;
 				ostr << i->first;
 				names.push_back(ostr.str());

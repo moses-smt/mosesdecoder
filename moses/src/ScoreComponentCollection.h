@@ -25,6 +25,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <numeric>
 #include <cassert>
 
+#ifdef MPI_ENABLE
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp>
+#endif
+
 #include "LMList.h"
 #include "ScoreProducer.h"
 #include "ScoreIndexManager.h"
@@ -32,8 +37,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+
 namespace Moses
 {
+
 
 /*** An unweighted collection of scores for a translation or step in a translation.
  *
@@ -57,6 +64,7 @@ class ScoreComponentCollection {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
 	friend class ScoreIndexManager;
 private:
+  const ScoreIndexManager* GetSim();
 	FVector m_scores;
 	const ScoreIndexManager* m_sim;
 
@@ -203,7 +211,42 @@ public:
 
     void ZeroAllLM(const LMList& lmList);
     void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
+  void L1Normalise();
 
+#ifdef MPI_ENABLE
+  public:
+    friend class boost::serialization::access;
+		
+  private:
+    //serialization
+    template<class Archive>
+    void save(Archive &ar, const unsigned int version) const {
+			ar << m_scores;
+    }
+		
+    template<class Archive>
+    void load(Archive &ar, const unsigned int version) {
+			ar >> m_scores;
+      m_sim = GetSim();
+
+    }
+
+		
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+		
+#endif
+  
+
+};
+
+struct SCCPlus {
+  ScoreComponentCollection operator()
+                    (const ScoreComponentCollection& lhs,
+                     const ScoreComponentCollection& rhs) {
+    ScoreComponentCollection sum(lhs);
+    sum.PlusEquals(rhs);
+    return sum;
+  }
 };
 
 }
