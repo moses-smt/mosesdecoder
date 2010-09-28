@@ -84,7 +84,6 @@ ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() con
 		size_t startInd = m_scoreIndexManager.GetBeginIndex(bookId);
 		size_t endInd = m_scoreIndexManager.GetEndIndex(bookId);
 		
-		std::cerr << producer->GetScoreProducerDescription();
 		
 		std::vector<float> weights;
 		copy(m_allWeights.begin() + startInd, m_allWeights.begin() + endInd, inserter(weights,weights.end()));
@@ -108,7 +107,6 @@ void StaticData::SetAllWeightsScoreComponentCollection(const ScoreComponentColle
 		size_t startInd = m_scoreIndexManager.GetBeginIndex(bookId);
 		size_t endInd = m_scoreIndexManager.GetEndIndex(bookId);
 		
-		std::cerr << producer->GetScoreProducerDescription();
 		
 		std::vector<float> weights = weightsScoreComponentCollection.GetScoresForProducer(producer);
 
