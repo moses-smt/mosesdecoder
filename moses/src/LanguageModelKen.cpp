@@ -109,6 +109,9 @@ float LanguageModelKen::GetValue(const vector<const Word*> &contextFactor, State
 	return TransformLMScore(ret.prob);
 }
 
+lm::WordIndex LanguageModelKen::GetLmID(const std::string &str) const {
+	return m_ngram->GetVocabulary().Index(str);
+}
 
 }
 

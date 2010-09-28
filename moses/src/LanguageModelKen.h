@@ -49,6 +49,7 @@ public:
 					, size_t nGramOrder);
 
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
+  lm::WordIndex GetLmID(const std::string &str) const;
 
   void CleanUpAfterSentenceProcessing() {}
   void InitializeBeforeSentenceProcessing() {}
