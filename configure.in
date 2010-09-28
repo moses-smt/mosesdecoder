@@ -174,14 +174,14 @@ fi
 if test "x$with_kenlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${with_kenlm}/lm"
+  CPPFLAGS="$CPPFLAGS -I${with_kenlm}"
 
-  AC_CHECK_HEADER(ngram.hh,
+  AC_CHECK_HEADER(lm/ngram.hh,
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${with_kenlm}])])
 
   LIB_KENLM="-lkenlm"
-  LDFLAGS="$LDFLAGS -L${with_kenlm}/lm"
+  LDFLAGS="$LDFLAGS -L${with_kenlm}"
   LIBS="$LIBS $LIB_KENLM"
   FMTLIBS="$FMTLIBS libkenlm.a"
   AM_CONDITIONAL([KEN_LM], true)
@@ -228,6 +228,6 @@ fi
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile kenlm/lm/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile kenlm/Makefile)
 
 AC_OUTPUT()

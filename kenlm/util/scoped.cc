@@ -1,4 +1,4 @@
-#include "scoped.hh"
+#include "util/scoped.hh"
 
 #include <err.h>
 #include <unistd.h>

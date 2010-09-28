@@ -1,9 +1,9 @@
-#include "vocab.hh"
+#include "lm/vocab.hh"
 
-#include "weights.hh"
-#include "../util/joint_sort.hh"
-#include "../util/murmur_hash.hh"
-#include "../util/probing_hash_table.hh"
+#include "lm/weights.hh"
+#include "util/joint_sort.hh"
+#include "util/murmur_hash.hh"
+#include "util/probing_hash_table.hh"
 
 #include <string>
 

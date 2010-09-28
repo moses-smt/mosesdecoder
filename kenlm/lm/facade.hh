@@ -1,8 +1,8 @@
 #ifndef LM_FACADE__
 #define LM_FACADE__
 
-#include "virtual_interface.hh"
-#include "../util/string_piece.hh"
+#include "lm/virtual_interface.hh"
+#include "util/string_piece.hh"
 
 #include <string>
 

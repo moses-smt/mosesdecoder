@@ -1,4 +1,4 @@
-#include "read_arpa.hh"
+#include "lm/read_arpa.hh"
 
 #include <cstdlib>
 #include <ctype.h>

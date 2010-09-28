@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include "ngram.hh"
+#include "lm/ngram.hh"
 
 #include "LanguageModelKen.h"
 #include "TypeDef.h"

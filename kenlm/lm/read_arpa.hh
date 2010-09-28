@@ -1,10 +1,10 @@
 #ifndef LM_READ_ARPA__
 #define LM_READ_ARPA__
 
-#include "exception.hh"
-#include "weights.hh"
-#include "word_index.hh"
-#include "../util/file_piece.hh"
+#include "lm/lm_exception.hh"
+#include "lm/weights.hh"
+#include "lm/word_index.hh"
+#include "util/file_piece.hh"
 
 #include <cstddef>
 #include <vector>

@@ -1,4 +1,4 @@
-#include "exception_util.hh"
+#include "util/exception.hh"
 
 #include <errno.h>
 #include <string.h>

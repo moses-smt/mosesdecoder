@@ -2,7 +2,7 @@
 #define UTIL_MMAP__
 // Utilities for mmaped files.  
 
-#include "scoped.hh"
+#include "util/scoped.hh"
 
 #include <cstddef>
 

@@ -1,6 +1,6 @@
-#include "exception.hh"
-#include "mmap.hh"
-#include "scoped.hh"
+#include "util/exception.hh"
+#include "util/mmap.hh"
+#include "util/scoped.hh"
 
 #include <assert.h>
 #include <err.h>

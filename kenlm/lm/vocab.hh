@@ -1,11 +1,11 @@
 #ifndef LM_VOCAB__
 #define LM_VOCAB__
 
-#include "virtual_interface.hh"
-#include "../util/key_value_packing.hh"
-#include "../util/probing_hash_table.hh"
-#include "../util/sorted_uniform.hh"
-#include "../util/string_piece.hh"
+#include "lm/virtual_interface.hh"
+#include "util/key_value_packing.hh"
+#include "util/probing_hash_table.hh"
+#include "util/sorted_uniform.hh"
+#include "util/string_piece.hh"
 
 namespace lm {
 

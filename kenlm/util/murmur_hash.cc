@@ -9,7 +9,7 @@
  * default option = 0 for seed
  */
 
-#include "murmur_hash.hh"
+#include "util/murmur_hash.hh"
 
 namespace util {
 

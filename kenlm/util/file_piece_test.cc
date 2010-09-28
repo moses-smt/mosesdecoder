@@ -1,4 +1,4 @@
-#include "file_piece.hh"
+#include "util/file_piece.hh"
 
 #define BOOST_TEST_MODULE FilePieceTest
 #include <boost/test/unit_test.hpp>

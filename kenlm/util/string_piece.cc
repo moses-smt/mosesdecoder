@@ -28,7 +28,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Copied from strings/stringpiece.cc with modifications
 
-#include "../util/string_piece.hh"
+#include "util/string_piece.hh"
 
 #ifdef USE_BOOST
 #include <boost/functional/hash/hash.hpp>

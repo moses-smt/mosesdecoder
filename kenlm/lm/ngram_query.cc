@@ -1,4 +1,4 @@
-#include "ngram.hh"
+#include "lm/ngram.hh"
 
 #include <cstdlib>
 #include <fstream>

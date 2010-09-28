@@ -1,11 +1,11 @@
 #include "ngram.hh"
 
-#include "exception.hh"
-#include "read_arpa.hh"
-#include "../util/file_piece.hh"
-#include "../util/joint_sort.hh"
-#include "../util/murmur_hash.hh"
-#include "../util/probing_hash_table.hh"
+#include "lm/lm_exception.hh"
+#include "lm/read_arpa.hh"
+#include "util/file_piece.hh"
+#include "util/joint_sort.hh"
+#include "util/murmur_hash.hh"
+#include "util/probing_hash_table.hh"
 
 #include <algorithm>
 #include <functional>
