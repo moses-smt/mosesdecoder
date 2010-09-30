@@ -74,6 +74,10 @@ AC_ARG_ENABLE(threads,
             [with_threads=yes]
         )
 
+AC_ARG_ENABLE(boost,
+            [AC_HELP_STRING([--enable-boost], [use Boost library])],
+            [enable_boost=yes]
+        )
 
 AC_ARG_WITH(zlib,
             [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
@@ -99,10 +103,15 @@ else
     CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
 fi
 
+if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes'
+then
+    AC_MSG_NOTICE([Using Boost library])
+    AX_BOOST_BASE([1.35.0])
+fi
+
 if test "x$with_threads" = 'xyes'
 then
     AC_MSG_NOTICE([Building threaded moses])
-    AX_BOOST_BASE([1.35.0])
     AX_BOOST_THREAD
     CPPFLAGS="$CPPFLAGS -DWITH_THREADS" 
     AM_CONDITIONAL([WITH_THREADS],true)
