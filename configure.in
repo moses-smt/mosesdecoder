@@ -106,7 +106,7 @@ fi
 if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes'
 then
     AC_MSG_NOTICE([Using Boost library])
-    AX_BOOST_BASE([1.35.0])
+    AX_BOOST_BASE([1.36.0])
 fi
 
 if test "x$with_threads" = 'xyes'
