@@ -23,9 +23,39 @@
 #include <set>
 #include "QueueEntry.h"
 
+#ifdef HAVE_BOOST
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_set.hpp>
+#include <boost/version.hpp>
+#endif
+
 namespace MosesChart
 {
-	
+
+#ifdef HAVE_BOOST
+class QueueEntryUniqueHasher
+{
+public:
+    size_t operator()(const QueueEntry * p) const
+    {
+        size_t seed = 0;
+        boost::hash_combine(seed, &(p->GetTranslationOption()));
+        boost::hash_combine(seed, p->GetChildEntries());
+        return seed;
+    }
+};
+
+class QueueEntryUniqueEqualityPred
+{
+public:
+    bool operator()(const QueueEntry * p, const QueueEntry * q) const
+    {
+        return ((&(p->GetTranslationOption()) == &(q->GetTranslationOption()))
+                && (p->GetChildEntries() == q->GetChildEntries()));
+    }
+};
+#endif
+
 class QueueEntryUniqueOrderer
 {
 public:
@@ -48,7 +78,13 @@ public:
 class Cube
 {
 protected:	
+#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
+	typedef boost::unordered_set<QueueEntry*,
+                                 QueueEntryUniqueHasher,
+                                 QueueEntryUniqueEqualityPred> UniqueCubeEntry;
+#else
 	typedef std::set<QueueEntry*, QueueEntryUniqueOrderer> UniqueCubeEntry;
+#endif
 	UniqueCubeEntry m_uniqueEntry;
 	
 	typedef std::priority_queue<QueueEntry*, std::vector<QueueEntry*>, QueueEntryScoreOrderer> SortedByScore;

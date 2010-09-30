@@ -86,6 +86,11 @@ public:
 	{ 
 		return GetHypothesis() < compare.GetHypothesis();
 	}
+
+	bool operator==(const ChildEntry & compare) const
+	{ 
+		return GetHypothesis() == compare.GetHypothesis();
+	}
 };
 
 // entry in the cub of 1 trans opt and all the hypotheses that goes with each non term.
@@ -120,5 +125,9 @@ public:
 	bool operator<(const QueueEntry &compare) const;
 	
 };
+
+#ifdef HAVE_BOOST
+std::size_t hash_value(const ChildEntry &);
+#endif
 
 }

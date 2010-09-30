@@ -29,6 +29,10 @@
 #include "../../moses/src/Util.h"
 #include "../../moses/src/WordConsumed.h"
 
+#ifdef HAVE_BOOST
+#include <boost/functional/hash.hpp>
+#endif
+
 using namespace std;
 using namespace Moses;
 
@@ -116,7 +120,14 @@ bool QueueEntry::operator<(const QueueEntry &compare) const
 	return ret;
 }
 
-	
+#ifdef HAVE_BOOST
+std::size_t hash_value(const ChildEntry & entry)
+{
+    boost::hash<const Hypothesis*> hasher;
+    return hasher(entry.GetHypothesis());
+}
+
+#endif
 std::ostream& operator<<(std::ostream &out, const ChildEntry &entry)
 {
 	out << *entry.GetHypothesis();
