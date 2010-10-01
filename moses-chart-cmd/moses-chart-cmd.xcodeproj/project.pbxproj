@@ -15,7 +15,6 @@
 		1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */; };
 		1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */; };
 		1ED8B842124B98A60030CCF4 /* libkenlm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E60D2A212496B1900D15873 /* libkenlm.a */; };
-		8DD76F6A0486A84900D96B5E /* moses-chart-cmd.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,7 +83,6 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				8DD76F6A0486A84900D96B5E /* moses-chart-cmd.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -104,7 +102,6 @@
 		1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* moses-chart-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-chart-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = "moses-chart-cmd.1"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,7 +191,6 @@
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
-				C6859E8B029090EE04C91782 /* moses-chart-cmd.1 */,
 			);
 			name = Documentation;
 			sourceTree = "<group>";
@@ -343,6 +339,7 @@
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 					../kenlm/lm,
+					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -353,6 +350,7 @@
 					"-lflm",
 					"-llattice",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 			};
@@ -370,6 +368,7 @@
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 					../kenlm/lm,
+					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -380,6 +379,7 @@
 					"-lflm",
 					"-llattice",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 			};

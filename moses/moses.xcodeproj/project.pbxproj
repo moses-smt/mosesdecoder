@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */; };
+		1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */; };
 		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
 		1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED00035124BC2690029177F /* ChartTranslationOption.h */; };
 		1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */; };
@@ -224,6 +226,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
+		1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
 		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
 		1ED00035124BC2690029177F /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
 		1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
@@ -467,6 +471,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */,
+				1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */,
 				1ED00034124BC2690029177F /* ChartTranslationOption.cpp */,
 				1ED00035124BC2690029177F /* ChartTranslationOption.h */,
 				1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */,
@@ -839,6 +845,7 @@
 				1ED0FF02124BB9380029177F /* XmlOption.h in Headers */,
 				1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */,
 				1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */,
+				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -986,6 +993,7 @@
 				1ED0FF01124BB9380029177F /* XmlOption.cpp in Sources */,
 				1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */,
 				1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */,
+				1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1029,13 +1037,16 @@
 					LM_IRST,
 					LM_INTERNAL,
 					LM_KEN,
+					LM_IRST,
+					LM_RAND,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,
 					../srilm/include,
-					../kenlm/lm,
+					../kenlm,
+					../randlm/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
@@ -1054,13 +1065,16 @@
 					LM_IRST,
 					LM_INTERNAL,
 					LM_KEN,
+					LM_IRST,
+					LM_RAND,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,
 					../srilm/include,
-					../kenlm/lm,
+					../kenlm,
+					../randlm/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;

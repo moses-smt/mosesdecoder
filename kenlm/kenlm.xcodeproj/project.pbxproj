@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E37EBBD12496A6200C1C73A /* exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E37EBBB12496A6200C1C73A /* exception.cc */; };
-		1E37EBBE12496A6200C1C73A /* exception.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E37EBBC12496A6200C1C73A /* exception.hh */; };
+		1E2B85C412555DB1000770D6 /* lm_exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B85C112555DB1000770D6 /* lm_exception.cc */; };
+		1E2B85C512555DB1000770D6 /* lm_exception.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E2B85C212555DB1000770D6 /* lm_exception.hh */; };
 		1E37EBC112496A7D00C1C73A /* ngram.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E37EBBF12496A7D00C1C73A /* ngram.cc */; };
 		1E37EBC212496A7D00C1C73A /* ngram.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E37EBC012496A7D00C1C73A /* ngram.hh */; };
 		1E37EBC712496AB400C1C73A /* virtual_interface.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E37EBC512496AB400C1C73A /* virtual_interface.cc */; };
@@ -16,8 +16,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1E37EBBB12496A6200C1C73A /* exception.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exception.cc; path = lm/exception.cc; sourceTree = "<group>"; };
-		1E37EBBC12496A6200C1C73A /* exception.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exception.hh; path = lm/exception.hh; sourceTree = "<group>"; };
+		1E2B85C112555DB1000770D6 /* lm_exception.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lm_exception.cc; path = lm/lm_exception.cc; sourceTree = "<group>"; };
+		1E2B85C212555DB1000770D6 /* lm_exception.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lm_exception.hh; path = lm/lm_exception.hh; sourceTree = "<group>"; };
 		1E37EBBF12496A7D00C1C73A /* ngram.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram.cc; path = lm/ngram.cc; sourceTree = "<group>"; };
 		1E37EBC012496A7D00C1C73A /* ngram.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ngram.hh; path = lm/ngram.hh; sourceTree = "<group>"; };
 		1E37EBC512496AB400C1C73A /* virtual_interface.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = virtual_interface.cc; path = lm/virtual_interface.cc; sourceTree = "<group>"; };
@@ -49,12 +49,12 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E2B85C112555DB1000770D6 /* lm_exception.cc */,
+				1E2B85C212555DB1000770D6 /* lm_exception.hh */,
 				1E37EBC512496AB400C1C73A /* virtual_interface.cc */,
 				1E37EBC612496AB400C1C73A /* virtual_interface.hh */,
 				1E37EBBF12496A7D00C1C73A /* ngram.cc */,
 				1E37EBC012496A7D00C1C73A /* ngram.hh */,
-				1E37EBBB12496A6200C1C73A /* exception.cc */,
-				1E37EBBC12496A6200C1C73A /* exception.hh */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -81,9 +81,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E37EBBE12496A6200C1C73A /* exception.hh in Headers */,
 				1E37EBC212496A7D00C1C73A /* ngram.hh in Headers */,
 				1E37EBC812496AB400C1C73A /* virtual_interface.hh in Headers */,
+				1E2B85C512555DB1000770D6 /* lm_exception.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,9 +129,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E37EBBD12496A6200C1C73A /* exception.cc in Sources */,
 				1E37EBC112496A7D00C1C73A /* ngram.cc in Sources */,
 				1E37EBC712496AB400C1C73A /* virtual_interface.cc in Sources */,
+				1E2B85C412555DB1000770D6 /* lm_exception.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +171,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/Users/hieuhoang/workspace/sourceforge/trunk/kenlm,
+					/usr/local/include,
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
@@ -184,6 +188,10 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/Users/hieuhoang/workspace/sourceforge/trunk/kenlm,
+					/usr/local/include,
+				);
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
 			};

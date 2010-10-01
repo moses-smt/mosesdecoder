@@ -56,7 +56,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1E4FC4861251FFBF00FB0D9D /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = CreateOnDisk; path = build/Debug/CreateOnDisk; sourceTree = "<group>"; };
+		1E4FC4861251FFBF00FB0D9D /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
 		1ED4FB4911BDBAA7004E826A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
 		1ED4FB4A11BDBAA7004E826A /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
 		1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -233,6 +233,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../randlm/lib,
 					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
@@ -244,6 +245,7 @@
 					"-lflm",
 					"-llattice",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};
@@ -259,6 +261,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../randlm/lib,
 					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
@@ -270,6 +273,7 @@
 					"-lflm",
 					"-llattice",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};

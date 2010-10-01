@@ -272,6 +272,7 @@
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 					../kenlm/lm,
+					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -281,6 +282,7 @@
 					"-lz",
 					"-lirstlm",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -309,6 +311,7 @@
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 					../kenlm/lm,
+					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -318,6 +321,7 @@
 					"-lz",
 					"-lirstlm",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -338,6 +342,7 @@
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
 					../kenlm/lm,
+					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -347,6 +352,7 @@
 					"-lz",
 					"-lirstlm",
 					"-lkenlm",
+					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
