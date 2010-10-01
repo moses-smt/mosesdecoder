@@ -225,8 +225,6 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 																			 , const std::string &factorDelimiter
 																			 , Word &lhs)
 {
-	m_arity = 0;
-	
 	// parse
 	vector<string> annotatedWordVector;
 	Tokenize(annotatedWordVector, phraseString);
@@ -249,8 +247,6 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 				annotatedWord = annotatedWord.substr(1, nextPos - 2);
 			else
 				annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
-			
-			m_arity++;
 		}
 		else
 		{
