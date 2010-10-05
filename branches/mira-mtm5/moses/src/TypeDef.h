@@ -92,6 +92,10 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #    define LM_RAND 1
 #  endif
 
+#  ifdef HAVE_KENLM
+#    define LM_KEN 1
+#  endif
+	
 #endif
 /////////////////////////////////////////////////
 
@@ -152,7 +156,7 @@ enum LMImplementation
 	,RandLM 	= 5
 	,Remote 	= 6
 	,ParallelBackoff	= 7
-
+	,Ken			= 8
 };
 
 enum PhraseTableImplementation

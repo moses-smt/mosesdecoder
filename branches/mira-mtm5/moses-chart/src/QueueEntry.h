@@ -33,6 +33,7 @@
 namespace Moses
 {
 	class WordConsumed;
+	class ChartTranslationOption;
 	extern bool g_debug;
 };
 
@@ -41,7 +42,6 @@ namespace MosesChart
 
 class TranslationOptionCollection;
 class TranslationOptionList;
-class TranslationOption;
 class ChartCell;
 class ChartCellCollection;
 class QueueEntry;
@@ -86,6 +86,11 @@ public:
 	{ 
 		return GetHypothesis() < compare.GetHypothesis();
 	}
+
+	bool operator==(const ChildEntry & compare) const
+	{ 
+		return GetHypothesis() == compare.GetHypothesis();
+	}
 };
 
 // entry in the cub of 1 trans opt and all the hypotheses that goes with each non term.
@@ -93,23 +98,22 @@ class QueueEntry
 {
 	friend std::ostream& operator<<(std::ostream&, const QueueEntry&);
 protected:
-	const TranslationOption &m_transOpt;
+	const Moses::ChartTranslationOption &m_transOpt;
 	std::vector<ChildEntry> m_childEntries;
 
 	float m_combinedScore;
 
 	QueueEntry(const QueueEntry &copy, size_t childEntryIncr);
-	bool CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells);
+	void CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells);
 
 	void CalcScore();
 
 public:
-	QueueEntry(const TranslationOption &transOpt
-						, const ChartCellCollection &allChartCells
-						, bool &isOK);
+	QueueEntry(const Moses::ChartTranslationOption &transOpt
+						, const ChartCellCollection &allChartCells);
 	~QueueEntry();
 
-	const TranslationOption &GetTranslationOption() const
+	const Moses::ChartTranslationOption &GetTranslationOption() const
 	{ return m_transOpt; }
 	const std::vector<ChildEntry> &GetChildEntries() const
 	{ return m_childEntries; }
@@ -121,5 +125,9 @@ public:
 	bool operator<(const QueueEntry &compare) const;
 	
 };
+
+#ifdef HAVE_BOOST
+std::size_t hash_value(const ChildEntry &);
+#endif
 
 }

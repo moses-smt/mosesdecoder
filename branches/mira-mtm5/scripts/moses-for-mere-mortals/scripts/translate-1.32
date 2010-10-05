@@ -1,0 +1,453 @@
+#!/usr/bin/env bash
+# translate-1.32
+# copyright 2010 João L. A. C. Rosas
+# date: 11/09/2010
+# licenced under the GPL licence, version 3
+# the Mosesdecoder (http://sourceforge.net/projects/mosesdecoder/), is a tool upon which this script depends that is licenced under the GNU Library or Lesser General Public License (LGPL)
+# The comments transcribe parts of the Moses manual (http://www.statmt.org/moses/manual/manual.pdf).
+# Special thanks to Hilário Leal Fontes and Maria José Machado, who helped to test the script and made very helpful suggestions
+
+# ***Purpose***: Given a set of documents for translation in $mosesdir/translation_input, this script produces the Moses translation of that set of documents. If its $translate_for_tmx parameter is set to 1, it segments better the input file, erases empty and repeated segments and some types of segments containing just non-alphabetic characters and produces a translation adapted to the TMX specification of translation memories. The modified input file and its translation are placed in the $mosesdir/files_for_tmx directory. If the $translate_for_tmx is set to a value different from 1, this script translates the unchanged input document and its translation is placed in the $mosesdir/translation_output directory.
+
+############################################################################################################################################
+# THIS SCRIPT ASSUMES THAT A IRSTLM AND RANDLM ENABLED MOSES HAS ALREADY BEEN INSTALLED WITH the create script IN $mosesdir, WHOSE         #
+# DEFAULT VALUE IS $HOME/moses-irstlm-randlm; CHANGE THIS VARIABLE IF YOU WANT IT TO REFER TO A DIFFERENT LOCATION.                        #
+# IT ALSO ASSUMES THAT THE TRAINING OF A CORPUS HAS ALREADY BEEN DONE WITH THE train script.                                               #
+# IT FINALLY ASSUMES THAT YOU HAVE PLACED THE DOCUMENTS TO BE TRANSLATED IN THE $mosesdir/translation_input DIRECTORY                      #
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                             #
+# !!! The names of the files to be translated should not include spaces !!!                                                                #
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                             #
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                             #
+# The names of the files to be translated MUST observe the following convention:                                                           #
+#		<basename>.<abbreviation of source language>      (ex: 100.en)				                                   #
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                             #
+############################################################################################################################################
+
+############################################################################################################################################
+# The values of the variables that follow should be filled according to your needs:                                                        #
+############################################################################################################################################
+
+#Full path of the base directory location of your Moses system 
+mosesdir=$HOME/moses-irstlm-randlm
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Even if you are using the demonstration corpus, you have to fill the $logfile parameter so that the script can be executed !!! 
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Name of the log file of the corpus to be used (time-saving tip: copy and paste it here; the default directory of the log files is $mosesdir/logs); example of a possible name of a log file: pt-en.C-200000.for_train-60-1.LM-300000.MM-1.day-18-01-10-time-14-08-50.txt) (!!! omit the path !!!; you MUST fill in this parameter !!!)
+logfile=
+#Create a translation report when translations are finished; 1 = Do; Any other value = Do not
+create_translation_report=1
+
+#-----------------------------------------------------*** TMX OPTIONS  ***---------------------------------------------------------------------------------
+
+#Process both the document to be translated and the Moses translation so that the machine translation can be used with a translation memory tool
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#!!! If you set this parameter to 1, you MUST NOT use the score script unless the $othercleanings, $improvesegmentation and $ removeduplicates parameters are all set to 0 and $minseglen is set to -1, since this processing changes the order of the segments and can also make the source document have a number of segments that is different from the number of segments of the reference translation (namely because it can delete some segments and/or add some new ones) !!!
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+translate_for_tmx=0
+#Minimal length of sentences; -1=any length; any other value=segments with less than $minseglen will be erased ( !!! only active if translate_for_tmx =1 !!!)
+minseglen=-1
+#Substitute tabulation signs by newlines and remove lines composed only of digits, spaces and parentheses ( !!! only active if translate_for_tmx = 1 !!!)
+othercleanings=1
+# Substitute any of the characters [:;.!?] followed by a space by that character followed by a newline; delete empty lines; substitute doublespaces by one space ( !!! only active if translate_for_tmx = 1 !!!)
+improvesegmentation=1
+#Sort segments and remove those segments that are identical ( !!! only active if translate_for_tmx =1 !!! )
+removeduplicates=1
+
+#-----------------------------------------------------*** MOSES DECODER PARAMETERS  ***--------------------------------------------------------------------
+
+#***** QUALITY TUNING:
+# Weights for phrase translation table (good values: 0.1-1; default: 1); ensures that the phrases are good translations of each other
+weight_t=1
+# Weights for language model (good values: 0.1-1; default: 1); ensures that output is fluent in target language
+weight_l=1
+# Weights for reordering model (good values: 0.1-1; default: 1); allows reordering of the input sentence
+weight_d=1
+# Weights for word penalty (good values: -3 to 3; default: 0; negative values favor large output; positive values favour short output); ensures translations do not get too long or too short
+weight_w=0
+#------------------------------------------
+# Use Minumum Bayes Risk (MBR) decoding (1 = Do; Any other value = do not); instead of outputting the translation with the highest probability, MBR decoding outputs the translation that is most similar to the most likely translations.
+mbr=0
+# Number of translation candidates consider. MBR decoding uses by default the top 200 distinct candidate translations to find the translation with minimum Bayes risk
+mbrsize=200
+# Scaling factor used to adjust the translation scores (default = 1.0)
+mbrscale=1.0
+# Adds walls around punctuation ,.!?:;". 1= Do; Any other value = do not. Specifying reordering constraints around punctuation is often a good idea. TODO not sure it does not require annotation of the corpus to be trained
+monotoneatpunctuation=0
+#***** SPEED TUNING:
+# Fixed limit for how many translation options are retrieved for each input phrase (0 = no limit; positive value = number of translation options per phrase)
+ttablelimit=20
+# Use the relative scores of hypothesis for pruning, instead of a fixed limit (0= no pruning; decimal value = more pruning)
+beamthreshold=0
+# Threshold for constructing hypotheses based on estimate cost (default: 0 = not used). During the beam search, many hypotheses are created that are too bad to be even entered on a stack. For many of them, it is even clear before the construction of the hypothesis that it would be not useful. Early discarding of such hypotheses hazards a guess about their viability. This is based on correct score except for the actual language model costs which are very expensive to compute. Hypotheses that, according to this estimate, are worse than the worst hypothesis of the target stack, even given an additional specified threshold as cushion, are not constructed at all. This often speeds up decoding significantly. Try threshold factors between 0.5 and 1
+earlydiscardingthreshold=0
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#To get faster performance than the default Moses setting at roughly the same performance, use the parameter settings $searchalgorithm=1, $cubepruningpoplimit=2000 and $stack=2000. With cube pruning, the size of the stack has little impact on performance, so it should be set rather high. The speed/quality trade-off is mostly regulated by the -cube-pruning-pop-limit, i.e. the number of hypotheses added to each stack
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+# Search algorithm; cube pruning is faster than the traditional search at comparable levels of search errors; 0 = default; 1 = turns on cube pruning
+searchalgorithm=0
+# Number of hypotheses added to each stack; only a fixed number of hypotheses are generated for each span; default is 1000, higher numbers slow down the decoder, may result in better quality
+cubepruningpoplimit=1000
+# Reduce size of hypothesis stack, that keeps the best partial translations (=beam); default: 100
+stack=100
+# Maximum phrase length (default: 20) TODO not sure to what it refers
+maxphraselength=20
+# ****** SPEED AND QUALITY TUNING
+# Minimum number of hypotheses from each coverage pattern; you may also require that a minimum number of hypotheses is added for each word coverage (they may be still pruned out, however). This is done using the switch -cube-pruning-diversity, which sets the minimum. The default is 0
+cubepruningdiversity=0
+# Distortion (reordering) limit in maximum number of words (0 = monotone; -1 = unlimited ; any other positive value = maximal number of words; default:6)); limiting distortion often increases speed and quality
+distortionlimit=6
+
+############################################################################################################################################
+#end of parameters that you should fill                                                                                                    #
+############################################################################################################################################
+
+
+############################################################################################################################################
+# DON'T CHANGE THE LINES THAT FOLLOW ... unless you know what you are doing!                                                               #
+############################################################################################################################################
+startdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+echo "********************************** DO PREPARATORY WORK:"
+
+#to avoid *** glibc detected *** errors with moses compiler
+export MALLOC_CHECK_=0
+
+if [ "$logfile" = "" ]; then
+	echo "In order to use this script, you have to at least fill its \$logfile parameter. Its allowable values are the names of the files located in $mosesdir/logs. You should also not forget to put the files to be translated in the $mosesdir/translation_input directory. Exiting ..."
+	exit 0
+fi
+
+echo "****** Set some important directories"
+#Base directory of corpora training logfiles
+logdir=$mosesdir/logs
+#Name of the directory where files to be translated are placed by the user
+docs_to_translate_dir="$mosesdir/translation_input"
+#Name of the directory where reference (man-made) translated files are located
+translation_reference_dir="$mosesdir/translation_reference"
+#Name of the directory where translated files not to be used to create TMX files are placed 
+translated_docs_dir="$mosesdir/translation_output"
+#Name of the directory where translated files used to create a TMX memory are placed (both source and target segments will be placed there)
+commonplacefortmx="$mosesdir/translation_files_for_tmx"
+if [ "$translate_for_tmx" = "1" ]; then
+	outputdir=$commonplacefortmx
+else
+	outputdir=$translated_docs_dir
+fi
+#Full path of the trained corpus files directory
+workdir=$mosesdir/corpora_trained
+#Full path of the tools (Moses, etc.) directory
+toolsdir=$mosesdir/tools
+stampdate=`date +day-%d-%m-%y-time-%H-%M-%S`
+#Full path of a temporary directory used for translating
+tmp=$mosesdir/$stampdate
+
+echo "check that log file exists"
+if [ ! -f $logdir/$logfile ]; then
+	echo "The log file you are trying to use ($logdir/$logfile) does not exist (please check). You may be using a log file of a previous training that you have already moved or erased. Exiting ..."
+	exit 0
+fi
+
+if `echo ${logfile} | grep "!!!INVALID!!!" 1>/dev/null 2>&1`; then
+	echo "The log file you are trying to use ($logdir/$logfile) points to a deficiently trained corpus. Exiting ..."
+	exit 0
+fi
+
+echo "****** Set some important variables"
+#Extract first language name
+lang1=`grep lang1 $logdir/$logfile | sed -e 's/.*lang1=\(\S*\).*/\1/g'`
+#Extract second language name
+lang2=`grep lang2 $logdir/$logfile | sed -e 's/.*lang2=\(\S*\).*/\1/g'`
+#Extract corpus name
+corpusbasename=`grep corpusbasename $logdir/$logfile | sed -e 's/.*corpusbasename=\(\S*\).*/\1/g'`
+#Extract language parameters
+lngmdlparameters=`grep language-model-parameters $logdir/$logfile | sed -e 's/.*language-model-parameters=\(\S*\).*/\1/g'`
+#Extract LM name
+lmbasenametemp=${lngmdlparameters#LM-*}
+lmbasename=${lmbasenametemp%%-*}
+#Extract training parameters
+trainingparameters=`grep training-parameters $logdir/$logfile | sed -e 's/\/*training-parameters=\(\S*\)*$/\1/g'`
+#Extract memorymapping parameters
+mm=`grep memory-mapping-parameters $logdir/$logfile | sed -e 's/\/*memory-mapping-parameters=\(\S*\)*$/\1/g'`
+param=`grep memory-mapping-extra-parameters $logdir/$logfile | sed -e 's/\/*memory-mapping-extra-parameters=\(\S*\)*$/\1/g'`
+tuningparameters=`grep tuning-parameters $logdir/$logfile | sed -e 's/\/*tuning-parameters=\(\S*\)*$/\1/g'`
+if [ "$tuningparameters" != "Tu-0" ]; then
+	tuning=1
+else
+	tuning=0
+fi
+#Extract $MinLen parameter
+MinLen=`grep minseglen $logdir/$logfile | sed -e 's/\/*minseglen=\(\S*\)*$/\1/g'`
+#Extract $MaxLen parameter
+MaxLen=`grep maxlen $logdir/$logfile | sed -e 's/\/*maxlen=\(\S*\)*$/\1/g'`
+#Extract $recaserbasename parameter
+recaserbasename=`grep recaserbasename $logdir/$logfile | sed -e 's/\/*recaserbasename=\(\S*\)*$/\1/g'`
+reportname="translation_summary-`date +day-%d-%m-%y-time-%H-%M-%S`"
+
+echo "****** Build name of directories where training files are located"
+#Full path of the tools directory (giza, irstlm, moses, scripts, ...)
+toolsdir="$mosesdir/tools"
+#Full path of the tools subdirectory where modified scripts are located
+modifiedscriptsdir="$toolsdir/modified-scripts"
+#Full path of the files used for training (corpus, language model, recaser, tuning, evaluation) 
+datadir="$mosesdir/corpora_for_training"
+#Full path of the training logs 
+logsdir="$mosesdir/logs"
+#Full path of the base directory where your corpus will be processed (corpus, model, lm, evaluation, recaser)
+workdir="$mosesdir/corpora_trained"
+#Full path of the language model directory
+lmdir="$workdir/lm/$lang2/$lngmdlparameters"
+#Full path of the tokenized files directory
+tokdir="$workdir/tok"
+#Full path of the cleaned files directory
+cleandir="$workdir/clean/MinLen-$MinLen.MaxLen-$MaxLen"
+#Full path of the lowercased (after cleaning) files directory
+lc_clean_dir="$workdir/lc_clean/MinLen-$MinLen.MaxLen-$MaxLen"
+#Full path of the lowercased (and not cleaned) files directory
+lc_no_clean_dir="$workdir/lc_no_clean"
+#Full path of the trained corpus files directory
+modeldir="$workdir/model/$lang1-$lang2-$corpusbasename.$lngmdlparameters/$trainingparameters"
+#Root-dir parameter of Moses
+rootdir=$modeldir
+#Full path of the memory-mapped files directory
+memmapsdir="$workdir/memmaps/$lang1-$lang2-$corpusbasename.$lngmdlparameters/$trainingparameters"
+if [ "$mm" = "1" ]; then
+	mmparameters="M-1"
+else
+	mmparameters="M-0"
+fi
+#Full path of the recaser files directory
+recaserdir="$workdir/recaser/$lang2/$recaserbasename-IRSTLM"
+#Full path of the detokenized files directory
+detokdir="$workdir/detok/$lang2/$testbasename"
+#Full path of the tuning files directory
+tuningdir="$workdir/tuning/$lang1-$lang2-$corpusbasename.$lngmdlparameters.$mmparameters.$tuningparameters/$trainingparameters"
+
+#Choose the moses.ini file that best reflects the type of training done
+echo "using $mosesinidir"
+if [ "$tuning" = "1" ]; then
+	mosesinidir=$tuningdir/moses.weight-reused.ini
+elif [ "$mm" = "1" ]; then
+	mosesinidir=$memmapsdir/moses.ini
+else
+	mosesinidir=$modeldir/moses.ini
+fi
+
+echo "****** Create auxiliary routines"
+#function that avoids some unwanted effects of interrupting training
+control_c() {
+	echo "******* Script interrupted by CTRL + C."
+	exit 0
+}
+trap control_c SIGINT
+
+#function that checks whether a trained corpus exists already
+checktrainedcorpusexists() {
+	if [ ! -f $lmdir/$lang2.$lngmdlparameters.blm.mm -a ! -f $lmdir/$lang2.$lngmdlparameters.BloomMap ]; then
+		echo "The trained corpus you are trying to use ($logdir/$logfile) wasn't correctly trained or does not exist. Its language model (for instance, file $lmdir/$lang2.$lngmdlparameters.blm.mm ***or** file $lmdir/$lang2.$lngmdlparameters.BloomMap) does not exist. Please train or retrain it, or use another trained corpus. Exiting ..."
+		exit 0
+	fi
+	if [ ! -f $recaserdir/phrase-table.$lang2.$recaserbasename.binphr.tgtvoc ]; then
+		echo "The trained corpus you are trying to use ($logdir/$logfile) wasn't correctly trained or does not exist. Its recaser training (for instance, file $recaserdir/phrase-table.$lang2.$recaserbasename.binphr.tgtvoc) does not exist. Please train or retrain it, or use another trained corpus. Exiting ..."
+		exit 0
+	fi
+	if [ ! -f $mosesinidir -o ! -d $modeldir ]; then
+		echo "The trained corpus you are trying to use ('$logdir/$logfile') wasn't correctly trained or does not exist. Its moses.ini file ($mosesinidir) ***or*** its training model directory ($modeldir) does not exist. Please train or retrain it, or use another trained corpus. Exiting ..."
+		exit 0
+	fi
+	if [ ! -f $memmapsdir/reordering-table.$corpusbasename.$lang1-$lang2.$param.binlexr.srctree ]; then
+		echo "The trained corpus you are trying to use ($logdir/$logfile) wasn't correctly trained. You have chosen to train it with memory-mapping and the memory-mapping files (for instance, $memmapsdir/reordering-table.$corpusbasename.$lang1-$lang2.$param.binlexr.srctree) do not exist. Please train or retrain it, or use another trained corpus. Exiting ..."
+		exit 0
+	fi
+}
+
+echo "****** Check that selected training is OK"
+checktrainedcorpusexists
+
+echo "****** Create some necessary directories if they do not yet exist"
+if [ ! -d $commonplacefortmx ]; then mkdir -p $commonplacefortmx; fi
+
+if [ ! -d $docs_to_translate_dir ]; then
+	mkdir -p $docs_to_translate_dir
+	echo "You need to put the file(s) you want to translate in the $docs_to_translate_dir directory."
+	exit 0
+fi
+
+if [ ! -d $translated_docs_dir ]; then mkdir -p $translated_docs_dir; fi
+
+if [ ! -d $translation_reference_dir ]; then mkdir -p $translation_reference_dir; fi
+
+if [ ! -d $tmp ]; then mkdir -p $tmp; fi
+
+echo "****** Export some important variables"
+#base directory of Moses scripts
+export SCRIPTS_ROOTDIR=$toolsdir/moses/scripts*
+export IRSTLM=$toolsdir/irstlm
+export PATH=$toolsdir/irstlm/bin/i686:$toolsdir/irstlm/bin:$PATH
+export RANDLM=$toolsdir/randlm
+export PATH=$toolsdir/randlm/bin:$PATH
+export PATH=$toolsdir/mgiza:$PATH
+export QMT_HOME=$toolsdir/mgiza
+export corpusbasename
+export lmbasename
+export lang1
+export lang2
+
+echo "********************************** TRANSLATE:"
+numtranslateddocs=0
+if (( $minseglen > 0 )); then
+	let "minseglen -= 1"
+fi
+tmpfilename=`date +day-%d-%m-%y-time-%H-%M-%S`
+#Prepare and translate all the files in $docs_to_translate_dir OR do the demo of this script; present the results in $translated_docs_dir
+for filetotranslate in $docs_to_translate_dir/*; do
+	echo $filetotranslate
+	if [ -f $filetotranslate ]; then
+		echo "********* $filetotranslate"
+		fromdos $filetotranslate
+		tr '\a\b\f\r\v|' '     /' < $filetotranslate > $filetotranslate.tmp
+		mv $filetotranslate.tmp $filetotranslate
+		name=${filetotranslate##*/}
+		if [ ! -f $outputdir/$name.$lang2.moses ]; then
+			if [ "$translate_for_tmx" = "1" ]; then
+				cp $filetotranslate $tmp/$name
+				echo "*** remove segments with less than $minseglen characters"
+				if (( $minseglen > 0 )); then
+					sed "/^.\{1,$minseglen\}$/d" < $tmp/$name > $tmp/$tmpfilename.txt
+					mv $tmp/$tmpfilename.txt $tmp/$name
+				fi
+				echo "*** clean segments with non-alphanumeric characters"
+				if [ "$othercleanings" = "1" ]; then
+					sed "s#\t#\n#g; /^[0-9]\+$/d; /^[0-9.)( ]\+$/d" < $tmp/$name > $tmp/$tmpfilename.txt
+					mv $tmp/$tmpfilename.txt $tmp/$name
+				fi
+				echo "*** improve segmentation"
+				if [ "$improvesegmentation" = "1" ]; then
+					sed "s#\: #\:\n#g; s#\. #.\n#g; s#\; #\;\n#g; s#\! #\!\n#g; s#\? #\?\n#g; s#  # #g; s#  # #g; s#  # #g; s#  # #g; s#  # #g; s#  # #g; s#  # #g; /^$/d; /^$/d; /^$/d; /^$/d; /^$/d; /^$/d; /^ $/d" < $tmp/$name > $tmp/$tmpfilename.txt
+					mv $tmp/$tmpfilename.txt $tmp/$name
+				fi
+				echo "*** sort and then remove duplicates"
+				if [ "$removeduplicates" = "1" ]; then
+					awk '!($0 in a) {a[$0];print}' $tmp/$name > $tmp/$tmpfilename.txt
+					mv $tmp/$tmpfilename.txt $tmp/$name
+				fi
+				cp $tmp/$name $commonplacefortmx
+			fi
+			let "numtranslateddocs += 1"
+			if [ "$translate_for_tmx" = "1" ]; then
+				$toolsdir/scripts/tokenizer.perl -l $lang1 < $tmp/$name > $tmp/$name.tok
+			else
+				$toolsdir/scripts/tokenizer.perl -l $lang1 < $filetotranslate > $tmp/$name.tok
+			fi
+			$toolsdir/scripts/lowercase.perl < $tmp/$name.tok > $tmp/$name.lowercase
+			echo "****** Translate"
+			$toolsdir/moses/moses-cmd/src/moses -f $mosesinidir -weight-t $weight_t -weight-l $weight_l -weight-d $weight_d -weight-w $weight_w -mbr $mbr -mbr-size $mbrsize -mbr-scale $mbrscale -monotone-at-punctuation $monotoneatpunctuation -ttable-limit $ttablelimit -b $beamthreshold -early-discarding-threshold $earlydiscardingthreshold -search-algorithm $searchalgorithm -cube-pruning-pop-limit $cubepruningpoplimit -s $stack -max-phrase-length $maxphraselength -cube-pruning-diversity $cubepruningdiversity -distortion-limit $distortionlimit < $tmp/$name.lowercase > $tmp/$name.$lang2
+			if [ -f $recaserdir/moses.ini ]; then
+				echo "****** Recase the output"
+				$toolsdir/moses/script*/recaser/recase.perl -model $recaserdir/moses.ini -in $tmp/$name.$lang2 -moses $toolsdir/moses/moses-cmd/src/moses > $tmp/$name.$lang2.recased
+				recased=1
+			fi
+			echo "****** Detokenize the output"
+			if [ "$recased" = "1" ]; then
+				$toolsdir/scripts/detokenizer.perl -l $lang2 < $tmp/$name.$lang2.recased > $tmp/$name.$lang2.txt
+			else
+				$toolsdir/scripts/detokenizer.perl -l $lang2 < $tmp/$name.$lang2 > $tmp/$name.$lang2.txt
+			fi
+			if [ "$translate_for_tmx" = "1" ]; then
+				sed "s#<#\&lt\;#g; s#>#\&gt\;#g; s#'#\&apos\;#g; s#\"#\&quot\;#g; s# / #/#g" < $tmp/$name.$lang2.txt > $commonplacefortmx/$name.$lang2.moses
+				sed "s#<#\&lt\;#g; s#>#\&gt\;#g; s#'#\&apos\;#g; s#\"#\&quot\;#g; s# / #/#g" < $tmp/$name > $commonplacefortmx/$name
+			else
+				sed 's# / #/#g; s/\\$/\\ /g' < $tmp/$name.$lang2.txt > $tmp/$name.$lang2.txt1
+				cp -f $tmp/$name.$lang2.txt1 $outputdir/$name.$lang2.moses
+			fi
+		else
+			echo "Document $name has already been translated to $outputdir/$name.$lang2. Translation will not be repeated."
+		fi
+	fi
+done
+#Remove the now superfluous $mosesdir/temp directory
+if [ -d $tmp ]; then
+	rm -rf $tmp
+fi
+if [ "$numtranslateddocs" = "0" ]; then
+	echo "The \$docs_to_translate_dir ($docs_to_translate_dir) has no new documents to be translated. You should place there the documents you want to translate. It should have no subdirectories. Exiting ..."
+	`find $tmp -type d -empty -exec rmdir {} \; 2>/dev/null`
+	exit 0
+fi
+
+
+if [ $create_translation_report -eq 1 ]; then
+	echo "********************************** BUILD TRANSLATION REPORT:"
+	echo "*** Script version ***: translate-1.32" > $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** Duration ***: " >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "Start time:           $startdate" >> $outputdir/$reportname
+	echo "End time:             `date +day:%d/%m/%y-time:%H:%M:%S`" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** Moses base directory ***: $mosesdir" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** Languages*** :" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "Source language: $lang1" >> $outputdir/$reportname
+	echo "Destination language: $lang2" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** Trained corpus used ***:" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	if [[ ${logfile-_} ]]; then	
+		echo "$logfile" >> $outputdir/$reportname
+	fi
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** Translated Files ***:" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	for filetotranslate in $docs_to_translate_dir/*.*; do
+		if [[ ${filetotranslate-_} ]]; then
+			echo "$filetotranslate" >> $outputdir/$reportname
+		fi
+	done
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** TMX parameters ***:" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "translate_for_tmx=$translate_for_tmx" >> $outputdir/$reportname
+	echo "minseglen=$minseglen" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "*** Moses decoder parameters ***:" >> $outputdir/$reportname
+	echo "========================================================================" >> $outputdir/$reportname
+	echo "********** Quality parameters **************" >> $outputdir/$reportname
+	echo "weight-t=$weight_t" >> $outputdir/$reportname
+	echo "weight-l=$weight_l" >> $outputdir/$reportname
+	echo "weight-d=$weight_d" >> $outputdir/$reportname
+	echo "weight-w=$weight_w" >> $outputdir/$reportname
+	echo "mbr=$mbr" >> $outputdir/$reportname
+	echo "mbr-size=$mbrsize" >> $outputdir/$reportname
+	echo "mbr-scale=$mbrscale" >> $outputdir/$reportname
+	echo "monotone-at-punctuation=$monotoneatpunctuation" >> $outputdir/$reportname
+	echo "********** Speed parameters ****************" >> $outputdir/$reportname
+	echo "ttable-limit=$ttablelimit" >> $outputdir/$reportname
+	echo "beam-threshold=$beamthreshold" >> $outputdir/$reportname
+	echo "early-discarding-threshold=$earlydiscardingthreshold" >> $outputdir/$reportname
+	echo "search-algorithm=$searchalgorithm" >> $outputdir/$reportname
+	echo "cube-pruning-pop-limit=$cubepruningpoplimit" >> $outputdir/$reportname
+	echo "stack=$stack" >> $outputdir/$reportname
+	echo "maxphraselength=$maxphraselength" >> $outputdir/$reportname
+	echo "********** Quality and speed parameters ****" >> $outputdir/$reportname
+	echo "cube-pruning-diversity=$cubepruningdiversity" >> $outputdir/$reportname
+	echo "distortion-limit=$distortionlimit" >> $outputdir/$reportname
+fi
+
+`find $tmp -type d -empty -exec rmdir {} \; 2>/dev/null`
+
+echo "Translation finished. The translations and a summary report of the translation are located in the $outputdir directory."
+
+#=================================================================================================================================================
+#Changed in version 1.32
+#=================================================================================================================================================
+# Adaptation to a change in the tofrodos package upon which this script depends
+# Better reactivity to user errors
+#=================================================================================================================================================
+#Changed in version 1.26
+#=================================================================================================================================================
+# Appends to the end of the name of the translated files ".$lang2.moses"
+# Does not translate files already translated
+# Tells user what to do if the $logfile parameter wasn't set
+# Special processing of translated files that will be used with a translation memory tool

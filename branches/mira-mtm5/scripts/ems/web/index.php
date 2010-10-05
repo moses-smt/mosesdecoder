@@ -7,7 +7,14 @@ require("analysis_diff.php");
 require("diff.php");
 
 function head($title) {
-  print "<HTML><HEAD><TITLE>$title</TITLE></HEAD>\n<BODY><H2>$title</H2>\n";
+  print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><title>'.$title.'</title>
+<script language="javascript" src="/javascripts/prototype.js"></script>
+<script language="javascript" src="/javascripts/scriptaculous.js"></script>
+<script language="javascript" src="hierarchical-segmentation.js"></script>
+<link href="hierarchical-segmentation.css" rel="stylesheet" type="text/css">
+</head>
+<body><h2>'.$title."</h2>\n";
 }
 
 if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {

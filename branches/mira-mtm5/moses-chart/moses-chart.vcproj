@@ -168,15 +168,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ChartTranslationOption.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ChartTranslationOptionCollection.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ChartTranslationOptionList.cpp"
 				>
 			</File>
 			<File
@@ -230,15 +222,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ChartTranslationOption.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ChartTranslationOptionCollection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\ChartTranslationOptionList.h"
 				>
 			</File>
 			<File

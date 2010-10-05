@@ -2,14 +2,17 @@
 #define LM_NGRAM__
 
 #include "lm/facade.hh"
+#include "lm/ngram_config.hh"
+#include "lm/vocab.hh"
+#include "lm/weights.hh"
+#include "util/key_value_packing.hh"
+#include "util/mmap.hh"
 #include "util/probing_hash_table.hh"
+#include "util/scoped.hh"
 #include "util/sorted_uniform.hh"
 #include "util/string_piece.hh"
-#include "util/murmur_hash.hh"
-#include "util/scoped.hh"
 
 #include <algorithm>
-#include <memory>
 #include <vector>
 
 namespace util { class FilePiece; }
@@ -38,99 +41,65 @@ class State {
     }
 
     // You shouldn't need to touch anything below this line, but the members are public so FullState will qualify as a POD.  
-    unsigned char valid_length_;
-    float backoff_[kMaxOrder - 1];
+    // This order minimizes total size of the struct if WordIndex is 64 bit, float is 32 bit, and alignment of 64 bit integers is 64 bit.  
     WordIndex history_[kMaxOrder - 1];
+    float backoff_[kMaxOrder - 1];
+    unsigned char valid_length_;
 };
 
-inline size_t hash_value(const State &state) {
-  // If the histories are equal, so are the backoffs.  
-  return MurmurHash64A(state.history_, sizeof(WordIndex) * state.valid_length_, 0);
-}
+size_t hash_value(const State &state);
+
+// TODO(hieuhoang1972): refactor language models to keep arbitrary state, not a void* pointer.  Then use FullScore like good people do.  For now, you get a stateless interface.  
+struct HieuShouldRefactorMoses {
+  float prob;
+  unsigned char ngram_length;
+  void *meaningless_unique_state;
+};
 
 namespace detail {
+
 // std::identity is an SGI extension :-(
 struct IdentityHash : public std::unary_function<uint64_t, size_t> {
-size_t operator()(uint64_t arg) const { return static_cast<size_t>(arg); }
+  size_t operator()(uint64_t arg) const { return static_cast<size_t>(arg); }
 };
 
-template <class Search> class GenericVocabulary : public base::Vocabulary {
-  public:
-    GenericVocabulary();
-
-    WordIndex Index(const StringPiece &str) const {
-      const WordIndex *ret;
-      return lookup_.Find(Hash(str), ret) ? *ret : kNotFound;
-    }
-
-    static size_t Size(const typename Search::Init &search_init, std::size_t entries) {
-      return Lookup::Size(search_init, entries);
-    }
-
-    /* This class forces unknown to zero.  The constructor starts vocab ids
-     * after this value.  The present hash function maps any string of 0s to 0.
-     * But that's fine because we never lookup a string of <unk>.  In short,
-     * don't change this.  
-     */
-    const static WordIndex kNotFound = 0;
-
-    // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
-    void Init(const typename Search::Init &search_init, char *start, std::size_t entries);
-
-    WordIndex Insert(const StringPiece &str);
-
-    void FinishedLoading();
-
+// Should return the same results as SRI.  
+// Why VocabularyT instead of just Vocabulary?  ModelFacade defines Vocabulary.  
+template <class Search, class VocabularyT> class GenericModel : public base::ModelFacade<GenericModel<Search, VocabularyT>, State, VocabularyT> {
   private:
-    static uint64_t Hash(const StringPiece &str) {
-      // This proved faster than Boost's hash in speed trials: total load time Murmur 67090000, Boost 72210000
-      return MurmurHash64A(str.data(), str.length(), 0);
-    }
-
-    typedef typename Search::template Table<WordIndex>::T Lookup;
-    Lookup lookup_;
-
-    // Safety check to ensure we were provided with all the expected entries.  
-    std::size_t expected_available_;
-
-    // These could be static if I trusted the static initialization fiasco.
-    const uint64_t hash_unk_, hash_unk_cap_;
-};
-
-struct Prob {
-  float prob;
-  void SetBackoff(float to);
-  void ZeroBackoff() {}
-};
-// No inheritance so this will be a POD.  
-struct ProbBackoff {
-  float prob;
-  float backoff;
-  void SetBackoff(float to) { backoff = to; }
-  void ZeroBackoff() { backoff = 0.0; }
-};
-
-// Should return the same results as SRI except ln instead of log10
-template <class Search> class GenericModel : public base::ModelFacade<GenericModel<Search>, State, GenericVocabulary<Search> > {
-  private:
-    typedef base::ModelFacade<GenericModel<Search>, State, GenericVocabulary<Search> > P;
+    typedef base::ModelFacade<GenericModel<Search, VocabularyT>, State, VocabularyT> P;
   public:
     // Get the size of memory that will be mapped given ngram counts.  This
     // does not include small non-mapped control structures, such as this class
     // itself.  
-    static size_t Size(const typename Search::Init &search_init, const std::vector<size_t> &counts);
+    static size_t Size(const std::vector<size_t> &counts, const Config &config = Config());
 
-    GenericModel(const char *file, const typename Search::Init &init);
+    GenericModel(const char *file, Config config = Config());
 
     FullScoreReturn FullScore(const State &in_state, const WordIndex new_word, State &out_state) const;
 
+    /* Slower but stateless call.  Don't use this if you can avoid it.  This
+     * is mostly a hack for Hieu to integrate it into Moses which is currently
+     * unable to handle arbitrary LM state.  Sigh. 
+     * The word indices should be in an array.  *begin is the earliest word of context.
+     * *(end-1) is the word being appended.  
+     */
+    HieuShouldRefactorMoses SlowStatelessScore(const WordIndex *begin, const WordIndex *end) const;
+
   private:
-    void LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts);
+    float SlowBackoffLookup(const WordIndex *const begin, const WordIndex *const end, unsigned char start) const;
+
+    // Appears after Size in the cc file.
+    void SetupMemory(char *start, const std::vector<size_t> &counts, const Config &config);
+
+    void LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts, const Config &config);
+
+    util::scoped_fd mapped_file_;
 
     // memory_ is the raw block of memory backing vocab_, unigram_, [middle.begin(), middle.end()), and longest_.  
     util::scoped_mmap memory_;
     
-    GenericVocabulary<Search> vocab_;
+    VocabularyT vocab_;
 
     ProbBackoff *unigram_;
 
@@ -143,26 +112,35 @@ template <class Search> class GenericModel : public base::ModelFacade<GenericMod
 
 struct ProbingSearch {
   typedef float Init;
+
+  static const unsigned char kBinaryTag = 1;
+
   template <class Value> struct Table {
-    typedef util::ProbingMap<uint64_t, Value, IdentityHash> T;
+    typedef util::ByteAlignedPacking<uint64_t, Value> Packing;
+    typedef util::ProbingHashTable<Packing, IdentityHash> T;
   };
 };
 
 struct SortedUniformSearch {
-  typedef util::SortedUniformInit Init;
+  // This is ignored.
+  typedef float Init;
+
+  static const unsigned char kBinaryTag = 2;
+
   template <class Value> struct Table {
-    typedef util::SortedUniformMap<uint64_t, Value> T;
+    typedef util::ByteAlignedPacking<uint64_t, Value> Packing;
+    typedef util::SortedUniformMap<Packing> T;
   };
 };
 
 } // namespace detail
 
 // These must also be instantiated in the cc file.  
-typedef detail::GenericVocabulary<detail::ProbingSearch> Vocabulary;
-typedef detail::GenericModel<detail::ProbingSearch> Model;
+typedef ::lm::ProbingVocabulary Vocabulary;
+typedef detail::GenericModel<detail::ProbingSearch, Vocabulary> Model;
 
-typedef detail::GenericVocabulary<detail::SortedUniformSearch> SortedVocabulary;
-typedef detail::GenericModel<detail::SortedUniformSearch> SortedModel;
+typedef ::lm::SortedVocabulary SortedVocabulary;
+typedef detail::GenericModel<detail::SortedUniformSearch, SortedVocabulary> SortedModel;
 
 } // namespace ngram
 } // namespace lm

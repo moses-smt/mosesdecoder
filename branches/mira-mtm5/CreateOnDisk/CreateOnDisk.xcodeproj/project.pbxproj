@@ -10,7 +10,6 @@
 		1ED4FB4B11BDBAA7004E826A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB4911BDBAA7004E826A /* Main.cpp */; };
 		1ED4FB6011BDBAFB004E826A /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */; };
 		1ED4FB6111BDBB00004E826A /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ED4FB5611BDBAD7004E826A /* libmoses.a */; };
-		8DD76F6A0486A84900D96B5E /* CreateOnDisk.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* CreateOnDisk.1 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,19 +50,17 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				8DD76F6A0486A84900D96B5E /* CreateOnDisk.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1E4FC4861251FFBF00FB0D9D /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
 		1ED4FB4911BDBAA7004E826A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
 		1ED4FB4A11BDBAA7004E826A /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
 		1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
-		8DD76F6C0486A84900D96B5E /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
-		C6859E8B029090EE04C91782 /* CreateOnDisk.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = CreateOnDisk.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,7 +100,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76F6C0486A84900D96B5E /* CreateOnDisk */,
+				1E4FC4861251FFBF00FB0D9D /* CreateOnDisk */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -127,7 +124,6 @@
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
-				C6859E8B029090EE04C91782 /* CreateOnDisk.1 */,
 			);
 			name = Documentation;
 			sourceTree = "<group>";
@@ -152,7 +148,7 @@
 			name = CreateOnDisk;
 			productInstallPath = "$(HOME)/bin";
 			productName = CreateOnDisk;
-			productReference = 8DD76F6C0486A84900D96B5E /* CreateOnDisk */;
+			productReference = 1E4FC4861251FFBF00FB0D9D /* CreateOnDisk */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -237,6 +233,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../randlm/lib,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -246,6 +244,8 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
+					"-lkenlm",
+					"-lrandlm",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};
@@ -261,6 +261,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/i386,
 					../srilm/lib/macosx,
+					../randlm/lib,
+					../kenlm/lm,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -270,6 +272,8 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
+					"-lkenlm",
+					"-lrandlm",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};

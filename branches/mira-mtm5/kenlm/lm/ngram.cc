@@ -1,17 +1,16 @@
-#include "lm/ngram.hh"
+#include "ngram.hh"
 
-#include "lm/arpa_io.hh"
-#include "lm/exception.hh"
+#include "lm/lm_exception.hh"
+#include "lm/read_arpa.hh"
 #include "util/file_piece.hh"
+#include "util/joint_sort.hh"
+#include "util/murmur_hash.hh"
 #include "util/probing_hash_table.hh"
-#include "util/scoped.hh"
-
-#include <boost/lexical_cast.hpp>
-#include <boost/progress.hpp>
 
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <limits>
 #include <string>
 
 #include <cmath>
@@ -25,41 +24,12 @@
 
 namespace lm {
 namespace ngram {
-namespace detail {
 
-// Sadly some LMs have <UNK>.  
-template <class Search> GenericVocabulary<Search>::GenericVocabulary() : hash_unk_(Hash("<unk>")), hash_unk_cap_(Hash("<UNK>")) {}
-
-template <class Search> void GenericVocabulary<Search>::Init(const typename Search::Init &search_init, char *start, std::size_t entries) {
-  lookup_ = Lookup(search_init, start, entries);
-  assert(kNotFound == 0);
-  available_ = kNotFound + 1;
-  // Later if available_ != expected_available_ then we can throw UnknownMissingException.
-  expected_available_ = entries;
+size_t hash_value(const State &state) {
+  return util::MurmurHashNative(state.history_, sizeof(WordIndex) * state.valid_length_);
 }
 
-template <class Search> WordIndex GenericVocabulary<Search>::Insert(const StringPiece &str) {
-  uint64_t hashed = Hash(str);
-  // Prevent unknown from going into the table.  
-  if (hashed == hash_unk_ || hashed == hash_unk_cap_) {
-    return kNotFound;
-  } else {
-    lookup_.Insert(hashed, available_);
-    return available_++;
-  }
-}
-
-template <class Search> void GenericVocabulary<Search>::FinishedLoading() {
-  lookup_.FinishedInserting();
-  const WordIndex *begin, *end;
-  if (!lookup_.Find(Hash("<s>"), begin)) throw BeginSentenceMissingException();
-  if (!lookup_.Find(Hash("</s>"), end)) throw EndSentenceMissingException();
-  if (expected_available_ != available_) {
-    // TODO: command line option for this.  
-    // throw UnknownMissingException();
-  }
-  SetSpecial(*begin, *end, kNotFound, available_);
-}
+namespace {
 
 /* All of the entropy is in low order bits and boost::hash does poorly with
  * these.  Odd numbers near 2^64 chosen by mashing on the keyboard.  There is a
@@ -79,119 +49,173 @@ uint64_t ChainedWordHash(const WordIndex *word, const WordIndex *word_end) {
   return current;
 }
 
-// Special unigram reader because unigram's data structure is different and because we're inserting vocab words.
-template <class Voc> void Read1Grams(util::FilePiece &f, const size_t count, Voc &vocab, ProbBackoff *unigrams) {
-  ReadNGramHeader(f, 1);
-  boost::progress_display progress(count, std::cerr, "Loading 1-grams\n");
-  for (size_t i = 0; i < count; ++i, ++progress) {
-    try {
-      float prob = f.ReadFloat();
-      if (f.get() != '\t')
-        throw FormatLoadException("Expected tab after probability");
-      ProbBackoff &value = unigrams[vocab.Insert(f.ReadDelimited())];
-      value.prob = prob;
-      switch (f.get()) {
-        case '\t':
-          value.SetBackoff(f.ReadFloat());
-          if ((f.get() != '\n')) throw FormatLoadException("Expected newline after backoff");
-          break;
-        case '\n':
-          value.ZeroBackoff();
-          break;
-        default:
-          throw FormatLoadException("Expected tab or newline after unigram");
-      }
-    } catch (const std::exception &f) {
-      throw FormatLoadException("Error reading the " + boost::lexical_cast<std::string>(i) + "th 1-gram.  " + f.what());
-    }
-  }
-  if (f.ReadLine().size()) throw FormatLoadException("Blank line after ngrams not blank");
-  vocab.FinishedLoading();
-}
-
 template <class Voc, class Store> void ReadNGrams(util::FilePiece &f, const unsigned int n, const size_t count, const Voc &vocab, Store &store) {
   ReadNGramHeader(f, n);
-  boost::progress_display progress(count, std::cerr, std::string("Loading ") + boost::lexical_cast<std::string>(n) + "-grams\n");
 
   // vocab ids of words in reverse order
   WordIndex vocab_ids[n];
-  typename Store::Value value;
-  for (size_t i = 0; i < count; ++i, ++progress) {
-    try {
-      value.prob = f.ReadFloat();
-      for (WordIndex *vocab_out = &vocab_ids[n-1]; vocab_out >= vocab_ids; --vocab_out) {
-        *vocab_out = vocab.Index(f.ReadDelimited());
-      }
-      uint64_t key = ChainedWordHash(vocab_ids, vocab_ids + n);
-
-      switch (f.get()) {
-        case '\t':
-          value.SetBackoff(f.ReadFloat());
-          break;
-        case '\n':
-          value.ZeroBackoff();
-          break;
-        default:
-          throw FormatLoadException("Got unexpected delimiter before backoff weight");
-      }
-      store.Insert(key, value);
-    } catch (const std::exception &f) {
-      throw FormatLoadException("Error reading the " + boost::lexical_cast<std::string>(i) + "th " + boost::lexical_cast<std::string>(n) + "-gram." + f.what());
-    }
+  typename Store::Packing::Value value;
+  for (size_t i = 0; i < count; ++i) {
+    ReadNGram(f, n, vocab, vocab_ids, value);
+    uint64_t key = ChainedWordHash(vocab_ids, vocab_ids + n);
+    store.Insert(Store::Packing::Make(key, value));
   }
 
-  if (f.ReadLine().size()) throw FormatLoadException("Blank line after ngrams not blank");
+  if (f.ReadLine().size()) UTIL_THROW(FormatLoadException, "Expected blank line after " << n << "-grams at byte " << f.Offset());
   store.FinishedInserting();
 }
 
-void Prob::SetBackoff(float to) {
-  throw FormatLoadException("Attempt to set backoff " + boost::lexical_cast<std::string>(to) + " for an n-gram with longest order.");
-}
+} // namespace
+namespace detail {
 
-template <class Search> size_t GenericModel<Search>::Size(const typename Search::Init &search_init, const std::vector<size_t> &counts) {
-  if (counts.size() < 2)
-    throw FormatLoadException("This ngram implementation assumes at least a bigram model.");
-  size_t memory_size = GenericVocabulary<Search>::Size(search_init, counts[0]);
-  memory_size += sizeof(ProbBackoff) * counts[0];
+template <class Search, class VocabularyT> size_t GenericModel<Search, VocabularyT>::Size(const std::vector<size_t> &counts, const Config &config) {
+  if (counts.size() > kMaxOrder) UTIL_THROW(FormatLoadException, "This model has order " << counts.size() << ".  Edit ngram.hh's kMaxOrder to at least this value and recompile.");
+  if (counts.size() < 2) UTIL_THROW(FormatLoadException, "This ngram implementation assumes at least a bigram model.");
+  size_t memory_size = VocabularyT::Size(counts[0], config.probing_multiplier);
+  memory_size += sizeof(ProbBackoff) * (counts[0] + 1); // +1 for hallucinate <unk>
   for (unsigned char n = 2; n < counts.size(); ++n) {
-    memory_size += Middle::Size(search_init, counts[n - 1]);
+    memory_size += Middle::Size(counts[n - 1], config.probing_multiplier);
   }
-  memory_size += Longest::Size(search_init, counts.back());
+  memory_size += Longest::Size(counts.back(), config.probing_multiplier);
   return memory_size;
 }
 
-template <class Search> GenericModel<Search>::GenericModel(const char *file, const typename Search::Init &search_init) {
-  util::FilePiece f(file);
+template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::SetupMemory(char *base, const std::vector<size_t> &counts, const Config &config) {
+  char *start = base;
+  size_t allocated = VocabularyT::Size(counts[0], config.probing_multiplier);
+  vocab_.Init(start, allocated, counts[0]);
+  start += allocated;
+  unigram_ = reinterpret_cast<ProbBackoff*>(start);
+  start += sizeof(ProbBackoff) * (counts[0] + 1);
+  for (unsigned int n = 2; n < counts.size(); ++n) {
+    allocated = Middle::Size(counts[n - 1], config.probing_multiplier);
+    middle_.push_back(Middle(start, allocated));
+    start += allocated;
+  }
+  allocated = Longest::Size(counts.back(), config.probing_multiplier);
+  longest_ = Longest(start, allocated);
+  start += allocated;
+  if (static_cast<std::size_t>(start - base) != Size(counts, config)) UTIL_THROW(FormatLoadException, "The data structures took " << (start - base) << " but Size says they should take " << Size(counts, config));
+}
+
+const char kMagicBytes[] = "mmap lm http://kheafield.com/code format version 0\n\0";
+struct BinaryFileHeader {
+  char magic[sizeof(kMagicBytes)];
+  float zero_f, one_f, minus_half_f;
+  WordIndex one_word_index, max_word_index;
+  uint64_t one_uint64;
+
+  void SetToReference() {
+    std::memcpy(magic, kMagicBytes, sizeof(magic));
+    zero_f = 0.0; one_f = 1.0; minus_half_f = -0.5;
+    one_word_index = 1;
+    max_word_index = std::numeric_limits<WordIndex>::max();
+    one_uint64 = 1;
+  }
+};
+
+bool IsBinaryFormat(int fd, off_t size) {
+  if (size == util::kBadSize || (size <= static_cast<off_t>(sizeof(BinaryFileHeader)))) return false;
+  // Try reading the header.  
+  util::scoped_mmap memory(mmap(NULL, sizeof(BinaryFileHeader), PROT_READ, MAP_FILE | MAP_PRIVATE, fd, 0), sizeof(BinaryFileHeader));
+  if (memory.get() == MAP_FAILED) return false;
+  BinaryFileHeader reference_header = BinaryFileHeader();
+  reference_header.SetToReference();
+  if (!memcmp(memory.get(), &reference_header, sizeof(BinaryFileHeader))) return true;
+  if (!memcmp(memory.get(), "mmap lm ", 8)) UTIL_THROW(FormatLoadException, "File looks like it should be loaded with mmap, but the test values don't match.  Was it built on a different machine or with a different compiler?");
+  return false;
+}
+
+std::size_t Align8(std::size_t in) {
+  std::size_t off = in % 8;
+  if (!off) return in;
+  return in + 8 - off;
+}
+
+std::size_t TotalHeaderSize(unsigned int order) {
+  return Align8(sizeof(BinaryFileHeader) + 1 /* order */ + sizeof(uint64_t) * order /* counts */ + sizeof(float) /* probing multiplier */ + 1 /* search_tag */);
+}
+
+void ReadBinaryHeader(const void *from, off_t size, std::vector<size_t> &out, float &probing_multiplier, unsigned char &search_tag) {
+  const char *from_char = reinterpret_cast<const char*>(from);
+  if (size < static_cast<off_t>(1 + sizeof(BinaryFileHeader))) UTIL_THROW(FormatLoadException, "File too short to have count information.");
+  // Skip over the BinaryFileHeader which was read by IsBinaryFormat.  
+  from_char += sizeof(BinaryFileHeader);
+  unsigned char order = *reinterpret_cast<const unsigned char*>(from_char);
+  if (size < static_cast<off_t>(TotalHeaderSize(order))) UTIL_THROW(FormatLoadException, "File too short to have full header.");
+  out.resize(static_cast<std::size_t>(order));
+  const uint64_t *counts = reinterpret_cast<const uint64_t*>(from_char + 1);
+  for (std::size_t i = 0; i < out.size(); ++i) {
+    out[i] = static_cast<std::size_t>(counts[i]);
+  }
+  const float *probing_ptr = reinterpret_cast<const float*>(counts + out.size());
+  probing_multiplier = *probing_ptr;
+  search_tag = *reinterpret_cast<const char*>(probing_ptr + 1);
+}
+
+void WriteBinaryHeader(void *to, const std::vector<size_t> &from, float probing_multiplier, char search_tag) {
+  BinaryFileHeader header = BinaryFileHeader();
+  header.SetToReference();
+  memcpy(to, &header, sizeof(BinaryFileHeader));
+  char *out = reinterpret_cast<char*>(to) + sizeof(BinaryFileHeader);
+  *reinterpret_cast<unsigned char*>(out) = static_cast<unsigned char>(from.size());
+  uint64_t *counts = reinterpret_cast<uint64_t*>(out + 1);
+  for (std::size_t i = 0; i < from.size(); ++i) {
+    counts[i] = from[i];
+  }
+  float *probing_ptr = reinterpret_cast<float*>(counts + from.size());
+  *probing_ptr = probing_multiplier;
+  *reinterpret_cast<char*>(probing_ptr + 1) = search_tag;
+}
+
+template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, Config config) : mapped_file_(util::OpenReadOrThrow(file)) {
+  const off_t file_size = util::SizeFile(mapped_file_.get());
 
   std::vector<size_t> counts;
-  ReadCounts(f, counts);
 
-  if (counts.size() < 2)
-    throw FormatLoadException("This ngram implementation assumes at least a bigram model.");
-  if (counts.size() > kMaxOrder)
-    throw FormatLoadException(std::string("Edit ngram.hh and change kMaxOrder to at least ") + boost::lexical_cast<std::string>(counts.size()));
-  unsigned char order = counts.size();
+  if (IsBinaryFormat(mapped_file_.get(), file_size)) {
+    memory_.reset(util::MapForRead(file_size, config.prefault, mapped_file_.get()), file_size);
 
-  const size_t memory_size = Size(search_init, counts);
-  memory_.reset(mmap(NULL, memory_size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0), memory_size);
-  if (memory_.get() == MAP_FAILED) throw AllocateMemoryLoadException(memory_size);
+    unsigned char search_tag;
+    ReadBinaryHeader(memory_.begin(), file_size, counts, config.probing_multiplier, search_tag);
+    if (config.probing_multiplier < 1.0) UTIL_THROW(FormatLoadException, "Binary format claims to have a probing multiplier of " << config.probing_multiplier << " which is < 1.0.");
+    if (search_tag != Search::kBinaryTag) UTIL_THROW(FormatLoadException, "The binary file has a different search strategy than the one requested.");
+    size_t memory_size = Size(counts, config);
 
-  char *start = static_cast<char*>(memory_.get());
-  vocab_.Init(search_init, start, counts[0]);
-  start += GenericVocabulary<Search>::Size(search_init, counts[0]);
-  unigram_ = reinterpret_cast<ProbBackoff*>(start);
-  start += sizeof(ProbBackoff) * counts[0];
-  for (unsigned int n = 2; n < order; ++n) {
-    middle_.push_back(Middle(search_init, start, counts[n - 1]));
-    start += Middle::Size(search_init, counts[n - 1]);
-  }
-  longest_ = Longest(search_init, start, counts[order - 1]);
-  assert(static_cast<size_t>(start + Longest::Size(search_init, counts[order - 1]) - reinterpret_cast<char*>(memory_.get())) == memory_size);
+    char *start = reinterpret_cast<char*>(memory_.get()) + TotalHeaderSize(counts.size());
+    if (memory_size != static_cast<size_t>(memory_.end() - start)) UTIL_THROW(FormatLoadException, "The mmap file " << file << " has size " << file_size << " but " << (memory_size + TotalHeaderSize(counts.size())) << " was expected based on the number of counts and configuration.");
 
-  LoadFromARPA(f, counts);
+    SetupMemory(start, counts, config);
+    vocab_.LoadedBinary();
+    for (typename std::vector<Middle>::iterator i = middle_.begin(); i != middle_.end(); ++i) {
+      i->LoadedBinary();
+    }
+    longest_.LoadedBinary();
 
-  if (std::fabs(unigram_[GenericVocabulary<Search>::kNotFound].backoff) > 0.0000001) {
-    throw FormatLoadException(std::string("Backoff for unknown word with index is ") + boost::lexical_cast<std::string>(unigram_[GenericVocabulary<Search>::kNotFound].backoff) + std::string(" not zero"));
+  } else {
+    if (config.probing_multiplier <= 1.0) UTIL_THROW(FormatLoadException, "probing multiplier must be > 1.0");
+
+    util::FilePiece f(file, mapped_file_.release(), config.messages);
+    ReadARPACounts(f, counts);
+    size_t memory_size = Size(counts, config);
+    char *start;
+
+    if (config.write_mmap) {
+      // Write out an mmap file.  
+      util::MapZeroedWrite(config.write_mmap, TotalHeaderSize(counts.size()) + memory_size, mapped_file_, memory_);
+      WriteBinaryHeader(memory_.get(), counts, config.probing_multiplier, Search::kBinaryTag);
+      start = reinterpret_cast<char*>(memory_.get()) + TotalHeaderSize(counts.size());
+    } else {
+      memory_.reset(util::MapAnonymous(memory_size), memory_size);
+      start = reinterpret_cast<char*>(memory_.get());
+    }
+    SetupMemory(start, counts, config);
+    try {
+      LoadFromARPA(f, counts, config);
+    } catch (FormatLoadException &e) {
+      e << " in file " << file;
+      throw;
+    }
   }
 
   // g++ prints warnings unless these are fully initialized.  
@@ -201,21 +225,38 @@ template <class Search> GenericModel<Search>::GenericModel(const char *file, con
   begin_sentence.backoff_[0] = unigram_[begin_sentence.history_[0]].backoff;
   State null_context = State();
   null_context.valid_length_ = 0;
-  P::Init(begin_sentence, null_context, vocab_, order);
+  P::Init(begin_sentence, null_context, vocab_, counts.size());
 }
 
-template <class Search> void GenericModel<Search>::LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts) {
-  // Default for <unk> is skip.  
-  unigram_[0].prob = 0.0;
-  unigram_[0].backoff = 0.0;
+template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts, const Config &config) {
   // Read the unigrams.
   Read1Grams(f, counts[0], vocab_, unigram_);
+  bool saw_unk = vocab_.SawUnk();
+  if (!saw_unk) {
+    switch(config.unknown_missing) {
+      case Config::THROW_UP:
+        {
+          SpecialWordMissingException e("<unk>");
+          e << " and configuration was set to throw if unknown is missing";
+          throw e;
+        }
+      case Config::COMPLAIN:
+        if (config.messages) *config.messages << "Language model is missing <unk>.  Substituting probability " << config.unknown_missing_prob << "." << std::endl; 
+        // There's no break;.  This is by design.  
+      case Config::SILENT:
+        // Default probabilities for unknown.  
+        unigram_[0].backoff = 0.0;
+        unigram_[0].prob = config.unknown_missing_prob;
+        break;
+    }
+  }
   
   // Read the n-grams.
   for (unsigned int n = 2; n < counts.size(); ++n) {
     ReadNGrams(f, n, counts[n-1], vocab_, middle_[n-2]);
   }
   ReadNGrams(f, counts.size(), counts[counts.size() - 1], vocab_, longest_);
+  if (std::fabs(unigram_[0].backoff) > 0.0000001) UTIL_THROW(FormatLoadException, "Backoff for unknown word should be zero, but was given as " << unigram_[0].backoff);
 }
 
 /* Ugly optimized function.
@@ -225,15 +266,14 @@ template <class Search> void GenericModel<Search>::LoadFromARPA(util::FilePiece 
  *
  * The search goes in increasing order of ngram length.  
  */
-template <class Search> FullScoreReturn GenericModel<Search>::FullScore(
+template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, VocabularyT>::FullScore(
     const State &in_state,
     const WordIndex new_word,
     State &out_state) const {
 
   FullScoreReturn ret;
-  // This is end pointer passed to SumBackoffs.
   const ProbBackoff &unigram = unigram_[new_word];
-  if (new_word == GenericVocabulary<Search>::kNotFound) {
+  if (new_word == 0) {
     ret.ngram_length = out_state.valid_length_ = 0;
     // all of backoff.
     ret.prob = std::accumulate(
@@ -269,7 +309,7 @@ template <class Search> FullScoreReturn GenericModel<Search>::FullScore(
     }
     lookup_hash = CombineWordHash(lookup_hash, *hist_iter);
     if (mid_iter == middle_.end()) break;
-    const ProbBackoff *found;
+    typename Middle::ConstIterator found;
     if (!mid_iter->Find(lookup_hash, found)) {
       // Didn't find an ngram using hist_iter.  
       // The history used in the found n-gram is [in_state.history_, hist_iter).  
@@ -282,11 +322,11 @@ template <class Search> FullScoreReturn GenericModel<Search>::FullScore(
           ret.prob);
       return ret;
     }
-    *backoff_out = found->backoff;
-    ret.prob = found->prob;
+    *backoff_out = found->GetValue().backoff;
+    ret.prob = found->GetValue().prob;
   }
   
-  const Prob *found;
+  typename Longest::ConstIterator found;
   if (!longest_.Find(lookup_hash, found)) {
     // It's an (P::Order()-1)-gram
     std::copy(in_state.history_, in_state.history_ + P::Order() - 2, out_state.history_ + 1);
@@ -299,13 +339,100 @@ template <class Search> FullScoreReturn GenericModel<Search>::FullScore(
   std::copy(in_state.history_, in_state.history_ + P::Order() - 2, out_state.history_ + 1);
   out_state.valid_length_ = P::Order() - 1;
   ret.ngram_length = P::Order();
-  ret.prob = found->prob;
+  ret.prob = found->GetValue().prob;
   return ret;
 }
 
-// This also instantiates GenericVocabulary.
-template class GenericModel<ProbingSearch>;
-template class GenericModel<SortedUniformSearch>;
+/* Until somebody implements stateful language models in Moses, here's a slower stateless version.  It also provides a mostly meaningless void * value that can be used for pruning. */
+template <class Search, class VocabularyT> HieuShouldRefactorMoses GenericModel<Search, VocabularyT>::SlowStatelessScore(
+    const WordIndex *begin, const WordIndex *end) const {
+  begin = std::max(begin, end - P::Order());
+
+  HieuShouldRefactorMoses ret;
+  // This is end pointer passed to SumBackoffs.
+  const ProbBackoff &unigram = unigram_[*(end - 1)];
+  if (!*(end - 1)) {
+    ret.ngram_length = 0;
+    // all of backoff.
+    ret.prob = unigram.prob + SlowBackoffLookup(begin, end - 1, 1);
+    ret.meaningless_unique_state = 0;
+    return ret;
+  }
+  ret.prob = unigram.prob;
+  if (begin == end - 1) {
+    ret.ngram_length = 1;
+    ret.meaningless_unique_state = reinterpret_cast<void*>(*(end - 1));
+    // No backoff because the context is empty.  
+    return ret;
+  }
+
+  // Ok now we now that the bigram contains known words.  Start by looking it up.
+
+  uint64_t lookup_hash = static_cast<uint64_t>(*(end - 1));
+  const WordIndex *hist_iter = end - 2;
+  const WordIndex *const hist_none = begin - 1;
+  typename std::vector<Middle>::const_iterator mid_iter = middle_.begin();
+  for (; ; ++mid_iter, --hist_iter) {
+    if (hist_iter == hist_none) {
+      // Ran out.  No backoff.  
+      ret.ngram_length = end - begin;
+      // ret.prob was already set.
+      ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 1);
+      return ret;
+    }
+    lookup_hash = CombineWordHash(lookup_hash, *hist_iter);
+    if (mid_iter == middle_.end()) break;
+    typename Middle::ConstIterator found;
+    if (!mid_iter->Find(lookup_hash, found)) {
+      // Didn't find an ngram using hist_iter.  
+      ret.ngram_length = end - 1 - hist_iter;
+      ret.prob += SlowBackoffLookup(begin, end - 1, mid_iter - middle_.begin() + 1);
+      ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 2);
+      return ret;
+    }
+    ret.prob = found->GetValue().prob;
+  }
+  
+  typename Longest::ConstIterator found;
+  if (!longest_.Find(lookup_hash, found)) {
+    // It's an (P::Order()-1)-gram
+    ret.ngram_length = P::Order() - 1;
+    ret.prob += SlowBackoffLookup(begin, end - 1, P::Order() - 1);
+    ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 3);
+    return ret;
+  }
+  // It's an P::Order()-gram
+  ret.ngram_length = P::Order();
+  ret.prob = found->GetValue().prob;
+  ret.meaningless_unique_state = reinterpret_cast<void*>(lookup_hash + 4);
+  return ret;
+}
+
+template <class Search, class VocabularyT> float GenericModel<Search, VocabularyT>::SlowBackoffLookup(
+    const WordIndex *const begin, const WordIndex *const end, unsigned char start) const {
+  // Add the backoff weights for n-grams of order start to (end - begin).  
+  if (end - begin < static_cast<std::ptrdiff_t>(start)) return 0.0;
+  float ret = 0.0;
+  if (start == 1) {
+    ret += unigram_[*(end - 1)].backoff;
+    start = 2;
+  }
+  uint64_t lookup_hash = static_cast<uint64_t>(*(end - 1));
+  for (unsigned char i = 2; i < start; ++i) {
+    lookup_hash = CombineWordHash(lookup_hash, *(end - i));
+  }
+  typename Middle::ConstIterator found;
+  // i is the order of the backoff we're looking for.
+  for (unsigned char i = start; i <= static_cast<unsigned char>(end - begin); ++i) {
+    lookup_hash = CombineWordHash(lookup_hash, *(end - i));
+    if (!middle_[i - 2].Find(lookup_hash, found)) break;
+    ret += found->GetValue().backoff;
+  }
+  return ret;
+}
+
+template class GenericModel<ProbingSearch, ProbingVocabulary>;
+template class GenericModel<SortedUniformSearch, SortedVocabulary>;
 } // namespace detail
 } // namespace ngram
 } // namespace lm

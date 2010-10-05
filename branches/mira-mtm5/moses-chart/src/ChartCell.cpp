@@ -22,14 +22,14 @@
 #include <algorithm>
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
-#include "ChartTranslationOption.h"
 #include "ChartCellCollection.h"
 #include "Cube.h"
 #include "QueueEntry.h"
 #include "../../moses/src/WordsRange.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/StaticData.h"
-#include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartTranslationOption.h"
+#include "../../moses/src/ChartTranslationOptionList.h"
 
 using namespace std;
 using namespace Moses;
@@ -74,7 +74,7 @@ void ChartCell::PruneToSize()
 	}
 }
 
-void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
+void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 																, const ChartCellCollection &allChartCells)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -82,18 +82,12 @@ void ChartCell::ProcessSentence(const TranslationOptionList &transOptList
 	Cube cube;
 
 	// add all trans opt into queue. using only 1st child node.
-	TranslationOptionList::const_iterator iterList;
+	ChartTranslationOptionList::const_iterator iterList;
 	for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList)
 	{
-		const TranslationOption &transOpt = **iterList;
-
-		bool isOK;
-		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells, isOK);
-
-		if (isOK)
-			cube.Add(queueEntry);
-		else
-			delete queueEntry;
+		const ChartTranslationOption &transOpt = **iterList;
+		QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells);
+		cube.Add(queueEntry);
 	}
 	
 	// pluck things out of queue and add to hypo collection

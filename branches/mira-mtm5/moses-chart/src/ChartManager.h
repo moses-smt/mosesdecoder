@@ -45,7 +45,8 @@ protected:
 	TranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   std::auto_ptr<Moses::SentenceStats> m_sentenceStats;
   const Moses::TranslationSystem* m_system;
-
+	clock_t m_start; /**< starting time, used for logging */
+	
 public:
   Manager(Moses::InputType const& source, const Moses::TranslationSystem* system);
 	~Manager();

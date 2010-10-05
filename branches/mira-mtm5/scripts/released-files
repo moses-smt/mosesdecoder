@@ -55,6 +55,7 @@ README
 released-files
 tokenizer/detokenizer.perl
 tokenizer/tokenizer.perl
+tokenizer/lowercase.perl
 tokenizer/nonbreaking_prefixes/nonbreaking_prefix.de
 tokenizer/nonbreaking_prefixes/nonbreaking_prefix.el
 tokenizer/nonbreaking_prefixes/nonbreaking_prefix.en

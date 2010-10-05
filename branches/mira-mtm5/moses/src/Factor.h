@@ -137,6 +137,9 @@ public:
 
 };
 
+#ifdef HAVE_BOOST
+size_t hash_value(const Factor &f);
+#endif
 
 }
 #endif

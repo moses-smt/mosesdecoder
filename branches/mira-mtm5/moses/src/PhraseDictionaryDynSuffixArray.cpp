@@ -45,9 +45,6 @@ void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
 void PhraseDictionaryDynSuffixArray::CleanUp() {
 	m_biSA->CleanUp();
 }
-void PhraseDictionaryDynSuffixArray::SetWeightTransModel(const std::vector<float, std::allocator<float> >&) {
-	return;
-}
 
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const {
 	TargetPhraseCollection *ret = new TargetPhraseCollection();
@@ -69,11 +66,13 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	return ret;
 }
 	
-const ChartRuleCollection *PhraseDictionaryDynSuffixArray::GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																													bool adhereTableLimit,const CellCollection &cellColl) const
+void PhraseDictionaryDynSuffixArray::GetChartRuleCollection(ChartTranslationOptionList &outColl
+																														,InputType const& src
+																														,WordsRange const& range
+																														,bool adhereTableLimit
+																														,const CellCollection &cellColl) const
 {
 	assert(false);
-	return NULL;
 }
 void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, string& alignment) { 
   m_biSA->addSntPair(source, target, alignment);

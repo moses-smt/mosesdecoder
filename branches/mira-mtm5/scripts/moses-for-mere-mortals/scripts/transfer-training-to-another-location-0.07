@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# transfer-training-to-another-location-0.07
+# copyright 2010 João L. A. C. Rosas
+# date: 27/02/2010
+# licenced under the GPL licence, version 3
+# Special thanks to Hilário Leal Fontes and Maria José Machado, who helped to test the script and made very helpful suggestions
+
+# ***Purpose***: Create a copy of your trained corpora that can be used by someone else (even if in another computer) or by you yourself in a different Moses installation (you can have more than one Moses installation in the same computer). Your $mosesdir is written literally (e.g., "/home/john") in several trained corpora files. You have to change that string so that it reflects the $mosesdir to which you want to transfer your trainings. This script locates your $mosesdir string in your trained corpora files and substitutes it by the equivalent $mosesdir string that defines the location where you want your trainings transferred to. It creates a $mosesdir/corpora_trained_for_another_location/newusername directory, within which it will create the corpora_trained and logs directory prepared for the other user/Moses installation. Takes a good while to run if you have trained very large corpora.
+
+############################################################################################################################################
+# THIS SCRIPT ASSUMES THAT A IRSTLM AND RANDLM ENABLED MOSES HAS ALREADY BEEN INSTALLED WITH THE create script IN $mosesdir; ITS  #
+# DEFAULT VALUE IS $HOME/moses-irstlm-randlm; CHANGE THIS VARIABLE IF YOU WANT IT TO REFER TO A DIFFERENT LOCATION.                        #
+# IT ALSO ASSUMES THAT THE TRAINING OF A CORPUS HAS ALREADY BEEN DONE WITH train-moses-irstlm-randlm.                                      #
+############################################################################################################################################
+
+############################################################################################################################################
+# The values of the variables that follow should be filled according to your needs:                                                        #
+############################################################################################################################################
+# Base dir of your the Moses system (e.g., $HOME/moses-irstlm-randlm) whose trainings you want to transfer (!!! you have to fill this parameter !!!)
+mosesdirmine=$HOME/moses-irstlm-randlm
+# ***Login name*** of the user to whom the trained corpora will be transferred; ex: "john" (!!! you have to fill this parameter !!!)
+newusername=john
+# Basedir of the Moses system of the user to which the trained corpora will be transferred; ex: "/media/1.5TB/moses-irstlm-randlm"  (!!! you have to fill this parameter !!!)
+mosesdirotheruser=
+############################################################################################################################################
+#end of parameters that you should fill                                                                                                    #
+############################################################################################################################################
+
+############################################################################################################################################
+# DON'T CHANGE THE LINES THAT FOLLOW ... unless you know what you are doing!                                                               #
+############################################################################################################################################
+# Register start date and time of corpus training 
+startdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+#Base dir of trained corpora
+corporatraineddir=$mosesdirmine/corpora_trained
+#Base dir of copy of your trained corpora prepared to be used by user $newusername
+corporatoexchange=$mosesdirmine/corpora_trained_for_another_location/$newusername
+if [ ! -d $corporatoexchange ]; then
+	mkdir -p $corporatoexchange
+fi
+
+echo "Please wait. This can take a long time if $mosesdirmine has many trained corpora or especially large trained corpora..."
+#copy present corporatraineddir to a safe place
+cp -rf $mosesdirmine/corpora_trained $corporatoexchange
+cp -rf $mosesdirmine/logs $corporatoexchange
+
+if [ -d $corporatoexchange ]; then
+	cd $corporatoexchange
+	grep -lr -e "$mosesdirmine" * | xargs sed -i "s#$mosesdirmine#$mosesdirotheruser#g"
+fi
+echo ""
+echo "Processing done. The trained corpora prepared for user $newusername are located in the $corporatoexchange directory. Please transfer manually its corpora_trained and logs subdirectories to the $mosesdirotheruser directory. YOU ARE STRONGLY ADVISED TO MAKE A BACKUP OF THIS LATTER DIRECTORY BEFORE THAT TRANSFER. After having done it, you can safely erase the $mosesdirmine/corpora_trained_for_another_location directory. Your trained corpora in $mosesdirmine were not changed."
+echo "Starting time: $startdate"
+echo "End time     : `date +day:%d/%m/%y-time:%H:%M:%S`"
+

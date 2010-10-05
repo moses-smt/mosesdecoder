@@ -33,7 +33,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "ChartRuleCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "DotChart.h"
 #include "FactorCollection.h"
 
@@ -181,8 +181,11 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 	
 	// cleanup cache
 	
-	// sort each target phrase collection
-	m_collection.Sort(m_tableLimit);
+	// prune each target phrase collection
+	if (m_tableLimit)
+	{
+		m_collection.Prune(m_tableLimit);
+	}
 	
 	return true;
 }
@@ -281,23 +284,8 @@ PhraseDictionarySCFG::~PhraseDictionarySCFG()
 	CleanUp();
 }
 
-void PhraseDictionarySCFG::SetWeightTransModel(const vector<float> &weightT)
-{
-	m_collection.SetWeightTransModel(this, weightT);
-}
-
-
 void PhraseDictionarySCFG::CleanUp()
-{
-	//RemoveAllInColl(m_chartTargetPhraseColl);
-	std::vector<ChartRuleCollection*>::iterator iter;
-	for (iter = m_chartTargetPhraseColl.begin(); iter != m_chartTargetPhraseColl.end(); ++iter)
-	{
-		ChartRuleCollection *item = *iter;
-		ChartRuleCollection::Delete(item);
-	}
-	m_chartTargetPhraseColl.clear();
-	
+{	
 	RemoveAllInColl(m_processedRuleColls);
 }
 

@@ -35,7 +35,7 @@ post-parse-clean
 	out: clean-parsed-stem
 	default-name: corpus/parsed-clean
 	pass-unless: input-parser output-parser
-	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-ratio
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-xml
 	error: there is a blank factor
 factorize
 	in: clean-parsed-stem
@@ -72,8 +72,17 @@ post-split-clean
 	in: split-stem 
 	out: clean-split-stem
 	default-name: corpus/split-clean
+	ignore-if: input-parser output-parser
 	pass-unless: input-splitter output-splitter
 	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 $max-sentence-length $working-dir/corpus/split-clean.lines-retained.VERSION
+	error: there is a blank factor
+post-split-clean-syntax
+	in: split-stem 
+	out: clean-split-stem
+	default-name: corpus/split-clean
+	ignore-unless: input-parser output-parser
+	pass-unless: input-splitter output-splitter
+	template: $moses-script-dir/training/clean-corpus-n.perl IN $input-extension $output-extension OUT 1 10000 $working-dir/corpus/parsed-clean.lines-retained.VERSION --ignore-xml
 	error: there is a blank factor
 
 [RECASING] single

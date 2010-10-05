@@ -5,14 +5,15 @@ use Getopt::Long "GetOptions";
 
 my $MAX_LENGTH = 4;
 
-my ($system,$segmentation,$reference,$dir,$input,$corpus,$ttable);
+my ($system,$segmentation,$reference,$dir,$input,$corpus,$ttable,$hierarchical);
 if (!&GetOptions('system=s' => \$system, # raw output from decoder
                  'reference=s' => \$reference, # tokenized reference
                  'dir=s' => \$dir, # directory for storing results
                  'input=s' => \$input, # tokenized input (as for decoder)
                  'segmentation=s' => \$segmentation, # system output with segmentation markup
                  'input-corpus=s' => \$corpus, # input side of parallel training corpus
-                 'ttable=s' => \$ttable) || # phrase translation table used for decoding
+                 'ttable=s' => \$ttable, # phrase translation table used for decoding
+		 'hierarchical' => \$hierarchical) || # hierarchical model?
     !defined($dir)) {
 	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-segmentation FILE]");	
 }
@@ -62,7 +63,12 @@ if (defined($system) || defined($reference)) {
 
 # segmentation
 if (defined($segmentation)) {
-  &segmentation();
+    if (defined($hierarchical)) {
+	&hierarchical_segmentation();
+    }
+    else {
+	&segmentation();
+    }
 }
 
 # coverage analysis
@@ -210,7 +216,12 @@ sub ttable_coverage {
   my @DISTRIBUTION = ();
   while(<TTABLE>) {
     chop;
-    my ($in,$out,$scores) = split(/ \|\|\| /);	
+    my @COLUMN = split(/ \|\|\| /);
+    my ($in,$out,$scores) = @COLUMN;
+    # handling hierarchical
+    $in =~ s/\[[^ \]]+\]$//; # remove lhs nt
+    next if $in =~ /\[[^ \]]+\]\[[^ \]]+\]/; # only consider flat rules
+    $scores = $COLUMN[4] if scalar @COLUMN == 5;
     my @IN = split(/ /,$in);
     $size = scalar @IN;
     next unless defined($INPUT_PHRASE{$size}{$in});
@@ -314,7 +325,9 @@ sub input_annotation {
   open(INPUT,$input) or die "Can't read input $input";
   while(<INPUT>) {
     chop;
-    s/\|\S+//g;
+    s/\|\S+//g; # remove additional factors
+    s/<[^>]+>//g; # remove xml markup
+    s/\s+/ /g; s/^ //; s/ $//; # remove redundant spaces
     print OUT $_."\t";
     my @WORD = split;
     my $sentence_length = scalar @WORD;
@@ -439,4 +452,378 @@ sub segmentation {
   close(SUMMARY);
 
   # TODO: error by segmentation
+}
+
+# analyze the trace file to collect statistics over the
+# hierarchical derivations and also create segmentation annotation
+sub hierarchical_segmentation {
+    my $last_sentence = -1;
+    my @DERIVATION;
+    my %STATS;
+    open(TRACE,$segmentation.".trace");
+    open(INPUT_TREE,">$dir/input-tree");
+    open(OUTPUT_TREE,">$dir/output-tree");
+    open(NODE,">$dir/node");
+    while(<TRACE>) {
+	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\d\- ]*): pC=[\d\.\-e]+, c=/ || die("cannot scan line $_");
+	my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
+	if ($last_sentence >= 0 && $sentence != $last_sentence) {
+	    &hs_process($last_sentence,\@DERIVATION,\%STATS);
+	    @DERIVATION = ();
+	}
+	my %ITEM;
+	$ITEM{'start'} = $start;
+	$ITEM{'end'} = $end;
+	$ITEM{'rule_lhs'} = $rule_lhs;
+	
+	$rule_rhs =~ s/</&lt;/g;
+	$rule_rhs =~ s/>/&gt;/g;
+	@{$ITEM{'rule_rhs'}} = split(/ /,$rule_rhs);
+	
+	foreach (split(/ /,$alignment)) {
+		/(\d+)\-(\d+)/ || die("funny alignment: $_\n");
+		$ITEM{'alignment'}{$2} = $1; # target non-terminal to source span
+		$ITEM{'alignedSpan'}{$1} = 1;
+	}
+
+	@{$ITEM{'spans'}} = ();
+	foreach my $span (reverse split(/\s+/,$spans)) {
+		$span =~ /\[(\d+)\.\.(\d+)\]=(\S+)$/ || die("funny span: $span\n");
+		my %SPAN = ( 'from' => $1, 'to' => $2, 'word' => $3 );
+		push @{$ITEM{'spans'}}, \%SPAN;
+	}
+
+	push @DERIVATION,\%ITEM;
+	$last_sentence = $sentence;
+    }
+    &hs_process($last_sentence,\@DERIVATION,\%STATS);
+    close(TRACE);
+    close(NODE);
+    close(INPUT_TREE);
+    close(OUTPUT_TREE);
+
+    open(SUMMARY,">$dir/rule");
+    print SUMMARY "sentence-count\t".(++$last_sentence)."\n";
+    print SUMMARY "glue-rule\t".$STATS{'glue-rule'}."\n";
+    print SUMMARY "depth\t".$STATS{'depth'}."\n";
+    foreach (keys %{$STATS{'rule-type'}}) {
+	print SUMMARY "rule\t$_\t".$STATS{'rule-type'}{$_}."\n";
+    }
+    close(SUMMARY);
+}
+
+# process a single sentence for hierarchical segmentation
+sub hs_process {
+    my ($sentence,$DERIVATION,$STATS) = @_;
+    
+    my $DROP_RULE = shift @{$DERIVATION}; # get rid of S -> S </s>
+    my $max = $$DERIVATION[0]{'end'};
+    
+    # consolidate glue rules into one rule
+    my %GLUE_RULE;
+    $GLUE_RULE{'start'} = 1;
+    $GLUE_RULE{'end'} = $max;
+    $GLUE_RULE{'rule_lhs'} = "S";
+    $GLUE_RULE{'depth'} = 0;
+    my $x=0;
+    while(1) {
+	my $RULE = shift @{$DERIVATION};
+	if ($$RULE{'rule_lhs'} eq "S" && 
+	    scalar(@{$$RULE{'rule_rhs'}}) == 2 &&
+	    $$RULE{'rule_rhs'}[0] eq "S" &&
+	    $$RULE{'rule_rhs'}[1] eq "X") {
+	    unshift @{$GLUE_RULE{'spans'}},$$RULE{'spans'}[1];
+	    push @{$GLUE_RULE{'rule_rhs'}}, "X";
+	    $GLUE_RULE{'alignment'}{$x} = $x;
+	    $GLUE_RULE{'alignedSpan'}{$x} = 1;
+	    $x++;
+	}
+	else {
+	    unshift @{$DERIVATION}, $RULE;
+	    last;
+	}
+    }
+    unshift @{$DERIVATION}, \%GLUE_RULE;	
+    $$STATS{'glue-rule'} += $x;
+    
+    # create chart
+    my %CHART;
+    foreach my $RULE (@{$DERIVATION}) {
+	$CHART{$$RULE{'start'}}{$$RULE{'end'}} = $RULE;
+    }
+    
+    # compute depth
+    &hs_compute_depth(1,$max,0,\%CHART);	
+    my $max_depth = 0;
+    foreach my $RULE (@{$DERIVATION}) {
+	next unless defined($$RULE{'depth'}); # better: delete offending rule S -> S <s>
+	$max_depth = $$RULE{'depth'} if $$RULE{'depth'} > $max_depth;
+    }
+    &hs_recompute_depth(1,$max,\%CHART,$max_depth);
+    $$STATS{'depth'} += $max_depth;
+    
+    # build matrix of divs
+    
+    my @MATRIX;
+    &hs_create_out_span(1,$max,\%CHART,\@MATRIX);
+    print OUTPUT_TREE &hs_output_matrix($sentence,\@MATRIX,$max_depth);
+    
+    my @MATRIX_IN;
+    &hs_create_in_span(1,$max,\%CHART,\@MATRIX_IN);
+    print INPUT_TREE &hs_output_matrix($sentence,\@MATRIX_IN,$max_depth);
+    
+    # number rules and get their children
+    my $id = 0;
+    foreach my $RULE (@{$DERIVATION}) {
+	next unless defined($$RULE{'start_div'}); # better: delete offending rule S -> S <s>
+	$$STATS{'rule-type'}{&hs_rule_type($RULE)}++ if $id>0;
+	$$RULE{'id'} = $id++;
+    }
+    &hs_get_children(1,$max,\%CHART);
+    
+    foreach my $RULE (@{$DERIVATION}) {
+	next unless defined($$RULE{'start_div'}); # better: delete offending rule S -> S <s>
+	
+	print NODE $sentence." ";
+	print NODE $$RULE{'depth'}." ";
+	print NODE $$RULE{'start_div'}." ".$$RULE{'end_div'}." ";
+	print NODE $$RULE{'start_div_in'}." ".$$RULE{'end_div_in'}." ";
+	print NODE join(",",@{$$RULE{'children'}})."\n";
+    }
+}
+
+sub hs_output_matrix {
+    my ($sentence,$MATRIX,$max_depth) = @_;
+    my @OPEN;
+    my $out = "";
+    for(my $d=0;$d<=$max_depth;$d++) { push @OPEN, 0; }
+    foreach my $SPAN (@$MATRIX) {
+	$out .= $sentence."\t";
+	for(my $d=0;$d<=$max_depth;$d++) {
+	    my $class = " ";
+	    my $closing_flag = 0;
+	    if (defined($$SPAN{'closing'}) && defined($$SPAN{'closing'}{$d})) {
+		$closing_flag = 1;
+	    }
+	    if ($d == $$SPAN{'depth'}) {
+		if (defined($$SPAN{'opening'}) && $closing_flag) {
+		    $class = "O";
+		}
+		elsif(defined($$SPAN{'opening'})) {
+		    $class = "[";
+		}
+		elsif($closing_flag) {
+		    $class = "]";
+		}
+		else {
+		    $class = "-";
+		}
+	    }
+	    elsif ($closing_flag) {
+		$class = "]";
+	    }
+	    elsif ($OPEN[$d]) {
+		$class = "-";				
+	    }
+	    $out .= $class;
+	}
+	$out .= "\t";		
+	$out .= $$SPAN{'lhs'} if defined($$SPAN{'lhs'});
+	$out .= "\t";
+	$out .= $$SPAN{'rhs'} if defined($$SPAN{'rhs'});
+	$out .= "\n";
+	$OPEN[$$SPAN{'depth'}] = 1 if defined($$SPAN{'opening'});
+	if(defined($$SPAN{'closing'})) {
+	    for(my $d=$max_depth;$d>=0;$d--) {
+		$OPEN[$d] = 0 if defined($$SPAN{'closing'}{$d});
+	    }
+	}
+    }
+    return $out;
+}
+
+sub hs_rule_type {
+    my ($RULE) = @_;
+    
+    my $type = "";
+    
+    # output side
+    my %NT;
+    my $total_word_count = 0;
+    my $word_count = 0;
+    my $nt_count = 0;
+    for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
+	if (defined($$RULE{'alignment'}{$i})) {
+	    $type .= $word_count if $word_count > 0;
+	    $word_count = 0;
+	    my $nt = chr(97+$nt_count++);
+	    $NT{$$RULE{'alignment'}{$i}} = $nt;
+	    $type .= $nt;			
+	}
+	else {
+	    $word_count++;
+	    $total_word_count++;
+	}
+    }
+    $type .= $word_count if $word_count > 0;
+    
+    $type .= ":".$total_word_count.":".$nt_count.":";
+    
+    # input side
+    $word_count = 0;
+    $total_word_count = 0;
+    for(my $i=0;$i<scalar(@{$$RULE{'spans'}});$i++) {
+	my $SUBSPAN = ${$$RULE{'spans'}}[$i];
+	if (defined($$RULE{'alignedSpan'}{$i})) {
+	    $type .= $word_count if $word_count > 0;
+	    $word_count = 0;
+	    $type .= $NT{$i};
+	}
+	else {
+	    $word_count++;
+	    $total_word_count++;
+	}
+    }
+    $type .= $word_count if $word_count > 0;
+    $type .= ":".$total_word_count;
+    return $type;
+}
+
+# compute depth of each node
+sub hs_compute_depth {
+    my ($start,$end,$depth,$CHART)  = @_;
+    my $RULE = $$CHART{$start}{$end};
+    $$RULE{'depth'} = $depth;
+    
+    for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
+	# non-terminals
+	if (defined($$RULE{'alignment'}{$i})) {
+	    my $SUBSPAN = $$RULE{'spans'}[$$RULE{'alignment'}{$i}];
+	    &hs_compute_depth($$SUBSPAN{'from'},$$SUBSPAN{'to'},$depth+1,$CHART);
+	}
+    }
+}
+
+# re-assign depth to as deep as possible
+sub hs_recompute_depth {
+    my ($start,$end,$CHART,$max_depth)  = @_;
+    my $RULE = $$CHART{$start}{$end};
+    
+    my $min_sub_depth = $max_depth+1;
+    for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
+	# non-terminals
+	if (defined($$RULE{'alignment'}{$i})) {
+	    my $SUBSPAN = $$RULE{'spans'}[$$RULE{'alignment'}{$i}];
+	    my $sub_depth = &hs_recompute_depth($$SUBSPAN{'from'},$$SUBSPAN{'to'},$CHART,$max_depth);
+	    $min_sub_depth = $sub_depth if $sub_depth < $min_sub_depth;
+	}
+    }
+    $$RULE{'depth'} = $min_sub_depth-1;
+    return $$RULE{'depth'};
+}
+
+# get child dependencies for a sentence
+sub hs_get_children {
+    my ($start,$end,$CHART)  = @_;
+    my $RULE = $$CHART{$start}{$end};
+    
+    my @CHILDREN = ();
+    $$RULE{'children'} = \@CHILDREN;
+    
+    for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
+	# non-terminals
+	if (defined($$RULE{'alignment'}{$i})) {
+	    my $SUBSPAN = $$RULE{'spans'}[$$RULE{'alignment'}{$i}];
+	    my $child = &hs_get_children($$SUBSPAN{'from'},$$SUBSPAN{'to'},$CHART);
+	    push @CHILDREN, $child;
+	}
+    }
+    return $$RULE{'id'};	
+}
+
+# create the span annotation for an output sentence
+sub hs_create_out_span {
+    my ($start,$end,$CHART,$MATRIX) = @_;
+    my $RULE = $$CHART{$start}{$end};
+    
+    my %SPAN;
+    $SPAN{'start'} = $start;
+    $SPAN{'end'} = $end;
+    $SPAN{'depth'} = $$RULE{'depth'};
+    $SPAN{'lhs'} = $$RULE{'rule_lhs'};
+    $SPAN{'opening'} = 1;
+    push @{$MATRIX},\%SPAN;
+    $$RULE{'start_div'} = $#{$MATRIX};
+    my $THIS_SPAN = \%SPAN;
+    # in output order ...
+    my $terminal = 1;
+    for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
+	# non-terminals
+	if (defined($$RULE{'alignment'}{$i})) {
+	    my $SUBSPAN = $$RULE{'spans'}[$$RULE{'alignment'}{$i}];
+	    &hs_create_out_span($$SUBSPAN{'from'},$$SUBSPAN{'to'},$CHART,$MATRIX);
+	    $terminal = 0;
+	}
+	# terminals
+	else {
+	    # new sequence of terminals?
+	    if (!$terminal) {
+		my %SPAN;
+		$SPAN{'start'} = $start;
+		$SPAN{'end'} = $end;
+		$SPAN{'depth'} = $$RULE{'depth'};
+		push @{$MATRIX},\%SPAN;
+		$THIS_SPAN = \%SPAN;								
+	    }
+	    $$THIS_SPAN{'rhs'} .= " " if defined($$THIS_SPAN{'rhs'});
+	    $$THIS_SPAN{'rhs'} .= $$RULE{"rule_rhs"}[$i];
+	    $terminal = 1;
+	}
+    }
+    $THIS_SPAN = $$MATRIX[scalar(@{$MATRIX})-1];
+    $$RULE{'end_div'} = $#{$MATRIX};
+    $$THIS_SPAN{'closing'}{$$RULE{'depth'}} = 1;
+}
+
+# create the span annotation for an input sentence
+sub hs_create_in_span {
+    my ($start,$end,$CHART,$MATRIX) = @_;
+    my $RULE = $$CHART{$start}{$end};
+    
+    my %SPAN;
+    $SPAN{'start'} = $start;
+    $SPAN{'end'} = $end;
+    $SPAN{'depth'} = $$RULE{'depth'};
+    $SPAN{'lhs'} = $$RULE{'rule_lhs'};
+    $SPAN{'opening'} = 1;
+    push @{$MATRIX},\%SPAN;
+    $$RULE{'start_div_in'} = $#{$MATRIX};
+    my $THIS_SPAN = \%SPAN;
+    
+    my $terminal = 1;
+    # in input order ...
+    for(my $i=0;$i<scalar(@{$$RULE{'spans'}});$i++) {
+	my $SUBSPAN = ${$$RULE{'spans'}}[$i];
+	if (defined($$RULE{'alignedSpan'}{$i})) {
+	    &hs_create_in_span($$SUBSPAN{'from'},$$SUBSPAN{'to'},$CHART,$MATRIX);
+	    $terminal = 0;
+	}
+	else {
+	    # new sequence of terminals?
+	    if (!$terminal) {
+		my %SPAN;
+		$SPAN{'start'} = $start;
+		$SPAN{'end'} = $end;
+		$SPAN{'depth'} = $$RULE{'depth'};
+		push @{$MATRIX},\%SPAN;
+		$THIS_SPAN = \%SPAN;								
+	    }
+	    $$THIS_SPAN{'rhs'} .= " " if defined($$THIS_SPAN{'rhs'});
+	    $$THIS_SPAN{'rhs'} .= $$SUBSPAN{'word'};
+	    $terminal = 1;
+	}
+    }
+    $THIS_SPAN = $$MATRIX[scalar(@{$MATRIX})-1];
+    $$RULE{'end_div_in'} = $#{$MATRIX};
+    $$THIS_SPAN{'closing'}{$$RULE{'depth'}} = 1;
 }

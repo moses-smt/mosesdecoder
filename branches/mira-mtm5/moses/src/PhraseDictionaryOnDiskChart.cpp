@@ -24,24 +24,26 @@
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
 #include "CellCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "../../OnDiskPt/src/TargetPhraseCollection.h"
 
 using namespace std;
 
 namespace Moses
 {
-	const ChartRuleCollection *PhraseDictionaryOnDisk::GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																																						bool adhereTableLimit,const CellCollection &cellColl) const
+	void PhraseDictionaryOnDisk::GetChartRuleCollection(ChartTranslationOptionList &outColl
+																											,InputType const& src
+																											, WordsRange const& range
+																											,bool adhereTableLimit
+																											,const CellCollection &cellColl) const
 	{
 		const StaticData &staticData = StaticData::Instance();
 		size_t rulesLimit = StaticData::Instance().GetRuleLimit();
 
 		// source phrase
 		Phrase *cachedSource = new Phrase(src.GetSubString(range));
-		m_sourcePhrase.push_back(cachedSource);
 		
-		ChartRuleCollection *ret = new ChartRuleCollection();
-		m_chartTargetPhraseColl.push_back(ret);
+		m_chartTargetPhraseColl.push_back(&outColl);
 		
 		size_t relEndPos = range.GetEndPos() - range.GetStartPos();
 		size_t absEndPos = range.GetEndPos();
@@ -245,7 +247,7 @@ namespace Moses
 						}
 						
 						assert(targetPhraseCollection);
-						ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+						outColl.Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
 												
 						numDerivations++;					
 						
@@ -257,11 +259,9 @@ namespace Moses
 			}
 		} // for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
 		
-		ret->CreateChartRules(rulesLimit);
+		outColl.CreateChartRules(rulesLimit);
 
-		//cerr << numDerivations << " ";
-		
-		return ret;
+		//cerr << numDerivations << " ";		
 	}
 	
 }; // namespace

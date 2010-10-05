@@ -21,15 +21,17 @@
 
 #include "QueueEntry.h"
 #include "ChartCell.h"
-#include "ChartTranslationOption.h"
-#include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "Cube.h"
 #include "../../moses/src/WordsRange.h"
-#include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartTranslationOption.h"
 #include "../../moses/src/Util.h"
 #include "../../moses/src/WordConsumed.h"
+
+#ifdef HAVE_BOOST
+#include <boost/functional/hash.hpp>
+#endif
 
 using namespace std;
 using namespace Moses;
@@ -37,48 +39,35 @@ using namespace Moses;
 namespace MosesChart
 {
 
-QueueEntry::QueueEntry(const TranslationOption &transOpt
-											 , const ChartCellCollection &allChartCells
-											 , bool &isOK)
+QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
+											 , const ChartCellCollection &allChartCells)
 :m_transOpt(transOpt)
 {
-	isOK = false;
-
-	const WordConsumed *wordsConsumed = &transOpt.GetChartRule().GetLastWordConsumed();
-	isOK = CreateChildEntry(wordsConsumed, allChartCells);
-
-	if (isOK)
-		CalcScore();
+	const WordConsumed *wordsConsumed = &transOpt.GetLastWordConsumed();
+	CreateChildEntry(wordsConsumed, allChartCells);
+	CalcScore();
 }
 
-bool QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
+void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
 {
-	bool ret;
 	// recursvile do the 1st first
 	const WordConsumed *prevWordsConsumed = wordsConsumed->GetPrevWordsConsumed();
 	if (prevWordsConsumed)
-		ret = CreateChildEntry(prevWordsConsumed, allChartCells);
-	else
-		ret = true;
+		CreateChildEntry(prevWordsConsumed, allChartCells);
 
-	if (ret && wordsConsumed->IsNonTerminal())
+	if (wordsConsumed->IsNonTerminal())
 	{ // non-term
 		const WordsRange &childRange = wordsConsumed->GetWordsRange();
 		const ChartCell &childCell = allChartCells.Get(childRange);
 		const Word &headWord = wordsConsumed->GetSourceWord();
 
-		if (childCell.GetSortedHypotheses(headWord).size() == 0)
-		{ // can't create hypo out of this. child cell is empty
-			return false;
-		}
+		assert(!childCell.GetSortedHypotheses(headWord).empty());
 
 		const Moses::Word &nonTerm = wordsConsumed->GetSourceWord();
 		assert(nonTerm.IsNonTerminal());
 		ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
 		m_childEntries.push_back(childEntry);
 	}
-
-	return ret;
 }
 
 QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
@@ -131,7 +120,14 @@ bool QueueEntry::operator<(const QueueEntry &compare) const
 	return ret;
 }
 
-	
+#ifdef HAVE_BOOST
+std::size_t hash_value(const ChildEntry & entry)
+{
+    boost::hash<const Hypothesis*> hasher;
+    return hasher(entry.GetHypothesis());
+}
+
+#endif
 std::ostream& operator<<(std::ostream &out, const ChildEntry &entry)
 {
 	out << *entry.GetHypothesis();

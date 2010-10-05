@@ -177,17 +177,6 @@ PhraseDictionaryMemory::~PhraseDictionaryMemory()
 {
 }
 
-void PhraseDictionaryMemory::SetWeightTransModel(const vector<float> &weightT)
-{
-	PhraseDictionaryNode::iterator iterDict;
-	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
-	{
-		PhraseDictionaryNode &phraseDictionaryNode = iterDict->second;
-		// recursively set weights in nodes
-		phraseDictionaryNode.SetWeightTransModel(this, weightT);
-	}
-}
-
 TO_STRING_BODY(PhraseDictionaryMemory);
 
 // friend
