@@ -1380,7 +1380,6 @@ void StaticData::ReLoadParameter()
 	for(size_t i=0;i<transSystem.GetPhraseDictionaries().size();++i)
 	{
 		PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
-		PhraseDictionary &phraseDictionary = *phraseDictionaryFeature.GetDictionary();
 		
 		//		std::cerr << "phraseDictionaryFeature.GetNumScoreComponents():" << phraseDictionaryFeature.GetNumScoreComponents() << std::endl;
 		//		std::cerr << "phraseDictionaryFeature.GetNumInputScores():" << phraseDictionaryFeature.GetNumInputScores() << std::endl;
@@ -1391,7 +1390,6 @@ void StaticData::ReLoadParameter()
 		
 		//  std::cerr << tmp_weights << std::endl;
 		
-		phraseDictionary.SetWeightTransModel(tmp_weights);
 		SetWeightsForScoreProducer(&phraseDictionaryFeature, tmp_weights);
 	}
 	

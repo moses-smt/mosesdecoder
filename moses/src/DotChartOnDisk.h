@@ -21,7 +21,7 @@
 
 #include <vector>
 #include <cassert>
-#include "ChartRule.h"
+#include "ChartTranslationOption.h"
 #include "WordConsumed.h"
 
 namespace OnDiskPt

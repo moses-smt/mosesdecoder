@@ -11,4 +11,4 @@ endif
 if WITH_SERVER
     SERVER = server
 endif
-SUBDIRS = moses/src moses-chart/src OnDiskPt/src moses-cmd/src misc moses-chart-cmd/src CreateOnDisk/src mira $(MERT) $(SERVER)
+SUBDIRS = moses/src moses-chart/src OnDiskPt/src kenlm moses-cmd/src misc moses-chart-cmd/src CreateOnDisk/src mira $(MERT) $(SERVER)

@@ -24,14 +24,13 @@
 #include "ChartHypothesis.h"
 #include "QueueEntry.h"
 #include "ChartCell.h"
-#include "ChartTranslationOption.h"
 #include "ChartManager.h"
 #include "../../moses/src/TargetPhrase.h"
 #include "../../moses/src/Phrase.h"
 #include "../../moses/src/StaticData.h"
 #include "../../moses/src/DummyScoreProducers.h"
 #include "../../moses/src/LMList.h"
-#include "../../moses/src/ChartRule.h"
+#include "../../moses/src/ChartTranslationOption.h"
 
 using namespace std;
 using namespace Moses;
@@ -45,8 +44,8 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 #endif
 
 Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
-:m_rule(queueEntry.GetTranslationOption().GetChartRule())
-,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetChartRule().GetWordsConsumedTargetOrder())
+:m_transOpt(queueEntry.GetTranslationOption())
+,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
 ,m_id(++s_HypothesesCreated)
 ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
 ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())

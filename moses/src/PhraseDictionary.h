@@ -45,7 +45,7 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
-class ChartRuleCollection;
+class ChartTranslationOptionList;
 class CellCollection;
 class TranslationSystem;
 
@@ -61,10 +61,7 @@ class PhraseDictionary: public Dictionary {
     size_t GetTableLimit() const { return m_tableLimit; }
     DecodeType GetDecodeType() const    {   return Translate;   }
     const PhraseDictionaryFeature* GetFeature() const;
-    /** set/change translation weights and recalc weighted score for each translation. 
-        * TODO This may be redundant now we use ScoreCollection
-    */
-    virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
+
 
     //! find list of translations that can translates src. Only for phrase input
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
@@ -74,8 +71,11 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-		virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																															bool adhereTableLimit,const CellCollection &cellColl) const=0;
+		virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
+																				, InputType const& src
+																				, WordsRange const& range
+																				, bool adhereTableLimit
+																				, const CellCollection &cellColl) const=0;
 
   protected:
     size_t m_tableLimit;

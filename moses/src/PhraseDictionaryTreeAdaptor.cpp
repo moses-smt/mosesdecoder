@@ -86,13 +86,6 @@ PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,Word
 }
 
 void PhraseDictionaryTreeAdaptor::
-SetWeightTransModel(const std::vector<float> &weightT)
-{
-	CleanUp();
-	imp->m_weights=weightT;
-}
-
-void PhraseDictionaryTreeAdaptor::
 AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
 {
 	imp->AddEquivPhrase(source,targetPhrase);

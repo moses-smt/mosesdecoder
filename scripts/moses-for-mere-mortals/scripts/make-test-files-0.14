@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# make-test-files-0.14
+# copyright 2010, João L. A. C. Rosas
+# licenced under the GPL licence, version 3
+# date: 23/08/2010
+# Special thanks to Hilário Leal Fontes and Maria José Machado, who helped to test the script and made very helpful suggestions
+
+# ***Purpose***: given 2 strictly aligned files, one in the source language and another in the target language, this script creates a backup of them and cuts each of them in 2 parts: one that will be used for training and another for testing the training. The initial files are divided into X sectors (defined by the user in the settings of this script) and the script extracts Y pseudorandom segments from each sector (the value Y is also defined by the user). This script can be used to create training test files that attempt to cover the whole universe of the sampling space and which simultaneously sample pseudorandomly each of those sectors Y times in an attempt to get a test file that is more representative of that universe than a list of X*Y consecutive segments would be. The files used for training will have those segments erased. The initial corpus will be preserved (the files that will be used for corpus training are new files created by this script).
+
+###########################################################################################################################################################
+#THIS SCRIPT ASSUMES THAT A IRSTLM AND RANDLM ENABLED MOSES HAS ALREADY BEEN INSTALLED WITH create-moses-irstlm-randlm IN $mosesdir (BY DEFAULT $HOME/moses-irstlm-randlm; CHANGE THIS VARIABLE ACCORDING TO YOUR NEEDS)
+# IT ALSO ASSUMES THAT THE PACKAGES UPON WHICH IT DEPENDS, INDICATED IN the create-moses-irstlm-randlm script, HAVE BEEN INSTALLED
+# This script should be used after the execution of create-moses-irstlm-randlm and before the execution of train-moses-irstlm-randlm (it creates the corpus and the test files that will be used by this latter script)
+###########################################################################################################################################################
+
+##########################################################################################################################################################
+#                             The values of the variables that follow should be filled according to your needs:                                          # ##########################################################################################################################################################
+#Base path of Moses installation
+mosesdir=$HOME/moses-irstlm-randlm
+#Source language abbreviation
+lang1=pt
+#Target language abbreviation
+lang2=en
+#Number of sectors in which each input file will be cut
+totalnumsectors=100
+#Number of segments pseudorandomly searched in each sector
+numsegs=10
+#Name of the source language file used for creating one of the test files (!!! omit the path; the name should not include spaces !!!)
+basefilename=200000
+##########################################################################################################################################################
+#                               DO NOT CHANGE THE LINES THAT FOLLOW ... unless you know what you are doing!                                              #
+##########################################################################################################################################################
+startdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+#Function to get a random positive number with up to 10 digits between highest ($1) and lowest ($2)
+randompos(){
+	num=$(( ( ($RANDOM & 3)<<30 | $RANDOM<<15 | $RANDOM ) - 0x80000000 ))
+	if [ $num -lt 0 ] ; then
+		# $1 = highest; $2 = lowest
+		newnum=$[ `expr 0 - $num` % ( $[ $1 - $2 ] + 1 )  + $2 ]
+	else
+		newnum=$[ $num % ( $[ $1 - $2 ] + 1 )  + $2 ]
+	fi
+	echo $newnum
+}
+
+exchange()
+{
+  local temp=${numsegarray[$1]} 
+  numsegarray[$1]=${numsegarray[$2]}
+  numsegarray[$2]=$temp
+  return
+}  
+
+#This function was published in jeronimo's blog (http://www.roth.lu/serendipity/index.php?/archives/31-Bash-Arrays-and-search-function.html)
+# Function to find out whether something exists in a bash array or not
+bash__is_in_array () {
+haystack=( "$@" )
+haystack_size=( "${#haystack[@]}" )
+needle=${haystack[$((${haystack_size}-1))]}
+for ((i=0;i<$(($haystack_size-1));i++)); do
+h=${haystack[${i}]};
+[ $h = $needle ] && return 42
+done
+}
+
+echo "************* Do some preparatory work (it can take a long time to read the input files, if they are large)"
+#Directory where the source and target language files used for creating one of the test files is located
+basefiledir=$mosesdir/corpora_for_training
+#Directory where will be placed the test files that will be created
+testdir=$mosesdir/corpora_for_training
+
+#Eliminate some control characters that can cause Moses training errors
+tr '\a\b\f\r\v|' '     /' < $basefiledir/$basefilename.$lang1 > $testdir/$basefilename.for_train.$lang1
+tr '\a\b\f\r\v|' '     /' < $basefiledir/$basefilename.$lang2 > $testdir/$basefilename.for_train.$lang2
+
+#Determine the number of lines of each file and check that they are equal
+numlines_s=`wc -l "$basefiledir/$basefilename.$lang1" | awk '{print $1'}`
+numlines_t=`wc -l "$basefiledir/$basefilename.$lang2" | awk '{print $1'}`
+if [ "$numlines_s" != "$numlines_t" ]; then
+	echo "Source and target files have a different number of segments (source = $numlines_s and target = $numlines_t). If you verify manually that they do have the same number of segments, then Bash is interpreting at least one of the characters of one of the files as something it isn't. If that is the case, you will have to isolate the line(s) that is (are) causing problems and to substitute the character in question by some other character. Exiting ..."
+	exit 0
+fi
+
+#Calculate number of lines per sector
+numlinespersector=$(echo "scale=0; $numlines_s/$totalnumsectors" | bc)
+#Calculate total number of segments to extract
+totsegstoextract=$(echo "scale=0; $totalnumsectors*$numsegs" | bc)
+
+echo "************* $totalnumsectors sectors to extract. This can take some time ..."
+#Create temporary files
+echo > /tmp/$basefilename.for_test.$lang1
+echo > /tmp/$basefilename.for_test.$lang2
+echo "extract segments for testing from:"
+#Total number of segments extracted so far for the training test file
+totsegsextracted=0
+if (( $(echo "scale=0; $totsegstoextract-$numlines_s" | bc) < 0 )); then
+	for (( sector=1; sector<=$totalnumsectors; sector++ )) ; do
+		echo "sector $sector"
+		floor=$(echo "scale=0; $numlinespersector*$sector-$numlinespersector+1" | bc)
+		ceiling=$(echo "scale=0; $numlinespersector*$sector" | bc)
+		sectornumsegsextracted=0
+		number=-1
+		while (( $sectornumsegsextracted < $numsegs )) ; do
+			number=`randompos $ceiling $floor`
+			bash__is_in_array "${numsegarray[@]}" $number
+			if [ $? -ne 42 ]; then
+				let "sectornumsegsextracted += 1"
+				let "totsegsextracted += 1"
+				awk "NR==$number{print;exit}" $testdir/$basefilename.for_train.$lang1 >> /tmp/$basefilename.for_test.$lang1
+				numsegarray[$totsegsextracted]=$number
+				f+=${numsegarray[$totsegsextracted]}
+				f+="d;"
+				awk "NR==$number{print;exit}" $testdir/$basefilename.for_train.$lang2 >> /tmp/$basefilename.for_test.$lang2
+			fi
+		done
+	done
+
+	echo "************* erase segments used for testing in training files"
+	f=`echo "$f" | sed 's#\;#\n#g' | sort -nr `
+	f=`echo "$f" | sed 's#\n#;#g'`
+	f=${f%;;*}
+	sed "$f" $testdir/$basefilename.for_train.$lang1 > /tmp/$basefilename.for_train.$lang1.temp
+	sed "$f" $testdir/$basefilename.for_train.$lang2 > /tmp/$basefilename.for_train.$lang2.temp
+	echo "************* final cleaning operations"
+	sed '1d' /tmp/$basefilename.for_test.$lang1 > $testdir/$basefilename.for_test.$lang1
+	sed '1d' /tmp/$basefilename.for_test.$lang2 > $testdir/$basefilename.for_test.$lang2
+	mv -f /tmp/$basefilename.for_train.$lang1.temp $testdir/$basefilename.for_train.$lang1
+	mv -f /tmp/$basefilename.for_train.$lang2.temp $testdir/$basefilename.for_train.$lang2
+else
+	echo "The files you want to sample have less lines than the number of sectors times the number of segments that you want to extract per sector. Exiting ..."
+	exit 0
+fi
+echo "starting date: $startdate"
+echo "ending date  : `date +day:%d/%m/%y-time:%H:%M:%S`"
+echo "!!! Test files created in $testdir/$basefilename.for_test.$lang1 and $testdir/$basefilename.for_test.$lang2. Corpus training files (where the segments selected for training were erased) created in $testdir/$basefilename.for_train.$lang1 and $testdir/$basefilename.for_train.$lang2 !!!"
+
+

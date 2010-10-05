@@ -9,8 +9,8 @@ libmoses_la_HEADERS = \
         BitmapContainer.h \
 	BleuScoreFeature.h \
         CellCollection.h \
-        ChartRule.h \
-        ChartRuleCollection.h \
+        ChartTranslationOption.h \
+        ChartTranslationOptionList.h \
         ConfusionNet.h \
         DecodeFeature.h \
         DecodeGraph.h \
@@ -140,8 +140,8 @@ libmoses_la_SOURCES = \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
 	BleuScoreFeature.cpp \
-        ChartRule.cpp \
-        ChartRuleCollection.cpp \
+        ChartTranslationOption.cpp \
+        ChartTranslationOptionList.cpp \
         ConfusionNet.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
@@ -280,6 +280,10 @@ if INTERNAL_LM
 libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
+endif
+
+if KEN_LM
+libmoses_la_SOURCES += LanguageModelKen.cpp
 endif
 
 libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)

@@ -45,7 +45,6 @@ class Phrase
 																					Not really used, but nice to know for debugging purposes
 																			*/
 	std::vector<Word>			m_words;
-	size_t m_arity;
 
 public:
 	/** No longer does anything as not using mem pool for Phrase class anymore */
@@ -198,9 +197,6 @@ public:
 	{
 		return Compare(compare) == 0;
 	}
-	
-	size_t GetArity() const
-	{ return m_arity; }
 
 };
 

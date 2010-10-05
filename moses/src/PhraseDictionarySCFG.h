@@ -24,11 +24,12 @@
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNodeSCFG.h"
-#include "ChartRuleCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "CellCollection.h"
 
 namespace Moses
 {
+	class ChartTranslationOptionList;
 	class ProcessedRuleStack;
 	class ProcessedRuleColl;	
 	
@@ -42,12 +43,8 @@ namespace Moses
 			
 		protected:
 			PhraseDictionaryNodeSCFG m_collection;
-			mutable std::vector<ChartRuleCollection*> m_chartTargetPhraseColl;
 			mutable std::vector<ProcessedRuleColl*>	m_processedRuleColls;
-			
-			Phrase									m_prevSource;
-			TargetPhraseCollection	*m_prevPhraseColl;
-			
+						
 			std::string m_filePath; 
 			
 			TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target);
@@ -68,8 +65,6 @@ namespace Moses
 		public:
 			PhraseDictionarySCFG(size_t numScoreComponent, PhraseDictionaryFeature* feature)
 			: MyBase(numScoreComponent, feature)
-			, m_prevSource(Input)
-			, m_prevPhraseColl(NULL)
 			{
 			}
 			virtual ~PhraseDictionarySCFG();
@@ -101,11 +96,11 @@ namespace Moses
 			
 			void InitializeForInput(const InputType& i);
 			
-			const ChartRuleCollection *GetChartRuleCollection(
-																												InputType const& src
-																												,WordsRange const& range
-																												,bool adhereTableLimit
-																												,const CellCollection &cellColl) const;
+	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
+																			,InputType const& src
+																			,WordsRange const& range
+																			,bool adhereTableLimit
+																			,const CellCollection &cellColl) const;
 			
 			void CleanUp();
 		};

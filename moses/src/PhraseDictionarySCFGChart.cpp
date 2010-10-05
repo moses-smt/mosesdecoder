@@ -22,7 +22,7 @@
 #include "PhraseDictionarySCFG.h"
 #include "FactorCollection.h"
 #include "InputType.h"
-#include "ChartRuleCollection.h"
+#include "ChartTranslationOptionList.h"
 #include "CellCollection.h"
 #include "DotChart.h"
 #include "StaticData.h"
@@ -31,35 +31,12 @@
 using namespace std;
 using namespace Moses;
 
-Word PhraseDictionarySCFG::CreateCoveredWord(const Word &origSourceLabel, const InputType &src, const WordsRange &range) const
-{
-	string coveredWordsString = origSourceLabel.GetFactor(0)->GetString();
-	
-	for (size_t pos = range.GetStartPos(); pos <= range.GetEndPos(); ++pos)
-	{
-		const Word &word = src.GetWord(pos);
-		coveredWordsString += "_" + word.GetFactor(0)->GetString();
-	}
-	
-	FactorCollection &factorCollection = FactorCollection::Instance();
-	
-	Word ret;
-	
-	const Factor *factor = factorCollection.AddFactor(Input, 0, coveredWordsString);
-	ret.SetFactor(0, factor);
-	
-	return ret;
-}
-
-const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
-																																							 InputType const& src
-																																							 ,WordsRange const& range
-																																							 ,bool adhereTableLimit
-																																							 ,const CellCollection &cellColl) const
-{
-	ChartRuleCollection *ret = new ChartRuleCollection();
-	m_chartTargetPhraseColl.push_back(ret);
-	
+void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &outColl
+																								 ,InputType const& src
+																								 ,WordsRange const& range
+																								 ,bool adhereTableLimit
+																								 ,const CellCollection &cellColl) const
+{	
 	size_t relEndPos = range.GetEndPos() - range.GetStartPos();
 	size_t absEndPos = range.GetEndPos();
 	
@@ -152,10 +129,8 @@ const ChartRuleCollection *PhraseDictionarySCFG::GetChartRuleCollection(
 		
 		if (targetPhraseCollection != NULL)
 		{
-			ret->Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+			outColl.Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
 		}
 	}
-	ret->CreateChartRules(rulesLimit);
-	
-	return ret;
+	outColl.CreateChartRules(rulesLimit);	
 }

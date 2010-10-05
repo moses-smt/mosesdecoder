@@ -431,7 +431,12 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 			{
 				if (isNonTerminal(vcbT.getWord( phraseT[j] )))
 				{
-					assert(bestAlignment->alignedToT[ j ].size() == 1);
+					if (bestAlignment->alignedToT[ j ].size() != 1)
+					{
+						cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
+						phraseTableFile.flush();
+						assert(bestAlignment->alignedToT[ j ].size() == 1);
+					}
 					int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
 					phraseTableFile << sourcePos << "-" << j << " ";
 				}

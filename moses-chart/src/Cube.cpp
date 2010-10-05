@@ -21,30 +21,15 @@
 
 #include "Cube.h"
 
+#include "../../moses/src/Util.h"
+
 using namespace std;
 
 namespace MosesChart
 {
 Cube::~Cube()
 {
-	clear();
-}
-
-void
-Cube::clear()
-{
-	while (!m_sortedByScore.empty())
-	{
-		m_sortedByScore.pop();
-	}
-
-	UniqueCubeEntry::iterator iter;
-	for (iter = m_uniqueEntry.begin(); iter != m_uniqueEntry.end(); ++iter)
-	{
-		QueueEntry *entry = *iter;
-		delete entry;
-	}
-	m_uniqueEntry.clear();
+    Moses::RemoveAllInColl(m_uniqueEntry);
 }
 
 bool Cube::Add(QueueEntry *queueEntry)

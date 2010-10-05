@@ -143,7 +143,6 @@ sub init_agenda_graph() {
 
 sub detect_machine {
     my ($hostname,$list) = @_;
-    $list = $1;
     $list =~ s/\s+/ /;
     $list =~ s/^ //;
     $list =~ s/ $//;
@@ -154,7 +153,7 @@ sub detect_machine {
 }
 
 sub detect_if_cluster {
-    my $hostname = `hostname`;
+    my $hostname = `hostname`; chop($hostname);
     foreach my $line (`cat $Bin/experiment.machines`) {
 	next unless $line =~ /^cluster: (.+)$/;
 	if (&detect_machine($hostname,$1)) {
@@ -165,12 +164,13 @@ sub detect_if_cluster {
 }
 
 sub detect_if_multicore {
-    my $hostname = `hostname`;
+    my $hostname = `hostname`; chop($hostname);
     foreach my $line (`cat $Bin/experiment.machines`) {
 	next unless $line =~ /^multicore-(\d+): (.+)$/;
-	my $cores = $1;
-	if (&detect_machine($hostname,$2)) {
+	my ($cores,$list) = ($1,$2);
+	if (&detect_machine($hostname,$list)) {
 	    $MAX_ACTIVE = $cores;
+	    $MULTICORE = 1;
         }
     }
 }
@@ -1174,9 +1174,8 @@ sub get_parameters_relevant_for_re_use {
     #my $module_set = $step; $module_set =~ s/:[^:]+$//;
     my ($module,$set,$dummy) = &deconstruct_name($step);
     foreach my $parameter (@{$RERUN_ON_CHANGE{&defined_step($step)}}) {
-	my $value = &backoff_and_get(&extend_local_name($module,$set,$parameter));
-	#my $value = &backoff_and_get($module_set.":".$parameter);
-        #print "XXX step: $step, parameter: $parameter -> ".(&extend_local_name($module,$set,$parameter))." = $value\n";
+	my $value = &backoff_and_get_array(&extend_local_name($module,$set,$parameter));
+        $value = join(" ",@{$value}) if ref($value) eq 'ARRAY';
 	$VALUE{$parameter} = $value if $value;
     }
 
@@ -1965,7 +1964,16 @@ sub define_evaluation_decode {
     my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
-    $settings .= " -t" if defined($report_segmentation) && $report_segmentation eq "yes";
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    
+    if (defined($report_segmentation) && $report_segmentation eq "yes") {
+      if ($hierarchical) {
+        $settings .= " -T $system_output.trace";
+      }
+      else {
+        $settings .= " -t";
+      }
+    }
 
     my $qsub_filter = 0;
     if ($jobs && $CLUSTER) {
@@ -2034,6 +2042,9 @@ sub define_evaluation_analysis {
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
         my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
 	$cmd .= " -segmentation $segmentation_file";
+    }
+    if (&get("TRAINING:hierarchical-rule-set")) {
+	$cmd .= " -hierarchical";
     }
     &create_step($step_id,$cmd);
 }
@@ -2155,7 +2166,6 @@ sub define_template {
 
     my $parallelizer = &get("GENERAL:generic-parallelizer");
     my $dir = &check_and_get("GENERAL:working-dir");
-    # print "$step XXX ".$parallelizer." XXX ".$MULTICORE." XXX ".$PARALLELIZE{$defined_step}."\n";
 
     my ($module,$set,$stepname) = &deconstruct_name($step);
 

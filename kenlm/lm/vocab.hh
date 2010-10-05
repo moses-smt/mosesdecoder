@@ -1,94 +1,106 @@
-#ifndef LM_VOCAB_H__
-#define LM_VOCAB_H__
+#ifndef LM_VOCAB__
+#define LM_VOCAB__
 
-#include "lm/exception.hh"
-#include "lm/word_index.hh"
-
-#include <boost/unordered_map.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-
-#include <memory>
+#include "lm/virtual_interface.hh"
+#include "util/key_value_packing.hh"
+#include "util/probing_hash_table.hh"
+#include "util/sorted_uniform.hh"
+#include "util/string_piece.hh"
 
 namespace lm {
 
-/* This doesn't inherit from Vocabulary so it can be used where the special
- * tags are not applicable.   
- * TODO: make ngram.* and SALM use this.
- */
-class GenericVocabulary {
+class ProbBackoff;
+
+namespace detail {
+uint64_t HashForVocab(const char *str, std::size_t len);
+inline uint64_t HashForVocab(const StringPiece &str) {
+  return HashForVocab(str.data(), str.length());
+}
+} // namespace detail
+
+// Vocabulary based on sorted uniform find storing only uint64_t values and using their offsets as indices.  
+class SortedVocabulary : public base::Vocabulary {
+  private:
+    // Sorted uniform requires a GetKey function.  
+    struct Entry {
+      uint64_t GetKey() const { return key; }
+      uint64_t key;
+      bool operator<(const Entry &other) const {
+        return key < other.key;
+      }
+    };
+
   public:
-    static const WordIndex kNotFoundIndex;
-    static const char *const kNotFoundWord;
-
-    GenericVocabulary() {
-      strings_.push_back(new std::string(kNotFoundWord));
-      ids_[strings_[0]] = kNotFoundIndex;
-      strings_.push_back(new std::string());
-      available_ = 1;
-    }
-
-    /* Query API */
+    SortedVocabulary();
 
     WordIndex Index(const StringPiece &str) const {
-      boost::unordered_map<StringPiece, WordIndex>::const_iterator i(ids_.find(str));
-      return (__builtin_expect(i == ids_.end(), 0)) ? kNotFoundIndex : i->second;
-    }
-
-    // Note that the literal token <unk> is in the index.  
-    WordIndex IndexOrThrow(const StringPiece &str) const {
-      boost::unordered_map<StringPiece, WordIndex>::const_iterator i(ids_.find(str));
-      if (i == ids_.end()) throw NotFoundInVocabException(str);
-      return i->second;
-    }
-
-    bool Known(const StringPiece &str) const {
-      return ids_.find(str) != ids_.end();
-    }
-
-    const char *Word(WordIndex index) const {
-      return strings_[index].c_str();
-    }
-
-    /* Insertion API */
-
-    void Reserve(size_t to) {
-      strings_.reserve(to);
-      ids_.rehash(to + 1);
-    }
-
-    std::string &Temp() {
-      return strings_.back();
-    }
-
-    // Take the string returned by Temp() and insert it.
-    WordIndex InsertOrFind() {
-      std::pair<boost::unordered_map<StringPiece, WordIndex>::const_iterator, bool> res(ids_.insert(std::make_pair(StringPiece(strings_.back()), available_)));
-      if (res.second) {
-        ++available_;
-        strings_.push_back(new std::string());
+      const Entry *found;
+      if (util::SortedUniformFind<const Entry *, uint64_t>(begin_, end_, detail::HashForVocab(str), found)) {
+        return found - begin_ + 1; // +1 because <unk> is 0 and does not appear in the lookup table.
+      } else {
+        return 0;
       }
-      return res.first->second;
     }
 
-    // Insert a word.  Throw up if already found.  Take ownership of the word in either case.  
-    WordIndex InsertOrThrow() throw(WordDuplicateVocabLoadException) {
-      std::pair<boost::unordered_map<StringPiece, WordIndex>::const_iterator, bool> res(ids_.insert(std::make_pair(StringPiece(strings_.back()), available_)));
-      if (!res.second) {
-        throw WordDuplicateVocabLoadException(strings_.back(), res.first->second, available_);
-      }
-      ++available_;
-      strings_.push_back(new std::string());
-      return res.first->second;
-    }
+    // Ignores second argument for consistency with probing hash which has a float here.  
+    static size_t Size(std::size_t entries, float ignored = 0.0);
+
+    // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
+    void Init(void *start, std::size_t allocated, std::size_t entries);
+
+    WordIndex Insert(const StringPiece &str);
+
+    // Reorders reorder_vocab so that the IDs are sorted.  
+    void FinishedLoading(ProbBackoff *reorder_vocab);
+
+    bool SawUnk() const { return saw_unk_; }
+
+    void LoadedBinary();
 
   private:
-    // TODO: optimize memory use here by using one giant buffer, preferably premade by a binary file format.
-    boost::ptr_vector<std::string> strings_;
-    boost::unordered_map<StringPiece, WordIndex> ids_;
+    Entry *begin_, *end_;
 
-    WordIndex available_;
+    bool saw_unk_;
+};
+
+// Vocabulary storing a map from uint64_t to WordIndex. 
+class ProbingVocabulary : public base::Vocabulary {
+  public:
+    ProbingVocabulary();
+
+    WordIndex Index(const StringPiece &str) const {
+      Lookup::ConstIterator i;
+      return lookup_.Find(detail::HashForVocab(str), i) ? i->GetValue() : 0;
+    }
+
+    static size_t Size(std::size_t entries, float probing_multiplier) {
+      return Lookup::Size(entries, probing_multiplier);
+    }
+
+    // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
+    void Init(void *start, std::size_t allocated, std::size_t entries);
+
+    WordIndex Insert(const StringPiece &str);
+
+    void FinishedLoading(ProbBackoff *reorder_vocab);
+
+    bool SawUnk() const { return saw_unk_; }
+
+    void LoadedBinary();
+
+  private:
+    // std::identity is an SGI extension :-(
+    struct IdentityHash : public std::unary_function<uint64_t, std::size_t> {
+      std::size_t operator()(uint64_t arg) const { return static_cast<std::size_t>(arg); }
+    };
+
+    typedef util::ProbingHashTable<util::ByteAlignedPacking<uint64_t, WordIndex>, IdentityHash> Lookup;
+
+    Lookup lookup_;
+
+    bool saw_unk_;
 };
 
 } // namespace lm
 
-#endif // LM_VOCAB_H__
+#endif // LM_VOCAB__

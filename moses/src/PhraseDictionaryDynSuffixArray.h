@@ -22,7 +22,6 @@ public:
 						, const LMList &languageModels
 						, float weightWP);
 	// functions below required by base class
-	void SetWeightTransModel(const std::vector<float, std::allocator<float> >&);
 	const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
 	void InitializeForInput(const InputType& i);
 	void AddEquivPhrase(const Phrase &, const TargetPhrase &){}
@@ -36,8 +35,11 @@ private:
 	const LMList *m_languageModels;
 	float m_weightWP;
 	
-	virtual const ChartRuleCollection *GetChartRuleCollection(InputType const& src, WordsRange const& range,
-																														bool adhereTableLimit,const CellCollection &cellColl) const;
+	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
+																			,InputType const& src
+																			,WordsRange const& range
+																			,bool adhereTableLimit
+																			,const CellCollection &cellColl) const;
 	
 
 };

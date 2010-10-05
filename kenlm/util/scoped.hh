@@ -1,13 +1,13 @@
-#ifndef UTIL_SCOPED_H__
-#define UTIL_SCOPED_H__
+#ifndef UTIL_SCOPED__
+#define UTIL_SCOPED__
 
-#include <boost/noncopyable.hpp>
+/* Other scoped objects in the style of scoped_ptr. */
 
 #include <cstddef>
 
 namespace util {
 
-template <class T, class R, R (*Free)(T*)> class scoped_thing : boost::noncopyable {
+template <class T, class R, R (*Free)(T*)> class scoped_thing {
   public:
     explicit scoped_thing(T *c = static_cast<T*>(0)) : c_(c) {}
 
@@ -26,9 +26,12 @@ template <class T, class R, R (*Free)(T*)> class scoped_thing : boost::noncopyab
 
   private:
     T *c_;
+
+    scoped_thing(const scoped_thing &);
+    scoped_thing &operator=(const scoped_thing &);
 };
 
-class scoped_fd : boost::noncopyable {
+class scoped_fd {
   public:
     scoped_fd() : fd_(-1) {}
 
@@ -45,39 +48,19 @@ class scoped_fd : boost::noncopyable {
 
     int operator*() const { return fd_; }
 
+    int release() {
+      int ret = fd_;
+      fd_ = -1;
+      return ret;
+    }
+
   private:
     int fd_;
+
+    scoped_fd(const scoped_fd &);
+    scoped_fd &operator=(const scoped_fd &);
 };
 
-// (void*)-1 is MAP_FAILED; this is done to avoid including the mmap header here.  
-class scoped_mmap : boost::noncopyable {
-  public:
-    scoped_mmap() : data_((void*)-1), size_(0) {}
-    scoped_mmap(void *data, std::size_t size) : data_(data), size_(size) {}
-    ~scoped_mmap();
-
-    void *get() const { return data_; }
-
-    const char *begin() const { return reinterpret_cast<char*>(data_); }
-    const char *end() const { return reinterpret_cast<char*>(data_) + size_; }
-    std::size_t size() const { return size_; }
-
-    void reset(void *data, std::size_t size) {
-      scoped_mmap other(data_, size_);
-      data_ = data;
-      size_ = size;
-    }
-
-    void reset() {
-      reset((void*)-1, 0);
-    }
-
-  private:
-    void *data_;
-    std::size_t size_;
-};
-
- 
 } // namespace util
 
-#endif // UTIL_SCOPED_H__
+#endif // UTIL_SCOPED__

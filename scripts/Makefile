@@ -10,8 +10,8 @@ DS?=$(shell date '+%Y%m%d')
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
 # The values here are just the defaults in case your environment does not set
 # them.
-TARGETDIR=/fs/thor3/bhaddow/moses.new
-BINDIR=/fs/thor3/bhaddow/moses.new/bin
+TARGETDIR=/Users/hieuhoang/temp
+BINDIR=/Users/hieuhoang/temp
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)

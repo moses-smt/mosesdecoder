@@ -315,6 +315,7 @@ weight-config = $toy-data/weight.ini
 ### tuning script to be used
 #
 tuning-script = $moses-script-dir/training/mert-moses.pl
+tuning-settings = "-mertdir $moses-src-dir/mert"
 
 ### specify the corpus used for tuning 
 # it should contain 1000s of sentences
