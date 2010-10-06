@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "LMList.h"
 #include "ScoreProducer.h"
-#include "ScoreIndexManager.h"
 #include "FeatureVector.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -62,11 +61,8 @@ namespace Moses
  */
 class ScoreComponentCollection {
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
-	friend class ScoreIndexManager;
 private:
-  const ScoreIndexManager* GetSim();
 	FVector m_scores;
-	const ScoreIndexManager* m_sim;
 
 public:
   //! Create a new score collection with all values set to 0.0
@@ -75,11 +71,8 @@ public:
   //! Clone a score collection
 	ScoreComponentCollection(const ScoreComponentCollection& rhs)
 	: m_scores(rhs.m_scores)
-	, m_sim(rhs.m_sim)
 	{}
 
-	inline size_t size() const { return m_scores.size(); }
-	float operator[](size_t x) const { return m_scores[m_sim->GetFeatureName(x)]; }
 
   //! Set all values to 0.0
 	void ZeroAll()
@@ -102,23 +95,30 @@ public:
 	  m_scores -= rhs.m_scores;
 	}
 
-	//! Add scores from a single ScoreProducer only
-	//! The length of scores must be equal to the number of score components
-	//! produced by sp
-	void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores);
 
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components
 	//! produced by sp
 	void PlusEquals(const ScoreProducer* sp, const ScoreComponentCollection& scores)
 	{
-		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		const size_t end = m_sim->GetEndIndex(sp->GetScoreBookkeepingID());
-		for (; i < end; ++i)
-		{
-			m_scores[m_sim->GetFeatureName(i)] += scores.m_scores[m_sim->GetFeatureName(i)];
-		}  
+    const std::vector<FName>& names = sp->GetFeatureNames();
+    for (std::vector<FName>::const_iterator i = names.begin();
+         i != names.end(); ++i) {
+      m_scores[*i] += scores.m_scores[*i];
+    }
 	}
+
+	//! Add scores from a single ScoreProducer only
+	//! The length of scores must be equal to the number of score components
+	//! produced by sp
+  void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
+  {
+    const std::vector<FName>& names = sp->GetFeatureNames();
+    assert(names.size() == scores.size());
+    for (size_t i = 0; i < scores.size(); ++i) {
+      m_scores[names[i]] = scores[i];
+    }
+  }
 
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
@@ -126,47 +126,27 @@ public:
 	void PlusEquals(const ScoreProducer* sp, float score)
 	{
 		assert(1 == sp->GetNumScoreComponents());
-		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		m_scores[m_sim->GetFeatureName(i)] += score;
+    m_scores[sp->GetFeatureNames()[0]] += score;
 	}
 
 	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
 	{
 		assert(scores.size() == sp->GetNumScoreComponents());
-		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		for (std::vector<float>::const_iterator vi = scores.begin();
-		     vi != scores.end(); ++vi)
-		{
-			m_scores[m_sim->GetFeatureName(i++)] = *vi;
-		}  
+    const std::vector<FName>& names = sp->GetFeatureNames();
+    for (size_t i = 0; i < scores.size(); ++i) {
+      m_scores[names[i]] = scores[i];
+    }
 	}
 
-	void Assign(const ScoreComponentCollection &copy)
-	{
-		m_scores =  copy.m_scores;
-	}
-	
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value
 	void Assign(const ScoreProducer* sp, float score)
 	{
 		assert(1 == sp->GetNumScoreComponents());
-		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		m_scores[m_sim->GetFeatureName(i)] = score;
+    m_scores[sp->GetFeatureNames()[0]] = score;
 	}
 
-	void Assign(size_t index, float score)
-	{
-		m_scores[m_sim->GetFeatureName(index)] = score;
-	}
-
-  //! Used to find the weighted total of scores.  rhs should contain a vector of weights
-  //! of the same length as the number of scores.
-	float InnerProduct(const std::vector<float>& rhs) const
-	{
-		return m_scores.inner_product(rhs);
-	}
 
 	float InnerProduct(const ScoreComponentCollection& rhs) const
 	{
@@ -183,28 +163,20 @@ public:
 	//! return a vector of all the scores associated with a certain ScoreProducer
 	std::vector<float> GetScoresForProducer(const ScoreProducer* sp) const
 	{
-		size_t id = sp->GetScoreBookkeepingID();
-		const size_t begin = m_sim->GetBeginIndex(id);
-		const size_t end = m_sim->GetEndIndex(id);
-		std::vector<float> res(end-begin);
-		size_t j = 0;
-		for (size_t i = begin; i < end; i++) {
-			res[j++] = m_scores[m_sim->GetFeatureName(i)];
-		}
-		return res;  
+    std::vector<float> res(sp->GetNumScoreComponents());
+    const std::vector<FName>& names = sp->GetFeatureNames();
+    for (size_t i = 0; i < names.size(); ++i) {
+      res[i] = m_scores[names[i]];
+    }
+    return res;
 	}
 
 	//! if a ScoreProducer produces a single score (for example, a language model score)
 	//! this will return it.  If not, this method will throw
 	float GetScoreForProducer(const ScoreProducer* sp) const
 	{
-		size_t id = sp->GetScoreBookkeepingID();
-		const size_t begin = m_sim->GetBeginIndex(id);
-#ifndef NDEBUG
-		const size_t end = m_sim->GetEndIndex(id);
-		assert(end-begin == 1);
-#endif
-		return m_scores[m_sim->GetFeatureName(begin)];
+    assert(sp->GetNumScoreComponents() == 1);
+    return m_scores[sp->GetFeatureNames()[0]];
 	}
 
 	float GetWeightedScore() const;
@@ -227,7 +199,6 @@ public:
     template<class Archive>
     void load(Archive &ar, const unsigned int version) {
 			ar >> m_scores;
-      m_sim = GetSim();
 
     }
 

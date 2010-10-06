@@ -115,19 +115,12 @@ int main(int argc, char* argv[])
 	IOWrapper *ioWrapper = GetIODevice(staticData);
 
 	// check on weights
-	vector<float> weights = staticData.GetAllWeights();
+	const ScoreComponentCollection& weights = staticData.GetAllWeights();
 	IFVERBOSE(2) {
-	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-	  TRACE_ERR("The global weight vector looks like this:");
-	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+	  TRACE_ERR("The global weight vector looks like this: ");
+    TRACE_ERR(weights);
 	  TRACE_ERR("\n");
 	}
-	// every score must have a weight!  check that here:
-	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-	  return EXIT_FAILURE;
-	}
-	
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 

@@ -26,8 +26,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "StaticData.h"
-#include "ScoreIndexManager.h"
 #include "FeatureVector.h"
 
 using namespace std;
@@ -76,8 +74,7 @@ namespace Moses {
     return ! (*this == rhs);
   }
   
-	FVector::FVector(size_t size, FValue defaultValue)  
-	:m_size(size)
+	FVector::FVector( FValue defaultValue)  
 	{
     m_features[DEFAULT_NAME] = defaultValue;
 	}
@@ -382,31 +379,6 @@ namespace Moses {
     return product;
   }
 
-  FValue FVector::inner_product(const std::vector<FValue>& rhs) const {		
-      assert(size() == rhs.size());
-      const ScoreIndexManager &sim = StaticData::Instance().GetScoreIndexManager();
-      FValue product = 0;
-      if (get(DEFAULT_NAME) == 0) {
-	  	  for (const_iterator i = cbegin(); i != cend(); i++) {
-					const FName &fname = i->first;
-					if (fname != DEFAULT_NAME) {
-						const std::string &name = fname.name();
-						size_t index = sim.GetFeatureIndex(name);
-						assert(rhs.size() > index);
-						
-						FValue rv = rhs[ index ];
-						product += i->second * rv;
-					}
-     	  }
-	  } else {
-		  for (size_t i = 0; i < rhs.size(); i++) {
-		      product += rhs[i] * get(sim.GetFeatureName(i));
-		  }
-      }
-      return product;
-  }
-  
-  
   const FVector operator+(const FVector& lhs, const FVector& rhs) {
     return FVector(lhs) += rhs;
   }

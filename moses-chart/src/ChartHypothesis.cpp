@@ -274,8 +274,8 @@ void Hypothesis::CalcLMScore()
 			{
 				if (targetPhrasePos == 0 && numTargetTerminals >= lmList.GetMaxNGramOrder() - 1)
 				{ // get from other prev hypo. faster
-					m_lmPrefix.Assign(prevHypo->m_lmPrefix);
-					m_lmNGram.Assign(prevHypo->m_lmNGram);
+					m_lmPrefix = prevHypo->m_lmPrefix;
+					m_lmNGram = prevHypo->m_lmNGram;
 				}
 				else
 				{ // calc

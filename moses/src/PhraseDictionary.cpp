@@ -64,8 +64,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
     m_alignmentsFile(alignmentsFile)
 {
     const StaticData& staticData = StaticData::Instance();
-	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-	//const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).InitFeatureNames();
     if (implementation == Memory || implementation == SCFG || implementation == OnDisk || implementation == SuffixArray) {
         m_useThreadSafePhraseDictionary = true;
     } else {

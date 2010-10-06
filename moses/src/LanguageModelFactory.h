@@ -11,7 +11,6 @@ namespace Moses
 {
 
 class LanguageModel;
-class ScoreIndexManager;
 
 namespace LanguageModelFactory {
 
@@ -23,7 +22,6 @@ namespace LanguageModelFactory {
 																		, const std::vector<FactorType> &factorTypes     
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
-																		, ScoreIndexManager &scoreIndexManager
 																		, int dub);
 	 
 };

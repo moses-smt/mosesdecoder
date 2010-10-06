@@ -38,8 +38,7 @@ class Phrase;
 
 class LanguageModelRandLM : public LanguageModelSingleFactor {
 public:
-  LanguageModelRandLM(bool registerScore, ScoreIndexManager &scoreIndexManager)
-    : LanguageModelSingleFactor(registerScore, scoreIndexManager), m_lm(0) {}
+  LanguageModelRandLM() : m_lm(0) {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
   ~LanguageModelRandLM() {

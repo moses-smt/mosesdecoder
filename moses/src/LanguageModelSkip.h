@@ -45,10 +45,7 @@ public:
 	/** Constructor
 	* \param lmImpl SRI or IRST LM which this LM can use to load data
 	*/
-	LanguageModelSkip(LanguageModelSingleFactor *lmImpl
-										, bool registerScore
-										, ScoreIndexManager &scoreIndexManager)
-	: LanguageModelSingleFactor(registerScore, scoreIndexManager)
+	LanguageModelSkip(LanguageModelSingleFactor *lmImpl)
 	{
 		m_lmImpl = lmImpl;		
 	}

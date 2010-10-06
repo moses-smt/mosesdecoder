@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "TypeDef.h"
-#include "ScoreIndexManager.h"
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
@@ -82,8 +81,7 @@ protected:
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
-	ScoreIndexManager				m_scoreIndexManager;
-	std::vector<float>			m_allWeights;
+	ScoreComponentCollection m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
     std::vector<DecodeGraph*> m_decodeGraphs;
@@ -205,6 +203,8 @@ protected:
 
 
 	StaticData();
+
+
 
 	void LoadPhraseBasedParameters();
 	void LoadChartDecodingParameters();
@@ -369,27 +369,18 @@ public:
 	{
 		return m_translationOptionThreshold;
 	}
-	//! returns the total number of score components across all types, all factors
-	size_t GetTotalScoreComponents() const
-	{
-		return m_scoreIndexManager.GetTotalNumberOfScores();
-	}
-	const ScoreIndexManager& GetScoreIndexManager() const
-	{
-		return m_scoreIndexManager;
-	}
 
-    const TranslationSystem& GetTranslationSystem(std::string id) const {
-        std::map<std::string, TranslationSystem>::const_iterator iter = 
-                m_translationSystems.find(id);
-        VERBOSE(2, "Looking for translation system id " << id << std::endl);
-        if (iter == m_translationSystems.end()) {
-          VERBOSE(1, "Translation system not found " << id << std::endl);
-            throw std::runtime_error("Unknown translation system id");
-        } else {
-          return iter->second;
-        }
+  const TranslationSystem& GetTranslationSystem(std::string id) const {
+    std::map<std::string, TranslationSystem>::const_iterator iter = 
+            m_translationSystems.find(id);
+    VERBOSE(2, "Looking for translation system id " << id << std::endl);
+    if (iter == m_translationSystems.end()) {
+      VERBOSE(1, "Translation system not found " << id << std::endl);
+        throw std::runtime_error("Unknown translation system id");
+    } else {
+      return iter->second;
     }
+  }
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
@@ -457,16 +448,39 @@ public:
 	{ return m_outputWordGraph; }
 
 	//! Sets the global score vector weights for a given ScoreProducer.
-	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	
-	const std::vector<float>& GetAllWeights() const
+	const ScoreComponentCollection& GetAllWeights() const
 	{
 		return m_allWeights;
 	}
-	ScoreComponentCollection GetAllWeightsScoreComponentCollection() const;
+
+  void SetAllWeights(const ScoreComponentCollection& weights) 
+  {
+    m_allWeights = weights;
+  }
+
+  //Weight for a single-valued feature
+  float GetWeight(const ScoreProducer* sp) const 
+  {
+    return m_allWeights.GetScoreForProducer(sp);
+  }
+
+  //Weight for a single-valued feature
+  void SetWeight(const ScoreProducer* sp, float weight) ;
+
+
+  //Weights for feature with fixed number of values
+  std::vector<float> GetWeights(const ScoreProducer* sp) const
+  {
+    return m_allWeights.GetScoresForProducer(sp);
+  }
+
+  //Weights for feature with fixed number of values
+  void SetWeights(const ScoreProducer* sp, const std::vector<float>& weights); 
+
 	
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };

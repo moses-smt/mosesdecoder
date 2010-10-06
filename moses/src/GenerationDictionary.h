@@ -57,7 +57,6 @@ public:
 	*/
   GenerationDictionary(
         size_t numFeatures, 
-        ScoreIndexManager &scoreIndexManager,
         const std::vector<FactorType> &input,
         const std::vector<FactorType> &output);
 	virtual ~GenerationDictionary();

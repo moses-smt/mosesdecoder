@@ -175,12 +175,12 @@ namespace Mira {
   }
 
   ScoreComponentCollection MosesDecoder::getWeights() {
-    return StaticData::Instance().GetAllWeightsScoreComponentCollection();
+    return StaticData::Instance().GetAllWeights();
   }
 
   void MosesDecoder::setWeights(const ScoreComponentCollection& weights) {
     cerr << "New weights: " << weights << endl;
-    StaticData::InstanceNonConst().SetAllWeightsScoreComponentCollection(weights);
+    StaticData::InstanceNonConst().SetAllWeights(weights);
   }
 
   void MosesDecoder::updateHistory(const vector<const Word*>& words) {

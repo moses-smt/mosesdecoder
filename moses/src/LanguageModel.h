@@ -49,10 +49,8 @@ protected:
 	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
 	/** constructor to be called by inherited class
-	 * \param registerScore whether this LM will be directly used to score sentence. 
-	 * 						Usually true, except where LM is a component in a composite LM, eg. LanguageModelJoint
 	 */
-	LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	LanguageModel();
 
 public:
 	/* Returned from LM implementations which points at the state used. For example, if a trigram score was requested

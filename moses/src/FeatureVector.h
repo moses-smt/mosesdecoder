@@ -67,6 +67,7 @@ namespace Moses {
     //const std::string& root() const {return m_root;}
     
     size_t hash() const;
+
     
     bool operator==(const FName& rhs) const ;
     bool operator!=(const FName& rhs) const ;
@@ -108,12 +109,8 @@ namespace Moses {
 	class FVector
 	{
   public:
-    // do not implement
-    FVector();
-    bool operator=(const FName& rhs);
-
     /** Empty feature vector, possibly with default value */
-    FVector(size_t size, FValue defaultValue = DEFAULT);
+    FVector(FValue defaultValue = DEFAULT);
     
     typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     /** Iterators */
@@ -142,15 +139,14 @@ namespace Moses {
     /** Element access */
     ProxyFVector operator[](const FName& name);
     FValue operator[](const FName& name) const;
-    
+
     /** Size */
-    size_t size() const {return m_size;}
+    size_t size() const {return m_features.size();}
     
     /** Equality */
     bool operator== (const FVector& rhs) const;
     bool operator!= (const FVector& rhs) const;
 
-    FValue inner_product(const std::vector<FValue>& rhs) const;
     FValue inner_product(const FVector& rhs) const;
     
     
@@ -192,7 +188,6 @@ namespace Moses {
     
 		
     FNVmap m_features;
-		size_t m_size;
 		
 #ifdef MPI_ENABLE
     //serialization

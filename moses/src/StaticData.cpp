@@ -300,14 +300,14 @@ bool StaticData::LoadData(Parameter *parameter)
 	// word penalties
   for (size_t i = 0; i < m_parameter->GetParam("weight-w").size(); ++i) {
     float weightWordPenalty       = Scan<float>( m_parameter->GetParam("weight-w")[i] );
-    m_wordPenaltyProducers.push_back(new WordPenaltyProducer(m_scoreIndexManager));
-    m_allWeights.push_back(weightWordPenalty);
+    m_wordPenaltyProducers.push_back(new WordPenaltyProducer());
+    SetWeight(m_wordPenaltyProducers.back(), weightWordPenalty);
   }
 	
 
 	float weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
-	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(m_scoreIndexManager);
-	m_allWeights.push_back(weightUnknownWord);
+	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
+  SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 	
 	// reordering constraints
 	m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
@@ -547,8 +547,6 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   
 
-	//m_scoreIndexManager.InitFeatureNames();
-
 	return true;
 }
 
@@ -572,6 +570,16 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
   {
     *parameter = Scan<bool>( m_parameter->GetParam( parameterName )[0]);
   }
+}
+
+void StaticData::SetWeight(const ScoreProducer* sp, float weight)
+{
+  m_allWeights.Assign(sp,weight);
+}
+
+void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& weights)
+{
+  m_allWeights.Assign(sp,weights);
 }
 
 StaticData::~StaticData()
@@ -706,7 +714,8 @@ bool StaticData::LoadGlobalLexicalModel()
 		}
 		vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
 		vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-		m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], weight[i], inputFactors, outputFactors ) );
+		m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], inputFactors, outputFactors ) );
+    SetWeight(m_globalLexicalModels.back(),weight[i]);
 	}
 	return true;
 }
@@ -717,11 +726,6 @@ bool StaticData::LoadLanguageModels()
 	{
 		// weights
 		vector<float> weightAll = Scan<float>(m_parameter->GetParam("weight-l"));
-		
-		for (size_t i = 0 ; i < weightAll.size() ; i++)
-		{
-			m_allWeights.push_back(weightAll[i]);
-		}
 		
 		// dictionary upper-bounds fo all IRST LMs
 		vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
@@ -739,7 +743,7 @@ bool StaticData::LoadLanguageModels()
 		{
         LanguageModel* lm = NULL;
         if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-            lm = new LanguageModelDelegate(true, m_scoreIndexManager, 
+            lm = new LanguageModelDelegate( 
                       static_cast<LanguageModelSingleFactor*>(languageModelsLoaded[lmVector[i]]));
         } else {
             vector<string>	token		= Tokenize(lmVector[i]);
@@ -774,7 +778,6 @@ bool StaticData::LoadLanguageModels()
                                                                                                     , factorTypes     
                                                                 , nGramOrder
                                                                                                     , languageModelFile
-                                                                                                    , m_scoreIndexManager
                                                                                                     , LMdub[i]);
           if (lm == NULL) 
           {
@@ -785,9 +788,9 @@ bool StaticData::LoadLanguageModels()
       }
 
 			m_languageModel.Add(lm);
+      SetWeight(lm,weightAll[i]);
 		}
 	}
-	//m_scoreIndexManager.InitFeatureNames();
   // flag indicating that language models were loaded,
   // since phrase table loading requires their presence
   m_fLMsLoaded = true;
@@ -832,17 +835,19 @@ bool StaticData::LoadGenerationTables()
 
 			VERBOSE(1, filePath << endl);
 
-			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager, input,output));
+			m_generationDictionary.push_back(new GenerationDictionary(numFeatures, input,output));
 			assert(m_generationDictionary.back() && "could not create GenerationDictionary");
 			if (!m_generationDictionary.back()->Load(filePath, Output))
 			{
 				delete m_generationDictionary.back();
 				return false;
 			}
+      vector<float> gdWeights;
 			for(size_t i = 0; i < numFeatures; i++) {
 				assert(currWeightNum < weight.size());
-				m_allWeights.push_back(weight[currWeightNum++]);
+				gdWeights.push_back(weight[currWeightNum++]);
 			}
+      SetWeights(m_generationDictionary.back(), gdWeights);
 		}
 		if (currWeightNum != weight.size()) {
 			TRACE_ERR( "  [WARNING] config file has " << weight.size() << " generation weights listed, but the configuration for generation files indicates there should be " << currWeightNum << "!\n");
@@ -983,27 +988,27 @@ bool StaticData::LoadPhraseTables()
 			
 			assert(numScoreComponent==weight.size());
 
-			std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
 			
             //This is needed for regression testing, but the phrase table
             //might not really be loading here
 			IFVERBOSE(1)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath <<endl);
+      
+      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
+            implementation
+            , numScoreComponent
+            , (currDict==0 ? m_numInputScores : 0)
+            , input
+            , output
+            , filePath
+            , weight
+            , maxTargetPhrase[index]
+            , targetPath, alignmentsFile);
             
-            PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-								implementation
-								, numScoreComponent
-                , (currDict==0 ? m_numInputScores : 0)
-                , input
-                , output
-                , filePath
-                , weight
-                , maxTargetPhrase[index]
-								, targetPath, alignmentsFile);
-                
-             m_phraseDictionary.push_back(pdf);
-                
+         m_phraseDictionary.push_back(pdf);
+            
+      SetWeights(m_phraseDictionary.back(),weight);
                 
             
 			
@@ -1094,8 +1099,8 @@ void StaticData::LoadPhraseBasedParameters()
   }
   for (size_t i = 0; i < distortionWeightCount; ++i) {
     float weightDistortion = Scan<float>(distortionWeights[i]);
-    m_distortionScoreProducers.push_back(new DistortionScoreProducer(m_scoreIndexManager));
-    m_allWeights.push_back(weightDistortion);
+    m_distortionScoreProducers.push_back(new DistortionScoreProducer());
+    SetWeight(m_distortionScoreProducers.back(), weightDistortion);
   }
 }
 
@@ -1205,7 +1210,7 @@ bool StaticData::LoadReferences() {
   }
   float bleuWeight = Scan<float>(bleuWeightStr[0]);
   m_bleuScoreFeature = new BleuScoreFeature();
-  m_allWeights.push_back(bleuWeight);
+  SetWeight(m_bleuScoreFeature, bleuWeight);
   
   vector<vector<string> > references(referenceFiles.size());
   for (size_t i =0; i < referenceFiles.size(); ++i) {
@@ -1245,26 +1250,13 @@ bool StaticData::LoadTargetBigramFeature()
 		UserMessage::Add("Wrong number of arguments for target-bigram-feature-wordlist (expected 1).");
 		return false;
 	}
-	m_targetBigramFeature = new TargetBigramFeature(m_scoreIndexManager);
+	m_targetBigramFeature = new TargetBigramFeature();
 	if (!m_targetBigramFeature->Load(wordFile[0])) {
 		UserMessage::Add("Unable to load word list from file " + wordFile[0]);
 		return false;
 	}
 
 	return true;
-}
-
-void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
-{
-  const size_t id = sp->GetScoreBookkeepingID();
-  const size_t begin = m_scoreIndexManager.GetBeginIndex(id);
-  const size_t end = m_scoreIndexManager.GetEndIndex(id);
-  assert(end - begin == weights.size());
-  if (m_allWeights.size() < end)
-    m_allWeights.resize(end);
-  std::vector<float>::const_iterator weightIter = weights.begin();
-  for (size_t i = begin; i < end; i++)
-    m_allWeights[i] = *weightIter++;
 }
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
@@ -1365,7 +1357,7 @@ void StaticData::ReLoadParameter()
 		{
 			continue;
 		}
-		SetWeightsForScoreProducer(*iterSP, Weights);
+		SetWeights(*iterSP, Weights);
 }
 	
 	//	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
@@ -1390,7 +1382,7 @@ void StaticData::ReLoadParameter()
 		
 		//  std::cerr << tmp_weights << std::endl;
 		
-		SetWeightsForScoreProducer(&phraseDictionaryFeature, tmp_weights);
+		SetWeights(&phraseDictionaryFeature, tmp_weights);
 	}
 	
 }
