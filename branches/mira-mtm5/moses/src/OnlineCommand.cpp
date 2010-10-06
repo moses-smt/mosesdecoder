@@ -109,11 +109,10 @@ void OnlineCommand::Execute() const
 			staticData.ReLoadParameter();
     // check on weights
 
-    vector<float> weights = staticData.GetAllWeights();
+    const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
-        TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-        TRACE_ERR("The global weight vector looks like this:");
-        for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+        TRACE_ERR("The global weight vector looks like this: ");
+        TRACE_ERR(weights);
         TRACE_ERR("\n");
     }
 

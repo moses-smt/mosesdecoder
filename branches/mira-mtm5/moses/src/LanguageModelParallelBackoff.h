@@ -78,7 +78,7 @@ protected:
   WidMatrix *widMatrix;
 
 public:
-	LanguageModelParallelBackoff(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	LanguageModelParallelBackoff(){}
 
 	
 	~LanguageModelParallelBackoff();

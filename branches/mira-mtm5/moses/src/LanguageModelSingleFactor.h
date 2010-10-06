@@ -38,7 +38,7 @@ protected:
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 
-	LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	LanguageModelSingleFactor() {}
 
 public:
   static State UnknownState;

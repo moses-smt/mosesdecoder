@@ -78,7 +78,6 @@ libmoses_la_HEADERS = \
         ReorderingConstraint.h \
         ReorderingStack.h \
         ScoreComponentCollection.h \
-        ScoreIndexManager.h \
         ScoreProducer.h \
         Search.h \
         SearchCubePruning.h \
@@ -207,7 +206,6 @@ libmoses_la_SOURCES = \
         ReorderingConstraint.cpp \
         ReorderingStack.cpp \
         ScoreComponentCollection.cpp \
-        ScoreIndexManager.cpp \
         ScoreProducer.cpp \
         Search.cpp \
         SearchCubePruning.cpp \

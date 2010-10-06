@@ -38,8 +38,8 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelKen::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL)
+LanguageModelKen::LanguageModelKen()
+:m_ngram(NULL)
 {
 }
 

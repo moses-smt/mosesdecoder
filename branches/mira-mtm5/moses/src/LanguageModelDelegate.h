@@ -31,8 +31,7 @@ namespace Moses {
 class LanguageModelDelegate: public LanguageModelSingleFactor {
   
   public:
-    LanguageModelDelegate(bool registerScore, ScoreIndexManager &scoreIndexManager, LanguageModelSingleFactor* delegate) :
-      LanguageModelSingleFactor(registerScore, scoreIndexManager), m_delegate(delegate)
+    LanguageModelDelegate(LanguageModelSingleFactor* delegate) : m_delegate(delegate)
       {
         m_nGramOrder = m_delegate->GetNGramOrder();
         m_factorType = m_delegate->GetFactorType();

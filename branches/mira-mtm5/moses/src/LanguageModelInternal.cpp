@@ -10,10 +10,6 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
-{
-}
 
 bool LanguageModelInternal::Load(const std::string &filePath
 																, FactorType factorType

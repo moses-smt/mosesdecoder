@@ -13,7 +13,7 @@ namespace Moses
  */
 class TargetBigramFeature : public StatefulFeatureFunction {
 public:
-	TargetBigramFeature(ScoreIndexManager &scoreIndexManager);
+	TargetBigramFeature(){}
 
 	bool Load(const std::string &filePath);
 

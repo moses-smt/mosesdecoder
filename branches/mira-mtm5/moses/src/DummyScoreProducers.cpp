@@ -37,10 +37,6 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
 		NOT_FOUND);
 }
 
-DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)
-{
-	scoreIndexManager.AddScoreProducer(this);
-}
 
 size_t DistortionScoreProducer::GetNumScoreComponents() const
 {
@@ -104,11 +100,6 @@ FFState* DistortionScoreProducer::Evaluate(
 }
 
 
-WordPenaltyProducer::WordPenaltyProducer(ScoreIndexManager &scoreIndexManager)
-{
-	scoreIndexManager.AddScoreProducer(this);
-}
-
 size_t WordPenaltyProducer::GetNumScoreComponents() const
 {
 	return 1;
@@ -129,11 +120,6 @@ size_t WordPenaltyProducer::GetNumInputScores() const { return 0;}
 void WordPenaltyProducer::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
-}
-
-UnknownWordPenaltyProducer::UnknownWordPenaltyProducer(ScoreIndexManager &scoreIndexManager)
-{
-	scoreIndexManager.AddScoreProducer(this);
 }
 
 size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const

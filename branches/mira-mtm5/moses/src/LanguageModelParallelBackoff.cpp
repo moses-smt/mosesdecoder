@@ -35,12 +35,6 @@ using namespace std;
 namespace Moses
 {
 
-	LanguageModelParallelBackoff::LanguageModelParallelBackoff(bool registerScore, ScoreIndexManager &scoreIndexManager)
-	:LanguageModelMultiFactor(registerScore, scoreIndexManager)
-	{
-		 ///
-	}
-	
 	LanguageModelParallelBackoff::~LanguageModelParallelBackoff()
 	{
      ///

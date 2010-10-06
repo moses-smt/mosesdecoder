@@ -53,9 +53,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
         exit(1);
     }
     
-    // add ScoreProducer - don't do this before our object is set up
-    const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-    const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+    const_cast<StaticData&>(StaticData::Instance()).SetWeights(this, weights);
 
     m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 }

@@ -9,11 +9,6 @@ namespace Moses {
 
 using namespace std;
 
-TargetBigramFeature::TargetBigramFeature(ScoreIndexManager &scoreIndexManager)
-{
-  scoreIndexManager.AddScoreProducer(this);
-}
-
 bool TargetBigramFeature::Load(const std::string &filePath) 
 {
   InputFileStream inFile(filePath);
@@ -75,7 +70,9 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
 		map<string,size_t>::const_iterator first, second;
 		if ((first = m_wordMap.find(words[i-1])) != m_wordMap.end() &&
 			(second = m_wordMap.find(words[i])) != m_wordMap.end()) {
-			accumulator->Assign(first->second * second->second, 1);
+      cerr << "FIXME" << endl;
+      assert(0);
+			//accumulator->Assign(first->second * second->second, 1);
 		}
 	}
 

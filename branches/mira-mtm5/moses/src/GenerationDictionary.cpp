@@ -33,13 +33,10 @@ using namespace std;
 
 namespace Moses
 {
-  GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager,
+  GenerationDictionary::GenerationDictionary(size_t numFeatures,
                                              const std::vector<FactorType> &input,
                                              const std::vector<FactorType> &output)
-  : Dictionary(numFeatures), DecodeFeature(input,output)
-{
-	scoreIndexManager.AddScoreProducer(this);
-}
+  : Dictionary(numFeatures), DecodeFeature(input,output) {}
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {	

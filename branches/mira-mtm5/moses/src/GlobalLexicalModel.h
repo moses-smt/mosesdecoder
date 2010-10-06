@@ -48,7 +48,6 @@ private:
 
 public:
 	GlobalLexicalModel(const std::string &filePath,
-	                   const float weight,
 	                   const std::vector< FactorType >& inFactors,
 	                   const std::vector< FactorType >& outFactors);
 	virtual ~GlobalLexicalModel();

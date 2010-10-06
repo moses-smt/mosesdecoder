@@ -69,11 +69,7 @@ BleuScoreFeature::BleuScoreFeature():
                                  m_count_history(BleuScoreState::bleu_order),
                                  m_match_history(BleuScoreState::bleu_order),
                                  m_target_length_history(0),
-                                 m_ref_length_history(0)
-{
-    const_cast<ScoreIndexManager&>
-        (StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-}
+                                 m_ref_length_history(0) {}
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {

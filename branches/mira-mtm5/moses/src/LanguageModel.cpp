@@ -37,11 +37,8 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModel::LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager) 
-{
-	if (registerScore)
-		scoreIndexManager.AddScoreProducer(this);
-}
+LanguageModel::LanguageModel() {}
+
 LanguageModel::~LanguageModel() {}
 
 // don't inline virtual funcs...
@@ -252,9 +249,7 @@ FFState* LanguageModel::Evaluate(
 }
 
 float LanguageModel::GetWeight() const {
-	size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
-	GetBeginIndex(GetScoreBookkeepingID());
-	return StaticData::Instance().GetAllWeights()[lmIndex];
+	return StaticData::Instance().GetAllWeights().GetScoreForProducer(this);
 }
 	
 }
