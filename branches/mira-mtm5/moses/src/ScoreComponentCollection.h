@@ -116,7 +116,7 @@ public:
     const std::vector<FName>& names = sp->GetFeatureNames();
     assert(names.size() == scores.size());
     for (size_t i = 0; i < scores.size(); ++i) {
-      m_scores[names[i]] = scores[i];
+      m_scores[names[i]] += scores[i];
     }
   }
 
