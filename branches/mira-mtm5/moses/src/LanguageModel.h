@@ -115,8 +115,6 @@ public:
 		return m_sentenceEndArray;
 	}
 	
-	virtual std::string GetScoreProducerDescription() const = 0;
-
 	//! scoring weight. Shouldn't this now be superceded by ScoreProducer???
 	float GetWeight() const;
 

@@ -3,8 +3,8 @@
 #ifndef moses_ScoreProducer_h
 #define moses_ScoreProducer_h
 
+#include <set>
 #include <string>
-#include <limits>
 #include <vector>
 
 #include "FeatureVector.h"
@@ -20,13 +20,13 @@ class ScoreProducer
 {
 private:
   mutable  std::vector<FName> m_names; //for features with fixed number of values
-
+  std::string m_description;
+  //In case there's multiple producers with the same description
+  static std::multiset<std::string> description_counts;
 	ScoreProducer(const ScoreProducer&);  // don't implement
 	
-	 #define UNASSIGNED std::numeric_limits<unsigned int>::max()
-	
 protected:
-	ScoreProducer() {}
+	ScoreProducer(const std::string& description);
 	virtual ~ScoreProducer();
 
 public:
@@ -37,7 +37,7 @@ public:
 	virtual size_t GetNumScoreComponents() const = 0;
 
 	//! returns a string description of this producer
-	virtual std::string GetScoreProducerDescription() const = 0;
+	const std::string& GetScoreProducerDescription() const {return m_description;}
 
 	//! returns the weight parameter name of this producer (used in n-best list)
 	virtual std::string GetScoreProducerWeightShortName() const = 0;

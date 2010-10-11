@@ -53,7 +53,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             , size_t tableLimit
 							, const std::string &targetFile  // default param
                             , const std::string &alignmentsFile) // default param
-  :DecodeFeature(input,output)
+  :DecodeFeature("PhraseModel",input,output)
 ,   m_numScoreComponent(numScoreComponent),
 	m_numInputScores(numInputScores),
 	m_filePath(filePath),
@@ -242,10 +242,6 @@ PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 	
 
-std::string PhraseDictionaryFeature::GetScoreProducerDescription() const
-{
-	return "PhraseModel";
-}
 
 size_t PhraseDictionaryFeature::GetNumScoreComponents() const
 {

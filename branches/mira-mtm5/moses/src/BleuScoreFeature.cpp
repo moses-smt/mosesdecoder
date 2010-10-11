@@ -66,6 +66,7 @@ void BleuScoreState::print(std::ostream& out) const {
 }
 
 BleuScoreFeature::BleuScoreFeature():
+                                 StatefulFeatureFunction("BleuScore"),      
                                  m_count_history(BleuScoreState::bleu_order),
                                  m_match_history(BleuScoreState::bleu_order),
                                  m_target_length_history(0),

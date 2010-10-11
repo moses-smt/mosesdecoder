@@ -13,12 +13,11 @@ namespace Moses
  */
 class TargetBigramFeature : public StatefulFeatureFunction {
 public:
-	TargetBigramFeature(){}
+	TargetBigramFeature(): StatefulFeatureFunction("TargetBigram"){}
 
 	bool Load(const std::string &filePath);
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 

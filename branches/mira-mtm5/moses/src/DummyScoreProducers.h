@@ -14,13 +14,12 @@ class WordsRange;
  */
 class DistortionScoreProducer : public StatefulFeatureFunction {
 public:
-	DistortionScoreProducer() {}
+	DistortionScoreProducer() : StatefulFeatureFunction("Description") {}
 
 	float CalculateDistortionScore(const Hypothesis& hypo,
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
@@ -38,10 +37,9 @@ public:
  */
 class WordPenaltyProducer : public StatelessFeatureFunction {
 public:
-	WordPenaltyProducer() {}
+	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty") {}
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
@@ -54,10 +52,9 @@ public:
 /** unknown word penalty */
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction {
 public:
-	UnknownWordPenaltyProducer() {}
+	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty") {}
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
 
