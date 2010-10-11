@@ -42,11 +42,6 @@ class BleuScoreFeature : public StatefulFeatureFunction {
 public:
     BleuScoreFeature();
 
-    std::string GetScoreProducerDescription() const
-    {
-        return "BleuScoreFeature";
-    }
-
     std::string GetScoreProducerWeightShortName() const
     {
         return "bl";

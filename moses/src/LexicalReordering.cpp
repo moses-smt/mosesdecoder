@@ -13,7 +13,8 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      const std::string &modelType,
                                      const std::string &filePath, 
                                      const std::vector<float>& weights)
-        : m_configuration(this, modelType) {
+        : StatefulFeatureFunction("LexicalReordering_" + modelType),
+          m_configuration(this, modelType) {
     std::cerr << "Creating lexical reordering...\n";
     std::cerr << "weights: ";
     for(size_t w = 0; w < weights.size(); ++w){

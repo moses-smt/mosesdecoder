@@ -41,14 +41,6 @@ LanguageModelSingleFactor::State LanguageModelSingleFactor::UnknownState=0;
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 
-std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
-{
-	std::ostringstream oss;
-	// what about LMs that are over multiple factors at once, POS + stem, for example?
-	oss << "LM_" << GetNGramOrder() << "gram";
-	return oss.str();
-} 
-
 }
 
 

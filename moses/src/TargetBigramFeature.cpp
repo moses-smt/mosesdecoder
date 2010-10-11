@@ -29,10 +29,6 @@ size_t TargetBigramFeature::GetNumScoreComponents() const
 	return m_wordMap.size() * m_wordMap.size();
 }
 
-string TargetBigramFeature::GetScoreProducerDescription() const
-{
-	return "TargetBigramFeature";
-}
 
 string TargetBigramFeature::GetScoreProducerWeightShortName() const
 {

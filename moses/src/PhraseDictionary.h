@@ -107,7 +107,6 @@ class PhraseDictionaryFeature :  public DecodeFeature
 	
     virtual bool ComputeValueInTranslationOption() const; 
 
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const
 	{
 		return "tm";

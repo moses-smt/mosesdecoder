@@ -37,7 +37,7 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModel::LanguageModel() {}
+LanguageModel::LanguageModel() : StatefulFeatureFunction("LM") {}
 
 LanguageModel::~LanguageModel() {}
 

@@ -70,7 +70,6 @@ public:
 	{
 		return m_factorType;
 	}
-	virtual std::string GetScoreProducerDescription() const;
 };
 
 }
