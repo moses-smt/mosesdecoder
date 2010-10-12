@@ -223,6 +223,7 @@
 		1ED0FF02124BB9380029177F /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE29124BB9380029177F /* XmlOption.h */; };
 		1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */; };
 		1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */; };
+		1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -444,6 +445,7 @@
 		1ED0FE29124BB9380029177F /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 		1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
 		1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
+		1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = src/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -471,12 +473,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */,
-				1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */,
-				1ED00034124BC2690029177F /* ChartTranslationOption.cpp */,
-				1ED00035124BC2690029177F /* ChartTranslationOption.h */,
-				1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */,
-				1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */,
 				1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */,
 				1ED0FD4D124BB9380029177F /* AlignmentInfo.h */,
 				1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */,
@@ -484,6 +480,10 @@
 				1ED0FD50124BB9380029177F /* BitmapContainer.cpp */,
 				1ED0FD51124BB9380029177F /* BitmapContainer.h */,
 				1ED0FD52124BB9380029177F /* CellCollection.h */,
+				1ED00034124BC2690029177F /* ChartTranslationOption.cpp */,
+				1ED00035124BC2690029177F /* ChartTranslationOption.h */,
+				1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */,
+				1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */,
 				1ED0FD57124BB9380029177F /* ConfusionNet.cpp */,
 				1ED0FD58124BB9380029177F /* ConfusionNet.h */,
 				1ED0FD59124BB9380029177F /* DecodeFeature.cpp */,
@@ -505,6 +505,7 @@
 				1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */,
 				1ED0FD6A124BB9380029177F /* DummyScoreProducers.h */,
 				1ED0FD6B124BB9380029177F /* DynSAInclude */,
+				1ED4FC7C11BDC0D2004E826A /* DynSAInclude */,
 				1ED0FD73124BB9380029177F /* DynSuffixArray.cpp */,
 				1ED0FD74124BB9380029177F /* DynSuffixArray.h */,
 				1ED0FD75124BB9380029177F /* Factor.cpp */,
@@ -559,6 +560,8 @@
 				1ED0FDA6124BB9380029177F /* LanguageModelMultiFactor.h */,
 				1ED0FDA7124BB9380029177F /* LanguageModelParallelBackoff.cpp */,
 				1ED0FDA8124BB9380029177F /* LanguageModelParallelBackoff.h */,
+				1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */,
+				1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */,
 				1ED0FDAB124BB9380029177F /* LanguageModelRemote.cpp */,
 				1ED0FDAC124BB9380029177F /* LanguageModelRemote.h */,
 				1ED0FDAD124BB9380029177F /* LanguageModelSingleFactor.cpp */,
@@ -607,6 +610,7 @@
 				1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */,
 				1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */,
 				1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */,
+				1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */,
 				1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */,
 				1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */,
 				1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */,
@@ -683,7 +687,6 @@
 				1ED0FE27124BB9380029177F /* WordsRange.h */,
 				1ED0FE28124BB9380029177F /* XmlOption.cpp */,
 				1ED0FE29124BB9380029177F /* XmlOption.h */,
-				1ED4FC7C11BDC0D2004E826A /* DynSAInclude */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -846,6 +849,7 @@
 				1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */,
 				1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */,
 				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
+				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

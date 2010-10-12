@@ -188,14 +188,10 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 																		, const Moses::PhraseDictionary &phraseDict
 																		, const std::vector<float> &weightT
 																		, const Moses::WordPenaltyProducer* wpProducer
-																		, const Moses::LMList &lmList
-																		, const Moses::Phrase &sourcePhrase) const
+																		, const Moses::LMList &lmList) const
 {
 	Moses::TargetPhrase *ret = new Moses::TargetPhrase(Moses::Output);
-	
-	// source phrase
-	ret->SetSourcePhrase(&sourcePhrase);
-	
+		
 	// words
 	size_t phraseSize = GetSize();
 	assert(phraseSize > 0); // last word is lhs

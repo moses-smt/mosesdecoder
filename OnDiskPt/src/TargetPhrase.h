@@ -72,8 +72,7 @@ public:
 																			, const Moses::PhraseDictionary &phraseDict
 																			, const std::vector<float> &weightT
 																			, const Moses::WordPenaltyProducer* wpProducer
-																			, const Moses::LMList &lmList
-																			, const Moses::Phrase &sourcePhrase) const;
+																			, const Moses::LMList &lmList) const;
 	UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
 	UINT64 ReadFromFile(std::fstream &fileTP, size_t numFactors);
 	

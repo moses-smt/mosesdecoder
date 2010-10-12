@@ -53,7 +53,6 @@ public:
 																										, const std::vector<float> &weightT
 																										, const Moses::WordPenaltyProducer* wpProducer
 																										, const Moses::LMList &lmList
-																										, const Moses::Phrase &sourcePhrase
 																										, const std::string &filePath
 																										, Vocab &vocab) const;
 	void ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper);
