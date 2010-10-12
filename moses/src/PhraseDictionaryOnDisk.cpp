@@ -110,7 +110,6 @@ void PhraseDictionaryOnDisk::CleanUp()
 	}
 	m_cache.clear();
 	
-	RemoveAllInColl(m_chartTargetPhraseColl);
 	RemoveAllInColl(m_runningNodesVec);
 	RemoveAllInColl(m_sourcePhraseNode);	
 }

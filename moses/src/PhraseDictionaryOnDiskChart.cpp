@@ -43,8 +43,6 @@ namespace Moses
 		// source phrase
 		Phrase *cachedSource = new Phrase(src.GetSubString(range));
 		
-		m_chartTargetPhraseColl.push_back(&outColl);
-		
 		size_t relEndPos = range.GetEndPos() - range.GetStartPos();
 		size_t absEndPos = range.GetEndPos();
 		
