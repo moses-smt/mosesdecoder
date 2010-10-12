@@ -54,7 +54,7 @@ int main (int argc, char * const argv[])
     if (lineNum%100000 == 0) cerr << lineNum << flush;
 		//cerr << lineNum << " " << line << endl;
 		
-		std::vector<float> misc;
+		std::vector<float> misc(1);
 		SourcePhrase sourcePhrase;
 		TargetPhrase *targetPhrase = new TargetPhrase(numScores);
 		Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
@@ -135,11 +135,8 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 					break;
 				case 5:					
 				{ // count info. Only store the 2nd one
-					if (misc.size() == 0)
-					{
-						float val = Moses::Scan<float>(tok);
-						misc.push_back(val);
-					}
+					float val = Moses::Scan<float>(tok);
+					misc[0] = val;
 					++stage;
 					break;
 				}
