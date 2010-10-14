@@ -1,5 +1,4 @@
 #include "TargetBigramFeature.h"
-#include "InputFileStream.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
@@ -9,30 +8,39 @@ namespace Moses {
 
 using namespace std;
 
+int TargetBigramState::Compare(const FFState& other) const {
+  const TargetBigramState& rhs = dynamic_cast<const TargetBigramState&>(other);
+  return Word::Compare(m_word,rhs.m_word);
+}
+
 bool TargetBigramFeature::Load(const std::string &filePath) 
 {
-  InputFileStream inFile(filePath);
+  if (filePath == "*") return true; //allow all
+  ifstream inFile(filePath.c_str());
   if (!inFile)
+  {
       return false;
-
-  size_t lineNo = 0;
-  std::string line;
-  while (getline(inFile, line)) {
-  m_wordMap[line] = lineNo++;
   }
 
-  inFile.Close();
+  std::string line;
+  m_vocab.insert(BOS_);
+  while (getline(inFile, line)) {
+    m_vocab.insert(line);
+  }
+
+  inFile.close();
+  return true;
 }
 
 size_t TargetBigramFeature::GetNumScoreComponents() const
 {
-	return m_wordMap.size() * m_wordMap.size();
+  return ScoreProducer::unlimited;
 }
 
 
 string TargetBigramFeature::GetScoreProducerWeightShortName() const
 {
-	return "tbf";
+	return "dlmb";
 }
 
 size_t TargetBigramFeature::GetNumInputScores() const
@@ -43,36 +51,37 @@ size_t TargetBigramFeature::GetNumInputScores() const
 
 const FFState* TargetBigramFeature::EmptyHypothesisState(const InputType &/*input*/) const
 {
-	return NULL;
+  return new TargetBigramState(m_bos);
 }
 
 FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        const FFState* prev_state,
                                        ScoreComponentCollection* accumulator) const
 {
-	vector<string> words;
-	if (cur_hypo.GetPrevHypo() != NULL) {
-		size_t prevPhraseSize = cur_hypo.GetPrevHypo()->GetCurrTargetPhrase().GetSize();
-		if (prevPhraseSize > 0) {
-			words.push_back(cur_hypo.GetPrevHypo()->GetCurrTargetPhrase().GetWord(prevPhraseSize - 1).ToString());
-		}
+  const TargetBigramState* tbState = dynamic_cast<const TargetBigramState*>(prev_state);
+  assert(tbState);
+  const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+  if (targetPhrase.GetSize() == 0) {
+    return new TargetBigramState(*tbState);
+  }
+  for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+    const Factor* f1 = NULL;
+    if (i == 0) {
+      f1 = tbState->GetWord().GetFactor(m_factorType);
+    } else {
+      f1 = targetPhrase.GetWord(i-1).GetFactor(m_factorType);
+    }
+    const Factor* f2 = targetPhrase.GetWord(i).GetFactor(m_factorType);
+    const string& w1 = f1->GetString();
+    const string& w2 = f2->GetString();
+    if (m_vocab.size() && 
+        (m_vocab.find(w1) == m_vocab.end() || m_vocab.find(w2) == m_vocab.end())) {
+      continue;
+    }
+    string name(w1 +":"+w2);
+    accumulator->PlusEquals(this,name,1);
+  }
+  return new TargetBigramState(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 	}
-	size_t currPhraseSize = cur_hypo.GetCurrTargetPhrase().GetSize();
-	for (size_t i = 0; i < currPhraseSize; ++i) {
-		words.push_back(cur_hypo.GetCurrTargetPhrase().GetWord(i).ToString());
-	}
-	
-	for (size_t i = 1; i < words.size(); ++i) {
-		map<string,size_t>::const_iterator first, second;
-		if ((first = m_wordMap.find(words[i-1])) != m_wordMap.end() &&
-			(second = m_wordMap.find(words[i])) != m_wordMap.end()) {
-      cerr << "FIXME" << endl;
-      assert(0);
-			//accumulator->Assign(first->second * second->second, 1);
-		}
-	}
-
-	return NULL;
 }
 
-}

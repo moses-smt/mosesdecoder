@@ -1,5 +1,6 @@
 bin_PROGRAMS = moses_test
-moses_test_SOURCES = MosesTest.cpp \
+moses_test_SOURCES = MockHypothesis.cpp \
+                     MosesTest.cpp \
                      ScoreComponentCollectionTest.cpp \
                      TargetBigramFeatureTest.cpp
 

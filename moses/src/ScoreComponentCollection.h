@@ -129,6 +129,14 @@ public:
     m_scores[sp->GetFeatureNames()[0]] += score;
 	}
 
+  //For features which have an unbounded number of components
+  void PlusEquals(const ScoreProducer*sp, const std::string& name, float score)
+  {
+    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] += score;
+  }
+
 	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
 	{
 		assert(scores.size() == sp->GetNumScoreComponents());
@@ -138,7 +146,7 @@ public:
     }
 	}
 
-	//! Special version PlusEquals(ScoreProducer, vector<float>)
+	//! Special version Assign(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value
 	void Assign(const ScoreProducer* sp, float score)
@@ -146,6 +154,14 @@ public:
 		assert(1 == sp->GetNumScoreComponents());
     m_scores[sp->GetFeatureNames()[0]] = score;
 	}
+
+  //For features which have an unbounded number of components
+  void Assign(const ScoreProducer*sp, const std::string name, float score) 
+  {
+    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] = score;
+  }
 
 
 	float InnerProduct(const ScoreComponentCollection& rhs) const
@@ -178,6 +194,15 @@ public:
     assert(sp->GetNumScoreComponents() == 1);
     return m_scores[sp->GetFeatureNames()[0]];
 	}
+
+  //For features which have an unbounded number of components
+  float GetScoreForProducer
+    (const ScoreProducer* sp, const std::string& name) const
+  {
+    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    FName fname(sp->GetScoreProducerDescription(),name);
+    return m_scores[fname];
+  }
 
 	float GetWeightedScore() const;
 
