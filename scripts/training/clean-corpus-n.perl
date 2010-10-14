@@ -48,6 +48,7 @@ if (-e $l1input) {
   $opn = "zcat $l1input.gz |";
 }
 open(F,$opn) or die "Can't open '$opn'";
+$opn = undef;
 my $l2input = "$corpus.$l2";
 if (-e $l2input) {
   $opn = $l2input;
