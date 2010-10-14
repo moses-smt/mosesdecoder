@@ -11,6 +11,7 @@ namespace Moses
 {
 
 multiset<string> ScoreProducer::description_counts;
+const size_t ScoreProducer::unlimited = -1;
 
 ScoreProducer::ScoreProducer(const std::string& description) 
 {

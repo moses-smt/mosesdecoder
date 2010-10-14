@@ -58,9 +58,9 @@ namespace Moses {
     //A feature name can either be initialised as a pair of strings,
     //which will be concatenated with a SEP between them, or as
     //a single string, which will be used as-is.
-    FName(const std::string root, const std::string name)
+    explicit FName(const std::string root, const std::string name)
 		{init(root + SEP + name);}
-    FName(const std::string& name)
+    explicit FName(const std::string& name)
 		{init(name);}
     
     const std::string& name() const;

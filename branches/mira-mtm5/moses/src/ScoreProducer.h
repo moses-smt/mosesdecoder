@@ -30,10 +30,12 @@ protected:
 	virtual ~ScoreProducer();
 
 public:
+
+  static const size_t unlimited;
+
 	//! returns the number of scores that a subclass produces.
 	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
-  //! will cause an error if this producer does not have a fixed number
-  //! of scores (eg sparse features)
+  //! sparse features returned unlimited
 	virtual size_t GetNumScoreComponents() const = 0;
 
 	//! returns a string description of this producer

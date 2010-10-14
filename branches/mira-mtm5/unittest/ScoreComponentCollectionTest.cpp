@@ -17,14 +17,16 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <stdexcept>
 
 #include <boost/test/unit_test.hpp>
 
-#include <DummyScoreProducers.h>
-#include <FeatureFunction.h>
-#include <ScoreComponentCollection.h>
+#include "DummyScoreProducers.h"
+#include "FeatureFunction.h"
+#include "ScoreComponentCollection.h"
 
 using namespace Moses;
+using namespace std;
 
 BOOST_AUTO_TEST_SUITE(scc)
 
@@ -42,21 +44,28 @@ class MockMultiFeature : public StatelessFeatureFunction {
     size_t GetNumScoreComponents() const {return 5;}
 };
 
-struct MockProducers {
-  MockProducers(): single(new MockSingleFeature()), 
-                    multi(new MockMultiFeature()) {}
-  ~MockProducers() {delete single; delete multi;}
+class MockSparseFeature : public StatelessFeatureFunction {
+  public:
+    MockSparseFeature(): StatelessFeatureFunction("MockSparse") {}
+    std::string GetScoreProducerWeightShortName() const {return "sf";}
+    size_t GetNumScoreComponents() const {return ScoreProducer::unlimited;}
+};
 
-  MockSingleFeature* single;
-  MockMultiFeature* multi;
+
+struct MockProducers {
+  MockProducers() {}
+
+  MockSingleFeature single;
+  MockMultiFeature multi;
+  MockSparseFeature sparse;
 };
 
 BOOST_FIXTURE_TEST_CASE(ctor, MockProducers) 
 {
   ScoreComponentCollection scc;
-  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(single),0);
+  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&single),0);
   float expected[] =  {0,0,0,0,0};
-  std::vector<float> actual= scc.GetScoresForProducer(multi);
+  std::vector<float> actual= scc.GetScoresForProducer(&multi);
   BOOST_CHECK_EQUAL_COLLECTIONS(expected, expected+5, actual.begin(), actual.begin()+5);
 }
 
@@ -68,23 +77,32 @@ BOOST_FIXTURE_TEST_CASE(plusequals, MockProducers)
   std::vector<float> vec2(arr2,arr2+5);
 
   ScoreComponentCollection scc;
-  scc.PlusEquals(single, 3.4f);
-  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(single), 3.4f);
-  scc.PlusEquals(multi,vec1);
-  std::vector<float> actual = scc.GetScoresForProducer(multi);
+  scc.PlusEquals(&single, 3.4f);
+  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&single), 3.4f);
+  scc.PlusEquals(&multi,vec1);
+  std::vector<float> actual = scc.GetScoresForProducer(&multi);
   BOOST_CHECK_EQUAL_COLLECTIONS(vec1.begin(),vec1.end()
         ,actual.begin(), actual.end());
-  scc.PlusEquals(multi,vec1);
-  actual = scc.GetScoresForProducer(multi);
+  scc.PlusEquals(&multi,vec1);
+  actual = scc.GetScoresForProducer(&multi);
   BOOST_CHECK_EQUAL_COLLECTIONS(vec2.begin(),vec2.end(),
          actual.begin(), actual.end());
 
-  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(single), 3.4f);
+  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&single), 3.4f);
 }
 
-BOOST_AUTO_TEST_CASE(test)
+BOOST_FIXTURE_TEST_CASE(sparse_feature, MockProducers)
 {
-  BOOST_CHECK(true);
+  ScoreComponentCollection scc;
+  scc.Assign(&sparse, "first", 1.3f);
+  scc.Assign(&sparse, "second", 2.1f);
+  BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), 1.3f);
+  BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"second"), 2.1f);
+  BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"third"), 0.0f);
+  scc.Assign(&sparse, "first", -1.9f);
+  BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -1.9f);
+  scc.PlusEquals(&sparse, "first", -1.9f);
+  BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -3.8f);
 }
 
 
