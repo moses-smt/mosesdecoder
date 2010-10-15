@@ -42,7 +42,6 @@ public:
 	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerWeightShortName() const;
 	size_t GetNumInputScores() const;
-  Word GetSentenceStartArray() const {return m_bos;}
 
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 

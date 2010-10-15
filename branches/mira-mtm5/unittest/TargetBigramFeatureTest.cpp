@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(empty_hypo)
   TargetBigramFeature tbf;
   auto_ptr<const FFState> ffs(tbf.EmptyHypothesisState(s));
   BOOST_CHECK(ffs.get());
-  TargetBigramState expected(tbf.GetSentenceStartArray());
+  TargetBigramState expected(MakeWord(BOS_));
   BOOST_CHECK_EQUAL(ffs->Compare(expected),0);
 }
 
@@ -150,6 +150,7 @@ BOOST_AUTO_TEST_CASE(evaluate_all)
 
   BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, "i:do"),1);
   BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, "do:not"),1);
+  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, "not:</s>"),0);
   BOOST_CHECK(! currState->Compare(TargetBigramState(MakeWord("not"))));
   
 }
@@ -164,6 +165,22 @@ BOOST_AUTO_TEST_CASE(evaluate_empty)
   auto_ptr<const FFState> currState(
     tbf.Evaluate(*hypos.empty(),prevState.get(),&scc));
   BOOST_CHECK(! currState->Compare(*prevState));
+}
+
+BOOST_AUTO_TEST_CASE(evaluate_eos) 
+{
+  HypothesisFixture hypos;
+  TargetBigramFeature tbf;
+  BOOST_CHECK(tbf.Load("*"));
+  TargetBigramState prevState(MakeWord("know"));
+  ScoreComponentCollection scc;
+  auto_ptr<const FFState> currState(
+    tbf.Evaluate(*hypos.full(),&prevState,&scc));
+
+  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, ".:</s>"),1);
+  BOOST_CHECK_EQUAL(scc.GetScoreForProducer(&tbf, "know:."),1);
+
+  BOOST_CHECK(! currState.get());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

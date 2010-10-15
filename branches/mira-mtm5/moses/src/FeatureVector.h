@@ -132,7 +132,7 @@ namespace Moses {
 		bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
     
     /** Load from file - each line should be 'root[_name] value' */
-    void load(const std::string& filename);
+    bool load(const std::string& filename);
     void save(const std::string& filename) const;
     void write(std::ostream& out) const ;
     

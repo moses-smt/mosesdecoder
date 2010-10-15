@@ -84,12 +84,11 @@ namespace Moses {
     m_features[DEFAULT_NAME] = DEFAULT;
 	}
 	
-	void FVector::load(const std::string& filename) {
+	bool FVector::load(const std::string& filename) {
+    clear();
 		ifstream in (filename.c_str());
 		if (!in) {
-			ostringstream msg;
-			msg << "Unable to open " << filename;
-			throw runtime_error(msg.str());
+      return false;
 		}
 		string line;
 		while(getline(in,line)) {
@@ -102,6 +101,7 @@ namespace Moses {
 			FName fname(namestring);
 			set(fname,value);
 		}
+    return true;
   }
   
   void FVector::save(const string& filename) const {

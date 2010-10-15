@@ -225,14 +225,14 @@ protected:
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
-    bool LoadDecodeGraphs();
+  bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
-	bool LoadTargetBigramFeature();
+	bool LoadDiscrimLMFeature();
   
-    void ReduceTransOptCache() const;
+  void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
 	
 public:

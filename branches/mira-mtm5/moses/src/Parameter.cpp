@@ -89,6 +89,7 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
+  AddParam("weight-file", "w", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
@@ -138,7 +139,7 @@ Parameter::Parameter()
   AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
 
 	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
-	AddParam("target-bigram-feature-wordlist", "Use the target bigram feature. Load the wordlist from given file.");
+	AddParam("discrim-lmodel-file", "Order and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
 
 }
 

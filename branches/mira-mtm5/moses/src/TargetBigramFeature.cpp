@@ -24,6 +24,7 @@ bool TargetBigramFeature::Load(const std::string &filePath)
 
   std::string line;
   m_vocab.insert(BOS_);
+  m_vocab.insert(BOS_);
   while (getline(inFile, line)) {
     m_vocab.insert(line);
   }
@@ -81,7 +82,17 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
     string name(w1 +":"+w2);
     accumulator->PlusEquals(this,name,1);
   }
+  if (cur_hypo.GetWordsBitmap().IsComplete()) {
+    const string& w1 = targetPhrase.GetWord(targetPhrase.GetSize()-1) 
+        .GetFactor(m_factorType)->GetString();
+    const string& w2 = EOS_;
+    if (m_vocab.empty() || (m_vocab.find(w1) != m_vocab.end())) {
+      string name(w1 +":"+w2);
+      accumulator->PlusEquals(this,name,1);
+    }
+    return NULL;
+  }
   return new TargetBigramState(targetPhrase.GetWord(targetPhrase.GetSize()-1));
-	}
+}
 }
 
