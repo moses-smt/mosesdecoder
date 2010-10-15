@@ -73,6 +73,12 @@ public:
 	: m_scores(rhs.m_scores)
 	{}
 
+  /** Load from file */
+  bool Load(const std::string& filename) 
+  {
+      return m_scores.load(filename);
+  }
+
 
   //! Set all values to 0.0
 	void ZeroAll()

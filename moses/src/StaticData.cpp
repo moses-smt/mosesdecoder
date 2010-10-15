@@ -457,8 +457,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGlobalLexicalModel()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
-  	if (!LoadTargetBigramFeature()) return false;
-    
+  if (!LoadDiscrimLMFeature()) return false;
 
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
@@ -543,10 +542,32 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_bleuScoreFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_bleuScoreFeature);
     }
+    if (m_targetBigramFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetBigramFeature);
+    }
     
   }
-  
 
+  //Load extra feature weights
+  //NB: These are common to all translation systems (at the moment!)
+  vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
+  if (extraWeightConfig.size()) 
+  {
+    if (extraWeightConfig.size() > 1) 
+    {
+      UserMessage::Add("Only one argument should be supplied for weight-file");
+      return false;
+    }
+    ScoreComponentCollection extraWeights;
+    if (!extraWeights.Load(extraWeightConfig[0])) 
+    {
+      UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
+      return false;
+    }
+    m_allWeights.PlusEquals(extraWeights);
+  }
+
+  
 	return true;
 }
 
@@ -588,10 +609,10 @@ StaticData::~StaticData()
 	RemoveAllInColl(m_generationDictionary);
 	RemoveAllInColl(m_reorderModels);
 	RemoveAllInColl(m_globalLexicalModels);
-    RemoveAllInColl(m_decodeGraphs);
-    RemoveAllInColl(m_wordPenaltyProducers);
-    RemoveAllInColl(m_distortionScoreProducers);
-    m_languageModel.CleanUp();
+  RemoveAllInColl(m_decodeGraphs);
+  RemoveAllInColl(m_wordPenaltyProducers);
+  RemoveAllInColl(m_distortionScoreProducers);
+  m_languageModel.CleanUp();
 	
 	// delete trans opt
 	map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
@@ -1240,19 +1261,33 @@ bool StaticData::LoadReferences() {
   return true;
 }
 
-bool StaticData::LoadTargetBigramFeature()
+bool StaticData::LoadDiscrimLMFeature()
 {
-	const vector<string> &wordFile = m_parameter->GetParam("target-bigram-feature-wordlist");
+	const vector<string> &wordFile = m_parameter->GetParam("discrim-lmodel-file");
 	if (wordFile.empty())
+  {
 		return true;
+  }
+
 
 	if (wordFile.size() != 1) {
 		UserMessage::Add("Wrong number of arguments for target-bigram-feature-wordlist (expected 1).");
 		return false;
 	}
+	vector<string> tokens = Tokenize(wordFile[0]);
+  if (tokens.size() != 2) {
+    UserMessage::Add("Format of discriminative language model parametr is <order> <filename>");
+    return false;
+  }
+  size_t order = Scan<size_t>(tokens[0]);
+  if (order != 2) {
+    UserMessage::Add("Only bigrams are supported by the discriminative LM");
+    return false;
+  }
+
 	m_targetBigramFeature = new TargetBigramFeature();
-	if (!m_targetBigramFeature->Load(wordFile[0])) {
-		UserMessage::Add("Unable to load word list from file " + wordFile[0]);
+	if (!m_targetBigramFeature->Load(tokens[1])) {
+		UserMessage::Add("Unable to load word list from file " + tokens[1]);
 		return false;
 	}
 
