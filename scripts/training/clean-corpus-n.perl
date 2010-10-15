@@ -46,6 +46,8 @@ if (-e $l1input) {
   $opn = $l1input;
 } elsif (-e $l1input.".gz") {
   $opn = "zcat $l1input.gz |";
+} else {
+    die "Error: $l1input does not exist";
 }
 open(F,$opn) or die "Can't open '$opn'";
 $opn = undef;
@@ -54,7 +56,10 @@ if (-e $l2input) {
   $opn = $l2input;
 } elsif (-e $l2input.".gz") {
   $opn = "zcat $l2input.gz |";
+} else  {
+ die "Error: $l2input does not exist";
 }
+ 
 open(E,$opn) or die "Can't open '$opn'";
 
 open(FO,">$out.$l1") or die "Can't write $out.$l1";
