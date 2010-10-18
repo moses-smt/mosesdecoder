@@ -349,7 +349,6 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
@@ -378,7 +377,6 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
