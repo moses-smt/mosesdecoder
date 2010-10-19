@@ -14,7 +14,7 @@ class WordsRange;
  */
 class DistortionScoreProducer : public StatefulFeatureFunction {
 public:
-	DistortionScoreProducer() : StatefulFeatureFunction("Description") {}
+	DistortionScoreProducer() : StatefulFeatureFunction("Distortion") {}
 
 	float CalculateDistortionScore(const Hypothesis& hypo,
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
