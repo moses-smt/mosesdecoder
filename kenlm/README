@@ -1,4 +1,7 @@
 Language model inference code by Kenneth Heafield <infer at kheafield.com>
+
+The official version can be found at http://kheafield.com/code/mt/infer.html .  People looking to integrate kenlm into their own decoder should use that version as their base.  This version has been modified slightly to meet Moses halfway during integration.  
+
 See LICENSE for list of files by other people and their licenses.  
 
 Compile:             ./compile.sh 
