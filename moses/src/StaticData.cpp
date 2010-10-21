@@ -1271,7 +1271,7 @@ bool StaticData::LoadDiscrimLMFeature()
 
 
 	if (wordFile.size() != 1) {
-		UserMessage::Add("Wrong number of arguments for target-bigram-feature-wordlist (expected 1).");
+		UserMessage::Add("Can only have one discrim-lmodel-file");
 		return false;
 	}
 	vector<string> tokens = Tokenize(wordFile[0]);
@@ -1286,6 +1286,7 @@ bool StaticData::LoadDiscrimLMFeature()
   }
 
 	m_targetBigramFeature = new TargetBigramFeature();
+  cerr << "loading from " << tokens[1] << endl;
 	if (!m_targetBigramFeature->Load(tokens[1])) {
 		UserMessage::Add("Unable to load word list from file " + tokens[1]);
 		return false;
