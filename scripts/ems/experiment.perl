@@ -49,6 +49,7 @@ my (@MODULE,
     %STEP_OUT,
     %STEP_OUTNAME,
     %STEP_PASS,       # config parameters that have to be set, otherwise pass
+    %STEP_PASS_IF,    # config parameters that have to be not set, otherwise pass
     %STEP_IGNORE,     # config parameters that have to be set, otherwise ignore
     %STEP_IGNORE_IF,  # config parameters that have to be not set, otherwise ignore
     %QSUB_SCRIPT,     # flag if script contains qsub's when run on cluster
@@ -206,6 +207,10 @@ sub read_meta {
 	    }
 	    elsif ($1 eq "pass-unless") {
 		@{$STEP_PASS{"$module:$step"}} = split(/\s+/,$2);
+		push @{$RERUN_ON_CHANGE{"$module:$step"}}, split(/\s+/,$2);
+	    }
+	    elsif ($1 eq "pass-if") {
+		@{$STEP_PASS_IF{"$module:$step"}} = split(/\s+/,$2);
 		push @{$RERUN_ON_CHANGE{"$module:$step"}}, split(/\s+/,$2);
 	    }
 	    elsif ($1 eq "ignore-unless") {
@@ -485,6 +490,15 @@ sub find_steps_for_module {
 	    }
 	    $PASS{$#DO_STEP}++ if $flag;
 	}
+
+	if (defined($STEP_PASS_IF{$defined_step})) {
+	    my $flag = 0;
+	    foreach my $pass (@{$STEP_PASS_IF{$defined_step}}) {
+		$flag = 1 
+		    if &backoff_and_get(&extend_local_name($module,$set,$pass));
+	    }
+	    $PASS{$#DO_STEP}++ if $flag;
+	}
 	
 	# special case for passing: steps that only affect factor 0
 	if (defined($ONLY_FACTOR_0{$defined_step})) {
@@ -737,6 +751,7 @@ sub find_re_use {
 
     # summarize and convert hashes into integers for to be re-used 
     print "\nSTEP SUMMARY:\n";
+    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION));
     for(my $i=$#DO_STEP;$i>=0;$i--) {
         if ($PASS{$i}) {
 	    $RE_USE[$i] = 0;
@@ -747,12 +762,16 @@ sub find_re_use {
 	    my @ALL = sort { $a <=> $b} keys %{$RE_USE[$i]};
             print "re-using (".join(" ",@ALL).")\n";
 	    $RE_USE[$i] = $ALL[0];
+            if ($ALL[0] != $VERSION) {
+	      print RE_USE "$DO_STEP[$i] $ALL[0]\n";
+            }
 	}
 	else {
 	    print "run\n";
 	    $RE_USE[$i] = 0;
 	}
     }
+    close(RE_USE);
 }
 
 sub find_dependencies {
@@ -816,10 +835,10 @@ sub draw_agenda_graph {
 		$step .= " (".$RE_USE[$i].")" if $RE_USE[$i];
 
 		my $color = "green";
-		$color = "#0000ff" if defined($DO{$i}) && $DO{$i} >= 1;
-		$color = "#8080ff" if defined($DONE{$i});
-		$color = "red" if defined($CRASHED{$i});
 		$color = "lightblue" if $RE_USE[$i];
+		$color = "#0000ff" if defined($DO{$i}) && $DO{$i} >= 1;
+		$color = "#8080ff" if defined($DONE{$i}) || ($RE_USE[$i] && $RE_USE[$i] == $VERSION);
+		$color = "red" if defined($CRASHED{$i});
 		$color = "lightyellow" if defined($PASS{$i});
 		
 		print DOT "    $i [label=\"$step\",shape=box,fontsize=10,height=0,style=filled,fillcolor=\"$color\"];\n";
@@ -893,6 +912,9 @@ sub define_step {
         elsif ($DO_STEP[$i] eq 'TRAINING:symmetrize-giza') {
             &define_training_symmetrize_giza($i);
         }
+	elsif ($DO_STEP[$i] eq 'TRAINING:build-biconcor') {
+            &define_training_build_biconcor($i);
+	}
         elsif ($DO_STEP[$i] eq 'TRAINING:build-lex-trans') {
             &define_training_build_lex_trans($i);
         }
@@ -1128,13 +1150,12 @@ sub check_info {
     print "\tcheck parameter count current: ".(scalar keys %VALUE).", old: ".(scalar keys %INFO)."\n" if $VERBOSE;
     return 0 unless scalar keys %INFO == scalar keys %VALUE;
     foreach my $parameter (keys %VALUE) {
-        if (! defined($VALUE{$parameter})) {
-          print "\tcurrent has not '$parameter' -> not re-usable\n" if $VERBOSE;
+        if (! defined($INFO{$parameter})) {
+          print "\told has no '$parameter' -> not re-usable\n" if $VERBOSE;
           return 0;
         }
 	print "\tcheck '$VALUE{$parameter}' eq '$INFO{$parameter}' -> " if $VERBOSE;
-        if (defined($INFO{$parameter})
-            && &match_info_strings($VALUE{$parameter},$INFO{$parameter})) { 
+        if (&match_info_strings($VALUE{$parameter},$INFO{$parameter})) { 
             print "ok\n" if $VERBOSE; 
         }
         else { 
@@ -1148,6 +1169,8 @@ sub check_info {
 
 sub match_info_strings { 
   my ($current,$old) = @_;
+  $current =~ s/ $//;
+  $old =~ s/ $//;
   return 1 if $current eq $old;
   # ignore time stamps, if that option is used
   if (defined($IGNORE_TIME)) {
@@ -1469,14 +1492,21 @@ sub factorize_one_language {
 	    my $script = &check_and_get("$type:$factor:factor-script");
 	    my $out = "$outfile.$factor";
 	    if ($parallelizer && defined($PARALLELIZE{&defined_step($DO_STEP[$step_id])}) 
-		&& &get("$module:jobs") && $CLUSTER) {
+		&& (  (&get("$module:jobs") && $CLUSTER)
+		   || (&get("$module:cores") && $MULTICORE))) {
 		my $subdir = $module;
 		$subdir =~ tr/A-Z/a-z/;
 		$subdir .= "/tmp.$set.$stepname.$type.$factor.$VERSION";
-		my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
-		my $qflags = "--queue-flags \"$qsub_args\"";
-		$cmd .= "$parallelizer $qflags -in $infile -out $out -cmd '$script %s %s $temp_dir/$subdir' -jobs ".&get("$module:jobs")." -tmpdir $temp_dir/$subdir\n";
-		$QSUB_STEP{$step_id}++;
+		if ($CLUSTER) {
+		    my $qflags = "";
+		    my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
+		    $qflags="--queue-flags \"$qsub_args\"" if ($CLUSTER && $qsub_args);
+		    $cmd .= "$parallelizer $qflags -in $infile -out $out -cmd '$script %s %s $temp_dir/$subdir' -jobs ".&get("$module:jobs")." -tmpdir $temp_dir/$subdir\n";
+		    $QSUB_STEP{$step_id}++;
+		}	
+		elsif ($MULTICORE) {
+		    $cmd .= "$parallelizer -in $infile -out $out -cmd '$script %s %s $temp_dir/$subdir' -cores ".&get("$module:cores")." -tmpdir $temp_dir/$subdir\n";
+		}
 	    }
 	    else {
 		$cmd .= "$script $infile $out $temp_dir\n";
@@ -1597,6 +1627,19 @@ sub define_training_symmetrize_giza {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_build_biconcor {
+    my ($step_id) = @_;
+
+    my ($model, $aligned,$corpus) = &get_output_and_input($step_id);
+    my $biconcor = &check_and_get("TRAINING:biconcor");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    my $method = &check_and_get("TRAINING:alignment-symmetrization-method");
+
+    my $cmd = "$biconcor -c $corpus.$input_extension -t $corpus.$output_extension -a $aligned.$method -s $model";
+    &create_step($step_id,$cmd);
+}
+
 sub define_training_build_lex_trans {
     my ($step_id) = @_;
 
@@ -1683,6 +1726,7 @@ sub define_training_create_config {
     my ($config,
 	$reordering_table,$phrase_translation_table,$generation_table,@LM)
 	= &get_output_and_input($step_id);
+    if ($LM[$#LM] =~ /biconcor/) { pop @LM; }
 
     my $cmd = &get_training_setting(9);
 
@@ -1737,7 +1781,7 @@ sub define_training_create_config {
 	$cmd .= "-lm $factor:$order:$LM[0]:$type ";
     }
     else {
-	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).") and LM files (".(scalar @LM).") does not match")
+	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
 	foreach my $lm (@LM) {
 	    my $set = shift @LM_SETS;
@@ -2020,11 +2064,15 @@ sub define_evaluation_decode {
 	$cmd .= " -queue-parameters \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 	$cmd .= " -decoder $decoder -config $dir/evaluation/filtered.$set.$VERSION/moses.ini -input-file $input --jobs $jobs  -decoder-parameters \"$settings\" > $system_output";
 	
-	$cmd .= " -n-best-file $system_output.best$nbest -n-best-size $nbest" if $nbest;
+        my $nbest_size;
+	$nbest_size = $nbest + 0 if $nbest;
+	$cmd .= " -n-best-file $system_output.best$nbest_size -n-best-size $nbest" if $nbest;
     }
     else {
 		$cmd = $filter."\n$decoder $settings -v 0 -f $dir/evaluation/filtered.$set.$VERSION/moses.ini < $input > $system_output";
-		$cmd .= " -n-best-list $system_output.best$nbest $nbest" if $nbest;
+        	my $nbest_size;
+		$nbest_size = $nbest + 0 if $nbest;
+		$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
 
     &create_step($step_id,$cmd);

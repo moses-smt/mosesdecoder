@@ -11,7 +11,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit /fs/thor4/html/experiment/setup";
+  print "<P>To add experiment, edit setup";
 }
 
 function overview() {

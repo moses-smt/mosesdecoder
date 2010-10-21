@@ -6,6 +6,7 @@ use Getopt::Long;
 my $help;
 my $lc = 0; # lowercase the corpus?
 my $ignore_ratio = 0;
+my $ignore_xml = 0;
 my $enc = "utf8"; # encoding of the input and output files
     # set to anything else you wish, but I have not tested it yet
 my $max_word_length = 1000; # any segment with a word (or factor) exceeding this length in chars
@@ -17,6 +18,7 @@ GetOptions(
   "lowercase|lc" => \$lc,
   "encoding=s" => \$enc,
   "ignore-ratio" => \$ignore_ratio,
+  "ignore-xml" => \$ignore_xml,
   "max-word-length|mwl=s" => \$max_word_length
 ) or exit(1);
 
@@ -108,14 +110,15 @@ while(my $f = <F>) {
   $f =~ s/ $//;
   next if $f eq '';
   next if $e eq '';
-  my @E = split(/ /,$e);
-  my @F = split(/ /,$f);
-  next if scalar(@E) > $max;
-  next if scalar(@F) > $max;
-  next if scalar(@E) < $min;
-  next if scalar(@F) < $min;
-  next if !$ignore_ratio && scalar(@E)/scalar(@F) > 9;
-  next if !$ignore_ratio && scalar(@F)/scalar(@E) > 9;
+
+  my $ec = &word_count($e);
+  my $fc = &word_count($f);
+  next if $ec > $max;
+  next if $fc > $max;
+  next if $ec < $min;
+  next if $fc < $min;
+  next if !$ignore_ratio && $ec/$fc > 9;
+  next if !$ignore_ratio && $fc/$ec > 9;
   # Skip this segment if any factor is longer than $max_word_length
   my $max_word_length_plus_one = $max_word_length + 1;
   next if $e =~ /[^\s\|]{$max_word_length_plus_one}/;
@@ -126,7 +129,6 @@ while(my $f = <F>) {
     if $f =~ /[ \|]\|/;
   die "There is a blank factor in $corpus.$l2 on line $innr: $e"
     if $e =~ /[ \|]\|/;
-    
   
   $outnr++;
   print FO $f."\n";
@@ -146,3 +148,15 @@ my $e = <E>;
 die "$corpus.$l2 is too long!" if defined $e;
 
 print STDERR "Input sentences: $innr  Output sentences:  $outnr\n";
+
+sub word_count {
+  my ($line) = @_;
+  if ($ignore_xml) {
+    $line =~ s/<\S[^>]*\S>//g;
+    $line =~ s/\s+/ /g;
+    $line =~ s/^ //g;
+    $line =~ s/ $//g;    
+  }
+  my @w = split(/ /,$line);
+  return scalar @w;
+}

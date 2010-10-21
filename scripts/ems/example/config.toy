@@ -258,6 +258,10 @@ alignment-symmetrization-method = grow-diag-final-and
 #
 #word-alignment = $working-dir/model/aligned.1
 
+### create a bilingual concordancer for the model
+#
+#biconcor = $moses-script-dir/ems/biconcor/biconcor
+
 ### lexicalized reordering: specify orientation type
 # (default: only distance-based reordering model)
 #
@@ -398,6 +402,10 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 # switches for the Moses decoder
 #
 decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
+
+### specify size of n-best list, if produced
+#
+#nbest = 100
 
 ### multiple reference translations
 #

@@ -39,7 +39,7 @@ function load_experiment_info() {
   reset($experiment);
   while (list($id,$info) = each($experiment)) {
     if (file_exists($dir."/steps/new") ||
-        file_exists($dir."/steps/1")) {
+        file_exists($dir."/steps/$id")) {
       $stat = stat("$dir/steps/$id/parameter.$id");
     }
     else {
@@ -71,7 +71,7 @@ function load_experiment_info() {
 function load_parameter($run) {
   global $dir;
   if (file_exists($dir."/steps/new") ||
-      file_exists($dir."/steps/1")) {
+      file_exists($dir."/steps/$run")) {
     $file = file("$dir/steps/$run/parameter.$run");
   } 
   else {
@@ -123,3 +123,49 @@ function process_file_entry($dir,$entry) {
     }
   }
 }
+
+function get_coverage_analysis_version($dir,$set,$id) {
+  if (file_exists("$dir/evaluation/$set.analysis.$id/input-annotation")) {
+    return $id;
+  }
+  if (file_exists("$dir/steps/$id/re-use.$id")) {
+    $re_use = file("$dir/steps/$id/re-use.$id");
+    foreach($re_use as $line) {
+      if (preg_match("/EVALUATION:(.+):analysis-coverage (\d+)/",$line,$match) &&
+	  $match[1] == $set &&
+	  file_exists("$dir/evaluation/$set.analysis.$match[2]/input-annotation")) {
+	return $match[2];
+      }
+    } 
+  }
+  # legacy stuff below...
+  if (! file_exists("$dir/steps/$id/REPORTING_report.$id")) {
+    return 0;
+  }
+  $report = file("$dir/steps/$id/REPORTING_report.$id.INFO");
+  foreach ($report as $line) {
+    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis-coverage/",$line,$match) &&
+        $match[2] == $set) {
+      $reuse_id = $match[1];
+      if (file_exists("$dir/evaluation/$set.analysis.$reuse_id/input-annotation")) {
+        return $reuse_id;
+      }
+    }
+  }
+  return 0;
+}
+
+function get_biconcor_version($dir,$id) {
+  if (file_exists("$dir/model/biconcor.$id")) {
+    return $id;
+  }
+  $re_use = file("$dir/steps/$id/re-use.$id");
+  foreach($re_use as $line) {
+    if (preg_match("/TRAINING:build-biconcor (\d+)/",$line,$match) &&
+        file_exists("$dir/model/biconcor.$match[1]")) {
+      return $match[1];
+    }
+  }
+  return 0;
+}
+
