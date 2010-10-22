@@ -1726,7 +1726,7 @@ sub define_training_create_config {
     my ($config,
 	$reordering_table,$phrase_translation_table,$generation_table,@LM)
 	= &get_output_and_input($step_id);
-    if ($LM[$#LM] =~ /biconcor/) { pop @LM; }
+    if ($LM[$#LM] =~ /biconcor/ || $LM[$#LM] eq '') { pop @LM; }
 
     my $cmd = &get_training_setting(9);
 
@@ -2044,6 +2044,11 @@ sub define_evaluation_decode {
     }
 
     my $cmd;
+    my $nbest_size;
+    if ($nbest) {
+	$nbest =~ /(\d+)/;
+	$nbest_size = $1;
+    }
     if ($jobs && $CLUSTER) {
 	if ($qsub_filter) {
 	    $cmd = "qsub $filter\n";
@@ -2064,15 +2069,11 @@ sub define_evaluation_decode {
 	$cmd .= " -queue-parameters \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 	$cmd .= " -decoder $decoder -config $dir/evaluation/filtered.$set.$VERSION/moses.ini -input-file $input --jobs $jobs  -decoder-parameters \"$settings\" > $system_output";
 	
-        my $nbest_size;
-	$nbest_size = $nbest + 0 if $nbest;
 	$cmd .= " -n-best-file $system_output.best$nbest_size -n-best-size $nbest" if $nbest;
     }
     else {
-		$cmd = $filter."\n$decoder $settings -v 0 -f $dir/evaluation/filtered.$set.$VERSION/moses.ini < $input > $system_output";
-        	my $nbest_size;
-		$nbest_size = $nbest + 0 if $nbest;
-		$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
+	$cmd = $filter."\n$decoder $settings -v 0 -f $dir/evaluation/filtered.$set.$VERSION/moses.ini < $input > $system_output";
+	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
 
     &create_step($step_id,$cmd);
