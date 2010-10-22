@@ -146,6 +146,7 @@ else
     AC_MSG_NOTICE([Building non-threaded moses. This will disable the moses server])
 fi
 
+AM_CONDITIONAL([WITH_UNITTEST], false)
 if test "x$enable_unittest" = 'xyes'
 then
   if test "x$BOOST_CPPFLAGS" = 'x'
