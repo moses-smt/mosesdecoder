@@ -196,12 +196,10 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 	for (size_t i = 0 ; i < count ; i++)
 	{
-	  //int lmId = GetLmID((*contextFactor[i])[factorType]);
+	  int lmId = GetLmID((*contextFactor[i])[factorType]);
 #ifdef DEBUG
-	  cout << "i=" << i << " -> " << (*contextFactor[i])[factorType]->GetString() << "\n";
+		cout << "i=" << i << " -> lmid=" << lmid << " -> |"<< (*contextFactor[i])[factorType]->GetString() << "|\n";
 #endif
-	  int lmId = GetLmID((*contextFactor[i])[factorType]->GetString());
-	  //	  cerr << (*contextFactor[i])[factorType]->GetString() << " = " << lmId;
 	  m_lmtb_ng->pushc(lmId);
 	}
   
