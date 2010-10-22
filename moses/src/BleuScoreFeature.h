@@ -26,8 +26,10 @@ public:
 
 private:
     Phrase m_words;
-
     size_t m_source_length;
+    size_t m_target_length;
+
+    // scaled reference length is needed for scoring incomplete hypotheses against reference translation
     float m_scaled_ref_length;
 
     std::vector< size_t > m_ngram_counts;
@@ -42,6 +44,11 @@ class BleuScoreFeature : public StatefulFeatureFunction {
 public:
     BleuScoreFeature();
 
+    std::string GetScoreProducerDescription() const
+    {
+    	return "BleuScoreFeature";
+    }
+
     std::string GetScoreProducerWeightShortName() const
     {
         return "bl";
@@ -53,6 +60,7 @@ public:
     }
 
     void LoadReferences(const std::vector< std::vector< std::string > > &);
+    void SetCurrentSourceLength(size_t);
     void SetCurrentReference(size_t);
     void UpdateHistory(const std::vector< const Word* >&);
     void GetNgramMatchCounts(Phrase&,
@@ -68,11 +76,15 @@ public:
     const FFState* EmptyHypothesisState(const InputType&) const;
 
 private:
+    size_t m_cur_source_length;
     std::map< size_t, std::pair< size_t, NGrams > > m_refs;
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
+
+    // counts for pseudo-document big_O
     std::vector< float > m_count_history;
     std::vector< float > m_match_history;
+    float m_source_length_history;
     float m_target_length_history;
     float m_ref_length_history;
 };
