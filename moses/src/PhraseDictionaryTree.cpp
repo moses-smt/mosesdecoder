@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace Moses
 {
@@ -25,16 +26,14 @@ std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
 class TgtCand {
 	IPhrase e;
 	Scores sc;
-	WordAlignments m_sourceAlignment, m_targetAlignment;
+	std::string m_alignment;
 public:
 	TgtCand() {}
 	
-	TgtCand(const IPhrase& a, const Scores& b
-					, const WordAlignments &sourceAlignment, const WordAlignments &targetAlignment) 
+	TgtCand(const IPhrase& a, const Scores& b , const std::string& alignment) 
 		: e(a)
 		, sc(b)
-		, m_sourceAlignment(sourceAlignment)
-		, m_targetAlignment(targetAlignment)
+		, m_alignment(alignment)
 	{}
 	
 	TgtCand(const IPhrase& a,const Scores& b) : e(a),sc(b) {}
@@ -58,22 +57,19 @@ public:
 	{
 		fWriteVector(f,e);
 		fWriteVector(f,sc);
-		fWriteStringVector(f, m_sourceAlignment);
-		fWriteStringVector(f, m_targetAlignment);
+		fWriteString(f, m_alignment.c_str(), m_alignment.size());
 	}
 	
 	void readBinWithAlignment(FILE* f) 
 	{
 		fReadVector(f,e);
 		fReadVector(f,sc);
-		fReadStringVector(f, m_sourceAlignment);
-		fReadStringVector(f, m_targetAlignment);
+		fReadString(f, m_alignment);
 	} 
 	
 	const IPhrase& GetPhrase() const {return e;}
 	const Scores& GetScores() const {return sc;}
-	const WordAlignments& GetSourceAlignment() const {return m_sourceAlignment;}
-	const WordAlignments& GetTargetAlignment() const {return m_targetAlignment;}
+	const std::string& GetAlignment() const {return m_alignment;}
 };
   
 
@@ -214,8 +210,7 @@ struct PDTimp {
 	
 		// convert target candidates from internal data structure to the external one
 	void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& rv,
-											std::vector<StringWordAlignmentCand>& swa,
-											std::vector<StringWordAlignmentCand>& twa) const
+											std::vector<std::string>& wa) const
 	{
 		for(TgtCands::const_iterator i=tcands.begin();i!=tcands.end();++i)
 		{
@@ -226,8 +221,7 @@ struct PDTimp {
 			for(size_t j=0;j<iphrase.size();++j)
 				vs.push_back(&tv->symbol(iphrase[j]));
 			rv.push_back(StringTgtCand(vs,i->GetScores()));
-			swa.push_back(StringWordAlignmentCand(vs,(i->GetSourceAlignment())));
-			twa.push_back(StringWordAlignmentCand(vs,(i->GetTargetAlignment())));
+			wa.push_back(i->GetAlignment());
 		}
 	}
 
@@ -332,17 +326,13 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
 	{
 		
 		Scores sc=tcand[i].GetScores();
-		WordAlignments			srcAlign=tcand[i].GetSourceAlignment();
-		WordAlignments			trgAlign=tcand[i].GetTargetAlignment();
+		std::string	trgAlign = tcand[i].GetAlignment();
 			
 		const IPhrase& iphr=tcand[i].GetPhrase();
 
 		out << i << " -- " << sc << " -- ";
 		for(size_t j=0;j<iphr.size();++j)			out << tv->symbol(iphr[j])<<" ";
-		out<< " -- ";		
-		for (size_t j=0;j<srcAlign.size();j++)			out << " " << srcAlign[j];
-		out << " -- ";
-		for (size_t j=0;j<trgAlign.size();j++)			out << " " << trgAlign[j];
+		out<< " -- " << trgAlign;		
 		out << std::endl;
 	}
 }
@@ -400,8 +390,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 void PhraseDictionaryTree::
 GetTargetCandidates(const std::vector<std::string>& src,
 										std::vector<StringTgtCand>& rv,
-										std::vector<StringWordAlignmentCand>& swa,
-										std::vector<StringWordAlignmentCand>& twa) const 
+										std::vector<std::string>& wa) const 
 {
 	IPhrase f(src.size());
 	for(size_t i=0;i<src.size();++i) 
@@ -412,7 +401,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 	
 	TgtCands tgtCands;
 	imp->GetTargetCandidates(f,tgtCands);
-	imp->ConvertTgtCand(tgtCands,rv,swa,twa);
+	imp->ConvertTgtCand(tgtCands,rv,wa);
 }
 
 
@@ -491,10 +480,10 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 		const std::string &sourcePhraseString	=tokens[0]
 											,&targetPhraseString=tokens[1]
 											,&scoreString				= tokens[2];		
-				
+		const std::string empty;
+		const std::string &alignmentString = PrintWordAlignment() ? tokens[3] : empty;
 		IPhrase f,e;
 		Scores sc;
-		WordAlignments sourceAlignment, targetAlignment;
 			
 		std::vector<std::string> wordVec = Tokenize(sourcePhraseString);
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
@@ -576,7 +565,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 				abort();
 			}
 		}
-		tgtCands.push_back(TgtCand(e,sc, sourceAlignment, targetAlignment));
+		tgtCands.push_back(TgtCand(e,sc, alignmentString));
 		assert(currFirstWord!=InvalidLabelId);
 	}
   if (PrintWordAlignment())
@@ -661,12 +650,11 @@ GetTargetCandidates(PrefixPtr p,
 void PhraseDictionaryTree::
 GetTargetCandidates(PrefixPtr p,
 										std::vector<StringTgtCand>& rv,
-										std::vector<StringWordAlignmentCand>& swa,
-										std::vector<StringWordAlignmentCand>& twa) const 
+										std::vector<std::string>& wa) const 
 {
 	TgtCands tcands;
 	imp->GetTargetCandidates(p,tcands);
-	imp->ConvertTgtCand(tcands,rv,swa,twa);
+	imp->ConvertTgtCand(tcands,rv,wa);
 }
 
 std::string PhraseDictionaryTree::GetScoreProducerDescription() const{
