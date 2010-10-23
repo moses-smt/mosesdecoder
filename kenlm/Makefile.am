@@ -19,9 +19,9 @@ libkenlm_a_SOURCES = \
 
 query_SOURCES = lm/ngram_query.cc
 query_DEPENDENCIES = libkenlm.a
-query_LDADD = -L$(top_srcdir)/kenlm -lkenlm
+query_LDADD = -L$(top_srcdir)/kenlm -lkenlm -lz
 
 build_binary_SOURCES = lm/ngram_build_binary.cc
 build_binary_DEPENDENCIES = libkenlm.a
-build_binary_LDADD = -L$(top_srcdir)/kenlm -lkenlm
+build_binary_LDADD = -L$(top_srcdir)/kenlm -lkenlm -lz
 

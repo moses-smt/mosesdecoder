@@ -68,7 +68,7 @@ template <class M> void Stateless(const M &model) {
   for (unsigned int i = 0; i < sizeof(words) / sizeof(const char*); ++i) {
     indices[i] = model.GetVocabulary().Index(words[i]);
   }
-  FullScoreReturn ret;
+  HieuShouldRefactorMoses ret;
   StatelessTest(indices, indices + 2, 2, -0.484652);
   StatelessTest(indices, indices + 3, 3, -0.348837);
   StatelessTest(indices, indices + 4, 4, -0.0155266);

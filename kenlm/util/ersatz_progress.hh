@@ -19,7 +19,7 @@ class ErsatzProgress {
     ~ErsatzProgress();
 
     ErsatzProgress &operator++() {
-      if (++current_ == next_) Milestone();
+      if (++current_ >= next_) Milestone();
       return *this;
     }
 
@@ -31,6 +31,10 @@ class ErsatzProgress {
     void Set(std::size_t to) {
       if ((current_ = to) >= next_) Milestone();
       Milestone();
+    }
+
+    void Finished() {
+      Set(complete_);
     }
 
   private:

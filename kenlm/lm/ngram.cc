@@ -195,7 +195,7 @@ template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::Ge
   } else {
     if (config.probing_multiplier <= 1.0) UTIL_THROW(FormatLoadException, "probing multiplier must be > 1.0");
 
-    util::FilePiece f(file, mapped_file_.release(), config.messages);
+    util::FilePiece f(mapped_file_.release(), file, config.messages);
     ReadARPACounts(f, counts);
     size_t memory_size = Size(counts, config);
     char *start;
