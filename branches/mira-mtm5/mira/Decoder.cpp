@@ -70,17 +70,7 @@ namespace Mira {
 		: m_manager(NULL) {
 	  // force initialisation of the phrase dictionary
       const StaticData &staticData = StaticData::Instance();
-      m_sentence = new Sentence(Input);
-      stringstream in("Initialising decoder..\n");
-      const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      m_sentence->Read(in,inputFactorOrder);
-			
-      //std::cerr << ((InputType&) *m_sentence).ToString() << std::endl;
-			
-      const TranslationSystem& system = staticData.GetTranslationSystem
-          (TranslationSystem::DEFAULT);
-      m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
-      m_manager->ProcessSentence();
+      const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
       // Add the bleu feature
       m_bleuScoreFeature = new BleuScoreFeature();
@@ -99,7 +89,8 @@ namespace Mira {
                               float bleuObjectiveWeight, 
                               float bleuScoreWeight,
                               vector< ScoreComponentCollection>& featureValues,
-                              vector< float>& bleuScores  )
+                              vector< float>& bleuScores,
+                              bool oracle)
   {
 	StaticData &staticData = StaticData::InstanceNonConst();
 
@@ -144,15 +135,18 @@ namespace Mira {
 
     // get the best
     vector<const Word*> best;
-    assert(sentences.GetSize() > 0);
-    const TrellisPath &path = sentences.at(0);
-    Phrase bestPhrase = path.GetTargetPhrase();
+    if (oracle) {
 
-    for (size_t pos = 0; pos < bestPhrase.GetSize(); ++pos) {
-    	const Word &word = bestPhrase.GetWord(pos);
-    	Word *newWord = new Word(word);
-    	best.push_back(newWord);
-	}
+        assert(sentences.GetSize() > 0);
+        const TrellisPath &path = sentences.at(0);
+        Phrase bestPhrase = path.GetTargetPhrase();
+
+        for (size_t pos = 0; pos < bestPhrase.GetSize(); ++pos) {
+        	const Word &word = bestPhrase.GetWord(pos);
+        	Word *newWord = new Word(word);
+        	best.push_back(newWord);
+    	}
+    }
 
     return best;
   }

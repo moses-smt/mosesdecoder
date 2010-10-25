@@ -200,6 +200,9 @@ int main(int argc, char** argv) {
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, clippingScheme, lowerBound, upperBound);
+    cerr << "Selected clipping scheme: " << clippingScheme << endl;
+    cerr << "lower bound: " << lowerBound << endl;
+    cerr << "upper bound: " << upperBound << endl;
   } else if (learner == "perceptron") {
     cerr << "Optimising using Perceptron" << endl;
     optimiser = new Perceptron();
@@ -247,7 +250,9 @@ int main(int argc, char** argv) {
                         0.0,
                         1.0,
                         featureValues[batch],
-                        bleuScores[batch]);
+                        bleuScores[batch],
+                        false);
+		  decoder->cleanup();
 
 		  // HOPE
 		  cout << "Run decoder to get nbest hope translations" << std::endl;
@@ -258,7 +263,9 @@ int main(int argc, char** argv) {
                         1.0,
                         1.0,
                         featureValues[batch],
-                        bleuScores[batch]);
+                        bleuScores[batch],
+                        true);
+		  decoder->cleanup();
 
 		  ScoreComponentCollection oracleFeatureValues = featureValues[batch][oraclePos];
 		  float oracleBleuScore = bleuScores[batch][oraclePos];
@@ -271,7 +278,9 @@ int main(int argc, char** argv) {
                         -1.0,
                         1.0,
                         featureValues[batch],
-                        bleuScores[batch]);
+                        bleuScores[batch],
+                        false);
+		  decoder->cleanup();
 
 	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
 	      vector< vector<float> > losses(batchSize);
@@ -300,7 +309,6 @@ int main(int argc, char** argv) {
 		  decoder->updateHistory(oracle);
 
 		  cumulativeWeights.PlusEquals(mosesWeights);
-		  decoder->cleanup();
 
 	      // Compute objective for all hypotheses of a training source sentence
 	      // add max(l_ij - Delta_ij * w') for check on objective
@@ -348,6 +356,10 @@ int main(int argc, char** argv) {
 				  cout << totalWeights << endl;
 			  }
 		  }
+
+		  for (size_t i = 0; i < oracle.size(); ++i) {
+			  delete oracle[i];
+		  }
 	  }
 
 	  // how has the objective function changed?
@@ -362,8 +374,9 @@ int main(int argc, char** argv) {
 
   tm = localtime(&now); // get struct filled out
   cout << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
-		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec;
+		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
+  delete decoder;
   exit(0);
 }
 
