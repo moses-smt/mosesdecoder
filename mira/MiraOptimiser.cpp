@@ -14,10 +14,6 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	size_t numberOfUpdates = 0;
 
-	cout << "Selected clipping scheme: " << m_clippingScheme << endl;
-	cout << "lower bound: " << m_lowerBound << endl;
-	cout << "upper bound: " << m_upperBound << endl;
-
 	vector< float> alphas(3*m_n);
 	for(size_t batch = 0; batch < featureValues.size(); batch++) {
 		if (m_clippingScheme == 2) {

@@ -59,7 +59,8 @@ class MosesDecoder {
                           float bleuObjectiveweight, //weight of bleu in objective
                           float bleuScoreWeight, //weight of bleu in score
                           std::vector<Moses::ScoreComponentCollection>& featureValues,
-                          std::vector<float>& scores );
+                          std::vector<float>& scores,
+                          bool oracle);
     void updateHistory(const std::vector<const Moses::Word*>& words);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
