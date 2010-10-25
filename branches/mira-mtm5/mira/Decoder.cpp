@@ -101,7 +101,7 @@ namespace Mira {
                               vector< ScoreComponentCollection>& featureValues,
                               vector< float>& bleuScores  )
   {
-    StaticData &staticData = StaticData::InstanceNonConst();
+	StaticData &staticData = StaticData::InstanceNonConst();
 
 	m_sentence = new Sentence(Input);
     stringstream in(source + "\n");

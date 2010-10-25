@@ -54,24 +54,43 @@ namespace Mira {
                          const Moses::ScoreComponentCollection& oracleScores);
   };
 
-
   class MiraOptimiser : public Optimiser {
    public:
-     MiraOptimiser(float lowerBound, float upperBound) :
-       Optimiser(),
-       lowerBound_(lowerBound),
-       upperBound_(upperBound) { }
+	  MiraOptimiser() :
+		  Optimiser() { }
 
-     ~MiraOptimiser() {} 
+	  MiraOptimiser(size_t n, size_t clippingScheme, float lowerBound, float upperBound) :
+		  Optimiser(),
+		  m_n(n),
+		  m_clippingScheme(clippingScheme),
+		  m_lowerBound(lowerBound),
+		  m_upperBound(upperBound) { }
+
+     ~MiraOptimiser() {}
    
       virtual void updateWeights(Moses::ScoreComponentCollection& weights,
-                         const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
-                         const std::vector< std::vector<float> >& losses,
-                         const Moses::ScoreComponentCollection& oracleScores);
+      						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
+      						  const std::vector< std::vector<float> >& losses,
+      						  const Moses::ScoreComponentCollection& oracleScores);
+      float computeDelta(Moses::ScoreComponentCollection& currWeights,
+      				const std::vector< Moses::ScoreComponentCollection>& featureValues,
+      				const size_t indexHope,
+      				const size_t indexFear,
+      				const std::vector< float>& losses,
+      				std::vector< float>& alphas,
+      				Moses::ScoreComponentCollection& featureValueDiffs);
+      void update(Moses::ScoreComponentCollection& currWeights, Moses::ScoreComponentCollection& featureValueDiffs, const float delta);
   
    private:
-     float lowerBound_;
-     float upperBound_;
+      // number of hypotheses used for each nbest list (number of hope, fear, best model translations)
+      size_t m_n;
+
+      // clipping scheme for weight updates
+      // 1: equal, 2: varied
+      size_t m_clippingScheme;
+
+      float m_lowerBound;
+      float m_upperBound;
   };
 }
 

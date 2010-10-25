@@ -77,9 +77,11 @@ int main(int argc, char** argv) {
   vector<string> referenceFiles;
   size_t epochs;
   string learner;
-  bool shuffle = true;
+  bool shuffle = true;	 // TODO: parameterize?
   size_t mixFrequency;
   size_t weightDumpFrequency;
+  size_t clippingScheme;
+  float lowerBound, upperBound;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -90,7 +92,11 @@ int main(int argc, char** argv) {
         ("epochs,e", po::value<size_t>(&epochs)->default_value(1), "Number of epochs")
         ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
         ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
-        ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights");
+        ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
+        ("clipping-scheme,c", po::value<size_t>(&clippingScheme)->default_value(1), "Select clipping scheme for weight updates (1: equal 2: varied")
+        ("lower-bound,lb", po::value<float>(&lowerBound)->default_value(-0.01), "Lower bound for mira clipping scheme")
+        ("upper-bound,ub", po::value<float>(&upperBound)->default_value(0.01), "Upper bound for mira clipping scheme");
+
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -122,22 +128,6 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  //FIXME: Make these configurable
-  float miraLowerBound = 0;
-  float miraUpperBound = 1;
-
-  Optimiser* optimiser = NULL;
-  if (learner == "mira") {
-    cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(miraLowerBound, miraUpperBound);
-  } else if (learner == "perceptron") {
-    cerr << "Optimising using Perceptron" << endl;
-    optimiser = new Perceptron();
-  } else {
-    cerr << "Error: Unknown optimiser: " << learner << endl;
-  }
-
-
   //load input and references 
   vector<string> inputSentences;
   if (!loadSentences(inputFile, inputSentences)) {
@@ -158,9 +148,25 @@ int main(int argc, char** argv) {
       return 1;
     }
   }
+
   //initialise moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
   MosesDecoder* decoder = new MosesDecoder(referenceSentences) ;
+  ScoreComponentCollection startWeights = decoder->getWeights();
+
+  // print feature function and weights
+  // TODO: scaling of feature functions
+  // TODO: initialise weights equally
+  const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
+  for (size_t i = 0; i < featureFunctions.size(); ++i) {
+	  cout << "Feature functions: " << featureFunctions[i]->GetScoreProducerDescription() << ": " << featureFunctions[i]->GetNumScoreComponents() << endl;
+	  vector< float> weights = startWeights.GetScoresForProducer(featureFunctions[i]);
+	  cout << "weights: ";
+	  for (size_t j = 0; j < weights.size(); ++j) {
+		  cout << weights[j];
+	  }
+	  cout << endl;
+  }
 
   //Optionally shuffle the sentences
   vector<size_t> order;
@@ -189,120 +195,174 @@ int main(int argc, char** argv) {
   shard.resize(shardSize);
   copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 
-  
+  Optimiser* optimiser = NULL;
+  size_t n = 10;								// size of n-best lists
+  if (learner == "mira") {
+    cerr << "Optimising using Mira" << endl;
+    optimiser = new MiraOptimiser(n, clippingScheme, lowerBound, upperBound);
+  } else if (learner == "perceptron") {
+    cerr << "Optimising using Perceptron" << endl;
+    optimiser = new Perceptron();
+  } else {
+    cerr << "Error: Unknown optimiser: " << learner << endl;
+  }
 
   //Main loop:
-  ScoreComponentCollection cumulativeWeights;
-  size_t modelHypoCount = 10;
-  size_t hopeHypoCount = 10;
-  size_t fearHypoCount = 10;
+  ScoreComponentCollection cumulativeWeights;		// collect weights per epoch to produce an average
   size_t iterations = 0;
+  size_t epoch = 0;
+
+  time_t now = time(0); // get current time
+  struct tm* tm = localtime(&now); // get struct filled out
+  cout << "Start date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
   
-	
-  for (size_t epoch = 0; epoch < epochs; ++epoch) {
-    //TODO: batching
-    size_t shardPosition = 0;
-    for (vector<size_t>::const_iterator sid = shard.begin();
-       sid != shard.end(); ++sid) {
-      const string& input = inputSentences[*sid];
-      const vector<string>& refs = referenceSentences[*sid];
+  // TODO: stop MIRA when score on dev or tuning set does not improve further?
+  for (size_t epoch = 1; epoch <= epochs; ++epoch) {
 
-      vector<vector<ScoreComponentCollection > > allScores(1);
-      vector<vector<float> > allLosses(1);
+	  cout << "\nEpoch " << epoch << std::endl;
+	  cumulativeWeights.ZeroAll();
 
+	  // compute sum in objective function after each epoch
+	  float maxSum = 0.0;
 
-			// MODEL
-      decoder->getNBest(input,
+	  //TODO: batching
+	  size_t batchSize = 1;
+	  size_t batch = 0;
+	  size_t shardPosition = 0;
+	  for (vector<size_t>::const_iterator sid = shard.begin(); sid != shard.end(); ++sid) {
+		  const string& input = inputSentences[*sid];
+		  const vector<string>& refs = referenceSentences[*sid];
+		  cout << "Input sentence " << *sid << ": \"" << input << "\"" << std::endl;
+
+		  // feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
+		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
+		  vector<vector<float> > bleuScores(batchSize);
+
+		  // MODEL
+		  cout << "Run decoder to get nbest wrt model score" << std::endl;
+		  decoder->getNBest(input,
                         *sid,
-                        modelHypoCount,
+                        n,
                         0.0,
                         1.0,
-                        allScores[0],
-                        allLosses[0]);
+                        featureValues[batch],
+                        bleuScores[batch]);
 
-
-			// HOPE
-      size_t oraclePos = allScores.size();
-      vector<const Word*> oracle =
-         decoder->getNBest(input,
-											 *sid,
-												modelHypoCount,
+		  // HOPE
+		  cout << "Run decoder to get nbest hope translations" << std::endl;
+		  size_t oraclePos = featureValues[batch].size();
+		  vector<const Word*> oracle = decoder->getNBest(input,
+						*sid,
+						n,
                         1.0,
                         1.0,
-                        allScores[0],
-                        allLosses[0]);
+                        featureValues[batch],
+                        bleuScores[batch]);
 
-      ScoreComponentCollection oracleScores = allScores[0][oraclePos];
-      float oracleLoss = allLosses[0][oraclePos];
+		  ScoreComponentCollection oracleFeatureValues = featureValues[batch][oraclePos];
+		  float oracleBleuScore = bleuScores[batch][oraclePos];
 			
-			// FEAR
-      decoder->getNBest(input,
+		  // FEAR
+		  cout << "Run decoder to get nbest fear translations" << std::endl;
+		  decoder->getNBest(input,
                         *sid,
-                        modelHypoCount,
+                        n,
                         -1.0,
                         1.0,
-                        allScores[0],
-                        allLosses[0]);
+                        featureValues[batch],
+                        bleuScores[batch]);
 
-      //set loss for each sentence as oracleloss - rawsentenceloss
-      for (size_t i = 0; i < allScores.size(); ++i) {
-        for (size_t j = 0; j < allScores[i].size(); ++j) {
-          allLosses[i][j] = oracleLoss - allLosses[i][j];
-        }
-      }
+	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
+	      vector< vector<float> > losses(batchSize);
+	      for (size_t i = 0; i < batchSize; ++i) {
+	    	  for (size_t j = 0; j < bleuScores[i].size(); ++j) {
+	    		  losses[i].push_back(oracleBleuScore - bleuScores[i][j]);
+	    		  //cout << "loss[" << i << "," << j << "]" << endl;
+	    	  }
+	      }
 
+	      // get weight vector and set weight for bleu feature to 0
+	      ScoreComponentCollection mosesWeights = decoder->getWeights();
+	      const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
+	      mosesWeights.Assign(featureFunctions.back(), 0);
+	      ScoreComponentCollection oldWeights(mosesWeights);
 			
-      //run optimiser
-		  ScoreComponentCollection mosesWeights = decoder->getWeights();	
-			optimiser->updateWeights(mosesWeights
-															, allScores
-															, allLosses
-															, oracleScores);
-			
-      //update moses weights
-      mosesWeights.L1Normalise();
-      decoder->setWeights(mosesWeights);
+		  //run optimiser
+	      cout << "Run optimiser.." << endl;
+	      optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
+
+		  //update moses weights
+	      mosesWeights.L1Normalise();
+		  decoder->setWeights(mosesWeights);
   
-      //history (for approx doc bleu)
-      decoder->updateHistory(oracle);
-      cumulativeWeights.PlusEquals(mosesWeights);
-			decoder->cleanup();
+		  //history (for approx doc bleu)
+		  decoder->updateHistory(oracle);
 
-      ++shardPosition;
-      ++iterations;
+		  cumulativeWeights.PlusEquals(mosesWeights);
+		  decoder->cleanup();
 
-      //mix weights?
+	      // Compute objective for all hypotheses of a training source sentence
+	      // add max(l_ij - Delta_ij * w') for check on objective
+	      float maxDiff = 0.0;
+	      for (size_t j = 0; j < 3*n; ++j) {
+	    	  ScoreComponentCollection featureDiff(oracleFeatureValues);
+	    	  featureDiff.MinusEquals(featureValues[batch][j]);
+	    	  float tmpMaxDiff = losses[batch][j] - featureDiff.InnerProduct(mosesWeights);
+	    	  if (tmpMaxDiff > maxDiff) {
+	    		  maxDiff = tmpMaxDiff;
+	    	  }
+	      }
+
+	      maxSum += maxDiff;
+
+		  ++shardPosition;
+		  ++iterations;
+
+		  //mix weights?
 #ifdef MPI_ENABLE
-      if (shardPosition % (shard.size() / mixFrequency) == 0) {
-        ScoreComponentCollection averageWeights;
-        VERBOSE(1, "Rank: " << rank << "Before mixing: " << mosesWeights << endl);
-        mpi::reduce(world,mosesWeights,averageWeights,SCCPlus(),0);
-        if (rank == 0) {
-          averageWeights.MultiplyEquals(1.0f/size);
-          VERBOSE(1, "After mixing: " << averageWeights << endl);
-        }
-        mpi::broadcast(world,averageWeights,0);
-        decoder->setWeights(averageWeights);
-      }
+		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
+			  ScoreComponentCollection averageWeights;
+			  VERBOSE(1, "Rank: " << rank << "Before mixing: " << mosesWeights << endl);
+			  mpi::reduce(world,mosesWeights,averageWeights,SCCPlus(),0);
+			  if (rank == 0) {
+				  averageWeights.MultiplyEquals(1.0f/size);
+				  VERBOSE(1, "After mixing: " << averageWeights << endl);
+			  }
+
+			  mpi::broadcast(world,averageWeights,0);
+			  decoder->setWeights(averageWeights);
+		  }
 #endif
 
-      //dump weights?
-      if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
-        ScoreComponentCollection totalWeights(cumulativeWeights);
+		  //dump weights?
+		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
+			  ScoreComponentCollection totalWeights(cumulativeWeights);
 #ifdef MPI_ENABLE
-      //average across processes
-      mpi::reduce(world,cumulativeWeights,totalWeights,SCCPlus(),0);
+			  //average across processes
+			  mpi::reduce(world,cumulativeWeights,totalWeights,SCCPlus(),0);
 #endif
-        if (rank == 0) {
-          cout << "WEIGHTS " << iterations << " ";
-          totalWeights.L1Normalise();
-          cout << totalWeights << endl;
-        }
-      }
-    }
+			  if (rank == 0) {
+				  cout << "Total weights (" << iterations << ") ";
+				  totalWeights.L1Normalise();
+				  cout << totalWeights << endl;
+			  }
+		  }
+	  }
+
+	  // how has the objective function changed?
+	  cout << "objective = " << maxSum << endl;
   }
-  
 
+  // take average of cumulative weights of last pass over all source sentences
+  cumulativeWeights.MultiplyEquals(1.0f/inputSentences.size());
+  
+  cerr << "Start weights: " << startWeights << endl;
+  cerr << "Averaged new weights: " << cumulativeWeights << endl;
+
+  tm = localtime(&now); // get struct filled out
+  cout << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec;
 
   exit(0);
 }
