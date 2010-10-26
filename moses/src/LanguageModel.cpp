@@ -50,7 +50,6 @@ size_t LanguageModel::GetNumScoreComponents() const
 	return 1;
 }
 
-
 float LanguageModel::GetWeight() const {
     size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
           GetBeginIndex(GetScoreBookkeepingID());
@@ -212,8 +211,10 @@ FFState* LanguageModel::Evaluate(
 		else			
 			contextFactor[index++] = &GetSentenceStartArray();
 	}
-	float lmScore	= GetValue(contextFactor);
-	//cout<<"context factor: "<<GetValue(contextFactor)<<endl;
+
+	State state;
+        unsigned int statelen;
+	float lmScore	= GetValue(contextFactor,&state,&statelen);
 
 	// main loop
 	size_t endPos = std::min(startPos + m_nGramOrder - 2
@@ -227,7 +228,7 @@ FFState* LanguageModel::Evaluate(
 		// add last factor
 		contextFactor.back() = &hypo.GetWord(currPos);
 
-		lmScore	+= GetValue(contextFactor);
+		lmScore	+= GetValue(contextFactor,&state,&statelen);
 	}
 
 	// end of sentence
@@ -246,12 +247,18 @@ FFState* LanguageModel::Evaluate(
 		}
 		lmScore	+= GetValue(contextFactor, &res->lmstate);
 	} else {
-		for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
-			for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
-				contextFactor[i] = contextFactor[i + 1];
-			contextFactor.back() = &hypo.GetWord(currPos);
+
+		if (endPos < currEndPos){ 
+			//need to get the LM state (otherwise the last LM state is fine)
+			for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+				for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+					contextFactor[i] = contextFactor[i + 1];
+				contextFactor.back() = &hypo.GetWord(currPos);
+			}
+			state = GetState(contextFactor);
 		}
-		res->lmstate = GetState(contextFactor);
+		res->lmstate = state;
+
 	}
 	out->PlusEquals(this, lmScore);
   IFVERBOSE(2) { hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t ); }

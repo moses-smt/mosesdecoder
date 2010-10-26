@@ -168,13 +168,21 @@ then
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS -I${with_irstlm}/include"
 
+  
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+  AC_MSG_NOTICE([!!! You are linking the IRSTLM library; be sure the release is >= 5.50.01 !!!])
+  AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
+  AC_MSG_NOTICE([])
+
+
   AC_CHECK_HEADER(n_gram.h,
                  [AC_DEFINE([HAVE_IRSTLM], [], [flag for IRSTLM])],
                  [AC_MSG_ERROR([Cannot find IRST-LM in ${with_irstlm}])])
 
   MY_ARCH=`uname -m`
   LIB_IRSTLM="-lirstlm"
-  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib/${MY_ARCH}"
+  LDFLAGS="$LDFLAGS -L${with_irstlm}/lib"
   LIBS="$LIBS $LIB_IRSTLM"
   FMTLIBS="$FMTLIBS libirstlm.a"
   AM_CONDITIONAL([IRST_LM], true)

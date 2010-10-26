@@ -119,7 +119,7 @@ public:
 	
 	virtual std::string GetScoreProducerDescription() const = 0;
 
-    float GetWeight() const;
+	float GetWeight() const;
 
 	std::string GetScoreProducerWeightShortName() const 
 	{ 

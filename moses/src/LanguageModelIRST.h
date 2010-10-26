@@ -59,11 +59,7 @@ protected:
 
 	void CreateFactors(FactorCollection &factorCollection);
 	int GetLmID( const std::string &str ) const;
-
-	int GetLmID( const Factor *factor ) const{
-	  size_t factorId = factor->GetId();
-	  return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];        
-	};
+	int GetLmID( const Factor *factor ) const;
   
 public:
 	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub);

@@ -120,16 +120,14 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_unknownId = m_lmtb->getDict()->oovcode(); // at the level of micro tags
   CreateFactors(factorCollection);
 
-  VERBOSE(1, "IRST: m_unknownId=" << m_unknownId << std::endl);
+  VERBOSE(0, "IRST: m_unknownId=" << m_unknownId << std::endl);
 
   //install caches
-  m_lmtb->init_probcache();
-  m_lmtb->init_statecache();
-  m_lmtb->init_lmtcaches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
+  m_lmtb->init_caches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
 
   if (m_lmtb_dub >0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 
-	free(filenamesOrig);
+  free(filenamesOrig);
   return true;
 }
 
@@ -181,6 +179,12 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
   return m_lmtb->getDict()->encode( str.c_str() ); // at the level of micro tags
 }
 
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
+{
+        size_t factorId = factor->GetId();
+        return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
+}
+
 float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const
 {
 	unsigned int dummy;
@@ -189,29 +193,28 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 
 	// set up context
 	size_t count = contextFactor.size();
-    
-	m_lmtb_ng->size=0;
-	if (count< (size_t)(m_lmtb_size-1)) m_lmtb_ng->pushc(m_lmtb_sentenceEnd);
-	if (count< (size_t)m_lmtb_size) m_lmtb_ng->pushc(m_lmtb_sentenceStart);  
+        if (count < 0) { cerr << "ERROR count < 0\n"; exit(100); };
 
-	for (size_t i = 0 ; i < count ; i++)
-	{
-	  int lmId = GetLmID((*contextFactor[i])[factorType]);
-#ifdef DEBUG
-		cout << "i=" << i << " -> lmid=" << lmid << " -> |"<< (*contextFactor[i])[factorType]->GetString() << "|\n";
-#endif
-	  m_lmtb_ng->pushc(lmId);
-	}
-  
-	if (finalState){        
-		*finalState=(State *)m_lmtb->cmaxsuffptr(*m_lmtb_ng);	
-		// back off stats not currently available
-		*len = 0;	
-	}
+        // set up context
+        int codes[MAX_NGRAM_SIZE];
 
-	float prob = m_lmtb->clprob(*m_lmtb_ng);
-  
-  
+	size_t idx=0;
+        //fill the farthest positions with at most ONE sentenceEnd symbol and at most ONE sentenceEnd symbol, if "empty" positions are available
+	//so that the vector looks like = "</s> <s> context_word context_word" for a two-word context and a LM of order 5
+	if (count < (size_t) (m_lmtb_size-1)) codes[idx++] = m_lmtb_sentenceEnd;  
+	if (count < (size_t) m_lmtb_size) codes[idx++] = m_lmtb_sentenceStart;  
+
+        for (size_t i = 0 ; i < count ; i++)
+                codes[idx++] =  GetLmID((*contextFactor[i])[factorType]);
+
+        float prob;
+        char* msp = NULL;
+        unsigned int ilen;
+        prob = m_lmtb->clprob(codes,idx,NULL,NULL,&msp,&ilen);
+
+	if (finalState) *finalState=(State *) msp;
+	if (len) *len = ilen;
+
 	return TransformLMScore(prob);
 }
 
