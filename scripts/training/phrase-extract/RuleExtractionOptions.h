@@ -30,13 +30,14 @@ struct RuleExtractionOptions
         int minWords;
         int maxSymbolsTarget;
         int maxSymbolsSource;
+        int maxNonTerm;
+        int maxScope;
         bool onlyDirectFlag;
         bool glueGrammarFlag;
         bool unknownWordLabelFlag;
         bool onlyOutputSpanInfo;
         bool noFileLimit;
         bool properConditioning;
-        int maxNonTerm;
         bool nonTermFirstWord;
         bool nonTermConsecTarget;
         bool nonTermConsecSource;
@@ -54,6 +55,8 @@ struct RuleExtractionOptions
           , minWords(1)
           , maxSymbolsTarget(999)
           , maxSymbolsSource(5)
+          , maxNonTerm(2)
+          , maxScope(3)
           // int minHoleSize(1)
           // int minSubPhraseSize(1) // minimum size of a remaining lexical phrase 
           , onlyDirectFlag(false)
@@ -63,7 +66,6 @@ struct RuleExtractionOptions
           , noFileLimit(false)
           //bool zipFiles(false)
           , properConditioning(false)
-          , maxNonTerm(2)
           , nonTermFirstWord(true)
           , nonTermConsecTarget(true)
           , nonTermConsecSource(false)

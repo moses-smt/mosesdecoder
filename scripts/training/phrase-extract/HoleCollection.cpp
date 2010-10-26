@@ -36,3 +36,30 @@ void HoleCollection::SortSourceHoles()
 	// sort
 	std::sort(m_sortedSourceHoles.begin(), m_sortedSourceHoles.end(), HoleSourceOrderer());
 }
+
+void HoleCollection::Add(int startT, int endT, int startS, int endS)
+{
+    Hole hole(startS, endS, startT, endT);
+    m_scope = Scope(hole);
+    m_sourceHoleStartPoints.insert(startS);
+    m_sourceHoleEndPoints.insert(endS);
+    m_holes.push_back(hole);
+}
+
+int HoleCollection::Scope(const Hole &proposedHole) const
+{
+    const int holeStart = proposedHole.GetStart(0);
+    const int holeEnd = proposedHole.GetEnd(0);
+    int scope = m_scope;
+    if (holeStart == m_sourcePhraseStart ||
+        m_sourceHoleEndPoints.find(holeStart-1) != m_sourceHoleEndPoints.end())
+    {
+        ++scope; // Adding hole would introduce choice point at start of hole.
+    }
+    if (holeEnd == m_sourcePhraseEnd || 
+        m_sourceHoleStartPoints.find(holeEnd+1) != m_sourceHoleStartPoints.end())
+    {
+        ++scope; // Adding hole would introduce choice point at end of hole.
+    }
+    return scope;
+}
