@@ -22,7 +22,7 @@ while (<INI>) {
       $abs = ensure_absolute($fn, $ini);
       die "File not found or empty: $fn (interpreted as $abs)"
         if ! -s $abs && ! -s $abs.".binphr.idx"; # accept binarized ttables
-      $_ = "$a $b $c $d $abs\n";
+      $_ = "$type $b $c $d $abs\n";
     }
     if ($section eq "generation-file" || $section eq "lmodel-file") {
       chomp;
