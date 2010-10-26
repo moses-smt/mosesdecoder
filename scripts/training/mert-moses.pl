@@ -304,8 +304,10 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
 
 
 
-
-die "Error: need to specify the mert directory" if !defined $mertdir;
+if (!defined $mertdir) {
+  $mertdir = "$SCRIPTS_ROOTDIR/../mert";
+  print STDERR "Assuming --mertdir=$mertdir\n";
+}
 
 my $mert_extract_cmd = "$mertdir/extractor";
 my $mert_mert_cmd = "$mertdir/mert";
