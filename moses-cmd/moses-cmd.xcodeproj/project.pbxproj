@@ -60,7 +60,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EBB1752126C169000AE6102 /* kenlm.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D /* kenlm */;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = kenlm;
 		};
 /* End PBXContainerItemProxy section */

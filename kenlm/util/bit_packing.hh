@@ -4,8 +4,13 @@
 /* Bit-level packing routines */
 
 #include <assert.h>
-#include <endian.h>
 #include <inttypes.h>
+
+#ifdef __APPLE__
+#include <i386/endian.h>
+#else
+#include <endian.h>
+#endif
 
 #if __BYTE_ORDER != __LITTLE_ENDIAN
 #error The bit aligned storage functions assume little endian architecture

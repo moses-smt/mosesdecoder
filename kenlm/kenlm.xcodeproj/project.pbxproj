@@ -13,6 +13,18 @@
 		1E37EBC212496A7D00C1C73A /* ngram.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E37EBC012496A7D00C1C73A /* ngram.hh */; };
 		1E37EBC712496AB400C1C73A /* virtual_interface.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E37EBC512496AB400C1C73A /* virtual_interface.cc */; };
 		1E37EBC812496AB400C1C73A /* virtual_interface.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E37EBC612496AB400C1C73A /* virtual_interface.hh */; };
+		1E8BF78A1278A434009F10C1 /* binary_format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7871278A434009F10C1 /* binary_format.cc */; };
+		1E8BF78B1278A434009F10C1 /* binary_format.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E8BF7881278A434009F10C1 /* binary_format.hh */; };
+		1E8BF78C1278A434009F10C1 /* enumerate_vocab.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E8BF7891278A434009F10C1 /* enumerate_vocab.hh */; };
+		1E8BF7971278A443009F10C1 /* ngram_config.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF78F1278A443009F10C1 /* ngram_config.cc */; };
+		1E8BF7981278A443009F10C1 /* ngram_hashed.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7901278A443009F10C1 /* ngram_hashed.cc */; };
+		1E8BF7991278A443009F10C1 /* ngram_hashed.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E8BF7911278A443009F10C1 /* ngram_hashed.hh */; };
+		1E8BF79A1278A443009F10C1 /* ngram_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7921278A443009F10C1 /* ngram_test.cc */; };
+		1E8BF79B1278A443009F10C1 /* ngram_trie.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7931278A443009F10C1 /* ngram_trie.cc */; };
+		1E8BF79C1278A443009F10C1 /* ngram_trie.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E8BF7941278A443009F10C1 /* ngram_trie.hh */; };
+		1E8BF79D1278A443009F10C1 /* trie.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7951278A443009F10C1 /* trie.cc */; };
+		1E8BF79E1278A443009F10C1 /* trie.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E8BF7961278A443009F10C1 /* trie.hh */; };
+		1E8BF7D51278A600009F10C1 /* bit_packing.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7D41278A600009F10C1 /* bit_packing.cc */; };
 		1EBB16D7126C158600AE6102 /* ersatz_progress.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16BF126C158600AE6102 /* ersatz_progress.cc */; };
 		1EBB16D8126C158600AE6102 /* ersatz_progress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16C0126C158600AE6102 /* ersatz_progress.hh */; };
 		1EBB16D9126C158600AE6102 /* exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16C1126C158600AE6102 /* exception.cc */; };
@@ -59,6 +71,18 @@
 		1E37EBC012496A7D00C1C73A /* ngram.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ngram.hh; path = lm/ngram.hh; sourceTree = "<group>"; };
 		1E37EBC512496AB400C1C73A /* virtual_interface.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = virtual_interface.cc; path = lm/virtual_interface.cc; sourceTree = "<group>"; };
 		1E37EBC612496AB400C1C73A /* virtual_interface.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = virtual_interface.hh; path = lm/virtual_interface.hh; sourceTree = "<group>"; };
+		1E8BF7871278A434009F10C1 /* binary_format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = binary_format.cc; path = lm/binary_format.cc; sourceTree = "<group>"; };
+		1E8BF7881278A434009F10C1 /* binary_format.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = binary_format.hh; path = lm/binary_format.hh; sourceTree = "<group>"; };
+		1E8BF7891278A434009F10C1 /* enumerate_vocab.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = enumerate_vocab.hh; path = lm/enumerate_vocab.hh; sourceTree = "<group>"; };
+		1E8BF78F1278A443009F10C1 /* ngram_config.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram_config.cc; path = lm/ngram_config.cc; sourceTree = "<group>"; };
+		1E8BF7901278A443009F10C1 /* ngram_hashed.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram_hashed.cc; path = lm/ngram_hashed.cc; sourceTree = "<group>"; };
+		1E8BF7911278A443009F10C1 /* ngram_hashed.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ngram_hashed.hh; path = lm/ngram_hashed.hh; sourceTree = "<group>"; };
+		1E8BF7921278A443009F10C1 /* ngram_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram_test.cc; path = lm/ngram_test.cc; sourceTree = "<group>"; };
+		1E8BF7931278A443009F10C1 /* ngram_trie.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram_trie.cc; path = lm/ngram_trie.cc; sourceTree = "<group>"; };
+		1E8BF7941278A443009F10C1 /* ngram_trie.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ngram_trie.hh; path = lm/ngram_trie.hh; sourceTree = "<group>"; };
+		1E8BF7951278A443009F10C1 /* trie.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trie.cc; path = lm/trie.cc; sourceTree = "<group>"; };
+		1E8BF7961278A443009F10C1 /* trie.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = trie.hh; path = lm/trie.hh; sourceTree = "<group>"; };
+		1E8BF7D41278A600009F10C1 /* bit_packing.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bit_packing.cc; path = util/bit_packing.cc; sourceTree = "<group>"; };
 		1EBB16BF126C158600AE6102 /* ersatz_progress.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ersatz_progress.cc; path = util/ersatz_progress.cc; sourceTree = "<group>"; };
 		1EBB16C0126C158600AE6102 /* ersatz_progress.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ersatz_progress.hh; path = util/ersatz_progress.hh; sourceTree = "<group>"; };
 		1EBB16C1126C158600AE6102 /* exception.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exception.cc; path = util/exception.cc; sourceTree = "<group>"; };
@@ -124,6 +148,18 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E8BF7D41278A600009F10C1 /* bit_packing.cc */,
+				1E8BF78F1278A443009F10C1 /* ngram_config.cc */,
+				1E8BF7901278A443009F10C1 /* ngram_hashed.cc */,
+				1E8BF7911278A443009F10C1 /* ngram_hashed.hh */,
+				1E8BF7921278A443009F10C1 /* ngram_test.cc */,
+				1E8BF7931278A443009F10C1 /* ngram_trie.cc */,
+				1E8BF7941278A443009F10C1 /* ngram_trie.hh */,
+				1E8BF7951278A443009F10C1 /* trie.cc */,
+				1E8BF7961278A443009F10C1 /* trie.hh */,
+				1E8BF7871278A434009F10C1 /* binary_format.cc */,
+				1E8BF7881278A434009F10C1 /* binary_format.hh */,
+				1E8BF7891278A434009F10C1 /* enumerate_vocab.hh */,
 				1ED9988612783457006BBB6C /* file_piece_test.cc */,
 				1EBB1708126C15C500AE6102 /* facade.hh */,
 				1EBB1709126C15C500AE6102 /* ngram_build_binary.cc */,
@@ -216,6 +252,11 @@
 				1EBB1722126C15C500AE6102 /* vocab.hh in Headers */,
 				1EBB1723126C15C500AE6102 /* weights.hh in Headers */,
 				1EBB1724126C15C500AE6102 /* word_index.hh in Headers */,
+				1E8BF78B1278A434009F10C1 /* binary_format.hh in Headers */,
+				1E8BF78C1278A434009F10C1 /* enumerate_vocab.hh in Headers */,
+				1E8BF7991278A443009F10C1 /* ngram_hashed.hh in Headers */,
+				1E8BF79C1278A443009F10C1 /* ngram_trie.hh in Headers */,
+				1E8BF79E1278A443009F10C1 /* trie.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,6 +323,13 @@
 				1EBB171F126C15C500AE6102 /* sri.cc in Sources */,
 				1EBB1721126C15C500AE6102 /* vocab.cc in Sources */,
 				1ED9988712783457006BBB6C /* file_piece_test.cc in Sources */,
+				1E8BF78A1278A434009F10C1 /* binary_format.cc in Sources */,
+				1E8BF7971278A443009F10C1 /* ngram_config.cc in Sources */,
+				1E8BF7981278A443009F10C1 /* ngram_hashed.cc in Sources */,
+				1E8BF79A1278A443009F10C1 /* ngram_test.cc in Sources */,
+				1E8BF79B1278A443009F10C1 /* ngram_trie.cc in Sources */,
+				1E8BF79D1278A443009F10C1 /* trie.cc in Sources */,
+				1E8BF7D51278A600009F10C1 /* bit_packing.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
