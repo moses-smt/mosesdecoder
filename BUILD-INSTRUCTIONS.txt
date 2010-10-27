@@ -8,9 +8,12 @@ and build it.  The SRILM can be downloaded from
 http://www.speech.sri.com/projects/srilm/download.html .
 
 
-If you want to use IRST's, you will need to download its source
-and build it.  The IRSTLM can be downloaded from 
-http://sourceforge.net/projects/irstlm/
+If you want to use IRST's, you will need to download its source and
+build it.  The IRSTLM can be downloaded from either the SourceForge
+website
+http://sourceforge.net/projects/irstlm
+or the official IRSTLM website
+http://hlt.fbk.eu/en/irstlm
 
 
 Ken's LM is included with the Moses distribution.  
