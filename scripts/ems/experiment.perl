@@ -835,9 +835,9 @@ sub draw_agenda_graph {
 		$step .= " (".$RE_USE[$i].")" if $RE_USE[$i];
 
 		my $color = "green";
-		$color = "lightblue" if $RE_USE[$i];
 		$color = "#0000ff" if defined($DO{$i}) && $DO{$i} >= 1;
 		$color = "#8080ff" if defined($DONE{$i}) || ($RE_USE[$i] && $RE_USE[$i] == $VERSION);
+		$color = "lightblue" if $RE_USE[$i] && $RE_USE[$i] != $VERSION;
 		$color = "red" if defined($CRASHED{$i});
 		$color = "lightyellow" if defined($PASS{$i});
 		
