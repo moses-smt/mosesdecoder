@@ -53,7 +53,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 1EBB1752126C169000AE6102 /* kenlm.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D /* libkenlm.a */;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = kenlm;
+		};
+		1ED0E9661277CFC500AC18B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EBB1752126C169000AE6102 /* kenlm.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* kenlm */;
 			remoteInfo = kenlm;
 		};
 /* End PBXContainerItemProxy section */
@@ -189,6 +196,7 @@
 			dependencies = (
 				03306D780C0B244800CA1311 /* PBXTargetDependency */,
 				1CE6472E1167A11600EC77CC /* PBXTargetDependency */,
+				1ED0E9671277CFC500AC18B1 /* PBXTargetDependency */,
 			);
 			name = "moses-cmd";
 			productInstallPath = "$(HOME)/bin";
@@ -277,6 +285,11 @@
 			name = OnDiskPt;
 			targetProxy = 1CE6472D1167A11600EC77CC /* PBXContainerItemProxy */;
 		};
+		1ED0E9671277CFC500AC18B1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = kenlm;
+			targetProxy = 1ED0E9661277CFC500AC18B1 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -299,7 +312,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib/,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
@@ -337,7 +350,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib/,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
@@ -367,7 +380,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib/,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,

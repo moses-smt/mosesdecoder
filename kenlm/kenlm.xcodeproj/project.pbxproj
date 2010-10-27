@@ -17,7 +17,6 @@
 		1EBB16D8126C158600AE6102 /* ersatz_progress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16C0126C158600AE6102 /* ersatz_progress.hh */; };
 		1EBB16D9126C158600AE6102 /* exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16C1126C158600AE6102 /* exception.cc */; };
 		1EBB16DA126C158600AE6102 /* exception.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16C2126C158600AE6102 /* exception.hh */; };
-		1EBB16DB126C158600AE6102 /* file_piece_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16C3126C158600AE6102 /* file_piece_test.cc */; };
 		1EBB16DC126C158600AE6102 /* file_piece.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16C4126C158600AE6102 /* file_piece.cc */; };
 		1EBB16DD126C158600AE6102 /* file_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16C5126C158600AE6102 /* file_piece.hh */; };
 		1EBB16DE126C158600AE6102 /* joint_sort_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16C6126C158600AE6102 /* joint_sort_test.cc */; };
@@ -63,7 +62,6 @@
 		1EBB16C0126C158600AE6102 /* ersatz_progress.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ersatz_progress.hh; path = util/ersatz_progress.hh; sourceTree = "<group>"; };
 		1EBB16C1126C158600AE6102 /* exception.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exception.cc; path = util/exception.cc; sourceTree = "<group>"; };
 		1EBB16C2126C158600AE6102 /* exception.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exception.hh; path = util/exception.hh; sourceTree = "<group>"; };
-		1EBB16C3126C158600AE6102 /* file_piece_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_piece_test.cc; path = util/file_piece_test.cc; sourceTree = "<group>"; };
 		1EBB16C4126C158600AE6102 /* file_piece.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_piece.cc; path = util/file_piece.cc; sourceTree = "<group>"; };
 		1EBB16C5126C158600AE6102 /* file_piece.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = file_piece.hh; path = util/file_piece.hh; sourceTree = "<group>"; };
 		1EBB16C6126C158600AE6102 /* joint_sort_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = joint_sort_test.cc; path = util/joint_sort_test.cc; sourceTree = "<group>"; };
@@ -142,7 +140,6 @@
 				1EBB16C0126C158600AE6102 /* ersatz_progress.hh */,
 				1EBB16C1126C158600AE6102 /* exception.cc */,
 				1EBB16C2126C158600AE6102 /* exception.hh */,
-				1EBB16C3126C158600AE6102 /* file_piece_test.cc */,
 				1EBB16C4126C158600AE6102 /* file_piece.cc */,
 				1EBB16C5126C158600AE6102 /* file_piece.hh */,
 				1EBB16C6126C158600AE6102 /* joint_sort_test.cc */,
@@ -266,7 +263,6 @@
 				1E2B85C412555DB1000770D6 /* lm_exception.cc in Sources */,
 				1EBB16D7126C158600AE6102 /* ersatz_progress.cc in Sources */,
 				1EBB16D9126C158600AE6102 /* exception.cc in Sources */,
-				1EBB16DB126C158600AE6102 /* file_piece_test.cc in Sources */,
 				1EBB16DC126C158600AE6102 /* file_piece.cc in Sources */,
 				1EBB16DE126C158600AE6102 /* joint_sort_test.cc in Sources */,
 				1EBB16E0126C158600AE6102 /* key_value_packing_test.cc in Sources */,

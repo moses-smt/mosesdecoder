@@ -336,7 +336,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
@@ -364,7 +364,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
