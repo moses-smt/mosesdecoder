@@ -49,6 +49,7 @@
 		1EBB1722126C15C500AE6102 /* vocab.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB1714126C15C500AE6102 /* vocab.hh */; };
 		1EBB1723126C15C500AE6102 /* weights.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB1715126C15C500AE6102 /* weights.hh */; };
 		1EBB1724126C15C500AE6102 /* word_index.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB1716126C15C500AE6102 /* word_index.hh */; };
+		1ED9988712783457006BBB6C /* file_piece_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1ED9988612783457006BBB6C /* file_piece_test.cc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -95,6 +96,7 @@
 		1EBB1714126C15C500AE6102 /* vocab.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = vocab.hh; path = lm/vocab.hh; sourceTree = "<group>"; };
 		1EBB1715126C15C500AE6102 /* weights.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = weights.hh; path = lm/weights.hh; sourceTree = "<group>"; };
 		1EBB1716126C15C500AE6102 /* word_index.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = word_index.hh; path = lm/word_index.hh; sourceTree = "<group>"; };
+		1ED9988612783457006BBB6C /* file_piece_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_piece_test.cc; path = util/file_piece_test.cc; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libkenlm.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libkenlm.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -122,6 +124,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1ED9988612783457006BBB6C /* file_piece_test.cc */,
 				1EBB1708126C15C500AE6102 /* facade.hh */,
 				1EBB1709126C15C500AE6102 /* ngram_build_binary.cc */,
 				1EBB170A126C15C500AE6102 /* ngram_config.hh */,
@@ -278,6 +281,7 @@
 				1EBB171E126C15C500AE6102 /* sri_test.cc in Sources */,
 				1EBB171F126C15C500AE6102 /* sri.cc in Sources */,
 				1EBB1721126C15C500AE6102 /* vocab.cc in Sources */,
+				1ED9988712783457006BBB6C /* file_piece_test.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
