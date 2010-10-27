@@ -40,7 +40,7 @@ class Phrase;
 /** Implementation of single factor LM using IRST's code.
 * This is the default LM for Moses and is available from the same sourceforge repository
 */
-class LanguageModelIRST : public LanguageModelSingleFactor
+class LanguageModelIRST : public LanguageModelPointerState
 {
 protected:
 	std::vector<int> m_lmIdLookup;

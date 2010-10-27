@@ -15,7 +15,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef USE_ZLIB
+#ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -31,10 +31,10 @@ ParseNumberException::ParseNumberException(StringPiece value) throw() {
 }
 
 GZException::GZException(void *file) {
-#ifdef USE_ZLIB
+#ifdef HAVE_ZLIB
   int num;
   *this << gzerror(file, &num) << " from zlib";
-#endif // USE_ZLIB
+#endif // HAVE_ZLIB
 }
 
 int OpenReadOrThrow(const char *name) {
@@ -62,8 +62,10 @@ FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, off_
 }
 
 FilePiece::~FilePiece() {
-#ifdef USE_ZLIB
+#ifdef HAVE_ZLIB
   if (gz_file_) {
+    // zlib took ownership
+    file_.release();
     int ret;
     if (Z_OK != (ret = gzclose(gz_file_))) {
       errx(1, "could not close file %s using zlib", file_name_.c_str());
@@ -74,7 +76,7 @@ FilePiece::~FilePiece() {
 }
 
 void FilePiece::Initialize(const char *name, std::ostream *show_progress, off_t min_buffer) throw (GZException) {
-#ifdef USE_ZLIB
+#ifdef HAVE_ZLIB
   gz_file_ = NULL;
 #endif
   file_name_ = name;
@@ -97,7 +99,7 @@ void FilePiece::Initialize(const char *name, std::ostream *show_progress, off_t 
   Shift();
   // gzip detect.
   if ((position_end_ - position_) > 2 && *position_ == 0x1f && static_cast<unsigned char>(*(position_ + 1)) == 0x8b) {
-#ifndef USE_ZLIB
+#ifndef HAVE_ZLIB
     UTIL_THROW(GZException, "Looks like a gzip file but support was not compiled in.");
 #endif
     if (!fallback_to_read_) {
@@ -230,14 +232,12 @@ void FilePiece::TransitionToRead() throw (GZException) {
   position_ = data_.begin();
   position_end_ = position_;
 
-#ifdef USE_ZLIB
+#ifdef HAVE_ZLIB
   assert(!gz_file_);
   gz_file_ = gzdopen(file_.get(), "r");
   if (!gz_file_) {
     UTIL_THROW(GZException, "zlib failed to open " << file_name_);
   }
-  // gz_file_ took ownership.  Also the fd shouldn't be used for anything else.  
-  file_.release();
 #endif
 }
 
@@ -274,16 +274,13 @@ void FilePiece::ReadShift() throw(GZException, EndOfFileException) {
   }
 
   ssize_t read_return;
-#ifdef USE_ZLIB
+#ifdef HAVE_ZLIB
   read_return = gzread(gz_file_, static_cast<char*>(data_.get()) + already_read, default_map_size_ - already_read);
   if (read_return == -1) throw GZException(gz_file_);
   if (total_size_ != kBadSize) {
-    z_off_t got_off = gztell(gz_file_);
-    if (got_off == -1) {
-      gzclearerr(gz_file_);
-    } else {
-      progress_.Set(got_off);
-    }
+    // Just get the position, don't actually seek.  Apparently this is how you do it. . . 
+    off_t ret = lseek(file_.get(), 0, SEEK_CUR);
+    if (ret != -1) progress_.Set(ret);
   }
 #else
   read_return = read(file_.get(), static_cast<char*>(data_.get()) + already_read, default_map_size_ - already_read);

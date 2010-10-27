@@ -1,7 +1,10 @@
 #include "lm/read_arpa.hh"
 
 #include <cstdlib>
+#include <vector>
+
 #include <ctype.h>
+#include <inttypes.h>
 
 namespace lm {
 
@@ -14,10 +17,15 @@ bool IsEntirelyWhiteSpace(const StringPiece &line) {
   return true;
 }
 
-template <class F> void GenericReadARPACounts(F &in, std::vector<size_t> &number) {
+template <class F> void GenericReadARPACounts(F &in, std::vector<uint64_t> &number) {
   number.clear();
   StringPiece line;
-  if (!IsEntirelyWhiteSpace(line = in.ReadLine())) UTIL_THROW(FormatLoadException, "First line was \"" << line << "\" not blank");
+  if (!IsEntirelyWhiteSpace(line = in.ReadLine())) {
+    if ((line.size() >= 2) && (line.data()[0] == 0x1f) && (static_cast<unsigned char>(line.data()[1]) == 0x8b)) {
+      UTIL_THROW(FormatLoadException, "Looks like a gzip file.  If this is an ARPA file, run\nzcat " << in.FileName() << " |kenlm/build_binary /dev/stdin " << in.FileName() << ".binary\nIf this already in binary format, you need to decompress it because mmap doesn't work on top of gzip.");
+    }
+    UTIL_THROW(FormatLoadException, "First line was \"" << static_cast<int>(line.data()[1]) << "\" not blank");
+  }
   if ((line = in.ReadLine()) != "\\data\\") UTIL_THROW(FormatLoadException, "second line was \"" << line << "\" not \\data\\.");
   while (!IsEntirelyWhiteSpace(line = in.ReadLine())) {
     if (line.size() < 6 || strncmp(line.data(), "ngram ", 6)) UTIL_THROW(FormatLoadException, "count line \"" << line << "\"doesn't begin with \"ngram \"");
@@ -69,6 +77,11 @@ class FakeFilePiece {
       return ret;
     }
 
+    const char *FileName() const {
+      // This only used for error messages and we don't know the file name. . . 
+      return "$file";
+    }
+
   private:
     std::istream &in_;
     std::string buffer_;
@@ -76,10 +89,10 @@ class FakeFilePiece {
 
 } // namespace
 
-void ReadARPACounts(util::FilePiece &in, std::vector<std::size_t> &number) {
+void ReadARPACounts(util::FilePiece &in, std::vector<uint64_t> &number) {
   GenericReadARPACounts(in, number);
 }
-void ReadARPACounts(std::istream &in, std::vector<std::size_t> &number) {
+void ReadARPACounts(std::istream &in, std::vector<uint64_t> &number) {
   FakeFilePiece fake(in);
   GenericReadARPACounts(fake, number);
 }
@@ -91,7 +104,7 @@ void ReadNGramHeader(std::istream &in, unsigned int length) {
   GenericReadNGramHeader(fake, length);
 }
 
-void ReadBackoff(util::FilePiece &in, Prob &weights) {
+void ReadBackoff(util::FilePiece &in, Prob &/*weights*/) {
   switch (in.get()) {
     case '\t':
       {
@@ -123,6 +136,15 @@ void ReadBackoff(util::FilePiece &in, ProbBackoff &weights) {
 
 void ReadEnd(util::FilePiece &in) {
   GenericReadEnd(in);
+  StringPiece line;
+  try {
+    while (true) {
+      line = in.ReadLine();
+      if (!IsEntirelyWhiteSpace(line)) UTIL_THROW(FormatLoadException, "Trailing line " << line);
+    }
+  } catch (const util::EndOfFileException &e) {
+    return;
+  }
 }
 void ReadEnd(std::istream &in) {
   FakeFilePiece fake(in);

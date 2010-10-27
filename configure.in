@@ -195,7 +195,7 @@ then
 
   AC_CHECK_HEADER(lm/ngram.hh,
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
-                 [AC_MSG_ERROR([Cannot find KEN-LM in ${with_kenlm}])])
+                 [AC_MSG_ERROR([Cannot find KEN-LM in ${PWD}/kenlm])])
 
   LIB_KENLM="-lkenlm"
   LDFLAGS="$LDFLAGS -L${PWD}/kenlm"

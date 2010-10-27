@@ -57,69 +57,143 @@ template <class M> void Continuation(const M &model) {
   AppendTest("loin", 5, -0.0432557);
 }
 
-#define StatelessTest(begin, end, ngram, score) \
-  ret = model.SlowStatelessScore(begin, end); \
+#define StatelessTest(word, provide, ngram, score) \
+  ret = model.FullScoreForgotState(indices + num_words - word, indices + num_words - word + provide, indices[num_words - word - 1], state); \
+  BOOST_CHECK_CLOSE(score, ret.prob, 0.001); \
+  BOOST_CHECK_EQUAL(static_cast<unsigned int>(ngram), ret.ngram_length); \
+  model.GetState(indices + num_words - word, indices + num_words - word + provide, before); \
+  ret = model.FullScore(before, indices[num_words - word - 1], out); \
+  BOOST_CHECK(state == out); \
   BOOST_CHECK_CLOSE(score, ret.prob, 0.001); \
   BOOST_CHECK_EQUAL(static_cast<unsigned int>(ngram), ret.ngram_length);
 
 template <class M> void Stateless(const M &model) {
   const char *words[] = {"<s>", "looking", "on", "a", "little", "the", "biarritz", "not_found", "more", ".", "</s>"};
-  WordIndex indices[sizeof(words) / sizeof(const char*)];
-  for (unsigned int i = 0; i < sizeof(words) / sizeof(const char*); ++i) {
-    indices[i] = model.GetVocabulary().Index(words[i]);
+  const size_t num_words = sizeof(words) / sizeof(const char*);
+  // Silience "array subscript is above array bounds" when extracting end pointer.
+  WordIndex indices[num_words + 1];
+  for (unsigned int i = 0; i < num_words; ++i) {
+    indices[num_words - 1 - i] = model.GetVocabulary().Index(words[i]);
   }
-  HieuShouldRefactorMoses ret;
-  StatelessTest(indices, indices + 2, 2, -0.484652);
-  StatelessTest(indices, indices + 3, 3, -0.348837);
-  StatelessTest(indices, indices + 4, 4, -0.0155266);
-  StatelessTest(indices, indices + 5, 5, -0.00306122);
+  FullScoreReturn ret;
+  State state, out, before;
+
+  ret = model.FullScoreForgotState(indices + num_words - 1, indices + num_words, indices[num_words - 2], state);
+  BOOST_CHECK_CLOSE(-0.484652, ret.prob, 0.001);
+  StatelessTest(1, 1, 2, -0.484652);
+
+  // looking
+  StatelessTest(1, 2, 2, -0.484652);
+  // on
+  AppendTest("on", 3, -0.348837);
+  StatelessTest(2, 3, 3, -0.348837);
+  StatelessTest(2, 2, 3, -0.348837);
+  StatelessTest(2, 1, 2, -0.4638903);
+  // a
+  StatelessTest(3, 4, 4, -0.0155266);
+  // little
+  AppendTest("little", 5, -0.00306122);
+  StatelessTest(4, 5, 5, -0.00306122);
   // the
-  StatelessTest(indices, indices + 6, 1, -4.04005);
-  StatelessTest(indices + 1, indices + 6, 1, -4.04005);
+  AppendTest("the", 1, -4.04005);
+  StatelessTest(5, 5, 1, -4.04005);
+  // No context of the.  
+  StatelessTest(5, 0, 1, -1.687872);
   // biarritz
-  StatelessTest(indices, indices + 7, 1, -1.9889);
+  StatelessTest(6, 1, 1, -1.9889);
   // not found
-  StatelessTest(indices, indices + 8, 0, -2.29666);
+  StatelessTest(7, 1, 0, -2.29666);
+  StatelessTest(7, 0, 0, -1.995635);
+
+  WordIndex unk[1];
+  unk[0] = 0;
+  model.GetState(unk, unk + 1, state);
+  BOOST_CHECK_EQUAL(0, state.valid_length_);
+}
+
+//const char *kExpectedOrderProbing[] = {"<unk>", ",", ".", "</s>", "<s>", "a", "also", "beyond", "biarritz", "call", "concerns", "consider", "considering", "for", "higher", "however", "i", "immediate", "in", "is", "little", "loin", "look", "looking", "more", "on", "screening", "small", "the", "to", "watch", "watching", "what", "would"};
+
+class ExpectEnumerateVocab : public EnumerateVocab {
+  public:
+    ExpectEnumerateVocab() {}
+
+    void Add(WordIndex index, const StringPiece &str) {
+      BOOST_CHECK_EQUAL(seen.size(), index);
+      seen.push_back(std::string(str.data(), str.length()));
+    }
+
+    void Check(const base::Vocabulary &vocab) {
+      BOOST_CHECK_EQUAL(34, seen.size());
+      BOOST_REQUIRE(!seen.empty());
+      BOOST_CHECK_EQUAL("<unk>", seen[0]);
+      for (WordIndex i = 0; i < seen.size(); ++i) {
+        BOOST_CHECK_EQUAL(i, vocab.Index(seen[i]));
+      }
+    }
+
+    void Clear() {
+      seen.clear();
+    }
+
+    std::vector<std::string> seen;
+};
+
+template <class ModelT> void LoadingTest() {
+  Config config;
+  config.arpa_complain = Config::NONE;
+  config.messages = NULL;
+  ExpectEnumerateVocab enumerate;
+  config.enumerate_vocab = &enumerate;
+  ModelT m("test.arpa", config);
+  enumerate.Check(m.GetVocabulary());
+  Starters(m);
+  Continuation(m);
+  Stateless(m);
 }
 
 BOOST_AUTO_TEST_CASE(probing) {
-  Model m("test.arpa");
-  Starters(m);
-  Continuation(m);
-  Stateless(m);
+  LoadingTest<Model>();
 }
+
 BOOST_AUTO_TEST_CASE(sorted) {
-  SortedModel m("test.arpa");
-  Starters(m);
-  Continuation(m);
-  Stateless(m);
+  LoadingTest<SortedModel>();
+}
+BOOST_AUTO_TEST_CASE(trie) {
+  LoadingTest<TrieModel>();
+}
+
+template <class ModelT> void BinaryTest() {
+  Config config;
+  config.write_mmap = "test.binary";
+  config.messages = NULL;
+  ExpectEnumerateVocab enumerate;
+  config.enumerate_vocab = &enumerate;
+
+  {
+    ModelT copy_model("test.arpa", config);
+    enumerate.Check(copy_model.GetVocabulary());
+    enumerate.Clear();
+  }
+
+  config.write_mmap = NULL;
+
+  ModelT binary("test.binary", config);
+  enumerate.Check(binary.GetVocabulary());
+  Starters(binary);
+  Continuation(binary);
+  Stateless(binary);
+  unlink("test.binary");
 }
 
 BOOST_AUTO_TEST_CASE(write_and_read_probing) {
-  Config config;
-  config.write_mmap = "test.binary";
-  {
-    Model copy_model("test.arpa", config);
-  }
-  Model binary("test.binary");
-  Starters(binary);
-  Continuation(binary);
-  Stateless(binary);
+  BinaryTest<Model>();
 }
-
 BOOST_AUTO_TEST_CASE(write_and_read_sorted) {
-  Config config;
-  config.write_mmap = "test.binary";
-  config.prefault = true;
-  {
-    SortedModel copy_model("test.arpa", config);
-  }
-  SortedModel binary("test.binary");
-  Starters(binary);
-  Continuation(binary);
-  Stateless(binary);
+  BinaryTest<SortedModel>();
 }
-
+BOOST_AUTO_TEST_CASE(write_and_read_trie) {
+  BinaryTest<TrieModel>();
+}
 
 } // namespace
 } // namespace ngram

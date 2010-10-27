@@ -11,7 +11,7 @@ using namespace std;
 namespace Moses
 {
 LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
+:LanguageModelPointerState(registerScore, scoreIndexManager)
 {
 }
 

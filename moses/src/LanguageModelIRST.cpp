@@ -43,7 +43,7 @@ namespace Moses
 {
 
 LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
+:LanguageModelPointerState(registerScore, scoreIndexManager)
 ,m_lmtb(0),m_lmtb_dub(dub)
 {
 }

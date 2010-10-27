@@ -1,21 +1,29 @@
 #ifndef LM_NGRAM_CONFIG__
 #define LM_NGRAM_CONFIG__
 
-/* Configuration for ngram model.  Separate header to reduce pollution. */
+#include <iosfwd>
 
-#include <iostream>
+/* Configuration for ngram model.  Separate header to reduce pollution. */
 
 namespace lm { namespace ngram {
 
+class EnumerateVocab;
+
 struct Config {
-  /* EFFECTIVE FOR BOTH ARPA AND BINARY READS */
+  // EFFECTIVE FOR BOTH ARPA AND BINARY READS 
+
   // Where to log messages including the progress bar.  Set to NULL for
   // silence.
   std::ostream *messages;
 
+  // This will be called with every string in the vocabulary.  See
+  // enumerate_vocab.hh for more detail.  Config does not take ownership; you
+  // are still responsible for deleting it (or stack allocating).  
+  EnumerateVocab *enumerate_vocab;
 
 
-  /* ONLY EFFECTIVE WHEN READING ARPA */
+
+  // ONLY EFFECTIVE WHEN READING ARPA
 
   // What to do when <unk> isn't in the provided model. 
   typedef enum {THROW_UP, COMPLAIN, SILENT} UnknownMissing;
@@ -32,25 +40,37 @@ struct Config {
   // Sorted version instead which has lower memory consumption.  
   float probing_multiplier;
 
+  // Amount of memory to use for building.  The actual memory usage will be
+  // higher since this just sets sort buffer size.  Only applies to trie
+  // models.
+  std::size_t building_memory;
+
+  // Template for temporary directory appropriate for passing to mkdtemp.  
+  // The characters XXXXXX are appended before passing to mkdtemp.  Only
+  // applies to trie.  If NULL, defaults to write_mmap.  If that's NULL,
+  // defaults to input file name.  
+  const char *temporary_directory_prefix;
+
+  // Level of complaining to do when an ARPA instead of a binary format.
+  typedef enum {ALL, EXPENSIVE, NONE} ARPALoadComplain;
+  ARPALoadComplain arpa_complain;
+
   // While loading an ARPA file, also write out this binary format file.  Set
   // to NULL to disable.  
   const char *write_mmap;
 
+  // Include the vocab in the binary file?  Only effective if write_mmap != NULL.  
+  bool include_vocab;
+
   
 
-  /* ONLY EFFECTIVE WHEN READING BINARY */
+  // ONLY EFFECTIVE WHEN READING BINARY
   bool prefault;
 
 
 
-  // Defaults. 
-  Config() :
-    messages(&std::cerr),
-    unknown_missing(COMPLAIN),
-    unknown_missing_prob(0.0),
-    probing_multiplier(1.5),
-    write_mmap(NULL),
-    prefault(false) {}
+  // Set defaults. 
+  Config();
 };
 
 } /* namespace ngram */ } /* namespace lm */

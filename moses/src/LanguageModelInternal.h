@@ -9,7 +9,7 @@ namespace Moses
 
 /** Guaranteed cross-platform LM implementation designed to mimic LM used in regression tests
 */
-class LanguageModelInternal : public LanguageModelSingleFactor
+class LanguageModelInternal : public LanguageModelPointerState
 {
 protected:
 	std::vector<const NGramNode*> m_lmIdLookup;

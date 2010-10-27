@@ -83,7 +83,7 @@ public:
 		return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);
 	}
 	
-	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -118,12 +118,17 @@ public:
 		}
 	
 		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValue(jointContext, finalState, len);
+		float ret = m_lmImpl->GetValueForgotState(jointContext, outState, len);
 
 		RemoveAllInColl(jointContext);
 		
 		return ret;
 	}
+
+  FFState *NewState(const FFState *from) const
+  {
+    return m_lmImpl->NewState(from);
+  }
 	
 };
 

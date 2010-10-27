@@ -41,8 +41,6 @@ protected:
 	LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
 
 public:
-  static State UnknownState;
-
 	virtual ~LanguageModelSingleFactor();
 	virtual bool Load(const std::string &filePath
 					, FactorType factorType
@@ -72,6 +70,25 @@ public:
 	}
 	std::string GetScoreProducerDescription() const;
 };
+
+// Single factor LM that uses a null pointer state.  
+class LanguageModelPointerState : public LanguageModelSingleFactor
+{
+protected:
+  typedef const void *State;
+
+  LanguageModelPointerState(bool registerScore, ScoreIndexManager &scoreIndexManager);
+
+  virtual ~LanguageModelPointerState();
+
+  FFState *NewState(const FFState *from = NULL) const;
+
+  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const;
+
+  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const = 0;
+};
+
+
 
 }
 

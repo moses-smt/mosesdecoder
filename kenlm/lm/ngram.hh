@@ -1,16 +1,13 @@
 #ifndef LM_NGRAM__
 #define LM_NGRAM__
 
+#include "lm/binary_format.hh"
 #include "lm/facade.hh"
 #include "lm/ngram_config.hh"
+#include "lm/ngram_hashed.hh"
+#include "lm/ngram_trie.hh"
 #include "lm/vocab.hh"
 #include "lm/weights.hh"
-#include "util/key_value_packing.hh"
-#include "util/mmap.hh"
-#include "util/probing_hash_table.hh"
-#include "util/scoped.hh"
-#include "util/sorted_uniform.hh"
-#include "util/string_piece.hh"
 
 #include <algorithm>
 #include <vector>
@@ -49,19 +46,7 @@ class State {
 
 size_t hash_value(const State &state);
 
-// TODO(hieuhoang1972): refactor language models to keep arbitrary state, not a void* pointer.  Then use FullScore like good people do.  For now, you get a stateless interface.  
-struct HieuShouldRefactorMoses {
-  float prob;
-  unsigned char ngram_length;
-  void *meaningless_unique_state;
-};
-
 namespace detail {
-
-// std::identity is an SGI extension :-(
-struct IdentityHash : public std::unary_function<uint64_t, size_t> {
-  size_t operator()(uint64_t arg) const { return static_cast<size_t>(arg); }
-};
 
 // Should return the same results as SRI.  
 // Why VocabularyT instead of just Vocabulary?  ModelFacade defines Vocabulary.  
@@ -72,75 +57,66 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
     // Get the size of memory that will be mapped given ngram counts.  This
     // does not include small non-mapped control structures, such as this class
     // itself.  
-    static size_t Size(const std::vector<size_t> &counts, const Config &config = Config());
+    static size_t Size(const std::vector<uint64_t> &counts, const Config &config = Config());
 
-    GenericModel(const char *file, Config config = Config());
+    GenericModel(const char *file, const Config &config = Config());
 
     FullScoreReturn FullScore(const State &in_state, const WordIndex new_word, State &out_state) const;
 
-    /* Slower but stateless call.  Don't use this if you can avoid it.  This
-     * is mostly a hack for Hieu to integrate it into Moses which is currently
-     * unable to handle arbitrary LM state.  Sigh. 
-     * The word indices should be in an array.  *begin is the earliest word of context.
-     * *(end-1) is the word being appended.  
+    /* Slower call without in_state.  Don't use this if you can avoid it.  This
+     * is mostly a hack for Hieu to integrate it into Moses which sometimes
+     * forgets LM state (i.e. it doesn't store it with the phrase).  Sigh.   
+     * The context indices should be in an array.  
+     * If context_rbegin != context_rend then *context_rbegin is the word
+     * before new_word.  
      */
-    HieuShouldRefactorMoses SlowStatelessScore(const WordIndex *begin, const WordIndex *end) const;
+    FullScoreReturn FullScoreForgotState(const WordIndex *context_rbegin, const WordIndex *context_rend, const WordIndex new_word, State &out_state) const;
+
+    /* Get the state for a context.  Don't use this if you can avoid it.  Use
+     * BeginSentenceState or EmptyContextState and extend from those.  If
+     * you're only going to use this state to call FullScore once, use
+     * FullScoreForgotState. */
+    void GetState(const WordIndex *context_rbegin, const WordIndex *context_rend, State &out_state) const;
 
   private:
-    float SlowBackoffLookup(const WordIndex *const begin, const WordIndex *const end, unsigned char start) const;
+    friend void LoadLM<>(const char *file, const Config &config, GenericModel<Search, VocabularyT> &to);
+
+    float SlowBackoffLookup(const WordIndex *const context_rbegin, const WordIndex *const context_rend, unsigned char start) const;
+
+    FullScoreReturn ScoreExceptBackoff(const WordIndex *context_rbegin, const WordIndex *context_rend, const WordIndex new_word, unsigned char &backoff_start, State &out_state) const;
 
     // Appears after Size in the cc file.
-    void SetupMemory(char *start, const std::vector<size_t> &counts, const Config &config);
+    void SetupMemory(void *start, const std::vector<uint64_t> &counts, const Config &config);
 
-    void LoadFromARPA(util::FilePiece &f, const std::vector<size_t> &counts, const Config &config);
+    void InitializeFromBinary(void *start, const Parameters &params, const Config &config, int fd);
 
-    util::scoped_fd mapped_file_;
+    void InitializeFromARPA(const char *file, util::FilePiece &f, void *start, const Parameters &params, const Config &config);
 
-    // memory_ is the raw block of memory backing vocab_, unigram_, [middle.begin(), middle.end()), and longest_.  
-    util::scoped_mmap memory_;
+    Backing &MutableBacking() { return backing_; }
+
+    static const ModelType kModelType = Search::kModelType;
+
+    Backing backing_;
     
     VocabularyT vocab_;
 
-    ProbBackoff *unigram_;
+    typedef typename Search::Unigram Unigram;
+    typedef typename Search::Middle Middle;
+    typedef typename Search::Longest Longest;
 
-    typedef typename Search::template Table<ProbBackoff>::T Middle;
-    std::vector<Middle> middle_;
-
-    typedef typename Search::template Table<Prob>::T Longest;
-    Longest longest_;
-};
-
-struct ProbingSearch {
-  typedef float Init;
-
-  static const unsigned char kBinaryTag = 1;
-
-  template <class Value> struct Table {
-    typedef util::ByteAlignedPacking<uint64_t, Value> Packing;
-    typedef util::ProbingHashTable<Packing, IdentityHash> T;
-  };
-};
-
-struct SortedUniformSearch {
-  // This is ignored.
-  typedef float Init;
-
-  static const unsigned char kBinaryTag = 2;
-
-  template <class Value> struct Table {
-    typedef util::ByteAlignedPacking<uint64_t, Value> Packing;
-    typedef util::SortedUniformMap<Packing> T;
-  };
+    Search search_;
 };
 
 } // namespace detail
 
 // These must also be instantiated in the cc file.  
-typedef ::lm::ProbingVocabulary Vocabulary;
-typedef detail::GenericModel<detail::ProbingSearch, Vocabulary> Model;
+typedef ::lm::ngram::ProbingVocabulary Vocabulary;
+typedef detail::GenericModel<detail::ProbingHashedSearch, Vocabulary> Model;
 
-typedef ::lm::SortedVocabulary SortedVocabulary;
-typedef detail::GenericModel<detail::SortedUniformSearch, SortedVocabulary> SortedModel;
+typedef ::lm::ngram::SortedVocabulary SortedVocabulary;
+typedef detail::GenericModel<detail::SortedHashedSearch, SortedVocabulary> SortedModel;
+
+typedef detail::GenericModel<trie::TrieSearch, SortedVocabulary> TrieModel;
 
 } // namespace ngram
 } // namespace lm

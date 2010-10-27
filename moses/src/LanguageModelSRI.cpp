@@ -36,7 +36,7 @@ using namespace std;
 namespace Moses
 {
 LanguageModelSRI::LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
+:LanguageModelPointerState(registerScore, scoreIndexManager)
 , m_srilmVocab(0)
 , m_srilmModel(0)
 {

@@ -36,7 +36,7 @@ class Phrase;
 
 // RandLM wrapper (single factor LM)
 
-class LanguageModelRandLM : public LanguageModelSingleFactor {
+class LanguageModelRandLM : public LanguageModelPointerState {
 public:
   LanguageModelRandLM(bool registerScore, ScoreIndexManager &scoreIndexManager)
     : LanguageModelSingleFactor(registerScore, scoreIndexManager), m_lm(0) {}

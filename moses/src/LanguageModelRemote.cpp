@@ -15,7 +15,7 @@ const Factor* LanguageModelRemote::BOS = NULL;
 const Factor* LanguageModelRemote::EOS = (LanguageModelRemote::BOS + 1);
 
 LanguageModelRemote::LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager) 
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
+:LanguageModelPointerState(registerScore, scoreIndexManager)
 {
 }
 

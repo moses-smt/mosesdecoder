@@ -25,10 +25,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 #include "Factor.h"
+#include "FFState.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "LanguageModelSingleFactor.h"
-#include "../../kenlm/lm/ngram.hh"
+#include "lm/ngram.hh"
 
 namespace Moses
 {
@@ -38,8 +39,11 @@ class Phrase;
 */
 class LanguageModelKen : public LanguageModelSingleFactor
 {
-protected:
-  lm::ngram::Model *m_ngram;
+private:
+	lm::ngram::Model *m_ngram;
+	std::vector<lm::WordIndex> m_lmIdLookup;
+
+	void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
 	
 public:
 	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager);
@@ -48,11 +52,16 @@ public:
 					, FactorType factorType
 					, size_t nGramOrder);
 
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
-  lm::WordIndex GetLmID(const std::string &str) const;
+	float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len=0) const;
+	void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  void CleanUpAfterSentenceProcessing() {}
-  void InitializeBeforeSentenceProcessing() {}
+	FFState *NewState(const FFState *from = NULL) const;
+
+	lm::WordIndex GetLmID(const std::string &str) const;
+
+	void CleanUpAfterSentenceProcessing() {}
+	void InitializeBeforeSentenceProcessing() {}
 
 };
 };

@@ -43,23 +43,33 @@ class LanguageModelDelegate: public LanguageModelSingleFactor {
 
       }
       
-    virtual bool Load(const std::string &
+    bool Load(const std::string &
           , FactorType
           , size_t)
     { 
       /* do nothing */
       return true;
     }
-    
-    virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const {
-      return m_delegate->GetValue(contextFactor, finalState, len);
+
+    float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const
+    {
+      return m_delegate->GetValueGivenState(contextFactor, state, len);
     }
-      
-      
+    float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const
+    {
+      return m_delegate->GetValueForgotState(contextFactor, state, len);
+    }
+    void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const 
+    {
+      m_delegate->GetState(contextFactor, outState);
+    }
+    FFState *NewState(const FFState *from = NULL) const
+    {
+      return m_delegate->NewState(from);
+    }
+    
   private:
     LanguageModelSingleFactor* m_delegate;
-
-
 };
 
 }

@@ -45,6 +45,7 @@ protected:
 	size_t			m_nGramOrder; //! max n-gram length contained in this LM
 	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
 																								//! Usually <s> and </s>
+  FFState *m_nullContextState, *m_beginSentenceState;
 
 	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
@@ -55,12 +56,6 @@ protected:
 	LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager);
 
 public:
-	/* Returned from LM implementations which points at the state used. For example, if a trigram score was requested
-	 * but the LM backed off to using the trigram, the State pointer will point to the bigram.
-	 * Used for more agressive pruning of hypothesis
-	 */
-  typedef const void* State;
-
 	virtual ~LanguageModel();
 
 	//! see ScoreProducer.h
@@ -81,25 +76,38 @@ public:
 	 * \param fullScore scores of all unigram, bigram... of contiguous n-gram of the phrase
 	 * \param ngramScore score of only n-gram of order m_nGramOrder
 	 */
-	void CalcScore(const Phrase &phrase
-							, float &fullScore
-							, float &ngramScore) const;
+	void CalcScore(
+      const Phrase &phrase,
+			float &fullScore,
+			float &ngramScore) const;
 	
-	void CalcScoreChart(const Phrase &phrase
-									, float &beginningBitsOnly
-									, float &ngramScore) const;
+	void CalcScoreChart(
+      const Phrase &phrase,
+      float &beginningBitsOnly,
+			float &ngramScore) const;
 	
 	/* get score of n-gram. n-gram should not be bigger than m_nGramOrder
 	 * Specific implementation can return State and len data to be used in hypothesis pruning
 	 * \param contextFactor n-gram to be scored
-	 * \param finalState state used by LM. Return arg
-	 * \param len ???
+	 * \param state LM state.  Input and output.  state must be initialized.  If state isn't initialized, you want GetValueWithoutState.
+	 * \param len If non-null, the n-gram length is written here.  
 	 */
-	virtual float GetValue(const std::vector<const Word*> &contextFactor
-												, State* finalState = 0
-												, unsigned int* len = 0) const = 0;
-	//! get State for a particular n-gram
-	State GetState(const std::vector<const Word*> &contextFactor, unsigned int* len = 0) const;
+	virtual float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
+
+  // Like GetValueGivenState but state may not be initialized (however it is non-NULL). 
+  // For example, state just came from NewState(NULL).   
+	virtual float GetValueForgotState(
+      const std::vector<const Word*> &contextFactor,
+      FFState &outState,
+      unsigned int* len = 0) const = 0;
+
+	//! get State for a particular n-gram.  We don't care what the score is.  
+  // This is here so models can implement a shortcut to GetValueAndState.  
+  virtual void GetState(
+      const std::vector<const Word*> &contextFactor,
+      FFState &outState) const;
+
+  virtual FFState *NewState(const FFState *from = NULL) const = 0;
 
 	//! max n-gram order of LM
 	size_t GetNGramOrder() const

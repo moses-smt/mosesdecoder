@@ -36,7 +36,7 @@ class Phrase;
 namespace Moses
 {
 
-class LanguageModelSRI : public LanguageModelSingleFactor
+class LanguageModelSRI : public LanguageModelPointerState
 {
 protected:
 	std::vector<VocabIndex> m_lmIdLookup;
