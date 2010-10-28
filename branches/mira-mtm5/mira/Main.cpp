@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
   bool shuffle;
   size_t mixFrequency;
   size_t weightDumpFrequency;
+  string weightDumpStem;
   size_t clippingScheme;
   float lowerBound, upperBound;
   po::options_description desc("Allowed options");
@@ -92,6 +93,7 @@ int main(int argc, char** argv) {
         ("epochs,e", po::value<size_t>(&epochs)->default_value(1), "Number of epochs")
         ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
         ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+        ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
         ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
         ("clipping-scheme,c", po::value<size_t>(&clippingScheme)->default_value(1), "Select clipping scheme for weight updates (1: equal 2: varied")
         ("lower-bound", po::value<float>(&lowerBound)->default_value(-0.01), "Lower bound for mira clipping scheme")
@@ -225,8 +227,8 @@ int main(int argc, char** argv) {
   // TODO: stop MIRA when score on dev or tuning set does not improve further?
   for (size_t epoch = 1; epoch <= epochs; ++epoch) {
 	  cout << "\nEpoch " << epoch << std::endl;
+    size_t weightEpochDump = 0; //number of weight dumps this epoch
 
-	  cumulativeWeights.ZeroAll();
 
 	  // compute sum in objective function after each epoch
 	  float maxSum = 0.0;
@@ -353,14 +355,22 @@ int main(int argc, char** argv) {
 		  //dump weights?
 		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
+        totalWeights.DivideEquals(iterations);
 #ifdef MPI_ENABLE
 			  //average across processes
-			  mpi::reduce(world,cumulativeWeights,totalWeights,SCCPlus(),0);
+        ScoreComponentCollection combinedTotalWeights;
+			  mpi::reduce(world,totalWeights,combinedTotalWeights,SCCPlus(),0);
 #endif
-			  if (rank == 0) {
-				  cout << "Total weights (" << iterations << ") ";
-				  totalWeights.L1Normalise();
-				  cout << totalWeights << endl;
+			  if (rank == 0 && !weightDumpStem.empty()) {
+          combinedTotalWeights.DivideEquals(size);
+          ostringstream filename;
+          filename << weightDumpStem << "_" << epoch;
+          if (weightDumpFrequency > 1) {
+            filename << "_" << weightEpochDump;
+          }
+          VERBOSE(1, "Dumping weights for epoch " << epoch << " to " << filename.str() << endl);
+          combinedTotalWeights.Save(filename.str());
+          ++weightEpochDump;
 			  }
 		  }
 

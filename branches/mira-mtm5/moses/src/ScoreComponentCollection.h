@@ -87,6 +87,7 @@ public:
 	}
 
 	void MultiplyEquals(float scalar);
+	void DivideEquals(float scalar);
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
 
   //! add the score in rhs
@@ -212,9 +213,10 @@ public:
 
 	float GetWeightedScore() const;
 
-    void ZeroAllLM(const LMList& lmList);
-    void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
+  void ZeroAllLM(const LMList& lmList);
+  void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
   void L1Normalise();
+  void Save(std::string filename) {m_scores.save(filename);}
 
 #ifdef MPI_ENABLE
   public:
