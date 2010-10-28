@@ -101,7 +101,7 @@ namespace LanguageModelFactory
 				break;
 			case Ken:
 				#ifdef LM_KEN
-					lm = new LanguageModelKen(true, scoreIndexManager);
+					lm = ConstructKenLM(true, scoreIndexManager, languageModelFile);
 				#endif
 				break;
 			case Joint:

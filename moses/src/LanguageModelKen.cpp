@@ -21,10 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <cassert>
 #include <cstring>
+#include <iostream>
+#include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/ngram.hh"
 
 #include "LanguageModelKen.h"
+#include "FFState.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -38,6 +41,37 @@ namespace Moses
 {
 
 namespace {
+
+/** Implementation of single factor LM using Ken's code.
+*/
+template <class Model> class LanguageModelKen : public LanguageModelSingleFactor
+{
+private:
+	Model *m_ngram;
+	std::vector<lm::WordIndex> m_lmIdLookup;
+
+	void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
+	
+public:
+	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	~LanguageModelKen();
+
+	bool Load(const std::string &filePath
+					, FactorType factorType
+					, size_t nGramOrder);
+
+	float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len=0) const;
+	void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+
+	FFState *NewState(const FFState *from = NULL) const;
+
+	lm::WordIndex GetLmID(const std::string &str) const;
+
+	void CleanUpAfterSentenceProcessing() {}
+	void InitializeBeforeSentenceProcessing() {}
+
+};
 
 class MappingBuilder : public lm::ngram::EnumerateVocab {
   public:
@@ -70,9 +104,8 @@ struct KenLMState : public FFState {
 		return std::memcmp(state.history_, other.state.history_, sizeof(lm::WordIndex) * state.valid_length_);
 	}
 };
-} // namespace
 
-void LanguageModelKen::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const
+template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const
 {
 	FactorType factorType = GetFactorType();
 	// set up context
@@ -84,17 +117,17 @@ void LanguageModelKen::TranslateIDs(const std::vector<const Word*> &contextFacto
 	}
 }
 
-LanguageModelKen::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager)
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager)
 :LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL)
 {
 }
 
-LanguageModelKen::~LanguageModelKen()
+template <class Model> LanguageModelKen<Model>::~LanguageModelKen()
 {
 	delete m_ngram;
 }
 
-bool LanguageModelKen::Load(const std::string &filePath, 
+template <class Model> bool LanguageModelKen<Model>::Load(const std::string &filePath, 
 			     FactorType factorType, 
 			     size_t /*nGramOrder*/)
 {
@@ -111,7 +144,7 @@ bool LanguageModelKen::Load(const std::string &filePath,
   lm::ngram::Config config;
   config.enumerate_vocab = &builder;
 
-	m_ngram = new lm::ngram::Model(filePath.c_str(), config);
+	m_ngram = new Model(filePath.c_str(), config);
 	m_nGramOrder  = m_ngram->Order();
 
 	KenLMState *tmp = new KenLMState();
@@ -123,7 +156,7 @@ bool LanguageModelKen::Load(const std::string &filePath,
 	return true;
 }
 
-float LanguageModelKen::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len) const
+template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len) const
 {
 	if (contextFactor.empty())
 	{
@@ -142,7 +175,7 @@ float LanguageModelKen::GetValueGivenState(const std::vector<const Word*> &conte
 	return TransformLMScore(ret.prob);
 }
 
-float LanguageModelKen::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState, unsigned int* len) const
+template <class Model> float LanguageModelKen<Model>::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState, unsigned int* len) const
 {
 	if (contextFactor.empty())
 	{
@@ -161,7 +194,7 @@ float LanguageModelKen::GetValueForgotState(const vector<const Word*> &contextFa
 	return TransformLMScore(ret.prob);
 }
 
-void LanguageModelKen::GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+template <class Model> void LanguageModelKen<Model>::GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
 	if (contextFactor.empty()) {
 		static_cast<KenLMState&>(outState).state = m_ngram->NullContextState();
 		return;
@@ -171,7 +204,7 @@ void LanguageModelKen::GetState(const std::vector<const Word*> &contextFactor, F
 	m_ngram->GetState(indices, indices + contextFactor.size(), static_cast<KenLMState&>(outState).state);
 }
 
-FFState *LanguageModelKen::NewState(const FFState *from) const {
+template <class Model> FFState *LanguageModelKen<Model>::NewState(const FFState *from) const {
 	KenLMState *ret = new KenLMState;
 	if (from) {
 		ret->state = static_cast<const KenLMState&>(*from).state;
@@ -179,8 +212,29 @@ FFState *LanguageModelKen::NewState(const FFState *from) const {
 	return ret;
 }
 
-lm::WordIndex LanguageModelKen::GetLmID(const std::string &str) const {
+template <class Model> lm::WordIndex LanguageModelKen<Model>::GetLmID(const std::string &str) const {
 	return m_ngram->GetVocabulary().Index(str);
+}
+
+} // namespace
+
+LanguageModelSingleFactor *ConstructKenLM(bool registerScore, ScoreIndexManager &scoreIndexManager, const std::string &file) {
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+    switch(model_type) {
+      case lm::ngram::HASH_PROBING:
+        return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager);
+      case lm::ngram::HASH_SORTED:
+        return new LanguageModelKen<lm::ngram::SortedModel>(registerScore, scoreIndexManager);
+      case lm::ngram::TRIE_SORTED:
+        return new LanguageModelKen<lm::ngram::TrieModel>(registerScore, scoreIndexManager);
+      default:
+        std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
+        abort();
+    }
+  } else {
+    return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager);
+  }
 }
 
 }
