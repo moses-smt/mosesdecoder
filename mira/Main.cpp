@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   vector<string> referenceFiles;
   size_t epochs;
   string learner;
-  bool shuffle = true;	 // TODO: parameterize?
+  bool shuffle;
   size_t mixFrequency;
   size_t weightDumpFrequency;
   size_t clippingScheme;
@@ -94,9 +94,9 @@ int main(int argc, char** argv) {
         ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
         ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
         ("clipping-scheme,c", po::value<size_t>(&clippingScheme)->default_value(1), "Select clipping scheme for weight updates (1: equal 2: varied")
-        ("lower-bound,lb", po::value<float>(&lowerBound)->default_value(-0.01), "Lower bound for mira clipping scheme")
-        ("upper-bound,ub", po::value<float>(&upperBound)->default_value(0.01), "Upper bound for mira clipping scheme");
-
+        ("lower-bound", po::value<float>(&lowerBound)->default_value(-0.01), "Lower bound for mira clipping scheme")
+        ("upper-bound", po::value<float>(&upperBound)->default_value(0.01), "Upper bound for mira clipping scheme")
+        ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -104,8 +104,6 @@ int main(int argc, char** argv) {
   po::store(po::command_line_parser(argc,argv).
             options(cmdline_options).run(), vm);
   po::notify(vm);
-
-  
 
   if (help) {
     std::cout << "Usage: " + string(argv[0]) +  " -f mosesini-file -i input-file -r reference-file(s) [options]" << std::endl;
@@ -171,12 +169,14 @@ int main(int argc, char** argv) {
   //Optionally shuffle the sentences
   vector<size_t> order;
   if (rank == 0) {
-    for (size_t i = 0; i < inputSentences.size(); ++i) {
+	for (size_t i = 0; i < inputSentences.size(); ++i) {
       order.push_back(i);
     }
+
     if (shuffle) {
-      RandomIndex rindex;
-      random_shuffle(order.begin(), order.end(), rindex);
+    	cout << "Shuffling input sentences.." << endl;
+    	RandomIndex rindex;
+    	random_shuffle(order.begin(), order.end(), rindex);
     }
   }
 
@@ -201,8 +201,10 @@ int main(int argc, char** argv) {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, clippingScheme, lowerBound, upperBound);
     cerr << "Selected clipping scheme: " << clippingScheme << endl;
-    cerr << "lower bound: " << lowerBound << endl;
-    cerr << "upper bound: " << upperBound << endl;
+    if (clippingScheme == 1) {
+    	cerr << "lower bound: " << lowerBound << endl;
+    	cerr << "upper bound: " << upperBound << endl;
+    }
   } else if (learner == "perceptron") {
     cerr << "Optimising using Perceptron" << endl;
     optimiser = new Perceptron();
@@ -222,8 +224,8 @@ int main(int argc, char** argv) {
   
   // TODO: stop MIRA when score on dev or tuning set does not improve further?
   for (size_t epoch = 1; epoch <= epochs; ++epoch) {
-
 	  cout << "\nEpoch " << epoch << std::endl;
+
 	  cumulativeWeights.ZeroAll();
 
 	  // compute sum in objective function after each epoch
@@ -310,19 +312,24 @@ int main(int argc, char** argv) {
 
 		  cumulativeWeights.PlusEquals(mosesWeights);
 
-	      // Compute objective for all hypotheses of a training source sentence
-	      // add max(l_ij - Delta_ij * w') for check on objective
-	      float maxDiff = 0.0;
-	      for (size_t j = 0; j < 3*n; ++j) {
+		  // sanity check: compare margin created by old weights against new weights
+		  float lossModelDiff_old = 0;
+		  float lossModelDiff_new = 0;
+	      for (size_t j = 0; j < featureValues.size(); ++j) {
 	    	  ScoreComponentCollection featureDiff(oracleFeatureValues);
 	    	  featureDiff.MinusEquals(featureValues[batch][j]);
-	    	  float tmpMaxDiff = losses[batch][j] - featureDiff.InnerProduct(mosesWeights);
-	    	  if (tmpMaxDiff > maxDiff) {
-	    		  maxDiff = tmpMaxDiff;
-	    	  }
+
+	    	  // old weights
+	    	  float margin = losses[batch][j] - featureDiff.InnerProduct(oldWeights);
+	    	  lossModelDiff_old += margin;
+
+	    	  // new weights
+	    	  margin = losses[batch][j] - featureDiff.InnerProduct(mosesWeights);
+	    	  lossModelDiff_new += margin;
 	      }
 
-	      maxSum += maxDiff;
+	      cerr << "Summed (loss - margin) with old weights: " << lossModelDiff_old << endl;
+	      cerr << "Summed (loss - margin) with new weights: " << lossModelDiff_new << endl;
 
 		  ++shardPosition;
 		  ++iterations;
@@ -361,9 +368,6 @@ int main(int argc, char** argv) {
 			  delete oracle[i];
 		  }
 	  }
-
-	  // how has the objective function changed?
-	  cout << "objective = " << maxSum << endl;
   }
 
   // take average of cumulative weights of last pass over all source sentences
@@ -372,6 +376,7 @@ int main(int argc, char** argv) {
   cerr << "Start weights: " << startWeights << endl;
   cerr << "Averaged new weights: " << cumulativeWeights << endl;
 
+  now = time(0); // get current time
   tm = localtime(&now); // get struct filled out
   cout << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
