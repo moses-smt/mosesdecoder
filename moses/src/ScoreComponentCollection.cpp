@@ -36,6 +36,12 @@ void ScoreComponentCollection::MultiplyEquals(float scalar)
 {
 	m_scores *= scalar;
 }
+
+void ScoreComponentCollection::DivideEquals(float scalar)
+{
+	m_scores /= scalar;
+}
+	
 	
 void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rhs)
 {
