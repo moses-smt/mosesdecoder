@@ -217,7 +217,6 @@ int main(int argc, char** argv) {
   //Main loop:
   ScoreComponentCollection cumulativeWeights;		// collect weights per epoch to produce an average
   size_t iterations = 0;
-  size_t epoch = 0;
 
   time_t now = time(0); // get current time
   struct tm* tm = localtime(&now); // get struct filled out
