@@ -59,12 +59,11 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, size_t clippingScheme, float lowerBound, float upperBound) :
+	  MiraOptimiser(size_t n, bool hildreth) :
 		  Optimiser(),
 		  m_n(n),
-		  m_clippingScheme(clippingScheme),
-		  m_lowerBound(lowerBound),
-		  m_upperBound(upperBound) { }
+		  m_hildreth(hildreth),
+		  m_c(0.01f) { }
 
      ~MiraOptimiser() {}
    
@@ -85,12 +84,8 @@ namespace Mira {
       // number of hypotheses used for each nbest list (number of hope, fear, best model translations)
       size_t m_n;
 
-      // clipping scheme for weight updates
-      // 1: equal, 2: varied
-      size_t m_clippingScheme;
-
-      float m_lowerBound;
-      float m_upperBound;
+      bool m_hildreth;
+      float m_c;
   };
 }
 
