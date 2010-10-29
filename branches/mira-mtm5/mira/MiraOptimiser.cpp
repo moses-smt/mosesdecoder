@@ -15,28 +15,30 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		size_t numberOfViolatedConstraints = 0;
 		vector< ScoreComponentCollection> featureValueDiffs;
 		vector< float> lossMarginDistances;
-		for(size_t batch = 0; batch < featureValues.size(); batch++) {
-			for (size_t i = 0; i < featureValues.size(); ++i) {
-				for (size_t j = 0; j < featureValues[i].size(); ++j) {
-					// check if optimisation criterion is violated for one hypothesis and the oracle
-					// h(e*) >= h(e_ij) + loss(e_ij)
-					// h(e*) - h(e_ij) >= loss(e_ij)
-					float modelScoreDiff = featureValues[i][j].InnerProduct(currWeights);
-					if (modelScoreDiff < losses[i][j]) {
-						++numberOfViolatedConstraints;
-					}
-
-					// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
-					// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
-					// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
-					// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
-					ScoreComponentCollection featureValueDiff = oracleFeatureValues;
-					featureValueDiff.MinusEquals(featureValues[i][j]);
-					featureValueDiffs.push_back(featureValueDiff);
-					float lossMarginDistance = losses[i][j] - modelScoreDiff;
-					lossMarginDistances.push_back(lossMarginDistance);
-					// TODO: should we only pass violated constraints to the optimiser?
+		for (size_t i = 0; i < featureValues.size(); ++i) {
+			for (size_t j = 0; j < featureValues[i].size(); ++j) {
+				// check if optimisation criterion is violated for one hypothesis and the oracle
+				// h(e*) >= h(e_ij) + loss(e_ij)
+				// h(e*) - h(e_ij) >= loss(e_ij)
+				float modelScoreDiff = featureValues[i][j].InnerProduct(currWeights);
+				if (modelScoreDiff < losses[i][j]) {
+					cerr << "Constraint violated: " << modelScoreDiff << " < " << losses[i][j] << endl;
+					++numberOfViolatedConstraints;
 				}
+				else {
+					cerr << "Constraint satisfied: " << modelScoreDiff << " >= " << losses[i][j] << endl;
+				}
+
+				// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
+				// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
+				// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
+				// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
+				ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+				featureValueDiff.MinusEquals(featureValues[i][j]);
+				featureValueDiffs.push_back(featureValueDiff);
+				float lossMarginDistance = losses[i][j] - modelScoreDiff;
+				lossMarginDistances.push_back(lossMarginDistance);
+				// TODO: should we only pass violated constraints to the optimiser?
 			}
 		}
 
@@ -63,10 +65,10 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	}
 	else {
 		// SMO:
-		vector< float> alphas(featureValues.size());
-		for(size_t batch = 0; batch < featureValues.size(); batch++) {
+		for (size_t i = 0; i < featureValues.size(); ++i) {
 			// initialise alphas for each source (alpha for oracle translation = C, all other alphas = 0)
-			for (size_t j = 0; j < featureValues.size(); ++j) {
+			vector< float> alphas(featureValues[i].size());
+			for (size_t j = 0; j < featureValues[i].size(); ++j) {
 				if (j == m_n) {										// TODO: use oracle index
 					// oracle
 					alphas[j] = m_c;
@@ -79,21 +81,26 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 
 			// consider all pairs of hypotheses
-			for (size_t j = 0; j < featureValues.size(); ++j) {
-				for (size_t k = 0; k < featureValues.size(); ++k) {
-					// Compute delta:
-					cout << "\nComparing pair" << j << "," << k << endl;
-					ScoreComponentCollection featureValueDiffs;
-					float delta = computeDelta(currWeights, featureValues[batch], j, k, losses[batch], alphas, featureValueDiffs);
+			size_t pairs = 0;
+			for (size_t j = 0; j < featureValues[i].size(); ++j) {
+				for (size_t k = 0; k < featureValues[i].size(); ++k) {
+					if (j <= k) {
+						++pairs;
 
-					// update weight vector:
-					if (delta != 0) {
-						update(currWeights, featureValueDiffs, delta);
+						// Compute delta:
+						cout << "\nComparing pair" << j << "," << k << endl;
+						ScoreComponentCollection featureValueDiffs;
+						float delta = computeDelta(currWeights, featureValues[i], j, k, losses[i], alphas, featureValueDiffs);
+
+						// update weight vector:
+						if (delta != 0) {
+							update(currWeights, featureValueDiffs, delta);
+						}
 					}
 				}
-
-				cout << endl;
 			}
+
+			cout << "number of pairs: " << pairs << endl;
 		}
 	}
 }
@@ -144,19 +151,19 @@ float MiraOptimiser::computeDelta(ScoreComponentCollection& currWeights,
 		// clip delta
 		cout << "Interval [" << (-1 * alphas[indexFear]) << "," << alphas[indexHope] << "]" << endl;
 		if (delta > alphas[indexHope]) {
-			cout << "clipping " << delta << " to " << alphas[indexHope] << endl;
+			//cout << "clipping " << delta << " to " << alphas[indexHope] << endl;
 			delta = alphas[indexHope];
 		}
 		else if (delta < (-1 * alphas[indexFear])) {
-			cout << "clipping " << delta << " to " << (-1 * alphas[indexFear]) << endl;
+			//cout << "clipping " << delta << " to " << (-1 * alphas[indexFear]) << endl;
 			delta = (-1 * alphas[indexFear]);
 		}
 
 		// update alphas
 		alphas[indexHope] -= delta;
 		alphas[indexFear] += delta;
-		cout << "alpha[" << indexHope << "] = " << alphas[indexHope] << endl;
-		cout << "alpha[" << indexFear << "] = " << alphas[indexFear] << endl;
+		//cout << "alpha[" << indexHope << "] = " << alphas[indexHope] << endl;
+		//cout << "alpha[" << indexFear << "] = " << alphas[indexFear] << endl;
 	}
 
 	return delta;
