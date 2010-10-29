@@ -6,10 +6,10 @@
 #include <limits>
 
 #include <assert.h>
-#include <cstdlib>
 #include <ctype.h>
 #include <err.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -167,7 +167,7 @@ StringPiece FilePiece::ReadLine(char delim) throw (GZException, EndOfFileExcepti
   } while (!at_end_);
   StringPiece ret(position_, position_end_ - position_);
   position_ = position_end_;
-  return position_;
+  return ret;
 }
 
 void FilePiece::Shift() throw(GZException, EndOfFileException) {
