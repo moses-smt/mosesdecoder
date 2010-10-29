@@ -78,11 +78,10 @@ int main(int argc, char** argv) {
   size_t epochs;
   string learner;
   bool shuffle;
+  bool hildreth;
   size_t mixFrequency;
   size_t weightDumpFrequency;
   string weightDumpStem;
-  size_t clippingScheme;
-  float lowerBound, upperBound;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -95,10 +94,8 @@ int main(int argc, char** argv) {
         ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
         ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
         ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
-        ("clipping-scheme,c", po::value<size_t>(&clippingScheme)->default_value(1), "Select clipping scheme for weight updates (1: equal 2: varied")
-        ("lower-bound", po::value<float>(&lowerBound)->default_value(-0.01), "Lower bound for mira clipping scheme")
-        ("upper-bound", po::value<float>(&upperBound)->default_value(0.01), "Upper bound for mira clipping scheme")
-        ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing");
+        ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
+	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -201,11 +198,12 @@ int main(int argc, char** argv) {
   size_t n = 10;								// size of n-best lists
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, clippingScheme, lowerBound, upperBound);
-    cerr << "Selected clipping scheme: " << clippingScheme << endl;
-    if (clippingScheme == 1) {
-    	cerr << "lower bound: " << lowerBound << endl;
-    	cerr << "upper bound: " << upperBound << endl;
+    optimiser = new MiraOptimiser(n, hildreth);
+    if (hildreth) {
+    	cerr << "Using Hildreth's optimisation algorithm.." << endl;
+    }
+    else {
+    	cerr << "Using some sort of SMO.. " << endl;
     }
   } else if (learner == "perceptron") {
     cerr << "Optimising using Perceptron" << endl;
@@ -272,7 +270,7 @@ int main(int argc, char** argv) {
 
 		  ScoreComponentCollection oracleFeatureValues = featureValues[batch][oraclePos];
 		  float oracleBleuScore = bleuScores[batch][oraclePos];
-			
+
 		  // FEAR
 		  cout << "Run decoder to get nbest fear translations" << std::endl;
 		  decoder->getNBest(input,
@@ -354,22 +352,22 @@ int main(int argc, char** argv) {
 		  //dump weights?
 		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
-        totalWeights.DivideEquals(iterations);
-#ifdef MPI_ENABLE
+			  totalWeights.DivideEquals(iterations);
 			  //average across processes
-        ScoreComponentCollection combinedTotalWeights;
+			  ScoreComponentCollection combinedTotalWeights;
+#ifdef MPI_ENABLE
 			  mpi::reduce(world,totalWeights,combinedTotalWeights,SCCPlus(),0);
 #endif
 			  if (rank == 0 && !weightDumpStem.empty()) {
-          combinedTotalWeights.DivideEquals(size);
-          ostringstream filename;
-          filename << weightDumpStem << "_" << epoch;
-          if (weightDumpFrequency > 1) {
-            filename << "_" << weightEpochDump;
-          }
-          VERBOSE(1, "Dumping weights for epoch " << epoch << " to " << filename.str() << endl);
-          combinedTotalWeights.Save(filename.str());
-          ++weightEpochDump;
+				  combinedTotalWeights.DivideEquals(size);
+				  ostringstream filename;
+				  filename << weightDumpStem << "_" << epoch;
+				  if (weightDumpFrequency > 1) {
+					  filename << "_" << weightEpochDump;
+				  }
+				  VERBOSE(1, "Dumping weights for epoch " << epoch << " to " << filename.str() << endl);
+				  combinedTotalWeights.Save(filename.str());
+				  ++weightEpochDump;
 			  }
 		  }
 

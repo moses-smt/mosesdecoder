@@ -1,4 +1,5 @@
 #include "Optimiser.h"
+#include "Hildreth.h"
 
 using namespace Moses;
 using namespace std;
@@ -10,83 +11,91 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<float> >& losses,
 		const ScoreComponentCollection& oracleFeatureValues) {
 
-	// TODO: do we need the oracle feature values?
+	if (m_hildreth) {
+		size_t numberOfViolatedConstraints = 0;
+		vector< ScoreComponentCollection> featureValueDiffs;
+		vector< float> lossMarginDistances;
+		for(size_t batch = 0; batch < featureValues.size(); batch++) {
+			for (size_t i = 0; i < featureValues.size(); ++i) {
+				for (size_t j = 0; j < featureValues[i].size(); ++j) {
+					// check if optimisation criterion is violated for one hypothesis and the oracle
+					// h(e*) >= h(e_ij) + loss(e_ij)
+					// h(e*) - h(e_ij) >= loss(e_ij)
+					float modelScoreDiff = featureValues[i][j].InnerProduct(currWeights);
+					if (modelScoreDiff < losses[i][j]) {
+						++numberOfViolatedConstraints;
+					}
 
-	size_t numberOfUpdates = 0;
+					// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
+					// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
+					// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
+					// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
+					ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+					featureValueDiff.MinusEquals(featureValues[i][j]);
+					featureValueDiffs.push_back(featureValueDiff);
+					float lossMarginDistance = losses[i][j] - modelScoreDiff;
+					lossMarginDistances.push_back(lossMarginDistance);
+					// TODO: should we only pass violated constraints to the optimiser?
+				}
+			}
+		}
 
-	vector< float> alphas(3*m_n);
-	for(size_t batch = 0; batch < featureValues.size(); batch++) {
-		if (m_clippingScheme == 2) {
+		if (numberOfViolatedConstraints > 0) {
+			// run optimisation
+			cerr << "Number of violated constraints: " << numberOfViolatedConstraints << endl;
+			// TODO: slack
+			// compute deltas for all given constraints
+			vector< float> deltas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
+
+			// Update the weight vector according to the deltas and the feature value differences
+			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
+			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
+				// scale feature value differences with delta
+				featureValueDiffs[k].MultiplyEquals(deltas[k]);
+
+				// apply update to weight vector
+				currWeights.PlusEquals(featureValueDiffs[k]);
+			}
+		}
+		else {
+			cout << "No constraint violated for this batch" << endl;
+		}
+	}
+	else {
+		// SMO:
+		vector< float> alphas(featureValues.size());
+		for(size_t batch = 0; batch < featureValues.size(); batch++) {
 			// initialise alphas for each source (alpha for oracle translation = C, all other alphas = 0)
-			for (size_t j = 0; j < 3*m_n; ++j) {
-				if (j == m_n) {
+			for (size_t j = 0; j < featureValues.size(); ++j) {
+				if (j == m_n) {										// TODO: use oracle index
 					// oracle
-					alphas[j] = m_upperBound;
-					std::cout << "alpha " << j << ": " << alphas[j] << endl;
+					alphas[j] = m_c;
+					//std::cout << "alpha " << j << ": " << alphas[j] << endl;
 				}
 				else {
 					alphas[j] = 0;
-					std::cout << "alpha " << j << ": " << alphas[j] << endl;
-				}
-			}
-		}
-
-		// iterate over nbest lists of translations, feature list contains n*model, n*hope, n*fear)
-		// Combinations for j and j': hope/fear, hope/model, model/fear?
-		// Currently we compare each hope against each fear (10x10),
-		// each hope against each model (10x10), each model against each fear translation (10x10)
-		for (size_t j = 0; j < m_n; ++j) {
-			size_t indexModel_j = j;
-			size_t indexHope_j = j + m_n;		// e_ij'
-			size_t indexFear_j = j + 2*m_n;	// e_ij
-
-			for (size_t k = 0; k < m_n; ++k) {
-				size_t indexModel_k = k;
-				size_t indexHope_k = k + m_n;		// e_ij'
-				size_t indexFear_k = k + 2*m_n;	// e_ij
-
-				// Hypothesis pair hope/fear
-				// Compute delta:
-				cout << "\nComparing hope/fear (" << indexHope_j << "," << indexFear_k << ")" << endl;
-				ScoreComponentCollection featureValueDiffs;
-				float delta = computeDelta(currWeights, featureValues[batch], indexHope_j, indexFear_k, losses[batch], alphas, featureValueDiffs);
-
-				// update weight vector:
-				if (delta != 0) {
-					update(currWeights, featureValueDiffs, delta);
-					++numberOfUpdates;
-				}
-
-				// Hypothesis pair hope/model
-				// Compute delta:
-				cout << "\nComparing hope/model (" << indexHope_j << "," << indexModel_k << ")" << endl;
-				featureValueDiffs.ZeroAll();
-				delta = computeDelta(currWeights, featureValues[batch], indexHope_j, indexModel_k, losses[batch], alphas, featureValueDiffs);
-
-				// update weight vector:
-				if (delta != 0) {
-					update(currWeights, featureValueDiffs, delta);
-					++numberOfUpdates;
-				}
-
-				// Hypothesis pair model/fear
-				// Compute delta:
-				cout << "\nComparing model/fear (" << indexModel_j << "," << indexFear_k << ")" << endl;
-				featureValueDiffs.ZeroAll();
-				delta = computeDelta(currWeights, featureValues[batch], indexModel_j, indexFear_k, losses[batch], alphas, featureValueDiffs);
-
-				// update weight vector:
-				if (delta != 0) {
-					update(currWeights, featureValueDiffs, delta);
-					++numberOfUpdates;
+					//std::cout << "alpha " << j << ": " << alphas[j] << endl;
 				}
 			}
 
-			cout << endl;
+			// consider all pairs of hypotheses
+			for (size_t j = 0; j < featureValues.size(); ++j) {
+				for (size_t k = 0; k < featureValues.size(); ++k) {
+					// Compute delta:
+					cout << "\nComparing pair" << j << "," << k << endl;
+					ScoreComponentCollection featureValueDiffs;
+					float delta = computeDelta(currWeights, featureValues[batch], j, k, losses[batch], alphas, featureValueDiffs);
+
+					// update weight vector:
+					if (delta != 0) {
+						update(currWeights, featureValueDiffs, delta);
+					}
+				}
+
+				cout << endl;
+			}
 		}
 	}
-
-	cout << "Number of updates: " << numberOfUpdates << endl;
 }
 
 /*
@@ -129,46 +138,25 @@ float MiraOptimiser::computeDelta(ScoreComponentCollection& currWeights,
 		cout << "loss diff - model diff: " << lossDiff << " - " << diffOfModelScores << endl;
 
 		// clipping
-		switch (m_clippingScheme) {
-		case 1:
-			if (delta > m_upperBound) {
-				cout << "clipping " << delta << " to " << m_upperBound << endl;
-				delta = m_upperBound;
-			}
-			else if (delta < m_lowerBound) {
-				cout << "clipping " << delta << " to " << m_lowerBound << endl;
-				delta = m_lowerBound;
-			}
-
-			// TODO: update
-			//m_lowerBound += delta;
-			//m_upperBound -= delta;
-			//cout << "m_lowerBound = " << m_lowerBound << endl;
-			//cout << "m_upperBound = " << m_upperBound << endl;
-
-			break;
-		case 2:
-			// fear translation: e_ij  --> alpha_ij  = alpha_ij  + delta
-			// hope translation: e_ij' --> alpha_ij' = alpha_ij' - delta
-			// clipping interval: [-alpha_ij, alpha_ij']
-			// clip delta
-			cout << "Interval [" << (-1 * alphas[indexFear]) << "," << alphas[indexHope] << "]" << endl;
-			if (delta > alphas[indexHope]) {
-				cout << "clipping " << delta << " to " << alphas[indexHope] << endl;
-				delta = alphas[indexHope];
-			}
-			else if (delta < (-1 * alphas[indexFear])) {
-				cout << "clipping " << delta << " to " << (-1 * alphas[indexFear]) << endl;
-				delta = (-1 * alphas[indexFear]);
-			}
-
-			// update alphas
-			alphas[indexHope] -= delta;
-			alphas[indexFear] += delta;
-			cout << "alpha[" << indexHope << "] = " << alphas[indexHope] << endl;
-			cout << "alpha[" << indexFear << "] = " << alphas[indexFear] << endl;
-			break;
+		// fear translation: e_ij  --> alpha_ij  = alpha_ij  + delta
+		// hope translation: e_ij' --> alpha_ij' = alpha_ij' - delta
+		// clipping interval: [-alpha_ij, alpha_ij']
+		// clip delta
+		cout << "Interval [" << (-1 * alphas[indexFear]) << "," << alphas[indexHope] << "]" << endl;
+		if (delta > alphas[indexHope]) {
+			cout << "clipping " << delta << " to " << alphas[indexHope] << endl;
+			delta = alphas[indexHope];
 		}
+		else if (delta < (-1 * alphas[indexFear])) {
+			cout << "clipping " << delta << " to " << (-1 * alphas[indexFear]) << endl;
+			delta = (-1 * alphas[indexFear]);
+		}
+
+		// update alphas
+		alphas[indexHope] -= delta;
+		alphas[indexFear] += delta;
+		cout << "alpha[" << indexHope << "] = " << alphas[indexHope] << endl;
+		cout << "alpha[" << indexFear << "] = " << alphas[indexFear] << endl;
 	}
 
 	return delta;
@@ -182,5 +170,7 @@ void MiraOptimiser::update(ScoreComponentCollection& currWeights, ScoreComponent
 	featureValueDiffs.MultiplyEquals(delta);
 	currWeights.PlusEquals(featureValueDiffs);
 }
+
 }
+
 

@@ -3,7 +3,8 @@ mira_SOURCES = \
     Decoder.cpp \
     Main.cpp  \
     MiraOptimiser.cpp \
-    Perceptron.cpp
+    Perceptron.cpp \
+    Hildreth.cpp
 
 
 AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$(top_srcdir)/moses/src -I$(top_srcdir)/moses-chart/src $(BOOST_CPPFLAGS)
