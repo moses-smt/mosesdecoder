@@ -20,32 +20,31 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				// check if optimisation criterion is violated for one hypothesis and the oracle
 				// h(e*) >= h(e_ij) + loss(e_ij)
 				// h(e*) - h(e_ij) >= loss(e_ij)
-				float modelScoreDiff = featureValues[i][j].InnerProduct(currWeights);
+				ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+				featureValueDiff.MinusEquals(featureValues[i][j]);
+				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				if (modelScoreDiff < losses[i][j]) {
-					cerr << "Constraint violated: " << modelScoreDiff << " < " << losses[i][j] << endl;
+					cerr << "Constraint violated: " << modelScoreDiff << " (modelScoreDiff) < " << losses[i][j] << " (loss)" << endl;
 					++numberOfViolatedConstraints;
 				}
 				else {
-					cerr << "Constraint satisfied: " << modelScoreDiff << " >= " << losses[i][j] << endl;
+					cerr << "Constraint satisfied: " << modelScoreDiff << " (modelScoreDiff) >= " << losses[i][j] << " (loss)" << endl;
 				}
 
 				// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
 				// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
 				// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
 				// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
-				ScoreComponentCollection featureValueDiff = oracleFeatureValues;
-				featureValueDiff.MinusEquals(featureValues[i][j]);
 				featureValueDiffs.push_back(featureValueDiff);
 				float lossMarginDistance = losses[i][j] - modelScoreDiff;
 				lossMarginDistances.push_back(lossMarginDistance);
-				// TODO: should we only pass violated constraints to the optimiser?
 			}
 		}
 
 		if (numberOfViolatedConstraints > 0) {
 			// run optimisation
 			cerr << "Number of violated constraints: " << numberOfViolatedConstraints << endl;
-			// TODO: slack
+			// TODO: slack? margin scale factor?
 			// compute deltas for all given constraints
 			vector< float> deltas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
 
