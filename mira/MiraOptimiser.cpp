@@ -24,11 +24,11 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				featureValueDiff.MinusEquals(featureValues[i][j]);
 				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				if (modelScoreDiff < losses[i][j]) {
-					cerr << "Constraint violated: " << modelScoreDiff << " (modelScoreDiff) < " << losses[i][j] << " (loss)" << endl;
+					//cerr << "Constraint violated: " << modelScoreDiff << " (modelScoreDiff) < " << losses[i][j] << " (loss)" << endl;
 					++numberOfViolatedConstraints;
 				}
 				else {
-					cerr << "Constraint satisfied: " << modelScoreDiff << " (modelScoreDiff) >= " << losses[i][j] << " (loss)" << endl;
+					//cerr << "Constraint satisfied: " << modelScoreDiff << " (modelScoreDiff) >= " << losses[i][j] << " (loss)" << endl;
 				}
 
 				// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
@@ -59,7 +59,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 		else {
-			cout << "No constraint violated for this batch" << endl;
+			cerr << "No constraint violated for this batch" << endl;
 		}
 	}
 	else {
@@ -71,11 +71,11 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				if (j == m_n) {										// TODO: use oracle index
 					// oracle
 					alphas[j] = m_c;
-					//std::cout << "alpha " << j << ": " << alphas[j] << endl;
+					//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
 				}
 				else {
 					alphas[j] = 0;
-					//std::cout << "alpha " << j << ": " << alphas[j] << endl;
+					//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
 				}
 			}
 
@@ -87,7 +87,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 						++pairs;
 
 						// Compute delta:
-						cout << "\nComparing pair" << j << "," << k << endl;
+						cerr << "\nComparing pair" << j << "," << k << endl;
 						ScoreComponentCollection featureValueDiffs;
 						float delta = computeDelta(currWeights, featureValues[i], j, k, losses[i], alphas, featureValueDiffs);
 
@@ -99,7 +99,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				}
 			}
 
-			cout << "number of pairs: " << pairs << endl;
+			cerr << "number of pairs: " << pairs << endl;
 		}
 	}
 }
@@ -128,7 +128,7 @@ float MiraOptimiser::computeDelta(ScoreComponentCollection& currWeights,
 
 	featureValueDiffs = featureValuesHope;
 	featureValueDiffs.MinusEquals(featureValuesFear);
-	cout << "feature value diffs: " << featureValueDiffs << endl;
+	cerr << "feature value diffs: " << featureValueDiffs << endl;
 	squaredNorm = featureValueDiffs.InnerProduct(featureValueDiffs);
 	diffOfModelScores = featureValueDiffs.InnerProduct(currWeights);
 
@@ -140,15 +140,15 @@ float MiraOptimiser::computeDelta(ScoreComponentCollection& currWeights,
 		// TODO: simplify and use BLEU scores of hypotheses directly?
 		float lossDiff = losses[indexFear] - losses[indexHope];
 		delta = (lossDiff - diffOfModelScores) / squaredNorm;
-		cout << "delta: " << delta << endl;
-		cout << "loss diff - model diff: " << lossDiff << " - " << diffOfModelScores << endl;
+		cerr << "delta: " << delta << endl;
+		cerr << "loss diff - model diff: " << lossDiff << " - " << diffOfModelScores << endl;
 
 		// clipping
 		// fear translation: e_ij  --> alpha_ij  = alpha_ij  + delta
 		// hope translation: e_ij' --> alpha_ij' = alpha_ij' - delta
 		// clipping interval: [-alpha_ij, alpha_ij']
 		// clip delta
-		cout << "Interval [" << (-1 * alphas[indexFear]) << "," << alphas[indexHope] << "]" << endl;
+		cerr << "Interval [" << (-1 * alphas[indexFear]) << "," << alphas[indexHope] << "]" << endl;
 		if (delta > alphas[indexHope]) {
 			//cout << "clipping " << delta << " to " << alphas[indexHope] << endl;
 			delta = alphas[indexHope];

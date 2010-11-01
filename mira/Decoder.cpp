@@ -127,7 +127,7 @@ namespace Mira {
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
-    	std::cout << "Score w/o bleu: " << scoreWithoutBleu << ", bleu: " << bleuScore << endl;
+    	cerr << "Score w/o bleu: " << scoreWithoutBleu << ", bleu: " << bleuScore << endl;
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);

@@ -156,13 +156,13 @@ int main(int argc, char** argv) {
   // TODO: initialise weights equally
   const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
   for (size_t i = 0; i < featureFunctions.size(); ++i) {
-	  cout << "Feature functions: " << featureFunctions[i]->GetScoreProducerDescription() << ": " << featureFunctions[i]->GetNumScoreComponents() << endl;
+	  cerr << "Feature functions: " << featureFunctions[i]->GetScoreProducerDescription() << ": " << featureFunctions[i]->GetNumScoreComponents() << endl;
 	  vector< float> weights = startWeights.GetScoresForProducer(featureFunctions[i]);
-	  cout << "weights: ";
+	  cerr << "weights: ";
 	  for (size_t j = 0; j < weights.size(); ++j) {
 		  cout << weights[j];
 	  }
-	  cout << endl;
+	  cerr << endl;
   }
 
   //Optionally shuffle the sentences
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
     }
 
     if (shuffle) {
-    	cout << "Shuffling input sentences.." << endl;
+    	cerr << "Shuffling input sentences.." << endl;
     	RandomIndex rindex;
     	random_shuffle(order.begin(), order.end(), rindex);
     }
@@ -218,12 +218,12 @@ int main(int argc, char** argv) {
 
   time_t now = time(0); // get current time
   struct tm* tm = localtime(&now); // get struct filled out
-  cout << "Start date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+  cerr << "Start date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
   
   // TODO: stop MIRA when score on dev or tuning set does not improve further?
   for (size_t epoch = 1; epoch <= epochs; ++epoch) {
-	  cout << "\nEpoch " << epoch << std::endl;
+	  cerr << "\nEpoch " << epoch << std::endl;
     size_t weightEpochDump = 0; //number of weight dumps this epoch
 
 
@@ -237,14 +237,14 @@ int main(int argc, char** argv) {
 	  for (vector<size_t>::const_iterator sid = shard.begin(); sid != shard.end(); ++sid) {
 		  const string& input = inputSentences[*sid];
 		  const vector<string>& refs = referenceSentences[*sid];
-		  cout << "Input sentence " << *sid << ": \"" << input << "\"" << std::endl;
+		  cerr << "Input sentence " << *sid << ": \"" << input << "\"" << std::endl;
 
 		  // feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
 		  vector<vector<float> > bleuScores(batchSize);
 
 		  // MODEL
-		  cout << "Run decoder to get nbest wrt model score" << std::endl;
+		  cerr << "Run decoder to get nbest wrt model score" << std::endl;
 		  decoder->getNBest(input,
                         *sid,
                         n,
@@ -256,7 +256,7 @@ int main(int argc, char** argv) {
 		  decoder->cleanup();
 
 		  // HOPE
-		  cout << "Run decoder to get nbest hope translations" << std::endl;
+		  cerr << "Run decoder to get nbest hope translations" << std::endl;
 		  size_t oraclePos = featureValues[batch].size();
 		  vector<const Word*> oracle = decoder->getNBest(input,
 						*sid,
@@ -272,7 +272,7 @@ int main(int argc, char** argv) {
 		  float oracleBleuScore = bleuScores[batch][oraclePos];
 
 		  // FEAR
-		  cout << "Run decoder to get nbest fear translations" << std::endl;
+		  cerr << "Run decoder to get nbest fear translations" << std::endl;
 		  decoder->getNBest(input,
                         *sid,
                         n,
@@ -299,7 +299,7 @@ int main(int argc, char** argv) {
 	      ScoreComponentCollection oldWeights(mosesWeights);
 			
 		  //run optimiser
-	      cout << "Run optimiser.." << endl;
+	      cerr << "Run optimiser.." << endl;
 	      optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
 
 		  //update moses weights
@@ -385,7 +385,7 @@ int main(int argc, char** argv) {
 
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out
-  cout << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+  cerr << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
   delete decoder;
