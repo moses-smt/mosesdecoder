@@ -115,7 +115,7 @@ typedef LVoc<std::string> WordVoc;
 
 static WordVoc* ReadVoc(const std::string& filename) {
     static std::map<std::string,WordVoc*> vocs;
-#ifdef HAVE_THREADS
+#ifdef WITH_THREADS
     boost::mutex mutex;
     boost::mutex::scoped_lock lock(mutex);
 #endif
