@@ -349,7 +349,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		int sntIndex = sntIndexes.at(snt); // get corpus index for sentence
 		if(sntIndex == -1) continue;	// bad flag set by GetSntIndexes()
 		ExtractPhrases(sntIndex, wrdIndices[snt], sourceSize, phrasePairs); 
-		cerr << "extracted " << phrasePairs.size() << endl;
+		//cerr << "extracted " << phrasePairs.size() << endl;
 		totalTrgPhrases += phrasePairs.size(); // keep track of count of each extracted phrase pair		
 		std::vector<PhrasePair*>::iterator iterPhrasePair;
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair) {
@@ -384,7 +384,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	for(ritr = phraseScores.rbegin(); ritr != phraseScores.rend(); ++ritr) {
 		Scores scoreVector = ritr->first;
 		TargetPhrase *targetPhrase = GetMosesFactorIDs(*ritr->second);
-    cerr << *targetPhrase << endl;
+    //cerr << *targetPhrase << endl;
 		target.push_back( make_pair( scoreVector, targetPhrase));
 
 		if(target.size() == maxReturn) break;
