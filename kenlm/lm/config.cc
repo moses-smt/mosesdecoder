@@ -1,4 +1,4 @@
-#include "lm/ngram_config.hh"
+#include "lm/config.hh"
 
 #include <iostream>
 
@@ -16,7 +16,7 @@ Config::Config() :
   arpa_complain(ALL),
   write_mmap(NULL),
   include_vocab(true),
-  prefault(false) {}
+  load_method(util::POPULATE_OR_READ) {}
 
 } // namespace ngram
 } // namespace lm

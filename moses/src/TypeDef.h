@@ -157,6 +157,7 @@ enum LMImplementation
 	,Remote 	= 6
 	,ParallelBackoff	= 7
 	,Ken			= 8
+	,LazyKen	= 9
 };
 
 enum PhraseTableImplementation

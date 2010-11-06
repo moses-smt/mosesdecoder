@@ -101,7 +101,12 @@ namespace LanguageModelFactory
 				break;
 			case Ken:
 				#ifdef LM_KEN
-					lm = ConstructKenLM(true, scoreIndexManager, languageModelFile);
+					lm = ConstructKenLM(true, scoreIndexManager, languageModelFile, false);
+				#endif
+				break;
+			case LazyKen:
+				#ifdef LM_KEN
+					lm = ConstructKenLM(true, scoreIndexManager, languageModelFile, true);
 				#endif
 				break;
 			case Joint:

@@ -193,7 +193,7 @@ then
   SAVE_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS -I${PWD}/kenlm"
 
-  AC_CHECK_HEADER(lm/ngram.hh,
+  AC_CHECK_HEADER(lm/model.hh,
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${PWD}/kenlm])])
 

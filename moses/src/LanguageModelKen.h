@@ -32,7 +32,7 @@ namespace Moses
 class ScoreIndexManager;
 
 // Doesn't actually load; moses wants the Load method for that.  It needs the file to autodetect binary format.  
-LanguageModelSingleFactor *ConstructKenLM(bool registerScore, ScoreIndexManager &scoreIndexManager, const std::string &file);
+LanguageModelSingleFactor *ConstructKenLM(bool registerScore, ScoreIndexManager &scoreIndexManager, const std::string &file, bool lazy);
 	
 };
 

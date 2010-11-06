@@ -1,8 +1,8 @@
-#ifndef LM_NGRAM_HASHED__
-#define LM_NGRAM_HASHED__
+#ifndef LM_SEARCH_HASHED__
+#define LM_SEARCH_HASHED__
 
 #include "lm/binary_format.hh"
-#include "lm/ngram_config.hh"
+#include "lm/config.hh"
 #include "lm/read_arpa.hh"
 #include "lm/weights.hh"
 
@@ -102,6 +102,14 @@ template <class MiddleT, class LongestT> struct TemplateHashedSearch : public Ha
     return true;
   }
 
+  bool LookupMiddleNoProb(const Middle &middle, WordIndex word, float &backoff, Node &node) const {
+    node = CombineWordHash(node, word);
+    typename Middle::ConstIterator found;
+    if (!middle.Find(node, found)) return false;
+    backoff = found->GetValue().backoff;
+    return true;
+  }
+
   bool LookupLongest(WordIndex word, float &prob, Node &node) const {
     node = CombineWordHash(node, word);
     typename Longest::ConstIterator found;
@@ -145,4 +153,4 @@ struct SortedHashedSearch : public TemplateHashedSearch<
 } // namespace ngram
 } // namespace lm
 
-#endif // LM_NGRAM_HASHED__
+#endif // LM_SEARCH_HASHED__

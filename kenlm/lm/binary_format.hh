@@ -1,7 +1,7 @@
 #ifndef LM_BINARY_FORMAT__
 #define LM_BINARY_FORMAT__
 
-#include "lm/ngram_config.hh"
+#include "lm/config.hh"
 #include "lm/read_arpa.hh"
 
 #include "util/file_piece.hh"
@@ -36,7 +36,7 @@ struct Backing {
   // File behind memory, if any.  
   util::scoped_fd file;
   // Raw block of memory backing the language model data structures
-  util::scoped_mmap memory;
+  util::scoped_memory memory;
 };
 
 namespace detail {

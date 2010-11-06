@@ -1,7 +1,9 @@
-#ifndef LM_NGRAM_CONFIG__
-#define LM_NGRAM_CONFIG__
+#ifndef LM_CONFIG__
+#define LM_CONFIG__
 
 #include <iosfwd>
+
+#include "util/mmap.hh"
 
 /* Configuration for ngram model.  Separate header to reduce pollution. */
 
@@ -63,9 +65,12 @@ struct Config {
   bool include_vocab;
 
   
-
+  
   // ONLY EFFECTIVE WHEN READING BINARY
-  bool prefault;
+  
+  // How to get the giant array into memory: lazy mmap, populate, read etc.
+  // See util/mmap.hh for details of MapMethod.  
+  util::LoadMethod load_method;
 
 
 
@@ -75,4 +80,4 @@ struct Config {
 
 } /* namespace ngram */ } /* namespace lm */
 
-#endif // LM_NGRAM_CONFIG__
+#endif // LM_CONFIG__

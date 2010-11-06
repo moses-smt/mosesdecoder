@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
-#include "lm/ngram.hh"
+#include "lm/model.hh"
 
 #include "LanguageModelKen.h"
 #include "FFState.h"
@@ -42,6 +42,38 @@ namespace Moses
 
 namespace {
 
+class MappingBuilder : public lm::ngram::EnumerateVocab {
+	public:
+		MappingBuilder(FactorType factorType, FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping) 
+		: m_factorType(factorType), m_factorCollection(factorCollection), m_mapping(mapping) {}
+
+		void Add(lm::WordIndex index, const StringPiece &str) {
+			m_word.assign(str.data(), str.size());
+			std::size_t factorId = m_factorCollection.AddFactor(Output, m_factorType, m_word)->GetId();
+			if (m_mapping.size() <= factorId) {
+				// 0 is <unk> :-)
+				m_mapping.resize(factorId + 1);
+			}
+			m_mapping[factorId] = index;
+		}
+
+	private:
+		std::string m_word;
+		FactorType m_factorType;
+		FactorCollection &m_factorCollection;
+	std::vector<lm::WordIndex> &m_mapping;
+};
+
+struct KenLMState : public FFState {
+	lm::ngram::State state;
+	int Compare(const FFState &o) const {
+		const KenLMState &other = static_cast<const KenLMState &>(o);
+		if (state.valid_length_ < other.state.valid_length_) return -1;
+		if (state.valid_length_ > other.state.valid_length_) return 1;
+		return std::memcmp(state.history_, other.state.history_, sizeof(lm::WordIndex) * state.valid_length_);
+	}
+};
+
 /** Implementation of single factor LM using Ken's code.
 */
 template <class Model> class LanguageModelKen : public LanguageModelSingleFactor
@@ -49,11 +81,12 @@ template <class Model> class LanguageModelKen : public LanguageModelSingleFactor
 private:
 	Model *m_ngram;
 	std::vector<lm::WordIndex> m_lmIdLookup;
+	bool m_lazy;
 
 	void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
 	
 public:
-	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, bool lazy);
 	~LanguageModelKen();
 
 	bool Load(const std::string &filePath
@@ -73,52 +106,20 @@ public:
 
 };
 
-class MappingBuilder : public lm::ngram::EnumerateVocab {
-  public:
-    MappingBuilder(FactorType factorType, FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping) 
-      : m_factorType(factorType), m_factorCollection(factorCollection), m_mapping(mapping) {}
-
-    void Add(lm::WordIndex index, const StringPiece &str) {
-      m_word.assign(str.data(), str.size());
-      std::size_t factorId = m_factorCollection.AddFactor(Output, m_factorType, m_word)->GetId();
-      if (m_mapping.size() <= factorId) {
-        // 0 is <unk> :-)
-        m_mapping.resize(factorId + 1);
-      }
-      m_mapping[factorId] = index;
-    }
-
-  private:
-    std::string m_word;
-    FactorType m_factorType;
-    FactorCollection &m_factorCollection;
-    std::vector<lm::WordIndex> &m_mapping;
-};
-
-struct KenLMState : public FFState {
-	lm::ngram::State state;
-	int Compare(const FFState &o) const {
-		const KenLMState &other = static_cast<const KenLMState &>(o);
-		if (state.valid_length_ < other.state.valid_length_) return -1;
-		if (state.valid_length_ > other.state.valid_length_) return 1;
-		return std::memcmp(state.history_, other.state.history_, sizeof(lm::WordIndex) * state.valid_length_);
-	}
-};
-
 template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const
 {
 	FactorType factorType = GetFactorType();
 	// set up context
 	for (size_t i = 0 ; i < contextFactor.size(); i++)
 	{
-    std::size_t factor = contextFactor[i]->GetFactor(factorType)->GetId();
-    lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+		std::size_t factor = contextFactor[i]->GetFactor(factorType)->GetId();
+		lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
 		indices[contextFactor.size() - 1 - i] = new_word;
 	}
 }
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL)
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, bool lazy)
+:LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL), m_lazy(lazy)
 {
 }
 
@@ -140,9 +141,10 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
 	m_sentenceEnd = factorCollection.AddFactor(Output, m_factorType, EOS_);
 	m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 
-  MappingBuilder builder(m_factorType, factorCollection, m_lmIdLookup);
-  lm::ngram::Config config;
-  config.enumerate_vocab = &builder;
+	MappingBuilder builder(m_factorType, factorCollection, m_lmIdLookup);
+	lm::ngram::Config config;
+	config.enumerate_vocab = &builder;
+	config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
 	m_ngram = new Model(filePath.c_str(), config);
 	m_nGramOrder  = m_ngram->Order();
@@ -163,7 +165,7 @@ template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const s
 		return 0;
 	}
 	lm::ngram::State &realState = static_cast<KenLMState&>(state).state;
-  std::size_t factor = contextFactor.back()->GetFactor(GetFactorType())->GetId();
+	std::size_t factor = contextFactor.back()->GetFactor(GetFactorType())->GetId();
 	lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
 	lm::ngram::State copied(realState);
 	lm::FullScoreReturn ret(m_ngram->FullScore(copied, new_word, realState));
@@ -218,23 +220,23 @@ template <class Model> lm::WordIndex LanguageModelKen<Model>::GetLmID(const std:
 
 } // namespace
 
-LanguageModelSingleFactor *ConstructKenLM(bool registerScore, ScoreIndexManager &scoreIndexManager, const std::string &file) {
-  lm::ngram::ModelType model_type;
-  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-    switch(model_type) {
-      case lm::ngram::HASH_PROBING:
-        return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager);
-      case lm::ngram::HASH_SORTED:
-        return new LanguageModelKen<lm::ngram::SortedModel>(registerScore, scoreIndexManager);
-      case lm::ngram::TRIE_SORTED:
-        return new LanguageModelKen<lm::ngram::TrieModel>(registerScore, scoreIndexManager);
-      default:
-        std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
-        abort();
-    }
-  } else {
-    return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager);
-  }
+LanguageModelSingleFactor *ConstructKenLM(bool registerScore, ScoreIndexManager &scoreIndexManager, const std::string &file, bool lazy) {
+	lm::ngram::ModelType model_type;
+	if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+		switch(model_type) {
+			case lm::ngram::HASH_PROBING:
+				return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager, lazy);
+			case lm::ngram::HASH_SORTED:
+				return new LanguageModelKen<lm::ngram::SortedModel>(registerScore, scoreIndexManager, lazy);
+			case lm::ngram::TRIE_SORTED:
+				return new LanguageModelKen<lm::ngram::TrieModel>(registerScore, scoreIndexManager, lazy);
+			default:
+				std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
+				abort();
+		}
+	} else {
+		return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager, lazy);
+	}
 }
 
 }
