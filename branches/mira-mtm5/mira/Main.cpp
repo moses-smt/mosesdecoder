@@ -82,6 +82,7 @@ int main(int argc, char** argv) {
   size_t mixFrequency;
   size_t weightDumpFrequency;
   string weightDumpStem;
+  float clipping;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -95,7 +96,8 @@ int main(int argc, char** argv) {
         ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
         ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
         ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm");
+	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
+	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold to regularise updates");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -125,7 +127,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  //load input and references 
+  // load input and references
   vector<string> inputSentences;
   if (!loadSentences(inputFile, inputSentences)) {
     cerr << "Error: Failed to load input sentences from " << inputFile << endl;
@@ -146,26 +148,25 @@ int main(int argc, char** argv) {
     }
   }
 
-  //initialise moses
+  // initialise moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
   MosesDecoder* decoder = new MosesDecoder(referenceSentences) ;
   ScoreComponentCollection startWeights = decoder->getWeights();
 
   // print feature function and weights
   // TODO: scaling of feature functions
-  // TODO: initialise weights equally
   const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
   for (size_t i = 0; i < featureFunctions.size(); ++i) {
 	  cerr << "Feature functions: " << featureFunctions[i]->GetScoreProducerDescription() << ": " << featureFunctions[i]->GetNumScoreComponents() << endl;
 	  vector< float> weights = startWeights.GetScoresForProducer(featureFunctions[i]);
 	  cerr << "weights: ";
 	  for (size_t j = 0; j < weights.size(); ++j) {
-		  cout << weights[j];
+		  cerr << weights[j] << " ";
 	  }
 	  cerr << endl;
   }
 
-  //Optionally shuffle the sentences
+  // Optionally shuffle the sentences
   vector<size_t> order;
   if (rank == 0) {
 	for (size_t i = 0; i < inputSentences.size(); ++i) {
@@ -180,17 +181,17 @@ int main(int argc, char** argv) {
   }
 
 #ifdef MPI_ENABLE
-  mpi::broadcast(world,order,0);
+  mpi::broadcast(world, order, 0);
 #endif
 
-  //Create the shards
+  // Create the shards according to the number of processes used
   vector<size_t> shard;
   float shardSize = (float)(order.size()) / size;
   VERBOSE(1, "Shard size: " << shardSize << endl);
   size_t shardStart = (size_t)(shardSize * rank);
   size_t shardEnd = (size_t)(shardSize * (rank+1));
   if (rank == size-1) shardEnd = order.size();
-  VERBOSE(1,"Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
+  VERBOSE(1, "Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
   shard.resize(shardSize);
   copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 
@@ -198,7 +199,7 @@ int main(int argc, char** argv) {
   size_t n = 10;								// size of n-best lists
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth);
+    optimiser = new MiraOptimiser(n, hildreth, clipping);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -221,11 +222,17 @@ int main(int argc, char** argv) {
   cerr << "Start date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
   
-  // TODO: stop MIRA when score on dev or tuning set does not improve further?
-  for (size_t epoch = 1; epoch <= epochs; ++epoch) {
-	  cerr << "\nEpoch " << epoch << std::endl;
-    size_t weightEpochDump = 0; //number of weight dumps this epoch
+  // the result of accumulating and averaging weights over one epoch and possibly several processes
+  ScoreComponentCollection averageTotalWeights;
 
+  // TODO: stop MIRA when score on dev or tuning set does not improve further?
+  for (size_t epoch = 0; epoch < epochs; ++epoch) {
+	  cerr << "\nEpoch " << epoch << endl;
+	  // Sum up weights over one epoch, final average uses weights from last epoch
+	  cumulativeWeights.ZeroAll();
+
+	  //number of weight dumps this epoch
+	  size_t weightEpochDump = 0;
 
 	  // compute sum in objective function after each epoch
 	  float maxSum = 0.0;
@@ -237,7 +244,7 @@ int main(int argc, char** argv) {
 	  for (vector<size_t>::const_iterator sid = shard.begin(); sid != shard.end(); ++sid) {
 		  const string& input = inputSentences[*sid];
 		  const vector<string>& refs = referenceSentences[*sid];
-		  cerr << "Input sentence " << *sid << ": \"" << input << "\"" << std::endl;
+		  cerr << "\nInput sentence " << *sid << ": \"" << input << "\"" << std::endl;
 
 		  // feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
@@ -312,23 +319,26 @@ int main(int argc, char** argv) {
 		  cumulativeWeights.PlusEquals(mosesWeights);
 
 		  // sanity check: compare margin created by old weights against new weights
-		  float lossModelDiff_old = 0;
-		  float lossModelDiff_new = 0;
+		  float lossMinusMargin_old = 0;
+		  float lossMinusMargin_new = 0;
 	      for (size_t j = 0; j < featureValues.size(); ++j) {
 	    	  ScoreComponentCollection featureDiff(oracleFeatureValues);
 	    	  featureDiff.MinusEquals(featureValues[batch][j]);
 
 	    	  // old weights
-	    	  float margin = losses[batch][j] - featureDiff.InnerProduct(oldWeights);
-	    	  lossModelDiff_old += margin;
+	    	  float margin = featureDiff.InnerProduct(oldWeights);
+	    	  lossMinusMargin_old += (losses[batch][j] - margin);
 
 	    	  // new weights
 	    	  margin = losses[batch][j] - featureDiff.InnerProduct(mosesWeights);
-	    	  lossModelDiff_new += margin;
+	    	  lossMinusMargin_new += margin;
 	      }
 
-	      cerr << "Summed (loss - margin) with old weights: " << lossModelDiff_old << endl;
-	      cerr << "Summed (loss - margin) with new weights: " << lossModelDiff_new << endl;
+	      cerr << "\nSummed (loss - margin) with old weights: " << lossMinusMargin_old << endl;
+	      cerr << "Summed (loss - margin) with new weights: " << lossMinusMargin_new << endl;
+	      if (lossMinusMargin_new > lossMinusMargin_old) {
+	    	  cerr << "Worsening: " << lossMinusMargin_new - lossMinusMargin_old << endl;
+	      }
 
 		  ++shardPosition;
 		  ++iterations;
@@ -337,36 +347,41 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLE
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
-			  VERBOSE(1, "Rank: " << rank << "Before mixing: " << mosesWeights << endl);
-			  mpi::reduce(world,mosesWeights,averageWeights,SCCPlus(),0);
+			  VERBOSE(1, "\nRank: " << rank << " Before mixing: " << mosesWeights << endl);
+
+			  // collect all weights in averageWeights and divide by number of processes
+			  mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
 			  if (rank == 0) {
-				  averageWeights.MultiplyEquals(1.0f/size);
-				  VERBOSE(1, "After mixing: " << averageWeights << endl);
+				  averageWeights.DivideEquals(size);
+				  //VERBOSE(1, "After mixing: " << averageWeights << endl);
 			  }
 
-			  mpi::broadcast(world,averageWeights,0);
+			  // broadcast average weights from process 0
+			  mpi::broadcast(world, averageWeights, 0);
 			  decoder->setWeights(averageWeights);
 		  }
 #endif
 
 		  //dump weights?
 		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
+			  // compute average weights per process over iterations
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
 			  totalWeights.DivideEquals(iterations);
-			  //average across processes
-			  ScoreComponentCollection combinedTotalWeights;
+
+			  // average across processes
 #ifdef MPI_ENABLE
-			  mpi::reduce(world,totalWeights,combinedTotalWeights,SCCPlus(),0);
+			  mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
 #endif
 			  if (rank == 0 && !weightDumpStem.empty()) {
-				  combinedTotalWeights.DivideEquals(size);
+				  averageTotalWeights.DivideEquals(size);
+
 				  ostringstream filename;
 				  filename << weightDumpStem << "_" << epoch;
 				  if (weightDumpFrequency > 1) {
 					  filename << "_" << weightEpochDump;
 				  }
 				  VERBOSE(1, "Dumping weights for epoch " << epoch << " to " << filename.str() << endl);
-				  combinedTotalWeights.Save(filename.str());
+				  averageTotalWeights.Save(filename.str());
 				  ++weightEpochDump;
 			  }
 		  }
@@ -376,12 +391,8 @@ int main(int argc, char** argv) {
 		  }
 	  }
   }
-
-  // take average of cumulative weights of last pass over all source sentences
-  cumulativeWeights.MultiplyEquals(1.0f/inputSentences.size());
   
-  cerr << "Start weights: " << startWeights << endl;
-  cerr << "Averaged new weights: " << cumulativeWeights << endl;
+  cerr << "Final new weights: " << averageTotalWeights << endl;
 
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out

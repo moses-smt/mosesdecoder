@@ -12,7 +12,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const ScoreComponentCollection& oracleFeatureValues) {
 
 	if (m_hildreth) {
-		size_t numberOfViolatedConstraints = 0;
+		size_t violatedConstraintsBefore = 0;
 		vector< ScoreComponentCollection> featureValueDiffs;
 		vector< float> lossMarginDistances;
 		for (size_t i = 0; i < featureValues.size(); ++i) {
@@ -24,11 +24,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				featureValueDiff.MinusEquals(featureValues[i][j]);
 				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				if (modelScoreDiff < losses[i][j]) {
-					//cerr << "Constraint violated: " << modelScoreDiff << " (modelScoreDiff) < " << losses[i][j] << " (loss)" << endl;
-					++numberOfViolatedConstraints;
-				}
-				else {
-					//cerr << "Constraint satisfied: " << modelScoreDiff << " (modelScoreDiff) >= " << losses[i][j] << " (loss)" << endl;
+					++violatedConstraintsBefore;
 				}
 
 				// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
@@ -41,21 +37,42 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 
-		if (numberOfViolatedConstraints > 0) {
-			// run optimisation
-			cerr << "Number of violated constraints: " << numberOfViolatedConstraints << endl;
+		if (violatedConstraintsBefore > 0) {
 			// TODO: slack? margin scale factor?
+			// run optimisation
+			cerr << "Number of violated constraints: " << violatedConstraintsBefore << endl;
 			// compute deltas for all given constraints
 			vector< float> deltas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
 
 			// Update the weight vector according to the deltas and the feature value differences
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
+			ScoreComponentCollection oldWeights(currWeights);
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
-				// scale feature value differences with delta
+				cerr << "delta: " << deltas[k] << " ---> " << deltas[k] << endl;
+
+				// compute update
 				featureValueDiffs[k].MultiplyEquals(deltas[k]);
 
 				// apply update to weight vector
 				currWeights.PlusEquals(featureValueDiffs[k]);
+			}
+
+			// sanity check: how many constraints violated after optimisation?
+			size_t violatedConstraintsAfter = 0;
+			for (size_t i = 0; i < featureValues.size(); ++i) {
+				for (size_t j = 0; j < featureValues[i].size(); ++j) {
+					ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+					featureValueDiff.MinusEquals(featureValues[i][j]);
+					float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+					if (modelScoreDiff < losses[i][j]) {
+						++violatedConstraintsAfter;
+					}
+				}
+			}
+
+			cerr << "Number of violated constraints after optimisation: " << violatedConstraintsAfter << endl;
+			if (violatedConstraintsAfter > violatedConstraintsBefore) {
+				cerr << "Increase: " << violatedConstraintsAfter - violatedConstraintsBefore << endl << endl;
 			}
 		}
 		else {
