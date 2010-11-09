@@ -59,11 +59,11 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth) :
+	  MiraOptimiser(size_t n, bool hildreth, float clipping) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
-		  m_c(0.01f) { }
+		  m_c(clipping) { }
 
      ~MiraOptimiser() {}
    
@@ -85,6 +85,8 @@ namespace Mira {
       size_t m_n;
 
       bool m_hildreth;
+
+      // clipping threshold to regularise updates
       float m_c;
   };
 }
