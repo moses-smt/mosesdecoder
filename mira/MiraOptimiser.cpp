@@ -48,7 +48,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
 			ScoreComponentCollection oldWeights(currWeights);
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
-				cerr << "delta: " << deltas[k] << " ---> " << deltas[k] << endl;
+				cerr << "delta: " << deltas[k] << endl;
 
 				// compute update
 				featureValueDiffs[k].MultiplyEquals(deltas[k]);
