@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w 
 
-# $Id: mert-moses.pl 1745 2008-05-16 15:54:02Z phkoehn $
+# $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
 # For other options see below or run 'mert-moses.pl --help'
@@ -52,7 +52,7 @@ $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 # defaults for initial values and ranges are:
 
 my $default_triples = {
-    # these two basic models exist even if not specified, they are
+    # these basic models exist even if not specified, they are
     # not associated with any model file
     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
@@ -60,13 +60,7 @@ my $default_triples = {
 my $additional_triples = {
     # if the more lambda parameters for the weights are needed
     # (due to additional tables) use the following values for them
-    "d"  => [ [ 1.0, 0.0, 2.0 ],    # lexicalized reordering model
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ] ],
+    "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
 	      [ 1.0, 0.0, 2.0 ] ],
@@ -76,18 +70,23 @@ my $additional_triples = {
 	      [ 0.2, 0.0, 0.5 ],
 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
+    "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
 };
+    # the following models (given by shortname) use same triplet
+    # for any number of lambdas, the number of the lambdas is determined
+    # by the ini file
+my $additional_tripes_loop = { map { ($_, 1) } qw/ d I / };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
 # uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex";
+my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex I=weight-i";
 my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
 # We parse moses.ini to figure out how many weights do we need to optimize.
 # For this, we must know the correspondence between options defining files
 # for models and options assigning weights to these models.
-my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex";
+my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex link-param-count=I";
 my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
@@ -137,15 +136,14 @@ my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
-#input weights for CNs and Lattices: don't have a direct ini file counter, so specified here
-my $___INPUTWEIGHTS = 1;
+#   ___INPUTWEIGHTS/--inputweights obsoleted by Ondrej, instead they are read
+#   from the ini file, from the link-param-count option
 
 
 my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $filterfile = undef;
-my $SCORENBESTCMD = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
@@ -160,6 +158,7 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # 0 means no previous data, i.e. from actual iteration
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                   # and so on 
+my $starting_weights_from_ini = 1;
 
 my $maximum_iterations = 25;
 
@@ -169,7 +168,6 @@ GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
   "input=s" => \$___DEV_F,
   "inputtype=i" => \$___INPUTTYPE,
-  "inputweights=i" => \$___INPUTWEIGHTS,
   "refs=s" => \$___DEV_E,
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
@@ -192,7 +190,6 @@ GetOptions(
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "filterfile=s" => \$filterfile, # input to filtering script (useful for lattices/confnets)
-  "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
@@ -202,6 +199,7 @@ GetOptions(
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
+  "starting-weights-from-ini!" => \$starting_weights_from_ini,
 ) or exit(1);
 
 print "Predict $___PREDICTABLE_SEEDS\n";
@@ -258,9 +256,10 @@ Options:
   --predictable-seeds ... provide predictable seeds to mert so that random restarts are the same on every run
   --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
                                   (this method is more memory-consumptive)
-  --activate-features=STRING  ... comma-separated list of features to work on
-                                  (if undef work on all features)
-                                  # (others are fixed to the starting values)
+  --activate-features=STRING  ... comma-separated list of features to optimize,
+                                  others are fixed to the starting values
+                                  default: optimize all features
+                                  example: tm_0,tm_4,d_0
   --prev-aggregate-nbestlist=INT  ... number of previous step to consider when loading data (default =-1)
                                       -1 means all previous, i.e. from iteration 1
                                       0 means no previous data, i.e. from actual iteration
@@ -268,25 +267,12 @@ Options:
                                       and so on 
 
   --maximum-iterations=ITERS    Maximum number of iterations to run tuning for.
+  --starting-weights-from-ini ... use the weights given in moses.ini file as
+                                  the starting weights (and also as the fixed
+                                  weights if --activate-features is used).
+                                  default: yes (used to be 'no')
 ";
   exit 1;
-}
-
-# update default variables if input is confusion network or lattice
-if ($___INPUTTYPE == 1 || $___INPUTTYPE == 2)
-{
-  $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
-  %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
-  %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
-  
-  my @my_array;
-  
-  for(my $i=0 ; $i < $___INPUTWEIGHTS ; $i++) 
-	{
-		push @my_array, [ 1.0, 0.0, 2.0 ];
-	}
-	push @{$default_triples -> {"I"}}, @my_array;
-	
 }
 
 
@@ -1124,7 +1110,16 @@ sub scan_config {
     "ttable-file" => 3,
     "generation-file" => 2,
     "distortion-file" => 2,
+    "link-param-count" => 0,
   );
+
+  my %weight_section_short_names = (%FULL2ABBR,
+         map { ($_, $_) } keys %ABBR2FULL);
+  # maps both long and short names of weight sections to the short names
+
+  my $config_weights;
+  # to collect all weight values from moses.ini
+  #   $config_weights->{shortname}  is a reference to array of features
   
   open INI, $ini or die "Can't read $ini";
   my $section = undef;  # name of the section we are reading
@@ -1135,57 +1130,81 @@ sub scan_config {
   my %defined_steps;  # check the ini file for compatible mapping steps and actually defined files
   while (<INI>) {
     $nr++;
+    chomp;
     next if /^\s*#/; # skip comments
+    next if /^\s*$/; # skip blank lines
     if (/^\[([^\]]*)\]\s*$/) {
       $section = $1;
       $shortname = $TABLECONFIG2ABBR{$section};
       next;
     }
+    if (defined $section && defined $weight_section_short_names{$section}) {
+      # this is a weight, store it
+      my $weightname = $weight_section_short_names{$section};
+      $config_weights->{$weightname} = []
+        if ! defined $config_weights->{$weightname};
+      push @{$config_weights->{$weightname}}, $_;
+    }
     if (defined $section && $section eq "mapping") {
       # keep track of mapping steps used
       $defined_steps{$1}++ if /^([TG])/ || /^\d+ ([TG])/;
     }
-    if (defined $section && defined $where_is_filename{$section}) {
-      print "$section -> $where_is_filename{$section}\n";
+    if (defined $section
+        && (defined $where_is_filename{$section}
+            || defined $where_is_lambda_count{$section})) {
       # this ini section is relevant to lambdas
-      chomp;
       my @flds = split / +/;
-      my $fn = $flds[$where_is_filename{$section}];
-      if (defined $fn && $fn !~ /^\s+$/) {
-	  print "checking weight-count for $section\n";
-        # this is a filename! check it
-	if ($fn !~ /^\//) {
-	  $error = 1;
-	  print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
-	}
-	if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx" && ! -s "$fn.binlexr.idx" ) {
-	  $error = 1;
-	  print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
-	}
-	# remember the number of files used, to know how many lambdas do we need
-        die "No short name was defined for section $section!"
-          if ! defined $shortname;
-
-        # how many lambdas does this model need?
-        # either specified explicitly, or the default, i.e. one
-        my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}] : 1;
-
-        print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
-        if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname} || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)) {
-          print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
-            .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
-          $error = 1;
+      my $filenamefield = $where_is_filename{$section};
+      if (defined $filenamefield) {
+        my $fn = $flds[$filenamefield];
+        print STDERR "Checking the filename in $section: $fn\n"
+          if $verbose;
+        if (defined $fn && $fn !~ /^\s+$/) {
+          # this is a filename! check it
+          if ($fn !~ /^\//) {
+            $error = 1;
+            print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
+          }
+          if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx"
+              && ! -s "$fn.binlexr.idx" ) {
+            $error = 1;
+            print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
+          }
+          # remember the number of files used, to know how many lambdas do we need
+          die "No short name was defined for section $section!"
+            if ! defined $shortname;
+          $defined_files{$shortname}++;
         }
-	else {
-	    # note: table may use less parameters than the maximum number
-	    # of triples
-	    for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
-		my ($start, $min, $max) 
-		    = @{${$additional_triples->{$shortname}}[$lambda]};
-		push @{$used_triples{$shortname}}, [$start, $min, $max];
-	    }
-	}
-        $defined_files{$shortname}++;
+      }
+
+      my $lambdacountfield = $where_is_lambda_count{$section};
+      # how many lambdas does this model need?
+      # either specified explicitly, or the default, i.e. one
+      my $needlambdas = defined $lambdacountfield
+                        ? $flds[$lambdacountfield] : 1;
+  
+      print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
+      if (!defined $___LAMBDA # user provides all lambdas on his own
+        && (!defined $additional_triples->{$shortname}
+            || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)
+        && (!defined $additional_tripes_loop->{$shortname})
+        ) {
+        print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
+          .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
+        $error = 1;
+      } else {
+        # note: models may use less parameters than the maximum number
+        # of triples, but it is actually bad, because then the ranges
+        # may be meant for another parameter
+        my @triplets = @{$additional_triples->{$shortname}};
+        for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
+          my $triplet = $lambda;
+          $triplet %= scalar(@triplets)
+            if $additional_tripes_loop->{$shortname};
+          my ($start, $min, $max) 
+              = @{$triplets[$triplet]};
+          push @{$used_triples{$shortname}}, [$start, $min, $max];
+        }
       }
     }
   }
@@ -1205,6 +1224,29 @@ sub scan_config {
   #print STDERR "SYNC distortion";
   push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
 
+  # check the weights provided in the ini file and plug them into the triples
+  # if --starting-weights-from_ini
+  foreach my $weightname (keys %used_triples) {
+    if (!defined $config_weights->{$weightname}) {
+      print STDERR "$inishortname:Model requires weights '$weightname' but none were found in the ini file.\n";
+      $error = 1;
+      next;
+    }
+    my $thesetriplets = $used_triples{$weightname};
+    my $theseconfig_weights = $config_weights->{$weightname};
+    if (scalar(@$thesetriplets) != scalar(@$theseconfig_weights)) {
+      print STDERR "$inishortname:Mismatched number of weights for '$weightname'. Expected "
+        .scalar(@$thesetriplets) .", got ".scalar(@$theseconfig_weights)."\n";
+      $error = 1;
+      next;
+    }
+    if ($starting_weights_from_ini) {
+      # copy weights from moses.ini to the starting value of used_triplets
+      for (my $i=0; $i < @$theseconfig_weights; $i++) {
+        $thesetriplets->[$i]->[0] = $theseconfig_weights->[$i];
+      }
+    }
+  }
 
   exit(1) if $error;
   return (\%defined_files);
