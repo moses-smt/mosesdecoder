@@ -87,7 +87,7 @@ sub print_parameters(){
 
 #script creation
 sub preparing_script(){
-  my $scriptheader="\#\!/bin/bash\n# the above line is ignored by qsub!\n\n";
+  my $scriptheader="\#\!/bin/bash\n# the above line is ignored by qsub, unless parameter \"-b yes\" is set!\n\n";
   $scriptheader.="uname -a\n\n";
 
   $scriptheader.="cd $workingdir\n\n";
@@ -136,8 +136,10 @@ preparing_script();
 
 my $maysync = $old_sge ? "" : "-sync y";
 
-# submit the main job
-my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname $jobscript > $jobscript.log 2>&1";
+# submit the main job with the parameter "-b yes"
+my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname -b yes $jobscript > $jobscript.log 2>&1";
+
+#run the qsubcmd 
 safesystem($qsubcmd) or die;
 
 #getting id of submitted job
