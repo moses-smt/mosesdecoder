@@ -10,8 +10,12 @@ my $ini = shift;
 die "usage: absolutize_moses_model.pl path-to-moses.ini > moses.abs.ini"
   if !defined $ini;
 
-open INI, $ini or die "Can't read $ini";
-while (<INI>) {
+binmode(STDIN, ":utf8");
+binmode(STDOUT, ":utf8");
+binmode(STDERR, ":utf8");
+
+$inih = my_open($ini);
+while (<$inih>) {
   if (/^\[([^\]]*)\]\s*$/) {
     $section = $1;
   }
@@ -43,7 +47,7 @@ while (<INI>) {
   }
   print $_;
 }
-close INI;
+close $inih if $ini ne "-";
 
 sub safesystem {
   print STDERR "Executing: @_\n";
@@ -86,4 +90,29 @@ sub ensure_relative_to_origin {
   $out =~ s/\/+/\//g;
   $out =~ s/\/(\.\/)+/\//g;
   return $out;
+}
+
+sub my_open {
+  my $f = shift;
+  if ($f eq "-") {
+    binmode(STDIN, ":utf8");
+    return *STDIN;
+  }
+
+  die "Not found: $f" if ! -e $f;
+
+  my $opn;
+  my $hdl;
+  my $ft = `file '$f'`;
+  # file might not recognize some files!
+  if ($f =~ /\.gz$/ || $ft =~ /gzip compressed data/) {
+    $opn = "zcat '$f' |";
+  } elsif ($f =~ /\.bz2$/ || $ft =~ /bzip2 compressed data/) {
+    $opn = "bzcat '$f' |";
+  } else {
+    $opn = "$f";
+  }
+  open $hdl, $opn or die "Can't open '$opn': $!";
+  binmode $hdl, ":utf8";
+  return $hdl;
 }
