@@ -5,8 +5,8 @@ use File::Basename;
 use File::Temp qw/tempfile/;
 use Getopt::Long "GetOptions";
 
-my $COLLINS = "/home/pkoehn/bin/COLLINS-PARSER";
-my $MXPOST  = "/home/pkoehn/bin/mxpost";
+my $COLLINS = "/exports/home/s0565741/work/bin/COLLINS-PARSER";
+my $MXPOST  = "/exports/home/s0565741/work/bin/mxpost";
 my $TMPDIR = "tmp";
 my $KEEP_TMP = 0;
 my $RAW = undef;

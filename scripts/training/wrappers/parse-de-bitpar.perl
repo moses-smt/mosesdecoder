@@ -6,7 +6,7 @@ use FindBin qw($Bin);
 use File::Basename;
 use File::Temp qw/tempfile/;
 
-my $BITPAR = "/Users/hieuhoang/workspace/bitpar";
+my $BITPAR = "/exports/home/s0565741/work/bin/bitpar";
 my $TMPDIR = "tmp";
 
 my $DEBUG = 0;
