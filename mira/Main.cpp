@@ -244,14 +244,14 @@ int main(int argc, char** argv) {
 	  for (vector<size_t>::const_iterator sid = shard.begin(); sid != shard.end(); ++sid) {
 		  const string& input = inputSentences[*sid];
 		  const vector<string>& refs = referenceSentences[*sid];
-		  cerr << "\nInput sentence " << *sid << ": \"" << input << "\"" << std::endl;
+		  cerr << "\nInput sentence " << *sid << ": \"" << input << "\"" << endl;
 
 		  // feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
 		  vector<vector<float> > bleuScores(batchSize);
 
 		  // MODEL
-		  cerr << "Run decoder to get nbest wrt model score" << std::endl;
+		  cerr << "Run decoder to get nbest wrt model score" << endl;
 		  decoder->getNBest(input,
                         *sid,
                         n,
@@ -263,7 +263,7 @@ int main(int argc, char** argv) {
 		  decoder->cleanup();
 
 		  // HOPE
-		  cerr << "Run decoder to get nbest hope translations" << std::endl;
+		  cerr << "Run decoder to get nbest hope translations" << endl;
 		  size_t oraclePos = featureValues[batch].size();
 		  vector<const Word*> oracle = decoder->getNBest(input,
 						*sid,
@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
 		  float oracleBleuScore = bleuScores[batch][oraclePos];
 
 		  // FEAR
-		  cerr << "Run decoder to get nbest fear translations" << std::endl;
+		  cerr << "Run decoder to get nbest fear translations" << endl;
 		  decoder->getNBest(input,
                         *sid,
                         n,
@@ -347,13 +347,16 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLE
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
-			  VERBOSE(1, "\nRank: " << rank << " Before mixing: " << mosesWeights << endl);
+			  VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
 
 			  // collect all weights in averageWeights and divide by number of processes
 			  mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
 			  if (rank == 0) {
 				  averageWeights.DivideEquals(size);
-				  //VERBOSE(1, "After mixing: " << averageWeights << endl);
+				  VERBOSE(1, "After mixing: " << averageWeights << endl);
+
+				  // normalise weights after averaging
+				  averageWeights.L1Normalise();
 			  }
 
 			  // broadcast average weights from process 0
@@ -375,11 +378,15 @@ int main(int argc, char** argv) {
 			  if (rank == 0 && !weightDumpStem.empty()) {
 				  averageTotalWeights.DivideEquals(size);
 
+				  // normalise weights after averaging
+				  averageTotalWeights.L1Normalise();
+
 				  ostringstream filename;
 				  filename << weightDumpStem << "_" << epoch;
 				  if (weightDumpFrequency > 1) {
 					  filename << "_" << weightEpochDump;
 				  }
+
 				  VERBOSE(1, "Dumping weights for epoch " << epoch << " to " << filename.str() << endl);
 				  averageTotalWeights.Save(filename.str());
 				  ++weightEpochDump;
