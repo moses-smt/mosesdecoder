@@ -33,6 +33,11 @@
 #include "../../moses/src/LMList.h"
 #include "../../moses/src/ChartRule.h"
 
+#include "../../moses/src/DiscriminativeReordering.h" //gaoyang0926
+#include "../../moses/src/WordConsumed.h"//gaoyang1012
+#include "../../moses/src/TreePenaltyProducer.h" //gaoyang1025
+#include "../../moses/src/DependencyProcessor.h" //gaoyang1029
+
 using namespace std;
 using namespace Moses;
 
@@ -230,8 +235,90 @@ void Hypothesis::CalcScore()
 
 	CalcLMScore();
 
+	//gaoyang1029
+	if( StaticData::Instance().GetUseDiscriminativeReordering()||StaticData::Instance().GetUseTreePenalty() )
+	{	
+		if(debugging) std::cerr << "\nCall DepProc for hypo: " << *this << std::endl;//gaoyang1025
+  	CalcDependencyProcessor(); //gaoyang1029
+	}//gaoyang1029
+
 	m_totalScore	= m_scoreBreakdown.GetWeightedScore();
+
+	if(debugging) std::cerr << "\nhypo finally: " << *this << std::endl;//gaoyang1025
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//gaoyang1006
+void Hypothesis::CalcDependencyProcessor()
+{
+	std::vector <size_t> oldPosVector;
+
+	//push_back unresolved dep pos from previous hypos to posVectorForDepScoring. These source pos should be absolute since it might remain
+	//unresolved and has to be carried on further.
+	for (size_t i=0; i<m_prevHypos.size(); i++)
+	{
+		for (size_t j=0; j<m_prevHypos[i]->GetUnresolvedDepPosVector().size(); j++)
+		{
+			oldPosVector.push_back(m_prevHypos[i]->GetUnresolvedDepPosVector()[j]);
+		}
+	}
+
+	if (debugging)
+	{
+		std::cerr << "oldPosVector\n";
+		for (size_t k=0; k<oldPosVector.size(); k++)
+		{
+			std::cerr << oldPosVector[k] << " ";
+		}
+		std::cerr << std::endl;
+	}
+
+	std::vector <size_t> newPosVector;
+
+	//push_back dep pos for newly-encountered words in the current hypo to posVectorForDepScoring. These source pos should be aligned and absolute	
+	//need to escape glue rules, since we don't want to score for <s> or </s> and <s> and </s> don't have alignment info either
+	//moreover, if it is glue rule, the sourcephrase pointer is 0 and segfault will result in the second "if" line
+	if (!m_rule.IsGlueRule()) 
+	{	
+		for(const WordConsumed *wordConsumed = &m_rule.GetLastWordConsumed(); wordConsumed; wordConsumed = wordConsumed->GetPrevWordsConsumed() )
+		{
+
+			if( !wordConsumed->GetSourceWord().IsNonTerminal() )//gaoyang1017
+			{
+				size_t pos = wordConsumed->GetWordsRange().GetStartPos();//gaoyang1017
+				newPosVector.push_back(pos);//gaoyang1017
+			}
+		}
+	}
+
+	if (debugging)
+	{
+		std::cerr << "newPosVector\n";
+		for (size_t k=0; k<newPosVector.size(); k++)
+		{
+			std::cerr << newPosVector[k] << " ";
+		}
+		std::cerr << std::endl;
+	}
+
+	if (oldPosVector.size() !=0 || newPosVector.size() !=0)
+	{
+		m_unresolvedDepPosVector = StaticData::Instance().GetDependencyProcessor()->ProcessHypo(*this, &m_scoreBreakdown, oldPosVector, newPosVector);
+	}	
+
+	if(debugging) 
+	{
+		std::cerr << "after DepProc, unresolvedDepPosVector is: "<<std::endl;
+	  for (size_t i=0; i<m_unresolvedDepPosVector.size(); i++)
+		{
+			std::cerr << m_unresolvedDepPosVector[i] << std::endl;
+		}
+	}
+
+}
+
 
 void Hypothesis::CalcLMScore()
 {
@@ -414,11 +501,22 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 
 	// words bitmap
 	out << " " << hypo.GetId()
+			<< " " << hypo.GetCurrChartRule() //gaoyang1003
 			<< " " << hypo.GetCurrTargetPhrase()
 			//<< " " << outPhrase
 			<< " " << hypo.GetCurrSourceRange();
 			//<< " " << hypo.m_currSourceWordsRange
-	
+
+
+	//gaoyang1003
+	/*std::cerr << "output wordsconsumedtargetorder\n";
+  for (size_t i=0; i<hypo.GetCurrChartRule().GetWordsConsumedTargetOrder().size(); i++)
+	{
+		out << hypo.GetCurrChartRule().GetWordsConsumedTargetOrder()[i]<<" ";
+	}
+	out << std::endl;*/
+
+
 	HypoList::const_iterator iter;
 	for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter)
 	{

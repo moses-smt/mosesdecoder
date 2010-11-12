@@ -44,6 +44,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "../../moses-chart/src/ChartTrellisPathList.h"
 #include "../../moses-chart/src/ChartTrellisPath.h"
 
+#include "DiscriminativeReordering.h"//gaoyang1018
+#include "TreePenaltyProducer.h"//gaoyang1025
+
 using namespace std;
 using namespace Moses;
 using namespace MosesChart;
@@ -413,6 +416,20 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, lo
 			  }
 		  }
     }
+
+		//gaoyang1029: discriminative reordering
+		if (StaticData::Instance().GetUseDiscriminativeReordering())
+		{
+			if (labeledOutput) *m_nBestStream << "dis: ";
+			*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDiscriminativeReordering()) << " ";
+		}
+
+		//gaoyang1029: tree penalty
+		if (StaticData::Instance().GetUseTreePenalty())
+		{
+			if (labeledOutput) *m_nBestStream << "tree: ";
+			*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetTreePenaltyProducer()) << " ";
+		}
 
 		// total
     *m_nBestStream << "||| " << path.GetTotalScore();

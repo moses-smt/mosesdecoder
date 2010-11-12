@@ -60,6 +60,9 @@ class DistortionScoreProducer;
 class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class DiscriminativeReordering; //gaoyang0415
+class TreePenaltyProducer;//gaoyang1025
+class DependencyProcessor;//gaoyang1029
 
 typedef std::pair<std::string, float> UnknownLHSEntry;	
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
@@ -90,7 +93,9 @@ protected:
 		m_weightDistortion, 
 		m_weightWordPenalty, 
 		m_wordDeletionWeight,
-		m_weightUnknownWord;
+		m_weightUnknownWord,
+		m_weightTreePenalty,//gaoyang1025
+		m_weightDiscriminativeReordering;//gaoyang1028
 
 	// PhraseTrans, Generation & LanguageModelScore has multiple weights.
 	int				m_maxDistortion;
@@ -120,6 +125,10 @@ protected:
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
 
+	bool m_orientationByAllPos;//gaoyang1015 determine orientation type for discriminative reordering scoring (mainly used in hierarchical model)
+	bool m_useDiscriminativeReordering;//gaoyang1029
+	bool m_useTreePenalty;//gaoyang1029
+
 	bool m_disableDiscarding;
 	bool m_printAllDerivations;
 
@@ -135,6 +144,11 @@ protected:
 	DistortionScoreProducer *m_distortionScoreProducer;
 	WordPenaltyProducer *m_wpProducer;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+
+	TreePenaltyProducer *m_tpProducer;//gaoyang1025
+	DependencyProcessor *m_dependencyProcessor;//gaoyang1028
+        DiscriminativeReordering *m_discriminativeReordering; //gaoyang1028
+
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_reportAllFactorsNBest;
@@ -219,6 +233,9 @@ protected:
 	bool LoadGenerationTables();
 	//! load decoding steps
 	bool LoadLexicalReorderingModel();
+
+        bool LoadDepProcessorAndInitFeatures();//gaoyang1028
+
 	bool LoadGlobalLexicalModel();
     void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
@@ -277,6 +294,27 @@ public:
 	{ 
 		return m_dropUnknown; 
 	}
+
+
+	//gaoyang1015 get the way to determine orientation type for discriminative reordering scoring (mainly used in hierarchical model)
+	inline bool GetOrientationByAllPos() const 
+	{ 
+		return m_orientationByAllPos; 
+	}
+
+	//gaoyang1029
+	inline bool GetUseDiscriminativeReordering() const 
+	{ 
+		return m_useDiscriminativeReordering; 
+	}
+
+	//gaoyang1029
+	inline bool GetUseTreePenalty() const 
+	{ 
+		return m_useTreePenalty; 
+	}
+
+
   inline bool GetDisableDiscarding() const
   {
     return m_disableDiscarding;
@@ -318,6 +356,23 @@ public:
 	{
 		return m_weightWordPenalty;
 	}
+
+	//gaoyang1025
+	float GetWeightTreePenalty() const
+	{
+		return m_weightTreePenalty;
+	}
+
+	//gaoyang1028
+	float GetWeightDiscriminativeReordering() const
+	{
+		return m_weightDiscriminativeReordering;
+	}
+
+	const std::string &GetRightSourcePreprocessedFile(const std::vector<std::string> &sourcePreprocessedFileVec, const std::string &inputFile);//gaoyang1030
+
+
+
 	float GetWeightUnknownWord() const
 	{
 		return m_weightUnknownWord;
@@ -485,6 +540,14 @@ public:
 	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
 	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
 	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
+
+	TreePenaltyProducer *GetTreePenaltyProducerForScoring() const { return m_tpProducer; }//gaoyang1025
+	const TreePenaltyProducer *GetTreePenaltyProducer() const { return m_tpProducer; }//gaoyang1025
+
+	DiscriminativeReordering *GetDiscriminativeReorderingForScoring() const { return m_discriminativeReordering; }//gaoyang1029
+	const DiscriminativeReordering *GetDiscriminativeReordering() const { return m_discriminativeReordering; }//gaoyang1029
+
+	const DependencyProcessor *GetDependencyProcessor() const { return m_dependencyProcessor; }//gaoyang1029
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };

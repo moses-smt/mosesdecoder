@@ -44,6 +44,31 @@ Parameter::Parameter()
 	AddParam("config", "f", "location of the configuration file");
 	AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
+
+
+/////////////////////common for discriminative reordering and tree penalty/////////////////////////////////////////////////////////////////////////
+	//gaoyang0720 add file param for processed parser output of testing sentences
+	AddParam("source-preprocessed-file", "spf", "pairwise dependency path file for every testing sentence, and other preprocessed files");
+
+/////////////////////for discriminative reordering/////////////////////////////////////////////////////////////////////////////////////////////////
+	AddParam("weight-dis", "dis", "weight for discriminative reordering");
+	AddParam("discriminative-reordering-file", "drf", "discriminative reordering model file");
+	//gaoyang1015 add switch for discriminative reordering: determine orientation type either by all pos or by first pos (defalt is first pos)
+	AddParam("orientation-by-all-pos", "orient", "determine orientation type by all pos in case of multiple alignment");
+	//gaoyang1024 add base number to scale the contribution of source word for discriminative reordering score of a hypo. The power is the height of the word in the dependency parse tree
+	AddParam("reordering-base", "rb", "base number to scale the contribution of source word for discriminative reordering score of a hypo");
+
+////////////////////for tree penalty///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	AddParam("weight-tree", "tree", "weight for tree penalty");//gaoyang1025
+	AddParam("tree-penalty-file", "tpf", "tree penalty model file");//gaoyang1028
+	//gaoyang1025 add base number to scale the contribution of source word for tree penalty score of a hypo. The power is the height of the word in the dependency parse tree
+	AddParam("tree-penalty-base", "tpb", "base number to scale the contribution of source word for tree penalty score of a hypo");	
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+
+
+
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
 	AddParam("generation-file", "location and properties of the generation table");

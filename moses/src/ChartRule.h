@@ -36,6 +36,9 @@ class ChartRule
 	friend std::ostream& operator<<(std::ostream&, const ChartRule&);
 
 protected:
+	size_t m_sourceSize;//gaoyang1017: size in terms of WordConsumed, so it is <= the actual word number(number of nonterms)
+	std::vector< std::vector<size_t> > m_alignmentVectorSourceOrder;//gaoyang1006
+
 	const Moses::TargetPhrase &m_targetPhrase;
 	const WordConsumed &m_lastWordConsumed;
 		/* map each source word in the phrase table to:
@@ -54,7 +57,14 @@ public:
 	ChartRule(const TargetPhrase &targetPhrase, const WordConsumed &lastWordConsumed)
 	:m_targetPhrase(targetPhrase)
 	,m_lastWordConsumed(lastWordConsumed)
-	{}
+	{
+		//std::cerr << "\ncreating ChartRule.\n";//gaoyang1017
+		SetSourceSize();//gaoyang1017
+		//std::cerr << "m_sourceSize: "<<m_sourceSize<<std::endl;//gaoyang1017
+		CreateAlignmentVectorSourceOrder();//gaoyang1017
+	}
+
+
 	~ChartRule()
 	{}
 
@@ -69,6 +79,21 @@ public:
 	{	return m_wordsConsumedTargetOrder; }
 
 	void CreateNonTermIndex();
+
+	void CreateAlignmentVectorSourceOrder();//gaoyang1006
+	const size_t GetFirstTargetPosAlignedWith(size_t pos) const;//gaoyang1004
+	const size_t GetLastTargetPosAlignedWith(size_t pos) const;//gaoyang1004
+	const bool IsAligned(size_t pos) const;//gaoyang1004
+	const bool IsGlueRule() const;//gaoyang1005
+	const std::vector< std::vector<size_t> > &GetAlignmentVectorSourceOrder() const //gaoyang1006
+	{	return m_alignmentVectorSourceOrder; }
+	const size_t GetSourcePosInRule(size_t posAbsolute) const;//gaoyang1007
+
+	const std::vector<size_t> GetAlignmentVector(size_t pos) const;//gaoyang1015
+
+	void SetSourceSize();//gaoyang1017
+	const size_t GetSourceSize() const;//gaoyang1017
+
 };
 
 }

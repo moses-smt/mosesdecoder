@@ -42,6 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+#include "DiscriminativeReordering.h" //gaoyang0415
+#include "TreePenaltyProducer.h" //gaoyang1025
+#include "DependencyProcessor.h" //gaoyang1029
 
 using namespace std;
 
@@ -342,6 +345,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
 	// unknown word processing
 	SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
+
+	//gaoyang1015 determine orientation type for discriminative reordering scoring (mainly used in hierarchical model)
+	SetBooleanParameter( &m_orientationByAllPos, "orientation-by-all-pos", false );
 	  
 	// minimum Bayes risk decoding
 	SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
@@ -439,6 +445,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	if (!LoadGenerationTables()) return false;
 	if (!LoadPhraseTables()) return false;
 	if (!LoadGlobalLexicalModel()) return false;
+	if (!LoadDepProcessorAndInitFeatures()) return false;//gaoyang1028
 
 	m_scoreIndexManager.InitFeatureNames();
 	if (m_parameter->GetParam("weight-file").size() > 0) {
@@ -506,6 +513,8 @@ StaticData::~StaticData()
 	delete m_distortionScoreProducer;
 	delete m_wpProducer;
 	delete m_unknownWordPenaltyProducer;
+
+	delete m_tpProducer;//gaoyang1025
 
 	//delete m_parameter;
 
@@ -578,6 +587,125 @@ bool StaticData::LoadLexicalReorderingModel()
     } 
     return true;
 }
+
+
+//gaoyang1028 to load the dependency orientation feature weights and source-preprocessed file, if either (or both) of discriminative reordering feature and tree penalty feature has/have weights
+bool StaticData::LoadDepProcessorAndInitFeatures()
+{
+	VERBOSE(2,"Loading DependencyProcessor and initialize features (DiscriminativeReordering and/or TreePenaltyProducer as appropriate)" << endl);
+
+	const string &inputFile = m_parameter->GetParam("input-file")[0];
+
+//////////////////////naive implementation: works for current experiments with 1 discriminative reordering feature, so there is 1 reordering-base, 1 source-preprocessed-file, 1 feature file and 1 weight
+
+	m_dependencyProcessor = new DependencyProcessor();
+	bool fileLoaded = false;//since DiscriminativeReordering and TreePenaltyProducer use same files, don't want to load same thing twice if both features are on
+
+	//discriminative reordering
+	const vector<float> &weightDis = Scan<float>(m_parameter->GetParam("weight-dis"));
+	if (weightDis.size() !=0)
+	{		
+		const vector<string> &featureFileDis = m_parameter->GetParam("discriminative-reordering-file");
+		const vector<string> &sourcePreprocessedFileDis = m_parameter->GetParam("source-preprocessed-file");
+		const vector<float> &reorderingBase = Scan<float>(m_parameter->GetParam("reordering-base"));//gaoyang1024
+
+		if ( !(weightDis.size()==1 && featureFileDis.size()==1 && reorderingBase.size()==1) )
+		{
+			std::cerr << "ERROR in discriminative reordering model spec!\n";
+			return false;
+		}
+
+		m_useDiscriminativeReordering = true;
+
+		if ( !fileLoaded )
+		{
+			m_dependencyProcessor->LoadFeatureFile(featureFileDis[0]);
+
+			const string &file = GetRightSourcePreprocessedFile(sourcePreprocessedFileDis, inputFile);
+			if (file == "")
+			{
+				std::cerr << "Name matching filed, no source-preprocessed-file is consistent with input file\n";
+				return false;
+			}
+			else m_dependencyProcessor->LoadSourcePreprocessedFile(file);
+
+			fileLoaded = true;
+		}
+
+		m_dependencyProcessor->SetReorderingBase(reorderingBase[0]);
+
+		m_discriminativeReordering = new DiscriminativeReordering(m_scoreIndexManager);
+		m_allWeights.push_back(weightDis[0]);	
+	}
+	else
+	{
+		m_useDiscriminativeReordering = false;
+	}	
+
+	//tree
+	const vector<float> &weightTree = Scan<float>(m_parameter->GetParam("weight-tree"));
+	if (weightTree.size() !=0)
+	{
+		const vector<string> &featureFileTree = m_parameter->GetParam("tree-penalty-file");
+		const vector<string> &sourcePreprocessedFileTree = m_parameter->GetParam("source-preprocessed-file");
+		const vector<float> &treePenaltyBase = Scan<float>(m_parameter->GetParam("tree-penalty-base"));//gaoyang1025
+
+		if ( !(weightTree.size()==1 && featureFileTree.size()==1 && treePenaltyBase.size()==1) )
+		{
+			std::cerr << "ERROR in tree penalty model spec!\n";
+			return false;
+		}
+
+		m_useTreePenalty = true;
+
+		if ( !fileLoaded )
+		{
+			m_dependencyProcessor->LoadFeatureFile(featureFileTree[0]);
+
+			const string &file = GetRightSourcePreprocessedFile(sourcePreprocessedFileTree, inputFile);
+			if (file == "")
+			{
+				std::cerr << "Name matching filed, no source-preprocessed-file is consistent with input file\n";
+				return false;
+			}
+			else m_dependencyProcessor->LoadSourcePreprocessedFile(file);
+
+			fileLoaded = true;
+		}
+
+		m_dependencyProcessor->SetTreePenaltyBase(treePenaltyBase[0]);
+
+		m_tpProducer = new TreePenaltyProducer(m_scoreIndexManager);//gaoyang1025
+		m_allWeights.push_back(weightTree[0]);//gaoyang1025
+	}
+	else
+	{
+		m_useTreePenalty = false;
+	}	
+	
+	return true;	
+}//gaoyang1028
+
+//gaoyang1030
+const string &StaticData::GetRightSourcePreprocessedFile(const vector<string> &sourcePreprocessedFileVec, const string &inputFile)
+{
+	std::cerr << "Doing name matching for sourcePreprocessed file\n";
+	std::cerr << "input file is: *"<<inputFile<<"*\n";
+	const string inputIdentity =  Tokenize<string>( Tokenize<string>(inputFile, "/").back(), "." ).front();
+	std::cerr << "inputIdentity: *"<<inputIdentity<<"*\n";
+
+	for (size_t i = 0; i < sourcePreprocessedFileVec.size(); i++)
+	{
+		const string sourcePreprocessedIdentity = Tokenize<string>( Tokenize<string>(sourcePreprocessedFileVec[i], "/").back(), "." ).front();
+		if(inputIdentity==sourcePreprocessedIdentity)
+		{
+			return sourcePreprocessedFileVec[i];
+		}
+	}
+	return "";
+	
+}
+
     
 bool StaticData::LoadGlobalLexicalModel()
 {

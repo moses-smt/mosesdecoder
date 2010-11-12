@@ -32,6 +32,9 @@ libmoses_la_HEADERS = \
         FloydWarshall.h \
         GenerationDictionary.h \
         GlobalLexicalModel.h \
+	DiscriminativeReordering.h \
+	TreePenaltyProducer.h \
+	DependencyProcessor.h \
         gzfilebuf.h \
         hash.h \
         Hypothesis.h \
@@ -155,6 +158,9 @@ libmoses_la_SOURCES = \
         FloydWarshall.cpp \
         GenerationDictionary.cpp \
         GlobalLexicalModel.cpp \
+	DiscriminativeReordering.cpp \
+	TreePenaltyProducer.cpp \
+	DependencyProcessor.cpp \
         hash.cpp \
         Hypothesis.cpp \
         HypothesisStack.cpp \

@@ -58,10 +58,21 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
 		// scores
 		assert(scoreChange.GetWeightedScore() == 0); // should only be changing 1 node
 
+
+
+		std::cerr << "replacementHypo: "<<replacementHypo << std::endl;//gaoyang1111
+		std::cerr << "origNode: "<<origNode.GetHypothesis() << std::endl;//gaoyang1111
+
 		scoreChange = replacementHypo.GetScoreBreakdown();
 		scoreChange.MinusEquals(origNode.GetHypothesis().GetScoreBreakdown());
-		
+
 		float deltaScore = scoreChange.GetWeightedScore();
+
+		std::cerr << "scoreChange: "<<scoreChange << std::endl; //gaoyang1111
+		std::cerr << "deltaScore: "<<deltaScore << std::endl;//gaoyang1111
+
+
+
 		assert(deltaScore <= 0.0005);
 
 		// follow prev hypos back to beginning

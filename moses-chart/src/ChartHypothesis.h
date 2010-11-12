@@ -47,10 +47,14 @@ protected:
 		static ObjectPool<Hypothesis> s_objectPool;
 #endif
 
+	static const bool debugging=false;//gaoyang1025
+
 	static unsigned int s_HypothesesCreated;
 
 	int m_id; /**< numeric ID of this hypothesis, used for logging */
 	const Moses::ChartRule &m_rule;
+
+	std::vector<size_t> m_unresolvedDepPosVector; //gaoyang1007
 
 	Moses::Phrase m_contextPrefix, m_contextSuffix;
 	const std::vector<size_t> &m_wordsConsumedTargetOrder; // same size as target phrase ?
@@ -72,6 +76,8 @@ protected:
 	size_t CalcSuffix(Moses::Phrase &ret, size_t size) const;
 
 	void CalcLMScore();
+
+	void CalcDependencyProcessor(); //gaoyang1029
 
 	Hypothesis(); // not implemented
 	Hypothesis(const Hypothesis &copy); // not implemented
@@ -102,6 +108,9 @@ public:
 
 	explicit Hypothesis(const QueueEntry &queueEntry, Manager &manager);
 	~Hypothesis();
+
+	Manager& GetManager() const//gaoyang1011
+	{ return m_manager;}
 
 	int GetId()const
 	{	return m_id;}
@@ -153,6 +162,18 @@ public:
 	{ 
 		return m_numTargetTerminals;
 	}
+
+	//gaoyang1007
+	const std::vector<size_t> GetUnresolvedDepPosVector() const
+	{
+		return m_unresolvedDepPosVector;//this is unset if rule is glue rule, don't know if error in compiling or runtime
+	}//gaoyang1007
+
+	//gaoyang1007
+	void SetUnresolvedDepPosVector(const std::vector<size_t> vec)
+	{
+		m_unresolvedDepPosVector = vec;
+	}//gaoyang1007	
 
 	TO_STRING();
 
