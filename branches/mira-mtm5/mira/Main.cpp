@@ -155,19 +155,6 @@ int main(int argc, char** argv) {
   startWeights.L1Normalise();
   decoder->setWeights(startWeights);
 
-  // print feature function and weights
-  // TODO: scaling of feature functions
-  const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
-  for (size_t i = 0; i < featureFunctions.size(); ++i) {
-	  cerr << "Feature functions: " << featureFunctions[i]->GetScoreProducerDescription() << ": " << featureFunctions[i]->GetNumScoreComponents() << endl;
-	  vector< float> weights = startWeights.GetScoresForProducer(featureFunctions[i]);
-	  cerr << "weights: ";
-	  for (size_t j = 0; j < weights.size(); ++j) {
-		  cerr << weights[j] << " ";
-	  }
-	  cerr << endl;
-  }
-
   // Optionally shuffle the sentences
   vector<size_t> order;
   if (rank == 0) {
@@ -227,6 +214,7 @@ int main(int argc, char** argv) {
   // the result of accumulating and averaging weights over one epoch and possibly several processes
   ScoreComponentCollection averageTotalWeights;
 
+  // TODO: scaling of feature values for probabilistic features
   // TODO: stop MIRA when score on dev or tuning set does not improve further?
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
@@ -252,7 +240,7 @@ int main(int argc, char** argv) {
 		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
 		  vector<vector<float> > bleuScores(batchSize);
 
-		  cout << "Using weights:" << decoder->getWeights() << endl;
+		  cerr << "Using weights:" << decoder->getWeights() << endl;
 
 		  // MODEL
 		  cerr << "Run decoder to get nbest wrt model score" << endl;
