@@ -152,6 +152,8 @@ int main(int argc, char** argv) {
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
   MosesDecoder* decoder = new MosesDecoder(referenceSentences) ;
   ScoreComponentCollection startWeights = decoder->getWeights();
+  startWeights.L1Normalise();
+  decoder->setWeights(startWeights);
 
   // print feature function and weights
   // TODO: scaling of feature functions
@@ -249,6 +251,8 @@ int main(int argc, char** argv) {
 		  // feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
 		  vector<vector<float> > bleuScores(batchSize);
+
+		  cout << "Using weights:" << decoder->getWeights() << endl;
 
 		  // MODEL
 		  cerr << "Run decoder to get nbest wrt model score" << endl;
