@@ -15,6 +15,7 @@ close(EXCLUDED_LINE);
 
 # MAIN LOOP
 my $lineNum = 1;
+my $linesOut = 0;
 my $exclInd = 0;
 my $nextLineExcl = -1;
 
@@ -39,6 +40,7 @@ while(<STDIN>)
     else
     {
     	print $line;
+	$linesOut++;
     }
   
     $lineNum++;
@@ -46,7 +48,8 @@ while(<STDIN>)
 #close(STDIN);
 
 print STDERR "num of lines=".($lineNum-1)."\n";
-
+print STDERR "num excluded=".(@excludedLines)."\n";
+print STDERR "lines out=".($linesOut)."\n";
 
 sub trim($)
 {
