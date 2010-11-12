@@ -11,23 +11,35 @@ GetOptions(
 
 open(EXCLUDED_LINE, $excludedLinesFile) or die("Can't open excluded file $excludedLinesFile");
 my @excludedLines = <EXCLUDED_LINE>;
-
-my $ln = undef;
-foreach $ln (@excludedLines)
-{
-#    print "hello $ln\n";
-}
 close(EXCLUDED_LINE);
 
 # MAIN LOOP
 my $lineNum = 1;
+my $exclInd = 0;
+my $nextLineExcl = -1;
+
+if (@excludedLines > 0)
+{
+	$nextLineExcl = $excludedLines[0];
+}
 
 #open(STDIN);
 while(<STDIN>)
 {
     my $line = $_;
-    
-    if 
+		    
+    if ($nextLineExcl == $lineNum)
+    {
+    	$exclInd++;
+    	if ($exclInd < @excludedLines) 
+    	{
+	    	$nextLineExcl = $excludedLines[$exclInd];
+	    }
+    }
+    else
+    {
+    	print $line;
+    }
   
     $lineNum++;
 }
