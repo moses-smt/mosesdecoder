@@ -23,7 +23,7 @@ GetOptions(
 `mkdir -p $TMPDIR`;
 my ($scriptname, $directories) = fileparse($0);
 my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
-open(INPUT,"iconv -c -f UTF-8 -t iso-8859-1 |");
+open(INPUT,"iconv -f UTF-8 -t iso-8859-1 --unicode-subst=\"UNKNOWNCHAR%04X\" |");
 while(<INPUT>)
 {
 		my $hasWords = 0;
@@ -49,7 +49,7 @@ if ($RAW)
 {
     $pipeline .= "tee \"$RAW\" |";
 }
-$pipeline .= "iconv -c -t UTF-8 -f iso-8859-1 |";
+$pipeline .= "iconv -t UTF-8 -f iso-8859-1 --unicode-subst=\"UNKNOWNCHAR%04X\" |";
 open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {
