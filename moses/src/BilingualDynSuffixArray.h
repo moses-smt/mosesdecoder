@@ -86,13 +86,12 @@ private:
 	DynSuffixArray* m_trgSA;
 	std::vector<wordID_t>* m_srcCorpus;
 	std::vector<wordID_t>* m_trgCorpus;
-	
-	FactorMask m_inputFactors;
-	FactorMask m_outputFactors;
+  std::vector<FactorType> m_inputFactors;
+  std::vector<FactorType> m_outputFactors;
 
 	std::vector<unsigned> m_srcSntBreaks, m_trgSntBreaks;
 
-	Vocab* m_vocab;
+	Vocab* m_srcVocab, *m_trgVocab;
 	ScoresComp* m_scoreCmp;
 
 	std::vector<SentenceAlignment> m_alignments;
@@ -102,7 +101,8 @@ private:
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
 	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
-		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&);
+		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&,
+    Vocab*);
 	int LoadAlignments(InputFileStream& aligs);
 	int LoadRawAlignments(InputFileStream& aligs);
 	int LoadRawAlignments(string& aligs);
