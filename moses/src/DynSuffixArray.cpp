@@ -85,7 +85,7 @@ int DynSuffixArray::LastFirstFunc(unsigned L_idx) {
   return fIdx;
 }
 
-void DynSuffixArray::InsertFactor(vuint_t* newSent, unsigned newIndex) {
+void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex) {
   // for sentences
   //stages 1, 2, 4 stay same from 1char case
   //(use last word of new text in step 2 and save Ltmp until last insert?)
@@ -152,7 +152,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
   }
 }
 
-void DynSuffixArray::DeleteFactor(unsigned index, unsigned num2del) {
+void DynSuffixArray::Delete(unsigned index, unsigned num2del) {
   int ltmp = m_L->at(m_ISA->at(index));
   int true_pos = LastFirstFunc(m_ISA->at(index)); // track cycle shift (newIndex - 1)
   for(size_t q = 0; q < num2del; ++q) {
@@ -176,7 +176,7 @@ void DynSuffixArray::DeleteFactor(unsigned index, unsigned num2del) {
   PrintAuxArrays();
 }
 
-void DynSuffixArray::SubstituteFactor(vuint_t* newSents, unsigned newIndex) {
+void DynSuffixArray::Substitute(vuint_t* newSents, unsigned newIndex) {
   std::cerr << "NEEDS TO IMPLEMENT SUBSITITUTE FACTOR\n";
   return;
 }
