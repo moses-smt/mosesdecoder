@@ -23,7 +23,10 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				ScoreComponentCollection featureValueDiff = oracleFeatureValues;
 				featureValueDiff.MinusEquals(featureValues[i][j]);
 				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-				if (modelScoreDiff < losses[i][j]) {
+				cerr << "loss of hypothesis: " << losses[i][j] << endl;
+				cerr << "model score difference: " << modelScoreDiff << endl;
+				float loss = losses[i][j] * m_marginScaleFactor;
+				if (modelScoreDiff < loss) {
 					++violatedConstraintsBefore;
 				}
 
@@ -32,7 +35,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
 				// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
 				featureValueDiffs.push_back(featureValueDiff);
-				float lossMarginDistance = losses[i][j] - modelScoreDiff;
+				float lossMarginDistance = loss - modelScoreDiff;
 				lossMarginDistances.push_back(lossMarginDistance);
 			}
 		}
@@ -40,13 +43,12 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		if (violatedConstraintsBefore > 0) {
 			// TODO: slack? margin scale factor?
 			// run optimisation
-			cerr << "Number of violated constraints: " << violatedConstraintsBefore << endl;
+			cerr << "\nNumber of violated constraints: " << violatedConstraintsBefore << endl;
 			// compute deltas for all given constraints
 			vector< float> deltas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
 
 			// Update the weight vector according to the deltas and the feature value differences
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
-			ScoreComponentCollection oldWeights(currWeights);
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 				cerr << "delta: " << deltas[k] << endl;
 
@@ -64,9 +66,12 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 					ScoreComponentCollection featureValueDiff = oracleFeatureValues;
 					featureValueDiff.MinusEquals(featureValues[i][j]);
 					float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-					if (modelScoreDiff < losses[i][j]) {
+					float loss = losses[i][j] * m_marginScaleFactor;
+					if (modelScoreDiff < loss) {
 						++violatedConstraintsAfter;
 					}
+
+					cerr << "New model score difference: " << modelScoreDiff << endl;
 				}
 			}
 
