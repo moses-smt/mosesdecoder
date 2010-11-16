@@ -59,11 +59,12 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, float clipping) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
 		  m_marginScaleFactor(marginScaleFactor),
+		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_c(clipping) { }
 
      ~MiraOptimiser() {}
@@ -90,6 +91,9 @@ namespace Mira {
 
       // scaling the margin to regularise updates
       float m_marginScaleFactor;
+
+      // add only violated constraints to the optimisation problem
+      bool m_onlyViolatedConstraints;
 
       // clipping threshold to regularise updates
       float m_c;

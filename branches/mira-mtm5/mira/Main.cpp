@@ -83,6 +83,8 @@ int main(int argc, char** argv) {
   size_t weightDumpFrequency;
   string weightDumpStem;
   float marginScaleFactor;
+  int n;
+  bool onlyViolatedConstraints;
   float clipping;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -99,6 +101,8 @@ int main(int argc, char** argv) {
         ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
+	    ("nbest,n", po::value<int>(&n)->default_value(10), "Number of translations in nbest list")
+	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold to regularise updates");
 
   po::options_description cmdline_options;
@@ -187,10 +191,10 @@ int main(int argc, char** argv) {
   copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 
   Optimiser* optimiser = NULL;
-  size_t n = 10;								// size of n-best lists
+  cerr << "Nbest list size: " << n << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, clipping);
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     	cerr << "Margin scale factor: " << marginScaleFactor << endl;
