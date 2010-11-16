@@ -193,6 +193,7 @@ int main(int argc, char** argv) {
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, clipping);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
+    	cerr << "Margin scale factor: " << marginScaleFactor << endl;
     }
     else {
     	cerr << "Using some sort of SMO.. " << endl;
