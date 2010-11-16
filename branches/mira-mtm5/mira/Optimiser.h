@@ -59,10 +59,11 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float clipping) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, float clipping) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
+		  m_marginScaleFactor(marginScaleFactor),
 		  m_c(clipping) { }
 
      ~MiraOptimiser() {}
@@ -84,7 +85,11 @@ namespace Mira {
       // number of hypotheses used for each nbest list (number of hope, fear, best model translations)
       size_t m_n;
 
+      // whether or not to use the Hildreth algorithm in the optimisation step
       bool m_hildreth;
+
+      // scaling the margin to regularise updates
+      float m_marginScaleFactor;
 
       // clipping threshold to regularise updates
       float m_c;

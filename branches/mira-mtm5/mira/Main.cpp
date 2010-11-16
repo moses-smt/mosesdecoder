@@ -82,6 +82,7 @@ int main(int argc, char** argv) {
   size_t mixFrequency;
   size_t weightDumpFrequency;
   string weightDumpStem;
+  float marginScaleFactor;
   float clipping;
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -97,6 +98,7 @@ int main(int argc, char** argv) {
         ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
         ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
+	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold to regularise updates");
 
   po::options_description cmdline_options;
@@ -188,7 +190,7 @@ int main(int argc, char** argv) {
   size_t n = 10;								// size of n-best lists
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, clipping);
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, clipping);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -281,6 +283,7 @@ int main(int argc, char** argv) {
                         bleuScores[batch],
                         false);
 		  decoder->cleanup();
+		  cerr << "BLEU of oracle: " << oracleBleuScore << endl;
 
 	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
 	      vector< vector<float> > losses(batchSize);
