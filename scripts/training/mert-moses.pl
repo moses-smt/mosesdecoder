@@ -136,8 +136,6 @@ my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
-#   ___INPUTWEIGHTS/--inputweights obsoleted by Ondrej, instead they are read
-#   from the ini file, from the link-param-count option
 
 
 my $mertdir = undef; # path to new mert directory
@@ -202,8 +200,6 @@ GetOptions(
   "starting-weights-from-ini!" => \$starting_weights_from_ini,
 ) or exit(1);
 
-print "Predict $___PREDICTABLE_SEEDS\n";
-
 # the 4 required parameters can be supplied on the command line directly
 # or using the --options
 if (scalar @ARGV == 4) {
@@ -214,59 +210,65 @@ if (scalar @ARGV == 4) {
   $___CONFIG = shift;
 }
 
-print STDERR "After default: $queue_flags\n";
 if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER || !defined $___CONFIG) {
   print STDERR "usage: mert-moses-new.pl input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
-  --nbest=100 ... how big nbestlist to generate
-  --jobs=N  ... set this to anything to run moses in parallel
-  --mosesparallelcmd=STRING ... use a different script instead of moses-parallel
-  --queue-flags=STRING  ... anything you with to pass to 
-              qsub, eg. '-l ws06osssmt=true'
-              The default is 
-								-l mem_free=0.5G -hard
-              To reset the parameters, please use \"--queue-flags=' '\" (i.e. a space between
-              the quotes).
+  --nbest=100            ... how big nbestlist to generate
+  --jobs=N               ... set this to anything to run moses in parallel
+  --mosesparallelcmd=STR ... use a different script instead of moses-parallel
+  --queue-flags=STRING   ... anything you with to pass to qsub, eg.
+                             '-l ws06osssmt=true'. The default is: '-hard'
+                             To reset the parameters, please use 
+                             --queue-flags=' '
+                             (i.e. a space between the quotes).
   --decoder-flags=STRING ... extra parameters for the decoder
-  --lambdas=STRING  ... default values and ranges for lambdas, a complex string
-         such as 'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
-  --allow-unknown-lambdas ... keep going even if someone supplies a new lambda
-         in the lambdas option (such as 'superbmodel:1,0-1'); optimize it, too
-  --continue  ... continue from the last achieved state
-  --skip-decoder ... skip the decoder run for the first time, assuming that
-                     we got interrupted during optimization
-  --shortest ... Use shortest reference length as effective reference length (mutually exclusive with --average and --closest)
-  --average ... Use average reference length as effective reference length (mutually exclusive with --shortest and --closest)
-  --closest ... Use closest reference length as effective reference length (mutually exclusive with --shortest and --average)
-  --nocase ... Do not preserve case information; i.e. case-insensitive evaluation (default is false)
-  --nonorm ... Do not use text normalization (flag is not active, i.e. text is NOT normalized)
-  --filtercmd=STRING  ... path to filter-model-given-input.pl
-  --filterfile=STRING  ... path to alternative to input-text for filtering model. useful for lattice decoding
-  --rootdir=STRING  ... where do helpers reside (if not given explicitly)
-  --mertdir=STRING ... path to new mert implementation
-  --mertargs=STRING ... extra args for mert, eg to specify scorer
-  --scorenbestcmd=STRING  ... path to score-nbest.py
-  --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
-  --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
-  --inputweights=N ... For confusion networks and lattices, number of weights to optimize for weight-i 
-                       (must supply -link-param-count N to decoder-flags if N != 1 for decoder to deal with this correctly)
+  --lambdas=STRING       ... default values and ranges for lambdas, a
+                             complex string such as
+                             'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
+  --allow-unknown-lambda ... keep going even if someone supplies a new
+                             lambda in the lambdas option (such as
+                             'superbmodel:1,0-1'); optimize it, too
+  --continue             ... continue from the last successful iteration
+  --skip-decoder         ... skip the decoder run for the first time,
+                             assuming that we got interrupted during
+                             optimization
+  --shortest --average --closest
+                         ... Use shortest/average/closest reference length
+                             as effective reference length (mutually exclusive)
+  --nocase               ... Do not preserve case information; i.e.
+                             case-insensitive evaluation (default is false).
+  --nonorm               ... Do not use text normalization (flag is not active,
+                             i.e. text is NOT normalized)
+  --filtercmd=STRING     ... path to filter-model-given-input.pl
+  --filterfile=STRING    ... path to alternative to input-text for filtering
+                             model. useful for lattice decoding
+  --rootdir=STRING       ... where do helpers reside (if not given explicitly)
+  --mertdir=STRING       ... path to new mert implementation
+  --mertargs=STRING      ... extra args for mert, eg. to specify scorer
+  --scorenbestcmd=STRING ... path to score-nbest.py
+  --old-sge              ... passed to parallelizers, assume Grid Engine < 6.0
+  --inputtype=[0|1|2]    ... Handle different input types: (0 for text,
+                             1 for confusion network, 2 for lattices,
+                             default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
-  --predictable-seeds ... provide predictable seeds to mert so that random restarts are the same on every run
-  --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
+  --predictable-seeds    ... provide predictable seeds to mert so that random
+                             restarts are the same on every run
+  --efficient_scorenbest_flag ... time-efficient scoring of nbest lists
                                   (this method is more memory-consumptive)
   --activate-features=STRING  ... comma-separated list of features to optimize,
                                   others are fixed to the starting values
                                   default: optimize all features
                                   example: tm_0,tm_4,d_0
-  --prev-aggregate-nbestlist=INT  ... number of previous step to consider when loading data (default =-1)
-                                      -1 means all previous, i.e. from iteration 1
-                                      0 means no previous data, i.e. from actual iteration
-                                      1 means 1 previous data , i.e. from the actual iteration and from the previous one
-                                      and so on 
+  --prev-aggregate-nbestlist=INT ... number of previous step to consider when
+                                     loading data (default =-1)
+                                    -1 means all previous, i.e. from iteration 1
+                                     0 means no previous data, i.e. only the
+                                       current iteration
+                                     N means this and N previous iterations
 
-  --maximum-iterations=ITERS    Maximum number of iterations to run tuning for.
+  --maximum-iterations=ITERS ... Maximum number of iterations. Default: $maximum_iterations
   --starting-weights-from-ini ... use the weights given in moses.ini file as
                                   the starting weights (and also as the fixed
                                   weights if --activate-features is used).
