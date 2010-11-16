@@ -26,17 +26,26 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				cerr << "loss of hypothesis: " << losses[i][j] << endl;
 				cerr << "model score difference: " << modelScoreDiff << endl;
 				float loss = losses[i][j] * m_marginScaleFactor;
+
+				bool addConstraint = true;
 				if (modelScoreDiff < loss) {
+					// constraint violated
 					++violatedConstraintsBefore;
 				}
+				else if (m_onlyViolatedConstraints) {
+					// constraint not violated
+					addConstraint = false;
+				}
 
-				// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
-				// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
-				// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
-				// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
-				featureValueDiffs.push_back(featureValueDiff);
-				float lossMarginDistance = loss - modelScoreDiff;
-				lossMarginDistances.push_back(lossMarginDistance);
+				if (addConstraint) {
+					// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
+					// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
+					// 1. vector Delta_h_ij of the feature value differences (oracle - hypothesis)
+					// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
+					featureValueDiffs.push_back(featureValueDiff);
+					float lossMarginDistance = loss - modelScoreDiff;
+					lossMarginDistances.push_back(lossMarginDistance);
+				}
 			}
 		}
 
