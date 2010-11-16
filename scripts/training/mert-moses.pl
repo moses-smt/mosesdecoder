@@ -1221,8 +1221,15 @@ sub scan_config {
     }
   }
 
-  #print STDERR "SYNC distortion";
-  push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
+  # The distance-based reordering model is never mentioned in moses.ini,
+  # except there is one extra weight-d in the list. So if we spot this
+  # one extra weight-d, we actually insert the triple for it.
+  # Hierarchical moses has no distance-based reordering.
+  push @{$used_triples{"d"}}, [1.0, 0.0, 2.0]
+    if defined $config_weights->{"d"}
+      && (!defined $used_triples{"d"}
+         || scalar @{$config_weights->{"d"}}
+            == scalar @{$used_triples{"d"}} +1);
 
   # check the weights provided in the ini file and plug them into the triples
   # if --starting-weights-from_ini
