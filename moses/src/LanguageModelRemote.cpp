@@ -14,11 +14,6 @@ namespace Moses {
 const Factor* LanguageModelRemote::BOS = NULL;
 const Factor* LanguageModelRemote::EOS = (LanguageModelRemote::BOS + 1);
 
-LanguageModelRemote::LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager) 
-:LanguageModelPointerState(registerScore, scoreIndexManager)
-{
-}
-
 bool LanguageModelRemote::Load(const std::string &filePath
                                         , FactorType factorType
                                         , size_t nGramOrder) 

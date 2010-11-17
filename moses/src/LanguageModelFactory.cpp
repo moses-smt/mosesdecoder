@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #	include "LanguageModelKen.h"
 #endif
 
+#include "LanguageModel.h"
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
@@ -63,71 +64,62 @@ namespace LanguageModelFactory
 																		, ScoreIndexManager &scoreIndexManager
 																		, int dub)
 	{
-	  LanguageModel *lm = NULL;
+	  LanguageModelImplementation *lm = NULL;
 	  switch (lmImplementation)
 	  {
 		  case RandLM:
 			#ifdef LM_RAND
-			lm = new LanguageModelRandLM(true,
-						 scoreIndexManager);
+			lm = new LanguageModelRandLM();
 			#endif
 			break;
 		  case Remote:
 			#ifdef LM_REMOTE
-			lm = new LanguageModelRemote(true,scoreIndexManager);
+			lm = new LanguageModelRemote();
 			#endif
 			break;
 
 	  	case SRI:
 				#ifdef LM_SRI
-				  lm = new LanguageModelSRI(true, scoreIndexManager);
+				  lm = new LanguageModelSRI();
 			  #endif
 			  break;
 			case IRST:
 				#ifdef LM_IRST
-	     		lm = new LanguageModelIRST(true, scoreIndexManager, dub);
+	     		lm = new LanguageModelIRST(dub);
 			  #endif
 				break;
 			case Skip:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelSkip(new LanguageModelSRI(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
+	     		lm = new LanguageModelSkip(new LanguageModelSRI());
 				#elif LM_INTERNAL
-     			lm = new LanguageModelSkip(new LanguageModelInternal(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
+     			lm = new LanguageModelSkip(new LanguageModelInternal());
 				#endif
 				break;
 			case Ken:
 				#ifdef LM_KEN
-					lm = ConstructKenLM(true, scoreIndexManager, languageModelFile, false);
+					lm = ConstructKenLM(languageModelFile, false);
 				#endif
 				break;
 			case LazyKen:
 				#ifdef LM_KEN
-					lm = ConstructKenLM(true, scoreIndexManager, languageModelFile, true);
+					lm = ConstructKenLM(languageModelFile, true);
 				#endif
 				break;
 			case Joint:
 				#ifdef LM_SRI
-	     		lm = new LanguageModelJoint(new LanguageModelSRI(false, scoreIndexManager)
-	     															, true
-	     															, scoreIndexManager);
+	     		lm = new LanguageModelJoint(new LanguageModelSRI());
 				#elif LM_INTERNAL
-	     		lm = new LanguageModelJoint(new LanguageModelInternal(false, scoreIndexManager)
-																		, true
-																		, scoreIndexManager);
+	     		lm = new LanguageModelJoint(new LanguageModelInternal());
 				#endif
 				break;
 			case ParallelBackoff:
 				#ifdef LM_SRI
-					lm = new LanguageModelParallelBackoff(true, scoreIndexManager);
+					lm = new LanguageModelParallelBackoff();
 				#endif
 					break;
 	  	case Internal:
 				#ifdef LM_INTERNAL
-					lm = new LanguageModelInternal(true, scoreIndexManager);
+					lm = new LanguageModelInternal();
 			  #endif
 			  break;
 	  }
@@ -159,7 +151,7 @@ namespace LanguageModelFactory
 	  	}
 	  }
 
-	  return lm;
+	  return new LanguageModel(scoreIndexManager, lm);
 	}
 }
 

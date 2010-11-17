@@ -42,9 +42,8 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelIRST::LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub)
-:LanguageModelPointerState(registerScore, scoreIndexManager)
-,m_lmtb(0),m_lmtb_dub(dub)
+LanguageModelIRST::LanguageModelIRST(int dub)
+:m_lmtb(0),m_lmtb_dub(dub)
 {
 }
 

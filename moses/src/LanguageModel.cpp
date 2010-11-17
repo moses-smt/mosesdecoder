@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FFState.h"
 #include "LanguageModel.h"
+#include "LanguageModelImplementation.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "Manager.h"
@@ -38,17 +39,32 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModel::LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager) 
+LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation) :
+	m_implementation(implementation)
 {
-	if (registerScore)
-		scoreIndexManager.AddScoreProducer(this);
-	m_nullContextState = NULL;
-	m_beginSentenceState = NULL;
+	scoreIndexManager.AddScoreProducer(this);
+#ifndef HAVE_THREADS
+	// ref counting handled by boost otherwise
+	m_implementation->IncrementReferenceCount();
+#endif
 }
+
+LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *loadedLM) :
+	m_implementation(loadedLM->m_implementation)
+{
+	scoreIndexManager.AddScoreProducer(this);
+#ifndef HAVE_THREADS
+	// ref counting handled by boost otherwise
+	m_implementation->IncrementReferenceCount();
+#endif
+}
+
 LanguageModel::~LanguageModel()
 {
-	delete m_nullContextState;
-	delete m_beginSentenceState;
+#ifndef HAVE_THREADS
+	if(m_implementation->DecrementReferenceCount() == 0)
+		delete m_implementation;
+#endif
 }
 
 // don't inline virtual funcs...
@@ -75,8 +91,9 @@ void LanguageModel::CalcScore(const Phrase &phrase
   	if (!phraseSize) return;
 	
 	vector<const Word*> contextFactor;
-	contextFactor.reserve(m_nGramOrder);
-	std::auto_ptr<FFState> state(NewState((phrase.GetWord(0) == GetSentenceStartArray()) ? m_beginSentenceState : m_nullContextState));
+	contextFactor.reserve(GetNGramOrder());
+	std::auto_ptr<FFState> state(m_implementation->NewState((phrase.GetWord(0) == m_implementation->GetSentenceStartArray()) ?
+		m_implementation->GetBeginSentenceState() : m_implementation->GetNullContextState()));
 	size_t currPos = 0;
 	while (currPos < phraseSize)
 	{
@@ -86,24 +103,24 @@ void LanguageModel::CalcScore(const Phrase &phrase
 		{ // do nothing. reset ngram. needed to score targbet phrases during pt loading in chart decoding
 			if (!contextFactor.empty()) {
 				// TODO: state operator= ?
-				state.reset(NewState(m_nullContextState));
+				state.reset(m_implementation->NewState(m_implementation->GetNullContextState()));
 				contextFactor.clear();
 			}
 		}
 		else
 		{
 			ShiftOrPush(contextFactor, word);
-			assert(contextFactor.size() <= m_nGramOrder);
+			assert(contextFactor.size() <= GetNGramOrder());
 			
-			if (word == GetSentenceStartArray())
+			if (word == m_implementation->GetSentenceStartArray())
 			{ // do nothing, don't include prob for <s> unigram
 				assert(currPos == 0);
 			}
 			else
 			{
-				float partScore = GetValueGivenState(contextFactor, *state);
+				float partScore = m_implementation->GetValueGivenState(contextFactor, *state);
 				fullScore += partScore;
-				if (contextFactor.size() == m_nGramOrder)
+				if (contextFactor.size() == GetNGramOrder())
 					ngramScore += partScore;
 			}
 		}
@@ -124,8 +141,9 @@ void LanguageModel::CalcScoreChart(const Phrase &phrase
 	if (!phraseSize) return;
 	
 	vector<const Word*> contextFactor;
-	contextFactor.reserve(m_nGramOrder);
-	std::auto_ptr<FFState> state(NewState((phrase.GetWord(0) == GetSentenceStartArray()) ? m_beginSentenceState : m_nullContextState));
+	contextFactor.reserve(GetNGramOrder());
+	std::auto_ptr<FFState> state(m_implementation->NewState((phrase.GetWord(0) == m_implementation->GetSentenceStartArray()) ?
+		m_implementation->GetBeginSentenceState() : m_implementation->GetNullContextState()));
 	size_t currPos = 0;
 	while (currPos < phraseSize)
 	{
@@ -133,17 +151,17 @@ void LanguageModel::CalcScoreChart(const Phrase &phrase
 		assert(!word.IsNonTerminal());
 		
 		ShiftOrPush(contextFactor, word);
-		assert(contextFactor.size() <= m_nGramOrder);
+		assert(contextFactor.size() <= GetNGramOrder());
 		
-		if (word == GetSentenceStartArray())
+		if (word == m_implementation->GetSentenceStartArray())
 		{ // do nothing, don't include prob for <s> unigram
 			assert(currPos == 0);
 		}
 		else
 		{
-			float partScore = GetValueGivenState(contextFactor, *state);
+			float partScore = m_implementation->GetValueGivenState(contextFactor, *state);
 			
-			if (contextFactor.size() == m_nGramOrder)
+			if (contextFactor.size() == GetNGramOrder())
 				ngramScore += partScore;
 			else
 				beginningBitsOnly += partScore;
@@ -153,40 +171,25 @@ void LanguageModel::CalcScoreChart(const Phrase &phrase
 	}
 }
 
-float LanguageModel::GetValueGivenState(
-	const std::vector<const Word*> &contextFactor,
-	FFState &state,
-	unsigned int* len) const
-{
-	return GetValueForgotState(contextFactor, state, len);
-}
-
-void LanguageModel::GetState(
-	const std::vector<const Word*> &contextFactor,
-	FFState &state) const
-{
-	GetValueForgotState(contextFactor, state, NULL);
-}
-	
 void LanguageModel::ShiftOrPush(vector<const Word*> &contextFactor, const Word &word) const
 {
-	if (contextFactor.size() < m_nGramOrder)
+	if (contextFactor.size() < GetNGramOrder())
 	{
 		contextFactor.push_back(&word);
 	}
 	else
 	{ // shift
-		for (size_t currNGramOrder = 0 ; currNGramOrder < m_nGramOrder - 1 ; currNGramOrder++)
+		for (size_t currNGramOrder = 0 ; currNGramOrder < GetNGramOrder() - 1 ; currNGramOrder++)
 		{
 			contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
 		}
-		contextFactor[m_nGramOrder - 1] = &word;
+		contextFactor[GetNGramOrder() - 1] = &word;
 	}
 }
 		
 const FFState* LanguageModel::EmptyHypothesisState(const InputType &/*input*/) const {
 	// This is actually correct.  The empty _hypothesis_ has <s> in it.  Phrases use m_emptyContextState.  
-	return NewState(m_beginSentenceState);
+	return m_implementation->NewState(m_implementation->GetBeginSentenceState());
 }
 
 FFState* LanguageModel::Evaluate(
@@ -197,72 +200,72 @@ FFState* LanguageModel::Evaluate(
 	// phrase boundary. Phrase-internal scores are taken directly from the
 	// translation option. In the unigram case, there is no overlap, so we don't
 	// need to do anything.
-	if(m_nGramOrder <= 1)
+	if(GetNGramOrder() <= 1)
 		return NULL;
 
 	clock_t t=0;
 	IFVERBOSE(2) { t  = clock(); } // track time
 	if (hypo.GetCurrTargetLength() == 0)
-		return ps ? NewState(ps) : NULL;
+		return ps ? m_implementation->NewState(ps) : NULL;
 	const size_t currEndPos = hypo.GetCurrTargetWordsRange().GetEndPos();
 	const size_t startPos = hypo.GetCurrTargetWordsRange().GetStartPos();
 
 	// 1st n-gram
-	vector<const Word*> contextFactor(m_nGramOrder);
+	vector<const Word*> contextFactor(GetNGramOrder());
 	size_t index = 0;
-	for (int currPos = (int) startPos - (int) m_nGramOrder + 1 ; currPos <= (int) startPos ; currPos++)
+	for (int currPos = (int) startPos - (int) GetNGramOrder() + 1 ; currPos <= (int) startPos ; currPos++)
 	{
 		if (currPos >= 0)
 			contextFactor[index++] = &hypo.GetWord(currPos);
 		else
 		{
-			contextFactor[index++] = &GetSentenceStartArray();
+			contextFactor[index++] = &m_implementation->GetSentenceStartArray();
 		}
 	}
   unsigned int statelen;
-	FFState *res = NewState(ps);
-	float lmScore = ps ? GetValueGivenState(contextFactor, *res, &statelen) : GetValueForgotState(contextFactor, *res, &statelen);
+	FFState *res = m_implementation->NewState(ps);
+	float lmScore = ps ? m_implementation->GetValueGivenState(contextFactor, *res, &statelen) : m_implementation->GetValueForgotState(contextFactor, *res, &statelen);
 
 	// main loop
-	size_t endPos = std::min(startPos + m_nGramOrder - 2
+	size_t endPos = std::min(startPos + GetNGramOrder() - 2
 			, currEndPos);
 	for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++)
 	{
 		// shift all args down 1 place
-		for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+		for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i++)
 			contextFactor[i] = contextFactor[i + 1];
 
 		// add last factor
 		contextFactor.back() = &hypo.GetWord(currPos);
 
-		lmScore	+= GetValueGivenState(contextFactor, *res, &statelen);
+		lmScore	+= m_implementation->GetValueGivenState(contextFactor, *res, &statelen);
 	}
 
 	// end of sentence
 	if (hypo.IsSourceCompleted())
 	{
 		const size_t size = hypo.GetSize();
-		contextFactor.back() = &GetSentenceEndArray();
+		contextFactor.back() = &m_implementation->GetSentenceEndArray();
 
-		for (size_t i = 0 ; i < m_nGramOrder - 1 ; i ++)
+		for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i ++)
 		{
-			int currPos = (int)(size - m_nGramOrder + i + 1);
+			int currPos = (int)(size - GetNGramOrder() + i + 1);
 			if (currPos < 0)
-				contextFactor[i] = &GetSentenceStartArray();
+				contextFactor[i] = &m_implementation->GetSentenceStartArray();
 			else
 				contextFactor[i] = &hypo.GetWord((size_t)currPos);
 		}
-		lmScore	+= GetValueForgotState(contextFactor, *res);
+		lmScore	+= m_implementation->GetValueForgotState(contextFactor, *res);
 	} else {
 
 		if (endPos < currEndPos){ 
 			//need to get the LM state (otherwise the last LM state is fine)
 			for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
-				for (size_t i = 0 ; i < m_nGramOrder - 1 ; i++)
+				for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i++)
 					contextFactor[i] = contextFactor[i + 1];
 				contextFactor.back() = &hypo.GetWord(currPos);
 			}
-		  GetState(contextFactor, *res);
+		  m_implementation->GetState(contextFactor, *res);
 		}
 	}
 	out->PlusEquals(this, lmScore);

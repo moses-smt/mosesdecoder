@@ -45,10 +45,7 @@ public:
 	/** Constructor
 	* \param lmImpl SRI or IRST LM which this LM can use to load data
 	*/
-	LanguageModelSkip(LanguageModelSingleFactor *lmImpl
-										, bool registerScore
-										, ScoreIndexManager &scoreIndexManager)
-	: LanguageModelSingleFactor(registerScore, scoreIndexManager)
+	LanguageModelSkip(LanguageModelSingleFactor *lmImpl)
 	{
 		m_lmImpl = lmImpl;		
 	}
@@ -73,6 +70,16 @@ public:
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
 		return m_lmImpl->Load(filePath, m_factorType, nGramOrder);
+	}
+
+	FFState *GetNullContextState() const
+	{
+		return m_lmImpl->GetNullContextState();
+	}
+
+	FFState *GetBeginSentenceState() const
+	{
+		return m_lmImpl->GetBeginSentenceState();
 	}
 
   FFState *NewState(const FFState *from = NULL) const

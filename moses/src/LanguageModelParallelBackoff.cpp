@@ -35,12 +35,6 @@ using namespace std;
 namespace Moses
 {
 
-	LanguageModelParallelBackoff::LanguageModelParallelBackoff(bool registerScore, ScoreIndexManager &scoreIndexManager)
-	:LanguageModelMultiFactor(registerScore, scoreIndexManager)
-	{
-		 ///
-	}
-	
 	LanguageModelParallelBackoff::~LanguageModelParallelBackoff()
 	{
      ///
@@ -297,7 +291,15 @@ void LanguageModelParallelBackoff::CreateFactors()
 	}
 
   // The old version did not initialize finalState like it should.  Technically that makes the behavior undefined, so it's not clear what else to do here.  
-	FFState *LanguageModelParallelBackoff::NewState(const FFState *from) const {
+  FFState *LanguageModelParallelBackoff::NewState(const FFState *from) const {
+    return NULL;
+  }
+
+  FFState *LanguageModelParallelBackoff::GetNullContextState() const {
+    return NULL;
+  }
+
+  FFState *LanguageModelParallelBackoff::GetBeginSentenceState() const {
     return NULL;
   }
 }

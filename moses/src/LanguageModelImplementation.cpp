@@ -19,22 +19,38 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_LanguageModelKen_h
-#define moses_LanguageModelKen_h
+#include <cassert>
+#include <limits>
+#include <iostream>
+#include <memory>
+#include <sstream>
 
-#include <string>
+#include "FFState.h"
+#include "LanguageModelImplementation.h"
+#include "TypeDef.h"
+#include "Util.h"
+#include "Manager.h"
+#include "FactorCollection.h"
+#include "Phrase.h"
+#include "StaticData.h"
 
-#include "LanguageModelSingleFactor.h"
+using namespace std;
 
 namespace Moses
 {
+float LanguageModelImplementation::GetValueGivenState(
+	const std::vector<const Word*> &contextFactor,
+	FFState &state,
+	unsigned int* len) const
+{
+	return GetValueForgotState(contextFactor, state, len);
+}
 
-class ScoreIndexManager;
-
-// Doesn't actually load; moses wants the Load method for that.  It needs the file to autodetect binary format.  
-LanguageModelSingleFactor *ConstructKenLM(const std::string &file, bool lazy);
+void LanguageModelImplementation::GetState(
+	const std::vector<const Word*> &contextFactor,
+	FFState &state) const
+{
+	GetValueForgotState(contextFactor, state, NULL);
+}
 	
-};
-
-
-#endif
+}

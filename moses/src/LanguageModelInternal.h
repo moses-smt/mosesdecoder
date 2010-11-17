@@ -26,7 +26,6 @@ protected:
 	float GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const;
 
 public:
-	LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager);
 	bool Load(const std::string &filePath
 					, FactorType factorType
 					, size_t nGramOrder);

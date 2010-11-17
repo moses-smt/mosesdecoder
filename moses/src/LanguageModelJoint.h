@@ -48,8 +48,7 @@ protected:
 	
 	size_t m_implFactor;
 public:
-	LanguageModelJoint(LanguageModelSingleFactor *lmImpl, bool registerScore, ScoreIndexManager &scoreIndexManager)
-	:LanguageModelMultiFactor(registerScore, scoreIndexManager)
+	LanguageModelJoint(LanguageModelSingleFactor *lmImpl)
 	{
 		m_lmImpl = lmImpl;
 	}
@@ -124,6 +123,16 @@ public:
 		
 		return ret;
 	}
+
+  FFState *GetNullContextState() const
+  {
+    return m_lmImpl->GetNullContextState();
+  }
+
+  FFState *GetBeginSentenceState() const
+  {
+    return m_lmImpl->GetBeginSentenceState();
+  }
 
   FFState *NewState(const FFState *from) const
   {

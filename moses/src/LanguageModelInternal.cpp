@@ -10,11 +10,6 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModelInternal::LanguageModelInternal(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelPointerState(registerScore, scoreIndexManager)
-{
-}
-
 bool LanguageModelInternal::Load(const std::string &filePath
 																, FactorType factorType
 																, size_t nGramOrder)

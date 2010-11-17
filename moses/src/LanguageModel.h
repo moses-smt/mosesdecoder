@@ -29,6 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FeatureFunction.h"
 #include "Word.h"
+#include "LanguageModelImplementation.h"
+
+#ifdef WITH_THREADS
+#include <boost/shared_ptr.hpp>
+#endif
 
 namespace Moses
 {
@@ -41,33 +46,37 @@ class Phrase;
 class LanguageModel : public StatefulFeatureFunction
 {
 protected:	
-	std::string	m_filePath; //! for debugging purposes
-	size_t			m_nGramOrder; //! max n-gram length contained in this LM
-	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
-																								//! Usually <s> and </s>
-  FFState *m_nullContextState, *m_beginSentenceState;
+#ifdef WITH_THREADS
+	// if we have threads, we also have boost and can let it handle thread-safe reference counting
+	boost::shared_ptr<LanguageModelImplementation> m_implementation;
+#else
+	LanguageModelImplementation *m_implementation;
+#endif
 
 	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
-	/** constructor to be called by inherited class
-	 * \param registerScore whether this LM will be directly used to score sentence. 
-	 * 						Usually true, except where LM is a component in a composite LM, eg. LanguageModelJoint
-	 */
-	LanguageModel(bool registerScore, ScoreIndexManager &scoreIndexManager);
-
 public:
+	/**
+	 * Create a new language model
+	 */
+	LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation);
+
+	/**
+	 * Create a new language model reusing an already loaded implementation
+	 */
+	LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *implementation);
+
 	virtual ~LanguageModel();
 
 	//! see ScoreProducer.h
 	size_t GetNumScoreComponents() const;
 
-	//! Single or multi-factor
-	virtual LMType GetLMType() const = 0;
-
 	/* whether this LM can be used on a particular phrase. 
 	 * Should return false if phrase size = 0 or factor types required don't exists
 	 */
-	virtual bool Useable(const Phrase &phrase) const = 0;
+	bool Useable(const Phrase &phrase) const {
+		return m_implementation->Useable(phrase);
+	}
 
 	/* calc total unweighted LM score of this phrase and return score via arguments.
 	 * Return scores should always be in natural log, regardless of representation with LM implementation.
@@ -86,46 +95,16 @@ public:
       float &beginningBitsOnly,
 			float &ngramScore) const;
 	
-	/* get score of n-gram. n-gram should not be bigger than m_nGramOrder
-	 * Specific implementation can return State and len data to be used in hypothesis pruning
-	 * \param contextFactor n-gram to be scored
-	 * \param state LM state.  Input and output.  state must be initialized.  If state isn't initialized, you want GetValueWithoutState.
-	 * \param len If non-null, the n-gram length is written here.  
-	 */
-	virtual float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
-
-  // Like GetValueGivenState but state may not be initialized (however it is non-NULL). 
-  // For example, state just came from NewState(NULL).   
-	virtual float GetValueForgotState(
-      const std::vector<const Word*> &contextFactor,
-      FFState &outState,
-      unsigned int* len = 0) const = 0;
-
-	//! get State for a particular n-gram.  We don't care what the score is.  
-  // This is here so models can implement a shortcut to GetValueAndState.  
-  virtual void GetState(
-      const std::vector<const Word*> &contextFactor,
-      FFState &outState) const;
-
-  virtual FFState *NewState(const FFState *from = NULL) const = 0;
-
 	//! max n-gram order of LM
 	size_t GetNGramOrder() const
 	{
-		return m_nGramOrder;
+		return m_implementation->GetNGramOrder();
 	}
 	
-	//! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
-	const Word &GetSentenceStartArray() const
+	virtual std::string GetScoreProducerDescription() const
 	{
-		return m_sentenceStartArray;
+		return m_implementation->GetScoreProducerDescription();
 	}
-	const Word &GetSentenceEndArray() const
-	{
-		return m_sentenceEndArray;
-	}
-	
-	virtual std::string GetScoreProducerDescription() const = 0;
 
 	float GetWeight() const;
 
@@ -134,9 +113,15 @@ public:
 		return "lm";
 	}
   
-	//! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
-	virtual void InitializeBeforeSentenceProcessing(){};
-	virtual void CleanUpAfterSentenceProcessing() {};
+	void InitializeBeforeSentenceProcessing()
+	{
+		m_implementation->InitializeBeforeSentenceProcessing();
+	}
+
+	void CleanUpAfterSentenceProcessing()
+	{
+		m_implementation->CleanUpAfterSentenceProcessing();
+	}
 
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 

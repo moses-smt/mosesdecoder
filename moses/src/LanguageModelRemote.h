@@ -29,7 +29,6 @@ class LanguageModelRemote : public LanguageModelPointerState {
 		static const Factor* BOS;
 		static const Factor* EOS;
 	public:
-		LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager);
 		~LanguageModelRemote();
 		void ClearSentenceCache() { m_cache.tree.clear(); m_curId = 1000; }
 		virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;

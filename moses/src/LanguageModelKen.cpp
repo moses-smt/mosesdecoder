@@ -82,11 +82,13 @@ private:
 	Model *m_ngram;
 	std::vector<lm::WordIndex> m_lmIdLookup;
 	bool m_lazy;
+	FFState *m_nullContextState;
+	FFState *m_beginSentenceState;
 
 	void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
 	
 public:
-	LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, bool lazy);
+	LanguageModelKen(bool lazy);
 	~LanguageModelKen();
 
 	bool Load(const std::string &filePath
@@ -97,6 +99,8 @@ public:
 	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len=0) const;
 	void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
+	FFState *GetNullContextState() const;
+	FFState *GetBeginSentenceState() const;
 	FFState *NewState(const FFState *from = NULL) const;
 
 	lm::WordIndex GetLmID(const std::string &str) const;
@@ -118,8 +122,8 @@ template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vec
 	}
 }
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool registerScore, ScoreIndexManager &scoreIndexManager, bool lazy)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager), m_ngram(NULL), m_lazy(lazy)
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool lazy)
+:m_ngram(NULL), m_lazy(lazy)
 {
 }
 
@@ -206,6 +210,14 @@ template <class Model> void LanguageModelKen<Model>::GetState(const std::vector<
 	m_ngram->GetState(indices, indices + contextFactor.size(), static_cast<KenLMState&>(outState).state);
 }
 
+template <class Model> FFState *LanguageModelKen<Model>::GetNullContextState() const {
+	return m_nullContextState;
+}
+
+template <class Model> FFState *LanguageModelKen<Model>::GetBeginSentenceState() const {
+	return m_beginSentenceState;
+}
+
 template <class Model> FFState *LanguageModelKen<Model>::NewState(const FFState *from) const {
 	KenLMState *ret = new KenLMState;
 	if (from) {
@@ -220,22 +232,22 @@ template <class Model> lm::WordIndex LanguageModelKen<Model>::GetLmID(const std:
 
 } // namespace
 
-LanguageModelSingleFactor *ConstructKenLM(bool registerScore, ScoreIndexManager &scoreIndexManager, const std::string &file, bool lazy) {
+LanguageModelSingleFactor *ConstructKenLM(const std::string &file, bool lazy) {
 	lm::ngram::ModelType model_type;
 	if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
 		switch(model_type) {
 			case lm::ngram::HASH_PROBING:
-				return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager, lazy);
+				return new LanguageModelKen<lm::ngram::ProbingModel>(lazy);
 			case lm::ngram::HASH_SORTED:
-				return new LanguageModelKen<lm::ngram::SortedModel>(registerScore, scoreIndexManager, lazy);
+				return new LanguageModelKen<lm::ngram::SortedModel>(lazy);
 			case lm::ngram::TRIE_SORTED:
-				return new LanguageModelKen<lm::ngram::TrieModel>(registerScore, scoreIndexManager, lazy);
+				return new LanguageModelKen<lm::ngram::TrieModel>(lazy);
 			default:
 				std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
 				abort();
 		}
 	} else {
-		return new LanguageModelKen<lm::ngram::ProbingModel>(registerScore, scoreIndexManager, lazy);
+		return new LanguageModelKen<lm::ngram::ProbingModel>(lazy);
 	}
 }
 

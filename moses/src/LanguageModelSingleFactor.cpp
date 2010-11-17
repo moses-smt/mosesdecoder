@@ -37,11 +37,6 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelSingleFactor::LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModel(registerScore, scoreIndexManager)
-{
-}
-
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 
@@ -64,14 +59,23 @@ struct PointerState : public FFState {
   }
 };
 
-LanguageModelPointerState::LanguageModelPointerState(bool registerScore, ScoreIndexManager &scoreIndexManager) 
-: LanguageModelSingleFactor(registerScore, scoreIndexManager)
+LanguageModelPointerState::LanguageModelPointerState()
 {
 m_nullContextState = new PointerState(NULL);
 m_beginSentenceState = new PointerState(NULL);
 }
 
 LanguageModelPointerState::~LanguageModelPointerState() {}
+
+FFState *LanguageModelPointerState::GetNullContextState() const
+{
+  return m_nullContextState;
+}
+
+FFState *LanguageModelPointerState::GetBeginSentenceState() const
+{
+  return m_beginSentenceState;
+}
 
 FFState *LanguageModelPointerState::NewState(const FFState *from) const
 {

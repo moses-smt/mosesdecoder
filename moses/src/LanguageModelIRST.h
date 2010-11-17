@@ -62,7 +62,7 @@ protected:
 	int GetLmID( const Factor *factor ) const;
   
 public:
-	LanguageModelIRST(bool registerScore, ScoreIndexManager &scoreIndexManager, int dub);
+	LanguageModelIRST(int dub);
 	~LanguageModelIRST();
 	bool Load(const std::string &filePath
 					, FactorType factorType

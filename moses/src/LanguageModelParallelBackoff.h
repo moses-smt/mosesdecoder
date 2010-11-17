@@ -78,9 +78,6 @@ private:
   WidMatrix *widMatrix;
 
 public:
-	LanguageModelParallelBackoff(bool registerScore, ScoreIndexManager &scoreIndexManager);
-
-	
 	~LanguageModelParallelBackoff();
 
 	bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
@@ -92,6 +89,8 @@ VocabIndex GetLmID( const Factor *factor, FactorType ft ) const;
 void CreateFactors();
 	
 float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const;
+FFState *GetNullContextState() const;
+FFState *GetBeginSentenceState() const;
 FFState *NewState(const FFState *from) const;
 	
 };
