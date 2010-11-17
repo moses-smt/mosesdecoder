@@ -135,30 +135,29 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 	size_t count = contextFactor.size();
 	if (count <= 0)
 	{
-		finalState = NULL;
+		if(finalState)
+			*finalState = NULL;
 		return 0;
 	}
 		
 	// set up context
-	VocabIndex context[MAX_NGRAM_SIZE];
+	VocabIndex ngram[count + 1];
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-		context[i] =  GetLmID((*contextFactor[count-2-i])[factorType]);
+		ngram[i+1] =  GetLmID((*contextFactor[count-2-i])[factorType]);
 	}
-	context[count-1] = Vocab_None;
+	ngram[count] = Vocab_None;
 	
 	assert((*contextFactor[count-1])[factorType] != NULL);
 	// call sri lm fn
-	VocabIndex lmId= GetLmID((*contextFactor[count-1])[factorType]);
-	float ret = GetValue(lmId, context);
+	VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
+	float ret = GetValue(lmId, ngram+1);
 
 	if (finalState) {
-		for (int i = count - 2 ; i >= 0 ; i--)
-			context[i+1] = context[i];
-		context[0] = lmId;
+		ngram[0] = lmId;
 		unsigned int dummy;
 		if (!len) { len = &dummy; }
-		*finalState = m_srilmModel->contextID(context,*len);
+		*finalState = m_srilmModel->contextID(ngram, *len);
 		(*len)++;
 	}
 	return ret;
