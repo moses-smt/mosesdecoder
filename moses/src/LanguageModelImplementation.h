@@ -40,7 +40,7 @@ class Phrase;
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModelImplementation
 {
-#ifndef HAVE_THREADS
+#ifndef WITH_THREADS
 protected:
 	/** constructor to be called by inherited class
 	 */
@@ -124,7 +124,7 @@ public:
 	virtual void InitializeBeforeSentenceProcessing(){};
 	virtual void CleanUpAfterSentenceProcessing() {};
 
-#ifndef HAVE_THREADS
+#ifndef WITH_THREADS
 	// ref counting handled by boost otherwise
 
 	unsigned int IncrementReferenceCount()

@@ -43,7 +43,7 @@ LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel
 	m_implementation(implementation)
 {
 	scoreIndexManager.AddScoreProducer(this);
-#ifndef HAVE_THREADS
+#ifndef WITH_THREADS
 	// ref counting handled by boost otherwise
 	m_implementation->IncrementReferenceCount();
 #endif
@@ -53,7 +53,7 @@ LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel
 	m_implementation(loadedLM->m_implementation)
 {
 	scoreIndexManager.AddScoreProducer(this);
-#ifndef HAVE_THREADS
+#ifndef WITH_THREADS
 	// ref counting handled by boost otherwise
 	m_implementation->IncrementReferenceCount();
 #endif
@@ -61,7 +61,7 @@ LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel
 
 LanguageModel::~LanguageModel()
 {
-#ifndef HAVE_THREADS
+#ifndef WITH_THREADS
 	if(m_implementation->DecrementReferenceCount() == 0)
 		delete m_implementation;
 #endif
