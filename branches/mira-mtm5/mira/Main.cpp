@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
   int n;
   bool onlyViolatedConstraints;
   float clipping;
+  bool fixedClipping;
   po::options_description desc("Allowed options");
   desc.add_options()
         ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -103,7 +104,8 @@ int main(int argc, char** argv) {
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
 	    ("nbest,n", po::value<int>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
-	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold to regularise updates");
+	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold for SMO to regularise updates")
+	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -194,7 +196,7 @@ int main(int argc, char** argv) {
   cerr << "Nbest list size: " << n << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping);
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     	cerr << "Margin scale factor: " << marginScaleFactor << endl;
@@ -307,6 +309,10 @@ int main(int argc, char** argv) {
 			
 		  //run optimiser
 	      cerr << "Run optimiser.." << endl;
+	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
+	    	  ((MiraOptimiser*)optimiser)->setOracleIndex(oraclePos);
+	      }
+
 	      optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
 
 		  //update moses weights

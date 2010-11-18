@@ -127,10 +127,22 @@ namespace Mira {
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
-    	cerr << "Score w/o bleu: " << scoreWithoutBleu << ", bleu: " << bleuScore << endl;
+    	cerr << "Total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
+
+    	/*// construct translation string
+    	vector<const Word*> sentence;
+        Phrase targetPhrase = path.GetTargetPhrase();
+
+        for (size_t pos = 0; pos < targetPhrase.GetSize(); ++pos) {
+        	const Word &word = targetPhrase.GetWord(pos);
+        	Word *newWord = new Word(word);
+        	cerr << *newWord << " ";
+    	}
+
+        cerr << endl;*/
     }
 
     // get the best

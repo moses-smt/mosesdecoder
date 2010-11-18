@@ -50,7 +50,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 
 		if (violatedConstraintsBefore > 0) {
-			// TODO: slack? margin scale factor?
+			// TODO: slack?
 			// run optimisation
 			cerr << "\nNumber of violated constraints: " << violatedConstraintsBefore << endl;
 			// compute deltas for all given constraints
@@ -96,17 +96,19 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	else {
 		// SMO:
 		for (size_t i = 0; i < featureValues.size(); ++i) {
-			// initialise alphas for each source (alpha for oracle translation = C, all other alphas = 0)
-			vector< float> alphas(featureValues[i].size());
-			for (size_t j = 0; j < featureValues[i].size(); ++j) {
-				if (j == m_n) {										// TODO: use oracle index
-					// oracle
-					alphas[j] = m_c;
-					//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
-				}
-				else {
-					alphas[j] = 0;
-					//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
+			vector< float> alphas(featureValues[i].size()); // TODO: dont pass alphas if not needed
+			if (!m_fixedClipping) {
+				// initialise alphas for each source (alpha for oracle translation = C, all other alphas = 0)
+				for (size_t j = 0; j < featureValues[i].size(); ++j) {
+					if (j == m_oracleIndex) {
+						// oracle
+						alphas[j] = m_c;
+						//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
+					}
+					else {
+						alphas[j] = 0;
+						//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
+					}
 				}
 			}
 
@@ -118,13 +120,14 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 						++pairs;
 
 						// Compute delta:
-						cerr << "\nComparing pair" << j << "," << k << endl;
 						ScoreComponentCollection featureValueDiffs;
 						float delta = computeDelta(currWeights, featureValues[i], j, k, losses[i], alphas, featureValueDiffs);
 
 						// update weight vector:
 						if (delta != 0) {
 							update(currWeights, featureValueDiffs, delta);
+							cerr << "\nComparing pair" << j << "," << k << endl;
+							cerr << "Update with delta: " << delta << endl;
 						}
 					}
 				}
@@ -143,60 +146,62 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
  */
 float MiraOptimiser::computeDelta(ScoreComponentCollection& currWeights,
 		const vector< ScoreComponentCollection>& featureValues,
-		const size_t indexHope,
-		const size_t indexFear,
+		const size_t j,
+		const size_t k,
 		const vector< float>& losses,
 		vector< float>& alphas,
 		ScoreComponentCollection& featureValueDiffs) {
 
-	const ScoreComponentCollection featureValuesHope = featureValues[indexHope];		// hypothesis j'
-	const ScoreComponentCollection featureValuesFear = featureValues[indexFear];		// hypothesis j
+ 	const ScoreComponentCollection featureValuesJ = featureValues[j]; // hypothesis j'
+ 	const ScoreComponentCollection featureValuesK = featureValues[k]; // hypothesis j
 
-	// compute delta
-	float delta = 0.0;
-	float diffOfModelScores = 0.0;		// (Dh_ij - Dh_ij') * w' --->  (h(e_ij') - h(e_ij))) * w' (inner product)
-	float squaredNorm = 0.0;			// ||Dh_ij - Dh_ij'||^2  --->  sum over squares of elements of h(e_ij') - h(e_ij)
+ 	// compute delta
+ 	float delta = 0.0;
+ 	float diffOfModelScores = 0.0; // (Dh_ij - Dh_ij') * w' ---> (h(e_ij') - h(e_ij))) * w' (inner product)
+ 	float squaredNorm = 0.0; // ||Dh_ij - Dh_ij'||^2 ---> sum over squares of elements of h(e_ij') - h(e_ij)
 
-	featureValueDiffs = featureValuesHope;
-	featureValueDiffs.MinusEquals(featureValuesFear);
-	cerr << "feature value diffs: " << featureValueDiffs << endl;
-	squaredNorm = featureValueDiffs.InnerProduct(featureValueDiffs);
-	diffOfModelScores = featureValueDiffs.InnerProduct(currWeights);
+ 	featureValueDiffs = featureValuesJ;
+ 	featureValueDiffs.MinusEquals(featureValuesK);
+ 	squaredNorm = featureValueDiffs.InnerProduct(featureValueDiffs);
+ 	diffOfModelScores = featureValueDiffs.InnerProduct(currWeights);
 
-	if (squaredNorm == 0.0) {
-		delta = 0.0;
+ 	if (squaredNorm == 0.0) {
+ 		delta = 0.0;
+ 	}
+ 	else {
+ 		// loss difference used to compute delta: (l_ij - l_ij') ---> B(e_ij') - B(e_ij)
+ 		// TODO: simplify and use BLEU scores of hypotheses directly?
+ 		float lossDiff = losses[k] - losses[j];
+ 		delta = (lossDiff - diffOfModelScores) / squaredNorm;
+
+ 		// clipping
+ 		if (m_fixedClipping) {
+ 			if (delta > m_c) {
+ 				delta = m_c;
+ 			}
+ 			else if (delta < -1 * m_c) {
+ 				delta = -1 * m_c;
+ 			}
+ 		}
+ 		else {
+ 			// alpha_ij = alpha_ij + delta
+ 			// alpha_ij' = alpha_ij' - delta
+ 			// clipping interval: [-alpha_ij, alpha_ij']
+ 			// clip delta
+ 			if (delta > alphas[j]) {
+ 				delta = alphas[j];
+ 			}
+ 			else if (delta < (-1 * alphas[k])) {
+ 				delta = (-1 * alphas[k]);
+ 			}
+
+ 			// update alphas
+ 			alphas[j] -= delta;
+ 			alphas[k] += delta;
+ 		}
 	}
-	else {
-		// loss difference used to compute delta: (l_ij - l_ij')  --->  B(e_ij') - B(e_ij)
-		// TODO: simplify and use BLEU scores of hypotheses directly?
-		float lossDiff = losses[indexFear] - losses[indexHope];
-		delta = (lossDiff - diffOfModelScores) / squaredNorm;
-		cerr << "delta: " << delta << endl;
-		cerr << "loss diff - model diff: " << lossDiff << " - " << diffOfModelScores << endl;
 
-		// clipping
-		// fear translation: e_ij  --> alpha_ij  = alpha_ij  + delta
-		// hope translation: e_ij' --> alpha_ij' = alpha_ij' - delta
-		// clipping interval: [-alpha_ij, alpha_ij']
-		// clip delta
-		cerr << "Interval [" << (-1 * alphas[indexFear]) << "," << alphas[indexHope] << "]" << endl;
-		if (delta > alphas[indexHope]) {
-			//cout << "clipping " << delta << " to " << alphas[indexHope] << endl;
-			delta = alphas[indexHope];
-		}
-		else if (delta < (-1 * alphas[indexFear])) {
-			//cout << "clipping " << delta << " to " << (-1 * alphas[indexFear]) << endl;
-			delta = (-1 * alphas[indexFear]);
-		}
-
-		// update alphas
-		alphas[indexHope] -= delta;
-		alphas[indexFear] += delta;
-		//cout << "alpha[" << indexHope << "] = " << alphas[indexHope] << endl;
-		//cout << "alpha[" << indexFear << "] = " << alphas[indexFear] << endl;
-	}
-
-	return delta;
+ 	return delta;
 }
 
 /*
