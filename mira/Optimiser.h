@@ -59,13 +59,14 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
 		  m_marginScaleFactor(marginScaleFactor),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
-		  m_c(clipping) { }
+		  m_c(clipping),
+		  m_fixedClipping(fixedClipping) { }
 
      ~MiraOptimiser() {}
    
@@ -81,6 +82,10 @@ namespace Mira {
       				std::vector< float>& alphas,
       				Moses::ScoreComponentCollection& featureValueDiffs);
       void update(Moses::ScoreComponentCollection& currWeights, Moses::ScoreComponentCollection& featureValueDiffs, const float delta);
+
+      void setOracleIndex(size_t oracleIndex) {
+    	  m_oracleIndex = oracleIndex;
+      }
   
    private:
       // number of hypotheses used for each nbest list (number of hope, fear, best model translations)
@@ -95,8 +100,14 @@ namespace Mira {
       // add only violated constraints to the optimisation problem
       bool m_onlyViolatedConstraints;
 
-      // clipping threshold to regularise updates
+      // clipping threshold for SMO to regularise updates
       float m_c;
+
+      // use a fixed clipping threshold with SMO  (instead of adaptive)
+      bool m_fixedClipping;
+
+      // index of oracle translation in hypothesis matrix
+      size_t m_oracleIndex;
   };
 }
 
