@@ -199,11 +199,13 @@ int main(int argc, char** argv) {
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
-    	cerr << "Margin scale factor: " << marginScaleFactor << endl;
     }
     else {
     	cerr << "Using some sort of SMO.. " << endl;
     }
+
+    cerr << "Margin scale factor: " << marginScaleFactor << endl;
+    cerr << "Add only violated constraints? " << onlyViolatedConstraints << endl;
   } else if (learner == "perceptron") {
     cerr << "Optimising using Perceptron" << endl;
     optimiser = new Perceptron();
