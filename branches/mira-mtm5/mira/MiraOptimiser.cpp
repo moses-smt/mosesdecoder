@@ -103,31 +103,61 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 					if (j == m_oracleIndex) {
 						// oracle
 						alphas[j] = m_c;
-						//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
 					}
 					else {
 						alphas[j] = 0;
-						//std::cerr << "alpha " << j << ": " << alphas[j] << endl;
 					}
 				}
 			}
 
 			// consider all pairs of hypotheses
+			size_t violatedConstraintsBefore = 0;
 			size_t pairs = 0;
 			for (size_t j = 0; j < featureValues[i].size(); ++j) {
 				for (size_t k = 0; k < featureValues[i].size(); ++k) {
 					if (j <= k) {
 						++pairs;
+						ScoreComponentCollection featureValueDiff = featureValues[i][k];
+						featureValueDiff.MinusEquals(featureValues[i][j]);
+						float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+						float loss_jk = (losses[i][j] - losses[i][k]) * m_marginScaleFactor;
 
-						// Compute delta:
-						ScoreComponentCollection featureValueDiffs;
-						float delta = computeDelta(currWeights, featureValues[i], j, k, losses[i], alphas, featureValueDiffs);
+						if (m_onlyViolatedConstraints) {
+							// check if optimisation criterion is violated for current hypothesis pair
+							// (oracle - hypothesis j) - (oracle - hypothesis_k) = hypothesis_k - hypothesis_j
+							bool addConstraint = true;
+							if (modelScoreDiff < loss_jk) {
+								// constraint violated
+								++violatedConstraintsBefore;
+							}
+							else if (m_onlyViolatedConstraints) {
+								// constraint not violated
+								addConstraint = false;
+							}
 
-						// update weight vector:
-						if (delta != 0) {
-							update(currWeights, featureValueDiffs, delta);
-							cerr << "\nComparing pair" << j << "," << k << endl;
-							cerr << "Update with delta: " << delta << endl;
+							if (addConstraint) {
+								// Compute delta:
+								float delta = computeDelta(currWeights, featureValueDiff, loss_jk, j, k, alphas);
+
+								// update weight vector:
+								if (delta != 0) {
+									update(currWeights, featureValueDiff, delta);
+									cerr << "\nComparing pair" << j << "," << k << endl;
+									cerr << "Update with delta: " << delta << endl;
+								}
+							}
+						}
+						else {
+							// add all constraints
+							// Compute delta:
+							float delta = computeDelta(currWeights, featureValueDiff, loss_jk, j, k, alphas);
+
+							// update weight vector:
+							if (delta != 0) {
+								update(currWeights, featureValueDiff, delta);
+								cerr << "\nComparing pair" << j << "," << k << endl;
+								cerr << "Update with delta: " << delta << endl;
+							}
 						}
 					}
 				}
@@ -145,34 +175,21 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
  * which are used in the delta term and in the weight update term.
  */
 float MiraOptimiser::computeDelta(ScoreComponentCollection& currWeights,
-		const vector< ScoreComponentCollection>& featureValues,
-		const size_t j,
-		const size_t k,
-		const vector< float>& losses,
-		vector< float>& alphas,
-		ScoreComponentCollection& featureValueDiffs) {
-
- 	const ScoreComponentCollection featureValuesJ = featureValues[j]; // hypothesis j'
- 	const ScoreComponentCollection featureValuesK = featureValues[k]; // hypothesis j
+		const ScoreComponentCollection featureValueDiff,
+		float loss_jk,
+		float j,
+		float k,
+		vector< float>& alphas) {
 
  	// compute delta
  	float delta = 0.0;
- 	float diffOfModelScores = 0.0; // (Dh_ij - Dh_ij') * w' ---> (h(e_ij') - h(e_ij))) * w' (inner product)
- 	float squaredNorm = 0.0; // ||Dh_ij - Dh_ij'||^2 ---> sum over squares of elements of h(e_ij') - h(e_ij)
-
- 	featureValueDiffs = featureValuesJ;
- 	featureValueDiffs.MinusEquals(featureValuesK);
- 	squaredNorm = featureValueDiffs.InnerProduct(featureValueDiffs);
- 	diffOfModelScores = featureValueDiffs.InnerProduct(currWeights);
-
+ 	float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+ 	float squaredNorm = featureValueDiff.InnerProduct(featureValueDiff);
  	if (squaredNorm == 0.0) {
  		delta = 0.0;
  	}
  	else {
- 		// loss difference used to compute delta: (l_ij - l_ij') ---> B(e_ij') - B(e_ij)
- 		// TODO: simplify and use BLEU scores of hypotheses directly?
- 		float lossDiff = losses[k] - losses[j];
- 		delta = (lossDiff - diffOfModelScores) / squaredNorm;
+ 		delta = (loss_jk - modelScoreDiff) / squaredNorm;
 
  		// clipping
  		if (m_fixedClipping) {

@@ -75,12 +75,11 @@ namespace Mira {
       						  const std::vector< std::vector<float> >& losses,
       						  const Moses::ScoreComponentCollection& oracleScores);
       float computeDelta(Moses::ScoreComponentCollection& currWeights,
-      				const std::vector< Moses::ScoreComponentCollection>& featureValues,
-      				const size_t indexHope,
-      				const size_t indexFear,
-      				const std::vector< float>& losses,
-      				std::vector< float>& alphas,
-      				Moses::ScoreComponentCollection& featureValueDiffs);
+      				const Moses::ScoreComponentCollection featureValuesDiff,
+      				float loss_jk,
+      				float j,
+      				float k,
+      				std::vector< float>& alphas);
       void update(Moses::ScoreComponentCollection& currWeights, Moses::ScoreComponentCollection& featureValueDiffs, const float delta);
 
       void setOracleIndex(size_t oracleIndex) {
