@@ -56,7 +56,7 @@ public:
 
 vector<string> tokenize( const char [] );
 
-void computeCountOfCounts( char* fileNameExtract );
+void computeCountOfCounts( char* fileNameExtract, int maxLines );
 void processPhrasePairs( vector< PhraseAlignment > & );
 PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > & );
 void outputPhrasePair( vector< PhraseAlignment * > &, float );
@@ -78,6 +78,7 @@ int negLogProb = 1;
 bool lexFlag = true;
 int countOfCounts[GT_MAX+1];
 float discountFactor[GT_MAX+1];
+int maxLinesGTDiscount = -1;
 
 int main(int argc, char* argv[]) 
 {
@@ -126,6 +127,11 @@ int main(int argc, char* argv[])
 			negLogProb = -1;
 			cerr << "using negative log-probabilities\n";
 		}
+		else if (strcmp(argv[i],"--MaxLinesGTDiscount") == 0) {
+			++i;
+			maxLinesGTDiscount = atoi(argv[i]);
+			cerr << "maxLinesGTDiscount=" << maxLinesGTDiscount << endl;
+		}
 		else {
 			cerr << "ERROR: unknown option " << argv[i] << endl;
 			exit(1);
@@ -138,7 +144,7 @@ int main(int argc, char* argv[])
   
 	// compute count of counts for Good Turing discounting
 	if (goodTuringFlag)
-		computeCountOfCounts( fileNameExtract );
+		computeCountOfCounts( fileNameExtract, maxLinesGTDiscount );
 
 	// sorted phrase extraction file
 	ifstream extractFile;
@@ -213,7 +219,7 @@ int main(int argc, char* argv[])
 	phraseTableFile.close();
 }
 
-void computeCountOfCounts( char* fileNameExtract )
+void computeCountOfCounts( char* fileNameExtract, int maxLines )
 {
 	cerr << "computing counts of counts";
 	for(int i=1;i<=GT_MAX;i++) countOfCounts[i] = 0;
@@ -227,13 +233,14 @@ void computeCountOfCounts( char* fileNameExtract )
 	istream &extractFileP = extractFile;
 
 	// loop through all extracted phrase translations
-	int i=0;
+	int lineNum = 0;
 	char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
 	lastLine[0] = '\0';
 	PhraseAlignment *lastPhrasePair = NULL;
 	while(true) {
 		if (extractFileP.eof()) break;
-		if (++i % 100000 == 0) cerr << "." << flush;
+		if (maxLines > 0 && lineNum >= maxLines) break;
+		if (++lineNum % 100000 == 0) cerr << "." << flush;
 		SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
 		if (extractFileP.eof())	break;
 		
@@ -247,9 +254,9 @@ void computeCountOfCounts( char* fileNameExtract )
 
 		// create new phrase pair
 		PhraseAlignment *phrasePair = new PhraseAlignment();
-		phrasePair->create( line, i );
+		phrasePair->create( line, lineNum );
 		
-		if (i == 1)
+		if (lineNum == 1)
 		{
 			lastPhrasePair = phrasePair;
 			continue;
@@ -271,7 +278,7 @@ void computeCountOfCounts( char* fileNameExtract )
 			phraseTableS.clear(); // these would get too big
 			// process line again, since phrase tables flushed
 			phrasePair->clear();
-			phrasePair->create( line, i ); 
+			phrasePair->create( line, lineNum ); 
 		}
 
 		int count = lastPhrasePair->count + 0.99999;
