@@ -8,8 +8,6 @@ DS?=$(shell date '+%Y%m%d')
 # Set TARGETDIR to directory where you want the compiled scripts to be copied
 # to.
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
-# The values here are just the defaults in case your environment does not set
-# them.
 TARGETDIR=/Users/hieuhoang/temp
 BINDIR=/Users/hieuhoang/temp
 
