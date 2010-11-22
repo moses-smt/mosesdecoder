@@ -62,8 +62,14 @@ public:
 	bool operator()(const Scores& s1, const Scores& s2) const { 
 		float score1(1), score2(1);
 		int idx1(0), idx2(0);
-		iterate(s1, itr) score1 += (*itr * m_weights.at(idx1++)); 
-		iterate(s2, itr) score2 += (*itr * m_weights.at(idx2++));
+        for (Scores::const_iterator itr = s1.begin(); 
+                itr != s1.end(); ++itr) {
+            (*itr * m_weights.at(idx1++)); 
+        }
+        for (Scores::const_iterator itr = s2.begin();
+            itr != s2.end(); ++itr) {
+            (*itr * m_weights.at(idx2++));
+        }
 		return score1 < score2;
 	}
 private: 

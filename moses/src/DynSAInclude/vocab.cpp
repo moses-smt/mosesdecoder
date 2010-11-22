@@ -88,8 +88,10 @@ namespace Moses {
 	{
 		// then each vcb entry
 		*vcbout << m_ids2words.size() << "\n";
-		iterate(m_ids2words, iter)
+        for (Id2Word::const_iterator iter = m_ids2words.begin();
+                iter != m_ids2words.end(); ++iter) {
 			*vcbout << iter->second << "\t" << iter->first << "\n";
+        }
 		return true;
 	}
 	
@@ -134,10 +136,14 @@ namespace Moses {
 	}
 	void Vocab::PrintVocab() 
 	{
-		iterate(m_ids2words, iter)
+        for (Id2Word::const_iterator iter = m_ids2words.begin();
+            iter != m_ids2words.end(); ++iter ) {
 			std::cerr << iter->second << "\t" << iter->first << "\n";
-		iterate(m_words2ids, iter)
+        }
+        for (Word2Id::const_iterator iter = m_words2ids.begin();
+            iter != m_words2ids.end(); ++iter ) {
 			std::cerr << iter->second << "\t" << iter->first << "\n";
+        }
 	}
 
 } //end namespace

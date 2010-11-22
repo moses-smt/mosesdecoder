@@ -75,7 +75,10 @@ int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align)
 		Utils::splitToInt(line, vtmp, "- ");
 		assert(vtmp.size() % 2 == 0);
 		std::vector<short> vAlgn;	// store as short ints for memory
-		iterate(vtmp, itr) vAlgn.push_back(short(*itr));
+        for (std::vector<int>::const_iterator itr = vtmp.begin();
+            itr != vtmp.end(); ++itr) {
+            vAlgn.push_back(short(*itr));
+        }
 		m_rawAlignments.push_back(vAlgn);
 	}
 	return m_rawAlignments.size();
@@ -86,7 +89,10 @@ int BilingualDynSuffixArray::LoadRawAlignments(string& align) {
   Utils::splitToInt(align, vtmp, "- ");
   assert(vtmp.size() % 2 == 0);
   vector<short> vAlgn;  // store as short ints for memory
-  iterate(vtmp, itr) vAlgn.push_back(short(*itr));
+  for (std::vector<int>::const_iterator itr = vtmp.begin();
+      itr != vtmp.end(); ++itr) {
+      vAlgn.push_back(short(*itr));
+  }
   m_rawAlignments.push_back(vAlgn);
   return m_rawAlignments.size();
 }
@@ -255,10 +261,11 @@ pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& p
 	for(int trgIdx = phrasepair.m_startTarget; trgIdx <= phrasepair.m_endTarget; ++trgIdx) {
 		float trgSumPairProbs(0);
 		wordID_t trgWord = m_trgCorpus->at(trgIdx + m_trgSntBreaks[phrasepair.m_sntIndex]);
-		iterate(targetProbs, trgItr) {
+        for (std::map<pair<wordID_t, wordID_t>, float>::const_iterator trgItr
+                = targetProbs.begin(); trgItr != targetProbs.end(); ++trgItr) {
 			if(trgItr->first.second == trgWord) 
 				trgSumPairProbs += trgItr->second;
-		}
+        }
 		if(trgSumPairProbs == 0) continue;	// currently don't store target-side SA
 		int noAligned = alignment.numberAligned.at(trgIdx);
 		float trgNormalizer = noAligned < 2 ? 1.0 : 1.0 / float(noAligned);

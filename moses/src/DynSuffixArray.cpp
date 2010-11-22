@@ -109,12 +109,13 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex) {
     int theLWord = (j == 0 ? Ltmp : newSent->at(j-1));
   
     m_L->insert(m_L->begin() + kprime, theLWord);
-    piterate(m_SA, itr) 
+    for (vuint_t::iterator itr = m_SA->begin(); itr != m_SA->end(); ++itr) {
       if(*itr >= newIndex) ++(*itr);
-  
+    }
     m_SA->insert(m_SA->begin() + kprime, newIndex);
-    piterate(m_ISA, itr)
+    for (vuint_t::iterator itr = m_ISA->begin(); itr != m_ISA->end(); ++itr) {
       if((int)*itr >= kprime) ++(*itr);
+    }
   
     m_ISA->insert(m_ISA->begin() + newIndex, kprime);
     k = kprime;
@@ -164,12 +165,14 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del) {
     m_F->erase(m_F->begin() + row);     
   
     m_ISA->erase(m_ISA->begin() + index);  // order is important     
-    piterate(m_ISA, itr)
+    for (vuint_t::iterator itr = m_ISA->begin(); itr != m_ISA->end(); ++itr) {
       if((int)*itr > row) --(*itr);
+    }
   
     m_SA->erase(m_SA->begin() + row);
-    piterate(m_SA, itr)
+    for (vuint_t::iterator itr = m_SA->begin(); itr != m_SA->end(); ++itr) {
       if(*itr > index) --(*itr);
+    }
   }
   m_L->at(m_ISA->at(index))= ltmp;
   Reorder(LastFirstFunc(m_ISA->at(index)), true_pos);
