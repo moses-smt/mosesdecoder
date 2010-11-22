@@ -319,7 +319,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	bool labeledOutput = staticData.IsLabeledNBestList();
 	bool reportAllFactors = staticData.GetReportAllFactorsNBest();
 	bool includeAlignment = staticData.NBestIncludesAlignment();
-	//bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
+	bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 	
 	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -454,13 +454,31 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 					out<< "-" << targetRange.GetEndPos();
 				}
 			}
-    		}
+		}
 	
-                if (StaticData::Instance().IsPathRecoveryEnabled()) {
-                	out << "|||";
-                        OutputInput(out, edges[0]);
-                }
-				
+		if (includeWordAlignment) {
+			out << " |||";
+			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
+			{
+				const Hypothesis &edge = *edges[currEdge];
+				const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+				WordsRange targetRange = path.GetTargetWordsRange(edge);
+				const int sourceOffset = sourceRange.GetStartPos();
+				const int targetOffset = targetRange.GetStartPos();
+				const AlignmentInfo AI = edge.GetCurrTargetPhrase().GetAlignmentInfo();
+				AlignmentInfo::const_iterator iter;
+				for (iter = AI.begin(); iter != AI.end(); ++iter)
+					{
+						out << " " << iter->first+sourceOffset << "-" << iter->second+targetOffset;
+					}
+			}
+		}
+	
+		if (StaticData::Instance().IsPathRecoveryEnabled()) {
+			out << "|||";
+			OutputInput(out, edges[0]);
+		}
+
 		out << endl;
 	}
 
