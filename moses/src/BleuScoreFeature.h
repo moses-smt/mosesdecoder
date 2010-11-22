@@ -29,6 +29,8 @@ private:
     size_t m_source_length;
     size_t m_target_length;
 
+    size_t m_source_phrase_length; // todo: delete
+
     // scaled reference length is needed for scoring incomplete hypotheses against reference translation
     float m_scaled_ref_length;
 
@@ -42,7 +44,8 @@ typedef std::map< Phrase, size_t > NGrams;
 
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
-    BleuScoreFeature();
+	BleuScoreFeature();
+    BleuScoreFeature(bool useScaledReference);
 
     std::string GetScoreProducerDescription() const
     {
@@ -80,6 +83,9 @@ private:
     std::map< size_t, std::pair< size_t, NGrams > > m_refs;
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
+
+    // whether or not to use the scaled reference
+    bool m_use_scaled_reference;
 
     // counts for pseudo-document big_O
     std::vector< float > m_count_history;
