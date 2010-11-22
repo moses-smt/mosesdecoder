@@ -85,6 +85,8 @@ int main(int argc, char** argv) {
   float marginScaleFactor;
   int n;
   bool onlyViolatedConstraints;
+  bool accumulateWeights;
+  bool useScaledReference;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -104,8 +106,11 @@ int main(int argc, char** argv) {
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
 	    ("nbest,n", po::value<int>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
+	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
+	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold for SMO to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
+
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -158,7 +163,7 @@ int main(int argc, char** argv) {
 
   // initialise moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
-  MosesDecoder* decoder = new MosesDecoder(referenceSentences) ;
+  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference) ;
   ScoreComponentCollection startWeights = decoder->getWeights();
   startWeights.L1Normalise();
   decoder->setWeights(startWeights);
@@ -230,7 +235,9 @@ int main(int argc, char** argv) {
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
 	  // Sum up weights over one epoch, final average uses weights from last epoch
-	  cumulativeWeights.ZeroAll();
+	  if (!accumulateWeights) {
+		  cumulativeWeights.ZeroAll();
+	  }
 
 	  //number of weight dumps this epoch
 	  size_t weightEpochDump = 0;
@@ -255,15 +262,19 @@ int main(int argc, char** argv) {
 
 		  // MODEL
 		  cerr << "Run decoder to get nbest wrt model score" << endl;
-		  decoder->getNBest(input,
+		  vector<const Word*> bestModel = decoder->getNBest(input,
                         *sid,
                         n,
                         0.0,
                         1.0,
                         featureValues[batch],
                         bleuScores[batch],
-                        false);
+                        true);
 		  decoder->cleanup();
+		  for (size_t i = 0; i < bestModel.size(); ++i) {
+			  cerr << *(bestModel[i]) << " ";
+		  }
+		  cerr << endl;
 
 		  // HOPE
 		  cerr << "Run decoder to get nbest hope translations" << endl;
@@ -277,6 +288,10 @@ int main(int argc, char** argv) {
                         bleuScores[batch],
                         true);
 		  decoder->cleanup();
+		  for (size_t i = 0; i < oracle.size(); ++i) {
+			  cerr << *(oracle[i]) << " ";
+		  }
+		  cerr << endl;
 
 		  ScoreComponentCollection oracleFeatureValues = featureValues[batch][oraclePos];
 		  float oracleBleuScore = bleuScores[batch][oraclePos];
@@ -377,6 +392,8 @@ int main(int argc, char** argv) {
 		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
 			  // compute average weights per process over iterations
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
+			  // TODO: when not accumulating over all epochs, we have to divide by
+			  // the number of iterations in this epoch!
 			  totalWeights.DivideEquals(iterations);
 
 			  // average across processes
@@ -403,6 +420,9 @@ int main(int argc, char** argv) {
 
 		  for (size_t i = 0; i < oracle.size(); ++i) {
 			  delete oracle[i];
+		  }
+		  for (size_t i = 0; i < bestModel.size(); ++i) {
+			  delete bestModel[i];
 		  }
 	  }
   }
