@@ -39,6 +39,11 @@
 		1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
 		1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */; };
 		1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1EB8A261129C04C700041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1EB8A297129C06A300041956 /* gzfilebuf.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A20C129C022000041956 /* gzfilebuf.h */; };
+		1EB8A29A129C06B300041956 /* gzfilebuf.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A20C129C022000041956 /* gzfilebuf.h */; };
+		1EB8A29B129C06B300041956 /* InputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A210129C024C00041956 /* InputFileStream.h */; };
+		1EB8A29C129C06B300041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -377,6 +382,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EB8A29A129C06B300041956 /* gzfilebuf.h in Sources */,
+				1EB8A29B129C06B300041956 /* InputFileStream.h in Sources */,
+				1EB8A29C129C06B300041956 /* InputFileStream.cpp in Sources */,
 				1C4757A8102B797900AB74DB /* tables-core.cpp in Sources */,
 				1C4757A9102B797900AB74DB /* tables-core.h in Sources */,
 				1C475795102B78DD00AB74DB /* score.cpp in Sources */,
@@ -397,6 +405,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EB8A297129C06A300041956 /* gzfilebuf.h in Sources */,
+				1EB8A261129C04C700041956 /* InputFileStream.cpp in Sources */,
 				1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -486,6 +496,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = score;
 			};
@@ -501,6 +512,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = score;
 				ZERO_LINK = NO;
@@ -547,6 +559,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "consolidate-direct";
 			};
@@ -561,6 +574,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "consolidate-direct";
 				ZERO_LINK = NO;

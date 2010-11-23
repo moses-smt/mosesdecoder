@@ -31,6 +31,7 @@
 #include "tables-core.h"
 #include "PhraseAlignment.h"
 #include "score.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -147,8 +148,8 @@ int main(int argc, char* argv[])
 		computeCountOfCounts( fileNameExtract, maxLinesGTDiscount );
 
 	// sorted phrase extraction file
-	ifstream extractFile;
-	extractFile.open(fileNameExtract);
+	Moses::InputFileStream extractFile(fileNameExtract);
+
 	if (extractFile.fail()) {
 		cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
 		exit(1);
