@@ -19,8 +19,8 @@ score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o
 consolidate: consolidate.o
 	$(CXX) $^ -o consolidate
 
-consolidate-direct: consolidate-direct.o
-	$(CXX) $^ -o consolidate-direct
+consolidate-direct: consolidate-direct.o InputFileStream.o
+	$(CXX) $^ -lz -o consolidate-direct
 
 relax-parse: tables-core.o SyntaxTree.o XmlTree.o relax-parse.o
 	$(CXX) $^ -o relax-parse
