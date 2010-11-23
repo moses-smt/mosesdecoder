@@ -45,7 +45,7 @@ typedef std::map< Phrase, size_t > NGrams;
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
 	BleuScoreFeature();
-    BleuScoreFeature(bool useScaledReference);
+    BleuScoreFeature(bool useScaledReference, bool scaleByInputLength);
 
     std::string GetScoreProducerDescription() const
     {
@@ -86,6 +86,9 @@ private:
 
     // whether or not to use the scaled reference
     bool m_use_scaled_reference;
+
+    // whether or not to scale the BLEU score by a history of the input size
+    bool m_scale_by_input_length;
 
     // counts for pseudo-document big_O
     std::vector< float > m_count_history;

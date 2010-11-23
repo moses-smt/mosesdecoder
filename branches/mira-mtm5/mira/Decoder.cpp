@@ -66,14 +66,14 @@ namespace Mira {
     delete[] mosesargv;
   }
  
-  MosesDecoder::MosesDecoder(const vector<vector<string> >& refs, bool useScaledReference)
+  MosesDecoder::MosesDecoder(const vector<vector<string> >& refs, bool useScaledReference, bool scaleByInputLength)
 		: m_manager(NULL) {
 	  // force initialisation of the phrase dictionary
       const StaticData &staticData = StaticData::Instance();
       const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
       // Add the bleu feature
-      m_bleuScoreFeature = new BleuScoreFeature(useScaledReference);
+      m_bleuScoreFeature = new BleuScoreFeature(useScaledReference, scaleByInputLength);
       (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
       m_bleuScoreFeature->LoadReferences(refs);
   }
