@@ -432,6 +432,9 @@ int main(int argc, char** argv) {
 		  for (size_t i = 0; i < bestModel.size(); ++i) {
 			  delete bestModel[i];
 		  }
+		  for (size_t i = 0; i < fear.size(); ++i) {
+			  delete fear[i];
+		  }
 	  }
   }
   
