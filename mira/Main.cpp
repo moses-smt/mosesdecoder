@@ -221,6 +221,7 @@ int main(int argc, char** argv) {
   //Main loop:
   ScoreComponentCollection cumulativeWeights;		// collect weights per epoch to produce an average
   size_t iterations = 0;
+  size_t iterationsThisEpoch = 0;
 
   time_t now = time(0); // get current time
   struct tm* tm = localtime(&now); // get struct filled out
@@ -231,10 +232,10 @@ int main(int argc, char** argv) {
   ScoreComponentCollection averageTotalWeights;
 
   // TODO: scaling of feature values for probabilistic features
-  // TODO: stop MIRA when score on dev or tuning set does not improve further?
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
 	  // Sum up weights over one epoch, final average uses weights from last epoch
+	  iterationsThisEpoch = 0;
 	  if (!accumulateWeights) {
 		  cumulativeWeights.ZeroAll();
 	  }
@@ -298,7 +299,7 @@ int main(int argc, char** argv) {
 
 		  // FEAR
 		  cerr << "Run decoder to get nbest fear translations" << endl;
-		  decoder->getNBest(input,
+		  vector<const Word*> fear = decoder->getNBest(input,
                         *sid,
                         n,
                         -1.0,
@@ -307,7 +308,10 @@ int main(int argc, char** argv) {
                         bleuScores[batch],
                         false);
 		  decoder->cleanup();
-		  cerr << "BLEU of oracle: " << oracleBleuScore << endl;
+		  for (size_t i = 0; i < fear.size(); ++i) {
+			  cerr << *(fear[i]) << " ";
+		  }
+		  cerr << endl;
 
 	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
 	      vector< vector<float> > losses(batchSize);
@@ -365,6 +369,7 @@ int main(int argc, char** argv) {
 
 		  ++shardPosition;
 		  ++iterations;
+		  ++iterationsThisEpoch;
 
 		  //mix weights?
 #ifdef MPI_ENABLE
@@ -392,9 +397,10 @@ int main(int argc, char** argv) {
 		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
 			  // compute average weights per process over iterations
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
-			  // TODO: when not accumulating over all epochs, we have to divide by
-			  // the number of iterations in this epoch!
-			  totalWeights.DivideEquals(iterations);
+			  if (accumulateWeights)
+				  totalWeights.DivideEquals(iterations);
+			  else
+				  totalWeights.DivideEquals(iterationsThisEpoch);
 
 			  // average across processes
 #ifdef MPI_ENABLE
