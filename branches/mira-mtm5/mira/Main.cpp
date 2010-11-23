@@ -308,7 +308,7 @@ int main(int argc, char** argv) {
                         1.0,
                         featureValues[batch],
                         bleuScores[batch],
-                        false);
+                        true);
 		  decoder->cleanup();
 		  for (size_t i = 0; i < fear.size(); ++i) {
 			  cerr << *(fear[i]) << " ";
