@@ -78,16 +78,18 @@ BleuScoreFeature::BleuScoreFeature():
                                  m_source_length_history(0),
                                  m_target_length_history(0),
                                  m_ref_length_history(0),
-                                 m_use_scaled_reference(true) {}
+                                 m_use_scaled_reference(true),
+                                 m_scale_by_input_length(true) {}
 
-BleuScoreFeature::BleuScoreFeature(bool useScaledReference):
+BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength):
                                  StatefulFeatureFunction("BleuScore"),      
                                  m_count_history(BleuScoreState::bleu_order),
                                  m_match_history(BleuScoreState::bleu_order),
                                  m_source_length_history(0),
                                  m_target_length_history(0),
                                  m_ref_length_history(0),
-                                 m_use_scaled_reference(useScaledReference) {}
+                                 m_use_scaled_reference(useScaledReference),
+                                 m_scale_by_input_length(scaleByInputLength) {}
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
@@ -152,15 +154,6 @@ void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
     m_source_length_history = 0.9 * (m_source_length_history + m_cur_source_length);
     m_target_length_history = 0.9 * (m_target_length_history + hypo.size());
     m_ref_length_history = 0.9 * (m_ref_length_history + m_cur_ref_length);
-    //std::cout << "reference_length/target_length history: " << (m_ref_length_history/m_target_length_history) << endl;
-    //std::cout << "source length history: " << m_source_length_history << endl;
-    /*cerr << "oracle length: " <<  hypo.size() << endl;
-    cerr << "refer. length: " << m_cur_ref_length << endl;
-    cerr << "ratio  length: " << (float)hypo.size()/m_cur_ref_length << endl;
-    cerr << "target history: " << m_target_length_history << endl;
-    cerr << "refer. history: " << m_ref_length_history << endl;
-	cerr << "ratio  history: " << (float)m_target_length_history/m_ref_length_history << endl << endl;*/
-    //cerr << "source/reference ratio: " << (float)m_cur_source_length/m_cur_ref_length << endl << endl;
 }
 
 /*
@@ -320,7 +313,10 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
     // B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
     // where c(e;) is a vector of reference length, ngram counts and ngram matches
-    precision *= m_source_length_history + state->m_source_length;
+	if (m_scale_by_input_length) {
+		precision *= m_source_length_history + state->m_source_length;
+	}
+
     return precision;
 }
 

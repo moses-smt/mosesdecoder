@@ -87,6 +87,7 @@ int main(int argc, char** argv) {
   bool onlyViolatedConstraints;
   bool accumulateWeights;
   bool useScaledReference;
+  bool scaleByInputLength;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
+	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold for SMO to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
@@ -163,7 +165,7 @@ int main(int argc, char** argv) {
 
   // initialise moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
-  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference) ;
+  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength);
   ScoreComponentCollection startWeights = decoder->getWeights();
   startWeights.L1Normalise();
   decoder->setWeights(startWeights);
