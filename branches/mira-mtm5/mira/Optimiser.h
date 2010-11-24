@@ -32,7 +32,7 @@ namespace Mira {
       virtual void updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector<std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector<std::vector<float> >& losses,
-                         const Moses::ScoreComponentCollection& oracleScores) = 0;
+                         const std::vector<Moses::ScoreComponentCollection>& oracleScores) = 0;
   };
  
   class DummyOptimiser : public Optimiser {
@@ -40,7 +40,7 @@ namespace Mira {
       virtual void updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector< std::vector<float> >& losses,
-                         const Moses::ScoreComponentCollection& oracleScores) 
+                         const std::vector<Moses::ScoreComponentCollection>& oracleScores)
                          {/* do nothing */}
   };
  
@@ -51,7 +51,7 @@ namespace Mira {
       virtual void updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector< std::vector<float> >& losses,
-                         const Moses::ScoreComponentCollection& oracleScores);
+                         const std::vector<Moses::ScoreComponentCollection>& oracleScores);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -73,7 +73,7 @@ namespace Mira {
       virtual void updateWeights(Moses::ScoreComponentCollection& weights,
       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
       						  const std::vector< std::vector<float> >& losses,
-      						  const Moses::ScoreComponentCollection& oracleScores);
+      						  const std::vector< Moses::ScoreComponentCollection>& oracleScores);
       float computeDelta(Moses::ScoreComponentCollection& currWeights,
       				const Moses::ScoreComponentCollection featureValuesDiff,
       				float loss_jk,
@@ -82,8 +82,8 @@ namespace Mira {
       				std::vector< float>& alphas);
       void update(Moses::ScoreComponentCollection& currWeights, Moses::ScoreComponentCollection& featureValueDiffs, const float delta);
 
-      void setOracleIndex(size_t oracleIndex) {
-    	  m_oracleIndex = oracleIndex;
+      void setOracleIndices(std::vector<size_t> oracleIndices) {
+    	  m_oracleIndices= oracleIndices;
       }
   
    private:
@@ -106,7 +106,7 @@ namespace Mira {
       bool m_fixedClipping;
 
       // index of oracle translation in hypothesis matrix
-      size_t m_oracleIndex;
+      std::vector<size_t> m_oracleIndices;
   };
 }
 

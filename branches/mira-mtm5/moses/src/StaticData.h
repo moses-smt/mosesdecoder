@@ -566,6 +566,7 @@ public:
 	bool ContinuePartialTranslation() const { return m_continuePartialTranslation; }
 	
 	void ReLoadParameter();
+	void ReLoadBleuScoreFeatureParameter();
 	Parameter* GetParameter()
 	{
 		return m_parameter;
