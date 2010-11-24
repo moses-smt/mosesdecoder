@@ -83,7 +83,8 @@ int main(int argc, char** argv) {
   size_t weightDumpFrequency;
   string weightDumpStem;
   float marginScaleFactor;
-  int n;
+  size_t n;
+  size_t batchSize;
   bool onlyViolatedConstraints;
   bool accumulateWeights;
   bool useScaledReference;
@@ -105,7 +106,8 @@ int main(int argc, char** argv) {
         ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
-	    ("nbest,n", po::value<int>(&n)->default_value(10), "Number of translations in nbest list")
+	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
+	    ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
@@ -163,7 +165,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  // initialise moses
+  // initialise Moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
   MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength);
   ScoreComponentCollection startWeights = decoder->getWeights();
@@ -242,85 +244,114 @@ int main(int argc, char** argv) {
 		  cumulativeWeights.ZeroAll();
 	  }
 
-	  //number of weight dumps this epoch
+	  // number of weight dumps this epoch
 	  size_t weightEpochDump = 0;
 
-	  // compute sum in objective function after each epoch
-	  float maxSum = 0.0;
-
-	  //TODO: batching
-	  size_t batchSize = 1;
-	  size_t batch = 0;
 	  size_t shardPosition = 0;
-	  for (vector<size_t>::const_iterator sid = shard.begin(); sid != shard.end(); ++sid) {
-		  const string& input = inputSentences[*sid];
-		  const vector<string>& refs = referenceSentences[*sid];
-		  cerr << "\nInput sentence " << *sid << ": \"" << input << "\"" << endl;
-
+	  vector<size_t>::const_iterator sid = shard.begin();
+	  while (sid != shard.end()) {
 		  // feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
-		  vector<vector<ScoreComponentCollection > > featureValues(batchSize);
-		  vector<vector<float> > bleuScores(batchSize);
+		  vector<vector<ScoreComponentCollection > > featureValues;
+		  vector<vector<float> > bleuScores;
 
-		  cerr << "Using weights:" << decoder->getWeights() << endl;
+		  // BATCHING: produce nbest lists for all input sentences in batch
+		  vector<size_t> oraclePositions;
+		  vector<float> oracleBleuScores;
+		  vector< vector< const Word*> > oracles;
+		  vector<ScoreComponentCollection> oracleFeatureValues;
+		  vector<size_t> inputLengths;
+		  vector<size_t> ref_ids;
+		  size_t actualBatchSize = 0;
+		  for (size_t batchPosition = 0; batchPosition < batchSize && sid != shard.end(); ++batchPosition) {
+			  const string& input = inputSentences[*sid];
+			  const vector<string>& refs = referenceSentences[*sid];
+			  cerr << "\nBatch position " << batchPosition << endl;
+			  cerr << "Input sentence " << *sid << ": \"" << input << "\"" << endl;
 
-		  // MODEL
-		  cerr << "Run decoder to get nbest wrt model score" << endl;
-		  vector<const Word*> bestModel = decoder->getNBest(input,
+			  vector<ScoreComponentCollection> newFeatureValues;
+			  vector<float> newBleuScores;
+			  featureValues.push_back(newFeatureValues);
+			  bleuScores.push_back(newBleuScores);
+
+			  // MODEL
+			  cerr << "Run decoder to get nbest wrt model score" << endl;
+			  vector<const Word*> bestModel = decoder->getNBest(input,
                         *sid,
                         n,
                         0.0,
                         1.0,
-                        featureValues[batch],
-                        bleuScores[batch],
+                        featureValues[batchPosition],
+                        bleuScores[batchPosition],
                         true);
-		  decoder->cleanup();
-		  for (size_t i = 0; i < bestModel.size(); ++i) {
-			  cerr << *(bestModel[i]) << " ";
-		  }
-		  cerr << endl;
+			  inputLengths.push_back(decoder->getCurrentInputLength());
+			  ref_ids.push_back(*sid);
+			  decoder->cleanup();
+			  for (size_t i = 0; i < bestModel.size(); ++i) {
+				  cerr << *(bestModel[i]) << " ";
+			  }
+			  cerr << endl;
+			  cerr << "model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
-		  // HOPE
-		  cerr << "Run decoder to get nbest hope translations" << endl;
-		  size_t oraclePos = featureValues[batch].size();
-		  vector<const Word*> oracle = decoder->getNBest(input,
+			  // HOPE
+			  cerr << "Run decoder to get nbest hope translations" << endl;
+			  size_t oraclePos = featureValues[batchPosition].size();
+			  oraclePositions.push_back(oraclePos);
+			  vector<const Word*> oracle = decoder->getNBest(input,
 						*sid,
 						n,
                         1.0,
                         1.0,
-                        featureValues[batch],
-                        bleuScores[batch],
+                        featureValues[batchPosition],
+                        bleuScores[batchPosition],
                         true);
-		  decoder->cleanup();
-		  for (size_t i = 0; i < oracle.size(); ++i) {
-			  cerr << *(oracle[i]) << " ";
-		  }
-		  cerr << endl;
+			  decoder->cleanup();
+			  oracles.push_back(oracle);
+			  for (size_t i = 0; i < oracle.size(); ++i) {
+				  //oracles[batchPosition].push_back(oracle[i]);
+				  cerr << *(oracle[i]) << " ";
+			  }
+			  cerr << endl;
+			  cerr << "oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
-		  ScoreComponentCollection oracleFeatureValues = featureValues[batch][oraclePos];
-		  float oracleBleuScore = bleuScores[batch][oraclePos];
+			  oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
+			  float oracleBleuScore = bleuScores[batchPosition][oraclePos];
+			  oracleBleuScores.push_back(oracleBleuScore);
 
-		  // FEAR
-		  cerr << "Run decoder to get nbest fear translations" << endl;
-		  vector<const Word*> fear = decoder->getNBest(input,
+			  // FEAR
+			  cerr << "Run decoder to get nbest fear translations" << endl;
+			  size_t fearPos = featureValues[batchPosition].size();
+			  vector<const Word*> fear = decoder->getNBest(input,
                         *sid,
                         n,
                         -1.0,
                         1.0,
-                        featureValues[batch],
-                        bleuScores[batch],
+                        featureValues[batchPosition],
+                        bleuScores[batchPosition],
                         true);
-		  decoder->cleanup();
-		  for (size_t i = 0; i < fear.size(); ++i) {
-			  cerr << *(fear[i]) << " ";
+			  decoder->cleanup();
+			  for (size_t i = 0; i < fear.size(); ++i) {
+				  cerr << *(fear[i]) << " ";
+			  }
+			  cerr << endl;
+			  cerr << "fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
+
+			  for (size_t i = 0; i < bestModel.size(); ++i) {
+				  delete bestModel[i];
+			  }
+			  for (size_t i = 0; i < fear.size(); ++i) {
+				  delete fear[i];
+			  }
+
+			  // next input sentence
+			  ++sid;
+			  ++actualBatchSize;
 		  }
-		  cerr << endl;
 
 	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
-	      vector< vector<float> > losses(batchSize);
-	      for (size_t i = 0; i < batchSize; ++i) {
-	    	  for (size_t j = 0; j < bleuScores[i].size(); ++j) {
-	    		  losses[i].push_back(oracleBleuScore - bleuScores[i][j]);
-	    		  //cout << "loss[" << i << "," << j << "]" << endl;
+	      vector< vector<float> > losses(actualBatchSize);
+	      for (size_t batchPosition = 0; batchPosition < actualBatchSize; ++batchPosition) {
+	    	  for (size_t j = 0; j < bleuScores[batchPosition].size(); ++j) {
+	    		  losses[batchPosition].push_back(oracleBleuScores[batchPosition] - bleuScores[batchPosition][j]);
 	    	  }
 	      }
 
@@ -328,39 +359,47 @@ int main(int argc, char** argv) {
 	      ScoreComponentCollection mosesWeights = decoder->getWeights();
 	      const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
 	      mosesWeights.Assign(featureFunctions.back(), 0);
-	      ScoreComponentCollection oldWeights(mosesWeights);
-			
-		  //run optimiser
-	      cerr << "Run optimiser.." << endl;
+
 	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
-	    	  ((MiraOptimiser*)optimiser)->setOracleIndex(oraclePos);
+	    	  ((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
 	      }
 
+		  // run optimiser on batch
+	      cerr << "\nRun optimiser.." << endl;
+	      ScoreComponentCollection oldWeights(mosesWeights);
 	      optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
 
-		  //update moses weights
+		  // update moses weights
 	      mosesWeights.L1Normalise();
 		  decoder->setWeights(mosesWeights);
   
-		  //history (for approx doc bleu)
-		  decoder->updateHistory(oracle);
+		  // update history (for approximate document bleu)
+		  decoder->updateHistory(oracles, inputLengths, ref_ids);
+
+		  // clean up oracle translations after updating history
+		  for (size_t i = 0; i < oracles.size(); ++i) {
+			  for (size_t j = 0; j < oracles[i].size(); ++j) {
+				  delete oracles[i][j];
+			  }
+		  }
 
 		  cumulativeWeights.PlusEquals(mosesWeights);
 
 		  // sanity check: compare margin created by old weights against new weights
 		  float lossMinusMargin_old = 0;
 		  float lossMinusMargin_new = 0;
-	      for (size_t j = 0; j < featureValues.size(); ++j) {
-	    	  ScoreComponentCollection featureDiff(oracleFeatureValues);
-	    	  featureDiff.MinusEquals(featureValues[batch][j]);
+		  for (size_t batchPosition = 0; batchPosition < actualBatchSize; ++batchPosition) {
+			  for (size_t j = 0; j < featureValues[batchPosition].size(); ++j) {
+				  ScoreComponentCollection featureDiff(oracleFeatureValues[batchPosition]);
+				  featureDiff.MinusEquals(featureValues[batchPosition][j]);
 
-	    	  // old weights
-	    	  float margin = featureDiff.InnerProduct(oldWeights);
-	    	  lossMinusMargin_old += (losses[batch][j] - margin);
-
-	    	  // new weights
-	    	  margin = losses[batch][j] - featureDiff.InnerProduct(mosesWeights);
-	    	  lossMinusMargin_new += margin;
+				  // old weights
+				  float margin = featureDiff.InnerProduct(oldWeights);
+				  lossMinusMargin_old += (losses[batchPosition][j] - margin);
+				  // new weights
+				  margin = featureDiff.InnerProduct(mosesWeights);
+				  lossMinusMargin_new += (losses[batchPosition][j] - margin);
+			  }
 	      }
 
 	      cerr << "\nSummed (loss - margin) with old weights: " << lossMinusMargin_old << endl;
@@ -373,7 +412,7 @@ int main(int argc, char** argv) {
 		  ++iterations;
 		  ++iterationsThisEpoch;
 
-		  //mix weights?
+		  // mix weights?
 #ifdef MPI_ENABLE
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
@@ -395,7 +434,7 @@ int main(int argc, char** argv) {
 		  }
 #endif
 
-		  //dump weights?
+		  // dump weights?
 		  if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
 			  // compute average weights per process over iterations
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
@@ -407,13 +446,17 @@ int main(int argc, char** argv) {
 			  // average across processes
 #ifdef MPI_ENABLE
 			  mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
-#endif
-			  if (rank == 0 && !weightDumpStem.empty()) {
+			  if (rank == 0) {
+				  // average and normalise weights
 				  averageTotalWeights.DivideEquals(size);
-
-				  // normalise weights after averaging
 				  averageTotalWeights.L1Normalise();
-
+			  }
+#endif
+#ifndef MPI_ENABLE
+			  // or use weights from single process
+			  averageTotalWeights = totalWeights;
+#endif
+			  if (!weightDumpStem.empty()) {
 				  ostringstream filename;
 				  filename << weightDumpStem << "_" << epoch;
 				  if (weightDumpFrequency > 1) {
@@ -425,20 +468,14 @@ int main(int argc, char** argv) {
 				  ++weightEpochDump;
 			  }
 		  }
-
-		  for (size_t i = 0; i < oracle.size(); ++i) {
-			  delete oracle[i];
-		  }
-		  for (size_t i = 0; i < bestModel.size(); ++i) {
-			  delete bestModel[i];
-		  }
-		  for (size_t i = 0; i < fear.size(); ++i) {
-			  delete fear[i];
-		  }
 	  }
   }
   
-  cerr << "Final new weights: " << averageTotalWeights << endl;
+#ifdef MPI_ENABLE
+			  mpi::finalize();
+#endif
+
+  cerr << "Average total weights: " << averageTotalWeights << endl;
 
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out

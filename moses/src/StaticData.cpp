@@ -1423,6 +1423,23 @@ void StaticData::ReLoadParameter()
 	
 }
 
+void StaticData::ReLoadBleuScoreFeatureParameter()
+{
+	//loop over all ScoreProducer to update weights
+	const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
+
+	std::vector<const ScoreProducer*>::const_iterator iterSP;
+	for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP)
+	{
+		std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
+		vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
+
+		if (paramShortName == "bl") {
+			SetWeights(*iterSP, Weights);
+		}
+	}
+}
+
 // ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() const {}
 // in ScoreComponentCollection.h
 	

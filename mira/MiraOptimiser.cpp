@@ -9,7 +9,7 @@ namespace Mira {
 void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
 		const vector< vector<float> >& losses,
-		const ScoreComponentCollection& oracleFeatureValues) {
+		const vector< ScoreComponentCollection>& oracleFeatureValues) {
 
 	if (m_hildreth) {
 		size_t violatedConstraintsBefore = 0;
@@ -20,7 +20,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				// check if optimisation criterion is violated for one hypothesis and the oracle
 				// h(e*) >= h(e_ij) + loss(e_ij)
 				// h(e*) - h(e_ij) >= loss(e_ij)
-				ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+				ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
 				featureValueDiff.MinusEquals(featureValues[i][j]);
 				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				cerr << "loss of hypothesis: " << losses[i][j] << endl;
@@ -49,6 +49,8 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 
+		cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
+
 		if (violatedConstraintsBefore > 0) {
 			// TODO: slack?
 			// run optimisation
@@ -72,7 +74,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			size_t violatedConstraintsAfter = 0;
 			for (size_t i = 0; i < featureValues.size(); ++i) {
 				for (size_t j = 0; j < featureValues[i].size(); ++j) {
-					ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+					ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
 					featureValueDiff.MinusEquals(featureValues[i][j]);
 					float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 					float loss = losses[i][j] * m_marginScaleFactor;
@@ -100,7 +102,7 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			if (!m_fixedClipping) {
 				// initialise alphas for each source (alpha for oracle translation = C, all other alphas = 0)
 				for (size_t j = 0; j < featureValues[i].size(); ++j) {
-					if (j == m_oracleIndex) {
+					if (j == m_oracleIndices[i]) {
 						// oracle
 						alphas[j] = m_c;
 					}

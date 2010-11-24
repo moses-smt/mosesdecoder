@@ -101,17 +101,19 @@ namespace Mira {
     const TranslationSystem& system = staticData.GetTranslationSystem
         (TranslationSystem::DEFAULT);
 
-    //set the weight for the bleu feature
+    // set the weight for the bleu feature
     ostringstream bleuWeightStr;
     bleuWeightStr << bleuObjectiveWeight;
     PARAM_VEC bleuWeight(1,bleuWeightStr.str());
+
     staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
-    staticData.ReLoadParameter();
+    staticData.ReLoadBleuScoreFeatureParameter();
 
     m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
     m_bleuScoreFeature->SetCurrentReference(sentenceid);
 
     //run the decoder
+    cerr << "Decoder: using weights:" << getWeights() << endl;
     m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
     m_manager->ProcessSentence();
     TrellisPathList sentences;
@@ -131,18 +133,6 @@ namespace Mira {
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
-
-    	/*// construct translation string
-    	vector<const Word*> sentence;
-        Phrase targetPhrase = path.GetTargetPhrase();
-
-        for (size_t pos = 0; pos < targetPhrase.GetSize(); ++pos) {
-        	const Word &word = targetPhrase.GetWord(pos);
-        	Word *newWord = new Word(word);
-        	cerr << *newWord << " ";
-    	}
-
-        cerr << endl;*/
     }
 
     // get the best
@@ -163,6 +153,9 @@ namespace Mira {
     return best;
   }
 
+  size_t MosesDecoder::getCurrentInputLength() {
+	  return (*m_sentence).GetSize();
+  }
 
   float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
     return scores.GetScoreForProducer(m_bleuScoreFeature);
@@ -184,6 +177,9 @@ namespace Mira {
   void MosesDecoder::updateHistory(const vector<const Word*>& words) {
     m_bleuScoreFeature->UpdateHistory(words);
   }
-	
+
+  void MosesDecoder::updateHistory(const vector< vector< const Word*> >& words, vector<size_t>& sourceLengths, vector<size_t>& ref_ids) {
+	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids);
+  }
 } 
 
