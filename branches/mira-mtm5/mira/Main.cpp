@@ -471,9 +471,9 @@ int main(int argc, char** argv) {
 	  }
   }
   
-#ifdef MPI_ENABLE
+/*#ifdef MPI_ENABLE
 			  mpi::finalize();
-#endif
+#endif*/
 
   cerr << "Average total weights: " << averageTotalWeights << endl;
 
