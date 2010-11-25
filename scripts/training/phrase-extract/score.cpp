@@ -225,8 +225,7 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines )
 	cerr << "computing counts of counts";
 	for(int i=1;i<=GT_MAX;i++) countOfCounts[i] = 0;
 
-	ifstream extractFile;
-	extractFile.open( fileNameExtract );
+	Moses::InputFileStream extractFile(fileNameExtract);
 	if (extractFile.fail()) {
 		cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
 		exit(1);
