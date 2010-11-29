@@ -334,7 +334,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 	    	float smoothed_target_length = m_target_length_history + state->m_target_length;
 	    	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
 	    	if (m_increase_BP) {
-	    		precision *= exp(1 - ((smoothed_ref_length + 1)/ smoothed_target_length));
+	    		precision *= exp(1 - ((1.1 * smoothed_ref_length)/ smoothed_target_length));
 	    	}
 	    	else{
 	    		precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
@@ -348,7 +348,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 				float smoothed_target_length = m_target_length_history + state->m_target_length;
 				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
 		    	if (m_increase_BP) {
-		    		precision *= exp(1 - ((smoothed_ref_length + 1)/ smoothed_target_length));
+		    		precision *= exp(1 - ((1.1 * smoothed_ref_length)/ smoothed_target_length));
 		    	}
 		    	else{
 		    		precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
@@ -361,7 +361,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 				float smoothed_target_length = m_target_length_history + state->m_target_length;
 				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
 		    	if (m_increase_BP) {
-		    		precision *= exp(1 - ((smoothed_ref_length + 1)/ smoothed_target_length));
+		    		precision *= exp(1 - ((1.1 * smoothed_ref_length)/ smoothed_target_length));
 		    	}
 		    	else{
 		    		precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
