@@ -355,6 +355,7 @@ int main(int argc, char** argv) {
 			  // next input sentence
 			  ++sid;
 			  ++actualBatchSize;
+			  ++shardPosition;
 		  }
 
 	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
@@ -423,8 +424,7 @@ int main(int argc, char** argv) {
 	    	  }
 	      }
 
-		  ++shardPosition;
-		  ++iterations;
+	      ++iterations;
 		  ++iterationsThisEpoch;
 
 		  // mix weights?
