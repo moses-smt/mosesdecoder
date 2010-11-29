@@ -90,6 +90,7 @@ int main(int argc, char** argv) {
   bool accumulateWeights;
   bool useScaledReference;
   bool scaleByInputLength;
+  bool increaseBP;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -109,11 +110,12 @@ int main(int argc, char** argv) {
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-	    ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(0), "Use nbest list with distinct translations in inference step")
+	    ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
+	    ("increase-BP", po::value<bool>(&increaseBP)->default_value(false), "Increase penalty for short translations")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold for SMO to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
@@ -169,7 +171,7 @@ int main(int argc, char** argv) {
 
   // initialise Moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
-  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength);
+  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, increaseBP);
   ScoreComponentCollection startWeights = decoder->getWeights();
   startWeights.L1Normalise();
   decoder->setWeights(startWeights);
@@ -205,7 +207,7 @@ int main(int argc, char** argv) {
 
   Optimiser* optimiser = NULL;
   cerr << "Nbest list size: " << n << endl;
-  cerr << "Distinct translations in nbest list?: " << distinctNbest << endl;
+  cerr << "Distinct translations in nbest list? " << distinctNbest << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping);
