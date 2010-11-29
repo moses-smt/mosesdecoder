@@ -59,14 +59,15 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, bool regulariseHildrethUpdates) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
 		  m_marginScaleFactor(marginScaleFactor),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_c(clipping),
-		  m_fixedClipping(fixedClipping) { }
+		  m_fixedClipping(fixedClipping),
+		  m_regulariseHildrethUpdates(regulariseHildrethUpdates) { }
 
      ~MiraOptimiser() {}
    
@@ -104,6 +105,9 @@ namespace Mira {
 
       // use a fixed clipping threshold with SMO  (instead of adaptive)
       bool m_fixedClipping;
+
+      // regularise Hildreth updates
+      bool m_regulariseHildrethUpdates;
 
       // index of oracle translation in hypothesis matrix
       std::vector<size_t> m_oracleIndices;

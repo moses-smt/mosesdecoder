@@ -56,19 +56,29 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			// run optimisation
 			cerr << "\nNumber of violated constraints: " << violatedConstraintsBefore << endl;
 			// compute deltas for all given constraints
-			vector< float> deltas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
+			vector< float> alphas;
+			if (m_regulariseHildrethUpdates) {
+				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances, m_c);
+			}
+			else {
+				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
+			}
 
 			// Update the weight vector according to the deltas and the feature value differences
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
+			float sumOfAlphas = 0;
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
-				cerr << "delta: " << deltas[k] << endl;
+				cerr << "alpha " << k << ": " << alphas[k] << endl;
+				sumOfAlphas += alphas[k];
 
 				// compute update
-				featureValueDiffs[k].MultiplyEquals(deltas[k]);
+				featureValueDiffs[k].MultiplyEquals(alphas[k]);
 
 				// apply update to weight vector
 				currWeights.PlusEquals(featureValueDiffs[k]);
 			}
+
+			cerr << "sum of alphas: " << sumOfAlphas << endl;
 
 			// sanity check: how many constraints violated after optimisation?
 			size_t violatedConstraintsAfter = 0;
