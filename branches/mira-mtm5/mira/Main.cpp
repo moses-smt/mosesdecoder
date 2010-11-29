@@ -91,6 +91,7 @@ int main(int argc, char** argv) {
   bool useScaledReference;
   bool scaleByInputLength;
   bool increaseBP;
+  bool regulariseHildrethUpdates;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -116,7 +117,8 @@ int main(int argc, char** argv) {
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("increase-BP", po::value<bool>(&increaseBP)->default_value(false), "Increase penalty for short translations")
-	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a clipping threshold for SMO to regularise updates")
+	    ("regularise-hildreth-updates", po::value<bool>(&regulariseHildrethUpdates)->default_value(false), "Regularise Hildreth updates with the value set for clipping")
+	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
 
@@ -210,7 +212,7 @@ int main(int argc, char** argv) {
   cerr << "Distinct translations in nbest list? " << distinctNbest << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping);
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
