@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+use utf8;
 
 ###############################################
 # An implementation of paired bootstrap resampling for testing the statistical
@@ -19,6 +20,7 @@ use strict;
 my $TIMES_TO_REPEAT_SUBSAMPLING = 1000;
 my $SUBSAMPLE_SIZE = 0; # if 0 then subsample size is equal to the whole set
 my $MAX_NGRAMS = 4;
+my $IO_ENCODING = "utf8"; # can be replaced with e.g. "encoding(iso-8859-13)" or alike
 
 #checking cmdline argument consistency
 if (@ARGV < 3) {
@@ -31,7 +33,7 @@ if (@ARGV < 3) {
 	exit 1;
 }
 
-print "reading data; " . `date`;
+print STDERR "reading data; " . `date`;
 
 #read all data
 my $data = readAllData(@ARGV);
@@ -39,14 +41,14 @@ my $data = readAllData(@ARGV);
 my $verbose = $ARGV[3];
 
 #calculate each sentence's contribution to BP and ngram precision
-print "performing preliminary calculations (hypothesis 1); " . `date`;
+print STDERR "performing preliminary calculations (hypothesis 1); " . `date`;
 preEvalHypo($data, "hyp1");
 
-print "performing preliminary calculations (hypothesis 2); " . `date`;
+print STDERR "performing preliminary calculations (hypothesis 2); " . `date`;
 preEvalHypo($data, "hyp2");
 
 #start comparing
-print "comparing hypotheses -- this may take some time; " . `date`;
+print STDERR "comparing hypotheses -- this may take some time; " . `date`;
 
 bootstrap_report("BLEU", \&getBleu);
 bootstrap_report("NIST", \&getNist);
@@ -89,7 +91,7 @@ sub bootstrap_pass {
 	my @subSample2Arr;
 
 	#applying sampling
-	for (1..$TIMES_TO_REPEAT_SUBSAMPLING) {
+	for my $idx (1..$TIMES_TO_REPEAT_SUBSAMPLING) {
 		my $subSampleIndices = drawWithReplacement($data->{size}, ($SUBSAMPLE_SIZE? $SUBSAMPLE_SIZE: $data->{size}));
 		
 		my $score1 = &$scoreFunc($data->{refs}, $data->{hyp1}, $subSampleIndices);
@@ -98,6 +100,17 @@ sub bootstrap_pass {
 		push @subSampleDiffArr, abs($score2 - $score1);
 		push @subSample1Arr, $score1;
 		push @subSample2Arr, $score2;
+		
+		if ($idx % 10 == 0) {
+			print STDERR ".";
+		}
+		if ($idx % 100 == 0) {
+			print STDERR "$idx\n";
+		}
+	}
+	
+	if ($TIMES_TO_REPEAT_SUBSAMPLING % 100 != 0) {
+		print STDERR ".$TIMES_TO_REPEAT_SUBSAMPLING\n";
 	}
 	
 	return (\@subSampleDiffArr, \@subSample1Arr, \@subSample2Arr);
@@ -235,6 +248,7 @@ sub readData {
 	my @result;
 	
 	open (FILE, $file) or die ("Failed to open `$file' for reading");
+	binmode (FILE, ":$IO_ENCODING");
 	
 	while (<FILE>) {
 		push @result, { words => [split(/\s+/, $_)] };
