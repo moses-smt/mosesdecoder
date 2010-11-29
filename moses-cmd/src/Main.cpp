@@ -57,10 +57,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Moses;
 
+static const size_t PRECISION = 3;
+
 /** Enforce rounding */
-void fix(std::ostream& stream) {
+void fix(std::ostream& stream, size_t size) {
     stream.setf(std::ios::fixed);
-    stream.precision(3);
+    stream.precision(size);
 }
 
 
@@ -145,7 +147,7 @@ class TranslationTask : public Task {
             //Word Graph
             if (m_wordGraphCollector) {
                 ostringstream out;
-                fix(out);
+                fix(out,PRECISION);
                 manager.GetWordGraph(m_lineNumber, out);
                 m_wordGraphCollector->Write(m_lineNumber, out.str());
             }
@@ -153,7 +155,7 @@ class TranslationTask : public Task {
             //Search Graph
             if (m_searchGraphCollector) {
                 ostringstream out;
-                fix(out);
+                fix(out,PRECISION);
                 manager.OutputSearchGraph(m_lineNumber, out);
                 m_searchGraphCollector->Write(m_lineNumber, out.str());
 
@@ -174,7 +176,7 @@ class TranslationTask : public Task {
             if (m_outputCollector) {
                 ostringstream out;
                 ostringstream debug;
-                fix(debug);
+                fix(debug,PRECISION);
                 
                 //All derivations - send them to debug stream
                 if (staticData.PrintAllDerivations()) {
@@ -267,7 +269,7 @@ class TranslationTask : public Task {
             //detailed translation reporting
             if (m_detailedTranslationCollector) {
 								ostringstream out;
-                fix(out);
+                fix(out,PRECISION);
                 TranslationAnalysis::PrintTranslationAnalysis(manager.GetTranslationSystem(), out, manager.GetBestHypothesis());
                 m_detailedTranslationCollector->Write(m_lineNumber,out.str());
             }
@@ -291,6 +293,39 @@ class TranslationTask : public Task {
 
 };
 
+static void PrintFeatureWeight(const FeatureFunction* ff) {
+  
+  size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
+  size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
+  for (size_t i = weightStart; i < weightEnd; ++i) {
+    cout << ff->GetScoreProducerDescription() <<  " " << ff->GetScoreProducerWeightShortName() << " " 
+        << StaticData::Instance().GetAllWeights()[i] << endl;
+  }
+}
+
+
+static void ShowWeights() {
+  fix(cout,6);
+  const StaticData& staticData = StaticData::Instance();
+  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for (size_t i = 0; i < sff.size(); ++i) {
+    PrintFeatureWeight(sff[i]);
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    PrintFeatureWeight(slf[i]);
+  }
+  for (size_t i = 0; i < pds.size(); ++i) {
+    PrintFeatureWeight(pds[i]);
+  }
+  for (size_t i = 0; i < gds.size(); ++i) {
+    PrintFeatureWeight(gds[i]);
+  }
+}
+
 int main(int argc, char** argv) {
     
 #ifdef HAVE_PROTOBUF
@@ -303,8 +338,8 @@ int main(int argc, char** argv) {
         TRACE_ERR(endl);
     }
 
-    fix(cout);
-    fix(cerr);
+    fix(cout,PRECISION);
+    fix(cerr,PRECISION);
 
 
     Parameter* params = new Parameter();
@@ -333,6 +368,11 @@ int main(int argc, char** argv) {
     
     if (!StaticData::LoadDataStatic(params)) {
         exit(1);
+    }
+    
+    if (params->isParamSpecified("show-weights")) {
+      ShowWeights();
+      exit(0);
     }
 
     const StaticData& staticData = StaticData::Instance();

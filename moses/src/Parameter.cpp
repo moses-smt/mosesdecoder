@@ -132,6 +132,7 @@ Parameter::Parameter()
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
     AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
+    AddParam("show-weights", "print feature weights and exit");
 }
 
 Parameter::~Parameter()
