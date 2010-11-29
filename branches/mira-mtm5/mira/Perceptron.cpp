@@ -24,7 +24,7 @@ using namespace std;
 
 namespace Mira {
 
-void Perceptron::updateWeights(ScoreComponentCollection& currWeights,
+size_t Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& scores,
 		const vector<vector<float> >& losses,
 		const vector<ScoreComponentCollection>& oracleScores)
