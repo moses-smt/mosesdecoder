@@ -205,6 +205,7 @@ int main(int argc, char** argv) {
 
   Optimiser* optimiser = NULL;
   cerr << "Nbest list size: " << n << endl;
+  cerr << "Distinct translations in nbest list?: " << distinctNbest << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping);
