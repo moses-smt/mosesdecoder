@@ -375,7 +375,7 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 	      cerr << "\nRun optimiser.." << endl;
 	      ScoreComponentCollection oldWeights(mosesWeights);
-	      optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
+	      size_t constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
 
 		  // update moses weights
 	      mosesWeights.L1Normalise();
@@ -410,10 +410,15 @@ int main(int argc, char** argv) {
 			  }
 	      }
 
-	      cerr << "\nSummed (loss - margin) with old weights: " << lossMinusMargin_old << endl;
+		  cerr << "\nConstraint change: " << constraintChange << endl;
+	      cerr << "Summed (loss - margin) with old weights: " << lossMinusMargin_old << endl;
 	      cerr << "Summed (loss - margin) with new weights: " << lossMinusMargin_new << endl;
 	      if (lossMinusMargin_new > lossMinusMargin_old) {
 	    	  cerr << "Worsening: " << lossMinusMargin_new - lossMinusMargin_old << endl;
+
+	    	  if (constraintChange < 0) {
+	    		  cerr << "Something is going wrong here.." << endl;
+	    	  }
 	      }
 
 		  ++shardPosition;

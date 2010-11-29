@@ -29,7 +29,7 @@ namespace Mira {
   class Optimiser {
     public:
       Optimiser() {}
-      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+      virtual size_t updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector<std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector<std::vector<float> >& losses,
                          const std::vector<Moses::ScoreComponentCollection>& oracleScores) = 0;
@@ -37,7 +37,7 @@ namespace Mira {
  
   class DummyOptimiser : public Optimiser {
     public:
-      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+      virtual size_t updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<Moses::ScoreComponentCollection>& oracleScores)
@@ -48,7 +48,7 @@ namespace Mira {
     public:
        
 
-      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+      virtual size_t updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<Moses::ScoreComponentCollection>& oracleScores);
@@ -70,7 +70,7 @@ namespace Mira {
 
      ~MiraOptimiser() {}
    
-      virtual void updateWeights(Moses::ScoreComponentCollection& weights,
+      virtual size_t updateWeights(Moses::ScoreComponentCollection& weights,
       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
       						  const std::vector< std::vector<float> >& losses,
       						  const std::vector< Moses::ScoreComponentCollection>& oracleScores);

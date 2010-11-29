@@ -6,7 +6,7 @@ using namespace std;
 
 namespace Mira {
 
-void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
+size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
 		const vector< vector<float> >& losses,
 		const vector< ScoreComponentCollection>& oracleFeatureValues) {
@@ -90,6 +90,8 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			if (violatedConstraintsAfter > violatedConstraintsBefore) {
 				cerr << "Increase: " << violatedConstraintsAfter - violatedConstraintsBefore << endl << endl;
 			}
+
+			return violatedConstraintsBefore - violatedConstraintsAfter;
 		}
 		else {
 			cerr << "No constraint violated for this batch" << endl;
@@ -168,6 +170,8 @@ void MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			cerr << "number of pairs: " << pairs << endl;
 		}
 	}
+
+	return 0;
 }
 
 /*
