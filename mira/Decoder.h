@@ -60,7 +60,8 @@ class MosesDecoder {
                           float bleuScoreWeight, //weight of bleu in score
                           std::vector< Moses::ScoreComponentCollection>& featureValues,
                           std::vector< float>& scores,
-                          bool oracle);
+                          bool oracle,
+                          bool distinct);
     size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids);

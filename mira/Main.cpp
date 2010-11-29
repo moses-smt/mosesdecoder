@@ -85,6 +85,7 @@ int main(int argc, char** argv) {
   float marginScaleFactor;
   size_t n;
   size_t batchSize;
+  bool distinctNbest;
   bool onlyViolatedConstraints;
   bool accumulateWeights;
   bool useScaledReference;
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
+	    ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(0), "Use nbest list with distinct translations in inference step")
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
@@ -282,7 +284,8 @@ int main(int argc, char** argv) {
                         1.0,
                         featureValues[batchPosition],
                         bleuScores[batchPosition],
-                        true);
+                        true,
+                        distinctNbest);
 			  inputLengths.push_back(decoder->getCurrentInputLength());
 			  ref_ids.push_back(*sid);
 			  decoder->cleanup();
@@ -303,7 +306,8 @@ int main(int argc, char** argv) {
                         1.0,
                         featureValues[batchPosition],
                         bleuScores[batchPosition],
-                        true);
+                        true,
+                        distinctNbest);
 			  decoder->cleanup();
 			  oracles.push_back(oracle);
 			  for (size_t i = 0; i < oracle.size(); ++i) {
@@ -327,7 +331,8 @@ int main(int argc, char** argv) {
                         1.0,
                         featureValues[batchPosition],
                         bleuScores[batchPosition],
-                        true);
+                        true,
+                        distinctNbest);
 			  decoder->cleanup();
 			  for (size_t i = 0; i < fear.size(); ++i) {
 				  cerr << *(fear[i]) << " ";

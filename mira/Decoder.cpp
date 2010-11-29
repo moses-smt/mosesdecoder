@@ -90,7 +90,8 @@ namespace Mira {
                               float bleuScoreWeight,
                               vector< ScoreComponentCollection>& featureValues,
                               vector< float>& bleuScores,
-                              bool oracle)
+                              bool oracle,
+                              bool distinct)
   {
 	StaticData &staticData = StaticData::InstanceNonConst();
 
@@ -113,11 +114,10 @@ namespace Mira {
     m_bleuScoreFeature->SetCurrentReference(sentenceid);
 
     //run the decoder
-    cerr << "Decoder: using weights:" << getWeights() << endl;
     m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
     m_manager->ProcessSentence();
     TrellisPathList sentences;
-    m_manager->CalcNBest(count,sentences);
+    m_manager->CalcNBest(count,sentences, distinct);
 						
     // read off the feature values and bleu scores for each sentence in the nbest list
     Moses::TrellisPathList::const_iterator iter;
