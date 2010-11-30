@@ -31,7 +31,8 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS);
+   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
+   $_DICTIONARY);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -103,6 +104,7 @@ $_HELP = 1
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
+		       'dictionary=s' => \$_DICTIONARY,
                );
 
 if ($_HELP) {
@@ -486,7 +488,10 @@ sub prepare {
     
     print STDERR "(1.0) selecting factors @ ".`date`;
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
-    my $corpus = ($___NOT_FACTORED && !$_XML) ? $___CORPUS : $___CORPUS.".".$___ALIGNMENT_FACTORS;    
+    my $corpus = ($___NOT_FACTORED && !$_XML) ? $___CORPUS : $___CORPUS.".".$___ALIGNMENT_FACTORS;
+
+    my $VCB_F, my $VCB_E;
+
     if ($___NOFORK) {
 	if (! $___NOT_FACTORED || $_XML) {
 	    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
@@ -496,8 +501,8 @@ sub prepare {
 	&make_classes($corpus.".".$___F,$___VCB_F.".classes");
 	&make_classes($corpus.".".$___E,$___VCB_E.".classes");
 	
-	my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
-	my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
+	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
+	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
 	
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
@@ -535,8 +540,8 @@ sub prepare {
 	    exit 0;
 	}
 	
-	my $VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
-	my $VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
+	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
+	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
 	
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
@@ -549,6 +554,18 @@ sub prepare {
 	waitpid($pid2, 0);
 	waitpid($pid, 0);
     }
+
+	if (defined $_DICTIONARY)
+	{
+		my $dict= &make_dicts_files($_DICTIONARY, $VCB_F,$VCB_E,
+                                    $___CORPUS_DIR."/gizadict.$___E-$___F",
+                                    $___CORPUS_DIR."/gizadict.$___F-$___E");
+		if (not $dict)
+		{
+			print STDERR "WARNING: empty dictionary\n";
+			undef $_DICTIONARY;
+		}
+	}
 }
 
 sub open_compressed {
@@ -695,6 +712,41 @@ sub get_vocabulary {
     
     return \%VCB;
 }
+
+sub make_dicts_files {
+    my ($dictfile,$VCB_SRC,$VCB_TGT,$outfile1, $outfile2) = @_;
+    my %numberized_dict;
+    print STDERR "(1.3) numberizing dictionaries $outfile1 and $outfile2 @ ".`date`;
+    if ((-e $outfile1) && (-e $outfile2)) {
+        print STDERR "  dictionary files already in place, reusing\n";
+        return;
+    }
+    open(DICT,$dictfile) or die "ERROR: Can't read $dictfile";
+	open(OUT1,">$outfile1") or die "ERROR: Can't write $outfile1";
+	open(OUT2,">$outfile2") or die "ERROR: Can't write $outfile2";
+    while(my $line = <DICT>) {
+		my $src, my $tgt;
+		($src, $tgt) = split(/\s/,$line);
+		chomp($tgt); chomp($src);
+		if ((not defined($$VCB_TGT{$tgt})) || (not defined($$VCB_SRC{$src})))
+		{
+			print STDERR "Warning: unknown word in dictionary: $src <=> $tgt\n";
+			next;
+		}
+		$numberized_dict{int($$VCB_TGT{$tgt})} = int($$VCB_SRC{$src}) ;
+	}
+    close(DICT);
+	my @items = sort {$a <=> $b} keys %numberized_dict;
+	if (scalar(@items) == 0) { return 0; } 
+	foreach my $key (@items)
+	{
+		print OUT1 "$key $numberized_dict{$key}\n";
+		print OUT2 "$numberized_dict{$key} $key\n";
+	}
+    close(OUT);
+	return 1;
+}
+
 
 sub numberize_txt_file {
     my ($VCB_DE,$in_de,$VCB_EN,$in_en,$out) = @_;
@@ -893,7 +945,10 @@ sub run_single_giza {
 	 c => $train,
 	 CoocurrenceFile => "$dir/$f-$e.cooc",
 	 o => "$dir/$f-$e");
-
+	
+	if (defined $_DICTIONARY)
+	{ $GizaDefaultOptions{d} = $___CORPUS_DIR."/gizadict.$f-$e"; }
+	
 	# 5 Giza threads
 	if (defined $_MGIZA){ $GizaDefaultOptions{"ncpus"} = $_MGIZA_CPUS; }
 
