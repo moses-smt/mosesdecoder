@@ -378,7 +378,7 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 	      cerr << "\nRun optimiser.." << endl;
 	      ScoreComponentCollection oldWeights(mosesWeights);
-	      size_t constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
+	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
 
 		  // update moses weights
 	      mosesWeights.L1Normalise();

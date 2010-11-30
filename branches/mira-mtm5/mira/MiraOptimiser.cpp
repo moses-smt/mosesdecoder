@@ -6,7 +6,7 @@ using namespace std;
 
 namespace Mira {
 
-size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
+int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
 		const vector< vector<float> >& losses,
 		const vector< ScoreComponentCollection>& oracleFeatureValues) {
