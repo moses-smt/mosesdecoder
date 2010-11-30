@@ -726,7 +726,7 @@ sub make_dicts_files {
 	open(OUT2,">$outfile2") or die "ERROR: Can't write $outfile2";
     while(my $line = <DICT>) {
 		my $src, my $tgt;
-		($src, $tgt) = split(/\s/,$line);
+		($src, $tgt) = split(/\s+/,$line);
 		chomp($tgt); chomp($src);
 		if ((not defined($$VCB_TGT{$tgt})) || (not defined($$VCB_SRC{$src})))
 		{
