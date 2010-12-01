@@ -80,9 +80,10 @@ BleuScoreFeature::BleuScoreFeature():
                                  m_ref_length_history(0),
                                  m_use_scaled_reference(true),
                                  m_scale_by_input_length(true),
-                                 m_increase_BP(false) {}
+                                 m_increase_BP(false),
+                                 m_historySmoothing(0.9) {}
 
-BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, bool increaseBP):
+BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, bool increaseBP, float historySmoothing):
                                  StatefulFeatureFunction("BleuScore"),      
                                  m_count_history(BleuScoreState::bleu_order),
                                  m_match_history(BleuScoreState::bleu_order),
@@ -91,7 +92,8 @@ BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLen
                                  m_ref_length_history(0),
                                  m_use_scaled_reference(useScaledReference),
                                  m_scale_by_input_length(scaleByInputLength),
-                                 m_increase_BP(increaseBP) {}
+                                 m_increase_BP(increaseBP),
+                                 m_historySmoothing(historySmoothing) {}
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
@@ -147,15 +149,15 @@ void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
 
     // update counts and matches for every ngram length with counts from hypo
     for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
-        m_count_history[i] = 0.9 * (m_count_history[i] + ngram_counts[i]);
-        m_match_history[i] = 0.9 * (m_match_history[i] + ngram_matches[i]);
+        m_count_history[i] = m_historySmoothing * (m_count_history[i] + ngram_counts[i]);
+        m_match_history[i] = m_historySmoothing * (m_match_history[i] + ngram_matches[i]);
         //cerr << "precisionHistory " << i + 1 << ": " << (m_match_history[i]/m_count_history[i]) << " (" << m_match_history[i] << "/" << m_count_history[i] << ")" << endl;
     }
 
     // update counts for reference and target length
-    m_source_length_history = 0.9 * (m_source_length_history + m_cur_source_length);
-    m_target_length_history = 0.9 * (m_target_length_history + hypo.size());
-    m_ref_length_history = 0.9 * (m_ref_length_history + m_cur_ref_length);
+    m_source_length_history = m_historySmoothing * (m_source_length_history + m_cur_source_length);
+    m_target_length_history = m_historySmoothing * (m_target_length_history + hypo.size());
+    m_ref_length_history = m_historySmoothing * (m_ref_length_history + m_cur_ref_length);
 }
 
 /*
@@ -171,6 +173,8 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 	    size_t cur_source_length = sourceLengths[batchPosition];
 	    size_t cur_ref_length = m_refs[ref_ids[batchPosition]].first;
 	    NGrams cur_ref_ngrams = m_refs[ref_ids[batchPosition]].second;
+	    cerr << "reference length: " << cur_ref_length << endl;
+
 	    // compute vector c(e;{r_k}):
 	    // vector of effective reference length, number of ngrams in e, number of ngram matches between e and r_k
 	    GetNgramMatchCounts(phrase, cur_ref_ngrams, ngram_counts, ngram_matches, 0);
@@ -182,8 +186,8 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 
 	        // do this for last position in batch
 	        if (batchPosition == hypos.size() - 1) {
-	        	m_count_history[i] *= 0.9;
-	        	m_match_history[i] *= 0.9;
+	        	m_count_history[i] *= m_historySmoothing;
+	        	m_match_history[i] *= m_historySmoothing;
 	        }
 	    }
 
@@ -194,9 +198,9 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 
 	    // do this for last position in batch
 	    if (batchPosition == hypos.size() - 1) {
-	    	m_source_length_history *= 0.9;
-	    	m_target_length_history *= 0.9;
-	    	m_ref_length_history *= 0.9;
+	    	m_source_length_history *= m_historySmoothing;
+	    	m_target_length_history *= m_historySmoothing;
+	    	m_ref_length_history *= m_historySmoothing;
 	    }
 	}
 }

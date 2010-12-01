@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/program_options.hpp>
 #ifdef MPI_ENABLE
+#include "mpi.h"
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;
 #endif
@@ -88,6 +89,7 @@ int main(int argc, char** argv) {
   bool distinctNbest;
   bool onlyViolatedConstraints;
   bool accumulateWeights;
+  float historySmoothing;
   bool useScaledReference;
   bool scaleByInputLength;
   bool increaseBP;
@@ -114,6 +116,7 @@ int main(int argc, char** argv) {
 	    ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
 	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
+	    ("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("increase-BP", po::value<bool>(&increaseBP)->default_value(false), "Increase penalty for short translations")
@@ -173,7 +176,7 @@ int main(int argc, char** argv) {
 
   // initialise Moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
-  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, increaseBP);
+  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, increaseBP, historySmoothing);
   ScoreComponentCollection startWeights = decoder->getWeights();
   startWeights.L1Normalise();
   decoder->setWeights(startWeights);
@@ -243,6 +246,8 @@ int main(int argc, char** argv) {
   ScoreComponentCollection averageTotalWeights;
 
   // TODO: scaling of feature values for probabilistic features
+  vector< ScoreComponentCollection> list_of_delta_h;	// collect delta_h and  loss for all examples of an epoch
+  vector< float> list_of_losses;
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
 	  // Sum up weights over one epoch, final average uses weights from last epoch
@@ -385,6 +390,9 @@ int main(int argc, char** argv) {
 		  decoder->setWeights(mosesWeights);
   
 		  // update history (for approximate document bleu)
+		  for (size_t i = 0; i < oracles.size(); ++i) {
+			  cerr << "oracle length: " << oracles[i].size() << " ";
+		  }
 		  decoder->updateHistory(oracles, inputLengths, ref_ids);
 
 		  // clean up oracle translations after updating history
@@ -410,6 +418,9 @@ int main(int argc, char** argv) {
 				  // new weights
 				  margin = featureDiff.InnerProduct(mosesWeights);
 				  lossMinusMargin_new += (losses[batchPosition][j] - margin);
+
+				  list_of_delta_h.push_back(featureDiff);
+				  list_of_losses.push_back(losses[batchPosition][j]);
 			  }
 	      }
 
@@ -431,13 +442,18 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLE
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
-			  VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
+			  if (rank == 0) {
+				  cerr << "Rank 0, before mixing: " << mosesWeights << endl);
+			  }
+
+			  //VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
 
 			  // collect all weights in averageWeights and divide by number of processes
 			  mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
 			  if (rank == 0) {
 				  averageWeights.DivideEquals(size);
-				  VERBOSE(1, "After mixing: " << averageWeights << endl);
+				  //VERBOSE(1, "After mixing: " << averageWeights << endl);
+				  cerr << "Rank 0, after mixing: " << averageWeights << endl);
 
 				  // normalise weights after averaging
 				  averageWeights.L1Normalise();
@@ -446,6 +462,14 @@ int main(int argc, char** argv) {
 			  // broadcast average weights from process 0
 			  mpi::broadcast(world, averageWeights, 0);
 			  decoder->setWeights(averageWeights);
+
+			  // compute summed error after mixing weights
+			  float summedError = 0.0;
+			  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
+				  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageWeights));
+			  }
+
+			  cerr << "summed error after mixing weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
 		  }
 #endif
 
@@ -458,6 +482,13 @@ int main(int argc, char** argv) {
 			  else
 				  totalWeights.DivideEquals(iterationsThisEpoch);
 
+#ifdef MPI_ENABLE
+			  if (rank == 0) {
+				  cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl);
+				  cerr << "Rank 0, total weights: " << totalWeights << endl);
+			  }
+#endif
+
 			  // average across processes
 #ifdef MPI_ENABLE
 			  mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
@@ -465,6 +496,7 @@ int main(int argc, char** argv) {
 				  // average and normalise weights
 				  averageTotalWeights.DivideEquals(size);
 				  averageTotalWeights.L1Normalise();
+				  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl);
 			  }
 #endif
 #ifndef MPI_ENABLE
@@ -482,13 +514,24 @@ int main(int argc, char** argv) {
 				  averageTotalWeights.Save(filename.str());
 				  ++weightEpochDump;
 			  }
+
+			  // compute summed error after dumping weights
+			  float summedError = 0.0;
+			  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
+				  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageTotalWeights));
+			  }
+
+			  cerr << "summed error after dumping weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
 		  }
 	  }
+
+	  list_of_delta_h.clear();
+	  list_of_losses.clear();
   }
   
-/*#ifdef MPI_ENABLE
-			  mpi::finalize();
-#endif*/
+#ifdef MPI_ENABLE
+  MPI_Finalize()
+#endif
 
   cerr << "Average total weights: " << averageTotalWeights << endl;
 

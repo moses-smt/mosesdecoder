@@ -23,8 +23,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
 				featureValueDiff.MinusEquals(featureValues[i][j]);
 				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-				cerr << "loss of hypothesis: " << losses[i][j] << endl;
-				cerr << "model score difference: " << modelScoreDiff << endl;
+				//cerr << "loss of hypothesis: " << losses[i][j] << endl;
+				//cerr << "model score difference: " << modelScoreDiff << endl;
 				float loss = losses[i][j] * m_marginScaleFactor;
 
 				bool addConstraint = true;
@@ -49,12 +49,12 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 
-		cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
+		//cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
 
 		if (violatedConstraintsBefore > 0) {
 			// TODO: slack?
 			// run optimisation
-			cerr << "\nNumber of violated constraints: " << violatedConstraintsBefore << endl;
+			//cerr << "\nNumber of violated constraints: " << violatedConstraintsBefore << endl;
 			// compute deltas for all given constraints
 			vector< float> alphas;
 			if (m_regulariseHildrethUpdates) {
@@ -68,7 +68,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
 			float sumOfAlphas = 0;
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
-				cerr << "alpha " << k << ": " << alphas[k] << endl;
+				//cerr << "alpha " << k << ": " << alphas[k] << endl;
 				sumOfAlphas += alphas[k];
 
 				// compute update
@@ -78,7 +78,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				currWeights.PlusEquals(featureValueDiffs[k]);
 			}
 
-			cerr << "sum of alphas: " << sumOfAlphas << endl;
+			//cerr << "sum of alphas: " << sumOfAlphas << endl;
 
 			// sanity check: how many constraints violated after optimisation?
 			size_t violatedConstraintsAfter = 0;
@@ -92,11 +92,11 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 						++violatedConstraintsAfter;
 					}
 
-					cerr << "New model score difference: " << modelScoreDiff << endl;
+					//cerr << "New model score difference: " << modelScoreDiff << endl;
 				}
 			}
 
-			cerr << "Number of violated constraints after optimisation: " << violatedConstraintsAfter << endl;
+			//cerr << "Number of violated constraints after optimisation: " << violatedConstraintsAfter << endl;
 			if (violatedConstraintsAfter > violatedConstraintsBefore) {
 				cerr << "Increase: " << violatedConstraintsAfter - violatedConstraintsBefore << endl << endl;
 			}

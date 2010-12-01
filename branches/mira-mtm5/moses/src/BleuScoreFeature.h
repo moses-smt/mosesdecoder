@@ -45,7 +45,7 @@ typedef std::map< Phrase, size_t > NGrams;
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
 	BleuScoreFeature();
-    BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, bool increaseBP);
+    BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, bool increaseBP, float historySmoothing);
 
     std::string GetScoreProducerDescription() const
     {
@@ -93,6 +93,8 @@ private:
 
     // increase penalty for short translations
     bool m_increase_BP;
+
+    float m_historySmoothing;
 
     // counts for pseudo-document big_O
     std::vector< float > m_count_history;
