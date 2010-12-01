@@ -530,7 +530,7 @@ int main(int argc, char** argv) {
   }
   
 #ifdef MPI_ENABLE
-  MPI_Finalize()
+  MPI_Finalize();
 #endif
 
   cerr << "Average total weights: " << averageTotalWeights << endl;
