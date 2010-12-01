@@ -41,7 +41,7 @@ namespace Mira {
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& scores,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<Moses::ScoreComponentCollection>& oracleScores)
-                         {/* do nothing */}
+                         { return 0; }
   };
  
   class Perceptron : public Optimiser {
