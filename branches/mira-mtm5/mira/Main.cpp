@@ -443,7 +443,7 @@ int main(int argc, char** argv) {
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
 			  if (rank == 0) {
-				  cerr << "Rank 0, before mixing: " << mosesWeights << endl);
+				  cerr << "Rank 0, before mixing: " << mosesWeights << endl;
 			  }
 
 			  //VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
@@ -453,7 +453,7 @@ int main(int argc, char** argv) {
 			  if (rank == 0) {
 				  averageWeights.DivideEquals(size);
 				  //VERBOSE(1, "After mixing: " << averageWeights << endl);
-				  cerr << "Rank 0, after mixing: " << averageWeights << endl);
+				  cerr << "Rank 0, after mixing: " << averageWeights << endl;
 
 				  // normalise weights after averaging
 				  averageWeights.L1Normalise();
@@ -484,8 +484,8 @@ int main(int argc, char** argv) {
 
 #ifdef MPI_ENABLE
 			  if (rank == 0) {
-				  cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl);
-				  cerr << "Rank 0, total weights: " << totalWeights << endl);
+				  cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl;
+				  cerr << "Rank 0, total weights: " << totalWeights << endl;
 			  }
 #endif
 
@@ -496,7 +496,7 @@ int main(int argc, char** argv) {
 				  // average and normalise weights
 				  averageTotalWeights.DivideEquals(size);
 				  averageTotalWeights.L1Normalise();
-				  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl);
+				  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
 			  }
 #endif
 #ifndef MPI_ENABLE
