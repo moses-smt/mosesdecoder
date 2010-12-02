@@ -52,7 +52,6 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		//cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
 
 		if (violatedConstraintsBefore > 0) {
-			// TODO: slack?
 			// run optimisation
 			//cerr << "\nNumber of violated constraints: " << violatedConstraintsBefore << endl;
 			// compute deltas for all given constraints
