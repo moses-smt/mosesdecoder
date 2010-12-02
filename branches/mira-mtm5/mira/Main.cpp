@@ -124,7 +124,6 @@ int main(int argc, char** argv) {
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
-
   po::options_description cmdline_options;
   cmdline_options.add(desc);
   po::variables_map vm;
@@ -462,14 +461,6 @@ int main(int argc, char** argv) {
 			  // broadcast average weights from process 0
 			  mpi::broadcast(world, averageWeights, 0);
 			  decoder->setWeights(averageWeights);
-
-			  // compute summed error after mixing weights
-			  float summedError = 0.0;
-			  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
-				  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageWeights));
-			  }
-
-			  cerr << "summed error after mixing weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
 		  }
 #endif
 
@@ -497,11 +488,27 @@ int main(int argc, char** argv) {
 				  averageTotalWeights.DivideEquals(size);
 				  averageTotalWeights.L1Normalise();
 				  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
+
+				  // compute summed error after dumping weights
+				  float summedError = 0.0;
+				  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
+					  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageTotalWeights));
+				  }
+
+				  cerr << "Rank 0: summed error after dumping weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
 			  }
 #endif
 #ifndef MPI_ENABLE
 			  // or use weights from single process
 			  averageTotalWeights = totalWeights;
+
+			  // compute summed error after dumping weights
+			  float summedError = 0.0;
+			  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
+				  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageTotalWeights));
+			  }
+
+			  cerr << "summed error after dumping weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
 #endif
 			  if (!weightDumpStem.empty()) {
 				  ostringstream filename;
@@ -514,14 +521,6 @@ int main(int argc, char** argv) {
 				  averageTotalWeights.Save(filename.str());
 				  ++weightEpochDump;
 			  }
-
-			  // compute summed error after dumping weights
-			  float summedError = 0.0;
-			  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
-				  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageTotalWeights));
-			  }
-
-			  cerr << "summed error after dumping weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
 		  }
 	  }
 
@@ -531,9 +530,12 @@ int main(int argc, char** argv) {
   
 #ifdef MPI_ENABLE
   MPI_Finalize();
+  if (rank == 0) {
+	  cerr << "Average total weights: " << averageTotalWeights << endl;
+  }
 #endif
 
-  cerr << "Average total weights: " << averageTotalWeights << endl;
+
 
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out
