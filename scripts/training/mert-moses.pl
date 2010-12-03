@@ -633,13 +633,13 @@ while(1) {
       $nbest_file = $nbest_file.".gz";
   }
   else {
-      die "Skipping not yet supported\n";
-      #print "skipped decoder run\n";
-      #if (0 == scalar @order_of_lambdas_from_decoder) {
-      #  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc run*.best*.out.gz | head -1 |");
-      #}
-      #$skip_decoder = 0;
-      #$need_to_normalize = 0;
+      $nbest_file="run$run.best$___N_BEST_LIST_SIZE.out.gz";
+      print "skipped decoder run $run\n";
+      if (0 == scalar @order_of_lambdas_from_decoder) {
+        @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc $nbest_file | head -1 |");
+      }
+      $skip_decoder = 0;
+      $need_to_normalize = 0;
   }
 
 
