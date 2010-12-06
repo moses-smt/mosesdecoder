@@ -79,6 +79,10 @@ public:
       return m_scores.load(filename);
   }
 
+  FVector GetScoresVector()
+  {
+	  return m_scores;
+  }
 
   //! Set all values to 0.0
 	void ZeroAll()
