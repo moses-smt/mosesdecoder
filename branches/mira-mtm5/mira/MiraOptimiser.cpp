@@ -9,6 +9,7 @@ namespace Mira {
 int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
 		const vector< vector<float> >& losses,
+		const vector<std::vector<float> >& bleuScores,
 		const vector< ScoreComponentCollection>& oracleFeatureValues) {
 
 	if (m_hildreth) {
@@ -26,6 +27,10 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				//cerr << "loss of hypothesis: " << losses[i][j] << endl;
 				//cerr << "model score difference: " << modelScoreDiff << endl;
 				float loss = losses[i][j] * m_marginScaleFactor;
+				if (m_weightedLossFunction) {
+					cerr << "loss: " << loss << endl;
+					loss *= log10(bleuScores[i][j]);
+				}
 
 				bool addConstraint = true;
 				if (modelScoreDiff < loss) {

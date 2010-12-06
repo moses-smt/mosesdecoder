@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
   size_t weightDumpFrequency;
   string weightDumpStem;
   float marginScaleFactor;
+  bool weightedLossFunction;
   size_t n;
   size_t batchSize;
   bool distinctNbest;
@@ -110,6 +111,7 @@ int main(int argc, char** argv) {
         ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
 	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
+	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 	    ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
@@ -213,7 +215,7 @@ int main(int argc, char** argv) {
   cerr << "Distinct translations in nbest list? " << distinctNbest << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates);
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates, weightedLossFunction);
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -385,13 +387,13 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 	      cerr << "\nRun optimiser.." << endl;
 	      ScoreComponentCollection oldWeights(mosesWeights);
-	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, oracleFeatureValues);
+	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues);
 
-		  // update moses weights
+		  // update Moses weights
 	      mosesWeights.L1Normalise();
 		  decoder->setWeights(mosesWeights);
   
-		  // update history (for approximate document bleu)
+		  // update history (for approximate document Bleu)
 		  for (size_t i = 0; i < oracles.size(); ++i) {
 			  cerr << "oracle length: " << oracles[i].size() << " ";
 		  }
