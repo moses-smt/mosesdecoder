@@ -25,18 +25,21 @@ using namespace std;
 namespace Mira {
 
 int Perceptron::updateWeights(ScoreComponentCollection& currWeights,
-		const vector< vector<ScoreComponentCollection> >& scores,
-		const vector<vector<float> >& losses,
-		const vector<ScoreComponentCollection>& oracleScores)
+		const vector< vector<ScoreComponentCollection> >& featureValues,
+		const vector< vector<float> >& losses,
+		const vector<std::vector<float> >& bleuScores,
+		const vector< ScoreComponentCollection>& oracleFeatureValues)
 {
-	for (size_t i = 0; i < scores.size(); ++i) {
-		for (size_t j = 0; j < scores[i].size(); ++j) {
+	for (size_t i = 0; i < featureValues.size(); ++i) {
+		for (size_t j = 0; j < featureValues[i].size(); ++j) {
 			if (losses[i][j] > 0) {
-				currWeights.MinusEquals(scores[i][j]);
-				currWeights.PlusEquals(oracleScores[i]);
+				currWeights.MinusEquals(featureValues[i][j]);
+				currWeights.PlusEquals(oracleFeatureValues[i]);
 			}
 		}
 	}
+
+	return 0;
 }
 }
 
