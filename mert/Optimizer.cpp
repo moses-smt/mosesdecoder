@@ -316,7 +316,7 @@ statscore_t Optimizer::Run(Point& P)const{
     exit(2);
   }
   if (scorer->getReferenceSize()!=FData->size()){
-    cerr<<"error size mismatch between FeatureData and Scorer"<<endl;
+    cerr<<"error length mismatch between feature file and score file"<<endl;
     exit(2);
   }
 
