@@ -94,6 +94,8 @@ int main(int argc, char** argv) {
   bool scaleByInputLength;
   bool increaseBP;
   bool regulariseHildrethUpdates;
+  bool accumulateOracles;
+  bool accumulateMostViolatedConstraints;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -122,6 +124,8 @@ int main(int argc, char** argv) {
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("increase-BP", po::value<bool>(&increaseBP)->default_value(false), "Increase penalty for short translations")
 	    ("regularise-hildreth-updates", po::value<bool>(&regulariseHildrethUpdates)->default_value(false), "Regularise Hildreth updates with the value set for clipping")
+	    ("accumulate-oracles", po::value<bool>(&accumulateOracles)->default_value(false), "Accumulate oracle translations over epochs")
+	    ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
@@ -213,9 +217,17 @@ int main(int argc, char** argv) {
   Optimiser* optimiser = NULL;
   cerr << "Nbest list size: " << n << endl;
   cerr << "Distinct translations in nbest list? " << distinctNbest << endl;
+  cerr << "Batch size: " << batchSize << endl;
+  cerr << "Accumulate oracles? " << accumulateOracles << endl;
+  cerr << "Accumulate most violated constraints? " << accumulateMostViolatedConstraints << endl;
+  cerr << "Margin scale factor: " << marginScaleFactor << endl;
+  cerr << "Add only violated constraints? " << onlyViolatedConstraints << endl;
+  float slack = regulariseHildrethUpdates ? clipping : 0;
+  cerr << "Using slack? " << slack << endl;
+  cerr << "Increase BP? " << increaseBP << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates, weightedLossFunction);
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates, weightedLossFunction, accumulateOracles, accumulateMostViolatedConstraints, order.size());
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -223,8 +235,6 @@ int main(int argc, char** argv) {
     	cerr << "Using some sort of SMO.. " << endl;
     }
 
-    cerr << "Margin scale factor: " << marginScaleFactor << endl;
-    cerr << "Add only violated constraints? " << onlyViolatedConstraints << endl;
   } else if (learner == "perceptron") {
     cerr << "Optimising using Perceptron" << endl;
     optimiser = new Perceptron();
@@ -387,7 +397,7 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 	      cerr << "\nRun optimiser.." << endl;
 	      ScoreComponentCollection oldWeights(mosesWeights);
-	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues);
+	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, ref_ids);
 
 		  // update Moses weights
 	      mosesWeights.L1Normalise();
@@ -548,7 +558,15 @@ int main(int argc, char** argv) {
 
 					  if (reached)  {
 						  // stop MIRA
-						  cerr << "\nStopping criterion has been reached.. stopping MIRA." << endl << endl;
+						  cerr << "\nStopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl << endl;
+						  cerr << "Average total weights: " << averageTotalWeights << endl;
+						  now = time(0); // get current time
+						  tm = localtime(&now); // get struct filled out
+						  cerr << "(1) End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+						       << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
+#ifdef MPI_ENABLE
+						  MPI_Abort(MPI_COMM_WORLD, 0);
+#endif
 						  goto end;
 					  }
 				  }
@@ -562,7 +580,6 @@ int main(int argc, char** argv) {
 	  list_of_losses.clear();
   }
   
-  end:
 #ifdef MPI_ENABLE
   MPI_Finalize();
 #endif
@@ -571,9 +588,10 @@ int main(int argc, char** argv) {
 	  cerr << "Average total weights: " << averageTotalWeights << endl;
   }
 
+ end:
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out
-  cerr << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+  cerr << "(2) End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
   delete decoder;
