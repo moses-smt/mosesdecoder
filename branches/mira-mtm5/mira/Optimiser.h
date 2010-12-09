@@ -65,7 +65,7 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, bool regulariseHildrethUpdates, bool weightedLossFunction, bool accumulateOracles, bool accumulateMostViolatedConstraints, size_t exampleSize) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, bool regulariseHildrethUpdates, bool weightedLossFunction, bool accumulateOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
@@ -77,6 +77,7 @@ namespace Mira {
 		  m_weightedLossFunction(weightedLossFunction),
 		  m_accumulateOracles(accumulateOracles),
 		  m_accumulateMostViolatedConstraints(accumulateMostViolatedConstraints),
+		  m_pastAndCurrentConstraints(pastAndCurrentConstraints),
 		  m_oracles(exampleSize) { }
 
      ~MiraOptimiser() {}
@@ -136,6 +137,8 @@ namespace Mira {
       std::vector< float> m_lossMarginDistances;
 
       bool m_accumulateMostViolatedConstraints;
+
+      bool m_pastAndCurrentConstraints;
   };
 }
 
