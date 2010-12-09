@@ -59,11 +59,20 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 					if (addConstraint) {
 						float lossMarginDistance = loss - modelScoreDiff;
 
-						if (m_accumulateMostViolatedConstraints) {
+						if (m_accumulateMostViolatedConstraints && !m_pastAndCurrentConstraints) {
 							if (lossMarginDistance > maxViolationLossMarginDistance) {
 								maxViolationLossMarginDistance = lossMarginDistance;
 								maxViolationfeatureValueDiff = featureValueDiff;
 							}
+						}
+						else if (m_pastAndCurrentConstraints) {
+							if (lossMarginDistance > maxViolationLossMarginDistance) {
+								maxViolationLossMarginDistance = lossMarginDistance;
+								maxViolationfeatureValueDiff = featureValueDiff;
+							}
+
+							featureValueDiffs.push_back(featureValueDiff);
+							lossMarginDistances.push_back(lossMarginDistance);
 						}
 						else {
 							// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
@@ -87,12 +96,9 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 		// run optimisation: compute alphas for all given constraints
 		vector< float> alphas;
-		if (m_accumulateMostViolatedConstraints) {
+		if (m_accumulateMostViolatedConstraints && !m_pastAndCurrentConstraints) {
 			m_featureValueDiffs.push_back(maxViolationfeatureValueDiff);
 			m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
-			for (size_t i = 0; i < m_lossMarginDistances.size(); ++i) {
-				cerr << "loss margin distance: " << m_lossMarginDistances[i] << endl;
-			}
 
 			cerr << "Number of constraints passed to optimiser: " << m_featureValueDiffs.size() << endl;
 			if (m_regulariseHildrethUpdates) {
@@ -114,6 +120,18 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 		else if (violatedConstraintsBefore > 0) {
+			if (m_pastAndCurrentConstraints) {
+				// add all (most violated) past constraints to the list of current constraints
+				for (size_t i = 0; i < m_featureValueDiffs.size(); ++i) {
+					featureValueDiffs.push_back(m_featureValueDiffs[i]);
+					lossMarginDistances.push_back(m_lossMarginDistances[i]);
+				}
+
+				// add new most violated constraint to list
+				m_featureValueDiffs.push_back(maxViolationfeatureValueDiff);
+				m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
+			}
+
 			//cerr << "Number of violated constraints before optimisation: " << violatedConstraintsBefore << endl;
 			cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
 			if (m_regulariseHildrethUpdates) {

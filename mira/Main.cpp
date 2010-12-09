@@ -96,6 +96,8 @@ int main(int argc, char** argv) {
   bool regulariseHildrethUpdates;
   bool accumulateOracles;
   bool accumulateMostViolatedConstraints;
+  bool pastAndCurrentConstraints;
+  bool suppressConvergence;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -126,6 +128,8 @@ int main(int argc, char** argv) {
 	    ("regularise-hildreth-updates", po::value<bool>(&regulariseHildrethUpdates)->default_value(false), "Regularise Hildreth updates with the value set for clipping")
 	    ("accumulate-oracles", po::value<bool>(&accumulateOracles)->default_value(false), "Accumulate oracle translations over epochs")
 	    ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
+	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
+	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold with SMO (instead of adaptive)");
 
@@ -227,7 +231,7 @@ int main(int argc, char** argv) {
   cerr << "Increase BP? " << increaseBP << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates, weightedLossFunction, accumulateOracles, accumulateMostViolatedConstraints, order.size());
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates, weightedLossFunction, accumulateOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -433,8 +437,11 @@ int main(int argc, char** argv) {
 				  margin = featureDiff.InnerProduct(mosesWeights);
 				  lossMinusMargin_new += (losses[batchPosition][j] - margin);
 
-				  list_of_delta_h.push_back(featureDiff);
-				  list_of_losses.push_back(losses[batchPosition][j]);
+				  // now collect translations of first epoch only
+				  if (epoch == 0) {
+					  list_of_delta_h.push_back(featureDiff);
+					  list_of_losses.push_back(losses[batchPosition][j]);
+				  }
 			  }
 	      }
 
@@ -539,35 +546,40 @@ int main(int argc, char** argv) {
 					  ScoreComponentCollection secondDiff(averageTotalWeightsCurrent);
 					  secondDiff.MinusEquals(averageTotalWeightsBeforePrevious);
 
-					  // check whether stopping criterion has been reached
-					  // (both difference vectors must have all weight changes smaller than 0.01)
-					  bool reached = true;
-					  FVector changes1 = firstDiff.GetScoresVector();
-					  FVector changes2 = secondDiff.GetScoresVector();
-					  FVector::const_iterator iterator1 = changes1.cbegin();
-					  FVector::const_iterator iterator2 = changes2.cbegin();
-					  while (iterator1 != changes1.cend()) {
-						  if ((*iterator1).second >= 0.01 || (*iterator2).second >= 0.01) {
-							  reached = false;
-							  break;
+					  if (!suppressConvergence) {
+						  // check whether stopping criterion has been reached
+						  // (both difference vectors must have all weight changes smaller than 0.01)
+						  bool reached = true;
+						  FVector changes1 = firstDiff.GetScoresVector();
+						  FVector changes2 = secondDiff.GetScoresVector();
+						  FVector::const_iterator iterator1 = changes1.cbegin();
+						  FVector::const_iterator iterator2 = changes2.cbegin();
+						  while (iterator1 != changes1.cend()) {
+							  if ((*iterator1).second >= 0.01 || (*iterator2).second >= 0.01) {
+								  reached = false;
+								  break;
+							  }
+
+							  ++iterator1;
+							  ++iterator2;
 						  }
 
-						  ++iterator1;
-						  ++iterator2;
-					  }
+						  if (reached)  {
+							  // stop MIRA
+							  cerr << "\nStopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl << endl;
+							  cerr << "Average total weights: " << averageTotalWeights << endl;
+							  now = time(0); // get current time
+							  tm = localtime(&now); // get struct filled out
+							  cerr << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+									  << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
-					  if (reached)  {
-						  // stop MIRA
-						  cerr << "\nStopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl << endl;
-						  cerr << "Average total weights: " << averageTotalWeights << endl;
-						  now = time(0); // get current time
-						  tm = localtime(&now); // get struct filled out
-						  cerr << "(1) End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
-						       << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
+							  delete decoder;
 #ifdef MPI_ENABLE
-						  MPI_Abort(MPI_COMM_WORLD, 0);
+							  MPI_Finalize();
+							  MPI_Abort(MPI_COMM_WORLD, 0);
 #endif
-						  goto end;
+							  exit(0);
+						  }
 					  }
 				  }
 
@@ -576,8 +588,8 @@ int main(int argc, char** argv) {
 		  }
 	  }
 
-	  list_of_delta_h.clear();
-	  list_of_losses.clear();
+	  //list_of_delta_h.clear();
+	  //list_of_losses.clear();
   }
   
 #ifdef MPI_ENABLE
@@ -588,10 +600,9 @@ int main(int argc, char** argv) {
 	  cerr << "Average total weights: " << averageTotalWeights << endl;
   }
 
- end:
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out
-  cerr << "(2) End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+  cerr << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
   delete decoder;
