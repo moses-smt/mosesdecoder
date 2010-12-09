@@ -33,7 +33,8 @@ namespace Mira {
                          const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
                          const std::vector<std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
-                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues) = 0;
+                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
+                         const std::vector< size_t> dummy) = 0;
   };
  
   class DummyOptimiser : public Optimiser {
@@ -42,7 +43,8 @@ namespace Mira {
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
-                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues)
+                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
+                         const std::vector< size_t> dummy)
                          { return 0; }
   };
  
@@ -54,7 +56,8 @@ namespace Mira {
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
-                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues);
+                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
+                         const std::vector< size_t> dummy);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -62,7 +65,7 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, bool regulariseHildrethUpdates, bool weightedLossFunction) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, bool regulariseHildrethUpdates, bool weightedLossFunction, bool accumulateOracles, bool accumulateMostViolatedConstraints, size_t exampleSize) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
@@ -71,7 +74,10 @@ namespace Mira {
 		  m_c(clipping),
 		  m_fixedClipping(fixedClipping),
 		  m_regulariseHildrethUpdates(regulariseHildrethUpdates),
-		  m_weightedLossFunction(weightedLossFunction) { }
+		  m_weightedLossFunction(weightedLossFunction),
+		  m_accumulateOracles(accumulateOracles),
+		  m_accumulateMostViolatedConstraints(accumulateMostViolatedConstraints),
+		  m_oracles(exampleSize) { }
 
      ~MiraOptimiser() {}
    
@@ -79,7 +85,8 @@ namespace Mira {
       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector< std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,
-      						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues);
+      						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
+      						  const std::vector< size_t> sentenceId);
       float computeDelta(Moses::ScoreComponentCollection& currWeights,
       				const Moses::ScoreComponentCollection featureValuesDiff,
       				float loss_jk,
@@ -118,6 +125,17 @@ namespace Mira {
 
       // index of oracle translation in hypothesis matrix
       std::vector<size_t> m_oracleIndices;
+
+      // keep a list of oracle translations over epochs
+      std::vector < std::vector< Moses::ScoreComponentCollection> > m_oracles;
+
+      bool m_accumulateOracles;
+
+      // accumulate most violated constraints for every example
+      std::vector< Moses::ScoreComponentCollection> m_featureValueDiffs;
+      std::vector< float> m_lossMarginDistances;
+
+      bool m_accumulateMostViolatedConstraints;
   };
 }
 
