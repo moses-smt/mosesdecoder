@@ -92,9 +92,9 @@ int main(int argc, char** argv) {
   float historySmoothing;
   bool useScaledReference;
   bool scaleByInputLength;
-  bool increaseBP;
-  bool regulariseHildrethUpdates;
-  bool accumulateOracles;
+  float BPfactor;
+  float slack;
+  size_t maxNumberOracles;
   bool accumulateMostViolatedConstraints;
   bool pastAndCurrentConstraints;
   bool suppressConvergence;
@@ -124,9 +124,9 @@ int main(int argc, char** argv) {
 	    ("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
-	    ("increase-BP", po::value<bool>(&increaseBP)->default_value(false), "Increase penalty for short translations")
-	    ("regularise-hildreth-updates", po::value<bool>(&regulariseHildrethUpdates)->default_value(false), "Regularise Hildreth updates with the value set for clipping")
-	    ("accumulate-oracles", po::value<bool>(&accumulateOracles)->default_value(false), "Accumulate oracle translations over epochs")
+	    ("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
+	    ("slack", po::value<float>(&slack)->default_value(0), "Use slack in optimization problem")
+	    ("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
 	    ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
 
   // initialise Moses
   initMoses(mosesConfigFile, verbosity);//, argc, argv);
-  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, increaseBP, historySmoothing);
+  MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
   ScoreComponentCollection startWeights = decoder->getWeights();
   startWeights.L1Normalise();
   decoder->setWeights(startWeights);
@@ -222,16 +222,15 @@ int main(int argc, char** argv) {
   cerr << "Nbest list size: " << n << endl;
   cerr << "Distinct translations in nbest list? " << distinctNbest << endl;
   cerr << "Batch size: " << batchSize << endl;
-  cerr << "Accumulate oracles? " << accumulateOracles << endl;
+  cerr << "Maximum number of oracles: " << maxNumberOracles << endl;
   cerr << "Accumulate most violated constraints? " << accumulateMostViolatedConstraints << endl;
   cerr << "Margin scale factor: " << marginScaleFactor << endl;
   cerr << "Add only violated constraints? " << onlyViolatedConstraints << endl;
-  float slack = regulariseHildrethUpdates ? clipping : 0;
   cerr << "Using slack? " << slack << endl;
-  cerr << "Increase BP? " << increaseBP << endl;
+  cerr << "BP factor: " << BPfactor << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, regulariseHildrethUpdates, weightedLossFunction, accumulateOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -401,7 +400,7 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 	      cerr << "\nRun optimiser.." << endl;
 	      ScoreComponentCollection oldWeights(mosesWeights);
-	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, ref_ids);
+	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
 
 		  // update Moses weights
 	      mosesWeights.L1Normalise();

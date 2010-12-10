@@ -80,10 +80,10 @@ BleuScoreFeature::BleuScoreFeature():
                                  m_ref_length_history(0),
                                  m_use_scaled_reference(true),
                                  m_scale_by_input_length(true),
-                                 m_increase_BP(false),
+                                 m_BP_factor(1.0),
                                  m_historySmoothing(0.9) {}
 
-BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, bool increaseBP, float historySmoothing):
+BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing):
                                  StatefulFeatureFunction("BleuScore"),      
                                  m_count_history(BleuScoreState::bleu_order),
                                  m_match_history(BleuScoreState::bleu_order),
@@ -92,7 +92,7 @@ BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLen
                                  m_ref_length_history(0),
                                  m_use_scaled_reference(useScaledReference),
                                  m_scale_by_input_length(scaleByInputLength),
-                                 m_increase_BP(increaseBP),
+                                 m_BP_factor(BPfactor),
                                  m_historySmoothing(historySmoothing) {}
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
@@ -317,8 +317,10 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
         if (state->m_ngram_counts[i]) {
             smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
             smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
-            if (smoothed_matches == 0) {
-            	smoothed_matches = 0.0001;
+            if (i > 0) {
+            	// smoothing for all n > 1
+            	smoothed_matches += 1;
+            	smoothed_count += 1;
             }
 
             precision *= smoothed_matches / smoothed_count;
@@ -337,12 +339,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 	    if (state->m_target_length < state->m_scaled_ref_length) {
 	    	float smoothed_target_length = m_target_length_history + state->m_target_length;
 	    	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-	    	if (m_increase_BP) {
-	    		precision *= exp(1 - ((1.1 * smoothed_ref_length)/ smoothed_target_length));
-	    	}
-	    	else{
-	    		precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
-	    	}
+	    	precision *= exp(1 - ((m_BP_factor * smoothed_ref_length)/ smoothed_target_length));
 	    }
 	}
 	else {
@@ -351,12 +348,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 			if (state->m_target_length < state->m_scaled_ref_length) {
 				float smoothed_target_length = m_target_length_history + state->m_target_length;
 				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-		    	if (m_increase_BP) {
-		    		precision *= exp(1 - ((1.1 * smoothed_ref_length)/ smoothed_target_length));
-		    	}
-		    	else{
-		    		precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
-		    	}
+		    	precision *= exp(1 - ((m_BP_factor * smoothed_ref_length)/ smoothed_target_length));
 			}
 		}
 		else {
@@ -364,12 +356,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 			if (state->m_target_length < state->m_source_phrase_length) {
 				float smoothed_target_length = m_target_length_history + state->m_target_length;
 				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-		    	if (m_increase_BP) {
-		    		precision *= exp(1 - ((1.1 * smoothed_ref_length)/ smoothed_target_length));
-		    	}
-		    	else{
-		    		precision *= exp(1 - (smoothed_ref_length / smoothed_target_length));
-		    	}
+				precision *= exp(1 - ((m_BP_factor * smoothed_ref_length)/ smoothed_target_length));
 			}
 		}
 	}

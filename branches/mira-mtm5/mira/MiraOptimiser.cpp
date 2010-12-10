@@ -11,12 +11,45 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<float> >& losses,
 		const vector<std::vector<float> >& bleuScores,
 		const vector< ScoreComponentCollection>& oracleFeatureValues,
+		const vector< float> oracleBleuScores,
 		const vector< size_t> sentenceIds) {
 
-	// add every oracle in batch to list of oracles
+	// add every oracle in batch to list of oracles (under certain conditions)
 	for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
+		float newWeightedScore = oracleFeatureValues[i].GetWeightedScore();
 		size_t sentenceId = sentenceIds[i];
-		m_oracles[sentenceId].push_back(oracleFeatureValues[i]);
+
+		// compare new oracle with existing oracles:
+		// if same translation exists, just update the bleu score
+		// if not, add the oracle
+		bool updated = false;
+		size_t indexOfWorst = 0;
+		float worstWeightedScore = 0;
+		for (size_t j = 0; j < m_oracles[sentenceId].size(); ++j) {
+			float currentWeightedScore = m_oracles[sentenceId][j].GetWeightedScore();
+			if (currentWeightedScore == newWeightedScore) {
+				cerr << "updated.." << endl;
+				m_bleu_of_oracles[sentenceId][j] = oracleBleuScores[j];
+				updated = true;
+				break;
+			}
+			else if (worstWeightedScore == 0 || currentWeightedScore > worstWeightedScore){
+				worstWeightedScore = currentWeightedScore;
+				indexOfWorst = j;
+			}
+		}
+
+		if (!updated) {
+			// add if number of maximum oracles not exceeded, otherwise override the worst
+			if (m_max_number_oracles > m_oracles[sentenceId].size()) {
+				m_oracles[sentenceId].push_back(oracleFeatureValues[i]);
+				m_bleu_of_oracles[sentenceId].push_back(oracleBleuScores[i]);
+			}
+			else {
+				m_oracles[sentenceId][indexOfWorst] = oracleFeatureValues[i];
+				m_bleu_of_oracles[sentenceId][indexOfWorst] = oracleBleuScores[i];
+			}
+		}
 	}
 
 	if (m_hildreth) {
@@ -38,6 +71,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 				// iterate over all available oracles (1 if not accumulating, otherwise one per started epoch)
 				for (size_t k = 0; k < m_oracles[sentenceId].size(); ++k) {
+					cerr << "Oracle " << k << ": " << m_oracles[sentenceId][k] << " (BLEU: " << m_bleu_of_oracles[sentenceId][k] << ", model score: " <<  m_oracles[sentenceId][k].GetWeightedScore() << ")" << endl;
 					ScoreComponentCollection featureValueDiff = m_oracles[sentenceId][k];
 					featureValueDiff.MinusEquals(featureValues[i][j]);
 					float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
@@ -87,7 +121,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 
-		if (!m_accumulateOracles) {
+		if (m_max_number_oracles == 1) {
 			for (size_t k = 0; k < sentenceIds.size(); ++k) {
 				size_t sentenceId = sentenceIds[k];
 				m_oracles[sentenceId].clear();
@@ -101,8 +135,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
 
 			cerr << "Number of constraints passed to optimiser: " << m_featureValueDiffs.size() << endl;
-			if (m_regulariseHildrethUpdates) {
-				alphas = Hildreth::optimise(m_featureValueDiffs, m_lossMarginDistances, m_c);
+			if (m_slack != 0) {
+				alphas = Hildreth::optimise(m_featureValueDiffs, m_lossMarginDistances, m_slack);
 			}
 			else {
 				alphas = Hildreth::optimise(m_featureValueDiffs, m_lossMarginDistances);
@@ -134,8 +168,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 			//cerr << "Number of violated constraints before optimisation: " << violatedConstraintsBefore << endl;
 			cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
-			if (m_regulariseHildrethUpdates) {
-				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances, m_c);
+			if (m_slack != 0) {
+				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances, m_slack);
 			}
 			else {
 				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
@@ -251,7 +285,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 	}
 
-	if (!m_accumulateOracles) {
+	if (m_max_number_oracles == 1) {
 		for (size_t k = 0; k < sentenceIds.size(); ++k) {
 			size_t sentenceId = sentenceIds[k];
 			m_oracles[sentenceId].clear();
