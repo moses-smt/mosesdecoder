@@ -27,8 +27,9 @@ namespace Mira {
 int Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
 		const vector< vector<float> >& losses,
-		const vector<std::vector<float> >& bleuScores,
+		const vector< vector<float> >& bleuScores,
 		const vector< ScoreComponentCollection>& oracleFeatureValues,
+		const vector< float> oracleBleuScores,
 		const vector< size_t> dummy)
 {
 	for (size_t i = 0; i < featureValues.size(); ++i) {

@@ -34,6 +34,7 @@ namespace Mira {
                          const std::vector<std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
                          const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
+                         const std::vector< float> oracleBleuScores,
                          const std::vector< size_t> dummy) = 0;
   };
  
@@ -44,6 +45,7 @@ namespace Mira {
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
                          const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
+                         const std::vector< float> oracleBleuScores,
                          const std::vector< size_t> dummy)
                          { return 0; }
   };
@@ -57,6 +59,7 @@ namespace Mira {
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
                          const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
+                         const std::vector< float> oracleBleuScores,
                          const std::vector< size_t> dummy);
   };
 
@@ -65,7 +68,7 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, bool regulariseHildrethUpdates, bool weightedLossFunction, bool accumulateOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, float slack, bool weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
@@ -73,12 +76,13 @@ namespace Mira {
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_c(clipping),
 		  m_fixedClipping(fixedClipping),
-		  m_regulariseHildrethUpdates(regulariseHildrethUpdates),
+		  m_slack(slack),
 		  m_weightedLossFunction(weightedLossFunction),
-		  m_accumulateOracles(accumulateOracles),
+		  m_max_number_oracles(maxNumberOracles),
 		  m_accumulateMostViolatedConstraints(accumulateMostViolatedConstraints),
 		  m_pastAndCurrentConstraints(pastAndCurrentConstraints),
-		  m_oracles(exampleSize) { }
+		  m_oracles(exampleSize),
+		  m_bleu_of_oracles(exampleSize) { }
 
      ~MiraOptimiser() {}
    
@@ -87,6 +91,7 @@ namespace Mira {
       						  const std::vector< std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
+      						  const std::vector< float> oracleBleuScores,
       						  const std::vector< size_t> sentenceId);
       float computeDelta(Moses::ScoreComponentCollection& currWeights,
       				const Moses::ScoreComponentCollection featureValuesDiff,
@@ -120,7 +125,7 @@ namespace Mira {
       bool m_fixedClipping;
 
       // regularise Hildreth updates
-      bool m_regulariseHildrethUpdates;
+      float m_slack;
 
       bool m_weightedLossFunction;
 
@@ -130,7 +135,9 @@ namespace Mira {
       // keep a list of oracle translations over epochs
       std::vector < std::vector< Moses::ScoreComponentCollection> > m_oracles;
 
-      bool m_accumulateOracles;
+      std::vector < std::vector< float> > m_bleu_of_oracles;
+
+      size_t m_max_number_oracles;
 
       // accumulate most violated constraints for every example
       std::vector< Moses::ScoreComponentCollection> m_featureValueDiffs;
