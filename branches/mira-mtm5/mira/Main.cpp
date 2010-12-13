@@ -437,7 +437,7 @@ int main(int argc, char** argv) {
 				  lossMinusMargin_new += (losses[batchPosition][j] - margin);
 
 				  // now collect translations of first epoch only
-				  if (epoch == 0) {
+				  if (rank == 0 && epoch == 0) {
 					  list_of_delta_h.push_back(featureDiff);
 					  list_of_losses.push_back(losses[batchPosition][j]);
 				  }
