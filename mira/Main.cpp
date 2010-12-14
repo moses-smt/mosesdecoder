@@ -98,6 +98,7 @@ int main(int argc, char** argv) {
   bool accumulateMostViolatedConstraints;
   bool pastAndCurrentConstraints;
   bool suppressConvergence;
+  bool ignoreUWeight;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -130,6 +131,7 @@ int main(int argc, char** argv) {
 	    ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
+	    ("ignore-u-weight", po::value<bool>(&ignoreUWeight)->default_value(false), "Don't tune unknown word penalty weight")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold");
 
@@ -228,6 +230,7 @@ int main(int argc, char** argv) {
   cerr << "Add only violated constraints? " << onlyViolatedConstraints << endl;
   cerr << "Using slack? " << slack << endl;
   cerr << "BP factor: " << BPfactor << endl;
+  cerr << "Ignore unknown word penalty? " << ignoreUWeight << endl;
   cerr << "Fixed clipping? " << fixedClipping << endl;
   cerr << "clipping: " << clipping << endl;
   if (learner == "mira") {
@@ -314,7 +317,8 @@ int main(int argc, char** argv) {
                         featureValues[batchPosition],
                         bleuScores[batchPosition],
                         true,
-                        distinctNbest);
+                        distinctNbest,
+                        ignoreUWeight);
 			  inputLengths.push_back(decoder->getCurrentInputLength());
 			  ref_ids.push_back(*sid);
 			  decoder->cleanup();
@@ -337,7 +341,8 @@ int main(int argc, char** argv) {
                         featureValues[batchPosition],
                         bleuScores[batchPosition],
                         true,
-                        distinctNbest);
+                        distinctNbest,
+                        ignoreUWeight);
 			  decoder->cleanup();
 			  oracles.push_back(oracle);
 			  cerr << "Rank " << rank << ": ";
@@ -363,7 +368,8 @@ int main(int argc, char** argv) {
                         featureValues[batchPosition],
                         bleuScores[batchPosition],
                         true,
-                        distinctNbest);
+                        distinctNbest,
+                        ignoreUWeight);
 			  decoder->cleanup();
 			  cerr << "Rank " << rank << ": ";
 			  for (size_t i = 0; i < fear.size(); ++i) {
