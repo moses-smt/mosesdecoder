@@ -99,6 +99,7 @@ int main(int argc, char** argv) {
   bool pastAndCurrentConstraints;
   bool suppressConvergence;
   bool ignoreUWeight;
+  bool ignoreWeirdUpdates;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -132,6 +133,7 @@ int main(int argc, char** argv) {
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
 	    ("ignore-u-weight", po::value<bool>(&ignoreUWeight)->default_value(false), "Don't tune unknown word penalty weight")
+	    ("ignore-weird-updates", po::value<bool>(&ignoreWeirdUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold");
 
@@ -413,10 +415,10 @@ int main(int argc, char** argv) {
 	      ScoreComponentCollection oldWeights(mosesWeights);
 	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
 
-		  // update Moses weights
+		  // normalise Moses weights
 	      mosesWeights.L1Normalise();
-		  decoder->setWeights(mosesWeights);
 
+	      // compute difference to old weights
 		  ScoreComponentCollection weightDifference(mosesWeights);
 		  weightDifference.MinusEquals(oldWeights);
 		  cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
@@ -433,8 +435,6 @@ int main(int argc, char** argv) {
 				  delete oracles[i][j];
 			  }
 		  }
-
-		  cumulativeWeights.PlusEquals(mosesWeights);
 
 		  // sanity check: compare margin created by old weights against new weights
 		  float lossMinusMargin_old = 0;
@@ -462,13 +462,26 @@ int main(int argc, char** argv) {
 		  cerr << "\nRank " << rank << ", constraint change: " << constraintChange << endl;
 		  cerr << "Rank " << rank << ", summed (loss - margin) with old weights: " << lossMinusMargin_old << endl;
 		  cerr << "Rank " << rank << ", summed (loss - margin) with new weights: " << lossMinusMargin_new << endl;
+		  bool useNewWeights = true;
 	      if (lossMinusMargin_new > lossMinusMargin_old) {
 	    	  cerr << "Rank " << rank << ", worsening: " << lossMinusMargin_new - lossMinusMargin_old << endl;
 
 	    	  if (constraintChange < 0) {
 	    		  cerr << "Rank " << rank << ", something is going wrong here.." << endl;
+	    		  if (ignoreWeirdUpdates) {
+	    			  useNewWeights = false;
+	    		  }
 	    	  }
 	      }
+
+	      if (useNewWeights) {
+	    	  decoder->setWeights(mosesWeights);
+	    	  cumulativeWeights.PlusEquals(mosesWeights);
+	      }
+	      else {
+	    	  cerr << "Ignore new weights, keep old weights.. " << endl;
+	      }
+
 
 	      ++iterations;
 		  ++iterationsThisEpoch;
@@ -587,7 +600,6 @@ int main(int argc, char** argv) {
 							  cerr << "Rank 0, end date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 									  << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
-							  delete decoder;
 #ifdef MPI_ENABLE
 							  MPI_Finalize();
 							  MPI_Abort(MPI_COMM_WORLD, 0);
