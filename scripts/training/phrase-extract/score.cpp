@@ -61,13 +61,11 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines );
 void processPhrasePairs( vector< PhraseAlignment > & );
 PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > & );
 void outputPhrasePair( vector< PhraseAlignment * > &, float );
-double computeLexicalTranslation( PHRASE &, PHRASE &, PhraseAlignment * );
+double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
 
 ofstream phraseTableFile;
 
 LexicalTable lexTable;
-PhraseTable phraseTableT;
-PhraseTable phraseTableS;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool wordAlignmentFlag = false;
@@ -166,7 +164,6 @@ int main(int argc, char* argv[])
 	}
   
   // loop through all extracted phrase translations
-  int lastSource = -1;
   float lastCount = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
@@ -196,27 +193,20 @@ int main(int argc, char* argv[])
 		if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair ))
 		{
 			lastPhrasePair->count += phrasePair.count;
-			phrasePair.clear();
 			continue;
 		}
 		
 		// if new source phrase, process last batch
-		if (lastSource >= 0 && lastSource != phrasePair.GetSource()) {
+		if (lastPhrasePair != NULL &&
+            lastPhrasePair->GetSource() != phrasePair.GetSource()) {
 			processPhrasePairs( phrasePairsWithSameF );
-			for(int j=0;j<phrasePairsWithSameF.size();j++)
-				phrasePairsWithSameF[j].clear();
 			phrasePairsWithSameF.clear();
-			phraseTableT.clear();
-			phraseTableS.clear();
-			// process line again, since phrase tables flushed
-			phrasePair.clear();
-			phrasePair.create( line, i ); 
+            lastPhrasePair = NULL;
 		}
 		
 		// add phrase pairs to list, it's now the last one
-		lastSource = phrasePair.GetSource();
 		phrasePairsWithSameF.push_back( phrasePair );
-		lastPhrasePair = &phrasePairsWithSameF[phrasePairsWithSameF.size()-1];
+		lastPhrasePair = &phrasePairsWithSameF.back();
 	}
 	processPhrasePairs( phrasePairsWithSameF );
 	phraseTableFile.close();
@@ -273,16 +263,6 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines )
 			phrasePair->clear();
 			delete(phrasePair);
 			continue;
-		}
-
-		// periodically house cleaning
-		if (phrasePair->GetSource() != lastPhrasePair->GetSource())
-		{
-			phraseTableT.clear(); // these would get too big
-			phraseTableS.clear(); // these would get too big
-			// process line again, since phrase tables flushed
-			phrasePair->clear();
-			phrasePair->create( line, lineNum ); 
 		}
 
 		int count = lastPhrasePair->count + 0.99999;
@@ -382,8 +362,8 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		count += phrasePair[i]->count;
 	}
 
-	PHRASE phraseS = phraseTableS.getPhrase( phrasePair[0]->GetSource() );
-	PHRASE phraseT = phraseTableT.getPhrase( phrasePair[0]->GetTarget() );
+	const PHRASE &phraseS = phrasePair[0]->GetSource();
+	const PHRASE &phraseT = phrasePair[0]->GetTarget();
 
 	// labels (if hierarchical)
 
@@ -470,7 +450,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	phraseTableFile << endl;
 }
 
-double computeLexicalTranslation( PHRASE &phraseS, PHRASE &phraseT, PhraseAlignment *alignment ) {
+double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, PhraseAlignment *alignment ) {
 	// lexical translation probability
 	double lexScore = 1.0;
 	int null = vcbS.getWordID("NULL");

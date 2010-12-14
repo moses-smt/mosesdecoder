@@ -7,6 +7,8 @@
  *  Copyright 2010 __MyCompanyName__. All rights reserved.
  *
  */
+#include "tables-core.h"
+
 #include <vector>
 #include <set>
 
@@ -14,24 +16,20 @@
 class PhraseAlignment 
 {
 protected:
-	int targetPhraseId, sourcePhraseId;
+  PHRASE phraseS;
+  PHRASE phraseT;
 
 	void createAlignVec(size_t sourceSize, size_t targetSize);
 public:
 	float count;
 	std::vector< std::set<size_t> > alignedToT;
 	std::vector< std::set<size_t> > alignedToS;
-  
-	PhraseAlignment();
 	
 	void create( char*, int );
 	void clear();
 	bool equals( const PhraseAlignment& );
 	bool match( const PhraseAlignment& );
 	
-	int GetTarget() const
-	{ return targetPhraseId; }
-	int GetSource() const
-	{ return sourcePhraseId; }
-	
+  const PHRASE &GetSource() const { return phraseS; }
+  const PHRASE &GetTarget() const { return phraseT; }
 };
