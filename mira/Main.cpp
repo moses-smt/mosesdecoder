@@ -406,6 +406,17 @@ int main(int argc, char** argv) {
 	      const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
 	      mosesWeights.Assign(featureFunctions.back(), 0);
 
+	      if (ignoreUWeight) {
+	    	  // set weight for unknown word penalty to 0
+	    	  for (size_t i = 0; i < featureFunctions.size(); ++i) {
+	    		  FName name = (featureFunctions[i]->GetFeatureNames())[0];
+	    		  FName compare("!UnknownWordPenalty");
+	    		  if (name == compare) {
+	    			  mosesWeights.Assign(featureFunctions[i], 0);
+	    		  }
+	    	  }
+	      }
+
 	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
 	    	  ((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
 	      }
