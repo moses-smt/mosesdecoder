@@ -167,6 +167,7 @@ int main(int argc, char* argv[])
   
   // loop through all extracted phrase translations
   int lastSource = -1;
+  float lastCount = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
 	char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
@@ -179,9 +180,9 @@ int main(int argc, char* argv[])
     if (extractFileP.eof())	break;
 				
 		// identical to last line? just add count
-		if (lastSource > 0 && strcmp(line,lastLine) == 0)
+		if (strcmp(line,lastLine) == 0)
 		{
-			lastPhrasePair->addToCount( line );
+			lastPhrasePair->count += lastCount;
 			continue;			
 		}
 		strcpy( lastLine, line );
@@ -189,6 +190,7 @@ int main(int argc, char* argv[])
 		// create new phrase pair
 		PhraseAlignment phrasePair;
 		phrasePair.create( line, i );
+        lastCount = phrasePair.count;
 		
 		// only differs in count? just add count
 		if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair ))
@@ -236,6 +238,7 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines )
 	int lineNum = 0;
 	char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
 	lastLine[0] = '\0';
+    float lastCount = 0.0f;
 	PhraseAlignment *lastPhrasePair = NULL;
 	while(true) {
 		if (extractFileP.eof()) break;
@@ -247,7 +250,7 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines )
 		// identical to last line? just add count
 		if (strcmp(line,lastLine) == 0)
 		{
-			lastPhrasePair->addToCount( line );
+            lastPhrasePair->count += lastCount;
 			continue;			
 		}
 		strcpy( lastLine, line );
@@ -255,6 +258,7 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines )
 		// create new phrase pair
 		PhraseAlignment *phrasePair = new PhraseAlignment();
 		phrasePair->create( line, lineNum );
+        lastCount = phrasePair->count;
 		
 		if (lineNum == 1)
 		{

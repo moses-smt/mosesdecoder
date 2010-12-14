@@ -25,7 +25,6 @@ public:
 	PhraseAlignment();
 	
 	void create( char*, int );
-	void addToCount( char* );
 	void clear();
 	bool equals( const PhraseAlignment& );
 	bool match( const PhraseAlignment& );

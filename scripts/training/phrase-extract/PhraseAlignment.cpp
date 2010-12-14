@@ -26,24 +26,6 @@ PhraseAlignment::PhraseAlignment()
 ,targetPhraseId(999999)
 {}
 
-void PhraseAlignment::addToCount( char line[] ) 
-{
-	vector< string > token = tokenize( line );
-	int item = 0;
-	for (int j=0; j<token.size(); j++) 
-	{
-		if (token[j] == "|||") item++;
-		if (item == 4)
-		{
-			float addCount;
-			sscanf(token[j].c_str(), "%f", &addCount);
-			count += addCount;
-		}
-	}
-	if (item < 4) // no specified counts -> counts as one
-		count += 1.0;
-}
-
 // read in a phrase pair and store it
 void PhraseAlignment::create( char line[], int lineID ) 
 {
