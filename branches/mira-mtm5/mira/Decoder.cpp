@@ -104,7 +104,8 @@ namespace Mira {
                               vector< float>& bleuScores,
                               bool oracle,
                               bool distinct,
-							  bool ignoreUWeight)
+							  bool ignoreUWeight,
+							  size_t rank)
   {
 	StaticData &staticData = StaticData::InstanceNonConst();
 
@@ -143,17 +144,15 @@ namespace Mira {
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
     	cerr << "Total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
-    	//if (distinct) {
-    		Phrase bestPhrase = path.GetTargetPhrase();
 
-    		for (size_t pos = 0; pos < bestPhrase.GetSize(); ++pos) {
-    			const Word &word = bestPhrase.GetWord(pos);
-    			Word *newWord = new Word(word);
-    			cerr << *newWord << " ";
-    		}
-
-    		cerr << endl;
-    	//}
+    	cerr << "Rank " << rank << ": " << endl;
+    	Phrase phrase = path.GetTargetPhrase();
+    	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+    		const Word &word = phrase.GetWord(pos);
+    		Word *newWord = new Word(word);
+    		cerr << *newWord << " ";
+		}
+    	cerr << endl;
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
