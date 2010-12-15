@@ -103,6 +103,8 @@ int main(int argc, char** argv) {
   bool ignoreUpdatesAll;
   bool ignoreUpdatesError;
   bool ignoreUpdatesConstraints;
+  bool logFeatureValues;
+  size_t baseOfLog;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -140,6 +142,8 @@ int main(int argc, char** argv) {
 	    ("ignore-updates-all", po::value<bool>(&ignoreUpdatesAll)->default_value(false), "Ignore updates that increase number of violated constraints OR increase the error")
 	    ("ignore-updates-error", po::value<bool>(&ignoreUpdatesError)->default_value(false), "Ignore updates that increase the error")
 	    ("ignore-updates-constraints", po::value<bool>(&ignoreUpdatesConstraints)->default_value(false), "Ignore updates that increase the number of violated constraints")
+	    ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
+	    ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold");
 
@@ -239,6 +243,8 @@ int main(int argc, char** argv) {
   cerr << "Using slack? " << slack << endl;
   cerr << "BP factor: " << BPfactor << endl;
   cerr << "Ignore unknown word penalty? " << ignoreUWeight << endl;
+  cerr << "fixed clipping? " << fixedClipping << endl;
+  cerr << "clipping: " << clipping << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
@@ -410,6 +416,10 @@ int main(int argc, char** argv) {
 
 	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
 	    	  ((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
+	      }
+
+	      if (logFeatureValues) {
+	    	  //featureValues.applyLog(baseOfLog);
 	      }
 
 		  // run optimiser on batch
@@ -617,9 +627,16 @@ int main(int argc, char** argv) {
 							  cerr << "Rank 0, end date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 									  << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
+							  ScoreComponentCollection dummy;
+							  ostringstream endfilename;
+							  endfilename << "stopping";
+							  dummy.Save(endfilename.str());
 #ifdef MPI_ENABLE
+							  MPI_Finalize();
 							  MPI_Abort(MPI_COMM_WORLD, 0);
 #endif
+
+							  exit(0);
 						  }
 					  }
 				  }
