@@ -211,7 +211,7 @@ if (scalar @ARGV == 4) {
 }
 
 if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER || !defined $___CONFIG) {
-  print STDERR "usage: mert-moses-new.pl input-text references decoder-executable decoder.ini
+  print STDERR "usage: mert-moses.pl input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100            ... how big nbestlist to generate
@@ -262,7 +262,7 @@ Options:
                                   default: optimize all features
                                   example: tm_0,tm_4,d_0
   --prev-aggregate-nbestlist=INT ... number of previous step to consider when
-                                     loading data (default =-1)
+                                     loading data (default = $prev_aggregate_nbl_size)
                                     -1 means all previous, i.e. from iteration 1
                                      0 means no previous data, i.e. only the
                                        current iteration
@@ -468,6 +468,7 @@ safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
 chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
 
 # fixed file names
+my $mert_outfile = "mert.out";
 my $mert_logfile = "mert.log";
 my $weights_in_file = "init.opt";
 my $weights_out_file = "weights.txt";
@@ -720,9 +721,9 @@ while(1) {
   $cmd = $cmd." --ifile run$run.$weights_in_file";
 
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
-    safesystem("$cmd 2> $mert_logfile") or die "Failed to run mert";
+    safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
   }
   die "Optimization failed, file $weights_out_file does not exist or is empty"
     if ! -s $weights_out_file;
@@ -731,6 +732,7 @@ while(1) {
  # backup copies
   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
+  safesystem ("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
@@ -899,9 +901,9 @@ sub run_decoder {
     my $decoder_cmd;
 
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file \"$filename\" -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
