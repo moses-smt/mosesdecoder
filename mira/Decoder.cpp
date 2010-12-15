@@ -145,7 +145,7 @@ namespace Mira {
     	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
     	cerr << "Total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
 
-    	cerr << "Rank " << rank << ": " << endl;
+    	cerr << "Rank " << rank << ": ";
     	Phrase phrase = path.GetTargetPhrase();
     	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
     		const Word &word = phrase.GetWord(pos);
