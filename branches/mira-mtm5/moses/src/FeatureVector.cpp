@@ -216,11 +216,9 @@ namespace Moses {
   
   void FVector::set(size_t index, float value) {
       size_t pos = 0;
-      cerr << "Setting index " << index << " to " << value << endl;
       for (const_iterator i = cbegin(); i != cend(); ++i) {
     	  if (pos == index) {
     		  m_features[i->first] = value;
-    		  cerr << i->first << ": " << value << endl;
     		  break;
     	  }
     	  ++pos;

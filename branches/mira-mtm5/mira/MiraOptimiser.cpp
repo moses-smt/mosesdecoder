@@ -157,17 +157,15 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			if (m_fixedClipping) {
 				for (size_t i = 1; i < totalUpdate.size(); ++i) { // skip DEFAULT weight
 					float currentUpdate = totalUpdate.get(i);
-					cerr << "total update: " << currentUpdate << endl;
  					if (currentUpdate > m_c) {
  						totalUpdate.set(i, m_c);
 					}
 					else if (currentUpdate < (-1 * m_c)) {
 						totalUpdate.set(i, -1 * m_c);
 					}
- 					cerr << "clipped: " << totalUpdate.get(i) << endl;
 				}
 			}
-			cerr << "total update: " << totalUpdate << endl;
+			cerr << "total clipped update: " << totalUpdate << endl;
 			currWeights.PlusEquals(totalUpdate);
 		}
 		else if (violatedConstraintsBefore > 0) {
@@ -209,17 +207,15 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			if (m_fixedClipping) {
 				for (size_t i = 1; i < totalUpdate.size(); ++i) { // skip DEFAULT weight
 					float currentUpdate = totalUpdate.get(i);
-					cerr << "total update: " << currentUpdate << endl;
  					if (currentUpdate > m_c) {
  						totalUpdate.set(i, m_c);
 					}
 					else if (currentUpdate < (-1 * m_c)) {
 						totalUpdate.set(i, -1 * m_c);
 					}
- 					cerr << "clipped: " << totalUpdate.get(i) << endl;
 				}
 			}
-			cerr << "total update: " << totalUpdate << endl;
+			cerr << "total clipped update: " << totalUpdate << endl;
 			currWeights.PlusEquals(totalUpdate);
 
 			// sanity check: how many constraints violated after optimisation?
