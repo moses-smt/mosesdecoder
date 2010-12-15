@@ -147,15 +147,6 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			for (size_t k = 0; k < m_featureValueDiffs.size(); ++k) {
 				// compute update
 				float update = alphas[k];
-				if (m_fixedClipping) {
-					if (update > m_c) {
-						update = m_c;
-					}
-					else if (update < -1 * m_c) {
-						update = -1 * m_c;
-					}
-				}
-
 				m_featureValueDiffs[k].MultiplyEquals(update);
 				cerr << "alpha: " << update << endl;
 
@@ -190,15 +181,6 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 				// compute update
 				float update = alphas[k];
-				if (m_fixedClipping) {
-					if (update > m_c) {
-						update = m_c;
-					}
-					else if (update < -1 * m_c) {
-						update = -1 * m_c;
-					}
-				}
-
 				featureValueDiffs[k].MultiplyEquals(update);
 				cerr << "alpha: " << update << endl;
 
