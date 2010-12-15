@@ -176,11 +176,10 @@ namespace Moses {
         value += get(DEFAULT_NAME);
       }
       /*if (i->first != DEFAULT_NAME && i->second != 0.0) {
-    	  out << value << ", ";
           out << i->first << "=" << value << ", ";
       }*/
       if (i->first != DEFAULT_NAME) {
-          	  out << value << ", ";
+          out << value << ", ";
       }
     }
     out << "}";
@@ -199,11 +198,35 @@ namespace Moses {
       return fi->second;
     }
   }
+
+  float FVector::get(size_t index) const {
+	  size_t pos = 0;
+	  for (const_iterator i = cbegin(); i != cend(); ++i) {
+		  FValue value = i->second;
+		  if (pos == index) {
+			  return value;
+		  }
+		  ++pos;
+	  }
+  }
 	
   void FVector::set(const FName& name, const FValue& value) {
     m_features[name] = value;
   }
   
+  void FVector::set(size_t index, float value) {
+      size_t pos = 0;
+      cerr << "Setting index " << index << " to " << value << endl;
+      for (const_iterator i = cbegin(); i != cend(); ++i) {
+    	  if (pos == index) {
+    		  m_features[i->first] = value;
+    		  cerr << i->first << ": " << value << endl;
+    		  break;
+    	  }
+    	  ++pos;
+      }
+  }
+
   FVector& FVector::operator+= (const FVector& rhs) {
     //default value will take care of itself here.
     for (iterator i = begin(); i != end(); ++i) {

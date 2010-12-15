@@ -100,6 +100,11 @@ public:
 	  m_scores += rhs.m_scores;
 	}
 
+	void PlusEquals(const FVector& scores)
+	{
+		m_scores += scores;
+	}
+
   //! subtract the score in rhs
 	void MinusEquals(const ScoreComponentCollection& rhs)
 	{
