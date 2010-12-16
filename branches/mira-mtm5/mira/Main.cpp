@@ -245,6 +245,8 @@ int main(int argc, char** argv) {
   cerr << "Ignore unknown word penalty? " << ignoreUWeight << endl;
   cerr << "fixed clipping? " << fixedClipping << endl;
   cerr << "clipping: " << clipping << endl;
+  cerr << "take log of feature values? " << logFeatureValues << endl;
+  cerr << "base of log: " << baseOfLog << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
@@ -419,7 +421,11 @@ int main(int argc, char** argv) {
 	      }
 
 	      if (logFeatureValues) {
-	    	  //featureValues.applyLog(baseOfLog);
+	    	  for (size_t i = 0; i < featureValues.size(); ++i) {
+	    		  for (size_t j = 0; j < featureValues[i].size(); ++j) {
+	    			  featureValues[i][j].ApplyLog(baseOfLog);
+	    		  }
+	    	  }
 	      }
 
 		  // run optimiser on batch
