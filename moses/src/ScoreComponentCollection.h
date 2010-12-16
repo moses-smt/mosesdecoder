@@ -203,6 +203,10 @@ public:
     return res;
 	}
 
+	void ApplyLog(size_t baseOfLog) {
+		m_scores.applyLog(baseOfLog);
+	}
+
 	//! if a ScoreProducer produces a single score (for example, a language model score)
 	//! this will return it.  If not, this method will throw
 	float GetScoreForProducer(const ScoreProducer* sp) const

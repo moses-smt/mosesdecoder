@@ -225,6 +225,22 @@ namespace Moses {
       }
   }
 
+  void FVector::applyLog(size_t baseOfLog) {
+      for (const_iterator i = cbegin(); i != cend(); ++i) {
+    	  FValue value = i->second;
+    	  // log_a(value) = ln(value) / ln(a)
+    	  float logOfValue = 0;
+    	  if (value < 0) {
+    		  logOfValue = log(-1*value) / log(baseOfLog);
+    		  logOfValue *= -1;
+    	  }
+    	  else if (value > 0) {
+    		  logOfValue = log(value) / log(baseOfLog);
+    	  }
+    	  m_features[i->first] = logOfValue;
+      }
+  }
+
   FVector& FVector::operator+= (const FVector& rhs) {
     //default value will take care of itself here.
     for (iterator i = begin(); i != end(); ++i) {

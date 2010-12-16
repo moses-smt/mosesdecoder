@@ -177,6 +177,7 @@ namespace Moses {
 
     float get(size_t index) const;
     void set(size_t index, float value);
+    void applyLog(size_t baseOfLog);
 		
 #ifdef MPI_ENABLE
     friend class boost::serialization::access;
