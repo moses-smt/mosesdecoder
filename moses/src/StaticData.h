@@ -61,6 +61,9 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+#ifdef HAVE_SYNLM
+class SyntacticLanguageModel;
+#endif
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;	
@@ -79,6 +82,9 @@ protected:
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
+#ifdef HAVE_SYNLM
+	SyntacticLanguageModel* m_syntacticLanguageModel;
+#endif
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
@@ -211,6 +217,11 @@ protected:
 	 * load all language models as specified in ini file
 	 */
 	bool LoadLanguageModels();
+
+#ifdef HAVE_SYNLM
+	bool LoadSyntacticLanguageModel();
+#endif
+
 	/***
 	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
 	 * (eg word-deletion, word-insertion tables)

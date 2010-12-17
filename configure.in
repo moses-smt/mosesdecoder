@@ -34,6 +34,13 @@ AC_ARG_WITH(srilm-dynamic,
             [with_srilm_dynamic=no]
             )
 
+AC_ARG_WITH(srilm-arch,
+            [AC_HELP_STRING([--with-srilm-arch=ARCH], [(optional) architecture for which SRILM was built])],
+            [with_srilm_arch=$withval],
+            [with_srilm_arch=no]
+           )
+
+
 AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
@@ -51,6 +58,12 @@ AC_ARG_WITH(randlm,
             [with_randlm=$withval],
             [with_randlm=no]
            )
+
+AC_ARG_WITH(synlm,
+	   [AC_HELP_STRING([--with-synlm=PATH], [(optional) path to syntactic language model parser])],
+	   [with_synlm=$withval],
+	   [with_synlm=no]
+	   )
 
 AC_ARG_WITH(notrace,
             [AC_HELP_STRING([--notrace], [disable trace])],
@@ -90,6 +103,7 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([KEN_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
+AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
 AM_CONDITIONAL([WITH_THREADS],false)
@@ -103,13 +117,13 @@ else
     CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
 fi
 
-if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes'
+if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes' || test "x$with_synlm"
 then
     AC_MSG_NOTICE([Using Boost library])
     AX_BOOST_BASE([1.36.0])
 fi
 
-if test "x$with_threads" = 'xyes'
+if test "x$with_threads" = 'xyes' || test "x$with_synlm"
 then
     AC_MSG_NOTICE([Building threaded moses])
     AX_BOOST_THREAD
@@ -151,7 +165,12 @@ then
     # ROOT/lib/i686-m64/liboolm.a
     # ROOT/lib/i686-m64/libdstruct.a
     # ROOT/lib/i686-m64/libmisc.a
-    MY_ARCH=`${with_srilm}/sbin/machine-type`
+    if test "x$with_srilm_arch" != 'xno'
+    then
+	MY_ARCH=${with_srilm_arch}    
+    else
+        MY_ARCH=`${with_srilm}/sbin/machine-type`
+    fi
     LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH} -L${with_srilm}/flm/obj/${MY_ARCH}"
     LIBS="$LIBS $LIB_SRILM"
     FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
@@ -222,6 +241,21 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+
+if test "x$with_synlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS" 
+  CPPFLAGS="$CPPFLAGS -DWITH_THREADS -I${with_synlm}/rvtl/include -I${with_synlm}/wsjparse/include -lm"
+
+
+
+
+  AC_CHECK_HEADERS(nl-cpt.h,
+	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])])
+
+  AM_CONDITIONAL([SYN_LM], true)
+
+fi
 
 
 AM_CONDITIONAL([WITH_MERT],false)
