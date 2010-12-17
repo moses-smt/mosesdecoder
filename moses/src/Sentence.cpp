@@ -28,8 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "Util.h"
 
+using namespace std;
+
 namespace Moses
 {
+
+Sentence::Sentence(FactorDirection direction)	
+: Phrase(direction)
+, InputType()
+{
+	assert(direction == Input);	
+	m_defaultLabelList.push_back(StaticData::Instance().GetInputDefaultNonTerminal());
+}
+	
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 
 {
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
@@ -38,6 +49,42 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
 	if (getline(in, line, '\n').eof())	
 			return 0;
+
+	//get covered words - if continual-partial-translation is switched on, parse input
+	const StaticData &staticData = StaticData::Instance();
+	m_frontSpanCoveredLength = 0;
+	m_sourceCompleted.resize(0);
+	if (staticData.ContinuePartialTranslation()){
+		string initialTargetPhrase;
+		string sourceCompletedStr;
+		int loc1 = line.find( "|||", 0 );
+		int loc2 = line.find( "|||", loc1 + 3 );
+		if (loc1 > -1 && loc2 > -1){
+			initialTargetPhrase = line.substr(0, loc1);
+			sourceCompletedStr = line.substr(loc1 + 3, loc2 - loc1 - 3);
+			line = line.substr(loc2 + 3);
+			sourceCompletedStr = Trim(sourceCompletedStr);
+			initialTargetPhrase = Trim(initialTargetPhrase);
+			m_initialTargetPhrase = initialTargetPhrase;
+			int len = sourceCompletedStr.size();
+			m_sourceCompleted.resize(len);
+			int contiguous = 1;
+			for (int i = 0; i < len; ++i){
+				if (sourceCompletedStr.at(i) == '1')
+				{
+					m_sourceCompleted[i] = true;
+					if (contiguous)
+						m_frontSpanCoveredLength ++;
+				}
+				else
+				{
+					m_sourceCompleted[i] = false;
+					contiguous = 0;
+				}
+			}
+		}
+	}
+
 	// remove extra spaces
 	line = Trim(line);
 
@@ -46,7 +93,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
 	
 	// parse XML markup in translation line
-	const StaticData &staticData = StaticData::Instance();
+	//const StaticData &staticData = StaticData::Instance();
 	std::vector<std::vector<XmlOption*> > xmlOptionsList(0);
 	std::vector< size_t > xmlWalls;
 	if (staticData.GetXmlInputType() != XmlPassThrough) {
@@ -57,6 +104,11 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 		}			
 	}
 	Phrase::CreateFromString(factorOrder, line, factorDelimiter);
+	
+	if (staticData.GetSearchAlgorithm() == ChartDecoding)
+	{
+		InitStartEndWord();
+	}
 	
 	//now that we have final word positions in phrase (from CreateFromString),
 	//we can make input phrase objects to go with our XmlOptions and create TranslationOptions
@@ -131,12 +183,27 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	return 1;
 }
 
+void Sentence::InitStartEndWord()
+{
+	FactorCollection &factorCollection = FactorCollection::Instance();
+	
+	Word startWord(Input);
+	const Factor *factor = factorCollection.AddFactor(Input, 0, BOS_); // TODO - non-factored
+	startWord.SetFactor(0, factor);
+	PrependWord(startWord);
+	
+	Word endWord(Input);
+	factor = factorCollection.AddFactor(Input, 0, EOS_); // TODO - non-factored
+	endWord.SetFactor(0, factor);
+	AddWord(endWord);
+}
+	
 TranslationOptionCollection* 
-Sentence::CreateTranslationOptionCollection() const 
+    Sentence::CreateTranslationOptionCollection(const TranslationSystem* system) const 
 {
 	size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
 	float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-	TranslationOptionCollection *rv= new TranslationOptionCollectionText(*this, maxNoTransOptPerCoverage, transOptThreshold);
+	TranslationOptionCollection *rv= new TranslationOptionCollectionText(system, *this, maxNoTransOptPerCoverage, transOptThreshold);
 	assert(rv);
 	return rv;
 }
@@ -158,7 +225,6 @@ bool Sentence::XmlOverlap(size_t startPos, size_t endPos) const {
 
 void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const {
 	//iterate over XmlOptions list, find exact source/target matches
-	const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	
 	for (std::vector<TranslationOption*>::const_iterator iterXMLOpts = m_xmlOptionsList.begin();
 	        iterXMLOpts != m_xmlOptionsList.end(); iterXMLOpts++) {
@@ -166,25 +232,6 @@ void Sentence::GetXmlTranslationOptions(std::vector <TranslationOption*> &list, 
  			list.push_back(*iterXMLOpts);
 		}
 	}
-}
-
-
-std::string Sentence::ParseXmlTagAttribute(const std::string& tag,const std::string& attributeName){
-	/*TODO deal with unescaping \"*/
-	string tagOpen = attributeName + "=\"";
-	size_t contentsStart = tag.find(tagOpen);
-	if (contentsStart == std::string::npos) return "";
-	contentsStart += tagOpen.size();
-	size_t contentsEnd = tag.find_first_of('"',contentsStart+1);
-	if (contentsEnd == std::string::npos) {
-		TRACE_ERR("Malformed XML attribute: "<< tag);
-		return "";	
-	}
-	size_t possibleEnd;
-	while (tag.at(contentsEnd-1) == '\\' && (possibleEnd = tag.find_first_of('"',contentsEnd+1)) != std::string::npos) {
-		contentsEnd = possibleEnd;
-	}
-	return tag.substr(contentsStart,contentsEnd-contentsStart);
 }
 
 void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder

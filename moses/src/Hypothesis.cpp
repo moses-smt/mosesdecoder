@@ -43,7 +43,6 @@ using namespace std;
 
 namespace Moses
 {
-unsigned int Hypothesis::s_HypothesesCreated = 0;
 
 #ifdef USE_HYPO_POOL
 	ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
@@ -53,25 +52,28 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
 	: m_prevHypo(NULL)
 	, m_targetPhrase(emptyTarget)
 	, m_sourcePhrase(0)
-	, m_sourceCompleted(source.GetSize())
+	, m_sourceCompleted(source.GetSize(), manager.m_source.m_sourceCompleted)
 	, m_sourceInput(source)
-	, m_currSourceWordsRange(NOT_FOUND, NOT_FOUND)
-	, m_currTargetWordsRange(NOT_FOUND, NOT_FOUND)
+	, m_currSourceWordsRange(
+			m_sourceCompleted.GetFirstGapPos()>0 ? 0 : NOT_FOUND,
+			m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
+	, m_currTargetWordsRange(0, emptyTarget.GetSize()-1)
 	, m_wordDeleted(false)
-	, m_ffStates(StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions().size())
+	, m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
 	, m_arcList(NULL)
   , m_transOpt(NULL)
   , m_manager(manager)
 
-  , m_id(0)
+  , m_id(m_manager.GetNextHypoId())
 {	// used for initial seeding of trans process	
 	// initialize scores
 	//_hash_computed = false;
-	s_HypothesesCreated = 1;
+	//s_HypothesesCreated = 1;
 	ResetScore();
-	const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetScoreIndexManager().GetStatefulFeatureFunctions();
+	const vector<const StatefulFeatureFunction*>& ffs = m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
 	for (unsigned i = 0; i < ffs.size(); ++i)
-	  m_ffStates[i] = ffs[i]->EmptyHypothesisState();
+	  m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
+    m_manager.GetSentenceStats().AddCreated();
 }
 
 /***
@@ -94,7 +96,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	, m_arcList(NULL)
   , m_transOpt(&transOpt)
   , m_manager(prevHypo.GetManager())
-	, m_id(s_HypothesesCreated++)
+	, m_id(m_manager.GetNextHypoId())
 {
 	// assert that we are not extending our hypothesis by retranslating something
 	// that this hypothesis has already translated!
@@ -103,6 +105,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 	//_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
   m_wordDeleted = transOpt.IsDeletionOption();
+    m_manager.GetSentenceStats().AddCreated();
 }
 
 Hypothesis::~Hypothesis()
@@ -281,13 +284,13 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
 	const vector<const StatelessFeatureFunction*>& sfs =
-	  staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+	  m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
 	for (unsigned i = 0; i < sfs.size(); ++i) {
     sfs[i]->Evaluate(m_targetPhrase, &m_scoreBreakdown);
 	}
 
 	const vector<const StatefulFeatureFunction*>& ffs =
-	  staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+	  m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
 	for (unsigned i = 0; i < ffs.size(); ++i) {
 		m_ffStates[i] = ffs[i]->Evaluate(
 			*this,
@@ -326,13 +329,6 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore ) {
 	// FUTURE COST
 	m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
-	//LEXICAL REORDERING COST
-	const std::vector<LexicalReordering*> &reorderModels = staticData.GetReorderModels();
-	for(unsigned int i = 0; i < reorderModels.size(); i++)
-	{
-		m_scoreBreakdown.PlusEquals(reorderModels[i], reorderModels[i]->CalcScore(this));
-	}
-
 	// TOTAL
 	float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
 
@@ -352,7 +348,8 @@ void Hypothesis::CalcRemainingScore()
 	IFVERBOSE(2) { t = clock(); } // track time excluding LM
 
 	// WORD PENALTY
-	m_scoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer(), - (float) m_currTargetWordsRange.GetNumWordsCovered()); 
+	m_scoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
+  , - (float)m_currTargetWordsRange.GetNumWordsCovered()); 
 
 	// TOTAL
 	m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
@@ -444,17 +441,24 @@ void Hypothesis::CleanupArcList()
 TO_STRING_BODY(Hypothesis)
  
 // friend
-ostream& operator<<(ostream& out, const Hypothesis& hypothesis)
+ostream& operator<<(ostream& out, const Hypothesis& hypo)
 {	
-	hypothesis.ToStream(out);
+	hypo.ToStream(out);
 	// words bitmap
-	out << "[" << hypothesis.m_sourceCompleted << "] ";
+	out << "[" << hypo.m_sourceCompleted << "] ";
 	
 	// scores
-	out << " [total=" << hypothesis.GetTotalScore() << "]";
-	out << " " << hypothesis.GetScoreBreakdown();
+	out << " [total=" << hypo.GetTotalScore() << "]";
+	out << " " << hypo.GetScoreBreakdown();
 	
 	// alignment
+	out << " " << hypo.GetCurrTargetPhrase().GetAlignmentInfo();
+	
+	/*
+	const Hypothesis *prevHypo = hypo.GetPrevHypo();
+	if (prevHypo)
+		out << endl << *prevHypo;
+	*/
 	
 	return out;
 }
@@ -500,12 +504,6 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 		allFactors.push_back(i);
 	}
 	return GetTargetPhraseStringRep(allFactors);
-}
-
-
-const ScoreComponentCollection &Hypothesis::GetCachedReorderingScore() const
-{
-	return m_transOpt->GetReorderingScore();
 }
 
 }

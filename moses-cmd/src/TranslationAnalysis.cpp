@@ -11,7 +11,7 @@ using namespace Moses;
 
 namespace TranslationAnalysis {
 
-void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
+  void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os, const Hypothesis* hypo)
 {
 	os << std::endl << "TRANSLATION HYPOTHESIS DETAILS:" << std::endl;
   std::vector<const Hypothesis*> translationPath;
@@ -39,6 +39,8 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 		WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
 		WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
 
+		const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignmentInfo();
+		
 		// language model backoff stats,
 		if (doLMStats) {
 			std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->GetLMStats();
@@ -60,8 +62,9 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 			epsilon = true;
       droppedWords.push_back(source);
     }
-    os << "         SOURCE: " << swr << " " << source << std::endl
-       << "  TRANSLATED AS: "               << target << std::endl;
+    os	<< "         SOURCE: " << swr << " " << source << std::endl
+				<< "  TRANSLATED AS: "               << target << std::endl
+				<< "  WORD ALIGNED: " << alignmentInfo					<< std::endl;
 		size_t twr_i = twr.GetStartPos();
 		size_t swr_i = swr.GetStartPos();
 		if (!epsilon) { sms << twr_i; }
@@ -90,7 +93,7 @@ void PrintTranslationAnalysis(std::ostream &os, const Hypothesis* hypo)
 	os << std::endl << std::endl;
 	if (doLMStats && lmCalls > 0) {
 		std::vector<unsigned int>::iterator acc = lmAcc.begin();
-		const LMList& lmlist = StaticData::Instance().GetAllLM();
+		const LMList& lmlist = system->GetLanguageModels();
 		LMList::const_iterator i = lmlist.begin();
 		for (; acc != lmAcc.end(); ++acc, ++i) {
 			char buf[256];

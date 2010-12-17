@@ -48,8 +48,7 @@ protected:
 	
 	size_t m_implFactor;
 public:
-	LanguageModelJoint(LanguageModelSingleFactor *lmImpl, bool registerScore, ScoreIndexManager &scoreIndexManager)
-	:LanguageModelMultiFactor(registerScore, scoreIndexManager)
+	LanguageModelJoint(LanguageModelSingleFactor *lmImpl)
 	{
 		m_lmImpl = lmImpl;
 	}
@@ -61,11 +60,9 @@ public:
 	
 	bool Load(const std::string &filePath
 					, const std::vector<FactorType> &factorTypes
-					, float weight
 					, size_t nGramOrder)
 	{
 		m_factorTypes				= FactorMask(factorTypes);
-		m_weight 						= weight;
 		m_filePath 					= filePath;
 		m_nGramOrder 				= nGramOrder;
 	
@@ -82,10 +79,10 @@ public:
 			m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
 		}
 	
-		return m_lmImpl->Load(filePath, m_implFactor, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);
 	}
 	
-	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = NULL) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -120,12 +117,27 @@ public:
 		}
 	
 		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValue(jointContext, finalState, len);
+		float ret = m_lmImpl->GetValueForgotState(jointContext, outState, len);
 
 		RemoveAllInColl(jointContext);
 		
 		return ret;
 	}
+
+  FFState *GetNullContextState() const
+  {
+    return m_lmImpl->GetNullContextState();
+  }
+
+  FFState *GetBeginSentenceState() const
+  {
+    return m_lmImpl->GetBeginSentenceState();
+  }
+
+  FFState *NewState(const FFState *from) const
+  {
+    return m_lmImpl->NewState(from);
+  }
 	
 };
 

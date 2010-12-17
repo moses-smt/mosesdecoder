@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <numeric>
 #include <cassert>
+
+#include "LMList.h"
 #include "ScoreProducer.h"
 #include "ScoreIndexManager.h"
 #include "TypeDef.h"
@@ -141,6 +143,11 @@ public:
 		}  
 	}
 
+	void Assign(const ScoreComponentCollection &copy)
+	{
+		m_scores =  copy.m_scores;
+	}
+	
 	//! Special version PlusEquals(ScoreProducer, vector<float>)
 	//! to add the score from a single ScoreProducer that produces
 	//! a single value
@@ -191,6 +198,11 @@ public:
 #endif
 		return m_scores[begin];
 	}
+
+	float GetWeightedScore() const;
+
+    void ZeroAllLM(const LMList& lmList);
+    void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
 
 };
 

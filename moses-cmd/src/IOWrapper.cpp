@@ -60,6 +60,7 @@ IOWrapper::IOWrapper(
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -80,6 +81,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_nBestStream(NULL)
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -104,11 +106,12 @@ IOWrapper::~IOWrapper()
 	{
 	  delete m_outputSearchGraphStream;
 	}
+  delete m_detailedTranslationReportingStream;
 }
 
-void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
-														, const std::vector<FactorType>			&outputFactorOrder
-														, const FactorMask							&inputFactorUsed
+void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
+														, const std::vector<FactorType>			&/*outputFactorOrder*/
+														, const FactorMask							&/*inputFactorUsed*/
 														, size_t												nBestSize
 														, const std::string							&nBestFilePath)
 {
@@ -153,6 +156,14 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&inputFactorOrder
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
 	}
+
+  // detailed translation reporting
+  if (staticData.IsDetailedTranslationReportingEnabled())
+  {
+    const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
+    m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+    assert(m_detailedTranslationReportingStream->good());
+  }
 }
 
 InputType*IOWrapper::GetInput(InputType* inputType)
@@ -215,9 +226,22 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
 	}
 }
 
+void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out) 
+{	
+	const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
-
-
+	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+	{
+		const Hypothesis &edge = *edges[currEdge];
+		OutputSurface(out, edge.GetCurrTargetPhrase(), StaticData::Instance().GetOutputFactorOrder(), reportAllFactors);
+		if (reportSegmentation == true
+		    && edge.GetCurrTargetPhrase().GetSize() > 0) {
+			out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
+			    << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
+		}
+	}
+  out << endl;
+}
 
 void IOWrapper::Backtrack(const Hypothesis *hypo){
 
@@ -227,18 +251,7 @@ void IOWrapper::Backtrack(const Hypothesis *hypo){
 	}
 }
 				
-void OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
-{
-	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
-	{
-		const Factor *factor = mbrBestHypo[i];
-		if (i>0) out << " ";
-			out << factor->GetString();
-	}
-	out << endl;
-}													 
-
-void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, ostream& out)
+void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*/, bool /*reportSegmentation*/, bool /*reportAllFactors*/, ostream& out)
 {
   
 	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
@@ -300,7 +313,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 
 
 
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder,long translationId)
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder, const TranslationSystem* system, long translationId)
 {
 	const StaticData &staticData = StaticData::Instance();
 	bool labeledOutput = staticData.IsLabeledNBestList();
@@ -325,7 +338,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 		std::string lastName = "";
 		const vector<const StatefulFeatureFunction*>& sff =
-			staticData.GetScoreIndexManager().GetStatefulFeatureFunctions();
+			system->GetStatefulFeatureFunctions();
 		for( size_t i=0; i<sff.size(); i++ )
 		{
 			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
@@ -341,7 +354,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 
 		const vector<const StatelessFeatureFunction*>& slf =
-			staticData.GetScoreIndexManager().GetStatelessFeatureFunctions();
+			system->GetStatelessFeatureFunctions();
 		for( size_t i=0; i<slf.size(); i++ )
 		{
 			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
@@ -359,7 +372,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
 			// translation components	for text input
-			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
 					out << " tm:";
@@ -375,7 +388,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 			// translation components for Confusion Network input
 			// first translation component has GetNumInputScores() scores from the input Confusion Network
 			// at the beginning of the vector
-			vector<PhraseDictionaryFeature*> pds = StaticData::Instance().GetPhraseDictionaries();
+			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				vector<PhraseDictionaryFeature*>::iterator iter;
 				
@@ -408,11 +421,11 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 		
 		// generation
-		vector<GenerationDictionary*> gds = StaticData::Instance().GetGenerationDictionaries();
+		const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
 		if (gds.size() > 0) {
 			if (labeledOutput)
 				out << " g: ";
-			vector<GenerationDictionary*>::iterator iter;
+			vector<GenerationDictionary*>::const_iterator iter;
 			for (iter = gds.begin(); iter != gds.end(); ++iter) {
 				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 				for (size_t j = 0; j<scores.size(); j++) {
@@ -441,13 +454,31 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 					out<< "-" << targetRange.GetEndPos();
 				}
 			}
-    		}
+		}
 	
-                if (StaticData::Instance().IsPathRecoveryEnabled()) {
-                	out << "|||";
-                        OutputInput(out, edges[0]);
-                }
-				
+		if (includeWordAlignment) {
+			out << " |||";
+			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
+			{
+				const Hypothesis &edge = *edges[currEdge];
+				const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
+				WordsRange targetRange = path.GetTargetWordsRange(edge);
+				const int sourceOffset = sourceRange.GetStartPos();
+				const int targetOffset = targetRange.GetStartPos();
+				const AlignmentInfo AI = edge.GetCurrTargetPhrase().GetAlignmentInfo();
+				AlignmentInfo::const_iterator iter;
+				for (iter = AI.begin(); iter != AI.end(); ++iter)
+					{
+						out << " " << iter->first+sourceOffset << "-" << iter->second+targetOffset;
+					}
+			}
+		}
+	
+		if (StaticData::Instance().IsPathRecoveryEnabled()) {
+			out << "|||";
+			OutputInput(out, edges[0]);
+		}
+
 		out << endl;
 	}
 
@@ -480,9 +511,6 @@ void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& 
     }
 }
 
-void IOWrapper::OutputNBestList(const TrellisPathList &nBestList, long translationId) {
-    OutputNBest(*m_nBestStream, nBestList,m_outputFactorOrder, translationId);
-}
 
 void IOWrapper::OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId) {
     OutputLatticeMBRNBest(*m_nBestStream, solutions,translationId);

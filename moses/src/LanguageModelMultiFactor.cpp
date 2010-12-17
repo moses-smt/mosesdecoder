@@ -24,10 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-LanguageModelMultiFactor::LanguageModelMultiFactor(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModel(registerScore, scoreIndexManager)
-{}
-
 std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
 {
 	std::ostringstream oss;

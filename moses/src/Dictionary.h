@@ -37,8 +37,6 @@ class Dictionary
 protected:
 	
 	const size_t m_numScoreComponent;
-	FactorMask m_inputFactors;
-	FactorMask m_outputFactors;
 
 public:
 	//! Constructor
@@ -46,16 +44,6 @@ public:
 	//!Destructor
 	virtual ~Dictionary();
 
-	//! returns output factor types as specified by the ini file
-	const FactorMask& GetOutputFactorMask() const
-	{
-		return m_outputFactors;
-	}
-	//! returns input factor types as specified by the ini file
-	const FactorMask& GetInputFactorMask() const
-	{
-		return m_inputFactors;
-	}
 
 	//! returns whether this dictionary is to be used for Translate or Generate
 	virtual DecodeType GetDecodeType() const = 0;

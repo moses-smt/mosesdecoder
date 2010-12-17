@@ -23,8 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <iostream>
 #include <fstream>
-#include "Ngram.h"
-#include "Vocab.h"
 
 #include "LanguageModelSRI.h"
 #include "TypeDef.h"
@@ -37,9 +35,8 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModelSRI::LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModelSingleFactor(registerScore, scoreIndexManager)
-, m_srilmVocab(0)
+LanguageModelSRI::LanguageModelSRI()
+: m_srilmVocab(0)
 , m_srilmModel(0)
 {
 }
@@ -52,13 +49,11 @@ LanguageModelSRI::~LanguageModelSRI()
 
 bool LanguageModelSRI::Load(const std::string &filePath
 												, FactorType factorType
-												, float weight
 												, size_t nGramOrder)
 {
-	m_srilmVocab  = new Vocab();
+	m_srilmVocab  = new ::Vocab();
   m_srilmModel	= new Ngram(*m_srilmVocab, nGramOrder);
 	m_factorType 	= factorType;
-	m_weight			= weight;
 	m_nGramOrder	= nGramOrder;
 	m_filePath		= filePath;
 
@@ -130,7 +125,7 @@ VocabIndex LanguageModelSRI::GetLmID( const Factor *factor ) const
 float LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
 	float p = m_srilmModel->wordProb( wordId, context );
-	return FloorScore(TransformSRIScore(p));  // log10->log
+	return FloorScore(TransformLMScore(p));  // log10->log
 }
 
 float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int *len) const
@@ -139,30 +134,29 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 	size_t count = contextFactor.size();
 	if (count <= 0)
 	{
-		finalState = NULL;
+		if(finalState)
+			*finalState = NULL;
 		return 0;
 	}
 		
 	// set up context
-	VocabIndex context[MAX_NGRAM_SIZE];
+	VocabIndex ngram[count + 1];
 	for (size_t i = 0 ; i < count - 1 ; i++)
 	{
-		context[i] =  GetLmID((*contextFactor[count-2-i])[factorType]);
+		ngram[i+1] =  GetLmID((*contextFactor[count-2-i])[factorType]);
 	}
-	context[count-1] = Vocab_None;
+	ngram[count] = Vocab_None;
 	
 	assert((*contextFactor[count-1])[factorType] != NULL);
 	// call sri lm fn
-	VocabIndex lmId= GetLmID((*contextFactor[count-1])[factorType]);
-	float ret = GetValue(lmId, context);
+	VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
+	float ret = GetValue(lmId, ngram+1);
 
 	if (finalState) {
-		for (int i = count - 2 ; i >= 0 ; i--)
-			context[i+1] = context[i];
-		context[0] = lmId;
+		ngram[0] = lmId;
 		unsigned int dummy;
 		if (!len) { len = &dummy; }
-		*finalState = m_srilmModel->contextID(context,*len);
+		*finalState = m_srilmModel->contextID(ngram, *len);
 		(*len)++;
 	}
 	return ret;

@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <string>
-#include "LanguageModel.h"
+#include "LanguageModelImplementation.h"
 #include "Word.h"
 #include "FactorTypeSet.h"
 
@@ -34,17 +34,14 @@ namespace Moses
 class Phrase;
 
 //! Abstract class for for multi factor LM 
-class LanguageModelMultiFactor : public LanguageModel
+class LanguageModelMultiFactor : public LanguageModelImplementation
 {
 protected:
 	FactorMask m_factorTypes;
 
-	LanguageModelMultiFactor(bool registerScore, ScoreIndexManager &scoreIndexManager);
-	
 public:
 	virtual bool Load(const std::string &filePath
 					, const std::vector<FactorType> &factorTypes
-					, float weight
 					, size_t nGramOrder) = 0;
 
 	LMType GetLMType() const

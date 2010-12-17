@@ -21,7 +21,7 @@ use strict;
 #Customizable parameters 
 
 #parameters for submiiting processes through Sun GridEngine
-my $queueparameters="-l mem_free=0.5G -hard";
+my $queueparameters="";
 
 # look for the correct pwdcmd 
 my $pwdcmd = getPwdCmd();

@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "Dictionary.h"
 #include "TargetPhraseCollection.h"
-#include "FeatureFunction.h"
+#include "DecodeFeature.h"
 
 namespace Moses
 {
@@ -45,6 +45,9 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
+class ChartTranslationOptionList;
+class CellCollection;
+class TranslationSystem;
 
 class PhraseDictionaryFeature;
 /**
@@ -58,10 +61,6 @@ class PhraseDictionary: public Dictionary {
     size_t GetTableLimit() const { return m_tableLimit; }
     DecodeType GetDecodeType() const    {   return Translate;   }
     const PhraseDictionaryFeature* GetFeature() const;
-    /** set/change translation weights and recalc weighted score for each translation. 
-        * TODO This may be redundant now we use ScoreCollection
-    */
-    virtual void SetWeightTransModel(const std::vector<float> &weightT)=0;
 
     //! find list of translations that can translates src. Only for phrase input
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
@@ -71,7 +70,12 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-    
+		virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
+																				, InputType const& src
+																				, WordsRange const& range
+																				, bool adhereTableLimit
+																				, const CellCollection &cellColl) const=0;
+
   protected:
     size_t m_tableLimit;
     const PhraseDictionaryFeature* m_feature;
@@ -81,18 +85,22 @@ class PhraseDictionary: public Dictionary {
 /**
  * Represents a feature derived from a phrase table.
  */
-class PhraseDictionaryFeature :  public StatelessFeatureFunction
+class PhraseDictionaryFeature :  public DecodeFeature
 {
  
 
  public:
-	PhraseDictionaryFeature(  size_t numScoreComponent
+	PhraseDictionaryFeature(  PhraseTableImplementation implementation
+														, size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t tableLimit);
+                            , size_t tableLimit
+														, const std::string &targetFile  
+														, const std::string &alignmentsFile);
+
                             
 	virtual ~PhraseDictionaryFeature();
 	
@@ -106,25 +114,41 @@ class PhraseDictionaryFeature :  public StatelessFeatureFunction
 	size_t GetNumScoreComponents() const;
 
 	size_t GetNumInputScores() const;
-
-	PhraseDictionary* GetDictionary(const InputType& source);
     
+    //Initialises the dictionary (may involve loading from file)
+    void InitDictionary(const TranslationSystem* system);
+
+    //Initialise the dictionary for this source (in this thread)
+    void InitDictionary(const TranslationSystem* system,const InputType& source);
+    
+    //Get the dictionary. Be sure to initialise it first.
+    const PhraseDictionary* GetDictionary() const;
+	
  private:
+     /** Load the appropriate phrase table */
+    PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
+     
     size_t m_numScoreComponent;
     unsigned m_numInputScores;
-    std::vector<FactorType> m_input;
-    std::vector<FactorType> m_output;
     std::string m_filePath;
     std::vector<float> m_weight;
     size_t m_tableLimit;
-    //Only instantiate one of these
-    std::auto_ptr<PhraseDictionary> m_memoryDictionary;
+    //We instantiate either the the thread-safe or non-thread-safe dictionary,
+    //but not both. The thread-safe one can be instantiated in the constructor and shared
+    //between threads, however the non-thread-safe one (eg PhraseDictionaryTree) must be instantiated
+    //on demand, and stored in thread-specific storage.
+    std::auto_ptr<PhraseDictionary> m_threadSafePhraseDictionary;
     #ifdef WITH_THREADS
-    boost::thread_specific_ptr<PhraseDictionary>  m_treeDictionary;
+    boost::thread_specific_ptr<PhraseDictionary>  m_threadUnsafePhraseDictionary;
     #else
-    std::auto_ptr<PhraseDictionary> m_treeDictionary;
+    std::auto_ptr<PhraseDictionary> m_threadUnsafePhraseDictionary;
     #endif
-
+    
+    bool m_useThreadSafePhraseDictionary;
+    PhraseTableImplementation m_implementation;
+    std::string m_targetFile;
+    std::string m_alignmentsFile;
+    
 };
 
 

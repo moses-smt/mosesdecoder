@@ -22,10 +22,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_StaticData_h
 #define moses_StaticData_h
 
+#include <stdexcept>
+#include <limits>
 #include <list>
 #include <vector>
 #include <map>
 #include <memory>
+#include <utility>
 
 #ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
@@ -40,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
+#include "TranslationSystem.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -55,12 +59,12 @@ class GlobalLexicalModel;
 class PhraseDictionaryFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
-class WordPenaltyProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
-#ifdef HAVE_SYNLM
-class SyntacticLanguageModel;
-#endif
+class TranslationSystem;
+
+typedef std::pair<std::string, float> UnknownLHSEntry;	
+typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
 
 /** Contains global variables and contants */
 class StaticData
@@ -75,28 +79,25 @@ protected:
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
-#ifdef HAVE_SYNLM
-	SyntacticLanguageModel* m_syntacticLanguageModel;
-#endif
 	ScoreIndexManager				m_scoreIndexManager;
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+    std::vector<DecodeGraph*> m_decodeGraphs;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
+    std::map<std::string, TranslationSystem> m_translationSystems;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
 		m_translationOptionThreshold,
-		m_weightDistortion, 
-		m_weightWordPenalty, 
-		m_wordDeletionWeight,
-		m_weightUnknownWord;
-									// PhraseTrans, Generation & LanguageModelScore has multiple weights.
-	int																	m_maxDistortion;
-									// do it differently from old pharaoh
-									// -ve	= no limit on distortion
-									// 0		= no disortion (monotone in old pharaoh)
+		m_wordDeletionWeight;
+
+	// PhraseTrans, Generation & LanguageModelScore has multiple weights.
+	int				m_maxDistortion;
+	// do it differently from old pharaoh
+	// -ve	= no limit on distortion
+	// 0		= no disortion (monotone in old pharaoh)
 	bool m_reorderingConstraint; // use additional reordering constraints
 	size_t                              
 			m_maxHypoStackSize //hypothesis-stack size that triggers pruning
@@ -119,26 +120,27 @@ protected:
 	 */
 	bool m_dropUnknown;
 	bool m_wordDeletionEnabled;
-  bool m_disableDiscarding;
-  bool m_printAllDerivations;
+
+	bool m_disableDiscarding;
+	bool m_printAllDerivations;
 
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
+	bool m_outputHypoScore;
 
 	SearchAlgorithm m_searchAlgorithm;
 	InputTypeEnum m_inputType;
 	size_t m_numInputScores;
 
 	mutable size_t m_verboseLevel;
-	DistortionScoreProducer *m_distortionScoreProducer;
-	WordPenaltyProducer *m_wpProducer;
+  std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
+	std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_reportAllFactorsNBest;
-	bool m_isDetailedTranslationReportingEnabled;
+  std::string m_detailedTranslationReportingFilePath;
 	bool m_onlyDistinctNBest;
-	bool m_computeLMBackoffStats;
 	bool m_UseAlignmentInfo;
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
@@ -152,6 +154,7 @@ protected:
 
 	bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
+  bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
 	size_t m_mbrSize; //! number of translation candidates considered
 	float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
   size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
@@ -161,12 +164,13 @@ protected:
   float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
   float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
     
+	size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
 
 	bool m_timeout; //! use timeout
 	size_t m_timeout_threshold; //! seconds after which time out is activated
 
 	bool m_useTransOptCache; //! flag indicating, if the persistent translation option cache should be used
-	mutable std::map<std::pair<size_t, Phrase>, pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
+	mutable std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> > m_transOptCache; //! persistent translation option cache
 	size_t m_transOptCacheMaxSize; //! maximum size for persistent translation option cache
     //FIXME: Single lock for cache not most efficient. However using a 
     //reader-writer for LRU cache is tricky - how to record last used time? 
@@ -185,20 +189,28 @@ protected:
 
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
+	size_t m_ruleLimit;
+
+	// Initial = 0 = can be used when creating poss trans
+	// Other = 1 = used to calculate LM score once all steps have been processed
+	Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
+	SourceLabelOverlap m_sourceLabelOverlap;
+	UnknownLHSList m_unknownLHS;
+
+
 	StaticData();
 
+	void LoadPhraseBasedParameters();
+	void LoadChartDecodingParameters();
+	void LoadNonTerminals();
+
 	//! helper fn to set bool param from ini file/command line
-	void SetBooleanParameter(bool *paramter, string parameterName, bool defaultValue);
+	void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
 
 	/***
 	 * load all language models as specified in ini file
 	 */
 	bool LoadLanguageModels();
-
-#ifdef HAVE_SYNLM
-	bool LoadSyntacticLanguageModel();
-#endif
-
 	/***
 	 * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
 	 * (eg word-deletion, word-insertion tables)
@@ -207,9 +219,11 @@ protected:
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
+    bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
-    void ReduceTransOptCache() const;   
+    void ReduceTransOptCache() const;
+	bool m_continuePartialTranslation;
 	
 public:
 
@@ -246,10 +260,6 @@ public:
 		return m_parameter->GetParam(paramName);
 	}
 
-	bool IsComputeLMBackoffStats() const
-	{
-		return m_computeLMBackoffStats;
-	}
 	const std::vector<FactorType> &GetInputFactorOrder() const
 	{
 		return m_inputFactorOrder;
@@ -259,7 +269,6 @@ public:
 		return m_outputFactorOrder;
 	}
 
-	std::vector<DecodeGraph*> GetDecodeStepVL(const InputType& source) const;
 	
 	inline bool GetSourceStartPosMattersForRecombination() const
 	{ 
@@ -297,22 +306,6 @@ public:
 	inline size_t GetMaxPhraseLength() const 
 	{ 
 		return m_maxPhraseLength;
-	}
-	const std::vector<LexicalReordering*> &GetReorderModels() const
-	{
-		return m_reorderModels;
-	}
-	float GetWeightDistortion() const
-	{
-		return m_weightDistortion;
-	}
-	float GetWeightWordPenalty() const
-	{
-		return m_weightWordPenalty;
-	}
-	float GetWeightUnknownWord() const
-	{
-		return m_weightUnknownWord;
 	}
 	bool IsWordDeletionEnabled() const
 	{
@@ -356,7 +349,7 @@ public:
 	}
 	bool UseEarlyDiscarding() const 
 	{
-		return m_earlyDiscardingThreshold != -numeric_limits<float>::infinity();
+		return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
 	}
 	float GetTranslationOptionThreshold() const
 	{
@@ -372,30 +365,17 @@ public:
 		return m_scoreIndexManager;
 	}
 
-	size_t GetLMSize() const
-	{
-		return m_languageModel.size();
-	}
-	const LMList &GetAllLM() const
-	{
-		return m_languageModel;
-	}
-	size_t GetPhraseDictionarySize() const
-	{
-		return m_phraseDictionary.size();
-	}
-	const std::vector<PhraseDictionaryFeature*> &GetPhraseDictionaries() const
-	{
-		return m_phraseDictionary;
-	}
-	const std::vector<GenerationDictionary*> &GetGenerationDictionaries() const
-	{
-		return m_generationDictionary;
-	}
-	size_t GetGenerationDictionarySize() const
-	{
-		return m_generationDictionary.size();
-	}
+    const TranslationSystem& GetTranslationSystem(std::string id) const {
+        std::map<std::string, TranslationSystem>::const_iterator iter = 
+                m_translationSystems.find(id);
+        VERBOSE(2, "Looking for translation system id " << id << std::endl);
+        if (iter == m_translationSystems.end()) {
+          VERBOSE(1, "Translation system not found " << id << std::endl);
+            throw std::runtime_error("Unknown translation system id");
+        } else {
+          return iter->second;
+        }
+    }
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
@@ -415,7 +395,11 @@ public:
 	}
 	bool IsDetailedTranslationReportingEnabled() const
 	{
-		return m_isDetailedTranslationReportingEnabled;
+		return !m_detailedTranslationReportingFilePath.empty();
+	}
+	const std::string &GetDetailedTranslationReportingFilePath() const
+	{
+		return m_detailedTranslationReportingFilePath;
 	}
 	
 	bool IsLabeledNBestList() const
@@ -445,7 +429,7 @@ public:
 		return m_nBestFilePath;
 	}
   	bool IsNBestEnabled() const {
-	  return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph
+	  return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_useConsensusDecoding
 #ifdef HAVE_PROTOBUF
 	|| m_outputSearchGraphPB
 #endif
@@ -463,16 +447,11 @@ public:
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
-	void InitializeBeforeSentenceProcessing(InputType const&) const;
-	void CleanUpAfterSentenceProcessing() const;
 	
 	const std::vector<float>& GetAllWeights() const
 	{
 		return m_allWeights;
 	}
-	const DistortionScoreProducer *GetDistortionScoreProducer() const { return m_distortionScoreProducer; }
-	const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
-	const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWordPenaltyProducer; }
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };
@@ -484,6 +463,7 @@ public:
 	size_t GetMaxNumFactors() const { return m_maxNumFactors; }
 	bool UseMBR() const { return m_mbr; }
   bool UseLatticeMBR() const { return m_useLatticeMBR ;}
+  bool UseConsensusDecoding() const {return m_useConsensusDecoding;}
   void SetUseLatticeMBR(bool flag) {m_useLatticeMBR = flag; }
 	size_t GetMBRSize() const { return m_mbrSize; }
 	float GetMBRScale() const { return m_mbrScale; }
@@ -513,8 +493,12 @@ public:
   
 	bool UseTimeout() const { return m_timeout; }
 	size_t GetTimeoutThreshold() const { return m_timeout_threshold; }
+
+	size_t GetLMCacheCleanupThreshold() const
+	{ return m_lmcache_cleanup_threshold; }
 	
 	bool GetOutputSearchGraph() const { return m_outputSearchGraph; }
+    void SetOutputSearchGraph(bool outputSearchGraph) {m_outputSearchGraph = outputSearchGraph;}
 	bool GetOutputSearchGraphExtended() const { return m_outputSearchGraphExtended; }
 #ifdef HAVE_PROTOBUF
 	bool GetOutputSearchGraphPB() const { return m_outputSearchGraphPB; }
@@ -529,7 +513,28 @@ public:
 
 	const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
   
-  bool PrintAllDerivations() const { return m_printAllDerivations;}
+	bool PrintAllDerivations() const { return m_printAllDerivations;}
+	
+	const UnknownLHSList &GetUnknownLHS() const
+	{ return m_unknownLHS; }
+
+	const Word &GetInputDefaultNonTerminal() const
+	{ return m_inputDefaultNonTerminal; }
+	const Word &GetOutputDefaultNonTerminal() const
+	{ return m_outputDefaultNonTerminal; }
+	
+	SourceLabelOverlap GetSourceLabelOverlap() const
+	{ return m_sourceLabelOverlap; }
+	
+	bool GetOutputHypoScore() const
+	{ return m_outputHypoScore; }
+	size_t GetRuleLimit() const
+	{ return m_ruleLimit; }
+	float GetRuleCountThreshold() const
+	{ return 999999; /* TODO wtf! */ }
+	
+
+	bool ContinuePartialTranslation() const { return m_continuePartialTranslation; }
 };
 
 }

@@ -16,7 +16,7 @@
 
 # memscore - in-memory phrase scoring for Statistical Machine Translation
 # Christian Hardmeier, FBK-irst, Trento, 2010
-# $Id: Makefile.am 2653 2010-01-18 14:52:34Z chardmeier $
+# $Id$
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -142,7 +142,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 SET_MAKE = @SET_MAKE@

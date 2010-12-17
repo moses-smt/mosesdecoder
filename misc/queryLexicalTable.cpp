@@ -21,7 +21,7 @@ void printHelp(){
 	"\n"; 
 }
 
-std::ostream& operator<<(std::ostream& o, Score s){
+std::ostream& operator<<(std::ostream& o, Scores s){
   for(int i = 0; i < s.size(); ++i){
 	o << s[i] << "  ";
   }

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"
+#include "FFState.h"
 #include "Phrase.h"
 #include "StaticData.h"
 
@@ -35,13 +36,7 @@ using namespace std;
 
 namespace Moses
 {
-// static variable init
-LanguageModelSingleFactor::State LanguageModelSingleFactor::UnknownState=0;
 
-LanguageModelSingleFactor::LanguageModelSingleFactor(bool registerScore, ScoreIndexManager &scoreIndexManager)
-:LanguageModel(registerScore, scoreIndexManager)
-{
-}
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 
@@ -52,6 +47,45 @@ std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 	oss << "LM_" << GetNGramOrder() << "gram";
 	return oss.str();
 } 
+
+struct PointerState : public FFState {
+  const void* lmstate;
+  PointerState(const void* lms) { lmstate = lms; }
+  int Compare(const FFState& o) const {
+    const PointerState& other = static_cast<const PointerState&>(o);
+    if (other.lmstate > lmstate) return 1;
+    else if (other.lmstate < lmstate) return -1;
+    return 0;
+  }
+};
+
+LanguageModelPointerState::LanguageModelPointerState()
+{
+m_nullContextState = new PointerState(NULL);
+m_beginSentenceState = new PointerState(NULL);
+}
+
+LanguageModelPointerState::~LanguageModelPointerState() {}
+
+FFState *LanguageModelPointerState::GetNullContextState() const
+{
+  return m_nullContextState;
+}
+
+FFState *LanguageModelPointerState::GetBeginSentenceState() const
+{
+  return m_beginSentenceState;
+}
+
+FFState *LanguageModelPointerState::NewState(const FFState *from) const
+{
+  return new PointerState(from ? static_cast<const PointerState*>(from)->lmstate : NULL);
+}
+
+float LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len) const 
+{
+  return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate, len);
+}
 
 }
 

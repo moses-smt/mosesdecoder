@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "InputType.h"
+#include "LexicalReordering.h"
 #include "Util.h"
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
@@ -46,8 +47,10 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 /** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here
 	* This fn should be called by inherited classes
 */
-TranslationOptionCollection::TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-	: m_source(src)
+TranslationOptionCollection::TranslationOptionCollection(const TranslationSystem* system, 
+    InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : m_system(system),
+    m_source(src)
 	,m_futureScore(src.GetSize())
 	,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
 	,m_translationOptionThreshold(translationOptionThreshold)
@@ -167,8 +170,9 @@ void TranslationOptionCollection::Prune()
 * \param factorCollection input sentence with all factors
 */
 
-void TranslationOptionCollection::ProcessUnknownWord(const std::vector <DecodeGraph*> &decodeStepVL)
+void TranslationOptionCollection::ProcessUnknownWord()
 {
+    const vector<DecodeGraph*>& decodeStepVL = m_system->GetDecodeGraphs();
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
@@ -225,10 +229,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 
 		isDigit = s.find_first_of("0123456789");
-		if (isDigit == string::npos) 
-			isDigit = 0;
-		else 
+		if (isDigit == 1) 
 			isDigit = 1;
+		else 
+			isDigit = 0;
 		// modify the starting bitmap
 	}
 	
@@ -239,9 +243,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	TargetPhrase targetPhrase(Output);
 	targetPhrase.SetSourcePhrase(m_unksrc);
 	if (inputScores != NULL) {
-		targetPhrase.SetScore(*inputScores);
+		targetPhrase.SetScore(m_system,*inputScores);
 	} else {
-		targetPhrase.SetScore();
+		targetPhrase.SetScore(m_system);
 	}
 	
 	if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit)
@@ -274,8 +278,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		//targetPhrase.SetAlignment();
 
 	}
-	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source, 0);	
-	transOpt->CalcScore();
+	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
+  , m_system->GetUnknownWordPenaltyProducer());	
+	transOpt->CalcScore(m_system);
 	Add(transOpt);
 }
 
@@ -374,12 +379,14 @@ void TranslationOptionCollection::CalcFutureScore()
  * \param decodeStepList list of decoding steps
  * \param factorCollection input sentence with all factors
  */
-void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeGraph*> &decodeStepVL)
+void TranslationOptionCollection::CreateTranslationOptions()
 {
 	// loop over all substrings of the source sentence, look them up
 	// in the phraseDictionary (which is the- possibly filtered-- phrase
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
+  
+    const vector <DecodeGraph*> &decodeStepVL = m_system->GetDecodeGraphs();
 
 	size_t size = m_source.GetSize();
 	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
@@ -398,10 +405,10 @@ void TranslationOptionCollection::CreateTranslationOptions(const vector <DecodeG
 		}
 	}
 
-	VERBOSE(3,"Translation Option Collection\n " << *this << endl);
+	VERBOSE(2,"Translation Option Collection\n " << *this << endl);
 
-	ProcessUnknownWord(decodeStepVL);
-
+	ProcessUnknownWord();
+	
 	// Prune
 	Prune();
 
@@ -482,7 +489,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			const DecodeStep &decodeStep = **iterStep;
 
 			static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
-																(m_source, *oldPtoc
+																(m_system, m_source, *oldPtoc
 																, startPos, endPos, adhereTableLimit );
 
 			// do rest of decode steps
@@ -498,7 +505,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 				for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt)
 				{
 					TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-					decodeStep.Process(inputPartialTranslOpt
+					decodeStep.Process(m_system, inputPartialTranslOpt
 																		 , decodeStep
 																		 , *newPtoc
 																		 , this
@@ -518,7 +525,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 			for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl)
 			{
 				TranslationOption *transOpt = *iterColl;
-				transOpt->CalcScore();
+				transOpt->CalcScore(m_system);
 				Add(transOpt);
 			}
 
@@ -577,12 +584,13 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
 	const WordsRange &coverage = translationOption->GetSourceWordsRange();
+	assert(coverage.GetEndPos() - coverage.GetStartPos() < m_collection[coverage.GetStartPos()].size());
 	m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
 TO_STRING_BODY(TranslationOptionCollection);
 
-inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
+std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll)
 {
 	size_t size = coll.GetSize();
 	for (size_t startPos = 0 ; startPos < size ; ++startPos)
@@ -593,7 +601,7 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
-			TranslationOptionList fullList = coll.GetTranslationOptionList(startPos, endPos);
+			const TranslationOptionList& fullList = coll.GetTranslationOptionList(startPos, endPos);
 			size_t sizeFull = fullList.size();
 		  for (size_t i = 0; i < sizeFull; i++)
 			{
@@ -613,8 +621,7 @@ inline std::ostream& operator<<(std::ostream& out, const TranslationOptionCollec
 
 void TranslationOptionCollection::CacheLexReordering()
 {
-	const std::vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetReorderModels();
-
+  const vector<LexicalReordering*> &lexReorderingModels = m_system->GetReorderModels();
 	std::vector<LexicalReordering*>::const_iterator iterLexreordering;
 
 	size_t size = m_source.GetSize();
@@ -639,17 +646,35 @@ void TranslationOptionCollection::CacheLexReordering()
 					const Phrase *sourcePhrase = transOpt.GetSourcePhrase();
 					if (sourcePhrase)
 					{
-						Score score = lexreordering.GetProb(*sourcePhrase
+						Scores score = lexreordering.GetProb(*sourcePhrase
 															, transOpt.GetTargetPhrase());
-						// TODO should have better handling of unknown reordering entries
 						if (!score.empty())
-							transOpt.CacheReorderingProb(lexreordering, score);
+							transOpt.CacheScores(lexreordering, score);
 					}
 				}
 			}
 		}
 	}
 }
+//! list of trans opt for a particular span
+	TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
+	{
+		size_t maxSize = endPos - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		assert(maxSize < m_collection[startPos].size());
+		return m_collection[startPos][maxSize];
+	}
+	const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
+	{
+		size_t maxSize = endPos - startPos;
+    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+    maxSize = std::min(maxSize, maxSizePhrase);
+
+		assert(maxSize < m_collection[startPos].size());
+	 	return m_collection[startPos][maxSize];
+	}
 
 }
 

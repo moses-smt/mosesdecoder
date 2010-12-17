@@ -68,9 +68,6 @@ public:
 			m_targetPhraseCollection = new TargetPhraseCollection();
 		return m_targetPhraseCollection;
 	}
-	// for mert
-	void SetWeightTransModel(const PhraseDictionaryMemory *phraseDictionary
-													, const std::vector<float> &weightT);
 
 	// iterators
 	typedef NodeMap::iterator iterator;

@@ -35,9 +35,9 @@ PartialTranslOptColl::PartialTranslOptColl()
 
 
 /** add a partial translation option to the collection (without pruning) */
-void PartialTranslOptColl::AddNoPrune(TranslationOption *partialTranslOpt)
+void PartialTranslOptColl::AddNoPrune(const TranslationSystem* system, TranslationOption *partialTranslOpt)
 {
-	partialTranslOpt->CalcScore();
+	partialTranslOpt->CalcScore(system);
 	if (partialTranslOpt->GetFutureScore() >= m_worstScore) 
 	{
 		m_list.push_back(partialTranslOpt);
@@ -54,10 +54,10 @@ void PartialTranslOptColl::AddNoPrune(TranslationOption *partialTranslOpt)
 /** add a partial translation option to the collection, prune if necessary.
  * This is done similar to the Prune() in TranslationOptionCollection */ 
 
-void PartialTranslOptColl::Add(TranslationOption *partialTranslOpt)
+void PartialTranslOptColl::Add(const TranslationSystem* system, TranslationOption *partialTranslOpt)
 {
 	// add
-	AddNoPrune( partialTranslOpt );
+	AddNoPrune(system,partialTranslOpt );
 	
 	// done if not too large (lazy pruning, only if twice as large as max)
 	if ( m_list.size() > 2 * m_maxSize ) {

@@ -45,10 +45,7 @@ public:
 	/** Constructor
 	* \param lmImpl SRI or IRST LM which this LM can use to load data
 	*/
-	LanguageModelSkip(LanguageModelSingleFactor *lmImpl
-										, bool registerScore
-										, ScoreIndexManager &scoreIndexManager)
-	: LanguageModelSingleFactor(registerScore, scoreIndexManager)
+	LanguageModelSkip(LanguageModelSingleFactor *lmImpl)
 	{
 		m_lmImpl = lmImpl;		
 	}
@@ -56,13 +53,12 @@ public:
 	{
 		delete m_lmImpl;
 	}
+
 	bool Load(const std::string &filePath
 					, FactorType factorType
-					, float weight
 					, size_t nGramOrder)
 	{
 		m_factorType 				= factorType;
-		m_weight 						= weight;
 		m_filePath 					= filePath;
 		m_nGramOrder 				= nGramOrder;
 		
@@ -73,10 +69,25 @@ public:
 		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
 		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-		return m_lmImpl->Load(filePath, m_factorType, weight, nGramOrder);
+		return m_lmImpl->Load(filePath, m_factorType, nGramOrder);
 	}
+
+	FFState *GetNullContextState() const
+	{
+		return m_lmImpl->GetNullContextState();
+	}
+
+	FFState *GetBeginSentenceState() const
+	{
+		return m_lmImpl->GetBeginSentenceState();
+	}
+
+  FFState *NewState(const FFState *from = NULL) const
+  {
+    return m_lmImpl->NewState(from);
+  }
 			
-	float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len = NULL) const
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -115,7 +126,7 @@ public:
 		std::reverse(chunkContext.begin(), chunkContext.end());
 
 		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValue(chunkContext, finalState, len);
+		float ret = m_lmImpl->GetValueForgotState(chunkContext, outState, len);
 
 		RemoveAllInColl(chunkContext);
 

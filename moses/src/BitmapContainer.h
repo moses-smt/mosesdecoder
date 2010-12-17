@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_BitmapContainer_h
 #define moses_BitmapContainer_h
 
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -187,7 +188,8 @@ class BackwardsEdge
 									, BitmapContainer &parent
 									, const TranslationOptionList &translations
 									, const SquareMatrix &futureScore,
-                                      const InputType& source);
+                    const InputType& source,
+                    const TranslationSystem* system);
 		~BackwardsEdge();
 
 		bool GetInitialized();

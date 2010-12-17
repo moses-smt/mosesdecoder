@@ -9,26 +9,34 @@ use FindBin qw($Bin);
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$OLD,$EXECUTE,$NO_GRAPH,$CONTINUE,$IGNORE_TIME);
+my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$VERBOSE,$IGNORE_TIME);
 my $SLEEP = 2;
 my $META = "$Bin/experiment.meta";
 
-my $MULTICORE = 0;
+# check if it is run on a multi-core machine
+# set number of maximal concurrently active processes
+my ($MULTICORE,$MAX_ACTIVE) = (0,2);
 &detect_if_multicore();
-my $MAX_ACTIVE = $MULTICORE ? 8 : 1;
 
+# check if running on a gridengine cluster
+my $CLUSTER;
+&detect_if_cluster();
+
+# get command line options;
 die("experiment.perl -config config-file [-exec] [-no-graph]")
     unless  &GetOptions('config=s' => \$CONFIG_FILE,
 			'continue=i' => \$CONTINUE,
 			'ignore-time' => \$IGNORE_TIME,
 			'exec' => \$EXECUTE,
+			'cluster' => \$CLUSTER,
+			'multicore' => \$MULTICORE,
 		   	'meta=s' => \$META,
-			'old' => \$OLD,
+			'verbose' => \$VERBOSE,
 			'sleep=i' => \$SLEEP,
 			'max-active=i' => \$MAX_ACTIVE,
 			'no-graph' => \$NO_GRAPH);
-if (! -e "steps") { `mkdir -p steps`; `touch steps/new`; }
-my $NEW = (-e "steps/new");
+if (! -e "steps") { `mkdir -p steps`; }
+
 die("error: could not find config file") 
     unless ($CONFIG_FILE && -e $CONFIG_FILE) ||
    	   ($CONTINUE && -e &steps_file("config.$CONTINUE",$CONTINUE));
@@ -41,11 +49,13 @@ my (@MODULE,
     %STEP_OUT,
     %STEP_OUTNAME,
     %STEP_PASS,       # config parameters that have to be set, otherwise pass
+    %STEP_PASS_IF,    # config parameters that have to be not set, otherwise pass
     %STEP_IGNORE,     # config parameters that have to be set, otherwise ignore
     %STEP_IGNORE_IF,  # config parameters that have to be not set, otherwise ignore
     %QSUB_SCRIPT,     # flag if script contains qsub's when run on cluster
     %QSUB_STEP,       # flag if step contains qsub's when run on cluster
     %RERUN_ON_CHANGE, # config parameter whose change invalidates old runs
+    %MULTIREF,	      # flag if step may be run on multiple sets (reference translations)
     %TEMPLATE,        # template if step follows a simple pattern
     %TEMPLATE_IF,     # part of template that is conditionally executed
     %ONLY_FACTOR_0,   # only run on a corpus that includes surface word
@@ -58,14 +68,16 @@ print "LOAD CONFIG...\n";
 my (@MODULE_LIST,  # list of modules (included sets) used
     %CONFIG);      # all (expanded) parameter settings from configuration file
 &read_config();
-  
+print "working directory is ".&check_and_get("GENERAL:working-dir")."\n";
+chdir(&check_and_get("GENERAL:working-dir"));
+
 my $VERSION = 0;     # experiment number
 $VERSION = $CONTINUE if $CONTINUE;
 &compute_version_number() if $EXECUTE && !$CONTINUE;
-`mkdir -p steps/$VERSION` if $NEW;
+`mkdir -p steps/$VERSION`;
 
 &log_config();
-print "VERSION = $VERSION\n";
+print "running experimenal run number $VERSION\n";
 
 print "\nESTABLISH WHICH STEPS NEED TO BE RUN\n";
 my (%NEEDED,     # mapping of input files to step numbers
@@ -86,59 +98,82 @@ my %RECURSIVE_RE_USE; # stores links from .INFO files that record prior re-use
 &find_re_use();
 
 print "\nDEFINE STEPS (run with -exec if everything ok)\n" unless $EXECUTE || $CONTINUE;
-my $CLUSTER;     # flag that indicates, if this experiment runs on a cluster
-my $EDDIE; # are we on eddie
-&detect_if_cluster();
-
 &define_step("all") unless $EXECUTE || $CONTINUE;
-
-&display_graph();
+&init_agenda_graph();
+&draw_agenda_graph();
 
 print "\nEXECUTE STEPS\n" if $EXECUTE;
 my (%DO,%DONE,%CRASHED);  # tracks steps that are currently processed or done
 &execute_steps() if $EXECUTE;
-&draw_agenda();
+&draw_agenda_graph();
 
-sub display_graph() {
+exit();
+
+### SUB ROUTINES
+# graph that depicts steps of the experiment, with depedencies
+
+sub init_agenda_graph() {
     my $dir = &check_and_get("GENERAL:working-dir");    
 
-    open(PS,">".&steps_file("graph.$VERSION.ps",$VERSION));
+    my $graph_file = &steps_file("graph.$VERSION",$VERSION);
+    open(PS,">".$graph_file.".ps");
     print PS "%!\n"
 		."/Helvetica findfont 36 scalefont setfont\n"
 		."72 72 moveto\n"
 		."(its all gone blank...) show\n"
 		."showpage\n";
     close(PS);
+    `convert $graph_file.ps $graph_file.png`;
 
     if (!$NO_GRAPH && !fork) {
-        my $file = &steps_file("graph.$VERSION.ps",$VERSION);
-	`gv -watch $file` if !$EDDIE;
-	$file =  &steps_file("graph.$VERSION.png",$VERSION);
-	`display -update 10 $file` if $EDDIE;
+	# use ghostview by default, it it is installed
+	if (`which gv 2> /dev/null`) {
+	  `gv -watch $graph_file.ps`;
+        }
+	# ... otherwise use graphviz's display
+	else {
+	  `display -update 10 $graph_file.png`;
+	}
 	#gotta exit the fork once the user has closed gv. Otherwise we'll have an extra instance of
 	#experiment.perl floating around running steps in parallel with its parent.
 	exit;
     }
 }
 
+# detection of cluster or multi-core machines
+
+sub detect_machine {
+    my ($hostname,$list) = @_;
+    $list =~ s/\s+/ /;
+    $list =~ s/^ //;
+    $list =~ s/ $//;
+    foreach my $machine (split(/ /,$list)) {
+	return 1 if $hostname =~ /$machine/;
+    }
+    return 0;
+}
+
 sub detect_if_cluster {
-    my $hostname = `hostname`;
-    $CLUSTER = ($hostname =~ /townhill/ || $hostname =~ /seville/ || 
-		$hostname =~ /hermes/   || $hostname =~ /lion/    ||
-    		$hostname =~ /seville/  || $hostname =~ /sannox/  ||
-		$hostname =~ /lutzow/   || $hostname =~ /frontend/);
-    print "running on a cluster\n" if $CLUSTER;
-    $EDDIE = ($hostname =~ /frontend/);
-    print "running on eddie\n" if $EDDIE;
+    my $hostname = `hostname`; chop($hostname);
+    foreach my $line (`cat $Bin/experiment.machines`) {
+	next unless $line =~ /^cluster: (.+)$/;
+	if (&detect_machine($hostname,$1)) {
+	    $CLUSTER = 1;
+	    print "running on a cluster\n" if $CLUSTER;
+        }
+    }  
 }
 
 sub detect_if_multicore {
-    my $hostname = `hostname`;
-    $MULTICORE = ($hostname =~ /tyr/  || $hostname =~ /thor/ ||
-		  $hostname =~ /odin/ || $hostname =~ /crom/ ||
-		  $hostname =~ /vali/ || $hostname =~ /saxnot/ ||
-		  $hostname =~ /vili/ || $hostname =~ /freyja/ ||
-		  $hostname =~ /bragi/|| $hostname =~ /hoenir/);
+    my $hostname = `hostname`; chop($hostname);
+    foreach my $line (`cat $Bin/experiment.machines`) {
+	next unless $line =~ /^multicore-(\d+): (.+)$/;
+	my ($cores,$list) = ($1,$2);
+	if (&detect_machine($hostname,$list)) {
+	    $MAX_ACTIVE = $cores;
+	    $MULTICORE = 1;
+        }
+    }
 }
 
 ### Read the meta information about all possible steps
@@ -174,6 +209,10 @@ sub read_meta {
 		@{$STEP_PASS{"$module:$step"}} = split(/\s+/,$2);
 		push @{$RERUN_ON_CHANGE{"$module:$step"}}, split(/\s+/,$2);
 	    }
+	    elsif ($1 eq "pass-if") {
+		@{$STEP_PASS_IF{"$module:$step"}} = split(/\s+/,$2);
+		push @{$RERUN_ON_CHANGE{"$module:$step"}}, split(/\s+/,$2);
+	    }
 	    elsif ($1 eq "ignore-unless") {
 		$STEP_IGNORE{"$module:$step"} = $2;
 	    }
@@ -185,6 +224,9 @@ sub read_meta {
 	    }
 	    elsif ($1 eq "rerun-on-change") {
 		push @{$RERUN_ON_CHANGE{"$module:$step"}}, split(/\s+/,$2);
+	    }
+	    elsif ($1 eq "multiref") {
+		$MULTIREF{"$module:$step"} = $2;
 	    }
 	    elsif ($1 eq "template") {
 		$TEMPLATE{"$module:$step"} = $2;
@@ -286,12 +328,12 @@ sub read_config {
 		    unless defined($CONFIG{$substitution});
 
 		my $o = $CONFIG{$substitution}[0];
-		print "changing $_ to ";
+		print "changing $_ to " if $VERBOSE;
 		s/\$\{$pattern\}/$o/ if $escaped;
 		s/\$$pattern/$o/ unless $escaped;
-		print "$_\n";
+		print "$_\n" if $VERBOSE;
 		if (/\$/) { 
-		    print "more resolving needed\n";
+		    print "more resolving needed\n" if $VERBOSE;
 		    $resolve = 1; 
 		}
 	    }
@@ -373,7 +415,7 @@ sub find_steps {
 sub find_steps_for_module {
     my ($module,$set,$final_module) = @_;
 
-    print "processing module $module:$set\n";
+    print "processing module $module:$set\n" if $VERBOSE;
 
     # go through potential steps from last to first (counter-chronological)
     foreach my $stepname (reverse @{$MODULE_STEP{$module}}) {
@@ -382,13 +424,13 @@ sub find_steps_for_module {
 	my $defined_step = &defined_step($step); # without set
 
 	# FIRST, some checking...
-	print "\tchecking step: $step\n";
+	print "\tchecking step: $step\n" if $VERBOSE;
 
 	# only add this step, if its output is needed by another step
 	my $out = &construct_name($module,$set,$STEP_OUT{$defined_step});
-	print "\t\tproduces $out\n";
+	print "\t\tproduces $out\n" if $VERBOSE;
 	next unless defined($NEEDED{$out});
-	print "\t\tneeded\n";
+	print "\t\tneeded\n" if $VERBOSE;
 	
         # if output of a step is specified, you do not have 
         # to execute that step
@@ -396,21 +438,27 @@ sub find_steps_for_module {
 	    $GIVEN{$out} = $step;
 	    next;
 	}
-	print "\t\toutput not specified in config\n";
+	print "\t\toutput not specified in config\n" if $VERBOSE;
 	
 	# not needed, if optional and not specified
 	if (defined($STEP_IGNORE{$defined_step})) {
 	    my $next = 0;
+	    my $and = 0;
 	    my @IGNORE = split(/ /,$STEP_IGNORE{$defined_step});
+            if ($IGNORE[0] eq "AND") {
+              $and = 1;
+              shift @IGNORE;
+            }
 	    foreach my $ignore (@IGNORE) {
 		my $extended_name = &extend_local_name($module,$set,$ignore);
 		if (! &backoff_and_get($extended_name)) {
-		    print "\t\tignored because of non-existance of ".$extended_name."\n";
+		    print "\t\tignored because of non-existance of ".$extended_name."\n" if $VERBOSE;
 		    $next++;
 		}
 	    }
-	    next if $next == scalar @IGNORE;
-	    print "\t\t=> not all non-existant, not ignored" if $next;
+            next if !$and && ($next == scalar @IGNORE); # OR: all parameters have to be missing
+            next if  $and && $next; # AND: any parameter has to be missing
+	    print "\t\t=> not all non-existant, not ignored" if $next && $VERBOSE;
 	}
 
 	# not needed, if alternative step is specified
@@ -419,7 +467,7 @@ sub find_steps_for_module {
 	    foreach my $ignore (split(/ /,$STEP_IGNORE_IF{$defined_step})) {
 		my $extended_name = &extend_local_name($module,$set,$ignore);
 		if (&backoff_and_get($extended_name)) {
-		    print "\t\tignored because of existance of ".$extended_name."\n";
+		    print "\t\tignored because of existance of ".$extended_name."\n" if $VERBOSE;
 		    $next++;
 		}
 	    }
@@ -430,7 +478,7 @@ sub find_steps_for_module {
 
 	push @DO_STEP,$step;	    
 	$STEP_LOOKUP{$step} = $#DO_STEP;
-	print "\tdo-step: $step\n";
+	print "\tdo-step: $step\n" if $VERBOSE;
 	
 	# mark as pass step (where no action is taken), if step is 
 	# optional and nothing needs to be do done
@@ -438,6 +486,15 @@ sub find_steps_for_module {
 	    my $flag = 1;
 	    foreach my $pass (@{$STEP_PASS{$defined_step}}) {
 		$flag = 0 
+		    if &backoff_and_get(&extend_local_name($module,$set,$pass));
+	    }
+	    $PASS{$#DO_STEP}++ if $flag;
+	}
+
+	if (defined($STEP_PASS_IF{$defined_step})) {
+	    my $flag = 0;
+	    foreach my $pass (@{$STEP_PASS_IF{$defined_step}}) {
+		$flag = 1 
 		    if &backoff_and_get(&extend_local_name($module,$set,$pass));
 	    }
 	    $PASS{$#DO_STEP}++ if $flag;
@@ -474,19 +531,19 @@ sub find_steps_for_module {
 	    # define input(s) as needed by this step
 	    my @IN = &construct_input($module,$set,$in);
 	    foreach my $in (@IN) {
-		print "\t\tneeds input $in: ";
+		print "\t\tneeds input $in: " if $VERBOSE;
 		if(defined($CONFIG{$in}) && $CONFIG{$in}[0] =~ /^\[(.+)\]$/) {
 		    $in = $1;
-		    print $in;
+		    print $in if $VERBOSE;
 		    push @{$NEEDED{$in}}, $#DO_STEP;
-		    print "\n\t\tcross-directed to $in\n";
+		    print "\n\t\tcross-directed to $in\n" if $VERBOSE;
 		}
 		elsif(defined($CONFIG{$in})) {
-		    print "\n\t\t... but that is specified\n";		    
+		    print "\n\t\t... but that is specified\n" if $VERBOSE; 
 		}
 		else {
 		    push @{$NEEDED{$in}}, $#DO_STEP;
-	            print "\n";
+	            print "\n" if $VERBOSE;
 		}
 		push @{$USES_INPUT{$#DO_STEP}},$in;
 	    }
@@ -503,7 +560,7 @@ sub check_producability {
     # if multiple outputs (due to multiple sets merged into one), 
     # only one needs to exist
     foreach my $out (@OUT) {
-	print "producable? $out\n";
+	print "producable? $out\n" if $VERBOSE;
 
 	# producable, if specified as file in the command line
 	return 1 if defined($CONFIG{$out});
@@ -513,7 +570,7 @@ sub check_producability {
 	foreach my $ds (keys %STEP_OUT) {
 	    my ($ds_module) = &deconstruct_name($ds);
 	    my $ds_out = &construct_name($ds_module,"",$STEP_OUT{$ds});
-	    print "checking $ds -> $ds_out\n";
+	    print "checking $ds -> $ds_out\n" if $VERBOSE;
 	    $defined_step = $ds if $out eq $ds_out;
 	}
 	die("ERROR: cannot possibly produce output $out")
@@ -528,11 +585,11 @@ sub check_producability {
 	    my $ds_set = $set;
 	    $ds_set = "" if $MODULE_TYPE{$ds_module} eq "single";
 	    my $req = &construct_name($ds_module,$ds_set,$ignore);
-	    print "producable req $req\n";
+	    print "producable req $req\n" if $VERBOSE;
 	    return 1 if defined($CONFIG{$req});
         }
     }
-    print "not producable: ($module,$set,$output)\n";
+    print "not producable: ($module,$set,$output)\n" if $VERBOSE;
     return 0;
 }
 
@@ -549,12 +606,6 @@ sub construct_input {
 	push @IN, &construct_name($module,$set,$in);
     }
     
-    # input from previous module, synchronized
-    elsif ($MODULE_TYPE{$module} eq "synchronous" &&
-	   $MODULE_TYPE{$1} eq "multiple") {
-	push @IN, &construct_name($1,$set,$2);
-    }
-    
     # input from previous model, multiple
     elsif ($MODULE_TYPE{$1} eq "multiple") {
 	my @SETS = &get_sets($1);
@@ -564,7 +615,7 @@ sub construct_input {
     }
     # input from previous model, synchronized to multiple
     elsif ($1 eq "EVALUATION" && $module eq "REPORTING") {
-	my @SETS = &get_sets("TESTING");
+	my @SETS = &get_sets("EVALUATION");
 	foreach my $set (@SETS) {
 	    push @IN, &construct_name($1,$set,$2);
 	}
@@ -600,12 +651,7 @@ sub find_re_use {
     }
 
     # find older steps from previous versions that can be re-used
-    if ($NEW) {
-	open(LS,"find $dir/steps/* -maxdepth 1 -follow | sort -r |");
-    }
-    else {
-	open(LS,"find $dir/steps -maxdepth 0 -follow | sort -r |");
-    }
+    open(LS,"find $dir/steps/* -maxdepth 1 -follow | sort -r |");
     while(my $info_file = <LS>) {
 	next unless $info_file =~ /INFO$/;
 	$info_file =~ s/.+\/([^\/]+)$/$1/; # ignore path
@@ -617,28 +663,28 @@ sub find_re_use {
 	    $pattern =~ s/.+\/([^\/]+)$/$1/; # ignore path
 	    next unless $info_file =~ /$pattern/;
 	    my $old_version = $1;
-	    print "re_use $i $DO_STEP[$i] (v$old_version) ".join(" ",keys %{$RE_USE[$i]})." ?\n";
-            print "\tno info file ".&versionize(&step_file($i),$old_version).".INFO\n" if ! -e &versionize(&step_file($i),$old_version).".INFO";
-            print "\tno done file " if ! -e &versionize(&step_file($i),$old_version).".DONE";
+	    print "re_use $i $DO_STEP[$i] (v$old_version) ".join(" ",keys %{$RE_USE[$i]})." ?\n" if $VERBOSE;
+            print "\tno info file ".&versionize(&step_file($i),$old_version).".INFO\n" if ! -e &versionize(&step_file($i),$old_version).".INFO" && $VERBOSE;
+            print "\tno done file " if ! -e &versionize(&step_file($i),$old_version).".DONE" && $VERBOSE;
 	    if (! -e &versionize(&step_file($i),$old_version).".INFO") {
-		print "\tinfo file does not exist\n";
-		print "\tnot re-usable\n";
+		print "\tinfo file does not exist\n" if $VERBOSE;
+		print "\tnot re-usable\n" if $VERBOSE;
 	    }
 	    elsif (! -e &versionize(&step_file($i),$old_version).".DONE") {
-		print "\tstep not done (done file does not exist)\n";
-		print "\tnot re-usable\n";
+		print "\tstep not done (done file does not exist)\n" if $VERBOSE;
+		print "\tnot re-usable\n" if $VERBOSE;
 	    }
 	    elsif (! &check_info($i,$old_version) ) {
-		print "\tparameters from info file do not match\n";
-		print "\tnot re-usable\n";
+		print "\tparameters from info file do not match\n" if $VERBOSE;
+		print "\tnot re-usable\n" if $VERBOSE;
 	    }
 	    elsif (&check_if_crashed($i,$old_version)) {
-		print "\tstep crashed\n";
-		print "\tnot re-usable\n";
+		print "\tstep crashed\n" if $VERBOSE;
+		print "\tnot re-usable\n" if $VERBOSE;
 	    }
 	    else {
 		$RE_USE[$i]{$old_version}++;
-		print "\tre-usable\n";
+		print "\tre-usable\n" if $VERBOSE;
 	    }
 	}
     }
@@ -653,21 +699,21 @@ sub find_re_use {
 	for(my $i=0;$i<=$#DO_STEP;$i++) {
 	    next unless $RE_USE[$i];
 	    foreach my $run (keys %{$RE_USE[$i]}) {
-		print "check on dependencies for $i ($run) $DO_STEP[$i]\n";
+		print "check on dependencies for $i ($run) $DO_STEP[$i]\n" if $VERBOSE;
 		foreach (@{$DEPENDENCY[$i]}) {
 		    my $parent = $_;
-		    print "\tchecking on $parent $DO_STEP[$parent]\n";
+		    print "\tchecking on $parent $DO_STEP[$parent]\n" if $VERBOSE;
 		    my @PASSING;
 		    # skip steps that are passed
 		    while (defined($PASS{$parent})) {
 			if (scalar (@{$DEPENDENCY[$parent]}) == 0) {
 			    $parent = 0;
-			    print "\tprevious step's output is specified\n";
+			    print "\tprevious step's output is specified\n" if $VERBOSE;
 			}
 			else {
 			    push @PASSING, $parent;
 			    $parent = $DEPENDENCY[$parent][0];
-			    print "\tmoving up to $parent $DO_STEP[$parent]\n";
+			    print "\tmoving up to $parent $DO_STEP[$parent]\n" if $VERBOSE;
 			}
 		    }
 		    # check if parent step may be re-used
@@ -675,7 +721,7 @@ sub find_re_use {
 			my $reuse_run = $run;
 			# if recursive re-use, switch to approapriate run
 			if (defined($RECURSIVE_RE_USE{$i,$run,$DO_STEP[$parent]})) {
-			    print "\trecursive re-use run $reuse_run\n";
+			    print "\trecursive re-use run $reuse_run\n" if $VERBOSE;
 			    $reuse_run = $RECURSIVE_RE_USE{$i,$run,$DO_STEP[$parent]};
 			}
 			# additional check for straight re-use
@@ -687,13 +733,13 @@ sub find_re_use {
 				if (-e &steps_file("$passed.$run",$run)) {
 				    delete($RE_USE[$i]{$run});
 				    $change = 1;
-				    print "\tpassed step $DO_STEP[$_] used in re-use run $run -> fail\n";
+				    print "\tpassed step $DO_STEP[$_] used in re-use run $run -> fail\n" if $VERBOSE;
 				}
 			    } 
 			}
 			# re-use step has to exist for this run
 			if (! defined($RE_USE[$parent]{$reuse_run})) {
-			    print "\tno previous step -> fail\n";
+			    print "\tno previous step -> fail\n" if $VERBOSE;
 			    delete($RE_USE[$i]{$run});
 			    $change = 1;	
 			}
@@ -705,6 +751,7 @@ sub find_re_use {
 
     # summarize and convert hashes into integers for to be re-used 
     print "\nSTEP SUMMARY:\n";
+    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION));
     for(my $i=$#DO_STEP;$i>=0;$i--) {
         if ($PASS{$i}) {
 	    $RE_USE[$i] = 0;
@@ -715,12 +762,16 @@ sub find_re_use {
 	    my @ALL = sort { $a <=> $b} keys %{$RE_USE[$i]};
             print "re-using (".join(" ",@ALL).")\n";
 	    $RE_USE[$i] = $ALL[0];
+            if ($ALL[0] != $VERSION) {
+	      print RE_USE "$DO_STEP[$i] $ALL[0]\n";
+            }
 	}
 	else {
 	    print "run\n";
 	    $RE_USE[$i] = 0;
 	}
     }
+    close(RE_USE);
 }
 
 sub find_dependencies {
@@ -732,7 +783,7 @@ sub find_dependencies {
 	$step =~ /^(.+:)[^:]+$/; 
 	my $module_set = $1;
 	foreach my $needed_by (@{$NEEDED{$module_set.$STEP_OUT{&defined_step($step)}}}) {
-	    print "$needed_by needed by $i\n";
+	    print "$needed_by needed by $i\n" if $VERBOSE;
 	    next if $needed_by eq 'final';
 	    push @{$DEPENDENCY[$needed_by]},$i;
 	}
@@ -743,7 +794,7 @@ sub find_dependencies {
 #    }
 }
 
-sub draw_agenda {
+sub draw_agenda_graph {
     my %M;
     my $dir = &check_and_get("GENERAL:working-dir");
     open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION));
@@ -785,9 +836,9 @@ sub draw_agenda {
 
 		my $color = "green";
 		$color = "#0000ff" if defined($DO{$i}) && $DO{$i} >= 1;
-		$color = "#8080ff" if defined($DONE{$i});
+		$color = "#8080ff" if defined($DONE{$i}) || ($RE_USE[$i] && $RE_USE[$i] == $VERSION);
+		$color = "lightblue" if $RE_USE[$i] && $RE_USE[$i] != $VERSION;
 		$color = "red" if defined($CRASHED{$i});
-		$color = "lightblue" if $RE_USE[$i];
 		$color = "lightyellow" if defined($PASS{$i});
 		
 		print DOT "    $i [label=\"$step\",shape=box,fontsize=10,height=0,style=filled,fillcolor=\"$color\"];\n";
@@ -861,6 +912,9 @@ sub define_step {
         elsif ($DO_STEP[$i] eq 'TRAINING:symmetrize-giza') {
             &define_training_symmetrize_giza($i);
         }
+	elsif ($DO_STEP[$i] eq 'TRAINING:build-biconcor') {
+            &define_training_build_biconcor($i);
+	}
         elsif ($DO_STEP[$i] eq 'TRAINING:build-lex-trans') {
             &define_training_build_lex_trans($i);
         }
@@ -883,24 +937,26 @@ sub define_step {
 	    &define_training_interpolated_lm_interpolate($i);
 	}
 	elsif ($DO_STEP[$i] eq 'TUNING:factorize-input') {
-            &define_tuningtesting_factorize($i);
+            &define_tuningevaluation_factorize($i);
         }	
  	elsif ($DO_STEP[$i] eq 'TUNING:tune') {
 	    &define_tuning_tune($i);
 	}
-        elsif ($DO_STEP[$i] =~ /^TESTING:(.+):factorize$/) {
-            &define_tuningtesting_factorize($i);
+        elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):factorize-input$/) {
+            &define_tuningevaluation_factorize($i);
         }	
-	elsif ($DO_STEP[$i] =~ /^TESTING:(.+):decode$/) {
-	    &define_testing_decode($1,$i);
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):decode$/) {
+	    &define_evaluation_decode($1,$i);
+	}
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis$/) {
+	    &define_evaluation_analysis($1,$i);
+	}
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis-coverage$/) {
+	    &define_evaluation_analysis_coverage($1,$i);
 	}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):meteor$/) {
 #	    &define_evaluation_meteor($1);
 	}
-	#elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):nist-bleu$/ ||
-	 #      $DO_STEP[$i] =~ /^EVALUATION:(.+):ibm-bleu$/) {
-	  #  &define_evaluation_bleu($1,$i);
-	#}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):ter$/) {
 #	    &define_evaluation_ter($1);
 	}
@@ -955,31 +1011,16 @@ sub execute_steps {
 		print "\texecuting $step via ";
 		&define_step($i);
 		&write_info($i);
+
+		# cluster job submission
 		if ($CLUSTER && ! &is_qsub_script($i)) {
 		    $DO{$i}++;
 		    print "qsub\n";
-		    my $qsub_args = "";
-		    if ($EDDIE) {
-		      print "name: $DO_STEP[$i]\n";
-		      my $memory = &get("$DO_STEP[$i]:memory");
-		      $memory = 2 if !defined($memory) && $DO_STEP[$i] =~ /run-giza/;
-		      print "memory: $memory\n";
-		      my $hours = &get("$DO_STEP[$i]:hours");
-		      $hours = 48 unless defined($hours);
-		      print "hours: $hours\n";
-		      my $project = &backoff_and_get("$DO_STEP[$i]:eddie-project");
-		      $project = "inf_iccs_smt" unless $project;
-		      $qsub_args = "-P $project";
-		      if (defined($hours)) {
-			$qsub_args .= " -l h_rt=$hours:0:0";
-		      }
-		      if (defined($memory)) {
-			$qsub_args .= " -pe memory $memory";
-		      }
-		      print "qsub args: $qsub_args\n";
-                    }
-		    `qsub $qsub_args  -e $step.STDERR $step -o $step.STDOUT`;
+		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
+		    `qsub $qsub_args -e $step.STDERR $step -o $step.STDOUT`;
 		}
+
+		# execute in fork
 		elsif ($CLUSTER || $active < $MAX_ACTIVE) {
 		    $active++;
 		    $DO{$i}++;
@@ -997,13 +1038,13 @@ sub execute_steps {
 	}
 
 	# update state
-	&draw_agenda() unless $done;	
+	&draw_agenda_graph() unless $done;	
 	
 	# sleep until one more step is done
 	while(! $done) {
 	    sleep($SLEEP);
 	    my $dir = &check_and_get("GENERAL:working-dir");
-	    `ls $dir/steps > /dev/null` if ($CLUSTER && !$EDDIE); # seville nfs bug
+	    `ls $dir/steps > /dev/null`; # nfs bug
 	    foreach my $i (keys %DO) {
 		if (-e &versionize(&step_file($i)).".DONE") {
 		    delete($DO{$i});
@@ -1022,6 +1063,24 @@ sub execute_steps {
 	    `touch $running_file`;
 	}    
     }
+}
+
+# a number of arguments to the job submission may be specified
+# note that this is specific to your gridengine implementation
+# and some options may not work.
+
+sub get_qsub_args {
+    my ($step) = @_;
+    my $qsub_args = &get("$step:qsub-settings");
+    $qsub_args = "" unless defined($qsub_args);
+    my $memory = &get("$step:qsub-memory");
+    $qsub_args .= " -pe memory $memory" if defined($memory);
+    my $hours = &get("$step:qsub-hours");
+    $qsub_args .= " -l h_rt=$hours:0:0" if defined($hours);
+    my $project = &backoff_and_get("$step:qsub-project");
+    $qsub_args = "-P $project" if defined($project);
+    print "qsub args: $qsub_args\n" if $VERBOSE;
+    return $qsub_args;
 }
 
 # certain scripts when run on the clusters submit jobs
@@ -1072,40 +1131,46 @@ sub check_info {
     while(<INFO>) {
 	chop;
 	if (/ = /) {
-	    next if $OLD && /^INPUT/;
 	    my ($parameter,$value) = split(/ = /,$_,2);
 	    $INFO{$parameter} = $value;
 	}
 	elsif (/^\# reuse run (\d+) for (\S+)/) {
 	    if ($1>0 && defined($STEP_LOOKUP{$2})) {
-		print "\tRECURSIVE_RE_USE{$i,$version,$2} = $1\n";
+		print "\tRECURSIVE_RE_USE{$i,$version,$2} = $1\n" if $VERBOSE;
 		$RECURSIVE_RE_USE{$i,$version,$2} = $1;
 	    }
 	    else {
-		print "\tnot using '$_', step $2 not required\n";
+		print "\tnot using '$_', step $2 not required\n" if $VERBOSE;
 		return 0;
 	    }
 	}
     }
     close(INFO);
 
-    print "\tcheck parameter count current: ".(scalar keys %VALUE).", old: ".(scalar keys %INFO)."\n";
+    print "\tcheck parameter count current: ".(scalar keys %VALUE).", old: ".(scalar keys %INFO)."\n" if $VERBOSE;
     return 0 unless scalar keys %INFO == scalar keys %VALUE;
     foreach my $parameter (keys %VALUE) {
-        if (! defined($VALUE{$parameter})) {
-          print "\tcurrent has not '$parameter' -> not re-usable\n";
+        if (! defined($INFO{$parameter})) {
+          print "\told has no '$parameter' -> not re-usable\n" if $VERBOSE;
           return 0;
         }
-	print "\tcheck '$VALUE{$parameter}' eq '$INFO{$parameter}' -> ";
-        if (&match_info_strings($VALUE{$parameter},$INFO{$parameter})) { print "ok\n"; }
-        else { print "mismatch\n"; return 0; }
+	print "\tcheck '$VALUE{$parameter}' eq '$INFO{$parameter}' -> " if $VERBOSE;
+        if (&match_info_strings($VALUE{$parameter},$INFO{$parameter})) { 
+            print "ok\n" if $VERBOSE; 
+        }
+        else { 
+            print "mismatch\n" if $VERBOSE;
+            return 0; 
+        }
     }
-    print "\tall parameters match\n";
+    print "\tall parameters match\n" if $VERBOSE;
     return 1;
 }
 
 sub match_info_strings { 
   my ($current,$old) = @_;
+  $current =~ s/ $//;
+  $old =~ s/ $//;
   return 1 if $current eq $old;
   # ignore time stamps, if that option is used
   if (defined($IGNORE_TIME)) {
@@ -1132,20 +1197,17 @@ sub get_parameters_relevant_for_re_use {
     #my $module_set = $step; $module_set =~ s/:[^:]+$//;
     my ($module,$set,$dummy) = &deconstruct_name($step);
     foreach my $parameter (@{$RERUN_ON_CHANGE{&defined_step($step)}}) {
-	my $value = &backoff_and_get(&extend_local_name($module,$set,$parameter));
-	#my $value = &backoff_and_get($module_set.":".$parameter);
-        #print "XXX step: $step, parameter: $parameter -> ".(&extend_local_name($module,$set,$parameter))." = $value\n";
+	my $value = &backoff_and_get_array(&extend_local_name($module,$set,$parameter));
+        $value = join(" ",@{$value}) if ref($value) eq 'ARRAY';
 	$VALUE{$parameter} = $value if $value;
     }
 
-    if (!$OLD) {
-    	my ($out,@INPUT) = &get_output_and_input($i);
- 	my $actually_used = "USED";
-   	foreach my $in_file (@INPUT) {
-   	    $actually_used .= " ".$in_file; 
-    	}
-    	$VALUE{"INPUT"} = $actually_used;
+    my ($out,@INPUT) = &get_output_and_input($i);
+    my $actually_used = "USED";
+    foreach my $in_file (@INPUT) {
+	$actually_used .= " ".$in_file; 
     }
+    $VALUE{"INPUT"} = $actually_used;
 
     foreach my $in_file (@{$USES_INPUT{$i}}) {
 	my $value = &backoff_and_get($in_file);
@@ -1173,6 +1235,15 @@ sub check_if_crashed {
     my ($i,$version) = @_;
     $version = $VERSION unless $version; # default: current version
 
+    # while running, sometimes the STDERR file is slow in appearing - wait a bit just in case
+    if ($version == $VERSION) {
+      my $j = 0;
+      while (! -e &versionize(&step_file($i),$version).".STDERR" && $j < 100) {
+        sleep(5);
+        $j++;
+      }
+    }
+
     #print "checking if $DO_STEP[$i]($version) crashed...\n";
     return 1 if ! -e &versionize(&step_file($i),$version).".STDERR";
 
@@ -1183,7 +1254,7 @@ sub check_if_crashed {
 	open(DIGEST,$file.".digest");
 	while(<DIGEST>) {
 	    $error++;
-	    print "\t$DO_STEP[$i]($version) crashed: $_";
+	    print "\t$DO_STEP[$i]($version) crashed: $_" if $VERBOSE;
 	}
 	close(DIGEST);
 	return $error;
@@ -1205,7 +1276,7 @@ sub check_if_crashed {
 		}
 		if (!$not_error) {
 		        push @DIGEST,$pattern;
-			print "\t$DO_STEP[$i]($version) crashed: $pattern\n";
+			print "\t$DO_STEP[$i]($version) crashed: $pattern\n" if $VERBOSE;
 			$error++;
 		}
 	    }
@@ -1242,7 +1313,7 @@ sub step_file2 {
 sub versionize {
     my ($file,$version) = @_;
     $version = $VERSION unless $version;
-    $file =~ s/steps\//steps\/$version\// if $NEW;
+    $file =~ s/steps\//steps\/$version\//;
     return $file.".".$version;
 }
 
@@ -1321,7 +1392,7 @@ sub define_corpus_factorize {
     &create_step($step_id,$cmd);
 }
 
-sub define_tuningtesting_factorize {
+sub define_tuningevaluation_factorize {
     my ($step_id) = @_;
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
 
@@ -1342,7 +1413,7 @@ sub define_lm_factorize {
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
 
     my ($output,$input) = &get_output_and_input($step_id);
-    print "LM:$set:factors\n";
+    print "LM:$set:factors\n" if $VERBOSE;
     my $factor = &check_backoff_and_get_array("LM:$set:factors");
     
     my $dir = &check_and_get("GENERAL:working-dir");
@@ -1382,7 +1453,7 @@ sub define_lm_train_randomized {
     $output =~ /^(.+)\/([^\/]+)$/;
     my ($output_dir,$output_prefix) = ($1,$2);
     my $cmd = "gzip $input\n";
-    $cmd .= "$training -struct BloomMap -order $order -output-prefix $output_prefix -output-dir $output_dir -input-type corpus -input-path $input.gz\n";
+    $cmd .= "$training -struct BloomMap -order $order -output-prefix $output_prefix -output-dir $output_dir -input-type corpus -input-path $input\n";
     $cmd .= "gunzip $input\n";
     $cmd .= "mv $output.BloomMap $output\n";
 
@@ -1412,7 +1483,7 @@ sub factorize_one_language {
     my $parallelizer = &get("GENERAL:generic-parallelizer");
     my ($module,$set,$stepname) = &deconstruct_name($DO_STEP[$step_id]);
     
-    my ($list,$cmd);
+    my ($cmd,$list) = ("");
     foreach my $factor (@{$FACTOR}) {
 	if ($factor eq "word") {
 	    $list .= " $infile";
@@ -1421,29 +1492,21 @@ sub factorize_one_language {
 	    my $script = &check_and_get("$type:$factor:factor-script");
 	    my $out = "$outfile.$factor";
 	    if ($parallelizer && defined($PARALLELIZE{&defined_step($DO_STEP[$step_id])}) 
-		&& &get("$module:jobs") && $CLUSTER) {
+		&& (  (&get("$module:jobs") && $CLUSTER)
+		   || (&get("$module:cores") && $MULTICORE))) {
 		my $subdir = $module;
 		$subdir =~ tr/A-Z/a-z/;
 		$subdir .= "/tmp.$set.$stepname.$type.$factor.$VERSION";
-		my $qflags = "";
-		if ($EDDIE) {
-		    my $memory = &get("$DO_STEP[$step_id]:memory");
-		    my $hours = &get("$DO_STEP[$step_id]:hours");
-		    my $project = &backoff_and_get("$DO_STEP[$step_id]:eddie-project");
-		    my $qsub_args = "-l h_rt=4:0:0";
-		    if (defined($hours)) {
-			$qsub_args = "-l h_rt=$hours:0:0";
-		    }
-		    if (defined($memory) && $memory > 1) {
-			$qsub_args = "$qsub_args -pe memory $memory";
-		    }
-		    if (defined($project)) {
-			$qsub_args = "$qsub_args -P $project";
-		    }
-		    $qflags = "--queue-flags \"$qsub_args\"";
-		} 
-		$cmd .= "$parallelizer $qflags -in $infile -out $out -cmd '$script %s %s $temp_dir/$subdir' -jobs ".&get("$module:jobs")." -tmpdir $temp_dir/$subdir\n";
-		$QSUB_STEP{$step_id}++;
+		if ($CLUSTER) {
+		    my $qflags = "";
+		    my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
+		    $qflags="--queue-flags \"$qsub_args\"" if ($CLUSTER && $qsub_args);
+		    $cmd .= "$parallelizer $qflags -in $infile -out $out -cmd '$script %s %s $temp_dir/$subdir' -jobs ".&get("$module:jobs")." -tmpdir $temp_dir/$subdir\n";
+		    $QSUB_STEP{$step_id}++;
+		}	
+		elsif ($MULTICORE) {
+		    $cmd .= "$parallelizer -in $infile -out $out -cmd '$script %s %s $temp_dir/$subdir' -cores ".&get("$module:cores")." -tmpdir $temp_dir/$subdir\n";
+		}
 	    }
 	    else {
 		$cmd .= "$script $infile $out $temp_dir\n";
@@ -1456,7 +1519,6 @@ sub factorize_one_language {
 
 sub define_tuning_tune {
     my ($step_id) = @_;
-    my $edinburgh = &check_and_get("GENERAL:edinburgh-script-dir");
     my $dir = &check_and_get("GENERAL:working-dir");
     
     my ($tuned_config,
@@ -1466,11 +1528,10 @@ sub define_tuning_tune {
     my $nbest_size = &check_and_get("TUNING:nbest");
     my $lambda = &backoff_and_get("TUNING:lambda");
     my $tune_continue = &backoff_and_get("TUNING:continue");
-    my $tune_async = &backoff_and_get("TUNING:async");
     my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
     my $tune_inputfilter =  &backoff_and_get("TUNING:input-filter");
 
-    print "define_tuning_tuning ($tuned_config,$config,$input)\n";
+    print "define_tuning_tuning ($tuned_config,$config,$input)\n" if $VERBOSE;
 
     my $jobs = &backoff_and_get("TUNING:jobs");
     my $decoder = &check_backoff_and_get("TUNING:decoder");
@@ -1482,23 +1543,18 @@ sub define_tuning_tune {
     my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
     $tuning_settings = "" unless $tuning_settings;
 
-    my $hours = &backoff_and_get("TUNING:hours");
-    my $memory = &backoff_and_get("TUNING:memory");
-    my $project = &backoff_and_get("TUNING:eddie-project");
-
     my $filter = "$scripts/training/filter-model-given-input.pl";
-    $filter = "$scripts/training/filter-and-binarize-model-given-input.pl $binarizer " if $binarizer;
+    $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$filter .= " --Hierarchical";
-	$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
-	# set number of non terminals, phrase length
-    }
+	#$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
+   }
     
     my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
 
     my $cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings";
 
-    if ($binarize_all || $tune_async) {
+    if ($binarize_all) {
 	$cmd .= " --no-filter-phrase-table";
     } else {
 	$cmd .= " --filtercmd '$filter'";
@@ -1508,22 +1564,10 @@ sub define_tuning_tune {
     $cmd .= " --continue" if $tune_continue;
     $cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
     $cmd .= " --filterfile $tune_inputfilter" if $tune_inputfilter;
-    if (!defined $memory) {
-	$memory = 2;
-    }
-    if (!defined $hours) {
-	$hours = 4;
-    }
-    my $qsub_args = "-l h_rt=$hours:0:0";
-    if ($memory > 1) {
-	$qsub_args = "$qsub_args -pe memory $memory";
-    }
-    if (defined($project)) {
-	$qsub_args = "$qsub_args -P $project";
-    }
-    $cmd .= " --queue-flags=\"$qsub_args\"" if $EDDIE;
+
+    my $qsub_args = &get_qsub_args("TUNING");
+    $cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
     $cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
-    $cmd .= " --async=1" if $tune_async;
     
     my $tuning_dir = $tuned_config;
     $tuning_dir =~ s/\/[^\/]+$//;
@@ -1583,6 +1627,19 @@ sub define_training_symmetrize_giza {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_build_biconcor {
+    my ($step_id) = @_;
+
+    my ($model, $aligned,$corpus) = &get_output_and_input($step_id);
+    my $biconcor = &check_and_get("TRAINING:biconcor");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    my $method = &check_and_get("TRAINING:alignment-symmetrization-method");
+
+    my $cmd = "$biconcor -c $corpus.$input_extension -t $corpus.$output_extension -a $aligned.$method -s $model";
+    &create_step($step_id,$cmd);
+}
+
 sub define_training_build_lex_trans {
     my ($step_id) = @_;
 
@@ -1602,7 +1659,6 @@ sub define_training_extract_phrases {
     my ($extract, $aligned,$corpus) = &get_output_and_input($step_id);
     my $cmd = &get_training_setting(5);
     $cmd .= "-alignment-file $aligned ";
-    $cmd .= "-proper-conditioning " if &get("TRAINING:proper-conditioning");
     $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
     $cmd .= "-extract-file $extract ";
     $cmd .= "-corpus $corpus ";
@@ -1614,14 +1670,11 @@ sub define_training_extract_phrases {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
 
-      if (&get("GENERAL:output-parser"))
-      {
-	  my $unknown_word_label = &get("TRAINING:unknown-word-label");
-	  $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model","")) 
-	      unless $unknown_word_label;
+      if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
 	  $cmd .= "-unknown-word-label $unknown_word_label ";
       }
-    }    
+    }
 
     my $extract_settings = &get("TRAINING:extract-settings");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
@@ -1673,6 +1726,7 @@ sub define_training_create_config {
     my ($config,
 	$reordering_table,$phrase_translation_table,$generation_table,@LM)
 	= &get_output_and_input($step_id);
+    if ($LM[$#LM] =~ /biconcor/ || $LM[$#LM] eq '') { pop @LM; }
 
     my $cmd = &get_training_setting(9);
 
@@ -1697,12 +1751,9 @@ sub define_training_create_config {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
-    
-    if (&get("GENERAL:output-parser"))
-    {
-	my $unknown_word_label = &get("TRAINING:unknown-word-label");
-	$unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version) 
-	    unless $unknown_word_label;
+
+    if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
+	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
     }
 
@@ -1730,7 +1781,7 @@ sub define_training_create_config {
 	$cmd .= "-lm $factor:$order:$LM[0]:$type ";
     }
     else {
-	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).") and LM files (".(scalar @LM).") does not match")
+	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
 	foreach my $lm (@LM) {
 	    my $set = shift @LM_SETS;
@@ -1765,9 +1816,10 @@ sub define_training_interpolated_lm_interpolate {
     my ($step_id) = @_;
 
     my ($interpolated_lm,
-	$interpolation_script, $srilm_dir, $tuning, @LM) 
+	$interpolation_script, $tuning, @LM) 
 	= &get_output_and_input($step_id);
-    
+    my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
+
     my $lm_list = "";
     foreach (@LM) {
 	$lm_list .= $_.",";
@@ -1820,6 +1872,7 @@ sub get_training_setting {
     my $xml = $source_syntax || $target_syntax;
 
     my $cmd = "$training_script ";
+    $cmd .= "$options " if defined($options);
     $cmd .= "-dont-zip ";
     $cmd .= "-first-step $step " if $step>1;
     $cmd .= "-last-step $step "  if $step<9;
@@ -1936,46 +1989,51 @@ sub encode_factor_list {
     return $id;
 }
 
-sub define_testing_decode {
+sub define_evaluation_decode {
     my ($set,$step_id) = @_;
     my $scripts = &check_and_get("GENERAL:moses-script-dir");
-    my $edinburgh = &check_and_get("GENERAL:edinburgh-script-dir");
     my $dir = &check_and_get("GENERAL:working-dir");
     
     my ($system_output,
 	$config,$input,$reference) = &get_output_and_input($step_id);
 
-    my $jobs = &backoff_and_get("TESTING:$set:jobs");
-    my $memory = &backoff_and_get("TESTING:$set:memory");
-    my $hours = &backoff_and_get("TESTING:$set:hours");
-    my $project = &backoff_and_get("TESTING:$set:eddie-project");
-    my $decoder = &check_backoff_and_get("TESTING:$set:decoder");
+    my $jobs = &backoff_and_get("EVALUATION:$set:jobs");
+    my $decoder = &check_backoff_and_get("EVALUATION:$set:decoder");
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $lex_binarizer = &get("GENERAL:rtable-binarizer");
-    my $settings = &backoff_and_get("TESTING:$set:decoder-settings");
+    my $settings = &backoff_and_get("EVALUATION:$set:decoder-settings");
     $settings = "" unless $settings;
-    my $nbest = &backoff_and_get("TESTING:$set:nbest");
+    my $nbest = &backoff_and_get("EVALUATION:$set:nbest");
     my $do_filter = &get("GENERAL:do_filter");
     my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
-    my $moses_parallel = &backoff_and_get("TESTING:$set:moses-parallel");
+    my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
+    my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    
+    if (defined($report_segmentation) && $report_segmentation eq "yes") {
+      if ($hierarchical) {
+        $settings .= " -T $system_output.trace";
+      }
+      else {
+        $settings .= " -t";
+      }
+    }
 
-    my $filter = "";
     my $qsub_filter = 0;
     if ($jobs && $CLUSTER) {
 	$qsub_filter = 1;
     }
     #occasionally, lattices and conf nets need to be able filter phrase tables, we can provide sentences/ngrams in a separate file
-    my $input_filter = &get("TESTING:$set:input-filter");
+    my $input_filter = &get("EVALUATION:$set:input-filter");
     $input_filter = $input unless ($input_filter);
 
-    if ($binarizer) {
-	$filter = "$scripts/training/filter-and-binarize-model-given-input.pl $binarizer $dir/evaluation/filtered.$set.$VERSION $config $input_filter";
-    } else {
-	$filter = "$scripts/training/filter-model-given-input.pl $dir/evaluation/filtered.$set.$VERSION $config $input_filter";
-    }
+    my $filter = "$scripts/training/filter-model-given-input.pl";
+    $filter .= " $dir/evaluation/filtered.$set.$VERSION $config $input_filter";
+    $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
+
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$filter .= " --Hierarchical";
-	$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
+	#$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
 	# set number of non terminals, phrase length
     }
  
@@ -1986,6 +2044,11 @@ sub define_testing_decode {
     }
 
     my $cmd;
+    my $nbest_size;
+    if ($nbest) {
+	$nbest =~ /(\d+)/;
+	$nbest_size = $1;
+    }
     if ($jobs && $CLUSTER) {
 	if ($qsub_filter) {
 	    $cmd = "qsub $filter\n";
@@ -2002,29 +2065,71 @@ sub define_testing_decode {
 	} else {
 	    $cmd .= "$scripts/generic/moses-parallel.pl";
 	}
-	if (!defined $memory) {
-	    $memory = 2;
-	}
-	if (!defined $hours) {
-	    $hours = 6;
-	}
-	my $qsub_args = "-l h_rt=$hours:0:0";
-	if ($memory > 1) {
-	    $qsub_args = "$qsub_args -pe memory $memory";
-	}
-	if (defined($project)) {
-	    $qsub_args = "$qsub_args -P $project";
-	}
-	$cmd .= " -queue-parameters \"$qsub_args\"" if $EDDIE;
+	my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
+	$cmd .= " -queue-parameters \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 	$cmd .= " -decoder $decoder -config $dir/evaluation/filtered.$set.$VERSION/moses.ini -input-file $input --jobs $jobs  -decoder-parameters \"$settings\" > $system_output";
 	
-	$cmd .= " -n-best-file $system_output.best$nbest -n-best-size $nbest" if $nbest;
+	$cmd .= " -n-best-file $system_output.best$nbest_size -n-best-size $nbest" if $nbest;
     }
     else {
-		$cmd = $filter."\n$decoder $settings -v 0 -f $dir/evaluation/filtered.$set.$VERSION/moses.ini < $input > $system_output";
-		$cmd .= " -n-best-list $system_output.best$nbest $nbest" if $nbest;
+	$cmd = $filter."\n$decoder $settings -v 0 -f $dir/evaluation/filtered.$set.$VERSION/moses.ini < $input > $system_output";
+	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
 
+    &create_step($step_id,$cmd);
+}
+
+sub define_evaluation_analysis {
+    my ($set,$step_id) = @_;
+
+    my ($analysis,
+	$output,$reference,$input) = &get_output_and_input($step_id);
+    my $script = &backoff_and_get("EVALUATION:$set:analysis");
+    my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+
+    my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis";
+    if (defined($report_segmentation) && $report_segmentation eq "yes") {
+        my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
+	$cmd .= " -segmentation $segmentation_file";
+    }
+    if (&get("TRAINING:hierarchical-rule-set")) {
+	$cmd .= " -hierarchical";
+    }
+    &create_step($step_id,$cmd);
+}
+
+sub define_evaluation_analysis_coverage {
+    my ($set,$step_id) = @_;
+
+    my ($analysis,
+	$input,$corpus,$ttable) = &get_output_and_input($step_id);
+    my $script = &backoff_and_get("EVALUATION:$set:analysis");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+
+    # translation table name
+    if (&backoff_and_get("TRAINING:input-factors")) {
+      my %IN = &get_factor_id("input");
+      my %OUT = &get_factor_id("output");
+      my $factors = &encode_factor_definition("translation-factors",\%IN,\%OUT);
+      my @FACTOR = split(/\+/,$factors);
+      my @SPECIFIED_NAME;
+      if (&backoff_and_get("TRAINING:phrase-translation-table")) {
+        @SPECIFIED_NAME = @{$CONFIG{"TRAINING:phrase-translation-table"}};
+      }
+      for(my $i=0;$i<scalar(@FACTOR);$i++) {
+	if ($FACTOR[$i] =~ /^0-/) {
+	  if (scalar(@SPECIFIED_NAME) > $i) {
+            $ttable = $SPECIFIED_NAME[$i];
+	  }
+	  else {
+	    $ttable .= ".".$FACTOR[$i];
+	  }
+	  last;
+	}
+      }
+    }
+
+    my $cmd = "$script -input $input -input-corpus $corpus.$input_extension -ttable $ttable -dir $analysis";
     &create_step($step_id,$cmd);
 }
 
@@ -2033,8 +2138,8 @@ sub define_reporting_report {
 
     my $score_file = &get_default_file("REPORTING","","report");
 
-    my $edinburgh = &check_and_get("GENERAL:edinburgh-script-dir");
-    my $cmd = "$edinburgh/report-experiment-scores.perl";
+    my $scripts = &check_and_get("GENERAL:moses-script-dir");
+    my $cmd = "$scripts/ems/support/report-experiment-scores.perl";
     
     # get scores that were produced
     foreach my $parent (@{$DEPENDENCY[$step_id]}) {
@@ -2103,16 +2208,21 @@ sub define_template {
     my ($step_id) = @_;
 
     my $step = $DO_STEP[$step_id];
-    print "building sh file for $step\n";
+    print "building sh file for $step\n" if $VERBOSE;
     my $defined_step = &defined_step($step);
     return 0 unless (defined($TEMPLATE   {$defined_step}) ||
 		     defined($TEMPLATE_IF{$defined_step}));
 
     my $parallelizer = &get("GENERAL:generic-parallelizer");
     my $dir = &check_and_get("GENERAL:working-dir");
-    # print "$step XXX ".$parallelizer." XXX ".$MULTICORE." XXX ".$PARALLELIZE{$defined_step}."\n";
 
     my ($module,$set,$stepname) = &deconstruct_name($step);
+
+    my $multiref = undef;
+    if ($MULTIREF{$defined_step} &&  # step needs to be run differently if multiple ref
+        &backoff_and_get(&extend_local_name($module,$set,"multiref"))) { # there are multiple ref
+      $multiref = $MULTIREF{$defined_step};
+    }
 
     my ($output,@INPUT) = &get_output_and_input($step_id);
 
@@ -2162,7 +2272,8 @@ sub define_template {
 		$tmp_dir .= "/tmp.$set.$stepname.$VERSION-".($i++);
 		if ($CLUSTER) {
 		    my $qflags = "";
-		    $qflags="--queue-flags \"-l h_rt=24:0:0\"" if $EDDIE;
+		    my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
+		    $qflags="--queue-flags \"$qsub_args\"" if ($CLUSTER && $qsub_args);
 		    $new_cmd .= "$parallelizer $qflags -in $in -out $out -cmd '$single_cmd' -jobs ".&get("$module:jobs")." -tmpdir $dir/$tmp_dir\n";
 		}	
 		if ($MULTICORE) {
@@ -2174,6 +2285,13 @@ sub define_template {
 	$cmd = $new_cmd;
 	$QSUB_STEP{$step_id}++;
     }
+
+    # command to be run on multiple reference translations
+    if (defined($multiref)) {
+      $cmd =~ s/^(.+)IN (.+)OUT(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' IN OUT/;
+      $cmd =~ s/^(.+)OUT(.+)IN (.*)$/$multiref '$1 mref-output-file $2 mref-input-file $3' IN OUT/;
+    }
+
     # input is array, but just specified as IN
     if ($cmd !~ /IN1/ && (scalar @INPUT) > 1 ) {
 	my $in = join(" ",@INPUT);
@@ -2189,7 +2307,7 @@ sub define_template {
     }
     $cmd =~ s/OUT/$output/g;
     $cmd =~ s/VERSION/$VERSION/g;
-    print "\tcmd is $cmd\n";
+    print "\tcmd is $cmd\n" if $VERBOSE;
     while ($cmd =~ /^([\S\s]*)\$([^\s\/]+)([\S\s]*)$/) {
 	my ($pre,$variable,$post) = ($1,$2,$3);
 	$cmd = $pre
@@ -2233,7 +2351,7 @@ sub create_step {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $subdir = $module;
     $subdir =~ tr/A-Z/a-z/; 
-    $subdir = "evaluation" if $subdir eq "testing" || $subdir eq "reporting";
+    $subdir = "evaluation" if $subdir eq "reporting";
     $subdir = "lm" if $subdir eq "interpolated-lm";
     open(STEP,">$file");
     print STEP "#!/bin/bash\n\n";
@@ -2302,7 +2420,7 @@ sub get_specified_or_default_file {
     my $specified = 
 	&construct_name($specified_module,$specified_set,$specified_parameter);
     if (defined($CONFIG{$specified})) {
-	print "\t\texpanding $CONFIG{$specified}[0]\n";
+	print "\t\texpanding $CONFIG{$specified}[0]\n" if $VERBOSE;
 	return &long_file_name($CONFIG{$specified}[0],$default_module,$default_set);
     }
     return &get_default_file($default_module,  $default_set,  $default_step);
@@ -2361,7 +2479,6 @@ sub long_file_name {
     if ($file !~ /\//) {
 	my $dir = $module;
 	$dir =~ tr/A-Z/a-z/;
-	$dir = "evaluation" if $module eq "testing";
 	$file = "$dir/$file";
     }
 
@@ -2381,8 +2498,7 @@ sub compute_version_number {
     open(LS,"find $dir/steps -maxdepth 1 -follow |");
     while(<LS>) {
 	s/.+\/([^\/]+)$/$1/; # ignore path
-	if ( $NEW && /^(\d+)$/ ||
-	    !$NEW && /^config.(\d+)$/) {
+	if ( /^(\d+)$/ ) {
 	    if ($1 >= $VERSION) {
 		$VERSION = $1 + 1;
 	    }
@@ -2393,6 +2509,5 @@ sub compute_version_number {
 
 sub steps_file {
   my ($file,$run) = @_;
-  return "steps/$run/$file" if $NEW;
-  return "steps/$file";
+  return "steps/$run/$file";
 }

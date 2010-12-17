@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 namespace Moses
 {
@@ -25,16 +26,14 @@ std::ostream& operator<<(std::ostream& out,const std::vector<T>& x)
 class TgtCand {
 	IPhrase e;
 	Scores sc;
-	WordAlignments m_sourceAlignment, m_targetAlignment;
+	std::string m_alignment;
 public:
 	TgtCand() {}
 	
-	TgtCand(const IPhrase& a, const Scores& b
-					, const WordAlignments &sourceAlignment, const WordAlignments &targetAlignment) 
+	TgtCand(const IPhrase& a, const Scores& b , const std::string& alignment) 
 		: e(a)
 		, sc(b)
-		, m_sourceAlignment(sourceAlignment)
-		, m_targetAlignment(targetAlignment)
+		, m_alignment(alignment)
 	{}
 	
 	TgtCand(const IPhrase& a,const Scores& b) : e(a),sc(b) {}
@@ -58,22 +57,19 @@ public:
 	{
 		fWriteVector(f,e);
 		fWriteVector(f,sc);
-		fWriteStringVector(f, m_sourceAlignment);
-		fWriteStringVector(f, m_targetAlignment);
+		fWriteString(f, m_alignment.c_str(), m_alignment.size());
 	}
 	
 	void readBinWithAlignment(FILE* f) 
 	{
 		fReadVector(f,e);
 		fReadVector(f,sc);
-		fReadStringVector(f, m_sourceAlignment);
-		fReadStringVector(f, m_targetAlignment);
+		fReadString(f, m_alignment);
 	} 
 	
 	const IPhrase& GetPhrase() const {return e;}
 	const Scores& GetScores() const {return sc;}
-	const WordAlignments& GetSourceAlignment() const {return m_sourceAlignment;}
-	const WordAlignments& GetTargetAlignment() const {return m_targetAlignment;}
+	const std::string& GetAlignment() const {return m_alignment;}
 };
   
 
@@ -119,7 +115,7 @@ typedef LVoc<std::string> WordVoc;
 
 static WordVoc* ReadVoc(const std::string& filename) {
     static std::map<std::string,WordVoc*> vocs;
-#ifdef HAVE_THREADS
+#ifdef WITH_THREADS
     boost::mutex mutex;
     boost::mutex::scoped_lock lock(mutex);
 #endif
@@ -214,8 +210,7 @@ struct PDTimp {
 	
 		// convert target candidates from internal data structure to the external one
 	void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& rv,
-											std::vector<StringWordAlignmentCand>& swa,
-											std::vector<StringWordAlignmentCand>& twa) const
+											std::vector<std::string>& wa) const
 	{
 		for(TgtCands::const_iterator i=tcands.begin();i!=tcands.end();++i)
 		{
@@ -226,8 +221,7 @@ struct PDTimp {
 			for(size_t j=0;j<iphrase.size();++j)
 				vs.push_back(&tv->symbol(iphrase[j]));
 			rv.push_back(StringTgtCand(vs,i->GetScores()));
-			swa.push_back(StringWordAlignmentCand(vs,(i->GetSourceAlignment())));
-			twa.push_back(StringWordAlignmentCand(vs,(i->GetTargetAlignment())));
+			wa.push_back(i->GetAlignment());
 		}
 	}
 
@@ -247,10 +241,11 @@ struct PDTimp {
 		else if(p.imp->isRoot()) 
 			{
 				if(wi<data.size() && data[wi])
-					{
-						assert(data[wi]->findKeyPtr(wi));
-						return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
-					}
+				{
+					const void* ptr = data[wi]->findKeyPtr(wi);
+					assert(ptr);
+					return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
+				}
 			}
 		else if(PTF const* nextP=p.imp->ptr()->getPtr(p.imp->idx)) 
 		{
@@ -270,11 +265,10 @@ struct PDTimp {
 
 int PDTimp::Read(const std::string& fn) 
 {
-	const StaticData &staticData = StaticData::Instance();
-	
 	std::string ifs, ift, ifi, ifsv, iftv;
 
-	if (staticData.UseAlignmentInfo()){//asking for word-to-word alignment
+	if (UseWordAlignment()) //asking for word-to-word alignment
+	{
 		if (!FileExists(fn+".binphr.srctree.wa") || !FileExists(fn+".binphr.tgtdata.wa")){
 			//		ERROR
 			std::stringstream strme;
@@ -287,9 +281,9 @@ int PDTimp::Read(const std::string& fn)
 		ifi=fn+".binphr.idx";
 		ifsv=fn+".binphr.srcvoc";
 		iftv=fn+".binphr.tgtvoc";
-		UseWordAlignment(true);
 	}
-	else{
+	else
+	{
 		if (!FileExists(fn+".binphr.srctree") || !FileExists(fn+".binphr.tgtdata")){
 			//		ERROR
 			std::stringstream strme;
@@ -303,8 +297,6 @@ int PDTimp::Read(const std::string& fn)
 		ifi=fn+".binphr.idx";
 		ifsv=fn+".binphr.srcvoc";
 		iftv=fn+".binphr.tgtvoc";
-		
-		UseWordAlignment(false);
 	}
 
 	FILE *ii=fOpen(ifi.c_str(),"rb");
@@ -334,17 +326,13 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
 	{
 		
 		Scores sc=tcand[i].GetScores();
-		WordAlignments			srcAlign=tcand[i].GetSourceAlignment();
-		WordAlignments			trgAlign=tcand[i].GetTargetAlignment();
+		std::string	trgAlign = tcand[i].GetAlignment();
 			
 		const IPhrase& iphr=tcand[i].GetPhrase();
 
 		out << i << " -- " << sc << " -- ";
 		for(size_t j=0;j<iphr.size();++j)			out << tv->symbol(iphr[j])<<" ";
-		out<< " -- ";		
-		for (size_t j=0;j<srcAlign.size();j++)			out << " " << srcAlign[j];
-		out << " -- ";
-		for (size_t j=0;j<trgAlign.size();j++)			out << " " << trgAlign[j];
+		out<< " -- " << trgAlign;		
 		out << std::endl;
 	}
 }
@@ -402,8 +390,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 void PhraseDictionaryTree::
 GetTargetCandidates(const std::vector<std::string>& src,
 										std::vector<StringTgtCand>& rv,
-										std::vector<StringWordAlignmentCand>& swa,
-										std::vector<StringWordAlignmentCand>& twa) const 
+										std::vector<std::string>& wa) const 
 {
 	IPhrase f(src.size());
 	for(size_t i=0;i<src.size();++i) 
@@ -414,7 +401,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 	
 	TgtCands tgtCands;
 	imp->GetTargetCandidates(f,tgtCands);
-	imp->ConvertTgtCand(tgtCands,rv,swa,twa);
+	imp->ConvertTgtCand(tgtCands,rv,wa);
 }
 
 
@@ -490,25 +477,13 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			abort();
 		}
 		
-		std::string sourcePhraseString, targetPhraseString;
-		std::string scoreString;
-		std::string sourceAlignString, targetAlignString;
-		
-		sourcePhraseString=tokens[0];
-		targetPhraseString=tokens[1];
-		if (numElement==3){
-			scoreString=tokens[2];
-		}
-		else{
-			sourceAlignString=tokens[2];
-			targetAlignString=tokens[3];
-			scoreString=tokens[4];
-		}
-		
-				
+		const std::string &sourcePhraseString	=tokens[0]
+											,&targetPhraseString=tokens[1]
+											,&scoreString				= tokens[2];		
+		const std::string empty;
+		const std::string &alignmentString = PrintWordAlignment() ? tokens[3] : empty;
 		IPhrase f,e;
 		Scores sc;
-		WordAlignments sourceAlignment, targetAlignment;
 			
 		std::vector<std::string> wordVec = Tokenize(sourcePhraseString);
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
@@ -517,30 +492,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 		wordVec = Tokenize(targetPhraseString);
 		for (size_t i = 0 ; i < wordVec.size() ; ++i)
 			e.push_back(imp->tv->add(wordVec[i]));
-		
-		
-		
-		//change "()" into "(-1)" for both source and target word-to-word alignments
-		std::string emtpyAlignStr="()";
-		std::string replaceAlignStr="(-1)";
-		sourceAlignString=Replace(sourceAlignString,emtpyAlignStr,replaceAlignStr);
-		targetAlignString=Replace(targetAlignString,emtpyAlignStr,replaceAlignStr);
-
-		//remove all "(" from both source and target word-to-word alignments
-		emtpyAlignStr="(";
-		replaceAlignStr="";
-		sourceAlignString=Replace(sourceAlignString,emtpyAlignStr,replaceAlignStr);
-		targetAlignString=Replace(targetAlignString,emtpyAlignStr,replaceAlignStr);
-		
-		//remove all ")" from both source and target word-to-word alignments
-		emtpyAlignStr=")";
-		replaceAlignStr="";
-		sourceAlignString=Replace(sourceAlignString,emtpyAlignStr,replaceAlignStr);
-		targetAlignString=Replace(targetAlignString,emtpyAlignStr,replaceAlignStr);
-		
-		sourceAlignment = Tokenize(sourceAlignString);
-		targetAlignment = Tokenize(targetAlignString);
-			
+					
 		//			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
 		// Mauro: to handle 0 probs in phrase tables
 		std::vector<float> scoreVector = Tokenize<float>(scoreString);
@@ -549,7 +501,6 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 			float tmp = scoreVector[i];
 			sc.push_back(((tmp>0.0)?tmp:(float)1.0e-38));
 		}
-		
 			
 		if(f.empty())
 		{
@@ -614,7 +565,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 				abort();
 			}
 		}
-		tgtCands.push_back(TgtCand(e,sc, sourceAlignment, targetAlignment));
+		tgtCands.push_back(TgtCand(e,sc, alignmentString));
 		assert(currFirstWord!=InvalidLabelId);
 	}
   if (PrintWordAlignment())
@@ -699,12 +650,11 @@ GetTargetCandidates(PrefixPtr p,
 void PhraseDictionaryTree::
 GetTargetCandidates(PrefixPtr p,
 										std::vector<StringTgtCand>& rv,
-										std::vector<StringWordAlignmentCand>& swa,
-										std::vector<StringWordAlignmentCand>& twa) const 
+										std::vector<std::string>& wa) const 
 {
 	TgtCands tcands;
 	imp->GetTargetCandidates(p,tcands);
-	imp->ConvertTgtCand(tcands,rv,swa,twa);
+	imp->ConvertTgtCand(tcands,rv,wa);
 }
 
 std::string PhraseDictionaryTree::GetScoreProducerDescription() const{

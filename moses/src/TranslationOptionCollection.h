@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <list>
 #include "TypeDef.h"
 #include "TranslationOption.h"
+#include "TranslationOptionList.h"
 #include "SquareMatrix.h"
 #include "WordsBitmap.h"
 #include "PartialTranslOptColl.h"
@@ -63,21 +64,24 @@ class TranslationOptionCollection
 	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
 	TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
+  const TranslationSystem* m_system;
 	std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
 	InputType const			&m_source; /*< reference to the input */
 	SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
 	const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
 	const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
 	std::vector<Phrase*> m_unksrcs;
+
 	
-	TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+	TranslationOptionCollection(const TranslationSystem* system, InputType const& src, size_t maxNoTransOptPerCoverage, 
+                                float translationOptionThreshold);
 	
 	void CalcFutureScore();
 
 	//! Force a creation of a translation option where there are none for a particular source position.
-	void ProcessUnknownWord(const std::vector <DecodeGraph*> &decodeStepVL);
+	void ProcessUnknownWord();
 	//! special handling of ONE unknown words.
-	virtual void ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t length = 1, const Scores *inputScores = NULL);
+    virtual void ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t length = 1, const Scores *inputScores = NULL);
 	//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
 	void Prune();
 
@@ -85,29 +89,13 @@ protected:
 	void Sort();
 
 	//! list of trans opt for a particular span
-	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos)
-	{
-		size_t maxSize = endPos - startPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
-
-		assert(maxSize < m_collection[startPos].size());
-		return m_collection[startPos][maxSize];
-	}
-	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const
-	{
-		size_t maxSize = endPos - startPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
-
-		assert(maxSize < m_collection[startPos].size());
-	 	return m_collection[startPos][maxSize];
-	}
+	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
+	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 	void Add(TranslationOption *translationOption);
 
 	//! implemented by inherited class, called by this class
-	virtual void ProcessUnknownWord(size_t sourcePos)=0;
-	void CacheLexReordering();
+    virtual void ProcessUnknownWord(size_t sourcePos)=0;
+    void CacheLexReordering();
 
 public:
   virtual ~TranslationOptionCollection();
@@ -119,7 +107,7 @@ public:
 	size_t GetSize() const { return m_source.GetSize(); };
 
 	//! Create all possible translations from the phrase tables
-	virtual void CreateTranslationOptions(const std::vector <DecodeGraph*> &decodeStepVL);
+    virtual void CreateTranslationOptions();
 	//! Create translation options that exactly cover a specific input span. 
 	virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
 																			, size_t startPosition

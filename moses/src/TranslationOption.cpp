@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LMList.h"
+#include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
 
@@ -58,12 +59,11 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 TranslationOption::TranslationOption(const WordsRange &wordsRange
 																		 , const TargetPhrase &targetPhrase
 																		 , const InputType &inputType
-																		 , int /*whatever*/)
+																		 , const UnknownWordPenaltyProducer* up)
 : m_targetPhrase(targetPhrase)
 , m_sourceWordsRange	(wordsRange)
 , m_futureScore(0)
 {
-	const UnknownWordPenaltyProducer *up = StaticData::Instance().GetUnknownWordPenaltyProducer();
   if (up) {
 		const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
 		vector<float> score(1);
@@ -92,7 +92,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy)
 , m_sourceWordsRange(copy.m_sourceWordsRange)
 , m_futureScore(copy.m_futureScore)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
-, m_reordering(copy.m_reordering)
+, m_cachedScores(copy.m_cachedScores)
 {}
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
@@ -102,7 +102,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 , m_sourceWordsRange(sourceWordsRange)
 , m_futureScore(copy.m_futureScore)
 , m_scoreBreakdown(copy.m_scoreBreakdown)
-, m_reordering(copy.m_reordering)
+, m_cachedScores(copy.m_cachedScores)
 {}
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
@@ -136,20 +136,21 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 	return bitmap.Overlap(GetSourceWordsRange());
 }
 
-void TranslationOption::CalcScore()
+void TranslationOption::CalcScore(const TranslationSystem* system)
 {
 	// LM scores
 	float ngramScore = 0;
 	float retFullScore = 0;
 
-	const LMList &allLM = StaticData::Instance().GetAllLM();
+    const LMList &allLM = system->GetLanguageModels();
 
 	allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, &m_scoreBreakdown);
 
 	size_t phraseSize = GetTargetPhrase().GetSize();
 	// future score
 	m_futureScore = retFullScore - ngramScore
-								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize * StaticData::Instance().GetWeightWordPenalty();
+								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize *
+        system->GetWeightWordPenalty();
 }
 
 TO_STRING_BODY(TranslationOption);
@@ -158,16 +159,15 @@ TO_STRING_BODY(TranslationOption);
 ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 {
 	out << possibleTranslation.GetTargetPhrase() 
-			<< "c=" << possibleTranslation.GetFutureScore()
+			<< " c=" << possibleTranslation.GetFutureScore()
 			<< " [" << possibleTranslation.GetSourceWordsRange() << "]"
 			<< possibleTranslation.GetScoreBreakdown();
 	return out;
 }
 
-void TranslationOption::CacheReorderingProb(const LexicalReordering &lexreordering
-												, const Score &score)
+void TranslationOption::CacheScores(const ScoreProducer &producer, const Scores &score)
 {
-	m_reordering.Assign(&lexreordering, score);
+	m_cachedScores[&producer] = new Scores(score);
 }
 
 }

@@ -1,16 +1,22 @@
 #!/usr/bin/env perl
 
-use XMLRPC::Lite;
+#
+# Sample client for mosesserver, illustrating allignment info
+#
 
-$url = "http://localhost:9084/RPC2";
+use Encode;
+use XMLRPC::Lite;
+use utf8;
+
+$url = "http://localhost:8080/RPC2";
 $proxy = XMLRPC::Lite->proxy($url);
 
-#my %param = ("text" => "das ist ein haus das ist ein haus das ist ein haus");
-#my %param = ("text" => "je ne sais pas . ");
-#my %param = ("text" => "actes pris en application des traités ce  euratom dont la publication est obligatoire");
-#my %param = ("text" => "actes pris en application des " );
-#my %param = ("text" => "je ne sais pas . ", "align" => "true");
-my %param = ("text" => "hello !");
+$text = "il a souhaité que la présidence trace à nice le chemin pour l' avenir .";
+
+# Work-around for XMLRPC::Lite bug
+$encoded = SOAP::Data->type(string => Encode::encode("utf8",$text));
+
+my %param = ("text" => $encoded, "align" => "true");
 $result = $proxy->call("translate",\%param)->result;
 print $result->{'text'} . "\n";
 if ($result->{'align'}) {

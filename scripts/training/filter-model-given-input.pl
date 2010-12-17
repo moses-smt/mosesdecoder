@@ -6,27 +6,51 @@
 
 # original code by Philipp Koehn
 # changes by Ondrej Bojar
+# adapted for hierarchical models by Phil Williams
 
 use strict;
 
+use FindBin qw($Bin);
+use Getopt::Long;
+
+my $SCRIPTS_ROOTDIR;
+if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
+    $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
+} else {
+    $SCRIPTS_ROOTDIR = $Bin;
+    if ($SCRIPTS_ROOTDIR eq '') {
+        $SCRIPTS_ROOTDIR = dirname(__FILE__);
+    }
+    $SCRIPTS_ROOTDIR =~ s/\/training$//;
+    $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
+}
+
+# consider phrases in input up to $MAX_LENGTH
+# in other words, all phrase-tables will be truncated at least to 10 words per
+# phrase.
 my $MAX_LENGTH = 10;
 
 # utilities
 my $ZCAT = "gzip -cd";
 
-# consider phrases in input up to this length
-# in other words, all phrase-tables will be truncated at least to 10 words per
-# phrase
+# get optional parameters
+my $opt_hierarchical = 0;
+my $binarizer = undef;
 
-my $dir = shift; 
+GetOptions(
+    "Hierarchical" => \$opt_hierarchical,
+    "Binarizer=s" => \$binarizer
+) or exit(1);
+
+# get command line parameters
+my $dir = shift;
 my $config = shift;
 my $input = shift;
 
 if (!defined $dir || !defined $config || !defined $input) {
-  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text\n";
+  print STDERR "usage: filter-model-given-input.pl targetdir moses.ini input.text [-Binarizer binarizer] [-Hierarchical]\n";
   exit 1;
 }
-
 $dir = ensure_full_path($dir);
 
 # buggy directory in place?
@@ -55,36 +79,51 @@ if (-d $dir) {
 safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
-my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS);
+my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE_WEIGHTS,%TABLE_NUMBER);
 my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
 while(<INI>) {
     print INI_OUT $_;
     if (/ttable-file\]/) {
-        while(1) {	       
+      while(1) {	       
     	my $table_spec = <INI>;
-    	if ($table_spec !~ /^([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
+    	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
     	    print INI_OUT $table_spec;
     	    last;
     	}
-    	my ($source_factor,$t,$w,$file) = ($1,$2,$3,$4);
+    	my ($phrase_table_impl,$source_factor,$t,$w,$file) = ($1,$2,$3,$4,$5);
+
+        if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
+            # Only Memory ("0") and NewFormat ("6") can be filtered.
+            print INI_OUT $table_spec;
+            next;
+        }
 
     	chomp($file);
     	push @TABLE, $file;
+	push @TABLE_WEIGHTS,$w;
+	$KNOWN_TTABLE{$#TABLE}++;
 
-    	my $new_name = "$dir/phrase-table.$source_factor-$t";
+    	my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
         my $cnt = 1;
         $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
         $new_name .= ".$cnt";
         $new_name_used{$new_name} = 1;
-    	print INI_OUT "$source_factor $t $w $new_name\n";
+	if ($binarizer && $phrase_table_impl == 6) {
+    	  print INI_OUT "2 $source_factor $t $w $new_name.bin\n";
+        }
+        elsif ($binarizer && $phrase_table_impl == 0) {
+    	  print INI_OUT "1 $source_factor $t $w $new_name\n";
+        } else {
+    	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
+        }
     	push @TABLE_NEW_NAME,$new_name;
 
     	$CONSIDER_FACTORS{$source_factor} = 1;
         print STDERR "Considering factor $source_factor\n";
     	push @TABLE_FACTORS, $source_factor;
-        }
+      }
     }
     elsif (/distortion-file/) {
         while(1) {
@@ -115,33 +154,53 @@ while(<INI>) {
 close(INI);
 close(INI_OUT);
 
+my %TMP_INPUT_FILENAME;
 
-# get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
-my %PHRASE_USED;
-open(INPUT,$input) or die "Can't read $input";
-while(my $line = <INPUT>) {
-    chomp($line);
-    my @WORD = split(/ +/,$line);
-    for(my $i=0;$i<=$#WORD;$i++) {
-        for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
-    	foreach (keys %CONSIDER_FACTORS) {
-    	    my @FACTOR = split(/,/);
-    	    my $phrase = "";
-    	    for(my $k=$i;$k<=$i+$j;$k++) {
-    		my @WORD_FACTOR = split(/\|/,$WORD[$k]);
-    		for(my $f=0;$f<=$#FACTOR;$f++) {
-    		    $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
-    		}
-    		chop($phrase);
-    		$phrase .= " ";
-    	    }
-    	    chop($phrase);
-    	    $PHRASE_USED{$_}{$phrase}++;
-    	}
+if ($opt_hierarchical)
+{
+    # Write a separate, temporary input file for each combination of source
+    # factors
+    foreach my $key (keys %CONSIDER_FACTORS) {
+        my $filename = "$dir/input-$key";
+        open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
+        $TMP_INPUT_FILENAME{$key} = $filename;
+        my @FACTOR = split(/,/, $key);
+        open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
+        while (my $line = <PIPE>) {
+            print FILEHANDLE $line
         }
+        close(FILEHANDLE);
     }
 }
-close(INPUT);
+
+my %PHRASE_USED;
+if (!$opt_hierarchical) {
+    # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
+    open(INPUT,$input) or die "Can't read $input";
+    while(my $line = <INPUT>) {
+        chomp($line);
+        my @WORD = split(/ +/,$line);
+        for(my $i=0;$i<=$#WORD;$i++) {
+            for(my $j=0;$j<$MAX_LENGTH && $j+$i<=$#WORD;$j++) {
+                foreach (keys %CONSIDER_FACTORS) {
+                    my @FACTOR = split(/,/);
+                    my $phrase = "";
+                    for(my $k=$i;$k<=$i+$j;$k++) {
+                        my @WORD_FACTOR = split(/\|/,$WORD[$k]);
+                        for(my $f=0;$f<=$#FACTOR;$f++) {
+                            $phrase .= $WORD_FACTOR[$FACTOR[$f]]."|";
+                        }
+                        chop($phrase);
+                        $phrase .= " ";
+                    }
+                    chop($phrase);
+                    $PHRASE_USED{$_}{$phrase}++;
+                }
+            }
+        }
+    }
+    close(INPUT);
+}
 
 # filter files
 for(my $i=0;$i<=$#TABLE;$i++) {
@@ -156,26 +215,70 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       $openstring = "$ZCAT $file.gz |";
     } elsif ($file =~ /\.gz$/) {
       $openstring = "$ZCAT $file |";
+    } elsif ($opt_hierarchical) {
+      $openstring = "cat $file |";
     } else {
       $openstring = "< $file";
     }
 
-    open(FILE,$openstring) or die "Can't open '$openstring'";
     open(FILE_OUT,">$new_file") or die "Can't write $new_file";
 
-    while(my $entry = <FILE>) {
-        my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
-        $foreign =~ s/ $//;
-        if (defined($PHRASE_USED{$factors}{$foreign})) {
-    	print FILE_OUT $entry;
-    	$used++;
+    if ($opt_hierarchical) {
+        my $tmp_input = $TMP_INPUT_FILENAME{$factors};
+        open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $tmp_input |");
+        while (my $line = <PIPE>) {
+            print FILE_OUT $line
         }
-        $total++;
+        close(FILEHANDLE);
+    } else {
+        open(FILE,$openstring) or die "Can't open '$openstring'";
+        while(my $entry = <FILE>) {
+            my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
+            $foreign =~ s/ $//;
+            if (defined($PHRASE_USED{$factors}{$foreign})) {
+                print FILE_OUT $entry;
+                $used++;
+            }
+            $total++;
+        }
+        close(FILE);
+        die "No phrases found in $file!" if $total == 0;
+        printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
     }
-    close(FILE);
+
+    if(defined($binarizer)) {
+      print STDERR "binarizing...";
+      # translation model
+      if ($KNOWN_TTABLE{$i}) {
+        # ... hierarchical translation model
+        if ($opt_hierarchical) {
+          my $cmd = "$binarizer $new_file $new_file.bin";
+	  print STDERR $cmd."\n";
+	  print STDERR `$cmd`;
+        }
+        # ... phrase translation model
+        else { 
+          my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
+        }
+      }
+      # reordering model
+      else {
+        my $lexbin = $binarizer; $lexbin =~ s/PhraseTable/LexicalTable/;
+        my $cmd = "$lexbin -in $new_file -out $new_file";
+        print STDERR $cmd."\n";
+        print STDERR `$cmd`;
+      }
+    }
+
     close(FILE_OUT);
-    die "No phrases found in $file!" if $total == 0;
-    printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
+}
+
+if ($opt_hierarchical)
+{
+    # Remove the temporary input files
+    unlink values %TMP_INPUT_FILENAME;
 }
 
 open(INFO,">$dir/info");

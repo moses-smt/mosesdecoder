@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <cassert>
+#include <iostream>
+#include "Util.h"
 
 namespace Moses
 {
@@ -11,6 +13,8 @@ class TranslationOption;
 
 class TranslationOptionList
 {
+	friend std::ostream& operator<<(std::ostream& out, const TranslationOptionList& coll);
+
 protected:
 	typedef std::vector<TranslationOption*> CollType;
 	CollType m_coll;
@@ -48,6 +52,8 @@ protected:
 	{
 		m_coll.push_back(transOpt);
 	}
+
+	TO_STRING();		
 
 };
 

@@ -2,6 +2,8 @@
 #include "Timer.h"
 #include "SearchNormal.h"
 
+using namespace std;
+
 namespace Moses
 {
 /**
@@ -14,13 +16,17 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
    ,m_source(source)
 	,m_hypoStackColl(source.GetSize() + 1)
-	,m_initialTargetPhrase(Output)
+	,m_initialTargetPhrase(Output, source.m_initialTargetPhrase)
 	,m_start(clock())
 	,interrupted_flag(0)
 	,m_transOptColl(transOptColl)
 {
 	VERBOSE(1, "Translating: " << m_source << endl);
 	const StaticData &staticData = StaticData::Instance();
+
+        if (m_initialTargetPhrase.GetSize() > 0) {
+          VERBOSE(1, "Search extends partial output: " << m_initialTargetPhrase<<endl);
+        }
 
 	// only if constraint decoding (having to match a specified output)
 	long sentenceID = source.GetTranslationId();
@@ -155,11 +161,12 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 	// MAIN LOOP. go through each possible range
 	for (size_t startPos = hypoFirstGapPos ; startPos < sourceSize ; ++startPos)
 	{
-		int lastEnd = static_cast<int>(hypothesis.GetCurrSourceWordsRange().GetEndPos());
-		if (startPos != 0 && (static_cast<int>(startPos) - lastEnd - 1) > maxDistortion) {
-//			cerr << "sp=" << startPos << " le=" << lastEnd << "  X=" << (static_cast<int>(startPos) - lastEnd - 1) << " MD:=" << maxDistortion << endl;
+		// don't bother expanding phrases if the first position is already taken
+		if(hypoBitmap.GetValue(startPos))
 			continue;
-		}
+
+		WordsRange prevRange = hypothesis.GetCurrSourceWordsRange();
+
 		size_t maxSize = sourceSize - startPos;
 		size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 		maxSize = (maxSize < maxSizePhrase) ? maxSize : maxSizePhrase;
@@ -172,7 +179,15 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			if (closestLeft != 0 && closestLeft != startPos && !m_source.CanIGetFromAToB(closestLeft, startPos)) {
 				continue;
 			}
+			if (prevRange.GetStartPos() != NOT_FOUND &&
+				prevRange.GetStartPos() > startPos && !m_source.CanIGetFromAToB(startPos, prevRange.GetStartPos())) {
+				continue;
+			}
 		}
+
+		WordsRange currentStartRange(startPos, startPos);
+		if(m_source.ComputeDistortionDistance(prevRange, currentStartRange) > maxDistortion)
+			continue;
 
 		for (size_t endPos = startPos ; endPos < startPos + maxSize ; ++endPos)
 		{
@@ -200,7 +215,7 @@ void SearchNormal::ProcessOneHypothesis(const Hypothesis &hypothesis)
 			size_t closestRight = hypoBitmap.GetEdgeToTheRightOf(endPos);
 			if (isWordLattice) {
 				//if (!leftMostEdge && closestRight != endPos && closestRight != sourceSize && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
-				if (closestRight != endPos && ((closestRight + 1) < sourceSize) && !m_source.CanIGetFromAToB(endPos, closestRight + 1)) {
+				if (closestRight != endPos && ((closestRight + 1) < sourceSize) && !m_source.CanIGetFromAToB(endPos + 1, closestRight + 1)) {
 					continue;
 				}
 			}

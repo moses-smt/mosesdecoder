@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
-#include "LexicalReordering.h"
 #include "InputType.h"
 #include "ObjectPool.h"
 
@@ -48,6 +47,7 @@ class WordsRange;
 class Hypothesis;
 class FFState;
 class Manager;
+class LexicalReordering;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -87,7 +87,6 @@ protected:
   Manager& m_manager;
 
 	int m_id; /*! numeric ID of this hypothesis, used for logging */
-	static unsigned int s_HypothesesCreated; // Statistics: how many hypotheses were created in total	
 
 	/*! used by initial seeding of the translation process */
 	Hypothesis(Manager& manager, InputType const& source, const TargetPhrase &emptyTarget);
@@ -173,8 +172,8 @@ public:
 		return m_sourcePhrase;
 	}
 
-	std::string GetSourcePhraseStringRep(const vector<FactorType> factorsToPrint) const;
-	std::string GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const;
+	std::string GetSourcePhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
+	std::string GetTargetPhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
 	inline const TargetPhrase GetTargetPhrase() const { return m_targetPhrase; }
 	std::string GetSourcePhraseStringRep() const;
 	std::string GetTargetPhraseStringRep() const;
@@ -269,13 +268,6 @@ public:
 	
 	std::vector<std::vector<unsigned int> > *GetLMStats() const { return NULL; }
 
-	static unsigned int GetHypothesesCreated()
-	{
-		return s_HypothesesCreated;
-	}
-
-	const ScoreComponentCollection &GetCachedReorderingScore() const;
-
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }
 };
@@ -308,13 +300,16 @@ struct CompareHypothesisTotalScore
 * which hypothesis are equal based on:
 *   the last n-1 target words are the same
 *   and the covers (source words translated) are the same
+* Directly using RecombineCompare is unreliable because the Compare methods
+* of some states are based on archictecture-dependent pointer comparisons.
+* That's why we use the hypothesis IDs instead.
 */
 class HypothesisRecombinationOrderer
 {
 public:
 	bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
 	{
-		return hypoA->RecombineCompare(*hypoB) < 0;
+		return (hypoA->RecombineCompare(*hypoB) < 0);
 	}
 };
 

@@ -69,6 +69,16 @@ public:
 	{
 		return m_collection.size();
 	}
+
+  const TrellisPath at(size_t position) const
+  {
+    const_iterator iter = m_collection.begin();
+    for(size_t i = position; i>0; i--) 
+    {
+      iter++;
+    }
+    return **iter;
+  }
 };
 
 }

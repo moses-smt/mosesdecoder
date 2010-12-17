@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <ctime>
 #include <iostream>
 #include <iterator>
 #include <fstream>
@@ -41,6 +42,7 @@ Parameter::Parameter()
 {
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
+	AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
@@ -53,7 +55,6 @@ Parameter::Parameter()
 	AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
 	AddParam("lmodel-file", "location and properties of the language models");
 	AddParam("lmodel-dub", "dictionary upper bounds of language models");
-	AddParam("lmstats", "L", "(1/0) compute LM backoff statistics for each translation hypothesis");
 	AddParam("mapping", "description of decoding steps");
 	AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
 	AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
@@ -66,21 +67,17 @@ Parameter::Parameter()
 	AddParam("report-all-factors", "report all factors in output, not just first");
 	AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
 	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
-#ifdef HAVE_SYNLM
-	AddParam("slmodel-file", "location of the syntactic language model file(s)");
-	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
-	AddParam("slmodel-factor", "factor to use with syntactic language model");
-	AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
-#endif
 	AddParam("stack", "s", "maximum stack size for histogram pruning");
 	AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
-	AddParam("translation-details", "T", "for each best translation hypothesis, print out details about what sourcce spans were used, dropped");
+    AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
+	AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
 	AddParam("ttable-file", "location and properties of the translation tables");
 	AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
 	AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
 	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
 	AddParam("verbose", "v", "verbosity level of the logging");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+  AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
@@ -89,7 +86,6 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
-	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
@@ -99,6 +95,7 @@ Parameter::Parameter()
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
  	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
+  AddParam("consensus-decoding", "con", "use consensus decoding (De Nero et. al. 2009)");
 	AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
  	AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
   AddParam("lmbr-thetas", "theta(s) for lattice mbr calculation");
@@ -107,6 +104,7 @@ Parameter::Parameter()
   AddParam("lmbr-r", "ngram precision decay value for lattice mbr");
   AddParam("lmbr-map-weight", "weight given to map solution when doing lattice MBR (default 0)");
   AddParam("lattice-hypo-set", "to use lattice as hypo set during lattice MBR");
+	AddParam("clean-lm-cache", "clean language model caches after N translations (default N=1)");
 	AddParam("use-persistent-cache", "cache translation options across sentences (default true)");
 	AddParam("persistent-cache-size", "maximum size of cache for translation options (default 10,000 input phrases)");
 	AddParam("recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
@@ -126,6 +124,14 @@ Parameter::Parameter()
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
+
+	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
+	AddParam("non-terminals", "list of non-term symbols, space separated");
+	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
+    AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
 }
 
 Parameter::~Parameter()
@@ -191,7 +197,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
 		&& (configPath = FindParam("-config", argc, argv)) == "")
 	{
 		PrintCredit();
-
+		Explain();
+		
 		UserMessage::Add("No configuration file was specified.  Use -config or -f");
 		return false;
 	}
@@ -296,21 +303,7 @@ bool Parameter::Validate()
 	}
 
   // do files exist?
-	// phrase tables
-	if (noErrorFlag) 
-	{
-		std::vector<std::string> ext;
-		// standard phrase table extension (i.e. full name has to be specified)
-		// raw tables in either un compressed or compressed form
-		ext.push_back("");
-	  ext.push_back(".gz");
-		// alternative file extension for binary phrase table format:
-		ext.push_back(".binphr.idx");
-		noErrorFlag = FilesExist("ttable-file", 3,ext);
-	}
-	// language model
-//	if (noErrorFlag)
-//		noErrorFlag = FilesExist("lmodel-file", 3);
+
 	// input file
 	if (noErrorFlag && m_setting["input-file"].size() == 1)
 	{
@@ -340,7 +333,7 @@ bool Parameter::Validate()
 }
 
 /** check whether a file exists */
-bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::vector<std::string> const& extensions)
+bool Parameter::FilesExist(const string &paramName, int fieldNo, std::vector<std::string> const& extensions)
 {
 	typedef std::vector<std::string> StringVec;
 	StringVec::const_iterator iter;
@@ -354,10 +347,17 @@ bool Parameter::FilesExist(const string &paramName, size_t tokenizeIndex,std::ve
 	for (iter = pathVec.begin() ; iter != pathVec.end() ; ++iter)
 	{
 		StringVec vec = Tokenize(*iter);
+
+		size_t tokenizeIndex;
+		if (fieldNo == -1)
+			tokenizeIndex = vec.size() - 1;
+		else
+			tokenizeIndex = static_cast<size_t>(fieldNo);
+
 		if (tokenizeIndex >= vec.size())
 		{
 			stringstream errorMsg("");
-			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per emtry in '"
+			errorMsg << "Expected at least " << (tokenizeIndex+1) << " tokens per entry in '"
 							<< paramName << "', but only found "
 							<< vec.size();
 			UserMessage::Add(errorMsg.str());
@@ -438,7 +438,7 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 
 
 /** read parameters from a configuration file */
-bool Parameter::ReadConfigFile( string filePath ) 
+bool Parameter::ReadConfigFile(const string &filePath ) 
 {
 	InputFileStream inFile(filePath);
 	string line, paramName;
@@ -473,6 +473,7 @@ bool Parameter::ReadConfigFile( string filePath )
 struct Credit
 {
 	string name, contact, currentPursuits, areaResponsibility;
+	int sortId;
 
 	Credit(string name, string contact, string currentPursuits, string areaResponsibility)
 	{
@@ -480,16 +481,20 @@ struct Credit
 		this->contact							= contact						;
 		this->currentPursuits			= currentPursuits		;
 		this->areaResponsibility	= areaResponsibility;
+		this->sortId							= rand() % 1000;
 	}
 
 	bool operator<(const Credit &other) const
 	{
+		/*
 		if (areaResponsibility.size() != 0 && other.areaResponsibility.size() ==0)
 			return true;
 		if (areaResponsibility.size() == 0 && other.areaResponsibility.size() !=0)
 			return false;
 
 		return name < other.name;
+		*/
+		return sortId < other.sortId;
 	}
 
 };
@@ -498,19 +503,19 @@ std::ostream& operator<<(std::ostream &os, const Credit &credit)
 {
 	os << credit.name;
 	if (credit.contact != "")
-		os << "\n   contact: " << credit.contact;
+		os << "\t   contact: " << credit.contact;
 	if (credit.currentPursuits != "")
-		os << "\n   " << credit.currentPursuits;
+		os << "   " << credit.currentPursuits;
 	if (credit.areaResponsibility != "")
-		os << "\n   I'll answer question on: " << credit.areaResponsibility;
-	os << endl;
+		os << "   I'll answer question on: " << credit.areaResponsibility;
 	return os;
 }
 
 void Parameter::PrintCredit()
 {
 	vector<Credit> everyone;
-
+	srand ( time(NULL) );
+	
 	everyone.push_back(Credit("Nicola Bertoldi"
 													, "911"
 													, ""
@@ -561,7 +566,7 @@ void Parameter::PrintCredit()
 													, "ambiguous source input, confusion networks, confusing source code"));
 	everyone.push_back(Credit("Hieu Hoang", "http://www.hoang.co.uk/hieu/"
 													, "phd student at Edinburgh Uni. Original Moses developer"
-													, "general queries/ flames on Moses. Doing stuff on async factored translation, so anything on that as well"));
+													, "general queries/ flames on Moses."));
 	
 	sort(everyone.begin(), everyone.end());
 
@@ -583,8 +588,8 @@ void Parameter::PrintCredit()
 			<< "License along with this library; if not, write to the Free Software" << endl
 			<< "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA" << endl << endl
 			<< "***********************************************************************" << endl << endl
-			<< "Built on " << __DATE__ << endl << endl
-			<< "CREDITS" << endl << endl;
+			<< "Built on " << __DATE__ << " at " __TIME__ << endl << endl
+			<< "WHO'S FAULT IS THIS GODDAM SOFTWARE:" << endl;
 
 	ostream_iterator<Credit> out(cerr, "\n");
 	copy(everyone.begin(), everyone.end(), out);

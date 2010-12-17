@@ -1,4 +1,4 @@
-// $Id: $
+// $Id: LatticeMBRGrid.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -171,7 +171,8 @@ int main(int argc, char* argv[]) {
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
         ++lineCount;
         Sentence sentence(Input);
-        Manager manager(*source,staticData.GetSearchAlgorithm());
+        const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+        Manager manager(*source,staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         TrellisPathList nBestList;
         manager.CalcNBest(nBestSize, nBestList,true);

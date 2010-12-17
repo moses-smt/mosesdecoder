@@ -11,6 +11,9 @@
 
 # Revision history
 
+# 5 Aug 2009  Handling with different reference length policies (shortest, average, closest) for BLEU 
+#             and case-sensistive/insensitive evaluation (Nicola Bertoldi)
+# 5 Jun 2008  Forked previous version to support new mert implementation.
 # 13 Feb 2007 Better handling of default values for lambda, now works with multiple
 #             models and lexicalized reordering
 # 11 Oct 2006 Handle different input types through parameter --inputype=[0|1]
@@ -38,20 +41,9 @@
 
 use FindBin qw($Bin);
 use File::Basename;
-use File::Spec::Functions;
 my $SCRIPTS_ROOTDIR = $Bin;
-if ($SCRIPTS_ROOTDIR eq '') {
-  $SCRIPTS_ROOTDIR = dirname(__FILE__);
-}
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
-if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
-  $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
-} else {
-  $ENV{"SCRIPTS_ROOTDIR"} = $SCRIPTS_ROOTDIR;
-}
-
-# utilities
-my $ZCAT = "gzip -cd";
+$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
 # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
 # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
@@ -60,7 +52,7 @@ my $ZCAT = "gzip -cd";
 # defaults for initial values and ranges are:
 
 my $default_triples = {
-    # these two basic models exist even if not specified, they are
+    # these basic models exist even if not specified, they are
     # not associated with any model file
     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
 };
@@ -68,13 +60,7 @@ my $default_triples = {
 my $additional_triples = {
     # if the more lambda parameters for the weights are needed
     # (due to additional tables) use the following values for them
-    "d"  => [ [ 1.0, 0.0, 2.0 ],    # lexicalized reordering model
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ],
-	      [ 1.0, 0.0, 2.0 ] ],
+    "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
 	      [ 1.0, 0.0, 2.0 ] ],
@@ -84,18 +70,23 @@ my $additional_triples = {
 	      [ 0.2, 0.0, 0.5 ],
 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
+    "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
 };
+    # the following models (given by shortname) use same triplet
+    # for any number of lambdas, the number of the lambdas is determined
+    # by the ini file
+my $additional_tripes_loop = { map { ($_, 1) } qw/ d I / };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
 # uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex";
+my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex I=weight-i";
 my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
 # We parse moses.ini to figure out how many weights do we need to optimize.
 # For this, we must know the correspondence between options defining files
 # for models and options assigning weights to these models.
-my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex";
+my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex link-param-count=I";
 my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
@@ -115,7 +106,7 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $queue_flags = "-l mem_free=0.5G -hard";  # extra parameters for parallelizer
+my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt is relevant only to JHU workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
@@ -123,48 +114,51 @@ my $___LAMBDA = undef; # string specifying the seed weights and boundaries of al
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
+my $___PREDICTABLE_SEEDS = 0;
+
 
 # Parameter for effective reference length when computing BLEU score
-# This is used by score-nbest-bleu.py
 # Default is to use shortest reference
+# Use "--shortest" to use shortest reference length
 # Use "--average" to use average reference length
 # Use "--closest" to use closest reference length
-# Only one between --average and --closest can be set
-# If both --average is used
+# Only one between --shortest, --average and --closest can be set
+# If more than one choice the defualt (--shortest) is used
+my $___SHORTEST = 0;
 my $___AVERAGE = 0;
 my $___CLOSEST = 0;
 
-# Use "--nonorm" to non normalize translation before computing BLEU
+# Use "--nocase" to compute case-insensitive scores
+my $___NOCASE = 0;
+
+# Use "--nonorm" to non normalize translation before computing scores
 my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
 my $___INPUTTYPE = 0; 
-#input weights for CNs and Lattices: don't have a direct ini file counter, so specified here
-my $___INPUTWEIGHTS = 1;
-
-# set 1 if using with async decoder
-my $___ASYNC = 0; 
-
-my $allow_unknown_lambdas = 0;
-my $allow_skipping_lambdas = 0;
 
 
-my $cmertdir = undef; # path to cmert directory
-my $pythonpath = undef; # path to python libraries needed by cmert
+my $mertdir = undef; # path to new mert directory
+my $mertargs = undef; # args to pass through to mert
 my $filtercmd = undef; # path to filter-model-given-input.pl
-my $filterfile = undef; 
-my $SCORENBESTCMD = undef;
+my $filterfile = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_BAK = undef; # backup pathname to startup ini file
-my $obo_scorenbest = undef; # set to pathname to a Ondrej Bojar's scorer (not included
-                            # in scripts distribution)
 my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient scoring of nbest lists
                                   # (this method is more memory-consumptive)
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
+my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loading data (default =-1)
+                                  # -1 means all previous, i.e. from iteration 1
+                                  # 0 means no previous data, i.e. from actual iteration
+                                  # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
+                                  # and so on 
+my $starting_weights_from_ini = 1;
+
+my $maximum_iterations = 25;
 
 use strict;
 use Getopt::Long;
@@ -172,7 +166,6 @@ GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
   "input=s" => \$___DEV_F,
   "inputtype=i" => \$___INPUTTYPE,
-  "inputweights=i" => \$___INPUTWEIGHTS,
   "refs=s" => \$___DEV_E,
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
@@ -183,27 +176,28 @@ GetOptions(
   "lambdas=s" => \$___LAMBDA,
   "continue" => \$continue,
   "skip-decoder" => \$skip_decoder,
+  "shortest" => \$___SHORTEST,
   "average" => \$___AVERAGE,
   "closest" => \$___CLOSEST,
+  "nocase" => \$___NOCASE,
   "nonorm" => \$___NONORM,
   "help" => \$usage,
-  "allow-unknown-lambdas" => \$allow_unknown_lambdas,
-  "allow-skipping-lambdas" => \$allow_skipping_lambdas,
   "verbose" => \$verbose,
+  "mertdir=s" => \$mertdir,
+  "mertargs=s" => \$mertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
-  "cmertdir=s" => \$cmertdir,
-  "pythonpath=s" => \$pythonpath,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
   "filterfile=s" => \$filterfile, # input to filtering script (useful for lattices/confnets)
-  "scorenbestcmd=s" => \$SCORENBESTCMD, # path to score-nbest.py
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
-  "obo-scorenbest=s" => \$obo_scorenbest, # see above
+  "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
-  "async=i" => \$___ASYNC, #whether script to be used with async decoder
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
+  "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
+  "maximum-iterations=i" => \$maximum_iterations,
+  "starting-weights-from-ini!" => \$starting_weights_from_ini,
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -216,75 +210,71 @@ if (scalar @ARGV == 4) {
   $___CONFIG = shift;
 }
 
-if ($___ASYNC) {
-	delete $default_triples->{"w"};
-	$additional_triples->{"w"} = [ [ 0.0, -1.0, 1.0 ] ];
-}
-
-print STDERR "After default: $queue_flags\n";
-
-if ($usage || !defined $___DEV_F || !defined$___DEV_E || !defined$___DECODER || !defined $___CONFIG) {
-  print STDERR "usage: mert-moses.pl input-text references decoder-executable decoder.ini
+if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER || !defined $___CONFIG) {
+  print STDERR "usage: mert-moses-new.pl input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
-  --nbest=100 ... how big nbestlist to generate
-  --jobs=N  ... set this to anything to run moses in parallel
-  --mosesparallelcmd=STRING ... use a different script instead of moses-parallel
-  --queue-flags=STRING  ... anything you with to pass to 
-              qsub, eg. '-l ws06osssmt=true'
-              The default is 
-								-l mem_free=0.5G -hard
-              To reset the parameters, please use \"--queue-flags=' '\" (i.e. a space between
-              the quotes).
+  --nbest=100            ... how big nbestlist to generate
+  --jobs=N               ... set this to anything to run moses in parallel
+  --mosesparallelcmd=STR ... use a different script instead of moses-parallel
+  --queue-flags=STRING   ... anything you with to pass to qsub, eg.
+                             '-l ws06osssmt=true'. The default is: '-hard'
+                             To reset the parameters, please use 
+                             --queue-flags=' '
+                             (i.e. a space between the quotes).
   --decoder-flags=STRING ... extra parameters for the decoder
-  --lambdas=STRING  ... default values and ranges for lambdas, a complex string
-         such as 'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
-  --allow-unknown-lambdas ... keep going even if someone supplies a new lambda
-         in the lambdas option (such as 'superbmodel:1,0-1'); optimize it, too
-  --continue  ... continue from the last achieved state
-  --skip-decoder ... skip the decoder run for the first time, assuming that
-                     we got interrupted during optimization
-  --average ... Use either average or shortest (default) reference
-                  length as effective reference length
-  --closest ... Use either closest or shortest (default) reference
-                  length as effective reference length
-  --nonorm ... Do not use text normalization
-  --filtercmd=STRING  ... path to filter-model-given-input.pl
-  --filterfile=STRING  ... path to alternative to input-text for filtering model. useful for lattice decoding
-  --rootdir=STRING  ... where do helpers reside (if not given explicitly)
-  --cmertdir=STRING ... where is cmert installed
-  --pythonpath=STRING  ... where is python executable
-  --scorenbestcmd=STRING  ... path to score-nbest.py
-  --old-sge ... passed to moses-parallel, assume Sun Grid Engine < 6.0
-  --inputtype=[0|1|2] ... Handle different input types (0 for text, 1 for confusion network, 2 for lattices, default is 0)
-  --inputweights=N ... For confusion networks and lattices, number of weights to optimize for weight-i 
-                       (must supply -link-param-count N to decoder-flags if N != 1 for decoder to deal with this correctly)
+  --lambdas=STRING       ... default values and ranges for lambdas, a
+                             complex string such as
+                             'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
+  --allow-unknown-lambda ... keep going even if someone supplies a new
+                             lambda in the lambdas option (such as
+                             'superbmodel:1,0-1'); optimize it, too
+  --continue             ... continue from the last successful iteration
+  --skip-decoder         ... skip the decoder run for the first time,
+                             assuming that we got interrupted during
+                             optimization
+  --shortest --average --closest
+                         ... Use shortest/average/closest reference length
+                             as effective reference length (mutually exclusive)
+  --nocase               ... Do not preserve case information; i.e.
+                             case-insensitive evaluation (default is false).
+  --nonorm               ... Do not use text normalization (flag is not active,
+                             i.e. text is NOT normalized)
+  --filtercmd=STRING     ... path to filter-model-given-input.pl
+  --filterfile=STRING    ... path to alternative to input-text for filtering
+                             model. useful for lattice decoding
+  --rootdir=STRING       ... where do helpers reside (if not given explicitly)
+  --mertdir=STRING       ... path to new mert implementation
+  --mertargs=STRING      ... extra args for mert, eg. to specify scorer
+  --scorenbestcmd=STRING ... path to score-nbest.py
+  --old-sge              ... passed to parallelizers, assume Grid Engine < 6.0
+  --inputtype=[0|1|2]    ... Handle different input types: (0 for text,
+                             1 for confusion network, 2 for lattices,
+                             default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
-  --efficient_scorenbest_flag ... activate a time-efficient scoring of nbest lists
+  --predictable-seeds    ... provide predictable seeds to mert so that random
+                             restarts are the same on every run
+  --efficient_scorenbest_flag ... time-efficient scoring of nbest lists
                                   (this method is more memory-consumptive)
-  --activate-features=STRING  ... comma-separated list of features to work on
-                                  (if undef work on all features)
-                                  # (others are fixed to the starting values)
+  --activate-features=STRING  ... comma-separated list of features to optimize,
+                                  others are fixed to the starting values
+                                  default: optimize all features
+                                  example: tm_0,tm_4,d_0
+  --prev-aggregate-nbestlist=INT ... number of previous step to consider when
+                                     loading data (default =-1)
+                                    -1 means all previous, i.e. from iteration 1
+                                     0 means no previous data, i.e. only the
+                                       current iteration
+                                     N means this and N previous iterations
+
+  --maximum-iterations=ITERS ... Maximum number of iterations. Default: $maximum_iterations
+  --starting-weights-from-ini ... use the weights given in moses.ini file as
+                                  the starting weights (and also as the fixed
+                                  weights if --activate-features is used).
+                                  default: yes (used to be 'no')
 ";
   exit 1;
-}
-
-# update default variables if input is confusion network or lattice
-if ($___INPUTTYPE == 1 || $___INPUTTYPE == 2)
-{
-  $ABBR_FULL_MAP = "$ABBR_FULL_MAP I=weight-i";
-  %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
-  %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
-  
-  my @my_array;
-  
-  for(my $i=0 ; $i < $___INPUTWEIGHTS ; $i++) 
-	{
-		push @my_array, [ 1.0, 0.0, 2.0 ];
-	}
-	push @{$default_triples -> {"I"}}, @my_array;
-	
 }
 
 
@@ -300,30 +290,67 @@ $qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper
 $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
-$cmertdir = "$SCRIPTS_ROOTDIR/training/cmert-0.5" if !defined $cmertdir;
-my $cmertcmd="$cmertdir/enhanced-mert";
 
-$SCORENBESTCMD = "$cmertdir/score-nbest.py" if ! defined $SCORENBESTCMD;
 
-$pythonpath = "$cmertdir/python" if !defined $pythonpath;
+if (!defined $mertdir) {
+  $mertdir = "$SCRIPTS_ROOTDIR/../mert";
+  print STDERR "Assuming --mertdir=$mertdir\n";
+}
 
-$ENV{PYTHONPATH} = $pythonpath; # other scripts need to know
+my $mert_extract_cmd = "$mertdir/extractor";
+my $mert_mert_cmd = "$mertdir/mert";
+
+die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
+die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
+
+$mertargs = "" if !defined $mertargs;
+
+my $scconfig = undef;
+if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/){
+  $scconfig=$1;
+  $scconfig =~ s/\,/ /g;
+  $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
+}
+
+# handling reference lengh strategy
+if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1){
+  die "You can specify just ONE reference length strategy (closest or shortest or average) not both\n";
+}
+
+if ($___SHORTEST){
+  $scconfig .= " reflen:shortest";
+}elsif ($___AVERAGE){
+  $scconfig .= " reflen:average";
+}elsif ($___CLOSEST){
+  $scconfig .= " reflen:closest";
+}
+
+# handling case-insensitive flag
+if ($___NOCASE) {
+  $scconfig .= " case:false";
+}else{
+  $scconfig .= " case:true";
+}
+$scconfig =~ s/^\s+//;
+$scconfig =~ s/\s+$//;
+$scconfig =~ s/\s+/,/g;
+
+$scconfig = "--scconfig $scconfig" if ($scconfig);
+
+my $mert_extract_args=$mertargs;
+$mert_extract_args .=" $scconfig";
+
+my $mert_mert_args=$mertargs;
+$mert_mert_args =~ s/\-+(binary|b)\b//;
+$mert_mert_args .=" $scconfig";
+if ($___ACTIVATE_FEATURES){ $mert_mert_args .=" -o \"$___ACTIVATE_FEATURES\""; }
 
 my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
 die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
-die "Not executable: $cmertcmd" if ! -x $cmertcmd;
 die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
 die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
-die "Not a dir: $pythonpath" if ! -d $pythonpath;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
 
-if (defined $obo_scorenbest) {
-  die "Not executable: $obo_scorenbest" if ! -x $___DECODER;
-  die "Ondrej's scorenbest supports only closest ref length"
-    if $___AVERAGE;
-}
-
-if ($___ACTIVATE_FEATURES){ $cmertcmd.=" -activate \"$___ACTIVATE_FEATURES\""; }
 
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
@@ -440,42 +467,109 @@ safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
 #chdir to the working directory
 chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
 
-
+# fixed file names
+my $mert_logfile = "mert.log";
+my $weights_in_file = "init.opt";
+my $weights_out_file = "weights.txt";
 
 
 # set start run
 my $start_run = 1;
+my $bestpoint = undef;
+my $devbleu = undef;
+
+my $prev_feature_file = undef;
+my $prev_score_file = undef;
 
 if ($continue) {
-  # need to load last best values
+  # getting the last finished step
   print STDERR "Trying to continue an interrupted optimization.\n";
   open IN, "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
   my $step = <IN>;
   chomp $step;
-  $step++;
   close IN;
 
-  if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz") {
-    # allow stepping one extra iteration back
-    $step--;
-    die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!"
-      if ! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz";
+  print STDERR "Last finished step is $step\n";
+
+  # getting the first needed step
+  my $firststep;
+  if ($prev_aggregate_nbl_size==-1){
+    $firststep=1;
+  }
+  else{
+    $firststep=$step-$prev_aggregate_nbl_size+1;
+    $firststep=($firststep>0)?$firststep:1;
+  }
+
+#checking if all needed data are available
+  if ($firststep<=$step){
+    print STDERR "First previous needed data index is $firststep\n";
+    print STDERR "Checking whether all needed data (from step $firststep to step $step) are available\n";
+    
+    for (my $prevstep=$firststep; $prevstep<=$step;$prevstep++){
+      print STDERR "Checking whether data of step $prevstep are available\n";
+      if (! -e "run$prevstep.features.dat"){
+	die "Can't start from step $step, because run$prevstep.features.dat was not found!";
+      }else{
+	if (defined $prev_feature_file){
+	  $prev_feature_file = "${prev_feature_file},run$prevstep.features.dat";
+	}
+	else{
+	  $prev_feature_file = "run$prevstep.features.dat";
+	}
+      }
+      if (! -e "run$prevstep.scores.dat"){
+	die "Can't start from step $step, because run$prevstep.scores.dat was not found!";
+      }else{
+	if (defined $prev_score_file){
+	  $prev_score_file = "${prev_score_file},run$prevstep.scores.dat";
+	}
+	else{
+	  $prev_score_file = "run$prevstep.scores.dat";
+	}
+      }
+    }
+    if (! -e "run$step.weights.txt"){
+      die "Can't start from step $step, because run$step.weights.txt was not found!";
+    }
+    if (! -e "run$step.$mert_logfile"){
+      die "Can't start from step $step, because run$step.$mert_logfile was not found!";
+    }
+    if (! -e "run$step.best$___N_BEST_LIST_SIZE.out.gz"){
+      die "Can't start from step $step, because run$step.best$___N_BEST_LIST_SIZE.out.gz was not found!";
+    }
+    print STDERR "All needed data are available\n";
+
+    print STDERR "Loading information from last step ($step)\n";
+    open(IN,"run$step.$mert_logfile") or die "Can't open run$step.$mert_logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+	$bestpoint = $1;
+	$devbleu = $2;
+	last;
+      }
+    }
+    close IN;
+    die "Failed to parse mert.log, missed Best point there."
+      if !defined $bestpoint || !defined $devbleu;
+    print "($step) BEST at $step $bestpoint => $devbleu at ".`date`;
+    
+    my @newweights = split /\s+/, $bestpoint;
+    
+    
+    print STDERR "Reading last cached lambda values (result from step $step)\n";
+    @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
+    
+    
+    # update my cache of lambda values
+    store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+    
+  }
+  else{
+    print STDERR "No pevious data are needed\n";
   }
 
   $start_run = $step +1;
-
-  print STDERR "Reading last cached lambda values (result from step $step)\n";
-  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
-
-  open IN, "weights.txt" or die "Can't read weights.txt";
-  my $newweights = <IN>;
-  chomp $newweights;
-  close IN;
-  my @newweights = split /\s+/, $newweights;
-
-  #dump_triples(\%used_triples);
-  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
-  #dump_triples(\%used_triples);
 }
 
 if ($___FILTER_PHRASE_TABLE){
@@ -483,7 +577,7 @@ if ($___FILTER_PHRASE_TABLE){
   print "filtering the phrase tables... ".`date`;
   my $___FILTER_F  = $___DEV_F;
   $___FILTER_F = $filterfile if (defined $filterfile);
-  my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";  
+  my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";
   if (defined $___JOBS) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
       or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
@@ -506,156 +600,71 @@ my $PARAMETERS;
 #$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
 $PARAMETERS = $___DECODER_FLAGS;
 
-my $devbleu = undef;
-my $startbleu = undef;
-my $bestpoint = undef;
 my $run=$start_run-1;
 
 my $oldallsorted = undef;
 my $allsorted = undef;
 
-my $prev_aggregate_nbl_size = -1;
+my $cmd;
+# features and scores from the last run.
+my $nbest_file=undef;
+
 while(1) {
   $run++;
+  if ($maximum_iterations && $run > $maximum_iterations) {
+      print "Maximum number of iterations exceeded - stopping\n";
+      last;
+  }
   # run beamdecoder with option to output nbestlists
   # the end result should be (1) @NBEST_LIST, a list of lists; (2) @SCORE, a list of lists of lists
 
   print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
-  create_config($___CONFIG, "./run$run.moses.ini", \%used_triples, $run, (defined$startbleu?$startbleu:"not-est."), (defined$devbleu?$devbleu:"not-est."));
+  create_config($___CONFIG, "./run$run.moses.ini", \%used_triples, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
 
 
   # skip if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      @order_of_lambdas_from_decoder = run_decoder(\%used_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
+      $nbest_file = run_decoder(\%used_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
       $need_to_normalize = 0;
-      safesystem("gzip -f run*out") or die "Failed to gzip run*out";
+      safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
+      $nbest_file = $nbest_file.".gz";
   }
   else {
-      print "skipped decoder run\n";
-      if (0 == scalar @order_of_lambdas_from_decoder) {
-        @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc run*.best*.out.gz | head -1 |");
-      }
-      $skip_decoder = 0;
-      $need_to_normalize = 0;
+      die "Skipping not yet supported\n";
+      #print "skipped decoder run\n";
+      #if (0 == scalar @order_of_lambdas_from_decoder) {
+      #  @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc run*.best*.out.gz | head -1 |");
+      #}
+      #$skip_decoder = 0;
+      #$need_to_normalize = 0;
   }
 
-  my $EFF_REF_LEN = "";
-  if ($___AVERAGE) {
-     $EFF_REF_LEN = "-a";
-  }elsif ($___CLOSEST){
-     $EFF_REF_LEN = "-e";
-  }   
 
-  my $EFF_NORM = "";
-  if ($___NONORM) {
-     $EFF_NORM = "-n";
-  }   
 
-  # To be sure that scoring script produses these fresh:
-  if (-e "cands.opt"){ safesystem("\\rm -f cands.opt") or die; }
-  if (-e "feats.opt"){ safesystem("\\rm -f feats.opt") or die; }
-  
-  # convert n-best list into a numberized format with error scores
-
+  # extract score statistics and features from the nbest lists
   print STDERR "Scoring the nbestlist.\n";
 
-  my $aggregate_nbl_size=0;
-  if (defined $obo_scorenbest) {
-    # Faster scoring method, never rescore previous iterations
-    my $cmd = "$ZCAT run$run.best*.out.gz | $obo_scorenbest ".join(" ", @references);
-    my $targetfile = "run$run.feats";
-    if (defined $___JOBS) {
-      safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$targetfile -stderr=run$run.scorenbest.err")
-        or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
-    } else {
-      safesystem("$cmd > $targetfile") or die "Failed to score nbestlist";
-    }
-    print STDERR "Combining all run*.feats\n";
-    $cmd = "sort -n -t: -k1,1 run*.feats | cut -d: -f2- > feats.opt";
-    safesystem($cmd) or die "Failed to create feats.opt";
+  my $base_feature_file = "features.dat";
+  my $base_score_file = "scores.dat";
+  my $feature_file = "run$run.${base_feature_file}";
+  my $score_file = "run$run.${base_score_file}";
 
-    print STDERR "Creating cands.opt\n";
-    open C, "cut -d: -f1 run*.feats | uniq -c |" or die "Failed to load counts from run*.feats";
-    my @cnts = ();
-    while (<C>) {
-      chomp;
-      s/^\s+//; s/\s+$//;
-      my ($cnt, $sent) = split /\s+/;
-      $aggregate_nbl_size += $cnt;
-      $cnts[$sent]+=$cnt;
-    }
-    close C;
-    print STDERR "Total candidates: $aggregate_nbl_size  in ".(scalar @cnts)." sentences\n";
-    die "Lost all candidates!" if $aggregate_nbl_size == 0;
-    open C, ">cands.opt" or die "Failed to create  cands.opt";
-    for (my $i=0; $i<@cnts; $i++) {
-      print C "$i $cnts[$i]\n";
-    }
-    close C;
-  
+  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
+
+  if (defined $___JOBS) {
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
+      or die "Failed to submit extraction to queue (via $qsubwrapper)";
   } else {
-    # traditional scoring code
-    my $cmd;
-    if (defined $efficient_scorenbest_flag){# time-efficient sorting method of nbest lists 
-       $oldallsorted="all.sorted.run".($run-1).".best$___N_BEST_LIST_SIZE";
-       $allsorted="all.sorted.run$run.best$___N_BEST_LIST_SIZE";
-
-       # Create an empty file for the first iteration
-       if ($run == 1){ safesystem("touch $oldallsorted"); };
-
-       if (-e $oldallsorted){ # the mert process works properly; the sorted file containing all previous nbests are already present
-          $cmd = "gunzip -dc run$run.best$___N_BEST_LIST_SIZE.out.gz | sort -m -n -t \"|\" -k 1,1 $oldallsorted - > $allsorted ; rm $oldallsorted ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./"; 
-       }
-       else{ # the mert process did not work properly; the sorted file containing all previous nbests is no more present; create again
-          $cmd = "gzip -d run*.best$___N_BEST_LIST_SIZE.out.gz ; sort -m -n -t \"|\" -k 1,1 run*.best$___N_BEST_LIST_SIZE.out > $allsorted ; gzip run*.best$___N_BEST_LIST_SIZE.out ; cat $allsorted | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
-       }
-    }
-    else{ # traditional scoring code
-       $cmd = "gunzip -dc run*.best*.out.gz | sort -n -t \"|\" -k 1,1 | $SCORENBESTCMD $EFF_NORM $EFF_REF_LEN ".join(" ", @references)." ./";
-    }
-
-    if (defined $___JOBS) {
-      $cmd = "setenv PYTHONPATH $pythonpath ; $cmd";
-      safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=scorenbest.out -stderr=scorenbest.err") or die "Failed to submit scoring nbestlist to queue (via $qsubwrapper)";
-    } else {
-      safesystem($cmd) or die "Failed to score nbestlist";
-    }
-
-    print STDERR "Hoping that scoring succeeded. We'll see if we can read the output files now.\n";
-
-    # keep a count of lines in nbests lists (alltogether)
-    # if it did not increase since last iteration, we are DONE
-
-    #try to debug why we don't see these files
-    #sleep(60);
-    
-    my @dirlist = `ls -lt`;
-    my $dirlist_string = join(' ',@dirlist);    
-    open(IN,"cands.opt") or die "Can't read cands.opt, directory contents were $dirlist_string";
-    while (<IN>) {
-      chomp;
-      my @flds = split / /;
-      $aggregate_nbl_size += $flds[1];
-    }
-    close(IN);
+    safesystem("$cmd > extract.out 2> extract.err") or die "Failed to do extraction of statistics.";
   }
-  print "$aggregate_nbl_size accumulated translations\n";
-  print "prev accumulated translations was : $prev_aggregate_nbl_size\n";
-  if ($aggregate_nbl_size <= $prev_aggregate_nbl_size){
-     print STDERR "No new hypotheses in nbest list. Stopping.\n";
-     last;
-  }
-  $prev_aggregate_nbl_size = $aggregate_nbl_size;
 
+  # Create the initial weights file for mert, in init.opt
+  # mert reads in the file init.opt containing the current
+  # values of lambda.
 
-  # run cmert
-  # cmert reads in the file init.opt containing three lines:
-  #  minimum values
-  #  maximum values
-  #  current values
   # We need to prepare the files and **the order of the lambdas must
   # correspond to the order @order_of_lambdas_from_decoder
 
@@ -664,97 +673,82 @@ while(1) {
   my @CURR = ();   # the starting values
   my @NAME = ();  # to which model does the lambda belong
   
-  # walk in order of @order_of_lambdas_from_decoder and collect the min,max,val
   my %visited = ();
   foreach my $name (@order_of_lambdas_from_decoder) {
-    next if $visited{$name};
-    $visited{$name} = 1;
-	if (!defined $used_triples{$name})
-	{
-    	die "The decoder produced also some '$name' scores, but we do not know the ranges for them, no way to optimize them\n";
-	}
-      
-		my $count = 0;
-    foreach my $feature (@{$used_triples{$name}}) {
-			$count++;
-      my ($val, $min, $max) = @$feature;
+      if (!defined $visited{$name}) {
+          $visited{$name} = 0;
+      } else {
+          $visited{$name}++;
+      }
+      my ($val, $min, $max) = @{$used_triples{$name}->[$visited{$name}]};
       push @CURR, $val;
       push @MIN, $min;
       push @MAX, $max;
-      push @NAME, $name;
-    }
+      push @NAME, $name;        
   }
 
-  open(OUT,"> init.opt") or die "Can't write init.opt (WD now $___WORKING_DIR)";
-  print OUT join(" ", @MIN)."\n";
-  print OUT join(" ", @MAX)."\n";
+  open(OUT,"> $weights_in_file") or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
   print OUT join(" ", @CURR)."\n";
   close(OUT);
-
-  #just for brevity
-  open(OUT,"> names.txt") or die "Can't write names.txt (WD now $___WORKING_DIR)";
-  print OUT join(" ", @NAME)."\n";
-  close(OUT);
-
+  print join(" ", @NAME)."\n";
+  
   # make a backup copy labelled with this run number
-  safesystem("\\cp -f init.opt run$run.init.opt") or die;
+  safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 
   my $DIM = scalar(@CURR); # number of lambdas
-  my $cmd="$cmertcmd -d $DIM -rootdir $SCRIPTS_ROOTDIR";
 
-  # remove previous cmert.log, if any, to avoid NFS race conditions
-  safesystem ("\\rm -f cmert.log weights.txt") or die;
- 
-  # remove previous cmert.log, if any, to avoid NFS race conditions
-  safesystem ("\\rm -f cmert.log weights.txt") or die;
+  # run mert
+  $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n 20";
+  if ($___PREDICTABLE_SEEDS) {
+      my $seed = $run * 1000;
+      $cmd = $cmd." -r $seed";
+  }
 
-  print STDERR "Starting cmert.\n";
+  if (defined $prev_feature_file) {
+    $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
+  }
+  else{
+    $cmd = $cmd." --ffile $feature_file";
+  }
+  if (defined $prev_score_file) {
+    $cmd = $cmd." --scfile $prev_score_file,$score_file";
+  }
+  else{
+    $cmd = $cmd." --scfile $score_file";
+  }
+
+  $cmd = $cmd." --ifile run$run.$weights_in_file";
+
   if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=cmert.log -queue-parameter=\"$queue_flags\"") or die "Failed to start cmert (via qsubwrapper $qsubwrapper)";
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
-    safesystem("$cmd 2> cmert.log") or die "Failed to run cmert";
+    safesystem("$cmd 2> $mert_logfile") or die "Failed to run mert";
   }
-  die "Optimization failed, file weights.txt does not exist or is empty"
-    if ! -s "weights.txt";
+  die "Optimization failed, file $weights_out_file does not exist or is empty"
+    if ! -s $weights_out_file;
 
-  
-  #try to debug why we don't see these files
-  #sleep(60);
-  
-  my @dirlist = `ls -lt`;
-  my $dirlist_string = join(' ',@dirlist);
 
-  # backup copies
-  safesystem ("\\mv -f feats.opt run$run.feats.opt; gzip run$run.feats.opt; ") or die "Can't mv and zip feats.opt, directory contents were $dirlist_string";
-  safesystem ("\\mv -f cands.opt run$run.cands.opt") or die "Can't mv cands.opt, directory contents were $dirlist_string";
-  safesystem ("\\cp -f cmert.log run$run.cmert.log") or die "Can't cp cmert.log, directory contents were $dirlist_string";
-  safesystem ("\\cp -f weights.txt run$run.weights.txt") or die "Can't cp weights.txt, directory contents were $dirlist_string"; # this one is needed for restarts, too
-
-  if ($___ACTIVATE_FEATURES){
-    safesystem ("\\mv -f reduced_feats.opt run$run.reduced_feats.opt ; gzip run$run.reduced_feats.opt") or die;
-    safesystem ("\\mv -f reduced_init.opt run$run.reduced_init.opt") or die;
-    safesystem ("\\mv -f reduced_weights.txt run$run.reduced_weights.txt") or die;
-    safesystem ("\\mv -f reduced_cmert.log run$run.reduced_cmert.log") or die;
-  }
+ # backup copies
+  safesystem ("\\cp -f extract.err run$run.extract.err") or die;
+  safesystem ("\\cp -f extract.out run$run.extract.out") or die;
+  safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
+  safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
+  safesystem ("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
 
   print "run $run end at ".`date`;
 
   $bestpoint = undef;
   $devbleu = undef;
-  $startbleu = undef;
-  open(IN,"cmert.log") or die "Can't open cmert.log";
+  open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
   while (<IN>) {
-    if (/Best point:\s*([\s\d\.\-]+?)\s*=> ([\d\.]+)/) {
+    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
       $bestpoint = $1;
       $devbleu = $2;
       last;
     }
-    elsif((! $startbleu) && /^starting.+=> ([\d\.]+)/) {
-      $startbleu = $1;
-    }
   }
   close IN;
-  die "Failed to parse cmert.log, missed Best point there."
+  die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
   print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
 
@@ -766,7 +760,7 @@ while(1) {
   ## additional stopping criterion: weights have not changed
   my $shouldstop = 1;
   for(my $i=0; $i<@CURR; $i++) {
-    die "Lost weight! cmert reported fewer weights (@newweights) than we gave it (@CURR)"
+    die "Lost weight! mert reported fewer weights (@newweights) than we gave it (@CURR)"
       if !defined $newweights[$i];
     if (abs($CURR[$i] - $newweights[$i]) >= $minimum_required_change_in_weights) {
       $shouldstop = 0;
@@ -784,15 +778,42 @@ while(1) {
     last;
   }
 
+  my $firstrun;
+  if ($prev_aggregate_nbl_size==-1){
+    $firstrun=1;
+  }
+  else{
+    $firstrun=$run-$prev_aggregate_nbl_size+1;
+    $firstrun=($firstrun>0)?$firstrun:1;
+  }
+  print "loading data from $firstrun to $run (prev_aggregate_nbl_size=$prev_aggregate_nbl_size)\n";
+  $prev_feature_file = undef;
+  $prev_score_file = undef;
+  for (my $i=$firstrun;$i<=$run;$i++){ 
+    if (defined $prev_feature_file){
+      $prev_feature_file = "${prev_feature_file},run${i}.${base_feature_file}";
+    }
+    else{
+      $prev_feature_file = "run${i}.${base_feature_file}";
+    }
+    if (defined $prev_score_file){
+      $prev_score_file = "${prev_score_file},run${i}.${base_score_file}";
+    }
+    else{
+      $prev_score_file = "run${i}.${base_score_file}";
+    }
+  }
+  print "loading data from $prev_feature_file\n" if defined($prev_feature_file);
+  print "loading data from $prev_score_file\n" if defined($prev_score_file);
 }
 print "Training finished at ".`date`;
 
 if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 
-safesystem("\\cp -f init.opt run$run.init.opt") or die;
-safesystem("\\cp -f cmert.log run$run.cmert.log") or die;
+safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
+safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $startbleu, $devbleu);
+create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -804,7 +825,6 @@ close F;
 chdir($cwd);
 
 } # end of local scope
-
 
 sub store_new_lambda_values {
   # given new lambda values (in given order), replace the 'val' element in our triples
@@ -879,20 +899,19 @@ sub run_decoder {
     my $decoder_cmd;
 
     if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-list '$filename $___N_BEST_LIST_SIZE distinct' -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-file \"$filename\" -n-best-size $___N_BEST_LIST_SIZE -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE distinct -i $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -i $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
     if (0 == scalar @$output_order_of_lambdas) {
       # we have to peek at the nbestlist
-      return get_order_of_scores_from_nbestlist($filename);
-    } else {
+      @$output_order_of_lambdas = get_order_of_scores_from_nbestlist($filename);
+    } 
       # we have checked the nbestlist already, we trust the order of output scores does not change
-      return @$output_order_of_lambdas;
-    }
+      return $filename;
 }
 
 sub get_order_of_scores_from_nbestlist {
@@ -913,7 +932,7 @@ sub get_order_of_scores_from_nbestlist {
   foreach my $tok (split /\s+/, $scores) {
     if ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?[-0-9.e\+]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
       # a score found, remember it
       die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
         if !defined $label;
@@ -931,7 +950,6 @@ sub create_config {
     my $outfn = shift; # where to save the config
     my $triples = shift; # the lambdas we should write
     my $iteration = shift;  # just for verbosity
-    my $bleu_started = shift; # just for verbosity
     my $bleu_achieved = shift; # just for verbosity
 
     my %P; # the hash of all parameters we wish to override
@@ -975,7 +993,7 @@ sub create_config {
     open(OUT,"> $outfn") or die "Can't write $outfn";
     print OUT "# MERT optimized configuration\n";
     print OUT "# decoder $___DECODER\n";
-    print OUT "# BLEU $bleu_started -> $bleu_achieved on dev $___DEV_F\n";
+    print OUT "# BLEU $bleu_achieved on dev $___DEV_F\n";
     print OUT "# We were before running iteration $iteration\n";
     print OUT "# finished ".`date`;
     my $line = <INI>;
@@ -1082,7 +1100,7 @@ sub scan_config {
 
   # in which field (counting from zero) is the filename to check?
   my %where_is_filename = (
-    "ttable-file" => 3,
+    "ttable-file" => 4,
     "generation-file" => 3,
     "lmodel-file" => 3,
     "distortion-file" => 3,
@@ -1091,10 +1109,19 @@ sub scan_config {
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
   my %where_is_lambda_count = (
-    "ttable-file" => 2,
+    "ttable-file" => 3,
     "generation-file" => 2,
     "distortion-file" => 2,
+    "link-param-count" => 0,
   );
+
+  my %weight_section_short_names = (%FULL2ABBR,
+         map { ($_, $_) } keys %ABBR2FULL);
+  # maps both long and short names of weight sections to the short names
+
+  my $config_weights;
+  # to collect all weight values from moses.ini
+  #   $config_weights->{shortname}  is a reference to array of features
   
   open INI, $ini or die "Can't read $ini";
   my $section = undef;  # name of the section we are reading
@@ -1105,64 +1132,81 @@ sub scan_config {
   my %defined_steps;  # check the ini file for compatible mapping steps and actually defined files
   while (<INI>) {
     $nr++;
+    chomp;
     next if /^\s*#/; # skip comments
+    next if /^\s*$/; # skip blank lines
     if (/^\[([^\]]*)\]\s*$/) {
       $section = $1;
       $shortname = $TABLECONFIG2ABBR{$section};
       next;
     }
+    if (defined $section && defined $weight_section_short_names{$section}) {
+      # this is a weight, store it
+      my $weightname = $weight_section_short_names{$section};
+      $config_weights->{$weightname} = []
+        if ! defined $config_weights->{$weightname};
+      push @{$config_weights->{$weightname}}, $_;
+    }
     if (defined $section && $section eq "mapping") {
       # keep track of mapping steps used
       $defined_steps{$1}++ if /^([TG])/ || /^\d+ ([TG])/;
     }
-    if (defined $section && defined $where_is_filename{$section}) {
+    if (defined $section
+        && (defined $where_is_filename{$section}
+            || defined $where_is_lambda_count{$section})) {
       # this ini section is relevant to lambdas
-      chomp;
       my @flds = split / +/;
-      my $fn = $flds[$where_is_filename{$section}];
-      if (defined $fn && $fn !~ /^\s+$/) {
-	  print "checking weight-count for $section\n";
-        # this is a filename! check it
-	if (not file_name_is_absolute $fn) {
-	  $error = 1;
-	  print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
-	}
-	if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx") {
-	  $error = 1;
-	  print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
-	}
-	# remember the number of files used, to know how many lambdas do we need
-        die "No short name was defined for section $section!"
-          if ! defined $shortname;
-
-        # how many lambdas does this model need?
-        # either specified explicitly, or the default, i.e. one
-        my $needlambdas = defined $where_is_lambda_count{$section} ? $flds[$where_is_lambda_count{$section}] : 1;
-
-        print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
-#if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname} || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)) {
-        if (!defined $___LAMBDA && (!defined $additional_triples->{$shortname})) {
-          print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
-            .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
-          $error = 1;
+      my $filenamefield = $where_is_filename{$section};
+      if (defined $filenamefield) {
+        my $fn = $flds[$filenamefield];
+        print STDERR "Checking the filename in $section: $fn\n"
+          if $verbose;
+        if (defined $fn && $fn !~ /^\s+$/) {
+          # this is a filename! check it
+          if ($fn !~ /^\//) {
+            $error = 1;
+            print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
+          }
+          if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx"
+              && ! -s "$fn.binlexr.idx" ) {
+            $error = 1;
+            print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
+          }
+          # remember the number of files used, to know how many lambdas do we need
+          die "No short name was defined for section $section!"
+            if ! defined $shortname;
+          $defined_files{$shortname}++;
         }
-	else {
-	    # note: table may use less parameters than the maximum number
-	    # of triples
-	    for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
-		#deal with case where needed lambdas are higher than size of additional triples defaults                             
-                my $safe_lambda=$lambda;
+      }
 
-                if ($safe_lambda >= scalar(@{$additional_triples->{$shortname}})) {
-                    $safe_lambda = scalar(@{$additional_triples->{$shortname}})-1;
-                    print STDERR "falling back to last default range for $shortname lambda $lambda, using range for $safe_lambda\n";
-                }
-		my ($start, $min, $max) 
-		    = @{${$additional_triples->{$shortname}}[$safe_lambda]};
-		push @{$used_triples{$shortname}}, [$start, $min, $max];
-	    }
-	}
-        $defined_files{$shortname}++;
+      my $lambdacountfield = $where_is_lambda_count{$section};
+      # how many lambdas does this model need?
+      # either specified explicitly, or the default, i.e. one
+      my $needlambdas = defined $lambdacountfield
+                        ? $flds[$lambdacountfield] : 1;
+  
+      print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
+      if (!defined $___LAMBDA # user provides all lambdas on his own
+        && (!defined $additional_triples->{$shortname}
+            || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)
+        && (!defined $additional_tripes_loop->{$shortname})
+        ) {
+        print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
+          .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
+        $error = 1;
+      } else {
+        # note: models may use less parameters than the maximum number
+        # of triples, but it is actually bad, because then the ranges
+        # may be meant for another parameter
+        my @triplets = @{$additional_triples->{$shortname}};
+        for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
+          my $triplet = $lambda;
+          $triplet %= scalar(@triplets)
+            if $additional_tripes_loop->{$shortname};
+          my ($start, $min, $max) 
+              = @{$triplets[$triplet]};
+          push @{$used_triples{$shortname}}, [$start, $min, $max];
+        }
       }
     }
   }
@@ -1179,41 +1223,39 @@ sub scan_config {
     }
   }
 
-	# distance-based distortion
-  if ($___ASYNC == 1)
-  {
-		print STDERR "ASYNC distortion & word penalty";
+  # The distance-based reordering model is never mentioned in moses.ini,
+  # except there is one extra weight-d in the list. So if we spot this
+  # one extra weight-d, we actually insert the triple for it.
+  # Hierarchical moses has no distance-based reordering.
+  push @{$used_triples{"d"}}, [1.0, 0.0, 2.0]
+    if defined $config_weights->{"d"}
+      && (!defined $used_triples{"d"}
+         || scalar @{$config_weights->{"d"}}
+            == scalar @{$used_triples{"d"}} +1);
 
-		my @my_array;
-	    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
-		{
-		    push @my_array, [ 1.0, 0.0, 2.0 ];
-		}
-		push @{$used_triples{"d"}}, @my_array;
-
-		@my_array = ();
-	    for(my $i=0 ; $i < $defined_steps{"T"} ; $i++) 
-		{
-		    push @my_array, [ 0.5, -1.0, 1.0 ];
-		}
-		push @{$used_triples{"w"}}, @my_array;
-
-		# debug print
-		print "distortion:";
-		my $refarray=$used_triples{"d"};
-		my @vector=@$refarray;
-		foreach my $subarray (@vector) {
-			my @toto=@$subarray;
-			print @toto,"\n";
-		}
-		#exit 1;
+  # check the weights provided in the ini file and plug them into the triples
+  # if --starting-weights-from_ini
+  foreach my $weightname (keys %used_triples) {
+    if (!defined $config_weights->{$weightname}) {
+      print STDERR "$inishortname:Model requires weights '$weightname' but none were found in the ini file.\n";
+      $error = 1;
+      next;
+    }
+    my $thesetriplets = $used_triples{$weightname};
+    my $theseconfig_weights = $config_weights->{$weightname};
+    if (scalar(@$thesetriplets) != scalar(@$theseconfig_weights)) {
+      print STDERR "$inishortname:Mismatched number of weights for '$weightname'. Expected "
+        .scalar(@$thesetriplets) .", got ".scalar(@$theseconfig_weights)."\n";
+      $error = 1;
+      next;
+    }
+    if ($starting_weights_from_ini) {
+      # copy weights from moses.ini to the starting value of used_triplets
+      for (my $i=0; $i < @$theseconfig_weights; $i++) {
+        $thesetriplets->[$i]->[0] = $theseconfig_weights->[$i];
+      }
+    }
   }
-  else
-  { 
-	print STDERR "SYNC distortion";
-    push @{$used_triples{"d"}}, [1.0, 0.0, 2.0];
-  }
-
 
   exit(1) if $error;
   return (\%defined_files);

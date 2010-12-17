@@ -59,8 +59,8 @@ public:
 		RemoveAllInColl( m_list );
 	}
 	
-	void AddNoPrune(TranslationOption *partialTranslOpt);
-	void Add(TranslationOption *partialTranslOpt);
+    void AddNoPrune(const TranslationSystem* system, TranslationOption *partialTranslOpt);
+    void Add(const TranslationSystem* system, TranslationOption *partialTranslOpt);
 	void Prune();
 
 	/** returns list of translation options */

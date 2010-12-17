@@ -36,6 +36,9 @@ class WordsRange;
 class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
+class TranslationSystem;
+	
+typedef std::vector<Word> LabelList;
 
 //! base class for sentences and confusion networks
 class InputType 
@@ -47,6 +50,12 @@ protected:
 	ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
  
 public:
+
+  // used in -continue-partial-translation
+	std::vector<bool> m_sourceCompleted;
+	std::string m_initialTargetPhrase;
+  size_t m_frontSpanCoveredLength;
+    // how many words from the beginning are covered
 
 	InputType(long translationId = 0);
 	virtual ~InputType();
@@ -107,7 +116,7 @@ public:
 	virtual void Print(std::ostream&) const =0;
 
 	//! create trans options specific to this InputType
-	virtual TranslationOptionCollection* CreateTranslationOptionCollection() const=0;
+    virtual TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const=0;
 
 	//! return substring. Only valid for Sentence class. TODO - get rid of this fn
 	virtual Phrase GetSubString(const WordsRange&) const =0;
@@ -120,6 +129,8 @@ public:
 	{
 		return m_reorderingConstraint;
 	};
+
+	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const = 0;
 
 	TO_STRING();
 	

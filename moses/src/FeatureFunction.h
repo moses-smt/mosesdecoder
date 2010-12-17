@@ -10,6 +10,7 @@ namespace Moses {
 class TargetPhrase;
 class Hypothesis;
 class FFState;
+class InputType;
 class ScoreComponentCollection;
 
 class FeatureFunction: public ScoreProducer {
@@ -53,8 +54,8 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const = 0;
   
-  //! return the state associated with the empty hypothesis
-  virtual const FFState* EmptyHypothesisState() const = 0;
+  //! return the state associated with the empty hypothesis for a given sentence
+  virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
   bool IsStateless() const;
 };

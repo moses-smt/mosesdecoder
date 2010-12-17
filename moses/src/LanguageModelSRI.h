@@ -27,20 +27,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Vocab.h"
+#include "Ngram.h"
 #include "LanguageModelSingleFactor.h"
 
 class Factor;
 class Phrase;
-class Ngram; // SRI forward decl
 
 namespace Moses
 {
 
-class LanguageModelSRI : public LanguageModelSingleFactor
+class LanguageModelSRI : public LanguageModelPointerState
 {
 protected:
 	std::vector<VocabIndex> m_lmIdLookup;
-	Vocab 			*m_srilmVocab;
+	::Vocab			*m_srilmVocab;
 	Ngram 			*m_srilmModel;
 	VocabIndex	m_unknownId;
 
@@ -50,11 +50,10 @@ protected:
 	VocabIndex GetLmID( const Factor *factor ) const;
 	
 public:
-	LanguageModelSRI(bool registerScore, ScoreIndexManager &scoreIndexManager);
+	LanguageModelSRI();
 	~LanguageModelSRI();
 	bool Load(const std::string &filePath
 					, FactorType factorType
-					, float weight
 					, size_t nGramOrder);
 
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;

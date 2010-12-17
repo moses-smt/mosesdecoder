@@ -31,6 +31,7 @@
 
 namespace Moses 
 {
+using namespace std;
 
 string ParseXmlTagAttribute(const string& tag,const string& attributeName){
 	/*TODO deal with unescaping \"*/
@@ -76,7 +77,10 @@ string TrimXml(const string& str)
  */
 bool isXmlTag(const string& tag)
 {
-	return tag[0] == '<';
+	return (tag[0] == '<' &&
+					(tag[1] == '/' ||
+					 (tag[1] >= 'a' && tag[1] <= 'z') ||
+					 (tag[1] >= 'A' && tag[1] <= 'Z')));
 }
 
 /**
@@ -87,7 +91,7 @@ bool isXmlTag(const string& tag)
  *
  * \param str input string
  */
-inline vector<string> TokenizeXml(const string& str)
+vector<string> TokenizeXml(const string& str)
 {
 	string lbrack = "<";
 	string rbrack = ">";
@@ -275,13 +279,13 @@ bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, Reor
 				string span = ParseXmlTagAttribute(tagContent,"span");
 				if (! span.empty()) 
 				{
-					vector<string> ij = Tokenize(span, ",");
+					vector<string> ij = Tokenize(span, "-");
 					if (ij.size() != 1 && ij.size() != 2) {
-						TRACE_ERR("ERROR: span attribute must be of the form \"i,j\" or \"i\": " << line << endl);
+						TRACE_ERR("ERROR: span attribute must be of the form \"i-j\" or \"i\": " << line << endl);
 						return false;
 					}
 					startPos = atoi(ij[0].c_str());
-					if (ij.size() == 1) endPos = startPos;
+					if (ij.size() == 1) endPos = startPos + 1;
 					else endPos = atoi(ij[1].c_str()) + 1;
 				}
 

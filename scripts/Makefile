@@ -8,10 +8,8 @@ DS?=$(shell date '+%Y%m%d')
 # Set TARGETDIR to directory where you want the compiled scripts to be copied
 # to.
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
-# The values here are just the defaults in case your environment does not set
-# them. (For this to work, use ?=, not = in the Makefile.)
-TARGETDIR?=/exports/home/s0565741/inf_iccs_smt/hieu/bin
-BINDIR?=/exports/home/s0565741/inf_iccs_smt/hieu/bin
+TARGETDIR=/Users/hieuhoang/temp
+BINDIR=/Users/hieuhoang/temp
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)
@@ -26,14 +24,14 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 all: compile
 
-SUBDIRS=cmert-0.5 phrase-extract symal mbr
-SUBDIRS_CLEAN=$(SUBDIRS) memscore
+SUBDIRS=training/phrase-extract training/symal training/mbr training/lexical-reordering ems/biconcor
+SUBDIRS_CLEAN=$(SUBDIRS) training/memscore
 
 compile: compile-memscore
 	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
-	  $(MAKE) -C training/$$subdir || exit 1; \
+	  $(MAKE) -C $$subdir || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
 	done
@@ -50,7 +48,7 @@ compile-memscore:
 clean:
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS_CLEAN); do \
-	  $(MAKE) -C training/$$subdir clean || exit 1; \
+	  $(MAKE) -C $$subdir clean || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
 	done
@@ -61,7 +59,7 @@ clean:
 ## That is for each script (listed below in MAIN_SCRIPTS),
 ## we create a date-stamped version in MAIN_SCRIPTS_TARGET_DIR
 
-MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-factored-phrase-model.perl clean-corpus-n.perl
+MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-model.perl clean-corpus-n.perl
 # Make trick to add directory name to all of them:
 MAIN_TRAINING_SCRIPTS=$(MAIN_TRAINING_SCRIPTS_NAMES:%=training/%)
 
@@ -81,7 +79,7 @@ release:
 	cat ./released-files \
 	| grep -v -x -f release-exclude \
 	| rsync -r --files-from - . $(RELEASEDIR)/
-	sed 's#^my \$$BINDIR\s*=.*#my \$$BINDIR="$(BINDIR)";#' training/train-factored-phrase-model.perl > $(RELEASEDIR)/training/train-factored-phrase-model.perl
+	sed 's#^my \$$BINDIR\s*=.*#my \$$BINDIR="$(BINDIR)";#' training/train-model.perl > $(RELEASEDIR)/training/train-model.perl
 	@echo "####### Do not forget to:" >> $(RELEASEDIR)/README
 	@echo "  export SCRIPTS_ROOTDIR=$(RELEASEDIR)" >> $(RELEASEDIR)/README
 	## Remember, only files listed in released-files are released!!

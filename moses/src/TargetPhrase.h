@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
+#include "AlignmentInfo.h"
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -40,7 +42,25 @@ class LMList;
 class PhraseDictionary;
 class GenerationDictionary;
 class ScoreProducer;
+class TranslationSystem;
+class WordPenaltyProducer;
 
+class CountInfo
+	{
+	public:
+		CountInfo()
+		{}
+		CountInfo(float countSource, float countTarget)
+		:m_countSource(countSource)
+		,m_countTarget(countTarget)
+		{	}
+		
+		float m_countSource;
+		float m_countTarget;
+		
+	};
+
+	
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
@@ -50,17 +70,20 @@ protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
+	AlignmentInfo m_alignmentInfo;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase const* m_sourcePhrase; 
+	Word m_lhsTarget;
+	CountInfo m_countInfo;
 
 	static bool wordalignflag;
 	static bool printalign;
 	
 public:
-		TargetPhrase(FactorDirection direction=Output);
-		~TargetPhrase(){};
-		
+	TargetPhrase(FactorDirection direction=Output);
+	TargetPhrase(FactorDirection direction, std::string out_string);
+	~TargetPhrase();
 	/** used by the unknown word handler.
 		* Set alignment to 0
 		*/
@@ -68,13 +91,13 @@ public:
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used
-	void SetScore();
+	void SetScore(const TranslationSystem* system);
 	
 	//!Set score for Sentence XML target options
 	void SetScore(float score);
 	
 	//! Set score for unknown words with input weights
-	void SetScore(const Scores &scoreVector); 
+	void SetScore(const TranslationSystem* system, const Scores &scoreVector); 
 
 	
 	/*** Called immediately after creation to initialize scores.
@@ -93,6 +116,15 @@ public:
 								const std::vector<float> &weightT,
 								float weightWP,
 								const LMList &languageModels);
+	
+	void SetScoreChart(const ScoreProducer* translationScoreProducer
+										 ,const Scores &scoreVector
+										 ,const std::vector<float> &weightT
+										 ,const LMList &languageModels
+                     ,const WordPenaltyProducer* wpProducer);
+	
+	// used by for unknown word proc in chart decoding
+	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 
 	
 	// used when creating translations of unknown words:
@@ -135,8 +167,18 @@ public:
 		return m_sourcePhrase;
 	}
 	
+	void SetTargetLHS(const Word &lhs)
+	{ 	m_lhsTarget = lhs; }
+	const Word &GetTargetLHS() const
+	{ return m_lhsTarget; }
 	
+	void SetAlignmentInfo(const std::string &alignString);
+	void SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
 	
+	AlignmentInfo &GetAlignmentInfo()
+	{ return m_alignmentInfo; }
+	const AlignmentInfo &GetAlignmentInfo() const
+	{ return m_alignmentInfo; }
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
@@ -151,6 +193,8 @@ public:
 		return printalign;
 	}
 
+	void CreateCountInfo(const std::string &countStr);
+	
 	TO_STRING();
 };
 

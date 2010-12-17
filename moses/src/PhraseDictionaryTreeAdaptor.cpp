@@ -43,17 +43,13 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
 																				 , float weightWP)
 {
 	if(m_numScoreComponent!=weight.size()) {
-		stringstream strme;
+		std::stringstream strme;
 		strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
 						 <<" "<<m_numScoreComponent<<"\n";
 		UserMessage::Add(strme.str());
 		return false;
 	}
 
-	// set Dictionary members
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
-	VERBOSE(2,"PhraseDictionaryTreeAdaptor: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 
 	// set PhraseDictionary members
 	m_tableLimit=tableLimit;
@@ -87,13 +83,6 @@ PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,Word
 	{
 		return imp->m_rangeCache[range.GetStartPos()][range.GetEndPos()];
 	}
-}
-
-void PhraseDictionaryTreeAdaptor::
-SetWeightTransModel(const std::vector<float> &weightT)
-{
-	CleanUp();
-	imp->m_weights=weightT;
 }
 
 void PhraseDictionaryTreeAdaptor::

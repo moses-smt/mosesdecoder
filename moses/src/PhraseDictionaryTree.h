@@ -18,10 +18,10 @@
 #include "PrefixTree.h"
 #include "File.h"
 #include "ObjectPool.h"
+#include "LexicalReorderingTable.h"
 #include "LVoc.h"
 #include "TypeDef.h"
 #include "Util.h"
-#include "StaticData.h"
 
 namespace Moses
 {
@@ -29,12 +29,9 @@ namespace Moses
 class Phrase;
 class Word;
 class ConfusionNet;
-
+class PDTimp;
 
 typedef PrefixTreeF<LabelId,OFF_T> PTF;
-
-class PDTimp;
-class PPimp;
 
 class PhraseDictionaryTree : public Dictionary {
 	PDTimp *imp; //implementation
@@ -82,8 +79,7 @@ public:
 	// get the target candidates for a given phrase
 	void GetTargetCandidates(const std::vector<std::string>& src,
 													 std::vector<StringTgtCand>& rv,
-													 std::vector<StringWordAlignmentCand>& swa,
-													 std::vector<StringWordAlignmentCand>& twa) const;
+													 std::vector<std::string>& wa) const;
 
 	/*****************************
 	 *   access to prefix tree   *
@@ -115,8 +111,7 @@ public:
 													 std::vector<StringTgtCand>& rv) const;
 	void GetTargetCandidates(PrefixPtr p,
 													 std::vector<StringTgtCand>& rv,
-													 std::vector<StringWordAlignmentCand>& swa,
-													 std::vector<StringWordAlignmentCand>& twa) const;
+													 std::vector<std::string>& wa) const;
 
 	// print target candidates for a given prefix pointer to a stream, mainly 
 	// for debugging

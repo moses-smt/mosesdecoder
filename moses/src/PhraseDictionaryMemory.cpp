@@ -50,10 +50,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 	
 	m_tableLimit = tableLimit;
 
-	//factors	
-	m_inputFactors = FactorMask(input);
-	m_outputFactors = FactorMask(output);
-	VERBOSE(2,"PhraseDictionaryMemory: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 
 	// data from file
 	InputFileStream inFile(filePath);
@@ -76,7 +72,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		if (numElement == NOT_FOUND) 
 		{ // init numElement
 			numElement = tokens.size();
-			assert(numElement == 3 || numElement == 5);
+			assert(numElement >= 3);
+			// extended style: source ||| target ||| scores ||| [alignment] ||| [counts]
 		}
 			 
 		if (tokens.size() != numElement)
@@ -87,20 +84,9 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			abort();
 		}
 
-		string sourcePhraseString, targetPhraseString;
-		string scoreString;
-		string sourceAlignString, targetAlignString;
-
-		sourcePhraseString=tokens[0];
-		targetPhraseString=tokens[1];
-		if (numElement==3){
-			scoreString=tokens[2];
-		}
-		else{
-			sourceAlignString=tokens[2];
-			targetAlignString=tokens[3];
-			scoreString=tokens[4];
-		}
+		const string &sourcePhraseString=tokens[0]
+								,&targetPhraseString=tokens[1]
+								,&scoreString = tokens[2];
 		
 		bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
 		if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -120,7 +106,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 			UserMessage::Add(strme.str());
 			abort();
 		}
-//		assert(scoreVector.size() == m_numScoreComponent);
 			
 		// source
 		Phrase sourcePhrase(Input);
@@ -129,8 +114,9 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		TargetPhrase targetPhrase(Output);
 		targetPhrase.SetSourcePhrase(&sourcePhrase);
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
-		
-		
+
+		if (tokens.size() > 3)
+			targetPhrase.SetAlignmentInfo(tokens[3]);
 		
 		// component score, for n-best output
 		std::vector<float> scv(scoreVector.size());
@@ -189,17 +175,6 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
 
 PhraseDictionaryMemory::~PhraseDictionaryMemory()
 {
-}
-
-void PhraseDictionaryMemory::SetWeightTransModel(const vector<float> &weightT)
-{
-	PhraseDictionaryNode::iterator iterDict;
-	for (iterDict = m_collection.begin() ; iterDict != m_collection.end() ; ++iterDict)
-	{
-		PhraseDictionaryNode &phraseDictionaryNode = iterDict->second;
-		// recursively set weights in nodes
-		phraseDictionaryNode.SetWeightTransModel(this, weightT);
-	}
 }
 
 TO_STRING_BODY(PhraseDictionaryMemory);

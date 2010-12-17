@@ -27,7 +27,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-InputType::InputType(long translationId) : m_translationId(translationId) {}
+InputType::InputType(long translationId) : m_translationId(translationId)
+{
+	m_frontSpanCoveredLength = 0;
+	m_sourceCompleted.resize(0);
+}
+
 InputType::~InputType() {}
 
 TO_STRING_BODY(InputType);
@@ -49,7 +54,7 @@ int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRang
 	return abs(dist);
 }
 
-bool InputType::CanIGetFromAToB(size_t start, size_t end) const
+bool InputType::CanIGetFromAToB(size_t /*start*/, size_t /*end*/) const
 {
   return true;
 }

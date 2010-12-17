@@ -11,7 +11,7 @@
 namespace Moses
 {
 
-class LanguageModelRemote : public LanguageModelSingleFactor {
+class LanguageModelRemote : public LanguageModelPointerState {
 	private:
 		struct Cache {
 			std::map<const Factor*, Cache> tree;
@@ -29,13 +29,11 @@ class LanguageModelRemote : public LanguageModelSingleFactor {
 		static const Factor* BOS;
 		static const Factor* EOS;
 	public:
-		LanguageModelRemote(bool registerScore, ScoreIndexManager &scoreIndexManager);
 		~LanguageModelRemote();
 		void ClearSentenceCache() { m_cache.tree.clear(); m_curId = 1000; }
 		virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;
         	bool Load(const std::string &filePath
                                         , FactorType factorType
-                                        , float weight
                                         , size_t nGramOrder);
 };
 

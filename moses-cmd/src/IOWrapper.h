@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ostream>
 #include <vector>
+#include <cassert>
 
 #include "TypeDef.h"
 #include "Sentence.h"
@@ -58,11 +59,12 @@ protected:
 	const std::vector<Moses::FactorType>	&m_inputFactorOrder;
 	const std::vector<Moses::FactorType>	&m_outputFactorOrder;
 	const Moses::FactorMask							&m_inputFactorUsed;
+	std::string										m_inputFilePath;
+	Moses::InputFileStream				*m_inputFile;
+	std::istream									*m_inputStream;
 	std::ostream 									*m_nBestStream
 																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
-	std::string										m_inputFilePath;
-	std::istream									*m_inputStream;
-	Moses::InputFileStream				*m_inputFile;
+  std::ostream                  *m_detailedTranslationReportingStream;
 	bool													m_surpressSingleBestOutput;
 	
 	void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -88,9 +90,8 @@ public:
 
 	Moses::InputType* GetInput(Moses::InputType *inputType);
 	
-    void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-	void OutputNBestList(const Moses::TrellisPathList &nBestList, long translationId);
-    void OutputLatticeMBRNBestList(const vector<LatticeMBRSolution>& solutions,long translationId);
+  void OutputBestHypo(const Moses::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+  void OutputLatticeMBRNBestList(const std::vector<LatticeMBRSolution>& solutions,long translationId);
 	void Backtrack(const Moses::Hypothesis *hypo);
 
 	void ResetTranslationId() { m_translationId = 0; }
@@ -103,16 +104,23 @@ public:
 	{
 	  return *m_outputSearchGraphStream;
 	}
+
+  std::ostream &GetDetailedTranslationReportingStream()
+  {
+		assert (m_detailedTranslationReportingStream);
+    return *m_detailedTranslationReportingStream;
+  } 
 };
 
 IOWrapper *GetIODevice(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors);
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&, long translationId);
-void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId);
-void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, 
-                    bool reportSegmentation, bool reportAllFactors, std::ostream& out);
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&,
+                  const TranslationSystem* system, long translationId);
+void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/, 
                         bool reportSegmentation, bool reportAllFactors, std::ostream& out);
+void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out);
+void OutputInput(std::ostream& os, const Hypothesis* hypo);
 
 #endif
