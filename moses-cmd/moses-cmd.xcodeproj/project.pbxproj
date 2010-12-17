@@ -211,7 +211,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-cmd" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-cmd */;
 			projectDirPath = "";
 			projectReferences = (

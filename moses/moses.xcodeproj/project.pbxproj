@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */; };
 		1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */; };
+		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
+		1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */; };
 		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
 		1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED00035124BC2690029177F /* ChartTranslationOption.h */; };
 		1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */; };
@@ -229,6 +231,8 @@
 /* Begin PBXFileReference section */
 		1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
 		1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
+		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
+		1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelImplementation.h; path = src/LanguageModelImplementation.h; sourceTree = "<group>"; };
 		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
 		1ED00035124BC2690029177F /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
 		1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
@@ -548,6 +552,8 @@
 				1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */,
 				1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */,
 				1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */,
+				1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */,
+				1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */,
 				1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */,
 				1ED0FD9E124BB9380029177F /* LanguageModelInternal.h */,
 				1ED0FD9F124BB9380029177F /* LanguageModelIRST.cpp */,
@@ -850,6 +856,7 @@
 				1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */,
 				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
 				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
+				1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -880,7 +887,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "moses" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* moses */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -998,6 +1012,7 @@
 				1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */,
 				1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */,
 				1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */,
+				1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

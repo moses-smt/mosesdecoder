@@ -17,40 +17,17 @@ using namespace std;
 extern Vocabulary vcbT;
 extern Vocabulary vcbS;
 
-extern PhraseTable phraseTableT;
-extern PhraseTable phraseTableS;
 extern bool hierarchicalFlag;
-
-PhraseAlignment::PhraseAlignment()
-:sourcePhraseId(999999)
-,targetPhraseId(999999)
-{}
-
-void PhraseAlignment::addToCount( char line[] ) 
-{
-	vector< string > token = tokenize( line );
-	int item = 0;
-	for (int j=0; j<token.size(); j++) 
-	{
-		if (token[j] == "|||") item++;
-		if (item == 4)
-		{
-			float addCount;
-			sscanf(token[j].c_str(), "%f", &addCount);
-			count += addCount;
-		}
-	}
-	if (item < 4) // no specified counts -> counts as one
-		count += 1.0;
-}
 
 // read in a phrase pair and store it
 void PhraseAlignment::create( char line[], int lineID ) 
 {
+    assert(phraseS.empty());
+    assert(phraseT.empty());
+
 	//cerr << "processing " << line;
 	vector< string > token = tokenize( line );
 	int item = 1;
-	PHRASE phraseS, phraseT;
 	for (int j=0; j<token.size(); j++) 
 	{
 		if (token[j] == "|||") item++;
@@ -92,11 +69,6 @@ void PhraseAlignment::create( char line[], int lineID )
 
 	createAlignVec(phraseS.size(), phraseT.size());
 	
-	assert(sourcePhraseId == 999999);
-	assert(targetPhraseId == 999999);
-	sourcePhraseId = phraseTableS.storeIfNew( phraseS );
-	targetPhraseId = phraseTableT.storeIfNew( phraseT );
-
 	if (item == 3)
 	{
 		count = 1.0;
@@ -125,9 +97,8 @@ void PhraseAlignment::createAlignVec(size_t sourceSize, size_t targetSize)
 
 void PhraseAlignment::clear() 
 {
-	sourcePhraseId = 999999;
-	targetPhraseId = 999999;
-
+  phraseS.clear();
+  phraseT.clear();
   alignedToT.clear();
   alignedToS.clear();
 }
@@ -151,8 +122,6 @@ bool PhraseAlignment::match( const PhraseAlignment& other )
 	if (other.GetTarget() != GetTarget()) return false;
 	if (other.GetSource() != GetSource()) return false;
 	if (!hierarchicalFlag) return true;
-	
-	PHRASE phraseT = phraseTableT.getPhrase( GetTarget() );
 	
   assert(phraseT.size() == alignedToT.size() + 1);
   assert(alignedToT.size() == other.alignedToT.size());

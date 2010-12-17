@@ -147,6 +147,13 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
 
 	MappingBuilder builder(m_factorType, factorCollection, m_lmIdLookup);
 	lm::ngram::Config config;
+
+	IFVERBOSE(1) {
+		config.messages = &std::cerr;
+	} else {
+		config.messages = NULL;
+	}
+
 	config.enumerate_vocab = &builder;
 	config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
