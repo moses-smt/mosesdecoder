@@ -423,6 +423,7 @@ safesystem("mkdir -p $tmpdir") or die;
 
 preparing_script();
 
+
 #launching process through the queue
 my @sgepids =();
 
@@ -434,7 +435,7 @@ while ($robust && scalar @idx_todo) {
  $robust--;
 
  my $failure=0;
- foreach my $idx (@idx_todo){
+ #foreach my $idx (@idx_todo){
 
   my $batch_and_join = undef;
   if ($old_sge) {
@@ -443,24 +444,25 @@ while ($robust && scalar @idx_todo) {
   } else {
     $batch_and_join = "-b no -j yes";
   }
-  $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash > ${jobscript}${idx}.log 2>&1";
+ my $array_jobs = $sentenceN / $splitN;
+  $cmd="qsub -t 1-$array_jobs $queueparameters $batch_and_join ${jobscript}.bash > ${jobscript}.log 2>&1";
   print STDERR "$cmd\n" if $dbg; 
 
   safesystem($cmd) or die;
 
   my ($res,$id);
 
-  open (IN,"${jobscript}${idx}.log")
-    or die "Can't read id of job ${jobscript}${idx}.log";
+  open (IN,"${jobscript}.log")
+    or die "Can't read id of job ${jobscript}.log";
   chomp($res=<IN>);
-  split(/\s+/,$res);
+  split(/\s+|\./,$res);
   $id=$_[2];
-  die "Failed to guess job id from $jobscript$idx.log, got: $res"
+  die "Failed to guess job id from $jobscript.log, got: $res"
     if $id !~ /^[0-9]+$/;
   close(IN);
 
   push @sgepids, $id;
- }
+ #}
 
  #waiting until all jobs have finished
  my $hj = "-hold_jid " . join(" -hold_jid ", @sgepids);
@@ -551,60 +553,85 @@ remove_temporary_files();
 
 #script creation
 sub preparing_script(){
-  foreach my $idx (@idxlist){
+
     my $scriptheader="";
-    $scriptheader.="\#\! /bin/bash\n\n";
-      # !!! this is useless. qsub ignores the first line of the script.
-      # Pass '-S /bin/bash' to qsub instead.
+    $scriptheader.="\#\!/bin/bash\n\n";
+      # qsub ignores the shebang line, so we'll also use the -S flag
+      #
+      # Be aware!! If you give qsub -S but not -V,
+      #   you likely won't have your regular environment variables set up 
+
+    $scriptheader.="\#\$ \-S /bin/bash\n";
+    $scriptheader.="\#\$ \-o $qsubout.\$TASK_ID\n";
+    $scriptheader.="\#\$ \-e $qsuberr.\$TASK_ID\n";
+    $scriptheader.="\#\$ \-N $qsubname\n\n"; # Unfortunately, qsub doesn't respect the pseudo-variable $TASK_ID for -N
+
+    $scriptheader.="if [ \"\" == \"\$SGE_TASK_ID\" ]; then\n";
+    $scriptheader.="\techo \"Job was not submitted as an array job\n\"";
+    $scriptheader.="\texit 1\n";
+    $scriptheader.="fi\n\n";
+
     $scriptheader.="uname -a\n\n";
     $scriptheader.="ulimit -c 0\n\n"; # avoid coredumps
-    $scriptheader.="cd $workingdir\n\n";
+    $scriptheader.="cd $workingdir\n";
 
-    open (OUT, "> ${jobscript}${idx}.bash");
+    $scriptheader.="\n";
+
+
+    my $idxindex=1;
+  foreach my $idx (@idxlist){
+      $scriptheader.="idxarray[".$idxindex."]=".$idx."\n";
+      $idxindex+=1;
+  }
+    $scriptheader.="\n";
+
+    open (OUT, "> ${jobscript}.bash");
     print OUT $scriptheader;
     my $inputmethod = $feed_moses_via_stdin ? "<" : "-input-file";
 
     my $tmpnbestlist="";
     if ($nbestflag){
-      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx$idx $nbestlist[1]";
+      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx\${idxarray[\$SGE_TASK_ID]} $nbestlist[1]";
+
+      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx\${idxarray[\$SGE_TASK_ID]} $nbestlist[1]";
       $tmpnbestlist = "$tmpnbestlist $nbestlist[2]" if scalar(@nbestlist)==3;
       $tmpnbestlist = "-n-best-list $tmpnbestlist";
     }
 
     my $tmpsearchgraphlist="";
     if ($searchgraphflag){
-      $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx$idx";
+      $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx\${idxarray[\$SGE_TASK_ID]}";
     }
 
     my $tmpwordgraphlist="";
     if ($wordgraphflag){
-      $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
+      $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx\${idxarray[\$SGE_TASK_ID]} $wordgraphlist[1]";
     }
 
-    print OUT "$mosescmd $mosesparameters $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+    print OUT "$mosescmd $mosesparameters $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx\${idxarray[\$SGE_TASK_ID]} > $tmpdir/${inputfile}.$splitpfx\${idxarray[\$SGE_TASK_ID]}.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
     if ($nbestflag){
-      print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
+      print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx\${idxarray[\$SGE_TASK_ID]} .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
     if ($searchgraphflag){
-      print OUT "\\mv -f $tmpdir/${searchgraphfile}.$splitpfx$idx .\n\n";
+      print OUT "\\mv -f $tmpdir/${searchgraphfile}.$splitpfx\${idxarray[\$SGE_TASK_ID]} .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
 
     if ($wordgraphflag){
-      print OUT "\\mv -f $tmpdir/${wordgraphfile}.$splitpfx$idx .\n\n";
+      print OUT "\\mv -f $tmpdir/${wordgraphfile}.$splitpfx\${idxarray[\$SGE_TASK_ID]} .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
 
-    print OUT "\\mv -f $tmpdir/${inputfile}.$splitpfx$idx.trans .\n\n";
+    print OUT "\\mv -f $tmpdir/${inputfile}.$splitpfx\${idxarray[\$SGE_TASK_ID]}.trans .\n\n";
     print OUT "echo exit status \$\?\n\n";
     close(OUT);
 
     #setting permissions of each script
-    chmod(oct(755),"${jobscript}${idx}.bash");
-  }
+    chmod(oct(755),"${jobscript}.bash");
+  
 }
 
 sub concatenate_wordgraph(){
@@ -897,13 +924,15 @@ sub remove_temporary_files(){
     if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
     if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
     if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}${idx}"); }
-    unlink("${jobscript}${idx}.bash");
-    unlink("${jobscript}${idx}.log");
-    unlink("$qsubname.W.log");
-    unlink("$qsubout$idx");
-    unlink("$qsuberr$idx");
-    rmdir("$tmpdir");
   }
+  for (my $task_id=1; $task_id<=$jobs; $task_id+=1) {
+    unlink("$qsubout.$task_id");
+    unlink("$qsuberr.$task_id");
+  }
+  unlink("$qsubname.W.log");
+  unlink("${jobscript}.bash");
+  unlink("${jobscript}.log");
+  rmdir("$tmpdir");
   if ($nbestflag && $nbestlist[0] eq '-'){ unlink("${nbestfile}$$"); };
   if ($searchgraphflag  && $searchgraphlist eq '-'){ unlink("${searchgraphfile}$$"); };
   if ($wordgraphflag  && $wordgraphlist eq '-'){ unlink("${wordgraphfile}$$"); };
