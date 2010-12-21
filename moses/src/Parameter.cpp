@@ -85,6 +85,8 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
+	AddParam("weight-wd", "wd", "weight for word dependency model"); 
+	AddParam("word-dependency-model", "word dependency model");
 	AddParam("weight-file", "wf", "file containing labeled weights");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");

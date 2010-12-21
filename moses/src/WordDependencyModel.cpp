@@ -112,12 +112,12 @@ const Scores WordDependencyModel::LookupScores(const std::vector<std::string> &a
 		for(size_t j = 0; j < referent.size(); j++) {
 			refw.CreateFromString(Output, singleFactor, referent[j], false);
 			float score = m_lm->GetValue(bigram);
-			std::cerr << "Word dependency score for antecedent " << antecedent[i] << " and referent " << referent[j] << ": " << score << std::endl;
+			// std::cerr << "Word dependency score for antecedent " << antecedent[i] << " and referent " << referent[j] << ": " << score << std::endl;
 			if(score > s[0])
 				s[0] = score;
 		}
 	}
-	std::cerr << "Maximum score: " << s[0] << std::endl;
+	// std::cerr << "Maximum score: " << s[0] << std::endl;
 	
 	return s;
 }
