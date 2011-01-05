@@ -25,7 +25,6 @@
 #include <vector>
 #include <string>
 #include "PhraseDictionary.h"
-#include "ChartTranslationOptionList.h"
 #include "../../OnDiskPt/src/OnDiskWrapper.h"
 #include "../../OnDiskPt/src/Word.h"
 #include "../../OnDiskPt/src/PhraseNode.h"
@@ -52,7 +51,6 @@ protected:
 	mutable OnDiskPt::OnDiskWrapper m_dbWrapper;
 
 	mutable std::map<UINT64, const TargetPhraseCollection*> m_cache;
-	mutable std::vector<ChartTranslationOptionList*> m_chartTargetPhraseColl;
 	mutable std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
 
 	mutable std::vector<ProcessedRuleStackOnDisk*>	m_runningNodesVec;

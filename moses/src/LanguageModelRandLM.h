@@ -36,7 +36,7 @@ class Phrase;
 
 // RandLM wrapper (single factor LM)
 
-class LanguageModelRandLM : public LanguageModelSingleFactor {
+class LanguageModelRandLM : public LanguageModelPointerState {
 public:
   LanguageModelRandLM() : m_lm(0) {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);

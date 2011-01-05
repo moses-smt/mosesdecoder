@@ -64,7 +64,7 @@ sub extract_nist_bleu {
 	$bleu = $1*100 if /BLEU score = (\S+)/;
 	$ratio = int(1000*$1)/1000 if /length ratio: (\S+)/;
     }
-    if (!$bleu) {
+    if (!defined($bleu)) {
 	print STDERR "ERROR (extract_nist_bleu): could not find BLEU score in file '$file'\n";
 	return "";
     }

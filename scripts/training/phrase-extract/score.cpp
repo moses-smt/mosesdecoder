@@ -31,6 +31,7 @@
 #include "tables-core.h"
 #include "PhraseAlignment.h"
 #include "score.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -56,17 +57,15 @@ public:
 
 vector<string> tokenize( const char [] );
 
-void computeCountOfCounts( char* fileNameExtract );
+void computeCountOfCounts( char* fileNameExtract, int maxLines );
 void processPhrasePairs( vector< PhraseAlignment > & );
 PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > & );
 void outputPhrasePair( vector< PhraseAlignment * > &, float );
-double computeLexicalTranslation( PHRASE &, PHRASE &, PhraseAlignment * );
+double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
 
 ofstream phraseTableFile;
 
 LexicalTable lexTable;
-PhraseTable phraseTableT;
-PhraseTable phraseTableS;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool wordAlignmentFlag = false;
@@ -78,6 +77,7 @@ int negLogProb = 1;
 bool lexFlag = true;
 int countOfCounts[GT_MAX+1];
 float discountFactor[GT_MAX+1];
+int maxLinesGTDiscount = -1;
 
 int main(int argc, char* argv[]) 
 {
@@ -126,6 +126,11 @@ int main(int argc, char* argv[])
 			negLogProb = -1;
 			cerr << "using negative log-probabilities\n";
 		}
+		else if (strcmp(argv[i],"--MaxLinesGTDiscount") == 0) {
+			++i;
+			maxLinesGTDiscount = atoi(argv[i]);
+			cerr << "maxLinesGTDiscount=" << maxLinesGTDiscount << endl;
+		}
 		else {
 			cerr << "ERROR: unknown option " << argv[i] << endl;
 			exit(1);
@@ -138,11 +143,11 @@ int main(int argc, char* argv[])
   
 	// compute count of counts for Good Turing discounting
 	if (goodTuringFlag)
-		computeCountOfCounts( fileNameExtract );
+		computeCountOfCounts( fileNameExtract, maxLinesGTDiscount );
 
 	// sorted phrase extraction file
-	ifstream extractFile;
-	extractFile.open(fileNameExtract);
+	Moses::InputFileStream extractFile(fileNameExtract);
+
 	if (extractFile.fail()) {
 		cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
 		exit(1);
@@ -159,7 +164,7 @@ int main(int argc, char* argv[])
 	}
   
   // loop through all extracted phrase translations
-  int lastSource = -1;
+  float lastCount = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
 	char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
@@ -172,9 +177,9 @@ int main(int argc, char* argv[])
     if (extractFileP.eof())	break;
 				
 		// identical to last line? just add count
-		if (lastSource > 0 && strcmp(line,lastLine) == 0)
+		if (strcmp(line,lastLine) == 0)
 		{
-			lastPhrasePair->addToCount( line );
+			lastPhrasePair->count += lastCount;
 			continue;			
 		}
 		strcpy( lastLine, line );
@@ -182,44 +187,37 @@ int main(int argc, char* argv[])
 		// create new phrase pair
 		PhraseAlignment phrasePair;
 		phrasePair.create( line, i );
+        lastCount = phrasePair.count;
 		
 		// only differs in count? just add count
 		if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair ))
 		{
 			lastPhrasePair->count += phrasePair.count;
-			phrasePair.clear();
 			continue;
 		}
 		
 		// if new source phrase, process last batch
-		if (lastSource >= 0 && lastSource != phrasePair.GetSource()) {
+		if (lastPhrasePair != NULL &&
+            lastPhrasePair->GetSource() != phrasePair.GetSource()) {
 			processPhrasePairs( phrasePairsWithSameF );
-			for(int j=0;j<phrasePairsWithSameF.size();j++)
-				phrasePairsWithSameF[j].clear();
 			phrasePairsWithSameF.clear();
-			phraseTableT.clear();
-			phraseTableS.clear();
-			// process line again, since phrase tables flushed
-			phrasePair.clear();
-			phrasePair.create( line, i ); 
+            lastPhrasePair = NULL;
 		}
 		
 		// add phrase pairs to list, it's now the last one
-		lastSource = phrasePair.GetSource();
 		phrasePairsWithSameF.push_back( phrasePair );
-		lastPhrasePair = &phrasePairsWithSameF[phrasePairsWithSameF.size()-1];
+		lastPhrasePair = &phrasePairsWithSameF.back();
 	}
 	processPhrasePairs( phrasePairsWithSameF );
 	phraseTableFile.close();
 }
 
-void computeCountOfCounts( char* fileNameExtract )
+void computeCountOfCounts( char* fileNameExtract, int maxLines )
 {
 	cerr << "computing counts of counts";
 	for(int i=1;i<=GT_MAX;i++) countOfCounts[i] = 0;
 
-	ifstream extractFile;
-	extractFile.open( fileNameExtract );
+	Moses::InputFileStream extractFile(fileNameExtract);
 	if (extractFile.fail()) {
 		cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
 		exit(1);
@@ -227,29 +225,32 @@ void computeCountOfCounts( char* fileNameExtract )
 	istream &extractFileP = extractFile;
 
 	// loop through all extracted phrase translations
-	int i=0;
+	int lineNum = 0;
 	char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
 	lastLine[0] = '\0';
+    float lastCount = 0.0f;
 	PhraseAlignment *lastPhrasePair = NULL;
 	while(true) {
 		if (extractFileP.eof()) break;
-		if (++i % 100000 == 0) cerr << "." << flush;
+		if (maxLines > 0 && lineNum >= maxLines) break;
+		if (++lineNum % 100000 == 0) cerr << "." << flush;
 		SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
 		if (extractFileP.eof())	break;
 		
 		// identical to last line? just add count
 		if (strcmp(line,lastLine) == 0)
 		{
-			lastPhrasePair->addToCount( line );
+            lastPhrasePair->count += lastCount;
 			continue;			
 		}
 		strcpy( lastLine, line );
 
 		// create new phrase pair
 		PhraseAlignment *phrasePair = new PhraseAlignment();
-		phrasePair->create( line, i );
+		phrasePair->create( line, lineNum );
+        lastCount = phrasePair->count;
 		
-		if (i == 1)
+		if (lineNum == 1)
 		{
 			lastPhrasePair = phrasePair;
 			continue;
@@ -262,16 +263,6 @@ void computeCountOfCounts( char* fileNameExtract )
 			phrasePair->clear();
 			delete(phrasePair);
 			continue;
-		}
-
-		// periodically house cleaning
-		if (phrasePair->GetSource() != lastPhrasePair->GetSource())
-		{
-			phraseTableT.clear(); // these would get too big
-			phraseTableS.clear(); // these would get too big
-			// process line again, since phrase tables flushed
-			phrasePair->clear();
-			phrasePair->create( line, i ); 
 		}
 
 		int count = lastPhrasePair->count + 0.99999;
@@ -371,8 +362,8 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 		count += phrasePair[i]->count;
 	}
 
-	PHRASE phraseS = phraseTableS.getPhrase( phrasePair[0]->GetSource() );
-	PHRASE phraseT = phraseTableT.getPhrase( phrasePair[0]->GetTarget() );
+	const PHRASE &phraseS = phrasePair[0]->GetSource();
+	const PHRASE &phraseT = phrasePair[0]->GetTarget();
 
 	// labels (if hierarchical)
 
@@ -459,7 +450,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount 
 	phraseTableFile << endl;
 }
 
-double computeLexicalTranslation( PHRASE &phraseS, PHRASE &phraseT, PhraseAlignment *alignment ) {
+double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, PhraseAlignment *alignment ) {
 	// lexical translation probability
 	double lexScore = 1.0;
 	int null = vcbS.getWordID("NULL");

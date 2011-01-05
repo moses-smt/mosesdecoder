@@ -12,7 +12,9 @@ if (!&GetOptions('mxpost=s' => \$MXPOST) ||
         exit(1);
 }
 
-open(TAGGER,"cat $IN | perl -ne 's/—/-/g; s/\\p{Dash_Punctuation}/-/g; s/\\p{Open_Punctuation}/\(/g; s/\\p{Close_Punctuation}/\)/g; s/\\p{Initial_Punctuation}/\"/g; s/\\p{Final_Punctuation}/\"/g; s/\\p{Connector_Punctuation}/-/g; s/•/*/g; s/\\p{Currency_Symbol}/\\\$/g; s/\\p{Math_Symbol}/*/g; print \$_;' | $MXPOST/mxpost |");
+my $pipeline = "perl -ne 'chop; tr/\\x20-\\x7f/\?/c; print \$_.\"\\n\";' | tee debug | ";
+$pipeline .= "$MXPOST/mxpost $MXPOST/tagger.project |";
+open(TAGGER,"cat $IN | $pipeline");
 open(OUT,">$OUT");
 while(<TAGGER>) {
     foreach my $word_pos (split) {

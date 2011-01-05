@@ -19,6 +19,7 @@
  ***********************************************************************/
 
 #include <algorithm>
+#include <iostream>
 #include "../../moses/src/StaticData.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOption.h"

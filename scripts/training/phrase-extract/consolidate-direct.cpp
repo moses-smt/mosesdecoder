@@ -22,6 +22,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include "InputFileStream.h"
 
 #include "SafeGetline.h"
 
@@ -75,9 +76,10 @@ int main(int argc, char* argv[])
   cerr << "Starting..." << endl;
 	
 	char* &fileNameDirect = argv[1];
-	ifstream fileDirect;
+	Moses::InputFileStream fileDirect(fileNameDirect);
+
 	
-	fileDirect.open(fileNameDirect);
+	//fileDirect.open(fileNameDirect);
 	if (fileDirect.fail()) {
     cerr << "ERROR: could not open extract file " << fileNameDirect << endl;
     exit(1);

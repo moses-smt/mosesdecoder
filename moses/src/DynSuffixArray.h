@@ -22,9 +22,9 @@ public:
   bool GetCorpusIndex(const vuint_t*, vuint_t*);
   void Load(FILE*);
   void Save(FILE*);
-  void InsertFactor(vuint_t*, unsigned);  
-  void DeleteFactor(unsigned, unsigned);
-  void SubstituteFactor(vuint_t*, unsigned);
+  void Insert(vuint_t*, unsigned);  
+  void Delete(unsigned, unsigned);
+  void Substitute(vuint_t*, unsigned);
 
 private: 
   vuint_t* m_SA;

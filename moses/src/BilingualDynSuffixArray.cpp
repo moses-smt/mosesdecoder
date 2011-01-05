@@ -17,7 +17,8 @@ BilingualDynSuffixArray::BilingualDynSuffixArray():
 	m_trgSA = 0;
 	m_srcCorpus = new std::vector<wordID_t>();
 	m_trgCorpus = new std::vector<wordID_t>();
-	m_vocab = new Vocab(false);
+	m_srcVocab = new Vocab(false);
+	m_trgVocab = new Vocab(false);
 	m_scoreCmp = 0;
 }
 
@@ -25,7 +26,8 @@ BilingualDynSuffixArray::~BilingualDynSuffixArray()
 {
 	if(m_srcSA) delete m_srcSA;
 	if(m_trgSA) delete m_trgSA;
-	if(m_vocab) delete m_vocab;
+	if(m_srcVocab) delete m_srcVocab;
+	if(m_trgVocab) delete m_trgVocab;
 	if(m_srcCorpus) delete m_srcCorpus;
 	if(m_trgCorpus) delete m_trgCorpus;
 	if(m_scoreCmp) delete m_scoreCmp;
@@ -37,17 +39,17 @@ bool BilingualDynSuffixArray::Load(
 	std::string source, std::string target, std::string alignments, 
 	const std::vector<float> &weight)
 {
-	m_inputFactors = FactorMask(inputFactors);
-	m_outputFactors = FactorMask(outputFactors);
+  m_inputFactors = inputFactors;
+  m_outputFactors = outputFactors;
 
 	m_scoreCmp = new ScoresComp(weight);
 	InputFileStream sourceStrme(source);
 	InputFileStream targetStrme(target);
-	cerr << "Loading source and target parallel corpus...\n";	
-	LoadCorpus(sourceStrme, inputFactors, Input, *m_srcCorpus, m_srcSntBreaks);
-	LoadCorpus(targetStrme, outputFactors, Output, *m_trgCorpus, m_trgSntBreaks);
+	cerr << "Loading source corpus...\n";	
+	LoadCorpus(sourceStrme, m_inputFactors, Input, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
+	cerr << "Loading target corpus...\n";	
+	LoadCorpus(targetStrme, m_outputFactors, Output, *m_trgCorpus, m_trgSntBreaks, m_trgVocab);
 	assert(m_srcSntBreaks.size() == m_trgSntBreaks.size());
-	m_vocab->MakeClosed();	// avoid adding new words to vocabulary
 
 	// build suffix arrays and auxilliary arrays
 	cerr << "Building Source Suffix Array...\n"; 
@@ -73,7 +75,10 @@ int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align)
 		Utils::splitToInt(line, vtmp, "- ");
 		assert(vtmp.size() % 2 == 0);
 		std::vector<short> vAlgn;	// store as short ints for memory
-		iterate(vtmp, itr) vAlgn.push_back(short(*itr));
+        for (std::vector<int>::const_iterator itr = vtmp.begin();
+            itr != vtmp.end(); ++itr) {
+            vAlgn.push_back(short(*itr));
+        }
 		m_rawAlignments.push_back(vAlgn);
 	}
 	return m_rawAlignments.size();
@@ -84,7 +89,10 @@ int BilingualDynSuffixArray::LoadRawAlignments(string& align) {
   Utils::splitToInt(align, vtmp, "- ");
   assert(vtmp.size() % 2 == 0);
   vector<short> vAlgn;  // store as short ints for memory
-  iterate(vtmp, itr) vAlgn.push_back(short(*itr));
+  for (std::vector<int>::const_iterator itr = vtmp.begin();
+      itr != vtmp.end(); ++itr) {
+      vAlgn.push_back(short(*itr));
+  }
   m_rawAlignments.push_back(vAlgn);
   return m_rawAlignments.size();
 }
@@ -165,7 +173,8 @@ void BilingualDynSuffixArray::CleanUp()
 }
 
 int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorList& factors,
-	const FactorDirection& direction, std::vector<wordID_t>& cArray, std::vector<wordID_t>& sntArray) 
+	const FactorDirection& direction, std::vector<wordID_t>& cArray, std::vector<wordID_t>& sntArray,
+  Vocab* vocab) 
 {
 	std::string line, word;
 	int sntIdx(0);
@@ -178,11 +187,12 @@ int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorLis
 		phrase.CreateFromString( factors, line, factorDelimiter);
 		// store words in vocabulary and corpus
 		for( size_t i = 0; i < phrase.GetSize(); ++i) {
-			cArray.push_back( m_vocab->GetWordID( phrase.GetWord(i) ) );
+			cArray.push_back( vocab->GetWordID(phrase.GetWord(i)) );
 		}
 		sntIdx += phrase.GetSize();					
 	}
-	//cArray.push_back(m_vocab->GetkOOVWordID);	// signify end of corpus 
+	//cArray.push_back(vocab->GetkOOVWordID);	// signify end of corpus 
+  vocab->MakeClosed(); // avoid adding words
 	return cArray.size();
 }
 
@@ -192,8 +202,8 @@ bool BilingualDynSuffixArray::GetLocalVocabIDs(const Phrase& src, SAPhrase &outp
 	size_t phraseSize = src.GetSize();
 	for (size_t pos = 0; pos < phraseSize; ++pos) {
 		const Word &word = src.GetWord(pos);
-		wordID_t arrayId = m_vocab->GetWordID(word);
-		if (arrayId == m_vocab->GetkOOVWordID())
+		wordID_t arrayId = m_srcVocab->GetWordID(word);
+		if (arrayId == m_srcVocab->GetkOOVWordID())
 		{ // oov
 				return false;
 		}
@@ -219,7 +229,7 @@ pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& p
 		wordID_t srcWord = m_srcCorpus->at(srcIdx + m_srcSntBreaks[phrasepair.m_sntIndex]);	// localIDs
 		const std::vector<int>& srcWordAlignments = alignment.alignedList.at(srcIdx);
 		if(srcWordAlignments.size() == 0) { // get p(NULL|src)
-			pair<wordID_t, wordID_t> wordpair = std::make_pair(srcWord, m_vocab->GetkOOVWordID());
+			pair<wordID_t, wordID_t> wordpair = std::make_pair(srcWord, m_srcVocab->GetkOOVWordID());
 			itrCache = m_wordPairCache.find(wordpair);
 			if(itrCache == m_wordPairCache.end()) { // if not in cache
 				CacheWordProbs(srcWord);
@@ -251,10 +261,11 @@ pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& p
 	for(int trgIdx = phrasepair.m_startTarget; trgIdx <= phrasepair.m_endTarget; ++trgIdx) {
 		float trgSumPairProbs(0);
 		wordID_t trgWord = m_trgCorpus->at(trgIdx + m_trgSntBreaks[phrasepair.m_sntIndex]);
-		iterate(targetProbs, trgItr) {
+        for (std::map<pair<wordID_t, wordID_t>, float>::const_iterator trgItr
+                = targetProbs.begin(); trgItr != targetProbs.end(); ++trgItr) {
 			if(trgItr->first.second == trgWord) 
 				trgSumPairProbs += trgItr->second;
-		}
+        }
 		if(trgSumPairProbs == 0) continue;	// currently don't store target-side SA
 		int noAligned = alignment.numberAligned.at(trgIdx);
 		float trgNormalizer = noAligned < 2 ? 1.0 : 1.0 / float(noAligned);
@@ -280,7 +291,7 @@ void BilingualDynSuffixArray::CacheWordProbs(wordID_t srcWord) const
 		const std::vector<int> srcAlg = GetSentenceAlignment(sntIdx).alignedList.at(srcWrdSntIdx); // list of target words for this source word
 		//const std::vector<int>& srcAlg = m_alignments.at(sntIdx).alignedList.at(srcWrdSntIdx); // list of target words for this source word
 		if(srcAlg.size() == 0) {
-			++counts[m_vocab->GetkOOVWordID()]; // if not alligned then align to NULL word
+			++counts[m_srcVocab->GetkOOVWordID()]; // if not alligned then align to NULL word
 			++denom;
 		}
 		else { //get target words aligned to srcword in this sentence
@@ -319,11 +330,10 @@ TargetPhrase* BilingualDynSuffixArray::GetMosesFactorIDs(const SAPhrase& phrase)
 {
 	TargetPhrase* targetPhrase = new TargetPhrase(Output);
 	for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
-		Word& word = m_vocab->GetWord( phrase.words[i]);
-		assert(word != m_vocab->GetkOOVWord());
+		Word& word = m_trgVocab->GetWord( phrase.words[i]);
+		assert(word != m_trgVocab->GetkOOVWord());
 		targetPhrase->AddWord(word);
 	}
-	
 	// scoring
 	return targetPhrase;
 }
@@ -349,7 +359,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		int sntIndex = sntIndexes.at(snt); // get corpus index for sentence
 		if(sntIndex == -1) continue;	// bad flag set by GetSntIndexes()
 		ExtractPhrases(sntIndex, wrdIndices[snt], sourceSize, phrasePairs); 
-		cerr << "extracted " << phrasePairs.size() << endl;
+		//cerr << "extracted " << phrasePairs.size() << endl;
 		totalTrgPhrases += phrasePairs.size(); // keep track of count of each extracted phrase pair		
 		std::vector<PhrasePair*>::iterator iterPhrasePair;
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair) {
@@ -384,7 +394,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	for(ritr = phraseScores.rbegin(); ritr != phraseScores.rend(); ++ritr) {
 		Scores scoreVector = ritr->first;
 		TargetPhrase *targetPhrase = GetMosesFactorIDs(*ritr->second);
-    cerr << *targetPhrase << endl;
+    //cerr << *targetPhrase << endl;
 		target.push_back( make_pair( scoreVector, targetPhrase));
 
 		if(target.size() == maxReturn) break;
@@ -423,27 +433,33 @@ std::vector<unsigned> BilingualDynSuffixArray::SampleSelection(std::vector<unsig
 void BilingualDynSuffixArray::addSntPair(string& source, string& target, string& alignment) {
   vuint_t srcFactor, trgFactor;
   cerr << "source, target, alignment = " << source << ", " << target << ", " << alignment << endl;
-  std::istringstream sss(source), sst(target), ssa(alignment);
-  string word;
+	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
   cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
-  m_vocab->MakeOpen();
-  while(sss >> word) { 
-    srcFactor.push_back(m_vocab->GetWordID(word));  // get vocab id
+  Phrase sphrase(Input);
+  sphrase.CreateFromString(m_inputFactors, source, factorDelimiter);
+  m_srcVocab->MakeOpen();
+  // store words in vocabulary and corpus
+  for(size_t i = 0; i < sphrase.GetSize(); ++i) {
+    srcFactor.push_back(m_srcVocab->GetWordID(sphrase.GetWord(i)));  // get vocab id
     cerr << "srcFactor[" << (srcFactor.size() - 1) << "] = " << srcFactor.back() << endl;
     m_srcCorpus->push_back(srcFactor.back()); // add word to corpus
   }
   m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence 
-  while(sst >> word) {
-    trgFactor.push_back(m_vocab->GetWordID(word));
+  m_srcVocab->MakeClosed();
+  Phrase tphrase(Output);
+  tphrase.CreateFromString(m_outputFactors, target, factorDelimiter);
+  m_trgVocab->MakeOpen();
+  for(size_t i = 0; i < tphrase.GetSize(); ++i) {
+    trgFactor.push_back(m_trgVocab->GetWordID(tphrase.GetWord(i)));  // get vocab id
     cerr << "trgFactor[" << (trgFactor.size() - 1) << "] = " << trgFactor.back() << endl;
     m_trgCorpus->push_back(trgFactor.back());
   }
   m_trgSntBreaks.push_back(oldTrgCrpSize);
-  m_srcSA->InsertFactor(&srcFactor, oldSrcCrpSize);
-  m_trgSA->InsertFactor(&trgFactor, oldTrgCrpSize);
+  m_srcSA->Insert(&srcFactor, oldSrcCrpSize);
+  m_trgSA->Insert(&trgFactor, oldTrgCrpSize);
   LoadRawAlignments(alignment);
-  m_vocab->MakeClosed();
+  m_trgVocab->MakeClosed();
 }
 SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
 	:m_sntIndex(sntIndex)

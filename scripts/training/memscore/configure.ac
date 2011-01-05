@@ -34,7 +34,7 @@ AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
-AX_BOOST_BASE([1.31.0])
+AX_BOOST_BASE([1.35.0])
 
 AC_CHECK_LIB([m], [cos])
 AC_CHECK_LIB([z], [gzopen])

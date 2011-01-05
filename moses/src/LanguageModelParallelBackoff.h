@@ -61,7 +61,7 @@ namespace Moses
 */
 class LanguageModelParallelBackoff : public LanguageModelMultiFactor
 {
-protected:
+private:
 	std::vector<FactorType> m_factorTypesOrdered;
 
 	FactoredVocab		*m_srilmVocab;
@@ -79,10 +79,8 @@ protected:
 
 public:
 	LanguageModelParallelBackoff(){}
-
 	
 	~LanguageModelParallelBackoff();
-
 	bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
 
 VocabIndex GetLmID( const std::string &str ) const;
@@ -91,8 +89,10 @@ VocabIndex GetLmID( const Factor *factor, FactorType ft ) const;
 
 void CreateFactors();
 	
-virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;
-
+float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const;
+FFState *GetNullContextState() const;
+FFState *GetBeginSentenceState() const;
+FFState *NewState(const FFState *from) const;
 	
 };
 

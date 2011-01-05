@@ -31,10 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "LanguageModelSingleFactor.h"
-#include "LanguageModelMultiFactor.h"
 #include "LanguageModelFactory.h"
-#include "LanguageModelDelegate.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
 #include "SentenceStats.h"
@@ -764,8 +761,8 @@ bool StaticData::LoadLanguageModels()
 		{
         LanguageModel* lm = NULL;
         if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-            lm = new LanguageModelDelegate( 
-                      static_cast<LanguageModelSingleFactor*>(languageModelsLoaded[lmVector[i]]));
+            lm = new LanguageModel( 
+                      (languageModelsLoaded[lmVector[i]]));
         } else {
             vector<string>	token		= Tokenize(lmVector[i]);
             if (token.size() != 4 && token.size() != 5 )

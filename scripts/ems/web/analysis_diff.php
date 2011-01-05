@@ -250,12 +250,12 @@ function bleu_diff_annotation() {
      $matched_with_score = string_edit_distance($word_with_score0,$word_with_score1);
      $matched = string_edit_distance($word0,$word1);
 
-     print "<font size=-2>[".$line["id"].":".$line["bleu1"]."]</font> ";
+     print "<font size=-2>[".$id2."-".$line["id"].":".$line["bleu1"]."]</font> ";
      $matched1 = preg_replace('/D/',"",$matched);
      $matched_with_score1 = preg_replace('/D/',"",$matched_with_score);
      bleu_line_diff( $word_with_score1, $matched1, $matched_with_score1 );
 
-     print "<font size=-2>[".$line["id"].":".$line["bleu0"]."]</font> ";     
+     print "<font size=-2>[".$id."-".$line["id"].":".$line["bleu0"]."]</font> ";     
      $matched0 = preg_replace('/I/',"",$matched);
      $matched_with_score0 = preg_replace('/I/',"",$matched_with_score);
      bleu_line_diff( $word_with_score0, $matched0, $matched_with_score0 );

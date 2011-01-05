@@ -2,7 +2,7 @@
 
 function diff() {
   global $experiment;
-  $display = $_GET[run];
+  $display = $_GET["run"];
   sort($display);
   while (list($i,$run) = each($display)) {
     if ($i==0) {
@@ -22,12 +22,15 @@ function compute_diff($base,$change) {
   $parameter_change = load_parameter($change);
   print "<H3>Experiment $change</H3><TABLE>";
   while (list($parameter,$base_value) = each($parameter_base)) {
+    if (!array_key_exists($parameter,$parameter_change)) {
+      $parameter_change[$parameter] = "";
+    }
     if ($base_value != $parameter_change[$parameter]) {
       output_diff_line($parameter,$base_value,$parameter_change[$parameter]);
     }
   }
   while (list($parameter,$change_value) = each($parameter_change)) {
-    if (!$parameter_base[$parameter]) {
+    if (!array_key_exists($parameter,$parameter_base)) {
       output_diff_line($parameter,"",$change_value);
     }
   }

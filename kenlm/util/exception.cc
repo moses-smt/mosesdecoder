@@ -16,7 +16,7 @@ const char *HandleStrerror(int ret, const char *buf) {
 }
 
 // The GNU version.
-const char *HandleStrerror(const char *ret, const char *) {
+const char *HandleStrerror(const char *ret, const char *buf) {
   return ret;
 }
 } // namespace
@@ -24,7 +24,12 @@ const char *HandleStrerror(const char *ret, const char *) {
 ErrnoException::ErrnoException() throw() : errno_(errno) {
   char buf[200];
   buf[0] = 0;
+#ifdef sun
+  const char *add = strerror(errno);
+#else
   const char *add = HandleStrerror(strerror_r(errno, buf, 200), buf);
+#endif
+
   if (add) {
     *this << add << ' ';
   }

@@ -37,8 +37,6 @@ class Vocabulary {
     WordIndex BeginSentence() const { return begin_sentence_; }
     WordIndex EndSentence() const { return end_sentence_; }
     WordIndex NotFound() const { return not_found_; }
-    // FullScoreReturn start index of unused word assignments.
-    WordIndex Available() const { return available_; }
 
     /* Most implementations allow StringPiece lookups and need only override
      * Index(StringPiece).  SRI requires null termination and overrides all
@@ -56,13 +54,13 @@ class Vocabulary {
     // Call SetSpecial afterward.  
     Vocabulary() {}
 
-    Vocabulary(WordIndex begin_sentence, WordIndex end_sentence, WordIndex not_found, WordIndex available) {
-      SetSpecial(begin_sentence, end_sentence, not_found, available);
+    Vocabulary(WordIndex begin_sentence, WordIndex end_sentence, WordIndex not_found) {
+      SetSpecial(begin_sentence, end_sentence, not_found);
     }
 
-    void SetSpecial(WordIndex begin_sentence, WordIndex end_sentence, WordIndex not_found, WordIndex available);
+    void SetSpecial(WordIndex begin_sentence, WordIndex end_sentence, WordIndex not_found);
 
-    WordIndex begin_sentence_, end_sentence_, not_found_, available_;
+    WordIndex begin_sentence_, end_sentence_, not_found_;
 
   private:
     // Disable copy constructors.  They're private and undefined. 
@@ -97,7 +95,7 @@ class Vocabulary {
  * missing these methods, see facade.hh.  
  *
  * This is the fastest way to use a model and presents a normal State class to
- * be included in hypothesis state structure.  
+ * be included in a hypothesis state structure.  
  *
  *
  * OPTION 2: Use the virtual interface below.  

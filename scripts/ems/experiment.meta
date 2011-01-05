@@ -319,6 +319,12 @@ symmetrize-giza
 	rerun-on-change: alignment-symmetrization-method training-options script
 	default-name: model/aligned
 	error: skip=<[1-9]
+build-biconcor
+	in: word-alignment corpus
+	out: biconcor-model
+	default-name: model/biconcor
+	ignore-unless: biconcor
+	error: usage
 build-lex-trans
 	in: word-alignment corpus
 	out: lexical-translation-table
@@ -354,14 +360,14 @@ build-generation
 	ignore-unless: generation-factors
 	default-name: model/generation-table
 create-config
-	in: reordering-table phrase-translation-table generation-table LM:binlm
+	in: reordering-table phrase-translation-table generation-table LM:binlm biconcor-model
 	out: config
 	ignore-if: use-hiero INTERPOLATED-LM:script
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script
 	default-name: model/moses.ini
 	error: Unknown option
 create-config-interpolated-lm
-	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm
+	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm biconcor-model
 	out: config
 	ignore-if: use-hiero
 	ignore-unless: INTERPOLATED-LM:script
@@ -617,6 +623,7 @@ remove-markup
 	in: system-output
 	out: cleaned-output
 	default-name: evaluation/cleaned
+	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
 	template: $moses-script-dir/ems/support/remove-segmenation-markup.perl < IN > OUT
 recase-output

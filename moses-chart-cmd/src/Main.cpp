@@ -83,6 +83,46 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 	return (source ? true : false);
 }
 
+static void PrintFeatureWeight(const FeatureFunction* ff) {
+ 
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    for (size_t i = 0; i < numScoreComps; ++i) {
+      cout << ff->GetScoreProducerDescription() <<  " " 
+           << ff->GetScoreProducerWeightShortName() << " " 
+           << values[i] << endl;
+    }
+  } else {
+    cout << ff->GetScoreProducerDescription() << " " <<
+      ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
+  }
+  
+}
+
+
+static void ShowWeights() {
+  cout.precision(6);
+  const StaticData& staticData = StaticData::Instance();
+  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for (size_t i = 0; i < sff.size(); ++i) {
+    PrintFeatureWeight(sff[i]);
+  }
+  for (size_t i = 0; i < pds.size(); ++i) {
+    PrintFeatureWeight(pds[i]);
+  }
+  for (size_t i = 0; i < gds.size(); ++i) {
+    PrintFeatureWeight(gds[i]);
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    PrintFeatureWeight(slf[i]);
+  }
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -108,6 +148,11 @@ int main(int argc, char* argv[])
 	const StaticData &staticData = StaticData::Instance();
 	if (!StaticData::LoadDataStatic(&parameter))
 		return EXIT_FAILURE;
+    
+    if (parameter.isParamSpecified("show-weights")) {
+      ShowWeights();
+      exit(0);
+    }
 
 	assert(staticData.GetSearchAlgorithm() == ChartDecoding);
 

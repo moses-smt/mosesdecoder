@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_LanguageModelSingleFactor_h
 #define moses_LanguageModelSingleFactor_h
 
-#include "LanguageModel.h"
+#include "LanguageModelImplementation.h"
 #include "Phrase.h"
 
 namespace Moses
@@ -32,7 +32,7 @@ class FactorCollection;
 class Factor;
 
 //! Abstract class for for single factor LM 
-class LanguageModelSingleFactor : public LanguageModel
+class LanguageModelSingleFactor : public LanguageModelImplementation
 {
 protected:	
 	const Factor *m_sentenceStart, *m_sentenceEnd;
@@ -41,8 +41,6 @@ protected:
 	LanguageModelSingleFactor() {}
 
 public:
-  static State UnknownState;
-
 	virtual ~LanguageModelSingleFactor();
 	virtual bool Load(const std::string &filePath
 					, FactorType factorType
@@ -71,6 +69,30 @@ public:
 		return m_factorType;
 	}
 };
+
+// Single factor LM that uses a null pointer state.  
+class LanguageModelPointerState : public LanguageModelSingleFactor
+{
+private:
+  FFState *m_nullContextState;
+  FFState *m_beginSentenceState;
+protected:
+  typedef const void *State;
+
+  LanguageModelPointerState();
+
+  virtual ~LanguageModelPointerState();
+
+  virtual FFState *GetNullContextState() const;
+  virtual FFState *GetBeginSentenceState() const;
+  virtual FFState *NewState(const FFState *from = NULL) const;
+
+  virtual float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const;
+
+  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const = 0;
+};
+
+
 
 }
 

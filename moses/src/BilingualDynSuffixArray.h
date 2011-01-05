@@ -62,8 +62,14 @@ public:
 	bool operator()(const Scores& s1, const Scores& s2) const { 
 		float score1(1), score2(1);
 		int idx1(0), idx2(0);
-		iterate(s1, itr) score1 += (*itr * m_weights.at(idx1++)); 
-		iterate(s2, itr) score2 += (*itr * m_weights.at(idx2++));
+        for (Scores::const_iterator itr = s1.begin(); 
+                itr != s1.end(); ++itr) {
+            (*itr * m_weights.at(idx1++)); 
+        }
+        for (Scores::const_iterator itr = s2.begin();
+            itr != s2.end(); ++itr) {
+            (*itr * m_weights.at(idx2++));
+        }
 		return score1 < score2;
 	}
 private: 
@@ -86,13 +92,12 @@ private:
 	DynSuffixArray* m_trgSA;
 	std::vector<wordID_t>* m_srcCorpus;
 	std::vector<wordID_t>* m_trgCorpus;
-	
-	FactorMask m_inputFactors;
-	FactorMask m_outputFactors;
+  std::vector<FactorType> m_inputFactors;
+  std::vector<FactorType> m_outputFactors;
 
 	std::vector<unsigned> m_srcSntBreaks, m_trgSntBreaks;
 
-	Vocab* m_vocab;
+	Vocab* m_srcVocab, *m_trgVocab;
 	ScoresComp* m_scoreCmp;
 
 	std::vector<SentenceAlignment> m_alignments;
@@ -102,7 +107,8 @@ private:
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
 	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
-		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&);
+		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&,
+    Vocab*);
 	int LoadAlignments(InputFileStream& aligs);
 	int LoadRawAlignments(InputFileStream& aligs);
 	int LoadRawAlignments(string& aligs);

@@ -11,7 +11,7 @@
 namespace Moses
 {
 
-class LanguageModelRemote : public LanguageModelSingleFactor {
+class LanguageModelRemote : public LanguageModelPointerState {
 	private:
 		struct Cache {
 			std::map<const Factor*, Cache> tree;

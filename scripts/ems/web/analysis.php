@@ -33,9 +33,9 @@ function generic_show(field,parameters) {
 }
 function highlight_phrase(sentence,phrase) {
   var input = "input-"+sentence+"-"+phrase;
-  $(input).setStyle({ borderWidth: '3px', borderColor: 'red' });
+  $(input).setStyle({ borderColor: 'red' });
   var output = "output-"+sentence+"-"+phrase;
-  $(output).setStyle({ borderWidth: '3px', borderColor: 'red' });
+  $(output).setStyle({ borderColor: 'red' });
 }
 function show_word_info(sentence,cc,tc,te) {
   var info = "info-"+sentence;
@@ -44,14 +44,30 @@ function show_word_info(sentence,cc,tc,te) {
 }
 function lowlight_phrase(sentence,phrase) {
   var input = "input-"+sentence+"-"+phrase;
-  $(input).setStyle({ borderWidth: '1px', borderColor: 'black' });
+  $(input).setStyle({ borderColor: 'black' });
   var output = "output-"+sentence+"-"+phrase;
-  $(output).setStyle({ borderWidth: '1px', borderColor: 'black' });
+  $(output).setStyle({ borderColor: 'black' });
 }
 function hide_word_info(sentence) {
   var info = "info-"+sentence;
   $(info).setStyle({ opacity: 0 });
 }
+function show_biconcor(sentence,phrase) {
+  var div = "biconcor-"+sentence;
+  var url = '?analysis=biconcor'
+            + '&setup=<?php print $setup ?>&id=<?php print get_biconcor_version($dir,$id); ?>&set=<?php print $set ?>'
+	    + '&sentence=' + sentence
+            + '&phrase=' + encodeURIComponent(phrase);
+  document.getElementById(div).innerHTML = "<center><img src=\"spinner.gif\" width=48 height=48></center>";
+  $(div).setStyle({ borderStyle: 'solid', 'border-width': '3px', borderColor: 'black' });
+  new Ajax.Updater(div, url, { method: 'get', evalScripts: true });
+}
+function close_biconcor(sentence) {
+  var div = "biconcor-"+sentence;
+  document.getElementById(div).innerHTML = "";
+  $(div).setStyle({ borderStyle: 'none', 'border-width': '0px', borderColor: 'white' });
+}
+
 </script>
 </head>
 <body>
@@ -586,7 +602,7 @@ function bleu_show() {
 
 // annotated sentences core: reads data, sorts sentences, displays them
 function sentence_annotation() {
-  global $set,$id,$dir;
+  global $set,$id,$dir,$biconcor;
 
   // load data
   $data = file("$dir/evaluation/$set.analysis.$id/bleu-annotation");
@@ -635,19 +651,19 @@ function sentence_annotation() {
 	  if ($sentence != $last_sentence) { $span = 0; }
 	  $last_sentence = $sentence;
 	  $segmentation[$sentence][$span]["brackets"] = $brackets;
-	  $segmentation[$sentence][$span]["nt"] = $nt;
+#	  $segmentation[$sentence][$span]["nt"] = $nt;
 	  $segmentation[$sentence][$span]["words"] = rtrim($words);
 	  if ($nt != "") { $nt_count[$nt]++; }
 	  $span++;
       }
       $hierarchical = 1;
-      if (count($nt_count) <= 2) {
-	  foreach ($segmentation as $sentence => $segmentation_span) {
-	      foreach ($segmentation_span as $span => $type) {
-		  $segmentation[$sentence][$span]["nt"]="";
-	      }
-	  }
-      }
+#      if (count($nt_count) <= 2) {
+#	  foreach ($segmentation as $sentence => $segmentation_span) {
+#	      foreach ($segmentation_span as $span => $type) {
+#		  $segmentation[$sentence][$span]["nt"]="";
+#	      }
+#	  }
+#     }
   }
   if (file_exists("$dir/evaluation/$set.analysis.$id/output-tree")) {
       $data = file("$dir/evaluation/$set.analysis.$id/output-tree");
@@ -689,6 +705,8 @@ function sentence_annotation() {
 	  $n++;
       }
   } 
+
+  $biconcor = get_biconcor_version($dir,$id);
 
   // sort
   global $sort;
@@ -739,6 +757,10 @@ function sentence_annotation() {
      }
      if ($input) {
        print "<div id=\"info-$i\" style=\"border-color:black; background:#ffff80; opacity:0; width:100%; border:1px;\">8364 occ. in corpus, 56 translations, entropy: 5.54</div>\n";
+       if ($biconcor) {
+	   //print "<div id=\"biconcor-$i\" style=\"display: none;\">xxx</div>";
+	   print "<div id=\"biconcor-$i\" class=\"biconcor\">xxx</div>";
+       }
        if ($hierarchical) {
          sentence_annotation_hierarchical("#".$line["id"],$line["id"],$input[$line["id"]],$segmentation[$line["id"]],"in");
        }
@@ -761,8 +783,25 @@ function sentence_annotation() {
   }
 }
 
+function coverage($coverage_vector) {
+  # get information from line in input annotation file
+  $coverage = array();
+  foreach (split(" ",$coverage_vector) as $item) {
+    if (preg_match("/[\-:]/",$item)) {
+      list($from,$to,$corpus_count,$ttable_count,$ttable_entropy) = preg_split("/[\-:]/",$item);
+      $coverage[$from][$to]["corpus_count"] = $corpus_count;
+      $coverage[$from][$to]["ttable_count"] = $ttable_count;
+      $coverage[$from][$to]["ttable_entropy"] = $ttable_entropy;
+    }
+  }
+  $word = split(" ",$words);
+
+  return $coverage;
+}
+
 // annotate an inpute sentence
 function input_annotation($sentence,$input,$segmentation) {
+  global $biconcor;
   list($words,$coverage_vector) = split("\t",$input);
 
   # get information from line in input annotation file
@@ -840,7 +879,7 @@ function input_annotation($sentence,$input,$segmentation) {
                   $highlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='#ffff80';";
                   $lowlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='".coverage_color($coverage[$j][$j])."';";
 		}
-	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,".$coverage[$from][$to]["corpus_count"].",".$coverage[$from][$to]["ttable_count"].",".$coverage[$from][$to]["ttable_entropy"]."); this.style.backgroundColor='#ffff80';$highlightwords\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';$lowlightwords\">";
+	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,".$coverage[$from][$to]["corpus_count"].",".$coverage[$from][$to]["ttable_count"].",".$coverage[$from][$to]["ttable_entropy"]."); this.style.backgroundColor='#ffff80';$highlightwords\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';$lowlightwords;\"".($biconcor?" onclick=\"show_biconcor($sentence,'".htmlspecialchars($phrase)."');\"":"").">";
             }
             print "</div></td>";
 	    $from += $size-1;
@@ -868,7 +907,7 @@ function input_annotation($sentence,$input,$segmentation) {
 	  $color = '#ffffff';
           $cc = 0; $tc = 0; $te = 0;
         }
-        print "<span id=\"inputword-$sentence-$j\" style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,$cc,$tc,$te); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\">$word[$j]</span>";
+        print "<span id=\"inputword-$sentence-$j\" style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,$cc,$tc,$te); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\"".($biconcor?" onclick=\"show_biconcor($sentence,'".htmlspecialchars($word[$j])."');\"":"").">$word[$j]</span>";
         if ($segmentation && array_key_exists($j,$segmentation["input_end"])) {
           print "</span>";
         }
@@ -945,7 +984,10 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
  function sentence_annotation_hierarchical($info,$sentence,$sequence,$segmentation,$in_out) {
     $In_Out = $in_out == "out" ? "Out" : "In";
 
-    $word = split(" ",$sequence);
+    list($words,$coverage_vector) = split("\t",$input);
+    $coverage = coverage($sequence);
+    $word = preg_split("/\s/",$sequence);
+
     $color = array("#ffe0e0","#f0e0ff","#e0e0ff","#c0c0ff","#a0a0ff");
     #$color = array("#FFC0C0","#FFC0FF","#C0C0FF","#C0FFFF","#C0FFC0");
     #$color = array("#c0c0c0","#e0e0ff","#b0b0ff","#8080ff","#4040ff");
@@ -983,7 +1025,9 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
 	for($w=0;$w<count($span_word);$w++) {
 	    if ($w > 0) { print " "; }
 	    if ($in_out == "in") {
+	        #print "<span style=\"background-color: ".coverage_color($coverage[$word_count][$word_count]).";\">";
 		print $word[$word_count];
+		#print "</span>";
 	    }
 	    else {
 	      list($surface,$correct) = split("\|", $word[$word_count]);
@@ -999,4 +1043,23 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
 	print "</div>"; # enclosing
     }
     print "</td></tr></table>\n";
+}
+
+function biconcor($query) {
+    global $set,$id,$dir;
+    $sentence = $_GET['sentence'];
+    $biconcor = get_biconcor_version($dir,$id);
+    print "<center>
+<form action=\"...\" method=get>
+<img src=\"close.gif\" width=17 height=17 onClick=\"close_biconcor($sentence);\">
+<input width=20 value=\"$query\">
+<input type=submit value=\"look up\">
+</form>
+<div class=\"biconcor-content\">";
+    $cmd = "./biconcor -l $dir/model/biconcor.$biconcor -q ".escapeshellarg($query)." 2>/dev/null";
+    # print $cmd."<p>";
+    system($cmd);
+    # print "<p>done.";
+    print "</div></center>";
+
 }

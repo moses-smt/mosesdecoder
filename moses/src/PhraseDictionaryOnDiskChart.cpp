@@ -39,11 +39,6 @@ namespace Moses
 	{
 		const StaticData &staticData = StaticData::Instance();
 		size_t rulesLimit = StaticData::Instance().GetRuleLimit();
-
-		// source phrase
-		Phrase *cachedSource = new Phrase(src.GetSubString(range));
-		
-		m_chartTargetPhraseColl.push_back(&outColl);
 		
 		size_t relEndPos = range.GetEndPos() - range.GetStartPos();
 		size_t absEndPos = range.GetEndPos();
@@ -234,7 +229,6 @@ namespace Moses
 																								 ,m_weight
 																								 ,m_wpProducer
 																								 ,*m_languageModels
-																								 ,*cachedSource
 																								 ,m_filePath
 																								 , m_dbWrapper.GetVocab());
 							

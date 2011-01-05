@@ -10,7 +10,6 @@ using namespace std;
 
 namespace Moses
 {
-
 bool LanguageModelInternal::Load(const std::string &filePath
 																, FactorType factorType
 																, size_t nGramOrder)

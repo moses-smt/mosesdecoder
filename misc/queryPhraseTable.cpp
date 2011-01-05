@@ -46,10 +46,10 @@ int main(int argc, char **argv) {
 		srcphrase = Moses::Tokenize<std::string>(line);
 
 		std::vector<Moses::StringTgtCand> tgtcands;
-		std::vector<Moses::StringWordAlignmentCand> src_wa, tgt_wa;
+		std::vector<std::string> wordAlignment;
 
 		if(useAlignments)
-			ptree.GetTargetCandidates(srcphrase, tgtcands, src_wa, tgt_wa);
+			ptree.GetTargetCandidates(srcphrase, tgtcands, wordAlignment);
 		else
 			ptree.GetTargetCandidates(srcphrase, tgtcands);
 
@@ -60,19 +60,7 @@ int main(int argc, char **argv) {
 			std::cout << " |||";
 
 			if(useAlignments) {
-				for(uint j = 0; j < src_wa[i].second.size(); j++)
-					if(src_wa[i].second[j] == "-1")
-						std::cout << " ()";
-					else
-						std::cout << " (" << src_wa[i].second[j] << ")";
-				std::cout << " |||";
-
-				for(uint j = 0; j < tgt_wa[i].second.size(); j++)
-					if(tgt_wa[i].second[j] == "-1")
-						std::cout << " ()";
-					else
-						std::cout << " (" << tgt_wa[i].second[j] << ")";
-				std::cout << " |||";
+				std::cout << " " << wordAlignment[i] << " |||";
 			}
 
 			for(uint j = 0; j < tgtcands[i].second.size(); j++)

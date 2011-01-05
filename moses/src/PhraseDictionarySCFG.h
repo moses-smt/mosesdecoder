@@ -24,7 +24,6 @@
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNodeSCFG.h"
-#include "ChartTranslationOptionList.h"
 #include "CellCollection.h"
 
 namespace Moses

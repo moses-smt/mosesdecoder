@@ -8,8 +8,6 @@
 #include <typeinfo>
 #include <stdint.h>
 
-#define iterate(c, i) for(typeof(c.begin()) i = c.begin(); i != c.end(); ++i)
-#define piterate(c, i) for(typeof(c->begin()) i = c->begin(); i != c->end(); ++i)
 #define THREADED false
 #define THREAD_MAX 2
 #define MAX_NGRAM_ORDER 8
