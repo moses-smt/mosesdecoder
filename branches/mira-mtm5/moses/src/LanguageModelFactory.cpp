@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #	include "LanguageModelKen.h"
 #endif
 
+#include "LanguageModel.h"
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
@@ -62,7 +63,7 @@ namespace LanguageModelFactory
 																		, const std::string &languageModelFile
 																		, int dub)
 	{
-	  LanguageModel *lm = NULL;
+	  LanguageModelImplementation *lm = NULL;
 	  switch (lmImplementation)
 	  {
 		  case RandLM:
@@ -95,7 +96,12 @@ namespace LanguageModelFactory
 				break;
 			case Ken:
 				#ifdef LM_KEN
-					lm = new LanguageModelKen();
+					lm = ConstructKenLM(languageModelFile, false);
+				#endif
+				break;
+			case LazyKen:
+				#ifdef LM_KEN
+					lm = ConstructKenLM(languageModelFile, true);
 				#endif
 				break;
 			case Joint:
@@ -144,7 +150,7 @@ namespace LanguageModelFactory
 	  	}
 	  }
 
-	  return lm;
+	  return new LanguageModel(lm);
 	}
 }
 

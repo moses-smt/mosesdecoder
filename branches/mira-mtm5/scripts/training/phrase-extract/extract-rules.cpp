@@ -99,6 +99,7 @@ int main(int argc, char* argv[])
              << " | --MaxSymbolsTarget[" << options.maxSymbolsTarget << "]"
              << " | --MaxSymbolsSource[" << options.maxSymbolsSource << "]"
              << " | --MaxNonTerm[" << options.maxNonTerm << "]"
+             << " | --MaxScope[" << options.maxScope << "]"
              << " | --SourceSyntax | --TargetSyntax"
              << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting ]\n";
         exit(1);
@@ -164,6 +165,14 @@ int main(int argc, char* argv[])
             options.maxNonTerm = atoi(argv[++i]);
             if (options.maxNonTerm < 1) {
                 cerr << "extract error: --MaxNonTerm should be at least 1" << endl;
+                exit(1);
+            }
+        }
+        // maximum scope (see Hopkins and Langmead (2010))
+        else if (strcmp(argv[i],"--MaxScope") == 0) {
+            options.maxScope = atoi(argv[++i]);
+            if (options.maxScope < 0) {
+                cerr << "extract error: --MaxScope should be at least 0" << endl;
                 exit(1);
             }
         }
@@ -392,7 +401,7 @@ void extractRules( SentenceAlignmentWithSyntax &sentence ) {
                     // are rules not allowed to start non-terminals?
                     int initStartT = options.nonTermFirstWord ? startT : startT + 1;
 
-                    HoleCollection holeColl; // empty hole collection
+                    HoleCollection holeColl(startS, endS); // empty hole collection
                     addHieroRule(sentence, startT, endT, startS, endS,
                             ruleExist, holeColl, 0, initStartT,
                             endT-startT+1, endS-startS+1);
@@ -733,6 +742,11 @@ void addHieroRule( SentenceAlignmentWithSyntax &sentence
 
                 // if consecutive non-terminals are not allowed, also check for source
                 if (!options.nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
+                    continue;
+
+                // check that rule scope would not exceed limit if sourceHole
+                // were added
+                if (holeColl.Scope(sourceHole) > options.maxScope)
                     continue;
 
                 // require that at least one aligned word is left (unless there are no words at all)

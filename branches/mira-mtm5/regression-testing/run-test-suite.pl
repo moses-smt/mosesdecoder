@@ -10,6 +10,8 @@ use Getopt::Long;
 my @tests = qw (
   chart.target-syntax
   chart.hierarchical
+  chart.target-syntax.ondisk
+  chart.hierarchical.ondisk
   phrase.basic-surface-only
   phrase.ptable-filtering
   phrase.multi-factor
@@ -25,6 +27,8 @@ my @tests = qw (
   phrase.lexicalized-reordering-cn
   phrase.consensus-decoding-surface
   phrase.continue-partial-translation
+  phrase.show-weights.lex-reorder
+  phrase.show-weights
 );
 #  xml-markup
 

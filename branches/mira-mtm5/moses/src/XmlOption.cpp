@@ -279,13 +279,13 @@ bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, Reor
 				string span = ParseXmlTagAttribute(tagContent,"span");
 				if (! span.empty()) 
 				{
-					vector<string> ij = Tokenize(span, ",");
+					vector<string> ij = Tokenize(span, "-");
 					if (ij.size() != 1 && ij.size() != 2) {
-						TRACE_ERR("ERROR: span attribute must be of the form \"i,j\" or \"i\": " << line << endl);
+						TRACE_ERR("ERROR: span attribute must be of the form \"i-j\" or \"i\": " << line << endl);
 						return false;
 					}
 					startPos = atoi(ij[0].c_str());
-					if (ij.size() == 1) endPos = startPos;
+					if (ij.size() == 1) endPos = startPos + 1;
 					else endPos = atoi(ij[1].c_str()) + 1;
 				}
 

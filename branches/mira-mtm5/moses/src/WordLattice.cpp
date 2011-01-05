@@ -66,13 +66,15 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 			std::vector<float>::iterator probsIterator;
 			data[i][j].second = std::vector<float>(0);
 			for(probsIterator = alt.first.second.begin(); probsIterator < alt.first.second.end(); probsIterator++) {
-				if (*probsIterator < 0.0f) { 
-				  TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n"); 
-				  //*probsIterator = 0.0f;
-				}
-				if (*probsIterator > 1.0f) { 
-				  TRACE_ERR("WARN: probability > 1: " << *probsIterator << "\n"); 
-				  //*probsIterator = 1.0f;
+				IFVERBOSE(1) {
+					if (*probsIterator < 0.0f) { 
+					  TRACE_ERR("WARN: neg probability: " << *probsIterator << "\n"); 
+					  //*probsIterator = 0.0f;
+					}
+					if (*probsIterator > 1.0f) { 
+					  TRACE_ERR("WARN: probability > 1: " << *probsIterator << "\n"); 
+					  //*probsIterator = 1.0f;
+					}
 				}
 				data[i][j].second.push_back(std::max(static_cast<float>(log(*probsIterator)), LOWEST_SCORE));
 			}

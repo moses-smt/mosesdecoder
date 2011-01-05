@@ -5,8 +5,8 @@ use File::Basename;
 use File::Temp qw/tempfile/;
 use Getopt::Long "GetOptions";
 
-my $COLLINS = "/home/pkoehn/bin/COLLINS-PARSER";
-my $MXPOST  = "/home/pkoehn/bin/mxpost";
+my $COLLINS = "/exports/home/s0565741/work/bin/COLLINS-PARSER";
+my $MXPOST  = "/exports/home/s0565741/work/bin/mxpost";
 my $TMPDIR = "tmp";
 my $KEEP_TMP = 0;
 my $RAW = undef;
@@ -24,7 +24,7 @@ GetOptions(
 
 # parser settings
 my $MaxChar=10000;
-my $MaxWord=200;
+my $MaxWord=120;
 my $ParserBin="$COLLINS/code/parser";
 my $ParserEvn="$COLLINS/models/model2/events.gz";
 my $ParserGrm="$COLLINS/models/model2/grammar";
@@ -37,8 +37,13 @@ $pipeline .= "perl -ne 'tr/\\x20-\\x7f//cd; print \$_.\"\\n\";' | ";
 $pipeline .= "$MXPOST/mxpost $MXPOST/tagger.project |";
 
 open(TAG,$pipeline);
-open(PARSER_IN,">$tmpfile");
+my $sentence_count=0;
 while(<TAG>) {
+  if ($sentence_count % 2000 == 0) {
+    close(PARSER_IN) if $sentence_count;
+    open(PARSER_IN,sprintf(">%s.%05d",$tmpfile,$sentence_count/2000));
+  }
+  $sentence_count++;
   chop;
 
   # convert tagged sequence into parser format
@@ -53,14 +58,16 @@ while(<TAG>) {
 close(TAG);
 close(PARSER_IN);
 
-# parse and process output of parser
-`rm $RAW` if defined($RAW) && -e $RAW;
-$pipeline = "gunzip -c $ParserEvn | $ParserBin $tmpfile $ParserGrm 10000 1 1 1 1 |";
-$pipeline .= "tee -a \"$RAW\" |" if defined($RAW);
+# parse
+for(my $i=0;$i * 2000 < $sentence_count;$i++) {
+  my $i_formatted = sprintf("%05d",$i);
+  `gunzip -c $ParserEvn | $ParserBin $tmpfile.$i_formatted $ParserGrm 10000 1 1 1 1 > $tmpfile.$i_formatted.out`;
+}
 
+# process output of parser
 my $DEBUG = 0;
 my $DEBUG_SPACE = "                                                       ";
-open(PARSER,$pipeline);
+open(PARSER,"cat $tmpfile.?????.out|");
 while(my $line = <PARSER>) {
     next unless $line =~ /^\(/;
     if ($line =~ /SentenceTooLong/) {
@@ -112,7 +119,7 @@ while(my $line = <PARSER>) {
     my $first=1;
     foreach (@OUT) {
         print " " unless $first;
-        s/\\//;
+	# s/\\//; #why?
         print $_;
         $first = 0;
     }
@@ -129,14 +136,15 @@ sub escape {
 
 sub check_length {
     my ($line) = @_;
-    my ($ret,$numc,$numw,@words);
+    my ($numc,$numw,@words);
+
+    return 0 if $line =~ /^\d+ [^a-z0-9]+$/i || $line eq "0"  || $line eq "0 ";
 
     $numc = length($line);
     @words = split(" ",$line);
     $numw = ($#words+1)/2;
 
-    $ret = (($numc <= $MaxChar) && ($numw <= $MaxWord));
-    $ret;
+    return ($numc <= $MaxChar) && ($numw <= $MaxWord);
 }
 
 sub conv_posfmt {

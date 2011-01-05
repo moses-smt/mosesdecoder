@@ -23,38 +23,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_LanguageModelKen_h
 
 #include <string>
-#include <vector>
-#include "Factor.h"
-#include "TypeDef.h"
-#include "Util.h"
+
 #include "LanguageModelSingleFactor.h"
-#include "../../kenlm/lm/ngram.hh"
 
 namespace Moses
 {
-class Phrase;
+// Doesn't actually load; moses wants the Load method for that.  It needs the file to autodetect binary format.  
+LanguageModelSingleFactor *ConstructKenLM(const std::string &file, bool lazy);
 	
-/** Implementation of single factor LM using Ken's code.
-*/
-class LanguageModelKen : public LanguageModelSingleFactor
-{
-protected:
-  lm::ngram::Model *m_ngram;
-	
-public:
-	LanguageModelKen();
-	~LanguageModelKen();
-	bool Load(const std::string &filePath
-					, FactorType factorType
-					, size_t nGramOrder);
-
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
-  lm::WordIndex GetLmID(const std::string &str) const;
-
-  void CleanUpAfterSentenceProcessing() {}
-  void InitializeBeforeSentenceProcessing() {}
-
-};
 };
 
 

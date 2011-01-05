@@ -88,7 +88,6 @@ training/wrappers/make-factor-pos.tree-tagger.perl
 training/wrappers/make-factor-stem.perl
 recaser/train-recaser.perl
 recaser/recase.perl
-recaser/detokenizer.perl
 recaser/truecase.perl
 recaser/detruecase.perl
 recaser/train-truecaser.perl

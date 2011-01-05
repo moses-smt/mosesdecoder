@@ -26,8 +26,8 @@ my $dbg="";
 my $version="";
 my $qsubname="WR$$";
 my $cmd="";
-my $cmdout="";
-my $cmderr="";
+my $cmdout=undef;
+my $cmderr=undef;
 my $parameters="";
 my $old_sge = 0; # assume grid engine < 6.0
 
@@ -77,8 +77,10 @@ sub usage(){
 #printparameters
 sub print_parameters(){
   print STDERR "command: $cmd\n";
-  print STDERR "file for stdout: $cmdout\n";
-  print STDERR "file for stderr: $cmderr\n";
+  if (defined($cmdout)){ print STDERR "file for stdout: $cmdout\n"; }
+  else { print STDERR "file for stdout is not defined, stdout is discarded\n"; }
+  if (defined($cmderr)){ print STDERR "file for stdout: $cmderr\n"; }
+  else { print STDERR "file for stderr is not defined, stderr is discarded\n"; }
   print STDERR "Qsub name: $qsubname\n";
   print STDERR "Queue parameters: $queueparameters\n";
   print STDERR "parameters directly passed to cmd: $parameters\n";
@@ -87,7 +89,7 @@ sub print_parameters(){
 
 #script creation
 sub preparing_script(){
-  my $scriptheader="\#\!/bin/bash\n# the above line is ignored by qsub!\n\n";
+  my $scriptheader="\#\!/bin/bash\n# the above line is ignored by qsub, unless parameter \"-b yes\" is set!\n\n";
   $scriptheader.="uname -a\n\n";
 
   $scriptheader.="cd $workingdir\n\n";
@@ -136,8 +138,10 @@ preparing_script();
 
 my $maysync = $old_sge ? "" : "-sync y";
 
-# submit the main job
-my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname $jobscript > $jobscript.log 2>&1";
+# create the qsubcmd to submit to the queue with the parameter "-b yes"
+my $qsubcmd="qsub $queueparameters $maysync -V -o $qsubout -e $qsuberr -N $qsubname -b yes $jobscript > $jobscript.log 2>&1";
+
+#run the qsubcmd 
 safesystem($qsubcmd) or die;
 
 #getting id of submitted job
@@ -213,7 +217,7 @@ sub kill_all_and_quit(){
 sub remove_temporary_files(){
   #removing temporary files
 
-  unlink("${jobscript}.csh");
+  unlink("${jobscript}");
   unlink("${jobscript}.log");
   unlink("$qsubout");
   unlink("$qsuberr");

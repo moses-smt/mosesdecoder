@@ -160,10 +160,8 @@ public:
 
 		// get target phrases in string representation
 		std::vector<StringTgtCand> cands;
-		std::vector<StringWordAlignmentCand> swacands;
-		std::vector<StringWordAlignmentCand> twacands;
-//		m_dict->GetTargetCandidates(srcString,cands);
-		m_dict->GetTargetCandidates(srcString,cands,swacands,twacands);
+		std::vector<std::string> wacands;
+		m_dict->GetTargetCandidates(srcString,cands,wacands);
 		if(cands.empty()) 
 		{
 			return 0;
@@ -179,16 +177,14 @@ public:
 			
 			StringTgtCand::first_type const& factorStrings=cands[i].first;
 			StringTgtCand::second_type const& probVector=cands[i].second;
-			//StringWordAlignmentCand::second_type const& swaVector=swacands[i].second;
-			//StringWordAlignmentCand::second_type const& twaVector=twacands[i].second;
 			
 			std::vector<float> scoreVector(probVector.size());
 			std::transform(probVector.begin(),probVector.end(),scoreVector.begin(),
 										 TransformScore);
 			std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),
 										 FloorScore);
-			CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,&src);
-			//CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,swaVector,twaVector,&src);
+			//CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,&src);
+			CreateTargetPhrase(targetPhrase,factorStrings,scoreVector,wacands[i],&src);
 			costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
 			tCands.push_back(targetPhrase);
 		}
@@ -278,6 +274,15 @@ public:
 
 	};
 
+	void CreateTargetPhrase(TargetPhrase& targetPhrase,
+													StringTgtCand::first_type const& factorStrings,
+													StringTgtCand::second_type const& scoreVector,
+													const std::string& alignmentString, 
+													Phrase const* srcPtr=0) const
+	{
+		CreateTargetPhrase(targetPhrase, factorStrings, scoreVector, srcPtr);
+		targetPhrase.SetAlignmentInfo(alignmentString);
+	}	
 
 	
 	void CreateTargetPhrase(TargetPhrase& targetPhrase,
@@ -296,8 +301,6 @@ public:
 		}
 		targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
-		
-//		targetPhrase.CreateAlignmentInfo("???", "???", 44);
 	}
 	
 	

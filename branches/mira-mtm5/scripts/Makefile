@@ -8,8 +8,6 @@ DS?=$(shell date '+%Y%m%d')
 # Set TARGETDIR to directory where you want the compiled scripts to be copied
 # to.
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
-# The values here are just the defaults in case your environment does not set
-# them.
 TARGETDIR=/Users/hieuhoang/temp
 BINDIR=/Users/hieuhoang/temp
 
@@ -26,14 +24,14 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 all: compile
 
-SUBDIRS=phrase-extract symal mbr lexical-reordering
-SUBDIRS_CLEAN=$(SUBDIRS) memscore
+SUBDIRS=training/phrase-extract training/symal training/mbr training/lexical-reordering ems/biconcor
+SUBDIRS_CLEAN=$(SUBDIRS) training/memscore
 
 compile: compile-memscore
 	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
-	  $(MAKE) -C training/$$subdir || exit 1; \
+	  $(MAKE) -C $$subdir || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
 	done
@@ -50,7 +48,7 @@ compile-memscore:
 clean:
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS_CLEAN); do \
-	  $(MAKE) -C training/$$subdir clean || exit 1; \
+	  $(MAKE) -C $$subdir clean || exit 1; \
 	  echo "### Compiler $$subdir"; \
 	  cd $$pwd; \
 	done

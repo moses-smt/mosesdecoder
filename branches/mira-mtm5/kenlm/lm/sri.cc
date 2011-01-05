@@ -31,8 +31,7 @@ void Vocabulary::FinishedLoading() {
   SetSpecial(
     sri_->ssIndex(),
     sri_->seIndex(),
-    sri_->unkIndex(),
-    sri_->highIndex() + 1);
+    sri_->unkIndex());
 }
 
 namespace {

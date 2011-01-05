@@ -5,7 +5,7 @@ use Getopt::Long "GetOptions";
 
 my $MAX_LENGTH = 4;
 
-my ($system,$segmentation,$reference,$dir,$input,$corpus,$ttable,$hierarchical);
+my ($system,$segmentation,$reference,$dir,$input,$corpus,$ttable,$hierarchical,$output_corpus,$alignment,$biconcor);
 if (!&GetOptions('system=s' => \$system, # raw output from decoder
                  'reference=s' => \$reference, # tokenized reference
                  'dir=s' => \$dir, # directory for storing results
@@ -13,9 +13,12 @@ if (!&GetOptions('system=s' => \$system, # raw output from decoder
                  'segmentation=s' => \$segmentation, # system output with segmentation markup
                  'input-corpus=s' => \$corpus, # input side of parallel training corpus
                  'ttable=s' => \$ttable, # phrase translation table used for decoding
+                 'output-corpus=s' => \$output_corpus, # output side of parallel training corpus
+                 'alignment-file=s' => \$alignment, # alignment of parallel corpus
+                 'biconcor=s' => \$biconcor, # binary for bilingual concordancer
 		 'hierarchical' => \$hierarchical) || # hierarchical model?
     !defined($dir)) {
-	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-segmentation FILE]");	
+	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-segmentation FILE] [-output-corpus FILE] [-alignment-file FILE] [-biconcor BIN]");	
 }
 
 `mkdir -p $dir`;
@@ -82,6 +85,11 @@ if (defined($ttable) || defined($corpus)) {
   &ttable_coverage() if defined($ttable);
   &corpus_coverage() if defined($corpus);
   &input_annotation();
+}
+
+# bilingual concordance -- not used by experiment.perl
+if (defined($corpus) && defined($output_corpus) && defined($alignment) && defined($biconcor)) {
+  `$biconcor -s $dir/biconcor -c $corpus -t $output_corpus -a $alignment`;
 }
 
 sub best_matches {
@@ -208,6 +216,9 @@ sub ttable_coverage {
   if (! -e $ttable && -e $ttable.".gz") {
     open(TTABLE,"gzip -cd $ttable.gz|");
   }
+  elsif ($ttable =~ /.gz$/) {
+    open(TTABLE,"gzip -cd $ttable|");
+  }
   else {
     open(TTABLE,$ttable) or die "Can't read ttable $ttable";
   }
@@ -219,7 +230,7 @@ sub ttable_coverage {
     my @COLUMN = split(/ \|\|\| /);
     my ($in,$out,$scores) = @COLUMN;
     # handling hierarchical
-    $in =~ s/\[[^ \]]+\]$//; # remove lhs nt
+    $in =~ s/ \[[^ \]]+\]$//; # remove lhs nt
     next if $in =~ /\[[^ \]]+\]\[[^ \]]+\]/; # only consider flat rules
     $scores = $COLUMN[4] if scalar @COLUMN == 5;
     my @IN = split(/ /,$in);
@@ -255,6 +266,7 @@ sub compute_entropy {
   }
   my $entropy = 0;
   foreach my $p (@_) {
+    next if $p == 0;
     $entropy -= ($p/$z)*log($p/$z)/log(2);
   }
   return $entropy;
@@ -465,7 +477,7 @@ sub hierarchical_segmentation {
     open(OUTPUT_TREE,">$dir/output-tree");
     open(NODE,">$dir/node");
     while(<TRACE>) {
-	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\d\- ]*): pC=[\d\.\-e]+, c=/ || die("cannot scan line $_");
+	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ || die("cannot scan line $_");
 	my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
 	if ($last_sentence >= 0 && $sentence != $last_sentence) {
 	    &hs_process($last_sentence,\@DERIVATION,\%STATS);
@@ -481,7 +493,7 @@ sub hierarchical_segmentation {
 	@{$ITEM{'rule_rhs'}} = split(/ /,$rule_rhs);
 	
 	foreach (split(/ /,$alignment)) {
-		/(\d+)\-(\d+)/ || die("funny alignment: $_\n");
+		/(\d+)[\-,](\d+)/ || die("funny alignment: $_\n");
 		$ITEM{'alignment'}{$2} = $1; # target non-terminal to source span
 		$ITEM{'alignedSpan'}{$1} = 1;
 	}
@@ -528,12 +540,14 @@ sub hs_process {
     my $x=0;
     while(1) {
 	my $RULE = shift @{$DERIVATION};
-	if ($$RULE{'rule_lhs'} eq "S" && 
-	    scalar(@{$$RULE{'rule_rhs'}}) == 2 &&
-	    $$RULE{'rule_rhs'}[0] eq "S" &&
-	    $$RULE{'rule_rhs'}[1] eq "X") {
+	if (scalar(@{$$RULE{'rule_rhs'}}) == 2 &&
+	     ($$RULE{'rule_lhs'} eq "S" && 
+	      $$RULE{'rule_rhs'}[0] eq "S" &&
+	      $$RULE{'rule_rhs'}[1] eq "X") ||
+	     ($$RULE{'rule_lhs'} eq "Q" && 
+	      $$RULE{'rule_rhs'}[0] eq "Q")) {
 	    unshift @{$GLUE_RULE{'spans'}},$$RULE{'spans'}[1];
-	    push @{$GLUE_RULE{'rule_rhs'}}, "X";
+	    push @{$GLUE_RULE{'rule_rhs'}}, $$RULE{'rule_rhs'}[1];
 	    $GLUE_RULE{'alignment'}{$x} = $x;
 	    $GLUE_RULE{'alignedSpan'}{$x} = 1;
 	    $x++;

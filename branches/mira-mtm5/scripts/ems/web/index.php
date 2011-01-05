@@ -13,6 +13,7 @@ function head($title) {
 <script language="javascript" src="/javascripts/scriptaculous.js"></script>
 <script language="javascript" src="hierarchical-segmentation.js"></script>
 <link href="hierarchical-segmentation.css" rel="stylesheet" type="text/css">
+<link href="bilingual-concordance.css" rel="stylesheet" type="text/css">
 </head>
 <body><h2>'.$title."</h2>\n";
 }
@@ -35,6 +36,7 @@ if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
     else if ($action == "PrecisionRecallDetails_show") { precision_recall_details(); }
     else if ($action == "CoverageDetails_show") { coverage_details(); }
     else if ($action == "SegmentationSummary_show") { segmentation_summary(); }
+    else if ($action == "biconcor") { biconcor($_GET["phrase"]); }
     else { print "ERROR! $action"; }
   }
   else if (array_key_exists("analysis_diff_home",$_GET)) {

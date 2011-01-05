@@ -21,6 +21,7 @@
 #ifndef HOLECOLLECTION_H_INCLUDED_
 #define HOLECOLLECTION_H_INCLUDED_
 
+#include <set>
 #include <vector>
 
 #include "Hole.h"
@@ -30,13 +31,26 @@ class HoleCollection
     protected:
         HoleList m_holes;
         std::vector<Hole*> m_sortedSourceHoles;
+        std::set<int> m_sourceHoleStartPoints;
+        std::set<int> m_sourceHoleEndPoints;
+        int m_scope;
+        int m_sourcePhraseStart;
+        int m_sourcePhraseEnd;
 
     public:
-        HoleCollection()
+        HoleCollection(int sourcePhraseStart, int sourcePhraseEnd)
+          : m_scope(0)
+          , m_sourcePhraseStart(sourcePhraseStart)
+          , m_sourcePhraseEnd(sourcePhraseEnd)
         {}
 
         HoleCollection(const HoleCollection &copy)
           : m_holes(copy.m_holes)
+          , m_sourceHoleStartPoints(copy.m_sourceHoleStartPoints)
+          , m_sourceHoleEndPoints(copy.m_sourceHoleEndPoints)
+          , m_scope(copy.m_scope)
+          , m_sourcePhraseStart(copy.m_sourcePhraseStart)
+          , m_sourcePhraseEnd(copy.m_sourcePhraseEnd)
         {} // don't copy sorted target holes. messes up sorting fn
 
         const HoleList &GetHoles() const
@@ -48,10 +62,7 @@ class HoleCollection
         std::vector<Hole*> &GetSortedSourceHoles()
             { return m_sortedSourceHoles; }
 
-        void Add(int startT, int endT, int startS, int endS)
-        {
-            m_holes.push_back(Hole(startS, endS, startT, endT));
-        }
+        void Add(int startT, int endT, int startS, int endS);
 
         bool OverlapSource(const Hole &sourceHole) const
         {
@@ -76,6 +87,9 @@ class HoleCollection
             }
             return false;
         }
+
+        // Determine the scope that would result from adding the given hole.
+        int Scope(const Hole &proposedHole) const;
 
         void SortSourceHoles();
 

@@ -14,6 +14,7 @@
 		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
 		1CE646E411679F6900EC77CC /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CE646E311679F5F00EC77CC /* libOnDiskPt.a */; };
+		1EBB175F126C16B800AE6102 /* libkenlm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBB175A126C169000AE6102 /* libkenlm.a */; };
 		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
 		B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */; };
@@ -48,6 +49,20 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
+		1EBB1759126C169000AE6102 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EBB1752126C169000AE6102 /* kenlm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = kenlm;
+		};
+		1ED0E9661277CFC500AC18B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EBB1752126C169000AE6102 /* kenlm.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = kenlm;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -74,6 +89,7 @@
 		1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
 		1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
 		1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1EBB1752126C169000AE6102 /* kenlm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = kenlm.xcodeproj; path = ../kenlm/kenlm.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* moses-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
 		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
@@ -86,6 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EBB175F126C16B800AE6102 /* libkenlm.a in Frameworks */,
 				1CE646E411679F6900EC77CC /* libOnDiskPt.a in Frameworks */,
 				B219B8540E93812700EAB407 /* libmoses.a in Frameworks */,
 			);
@@ -105,6 +122,7 @@
 		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
 			isa = PBXGroup;
 			children = (
+				1EBB1752126C169000AE6102 /* kenlm.xcodeproj */,
 				1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */,
 				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
@@ -147,6 +165,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1EBB1753126C169000AE6102 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EBB175A126C169000AE6102 /* libkenlm.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -170,6 +196,7 @@
 			dependencies = (
 				03306D780C0B244800CA1311 /* PBXTargetDependency */,
 				1CE6472E1167A11600EC77CC /* PBXTargetDependency */,
+				1ED0E9671277CFC500AC18B1 /* PBXTargetDependency */,
 			);
 			name = "moses-cmd";
 			productInstallPath = "$(HOME)/bin";
@@ -184,10 +211,21 @@
 			isa = PBXProject;
 			buildConfigurationList = 03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-cmd" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-cmd */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 1EBB1753126C169000AE6102 /* Products */;
+					ProjectRef = 1EBB1752126C169000AE6102 /* kenlm.xcodeproj */;
+				},
 				{
 					ProductGroup = 03306D600C0B240B00CA1311 /* Products */;
 					ProjectRef = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
@@ -219,6 +257,13 @@
 			remoteRef = 1CE646E211679F5F00EC77CC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		1EBB175A126C169000AE6102 /* libkenlm.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libkenlm.a;
+			remoteRef = 1EBB1759126C169000AE6102 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -247,6 +292,11 @@
 			name = OnDiskPt;
 			targetProxy = 1CE6472D1167A11600EC77CC /* PBXContainerItemProxy */;
 		};
+		1ED0E9671277CFC500AC18B1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = kenlm;
+			targetProxy = 1ED0E9661277CFC500AC18B1 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -269,7 +319,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib/,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
@@ -281,7 +331,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PREBINDING = NO;
@@ -308,7 +357,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib/,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
@@ -320,7 +369,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PREBINDING = NO;
@@ -339,7 +387,7 @@
 				HEADER_SEARCH_PATHS = ../moses/src;
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib/,
 					../srilm/lib/macosx,
 					../kenlm/lm,
 					../randlm/lib,
@@ -351,7 +399,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PREBINDING = NO;

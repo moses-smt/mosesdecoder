@@ -6,7 +6,7 @@ use FindBin qw($Bin);
 use File::Basename;
 use File::Temp qw/tempfile/;
 
-my $BITPAR = "/home/pkoehn/statmt/project/bitpar/GermanParser";
+my $BITPAR = "/exports/home/s0565741/work/bin/bitpar";
 my $TMPDIR = "tmp";
 
 my $DEBUG = 0;
@@ -23,15 +23,23 @@ GetOptions(
 `mkdir -p $TMPDIR`;
 my ($scriptname, $directories) = fileparse($0);
 my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
-open(INPUT,"iconv -c -f utf8 -t iso-8859-1 |");
+open(INPUT,"iconv -c -f UTF-8 -t iso-8859-1 |");
 while(<INPUT>)
 {
-    foreach (split)
+		my $hasWords = 0;
+	  foreach (split)
     {
         s/\(/\*LRB\*/g;
         s/\)/\*RRB\*/g;
         print $TMP $_."\n";
+
+				$hasWords = 1;        
     }
+    
+    if ($hasWords == 0) {
+    	print $TMP " \n";
+    }
+        
     print $TMP "\n";
 }
 close($TMP);
@@ -41,7 +49,7 @@ if ($RAW)
 {
     $pipeline .= "tee \"$RAW\" |";
 }
-$pipeline .= "iconv -c -t utf8 -f iso-8859-1 |";
+$pipeline .= "iconv -c -t UTF-8 -f iso-8859-1 |";
 open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {

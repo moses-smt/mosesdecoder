@@ -79,8 +79,7 @@ public:
 	// get the target candidates for a given phrase
 	void GetTargetCandidates(const std::vector<std::string>& src,
 													 std::vector<StringTgtCand>& rv,
-													 std::vector<StringWordAlignmentCand>& swa,
-													 std::vector<StringWordAlignmentCand>& twa) const;
+													 std::vector<std::string>& wa) const;
 
 	/*****************************
 	 *   access to prefix tree   *
@@ -112,8 +111,7 @@ public:
 													 std::vector<StringTgtCand>& rv) const;
 	void GetTargetCandidates(PrefixPtr p,
 													 std::vector<StringTgtCand>& rv,
-													 std::vector<StringWordAlignmentCand>& swa,
-													 std::vector<StringWordAlignmentCand>& twa) const;
+													 std::vector<std::string>& wa) const;
 
 	// print target candidates for a given prefix pointer to a stream, mainly 
 	// for debugging
