@@ -144,29 +144,24 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 			// Update the weight vector according to the alphas and the feature value differences
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
-			FVector totalUpdate(0);
-			// compute update
 			for (size_t k = 0; k < m_featureValueDiffs.size(); ++k) {
-				m_featureValueDiffs[k].MultiplyEquals(alphas[k]);
-				FVector update = m_featureValueDiffs[k].GetScoresVector();
-				totalUpdate += update;
-			}
-
-			cerr << "total unclipped update: " << totalUpdate << endl;
-
-			if (m_fixedClipping) {
-				for (size_t i = 1; i < totalUpdate.size(); ++i) { // skip DEFAULT weight
-					float currentUpdate = totalUpdate.get(i);
- 					if (currentUpdate > m_c) {
- 						totalUpdate.set(i, m_c);
+				// compute update
+				float update = alphas[k];
+				if (m_fixedClipping) {
+					if (update > m_c) {
+						update = m_c;
 					}
-					else if (currentUpdate < (-1 * m_c)) {
-						totalUpdate.set(i, -1 * m_c);
+					else if (update < -1 * m_c) {
+						update = -1 * m_c;
 					}
 				}
+
+				m_featureValueDiffs[k].MultiplyEquals(update);
+				cerr << "alpha: " << update << endl;
+
+				// apply update to weight vector
+				currWeights.PlusEquals(m_featureValueDiffs[k]);
 			}
-			cerr << "total clipped update: " << totalUpdate << endl;
-			currWeights.PlusEquals(totalUpdate);
 		}
 		else if (violatedConstraintsBefore > 0) {
 			if (m_pastAndCurrentConstraints) {
@@ -192,31 +187,24 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 			// Update the weight vector according to the alphas and the feature value differences
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
-			FVector totalUpdate(0);
-			// compute update
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 				// compute update
-				featureValueDiffs[k].MultiplyEquals(alphas[k]);
-				FVector update = featureValueDiffs[k].GetScoresVector();
-				totalUpdate += update;
-			}
-
-			cerr << "total unclipped update: " << totalUpdate << endl;
-
-			// apply update to weight vector
-			if (m_fixedClipping) {
-				for (size_t i = 1; i < totalUpdate.size(); ++i) { // skip DEFAULT weight
-					float currentUpdate = totalUpdate.get(i);
- 					if (currentUpdate > m_c) {
- 						totalUpdate.set(i, m_c);
+				float update = alphas[k];
+				if (m_fixedClipping) {
+					if (update > m_c) {
+						update = m_c;
 					}
-					else if (currentUpdate < (-1 * m_c)) {
-						totalUpdate.set(i, -1 * m_c);
+					else if (update < -1 * m_c) {
+						update = -1 * m_c;
 					}
 				}
+
+				featureValueDiffs[k].MultiplyEquals(update);
+				cerr << "alpha: " << update << endl;
+
+				// apply update to weight vector
+				currWeights.PlusEquals(featureValueDiffs[k]);
 			}
-			cerr << "total clipped update: " << totalUpdate << endl;
-			currWeights.PlusEquals(totalUpdate);
 
 			// sanity check: how many constraints violated after optimisation?
 			size_t violatedConstraintsAfter = 0;
