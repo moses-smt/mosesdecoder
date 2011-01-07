@@ -1601,6 +1601,7 @@ sub create_ini {
      print INI "$phrase_table_impl $ff 5 $file\n";
    }
    if ($_GLUE_GRAMMAR) {
+     &full_path(\$___GLUE_GRAMMAR_FILE);
      print INI "6 0 0 1 $___GLUE_GRAMMAR_FILE\n";
    }
    if ($num_of_ttables != $stepsused{"T"}) {
