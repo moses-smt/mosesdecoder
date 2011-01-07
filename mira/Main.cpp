@@ -100,6 +100,8 @@ int main(int argc, char** argv) {
   bool suppressConvergence;
   bool ignoreUWeight;
   bool ignoreWeirdUpdates;
+  bool logFeatureValues;
+  size_t baseOfLog;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -134,6 +136,8 @@ int main(int argc, char** argv) {
 	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
 	    ("ignore-u-weight", po::value<bool>(&ignoreUWeight)->default_value(false), "Don't tune unknown word penalty weight")
 	    ("ignore-weird-updates", po::value<bool>(&ignoreWeirdUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
+	    ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
+	    ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold");
 
@@ -233,6 +237,8 @@ int main(int argc, char** argv) {
   cerr << "Using slack? " << slack << endl;
   cerr << "BP factor: " << BPfactor << endl;
   cerr << "Ignore unknown word penalty? " << ignoreUWeight << endl;
+  cerr << "take log of feature values? " << logFeatureValues << endl;
+  cerr << "base of log: " << baseOfLog << endl;
   cerr << "Fixed clipping? " << fixedClipping << endl;
   cerr << "clipping: " << clipping << endl;
   if (learner == "mira") {
@@ -408,6 +414,16 @@ int main(int argc, char** argv) {
 
 	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
 	    	  ((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
+	      }
+
+	      if (logFeatureValues) {
+	    	  for (size_t i = 0; i < featureValues.size(); ++i) {
+	    		  for (size_t j = 0; j < featureValues[i].size(); ++j) {
+	    			  featureValues[i][j].ApplyLog(baseOfLog);
+	    		  }
+
+	    		  oracleFeatureValues[i].ApplyLog(baseOfLog);
+	    	  }
 	      }
 
 		  // run optimiser on batch

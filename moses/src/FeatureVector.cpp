@@ -179,7 +179,7 @@ namespace Moses {
           out << i->first << "=" << value << ", ";
       }*/
       if (i->first != DEFAULT_NAME) {
-          out << value << ", ";
+    	  out << value << ", ";
       }
     }
     out << "}";
@@ -215,30 +215,30 @@ namespace Moses {
   }
   
   void FVector::set(size_t index, float value) {
-      size_t pos = 0;
-      for (const_iterator i = cbegin(); i != cend(); ++i) {
-    	  if (pos == index) {
-    		  m_features[i->first] = value;
-    		  break;
-    	  }
-    	  ++pos;
-      }
+	  size_t pos = 0;
+	  for (const_iterator i = cbegin(); i != cend(); ++i) {
+		  if (pos == index) {
+			  m_features[i->first] = value;
+			  break;
+		  }
+		  ++pos;
+	  }
   }
 
   void FVector::applyLog(size_t baseOfLog) {
-      for (const_iterator i = cbegin(); i != cend(); ++i) {
-    	  FValue value = i->second;
-    	  // log_a(value) = ln(value) / ln(a)
-    	  float logOfValue = 0;
-    	  if (value < 0) {
-    		  logOfValue = log(-1*value) / log(baseOfLog);
-    		  logOfValue *= -1;
-    	  }
-    	  else if (value > 0) {
-    		  logOfValue = log(value) / log(baseOfLog);
-    	  }
-    	  m_features[i->first] = logOfValue;
-      }
+	  for (const_iterator i = cbegin(); i != cend(); ++i) {
+		  FValue value = i->second;
+		  // log_a(value) = ln(value) / ln(a)
+		  float logOfValue = 0;
+		  if (value < 0) {
+			  logOfValue = log(-1*value) / log(baseOfLog);
+			  logOfValue *= -1;
+		  }
+		  else if (value > 0) {
+			  logOfValue = log(value) / log(baseOfLog);
+		  }
+		  m_features[i->first] = logOfValue;
+	  }
   }
 
   FVector& FVector::operator+= (const FVector& rhs) {
