@@ -326,15 +326,11 @@ int main(int argc, char** argv) {
                         bleuScores[batchPosition],
                         true,
                         distinctNbest,
-                        ignoreUWeight);
+                        ignoreUWeight,
+                        rank);
 			  inputLengths.push_back(decoder->getCurrentInputLength());
 			  ref_ids.push_back(*sid);
 			  decoder->cleanup();
-			  cerr << "Rank " << rank << ": ";
-			  for (size_t i = 0; i < bestModel.size(); ++i) {
-				  cerr << *(bestModel[i]) << " ";
-			  }
-			  cerr << endl;
 			  cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
 			  // HOPE
@@ -350,15 +346,10 @@ int main(int argc, char** argv) {
                         bleuScores[batchPosition],
                         true,
                         distinctNbest,
-                        ignoreUWeight);
+                        ignoreUWeight,
+                        rank);
 			  decoder->cleanup();
 			  oracles.push_back(oracle);
-			  cerr << "Rank " << rank << ": ";
-			  for (size_t i = 0; i < oracle.size(); ++i) {
-				  //oracles[batchPosition].push_back(oracle[i]);
-				  cerr << *(oracle[i]) << " ";
-			  }
-			  cerr << endl;
 			  cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
 			  oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
@@ -377,13 +368,9 @@ int main(int argc, char** argv) {
                         bleuScores[batchPosition],
                         true,
                         distinctNbest,
-                        ignoreUWeight);
+                        ignoreUWeight,
+                        rank);
 			  decoder->cleanup();
-			  cerr << "Rank " << rank << ": ";
-			  for (size_t i = 0; i < fear.size(); ++i) {
-				  cerr << *(fear[i]) << " ";
-			  }
-			  cerr << endl;
 			  cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
 
 			  for (size_t i = 0; i < bestModel.size(); ++i) {
