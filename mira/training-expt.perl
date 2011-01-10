@@ -81,6 +81,7 @@ my $trainer_exe = &param_required("train.trainer");
 #optional training parameters
 my $epochs = &param("train.epochs", 2);
 my $learner = &param("train.learner", "mira");
+my $batch = &param("train.batch", 1);
 my $extra_args = &param("train.extra-args");
 my $continue_from_epoch = &param("train.continue-from-epoch", 0);
 
@@ -102,6 +103,11 @@ $test_ini_file = &param_required("test.moses-ini-file");
 &check_exists ("test ini file", $test_ini_file);
 my $weight_file_stem = "$name-weights";
 my $weight_frequency = &param("test.frequency",1);
+
+# adjust test frequency when using batches > 1
+if ($batch > 1) {
+    $weight_frequency = 1;
+}
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
@@ -144,6 +150,7 @@ print TRAIN "-l $learner \\\n";
 print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
 print TRAIN "--weight-dump-frequency $weight_frequency \\\n";
 print TRAIN "--epochs $epochs \\\n";
+print TRAIN "-b $batch \\\n";
 print TRAIN $extra_args;
 
 print TRAIN "\n";
@@ -182,17 +189,30 @@ while(1) {
     } else {
         #my $epoch = 1 + int $train_iteration / $weight_frequency;
         $epoch = int $train_iteration / $weight_frequency;
-        $epoch_slice = $train_iteration % $weight_frequency;
-        $new_weight_file .= $epoch . "_" . $epoch_slice;
+	$epoch_slice = $train_iteration % $weight_frequency;
+        if ($epoch < 10) {
+	    $new_weight_file .= "0" . $epoch . "_" . $epoch_slice;
+	}
+	else {
+	    $new_weight_file .= $epoch . "_" . $epoch_slice;
+	}	
     }
-    print "Waiting for $new_weight_file\n";
-    while ((! -e $new_weight_file) && &check_running($train_job_id)) {
-        sleep 10;
-    }
-    if (! -e $new_weight_file ) {
-        print "Training finished at " . scalar(localtime()) . "\n";
+    
+    if (-e "stopping") {
+	print "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
         exit 0;
     }
+    else {
+	print "Waiting for $new_weight_file\n";
+	while ((! -e $new_weight_file) && &check_running($train_job_id)) {
+	    sleep 10;
+	}
+	if (! -e $new_weight_file ) {
+	    print "Training finished at " . scalar(localtime()) . "\n";
+	    exit 0;
+	}
+    }
+
     #new weight file written. create test script and submit
     #file names
     my $job_name = $name . "_$train_iteration";
@@ -205,14 +225,28 @@ while(1) {
     my $output_error_file;
     my $bleu_file;
     if ($weight_frequency == 1) {
-        $output_file = $working_dir."/".$name."_".$train_iteration.".out";
-	$output_error_file = $working_dir."/".$name."_".$train_iteration.".err";
-	$bleu_file = $working_dir."/".$name."_".$train_iteration.".bleu";
+	if ($train_iteration < 10) {
+	    $output_file = $working_dir."/".$name."_0".$train_iteration.".out";
+	    $output_error_file = $working_dir."/".$name."_0".$train_iteration.".err";
+	    $bleu_file = $working_dir."/".$name."_0".$train_iteration.".bleu";
+	}
+	else {
+	    $output_file = $working_dir."/".$name."_0".$train_iteration.".out";
+	    $output_error_file = $working_dir."/".$name."_0".$train_iteration.".err";
+	    $bleu_file = $working_dir."/".$name."_0".$train_iteration.".bleu";
+	}        
     }
     else {
-        $output_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.".out";
-	$output_error_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.".err";
-	$bleu_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.".bleu";
+	if ($epoch < 10) {
+	    $output_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.".out";
+	    $output_error_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.".err";
+	    $bleu_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.".bleu";
+	}
+	else {
+	    $output_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.".out";
+	    $output_error_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.".err";
+	    $bleu_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.".bleu";
+	}        
     }
 
     if (! (open TEST, ">$test_script_file" )) {
@@ -246,7 +280,7 @@ while(1) {
     my %extra_weights;
     while(<WEIGHTS>) {
         chomp;
-        my ($name,$value) = split;
+	my ($name,$value) = split;
         #next if ($name =~ /^!Unknown/);
         if ($name eq "DEFAULT_") {
             $default_weight = $value;
@@ -269,6 +303,9 @@ while(1) {
         }
     }
     close WEIGHTS;
+
+    die "LM weight not defined" unless defined $lm_weight;
+
     # If there was a core weight file, then we have to load the weights
     # from the new weight file
     if ($core_weight_file ne $new_weight_file) {
@@ -300,7 +337,7 @@ while(1) {
     foreach my $lexicalreordering_weight (@lexicalreordering_weights) {
         $total += abs($lexicalreordering_weight + $default_weight);
     }
-
+    
     # Create new ini file
     my $new_test_ini_file = $working_dir . "/" . $test_script . ".$train_iteration.ini";
     if (! (open NEWINI, ">$new_test_ini_file" )) {

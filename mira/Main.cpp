@@ -100,11 +100,6 @@ int main(int argc, char** argv) {
   bool suppressConvergence;
   bool ignoreUWeight;
   bool ignoreWeirdUpdates;
-  bool ignoreUpdatesAll;
-  bool ignoreUpdatesError;
-  bool ignoreUpdatesConstraints;
-  bool logFeatureValues;
-  size_t baseOfLog;
   float clipping;
   bool fixedClipping;
   po::options_description desc("Allowed options");
@@ -139,11 +134,6 @@ int main(int argc, char** argv) {
 	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
 	    ("ignore-u-weight", po::value<bool>(&ignoreUWeight)->default_value(false), "Don't tune unknown word penalty weight")
 	    ("ignore-weird-updates", po::value<bool>(&ignoreWeirdUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
-	    ("ignore-updates-all", po::value<bool>(&ignoreUpdatesAll)->default_value(false), "Ignore updates that increase number of violated constraints OR increase the error")
-	    ("ignore-updates-error", po::value<bool>(&ignoreUpdatesError)->default_value(false), "Ignore updates that increase the error")
-	    ("ignore-updates-constraints", po::value<bool>(&ignoreUpdatesConstraints)->default_value(false), "Ignore updates that increase the number of violated constraints")
-	    ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
-	    ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold");
 
@@ -243,10 +233,8 @@ int main(int argc, char** argv) {
   cerr << "Using slack? " << slack << endl;
   cerr << "BP factor: " << BPfactor << endl;
   cerr << "Ignore unknown word penalty? " << ignoreUWeight << endl;
-  cerr << "fixed clipping? " << fixedClipping << endl;
+  cerr << "Fixed clipping? " << fixedClipping << endl;
   cerr << "clipping: " << clipping << endl;
-  cerr << "take log of feature values? " << logFeatureValues << endl;
-  cerr << "base of log: " << baseOfLog << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
@@ -332,11 +320,15 @@ int main(int argc, char** argv) {
                         bleuScores[batchPosition],
                         true,
                         distinctNbest,
-                        ignoreUWeight,
-                        rank);
+                        ignoreUWeight);
 			  inputLengths.push_back(decoder->getCurrentInputLength());
 			  ref_ids.push_back(*sid);
 			  decoder->cleanup();
+			  cerr << "Rank " << rank << ": ";
+			  for (size_t i = 0; i < bestModel.size(); ++i) {
+				  cerr << *(bestModel[i]) << " ";
+			  }
+			  cerr << endl;
 			  cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
 			  // HOPE
@@ -352,10 +344,15 @@ int main(int argc, char** argv) {
                         bleuScores[batchPosition],
                         true,
                         distinctNbest,
-                        ignoreUWeight,
-                        rank);
+                        ignoreUWeight);
 			  decoder->cleanup();
 			  oracles.push_back(oracle);
+			  cerr << "Rank " << rank << ": ";
+			  for (size_t i = 0; i < oracle.size(); ++i) {
+				  //oracles[batchPosition].push_back(oracle[i]);
+				  cerr << *(oracle[i]) << " ";
+			  }
+			  cerr << endl;
 			  cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
 			  oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
@@ -374,9 +371,13 @@ int main(int argc, char** argv) {
                         bleuScores[batchPosition],
                         true,
                         distinctNbest,
-                        ignoreUWeight,
-                        rank);
+                        ignoreUWeight);
 			  decoder->cleanup();
+			  cerr << "Rank " << rank << ": ";
+			  for (size_t i = 0; i < fear.size(); ++i) {
+				  cerr << *(fear[i]) << " ";
+			  }
+			  cerr << endl;
 			  cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
 
 			  for (size_t i = 0; i < bestModel.size(); ++i) {
@@ -405,27 +406,8 @@ int main(int argc, char** argv) {
 	      const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
 	      mosesWeights.Assign(featureFunctions.back(), 0);
 
-	      /*if (ignoreUWeight) {
-	    	  // set weight for unknown word penalty to 0
-	    	  for (size_t i = 0; i < featureFunctions.size(); ++i) {
-	    		  FName name = (featureFunctions[i]->GetFeatureNames())[0];
-	    		  FName compare("!UnknownWordPenalty");
-	    		  if (name == compare) {
-	    			  mosesWeights.Assign(featureFunctions[i], 0);
-	    		  }
-	    	  }
-	      }*/
-
 	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
 	    	  ((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
-	      }
-
-	      if (logFeatureValues) {
-	    	  for (size_t i = 0; i < featureValues.size(); ++i) {
-	    		  for (size_t j = 0; j < featureValues[i].size(); ++j) {
-	    			  featureValues[i][j].ApplyLog(baseOfLog);
-	    		  }
-	    	  }
 	      }
 
 		  // run optimiser on batch
@@ -483,9 +465,6 @@ int main(int argc, char** argv) {
 		  bool useNewWeights = true;
 	      if (lossMinusMargin_new > lossMinusMargin_old) {
 	    	  cerr << "Rank " << rank << ", worsening: " << lossMinusMargin_new - lossMinusMargin_old << endl;
-	    	  if (ignoreUpdatesError || ignoreUpdatesAll) {
-	    		  useNewWeights = false;
-	    	  }
 
 	    	  if (constraintChange < 0) {
 	    		  cerr << "Rank " << rank << ", something is going wrong here.." << endl;
@@ -494,13 +473,6 @@ int main(int argc, char** argv) {
 	    		  }
 	    	  }
 	      }
-
-	      if (ignoreUpdatesConstraints || ignoreUpdatesAll) {
-	    	  if (constraintChange < 0) {
-	    		  useNewWeights = false;
-	    	  }
-	      }
-
 
 	      if (useNewWeights) {
 	    	  decoder->setWeights(mosesWeights);
@@ -580,8 +552,9 @@ int main(int argc, char** argv) {
 					  filename << weightDumpStem << "_0" << epoch;
 				  }
 				  else {
-					  filename << weightDumpStem << "_" << epoch;
+					  filename << weightDumpStem << "_" << epoch; 	                                   
 				  }
+
 				  if (weightDumpFrequency > 1) {
 					  filename << "_" << weightEpochDump;
 				  }
@@ -641,7 +614,6 @@ int main(int argc, char** argv) {
 							  MPI_Finalize();
 							  MPI_Abort(MPI_COMM_WORLD, 0);
 #endif
-
 							  exit(0);
 						  }
 					  }

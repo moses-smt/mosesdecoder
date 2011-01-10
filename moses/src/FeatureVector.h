@@ -174,11 +174,11 @@ namespace Moses {
     
     /** printing */
     std::ostream& print(std::ostream& out) const;
-
+		
     float get(size_t index) const;
     void set(size_t index, float value);
     void applyLog(size_t baseOfLog);
-		
+
 #ifdef MPI_ENABLE
     friend class boost::serialization::access;
 #endif  
@@ -189,6 +189,7 @@ namespace Moses {
      default value */
     const FValue& get(const FName& name) const;
     void set(const FName& name, const FValue& value);
+    
 		
     FNVmap m_features;
 		
