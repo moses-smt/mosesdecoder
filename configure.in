@@ -197,12 +197,16 @@ then
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${PWD}/kenlm])])
 
-  LIB_KENLM="-lkenlm"
-  LDFLAGS="$LDFLAGS -L${PWD}/kenlm"
-  LIBS="$LIBS $LIB_KENLM"
-  FMTLIBS="$FMTLIBS libkenlm.a"
+  KENLM_LDFLAGS="-L\$(top_srcdir)/kenlm -lkenlm -lz"
+  KENLM_DEPS="\$(top_srcdir)/kenlm/libkenlm.la"
+  FMTLIBS="$FMTLIBS libkenlm.la"
   AM_CONDITIONAL([KEN_LM], true)
+else
+  KENLM_LDFLAGS=""
+  KENLM_DEPS=""
 fi
+AC_SUBST(KENLM_LDFLAGS)
+AC_SUBST(KENLM_DEPS)
 
 if test "x$with_randlm" != 'xno'
 then
