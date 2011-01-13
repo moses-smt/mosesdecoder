@@ -281,4 +281,4 @@ if KEN_LM
 libmoses_la_SOURCES += LanguageModelKen.cpp
 endif
 
-libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
+libmoses_la_LIBADD = $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)

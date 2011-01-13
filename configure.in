@@ -106,13 +106,13 @@ fi
 if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes'
 then
     AC_MSG_NOTICE([Using Boost library])
-    AX_BOOST_BASE([1.36.0])
+    BOOST_REQUIRE([1.36.0])
 fi
 
 if test "x$with_threads" = 'xyes'
 then
     AC_MSG_NOTICE([Building threaded moses])
-    AX_BOOST_THREAD
+    BOOST_THREADS
     CPPFLAGS="$CPPFLAGS -DWITH_THREADS" 
     AM_CONDITIONAL([WITH_THREADS],true)
 else
