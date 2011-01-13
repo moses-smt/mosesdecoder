@@ -27,6 +27,7 @@
 #include <vector>
 #include "../../moses/src/Word.h"
 #include "../../moses/src/WordsRange.h"
+#include "../../moses/src/NonTerminal.h"
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
 #include "QueueEntry.h"
@@ -52,7 +53,7 @@ public:
 
 protected:
 	std::map<Moses::Word, HypothesisCollection> m_hypoColl;	
-	std::vector<Moses::Word> m_headWords;
+	Moses::NonTerminalSet m_headWords;
 
 	Moses::WordsRange m_coverage;
 
@@ -74,7 +75,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 	bool HeadwordExists(const Moses::Word &headWord) const;
-	const std::vector<Moses::Word> &GetHeadwords() const
+	const Moses::NonTerminalSet &GetHeadwords() const
 	{ return m_headWords; }
 
 	void CleanupArcList();

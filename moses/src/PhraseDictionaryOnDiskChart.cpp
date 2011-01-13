@@ -110,16 +110,16 @@ namespace Moses
 			size_t nonTermNumWordsCovered = endPos - startPos + 1;
 			
 			// get target headwords in this span from chart
-			const vector<Word> &headWords = cellColl.GetHeadwords(WordsRange(startPos, endPos));
+			const NonTerminalSet &headWords = cellColl.GetHeadwords(WordsRange(startPos, endPos));
 			
 			const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
 								,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
 
 			// go through each SOURCE lhs
-			const LabelList &sourceLHSList = src.GetLabelList(startPos, endPos);
+			const NonTerminalSet &sourceLHSSet = src.GetLabelSet(startPos, endPos);
 			
-			LabelList::const_iterator iterSourceLHS;
-			for (iterSourceLHS = sourceLHSList.begin(); iterSourceLHS != sourceLHSList.end(); ++iterSourceLHS)
+			NonTerminalSet::const_iterator iterSourceLHS;
+			for (iterSourceLHS = sourceLHSSet.begin(); iterSourceLHS != sourceLHSSet.end(); ++iterSourceLHS)
 			{
 				const Word &sourceLHS = *iterSourceLHS;
 				
@@ -138,7 +138,7 @@ namespace Moses
 					continue; // didn't find source node
 				
 				// go through each TARGET lhs
-				vector<Word>::const_iterator iterTargetLHS;
+				NonTerminalSet::const_iterator iterTargetLHS;
 				for (iterTargetLHS = headWords.begin(); iterTargetLHS != headWords.end(); ++iterTargetLHS)
 				{
 					const Word &targetLHS = *iterTargetLHS;
@@ -199,11 +199,11 @@ namespace Moses
 				const OnDiskPt::PhraseNode &prevNode = prevProcessedRule.GetLastNode();
 				
 				//get node for each source LHS
-				const LabelList &lhsList = src.GetLabelList(range.GetStartPos(), range.GetEndPos());
-				LabelList::const_iterator iterLabelList;
-				for (iterLabelList = lhsList.begin(); iterLabelList != lhsList.end(); ++iterLabelList)
+				const NonTerminalSet &lhsSet = src.GetLabelSet(range.GetStartPos(), range.GetEndPos());
+				NonTerminalSet::const_iterator iterLabelSet;
+				for (iterLabelSet = lhsSet.begin(); iterLabelSet != lhsSet.end(); ++iterLabelSet)
 				{
-					const Word &sourceLHS = *iterLabelList;
+					const Word &sourceLHS = *iterLabelSet;
 					
 					OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceLHS);
 					if (sourceLHSBerkeleyDb == NULL)

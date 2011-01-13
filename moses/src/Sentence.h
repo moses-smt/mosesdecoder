@@ -54,7 +54,7 @@ class Sentence : public Phrase, public InputType
 	std::vector <TranslationOption*> m_xmlOptionsList;
 	std::vector <bool> m_xmlCoverageMap;
 
-	LabelList m_defaultLabelList;
+	NonTerminalSet m_defaultLabelSet;
 	
 	void InitStartEndWord();
 
@@ -98,8 +98,8 @@ class Sentence : public Phrase, public InputType
 												, const std::string &phraseString
 												, const std::string &factorDelimiter);
 	
-    const LabelList &GetLabelList(size_t /*startPos*/, size_t /*endPos*/) const
-	{	return m_defaultLabelList;	}
+    const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const
+	{	return m_defaultLabelSet;	}
 
 };
 

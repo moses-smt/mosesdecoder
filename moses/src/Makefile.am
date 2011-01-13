@@ -56,6 +56,7 @@ libmoses_la_HEADERS = \
         LexicalReorderingState.h \
         LexicalReorderingTable.h \
         Manager.h \
+        NonTerminal.h \
         ObjectPool.h \
         PCNTools.h \
         PDTAimp.h \

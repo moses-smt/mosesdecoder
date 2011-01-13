@@ -44,7 +44,8 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &ou
 
 	ProcessedRuleColl &processedRuleCol = *m_processedRuleColls[range.GetStartPos()];
 	const ProcessedRuleList &runningNodes = processedRuleCol.GetRunningNodes();
-    // Note that runningNodes can be expanded as the loop runs (through calls to processedRuleCol::Add())
+    // Note that runningNodes can be expanded as the loop runs (through calls to
+    // ExtendPartialRuleApplication()).
 	for (size_t ind = 0; ind < runningNodes.size(); ++ind)
 	{
 		const ProcessedRule &prevProcessedRule = *runningNodes[ind];
@@ -82,35 +83,15 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &ou
 			stackInd = relEndPos + 1;
 		}
 		
-		// get headwords in this span from chart
-		const vector<Word> &headWords = cellColl.GetHeadwords(WordsRange(startPos, endPos));
-		
-		// go thru each source span
-		const LabelList &labelList = src.GetLabelList(startPos, endPos);
-		
-		LabelList::const_iterator iterLabelList;
-		for (iterLabelList = labelList.begin(); iterLabelList != labelList.end(); ++iterLabelList)
-		{
-			const Word &sourceLabel = *iterLabelList;
-			
-			// go thru each headword & see if in phrase table
-			vector<Word>::const_iterator iterHeadWords;
-			for (iterHeadWords = headWords.begin(); iterHeadWords != headWords.end(); ++iterHeadWords)
-			{
-				const Word &headWord = *iterHeadWords;
-				
-				const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceLabel, headWord);
-				if (node != NULL)
-				{
-					WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
-																													 , headWord
-																													 , prevWordConsumed);
-					
-					ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
-					processedRuleCol.Add(stackInd, processedRule);
-				}
-			} // for (iterHeadWords
-		} // for (iterLabelList 
+		const NonTerminalSet &sourceNonTerms =
+            src.GetLabelSet(startPos, endPos);
+
+        const NonTerminalSet &targetNonTerms =
+            cellColl.GetHeadwords(WordsRange(startPos, endPos));
+
+        ExtendPartialRuleApplication(prevNode, prevWordConsumed, startPos,
+                                     endPos, stackInd, sourceNonTerms,
+                                     targetNonTerms, processedRuleCol);
 	}
 	
 	// return list of target phrases
@@ -133,4 +114,91 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &ou
 		}
 	}
 	outColl.CreateChartRules(rulesLimit);	
+}
+
+// Given a partial rule application ending at startPos-1 and given the sets of
+// source and target non-terminals covering the span [startPos, endPos],
+// determines the full or partial rule applications that can be produced through
+// extending the current rule application by a single non-terminal.
+void PhraseDictionarySCFG::ExtendPartialRuleApplication(
+    const PhraseDictionaryNodeSCFG & node,
+    const WordConsumed *prevWordConsumed,
+    size_t startPos,
+    size_t endPos,
+    size_t stackInd,
+    const NonTerminalSet & sourceNonTerms,
+    const NonTerminalSet & targetNonTerms,
+    ProcessedRuleColl & processedRuleColl) const
+{
+    const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
+        node.GetNonTerminalMap();
+
+    const size_t numChildren = nonTermMap.size();
+    if (numChildren == 0)
+    {
+        return;
+    }
+    const size_t numSourceNonTerms = sourceNonTerms.size();
+    const size_t numTargetNonTerms = targetNonTerms.size();
+    const size_t numCombinations = numSourceNonTerms * numTargetNonTerms;
+
+    // We can search by either:
+    //   1. Enumerating all possible source-target NT pairs that are valid for
+    //      the span and then searching for matching children in the node,
+    // or
+    //   2. Iterating over all the NT children in the node, searching
+    //      for each source and target NT in the span's sets.
+    // We'll do whichever minimises the number of lookups:
+    if (numCombinations <= numChildren*2)
+    {
+        NonTerminalSet::const_iterator p = sourceNonTerms.begin();
+        NonTerminalSet::const_iterator sEnd = sourceNonTerms.end();
+        for (; p != sEnd; ++p)
+        {
+            const Word & sourceNonTerm = *p;
+            NonTerminalSet::const_iterator q = targetNonTerms.begin();
+            NonTerminalSet::const_iterator tEnd = targetNonTerms.end();
+            for (; q != tEnd; ++q)
+            {
+                const Word & targetNonTerm = *q;
+                const PhraseDictionaryNodeSCFG * child =
+                    node.GetChild(sourceNonTerm, targetNonTerm);
+                if (child == NULL)
+                {
+                    continue;
+                }
+                WordConsumed * wc = new WordConsumed(startPos, endPos,
+                                                     targetNonTerm,
+                                                     prevWordConsumed);
+                ProcessedRule * rule = new ProcessedRule(*child, wc);
+                processedRuleColl.Add(stackInd, rule);
+            }
+        }
+    }
+    else
+    {
+        PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator p;
+        PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator end =
+                                                            nonTermMap.end();
+        for (p = nonTermMap.begin(); p != end; ++p)
+        {
+            const PhraseDictionaryNodeSCFG::NonTerminalMapKey & key = p->first;
+            const Word & sourceNonTerm = key.first;
+            if (sourceNonTerms.find(sourceNonTerm) == sourceNonTerms.end())
+            {
+                continue;
+            }
+            const Word & targetNonTerm = key.second;
+            if (targetNonTerms.find(targetNonTerm) == targetNonTerms.end())
+            {
+                continue;
+            }
+            const PhraseDictionaryNodeSCFG & child = p->second;
+            WordConsumed * wc = new WordConsumed(startPos, endPos,
+                                                 targetNonTerm,
+                                                 prevWordConsumed);
+            ProcessedRule * rule = new ProcessedRule(child, wc);
+            processedRuleColl.Add(stackInd, rule);
+        }
+    }
 }

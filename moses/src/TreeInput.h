@@ -24,13 +24,13 @@ class TreeInput : public Sentence
 	friend std::ostream& operator<<(std::ostream&, const TreeInput&);
 
 protected:
-	std::vector<std::vector<LabelList> > m_sourceChart;
+	std::vector<std::vector<NonTerminalSet> > m_sourceChart;
 
 	void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
 										,const std::vector<FactorType>& factorOrder);
 	void AddChartLabel(size_t startPos, size_t endPos, const Word &label
 										 ,const std::vector<FactorType>& factorOrder);
-	LabelList &GetLabelList(size_t startPos, size_t endPos)
+	NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos)
 	{
 		return m_sourceChart[startPos][endPos - startPos];
 	}
@@ -54,7 +54,7 @@ public:
 	//! create trans options specific to this InputType
 	virtual TranslationOptionCollection* CreateTranslationOptionCollection() const;
 
-	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const
+	virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const
 	{	return m_sourceChart[startPos][endPos - startPos];	}
 
 };
