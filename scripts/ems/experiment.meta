@@ -702,12 +702,19 @@ ibm-bleu-c
         rerun-on-change: ibm-bleu-c
         template: $ibm-bleu-c -s $input-sgm -r IN1 -t IN > OUT
 multi-bleu
-	in: recased-output reference
+	in: cleaned-output reference
 	out: multi-bleu-score
 	default-name: evaluation/multi-bleu
 	ignore-unless: multi-bleu
 	rerun-on-change: multi-bleu
 	template: $multi-bleu IN1 < IN > OUT
+multi-bleu-c
+	in: recased-output tokenized-reference
+	out: multi-bleu-c-score
+	default-name: evaluation/multi-bleu-c
+	ignore-unless: multi-bleu-c
+	rerun-on-change: multi-bleu-c
+	template: $multi-bleu-c IN1 < IN > OUT
 ter
 	in: wrapped-output reference-sgm
 	out: ter-score
@@ -740,6 +747,6 @@ analysis-coverage
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage
 	out: report
 	default-name: evaluation/report
