@@ -62,6 +62,7 @@ my $additional_triples = {
     # (due to additional tables) use the following values for them
     "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
+    "slm"=> [ [ 1.0, 0.0, 2.0 ] ],  # language model
     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
 	      [ 1.0, 0.0, 2.0 ] ],
     "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
@@ -79,14 +80,14 @@ my $additional_tripes_loop = { map { ($_, 1) } qw/ d I / };
 
 # moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
 # uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex I=weight-i";
+my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation slm=weight-slm lex=weight-lex I=weight-i";
 my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
 
 # We parse moses.ini to figure out how many weights do we need to optimize.
 # For this, we must know the correspondence between options defining files
 # for models and options assigning weights to these models.
-my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex link-param-count=I";
+my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d slmodel-file=slm generation-file=g global-lexical-file=lex link-param-count=I";
 my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
 
 # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
@@ -1107,6 +1108,7 @@ sub scan_config {
     "lmodel-file" => 3,
     "distortion-file" => 3,
     "global-lexical-file" => 1,
+    "slmodel-file" => 0,
   );
   # by default, each line of each section means one lambda, but some sections
   # explicitly state a custom number of lambdas
