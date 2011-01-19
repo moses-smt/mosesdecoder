@@ -1,0 +1,50 @@
+Seeding random numbers with 5000
+Scorer config string: reflen:closest,case:true
+name: reflen value: closest
+name: case value: true
+Using scorer regularisation strategy: none
+Using scorer regularisation window: 0
+Using case preservation: 1
+Using reference length strategy: closest
+Data::score_type BLEU
+Data::Scorer type from Scorer: BLEU
+BleuScorer: 9
+ScoreData: number_of_scores: 9
+Loading Data from: run1.scores.dat and run1.features.dat
+loading feature data from run1.features.dat
+loading score data from run1.scores.dat
+Loading Data from: run2.scores.dat and run2.features.dat
+loading feature data from run2.features.dat
+loading score data from run2.scores.dat
+Loading Data from: run3.scores.dat and run3.features.dat
+loading feature data from run3.features.dat
+loading score data from run3.scores.dat
+Loading Data from: run4.scores.dat and run4.features.dat
+loading feature data from run4.features.dat
+loading score data from run4.scores.dat
+Loading Data from: run5.scores.dat and run5.features.dat
+loading feature data from run5.features.dat
+loading score data from run5.scores.dat
+Data loaded : [0] seconds
+Try number 1 : [0] seconds
+Try number 2 : [0] seconds
+Try number 3 : [0] seconds
+Try number 4 : [1] seconds
+Try number 5 : [1] seconds
+Try number 6 : [1] seconds
+Try number 7 : [1] seconds
+Try number 8 : [1] seconds
+Try number 9 : [2] seconds
+Try number 10 : [2] seconds
+Try number 11 : [2] seconds
+Try number 12 : [2] seconds
+Try number 13 : [2] seconds
+Try number 14 : [3] seconds
+Try number 15 : [3] seconds
+Try number 16 : [3] seconds
+Try number 17 : [3] seconds
+Try number 18 : [3] seconds
+Try number 19 : [4] seconds
+Try number 20 : [4] seconds
+Best point: 0.0836727 0.135627 0.0602366 0.0263658 0.043897 0.0146552 0.0770568 0.112996 0.0437857 0.0206718 0.133082 0.0821608 -0.101029 -0.0647629  => 0.408975
+Stopping... : [4] seconds

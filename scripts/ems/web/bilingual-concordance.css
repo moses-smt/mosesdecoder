@@ -1,0 +1,51 @@
+.pp_head {
+  font-size: 150%;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pp_target_header {
+  font-size: 120%;
+  font-weight: bold;
+  text-align: center;
+}
+
+table.biconcor { 
+  table-layout: fixed; 
+  padding: 0px; 
+  margin: 0px; 
+}
+
+tr.biconcor { 
+  padding: 0px; 
+  margin: 0px; 
+}
+
+td.biconcor { 
+  white-space: nowrap; 
+  overflow: hidden; 
+  padding: 0px; 
+  margin: 0px; 
+}
+
+td.pp_source_left { 
+  text-align: right; 
+}
+
+td.pp_target_left { 
+  text-align: right; 
+}
+
+td.pp_source { 
+  font-weight: bold; 
+}
+
+td.pp_target { 
+  font-weight: bold; 
+}
+
+td.pp_source_right { 
+  border-style:solid; 
+  border-width:0px 2px 0px 0px ; 
+  border-color: black; 
+}
