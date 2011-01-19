@@ -605,7 +605,7 @@ sub preparing_script(){
     $scriptheader.="\#\$ \-N $qsubname\n\n"; # Unfortunately, qsub doesn't respect the pseudo-variable $TASK_ID for -N
 
     $scriptheader.="if [ \"\" == \"\$SGE_TASK_ID\" ]; then\n";
-    $scriptheader.="\techo \"Job was not submitted as an array job\n\"";
+    $scriptheader.="\techo \"Job was not submitted as an array job\"\n";
     $scriptheader.="\texit 1\n";
     $scriptheader.="fi\n\n";
 
