@@ -139,6 +139,7 @@ public:
 */
 class PhraseDictionaryNodeSCFG
 {
+public:
     typedef std::pair<Word, Word> NonTerminalMapKey;
 
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
@@ -156,6 +157,7 @@ class PhraseDictionaryNodeSCFG
     typedef std::map<NonTerminalMapKey, PhraseDictionaryNodeSCFG> NonTerminalMap;
 #endif
 
+private:
     friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
 
 	// only these classes are allowed to instantiate this class
@@ -190,6 +192,9 @@ public:
 			m_targetPhraseCollection = new TargetPhraseCollection();
 		return *m_targetPhraseCollection;
 	}
+
+    const NonTerminalMap & GetNonTerminalMap() const
+    { return m_nonTermMap; }
 
 	TO_STRING();
 };

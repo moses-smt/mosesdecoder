@@ -35,16 +35,10 @@
 #endif
 
 #include <algorithm>
-#include <iostream>
 
 #ifdef HAVE_ICU
 U_NAMESPACE_BEGIN
 #endif
-
-std::ostream& operator<<(std::ostream& o, const StringPiece& piece) {
-  o.write(piece.data(), static_cast<std::streamsize>(piece.size()));
-  return o;
-}
 
 #ifdef HAVE_BOOST
 size_t hash_value(const StringPiece &str) {

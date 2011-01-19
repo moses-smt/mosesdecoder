@@ -56,6 +56,7 @@ libmoses_la_HEADERS = \
         LexicalReorderingState.h \
         LexicalReorderingTable.h \
         Manager.h \
+        NonTerminal.h \
         ObjectPool.h \
         PCNTools.h \
         PDTAimp.h \
@@ -288,4 +289,4 @@ if KEN_LM
 libmoses_la_SOURCES += LanguageModelKen.cpp
 endif
 
-libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
+libmoses_la_LIBADD = $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)

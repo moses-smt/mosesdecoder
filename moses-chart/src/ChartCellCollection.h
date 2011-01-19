@@ -55,7 +55,7 @@ public:
 		return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
 	}
 	
-	const std::vector<Moses::Word> &GetHeadwords(const Moses::WordsRange &coverage) const
+	const Moses::NonTerminalSet &GetHeadwords(const Moses::WordsRange &coverage) const
 	{
 		const ChartCell &cell = Get(coverage);
 		return cell.GetHeadwords();

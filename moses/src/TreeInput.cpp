@@ -269,21 +269,20 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
 	assert(label.IsNonTerminal());
 	
 	SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
-	LabelList &list = GetLabelList(startPos, endPos);
+	NonTerminalSet &list = GetLabelSet(startPos, endPos);
 	switch (overlapType)
 	{
 		case SourceLabelOverlapAdd: 
-			list.push_back(label);
+			list.insert(label);
 			break;
 		case SourceLabelOverlapReplace:
 			if (list.size() > 0) // replace existing label
-				list[0] = label;
-			else
-				list.push_back(label);
+                list.clear();
+			list.insert(label);
 			break;
 		case SourceLabelOverlapDiscard:
 			if (list.size() == 0) 
-				list.push_back(label);
+				list.insert(label);
 			break;
 	}
 }
@@ -307,9 +306,9 @@ std::ostream& operator<<(std::ostream &out, const TreeInput &input)
 	{
 		for (size_t endPos = startPos; endPos < size; ++endPos)
 		{
-			const LabelList &labelList = input.GetLabelList(startPos, endPos);
-			LabelList::const_iterator iter;
-			for (iter = labelList.begin(); iter != labelList.end(); ++iter)
+			const NonTerminalSet &labelSet = input.GetLabelSet(startPos, endPos);
+			NonTerminalSet::const_iterator iter;
+			for (iter = labelSet.begin(); iter != labelSet.end(); ++iter)
 			{
 				const Word &word = *iter;
 				out << "[" << startPos <<"," << endPos << "]=" 

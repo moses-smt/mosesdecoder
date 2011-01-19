@@ -25,6 +25,9 @@
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "CellCollection.h"
+#include "InputType.h"
+#include "WordConsumed.h"
+#include "NonTerminal.h"
 
 namespace Moses
 {
@@ -100,7 +103,17 @@ namespace Moses
 																			,WordsRange const& range
 																			,bool adhereTableLimit
 																			,const CellCollection &cellColl) const;
-			
+
+      void ExtendPartialRuleApplication(
+          const PhraseDictionaryNodeSCFG & node,
+          const WordConsumed * prevWordConsumed,
+          size_t startPos,
+          size_t endPos,
+          size_t stackInd,
+          const NonTerminalSet & sourceNonTerms,
+          const NonTerminalSet & targetNonTerms,
+          ProcessedRuleColl & processedRuleColl) const;
+
 			void CleanUp();
 		};
 	
