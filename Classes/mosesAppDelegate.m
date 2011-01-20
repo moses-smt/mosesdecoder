@@ -26,6 +26,10 @@
     [self.window addSubview:viewController.view];
     [self.window makeKeyAndVisible];
 
+		NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		
+		NSLog(@"paths = %@", paths); 
+		
     return YES;
 }
 
