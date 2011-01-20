@@ -23,7 +23,7 @@ namespace HashMapSpace
         public:
 //     ~hashMap();
             long hashValue ( string key );
-            int trouve ( size_t searchKey );
+            int trouve ( long searchKey );
             int trouve ( string key );
             void addHasher ( string key, string value );
             stringHasher getHasher ( string key );
