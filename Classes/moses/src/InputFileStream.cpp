@@ -40,7 +40,7 @@ InputFileStream::InputFileStream(const std::string &filePath)
     fb = fb->open(filePath.c_str(), std::ios::in);
     if (! fb) {
       cerr << "Can't read " << filePath.c_str() << endl;
-      exit(1);
+      return;
     }
     m_streambuf = fb;
   }

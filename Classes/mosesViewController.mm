@@ -9,6 +9,9 @@
 #import "CFunctions.h"
 #import "mosesViewController.h"
 
+extern "C" {
+#import "minzipwrapper.h"
+}
 @implementation mosesViewController
 
 @synthesize doNotPressButton;
@@ -52,7 +55,25 @@
 	const char *iniPath = [iniPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
 	
 	int ret = LoadModel(documentsDirectory, iniPath, source, target, description);
-	//NSLog(ret);
+	
+	if (ret)
+	{
+		NSLog(@"oh dear");
+		// Create a suitable alert view
+		alertView = [ [UIAlertView alloc]
+								 initWithTitle:@"Error"
+								 message:@"Can't load model" 
+								 delegate:self
+								 cancelButtonTitle:@"Close"
+								 otherButtonTitles:nil ];
+		// show alert
+		[alertView show];
+		//	[alertView release];
+	}
+	else {
+		NSLog(@"Loaded");
+	}
+
 	
 }
 
@@ -83,7 +104,7 @@
     [super dealloc];
 }
 
-- (IBAction) doNotPressButtonWasTouched
+- (IBAction) translateButtonWasTouched
 {	
 	// made red
 	[doNotPressButton setTitleColor:[UIColor redColor] 
@@ -106,6 +127,55 @@
 	
 	[greeting release];
 	
+}
+
+- (IBAction) infoButtonWasTouched
+{	
+	NSMutableArray *retval = [NSMutableArray array];
+	
+
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *publicDocumentsDir = [paths objectAtIndex:0];   
+	
+	NSError *error;
+	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
+	if (files == nil) {
+		NSLog(@"Error reading contents of documents directory: %@", [error localizedDescription]);
+		//return retval;
+	}
+	
+	for (NSString *file in files) 
+	{
+		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
+		fullPath = [fullPath stringByAppendingPathComponent:file]; 
+		NSLog(fullPath);
+
+		if ([fullPath.pathExtension compare:@"zip" options:NSCaseInsensitiveSearch] == NSOrderedSame) 
+		{        
+			NSLog(@"unzipping");	
+
+			const char *fileCStr = [fullPath cStringUsingEncoding: NSASCIIStringEncoding  ];
+			const char *docPathCtr = [publicDocumentsDir cStringUsingEncoding: NSASCIIStringEncoding  ];
+
+			Unzip(fileCStr, docPathCtr);
+			
+		}
+		else 
+		{
+			NSLog(fullPath);		
+		}
+
+	}
+	
+}
+
+- (void) alertView:(UIAlertView *)alertView
+didDismissWithButtonIndex:(NSInteger) buttonIndex
+{
+	NSLog(@"button=%i", buttonIndex);
+	NSLog(@"alertView=%i", alertView);
+	
+	exit(1);	
 }
 
 @end

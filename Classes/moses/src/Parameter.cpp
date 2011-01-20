@@ -442,6 +442,9 @@ void Parameter::OverwriteParam(const string &paramSwitch, const string &paramNam
 bool Parameter::ReadConfigFile(const string &filePath ) 
 {
 	InputFileStream inFile(filePath);
+	if (!inFile.IsGood())
+		return false;
+	
 	string line, paramName;
 	while(getline(inFile, line)) 
 	{

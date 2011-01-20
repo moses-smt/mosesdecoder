@@ -18,7 +18,8 @@
 @property (nonatomic, retain) IBOutlet UIButton *doNotPressButton;
 @property (nonatomic, retain) IBOutlet UITextField *sourceText, *targetText;
 
-- (IBAction) doNotPressButtonWasTouched;
+- (IBAction) translateButtonWasTouched;
+- (IBAction) infoButtonWasTouched;
 
 @end
 

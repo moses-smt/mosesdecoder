@@ -41,6 +41,10 @@ public:
 	~InputFileStream();
 
 	void Close();
+	
+	bool IsGood()
+	{ return this->good(); }
+		
 };
 
 }

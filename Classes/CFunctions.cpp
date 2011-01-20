@@ -13,6 +13,7 @@
 #include "Manager.h"
 #include "UserMessage.h"
 #include "Tokenizer.h"
+#include "minzipwrapper.h"
 
 using namespace std;
 using namespace Moses;

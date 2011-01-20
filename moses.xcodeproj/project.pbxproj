@@ -11,6 +11,11 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		1E0856A912E8114E009E038C /* icon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 1E0856A812E8114E009E038C /* icon.jpg */; };
+		1E340C1912E8564F009A4739 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E340C0C12E8564F009A4739 /* ioapi.c */; };
+		1E340C1E12E8564F009A4739 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E340C1312E8564F009A4739 /* mztools.c */; };
+		1E340C1F12E8564F009A4739 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E340C1512E8564F009A4739 /* unzip.c */; };
+		1E340C2012E8564F009A4739 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E340C1712E8564F009A4739 /* zip.c */; };
+		1E340C4712E8581E009A4739 /* minzipwrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E340C4512E8581E009A4739 /* minzipwrapper.c */; };
 		1E6456BA12E824140018EB1A /* Collation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6456B612E824140018EB1A /* Collation.cpp */; };
 		1E6456BB12E824140018EB1A /* Tokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6456B812E824140018EB1A /* Tokenizer.cpp */; };
 		1E81890E12E6FAC900A60062 /* mosesAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E81890B12E6FAC900A60062 /* mosesAppDelegate.m */; };
@@ -152,6 +157,17 @@
 		1D6058910D05DD3D006BFB54 /* moses.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1E0856A812E8114E009E038C /* icon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = icon.jpg; sourceTree = "<group>"; };
+		1E340C0B12E8564F009A4739 /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = crypt.h; path = Classes/minizip/crypt.h; sourceTree = "<group>"; };
+		1E340C0C12E8564F009A4739 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ioapi.c; path = Classes/minizip/ioapi.c; sourceTree = "<group>"; };
+		1E340C0D12E8564F009A4739 /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ioapi.h; path = Classes/minizip/ioapi.h; sourceTree = "<group>"; };
+		1E340C1312E8564F009A4739 /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mztools.c; path = Classes/minizip/mztools.c; sourceTree = "<group>"; };
+		1E340C1412E8564F009A4739 /* mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mztools.h; path = Classes/minizip/mztools.h; sourceTree = "<group>"; };
+		1E340C1512E8564F009A4739 /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = unzip.c; path = Classes/minizip/unzip.c; sourceTree = "<group>"; };
+		1E340C1612E8564F009A4739 /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unzip.h; path = Classes/minizip/unzip.h; sourceTree = "<group>"; };
+		1E340C1712E8564F009A4739 /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = zip.c; path = Classes/minizip/zip.c; sourceTree = "<group>"; };
+		1E340C1812E8564F009A4739 /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zip.h; path = Classes/minizip/zip.h; sourceTree = "<group>"; };
+		1E340C4512E8581E009A4739 /* minzipwrapper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minzipwrapper.c; path = Classes/minizip/minzipwrapper.c; sourceTree = "<group>"; };
+		1E340C4612E8581E009A4739 /* minzipwrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = minzipwrapper.h; path = Classes/minizip/minzipwrapper.h; sourceTree = "<group>"; };
 		1E6456B512E824140018EB1A /* CollateNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CollateNode.h; path = Classes/tokenizer/src/CollateNode.h; sourceTree = "<group>"; };
 		1E6456B612E824140018EB1A /* Collation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Collation.cpp; path = Classes/tokenizer/src/Collation.cpp; sourceTree = "<group>"; };
 		1E6456B712E824140018EB1A /* Collation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Collation.h; path = Classes/tokenizer/src/Collation.h; sourceTree = "<group>"; };
@@ -476,6 +492,24 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1E340C0512E855F0009A4739 /* minizip */ = {
+			isa = PBXGroup;
+			children = (
+				1E340C4512E8581E009A4739 /* minzipwrapper.c */,
+				1E340C4612E8581E009A4739 /* minzipwrapper.h */,
+				1E340C0B12E8564F009A4739 /* crypt.h */,
+				1E340C0C12E8564F009A4739 /* ioapi.c */,
+				1E340C0D12E8564F009A4739 /* ioapi.h */,
+				1E340C1312E8564F009A4739 /* mztools.c */,
+				1E340C1412E8564F009A4739 /* mztools.h */,
+				1E340C1512E8564F009A4739 /* unzip.c */,
+				1E340C1612E8564F009A4739 /* unzip.h */,
+				1E340C1712E8564F009A4739 /* zip.c */,
+				1E340C1812E8564F009A4739 /* zip.h */,
+			);
+			name = minizip;
+			sourceTree = "<group>";
+		};
 		1E6456B412E823FE0018EB1A /* tokenizer */ = {
 			isa = PBXGroup;
 			children = (
@@ -791,6 +825,7 @@
 		29B97314FDCFA39411CA2CEA /* moses */ = {
 			isa = PBXGroup;
 			children = (
+				1E340C0512E855F0009A4739 /* minizip */,
 				1E6456B412E823FE0018EB1A /* tokenizer */,
 				1E85C54912E6D3480054A39F /* kenlm */,
 				1E85C3DE12E6D23F0054A39F /* OnDiskPt */,
@@ -1028,6 +1063,11 @@
 				1E818A4312E7488C00A60062 /* CFunctions.cpp in Sources */,
 				1E6456BA12E824140018EB1A /* Collation.cpp in Sources */,
 				1E6456BB12E824140018EB1A /* Tokenizer.cpp in Sources */,
+				1E340C1912E8564F009A4739 /* ioapi.c in Sources */,
+				1E340C1E12E8564F009A4739 /* mztools.c in Sources */,
+				1E340C1F12E8564F009A4739 /* unzip.c in Sources */,
+				1E340C2012E8564F009A4739 /* zip.c in Sources */,
+				1E340C4712E8581E009A4739 /* minzipwrapper.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
