@@ -1,0 +1,100 @@
+// $Id: WordsRange.h 3002 2010-03-25 11:43:18Z bhaddow $
+
+/***********************************************************************
+Moses - factored phrase-based language decoder
+Copyright (C) 2006 University of Edinburgh
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
+
+#ifndef moses_WordsRange_h
+#define moses_WordsRange_h
+
+#include <iostream>
+#include "TypeDef.h"
+#include "Util.h"
+
+namespace Moses
+{
+
+/***
+ * Efficient version of WordsBitmap for contiguous ranges
+ */
+class WordsRange
+{
+	friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
+
+	size_t m_startPos, m_endPos;
+public:
+	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
+	inline WordsRange(const WordsRange &copy)
+	 : m_startPos(copy.GetStartPos())
+	 , m_endPos(copy.GetEndPos())
+	 {}
+	
+	inline size_t GetStartPos() const
+	{
+		return m_startPos;
+	}
+	inline size_t GetEndPos() const
+	{
+		return m_endPos;
+	}
+
+	//! count of words translated
+	inline size_t GetNumWordsCovered() const
+	{
+		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
+	}
+
+	//! transitive comparison
+	inline bool operator<(const WordsRange& x) const 
+	{
+		return (m_startPos<x.m_startPos 
+						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
+	}
+
+	// equality operator
+	inline bool operator==(const WordsRange& x) const 
+	{
+	  return (m_startPos==x.m_startPos && m_endPos==x.m_endPos);
+	}	
+	// Whether two word ranges overlap or not
+	inline bool Overlap(const WordsRange& x) const
+	{
+		
+		if ( x.m_endPos < m_startPos || x.m_startPos > m_endPos) return false;
+		
+		return true;
+	}
+	
+	inline size_t GetNumWordsBetween(const WordsRange& x) const
+	{
+	  assert(!Overlap(x));
+
+	  if (x.m_endPos < m_startPos) {
+	    return m_startPos - x.m_endPos;
+	  }
+
+	  return x.m_startPos - m_endPos;
+	}
+
+
+	TO_STRING();
+};
+
+
+}
+#endif
