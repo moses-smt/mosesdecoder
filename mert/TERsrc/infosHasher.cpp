@@ -6,14 +6,14 @@ using namespace std;
 
 namespace HashMapSpace
 {
-    infosHasher::infosHasher (size_t cle,string cleTxt, vector<int> valueVecInt )
+    infosHasher::infosHasher (long cle,string cleTxt, vector<int> valueVecInt )
     {
         m_hashKey=cle;
         m_key=cleTxt;
         m_value=valueVecInt;
     }
 //     infosHasher::~infosHasher(){};*/
-    size_t  infosHasher::getHashKey()
+    long  infosHasher::getHashKey()
     {
         return m_hashKey;
     }

@@ -6,30 +6,30 @@ using namespace std;
 
 namespace HashMapSpace
 {
-    stringHasher::stringHasher ( std::size_t cle, std::string cleTxt, std::string valueTxt )
+    stringHasher::stringHasher ( long cle, string cleTxt, string valueTxt )
     {
         m_hashKey=cle;
         m_key=cleTxt;
         m_value=valueTxt;
     }
 //     stringHasher::~stringHasher(){};*/
-    std::size_t  stringHasher::getHashKey()
+    long  stringHasher::getHashKey()
     {
         return m_hashKey;
     }
-    std::string  stringHasher::getKey()
+    string  stringHasher::getKey()
     {
         return m_key;
     }
-    std::string  stringHasher::getValue()
+    string  stringHasher::getValue()
     {
         return m_value;
     }
-    void stringHasher::setValue ( std::string  value )
+    void stringHasher::setValue ( string  value )
     {
         m_value=value;
     }
 
 
-// typedef stdext::hash_map<std::string, std::string, stringhasher> HASH_S_S;
+// typedef stdext::hash_map<string, string, stringhasher> HASH_S_S;
 }

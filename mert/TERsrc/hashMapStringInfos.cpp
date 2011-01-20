@@ -17,13 +17,13 @@ namespace HashMapSpace
 	  }
 	}*/
     /**
-    * int hashMapStringInfos::trouve ( size_t searchKey )
+    * int hashMapStringInfos::trouve ( long searchKey )
     * @param searchKey
     * @return
     */
-    int hashMapStringInfos::trouve ( size_t searchKey )
+    int hashMapStringInfos::trouve ( long searchKey )
     {
-	size_t foundKey;
+	long foundKey;
     //       vector<stringInfosHasher>::const_iterator l_hasher=m_hasher.begin();
 	for ( vector<stringInfosHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
 	{
@@ -38,8 +38,8 @@ namespace HashMapSpace
 
     int hashMapStringInfos::trouve ( string key )
     {
-	size_t searchKey=hashValue ( key );
-	size_t foundKey;;
+	long searchKey=hashValue ( key );
+	long foundKey;;
     //       vector<stringInfosHasher>::const_iterator l_hasher=m_hasher.begin();
 	for ( vector<stringInfosHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
 	{
@@ -53,14 +53,17 @@ namespace HashMapSpace
     }
 
     /**
-    * size_t hashMapStringInfos::hashValue ( string key )
+    * long hashMapStringInfos::hashValue ( string key )
     * @param key
     * @return
     */
-    size_t hashMapStringInfos::hashValue ( string key )
+    long hashMapStringInfos::hashValue ( string key )
     {
-	boost::hash<string> hasher;
-	return hasher ( key );
+		locale loc;                 // the "C" locale
+	const collate<char>& coll = use_facet<collate<char> >(loc);
+	return coll.hash(key.data(),key.data()+key.length());
+// 	boost::hash<string> hasher;
+// 	return hasher ( key );
     }
     /**
     * void hashMapStringInfos::addHasher ( string key, string value )
@@ -74,7 +77,7 @@ namespace HashMapSpace
     //         cerr << "ICI1" <<endl;
 	    stringInfosHasher H ( hashValue ( key ),key,value );
     //         cerr <<" "<< hashValue ( key )<<" "<< key<<" "<<value <<endl;
-    //         cerr << "ICI2" <<endl;
+    //         cerr << "ICI2" <<endl;		
 
 	    m_hasher.push_back ( H );
 	}
@@ -85,8 +88,8 @@ namespace HashMapSpace
     }
     stringInfosHasher hashMapStringInfos::getHasher ( string key )
     {
-	size_t searchKey=hashValue ( key );
-	size_t foundKey;
+	long searchKey=hashValue ( key );
+	long foundKey;
     //       vector<stringInfosHasher>::const_iterator l_hasher=m_hasher.begin();
 	for ( vector<stringInfosHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
 	{
@@ -102,8 +105,8 @@ namespace HashMapSpace
     }
     vector<string> hashMapStringInfos::getValue ( string key )
     {
-	size_t searchKey=hashValue ( key );
-	size_t foundKey;
+	long searchKey=hashValue ( key );
+	long foundKey;
 	vector<string> retour;
     //       vector<stringInfosHasher>::const_iterator l_hasher=m_hasher.begin();
 	for ( vector<stringInfosHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
@@ -119,8 +122,8 @@ namespace HashMapSpace
     }
     //     string hashMapStringInfos::searchValue ( string value )
     //     {
-    // //       size_t searchKey=hashValue ( key );
-    // //       size_t foundKey;
+    // //       long searchKey=hashValue ( key );
+    // //       long foundKey;
     //       vector<int> foundValue;
     //
     // //       vector<stringInfosHasher>::const_iterator l_hasher=m_hasher.begin();
@@ -138,8 +141,8 @@ namespace HashMapSpace
 
     void hashMapStringInfos::setValue ( string key , vector<string>  value )
     {
-	size_t searchKey=hashValue ( key );
-	size_t foundKey;
+	long searchKey=hashValue ( key );
+	long foundKey;
     //       vector<stringInfosHasher>::const_iterator l_hasher=m_hasher.begin();
 	for ( vector<stringInfosHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
 	{
@@ -170,7 +173,7 @@ namespace HashMapSpace
 
 
 
-//     size_t hashValue(string key){}
+//     long hashValue(string key){}
 
 }
 

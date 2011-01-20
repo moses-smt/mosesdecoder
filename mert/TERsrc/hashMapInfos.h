@@ -17,21 +17,21 @@ namespace HashMapSpace
     class hashMapInfos
     {
         private:
-            std::vector<infosHasher> m_hasher;
+            vector<infosHasher> m_hasher;
 
         public:
 //     ~hashMap();
-            std::size_t hashValue ( std::string key );
-            int trouve ( std::size_t searchKey );
-            int trouve ( std::string key );
-            void addHasher ( std::string key, vector<int>  value );
-            void addValue ( std::string key, vector<int>  value );
-            infosHasher getHasher ( std::string key );
-            vector<int> getValue ( std::string key );
-//         std::string searchValue ( std::string key );
-            void setValue ( std::string key , vector<int>  value );
+            long hashValue ( string key );
+            int trouve ( long searchKey );
+            int trouve ( string key );
+            void addHasher ( string key, vector<int>  value );
+            void addValue ( string key, vector<int>  value );
+            infosHasher getHasher ( string key );
+            vector<int> getValue ( string key );
+//         string searchValue ( string key );
+            void setValue ( string key , vector<int>  value );
             void printHash();
-            std::vector<infosHasher> getHashMap();
+            vector<infosHasher> getHashMap();
             string printStringHash();
             string printStringHash2();
             string printStringHashForLexicon();

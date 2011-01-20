@@ -12,13 +12,13 @@ namespace HashMapSpace
     class infosHasher
     {
         private:
-            size_t m_hashKey;
+            long m_hashKey;
             string m_key;
             vector<int> m_value;
 
         public:
-            infosHasher ( size_t cle, string cleTxt, vector<int> valueVecInt );
-            size_t getHashKey();
+            infosHasher ( long cle, string cleTxt, vector<int> valueVecInt );
+            long getHashKey();
             string getKey();
             vector<int> getValue();
             void setValue ( vector<int> value );

@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <locale>
 
 using namespace std;
 
@@ -17,20 +18,20 @@ namespace HashMapSpace
     class hashMap
     {
         private:
-            std::vector<stringHasher> m_hasher;
+            vector<stringHasher> m_hasher;
 
         public:
 //     ~hashMap();
-            std::size_t hashValue ( std::string key );
-            int trouve ( std::size_t searchKey );
+            long hashValue ( string key );
+            int trouve ( size_t searchKey );
             int trouve ( string key );
-            void addHasher ( std::string key, std::string value );
-            stringHasher getHasher ( std::string key );
-            std::string getValue ( std::string key );
-            std::string searchValue ( std::string key );
-            void setValue ( std::string key , std::string value );
+            void addHasher ( string key, string value );
+            stringHasher getHasher ( string key );
+            string getValue ( string key );
+            string searchValue ( string key );
+            void setValue ( string key , string value );
             void printHash();
-            std::vector<stringHasher> getHashMap();
+            vector<stringHasher> getHashMap();
             string printStringHash();
             string printStringHash2();
             string printStringHashForLexicon();

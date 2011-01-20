@@ -21,8 +21,8 @@ namespace HashMapSpace
 
         public:
 //     ~hashMap();
-            size_t hashValue ( string key );
-            int trouve ( size_t searchKey );
+            long hashValue ( string key );
+            int trouve ( long searchKey );
             int trouve ( string key );
             void addHasher ( string key, vector<string>  value );
             void addValue ( string key, vector<string>  value );

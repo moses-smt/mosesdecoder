@@ -23,7 +23,7 @@ namespace HashMapSpace
      */
     int hashMap::trouve ( size_t searchKey )
     {
-        std::size_t foundKey;
+        long foundKey;
 //       std::vector<stringHasher>::const_iterator l_hasher=m_hasher.begin();
         for ( vector<stringHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
         {
@@ -37,8 +37,8 @@ namespace HashMapSpace
     }
     int hashMap::trouve ( string key )
     {
-        std::size_t searchKey=hashValue ( key );
-        std::size_t foundKey;;
+        long searchKey=hashValue ( key );
+        long foundKey;;
 //       std::vector<stringHasher>::const_iterator l_hasher=m_hasher.begin();
         for ( vector<stringHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
         {
@@ -51,14 +51,17 @@ namespace HashMapSpace
         return 0;
     }
     /**
-     * std::size_t hashMap::hashValue ( std::string key )
+     * long hashMap::hashValue ( string key )
      * @param key
      * @return
      */
-    std::size_t hashMap::hashValue ( std::string key )
+    long hashMap::hashValue ( string key )
     {
-        boost::hash<std::string> hasher;
-        return hasher ( key );
+	locale loc;                 // the "C" locale
+	const collate<char>& coll = use_facet<collate<char> >(loc);
+	return coll.hash(key.data(),key.data()+key.length());
+//         boost::hash<std::string> hasher;
+//         return hasher ( key );
     }
     /**
      * void hashMap::addHasher ( std::string key, std::string value )
@@ -79,8 +82,8 @@ namespace HashMapSpace
     }
     stringHasher hashMap::getHasher ( std::string key )
     {
-        std::size_t searchKey=hashValue ( key );
-        std::size_t foundKey;
+        long searchKey=hashValue ( key );
+        long foundKey;
 	stringHasher defaut(0,"","");
 //       std::vector<stringHasher>::const_iterator l_hasher=m_hasher.begin();
         for ( vector<stringHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
@@ -95,8 +98,8 @@ namespace HashMapSpace
     }
     std::string hashMap::getValue ( std::string key )
     {
-        std::size_t searchKey=hashValue ( key );
-        std::size_t foundKey;
+        long searchKey=hashValue ( key );
+        long foundKey;
 //       std::vector<stringHasher>::const_iterator l_hasher=m_hasher.begin();
         for ( vector<stringHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
         {
@@ -111,8 +114,8 @@ namespace HashMapSpace
     }
     std::string hashMap::searchValue ( std::string value )
     {
-//       std::size_t searchKey=hashValue ( key );
-//       std::size_t foundKey;
+//       long searchKey=hashValue ( key );
+//       long foundKey;
         string foundValue;
 
 //       std::vector<stringHasher>::const_iterator l_hasher=m_hasher.begin();
@@ -130,8 +133,8 @@ namespace HashMapSpace
 
     void hashMap::setValue ( std::string key , std::string value )
     {
-        std::size_t searchKey=hashValue ( key );
-        std::size_t foundKey;
+        long searchKey=hashValue ( key );
+        long foundKey;
 //       std::vector<stringHasher>::const_iterator l_hasher=m_hasher.begin();
         for ( vector<stringHasher>:: iterator l_hasher=m_hasher.begin() ; l_hasher!=m_hasher.end() ; l_hasher++ )
         {
@@ -158,7 +161,7 @@ namespace HashMapSpace
 
 
 
-//     std::size_t hashValue(std::string key){}
+//     long hashValue(std::string key){}
 
 }
 

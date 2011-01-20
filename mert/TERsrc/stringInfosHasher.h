@@ -11,14 +11,14 @@ namespace HashMapSpace
     class stringInfosHasher
     {
         private:
-            std::size_t m_hashKey;
-            std::string m_key;
+            long m_hashKey;
+            string m_key;
             vector<string> m_value;
 
         public:
-            stringInfosHasher ( std::size_t cle, std::string cleTxt, vector<string> valueVecInt );
-            std::size_t getHashKey();
-            std::string getKey();
+            stringInfosHasher ( long cle, string cleTxt, vector<string> valueVecInt );
+            long getHashKey();
+            string getKey();
             vector<string> getValue();
             void setValue ( vector<string> value );
 

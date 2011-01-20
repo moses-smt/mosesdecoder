@@ -4,23 +4,23 @@
 //#include <ext/hash_map>
 #include <iostream>
 
-
+using namespace std;
 namespace HashMapSpace
 {
 
     class stringHasher
     {
         private:
-            std::size_t m_hashKey;
-            std::string m_key;
-            std::string m_value;
+            long m_hashKey;
+            string m_key;
+            string m_value;
 
         public:
-            stringHasher ( std::size_t cle, std::string cleTxt, std::string valueTxt );
-            std::size_t getHashKey();
-            std::string getKey();
-            std::string getValue();
-            void setValue ( std::string value );
+            stringHasher ( long cle, string cleTxt, string valueTxt );
+            long getHashKey();
+            string getKey();
+            string getValue();
+            void setValue ( string value );
 
 
     };
