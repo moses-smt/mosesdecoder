@@ -10,8 +10,10 @@
 #include "unzip.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #define WRITEBUFFERSIZE (8192)
 
@@ -19,13 +21,7 @@
 int mymkdir(const char* dirname)
 {
 	int ret=0;
-#ifdef WIN32
-	ret = mkdir(dirname);
-#else
-#ifdef unix
 	ret = mkdir (dirname,0775);
-#endif
-#endif
 	return ret;
 }
 

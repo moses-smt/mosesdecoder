@@ -175,7 +175,7 @@ didDismissWithButtonIndex:(NSInteger) buttonIndex
 	NSLog(@"button=%i", buttonIndex);
 	NSLog(@"alertView=%i", alertView);
 	
-	exit(1);	
+	//exit(1);	
 }
 
 @end
