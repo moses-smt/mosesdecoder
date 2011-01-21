@@ -2,18 +2,18 @@
 //  mosesAppDelegate.m
 //  moses
 //
-//  Created by Hieu Hoang on 19/01/2011.
+//  Created by Hieu Hoang on 21/01/2011.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
 #import "mosesAppDelegate.h"
-#import "mosesViewController.h"
+
 
 @implementation mosesAppDelegate
 
 @synthesize window;
-@synthesize viewController;
 @synthesize tabBarController;
+
 
 #pragma mark -
 #pragma mark Application lifecycle
@@ -22,14 +22,10 @@
     
     // Override point for customization after application launch.
 
-    // Add the view controller's view to the window and display.
-		[self.window addSubview:tabBarController.view];
-		[self.window makeKeyAndVisible];
+    // Add the tab bar controller's view to the window and display.
+    [self.window addSubview:tabBarController.view];
+    [self.window makeKeyAndVisible];
 
-		NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-		
-		NSLog(@"paths = %@", paths); 
-		
     return YES;
 }
 
@@ -73,6 +69,22 @@
 
 
 #pragma mark -
+#pragma mark UITabBarControllerDelegate methods
+
+/*
+// Optional UITabBarControllerDelegate method.
+- (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController {
+}
+*/
+
+/*
+// Optional UITabBarControllerDelegate method.
+- (void)tabBarController:(UITabBarController *)tabBarController didEndCustomizingViewControllers:(NSArray *)viewControllers changed:(BOOL)changed {
+}
+*/
+
+
+#pragma mark -
 #pragma mark Memory management
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
@@ -83,12 +95,10 @@
 
 
 - (void)dealloc {
-	[tabBarController release];
-
-    [viewController release];
+    [tabBarController release];
     [window release];
     [super dealloc];
 }
 
-
 @end
+

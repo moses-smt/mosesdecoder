@@ -1,15 +1,15 @@
 //
-//  second.m
+//  View2.m
 //  moses
 //
 //  Created by Hieu Hoang on 21/01/2011.
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-#import "SecondViewController.h"
+#import "View2.h"
 
 
-@implementation SecondViewController
+@implementation View2
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
@@ -22,12 +22,12 @@
 }
 */
 
+/*
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-	NSLog(@"2nd loaded");
 }
-
+*/
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -55,5 +55,9 @@
     [super dealloc];
 }
 
+- (IBAction) loadButtonWasTouched
+{
+	NSLog(@"load");
+}
 
 @end
