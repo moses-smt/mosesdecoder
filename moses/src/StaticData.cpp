@@ -1229,6 +1229,7 @@ void StaticData::ReduceTransOptCache() const
 
 void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
 {
+    if (m_transOptCacheMaxSize == 0) return;
 	std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
 	TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
 #ifdef WITH_THREADS   
