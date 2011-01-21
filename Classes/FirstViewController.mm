@@ -1,5 +1,5 @@
 //
-//  mosesViewController.m
+//  FirstViewController.m
 //  moses
 //
 //  Created by Hieu Hoang on 19/01/2011.
@@ -7,12 +7,12 @@
 //
 
 #import "CFunctions.h"
-#import "mosesViewController.h"
+#import "FirstViewController.h"
 
 extern "C" {
 #import "minzipwrapper.h"
 }
-@implementation mosesViewController
+@implementation FirstViewController
 
 @synthesize doNotPressButton;
 @synthesize sourceText;

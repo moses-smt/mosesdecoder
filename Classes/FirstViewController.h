@@ -1,5 +1,5 @@
 //
-//  mosesViewController.h
+//  FirstViewController.h
 //  moses
 //
 //  Created by Hieu Hoang on 19/01/2011.
@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface mosesViewController : UIViewController {
+@interface FirstViewController : UIViewController {
 	UIButton *doNotPressButton;
 	UIAlertView *alertView;
 	UITextField *sourceText, *targetText;

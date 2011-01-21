@@ -18,10 +18,12 @@
 		1E340C4712E8581E009A4739 /* minzipwrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E340C4512E8581E009A4739 /* minzipwrapper.c */; };
 		1E6456BA12E824140018EB1A /* Collation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6456B612E824140018EB1A /* Collation.cpp */; };
 		1E6456BB12E824140018EB1A /* Tokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6456B812E824140018EB1A /* Tokenizer.cpp */; };
+		1E6A994412E9864500C8523B /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E6A994312E9864500C8523B /* MainWindow.xib */; };
+		1E6A999412E9887000C8523B /* SecondView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E6A999212E9887000C8523B /* SecondView.xib */; };
+		1E6A99DE12E98B1D00C8523B /* SecondViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E6A99DD12E98B1D00C8523B /* SecondViewController.m */; };
 		1E81890E12E6FAC900A60062 /* mosesAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E81890B12E6FAC900A60062 /* mosesAppDelegate.m */; };
-		1E81890F12E6FAC900A60062 /* mosesViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1E81890D12E6FAC900A60062 /* mosesViewController.mm */; };
-		1E81892012E6FB3300A60062 /* mosesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E81891F12E6FB3300A60062 /* mosesViewController.xib */; };
-		1E81894112E6FBA000A60062 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E81894012E6FBA000A60062 /* MainWindow.xib */; };
+		1E81890F12E6FAC900A60062 /* FirstViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1E81890D12E6FAC900A60062 /* FirstViewController.mm */; };
+		1E81892012E6FB3300A60062 /* FirstView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E81891F12E6FB3300A60062 /* FirstView.xib */; };
 		1E818A4312E7488C00A60062 /* CFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E818A4212E7488C00A60062 /* CFunctions.cpp */; };
 		1E85C3F112E6D2B20054A39F /* OnDiskWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E85C3E112E6D2B20054A39F /* OnDiskWrapper.cpp */; };
 		1E85C3F212E6D2B20054A39F /* Phrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E85C3E312E6D2B20054A39F /* Phrase.cpp */; };
@@ -173,12 +175,15 @@
 		1E6456B712E824140018EB1A /* Collation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Collation.h; path = Classes/tokenizer/src/Collation.h; sourceTree = "<group>"; };
 		1E6456B812E824140018EB1A /* Tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tokenizer.cpp; path = Classes/tokenizer/src/Tokenizer.cpp; sourceTree = "<group>"; };
 		1E6456B912E824140018EB1A /* Tokenizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tokenizer.h; path = Classes/tokenizer/src/Tokenizer.h; sourceTree = "<group>"; };
+		1E6A994312E9864500C8523B /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
+		1E6A999212E9887000C8523B /* SecondView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SecondView.xib; sourceTree = "<group>"; };
+		1E6A99DC12E98B1D00C8523B /* SecondViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SecondViewController.h; sourceTree = "<group>"; };
+		1E6A99DD12E98B1D00C8523B /* SecondViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SecondViewController.m; sourceTree = "<group>"; };
 		1E81890A12E6FAC900A60062 /* mosesAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mosesAppDelegate.h; sourceTree = "<group>"; };
 		1E81890B12E6FAC900A60062 /* mosesAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = mosesAppDelegate.m; sourceTree = "<group>"; };
-		1E81890C12E6FAC900A60062 /* mosesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mosesViewController.h; sourceTree = "<group>"; };
-		1E81890D12E6FAC900A60062 /* mosesViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mosesViewController.mm; sourceTree = "<group>"; };
-		1E81891F12E6FB3300A60062 /* mosesViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = mosesViewController.xib; sourceTree = "<group>"; };
-		1E81894012E6FBA000A60062 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
+		1E81890C12E6FAC900A60062 /* FirstViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FirstViewController.h; sourceTree = "<group>"; };
+		1E81890D12E6FAC900A60062 /* FirstViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FirstViewController.mm; sourceTree = "<group>"; };
+		1E81891F12E6FB3300A60062 /* FirstView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FirstView.xib; sourceTree = "<group>"; };
 		1E818A4112E7488C00A60062 /* CFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFunctions.h; sourceTree = "<group>"; };
 		1E818A4212E7488C00A60062 /* CFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CFunctions.cpp; sourceTree = "<group>"; };
 		1E85C3E112E6D2B20054A39F /* OnDiskWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OnDiskWrapper.cpp; path = Classes/OnDiskPt/src/OnDiskWrapper.cpp; sourceTree = "<group>"; };
@@ -474,10 +479,12 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				1E6A99DC12E98B1D00C8523B /* SecondViewController.h */,
+				1E6A99DD12E98B1D00C8523B /* SecondViewController.m */,
 				1E81890A12E6FAC900A60062 /* mosesAppDelegate.h */,
 				1E81890B12E6FAC900A60062 /* mosesAppDelegate.m */,
-				1E81890C12E6FAC900A60062 /* mosesViewController.h */,
-				1E81890D12E6FAC900A60062 /* mosesViewController.mm */,
+				1E81890C12E6FAC900A60062 /* FirstViewController.h */,
+				1E81890D12E6FAC900A60062 /* FirstViewController.mm */,
 				1E818A4112E7488C00A60062 /* CFunctions.h */,
 				1E818A4212E7488C00A60062 /* CFunctions.cpp */,
 			);
@@ -851,10 +858,11 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1E6A999212E9887000C8523B /* SecondView.xib */,
 				1E0856A812E8114E009E038C /* icon.jpg */,
-				1E81894012E6FBA000A60062 /* MainWindow.xib */,
-				1E81891F12E6FB3300A60062 /* mosesViewController.xib */,
+				1E81891F12E6FB3300A60062 /* FirstView.xib */,
 				8D1107310486CEB800E47090 /* moses-Info.plist */,
+				1E6A994312E9864500C8523B /* MainWindow.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -918,9 +926,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E81892012E6FB3300A60062 /* mosesViewController.xib in Resources */,
-				1E81894112E6FBA000A60062 /* MainWindow.xib in Resources */,
+				1E81892012E6FB3300A60062 /* FirstView.xib in Resources */,
 				1E0856A912E8114E009E038C /* icon.jpg in Resources */,
+				1E6A994412E9864500C8523B /* MainWindow.xib in Resources */,
+				1E6A999412E9887000C8523B /* SecondView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1059,7 +1068,7 @@
 				1E85C85212E6DAE80054A39F /* vocab.cpp in Sources */,
 				1E85C85312E6DAE80054A39F /* DynSuffixArray.cpp in Sources */,
 				1E81890E12E6FAC900A60062 /* mosesAppDelegate.m in Sources */,
-				1E81890F12E6FAC900A60062 /* mosesViewController.mm in Sources */,
+				1E81890F12E6FAC900A60062 /* FirstViewController.mm in Sources */,
 				1E818A4312E7488C00A60062 /* CFunctions.cpp in Sources */,
 				1E6456BA12E824140018EB1A /* Collation.cpp in Sources */,
 				1E6456BB12E824140018EB1A /* Tokenizer.cpp in Sources */,
@@ -1068,6 +1077,7 @@
 				1E340C1F12E8564F009A4739 /* unzip.c in Sources */,
 				1E340C2012E8564F009A4739 /* zip.c in Sources */,
 				1E340C4712E8581E009A4739 /* minzipwrapper.c in Sources */,
+				1E6A99DE12E98B1D00C8523B /* SecondViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

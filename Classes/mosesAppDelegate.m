@@ -13,7 +13,7 @@
 
 @synthesize window;
 @synthesize viewController;
-
+@synthesize tabBarController;
 
 #pragma mark -
 #pragma mark Application lifecycle
@@ -23,8 +23,8 @@
     // Override point for customization after application launch.
 
     // Add the view controller's view to the window and display.
-    [self.window addSubview:viewController.view];
-    [self.window makeKeyAndVisible];
+		[self.window addSubview:tabBarController.view];
+		[self.window makeKeyAndVisible];
 
 		NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		
@@ -83,6 +83,8 @@
 
 
 - (void)dealloc {
+	[tabBarController release];
+
     [viewController release];
     [window release];
     [super dealloc];

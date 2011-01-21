@@ -12,11 +12,14 @@
 
 @interface mosesAppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow *window;
+	UITabBarController *tabBarController;
+
     mosesViewController *viewController;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet mosesViewController *viewController;
+@property (nonatomic, retain) IBOutlet UITabBarController *tabBarController;
 
 @end
 
