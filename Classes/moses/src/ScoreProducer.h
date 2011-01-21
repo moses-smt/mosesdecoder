@@ -24,7 +24,6 @@ class FFState;
 class ScoreProducer
 {
 private:
-	static unsigned int s_globalScoreBookkeepingIdCounter;
 	unsigned int m_scoreBookkeepingId;
 
 	ScoreProducer(const ScoreProducer&);  // don't implement
@@ -38,6 +37,8 @@ protected:
 	virtual ~ScoreProducer();
 
 public:
+	static unsigned int s_globalScoreBookkeepingIdCounter;
+
 	//! contiguous id
 	unsigned int GetScoreBookkeepingID() const { return m_scoreBookkeepingId; }
 	void CreateScoreBookkeepingID()	{	m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;}

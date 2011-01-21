@@ -61,7 +61,7 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
   return max;
 }
 
-StaticData StaticData::s_instance;
+StaticData *StaticData::s_instance = new StaticData();
 
 StaticData::StaticData()
 :m_numLinkParams(1)
@@ -1238,6 +1238,17 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 	ReduceTransOptCache();
 }
 
+	
+void StaticData::Reset()
+{
+	delete s_instance;
+	
+	ScoreProducer::s_globalScoreBookkeepingIdCounter = 0;
+	
+	s_instance = new StaticData(); 
+}
+
+	
 }
 
 

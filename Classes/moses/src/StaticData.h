@@ -62,7 +62,7 @@ class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class TranslationSystem;
-
+	
 typedef std::pair<std::string, float> UnknownLHSEntry;	
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;	
 
@@ -70,7 +70,7 @@ typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 class StaticData
 {
 private:
-	static StaticData									s_instance;
+	static StaticData									*s_instance;
 protected:	
 
 	std::map<long,Phrase> m_constraints;
@@ -233,21 +233,19 @@ public:
 	//! destructor
 	~StaticData();
 	//! return static instance for use like global variable
-	static const StaticData& Instance() { return s_instance; }
+	static const StaticData& Instance() { return *s_instance; }
 	
 	/** delete current static instance and replace with another. 
 		* Used by gui front end
 		*/
-	#ifdef WIN32
-	static void Reset() { s_instance = StaticData(); }
-	#endif
+	static void Reset();
 	
 	/** load data into static instance. This function is required
 		* as LoadData() is not const
 		*/
 	static bool LoadDataStatic(Parameter *parameter)
 	{
-		return s_instance.LoadData(parameter);
+		return s_instance->LoadData(parameter);
 	}
 
 	/** Main function to load everything.

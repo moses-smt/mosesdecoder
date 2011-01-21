@@ -12,6 +12,7 @@
 @interface View2 : UIViewController {
 	IBOutlet UITextField *txtList, *txtLoad;
 	IBOutlet UIButton *btLoad;
+	UIAlertView *alertView;
 
 }
 

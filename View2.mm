@@ -7,6 +7,10 @@
 //
 
 #import "View2.h"
+extern "C" {
+#import "minzipwrapper.h"
+}
+#import "CFunctions.h"
 
 
 @implementation View2
@@ -22,12 +26,53 @@
 }
 */
 
-/*
+
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+	NSMutableArray *retval = [NSMutableArray array];
+	
+	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *publicDocumentsDir = [paths objectAtIndex:0];   
+	
+	NSError *error;
+	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
+	if (files == nil) {
+		NSLog(@"Error reading contents of documents directory: %@", [error localizedDescription]);
+		//return retval;
+	}
+	
+	NSString *modelList = @"";
+	
+	for (NSString *file in files) 
+	{
+		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
+		fullPath = [fullPath stringByAppendingPathComponent:file]; 
+		NSLog(fullPath);
+		
+		if ([fullPath.pathExtension compare:@"zip" options:NSCaseInsensitiveSearch] == NSOrderedSame) 
+		{        
+			NSLog(@"unzipping");	
+			
+			const char *fileCStr = [fullPath cStringUsingEncoding: NSASCIIStringEncoding  ];
+			const char *docPathCtr = [publicDocumentsDir cStringUsingEncoding: NSASCIIStringEncoding  ];
+			
+			Unzip(fileCStr, docPathCtr);
+			remove(fileCStr);
+			
+		}
+		else 
+		{
+			NSLog(fullPath);		
+			modelList = [modelList stringByAppendingPathComponent:@" "]; 
+			modelList = [modelList stringByAppendingPathComponent:file]; 
+		}
+		
+	}
+	
+	txtList.text = modelList;
 }
-*/
 
 /*
 // Override to allow orientations other than the default portrait orientation.
@@ -58,6 +103,45 @@
 - (IBAction) loadButtonWasTouched
 {
 	NSLog(@"load");
+
+	NSString *modelDir = txtLoad.text;
+
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
+	
+	NSString *modelPathNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/"];
+	modelPathNS = [modelPathNS stringByAppendingPathComponent:modelDir];
+	const char *modelPath = [modelPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
+	
+	NSString *iniPathNS = [modelPathNS stringByAppendingPathComponent:@"/moses.ini"]; 
+	const char *iniPath = [iniPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
+	NSLog(iniPathNS);
+	
+	char source[1000];
+	char target[1000];
+	char description[1000];
+	
+	
+	int ret = LoadModel(modelPath, iniPath, source, target, description);
+	
+	if (ret)
+	{
+		NSLog(@"oh dear");
+		// Create a suitable alert view
+		alertView = [ [UIAlertView alloc]
+								 initWithTitle:@"Error"
+								 message:@"Can't load model" 
+								 delegate:self
+								 cancelButtonTitle:@"Close"
+								 otherButtonTitles:nil ];
+		// show alert
+		[alertView show];
+		//	[alertView release];
+	}
+	else {
+		NSLog(@"Loaded");
+	}
+	
 }
 
 @end

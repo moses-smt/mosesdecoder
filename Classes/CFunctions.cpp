@@ -34,6 +34,7 @@ int LoadModel(const char *appDir, const char *iniPath, char *source, char *targe
 		return 1;
 	}
 	
+	StaticData::Reset();
 	const StaticData &staticData = StaticData::Instance();
 	if (!staticData.LoadDataStatic(param))
 		return 2;
