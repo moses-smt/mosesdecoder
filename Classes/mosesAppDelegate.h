@@ -11,6 +11,7 @@
 @interface mosesAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate> {
     UIWindow *window;
     UITabBarController *tabBarController;
+	UIAlertView *alertView;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;

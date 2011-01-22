@@ -27,57 +27,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-	// persistant storage
-	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-	
-	NSString *currModel = [prefs stringForKey:@"currentModel"];
-	NSLog(currModel);
-	
-	// load model
-	if (currModel == nil)
-	{
-		self.tabBarController.selectedIndex = 1;
-		self.view.userInteractionEnabled = NO;
-	}
-	else
-	{
-		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-		NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
-		
-		NSString *modelPathNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/"];
-		modelPathNS = [modelPathNS stringByAppendingPathComponent:currModel];
-		const char *modelPath = [modelPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
-		
-		NSString *iniPathNS = [modelPathNS stringByAppendingPathComponent:@"/moses.ini"]; 
-		const char *iniPath = [iniPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
-		NSLog(iniPathNS);
-		
-		char source[1000];
-		char target[1000];
-		char description[1000];
-		
-		
-		int ret = LoadModel(modelPath, iniPath, source, target, description);
-		
-		if (ret)
-		{
-			NSLog(@"oh dear");
-			// Create a suitable alert view
-			alertView = [ [UIAlertView alloc]
-									 initWithTitle:@"Error"
-									 message:@"Can't load model" 
-									 delegate:self
-									 cancelButtonTitle:@"Close"
-									 otherButtonTitles:nil ];
-			// show alert
-			[alertView show];
-			//	[alertView release];
-		}
-		else {
-			NSLog(@"Loaded");
-		}
-		
-	}
 }
 
 /*
