@@ -34,7 +34,12 @@
 	NSLog(currModel);
 	
 	// load model
-	if (currModel != nil)
+	if (currModel == nil)
+	{
+		self.tabBarController.selectedIndex = 1;
+		self.view.userInteractionEnabled = NO;
+	}
+	else
 	{
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
