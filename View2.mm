@@ -6,6 +6,7 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
+#import "View1.h"
 #import "View2.h"
 extern "C" {
 #import "minzipwrapper.h"
@@ -201,6 +202,10 @@ extern "C" {
 		// show alert
 		[alertView show];
 		//	[alertView release];
+
+		View1 *viewTranslate = [self.tabBarController.viewControllers objectAtIndex:0];		
+		viewTranslate.view.userInteractionEnabled = NO;
+
 	}
 	else {
 		NSLog(@"Loaded");
@@ -212,6 +217,10 @@ extern "C" {
 		
 		NSLog(modelDir);
 		
+		View1 *viewTranslate = [self.tabBarController.viewControllers objectAtIndex:0];		
+		viewTranslate.view.userInteractionEnabled = YES;
+		self.tabBarController.selectedIndex = 0;
+	
 	}
 	
 	

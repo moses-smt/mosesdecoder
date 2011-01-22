@@ -7,7 +7,8 @@
 //
 
 #import "mosesAppDelegate.h"
-
+#import "View1.h"
+#import "View2.h"
 
 @implementation mosesAppDelegate
 
@@ -25,8 +26,8 @@
     // Add the tab bar controller's view to the window and display.
     [self.window addSubview:tabBarController.view];
     [self.window makeKeyAndVisible];
-
-    return YES;
+	
+	return YES;
 }
 
 
@@ -70,14 +71,12 @@
 
 #pragma mark -
 #pragma mark UITabBarControllerDelegate methods
-
 /*
 // Optional UITabBarControllerDelegate method.
 - (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController {
 }
-*/
 
-/*
+
 // Optional UITabBarControllerDelegate method.
 - (void)tabBarController:(UITabBarController *)tabBarController didEndCustomizingViewControllers:(NSArray *)viewControllers changed:(BOOL)changed {
 }

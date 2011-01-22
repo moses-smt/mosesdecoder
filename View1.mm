@@ -10,6 +10,7 @@
 #import "CFunctions.h"
 
 @implementation View1
+@synthesize tab;
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
@@ -102,27 +103,33 @@
 
 - (IBAction) translateButtonWasTouched
 {
+	[txtSource endEditing:YES];
+	[self translateNow];
+}
+
+- (IBAction) translateNow
+{
 	NSLog(@"translate");
-	// made red
-	[btTranslate  setTitleColor:[UIColor redColor] 
-												 forState:UIControlStateNormal];
 	
 	NSString *sourceString = txtSource.text;
 	NSLog(sourceString);
 	
-	const char *cstring = [sourceString UTF8String];
-	char* result = (char *) malloc(sizeof(char)*1000);
-	TranslateSentence(cstring,result);
-	
-	NSString *greeting = //[[NSString alloc] initWithFormat:@"Hello, %@!", nameString];
-	[[NSString alloc] initWithUTF8String: result];
-	NSLog(greeting);
-	
-	free(result);
-	
-	txTarget.text = greeting;
-	
-	[greeting release];
+	sourceString = [sourceString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	if ([sourceString length] > 0)
+	{
+		const char *cstring = [sourceString UTF8String];
+		char* result = (char *) malloc(sizeof(char)*1000);
+		TranslateSentence(cstring,result);
+		
+		NSString *targetString = [[NSString alloc] initWithUTF8String: result];
+		NSLog(targetString);
+		
+		free(result);
+		
+		txTarget.text = targetString;
+		
+		[targetString release];
+	}
 }
 
 - (void) alertView:(UIAlertView *)alertView
@@ -130,7 +137,8 @@ didDismissWithButtonIndex:(NSInteger) buttonIndex
 {
 	NSLog(@"button=%i", buttonIndex);
 	
-	//exit(1);	
+	self.tabBarController.selectedIndex = 1;
+	self.view.userInteractionEnabled = NO;
 }
 
 @end
