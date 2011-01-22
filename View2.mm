@@ -14,6 +14,7 @@ extern "C" {
 
 
 @implementation View2
+@synthesize folderNames;
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
@@ -30,9 +31,11 @@ extern "C" {
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-	NSMutableArray *retval = [NSMutableArray array];
 	
+	self.folderNames = [[NSMutableArray alloc] init];
 	
+	NSInteger i = self.folderNames.count;
+
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *publicDocumentsDir = [paths objectAtIndex:0];   
 	
@@ -73,12 +76,16 @@ extern "C" {
 			{
 				modelList = [modelList stringByAppendingPathComponent:@" "]; 
 				modelList = [modelList stringByAppendingPathComponent:file]; 				
+				
+				[self.folderNames addObject:file];
+
 			}
 		}
 		
 	}
-	
-	txtList.text = modelList;
+
+	NSInteger j = self.folderNames.count;
+
 }
 
 /*
@@ -104,15 +111,53 @@ extern "C" {
 
 
 - (void)dealloc {
+	[self.folderNames dealloc];
     [super dealloc];
 }
 
-- (IBAction) loadButtonWasTouched
+
+- (IBAction) downloadButtonWasTouched
 {
+	NSString *url = txtURL.text;
+	NSLog(url);
+		
+}
+
+// Customize the number of rows in the table view.
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+	NSInteger num = self.folderNames.count;
+	return num;
+}
+
+// Customize the appearance of table view cells.
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	
+	static NSString *CellIdentifier = @"Cell";
+	
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+	if (cell == nil) {
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+	}
+	
+	NSInteger row = [indexPath row];
+	NSString *txt = [self.folderNames objectAtIndex:row];
+	// Configure the cell.
+	cell.textLabel.text = txt;
+	
+	return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	
 	NSLog(@"load");
 
-	NSString *modelDir = txtLoad.text;
-
+	//Get the dictionary of the selected data source.
+	NSInteger row = indexPath.row;	
+	NSString *modelDir = [self.folderNames objectAtIndex:row];
+	
+	NSLog(modelDir);
+	
+		
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
 	
@@ -157,14 +202,8 @@ extern "C" {
 		
 	}
 	
+	
 }
 
-- (IBAction) downloadButtonWasTouched
-{
-	NSString *url = txtURL.text;
-	NSLog(url);
-	
-	
-}
 
 @end

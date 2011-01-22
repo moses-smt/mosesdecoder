@@ -9,17 +9,24 @@
 #import <UIKit/UIKit.h>
 
 
-@interface View2 : UIViewController {
-	IBOutlet UITextField *txtList, *txtLoad, *txtURL;
+@interface View2 : UIViewController 
+										<UITableViewDelegate, UITableViewDataSource>
+{
+	IBOutlet UITextField *txtURL;
 	IBOutlet UIButton *btLoad, *btDownload;
 	UIAlertView *alertView;
+	NSMutableArray *folderNames;
 
 }
 
-@property (nonatomic, retain) IBOutlet UITextField *txtList, *txtLoad, *txtURL;
+@property (nonatomic, retain) IBOutlet UITextField *txtURL;
 @property (nonatomic, retain) IBOutlet UIButton *btLoad, *btDownload;
 
-- (IBAction) loadButtonWasTouched;
+@property (nonatomic, retain) NSMutableArray *folderNames;
+
 - (IBAction) downloadButtonWasTouched;
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
