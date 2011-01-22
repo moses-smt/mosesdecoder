@@ -63,22 +63,6 @@
 				</object>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 				<bool key="IBUIHorizontal">NO</bool>
-				<object class="IBUIViewController" key="IBUISelectedViewController" id="260748302">
-					<string key="IBUITitle">Previous Trans</string>
-					<object class="IBUITabBarItem" key="IBUITabBarItem" id="1021766058">
-						<string key="IBUITitle">Previous Trans</string>
-						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUITabBar"/>
-					</object>
-					<reference key="IBUIToolbarItems" ref="0"/>
-					<reference key="IBUIParentViewController" ref="1034742383"/>
-					<string key="IBUINibName">View3</string>
-					<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
-						<int key="interfaceOrientation">1</int>
-					</object>
-					<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-					<bool key="IBUIHorizontal">NO</bool>
-				</object>
 				<object class="NSMutableArray" key="IBUIViewControllers">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIViewController" id="1024858337">
@@ -110,7 +94,6 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<bool key="IBUIHorizontal">NO</bool>
 					</object>
-					<reference ref="260748302"/>
 				</object>
 				<object class="IBUITabBar" key="IBUITabBar" id="795333663">
 					<nil key="NSNextResponder"/>
@@ -189,7 +172,6 @@
 							<reference ref="795333663"/>
 							<reference ref="1024858337"/>
 							<reference ref="268481961"/>
-							<reference ref="260748302"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -230,20 +212,6 @@
 						<int key="objectID">-2</int>
 						<reference key="object" ref="532797962"/>
 						<reference key="parent" ref="0"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">125</int>
-						<reference key="object" ref="260748302"/>
-						<object class="NSMutableArray" key="children">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="1021766058"/>
-						</object>
-						<reference key="parent" ref="1034742383"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">126</int>
-						<reference key="object" ref="1021766058"/>
-						<reference key="parent" ref="260748302"/>
 					</object>
 				</object>
 			</object>
@@ -385,13 +353,13 @@
 					<string key="className">View2</string>
 					<string key="superclassName">UIViewController</string>
 					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">loadButtonWasTouched</string>
+						<string key="NS.key.0">downloadButtonWasTouched</string>
 						<string key="NS.object.0">id</string>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">loadButtonWasTouched</string>
+						<string key="NS.key.0">downloadButtonWasTouched</string>
 						<object class="IBActionInfo" key="NS.object.0">
-							<string key="name">loadButtonWasTouched</string>
+							<string key="name">downloadButtonWasTouched</string>
 							<string key="candidateClassName">id</string>
 						</object>
 					</object>
@@ -399,14 +367,14 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>btDownload</string>
 							<string>btLoad</string>
-							<string>txtList</string>
-							<string>txtLoad</string>
+							<string>txtURL</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIButton</string>
-							<string>UITextField</string>
+							<string>UIButton</string>
 							<string>UITextField</string>
 						</object>
 					</object>
@@ -414,22 +382,22 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>btDownload</string>
 							<string>btLoad</string>
-							<string>txtList</string>
-							<string>txtLoad</string>
+							<string>txtURL</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">btDownload</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">btLoad</string>
 								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">txtList</string>
-								<string key="candidateClassName">UITextField</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">txtLoad</string>
+								<string key="name">txtURL</string>
 								<string key="candidateClassName">UITextField</string>
 							</object>
 						</object>

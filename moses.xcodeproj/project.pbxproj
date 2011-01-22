@@ -872,8 +872,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				28A0AB4B0D9B1048005BE974 /* moses_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
+				28A0AB4B0D9B1048005BE974 /* moses_Prefix.pch */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
