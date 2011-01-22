@@ -22,12 +22,23 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
     
-    // Override point for customization after application launch.
+	// Override point for customization after application launch.
 
-    // Add the tab bar controller's view to the window and display.
-    [self.window addSubview:tabBarController.view];
-    [self.window makeKeyAndVisible];
+	// Add the tab bar controller's view to the window and display.
+	[self.window addSubview:tabBarController.view];
+	[self.window makeKeyAndVisible];
 
+	NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+	bundlePath = [bundlePath stringByAppendingPathComponent:@"/en-ht.zip"];
+	NSLog(bundlePath);
+	
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
+	documentsDirectoryNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/en-ht.zip"];
+	NSLog(documentsDirectoryNS);
+
+	[[NSFileManager defaultManager] moveItemAtPath:bundlePath toPath:documentsDirectoryNS error:nil];
+	
 	// persistant storage
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	
