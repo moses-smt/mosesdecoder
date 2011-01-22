@@ -10,7 +10,8 @@
 
 
 @interface View3 : UIViewController {
-
+	IBOutlet UITableView *table;
+	
 }
 
 @end

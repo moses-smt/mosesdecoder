@@ -159,4 +159,12 @@ extern "C" {
 	
 }
 
+- (IBAction) downloadButtonWasTouched
+{
+	NSString *url = txtURL.text;
+	NSLog(url);
+	
+	
+}
+
 @end

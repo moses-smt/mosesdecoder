@@ -10,15 +10,16 @@
 
 
 @interface View2 : UIViewController {
-	IBOutlet UITextField *txtList, *txtLoad;
-	IBOutlet UIButton *btLoad;
+	IBOutlet UITextField *txtList, *txtLoad, *txtURL;
+	IBOutlet UIButton *btLoad, *btDownload;
 	UIAlertView *alertView;
 
 }
 
-@property (nonatomic, retain) IBOutlet UITextField *txtList, *txtLoad;
-@property (nonatomic, retain) IBOutlet UIButton *btLoad;
+@property (nonatomic, retain) IBOutlet UITextField *txtList, *txtLoad, *txtURL;
+@property (nonatomic, retain) IBOutlet UIButton *btLoad, *btDownload;
 
 - (IBAction) loadButtonWasTouched;
+- (IBAction) downloadButtonWasTouched;
 
 @end
