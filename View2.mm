@@ -64,9 +64,16 @@ extern "C" {
 		}
 		else 
 		{
-			NSLog(fullPath);		
-			modelList = [modelList stringByAppendingPathComponent:@" "]; 
-			modelList = [modelList stringByAppendingPathComponent:file]; 
+			NSLog(fullPath);
+			fullPath = [fullPath stringByAppendingPathComponent:@"/moses.ini"]; 
+			NSLog(fullPath);
+
+			BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
+			if (fileExists)
+			{
+				modelList = [modelList stringByAppendingPathComponent:@" "]; 
+				modelList = [modelList stringByAppendingPathComponent:file]; 				
+			}
 		}
 		
 	}
@@ -140,6 +147,14 @@ extern "C" {
 	}
 	else {
 		NSLog(@"Loaded");
+		
+		// persistant storage
+		NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];		
+		[prefs setValue:modelDir forKey: @"currentModel"];
+		[prefs synchronize];
+		
+		NSLog(modelDir);
+		
 	}
 	
 }
