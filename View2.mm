@@ -122,6 +122,17 @@ extern "C" {
 	NSString *url = txtURL.text;
 	NSLog(url);
 		
+	// Create a suitable alert view
+	alertView = [ [UIAlertView alloc]
+							 initWithTitle:@"Warning"
+							 message:@"Not functioning yet." 
+							 delegate:self
+							 cancelButtonTitle:@"Close"
+							 otherButtonTitles:nil ];
+	// show alert
+	[alertView show];
+	[alertView release];
+	
 }
 
 // Customize the number of rows in the table view.
