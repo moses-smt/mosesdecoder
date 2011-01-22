@@ -11,6 +11,8 @@
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
+		1EB923D512EA70910009D1B5 /* View3.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EB923D312EA70910009D1B5 /* View3.mm */; };
+		1EB923D612EA70910009D1B5 /* View3.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1EB923D412EA70910009D1B5 /* View3.xib */; };
 		1EDCCE6B12E9A2FA006BB2DE /* View1.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCCE6912E9A2FA006BB2DE /* View1.mm */; };
 		1EDCCE6C12E9A2FA006BB2DE /* View1.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1EDCCE6A12E9A2FA006BB2DE /* View1.xib */; };
 		1EDCCE7912E9A3D4006BB2DE /* View2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCCE7712E9A3D4006BB2DE /* View2.mm */; };
@@ -159,6 +161,9 @@
 		1D3623250D0F684500981E51 /* mosesAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = mosesAppDelegate.m; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* moses.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		1EB923D212EA70910009D1B5 /* View3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = View3.h; sourceTree = "<group>"; };
+		1EB923D312EA70910009D1B5 /* View3.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = View3.mm; sourceTree = "<group>"; };
+		1EB923D412EA70910009D1B5 /* View3.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = View3.xib; sourceTree = "<group>"; };
 		1EDCCE6812E9A2FA006BB2DE /* View1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = View1.h; sourceTree = "<group>"; };
 		1EDCCE6912E9A2FA006BB2DE /* View1.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = View1.mm; sourceTree = "<group>"; };
 		1EDCCE6A12E9A2FA006BB2DE /* View1.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = View1.xib; sourceTree = "<group>"; };
@@ -867,12 +872,6 @@
 			children = (
 				28A0AB4B0D9B1048005BE974 /* moses_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
-				1EDCCE6812E9A2FA006BB2DE /* View1.h */,
-				1EDCCE6912E9A2FA006BB2DE /* View1.mm */,
-				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
-				1EDCCE7612E9A3D4006BB2DE /* View2.h */,
-				1EDCCE7712E9A3D4006BB2DE /* View2.mm */,
-				1EDCCE7812E9A3D4006BB2DE /* View2.xib */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -880,8 +879,17 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1EDCCE6812E9A2FA006BB2DE /* View1.h */,
+				1EDCCE6912E9A2FA006BB2DE /* View1.mm */,
+				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
+				1EDCCE7612E9A3D4006BB2DE /* View2.h */,
+				1EDCCE7712E9A3D4006BB2DE /* View2.mm */,
+				1EDCCE7812E9A3D4006BB2DE /* View2.xib */,
 				28AD73870D9D96C1002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* moses-Info.plist */,
+				1EB923D212EA70910009D1B5 /* View3.h */,
+				1EB923D312EA70910009D1B5 /* View3.mm */,
+				1EB923D412EA70910009D1B5 /* View3.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -948,6 +956,7 @@
 				28AD73880D9D96C1002E5188 /* MainWindow.xib in Resources */,
 				1EDCCE6C12E9A2FA006BB2DE /* View1.xib in Resources */,
 				1EDCCE7A12E9A3D4006BB2DE /* View2.xib in Resources */,
+				1EB923D612EA70910009D1B5 /* View3.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1096,6 +1105,7 @@
 				1EDCD11312E9A948006BB2DE /* CFunctions.cpp in Sources */,
 				1EDCD11F12E9A962006BB2DE /* Collation.cpp in Sources */,
 				1EDCD12012E9A962006BB2DE /* Tokenizer.cpp in Sources */,
+				1EB923D512EA70910009D1B5 /* View3.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
