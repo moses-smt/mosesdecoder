@@ -32,21 +32,12 @@ extern "C" {
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-	self.folderNames = [[NSMutableArray alloc] init];
-	
-	NSInteger i = self.folderNames.count;
-
+	//1st loop. unzip any files transferred by itunes
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *publicDocumentsDir = [paths objectAtIndex:0];   
 	
 	NSError *error;
 	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
-	if (files == nil) {
-		NSLog(@"Error reading contents of documents directory: %@", [error localizedDescription]);
-		//return retval;
-	}
-	
-	NSString *modelList = @"";
 	
 	for (NSString *file in files) 
 	{
@@ -62,29 +53,39 @@ extern "C" {
 			const char *docPathCtr = [publicDocumentsDir cStringUsingEncoding: NSASCIIStringEncoding  ];
 			
 			Unzip(fileCStr, docPathCtr);
-			remove(fileCStr);
-			
+			remove(fileCStr);			
 		}
-		else 
+	}
+	
+	// 2nd loop. List folder names
+	self.folderNames = [[NSMutableArray alloc] init];
+	
+	files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
+	if (files == nil) {
+		NSLog(@"Error reading contents of documents directory: %@", [error localizedDescription]);
+		//return retval;
+	}
+	
+	NSString *modelList = @"";
+	
+	for (NSString *file in files) 
+	{
+		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
+		fullPath = [fullPath stringByAppendingPathComponent:file]; 
+		fullPath = [fullPath stringByAppendingPathComponent:@"/moses.ini"]; 
+		NSLog(fullPath);
+
+		BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
+		if (fileExists)
 		{
-			NSLog(fullPath);
-			fullPath = [fullPath stringByAppendingPathComponent:@"/moses.ini"]; 
-			NSLog(fullPath);
+			modelList = [modelList stringByAppendingPathComponent:@" "]; 
+			modelList = [modelList stringByAppendingPathComponent:file]; 				
+			
+			[self.folderNames addObject:file];
 
-			BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
-			if (fileExists)
-			{
-				modelList = [modelList stringByAppendingPathComponent:@" "]; 
-				modelList = [modelList stringByAppendingPathComponent:file]; 				
-				
-				[self.folderNames addObject:file];
-
-			}
 		}
 		
 	}
-
-	NSInteger j = self.folderNames.count;
 
 }
 
