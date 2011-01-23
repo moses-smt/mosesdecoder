@@ -12,7 +12,26 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		1E1AA47512EB2F610035CC20 /* icon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 1E1AA47412EB2F610035CC20 /* icon.jpg */; };
-		1E1AE70012EB61F700AEA3D9 /* en-ht.zip in Resources */ = {isa = PBXBuildFile; fileRef = 1E1AE6FF12EB61F700AEA3D9 /* en-ht.zip */; };
+		1E5BD53A12EB7E0F00E2F403 /* htable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51012EB7E0F00E2F403 /* htable.cpp */; };
+		1E5BD53D12EB7E0F00E2F403 /* linearlm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51612EB7E0F00E2F403 /* linearlm.cpp */; };
+		1E5BD53E12EB7E0F00E2F403 /* lmmacro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51812EB7E0F00E2F403 /* lmmacro.cpp */; };
+		1E5BD53F12EB7E0F00E2F403 /* lmtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51A12EB7E0F00E2F403 /* lmtable.cpp */; };
+		1E5BD54112EB7E0F00E2F403 /* mempool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51E12EB7E0F00E2F403 /* mempool.cpp */; };
+		1E5BD54212EB7E0F00E2F403 /* mfstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD52012EB7E0F00E2F403 /* mfstream.cpp */; };
+		1E5BD54312EB7E0F00E2F403 /* mixture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD52212EB7E0F00E2F403 /* mixture.cpp */; };
+		1E5BD54512EB7E0F00E2F403 /* ngramcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD52612EB7E0F00E2F403 /* ngramcache.cpp */; };
+		1E5BD54612EB7E0F00E2F403 /* ngramtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD52812EB7E0F00E2F403 /* ngramtable.cpp */; };
+		1E5BD54812EB7E0F00E2F403 /* normcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD52B12EB7E0F00E2F403 /* normcache.cpp */; };
+		1E5BD54D12EB7E0F00E2F403 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD53212EB7E0F00E2F403 /* timer.cpp */; };
+		1E5BD54F12EB7E0F00E2F403 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD53512EB7E0F00E2F403 /* util.cpp */; };
+		1E5BD5C612EC464C00E2F403 /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD5C412EC464C00E2F403 /* LanguageModelIRST.cpp */; };
+		1E5BD5F012EC47BE00E2F403 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD5EF12EC47BE00E2F403 /* dictionary.cpp */; };
+		1E5BD5F412EC47E400E2F403 /* n_gram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD5F312EC47E400E2F403 /* n_gram.cpp */; };
+		1E5BD61712EC4AC100E2F403 /* interplm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD61512EC4AC100E2F403 /* interplm.cpp */; };
+		1E5BD61E12EC4AE600E2F403 /* mdiadapt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD61D12EC4AE600E2F403 /* mdiadapt.cpp */; };
+		1E5BD62212EC4AFC00E2F403 /* shiftlm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD62112EC4AFC00E2F403 /* shiftlm.cpp */; };
+		1E5BD63512EC4B9300E2F403 /* cmd.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD63412EC4B9300E2F403 /* cmd.c */; };
+		1EB91C0012EB712C004F306E /* en-ht.zip in Resources */ = {isa = PBXBuildFile; fileRef = 1EB91BFF12EB712C004F306E /* en-ht.zip */; };
 		1EB923D512EA70910009D1B5 /* View3.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EB923D312EA70910009D1B5 /* View3.mm */; };
 		1EB923D612EA70910009D1B5 /* View3.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1EB923D412EA70910009D1B5 /* View3.xib */; };
 		1EDCCE6B12E9A2FA006BB2DE /* View1.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCCE6912E9A2FA006BB2DE /* View1.mm */; };
@@ -164,7 +183,47 @@
 		1D6058910D05DD3D006BFB54 /* moses.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		1E1AA47412EB2F610035CC20 /* icon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = icon.jpg; sourceTree = "<group>"; };
-		1E1AE6FF12EB61F700AEA3D9 /* en-ht.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = "en-ht.zip"; path = "../../../data/en-ht/en-ht.zip"; sourceTree = SOURCE_ROOT; };
+		1E5BD50A12EB7E0F00E2F403 /* cmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cmd.h; path = Classes/irstlm/src/cmd.h; sourceTree = "<group>"; };
+		1E5BD50E12EB7E0F00E2F403 /* dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dictionary.h; path = Classes/irstlm/src/dictionary.h; sourceTree = "<group>"; };
+		1E5BD50F12EB7E0F00E2F403 /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gzfilebuf.h; path = Classes/irstlm/src/gzfilebuf.h; sourceTree = "<group>"; };
+		1E5BD51012EB7E0F00E2F403 /* htable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = htable.cpp; path = Classes/irstlm/src/htable.cpp; sourceTree = "<group>"; };
+		1E5BD51112EB7E0F00E2F403 /* htable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = htable.h; path = Classes/irstlm/src/htable.h; sourceTree = "<group>"; };
+		1E5BD51212EB7E0F00E2F403 /* index.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = index.h; path = Classes/irstlm/src/index.h; sourceTree = "<group>"; };
+		1E5BD51412EB7E0F00E2F403 /* interplm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = interplm.h; path = Classes/irstlm/src/interplm.h; sourceTree = "<group>"; };
+		1E5BD51612EB7E0F00E2F403 /* linearlm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = linearlm.cpp; path = Classes/irstlm/src/linearlm.cpp; sourceTree = "<group>"; };
+		1E5BD51712EB7E0F00E2F403 /* linearlm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = linearlm.h; path = Classes/irstlm/src/linearlm.h; sourceTree = "<group>"; };
+		1E5BD51812EB7E0F00E2F403 /* lmmacro.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lmmacro.cpp; path = Classes/irstlm/src/lmmacro.cpp; sourceTree = "<group>"; };
+		1E5BD51912EB7E0F00E2F403 /* lmmacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lmmacro.h; path = Classes/irstlm/src/lmmacro.h; sourceTree = "<group>"; };
+		1E5BD51A12EB7E0F00E2F403 /* lmtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lmtable.cpp; path = Classes/irstlm/src/lmtable.cpp; sourceTree = "<group>"; };
+		1E5BD51B12EB7E0F00E2F403 /* lmtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lmtable.h; path = Classes/irstlm/src/lmtable.h; sourceTree = "<group>"; };
+		1E5BD51D12EB7E0F00E2F403 /* mdiadapt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mdiadapt.h; path = Classes/irstlm/src/mdiadapt.h; sourceTree = "<group>"; };
+		1E5BD51E12EB7E0F00E2F403 /* mempool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mempool.cpp; path = Classes/irstlm/src/mempool.cpp; sourceTree = "<group>"; };
+		1E5BD51F12EB7E0F00E2F403 /* mempool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mempool.h; path = Classes/irstlm/src/mempool.h; sourceTree = "<group>"; };
+		1E5BD52012EB7E0F00E2F403 /* mfstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mfstream.cpp; path = Classes/irstlm/src/mfstream.cpp; sourceTree = "<group>"; };
+		1E5BD52112EB7E0F00E2F403 /* mfstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mfstream.h; path = Classes/irstlm/src/mfstream.h; sourceTree = "<group>"; };
+		1E5BD52212EB7E0F00E2F403 /* mixture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mixture.cpp; path = Classes/irstlm/src/mixture.cpp; sourceTree = "<group>"; };
+		1E5BD52312EB7E0F00E2F403 /* mixture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mixture.h; path = Classes/irstlm/src/mixture.h; sourceTree = "<group>"; };
+		1E5BD52512EB7E0F00E2F403 /* n_gram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = n_gram.h; path = Classes/irstlm/src/n_gram.h; sourceTree = "<group>"; };
+		1E5BD52612EB7E0F00E2F403 /* ngramcache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngramcache.cpp; path = Classes/irstlm/src/ngramcache.cpp; sourceTree = "<group>"; };
+		1E5BD52712EB7E0F00E2F403 /* ngramcache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ngramcache.h; path = Classes/irstlm/src/ngramcache.h; sourceTree = "<group>"; };
+		1E5BD52812EB7E0F00E2F403 /* ngramtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngramtable.cpp; path = Classes/irstlm/src/ngramtable.cpp; sourceTree = "<group>"; };
+		1E5BD52912EB7E0F00E2F403 /* ngramtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ngramtable.h; path = Classes/irstlm/src/ngramtable.h; sourceTree = "<group>"; };
+		1E5BD52B12EB7E0F00E2F403 /* normcache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = normcache.cpp; path = Classes/irstlm/src/normcache.cpp; sourceTree = "<group>"; };
+		1E5BD52C12EB7E0F00E2F403 /* normcache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = normcache.h; path = Classes/irstlm/src/normcache.h; sourceTree = "<group>"; };
+		1E5BD53112EB7E0F00E2F403 /* shiftlm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shiftlm.h; path = Classes/irstlm/src/shiftlm.h; sourceTree = "<group>"; };
+		1E5BD53212EB7E0F00E2F403 /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timer.cpp; path = Classes/irstlm/src/timer.cpp; sourceTree = "<group>"; };
+		1E5BD53312EB7E0F00E2F403 /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timer.h; path = Classes/irstlm/src/timer.h; sourceTree = "<group>"; };
+		1E5BD53512EB7E0F00E2F403 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = util.cpp; path = Classes/irstlm/src/util.cpp; sourceTree = "<group>"; };
+		1E5BD53612EB7E0F00E2F403 /* irstlm-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "irstlm-util.h"; path = "Classes/irstlm/src/irstlm-util.h"; sourceTree = "<group>"; };
+		1E5BD5C412EC464C00E2F403 /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = Classes/moses/src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
+		1E5BD5C512EC464C00E2F403 /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = Classes/moses/src/LanguageModelIRST.h; sourceTree = "<group>"; };
+		1E5BD5EF12EC47BE00E2F403 /* dictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dictionary.cpp; path = Classes/irstlm/src/dictionary.cpp; sourceTree = "<group>"; };
+		1E5BD5F312EC47E400E2F403 /* n_gram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = n_gram.cpp; path = Classes/irstlm/src/n_gram.cpp; sourceTree = "<group>"; };
+		1E5BD61512EC4AC100E2F403 /* interplm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = interplm.cpp; path = Classes/irstlm/src/interplm.cpp; sourceTree = "<group>"; };
+		1E5BD61D12EC4AE600E2F403 /* mdiadapt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mdiadapt.cpp; path = Classes/irstlm/src/mdiadapt.cpp; sourceTree = "<group>"; };
+		1E5BD62112EC4AFC00E2F403 /* shiftlm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shiftlm.cpp; path = Classes/irstlm/src/shiftlm.cpp; sourceTree = "<group>"; };
+		1E5BD63412EC4B9300E2F403 /* cmd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cmd.c; path = Classes/irstlm/src/cmd.c; sourceTree = "<group>"; };
+		1EB91BFF12EB712C004F306E /* en-ht.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = "en-ht.zip"; path = "../../../data/en-ht/en-ht.zip"; sourceTree = SOURCE_ROOT; };
 		1EB923D212EA70910009D1B5 /* View3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View3.h; path = ../View3.h; sourceTree = "<group>"; };
 		1EB923D312EA70910009D1B5 /* View3.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = View3.mm; path = ../View3.mm; sourceTree = "<group>"; };
 		1EB923D412EA70910009D1B5 /* View3.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = View3.xib; sourceTree = "<group>"; };
@@ -510,6 +569,51 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1E5BD4FE12EB7D9E00E2F403 /* irstlm */ = {
+			isa = PBXGroup;
+			children = (
+				1E5BD63412EC4B9300E2F403 /* cmd.c */,
+				1E5BD62112EC4AFC00E2F403 /* shiftlm.cpp */,
+				1E5BD61D12EC4AE600E2F403 /* mdiadapt.cpp */,
+				1E5BD61512EC4AC100E2F403 /* interplm.cpp */,
+				1E5BD5F312EC47E400E2F403 /* n_gram.cpp */,
+				1E5BD5EF12EC47BE00E2F403 /* dictionary.cpp */,
+				1E5BD50A12EB7E0F00E2F403 /* cmd.h */,
+				1E5BD50E12EB7E0F00E2F403 /* dictionary.h */,
+				1E5BD50F12EB7E0F00E2F403 /* gzfilebuf.h */,
+				1E5BD51012EB7E0F00E2F403 /* htable.cpp */,
+				1E5BD51112EB7E0F00E2F403 /* htable.h */,
+				1E5BD51212EB7E0F00E2F403 /* index.h */,
+				1E5BD51412EB7E0F00E2F403 /* interplm.h */,
+				1E5BD51612EB7E0F00E2F403 /* linearlm.cpp */,
+				1E5BD51712EB7E0F00E2F403 /* linearlm.h */,
+				1E5BD51812EB7E0F00E2F403 /* lmmacro.cpp */,
+				1E5BD51912EB7E0F00E2F403 /* lmmacro.h */,
+				1E5BD51A12EB7E0F00E2F403 /* lmtable.cpp */,
+				1E5BD51B12EB7E0F00E2F403 /* lmtable.h */,
+				1E5BD51D12EB7E0F00E2F403 /* mdiadapt.h */,
+				1E5BD51E12EB7E0F00E2F403 /* mempool.cpp */,
+				1E5BD51F12EB7E0F00E2F403 /* mempool.h */,
+				1E5BD52012EB7E0F00E2F403 /* mfstream.cpp */,
+				1E5BD52112EB7E0F00E2F403 /* mfstream.h */,
+				1E5BD52212EB7E0F00E2F403 /* mixture.cpp */,
+				1E5BD52312EB7E0F00E2F403 /* mixture.h */,
+				1E5BD52512EB7E0F00E2F403 /* n_gram.h */,
+				1E5BD52612EB7E0F00E2F403 /* ngramcache.cpp */,
+				1E5BD52712EB7E0F00E2F403 /* ngramcache.h */,
+				1E5BD52812EB7E0F00E2F403 /* ngramtable.cpp */,
+				1E5BD52912EB7E0F00E2F403 /* ngramtable.h */,
+				1E5BD52B12EB7E0F00E2F403 /* normcache.cpp */,
+				1E5BD52C12EB7E0F00E2F403 /* normcache.h */,
+				1E5BD53112EB7E0F00E2F403 /* shiftlm.h */,
+				1E5BD53212EB7E0F00E2F403 /* timer.cpp */,
+				1E5BD53312EB7E0F00E2F403 /* timer.h */,
+				1E5BD53512EB7E0F00E2F403 /* util.cpp */,
+				1E5BD53612EB7E0F00E2F403 /* irstlm-util.h */,
+			);
+			name = irstlm;
+			sourceTree = "<group>";
+		};
 		1EDCCEB712E9A62D006BB2DE /* minizip */ = {
 			isa = PBXGroup;
 			children = (
@@ -636,6 +740,8 @@
 		1EDCCF6612E9A77A006BB2DE /* Moses */ = {
 			isa = PBXGroup;
 			children = (
+				1E5BD5C412EC464C00E2F403 /* LanguageModelIRST.cpp */,
+				1E5BD5C512EC464C00E2F403 /* LanguageModelIRST.h */,
 				1EDCCF6712E9A78F006BB2DE /* AlignmentInfo.cpp */,
 				1EDCCF6812E9A78F006BB2DE /* AlignmentInfo.h */,
 				1EDCCF6912E9A78F006BB2DE /* BilingualDynSuffixArray.cpp */,
@@ -863,6 +969,7 @@
 		29B97314FDCFA39411CA2CEA /* moses */ = {
 			isa = PBXGroup;
 			children = (
+				1E5BD4FE12EB7D9E00E2F403 /* irstlm */,
 				1EDCCF6612E9A77A006BB2DE /* Moses */,
 				1EDCCF6512E9A76B006BB2DE /* OnDiskPt */,
 				1EDCCEEB12E9A6A9006BB2DE /* kenlm */,
@@ -889,7 +996,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				1E1AE6FF12EB61F700AEA3D9 /* en-ht.zip */,
+				1EB91BFF12EB712C004F306E /* en-ht.zip */,
 				1EB923D412EA70910009D1B5 /* View3.xib */,
 				1EDCCE7812E9A3D4006BB2DE /* View2.xib */,
 				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
@@ -964,7 +1071,7 @@
 				1EDCCE7A12E9A3D4006BB2DE /* View2.xib in Resources */,
 				1EB923D612EA70910009D1B5 /* View3.xib in Resources */,
 				1E1AA47512EB2F610035CC20 /* icon.jpg in Resources */,
-				1E1AE70012EB61F700AEA3D9 /* en-ht.zip in Resources */,
+				1EB91C0012EB712C004F306E /* en-ht.zip in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1114,6 +1221,25 @@
 				1EDCD11F12E9A962006BB2DE /* Collation.cpp in Sources */,
 				1EDCD12012E9A962006BB2DE /* Tokenizer.cpp in Sources */,
 				1EB923D512EA70910009D1B5 /* View3.mm in Sources */,
+				1E5BD53A12EB7E0F00E2F403 /* htable.cpp in Sources */,
+				1E5BD53D12EB7E0F00E2F403 /* linearlm.cpp in Sources */,
+				1E5BD53E12EB7E0F00E2F403 /* lmmacro.cpp in Sources */,
+				1E5BD53F12EB7E0F00E2F403 /* lmtable.cpp in Sources */,
+				1E5BD54112EB7E0F00E2F403 /* mempool.cpp in Sources */,
+				1E5BD54212EB7E0F00E2F403 /* mfstream.cpp in Sources */,
+				1E5BD54312EB7E0F00E2F403 /* mixture.cpp in Sources */,
+				1E5BD54512EB7E0F00E2F403 /* ngramcache.cpp in Sources */,
+				1E5BD54612EB7E0F00E2F403 /* ngramtable.cpp in Sources */,
+				1E5BD54812EB7E0F00E2F403 /* normcache.cpp in Sources */,
+				1E5BD54D12EB7E0F00E2F403 /* timer.cpp in Sources */,
+				1E5BD54F12EB7E0F00E2F403 /* util.cpp in Sources */,
+				1E5BD5C612EC464C00E2F403 /* LanguageModelIRST.cpp in Sources */,
+				1E5BD5F012EC47BE00E2F403 /* dictionary.cpp in Sources */,
+				1E5BD5F412EC47E400E2F403 /* n_gram.cpp in Sources */,
+				1E5BD61712EC4AC100E2F403 /* interplm.cpp in Sources */,
+				1E5BD61E12EC4AE600E2F403 /* mdiadapt.cpp in Sources */,
+				1E5BD62212EC4AFC00E2F403 /* shiftlm.cpp in Sources */,
+				1E5BD63512EC4B9300E2F403 /* cmd.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1156,6 +1282,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_KEN,
 					LM_INTERNAL,
+					LM_IRST,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -1175,6 +1302,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LM_KEN,
 					LM_INTERNAL,
+					LM_IRST,
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;

@@ -10,6 +10,7 @@
 #import "View1.h"
 #import "View2.h"
 #import "CFunctions.h"
+//#include "stdio.h"
 
 @implementation mosesAppDelegate
 
@@ -28,6 +29,8 @@
 	[self.window addSubview:tabBarController.view];
 	[self.window makeKeyAndVisible];
 
+	self.tabBarController.selectedIndex = 1;
+
 	NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
 	bundlePath = [bundlePath stringByAppendingPathComponent:@"/en-ht.zip"];
 	NSLog(bundlePath);
@@ -38,8 +41,10 @@
 	NSLog(documentsDirectoryNS);
 
 	[[NSFileManager defaultManager] moveItemAtPath:bundlePath toPath:documentsDirectoryNS error:nil];
+	//rename([bundlePath UTF8String], [documentsDirectoryNS UTF8String]);
 	
 	// persistant storage
+	/*
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	
 	NSString *currModel = [prefs stringForKey:@"currentModel"];
@@ -92,6 +97,7 @@
 		}
 		
 	}
+	*/
 	
 	return YES;
 }

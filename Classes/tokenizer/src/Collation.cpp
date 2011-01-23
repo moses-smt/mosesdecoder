@@ -1,7 +1,9 @@
 
+#include <cassert>
 #include "Collation.h"
 #include "InputFileStream.h"
 #include "Util.h"
+#include "Tokenizer.h"
 
 using namespace std;
 using namespace Moses;

@@ -16,6 +16,7 @@ extern "C" {
 
 @implementation View2
 @synthesize folderNames;
+@synthesize busyIndicator;
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
@@ -33,61 +34,12 @@ extern "C" {
 - (void)viewDidLoad {
     [super viewDidLoad];
 	
-	//1st loop. unzip any files transferred by itunes
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString *publicDocumentsDir = [paths objectAtIndex:0];   
+	timer = [NSTimer scheduledTimerWithTimeInterval:2.0
+																					 target:self
+																				 selector:@selector(targetMethod:)
+																				 userInfo:nil
+																					repeats:NO];
 	
-	NSError *error;
-	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
-	
-	for (NSString *file in files) 
-	{
-		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
-		fullPath = [fullPath stringByAppendingPathComponent:file]; 
-		NSLog(fullPath);
-		
-		if ([fullPath.pathExtension compare:@"zip" options:NSCaseInsensitiveSearch] == NSOrderedSame) 
-		{        
-			NSLog(@"unzipping");	
-			
-			const char *fileCStr = [fullPath cStringUsingEncoding: NSASCIIStringEncoding  ];
-			const char *docPathCtr = [publicDocumentsDir cStringUsingEncoding: NSASCIIStringEncoding  ];
-			
-			Unzip(fileCStr, docPathCtr);
-			remove(fileCStr);			
-		}
-	}
-	
-	// 2nd loop. List folder names
-	self.folderNames = [[NSMutableArray alloc] init];
-	
-	files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
-	if (files == nil) {
-		NSLog(@"Error reading contents of documents directory: %@", [error localizedDescription]);
-		//return retval;
-	}
-	
-	NSString *modelList = @"";
-	
-	for (NSString *file in files) 
-	{
-		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
-		fullPath = [fullPath stringByAppendingPathComponent:file]; 
-		fullPath = [fullPath stringByAppendingPathComponent:@"/moses.ini"]; 
-		NSLog(fullPath);
-
-		BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
-		if (fileExists)
-		{
-			modelList = [modelList stringByAppendingPathComponent:@" "]; 
-			modelList = [modelList stringByAppendingPathComponent:file]; 				
-			
-			[self.folderNames addObject:file];
-
-		}
-		
-	}
-
 }
 
 /*
@@ -114,6 +66,7 @@ extern "C" {
 
 - (void)dealloc {
 	[self.folderNames dealloc];
+	[timer dealloc];
     [super dealloc];
 }
 
@@ -161,8 +114,9 @@ extern "C" {
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	
 	NSLog(@"load");
+
+	[busyIndicator startAnimating];
 
 	//Get the dictionary of the selected data source.
 	NSInteger row = indexPath.row;	
@@ -223,6 +177,73 @@ extern "C" {
 	
 	}
 	
+	[busyIndicator stopAnimating];
+	
+}
+
+
+- (void) targetMethod: (NSTimer*) callingTimer
+{
+	NSLog(@"loadme");
+	[busyIndicator startAnimating];
+	
+	//1st loop. unzip any files transferred by itunes
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+	NSString *publicDocumentsDir = [paths objectAtIndex:0];   
+	
+	NSError *error;
+	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
+	
+	for (NSString *file in files) 
+	{
+		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
+		fullPath = [fullPath stringByAppendingPathComponent:file]; 
+		NSLog(fullPath);
+		
+		if ([fullPath.pathExtension compare:@"zip" options:NSCaseInsensitiveSearch] == NSOrderedSame) 
+		{        
+			NSLog(@"unzipping");	
+			
+			const char *fileCStr = [fullPath cStringUsingEncoding: NSASCIIStringEncoding  ];
+			const char *docPathCtr = [publicDocumentsDir cStringUsingEncoding: NSASCIIStringEncoding  ];
+			
+			Unzip(fileCStr, docPathCtr);
+			remove(fileCStr);			
+		}
+	}
+	
+	// 2nd loop. List folder names
+	self.folderNames = [[NSMutableArray alloc] init];
+	
+	files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
+	if (files == nil) {
+		NSLog(@"Error reading contents of documents directory: %@", [error localizedDescription]);
+		//return retval;
+	}
+	
+	NSString *modelList = @"";
+	
+	for (NSString *file in files) 
+	{
+		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
+		fullPath = [fullPath stringByAppendingPathComponent:file]; 
+		fullPath = [fullPath stringByAppendingPathComponent:@"/moses.ini"]; 
+		NSLog(fullPath);
+		
+		BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
+		if (fileExists)
+		{
+			modelList = [modelList stringByAppendingPathComponent:@" "]; 
+			modelList = [modelList stringByAppendingPathComponent:file]; 				
+			
+			[self.folderNames addObject:file];
+			
+		}
+		
+	}
+	
+	[tableView reloadData];
+	[busyIndicator stopAnimating];
 	
 }
 
