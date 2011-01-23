@@ -31,18 +31,27 @@
 
 	self.tabBarController.selectedIndex = 1;
 
-	NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
-	bundlePath = [bundlePath stringByAppendingPathComponent:@"/en-ht.zip"];
-	NSLog(bundlePath);
+	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
 	
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-	NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
-	documentsDirectoryNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/en-ht.zip"];
-	NSLog(documentsDirectoryNS);
+	NSString *isInit = [prefs stringForKey:@"init"];
+	
+	if (isInit == nil)
+	{
+		NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+		bundlePath = [bundlePath stringByAppendingPathComponent:@"/en-ht.zip"];
+		NSLog(bundlePath);
+		
+		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+		NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
+		documentsDirectoryNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/en-ht.zip"];
+		NSLog(documentsDirectoryNS);
 
-	[[NSFileManager defaultManager] moveItemAtPath:bundlePath toPath:documentsDirectoryNS error:nil];
-	//rename([bundlePath UTF8String], [documentsDirectoryNS UTF8String]);
-	
+		[[NSFileManager defaultManager] copyItemAtPath:bundlePath toPath:documentsDirectoryNS error:nil];
+		
+		[prefs setValue:@"0" forKey: @"init"];
+		[prefs synchronize];
+	}
+		
 	// persistant storage
 	/*
 	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];

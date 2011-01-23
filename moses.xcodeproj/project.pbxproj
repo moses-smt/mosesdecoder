@@ -31,7 +31,6 @@
 		1E5BD61E12EC4AE600E2F403 /* mdiadapt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD61D12EC4AE600E2F403 /* mdiadapt.cpp */; };
 		1E5BD62212EC4AFC00E2F403 /* shiftlm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD62112EC4AFC00E2F403 /* shiftlm.cpp */; };
 		1E5BD63512EC4B9300E2F403 /* cmd.c in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD63412EC4B9300E2F403 /* cmd.c */; };
-		1EB91C0012EB712C004F306E /* en-ht.zip in Resources */ = {isa = PBXBuildFile; fileRef = 1EB91BFF12EB712C004F306E /* en-ht.zip */; };
 		1EB923D512EA70910009D1B5 /* View3.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EB923D312EA70910009D1B5 /* View3.mm */; };
 		1EB923D612EA70910009D1B5 /* View3.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1EB923D412EA70910009D1B5 /* View3.xib */; };
 		1EDCCE6B12E9A2FA006BB2DE /* View1.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCCE6912E9A2FA006BB2DE /* View1.mm */; };
@@ -172,6 +171,7 @@
 		1EDCD11312E9A948006BB2DE /* CFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCD11112E9A948006BB2DE /* CFunctions.cpp */; };
 		1EDCD11F12E9A962006BB2DE /* Collation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCD11B12E9A962006BB2DE /* Collation.cpp */; };
 		1EDCD12012E9A962006BB2DE /* Tokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDCD11D12E9A962006BB2DE /* Tokenizer.cpp */; };
+		1EFF0A2512EC84F900B5B68A /* en-ht.zip in Resources */ = {isa = PBXBuildFile; fileRef = 1EFF0A2412EC84F900B5B68A /* en-ht.zip */; };
 		288765080DF74369002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765070DF74369002DB57D /* CoreGraphics.framework */; };
 		28AD73880D9D96C1002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD73870D9D96C1002E5188 /* MainWindow.xib */; };
 /* End PBXBuildFile section */
@@ -223,7 +223,6 @@
 		1E5BD61D12EC4AE600E2F403 /* mdiadapt.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mdiadapt.cpp; path = Classes/irstlm/src/mdiadapt.cpp; sourceTree = "<group>"; };
 		1E5BD62112EC4AFC00E2F403 /* shiftlm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shiftlm.cpp; path = Classes/irstlm/src/shiftlm.cpp; sourceTree = "<group>"; };
 		1E5BD63412EC4B9300E2F403 /* cmd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cmd.c; path = Classes/irstlm/src/cmd.c; sourceTree = "<group>"; };
-		1EB91BFF12EB712C004F306E /* en-ht.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = "en-ht.zip"; path = "../../../data/en-ht/en-ht.zip"; sourceTree = SOURCE_ROOT; };
 		1EB923D212EA70910009D1B5 /* View3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View3.h; path = ../View3.h; sourceTree = "<group>"; };
 		1EB923D312EA70910009D1B5 /* View3.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = View3.mm; path = ../View3.mm; sourceTree = "<group>"; };
 		1EB923D412EA70910009D1B5 /* View3.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = View3.xib; sourceTree = "<group>"; };
@@ -523,6 +522,7 @@
 		1EDCD11C12E9A962006BB2DE /* Collation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Collation.h; path = Classes/tokenizer/src/Collation.h; sourceTree = "<group>"; };
 		1EDCD11D12E9A962006BB2DE /* Tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tokenizer.cpp; path = Classes/tokenizer/src/Tokenizer.cpp; sourceTree = "<group>"; };
 		1EDCD11E12E9A962006BB2DE /* Tokenizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tokenizer.h; path = Classes/tokenizer/src/Tokenizer.h; sourceTree = "<group>"; };
+		1EFF0A2412EC84F900B5B68A /* en-ht.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = "en-ht.zip"; path = "../../../data/en-ht/en-ht.zip"; sourceTree = SOURCE_ROOT; };
 		288765070DF74369002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		28A0AB4B0D9B1048005BE974 /* moses_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = moses_Prefix.pch; sourceTree = "<group>"; };
 		28AD73870D9D96C1002E5188 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
@@ -996,7 +996,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				1EB91BFF12EB712C004F306E /* en-ht.zip */,
+				1EFF0A2412EC84F900B5B68A /* en-ht.zip */,
 				1EB923D412EA70910009D1B5 /* View3.xib */,
 				1EDCCE7812E9A3D4006BB2DE /* View2.xib */,
 				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
@@ -1071,7 +1071,7 @@
 				1EDCCE7A12E9A3D4006BB2DE /* View2.xib in Resources */,
 				1EB923D612EA70910009D1B5 /* View3.xib in Resources */,
 				1E1AA47512EB2F610035CC20 /* icon.jpg in Resources */,
-				1EB91C0012EB712C004F306E /* en-ht.zip in Resources */,
+				1EFF0A2512EC84F900B5B68A /* en-ht.zip in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

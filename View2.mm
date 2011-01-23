@@ -73,20 +73,24 @@ extern "C" {
 
 - (IBAction) downloadButtonWasTouched
 {
-	NSString *url = txtURL.text;
-	NSLog(url);
-		
-	// Create a suitable alert view
-	alertView = [ [UIAlertView alloc]
-							 initWithTitle:@"Warning"
-							 message:@"Not functioning yet." 
-							 delegate:self
-							 cancelButtonTitle:@"Close"
-							 otherButtonTitles:nil ];
-	// show alert
-	[alertView show];
-	[alertView release];
+	[busyIndicator startAnimating];
+
+	NSString *urlStr = txtURL.text;
+	NSLog(urlStr);
 	
+	NSURL *url = [NSURL URLWithString:urlStr];
+	NSData *data = [NSData dataWithContentsOfURL:url];
+	
+	if (data != nil) 
+	{
+		NSLog(@"\nis not nil");
+		NSString *fileName = [url lastPathComponent];
+		
+		[data writeToFile:fileName atomically:YES];
+		[self InitView];
+	}		
+	
+	[busyIndicator stopAnimating];
 }
 
 // Customize the number of rows in the table view.
@@ -184,6 +188,11 @@ extern "C" {
 
 - (void) targetMethod: (NSTimer*) callingTimer
 {
+	[self InitView];
+}
+	 
+ - (void) InitView
+ {
 	NSLog(@"loadme");
 	[busyIndicator startAnimating];
 	
