@@ -48,8 +48,10 @@ class WordsRange;
 class ChartTranslationOptionList;
 class CellCollection;
 class TranslationSystem;
+class ChartRuleLookupManager;
 
 class PhraseDictionaryFeature;
+
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
@@ -70,11 +72,10 @@ class PhraseDictionary: public Dictionary {
     virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
     virtual void InitializeForInput(InputType const& source) = 0;
     
-		virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
-																				, InputType const& src
-																				, WordsRange const& range
-																				, bool adhereTableLimit
-																				, const CellCollection &cellColl) const=0;
+    //! Create a sentence-specific manager for SCFG rule lookup.
+    virtual ChartRuleLookupManager *CreateRuleLookupManager(
+        const InputType &,
+        const CellCollection &) = 0;
 
   protected:
     size_t m_tableLimit;

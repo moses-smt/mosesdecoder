@@ -8,6 +8,9 @@ libmoses_la_HEADERS = \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
         CellCollection.h \
+        ChartRuleLookupManager.h \
+        ChartRuleLookupManagerMemory.h \
+        ChartRuleLookupManagerOnDisk.h \
         ChartTranslationOption.h \
         ChartTranslationOptionList.h \
         ConfusionNet.h \
@@ -137,6 +140,8 @@ libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
+        ChartRuleLookupManagerMemory.cpp \
+        ChartRuleLookupManagerOnDisk.cpp \
         ChartTranslationOption.cpp \
         ChartTranslationOptionList.cpp \
         ConfusionNet.cpp \
@@ -192,11 +197,9 @@ libmoses_la_SOURCES = \
         PhraseDictionaryDynSuffixArray.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
-        PhraseDictionarySCFGChart.cpp \
         PhraseDictionaryNode.cpp \
         PhraseDictionaryNodeSCFG.cpp \
         PhraseDictionaryOnDisk.cpp \
-        PhraseDictionaryOnDiskChart.cpp \
         PhraseDictionaryTree.cpp \
         PhraseDictionaryTreeAdaptor.cpp \
         PrefixTreeMap.cpp \

@@ -67,15 +67,14 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary {
 	
 	size_t GetNumInputScores() const;
     virtual void InitializeForInput(InputType const& source);
-	
-	void GetChartRuleCollection(ChartTranslationOptionList &outColl
-															,InputType const& /*src*/
-															,WordsRange const& /*range*/
-															,bool /*adhereTableLimit*/
-															,const CellCollection &/*cellColl*/) const
-	{ 
-		assert(false);
-	}
+
+  virtual ChartRuleLookupManager *CreateRuleLookupManager(
+      const InputType &,
+      const CellCollection &) 
+  {
+    assert(false);
+    return 0;
+  }
 };
 
 }

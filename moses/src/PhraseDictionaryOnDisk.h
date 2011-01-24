@@ -42,19 +42,13 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
 	
 protected:
+	OnDiskPt::OnDiskWrapper m_dbWrapper;
     const LMList* m_languageModels;
-    const WordPenaltyProducer* m_wpProducer;;
+    const WordPenaltyProducer* m_wpProducer;
 	std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 	std::vector<float> m_weight;
 	std::string m_filePath;
-	
-	mutable OnDiskPt::OnDiskWrapper m_dbWrapper;
 
-	mutable std::map<UINT64, const TargetPhraseCollection*> m_cache;
-	mutable std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
-
-	mutable std::vector<ProcessedRuleStackOnDisk*>	m_runningNodesVec;
-	
 	void LoadTargetLookup();
 	
 public:
@@ -86,18 +80,12 @@ public:
 	//! Create entry for translation of source to targetPhrase
 	virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
 	
-	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
-																			,InputType const& src
-																			,WordsRange const& range
-																			,bool adhereTableLimit
-																			,const CellCollection &cellColl) const;
-	
 	void InitializeForInput(const InputType& input);
 	void CleanUp();
 	
+  virtual ChartRuleLookupManager *CreateRuleLookupManager(
+      const InputType &,
+      const CellCollection &);
 };
 
-
-};
-
-
+}  // namespace Moses

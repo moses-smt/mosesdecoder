@@ -1,45 +1,72 @@
-// $Id$
-// vim:tabstop=2
 /***********************************************************************
- Moses - factored phrase-based language decoder
- Copyright (C) 2010 Hieu Hoang
- 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+  Moses - factored phrase-based language decoder
+  Copyright (C) 2011 University of Edinburgh
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include "ChartRuleLookupManagerMemory.h"
+
 #include "PhraseDictionarySCFG.h"
-#include "FactorCollection.h"
 #include "InputType.h"
 #include "ChartTranslationOptionList.h"
 #include "CellCollection.h"
 #include "DotChart.h"
 #include "StaticData.h"
-#include "TreeInput.h"
+#include "NonTerminal.h"
 
-using namespace std;
-using namespace Moses;
+namespace Moses
+{
 
-void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &outColl
-																								 ,InputType const& src
-																								 ,WordsRange const& range
-																								 ,bool adhereTableLimit
-																								 ,const CellCollection &cellColl) const
-{	
-	size_t relEndPos = range.GetEndPos() - range.GetStartPos();
-	size_t absEndPos = range.GetEndPos();
-	
+ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
+    const InputType &src,
+    const CellCollection &cellColl,
+    const PhraseDictionarySCFG &ruleTable)
+  : ChartRuleLookupManager(src, cellColl)
+  , m_ruleTable(ruleTable)
+{
+  assert(m_processedRuleColls.size() == 0);
+  size_t sourceSize = src.GetSize();
+  m_processedRuleColls.resize(sourceSize);
+
+  const PhraseDictionaryNodeSCFG &rootNode = m_ruleTable.GetRootNode();
+
+  for (size_t ind = 0; ind < m_processedRuleColls.size(); ++ind)
+  {
+    ProcessedRule *initProcessedRule = new ProcessedRule(rootNode);
+
+    ProcessedRuleColl *processedRuleColl = new ProcessedRuleColl(sourceSize - ind + 1);
+    processedRuleColl->Add(0, initProcessedRule); // init rule. stores the top node in tree
+
+    m_processedRuleColls[ind] = processedRuleColl;
+  }
+}
+
+ChartRuleLookupManagerMemory::~ChartRuleLookupManagerMemory()
+{
+  RemoveAllInColl(m_processedRuleColls);
+}
+
+void ChartRuleLookupManagerMemory::GetChartRuleCollection(
+    const WordsRange &range,
+    bool adhereTableLimit,
+    ChartTranslationOptionList &outColl)
+{
+  size_t relEndPos = range.GetEndPos() - range.GetStartPos();
+  size_t absEndPos = range.GetEndPos();
+
 	// MAIN LOOP. create list of nodes of target phrases
 
 	ProcessedRuleColl &processedRuleCol = *m_processedRuleColls[range.GetStartPos()];
@@ -56,7 +83,7 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &ou
 		// search for terminal symbol
 		if (startPos == absEndPos)
 		{
-			const Word &sourceWord = src.GetWord(absEndPos);
+			const Word &sourceWord = GetSentence().GetWord(absEndPos);
 			const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord);
 			if (node != NULL)
 			{
@@ -84,10 +111,10 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &ou
 		}
 		
 		const NonTerminalSet &sourceNonTerms =
-            src.GetLabelSet(startPos, endPos);
+            GetSentence().GetLabelSet(startPos, endPos);
 
         const NonTerminalSet &targetNonTerms =
-            cellColl.GetHeadwords(WordsRange(startPos, endPos));
+            GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
 
         ExtendPartialRuleApplication(prevNode, prevWordConsumed, startPos,
                                      endPos, stackInd, sourceNonTerms,
@@ -120,7 +147,7 @@ void PhraseDictionarySCFG::GetChartRuleCollection(ChartTranslationOptionList &ou
 // source and target non-terminals covering the span [startPos, endPos],
 // determines the full or partial rule applications that can be produced through
 // extending the current rule application by a single non-terminal.
-void PhraseDictionarySCFG::ExtendPartialRuleApplication(
+void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
     const PhraseDictionaryNodeSCFG & node,
     const WordConsumed *prevWordConsumed,
     size_t startPos,
@@ -128,7 +155,7 @@ void PhraseDictionarySCFG::ExtendPartialRuleApplication(
     size_t stackInd,
     const NonTerminalSet & sourceNonTerms,
     const NonTerminalSet & targetNonTerms,
-    ProcessedRuleColl & processedRuleColl) const
+    ProcessedRuleColl & processedRuleColl)
 {
     const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
         node.GetNonTerminalMap();
@@ -202,3 +229,5 @@ void PhraseDictionarySCFG::ExtendPartialRuleApplication(
         }
     }
 }
+
+}  // namespace Moses

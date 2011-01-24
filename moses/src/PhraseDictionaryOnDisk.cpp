@@ -24,6 +24,7 @@
 #include "StaticData.h"
 #include "TargetPhraseCollection.h"
 #include "DotChartOnDisk.h"
+#include "ChartRuleLookupManagerOnDisk.h"
 
 using namespace std;
 
@@ -85,33 +86,12 @@ void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase &source, TargetPhrase *
 
 void PhraseDictionaryOnDisk::InitializeForInput(const InputType& input)
 {
-	assert(m_runningNodesVec.size() == 0);
-	size_t sourceSize = input.GetSize();
-	m_runningNodesVec.resize(sourceSize);
-
-	for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind)
-	{
-		ProcessedRuleOnDisk *initProcessedRule = new ProcessedRuleOnDisk(m_dbWrapper.GetRootSourceNode());
-
-		ProcessedRuleStackOnDisk *processedStack = new ProcessedRuleStackOnDisk(sourceSize - ind + 1);
-		processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
-
-		m_runningNodesVec[ind] = processedStack;
-	}
-
+  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
 
 void PhraseDictionaryOnDisk::CleanUp()
 {
-	std::map<UINT64, const TargetPhraseCollection*>::const_iterator iterCache;
-	for (iterCache = m_cache.begin(); iterCache != m_cache.end(); ++iterCache)
-	{
-		delete iterCache->second;
-	}
-	m_cache.clear();
-	
-	RemoveAllInColl(m_runningNodesVec);
-	RemoveAllInColl(m_sourcePhraseNode);	
+  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
 
 void PhraseDictionaryOnDisk::LoadTargetLookup()
@@ -119,6 +99,16 @@ void PhraseDictionaryOnDisk::LoadTargetLookup()
 	// TODO
 }
 
-	
+ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
+    const InputType &sentence,
+    const CellCollection &cellCollection)
+{
+  return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
+                                          m_dbWrapper, m_languageModels,
+                                          m_wpProducer, m_inputFactorsVec,
+                                          m_outputFactorsVec, m_weight,
+                                          m_filePath);
+}
+
 }
 

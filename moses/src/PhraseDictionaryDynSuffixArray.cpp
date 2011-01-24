@@ -66,19 +66,16 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 	return ret;
 }
 	
-void PhraseDictionaryDynSuffixArray::GetChartRuleCollection(ChartTranslationOptionList &outColl
-																														,InputType const& src
-																														,WordsRange const& range
-																														,bool adhereTableLimit
-																														,const CellCollection &cellColl) const
-{
-	assert(false);
-}
 void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, string& alignment) { 
   m_biSA->addSntPair(source, target, alignment);
 }
 void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned idx, unsigned num2Del) { 
   // need to implement -- 
+}
+
+ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const CellCollection&) {
+  assert(false);
+  return 0;
 }
 
 }// end namepsace
