@@ -53,6 +53,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TreeInput.h"
 #include "TranslationAnalysis.h"
 #include "mbr.h"
+#include "ThreadPool.h"
 #include "../../moses-chart/src/ChartManager.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
 #include "../../moses-chart/src/ChartTrellisPathList.h"
@@ -67,6 +68,72 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 using namespace MosesChart;
+
+/**
+  * Translates a sentence.
+ **/
+class TranslationTask : public Task
+{
+ public:
+  TranslationTask(InputType *source, IOWrapper &ioWrapper)
+    : m_source(source)
+    , m_ioWrapper(ioWrapper)
+  {}
+
+  ~TranslationTask() { delete m_source; }
+
+  void Run()
+  {
+    const StaticData &staticData = StaticData::Instance();
+    const TranslationSystem &system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+    const size_t lineNumber = m_source->GetTranslationId();
+
+    VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
+
+    MosesChart::Manager manager(*m_source, &system);
+    manager.ProcessSentence();
+
+    assert(!staticData.UseMBR());
+
+    // 1-best
+    const MosesChart::Hypothesis *bestHypo = manager.GetBestHypothesis();
+    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber,
+                               staticData.GetReportSegmentation(),
+                               staticData.GetReportAllFactors());
+    IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
+  
+    // n-best
+    size_t nBestSize = staticData.GetNBestSize();
+    if (nBestSize > 0)
+    {
+      VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+      MosesChart::TrellisPathList nBestList;
+      manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+      m_ioWrapper.OutputNBestList(nBestList, bestHypo, &system, lineNumber);
+      IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+    }
+  
+    if (staticData.GetOutputSearchGraph())
+    {
+      std::ostringstream out;
+      manager.GetSearchGraph(lineNumber, out);
+      OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
+      assert(oc);
+      oc->Write(lineNumber, out.str());
+    }
+
+    IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
+    manager.CalcDecoderStatistics();
+  }
+
+ private:
+  // Non-copyable: copy constructor and assignment operator not implemented.
+  TranslationTask(const TranslationTask &);
+  TranslationTask &operator=(const TranslationTask &);
+
+  InputType *m_source;
+  IOWrapper &m_ioWrapper;
+};
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
 {
@@ -168,84 +235,16 @@ int main(int argc, char* argv[])
 
 	// read each sentence & decode
 	InputType *source=0;
-	size_t lineCount = 0;
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
 	{
-			// note: source is only valid within this while loop!
 		IFVERBOSE(1)
 			ResetUserTime();
-			
-    VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
-		//cerr << *source << endl;
-		
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-		MosesChart::Manager manager(*source, &system);
-		manager.ProcessSentence();
+    TranslationTask *task = new TranslationTask(source, *ioWrapper);
+    source = NULL;  // TranslationTask is responsible for deleting source.
+    task->Run();
+    delete task;
+  }
 
-		assert(!staticData.UseMBR());
-
-		if (!staticData.UseMBR()){
-      const MosesChart::Hypothesis *bestHypo = manager.GetBestHypothesis();
-			ioWrapper->OutputBestHypo(bestHypo, source->GetTranslationId(),
-													 staticData.GetReportSegmentation(),
-													 staticData.GetReportAllFactors()
-													 );
-			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
-			
-			// n-best
-			size_t nBestSize = staticData.GetNBestSize();
-			if (nBestSize > 0)
-			{
-			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-					MosesChart::TrellisPathList nBestList;
-					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioWrapper->OutputNBestList(nBestList, bestHypo, &system, source->GetTranslationId());
-			
-					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
-			}
-			
-			if (staticData.GetOutputSearchGraph())
-      {
-        std::ostringstream out;
-        manager.GetSearchGraph(source->GetTranslationId(), out);
-        OutputCollector *oc = ioWrapper->GetSearchGraphOutputCollector();
-        assert(oc);
-        oc->Write(source->GetTranslationId(), out.str());
-      }
-
-		}
-		else {
-			/*
-			size_t nBestSize = staticData.GetNBestSize();
-			cerr << "NBEST SIZE : " << nBestSize << endl;
-			assert(nBestSize > 0);
-			
-		  if (nBestSize > 0)
-			{
-			  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-				MosesChart::TrellisPathList nBestList;
-				manager.CalcNBest(nBestSize, nBestList,true);
-				std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-				ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
-													 staticData.GetReportSegmentation(),
-													 staticData.GetReportAllFactors()
-													 );
-				IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
-		  }
-			*/
-
-		}	
-		/*		 
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
-			TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
-		}
-		*/
-
-		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
-    
-		manager.CalcDecoderStatistics();
-	} // while(ReadInput
-	
 	delete ioWrapper;
 
 	IFVERBOSE(1)

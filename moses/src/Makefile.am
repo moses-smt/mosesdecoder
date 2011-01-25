@@ -91,6 +91,7 @@ libmoses_la_HEADERS = \
         StaticData.h \
         TargetPhrase.h \
         TargetPhraseCollection.h \
+        ThreadPool.h \
         Timer.h \
         TranslationOption.h \
         TranslationOptionCollection.h \
@@ -217,6 +218,7 @@ libmoses_la_SOURCES = \
         StaticData.cpp \
         TargetPhrase.cpp \
         TargetPhraseCollection.cpp \
+        ThreadPool.cpp \
         Timer.cpp \
         TranslationOption.cpp \
         TranslationOptionCollection.cpp \
