@@ -29,7 +29,8 @@
 
 @property (nonatomic, retain) NSMutableArray *folderNames;
 
-- (IBAction) downloadButtonWasTouched;
+- (IBAction) downloadButtonWasTouched:(id)sender;
+- (IBAction) downloadNow;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;

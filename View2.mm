@@ -70,8 +70,14 @@ extern "C" {
     [super dealloc];
 }
 
+- (IBAction) downloadButtonWasTouched:(id)sender
+{
+	[self downloadNow];
+	txtURL.enabled = NO;
+	txtURL.enabled = YES;
+}
 
-- (IBAction) downloadButtonWasTouched
+- (IBAction) downloadNow
 {
 	[busyIndicator startAnimating];
 
@@ -88,7 +94,20 @@ extern "C" {
 		
 		[data writeToFile:fileName atomically:YES];
 		[self InitView];
-	}		
+	}	
+	else {
+		NSLog(@"nothing download");
+		alertView = [ [UIAlertView alloc]
+								 initWithTitle:@"Error"
+								 message:@"Couldn't download model" 
+								 delegate:self
+								 cancelButtonTitle:@"Close"
+								 otherButtonTitles:nil ];
+		// show alert
+		[alertView show];
+		//	[alertView release];
+	}
+
 	
 	[busyIndicator stopAnimating];
 }

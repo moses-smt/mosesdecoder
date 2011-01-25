@@ -547,16 +547,16 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				1EDCD11112E9A948006BB2DE /* CFunctions.cpp */,
+				1EDCD11212E9A948006BB2DE /* CFunctions.h */,
+				1D3623240D0F684500981E51 /* mosesAppDelegate.h */,
+				1D3623250D0F684500981E51 /* mosesAppDelegate.mm */,
 				1EDCCE6812E9A2FA006BB2DE /* View1.h */,
 				1EDCCE6912E9A2FA006BB2DE /* View1.mm */,
 				1EDCCE7612E9A3D4006BB2DE /* View2.h */,
 				1EDCCE7712E9A3D4006BB2DE /* View2.mm */,
 				1EB923D212EA70910009D1B5 /* View3.h */,
 				1EB923D312EA70910009D1B5 /* View3.mm */,
-				1EDCD11112E9A948006BB2DE /* CFunctions.cpp */,
-				1EDCD11212E9A948006BB2DE /* CFunctions.h */,
-				1D3623240D0F684500981E51 /* mosesAppDelegate.h */,
-				1D3623250D0F684500981E51 /* mosesAppDelegate.mm */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -997,12 +997,12 @@
 			isa = PBXGroup;
 			children = (
 				1EFF0A2412EC84F900B5B68A /* en-ht.zip */,
-				1EB923D412EA70910009D1B5 /* View3.xib */,
-				1EDCCE7812E9A3D4006BB2DE /* View2.xib */,
-				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
-				28AD73870D9D96C1002E5188 /* MainWindow.xib */,
 				1E1AA47412EB2F610035CC20 /* icon.jpg */,
+				28AD73870D9D96C1002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* moses-Info.plist */,
+				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
+				1EDCCE7812E9A3D4006BB2DE /* View2.xib */,
+				1EB923D412EA70910009D1B5 /* View3.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
