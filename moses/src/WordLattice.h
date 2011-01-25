@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "ConfusionNet.h"
+#include "PCNTools.h"
 
 namespace Moses
 {
@@ -23,6 +24,12 @@ public:
 	// is it possible to get from the edge of the previous word range to the current word range
 	virtual bool CanIGetFromAToB(size_t start, size_t end) const;
 	
+	/** Given a lattice represented using the PCN::CN data type (topologically sorted agency list
+	 * representation), initialize the WordLattice object
+	 */
+	int InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line = "");
+	/** Read from PLF format (1 lattice per line)
+	 */
 	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
 
 	/** Convert internal representation into an edge matrix
