@@ -37,6 +37,9 @@ GZException::GZException(void *file) {
 #endif // HAVE_ZLIB
 }
 
+// Sigh this is the only way I could come up with to do a _const_ bool.  It has ' ', '\f', '\n', '\r', '\t', and '\v' (same as isspace on C locale). 
+const bool kSpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 int OpenReadOrThrow(const char *name) {
   int ret = open(name, O_RDONLY);
   if (ret == -1) UTIL_THROW(ErrnoException, "in open (" << name << ") for reading");
@@ -105,13 +108,6 @@ long int FilePiece::ReadLong() throw(GZException, EndOfFileException, ParseNumbe
 }
 unsigned long int FilePiece::ReadULong() throw(GZException, EndOfFileException, ParseNumberException) {
   return ReadNumber<unsigned long int>();
-}
-
-void FilePiece::SkipSpaces() throw (GZException, EndOfFileException) {
-  for (; ; ++position_) {
-    if (position_ == position_end_) Shift();
-    if (!isspace(*position_)) return;
-  }
 }
 
 void FilePiece::Initialize(const char *name, std::ostream *show_progress, off_t min_buffer) throw (GZException) {
@@ -188,20 +184,6 @@ template <class T> T FilePiece::ReadNumber() throw(GZException, EndOfFileExcepti
   if (end == position_) throw ParseNumberException(ReadDelimited());
   position_ = end;
   return ret;
-}
-
-const char *FilePiece::FindDelimiterOrEOF() throw (GZException, EndOfFileException) {
-  for (const char *i = position_; i <= last_space_; ++i) {
-    if (isspace(*i)) return i;
-  }
-  while (!at_end_) {
-    size_t skip = position_end_ - position_;
-    Shift();
-    for (const char *i = position_ + skip; i <= last_space_; ++i) {
-      if (isspace(*i)) return i;
-    }
-  }
-  return position_end_;
 }
 
 void FilePiece::Shift() throw(GZException, EndOfFileException) {

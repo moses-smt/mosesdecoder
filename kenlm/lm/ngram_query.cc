@@ -1,9 +1,12 @@
+#include "lm/enumerate_vocab.hh"
 #include "lm/model.hh"
 
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
+
+#include <ctype.h>
 
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -42,21 +45,40 @@ template <class Model> void Query(const Model &model) {
     state = model.BeginSentenceState();
     float total = 0.0;
     bool got = false;
+    unsigned int oov = 0;
     while (std::cin >> word) {
       got = true;
-      ret = model.FullScore(state, model.GetVocabulary().Index(word), out);
+      lm::WordIndex vocab = model.GetVocabulary().Index(word);
+      if (vocab == 0) ++oov;
+      ret = model.FullScore(state, vocab, out);
       total += ret.prob;
-      std::cout << word << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << ' ';
+      std::cout << word << '=' << vocab << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\n';
       state = out;
-      if (std::cin.get() == '\n') break;
+      char c;
+      while (true) {
+        c = std::cin.get();
+        if (!std::cin) break;
+        if (c == '\n') break;
+        if (!isspace(c)) {
+          std::cin.unget();
+          break;
+        }
+      }
+      if (c == '\n') break;
     }
     if (!got && !std::cin) break;
     ret = model.FullScore(state, model.GetVocabulary().EndSentence(), out);
     total += ret.prob;
-    std::cout << "</s> " << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << ' ';
-    std::cout << "Total: " << total << '\n';
+    std::cout << "</s>=" << model.GetVocabulary().EndSentence() << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\n';
+    std::cout << "Total: " << total << " OOV: " << oov << '\n';
   }
   PrintUsage("After queries:\n");
+}
+
+template <class Model> void Query(const char *name) {
+  lm::ngram::Config config;
+  Model model(name, config);
+  Query(model);
 }
 
 int main(int argc, char *argv[]) {
@@ -64,9 +86,25 @@ int main(int argc, char *argv[]) {
     std::cerr << "Pass language model name." << std::endl;
     return 0;
   }
-  {
-    lm::ngram::Model ngram(argv[1]);
-    Query(ngram);
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(argv[1], model_type)) {
+    switch(model_type) {
+      case lm::ngram::HASH_PROBING:
+        Query<lm::ngram::ProbingModel>(argv[1]);
+        break;
+      case lm::ngram::HASH_SORTED:
+        Query<lm::ngram::SortedModel>(argv[1]);
+        break;
+      case lm::ngram::TRIE_SORTED:
+        Query<lm::ngram::TrieModel>(argv[1]);
+        break;
+      default:
+        std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
+        abort();
+    }
+  } else {
+    Query<lm::ngram::ProbingModel>(argv[1]);
   }
+
   PrintUsage("Total time including destruction:\n");
 }

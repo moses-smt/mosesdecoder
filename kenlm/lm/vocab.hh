@@ -27,15 +27,18 @@ inline uint64_t HashForVocab(const StringPiece &str) {
 
 class WriteWordsWrapper : public EnumerateVocab {
   public:
-    WriteWordsWrapper(EnumerateVocab *inner, int fd);
+    WriteWordsWrapper(EnumerateVocab *inner);
 
     ~WriteWordsWrapper();
     
     void Add(WordIndex index, const StringPiece &str);
 
+    void Write(int fd);
+
   private:
     EnumerateVocab *inner_;
-    int fd_;
+
+    std::string buffer_;
 };
 
 // Vocabulary based on sorted uniform find storing only uint64_t values and using their offsets as indices.  
@@ -62,7 +65,6 @@ class SortedVocabulary : public base::Vocabulary {
       }
     }
 
-    // Ignores second argument for consistency with probing hash which has a float here.  
     static size_t Size(std::size_t entries, const Config &config);
 
     // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.

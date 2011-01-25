@@ -1,5 +1,7 @@
 #include "lm/read_arpa.hh"
 
+#include "lm/blank.hh"
+
 #include <cstdlib>
 #include <vector>
 
@@ -7,6 +9,9 @@
 #include <inttypes.h>
 
 namespace lm {
+
+// 1 for '\t', '\n', and ' '.  This is stricter than isspace.  
+const bool kARPASpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 namespace {
 
@@ -116,21 +121,27 @@ void ReadBackoff(util::FilePiece &in, Prob &/*weights*/) {
     case '\n':
       break;
     default:
-      UTIL_THROW(FormatLoadException, "Expected tab or newline after unigram");
+      UTIL_THROW(FormatLoadException, "Expected tab or newline for backoff");
   }
 }
 
 void ReadBackoff(util::FilePiece &in, ProbBackoff &weights) {
+  // Always make zero negative.  
+  // Negative zero means that no (n+1)-gram has this n-gram as context.  
+  // Therefore the hypothesis state can be shorter.  Of course, many n-grams
+  // are context for (n+1)-grams.  An algorithm in the data structure will go
+  // back and set the backoff to positive zero in these cases.
   switch (in.get()) {
     case '\t':
       weights.backoff = in.ReadFloat();
+      if (weights.backoff == ngram::kExtensionBackoff) weights.backoff = ngram::kNoExtensionBackoff;
       if ((in.get() != '\n')) UTIL_THROW(FormatLoadException, "Expected newline after backoff");
       break;
     case '\n':
-      weights.backoff = 0.0;
+      weights.backoff = ngram::kNoExtensionBackoff;
       break;
     default:
-      UTIL_THROW(FormatLoadException, "Expected tab or newline after unigram");
+      UTIL_THROW(FormatLoadException, "Expected tab or newline for backoff");
   }
 }
 
