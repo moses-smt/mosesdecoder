@@ -125,10 +125,8 @@ int main(int argc, char* argv[])
 		TRACE_ERR(endl);
 	}
 
-	cout.setf(std::ios::fixed); 
-	cout.precision(3);
-	cerr.setf(std::ios::fixed); 
-	cerr.precision(3);
+  IOWrapper::FixPrecision(cout);
+  IOWrapper::FixPrecision(cerr);
 
 	// load data structures
 	Parameter parameter;
@@ -187,7 +185,8 @@ int main(int argc, char* argv[])
 		assert(!staticData.UseMBR());
 
 		if (!staticData.UseMBR()){
-			ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
+      const MosesChart::Hypothesis *bestHypo = manager.GetBestHypothesis();
+			ioWrapper->OutputBestHypo(bestHypo, source->GetTranslationId(),
 													 staticData.GetReportSegmentation(),
 													 staticData.GetReportAllFactors()
 													 );
@@ -200,13 +199,19 @@ int main(int argc, char* argv[])
 			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
 					MosesChart::TrellisPathList nBestList;
 					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioWrapper->OutputNBestList(nBestList, &system, source->GetTranslationId());
+					ioWrapper->OutputNBestList(nBestList, bestHypo, &system, source->GetTranslationId());
 			
 					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
 			}
 			
 			if (staticData.GetOutputSearchGraph())
-				manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
+      {
+        std::ostringstream out;
+        manager.GetSearchGraph(source->GetTranslationId(), out);
+        OutputCollector *oc = ioWrapper->GetSearchGraphOutputCollector();
+        assert(oc);
+        oc->Write(source->GetTranslationId(), out.str());
+      }
 
 		}
 		else {

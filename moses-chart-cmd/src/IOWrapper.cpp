@@ -59,8 +59,11 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_inputFactorUsed(inputFactorUsed)
 ,m_nBestStream(NULL)
 ,m_outputSearchGraphStream(NULL)
-,m_detailedTranslationReportingStream(0)
+,m_detailedTranslationReportingStream(NULL)
 ,m_inputFilePath(inputFilePath)
+,m_nBestOutputCollector(NULL)
+,m_searchGraphOutputCollector(NULL)
+,m_singleBestOutputCollector(NULL)
 {
 	const StaticData &staticData = StaticData::Instance();
 
@@ -88,7 +91,13 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 			m_nBestStream = nBestFile;
 			nBestFile->open(nBestFilePath.c_str());
 		}
+    m_nBestOutputCollector = new Moses::OutputCollector(m_nBestStream);
 	}
+
+  if (!m_surpressSingleBestOutput)
+  {
+    m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
+  }
 
 	// search graph output
 	if (staticData.GetOutputSearchGraph())
@@ -97,6 +106,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 	  std::ofstream *file = new std::ofstream;
 	  m_outputSearchGraphStream = file;
 	  file->open(fileName.c_str());
+    m_searchGraphOutputCollector = new Moses::OutputCollector(m_outputSearchGraphStream);
 	}
 
   // detailed translation reporting
@@ -113,17 +123,15 @@ IOWrapper::~IOWrapper()
   {
     delete m_inputStream;
   }
-	if (m_nBestStream != NULL && !m_surpressSingleBestOutput)
+	if (!m_surpressSingleBestOutput)
 	{ // outputting n-best to file, rather than stdout. need to close file and delete obj
 		delete m_nBestStream;
 	}
-
-	if (m_outputSearchGraphStream != NULL)
-	{
-	  delete m_outputSearchGraphStream;
-	}
-
+	delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_nBestOutputCollector;
+  delete m_searchGraphOutputCollector;
+  delete m_singleBestOutputCollector;
 }
 
 InputType*IOWrapper::GetInput(InputType* inputType)
@@ -251,6 +259,8 @@ void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *h
 
 void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors)
 {
+  std::ostringstream out;
+  IOWrapper::FixPrecision(out);
 	if (hypo != NULL)
 	{
 		VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);		
@@ -260,7 +270,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 
 		if (StaticData::Instance().GetOutputHypoScore())
 		{
-			cout << hypo->GetTotalScore() << " " 
+			out << hypo->GetTotalScore() << " " 
 					<< MosesChart::Hypothesis::GetHypoCount() << " ";
 		}
 		
@@ -272,8 +282,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 		if (!m_surpressSingleBestOutput)
 		{
 			if (StaticData::Instance().IsPathRecoveryEnabled()) {
-				//OutputInput(cout, hypo);
-				cout << "||| ";
+				out << "||| ";
 			}
 			Phrase outPhrase(Output);
 			hypo->CreateOutputPhrase(outPhrase);
@@ -285,7 +294,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 
 			const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 			string output = outPhrase.GetStringRep(outputFactorOrder);
-			cout << output << endl;
+			out << output << endl;
 		}
 	}
 	else
@@ -294,18 +303,44 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 		
 		if (StaticData::Instance().GetOutputHypoScore())
 		{
-			cout << "0 ";
+			out << "0 ";
 		}
 		
-		if (!m_surpressSingleBestOutput)
-		{
-			cout << endl;
-		}
+		out << endl;
 	}
+
+  if (m_singleBestOutputCollector)
+  {
+    m_singleBestOutputCollector->Write(translationId, out.str());
+  }
 }
 
-void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, const TranslationSystem* system, long translationId)
+void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, const MosesChart::Hypothesis *bestHypo, const TranslationSystem* system, long translationId)
 {
+  std::ostringstream out;
+
+  // Check if we're writing to std::cout.
+  if (m_surpressSingleBestOutput)
+  {
+    // Set precision only if we're writing the n-best list to cout.  This is to
+    // preserve existing behaviour, but should probably be done either way.
+    IOWrapper::FixPrecision(out);
+
+    // The output from -output-hypo-score is always written to std::cout.
+    if (StaticData::Instance().GetOutputHypoScore())
+    {
+      if (bestHypo != NULL)
+      {
+        out << bestHypo->GetTotalScore() << " "
+            << MosesChart::Hypothesis::GetHypoCount() << " ";
+      }
+      else
+      {
+        out << "0 ";
+      }
+    }
+  }
+
 	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
 	//bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 
@@ -323,9 +358,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 		outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
 
 		// print the surface factor of the translation
-		*m_nBestStream << translationId << " ||| ";
-		OutputSurface(*m_nBestStream, outputPhrase, m_outputFactorOrder, false);
-		*m_nBestStream << " ||| ";
+		out << translationId << " ||| ";
+		OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+		out << " ||| ";
 
 		// print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
@@ -335,10 +370,10 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 		const LMList& lml = system->GetLanguageModels();
     if (lml.size() > 0) {
 			if (labeledOutput)
-	      *m_nBestStream << "lm: ";
+	      out << "lm: ";
 		  LMList::const_iterator lmi = lml.begin();
 		  for (; lmi != lml.end(); ++lmi) {
-			  *m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
+			  out << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
 		  }
     }
 
@@ -348,12 +383,12 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
 			if (pds.size() > 0) {
 				if (labeledOutput)
-					*m_nBestStream << "tm: ";
+					out << "tm: ";
 				vector<PhraseDictionaryFeature*>::iterator iter;
 				for (iter = pds.begin(); iter != pds.end(); ++iter) {
 					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 					for (size_t j = 0; j<scores.size(); ++j)
-						*m_nBestStream << scores[j] << " ";
+						out << scores[j] << " ";
 				}
 			}
 		}
@@ -373,10 +408,10 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 				if (pd_numinputscore){
 
 					if (labeledOutput)
-						*m_nBestStream << "I: ";
+						out << "I: ";
 
 					for (size_t j = 0; j < pd_numinputscore; ++j)
-						*m_nBestStream << scores[j] << " ";
+						out << scores[j] << " ";
 				}
 
 
@@ -386,9 +421,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 					size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
 					if (iter == pds.begin() && labeledOutput)
-						*m_nBestStream << "tm: ";
+						out << "tm: ";
 					for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-						*m_nBestStream << scores[j] << " ";
+						out << scores[j] << " ";
 				}
 			}
 		}
@@ -397,25 +432,25 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
 
 		// word penalty
 		if (labeledOutput)
-	    *m_nBestStream << "w: ";
-		*m_nBestStream << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
+	    out << "w: ";
+		out << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
 
 		// generation
 		const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
 			if (labeledOutput)
-	      *m_nBestStream << "g: ";
+	      out << "g: ";
 		  vector<GenerationDictionary*>::const_iterator iter;
 		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
 			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 			  for (size_t j = 0; j<scores.size(); j++) {
-				  *m_nBestStream << scores[j] << " ";
+				  out << scores[j] << " ";
 			  }
 		  }
     }
 
 		// total
-    *m_nBestStream << "||| " << path.GetTotalScore();
+    out << "||| " << path.GetTotalScore();
 
 		/*
     if (includeAlignment) {
@@ -437,9 +472,17 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
     }
 		*/
 
-    *m_nBestStream << endl;
+    out << endl;
 	}
 
-	*m_nBestStream<<std::flush;
+	out <<std::flush;
+
+  assert(m_nBestOutputCollector);
+  m_nBestOutputCollector->Write(translationId, out.str());
 }
 
+void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
+{
+  stream.setf(std::ios::fixed);
+  stream.precision(size);
+}
