@@ -11,7 +11,7 @@
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
-		1E1AA47512EB2F610035CC20 /* icon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 1E1AA47412EB2F610035CC20 /* icon.jpg */; };
+		1E21F0FC12EFD27C00BFF722 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E21F0FB12EFD27C00BFF722 /* icon.png */; };
 		1E5BD53A12EB7E0F00E2F403 /* htable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51012EB7E0F00E2F403 /* htable.cpp */; };
 		1E5BD53D12EB7E0F00E2F403 /* linearlm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51612EB7E0F00E2F403 /* linearlm.cpp */; };
 		1E5BD53E12EB7E0F00E2F403 /* lmmacro.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD51812EB7E0F00E2F403 /* lmmacro.cpp */; };
@@ -182,7 +182,7 @@
 		1D3623250D0F684500981E51 /* mosesAppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mosesAppDelegate.mm; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* moses.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = moses.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		1E1AA47412EB2F610035CC20 /* icon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = icon.jpg; sourceTree = "<group>"; };
+		1E21F0FB12EFD27C00BFF722 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		1E5BD50A12EB7E0F00E2F403 /* cmd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cmd.h; path = Classes/irstlm/src/cmd.h; sourceTree = "<group>"; };
 		1E5BD50E12EB7E0F00E2F403 /* dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dictionary.h; path = Classes/irstlm/src/dictionary.h; sourceTree = "<group>"; };
 		1E5BD50F12EB7E0F00E2F403 /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gzfilebuf.h; path = Classes/irstlm/src/gzfilebuf.h; sourceTree = "<group>"; };
@@ -996,8 +996,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				1E21F0FB12EFD27C00BFF722 /* icon.png */,
 				1EFF0A2412EC84F900B5B68A /* en-ht.zip */,
-				1E1AA47412EB2F610035CC20 /* icon.jpg */,
 				28AD73870D9D96C1002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* moses-Info.plist */,
 				1EDCCE6A12E9A2FA006BB2DE /* View1.xib */,
@@ -1070,8 +1070,8 @@
 				1EDCCE6C12E9A2FA006BB2DE /* View1.xib in Resources */,
 				1EDCCE7A12E9A3D4006BB2DE /* View2.xib in Resources */,
 				1EB923D612EA70910009D1B5 /* View3.xib in Resources */,
-				1E1AA47512EB2F610035CC20 /* icon.jpg in Resources */,
 				1EFF0A2512EC84F900B5B68A /* en-ht.zip in Resources */,
+				1E21F0FC12EFD27C00BFF722 /* icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
