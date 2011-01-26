@@ -3,13 +3,14 @@
 using namespace std;
 namespace TERCpp
 {
+
     string documentStructure::toString()
     {
         stringstream s;
 // 	s << "nword : " << vectorToString(nwords)<<endl;
 // 	s << "alignment" << vectorToString(alignment)<<endl;
 // 	s << "afterShift" << vectorToString(alignment)<<endl;
-        s << "Nothing to be printed" <<endl;
+        s << "Nothing to be printed" << endl;
         return s.str();
     }
 
@@ -18,9 +19,9 @@ namespace TERCpp
         return docId;
     }
 
-    vector< segmentStructure > documentStructure::getSegments()
+    vector< segmentStructure >* documentStructure::getSegments()
     {
-        return seg;
+        return &seg;
     }
 
     string documentStructure::getSysId()
@@ -30,16 +31,46 @@ namespace TERCpp
 
     void documentStructure::addSegments ( segmentStructure s )
     {
-      seg.push_back(s);
+        seg.push_back ( s );
     }
     void documentStructure::addSegments ( string id, string text )
     {
-      segmentStructure tmp_seg(id,text);
-      seg.push_back(tmp_seg);
+        segmentStructure tmp_seg ( id, text );
+        seg.push_back ( tmp_seg );
     }
     segmentStructure* documentStructure::getLastSegments()
     {
-      return & seg.at((int)seg.size()-1);
+        return & seg.at ( ( int ) seg.size() - 1 );
+    }
+    void documentStructure::setDocId ( string s )
+    {
+        docId = s;
+    }
+    void documentStructure::setSysId ( string s )
+    {
+        sysId = s;
+    }
+
+    segmentStructure* documentStructure::getSegment ( string id )
+    {
+        for ( int i = 0; i < ( int ) seg.size(); i++ )
+        {
+            if ( id.compare ( seg.at ( i ).getSegId() ) == 0 )
+            {
+                return & ( seg.at ( i ) );
+            }
+        }
+        cerr << "ERROR : documentStructure::getSegment : Segment " << id << " does not exist" <<endl;
+        cerr << "Segment size " << seg.size()<< endl;
+	for (int i=0;i<(int)seg.size(); i++)
+	{
+	  cerr <<seg.at(i).getSegId()<<endl;
+	}
+	exit(0);
+    }
+    int documentStructure::getSize()
+    {
+        return ( int ) seg.size();
     }
 
 

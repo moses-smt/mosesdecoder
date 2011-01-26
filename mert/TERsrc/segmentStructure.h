@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include "tools.h"
+#include "tercalc.h"
 
 
 using namespace std;
@@ -17,21 +18,26 @@ namespace TERCpp
     class segmentStructure
     {
         private:
-	  string segId;
-	  vecString content;
-
-	public:
-	  segmentStructure();
-	  segmentStructure(string id, vecString vecS);
-	  segmentStructure(string id, string txt);
-	  string getSegId();
-	  void setSegId(string s);
-	  void addContent(vecString vecS);
-	  void addContent(string s);
+            string segId;
+            vecString content;
+            terAlignment evaluation;
+            string bestDocId;
+        public:
+            segmentStructure();
+            segmentStructure ( string id, vecString vecS );
+            segmentStructure ( string id, string txt );
+            string getSegId();
+            terAlignment getAlignment();
+            void setAlignment(terAlignment& l_align);
+            void setSegId ( string s );
+            void setBestDocId ( string s );
+            string getBestDocId();
+            void addContent ( vecString vecS );
+            void addContent ( string s );
 // 	  {
 // 	    return segId;
 // 	  }
-	  vecString getContent();
+            vecString getContent();
 // 	  {
 // 	    return content;
 // 	  }
@@ -55,7 +61,7 @@ namespace TERCpp
             // This is used to store the cost of a shift, so we don't have to
             // calculate it multiple times.
             double cost;
-	    string toString();
+            string toString();
     };
 
 }

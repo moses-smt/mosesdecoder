@@ -6,6 +6,12 @@ namespace TERCpp
 
     terAlignment::terAlignment()
     {
+// 		vector<string> ref;
+// 		vector<string> hyp;
+// 		vector<string> aftershift;
+
+        //   TERshift[] allshifts = null;
+
         numEdits=0;
         numWords=0;
         bestRef="";
@@ -24,36 +30,46 @@ namespace TERCpp
         s << "Original Hyp: " << join ( " ", hyp ) <<endl;
         s << "Hyp After Shift: " << join ( " ", aftershift );
         s << endl;
+// 		string s = "Original Ref: " + join(" ", ref) + 	"\nOriginal Hyp: " + join(" ", hyp) + "\nHyp After Shift: " + join(" ", aftershift);
         if ( ( int ) sizeof ( alignment ) >0 )
         {
             s << "Alignment: (";
+// 			s += "\nAlignment: (";
             for ( int i = 0; i < ( int ) ( alignment.size() ); i++ )
             {
                 s << alignment[i];
+// 				s+=alignment[i];
             }
+// 			s += ")";
             s << ")";
         }
         s << endl;
         if ( ( int ) allshifts.size() == 0 )
         {
+// 			s += "\nNumShifts: 0";
             s << "NumShifts: 0";
         }
         else
         {
+// 			s += "\nNumShifts: " + (int)allshifts.size();
             s << "NumShifts: "<< ( int ) allshifts.size();
             for ( int i = 0; i < ( int ) allshifts.size(); i++ )
             {
                 s << endl << "  " ;
                 s << ( ( terShift ) allshifts[i] ).toString();
+// 				s += "\n  " + allshifts[i];
             }
         }
         s << endl << "Score: " << score() << " (" << numEdits << "/" << numWords << ")";
+// 		s += "\nScore: " + score() + " (" + numEdits + "/" + numWords + ")";
         return s.str();
 
     }
     string terAlignment::join ( string delim, vector<string> arr )
     {
         if ( ( int ) arr.size() == 0 ) return "";
+// 		if ((int)delim.compare("") == 0) delim = new String("");
+// 		String s = new String("");
         stringstream s;
         s.str ( "" );
         for ( int i = 0; i < ( int ) arr.size(); i++ )
@@ -68,6 +84,7 @@ namespace TERCpp
             }
         }
         return s.str();
+// 		return "";
     }
     double terAlignment::score()
     {
@@ -113,6 +130,9 @@ namespace TERCpp
 		}		
 	  }
 	}
+	//	if(numEdits != numSft + numDel + numIns + numSub)
+	//      System.out.println("** Error, unmatch edit erros " + numEdits + 
+	//                         " vs " + (numSft + numDel + numIns + numSub));
   }
 
 }

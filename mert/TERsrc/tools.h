@@ -24,6 +24,22 @@ namespace Tools
     typedef vector<alignmentElement> WERalignment;
 
 
+struct param
+{
+    bool debugMode;
+    string referenceFile;     // path to the resources
+    string hypothesisFile;     // path to the configuration files
+    string outputFileExtension;
+    string outputFileName;
+    bool noPunct;
+    bool caseOn;
+    bool normalize;
+    bool tercomLike;
+    bool sgmlInputs;
+    bool noTxtIds;
+};
+// param = { false, "","","","" };
+
 // class tools{
 // private:
 // public:
@@ -37,7 +53,10 @@ namespace Tools
     string lowerCase(string str);
     string removePunct(string str);
     string tokenizePunct(string str);
+    string removePunctTercom(string str);
+    string normalizeStd(string str);
+    string printParams(param p);
 // };
-
+    param copyParam(param p);
 }
 #endif

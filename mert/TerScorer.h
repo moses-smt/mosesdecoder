@@ -55,6 +55,7 @@ class TerScorer: public StatisticsBasedScorer {
 		vector<size_t> _reflengths;
 		vector<multiset<int> > _reftokens;
 		vector<vector<int> > m_references;
+		vector<vector<vector<int> > > m_multi_references;
 		string m_pid;
   
 };

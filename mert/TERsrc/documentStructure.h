@@ -24,12 +24,15 @@ namespace TERCpp
         public:
             string getDocId();
             string getSysId();
-            vector<segmentStructure> getSegments();
+            vector<segmentStructure>* getSegments();
             segmentStructure* getLastSegments();
-            void setDocId(string s);
-            void setSysId(string s);
-            void addSegments(segmentStructure s);
-            void addSegments(string id, string text);
+            void setDocId ( string s );
+            void setSysId ( string s );
+            void addSegments ( segmentStructure s );
+            void addSegments ( string id, string text );
+            segmentStructure* getSegment ( string id );
+            int getSize();
+
 // 	alignmentStruct();
 // 	alignmentStruct (int _start, int _end, int _moveto, int _newloc);
 // 	alignmentStruct (int _start, int _end, int _moveto, int _newloc, vector<string> _shifted);
