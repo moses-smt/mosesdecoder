@@ -101,6 +101,11 @@ class TranslationTask : public Task
                                staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors());
     IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
+
+    if (staticData.IsDetailedTranslationReportingEnabled())
+    {
+      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, lineNumber);
+    }
   
     // n-best
     size_t nBestSize = staticData.GetNBestSize();
@@ -202,6 +207,26 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;		
 	}
 
+  // create threadpool, if necessary
+  int threadcount = (parameter.GetParam("threads").size() > 0) ?
+                    Scan<size_t>(parameter.GetParam("threads")[0]) : 1;
+
+#ifdef WITH_THREADS
+  if (threadcount < 1)
+  {
+    cerr << "Error: Need to specify a positive number of threads" << endl;
+    exit(1);
+  }
+  ThreadPool pool(threadcount);
+#else
+  if (threadcount > 1)
+  {
+    cerr << "Error: Thread count of " << threadcount
+         << " but moses not built with thread support" << endl;
+    exit(1);
+  }
+#endif
+
 	const StaticData &staticData = StaticData::Instance();
 	if (!StaticData::LoadDataStatic(&parameter))
 		return EXIT_FAILURE;
@@ -240,10 +265,18 @@ int main(int argc, char* argv[])
 		IFVERBOSE(1)
 			ResetUserTime();
     TranslationTask *task = new TranslationTask(source, *ioWrapper);
-    source = NULL;  // TranslationTask is responsible for deleting source.
+    source = NULL;  // task will delete source
+#ifdef WITH_THREADS
+    pool.Submit(task);  // pool will delete task
+#else
     task->Run();
     delete task;
+#endif
   }
+
+#ifdef WITH_THREADS
+  pool.Stop(true);  // flush remaining jobs
+#endif
 
 	delete ioWrapper;
 

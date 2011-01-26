@@ -61,6 +61,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_outputSearchGraphStream(NULL)
 ,m_detailedTranslationReportingStream(NULL)
 ,m_inputFilePath(inputFilePath)
+,m_detailOutputCollector(NULL)
 ,m_nBestOutputCollector(NULL)
 ,m_searchGraphOutputCollector(NULL)
 ,m_singleBestOutputCollector(NULL)
@@ -114,6 +115,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
+    m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
 }
 
@@ -129,6 +131,7 @@ IOWrapper::~IOWrapper()
 	}
 	delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
@@ -257,6 +260,20 @@ void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *h
 	}
 }
 
+void IOWrapper::OutputDetailedTranslationReport(
+    const MosesChart::Hypothesis *hypo,
+    long translationId)
+{
+  if (hypo == NULL)
+  {
+    return;
+  }
+  std::ostringstream out;
+  OutputTranslationOptions(out, hypo, translationId);
+  assert(m_detailOutputCollector);
+  m_detailOutputCollector->Write(translationId, out.str());
+}
+
 void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors)
 {
   std::ostringstream out;
@@ -273,12 +290,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 			out << hypo->GetTotalScore() << " " 
 					<< MosesChart::Hypothesis::GetHypoCount() << " ";
 		}
-		
-		if (StaticData::Instance().IsDetailedTranslationReportingEnabled())
-		{
-			OutputTranslationOptions(*m_detailedTranslationReportingStream, hypo, translationId);
-		}
-		
+
 		if (!m_surpressSingleBestOutput)
 		{
 			if (StaticData::Instance().IsPathRecoveryEnabled()) {
