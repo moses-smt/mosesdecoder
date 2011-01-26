@@ -1308,6 +1308,41 @@
 			};
 			name = AdHocDistr;
 		};
+		1EFAE3C112EFF09D00175A16 /* AppStoreDistr */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Hieu Hoang";
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_KEN,
+					LM_INTERNAL,
+					LM_IRST,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = Classes/kenlm;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				OTHER_LDFLAGS = "-lz";
+				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "1A008427-1FAF-4650-A620-14402FCD260F";
+				SDKROOT = iphoneos;
+			};
+			name = AppStoreDistr;
+		};
+		1EFAE3C212EFF09D00175A16 /* AppStoreDistr */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = moses_Prefix.pch;
+				INFOPLIST_FILE = "moses-Info.plist";
+				PRODUCT_NAME = moses;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = AppStoreDistr;
+		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1357,6 +1392,7 @@
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
+				1EFAE3C212EFF09D00175A16 /* AppStoreDistr */,
 				1E714F6A12EC947100075634 /* AdHocDistr */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -1367,6 +1403,7 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
+				1EFAE3C112EFF09D00175A16 /* AppStoreDistr */,
 				1E714F6912EC947100075634 /* AdHocDistr */,
 			);
 			defaultConfigurationIsVisible = 0;
