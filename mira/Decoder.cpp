@@ -201,7 +201,7 @@ namespace Mira {
   }
 
   void MosesDecoder::setWeights(const ScoreComponentCollection& weights) {
-    cerr << "New weights: " << weights << endl;
+    //cerr << "New weights: " << weights << endl;
     StaticData::InstanceNonConst().SetAllWeights(weights);
   }
 

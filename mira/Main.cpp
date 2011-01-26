@@ -424,7 +424,7 @@ int main(int argc, char** argv) {
 	      // compute difference to old weights
 		  ScoreComponentCollection weightDifference(mosesWeights);
 		  weightDifference.MinusEquals(oldWeights);
-		  cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
+		  //cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
   
 		  // update history (for approximate document Bleu)
 		  for (size_t i = 0; i < oracles.size(); ++i) {
@@ -493,9 +493,9 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLE
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
-			  if (rank == 0) {
-				  cerr << "Rank 0, before mixing: " << mosesWeights << endl;
-			  }
+			  //if (rank == 0) {
+			  //	  cerr << "Rank 0, before mixing: " << mosesWeights << endl;
+			  //}
 
 			  //VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
 
@@ -504,7 +504,7 @@ int main(int argc, char** argv) {
 			  if (rank == 0) {
 				  averageWeights.DivideEquals(size);
 				  //VERBOSE(1, "After mixing: " << averageWeights << endl);
-				  cerr << "Rank 0, after mixing: " << averageWeights << endl;
+				  //cerr << "Rank 0, after mixing: " << averageWeights << endl;
 
 				  // normalise weights after averaging
 				  averageWeights.L1Normalise();
@@ -524,10 +524,10 @@ int main(int argc, char** argv) {
 			  else
 				  totalWeights.DivideEquals(iterationsThisEpoch);
 
-			  if (rank == 0) {
-				  cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl;
-				  cerr << "Rank 0, total weights: " << totalWeights << endl;
-			  }
+			  //if (rank == 0) {
+			    //cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl;
+			    //cerr << "Rank 0, total weights: " << totalWeights << endl;
+			  //}
 
 			  if (weightEpochDump + 1 == weightDumpFrequency){
 				  // last weight dump in epoch
@@ -548,7 +548,7 @@ int main(int argc, char** argv) {
 				  // average and normalise weights
 				  averageTotalWeights.DivideEquals(size);
 				  averageTotalWeights.L1Normalise();
-				  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
+				  //cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
 
 				  ostringstream filename;
 				  if (epoch < 10) {
@@ -603,21 +603,17 @@ int main(int argc, char** argv) {
 						  if (reached)  {
 							  // stop MIRA
 							  cerr << "\nRank 0, stopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl << endl;
-							  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
-							  now = time(0); // get current time
-							  tm = localtime(&now); // get struct filled out
-							  cerr << "Rank 0, end date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
-									  << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
-
+							  //cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
+							  
 							  ScoreComponentCollection dummy;
 							  ostringstream endfilename;
 							  endfilename << "stopping";
 							  dummy.Save(endfilename.str());
+							 
 #ifdef MPI_ENABLE
-							  MPI_Finalize();
 							  MPI_Abort(MPI_COMM_WORLD, 0);
 #endif
-							  exit(0);
+							  goto end;
 						  }
 					  }
 				  }
@@ -630,14 +626,16 @@ int main(int argc, char** argv) {
 	  //list_of_delta_h.clear();
 	  //list_of_losses.clear();
   }
-  
+
+ end:  
+
 #ifdef MPI_ENABLE
   MPI_Finalize();
 #endif
 
-  if (rank == 0) {
-	  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
-  }
+  //if (rank == 0) {
+  //	  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
+  //}
 
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out

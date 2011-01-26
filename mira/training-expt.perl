@@ -88,7 +88,6 @@ my $continue_from_epoch = &param("train.continue-from-epoch", 0);
 #test configuration
 my ($test_input_file, $test_reference_file,$test_ini_file,$bleu_script,$use_moses);
 my $test_exe = &param("test.moses");
-
 &check_exists("test  executable", $test_exe);
 $bleu_script  = &param_required("test.bleu");
 &check_exists("multi-bleu script", $bleu_script);
@@ -103,6 +102,7 @@ $test_ini_file = &param_required("test.moses-ini-file");
 &check_exists ("test ini file", $test_ini_file);
 my $weight_file_stem = "$name-weights";
 my $weight_frequency = &param("test.frequency",1);
+my $extra_memory = &param("test.extra-memory",0);
 
 # adjust test frequency when using batches > 1
 if ($batch > 1) {
@@ -154,6 +154,7 @@ print TRAIN "-b $batch \\\n";
 print TRAIN $extra_args;
 
 print TRAIN "\n";
+print TRAIN "mpirun finished.\n";
 close TRAIN;
 
 if (! $execute) {
@@ -198,7 +199,7 @@ while(1) {
 	}	
     }
     
-    if (-e "stopping") {
+    if (-e "$working_dir/stopping") {
 	print "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
         exit 0;
     }
@@ -277,11 +278,13 @@ while(1) {
         print "Warning: unable to open weights file $core_weight_file\n";
         next;
     }
+    my $readExtraWeights = 0;
     my %extra_weights;
     while(<WEIGHTS>) {
         chomp;
 	my ($name,$value) = split;
         #next if ($name =~ /^!Unknown/);
+	next if ($name =~ /^BleuScore/);
         if ($name eq "DEFAULT_") {
             $default_weight = $value;
         } else {
@@ -297,12 +300,16 @@ while(1) {
               $distortion_weight = $value;
             } elsif ($name =~ /^LexicalReordering/) {
               push @lexicalreordering_weights,$value;
-            } elsif ($name ne "BleuScore") {
+            } else {
               $extra_weights{$name} = $value;
+	      $readExtraWeights += 1;
             }
         }
     }
     close WEIGHTS;
+
+    print "Number of extra weights read: ".$readExtraWeights."\n";
+    print "Number of extra weights stored: ". keys( %extra_weights ) ."\n";
 
     die "LM weight not defined" unless defined $lm_weight;
 
@@ -325,18 +332,19 @@ while(1) {
                 abs($unknownwordpenalty_weight+$default_weight) +
                 abs($lm_weight+$default_weight) +
                 abs($distortion_weight+$default_weight);
-    # if weights are normalized already, do nothing
-    if ($total == 0) {
-	$total = 1.0;
-	$default_weight = 0.0;
-    }
-
+    
     foreach my $phrasemodel_weight (@phrasemodel_weights) {
         $total += abs($phrasemodel_weight + $default_weight);
     }
     foreach my $lexicalreordering_weight (@lexicalreordering_weights) {
         $total += abs($lexicalreordering_weight + $default_weight);
     }
+
+    foreach my $extra_weight (keys %extra_weights) {
+	$total += abs($extra_weights{$extra_weight} + $default_weight);
+    }
+
+    print "TOTAL: ", $total, "\n";
     
     # Create new ini file
     my $new_test_ini_file = $working_dir . "/" . $test_script . ".$train_iteration.ini";
@@ -349,45 +357,62 @@ while(1) {
         next;
     }
 
+    my $verifyNormalisation = 0;
+    my $uWeightCounted = 0;
+
     while(<OLDINI>) {
         if (/weight-l/) {
             print NEWINI "[weight-l]\n";
             print NEWINI ($lm_weight+$default_weight) / $total;
+	    $verifyNormalisation += abs($lm_weight+$default_weight) / $total;
             print NEWINI "\n";
             readline(OLDINI);
         } elsif (/weight-t/) {
             print NEWINI "[weight-t]\n";
             foreach my $phrasemodel_weight (@phrasemodel_weights) {
                 print NEWINI ($phrasemodel_weight+$default_weight) / $total;
+		$verifyNormalisation += abs($phrasemodel_weight+$default_weight) / $total;
                 print NEWINI "\n";
                 readline(OLDINI);
             }
         } elsif (/weight-d/) {
             print NEWINI "[weight-d]\n";
             print NEWINI ($distortion_weight+$default_weight) / $total;
+	    $verifyNormalisation += abs($distortion_weight+$default_weight) / $total;
             print NEWINI "\n";
             readline(OLDINI);
             foreach my $lexicalreordering_weight (@lexicalreordering_weights) {
                 print NEWINI ($lexicalreordering_weight+$default_weight) / $total;
+		$verifyNormalisation += abs($lexicalreordering_weight+$default_weight) / $total;
                 print NEWINI "\n";
                 readline(OLDINI);
             }
         } elsif (/weight-w/) {
             print NEWINI "[weight-w]\n";
             print NEWINI ($wordpenalty_weight+$default_weight) / $total;
+	    $verifyNormalisation += abs($wordpenalty_weight+$default_weight) / $total;
             print NEWINI "\n";
             readline(OLDINI);
-        } elsif (/weight-u/) {
+        } elsif (/weight-u/) { 
             print NEWINI "[weight-u]\n";
             print NEWINI ($unknownwordpenalty_weight+$default_weight) / $total;
-            print NEWINI "\n";
-            readline(OLDINI);
+	    $verifyNormalisation += abs($unknownwordpenalty_weight+$default_weight) / $total;
+	    $uWeightCounted = 1;
+        #    print NEWINI "\n";
+        #    readline(OLDINI);
         } else {
             print NEWINI;
         }
     }
     close NEWINI;
     close OLDINI;
+    
+    if(!$uWeightCounted) {
+	$verifyNormalisation += abs($unknownwordpenalty_weight+$default_weight) / $total;
+    }
+
+    print "Core weights add up to ", $verifyNormalisation, "\n";
+    my $writtenExtraWeights = 0;
 
     # if there are any non-core weights, write them to a weights file
     my $extra_weight_file = undef;
@@ -402,19 +427,24 @@ while(1) {
         $default_weight = $extra_weights{"DEFAULT_"};
         $core_weight = $extra_weights{"core"} + $default_weight;
       }
-      #print "total: $total core: $core_weight default: $default_weight\n";
       foreach my $name (sort keys %extra_weights) {
         next if ($name eq "core");
         next if ($name eq "DEFAULT_");
         my $value = $extra_weights{$name} + $default_weight;
-        #print "name: $name value: $value\n";
-        $value /= $core_weight;
-        $value /= $total;
-        #print "name: $name value: $value\n";
-        print EXTRAWEIGHT "$name $value\n" if $value;
+	
+	# print only non-zero feature weights to file
+	if ($value) {
+	    $value /= $core_weight;
+	    $value /= $total;
+	    print EXTRAWEIGHT "$name $value\n";
+	    $verifyNormalisation += abs($value);
+	    $writtenExtraWeights += 1;
+	} 
       }
     }
 
+    print "Number of extra weights written to scale file: ", $writtenExtraWeights, "\n";
+    print "All weights add up to ", $verifyNormalisation, "\n";
 
     print TEST "#!/bin/sh\n";
     print TEST "#\$ -N $job_name\n";
@@ -437,7 +467,12 @@ while(1) {
 
     #launch testing
     if ($have_sge) {
-      &submit_job_sge($test_script_file);
+	if ($extra_memory) {
+	    &submit_job_sge_extra_memory($test_script_file);
+	}
+	else {
+	    &submit_job_sge($test_script_file);
+	}
     } else {
       &submit_job_no_sge($test_script_file, $test_out,$test_err);
     }
@@ -496,6 +531,19 @@ sub check_exists {
 sub submit_job_sge {
     my($script_file) = @_;
     my $qsub_result = `qsub -P $queue $script_file`;
+    if ($qsub_result !~ /Your job (\d+)/) {
+        print "Failed to qsub job: $qsub_result\n";
+        return 0;
+    }
+    my $job_name = basename($script_file);
+    print "Submitted job: $job_name  id: $1  " .
+        scalar(localtime()) . "\n";
+    return $1;
+}
+
+sub submit_job_sge_extra_memory {
+    my($script_file) = @_;
+    my $qsub_result = `qsub -pe $extra_memory -P $queue $script_file`;
     if ($qsub_result !~ /Your job (\d+)/) {
         print "Failed to qsub job: $qsub_result\n";
         return 0;
