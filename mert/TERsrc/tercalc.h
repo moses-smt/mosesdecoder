@@ -19,7 +19,7 @@ using namespace Tools;
 using namespace HashMapSpace;
 namespace TERCpp
 {
-#define ARRAY_MAX_SIZE 10000
+#define ARRAY_MAX_SIZE 1000
 
 // typedef size_t WERelement[2];
 // Vecteur d'alignement contenant le hash du mot et son evaluation (0=ok, 1=sub, 2=ins, 3=del)
