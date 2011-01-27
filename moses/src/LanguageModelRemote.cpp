@@ -55,7 +55,7 @@ bool LanguageModelRemote::start(const std::string& host, int port) {
   return true;
 }
 
-float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const {
+float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFactor, State* finalState) const {
   size_t count = contextFactor.size();
   if (count == 0) {
     if (finalState) *finalState = NULL;
@@ -76,7 +76,6 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   cur = &cur->tree[event_word ? event_word : EOS];
   if (cur->prob) {
     if (finalState) *finalState = cur->boState;
-    if (len) *len = m_nGramOrder;
     return cur->prob;
   }
   cur->boState = *reinterpret_cast<const State*>(&m_curId);
@@ -119,7 +118,6 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   cur->prob = FloorScore(TransformLMScore(*reinterpret_cast<float*>(res)));
   if (finalState) {
     *finalState = cur->boState;
-    if (len) *len = m_nGramOrder;
   }
   return cur->prob;
 }

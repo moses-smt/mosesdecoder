@@ -111,8 +111,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
 }
 
 float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor
-												, State* finalState
-												, unsigned int* /*len*/) const
+												, State* finalState) const
 {
 	const size_t ngram = contextFactor.size();
 	switch (ngram)

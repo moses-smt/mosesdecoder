@@ -184,10 +184,8 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
         return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
-float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const
+float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
-	unsigned int dummy;
-	if (!len) { len = &dummy; }
 	FactorType factorType = GetFactorType();
 
 	// set up context
@@ -212,7 +210,6 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
         prob = m_lmtb->clprob(codes,idx,NULL,NULL,&msp,&ilen);
 
 	if (finalState) *finalState=(State *) msp;
-	if (len) *len = ilen;
 
 	return TransformLMScore(prob);
 }

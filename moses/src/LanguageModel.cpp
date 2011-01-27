@@ -222,9 +222,8 @@ FFState* LanguageModel::Evaluate(
 			contextFactor[index++] = &m_implementation->GetSentenceStartArray();
 		}
 	}
-  unsigned int statelen;
 	FFState *res = m_implementation->NewState(ps);
-	float lmScore = ps ? m_implementation->GetValueGivenState(contextFactor, *res, &statelen) : m_implementation->GetValueForgotState(contextFactor, *res, &statelen);
+	float lmScore = ps ? m_implementation->GetValueGivenState(contextFactor, *res) : m_implementation->GetValueForgotState(contextFactor, *res);
 
 	// main loop
 	size_t endPos = std::min(startPos + GetNGramOrder() - 2
@@ -238,7 +237,7 @@ FFState* LanguageModel::Evaluate(
 		// add last factor
 		contextFactor.back() = &hypo.GetWord(currPos);
 
-		lmScore	+= m_implementation->GetValueGivenState(contextFactor, *res, &statelen);
+		lmScore	+= m_implementation->GetValueGivenState(contextFactor, *res);
 	}
 
 	// end of sentence

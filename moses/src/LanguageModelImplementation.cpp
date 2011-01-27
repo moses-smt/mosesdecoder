@@ -40,17 +40,16 @@ namespace Moses
 {
 float LanguageModelImplementation::GetValueGivenState(
 	const std::vector<const Word*> &contextFactor,
-	FFState &state,
-	unsigned int* len) const
+	FFState &state) const
 {
-	return GetValueForgotState(contextFactor, state, len);
+	return GetValueForgotState(contextFactor, state);
 }
 
 void LanguageModelImplementation::GetState(
 	const std::vector<const Word*> &contextFactor,
 	FFState &state) const
 {
-	GetValueForgotState(contextFactor, state, NULL);
+	GetValueForgotState(contextFactor, state);
 }
 	
 }

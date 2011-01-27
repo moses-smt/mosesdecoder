@@ -128,7 +128,7 @@ float LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 	return FloorScore(TransformLMScore(p));  // log10->log
 }
 
-float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState, unsigned int *len) const
+float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
 	FactorType	factorType = GetFactorType();
 	size_t count = contextFactor.size();
@@ -155,9 +155,7 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
 	if (finalState) {
 		ngram[0] = lmId;
 		unsigned int dummy;
-		if (!len) { len = &dummy; }
-		*finalState = m_srilmModel->contextID(ngram, *len);
-		(*len)++;
+		*finalState = m_srilmModel->contextID(ngram, dummy);
 	}
 	return ret;
 }

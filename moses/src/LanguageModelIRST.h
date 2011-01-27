@@ -68,7 +68,7 @@ public:
 					, FactorType factorType
 					, size_t nGramOrder);
 
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
+  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
 
   void CleanUpAfterSentenceProcessing();
   void InitializeBeforeSentenceProcessing();

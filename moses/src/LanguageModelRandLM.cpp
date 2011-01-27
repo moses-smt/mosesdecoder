@@ -88,9 +88,7 @@ randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const {
 }
 
 float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
-				    State* finalState, unsigned int* len) const {
-  unsigned int dummy;   // is this needed ?
-  if (!len) { len = &dummy; }
+				    State* finalState) const {
   FactorType factorType = GetFactorType();
   // set up context
   randlm::WordID ngram[MAX_NGRAM_SIZE];
@@ -101,9 +99,8 @@ float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   }
   int found = 0;
   float logprob = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
-  *len = 0; // not available
   //if (finalState)
-  //  std::cerr << " = " << logprob << "(" << *finalState << ", " << *len <<")"<< std::endl;
+  //  std::cerr << " = " << logprob << "(" << *finalState << ", " <<")"<< std::endl;
   //else
   //  std::cerr << " = " << logprob << std::endl;
   return logprob;

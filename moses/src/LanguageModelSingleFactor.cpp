@@ -82,9 +82,9 @@ FFState *LanguageModelPointerState::NewState(const FFState *from) const
   return new PointerState(from ? static_cast<const PointerState*>(from)->lmstate : NULL);
 }
 
-float LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len) const 
+float LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const 
 {
-  return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate, len);
+  return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate);
 }
 
 }

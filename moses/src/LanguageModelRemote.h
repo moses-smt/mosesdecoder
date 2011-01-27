@@ -31,7 +31,7 @@ class LanguageModelRemote : public LanguageModelPointerState {
 	public:
 		~LanguageModelRemote();
 		void ClearSentenceCache() { m_cache.tree.clear(); m_curId = 1000; }
-		virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0, unsigned int* len = 0) const;
+		virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
         	bool Load(const std::string &filePath
                                         , FactorType factorType
                                         , size_t nGramOrder);
