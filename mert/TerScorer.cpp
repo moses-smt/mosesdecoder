@@ -110,7 +110,7 @@ float TerScorer::calculateScore ( const vector<int>& comps )
 {
         cerr << "TerScorer::calculateScore called" << endl;
         float denom = 1.0 * comps[1];
-        float num =  1.0 * comps[0];
+        float num =  -1.0 * comps[0];
         if ( denom == 0 )
         {
 //         shouldn't happen!
@@ -127,7 +127,7 @@ float TerScorer::calculateScore ( const vector<float>& comps )
 {
         cerr << "TerScorer::calculateScore called" << endl;
         float denom = 1.0 * comps[1];
-        float num =  1.0 * comps[0];
+        float num =  -1.0 * comps[0];
         if ( denom == 0 )
         {
 //         shouldn't happen!
