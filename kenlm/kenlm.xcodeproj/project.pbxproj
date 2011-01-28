@@ -48,7 +48,6 @@
 		1EBB16EA126C158600AE6102 /* scoped.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16D2126C158600AE6102 /* scoped.hh */; };
 		1EBB16EB126C158600AE6102 /* sorted_uniform_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16D3126C158600AE6102 /* sorted_uniform_test.cc */; };
 		1EBB16EC126C158600AE6102 /* sorted_uniform.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16D4126C158600AE6102 /* sorted_uniform.hh */; };
-		1EBB16ED126C158600AE6102 /* string_piece.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16D5126C158600AE6102 /* string_piece.cc */; };
 		1EBB16EE126C158600AE6102 /* string_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16D6126C158600AE6102 /* string_piece.hh */; };
 		1EBB1717126C15C500AE6102 /* facade.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB1708126C15C500AE6102 /* facade.hh */; };
 		1EBB171A126C15C500AE6102 /* ngram_query.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB170B126C15C500AE6102 /* ngram_query.cc */; };
@@ -106,7 +105,6 @@
 		1EBB16D2126C158600AE6102 /* scoped.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = scoped.hh; path = util/scoped.hh; sourceTree = "<group>"; };
 		1EBB16D3126C158600AE6102 /* sorted_uniform_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sorted_uniform_test.cc; path = util/sorted_uniform_test.cc; sourceTree = "<group>"; };
 		1EBB16D4126C158600AE6102 /* sorted_uniform.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sorted_uniform.hh; path = util/sorted_uniform.hh; sourceTree = "<group>"; };
-		1EBB16D5126C158600AE6102 /* string_piece.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = string_piece.cc; path = util/string_piece.cc; sourceTree = "<group>"; };
 		1EBB16D6126C158600AE6102 /* string_piece.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = string_piece.hh; path = util/string_piece.hh; sourceTree = "<group>"; };
 		1EBB1708126C15C500AE6102 /* facade.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = facade.hh; path = lm/facade.hh; sourceTree = "<group>"; };
 		1EBB170B126C15C500AE6102 /* ngram_query.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ngram_query.cc; path = lm/ngram_query.cc; sourceTree = "<group>"; };
@@ -198,7 +196,6 @@
 				1EBB16D2126C158600AE6102 /* scoped.hh */,
 				1EBB16D3126C158600AE6102 /* sorted_uniform_test.cc */,
 				1EBB16D4126C158600AE6102 /* sorted_uniform.hh */,
-				1EBB16D5126C158600AE6102 /* string_piece.cc */,
 				1EBB16D6126C158600AE6102 /* string_piece.hh */,
 				1E2B85C112555DB1000770D6 /* lm_exception.cc */,
 				1E2B85C212555DB1000770D6 /* lm_exception.hh */,
@@ -287,7 +284,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "kenlm" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* kenlm */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -314,7 +318,6 @@
 				1EBB16E6126C158600AE6102 /* probing_hash_table_test.cc in Sources */,
 				1EBB16E9126C158600AE6102 /* scoped.cc in Sources */,
 				1EBB16EB126C158600AE6102 /* sorted_uniform_test.cc in Sources */,
-				1EBB16ED126C158600AE6102 /* string_piece.cc in Sources */,
 				1EBB171A126C15C500AE6102 /* ngram_query.cc in Sources */,
 				1EBB171C126C15C500AE6102 /* read_arpa.cc in Sources */,
 				1EBB171E126C15C500AE6102 /* sri_test.cc in Sources */,

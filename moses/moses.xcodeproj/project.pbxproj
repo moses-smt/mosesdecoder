@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */; };
+		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
+		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
+		1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */; };
+		1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */; };
 		1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */; };
 		1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */; };
 		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
@@ -85,7 +90,6 @@
 		1ED0FE73124BB9380029177F /* InputType.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD97124BB9380029177F /* InputType.h */; };
 		1ED0FE74124BB9380029177F /* LanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD98124BB9380029177F /* LanguageModel.cpp */; };
 		1ED0FE75124BB9380029177F /* LanguageModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD99124BB9380029177F /* LanguageModel.h */; };
-		1ED0FE76124BB9380029177F /* LanguageModelDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */; };
 		1ED0FE77124BB9380029177F /* LanguageModelFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */; };
 		1ED0FE78124BB9380029177F /* LanguageModelFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */; };
 		1ED0FE79124BB9380029177F /* LanguageModelInternal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */; };
@@ -146,9 +150,7 @@
 		1ED0FEB3124BB9380029177F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */; };
 		1ED0FEB4124BB9380029177F /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */; };
 		1ED0FEB5124BB9380029177F /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */; };
-		1ED0FEB6124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */; };
 		1ED0FEB7124BB9380029177F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */; };
-		1ED0FEB8124BB9380029177F /* PhraseDictionarySCFGChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */; };
 		1ED0FEB9124BB9380029177F /* PhraseDictionaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */; };
 		1ED0FEBA124BB9380029177F /* PhraseDictionaryTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */; };
 		1ED0FEBB124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */; };
@@ -229,6 +231,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
+		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
+		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
+		1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
+		1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerOnDisk.h; path = src/ChartRuleLookupManagerOnDisk.h; sourceTree = "<group>"; };
 		1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
 		1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
 		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
@@ -308,7 +315,6 @@
 		1ED0FD97124BB9380029177F /* InputType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputType.h; path = src/InputType.h; sourceTree = "<group>"; };
 		1ED0FD98124BB9380029177F /* LanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModel.cpp; path = src/LanguageModel.cpp; sourceTree = "<group>"; };
 		1ED0FD99124BB9380029177F /* LanguageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModel.h; path = src/LanguageModel.h; sourceTree = "<group>"; };
-		1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelDelegate.h; path = src/LanguageModelDelegate.h; sourceTree = "<group>"; };
 		1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelFactory.cpp; path = src/LanguageModelFactory.cpp; sourceTree = "<group>"; };
 		1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelFactory.h; path = src/LanguageModelFactory.h; sourceTree = "<group>"; };
 		1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelInternal.cpp; path = src/LanguageModelInternal.cpp; sourceTree = "<group>"; };
@@ -369,9 +375,7 @@
 		1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
 		1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
-		1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDiskChart.cpp; path = src/PhraseDictionaryOnDiskChart.cpp; sourceTree = "<group>"; };
 		1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
-		1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFGChart.cpp; path = src/PhraseDictionarySCFGChart.cpp; sourceTree = "<group>"; };
 		1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTree.cpp; path = src/PhraseDictionaryTree.cpp; sourceTree = "<group>"; };
 		1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTree.h; path = src/PhraseDictionaryTree.h; sourceTree = "<group>"; };
 		1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTreeAdaptor.cpp; path = src/PhraseDictionaryTreeAdaptor.cpp; sourceTree = "<group>"; };
@@ -484,6 +488,11 @@
 				1ED0FD50124BB9380029177F /* BitmapContainer.cpp */,
 				1ED0FD51124BB9380029177F /* BitmapContainer.h */,
 				1ED0FD52124BB9380029177F /* CellCollection.h */,
+				1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */,
+				1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */,
+				1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */,
+				1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */,
+				1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */,
 				1ED00034124BC2690029177F /* ChartTranslationOption.cpp */,
 				1ED00035124BC2690029177F /* ChartTranslationOption.h */,
 				1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */,
@@ -549,7 +558,6 @@
 				1ED0FD97124BB9380029177F /* InputType.h */,
 				1ED0FD98124BB9380029177F /* LanguageModel.cpp */,
 				1ED0FD99124BB9380029177F /* LanguageModel.h */,
-				1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */,
 				1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */,
 				1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */,
 				1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */,
@@ -614,10 +622,8 @@
 				1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */,
 				1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */,
 				1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */,
-				1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */,
 				1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */,
 				1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */,
-				1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */,
 				1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */,
 				1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */,
 				1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */,
@@ -781,7 +787,6 @@
 				1ED0FE71124BB9380029177F /* InputFileStream.h in Headers */,
 				1ED0FE73124BB9380029177F /* InputType.h in Headers */,
 				1ED0FE75124BB9380029177F /* LanguageModel.h in Headers */,
-				1ED0FE76124BB9380029177F /* LanguageModelDelegate.h in Headers */,
 				1ED0FE78124BB9380029177F /* LanguageModelFactory.h in Headers */,
 				1ED0FE7A124BB9380029177F /* LanguageModelInternal.h in Headers */,
 				1ED0FE7C124BB9380029177F /* LanguageModelIRST.h in Headers */,
@@ -857,6 +862,9 @@
 				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
 				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
 				1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */,
+				1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */,
+				1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */,
+				1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -971,9 +979,7 @@
 				1ED0FEB0124BB9380029177F /* PhraseDictionaryNode.cpp in Sources */,
 				1ED0FEB2124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp in Sources */,
 				1ED0FEB4124BB9380029177F /* PhraseDictionaryOnDisk.cpp in Sources */,
-				1ED0FEB6124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp in Sources */,
 				1ED0FEB7124BB9380029177F /* PhraseDictionarySCFG.cpp in Sources */,
-				1ED0FEB8124BB9380029177F /* PhraseDictionarySCFGChart.cpp in Sources */,
 				1ED0FEB9124BB9380029177F /* PhraseDictionaryTree.cpp in Sources */,
 				1ED0FEBB124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp in Sources */,
 				1ED0FEBE124BB9380029177F /* PrefixTreeMap.cpp in Sources */,
@@ -1013,6 +1019,8 @@
 				1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */,
 				1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */,
 				1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */,
+				1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */,
+				1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,10 +1,10 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
-/* define if the Boost library is available */
+/* Defined if the requested minimum BOOST version is satisfied */
 #undef HAVE_BOOST
 
-/* define if the Boost::Thread library is available */
-#undef HAVE_BOOST_THREAD
+/* Define to 1 if you have <boost/thread.hpp> */
+#undef HAVE_BOOST_THREAD_HPP
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
