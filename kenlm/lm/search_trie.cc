@@ -501,7 +501,7 @@ void ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const st
     }
     // Sort full records by full n-gram.  
     EntryProxy proxy_begin(begin, entry_size), proxy_end(out_end, entry_size);
-    // Tried  __gnu_parallel::sort here but it took too much memory.  
+    // parallel_sort uses too much RAM
     std::sort(NGramIter(proxy_begin), NGramIter(proxy_end), CompareRecords<EntryProxy>(order));
     files.push_back(DiskFlush(begin, out_end, file_prefix, batch, order, weights_size));
     WriteContextFile(begin, out_end, files.back(), entry_size, order);

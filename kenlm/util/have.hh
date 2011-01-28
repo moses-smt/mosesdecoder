@@ -4,8 +4,6 @@
 #ifndef UTIL_HAVE__
 #define UTIL_HAVE__
 
-#include "../config.h"
-
 #define HAVE_ZLIB
 
 #endif // UTIL_HAVE__
