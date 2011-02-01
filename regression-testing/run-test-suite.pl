@@ -29,8 +29,8 @@ my @tests = qw (
   phrase.continue-partial-translation
   phrase.show-weights.lex-reorder
   phrase.show-weights
+  phrase.xml-markup
 );
-#  xml-markup
 
 ############################################################
 use MosesRegressionTesting;
