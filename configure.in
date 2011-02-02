@@ -85,6 +85,12 @@ AC_ARG_WITH(zlib,
             [with_zlib=no]
            )
 
+AC_ARG_WITH(tcmalloc,
+            [AC_HELP_STRING([--with-tcmalloc], [(optional) link with tcmalloc; default is no])],
+            [with_tcmalloc=$withval],
+            [with_tcmalloc=no],
+           )
+
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
@@ -226,6 +232,10 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+if test "x$with_tcmalloc" != 'xno'
+then
+  AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_ERROR([Cannot find tcmalloc])])
+fi
 
 
 AM_CONDITIONAL([WITH_MERT],false)
