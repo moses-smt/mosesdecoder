@@ -98,7 +98,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 	
 	// parse XML markup in translation line
 	//const StaticData &staticData = StaticData::Instance();
-	std::vector<std::vector<XmlOption*> > xmlOptionsList(0);
+	std::vector<XmlOption*> xmlOptionsList(0);
 	std::vector< size_t > xmlWalls;
 	if (staticData.GetXmlInputType() != XmlPassThrough) {
 		if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls )) {
@@ -125,47 +125,19 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 		
 		//iterXMLOpts will be empty for XmlIgnore
 		//look at each column
-		for(std::vector<std::vector<XmlOption*> >::const_iterator iterXmlOpts = xmlOptionsList.begin();
+		for(std::vector<XmlOption*>::const_iterator iterXmlOpts = xmlOptionsList.begin();
 				iterXmlOpts != xmlOptionsList.end(); iterXmlOpts++) {
 			
-			//now we are looking through one column of linked things. 
-			//TODO: We could drop this inner loop if we didn't support linked opts.
-			//we could loop once, make the new TranslationOption, note its pos. in the coverageMap,
-			//and delete the XmlOption -JS
-			std::vector<TranslationOption*> linkedTransOpts(0);
-			for(std::vector<XmlOption*>::const_iterator iterLinkedXmlOpts = (iterXmlOpts)->begin();
-					iterLinkedXmlOpts != (iterXmlOpts)->end(); iterLinkedXmlOpts++) {
-				
-				//make each item into a translation option
-				TranslationOption *transOpt = new TranslationOption((*iterLinkedXmlOpts)->range,(*iterLinkedXmlOpts)->targetPhrase,*this);
-				
-				//store it temporarily in the linkedTransOpts vector
-				linkedTransOpts.push_back(transOpt);
+			const XmlOption *xmlOption = *iterXmlOpts;
 			
-				delete (*iterLinkedXmlOpts);				
+			TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase, *this);
+			m_xmlOptionsList.push_back(transOpt);
+			
+			for(size_t j=transOpt->GetSourceWordsRange().GetStartPos();j<=transOpt->GetSourceWordsRange().GetEndPos();j++) {
+				m_xmlCoverageMap[j]=true;
 			}
 			
-			//now link them up and add to m_XmlOptionsList TODO: this is complicated by linked options. Drop it? -JS
-			for(std::vector<TranslationOption *>::const_iterator iterLinkedTransOpts1 = linkedTransOpts.begin();
-					iterLinkedTransOpts1 != linkedTransOpts.end(); iterLinkedTransOpts1++) {
-				
-				for(std::vector<TranslationOption *>::const_iterator iterLinkedTransOpts2 = linkedTransOpts.begin();
-					iterLinkedTransOpts2 != linkedTransOpts.end(); iterLinkedTransOpts2++) {
-					
-					if (iterLinkedTransOpts1 != iterLinkedTransOpts2) {
-						(*iterLinkedTransOpts1)->AddLinkedTransOpt(*iterLinkedTransOpts2);
-					}
-				} //inner linked opts loop
-				
-				//ok everything is linked up and initialized, add it to our list of options and mark locations in coverage map
-				TranslationOption *transOpt = *iterLinkedTransOpts1;
-				
-				m_xmlOptionsList.push_back(transOpt);
-				
-				for(size_t j=transOpt->GetSourceWordsRange().GetStartPos();j<=transOpt->GetSourceWordsRange().GetEndPos();j++) {
-					m_xmlCoverageMap[j]=true;
-				}
-			}//outer linked opts loop
+			delete xmlOption;				
 		}
 		
 	}	

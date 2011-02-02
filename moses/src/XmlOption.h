@@ -18,9 +18,10 @@ struct XmlOption {
 
 	WordsRange range;
 	TargetPhrase targetPhrase;
-	std::vector<XmlOption*> linkedOptions;
 
-	XmlOption(const WordsRange &r, const TargetPhrase &tp): range(r), targetPhrase(tp), linkedOptions(0) {}
+	XmlOption(const WordsRange &r, const TargetPhrase &tp)
+	: range(r), targetPhrase(tp) 
+	{}
 
 };
 
@@ -29,7 +30,7 @@ std::string TrimXml(const std::string& str) ;
 bool isXmlTag(const std::string& tag);
 std::vector<std::string> TokenizeXml(const std::string& str);
 
-bool ProcessAndStripXMLTags(std::string &line,std::vector<std::vector<XmlOption*> > &res, ReorderingConstraint &reorderingConstraint, std::vector< size_t > &walls );
+bool ProcessAndStripXMLTags(std::string &line, std::vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, std::vector< size_t > &walls );
 
 }
 

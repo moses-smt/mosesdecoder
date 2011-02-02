@@ -149,7 +149,7 @@ vector<string> TokenizeXml(const string& str)
  parse because we don't have the completed source parsed until after this function
  removes all the markup from it (CreateFromString in Sentence::Read).
  */
-bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls ) {
+bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls ) {
 	//parse XML markup in translation line
 	
 	// no xml tag? we're done.
@@ -165,9 +165,8 @@ bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, Reor
 	vector< OpenedTag > tagStack; // stack that contains active opened tags
 
 	string cleanLine; // return string (text without xml)
-	vector<XmlOption*> linkedOptions;
 	size_t wordPos = 0; // position in sentence (in terms of number of words)
-	bool isLinked = false;
+
 	const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
@@ -234,16 +233,6 @@ bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, Reor
 
 			if (isOpen || isUnary)
 			{
-				// special case: linked tag turns on linked flag
-				if (tagName == "linked")
-				{
-					if (isLinked)
-					{
-						TRACE_ERR("ERROR: second linked tag opened before first one closed: " << line << endl);
-						return false;
-					}
-					isLinked = true;
-				}
 				// put the tag on the tag stack
 				OpenedTag openedTag = make_pair( tagName, make_pair( wordPos, tagContent ) );
 				tagStack.push_back( openedTag );
@@ -290,11 +279,6 @@ bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, Reor
 				}
 
 				VERBOSE(3,"XML TAG " << tagName << " (" << tagContent << ") spanning " << startPos << " to " << (endPos-1) << " complete, commence processing" << endl);
-				// special tag: <linked>
-				if (tagName == "linked")
-				{
-					isLinked = false;
-				}
 
 				// special tag: wall
 				if (tagName == "wall")
@@ -375,18 +359,7 @@ bool ProcessAndStripXMLTags(string &line, vector<vector<XmlOption*> > &res, Reor
 							XmlOption *option = new XmlOption(range,targetPhrase);
 							assert(option);
 						
-							if (isLinked) 
-							{
-								// push all linked items as one column in our list of xmloptions
-								linkedOptions.push_back(option);
-							} 
-							else 
-							{
-								// push one-item list (not linked to anything)
-								vector<XmlOption*> optList(0);
-								optList.push_back(option);
-								res.push_back(optList);
-							}
+							res.push_back(option);
 						}
 						altTexts.clear();
 						altProbs.clear();
