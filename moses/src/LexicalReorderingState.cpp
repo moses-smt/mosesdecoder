@@ -30,14 +30,18 @@ size_t LexicalReorderingConfiguration::GetNumberOfTypes() const {
 size_t LexicalReorderingConfiguration::GetNumScoreComponents() const {
   size_t score_per_dir = m_collapseScores ? 1 : GetNumberOfTypes();
   if (m_direction == Bidirectional) {
-      return 2 * score_per_dir;
+      return 2 * score_per_dir + m_additionalScoreComponents;
   } else {
-      return score_per_dir;
+      return score_per_dir + m_additionalScoreComponents;
   }
 }
 
+void LexicalReorderingConfiguration::SetAdditionalScoreComponents(size_t number) {
+	m_additionalScoreComponents = number;
+}
+
 LexicalReorderingConfiguration::LexicalReorderingConfiguration(ScoreProducer *scoreProducer, const std::string &modelType)
-    : m_scoreProducer(scoreProducer), m_modelType(None), m_phraseBased(true), m_collapseScores(false), m_direction(Backward) {
+    : m_scoreProducer(scoreProducer), m_modelType(None), m_phraseBased(true), m_collapseScores(false), m_direction(Backward), m_additionalScoreComponents(0) {
   std::vector<std::string> config = Tokenize<std::string>(modelType, "-");
   
   for (size_t i=0; i<config.size(); ++i) {

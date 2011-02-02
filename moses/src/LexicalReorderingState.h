@@ -29,6 +29,7 @@ class LexicalReorderingConfiguration {
     LexicalReorderingState *CreateLexicalReorderingState(const InputType &input) const;
     
     size_t GetNumScoreComponents() const;
+    void SetAdditionalScoreComponents(size_t number);
     size_t GetNumberOfTypes() const;
     
     ScoreProducer *GetScoreProducer() const {
@@ -54,7 +55,7 @@ class LexicalReorderingConfiguration {
     bool CollapseScores() const {
       return m_collapseScores;
     }
-    
+
   private:
     ScoreProducer *m_scoreProducer;
     ModelType m_modelType;
@@ -62,6 +63,7 @@ class LexicalReorderingConfiguration {
     bool m_collapseScores;
     Direction m_direction;
     Condition m_condition;
+    size_t m_additionalScoreComponents;
 };
 
   //! Abstract class for lexical reordering model states

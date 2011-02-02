@@ -84,6 +84,11 @@ public:
 	  return m_scores;
   }
 
+  size_t Size()
+  {
+	  return m_scores.size();
+  }
+
   //! Set all values to 0.0
 	void ZeroAll()
 	{

@@ -61,7 +61,6 @@ private:
     std::string m_modelTypeString;
     std::vector<std::string> m_modelType;
     LexicalReorderingTable* m_table;
-    size_t m_numScoreComponents;
     //std::vector<Direction> m_direction;
     std::vector<LexicalReorderingConfiguration::Condition> m_condition;
     //std::vector<size_t> m_scoreOffset;

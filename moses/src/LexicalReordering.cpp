@@ -46,10 +46,13 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
             exit(1);
     }
     
-
-    if(weights.size() != m_configuration.GetNumScoreComponents()) {
+    size_t numberOfScoreComponents = m_configuration.GetNumScoreComponents();
+    if (weights.size() > numberOfScoreComponents){
+    	m_configuration.SetAdditionalScoreComponents(numberOfScoreComponents - weights.size());
+    }
+    else if(weights.size() < numberOfScoreComponents) {
         std::ostringstream os;
-        os << "Lexical reordering model (type " << modelType << "): expected " << m_numScoreComponents << " weights, got " << weights.size() << std::endl;
+        os << "Lexical reordering model (type " << modelType << "): expected " << numberOfScoreComponents << " weights, got " << weights.size() << std::endl;
         UserMessage::Add(os.str());
         exit(1);
     }
