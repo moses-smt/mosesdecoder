@@ -207,28 +207,6 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
 {
 	// create hypothesis and calculate all its scores
 	Hypothesis *newHypo = hypothesis.CreateNext(transOpt, NULL); // TODO FIXME This is absolutely broken - don't pass null here
-
-	// expand hypothesis further if transOpt was linked
-	std::vector<TranslationOption*>::const_iterator iterLinked = transOpt.GetLinkedTransOpts().begin();
-	std::vector<TranslationOption*>::const_iterator iterEnd = transOpt.GetLinkedTransOpts().end();
-
-	while (iterLinked != iterEnd)
-	{
-		const WordsBitmap hypoBitmap = newHypo->GetWordsBitmap();
-		if (hypoBitmap.Overlap((**iterLinked).GetSourceWordsRange())) {
-			// don't want to add a hypothesis that has some but not all of a linked TO set, so return
-			delete newHypo;
-			return NULL;
-		}
-		else
-		{
-			newHypo->CalcScore(m_futurescore);
-			newHypo = newHypo->CreateNext(**iterLinked, NULL); // TODO FIXME This is absolutely broken - don't pass null here
-		}
-
-		++iterLinked;
-	}
-
 	newHypo->CalcScore(m_futurescore);
 	
 	return newHypo;

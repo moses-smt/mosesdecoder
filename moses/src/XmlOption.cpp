@@ -144,11 +144,6 @@ vector<string> TokenizeXml(const string& str)
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
-/*TODO: we'd only have to return a vector of XML options if we dropped linking. 2-d vector
- is so we can link things up afterwards. We can't create TranslationOptions as we
- parse because we don't have the completed source parsed until after this function
- removes all the markup from it (CreateFromString in Sentence::Read).
- */
 bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls ) {
 	//parse XML markup in translation line
 	
