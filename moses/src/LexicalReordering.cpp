@@ -48,7 +48,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     
     size_t numberOfScoreComponents = m_configuration.GetNumScoreComponents();
     if (weights.size() > numberOfScoreComponents){
-    	m_configuration.SetAdditionalScoreComponents(numberOfScoreComponents - weights.size());
+    	m_configuration.SetAdditionalScoreComponents(weights.size() - numberOfScoreComponents);
     }
     else if(weights.size() < numberOfScoreComponents) {
         std::ostringstream os;
