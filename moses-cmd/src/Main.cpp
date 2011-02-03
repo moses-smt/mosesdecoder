@@ -58,7 +58,6 @@ void fix(std::ostream& stream, size_t size) {
     stream.precision(size);
 }
 
-
 /**
   * Translates a sentence.
   **/
@@ -69,11 +68,12 @@ class TranslationTask : public Task {
         TranslationTask(size_t lineNumber,
              InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
                        OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
-                       OutputCollector* detailedTranslationCollector) :
+                       OutputCollector* detailedTranslationCollector, std::ofstream *alignmentStream ) :
              m_source(source), m_lineNumber(lineNumber),
                 m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
                 m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
-                m_detailedTranslationCollector(detailedTranslationCollector) {}
+                m_detailedTranslationCollector(detailedTranslationCollector),
+                m_alignmentStream(alignmentStream) {}
 
         void Run() 
         {
@@ -139,7 +139,8 @@ class TranslationTask : public Task {
                                 bestHypo,
                                 staticData.GetOutputFactorOrder(), 
                                 staticData.GetReportSegmentation(),
-                                staticData.GetReportAllFactors());
+                                staticData.GetReportAllFactors(),
+                                m_alignmentStream);
                         IFVERBOSE(1) {
                             debug << "BEST TRANSLATION: " << *bestHypo << endl;
                         }
@@ -231,6 +232,7 @@ class TranslationTask : public Task {
         OutputCollector* m_wordGraphCollector;
         OutputCollector* m_searchGraphCollector;
         OutputCollector* m_detailedTranslationCollector;
+        std::ofstream *m_alignmentStream;
         
 
 };
@@ -384,7 +386,7 @@ int main(int argc, char** argv) {
         }
         TranslationTask* task = 
                 new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get(), wordGraphCollector.get(),
-                                    searchGraphCollector.get(), detailedTranslationCollector.get());
+                                    searchGraphCollector.get(), detailedTranslationCollector.get(), ioWrapper->GetAlignmentOutputStream());
 #ifdef WITH_THREADS
         pool.Submit(task);
 

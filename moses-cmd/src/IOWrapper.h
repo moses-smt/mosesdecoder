@@ -65,6 +65,7 @@ protected:
 	std::ostream 									*m_nBestStream
 																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
+    std::ofstream *m_alignmentOutputStream;
 	bool													m_surpressSingleBestOutput;
 	
 	void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -96,6 +97,11 @@ public:
 
 	void ResetTranslationId() { m_translationId = 0; }
 
+	std::ofstream *GetAlignmentOutputStream()
+	{
+		return m_alignmentOutputStream;
+	}
+
 	std::ostream &GetOutputWordGraphStream()
 	{
 		return *m_outputWordGraphStream;
@@ -114,7 +120,7 @@ public:
 
 IOWrapper *GetIODevice(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
-void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors);
+void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors, std::ofstream *alignmentStream);
 void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&,
                   const TranslationSystem* system, long translationId);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);

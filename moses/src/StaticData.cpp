@@ -143,6 +143,11 @@ bool StaticData::LoadData(Parameter *parameter)
 		  TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
 		m_PrintAlignmentInfoNbest=false;
 	}
+
+    if (m_parameter->GetParam("alignment-output-file").size() > 0)
+    {
+        m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+    }
 	
 	// n-best
 	if (m_parameter->GetParam("n-best-list").size() >= 2)
