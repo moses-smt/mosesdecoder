@@ -492,7 +492,7 @@ bool StaticData::LoadData(Parameter *parameter)
         for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
           if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
             VERBOSE(2,"Adding decoder graph " << k << " to translation system " << config[0] << endl);
-            m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k]);
+            m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k],m_decodeGraphBackoff[k]);
           }
         }
       } else if (id == "R") {
@@ -1168,6 +1168,19 @@ bool StaticData::LoadDecodeGraphs() {
 		prevDecodeGraphInd = decodeGraphInd;
 	}
 	
+	// set maximum n-gram size for backoff approach to decoding paths
+	// default is always use subsequent paths (value = 0)
+	for(size_t i=0; i<m_decodeGraphs.size(); i++)
+	{
+		m_decodeGraphBackoff.push_back( 0 );
+	}
+    	// if specified, record maxmimum unseen n-gram size
+	const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
+	for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++)
+	{
+		m_decodeGraphBackoff[i] = Scan<size_t>(backoffVector[i]);
+	}
+
     return true;
 }
 

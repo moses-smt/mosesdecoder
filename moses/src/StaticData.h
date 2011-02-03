@@ -85,10 +85,11 @@ protected:
 	std::vector<float>			m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
-    std::vector<DecodeGraph*> m_decodeGraphs;
+	std::vector<DecodeGraph*> m_decodeGraphs;
+	std::vector<size_t> m_decodeGraphBackoff;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
-    std::map<std::string, TranslationSystem> m_translationSystems;
+	std::map<std::string, TranslationSystem> m_translationSystems;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,

@@ -57,9 +57,10 @@ namespace Moses {
     }
     
     
-    void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph) {
+    void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff) {
       m_decodeGraphs.push_back(decodeGraph);
-        }
+      m_decodeGraphBackoff.push_back(backoff);
+    }
     
     
     void TranslationSystem::AddReorderModel(LexicalReordering* reorderModel) {
