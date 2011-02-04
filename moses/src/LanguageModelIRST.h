@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class lmtable;  // irst lm table
 class lmmacro;  // irst lm for macro tags
 class ngram;
+class dictionary;
 
 namespace Moses
 {
@@ -43,9 +44,8 @@ class Phrase;
 class LanguageModelIRST : public LanguageModelPointerState
 {
 protected:
-	std::vector<int> m_lmIdLookup;
+	mutable std::vector<int> m_lmIdLookup;
 	lmtable* m_lmtb;
-	ngram* m_lmtb_ng;
 	
 	int	m_unknownId;
 	int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
@@ -55,12 +55,12 @@ protected:
 
 	std::string m_mapFilePath;
   
-//	float GetValue(LmId wordId, ngram *context) const;
-
 	void CreateFactors(FactorCollection &factorCollection);
 	int GetLmID( const std::string &str ) const;
 	int GetLmID( const Factor *factor ) const;
-  
+
+	dictionary* d;
+
 public:
 	LanguageModelIRST(int dub);
 	~LanguageModelIRST();

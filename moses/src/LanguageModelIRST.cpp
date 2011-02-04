@@ -56,7 +56,6 @@ LanguageModelIRST::~LanguageModelIRST()
 #endif
 
   delete m_lmtb;
-  delete m_lmtb_ng;
 }
 
 
@@ -91,12 +90,13 @@ bool LanguageModelIRST::Load(const std::string &filePath,
     }
     InputFileStream inpMap(m_mapFilePath);
     m_lmtb = new lmmacro(m_filePath, inp, inpMap);
-
+    d=((lmmacro *)m_lmtb)->getDict();
 
   } else {
     // case (standard) LMfile only: create an object of lmtable
     cerr << "Loading LM file (no MAP)\n";
     m_lmtb  = (lmtable *)new lmtable;
+    d=((lmtable *)m_lmtb)->getDict();
 
   // Load the (possibly binary) model
 #ifdef WIN32
@@ -110,13 +110,12 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 
   }
 
-  m_lmtb_ng=new ngram(m_lmtb->getDict()); // ngram of words/micro tags
   m_lmtb_size=m_lmtb->maxlevel();
 
   // LM can be ok, just outputs warnings
 
   // Mauro: in the original, the following two instructions are wrongly switched:
-  m_unknownId = m_lmtb->getDict()->oovcode(); // at the level of micro tags
+  m_unknownId = d->oovcode(); // at the level of micro tags
   CreateFactors(factorCollection);
 
   VERBOSE(0, "IRST: m_unknownId=" << m_unknownId << std::endl);
@@ -137,7 +136,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 	size_t maxFactorId = 0; // to create lookup vector later on
 	
 	dict_entry *entry;
-	dictionary_iter iter(m_lmtb->getDict()); // at the level of micro tags
+	dictionary_iter iter(d); // at the level of micro tags
 	while ( (entry = iter.next()) != NULL)
 	{
 		size_t factorId = factorCollection.AddFactor(Output, m_factorType, entry->word)->GetId();
@@ -175,13 +174,49 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
 {
-  return m_lmtb->getDict()->encode( str.c_str() ); // at the level of micro tags
+  return d->encode( str.c_str() ); // at the level of micro tags
 }
 
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
         size_t factorId = factor->GetId();
-        return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
+
+	if  (factorId >= m_lmIdLookup.size()) {
+		if (d->incflag()==1) {
+			std::string s = factor->GetString();
+			int code = d->encode(s.c_str());
+
+//////////// 
+/// IL PPROBLEMA ERA QUI
+/// m_lmIdLookup.push_back(code);
+/// PERCHE' USANDO PUSH_BACK IN REALTA' INSEREVIVAMO L'ELEMENTO NUOVO 
+/// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
+/// Cosi' funziona ....
+/// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
+/// quindi controllo
+/// e scopro che rimane vuota una entry ogni due
+/// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
+/// non da problemi di correttezza, ma solo di "spreco" di memoria
+/// potremmo sostituirerendere  m_lmIdLookup una std:map invece che un std::vector,
+/// ma si perde in efficienza nell'accesso perche' non e' piu' possibile quello random dei vettori
+/// a te la scelta!!!!
+////////////////
+
+
+			//resize and fill with m_unknownId
+	       		m_lmIdLookup.resize(factorId+1, m_unknownId);
+
+		       //insert new code
+			m_lmIdLookup[factorId] = code;
+
+			return code;
+
+		} else {
+			return m_unknownId;
+		}
+        } else {
+        	return m_lmIdLookup[factorId];
+        }
 }
 
 float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
@@ -201,9 +236,10 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	if (count < (size_t) (m_lmtb_size-1)) codes[idx++] = m_lmtb_sentenceEnd;  
 	if (count < (size_t) m_lmtb_size) codes[idx++] = m_lmtb_sentenceStart;  
 
-        for (size_t i = 0 ; i < count ; i++)
-                codes[idx++] =  GetLmID((*contextFactor[i])[factorType]);
-
+        for (size_t i = 0 ; i < count ; i++) {
+                codes[idx] =  GetLmID((*contextFactor[i])[factorType]);
+		idx++;
+        }
         float prob;
         char* msp = NULL;
         unsigned int ilen;
