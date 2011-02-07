@@ -47,7 +47,12 @@ public:
 	{}
 	~ProcessedRule()
 	{
+#ifdef USE_BOOST_POOL
+    // Do nothing.  WordConsumed objects are stored in object pools owned by
+    // the sentence-specific ChartRuleLookupManagers.
+#else
 		delete m_wordsConsumed;
+#endif
 	}
 	const PhraseDictionaryNodeSCFG &GetLastNode() const
 	{ return m_lastNode; }

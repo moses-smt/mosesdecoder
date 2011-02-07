@@ -45,7 +45,12 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
 
   for (size_t ind = 0; ind < m_processedRuleColls.size(); ++ind)
   {
+#ifdef USE_BOOST_POOL
+    ProcessedRule *initProcessedRule = m_processedRulePool.malloc();
+    new (initProcessedRule) ProcessedRule(rootNode);
+#else
     ProcessedRule *initProcessedRule = new ProcessedRule(rootNode);
+#endif
 
     ProcessedRuleColl *processedRuleColl = new ProcessedRuleColl(sourceSize - ind + 1);
     processedRuleColl->Add(0, initProcessedRule); // init rule. stores the top node in tree
@@ -87,10 +92,19 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 			const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord);
 			if (node != NULL)
 			{
-				WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos
-																												 , sourceWord
-																												 , prevWordConsumed);
-				ProcessedRule *processedRule = new ProcessedRule(*node, newWordConsumed);
+#ifdef USE_BOOST_POOL
+        WordConsumed *newWordConsumed = m_wordConsumedPool.malloc();
+        new (newWordConsumed) WordConsumed(absEndPos, absEndPos, sourceWord,
+                                           prevWordConsumed);
+        ProcessedRule *processedRule = m_processedRulePool.malloc();
+        new (processedRule) ProcessedRule(*node, newWordConsumed);
+#else
+        WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos,
+                                                         sourceWord,
+                                                         prevWordConsumed);
+        ProcessedRule *processedRule = new ProcessedRule(*node,
+                                                         newWordConsumed);
+#endif
 				processedRuleCol.Add(relEndPos+1, processedRule);
 			}
 		}
@@ -194,10 +208,18 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
                 {
                     continue;
                 }
+#ifdef USE_BOOST_POOL
+                WordConsumed *wc = m_wordConsumedPool.malloc();
+                new (wc) WordConsumed(startPos, endPos, targetNonTerm,
+                                      prevWordConsumed);
+                ProcessedRule *rule = m_processedRulePool.malloc();
+                new (rule) ProcessedRule(*child, wc);
+#else
                 WordConsumed * wc = new WordConsumed(startPos, endPos,
                                                      targetNonTerm,
                                                      prevWordConsumed);
                 ProcessedRule * rule = new ProcessedRule(*child, wc);
+#endif
                 processedRuleColl.Add(stackInd, rule);
             }
         }
@@ -221,10 +243,18 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
                 continue;
             }
             const PhraseDictionaryNodeSCFG & child = p->second;
+#ifdef USE_BOOST_POOL
+            WordConsumed *wc = m_wordConsumedPool.malloc();
+            new (wc) WordConsumed(startPos, endPos, targetNonTerm,
+                                  prevWordConsumed);
+            ProcessedRule *rule = m_processedRulePool.malloc();
+            new (rule) ProcessedRule(child, wc);
+#else
             WordConsumed * wc = new WordConsumed(startPos, endPos,
                                                  targetNonTerm,
                                                  prevWordConsumed);
             ProcessedRule * rule = new ProcessedRule(child, wc);
+#endif
             processedRuleColl.Add(stackInd, rule);
         }
     }
