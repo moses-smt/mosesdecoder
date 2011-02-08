@@ -263,11 +263,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 			else
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 		}
-		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation		
-
-
-
-		
+		//create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation	
+        
+		targetPhrase.SetAlignmentInfo("0-0");
 		
 	}
 	else 
