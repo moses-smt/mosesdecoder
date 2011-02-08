@@ -223,40 +223,55 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 	}
 }
 
+void OutputAlignment(std::ofstream *alignmentStream, const vector<const Hypothesis *> &edges)
+{
+    size_t targetOffset = 0;
+
+	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+	{
+		const Hypothesis &edge = *edges[currEdge];
+        const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+        size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+        AlignmentInfo::const_iterator it;
+        for (it = tp.GetAlignmentInfo().begin(); it != tp.GetAlignmentInfo().end(); ++it)
+        {
+            *alignmentStream << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
+        }
+        targetOffset += tp.GetSize();
+	}
+    *alignmentStream << std::endl;
+}
+
+void OutputAlignment(std::ofstream *alignmentStream, const Hypothesis *hypo)
+{
+    if (hypo && ! StaticData::Instance().GetAlignmentOutputFile().empty() && alignmentStream)
+    {
+        std::vector<const Hypothesis *> edges;
+        const Hypothesis *currentHypo = hypo;
+        while (currentHypo)
+        {
+            edges.push_back(currentHypo);
+            currentHypo = currentHypo->GetPrevHypo();
+        }
+        
+        OutputAlignment(alignmentStream, edges);
+    }
+}
+
+void OutputAlignment(std::ofstream *alignmentStream, const TrellisPath &path)
+{
+    if (! StaticData::Instance().GetAlignmentOutputFile().empty() && alignmentStream)
+    {
+        OutputAlignment(alignmentStream, path.GetEdges());
+    }
+}
+
 void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
-									 ,bool reportSegmentation, bool reportAllFactors, std::ofstream *alignmentStream)
+									 ,bool reportSegmentation, bool reportAllFactors)
 {
 	if ( hypo != NULL)
 	{
-        if (! StaticData::Instance().GetAlignmentOutputFile().empty() && alignmentStream)
-        {
-            size_t targetOffset = 0;
-
-            std::stack<const Hypothesis *> edges;
-            const Hypothesis *currentHypo = hypo;
-            while (currentHypo)
-            {
-                edges.push(currentHypo);
-                currentHypo = currentHypo->GetPrevHypo();
-            }
-
-            while (!edges.empty())
-            {
-            	const Hypothesis &edge = *edges.top();
-                edges.pop();
-                const TargetPhrase &tp = edge.GetCurrTargetPhrase();
-                size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-                AlignmentInfo::const_iterator it;
-                for (it = tp.GetAlignmentInfo().begin(); it != tp.GetAlignmentInfo().end(); ++it)
-                {
-                    *alignmentStream << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
-                }
-                targetOffset += tp.GetSize();
-            }
-            *alignmentStream << std::endl;
-        }
-
-        OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors, NULL);
+        OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
 		OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
 		if (reportSegmentation == true
@@ -338,7 +353,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 				OutputInput(cout, hypo);
 				cout << "||| ";
 			}
-			OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors, NULL);
+			OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
 			cout << endl;
 		}
 	}

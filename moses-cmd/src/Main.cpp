@@ -139,8 +139,8 @@ class TranslationTask : public Task {
                                 bestHypo,
                                 staticData.GetOutputFactorOrder(), 
                                 staticData.GetReportSegmentation(),
-                                staticData.GetReportAllFactors(),
-                                m_alignmentStream);
+                                staticData.GetReportAllFactors());
+                        OutputAlignment(m_alignmentStream, bestHypo);
                         IFVERBOSE(1) {
                             debug << "BEST TRANSLATION: " << *bestHypo << endl;
                         }
@@ -186,6 +186,7 @@ class TranslationTask : public Task {
                         OutputBestHypo(conBestHypo, m_lineNumber,
                                        staticData.GetReportSegmentation(),
                                        staticData.GetReportAllFactors(),out);
+                        OutputAlignment(m_alignmentStream, conBestHypo);
                         IFVERBOSE(2) { PrintUserTime("finished Consensus decoding"); }
                     } 
                     else
@@ -195,6 +196,7 @@ class TranslationTask : public Task {
                         OutputBestHypo(mbrBestHypo, m_lineNumber,
                                     staticData.GetReportSegmentation(),
                                     staticData.GetReportAllFactors(),out);
+                        OutputAlignment(m_alignmentStream, mbrBestHypo);
                         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
                         
                     }
