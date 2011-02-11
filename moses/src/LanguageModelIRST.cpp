@@ -63,42 +63,35 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 			     FactorType factorType, 
 			     size_t nGramOrder)
 {
-  const char *SepString = " \t\n";
   cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_factorType 	 = factorType;
   m_nGramOrder	 = nGramOrder;
+  m_filePath = filePath;
 
-  // get name of LM file and, if any, of the micro-macro map file
-  char *filenamesOrig = strdup(filePath.c_str());
-  char *filenames = filenamesOrig;
-  m_filePath = strsep(&filenames, SepString);
+  //checking the language model type
+  int lmtype = getLanguageModelType(m_filePath);
+  std::cerr << "IRSTLM Language Model Type of " << filePath << " is " << lmtype << std::endl;
 
-  // Open the input file (possibly gzipped)
-  InputFileStream inp(m_filePath);
+  if (lmtype == _IRSTLM_LMMACRO){
+    // case lmmacro: LM is of type lmmacro, create an object of lmmacro
 
-  if (filenames) {
-    // case LMfile + MAPfile: create an object of lmmacro class and load both LM file and map
-    cerr << "Loading LM file + MAP\n";
-    m_mapFilePath = strsep(&filenames, SepString);
-    if (!FileExists(m_mapFilePath)) {
-      cerr << "ERROR: Map file <" << m_mapFilePath << "> does not exist\n";
-			free(filenamesOrig);
-      return false;
-    }
-    InputFileStream inpMap(m_mapFilePath);
-    m_lmtb = new lmmacro(m_filePath, inp, inpMap);
+    m_lmtb = new lmmacro();
     d=((lmmacro *)m_lmtb)->getDict();
 
-  } else {
-    // case (standard) LMfile only: create an object of lmtable
-    cerr << "Loading LM file (no MAP)\n";
-    m_lmtb  = (lmtable *)new lmtable;
+    ((lmmacro*) m_lmtb)->load(m_filePath);
+  } else if (lmtype == _IRSTLM_LMTABLE){
+    // case (standard) lmmacro: LM is of type lmtable: create an object of lmtable
+    std::cerr << "Loading LM file (no MAP)\n";
+    m_lmtb  = (lmtable *)new lmtable();
     d=((lmtable *)m_lmtb)->getDict();
 
-  // Load the (possibly binary) model
+    // Load the (possibly binary) model
+    // Open the input file (possibly gzipped)
+    InputFileStream inp(m_filePath);
+
 #ifdef WIN32
     m_lmtb->load(inp); //don't use memory map
 #else
@@ -108,7 +101,12 @@ bool LanguageModelIRST::Load(const std::string &filePath,
       m_lmtb->load(inp,m_filePath.c_str(),NULL,0);
 #endif  
 
+  }else{  
+    std::cerr << "This language model type is unknown!" << std::endl;
+    exit(1);
   }
+
+  if (lmtype == _IRSTLM_LMMACRO) { m_lmtb->getDict()->incflag(1); }
 
   m_lmtb_size=m_lmtb->maxlevel();
 
@@ -118,14 +116,14 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_unknownId = d->oovcode(); // at the level of micro tags
   CreateFactors(factorCollection);
 
-  VERBOSE(0, "IRST: m_unknownId=" << m_unknownId << std::endl);
+  VERBOSE(1, "IRST: m_unknownId=" << m_unknownId << std::endl);
 
-  //install caches
-  m_lmtb->init_caches(m_lmtb->maxlevel()>2?m_lmtb->maxlevel()-1:2);
+  //install caches to save time (only if PS_CACHE_ENABLE is defined through compilation flags)
+  int ml = ((lmtable *)m_lmtb)->maxlevel();
+  m_lmtb->init_caches(ml>2?ml-1:2);
 
-  if (m_lmtb_dub >0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+  if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 
-  free(filenamesOrig);
   return true;
 }
 
@@ -237,8 +235,7 @@ float LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, Stat
 	if (count < (size_t) m_lmtb_size) codes[idx++] = m_lmtb_sentenceStart;  
 
         for (size_t i = 0 ; i < count ; i++) {
-                codes[idx] =  GetLmID((*contextFactor[i])[factorType]);
-		idx++;
+                codes[idx++] =  GetLmID((*contextFactor[i])[factorType]);
         }
         float prob;
         char* msp = NULL;
