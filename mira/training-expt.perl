@@ -154,7 +154,7 @@ print TRAIN "-b $batch \\\n";
 print TRAIN $extra_args;
 
 print TRAIN "\n";
-print TRAIN "mpirun finished.\n";
+print TRAIN "echo \"mpirun finished.\"\n";
 close TRAIN;
 
 if (! $execute) {
@@ -258,7 +258,7 @@ while(1) {
     my $extra_args = &param("test.extra-args");
 
     # Normalise the weights and splice them into the moses ini file.
-    my ($default_weight,$wordpenalty_weight,$unknownwordpenalty_weight,@phrasemodel_weights,$lm_weight,$distortion_weight,@lexicalreordering_weights);
+    my ($default_weight,$wordpenalty_weight,$unknownwordpenalty_weight,@phrasemodel_weights,$lm_weight,$lm2_weight,$distortion_weight,@lexicalreordering_weights);
     # Check if there's a feature file, and a core feature. If there
     # is, then we read the core weights from there
     my $core_weight_file = $new_weight_file;
@@ -294,7 +294,10 @@ while(1) {
               $unknownwordpenalty_weight = $value;
             } elsif ($name =~ /^PhraseModel/) {
               push @phrasemodel_weights,$value;
-            } elsif ($name =~ /^LM/) {
+	    } elsif ($name =~ /^LM\:2/) {
+              $lm2_weight = $value;
+            }  
+	    elsif ($name =~ /^LM/) {
               $lm_weight = $value;
             } elsif ($name eq "Distortion") {
               $distortion_weight = $value;
@@ -333,6 +336,10 @@ while(1) {
                 abs($lm_weight+$default_weight) +
                 abs($distortion_weight+$default_weight);
     
+    if (defined $lm2_weight) {
+	$total += abs($lm2_weight + $default_weight);
+    }
+
     foreach my $phrasemodel_weight (@phrasemodel_weights) {
         $total += abs($phrasemodel_weight + $default_weight);
     }
@@ -366,6 +373,14 @@ while(1) {
             print NEWINI ($lm_weight+$default_weight) / $total;
 	    $verifyNormalisation += abs($lm_weight+$default_weight) / $total;
             print NEWINI "\n";
+
+	    if (defined $lm2_weight) {
+		readline(OLDINI);
+		print NEWINI ($lm2_weight+$default_weight) / $total;
+		$verifyNormalisation += abs($lm2_weight+$default_weight) / $total;
+		print NEWINI "\n";
+	    }
+
             readline(OLDINI);
         } elsif (/weight-t/) {
             print NEWINI "[weight-t]\n";
