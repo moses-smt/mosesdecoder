@@ -5,6 +5,9 @@
 # written by Josh Schroeder, based on code by Philipp Koehn
 # further modifications by Ondrej Bojar
 
+# This added by Herve Saint-Amand for compatibility with translate.cgi
+$|++;
+
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 use strict;
