@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "FactorTypeSet.h"
 #include "FactorCollection.h"
 #include "Hypothesis.h"
+#include "OutputCollector.h"
 #include "TrellisPathList.h"
 #include "InputFileStream.h"
 #include "InputType.h"
@@ -128,7 +129,7 @@ void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*transla
                         bool reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out);
 void OutputInput(std::ostream& os, const Hypothesis* hypo);
-void OutputAlignment(std::ofstream *alignmentStream, const Hypothesis *hypo);
-void OutputAlignment(std::ofstream *alignmentStream, const TrellisPath &path);
+void OutputAlignment(OutputCollector* collector, size_t lineNo, const Hypothesis *hypo);
+void OutputAlignment(OutputCollector* collector, size_t lineNo,  const TrellisPath &path);
 
 #endif

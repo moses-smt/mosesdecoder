@@ -68,12 +68,13 @@ class TranslationTask : public Task {
         TranslationTask(size_t lineNumber,
              InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
                        OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
-                       OutputCollector* detailedTranslationCollector, std::ofstream *alignmentStream ) :
+                       OutputCollector* detailedTranslationCollector,
+                       OutputCollector* alignmentInfoCollector ) :
              m_source(source), m_lineNumber(lineNumber),
                 m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
                 m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
                 m_detailedTranslationCollector(detailedTranslationCollector),
-                m_alignmentStream(alignmentStream) {}
+                m_alignmentInfoCollector(alignmentInfoCollector) {}
 
         void Run() 
         {
@@ -140,7 +141,7 @@ class TranslationTask : public Task {
                                 staticData.GetOutputFactorOrder(), 
                                 staticData.GetReportSegmentation(),
                                 staticData.GetReportAllFactors());
-                        OutputAlignment(m_alignmentStream, bestHypo);
+                        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, bestHypo);
                         IFVERBOSE(1) {
                             debug << "BEST TRANSLATION: " << *bestHypo << endl;
                         }
@@ -186,7 +187,7 @@ class TranslationTask : public Task {
                         OutputBestHypo(conBestHypo, m_lineNumber,
                                        staticData.GetReportSegmentation(),
                                        staticData.GetReportAllFactors(),out);
-                        OutputAlignment(m_alignmentStream, conBestHypo);
+                        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, conBestHypo);
                         IFVERBOSE(2) { PrintUserTime("finished Consensus decoding"); }
                     } 
                     else
@@ -196,7 +197,7 @@ class TranslationTask : public Task {
                         OutputBestHypo(mbrBestHypo, m_lineNumber,
                                     staticData.GetReportSegmentation(),
                                     staticData.GetReportAllFactors(),out);
-                        OutputAlignment(m_alignmentStream, mbrBestHypo);
+                        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, mbrBestHypo);
                         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
                         
                     }
@@ -234,6 +235,7 @@ class TranslationTask : public Task {
         OutputCollector* m_wordGraphCollector;
         OutputCollector* m_searchGraphCollector;
         OutputCollector* m_detailedTranslationCollector;
+        OutputCollector* m_alignmentInfoCollector;
         std::ofstream *m_alignmentStream;
         
 
@@ -381,14 +383,21 @@ int main(int argc, char** argv) {
     if (staticData.IsDetailedTranslationReportingEnabled()) {
         detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
     }
+    auto_ptr<OutputCollector> alignmentInfoCollector;
+    if (!staticData.GetAlignmentOutputFile().empty()) {
+        alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
+    }
     
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
         IFVERBOSE(1) {
                 ResetUserTime();
         }
         TranslationTask* task = 
-                new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get(), wordGraphCollector.get(),
-                                    searchGraphCollector.get(), detailedTranslationCollector.get(), ioWrapper->GetAlignmentOutputStream());
+                new TranslationTask(lineCount,source, outputCollector.get(),
+                 nbestCollector.get(), wordGraphCollector.get(),
+                                     searchGraphCollector.get(),
+                                     detailedTranslationCollector.get(),
+                                     alignmentInfoCollector.get() );
 #ifdef WITH_THREADS
         pool.Submit(task);
 

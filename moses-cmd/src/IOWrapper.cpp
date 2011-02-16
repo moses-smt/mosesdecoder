@@ -223,8 +223,9 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 	}
 }
 
-void OutputAlignment(std::ofstream *alignmentStream, const vector<const Hypothesis *> &edges)
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
 {
+    ostringstream out;
     size_t targetOffset = 0;
 
 	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
@@ -235,16 +236,17 @@ void OutputAlignment(std::ofstream *alignmentStream, const vector<const Hypothes
         AlignmentInfo::const_iterator it;
         for (it = tp.GetAlignmentInfo().begin(); it != tp.GetAlignmentInfo().end(); ++it)
         {
-            *alignmentStream << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
+            out << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
         }
         targetOffset += tp.GetSize();
 	}
-    *alignmentStream << std::endl;
+    out << std::endl;
+    collector->Write(lineNo,out.str());
 }
 
-void OutputAlignment(std::ofstream *alignmentStream, const Hypothesis *hypo)
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo)
 {
-    if (hypo && ! StaticData::Instance().GetAlignmentOutputFile().empty() && alignmentStream)
+    if (collector)
     {
         std::vector<const Hypothesis *> edges;
         const Hypothesis *currentHypo = hypo;
@@ -254,15 +256,15 @@ void OutputAlignment(std::ofstream *alignmentStream, const Hypothesis *hypo)
             currentHypo = currentHypo->GetPrevHypo();
         }
         
-        OutputAlignment(alignmentStream, edges);
+        OutputAlignment(collector,lineNo, edges);
     }
 }
 
-void OutputAlignment(std::ofstream *alignmentStream, const TrellisPath &path)
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
 {
-    if (! StaticData::Instance().GetAlignmentOutputFile().empty() && alignmentStream)
+    if (collector)
     {
-        OutputAlignment(alignmentStream, path.GetEdges());
+        OutputAlignment(collector,lineNo, path.GetEdges());
     }
 }
 
