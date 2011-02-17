@@ -79,6 +79,13 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
         terAlignment result;
         for ( int incRefs = 0; incRefs < ( int ) m_multi_references.size(); incRefs++ )
         {
+	        if ( sid >= ( int ) m_multi_references.at(incRefs).size() )
+	        {
+	                stringstream msg;
+	                msg << "Sentence id (" << sid << ") not found in reference set";
+        	        throw runtime_error ( msg.str() );
+	        }
+
                 vector<int> testtokens;
                 vector<int> reftokens;
                 reftokens = m_multi_references.at ( incRefs ).at ( sid );
@@ -108,35 +115,35 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
 
 float TerScorer::calculateScore ( const vector<int>& comps )
 {
-        cerr << "TerScorer::calculateScore called" << endl;
+//        cerr << "TerScorer::calculateScore called" << endl;
         float denom = 1.0 * comps[1];
         float num =  -1.0 * comps[0];
         if ( denom == 0 )
         {
 //         shouldn't happen!
-                cerr << "CalculateScore Gives : " << num << "/" << denom << "=0.0" << endl;
+//                cerr << "CalculateScore Gives : " << num << "/" << denom << "=0.0" << endl;
                 return 0.0;
         }
         else
         {
-                cerr << "CalculateScore Gives : " << num << "/" << denom << "=" << num / denom << endl;
-                return num / denom;
+//                cerr << "CalculateScore Gives : " << num << "/" << denom << "=" << num / denom << endl;
+                return (1.0+(num / denom));
         }
 }
 float TerScorer::calculateScore ( const vector<float>& comps )
 {
-        cerr << "TerScorer::calculateScore called" << endl;
+//        cerr << "TerScorer::calculateScore called" << endl;
         float denom = 1.0 * comps[1];
         float num =  -1.0 * comps[0];
         if ( denom == 0 )
         {
 //         shouldn't happen!
-                cerr << "CalculateScore Gives : " << num << "/" << denom << "=0.0" << endl;
+//                cerr << "CalculateScore Gives : " << num << "/" << denom << "=0.0" << endl;
                 return 0.0;
         }
         else
         {
-                cerr << "CalculateScore Gives : " << num << "/" << denom << "=" << num / denom << endl;
-                return num / denom;
+//                cerr << "CalculateScore Gives : " << num << "/" << denom << "=" << num / denom << endl;
+                return (1.0+(num / denom));
         }
 }
