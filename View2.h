@@ -12,8 +12,7 @@
 @interface View2 : UIViewController 
 										<UITableViewDelegate, UITableViewDataSource>
 {
-	IBOutlet UITextField *txtURL;
-	IBOutlet UIButton *btLoad, *btDownload;
+	IBOutlet UIButton *btLoad;
 	IBOutlet UIActivityIndicatorView *busyIndicator;
 	IBOutlet UITableView *tableView;
 	UIAlertView *alertView;
@@ -23,8 +22,7 @@
 
 }
 
-@property (nonatomic, retain) IBOutlet UITextField *txtURL;
-@property (nonatomic, retain) IBOutlet UIButton *btLoad, *btDownload;
+@property (nonatomic, retain) IBOutlet UIButton *btLoad;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView *busyIndicator;
 
 @property (nonatomic, retain) NSMutableArray *folderNames;

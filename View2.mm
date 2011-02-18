@@ -31,10 +31,12 @@ extern "C" {
 
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
-    [super viewDidLoad];
-	
-	timer = [NSTimer scheduledTimerWithTimeInterval:2.0
+//- (void)viewDidLoad {
+//    [super viewDidLoad];
+- (void)viewDidAppear:(BOOL)animated {
+
+	[super viewDidAppear:animated];
+	timer = [NSTimer scheduledTimerWithTimeInterval:1.0
 																					 target:self
 																				 selector:@selector(targetMethod:)
 																				 userInfo:nil
@@ -70,47 +72,6 @@ extern "C" {
     [super dealloc];
 }
 
-- (IBAction) downloadButtonWasTouched:(id)sender
-{
-	[self downloadNow];
-	txtURL.enabled = NO;
-	txtURL.enabled = YES;
-}
-
-- (IBAction) downloadNow
-{
-	[busyIndicator startAnimating];
-
-	NSString *urlStr = txtURL.text;
-	NSLog(urlStr);
-	
-	NSURL *url = [NSURL URLWithString:urlStr];
-	NSData *data = [NSData dataWithContentsOfURL:url];
-	
-	if (data != nil) 
-	{
-		NSLog(@"\nis not nil");
-		NSString *fileName = [url lastPathComponent];
-		
-		[data writeToFile:fileName atomically:YES];
-		[self InitView];
-	}	
-	else {
-		NSLog(@"nothing download");
-		alertView = [ [UIAlertView alloc]
-								 initWithTitle:@"Error"
-								 message:@"Couldn't download model" 
-								 delegate:self
-								 cancelButtonTitle:@"Close"
-								 otherButtonTitles:nil ];
-		// show alert
-		[alertView show];
-		//	[alertView release];
-	}
-
-	
-	[busyIndicator stopAnimating];
-}
 
 // Customize the number of rows in the table view.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -168,7 +129,7 @@ extern "C" {
 	
 	if (ret)
 	{
-		NSLog(@"oh dear");
+		NSLog(@"Failure loading model");
 		// Create a suitable alert view
 		alertView = [ [UIAlertView alloc]
 								 initWithTitle:@"Error"
