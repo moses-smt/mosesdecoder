@@ -69,7 +69,7 @@ extern "C" {
 - (void)dealloc {
 	[self.folderNames dealloc];
 	[timer dealloc];
-    [super dealloc];
+  [super dealloc];
 }
 
 
@@ -183,6 +183,7 @@ extern "C" {
 	NSError *error;
 	NSArray *files = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:publicDocumentsDir error:&error];
 	
+	 /*
 	for (NSString *file in files) 
 	{
 		NSString *fullPath = [publicDocumentsDir stringByAppendingPathComponent:@"/"]; 
@@ -200,7 +201,8 @@ extern "C" {
 			remove(fileCStr);			
 		}
 	}
-	
+	*/
+	 
 	// 2nd loop. List folder names
 	self.folderNames = [[NSMutableArray alloc] init];
 	

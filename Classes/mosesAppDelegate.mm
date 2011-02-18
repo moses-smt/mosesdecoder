@@ -10,7 +10,9 @@
 #import "View1.h"
 #import "View2.h"
 #import "CFunctions.h"
-//#include "stdio.h"
+extern "C" {
+#import "minzipwrapper.h"
+}
 
 @implementation mosesAppDelegate
 
@@ -43,70 +45,21 @@
 		
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
-		documentsDirectoryNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/en-ht.zip"];
-		NSLog(documentsDirectoryNS);
+		NSString *fullPathNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/en-ht.zip"];
+		NSLog(fullPathNS);
 
-		[[NSFileManager defaultManager] copyItemAtPath:bundlePath toPath:documentsDirectoryNS error:nil];
+		[[NSFileManager defaultManager] copyItemAtPath:bundlePath toPath:fullPathNS error:nil];
+		
+		const char *fullPath = [fullPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
+		const char *docPathCtr = [documentsDirectoryNS cStringUsingEncoding: NSASCIIStringEncoding  ];
+		
+		Unzip(fullPath, docPathCtr);
+		remove(fullPath);			
 		
 		[prefs setValue:@"0" forKey: @"init"];
 		[prefs synchronize];
 	}
 		
-	// persistant storage
-	/*
-	NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-	
-	NSString *currModel = [prefs stringForKey:@"currentModel"];
-	NSLog(currModel);
-	
-	// load model
-	if (currModel == nil)
-	{
-		tabBarController.selectedIndex = 1;
-		
-		UIViewController *viewTranslate = [tabBarController.viewControllers objectAtIndex:0];
-		viewTranslate.view.userInteractionEnabled = NO;
-	}
-	else
-	{
-		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-		NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
-		
-		NSString *modelPathNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/"];
-		modelPathNS = [modelPathNS stringByAppendingPathComponent:currModel];
-		const char *modelPath = [modelPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
-		
-		NSString *iniPathNS = [modelPathNS stringByAppendingPathComponent:@"/moses.ini"]; 
-		const char *iniPath = [iniPathNS cStringUsingEncoding: NSASCIIStringEncoding  ];
-		NSLog(iniPathNS);
-		
-		char source[1000];
-		char target[1000];
-		char description[1000];
-		
-		
-		int ret = LoadModel(modelPath, iniPath, source, target, description);
-		
-		if (ret)
-		{
-			NSLog(@"oh dear");
-			// Create a suitable alert view
-			alertView = [ [UIAlertView alloc]
-									 initWithTitle:@"Error"
-									 message:@"Can't load model" 
-									 delegate:self
-									 cancelButtonTitle:@"Close"
-									 otherButtonTitles:nil ];
-			// show alert
-			[alertView show];
-			//	[alertView release];
-		}
-		else {
-			NSLog(@"Loaded");
-		}
-		
-	}
-	*/
 	
 	return YES;
 }
