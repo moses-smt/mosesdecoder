@@ -33,7 +33,7 @@ namespace Moses
 using namespace std;
 
 bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType, 
-			       size_t nGramOrder) {
+                               size_t nGramOrder) {
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_filePath = filePath;
