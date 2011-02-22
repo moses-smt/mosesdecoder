@@ -295,9 +295,11 @@ public:
 		for(size_t k=0;k<factorStrings.size();++k) 
 		{
 			std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
+            assert(factors.size()==m_output.size());
 			Word& w=targetPhrase.AddWord();
-			for(size_t l=0;l<m_output.size();++l)
+			for(size_t l=0;l<m_output.size();++l) {
 				w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
+            }
 		}
 		targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, m_weights, m_weightWP, *m_languageModels);
 		targetPhrase.SetSourcePhrase(srcPtr);
