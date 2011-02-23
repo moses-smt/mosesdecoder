@@ -351,7 +351,7 @@ build-reordering
 build-ttable
 	in: extracted-phrases lexical-translation-table
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script report-precision-by-coverage
 	default-name: model/phrase-table
 build-generation
 	in: corpus
@@ -363,7 +363,7 @@ create-config
 	in: reordering-table phrase-translation-table generation-table LM:binlm biconcor-model
 	out: config
 	ignore-if: use-hiero INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
 	default-name: model/moses.ini
 	error: Unknown option
 create-config-interpolated-lm
@@ -371,7 +371,7 @@ create-config-interpolated-lm
 	out: config
 	ignore-if: use-hiero
 	ignore-unless: INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
@@ -608,7 +608,7 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest report-segmentation
+	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
 hiero-decode
@@ -738,15 +738,22 @@ analysis
 	in: recased-output reference input
 	out: analysis
 	default-name: evaluation/analysis
+	ignore-if: report-precision-by-coverage
 	ignore-unless: analysis
 analysis-coverage
 	in: input TRAINING:corpus TRAINING:phrase-translation-table
 	out: analysis-coverage
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage
+	rerun-on-change: score-settings
+analysis-precision
+	in: recased-output reference input TRAINING:corpus TRAINING:phrase-translation-table
+	out: analysis
+	default-name: evaluation/analysis
+	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec
 	out: report
 	default-name: evaluation/report

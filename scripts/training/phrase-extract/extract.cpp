@@ -86,6 +86,7 @@ ofstream extractFileInv;
 ofstream extractFileOrientation;
 int maxPhraseLength;
 bool orientationFlag = false;
+bool translationFlag = true;
 bool onlyOutputSpanInfo = false;
 
 int main(int argc, char* argv[])
@@ -109,6 +110,9 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
       orientationFlag = true;
+    }
+    else if (strcmp(argv[i],"--NoTTable") == 0) {
+      translationFlag = false;
     }
     else if(strcmp(argv[i],"--model") == 0){
       if (i+1 >= argc){
@@ -192,12 +196,15 @@ int main(int argc, char* argv[])
   istream *aFileP = &aFile;
 
   // open output files
-  string fileNameExtractInv = fileNameExtract + ".inv";
-  string fileNameExtractOrientation = fileNameExtract + ".o";
-  extractFile.open(fileNameExtract.c_str());
-  extractFileInv.open(fileNameExtractInv.c_str());
-  if (orientationFlag)
+  if (translationFlag) {
+    string fileNameExtractInv = fileNameExtract + ".inv";
+    extractFile.open(fileNameExtract.c_str());
+    extractFileInv.open(fileNameExtractInv.c_str());
+  }
+  if (orientationFlag) {
+    string fileNameExtractOrientation = fileNameExtract + ".o";
     extractFileOrientation.open(fileNameExtractOrientation.c_str());
+  }
 
   int i=0;
   while(true) {
@@ -230,8 +237,10 @@ int main(int argc, char* argv[])
   aFile.close();
   //az: only close if we actually opened it
   if (!onlyOutputSpanInfo) {
-    extractFile.close();
-    extractFileInv.close();
+    if (translationFlag) {
+      extractFile.close();
+      extractFileInv.close();
+    }
     if (orientationFlag) extractFileOrientation.close();
   }
 }
@@ -574,40 +583,45 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   }
 
   for(int fi=startF;fi<=endF;fi++) {
-    extractFile << sentence.source[fi] << " ";
+    if (translationFlag) extractFile << sentence.source[fi] << " ";
     if (orientationFlag) extractFileOrientation << sentence.source[fi] << " ";
   }
-  extractFile << "||| ";
+  if (translationFlag) extractFile << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
 
   // target
   for(int ei=startE;ei<=endE;ei++) {
-    extractFile << sentence.target[ei] << " ";
-    extractFileInv << sentence.target[ei] << " ";
+    if (translationFlag) extractFile << sentence.target[ei] << " ";
+    if (translationFlag) extractFileInv << sentence.target[ei] << " ";
     if (orientationFlag) extractFileOrientation << sentence.target[ei] << " ";
   }
-  extractFile << "|||";
-  extractFileInv << "||| ";
+  if (translationFlag) extractFile << "|||";
+  if (translationFlag) extractFileInv << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
 
   // source (for inverse)
-  for(int fi=startF;fi<=endF;fi++)
-    extractFileInv << sentence.source[fi] << " ";
-  extractFileInv << "|||";
+  if (translationFlag) {
+    for(int fi=startF;fi<=endF;fi++)
+      extractFileInv << sentence.source[fi] << " ";
+    extractFileInv << "|||";
+  }
 
   // alignment
-  for(int ei=startE;ei<=endE;ei++)
-    for(int i=0;i<sentence.alignedToT[ei].size();i++) {
-      int fi = sentence.alignedToT[ei][i];
-      extractFile << " " << fi-startF << "-" << ei-startE;
-      extractFileInv << " " << ei-startE << "-" << fi-startF;
+  if (translationFlag) {
+    for(int ei=startE;ei<=endE;ei++) {
+      for(int i=0;i<sentence.alignedToT[ei].size();i++) {
+        int fi = sentence.alignedToT[ei][i];
+        extractFile << " " << fi-startF << "-" << ei-startE;
+        extractFileInv << " " << ei-startE << "-" << fi-startF;
+      }
     }
+  }
 
   if (orientationFlag)
     extractFileOrientation << orientationInfo;
 
-  extractFile << "\n";
-  extractFileInv << "\n";
+  if (translationFlag) extractFile << "\n";
+  if (translationFlag) extractFileInv << "\n";
   if (orientationFlag) extractFileOrientation << "\n";
 }
 

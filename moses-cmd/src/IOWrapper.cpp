@@ -276,6 +276,7 @@ void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<
         OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
 		OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
+		// trace option "-t"
 		if (reportSegmentation == true
 		    && hypo->GetCurrTargetPhrase().GetSize() > 0) {
 			out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
