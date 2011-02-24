@@ -52,7 +52,7 @@ my $name = &param_required("general.name");
 my $queue = &param("general.queue", "inf_iccs_smt");
 my $mpienv = &param("general.mpienv", "openmpi_smp8_mark2");
 my $vmem = &param("general.vmem", "6");
-
+my $decoder_settings = &param("general.decoder-settings", "");
 
 #
 # Create the training script
@@ -84,6 +84,8 @@ my $learner = &param("train.learner", "mira");
 my $batch = &param("train.batch", 1);
 my $extra_args = &param("train.extra-args");
 my $continue_from_epoch = &param("train.continue-from-epoch", 0);
+my $extra_memory_train = &param("train.extra-memory",0);
+my $by_node = &param("train.by-node",0);
 
 #test configuration
 my ($test_input_file, $test_reference_file,$test_ini_file,$bleu_script,$use_moses);
@@ -102,7 +104,7 @@ $test_ini_file = &param_required("test.moses-ini-file");
 &check_exists ("test ini file", $test_ini_file);
 my $weight_file_stem = "$name-weights";
 my $weight_frequency = &param("test.frequency",1);
-my $extra_memory = &param("test.extra-memory",0);
+my $extra_memory_test = &param("test.extra-memory",0);
 
 # adjust test frequency when using batches > 1
 if ($batch > 1) {
@@ -129,7 +131,12 @@ my $train_err = $train_script . ".err";
 open TRAIN, ">$train_script_file" or die "Unable to open \"$train_script_file\" for writing";
 
 &header(*TRAIN,$job_name,$working_dir,$jobs,$hours,$vmem,$train_out,$train_err);
-print TRAIN "mpirun -np \$NSLOTS $trainer_exe \\\n";
+if ($by_node) {
+    print TRAIN "mpirun -np \$NSLOTS --bynode $trainer_exe \\\n";
+}
+else {
+    print TRAIN "mpirun -np \$NSLOTS $trainer_exe \\\n";
+}
 print TRAIN "-f $moses_ini_file \\\n";
 print TRAIN "-i $input_file \\\n";
 my @refs;
@@ -151,6 +158,7 @@ print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
 print TRAIN "--weight-dump-frequency $weight_frequency \\\n";
 print TRAIN "--epochs $epochs \\\n";
 print TRAIN "-b $batch \\\n";
+print TRAIN "--decoder-settings \"$decoder_settings\" \\\n";
 print TRAIN $extra_args;
 
 print TRAIN "\n";
@@ -165,7 +173,14 @@ if (! $execute) {
 #submit the training job
 my $train_job_id;
 if ($have_sge) {
-  $train_job_id = &submit_job_sge($train_script_file);
+    if ($extra_memory_train) {
+	print "SUBMIT TRAINING JOB WITH EXTRA MEMORY: $extra_memory_train \n";
+	$train_job_id = &submit_job_sge_extra_memory($train_script_file,$extra_memory_train);
+    }
+    else {
+	print "SUBMIT TRAINING JOB WITH NO EXTRA MEMORY \n";
+	$train_job_id = &submit_job_sge($train_script_file);
+    }
 } else {
   $train_job_id = &submit_job_no_sge($train_script_file, $train_out,$train_err);
 }
@@ -469,7 +484,7 @@ while(1) {
     print TEST "#\$ -e $test_err\n";
     print TEST "\n";
     # use same decoder settings than for experiment.perl evaluation, but omit -t option (segmentation)
-    print TEST "$test_exe -mbr -mp -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -v 0 -i $test_input_file -f $new_test_ini_file ";
+    print TEST "$test_exe $decoder_settings -i $test_input_file -f $new_test_ini_file ";
     if ($extra_weight_file) {
       print TEST "-weight-file $extra_weight_file ";
     }
@@ -482,10 +497,12 @@ while(1) {
 
     #launch testing
     if ($have_sge) {
-	if ($extra_memory) {
-	    &submit_job_sge_extra_memory($test_script_file);
+	if ($extra_memory_test) {
+	    print "SUBMIT TEST JOB WITH EXTRA MEMORY: $extra_memory_train \n";
+	    &submit_job_sge_extra_memory($test_script_file,$extra_memory_test);
 	}
 	else {
+	    print "SUBMIT TEST JOB WITH NO EXTRA MEMORY\n";
 	    &submit_job_sge($test_script_file);
 	}
     } else {
@@ -557,8 +574,9 @@ sub submit_job_sge {
 }
 
 sub submit_job_sge_extra_memory {
-    my($script_file) = @_;
+    my($script_file,$extra_memory) = @_;
     my $qsub_result = `qsub -pe $extra_memory -P $queue $script_file`;
+    print "SUBMIT CMD: qsub -pe $extra_memory -P $queue $script_file \n";
     if ($qsub_result !~ /Your job (\d+)/) {
         print "Failed to qsub job: $qsub_result\n";
         return 0;
