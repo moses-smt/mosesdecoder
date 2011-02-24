@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold")
 	    ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 	    ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
-	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(false), "Compute BLEU score of oracle translations of the whole tuning set");
+	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
