@@ -8,16 +8,16 @@
 
 class Timer
 {
- friend std::ostream& operator<<(std::ostream& os, Timer& t);
+  friend std::ostream& operator<<(std::ostream& os, Timer& t);
 
- private:
+private:
   bool running;
   time_t start_time;
 
-	//TODO in seconds?
+  //TODO in seconds?
   double elapsed_time();
 
- public:
+public:
   /***
    * 'running' is initially false.  A timer needs to be explicitly started
    * using 'start' or 'restart'
