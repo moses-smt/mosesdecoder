@@ -4,7 +4,8 @@
 
 using namespace std;
 
-int main() {
+int main()
+{
   cerr << "Reading PLF from STDIN...\n";
   string line;
   int lc = 0;
