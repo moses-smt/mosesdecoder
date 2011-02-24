@@ -62,37 +62,37 @@ namespace Moses
 class LanguageModelParallelBackoff : public LanguageModelMultiFactor
 {
 private:
-	std::vector<FactorType> m_factorTypesOrdered;
+  std::vector<FactorType> m_factorTypesOrdered;
 
-	FactoredVocab		*m_srilmVocab;
-	FNgram 					*m_srilmModel;
-	VocabIndex	m_unknownId;
-	VocabIndex  m_wtid;
-	VocabIndex  m_wtbid;
-	VocabIndex  m_wteid;
+  FactoredVocab		*m_srilmVocab;
+  FNgram 					*m_srilmModel;
+  VocabIndex	m_unknownId;
+  VocabIndex  m_wtid;
+  VocabIndex  m_wtbid;
+  VocabIndex  m_wteid;
   FNgramSpecs<FNgramCount>* fnSpecs;
-	//std::vector<VocabIndex> m_lmIdLookup;
-	std::map<size_t, VocabIndex>* lmIdMap;
-	std::fstream* debugStream;
+  //std::vector<VocabIndex> m_lmIdLookup;
+  std::map<size_t, VocabIndex>* lmIdMap;
+  std::fstream* debugStream;
 
   WidMatrix *widMatrix;
 
 public:
-	~LanguageModelParallelBackoff();
+  ~LanguageModelParallelBackoff();
 
-	bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
+  bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
 
-VocabIndex GetLmID( const std::string &str ) const;
+  VocabIndex GetLmID( const std::string &str ) const;
 
-VocabIndex GetLmID( const Factor *factor, FactorType ft ) const;
+  VocabIndex GetLmID( const Factor *factor, FactorType ft ) const;
 
-void CreateFactors();
-	
-float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
-FFState *GetNullContextState() const;
-FFState *GetBeginSentenceState() const;
-FFState *NewState(const FFState *from) const;
-	
+  void CreateFactors();
+
+  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+  FFState *GetNullContextState() const;
+  FFState *GetBeginSentenceState() const;
+  FFState *NewState(const FFState *from) const;
+
 };
 
 }

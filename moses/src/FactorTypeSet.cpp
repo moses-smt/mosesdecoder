@@ -27,11 +27,10 @@ namespace Moses
 {
 FactorMask::FactorMask(const vector<FactorType> &factors)
 {
-	vector<FactorType>::const_iterator iter;
-	for (iter = factors.begin() ; iter != factors.end() ; ++iter)
-	{
-		this->set(*iter);
-	}
+  vector<FactorType>::const_iterator iter;
+  for (iter = factors.begin() ; iter != factors.end() ; ++iter) {
+    this->set(*iter);
+  }
 }
 
 TO_STRING_BODY(FactorMask);
@@ -40,13 +39,15 @@ TO_STRING_BODY(FactorMask);
 std::ostream& operator<<(std::ostream& out, const FactorMask& fm)
 {
   out << "FactorMask<";
-	bool first = true;
-  for (size_t currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
-  {
-    if (fm[currFactor])
-    {
-			if (first) { first = false; } else { out << ","; }
-			out << currFactor;
+  bool first = true;
+  for (size_t currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
+    if (fm[currFactor]) {
+      if (first) {
+        first = false;
+      } else {
+        out << ",";
+      }
+      out << currFactor;
     }
   }
   out << ">";

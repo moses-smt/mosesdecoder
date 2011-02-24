@@ -36,102 +36,93 @@ namespace Moses
 * order of chunk hardcoded to 3 (m_realNGramOrder)
 */
 class LanguageModelSkip : public LanguageModelSingleFactor
-{	
+{
 protected:
-	size_t m_realNGramOrder;
-	LanguageModelSingleFactor *m_lmImpl;
-	
+  size_t m_realNGramOrder;
+  LanguageModelSingleFactor *m_lmImpl;
+
 public:
-	/** Constructor
-	* \param lmImpl SRI or IRST LM which this LM can use to load data
-	*/
-	LanguageModelSkip(LanguageModelSingleFactor *lmImpl)
-	{
-		m_lmImpl = lmImpl;		
-	}
-	~LanguageModelSkip()
-	{
-		delete m_lmImpl;
-	}
+  /** Constructor
+  * \param lmImpl SRI or IRST LM which this LM can use to load data
+  */
+  LanguageModelSkip(LanguageModelSingleFactor *lmImpl) {
+    m_lmImpl = lmImpl;
+  }
+  ~LanguageModelSkip() {
+    delete m_lmImpl;
+  }
 
-	bool Load(const std::string &filePath
-					, FactorType factorType
-					, size_t nGramOrder)
-	{
-		m_factorType 				= factorType;
-		m_filePath 					= filePath;
-		m_nGramOrder 				= nGramOrder;
-		
-		m_realNGramOrder 		= 3;
+  bool Load(const std::string &filePath
+            , FactorType factorType
+            , size_t nGramOrder) {
+    m_factorType 				= factorType;
+    m_filePath 					= filePath;
+    m_nGramOrder 				= nGramOrder;
 
-		FactorCollection &factorCollection = FactorCollection::Instance();
+    m_realNGramOrder 		= 3;
 
-		m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
-		m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
+    FactorCollection &factorCollection = FactorCollection::Instance();
 
-		return m_lmImpl->Load(filePath, m_factorType, nGramOrder);
-	}
+    m_sentenceStartArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, BOS_);
+    m_sentenceEndArray[m_factorType] = factorCollection.AddFactor(Output, m_factorType, EOS_);
 
-	FFState *GetNullContextState() const
-	{
-		return m_lmImpl->GetNullContextState();
-	}
+    return m_lmImpl->Load(filePath, m_factorType, nGramOrder);
+  }
 
-	FFState *GetBeginSentenceState() const
-	{
-		return m_lmImpl->GetBeginSentenceState();
-	}
+  FFState *GetNullContextState() const {
+    return m_lmImpl->GetNullContextState();
+  }
 
-  FFState *NewState(const FFState *from = NULL) const
-  {
+  FFState *GetBeginSentenceState() const {
+    return m_lmImpl->GetBeginSentenceState();
+  }
+
+  FFState *NewState(const FFState *from = NULL) const {
     return m_lmImpl->NewState(from);
   }
-			
-	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
-	{
-		if (contextFactor.size() == 0)
-		{
-			return 0;
-		}
 
-		// only process context where last word is a word we want
-		const Factor *factor = (*contextFactor.back())[m_factorType];
-		std::string strWord = factor->GetString();
-		if (strWord.find("---") == 0)
-			return 0;
-		
-		// add last word
-		std::vector<const Word*> chunkContext;
-		Word* chunkWord = new Word;
-		chunkWord->SetFactor(m_factorType, factor);
-		chunkContext.push_back(chunkWord);
-		
-		// create context in reverse 'cos we skip words we don't want
-		for (int currPos = (int)contextFactor.size() - 2 ; currPos >= 0 && chunkContext.size() < m_realNGramOrder ; --currPos )
-		{
-			const Word &word = *contextFactor[currPos];
-			factor = word[m_factorType];
-			std::string strWord = factor->GetString();
-			bool skip = strWord.find("---") == 0;
-			if (skip)
-				continue;
+  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+    if (contextFactor.size() == 0) {
+      return 0;
+    }
 
-			// add word to chunked context
-			Word* chunkWord = new Word;
-			chunkWord->SetFactor(m_factorType, factor);
-			chunkContext.push_back(chunkWord);
-		}
-	
-		// create context factor the right way round
-		std::reverse(chunkContext.begin(), chunkContext.end());
+    // only process context where last word is a word we want
+    const Factor *factor = (*contextFactor.back())[m_factorType];
+    std::string strWord = factor->GetString();
+    if (strWord.find("---") == 0)
+      return 0;
 
-		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValueForgotState(chunkContext, outState);
+    // add last word
+    std::vector<const Word*> chunkContext;
+    Word* chunkWord = new Word;
+    chunkWord->SetFactor(m_factorType, factor);
+    chunkContext.push_back(chunkWord);
 
-		RemoveAllInColl(chunkContext);
+    // create context in reverse 'cos we skip words we don't want
+    for (int currPos = (int)contextFactor.size() - 2 ; currPos >= 0 && chunkContext.size() < m_realNGramOrder ; --currPos ) {
+      const Word &word = *contextFactor[currPos];
+      factor = word[m_factorType];
+      std::string strWord = factor->GetString();
+      bool skip = strWord.find("---") == 0;
+      if (skip)
+        continue;
 
-		return ret;
-	}
+      // add word to chunked context
+      Word* chunkWord = new Word;
+      chunkWord->SetFactor(m_factorType, factor);
+      chunkContext.push_back(chunkWord);
+    }
+
+    // create context factor the right way round
+    std::reverse(chunkContext.begin(), chunkContext.end());
+
+    // calc score on chunked phrase
+    float ret = m_lmImpl->GetValueForgotState(chunkContext, outState);
+
+    RemoveAllInColl(chunkContext);
+
+    return ret;
+  }
 };
 
 }

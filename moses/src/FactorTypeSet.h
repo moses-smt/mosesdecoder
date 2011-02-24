@@ -35,18 +35,18 @@ namespace Moses
 */
 class FactorMask : public std::bitset<MAX_NUM_FACTORS>
 {
-	friend std::ostream& operator<<(std::ostream&, const FactorMask&);
+  friend std::ostream& operator<<(std::ostream&, const FactorMask&);
 
 public:
-	//! construct object from list of FactorType.
-	explicit FactorMask(const std::vector<FactorType> &factors);
-	//! default constructor
-	inline FactorMask() {}
-	//! copy constructor
-	FactorMask(const std::bitset<MAX_NUM_FACTORS>& rhs) : std::bitset<MAX_NUM_FACTORS>(rhs) { }
+  //! construct object from list of FactorType.
+  explicit FactorMask(const std::vector<FactorType> &factors);
+  //! default constructor
+  inline FactorMask() {}
+  //! copy constructor
+  FactorMask(const std::bitset<MAX_NUM_FACTORS>& rhs) : std::bitset<MAX_NUM_FACTORS>(rhs) { }
 
 
-	TO_STRING();
+  TO_STRING();
 };
 
 }

@@ -32,45 +32,38 @@ class NGramCollection;
 class NGramNode
 {
 protected:
-	float						m_score, m_logBackOff;
-	NGramCollection	*m_map;
-	NGramNode				*m_rootNGram;
+  float						m_score, m_logBackOff;
+  NGramCollection	*m_map;
+  NGramNode				*m_rootNGram;
 public:
-	NGramNode();
-	~NGramNode();
-	NGramCollection *GetNGramColl()
-	{
-		return m_map;
-	}
+  NGramNode();
+  ~NGramNode();
+  NGramCollection *GetNGramColl() {
+    return m_map;
+  }
 
-	const NGramNode *GetNGram(const Factor *factor) const;
-	NGramNode *GetNGram(const Factor *factor);
+  const NGramNode *GetNGram(const Factor *factor) const;
+  NGramNode *GetNGram(const Factor *factor);
 
-	const NGramNode *GetRootNGram() const
-	{
-		return m_rootNGram;
-	}
-	void SetRootNGram(NGramNode *rootNGram)
-	{
-		m_rootNGram = rootNGram;
-	}
+  const NGramNode *GetRootNGram() const {
+    return m_rootNGram;
+  }
+  void SetRootNGram(NGramNode *rootNGram) {
+    m_rootNGram = rootNGram;
+  }
 
-	float GetScore() const
-	{
-		return m_score;
-	}
-	float GetLogBackOff() const
-	{
-		return m_logBackOff;
-	}
-	void SetScore(float score)
-	{
-		m_score = score;
-	}
-	void SetLogBackOff(float logBackOff)
-	{
-		m_logBackOff = logBackOff;
-	}
+  float GetScore() const {
+    return m_score;
+  }
+  float GetLogBackOff() const {
+    return m_logBackOff;
+  }
+  void SetScore(float score) {
+    m_score = score;
+  }
+  void SetLogBackOff(float logBackOff) {
+    m_logBackOff = logBackOff;
+  }
 
 };
 

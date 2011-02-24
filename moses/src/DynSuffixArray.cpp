@@ -3,9 +3,11 @@
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
-DynSuffixArray::DynSuffixArray() {
+DynSuffixArray::DynSuffixArray()
+{
   m_SA = new vuint_t();
   m_ISA = new vuint_t();
   m_F = new vuint_t();
@@ -13,22 +15,24 @@ DynSuffixArray::DynSuffixArray() {
   std::cerr << "DYNAMIC SUFFIX ARRAY CLASS INSTANTIATED" << std::endl;
 }
 
-DynSuffixArray::~DynSuffixArray() {
+DynSuffixArray::~DynSuffixArray()
+{
   delete m_SA;
   delete m_ISA;
   delete m_F;
   delete m_L;
 }
 
-DynSuffixArray::DynSuffixArray(vuint_t* crp) {
+DynSuffixArray::DynSuffixArray(vuint_t* crp)
+{
   // make native int array and pass to SA builder
-  m_corpus = crp; 
+  m_corpus = crp;
   int size = m_corpus->size();
   int* tmpArr = new int[size];
-  for(int i=0 ; i < size; ++i) tmpArr[i] = i; 
-  
+  for(int i=0 ; i < size; ++i) tmpArr[i] = i;
+
   Qsort(tmpArr, 0, size-1);
-  
+
   m_SA = new vuint_t(tmpArr, tmpArr + size);
   //std::cerr << "printing SA " << std::endl;
   //for(int i=0; i < size; ++i) std::cerr << m_SA->at(i) << std::endl;
@@ -38,22 +42,24 @@ DynSuffixArray::DynSuffixArray(vuint_t* crp) {
   //printAuxArrays();
 }
 
-void DynSuffixArray::BuildAuxArrays() {
+void DynSuffixArray::BuildAuxArrays()
+{
   int size = m_SA->size();
   m_ISA = new vuint_t(size);
   m_F = new vuint_t(size);
   m_L = new vuint_t(size);
-  
+
   for(int i=0; i < size; ++i) {
     m_ISA->at(m_SA->at(i)) = i;
     //(*m_ISA)[(*m_SA)[i]] = i;
     (*m_F)[i] = (*m_corpus)[m_SA->at(i)];
-    (*m_L)[i] = (*m_corpus)[(m_SA->at(i) == 0 ? size-1 : m_SA->at(i)-1)]; 
+    (*m_L)[i] = (*m_corpus)[(m_SA->at(i) == 0 ? size-1 : m_SA->at(i)-1)];
   }
 }
 
-int DynSuffixArray::Rank(unsigned word, unsigned idx) {
-/* use Gerlach's code to make rank faster */
+int DynSuffixArray::Rank(unsigned word, unsigned idx)
+{
+  /* use Gerlach's code to make rank faster */
   // the number of word in L[0..i]
   int r(0);
   for(unsigned i=0; i < idx; ++i)
@@ -63,29 +69,32 @@ int DynSuffixArray::Rank(unsigned word, unsigned idx) {
 
 /* count function should be implemented
  * with binary search over suffix array!! */
-int DynSuffixArray::F_firstIdx(unsigned word) {
+int DynSuffixArray::F_firstIdx(unsigned word)
+{
   // return index of first row where word is found in m_F
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
   //cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
   if(low >= m_F->size())
-    return -1; 
-  else 
+    return -1;
+  else
     return low;
 }
 
 /* uses rank() and c() to obtain the LastFirstFunc function */
-int DynSuffixArray::LastFirstFunc(unsigned L_idx) {
+int DynSuffixArray::LastFirstFunc(unsigned L_idx)
+{
   int fIdx(-1);
   //cerr << "in LastFirstFcn() with L_idx = " << L_idx << endl;
   unsigned word = m_L->at(L_idx);
-  if((fIdx = F_firstIdx(word)) != -1) { 
+  if((fIdx = F_firstIdx(word)) != -1) {
     //cerr << "fidx + Rank(" << word << "," << L_idx << ") = " << fIdx << "+" << Rank(word, L_idx) << endl;
     fIdx += Rank(word, L_idx);
   }
   return fIdx;
 }
 
-void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex) {
+void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex)
+{
   // for sentences
   //stages 1, 2, 4 stay same from 1char case
   //(use last word of new text in step 2 and save Ltmp until last insert?)
@@ -102,12 +111,12 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex) {
     kprime = LastFirstFunc(k);  // find cycle that starts with (newindex - 1)
     //kprime += ((m_L[k] == Ltmp) && (k > isa[k]) ? 1 : 0); // yada yada
     // only terminal char can be 0 so add new vocab at end
-    kprime = (kprime > 0 ? kprime : m_SA->size());  
+    kprime = (kprime > 0 ? kprime : m_SA->size());
     true_pos += (kprime <= true_pos ? 1 : 0); // track changes
     // insert everything
     m_F->insert(m_F->begin() + kprime, newSent->at(j));
     int theLWord = (j == 0 ? Ltmp : newSent->at(j-1));
-  
+
     m_L->insert(m_L->begin() + kprime, theLWord);
     for (vuint_t::iterator itr = m_SA->begin(); itr != m_SA->end(); ++itr) {
       if(*itr >= newIndex) ++(*itr);
@@ -116,7 +125,7 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex) {
     for (vuint_t::iterator itr = m_ISA->begin(); itr != m_ISA->end(); ++itr) {
       if((int)*itr >= kprime) ++(*itr);
     }
-  
+
     m_ISA->insert(m_ISA->begin() + newIndex, kprime);
     k = kprime;
     //PrintAuxArrays();
@@ -125,10 +134,11 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex) {
   Reorder(true_pos, LastFirstFunc(kprime)); // actual position vs computed position of cycle (newIndex-1)
 }
 
-void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
-  //cerr << "j=" << j << "\tj'=" << jprime << endl; 
+void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
+{
+  //cerr << "j=" << j << "\tj'=" << jprime << endl;
   while(j != jprime) {
-    //cerr << "j=" << j << "\tj'=" << jprime << endl; 
+    //cerr << "j=" << j << "\tj'=" << jprime << endl;
     int tmp, isaIdx(-1);
     int new_j = LastFirstFunc(j);
     // for SA, L, and F, the element at pos j is moved to j'
@@ -138,10 +148,10 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
     tmp = m_SA->at(j);  // SA
     m_SA->at(j) = m_SA->at(jprime);
     m_SA->at(jprime) = tmp;
-  
+
     // all ISA values between (j...j'] decremented
     for(size_t i = 0; i < m_ISA->size(); ++i) {
-      if((m_ISA->at(i) == j) && (isaIdx == -1)) 
+      if((m_ISA->at(i) == j) && (isaIdx == -1))
         isaIdx = i; // store index of ISA[i] = j
       if((m_ISA->at(i) > j) && (m_ISA->at(i) <= jprime)) --(*m_ISA)[i];
     }
@@ -153,7 +163,8 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime) {
   }
 }
 
-void DynSuffixArray::Delete(unsigned index, unsigned num2del) {
+void DynSuffixArray::Delete(unsigned index, unsigned num2del)
+{
   int ltmp = m_L->at(m_ISA->at(index));
   int true_pos = LastFirstFunc(m_ISA->at(index)); // track cycle shift (newIndex - 1)
   for(size_t q = 0; q < num2del; ++q) {
@@ -161,14 +172,14 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del) {
     std::cerr << "row = " << row << std::endl;
     std::cerr << "SA[r]/index = " << m_SA->at(row) << "/" << index << std::endl;
     true_pos -= (row <= true_pos ? 1 : 0); // track changes
-    m_L->erase(m_L->begin() + row);     
-    m_F->erase(m_F->begin() + row);     
-  
-    m_ISA->erase(m_ISA->begin() + index);  // order is important     
+    m_L->erase(m_L->begin() + row);
+    m_F->erase(m_F->begin() + row);
+
+    m_ISA->erase(m_ISA->begin() + index);  // order is important
     for (vuint_t::iterator itr = m_ISA->begin(); itr != m_ISA->end(); ++itr) {
       if((int)*itr > row) --(*itr);
     }
-  
+
     m_SA->erase(m_SA->begin() + row);
     for (vuint_t::iterator itr = m_SA->begin(); itr != m_SA->end(); ++itr) {
       if(*itr > index) --(*itr);
@@ -179,12 +190,14 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del) {
   PrintAuxArrays();
 }
 
-void DynSuffixArray::Substitute(vuint_t* newSents, unsigned newIndex) {
+void DynSuffixArray::Substitute(vuint_t* newSents, unsigned newIndex)
+{
   std::cerr << "NEEDS TO IMPLEMENT SUBSITITUTE FACTOR\n";
   return;
 }
 
-bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
+bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
+{
   pair<vuint_t::iterator,vuint_t::iterator> bounds;
   indices->clear();
   size_t phrasesize = phrase->size();
@@ -207,43 +220,45 @@ bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices) {
     for(size_t pos = 1; pos < phrasesize; ++pos) { // for all following words
       if(m_corpus->at(crpIdx + pos) != phrase->at(pos)) {  // if word doesn't match
         if(indices->size() > 0) i = uprBnd;  // past the phrases since SA is ordered
-        break; 
+        break;
+      } else if(pos == phrasesize-1) { // found phrase
+        indices->push_back(crpIdx + pos);  // store rigthmost index of phrase
       }
-      else if(pos == phrasesize-1) { // found phrase 
-        indices->push_back(crpIdx + pos);  // store rigthmost index of phrase 
-      }
-    }  
+    }
   }
   //cerr << "Total count of phrase = " << indices->size() << endl;
   return (indices->size() > 0);
 }
 
-void DynSuffixArray::Save(FILE* fout) {
+void DynSuffixArray::Save(FILE* fout)
+{
   fWriteVector(fout, *m_SA);
 }
 
-void DynSuffixArray::Load(FILE* fin) {
+void DynSuffixArray::Load(FILE* fin)
+{
   fReadVector(fin, *m_SA);
 }
 
-int DynSuffixArray::Compare(int pos1, int pos2, int max) {
+int DynSuffixArray::Compare(int pos1, int pos2, int max)
+{
   for (size_t i = 0; i < (unsigned)max; ++i) {
     if((pos1 + i < m_corpus->size()) && (pos2 + i >= m_corpus->size()))
       return 1;
     if((pos2 + i < m_corpus->size()) && (pos1 + i >= m_corpus->size()))
       return -1;
-  
+
     int diff = m_corpus->at(pos1+i) - m_corpus->at(pos2+i);
     if(diff != 0) return diff;
   }
   return 0;
 }
 
-void DynSuffixArray::Qsort(int* array, int begin, int end) {
-  if(end > begin) 
-  {
-    int index; 
-    {	
+void DynSuffixArray::Qsort(int* array, int begin, int end)
+{
+  if(end > begin) {
+    int index;
+    {
       index = begin + (rand() % (end - begin + 1));
       int pivot = array[index];
       {

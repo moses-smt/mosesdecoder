@@ -34,13 +34,13 @@ namespace Moses
 class InputFileStream : public std::istream
 {
 protected:
-	std::streambuf *m_streambuf;
+  std::streambuf *m_streambuf;
 public:
 
-	InputFileStream(const std::string &filePath);
-	~InputFileStream();
+  InputFileStream(const std::string &filePath);
+  ~InputFileStream();
 
-	void Close();
+  void Close();
 };
 
 }

@@ -26,8 +26,8 @@ TO_STRING_BODY(WordsRange);
 
 std::ostream& operator << (std::ostream& out, const WordsRange& range)
 {
-	out << "[" << range.m_startPos << ".." << range.m_endPos << "]";
-	return out;
+  out << "[" << range.m_startPos << ".." << range.m_endPos << "]";
+  return out;
 }
 
 }

@@ -28,12 +28,11 @@ using namespace std;
 namespace Moses
 {
 InputFileStream::InputFileStream(const std::string &filePath)
-: std::istream(NULL)
-, m_streambuf(NULL)
+  : std::istream(NULL)
+  , m_streambuf(NULL)
 {
   if (filePath.size() > 3 &&
-      filePath.substr(filePath.size() - 3, 3) == ".gz")
-  {
+      filePath.substr(filePath.size() - 3, 3) == ".gz") {
     m_streambuf = new gzfilebuf(filePath.c_str());
   } else {
     std::filebuf* fb = new std::filebuf();
@@ -50,7 +49,7 @@ InputFileStream::InputFileStream(const std::string &filePath)
 InputFileStream::~InputFileStream()
 {
   delete m_streambuf;
-	m_streambuf = NULL;
+  m_streambuf = NULL;
 }
 
 void InputFileStream::Close()

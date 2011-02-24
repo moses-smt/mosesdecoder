@@ -37,7 +37,7 @@ class WordsRange;
 // each sentence that is to be decoded.
 class ChartRuleLookupManager
 {
- public:
+public:
   ChartRuleLookupManager(const InputType &sentence,
                          const CellCollection &cellColl)
     : m_sentence(sentence)
@@ -45,15 +45,19 @@ class ChartRuleLookupManager
 
   virtual ~ChartRuleLookupManager() {}
 
-  const InputType &GetSentence() const { return m_sentence; }
-  const CellCollection &GetCellCollection() const { return m_cellCollection; }
+  const InputType &GetSentence() const {
+    return m_sentence;
+  }
+  const CellCollection &GetCellCollection() const {
+    return m_cellCollection;
+  }
 
   virtual void GetChartRuleCollection(
-      const WordsRange &range,
-      bool adhereTableLimit,
-      ChartTranslationOptionList &outColl) = 0;
+    const WordsRange &range,
+    bool adhereTableLimit,
+    ChartTranslationOptionList &outColl) = 0;
 
- private:
+private:
   // Non-copyable: copy constructor and assignment operator not implemented.
   ChartRuleLookupManager(const ChartRuleLookupManager &);
   ChartRuleLookupManager &operator=(const ChartRuleLookupManager &);

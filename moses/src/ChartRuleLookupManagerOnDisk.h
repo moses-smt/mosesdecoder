@@ -36,7 +36,7 @@ namespace Moses
 // Implementation of ChartRuleLookupManager for on-disk rule tables.
 class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManager
 {
- public:
+public:
   ChartRuleLookupManagerOnDisk(const InputType &sentence,
                                const CellCollection &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
@@ -54,7 +54,7 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManager
                                       bool adhereTableLimit,
                                       ChartTranslationOptionList &outColl);
 
- private:
+private:
   const PhraseDictionaryOnDisk &m_dictionary;
   OnDiskPt::OnDiskWrapper &m_dbWrapper;
   const LMList *m_languageModels;

@@ -27,74 +27,75 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Moses;
 
-Moses::ThreadPool::ThreadPool( size_t numThreads ) 
-    : m_stopped(false), m_stopping(false)
+Moses::ThreadPool::ThreadPool( size_t numThreads )
+  : m_stopped(false), m_stopping(false)
 {
-    for (size_t i = 0; i < numThreads; ++i) {
-        m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
-    }
+  for (size_t i = 0; i < numThreads; ++i) {
+    m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
+  }
 }
 
 void Moses::ThreadPool::Execute()
 {
-    do {
-        Task* task = NULL;
-        { // Find a job to perform
-            boost::mutex::scoped_lock lock(m_mutex);
-            if (m_tasks.empty() && !m_stopped) {
-                m_threadNeeded.wait(lock);
-            }
-            if (!m_stopped && !m_tasks.empty()) {
-                task = m_tasks.front();
-                m_tasks.pop();
-            }
-        }
-        //Execute job
-        if (task) {
-            task->Run();
-            delete task;
-        }
-        m_threadAvailable.notify_all();
-    } while (!m_stopped);
+  do {
+    Task* task = NULL;
+    {
+      // Find a job to perform
+      boost::mutex::scoped_lock lock(m_mutex);
+      if (m_tasks.empty() && !m_stopped) {
+        m_threadNeeded.wait(lock);
+      }
+      if (!m_stopped && !m_tasks.empty()) {
+        task = m_tasks.front();
+        m_tasks.pop();
+      }
+    }
+    //Execute job
+    if (task) {
+      task->Run();
+      delete task;
+    }
+    m_threadAvailable.notify_all();
+  } while (!m_stopped);
 #ifdef BOOST_HAS_PTHREADS
-    TRACE_ERR("Thread " << pthread_self() << " exiting" << endl);
+  TRACE_ERR("Thread " << pthread_self() << " exiting" << endl);
 #endif
 }
 
 void Moses::ThreadPool::Submit( Task* task )
 {
-    boost::mutex::scoped_lock lock(m_mutex);
-    if (m_stopping) {
-        throw runtime_error("ThreadPool stopping - unable to accept new jobs");
-    }
-    m_tasks.push(task);
-    m_threadNeeded.notify_all();
-     
+  boost::mutex::scoped_lock lock(m_mutex);
+  if (m_stopping) {
+    throw runtime_error("ThreadPool stopping - unable to accept new jobs");
+  }
+  m_tasks.push(task);
+  m_threadNeeded.notify_all();
+
 }
 
 void Moses::ThreadPool::Stop(bool processRemainingJobs)
 {
-    {
-        //prevent more jobs from being added to the queue
-        boost::mutex::scoped_lock lock(m_mutex);
-        if (m_stopped) return;
-        m_stopping = true;
+  {
+    //prevent more jobs from being added to the queue
+    boost::mutex::scoped_lock lock(m_mutex);
+    if (m_stopped) return;
+    m_stopping = true;
+  }
+  if (processRemainingJobs) {
+    boost::mutex::scoped_lock lock(m_mutex);
+    //wait for queue to drain.
+    while (!m_tasks.empty() && !m_stopped) {
+      m_threadAvailable.wait(lock);
     }
-    if (processRemainingJobs) {
-        boost::mutex::scoped_lock lock(m_mutex);
-        //wait for queue to drain.
-        while (!m_tasks.empty() && !m_stopped) {
-            m_threadAvailable.wait(lock);
-        }
-    }
-    //tell all threads to stop
-    {
-        boost::mutex::scoped_lock lock(m_mutex);
-        m_stopped = true;
-    }
-    m_threadNeeded.notify_all();
-    
-    
-    m_threads.join_all();
+  }
+  //tell all threads to stop
+  {
+    boost::mutex::scoped_lock lock(m_mutex);
+    m_stopped = true;
+  }
+  m_threadNeeded.notify_all();
+
+
+  m_threads.join_all();
 }
 #endif //WITH_THREADS

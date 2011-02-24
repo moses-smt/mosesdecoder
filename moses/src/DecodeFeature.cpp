@@ -27,14 +27,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
-  DecodeFeature::DecodeFeature(const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
-      m_input(input), m_output(output){
+DecodeFeature::DecodeFeature(const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
+  m_input(input), m_output(output)
+{
 
-    m_inputFactors = FactorMask(input);
-    m_outputFactors = FactorMask(output);
-    VERBOSE(2,"DecodeFeature: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
+  m_inputFactors = FactorMask(input);
+  m_outputFactors = FactorMask(output);
+  VERBOSE(2,"DecodeFeature: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);
 }
 
 
@@ -49,12 +51,12 @@ const FactorMask& DecodeFeature::GetInputFactorMask() const
   return m_inputFactors;
 }
 
-const std::vector<FactorType>& DecodeFeature::GetInput() const 
+const std::vector<FactorType>& DecodeFeature::GetInput() const
 {
   return m_input;
 }
 
-const std::vector<FactorType>& DecodeFeature::GetOutput() const 
+const std::vector<FactorType>& DecodeFeature::GetOutput() const
 {
   return m_output;
 }

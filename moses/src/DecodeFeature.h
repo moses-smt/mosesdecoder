@@ -28,30 +28,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureFunction.h"
 #include "TypeDef.h"
 
-namespace Moses {
+namespace Moses
+{
 
 /**
-  * A feature on the decoding path (Generation or Translation) 
+  * A feature on the decoding path (Generation or Translation)
  **/
-class DecodeFeature : public StatelessFeatureFunction {
+class DecodeFeature : public StatelessFeatureFunction
+{
 
-  public:
-    DecodeFeature(const std::vector<FactorType> &input, const std::vector<FactorType> &output);
-    
-    //! returns output factor types as specified by the ini file
-    const FactorMask& GetOutputFactorMask() const;
-    
-    //! returns input factor types as specified by the ini file
-    const FactorMask& GetInputFactorMask() const;
-    
-    const std::vector<FactorType>& GetInput() const;
-    const std::vector<FactorType>& GetOutput() const;
-    
-  private:
-    std::vector<FactorType> m_input;
-    std::vector<FactorType> m_output;
-    FactorMask m_inputFactors;
-    FactorMask m_outputFactors;
+public:
+  DecodeFeature(const std::vector<FactorType> &input, const std::vector<FactorType> &output);
+
+  //! returns output factor types as specified by the ini file
+  const FactorMask& GetOutputFactorMask() const;
+
+  //! returns input factor types as specified by the ini file
+  const FactorMask& GetInputFactorMask() const;
+
+  const std::vector<FactorType>& GetInput() const;
+  const std::vector<FactorType>& GetOutput() const;
+
+private:
+  std::vector<FactorType> m_input;
+  std::vector<FactorType> m_output;
+  FactorMask m_inputFactors;
+  FactorMask m_outputFactors;
 };
 
 }

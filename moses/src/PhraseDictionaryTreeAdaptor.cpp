@@ -24,90 +24,90 @@ namespace Moses
 
 PhraseDictionaryTreeAdaptor::
 PhraseDictionaryTreeAdaptor(size_t numScoreComponent, unsigned numInputScores, const PhraseDictionaryFeature* feature)
-	: PhraseDictionary(numScoreComponent,feature), imp(new PDTAimp(this,numInputScores)) {
+  : PhraseDictionary(numScoreComponent,feature), imp(new PDTAimp(this,numInputScores))
+{
 }
 
-PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor() 
+PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
-	imp->CleanUp();
-	delete imp;
+  imp->CleanUp();
+  delete imp;
 }
 
 
 bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
-																				 , const std::vector<FactorType> &output
-																				 , const std::string &filePath
-																				 , const std::vector<float> &weight
-																				 , size_t tableLimit
-																				 , const LMList &languageModels
-																				 , float weightWP)
+                                       , const std::vector<FactorType> &output
+                                       , const std::string &filePath
+                                       , const std::vector<float> &weight
+                                       , size_t tableLimit
+                                       , const LMList &languageModels
+                                       , float weightWP)
 {
-	if(m_numScoreComponent!=weight.size()) {
-		std::stringstream strme;
-		strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
-						 <<" "<<m_numScoreComponent<<"\n";
-		UserMessage::Add(strme.str());
-		return false;
-	}
+  if(m_numScoreComponent!=weight.size()) {
+    std::stringstream strme;
+    strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
+          <<" "<<m_numScoreComponent<<"\n";
+    UserMessage::Add(strme.str());
+    return false;
+  }
 
 
-	// set PhraseDictionary members
-	m_tableLimit=tableLimit;
+  // set PhraseDictionary members
+  m_tableLimit=tableLimit;
 
-	imp->Create(input,output,filePath,
-							weight,languageModels,weightWP);
-	return true;
+  imp->Create(input,output,filePath,
+              weight,languageModels,weightWP);
+  return true;
 }
 
-void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source) {
-    imp->CleanUp();
-    // caching only required for confusion net
-    if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
-        imp->CacheSource(*cn);                     
+void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
+{
+  imp->CleanUp();
+  // caching only required for confusion net
+  if(ConfusionNet const* cn=dynamic_cast<ConfusionNet const*>(&source))
+    imp->CacheSource(*cn);
 }
 
-TargetPhraseCollection const* 
+TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
 {
-	return imp->GetTargetPhraseCollection(src);
+  return imp->GetTargetPhraseCollection(src);
 }
 
-TargetPhraseCollection const* 
+TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
 {
-	if(imp->m_rangeCache.empty())
-	{
-		return imp->GetTargetPhraseCollection(src.GetSubString(range));
-	}
-	else
-	{
-		return imp->m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-	}
+  if(imp->m_rangeCache.empty()) {
+    return imp->GetTargetPhraseCollection(src.GetSubString(range));
+  } else {
+    return imp->m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+  }
 }
 
 void PhraseDictionaryTreeAdaptor::
-AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
+AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 {
-	imp->AddEquivPhrase(source,targetPhrase);
+  imp->AddEquivPhrase(source,targetPhrase);
 }
 void PhraseDictionaryTreeAdaptor::EnableCache()
 {
-	imp->useCache=1;
+  imp->useCache=1;
 }
 void PhraseDictionaryTreeAdaptor::DisableCache()
 {
-	imp->useCache=0;
+  imp->useCache=0;
 }
 
 
 
-size_t PhraseDictionaryTreeAdaptor::GetNumInputScores() const {
-	return imp->GetNumInputScores();
+size_t PhraseDictionaryTreeAdaptor::GetNumInputScores() const
+{
+  return imp->GetNumInputScores();
 }
 
 std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription() const
 {
-	return "PhraseModel";
+  return "PhraseModel";
 }
 
 }

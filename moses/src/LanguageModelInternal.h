@@ -12,25 +12,24 @@ namespace Moses
 class LanguageModelInternal : public LanguageModelPointerState
 {
 protected:
-	std::vector<const NGramNode*> m_lmIdLookup;
-	NGramCollection m_map;
+  std::vector<const NGramNode*> m_lmIdLookup;
+  NGramCollection m_map;
 
-	const NGramNode* GetLmID( const Factor *factor ) const
-	{
-		size_t factorId = factor->GetId();
-		return ( factorId >= m_lmIdLookup.size()) ? NULL : m_lmIdLookup[factorId];        
+  const NGramNode* GetLmID( const Factor *factor ) const {
+    size_t factorId = factor->GetId();
+    return ( factorId >= m_lmIdLookup.size()) ? NULL : m_lmIdLookup[factorId];
   };
 
-	float GetValue(const Factor *factor0, State* finalState) const;
-	float GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const;
-	float GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const;
+  float GetValue(const Factor *factor0, State* finalState) const;
+  float GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const;
+  float GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const;
 
 public:
-	bool Load(const std::string &filePath
-					, FactorType factorType
-					, size_t nGramOrder);
-	float GetValue(const std::vector<const Word*> &contextFactor
-												, State* finalState = 0) const;
+  bool Load(const std::string &filePath
+            , FactorType factorType
+            , size_t nGramOrder);
+  float GetValue(const std::vector<const Word*> &contextFactor
+                 , State* finalState = 0) const;
 };
 
 }

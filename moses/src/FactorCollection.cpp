@@ -35,65 +35,63 @@ FactorCollection FactorCollection::s_instance;
 
 void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorType, const string &filePath)
 {
-	ifstream 	inFile(filePath.c_str());
+  ifstream 	inFile(filePath.c_str());
 
-	string line;
-#ifdef WITH_THREADS   
-	boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
-    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  string line;
+#ifdef WITH_THREADS
+  boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
 #endif
-	while( !getline(inFile, line, '\n').eof())
-	{
-		vector<string> token = Tokenize( line );
-		if (token.size() < 2) 
-		{
-			continue;
-		}		
-		// looks like good line
-		AddFactor(direction, factorType, token[1]);
-	}
+  while( !getline(inFile, line, '\n').eof()) {
+    vector<string> token = Tokenize( line );
+    if (token.size() < 2) {
+      continue;
+    }
+    // looks like good line
+    AddFactor(direction, factorType, token[1]);
+  }
 }
 
 bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
 {
 #ifdef WITH_THREADS
-	boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
-#endif   
-	// find string id
-	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
+  boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
+  // find string id
+  const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
 
-	FactorSet::const_iterator iterFactor;
-	Factor search(direction, factorType, ptrString); // id not used for searching
+  FactorSet::const_iterator iterFactor;
+  Factor search(direction, factorType, ptrString); // id not used for searching
 
-	iterFactor = m_collection.find(search);
-	return iterFactor != m_collection.end();
+  iterFactor = m_collection.find(search);
+  return iterFactor != m_collection.end();
 }
 
 const Factor *FactorCollection::AddFactor(FactorDirection direction
-																				, FactorType 			factorType
-																				, const string 		&factorString)
+    , FactorType 			factorType
+    , const string 		&factorString)
 {
 #ifdef WITH_THREADS
-	boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
-    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
 #endif
-	// find string id
-	const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-	pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );
-	if (ret.second)
-		++m_factorId; // new factor, make sure next new factor has diffrernt id
-		
-	const Factor *factor = &(*ret.first);
-	return factor;
+  // find string id
+  const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
+  pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );
+  if (ret.second)
+    ++m_factorId; // new factor, make sure next new factor has diffrernt id
+
+  const Factor *factor = &(*ret.first);
+  return factor;
 }
 
 FactorCollection::~FactorCollection()
 {
-	//FactorSet::iterator iter;
-	//for (iter = m_collection.begin() ; iter != m_collection.end() ; iter++)
-	//{
-	//	delete (*iter);
-	//}
+  //FactorSet::iterator iter;
+  //for (iter = m_collection.begin() ; iter != m_collection.end() ; iter++)
+  //{
+  //	delete (*iter);
+  //}
 }
 
 TO_STRING_BODY(FactorCollection);
@@ -101,15 +99,14 @@ TO_STRING_BODY(FactorCollection);
 // friend
 ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
 {
-	FactorSet::const_iterator iterFactor;
+  FactorSet::const_iterator iterFactor;
 
-	for (iterFactor = factorCollection.m_collection.begin() ; iterFactor != factorCollection.m_collection.end() ; ++iterFactor)
-	{
-		const Factor &factor 	= *iterFactor;
-		out << factor;
-	}
+  for (iterFactor = factorCollection.m_collection.begin() ; iterFactor != factorCollection.m_collection.end() ; ++iterFactor) {
+    const Factor &factor 	= *iterFactor;
+    out << factor;
+  }
 
-	return out;
+  return out;
 }
 
 }

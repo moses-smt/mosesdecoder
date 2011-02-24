@@ -5,10 +5,12 @@
 #include <vector>
 
 
-namespace Moses {
+namespace Moses
+{
 
-class FFState {
- public:
+class FFState
+{
+public:
   virtual ~FFState();
   virtual int Compare(const FFState& other) const = 0;
 };

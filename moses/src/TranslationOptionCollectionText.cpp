@@ -33,41 +33,43 @@ using namespace std;
 namespace Moses
 {
 /** constructor; just initialize the base class */
-  TranslationOptionCollectionText::TranslationOptionCollectionText(const TranslationSystem* system, Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold) 
-	: TranslationOptionCollection(system, inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
+TranslationOptionCollectionText::TranslationOptionCollectionText(const TranslationSystem* system, Sentence const &inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(system, inputSentence, maxNoTransOptPerCoverage, translationOptionThreshold) {}
 
 /* forcibly create translation option for a particular source word.
 	* For text, this function is easy, just call the base class' ProcessOneUnknownWord()
 */
 void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
 {
-	const Word &sourceWord = m_source.GetWord(sourcePos);
-	ProcessOneUnknownWord(sourceWord,sourcePos);
+  const Word &sourceWord = m_source.GetWord(sourcePos);
+  ProcessOneUnknownWord(sourceWord,sourcePos);
 }
 
 /**
  * Check the source sentence for coverage data
  */
-bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const {
-	Sentence const& source=dynamic_cast<Sentence const&>(m_source);
-	return source.XmlOverlap(startPosition,endPosition);
+bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const
+{
+  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  return source.XmlOverlap(startPosition,endPosition);
 }
 
 /**
  * Create xml-based translation options for the specific input span
  */
-void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosition, size_t endPosition) {
-	Sentence const& source=dynamic_cast<Sentence const&>(m_source);
-	
-	vector <TranslationOption*> xmlOptions;
-	
-	source.GetXmlTranslationOptions(xmlOptions,startPosition,endPosition);
+void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPosition, size_t endPosition)
+{
+  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
 
-	//get vector of TranslationOptions from Sentence
-	for(size_t i=0;i<xmlOptions.size();i++) {
-		xmlOptions[i]->CalcScore(m_system);
-		Add(xmlOptions[i]);
-	}
+  vector <TranslationOption*> xmlOptions;
+
+  source.GetXmlTranslationOptions(xmlOptions,startPosition,endPosition);
+
+  //get vector of TranslationOptions from Sentence
+  for(size_t i=0; i<xmlOptions.size(); i++) {
+    xmlOptions[i]->CalcScore(m_system);
+    Add(xmlOptions[i]);
+  }
 
 };
 

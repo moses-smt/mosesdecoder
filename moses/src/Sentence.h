@@ -39,67 +39,66 @@ class TranslationOptionCollection;
 
 
 /***
- * A Phrase class with an ID. Used specifically as source input so contains functionality to read 
+ * A Phrase class with an ID. Used specifically as source input so contains functionality to read
  *	from IODevice and create trans opt
  */
 class Sentence : public Phrase, public InputType
 {
 
- private:
- 
-	/**
-	 * Utility method that takes in a string representing an XML tag and the name of the attribute,
-	 * and returns the value of that tag if present, empty string otherwise
-	 */
-	std::vector <TranslationOption*> m_xmlOptionsList;
-	std::vector <bool> m_xmlCoverageMap;
+private:
 
-	NonTerminalSet m_defaultLabelSet;
-	
-	void InitStartEndWord();
+  /**
+   * Utility method that takes in a string representing an XML tag and the name of the attribute,
+   * and returns the value of that tag if present, empty string otherwise
+   */
+  std::vector <TranslationOption*> m_xmlOptionsList;
+  std::vector <bool> m_xmlCoverageMap;
+
+  NonTerminalSet m_defaultLabelSet;
+
+  void InitStartEndWord();
 
 
- public:
-	Sentence(FactorDirection direction);
+public:
+  Sentence(FactorDirection direction);
 
-	InputTypeEnum GetType() const
-	{	return SentenceInput;}
+  InputTypeEnum GetType() const {
+    return SentenceInput;
+  }
 
-	//! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
-	Phrase GetSubString(const WordsRange& r) const 
-	{
-		return Phrase::GetSubString(r);
-	}
+  //! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
+  Phrase GetSubString(const WordsRange& r) const {
+    return Phrase::GetSubString(r);
+  }
 
-	//! Calls Phrase::GetWord(). Implements abstract InputType::GetWord()
-	const Word& GetWord(size_t pos) const
-	{
-		return Phrase::GetWord(pos);
-	}
+  //! Calls Phrase::GetWord(). Implements abstract InputType::GetWord()
+  const Word& GetWord(size_t pos) const {
+    return Phrase::GetWord(pos);
+  }
 
-	//! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
-	size_t GetSize() const 
-	{
-		return Phrase::GetSize();
-	}
-	
-	//! Returns true if there were any XML tags parsed that at least partially covered the range passed
-	bool XmlOverlap(size_t startPos, size_t endPos) const;
+  //! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
+  size_t GetSize() const {
+    return Phrase::GetSize();
+  }
 
-	//! populates vector argument with XML force translation options for the specific range passed
-	void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
+  //! Returns true if there were any XML tags parsed that at least partially covered the range passed
+  bool XmlOverlap(size_t startPos, size_t endPos) const;
 
-	int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
-	void Print(std::ostream& out) const;
+  //! populates vector argument with XML force translation options for the specific range passed
+  void GetXmlTranslationOptions(std::vector <TranslationOption*> &list, size_t startPos, size_t endPos) const;
 
-    TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const;
-	
-	void CreateFromString(const std::vector<FactorType> &factorOrder
-												, const std::string &phraseString
-												, const std::string &factorDelimiter);
-	
-    const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const
-	{	return m_defaultLabelSet;	}
+  int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  void Print(std::ostream& out) const;
+
+  TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const;
+
+  void CreateFromString(const std::vector<FactorType> &factorOrder
+                        , const std::string &phraseString
+                        , const std::string &factorDelimiter);
+
+  const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
+    return m_defaultLabelSet;
+  }
 
 };
 

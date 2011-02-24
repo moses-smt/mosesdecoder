@@ -10,11 +10,12 @@ namespace Moses
 class ConfusionNet;
 class TranslationSystem;
 
-class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection {
- public:
-   TranslationOptionCollectionConfusionNet(const TranslationSystem* system, const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
+{
+public:
+  TranslationOptionCollectionConfusionNet(const TranslationSystem* system, const ConfusionNet &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
-	void ProcessUnknownWord(size_t sourcePos);
+  void ProcessUnknownWord(size_t sourcePos);
 
 };
 

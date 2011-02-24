@@ -53,74 +53,67 @@ typedef std::priority_queue< HypothesisQueueItem*, std::vector< HypothesisQueueI
 
 class HypothesisQueueItem
 {
-	private:
-		size_t m_hypothesis_pos, m_translation_pos;
-		Hypothesis *m_hypothesis;
-		BackwardsEdge *m_edge;
+private:
+  size_t m_hypothesis_pos, m_translation_pos;
+  Hypothesis *m_hypothesis;
+  BackwardsEdge *m_edge;
 
-		HypothesisQueueItem();
+  HypothesisQueueItem();
 
-	public:
-		HypothesisQueueItem(const size_t hypothesis_pos
-												, const size_t translation_pos
-												, Hypothesis *hypothesis
-												, BackwardsEdge *edge)
-		  : m_hypothesis_pos(hypothesis_pos)
-		  , m_translation_pos(translation_pos)
-		  , m_hypothesis(hypothesis)
-		  , m_edge(edge)
-		{
-		}
+public:
+  HypothesisQueueItem(const size_t hypothesis_pos
+                      , const size_t translation_pos
+                      , Hypothesis *hypothesis
+                      , BackwardsEdge *edge)
+    : m_hypothesis_pos(hypothesis_pos)
+    , m_translation_pos(translation_pos)
+    , m_hypothesis(hypothesis)
+    , m_edge(edge) {
+  }
 
-		~HypothesisQueueItem()
-		{
-		}
+  ~HypothesisQueueItem() {
+  }
 
-		int GetHypothesisPos()
-		{
-			return m_hypothesis_pos;
-		}
-		
-		int GetTranslationPos()
-		{
-			return m_translation_pos;
-		}
+  int GetHypothesisPos() {
+    return m_hypothesis_pos;
+  }
 
-		Hypothesis *GetHypothesis()
-		{
-			return m_hypothesis;
-		}
+  int GetTranslationPos() {
+    return m_translation_pos;
+  }
 
-		BackwardsEdge *GetBackwardsEdge()
-		{
-			return m_edge;
-		}
+  Hypothesis *GetHypothesis() {
+    return m_hypothesis;
+  }
+
+  BackwardsEdge *GetBackwardsEdge() {
+    return m_edge;
+  }
 };
 
 // Allows to compare two HypothesisQueueItem objects by the corresponding scores.
 class QueueItemOrderer
 {
-	public:
-		bool operator()(HypothesisQueueItem* itemA, HypothesisQueueItem* itemB) const
-		{
-			float scoreA = itemA->GetHypothesis()->GetTotalScore();
-			float scoreB = itemB->GetHypothesis()->GetTotalScore();
+public:
+  bool operator()(HypothesisQueueItem* itemA, HypothesisQueueItem* itemB) const {
+    float scoreA = itemA->GetHypothesis()->GetTotalScore();
+    float scoreB = itemB->GetHypothesis()->GetTotalScore();
 
-			return (scoreA < scoreB);
+    return (scoreA < scoreB);
 
-			/*
-			{
-				return true;
-			}
-			else if (scoreA < scoreB)
-			{
-				return false;
-			}
-			else
-			{
-				return itemA < itemB;
-			}*/
-		}
+    /*
+    {
+    	return true;
+    }
+    else if (scoreA < scoreB)
+    {
+    	return false;
+    }
+    else
+    {
+    	return itemA < itemB;
+    }*/
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,26 +124,25 @@ class QueueItemOrderer
 
 class HypothesisScoreOrderer
 {
-  public:
-	  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const
-	  {
-			float scoreA = hypoA->GetTotalScore();
-			float scoreB = hypoB->GetTotalScore();
+public:
+  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
+    float scoreA = hypoA->GetTotalScore();
+    float scoreB = hypoB->GetTotalScore();
 
-			return (scoreA > scoreB);
-			/*
-			{
-				return true;
-			}
-			else if (scoreA < scoreB)
-				{
-					return false;
-				}
-			else
-				{
-					return hypoA < hypoB;
-				}*/
-			}
+    return (scoreA > scoreB);
+    /*
+    {
+    	return true;
+    }
+    else if (scoreA < scoreB)
+    	{
+    		return false;
+    	}
+    else
+    	{
+    		return hypoA < hypoB;
+    	}*/
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,41 +153,41 @@ class HypothesisScoreOrderer
 
 class BackwardsEdge
 {
-	private:
-		friend class BitmapContainer;
-		bool m_initialized;
+private:
+  friend class BitmapContainer;
+  bool m_initialized;
 
-		const BitmapContainer &m_prevBitmapContainer;
-		BitmapContainer &m_parent;
-		const TranslationOptionList &m_translations;
-		const SquareMatrix &m_futurescore;
-		
-		std::vector< const Hypothesis* > m_hypotheses;
-		std::set< int > m_seenPosition;
+  const BitmapContainer &m_prevBitmapContainer;
+  BitmapContainer &m_parent;
+  const TranslationOptionList &m_translations;
+  const SquareMatrix &m_futurescore;
 
-		// We don't want to instantiate "empty" objects.
-		BackwardsEdge();
+  std::vector< const Hypothesis* > m_hypotheses;
+  std::set< int > m_seenPosition;
 
-		Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
-		bool SeenPosition(const size_t x, const size_t y);
-		void SetSeenPosition(const size_t x, const size_t y);
+  // We don't want to instantiate "empty" objects.
+  BackwardsEdge();
 
-	protected:
-		void Initialize();
+  Hypothesis *CreateHypothesis(const Hypothesis &hypothesis, const TranslationOption &transOpt);
+  bool SeenPosition(const size_t x, const size_t y);
+  void SetSeenPosition(const size_t x, const size_t y);
 
-	public:
-		BackwardsEdge(const BitmapContainer &prevBitmapContainer
-									, BitmapContainer &parent
-									, const TranslationOptionList &translations
-									, const SquareMatrix &futureScore,
-                    const InputType& source,
-                    const TranslationSystem* system);
-		~BackwardsEdge();
+protected:
+  void Initialize();
 
-		bool GetInitialized();
-		const BitmapContainer &GetBitmapContainer() const;
-		int GetDistortionPenalty();
-		void PushSuccessors(const size_t x, const size_t y);
+public:
+  BackwardsEdge(const BitmapContainer &prevBitmapContainer
+                , BitmapContainer &parent
+                , const TranslationOptionList &translations
+                , const SquareMatrix &futureScore,
+                const InputType& source,
+                const TranslationSystem* system);
+  ~BackwardsEdge();
+
+  bool GetInitialized();
+  const BitmapContainer &GetBitmapContainer() const;
+  int GetDistortionPenalty();
+  void PushSuccessors(const size_t x, const size_t y);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -208,42 +200,42 @@ class BackwardsEdge
 
 class BitmapContainer
 {
-	private:
-		WordsBitmap m_bitmap;
-	  HypothesisStackCubePruning &m_stack;
-		HypothesisSet m_hypotheses;
-		BackwardsEdgeSet m_edges;
-		HypothesisQueue m_queue;
-  	size_t m_numStackInsertions;
+private:
+  WordsBitmap m_bitmap;
+  HypothesisStackCubePruning &m_stack;
+  HypothesisSet m_hypotheses;
+  BackwardsEdgeSet m_edges;
+  HypothesisQueue m_queue;
+  size_t m_numStackInsertions;
 
-		// We always require a corresponding bitmap to be supplied.
-		BitmapContainer();
-		BitmapContainer(const BitmapContainer &);
-	public:
-		BitmapContainer(const WordsBitmap &bitmap
-										, HypothesisStackCubePruning &stack);
-		
-		// The destructor will also delete all the edges that are
-		// connected to this BitmapContainer.
-		~BitmapContainer();
-		
-		void Enqueue(int hypothesis_pos, int translation_pos, Hypothesis *hypothesis, BackwardsEdge *edge);
-		HypothesisQueueItem *Dequeue(bool keepValue=false);
-		HypothesisQueueItem *Top() const;
-		size_t Size();
-		bool Empty() const;
+  // We always require a corresponding bitmap to be supplied.
+  BitmapContainer();
+  BitmapContainer(const BitmapContainer &);
+public:
+  BitmapContainer(const WordsBitmap &bitmap
+                  , HypothesisStackCubePruning &stack);
 
-		const WordsBitmap &GetWordsBitmap();
-		const HypothesisSet &GetHypotheses() const;
-		size_t GetHypothesesSize() const;
-		const BackwardsEdgeSet &GetBackwardsEdges();
-		
-  	void InitializeEdges();
-		void ProcessBestHypothesis();
-  	void EnsureMinStackHyps(const size_t minNumHyps);
-		void AddHypothesis(Hypothesis *hypothesis);
-		void AddBackwardsEdge(BackwardsEdge *edge);
-		void SortHypotheses();
+  // The destructor will also delete all the edges that are
+  // connected to this BitmapContainer.
+  ~BitmapContainer();
+
+  void Enqueue(int hypothesis_pos, int translation_pos, Hypothesis *hypothesis, BackwardsEdge *edge);
+  HypothesisQueueItem *Dequeue(bool keepValue=false);
+  HypothesisQueueItem *Top() const;
+  size_t Size();
+  bool Empty() const;
+
+  const WordsBitmap &GetWordsBitmap();
+  const HypothesisSet &GetHypotheses() const;
+  size_t GetHypothesesSize() const;
+  const BackwardsEdgeSet &GetBackwardsEdges();
+
+  void InitializeEdges();
+  void ProcessBestHypothesis();
+  void EnsureMinStackHyps(const size_t minNumHyps);
+  void AddHypothesis(Hypothesis *hypothesis);
+  void AddBackwardsEdge(BackwardsEdge *edge);
+  void SortHypotheses();
 };
 
 }

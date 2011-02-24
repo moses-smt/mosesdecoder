@@ -35,21 +35,21 @@ namespace Moses
 class Dictionary
 {
 protected:
-	
-	const size_t m_numScoreComponent;
+
+  const size_t m_numScoreComponent;
 
 public:
-	//! Constructor
-	Dictionary(size_t numScoreComponent);
-	//!Destructor
-	virtual ~Dictionary();
+  //! Constructor
+  Dictionary(size_t numScoreComponent);
+  //!Destructor
+  virtual ~Dictionary();
 
 
-	//! returns whether this dictionary is to be used for Translate or Generate
-	virtual DecodeType GetDecodeType() const = 0;
+  //! returns whether this dictionary is to be used for Translate or Generate
+  virtual DecodeType GetDecodeType() const = 0;
 
-	// clean up temporary memory, called after processing each sentence
-	virtual void CleanUp();
+  // clean up temporary memory, called after processing each sentence
+  virtual void CleanUp();
 };
 
 }

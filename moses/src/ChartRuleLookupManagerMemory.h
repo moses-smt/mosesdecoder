@@ -22,7 +22,7 @@
 #define moses_ChartRuleLookupManagerMemory_h
 
 #include <vector>
- 
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #ifdef USE_BOOST_POOL
@@ -47,7 +47,7 @@ class WordsRange;
 // Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManager
 {
- public:
+public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
                                const CellCollection &cellColl,
                                const PhraseDictionarySCFG &ruleTable);
@@ -55,20 +55,20 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManager
   ~ChartRuleLookupManagerMemory();
 
   virtual void GetChartRuleCollection(
-      const WordsRange &range,
-      bool adhereTableLimit,
-      ChartTranslationOptionList &outColl);
+    const WordsRange &range,
+    bool adhereTableLimit,
+    ChartTranslationOptionList &outColl);
 
- private:
+private:
   void ExtendPartialRuleApplication(
-      const PhraseDictionaryNodeSCFG &node,
-      const WordConsumed *prevWordConsumed,
-      size_t startPos,
-      size_t endPos,
-      size_t stackInd,
-      const NonTerminalSet &sourceNonTerms,
-      const NonTerminalSet &targetNonTerms,
-      ProcessedRuleColl &processedRuleColl);
+    const PhraseDictionaryNodeSCFG &node,
+    const WordConsumed *prevWordConsumed,
+    size_t startPos,
+    size_t endPos,
+    size_t stackInd,
+    const NonTerminalSet &sourceNonTerms,
+    const NonTerminalSet &targetNonTerms,
+    ProcessedRuleColl &processedRuleColl);
 
   std::vector<ProcessedRuleColl*> m_processedRuleColls;
   const PhraseDictionarySCFG &m_ruleTable;

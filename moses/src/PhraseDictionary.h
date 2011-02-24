@@ -55,31 +55,36 @@ class PhraseDictionaryFeature;
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
-class PhraseDictionary: public Dictionary {
-  public: 
-    PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature): 
-        Dictionary(numScoreComponent), m_tableLimit(0), m_feature(feature) {}
-    //! table limit number. 
-    size_t GetTableLimit() const { return m_tableLimit; }
-    DecodeType GetDecodeType() const    {   return Translate;   }
-    const PhraseDictionaryFeature* GetFeature() const;
+class PhraseDictionary: public Dictionary
+{
+public:
+  PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature):
+    Dictionary(numScoreComponent), m_tableLimit(0), m_feature(feature) {}
+  //! table limit number.
+  size_t GetTableLimit() const {
+    return m_tableLimit;
+  }
+  DecodeType GetDecodeType() const    {
+    return Translate;
+  }
+  const PhraseDictionaryFeature* GetFeature() const;
 
-    //! find list of translations that can translates src. Only for phrase input
-    virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
-    //! find list of translations that can translates a portion of src. Used by confusion network decoding
-    virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
-    //! Create entry for translation of source to targetPhrase
-    virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
-    virtual void InitializeForInput(InputType const& source) = 0;
-    
-    //! Create a sentence-specific manager for SCFG rule lookup.
-    virtual ChartRuleLookupManager *CreateRuleLookupManager(
-        const InputType &,
-        const CellCollection &) = 0;
+  //! find list of translations that can translates src. Only for phrase input
+  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
+  //! find list of translations that can translates a portion of src. Used by confusion network decoding
+  virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
+  //! Create entry for translation of source to targetPhrase
+  virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
+  virtual void InitializeForInput(InputType const& source) = 0;
 
-  protected:
-    size_t m_tableLimit;
-    const PhraseDictionaryFeature* m_feature;
+  //! Create a sentence-specific manager for SCFG rule lookup.
+  virtual ChartRuleLookupManager *CreateRuleLookupManager(
+    const InputType &,
+    const CellCollection &) = 0;
+
+protected:
+  size_t m_tableLimit;
+  const PhraseDictionaryFeature* m_feature;
 };
 
 
@@ -88,68 +93,67 @@ class PhraseDictionary: public Dictionary {
  */
 class PhraseDictionaryFeature :  public DecodeFeature
 {
- 
 
- public:
-	PhraseDictionaryFeature(  PhraseTableImplementation implementation
-														, size_t numScoreComponent
+
+public:
+  PhraseDictionaryFeature(  PhraseTableImplementation implementation
+                            , size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
                             , size_t tableLimit
-														, const std::string &targetFile  
-														, const std::string &alignmentsFile);
+                            , const std::string &targetFile
+                            , const std::string &alignmentsFile);
 
-                            
-	virtual ~PhraseDictionaryFeature();
-	
-    virtual bool ComputeValueInTranslationOption() const; 
 
-	std::string GetScoreProducerDescription() const;
-	std::string GetScoreProducerWeightShortName() const
-	{
-		return "tm";
-	}
-	size_t GetNumScoreComponents() const;
+  virtual ~PhraseDictionaryFeature();
 
-	size_t GetNumInputScores() const;
-    
-    //Initialises the dictionary (may involve loading from file)
-    void InitDictionary(const TranslationSystem* system);
+  virtual bool ComputeValueInTranslationOption() const;
 
-    //Initialise the dictionary for this source (in this thread)
-    void InitDictionary(const TranslationSystem* system,const InputType& source);
-    
-    //Get the dictionary. Be sure to initialise it first.
-    const PhraseDictionary* GetDictionary() const;
-	
- private:
-     /** Load the appropriate phrase table */
-    PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
-     
-    size_t m_numScoreComponent;
-    unsigned m_numInputScores;
-    std::string m_filePath;
-    std::vector<float> m_weight;
-    size_t m_tableLimit;
-    //We instantiate either the the thread-safe or non-thread-safe dictionary,
-    //but not both. The thread-safe one can be instantiated in the constructor and shared
-    //between threads, however the non-thread-safe one (eg PhraseDictionaryTree) must be instantiated
-    //on demand, and stored in thread-specific storage.
-    std::auto_ptr<PhraseDictionary> m_threadSafePhraseDictionary;
-    #ifdef WITH_THREADS
-    boost::thread_specific_ptr<PhraseDictionary>  m_threadUnsafePhraseDictionary;
-    #else
-    std::auto_ptr<PhraseDictionary> m_threadUnsafePhraseDictionary;
-    #endif
-    
-    bool m_useThreadSafePhraseDictionary;
-    PhraseTableImplementation m_implementation;
-    std::string m_targetFile;
-    std::string m_alignmentsFile;
-    
+  std::string GetScoreProducerDescription() const;
+  std::string GetScoreProducerWeightShortName() const {
+    return "tm";
+  }
+  size_t GetNumScoreComponents() const;
+
+  size_t GetNumInputScores() const;
+
+  //Initialises the dictionary (may involve loading from file)
+  void InitDictionary(const TranslationSystem* system);
+
+  //Initialise the dictionary for this source (in this thread)
+  void InitDictionary(const TranslationSystem* system,const InputType& source);
+
+  //Get the dictionary. Be sure to initialise it first.
+  const PhraseDictionary* GetDictionary() const;
+
+private:
+  /** Load the appropriate phrase table */
+  PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
+
+  size_t m_numScoreComponent;
+  unsigned m_numInputScores;
+  std::string m_filePath;
+  std::vector<float> m_weight;
+  size_t m_tableLimit;
+  //We instantiate either the the thread-safe or non-thread-safe dictionary,
+  //but not both. The thread-safe one can be instantiated in the constructor and shared
+  //between threads, however the non-thread-safe one (eg PhraseDictionaryTree) must be instantiated
+  //on demand, and stored in thread-specific storage.
+  std::auto_ptr<PhraseDictionary> m_threadSafePhraseDictionary;
+#ifdef WITH_THREADS
+  boost::thread_specific_ptr<PhraseDictionary>  m_threadUnsafePhraseDictionary;
+#else
+  std::auto_ptr<PhraseDictionary> m_threadUnsafePhraseDictionary;
+#endif
+
+  bool m_useThreadSafePhraseDictionary;
+  PhraseTableImplementation m_implementation;
+  std::string m_targetFile;
+  std::string m_alignmentsFile;
+
 };
 
 
