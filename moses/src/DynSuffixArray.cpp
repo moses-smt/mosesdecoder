@@ -190,7 +190,7 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del)
   PrintAuxArrays();
 }
 
-void DynSuffixArray::Substitute(vuint_t* newSents, unsigned newIndex)
+void DynSuffixArray::Substitute(vuint_t* /* newSents */, unsigned /* newIndex */)
 {
   std::cerr << "NEEDS TO IMPLEMENT SUBSITITUTE FACTOR\n";
   return;

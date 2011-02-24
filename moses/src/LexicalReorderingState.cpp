@@ -484,7 +484,7 @@ LexicalReorderingState::ReorderingType HierarchicalReorderingForwardState::GetOr
   return NM;
 }
 
-LexicalReorderingState::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap coverage) const
+LexicalReorderingState::ReorderingType HierarchicalReorderingForwardState::GetOrientationTypeLeftRight(WordsRange currRange, WordsBitmap /* coverage */) const
 {
   if (currRange.GetStartPos() > m_prevRange.GetEndPos()) {
     return R;

@@ -66,7 +66,7 @@ public:
   }
 
 #ifdef USE_HYPO_POOL
-  void *operator new(size_t num_bytes) {
+  void *operator new(size_t /* num_bytes */) {
     void *ptr = s_objectPool.getPtr();
     return ptr;
   }

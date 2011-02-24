@@ -96,7 +96,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
                                 , const std::vector<FactorType> &output
                                 , std::istream &inStream
                                 , const std::vector<float> &weight
-                                , size_t tableLimit
+                                , size_t /* tableLimit */
                                 , const LMList &languageModels
                                 , const WordPenaltyProducer* wpProducer)
 {
@@ -224,7 +224,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
   return *currNode;
 }
 
-void PhraseDictionarySCFG::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionarySCFG::AddEquivPhrase(const Phrase & /* source */, const TargetPhrase & /* targetPhrase */)
 {
   assert(false); // TODO
 }
@@ -235,7 +235,7 @@ void PhraseDictionarySCFG::AddEquivPhrase(TargetPhraseCollection	&targetPhraseCo
 }
 
 
-const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase &source) const
+const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase & /* source */) const
 {
   // exactly like CreateTargetPhraseCollection, but don't create
   assert(false);
@@ -256,7 +256,7 @@ const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(co
    */
 }
 
-void PhraseDictionarySCFG::InitializeForInput(const InputType& input)
+void PhraseDictionarySCFG::InitializeForInput(const InputType& /* input */)
 {
   // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }

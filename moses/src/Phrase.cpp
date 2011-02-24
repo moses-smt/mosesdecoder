@@ -212,7 +212,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 void Phrase::CreateFromStringNewFormat(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
                                        , const std::string &phraseString
-                                       , const std::string &factorDelimiter
+                                       , const std::string & /*factorDelimiter */
                                        , Word &lhs)
 {
   // parse

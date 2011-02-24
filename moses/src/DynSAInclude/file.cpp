@@ -16,7 +16,7 @@ const std::string FileHandler::kGunzipCommand = "gunzip -f";
 const std::string FileHandler::kBzip2Command = "bzip2 -f";
 const std::string FileHandler::kBunzip2Command = "bunzip2 -f";
 
-FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags, bool checkExists)
+FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags, bool /* checkExists */)
   : std::fstream(NULL), path_(path), flags_(flags), buffer_(NULL), fp_(NULL)
 {
   if( !(flags^(std::ios::in|std::ios::out)) ) {

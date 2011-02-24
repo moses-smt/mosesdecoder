@@ -191,7 +191,7 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 }
 
 
-Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
+Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> & /*inputFactors */
     , const std::vector<Moses::FactorType> &outputFactors
     , const Vocab &vocab
     , const Moses::PhraseDictionary &phraseDict

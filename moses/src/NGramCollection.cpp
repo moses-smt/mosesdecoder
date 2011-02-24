@@ -32,7 +32,7 @@ NGramCollection::~NGramCollection()
   }
 }
 
-void NGramCollection::Add(const Factor *factor, const NGramNode &ngramNode)
+void NGramCollection::Add(const Factor * /* factor */, const NGramNode & /* ngramNode */)
 {
 }
 

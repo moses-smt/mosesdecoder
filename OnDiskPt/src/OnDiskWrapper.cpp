@@ -194,7 +194,7 @@ PhraseNode &OnDiskWrapper::GetRootSourceNode()
   return *m_rootSourceNode;
 }
 
-Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection direction
+Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
                                       , const std::vector<Moses::FactorType> &factorsVec
                                       , const Moses::Word &origWord) const
 {

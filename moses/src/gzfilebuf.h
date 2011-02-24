@@ -18,18 +18,18 @@ public:
     gzclose(_gzf);
   }
 protected:
-  virtual int_type overflow (int_type c) {
+  virtual int_type overflow (int_type /* c */) {
     throw;
   }
 
   // write multiple characters
   virtual
-  std::streamsize xsputn (const char* s,
-                          std::streamsize num) {
+  std::streamsize xsputn (const char* /* s */,
+                          std::streamsize /* num */) {
     throw;
   }
 
-  virtual std::streampos seekpos ( std::streampos sp, std::ios_base::openmode which = std::ios_base::in | std::ios_base::out ) {
+  virtual std::streampos seekpos ( std::streampos /* sp */, std::ios_base::openmode /* which = std::ios_base::in | std::ios_base::out */ ) {
     throw;
   }
 

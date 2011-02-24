@@ -14,7 +14,7 @@ using namespace Moses;
 namespace TranslationAnalysis
 {
 
-void PrintTranslationAnalysis(ostream &os, const Hypothesis* hypo)
+void PrintTranslationAnalysis(ostream & /* os */, const Hypothesis* /* hypo */)
 {
   /*
   os << endl << "TRANSLATION HYPOTHESIS DETAILS:" << endl;

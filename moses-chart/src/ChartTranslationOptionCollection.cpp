@@ -114,7 +114,7 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t end
   std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
   std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
   for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
-    const DecodeGraph &decodeGraph = **iterDecodeGraph;
+    //const DecodeGraph &decodeGraph = **iterDecodeGraph;
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t numTransOpt = fullList.GetSize();
     if (numTransOpt == 0) {
@@ -168,7 +168,7 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos)
 }
 
 //! special handling of ONE unknown words.
-void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord, size_t sourcePos, size_t length)
+void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord, size_t sourcePos, size_t /* length */)
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
@@ -194,7 +194,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
   m_unksrc->AddWord() = sourceWord;
   m_unksrcs.push_back(m_unksrc);
 
-  TranslationOption *transOpt;
+  //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
     // words consumed
     std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>();
@@ -212,7 +212,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
       float prob = iterLHS->second;
 
       // lhs
-      const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
+      //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
       Word targetLHS(true);
 
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
@@ -251,7 +251,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
     UnknownLHSList::const_iterator iterLHS;
     for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
       const string &targetLHSStr = iterLHS->first;
-      float prob = iterLHS->second;
+      //float prob = iterLHS->second;
 
       Word targetLHS(true);
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
@@ -285,7 +285,7 @@ void TranslationOptionCollection::Add(ChartTranslationOption *transOpt, size_t p
 }
 
 //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-void TranslationOptionCollection::Prune(size_t startPos, size_t endPos)
+void TranslationOptionCollection::Prune(size_t /* startPos */, size_t /* endPos */)
 {
 
 }

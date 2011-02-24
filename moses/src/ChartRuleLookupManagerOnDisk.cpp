@@ -149,13 +149,13 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       stackInd = relEndPos + 1;
     }
 
-    size_t nonTermNumWordsCovered = endPos - startPos + 1;
+    // size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
     // get target headwords in this span from chart
     const NonTerminalSet &headWords = GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
 
-    const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
-                                       ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
+    //const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
+    //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
 
     // go through each SOURCE lhs
     const NonTerminalSet &sourceLHSSet = GetSentence().GetLabelSet(startPos, endPos);

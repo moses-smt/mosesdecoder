@@ -54,7 +54,7 @@ void ProcessedRuleStackOnDisk::SortSavedNodes()
   sort(m_savedNode.begin(), m_savedNode.end(), SavedNodesOderer());
 }
 
-std::ostream& operator<<(std::ostream &out, const ProcessedRuleOnDisk &rule)
+std::ostream& operator<<(std::ostream &out, const ProcessedRuleOnDisk & /* rule */)
 {
   //const MosesBerkeleyPt::SourcePhraseNode &node = rule.GetLastNode();
   //out << node;

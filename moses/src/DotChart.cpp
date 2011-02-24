@@ -37,7 +37,7 @@ ProcessedRuleColl::~ProcessedRuleColl()
 #endif
 }
 
-std::ostream& operator<<(std::ostream &out, const ProcessedRule &rule)
+std::ostream& operator<<(std::ostream &out, const ProcessedRule& /* rule */)
 {
   //const PhraseDictionaryNode &node = rule.GetLastNode();
   //out << node;

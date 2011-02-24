@@ -78,13 +78,13 @@ protected:
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
   std::vector<GenerationDictionary*>	m_generationDictionary;
-  Parameter			*m_parameter;
-  std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
+  Parameter *m_parameter;
+  std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   ScoreIndexManager				m_scoreIndexManager;
   std::vector<float>			m_allWeights;
-  std::vector<LexicalReordering*>                   m_reorderModels;
-  std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+  std::vector<LexicalReordering*>  m_reorderModels;
+  std::vector<GlobalLexicalModel*> m_globalLexicalModels;
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
@@ -101,10 +101,10 @@ protected:
   // do it differently from old pharaoh
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
-  bool m_reorderingConstraint; // use additional reordering constraints
+  bool m_reorderingConstraint; //! use additional reordering constraints
   size_t
-  m_maxHypoStackSize //hypothesis-stack size that triggers pruning
-  , m_minHypoStackDiversity // minimum number of hypothesis in stack for each source word coverage
+  m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
+  , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
   , m_nBestSize
   , m_nBestFactor
   , m_maxNoTransOptPerCoverage
@@ -117,11 +117,7 @@ protected:
 
   std::string									m_nBestFilePath;
   bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
-  /***
-   * false = treat unknown words as unknowns, and translate them as themselves;
-   * true = drop (ignore) them
-   */
-  bool m_dropUnknown;
+  bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
@@ -211,15 +207,9 @@ protected:
 
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
-
-  /***
-   * load all language models as specified in ini file
-   */
+  //! load all language models as specified in ini file
   bool LoadLanguageModels();
-  /***
-   * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
-   * (eg word-deletion, word-insertion tables)
-   */
+  //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
   bool LoadGenerationTables();
@@ -251,16 +241,12 @@ public:
   }
 #endif
 
-  /** load data into static instance. This function is required
-  	* as LoadData() is not const
-  	*/
+  //! Load data into static instance. This function is required as LoadData() is not const
   static bool LoadDataStatic(Parameter *parameter) {
     return s_instance.LoadData(parameter);
   }
 
-  /** Main function to load everything.
-   * Also initialize the Parameter object
-   */
+  //! Main function to load everything. Also initialize the Parameter object
   bool LoadData(Parameter *parameter);
 
   const PARAM_VEC &GetParam(const std::string &paramName) const {

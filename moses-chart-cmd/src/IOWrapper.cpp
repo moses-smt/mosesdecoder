@@ -193,7 +193,7 @@ void IOWrapper::Backtrack(const MosesChart::Hypothesis *hypo)
   }
 }
 
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
@@ -250,7 +250,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors)
+void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
   std::ostringstream out;
   IOWrapper::FixPrecision(out);

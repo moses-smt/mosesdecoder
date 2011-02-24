@@ -57,7 +57,7 @@ public:
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseCollection
                                      , const WordConsumed &wordConsumed
-                                     , bool adhereTableLimit
+                                     , bool /* adhereTableLimit */
                                      , size_t ruleLimit)
 {
   TargetPhraseCollection::const_iterator iter;

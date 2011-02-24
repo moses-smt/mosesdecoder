@@ -67,24 +67,24 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 }
 
 //! find list of translations that can translates src. Only for phrase input
-const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& src) const
+const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& /* src */) const
 {
   assert(false);
   return NULL;
 }
 
-void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase& /* source */, const TargetPhrase& /*targetPhrase */)
 {
   assert(false); // TODO
 }
 
 
 //! Create entry for translation of source to targetPhrase
-void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase)
+void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase& /* source */, TargetPhrase * /* targetPhrase */)
 {
 }
 
-void PhraseDictionaryOnDisk::InitializeForInput(const InputType& input)
+void PhraseDictionaryOnDisk::InitializeForInput(const InputType& /* input */)
 {
   // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }

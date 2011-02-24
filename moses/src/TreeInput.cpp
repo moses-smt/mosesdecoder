@@ -40,8 +40,6 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
-  const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -174,9 +172,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
   const StaticData &staticData = StaticData::Instance();
 
-  const string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   string line;
-
   if (getline(in, line, '\n').eof())
     return 0;
   // remove extra spaces
@@ -232,7 +228,7 @@ TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() cons
 }
 
 void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
-                              , const std::vector<FactorType>& factorOrder)
+                              , const std::vector<FactorType>& /* factorOrder */)
 {
   assert(label.IsNonTerminal());
 

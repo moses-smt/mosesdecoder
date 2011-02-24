@@ -119,7 +119,7 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
     , const std::vector<float> &weightT
     , const Moses::WordPenaltyProducer* wpProducer
     , const Moses::LMList &lmList
-    , const std::string &filePath
+    , const std::string & /* filePath */
     , Vocab &vocab) const
 {
   Moses::TargetPhraseCollection *ret = new Moses::TargetPhraseCollection();

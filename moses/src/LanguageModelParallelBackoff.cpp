@@ -109,7 +109,7 @@ bool LanguageModelParallelBackoff::Load(const std::string &filePath, const std::
   CreateFactors();
 
   cerr << "Factors created! \n";
-  FactorCollection &factorCollection = FactorCollection::Instance();
+  //FactorCollection &factorCollection = FactorCollection::Instance();
 
   /*for (size_t index = 0 ; index < m_factorTypesOrdered.size() ; ++index)
   {
@@ -219,7 +219,7 @@ void LanguageModelParallelBackoff::CreateFactors()
 
 }
 
-float LanguageModelParallelBackoff::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
+float LanguageModelParallelBackoff::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState & /*outState */) const
 {
 
   static WidMatrix widMatrix;
@@ -278,7 +278,7 @@ float LanguageModelParallelBackoff::GetValueForgotState(const std::vector<const 
 }
 
 // The old version did not initialize finalState like it should.  Technically that makes the behavior undefined, so it's not clear what else to do here.
-FFState *LanguageModelParallelBackoff::NewState(const FFState *from) const
+FFState *LanguageModelParallelBackoff::NewState(const FFState * /*from*/) const
 {
   return NULL;
 }

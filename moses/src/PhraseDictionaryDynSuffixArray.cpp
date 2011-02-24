@@ -73,7 +73,7 @@ void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, s
 {
   m_biSA->addSntPair(source, target, alignment);
 }
-void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned idx, unsigned num2Del)
+void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 {
   // need to implement --
 }

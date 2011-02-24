@@ -62,7 +62,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                                    , size_t nGramOrder
                                    , const std::string &languageModelFile
                                    , ScoreIndexManager &scoreIndexManager
-                                   , int dub)
+                                   , int /* dub */)
 {
   LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
