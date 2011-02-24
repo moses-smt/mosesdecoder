@@ -29,41 +29,43 @@ class Node;
 
 class Subgraph
 {
-    public:
-        Subgraph(Node * root);
+public:
+  Subgraph(Node * root);
 
-        bool
-        isTrivial() const;
+  bool
+  isTrivial() const;
 
-        bool
-        isFragment() const;
+  bool
+  isFragment() const;
 
-        bool
-        canFormSCFGRule() const;
+  bool
+  canFormSCFGRule() const;
 
-        bool
-        isSinkNode(Node *) const;
+  bool
+  isSinkNode(Node *) const;
 
-        bool
-        expand(const std::set<Node *> & frontierSet);
+  bool
+  expand(const std::set<Node *> & frontierSet);
 
-        const Node *
-        getRoot() const { return m_root; };
+  const Node *
+  getRoot() const {
+    return m_root;
+  };
 
-        std::set<Node *>
-        getSinkNodes() const;
+  std::set<Node *>
+  getSinkNodes() const;
 
-        std::vector<Node *>
-        getLeafNodes() const;
+  std::vector<Node *>
+  getLeafNodes() const;
 
-    private:
-        Node * m_root;
-        std::stack<Node *> m_expandableNodes;
-        std::set<Node *> m_expandedNodes;
+private:
+  Node * m_root;
+  std::stack<Node *> m_expandableNodes;
+  std::set<Node *> m_expandedNodes;
 
-        void
-        getLeafNodes(Node * root, std::vector<Node *> & leafNodes,
-                     const std::set<Node *> & sinkNodes) const;
+  void
+  getLeafNodes(Node * root, std::vector<Node *> & leafNodes,
+               const std::set<Node *> & sinkNodes) const;
 };
 
 #endif

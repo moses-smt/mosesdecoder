@@ -25,20 +25,22 @@
 
 class Exception
 {
-    public:
-        Exception(const char * msg)
-          : m_msg(msg)
-        {}
+public:
+  Exception(const char * msg)
+    : m_msg(msg)
+  {}
 
-        Exception(const std::string & msg)
-          : m_msg(msg)
-        {}
+  Exception(const std::string & msg)
+    : m_msg(msg)
+  {}
 
-        const std::string &
-        getMsg() const { return m_msg; }
+  const std::string &
+  getMsg() const {
+    return m_msg;
+  }
 
-    private:
-        std::string m_msg;
+private:
+  std::string m_msg;
 };
 
 #endif

@@ -44,7 +44,7 @@ vector< string > splitLine();
 int main(int argc, char* argv[])
 {
   cerr << "Consolidate v2.0 written by Philipp Koehn\n"
-    << "consolidating direct and indirect rule tables\n";
+       << "consolidating direct and indirect rule tables\n";
 
   if (argc < 4) {
     cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect]\n";
@@ -54,24 +54,20 @@ int main(int argc, char* argv[])
   char* &fileNameIndirect = argv[2];
   char* &fileNameConsolidated = argv[3];
 
-  for(int i=4;i<argc;i++) {
+  for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"--Hierarchical") == 0) {
       hierarchicalFlag = true;
       cerr << "processing hierarchical rules\n";
-    }
-    else if (strcmp(argv[i],"--OnlyDirect") == 0) {
+    } else if (strcmp(argv[i],"--OnlyDirect") == 0) {
       onlyDirectFlag = true;
       cerr << "only including direct translation scores p(e|f)\n";
-    }
-    else if (strcmp(argv[i],"--NoPhraseCount") == 0) {
+    } else if (strcmp(argv[i],"--NoPhraseCount") == 0) {
       phraseCountFlag = false;
       cerr << "not including the phrase count feature\n";
-    }
-    else if (strcmp(argv[i],"--LogProb") == 0) {
+    } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
-    }
-    else {
+    } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
     }
@@ -80,7 +76,8 @@ int main(int argc, char* argv[])
   processFiles( fileNameDirect, fileNameIndirect, fileNameConsolidated );
 }
 
-void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameConsolidated ) {
+void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameConsolidated )
+{
   // open input files
   ifstream fileDirect,fileIndirect;
 
@@ -101,8 +98,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   // open output file: consolidated phrase table
   ofstream fileConsolidated;
   fileConsolidated.open(fileNameConsolidated);
-  if (fileConsolidated.fail()) 
-  {
+  if (fileConsolidated.fail()) {
     cerr << "ERROR: could not open output file " << fileNameConsolidated << endl;
     exit(1);
   }
@@ -122,34 +118,32 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // indirect: source target probabilities
 
     // consistency checks
-		/*
+    /*
     size_t expectedSize = (hierarchicalFlag ? 5 : 4);
     if (itemDirect.size() != expectedSize)
     {
-      cerr << "ERROR: expected " << expectedSize << " items in file " 
+      cerr << "ERROR: expected " << expectedSize << " items in file "
         << fileNameDirect << ", line " << i << endl;
       exit(1);
     }
 
     if (itemIndirect.size() != 4)
     {
-      cerr << "ERROR: expected 4 items in file " 
+      cerr << "ERROR: expected 4 items in file "
         << fileNameIndirect << ", line " << i << endl;
       exit(1);
     }
-		*/
-		
-    if (itemDirect[0].compare( itemIndirect[0] ) != 0)
-    {
-      cerr << "ERROR: target phrase does not match in line " << i << ": '" 
-        << itemDirect[0] << "' != '" << itemIndirect[0] << "'" << endl;
+    */
+
+    if (itemDirect[0].compare( itemIndirect[0] ) != 0) {
+      cerr << "ERROR: target phrase does not match in line " << i << ": '"
+           << itemDirect[0] << "' != '" << itemIndirect[0] << "'" << endl;
       exit(1);
     }
 
-    if (itemDirect[1].compare( itemIndirect[1] ) != 0)
-    {
-      cerr << "ERROR: source phrase does not match in line " << i << ": '" 
-        << itemDirect[1] << "' != '" << itemIndirect[1] << "'" << endl;
+    if (itemDirect[1].compare( itemIndirect[1] ) != 0) {
+      cerr << "ERROR: source phrase does not match in line " << i << ": '"
+           << itemDirect[1] << "' != '" << itemIndirect[1] << "'" << endl;
       exit(1);
     }
 
@@ -165,13 +159,13 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     if (phraseCountFlag) {
       fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
     }
-		
-    // alignment 
+
+    // alignment
     fileConsolidated << " ||| " << itemDirect[3];
 
     // counts, for debugging
     fileConsolidated << "||| " << itemIndirect[4] << " " // indirect
-																	<< itemDirect[4]; // direct
+                     << itemDirect[4]; // direct
 
     fileConsolidated << endl;
   }
@@ -180,21 +174,21 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   fileConsolidated.close();
 }
 
-bool getLine( istream &fileP, vector< string > &item ) 
+bool getLine( istream &fileP, vector< string > &item )
 {
-  if (fileP.eof()) 
+  if (fileP.eof())
     return false;
 
   SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-  if (fileP.eof()) 
+  if (fileP.eof())
     return false;
 
   item = splitLine();
 
   return true;
-} 
+}
 
-vector< string > splitLine() 
+vector< string > splitLine()
 {
   vector< string > item;
   bool betweenWords = true;
@@ -205,8 +199,7 @@ vector< string > splitLine()
         line[i+1] == '|' &&
         line[i+2] == '|' &&
         line[i+3] == '|' &&
-        line[i+4] == ' ')
-    {
+        line[i+4] == ' ') {
       if (start > i) start = i; // empty item
       item.push_back( string( line+start, i-start ) );
       start = i+5;

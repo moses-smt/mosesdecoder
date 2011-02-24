@@ -12,7 +12,8 @@
 #include <fstream>
 
 PhraseScorer*
-LexicalDecompositionPhraseScorer::create_scorer(const char *argv[], int &argp, bool reverse, const PhraseScorerFactory &ptf) {
+LexicalDecompositionPhraseScorer::create_scorer(const char *argv[], int &argp, bool reverse, const PhraseScorerFactory &ptf)
+{
 
   if(argv[argp] == NULL)
     usage();
@@ -22,10 +23,11 @@ LexicalDecompositionPhraseScorer::create_scorer(const char *argv[], int &argp, b
   return new LexicalDecompositionPhraseScorer(ptf.get_phrase_table(), reverse, lwfile, argv, argp, ptf);
 }
 
-LexicalDecompositionPhraseScorer::LexicalDecompositionPhraseScorer(PhraseTable &pd, bool reverse, 
-                                                                   const String &weightfile, const char *argv[], int &argp, 
-                                                                   const PhraseScorerFactory &ptf) :
-  PhraseScorer(pd, reverse) {
+LexicalDecompositionPhraseScorer::LexicalDecompositionPhraseScorer(PhraseTable &pd, bool reverse,
+    const String &weightfile, const char *argv[], int &argp,
+    const PhraseScorerFactory &ptf) :
+  PhraseScorer(pd, reverse)
+{
 
   black_box_scorer = AbsoluteDiscountPhraseScorer::create_scorer(argv, argp, reverse, ptf);
 
@@ -54,7 +56,8 @@ LexicalDecompositionPhraseScorer::LexicalDecompositionPhraseScorer(PhraseTable &
 }
 
 Score
-LexicalDecompositionPhraseScorer::get_weight(const String &s_src, const String &s_tgt) const {
+LexicalDecompositionPhraseScorer::get_weight(const String &s_src, const String &s_tgt) const
+{
   //Code copied from LexicalWeightPhraseScorer; it should be factored !! -- 2010/01/27
 
   Count src = PhraseText::index_word(s_src);
@@ -63,7 +66,8 @@ LexicalDecompositionPhraseScorer::get_weight(const String &s_src, const String &
 }
 
 inline Score
-LexicalDecompositionPhraseScorer::get_weight(Count src, Count tgt) const {
+LexicalDecompositionPhraseScorer::get_weight(Count src, Count tgt) const
+{
   //Code copied from LexicalWeightPhraseScorer; it should be factored !! -- 2010/01/27
 
   WeightMapType_::const_iterator it = weight_map_.find(std::make_pair(src, tgt));
@@ -73,7 +77,8 @@ LexicalDecompositionPhraseScorer::get_weight(Count src, Count tgt) const {
 }
 
 void
-LexicalDecompositionPhraseScorer::do_score_phrases() {
+LexicalDecompositionPhraseScorer::do_score_phrases()
+{
 
   //Estimate p(J|I) = p(src_len|tgt_len)
 
@@ -90,7 +95,7 @@ LexicalDecompositionPhraseScorer::do_score_phrases() {
     PhraseInfo &tgt = phrase_table_.get_tgt_phrase(ppair.get_tgt());
     unsigned src_len = src.get_phrase().size();
     unsigned tgt_len = tgt.get_phrase().size();
-        
+
     /*//Debug code
     for (unsigned i=0; i<src_len; i++)
       std::cerr<<src.get_phrase().word(i)<<" ";
@@ -118,8 +123,9 @@ LexicalDecompositionPhraseScorer::do_score_phrases() {
   }
 }
 
-Score 
-LexicalDecompositionPhraseScorer::get_noisy_or_combination(Count src_word, PhraseInfo &tgt_phrase) {
+Score
+LexicalDecompositionPhraseScorer::get_noisy_or_combination(Count src_word, PhraseInfo &tgt_phrase)
+{
 
   Score sc=1.0;
 
@@ -134,7 +140,8 @@ LexicalDecompositionPhraseScorer::get_noisy_or_combination(Count src_word, Phras
 }
 
 Score
-LexicalDecompositionPhraseScorer::do_get_score(const PhraseTable::const_iterator &it) {
+LexicalDecompositionPhraseScorer::do_get_score(const PhraseTable::const_iterator &it)
+{
 
   /*
     The implementation of this method relies on the asumption that the
@@ -150,11 +157,11 @@ LexicalDecompositionPhraseScorer::do_get_score(const PhraseTable::const_iterator
 
   Score prod=1.0;
 
-  for(unsigned j=0; j<src_len; j++) 
+  for(unsigned j=0; j<src_len; j++)
     prod *= get_noisy_or_combination(src_phrase.get_phrase()[j], tgt_phrase);
 
   Score lambda= static_cast<Score>(black_box_scorer->get_discount()) *
-    tgt_phrase.get_distinct() / tgt_phrase.get_count();
+                tgt_phrase.get_distinct() / tgt_phrase.get_count();
 
   Score ret_value = black_box_scorer->get_score(it) + (lambda * prod * prob_srclen_tgtlen_[src_len][tgt_len]);
 
@@ -170,7 +177,7 @@ LexicalDecompositionPhraseScorer::do_get_score(const PhraseTable::const_iterator
            <<prod<<"; prob_srclen_tgtlen_["<<src_len<<"]["<<tgt_len<<"]: "<<prob_srclen_tgtlen_[src_len][tgt_len]
            <<"; count: "<<it->get_count()<<"; score: "<<ret_value;
   std::cerr<<std::endl;
-  */  
+  */
 
   return ret_value;
 }

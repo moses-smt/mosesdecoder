@@ -16,16 +16,16 @@
 #define	CMDBOOLTYPE	9
 
 typedef struct {
-	char	*Name;
-	int	Idx;
+  char	*Name;
+  int	Idx;
 } Enum_T;
 
 typedef struct {
-	int	Type;
-	char	*Name,
-		*ArgStr;
-	void	*Val,
-		*p;
+  int	Type;
+  char	*Name,
+        *ArgStr;
+  void	*Val,
+        *p;
 } Cmd_T;
 
 #ifdef  __cplusplus
@@ -33,14 +33,14 @@ extern "C" {
 #endif
 
 #if defined(__STDC__)
-int DeclareParams(char *, ...);
+  int DeclareParams(char *, ...);
 #else
-int DeclareParams();
+  int DeclareParams();
 #endif
 
-int	GetParams(int *n, char ***a,char *CmdFileName),
-	SPrintParams(),
-	PrintParams();
+  int	GetParams(int *n, char ***a,char *CmdFileName),
+      SPrintParams(),
+      PrintParams();
 
 #ifdef  __cplusplus
 }

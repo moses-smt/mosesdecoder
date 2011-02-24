@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   lexdecom.h
  * Author: Felipe Sánchez-Martínez, Universitat d'Alacant <fsanchez@dlsi.ua.es>
  *
@@ -11,10 +11,11 @@
 #include "phrasetable.h"
 #include "scorer.h"
 
-class LexicalDecompositionPhraseScorer : public PhraseScorer {
- private:
-  explicit LexicalDecompositionPhraseScorer(PhraseTable &pd, bool reverse, const String &lwfile, 
-                                            const char *argv[], int &argp,  const PhraseScorerFactory &ptf);
+class LexicalDecompositionPhraseScorer : public PhraseScorer
+{
+private:
+  explicit LexicalDecompositionPhraseScorer(PhraseTable &pd, bool reverse, const String &lwfile,
+      const char *argv[], int &argp,  const PhraseScorerFactory &ptf);
 
   virtual void do_score_phrases();
   virtual Score do_get_score(const PhraseTable::const_iterator &it);
@@ -28,12 +29,12 @@ class LexicalDecompositionPhraseScorer : public PhraseScorer {
 
   // p(J|I) = probability of source-length J given target-length I
   std::map<unsigned, std::map<unsigned, Score> > prob_srclen_tgtlen_;
-  
+
   Score get_noisy_or_combination(Count src_word, PhraseInfo &tgt_phrase);
 
   PhraseScorer* black_box_scorer;
 
- public:
+public:
   static PhraseScorer *create_scorer(const char *argv[], int &argp, bool reverse,  const PhraseScorerFactory &ptf);
 };
 

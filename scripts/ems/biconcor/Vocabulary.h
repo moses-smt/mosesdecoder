@@ -29,14 +29,18 @@ using namespace std;
 typedef string WORD;
 typedef unsigned int WORD_ID;
 
-class Vocabulary {
- public:
+class Vocabulary
+{
+public:
   map<WORD, WORD_ID> lookup;
   vector< WORD > vocab;
   WORD_ID StoreIfNew( const WORD& );
   WORD_ID GetWordID( const WORD& );
   vector<WORD_ID> Tokenize( const char[] );
-  inline WORD &GetWord( WORD_ID id ) const { WORD &i = (WORD&) vocab[ id ]; return i; }
-	void Save( string fileName );
-	void Load( string fileName );
+  inline WORD &GetWord( WORD_ID id ) const {
+    WORD &i = (WORD&) vocab[ id ];
+    return i;
+  }
+  void Save( string fileName );
+  void Load( string fileName );
 };

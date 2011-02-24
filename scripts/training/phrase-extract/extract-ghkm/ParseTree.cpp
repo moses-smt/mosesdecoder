@@ -21,33 +21,32 @@
 
 ParseTree::~ParseTree()
 {
-    for (std::vector<ParseTree*>::iterator p(m_children.begin());
-         p != m_children.end(); ++p)
-    {
-        delete *p;
-    }
+  for (std::vector<ParseTree*>::iterator p(m_children.begin());
+       p != m_children.end(); ++p) {
+    delete *p;
+  }
 }
 
 void
 ParseTree::setChildren(const std::vector<ParseTree*> & children)
 {
-    m_children = children;
+  m_children = children;
 }
 
 void
 ParseTree::setParent(ParseTree * parent)
 {
-    m_parent = parent;
+  m_parent = parent;
 }
 
 void
 ParseTree::addChild(ParseTree * child)
 {
-    m_children.push_back(child);
+  m_children.push_back(child);
 }
 
 bool
 ParseTree::isLeaf() const
 {
-    return m_children.empty();
+  return m_children.empty();
 }

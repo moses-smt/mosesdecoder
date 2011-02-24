@@ -12,7 +12,8 @@
 
 using namespace std;
 
-ModelScore::ModelScore() {
+ModelScore::ModelScore()
+{
   for(int i=MONO; i<=NOMONO; ++i) {
     count_fe_prev.push_back(0);
     count_fe_next.push_back(0);
@@ -21,7 +22,8 @@ ModelScore::ModelScore() {
   }
 }
 
-ModelScore* ModelScore::createModelScore(const string& modeltype) {
+ModelScore* ModelScore::createModelScore(const string& modeltype)
+{
   if (modeltype.compare("mslr") == 0) {
     return new ModelScoreMSLR();
   } else if (modeltype.compare("msd") == 0) {
@@ -36,45 +38,53 @@ ModelScore* ModelScore::createModelScore(const string& modeltype) {
   }
 }
 
-void ModelScore::reset_fe() {
+void ModelScore::reset_fe()
+{
   for(int i=MONO; i<=NOMONO; ++i) {
     count_fe_prev[i] = 0;
     count_fe_next[i] = 0;
   }
 }
 
-void ModelScore::reset_f() {
+void ModelScore::reset_f()
+{
   for(int i=MONO; i<=NOMONO; ++i) {
     count_f_prev[i] = 0;
     count_f_next[i] = 0;
   }
 }
 
-void ModelScore::add_example(const string& previous, string& next) { 
+void ModelScore::add_example(const string& previous, string& next)
+{
   count_fe_prev[getType(previous)]++;
   count_f_prev[getType(previous)]++;
   count_fe_next[getType(next)]++;
   count_f_next[getType(next)]++;
 }
 
-const vector<double>& ModelScore::get_scores_fe_prev() const {
+const vector<double>& ModelScore::get_scores_fe_prev() const
+{
   return count_fe_prev;
 }
 
-const vector<double>& ModelScore::get_scores_fe_next() const {
+const vector<double>& ModelScore::get_scores_fe_next() const
+{
   return count_fe_next;
 }
 
-const vector<double>& ModelScore::get_scores_f_prev() const {
+const vector<double>& ModelScore::get_scores_f_prev() const
+{
   return count_f_prev;
 }
 
-const vector<double>& ModelScore::get_scores_f_next() const {
+const vector<double>& ModelScore::get_scores_f_next() const
+{
   return count_f_next;
 }
 
 
-ORIENTATION ModelScore::getType(const string& s) {
+ORIENTATION ModelScore::getType(const string& s)
+{
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0) {
@@ -94,7 +104,8 @@ ORIENTATION ModelScore::getType(const string& s) {
 }
 
 
-ORIENTATION ModelScoreMSLR::getType(const string& s) {
+ORIENTATION ModelScoreMSLR::getType(const string& s)
+{
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0) {
@@ -105,7 +116,7 @@ ORIENTATION ModelScoreMSLR::getType(const string& s) {
     return DLEFT;
   } else if (s.compare("other") == 0 || s.compare("nomono") == 0) {
     cerr << "Illegal reordering type used: " << s << " for model type mslr. You have to re-run step 5 in order to train such a model." <<  endl;
-    exit(1);   
+    exit(1);
   } else {
     cerr << "Illegal reordering type used: " << s << endl;
     exit(1);
@@ -113,7 +124,8 @@ ORIENTATION ModelScoreMSLR::getType(const string& s) {
 }
 
 
-ORIENTATION ModelScoreLR::getType(const string& s) {
+ORIENTATION ModelScoreLR::getType(const string& s)
+{
   if (s.compare("mono") == 0 || s.compare("dright") == 0) {
     return DRIGHT;
   } else if (s.compare("swap") == 0 || s.compare("dleft") == 0) {
@@ -128,14 +140,15 @@ ORIENTATION ModelScoreLR::getType(const string& s) {
 }
 
 
-ORIENTATION ModelScoreMSD::getType(const string& s) {
+ORIENTATION ModelScoreMSD::getType(const string& s)
+{
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0) {
     return SWAP;
   } else if (s.compare("dleft") == 0 ||
-	     s.compare("dright") == 0 || 
-	     s.compare("other") == 0) {
+             s.compare("dright") == 0 ||
+             s.compare("other") == 0) {
     return OTHER;
   } else if (s.compare("nomono") == 0) {
     cerr << "Illegal reordering type used: " << s << " for model type msd. You have to re-run step 5 in order to train such a model." <<  endl;
@@ -146,14 +159,15 @@ ORIENTATION ModelScoreMSD::getType(const string& s) {
   }
 }
 
-ORIENTATION ModelScoreMonotonicity::getType(const string& s) {
+ORIENTATION ModelScoreMonotonicity::getType(const string& s)
+{
   if (s.compare("mono") == 0) {
     return MONO;
   } else if (s.compare("swap") == 0 ||
-	     s.compare("dleft") == 0 ||
-	     s.compare("dright") == 0 || 
-	     s.compare("other") == 0 ||
-	     s.compare("nomono") == 0 ) {
+             s.compare("dleft") == 0 ||
+             s.compare("dright") == 0 ||
+             s.compare("other") == 0 ||
+             s.compare("nomono") == 0 ) {
     return NOMONO;
   } else {
     cerr << "Illegal reordering type used: " << s << endl;
@@ -162,33 +176,38 @@ ORIENTATION ModelScoreMonotonicity::getType(const string& s) {
 }
 
 
-  
-void ScorerMSLR::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+
+void ScorerMSLR::score(const vector<double>&  all_scores, vector<double>&  scores) const
+{
   scores.push_back(all_scores[MONO]);
   scores.push_back(all_scores[SWAP]);
   scores.push_back(all_scores[DLEFT]);
   scores.push_back(all_scores[DRIGHT]);
 }
-  
-void ScorerMSD::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+
+void ScorerMSD::score(const vector<double>&  all_scores, vector<double>&  scores) const
+{
   scores.push_back(all_scores[MONO]);
   scores.push_back(all_scores[SWAP]);
   scores.push_back(all_scores[DRIGHT]+all_scores[DLEFT]+all_scores[OTHER]);
 }
 
-void ScorerMonotonicity::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+void ScorerMonotonicity::score(const vector<double>&  all_scores, vector<double>&  scores) const
+{
   scores.push_back(all_scores[MONO]);
   scores.push_back(all_scores[SWAP]+all_scores[DRIGHT]+all_scores[DLEFT]+all_scores[OTHER]+all_scores[NOMONO]);
 }
 
-  
-void ScorerLR::score(const vector<double>&  all_scores, vector<double>&  scores) const {
+
+void ScorerLR::score(const vector<double>&  all_scores, vector<double>&  scores) const
+{
   scores.push_back(all_scores[MONO]+all_scores[DRIGHT]);
   scores.push_back(all_scores[SWAP]+all_scores[DLEFT]);
 }
 
 
-void ScorerMSLR::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
+void ScorerMSLR::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const
+{
   double total = accumulate(scores.begin(), scores.end(), 0);
   smoothing.push_back(weight*(scores[MONO]+0.1)/total);
   smoothing.push_back(weight*(scores[SWAP]+0.1)/total);
@@ -196,52 +215,60 @@ void ScorerMSLR::createSmoothing(const vector<double>&  scores, double weight, v
   smoothing.push_back(weight*(scores[DRIGHT]+0.1)/total);
 }
 
-void ScorerMSLR::createConstSmoothing(double weight, vector<double>& smoothing) const {
+void ScorerMSLR::createConstSmoothing(double weight, vector<double>& smoothing) const
+{
   for (int i=1; i<=4; ++i) {
     smoothing.push_back(weight);
   }
 }
 
 
-void ScorerMSD::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
+void ScorerMSD::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const
+{
   double total = accumulate(scores.begin(), scores.end(), 0);
   smoothing.push_back(weight*(scores[MONO]+0.1)/total);
   smoothing.push_back(weight*(scores[SWAP]+0.1)/total);
   smoothing.push_back(weight*(scores[DLEFT]+scores[DRIGHT]+scores[OTHER]+0.1)/total);
 }
 
-void ScorerMSD::createConstSmoothing(double weight, vector<double>& smoothing) const {
+void ScorerMSD::createConstSmoothing(double weight, vector<double>& smoothing) const
+{
   for (int i=1; i<=3; ++i) {
     smoothing.push_back(weight);
   }
 }
 
-void ScorerMonotonicity::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
+void ScorerMonotonicity::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const
+{
   double total = accumulate(scores.begin(), scores.end(), 0);
   smoothing.push_back(weight*(scores[MONO]+0.1)/total);
   smoothing.push_back(weight*(scores[SWAP]+scores[DLEFT]+scores[DRIGHT]+scores[OTHER]+scores[NOMONO]+0.1)/total);
 }
 
-void ScorerMonotonicity::createConstSmoothing(double weight, vector<double>& smoothing) const {
+void ScorerMonotonicity::createConstSmoothing(double weight, vector<double>& smoothing) const
+{
   for (double i=1; i<=2; ++i) {
     smoothing.push_back(weight);
   }
 }
 
 
-void ScorerLR::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const {
+void ScorerLR::createSmoothing(const vector<double>&  scores, double weight, vector<double>& smoothing) const
+{
   double total = accumulate(scores.begin(), scores.end(), 0);
   smoothing.push_back(weight*(scores[MONO]+scores[DRIGHT]+0.1)/total);
   smoothing.push_back(weight*(scores[SWAP]+scores[DLEFT])/total);
 }
 
-void ScorerLR::createConstSmoothing(double weight, vector<double>& smoothing) const {
+void ScorerLR::createConstSmoothing(double weight, vector<double>& smoothing) const
+{
   for (int i=1; i<=2; ++i) {
     smoothing.push_back(weight);
   }
 }
 
-void Model::score_fe(const string& f, const string& e)  {
+void Model::score_fe(const string& f, const string& e)
+{
   if (!fe)    //Make sure we do not do anything if it is not a fe model
     return;
   fprintf(file,"%s ||| %s ||| ",f.c_str(),e.c_str());
@@ -275,7 +302,8 @@ void Model::score_fe(const string& f, const string& e)  {
   fprintf(file,"\n");
 }
 
-void Model::score_f(const string& f) {
+void Model::score_f(const string& f)
+{
   if (fe)      //Make sure we do not do anything if it is not a f model
     return;
   fprintf(file, "%s ||| ", f.c_str());
@@ -310,7 +338,8 @@ void Model::score_f(const string& f) {
 }
 
 Model::Model(ModelScore* ms, Scorer* sc, const string& dir, const string& lang, const string& fn)
-  : modelscore(ms), scorer(sc), filename(fn) {
+  : modelscore(ms), scorer(sc), filename(fn)
+{
 
   file = fopen(filename.c_str(),"w");
   if (!file) {
@@ -322,8 +351,8 @@ Model::Model(ModelScore* ms, Scorer* sc, const string& dir, const string& lang, 
   if (lang.compare("fe") == 0) {
     fe = true;
   } else if (lang.compare("f") != 0) {
-    cerr << "You have given an illegal language to condition on: "  << lang 
-	 << "\nLegal types: fe (on both languages), f (only on source language)\n";
+    cerr << "You have given an illegal language to condition on: "  << lang
+         << "\nLegal types: fe (on both languages), f (only on source language)\n";
     exit(1);
   }
 
@@ -333,16 +362,18 @@ Model::Model(ModelScore* ms, Scorer* sc, const string& dir, const string& lang, 
     next = false;
   } else if (dir.compare("forward") == 0) {
     previous = false;
-  } 
+  }
 }
 
-Model::~Model() {
+Model::~Model()
+{
   fclose(file);
   delete modelscore;
   delete scorer;
 }
 
-void Model::zipFile() {
+void Model::zipFile()
+{
   fclose(file);
   file = fopen(filename.c_str(), "rb");
   FILE* gzfile = (FILE*) gzopen((filename+".gz").c_str(),"wb");
@@ -358,7 +389,8 @@ void Model::zipFile() {
   remove(filename.c_str());
 }
 
-void Model::split_config(const string& config, string& dir, string& lang, string& orient) {
+void Model::split_config(const string& config, string& dir, string& lang, string& orient)
+{
   istringstream is(config);
   string type;
   getline(is, type, '-');
@@ -367,7 +399,8 @@ void Model::split_config(const string& config, string& dir, string& lang, string
   getline(is, lang, '-');
 }
 
-Model* Model::createModel(ModelScore* modelscore, const string& config, const string& filepath) {
+Model* Model::createModel(ModelScore* modelscore, const string& config, const string& filepath)
+{
   string dir, lang, orient, filename;
   split_config(config,dir,lang,orient);
 
@@ -381,20 +414,22 @@ Model* Model::createModel(ModelScore* modelscore, const string& config, const st
   } else if (orient.compare("leftright") == 0) {
     return new Model(modelscore, new ScorerLR(), dir, lang, filename);
   } else {
-    cerr << "Illegal orientation type of reordering model: " << orient 
-	 << "\n allowed types: mslr, msd, monotonicity, leftright\n";
+    cerr << "Illegal orientation type of reordering model: " << orient
+         << "\n allowed types: mslr, msd, monotonicity, leftright\n";
     exit(1);
   }
 }
 
 
 
-void Model::createSmoothing(double w)  {
+void Model::createSmoothing(double w)
+{
   scorer->createSmoothing(modelscore->get_scores_fe_prev(), w, smoothing_prev);
   scorer->createSmoothing(modelscore->get_scores_fe_prev(), w, smoothing_next);
 }
 
-void Model::createConstSmoothing(double w)  {
+void Model::createConstSmoothing(double w)
+{
   scorer->createConstSmoothing(w, smoothing_prev);
   scorer->createConstSmoothing(w, smoothing_next);
 }

@@ -22,44 +22,37 @@
 bool
 spansIntersect(const Span & a, const Span & b)
 {
-    for (Span::const_iterator p(a.begin()); p != a.end(); ++p)
-    {
-        Span::const_iterator q = b.find(*p);
-        if (q != b.end())
-        {
-            return true;
-        }
+  for (Span::const_iterator p(a.begin()); p != a.end(); ++p) {
+    Span::const_iterator q = b.find(*p);
+    if (q != b.end()) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 Span
 closure(const Span & s)
 {
-    Span result;
-    if (s.empty())
-    {
-        return result;
-    }
-    Span::const_iterator p(s.begin());
-    int min = *p;
-    int max = *p;
-    ++p;
-    for (; p != s.end(); ++p)
-    {
-        if (*p < min)
-        {
-            min = *p;
-        }
-        if (*p > max)
-        {
-            max = *p;
-        }
-    }
-    for (int i = min; i <= max; ++i)
-    {
-        result.insert(i);
-    }
-
+  Span result;
+  if (s.empty()) {
     return result;
+  }
+  Span::const_iterator p(s.begin());
+  int min = *p;
+  int max = *p;
+  ++p;
+  for (; p != s.end(); ++p) {
+    if (*p < min) {
+      min = *p;
+    }
+    if (*p > max) {
+      max = *p;
+    }
+  }
+  for (int i = min; i <= max; ++i) {
+    result.insert(i);
+  }
+
+  return result;
 }

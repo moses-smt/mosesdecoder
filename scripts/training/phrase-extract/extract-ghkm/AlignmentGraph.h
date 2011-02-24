@@ -33,102 +33,122 @@ enum NodeType { SOURCE, TARGET, TREE };
 
 class Node
 {
-    public:
+public:
 
-        Node(const std::string & label, NodeType type)
-          : m_label(label)
-          , m_type(type)
-          , m_children()
-          , m_parents()
-        {}
+  Node(const std::string & label, NodeType type)
+    : m_label(label)
+    , m_type(type)
+    , m_children()
+    , m_parents()
+  {}
 
-        const std::string &
-        getLabel() const { return m_label; }
+  const std::string &
+  getLabel() const {
+    return m_label;
+  }
 
-        NodeType
-        getType() const { return m_type; }
+  NodeType
+  getType() const {
+    return m_type;
+  }
 
-        const std::vector<Node*> &
-        getChildren() const { return m_children; }
+  const std::vector<Node*> &
+  getChildren() const {
+    return m_children;
+  }
 
-        const std::vector<Node*> &
-        getParents() const { return m_parents; }
+  const std::vector<Node*> &
+  getParents() const {
+    return m_parents;
+  }
 
-        void
-        setChildren(const std::vector<Node*> &);
+  void
+  setChildren(const std::vector<Node*> &);
 
-        void
-        setParents(const std::vector<Node*> &);
+  void
+  setParents(const std::vector<Node*> &);
 
-        void
-        addChild(Node *);
+  void
+  addChild(Node *);
 
-        void
-        addParent(Node *);
+  void
+  addParent(Node *);
 
-        bool
-        isSink() const;
+  bool
+  isSink() const;
 
-        void
-        propagateIndex(int);
+  void
+  propagateIndex(int);
 
-        Span &
-        getSpan() { return m_span; }
+  Span &
+  getSpan() {
+    return m_span;
+  }
 
-        const Span &
-        getSpan() const { return m_span; }
+  const Span &
+  getSpan() const {
+    return m_span;
+  }
 
-        Span &
-        getComplementSpan() { return m_complementSpan; }
+  Span &
+  getComplementSpan() {
+    return m_complementSpan;
+  }
 
-        const Span &
-        getComplementSpan() const { return m_complementSpan; }
+  const Span &
+  getComplementSpan() const {
+    return m_complementSpan;
+  }
 
-        std::vector<std::string>
-        getTargetWords() const;
+  std::vector<std::string>
+  getTargetWords() const;
 
-    private:
-        std::string m_label;
-        NodeType m_type;
-        std::vector<Node*> m_children;
-        std::vector<Node*> m_parents;
-        Span m_span;
-        Span m_complementSpan;
+private:
+  std::string m_label;
+  NodeType m_type;
+  std::vector<Node*> m_children;
+  std::vector<Node*> m_parents;
+  Span m_span;
+  Span m_complementSpan;
 
-        // Disallow copying
-        Node(const Node &);
-        Node & operator=(const Node &);
+  // Disallow copying
+  Node(const Node &);
+  Node & operator=(const Node &);
 
-        void
-        getTargetWords(std::vector<std::string> &) const;
+  void
+  getTargetWords(std::vector<std::string> &) const;
 };
 
 class AlignmentGraph
 {
-    public:
-        AlignmentGraph(const ParseTree *,
-                       const std::vector<std::string> &,
-                       const Alignment &);
+public:
+  AlignmentGraph(const ParseTree *,
+                 const std::vector<std::string> &,
+                 const Alignment &);
 
-        ~AlignmentGraph();
+  ~AlignmentGraph();
 
-        Node *
-        getRoot() { return m_root; }
+  Node *
+  getRoot() {
+    return m_root;
+  }
 
-        std::vector<Node *> &
-        getSourceNodes() { return m_sourceNodes; }
+  std::vector<Node *> &
+  getSourceNodes() {
+    return m_sourceNodes;
+  }
 
-        std::vector<Rule>
-        inferRules() const;
+  std::vector<Rule>
+  inferRules() const;
 
-    private:
-        Node * m_root;
-        std::vector<Node *> m_sourceNodes;
-        std::vector<Node *> m_targetNodes;
+private:
+  Node * m_root;
+  std::vector<Node *> m_sourceNodes;
+  std::vector<Node *> m_targetNodes;
 
-        // Disallow copying
-        AlignmentGraph(const AlignmentGraph &);
-        AlignmentGraph & operator=(const AlignmentGraph &);
+  // Disallow copying
+  AlignmentGraph(const AlignmentGraph &);
+  AlignmentGraph & operator=(const AlignmentGraph &);
 };
 
 #endif

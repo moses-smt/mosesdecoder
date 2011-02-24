@@ -27,51 +27,43 @@
 Alignment
 readAlignment(const std::string & s)
 {
-    Alignment a;
+  Alignment a;
 
-    const std::string digits = "0123456789";
+  const std::string digits = "0123456789";
 
-    std::string::size_type begin = s.find_first_of(digits);
-    if (begin == std::string::npos)
-    {
-        // Empty word alignments are allowed
-        return a;
-    }
-
-    while (true)
-    {
-        std::string::size_type end = s.find("-", begin);
-        if (end == std::string::npos)
-        {
-            throw Exception("Alignment separator '-' missing");
-        }
-        int src = std::atoi(s.substr(begin, end-begin).c_str());
-
-        begin = s.find_first_of(digits, end);
-        if (begin == std::string::npos)
-        {
-            throw Exception("Target index missing");
-        }
-
-        end = s.find(" ", begin);
-        int tgt;
-        if (end == std::string::npos)
-        {
-            tgt = std::atoi(s.substr(begin).c_str());
-        }
-        else
-        {
-            tgt = std::atoi(s.substr(begin, end-begin).c_str());
-        }
-
-        a.push_back(std::make_pair(src, tgt));
-
-        if (end == std::string::npos)
-        {
-            break;
-        }
-        begin = s.find_first_of(digits, end);
-    }
-
+  std::string::size_type begin = s.find_first_of(digits);
+  if (begin == std::string::npos) {
+    // Empty word alignments are allowed
     return a;
+  }
+
+  while (true) {
+    std::string::size_type end = s.find("-", begin);
+    if (end == std::string::npos) {
+      throw Exception("Alignment separator '-' missing");
+    }
+    int src = std::atoi(s.substr(begin, end-begin).c_str());
+
+    begin = s.find_first_of(digits, end);
+    if (begin == std::string::npos) {
+      throw Exception("Target index missing");
+    }
+
+    end = s.find(" ", begin);
+    int tgt;
+    if (end == std::string::npos) {
+      tgt = std::atoi(s.substr(begin).c_str());
+    } else {
+      tgt = std::atoi(s.substr(begin, end-begin).c_str());
+    }
+
+    a.push_back(std::make_pair(src, tgt));
+
+    if (end == std::string::npos) {
+      break;
+    }
+    begin = s.find_first_of(digits, end);
+  }
+
+  return a;
 }

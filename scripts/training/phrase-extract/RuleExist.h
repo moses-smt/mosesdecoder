@@ -29,34 +29,30 @@
 // which are potential holes in larger phrase pairs
 class RuleExist
 {
-    protected:
-        std::vector< std::vector<HoleList> > m_phraseExist;
-        // indexed by source pos. and source length 
-        // maps to list of holes where <int, int> are target pos
+protected:
+  std::vector< std::vector<HoleList> > m_phraseExist;
+  // indexed by source pos. and source length
+  // maps to list of holes where <int, int> are target pos
 
-    public:
-        RuleExist(size_t size)
-            :m_phraseExist(size)
-        {
-            // size is the length of the source sentence
-            for (size_t pos = 0; pos < size; ++pos)
-            {
-                // create empty hole lists
-                std::vector<HoleList> &endVec = m_phraseExist[pos];
-                endVec.resize(size - pos);
-            }
-        }
+public:
+  RuleExist(size_t size)
+    :m_phraseExist(size) {
+    // size is the length of the source sentence
+    for (size_t pos = 0; pos < size; ++pos) {
+      // create empty hole lists
+      std::vector<HoleList> &endVec = m_phraseExist[pos];
+      endVec.resize(size - pos);
+    }
+  }
 
-        void Add(int startT, int endT, int startS, int endS)
-        {
-            m_phraseExist[startT][endT - startT].push_back(Hole(startS, endS, startT, endT));
-        }
+  void Add(int startT, int endT, int startS, int endS) {
+    m_phraseExist[startT][endT - startT].push_back(Hole(startS, endS, startT, endT));
+  }
 
-        const HoleList &GetSourceHoles(int startT, int endT) const
-        {
-            const HoleList &sourceHoles = m_phraseExist[startT][endT - startT];
-            return sourceHoles;
-        }
+  const HoleList &GetSourceHoles(int startT, int endT) const {
+    const HoleList &sourceHoles = m_phraseExist[startT][endT - startT];
+    return sourceHoles;
+  }
 
 };
 
