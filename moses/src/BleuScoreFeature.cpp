@@ -454,7 +454,6 @@ vector<float> BleuScoreFeature::CalculateBleuOfCorpus(const vector< vector< cons
 
 	// calculate bleu score
 	float precision = 1.0;
-	float smoothed_count, smoothed_matches;
 
 	vector<float> bleu;
 	// Calculate geometric mean of modified ngram precisions
@@ -462,19 +461,8 @@ vector<float> BleuScoreFeature::CalculateBleuOfCorpus(const vector< vector< cons
 	// 		  = BP * 4th root(PRODUCT_1_4 p_n)
 	for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
 		if (sumOfNgramCounts[i]) {
-			smoothed_matches = sumOfClippedNgramMatches[i];
-			smoothed_count = sumOfNgramCounts[i];
-			if (i > 0) {
-				// smoothing for all n > 1
-				smoothed_matches += 1;
-				smoothed_count += 1;
-    	}
-
-			precision *= smoothed_matches / smoothed_count;
-			bleu.push_back(smoothed_matches / smoothed_count);
-    }
-		else {
-			cerr << "no counts for order " << i+1 << endl;
+			precision *= sumOfClippedNgramMatches[i] / sumOfNgramCounts[i];
+			bleu.push_back(sumOfClippedNgramMatches[i] / sumOfNgramCounts[i]);
     }
 	}
 
