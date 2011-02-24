@@ -42,7 +42,7 @@ namespace Mira {
  * Initialise moses (including StaticData) using the given ini file and debuglevel, passing through any 
  * other command line arguments. 
  **/
-void initMoses(const std::string& inifile, int debuglevel,  int argc=0, char** argv=NULL );
+void initMoses(const std::string& inifile, int debuglevel,  int argc, std::vector<std::string> decoder_params);
 
 
 /**
@@ -67,6 +67,7 @@ class MosesDecoder {
     size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids);
+    void calculateBleuOfCorpus(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& ref_ids, size_t epoch);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
 		void cleanup();

@@ -72,11 +72,17 @@ public:
                              std::vector< size_t >&,
                              std::vector< size_t >&,
                              size_t skip = 0) const;
+    void GetClippedNgramMatchesAndCounts(Phrase&,
+                                 const NGrams&,
+                                 std::vector< size_t >&,
+                                 std::vector< size_t >&,
+                                 size_t skip = 0) const;
 
     FFState* Evaluate( const Hypothesis& cur_hypo, 
                        const FFState* prev_state, 
                        ScoreComponentCollection* accumulator) const;
     float CalculateBleu(BleuScoreState*) const;
+    std::vector<float> CalculateBleuOfCorpus(const std::vector< std::vector< const Word* > >& hypos, const std::vector<size_t>& ref_ids);
     const FFState* EmptyHypothesisState(const InputType&) const;
 
 private:

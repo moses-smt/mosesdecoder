@@ -104,6 +104,14 @@ namespace Mira {
       void setOracleIndices(std::vector<size_t> oracleIndices) {
     	  m_oracleIndices= oracleIndices;
       }
+
+      void setSlack(float slack) {
+      	m_slack = slack;
+      }
+
+      void setMarginScaleFactor(float msf) {
+      	m_marginScaleFactor = msf;
+      }
   
    private:
       // number of hypotheses used for each nbest list (number of hope, fear, best model translations)

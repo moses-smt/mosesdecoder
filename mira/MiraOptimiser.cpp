@@ -63,7 +63,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 		for (size_t i = 0; i < featureValues.size(); ++i) {
 			size_t sentenceId = sentenceIds[i];
-			cerr << "Available oracles for source sentence " << sentenceId << ": " << m_oracles[sentenceId].size() << endl;
+			if (m_oracles[sentenceId].size() > 1)
+				cerr << "Available oracles for source sentence " << sentenceId << ": " << m_oracles[sentenceId].size() << endl;
 			for (size_t j = 0; j < featureValues[i].size(); ++j) {
 				// check if optimisation criterion is violated for one hypothesis and the oracle
 				// h(e*) >= h(e_ij) + loss(e_ij)
@@ -89,6 +90,14 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 						// constraint not violated
 						addConstraint = false;
 					}
+
+					/*if (modelScoreDiff < loss) {
+						// constraint violated
+						cerr << modelScoreDiff << " <  " << loss << endl;
+					}
+					else {
+						cerr << modelScoreDiff << " >= " << loss << endl;
+					}*/
 
 					if (addConstraint) {
 						float lossMarginDistance = loss - modelScoreDiff;
@@ -134,7 +143,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			m_featureValueDiffs.push_back(maxViolationfeatureValueDiff);
 			m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
 
-			cerr << "Number of constraints passed to optimiser: " << m_featureValueDiffs.size() << endl;
+//			cerr << "Number of constraints passed to optimiser: " << m_featureValueDiffs.size() << endl;
 			if (m_slack != 0) {
 				alphas = Hildreth::optimise(m_featureValueDiffs, m_lossMarginDistances, m_slack);
 			}
@@ -176,10 +185,28 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
 			}
 
-			//cerr << "Number of violated constraints before optimisation: " << violatedConstraintsBefore << endl;
-			cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
+			cerr << "Number of violated constraints before optimisation: " << violatedConstraintsBefore << endl;
+			if (featureValueDiffs.size() != 30) {
+				cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
+			}
 			if (m_slack != 0) {
+				/*cerr << "Feature value diffs (A): " << endl;
+				for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
+					cerr << featureValueDiffs[k] << endl;
+				}
+				cerr << endl << "Loss - margin (b): " << endl;
+				for (size_t i = 0; i < lossMarginDistances.size(); ++i) {
+					cerr << lossMarginDistances[i] << endl;
+				}
+				cerr << endl;
+				cerr << "Slack: " << m_slack << endl;*/
+
 				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances, m_slack);
+				/*cerr << "Alphas: " << endl;
+				for (size_t i = 0; i < alphas.size(); ++i) {
+					cerr << alphas[i] << endl;
+				}
+				cerr << endl << endl;*/
 			}
 			else {
 				alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
@@ -189,22 +216,28 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
 			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 				// compute update
-				float update = alphas[k];
+				float alpha = alphas[k];
 				if (m_fixedClipping) {
-					if (update > m_c) {
-						update = m_c;
+					if (alpha > m_c) {
+						alpha = m_c;
 					}
-					else if (update < -1 * m_c) {
-						update = -1 * m_c;
+					else if (alpha < -1 * m_c) {
+						alpha = -1 * m_c;
 					}
 				}
 
-				featureValueDiffs[k].MultiplyEquals(update);
-				cerr << "alpha: " << update << endl;
+				featureValueDiffs[k].MultiplyEquals(alpha);
+				//cerr << "alpha: " << alpha << endl;
 
 				// apply update to weight vector
 				currWeights.PlusEquals(featureValueDiffs[k]);
 			}
+
+			/*cerr << "Updates to weight vector: " << endl;
+			for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
+				cerr << featureValueDiffs[k] << endl;
+			}
+			cerr << endl << endl;*/
 
 			// sanity check: how many constraints violated after optimisation?
 			size_t violatedConstraintsAfter = 0;
@@ -216,15 +249,16 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 					float loss = losses[i][j] * m_marginScaleFactor;
 					if (modelScoreDiff < loss) {
 						++violatedConstraintsAfter;
+						//cerr << modelScoreDiff << " <  " << loss << endl;
+					}
+					else {
+						//cerr << modelScoreDiff << " >= " << loss << endl;
 					}
 				}
 			}
 
-			//cerr << "Number of violated constraints after optimisation: " << violatedConstraintsAfter << endl;
-			if (violatedConstraintsAfter > violatedConstraintsBefore) {
-				cerr << "Increase: " << violatedConstraintsAfter - violatedConstraintsBefore << endl << endl;
-			}
-
+			int constraintChange = violatedConstraintsBefore - violatedConstraintsAfter;
+			cerr << "Constraint change: " << constraintChange << endl;
 			return violatedConstraintsBefore - violatedConstraintsAfter;
 		}
 		else {

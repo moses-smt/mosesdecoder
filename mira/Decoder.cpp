@@ -43,7 +43,7 @@ namespace Mira {
     return c;
   }
       
-  void initMoses(const string& inifile, int debuglevel,  int argc, char** argv) {
+  void initMoses(const string& inifile, int debuglevel,  int argc, vector<string> decoder_params) {
     static int BASE_ARGC = 5;
     Parameter* params = new Parameter();
     char ** mosesargv = new char*[BASE_ARGC + argc];
@@ -56,8 +56,10 @@ namespace Mira {
     mosesargv[4] = strToChar("-mbr"); //so we can do nbest
     
     for (int i = 0; i < argc; ++i) {
-      mosesargv[BASE_ARGC + i] = argv[i];
+    	char *cstr = &(decoder_params[i])[0];
+      mosesargv[BASE_ARGC + i] = cstr;
     }
+
     params->LoadParam(BASE_ARGC + argc,mosesargv);
     StaticData::LoadDataStatic(params);
     for (int i = 0; i < BASE_ARGC; ++i) {
@@ -68,21 +70,16 @@ namespace Mira {
  
   MosesDecoder::MosesDecoder(const vector<vector<string> >& refs, bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing)
 		: m_manager(NULL) {
-	  // force initialisation of the phrase dictionary
+			// force initialisation of the phrase dictionary (TODO: what for?)
       const StaticData &staticData = StaticData::Instance();
-
-      // is this needed?
-      //m_sentence = new Sentence(Input);
-      //stringstream in("Initialising decoder..\n");
-      //const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      //m_sentence->Read(in,inputFactorOrder);
+      m_sentence = new Sentence(Input);
+      stringstream in("Initialising decoder..\n");
+      const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+      m_sentence->Read(in,inputFactorOrder);
 
       const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-
-      // is this needed?
-      //(TranslationSystem::DEFAULT);
-      //m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
-      //m_manager->ProcessSentence();
+      m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
+      m_manager->ProcessSentence();
 
       // Add the bleu feature
       m_bleuScoreFeature = new BleuScoreFeature(useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
@@ -107,14 +104,13 @@ namespace Mira {
 							  bool ignoreUWeight,
 							  size_t rank)
   {
-	StaticData &staticData = StaticData::InstanceNonConst();
+  	StaticData &staticData = StaticData::InstanceNonConst();
 
-	m_sentence = new Sentence(Input);
+  	m_sentence = new Sentence(Input);
     stringstream in(source + "\n");
     const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
     m_sentence->Read(in,inputFactorOrder);
-    const TranslationSystem& system = staticData.GetTranslationSystem
-        (TranslationSystem::DEFAULT);
+    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
     // set the weight for the bleu feature
     ostringstream bleuWeightStr;
@@ -212,5 +208,19 @@ namespace Mira {
   void MosesDecoder::updateHistory(const vector< vector< const Word*> >& words, vector<size_t>& sourceLengths, vector<size_t>& ref_ids) {
 	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids);
   }
+
+  void MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch) {
+  	  vector<float> bleu = m_bleuScoreFeature->CalculateBleuOfCorpus(words, ref_ids);
+  	  cerr << "\nBleu after epoch " << epoch << ": ";
+  	  if (bleu.size() > 0) {
+  	  	cerr << "\nBLEU: " << bleu[4]*100 << ", "
+  	  			<< bleu[3]*100 << "/" << bleu[2]*100 << "/" << bleu[1]*100 << "/" << bleu[0]*100 << " "
+  	  			<< "(BP=" << bleu[5] << ", " << "ratio=" << bleu[6] << ", "
+  	  			<< "hyp_len=" << bleu[7] << ", ref_len=" << bleu[8] << ")" << endl;
+  	  }
+  	  else {
+  	  	cerr << "BLEU: 0" << endl;
+  	  }
+    }
 } 
 

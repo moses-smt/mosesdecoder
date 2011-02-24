@@ -238,6 +238,51 @@ void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
     }
 }
 
+void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
+                                           const NGrams& ref_ngram_counts,
+                                           std::vector< size_t >& ret_counts,
+                                           std::vector< size_t >& ret_matches,
+                                           size_t skip_first) const
+{
+	std::map< Phrase, size_t >::const_iterator ref_ngram_counts_iter;
+	size_t ngram_start_idx, ngram_end_idx;
+
+	std::map<size_t, std::map<Phrase, size_t> > ngram_matches;
+	for (size_t end_idx = skip_first; end_idx < phrase.GetSize(); end_idx++) {
+		for (size_t order = 0; order < BleuScoreState::bleu_order; order++) {
+			if (order > end_idx) break;
+
+			ngram_end_idx = end_idx;
+			ngram_start_idx = end_idx - order;
+
+			Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx));
+			string ngramString = ngram.ToString();
+			ret_counts[order]++;
+
+			ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
+			if (ref_ngram_counts_iter != ref_ngram_counts.end()) {
+				ngram_matches[order][ngram]++;
+			}
+		}
+	}
+
+	// clip ngram matches
+	for (size_t order = 0; order < BleuScoreState::bleu_order; order++) {
+		std::map<Phrase, size_t>::const_iterator iter;
+
+		// iterate over ngram counts for every ngram order
+		for (iter=ngram_matches[order].begin(); iter != ngram_matches[order].end(); ++iter) {
+			ref_ngram_counts_iter = ref_ngram_counts.find(iter->first);
+			if (iter->second > ref_ngram_counts_iter->second) {
+				ret_matches[order] += ref_ngram_counts_iter->second;
+			}
+			else {
+				ret_matches[order] += iter->second;
+			}
+    }
+	}
+}
+
 /*
  * Given a previous state, compute Bleu score for the updated state with an additional target
  * phrase translated.
@@ -369,6 +414,94 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 	}
 
     return precision;
+}
+
+vector<float> BleuScoreFeature::CalculateBleuOfCorpus(const vector< vector< const Word* > >& oracles, const vector<size_t>& ref_ids) {
+	// get ngram matches and counts for all oracle sentences and their references
+	vector<size_t> sumOfClippedNgramMatches(BleuScoreState::bleu_order);
+	vector<size_t> sumOfNgramCounts(BleuScoreState::bleu_order);
+	size_t ref_length = 0;
+	size_t target_length = 0;
+
+	for (size_t batchPosition = 0; batchPosition < oracles.size(); ++batchPosition){
+		Phrase phrase(Output, oracles[batchPosition]);
+		size_t ref_id = ref_ids[batchPosition];
+		size_t cur_ref_length = m_refs[ref_id].first;
+		NGrams cur_ref_ngrams = m_refs[ref_id].second;
+
+		ref_length += cur_ref_length;
+		target_length += oracles[batchPosition].size();
+
+		std::vector< size_t > ngram_counts(BleuScoreState::bleu_order);
+		std::vector< size_t > clipped_ngram_matches(BleuScoreState::bleu_order);
+		GetClippedNgramMatchesAndCounts(phrase, cur_ref_ngrams, ngram_counts, clipped_ngram_matches, 0);
+
+		// add clipped ngram matches and ngram counts to corpus sums
+		for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
+			sumOfClippedNgramMatches[i] += clipped_ngram_matches[i];
+			sumOfNgramCounts[i] += ngram_counts[i];
+		}
+	}
+
+	if (!sumOfNgramCounts[0]) {
+		vector<float> empty(0);
+		return empty;
+	}
+	if (!sumOfClippedNgramMatches[0]) {
+		vector<float> empty(0);
+		return empty;			// if we have no unigram matches, score should be 0
+	}
+
+	// calculate bleu score
+	float precision = 1.0;
+	float smoothed_count, smoothed_matches;
+
+	vector<float> bleu;
+	// Calculate geometric mean of modified ngram precisions
+	// BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
+	// 		  = BP * 4th root(PRODUCT_1_4 p_n)
+	for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
+		if (sumOfNgramCounts[i]) {
+			smoothed_matches = sumOfClippedNgramMatches[i];
+			smoothed_count = sumOfNgramCounts[i];
+			if (i > 0) {
+				// smoothing for all n > 1
+				smoothed_matches += 1;
+				smoothed_count += 1;
+    	}
+
+			precision *= smoothed_matches / smoothed_count;
+			bleu.push_back(smoothed_matches / smoothed_count);
+    }
+		else {
+			cerr << "no counts for order " << i+1 << endl;
+    }
+	}
+
+	// take geometric mean
+	precision = pow(precision, (float)1/4);
+
+	// Apply brevity penalty if applicable.
+	// BP = 1 				if c > r
+	// BP = e^(1- r/c))		if c <= r
+	// where
+	// c: length of the candidate translation
+	// r: effective reference length (sum of best match lengths for each candidate sentence)
+	float BP;
+	if (target_length < ref_length) {
+		precision *= exp(1 - (1.0*ref_length/target_length));
+		BP = exp(1 - (1.0*ref_length/target_length));
+	}
+	else {
+		BP = 1.0;
+  }
+
+	bleu.push_back(precision);
+	bleu.push_back(BP);
+	bleu.push_back(1.0*target_length/ref_length);
+	bleu.push_back(target_length);
+	bleu.push_back(ref_length);
+	return bleu;
 }
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const

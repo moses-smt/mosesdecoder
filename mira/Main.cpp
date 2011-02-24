@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
+
 #ifdef MPI_ENABLE
 #include <boost/mpi.hpp>
 namespace mpi = boost::mpi;
@@ -83,6 +85,8 @@ int main(int argc, char** argv) {
   size_t weightDumpFrequency;
   string weightDumpStem;
   float marginScaleFactor;
+  float marginScaleFactorStep;
+  float marginScaleFactorMin;
   bool weightedLossFunction;
   size_t n;
   size_t batchSize;
@@ -94,6 +98,8 @@ int main(int argc, char** argv) {
   bool scaleByInputLength;
   float BPfactor;
   float slack;
+  float slack_step;
+  float slack_max;
   size_t maxNumberOracles;
   bool accumulateMostViolatedConstraints;
   bool pastAndCurrentConstraints;
@@ -104,21 +110,26 @@ int main(int argc, char** argv) {
   size_t baseOfLog;
   float clipping;
   bool fixedClipping;
+  string decoder_settings;
+  float min_weight_change;
+  bool devBleu;
   po::options_description desc("Allowed options");
   desc.add_options()
-        ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
-        ("config,f",po::value<string>(&mosesConfigFile),"Moses ini file")
-        ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-        ("input-file,i",po::value<string>(&inputFile),"Input file containing tokenised source")
-        ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
-        ("epochs,e", po::value<size_t>(&epochs)->default_value(1), "Number of epochs")
-        ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
-        ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
-        ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
-        ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
-        ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
+      ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
+      ("config,f",po::value<string>(&mosesConfigFile),"Moses ini file")
+      ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
+      ("input-file,i",po::value<string>(&inputFile),"Input file containing tokenised source")
+      ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+      ("epochs,e", po::value<size_t>(&epochs)->default_value(1), "Number of epochs")
+      ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
+      ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+      ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
+      ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights")
+      ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
-	    ("margin-scale-factor,m", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
+	    ("msf", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
+	    ("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
+	    ("msf-min", po::value<float>(&marginScaleFactorMin)->default_value(1.0), "Minimum value that margin is scaled by")
 	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
@@ -129,7 +140,9 @@ int main(int argc, char** argv) {
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
-	    ("slack", po::value<float>(&slack)->default_value(0), "Use slack in optimization problem")
+	    ("slack", po::value<float>(&slack)->default_value(0), "Use slack in optimizer")
+	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
+	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
 	    ("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
 	    ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
@@ -138,8 +151,11 @@ int main(int argc, char** argv) {
 	    ("ignore-weird-updates", po::value<bool>(&ignoreWeirdUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
 	    ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 	    ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
-	    ("clipping", po::value<float>(&clipping)->default_value(0.01f), "Set a threshold to regularise updates")
-	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold");
+	    ("clipping", po::value<float>(&clipping)->default_value(0.01), "Set a threshold to regularise updates")
+	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold")
+	    ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
+	    ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(false), "Compute BLEU score of oracle translations of the whole tuning set");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -191,7 +207,9 @@ int main(int argc, char** argv) {
   }
 
   // initialise Moses
-  initMoses(mosesConfigFile, verbosity);//, argc, argv);
+  vector<string> decoder_params;
+  boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
+  initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
   MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
   ScoreComponentCollection startWeights = decoder->getWeights();
   startWeights.L1Normalise();
@@ -260,8 +278,8 @@ int main(int argc, char** argv) {
 
   //Main loop:
   ScoreComponentCollection cumulativeWeights;		// collect weights per epoch to produce an average
-  size_t iterations = 0;
-  size_t iterationsThisEpoch = 0;
+  size_t weightChanges = 0;
+  size_t weightChangesThisEpoch = 0;
 
   time_t now = time(0); // get current time
   struct tm* tm = localtime(&now); // get struct filled out
@@ -270,24 +288,27 @@ int main(int argc, char** argv) {
   
   // the result of accumulating and averaging weights over one epoch and possibly several processes
   ScoreComponentCollection averageTotalWeights;
-
   ScoreComponentCollection averageTotalWeightsCurrent;
   ScoreComponentCollection averageTotalWeightsPrevious;
   ScoreComponentCollection averageTotalWeightsBeforePrevious;
 
-  // TODO: scaling of feature values for probabilistic features
-  vector< ScoreComponentCollection> list_of_delta_h;	// collect delta_h and  loss for all examples of an epoch
-  vector< float> list_of_losses;
+  // print initial weights
+  cerr << "weights: " << decoder->getWeights() << endl;
+
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
+	  weightChangesThisEpoch = 0;
 	  // Sum up weights over one epoch, final average uses weights from last epoch
-	  iterationsThisEpoch = 0;
 	  if (!accumulateWeights) {
 		  cumulativeWeights.ZeroAll();
 	  }
 
 	  // number of weight dumps this epoch
 	  size_t weightEpochDump = 0;
+
+	  // collect all oracles for dev set
+	  vector< vector< const Word*> > allOracles;
+	  vector<size_t> all_ref_ids;
 
 	  size_t shardPosition = 0;
 	  vector<size_t>::const_iterator sid = shard.begin();
@@ -330,6 +351,7 @@ int main(int argc, char** argv) {
                         rank);
 			  inputLengths.push_back(decoder->getCurrentInputLength());
 			  ref_ids.push_back(*sid);
+			  all_ref_ids.push_back(*sid);
 			  decoder->cleanup();
 			  cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
@@ -338,8 +360,8 @@ int main(int argc, char** argv) {
 			  size_t oraclePos = featureValues[batchPosition].size();
 			  oraclePositions.push_back(oraclePos);
 			  vector<const Word*> oracle = decoder->getNBest(input,
-						*sid,
-						n,
+												*sid,
+												n,
                         1.0,
                         1.0,
                         featureValues[batchPosition],
@@ -350,6 +372,7 @@ int main(int argc, char** argv) {
                         rank);
 			  decoder->cleanup();
 			  oracles.push_back(oracle);
+			  allOracles.push_back(oracle);
 			  cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
 			  oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
@@ -380,51 +403,63 @@ int main(int argc, char** argv) {
 				  delete fear[i];
 			  }
 
+			  cerr << "\nRank " << rank << ", sentence " << *sid << ", Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+
 			  // next input sentence
 			  ++sid;
 			  ++actualBatchSize;
 			  ++shardPosition;
 		  }
 
-	      // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
-	      vector< vector<float> > losses(actualBatchSize);
-	      for (size_t batchPosition = 0; batchPosition < actualBatchSize; ++batchPosition) {
-	    	  for (size_t j = 0; j < bleuScores[batchPosition].size(); ++j) {
-	    		  losses[batchPosition].push_back(oracleBleuScores[batchPosition] - bleuScores[batchPosition][j]);
-	    	  }
-	      }
+		  // Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
+		  vector< vector<float> > losses(actualBatchSize);
+		  for (size_t batchPosition = 0; batchPosition < actualBatchSize; ++batchPosition) {
+		  	for (size_t j = 0; j < bleuScores[batchPosition].size(); ++j) {
+		  		losses[batchPosition].push_back(oracleBleuScores[batchPosition] - bleuScores[batchPosition][j]);
+		  	}
+		  }
 
-	      // get weight vector and set weight for bleu feature to 0
-	      ScoreComponentCollection mosesWeights = decoder->getWeights();
-	      const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
-	      mosesWeights.Assign(featureFunctions.back(), 0);
+		  // get weight vector and set weight for bleu feature to 0
+		  ScoreComponentCollection mosesWeights = decoder->getWeights();
+		  const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
+		  mosesWeights.Assign(featureFunctions.back(), 0);
 
-	      if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
-	    	  ((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
-	      }
+		  if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
+		  	((MiraOptimiser*)optimiser)->setOracleIndices(oraclePositions);
+		  }
 
-	      if (logFeatureValues) {
-	    	  for (size_t i = 0; i < featureValues.size(); ++i) {
-	    		  for (size_t j = 0; j < featureValues[i].size(); ++j) {
-	    			  featureValues[i][j].ApplyLog(baseOfLog);
-	    		  }
+		  if (logFeatureValues) {
+		  	for (size_t i = 0; i < featureValues.size(); ++i) {
+		  		for (size_t j = 0; j < featureValues[i].size(); ++j) {
+		  			featureValues[i][j].ApplyLog(baseOfLog);
+		  		}
 
-	    		  oracleFeatureValues[i].ApplyLog(baseOfLog);
-	    	  }
-	      }
+		  		oracleFeatureValues[i].ApplyLog(baseOfLog);
+		  	}
+		  }
 
 		  // run optimiser on batch
-	      cerr << "\nRank " << rank << ", run optimiser.." << endl;
-	      ScoreComponentCollection oldWeights(mosesWeights);
-	      int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
+		  cerr << "\nRank " << rank << ", run optimiser.." << endl;
+		  ScoreComponentCollection oldWeights(mosesWeights);
+		  int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
 
 		  // normalise Moses weights
-	      mosesWeights.L1Normalise();
+		  mosesWeights.L1Normalise();
 
-	      // compute difference to old weights
+		  // print weights and features values
+		  cerr << "\nRank " << rank << ", weights (normalised): " << mosesWeights << endl;
+/*		  cerr << "Rank " << rank << ", feature values: " << endl;
+		  for (size_t i = 0; i < featureValues.size(); ++i) {
+		  	for (size_t j = 0; j < featureValues[i].size(); ++j) {
+		  		cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
+		  	}
+		  }
+		  cerr << endl;*/
+
+		  // compute difference to old weights
 		  ScoreComponentCollection weightDifference(mosesWeights);
 		  weightDifference.MinusEquals(oldWeights);
-		  //cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
+		  cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
   
 		  // update history (for approximate document Bleu)
 		  for (size_t i = 0; i < oracles.size(); ++i) {
@@ -432,82 +467,42 @@ int main(int argc, char** argv) {
 		  }
 		  decoder->updateHistory(oracles, inputLengths, ref_ids);
 
-		  // clean up oracle translations after updating history
-		  for (size_t i = 0; i < oracles.size(); ++i) {
-			  for (size_t j = 0; j < oracles[i].size(); ++j) {
-				  delete oracles[i][j];
-			  }
+		  if (!devBleu) {
+		  	// clean up oracle translations after updating history
+		  	for (size_t i = 0; i < oracles.size(); ++i) {
+		  		for (size_t j = 0; j < oracles[i].size(); ++j) {
+		  			delete oracles[i][j];
+		  		}
+		  	}
 		  }
 
-		  // sanity check: compare margin created by old weights against new weights
-		  float lossMinusMargin_old = 0;
-		  float lossMinusMargin_new = 0;
-		  for (size_t batchPosition = 0; batchPosition < actualBatchSize; ++batchPosition) {
-			  for (size_t j = 0; j < featureValues[batchPosition].size(); ++j) {
-				  ScoreComponentCollection featureDiff(oracleFeatureValues[batchPosition]);
-				  featureDiff.MinusEquals(featureValues[batchPosition][j]);
+		  // set and accumulate weights
+		  decoder->setWeights(mosesWeights);
+		  cumulativeWeights.PlusEquals(mosesWeights);
 
-				  // old weights
-				  float margin = featureDiff.InnerProduct(oldWeights);
-				  lossMinusMargin_old += (losses[batchPosition][j] - margin);
-				  // new weights
-				  margin = featureDiff.InnerProduct(mosesWeights);
-				  lossMinusMargin_new += (losses[batchPosition][j] - margin);
-
-				  // now collect translations of first epoch only
-				  if (rank == 0 && epoch == 0) {
-					  list_of_delta_h.push_back(featureDiff);
-					  list_of_losses.push_back(losses[batchPosition][j]);
-				  }
-			  }
-	      }
-
-		  cerr << "\nRank " << rank << ", constraint change: " << constraintChange << endl;
-		  cerr << "Rank " << rank << ", summed (loss - margin) with old weights: " << lossMinusMargin_old << endl;
-		  cerr << "Rank " << rank << ", summed (loss - margin) with new weights: " << lossMinusMargin_new << endl;
-		  bool useNewWeights = true;
-	      if (lossMinusMargin_new > lossMinusMargin_old) {
-	    	  cerr << "Rank " << rank << ", worsening: " << lossMinusMargin_new - lossMinusMargin_old << endl;
-
-	    	  if (constraintChange < 0) {
-	    		  cerr << "Rank " << rank << ", something is going wrong here.." << endl;
-	    		  if (ignoreWeirdUpdates) {
-	    			  useNewWeights = false;
-	    		  }
-	    	  }
-	      }
-
-	      if (useNewWeights) {
-	    	  decoder->setWeights(mosesWeights);
-	    	  cumulativeWeights.PlusEquals(mosesWeights);
-	      }
-	      else {
-	    	  cerr << "Ignore new weights, keep old weights.. " << endl;
-	      }
-
-
-	      ++iterations;
-		  ++iterationsThisEpoch;
+		  ++weightChanges;
+		  ++weightChangesThisEpoch;
 
 		  // mix weights?
 #ifdef MPI_ENABLE
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 			  ScoreComponentCollection averageWeights;
-			  //if (rank == 0) {
-			  //	  cerr << "Rank 0, before mixing: " << mosesWeights << endl;
-			  //}
+			  if (rank == 0) {
+			  	  cerr << "Rank 0, before mixing: " << mosesWeights << endl;
+			  }
 
-			  //VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
+			  VERBOSE(1, "\nRank: " << rank << " \nBefore mixing: " << mosesWeights << endl);
 
 			  // collect all weights in averageWeights and divide by number of processes
 			  mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
 			  if (rank == 0) {
 				  averageWeights.DivideEquals(size);
-				  //VERBOSE(1, "After mixing: " << averageWeights << endl);
-				  //cerr << "Rank 0, after mixing: " << averageWeights << endl;
 
 				  // normalise weights after averaging
 				  averageWeights.L1Normalise();
+
+				  VERBOSE(1, "After mixing (normalised): " << averageWeights << endl);
+				  cerr << "Rank 0, after mixing (normalised): " << averageWeights << endl;
 			  }
 
 			  // broadcast average weights from process 0
@@ -520,14 +515,14 @@ int main(int argc, char** argv) {
 			  // compute average weights per process over iterations
 			  ScoreComponentCollection totalWeights(cumulativeWeights);
 			  if (accumulateWeights)
-				  totalWeights.DivideEquals(iterations);
+				  totalWeights.DivideEquals(weightChanges);
 			  else
-				  totalWeights.DivideEquals(iterationsThisEpoch);
+				  totalWeights.DivideEquals(weightChangesThisEpoch);
 
-			  //if (rank == 0) {
-			    //cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl;
-			    //cerr << "Rank 0, total weights: " << totalWeights << endl;
-			  //}
+			  if (rank == 0) {
+			  	cerr << "Rank 0, cumulative weights: " << cumulativeWeights << endl;
+			  	cerr << "Rank 0, total weights: " << totalWeights << endl;
+			  }
 
 			  if (weightEpochDump + 1 == weightDumpFrequency){
 				  // last weight dump in epoch
@@ -545,10 +540,10 @@ int main(int argc, char** argv) {
 #endif
 
 			  if (rank == 0 && !weightDumpStem.empty()) {
-				  // average and normalise weights
+				  // average by number of processes and normalise weights
 				  averageTotalWeights.DivideEquals(size);
 				  averageTotalWeights.L1Normalise();
-				  //cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
+				  cerr << "Rank 0, average total weights (normalised): " << averageTotalWeights << endl;
 
 				  ostringstream filename;
 				  if (epoch < 10) {
@@ -567,20 +562,14 @@ int main(int argc, char** argv) {
 
 				  if (weightEpochDump + 1 == weightDumpFrequency){
 					  // last weight dump in epoch
-
-					  // compute summed error
-					  float summedError = 0;
-					  for (size_t i = 0; i < list_of_delta_h.size(); ++i) {
-						  summedError += (list_of_losses[i] - list_of_delta_h[i].InnerProduct(averageTotalWeights));
-					  }
-					  cerr << "Rank 0, summed error after dumping weights: " << summedError << " (" << list_of_delta_h.size() << " examples)" << endl;
-
 					  // compare new average weights with previous weights
 					  averageTotalWeightsCurrent = averageTotalWeights;
 					  ScoreComponentCollection firstDiff(averageTotalWeightsCurrent);
 					  firstDiff.MinusEquals(averageTotalWeightsPrevious);
+					  cerr << "Rank 0, weight changes since previous epoch: " << firstDiff << endl;
 					  ScoreComponentCollection secondDiff(averageTotalWeightsCurrent);
 					  secondDiff.MinusEquals(averageTotalWeightsBeforePrevious);
+					  cerr << "Rank 0, weight changes since before previous epoch: " << secondDiff << endl;
 
 					  if (!suppressConvergence) {
 						  // check whether stopping criterion has been reached
@@ -591,7 +580,7 @@ int main(int argc, char** argv) {
 						  FVector::const_iterator iterator1 = changes1.cbegin();
 						  FVector::const_iterator iterator2 = changes2.cbegin();
 						  while (iterator1 != changes1.cend()) {
-							  if ((*iterator1).second >= 0.01 || (*iterator2).second >= 0.01) {
+							  if (abs((*iterator1).second) >= min_weight_change || abs((*iterator2).second) >= min_weight_change) {
 								  reached = false;
 								  break;
 							  }
@@ -602,9 +591,8 @@ int main(int argc, char** argv) {
 
 						  if (reached)  {
 							  // stop MIRA
-							  cerr << "\nRank 0, stopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl << endl;
-							  //cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
-							  
+							  cerr << "\nRank 0, stopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl;
+
 							  ScoreComponentCollection dummy;
 							  ostringstream endfilename;
 							  endfilename << "stopping";
@@ -613,6 +601,17 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLE
 							  MPI_Abort(MPI_COMM_WORLD, 0);
 #endif
+							  if (devBleu) {
+							  	// calculate bleu score of all oracle translations of dev set
+							  	decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch);
+								}
+							  if (marginScaleFactorStep > 0) {
+							  	cerr << "margin scale factor: " << marginScaleFactor << endl;
+							  }
+							  if (slack_step > 0) {
+							  	cerr << "slack: " << slack << endl;
+							  }
+
 							  goto end;
 						  }
 					  }
@@ -623,8 +622,47 @@ int main(int argc, char** argv) {
 		  }
 	  }
 
-	  //list_of_delta_h.clear();
-	  //list_of_losses.clear();
+	  if (devBleu) {
+	  	// calculate bleu score of all oracle translations of dev set
+	  	decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch);
+
+	  	// clean up oracle translations
+	  	for (size_t i = 0; i < allOracles.size(); ++i) {
+	  		for (size_t j = 0; j < allOracles[i].size(); ++j) {
+	  			delete allOracles[i][j];
+	  		}
+	  	}
+	  }
+
+	  // if using flexible margin scale factor, increase scaling (decrease value) for next epoch
+	  if (marginScaleFactorStep > 0) {
+	  	if (marginScaleFactor - marginScaleFactorStep >= marginScaleFactorMin) {
+	  		if (typeid(*optimiser) == typeid(MiraOptimiser)) {
+	  			cerr << "old margin scale factor: " << marginScaleFactor << endl;
+					marginScaleFactor -= marginScaleFactorStep;
+					cerr << "new margin scale factor: " << marginScaleFactor << endl;
+					((MiraOptimiser*)optimiser)->setMarginScaleFactor(marginScaleFactor);
+	  		}
+	  	}
+	  	else {
+	  		cerr << "margin scale factor: " << marginScaleFactor << endl;
+	  	}
+	  }
+
+	  // if using flexible slack, increase slack for next epoch
+	  if (slack_step > 0) {
+	  	if (slack + slack_step <= slack_max) {
+	  		if (typeid(*optimiser) == typeid(MiraOptimiser)) {
+	  			cerr << "old slack: " << slack << endl;
+	  			slack += slack_step;
+	  			cerr << "new slack: " << slack << endl;
+	  			((MiraOptimiser*)optimiser)->setSlack(slack);
+	  		}
+	  	}
+	  	else {
+	  		cerr << "slack: " << slack << endl;
+	  	}
+	  }
   }
 
  end:  
@@ -633,13 +671,9 @@ int main(int argc, char** argv) {
   MPI_Finalize();
 #endif
 
-  //if (rank == 0) {
-  //	  cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
-  //}
-
   now = time(0); // get current time
   tm = localtime(&now); // get struct filled out
-  cerr << "End date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
+  cerr << "\nEnd date/time: " << tm->tm_mon+1 << "/" << tm->tm_mday << "/" << tm->tm_year + 1900
 		    << ", " << tm->tm_hour << ":" << tm->tm_min << ":" << tm->tm_sec << endl;
 
   delete decoder;
