@@ -461,9 +461,9 @@ vector<float> BleuScoreFeature::CalculateBleuOfCorpus(const vector< vector< cons
 	// 		  = BP * 4th root(PRODUCT_1_4 p_n)
 	for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
 		if (sumOfNgramCounts[i]) {
-			precision *= sumOfClippedNgramMatches[i] / sumOfNgramCounts[i];
-			bleu.push_back(sumOfClippedNgramMatches[i] / sumOfNgramCounts[i]);
-    }
+			precision *= 1.0*sumOfClippedNgramMatches[i] / sumOfNgramCounts[i];
+			bleu.push_back(1.0*sumOfClippedNgramMatches[i] / sumOfNgramCounts[i]);
+		}
 	}
 
 	// take geometric mean
