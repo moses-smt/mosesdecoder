@@ -603,7 +603,7 @@ int main(int argc, char** argv) {
 #endif
 							  if (devBleu) {
 							  	// calculate bleu score of all oracle translations of dev set
-							  	decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch);
+							    decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
 								}
 							  if (marginScaleFactorStep > 0) {
 							  	cerr << "margin scale factor: " << marginScaleFactor << endl;
@@ -624,7 +624,7 @@ int main(int argc, char** argv) {
 
 	  if (devBleu) {
 	  	// calculate bleu score of all oracle translations of dev set
-	  	decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch);
+	    decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
 
 	  	// clean up oracle translations
 	  	for (size_t i = 0; i < allOracles.size(); ++i) {
