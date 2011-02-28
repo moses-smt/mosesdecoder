@@ -43,7 +43,7 @@ bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 //bool TargetPhrase::printalign;
 
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
-  :Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+  :Phrase(direction, 0),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
 {
 
   //ACAT
@@ -55,7 +55,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
 
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
-  :Phrase(direction)
+  :Phrase(direction, ARRAY_SIZE_INCR)
   , m_transScore(0.0)
   , m_ngramScore(0.0)
   , m_fullScore(0.0)

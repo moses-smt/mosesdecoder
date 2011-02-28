@@ -98,7 +98,7 @@ TrellisNode::~TrellisNode()
 Moses::Phrase TrellisNode::GetOutputPhrase() const
 {
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
-  Moses::Phrase ret(Moses::Output);
+  Moses::Phrase ret(Moses::Output, Moses::ARRAY_SIZE_INCR);
 
   const Moses::Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {

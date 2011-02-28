@@ -69,7 +69,7 @@ LexicalReordering::~LexicalReordering()
 
 Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
 {
-  return m_table->GetScore(f, e, Phrase(Output));
+  return m_table->GetScore(f, e, Phrase(Output, ARRAY_SIZE_INCR));
 }
 
 FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,

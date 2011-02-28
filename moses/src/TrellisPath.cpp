@@ -156,7 +156,7 @@ void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
 
 Phrase TrellisPath::GetTargetPhrase() const
 {
-  Phrase targetPhrase(Output);
+  Phrase targetPhrase(Output, ARRAY_SIZE_INCR);
 
   int numHypo = (int) m_path.size();
   for (int node = numHypo - 2 ; node >= 0 ; --node) {
@@ -174,7 +174,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
 {
   const std::vector<FactorType> &outputFactor = StaticData::Instance().GetOutputFactorOrder();
   Phrase targetPhrase = GetTargetPhrase()
-                        ,ret(Output);
+                        ,ret(Output, targetPhrase.GetSize());
 
   for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos) {
     Word &newWord = ret.AddWord();

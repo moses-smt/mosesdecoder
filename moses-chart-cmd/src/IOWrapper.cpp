@@ -269,7 +269,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
       if (StaticData::Instance().IsPathRecoveryEnabled()) {
         out << "||| ";
       }
-      Phrase outPhrase(Output);
+      Phrase outPhrase(Output, ARRAY_SIZE_INCR);
       hypo->CreateOutputPhrase(outPhrase);
 
       // delete 1st & last

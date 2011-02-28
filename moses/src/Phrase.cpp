@@ -104,7 +104,7 @@ void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& fac
 
 Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 {
-  Phrase retPhrase(m_direction);
+  Phrase retPhrase(m_direction, wordsRange.GetNumWordsCovered());
 
   for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
     Word &word = retPhrase.AddWord();
@@ -116,7 +116,6 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
-  Phrase retPhrase(m_direction);
   stringstream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
@@ -189,6 +188,8 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 
+  m_words.reserve(phraseVector.size());
+
   for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++) {
     // add word this phrase
     Word &word = AddWord();
@@ -221,6 +222,8 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
   //		to
   // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+
+  m_words.reserve(annotatedWordVector.size()-1);
 
   for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++) {
     string &annotatedWord = annotatedWordVector[phrasePos];

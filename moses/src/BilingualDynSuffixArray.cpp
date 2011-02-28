@@ -182,7 +182,7 @@ int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorLis
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	while(getline(corpus, line)) {
 		sntArray.push_back(sntIdx);
-		Phrase phrase(direction);
+		Phrase phrase(direction, ARRAY_SIZE_INCR);
 		// parse phrase
 		phrase.CreateFromString( factors, line, factorDelimiter);
 		// store words in vocabulary and corpus
@@ -438,7 +438,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
   cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
-  Phrase sphrase(Input);
+  Phrase sphrase(Input, ARRAY_SIZE_INCR);
   sphrase.CreateFromString(m_inputFactors, source, factorDelimiter);
   m_srcVocab->MakeOpen();
   // store words in vocabulary and corpus
@@ -449,7 +449,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   }
   m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence 
   m_srcVocab->MakeClosed();
-  Phrase tphrase(Output);
+  Phrase tphrase(Output, ARRAY_SIZE_INCR);
   tphrase.CreateFromString(m_outputFactors, target, factorDelimiter);
   m_trgVocab->MakeOpen();
   for(size_t i = 0; i < tphrase.GetSize(); ++i) {

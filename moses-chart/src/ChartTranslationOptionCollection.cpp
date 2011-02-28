@@ -190,7 +190,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
     // modify the starting bitmap
   }
 
-  Phrase* m_unksrc = new Phrase(Input);
+  Phrase* m_unksrc = new Phrase(Input, 1);
   m_unksrc->AddWord() = sourceWord;
   m_unksrcs.push_back(m_unksrc);
 

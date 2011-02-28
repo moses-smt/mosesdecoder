@@ -107,7 +107,7 @@ void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 
 Phrase Hypothesis::GetOutputPhrase() const
 {
-  Phrase outPhrase(Output);
+  Phrase outPhrase(Output, ARRAY_SIZE_INCR);
   CreateOutputPhrase(outPhrase);
   return outPhrase;
 }
@@ -219,7 +219,7 @@ void Hypothesis::CalcLMScore()
 
   m_scoreBreakdown.ZeroAllLM(lmList);
 
-  Phrase outPhrase(Output); // = GetOutputPhrase();
+  Phrase outPhrase(Output, ARRAY_SIZE_INCR); // = GetOutputPhrase();
   bool calcNow = false, firstPhrase = true;
 
   for (size_t targetPhrasePos = 0; targetPhrasePos < GetCurrTargetPhrase().GetSize(); ++targetPhrasePos) {

@@ -236,11 +236,11 @@ public:
     std::vector<float> scores;
     Phrase src;
 
-    State() : range(0,0),scores(0),src(Input) {}
+    State() : range(0,0),scores(0),src(Input, ARRAY_SIZE_INCR) {}
     State(Position b,Position e,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0))
-      : ptr(v),range(b,e),scores(sv),src(Input) {}
+      : ptr(v),range(b,e),scores(sv),src(Input, ARRAY_SIZE_INCR) {}
     State(Range const& r,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0))
-      : ptr(v),range(r),scores(sv),src(Input) {}
+      : ptr(v),range(r),scores(sv),src(Input, ARRAY_SIZE_INCR) {}
 
     Position begin() const {
       return range.first;

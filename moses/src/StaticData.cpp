@@ -395,12 +395,12 @@ bool StaticData::LoadData(Parameter *parameter)
 
       if (vecStr.size() == 1) {
         sentenceID++;
-        Phrase phrase(Output);
+        Phrase phrase(Output, 0);
         phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else if (vecStr.size() == 2) {
         sentenceID = Scan<long>(vecStr[0]);
-        Phrase phrase(Output);
+        Phrase phrase(Output, 0);
         phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else {

@@ -148,7 +148,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
     Word sourceLHS, targetLHS;
 
     // source
-    Phrase sourcePhrase(Input);
+    Phrase sourcePhrase(Input, 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     // create target phrase obj

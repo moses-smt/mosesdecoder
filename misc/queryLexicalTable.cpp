@@ -86,7 +86,7 @@ int main(int argc, char** argv)
   if(use_context) {
     c_mask.push_back(0);
   }
-  Phrase e(Output),f(Input),c(Output);
+  Phrase e(Output, 0),f(Input, 0),c(Output, 0);
   e.CreateFromString(e_mask, query_e, "|");
   f.CreateFromString(f_mask, query_f, "|");
   c.CreateFromString(c_mask,  query_c,"|");
