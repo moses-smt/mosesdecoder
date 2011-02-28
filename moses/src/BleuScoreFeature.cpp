@@ -304,6 +304,10 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
     // Get context and append new words.
     num_new_words = cur_hypo.GetTargetPhrase().GetSize();
+    if (num_new_words == 0) {
+	return new_state;
+    }
+ 
     Phrase new_words = ps.m_words;
     new_words.Append(cur_hypo.GetTargetPhrase());
     //cerr << "NW: " << new_words << endl;
