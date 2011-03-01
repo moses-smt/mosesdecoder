@@ -1272,8 +1272,8 @@ bool StaticData::LoadDiscrimLMFeature()
 		return false;
 	}
 	vector<string> tokens = Tokenize(wordFile[0]);
-  if (tokens.size() != 2) {
-    UserMessage::Add("Format of discriminative language model parametr is <order> <filename>");
+  if (tokens.size() != 2 && tokens.size() != 3) {
+    UserMessage::Add("Format of discriminative language model parametr is <order> [factor] <filename>");
     return false;
   }
   size_t order = Scan<size_t>(tokens[0]);
@@ -1281,11 +1281,17 @@ bool StaticData::LoadDiscrimLMFeature()
     UserMessage::Add("Only bigrams are supported by the discriminative LM");
     return false;
   }
+  FactorType factorId = 0;
+  string filename = tokens[1];
+  if (tokens.size() == 3) {
+    factorId = Scan<size_t>(tokens[1]);
+    filename = tokens[2];
+  }
 
-	m_targetBigramFeature = new TargetBigramFeature();
-  cerr << "loading from " << tokens[1] << endl;
-	if (!m_targetBigramFeature->Load(tokens[1])) {
-		UserMessage::Add("Unable to load word list from file " + tokens[1]);
+	m_targetBigramFeature = new TargetBigramFeature(factorId);
+  cerr << "loading from " << filename << endl;
+	if (!m_targetBigramFeature->Load(filename)) {
+		UserMessage::Add("Unable to load word list from file " + filename);
 		return false;
 	}
 
