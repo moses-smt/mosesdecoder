@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
   string decoder_settings;
   float min_weight_change;
   bool devBleu;
+  bool normaliseWeights;
   po::options_description desc("Allowed options");
   desc.add_options()
       ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -155,7 +156,8 @@ int main(int argc, char** argv) {
 	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold")
 	    ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 	    ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
-	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set");
+	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
+	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(true), "Whether to normalise the updated weights before passing them to the decoder");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -444,11 +446,16 @@ int main(int argc, char** argv) {
 		  int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
 
 		  // normalise Moses weights
-		  mosesWeights.L1Normalise();
+		  if (normaliseWeights) {
+		  	mosesWeights.L1Normalise();
+		  	cerr << "\nRank " << rank << ", weights (normalised): " << mosesWeights << endl;
+		  }
+		  else {
+		  	cerr << "\nRank " << rank << ", weights: " << mosesWeights << endl;
+		  }
 
 		  // print weights and features values
-		  cerr << "\nRank " << rank << ", weights (normalised): " << mosesWeights << endl;
-/*		  cerr << "Rank " << rank << ", feature values: " << endl;
+			/*		  cerr << "Rank " << rank << ", feature values: " << endl;
 		  for (size_t i = 0; i < featureValues.size(); ++i) {
 		  	for (size_t j = 0; j < featureValues[i].size(); ++j) {
 		  		cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
@@ -499,10 +506,15 @@ int main(int argc, char** argv) {
 				  averageWeights.DivideEquals(size);
 
 				  // normalise weights after averaging
-				  averageWeights.L1Normalise();
-
-				  VERBOSE(1, "After mixing (normalised): " << averageWeights << endl);
-				  cerr << "Rank 0, after mixing (normalised): " << averageWeights << endl;
+				  if (normaliseWeights) {
+				  	averageWeights.L1Normalise();
+				  	VERBOSE(1, "After mixing (normalised): " << averageWeights << endl);
+				  	cerr << "Rank 0, after mixing (normalised): " << averageWeights << endl;
+				  }
+				  else {
+				  	VERBOSE(1, "After mixing: " << averageWeights << endl);
+				  	cerr << "Rank 0, after mixing: " << averageWeights << endl;
+				  }
 			  }
 
 			  // broadcast average weights from process 0
@@ -542,8 +554,14 @@ int main(int argc, char** argv) {
 			  if (rank == 0 && !weightDumpStem.empty()) {
 				  // average by number of processes and normalise weights
 				  averageTotalWeights.DivideEquals(size);
-				  averageTotalWeights.L1Normalise();
-				  cerr << "Rank 0, average total weights (normalised): " << averageTotalWeights << endl;
+				  if (normaliseWeights) {
+				  	averageTotalWeights.L1Normalise();
+				  	cerr << "Rank 0, average total weights (normalised): " << averageTotalWeights << endl;
+				  }
+				  else {
+				  	cerr << "Rank 0, average total weights: " << averageTotalWeights << endl;
+				  }
+
 
 				  ostringstream filename;
 				  if (epoch < 10) {
