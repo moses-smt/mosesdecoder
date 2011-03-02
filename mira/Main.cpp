@@ -114,6 +114,7 @@ int main(int argc, char** argv) {
   float min_weight_change;
   bool devBleu;
   bool normaliseWeights;
+  bool print_feature_values;
   po::options_description desc("Allowed options");
   desc.add_options()
       ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -157,7 +158,8 @@ int main(int argc, char** argv) {
 	    ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 	    ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
-	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(true), "Whether to normalise the updated weights before passing them to the decoder");
+	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(true), "Whether to normalise the updated weights before passing them to the decoder")
+	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -454,14 +456,15 @@ int main(int argc, char** argv) {
 		  	cerr << "\nRank " << rank << ", weights: " << mosesWeights << endl;
 		  }
 
-		  // print weights and features values
-			/*		  cerr << "Rank " << rank << ", feature values: " << endl;
-		  for (size_t i = 0; i < featureValues.size(); ++i) {
-		  	for (size_t j = 0; j < featureValues[i].size(); ++j) {
-		  		cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
-		  	}
+		  if (print_feature_values) {
+		  cerr << "Rank " << rank << ", feature values: " << endl;
+				for (size_t i = 0; i < featureValues.size(); ++i) {
+					for (size_t j = 0; j < featureValues[i].size(); ++j) {
+						cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
+					}
+				}
+				cerr << endl;
 		  }
-		  cerr << endl;*/
 
 		  // compute difference to old weights
 		  ScoreComponentCollection weightDifference(mosesWeights);
@@ -646,10 +649,10 @@ int main(int argc, char** argv) {
 
 	    ostringstream filename;
 	    if (epoch < 10) {
-	    	filename << "oracles_of_dev_set" << "_0" << epoch;
+	    	filename << "oracles_of_dev_set" << "_0" << epoch << "_rank" << rank;
 	    }
 	    else {
-	    	filename << "oracles_of_dev_set" << "_" << epoch;
+	    	filename << "oracles_of_dev_set" << "_" << epoch << "_rank" << rank;
 	    }
 	    ofstream out((filename.str()).c_str());
 
