@@ -49,7 +49,10 @@ public:
   void CleanUpAfterSentenceProcessing() {
     m_lm->clearCaches(); // clear caches
   }
-  void InitializeBeforeSentenceProcessing() {} // nothing to do
+  void InitializeBeforeSentenceProcessing() {
+    m_lm->initThreadSpecificData(); // Creates thread specific data iff
+                                    // compiled with multithreading.
+  }
 protected:
   std::vector<randlm::WordID> m_randlm_ids_vec;
   randlm::RandLM* m_lm;
