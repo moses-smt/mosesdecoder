@@ -73,21 +73,37 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
   // MAIN LOOP. create list of nodes of target phrases
 
+  // get list of all rules that apply to spans at same starting position
   ProcessedRuleColl &processedRuleCol = *m_processedRuleColls[range.GetStartPos()];
   const ProcessedRuleList &runningNodes = processedRuleCol.GetRunningNodes();
-  // Note that runningNodes can be expanded as the loop runs (through calls to
-  // ExtendPartialRuleApplication()).
+
+  // loop through the rules
+  // (note that runningNodes can be expanded as the loop runs 
+  //  through calls to ExtendPartialRuleApplication())
   for (size_t ind = 0; ind < runningNodes.size(); ++ind) {
+    // rule we are about to extend
     const ProcessedRule &prevProcessedRule = *runningNodes[ind];
+    // note where it was found in the prefix tree of the rule dictionary
     const PhraseDictionaryNodeSCFG &prevNode = prevProcessedRule.GetLastNode();
+    // look up end position of the span it covers
     const WordConsumed *prevWordConsumed = prevProcessedRule.GetLastWordConsumed();
+    // we will now try to extend it, starting after where it ended
+    // (note: prevWordConsumed == NULL matches for the dummy rule 
+    //  at root of the prefix tree)
     size_t startPos = (prevWordConsumed == NULL) ? range.GetStartPos() : prevWordConsumed->GetWordsRange().GetEndPos() + 1;
 
     // search for terminal symbol
+    // (if only one more word position needs to be covered)
     if (startPos == absEndPos) {
+
+      // look up in rule dictionary, if the current rule can be extended
+      // with the source word in the last position
       const Word &sourceWord = GetSentence().GetWord(absEndPos);
       const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord);
+
+      // if we found a new rule -> create it and add it to the list
       if (node != NULL) {
+				// create the rule
 #ifdef USE_BOOST_POOL
         WordConsumed *newWordConsumed = m_wordConsumedPool.malloc();
         new (newWordConsumed) WordConsumed(absEndPos, absEndPos, sourceWord,
@@ -107,20 +123,28 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
     // search for non-terminals
     size_t endPos, stackInd;
+
+    // span is already complete covered? nothing can be done
     if (startPos > absEndPos)
       continue;
+
     else if (startPos == range.GetStartPos() && range.GetEndPos() > range.GetStartPos()) {
       // start.
       endPos = absEndPos - 1;
       stackInd = relEndPos;
-    } else {
+    } 
+    else 
+    {
       endPos = absEndPos;
       stackInd = relEndPos + 1;
     }
 
+    // we have to cover the remainder of the span
+    // source non-terminal labels for the remainder
     const NonTerminalSet &sourceNonTerms =
       GetSentence().GetLabelSet(startPos, endPos);
 
+    // target non-terminal labels for the remainder
     const NonTerminalSet &targetNonTerms =
       GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
 
@@ -129,19 +153,22 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
                                  targetNonTerms, processedRuleCol);
   }
 
-  // return list of target phrases
-  ProcessedRuleList &nodes = processedRuleCol.Get(relEndPos + 1);
+  // list of rules that that cover the entire span
+  ProcessedRuleList &rules = processedRuleCol.Get(relEndPos + 1);
 
+  // look up target sides for the rules
   size_t rulesLimit = StaticData::Instance().GetRuleLimit();
-  ProcessedRuleList::const_iterator iterNode;
-  for (iterNode = nodes.begin(); iterNode != nodes.end(); ++iterNode) {
-    const ProcessedRule &processedRule = **iterNode;
+  ProcessedRuleList::const_iterator iterRule;
+  for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
+    const ProcessedRule &processedRule = **iterRule;
     const PhraseDictionaryNodeSCFG &node = processedRule.GetLastNode();
     const WordConsumed *wordConsumed = processedRule.GetLastWordConsumed();
     assert(wordConsumed);
 
+    // look up target sides
     const TargetPhraseCollection *targetPhraseCollection = node.GetTargetPhraseCollection();
 
+    // add the fully expanded rule (with lexical target side)
     if (targetPhraseCollection != NULL) {
       outColl.Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
     }
@@ -182,19 +209,29 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   //      for each source and target NT in the span's sets.
   // We'll do whichever minimises the number of lookups:
   if (numCombinations <= numChildren*2) {
+
+		// loop over possible source non-terminal labels (as found in input tree)
     NonTerminalSet::const_iterator p = sourceNonTerms.begin();
     NonTerminalSet::const_iterator sEnd = sourceNonTerms.end();
     for (; p != sEnd; ++p) {
       const Word & sourceNonTerm = *p;
+
+      // loop over possible target non-terminal labels (as found in chart)
       NonTerminalSet::const_iterator q = targetNonTerms.begin();
       NonTerminalSet::const_iterator tEnd = targetNonTerms.end();
       for (; q != tEnd; ++q) {
         const Word & targetNonTerm = *q;
+
+        // try to match both source and target non-terminal
         const PhraseDictionaryNodeSCFG * child =
           node.GetChild(sourceNonTerm, targetNonTerm);
+
+        // nothing found? then we are done
         if (child == NULL) {
           continue;
         }
+
+        // create new rule
 #ifdef USE_BOOST_POOL
         WordConsumed *wc = m_wordConsumedPool.malloc();
         new (wc) WordConsumed(startPos, endPos, targetNonTerm,
@@ -210,11 +247,15 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         processedRuleColl.Add(stackInd, rule);
       }
     }
-  } else {
+  } 
+  else 
+  {
+    // loop over possible expansions of the rule
     PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator p;
     PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator end =
       nonTermMap.end();
     for (p = nonTermMap.begin(); p != end; ++p) {
+      // does it match possible source and target non-terminals?
       const PhraseDictionaryNodeSCFG::NonTerminalMapKey & key = p->first;
       const Word & sourceNonTerm = key.first;
       if (sourceNonTerms.find(sourceNonTerm) == sourceNonTerms.end()) {
@@ -224,6 +265,8 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       if (targetNonTerms.find(targetNonTerm) == targetNonTerms.end()) {
         continue;
       }
+
+      // create new rule
       const PhraseDictionaryNodeSCFG & child = p->second;
 #ifdef USE_BOOST_POOL
       WordConsumed *wc = m_wordConsumedPool.malloc();
