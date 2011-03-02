@@ -148,7 +148,7 @@ namespace Mira {
     	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
     		const Word &word = phrase.GetWord(pos);
     		Word *newWord = new Word(word);
-    		cerr << *newWord << " ";
+    		cerr << *newWord;
     	}
 
     	cerr << endl;

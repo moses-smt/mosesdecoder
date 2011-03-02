@@ -644,12 +644,31 @@ int main(int argc, char** argv) {
 	  	// calculate bleu score of all oracle translations of dev set
 	    decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
 
-	  	// clean up oracle translations
-	  	for (size_t i = 0; i < allOracles.size(); ++i) {
-	  		for (size_t j = 0; j < allOracles[i].size(); ++j) {
-	  			delete allOracles[i][j];
-	  		}
-	  	}
+	    ostringstream filename;
+	    if (epoch < 10) {
+	    	filename << "oracles_of_dev_set" << "_0" << epoch;
+	    }
+	    else {
+	    	filename << "oracles_of_dev_set" << "_" << epoch;
+	    }
+	    ofstream out((filename.str()).c_str());
+
+	    // print oracle translations to file and delete them afterwards
+	    if (!out) {
+	    	ostringstream msg;
+	    	msg << "Unable to open " << filename;
+	    	throw runtime_error(msg.str());
+	    }
+	    else {
+	    	for (size_t i = 0; i < allOracles.size(); ++i) {
+	    		for (size_t j = 0; j < allOracles[i].size(); ++j) {
+	    			out << *(allOracles[i][j]);
+	    			delete allOracles[i][j];
+	    		}
+	    		out << endl;
+	    	}
+	    	out.close();
+	    }
 	  }
 
 	  // if using flexible margin scale factor, increase scaling (decrease value) for next epoch
