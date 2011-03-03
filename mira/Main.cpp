@@ -450,6 +450,7 @@ int main(int argc, char** argv) {
 
 		  // set decoder weights and accumulate weights
 		  if (controlUpdates && updateStatus < 0) {
+		  	// TODO: could try to repeat hildreth with more slack
 		  	cerr << "update ignored!" << endl;
 		  }
 		  else {

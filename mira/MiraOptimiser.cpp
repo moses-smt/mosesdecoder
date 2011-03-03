@@ -130,6 +130,11 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 	}
 
+	cerr << "Number of violated constraints before optimisation: " << violatedConstraintsBefore << endl;
+	if (featureValueDiffs.size() != 30) {
+		cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
+	}
+
 	// run optimisation: compute alphas for all given constraints
 	vector< float> alphas;
 	if (m_accumulateMostViolatedConstraints && !m_pastAndCurrentConstraints) {
@@ -167,11 +172,6 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
 		}
 
-		cerr << "Number of violated constraints before optimisation: " << violatedConstraintsBefore << endl;
-		if (featureValueDiffs.size() != 30) {
-			cerr << "Number of constraints passed to optimiser: " << featureValueDiffs.size() << endl;
-		}
-
 		if (m_slack != 0) {
 			alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances, m_slack);
 		}
@@ -189,33 +189,34 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			// apply update to weight vector
 			currWeights.PlusEquals(featureValueDiffs[k]);
 		}
-
-		// sanity check: how many constraints violated after optimisation?
-		size_t violatedConstraintsAfter = 0;
-		float newDistanceFromOptimum = 0;
-		for (size_t i = 0; i < featureValues.size(); ++i) {
-			for (size_t j = 0; j < featureValues[i].size(); ++j) {
-				ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
-				featureValueDiff.MinusEquals(featureValues[i][j]);
-				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-				float loss = losses[i][j] * m_marginScaleFactor;
-				if (modelScoreDiff < loss) {
-					++violatedConstraintsAfter;
-					newDistanceFromOptimum += (loss - modelScoreDiff);
-				}
-			}
-		}
-
-		int constraintChange = violatedConstraintsBefore - violatedConstraintsAfter;
-		cerr << "Constraint change: " << constraintChange << endl;
-		float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
-		cerr << "Distance change: " << distanceChange << endl;
-		if (constraintChange < 0 && distanceChange < 0) {
-			return -1;
-		}
 	}
 	else {
 		cerr << "No constraint violated for this batch" << endl;
+		return 0;
+	}
+
+	// sanity check: how many constraints violated after optimisation?
+	size_t violatedConstraintsAfter = 0;
+	float newDistanceFromOptimum = 0;
+	for (size_t i = 0; i < featureValues.size(); ++i) {
+		for (size_t j = 0; j < featureValues[i].size(); ++j) {
+			ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
+			featureValueDiff.MinusEquals(featureValues[i][j]);
+			float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+			float loss = losses[i][j] * m_marginScaleFactor;
+			if (modelScoreDiff < loss) {
+				++violatedConstraintsAfter;
+				newDistanceFromOptimum += (loss - modelScoreDiff);
+			}
+		}
+	}
+
+	int constraintChange = violatedConstraintsBefore - violatedConstraintsAfter;
+	cerr << "Constraint change: " << constraintChange << endl;
+	float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
+	cerr << "Distance change: " << distanceChange << endl;
+	if (constraintChange < 0 && distanceChange < 0) {
+		return -1;
 	}
 
 	return 0;
