@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
-	    ("slack", po::value<float>(&slack)->default_value(0), "Use slack in optimizer")
+	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
 	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
 	    ("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
