@@ -212,6 +212,18 @@ public:
 		m_scores.applyLog(baseOfLog);
 	}
 
+	void ClipAll(float maxValue)
+	{
+		for (size_t i = 0; i < m_scores.size(); ++i) {
+			if (m_scores.get(i) > maxValue) {
+				m_scores.set(i, maxValue);
+			}
+			else if (m_scores.get(i) < maxValue*-1) {
+				m_scores.set(i, maxValue*-1);
+			}
+		}
+	}
+
 	//! if a ScoreProducer produces a single score (for example, a language model score)
 	//! this will return it.  If not, this method will throw
 	float GetScoreForProducer(const ScoreProducer* sp) const

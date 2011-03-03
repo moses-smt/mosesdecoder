@@ -105,13 +105,13 @@ int main(int argc, char** argv) {
   bool pastAndCurrentConstraints;
   bool suppressConvergence;
   bool ignoreUWeight;
-  bool ignoreWeirdUpdates;
+  bool controlUpdates;
   bool logFeatureValues;
   size_t baseOfLog;
-  float clipping;
-  bool fixedClipping;
   string decoder_settings;
   float min_weight_change;
+  float max_sentence_update;
+  float decrease_learning_rate;
   bool devBleu;
   bool normaliseWeights;
   bool print_feature_values;
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
       ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
       ("input-file,i",po::value<string>(&inputFile),"Input file containing tokenised source")
       ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
-      ("epochs,e", po::value<size_t>(&epochs)->default_value(1), "Number of epochs")
+      ("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
       ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
       ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
       ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
@@ -150,15 +150,15 @@ int main(int argc, char** argv) {
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("suppress-convergence", po::value<bool>(&suppressConvergence)->default_value(false), "Suppress convergence, fixed number of epochs")
 	    ("ignore-u-weight", po::value<bool>(&ignoreUWeight)->default_value(false), "Don't tune unknown word penalty weight")
-	    ("ignore-weird-updates", po::value<bool>(&ignoreWeirdUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
+	    ("control-updates", po::value<bool>(&controlUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
 	    ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 	    ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
-	    ("clipping", po::value<float>(&clipping)->default_value(0.01), "Set a threshold to regularise updates")
-	    ("fixed-clipping", po::value<bool>(&fixedClipping)->default_value(false), "Use a fixed clipping threshold")
 	    ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 	    ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+	    ("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(0), "Set a maximum weight update per sentence")
+	    ("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0), "Decrease learning rate by the given value after every epoch (starting with 1 = no restriction)")
 	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
-	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(true), "Whether to normalise the updated weights before passing them to the decoder")
+	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values");
 
   po::options_description cmdline_options;
@@ -263,11 +263,9 @@ int main(int argc, char** argv) {
   cerr << "Ignore unknown word penalty? " << ignoreUWeight << endl;
   cerr << "take log of feature values? " << logFeatureValues << endl;
   cerr << "base of log: " << baseOfLog << endl;
-  cerr << "Fixed clipping? " << fixedClipping << endl;
-  cerr << "clipping: " << clipping << endl;
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
-    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, clipping, fixedClipping, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
+    optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
@@ -301,6 +299,7 @@ int main(int argc, char** argv) {
   // print initial weights
   cerr << "weights: " << decoder->getWeights() << endl;
 
+  float learning_rate = 1;
   for (size_t epoch = 0; epoch < epochs; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
 	  weightChangesThisEpoch = 0;
@@ -447,19 +446,49 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 		  cerr << "\nRank " << rank << ", run optimiser.." << endl;
 		  ScoreComponentCollection oldWeights(mosesWeights);
-		  int constraintChange = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
+		  int updateStatus = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
 
-		  // normalise Moses weights
-		  if (normaliseWeights) {
-		  	mosesWeights.L1Normalise();
-		  	cerr << "\nRank " << rank << ", weights (normalised): " << mosesWeights << endl;
+		  // set decoder weights and accumulate weights
+		  if (controlUpdates && updateStatus < 0) {
+		  	cerr << "update ignored!" << endl;
 		  }
 		  else {
-		  	cerr << "\nRank " << rank << ", weights: " << mosesWeights << endl;
+		  	// apply learning rate
+		  	if (learning_rate < 1) {
+		  		cerr << "before applying learning rate: " << mosesWeights << endl;
+		  		mosesWeights.MultiplyEquals(learning_rate);
+		  		cerr << "after applying learning rate: " << mosesWeights << endl;
+		  	}
+
+		  	// apply clipping
+		  	if (max_sentence_update > 0) {
+		  		cerr << "before clipping: " << mosesWeights << endl;
+		  		mosesWeights.ClipAll(max_sentence_update);
+		  		cerr << "after clipping: " << mosesWeights << endl;
+		  	}
+
+		  	if (normaliseWeights) {
+		  		mosesWeights.L1Normalise();
+		  		cerr << "\nRank " << rank << ", weights (normalised): " << mosesWeights << endl;
+		  	}
+		  	else {
+		  		cerr << "\nRank " << rank << ", weights: " << mosesWeights << endl;
+		  	}
+
+		  	decoder->setWeights(mosesWeights);
+		  	cumulativeWeights.PlusEquals(mosesWeights);
+
+		  	++weightChanges;
+		  	++weightChangesThisEpoch;
+
+		  	// compute difference to old weights
+		  	ScoreComponentCollection weightDifference(mosesWeights);
+		  	weightDifference.MinusEquals(oldWeights);
+		  	cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
 		  }
 
 		  if (print_feature_values) {
-		  cerr << "Rank " << rank << ", feature values: " << endl;
+		  	cerr << "Rank " << rank << ", feature values: " << endl;
 				for (size_t i = 0; i < featureValues.size(); ++i) {
 					for (size_t j = 0; j < featureValues[i].size(); ++j) {
 						cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
@@ -468,11 +497,6 @@ int main(int argc, char** argv) {
 				cerr << endl;
 		  }
 
-		  // compute difference to old weights
-		  ScoreComponentCollection weightDifference(mosesWeights);
-		  weightDifference.MinusEquals(oldWeights);
-		  cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
-  
 		  // update history (for approximate document Bleu)
 		  for (size_t i = 0; i < oracles.size(); ++i) {
 			  cerr << "Rank " << rank << ", oracle length: " << oracles[i].size() << " ";
@@ -487,13 +511,6 @@ int main(int argc, char** argv) {
 		  		}
 		  	}
 		  }
-
-		  // set and accumulate weights
-		  decoder->setWeights(mosesWeights);
-		  cumulativeWeights.PlusEquals(mosesWeights);
-
-		  ++weightChanges;
-		  ++weightChangesThisEpoch;
 
 		  // mix weights?
 #ifdef MPI_ENABLE
@@ -710,9 +727,8 @@ int main(int argc, char** argv) {
 	  if (marginScaleFactorStep > 0) {
 	  	if (marginScaleFactor - marginScaleFactorStep >= marginScaleFactorMin) {
 	  		if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-	  			cerr << "old margin scale factor: " << marginScaleFactor << endl;
-					marginScaleFactor -= marginScaleFactorStep;
-					cerr << "new margin scale factor: " << marginScaleFactor << endl;
+	  			marginScaleFactor -= marginScaleFactorStep;
+					cerr << "Change margin scale factor to: " << marginScaleFactor << endl;
 					((MiraOptimiser*)optimiser)->setMarginScaleFactor(marginScaleFactor);
 	  		}
 	  	}
@@ -725,15 +741,23 @@ int main(int argc, char** argv) {
 	  if (slack_step > 0) {
 	  	if (slack + slack_step <= slack_max) {
 	  		if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-	  			cerr << "old slack: " << slack << endl;
 	  			slack += slack_step;
-	  			cerr << "new slack: " << slack << endl;
+	  			cerr << "Change slack to: " << slack << endl;
 	  			((MiraOptimiser*)optimiser)->setSlack(slack);
 	  		}
 	  	}
 	  	else {
 	  		cerr << "slack: " << slack << endl;
 	  	}
+	  }
+
+	  // change learning rate
+	  if (decrease_learning_rate > 0) {
+	  	learning_rate -= decrease_learning_rate;
+	  	cerr << "Change learning rate to " << learning_rate << endl;
+	  }
+	  else {
+	  	cerr << "learning rate: " << learning_rate << endl;
 	  }
   }
 

@@ -68,14 +68,12 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float clipping, bool fixedClipping, float slack, bool weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize) :
+	  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float slack, bool weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
 		  m_marginScaleFactor(marginScaleFactor),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
-		  m_c(clipping),
-		  m_fixedClipping(fixedClipping),
 		  m_slack(slack),
 		  m_weightedLossFunction(weightedLossFunction),
 		  m_max_number_oracles(maxNumberOracles),
@@ -93,13 +91,6 @@ namespace Mira {
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
       						  const std::vector< float> oracleBleuScores,
       						  const std::vector< size_t> sentenceId);
-      float computeDelta(Moses::ScoreComponentCollection& currWeights,
-      				const Moses::ScoreComponentCollection featureValuesDiff,
-      				float loss_jk,
-      				float j,
-      				float k,
-      				std::vector< float>& alphas);
-      void update(Moses::ScoreComponentCollection& currWeights, Moses::ScoreComponentCollection& featureValueDiffs, const float delta);
 
       void setOracleIndices(std::vector<size_t> oracleIndices) {
     	  m_oracleIndices= oracleIndices;
@@ -125,12 +116,6 @@ namespace Mira {
 
       // add only violated constraints to the optimisation problem
       bool m_onlyViolatedConstraints;
-
-      // clipping threshold for SMO to regularise updates
-      float m_c;
-
-      // use a fixed clipping threshold with SMO  (instead of adaptive)
-      bool m_fixedClipping;
 
       // regularise Hildreth updates
       float m_slack;
