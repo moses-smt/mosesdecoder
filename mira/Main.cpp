@@ -215,9 +215,11 @@ int main(int argc, char** argv) {
   boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
   initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
   MosesDecoder* decoder = new MosesDecoder(referenceSentences, useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
-  ScoreComponentCollection startWeights = decoder->getWeights();
-  startWeights.L1Normalise();
-  decoder->setWeights(startWeights);
+  if (normaliseWeights) {
+  	ScoreComponentCollection startWeights = decoder->getWeights();
+  	startWeights.L1Normalise();
+  	decoder->setWeights(startWeights);
+  }
 
   // Optionally shuffle the sentences
   vector<size_t> order;
