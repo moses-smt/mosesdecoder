@@ -335,7 +335,6 @@ public:
   const TranslationSystem& GetTranslationSystem(std::string id) const {
     std::map<std::string, TranslationSystem>::const_iterator iter =
       m_translationSystems.find(id);
-    VERBOSE(2, "Looking for translation system id " << id << std::endl);
     if (iter == m_translationSystems.end()) {
       VERBOSE(1, "Translation system not found " << id << std::endl);
       throw std::runtime_error("Unknown translation system id");
