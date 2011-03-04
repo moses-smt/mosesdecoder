@@ -309,6 +309,9 @@ int main(int argc, char** argv) {
   float prevAverageApproxBleu = 0;
   float beforePrevAverageApproxBleu = 0;
   bool stop = false;
+  float *sendbuf, *recvbuf;
+  sendbuf = (float *)malloc(sizeof(float));
+  recvbuf = (float *)malloc(sizeof(float));
   for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
 	  weightChangesThisEpoch = 0;
@@ -654,7 +657,7 @@ int main(int argc, char** argv) {
 							  MPI_Abort(MPI_COMM_WORLD, 0);
 #endif
 							  if (devBleu) {
-							  	// calculate bleu score of all oracle translations of dev set
+							    // calculate bleu score of all oracle translations of dev set
 							    float bleu = decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
 
 							    // print out translations
@@ -686,16 +689,23 @@ int main(int argc, char** argv) {
 
 #ifdef MPI_ENABLE
 							    // average bleu across processes
-							    mpi::reduce(world, bleu, averageBleu, SCCPlus(), 0);
+							    sendbuf[0] = bleu;
+							    recvbuf[0] = 0;
+							    MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+							    averageBleu = recvbuf[0];
 							    cerr << "Average Bleu (dev) after epoch " << epoch << ":" << averageBleu << endl;
 
-								  // average approximate sentence bleu across processes
-								  mpi::reduce(world, summedApproxBleu, averageApproxBleu, SCCPlus(), 0);
-								  cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+							    // average approximate sentence bleu across processes
+							    sendbuf[0] = summedApproxBleu;
+							    recvbuf[0] = 0;
+							    MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+							    averageApproxBleu = recvbuf[0];
+							    averageApproxBleu /= weightChangesThisEpoch;
+							    cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
 #endif
 #ifndef MPI_ENABLE
-								  averageApproxBleu = summedApproxBleu/weightChangesThisEpoch;
-								  cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+							    averageApproxBleu = summedApproxBleu/weightChangesThisEpoch;
+							    cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
 #endif
 							  }
 
@@ -748,38 +758,50 @@ int main(int argc, char** argv) {
 	    	out.close();
 	    }
 
-	    beforePrevAverageBleu = prevAverageBleu;
-	    beforePrevAverageApproxBleu = prevAverageApproxBleu;
-	    prevAverageBleu = averageBleu;
-	    prevAverageApproxBleu = averageApproxBleu;
+	    if (rank ==0) {
+	      beforePrevAverageBleu = prevAverageBleu;
+	      beforePrevAverageApproxBleu = prevAverageApproxBleu;
+	      prevAverageBleu = averageBleu;
+	      prevAverageApproxBleu = averageApproxBleu;
 
 #ifdef MPI_ENABLE
-	    // average bleu across processes
-	    mpi::reduce(world, bleu, averageBleu, SCCPlus(), 0);
-	    cerr << "Average Bleu (dev) after epoch " << epoch << ":" << averageBleu << endl;
-
-	    // average approximate sentence bleu across processes
-	    mpi::reduce(world, summedApproxBleu, averageApproxBleu, SCCPlus(), 0);
-	    cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+	      // average bleu across processes
+	      sendbuf[0] = bleu;
+	      recvbuf[0] = 0;
+	      MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+	      averageBleu = recvbuf[0];
+	      cerr << "Average Bleu (dev) after epoch " << epoch << ":" << averageBleu << endl;
+	      
+	      // average approximate sentence bleu across processes
+	      sendbuf[0] = summedApproxBleu;
+	      recvbuf[0] = 0;
+	      MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+	      averageApproxBleu = recvbuf[0];
+	      averageApproxBleu /= weightChangesThisEpoch;
+	      cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
 #endif
 #ifndef MPI_ENABLE
-	    averageApproxBleu = summedApproxBleu/weightChangesThisEpoch;
-	    cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+	      averageApproxBleu = summedApproxBleu/weightChangesThisEpoch;
+	      cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
 #endif
+	      
+	      if (averageBleu < prevAverageBleu && prevAverageBleu < beforePrevAverageBleu) {
+	      	if (stop_dev_bleu) {
+	      		stop = true;
+	      		cerr << "average Bleu (dev) is decreasing.. stop tuning." << endl;
+					}
+	      	else
+	      		cerr << "average Bleu (dev) is decreasing.." << endl;
+	      }
 
-	    if (averageBleu < prevAverageBleu && prevAverageBleu < beforePrevAverageBleu) {
-	    	cerr << "average Bleu (dev) is decreasing.." << endl;
-	    	if (stop_dev_bleu) {
-	    		stop = true;
-	    		cerr << "stop." << endl;
-	    	}
-	    }
-	    if (averageApproxBleu < prevAverageApproxBleu && prevAverageApproxBleu < beforePrevAverageApproxBleu) {
-	    	cerr << "average approx. sentence Bleu (dev) is decreasing.." << endl;
-	    	if (stop_approx_dev_bleu) {
-	    		stop = true;
-	    		cerr << "stop." << endl;
-	    	}
+	      if (averageApproxBleu < prevAverageApproxBleu && prevAverageApproxBleu < beforePrevAverageApproxBleu) {
+	      	if (stop_approx_dev_bleu) {
+	      		stop = true;
+	      		cerr << "average approx. sentence Bleu (dev) is decreasing.. stop tuning." << endl;
+	      	}
+	      	else
+	      		cerr << "average approx. sentence Bleu (dev) is decreasing.." << endl;
+				}
 	    }
 	  }
 
