@@ -115,6 +115,8 @@ int main(int argc, char** argv) {
   bool devBleu;
   bool normaliseWeights;
   bool print_feature_values;
+  bool stop_dev_bleu;
+  bool stop_approx_dev_bleu;
   po::options_description desc("Allowed options");
   desc.add_options()
       ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -159,7 +161,9 @@ int main(int argc, char** argv) {
 	    ("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0), "Decrease learning rate by the given value after every epoch (starting with 1 = no restriction)")
 	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
 	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
-	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values");
+	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases")
+	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -269,9 +273,6 @@ int main(int argc, char** argv) {
     if (hildreth) {
     	cerr << "Using Hildreth's optimisation algorithm.." << endl;
     }
-    else {
-    	cerr << "Using some sort of SMO.. " << endl;
-    }
 
   } else if (learner == "perceptron") {
     cerr << "Optimising using Perceptron" << endl;
@@ -300,9 +301,18 @@ int main(int argc, char** argv) {
   cerr << "weights: " << decoder->getWeights() << endl;
 
   float learning_rate = 1;
-  for (size_t epoch = 0; epoch < epochs; ++epoch) {
+  float averageBleu = 0;
+  float prevAverageBleu = 0;
+  float beforePrevAverageBleu = 0;
+  float summedApproxBleu = 0;
+  float averageApproxBleu = 0;
+  float prevAverageApproxBleu = 0;
+  float beforePrevAverageApproxBleu = 0;
+  bool stop = false;
+  for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
 	  cerr << "\nEpoch " << epoch << endl;
 	  weightChangesThisEpoch = 0;
+	  summedApproxBleu = 0;
 	  // Sum up weights over one epoch, final average uses weights from last epoch
 	  if (!accumulateWeights) {
 		  cumulativeWeights.ZeroAll();
@@ -408,7 +418,8 @@ int main(int argc, char** argv) {
 				  delete fear[i];
 			  }
 
-			  cerr << "\nRank " << rank << ", sentence " << *sid << ", Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+			  cerr << "Sentence " << *sid << ", Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+			  summedApproxBleu += bleuScores[batchPosition][oraclePos];
 
 			  // next input sentence
 			  ++sid;
@@ -644,7 +655,7 @@ int main(int argc, char** argv) {
 #endif
 							  if (devBleu) {
 							  	// calculate bleu score of all oracle translations of dev set
-							    decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
+							    float bleu = decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
 
 							    // print out translations
 							    ostringstream filename;
@@ -672,7 +683,21 @@ int main(int argc, char** argv) {
 							    	}
 							    	out.close();
 							    }
-								}
+
+#ifdef MPI_ENABLE
+							    // average bleu across processes
+							    mpi::reduce(world, bleu, averageBleu, SCCPlus(), 0);
+							    cerr << "Average Bleu (dev) after epoch " << epoch << ":" << averageBleu << endl;
+
+								  // average approximate sentence bleu across processes
+								  mpi::reduce(world, summedApproxBleu, averageApproxBleu, SCCPlus(), 0);
+								  cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+#endif
+#ifndef MPI_ENABLE
+								  averageApproxBleu = summedApproxBleu/weightChangesThisEpoch;
+								  cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+#endif
+							  }
 
 							  if (marginScaleFactorStep > 0) {
 							  	cerr << "margin scale factor: " << marginScaleFactor << endl;
@@ -694,7 +719,7 @@ int main(int argc, char** argv) {
 
 	  if (devBleu) {
 	  	// calculate bleu score of all oracle translations of dev set
-	    decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
+	    float bleu = decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
 
 	    // print out translations
 	    ostringstream filename;
@@ -721,6 +746,40 @@ int main(int argc, char** argv) {
 	    		out << endl;
 	    	}
 	    	out.close();
+	    }
+
+	    beforePrevAverageBleu = prevAverageBleu;
+	    beforePrevAverageApproxBleu = prevAverageApproxBleu;
+	    prevAverageBleu = averageBleu;
+	    prevAverageApproxBleu = averageApproxBleu;
+
+#ifdef MPI_ENABLE
+	    // average bleu across processes
+	    mpi::reduce(world, bleu, averageBleu, SCCPlus(), 0);
+	    cerr << "Average Bleu (dev) after epoch " << epoch << ":" << averageBleu << endl;
+
+	    // average approximate sentence bleu across processes
+	    mpi::reduce(world, summedApproxBleu, averageApproxBleu, SCCPlus(), 0);
+	    cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+#endif
+#ifndef MPI_ENABLE
+	    averageApproxBleu = summedApproxBleu/weightChangesThisEpoch;
+	    cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+#endif
+
+	    if (averageBleu < prevAverageBleu && prevAverageBleu < beforePrevAverageBleu) {
+	    	cerr << "average Bleu (dev) is decreasing.." << endl;
+	    	if (stop_dev_bleu) {
+	    		stop = true;
+	    		cerr << "stop." << endl;
+	    	}
+	    }
+	    if (averageApproxBleu < prevAverageApproxBleu && prevAverageApproxBleu < beforePrevAverageApproxBleu) {
+	    	cerr << "average approx. sentence Bleu (dev) is decreasing.." << endl;
+	    	if (stop_approx_dev_bleu) {
+	    		stop = true;
+	    		cerr << "stop." << endl;
+	    	}
 	    }
 	  }
 
@@ -753,7 +812,7 @@ int main(int argc, char** argv) {
 	  }
 
 	  // change learning rate
-	  if (decrease_learning_rate > 0) {
+	  if ((decrease_learning_rate > 0) && (learning_rate-decrease_learning_rate > 0)) {
 	  	learning_rate -= decrease_learning_rate;
 	  	cerr << "Change learning rate to " << learning_rate << endl;
 	  }
