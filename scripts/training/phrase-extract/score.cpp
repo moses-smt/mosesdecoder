@@ -57,12 +57,10 @@ public:
 vector<string> tokenize( const char [] );
 
 void computeCountOfCounts( char* fileNameExtract, int maxLines );
-void processPhrasePairs( vector< PhraseAlignment > & );
+void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
 PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > & );
-void outputPhrasePair( vector< PhraseAlignment * > &, float );
+void outputPhrasePair( vector< PhraseAlignment * > &, float, ostream &phraseTableFile );
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
-
-ofstream phraseTableFile;
 
 LexicalTable lexTable;
 bool inverseFlag = false;
@@ -141,13 +139,22 @@ int main(int argc, char* argv[])
   istream &extractFileP = extractFile;
 
   // output file: phrase translation table
-  phraseTableFile.open(fileNamePhraseTable);
-  if (phraseTableFile.fail()) {
-    cerr << "ERROR: could not open file phrase table file "
-         << fileNamePhraseTable << endl;
-    exit(1);
-  }
+	ostream *phraseTableFile;
 
+	if (strcmp(fileNamePhraseTable, "-") == 0) {
+		phraseTableFile = &cout;
+	}
+	else {
+		ofstream *outputFile = new ofstream();
+		outputFile->open(fileNamePhraseTable);
+		if (outputFile->fail()) {
+			cerr << "ERROR: could not open file phrase table file "
+					 << fileNamePhraseTable << endl;
+			exit(1);
+		}
+		phraseTableFile = outputFile;
+	}
+	
   // loop through all extracted phrase translations
   float lastCount = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
@@ -182,7 +189,7 @@ int main(int argc, char* argv[])
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
-      processPhrasePairs( phrasePairsWithSameF );
+      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
       phrasePairsWithSameF.clear();
       lastPhrasePair = NULL;
     }
@@ -191,8 +198,12 @@ int main(int argc, char* argv[])
     phrasePairsWithSameF.push_back( phrasePair );
     lastPhrasePair = &phrasePairsWithSameF.back();
   }
-  processPhrasePairs( phrasePairsWithSameF );
-  phraseTableFile.close();
+  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
+	
+	if (phraseTableFile != &cout) {
+		(dynamic_cast<ofstream*>(phraseTableFile))->close();
+		delete phraseTableFile;
+	}
 }
 
 void computeCountOfCounts( char* fileNameExtract, int maxLines )
@@ -269,7 +280,7 @@ void computeCountOfCounts( char* fileNameExtract, int maxLines )
   }
 }
 
-void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
+void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
 {
   if (phrasePair.size() == 0) return;
 
@@ -303,7 +314,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
 
   for(size_t g=0; g<phrasePairGroup.size(); g++) {
     vector< PhraseAlignment* > &group = phrasePairGroup[g];
-    outputPhrasePair( group, totalSource );
+    outputPhrasePair( group, totalSource, phraseTableFile );
   }
 }
 
@@ -322,7 +333,7 @@ PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > &phrasePair )
   return bestAlignment;
 }
 
-void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount )
+void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount, ostream &phraseTableFile )
 {
   if (phrasePair.size() == 0) return;
 
