@@ -62,7 +62,6 @@ class MosesDecoder {
                           std::vector< float>& scores,
                           bool oracle,
                           bool distinct,
-                          bool ignoreUWeight,
                           size_t rank);
     size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);

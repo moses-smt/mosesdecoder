@@ -101,7 +101,6 @@ namespace Mira {
                               vector< float>& bleuScores,
                               bool oracle,
                               bool distinct,
-							  bool ignoreUWeight,
 							  size_t rank)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
@@ -155,11 +154,6 @@ namespace Mira {
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
-
-    	if (ignoreUWeight) {
-    		const UnknownWordPenaltyProducer *unknownWPP = (const_cast<TranslationSystem&>(system)).GetUnknownWordPenaltyProducer();
-    		(featureValues.back()).Assign(unknownWPP, 0);
-    	}
     }
 
     // get the best
@@ -212,16 +206,16 @@ namespace Mira {
   float MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {
   	  vector<float> bleu = m_bleuScoreFeature->CalculateBleuOfCorpus(words, ref_ids);
 	  if (bleu.size() > 0) {
-	    cerr << "\nBLEU (after epoch " << epoch << ", rank " << rank << "): " << bleu[4]*100 << ", "
+	    cerr << "\nRank " << rank << ", BLEU after epoch " << epoch << ": " << bleu[4]*100 << ", "
 	   << bleu[0]*100 << "/" << bleu[1]*100 << "/" << bleu[2]*100 << "/" << bleu[3]*100 << " "
 		 << "(BP=" << bleu[5] << ", " << "ratio=" << bleu[6] << ", "
 		 << "hyp_len=" << bleu[7] << ", ref_len=" << bleu[8] << ")" << endl;
 				return bleu[4]*100;
-  	  }
-  	  else {
-  	  	cerr << "BLEU: 0" << endl;
-  	  	return 0;
-  	  }
-    }
+	  }
+	  else {
+	  	cerr << "\nRank " << rank << ", BLEU after epoch " << epoch << ": 0" << endl;
+	  	return 0;
+	  }
+  }
 } 
 
