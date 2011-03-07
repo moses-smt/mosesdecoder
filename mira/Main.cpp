@@ -550,7 +550,7 @@ int main(int argc, char** argv) {
 		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
 		  	ScoreComponentCollection averageWeights;
 #ifdef MPI_ENABLE
-			  cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl);
+			  cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
 
 			  // collect all weights in averageWeights and divide by number of processes
 			  mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
