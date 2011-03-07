@@ -200,6 +200,7 @@ int main(int argc, char* argv[])
   }
   processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
 	
+	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
 		(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
