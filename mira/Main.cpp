@@ -578,14 +578,14 @@ int main(int argc, char** argv) {
 			  if (rank == 0 && !weightDumpStem.empty()) {
 			  	ostringstream filename;
 			  	if (epoch < 10) {
-			  		filename << weightDumpStem << "_0" << epoch << "_average";
+			  		filename << weightDumpStem << "_0" << epoch;
 			  	}
 			  	else {
-			  		filename << weightDumpStem << "_" << epoch << "_average";
+			  		filename << weightDumpStem << "_" << epoch;
 			  	}
 
 			  	if (mixingFrequency > 1) {
-			  		filename << "_" << weightEpochDump;
+			  		filename << "_" << weightEpochDump << "_average";
 			  	}
 
 			  	cerr << "Dumping average weights for epoch " << epoch << " to " << filename.str() << endl;
