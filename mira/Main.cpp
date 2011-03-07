@@ -601,10 +601,10 @@ int main(int argc, char** argv) {
 	  	// print out translations
 	  	ostringstream filename;
 	  	if (epoch < 10) {
-	  		filename << "oracles_of_dev_set" << "_0" << epoch << "_rank" << rank;
+	  		filename << "dev_set_oracles" << "_0" << epoch << "_rank" << rank;
 	  	}
 	  	else {
-	  		filename << "oracles_of_dev_set" << "_" << epoch << "_rank" << rank;
+	  		filename << "dev_set_oracles" << "_" << epoch << "_rank" << rank;
 	  	}
 	  	ofstream out((filename.str()).c_str());
 
