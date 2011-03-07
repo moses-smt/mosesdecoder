@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
   string learner;
   bool shuffle;
   bool hildreth;
-  size_t mixFrequency;
+  size_t mixingFrequency;
   size_t weightDumpFrequency;
   string weightDumpStem;
   float marginScaleFactor;
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
       ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
       ("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
       ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
-      ("mix-frequency", po::value<size_t>(&mixFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+      ("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
       ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
       ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
@@ -252,8 +252,8 @@ int main(int argc, char** argv) {
   copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 
   Optimiser* optimiser = NULL;
-  cerr << "mix-frequency: " << mixFrequency << endl;
-  cerr << "weight-dump-stem: " << mixFrequency << endl;
+  cerr << "mix-frequency: " << mixingFrequency << endl;
+  cerr << "weight-dump-stem: " << mixingFrequency << endl;
   cerr << "shuffle: " << shuffle << endl;
   cerr << "hildreth: " << hildreth << endl;
   cerr << "msf: " << marginScaleFactor << endl;
@@ -546,7 +546,7 @@ int main(int argc, char** argv) {
 		  }
 
 		  // mix weights?
-		  if (shardPosition % (shard.size() / mixFrequency) == 0) {
+		  if (shardPosition % (shard.size() / mixingFrequency) == 0) {
 		  	ScoreComponentCollection averageWeights;
 #ifdef MPI_ENABLE
 			  cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
@@ -584,7 +584,7 @@ int main(int argc, char** argv) {
 			  		filename << weightDumpStem << "_" << epoch << "_average";
 			  	}
 
-			  	if (mixFrequency > 1) {
+			  	if (mixingFrequency > 1) {
 			  		filename << "_" << weightEpochDump;
 			  	}
 
