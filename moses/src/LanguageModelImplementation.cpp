@@ -38,7 +38,7 @@ using namespace std;
 
 namespace Moses
 {
-float LanguageModelImplementation::GetValueGivenState(
+LMResult LanguageModelImplementation::GetValueGivenState(
   const std::vector<const Word*> &contextFactor,
   FFState &state) const
 {

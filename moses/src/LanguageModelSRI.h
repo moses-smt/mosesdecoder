@@ -44,7 +44,7 @@ protected:
   Ngram 			*m_srilmModel;
   VocabIndex	m_unknownId;
 
-  float GetValue(VocabIndex wordId, VocabIndex *context) const;
+  LMResult GetValue(VocabIndex wordId, VocabIndex *context) const;
   void CreateFactors();
   VocabIndex GetLmID( const std::string &str ) const;
   VocabIndex GetLmID( const Factor *factor ) const;
@@ -56,7 +56,7 @@ public:
             , FactorType factorType
             , size_t nGramOrder);
 
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 };
 
 

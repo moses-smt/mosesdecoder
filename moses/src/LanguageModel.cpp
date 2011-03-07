@@ -114,7 +114,7 @@ void LanguageModel::CalcScore(const Phrase &phrase
         // do nothing, don't include prob for <s> unigram
         assert(currPos == 0);
       } else {
-        float partScore = m_implementation->GetValueGivenState(contextFactor, *state);
+        float partScore = m_implementation->GetValueGivenState(contextFactor, *state).score;
         fullScore += partScore;
         if (contextFactor.size() == GetNGramOrder())
           ngramScore += partScore;
@@ -153,7 +153,7 @@ void LanguageModel::CalcScoreChart(const Phrase &phrase
       // do nothing, don't include prob for <s> unigram
       assert(currPos == 0);
     } else {
-      float partScore = m_implementation->GetValueGivenState(contextFactor, *state);
+      float partScore = m_implementation->GetValueGivenState(contextFactor, *state).score;
 
       if (contextFactor.size() == GetNGramOrder())
         ngramScore += partScore;
@@ -216,7 +216,7 @@ FFState* LanguageModel::Evaluate(
     }
   }
   FFState *res = m_implementation->NewState(ps);
-  float lmScore = ps ? m_implementation->GetValueGivenState(contextFactor, *res) : m_implementation->GetValueForgotState(contextFactor, *res);
+  float lmScore = ps ? m_implementation->GetValueGivenState(contextFactor, *res).score : m_implementation->GetValueForgotState(contextFactor, *res).score;
 
   // main loop
   size_t endPos = std::min(startPos + GetNGramOrder() - 2
@@ -229,7 +229,7 @@ FFState* LanguageModel::Evaluate(
     // add last factor
     contextFactor.back() = &hypo.GetWord(currPos);
 
-    lmScore	+= m_implementation->GetValueGivenState(contextFactor, *res);
+    lmScore	+= m_implementation->GetValueGivenState(contextFactor, *res).score;
   }
 
   // end of sentence
@@ -244,7 +244,7 @@ FFState* LanguageModel::Evaluate(
       else
         contextFactor[i] = &hypo.GetWord((size_t)currPos);
     }
-    lmScore	+= m_implementation->GetValueForgotState(contextFactor, *res);
+    lmScore	+= m_implementation->GetValueForgotState(contextFactor, *res).score;
   } else {
 
     if (endPos < currEndPos) {

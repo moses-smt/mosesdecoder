@@ -88,7 +88,7 @@ public:
 
   void CreateFactors();
 
-  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
   FFState *GetNullContextState() const;
   FFState *GetBeginSentenceState() const;
   FFState *NewState(const FFState *from) const;

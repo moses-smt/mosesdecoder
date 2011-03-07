@@ -78,9 +78,12 @@ public:
     return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);
   }
 
-  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
     if (contextFactor.size() == 0) {
-      return 0;
+      LMResult ret;
+      ret.score = 0.0;
+      ret.unknown = false;
+      return ret;
     }
 
     // joint context for internal LM
@@ -109,7 +112,7 @@ public:
     }
 
     // calc score on chunked phrase
-    float ret = m_lmImpl->GetValueForgotState(jointContext, outState);
+    LMResult ret = m_lmImpl->GetValueForgotState(jointContext, outState);
 
     RemoveAllInColl(jointContext);
 

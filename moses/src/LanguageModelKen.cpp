@@ -97,8 +97,8 @@ public:
             , FactorType factorType
             , size_t nGramOrder);
 
-  float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
-  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+  LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
+  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
   void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
   FFState *GetNullContextState() const;
@@ -171,10 +171,13 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
   return true;
 }
 
-template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const
+template <class Model> LMResult LanguageModelKen<Model>::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const
 {
+  LMResult result;
   if (contextFactor.empty()) {
-    return 0;
+    result.score = 0.0;
+    result.unknown = false;
+    return result;
   }
   lm::ngram::State &realState = static_cast<KenLMState&>(state).state;
   std::size_t factor = contextFactor.back()->GetFactor(GetFactorType())->GetId();
@@ -182,21 +185,29 @@ template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const s
   lm::ngram::State copied(realState);
   lm::FullScoreReturn ret(m_ngram->FullScore(copied, new_word, realState));
 
-  return TransformLMScore(ret.prob);
+  result.score = TransformLMScore(ret.prob);
+  result.unknown = (new_word == 0);
+  return result;
 }
 
-template <class Model> float LanguageModelKen<Model>::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState) const
+template <class Model> LMResult LanguageModelKen<Model>::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState) const
 {
+  LMResult result;
   if (contextFactor.empty()) {
     static_cast<KenLMState&>(outState).state = m_ngram->NullContextState();
-    return 0;
+    result.score = 0.0;
+    result.unknown = false;
+    return result;
   }
 
   lm::WordIndex indices[contextFactor.size()];
   TranslateIDs(contextFactor, indices);
 
   lm::FullScoreReturn ret(m_ngram->FullScoreForgotState(indices + 1, indices + contextFactor.size(), indices[0], static_cast<KenLMState&>(outState).state));
-  return TransformLMScore(ret.prob);
+
+  result.score = TransformLMScore(ret.prob);
+  result.unknown = (indices[0] == 0);
+  return result;
 }
 
 template <class Model> void LanguageModelKen<Model>::GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const

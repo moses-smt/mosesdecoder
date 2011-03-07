@@ -35,7 +35,7 @@ public:
     m_cache.tree.clear();
     m_curId = 1000;
   }
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
   bool Load(const std::string &filePath
             , FactorType factorType
             , size_t nGramOrder);

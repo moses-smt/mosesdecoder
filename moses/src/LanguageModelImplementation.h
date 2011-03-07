@@ -37,6 +37,13 @@ class FactorCollection;
 class Factor;
 class Phrase;
 
+struct LMResult {
+  // log probability
+  float score;
+  // Is the word unknown?  
+  bool unknown;
+};
+
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModelImplementation
 {
@@ -75,11 +82,11 @@ public:
    * \param contextFactor n-gram to be scored
    * \param state LM state.  Input and output.  state must be initialized.  If state isn't initialized, you want GetValueWithoutState.
    */
-  virtual float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
+  virtual LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
 
   // Like GetValueGivenState but state may not be initialized (however it is non-NULL).
   // For example, state just came from NewState(NULL).
-  virtual float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
+  virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
 
   //! get State for a particular n-gram.  We don't care what the score is.
   // This is here so models can implement a shortcut to GetValueAndState.

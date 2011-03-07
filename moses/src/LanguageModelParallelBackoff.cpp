@@ -219,7 +219,7 @@ void LanguageModelParallelBackoff::CreateFactors()
 
 }
 
-float LanguageModelParallelBackoff::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState & /*outState */) const
+LMResult LanguageModelParallelBackoff::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState & /*outState */) const
 {
 
   static WidMatrix widMatrix;
@@ -250,8 +250,11 @@ float LanguageModelParallelBackoff::GetValueForgotState(const std::vector<const 
   }
 
 
-  float p = m_srilmModel->wordProb( widMatrix, contextFactor.size() - 1, contextFactor.size() );
-  return FloorScore(TransformLMScore(p));
+  LMResult ret;
+  ret.score = m_srilmModel->wordProb( widMatrix, contextFactor.size() - 1, contextFactor.size() );
+  ret.score = FloorScore(TransformLMScore(ret.score));
+  ret.unknown = !contextFactor.empty() && (widMatrix[contextFactor.size() - 1][0] == m_unknownId);
+  return ret;
 
   /*if (contextFactor.size() == 0)
   {
