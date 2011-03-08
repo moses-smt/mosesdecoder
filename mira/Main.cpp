@@ -607,10 +607,14 @@ int main(int argc, char** argv) {
 			  	// dump final average weights
 			  	ostringstream filenameTotal;
 			  	if (epoch < 10) {
-			  		filenameTotal << weightDumpStem << "_0" << epoch;
+			  		filename << weightDumpStem << "_0" << epoch;
 			  	}
 			  	else {
-			  		filenameTotal << weightDumpStem << "_" << epoch;
+			  		filename << weightDumpStem << "_" << epoch;
+			  	}
+
+			  	if (mixingFrequency > 1) {
+			  		filename << "_" << weightEpochDump;
 			  	}
 
 			  	if (accumulateWeights) {
