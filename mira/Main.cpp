@@ -578,24 +578,25 @@ int main(int argc, char** argv) {
 
 			  	cerr << "Dumping average weights for epoch " << epoch << " to " << filename.str() << endl;
 			  	averageWeights.Save(filename.str());
+			  }
 
-			  	// dump average total weights
-			  	// Average weights of all processes over one or more epochs
-			  	ScoreComponentCollection totalWeights(cumulativeWeights);
-			  	if (accumulateWeights) {
-			  		totalWeights.DivideEquals(weightChanges);
-			  	}
-			  	else {
-			  		totalWeights.DivideEquals(weightChangesThisEpoch);
-			  	}
+			  // Average and dump weights of all processes over one or more epochs
+			  ScoreComponentCollection totalWeights(cumulativeWeights);
+			  if (accumulateWeights) {
+			  	totalWeights.DivideEquals(weightChanges);
+			  }
+			  else {
+			  	totalWeights.DivideEquals(weightChangesThisEpoch);
+			  }
 
 #ifdef MPI_ENABLE
-			  	// average across processes
-			  	mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
+			  // average across processes
+			  mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
 #endif
 #ifndef MPI_ENABLE
-			  	averageTotalWeights = totalWeights;
+			  averageTotalWeights = totalWeights;
 #endif
+			  if (rank == 0 && !weightDumpStem.empty()) {
 			  	// divide by number of processes
 			  	averageTotalWeights.DivideEquals(size);
 
@@ -605,16 +606,16 @@ int main(int argc, char** argv) {
 			  	}
 
 			  	// dump final average weights
-			  	ostringstream filenameTotal;
+			  	ostringstream filename;
 			  	if (epoch < 10) {
-			  		filenameTotal << weightDumpStem << "_0" << epoch;
+			  		filename << weightDumpStem << "_0" << epoch;
 			  	}
 			  	else {
-			  		filenameTotal << weightDumpStem << "_" << epoch;
+			  		filename << weightDumpStem << "_" << epoch;
 			  	}
 
 			  	if (mixingFrequency > 1) {
-			  		filenameTotal << "_" << weightEpochDump;
+							filename << "_" << weightEpochDump;
 			  	}
 
 			  	if (accumulateWeights) {
@@ -624,11 +625,11 @@ int main(int argc, char** argv) {
 			  		cerr << "\nAverage total weights after epoch " << epoch << ": " << averageTotalWeights << endl;
 			  	}
 
-			  	cerr << "Dumping average total weights after epoch " << epoch << " to " << filenameTotal.str() << endl;
-			  	averageTotalWeights.Save(filenameTotal.str());
+			  	cerr << "Dumping average total weights after epoch " << epoch << " to " << filename.str() << endl;
+			  	averageTotalWeights.Save(filename.str());
 			  	++weightEpochDump;
-			  }
-		  }
+			  }// end averaging and printing total weights
+		  } //end mixing
 	  } // end of shard loop, end of this epoch
 
 	  if (devBleu) {
@@ -822,7 +823,7 @@ int main(int argc, char** argv) {
 	    	}
 	  	}
 #ifdef MPI_ENABLE
-	  		mpi::broadcast(world, stop, 0);
+	  	mpi::broadcast(world, stop, 0);
 #endif
 	  } //end if (weightConvergence)
 
