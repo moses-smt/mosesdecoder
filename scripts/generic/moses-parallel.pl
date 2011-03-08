@@ -38,7 +38,6 @@ my $jobscript="$workingdir/job$$";
 my $qsubout="$workingdir/out.job$$";
 my $qsuberr="$workingdir/err.job$$";
 
-
 my $mosesparameters="";
 my $feed_moses_via_stdin = 0;
       # a workaround, for a reason, the default "-input-file X" blocks
@@ -64,6 +63,7 @@ my $wordgraphlist=undef;
 my $wordgraphfile=undef;
 my $wordgraphflag=0;
 my $robust=5; # resubmit crashed jobs robust-times
+my $alifile=undef;
 my $logfile="";
 my $logflag="";
 my $searchgraphlist="";
@@ -92,6 +92,7 @@ sub init(){
              'n-best-size=i'=> \$oldnbest,
 	     'output-search-graph|osg=s'=> \$searchgraphlist,
              'output-word-graph|owg=s'=> \$wordgraphlist,
+             'alignment-output-file=s'=> \$alifile,
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
@@ -537,6 +538,7 @@ while ($robust && scalar @idx_todo) {
 #concatenating translations and removing temporary files
 concatenate_1best();
 concatenate_logs() if $logflag;
+concatenate_ali() if defined $alifile;  
 concatenate_nbest() if $nbestflag;  
 safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 
@@ -571,6 +573,11 @@ sub preparing_script(){
       $tmpnbestlist = "-n-best-list $tmpnbestlist";
     }
 
+    my $tmpalioutfile = "";
+    if (defined $alifile){
+      $tmpalioutfile="-alignment-output-file $tmpdir/$alifile.$splitpfx$idx";
+    }
+
     my $tmpsearchgraphlist="";
     if ($searchgraphflag){
       $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx$idx";
@@ -581,9 +588,13 @@ sub preparing_script(){
       $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
     }
 
-    print OUT "$mosescmd $mosesparameters $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+    print OUT "$mosescmd $mosesparameters $tmpalioutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
+    if (defined $alifile){
+      print OUT "\\mv -f $tmpdir/${alifile}.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }
     if ($nbestflag){
       print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
@@ -798,6 +809,18 @@ sub concatenate_logs(){
   close(OUT);
 }
 
+sub concatenate_ali(){
+  open (OUT, "> ${alifile}");
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "$alifile.$splitpfx$idx");
+    @in=<IN>;
+    print OUT "@in";
+    close(IN);
+  }
+  close(OUT);
+}
+
 
 sub check_exit_status(){
   print STDERR "check_exit_status\n";
@@ -894,6 +917,7 @@ sub remove_temporary_files(){
   foreach my $idx (@idxlist){
     unlink("${inputfile}.${splitpfx}${idx}.trans");
     unlink("${inputfile}.${splitpfx}${idx}");
+    if (defined $alifile){ unlink("${alifile}.${splitpfx}${idx}"); }
     if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
     if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
     if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}${idx}"); }
