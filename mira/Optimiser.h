@@ -35,7 +35,9 @@ namespace Mira {
                          const std::vector<std::vector<float> >& bleuScores,
                          const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
                          const std::vector< float> oracleBleuScores,
-                         const std::vector< size_t> dummy) = 0;
+                         const std::vector< size_t> dummy,
+                         float learning_rate,
+                         float max_sentence_update) = 0;
   };
  
   class DummyOptimiser : public Optimiser {
@@ -46,7 +48,9 @@ namespace Mira {
                          const std::vector<std::vector<float> >& bleuScores,
                          const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
                          const std::vector< float> oracleBleuScores,
-                         const std::vector< size_t> dummy)
+                         const std::vector< size_t> dummy,
+                         float learning_rate,
+                         float max_sentence_update)
                          { return 0; }
   };
  
@@ -60,7 +64,9 @@ namespace Mira {
                          const std::vector<std::vector<float> >& bleuScores,
                          const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
                          const std::vector< float> oracleBleuScores,
-                         const std::vector< size_t> dummy);
+                         const std::vector< size_t> dummy,
+                         float learning_rate,
+                         float max_sentence_update);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -90,7 +96,9 @@ namespace Mira {
       						  const std::vector<std::vector<float> >& bleuScores,
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
       						  const std::vector< float> oracleBleuScores,
-      						  const std::vector< size_t> sentenceId);
+      						  const std::vector< size_t> sentenceId,
+										float learning_rate,
+										float max_sentence_update);
 
       void setOracleIndices(std::vector<size_t> oracleIndices) {
     	  m_oracleIndices= oracleIndices;

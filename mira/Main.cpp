@@ -105,6 +105,7 @@ int main(int argc, char** argv) {
   bool pastAndCurrentConstraints;
   bool weightConvergence;
   bool controlUpdates;
+  float learning_rate;
   bool logFeatureValues;
   size_t baseOfLog;
   string decoder_settings;
@@ -118,49 +119,50 @@ int main(int argc, char** argv) {
   bool stop_approx_dev_bleu;
   po::options_description desc("Allowed options");
   desc.add_options()
-      ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
+		  ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
+		  ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(true), "Accumulate and average weights over all epochs")
+		  ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
+		  ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
+    	("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
       ("config,f",po::value<string>(&mosesConfigFile),"Moses ini file")
-      ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-      ("input-file,i",po::value<string>(&inputFile),"Input file containing tokenised source")
-      ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+      ("control-updates", po::value<bool>(&controlUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
+      ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
+      ("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0), "Decrease learning rate by the given value after every epoch")
+      ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
+      ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
       ("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
+      ("help",po::value( &help )->zero_tokens()->default_value(false), "Print this help message and exit")
+      ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
+      ("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
+      ("input-file,i",po::value<string>(&inputFile),"Input file containing tokenised source")
       ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
+      ("learning-rate", po::value<float>(&learning_rate)->default_value(1), "Learning rate (fixed or flexible)")
+      ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
+      ("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
+      ("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(0), "Set a maximum weight update per sentence")
+      ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
       ("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
-      ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights")
-      ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-	    ("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
 	    ("msf", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
-	    ("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
 	    ("msf-min", po::value<float>(&marginScaleFactorMin)->default_value(1.0), "Minimum value that margin is scaled by")
-	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
+	    ("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
-	    ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-	    ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
-	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
-	    ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(true), "Accumulate and average weights over all epochs")
-	    ("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
-	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
-	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
-	    ("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
-	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
-	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
-	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
-	    ("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
-	    ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
-	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
-	    ("weight-convergence", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
-	    ("control-updates", po::value<bool>(&controlUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
-	    ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
-	    ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
-	    ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
-	    ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
-	    ("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(0), "Set a maximum weight update per sentence")
-	    ("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0), "Decrease learning rate by the given value after every epoch (starting with 1 = no restriction)")
-	    ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
 	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
+	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
+	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
+	    ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
+	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
+	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
+	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases")
-	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases");
+	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases")
+	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
+	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
+	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
+	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
+	    ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -315,13 +317,13 @@ int main(int argc, char** argv) {
   
   ScoreComponentCollection averageWeights;
   ScoreComponentCollection averageTotalWeights;
+  ScoreComponentCollection averageTotalWeightsEnd;
   ScoreComponentCollection averageTotalWeightsPrevious;
   ScoreComponentCollection averageTotalWeightsBeforePrevious;
 
   // print initial weights
   cerr << "weights: " << decoder->getWeights() << endl;
 
-  float learning_rate = 1;
   float averageBleu = 0;
   float prevAverageBleu = 0;
   float beforePrevAverageBleu = 0;
@@ -478,7 +480,7 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 		  cerr << "\nRank " << rank << ", run optimiser.." << endl;
 		  ScoreComponentCollection oldWeights(mosesWeights);
-		  int updateStatus = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids);
+		  int updateStatus = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids, learning_rate, max_sentence_update);
 
 		  // set decoder weights and accumulate weights
 		  if (controlUpdates && updateStatus < 0) {
@@ -486,20 +488,6 @@ int main(int argc, char** argv) {
 		  	cerr << "update ignored!" << endl;
 		  }
 		  else {
-		  	// apply learning rate
-		  	if (learning_rate < 1) {
-		  		cerr << "before applying learning rate: " << mosesWeights << endl;
-		  		mosesWeights.MultiplyEquals(learning_rate);
-		  		cerr << "after applying learning rate: " << mosesWeights << endl;
-		  	}
-
-		  	// apply clipping
-		  	if (max_sentence_update > 0) {
-		  		cerr << "before clipping: " << mosesWeights << endl;
-		  		mosesWeights.ClipAll(max_sentence_update);
-		  		cerr << "after clipping: " << mosesWeights << endl;
-		  	}
-
 		  	if (normaliseWeights) {
 		  		mosesWeights.L1Normalise();
 		  		cerr << "\nRank " << rank << ", weights (normalised): " << mosesWeights << endl;
@@ -585,11 +573,56 @@ int main(int argc, char** argv) {
 			  	}
 
 			  	if (mixingFrequency > 1) {
-			  		filename << "_" << weightEpochDump << "_average";
+			  		filename << "_" << weightEpochDump << "_mixed";
 			  	}
 
 			  	cerr << "Dumping average weights for epoch " << epoch << " to " << filename.str() << endl;
 			  	averageWeights.Save(filename.str());
+
+			  	// dump average total weights
+			  	// Average weights of all processes over one or more epochs
+			  	ScoreComponentCollection totalWeights(cumulativeWeights);
+			  	if (accumulateWeights) {
+			  		totalWeights.DivideEquals(weightChanges);
+			  	}
+			  	else {
+			  		totalWeights.DivideEquals(weightChangesThisEpoch);
+			  	}
+
+#ifdef MPI_ENABLE
+			  	// average across processes
+			  	mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
+#endif
+#ifndef MPI_ENABLE
+			  	averageTotalWeights = totalWeights;
+#endif
+			  	// divide by number of processes
+			  	averageTotalWeights.DivideEquals(size);
+
+			  	// normalise weights after averaging
+			  	if (normaliseWeights) {
+			  		averageTotalWeights.L1Normalise();
+			  	}
+
+			  	// dump final average weights
+			  	ostringstream filenameTotal;
+			  	if (epoch < 10) {
+			  		filenameTotal << weightDumpStem << "_0" << epoch;
+			  	}
+			  	else {
+			  		filenameTotal << weightDumpStem << "_" << epoch;
+			  	}
+
+			  	if (accumulateWeights) {
+			  		cerr << "\nAverage total weights (cumulative) after epoch " << epoch << ": " << averageTotalWeights << endl;
+			  	}
+			  	else {
+			  		cerr << "\nAverage total weights after epoch " << epoch << ": " << averageTotalWeights << endl;
+			  	}
+
+			  	cerr << "Dumping average total weights after epoch " << epoch << " to " << filenameTotal.str() << endl;
+			  	averageTotalWeights.Save(filenameTotal.str());
+			  	++weightEpochDump;
 			  }
 		  }
 	  } // end of shard loop, end of this epoch
@@ -708,22 +741,22 @@ int main(int argc, char** argv) {
 
 	  if (rank == 0) {
 				averageTotalWeightsBeforePrevious = averageTotalWeightsPrevious;
-				averageTotalWeightsPrevious = averageTotalWeights;
+				averageTotalWeightsPrevious = averageTotalWeightsEnd;
 	  }
 #ifdef MPI_ENABLE
 	  // average across processes
-	  mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
+	  mpi::reduce(world, totalWeights, averageTotalWeightsEnd, SCCPlus(), 0);
 #endif
 #ifndef MPI_ENABLE
-	  averageTotalWeights = totalWeights;
+	  averageTotalWeightsEnd = totalWeights;
 #endif
 	  if (rank == 0 && !weightDumpStem.empty()) {
 	  	// divide by number of processes
-	  	averageTotalWeights.DivideEquals(size);
+	  	averageTotalWeightsEnd.DivideEquals(size);
 
 	  	// normalise weights after averaging
 	  	if (normaliseWeights) {
-	  		averageTotalWeights.L1Normalise();
+	  		averageTotalWeightsEnd.L1Normalise();
 	  	}
 
 	  	// dump final average weights
@@ -736,14 +769,14 @@ int main(int argc, char** argv) {
 	  	}
 
 	  	if (accumulateWeights) {
-	  		cerr << "\nAverage total weights (cumulative) after epoch " << epoch << ": " << averageTotalWeights << endl;
+	  		cerr << "\nAverage total weights (cumulative) after epoch " << epoch << ": " << averageTotalWeightsEnd << endl;
 	  	}
 	  	else {
-	  		cerr << "\nAverage total weights after epoch " << epoch << ": " << averageTotalWeights << endl;
+	  		cerr << "\nAverage total weights after epoch " << epoch << ": " << averageTotalWeightsEnd << endl;
 	  	}
 
 	  	cerr << "Dumping average total weights after epoch " << epoch << " to " << filename.str() << endl;
-	  	averageTotalWeights.Save(filename.str());
+	  	averageTotalWeightsEnd.Save(filename.str());
 
 	  }// end averaging and printing total weights
 
@@ -798,9 +831,6 @@ int main(int argc, char** argv) {
 	  			((MiraOptimiser*)optimiser)->setMarginScaleFactor(marginScaleFactor);
 	  		}
 	  	}
-	  	else {
-	  		cerr << "Margin scale factor: " << marginScaleFactor << endl;
-	  	}
 	  }
 
 	  // if using flexible slack, increase slack for next epoch
@@ -812,18 +842,12 @@ int main(int argc, char** argv) {
 	  			((MiraOptimiser*)optimiser)->setSlack(slack);
 	  		}
 	  	}
-	  	else {
-	  		cerr << "Slack: " << slack << endl;
-	  	}
 	  }
 
 	  // change learning rate
 	  if ((decrease_learning_rate > 0) && (learning_rate-decrease_learning_rate > 0)) {
 	  	learning_rate -= decrease_learning_rate;
 	  	cerr << "Change learning rate to " << learning_rate << endl;
-	  }
-	  else {
-	  	cerr << "Learning rate: " << learning_rate << endl;
 	  }
   } // end of epoch loop
 

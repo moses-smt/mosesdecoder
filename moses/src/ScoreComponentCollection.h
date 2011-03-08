@@ -212,7 +212,7 @@ public:
 		m_scores.applyLog(baseOfLog);
 	}
 
-	void ClipAll(float maxValue)
+	void ThresholdScaling(float maxValue)
 	{
 		// find (smallest) factor for which all weights are <= maxValue
 		// 0.1 / 0.14 = 0.714285714

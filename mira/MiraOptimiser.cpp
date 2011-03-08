@@ -12,7 +12,9 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector<std::vector<float> >& bleuScores,
 		const vector< ScoreComponentCollection>& oracleFeatureValues,
 		const vector< float> oracleBleuScores,
-		const vector< size_t> sentenceIds) {
+		const vector< size_t> sentenceIds,
+		float learning_rate,
+		float max_sentence_update) {
 
 	// add every oracle in batch to list of oracles (under certain conditions)
 	for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
@@ -137,6 +139,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	// run optimisation: compute alphas for all given constraints
 	vector< float> alphas;
+	ScoreComponentCollection totalUpdate;
 	if (m_accumulateMostViolatedConstraints && !m_pastAndCurrentConstraints) {
 		m_featureValueDiffs.push_back(maxViolationfeatureValueDiff);
 		m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
@@ -155,8 +158,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			float update = alphas[k];
 			m_featureValueDiffs[k].MultiplyEquals(update);
 
-			// apply update to weight vector
-			currWeights.PlusEquals(m_featureValueDiffs[k]);
+			// accumulate update
+			totalUpdate.PlusEquals(m_featureValueDiffs[k]);
 		}
 	}
 	else if (violatedConstraintsBefore > 0) {
@@ -186,14 +189,33 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			float alpha = alphas[k];
 			featureValueDiffs[k].MultiplyEquals(alpha);
 
-			// apply update to weight vector
-			currWeights.PlusEquals(featureValueDiffs[k]);
+			// accumulate update
+			totalUpdate.PlusEquals(featureValueDiffs[k]);
 		}
 	}
 	else {
 		cerr << "No constraint violated for this batch" << endl;
 		return 0;
 	}
+
+	// apply learning rate (fixed or flexible)
+	if (learning_rate < 1) {
+		cerr << "Update before applying learning rate: " << totalUpdate << endl;
+		totalUpdate.MultiplyEquals(learning_rate);
+		cerr << "Update after applying learning rate: " << totalUpdate << endl;
+	}
+
+	// apply threshold scaling
+	if (max_sentence_update > 0) {
+		cerr << "Update before scaling to max-sentence-update: " << totalUpdate << endl;
+		totalUpdate.ThresholdScaling(max_sentence_update);
+		cerr << "Update after scaling to max-sentence-update: " << totalUpdate << endl;
+	}
+
+	// apply update to weight vector
+	cerr << "Weights before update: " << currWeights << endl;
+	currWeights.PlusEquals(totalUpdate);
+	cerr << "Weights after update: " << currWeights << endl;
 
 	// sanity check: how many constraints violated after optimisation?
 	size_t violatedConstraintsAfter = 0;

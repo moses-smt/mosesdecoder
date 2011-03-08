@@ -30,7 +30,9 @@ int Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<float> >& bleuScores,
 		const vector< ScoreComponentCollection>& oracleFeatureValues,
 		const vector< float> oracleBleuScores,
-		const vector< size_t> dummy)
+		const vector< size_t> dummy,
+		float learning_rate,
+		float max_sentence_update)
 {
 	for (size_t i = 0; i < featureValues.size(); ++i) {
 		for (size_t j = 0; j < featureValues[i].size(); ++j) {
