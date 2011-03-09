@@ -73,16 +73,20 @@ void ChartCell::PruneToSize()
   }
 }
 
+// decoding at span level: fill chart cell with hypotheses
+// (implementation of cube pruning)
 void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
                                 , const ChartCellCollection &allChartCells)
 {
   const StaticData &staticData = StaticData::Instance();
 
+  // priority queue for applicable rules with selected hypotheses
   Cube cube;
 
   // add all trans opt into queue. using only 1st child node.
   ChartTranslationOptionList::const_iterator iterList;
-  for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) {
+  for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) 
+  {
     const ChartTranslationOption &transOpt = **iterList;
     QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells);
     cube.Add(queueEntry);
@@ -90,19 +94,17 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // pluck things out of queue and add to hypo collection
   const size_t popLimit = staticData.GetCubePruningPopLimit();
-
-  for (size_t numPops = 0; numPops < popLimit && !cube.IsEmpty(); ++numPops) {
+  for (size_t numPops = 0; numPops < popLimit && !cube.IsEmpty(); ++numPops) 
+  {
     QueueEntry *queueEntry = cube.Pop();
 
-    queueEntry->GetTranslationOption().GetTotalScore();
+    // create hypothesis from QueueEntry
     Hypothesis *hypo = new Hypothesis(*queueEntry, m_manager);
     assert(hypo);
-
     hypo->CalcScore();
-
     AddHypothesis(hypo);
 
-    // Expand queue entry
+    // add neighbors to the queue
     queueEntry->CreateDeviants(cube);
   }
 }

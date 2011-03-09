@@ -63,6 +63,8 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 
   // over threshold, try to add to collection
   std::pair<HCType::iterator, bool> addRet = Add(hypo, manager);
+
+  // does it have the same state as an existing hypothesis?
   if (addRet.second) {
     // nothing found. add to collection
     return true;
@@ -99,7 +101,8 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
     VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
-    } else {
+    } 
+    else {
       Hypothesis::Delete(hypo);
     }
     return false;

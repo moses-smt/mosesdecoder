@@ -43,6 +43,7 @@ unsigned int Hypothesis::s_HypothesesCreated = 0;
 ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
+/** Create a hypothesis from a rule */
 Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
   :m_transOpt(queueEntry.GetTranslationOption())
   ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
@@ -56,21 +57,27 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
   assert(GetCurrTargetPhrase().GetSize() == m_wordsConsumedTargetOrder.size());
   //TRACE_ERR(m_targetPhrase << endl);
 
+  // underlying hypotheses for sub-spans
   m_numTargetTerminals = GetCurrTargetPhrase().GetNumTerminals();
-
   const std::vector<ChildEntry> &childEntries = queueEntry.GetChildEntries();
+
+  // ... are stored
   assert(m_prevHypos.empty());
   m_prevHypos.reserve(childEntries.size());
+
   vector<ChildEntry>::const_iterator iter;
-  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) {
+  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
+  {
     const ChildEntry &childEntry = *iter;
     const Hypothesis *prevHypo = childEntry.GetHypothesis();
 
+    // keep count of words (= length of generated string)
     m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
 
     m_prevHypos.push_back(prevHypo);
   }
 
+  // compute the relevant context for language model scoring (prefix and suffix strings)
   size_t maxNGram = manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder();
   CalcPrefix(m_contextPrefix, maxNGram - 1);
   CalcSuffix(m_contextSuffix, maxNGram - 1);
@@ -78,6 +85,7 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
 
 Hypothesis::~Hypothesis()
 {
+  // delete hypotheses that are not in the chart (recombined away)
   if (m_arcList) {
     ArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
@@ -90,6 +98,9 @@ Hypothesis::~Hypothesis()
   }
 }
 
+/** Create full output phrase that is contained in the hypothesis (and its children)
+ * \param outPhrase full output phrase
+ */
 void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
@@ -99,12 +110,14 @@ void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
       size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
-    } else {
+    } 
+    else {
       outPhrase.AddWord(word);
     }
   }
 }
 
+/** Return full output phrase */
 Phrase Hypothesis::GetOutputPhrase() const
 {
   Phrase outPhrase(Output, ARRAY_SIZE_INCR);
@@ -112,20 +125,29 @@ Phrase Hypothesis::GetOutputPhrase() const
   return outPhrase;
 }
 
+/** Construct the prefix string of up to specified size 
+ * \param ret prefix string
+ * \param size maximum size (typically max lm context window)
+ */
 size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
 {
+  // loop over the rule that is being applied
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
 
+    // for non-terminals, retrieve it from underlying hypothesis
     if (word.IsNonTerminal()) {
       size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       size = prevHypo->CalcPrefix(ret, size);
-    } else {
+    } 
+    // for words, add word
+    else {
       ret.AddWord(GetCurrTargetPhrase().GetWord(pos));
       size--;
     }
 
+    // finish when maximum length reached
     if (size==0)
       break;
   }
@@ -133,12 +155,18 @@ size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
   return size;
 }
 
+/** Construct the suffix phrase of up to specified size 
+ * will always be called after the construction of prefix phrase
+ * \param ret suffix phrase
+ * \param size maximum size of suffix
+ */
 size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 {
   assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
+  // special handling for small hypotheses
+  // does the prefix match the entire hypothesis string? -> just copy prefix
   if (m_contextPrefix.GetSize() == m_numTargetTerminals) {
-    // small hypo. the prefix will contains the whole hypo
     size_t maxCount = min(m_contextPrefix.GetSize(), size)
                       , pos			= m_contextPrefix.GetSize() - 1;
 
@@ -150,7 +178,9 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 
     size -= maxCount;
     return size;
-  } else {
+  } 
+  // construct suffix analogous to prefix
+  else {
     for (int pos = (int) GetCurrTargetPhrase().GetSize() - 1; pos >= 0 ; --pos) {
       const Word &word = GetCurrTargetPhrase().GetWord(pos);
 
@@ -158,7 +188,8 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
         size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
         const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
         size = prevHypo->CalcSuffix(ret, size);
-      } else {
+      } 
+      else {
         ret.PrependWord(GetCurrTargetPhrase().GetWord(pos));
         size--;
       }
@@ -171,6 +202,11 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
   }
 }
 
+/** Check recombinability due to language model context
+ * if two hypotheses match in their edge phrases, they are indistinguishable
+ * in terms of future search, so the weaker one can be dropped.
+ * \param other other hypothesis for comparison
+ */
 int Hypothesis::LMContextCompare(const Hypothesis &other) const
 {
   // prefix
@@ -212,47 +248,66 @@ void Hypothesis::CalcScore()
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
 
+// compute languane model score for the hypothesis
 void Hypothesis::CalcLMScore()
 {
+  // get the language models involved
   const LMList& lmList = m_manager.GetTranslationSystem()->GetLanguageModels();
   assert(m_lmNGram.GetWeightedScore() == 0);
 
+  // start scores with 0
   m_scoreBreakdown.ZeroAllLM(lmList);
 
-  Phrase outPhrase(Output, ARRAY_SIZE_INCR); // = GetOutputPhrase();
-  bool calcNow = false, firstPhrase = true;
+  // initialize output string (empty)
+  Phrase outPhrase(Output, ARRAY_SIZE_INCR);
+  bool firstPhrase = true; // flag for first word
 
-  for (size_t targetPhrasePos = 0; targetPhrasePos < GetCurrTargetPhrase().GetSize(); ++targetPhrasePos) {
+  // loop over rule
+  for (size_t targetPhrasePos = 0; targetPhrasePos < GetCurrTargetPhrase().GetSize(); ++targetPhrasePos) 
+  {
+    // consult rule for either word or non-terminal
     const Word &targetWord = GetCurrTargetPhrase().GetWord(targetPhrasePos);
-    if (!targetWord.IsNonTerminal()) {
-      // just a word, add to phrase for lm scoring
+
+    // just a word, add it to phrase for lm scoring
+    if (!targetWord.IsNonTerminal()) 
+    {
       outPhrase.AddWord(targetWord);
-    } else {
+    } 
+    // non-terminal, add phrase from underlying hypothesis
+    else 
+    {
+      // look up underlying hypothesis
       size_t nonTermInd = m_wordsConsumedTargetOrder[targetPhrasePos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       size_t numTargetTerminals = prevHypo->GetNumTargetTerminals();
 
-      if (numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) {
-        // large hypo (for trigram lm, another hypo equal or over 2 words). just take the prefix & suffix
-        m_lmNGram.PlusEqualsAllLM(lmList, prevHypo->m_lmNGram);
-
-        // calc & add overlapping lm scores
-        // prefix
-        outPhrase.Append(prevHypo->GetPrefix());
-        calcNow = true;
-      } else {
-        // small hypo (for trigram lm, 1-word hypos).
+      // check if we are dealing with a large sub-phrase
+      // (large sub-phrases have internal language model scores)
+      if (numTargetTerminals < lmList.GetMaxNGramOrder() - 1) 
+      {
+        // small sub-phrase (for trigram lm, 1 or 2-word hypos).
         // add target phrase to temp phrase and continue, but don't score yet
         outPhrase.Append(prevHypo->GetPrefix());
       }
+      else {
+        // large sub-phrase
+        // we add the internal scores
+        m_lmNGram.PlusEqualsAllLM(lmList, prevHypo->m_lmNGram);
 
-      if (calcNow) {
+        // we will still have to score the prefix
+        outPhrase.Append(prevHypo->GetPrefix());
+
+        // preliminary language model scoring
+
+        // special case: rule starts with non-terminal
         if (targetPhrasePos == 0 && numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) {
           // get from other prev hypo. faster
           m_lmPrefix.Assign(prevHypo->m_lmPrefix);
           m_lmNGram.Assign(prevHypo->m_lmNGram);
-        } else {
-          // calc
+        } 
+        // general case
+        else {
+          // score everything we got so far
           lmList.CalcAllLMScores(outPhrase
                                  , m_lmNGram
                                  , (firstPhrase) ? &m_lmPrefix : NULL);
@@ -263,8 +318,7 @@ void Hypothesis::CalcLMScore()
         outPhrase.Append(prevHypo->GetSuffix());
 
         firstPhrase = false;
-        calcNow = false;
-      }
+      } // if long sub-phrase
     } // if (!targetWord.IsNonTerminal())
   } // for (size_t targetPhrasePos
 
@@ -272,7 +326,9 @@ void Hypothesis::CalcLMScore()
                          , m_lmNGram
                          , (firstPhrase) ? &m_lmPrefix : NULL);
 
+  // add score estimate for prefix
   m_scoreBreakdown.PlusEqualsAllLM(lmList, m_lmPrefix);
+  // add real score for words with full history
   m_scoreBreakdown.PlusEqualsAllLM(lmList, m_lmNGram);
 
   /*

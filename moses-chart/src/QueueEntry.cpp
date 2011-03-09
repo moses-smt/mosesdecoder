@@ -39,6 +39,7 @@ using namespace Moses;
 namespace MosesChart
 {
 
+// create a cube for a rule
 QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
                        , const ChartCellCollection &allChartCells)
   :m_transOpt(transOpt)
@@ -48,28 +49,37 @@ QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
   CalcScore();
 }
 
+// for each non-terminal, create a ordered list of matching hypothesis from the chart
 void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
 {
-  // recursvile do the 1st first
+  // recurse through the linked list of source side non-terminals and terminals
   const WordConsumed *prevWordsConsumed = wordsConsumed->GetPrevWordsConsumed();
   if (prevWordsConsumed)
     CreateChildEntry(prevWordsConsumed, allChartCells);
 
-  if (wordsConsumed->IsNonTerminal()) {
-    // non-term
-    const WordsRange &childRange = wordsConsumed->GetWordsRange();
-    const ChartCell &childCell = allChartCells.Get(childRange);
-    const Word &headWord = wordsConsumed->GetSourceWord();
+  // only deal with non-terminals
+  if (wordsConsumed->IsNonTerminal()) 
+  {
+    // get the essential information about the non-terminal
+    const WordsRange &childRange = wordsConsumed->GetWordsRange(); // span covered by child
+    const ChartCell &childCell = allChartCells.Get(childRange);    // list of all hypos for that span
+    const Word &headWord = wordsConsumed->GetSourceWord();         // target (sic!) non-terminal label 
 
+    // there have to be hypothesis with the desired non-terminal
+    // (otherwise the rule would not be considered)
     assert(!childCell.GetSortedHypotheses(headWord).empty());
 
+    // ??? why are we looking it up again?
     const Moses::Word &nonTerm = wordsConsumed->GetSourceWord();
     assert(nonTerm.IsNonTerminal());
+    // create a list of hypotheses that match the non-terminal
     ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
+    // add them to the vector for such lists
     m_childEntries.push_back(childEntry);
   }
 }
 
+// create the QueueEntry from an existing one, differing only in one child hypothesis
 QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
   :m_transOpt(copy.m_transOpt)
   ,m_childEntries(copy.m_childEntries)
@@ -84,8 +94,11 @@ QueueEntry::~QueueEntry()
   //Moses::RemoveAllInColl(m_childEntries);
 }
 
+// create new QueueEntry for neighboring principle rules
+// (duplicate detection is handled in Cube)
 void QueueEntry::CreateDeviants(Cube &cube) const
 {
+  // loop over all child hypotheses
   for (size_t ind = 0; ind < m_childEntries.size(); ind++) {
     const ChildEntry &childEntry = m_childEntries[ind];
 
@@ -96,6 +109,8 @@ void QueueEntry::CreateDeviants(Cube &cube) const
   }
 }
 
+// compute an estimated cost of the principle rule
+// (consisting of rule translation scores plus child hypotheses scores)
 void QueueEntry::CalcScore()
 {
   m_combinedScore = m_transOpt.GetTotalScore();
@@ -105,7 +120,6 @@ void QueueEntry::CalcScore()
     const Hypothesis *hypo = childEntry.GetHypothesis();
     m_combinedScore += hypo->GetTotalScore();
   }
-
 }
 
 bool QueueEntry::operator<(const QueueEntry &compare) const
