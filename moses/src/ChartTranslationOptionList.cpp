@@ -71,7 +71,8 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseC
       // not yet filled out quota. add everything
       m_collection.push_back(new ChartTranslationOption(targetPhrase, wordConsumed, m_range));
       m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
-    } else if (score > m_scoreThreshold) {
+    }
+    else if (score > m_scoreThreshold) {
       // full but not bursting. add if better than worst score
       m_collection.push_back(new ChartTranslationOption(targetPhrase, wordConsumed, m_range));
     }

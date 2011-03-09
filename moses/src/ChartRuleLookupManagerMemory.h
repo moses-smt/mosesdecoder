@@ -66,8 +66,6 @@ private:
     size_t startPos,
     size_t endPos,
     size_t stackInd,
-    const NonTerminalSet &sourceNonTerms,
-    const NonTerminalSet &targetNonTerms,
     ProcessedRuleColl &processedRuleColl);
 
   std::vector<ProcessedRuleColl*> m_processedRuleColls;

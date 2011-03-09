@@ -139,18 +139,9 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
       stackInd = relEndPos + 1;
     }
 
-    // we have to cover the remainder of the span
-    // source non-terminal labels for the remainder
-    const NonTerminalSet &sourceNonTerms =
-      GetSentence().GetLabelSet(startPos, endPos);
-
-    // target non-terminal labels for the remainder
-    const NonTerminalSet &targetNonTerms =
-      GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
 
     ExtendPartialRuleApplication(prevNode, prevWordConsumed, startPos,
-                                 endPos, stackInd, sourceNonTerms,
-                                 targetNonTerms, processedRuleCol);
+                                 endPos, stackInd, processedRuleCol);
   }
 
   // list of rules that that cover the entire span
@@ -186,10 +177,16 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   size_t startPos,
   size_t endPos,
   size_t stackInd,
-  const NonTerminalSet & sourceNonTerms,
-  const NonTerminalSet & targetNonTerms,
   ProcessedRuleColl & processedRuleColl)
 {
+  // source non-terminal labels for the remainder
+  const NonTerminalSet &sourceNonTerms =
+    GetSentence().GetLabelSet(startPos, endPos);
+
+  // target non-terminal labels for the remainder
+  const NonTerminalSet &targetNonTerms =
+    GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
+
   const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
     node.GetNonTerminalMap();
 
