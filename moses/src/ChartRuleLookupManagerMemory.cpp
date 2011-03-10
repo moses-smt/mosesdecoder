@@ -129,10 +129,19 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
       continue;
 
     else if (startPos == range.GetStartPos() && range.GetEndPos() > range.GetStartPos()) {
-      // start.
+      // We're at the root of the prefix tree so won't try to cover the full
+      // span (i.e. we don't allow non-lexical unary rules).  However, we need
+      // to match non-unary rules that begin with a non-terminal child, so we
+      // do that in two steps: during this iteration we search for non-terminals
+      // that cover all but the last source word in the span (there won't
+      // already be running nodes for these because that would have required a
+      // non-lexical unary rule match for an earlier span).  Any matches will
+      // result in running nodes being appended to the list and on subsequent
+      // iterations (for this same span), we'll extend them to cover the final
+      // word.
       endPos = absEndPos - 1;
       stackInd = relEndPos;
-    } 
+    }
     else 
     {
       endPos = absEndPos;
