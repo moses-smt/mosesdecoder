@@ -22,16 +22,16 @@
 #include "ChartTrellisPath.h"
 #include "ChartHypothesis.h"
 #include "ChartTrellisPathCollection.h"
-#include "../../moses/src/StaticData.h"
-#include "../../moses/src/Word.h"
+#include "StaticData.h"
+#include "Word.h"
 
 using namespace std;
 
-namespace MosesChart
+namespace Moses
 {
 
-TrellisPath::TrellisPath(const Hypothesis *hypo)
-  :m_finalNode(new TrellisNode(hypo))
+ChartTrellisPath::ChartTrellisPath(const ChartHypothesis *hypo)
+  :m_finalNode(new ChartTrellisNode(hypo))
   ,m_scoreBreakdown(hypo->GetScoreBreakdown())
   ,m_totalScore(hypo->GetTotalScore())
   ,m_prevNodeChanged(NULL)
@@ -39,14 +39,14 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
 {
 }
 
-TrellisPath::TrellisPath(const TrellisPath &origPath
-                         , const TrellisNode &soughtNode
-                         , const Hypothesis &replacementHypo
+ChartTrellisPath::ChartTrellisPath(const ChartTrellisPath &origPath
+                         , const ChartTrellisNode &soughtNode
+                         , const ChartHypothesis &replacementHypo
                          , Moses::ScoreComponentCollection	&scoreChange)
   :m_scoreBreakdown(origPath.GetScoreBreakdown())
   ,m_prevPath(&origPath)
 {
-  m_finalNode = new TrellisNode(origPath.GetFinalNode()
+  m_finalNode = new ChartTrellisNode(origPath.GetFinalNode()
                                 , soughtNode
                                 , replacementHypo
                                 , scoreChange
@@ -57,61 +57,61 @@ TrellisPath::TrellisPath(const TrellisPath &origPath
   m_totalScore = m_scoreBreakdown.GetWeightedScore();
 }
 
-TrellisPath::~TrellisPath()
+ChartTrellisPath::~ChartTrellisPath()
 {
   delete m_finalNode;
 }
 
-Moses::Phrase TrellisPath::GetOutputPhrase() const
+Moses::Phrase ChartTrellisPath::GetOutputPhrase() const
 {
   Moses::Phrase ret = GetFinalNode().GetOutputPhrase();
   return ret;
 }
 
-void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl, const TrellisNode &soughtNode) const
+void ChartTrellisPath::CreateDeviantPaths(ChartTrellisPathCollection &pathColl, const ChartTrellisNode &soughtNode) const
 {
   // copy this path but replace startHypo with its arc
-  const ArcList *arcList = soughtNode.GetHypothesis().GetArcList();
+  const ChartArcList *arcList = soughtNode.GetHypothesis().GetArcList();
 
   if (arcList) {
-    ArcList::const_iterator iterArcList;
-    for (iterArcList = arcList->begin(); iterArcList != arcList->end(); ++iterArcList) {
+    ChartArcList::const_iterator iterChartArcList;
+    for (iterChartArcList = arcList->begin(); iterChartArcList != arcList->end(); ++iterChartArcList) {
       Moses::ScoreComponentCollection	scoreChange;
 
-      const Hypothesis &replacementHypo = **iterArcList;
-      TrellisPath *newPath = new TrellisPath(*this, soughtNode, replacementHypo, scoreChange);
+      const ChartHypothesis &replacementHypo = **iterChartArcList;
+      ChartTrellisPath *newPath = new ChartTrellisPath(*this, soughtNode, replacementHypo, scoreChange);
       pathColl.Add(newPath);
     }
   }
 
   // recusively create deviant paths for child nodes
-  const TrellisNode::NodeChildren &children = soughtNode.GetChildren();
+  const ChartTrellisNode::NodeChildren &children = soughtNode.GetChildren();
 
-  TrellisNode::NodeChildren::const_iterator iter;
+  ChartTrellisNode::NodeChildren::const_iterator iter;
   for (iter = children.begin(); iter != children.end(); ++iter) {
-    const TrellisNode &child = **iter;
+    const ChartTrellisNode &child = **iter;
     CreateDeviantPaths(pathColl, child);
   }
 }
 
-void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl) const
+void ChartTrellisPath::CreateDeviantPaths(ChartTrellisPathCollection &pathColl) const
 {
   if (m_prevNodeChanged == NULL) {
     // initial enumeration from a pure hypo
     CreateDeviantPaths(pathColl, GetFinalNode());
   } else {
     // don't change m_prevNodeChanged, just it's children
-    const TrellisNode::NodeChildren &children = m_prevNodeChanged->GetChildren();
+    const ChartTrellisNode::NodeChildren &children = m_prevNodeChanged->GetChildren();
 
-    TrellisNode::NodeChildren::const_iterator iter;
+    ChartTrellisNode::NodeChildren::const_iterator iter;
     for (iter = children.begin(); iter != children.end(); ++iter) {
-      const TrellisNode &child = **iter;
+      const ChartTrellisNode &child = **iter;
       CreateDeviantPaths(pathColl, child);
     }
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const TrellisPath &path)
+std::ostream& operator<<(std::ostream &out, const ChartTrellisPath &path)
 {
   out << &path << "  " << path.m_prevPath << "  " << path.GetOutputPhrase() << endl;
 

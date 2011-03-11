@@ -41,7 +41,7 @@ namespace Moses
 {
 
 class ChartTranslationOptionList;
-class ProcessedRuleColl;
+class DottedRuleColl;
 class WordsRange;
 
 // Implementation of ChartRuleLookupManager for in-memory rule tables.
@@ -66,15 +66,15 @@ private:
     size_t startPos,
     size_t endPos,
     size_t stackInd,
-    ProcessedRuleColl &processedRuleColl);
+    DottedRuleColl &dottedRuleColl);
 
-  std::vector<ProcessedRuleColl*> m_processedRuleColls;
+  std::vector<DottedRuleColl*> m_dottedRuleColls;
   const PhraseDictionarySCFG &m_ruleTable;
 #ifdef USE_BOOST_POOL
-  // Use object pools to allocate the ProcessedRule and WordConsumed objects
+  // Use object pools to allocate the DottedRule and WordConsumed objects
   // for this sentence.  We allocate a lot of them and this has been seen to
   // significantly improve performance, especially for multithreaded decoding.
-  boost::object_pool<ProcessedRule> m_processedRulePool;
+  boost::object_pool<DottedRule> m_dottedRulePool;
   boost::object_pool<WordConsumed> m_wordConsumedPool;
 #endif
 };

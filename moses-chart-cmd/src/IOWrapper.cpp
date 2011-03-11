@@ -41,12 +41,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
 #include "PhraseDictionary.h"
-#include "../../moses-chart/src/ChartTrellisPathList.h"
-#include "../../moses-chart/src/ChartTrellisPath.h"
+#include "ChartTrellisPathList.h"
+#include "ChartTrellisPath.h"
 
 using namespace std;
 using namespace Moses;
-using namespace MosesChart;
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
@@ -163,30 +162,30 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
   }
 }
 
-void OutputSurface(std::ostream &out, const MosesChart::Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
+void OutputSurface(std::ostream &out, const ChartHypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
                    ,bool reportSegmentation, bool reportAllFactors)
 {
   if ( hypo != NULL) {
     //OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
-    const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+    const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
 
-    vector<const MosesChart::Hypothesis*>::const_iterator iter;
+    vector<const ChartHypothesis*>::const_iterator iter;
     for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-      const MosesChart::Hypothesis *prevHypo = *iter;
+      const ChartHypothesis *prevHypo = *iter;
 
       OutputSurface(out, prevHypo, outputFactorOrder, reportSegmentation, reportAllFactors);
     }
   }
 }
 
-void IOWrapper::Backtrack(const MosesChart::Hypothesis *hypo)
+void IOWrapper::Backtrack(const ChartHypothesis *hypo)
 {
-  const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+  const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
 
-  vector<const MosesChart::Hypothesis*>::const_iterator iter;
+  vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-    const MosesChart::Hypothesis *prevHypo = *iter;
+    const ChartHypothesis *prevHypo = *iter;
 
     VERBOSE(3,prevHypo->GetId() << " <= ");
     Backtrack(prevHypo);
@@ -201,7 +200,7 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
   }
 }
 /*
-void OutputInput(std::vector<const Phrase*>& map, const MosesChart::Hypothesis* hypo)
+void OutputInput(std::vector<const Phrase*>& map, const ChartHypothesis* hypo)
 {
 	if (hypo->GetPrevHypos())
 	{
@@ -210,7 +209,7 @@ void OutputInput(std::vector<const Phrase*>& map, const MosesChart::Hypothesis* 
 	}
 }
 
-void OutputInput(std::ostream& os, const MosesChart::Hypothesis* hypo)
+void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
 {
 	size_t len = StaticData::Instance().GetInput()->GetSize();
 	std::vector<const Phrase*> inp_phrases(len, 0);
@@ -220,7 +219,7 @@ void OutputInput(std::ostream& os, const MosesChart::Hypothesis* hypo)
 }
 */
 
-void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *hypo, long translationId)
+void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, long translationId)
 {
   // recursive
   if (hypo != NULL) {
@@ -229,16 +228,16 @@ void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *h
         << endl;
   }
 
-  const std::vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
-  std::vector<const MosesChart::Hypothesis*>::const_iterator iter;
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-    const MosesChart::Hypothesis *prevHypo = *iter;
+    const ChartHypothesis *prevHypo = *iter;
     OutputTranslationOptions(out, prevHypo, translationId);
   }
 }
 
 void IOWrapper::OutputDetailedTranslationReport(
-  const MosesChart::Hypothesis *hypo,
+  const ChartHypothesis *hypo,
   long translationId)
 {
   if (hypo == NULL) {
@@ -250,7 +249,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
+void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
   std::ostringstream out;
   IOWrapper::FixPrecision(out);
@@ -262,7 +261,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << hypo->GetTotalScore() << " "
-          << MosesChart::Hypothesis::GetHypoCount() << " ";
+          << ChartHypothesis::GetHypoCount() << " ";
     }
 
     if (!m_surpressSingleBestOutput) {
@@ -296,7 +295,7 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
   }
 }
 
-void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, const MosesChart::Hypothesis *bestHypo, const TranslationSystem* system, long translationId)
+void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const ChartHypothesis *bestHypo, const TranslationSystem* system, long translationId)
 {
   std::ostringstream out;
 
@@ -310,7 +309,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
     if (StaticData::Instance().GetOutputHypoScore()) {
       if (bestHypo != NULL) {
         out << bestHypo->GetTotalScore() << " "
-            << MosesChart::Hypothesis::GetHypoCount() << " ";
+            << ChartHypothesis::GetHypoCount() << " ";
       } else {
         out << "0 ";
       }
@@ -320,9 +319,9 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
   bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
   //bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 
-  MosesChart::TrellisPathList::const_iterator iter;
+  ChartTrellisPathList::const_iterator iter;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
-    const MosesChart::TrellisPath &path = **iter;
+    const ChartTrellisPath &path = **iter;
     //cerr << path << endl << endl;
 
     Moses::Phrase outputPhrase = path.GetOutputPhrase();
@@ -431,7 +430,7 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
     	*m_nBestStream << " |||";
     	for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
     	{
-    		const MosesChart::Hypothesis &edge = *edges[currEdge];
+    		const ChartHypothesis &edge = *edges[currEdge];
     		WordsRange sourceRange = edge.GetCurrSourceWordsRange();
     		WordsRange targetRange = edge.GetCurrTargetWordsRange();
     		*m_nBestStream << " " << sourceRange.GetStartPos();

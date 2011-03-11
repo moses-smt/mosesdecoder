@@ -25,22 +25,22 @@
 #include "QueueEntry.h"
 
 
-namespace MosesChart
+namespace Moses
 {
 
 // order by descending score
 class ChartHypothesisScoreOrderer
 {
 public:
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
+  bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
     return hypoA->GetTotalScore() > hypoB->GetTotalScore();
   }
 };
 
-class HypothesisRecombinationOrderer
+class ChartHypothesisRecombinationOrderer
 {
 public:
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
+  bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
     // assert in same cell
     const Moses::WordsRange &rangeA	= hypoA->GetCurrSourceRange()
                                       , &rangeB	= hypoB->GetCurrSourceRange();
@@ -63,22 +63,13 @@ public:
   }
 };
 
-// order by descending score
-class HypothesisScoreOrderer
-{
-public:
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    return hypoA->GetTotalScore() > hypoB->GetTotalScore();
-  }
-};
-
 // 1 of these for each target LHS in each cell
-class HypothesisCollection
+class ChartHypothesisCollection
 {
-  friend std::ostream& operator<<(std::ostream&, const HypothesisCollection&);
+  friend std::ostream& operator<<(std::ostream&, const ChartHypothesisCollection&);
 
 protected:
-  typedef std::set<Hypothesis*, HypothesisRecombinationOrderer> HCType;
+  typedef std::set<ChartHypothesis*, ChartHypothesisRecombinationOrderer> HCType;
   HCType m_hypos;
   HypoList m_hyposOrdered;
 
@@ -90,7 +81,7 @@ protected:
   /** add hypothesis to stack. Prune if necessary.
    * Returns false if equiv hypo exists in collection, otherwise returns true
    */
-  std::pair<HCType::iterator, bool> Add(Hypothesis *hypo, Manager &manager);
+  std::pair<HCType::iterator, bool> Add(ChartHypothesis *hypo, ChartManager &manager);
 
 public:
   typedef HCType::iterator iterator;
@@ -103,16 +94,16 @@ public:
     return m_hypos.end();
   }
 
-  HypothesisCollection();
-  ~HypothesisCollection();
-  bool AddHypothesis(Hypothesis *hypo, Manager &manager);
+  ChartHypothesisCollection();
+  ~ChartHypothesisCollection();
+  bool AddHypothesis(ChartHypothesis *hypo, ChartManager &manager);
 
   //! remove hypothesis pointed to by iterator but don't delete the object
   void Detach(const HCType::iterator &iter);
   /** destroy Hypothesis pointed to by iterator (object pool version) */
   void Remove(const HCType::iterator &iter);
 
-  void PruneToSize(Manager &manager);
+  void PruneToSize(ChartManager &manager);
 
   size_t GetSize() const {
     return m_hypos.size();

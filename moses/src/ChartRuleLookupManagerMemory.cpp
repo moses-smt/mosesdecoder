@@ -37,30 +37,30 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   : ChartRuleLookupManager(src, cellColl)
   , m_ruleTable(ruleTable)
 {
-  assert(m_processedRuleColls.size() == 0);
+  assert(m_dottedRuleColls.size() == 0);
   size_t sourceSize = src.GetSize();
-  m_processedRuleColls.resize(sourceSize);
+  m_dottedRuleColls.resize(sourceSize);
 
   const PhraseDictionaryNodeSCFG &rootNode = m_ruleTable.GetRootNode();
 
-  for (size_t ind = 0; ind < m_processedRuleColls.size(); ++ind) {
+  for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
 #ifdef USE_BOOST_POOL
-    ProcessedRule *initProcessedRule = m_processedRulePool.malloc();
-    new (initProcessedRule) ProcessedRule(rootNode);
+    DottedRule *initDottedRule = m_dottedRulePool.malloc();
+    new (initDottedRule) DottedRule(rootNode);
 #else
-    ProcessedRule *initProcessedRule = new ProcessedRule(rootNode);
+    DottedRule *initDottedRule = new DottedRule(rootNode);
 #endif
 
-    ProcessedRuleColl *processedRuleColl = new ProcessedRuleColl(sourceSize - ind + 1);
-    processedRuleColl->Add(0, initProcessedRule); // init rule. stores the top node in tree
+    DottedRuleColl *dottedRuleColl = new DottedRuleColl(sourceSize - ind + 1);
+    dottedRuleColl->Add(0, initDottedRule); // init rule. stores the top node in tree
 
-    m_processedRuleColls[ind] = processedRuleColl;
+    m_dottedRuleColls[ind] = dottedRuleColl;
   }
 }
 
 ChartRuleLookupManagerMemory::~ChartRuleLookupManagerMemory()
 {
-  RemoveAllInColl(m_processedRuleColls);
+  RemoveAllInColl(m_dottedRuleColls);
 }
 
 void ChartRuleLookupManagerMemory::GetChartRuleCollection(
@@ -74,19 +74,19 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // MAIN LOOP. create list of nodes of target phrases
 
   // get list of all rules that apply to spans at same starting position
-  ProcessedRuleColl &processedRuleCol = *m_processedRuleColls[range.GetStartPos()];
-  const ProcessedRuleList &runningNodes = processedRuleCol.GetRunningNodes();
+  DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
+  const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
 
   // loop through the rules
-  // (note that runningNodes can be expanded as the loop runs 
+  // (note that expandableDottedRuleList can be expanded as the loop runs 
   //  through calls to ExtendPartialRuleApplication())
-  for (size_t ind = 0; ind < runningNodes.size(); ++ind) {
+  for (size_t ind = 0; ind < expandableDottedRuleList.size(); ++ind) {
     // rule we are about to extend
-    const ProcessedRule &prevProcessedRule = *runningNodes[ind];
+    const DottedRule &prevDottedRule = *expandableDottedRuleList[ind];
     // note where it was found in the prefix tree of the rule dictionary
-    const PhraseDictionaryNodeSCFG &prevNode = prevProcessedRule.GetLastNode();
+    const PhraseDictionaryNodeSCFG &prevNode = prevDottedRule.GetLastNode();
     // look up end position of the span it covers
-    const WordConsumed *prevWordConsumed = prevProcessedRule.GetLastWordConsumed();
+    const WordConsumed *prevWordConsumed = prevDottedRule.GetLastWordConsumed();
     // we will now try to extend it, starting after where it ended
     // (note: prevWordConsumed == NULL matches for the dummy rule 
     //  at root of the prefix tree)
@@ -108,16 +108,16 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
         WordConsumed *newWordConsumed = m_wordConsumedPool.malloc();
         new (newWordConsumed) WordConsumed(absEndPos, absEndPos, sourceWord,
                                            prevWordConsumed);
-        ProcessedRule *processedRule = m_processedRulePool.malloc();
-        new (processedRule) ProcessedRule(*node, newWordConsumed);
+        DottedRule *dottedRule = m_dottedRulePool.malloc();
+        new (dottedRule) DottedRule(*node, newWordConsumed);
 #else
         WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos,
             sourceWord,
             prevWordConsumed);
-        ProcessedRule *processedRule = new ProcessedRule(*node,
+        DottedRule *dottedRule = new DottedRule(*node,
             newWordConsumed);
 #endif
-        processedRuleCol.Add(relEndPos+1, processedRule);
+        dottedRuleCol.Add(relEndPos+1, dottedRule);
       }
     }
 
@@ -150,19 +150,19 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
 
     ExtendPartialRuleApplication(prevNode, prevWordConsumed, startPos,
-                                 endPos, stackInd, processedRuleCol);
+                                 endPos, stackInd, dottedRuleCol);
   }
 
   // list of rules that that cover the entire span
-  ProcessedRuleList &rules = processedRuleCol.Get(relEndPos + 1);
+  DottedRuleList &rules = dottedRuleCol.Get(relEndPos + 1);
 
   // look up target sides for the rules
   size_t rulesLimit = StaticData::Instance().GetRuleLimit();
-  ProcessedRuleList::const_iterator iterRule;
+  DottedRuleList::const_iterator iterRule;
   for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
-    const ProcessedRule &processedRule = **iterRule;
-    const PhraseDictionaryNodeSCFG &node = processedRule.GetLastNode();
-    const WordConsumed *wordConsumed = processedRule.GetLastWordConsumed();
+    const DottedRule &dottedRule = **iterRule;
+    const PhraseDictionaryNodeSCFG &node = dottedRule.GetLastNode();
+    const WordConsumed *wordConsumed = dottedRule.GetLastWordConsumed();
     assert(wordConsumed);
 
     // look up target sides
@@ -186,7 +186,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   size_t startPos,
   size_t endPos,
   size_t stackInd,
-  ProcessedRuleColl & processedRuleColl)
+  DottedRuleColl & dottedRuleColl)
 {
   // source non-terminal labels for the remainder
   const NonTerminalSet &sourceNonTerms =
@@ -194,7 +194,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
 
   // target non-terminal labels for the remainder
   const NonTerminalSet &targetNonTerms =
-    GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
+    GetCellCollection().GetConstituentLabelSet(WordsRange(startPos, endPos));
 
   const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
     node.GetNonTerminalMap();
@@ -242,15 +242,15 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         WordConsumed *wc = m_wordConsumedPool.malloc();
         new (wc) WordConsumed(startPos, endPos, targetNonTerm,
                               prevWordConsumed);
-        ProcessedRule *rule = m_processedRulePool.malloc();
-        new (rule) ProcessedRule(*child, wc);
+        DottedRule *rule = m_dottedRulePool.malloc();
+        new (rule) DottedRule(*child, wc);
 #else
         WordConsumed * wc = new WordConsumed(startPos, endPos,
                                              targetNonTerm,
                                              prevWordConsumed);
-        ProcessedRule * rule = new ProcessedRule(*child, wc);
+        DottedRule * rule = new DottedRule(*child, wc);
 #endif
-        processedRuleColl.Add(stackInd, rule);
+        dottedRuleColl.Add(stackInd, rule);
       }
     }
   } 
@@ -278,15 +278,15 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       WordConsumed *wc = m_wordConsumedPool.malloc();
       new (wc) WordConsumed(startPos, endPos, targetNonTerm,
                             prevWordConsumed);
-      ProcessedRule *rule = m_processedRulePool.malloc();
-      new (rule) ProcessedRule(child, wc);
+      DottedRule *rule = m_dottedRulePool.malloc();
+      new (rule) DottedRule(child, wc);
 #else
       WordConsumed * wc = new WordConsumed(startPos, endPos,
                                            targetNonTerm,
                                            prevWordConsumed);
-      ProcessedRule * rule = new ProcessedRule(child, wc);
+      DottedRule * rule = new DottedRule(child, wc);
 #endif
-      processedRuleColl.Add(stackInd, rule);
+      dottedRuleColl.Add(stackInd, rule);
     }
   }
 }

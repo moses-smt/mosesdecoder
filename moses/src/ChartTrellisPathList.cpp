@@ -21,13 +21,13 @@
 
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
-#include "../../moses/src/Util.h"
+#include "Util.h"
 
 using namespace std;
 
-namespace MosesChart
+namespace Moses
 {
-TrellisPathList::~TrellisPathList()
+ChartTrellisPathList::~ChartTrellisPathList()
 {
   // clean up
   Moses::RemoveAllInColl(m_collection);

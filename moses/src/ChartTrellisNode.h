@@ -18,48 +18,49 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
+
 #pragma once
 
-#include <set>
-#include "ChartTrellisPath.h"
+#include <vector>
+#include "Phrase.h"
 
-namespace MosesChart
+namespace Moses
 {
+class ScoreComponentCollection;
+class ChartHypothesis;
 
-class TrellisPath;
-
-struct CompareTrellisPathCollection {
-  bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const {
-    return (pathA->GetTotalScore() > pathB->GetTotalScore());
-  }
-};
-
-class TrellisPathCollection
+class ChartTrellisNode
 {
+  friend std::ostream& operator<<(std::ostream&, const ChartTrellisNode&);
+public:
+  typedef std::vector<ChartTrellisNode*> NodeChildren;
+
 protected:
-  typedef std::multiset<TrellisPath*, CompareTrellisPathCollection> CollectionType;
-  CollectionType m_collection;
+  const ChartHypothesis *m_hypo;
+  NodeChildren m_edge;
 
 public:
-  ~TrellisPathCollection();
+  ChartTrellisNode(const ChartHypothesis *hypo);
+  ChartTrellisNode(const ChartTrellisNode &origNode
+              , const ChartTrellisNode &soughtNode
+              , const ChartHypothesis &replacementHypo
+              , Moses::ScoreComponentCollection	&scoreChange
+              , const ChartTrellisNode *&nodeChanged);
+  ~ChartTrellisNode();
 
-  size_t GetSize() const {
-    return m_collection.size();
+  const ChartHypothesis &GetHypothesis() const {
+    return *m_hypo;
   }
 
-  void Add(TrellisPath *path);
-  void Prune(size_t newSize);
-
-  TrellisPath *pop() {
-    TrellisPath *top = *m_collection.begin();
-
-    // Detach
-    m_collection.erase(m_collection.begin());
-    return top;
+  const NodeChildren &GetChildren() const {
+    return m_edge;
   }
 
+  const ChartTrellisNode &GetChild(size_t ind) const {
+    return *m_edge[ind];
+  }
+
+  Moses::Phrase GetOutputPhrase() const;
 };
 
-
 }
-

@@ -25,9 +25,9 @@
 #include <queue>
 #include <map>
 #include <vector>
-#include "../../moses/src/Word.h"
-#include "../../moses/src/WordsRange.h"
-#include "../../moses/src/NonTerminal.h"
+#include "Word.h"
+#include "WordsRange.h"
+#include "NonTerminal.h"
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
 #include "QueueEntry.h"
@@ -35,16 +35,9 @@
 namespace Moses
 {
 class ChartTranslationOptionList;
-}
-
-namespace MosesChart
-{
-
-class TranslationOptionCollection;
-class TranslationOptionList;
-class TranslationOption;
+class ChartTranslationOptionCollection;
 class ChartCellCollection;
-class Manager;
+class ChartManager;
 
 class ChartCell
 {
@@ -52,31 +45,31 @@ class ChartCell
 public:
 
 protected:
-  std::map<Moses::Word, HypothesisCollection> m_hypoColl;
-  Moses::NonTerminalSet m_headWords;
+  std::map<Moses::Word, ChartHypothesisCollection> m_hypoColl;
+  Moses::NonTerminalSet m_constituentLabelSet;
 
   Moses::WordsRange m_coverage;
 
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
-  Manager &m_manager;
+  ChartManager &m_manager;
 
 public:
-  ChartCell(size_t startPos, size_t endPos, Manager &manager);
+  ChartCell(size_t startPos, size_t endPos, ChartManager &manager);
 
   void ProcessSentence(const Moses::ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
 
-  const HypoList &GetSortedHypotheses(const Moses::Word &headWord) const;
-  bool AddHypothesis(Hypothesis *hypo);
+  const HypoList &GetSortedHypotheses(const Moses::Word &constituentLabel) const;
+  bool AddHypothesis(ChartHypothesis *hypo);
 
   void SortHypotheses();
   void PruneToSize();
 
-  const Hypothesis *GetBestHypothesis() const;
+  const ChartHypothesis *GetBestHypothesis() const;
 
-  bool HeadwordExists(const Moses::Word &headWord) const;
-  const Moses::NonTerminalSet &GetHeadwords() const {
-    return m_headWords;
+  bool ConstituentLabelExists(const Moses::Word &constituentLabel) const;
+  const Moses::NonTerminalSet &GetConstituentLabelSet() const {
+    return m_constituentLabelSet;
   }
 
   void CleanupArcList();

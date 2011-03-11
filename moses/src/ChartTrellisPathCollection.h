@@ -20,44 +20,46 @@
  ***********************************************************************/
 #pragma once
 
-#include "ChartCell.h"
-#include "../../moses/src/WordsRange.h"
-#include "../../moses/src/CellCollection.h"
+#include <set>
+#include "ChartTrellisPath.h"
 
 namespace Moses
 {
-class InputType;
-}
 
-namespace MosesChart
-{
-class Manager;
+class ChartTrellisPath;
 
-class ChartCellCollection : public Moses::CellCollection
-{
-public:
-  typedef std::vector<ChartCell*> InnerCollType;
-  typedef std::vector<InnerCollType> OuterCollType;
-
-protected:
-  OuterCollType m_hypoStackColl;
-
-public:
-  ChartCellCollection(const Moses::InputType &input, Manager &manager);
-  ~ChartCellCollection();
-
-  ChartCell &Get(const Moses::WordsRange &coverage) {
-    return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
-  }
-  const ChartCell &Get(const Moses::WordsRange &coverage) const {
-    return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
-  }
-
-  const Moses::NonTerminalSet &GetHeadwords(const Moses::WordsRange &coverage) const {
-    const ChartCell &cell = Get(coverage);
-    return cell.GetHeadwords();
+struct CompareChartTrellisPathCollection {
+  bool operator()(const ChartTrellisPath* pathA, const ChartTrellisPath* pathB) const {
+    return (pathA->GetTotalScore() > pathB->GetTotalScore());
   }
 };
+
+class ChartTrellisPathCollection
+{
+protected:
+  typedef std::multiset<ChartTrellisPath*, CompareChartTrellisPathCollection> CollectionType;
+  CollectionType m_collection;
+
+public:
+  ~ChartTrellisPathCollection();
+
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+
+  void Add(ChartTrellisPath *path);
+  void Prune(size_t newSize);
+
+  ChartTrellisPath *pop() {
+    ChartTrellisPath *top = *m_collection.begin();
+
+    // Detach
+    m_collection.erase(m_collection.begin());
+    return top;
+  }
+
+};
+
 
 }
 

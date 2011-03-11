@@ -22,20 +22,20 @@
 #include <cassert>
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
-#include "../../moses/src/InputType.h"
-#include "../../moses/src/StaticData.h"
-#include "../../moses/src/DecodeStep.h"
-#include "../../moses/src/DummyScoreProducers.h"
-#include "../../moses/src/WordConsumed.h"
-#include "../../moses/src/Util.h"
+#include "InputType.h"
+#include "StaticData.h"
+#include "DecodeStep.h"
+#include "DummyScoreProducers.h"
+#include "WordConsumed.h"
+#include "Util.h"
 
 using namespace std;
 using namespace Moses;
 
-namespace MosesChart
+namespace Moses
 {
 
-TranslationOptionCollection::TranslationOptionCollection(InputType const& source
+ChartTranslationOptionCollection::ChartTranslationOptionCollection(InputType const& source
     , const Moses::TranslationSystem* system
     , const ChartCellCollection &hypoStackColl
     , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers)
@@ -56,7 +56,7 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& source
   }
 }
 
-TranslationOptionCollection::~TranslationOptionCollection()
+ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
 {
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhrase);
@@ -71,7 +71,7 @@ TranslationOptionCollection::~TranslationOptionCollection()
 
 }
 
-void TranslationOptionCollection::CreateTranslationOptionsForRange(
+void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
   size_t startPos
   , size_t endPos)
 {
@@ -100,7 +100,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 }
 
 //! Force a creation of a translation option where there are none for a particular source position.
-void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t endPos)
+void ChartTranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t endPos)
 {
   if (startPos != endPos) {
     // only for 1 word phrases
@@ -130,20 +130,20 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t end
 }
 
 
-ChartTranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
+ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {
   size_t sizeVec = m_collection[startPos].size();
   assert(endPos-startPos < sizeVec);
   return m_collection[startPos][endPos - startPos];
 }
-const ChartTranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
+const ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
 {
   size_t sizeVec = m_collection[startPos].size();
   assert(endPos-startPos < sizeVec);
   return m_collection[startPos][endPos - startPos];
 }
 
-std::ostream& operator<<(std::ostream &out, const TranslationOptionCollection &coll)
+std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionCollection &coll)
 {
   std::vector< std::vector< ChartTranslationOptionList > >::const_iterator iterOuter;
   for (iterOuter = coll.m_collection.begin(); iterOuter != coll.m_collection.end(); ++iterOuter) {
@@ -160,15 +160,15 @@ std::ostream& operator<<(std::ostream &out, const TranslationOptionCollection &c
   return out;
 }
 
-// taken from TranslationOptionCollectionText.
-void TranslationOptionCollection::ProcessUnknownWord(size_t sourcePos)
+// taken from ChartTranslationOptionCollectionText.
+void ChartTranslationOptionCollection::ProcessUnknownWord(size_t sourcePos)
 {
   const Word &sourceWord = m_source.GetWord(sourcePos);
   ProcessOneUnknownWord(sourceWord,sourcePos);
 }
 
 //! special handling of ONE unknown words.
-void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord, size_t sourcePos, size_t /* length */)
+void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord, size_t sourcePos, size_t /* length */)
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
@@ -278,20 +278,20 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
   }
 }
 
-void TranslationOptionCollection::Add(ChartTranslationOption *transOpt, size_t pos)
+void ChartTranslationOptionCollection::Add(ChartTranslationOption *transOpt, size_t pos)
 {
   ChartTranslationOptionList &transOptList = GetTranslationOptionList(pos, pos);
   transOptList.Add(transOpt);
 }
 
 //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-void TranslationOptionCollection::Prune(size_t /* startPos */, size_t /* endPos */)
+void ChartTranslationOptionCollection::Prune(size_t /* startPos */, size_t /* endPos */)
 {
 
 }
 
 //! sort all trans opt in each list for cube pruning */
-void TranslationOptionCollection::Sort(size_t startPos, size_t endPos)
+void ChartTranslationOptionCollection::Sort(size_t startPos, size_t endPos)
 {
   ChartTranslationOptionList &list = GetTranslationOptionList(startPos, endPos);
   list.Sort();

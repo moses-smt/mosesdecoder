@@ -19,43 +19,46 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "Cube.h"
+#include "ChartTrellisPathCollection.h"
+#include "ChartTrellisPath.h"
 
-#include "../../moses/src/Util.h"
-
-using namespace std;
-
-namespace MosesChart
+namespace Moses
 {
-Cube::~Cube()
+
+ChartTrellisPathCollection::~ChartTrellisPathCollection()
 {
-  Moses::RemoveAllInColl(m_uniqueEntry);
+  // clean up
+  Moses::RemoveAllInColl(m_collection);
 }
 
-bool Cube::Add(QueueEntry *queueEntry)
+void ChartTrellisPathCollection::Add(ChartTrellisPath *path)
 {
-  pair<UniqueCubeEntry::iterator, bool> inserted = m_uniqueEntry.insert(queueEntry);
+  m_collection.insert(path);
+}
 
-  if (inserted.second) {
-    // inserted
-    m_sortedByScore.push(queueEntry);
-  } else {
-    // already there
-    //cerr << "already there\n";
-    delete queueEntry;
+void ChartTrellisPathCollection::Prune(size_t newSize)
+{
+  size_t currSize = m_collection.size();
+
+  if (currSize <= newSize)
+    return; // don't need to prune
+
+  CollectionType::reverse_iterator iterRev;
+  for (iterRev = m_collection.rbegin() ; iterRev != m_collection.rend() ; ++iterRev) {
+    ChartTrellisPath *trellisPath = *iterRev;
+    delete trellisPath;
+
+    currSize--;
+    if (currSize == newSize)
+      break;
   }
 
-  //assert(m_uniqueEntry.size() == m_sortedByScore.size());
+  // delete path in m_collection
+  CollectionType::iterator iter = m_collection.begin();
+  for (size_t i = 0 ; i < newSize ; ++i)
+    iter++;
 
-  return inserted.second;
-}
-
-QueueEntry *Cube::Pop()
-{
-  QueueEntry *entry = m_sortedByScore.top();
-  m_sortedByScore.pop();
-
-  return entry;
+  m_collection.erase(iter, m_collection.end());
 }
 
 }

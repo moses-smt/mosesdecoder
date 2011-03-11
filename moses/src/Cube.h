@@ -29,7 +29,7 @@
 #include <boost/version.hpp>
 #endif
 
-namespace MosesChart
+namespace Moses
 {
 
 #ifdef HAVE_BOOST

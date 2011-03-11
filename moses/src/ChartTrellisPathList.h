@@ -19,37 +19,52 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "ChartCellCollection.h"
-#include "../../moses/src/InputType.h"
-#include "../../moses/src/WordsRange.h"
+#pragma once
 
-namespace MosesChart
-{
-ChartCellCollection::ChartCellCollection(const Moses::InputType &input, Manager &manager)
-  :m_hypoStackColl(input.GetSize())
-{
-  size_t size = input.GetSize();
-  for (size_t startPos = 0; startPos < size; ++startPos) {
-    InnerCollType &inner = m_hypoStackColl[startPos];
-    inner.resize(size - startPos);
+#include <vector>
 
-    size_t ind = 0;
-    for (size_t endPos = startPos ; endPos < size; ++endPos) {
-      ChartCell *cell = new ChartCell(startPos, endPos, manager);
-      inner[ind] = cell;
-      ++ind;
-    }
+namespace Moses
+{
+class ChartTrellisPath;
+
+class ChartTrellisPathList
+{
+protected:
+  typedef std::vector<const ChartTrellisPath*> CollType;
+  CollType m_collection;
+
+public:
+  // iters
+  typedef CollType::iterator iterator;
+  typedef CollType::const_iterator const_iterator;
+
+  iterator begin() {
+    return m_collection.begin();
   }
-}
-
-ChartCellCollection::~ChartCellCollection()
-{
-  OuterCollType::iterator iter;
-  for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter) {
-    InnerCollType &inner = *iter;
-    Moses::RemoveAllInColl(inner);
+  iterator end() {
+    return m_collection.end();
   }
-}
+  const_iterator begin() const {
+    return m_collection.begin();
+  }
+  const_iterator end() const {
+    return m_collection.end();
+  }
+  void clear() {
+    m_collection.clear();
+  }
+
+  virtual ~ChartTrellisPathList();
+
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+
+  //! add a new entry into collection
+  void Add(ChartTrellisPath *trellisPath) {
+    m_collection.push_back(trellisPath);
+  }
+};
 
 } // namespace
 

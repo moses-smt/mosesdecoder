@@ -54,17 +54,17 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_weight(weight)
   , m_filePath(filePath)
 {
-  assert(m_runningNodesVec.size() == 0);
+  assert(m_expandableDottedRuleListVec.size() == 0);
   size_t sourceSize = sentence.GetSize();
-  m_runningNodesVec.resize(sourceSize);
+  m_expandableDottedRuleListVec.resize(sourceSize);
 
-  for (size_t ind = 0; ind < m_runningNodesVec.size(); ++ind) {
-    ProcessedRuleOnDisk *initProcessedRule = new ProcessedRuleOnDisk(m_dbWrapper.GetRootSourceNode());
+  for (size_t ind = 0; ind < m_expandableDottedRuleListVec.size(); ++ind) {
+    DottedRuleOnDisk *initDottedRule = new DottedRuleOnDisk(m_dbWrapper.GetRootSourceNode());
 
-    ProcessedRuleStackOnDisk *processedStack = new ProcessedRuleStackOnDisk(sourceSize - ind + 1);
-    processedStack->Add(0, initProcessedRule); // init rule. stores the top node in tree
+    DottedRuleStackOnDisk *processedStack = new DottedRuleStackOnDisk(sourceSize - ind + 1);
+    processedStack->Add(0, initDottedRule); // init rule. stores the top node in tree
 
-    m_runningNodesVec[ind] = processedStack;
+    m_expandableDottedRuleListVec[ind] = processedStack;
   }
 }
 
@@ -76,7 +76,7 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
   }
   m_cache.clear();
 
-  RemoveAllInColl(m_runningNodesVec);
+  RemoveAllInColl(m_expandableDottedRuleListVec);
   RemoveAllInColl(m_sourcePhraseNode);
 }
 
@@ -92,23 +92,23 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   size_t absEndPos = range.GetEndPos();
 
   // MAIN LOOP. create list of nodes of target phrases
-  ProcessedRuleStackOnDisk &runningNodes = *m_runningNodesVec[range.GetStartPos()];
+  DottedRuleStackOnDisk &expandableDottedRuleList = *m_expandableDottedRuleListVec[range.GetStartPos()];
 
   // sort save nodes so only do nodes with most counts
-  runningNodes.SortSavedNodes();
+  expandableDottedRuleList.SortSavedNodes();
   size_t numDerivations = 0
                           ,maxDerivations = 999999; // staticData.GetMaxDerivations();
   bool overThreshold = true;
 
-  const ProcessedRuleStackOnDisk::SavedNodeColl &savedNodeColl = runningNodes.GetSavedNodeColl();
+  const DottedRuleStackOnDisk::SavedNodeColl &savedNodeColl = expandableDottedRuleList.GetSavedNodeColl();
   //cerr << "savedNodeColl=" << savedNodeColl.size() << " ";
 
   for (size_t ind = 0; ind < (savedNodeColl.size()) && ((numDerivations < maxDerivations) || overThreshold) ; ++ind) {
     const SavedNodeOnDisk &savedNode = *savedNodeColl[ind];
 
-    const ProcessedRuleOnDisk &prevProcessedRule = savedNode.GetProcessedRule();
-    const OnDiskPt::PhraseNode &prevNode = prevProcessedRule.GetLastNode();
-    const WordConsumed *prevWordConsumed = prevProcessedRule.GetLastWordConsumed();
+    const DottedRuleOnDisk &prevDottedRule = savedNode.GetDottedRule();
+    const OnDiskPt::PhraseNode &prevNode = prevDottedRule.GetLastNode();
+    const WordConsumed *prevWordConsumed = prevDottedRule.GetLastWordConsumed();
     size_t startPos = (prevWordConsumed == NULL) ? range.GetStartPos() : prevWordConsumed->GetWordsRange().GetEndPos() + 1;
 
     // search for terminal symbol
@@ -125,8 +125,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos
               , sourceWord
               , prevWordConsumed);
-          ProcessedRuleOnDisk *processedRule = new ProcessedRuleOnDisk(*node, newWordConsumed);
-          runningNodes.Add(relEndPos+1, processedRule);
+          DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newWordConsumed);
+          expandableDottedRuleList.Add(relEndPos+1, dottedRule);
 
           // cache for cleanup
           m_sourcePhraseNode.push_back(node);
@@ -151,8 +151,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
-    // get target headwords in this span from chart
-    const NonTerminalSet &headWords = GetCellCollection().GetHeadwords(WordsRange(startPos, endPos));
+    // get target nonterminals in this span from chart
+    const NonTerminalSet &chartNonTermSet = GetCellCollection().GetConstituentLabelSet(WordsRange(startPos, endPos));
 
     //const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
     //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
@@ -178,25 +178,25 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         continue; // didn't find source node
 
       // go through each TARGET lhs
-      NonTerminalSet::const_iterator iterTargetLHS;
-      for (iterTargetLHS = headWords.begin(); iterTargetLHS != headWords.end(); ++iterTargetLHS) {
-        const Word &targetLHS = *iterTargetLHS;
+      NonTerminalSet::const_iterator iterChartNonTerm;
+      for (iterChartNonTerm = chartNonTermSet.begin(); iterChartNonTerm != chartNonTermSet.end(); ++iterChartNonTerm) {
+        const Word &chartNonTerm = *iterChartNonTerm;
 
-        //cerr << sourceLHS << " " << defaultSourceNonTerm << " " << targetLHS << " " << defaultTargetNonTerm << endl;
+        //cerr << sourceLHS << " " << defaultSourceNonTerm << " " << chartNonTerm << " " << defaultTargetNonTerm << endl;
 
-        //bool isSyntaxNonTerm = (sourceLHS != defaultSourceNonTerm) || (targetLHS != defaultTargetNonTerm);
+        //bool isSyntaxNonTerm = (sourceLHS != defaultSourceNonTerm) || (chartNonTerm != defaultTargetNonTerm);
         bool doSearch = true; //isSyntaxNonTerm ? nonTermNumWordsCovered <=  maxSyntaxSpan :
         //						nonTermNumWordsCovered <= maxDefaultSpan;
 
         if (doSearch) {
 
-          OnDiskPt::Word *targetLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(Output, m_outputFactorsVec, targetLHS);
+          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(Output, m_outputFactorsVec, chartNonTerm);
 
-          if (targetLHSBerkeleyDb == NULL)
+          if (chartNonTermBerkeleyDb == NULL)
             continue;
 
-          const OnDiskPt::PhraseNode *node = sourceNode->GetChild(*targetLHSBerkeleyDb, m_dbWrapper);
-          delete targetLHSBerkeleyDb;
+          const OnDiskPt::PhraseNode *node = sourceNode->GetChild(*chartNonTermBerkeleyDb, m_dbWrapper);
+          delete chartNonTermBerkeleyDb;
 
           if (node == NULL)
             continue;
@@ -204,36 +204,36 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           // found matching entry
           //const Word &sourceWord = node->GetSourceWord();
           WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
-              , targetLHS
+              , chartNonTerm
               , prevWordConsumed);
 
-          ProcessedRuleOnDisk *processedRule = new ProcessedRuleOnDisk(*node, newWordConsumed);
-          runningNodes.Add(stackInd, processedRule);
+          DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newWordConsumed);
+          expandableDottedRuleList.Add(stackInd, dottedRule);
 
           m_sourcePhraseNode.push_back(node);
         }
-      } // for (iterHeadWords
+      } // for (iterChartNonTerm
 
       delete sourceNode;
 
     } // for (iterLabelListf
 
     // return list of target phrases
-    ProcessedRuleCollOnDisk &nodes = runningNodes.Get(relEndPos + 1);
+    DottedRuleCollOnDisk &nodes = expandableDottedRuleList.Get(relEndPos + 1);
 
     // source LHS
-    ProcessedRuleCollOnDisk::const_iterator iterProcessedRuleColl;
-    for (iterProcessedRuleColl = nodes.begin(); iterProcessedRuleColl != nodes.end(); ++iterProcessedRuleColl) {
+    DottedRuleCollOnDisk::const_iterator iterDottedRuleColl;
+    for (iterDottedRuleColl = nodes.begin(); iterDottedRuleColl != nodes.end(); ++iterDottedRuleColl) {
       // node of last source word
-      const ProcessedRuleOnDisk &prevProcessedRule = **iterProcessedRuleColl;
-      if (prevProcessedRule.Done())
+      const DottedRuleOnDisk &prevDottedRule = **iterDottedRuleColl;
+      if (prevDottedRule.Done())
         continue;
-      prevProcessedRule.Done(true);
+      prevDottedRule.Done(true);
 
-      const WordConsumed *wordConsumed = prevProcessedRule.GetLastWordConsumed();
+      const WordConsumed *wordConsumed = prevDottedRule.GetLastWordConsumed();
       assert(wordConsumed);
 
-      const OnDiskPt::PhraseNode &prevNode = prevProcessedRule.GetLastNode();
+      const OnDiskPt::PhraseNode &prevNode = prevDottedRule.GetLastNode();
 
       //get node for each source LHS
       const NonTerminalSet &lhsSet = GetSentence().GetLabelSet(range.GetStartPos(), range.GetEndPos());

@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../../moses/src/StaticData.h"
+#include "StaticData.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOption.h"
 #include "WordsRange.h"

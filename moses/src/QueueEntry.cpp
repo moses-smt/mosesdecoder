@@ -24,10 +24,10 @@
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "Cube.h"
-#include "../../moses/src/WordsRange.h"
-#include "../../moses/src/ChartTranslationOption.h"
-#include "../../moses/src/Util.h"
-#include "../../moses/src/WordConsumed.h"
+#include "WordsRange.h"
+#include "ChartTranslationOption.h"
+#include "Util.h"
+#include "WordConsumed.h"
 
 #ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
@@ -36,7 +36,7 @@
 using namespace std;
 using namespace Moses;
 
-namespace MosesChart
+namespace Moses
 {
 
 // create a cube for a rule
@@ -63,17 +63,14 @@ void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, cons
     // get the essential information about the non-terminal
     const WordsRange &childRange = wordsConsumed->GetWordsRange(); // span covered by child
     const ChartCell &childCell = allChartCells.Get(childRange);    // list of all hypos for that span
-    const Word &headWord = wordsConsumed->GetSourceWord();         // target (sic!) non-terminal label 
+    const Word &nonTerm = wordsConsumed->GetSourceWord();          // target (sic!) non-terminal label 
 
     // there have to be hypothesis with the desired non-terminal
     // (otherwise the rule would not be considered)
-    assert(!childCell.GetSortedHypotheses(headWord).empty());
+    assert(!childCell.GetSortedHypotheses(nonTerm).empty());
 
-    // ??? why are we looking it up again?
-    const Moses::Word &nonTerm = wordsConsumed->GetSourceWord();
-    assert(nonTerm.IsNonTerminal());
     // create a list of hypotheses that match the non-terminal
-    ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm), nonTerm);
+    ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm));
     // add them to the vector for such lists
     m_childEntries.push_back(childEntry);
   }
@@ -96,7 +93,7 @@ QueueEntry::~QueueEntry()
 
 // create new QueueEntry for neighboring principle rules
 // (duplicate detection is handled in Cube)
-void QueueEntry::CreateDeviants(Cube &cube) const
+void QueueEntry::CreateNeighbors(Cube &cube) const
 {
   // loop over all child hypotheses
   for (size_t ind = 0; ind < m_childEntries.size(); ind++) {
@@ -117,7 +114,7 @@ void QueueEntry::CalcScore()
   for (size_t ind = 0; ind < m_childEntries.size(); ind++) {
     const ChildEntry &childEntry = m_childEntries[ind];
 
-    const Hypothesis *hypo = childEntry.GetHypothesis();
+    const ChartHypothesis *hypo = childEntry.GetHypothesis();
     m_combinedScore += hypo->GetTotalScore();
   }
 }
@@ -134,7 +131,7 @@ bool QueueEntry::operator<(const QueueEntry &compare) const
 #ifdef HAVE_BOOST
 std::size_t hash_value(const ChildEntry & entry)
 {
-  boost::hash<const Hypothesis*> hasher;
+  boost::hash<const ChartHypothesis*> hasher;
   return hasher(entry.GetHypothesis());
 }
 

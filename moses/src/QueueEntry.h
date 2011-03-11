@@ -26,8 +26,8 @@
 #include <queue>
 #include <set>
 #include <iostream>
-#include "../../moses/src/WordsRange.h"
-#include "../../moses/src/Word.h"
+#include "WordsRange.h"
+#include "Word.h"
 #include "ChartHypothesis.h"
 
 namespace Moses
@@ -35,11 +35,6 @@ namespace Moses
 class WordConsumed;
 class ChartTranslationOption;
 extern bool g_debug;
-};
-
-namespace MosesChart
-{
-
 class TranslationOptionCollection;
 class TranslationOptionList;
 class ChartCell;
@@ -47,7 +42,7 @@ class ChartCellCollection;
 class QueueEntry;
 class Cube;
 
-typedef std::vector<const Hypothesis*> HypoList;
+typedef std::vector<const ChartHypothesis*> HypoList;
 
 // wrapper around list of hypothese for a particular non-term of a trans opt
 class ChildEntry
@@ -59,10 +54,9 @@ protected:
   const HypoList *m_orderedHypos;
 
 public:
-  ChildEntry(size_t pos, const HypoList &orderedHypos, const Moses::Word & /*headWord*/ )
+  ChildEntry(size_t pos, const HypoList &orderedHypos)
     :m_pos(pos)
     ,m_orderedHypos(&orderedHypos)
-    //,m_headWord(headWord)
   {}
 
   size_t IncrementPos() {
@@ -73,12 +67,9 @@ public:
     return m_pos + 1 < m_orderedHypos->size();
   }
 
-  const Hypothesis *GetHypothesis() const {
+  const ChartHypothesis *GetHypothesis() const {
     return (*m_orderedHypos)[m_pos];
   }
-
-  //const Moses::Word &GetHeadWord() const
-  //{ return m_headWord; }
 
   //! transitive comparison used for adding objects into FactorCollection
   bool operator<(const ChildEntry &compare) const {
@@ -120,7 +111,7 @@ public:
     return m_combinedScore;
   }
 
-  void CreateDeviants(Cube &) const;
+  void CreateNeighbors(Cube &) const;
 
   bool operator<(const QueueEntry &compare) const;
 

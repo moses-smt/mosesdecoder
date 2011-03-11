@@ -25,26 +25,26 @@
 #include "QueueEntry.h"
 #include "ChartCell.h"
 #include "ChartManager.h"
-#include "../../moses/src/TargetPhrase.h"
-#include "../../moses/src/Phrase.h"
-#include "../../moses/src/StaticData.h"
-#include "../../moses/src/DummyScoreProducers.h"
-#include "../../moses/src/LMList.h"
-#include "../../moses/src/ChartTranslationOption.h"
+#include "TargetPhrase.h"
+#include "Phrase.h"
+#include "StaticData.h"
+#include "DummyScoreProducers.h"
+#include "LMList.h"
+#include "ChartTranslationOption.h"
 
 using namespace std;
 using namespace Moses;
 
-namespace MosesChart
+namespace Moses
 {
-unsigned int Hypothesis::s_HypothesesCreated = 0;
+unsigned int ChartHypothesis::s_HypothesesCreated = 0;
 
 #ifdef USE_HYPO_POOL
-ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
+ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
 #endif
 
 /** Create a hypothesis from a rule */
-Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
+ChartHypothesis::ChartHypothesis(const QueueEntry &queueEntry, ChartManager &manager)
   :m_transOpt(queueEntry.GetTranslationOption())
   ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
   ,m_id(++s_HypothesesCreated)
@@ -69,7 +69,7 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
   for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
   {
     const ChildEntry &childEntry = *iter;
-    const Hypothesis *prevHypo = childEntry.GetHypothesis();
+    const ChartHypothesis *prevHypo = childEntry.GetHypothesis();
 
     // keep count of words (= length of generated string)
     m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
@@ -83,13 +83,13 @@ Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
   CalcSuffix(m_contextSuffix, maxNGram - 1);
 }
 
-Hypothesis::~Hypothesis()
+ChartHypothesis::~ChartHypothesis()
 {
   // delete hypotheses that are not in the chart (recombined away)
   if (m_arcList) {
-    ArcList::iterator iter;
+    ChartArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
-      Hypothesis *hypo = *iter;
+      ChartHypothesis *hypo = *iter;
       Delete(hypo);
     }
     m_arcList->clear();
@@ -101,14 +101,14 @@ Hypothesis::~Hypothesis()
 /** Create full output phrase that is contained in the hypothesis (and its children)
  * \param outPhrase full output phrase
  */
-void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
+void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
       size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
-      const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+      const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
     else {
@@ -118,7 +118,7 @@ void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 }
 
 /** Return full output phrase */
-Phrase Hypothesis::GetOutputPhrase() const
+Phrase ChartHypothesis::GetOutputPhrase() const
 {
   Phrase outPhrase(Output, ARRAY_SIZE_INCR);
   CreateOutputPhrase(outPhrase);
@@ -129,7 +129,7 @@ Phrase Hypothesis::GetOutputPhrase() const
  * \param ret prefix string
  * \param size maximum size (typically max lm context window)
  */
-size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
+size_t ChartHypothesis::CalcPrefix(Phrase &ret, size_t size) const
 {
   // loop over the rule that is being applied
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
@@ -138,7 +138,7 @@ size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
     // for non-terminals, retrieve it from underlying hypothesis
     if (word.IsNonTerminal()) {
       size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
-      const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+      const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       size = prevHypo->CalcPrefix(ret, size);
     } 
     // for words, add word
@@ -160,7 +160,7 @@ size_t Hypothesis::CalcPrefix(Phrase &ret, size_t size) const
  * \param ret suffix phrase
  * \param size maximum size of suffix
  */
-size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
+size_t ChartHypothesis::CalcSuffix(Phrase &ret, size_t size) const
 {
   assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
@@ -186,7 +186,7 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 
       if (word.IsNonTerminal()) {
         size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
-        const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+        const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
         size = prevHypo->CalcSuffix(ret, size);
       } 
       else {
@@ -207,7 +207,7 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
  * in terms of future search, so the weaker one can be dropped.
  * \param other other hypothesis for comparison
  */
-int Hypothesis::LMContextCompare(const Hypothesis &other) const
+int ChartHypothesis::LMContextCompare(const ChartHypothesis &other) const
 {
   // prefix
   if (m_currSourceWordsRange.GetStartPos() > 0) {
@@ -228,12 +228,12 @@ int Hypothesis::LMContextCompare(const Hypothesis &other) const
   return 0;
 }
 
-void Hypothesis::CalcScore()
+void ChartHypothesis::CalcScore()
 {
   // total scores from prev hypos
-  std::vector<const Hypothesis*>::iterator iter;
+  std::vector<const ChartHypothesis*>::iterator iter;
   for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
-    const Hypothesis &prevHypo = **iter;
+    const ChartHypothesis &prevHypo = **iter;
     const ScoreComponentCollection &scoreBreakdown = prevHypo.GetScoreBreakdown();
 
     m_scoreBreakdown.PlusEquals(scoreBreakdown);
@@ -249,7 +249,7 @@ void Hypothesis::CalcScore()
 }
 
 // compute languane model score for the hypothesis
-void Hypothesis::CalcLMScore()
+void ChartHypothesis::CalcLMScore()
 {
   // get the language models involved
   const LMList& lmList = m_manager.GetTranslationSystem()->GetLanguageModels();
@@ -278,7 +278,7 @@ void Hypothesis::CalcLMScore()
     {
       // look up underlying hypothesis
       size_t nonTermInd = m_wordsConsumedTargetOrder[targetPhrasePos];
-      const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+      const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       size_t numTargetTerminals = prevHypo->GetNumTargetTerminals();
 
       // check if we are dealing with a large sub-phrase
@@ -346,21 +346,21 @@ void Hypothesis::CalcLMScore()
   */
 }
 
-void Hypothesis::AddArc(Hypothesis *loserHypo)
+void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)
 {
   if (!m_arcList) {
     if (loserHypo->m_arcList) { // we don't have an arcList, but loser does
       this->m_arcList = loserHypo->m_arcList;  // take ownership, we'll delete
       loserHypo->m_arcList = 0;                // prevent a double deletion
     } else {
-      this->m_arcList = new ArcList();
+      this->m_arcList = new ChartArcList();
     }
   } else {
     if (loserHypo->m_arcList) {  // both have an arc list: merge. delete loser
       size_t my_size = m_arcList->size();
       size_t add_size = loserHypo->m_arcList->size();
       this->m_arcList->resize(my_size + add_size, 0);
-      std::memcpy(&(*m_arcList)[0] + my_size, &(*loserHypo->m_arcList)[0], add_size * sizeof(Hypothesis *));
+      std::memcpy(&(*m_arcList)[0] + my_size, &(*loserHypo->m_arcList)[0], add_size * sizeof(ChartHypothesis *));
       delete loserHypo->m_arcList;
       loserHypo->m_arcList = 0;
     } else { // loserHypo doesn't have any arcs
@@ -371,13 +371,13 @@ void Hypothesis::AddArc(Hypothesis *loserHypo)
 }
 
 // sorting helper
-struct CompareChartHypothesisTotalScore {
-  bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const {
+struct CompareChartChartHypothesisTotalScore {
+  bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const {
     return hypo1->GetTotalScore() > hypo2->GetTotalScore();
   }
 };
 
-void Hypothesis::CleanupArcList()
+void ChartHypothesis::CleanupArcList()
 {
   // point this hypo's main hypo to itself
   m_winningHypo = this;
@@ -397,29 +397,29 @@ void Hypothesis::CleanupArcList()
     nth_element(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()
-                , CompareChartHypothesisTotalScore());
+                , CompareChartChartHypothesisTotalScore());
 
     // delete bad ones
-    ArcList::iterator iter;
+    ChartArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
-      Hypothesis *arc = *iter;
-      Hypothesis::Delete(arc);
+      ChartHypothesis *arc = *iter;
+      ChartHypothesis::Delete(arc);
     }
     m_arcList->erase(m_arcList->begin() + nBestSize
                      , m_arcList->end());
   }
 
   // set all arc's main hypo variable to this hypo
-  ArcList::iterator iter = m_arcList->begin();
+  ChartArcList::iterator iter = m_arcList->begin();
   for (; iter != m_arcList->end() ; ++iter) {
-    Hypothesis *arc = *iter;
+    ChartHypothesis *arc = *iter;
     arc->SetWinningHypo(this);
   }
 
   //cerr << m_arcList->size() << " ";
 }
 
-void Hypothesis::SetWinningHypo(const Hypothesis *hypo)
+void ChartHypothesis::SetWinningHypo(const ChartHypothesis *hypo)
 {
   m_winningHypo = hypo;
 
@@ -428,10 +428,10 @@ void Hypothesis::SetWinningHypo(const Hypothesis *hypo)
   m_contextSuffix.Clear();
 }
 
-TO_STRING_BODY(Hypothesis)
+TO_STRING_BODY(ChartHypothesis)
 
 // friend
-ostream& operator<<(ostream& out, const Hypothesis& hypo)
+ostream& operator<<(ostream& out, const ChartHypothesis& hypo)
 {
   //Phrase outPhrase(Output);
   //hypo.CreateOutputPhrase(outPhrase);
@@ -445,7 +445,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 
   HypoList::const_iterator iter;
   for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) {
-    const Hypothesis &prevHypo = **iter;
+    const ChartHypothesis &prevHypo = **iter;
     out << " " << prevHypo.GetId();
   }
 

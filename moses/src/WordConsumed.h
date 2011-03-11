@@ -33,7 +33,7 @@ class WordConsumed
 
 protected:
   WordsRange	m_coverage;
-  const Word &m_sourceWord; // can be non-term headword, or term
+  const Word &m_sourceWord; // can be non-term or term
   const WordConsumed *m_prevWordsConsumed;
 public:
   WordConsumed(); // not implmented

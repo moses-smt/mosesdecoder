@@ -25,36 +25,36 @@
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
-#include "../../moses/src/InputType.h"
-#include "../../moses/src/WordsRange.h"
-#include "../../moses/src/TrellisPathList.h"
-#include "../../moses/src/SentenceStats.h"
-#include "../../moses/src/TranslationSystem.h"
-#include "../../moses/src/ChartRuleLookupManager.h"
+#include "InputType.h"
+#include "WordsRange.h"
+#include "ChartTrellisPathList.h"
+#include "SentenceStats.h"
+#include "TranslationSystem.h"
+#include "ChartRuleLookupManager.h"
 
-namespace MosesChart
+namespace Moses
 {
 
-class Hypothesis;
-class TrellisPathList;
+class ChartHypothesis;
+class ChartTrellisPathList;
 
-class Manager
+class ChartManager
 {
 protected:
   Moses::InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
-  TranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
+  ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   std::auto_ptr<Moses::SentenceStats> m_sentenceStats;
   const Moses::TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
   std::vector<Moses::ChartRuleLookupManager*> m_ruleLookupManagers;
 
 public:
-  Manager(Moses::InputType const& source, const Moses::TranslationSystem* system);
-  ~Manager();
+  ChartManager(Moses::InputType const& source, const Moses::TranslationSystem* system);
+  ~ChartManager();
   void ProcessSentence();
-  const Hypothesis *GetBestHypothesis() const;
-  void CalcNBest(size_t count, MosesChart::TrellisPathList &ret,bool onlyDistinct=0) const;
+  const ChartHypothesis *GetBestHypothesis() const;
+  void CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct=0) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 

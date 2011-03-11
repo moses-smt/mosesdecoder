@@ -32,8 +32,8 @@
 namespace Moses
 {
 class ChartTranslationOptionList;
-class ProcessedRuleStack;
-class ProcessedRuleColl;
+class DottedRuleStack;
+class DottedRuleColl;
 
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.

@@ -26,10 +26,10 @@ using namespace std;
 
 namespace Moses
 {
-ProcessedRuleColl::~ProcessedRuleColl()
+DottedRuleColl::~DottedRuleColl()
 {
 #ifdef USE_BOOST_POOL
-  // Do nothing.  ProcessedRule objects are stored in object pools owned by
+  // Do nothing.  DottedRule objects are stored in object pools owned by
   // the sentence-specific ChartRuleLookupManagers.
 #else
   std::for_each(m_coll.begin(), m_coll.end(),
@@ -37,7 +37,7 @@ ProcessedRuleColl::~ProcessedRuleColl()
 #endif
 }
 
-std::ostream& operator<<(std::ostream &out, const ProcessedRule& /* rule */)
+std::ostream& operator<<(std::ostream &out, const DottedRule& /* rule */)
 {
   //const PhraseDictionaryNode &node = rule.GetLastNode();
   //out << node;
@@ -45,11 +45,11 @@ std::ostream& operator<<(std::ostream &out, const ProcessedRule& /* rule */)
   return out;
 }
 
-std::ostream& operator<<(std::ostream &out, const ProcessedRuleList &coll)
+std::ostream& operator<<(std::ostream &out, const DottedRuleList &coll)
 {
-  ProcessedRuleList::const_iterator iter;
+  DottedRuleList::const_iterator iter;
   for (iter = coll.begin(); iter != coll.end(); ++iter) {
-    const ProcessedRule &rule = **iter;
+    const DottedRule &rule = **iter;
     out << rule << endl;
 
   }

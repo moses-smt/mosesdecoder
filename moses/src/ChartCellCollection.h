@@ -18,53 +18,43 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
-
 #pragma once
 
-#include <vector>
+#include "ChartCell.h"
+#include "WordsRange.h"
+#include "CellCollection.h"
 
-namespace MosesChart
+namespace Moses
 {
-class TrellisPath;
+class InputType;
+class ChartManager;
 
-class TrellisPathList
+class ChartCellCollection : public Moses::CellCollection
 {
+public:
+  typedef std::vector<ChartCell*> InnerCollType;
+  typedef std::vector<InnerCollType> OuterCollType;
+
 protected:
-  typedef std::vector<const TrellisPath*> CollType;
-  CollType m_collection;
+  OuterCollType m_hypoStackColl;
 
 public:
-  // iters
-  typedef CollType::iterator iterator;
-  typedef CollType::const_iterator const_iterator;
+  ChartCellCollection(const Moses::InputType &input, ChartManager &manager);
+  ~ChartCellCollection();
 
-  iterator begin() {
-    return m_collection.begin();
+  ChartCell &Get(const Moses::WordsRange &coverage) {
+    return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
-  iterator end() {
-    return m_collection.end();
-  }
-  const_iterator begin() const {
-    return m_collection.begin();
-  }
-  const_iterator end() const {
-    return m_collection.end();
-  }
-  void clear() {
-    m_collection.clear();
+  const ChartCell &Get(const Moses::WordsRange &coverage) const {
+    return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
 
-  virtual ~TrellisPathList();
-
-  size_t GetSize() const {
-    return m_collection.size();
-  }
-
-  //! add a new entry into collection
-  void Add(TrellisPath *trellisPath) {
-    m_collection.push_back(trellisPath);
+  /** Return set of constituents that have hypotheses in the given span */
+  const Moses::NonTerminalSet &GetConstituentLabelSet(const Moses::WordsRange &coverage) const {
+    const ChartCell &cell = Get(coverage);
+    return cell.GetConstituentLabelSet();
   }
 };
 
-} // namespace
+}
 

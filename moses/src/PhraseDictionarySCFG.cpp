@@ -144,7 +144,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 
     // parse source & find pt node
 
-    // head word
+    // constituent labels
     Word sourceLHS, targetLHS;
 
     // source

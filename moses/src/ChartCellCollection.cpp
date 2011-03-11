@@ -19,53 +19,37 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#pragma once
-
-#include <vector>
-#include "../../moses/src/Phrase.h"
+#include "ChartCellCollection.h"
+#include "InputType.h"
+#include "WordsRange.h"
 
 namespace Moses
 {
-class ScoreComponentCollection;
+ChartCellCollection::ChartCellCollection(const Moses::InputType &input, ChartManager &manager)
+  :m_hypoStackColl(input.GetSize())
+{
+  size_t size = input.GetSize();
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    InnerCollType &inner = m_hypoStackColl[startPos];
+    inner.resize(size - startPos);
+
+    size_t ind = 0;
+    for (size_t endPos = startPos ; endPos < size; ++endPos) {
+      ChartCell *cell = new ChartCell(startPos, endPos, manager);
+      inner[ind] = cell;
+      ++ind;
+    }
+  }
 }
 
-namespace MosesChart
+ChartCellCollection::~ChartCellCollection()
 {
-
-class Hypothesis;
-
-class TrellisNode
-{
-  friend std::ostream& operator<<(std::ostream&, const TrellisNode&);
-public:
-  typedef std::vector<TrellisNode*> NodeChildren;
-
-protected:
-  const Hypothesis *m_hypo;
-  NodeChildren m_edge;
-
-public:
-  TrellisNode(const Hypothesis *hypo);
-  TrellisNode(const TrellisNode &origNode
-              , const TrellisNode &soughtNode
-              , const Hypothesis &replacementHypo
-              , Moses::ScoreComponentCollection	&scoreChange
-              , const TrellisNode *&nodeChanged);
-  ~TrellisNode();
-
-  const Hypothesis &GetHypothesis() const {
-    return *m_hypo;
+  OuterCollType::iterator iter;
+  for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter) {
+    InnerCollType &inner = *iter;
+    Moses::RemoveAllInColl(inner);
   }
-
-  const NodeChildren &GetChildren() const {
-    return m_edge;
-  }
-
-  const TrellisNode &GetChild(size_t ind) const {
-    return *m_edge[ind];
-  }
-
-  Moses::Phrase GetOutputPhrase() const;
-};
-
 }
+
+} // namespace
+

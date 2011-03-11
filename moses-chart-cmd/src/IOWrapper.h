@@ -40,18 +40,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Sentence.h"
 #include "FactorTypeSet.h"
 #include "TranslationSystem.h"
-#include "TrellisPathList.h"
+#include "ChartTrellisPathList.h"
 #include "OutputCollector.h"
-#include "../../moses-chart/src/ChartHypothesis.h"
+#include "ChartHypothesis.h"
 
 namespace Moses
 {
 class FactorCollection;
-}
-
-namespace MosesChart
-{
-class TrellisPathList;
+class ChartTrellisPathList;
 }
 
 class IOWrapper
@@ -83,11 +79,11 @@ public:
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
-  void OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+  void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-  void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const MosesChart::Hypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
-  void OutputDetailedTranslationReport(const MosesChart::Hypothesis *hypo, long translationId);
-  void Backtrack(const MosesChart::Hypothesis *hypo);
+  void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
+  void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, long translationId);
+  void Backtrack(const Moses::ChartHypothesis *hypo);
 
   void ResetTranslationId() {
     m_translationId = 0;

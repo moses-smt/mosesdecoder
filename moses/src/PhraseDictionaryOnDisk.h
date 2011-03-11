@@ -32,7 +32,7 @@
 namespace Moses
 {
 class TargetPhraseCollection;
-class ProcessedRuleStackOnDisk;
+class DottedRuleStackOnDisk;
 class CellCollection;
 class WordPenaltyProducer;
 

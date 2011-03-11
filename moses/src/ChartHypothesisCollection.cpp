@@ -20,7 +20,7 @@
  ***********************************************************************/
 
 #include <algorithm>
-#include "../../moses/src/StaticData.h"
+#include "StaticData.h"
 #include "ChartHypothesisCollection.h"
 #include "ChartHypothesis.h"
 #include "ChartManager.h"
@@ -28,10 +28,10 @@
 using namespace std;
 using namespace Moses;
 
-namespace MosesChart
+namespace Moses
 {
 
-HypothesisCollection::HypothesisCollection()
+ChartHypothesisCollection::ChartHypothesisCollection()
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -41,23 +41,23 @@ HypothesisCollection::HypothesisCollection()
   m_bestScore = -std::numeric_limits<float>::infinity();
 }
 
-HypothesisCollection::~HypothesisCollection()
+ChartHypothesisCollection::~ChartHypothesisCollection()
 {
   HCType::iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
-    Hypothesis *hypo = *iter;
-    Hypothesis::Delete(hypo);
+    ChartHypothesis *hypo = *iter;
+    ChartHypothesis::Delete(hypo);
   }
   //Moses::RemoveAllInColl(m_hypos);
 }
 
-bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
+bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)
 {
   if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {
     // really bad score. don't bother adding hypo into collection
     manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    Hypothesis::Delete(hypo);
+    ChartHypothesis::Delete(hypo);
     return false;
   }
 
@@ -72,7 +72,7 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 
   // equiv hypo exists, recombine with other hypo
   HCType::iterator &iterExisting = addRet.first;
-  Hypothesis *hypoExisting = *iterExisting;
+  ChartHypothesis *hypoExisting = *iterExisting;
   assert(iterExisting != m_hypos.end());
 
   //StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
@@ -103,13 +103,13 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
       hypoExisting->AddArc(hypo);
     } 
     else {
-      Hypothesis::Delete(hypo);
+      ChartHypothesis::Delete(hypo);
     }
     return false;
   }
 }
 
-pair<HypothesisCollection::HCType::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo, Manager &manager)
+pair<ChartHypothesisCollection::HCType::iterator, bool> ChartHypothesisCollection::Add(ChartHypothesis *hypo, ChartManager &manager)
 {
   std::pair<HCType::iterator, bool> ret = m_hypos.insert(hypo);
   if (ret.second) {
@@ -135,14 +135,14 @@ pair<HypothesisCollection::HCType::iterator, bool> HypothesisCollection::Add(Hyp
 }
 
 /** Remove hypothesis pointed to by iterator but don't delete the object. */
-void HypothesisCollection::Detach(const HCType::iterator &iter)
+void ChartHypothesisCollection::Detach(const HCType::iterator &iter)
 {
   m_hypos.erase(iter);
 }
 
-void HypothesisCollection::Remove(const HCType::iterator &iter)
+void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
 {
-  Hypothesis *h = *iter;
+  ChartHypothesis *h = *iter;
 
   /*
    stringstream strme("");
@@ -158,10 +158,10 @@ void HypothesisCollection::Remove(const HCType::iterator &iter)
    */
 
   Detach(iter);
-  Hypothesis::Delete(h);
+  ChartHypothesis::Delete(h);
 }
 
-void HypothesisCollection::PruneToSize(Manager &manager)
+void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 {
   if (GetSize() > m_maxHypoStackSize) { // ok, if not over the limit
     priority_queue<float> bestScores;
@@ -171,7 +171,7 @@ void HypothesisCollection::PruneToSize(Manager &manager)
     HCType::iterator iter = m_hypos.begin();
     float score = 0;
     while (iter != m_hypos.end()) {
-      Hypothesis *hypo = *iter;
+      ChartHypothesis *hypo = *iter;
       score = hypo->GetTotalScore();
       if (score > m_bestScore+m_beamWidth) {
         bestScores.push(score);
@@ -191,7 +191,7 @@ void HypothesisCollection::PruneToSize(Manager &manager)
     // delete all hypos under score threshold
     iter = m_hypos.begin();
     while (iter != m_hypos.end()) {
-      Hypothesis *hypo = *iter;
+      ChartHypothesis *hypo = *iter;
       float score = hypo->GetTotalScore();
       if (score < scoreThreshold) {
         HCType::iterator iterRemove = iter++;
@@ -206,7 +206,7 @@ void HypothesisCollection::PruneToSize(Manager &manager)
     IFVERBOSE(3) {
       TRACE_ERR("stack now contains: ");
       for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
-        Hypothesis *hypo = *iter;
+        ChartHypothesis *hypo = *iter;
         TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
       }
       TRACE_ERR( endl);
@@ -214,16 +214,16 @@ void HypothesisCollection::PruneToSize(Manager &manager)
 
     // desperation pruning
     if (m_hypos.size() > m_maxHypoStackSize * 2) {
-      std::vector<Hypothesis*> hyposOrdered;
+      std::vector<ChartHypothesis*> hyposOrdered;
 
       // sort hypos
       std::copy(m_hypos.begin(), m_hypos.end(), std::inserter(hyposOrdered, hyposOrdered.end()));
       std::sort(hyposOrdered.begin(), hyposOrdered.end(), ChartHypothesisScoreOrderer());
 
       //keep only |size|. delete the rest
-      std::vector<Hypothesis*>::iterator iter;
+      std::vector<ChartHypothesis*>::iterator iter;
       for (iter = hyposOrdered.begin() + (m_maxHypoStackSize * 2); iter != hyposOrdered.end(); ++iter) {
-        Hypothesis *hypo = *iter;
+        ChartHypothesis *hypo = *iter;
         HCType::iterator iterFindHypo = m_hypos.find(hypo);
         assert(iterFindHypo != m_hypos.end());
         Remove(iterFindHypo);
@@ -232,7 +232,7 @@ void HypothesisCollection::PruneToSize(Manager &manager)
   }
 }
 
-void HypothesisCollection::SortHypotheses()
+void ChartHypothesisCollection::SortHypotheses()
 {
   assert(m_hyposOrdered.empty());
   if (!m_hypos.empty()) {
@@ -245,27 +245,27 @@ void HypothesisCollection::SortHypotheses()
   }
 }
 
-void HypothesisCollection::CleanupArcList()
+void ChartHypothesisCollection::CleanupArcList()
 {
   HCType::iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
-    Hypothesis *mainHypo = *iter;
+    ChartHypothesis *mainHypo = *iter;
     mainHypo->CleanupArcList();
   }
 }
 
-void HypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
   HCType::const_iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
-    Hypothesis &mainHypo = **iter;
+    ChartHypothesis &mainHypo = **iter;
     outputSearchGraphStream << translationId << " " << mainHypo << endl;
 
-    const ArcList *arcList = mainHypo.GetArcList();
+    const ChartArcList *arcList = mainHypo.GetArcList();
     if (arcList) {
-      ArcList::const_iterator iterArc;
+      ChartArcList::const_iterator iterArc;
       for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
-        const Hypothesis &arc = **iterArc;
+        const ChartHypothesis &arc = **iterArc;
         outputSearchGraphStream << translationId << " " << arc << endl;
       }
     }
@@ -273,11 +273,11 @@ void HypothesisCollection::GetSearchGraph(long translationId, std::ostream &outp
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const HypothesisCollection &coll)
+std::ostream& operator<<(std::ostream &out, const ChartHypothesisCollection &coll)
 {
   HypoList::const_iterator iterInside;
   for (iterInside = coll.m_hyposOrdered.begin(); iterInside != coll.m_hyposOrdered.end(); ++iterInside) {
-    const Hypothesis &hypo = **iterInside;
+    const ChartHypothesis &hypo = **iterInside;
     out << hypo << endl;
   }
 

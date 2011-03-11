@@ -28,24 +28,24 @@
 namespace Moses
 {
 
-class ProcessedRule
+class DottedRule
 {
-  friend std::ostream& operator<<(std::ostream&, const ProcessedRule&);
+  friend std::ostream& operator<<(std::ostream&, const DottedRule&);
 
 protected:
   const PhraseDictionaryNodeSCFG &m_lastNode;
   const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
 public:
   // used only to init dot stack.
-  explicit ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode)
+  explicit DottedRule(const PhraseDictionaryNodeSCFG &lastNode)
     :m_lastNode(lastNode)
     ,m_wordsConsumed(NULL)
   {}
-  ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
+  DottedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
     :m_lastNode(lastNode)
     ,m_wordsConsumed(wordsConsumed)
   {}
-  ~ProcessedRule() {
+  ~DottedRule() {
 #ifdef USE_BOOST_POOL
     // Do nothing.  WordConsumed objects are stored in object pools owned by
     // the sentence-specific ChartRuleLookupManagers.
@@ -61,18 +61,18 @@ public:
   }
 };
 
-typedef std::vector<const ProcessedRule*> ProcessedRuleList;
+typedef std::vector<const DottedRule*> DottedRuleList;
 
-// Collection of all ProcessedRules that share a common start point,
+// Collection of all DottedRules that share a common start point,
 // grouped by end point.  Additionally, maintains a list of all
-// ProcessedRules that could be expanded further, i.e. for which the
+// DottedRules that could be expanded further, i.e. for which the
 // corresponding PhraseDictionaryNodeSCFG is not a leaf.
-class ProcessedRuleColl
+class DottedRuleColl
 {
 protected:
-  typedef std::vector<ProcessedRuleList> CollType;
+  typedef std::vector<DottedRuleList> CollType;
   CollType m_coll;
-  ProcessedRuleList m_runningNodes;
+  DottedRuleList m_expandableDottedRuleList;
 
 public:
   typedef CollType::iterator iterator;
@@ -91,29 +91,29 @@ public:
     return m_coll.end();
   }
 
-  ProcessedRuleColl(size_t size)
+  DottedRuleColl(size_t size)
     : m_coll(size)
   {}
 
-  ~ProcessedRuleColl();
+  ~DottedRuleColl();
 
-  const ProcessedRuleList &Get(size_t pos) const {
+  const DottedRuleList &Get(size_t pos) const {
     return m_coll[pos];
   }
-  ProcessedRuleList &Get(size_t pos) {
+  DottedRuleList &Get(size_t pos) {
     return m_coll[pos];
   }
 
-  void Add(size_t pos, const ProcessedRule *processedRule) {
-    assert(processedRule);
-    m_coll[pos].push_back(processedRule);
-    if (!processedRule->GetLastNode().IsLeaf()) {
-      m_runningNodes.push_back(processedRule);
+  void Add(size_t pos, const DottedRule *dottedRule) {
+    assert(dottedRule);
+    m_coll[pos].push_back(dottedRule);
+    if (!dottedRule->GetLastNode().IsLeaf()) {
+      m_expandableDottedRuleList.push_back(dottedRule);
     }
   }
 
-  const ProcessedRuleList &GetRunningNodes() const {
-    return m_runningNodes;
+  const DottedRuleList &GetExpandableDottedRuleList() const {
+    return m_expandableDottedRuleList;
   }
 
 };

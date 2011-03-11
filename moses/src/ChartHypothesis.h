@@ -22,29 +22,29 @@
 #pragma once
 
 #include <vector>
-#include "../../moses/src/Util.h"
-#include "../../moses/src/WordsRange.h"
-#include "../../moses/src/ScoreComponentCollection.h"
-#include "../../moses/src/Phrase.h"
-#include "../../moses/src/ChartTranslationOption.h"
-#include "../../moses/src/ObjectPool.h"
+#include "Util.h"
+#include "WordsRange.h"
+#include "ScoreComponentCollection.h"
+#include "Phrase.h"
+#include "ChartTranslationOption.h"
+#include "ObjectPool.h"
 
-namespace MosesChart
+namespace Moses
 {
 class QueueEntry;
-class Hypothesis;
-class Manager;
+class ChartHypothesis;
+class ChartManager;
 
-typedef std::vector<Hypothesis*> ArcList;
+typedef std::vector<ChartHypothesis*> ChartArcList;
 
-class Hypothesis
+class ChartHypothesis
 {
-  friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
+  friend std::ostream& operator<<(std::ostream&, const ChartHypothesis&);
 
 protected:
 
 #ifdef USE_HYPO_POOL
-  static ObjectPool<Hypothesis> s_objectPool;
+  static ObjectPool<ChartHypothesis> s_objectPool;
 #endif
 
   static unsigned int s_HypothesesCreated;
@@ -61,20 +61,20 @@ protected:
   float m_totalScore;
   size_t m_numTargetTerminals;
 
-  ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-  const Hypothesis 	*m_winningHypo;
+  ChartArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
+  const ChartHypothesis 	*m_winningHypo;
 
-  std::vector<const Hypothesis*> m_prevHypos;
+  std::vector<const ChartHypothesis*> m_prevHypos;
 
-  Manager& m_manager;
+  ChartManager& m_manager;
 
   size_t CalcPrefix(Moses::Phrase &ret, size_t size) const;
   size_t CalcSuffix(Moses::Phrase &ret, size_t size) const;
 
   void CalcLMScore();
 
-  Hypothesis(); // not implemented
-  Hypothesis(const Hypothesis &copy); // not implemented
+  ChartHypothesis(); // not implemented
+  ChartHypothesis(const ChartHypothesis &copy); // not implemented
 
 public:
   static void ResetHypoCount() {
@@ -90,17 +90,17 @@ public:
     return ptr;
   }
 
-  static void Delete(Hypothesis *hypo) {
+  static void Delete(ChartHypothesis *hypo) {
     s_objectPool.freeObject(hypo);
   }
 #else
-  static void Delete(Hypothesis *hypo) {
+  static void Delete(ChartHypothesis *hypo) {
     delete hypo;
   }
 #endif
 
-  explicit Hypothesis(const QueueEntry &queueEntry, Manager &manager);
-  ~Hypothesis();
+  explicit ChartHypothesis(const QueueEntry &queueEntry, ChartManager &manager);
+  ~ChartHypothesis();
 
   int GetId()const {
     return m_id;
@@ -114,14 +114,14 @@ public:
   const Moses::WordsRange &GetCurrSourceRange()const {
     return m_currSourceWordsRange;
   }
-  inline const ArcList* GetArcList() const {
+  inline const ChartArcList* GetArcList() const {
     return m_arcList;
   }
 
   void CreateOutputPhrase(Moses::Phrase &outPhrase) const;
   Moses::Phrase GetOutputPhrase() const;
 
-  int LMContextCompare(const Hypothesis &other) const;
+  int LMContextCompare(const ChartHypothesis &other) const;
 
   const Moses::Phrase &GetPrefix() const {
     return m_contextPrefix;
@@ -132,9 +132,9 @@ public:
 
   void CalcScore();
 
-  void AddArc(Hypothesis *loserHypo);
+  void AddArc(ChartHypothesis *loserHypo);
   void CleanupArcList();
-  void SetWinningHypo(const Hypothesis *hypo);
+  void SetWinningHypo(const ChartHypothesis *hypo);
 
   const Moses::ScoreComponentCollection &GetScoreBreakdown() const {
     return m_scoreBreakdown;
@@ -143,7 +143,7 @@ public:
     return m_totalScore;
   }
 
-  const std::vector<const Hypothesis*> &GetPrevHypos() const {
+  const std::vector<const ChartHypothesis*> &GetPrevHypos() const {
     return m_prevHypos;
   }
 
@@ -162,7 +162,7 @@ public:
 
   TO_STRING();
 
-}; // class Hypothesis
+}; // class ChartHypothesis
 
 }
 

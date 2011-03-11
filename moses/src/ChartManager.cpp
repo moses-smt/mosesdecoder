@@ -26,8 +26,8 @@
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPathCollection.h"
-#include "../../moses/src/StaticData.h"
-#include "../../moses/src/DecodeStep.h"
+#include "StaticData.h"
+#include "DecodeStep.h"
 
 using namespace std;
 using namespace Moses;
@@ -35,12 +35,8 @@ using namespace Moses;
 namespace Moses
 {
 extern bool g_debug;
-}
 
-namespace MosesChart
-{
-
-Manager::Manager(InputType const& source, const TranslationSystem* system)
+ChartManager::ChartManager(InputType const& source, const TranslationSystem* system)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
   ,m_transOptColl(source, system, m_hypoStackColl, m_ruleLookupManagers)
@@ -59,7 +55,7 @@ Manager::Manager(InputType const& source, const TranslationSystem* system)
   }
 }
 
-Manager::~Manager()
+ChartManager::~ChartManager()
 {
   m_system->CleanUpAfterSentenceProcessing();
 
@@ -72,14 +68,14 @@ Manager::~Manager()
 
 }
 
-void Manager::ProcessSentence()
+void ChartManager::ProcessSentence()
 {
   VERBOSE(1,"Translating: " << m_source << endl);
 
   ResetSentenceStats(m_source);
 
   VERBOSE(2,"Decoding: " << endl);
-  //Hypothesis::ResetHypoCount();
+  //ChartHypothesis::ResetHypoCount();
 
   // MAIN LOOP
   size_t size = m_source.GetSize();
@@ -110,7 +106,7 @@ void Manager::ProcessSentence()
   }
 
   IFVERBOSE(1) {
-    cerr << "Num of hypo = " << Hypothesis::GetHypoCount() << " --- cells:" << endl;
+    cerr << "Num of hypo = " << ChartHypothesis::GetHypoCount() << " --- cells:" << endl;
 
     for (size_t startPos = 0; startPos < size; ++startPos) {
       cerr.width(3);
@@ -131,7 +127,7 @@ void Manager::ProcessSentence()
   }
 }
 
-const Hypothesis *Manager::GetBestHypothesis() const
+const ChartHypothesis *ChartManager::GetBestHypothesis() const
 {
   size_t size = m_source.GetSize();
 
@@ -144,26 +140,26 @@ const Hypothesis *Manager::GetBestHypothesis() const
   }
 }
 
-void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) const
+void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct) const
 {
   size_t size = m_source.GetSize();
   if (count == 0 || size == 0)
     return;
 
-  TrellisPathCollection contenders;
+  ChartTrellisPathCollection contenders;
   set<Phrase> distinctHyps;
 
   // add all pure paths
   WordsRange range(0, size-1);
   const ChartCell &lastCell = m_hypoStackColl.Get(range);
-  const Hypothesis *hypo = lastCell.GetBestHypothesis();
+  const ChartHypothesis *hypo = lastCell.GetBestHypothesis();
 
   if (hypo == NULL) {
     // no hypothesis
     return;
   }
 
-  MosesChart::TrellisPath *purePath = new TrellisPath(hypo);
+  ChartTrellisPath *purePath = new ChartTrellisPath(hypo);
   contenders.Add(purePath);
 
   // factor defines stopping point for distinct n-best list if too many candidates identical
@@ -173,7 +169,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   // MAIN loop
   for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * nBestFactor) ; iteration++) {
     // get next best from list of contenders
-    TrellisPath *path = contenders.pop();
+    ChartTrellisPath *path = contenders.pop();
     assert(path);
 
     // create deviations from current best
@@ -196,11 +192,11 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   }
 }
 
-void Manager::CalcDecoderStatistics() const
+void ChartManager::CalcDecoderStatistics() const
 {
 }
 
-void Manager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
+void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
   size_t size = m_source.GetSize();
   for (size_t width = 1; width <= size; ++width) {

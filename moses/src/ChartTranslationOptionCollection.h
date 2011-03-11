@@ -22,10 +22,10 @@
 #pragma once
 
 #include <vector>
-#include "../../moses/src/InputType.h"
-#include "../../moses/src/DecodeGraph.h"
-#include "../../moses/src/ChartTranslationOptionList.h"
-#include "../../moses/src/ChartRuleLookupManager.h"
+#include "InputType.h"
+#include "DecodeGraph.h"
+#include "ChartTranslationOptionList.h"
+#include "ChartRuleLookupManager.h"
 
 namespace Moses
 {
@@ -34,15 +34,11 @@ class Word;
 class ChartTranslationOption;
 class WordConsumed;
 class WordPenaltyProducer;
-};
-
-namespace MosesChart
-{
 class ChartCellCollection;
 
-class TranslationOptionCollection
+class ChartTranslationOptionCollection
 {
-  friend std::ostream& operator<<(std::ostream&, const TranslationOptionCollection&);
+  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionCollection&);
 protected:
   const Moses::InputType		&m_source;
   const Moses::TranslationSystem* m_system;
@@ -63,7 +59,7 @@ protected:
 
   void ProcessUnknownWord(size_t startPos, size_t endPos);
 
-  // taken from TranslationOptionCollectionText.
+  // taken from ChartTranslationOptionCollectionText.
   void ProcessUnknownWord(size_t sourcePos);
 
   //! special handling of ONE unknown words.
@@ -77,11 +73,11 @@ protected:
   void Sort(size_t startPos, size_t endPos);
 
 public:
-  TranslationOptionCollection(Moses::InputType const& source
+  ChartTranslationOptionCollection(Moses::InputType const& source
                               , const Moses::TranslationSystem* system
                               , const ChartCellCollection &hypoStackColl
                               , const std::vector<Moses::ChartRuleLookupManager*> &ruleLookupManagers);
-  virtual ~TranslationOptionCollection();
+  virtual ~ChartTranslationOptionCollection();
   void CreateTranslationOptionsForRange(size_t startPos
                                         , size_t endPos);
 

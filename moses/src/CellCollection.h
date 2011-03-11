@@ -34,7 +34,7 @@ class CellCollection
 public:
   virtual ~CellCollection()
   {}
-  virtual const NonTerminalSet &GetHeadwords(const Moses::WordsRange &coverage) const = 0;
+  virtual const NonTerminalSet &GetConstituentLabelSet(const Moses::WordsRange &coverage) const = 0;
 };
 
 }

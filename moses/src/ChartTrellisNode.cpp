@@ -21,33 +21,33 @@
 
 #include "ChartTrellisNode.h"
 #include "ChartHypothesis.h"
-#include "../../moses/src/ScoreComponentCollection.h"
+#include "ScoreComponentCollection.h"
 
 using namespace std;
 
-namespace MosesChart
+namespace Moses
 {
 
-TrellisNode::TrellisNode(const Hypothesis *hypo)
+ChartTrellisNode::ChartTrellisNode(const ChartHypothesis *hypo)
   :m_hypo(hypo)
 {
-  const std::vector<const Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
 
   m_edge.reserve(prevHypos.size());
   for (size_t ind = 0; ind < prevHypos.size(); ++ind) {
-    const Hypothesis *prevHypo = prevHypos[ind];
-    TrellisNode *child = new TrellisNode(prevHypo);
+    const ChartHypothesis *prevHypo = prevHypos[ind];
+    ChartTrellisNode *child = new ChartTrellisNode(prevHypo);
     m_edge.push_back(child);
   }
 
   assert(m_hypo);
 }
 
-TrellisNode::TrellisNode(const TrellisNode &origNode
-                         , const TrellisNode &soughtNode
-                         , const Hypothesis &replacementHypo
+ChartTrellisNode::ChartTrellisNode(const ChartTrellisNode &origNode
+                         , const ChartTrellisNode &soughtNode
+                         , const ChartHypothesis &replacementHypo
                          , Moses::ScoreComponentCollection	&scoreChange
-                         , const TrellisNode *&nodeChanged)
+                         , const ChartTrellisNode *&nodeChanged)
 {
   if (&origNode.GetHypothesis() == &soughtNode.GetHypothesis()) {
     // this node should be replaced
@@ -64,13 +64,13 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
     assert(deltaScore <= 0.0005);
 
     // follow prev hypos back to beginning
-    const std::vector<const Hypothesis*> &prevHypos = replacementHypo.GetPrevHypos();
-    vector<const Hypothesis*>::const_iterator iter;
+    const std::vector<const ChartHypothesis*> &prevHypos = replacementHypo.GetPrevHypos();
+    vector<const ChartHypothesis*>::const_iterator iter;
     assert(m_edge.empty());
     m_edge.reserve(prevHypos.size());
     for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-      const Hypothesis *prevHypo = *iter;
-      TrellisNode *prevNode = new TrellisNode(prevHypo);
+      const ChartHypothesis *prevHypo = *iter;
+      ChartTrellisNode *prevNode = new ChartTrellisNode(prevHypo);
       m_edge.push_back(prevNode);
     }
 
@@ -81,8 +81,8 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
     assert(m_edge.empty());
     m_edge.reserve(origNode.m_edge.size());
     for (iter = origNode.m_edge.begin(); iter != origNode.m_edge.end(); ++iter) {
-      const TrellisNode &prevNode = **iter;
-      TrellisNode *newPrevNode = new TrellisNode(prevNode, soughtNode, replacementHypo, scoreChange, nodeChanged);
+      const ChartTrellisNode &prevNode = **iter;
+      ChartTrellisNode *newPrevNode = new ChartTrellisNode(prevNode, soughtNode, replacementHypo, scoreChange, nodeChanged);
       m_edge.push_back(newPrevNode);
     }
   }
@@ -90,12 +90,12 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
   assert(m_hypo);
 }
 
-TrellisNode::~TrellisNode()
+ChartTrellisNode::~ChartTrellisNode()
 {
   Moses::RemoveAllInColl(m_edge);
 }
 
-Moses::Phrase TrellisNode::GetOutputPhrase() const
+Moses::Phrase ChartTrellisNode::GetOutputPhrase() const
 {
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
   Moses::Phrase ret(Moses::Output, Moses::ARRAY_SIZE_INCR);
@@ -106,7 +106,7 @@ Moses::Phrase TrellisNode::GetOutputPhrase() const
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
       size_t nonTermInd = m_hypo->GetWordsConsumedTargetOrder(pos);
-      const TrellisNode &childNode = GetChild(nonTermInd);
+      const ChartTrellisNode &childNode = GetChild(nonTermInd);
       Moses::Phrase childPhrase = childNode.GetOutputPhrase();
       ret.Append(childPhrase);
     } else {
@@ -117,11 +117,11 @@ Moses::Phrase TrellisNode::GetOutputPhrase() const
   return ret;
 }
 
-std::ostream& operator<<(std::ostream &out, const TrellisNode &node)
+std::ostream& operator<<(std::ostream &out, const ChartTrellisNode &node)
 {
   out << "*   " << node.GetHypothesis() << endl;
 
-  TrellisNode::NodeChildren::const_iterator iter;
+  ChartTrellisNode::NodeChildren::const_iterator iter;
   for (iter = node.GetChildren().begin(); iter != node.GetChildren().end(); ++iter) {
     out << **iter;
   }
