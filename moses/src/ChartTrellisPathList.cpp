@@ -30,7 +30,7 @@ namespace Moses
 ChartTrellisPathList::~ChartTrellisPathList()
 {
   // clean up
-  Moses::RemoveAllInColl(m_collection);
+  RemoveAllInColl(m_collection);
 }
 
 } // namespace

@@ -108,8 +108,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     const DottedRuleOnDisk &prevDottedRule = savedNode.GetDottedRule();
     const OnDiskPt::PhraseNode &prevNode = prevDottedRule.GetLastNode();
-    const WordConsumed *prevWordConsumed = prevDottedRule.GetLastWordConsumed();
-    size_t startPos = (prevWordConsumed == NULL) ? range.GetStartPos() : prevWordConsumed->GetWordsRange().GetEndPos() + 1;
+    const CoveredChartSpan *prevCoveredChartSpan = prevDottedRule.GetLastCoveredChartSpan();
+    size_t startPos = (prevCoveredChartSpan == NULL) ? range.GetStartPos() : prevCoveredChartSpan->GetWordsRange().GetEndPos() + 1;
 
     // search for terminal symbol
     if (startPos == absEndPos) {
@@ -122,10 +122,10 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           // TODO figure out why source word is needed from node, not from sentence
           // prob to do with factors or non-term
           //const Word &sourceWord = node->GetSourceWord();
-          WordConsumed *newWordConsumed = new WordConsumed(absEndPos, absEndPos
+          CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(absEndPos, absEndPos
               , sourceWord
-              , prevWordConsumed);
-          DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newWordConsumed);
+              , prevCoveredChartSpan);
+          DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newCoveredChartSpan);
           expandableDottedRuleList.Add(relEndPos+1, dottedRule);
 
           // cache for cleanup
@@ -203,11 +203,11 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
           // found matching entry
           //const Word &sourceWord = node->GetSourceWord();
-          WordConsumed *newWordConsumed = new WordConsumed(startPos, endPos
+          CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(startPos, endPos
               , chartNonTerm
-              , prevWordConsumed);
+              , prevCoveredChartSpan);
 
-          DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newWordConsumed);
+          DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newCoveredChartSpan);
           expandableDottedRuleList.Add(stackInd, dottedRule);
 
           m_sourcePhraseNode.push_back(node);
@@ -230,8 +230,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         continue;
       prevDottedRule.Done(true);
 
-      const WordConsumed *wordConsumed = prevDottedRule.GetLastWordConsumed();
-      assert(wordConsumed);
+      const CoveredChartSpan *coveredChartSpan = prevDottedRule.GetLastCoveredChartSpan();
+      assert(coveredChartSpan);
 
       const OnDiskPt::PhraseNode &prevNode = prevDottedRule.GetLastNode();
 
@@ -275,7 +275,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           }
 
           assert(targetPhraseCollection);
-          outColl.Add(*targetPhraseCollection, *wordConsumed, adhereTableLimit, rulesLimit);
+          outColl.Add(*targetPhraseCollection, *coveredChartSpan, adhereTableLimit, rulesLimit);
 
           numDerivations++;
 

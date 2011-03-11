@@ -19,7 +19,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "Cube.h"
+#include "RuleCubeQueue.h"
 
 #include "Util.h"
 
@@ -27,22 +27,22 @@ using namespace std;
 
 namespace Moses
 {
-Cube::~Cube()
+RuleCubeQueue::~RuleCubeQueue()
 {
-  Moses::RemoveAllInColl(m_uniqueEntry);
+  RemoveAllInColl(m_uniqueEntry);
 }
 
-bool Cube::Add(QueueEntry *queueEntry)
+bool RuleCubeQueue::Add(RuleCube *ruleCube)
 {
-  pair<UniqueCubeEntry::iterator, bool> inserted = m_uniqueEntry.insert(queueEntry);
+  pair<UniqueCubeEntry::iterator, bool> inserted = m_uniqueEntry.insert(ruleCube);
 
   if (inserted.second) {
     // inserted
-    m_sortedByScore.push(queueEntry);
+    m_sortedByScore.push(ruleCube);
   } else {
     // already there
     //cerr << "already there\n";
-    delete queueEntry;
+    delete ruleCube;
   }
 
   //assert(m_uniqueEntry.size() == m_sortedByScore.size());
@@ -50,12 +50,12 @@ bool Cube::Add(QueueEntry *queueEntry)
   return inserted.second;
 }
 
-QueueEntry *Cube::Pop()
+RuleCube *RuleCubeQueue::Pop()
 {
-  QueueEntry *entry = m_sortedByScore.top();
+  RuleCube *ruleCube = m_sortedByScore.top();
   m_sortedByScore.pop();
 
-  return entry;
+  return ruleCube;
 }
 
 }

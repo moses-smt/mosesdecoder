@@ -40,14 +40,14 @@ protected:
   const ChartTrellisNode *m_prevNodeChanged;
   const ChartTrellisPath *m_prevPath;
 
-  Moses::ScoreComponentCollection	m_scoreBreakdown;
+  ScoreComponentCollection	m_scoreBreakdown;
   float m_totalScore;
 
   // deviate by 1 hypo
   ChartTrellisPath(const ChartTrellisPath &origPath
               , const ChartTrellisNode &soughtNode
               , const ChartHypothesis &replacementHypo
-              , Moses::ScoreComponentCollection	&scoreChange);
+              , ScoreComponentCollection	&scoreChange);
 
   void CreateDeviantPaths(ChartTrellisPathCollection &pathColl, const ChartTrellisNode &soughtNode) const;
 
@@ -65,10 +65,10 @@ public:
     return m_totalScore;
   }
 
-  Moses::Phrase GetOutputPhrase() const;
+  Phrase GetOutputPhrase() const;
 
   /** returns detailed component scores */
-  inline const Moses::ScoreComponentCollection &GetScoreBreakdown() const {
+  inline const ScoreComponentCollection &GetScoreBreakdown() const {
     return m_scoreBreakdown;
   }
 

@@ -32,29 +32,29 @@
 
 namespace Moses
 {
-class WordConsumed;
+class CoveredChartSpan;
 class ChartTranslationOption;
 extern bool g_debug;
 class TranslationOptionCollection;
 class TranslationOptionList;
 class ChartCell;
 class ChartCellCollection;
-class QueueEntry;
-class Cube;
+class RuleCube;
+class RuleCubeQueue;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
 
 // wrapper around list of hypothese for a particular non-term of a trans opt
-class ChildEntry
+class RuleCubeDimension
 {
-  friend std::ostream& operator<<(std::ostream&, const ChildEntry&);
+  friend std::ostream& operator<<(std::ostream&, const RuleCubeDimension&);
 
 protected:
   size_t m_pos;
   const HypoList *m_orderedHypos;
 
 public:
-  ChildEntry(size_t pos, const HypoList &orderedHypos)
+  RuleCubeDimension(size_t pos, const HypoList &orderedHypos)
     :m_pos(pos)
     ,m_orderedHypos(&orderedHypos)
   {}
@@ -72,53 +72,54 @@ public:
   }
 
   //! transitive comparison used for adding objects into FactorCollection
-  bool operator<(const ChildEntry &compare) const {
+  bool operator<(const RuleCubeDimension &compare) const {
     return GetHypothesis() < compare.GetHypothesis();
   }
 
-  bool operator==(const ChildEntry & compare) const {
+  bool operator==(const RuleCubeDimension & compare) const {
     return GetHypothesis() == compare.GetHypothesis();
   }
 };
 
-// entry in the cub of 1 trans opt and all the hypotheses that goes with each non term.
-class QueueEntry
+// Stores one dimension in the cube
+// (all the hypotheses that match one non terminal)
+class RuleCube
 {
-  friend std::ostream& operator<<(std::ostream&, const QueueEntry&);
+  friend std::ostream& operator<<(std::ostream&, const RuleCube&);
 protected:
-  const Moses::ChartTranslationOption &m_transOpt;
-  std::vector<ChildEntry> m_childEntries;
+  const ChartTranslationOption &m_transOpt;
+  std::vector<RuleCubeDimension> m_cube;
 
   float m_combinedScore;
 
-  QueueEntry(const QueueEntry &copy, size_t childEntryIncr);
-  void CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells);
+  RuleCube(const RuleCube &copy, size_t ruleCubeDimensionIncr);
+  void CreateRuleCubeDimension(const CoveredChartSpan *coveredChartSpan, const ChartCellCollection &allChartCells);
 
   void CalcScore();
 
 public:
-  QueueEntry(const Moses::ChartTranslationOption &transOpt
+  RuleCube(const ChartTranslationOption &transOpt
              , const ChartCellCollection &allChartCells);
-  ~QueueEntry();
+  ~RuleCube();
 
-  const Moses::ChartTranslationOption &GetTranslationOption() const {
+  const ChartTranslationOption &GetTranslationOption() const {
     return m_transOpt;
   }
-  const std::vector<ChildEntry> &GetChildEntries() const {
-    return m_childEntries;
+  const std::vector<RuleCubeDimension> &GetCube() const {
+    return m_cube;
   }
   float GetCombinedScore() const {
     return m_combinedScore;
   }
 
-  void CreateNeighbors(Cube &) const;
+  void CreateNeighbors(RuleCubeQueue &) const;
 
-  bool operator<(const QueueEntry &compare) const;
+  bool operator<(const RuleCube &compare) const;
 
 };
 
 #ifdef HAVE_BOOST
-std::size_t hash_value(const ChildEntry &);
+std::size_t hash_value(const RuleCubeDimension &);
 #endif
 
 }

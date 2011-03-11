@@ -48,7 +48,7 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
     ChartHypothesis *hypo = *iter;
     ChartHypothesis::Delete(hypo);
   }
-  //Moses::RemoveAllInColl(m_hypos);
+  //RemoveAllInColl(m_hypos);
 }
 
 bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)

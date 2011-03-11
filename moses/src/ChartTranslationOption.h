@@ -28,7 +28,7 @@
 
 namespace Moses
 {
-class WordConsumed;
+class CoveredChartSpan;
 
 // basically a phrase translation and the vector of words consumed to map each word
 class ChartTranslationOption
@@ -36,13 +36,13 @@ class ChartTranslationOption
   friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
 
 protected:
-  const Moses::TargetPhrase &m_targetPhrase;
-  const WordConsumed &m_lastWordConsumed;
+  const TargetPhrase &m_targetPhrase;
+  const CoveredChartSpan &m_lastCoveredChartSpan;
   /* map each source word in the phrase table to:
   		1. a word in the input sentence, if the pt word is a terminal
   		2. a 1+ phrase in the input sentence, if the pt word is a non-terminal
   */
-  std::vector<size_t> m_wordsConsumedTargetOrder;
+  std::vector<size_t> m_coveredChartSpanListTargetOrder;
   /* size is the size of the target phrase.
   	Usually filled with NOT_KNOWN, unless the pos is a non-term, in which case its filled
   	with its index
@@ -52,9 +52,9 @@ protected:
   ChartTranslationOption(const ChartTranslationOption &copy); // not implmenented
 
 public:
-  ChartTranslationOption(const TargetPhrase &targetPhrase, const WordConsumed &lastWordConsumed, const WordsRange	&wordsRange)
+  ChartTranslationOption(const TargetPhrase &targetPhrase, const CoveredChartSpan &lastCoveredChartSpan, const WordsRange	&wordsRange)
     :m_targetPhrase(targetPhrase)
-    ,m_lastWordConsumed(lastWordConsumed)
+    ,m_lastCoveredChartSpan(lastCoveredChartSpan)
     ,m_wordsRange(wordsRange)
   {}
   ~ChartTranslationOption()
@@ -64,16 +64,16 @@ public:
     return m_targetPhrase;
   }
 
-  const WordConsumed &GetLastWordConsumed() const {
-    return m_lastWordConsumed;
+  const CoveredChartSpan &GetLastCoveredChartSpan() const {
+    return m_lastCoveredChartSpan;
   }
-  const std::vector<size_t> &GetWordsConsumedTargetOrder() const {
-    return m_wordsConsumedTargetOrder;
+  const std::vector<size_t> &GetCoveredChartSpanTargetOrder() const {
+    return m_coveredChartSpanListTargetOrder;
   }
 
   void CreateNonTermIndex();
 
-  const Moses::WordsRange &GetSourceWordsRange() const {
+  const WordsRange &GetSourceWordsRange() const {
     return m_wordsRange;
   }
 

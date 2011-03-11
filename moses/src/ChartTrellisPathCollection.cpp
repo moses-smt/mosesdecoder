@@ -28,7 +28,7 @@ namespace Moses
 ChartTrellisPathCollection::~ChartTrellisPathCollection()
 {
   // clean up
-  Moses::RemoveAllInColl(m_collection);
+  RemoveAllInColl(m_collection);
 }
 
 void ChartTrellisPathCollection::Add(ChartTrellisPath *path)

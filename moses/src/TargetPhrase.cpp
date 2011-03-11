@@ -304,9 +304,9 @@ void TargetPhrase::SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &
 
 void TargetPhrase::CreateCountInfo(const std::string &countStr)
 {
-  vector<float> count = Moses::Tokenize<float>(countStr);
+  vector<float> count = Tokenize<float>(countStr);
   assert(count.size() == 2);
-  m_countInfo = Moses::CountInfo(count[1], count[0]);
+  m_countInfo = CountInfo(count[1], count[0]);
 }
 
 

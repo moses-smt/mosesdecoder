@@ -31,7 +31,7 @@
 
 namespace Moses
 {
-class QueueEntry;
+class RuleCube;
 class ChartHypothesis;
 class ChartManager;
 
@@ -50,12 +50,12 @@ protected:
   static unsigned int s_HypothesesCreated;
 
   int m_id; /**< numeric ID of this hypothesis, used for logging */
-  const Moses::ChartTranslationOption &m_transOpt;
+  const ChartTranslationOption &m_transOpt;
 
-  Moses::Phrase m_contextPrefix, m_contextSuffix;
-  const std::vector<size_t> &m_wordsConsumedTargetOrder; // same size as target phrase ?
-  Moses::WordsRange					m_currSourceWordsRange;
-  Moses::ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
+  Phrase m_contextPrefix, m_contextSuffix;
+  const std::vector<size_t> &m_coveredChartSpanListTargetOrder; // same size as target phrase ?
+  WordsRange					m_currSourceWordsRange;
+  ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   ,m_lmNGram
   ,m_lmPrefix;
   float m_totalScore;
@@ -68,8 +68,8 @@ protected:
 
   ChartManager& m_manager;
 
-  size_t CalcPrefix(Moses::Phrase &ret, size_t size) const;
-  size_t CalcSuffix(Moses::Phrase &ret, size_t size) const;
+  size_t CalcPrefix(Phrase &ret, size_t size) const;
+  size_t CalcSuffix(Phrase &ret, size_t size) const;
 
   void CalcLMScore();
 
@@ -99,34 +99,34 @@ public:
   }
 #endif
 
-  explicit ChartHypothesis(const QueueEntry &queueEntry, ChartManager &manager);
+  explicit ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager);
   ~ChartHypothesis();
 
   int GetId()const {
     return m_id;
   }
-  const Moses::ChartTranslationOption &GetTranslationOption()const {
+  const ChartTranslationOption &GetTranslationOption()const {
     return m_transOpt;
   }
-  const Moses::TargetPhrase &GetCurrTargetPhrase()const {
+  const TargetPhrase &GetCurrTargetPhrase()const {
     return m_transOpt.GetTargetPhrase();
   }
-  const Moses::WordsRange &GetCurrSourceRange()const {
+  const WordsRange &GetCurrSourceRange()const {
     return m_currSourceWordsRange;
   }
   inline const ChartArcList* GetArcList() const {
     return m_arcList;
   }
 
-  void CreateOutputPhrase(Moses::Phrase &outPhrase) const;
-  Moses::Phrase GetOutputPhrase() const;
+  void CreateOutputPhrase(Phrase &outPhrase) const;
+  Phrase GetOutputPhrase() const;
 
   int LMContextCompare(const ChartHypothesis &other) const;
 
-  const Moses::Phrase &GetPrefix() const {
+  const Phrase &GetPrefix() const {
     return m_contextPrefix;
   }
-  const Moses::Phrase &GetSuffix() const {
+  const Phrase &GetSuffix() const {
     return m_contextSuffix;
   }
 
@@ -136,7 +136,7 @@ public:
   void CleanupArcList();
   void SetWinningHypo(const ChartHypothesis *hypo);
 
-  const Moses::ScoreComponentCollection &GetScoreBreakdown() const {
+  const ScoreComponentCollection &GetScoreBreakdown() const {
     return m_scoreBreakdown;
   }
   float GetTotalScore() const {
@@ -147,12 +147,12 @@ public:
     return m_prevHypos;
   }
 
-  size_t GetWordsConsumedTargetOrder(size_t pos) const {
-    assert(pos < m_wordsConsumedTargetOrder.size());
-    return m_wordsConsumedTargetOrder[pos];
+  size_t GetCoveredChartSpanTargetOrder(size_t pos) const {
+    assert(pos < m_coveredChartSpanListTargetOrder.size());
+    return m_coveredChartSpanListTargetOrder[pos];
   }
 
-  const Moses::Word &GetTargetLHS() const {
+  const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();
   }
 

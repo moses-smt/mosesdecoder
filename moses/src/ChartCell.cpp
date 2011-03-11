@@ -23,8 +23,8 @@
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
-#include "Cube.h"
-#include "QueueEntry.h"
+#include "RuleCubeQueue.h"
+#include "RuleCube.h"
 #include "WordsRange.h"
 #include "Util.h"
 #include "StaticData.h"
@@ -47,9 +47,9 @@ ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager)
 }
 
 /** Get all hypotheses in the cell that have the specified constituent label */
-const HypoList &ChartCell::GetSortedHypotheses(const Moses::Word &constituentLabel) const
+const HypoList &ChartCell::GetSortedHypotheses(const Word &constituentLabel) const
 {
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator
+  std::map<Word, ChartHypothesisCollection>::const_iterator
   iter = m_hypoColl.find(constituentLabel);
   assert(iter != m_hypoColl.end());
   return iter->second.GetSortedHypotheses();
@@ -65,7 +65,7 @@ bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 /** Pruning */
 void ChartCell::PruneToSize()
 {
-  std::map<Moses::Word, ChartHypothesisCollection>::iterator iter;
+  std::map<Word, ChartHypothesisCollection>::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
     coll.PruneToSize(m_manager);
@@ -83,31 +83,31 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   const StaticData &staticData = StaticData::Instance();
 
   // priority queue for applicable rules with selected hypotheses
-  Cube cube;
+  RuleCubeQueue queue;
 
   // add all trans opt into queue. using only 1st child node.
   ChartTranslationOptionList::const_iterator iterList;
   for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) 
   {
     const ChartTranslationOption &transOpt = **iterList;
-    QueueEntry *queueEntry = new QueueEntry(transOpt, allChartCells);
-    cube.Add(queueEntry);
+    RuleCube *ruleCube = new RuleCube(transOpt, allChartCells);
+    queue.Add(ruleCube);
   }
 
   // pluck things out of queue and add to hypo collection
   const size_t popLimit = staticData.GetCubePruningPopLimit();
-  for (size_t numPops = 0; numPops < popLimit && !cube.IsEmpty(); ++numPops) 
+  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
   {
-    QueueEntry *queueEntry = cube.Pop();
+    RuleCube *ruleCube = queue.Pop();
 
-    // create hypothesis from QueueEntry
-    ChartHypothesis *hypo = new ChartHypothesis(*queueEntry, m_manager);
+    // create hypothesis from RuleCube
+    ChartHypothesis *hypo = new ChartHypothesis(*ruleCube, m_manager);
     assert(hypo);
     hypo->CalcScore();
     AddHypothesis(hypo);
 
     // add neighbors to the queue
-    queueEntry->CreateNeighbors(cube);
+    ruleCube->CreateNeighbors(queue);
   }
 }
 
@@ -115,7 +115,7 @@ void ChartCell::SortHypotheses()
 {
   // sort each mini cells & fill up target lhs list
   assert(m_constituentLabelSet.empty());
-  std::map<Moses::Word, ChartHypothesisCollection>::iterator iter;
+  std::map<Word, ChartHypothesisCollection>::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     m_constituentLabelSet.insert(iter->first);
 
@@ -130,7 +130,7 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   const ChartHypothesis *ret = NULL;
   float bestScore = -std::numeric_limits<float>::infinity();
 
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator iter;
+  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
     assert(sortedList.size() > 0);
@@ -146,9 +146,9 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
 }
 
 /** Is there a hypothesis in the cell that has the specified constituent label? */
-bool ChartCell::ConstituentLabelExists(const Moses::Word &constituentLabel) const
+bool ChartCell::ConstituentLabelExists(const Word &constituentLabel) const
 {
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator iter;
+  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
   iter = m_hypoColl.find(constituentLabel);
   return (iter != m_hypoColl.end());
 }
@@ -158,7 +158,7 @@ void ChartCell::CleanupArcList()
   // only necessary if n-best calculations are enabled
   if (!m_nBestIsEnabled) return;
 
-  std::map<Moses::Word, ChartHypothesisCollection>::iterator iter;
+  std::map<Word, ChartHypothesisCollection>::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
     coll.CleanupArcList();
@@ -167,9 +167,9 @@ void ChartCell::CleanupArcList()
 
 void ChartCell::OutputSizes(std::ostream &out) const
 {
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator iter;
+  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
-    const Moses::Word &targetLHS = iter->first;
+    const Word &targetLHS = iter->first;
     const ChartHypothesisCollection &coll = iter->second;
 
     out << targetLHS << "=" << coll.GetSize() << " ";
@@ -179,7 +179,7 @@ void ChartCell::OutputSizes(std::ostream &out) const
 size_t ChartCell::GetSize() const
 {
   size_t ret = 0;
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator iter;
+  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const ChartHypothesisCollection &coll = iter->second;
 
@@ -191,7 +191,7 @@ size_t ChartCell::GetSize() const
 
 void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator iterOutside;
+  std::map<Word, ChartHypothesisCollection>::const_iterator iterOutside;
   for (iterOutside = m_hypoColl.begin(); iterOutside != m_hypoColl.end(); ++iterOutside) {
     const ChartHypothesisCollection &coll = iterOutside->second;
     coll.GetSearchGraph(translationId, outputSearchGraphStream);
@@ -201,9 +201,9 @@ void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGra
 
 std::ostream& operator<<(std::ostream &out, const ChartCell &cell)
 {
-  std::map<Moses::Word, ChartHypothesisCollection>::const_iterator iterOutside;
+  std::map<Word, ChartHypothesisCollection>::const_iterator iterOutside;
   for (iterOutside = cell.m_hypoColl.begin(); iterOutside != cell.m_hypoColl.end(); ++iterOutside) {
-    const Moses::Word &targetLHS = iterOutside->first;
+    const Word &targetLHS = iterOutside->first;
     cerr << targetLHS << ":" << endl;
 
     const ChartHypothesisCollection &coll = iterOutside->second;

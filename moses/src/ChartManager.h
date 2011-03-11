@@ -41,16 +41,16 @@ class ChartTrellisPathList;
 class ChartManager
 {
 protected:
-  Moses::InputType const& m_source; /**< source sentence to be translated */
+  InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
-  std::auto_ptr<Moses::SentenceStats> m_sentenceStats;
-  const Moses::TranslationSystem* m_system;
+  std::auto_ptr<SentenceStats> m_sentenceStats;
+  const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
-  std::vector<Moses::ChartRuleLookupManager*> m_ruleLookupManagers;
+  std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
 
 public:
-  ChartManager(Moses::InputType const& source, const Moses::TranslationSystem* system);
+  ChartManager(InputType const& source, const TranslationSystem* system);
   ~ChartManager();
   void ProcessSentence();
   const ChartHypothesis *GetBestHypothesis() const;
@@ -58,22 +58,22 @@ public:
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 
-  const Moses::InputType& GetSource() const {
+  const InputType& GetSource() const {
     return m_source;
   }
-  const Moses::TranslationSystem* GetTranslationSystem() const {
+  const TranslationSystem* GetTranslationSystem() const {
     return m_system;
   }
 
-  Moses::SentenceStats& GetSentenceStats() const {
+  SentenceStats& GetSentenceStats() const {
     return *m_sentenceStats;
   }
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
    */
   void CalcDecoderStatistics() const;
-  void ResetSentenceStats(const Moses::InputType& source) {
-    m_sentenceStats = std::auto_ptr<Moses::SentenceStats>(new Moses::SentenceStats(source));
+  void ResetSentenceStats(const InputType& source) {
+    m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
   }
 
 };

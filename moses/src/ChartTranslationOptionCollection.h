@@ -32,7 +32,7 @@ namespace Moses
 class DecodeGraph;
 class Word;
 class ChartTranslationOption;
-class WordConsumed;
+class CoveredChartSpan;
 class WordPenaltyProducer;
 class ChartCellCollection;
 
@@ -40,22 +40,22 @@ class ChartTranslationOptionCollection
 {
   friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionCollection&);
 protected:
-  const Moses::InputType		&m_source;
-  const Moses::TranslationSystem* m_system;
-  std::vector <Moses::DecodeGraph*> m_decodeGraphList;
+  const InputType		&m_source;
+  const TranslationSystem* m_system;
+  std::vector <DecodeGraph*> m_decodeGraphList;
   const ChartCellCollection &m_hypoStackColl;
-  const std::vector<Moses::ChartRuleLookupManager*> &m_ruleLookupManagers;
+  const std::vector<ChartRuleLookupManager*> &m_ruleLookupManagers;
 
-  std::vector< std::vector< Moses::ChartTranslationOptionList > >	m_collection; /*< contains translation options */
-  std::vector<Moses::Phrase*> m_unksrcs;
-  std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
-  std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
+  std::vector< std::vector< ChartTranslationOptionList > >	m_collection; /*< contains translation options */
+  std::vector<Phrase*> m_unksrcs;
+  std::list<TargetPhrase*> m_cacheTargetPhrase;
+  std::list<std::vector<CoveredChartSpan*>* > m_coveredChartSpanCache;
 
   // for adding 1 trans opt in unknown word proc
-  void Add(Moses::ChartTranslationOption *transOpt, size_t pos);
+  void Add(ChartTranslationOption *transOpt, size_t pos);
 
-  Moses::ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
-  const Moses::ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
+  ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
+  const ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 
   void ProcessUnknownWord(size_t startPos, size_t endPos);
 
@@ -63,7 +63,7 @@ protected:
   void ProcessUnknownWord(size_t sourcePos);
 
   //! special handling of ONE unknown words.
-  virtual void ProcessOneUnknownWord(const Moses::Word &sourceWord
+  virtual void ProcessOneUnknownWord(const Word &sourceWord
                                      , size_t sourcePos, size_t length = 1);
 
   //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
@@ -73,15 +73,15 @@ protected:
   void Sort(size_t startPos, size_t endPos);
 
 public:
-  ChartTranslationOptionCollection(Moses::InputType const& source
-                              , const Moses::TranslationSystem* system
+  ChartTranslationOptionCollection(InputType const& source
+                              , const TranslationSystem* system
                               , const ChartCellCollection &hypoStackColl
-                              , const std::vector<Moses::ChartRuleLookupManager*> &ruleLookupManagers);
+                              , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers);
   virtual ~ChartTranslationOptionCollection();
   void CreateTranslationOptionsForRange(size_t startPos
                                         , size_t endPos);
 
-  const Moses::ChartTranslationOptionList &GetTranslationOptionList(const Moses::WordsRange &range) const {
+  const ChartTranslationOptionList &GetTranslationOptionList(const WordsRange &range) const {
     return GetTranslationOptionList(range.GetStartPos(), range.GetEndPos());
   }
 

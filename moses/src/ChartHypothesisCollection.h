@@ -22,7 +22,7 @@
 
 #include <set>
 #include "ChartHypothesis.h"
-#include "QueueEntry.h"
+#include "RuleCube.h"
 
 
 namespace Moses
@@ -42,12 +42,12 @@ class ChartHypothesisRecombinationOrderer
 public:
   bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
     // assert in same cell
-    const Moses::WordsRange &rangeA	= hypoA->GetCurrSourceRange()
+    const WordsRange &rangeA	= hypoA->GetCurrSourceRange()
                                       , &rangeB	= hypoB->GetCurrSourceRange();
     assert(rangeA == rangeB);
 
     /*
-    int ret = Moses::Word::Compare(hypoA->GetTargetLHS(), hypoB->GetTargetLHS());
+    int ret = Word::Compare(hypoA->GetTargetLHS(), hypoB->GetTargetLHS());
     if (ret != 0)
     	return (ret < 0);
     */

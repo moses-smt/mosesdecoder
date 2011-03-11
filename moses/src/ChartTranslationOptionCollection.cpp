@@ -26,7 +26,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 #include "Util.h"
 
 using namespace std;
@@ -36,7 +36,7 @@ namespace Moses
 {
 
 ChartTranslationOptionCollection::ChartTranslationOptionCollection(InputType const& source
-    , const Moses::TranslationSystem* system
+    , const TranslationSystem* system
     , const ChartCellCollection &hypoStackColl
     , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers)
   :m_source(source)
@@ -61,13 +61,13 @@ ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhrase);
 
-  std::list<std::vector<Moses::WordConsumed*>* >::iterator iterOuter;
-  for (iterOuter = m_cachedWordsConsumed.begin(); iterOuter != m_cachedWordsConsumed.end(); ++iterOuter) {
-    std::vector<Moses::WordConsumed*> &inner = **iterOuter;
+  std::list<std::vector<CoveredChartSpan*>* >::iterator iterOuter;
+  for (iterOuter = m_coveredChartSpanCache.begin(); iterOuter != m_coveredChartSpanCache.end(); ++iterOuter) {
+    std::vector<CoveredChartSpan*> &inner = **iterOuter;
     RemoveAllInColl(inner);
   }
 
-  RemoveAllInColl(m_cachedWordsConsumed);
+  RemoveAllInColl(m_coveredChartSpanCache);
 
 }
 
@@ -168,14 +168,14 @@ void ChartTranslationOptionCollection::ProcessUnknownWord(size_t sourcePos)
 }
 
 //! special handling of ONE unknown words.
-void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourceWord, size_t sourcePos, size_t /* length */)
+void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t /* length */)
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
   vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
 
-  Moses::ChartTranslationOptionList &transOptColl = GetTranslationOptionList(sourcePos, sourcePos);
+  ChartTranslationOptionList &transOptColl = GetTranslationOptionList(sourcePos, sourcePos);
   const WordsRange &range = transOptColl.GetSourceRange();
 
   size_t isDigit = 0;
@@ -197,12 +197,12 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &
   //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
     // words consumed
-    std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>();
-    m_cachedWordsConsumed.push_back(wordsConsumed);
+    std::vector<CoveredChartSpan*> *coveredChartSpanList = new std::vector<CoveredChartSpan*>();
+    m_coveredChartSpanCache.push_back(coveredChartSpanList);
 
-    WordConsumed *wc = new WordConsumed(sourcePos, sourcePos, sourceWord, NULL);
-    wordsConsumed->push_back(wc);
-    assert(wordsConsumed->size());
+    CoveredChartSpan *wc = new CoveredChartSpan(sourcePos, sourcePos, sourceWord, NULL);
+    coveredChartSpanList->push_back(wc);
+    assert(coveredChartSpanList->size());
 
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
@@ -236,7 +236,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &
 
       // chart rule
       ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
-          , *wordsConsumed->back()
+          , *coveredChartSpanList->back()
           , range);
       chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);
@@ -263,14 +263,14 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &
       targetPhrase->SetTargetLHS(targetLHS);
 
       // words consumed
-      std::vector<WordConsumed*> *wordsConsumed = new std::vector<WordConsumed*>;
-      m_cachedWordsConsumed.push_back(wordsConsumed);
-      wordsConsumed->push_back(new WordConsumed(sourcePos, sourcePos, sourceWord, NULL));
+      std::vector<CoveredChartSpan*> *coveredChartSpanList = new std::vector<CoveredChartSpan*>;
+      m_coveredChartSpanCache.push_back(coveredChartSpanList);
+      coveredChartSpanList->push_back(new CoveredChartSpan(sourcePos, sourcePos, sourceWord, NULL));
 
       // chart rule
-      assert(wordsConsumed->size());
+      assert(coveredChartSpanList->size());
       ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
-          , *wordsConsumed->back()
+          , *coveredChartSpanList->back()
           , range);
       chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);

@@ -42,7 +42,7 @@ ChartTrellisPath::ChartTrellisPath(const ChartHypothesis *hypo)
 ChartTrellisPath::ChartTrellisPath(const ChartTrellisPath &origPath
                          , const ChartTrellisNode &soughtNode
                          , const ChartHypothesis &replacementHypo
-                         , Moses::ScoreComponentCollection	&scoreChange)
+                         , ScoreComponentCollection	&scoreChange)
   :m_scoreBreakdown(origPath.GetScoreBreakdown())
   ,m_prevPath(&origPath)
 {
@@ -62,9 +62,9 @@ ChartTrellisPath::~ChartTrellisPath()
   delete m_finalNode;
 }
 
-Moses::Phrase ChartTrellisPath::GetOutputPhrase() const
+Phrase ChartTrellisPath::GetOutputPhrase() const
 {
-  Moses::Phrase ret = GetFinalNode().GetOutputPhrase();
+  Phrase ret = GetFinalNode().GetOutputPhrase();
   return ret;
 }
 
@@ -76,7 +76,7 @@ void ChartTrellisPath::CreateDeviantPaths(ChartTrellisPathCollection &pathColl, 
   if (arcList) {
     ChartArcList::const_iterator iterChartArcList;
     for (iterChartArcList = arcList->begin(); iterChartArcList != arcList->end(); ++iterChartArcList) {
-      Moses::ScoreComponentCollection	scoreChange;
+      ScoreComponentCollection	scoreChange;
 
       const ChartHypothesis &replacementHypo = **iterChartArcList;
       ChartTrellisPath *newPath = new ChartTrellisPath(*this, soughtNode, replacementHypo, scoreChange);

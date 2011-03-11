@@ -25,7 +25,7 @@
 
 namespace Moses
 {
-ChartCellCollection::ChartCellCollection(const Moses::InputType &input, ChartManager &manager)
+ChartCellCollection::ChartCellCollection(const InputType &input, ChartManager &manager)
   :m_hypoStackColl(input.GetSize())
 {
   size_t size = input.GetSize();
@@ -47,7 +47,7 @@ ChartCellCollection::~ChartCellCollection()
   OuterCollType::iterator iter;
   for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter) {
     InnerCollType &inner = *iter;
-    Moses::RemoveAllInColl(inner);
+    RemoveAllInColl(inner);
   }
 }
 

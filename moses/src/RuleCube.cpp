@@ -19,15 +19,15 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "QueueEntry.h"
+#include "RuleCube.h"
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
-#include "Cube.h"
+#include "RuleCubeQueue.h"
 #include "WordsRange.h"
 #include "ChartTranslationOption.h"
 #include "Util.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 
 #ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
@@ -40,113 +40,113 @@ namespace Moses
 {
 
 // create a cube for a rule
-QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
+RuleCube::RuleCube(const ChartTranslationOption &transOpt
                        , const ChartCellCollection &allChartCells)
   :m_transOpt(transOpt)
 {
-  const WordConsumed *wordsConsumed = &transOpt.GetLastWordConsumed();
-  CreateChildEntry(wordsConsumed, allChartCells);
+  const CoveredChartSpan *coveredChartSpan = &transOpt.GetLastCoveredChartSpan();
+  CreateRuleCubeDimension(coveredChartSpan, allChartCells);
   CalcScore();
 }
 
 // for each non-terminal, create a ordered list of matching hypothesis from the chart
-void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, const ChartCellCollection &allChartCells)
+void RuleCube::CreateRuleCubeDimension(const CoveredChartSpan *coveredChartSpan, const ChartCellCollection &allChartCells)
 {
   // recurse through the linked list of source side non-terminals and terminals
-  const WordConsumed *prevWordsConsumed = wordsConsumed->GetPrevWordsConsumed();
-  if (prevWordsConsumed)
-    CreateChildEntry(prevWordsConsumed, allChartCells);
+  const CoveredChartSpan *prevCoveredChartSpan = coveredChartSpan->GetPrevCoveredChartSpan();
+  if (prevCoveredChartSpan)
+    CreateRuleCubeDimension(prevCoveredChartSpan, allChartCells);
 
   // only deal with non-terminals
-  if (wordsConsumed->IsNonTerminal()) 
+  if (coveredChartSpan->IsNonTerminal()) 
   {
     // get the essential information about the non-terminal
-    const WordsRange &childRange = wordsConsumed->GetWordsRange(); // span covered by child
+    const WordsRange &childRange = coveredChartSpan->GetWordsRange(); // span covered by child
     const ChartCell &childCell = allChartCells.Get(childRange);    // list of all hypos for that span
-    const Word &nonTerm = wordsConsumed->GetSourceWord();          // target (sic!) non-terminal label 
+    const Word &nonTerm = coveredChartSpan->GetSourceWord();          // target (sic!) non-terminal label 
 
     // there have to be hypothesis with the desired non-terminal
     // (otherwise the rule would not be considered)
     assert(!childCell.GetSortedHypotheses(nonTerm).empty());
 
     // create a list of hypotheses that match the non-terminal
-    ChildEntry childEntry(0, childCell.GetSortedHypotheses(nonTerm));
+    RuleCubeDimension ruleCubeDimension(0, childCell.GetSortedHypotheses(nonTerm));
     // add them to the vector for such lists
-    m_childEntries.push_back(childEntry);
+    m_cube.push_back(ruleCubeDimension);
   }
 }
 
-// create the QueueEntry from an existing one, differing only in one child hypothesis
-QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
+// create the RuleCube from an existing one, differing only in one child hypothesis
+RuleCube::RuleCube(const RuleCube &copy, size_t ruleCubeDimensionIncr)
   :m_transOpt(copy.m_transOpt)
-  ,m_childEntries(copy.m_childEntries)
+  ,m_cube(copy.m_cube)
 {
-  ChildEntry &childEntry = m_childEntries[childEntryIncr];
-  childEntry.IncrementPos();
+  RuleCubeDimension &ruleCubeDimension = m_cube[ruleCubeDimensionIncr];
+  ruleCubeDimension.IncrementPos();
   CalcScore();
 }
 
-QueueEntry::~QueueEntry()
+RuleCube::~RuleCube()
 {
-  //Moses::RemoveAllInColl(m_childEntries);
+  //RemoveAllInColl(m_cube);
 }
 
-// create new QueueEntry for neighboring principle rules
-// (duplicate detection is handled in Cube)
-void QueueEntry::CreateNeighbors(Cube &cube) const
+// create new RuleCube for neighboring principle rules
+// (duplicate detection is handled in RuleCubeQueue)
+void RuleCube::CreateNeighbors(RuleCubeQueue &queue) const
 {
   // loop over all child hypotheses
-  for (size_t ind = 0; ind < m_childEntries.size(); ind++) {
-    const ChildEntry &childEntry = m_childEntries[ind];
+  for (size_t ind = 0; ind < m_cube.size(); ind++) {
+    const RuleCubeDimension &ruleCubeDimension = m_cube[ind];
 
-    if (childEntry.HasMoreHypo()) {
-      QueueEntry *newEntry = new QueueEntry(*this, ind);
-      cube.Add(newEntry);
+    if (ruleCubeDimension.HasMoreHypo()) {
+      RuleCube *newEntry = new RuleCube(*this, ind);
+      queue.Add(newEntry);
     }
   }
 }
 
 // compute an estimated cost of the principle rule
 // (consisting of rule translation scores plus child hypotheses scores)
-void QueueEntry::CalcScore()
+void RuleCube::CalcScore()
 {
   m_combinedScore = m_transOpt.GetTotalScore();
-  for (size_t ind = 0; ind < m_childEntries.size(); ind++) {
-    const ChildEntry &childEntry = m_childEntries[ind];
+  for (size_t ind = 0; ind < m_cube.size(); ind++) {
+    const RuleCubeDimension &ruleCubeDimension = m_cube[ind];
 
-    const ChartHypothesis *hypo = childEntry.GetHypothesis();
+    const ChartHypothesis *hypo = ruleCubeDimension.GetHypothesis();
     m_combinedScore += hypo->GetTotalScore();
   }
 }
 
-bool QueueEntry::operator<(const QueueEntry &compare) const
+bool RuleCube::operator<(const RuleCube &compare) const
 {
   if (&m_transOpt != &compare.m_transOpt)
     return &m_transOpt < &compare.m_transOpt;
 
-  bool ret = m_childEntries < compare.m_childEntries;
+  bool ret = m_cube < compare.m_cube;
   return ret;
 }
 
 #ifdef HAVE_BOOST
-std::size_t hash_value(const ChildEntry & entry)
+std::size_t hash_value(const RuleCubeDimension & ruleCubeDimension)
 {
   boost::hash<const ChartHypothesis*> hasher;
-  return hasher(entry.GetHypothesis());
+  return hasher(ruleCubeDimension.GetHypothesis());
 }
 
 #endif
-std::ostream& operator<<(std::ostream &out, const ChildEntry &entry)
+std::ostream& operator<<(std::ostream &out, const RuleCubeDimension &ruleCubeDimension)
 {
-  out << *entry.GetHypothesis();
+  out << *ruleCubeDimension.GetHypothesis();
   return out;
 }
 
-std::ostream& operator<<(std::ostream &out, const QueueEntry &entry)
+std::ostream& operator<<(std::ostream &out, const RuleCube &ruleCube)
 {
-  out << entry.GetTranslationOption() << endl;
-  std::vector<ChildEntry>::const_iterator iter;
-  for (iter = entry.GetChildEntries().begin(); iter != entry.GetChildEntries().end(); ++iter) {
+  out << ruleCube.GetTranslationOption() << endl;
+  std::vector<RuleCubeDimension>::const_iterator iter;
+  for (iter = ruleCube.GetCube().begin(); iter != ruleCube.GetCube().end(); ++iter) {
     out << *iter << endl;
   }
   return out;

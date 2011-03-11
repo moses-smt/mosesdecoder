@@ -45,7 +45,7 @@ protected:
   typedef std::vector<ChartTranslationOption*> CollType;
   CollType m_collection;
   float m_scoreThreshold;
-  Moses::WordsRange m_range;
+  WordsRange m_range;
 
 public:
   // iters
@@ -99,15 +99,15 @@ public:
     return m_collection.empty();
   }
 
-  void Add(const Moses::TargetPhraseCollection &targetPhraseCollection
-           , const WordConsumed &wordConsumed
+  void Add(const TargetPhraseCollection &targetPhraseCollection
+           , const CoveredChartSpan &coveredChartSpan
            , bool ruleLimit
            , size_t tableLimit);
   void Add(ChartTranslationOption *transOpt);
 
   void CreateChartRules(size_t ruleLimit);
 
-  const Moses::WordsRange &GetSourceRange() const {
+  const WordsRange &GetSourceRange() const {
     return m_range;
   }
 

@@ -23,7 +23,7 @@
 #include <cassert>
 #include "PhraseDictionaryNodeSCFG.h"
 #include "ChartTranslationOption.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 
 namespace Moses
 {
@@ -34,30 +34,30 @@ class DottedRule
 
 protected:
   const PhraseDictionaryNodeSCFG &m_lastNode;
-  const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
+  const CoveredChartSpan *m_coveredChartSpan; // usually contains something, unless its the init processed rule
 public:
   // used only to init dot stack.
   explicit DottedRule(const PhraseDictionaryNodeSCFG &lastNode)
     :m_lastNode(lastNode)
-    ,m_wordsConsumed(NULL)
+    ,m_coveredChartSpan(NULL)
   {}
-  DottedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
+  DottedRule(const PhraseDictionaryNodeSCFG &lastNode, const CoveredChartSpan *coveredChartSpan)
     :m_lastNode(lastNode)
-    ,m_wordsConsumed(wordsConsumed)
+    ,m_coveredChartSpan(coveredChartSpan)
   {}
   ~DottedRule() {
 #ifdef USE_BOOST_POOL
-    // Do nothing.  WordConsumed objects are stored in object pools owned by
+    // Do nothing.  CoveredChartSpan objects are stored in object pools owned by
     // the sentence-specific ChartRuleLookupManagers.
 #else
-    delete m_wordsConsumed;
+    delete m_coveredChartSpan;
 #endif
   }
   const PhraseDictionaryNodeSCFG &GetLastNode() const {
     return m_lastNode;
   }
-  const WordConsumed *GetLastWordConsumed() const {
-    return m_wordsConsumed;
+  const CoveredChartSpan *GetLastCoveredChartSpan() const {
+    return m_coveredChartSpan;
   }
 };
 

@@ -26,7 +26,7 @@
 #include "PhraseDictionaryNodeSCFG.h"
 #include "CellCollection.h"
 #include "InputType.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 #include "NonTerminal.h"
 
 namespace Moses

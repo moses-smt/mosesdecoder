@@ -35,7 +35,7 @@
 #include "NonTerminal.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "PhraseDictionarySCFG.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 
 namespace Moses
 {
@@ -62,7 +62,7 @@ public:
 private:
   void ExtendPartialRuleApplication(
     const PhraseDictionaryNodeSCFG &node,
-    const WordConsumed *prevWordConsumed,
+    const CoveredChartSpan *prevCoveredChartSpan,
     size_t startPos,
     size_t endPos,
     size_t stackInd,
@@ -71,11 +71,11 @@ private:
   std::vector<DottedRuleColl*> m_dottedRuleColls;
   const PhraseDictionarySCFG &m_ruleTable;
 #ifdef USE_BOOST_POOL
-  // Use object pools to allocate the DottedRule and WordConsumed objects
+  // Use object pools to allocate the DottedRule and CoveredChartSpan objects
   // for this sentence.  We allocate a lot of them and this has been seen to
   // significantly improve performance, especially for multithreaded decoding.
   boost::object_pool<DottedRule> m_dottedRulePool;
-  boost::object_pool<WordConsumed> m_wordConsumedPool;
+  boost::object_pool<CoveredChartSpan> m_coveredChartSpanPool;
 #endif
 };
 

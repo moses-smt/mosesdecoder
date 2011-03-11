@@ -46,7 +46,7 @@ ChartTrellisNode::ChartTrellisNode(const ChartHypothesis *hypo)
 ChartTrellisNode::ChartTrellisNode(const ChartTrellisNode &origNode
                          , const ChartTrellisNode &soughtNode
                          , const ChartHypothesis &replacementHypo
-                         , Moses::ScoreComponentCollection	&scoreChange
+                         , ScoreComponentCollection	&scoreChange
                          , const ChartTrellisNode *&nodeChanged)
 {
   if (&origNode.GetHypothesis() == &soughtNode.GetHypothesis()) {
@@ -92,22 +92,22 @@ ChartTrellisNode::ChartTrellisNode(const ChartTrellisNode &origNode
 
 ChartTrellisNode::~ChartTrellisNode()
 {
-  Moses::RemoveAllInColl(m_edge);
+  RemoveAllInColl(m_edge);
 }
 
-Moses::Phrase ChartTrellisNode::GetOutputPhrase() const
+Phrase ChartTrellisNode::GetOutputPhrase() const
 {
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
-  Moses::Phrase ret(Moses::Output, Moses::ARRAY_SIZE_INCR);
+  Phrase ret(Output, ARRAY_SIZE_INCR);
 
-  const Moses::Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
+  const Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {
-    const Moses::Word &word = currTargetPhrase.GetWord(pos);
+    const Word &word = currTargetPhrase.GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = m_hypo->GetWordsConsumedTargetOrder(pos);
+      size_t nonTermInd = m_hypo->GetCoveredChartSpanTargetOrder(pos);
       const ChartTrellisNode &childNode = GetChild(nonTermInd);
-      Moses::Phrase childPhrase = childNode.GetOutputPhrase();
+      Phrase childPhrase = childNode.GetOutputPhrase();
       ret.Append(childPhrase);
     } else {
       ret.AddWord(word);

@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <vector>
 #include "ChartHypothesis.h"
-#include "QueueEntry.h"
+#include "RuleCube.h"
 #include "ChartCell.h"
 #include "ChartManager.h"
 #include "TargetPhrase.h"
@@ -44,32 +44,32 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 #endif
 
 /** Create a hypothesis from a rule */
-ChartHypothesis::ChartHypothesis(const QueueEntry &queueEntry, ChartManager &manager)
-  :m_transOpt(queueEntry.GetTranslationOption())
-  ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
+ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager)
+  :m_transOpt(ruleCube.GetTranslationOption())
+  ,m_coveredChartSpanListTargetOrder(ruleCube.GetTranslationOption().GetCoveredChartSpanTargetOrder())
   ,m_id(++s_HypothesesCreated)
-  ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
+  ,m_currSourceWordsRange(ruleCube.GetTranslationOption().GetSourceWordsRange())
   ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_arcList(NULL)
   ,m_manager(manager)
 {
-  assert(GetCurrTargetPhrase().GetSize() == m_wordsConsumedTargetOrder.size());
+  assert(GetCurrTargetPhrase().GetSize() == m_coveredChartSpanListTargetOrder.size());
   //TRACE_ERR(m_targetPhrase << endl);
 
   // underlying hypotheses for sub-spans
   m_numTargetTerminals = GetCurrTargetPhrase().GetNumTerminals();
-  const std::vector<ChildEntry> &childEntries = queueEntry.GetChildEntries();
+  const std::vector<RuleCubeDimension> &childEntries = ruleCube.GetCube();
 
   // ... are stored
   assert(m_prevHypos.empty());
   m_prevHypos.reserve(childEntries.size());
 
-  vector<ChildEntry>::const_iterator iter;
+  vector<RuleCubeDimension>::const_iterator iter;
   for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
   {
-    const ChildEntry &childEntry = *iter;
-    const ChartHypothesis *prevHypo = childEntry.GetHypothesis();
+    const RuleCubeDimension &ruleCubeDimension = *iter;
+    const ChartHypothesis *prevHypo = ruleCubeDimension.GetHypothesis();
 
     // keep count of words (= length of generated string)
     m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
@@ -107,7 +107,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
+      size_t nonTermInd = m_coveredChartSpanListTargetOrder[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
@@ -137,7 +137,7 @@ size_t ChartHypothesis::CalcPrefix(Phrase &ret, size_t size) const
 
     // for non-terminals, retrieve it from underlying hypothesis
     if (word.IsNonTerminal()) {
-      size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
+      size_t nonTermInd = m_coveredChartSpanListTargetOrder[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       size = prevHypo->CalcPrefix(ret, size);
     } 
@@ -185,7 +185,7 @@ size_t ChartHypothesis::CalcSuffix(Phrase &ret, size_t size) const
       const Word &word = GetCurrTargetPhrase().GetWord(pos);
 
       if (word.IsNonTerminal()) {
-        size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
+        size_t nonTermInd = m_coveredChartSpanListTargetOrder[pos];
         const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
         size = prevHypo->CalcSuffix(ret, size);
       } 
@@ -277,7 +277,7 @@ void ChartHypothesis::CalcLMScore()
     else 
     {
       // look up underlying hypothesis
-      size_t nonTermInd = m_wordsConsumedTargetOrder[targetPhrasePos];
+      size_t nonTermInd = m_coveredChartSpanListTargetOrder[targetPhrasePos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       size_t numTargetTerminals = prevHypo->GetNumTargetTerminals();
 

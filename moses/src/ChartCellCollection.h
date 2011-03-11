@@ -29,7 +29,7 @@ namespace Moses
 class InputType;
 class ChartManager;
 
-class ChartCellCollection : public Moses::CellCollection
+class ChartCellCollection : public CellCollection
 {
 public:
   typedef std::vector<ChartCell*> InnerCollType;
@@ -39,18 +39,18 @@ protected:
   OuterCollType m_hypoStackColl;
 
 public:
-  ChartCellCollection(const Moses::InputType &input, ChartManager &manager);
+  ChartCellCollection(const InputType &input, ChartManager &manager);
   ~ChartCellCollection();
 
-  ChartCell &Get(const Moses::WordsRange &coverage) {
+  ChartCell &Get(const WordsRange &coverage) {
     return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
-  const ChartCell &Get(const Moses::WordsRange &coverage) const {
+  const ChartCell &Get(const WordsRange &coverage) const {
     return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
 
   /** Return set of constituents that have hypotheses in the given span */
-  const Moses::NonTerminalSet &GetConstituentLabelSet(const Moses::WordsRange &coverage) const {
+  const NonTerminalSet &GetConstituentLabelSet(const WordsRange &coverage) const {
     const ChartCell &cell = Get(coverage);
     return cell.GetConstituentLabelSet();
   }

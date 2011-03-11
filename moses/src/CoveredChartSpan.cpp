@@ -19,16 +19,16 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 
 namespace Moses
 {
 
-std::ostream& operator<<(std::ostream &out, const WordConsumed &wordConsumed)
+std::ostream& operator<<(std::ostream &out, const CoveredChartSpan &coveredChartSpan)
 {
-  out << wordConsumed.m_coverage << "=" << wordConsumed.m_sourceWord << " ";
-  if (wordConsumed.m_prevWordsConsumed)
-    out << " " << *wordConsumed.m_prevWordsConsumed;
+  out << coveredChartSpan.m_coverage << "=" << coveredChartSpan.m_sourceWord << " ";
+  if (coveredChartSpan.m_prevCoveredChartSpan)
+    out << " " << *coveredChartSpan.m_prevCoveredChartSpan;
 
   return out;
 }

@@ -30,7 +30,7 @@
 #include "NonTerminal.h"
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
-#include "QueueEntry.h"
+#include "RuleCube.h"
 
 namespace Moses
 {
@@ -45,10 +45,10 @@ class ChartCell
 public:
 
 protected:
-  std::map<Moses::Word, ChartHypothesisCollection> m_hypoColl;
-  Moses::NonTerminalSet m_constituentLabelSet;
+  std::map<Word, ChartHypothesisCollection> m_hypoColl;
+  NonTerminalSet m_constituentLabelSet;
 
-  Moses::WordsRange m_coverage;
+  WordsRange m_coverage;
 
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
   ChartManager &m_manager;
@@ -56,10 +56,10 @@ protected:
 public:
   ChartCell(size_t startPos, size_t endPos, ChartManager &manager);
 
-  void ProcessSentence(const Moses::ChartTranslationOptionList &transOptList
+  void ProcessSentence(const ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
 
-  const HypoList &GetSortedHypotheses(const Moses::Word &constituentLabel) const;
+  const HypoList &GetSortedHypotheses(const Word &constituentLabel) const;
   bool AddHypothesis(ChartHypothesis *hypo);
 
   void SortHypotheses();
@@ -67,8 +67,8 @@ public:
 
   const ChartHypothesis *GetBestHypothesis() const;
 
-  bool ConstituentLabelExists(const Moses::Word &constituentLabel) const;
-  const Moses::NonTerminalSet &GetConstituentLabelSet() const {
+  bool ConstituentLabelExists(const Word &constituentLabel) const;
+  const NonTerminalSet &GetConstituentLabelSet() const {
     return m_constituentLabelSet;
   }
 

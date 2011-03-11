@@ -22,7 +22,7 @@
 #include <vector>
 #include <cassert>
 #include "ChartTranslationOption.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 
 namespace OnDiskPt
 {
@@ -38,33 +38,33 @@ class DottedRuleOnDisk
 
 protected:
   const OnDiskPt::PhraseNode &m_lastNode;
-  const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
+  const CoveredChartSpan *m_coveredChartSpan; // usually contains something, unless its the init processed rule
   mutable bool m_done;
 public:
   // used only to init dot stack.
   explicit DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode)
     :m_lastNode(lastNode)
-    ,m_wordsConsumed(NULL)
+    ,m_coveredChartSpan(NULL)
     ,m_done(false)
   {}
-  DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode, const WordConsumed *wordsConsumed)
+  DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode, const CoveredChartSpan *coveredChartSpan)
     :m_lastNode(lastNode)
-    ,m_wordsConsumed(wordsConsumed)
+    ,m_coveredChartSpan(coveredChartSpan)
     ,m_done(false)
   {}
   ~DottedRuleOnDisk() {
-    delete m_wordsConsumed;
+    delete m_coveredChartSpan;
   }
   const OnDiskPt::PhraseNode &GetLastNode() const {
     return m_lastNode;
   }
-  const WordConsumed *GetLastWordConsumed() const {
-    return m_wordsConsumed;
+  const CoveredChartSpan *GetLastCoveredChartSpan() const {
+    return m_coveredChartSpan;
   }
 
   bool IsCurrNonTerminal() const {
-    assert(m_wordsConsumed);
-    return m_wordsConsumed->IsNonTerminal();
+    assert(m_coveredChartSpan);
+    return m_coveredChartSpan->IsNonTerminal();
   }
 
   bool Done() const {
@@ -82,7 +82,7 @@ public:
   	if (m_lastNode > compare.m_lastNode)
   		return 1;
 
-  	return m_wordsConsumed < compare.m_wordsConsumed;
+  	return m_coveredChartSpan < compare.m_coveredChartSpan;
   }
   inline bool operator<(const DottedRule &compare) const
   {

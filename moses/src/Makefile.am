@@ -24,7 +24,7 @@ libmoses_la_HEADERS = \
 	ChartTrellisPathCollection.h \
 	ChartTrellisPathList.h \
         ConfusionNet.h \
-	Cube.h \
+        CoveredChartSpan.h \
         DecodeFeature.h \
         DecodeGraph.h \
         DecodeStep.h \
@@ -88,9 +88,10 @@ libmoses_la_HEADERS = \
         PhraseDictionaryTreeAdaptor.h \
         PrefixTree.h \
         PrefixTreeMap.h \
-	QueueEntry.h \
         ReorderingConstraint.h \
         ReorderingStack.h \
+	RuleCube.h \
+	RuleCubeQueue.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
         ScoreProducer.h \
@@ -120,7 +121,6 @@ libmoses_la_HEADERS = \
         UserMessage.h \
         Util.h \
         Word.h \
-        WordConsumed.h \
         WordLattice.h \
         WordsBitmap.h \
         WordsRange.h \
@@ -168,7 +168,7 @@ libmoses_la_SOURCES = \
 	ChartTrellisPathCollection.cpp \
 	ChartTrellisPathList.cpp \
         ConfusionNet.cpp \
-	Cube.cpp \
+        CoveredChartSpan.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
         DecodeStep.cpp \
@@ -227,9 +227,10 @@ libmoses_la_SOURCES = \
         PhraseDictionaryTree.cpp \
         PhraseDictionaryTreeAdaptor.cpp \
         PrefixTreeMap.cpp \
-	QueueEntry.cpp \
         ReorderingConstraint.cpp \
         ReorderingStack.cpp \
+	RuleCube.cpp \
+	RuleCubeQueue.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
         ScoreProducer.cpp \
@@ -256,7 +257,6 @@ libmoses_la_SOURCES = \
         UserMessage.cpp \
         Util.cpp \
         Word.cpp \
-        WordConsumed.cpp \
         WordLattice.cpp \
         WordsBitmap.cpp \
         WordsRange.cpp \

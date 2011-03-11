@@ -21,7 +21,7 @@
 #include "ChartTranslationOption.h"
 #include "TargetPhrase.h"
 #include "AlignmentInfo.h"
-#include "WordConsumed.h"
+#include "CoveredChartSpan.h"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ namespace Moses
 
 void ChartTranslationOption::CreateNonTermIndex()
 {
-  m_wordsConsumedTargetOrder.resize(m_targetPhrase.GetSize(), NOT_FOUND);
+  m_coveredChartSpanListTargetOrder.resize(m_targetPhrase.GetSize(), NOT_FOUND);
   const AlignmentInfo &alignInfo = m_targetPhrase.GetAlignmentInfo();
 
   size_t nonTermInd = 0;
@@ -45,14 +45,14 @@ void ChartTranslationOption::CreateNonTermIndex()
     prevSourcePos = sourcePos;
 
     size_t targetPos = iter->second;
-    m_wordsConsumedTargetOrder[targetPos] = nonTermInd;
+    m_coveredChartSpanListTargetOrder[targetPos] = nonTermInd;
     nonTermInd++;
   }
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOption &rule)
 {
-  out << rule.m_lastWordConsumed << ": " << rule.m_targetPhrase.GetTargetLHS() << "->" << rule.m_targetPhrase;
+  out << rule.m_lastCoveredChartSpan << ": " << rule.m_targetPhrase.GetTargetLHS() << "->" << rule.m_targetPhrase;
   return out;
 }
 

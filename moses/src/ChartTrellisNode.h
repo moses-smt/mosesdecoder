@@ -44,7 +44,7 @@ public:
   ChartTrellisNode(const ChartTrellisNode &origNode
               , const ChartTrellisNode &soughtNode
               , const ChartHypothesis &replacementHypo
-              , Moses::ScoreComponentCollection	&scoreChange
+              , ScoreComponentCollection	&scoreChange
               , const ChartTrellisNode *&nodeChanged);
   ~ChartTrellisNode();
 
@@ -60,7 +60,7 @@ public:
     return *m_edge[ind];
   }
 
-  Moses::Phrase GetOutputPhrase() const;
+  Phrase GetOutputPhrase() const;
 };
 
 }
