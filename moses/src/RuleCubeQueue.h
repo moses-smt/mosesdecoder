@@ -39,7 +39,7 @@ public:
   size_t operator()(const RuleCube * p) const {
     size_t seed = 0;
     boost::hash_combine(seed, &(p->GetTranslationOption()));
-    boost::hash_combine(seed, p->GetChildEntries());
+    boost::hash_combine(seed, p->GetCube());
     return seed;
   }
 };
@@ -49,7 +49,7 @@ class RuleCubeUniqueEqualityPred
 public:
   bool operator()(const RuleCube * p, const RuleCube * q) const {
     return ((&(p->GetTranslationOption()) == &(q->GetTranslationOption()))
-            && (p->GetChildEntries() == q->GetChildEntries()));
+            && (p->GetCube() == q->GetCube()));
   }
 };
 #endif
