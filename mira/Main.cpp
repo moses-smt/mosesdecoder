@@ -112,6 +112,7 @@ int main(int argc, char** argv) {
   float min_weight_change;
   float max_sentence_update;
   float decrease_learning_rate;
+  float decrease_sentence_update;
   bool devBleu;
   bool normaliseWeights;
   bool print_feature_values;
@@ -128,6 +129,7 @@ int main(int argc, char** argv) {
       ("control-updates", po::value<bool>(&controlUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
       ("decoder-settings",  po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
       ("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0), "Decrease learning rate by the given value after every epoch")
+      ("decr-sentence-update", po::value<float>(&decrease_sentence_update)->default_value(0), "Decrease maximum weight update by the given value after every epoch")
       ("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
       ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
       ("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
@@ -255,7 +257,7 @@ int main(int argc, char** argv) {
 
   Optimiser* optimiser = NULL;
   cerr << "mix-frequency: " << mixingFrequency << endl;
-  cerr << "weight-dump-stem: " << mixingFrequency << endl;
+  cerr << "weight-dump-stem: " << weightDumpStem << endl;
   cerr << "shuffle: " << shuffle << endl;
   cerr << "hildreth: " << hildreth << endl;
   cerr << "msf: " << marginScaleFactor << endl;
@@ -277,7 +279,6 @@ int main(int argc, char** argv) {
   cerr << "max-number-oracles: " << maxNumberOracles << endl;
   cerr << "accumulate-most-violated-constraints: " << accumulateMostViolatedConstraints << endl;
   cerr << "past-and-current-constraints: " << pastAndCurrentConstraints << endl;
-  cerr << "weight-convergence: " << weightConvergence << endl;
   cerr << "control-updates: " << controlUpdates << endl;
   cerr << "log-feature-values: " << logFeatureValues << endl;
   cerr << "base-of-log: " << baseOfLog << endl;
@@ -290,6 +291,8 @@ int main(int argc, char** argv) {
   cerr << "print-feature-values: " << print_feature_values << endl;
   cerr << "stop-dev-bleu: " << stop_dev_bleu << endl;
   cerr << "stop-approx-dev-bleu: " << stop_approx_dev_bleu << endl;
+  cerr << "stop-weights: " << weightConvergence << endl;
+
 
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
@@ -850,9 +853,15 @@ int main(int argc, char** argv) {
 	  }
 
 	  // change learning rate
-	  if ((decrease_learning_rate > 0) && (learning_rate-decrease_learning_rate > 0)) {
+	  if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate > 0)) {
 	  	learning_rate -= decrease_learning_rate;
 	  	cerr << "Change learning rate to " << learning_rate << endl;
+	  }
+
+	  // change maximum sentence update
+	  if ((decrease_sentence_update > 0) && (max_sentence_update - decrease_sentence_update > 0)) {
+	  	max_sentence_update -= decrease_sentence_update;
+	  	cerr << "Change maximum sentence update to " << max_sentence_update << endl;
 	  }
   } // end of epoch loop
 
