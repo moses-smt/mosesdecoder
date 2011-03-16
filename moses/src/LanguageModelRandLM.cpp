@@ -46,6 +46,7 @@ bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorTyp
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);
+  m_lm->initThreadSpecificData();
   return true;
 }
 
