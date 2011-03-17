@@ -132,6 +132,11 @@ void BleuScoreFeature::SetCurrentReference(size_t ref_id) {
     m_cur_ref_ngrams = m_refs[ref_id].second;
 }
 
+void BleuScoreFeature::SetBPfactor(float factor) {
+	m_BP_factor = factor;
+	std::cerr << "New BP factor: " << m_BP_factor << std::endl;
+}
+
 /*
  * Update the pseudo-document big_O after each translation of a source sentence.
  * (big_O is an exponentially-weighted moving average of vectors c(e;{r_k}))

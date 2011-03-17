@@ -203,19 +203,29 @@ namespace Mira {
 	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids);
   }
 
-  float MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {
+  vector<float> MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {
   	  vector<float> bleu = m_bleuScoreFeature->CalculateBleuOfCorpus(words, ref_ids);
 	  if (bleu.size() > 0) {
 	    cerr << "\nRank " << rank << ", BLEU after epoch " << epoch << ": " << bleu[4]*100 << ", "
 	   << bleu[0]*100 << "/" << bleu[1]*100 << "/" << bleu[2]*100 << "/" << bleu[3]*100 << " "
 		 << "(BP=" << bleu[5] << ", " << "ratio=" << bleu[6] << ", "
 		 << "hyp_len=" << bleu[7] << ", ref_len=" << bleu[8] << ")" << endl;
-				return bleu[4]*100;
+	    vector<float> bleuAndRatio(2);
+	    bleuAndRatio[0] = bleu[4]*100;
+	    bleuAndRatio[1] = bleu[6];
+	    return bleuAndRatio;
 	  }
 	  else {
 	  	cerr << "\nRank " << rank << ", BLEU after epoch " << epoch << ": 0" << endl;
-	  	return 0;
+	  	vector<float> bleuAndRatio(2);
+	  	bleuAndRatio[0] = 0;
+	  	bleuAndRatio[1] = 0;
+	  	return bleuAndRatio;
 	  }
+  }
+
+  void MosesDecoder::setBPfactor(float factor) {
+  	m_bleuScoreFeature->SetBPfactor(factor);
   }
 } 
 

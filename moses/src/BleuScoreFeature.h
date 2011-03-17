@@ -65,6 +65,7 @@ public:
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentSourceLength(size_t);
     void SetCurrentReference(size_t);
+    void SetBPfactor(float);
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids);
     void GetNgramMatchCounts(Phrase&,

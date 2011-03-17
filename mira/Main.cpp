@@ -97,6 +97,7 @@ int main(int argc, char** argv) {
   bool useScaledReference;
   bool scaleByInputLength;
   float BPfactor;
+  bool adapt_BPfactor;
   float slack;
   float slack_step;
   float slack_max;
@@ -122,6 +123,7 @@ int main(int argc, char** argv) {
   desc.add_options()
 		  ("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false), "Accumulate most violated constraint per example")
 		  ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(true), "Accumulate and average weights over all epochs")
+		  ("adapt-BP-factor", po::value<bool>(&adapt_BPfactor)->default_value(0), "Set factor to 1 when optimal translation length in reached")
 		  ("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 		  ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
     	("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
@@ -256,6 +258,7 @@ int main(int argc, char** argv) {
   copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 
   Optimiser* optimiser = NULL;
+  cerr << "adapt-BP-factor: " << adapt_BPfactor << endl;
   cerr << "mix-frequency: " << mixingFrequency << endl;
   cerr << "weight-dump-stem: " << weightDumpStem << endl;
   cerr << "shuffle: " << shuffle << endl;
@@ -293,7 +296,6 @@ int main(int argc, char** argv) {
   cerr << "stop-approx-dev-bleu: " << stop_approx_dev_bleu << endl;
   cerr << "stop-weights: " << weightConvergence << endl;
 
-
   if (learner == "mira") {
     cerr << "Optimising using Mira" << endl;
     optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor, onlyViolatedConstraints, slack, weightedLossFunction, maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
@@ -327,6 +329,7 @@ int main(int argc, char** argv) {
   // print initial weights
   cerr << "weights: " << decoder->getWeights() << endl;
 
+  float averageRatio = 0;
   float averageBleu = 0;
   float prevAverageBleu = 0;
   float beforePrevAverageBleu = 0;
@@ -637,7 +640,9 @@ int main(int argc, char** argv) {
 
 	  if (devBleu) {
 	  	// calculate bleu score of all oracle translations of dev set
-	  	float bleu = decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
+	  	vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
+	  	float bleu = bleuAndRatio[0];
+	  	float ratio = bleuAndRatio[1];
 
 	  	// print out translations
 	  	ostringstream filename;
@@ -684,6 +689,28 @@ int main(int argc, char** argv) {
 	  		// divide by number of processes
 	  		averageBleu /= size;
 	  		cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu << endl;
+	  	}
+
+	  	// average ratio across processes
+	  	sendbuf[0] = ratio;
+	  	recvbuf[0] = 0;
+	  	MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+	  	if (rank == 0) {
+	  		averageRatio = recvbuf[0];
+
+	  		// divide by number of processes
+	  		averageRatio /= size;
+	  		cerr << "Average ratio (dev) after epoch " << epoch << ": " << averageRatio << endl;
+	  		if (averageRatio > 1.008 && adapt_BPfactor) {
+	  			BPfactor = 0.95;
+	  			decoder->setBPfactor(BPfactor);
+	  			cerr << "Change BPfactor to 0.95.." << endl;
+	  		}
+	  		else if (averageRatio > 1.0 && adapt_BPfactor) {
+	  			BPfactor = 1;
+	  			decoder->setBPfactor(BPfactor);
+	  			cerr << "Change BPfactor to 1.." << endl;
+	  		}
 	  	}
 
 	  	// average approximate sentence bleu across processes
@@ -853,14 +880,20 @@ int main(int argc, char** argv) {
 	  }
 
 	  // change learning rate
-	  if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate > 0)) {
+	  if ((decrease_learning_rate > 0) && (learning_rate > 0)) {
 	  	learning_rate -= decrease_learning_rate;
+	  	if (learning_rate < 0) {
+	  		learning_rate = 0;
+	  	}
 	  	cerr << "Change learning rate to " << learning_rate << endl;
 	  }
 
 	  // change maximum sentence update
-	  if ((decrease_sentence_update > 0) && (max_sentence_update - decrease_sentence_update > 0)) {
+	  if ((decrease_sentence_update > 0) && (max_sentence_update > 0)) {
 	  	max_sentence_update -= decrease_sentence_update;
+	  	if (max_sentence_update < 0) {
+	  		max_sentence_update = 0;
+	  	}
 	  	cerr << "Change maximum sentence update to " << max_sentence_update << endl;
 	  }
   } // end of epoch loop
