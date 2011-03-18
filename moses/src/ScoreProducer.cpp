@@ -30,7 +30,8 @@ ScoreProducer::~ScoreProducer() {}
 
 const vector<FName>& ScoreProducer::GetFeatureNames() const
 {
-  if (m_names.size() != GetNumScoreComponents()) 
+  if (m_names.size() != GetNumScoreComponents() && 
+      unlimited != GetNumScoreComponents()) 
   {
     const string& desc = GetScoreProducerDescription();
     if (GetNumScoreComponents() == 1) 
