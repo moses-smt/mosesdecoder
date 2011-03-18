@@ -175,12 +175,12 @@ namespace Moses {
       if (i->first != DEFAULT_NAME) {
         value += get(DEFAULT_NAME);
       }
-      /*if (i->first != DEFAULT_NAME && i->second != 0.0) {
+      if (i->first != DEFAULT_NAME && i->second != 0.0) {
           out << i->first << "=" << value << ", ";
-      }*/
-      if (i->first != DEFAULT_NAME) {
-    	  out << value << ", ";
       }
+      /*if (i->first != DEFAULT_NAME) {
+    	  out << value << ", ";
+      }*/
     }
     out << "}";
     return out;
