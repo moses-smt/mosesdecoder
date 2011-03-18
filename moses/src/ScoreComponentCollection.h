@@ -200,7 +200,9 @@ public:
 	//! return a vector of all the scores associated with a certain ScoreProducer
 	std::vector<float> GetScoresForProducer(const ScoreProducer* sp) const
 	{
-    std::vector<float> res(sp->GetNumScoreComponents());
+    size_t components = sp->GetNumScoreComponents();
+    if (components == ScoreProducer::unlimited) return std::vector<float>();
+    std::vector<float> res(components);
     const std::vector<FName>& names = sp->GetFeatureNames();
     for (size_t i = 0; i < names.size(); ++i) {
       res[i] = m_scores[names[i]];
