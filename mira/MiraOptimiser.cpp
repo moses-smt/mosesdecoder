@@ -199,14 +199,14 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	}
 
 	// apply learning rate (fixed or flexible)
-	if (learning_rate < 1) {
+	if (learning_rate != 1) {
 		cerr << "Update before applying learning rate: " << totalUpdate << endl;
 		totalUpdate.MultiplyEquals(learning_rate);
 		cerr << "Update after applying learning rate: " << totalUpdate << endl;
 	}
 
 	// apply threshold scaling
-	if (max_sentence_update > 0) {
+	if (max_sentence_update != -1) {
 		cerr << "Update before scaling to max-sentence-update: " << totalUpdate << endl;
 		totalUpdate.ThresholdScaling(max_sentence_update);
 		cerr << "Update after scaling to max-sentence-update: " << totalUpdate << endl;

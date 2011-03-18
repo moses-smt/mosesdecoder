@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
       ("learning-rate", po::value<float>(&learning_rate)->default_value(1), "Learning rate (fixed or flexible)")
       ("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
       ("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
-      ("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(0), "Set a maximum weight update per sentence")
+      ("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(-1), "Set a maximum weight update per sentence")
       ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
       ("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
 	    ("msf", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
@@ -486,6 +486,7 @@ int main(int argc, char** argv) {
 		  // run optimiser on batch
 		  cerr << "\nRank " << rank << ", run optimiser.." << endl;
 		  ScoreComponentCollection oldWeights(mosesWeights);
+
 		  int updateStatus = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids, learning_rate, max_sentence_update);
 
 		  // set decoder weights and accumulate weights
@@ -882,8 +883,12 @@ int main(int argc, char** argv) {
 	  // change learning rate
 	  if ((decrease_learning_rate > 0) && (learning_rate > 0)) {
 	  	learning_rate -= decrease_learning_rate;
-	  	if (learning_rate < 0) {
+	  	if (learning_rate <= 0) {
 	  		learning_rate = 0;
+	  		stop = true;
+#ifdef MPI_ENABLE
+	  		mpi::broadcast(world, stop, 0);
+#endif
 	  	}
 	  	cerr << "Change learning rate to " << learning_rate << endl;
 	  }
@@ -891,8 +896,12 @@ int main(int argc, char** argv) {
 	  // change maximum sentence update
 	  if ((decrease_sentence_update > 0) && (max_sentence_update > 0)) {
 	  	max_sentence_update -= decrease_sentence_update;
-	  	if (max_sentence_update < 0) {
+	  	if (max_sentence_update <= 0) {
 	  		max_sentence_update = 0;
+	  		stop = true;
+#ifdef MPI_ENABLE
+	  		mpi::broadcast(world, stop, 0);
+#endif
 	  	}
 	  	cerr << "Change maximum sentence update to " << max_sentence_update << endl;
 	  }
