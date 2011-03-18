@@ -110,6 +110,7 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   //  std::cerr << " = " << logprob << "(" << *finalState << ", " <<")"<< std::endl;
   //else
   //  std::cerr << " = " << logprob << std::endl;
+  return ret;
 }
 
 }
