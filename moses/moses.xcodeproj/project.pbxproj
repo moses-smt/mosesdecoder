@@ -254,6 +254,8 @@
 		1ED0FF02124BB9380029177F /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE29124BB9380029177F /* XmlOption.h */; };
 		1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */; };
 		1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */; };
+		1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EE58D9D133726C700D93158 /* NonTerminal.cpp */; };
+		1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE58D9E133726C700D93158 /* NonTerminal.h */; };
 		1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */; };
 /* End PBXBuildFile section */
 
@@ -507,6 +509,8 @@
 		1ED0FE29124BB9380029177F /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 		1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
 		1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
+		1EE58D9D133726C700D93158 /* NonTerminal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NonTerminal.cpp; path = src/NonTerminal.cpp; sourceTree = "<group>"; };
+		1EE58D9E133726C700D93158 /* NonTerminal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonTerminal.h; path = src/NonTerminal.h; sourceTree = "<group>"; };
 		1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = src/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -535,6 +539,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EE58D9D133726C700D93158 /* NonTerminal.cpp */,
+				1EE58D9E133726C700D93158 /* NonTerminal.h */,
 				1E2E1632132A892800ED4085 /* OutputCollector.h */,
 				1E2E1633132A892800ED4085 /* RuleCube.cpp */,
 				1E2E1634132A892800ED4085 /* RuleCube.h */,
@@ -960,6 +966,7 @@
 				1E2E163B132A892800ED4085 /* RuleCube.h in Headers */,
 				1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */,
 				1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */,
+				1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1129,6 +1136,7 @@
 				1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */,
 				1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */,
 				1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */,
+				1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1144,6 +1152,24 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					LM_RAND,
+					HAVE_CONFIG_H,
+				);
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					../,
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = moses;
 			};
@@ -1155,6 +1181,24 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					LM_RAND,
+					HAVE_CONFIG_H,
+				);
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					../,
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = moses;
 			};
