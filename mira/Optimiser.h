@@ -50,7 +50,8 @@ namespace Mira {
                          const std::vector< float> oracleBleuScores,
                          const std::vector< size_t> dummy,
                          float learning_rate,
-                         float max_sentence_update)
+                         float max_sentence_update,
+                         size_t rank)
                          { return 0; }
   };
  
@@ -66,7 +67,8 @@ namespace Mira {
                          const std::vector< float> oracleBleuScores,
                          const std::vector< size_t> dummy,
                          float learning_rate,
-                         float max_sentence_update);
+                         float max_sentence_update,
+                         size_t rank);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -98,7 +100,8 @@ namespace Mira {
       						  const std::vector< float> oracleBleuScores,
       						  const std::vector< size_t> sentenceId,
 										float learning_rate,
-										float max_sentence_update);
+										float max_sentence_update,
+										size_t rank);
 
       void setOracleIndices(std::vector<size_t> oracleIndices) {
     	  m_oracleIndices= oracleIndices;

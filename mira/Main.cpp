@@ -357,8 +357,8 @@ int main(int argc, char** argv) {
 	  // number of weight dumps this epoch
 	  size_t weightEpochDump = 0;
 
-	  // collect all oracles for dev set
-	  vector< vector< const Word*> > allOracles;
+	  // collect best model score translations for computing bleu on dev set
+	  vector< vector< const Word*> > allBestModelScore;
 	  vector<size_t> all_ref_ids;
 
 	  size_t shardPosition = 0;
@@ -368,6 +368,10 @@ int main(int argc, char** argv) {
 		  vector<vector<ScoreComponentCollection > > featureValues;
 		  vector<vector<float> > bleuScores;
 
+		  // get moses weights
+		  ScoreComponentCollection mosesWeights = decoder->getWeights();
+		  cerr << "Rank " << rank << ", weights: " << mosesWeights << endl;
+
 		  // BATCHING: produce nbest lists for all input sentences in batch
 		  vector<size_t> oraclePositions;
 		  vector<float> oracleBleuScores;
@@ -376,8 +380,9 @@ int main(int argc, char** argv) {
 		  vector<size_t> inputLengths;
 		  vector<size_t> ref_ids;
 		  size_t actualBatchSize = 0;
+		  string& input = inputSentences[0];
 		  for (size_t batchPosition = 0; batchPosition < batchSize && sid != shard.end(); ++batchPosition) {
-			  const string& input = inputSentences[*sid];
+			  input = inputSentences[*sid];
 			  const vector<string>& refs = referenceSentences[*sid];
 			  cerr << "\nRank " << rank << ", batch position " << batchPosition << endl;
 			  cerr << "Rank " << rank << ", input sentence " << *sid << ": \"" << input << "\"" << endl;
@@ -402,6 +407,7 @@ int main(int argc, char** argv) {
 			  inputLengths.push_back(decoder->getCurrentInputLength());
 			  ref_ids.push_back(*sid);
 			  all_ref_ids.push_back(*sid);
+			  allBestModelScore.push_back(bestModel);
 			  decoder->cleanup();
 			  cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
@@ -421,7 +427,6 @@ int main(int argc, char** argv) {
                         rank);
 			  decoder->cleanup();
 			  oracles.push_back(oracle);
-			  allOracles.push_back(oracle);
 			  cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
 			  oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
@@ -444,9 +449,9 @@ int main(int argc, char** argv) {
 			  decoder->cleanup();
 			  cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
 
-			  for (size_t i = 0; i < bestModel.size(); ++i) {
-				  delete bestModel[i];
-			  }
+//			  for (size_t i = 0; i < bestModel.size(); ++i) {
+//					 delete bestModel[i];
+//			  }
 			  for (size_t i = 0; i < fear.size(); ++i) {
 				  delete fear[i];
 			  }
@@ -468,8 +473,7 @@ int main(int argc, char** argv) {
 		  	}
 		  }
 
-		  // get weight vector and set weight for bleu feature to 0
-		  ScoreComponentCollection mosesWeights = decoder->getWeights();
+		  // set weight for bleu feature to 0
 		  const vector<const ScoreProducer*> featureFunctions = StaticData::Instance().GetTranslationSystem (TranslationSystem::DEFAULT).GetFeatureFunctions();
 		  mosesWeights.Assign(featureFunctions.back(), 0);
 
@@ -488,10 +492,10 @@ int main(int argc, char** argv) {
 		  }
 
 		  // run optimiser on batch
-		  cerr << "\nRank " << rank << ", run optimiser.." << endl;
+		  cerr << "\nRank " << rank << ", run optimiser:" << endl;
 		  ScoreComponentCollection oldWeights(mosesWeights);
 
-		  int updateStatus = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids, learning_rate, max_sentence_update);
+		  int updateStatus = optimiser->updateWeights(mosesWeights, featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids, learning_rate, max_sentence_update, rank);
 
 		  // set decoder weights and accumulate weights
 		  if (controlUpdates && updateStatus < 0) {
@@ -517,6 +521,23 @@ int main(int argc, char** argv) {
 		  	ScoreComponentCollection weightDifference(mosesWeights);
 		  	weightDifference.MinusEquals(oldWeights);
 		  	cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
+
+		  	// compare best model results with new weights
+		  	if (actualBatchSize == 1) {
+		  		cerr << "\nRank " << rank << ", nbest model score translations with new weights" << endl;
+		  		vector<const Word*> bestModel = decoder->getNBest(input,
+		  				*sid,
+		  				n,
+		  				0.0,
+		  				1.0,
+		  				featureValues[0],
+		  				bleuScores[0],
+		  				true,
+		  				distinctNbest,
+		  				rank);
+		  		decoder->cleanup();
+		  		cerr << endl;
+				}
 		  }
 
 		  if (print_feature_values) {
@@ -535,12 +556,10 @@ int main(int argc, char** argv) {
 		  }
 		  decoder->updateHistory(oracles, inputLengths, ref_ids);
 
-		  if (!devBleu) {
-		  	// clean up oracle translations after updating history
-		  	for (size_t i = 0; i < oracles.size(); ++i) {
-		  		for (size_t j = 0; j < oracles[i].size(); ++j) {
-		  			delete oracles[i][j];
-		  		}
+		  // clean up oracle translations after updating history
+		  for (size_t i = 0; i < oracles.size(); ++i) {
+		  	for (size_t j = 0; j < oracles[i].size(); ++j) {
+		  		delete oracles[i][j];
 		  	}
 		  }
 
@@ -644,18 +663,18 @@ int main(int argc, char** argv) {
 	  } // end of shard loop, end of this epoch
 
 	  if (devBleu) {
-	  	// calculate bleu score of all oracle translations of dev set
-	  	vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allOracles, all_ref_ids, epoch, rank);
+	  	// calculate bleu score of dev set
+	  	vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allBestModelScore, all_ref_ids, epoch, rank);
 	  	float bleu = bleuAndRatio[0];
 	  	float ratio = bleuAndRatio[1];
 
 	  	// print out translations
-	  	ostringstream filename;
+/*	  	ostringstream filename;
 	  	if (epoch < 10) {
-	  		filename << "dev_set_oracles" << "_0" << epoch << "_rank" << rank;
+	  		filename << "dev_set_bestModel" << "_0" << epoch << "_rank" << rank;
 	  	}
 	  	else {
-	  		filename << "dev_set_oracles" << "_" << epoch << "_rank" << rank;
+	  		filename << "dev_set_bestModel" << "_" << epoch << "_rank" << rank;
 	  	}
 	  	ofstream out((filename.str()).c_str());
 
@@ -666,14 +685,20 @@ int main(int argc, char** argv) {
 	  		throw runtime_error(msg.str());
 	  	}
 	  	else {
-	  		for (size_t i = 0; i < allOracles.size(); ++i) {
-	  			for (size_t j = 0; j < allOracles[i].size(); ++j) {
-	  				out << *(allOracles[i][j]);
-	  				delete allOracles[i][j];
+	  		for (size_t i = 0; i < allBestModelScore.size(); ++i) {
+	  			for (size_t j = 0; j < allBestModelScore[i].size(); ++j) {
+	  				out << *(allBestModelScore[i][j]);
+	  				delete allBestModelScore[i][j];
 	  			}
 	  			out << endl;
 	  		}
 	  		out.close();
+	  	}*/
+
+	  	for (size_t i = 0; i < allBestModelScore.size(); ++i) {
+	  		for (size_t j = 0; j < allBestModelScore[i].size(); ++j) {
+	  			delete allBestModelScore[i][j];
+	  		}
 	  	}
 
 	  	if (rank == 0) {

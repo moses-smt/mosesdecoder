@@ -14,7 +14,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< float> oracleBleuScores,
 		const vector< size_t> sentenceIds,
 		float learning_rate,
-		float max_sentence_update) {
+		float max_sentence_update,
+		size_t rank) {
 
 	// add every oracle in batch to list of oracles (under certain conditions)
 	for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
@@ -82,6 +83,8 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				if (m_weightedLossFunction) {
 					loss *= log10(bleuScores[i][j]);
 				}
+
+				cerr << "Rank " << rank << ", loss: " << loss << ", model score diff: " << modelScoreDiff << endl;
 
 				bool addConstraint = true;
 				if (modelScoreDiff < loss) {
@@ -200,22 +203,22 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	// apply learning rate (fixed or flexible)
 	if (learning_rate != 1) {
-		cerr << "Update before applying learning rate: " << totalUpdate << endl;
+		cerr << "Rank " << rank << ", update before applying learning rate: " << totalUpdate << endl;
 		totalUpdate.MultiplyEquals(learning_rate);
-		cerr << "Update after applying learning rate: " << totalUpdate << endl;
+		cerr << "Rank " << rank << ", update after applying learning rate: " << totalUpdate << endl;
 	}
 
 	// apply threshold scaling
 	if (max_sentence_update != -1) {
-		cerr << "Update before scaling to max-sentence-update: " << totalUpdate << endl;
+		cerr << "Rank " << rank << ", update before scaling to max-sentence-update: " << totalUpdate << endl;
 		totalUpdate.ThresholdScaling(max_sentence_update);
-		cerr << "Update after scaling to max-sentence-update: " << totalUpdate << endl;
+		cerr << "Rank " << rank << ", update after scaling to max-sentence-update: " << totalUpdate << endl;
 	}
 
 	// apply update to weight vector
-	cerr << "Weights before update: " << currWeights << endl;
+	cerr << "Rank " << rank << ", weights before update: " << currWeights << endl;
 	currWeights.PlusEquals(totalUpdate);
-	cerr << "Weights after update: " << currWeights << endl;
+	cerr << "Rank " << rank << ", weights after update: " << currWeights << endl;
 
 	// sanity check: how many constraints violated after optimisation?
 	size_t violatedConstraintsAfter = 0;
@@ -234,9 +237,9 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	}
 
 	int constraintChange = violatedConstraintsBefore - violatedConstraintsAfter;
-	cerr << "Constraint change: " << constraintChange << endl;
+	cerr << "Rank " << rank << ", constraint change: " << constraintChange << " (before: " << violatedConstraintsBefore << ")" << endl;
 	float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
-	cerr << "Distance change: " << distanceChange << endl;
+	cerr << "Rank " << rank << ", distance change: " << distanceChange << endl;
 	if (constraintChange < 0 && distanceChange < 0) {
 		return -1;
 	}
