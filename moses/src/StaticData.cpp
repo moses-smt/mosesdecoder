@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModel.h"
 #include "SentenceStats.h"
 #include "PhraseDictionary.h"
+#include "PhrasePairFeature.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "TargetBigramFeature.h"
@@ -73,6 +74,8 @@ StaticData::StaticData()
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
 ,m_bleuScoreFeature(NULL)
+,m_targetBigramFeature(NULL)
+,m_phrasePairFeature(NULL)
 ,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
@@ -455,6 +458,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
   if (!LoadDiscrimLMFeature()) return false;
+  if (!LoadPhrasePairFeature()) return false;
 
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
@@ -542,6 +546,9 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_targetBigramFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetBigramFeature);
     }
+    if (m_phrasePairFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phrasePairFeature);
+    }
     
   }
 
@@ -622,6 +629,7 @@ StaticData::~StaticData()
 	// small score producers
 	delete m_unknownWordPenaltyProducer;
 	delete m_targetBigramFeature;
+  delete m_phrasePairFeature;
 
 	//delete m_parameter;
 
@@ -1296,6 +1304,21 @@ bool StaticData::LoadDiscrimLMFeature()
 	}
 
 	return true;
+}
+
+bool StaticData::LoadPhrasePairFeature() 
+{
+	const vector<string> &phrasePairFactors =
+     m_parameter->GetParam("phrase-pair-feature");
+  if (phrasePairFactors.size() == 0) return true;
+  if (phrasePairFactors.size() != 2) {
+    UserMessage::Add("Need to specify source and target factors for phrase pair feature");
+    return false;
+  }
+  size_t sourceFactorId = Scan<FactorType>(phrasePairFactors[0]);
+  size_t targetFactorId = Scan<FactorType>(phrasePairFactors[1]);
+  m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId);
+  return true;
 }
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const

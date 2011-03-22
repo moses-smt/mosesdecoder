@@ -48,6 +48,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	{
 		Phrase phrase = inputType.GetSubString(wordsRange);
 		m_sourcePhrase = new Phrase(phrase);
+    m_targetPhrase.SetSourcePhrase(m_sourcePhrase);
 	}
 	else
 	{ // TODO lex reordering with confusion network

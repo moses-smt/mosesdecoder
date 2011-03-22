@@ -57,6 +57,7 @@ class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseDictionaryFeature;
+class PhrasePairFeature;
 class BleuScoreFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
@@ -89,6 +90,7 @@ protected:
 		// Other		= 1 = used to calculate LM score once all steps have been processed
     std::map<std::string, TranslationSystem> m_translationSystems;
 	TargetBigramFeature *m_targetBigramFeature;
+  PhrasePairFeature *m_phrasePairFeature;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -231,6 +233,7 @@ protected:
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
 	bool LoadDiscrimLMFeature();
+  bool LoadPhrasePairFeature();
   
   void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
