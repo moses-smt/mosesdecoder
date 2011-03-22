@@ -37,7 +37,8 @@ namespace Mira {
                          const std::vector< float> oracleBleuScores,
                          const std::vector< size_t> dummy,
                          float learning_rate,
-                         float max_sentence_update) = 0;
+                         float max_sentence_update,
+                         size_t rank) = 0;
   };
  
   class DummyOptimiser : public Optimiser {
