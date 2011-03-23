@@ -68,14 +68,14 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-:m_numLinkParams(1)
+:m_targetBigramFeature(NULL)
+,m_phrasePairFeature(NULL)
+,m_numLinkParams(1)
 ,m_fLMsLoaded(false)
 ,m_sourceStartPosMattersForRecombination(false)
 ,m_inputType(SentenceInput)
 ,m_numInputScores(0)
 ,m_bleuScoreFeature(NULL)
-,m_targetBigramFeature(NULL)
-,m_phrasePairFeature(NULL)
 ,m_detailedTranslationReportingFilePath()
 ,m_onlyDistinctNBest(false)
 ,m_factorDelimiter("|") // default delimiter between factors
@@ -1311,12 +1311,17 @@ bool StaticData::LoadPhrasePairFeature()
 	const vector<string> &phrasePairFactors =
      m_parameter->GetParam("phrase-pair-feature");
   if (phrasePairFactors.size() == 0) return true;
-  if (phrasePairFactors.size() != 2) {
+  if (phrasePairFactors.size() != 1) {
     UserMessage::Add("Need to specify source and target factors for phrase pair feature");
     return false;
   }
-  size_t sourceFactorId = Scan<FactorType>(phrasePairFactors[0]);
-  size_t targetFactorId = Scan<FactorType>(phrasePairFactors[1]);
+	vector<string> tokens = Tokenize(phrasePairFactors[0]);
+  if (tokens.size() != 2) {
+    UserMessage::Add("Need to specify source and target factors for phrase pair feature");
+    return false;
+  }
+  size_t sourceFactorId = Scan<FactorType>(tokens[0]);
+  size_t targetFactorId = Scan<FactorType>(tokens[1]);
   m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId);
   return true;
 }

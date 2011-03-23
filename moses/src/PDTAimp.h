@@ -300,7 +300,7 @@ public:
 				w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
 		}
 		targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, m_weights, m_weightWP, *m_languageModels);
-		targetPhrase.SetSourcePhrase(srcPtr);
+		targetPhrase.SetSourcePhrase(*srcPtr);
 	}
 	
 	

@@ -32,10 +32,10 @@ size_t PhrasePairFeature::GetNumInputScores() const
 void PhrasePairFeature::Evaluate(
   const TargetPhrase& cur_hypo,
   ScoreComponentCollection* accumulator) const {
-   const Phrase* source = cur_hypo.GetSourcePhrase();
+   const Phrase& source = cur_hypo.GetSourcePhrase();
    const AlignmentInfo& align = cur_hypo.GetAlignmentInfo();
   for (AlignmentInfo::const_iterator i = align.begin(); i != align.end(); ++i) {
-    const Factor* sourceFactor = source->GetWord(i->first).GetFactor(m_sourceFactorId);
+    const Factor* sourceFactor = source.GetWord(i->first).GetFactor(m_sourceFactorId);
     const Factor* targetFactor = cur_hypo.GetWord(i->second).GetFactor(m_targetFactorId);
     ostringstream namestr;
     namestr << sourceFactor->GetString();

@@ -48,11 +48,10 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	{
 		Phrase phrase = inputType.GetSubString(wordsRange);
 		m_sourcePhrase = new Phrase(phrase);
-    m_targetPhrase.SetSourcePhrase(m_sourcePhrase);
 	}
 	else
 	{ // TODO lex reordering with confusion network
-		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
+		m_sourcePhrase = new Phrase(targetPhrase.GetSourcePhrase());
 	}
 }
 
@@ -79,7 +78,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	}
 	else
 	{ // TODO lex reordering with confusion network
-		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
+		m_sourcePhrase = new Phrase(targetPhrase.GetSourcePhrase());
 		//the target phrase from a confusion network/lattice has input scores that we want to keep
 		m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 

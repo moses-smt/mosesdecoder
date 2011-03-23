@@ -73,7 +73,7 @@ protected:
 	AlignmentInfo m_alignmentInfo;
 
 	// in case of confusion net, ptr to source phrase
-	Phrase const* m_sourcePhrase; 
+	Phrase m_sourcePhrase; 
 	Word m_lhsTarget;
 	CountInfo m_countInfo;
 
@@ -158,11 +158,11 @@ public:
 	}
 
 	//! TODO - why is this needed and is it set correctly by every phrase dictionary class ? should be set in constructor
-	void SetSourcePhrase(Phrase const* p) 
+	void SetSourcePhrase(const Phrase&  p) 
 	{
 		m_sourcePhrase=p;
 	}
-	Phrase const* GetSourcePhrase() const 
+	const Phrase& GetSourcePhrase() const 
 	{
 		return m_sourcePhrase;
 	}
