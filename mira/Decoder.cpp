@@ -101,7 +101,7 @@ namespace Mira {
                               vector< float>& bleuScores,
                               bool oracle,
                               bool distinct,
-							  size_t rank)
+                              size_t rank)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
 
@@ -138,7 +138,7 @@ namespace Mira {
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
-    	cerr << "Total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
+    	cerr << "Rank " << rank << ", total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
 
     	Phrase bestPhrase = path.GetTargetPhrase();
 

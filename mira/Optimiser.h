@@ -30,37 +30,21 @@ namespace Mira {
     public:
       Optimiser() {}
       virtual int updateWeights(Moses::ScoreComponentCollection& weights,
-                         const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
-                         const std::vector<std::vector<float> >& losses,
-                         const std::vector<std::vector<float> >& bleuScores,
-                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
-                         const std::vector< float> oracleBleuScores,
-                         const std::vector< size_t> dummy,
-                         float learning_rate,
-                         float max_sentence_update,
-                         size_t rank) = 0;
-  };
- 
-  class DummyOptimiser : public Optimiser {
-    public:
-      virtual int updateWeights(Moses::ScoreComponentCollection& weights,
-                         const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
-                         const std::vector< std::vector<float> >& losses,
-                         const std::vector<std::vector<float> >& bleuScores,
-                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
-                         const std::vector< float> oracleBleuScores,
-                         const std::vector< size_t> dummy,
-                         float learning_rate,
-                         float max_sentence_update,
-                         size_t rank)
-                         { return 0; }
+            						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
+            						  const std::vector< std::vector<float> >& losses,
+            						  const std::vector<std::vector<float> >& bleuScores,
+            						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
+            						  const std::vector< float> oracleBleuScores,
+            						  const std::vector< size_t> sentenceId,
+      										float learning_rate,
+      										float max_sentence_update,
+      										size_t rank,
+      										bool update_after_epoch) = 0;
   };
  
   class Perceptron : public Optimiser {
     public:
-       
-
-      virtual int updateWeights(Moses::ScoreComponentCollection& weights,
+			virtual int updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
@@ -69,7 +53,8 @@ namespace Mira {
                          const std::vector< size_t> dummy,
                          float learning_rate,
                          float max_sentence_update,
-                         size_t rank);
+                         size_t rank,
+                         bool update_after_epoch);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -93,7 +78,7 @@ namespace Mira {
 
      ~MiraOptimiser() {}
    
-      virtual int updateWeights(Moses::ScoreComponentCollection& weights,
+     virtual int updateWeights(Moses::ScoreComponentCollection& weights,
       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector< std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,
@@ -102,7 +87,8 @@ namespace Mira {
       						  const std::vector< size_t> sentenceId,
 										float learning_rate,
 										float max_sentence_update,
-										size_t rank);
+										size_t rank,
+										bool update_after_epoch);
 
       void setOracleIndices(std::vector<size_t> oracleIndices) {
     	  m_oracleIndices= oracleIndices;
@@ -114,6 +100,14 @@ namespace Mira {
 
       void setMarginScaleFactor(float msf) {
       	m_marginScaleFactor = msf;
+      }
+
+      Moses::ScoreComponentCollection getAccumulatedUpdates() {
+					return m_accumulatedUpdates;
+      }
+
+      void resetAccumulatedUpdates() {
+      	m_accumulatedUpdates.ZeroAll();
       }
   
    private:
@@ -151,6 +145,8 @@ namespace Mira {
       bool m_accumulateMostViolatedConstraints;
 
       bool m_pastAndCurrentConstraints;
+
+      Moses::ScoreComponentCollection m_accumulatedUpdates;
   };
 }
 
