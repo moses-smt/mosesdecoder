@@ -125,6 +125,7 @@ int main(int argc, char** argv) {
 	bool stop_dev_bleu;
 	bool stop_approx_dev_bleu;
 	bool update_after_epoch;
+	size_t update_after;
 	po::options_description desc("Allowed options");
 	desc.add_options()("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
 			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(true), "Accumulate and average weights over all epochs")
@@ -171,6 +172,7 @@ int main(int argc, char** argv) {
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
 	    ("update-after-epoch", po::value<bool>(&update_after_epoch)->default_value(false), "Accumulate updates and apply them to the weight vector at the end of an epoch")
+	    ("update-after", po::value<size_t>(&update_after)->default_value(1), "Accumulate updates of given number of sentences and apply them to the weight vector afterwards")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
@@ -310,6 +312,11 @@ int main(int argc, char** argv) {
 	cerr << "stop-approx-dev-bleu: " << stop_approx_dev_bleu << endl;
 	cerr << "stop-weights: " << weightConvergence << endl;
 	cerr << "update-after-epoch: " << update_after_epoch << endl;
+
+	if (update_after > 1) {
+		// make sure the remaining changes of one epoch are applied
+		update_after_epoch = true;
+	}
 
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
@@ -564,22 +571,22 @@ int main(int argc, char** argv) {
 				}
 			}
 
-			bool makeUpdate = (update_after_epoch && sid == shard.end());
+			bool makeUpdate = ((update_after_epoch && sid == shard.end()) || ((update_after > 1) && (shardPosition % shard.size() == update_after)));
 			bool mix = (shardPosition % (shard.size() / mixingFrequency) == 0);
 
-			// apply accumulated updates at end of epoch
+			// apply accumulated updates
 			if (makeUpdate && typeid(*optimiser) == typeid(MiraOptimiser)) {
 				ScoreComponentCollection mosesWeights = decoder->getWeights();
 				ScoreComponentCollection accumulatedUpdates = ((MiraOptimiser*) optimiser)->getAccumulatedUpdates();
-				cerr << "\nRank " << rank << ", updates to apply after epoch " << epoch << ": " << accumulatedUpdates << endl;
+				cerr << "\nRank " << rank << ", updates to apply during epoch " << epoch << ": " << accumulatedUpdates << endl;
 				mosesWeights.PlusEquals(accumulatedUpdates);
 				((MiraOptimiser*) optimiser)->resetAccumulatedUpdates();
 
 				if (normaliseWeights) {
 					mosesWeights.L1Normalise();
-						cerr << "Rank " << rank << ", new weights (normalised) after epoch " << epoch << ": " << mosesWeights << endl;
+						cerr << "Rank " << rank << ", new weights (normalised) during epoch " << epoch << ": " << mosesWeights << endl;
 				} else {
-					cerr << "Rank " << rank << ", new weights after epoch " << epoch  << ": " << mosesWeights << endl;
+					cerr << "Rank " << rank << ", new weights during epoch " << epoch  << ": " << mosesWeights << endl;
 				}
 
 				decoder->setWeights(mosesWeights);
@@ -588,7 +595,7 @@ int main(int argc, char** argv) {
 				++weightChangesThisEpoch;
 			}
 
-			// mix weights?
+			// mix weights
 			if (mix && !update_after_epoch) {
 				ScoreComponentCollection averageWeights;
 #ifdef MPI_ENABLE
@@ -619,8 +626,8 @@ int main(int argc, char** argv) {
 #endif
 			} // end mixing
 
+			// Average and dump weights of all processes over one or more epochs
 			if ((mix && !update_after_epoch) || makeUpdate) {
-				// Average and dump weights of all processes over one or more epochs
 				ScoreComponentCollection totalWeights(cumulativeWeights);
 				if (accumulateWeights) {
 					totalWeights.DivideEquals(weightChanges);
