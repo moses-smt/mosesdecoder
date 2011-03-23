@@ -512,11 +512,9 @@ int main(int argc, char** argv) {
 			} else if (!update_after_epoch) {
 				if (normaliseWeights) {
 					mosesWeights.L1Normalise();
-					cerr << "\nRank " << rank << ", new weights (normalised): "
-					    << mosesWeights << endl;
+					cerr << "\nRank " << rank << ", new weights (normalised): " << mosesWeights << endl;
 				} else {
-					cerr << "\nRank " << rank << ", new weights: " << mosesWeights
-					    << endl;
+					cerr << "\nRank " << rank << ", new weights: " << mosesWeights << endl;
 				}
 
 				decoder->setWeights(mosesWeights);
@@ -528,8 +526,7 @@ int main(int argc, char** argv) {
 				// compute difference to old weights
 				ScoreComponentCollection weightDifference(mosesWeights);
 				weightDifference.MinusEquals(oldWeights);
-				cerr << "Rank " << rank << ", weight difference: " << weightDifference
-				    << endl;
+				cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
 
 				// compare best model results with new weights
 				if (actualBatchSize == 1) {
@@ -547,8 +544,7 @@ int main(int argc, char** argv) {
 				cerr << "Rank " << rank << ", feature values: " << endl;
 				for (size_t i = 0; i < featureValues.size(); ++i) {
 					for (size_t j = 0; j < featureValues[i].size(); ++j) {
-						cerr << featureValues[i][j].Size() << ": " << featureValues[i][j]
-						    << endl;
+						cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
 					}
 				}
 				cerr << endl;
@@ -568,131 +564,110 @@ int main(int argc, char** argv) {
 				}
 			}
 
-			if (!update_after_epoch) {
-				// mix weights?
-				if (shardPosition % (shard.size() / mixingFrequency) == 0) {
-					ScoreComponentCollection averageWeights;
-#ifdef MPI_ENABLE
-					cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
+			bool makeUpdate = (update_after_epoch && sid == shard.end());
+			bool mix = (shardPosition % (shard.size() / mixingFrequency) == 0);
 
-					// collect all weights in averageWeights and divide by number of processes
-					mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
-					if (rank == 0) {
-						// divide by number of processes
-						averageWeights.DivideEquals(size);
+			// apply accumulated updates at end of epoch
+			if (makeUpdate && typeid(*optimiser) == typeid(MiraOptimiser)) {
+				ScoreComponentCollection mosesWeights = decoder->getWeights();
+				ScoreComponentCollection accumulatedUpdates = ((MiraOptimiser*) optimiser)->getAccumulatedUpdates();
+				cerr << "\nRank " << rank << ", updates to apply after epoch " << epoch << ": " << accumulatedUpdates << endl;
+				mosesWeights.PlusEquals(accumulatedUpdates);
+				((MiraOptimiser*) optimiser)->resetAccumulatedUpdates();
 
-						// normalise weights after averaging
-						if (normaliseWeights) {
-							averageWeights.L1Normalise();
-							cerr << "Average weights after mixing (normalised): " << averageWeights << endl;
-						}
-						else {
-							cerr << "Average weights after mixing: " << averageWeights << endl;
-						}
-					}
+				if (normaliseWeights) {
+					mosesWeights.L1Normalise();
+						cerr << "Rank " << rank << ", new weights (normalised) after epoch " << epoch << ": " << mosesWeights << endl;
+				} else {
+					cerr << "Rank " << rank << ", new weights after epoch " << epoch  << ": " << mosesWeights << endl;
+				}
 
-					// broadcast average weights from process 0
-					mpi::broadcast(world, averageWeights, 0);
-					decoder->setWeights(averageWeights);
-#endif
-#ifndef MPI_ENABLE
-					averageWeights = mosesWeights;
-#endif
-					// dump weights after mixing
-					if (rank == 0 && !weightDumpStem.empty()) {
-						ostringstream filename;
-						if (epoch < 10) {
-							filename << weightDumpStem << "_0" << epoch;
-						} else {
-							filename << weightDumpStem << "_" << epoch;
-						}
-
-						if (mixingFrequency > 1) {
-							filename << "_" << weightEpochDump << "_mixed";
-						}
-
-						cerr << "Dumping average weights for epoch " << epoch << " to "
-						    << filename.str() << endl;
-						averageWeights.Save(filename.str());
-					}
-
-					// Average and dump weights of all processes over one or more epochs
-					ScoreComponentCollection totalWeights(cumulativeWeights);
-					if (accumulateWeights) {
-						totalWeights.DivideEquals(weightChanges);
-					} else {
-						totalWeights.DivideEquals(weightChangesThisEpoch);
-					}
-
-#ifdef MPI_ENABLE
-					// average across processes
-					mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
-#endif
-#ifndef MPI_ENABLE
-					averageTotalWeights = totalWeights;
-#endif
-					if (rank == 0 && !weightDumpStem.empty()) {
-						// divide by number of processes
-						averageTotalWeights.DivideEquals(size);
-
-						// normalise weights after averaging
-						if (normaliseWeights) {
-							averageTotalWeights.L1Normalise();
-						}
-
-						// dump final average weights
-						ostringstream filename;
-						if (epoch < 10) {
-							filename << weightDumpStem << "_0" << epoch;
-						} else {
-							filename << weightDumpStem << "_" << epoch;
-						}
-
-						if (mixingFrequency > 1) {
-							filename << "_" << weightEpochDump;
-						}
-
-						if (accumulateWeights) {
-							cerr << "\nAverage total weights (cumulative) during epoch "
-							    << epoch << ": " << averageTotalWeights << endl;
-						} else {
-							cerr << "\nAverage total weights during epoch " << epoch << ": "
-							    << averageTotalWeights << endl;
-						}
-
-						cerr << "Dumping average total weights during epoch " << epoch
-						    << " to " << filename.str() << endl;
-						averageTotalWeights.Save(filename.str());
-						++weightEpochDump;
-					}// end averaging and printing total weights
-				} //end mixing
-			} //end if !update_after_epoch
-		} // end of shard loop, end of this epoch
-
-		// apply accumulated updates
-		if (update_after_epoch && typeid(*optimiser) == typeid(MiraOptimiser)) {
-			ScoreComponentCollection mosesWeights = decoder->getWeights();
-			ScoreComponentCollection accumulatedUpdates =
-			    ((MiraOptimiser*) optimiser)->getAccumulatedUpdates();
-			cerr << "\nRank " << rank << ", updates to apply after epoch " << epoch
-			    << ": " << accumulatedUpdates << endl;
-			mosesWeights.PlusEquals(accumulatedUpdates);
-			((MiraOptimiser*) optimiser)->resetAccumulatedUpdates();
-
-			if (normaliseWeights) {
-				mosesWeights.L1Normalise();
-				cerr << "Rank " << rank << ", new weights (normalised) after epoch "
-				    << epoch << ": " << mosesWeights << endl;
-			} else {
-				cerr << "Rank " << rank << ", new weights after epoch " << epoch
-				    << ": " << mosesWeights << endl;
+				decoder->setWeights(mosesWeights);
+				cumulativeWeights.PlusEquals(mosesWeights);
+				++weightChanges;
+				++weightChangesThisEpoch;
 			}
 
-			decoder->setWeights(mosesWeights);
-			cumulativeWeights.PlusEquals(mosesWeights);
-			++weightChanges;
-			++weightChangesThisEpoch;
-		} // end if update_after_epoch
+			// mix weights?
+			if (mix && !update_after_epoch) {
+				ScoreComponentCollection averageWeights;
+#ifdef MPI_ENABLE
+				cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
+
+				// collect all weights in averageWeights and divide by number of processes
+				mpi::reduce(world, mosesWeights, averageWeights, SCCPlus(), 0);
+				if (rank == 0) {
+					// divide by number of processes
+					averageWeights.DivideEquals(size);
+
+					// normalise weights after averaging
+					if (normaliseWeights) {
+						averageWeights.L1Normalise();
+						cerr << "Average weights after mixing (normalised): " << averageWeights << endl;
+					}
+					else {
+						cerr << "Average weights after mixing: " << averageWeights << endl;
+					}
+				}
+
+				// broadcast average weights from process 0
+				mpi::broadcast(world, averageWeights, 0);
+				decoder->setWeights(averageWeights);
+#endif
+#ifndef MPI_ENABLE
+				averageWeights = mosesWeights;
+#endif
+			} // end mixing
+
+			if ((mix && !update_after_epoch) || makeUpdate) {
+				// Average and dump weights of all processes over one or more epochs
+				ScoreComponentCollection totalWeights(cumulativeWeights);
+				if (accumulateWeights) {
+					totalWeights.DivideEquals(weightChanges);
+				} else {
+					totalWeights.DivideEquals(weightChangesThisEpoch);
+				}
+
+#ifdef MPI_ENABLE
+				// average across processes
+				mpi::reduce(world, totalWeights, averageTotalWeights, SCCPlus(), 0);
+#endif
+#ifndef MPI_ENABLE
+				averageTotalWeights = totalWeights;
+#endif
+				if (rank == 0 && !weightDumpStem.empty()) {
+					// divide by number of processes
+					averageTotalWeights.DivideEquals(size);
+
+					// normalise weights after averaging
+					if (normaliseWeights) {
+						averageTotalWeights.L1Normalise();
+					}
+
+					// dump final average weights
+					ostringstream filename;
+					if (epoch < 10) {
+							filename << weightDumpStem << "_0" << epoch;
+					} else {
+						filename << weightDumpStem << "_" << epoch;
+					}
+
+					if (mixingFrequency > 1) {
+						filename << "_" << weightEpochDump;
+					}
+
+					if (accumulateWeights) {
+						cerr << "\nAverage total weights (cumulative) during epoch "	<< epoch << ": " << averageTotalWeights << endl;
+					} else {
+						cerr << "\nAverage total weights during epoch " << epoch << ": " << averageTotalWeights << endl;
+					}
+
+					cerr << "Dumping average total weights during epoch " << epoch << " to " << filename.str() << endl;
+					averageTotalWeights.Save(filename.str());
+					++weightEpochDump;
+				}
+			}// end averaging and dumping total weights
+		} // end of shard loop, end of this epoch
 
 		if (devBleu) {
 			// calculate bleu score of dev set
@@ -700,33 +675,6 @@ int main(int argc, char** argv) {
 			    allBestModelScore, all_ref_ids, epoch, rank);
 			float bleu = bleuAndRatio[0];
 			float ratio = bleuAndRatio[1];
-
-			// print out translations
-			/*	  	ostringstream filename;
-			 if (epoch < 10) {
-			 filename << "dev_set_bestModel" << "_0" << epoch << "_rank" << rank;
-			 }
-			 else {
-			 filename << "dev_set_bestModel" << "_" << epoch << "_rank" << rank;
-			 }
-			 ofstream out((filename.str()).c_str());
-
-			 // print oracle translations to file and delete them afterwards
-			 if (!out) {
-			 ostringstream msg;
-			 msg << "Unable to open " << filename;
-			 throw runtime_error(msg.str());
-			 }
-			 else {
-			 for (size_t i = 0; i < allBestModelScore.size(); ++i) {
-			 for (size_t j = 0; j < allBestModelScore[i].size(); ++j) {
-			 out << *(allBestModelScore[i][j]);
-			 delete allBestModelScore[i][j];
-			 }
-			 out << endl;
-			 }
-			 out.close();
-			 }*/
 
 			for (size_t i = 0; i < allBestModelScore.size(); ++i) {
 				for (size_t j = 0; j < allBestModelScore[i].size(); ++j) {
@@ -790,11 +738,9 @@ int main(int argc, char** argv) {
 #endif
 #ifndef MPI_ENABLE
 			averageBleu = bleu;
-			cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu
-			    << endl;
+			cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu << endl;
 			averageApproxBleu = summedApproxBleu / weightChangesThisEpoch;
-			cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch
-			    << ": " << averageApproxBleu << endl;
+			cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
 #endif
 			if (rank == 0) {
 				if (averageBleu < prevAverageBleu && prevAverageBleu
@@ -831,56 +777,6 @@ int main(int argc, char** argv) {
 			mpi::broadcast(world, stop, 0);
 #endif
 		} // end if (dev_bleu)
-
-		// Average weights of all processes over one or more epochs
-		ScoreComponentCollection totalWeights(cumulativeWeights);
-		if (accumulateWeights) {
-			totalWeights.DivideEquals(weightChanges);
-		} else {
-			totalWeights.DivideEquals(weightChangesThisEpoch);
-		}
-
-		if (rank == 0) {
-			averageTotalWeightsBeforePrevious = averageTotalWeightsPrevious;
-			averageTotalWeightsPrevious = averageTotalWeightsEnd;
-		}
-#ifdef MPI_ENABLE
-		// average across processes
-		mpi::reduce(world, totalWeights, averageTotalWeightsEnd, SCCPlus(), 0);
-#endif
-#ifndef MPI_ENABLE
-		averageTotalWeightsEnd = totalWeights;
-#endif
-		if (rank == 0 && !weightDumpStem.empty()) {
-			// divide by number of processes
-			averageTotalWeightsEnd.DivideEquals(size);
-
-			// normalise weights after averaging
-			if (normaliseWeights) {
-				averageTotalWeightsEnd.L1Normalise();
-			}
-
-			// dump final average weights
-			ostringstream filename;
-			if (epoch < 10) {
-				filename << weightDumpStem << "_0" << epoch << "_averageTotal";
-			} else {
-				filename << weightDumpStem << "_" << epoch << "_averageTotal";
-			}
-
-			if (accumulateWeights) {
-				cerr << "\nAverage total weights (cumulative) after epoch " << epoch
-				    << ": " << averageTotalWeightsEnd << endl;
-			} else {
-				cerr << "\nAverage total weights after epoch " << epoch << ": "
-				    << averageTotalWeightsEnd << endl;
-			}
-
-			cerr << "Dumping average total weights after epoch " << epoch << " to "
-			    << filename.str() << endl;
-			averageTotalWeightsEnd.Save(filename.str());
-
-		}// end averaging and printing total weights
 
 		// Test if weights have converged
 		if (weightConvergence) {
