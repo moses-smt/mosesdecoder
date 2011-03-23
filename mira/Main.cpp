@@ -126,110 +126,55 @@ int main(int argc, char** argv) {
 	bool stop_approx_dev_bleu;
 	bool update_after_epoch;
 	po::options_description desc("Allowed options");
-	desc.add_options()("accumulate-most-violated-constraints", po::value<bool>(
-	    &accumulateMostViolatedConstraints)->default_value(false),
-	    "Accumulate most violated constraint per example")("accumulate-weights",
-	    po::value<bool>(&accumulateWeights)->default_value(true),
-	    "Accumulate and average weights over all epochs")("adapt-BP-factor",
-	    po::value<bool>(&adapt_BPfactor)->default_value(0),
-	    "Set factor to 1 when optimal translation length in reached")(
-	    "base-of-log", po::value<size_t>(&baseOfLog)->default_value(10),
-	    "Base for log-ing feature values")("batch-size,b", po::value<size_t>(
-	    &batchSize)->default_value(1),
-	    "Size of batch that is send to optimiser for weight adjustments")(
-	    "BP-factor", po::value<float>(&BPfactor)->default_value(1.0),
-	    "Increase penalty for short translations")("config,f", po::value<string>(
-	    &mosesConfigFile), "Moses ini file")(
-	    "control-updates",
-	    po::value<bool>(&controlUpdates)->default_value(false),
-	    "Ignore updates that increase number of violated constraints AND increase the error")(
-	    "decoder-settings", po::value<string>(&decoder_settings)->default_value(
-	        ""), "Decoder settings for tuning runs")("decr-learning-rate",
-	    po::value<float>(&decrease_learning_rate)->default_value(0),
-	    "Decrease learning rate by the given value after every epoch")(
-	    "decr-sentence-update",
-	    po::value<float>(&decrease_sentence_update)->default_value(0),
-	    "Decrease maximum weight update by the given value after every epoch")(
-	    "dev-bleu", po::value<bool>(&devBleu)->default_value(true),
-	    "Compute BLEU score of oracle translations of the whole tuning set")(
-	    "distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false),
-	    "Use nbest list with distinct translations in inference step")(
-	    "epochs,e", po::value<size_t>(&epochs)->default_value(5),
-	    "Number of epochs")("help",
-	    po::value(&help)->zero_tokens()->default_value(false),
-	    "Print this help message and exit")("hildreth",
-	    po::value<bool>(&hildreth)->default_value(true),
-	    "Use Hildreth's optimisation algorithm")("history-smoothing", po::value<
-	    float>(&historySmoothing)->default_value(0.9),
-	    "Adjust the factor for history smoothing")("input-file,i", po::value<
-	    string>(&inputFile), "Input file containing tokenised source")(
-	    "learner,l", po::value<string>(&learner)->default_value("mira"),
-	    "Learning algorithm")("learning-rate",
-	    po::value<float>(&learning_rate)->default_value(1),
-	    "Learning rate (fixed or flexible)")("log-feature-values",
-	    po::value<bool>(&logFeatureValues)->default_value(false),
-	    "Take log of feature values according to the given base.")(
-	    "max-number-oracles",
-	    po::value<size_t>(&maxNumberOracles)->default_value(1),
-	    "Set a maximum number of oracles to use per example")(
-	    "min-sentence-update",
-	    po::value<float>(&min_sentence_update)->default_value(0),
-	    "Set a minimum weight update per sentence")("min-learning-rate",
-	    po::value<float>(&min_learning_rate)->default_value(0),
-	    "Set a minimum learning rate")("max-sentence-update", po::value<float>(
-	    &max_sentence_update)->default_value(-1),
-	    "Set a maximum weight update per sentence")("min-weight-change",
-	    po::value<float>(&min_weight_change)->default_value(0.01),
-	    "Set minimum weight change for stopping criterion")("mixing-frequency",
-	    po::value<size_t>(&mixingFrequency)->default_value(1),
-	    "How often per epoch to mix weights, when using mpi")("msf", po::value<
-	    float>(&marginScaleFactor)->default_value(1.0),
-	    "Margin scale factor, regularises the update by scaling the enforced margin")(
-	    "msf-min", po::value<float>(&marginScaleFactorMin)->default_value(1.0),
-	    "Minimum value that margin is scaled by")("msf-step", po::value<float>(
-	    &marginScaleFactorStep)->default_value(0),
-	    "Decrease margin scale factor iteratively by the value provided")(
-	    "nbest,n", po::value<size_t>(&n)->default_value(10),
-	    "Number of translations in nbest list")("normalise", po::value<bool>(
-	    &normaliseWeights)->default_value(false),
-	    "Whether to normalise the updated weights before passing them to the decoder")(
-	    "only-violated-constraints",
-	    po::value<bool>(&onlyViolatedConstraints)->default_value(false),
-	    "Add only violated constraints to the optimisation problem")(
-	    "past-and-current-constraints",
-	    po::value<bool>(&pastAndCurrentConstraints)->default_value(false),
-	    "Accumulate most violated constraint per example and use them along all current constraints")(
-	    "print-feature-values",
-	    po::value<bool>(&print_feature_values)->default_value(false),
-	    "Print out feature values")("reference-files,r",
-	    po::value<vector<string> >(&referenceFiles),
-	    "Reference translation files for training")("scale-by-input-length",
-	    po::value<bool>(&scaleByInputLength)->default_value(true),
-	    "Scale the BLEU score by a history of the input lengths")("shuffle",
-	    po::value<bool>(&shuffle)->default_value(false),
-	    "Shuffle input sentences before processing")("slack", po::value<float>(
-	    &slack)->default_value(0.01), "Use slack in optimizer")("slack-max",
-	    po::value<float>(&slack_max)->default_value(0), "Maximum slack used")(
-	    "slack-step", po::value<float>(&slack_step)->default_value(0),
-	    "Increase slack from epoch to epoch by the value provided")(
-	    "stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false),
-	    "Stop when average Bleu (dev) decreases")("stop-approx-dev-bleu",
-	    po::value<bool>(&stop_approx_dev_bleu)->default_value(false),
-	    "Stop when average approx. sentence Bleu (dev) decreases")(
-	    "stop-weights",
-	    po::value<bool>(&weightConvergence)->default_value(false),
-	    "Stop when weights converge")("update-after-epoch", po::value<bool>(
-	    &update_after_epoch)->default_value(false),
-	    "Accumulate updates and apply them to the weight vector at the end of an epoch")(
-	    "use-scaled-reference",
-	    po::value<bool>(&useScaledReference)->default_value(true),
-	    "Use scaled reference length for comparing target and reference length of phrases")(
-	    "verbosity,v", po::value<int>(&verbosity)->default_value(0),
-	    "Verbosity level")("weighted-loss-function", po::value<bool>(
-	    &weightedLossFunction)->default_value(false),
-	    "Weight the loss of a hypothesis by its Bleu score")("weight-dump-stem",
-	    po::value<string>(&weightDumpStem)->default_value("weights"),
-	    "Stem of filename to use for dumping weights");
+	desc.add_options()("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
+			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(true), "Accumulate and average weights over all epochs")
+			("adapt-BP-factor", po::value<bool>(&adapt_BPfactor)->default_value(0), "Set factor to 1 when optimal translation length in reached")
+			("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
+			("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
+			("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
+			("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
+			("control-updates", po::value<bool>(&controlUpdates)->default_value(false), "Ignore updates that increase number of violated constraints AND increase the error")
+			("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
+			("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
+			("decr-sentence-update", po::value<float>(&decrease_sentence_update)->default_value(0), "Decrease maximum weight update by the given value after every epoch")
+			("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
+			("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(false), "Use nbest list with distinct translations in inference step")
+			("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
+			("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+			("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
+			("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
+			("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
+			("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
+			("learning-rate", po::value<float>(&learning_rate)->default_value(1), "Learning rate (fixed or flexible)")
+			("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
+			("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
+			("min-sentence-update", po::value<float>(&min_sentence_update)->default_value(0), "Set a minimum weight update per sentence")
+			("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
+			("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(-1), "Set a maximum weight update per sentence")
+			("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+			("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+			("msf", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
+			("msf-min", po::value<float>(&marginScaleFactorMin)->default_value(1.0), "Minimum value that margin is scaled by")
+			("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
+			("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
+			("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
+	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
+	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
+	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
+	    ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
+	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
+	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
+	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
+	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases")
+	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases")
+	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
+	    ("update-after-epoch", po::value<bool>(&update_after_epoch)->default_value(false), "Accumulate updates and apply them to the weight vector at the end of an epoch")
+	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
+	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
+	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
+	    ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
 	po::options_description cmdline_options;
 	cmdline_options.add(desc);
