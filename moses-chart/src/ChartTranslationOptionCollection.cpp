@@ -257,7 +257,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			//targetPhrase->SetScore();
 			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 			targetPhrase->SetScore(m_system->GetWordPenaltyProducer(), wordPenaltyScore);
-			targetPhrase->SetSourcePhrase(m_unksrc);
+			targetPhrase->SetSourcePhrase(*m_unksrc);
 			targetPhrase->SetTargetLHS(targetLHS);
 						
 			// chart rule
@@ -286,7 +286,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
 			assert(targetLHS.GetFactor(0) != NULL);
 
 			m_cacheTargetPhrase.push_back(targetPhrase);
-			targetPhrase->SetSourcePhrase(m_unksrc);
+			targetPhrase->SetSourcePhrase(*m_unksrc);
 			targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
 			targetPhrase->SetTargetLHS(targetLHS);
 
