@@ -465,9 +465,8 @@ int main(int argc, char** argv) {
 					delete fear[i];
 				}
 
-				cerr << "Sentence " << *sid << ", Bleu: "
-				    << bleuScores[batchPosition][oraclePos] << endl;
-				summedApproxBleu += bleuScores[batchPosition][oraclePos];
+				cerr << "Sentence " << *sid << ", Bleu: "  << bleuScores[batchPosition][oraclePos] << endl;
+				summedApproxBleu += bleuScores[batchPosition][0];
 
 				// next input sentence
 				++sid;
@@ -537,11 +536,17 @@ int main(int argc, char** argv) {
 
 				// compare best model results with new weights
 				if (actualBatchSize == 1) {
-					cerr << "\nRank " << rank
-					    << ", nbest model score translations with new weights" << endl;
+					cerr << "\nRank " << rank << ", nbest model score translations with new weights" << endl;
 					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n,
 					    0.0, 1.0, featureValues[0], bleuScores[0], true, distinctNbest,
 					    rank);
+					decoder->cleanup();
+					cerr << endl;
+
+					cerr << "\nRank " << rank << ", nbest hope translations with new weights" << endl;
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, n,
+							1.0, 1.0, featureValues[0], bleuScores[0], true, distinctNbest,
+							rank);
 					decoder->cleanup();
 					cerr << endl;
 				}
@@ -678,8 +683,7 @@ int main(int argc, char** argv) {
 
 		if (devBleu) {
 			// calculate bleu score of dev set
-			vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(
-			    allBestModelScore, all_ref_ids, epoch, rank);
+			vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allBestModelScore, all_ref_ids, epoch, rank);
 			float bleu = bleuAndRatio[0];
 			float ratio = bleuAndRatio[1];
 
