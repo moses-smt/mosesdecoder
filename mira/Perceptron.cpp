@@ -34,7 +34,7 @@ int Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		float learning_rate,
 		float max_sentence_update,
 		size_t rank,
-		bool update_after_epoch)
+		int updates_per_epoch)
 {
 	for (size_t i = 0; i < featureValues.size(); ++i) {
 		for (size_t j = 0; j < featureValues[i].size(); ++j) {

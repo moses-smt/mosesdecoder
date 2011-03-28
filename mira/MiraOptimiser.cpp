@@ -13,7 +13,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
         ScoreComponentCollection>& oracleFeatureValues,
     const vector<float> oracleBleuScores, const vector<size_t> sentenceIds,
     float learning_rate, float max_sentence_update, size_t rank,
-    bool update_after_epoch) {
+    int updates_per_epoch) {
 
 	// add every oracle in batch to list of oracles (under certain conditions)
 	for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
@@ -52,8 +52,9 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 	}
 
-	size_t violatedConstraintsBefore = 0;
+	// vector of feature values differences for all created constraints
 	vector<ScoreComponentCollection> featureValueDiffs;
+	size_t violatedConstraintsBefore = 0;
 	vector<float> lossMarginDistances;
 
 	// find most violated constraint
@@ -61,11 +62,12 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	ScoreComponentCollection maxViolationfeatureValueDiff;
 
 	float oldDistanceFromOptimum = 0;
+	// iterate over input sentences (1 (online) or more (batch))
 	for (size_t i = 0; i < featureValues.size(); ++i) {
 		size_t sentenceId = sentenceIds[i];
 		if (m_oracles[sentenceId].size() > 1)
-			cerr << "Available oracles for source sentence " << sentenceId << ": "
-			    << m_oracles[sentenceId].size() << endl;
+			cerr << "Available oracles for source sentence " << sentenceId << ": "  << m_oracles[sentenceId].size() << endl;
+		// iterate over hypothesis translations for one input sentence
 		for (size_t j = 0; j < featureValues[i].size(); ++j) {
 			// check if optimisation criterion is violated for one hypothesis and the oracle
 			// h(e*) >= h(e_ij) + loss(e_ij)
@@ -141,7 +143,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	// run optimisation: compute alphas for all given constraints
 	vector<float> alphas;
-	ScoreComponentCollection totalUpdate;
+	ScoreComponentCollection summedUpdate;
 	if (m_accumulateMostViolatedConstraints && !m_pastAndCurrentConstraints) {
 		m_featureValueDiffs.push_back(maxViolationfeatureValueDiff);
 		m_lossMarginDistances.push_back(maxViolationLossMarginDistance);
@@ -156,12 +158,11 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		// Update the weight vector according to the alphas and the feature value differences
 		// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
 		for (size_t k = 0; k < m_featureValueDiffs.size(); ++k) {
-			// compute update
-			float update = alphas[k];
-			m_featureValueDiffs[k].MultiplyEquals(update);
+			float alpha = alphas[k];
+			m_featureValueDiffs[k].MultiplyEquals(alpha);
 
-			// accumulate update
-			totalUpdate.PlusEquals(m_featureValueDiffs[k]);
+			// sum up update
+			summedUpdate.PlusEquals(m_featureValueDiffs[k]);
 		}
 	} else if (violatedConstraintsBefore > 0) {
 		if (m_pastAndCurrentConstraints) {
@@ -177,22 +178,20 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 
 		if (m_slack != 0) {
-			alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances,
-			    m_slack);
+			alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances, m_slack);
 		} else {
 			alphas = Hildreth::optimise(featureValueDiffs, lossMarginDistances);
 		}
 
 		// Update the weight vector according to the alphas and the feature value differences
-		// * w' = w' + delta * Dh_ij ---> w' = w' + delta * (h(e*) - h(e_ij))
+		// * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
 		for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
-			// compute update
 			float alpha = alphas[k];
 			featureValueDiffs[k].MultiplyEquals(alpha);
 
-			// accumulate update
-			totalUpdate.PlusEquals(featureValueDiffs[k]);
-		}
+			// sum up update
+			summedUpdate.PlusEquals(featureValueDiffs[k]);
+	        }
 	} else {
 		cerr << "No constraint violated for this batch" << endl;
 		return 0;
@@ -200,34 +199,26 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	// apply learning rate (fixed or flexible)
 	if (learning_rate != 1) {
-		cerr << "Rank " << rank << ", update before applying learning rate: "
-		    << totalUpdate << endl;
-		totalUpdate.MultiplyEquals(learning_rate);
-		cerr << "Rank " << rank << ", update after applying learning rate: "
-		    << totalUpdate << endl;
+		cerr << "Rank " << rank << ", update before applying learning rate: " << summedUpdate << endl;
+		summedUpdate.MultiplyEquals(learning_rate);
+		cerr << "Rank " << rank << ", update after applying learning rate: " << summedUpdate << endl;
 	}
 
 	// apply threshold scaling
 	if (max_sentence_update != -1) {
-		cerr << "Rank " << rank
-		    << ", update before scaling to max-sentence-update: " << totalUpdate
-		    << endl;
-		totalUpdate.ThresholdScaling(max_sentence_update);
-		cerr << "Rank " << rank
-		    << ", update after scaling to max-sentence-update: " << totalUpdate
-		    << endl;
+		cerr << "Rank " << rank << ", update before scaling to max-sentence-update: " << summedUpdate << endl;
+		summedUpdate.ThresholdScaling(max_sentence_update);
+		cerr << "Rank " << rank << ", update after scaling to max-sentence-update: " << summedUpdate << endl;
 	}
 
-	if (update_after_epoch) {
-		m_accumulatedUpdates.PlusEquals(totalUpdate);
+	if (updates_per_epoch > 0) {
+		m_accumulatedUpdates.PlusEquals(summedUpdate);
 		cerr << "Rank " << rank << ", new accumulated updates:" << m_accumulatedUpdates << endl;
 	} else {
 		// apply update to weight vector
-		cerr << "Rank " << rank << ", weights before update: " << currWeights
-		    << endl;
-		currWeights.PlusEquals(totalUpdate);
-		cerr << "Rank " << rank << ", weights after update: " << currWeights
-		    << endl;
+		cerr << "Rank " << rank << ", weights before update: " << currWeights << endl;
+		currWeights.PlusEquals(summedUpdate);
+		cerr << "Rank " << rank << ", weights after update: " << currWeights << endl;
 
 		// sanity check: how many constraints violated after optimisation?
 		size_t violatedConstraintsAfter = 0;

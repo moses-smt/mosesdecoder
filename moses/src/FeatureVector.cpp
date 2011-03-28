@@ -181,6 +181,10 @@ namespace Moses {
       /*if (i->first != DEFAULT_NAME) {
     	  out << value << ", ";
       }*/
+      if (i->first != DEFAULT_NAME) {
+    	  out << value << ", ";
+    	  //out << i->first << "=" << value << ", ";
+      }
     }
     out << "}";
     return out;
