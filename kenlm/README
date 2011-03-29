@@ -1,7 +1,12 @@
 Language model inference code by Kenneth Heafield <infer at kheafield.com>
-The official website is http://kheafield.com/code/mt/infer.html .  If you're a decoder developer, please download the latest version from there instead of copying from Moses.  
+The official website is http://kheafield.com/code/kenlm/ .  If you're a decoder developer, please download the latest version from there instead of copying from Moses.  
 
-This documentation is directed at decoder developers.  
+While the primary means of building kenlm for use in Moses is the Moses build system, you can also compile independently using:
+./compile.sh to compile the code
+./test.sh to compile and run tests; requires Boost
+./clean.sh to clean
+
+The rest of the documentation is directed at decoder developers.  
 
 Binary format via mmap is supported.  Run ./build_binary to make one then pass the binary file name instead.  
 
