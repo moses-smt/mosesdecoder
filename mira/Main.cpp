@@ -834,9 +834,6 @@ int main(int argc, char** argv) {
 
 			mixedAverageWeightsBeforePrevious = mixedAverageWeightsPrevious;
 			mixedAverageWeightsPrevious = mixedAverageWeights;
-			cerr << "mixed average weights: " << mixedAverageWeights << endl;
-			cerr << "mixed average weights previous: " << mixedAverageWeightsPrevious << endl;
-			cerr << "mixed average weights before previous: " << mixedAverageWeightsBeforePrevious << endl;
 #ifdef MPI_ENABLE
 			mpi::broadcast(world, stop, 0);
 #endif
