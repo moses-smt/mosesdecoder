@@ -88,6 +88,8 @@ my $by_node = &param("train.by-node",0);
 my $slots = &param("train.slots",8);
 my $jobs = &param("train.jobs",8);
 my $mixing_frequency = &param("train.mixing-frequency",1);
+my $weight_dump_frequency = &param("train.weight-dump-frequency",1);
+
 
 #test configuration
 my ($test_input_file, $test_reference_file,$test_ini_file,$bleu_script,$use_moses);
@@ -107,7 +109,7 @@ $test_ini_file = &param_required("test.moses-ini-file");
 my $weight_file_stem = "$name-weights";
 my $extra_memory_test = &param("test.extra-memory",0);
 my $skip_test = &param("test.skip-test",0);
-my $skip_devtest = &param("test.skip-devtest",0);
+my $skip_dev = &param("test.skip-dev",0);
 
 
 # adjust test frequency when using batches > 1
@@ -128,6 +130,15 @@ if ($shardSize < $mixing_frequency) {
     }
 
     print "Warning: mixing frequency must not be larger than shard size, setting mixing frequency to $mixing_frequency\n";
+}
+
+if ($shardSize < $weight_dump_frequency) {
+    $weight_dump_frequency = int($shardSize);
+    if ($weight_dump_frequency == 0) {
+	$weight_dump_frequency = 1;
+    }
+
+    print "Warning: weight dump frequency must not be larger than shard size, setting weight dump frequency to $weight_dump_frequency\n";
 }
 
 #file names
@@ -164,6 +175,7 @@ print TRAIN "\\\n";
 print TRAIN "-l $learner \\\n";
 print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
 print TRAIN "--mixing-frequency $mixing_frequency \\\n";
+print TRAIN "--weight-dump-frequency $weight_dump_frequency \\\n";
 print TRAIN "--epochs $epochs \\\n";
 print TRAIN "-b $batch \\\n";
 print TRAIN "--decoder-settings \"$decoder_settings\" \\\n";
@@ -243,37 +255,11 @@ while(1) {
     #new weight file written. create test script and submit    
     my $suffix = "";
     if (!$skip_test) {
-	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix);
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "test", $test_ini_file, $test_input_file, $test_reference_file);
     }
-    
-#    if ($mixing_frequency == 1) {
-#	print "Waiting for $totalAverageWeightFile\n";
-#        while ((! -e $totalAverageWeightFile) && &check_running($train_job_id)) {
-#            sleep 10;
-#        }
-#        if (! -e $totalAverageWeightFile) {
-#            print "Training finished at " . scalar(localtime()) . "\n";
-#            exit 0;
-#        }
-#
-#	$suffix = "_averageTotal";
-#	createTestScriptAndSubmit($epoch, $epoch_slice, $totalAverageWeightFile, $suffix);
-#    }
-#    else {
-#	if ($epoch_slice+1 == $mixing_frequency) {
-#	    print "Waiting for $totalAverageWeightFile\n";
-#	    while ((! -e $totalAverageWeightFile) && &check_running($train_job_id)) {
-#		sleep 10;
-#	    }
-#	    if (! -e $totalAverageWeightFile) {
-#		print "Training finished at " . scalar(localtime()) . "\n";
-#		exit 0;
-#	    }
-#
-#	    $suffix = "_averageTotal";
-#	    createTestScriptAndSubmit($epoch, $epoch_slice, $totalAverageWeightFile, $suffix);
-#	}
-#    }
+    if (!$skip_dev) {
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $refs[0]);
+    }
 }
 
 sub createTestScriptAndSubmit {
@@ -281,52 +267,51 @@ sub createTestScriptAndSubmit {
     my $epoch_slice = $_[1];
     my $new_weight_file = $_[2];
     my $suffix = $_[3];
+    my $testtype = $_[4];
+    my $old_ini_file = $_[5];
+    my $input_file = $_[6];
+    my $reference_file = $_[7];
 
     #file names
-    my $job_name = $name."_$train_iteration".$suffix;
-    my $test_script = "$name-test";
+    my $job_name = $name."_".$testtype."_".$train_iteration.$suffix;
+
+    my $test_script = "$name-$testtype";
     my $test_script_file = $working_dir."/".$test_script.".$train_iteration".$suffix.".sh"; 
     my $test_out = $test_script . ".$train_iteration" . $suffix . ".out";
     my $test_err = $test_script . ".$train_iteration" . $suffix . ".err";
-    my $devtest_script_file = $working_dir."/".$test_script.".dev.$train_iteration".$suffix.".sh"; 
-    my $devtest_out = $devtest_script . ".$train_iteration" . $suffix . ".out";
-    my $devtest_err = $devtest_script . ".$train_iteration" . $suffix . ".err";
+
     my $output_file;
     my $output_error_file;
     my $bleu_file;
     if ($mixing_frequency == 1) {
 	if ($train_iteration < 10) {
-	    $output_file = $working_dir."/".$name."_0".$train_iteration.$suffix.".out";
-	    $output_error_file = $working_dir."/".$name."_0".$train_iteration.$suffix.".err";
-	    $bleu_file = $working_dir."/".$name."_0".$train_iteration.$suffix.".bleu";
+	    $output_file = $working_dir."/".$name."_0".$train_iteration.$suffix."_$testtype".".out";
+	    $output_error_file = $working_dir."/".$name."_0".$train_iteration.$suffix."_$testtype".".err";
+	    $bleu_file = $working_dir."/".$name."_0".$train_iteration.$suffix."_$testtype".".bleu";
 	}
 	else {
-	    $output_file = $working_dir."/".$name."_".$train_iteration.$suffix.".out";
-	    $output_error_file = $working_dir."/".$name."_".$train_iteration.$suffix.".err";
-	    $bleu_file = $working_dir."/".$name."_".$train_iteration.$suffix.".bleu";
+	    $output_file = $working_dir."/".$name."_".$train_iteration.$suffix."_$testtype".".out";
+	    $output_error_file = $working_dir."/".$name."_".$train_iteration.$suffix."_$testtype".".err";
+	    $bleu_file = $working_dir."/".$name."_".$train_iteration.$suffix."_$testtype".".bleu";
 	}        
     }
     else {
 	if ($epoch < 10) {
-	    $output_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix.".out";
-	    $output_error_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix.".err";
-	    $bleu_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix.".bleu";
+	    $output_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix."_$testtype".".out";
+	    $output_error_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix."_$testtype".".err";
+	    $bleu_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix."_$testtype".".bleu";
 	}
 	else {
-	    $output_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix.".out";
-	    $output_error_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix.".err";
-	    $bleu_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix.".bleu";
+	    $output_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix."_$testtype".".out";
+	    $output_error_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix."_$testtype".".err";
+	    $bleu_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix."_$testtype".".bleu";
 	}        
     }
 
     if (! (open TEST, ">$test_script_file" )) {
         die "Unable to create test script $test_script_file\n";
     }
-    if (!$skip_devtest) {
-	if (! (open DEVTEST, ">$devtest_script_file" )) {
-	    die "Unable to create test script $devtest_script_file\n";
-    }
-    }
+    
     my $hours = &param("test.hours",12);
     my $extra_args = &param("test.extra-args");
 
@@ -399,12 +384,12 @@ sub createTestScriptAndSubmit {
     }
       
     # Create new ini file
-    my $new_test_ini_file = $working_dir."/".$test_script.".".$train_iteration.$suffix.".ini";
-    if (! (open NEWINI, ">$new_test_ini_file" )) {
-        die "Unable to create ini file $new_test_ini_file\n";
+    my $new_ini_file = $working_dir."/".$test_script.".".$train_iteration.$suffix.".ini";
+    if (! (open NEWINI, ">$new_ini_file" )) {
+        die "Unable to create ini file $new_ini_file\n";
     }
-    if (! (open OLDINI, "$test_ini_file" )) {
-        die "Unable to read ini file $test_ini_file\n";
+    if (! (open OLDINI, "$old_ini_file" )) {
+        die "Unable to read ini file $old_ini_file\n";
     }
 
     while(<OLDINI>) {
@@ -485,15 +470,15 @@ sub createTestScriptAndSubmit {
     print TEST "#\$ -o $test_out\n";
     print TEST "#\$ -e $test_err\n";
     print TEST "\n";
-    print TEST "$test_exe $decoder_settings -i $test_input_file -f $new_test_ini_file ";
+    print TEST "$test_exe $decoder_settings -i $input_file -f $new_ini_file ";
     if ($extra_weight_file) {
       print TEST "-weight-file $extra_weight_file ";
     }
     print TEST $extra_args;
     print TEST " 1> $output_file 2> $output_error_file\n";
-    print TEST "echo \"Decoding of test set finished.\"\n";
-    print TEST "$bleu_script $test_reference_file < $output_file > $bleu_file\n";
-    print TEST "echo \"Computed BLEU score of test set.\"\n";
+    print TEST "echo \"Decoding of ".$testtype." set finished.\"\n";
+    print TEST "$bleu_script $reference_file < $output_file > $bleu_file\n";
+    print TEST "echo \"Computed BLEU score of ".$testtype." set.\"\n";
     close TEST;
 
     #launch testing
@@ -507,40 +492,7 @@ sub createTestScriptAndSubmit {
 	}
     } else {
       &submit_job_no_sge($test_script_file, $test_out,$test_err);
-    }
-
-    if (!$skip_devtest) {
-	print DEVTEST "#!/bin/sh\n";
-	print DEVTEST "#\$ -N $job_name\n";
-	print DEVTEST "#\$ -wd $working_dir\n";
-	print DEVTEST "#\$ -l h_rt=$hours:00:00\n";
-	print DEVTEST "#\$ -o $test_out\n";
-	print DEVTEST "#\$ -e $test_err\n";
-	print DEVTEST "\n";
-	print DEVTEST "$test_exe $decoder_settings -i $test_input_file -f $new_test_ini_file ";
-	if ($extra_weight_file) {
-	    print DEVTEST "-weight-file $extra_weight_file ";
-	}
-	print DEVTEST $extra_args;
-	print DEVTEST " 1> $output_file 2> $output_error_file\n";
-	print DEVTEST "echo \"Decoding of test set finished.\"\n";
-	print DEVTEST "$bleu_script $test_reference_file < $output_file > $bleu_file\n";
-	print DEVTEST "echo \"Computed BLEU score of test set.\"\n";
-	close DEVTEST;
-	    
-	#launch testing
-	if ($have_sge) {
-	    if ($extra_memory_test) {
-		print "Extra memory for test job: $extra_memory_test \n";
-		&submit_job_sge_extra_memory($devtest_script_file,$extra_memory_test);
-	    }
-	    else {
-		&submit_job_sge($devtest_script_file);
-	    }
-	} else {
-	    &submit_job_no_sge($devtest_script_file, $test_out,$test_err);
-	}
-    }
+  }
 }
 
 sub param {
@@ -594,8 +546,10 @@ sub check_exists {
 
 sub submit_job_sge {
     my($script_file) = @_;
-    my $qsub_result = `qsub -q ecdf\@\@westmere_ge_hosts -P $queue $script_file`;
-    print "SUBMIT CMD: qsub -q ecdf\@\@westmere_ge_hosts -P $queue $script_file\n";
+#    my $qsub_result = `qsub -q ecdf\@\@westmere_ge_hosts -P $queue $script_file`;
+#    print "SUBMIT CMD: qsub -q ecdf\@\@westmere_ge_hosts -P $queue $script_file\n";
+    my $qsub_result = `qsub -P $queue $script_file`;
+    print "SUBMIT CMD: qsub -P $queue $script_file\n";
     if ($qsub_result !~ /Your job (\d+)/) {
         print "Failed to qsub job: $qsub_result\n";
         return 0;
@@ -608,8 +562,10 @@ sub submit_job_sge {
 
 sub submit_job_sge_extra_memory {
     my($script_file,$extra_memory) = @_;
-    my $qsub_result = `qsub -q ecdf\@\@westmere_ge_hosts -pe $extra_memory -P $queue $script_file`;
-    print "SUBMIT CMD: qsub -q ecdf\@\@westmere_ge_hosts -pe $extra_memory -P $queue $script_file \n";
+#    my $qsub_result = `qsub -q ecdf\@\@westmere_ge_hosts -pe $extra_memory -P $queue $script_file`;
+#    print "SUBMIT CMD: qsub -q ecdf\@\@westmere_ge_hosts -pe $extra_memory -P $queue $script_file \n";
+    my $qsub_result = `qsub -pe $extra_memory -P $queue $script_file`;                                                                                
+    print "SUBMIT CMD: qsub -pe $extra_memory -P $queue $script_file \n";
     if ($qsub_result !~ /Your job (\d+)/) {
         print "Failed to qsub job: $qsub_result\n";
         return 0;
