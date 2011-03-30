@@ -22,6 +22,7 @@
 #include "ChartTrellisNode.h"
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -100,6 +101,10 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
   Phrase ret(Output, ARRAY_SIZE_INCR);
 
+  const ChartTranslationOption &transOpt = m_hypo->GetTranslationOption();
+  
+  VERBOSE(3, "Trans Opt:" << transOpt << std::endl);
+    
   const Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {
     const Word &word = currTargetPhrase.GetWord(pos);
