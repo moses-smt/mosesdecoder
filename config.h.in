@@ -24,6 +24,9 @@
 /* Define to 1 if you have the `oolm' library (-loolm). */
 #undef HAVE_LIBOOLM
 
+/* Define to 1 if you have the `tcmalloc' library (-ltcmalloc). */
+#undef HAVE_LIBTCMALLOC
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -84,6 +87,9 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Flag to enable use of Boost pool */
+#undef USE_BOOST_POOL
 
 /* Version number of package */
 #undef VERSION
