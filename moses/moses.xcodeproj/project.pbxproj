@@ -607,7 +607,6 @@
 				1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */,
 				1ED0FD6A124BB9380029177F /* DummyScoreProducers.h */,
 				1ED0FD6B124BB9380029177F /* DynSAInclude */,
-				1ED4FC7C11BDC0D2004E826A /* DynSAInclude */,
 				1ED0FD73124BB9380029177F /* DynSuffixArray.cpp */,
 				1ED0FD74124BB9380029177F /* DynSuffixArray.h */,
 				1ED0FD75124BB9380029177F /* Factor.cpp */,
@@ -808,14 +807,6 @@
 				1ED0FD70124BB9380029177F /* utils.h */,
 				1ED0FD71124BB9380029177F /* vocab.cpp */,
 				1ED0FD72124BB9380029177F /* vocab.h */,
-			);
-			name = DynSAInclude;
-			path = src/DynSAInclude;
-			sourceTree = "<group>";
-		};
-		1ED4FC7C11BDC0D2004E826A /* DynSAInclude */ = {
-			isa = PBXGroup;
-			children = (
 			);
 			name = DynSAInclude;
 			path = src/DynSAInclude;
