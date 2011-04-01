@@ -45,8 +45,8 @@ public:
   {}
 
   explicit Word(size_t numFactors, bool isNonTerminal)
-    :m_factors(numFactors)
-    ,m_isNonTerminal(isNonTerminal)
+  :m_isNonTerminal(isNonTerminal)
+  ,m_factors(numFactors)
   {}
 
   Word(const Word &copy);

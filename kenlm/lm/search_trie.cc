@@ -775,8 +775,8 @@ void SanityCheckCounts(const std::vector<uint64_t> &initial, const std::vector<u
 }
 
 void BuildTrie(const std::string &file_prefix, std::vector<uint64_t> &counts, const Config &config, TrieSearch &out, Backing &backing) {
-  SortedFileReader inputs[counts.size() - 1];
-  ContextReader contexts[counts.size() - 1];
+  SortedFileReader *inputs  = (SortedFileReader*) malloc(sizeof(SortedFileReader) * (counts.size() - 1));
+  ContextReader *contexts   = (ContextReader*) malloc(sizeof(ContextReader) * (counts.size() - 1));
 
   for (unsigned char i = 2; i <= counts.size(); ++i) {
     std::stringstream assembled;
@@ -850,6 +850,9 @@ void BuildTrie(const std::string &file_prefix, std::vector<uint64_t> &counts, co
     }
     out.middle.back().FinishedLoading(out.longest.InsertIndex());
   }
+  
+  free(inputs);
+  free(contexts); 
 }
 
 bool IsDirectory(const char *path) {
