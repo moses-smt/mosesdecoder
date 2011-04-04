@@ -398,10 +398,11 @@ int main(int argc, char** argv) {
 			vector<size_t> inputLengths;
 			vector<size_t> ref_ids;
 			size_t actualBatchSize = 0;
-			string& input = inputSentences[0];
+
+			vector<size_t>::const_iterator current_sid = sid;
 			for (size_t batchPosition = 0; batchPosition < batchSize && sid
 			    != shard.end(); ++batchPosition) {
-				input = inputSentences[*sid];
+				string& input = inputSentences[*sid];
 				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "Rank " << rank << ", batch position " << batchPosition << endl;
 				cerr << "Rank " << rank << ", input sentence " << *sid << ": \"" << input << "\"" << endl;
@@ -454,7 +455,7 @@ int main(int argc, char** argv) {
 					delete fear[i];
 				}
 
-				cerr << "Sentence " << *sid << ", Bleu: "  << bleuScores[batchPosition][oraclePos] << endl;
+				cerr << "Sentence " << *sid << ", best model Bleu: "  << bleuScores[batchPosition][0] << endl;
 				summedApproxBleu += bleuScores[batchPosition][0];
 
 				// next input sentence
@@ -495,6 +496,26 @@ int main(int argc, char** argv) {
 			cerr << "\nRank " << rank << ", run optimiser:" << endl;
 			ScoreComponentCollection oldWeights(mosesWeights);
 
+			// print 1best model results with old weights
+			if (actualBatchSize == 1) {
+				vector<vector<ScoreComponentCollection> > dummy1;
+				vector<vector<float> > dummy2;
+				vector<ScoreComponentCollection> dummy_new1;
+				vector<float> dummy_new2;
+				dummy1.push_back(dummy_new1);
+				dummy2.push_back(dummy_new2);
+				string& input = inputSentences[*current_sid];
+				cerr << "\nRank " << rank << ", 1best model with old weights: ";
+				decoder->getNBest(input, *current_sid, 1, 0.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest, rank);
+				decoder->cleanup();
+				cerr << endl;
+
+				cerr << "\nRank " << rank << ", 1best hope with old weights: ";
+				decoder->getNBest(input, *current_sid, 1, 1.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest, rank);
+				decoder->cleanup();
+				cerr << endl;
+			}
+
 			int updateStatus = optimiser->updateWeights(mosesWeights, featureValues,
 			    losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
 			    learning_rate, max_sentence_update, rank, updates_per_epoch);
@@ -534,21 +555,23 @@ int main(int argc, char** argv) {
 				weightDifference.MinusEquals(oldWeights);
 				cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
 
-				// compare best model results with new weights
+				// print 1best model results with new weights
 				if (actualBatchSize == 1) {
-					cerr << "\nRank " << rank << ", nbest model score translations with new weights" << endl;
-					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n,
-										0.0, 1.0, featureValues[0], bleuScores[0], true, distinctNbest,
-										rank);
-					decoder->cleanup();
-					cerr << endl;
-
-					cerr << "\nRank " << rank << ", nbest hope translations with new weights" << endl;
-					vector<const Word*> oracle = decoder->getNBest(input, *sid, n,
-										1.0, 1.0, featureValues[0], bleuScores[0], true, distinctNbest,
-										rank);
-					decoder->cleanup();
-					cerr << endl;
+						vector<vector<ScoreComponentCollection> > dummy1;
+						vector<vector<float> > dummy2;
+						vector<ScoreComponentCollection> dummy_new1;
+						vector<float> dummy_new2;
+						dummy1.push_back(dummy_new1);
+						dummy2.push_back(dummy_new2);
+						string& input = inputSentences[*current_sid];
+						cerr << "\nRank " << rank << ", 1best model with new weights: ";
+						decoder->getNBest(input, *current_sid, 1, 0.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest,	rank);
+						decoder->cleanup();
+						cerr << endl;
+						cerr << "\nRank " << rank << ", 1best hope with new weights: ";
+						decoder->getNBest(input, *current_sid, 1, 1.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest,	rank);
+						decoder->cleanup();
+						cerr << endl;
 				}
 			}
 
