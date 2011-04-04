@@ -23,6 +23,7 @@
 #include "StaticData.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOption.h"
+#include "ChartCellCollection.h"
 #include "WordsRange.h"
 
 using namespace std;
@@ -46,17 +47,17 @@ ChartTranslationOptionList::~ChartTranslationOptionList()
   RemoveAllInColl(m_collection);
 }
 
-
-class ChartRuleOrderer
+class ChartTranslationOptionOrderer
 {
 public:
   bool operator()(const ChartTranslationOption* itemA, const ChartTranslationOption* itemB) const {
-    return itemA->GetTargetPhrase().GetFutureScore() > itemB->GetTargetPhrase().GetFutureScore();
+    return itemA->GetEstimateOfBestScore() > itemB->GetEstimateOfBestScore();
   }
 };
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseCollection
                                      , const CoveredChartSpan &coveredChartSpan
+                                     , const ChartCellCollection &chartCellColl
                                      , bool /* adhereTableLimit */
                                      , size_t ruleLimit)
 {
@@ -65,16 +66,25 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseC
 
   for (iter = targetPhraseCollection.begin(); iter != iterEnd; ++iter) {
     const TargetPhrase &targetPhrase = **iter;
-    float score = targetPhrase.GetFutureScore();
 
     if (m_collection.size() < ruleLimit) {
       // not yet filled out quota. add everything
-      m_collection.push_back(new ChartTranslationOption(targetPhrase, coveredChartSpan, m_range));
+      ChartTranslationOption *option = new ChartTranslationOption(
+        targetPhrase, coveredChartSpan, m_range, chartCellColl);
+      m_collection.push_back(option);
+      float score = option->GetEstimateOfBestScore();
       m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
     }
-    else if (score > m_scoreThreshold) {
+    else {
       // full but not bursting. add if better than worst score
-      m_collection.push_back(new ChartTranslationOption(targetPhrase, coveredChartSpan, m_range));
+      ChartTranslationOption option(targetPhrase, coveredChartSpan, m_range,
+                                    chartCellColl);
+      float score = option.GetEstimateOfBestScore();
+      if (score > m_scoreThreshold) {
+        // dynamic allocation deferred until here on the assumption that most
+        // options will score below the threshold.
+        m_collection.push_back(new ChartTranslationOption(option));
+      }
     }
 
     // prune if bursting
@@ -82,12 +92,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseC
       std::nth_element(m_collection.begin()
                        , m_collection.begin() + ruleLimit
                        , m_collection.end()
-                       , ChartRuleOrderer());
+                       , ChartTranslationOptionOrderer());
       // delete the bottom half
       for (size_t ind = ruleLimit; ind < m_collection.size(); ++ind) {
         // make the best score of bottom half the score threshold
-        const TargetPhrase &targetPhrase = m_collection[ind]->GetTargetPhrase();
-        float score = targetPhrase.GetFutureScore();
+        float score = m_collection[ind]->GetEstimateOfBestScore();
         m_scoreThreshold = (score > m_scoreThreshold) ? score : m_scoreThreshold;
         delete m_collection[ind];
       }
@@ -109,7 +118,7 @@ void ChartTranslationOptionList::CreateChartRules(size_t ruleLimit)
     std::nth_element(m_collection.begin()
                      , m_collection.begin() + ruleLimit
                      , m_collection.end()
-                     , ChartRuleOrderer());
+                     , ChartTranslationOptionOrderer());
 
     // delete the bottom half
     for (size_t ind = ruleLimit; ind < m_collection.size(); ++ind) {
@@ -125,21 +134,6 @@ void ChartTranslationOptionList::CreateChartRules(size_t ruleLimit)
   }
 }
 
-// helper class
-class ChartTranslationOptionOrderer
-{
-public:
-  bool operator()(const ChartTranslationOption* transOptA, const ChartTranslationOption* transOptB) const {
-    /*
-     if (transOptA->GetArity() != transOptB->GetArity())
-     {
-     return transOptA->GetArity() < transOptB->GetArity();
-     }
-     */
-    return transOptA->GetTotalScore() > transOptB->GetTotalScore();
-  }
-};
-
 
 void ChartTranslationOptionList::Sort()
 {
@@ -149,7 +143,7 @@ void ChartTranslationOptionList::Sort()
   CollType::const_iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
     const ChartTranslationOption *transOpt = *iter;
-    float score = transOpt->GetTotalScore();
+    float score = transOpt->GetEstimateOfBestScore();
     scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
   }
 
@@ -158,7 +152,7 @@ void ChartTranslationOptionList::Sort()
   size_t ind = 0;
   while (ind < m_collection.size()) {
     const ChartTranslationOption *transOpt = m_collection[ind];
-    if (transOpt->GetTotalScore() < scoreThreshold) {
+    if (transOpt->GetEstimateOfBestScore() < scoreThreshold) {
       delete transOpt;
       m_collection.erase(m_collection.begin() + ind);
     } else {

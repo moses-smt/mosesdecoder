@@ -273,7 +273,7 @@ void PhraseDictionarySCFG::CleanUp()
 
 ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(
   const InputType &sentence,
-  const CellCollection &cellCollection)
+  const ChartCellCollection &cellCollection)
 {
   return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
 }

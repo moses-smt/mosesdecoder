@@ -110,7 +110,7 @@ void RuleCube::CreateNeighbors(RuleCubeQueue &queue) const
 // (consisting of rule translation scores plus child hypotheses scores)
 void RuleCube::CalcScore()
 {
-  m_combinedScore = m_transOpt.GetTotalScore();
+  m_combinedScore = m_transOpt.GetTargetPhrase().GetFutureScore();
   for (size_t ind = 0; ind < m_cube.size(); ind++) {
     const RuleCubeDimension &ruleCubeDimension = m_cube[ind];
 

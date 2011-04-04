@@ -46,7 +46,7 @@ class StaticData;
 class InputType;
 class WordsRange;
 class ChartTranslationOptionList;
-class CellCollection;
+class ChartCellCollection;
 class TranslationSystem;
 class ChartRuleLookupManager;
 
@@ -80,7 +80,7 @@ public:
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const CellCollection &) = 0;
+    const ChartCellCollection &) = 0;
 
 protected:
   size_t m_tableLimit;

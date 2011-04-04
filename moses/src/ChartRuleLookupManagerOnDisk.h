@@ -23,7 +23,6 @@
 
 #include "../../OnDiskPt/src/OnDiskWrapper.h"
 
-#include "CellCollection.h"
 #include "ChartRuleLookupManager.h"
 #include "ChartTranslationOptionList.h"
 #include "DotChartOnDisk.h"
@@ -38,7 +37,7 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerOnDisk(const InputType &sentence,
-                               const CellCollection &cellColl,
+                               const ChartCellCollection &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,
                                const LMList *languageModels,

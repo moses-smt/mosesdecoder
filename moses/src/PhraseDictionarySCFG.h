@@ -24,7 +24,6 @@
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNodeSCFG.h"
-#include "CellCollection.h"
 #include "InputType.h"
 #include "CoveredChartSpan.h"
 #include "NonTerminal.h"
@@ -106,7 +105,7 @@ public:
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const CellCollection &);
+    const ChartCellCollection &);
 };
 
 }  // namespace Moses

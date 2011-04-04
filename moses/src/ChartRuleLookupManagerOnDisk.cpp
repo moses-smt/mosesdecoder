@@ -24,7 +24,6 @@
 #include "PhraseDictionaryOnDisk.h"
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
-#include "CellCollection.h"
 #include "ChartTranslationOptionList.h"
 #include "../../OnDiskPt/src/TargetPhraseCollection.h"
 
@@ -35,7 +34,7 @@ namespace Moses
 
 ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const InputType &sentence,
-  const CellCollection &cellColl,
+  const ChartCellCollection &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const LMList *languageModels,
@@ -275,7 +274,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           }
 
           assert(targetPhraseCollection);
-          outColl.Add(*targetPhraseCollection, *coveredChartSpan, adhereTableLimit, rulesLimit);
+          outColl.Add(*targetPhraseCollection, *coveredChartSpan,
+                      GetCellCollection(), adhereTableLimit, rulesLimit);
 
           numDerivations++;
 

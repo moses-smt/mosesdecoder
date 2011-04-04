@@ -26,13 +26,14 @@
 #include "DotChart.h"
 #include "StaticData.h"
 #include "NonTerminal.h"
+#include "ChartCellCollection.h"
 
 namespace Moses
 {
 
 ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   const InputType &src,
-  const CellCollection &cellColl,
+  const ChartCellCollection &cellColl,
   const PhraseDictionarySCFG &ruleTable)
   : ChartRuleLookupManager(src, cellColl)
   , m_ruleTable(ruleTable)
@@ -170,7 +171,8 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
     // add the fully expanded rule (with lexical target side)
     if (targetPhraseCollection != NULL) {
-      outColl.Add(*targetPhraseCollection, *coveredChartSpan, adhereTableLimit, rulesLimit);
+      outColl.Add(*targetPhraseCollection, *coveredChartSpan,
+                  GetCellCollection(), adhereTableLimit, rulesLimit);
     }
   }
   outColl.CreateChartRules(rulesLimit);

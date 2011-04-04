@@ -49,7 +49,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
-                               const CellCollection &cellColl,
+                               const ChartCellCollection &cellColl,
                                const PhraseDictionarySCFG &ruleTable);
 
   ~ChartRuleLookupManagerMemory();

@@ -237,7 +237,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       // chart rule
       ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
           , *coveredChartSpanList->back()
-          , range);
+          , range
+          , m_hypoStackColl);
       chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);
     } // for (iterLHS
@@ -271,7 +272,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       assert(coveredChartSpanList->size());
       ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
           , *coveredChartSpanList->back()
-          , range);
+          , range
+          , m_hypoStackColl);
       chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);
     }

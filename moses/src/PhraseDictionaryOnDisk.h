@@ -33,7 +33,6 @@ namespace Moses
 {
 class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
-class CellCollection;
 class WordPenaltyProducer;
 
 class PhraseDictionaryOnDisk : public PhraseDictionary
@@ -87,7 +86,7 @@ public:
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const CellCollection &);
+    const ChartCellCollection &);
 };
 
 }  // namespace Moses

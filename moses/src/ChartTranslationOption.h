@@ -29,6 +29,7 @@
 namespace Moses
 {
 class CoveredChartSpan;
+class ChartCellCollection;
 
 // basically a phrase translation and the vector of words consumed to map each word
 class ChartTranslationOption
@@ -49,14 +50,22 @@ protected:
   */
   const WordsRange	&m_wordsRange;
 
-  ChartTranslationOption(const ChartTranslationOption &copy); // not implmenented
+    float m_estimateOfBestScore;
+
+  ChartTranslationOption &operator=(const ChartTranslationOption &);  // not implemented
+
+  void CalcEstimateOfBestScore(const CoveredChartSpan *, const ChartCellCollection &);
 
 public:
-  ChartTranslationOption(const TargetPhrase &targetPhrase, const CoveredChartSpan &lastCoveredChartSpan, const WordsRange	&wordsRange)
+  ChartTranslationOption(const TargetPhrase &targetPhrase, const CoveredChartSpan &lastCoveredChartSpan, const WordsRange	&wordsRange, const ChartCellCollection &allChartCells)
     :m_targetPhrase(targetPhrase)
     ,m_lastCoveredChartSpan(lastCoveredChartSpan)
     ,m_wordsRange(wordsRange)
-  {}
+    ,m_estimateOfBestScore(m_targetPhrase.GetFutureScore())
+  {
+    CalcEstimateOfBestScore(&m_lastCoveredChartSpan, allChartCells);
+  }
+
   ~ChartTranslationOption()
   {}
 
@@ -77,8 +86,12 @@ public:
     return m_wordsRange;
   }
 
-  inline float GetTotalScore() const {
-    return m_targetPhrase.GetFutureScore();
+  // return an estimate of the best score possible with this translation option.
+  // the estimate is the sum of the target phrase's estimated score plus the
+  // scores of the best child hypotheses.  (the same as the ordering criterion
+  // currently used in RuleCubeQueue.)
+  inline float GetEstimateOfBestScore() const {
+    return m_estimateOfBestScore;
   }
 
 };

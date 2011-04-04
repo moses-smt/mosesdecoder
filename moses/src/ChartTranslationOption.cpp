@@ -22,6 +22,7 @@
 #include "TargetPhrase.h"
 #include "AlignmentInfo.h"
 #include "CoveredChartSpan.h"
+#include "ChartCellCollection.h"
 
 using namespace std;
 
@@ -47,6 +48,38 @@ void ChartTranslationOption::CreateNonTermIndex()
     size_t targetPos = iter->second;
     m_coveredChartSpanListTargetOrder[targetPos] = nonTermInd;
     nonTermInd++;
+  }
+}
+
+void ChartTranslationOption::CalcEstimateOfBestScore(
+  const CoveredChartSpan *coveredChartSpan,
+  const ChartCellCollection &allChartCells)
+{
+  // recurse through the linked list of source side non-terminals and terminals
+  const CoveredChartSpan *prevCoveredChartSpan =
+    coveredChartSpan->GetPrevCoveredChartSpan();
+  if (prevCoveredChartSpan)
+  {
+    CalcEstimateOfBestScore(prevCoveredChartSpan, allChartCells);
+  }
+
+  // only deal with non-terminals
+  if (coveredChartSpan->IsNonTerminal())
+  {
+    // get the essential information about the non-terminal
+    const WordsRange &childRange = coveredChartSpan->GetWordsRange();
+    const ChartCell &childCell = allChartCells.Get(childRange);
+    const Word &nonTerm = coveredChartSpan->GetSourceWord();
+
+    // there have to be hypotheses with the desired non-terminal
+    // (otherwise the rule would not be considered)
+    assert(!childCell.GetSortedHypotheses(nonTerm).empty());
+
+    // create a list of hypotheses that match the non-terminal
+    const vector<const ChartHypothesis *> &stack =
+      childCell.GetSortedHypotheses(nonTerm);
+    const ChartHypothesis *hypo = stack[0];
+    m_estimateOfBestScore += hypo->GetTotalScore();
   }
 }
 
