@@ -171,6 +171,8 @@ namespace Mira {
     	}
     }
 
+    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
+
     return best;
   }
 
