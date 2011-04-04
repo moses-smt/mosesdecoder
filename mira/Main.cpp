@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
 	    ("updates-per-epoch", po::value<int>(&updates_per_epoch)->default_value(-1), "Accumulate updates and apply them to the weight vector the specified number of times per epoch")
-	    ("use-average-weights-for-pruning", po::value<bool>(&useAverageWeightsForPruning)->default_value(true), "Use total weights (cumulative/weights changes) for pruning instead of current weights")
+	    ("use-average-weights-for-pruning", po::value<bool>(&useAverageWeightsForPruning)->default_value(false), "Use total weights (cumulative/weights changes) for pruning instead of current weights")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
