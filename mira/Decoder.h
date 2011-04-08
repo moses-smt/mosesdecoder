@@ -63,6 +63,10 @@ class MosesDecoder {
                           bool oracle,
                           bool distinct,
                           size_t rank);
+    std::vector<float> getBleuAndScore(const std::string& source,
+													size_t sentenceid,
+													float bleuObjectiveWeight,
+													bool distinct);
     size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids);

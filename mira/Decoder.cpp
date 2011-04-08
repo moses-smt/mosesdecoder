@@ -71,7 +71,7 @@ namespace Mira {
   MosesDecoder::MosesDecoder(const vector<vector<string> >& refs, bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing)
 		: m_manager(NULL) {
 			// force initialisation of the phrase dictionary (TODO: what for?)
-      const StaticData &staticData = StaticData::Instance();
+			const StaticData &staticData = StaticData::Instance();
       m_sentence = new Sentence(Input);
       stringstream in("Initialising decoder..\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
@@ -171,9 +171,56 @@ namespace Mira {
     	}
     }
 
-    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
+//    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
 
     return best;
+  }
+
+  vector<float> MosesDecoder::getBleuAndScore(const std::string& source,
+                                size_t sentenceid,
+                                float bleuObjectiveWeight,
+                                bool distinct)
+  {
+  	StaticData &staticData = StaticData::InstanceNonConst();
+
+  	m_sentence = new Sentence(Input);
+  	stringstream in(source + "\n");
+  	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+  	m_sentence->Read(in,inputFactorOrder);
+  	const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+
+  	// set the weight for the bleu feature
+  	ostringstream bleuWeightStr;
+  	bleuWeightStr << bleuObjectiveWeight;
+  	PARAM_VEC bleuWeight(1,bleuWeightStr.str());
+
+  	staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
+  	staticData.ReLoadBleuScoreFeatureParameter();
+
+  	m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
+  	m_bleuScoreFeature->SetCurrentReference(sentenceid);
+
+  	//run the decoder
+  	m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
+  	m_manager->ProcessSentence();
+  	TrellisPathList sentences;
+  	m_manager->CalcNBest(1, sentences, distinct);
+
+  	// read off the feature values and bleu scores for each sentence in the nbest list
+  	Moses::TrellisPathList::const_iterator iter;
+  	vector<float> bleuAndScore;
+  	for (iter = sentences.begin() ; iter != sentences.end() ; ++iter) {
+  		const Moses::TrellisPath &path = **iter;
+  		float bleuScore = getBleuScore(path.GetScoreBreakdown());
+
+  		float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
+  		bleuAndScore.push_back(bleuScore);
+  		bleuAndScore.push_back(scoreWithoutBleu);
+
+//    	cerr << "Total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
+  	}
+
+  	return bleuAndScore;
   }
 
   size_t MosesDecoder::getCurrentInputLength() {

@@ -169,8 +169,8 @@ int main(int argc, char** argv) {
 	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
 	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
 	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
-	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases")
-	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases")
+	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases (or no more increases)")
+	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases (or no more increases)")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
 	    ("updates-per-epoch", po::value<int>(&updates_per_epoch)->default_value(-1), "Accumulate updates and apply them to the weight vector the specified number of times per epoch")
 	    ("use-average-weights-for-pruning", po::value<bool>(&useAverageWeightsForPruning)->default_value(false), "Use total weights (cumulative/weights changes) for pruning instead of current weights")
@@ -275,6 +275,7 @@ int main(int argc, char** argv) {
 
 	Optimiser* optimiser = NULL;
 	cerr << "adapt-BP-factor: " << adapt_BPfactor << endl;
+	cerr << "control-updates: " << controlUpdates << endl;
 	cerr << "mix-frequency: " << mixingFrequency << endl;
 	cerr << "weight-dump-frequency: " << weightDumpFrequency << endl;
 	cerr << "weight-dump-stem: " << weightDumpStem << endl;
@@ -300,7 +301,6 @@ int main(int argc, char** argv) {
 	cerr << "accumulate-most-violated-constraints: "
 	    << accumulateMostViolatedConstraints << endl;
 	cerr << "past-and-current-constraints: " << pastAndCurrentConstraints << endl;
-	cerr << "control-updates: " << controlUpdates << endl;
 	cerr << "log-feature-values: " << logFeatureValues << endl;
 	cerr << "base-of-log: " << baseOfLog << endl;
 	cerr << "decoder-settings: " << decoder_settings << endl;
@@ -365,6 +365,7 @@ int main(int argc, char** argv) {
 	// Note: make sure that the variable mosesWeights always holds the current decoder weights
 	for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
 		cerr << "\nEpoch " << epoch << endl;
+		bool weightsUpdated = false;
 		numberCumulativeWeightsThisEpoch = 0;
 		summedApproxBleu = 0;
 		// Sum up weights over one epoch, final average uses weights from last epoch
@@ -388,7 +389,8 @@ int main(int argc, char** argv) {
 
 			// get moses weights
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
-			cerr << "\nRank " << rank << ", weights: " << mosesWeights << endl;
+			cerr << "\nNext batch" << endl;
+			cerr << "Rank " << rank << ", weights: " << mosesWeights << endl;
 
 			// BATCHING: produce nbest lists for all input sentences in batch
 			vector<size_t> oraclePositions;
@@ -455,7 +457,7 @@ int main(int argc, char** argv) {
 					delete fear[i];
 				}
 
-				cerr << "Sentence " << *sid << ", best model Bleu: "  << bleuScores[batchPosition][0] << endl;
+				cerr << "Sentence " << *sid << ", best model Bleu (approximate sentence bleu): "  << bleuScores[batchPosition][0] << endl;
 				summedApproxBleu += bleuScores[batchPosition][0];
 
 				// next input sentence
@@ -492,103 +494,93 @@ int main(int argc, char** argv) {
 				}
 			}
 
-			// run optimiser on batch
-			cerr << "\nRank " << rank << ", run optimiser:" << endl;
-			ScoreComponentCollection oldWeights(mosesWeights);
-
-			// print 1best model results with old weights
+			// get 1best model results with old weights
+			vector<float> bestModelOld;
 			if (actualBatchSize == 1) {
-				vector<vector<ScoreComponentCollection> > dummy1;
-				vector<vector<float> > dummy2;
-				vector<ScoreComponentCollection> dummy_new1;
-				vector<float> dummy_new2;
-				dummy1.push_back(dummy_new1);
-				dummy2.push_back(dummy_new2);
 				string& input = inputSentences[*current_sid];
-				cerr << "\nRank " << rank << ", 1best model with old weights: ";
-				decoder->getNBest(input, *current_sid, 1, 0.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest, rank);
+				bestModelOld = decoder->getBleuAndScore(input, *current_sid, 0.0, distinctNbest);
 				decoder->cleanup();
-				cerr << endl;
+			}
 
-				cerr << "\nRank " << rank << ", 1best hope with old weights: ";
-				decoder->getNBest(input, *current_sid, 1, 1.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest, rank);
-				decoder->cleanup();
+			// optionally print out the feature values
+			if (print_feature_values) {
+				cerr << "\nRank " << rank << ", feature values: " << endl;
+				for (size_t i = 0; i < featureValues.size(); ++i) {
+					for (size_t j = 0; j < featureValues[i].size(); ++j) {
+						cerr << featureValues[i][j] << endl;
+					}
+				}
 				cerr << endl;
 			}
 
+			// run optimiser on batch
+			cerr << "Rank " << rank << ", run optimiser:" << endl;
+			ScoreComponentCollection oldWeights(mosesWeights);
 			int updateStatus = optimiser->updateWeights(mosesWeights, featureValues,
 			    losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
 			    learning_rate, max_sentence_update, rank, updates_per_epoch);
 
+//			if (updateStatus < 0) {
+//				cerr << "Bogus result from hildreth optimizer.. exit." << endl;
+//				exit(1);
+//			}
 			if (controlUpdates && updateStatus < 0) {
 				// TODO: could try to repeat hildreth with more slack
 				cerr << "update ignored!" << endl;
-			} else if (updates_per_epoch == -1) {
-				// apply new weights now
-				if (normaliseWeights) {
-					mosesWeights.L1Normalise();
-					cerr << "\nRank " << rank << ", new weights (normalised): " << mosesWeights << endl;
-				} else {
-					cerr << "\nRank " << rank << ", new weights: " << mosesWeights << endl;
-				}
-
-				cumulativeWeights.PlusEquals(mosesWeights);
-				++numberCumulativeWeights;
-				++numberCumulativeWeightsThisEpoch;
-				if (useAverageWeightsForPruning) {
-					ScoreComponentCollection averageWeights(cumulativeWeights);
-					if (accumulateWeights) {
-						averageWeights.DivideEquals(numberCumulativeWeights);
-					} else {
-						averageWeights.DivideEquals(numberCumulativeWeightsThisEpoch);
-					}
-
-					mosesWeights = averageWeights;
-					cerr << "Rank " << rank << ", average weights: " << averageWeights << endl;
-				}
-
-				// set new Moses weights (averaged or not)
-				decoder->setWeights(mosesWeights);
-
-				// compute difference to old weights
-				ScoreComponentCollection weightDifference(mosesWeights);
-				weightDifference.MinusEquals(oldWeights);
-				cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
-
-				// print 1best model results with new weights
-				if (actualBatchSize == 1) {
-						vector<vector<ScoreComponentCollection> > dummy1;
-						vector<vector<float> > dummy2;
-						vector<ScoreComponentCollection> dummy_new1;
-						vector<float> dummy_new2;
-						dummy1.push_back(dummy_new1);
-						dummy2.push_back(dummy_new2);
-						string& input = inputSentences[*current_sid];
-						cerr << "\nRank " << rank << ", 1best model with new weights: ";
-						decoder->getNBest(input, *current_sid, 1, 0.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest,	rank);
-						decoder->cleanup();
-						cerr << endl;
-						cerr << "\nRank " << rank << ", 1best hope with new weights: ";
-						decoder->getNBest(input, *current_sid, 1, 1.0, 1.0, dummy1[0], dummy2[0], false, distinctNbest,	rank);
-						decoder->cleanup();
-						cerr << endl;
-				}
 			}
+			else if (updateStatus == 1) {
+				cerr << "No update for this batch" << endl;
+			}
+			else if (updateStatus == 0) {
+				weightsUpdated = true;
 
-			if (print_feature_values) {
-				cerr << "Rank " << rank << ", feature values: " << endl;
-				for (size_t i = 0; i < featureValues.size(); ++i) {
-					for (size_t j = 0; j < featureValues[i].size(); ++j) {
-						cerr << featureValues[i][j].Size() << ": " << featureValues[i][j] << endl;
+				if (updates_per_epoch == -1) {
+					// pass new weights to decoder
+					if (normaliseWeights) {
+						mosesWeights.L1Normalise();
+					}
+
+					cumulativeWeights.PlusEquals(mosesWeights);
+					++numberCumulativeWeights;
+					++numberCumulativeWeightsThisEpoch;
+					if (useAverageWeightsForPruning) {
+						ScoreComponentCollection averageWeights(cumulativeWeights);
+						if (accumulateWeights) {
+							averageWeights.DivideEquals(numberCumulativeWeights);
+						} else {
+							averageWeights.DivideEquals(numberCumulativeWeightsThisEpoch);
+						}
+
+						mosesWeights = averageWeights;
+						cerr << "Rank " << rank << ", set new average weights: " << mosesWeights << endl;
+					}
+					else {
+						cerr << "Rank " << rank << ", set new weights: " << mosesWeights << endl;
+					}
+
+					// set new Moses weights (averaged or not)
+					decoder->setWeights(mosesWeights);
+
+					// compute difference to old weights
+					ScoreComponentCollection weightDifference(mosesWeights);
+					weightDifference.MinusEquals(oldWeights);
+					cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
+
+					// get 1best model results with new weights
+					vector<float> bestModelNew;
+					if (actualBatchSize == 1) {
+						string& input = inputSentences[*current_sid];
+						bestModelNew = decoder->getBleuAndScore(input, *current_sid, 0.0, distinctNbest);
+						decoder->cleanup();
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old : " << bestModelOld[0] << ", new: " << bestModelNew[0] << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old : " << bestModelOld[1] << ", new: " << bestModelNew[1] << endl;
 					}
 				}
-				cerr << endl;
 			}
 
 			// update history (for approximate document Bleu)
 			for (size_t i = 0; i < oracles.size(); ++i) {
-				cerr << "Rank " << rank << ", oracle length: " << oracles[i].size()
-				    << " ";
+				cerr << "Rank " << rank << ", oracle length: " << oracles[i].size() << " ";
 			}
 			decoder->updateHistory(oracles, inputLengths, ref_ids);
 
@@ -611,9 +603,6 @@ int main(int argc, char** argv) {
 
 				if (normaliseWeights) {
 					mosesWeights.L1Normalise();
-						cerr << "Rank " << rank << ", weights (normalised) after applying cumulative update: " << mosesWeights << endl;
-				} else {
-					cerr << "Rank " << rank << ", weights after applying cumulative update: " << mosesWeights << endl;
 				}
 
 				cumulativeWeights.PlusEquals(mosesWeights);
@@ -629,10 +618,18 @@ int main(int argc, char** argv) {
 					}
 
 					mosesWeights = averageWeights;
-					cerr << "Rank " << rank << ", average weights after applying cumulative update: " << averageWeights << endl;
+					cerr << "Rank " << rank << ", set new average weights after applying cumulative update: " << mosesWeights << endl;
+				}
+				else {
+					cerr << "Rank " << rank << ", set new weights after applying cumulative update: " << mosesWeights << endl;
 				}
 
 				decoder->setWeights(mosesWeights);
+
+				// compute difference to old weights
+				ScoreComponentCollection weightDifference(mosesWeights);
+				weightDifference.MinusEquals(oldWeights);
+				cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
 			}
 
 			// mix weights?
@@ -717,210 +714,205 @@ int main(int argc, char** argv) {
 			}// end averaging and dumping total weights
 		} // end of shard loop, end of this epoch
 
-		if (devBleu) {
-			// calculate bleu score of dev set
-			vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allBestModelScore, all_ref_ids, epoch, rank);
-			float bleu = bleuAndRatio[0];
-			float ratio = bleuAndRatio[1];
+		if (!weightsUpdated) {
+			cerr << "\nNo weight updates during this epoch.. stopping." << endl;
+			stop = true;
+		}
+		else {
+			if (devBleu) {
+				// calculate bleu score of dev set
+				vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allBestModelScore, all_ref_ids, epoch, rank);
+				float bleu = bleuAndRatio[0];
+				float ratio = bleuAndRatio[1];
 
-			for (size_t i = 0; i < allBestModelScore.size(); ++i) {
-				for (size_t j = 0; j < allBestModelScore[i].size(); ++j) {
-					delete allBestModelScore[i][j];
+				for (size_t i = 0; i < allBestModelScore.size(); ++i) {
+					for (size_t j = 0; j < allBestModelScore[i].size(); ++j) {
+						delete allBestModelScore[i][j];
+					}
 				}
-			}
 
-			if (rank == 0) {
-				beforePrevAverageBleu = prevAverageBleu;
-				beforePrevAverageApproxBleu = prevAverageApproxBleu;
-				prevAverageBleu = averageBleu;
-				prevAverageApproxBleu = averageApproxBleu;
-			}
+				if (rank == 0) {
+					beforePrevAverageBleu = prevAverageBleu;
+					beforePrevAverageApproxBleu = prevAverageApproxBleu;
+					prevAverageBleu = averageBleu;
+					prevAverageApproxBleu = averageApproxBleu;
+				}
 
 #ifdef MPI_ENABLE
-			// average bleu across processes
-			sendbuf[0] = bleu;
-			recvbuf[0] = 0;
-			MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
-			if (rank == 0) {
-				averageBleu = recvbuf[0];
+				// average bleu across processes
+				sendbuf[0] = bleu;
+				recvbuf[0] = 0;
+				MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+				if (rank == 0) {
+					averageBleu = recvbuf[0];
 
-				// divide by number of processes
-				averageBleu /= size;
-				cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu << endl;
-			}
-
-			// average ratio across processes
-			sendbuf[0] = ratio;
-			recvbuf[0] = 0;
-			MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
-			if (rank == 0) {
-				averageRatio = recvbuf[0];
-
-				// divide by number of processes
-				averageRatio /= size;
-				cerr << "Average ratio (dev) after epoch " << epoch << ": " << averageRatio << endl;
-				if (averageRatio > 1.008 && adapt_BPfactor) {
-					BPfactor -= 0.05;
-					decoder->setBPfactor(BPfactor);
-					cerr << "Change BPfactor to " << BPfactor << ".." << endl;
+					// divide by number of processes
+					averageBleu /= size;
+					cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu << endl;
 				}
-				else if (averageRatio > 1.0 && adapt_BPfactor) {
-					BPfactor = 1;
-					decoder->setBPfactor(BPfactor);
-					cerr << "Change BPfactor to 1.." << endl;
+
+				// average ratio across processes
+				sendbuf[0] = ratio;
+				recvbuf[0] = 0;
+				MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+				if (rank == 0) {
+					averageRatio = recvbuf[0];
+
+					// divide by number of processes
+					averageRatio /= size;
+					cerr << "Average ratio (dev) after epoch " << epoch << ": " << averageRatio << endl;
+					if (averageRatio > 1.008 && adapt_BPfactor) {
+						BPfactor -= 0.05;
+						decoder->setBPfactor(BPfactor);
+						cerr << "Change BPfactor to " << BPfactor << ".." << endl;
+					}
+					else if (averageRatio > 1.0 && adapt_BPfactor) {
+						BPfactor = 1;
+						decoder->setBPfactor(BPfactor);
+						cerr << "Change BPfactor to 1.." << endl;
+					}
 				}
-			}
 
-			// average approximate sentence bleu across processes
-			sendbuf[0] = summedApproxBleu/numberCumulativeWeightsThisEpoch;
-			recvbuf[0] = 0;
-			MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
-			if (rank == 0) {
-				averageApproxBleu = recvbuf[0];
+				// average approximate sentence bleu across processes
+				sendbuf[0] = summedApproxBleu/numberCumulativeWeightsThisEpoch;
+				recvbuf[0] = 0;
+				MPI_Reduce(sendbuf, recvbuf, 1, MPI_FLOAT, MPI_SUM, 0, world);
+				if (rank == 0) {
+					averageApproxBleu = recvbuf[0];
 
-				// divide by number of processes
-				averageApproxBleu /= size;
-				cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
-			}
+					// divide by number of processes
+					averageApproxBleu /= size;
+					cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+				}
 #endif
 #ifndef MPI_ENABLE
-			averageBleu = bleu;
-			cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu << endl;
-			averageApproxBleu = summedApproxBleu / numberCumulativeWeightsThisEpoch;
-			cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
+				averageBleu = bleu;
+				cerr << "Average Bleu (dev) after epoch " << epoch << ": " << averageBleu << endl;
+				averageApproxBleu = summedApproxBleu / numberCumulativeWeightsThisEpoch;
+				cerr << "Average approx. sentence Bleu (dev) after epoch " << epoch << ": " << averageApproxBleu << endl;
 #endif
-			if (rank == 0) {
-				if (averageBleu < prevAverageBleu && prevAverageBleu
-				    < beforePrevAverageBleu) {
+				if (rank == 0) {
 					if (stop_dev_bleu) {
-						stop = true;
-						cerr << "Average Bleu (dev) is decreasing.. stop tuning." << endl;
-						ScoreComponentCollection dummy;
-						ostringstream endfilename;
-						endfilename << "stopping";
-						dummy.Save(endfilename.str());
-					} else
-						cerr << "Average Bleu (dev) is decreasing.." << endl;
-				}
-
-				if (averageApproxBleu < prevAverageApproxBleu && prevAverageApproxBleu
-				    < beforePrevAverageApproxBleu) {
-					if (stop_approx_dev_bleu) {
-						stop = true;
-						cerr
-						    << "Average approx. sentence Bleu (dev) is decreasing.. stop tuning."
-						    << endl;
-						ScoreComponentCollection dummy;
-						ostringstream endfilename;
-						endfilename << "stopping";
-						dummy.Save(endfilename.str());
-					} else
-						cerr << "Average approx. sentence Bleu (dev) is decreasing.."
-						    << endl;
-				}
-			}
-
-#ifdef MPI_ENABLE
-			mpi::broadcast(world, stop, 0);
-#endif
-		} // end if (dev_bleu)
-
-		// Test if weights have converged
-		if (weightConvergence) {
-			bool reached = true;
-			if (rank == 0 && (epoch >= 2)) {
-				ScoreComponentCollection firstDiff(mixedAverageWeights);
-				firstDiff.MinusEquals(mixedAverageWeightsPrevious);
-				cerr << "Average weight changes since previous epoch: " << firstDiff
-				    << endl;
-				ScoreComponentCollection secondDiff(mixedAverageWeights);
-				secondDiff.MinusEquals(mixedAverageWeightsBeforePrevious);
-				cerr << "Average weight changes since before previous epoch: "
-				    << secondDiff << endl << endl;
-
-				// check whether stopping criterion has been reached
-				// (both difference vectors must have all weight changes smaller than min_weight_change)
-				FVector changes1 = firstDiff.GetScoresVector();
-				FVector changes2 = secondDiff.GetScoresVector();
-				FVector::const_iterator iterator1 = changes1.cbegin();
-				FVector::const_iterator iterator2 = changes2.cbegin();
-				while (iterator1 != changes1.cend()) {
-					if (abs((*iterator1).second) >= min_weight_change || abs(
-					    (*iterator2).second) >= min_weight_change) {
-						reached = false;
-						break;
+						if (averageBleu <= prevAverageBleu && prevAverageBleu <= beforePrevAverageBleu) {
+							stop = true;
+							cerr << "Average Bleu (dev) is decreasing or no more increasing.. stop tuning." << endl;
+							ScoreComponentCollection dummy;
+							ostringstream endfilename;
+							endfilename << "stopping";
+							dummy.Save(endfilename.str());
+						}
 					}
 
-					++iterator1;
-					++iterator2;
+					if (stop_approx_dev_bleu) {
+						if (averageApproxBleu <= prevAverageApproxBleu && prevAverageApproxBleu <= beforePrevAverageApproxBleu) {
+							stop = true;
+							cerr << "Average approx. sentence Bleu (dev) is decreasing or no more increasing.. stop tuning." << endl;
+							ScoreComponentCollection dummy;
+							ostringstream endfilename;
+							endfilename << "stopping";
+							dummy.Save(endfilename.str());
+						}
+					}
 				}
 
-				if (reached) {
-					// stop MIRA
+#ifdef MPI_ENABLE
+				mpi::broadcast(world, stop, 0);
+#endif
+			} // end if (dev_bleu)
+
+			// Test if weights have converged
+			if (weightConvergence) {
+				bool reached = true;
+				if (rank == 0 && (epoch >= 2)) {
+					ScoreComponentCollection firstDiff(mixedAverageWeights);
+					firstDiff.MinusEquals(mixedAverageWeightsPrevious);
+					cerr << "Average weight changes since previous epoch: " << firstDiff << endl;
+					ScoreComponentCollection secondDiff(mixedAverageWeights);
+					secondDiff.MinusEquals(mixedAverageWeightsBeforePrevious);
+					cerr << "Average weight changes since before previous epoch: " << secondDiff << endl << endl;
+
+					// check whether stopping criterion has been reached
+					// (both difference vectors must have all weight changes smaller than min_weight_change)
+					FVector changes1 = firstDiff.GetScoresVector();
+					FVector changes2 = secondDiff.GetScoresVector();
+					FVector::const_iterator iterator1 = changes1.cbegin();
+					FVector::const_iterator iterator2 = changes2.cbegin();
+					while (iterator1 != changes1.cend()) {
+						if (abs((*iterator1).second) >= min_weight_change || abs(
+								(*iterator2).second) >= min_weight_change) {
+							reached = false;
+							break;
+						}
+
+						++iterator1;
+						++iterator2;
+					}
+
+					if (reached) {
+						// stop MIRA
+						stop = true;
+						cerr << "Stopping criterion has been reached after epoch " << epoch << ".. stopping MIRA." << endl;
+						ScoreComponentCollection dummy;
+						ostringstream endfilename;
+						endfilename << "stopping";
+						dummy.Save(endfilename.str());
+					}
+				}
+
+				mixedAverageWeightsBeforePrevious = mixedAverageWeightsPrevious;
+				mixedAverageWeightsPrevious = mixedAverageWeights;
+#ifdef MPI_ENABLE
+				mpi::broadcast(world, stop, 0);
+#endif
+			} //end if (weightConvergence)
+
+			// if using flexible margin scale factor, increase scaling (decrease value) for next epoch
+			if (marginScaleFactorStep > 0) {
+				if (marginScaleFactor - marginScaleFactorStep >= marginScaleFactorMin) {
+					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
+								marginScaleFactor -= marginScaleFactorStep;
+								cerr << "Change margin scale factor to: " << marginScaleFactor << endl;
+								((MiraOptimiser*) optimiser)->setMarginScaleFactor(marginScaleFactor);
+					}
+				}
+			}
+
+			// if using flexible slack, increase slack for next epoch
+			if (slack_step > 0) {
+				if (slack + slack_step <= slack_max) {
+					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
+						slack += slack_step;
+						cerr << "Change slack to: " << slack << endl;
+						((MiraOptimiser*) optimiser)->setSlack(slack);
+					}
+				}
+			}
+
+			// change learning rate
+			if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate >= min_learning_rate)) {
+				learning_rate -= decrease_learning_rate;
+				if (learning_rate <= 0.0001) {
+					learning_rate = 0;
 					stop = true;
-					cerr << "Stopping criterion has been reached after epoch " << epoch
-					    << ".. stopping MIRA." << endl;
-					ScoreComponentCollection dummy;
-					ostringstream endfilename;
-					endfilename << "stopping";
-					dummy.Save(endfilename.str());
-				}
-			}
-
-			mixedAverageWeightsBeforePrevious = mixedAverageWeightsPrevious;
-			mixedAverageWeightsPrevious = mixedAverageWeights;
 #ifdef MPI_ENABLE
-			mpi::broadcast(world, stop, 0);
+					mpi::broadcast(world, stop, 0);
 #endif
-		} //end if (weightConvergence)
-
-		// if using flexible margin scale factor, increase scaling (decrease value) for next epoch
-		if (marginScaleFactorStep > 0) {
-			if (marginScaleFactor - marginScaleFactorStep >= marginScaleFactorMin) {
-				if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-							marginScaleFactor -= marginScaleFactorStep;
-							cerr << "Change margin scale factor to: " << marginScaleFactor << endl;
-							((MiraOptimiser*) optimiser)->setMarginScaleFactor(marginScaleFactor);
 				}
+				cerr << "Change learning rate to " << learning_rate << endl;
 			}
-		}
 
-		// if using flexible slack, increase slack for next epoch
-		if (slack_step > 0) {
-			if (slack + slack_step <= slack_max) {
-				if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-					slack += slack_step;
-					cerr << "Change slack to: " << slack << endl;
-					((MiraOptimiser*) optimiser)->setSlack(slack);
+			// change maximum sentence update
+			if ((decrease_sentence_update > 0) && (max_sentence_update - decrease_sentence_update >= min_sentence_update)) {
+				max_sentence_update -= decrease_sentence_update;
+				if (max_sentence_update <= 0.0001) {
+					max_sentence_update = 0;
+					stop = true;
+#ifdef MPI_ENABLE
+					mpi::broadcast(world, stop, 0);
+#endif
 				}
+				cerr << "Change maximum sentence update to " << max_sentence_update << endl;
 			}
-		}
-
-		// change learning rate
-		if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate >= min_learning_rate)) {
-			learning_rate -= decrease_learning_rate;
-			if (learning_rate <= 0.0001) {
-				learning_rate = 0;
-				stop = true;
-#ifdef MPI_ENABLE
-				mpi::broadcast(world, stop, 0);
-#endif
-			}
-			cerr << "Change learning rate to " << learning_rate << endl;
-		}
-
-		// change maximum sentence update
-		if ((decrease_sentence_update > 0) && (max_sentence_update - decrease_sentence_update >= min_sentence_update)) {
-			max_sentence_update -= decrease_sentence_update;
-			if (max_sentence_update <= 0.0001) {
-				max_sentence_update = 0;
-				stop = true;
-#ifdef MPI_ENABLE
-				mpi::broadcast(world, stop, 0);
-#endif
-			}
-			cerr << "Change maximum sentence update to "
-					<< max_sentence_update << endl;
 		}
 	} // end of epoch loop
 
