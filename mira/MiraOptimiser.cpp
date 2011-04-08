@@ -202,13 +202,16 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			summedUpdate.PlusEquals(featureValueDiffs[k]);
 		}
 	} else {
-		cerr << "No constraint violated for this batch" << endl;
+		cerr << "Rank " << rank << ", no constraint violated for this batch" << endl;
 		return 1;
 	}
 
 	// sanity check: still violated constraints after optimisation?
 	ScoreComponentCollection newWeights(currWeights);
 	newWeights.PlusEquals(summedUpdate);
+	if (updates_per_epoch > 0) {
+		newWeights.PlusEquals(m_accumulatedUpdates);
+	}
 	int violatedConstraintsAfter = 0;
 	float newDistanceFromOptimum = 0;
 	for (size_t i = 0; i < featureValues.size(); ++i) {
