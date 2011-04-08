@@ -125,11 +125,12 @@ int main(int argc, char** argv) {
 	bool stop_dev_bleu;
 	bool stop_approx_dev_bleu;
 	int updates_per_epoch;
-	bool useAverageWeightsForPruning;
+	bool averageWeights;
 	po::options_description desc("Allowed options");
 	desc.add_options()("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
 			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 			("adapt-BP-factor", po::value<bool>(&adapt_BPfactor)->default_value(0), "Set factor to 1 when optimal translation length in reached")
+			("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 			("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 			("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 			("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
@@ -173,7 +174,6 @@ int main(int argc, char** argv) {
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases (or no more increases)")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
 	    ("updates-per-epoch", po::value<int>(&updates_per_epoch)->default_value(-1), "Accumulate updates and apply them to the weight vector the specified number of times per epoch")
-	    ("use-average-weights-for-pruning", po::value<bool>(&useAverageWeightsForPruning)->default_value(false), "Use total weights (cumulative/weights changes) for pruning instead of current weights")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 	    ("weighted-loss-function", po::value<bool>(&weightedLossFunction)->default_value(false), "Weight the loss of a hypothesis by its Bleu score")
@@ -314,7 +314,7 @@ int main(int argc, char** argv) {
 	cerr << "stop-approx-dev-bleu: " << stop_approx_dev_bleu << endl;
 	cerr << "stop-weights: " << weightConvergence << endl;
 	cerr << "updates-per-epoch: " << updates_per_epoch << endl;
-	cerr << "use-total-weights-for-pruning: " << useAverageWeightsForPruning << endl;
+	cerr << "use-total-weights-for-pruning: " << averageWeights << endl;
 
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
@@ -538,7 +538,7 @@ int main(int argc, char** argv) {
 					cumulativeWeights.PlusEquals(mosesWeights);
 					++numberCumulativeWeights;
 					++numberCumulativeWeightsThisEpoch;
-					if (useAverageWeightsForPruning) {
+					if (averageWeights) {
 						ScoreComponentCollection averageWeights(cumulativeWeights);
 						if (accumulateWeights) {
 							averageWeights.DivideEquals(numberCumulativeWeights);
@@ -604,7 +604,7 @@ int main(int argc, char** argv) {
 				++numberCumulativeWeights;
 				++numberCumulativeWeightsThisEpoch;
 
-				if (useAverageWeightsForPruning) {
+				if (averageWeights) {
 					ScoreComponentCollection averageWeights(cumulativeWeights);
 					if (accumulateWeights) {
 						averageWeights.DivideEquals(numberCumulativeWeights);
