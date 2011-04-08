@@ -364,7 +364,7 @@ int main(int argc, char** argv) {
 	recvbuf = (float *) malloc(sizeof(float));
 	// Note: make sure that the variable mosesWeights always holds the current decoder weights
 	for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
-		cerr << "\nEpoch " << epoch << endl;
+		cerr << "\nRank " << rank << ", epoch " << epoch << endl;
 		bool weightsUpdated = false;
 		numberCumulativeWeightsThisEpoch = 0;
 		summedApproxBleu = 0;
@@ -389,7 +389,7 @@ int main(int argc, char** argv) {
 
 			// get moses weights
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
-			cerr << "\nNext batch" << endl;
+			cerr << "\nRank " << rank << ", next batch" << endl;
 			cerr << "Rank " << rank << ", weights: " << mosesWeights << endl;
 
 			// BATCHING: produce nbest lists for all input sentences in batch
@@ -457,7 +457,7 @@ int main(int argc, char** argv) {
 					delete fear[i];
 				}
 
-				cerr << "Sentence " << *sid << ", best model Bleu (approximate sentence bleu): "  << bleuScores[batchPosition][0] << endl;
+				cerr << "Rank " << rank << ", " << *sid << ", best model Bleu (approximate sentence bleu): "  << bleuScores[batchPosition][0] << endl;
 				summedApproxBleu += bleuScores[batchPosition][0];
 
 				// next input sentence
@@ -514,24 +514,19 @@ int main(int argc, char** argv) {
 			}
 
 			// run optimiser on batch
-			cerr << "Rank " << rank << ", run optimiser:" << endl;
+			cerr << "\nRank " << rank << ", run optimiser:" << endl;
 			ScoreComponentCollection oldWeights(mosesWeights);
 			int updateStatus = optimiser->updateWeights(mosesWeights, featureValues,
 			    losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
-			    learning_rate, max_sentence_update, rank, updates_per_epoch);
+			    learning_rate, max_sentence_update, rank, updates_per_epoch, controlUpdates);
 
-//			if (updateStatus < 0) {
-//				cerr << "Bogus result from hildreth optimizer.. exit." << endl;
-//				exit(1);
-//			}
-			if (controlUpdates && updateStatus < 0) {
-				// TODO: could try to repeat hildreth with more slack
-				cerr << "update ignored!" << endl;
+			if (updateStatus == 1) {
+				cerr << "Rank " << rank << ", no update for batch" << endl;
 			}
-			else if (updateStatus == 1) {
-				cerr << "No update for this batch" << endl;
+			else if (updateStatus == -1) {
+				cerr << "Rank " << rank << ", update ignored" << endl;
 			}
-			else if (updateStatus == 0) {
+			else {
 				weightsUpdated = true;
 
 				if (updates_per_epoch == -1) {
