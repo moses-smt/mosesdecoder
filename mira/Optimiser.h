@@ -39,7 +39,8 @@ namespace Mira {
       										float learning_rate,
       										float max_sentence_update,
       										size_t rank,
-      										int updates_per_epoch) = 0;
+      										int updates_per_epoch,
+      										bool controlUpdates) = 0;
   };
  
   class Perceptron : public Optimiser {
@@ -54,7 +55,8 @@ namespace Mira {
                          float learning_rate,
                          float max_sentence_update,
                          size_t rank,
-                         int updates_per_epoch);
+                         int updates_per_epoch,
+                         bool controlUpdates);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -88,7 +90,8 @@ namespace Mira {
 										float learning_rate,
 										float max_sentence_update,
 										size_t rank,
-										int updates_per_epoch);
+										int updates_per_epoch,
+										bool controlUpdates);
 
       void setOracleIndices(std::vector<size_t> oracleIndices) {
     	  m_oracleIndices= oracleIndices;
