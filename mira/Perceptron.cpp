@@ -24,7 +24,7 @@ using namespace std;
 
 namespace Mira {
 
-int Perceptron::updateWeights(ScoreComponentCollection& currWeights,
+vector<int> Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
 		const vector< vector<float> >& losses,
 		const vector< vector<float> >& bleuScores,
@@ -46,7 +46,9 @@ int Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		}
 	}
 
-	return 0;
+	vector<int> status(1);
+	status[0] = 0;
+	return status;
 }
 }
 

@@ -29,7 +29,7 @@ namespace Mira {
   class Optimiser {
     public:
       Optimiser() {}
-      virtual int updateWeights(Moses::ScoreComponentCollection& weights,
+      virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& weights,
             						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
             						  const std::vector< std::vector<float> >& losses,
             						  const std::vector<std::vector<float> >& bleuScores,
@@ -45,7 +45,7 @@ namespace Mira {
  
   class Perceptron : public Optimiser {
     public:
-			virtual int updateWeights(Moses::ScoreComponentCollection& weights,
+			virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
                          const std::vector< std::vector<float> >& losses,
                          const std::vector<std::vector<float> >& bleuScores,
@@ -80,7 +80,7 @@ namespace Mira {
 
      ~MiraOptimiser() {}
    
-     virtual int updateWeights(Moses::ScoreComponentCollection& weights,
+     virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& weights,
       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector< std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,

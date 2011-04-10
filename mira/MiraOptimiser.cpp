@@ -6,7 +6,7 @@ using namespace std;
 
 namespace Mira {
 
-int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
+vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
     const vector<vector<ScoreComponentCollection> >& featureValues,
     const vector<vector<float> >& losses,
     const vector<std::vector<float> >& bleuScores, const vector<
@@ -203,7 +203,11 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 	} else {
 		cerr << "Rank " << rank << ", check, no constraint violated for this batch" << endl;
-		return 1;
+		vector<int> status(3);
+		status[0] = 1;
+		status[1] = 0;
+		status[2] = 0;
+		return status;
 	}
 
 	// sanity check: still violated constraints after optimisation?
@@ -236,7 +240,11 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
 		cerr << "Rank " << rank << ", check, there are still violated constraints, the distance change is: " << distanceChange << endl;
 		if (controlUpdates && (violatedConstraintsBefore - violatedConstraintsAfter) < 0 && distanceChange < 0) {
-			return -1;
+			vector<int> statusPlus(3);
+			statusPlus[0] = -1;
+			statusPlus[1] = violatedConstraintsBefore;
+			statusPlus[2] = violatedConstraintsAfter;
+			return statusPlus;
 		}
 	}
 
@@ -265,7 +273,11 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		cerr << "Rank " << rank << ", weights after update: " << currWeights << endl;
 	}
 
-	return 0;
+	vector<int> statusPlus(3);
+	statusPlus[0] = 0;
+	statusPlus[1] = violatedConstraintsBefore;
+	statusPlus[2] = violatedConstraintsAfter;
+	return statusPlus;
 }
 
 }
