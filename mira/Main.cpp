@@ -774,7 +774,10 @@ int main(int argc, char** argv) {
 		if (stop_optimal) {
 			if (epoch > 0) {
 				if (sumConstraintChangeAbs_lastEpoch == sumConstraintChangeAbs && sumStillViolatedConstraints_lastEpoch == sumStillViolatedConstraints) {
-					cerr << "Epoch " << epoch << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl;
+					cerr << "Rank " << rank << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl;
+				}
+				else {
+					cerr << "Rank " << rank << ", sum of violated constraints: " << sumStillViolatedConstraints << ", sum of constraint changes " <<  sumConstraintChangeAbs << endl;
 				}
 			}
 
