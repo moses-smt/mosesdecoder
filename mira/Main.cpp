@@ -730,8 +730,13 @@ int main(int argc, char** argv) {
 		} // end of shard loop, end of this epoch
 
 		size_t sumUpdates;
+		size_t *sendbuf_int, *recvbuf_int;
 #ifdef MPI_ENABLE
-		mpi::reduce(world, numberOfUpdatesThisEpoch, sumUpdates, SCCPlus(), 0);
+		//mpi::reduce(world, numberOfUpdatesThisEpoch, sumUpdates, MPI_SUM, 0);
+		sendbuf_int[0] = numberOfUpdatesThisEpoch;
+		recvbuf_int[0] = 0;
+		MPI_Reduce(sendbuf_int, recvbuf_int, 1, MPI_UNSIGNED, MPI_SUM, 0, world);
+		sumUpdates = recvbuf_int[0];
 #endif
 #ifndef MPI_ENABLE
 		sumUpdates = numberOfUpdatesThisEpoch;
