@@ -582,8 +582,8 @@ int main(int argc, char** argv) {
 						string& input = inputSentences[*current_sid];
 						bestModelNew = decoder->getBleuAndScore(input, *current_sid, 0.0, distinctNbest);
 						decoder->cleanup();
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old : " << bestModelOld[0] << ", new: " << bestModelNew[0] << endl;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old : " << bestModelOld[1] << ", new: " << bestModelNew[1] << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld[0] << ", new: " << bestModelNew[0] << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld[1] << ", new: " << bestModelNew[1] << endl;
 					}
 				}
 			}
@@ -730,26 +730,32 @@ int main(int argc, char** argv) {
 		} // end of shard loop, end of this epoch
 
 		size_t sumUpdates;
-		size_t *sendbuf_int, *recvbuf_int;
+		size_t *sendbuf_uint, *recvbuf_uint;
+		sendbuf_uint = (size_t *) malloc(sizeof(size_t));
+		recvbuf_uint = (size_t *) malloc(sizeof(size_t));
 #ifdef MPI_ENABLE
 		//mpi::reduce(world, numberOfUpdatesThisEpoch, sumUpdates, MPI_SUM, 0);
-		sendbuf_int[0] = numberOfUpdatesThisEpoch;
-		recvbuf_int[0] = 0;
-		MPI_Reduce(sendbuf_int, recvbuf_int, 1, MPI_UNSIGNED, MPI_SUM, 0, world);
-		sumUpdates = recvbuf_int[0];
+		sendbuf_uint[0] = numberOfUpdatesThisEpoch;
+		recvbuf_uint[0] = 0;
+		MPI_Reduce(sendbuf_uint, recvbuf_uint, 1, MPI_UNSIGNED, MPI_SUM, 0, world);
+		sumUpdates = recvbuf_uint[0];
 #endif
 #ifndef MPI_ENABLE
 		sumUpdates = numberOfUpdatesThisEpoch;
 #endif
-		if (sumUpdates == 0) {
-			cerr << "\nNo weight updates during this epoch.. stopping." << endl;
-			stop = true;
+		if (rank == 0 && sumUpdates == 0) {
+		  cerr << "\nNo weight updates during this epoch.. stopping." << endl;
+		  stop = true;
+#ifdef MPI_ENABLE
+		  mpi::broadcast(world, stop, 0);
+#endif
 		}
-		else {
-			if (stop_optimal) {
-				//TODO
-			}
 
+		if (stop_optimal) {
+		  //TODO
+		}
+		
+		if (!stop) {
 			if (devBleu) {
 				// calculate bleu score of dev set
 				vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allBestModelScore, all_ref_ids, epoch, rank);

@@ -202,7 +202,7 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			summedUpdate.PlusEquals(featureValueDiffs[k]);
 		}
 	} else {
-		cerr << "Rank " << rank << ", no constraint violated for this batch" << endl;
+		cerr << "Rank " << rank << ", check, no constraint violated for this batch" << endl;
 		return 1;
 	}
 
@@ -231,10 +231,10 @@ int MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 	}
-	cerr << "Rank " << rank << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << endl;
+	cerr << "Rank " << rank << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl;
 	if (violatedConstraintsAfter > 0) {
 		float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
-		cerr << "Rank " << rank << ", there are still violated constraints, the distance change is: " << distanceChange << endl;
+		cerr << "Rank " << rank << ", check, there are still violated constraints, the distance change is: " << distanceChange << endl;
 		if (controlUpdates && (violatedConstraintsBefore - violatedConstraintsAfter) < 0 && distanceChange < 0) {
 			return -1;
 		}
