@@ -58,6 +58,25 @@ bool loadSentences(const string& filename, vector<string>& sentences) {
 	return true;
 }
 
+bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size) {
+	if (actual_batch_size > 1) {
+		bool mix_or_dump = false;
+		size_t numberSubtracts = actual_batch_size;
+		do {
+			if (shard_position % mix_or_dump_base == 0) {
+				mix_or_dump = true;
+				break;
+			}
+			--shard_position;
+			--numberSubtracts;
+		} while (numberSubtracts > 0);
+		return mix_or_dump;
+	}
+	else {
+		return ((shard_position % mix_or_dump_base) == 0);
+	}
+}
+
 struct RandomIndex {
 	ptrdiff_t operator()(ptrdiff_t max) {
 		return static_cast<ptrdiff_t> (rand() % max);
@@ -647,8 +666,10 @@ int main(int argc, char** argv) {
 				}
 			}
 
+			size_t mixing_base = shard.size() / mixingFrequency;
+			size_t dumping_base = shard.size() / weightDumpFrequency;
 			// mix weights?
-			if (shardPosition % (shard.size() / mixingFrequency) == 0) {
+			if (evaluateModulo(shardPosition, mixing_base, actualBatchSize)) {
 #ifdef MPI_ENABLE
 				ScoreComponentCollection mixedWeights;
 				cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
@@ -680,7 +701,7 @@ int main(int argc, char** argv) {
 			} // end mixing
 
 			// Dump weights?
-			if (shardPosition % (shard.size() / weightDumpFrequency) == 0) {
+			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
 				ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
 				if (accumulateWeights) {
 					tmpAverageWeights.DivideEquals(numberOfUpdates);
@@ -726,7 +747,7 @@ int main(int argc, char** argv) {
 					mixedAverageWeights.Save(filename.str());
 					++weightEpochDump;
 				}
-			}// end averaging and dumping total weights
+			}// end dumping
 		} // end of shard loop, end of this epoch
 
 		size_t sumUpdates;
