@@ -732,7 +732,7 @@ int main(int argc, char** argv) {
 						filename << weightDumpStem << "_" << epoch;
 					}
 
-					if (mixingFrequency > 1) {
+					if (weightDumpFrequency > 1) {
 						filename << "_" << weightEpochDump;
 					}
 
