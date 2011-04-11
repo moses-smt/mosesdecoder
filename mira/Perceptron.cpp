@@ -34,6 +34,7 @@ vector<int> Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		float learning_rate,
 		float max_sentence_update,
 		size_t rank,
+		size_t epoch,
 		int updates_per_epoch,
 		bool controlUpdates)
 {

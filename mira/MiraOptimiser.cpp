@@ -12,7 +12,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
     const vector<std::vector<float> >& bleuScores, const vector<
         ScoreComponentCollection>& oracleFeatureValues,
     const vector<float> oracleBleuScores, const vector<size_t> sentenceIds,
-    float learning_rate, float max_sentence_update, size_t rank,
+    float learning_rate, float max_sentence_update, size_t rank, size_t epoch,
     int updates_per_epoch,
     bool controlUpdates) {
 
@@ -202,7 +202,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			summedUpdate.PlusEquals(featureValueDiffs[k]);
 		}
 	} else {
-		cerr << "Rank " << rank << ", check, no constraint violated for this batch" << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", check, no constraint violated for this batch" << endl;
 		vector<int> status(3);
 		status[0] = 1;
 		status[1] = 0;
@@ -235,10 +235,10 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			}
 		}
 	}
-	cerr << "Rank " << rank << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl;
+	cerr << "Rank " << rank << ", epoch " << epoch << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl;
+	cerr << "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl;
 	if (violatedConstraintsAfter > 0) {
 		float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
-		cerr << "Rank " << rank << ", check, there are still violated constraints, the distance change is: " << distanceChange << endl;
 		if (controlUpdates && (violatedConstraintsBefore - violatedConstraintsAfter) < 0 && distanceChange < 0) {
 			vector<int> statusPlus(3);
 			statusPlus[0] = -1;

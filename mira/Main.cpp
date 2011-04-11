@@ -433,7 +433,7 @@ int main(int argc, char** argv) {
 			vector<size_t> ref_ids;
 			size_t actualBatchSize = 0;
 
-			vector<size_t>::const_iterator current_sid = sid;
+			vector<size_t>::const_iterator current_sid_start = sid;
 			for (size_t batchPosition = 0; batchPosition < batchSize && sid
 			    != shard.end(); ++batchPosition) {
 				string& input = inputSentences[*sid];
@@ -528,9 +528,9 @@ int main(int argc, char** argv) {
 
 			// get 1best model results with old weights
 			vector<float> bestModelOld;
-			if (actualBatchSize == 1) {
-				string& input = inputSentences[*current_sid];
-				bestModelOld = decoder->getBleuAndScore(input, *current_sid, 0.0, distinctNbest);
+			for (size_t i = 0; i < actualBatchSize; ++i) {
+				string& input = inputSentences[*current_sid_start + i];
+				bestModelOld = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, distinctNbest);
 				decoder->cleanup();
 			}
 
@@ -550,7 +550,7 @@ int main(int argc, char** argv) {
 			ScoreComponentCollection oldWeights(mosesWeights);
 			vector<int> update_status = optimiser->updateWeights(mosesWeights, featureValues,
 			    losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
-			    learning_rate, max_sentence_update, rank, updates_per_epoch, controlUpdates);
+			    learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
 
 			if (update_status[0] == 1) {
 				cerr << "Rank " << rank << ", no update for batch" << endl;
@@ -594,11 +594,11 @@ int main(int argc, char** argv) {
 					weightDifference.MinusEquals(oldWeights);
 					cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
 
-					// get 1best model results with new weights
+					// get 1best model results with new weights (for each sentence in batch)
 					vector<float> bestModelNew;
-					if (actualBatchSize == 1) {
-						string& input = inputSentences[*current_sid];
-						bestModelNew = decoder->getBleuAndScore(input, *current_sid, 0.0, distinctNbest);
+					for (size_t i = 0; i < actualBatchSize; ++i) {
+						string& input = inputSentences[*current_sid_start + i];
+						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, distinctNbest);
 						decoder->cleanup();
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld[0] << ", new: " << bestModelNew[0] << endl;
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld[1] << ", new: " << bestModelNew[1] << endl;
@@ -774,11 +774,14 @@ int main(int argc, char** argv) {
 		if (stop_optimal) {
 			if (epoch > 0) {
 				if (sumConstraintChangeAbs_lastEpoch == sumConstraintChangeAbs && sumStillViolatedConstraints_lastEpoch == sumStillViolatedConstraints) {
-					cerr << "Rank " << rank << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl;
 				}
 				else {
-					cerr << "Rank " << rank << ", sum of violated constraints: " << sumStillViolatedConstraints << ", sum of constraint changes " <<  sumConstraintChangeAbs << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << ", sum of constraint changes " <<  sumConstraintChangeAbs << endl;
 				}
+			}
+			else {
+				cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << endl;
 			}
 
 			sumConstraintChangeAbs_lastEpoch = sumConstraintChangeAbs;

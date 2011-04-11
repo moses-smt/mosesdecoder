@@ -39,6 +39,7 @@ namespace Mira {
       										float learning_rate,
       										float max_sentence_update,
       										size_t rank,
+													size_t epoch,
       										int updates_per_epoch,
       										bool controlUpdates) = 0;
   };
@@ -55,6 +56,7 @@ namespace Mira {
                          float learning_rate,
                          float max_sentence_update,
                          size_t rank,
+                         size_t epoch,
                          int updates_per_epoch,
                          bool controlUpdates);
   };
@@ -90,6 +92,7 @@ namespace Mira {
 										float learning_rate,
 										float max_sentence_update,
 										size_t rank,
+										size_t epoch,
 										int updates_per_epoch,
 										bool controlUpdates);
 
