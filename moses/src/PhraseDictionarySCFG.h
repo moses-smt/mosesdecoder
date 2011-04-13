@@ -25,6 +25,9 @@
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "CellCollection.h"
+#include "InputType.h"
+#include "WordConsumed.h"
+#include "NonTerminal.h"
 
 namespace Moses
 {
@@ -42,8 +45,6 @@ namespace Moses
 			
 		protected:
 			PhraseDictionaryNodeSCFG m_collection;
-			mutable std::vector<ProcessedRuleColl*>	m_processedRuleColls;
-						
 			std::string m_filePath; 
 			
 			TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target);
@@ -81,6 +82,10 @@ namespace Moses
 								, size_t tableLimit
 								, const LMList &languageModels
 						    , const WordPenaltyProducer* wpProducer);
+
+      const PhraseDictionaryNodeSCFG &GetRootNode() const
+      { return m_collection; }
+
 			
 			const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 			
@@ -95,13 +100,11 @@ namespace Moses
 			
 			void InitializeForInput(const InputType& i);
 			
-	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
-																			,InputType const& src
-																			,WordsRange const& range
-																			,bool adhereTableLimit
-																			,const CellCollection &cellColl) const;
-			
 			void CleanUp();
+
+      ChartRuleLookupManager *CreateRuleLookupManager(
+          const InputType &,
+          const CellCollection &);
 		};
-	
-}
+
+}  // namespace Moses

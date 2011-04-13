@@ -10,6 +10,7 @@ my %TYPE;
 $TYPE{"nist-bleu"}   = "BLEU";
 $TYPE{"multi-bleu"}  = "BLEU";
 $TYPE{"nist-bleu-c"} = "BLEU-c";
+$TYPE{"multi-bleu-c"}= "BLEU-c";
 $TYPE{"ibm-bleu"}    = "IBM";
 $TYPE{"ibm-bleu-c"}  = "IBM-c";
 
@@ -52,8 +53,8 @@ sub process {
     elsif ($type eq 'ibm-bleu' || $type eq 'ibm-bleu-c') {
 	$SCORE{$set} .= &extract_ibm_bleu($file,$type)." ";
     }
-    elsif ($type eq 'multi-bleu') {
-	$SCORE{$set} .= &extract_multi_bleu($file)." ";
+    elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c') {
+	$SCORE{$set} .= &extract_multi_bleu($file,$type)." ";
     }
 }
 
@@ -96,7 +97,7 @@ sub extract_ibm_bleu {
 }
 
 sub extract_multi_bleu {
-    my ($file) = @_;
+    my ($file,$type) = @_;
     my ($bleu,$ratio);
     foreach (`cat $file`) {
 	$bleu = $1 if /BLEU = (\S+), /;
@@ -107,5 +108,5 @@ sub extract_multi_bleu {
 
     $AVERAGE{"multi-bleu"} += $bleu;
 
-    return $output."BLEU";
+    return $output.$TYPE{$type};
 }

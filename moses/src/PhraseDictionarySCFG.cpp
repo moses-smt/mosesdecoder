@@ -36,6 +36,7 @@
 #include "ChartTranslationOptionList.h"
 #include "DotChart.h"
 #include "FactorCollection.h"
+#include "ChartRuleLookupManagerMemory.h"
 
 using namespace std;
 
@@ -264,19 +265,7 @@ const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(co
 
 void PhraseDictionarySCFG::InitializeForInput(const InputType& input)
 {
-	assert(m_processedRuleColls.size() == 0);
-	size_t sourceSize = input.GetSize();
-	m_processedRuleColls.resize(sourceSize);
-	
-	for (size_t ind = 0; ind < m_processedRuleColls.size(); ++ind)
-	{
-		ProcessedRule *initProcessedRule = new ProcessedRule(m_collection);
-		
-		ProcessedRuleColl *processedRuleColl = new ProcessedRuleColl(sourceSize - ind + 1);
-		processedRuleColl->Add(0, initProcessedRule); // init rule. stores the top node in tree
-		
-		m_processedRuleColls[ind] = processedRuleColl;
-	}
+  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
 
 PhraseDictionarySCFG::~PhraseDictionarySCFG()
@@ -286,7 +275,14 @@ PhraseDictionarySCFG::~PhraseDictionarySCFG()
 
 void PhraseDictionarySCFG::CleanUp()
 {	
-	RemoveAllInColl(m_processedRuleColls);
+  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
+}
+
+ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(
+    const InputType &sentence,
+    const CellCollection &cellCollection)
+{
+  return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
 }
 
 TO_STRING_BODY(PhraseDictionarySCFG);

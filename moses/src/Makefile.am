@@ -9,6 +9,9 @@ libmoses_la_HEADERS = \
         BitmapContainer.h \
 	BleuScoreFeature.h \
         CellCollection.h \
+        ChartRuleLookupManager.h \
+        ChartRuleLookupManagerMemory.h \
+        ChartRuleLookupManagerOnDisk.h \
         ChartTranslationOption.h \
         ChartTranslationOptionList.h \
         ConfusionNet.h \
@@ -58,6 +61,7 @@ libmoses_la_HEADERS = \
         LexicalReorderingState.h \
         LexicalReorderingTable.h \
         Manager.h \
+        NonTerminal.h \
         ObjectPool.h \
         OnlineCommand.h \
         PCNTools.h \
@@ -140,7 +144,9 @@ libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
-	BleuScoreFeature.cpp \
+	      BleuScoreFeature.cpp \
+        ChartRuleLookupManagerMemory.cpp \
+        ChartRuleLookupManagerOnDisk.cpp \
         ChartTranslationOption.cpp \
         ChartTranslationOptionList.cpp \
         ConfusionNet.cpp \
@@ -198,11 +204,9 @@ libmoses_la_SOURCES = \
         PhraseDictionaryDynSuffixArray.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
-        PhraseDictionarySCFGChart.cpp \
         PhraseDictionaryNode.cpp \
         PhraseDictionaryNodeSCFG.cpp \
         PhraseDictionaryOnDisk.cpp \
-        PhraseDictionaryOnDiskChart.cpp \
         PhraseDictionaryTree.cpp \
         PhraseDictionaryTreeAdaptor.cpp \
         PhrasePairFeature.cpp \
@@ -288,4 +292,4 @@ if KEN_LM
 libmoses_la_SOURCES += LanguageModelKen.cpp
 endif
 
-libmoses_la_LIBADD = $(BOOST_LDFLAGS) $(BOOST_THREAD_LIB)
+libmoses_la_LIBADD = $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)

@@ -43,17 +43,28 @@ namespace MosesChart
 Manager::Manager(InputType const& source, const TranslationSystem* system)
 :m_source(source)
 ,m_hypoStackColl(source, *this)
-,m_transOptColl(source, system, m_hypoStackColl)
+,m_transOptColl(source, system, m_hypoStackColl, m_ruleLookupManagers)
 ,m_system(system)
 ,m_start(clock())
-
 {
 	m_system->InitializeBeforeSentenceProcessing(source);
+  const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();
+  m_ruleLookupManagers.reserve(dictionaries.size());
+  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
+       p != dictionaries.end(); ++p)
+  {
+    PhraseDictionaryFeature *pdf = *p;
+    const PhraseDictionary *dict = pdf->GetDictionary();
+    PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
+    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, m_hypoStackColl));
+  }
 }
 
 Manager::~Manager()
 {
 	m_system->CleanUpAfterSentenceProcessing();
+
+  RemoveAllInColl(m_ruleLookupManagers);
 	
 	clock_t end = clock();
 	float et = (end - m_start);

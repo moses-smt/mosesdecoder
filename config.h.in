@@ -1,19 +1,19 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
-/* define if the Boost library is available */
+/* Defined if the requested minimum BOOST version is satisfied */
 #undef HAVE_BOOST
 
-/* define if the Boost::MPI library is available */
-#undef HAVE_BOOST_MPI
+/* Define to 1 if you have <boost/archive/text_oarchive.hpp> */
+#undef HAVE_BOOST_ARCHIVE_TEXT_OARCHIVE_HPP
 
-/* define if the Boost::PROGRAM_OPTIONS library is available */
-#undef HAVE_BOOST_PROGRAM_OPTIONS
+/* Define to 1 if you have <boost/mpi/communicator.hpp> */
+#undef HAVE_BOOST_MPI_COMMUNICATOR_HPP
 
-/* define if the Boost::Serialization library is available */
-#undef HAVE_BOOST_SERIALIZATION
+/* Define to 1 if you have <boost/program_options.hpp> */
+#undef HAVE_BOOST_PROGRAM_OPTIONS_HPP
 
-/* define if the Boost::Thread library is available */
-#undef HAVE_BOOST_THREAD
+/* Define to 1 if you have <boost/thread.hpp> */
+#undef HAVE_BOOST_THREAD_HPP
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
@@ -87,6 +87,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

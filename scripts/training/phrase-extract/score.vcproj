@@ -61,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="zlib.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -133,6 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="zlib.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -178,6 +180,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\InputFileStream.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PhraseAlignment.cpp"
 				>
 			</File>
@@ -197,6 +203,10 @@
 			>
 			<File
 				RelativePath=".\AlignmentPhrase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InputFileStream.h"
 				>
 			</File>
 			<File

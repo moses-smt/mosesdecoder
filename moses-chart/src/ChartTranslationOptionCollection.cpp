@@ -37,12 +37,14 @@ namespace MosesChart
 
 TranslationOptionCollection::TranslationOptionCollection(InputType const& source
 																											, const Moses::TranslationSystem* system
-																											, const ChartCellCollection &hypoStackColl)
+																											, const ChartCellCollection &hypoStackColl
+																											, const std::vector<ChartRuleLookupManager*> &ruleLookupManagers)
 :m_source(source)
 ,m_system(system)
 ,m_decodeGraphList(system->GetDecodeGraphs())
 ,m_hypoStackColl(hypoStackColl)
 ,m_collection(source.GetSize())
+,m_ruleLookupManagers(ruleLookupManagers)
 {
 	// create 2-d vector
 	size_t size = source.GetSize();
@@ -76,14 +78,21 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 																			size_t startPos
 																		, size_t endPos)
 {
+  ChartTranslationOptionList &chartRuleColl = GetTranslationOptionList(startPos, endPos);
+  const WordsRange &wordsRange = chartRuleColl.GetSourceRange();
+
+  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
 	std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
-	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph)
+  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
+	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers)
 	{
 		const DecodeGraph &decodeGraph = **iterDecodeGraph;
+	  assert(decodeGraph.GetSize() == 1);
+    ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
 		size_t maxSpan = decodeGraph.GetMaxChartSpan();
 		if (maxSpan == 0 || (endPos-startPos+1) <= maxSpan)
 		{
-			CreateTranslationOptionsForRange(decodeGraph, startPos, endPos, true);
+      ruleLookupManager.GetChartRuleCollection(wordsRange, true, chartRuleColl);
 		}
 	}
 
@@ -104,18 +113,22 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t end
 	}
 
 	ChartTranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
+  const WordsRange &wordsRange = fullList.GetSourceRange();
 
 	// try to translation for coverage with no trans by expanding table limit
 	std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
-	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph)
+  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
+	for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers)
 	{
 		const DecodeGraph &decodeGraph = **iterDecodeGraph;
+    ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
 		size_t numTransOpt = fullList.GetSize();
 		if (numTransOpt == 0)
 		{
-			CreateTranslationOptionsForRange(decodeGraph, startPos, startPos, false);
+      ruleLookupManager.GetChartRuleCollection(wordsRange, false, fullList);
 		}
 	}
+  assert(iterRuleLookupManagers == m_ruleLookupManagers.end());
 
 	bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
 	// create unknown words for 1 word coverage where we don't have any trans options
@@ -123,33 +136,6 @@ void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t end
 		ProcessUnknownWord(startPos);
 }
 
-
-void TranslationOptionCollection::CreateTranslationOptionsForRange(
-																													 const DecodeGraph &decodeGraph
-																													 , size_t startPos
-																													 , size_t endPos
-																													 , bool adhereTableLimit)
-{
-	assert(decodeGraph.GetSize() == 1);
-	const DecodeStep &decodeStep = **decodeGraph.begin();
-
-	// get wordsrange that doesn't go away until after sentence processing
-	const WordsRange &wordsRange = GetTranslationOptionList(startPos, endPos).GetSourceRange();
-
-	ChartTranslationOptionList &translationOptionList = GetTranslationOptionList(startPos, endPos);
-    const PhraseDictionary* phraseDictionary =
-        decodeStep.GetPhraseDictionaryFeature()->GetDictionary();
-	//cerr << phraseDictionary.GetScoreProducerDescription() << endl;
-	
-	ChartTranslationOptionList &chartRuleCollection = GetTranslationOptionList(startPos, endPos);
-
-	phraseDictionary->GetChartRuleCollection(chartRuleCollection
-																					, m_source
-																					, wordsRange
-																					, adhereTableLimit
-																					, m_hypoStackColl);
-	//cerr << "chartRuleCollection size=" << chartRuleCollection->GetSize();	
-}
 
 ChartTranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {

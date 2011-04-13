@@ -114,11 +114,10 @@ void ChartCell::SortHypotheses()
 {
 	// sort each mini cells & fill up target lhs list
 	assert(m_headWords.empty());
-	m_headWords.reserve(m_hypoColl.size());
 	std::map<Moses::Word, HypothesisCollection>::iterator iter;
 	for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter)
 	{
-		m_headWords.push_back(iter->first);
+        m_headWords.insert(iter->first);
 
 		HypothesisCollection &coll = iter->second;
 		coll.SortHypotheses();		

@@ -16,8 +16,8 @@ AC_PROG_LIBTOOL
 
 AX_XMLRPC_C
 
-AX_BOOST_BASE([1.37.0])
-AX_BOOST_PROGRAM_OPTIONS
+BOOST_REQUIRE([1.37.0])
+BOOST_PROGRAM_OPTIONS
 
 ac_have_mpi=no
 AC_ARG_WITH(mpi,
@@ -31,8 +31,8 @@ if test $ac_have_mpi = yes ; then
   if test  $CXX = none ; then
     AC_MSG_ERROR([Cannot locate MPI compiler drivers])
   fi
-  AX_BOOST_SERIALIZATION
-  AX_BOOST_MPI
+  BOOST_SERIALIZATION
+  BOOST_MPI
   AC_DEFINE(MPI_ENABLED,1,[Define if compiling with MPI.])
   CPPFLAGS="$CPPFLAGS -DMPI_ENABLE=1"
 fi
@@ -133,13 +133,13 @@ fi
 if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes'
 then
     AC_MSG_NOTICE([Using Boost library])
-    AX_BOOST_BASE([1.36.0])
+    BOOST_REQUIRE([1.36.0])
 fi
 
 if test "x$with_threads" = 'xyes'
 then
     AC_MSG_NOTICE([Building threaded moses])
-    AX_BOOST_THREAD
+    BOOST_THREADS
     CPPFLAGS="$CPPFLAGS -DWITH_THREADS" 
     AM_CONDITIONAL([WITH_THREADS],true)
 else
@@ -149,10 +149,6 @@ fi
 AM_CONDITIONAL([WITH_UNITTEST], false)
 if test "x$enable_unittest" = 'xyes'
 then
-  if test "x$BOOST_CPPFLAGS" = 'x'
-  then
-    AC_MSG_ERROR([Require boost to build unit tests])
-  fi
   AC_MSG_NOTICE([Building unit tests])
   AM_CONDITIONAL([WITH_UNITTEST], true)
 fi
@@ -236,12 +232,16 @@ then
                  [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
                  [AC_MSG_ERROR([Cannot find KEN-LM in ${PWD}/kenlm])])
 
-  LIB_KENLM="-lkenlm"
-  LDFLAGS="$LDFLAGS -L${PWD}/kenlm"
-  LIBS="$LIBS $LIB_KENLM"
-  FMTLIBS="$FMTLIBS libkenlm.a"
+  KENLM_LDFLAGS="-L\$(top_srcdir)/kenlm -lkenlm -lz"
+  KENLM_DEPS="\$(top_srcdir)/kenlm/libkenlm.la"
+  FMTLIBS="$FMTLIBS libkenlm.la"
   AM_CONDITIONAL([KEN_LM], true)
+else
+  KENLM_LDFLAGS=""
+  KENLM_DEPS=""
 fi
+AC_SUBST(KENLM_LDFLAGS)
+AC_SUBST(KENLM_DEPS)
 
 if test "x$with_randlm" != 'xno'
 then

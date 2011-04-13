@@ -38,7 +38,11 @@ Sentence::Sentence(FactorDirection direction)
 , InputType()
 {
 	assert(direction == Input);	
-	m_defaultLabelList.push_back(StaticData::Instance().GetInputDefaultNonTerminal());
+    const StaticData& staticData = StaticData::Instance();
+    if (staticData.GetSearchAlgorithm() == ChartDecoding)
+    {
+	    m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
+    }
 }
 	
 int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder) 

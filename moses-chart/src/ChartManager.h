@@ -30,6 +30,7 @@
 #include "../../moses/src/TrellisPathList.h"
 #include "../../moses/src/SentenceStats.h"
 #include "../../moses/src/TranslationSystem.h"
+#include "../../moses/src/ChartRuleLookupManager.h"
 
 namespace MosesChart
 {
@@ -46,6 +47,7 @@ protected:
   std::auto_ptr<Moses::SentenceStats> m_sentenceStats;
   const Moses::TranslationSystem* m_system;
 	clock_t m_start; /**< starting time, used for logging */
+  std::vector<Moses::ChartRuleLookupManager*> m_ruleLookupManagers;
 	
 public:
   Manager(Moses::InputType const& source, const Moses::TranslationSystem* system);

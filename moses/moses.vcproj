@@ -408,6 +408,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelImplementation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelInternal.cpp"
 				>
 				<FileConfiguration
@@ -883,6 +887,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LanguageModelFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelImplementation.h"
 				>
 			</File>
 			<File

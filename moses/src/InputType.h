@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
+#include "NonTerminal.h"
 
 namespace Moses
 {
@@ -38,8 +39,6 @@ class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
 	
-typedef std::vector<Word> LabelList;
-
 //! base class for sentences and confusion networks
 class InputType 
 {
@@ -130,7 +129,7 @@ public:
 		return m_reorderingConstraint;
 	};
 
-	virtual const LabelList &GetLabelList(size_t startPos, size_t endPos) const = 0;
+	virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const = 0;
 
 	TO_STRING();
 	

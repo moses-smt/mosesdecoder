@@ -30,10 +30,10 @@ public:
 	 */
 	void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
 	
-    const LabelList &GetLabelList(size_t /*startPos*/, size_t /*endPos*/) const
+    const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const
 	{
 		assert(false);
-		return *(new LabelList());
+		return *(new NonTerminalSet());
 	}
 	
 };

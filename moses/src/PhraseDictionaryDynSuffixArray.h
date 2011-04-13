@@ -28,18 +28,13 @@ public:
 	void CleanUp();
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
+  ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const CellCollection&);
 private:
 	BilingualDynSuffixArray *m_biSA;
 	std::vector<float> m_weight;
 	size_t m_tableLimit;
 	const LMList *m_languageModels;
 	float m_weightWP;
-	
-	virtual void GetChartRuleCollection(ChartTranslationOptionList &outColl
-																			,InputType const& src
-																			,WordsRange const& range
-																			,bool adhereTableLimit
-																			,const CellCollection &cellColl) const;
 	
 
 };

@@ -25,6 +25,7 @@
 #include "../../moses/src/InputType.h"
 #include "../../moses/src/DecodeGraph.h"
 #include "../../moses/src/ChartTranslationOptionList.h"
+#include "../../moses/src/ChartRuleLookupManager.h"
 
 namespace Moses
 {
@@ -47,17 +48,13 @@ protected:
 	const Moses::TranslationSystem* m_system;
   std::vector <Moses::DecodeGraph*> m_decodeGraphList;
 	const ChartCellCollection &m_hypoStackColl;
+  const std::vector<Moses::ChartRuleLookupManager*> &m_ruleLookupManagers;
 
 	std::vector< std::vector< Moses::ChartTranslationOptionList > >	m_collection; /*< contains translation options */
 	std::vector<Moses::Phrase*> m_unksrcs;
 	std::list<Moses::TargetPhrase*> m_cacheTargetPhrase;
 	std::list<std::vector<Moses::WordConsumed*>* > m_cachedWordsConsumed;
 	
-	virtual void CreateTranslationOptionsForRange(const Moses::DecodeGraph& decodeGraph,
-                                        size_t startPosition
-																			, size_t endPosition
-																			, bool adhereTableLimit);
-
 	// for adding 1 trans opt in unknown word proc
 	void Add(Moses::ChartTranslationOption *transOpt, size_t pos);
 
@@ -82,9 +79,9 @@ protected:
 public:
 	TranslationOptionCollection(Moses::InputType const& source
 														, const Moses::TranslationSystem* system
-														, const ChartCellCollection &hypoStackColl);
+														, const ChartCellCollection &hypoStackColl
+														, const std::vector<Moses::ChartRuleLookupManager*> &ruleLookupManagers);
 	virtual ~TranslationOptionCollection();
-	//virtual void CreateTranslationOptions(const std::vector <Moses::DecodeGraph*> &decodeGraphList);
 	void CreateTranslationOptionsForRange(size_t startPos
 																			, size_t endPos);
 
