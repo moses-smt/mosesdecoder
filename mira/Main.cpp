@@ -527,10 +527,11 @@ int main(int argc, char** argv) {
 			}
 
 			// get 1best model results with old weights
-			vector<float> bestModelOld;
+			vector< vector <float > > bestModelOld_batch;
 			for (size_t i = 0; i < actualBatchSize; ++i) {
 				string& input = inputSentences[*current_sid_start + i];
-				bestModelOld = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, distinctNbest);
+				vector <float> bestModelOld = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, distinctNbest);
+				bestModelOld_batch.push_back(bestModelOld);
 				decoder->cleanup();
 			}
 
@@ -600,8 +601,8 @@ int main(int argc, char** argv) {
 						string& input = inputSentences[*current_sid_start + i];
 						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, distinctNbest);
 						decoder->cleanup();
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld[0] << ", new: " << bestModelNew[0] << endl;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld[1] << ", new: " << bestModelNew[1] << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
 					}
 				}
 			}

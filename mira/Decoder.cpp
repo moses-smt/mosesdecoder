@@ -207,19 +207,13 @@ namespace Mira {
   	m_manager->CalcNBest(1, sentences, distinct);
 
   	// read off the feature values and bleu scores for each sentence in the nbest list
-  	Moses::TrellisPathList::const_iterator iter;
+  	Moses::TrellisPathList::const_iterator iter = sentences.begin();
   	vector<float> bleuAndScore;
-  	for (iter = sentences.begin() ; iter != sentences.end() ; ++iter) {
-  		const Moses::TrellisPath &path = **iter;
-  		float bleuScore = getBleuScore(path.GetScoreBreakdown());
-
-  		float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
-  		bleuAndScore.push_back(bleuScore);
-  		bleuAndScore.push_back(scoreWithoutBleu);
-
-//    	cerr << "Total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
-  	}
-
+  	const Moses::TrellisPath &path = **iter;
+  	float bleuScore = getBleuScore(path.GetScoreBreakdown());
+  	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
+  	bleuAndScore.push_back(bleuScore);
+  	bleuAndScore.push_back(scoreWithoutBleu);
   	return bleuAndScore;
   }
 
