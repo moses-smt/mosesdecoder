@@ -611,7 +611,7 @@ int main(int argc, char** argv) {
 			for (size_t i = 0; i < oracles.size(); ++i) {
 				cerr << "Rank " << rank << ", oracle length: " << oracles[i].size() << " ";
 			}
-			decoder->updateHistory(oracles, inputLengths, ref_ids);
+			decoder->updateHistory(oracles, inputLengths, ref_ids, rank, epoch);
 
 			// clean up oracle translations after updating history
 			for (size_t i = 0; i < oracles.size(); ++i) {

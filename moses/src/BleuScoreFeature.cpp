@@ -168,7 +168,7 @@ void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
 /*
  * Update history with a batch of oracle translations
  */
-void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypos, vector<size_t>& sourceLengths, vector<size_t>& ref_ids) {
+void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypos, vector<size_t>& sourceLengths, vector<size_t>& ref_ids, size_t rank, size_t epoch) {
 	for (size_t batchPosition = 0; batchPosition < hypos.size(); ++batchPosition){
 	    Phrase phrase(Output, hypos[batchPosition]);
 	    std::vector< size_t > ngram_counts(BleuScoreState::bleu_order);
@@ -203,6 +203,8 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 
 	    // do this for last position in batch
 	    if (batchPosition == hypos.size() - 1) {
+	    	cerr << "Rank " << rank << ", epoch " << epoch << " ,source length history: " << m_source_length_history << " --> " << m_source_length_history * m_historySmoothing << endl;
+	    	cerr << "Rank " << rank << ", epoch " << epoch << " ,target length history: " << m_target_length_history << " --> " << m_target_length_history * m_historySmoothing << endl;
 	    	m_source_length_history *= m_historySmoothing;
 	    	m_target_length_history *= m_historySmoothing;
 	    	m_ref_length_history *= m_historySmoothing;

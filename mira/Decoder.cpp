@@ -242,8 +242,8 @@ namespace Mira {
     m_bleuScoreFeature->UpdateHistory(words);
   }
 
-  void MosesDecoder::updateHistory(const vector< vector< const Word*> >& words, vector<size_t>& sourceLengths, vector<size_t>& ref_ids) {
-	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids);
+  void MosesDecoder::updateHistory(const vector< vector< const Word*> >& words, vector<size_t>& sourceLengths, vector<size_t>& ref_ids, size_t rank, size_t epoch) {
+	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids, rank, epoch);
   }
 
   vector<float> MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {
