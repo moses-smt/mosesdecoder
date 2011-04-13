@@ -59,6 +59,7 @@ bool loadSentences(const string& filename, vector<string>& sentences) {
 }
 
 bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size) {
+	if (mix_or_dump_base == 0) return 0;
 	if (actual_batch_size > 1) {
 		bool mix_or_dump = false;
 		size_t numberSubtracts = actual_batch_size;
@@ -666,8 +667,8 @@ int main(int argc, char** argv) {
 				}
 			}
 
-			size_t mixing_base = shard.size() / mixingFrequency;
-			size_t dumping_base = shard.size() / weightDumpFrequency;
+			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
+			size_t dumping_base = weightDumpFrequency ==0 ? 0 : shard.size() / weightDumpFrequency;
 			// mix weights?
 			if (evaluateModulo(shardPosition, mixing_base, actualBatchSize)) {
 #ifdef MPI_ENABLE
