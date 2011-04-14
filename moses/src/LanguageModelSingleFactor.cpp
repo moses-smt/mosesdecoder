@@ -42,15 +42,17 @@ LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
 {
-	std::ostringstream oss;
-	// what about LMs that are over multiple factors at once, POS + stem, for example?
-	oss << "LM_" << GetNGramOrder() << "gram";
-	return oss.str();
-} 
+  std::ostringstream oss;
+  // what about LMs that are over multiple factors at once, POS + stem, for example?
+  oss << "LM_" << GetNGramOrder() << "gram";
+  return oss.str();
+}
 
 struct PointerState : public FFState {
   const void* lmstate;
-  PointerState(const void* lms) { lmstate = lms; }
+  PointerState(const void* lms) {
+    lmstate = lms;
+  }
   int Compare(const FFState& o) const {
     const PointerState& other = static_cast<const PointerState&>(o);
     if (other.lmstate > lmstate) return 1;
@@ -61,8 +63,8 @@ struct PointerState : public FFState {
 
 LanguageModelPointerState::LanguageModelPointerState()
 {
-m_nullContextState = new PointerState(NULL);
-m_beginSentenceState = new PointerState(NULL);
+  m_nullContextState = new PointerState(NULL);
+  m_beginSentenceState = new PointerState(NULL);
 }
 
 LanguageModelPointerState::~LanguageModelPointerState() {}
@@ -82,9 +84,9 @@ FFState *LanguageModelPointerState::NewState(const FFState *from) const
   return new PointerState(from ? static_cast<const PointerState*>(from)->lmstate : NULL);
 }
 
-float LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len) const 
+LMResult LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
 {
-  return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate, len);
+  return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate);
 }
 
 }

@@ -33,55 +33,49 @@ namespace Moses
 //! A square array of floats to store future costs
 class SquareMatrix
 {
-	friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
+  friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
 protected:
-	const size_t m_size; /**< length of the square (sentence length) */
-	float *m_array; /**< two-dimensional array to store floats */
+  const size_t m_size; /**< length of the square (sentence length) */
+  float *m_array; /**< two-dimensional array to store floats */
 
-	SquareMatrix(); // not implemented
-	SquareMatrix(const SquareMatrix &copy); // not implemented
-	
+  SquareMatrix(); // not implemented
+  SquareMatrix(const SquareMatrix &copy); // not implemented
+
 public:
-	SquareMatrix(size_t size)
-	:m_size(size)
-	{
-		m_array = (float*) malloc(sizeof(float) * size * size);
-	}
-	~SquareMatrix()
-	{
-		free(m_array);
-	}
-	/** Returns length of the square: typically the sentence length */
-	inline size_t GetSize() const
-	{
-		return m_size;
-	}
-	/** Get a future cost score for a span */
-	inline float GetScore(size_t startPos, size_t endPos) const
-	{
-		return m_array[startPos * m_size + endPos];
-	}
-	/** Set a future cost score for a span */
-	inline void SetScore(size_t startPos, size_t endPos, float value)
-	{
-		m_array[startPos * m_size + endPos] = value;
-	}
-	float CalcFutureScore( WordsBitmap const& ) const;
-	float CalcFutureScore( WordsBitmap const&, size_t startPos, size_t endPos ) const;
-	
-	TO_STRING();
+  SquareMatrix(size_t size)
+    :m_size(size) {
+    m_array = (float*) malloc(sizeof(float) * size * size);
+  }
+  ~SquareMatrix() {
+    free(m_array);
+  }
+  /** Returns length of the square: typically the sentence length */
+  inline size_t GetSize() const {
+    return m_size;
+  }
+  /** Get a future cost score for a span */
+  inline float GetScore(size_t startPos, size_t endPos) const {
+    return m_array[startPos * m_size + endPos];
+  }
+  /** Set a future cost score for a span */
+  inline void SetScore(size_t startPos, size_t endPos, float value) {
+    m_array[startPos * m_size + endPos] = value;
+  }
+  float CalcFutureScore( WordsBitmap const& ) const;
+  float CalcFutureScore( WordsBitmap const&, size_t startPos, size_t endPos ) const;
+
+  TO_STRING();
 };
 
 inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
 {
-	for (size_t endPos = 0 ; endPos < matrix.GetSize() ; endPos++)
-	{
-		for (size_t startPos = 0 ; startPos < matrix.GetSize() ; startPos++)
-			out << matrix.GetScore(startPos, endPos) << " ";
-		out << std::endl;
-	}
-	
-	return out;
+  for (size_t endPos = 0 ; endPos < matrix.GetSize() ; endPos++) {
+    for (size_t startPos = 0 ; startPos < matrix.GetSize() ; startPos++)
+      out << matrix.GetScore(startPos, endPos) << " ";
+    out << std::endl;
+  }
+
+  return out;
 }
 
 }

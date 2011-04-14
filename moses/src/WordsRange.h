@@ -34,65 +34,58 @@ namespace Moses
  */
 class WordsRange
 {
-	friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
+  friend std::ostream& operator << (std::ostream& out, const WordsRange& range);
 
-	size_t m_startPos, m_endPos;
+  size_t m_startPos, m_endPos;
 public:
-	inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
-	inline WordsRange(const WordsRange &copy)
-	 : m_startPos(copy.GetStartPos())
-	 , m_endPos(copy.GetEndPos())
-	 {}
-	
-	inline size_t GetStartPos() const
-	{
-		return m_startPos;
-	}
-	inline size_t GetEndPos() const
-	{
-		return m_endPos;
-	}
+  inline WordsRange(size_t startPos, size_t endPos) : m_startPos(startPos), m_endPos(endPos) {}
+  inline WordsRange(const WordsRange &copy)
+    : m_startPos(copy.GetStartPos())
+    , m_endPos(copy.GetEndPos())
+  {}
 
-	//! count of words translated
-	inline size_t GetNumWordsCovered() const
-	{
-		return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
-	}
+  inline size_t GetStartPos() const {
+    return m_startPos;
+  }
+  inline size_t GetEndPos() const {
+    return m_endPos;
+  }
 
-	//! transitive comparison
-	inline bool operator<(const WordsRange& x) const 
-	{
-		return (m_startPos<x.m_startPos 
-						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
-	}
+  //! count of words translated
+  inline size_t GetNumWordsCovered() const {
+    return (m_startPos == NOT_FOUND) ? 0 : m_endPos - m_startPos + 1;
+  }
 
-	// equality operator
-	inline bool operator==(const WordsRange& x) const 
-	{
-	  return (m_startPos==x.m_startPos && m_endPos==x.m_endPos);
-	}	
-	// Whether two word ranges overlap or not
-	inline bool Overlap(const WordsRange& x) const
-	{
-		
-		if ( x.m_endPos < m_startPos || x.m_startPos > m_endPos) return false;
-		
-		return true;
-	}
-	
-	inline size_t GetNumWordsBetween(const WordsRange& x) const
-	{
-	  assert(!Overlap(x));
+  //! transitive comparison
+  inline bool operator<(const WordsRange& x) const {
+    return (m_startPos<x.m_startPos
+            || (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
+  }
 
-	  if (x.m_endPos < m_startPos) {
-	    return m_startPos - x.m_endPos;
-	  }
+  // equality operator
+  inline bool operator==(const WordsRange& x) const {
+    return (m_startPos==x.m_startPos && m_endPos==x.m_endPos);
+  }
+  // Whether two word ranges overlap or not
+  inline bool Overlap(const WordsRange& x) const {
 
-	  return x.m_startPos - m_endPos;
-	}
+    if ( x.m_endPos < m_startPos || x.m_startPos > m_endPos) return false;
+
+    return true;
+  }
+
+  inline size_t GetNumWordsBetween(const WordsRange& x) const {
+    assert(!Overlap(x));
+
+    if (x.m_endPos < m_startPos) {
+      return m_startPos - x.m_endPos;
+    }
+
+    return x.m_startPos - m_endPos;
+  }
 
 
-	TO_STRING();
+  TO_STRING();
 };
 
 

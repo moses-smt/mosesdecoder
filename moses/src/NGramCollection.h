@@ -36,19 +36,18 @@ typedef std::vector<const Factor*> FactorVector;
 class NGramCollection
 {
 protected:
-	typedef std::map<const Factor*, NGramNode*> Collection;
-	Collection m_collection;
+  typedef std::map<const Factor*, NGramNode*> Collection;
+  Collection m_collection;
 
-	void Add(const Factor *factor, const NGramNode &ngramNode);
+  void Add(const Factor *factor, const NGramNode &ngramNode);
 public:
-	NGramCollection()
-	{
-	}
-	~NGramCollection();
+  NGramCollection() {
+  }
+  ~NGramCollection();
 
-	NGramNode *GetOrCreateNGram(const Factor *factor);
-	NGramNode *GetNGram(const Factor *factor);
-	const NGramNode *GetNGram(const Factor *factor) const;
+  NGramNode *GetOrCreateNGram(const Factor *factor);
+  NGramNode *GetNGram(const Factor *factor);
+  const NGramNode *GetNGram(const Factor *factor) const;
 
 };
 

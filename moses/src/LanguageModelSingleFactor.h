@@ -31,45 +31,40 @@ namespace Moses
 class FactorCollection;
 class Factor;
 
-//! Abstract class for for single factor LM 
+//! Abstract class for for single factor LM
 class LanguageModelSingleFactor : public LanguageModelImplementation
 {
-protected:	
-	const Factor *m_sentenceStart, *m_sentenceEnd;
-	FactorType	m_factorType;
+protected:
+  const Factor *m_sentenceStart, *m_sentenceEnd;
+  FactorType	m_factorType;
 
 public:
-	virtual ~LanguageModelSingleFactor();
-	virtual bool Load(const std::string &filePath
-					, FactorType factorType
-					, size_t nGramOrder) = 0;
+  virtual ~LanguageModelSingleFactor();
+  virtual bool Load(const std::string &filePath
+                    , FactorType factorType
+                    , size_t nGramOrder) = 0;
 
-	LMType GetLMType() const
-	{
-		return SingleFactor;
-	}
+  LMType GetLMType() const {
+    return SingleFactor;
+  }
 
-	bool Useable(const Phrase &phrase) const
-	{
-		return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);		
-	}
-	
-	const Factor *GetSentenceStart() const
-	{
-		return m_sentenceStart;
-	}
-	const Factor *GetSentenceEnd() const
-	{
-		return m_sentenceEnd;
-	}
-	FactorType GetFactorType() const
-	{
-		return m_factorType;
-	}
-	std::string GetScoreProducerDescription() const;
+  bool Useable(const Phrase &phrase) const {
+    return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
+  }
+
+  const Factor *GetSentenceStart() const {
+    return m_sentenceStart;
+  }
+  const Factor *GetSentenceEnd() const {
+    return m_sentenceEnd;
+  }
+  FactorType GetFactorType() const {
+    return m_factorType;
+  }
+  std::string GetScoreProducerDescription() const;
 };
 
-// Single factor LM that uses a null pointer state.  
+// Single factor LM that uses a null pointer state.
 class LanguageModelPointerState : public LanguageModelSingleFactor
 {
 private:
@@ -86,9 +81,9 @@ protected:
   virtual FFState *GetBeginSentenceState() const;
   virtual FFState *NewState(const FFState *from = NULL) const;
 
-  virtual float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const;
+  virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const = 0;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const = 0;
 };
 
 

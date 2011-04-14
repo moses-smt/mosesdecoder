@@ -58,22 +58,23 @@ public:
 };
 class ScoresComp {
 public: 
-	ScoresComp(const std::vector<float>& weights): m_weights(weights) {}
-	bool operator()(const Scores& s1, const Scores& s2) const { 
-		float score1(1), score2(1);
-		int idx1(0), idx2(0);
-        for (Scores::const_iterator itr = s1.begin(); 
-                itr != s1.end(); ++itr) {
-            (*itr * m_weights.at(idx1++)); 
-        }
-        for (Scores::const_iterator itr = s2.begin();
-            itr != s2.end(); ++itr) {
-            (*itr * m_weights.at(idx2++));
-        }
-		return score1 < score2;
-	}
+  ScoresComp(const std::vector<float>& weights): m_weights(weights) {}
+  bool operator()(const Scores& s1, const Scores& s2) const { 
+    return s1[0] < s2[0]; // just p(e|f) as approximation
+    /*float score1(0), score2(0);
+    int idx1(0), idx2(0);
+    for (Scores::const_iterator itr = s1.begin(); 
+            itr != s1.end(); ++itr) {
+        score1 += log(*itr * m_weights.at(idx1++)); 
+    }
+    for (Scores::const_iterator itr = s2.begin();
+        itr != s2.end(); ++itr) {
+        score2 += log(*itr * m_weights.at(idx2++));
+    }
+    return score1 < score2;*/
+  }
 private: 
-	const std::vector<float>& m_weights;
+  const std::vector<float>& m_weights;
 };
 	
 class BilingualDynSuffixArray {

@@ -32,19 +32,18 @@ namespace Moses
  */
 void SentenceStats::CalcFinalStats(const Hypothesis& bestHypo)
 {
-	//deleted words
-	AddDeletedWords(bestHypo);
-	//inserted words--not implemented yet 8/1 TODO
+  //deleted words
+  AddDeletedWords(bestHypo);
+  //inserted words--not implemented yet 8/1 TODO
 }
 
 void SentenceStats::AddDeletedWords(const Hypothesis& hypo)
 {
-	//don't check either a null pointer or the empty initial hypothesis (if we were given the empty hypo, the null check will save us)
-	if(hypo.GetPrevHypo() != NULL && hypo.GetPrevHypo()->GetCurrSourceWordsRange().GetNumWordsCovered() > 0) AddDeletedWords(*hypo.GetPrevHypo());
-	if(hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0)
-	{
-		m_deletedWords.push_back(hypo.GetSourcePhrase());
-	}
+  //don't check either a null pointer or the empty initial hypothesis (if we were given the empty hypo, the null check will save us)
+  if(hypo.GetPrevHypo() != NULL && hypo.GetPrevHypo()->GetCurrSourceWordsRange().GetNumWordsCovered() > 0) AddDeletedWords(*hypo.GetPrevHypo());
+  if(hypo.GetCurrTargetWordsRange().GetNumWordsCovered() == 0) {
+    m_deletedWords.push_back(hypo.GetSourcePhrase());
+  }
 }
 
 }

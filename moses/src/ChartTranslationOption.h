@@ -2,17 +2,17 @@
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -28,56 +28,72 @@
 
 namespace Moses
 {
-class WordConsumed;
+class CoveredChartSpan;
+class ChartCellCollection;
 
 // basically a phrase translation and the vector of words consumed to map each word
 class ChartTranslationOption
 {
-	friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
+  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
 
 protected:
-	const Moses::TargetPhrase &m_targetPhrase;
-	const WordConsumed &m_lastWordConsumed;
-		/* map each source word in the phrase table to:
-				1. a word in the input sentence, if the pt word is a terminal
-				2. a 1+ phrase in the input sentence, if the pt word is a non-terminal
-		*/
-	std::vector<size_t> m_wordsConsumedTargetOrder;
-		/* size is the size of the target phrase.
-			Usually filled with NOT_KNOWN, unless the pos is a non-term, in which case its filled
-			with its index 
-		*/
-	const WordsRange	&m_wordsRange;
+  const TargetPhrase &m_targetPhrase;
+  const CoveredChartSpan &m_lastCoveredChartSpan;
+  /* map each source word in the phrase table to:
+  		1. a word in the input sentence, if the pt word is a terminal
+  		2. a 1+ phrase in the input sentence, if the pt word is a non-terminal
+  */
+  std::vector<size_t> m_coveredChartSpanListTargetOrder;
+  /* size is the size of the target phrase.
+  	Usually filled with NOT_KNOWN, unless the pos is a non-term, in which case its filled
+  	with its index
+  */
+  const WordsRange	&m_wordsRange;
 
-	ChartTranslationOption(const ChartTranslationOption &copy); // not implmenented
+    float m_estimateOfBestScore;
+
+  ChartTranslationOption &operator=(const ChartTranslationOption &);  // not implemented
+
+  void CalcEstimateOfBestScore(const CoveredChartSpan *, const ChartCellCollection &);
 
 public:
-	ChartTranslationOption(const TargetPhrase &targetPhrase, const WordConsumed &lastWordConsumed, const WordsRange	&wordsRange)
-	:m_targetPhrase(targetPhrase)
-	,m_lastWordConsumed(lastWordConsumed)
-	,m_wordsRange(wordsRange)
-	{}
-	~ChartTranslationOption()
-	{}
+  ChartTranslationOption(const TargetPhrase &targetPhrase, const CoveredChartSpan &lastCoveredChartSpan, const WordsRange	&wordsRange, const ChartCellCollection &allChartCells)
+    :m_targetPhrase(targetPhrase)
+    ,m_lastCoveredChartSpan(lastCoveredChartSpan)
+    ,m_wordsRange(wordsRange)
+    ,m_estimateOfBestScore(m_targetPhrase.GetFutureScore())
+  {
+    CalcEstimateOfBestScore(&m_lastCoveredChartSpan, allChartCells);
+  }
 
-	const TargetPhrase &GetTargetPhrase() const
-	{ return m_targetPhrase; }
+  ~ChartTranslationOption()
+  {}
 
-	const WordConsumed &GetLastWordConsumed() const
-	{ 
-		return m_lastWordConsumed;
-	}
-	const std::vector<size_t> &GetWordsConsumedTargetOrder() const
-	{	return m_wordsConsumedTargetOrder; }
+  const TargetPhrase &GetTargetPhrase() const {
+    return m_targetPhrase;
+  }
 
-	void CreateNonTermIndex();
-		
-	const Moses::WordsRange &GetSourceWordsRange() const
-	{ return m_wordsRange; }
+  const CoveredChartSpan &GetLastCoveredChartSpan() const {
+    return m_lastCoveredChartSpan;
+  }
+  const std::vector<size_t> &GetCoveredChartSpanTargetOrder() const {
+    return m_coveredChartSpanListTargetOrder;
+  }
 
-	inline float GetTotalScore() const 	 
-	{ return m_targetPhrase.GetFutureScore(); }
-	
+  void CreateNonTermIndex();
+
+  const WordsRange &GetSourceWordsRange() const {
+    return m_wordsRange;
+  }
+
+  // return an estimate of the best score possible with this translation option.
+  // the estimate is the sum of the target phrase's estimated score plus the
+  // scores of the best child hypotheses.  (the same as the ordering criterion
+  // currently used in RuleCubeQueue.)
+  inline float GetEstimateOfBestScore() const {
+    return m_estimateOfBestScore;
+  }
+
 };
 
 }

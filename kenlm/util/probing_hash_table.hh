@@ -1,6 +1,8 @@
 #ifndef UTIL_PROBING_HASH_TABLE__
 #define UTIL_PROBING_HASH_TABLE__
 
+#include "util/exception.hh"
+
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -8,6 +10,13 @@
 #include <assert.h>
 
 namespace util {
+
+/* Thrown when table grows too large */
+class ProbingSizeException : public Exception {
+  public:
+    ProbingSizeException() throw() {}
+    ~ProbingSizeException() throw() {}
+};
 
 /* Non-standard hash table
  * Buckets must be set at the beginning and must be greater than maximum number
@@ -33,9 +42,9 @@ template <class PackingT, class HashT, class EqualT = std::equal_to<typename Pac
     }
 
     // Must be assigned to later.  
-    ProbingHashTable()
+    ProbingHashTable() : entries_(0)
 #ifdef DEBUG
-      : initialized_(false), entries_(0) 
+      , initialized_(false)
 #endif
     {}
 
@@ -45,17 +54,18 @@ template <class PackingT, class HashT, class EqualT = std::equal_to<typename Pac
         end_(begin_ + (allocated / Packing::kBytes)),
         invalid_(invalid),
         hash_(hash_func),
-        equal_(equal_func) 
+        equal_(equal_func),
+        entries_(0)
 #ifdef DEBUG
         , initialized_(true),
-        entries_(0) 
 #endif
     {}
 
     template <class T> void Insert(const T &t) {
+      if (++entries_ >= buckets_)
+        UTIL_THROW(ProbingSizeException, "Hash table with " << buckets_ << " buckets is full.");
 #ifdef DEBUG
       assert(initialized_);
-      assert(++entries_ < buckets_);
 #endif
       for (MutableIterator i(begin_ + (hash_(t.GetKey()) % buckets_));;) {
         if (equal_(i->GetKey(), invalid_)) { *i = t; return; }
@@ -67,6 +77,16 @@ template <class PackingT, class HashT, class EqualT = std::equal_to<typename Pac
 
     void LoadedBinary() {}
 
+    // Don't change anything related to GetKey,  
+    template <class Key> bool UnsafeMutableFind(const Key key, MutableIterator &out) {
+      for (MutableIterator i(begin_ + (hash_(key) % buckets_));;) {
+        Key got(i->GetKey());
+        if (equal_(got, key)) { out = i; return true; }
+        if (equal_(got, invalid_)) return false;
+        if (++i == end_) i = begin_;
+      }    
+    }
+
     template <class Key> bool Find(const Key key, ConstIterator &out) const {
 #ifdef DEBUG
       assert(initialized_);
@@ -74,8 +94,8 @@ template <class PackingT, class HashT, class EqualT = std::equal_to<typename Pac
       for (ConstIterator i(begin_ + (hash_(key) % buckets_));;) {
         Key got(i->GetKey());
         if (equal_(got, key)) { out = i; return true; }
-        if (equal_(got, invalid_)) { return false; }
-        if (++i == end_) { i = begin_; }
+        if (equal_(got, invalid_)) return false;
+        if (++i == end_) i = begin_;
       }    
     }
 
@@ -86,9 +106,9 @@ template <class PackingT, class HashT, class EqualT = std::equal_to<typename Pac
     Key invalid_;
     Hash hash_;
     Equal equal_;
+    std::size_t entries_;
 #ifdef DEBUG
     bool initialized_;
-    std::size_t entries_;
 #endif
 };
 

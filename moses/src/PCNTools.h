@@ -28,19 +28,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdlib>
 
 /** A couple of utilities to read .pcn files. A python-compatible format
-  * for encoding confusion networks.
+  * for encoding confusion networks and word lattices.
   */
-namespace PCN {
+namespace PCN
+{
 
-  typedef std::pair<std::pair<std::string, std::vector<float> >, size_t> CNAlt;
-  typedef std::vector<CNAlt> CNCol;
-  typedef std::vector<CNCol> CN;
+typedef std::pair<std::pair<std::string, std::vector<float> >, size_t> CNAlt;
+typedef std::vector<CNAlt> CNCol;
+typedef std::vector<CNCol> CN;
 
-  /** Given a string ((('foo',0.1),('bar',0.9)),...) representation of a
-    * confusion net in PCN format, return a CN object 
-    */
-  CN parsePCN(const std::string& in);
-  
+/** Given a string ((('foo',0.1,1),('bar',0.9,2)),...) representation of a
+  * word lattice in PCN format, return a CN object representing the lattice
+  */
+CN parsePCN(const std::string& in);
+
 };
 
 #endif

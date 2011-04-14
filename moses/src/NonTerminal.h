@@ -38,29 +38,27 @@ namespace Moses
 class NonTerminalHasher
 {
 public:
-    size_t operator()(const Word & k) const
-    {
-        // Assumes that only the first factor is relevant.
-        const Factor * f = k[0];
-        return hash_value(*f);
-    }
+  size_t operator()(const Word & k) const {
+    // Assumes that only the first factor is relevant.
+    const Factor * f = k[0];
+    return hash_value(*f);
+  }
 };
 
 class NonTerminalEqualityPred
 {
 public:
-    bool operator()(const Word & k1, const Word & k2) const
-    {
-        // Assumes that only the first factor is relevant.
-        const Factor * f1 = k1[0];
-        const Factor * f2 = k2[0];
-        return !(f1->Compare(*f2));
-    }
+  bool operator()(const Word & k1, const Word & k2) const {
+    // Assumes that only the first factor is relevant.
+    const Factor * f1 = k1[0];
+    const Factor * f2 = k2[0];
+    return !(f1->Compare(*f2));
+  }
 };
 
 typedef boost::unordered_set<Word,
-                             NonTerminalHasher,
-                             NonTerminalEqualityPred> NonTerminalSet;
+        NonTerminalHasher,
+        NonTerminalEqualityPred> NonTerminalSet;
 #else
 typedef std::set<Word> NonTerminalSet;
 #endif

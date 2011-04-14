@@ -2,6 +2,7 @@
 #define LM_VOCAB__
 
 #include "lm/enumerate_vocab.hh"
+#include "lm/lm_exception.hh"
 #include "lm/virtual_interface.hh"
 #include "util/key_value_packing.hh"
 #include "util/probing_hash_table.hh"
@@ -27,15 +28,18 @@ inline uint64_t HashForVocab(const StringPiece &str) {
 
 class WriteWordsWrapper : public EnumerateVocab {
   public:
-    WriteWordsWrapper(EnumerateVocab *inner, int fd);
+    WriteWordsWrapper(EnumerateVocab *inner);
 
     ~WriteWordsWrapper();
     
     void Add(WordIndex index, const StringPiece &str);
 
+    void Write(int fd);
+
   private:
     EnumerateVocab *inner_;
-    int fd_;
+
+    std::string buffer_;
 };
 
 // Vocabulary based on sorted uniform find storing only uint64_t values and using their offsets as indices.  
@@ -62,7 +66,6 @@ class SortedVocabulary : public base::Vocabulary {
       }
     }
 
-    // Ignores second argument for consistency with probing hash which has a float here.  
     static size_t Size(std::size_t entries, const Config &config);
 
     // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
@@ -131,6 +134,15 @@ class ProbingVocabulary : public base::Vocabulary {
 
     EnumerateVocab *enumerate_;
 };
+
+void MissingUnknown(const Config &config) throw(SpecialWordMissingException);
+void MissingSentenceMarker(const Config &config, const char *str) throw(SpecialWordMissingException);
+
+template <class Vocab> void CheckSpecials(const Config &config, const Vocab &vocab) throw(SpecialWordMissingException) {
+  if (!vocab.SawUnk()) MissingUnknown(config);
+  if (vocab.BeginSentence() == vocab.NotFound()) MissingSentenceMarker(config, "<s>");
+  if (vocab.EndSentence() == vocab.NotFound()) MissingSentenceMarker(config, "</s>");
+}
 
 } // namespace ngram
 } // namespace lm

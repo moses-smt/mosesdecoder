@@ -29,29 +29,30 @@ namespace Moses
 
 InputType::InputType(long translationId) : m_translationId(translationId)
 {
-	m_frontSpanCoveredLength = 0;
-	m_sourceCompleted.resize(0);
+  m_frontSpanCoveredLength = 0;
+  m_sourceCompleted.resize(0);
 }
 
 InputType::~InputType() {}
 
 TO_STRING_BODY(InputType);
 
-std::ostream& operator<<(std::ostream& out,InputType const& x) 
+std::ostream& operator<<(std::ostream& out,InputType const& x)
 {
-	x.Print(out); return out;
+  x.Print(out);
+  return out;
 }
 
 // default implementation is one column equals one word
 int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
 {
   int dist = 0;
-	if (prev.GetNumWordsCovered() == 0) {
-	  dist = current.GetStartPos();
-	} else {
-	  dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
-	}
-	return abs(dist);
+  if (prev.GetNumWordsCovered() == 0) {
+    dist = current.GetStartPos();
+  } else {
+    dist = (int)prev.GetEndPos() - (int)current.GetStartPos() + 1 ;
+  }
+  return abs(dist);
 }
 
 bool InputType::CanIGetFromAToB(size_t /*start*/, size_t /*end*/) const

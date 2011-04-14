@@ -25,46 +25,67 @@ using namespace std;
 class FeatureStats
 {
 private:
-	featstats_t array_;		
-	size_t entries_;
-	size_t available_;
-		
+  featstats_t array_;
+  size_t entries_;
+  size_t available_;
+
 public:
-	FeatureStats();
-	FeatureStats(const size_t size);
-	FeatureStats(const FeatureStats &stats);
-	FeatureStats(std::string &theString);
-	FeatureStats& operator=(const FeatureStats &stats);
-	
-	~FeatureStats();
-	
-	bool isfull(){return (entries_ < available_)?0:1; }
-	void expand();
-	void add(FeatureStatsType v);
-		
-	inline void clear() { memset((void*) array_,0,featbytes_); }
-	
-	inline FeatureStatsType get(size_t i){ return array_[i]; }
-	inline FeatureStatsType get(size_t i)const{ return array_[i]; }
-	inline featstats_t getArray() const { return array_; }
+  FeatureStats();
+  FeatureStats(const size_t size);
+  FeatureStats(const FeatureStats &stats);
+  FeatureStats(std::string &theString);
+  FeatureStats& operator=(const FeatureStats &stats);
 
-	void set(std::string &theString);
+  ~FeatureStats();
 
-	inline size_t bytes() const{ return featbytes_; }
-	inline size_t size() const{ return entries_; }
-	inline size_t available() const{ return available_; }
-	
-	void savetxt(const std::string &file);
-	void savetxt(ofstream& outFile);
-	void savebin(ofstream& outFile);
-	inline void savetxt(){ savetxt("/dev/stdout"); }
-	
-	void loadtxt(const std::string &file);
-	void loadtxt(ifstream& inFile);
-	void loadbin(ifstream& inFile);
+  bool isfull() {
+    return (entries_ < available_)?0:1;
+  }
+  void expand();
+  void add(FeatureStatsType v);
 
-	inline void reset(){ entries_ = 0; clear(); }
-	
+  inline void clear() {
+    memset((void*) array_,0,featbytes_);
+  }
+
+  inline FeatureStatsType get(size_t i) {
+    return array_[i];
+  }
+  inline FeatureStatsType get(size_t i)const {
+    return array_[i];
+  }
+  inline featstats_t getArray() const {
+    return array_;
+  }
+
+  void set(std::string &theString);
+
+  inline size_t bytes() const {
+    return featbytes_;
+  }
+  inline size_t size() const {
+    return entries_;
+  }
+  inline size_t available() const {
+    return available_;
+  }
+
+  void savetxt(const std::string &file);
+  void savetxt(ofstream& outFile);
+  void savebin(ofstream& outFile);
+  inline void savetxt() {
+    savetxt("/dev/stdout");
+  }
+
+  void loadtxt(const std::string &file);
+  void loadtxt(ifstream& inFile);
+  void loadbin(ifstream& inFile);
+
+  inline void reset() {
+    entries_ = 0;
+    clear();
+  }
+
   /**write the whole object to a stream*/
   friend ostream& operator<<(ostream& o, const FeatureStats& e);
 };

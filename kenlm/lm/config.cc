@@ -9,7 +9,8 @@ Config::Config() :
   messages(&std::cerr),
   enumerate_vocab(NULL),
   unknown_missing(COMPLAIN),
-  unknown_missing_prob(0.0),
+  sentence_marker_missing(THROW_UP),
+  unknown_missing_logprob(-100.0),
   probing_multiplier(1.5),
   building_memory(1073741824ULL), // 1 GB
   temporary_directory_prefix(NULL),

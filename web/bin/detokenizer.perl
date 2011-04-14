@@ -2,6 +2,8 @@
 
 # Sample De-Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
+#
+# This script is now outdated, use scripts/tokenizer/detokenizer.perl instead
 
 # This added by Herve Saint-Amand for compatibility with translate.cgi
 $|++;

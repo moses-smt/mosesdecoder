@@ -13,14 +13,12 @@ libkenlm_la_SOURCES = \
 	lm/read_arpa.cc \
 	lm/virtual_interface.cc \
 	lm/vocab.cc \
-	util/string_piece.cc \
 	util/scoped.cc \
 	util/murmur_hash.cc   \
 	util/mmap.cc   \
 	util/file_piece.cc   \
 	util/ersatz_progress.cc   \
 	util/exception.cc   \
-	util/string_piece.cc \
 	util/bit_packing.cc 
 
 query_SOURCES = lm/ngram_query.cc

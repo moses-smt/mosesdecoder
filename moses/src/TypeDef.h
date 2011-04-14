@@ -95,7 +95,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #  ifdef HAVE_KENLM
 #    define LM_KEN 1
 #  endif
-	
+
 #endif
 /////////////////////////////////////////////////
 
@@ -107,109 +107,97 @@ const int NUM_LANGUAGES = 2;
 
 const size_t MAX_NUM_FACTORS = 4;
 
-enum FactorDirection
-{
-	Input,			//! Source factors
-	Output			//! Target factors
+enum FactorDirection {
+  Input,			//! Source factors
+  Output			//! Target factors
 };
 
-enum DecodeType
-{
-	Translate
-	,Generate
+enum DecodeType {
+  Translate
+  ,Generate
   ,InsertNullFertilityWord //! an optional step that attempts to insert a few closed-class words to improve LM scores
 };
 
 namespace LexReorderType
 {
-	enum LexReorderType // explain values
-		{
-			Backward
-			,Forward
-			,Bidirectional
-			,Fe
-			,F
-		};
+enum LexReorderType { // explain values
+  Backward
+  ,Forward
+  ,Bidirectional
+  ,Fe
+  ,F
+};
 }
 
 namespace DistortionOrientationType
 {
-	enum DistortionOrientationOptions
-		{
-			Monotone, //distinguish only between monotone and non-monotone as possible orientations
-			Msd //further separate non-monotone into swapped and discontinuous
-		};
+enum DistortionOrientationOptions {
+  Monotone, //distinguish only between monotone and non-monotone as possible orientations
+  Msd //further separate non-monotone into swapped and discontinuous
+};
 }
 
-enum LMType
-{
-	SingleFactor
-	,MultiFactor
+enum LMType {
+  SingleFactor
+  ,MultiFactor
 };
-enum LMImplementation
-{
-	SRI			= 0
-	,IRST		= 1
-	,Skip		= 2
-	,Joint		= 3
-	,Internal	= 4
-	,RandLM 	= 5
-	,Remote 	= 6
-	,ParallelBackoff	= 7
-	,Ken			= 8
-	,LazyKen	= 9
+enum LMImplementation {
+  SRI			= 0
+  ,IRST		= 1
+  ,Skip		= 2
+  ,Joint		= 3
+  ,Internal	= 4
+  ,RandLM 	= 5
+  ,Remote 	= 6
+  ,ParallelBackoff	= 7
+  ,Ken			= 8
+  ,LazyKen	= 9
 };
 
-enum PhraseTableImplementation
-{
-	Memory				= 0
-	,Binary				= 1
-	,OnDisk				= 2 
-	//,GlueRule		= 3
-	//,Joshua			= 4
-	//,MemorySourceLabel	= 5
-	,SCFG					= 6
-	//,BerkeleyDb	= 7
-	,SuffixArray	= 8
-};	
-
-enum InputTypeEnum
-{
-	SentenceInput						= 0
-	,ConfusionNetworkInput	= 1
-	,WordLatticeInput				= 2
-	,TreeInputType					= 3
+enum PhraseTableImplementation {
+  Memory				= 0
+  ,Binary				= 1
+  ,OnDisk				= 2
+  //,GlueRule		= 3
+  //,Joshua			= 4
+  //,MemorySourceLabel	= 5
+  ,SCFG					= 6
+  //,BerkeleyDb	= 7
+  ,SuffixArray	= 8
 };
 
-enum XmlInputType
-{
-	XmlPassThrough	= 0,
-	XmlIgnore				= 1,
-	XmlExclusive		= 2,
-	XmlInclusive		= 3
+enum InputTypeEnum {
+  SentenceInput						= 0
+  ,ConfusionNetworkInput	= 1
+  ,WordLatticeInput				= 2
+  ,TreeInputType					= 3
 };
 
-enum DictionaryFind
-{
-	Best		= 0
-	,All		= 1
+enum XmlInputType {
+  XmlPassThrough	= 0,
+  XmlIgnore				= 1,
+  XmlExclusive		= 2,
+  XmlInclusive		= 3
 };
 
-enum SearchAlgorithm
-{
-	Normal				= 0
-	,CubePruning	= 1
-	,CubeGrowing	= 2
-	,ChartDecoding= 3
+enum DictionaryFind {
+  Best		= 0
+  ,All		= 1
 };
 
-enum SourceLabelOverlap
-{
-	SourceLabelOverlapAdd = 0
-	,SourceLabelOverlapReplace = 1
-	,SourceLabelOverlapDiscard = 2
+enum SearchAlgorithm {
+  Normal				= 0
+  ,CubePruning	= 1
+  ,CubeGrowing	= 2
+  ,ChartDecoding= 3
 };
-	
+
+enum SourceLabelOverlap {
+  SourceLabelOverlapAdd = 0
+  ,SourceLabelOverlapReplace = 1
+  ,SourceLabelOverlapDiscard = 2
+};
+
 // typedef
 typedef size_t FactorType;
 

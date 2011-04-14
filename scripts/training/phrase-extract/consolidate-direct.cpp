@@ -17,6 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <string.h>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -33,90 +34,103 @@ using namespace std;
 char line[LINE_MAX_LENGTH];
 
 
-vector< string > splitLine() 
+vector< string > splitLine()
 {
   vector< string > item;
   int start=0;
-	int i=0;
+  int i=0;
   for(; line[i] != '\0'; i++) {
-		if (line[i] == ' ' &&
-				line[i+1] == '|' &&
-				line[i+2] == '|' &&
-				line[i+3] == '|' &&
-				line[i+4] == ' ')
-		{
-			if (start > i) start = i; // empty item
-			item.push_back( string( line+start, i-start ) );
-			start = i+5;
-			i += 3;
-		}
-	}
-	item.push_back( string( line+start, i-start ) );
-	
+    if (line[i] == ' ' &&
+        line[i+1] == '|' &&
+        line[i+2] == '|' &&
+        line[i+3] == '|' &&
+        line[i+4] == ' ') {
+      if (start > i) start = i; // empty item
+      item.push_back( string( line+start, i-start ) );
+      start = i+5;
+      i += 3;
+    }
+  }
+  item.push_back( string( line+start, i-start ) );
+
   return item;
 }
 
-bool getLine( istream &fileP, vector< string > &item ) 
+bool getLine( istream &fileP, vector< string > &item )
 {
-	if (fileP.eof()) 
-		return false;
-	
-	SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
-	if (fileP.eof()) 
-		return false;
-	
-	item = splitLine();
-	
-	return true;
-} 
+  if (fileP.eof())
+    return false;
+
+  SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
+  if (fileP.eof())
+    return false;
+
+  item = splitLine();
+
+  return true;
+}
 
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   cerr << "Starting..." << endl;
-	
-	char* &fileNameDirect = argv[1];
-	Moses::InputFileStream fileDirect(fileNameDirect);
 
-	
-	//fileDirect.open(fileNameDirect);
-	if (fileDirect.fail()) {
+  char* &fileNameDirect = argv[1];
+  Moses::InputFileStream fileDirect(fileNameDirect);
+
+
+  //fileDirect.open(fileNameDirect);
+  if (fileDirect.fail()) {
     cerr << "ERROR: could not open extract file " << fileNameDirect << endl;
     exit(1);
   }
-	istream &fileDirectP = fileDirect;
+  istream &fileDirectP = fileDirect;
 
   char* &fileNameConsolidated = argv[2];
-	ofstream fileConsolidated;
-	fileConsolidated.open(fileNameConsolidated);
-  if (fileConsolidated.fail()) 
-	{
-    cerr << "ERROR: could not open output file " << fileNameConsolidated << endl;
-    exit(1);
-  }
+  ostream *fileConsolidated;
 	
-	int i=0;
+	if (strcmp(fileNameConsolidated, "-") == 0) {
+		fileConsolidated = &cout;
+	}
+	else {
+		ofstream *outputFile = new ofstream();
+		outputFile->open(fileNameConsolidated);
+		if (outputFile->fail()) {
+			cerr << "ERROR: could not open file phrase table file "
+			<< fileNameConsolidated << endl;
+			exit(1);
+		}
+		fileConsolidated = outputFile;
+	}
+	
+  int i=0;
   while(true) {
-		i++;
+    i++;
     if (i%1000 == 0) cerr << "." << flush;
     if (i%10000 == 0) cerr << ":" << flush;
     if (i%100000 == 0) cerr << "!" << flush;
-		
-		vector< string > itemDirect;
-		if (! getLine(fileDirectP,  itemDirect  ))
-			break;
-			
-		fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
-		
-		// output alignment and probabilities
-		fileConsolidated	<< itemDirect[2]						// prob direct 	
-											<< " 2.718" // phrase count feature
-											<< " ||| " << itemDirect[3];	// alignment
 
-		// counts
-		fileConsolidated << "||| 0 " << itemDirect[4]; // indirect
-		fileConsolidated << endl;
-		
+    vector< string > itemDirect;
+    if (! getLine(fileDirectP,  itemDirect  ))
+      break;
+
+    (*fileConsolidated) << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
+
+    // output alignment and probabilities
+    (*fileConsolidated)	<< itemDirect[2]						// prob direct
+                      << " 2.718" // phrase count feature
+                      << " ||| " << itemDirect[3];	// alignment
+
+    // counts
+    (*fileConsolidated) << "||| 0 " << itemDirect[4]; // indirect
+    (*fileConsolidated) << endl;
+
+  }
+
+	fileConsolidated->flush();
+	if (fileConsolidated != &cout) {
+		(dynamic_cast<ofstream*>(fileConsolidated))->close();
+		delete fileConsolidated;
 	}
 	
   cerr << "Finished" << endl;

@@ -31,18 +31,18 @@ namespace Moses
 using namespace std;
 
 DecodeStepGeneration::DecodeStepGeneration(const GenerationDictionary* dict, const DecodeStep* prev)
-: DecodeStep(dict, prev)
+  : DecodeStep(dict, prev)
 {
 }
 
 
 TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-                                  , const ScoreComponentCollection& generationScore) const
+    , const ScoreComponentCollection& generationScore) const
 {
-	if (IsFilteringStep()) {
-  	if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors)) 
-			return NULL;
-	}
+  if (IsFilteringStep()) {
+    if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors))
+      return NULL;
+  }
 
   TranslationOption *newTransOpt = new TranslationOption(oldTO);
   newTransOpt->MergeNewFeatures(mergePhrase, generationScore, m_newOutputFactors);
@@ -60,36 +60,34 @@ typedef list< WordPair >::const_iterator WordListIterator;
 inline void IncrementIterators(vector< WordListIterator > &wordListIterVector
                                , const vector< WordList > &wordListVector)
 {
-  for (size_t currPos = 0 ; currPos < wordListVector.size() ; currPos++)
-    {
-      WordListIterator &iter = wordListIterVector[currPos];
-      iter++;
-      if (iter != wordListVector[currPos].end())
-        { // eg. 4 -> 5
-          return;
-        }
-      else
-        { //  eg 9 -> 10
-          iter = wordListVector[currPos].begin();
-        }
+  for (size_t currPos = 0 ; currPos < wordListVector.size() ; currPos++) {
+    WordListIterator &iter = wordListIterVector[currPos];
+    iter++;
+    if (iter != wordListVector[currPos].end()) {
+      // eg. 4 -> 5
+      return;
+    } else {
+      //  eg 9 -> 10
+      iter = wordListVector[currPos].begin();
     }
+  }
 }
 
 void DecodeStepGeneration::Process(const TranslationSystem* system
-                              , const TranslationOption &inputPartialTranslOpt
-                              , const DecodeStep &decodeStep
-                              , PartialTranslOptColl &outputPartialTranslOptColl
-                              , TranslationOptionCollection * /* toc */
-                              , bool /*adhereTableLimit*/) const
+                                   , const TranslationOption &inputPartialTranslOpt
+                                   , const DecodeStep &decodeStep
+                                   , PartialTranslOptColl &outputPartialTranslOptColl
+                                   , TranslationOptionCollection * /* toc */
+                                   , bool /*adhereTableLimit*/) const
 {
-  if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0)
-    { // word deletion
+  if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
+    // word deletion
 
-      TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
-      outputPartialTranslOptColl.Add(system, newTransOpt);
+    TranslationOption *newTransOpt = new TranslationOption(inputPartialTranslOpt);
+    outputPartialTranslOptColl.Add(system, newTransOpt);
 
-      return;
-    }
+    return;
+  }
 
   // normal generation step
   const GenerationDictionary* generationDictionary  = decodeStep.GetGenerationDictionaryFeature();
@@ -103,71 +101,63 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
 
   // create generation list
   int wordListVectorPos = 0;
-  for (size_t currPos = 0 ; currPos < targetLength ; currPos++) // going thorugh all words
-    {
-      // generatable factors for this word to be put in wordList
-      WordList &wordList = wordListVector[wordListVectorPos];
-      const Word &word = targetPhrase.GetWord(currPos);
+  for (size_t currPos = 0 ; currPos < targetLength ; currPos++) { // going thorugh all words
+    // generatable factors for this word to be put in wordList
+    WordList &wordList = wordListVector[wordListVectorPos];
+    const Word &word = targetPhrase.GetWord(currPos);
 
-      // consult dictionary for possible generations for this word
-      const OutputWordCollection *wordColl = generationDictionary->FindWord(word);
+    // consult dictionary for possible generations for this word
+    const OutputWordCollection *wordColl = generationDictionary->FindWord(word);
 
-      if (wordColl == NULL)
-        { // word not found in generation dictionary
-          //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
-          return; // can't be part of a phrase, special handling
-        }
-      else
-        {
-          // sort(*wordColl, CompareWordCollScore);
-          OutputWordCollection::const_iterator iterWordColl;
-          for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl)
-            {
-              const Word &outputWord = (*iterWordColl).first;
-              const ScoreComponentCollection& score = (*iterWordColl).second;
-              // enter into word list generated factor(s) and its(their) score(s)
-              wordList.push_back(WordPair(outputWord, score));
-            }
+    if (wordColl == NULL) {
+      // word not found in generation dictionary
+      //toc->ProcessUnknownWord(sourceWordsRange.GetStartPos(), factorCollection);
+      return; // can't be part of a phrase, special handling
+    } else {
+      // sort(*wordColl, CompareWordCollScore);
+      OutputWordCollection::const_iterator iterWordColl;
+      for (iterWordColl = wordColl->begin() ; iterWordColl != wordColl->end(); ++iterWordColl) {
+        const Word &outputWord = (*iterWordColl).first;
+        const ScoreComponentCollection& score = (*iterWordColl).second;
+        // enter into word list generated factor(s) and its(their) score(s)
+        wordList.push_back(WordPair(outputWord, score));
+      }
 
-          wordListVectorPos++; // done, next word
-        }
+      wordListVectorPos++; // done, next word
     }
+  }
 
   // use generation list (wordList)
   // set up iterators (total number of expansions)
   size_t numIteration = 1;
   vector< WordListIterator >  wordListIterVector(targetLength);
   vector< const Word* >       mergeWords(targetLength);
-  for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
-    {
-      wordListIterVector[currPos] = wordListVector[currPos].begin();
-      numIteration *= wordListVector[currPos].size();
-    }
+  for (size_t currPos = 0 ; currPos < targetLength ; currPos++) {
+    wordListIterVector[currPos] = wordListVector[currPos].begin();
+    numIteration *= wordListVector[currPos].size();
+  }
 
   // go thru each possible factor for each word & create hypothesis
-  for (size_t currIter = 0 ; currIter < numIteration ; currIter++)
-    {
-      ScoreComponentCollection generationScore; // total score for this string of words
+  for (size_t currIter = 0 ; currIter < numIteration ; currIter++) {
+    ScoreComponentCollection generationScore; // total score for this string of words
 
-      // create vector of words with new factors for last phrase
-      for (size_t currPos = 0 ; currPos < targetLength ; currPos++)
-        {
-          const WordPair &wordPair = *wordListIterVector[currPos];
-          mergeWords[currPos] = &(wordPair.first);
-          generationScore.PlusEquals(wordPair.second);
-        }
-
-      // merge with existing trans opt
-      Phrase genPhrase(Output, mergeWords);
-      TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
-      if (newTransOpt != NULL)
-        {
-          outputPartialTranslOptColl.Add(system, newTransOpt);
-        }
-
-      // increment iterators
-      IncrementIterators(wordListIterVector, wordListVector);
+    // create vector of words with new factors for last phrase
+    for (size_t currPos = 0 ; currPos < targetLength ; currPos++) {
+      const WordPair &wordPair = *wordListIterVector[currPos];
+      mergeWords[currPos] = &(wordPair.first);
+      generationScore.PlusEquals(wordPair.second);
     }
+
+    // merge with existing trans opt
+    Phrase genPhrase(Output, mergeWords);
+    TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
+    if (newTransOpt != NULL) {
+      outputPartialTranslOptColl.Add(system, newTransOpt);
+    }
+
+    // increment iterators
+    IncrementIterators(wordListIterVector, wordListVector);
+  }
 }
 
 }

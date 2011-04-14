@@ -158,7 +158,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "CreateOnDisk" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* CreateOnDisk */;
 			projectDirPath = "";
 			projectReferences = (
@@ -231,10 +238,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib,
 					../srilm/lib/macosx,
 					../randlm/lib,
-					../kenlm/lm,
+					../kenlm,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -259,10 +266,10 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/i386,
+					../irstlm/lib,
 					../srilm/lib/macosx,
 					../randlm/lib,
-					../kenlm/lm,
+					../kenlm,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -287,6 +294,8 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../irstlm/include;
+				LIBRARY_SEARCH_PATHS = "";
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
@@ -300,6 +309,8 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../irstlm/include;
+				LIBRARY_SEARCH_PATHS = "";
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;

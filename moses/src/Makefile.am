@@ -8,9 +8,23 @@ libmoses_la_HEADERS = \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
         CellCollection.h \
+	ChartCell.h \
+	ChartCellCollection.h \
+	ChartHypothesis.h \
+	ChartHypothesisCollection.h \
+	ChartManager.h \
+        ChartRuleLookupManager.h \
+        ChartRuleLookupManagerMemory.h \
+        ChartRuleLookupManagerOnDisk.h \
         ChartTranslationOption.h \
+	ChartTranslationOptionCollection.h \
         ChartTranslationOptionList.h \
+	ChartTrellisNode.h \
+	ChartTrellisPath.h \
+	ChartTrellisPathCollection.h \
+	ChartTrellisPathList.h \
         ConfusionNet.h \
+        CoveredChartSpan.h \
         DecodeFeature.h \
         DecodeGraph.h \
         DecodeStep.h \
@@ -76,6 +90,8 @@ libmoses_la_HEADERS = \
         PrefixTreeMap.h \
         ReorderingConstraint.h \
         ReorderingStack.h \
+	RuleCube.h \
+	RuleCubeQueue.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
         ScoreProducer.h \
@@ -88,6 +104,7 @@ libmoses_la_HEADERS = \
         StaticData.h \
         TargetPhrase.h \
         TargetPhraseCollection.h \
+        ThreadPool.h \
         Timer.h \
         TranslationOption.h \
         TranslationOptionCollection.h \
@@ -104,7 +121,6 @@ libmoses_la_HEADERS = \
         UserMessage.h \
         Util.h \
         Word.h \
-        WordConsumed.h \
         WordLattice.h \
         WordsBitmap.h \
         WordsRange.h \
@@ -141,9 +157,22 @@ libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
+	ChartCell.cpp \
+	ChartCellCollection.cpp \
+	ChartHypothesis.cpp \
+	ChartHypothesisCollection.cpp \
+	ChartManager.cpp \
+        ChartRuleLookupManagerMemory.cpp \
+        ChartRuleLookupManagerOnDisk.cpp \
         ChartTranslationOption.cpp \
+	ChartTranslationOptionCollection.cpp \
         ChartTranslationOptionList.cpp \
+	ChartTrellisNode.cpp \
+	ChartTrellisPath.cpp \
+	ChartTrellisPathCollection.cpp \
+	ChartTrellisPathList.cpp \
         ConfusionNet.cpp \
+        CoveredChartSpan.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
         DecodeStep.cpp \
@@ -196,16 +225,16 @@ libmoses_la_SOURCES = \
         PhraseDictionaryDynSuffixArray.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
-        PhraseDictionarySCFGChart.cpp \
         PhraseDictionaryNode.cpp \
         PhraseDictionaryNodeSCFG.cpp \
         PhraseDictionaryOnDisk.cpp \
-        PhraseDictionaryOnDiskChart.cpp \
         PhraseDictionaryTree.cpp \
         PhraseDictionaryTreeAdaptor.cpp \
         PrefixTreeMap.cpp \
         ReorderingConstraint.cpp \
         ReorderingStack.cpp \
+	RuleCube.cpp \
+	RuleCubeQueue.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
         ScoreProducer.cpp \
@@ -218,6 +247,7 @@ libmoses_la_SOURCES = \
         StaticData.cpp \
         TargetPhrase.cpp \
         TargetPhraseCollection.cpp \
+        ThreadPool.cpp \
         Timer.cpp \
         TranslationOption.cpp \
         TranslationOptionCollection.cpp \
@@ -231,7 +261,6 @@ libmoses_la_SOURCES = \
         UserMessage.cpp \
         Util.cpp \
         Word.cpp \
-        WordConsumed.cpp \
         WordLattice.cpp \
         WordsBitmap.cpp \
         WordsRange.cpp \

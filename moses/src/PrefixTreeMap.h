@@ -25,20 +25,21 @@ typedef FilePtr<PTF>               CPT;
 typedef std::vector<CPT>           Data;
 typedef LVoc<std::string>          WordVoc;
 
-class GenericCandidate {
+class GenericCandidate
+{
 public:
   typedef std::vector<IPhrase>              PhraseList;
   typedef std::vector< std::vector<float> > ScoreList;
 public:
-  GenericCandidate(){
+  GenericCandidate() {
   };
   GenericCandidate(const GenericCandidate& other)
     : m_PhraseList(other.m_PhraseList), m_ScoreList(other.m_ScoreList) {
   };
   GenericCandidate(const PhraseList& p, const ScoreList& s)
-	: m_PhraseList(p), m_ScoreList(s) {
+    : m_PhraseList(p), m_ScoreList(s) {
   };
-  ~GenericCandidate(){
+  ~GenericCandidate() {
   };
 public:
   size_t NumPhrases() const {
@@ -74,42 +75,56 @@ class PPtr {
 */
 
 struct PPimp {
-         PTF const*p;unsigned idx;bool root;
-         
-         PPimp(PTF const* x,unsigned i,bool b) : p(x),idx(i),root(b) {}
-         bool isValid() const {return root || (p && idx<p->size());}
- 
-         bool isRoot() const {return root;}
-         PTF const* ptr() const {return p;}
+  PTF const*p;
+  unsigned idx;
+  bool root;
+
+  PPimp(PTF const* x,unsigned i,bool b) : p(x),idx(i),root(b) {}
+  bool isValid() const {
+    return root || (p && idx<p->size());
+  }
+
+  bool isRoot() const {
+    return root;
+  }
+  PTF const* ptr() const {
+    return p;
+  }
 };
 
 
-class Candidates : public std::vector<GenericCandidate> {
+class Candidates : public std::vector<GenericCandidate>
+{
   typedef std::vector<GenericCandidate> MyBase;
- public:
+public:
   Candidates() : MyBase() {
   };
-	void writeBin(FILE* f) const;
-	void readBin(FILE* f);
+  void writeBin(FILE* f) const;
+  void readBin(FILE* f);
 };
 
-class PrefixTreeMap {
- public:
+class PrefixTreeMap
+{
+public:
   PrefixTreeMap() : m_FileSrc(0), m_FileTgt(0) {
     PTF::setDefault(InvalidOffT);
   }
   ~PrefixTreeMap() {
-    if(m_FileSrc) {fClose(m_FileSrc);}
-    if(m_FileTgt) {fClose(m_FileTgt);}
+    if(m_FileSrc) {
+      fClose(m_FileSrc);
+    }
+    if(m_FileTgt) {
+      fClose(m_FileTgt);
+    }
     FreeMemory();
   }
- public:
-  static const LabelId MagicWord; 
- public:
+public:
+  static const LabelId MagicWord;
+public:
   void FreeMemory();
 
   int Read(const std::string& fileNameStem, int numVocs = -1);
-	
+
   void GetCandidates(const IPhrase& key, Candidates* cands);
   void GetCandidates(const PPimp& p, Candidates* cands);
 
@@ -117,19 +132,19 @@ class PrefixTreeMap {
   IPhrase ConvertPhrase(const std::vector< std::string >& p, unsigned int voc) const;
   LabelId ConvertWord(const std::string& w, unsigned int voc) const;
   std::string ConvertWord(LabelId w, unsigned int voc) const;
-public: //low level 
+public: //low level
   PPimp* GetRoot();
   PPimp* Extend(PPimp* p, LabelId wi);
-  PPimp* Extend(PPimp* p, const std::string w, size_t voc){
+  PPimp* Extend(PPimp* p, const std::string w, size_t voc) {
     return Extend(p, ConvertWord(w,voc));
   }
- private:
+private:
   Data  m_Data;
-  FILE* m_FileSrc; 
+  FILE* m_FileSrc;
   FILE* m_FileTgt;
 
   std::vector<WordVoc*> m_Voc;
-  ObjectPool<PPimp>     m_PtrPool; 
+  ObjectPool<PPimp>     m_PtrPool;
 };
 
 }

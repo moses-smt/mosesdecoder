@@ -27,28 +27,27 @@
 
 bool SentenceAlignment::processTargetSentence(const char * targetString, int)
 {
-    target = tokenize(targetString);
-    return true;
+  target = tokenize(targetString);
+  return true;
 }
 
 bool SentenceAlignment::processSourceSentence(const char * sourceString, int)
 {
-    source = tokenize(sourceString);
-    return true;
+  source = tokenize(sourceString);
+  return true;
 }
 
-bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID) {
-    using namespace std;
+bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID)
+{
+  using namespace std;
 
-    // process sentence strings and store in target and source members.
-    if (!processTargetSentence(targetString, sentenceID))
-    {
-        return false;
-    }
-    if (!processSourceSentence(sourceString, sentenceID))
-    {
-        return false;
-    }
+  // process sentence strings and store in target and source members.
+  if (!processTargetSentence(targetString, sentenceID)) {
+    return false;
+  }
+  if (!processSourceSentence(sourceString, sentenceID)) {
+    return false;
+  }
 
   // check if sentences are empty
   if (target.size() == 0 || source.size() == 0) {
@@ -56,7 +55,7 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
     cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
     return false;
   }
-	
+
   // prepare data structures for alignments
   for(int i=0; i<source.size(); i++) {
     alignedCountS.push_back( 0 );
@@ -65,19 +64,19 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
     vector< int > dummy;
     alignedToT.push_back( dummy );
   }
-	
+
   // reading in alignments
   vector<string> alignmentSequence = tokenize( alignmentString );
   for(int i=0; i<alignmentSequence.size(); i++) {
     int s,t;
     // cout << "scaning " << alignmentSequence[i].c_str() << endl;
     if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {
-      cerr << "WARNING: " << alignmentSequence[i] << " is a bad alignment point in sentence " << sentenceID << endl; 
+      cerr << "WARNING: " << alignmentSequence[i] << " is a bad alignment point in sentence " << sentenceID << endl;
       cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
       return false;
     }
-		// cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << s << ", " << t << endl;
-    if (t >= target.size() || s >= source.size()) { 
+    // cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << s << ", " << t << endl;
+    if (t >= target.size() || s >= source.size()) {
       cerr << "WARNING: sentence " << sentenceID << " has alignment point (" << s << ", " << t << ") out of bounds (" << source.size() << ", " << target.size() << ")\n";
       cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
       return false;

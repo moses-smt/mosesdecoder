@@ -6,7 +6,7 @@
 class ConfusionNet;
 
 void GenerateCandidates(const ConfusionNet& src,
-												const std::vector<PhraseDictionaryTree const*>& pdicts,
-												const std::vector<std::vector<float> >& weights,
-												int verbose=0) ;
+                        const std::vector<PhraseDictionaryTree const*>& pdicts,
+                        const std::vector<std::vector<float> >& weights,
+                        int verbose=0) ;
 #endif

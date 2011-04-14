@@ -37,105 +37,100 @@ class FactorCollection;
 class Factor;
 class Phrase;
 
+struct LMResult {
+  // log probability
+  float score;
+  // Is the word unknown?  
+  bool unknown;
+};
+
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModelImplementation
 {
 #ifndef WITH_THREADS
 protected:
-	/** constructor to be called by inherited class
-	 */
-	LanguageModelImplementation() : m_referenceCount(0) {}
+  /** constructor to be called by inherited class
+   */
+  LanguageModelImplementation() : m_referenceCount(0) {}
 
 private:
-	// ref counting handled by boost if we have threads
-	unsigned int m_referenceCount;
+  // ref counting handled by boost if we have threads
+  unsigned int m_referenceCount;
 #else
-	// default constructor is ok
+  // default constructor is ok
 #endif
 
-protected:	
-	std::string	m_filePath; //! for debugging purposes
-	size_t			m_nGramOrder; //! max n-gram length contained in this LM
-	Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM. 
-																								//! Usually <s> and </s>
+protected:
+  std::string	m_filePath; //! for debugging purposes
+  size_t			m_nGramOrder; //! max n-gram length contained in this LM
+  Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM.
+  //! Usually <s> and </s>
 
 public:
-	virtual ~LanguageModelImplementation() {}
+  virtual ~LanguageModelImplementation() {}
 
-	//! Single or multi-factor
-	virtual LMType GetLMType() const = 0;
+  //! Single or multi-factor
+  virtual LMType GetLMType() const = 0;
 
-	/* whether this LM can be used on a particular phrase. 
-	 * Should return false if phrase size = 0 or factor types required don't exists
-	 */
-	virtual bool Useable(const Phrase &phrase) const = 0;
+  /* whether this LM can be used on a particular phrase.
+   * Should return false if phrase size = 0 or factor types required don't exists
+   */
+  virtual bool Useable(const Phrase &phrase) const = 0;
 
-	/* get score of n-gram. n-gram should not be bigger than m_nGramOrder
-	 * Specific implementation can return State and len data to be used in hypothesis pruning
-	 * \param contextFactor n-gram to be scored
-	 * \param state LM state.  Input and output.  state must be initialized.  If state isn't initialized, you want GetValueWithoutState.
-	 * \param len If non-null, the n-gram length is written here.  
-	 */
-	virtual float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
+  /* get score of n-gram. n-gram should not be bigger than m_nGramOrder
+   * Specific implementation can return State and len data to be used in hypothesis pruning
+   * \param contextFactor n-gram to be scored
+   * \param state LM state.  Input and output.  state must be initialized.  If state isn't initialized, you want GetValueWithoutState.
+   */
+  virtual LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
 
-  // Like GetValueGivenState but state may not be initialized (however it is non-NULL). 
-  // For example, state just came from NewState(NULL).   
-	virtual float GetValueForgotState(
-      const std::vector<const Word*> &contextFactor,
-      FFState &outState,
-      unsigned int* len = 0) const = 0;
+  // Like GetValueGivenState but state may not be initialized (however it is non-NULL).
+  // For example, state just came from NewState(NULL).
+  virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
 
-	//! get State for a particular n-gram.  We don't care what the score is.  
-  // This is here so models can implement a shortcut to GetValueAndState.  
-  virtual void GetState(
-      const std::vector<const Word*> &contextFactor,
-      FFState &outState) const;
+  //! get State for a particular n-gram.  We don't care what the score is.
+  // This is here so models can implement a shortcut to GetValueAndState.
+  virtual void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-	virtual FFState *GetNullContextState() const = 0;
-	virtual FFState *GetBeginSentenceState() const = 0;
+  virtual FFState *GetNullContextState() const = 0;
+  virtual FFState *GetBeginSentenceState() const = 0;
   virtual FFState *NewState(const FFState *from = NULL) const = 0;
 
-	//! max n-gram order of LM
-	size_t GetNGramOrder() const
-	{
-		return m_nGramOrder;
-	}
-	
-	//! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
-	const Word &GetSentenceStartArray() const
-	{
-		return m_sentenceStartArray;
-	}
-	const Word &GetSentenceEndArray() const
-	{
-		return m_sentenceEndArray;
-	}
-	
-	virtual std::string GetScoreProducerDescription() const = 0;
+  //! max n-gram order of LM
+  size_t GetNGramOrder() const {
+    return m_nGramOrder;
+  }
 
-	float GetWeight() const;
+  //! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
+  const Word &GetSentenceStartArray() const {
+    return m_sentenceStartArray;
+  }
+  const Word &GetSentenceEndArray() const {
+    return m_sentenceEndArray;
+  }
 
-	std::string GetScoreProducerWeightShortName() const 
-	{ 
-		return "lm";
-	}
-  
-	//! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
-	virtual void InitializeBeforeSentenceProcessing(){};
-	virtual void CleanUpAfterSentenceProcessing() {};
+  virtual std::string GetScoreProducerDescription() const = 0;
+
+  float GetWeight() const;
+
+  std::string GetScoreProducerWeightShortName() const {
+    return "lm";
+  }
+
+  //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
+  virtual void InitializeBeforeSentenceProcessing() {};
+  virtual void CleanUpAfterSentenceProcessing() {};
 
 #ifndef WITH_THREADS
-	// ref counting handled by boost otherwise
+  // ref counting handled by boost otherwise
 
-	unsigned int IncrementReferenceCount()
-	{
-		return ++m_referenceCount;
-	}
+  unsigned int IncrementReferenceCount() {
+    return ++m_referenceCount;
+  }
 
-	unsigned int DecrementReferenceCount()
-	{
-		return --m_referenceCount;
-	}
+  unsigned int DecrementReferenceCount() {
+    return --m_referenceCount;
+  }
 #endif
 };
 

@@ -11,7 +11,7 @@ namespace Moses {
 
 BilingualDynSuffixArray::BilingualDynSuffixArray():
 	m_maxPhraseLength(StaticData::Instance().GetMaxPhraseLength()), 
-	m_maxSampleSize(500)
+	m_maxSampleSize(20)
 { 
 	m_srcSA = 0; 
 	m_trgSA = 0;
@@ -182,7 +182,7 @@ int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorLis
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	while(getline(corpus, line)) {
 		sntArray.push_back(sntIdx);
-		Phrase phrase(direction);
+		Phrase phrase(direction, ARRAY_SIZE_INCR);
 		// parse phrase
 		phrase.CreateFromString( factors, line, factorDelimiter);
 		// store words in vocabulary and corpus
@@ -218,6 +218,7 @@ bool BilingualDynSuffixArray::GetLocalVocabIDs(const Phrase& src, SAPhrase &outp
 
 pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& phrasepair) const 
 {
+	//return pair<float, float>(0, 0);
 	float srcLexWeight(1.0), trgLexWeight(1.0);
 	std::map<pair<wordID_t, wordID_t>, float> targetProbs; // collect sum of target probs given source words
 	//const SentenceAlignment& alignment = m_alignments[phrasepair.m_sntIndex];
@@ -350,8 +351,8 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	std::vector<unsigned> wrdIndices(0);	
 	// extract sentence IDs from SA and return rightmost index of phrases
 	if(!m_srcSA->GetCorpusIndex(&(localIDs.words), &wrdIndices)) return;
-	if(wrdIndices.size() > m_maxSampleSize) 
-		wrdIndices = SampleSelection(wrdIndices);
+	//if(wrdIndices.size() > m_maxSampleSize) // select only first samples 
+          //wrdIndices = SampleSelection(wrdIndices);
 	std::vector<int> sntIndexes = GetSntIndexes(wrdIndices, sourceSize);	
 	// for each sentence with this phrase
 	for(size_t snt = 0; snt < sntIndexes.size(); ++snt) {
@@ -365,6 +366,8 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		for (iterPhrasePair = phrasePairs.begin(); iterPhrasePair != phrasePairs.end(); ++iterPhrasePair) {
 			SAPhrase phrase = TrgPhraseFromSntIdx(**iterPhrasePair);
 			phraseCounts[phrase]++;	// count each unique phrase
+                        // TODO::Inefficient to extract lexical weight here. Should do it later
+                        //       once the top phrases have been chosen by phrase prob p(e|f)
 			pair<float, float> lexWeight = GetLexicalWeight(**iterPhrasePair);	// get lexical weighting for this phrase pair 
 			itrLexW = lexicalWeights.find(phrase); // check if phrase already has lexical weight attached
 			if((itrLexW != lexicalWeights.end()) && (itrLexW->second.first < lexWeight.first)) 
@@ -375,7 +378,6 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		RemoveAllInColl(phrasePairs);
 	} // done with all sentences
 	// convert to moses phrase pairs
-	const size_t maxReturn = 20;
 	std::map<SAPhrase, int>::const_iterator iterPhrases; 
 	std::multimap<Scores, const SAPhrase*, ScoresComp> phraseScores (*m_scoreCmp);
 	// get scores of all phrases
@@ -394,10 +396,8 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	for(ritr = phraseScores.rbegin(); ritr != phraseScores.rend(); ++ritr) {
 		Scores scoreVector = ritr->first;
 		TargetPhrase *targetPhrase = GetMosesFactorIDs(*ritr->second);
-    //cerr << *targetPhrase << endl;
 		target.push_back( make_pair( scoreVector, targetPhrase));
-
-		if(target.size() == maxReturn) break;
+		if(target.size() == m_maxSampleSize) break;
 	}
 	return;
 }
@@ -421,6 +421,8 @@ std::vector<int> BilingualDynSuffixArray::GetSntIndexes(std::vector<unsigned>& w
 
 std::vector<unsigned> BilingualDynSuffixArray::SampleSelection(std::vector<unsigned> sample) const 
 {
+        //sample.erase(wrdIndices.begin()+m_maxSampleSize, wrdIndices.end());
+        //return sample; 
 	int size = sample.size();
 	//if(size < m_maxSampleSize) return sample;
 	std::vector<unsigned> subSample;
@@ -436,7 +438,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   const unsigned oldSrcCrpSize = m_srcCorpus->size(), oldTrgCrpSize = m_trgCorpus->size();
   cerr << "old source corpus size = " << oldSrcCrpSize << "\told target size = " << oldTrgCrpSize << endl;
-  Phrase sphrase(Input);
+  Phrase sphrase(Input, ARRAY_SIZE_INCR);
   sphrase.CreateFromString(m_inputFactors, source, factorDelimiter);
   m_srcVocab->MakeOpen();
   // store words in vocabulary and corpus
@@ -447,7 +449,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   }
   m_srcSntBreaks.push_back(oldSrcCrpSize); // former end of corpus is index of new sentence 
   m_srcVocab->MakeClosed();
-  Phrase tphrase(Output);
+  Phrase tphrase(Output, ARRAY_SIZE_INCR);
   tphrase.CreateFromString(m_outputFactors, target, factorDelimiter);
   m_trgVocab->MakeOpen();
   for(size_t i = 0; i < tphrase.GetSize(); ++i) {

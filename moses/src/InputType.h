@@ -38,101 +38,100 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
-	
+
 //! base class for sentences and confusion networks
-class InputType 
+class InputType
 {
 protected:
-	long m_translationId; 	//< contiguous Id
-	bool m_hasMetaData;
-	long m_segId;
-	ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
- 
+  long m_translationId; 	//< contiguous Id
+  bool m_hasMetaData;
+  long m_segId;
+  ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
+
 public:
 
   // used in -continue-partial-translation
-	std::vector<bool> m_sourceCompleted;
-	std::string m_initialTargetPhrase;
+  std::vector<bool> m_sourceCompleted;
+  std::string m_initialTargetPhrase;
   size_t m_frontSpanCoveredLength;
-    // how many words from the beginning are covered
+  // how many words from the beginning are covered
 
-	InputType(long translationId = 0);
-	virtual ~InputType();
+  InputType(long translationId = 0);
+  virtual ~InputType();
 
-	virtual InputTypeEnum GetType() const = 0;
+  virtual InputTypeEnum GetType() const = 0;
 
-	long GetTranslationId() const
-	{
-		return m_translationId;
-	}
-	void SetTranslationId(long translationId)
-	{
-		m_translationId = translationId;
-	}
-	//! returns the number of words moved
-	virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
+  long GetTranslationId() const {
+    return m_translationId;
+  }
+  void SetTranslationId(long translationId) {
+    m_translationId = translationId;
+  }
+  //! returns the number of words moved
+  virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 
   //! In a word lattice, tells you if there's a path from node start to node end
-	virtual bool CanIGetFromAToB(size_t start, size_t end) const;
-	
+  virtual bool CanIGetFromAToB(size_t start, size_t end) const;
+
   //! is there a path covering [range] (lattice only, otherwise true)
-	inline bool IsCoveragePossible(const WordsRange& range) const
-	{
-		return CanIGetFromAToB(range.GetStartPos(), range.GetEndPos() + 1);
-	}
+  inline bool IsCoveragePossible(const WordsRange& range) const {
+    return CanIGetFromAToB(range.GetStartPos(), range.GetEndPos() + 1);
+  }
 
   //! In a word lattice, you can't always get from node A to node B
-	inline bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const
-	{
-		//  return ComputeDistortionDistance(prev, current) < 100000;
-		size_t t = prev.GetEndPos()+1;  // 2
-		size_t l = current.GetEndPos()+1;   //l=1
-		size_t r = l; 
-		if (l<t) { r = t; } else { l = t; }  //r=2
-		if (!CanIGetFromAToB(l,r)) return false;
+  inline bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const {
+    //  return ComputeDistortionDistance(prev, current) < 100000;
+    size_t t = prev.GetEndPos()+1;  // 2
+    size_t l = current.GetEndPos()+1;   //l=1
+    size_t r = l;
+    if (l<t) {
+      r = t;  //r=2
+    } else {
+      l = t;
+    }
+    if (!CanIGetFromAToB(l,r)) return false;
 
-		// there's another check here: a current span may end at a place that previous could get to,
-		// but it may not *START* at a place it can get to. We'll also have to check if we're going left or right
+    // there's another check here: a current span may end at a place that previous could get to,
+    // but it may not *START* at a place it can get to. We'll also have to check if we're going left or right
 
-		r = current.GetStartPos();
-		l = prev.GetEndPos()+1; 
-		if (l == r) return true;
-		if (prev.GetEndPos() > current.GetStartPos()) {
-						r = prev.GetStartPos(); 
-						l = current.GetEndPos()+1; 
-						if (r == l) return true;
-		}
-		return CanIGetFromAToB(l,r);
-	}
+    r = current.GetStartPos();
+    l = prev.GetEndPos()+1;
+    if (l == r) return true;
+    if (prev.GetEndPos() > current.GetStartPos()) {
+      r = prev.GetStartPos();
+      l = current.GetEndPos()+1;
+      if (r == l) return true;
+    }
+    return CanIGetFromAToB(l,r);
+  }
 
-	//! number of words in this sentence/confusion network
-	virtual size_t GetSize() const =0;
+  //! number of words in this sentence/confusion network
+  virtual size_t GetSize() const =0;
 
-	//! populate this InputType with data from in stream
-	virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
-	
-	//! Output debugging info to stream out
-	virtual void Print(std::ostream&) const =0;
+  //! populate this InputType with data from in stream
+  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
 
-	//! create trans options specific to this InputType
-    virtual TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const=0;
+  //! Output debugging info to stream out
+  virtual void Print(std::ostream&) const =0;
 
-	//! return substring. Only valid for Sentence class. TODO - get rid of this fn
-	virtual Phrase GetSubString(const WordsRange&) const =0;
+  //! create trans options specific to this InputType
+  virtual TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const=0;
 
-	//! return substring at a particular position. Only valid for Sentence class. TODO - get rid of this fn
-	virtual const Word& GetWord(size_t pos) const=0;
+  //! return substring. Only valid for Sentence class. TODO - get rid of this fn
+  virtual Phrase GetSubString(const WordsRange&) const =0;
 
-	//! Returns the reordering constraints
-	const ReorderingConstraint& GetReorderingConstraint() const
-	{
-		return m_reorderingConstraint;
-	};
+  //! return substring at a particular position. Only valid for Sentence class. TODO - get rid of this fn
+  virtual const Word& GetWord(size_t pos) const=0;
 
-	virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const = 0;
+  //! Returns the reordering constraints
+  const ReorderingConstraint& GetReorderingConstraint() const {
+    return m_reorderingConstraint;
+  };
 
-	TO_STRING();
-	
+  virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const = 0;
+
+  TO_STRING();
+
 };
 
 std::ostream& operator<<(std::ostream&,InputType const&);

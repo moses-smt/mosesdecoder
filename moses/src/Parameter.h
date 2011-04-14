@@ -36,45 +36,43 @@ typedef std::map<std::string, bool>         PARAM_BOOL;
 typedef std::map<std::string, std::string > PARAM_STRING;
 
 /** Handles parameter values set in config file or on command line.
- * Process raw parameter data (names and values as strings) for StaticData 
+ * Process raw parameter data (names and values as strings) for StaticData
  * to parse; to get useful values, see StaticData. */
 class Parameter
 {
 protected:
-	PARAM_MAP m_setting;
-	PARAM_BOOL m_valid;
-	PARAM_STRING m_abbreviation;
-	PARAM_STRING m_description;
+  PARAM_MAP m_setting;
+  PARAM_BOOL m_valid;
+  PARAM_STRING m_abbreviation;
+  PARAM_STRING m_description;
 
-	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
-	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
-	bool ReadConfigFile(const std::string &filePath );
-	bool FilesExist(const std::string &paramName, int fieldNo, std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
-	bool isOption(const char* token);
-	bool Validate();
+  std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
+  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
+  bool ReadConfigFile(const std::string &filePath );
+  bool FilesExist(const std::string &paramName, int fieldNo, std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
+  bool isOption(const char* token);
+  bool Validate();
 
-	void AddParam(const std::string &paramName, const std::string &description);
-	void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
+  void AddParam(const std::string &paramName, const std::string &description);
+  void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 
-	void PrintCredit();
+  void PrintCredit();
 
 public:
-	Parameter();
-	~Parameter();
-	bool LoadParam(int argc, char* argv[]);
-	bool LoadParam(const std::string &filePath);
-	void Explain();
+  Parameter();
+  ~Parameter();
+  bool LoadParam(int argc, char* argv[]);
+  bool LoadParam(const std::string &filePath);
+  void Explain();
 
-	/** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
-	const PARAM_VEC &GetParam(const std::string &paramName)
-	{
-		return m_setting[paramName];
-	}
-	/** check if parameter is defined (either in moses.ini or as switch) */
-	bool isParamSpecified(const std::string &paramName)
-	{
-	  return  m_setting.find( paramName ) != m_setting.end();
-	}
+  /** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
+  const PARAM_VEC &GetParam(const std::string &paramName) {
+    return m_setting[paramName];
+  }
+  /** check if parameter is defined (either in moses.ini or as switch) */
+  bool isParamSpecified(const std::string &paramName) {
+    return  m_setting.find( paramName ) != m_setting.end();
+  }
 
 };
 

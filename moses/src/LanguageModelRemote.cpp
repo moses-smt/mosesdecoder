@@ -9,36 +9,41 @@
 #include "LanguageModelRemote.h"
 #include "Factor.h"
 
-namespace Moses {
+namespace Moses
+{
 
 const Factor* LanguageModelRemote::BOS = NULL;
 const Factor* LanguageModelRemote::EOS = (LanguageModelRemote::BOS + 1);
 
 bool LanguageModelRemote::Load(const std::string &filePath
-                                        , FactorType factorType
-                                        , size_t nGramOrder) 
+                               , FactorType factorType
+                               , size_t nGramOrder)
 {
-        m_factorType    = factorType;
-        m_nGramOrder    = nGramOrder;
+  m_factorType    = factorType;
+  m_nGramOrder    = nGramOrder;
 
-	int cutAt = filePath.find(':',0);
-	std::string host = filePath.substr(0,cutAt);
-        //std::cerr << "port string = '" << filePath.substr(cutAt+1,filePath.size()-cutAt) << "'\n";
-	int port = atoi(filePath.substr(cutAt+1,filePath.size()-cutAt).c_str());
-	bool good = start(host,port);
-	if (!good) {
-		std::cerr << "failed to connect to lm server on " << host << " on port " << port << std::endl;
-	}
-	ClearSentenceCache();
-	return good;
+  int cutAt = filePath.find(':',0);
+  std::string host = filePath.substr(0,cutAt);
+  //std::cerr << "port string = '" << filePath.substr(cutAt+1,filePath.size()-cutAt) << "'\n";
+  int port = atoi(filePath.substr(cutAt+1,filePath.size()-cutAt).c_str());
+  bool good = start(host,port);
+  if (!good) {
+    std::cerr << "failed to connect to lm server on " << host << " on port " << port << std::endl;
+  }
+  ClearSentenceCache();
+  return good;
 }
 
 
-bool LanguageModelRemote::start(const std::string& host, int port) {
+bool LanguageModelRemote::start(const std::string& host, int port)
+{
   //std::cerr << "host = " << host << ", port = " << port << "\n";
   sock = socket(AF_INET, SOCK_STREAM, 0);
   hp = gethostbyname(host.c_str());
-  if (hp==NULL) { herror("gethostbyname failed"); exit(1); }
+  if (hp==NULL) {
+    herror("gethostbyname failed");
+    exit(1);
+  }
 
   bzero((char *)&server, sizeof(server));
   bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
@@ -47,25 +52,29 @@ bool LanguageModelRemote::start(const std::string& host, int port) {
 
   int errors = 0;
   while (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
-      //std::cerr << "Error: connect()\n";
-      sleep(1);
-      errors++;
-      if (errors > 5) return false;
+    //std::cerr << "Error: connect()\n";
+    sleep(1);
+    errors++;
+    if (errors > 5) return false;
   }
   return true;
 }
 
-float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFactor, State* finalState, unsigned int* len) const {
+LMResult LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFactor, State* finalState) const
+{
+  LMResult ret;
+  ret.unknown = false;
   size_t count = contextFactor.size();
   if (count == 0) {
     if (finalState) *finalState = NULL;
-    return 0;
+    ret.score = 0.0;
+    return ret;
   }
   //std::cerr << "contextFactor.size() = " << count << "\n";
   size_t max = m_nGramOrder;
   const FactorType factor = GetFactorType();
   if (max > count) max = count;
- 
+
   Cache* cur = &m_cache;
   int pc = static_cast<int>(count) - 1;
   for (int i = 0; i < pc; ++i) {
@@ -76,8 +85,8 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   cur = &cur->tree[event_word ? event_word : EOS];
   if (cur->prob) {
     if (finalState) *finalState = cur->boState;
-    if (len) *len = m_nGramOrder;
-    return cur->prob;
+    ret.score = cur->prob;
+    return ret;
   }
   cur->boState = *reinterpret_cast<const State*>(&m_curId);
   ++m_curId;
@@ -85,17 +94,17 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   std::ostringstream os;
   os << "prob ";
   if (event_word == NULL) {
-	os << "</s>";
+    os << "</s>";
   } else {
-	os << event_word->GetString();
+    os << event_word->GetString();
   }
   for (size_t i=1; i<max; i++) {
-        const Factor* f = contextFactor[count-1-i]->GetFactor(factor);
-	if (f == NULL) {
-		os << " <s>";
-	} else {
-		os << ' ' << f->GetString();
-	}
+    const Factor* f = contextFactor[count-1-i]->GetFactor(factor);
+    if (f == NULL) {
+      os << " <s>";
+    } else {
+      os << ' ' << f->GetString();
+    }
   }
   os << std::endl;
   std::string out = os.str();
@@ -105,28 +114,31 @@ float LanguageModelRemote::GetValue(const std::vector<const Word*> &contextFacto
   int errors = 0;
   int cnt = 0;
   while (1) {
-      if (r < 0) {
-        errors++; sleep(1);
-        //std::cerr << "Error: read()\n";
-        if (errors > 5) exit(1);
-        } else if (r==0 || res[cnt] == '\n') { break; }
-      else {
-        cnt += r;
-        if (cnt==6) break;
-        read(sock, &res[cnt], 6-cnt);
-      }
+    if (r < 0) {
+      errors++;
+      sleep(1);
+      //std::cerr << "Error: read()\n";
+      if (errors > 5) exit(1);
+    } else if (r==0 || res[cnt] == '\n') {
+      break;
+    } else {
+      cnt += r;
+      if (cnt==6) break;
+      read(sock, &res[cnt], 6-cnt);
+    }
   }
   cur->prob = FloorScore(TransformLMScore(*reinterpret_cast<float*>(res)));
   if (finalState) {
     *finalState = cur->boState;
-    if (len) *len = m_nGramOrder;
   }
-  return cur->prob;
+  ret.score = cur->prob;
+  return ret;
 }
 
-LanguageModelRemote::~LanguageModelRemote() {
+LanguageModelRemote::~LanguageModelRemote()
+{
   // Step 8 When finished send all lingering transmissions and close the connection
-  close(sock); 
+  close(sock);
 }
 
 }

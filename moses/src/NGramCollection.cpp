@@ -26,40 +26,36 @@ namespace Moses
 {
 NGramCollection::~NGramCollection()
 {
-	Collection::iterator iter;
-	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
-	{
-		delete (iter->second);
-	}
+  Collection::iterator iter;
+  for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter) {
+    delete (iter->second);
+  }
 }
 
-void NGramCollection::Add(const Factor *factor, const NGramNode &ngramNode)
+void NGramCollection::Add(const Factor * /* factor */, const NGramNode & /* ngramNode */)
 {
 }
 
 NGramNode *NGramCollection::GetOrCreateNGram(const Factor *factor)
 {
-	Collection::iterator iter = m_collection.find(factor);
-	if (iter == m_collection.end())
-	{
-		return (m_collection[factor] = new NGramNode());
-	}
-	else
-	{
-		return (iter->second);
-	}
+  Collection::iterator iter = m_collection.find(factor);
+  if (iter == m_collection.end()) {
+    return (m_collection[factor] = new NGramNode());
+  } else {
+    return (iter->second);
+  }
 }
 
 NGramNode *NGramCollection::GetNGram(const Factor *factor)
 {
-	Collection::iterator iter = m_collection.find(factor);
-	return (iter == m_collection.end()) ? NULL : (iter->second) ;
+  Collection::iterator iter = m_collection.find(factor);
+  return (iter == m_collection.end()) ? NULL : (iter->second) ;
 }
 
 const NGramNode *NGramCollection::GetNGram(const Factor *factor) const
 {
-	Collection::const_iterator iter = m_collection.find(factor);
-	return (iter == m_collection.end()) ? NULL : (iter->second) ;
+  Collection::const_iterator iter = m_collection.find(factor);
+  return (iter == m_collection.end()) ? NULL : (iter->second) ;
 }
 
 }

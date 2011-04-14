@@ -17,12 +17,6 @@
 
 use strict;
 
-use FindBin qw($Bin);
-use File::Basename;
-my $SCRIPTS_ROOTDIR = $Bin;
-$SCRIPTS_ROOTDIR =~ s/\/generic$//;
-$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
-
 #######################
 #Customizable parameters 
 
@@ -35,8 +29,6 @@ my $pwdcmd = getPwdCmd();
 my $workingdir = `$pwdcmd`; chomp $workingdir;
 my $tmpdir="$workingdir/tmp$$";
 my $splitpfx="split$$";
-my $linespfx="lineNum$$";
-my $timespfx="times$$";
 
 $SIG{'INT'} = \&kill_all_and_quit; # catch exception for CTRL-C
 
@@ -45,7 +37,6 @@ $SIG{'INT'} = \&kill_all_and_quit; # catch exception for CTRL-C
 my $jobscript="$workingdir/job$$";
 my $qsubout="$workingdir/out.job$$";
 my $qsuberr="$workingdir/err.job$$";
-
 
 my $mosesparameters="";
 my $feed_moses_via_stdin = 0;
@@ -72,11 +63,9 @@ my $wordgraphlist=undef;
 my $wordgraphfile=undef;
 my $wordgraphflag=0;
 my $robust=5; # resubmit crashed jobs robust-times
+my $alifile=undef;
 my $logfile="";
 my $logflag="";
-my $existingtimesfile=undef;
-my $timesfile="";
-my $timesflag="";
 my $searchgraphlist="";
 my $searchgraphfile="";
 my $searchgraphflag=0;
@@ -97,14 +86,13 @@ sub init(){
              'decoder-parameters=s'=> \$mosesparameters,
              'feed-decoder-via-stdin'=> \$feed_moses_via_stdin,
 	     'logfile=s'=> \$logfile,
-	     'timesfile=s'=> \$timesfile,
-	     'existingtimesfile=s'=> \$existingtimesfile,
 	     'i|inputfile|input-file=s'=> \$inputlist,
              'n-best-list=s'=> \$nbestlist,
              'n-best-file=s'=> \$oldnbestfile,
              'n-best-size=i'=> \$oldnbest,
 	     'output-search-graph|osg=s'=> \$searchgraphlist,
              'output-word-graph|owg=s'=> \$wordgraphlist,
+             'alignment-output-file=s'=> \$alifile,
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
@@ -119,8 +107,6 @@ sub init(){
   getWordGraphParameters();
   
   getLogParameters();
-
-  getTimesParameters();
 
 #print_parameters();
 #print STDERR "nbestflag:$nbestflag\n";
@@ -163,7 +149,6 @@ sub usage(){
   print STDERR "*  -i|inputfile|input-file <file>   the input text to translate\n";
   print STDERR "*  -jobs <N> number of required jobs\n";
   print STDERR "   -logfile <file> file where storing log files of all jobs\n";
-  print STDERR "   -timesfile <file> file where storing per-sentence translation times of all jobs\n";
   print STDERR "   -qsub-prefix <string> name for sumbitte jobs\n";
   print STDERR "   -queue-parameters <string> specific requirements for queue\n";
   print STDERR "   -old-sge Assume Sun Grid Engine < 6.0\n";
@@ -204,7 +189,6 @@ sub print_parameters(){
   print STDERR "Output Search Graph: $searchgraphlist\n" if ($searchgraphflag);
   print STDERR "Output Word Graph: $wordgraphlist\n" if ($wordgraphflag);
   print STDERR "LogFile:$logfile\n" if ($logflag);
-  print STDERR "TimesFile:$timesfile\n" if ($timesflag);
   print STDERR "Qsub name: $qsubname\n";
   print STDERR "Queue parameters: $queueparameters\n";
   print STDERR "Inputtype: text\n" if $inputtype == 0;
@@ -218,12 +202,6 @@ sub print_parameters(){
 sub getLogParameters(){
   if ($logfile){ $logflag=1; }
 }
-
-#get parameters for times file
-sub getTimesParameters(){
-  if ($timesfile){ $timesflag=1; }
-}
-
 
 #get parameters for nbest computation (possibly from configuration file)
 sub getNbestParameters(){
@@ -354,8 +332,6 @@ if (! -e $cfgfile) {
 print_parameters(); # so that people know
 exit(1) if $dbg; # debug mode: just print and do not run
 
-safesystem("mkdir -p $tmpdir") or die;
-
 
 #splitting test file in several parts
 #$decimal="-d"; #split does not accept this options (on MAC OS)
@@ -367,96 +343,86 @@ my $splitN;
 
 my @idxlist=();
 
-# SGE jobs can be submitted as array jobs with a range (ex: -t 1-64)
-# Unfortunately, SGE can't handle multiple ranges (ex: -t 1-3,9-16,20-64)
-#
-# If some jobs fail, we want to be able to restart them
-# using a minimal number of calls to qsub.
-# 
-# These two arrays will be used to keep track of the start and end ranges
-# of any jobs that need to be re-run.
-# 
-# So, if jobs 9,10,12,18,19,20 died and need to be restarted, 
-# then @idxstarts would be set to  (9,12,18)
-#  and @idxends   would be set to (10,12,20)
-#
-# $idxranges stores the (zero-based) index of the last range,
-# so it would be 2 in the example above
-my @idxstarts=();
-my @idxends=();
-my $idxranges=-1;
+if ($inputtype==0){ #text input
+#getting the number of input sentences (one sentence per line)
+  chomp($sentenceN=`wc -l ${inputlist} | awk '{print \$1}' `);
 
+#Reducing the number of jobs if less sentences to translate
+  if ($jobs>$sentenceN){ $jobs=$sentenceN; }
 
-if ($inputtype>=0 && $inputtype<=2) {
+#Computing the number of sentences for each files
+  if ($sentenceN % $jobs == 0){ $splitN=int($sentenceN / $jobs); }
+  else{ $splitN=int($sentenceN /$jobs) + 1; }
 
-    my $tmpfile;
+  if ($dbg){
+    print STDERR "There are $sentenceN sentences to translate\n";
+    print STDERR "There are at most $splitN sentences per job\n";
+  }
 
-    if ($inputtype==1) { #confusion network input
-	# Transform the text to use only one line per sentence CN
-#	$tmpdir="/tmp/$$";
-    	$tmpfile="$tmpdir/cnsplit$$";
-	$cmd="cat $inputlist | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' > $tmpfile";
-	safesystem("$cmd") or die;
-    } else {
-#	$tmpdir = ".";
-	$tmpfile = $inputlist;
-    }
-    
-    
-    #getting the number of input sentences (one sentence per line)
-    chomp($sentenceN=`wc -l ${tmpfile} | awk '{print \$1}' `);
+  $cmd="split $decimal -a 2 -l $splitN $inputlist ${inputfile}.$splitpfx-";
+  safesystem("$cmd") or die;
+}
+elsif ($inputtype==1){ #confusion network input
+  my $tmpfile="/tmp/cnsplit$$";
+  $cmd="cat $inputlist | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' > $tmpfile";
+  safesystem("$cmd") or die;
 
-    #Reducing the number of jobs if less sentences to translate
-    if ($jobs>$sentenceN){ $jobs=$sentenceN; }
+#getting the number of input CNs
+  chomp($sentenceN=`wc -l $tmpfile | awk '{print \$1}' `);
 
-    if ($dbg){
-	print STDERR "There are $sentenceN sentences to translate, and $jobs jobs.\n";
-    }
+#Reducing the number of jobs if less CNs to translate
+  if ($jobs>$sentenceN){ $jobs=$sentenceN; }
 
-    # Split the input sentences
-    $cmd="$SCRIPTS_ROOTDIR/generic/balance-corpus --num-parts=$jobs --corpus=$tmpfile --prefix=$inputfile.$splitpfx- --no-zeropad --min-words=0 --index-prefix $inputfile.$linespfx-";
-    if ($searchgraphflag || $wordgraphflag) {
-	$cmd.=" --balance-naive";
-	print STDERR "WARNING: Use of search graph and word graph outputs currently only work with the balance-corpus --balance-naive flag. Enabling that flag in lieu of the default. This disables the use of an existing times file."
-    } elsif (defined $existingtimesfile) {
-	my @t=();
-	open(EXISTINGTIMES,$existingtimesfile) or die "Can't read existing times file:\t$existingtimesfile";
-	@t=<EXISTINGTIMES>;
-	close(EXISTINGTIMES);
-	if ($sentenceN == scalar(@t)) {
-	    $cmd.=" --balance-time $existingtimesfile";
-	} else {
-	    print STDERR "WARNING: The number of time entries doesn't match the number of sentences - therefore, not using existing time file.";
-	}
-    }
-    safesystem("$cmd") or die;
+#Computing the number of CNs for each files
+  if ($sentenceN % $jobs == 0){ $splitN=int($sentenceN / $jobs); }
+  else{ $splitN=int($sentenceN /$jobs) + 1; }
 
-    
-    if ($inputtype==1) { #confusion network input
-    	my @idxlist=();
-	chomp(@idxlist=`ls ${tmpdir}/$tmpfile-[0-9]*`);
-	grep(s/.+\-(\d+)\D*$/$1/e,@idxlist);
+  if ($dbg){
+    print STDERR "There are $sentenceN confusion networks to translate\n";
+    print STDERR "There are at most $splitN sentences per job\n";
+  }
 
-	# Restore the text back to multiple lines per sentence CN
-	foreach my $idx (@idxlist){
-	    $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
-	    safesystem("cat ${tmpdir}/$tmpfile-$idx | $cmd > ${inputfile}.$splitpfx-$idx ; \\rm -f $tmpfile-$idx;");
-	}
-    }
+  $cmd="split $decimal -a 2 -l $splitN $tmpfile $tmpfile-";
+  safesystem("$cmd") or die;
+ 
+  my @idxlist=();
+  chomp(@idxlist=`ls $tmpfile-*`);
+  grep(s/.+(\-\S+)$/$1/e,@idxlist);
 
-} else {
-    # unknown input type
-    die "INPUTTYPE:$inputtype is unknown!\n";
+  foreach my $idx (@idxlist){
+    $cmd="perl -pe 's/ _CNendline_ /\\n/g;s/ _CNendline_/\\n/g;'";
+    safesystem("cat $tmpfile$idx | $cmd > ${inputfile}.$splitpfx$idx ; \\rm -f $tmpfile$idx;");
+  }
+}
+elsif ($inputtype==2){ #confusion network input
+#getting the number of input lattices (one lattice per line)
+  chomp($sentenceN=`wc -l ${inputlist} | awk '{print \$1}' `);
+
+#Reducing the number of jobs if less lattices to translate
+  if ($jobs>$sentenceN){ $jobs=$sentenceN; }
+
+#Computing the number of sentences for each files
+  if ($sentenceN % $jobs == 0){ $splitN=int($sentenceN / $jobs); }
+  else{ $splitN=int($sentenceN /$jobs) + 1; }
+
+  if ($dbg){
+    print STDERR "There are $sentenceN lattices to translate\n";
+    print STDERR "There are at most $splitN lattices per job\n";
+  }
+
+  $cmd="split $decimal -a 2 -l $splitN $inputlist ${inputfile}.$splitpfx-";
+  safesystem("$cmd") or die;
+}
+else{ #unknown input type
+  die "INPUTTYPE:$inputtype is unknown!\n";
 }
 
-
-
 chomp(@idxlist=`ls ${inputfile}.$splitpfx-*`);
-grep(s/.+\-(\d+)\D*$/$1/e,@idxlist);
-@idxlist = sort {$a <=> $b} @idxlist;
- 
-preparing_script();
+grep(s/.+(\-\S+)$/$1/e,@idxlist);
 
+safesystem("mkdir -p $tmpdir") or die;
+
+preparing_script();
 
 #launching process through the queue
 my @sgepids =();
@@ -469,7 +435,7 @@ while ($robust && scalar @idx_todo) {
  $robust--;
 
  my $failure=0;
- #foreach my $idx (@idx_todo){
+ foreach my $idx (@idx_todo){
 
   my $batch_and_join = undef;
   if ($old_sge) {
@@ -478,22 +444,19 @@ while ($robust && scalar @idx_todo) {
   } else {
     $batch_and_join = "-b no -j yes";
   }
- calculateIdxRanges();
- for (my $rangeindex=0; $rangeindex<=$idxranges; $rangeindex+=1) {
-     
-  $cmd="qsub -t $idxstarts[$rangeindex]-$idxends[$rangeindex] $queueparameters $batch_and_join ${jobscript}.bash > ${jobscript}.log 2>&1";
+  $cmd="qsub $queueparameters $batch_and_join -o $qsubout$idx -e $qsuberr$idx -N $qsubname$idx ${jobscript}${idx}.bash > ${jobscript}${idx}.log 2>&1";
   print STDERR "$cmd\n" if $dbg; 
 
   safesystem($cmd) or die;
 
   my ($res,$id);
 
-  open (IN,"${jobscript}.log")
-    or die "Can't read id of job ${jobscript}.log";
+  open (IN,"${jobscript}${idx}.log")
+    or die "Can't read id of job ${jobscript}${idx}.log";
   chomp($res=<IN>);
-  split(/\s+|\./,$res);
+  split(/\s+/,$res);
   $id=$_[2];
-  die "Failed to guess job id from $jobscript.log, got: $res"
+  die "Failed to guess job id from $jobscript$idx.log, got: $res"
     if $id !~ /^[0-9]+$/;
   close(IN);
 
@@ -575,7 +538,7 @@ while ($robust && scalar @idx_todo) {
 #concatenating translations and removing temporary files
 concatenate_1best();
 concatenate_logs() if $logflag;
-concatenate_runtimes() if $timesflag;
+concatenate_ali() if defined $alifile;  
 concatenate_nbest() if $nbestflag;  
 safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 
@@ -585,96 +548,74 @@ safesystem("cat searchgraph$$ >> /dev/stdout") if $searchgraphlist eq '-';
 concatenate_wordgraph() if $wordgraphflag;  
 safesystem("cat wordgraph$$ >> /dev/stdout") if $wordgraphlist[0] eq '-';
 
-#Commented out for debugging purposes only. Please uncomment!
-#remove_temporary_files();
+remove_temporary_files();
 
 
 #script creation
 sub preparing_script(){
-
+  foreach my $idx (@idxlist){
     my $scriptheader="";
-    $scriptheader.="\#\!/bin/bash\n\n";
-      # qsub ignores the shebang line, so we'll also use the -S flag
-      #
-      # Be aware!! If you give qsub -S but not -V,
-      #   you likely won't have your regular environment variables set up 
-
-    $scriptheader.="\#\$ \-S /bin/bash\n";
-    $scriptheader.="\#\$ \-o $qsubout-\$TASK_ID\n";
-    $scriptheader.="\#\$ \-e $qsuberr-\$TASK_ID\n";
-    $scriptheader.="\#\$ \-N $qsubname\n\n"; # Unfortunately, qsub doesn't respect the pseudo-variable $TASK_ID for -N
-
-    $scriptheader.="if [ \"\" == \"\$SGE_TASK_ID\" ]; then\n";
-    $scriptheader.="\tif [ \"\" == \"\$PBS_ARRAYID\" ]; then\n";
-    $scriptheader.="\t\techo \"Job was not submitted as an array job\"\n";
-    $scriptheader.="\t\texit 1\n";
-    $scriptheader.="\telse\n";
-    $scriptheader.="\t\techo \"SGE_TASK_ID is not available, but PBS_ARRAYID is; using that instead.\"\n";
-    $scriptheader.="\t\tSGE_TASK_ID=\$PBS_ARRAYID\n";
-    $scriptheader.="\tfi\n";
-    $scriptheader.="fi\n\n";
-
+    $scriptheader.="\#\! /bin/bash\n\n";
+      # !!! this is useless. qsub ignores the first line of the script.
+      # Pass '-S /bin/bash' to qsub instead.
     $scriptheader.="uname -a\n\n";
     $scriptheader.="ulimit -c 0\n\n"; # avoid coredumps
-    $scriptheader.="cd $workingdir\n";
+    $scriptheader.="cd $workingdir\n\n";
 
-    $scriptheader.="\n";
-
-
-    my $idxindex=1;
-  foreach my $idx (@idxlist){
-      $scriptheader.="idxarray[".$idxindex."]=".$idx."\n";
-      $idxindex+=1;
-  }
-    $scriptheader.="\n";
-
-    open (OUT, "> ${jobscript}.bash");
+    open (OUT, "> ${jobscript}${idx}.bash");
     print OUT $scriptheader;
     my $inputmethod = $feed_moses_via_stdin ? "<" : "-input-file";
 
     my $tmpnbestlist="";
     if ($nbestflag){
-      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx-\${idxarray[\$SGE_TASK_ID]} $nbestlist[1]";
-
-      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx-\${idxarray[\$SGE_TASK_ID]} $nbestlist[1]";
+      $tmpnbestlist="$tmpdir/$nbestfile.$splitpfx$idx $nbestlist[1]";
       $tmpnbestlist = "$tmpnbestlist $nbestlist[2]" if scalar(@nbestlist)==3;
       $tmpnbestlist = "-n-best-list $tmpnbestlist";
     }
 
+    my $tmpalioutfile = "";
+    if (defined $alifile){
+      $tmpalioutfile="-alignment-output-file $tmpdir/$alifile.$splitpfx$idx";
+    }
+
     my $tmpsearchgraphlist="";
     if ($searchgraphflag){
-      $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx-\${idxarray[\$SGE_TASK_ID]}";
+      $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx$idx";
     }
 
     my $tmpwordgraphlist="";
     if ($wordgraphflag){
-      $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx-\${idxarray[\$SGE_TASK_ID]} $wordgraphlist[1]";
+      $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
     }
 
-    print OUT "$mosescmd $mosesparameters $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx-\${idxarray[\$SGE_TASK_ID]} > $tmpdir/${inputfile}.$splitpfx-\${idxarray[\$SGE_TASK_ID]}.trans\n\n";
+    print OUT "$mosescmd $mosesparameters $tmpalioutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
+    if (defined $alifile){
+      print OUT "\\mv -f $tmpdir/${alifile}.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }
     if ($nbestflag){
-      print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx-\${idxarray[\$SGE_TASK_ID]} .\n\n";
+      print OUT "\\mv -f $tmpdir/${nbestfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
     if ($searchgraphflag){
-      print OUT "\\mv -f $tmpdir/${searchgraphfile}.$splitpfx-\${idxarray[\$SGE_TASK_ID]} .\n\n";
+      print OUT "\\mv -f $tmpdir/${searchgraphfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
 
     if ($wordgraphflag){
-      print OUT "\\mv -f $tmpdir/${wordgraphfile}.$splitpfx-\${idxarray[\$SGE_TASK_ID]} .\n\n";
+      print OUT "\\mv -f $tmpdir/${wordgraphfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
 
-    print OUT "\\mv -f $tmpdir/${inputfile}.$splitpfx-\${idxarray[\$SGE_TASK_ID]}.trans .\n\n";
+    print OUT "\\mv -f $tmpdir/${inputfile}.$splitpfx$idx.trans .\n\n";
     print OUT "echo exit status \$\?\n\n";
     close(OUT);
 
     #setting permissions of each script
-    chmod(oct(755),"${jobscript}.bash");
-  
+    chmod(oct(755),"${jobscript}${idx}.bash");
+  }
 }
 
 sub concatenate_wordgraph(){
@@ -691,12 +632,12 @@ sub concatenate_wordgraph(){
 
 #computing the length of each input file
     my @in=();
-    open (IN, "${inputfile}.${splitpfx}-${idx}.trans");
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
     @in=<IN>;
     close(IN);
     $inplength{$idx} = scalar(@in);
 
-    open (IN, "${wordgraphfile}.${splitpfx}-${idx}");
+    open (IN, "${wordgraphfile}.${splitpfx}${idx}");
     while (<IN>){
 
       my $code="";
@@ -752,12 +693,12 @@ sub concatenate_searchgraph(){
 
 #computing the length of each input file
     my @in=();
-    open (IN, "${inputfile}.${splitpfx}-${idx}.trans");
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
     @in=<IN>;
     close(IN);
     $inplength{$idx} = scalar(@in);
 
-    open (IN, "${searchgraphfile}.${splitpfx}-${idx}");
+    open (IN, "${searchgraphfile}.${splitpfx}${idx}");
     while (<IN>){
       my ($code,@extra)=split(/[ \t]+/,$_);
       $code += $offset;
@@ -787,103 +728,92 @@ sub concatenate_searchgraph(){
 }
 
 sub concatenate_nbest(){
+  my $oldcode="";
+  my $newcode=-1;
+  my %inplength = ();
+  my $offset = 0;
+ 
+# get the list of feature and set a fictitious string with zero scores
+  open (IN, "${nbestfile}.${splitpfx}$idxlist[0]");
+  my $str = <IN>;
+  chomp($str);
+  close(IN);
+  my ($code,$trans,$featurescores,$globalscore)=split(/\|\|\|/,$str);
+  
+  my $emptytrans = "  ";
+  my $emptyglobalscore = " 0.0";
+  my $emptyfeaturescores = $featurescores;
+  $emptyfeaturescores =~ s/[-0-9\.]+/0/g;
 
-    # Read original line numbers for each part	
-    my @lineNum;
-    my $lastLine = 0;
-    foreach my $idx (@idxlist){
-	open (IN,"$inputfile.$linespfx-$idx");
-	for (my $i=0; <IN>; $i+=1) {
-	    chomp;
-	    $lineNum[$idx][$i] = $_;
-	    $lastLine=$lineNum[$idx][$i] if ($lineNum[$idx][$i] > $lastLine);
-	}
-	close(IN);
-    }
+  my $outnbest=$nbestlist[0];
+  if ($nbestlist[0] eq '-'){ $outnbest="nbest$$"; }
 
-    # Initialize n-best lists to empty string
-    my @nbest;
-    for my $originalLine (0 .. $lastLine) {
-	$nbest[$originalLine] = "";
-    }
+  open (OUT, "> $outnbest");
+  foreach my $idx (@idxlist){
 
-    # Read n-best lists for each part
-    foreach my $idx (@idxlist){
-	open (IN, "${nbestfile}.${splitpfx}-${idx}");
-	while (<IN>) {
-	    my ($code,@extra)=split(/\|\|\|/,$_);
-	    my $originalLine = $lineNum[$idx][$code];
-	    $nbest[$originalLine] .= join("\|\|\|",("$originalLine ",@extra));
-	}
-	close(IN);
-    }
-    
-    # Some input lines may have returned an empty n-best lines
-    # get the list of feature and set a fictitious string with zero scores
-    open (IN, "${nbestfile}.${splitpfx}-$idxlist[0]");
-    my $str = <IN>;
-    chomp($str);
+#computing the length of each input file
+    my @in=();
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
+    @in=<IN>;
     close(IN);
-    my ($code,$trans,$featurescores,$globalscore)=split(/\|\|\|/,$str);    
-    my $emptytrans = "  ";
-    my $emptyglobalscore = " 0.0";
-    my $emptyfeaturescores = $featurescores;
-    $emptyfeaturescores =~ s/[-0-9\.]+/0/g;
+    $inplength{$idx} = scalar(@in);
 
-    # Print n-best list results
-    my $outnbest=$nbestlist[0];
-    if ($nbestlist[0] eq '-'){ $outnbest="nbest$$"; }
-    open (OUT, "> $outnbest");
-    for my $originalLine (0 .. $lastLine) {
-	if ($nbest[$originalLine] eq "") {
-	    print OUT join("\|\|\|",("$originalLine ",$emptytrans,$emptyfeaturescores,$emptyglobalscore)),"\n";
-	} else {
-	    print OUT $nbest[$originalLine];
-	}
-	
+    open (IN, "${nbestfile}.${splitpfx}${idx}");
+    while (<IN>){
+      my ($code,@extra)=split(/\|\|\|/,$_);
+      $code += $offset;
+      if ($code ne $oldcode){
+
+# if there is a jump between two consecutive codes
+# it means that an input sentence is not translated
+# fill this hole with a "fictitious" list of translation
+# comprising just one "emtpy translation" with zero scores
+        while ($code - $oldcode > 1){
+           $oldcode++;
+           print OUT join("\|\|\|",($oldcode,$emptytrans,$emptyfeaturescores,$emptyglobalscore)),"\n";
+        }
+      }
+      $oldcode=$code;
+      print OUT join("\|\|\|",($oldcode,@extra));
     }
-    close(OUT);
-    
-}
+    close(IN);
+    $offset += $inplength{$idx};
 
+    while ($offset - $oldcode > 1){
+      $oldcode++;
+      print OUT join("\|\|\|",($oldcode,$emptytrans,$emptyfeaturescores,$emptyglobalscore)),"\n";
+    }
+  }
+  close(OUT);
+}
 
 sub concatenate_1best(){
-    safesystem("rm -f ${inputfile}.$linespfx-trans");
-    foreach my $idx (@idxlist){
-	safesystem("paste $inputfile.$linespfx-$idx ${inputfile}.${splitpfx}-${idx}.trans >> ${inputfile}.$linespfx-trans");
-    }
-    safesystem("cat ${inputfile}.$linespfx-trans | sort -n | cut -f 2");
-}
-
-# Use this function to extract a list of 
-#   how long it took to translate each sentence
-sub concatenate_runtimes(){
-
-    # Extract translation times for each part
-    foreach my $idx (@idxlist){
-	open (IN, "$qsubout-$idx");
-	open (OUT, "> $inputfile.$timespfx-$idx");
-	while(my $line=<IN>) {
-	    print OUT $1."\n" if $line =~ /^[[:space:]]*Translation took[[:space:]]+([[:digit:]]+\.[[:digit:]]+) seconds[[:space:]]*$/;
-	}
-	close(IN);
-	close(OUT);
-    }
-
-    # Properly order the times (by sentence number)
-    safesystem("rm -f ${inputfile}.$linespfx-times");
-    foreach my $idx (@idxlist){
-	safesystem("paste $inputfile.$linespfx-$idx ${inputfile}.${timespfx}-${idx} >> ${inputfile}.$linespfx-times");
-    }
-    safesystem("cat ${inputfile}.$linespfx-times | sort -n | cut -f 2 > ${timesfile}");
-
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
+    @in=<IN>;
+    print STDOUT "@in";
+    close(IN);
+  }
 }
 
 sub concatenate_logs(){
   open (OUT, "> ${logfile}");
   foreach my $idx (@idxlist){
     my @in=();
-    open (IN, "$qsubout-$idx");
+    open (IN, "$qsubout$idx");
+    @in=<IN>;
+    print OUT "@in";
+    close(IN);
+  }
+  close(OUT);
+}
+
+sub concatenate_ali(){
+  open (OUT, "> ${alifile}");
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "$alifile.$splitpfx$idx");
     @in=<IN>;
     print OUT "@in";
     close(IN);
@@ -897,12 +827,9 @@ sub check_exit_status(){
   my $failure=0;
   foreach my $idx (@idxlist){
     print STDERR "check_exit_status of job $idx\n";
-    open(IN,"$qsubout-$idx");
+    open(IN,"$qsubout$idx");
     while (<IN>){
-	if (/exit status 1/) {
-	    $failure=1;
-	    print STDERR "\tfailure found for $idx\n";
-	}
+      $failure=1 if (/exit status 1/);
     }
     close(IN);
   }
@@ -932,23 +859,23 @@ sub check_translation(){
   my @failed = ();
   foreach my $idx (@idx_todo){
     if ($inputtype==0){#text input
-      chomp($inputN=`wc -l ${inputfile}.$splitpfx-$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     elsif ($inputtype==1){#confusion network input
-      chomp($inputN=`cat ${inputfile}.$splitpfx-$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
+      chomp($inputN=`cat ${inputfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
     }
     elsif ($inputtype==2){#lattice input
-      chomp($inputN=`wc -l ${inputfile}.$splitpfx-$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     else{#unknown input
       die "INPUTTYPE:$inputtype is unknown!\n";
     }
-    chomp($outputN=`wc -l ${inputfile}.$splitpfx-$idx.trans | cut -d' ' -f1`);
+    chomp($outputN=`wc -l ${inputfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
     
     if ($inputN != $outputN){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
-      print STDERR "outputfile=${inputfile}.$splitpfx-$idx.trans inputfile=${inputfile}.$splitpfx-$idx\n";
+      print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       push @failed,$idx;
     }
   }
@@ -961,23 +888,24 @@ sub check_translation_old_sge(){
   my $outputN;
   foreach my $idx (@idx_todo){
     if ($inputtype==0){#text input
-      chomp($inputN=`wc -l ${inputfile}.$splitpfx-$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     elsif ($inputtype==1){#confusion network input
-      chomp($inputN=`cat ${inputfile}.$splitpfx-$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l | cut -d' ' -f1 `);
+      chomp($inputN=`cat ${inputfile}.$splitpfx$idx | perl -pe 's/\\n/ _CNendline_ /g;' | perl -pe 's/_CNendline_  _CNendline_ /_CNendline_\\n/g;' | wc -l |
+ cut -d' ' -f1 `);
     }
     elsif ($inputtype==2){#lattice input
-      chomp($inputN=`wc -l ${inputfile}.$splitpfx-$idx | cut -d' ' -f1`);
+      chomp($inputN=`wc -l ${inputfile}.$splitpfx$idx | cut -d' ' -f1`);
     }
     else{#unknown input
       die "INPUTTYPE:$inputtype is unknown!\n";
     }
-    chomp($outputN=`wc -l ${inputfile}.$splitpfx-$idx.trans | cut -d' ' -f1`);
+    chomp($outputN=`wc -l ${inputfile}.$splitpfx$idx.trans | cut -d' ' -f1`);
 
     if ($inputN != $outputN){
       print STDERR "Split ($idx) were not entirely translated\n";
       print STDERR "outputN=$outputN inputN=$inputN\n";
-      print STDERR "outputfile=${inputfile}.$splitpfx-$idx.trans inputfile=${inputfile}.$splitpfx-$idx\n";
+      print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       return 1;
     }
   }
@@ -987,22 +915,19 @@ sub check_translation_old_sge(){
 sub remove_temporary_files(){
   #removing temporary files
   foreach my $idx (@idxlist){
-    unlink("${inputfile}.${splitpfx}-${idx}.trans");
-    unlink("${inputfile}.${linespfx}-${idx}");
-    unlink("${inputfile}.${timespfx}-${idx}");
-    unlink("${inputfile}.${splitpfx}-${idx}");
-    unlink("${inputfile}.${linespfx}-trans");
-    unlink("${inputfile}.${linespfx}-times");
-    if ($nbestflag){ unlink("${nbestfile}.${splitpfx}-${idx}"); }
-    if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}-${idx}"); }
-    if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}-${idx}"); }
-    unlink("$qsubout-$idx");
-    unlink("$qsuberr-$idx");
+    unlink("${inputfile}.${splitpfx}${idx}.trans");
+    unlink("${inputfile}.${splitpfx}${idx}");
+    if (defined $alifile){ unlink("${alifile}.${splitpfx}${idx}"); }
+    if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
+    if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
+    if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}${idx}"); }
+    unlink("${jobscript}${idx}.bash");
+    unlink("${jobscript}${idx}.log");
+    unlink("$qsubname.W.log");
+    unlink("$qsubout$idx");
+    unlink("$qsuberr$idx");
+    rmdir("$tmpdir");
   }
-  unlink("$qsubname.W.log");
-  unlink("${jobscript}.bash");
-  unlink("${jobscript}.log");
-  rmdir("$tmpdir");
   if ($nbestflag && $nbestlist[0] eq '-'){ unlink("${nbestfile}$$"); };
   if ($searchgraphflag  && $searchgraphlist eq '-'){ unlink("${searchgraphfile}$$"); };
   if ($wordgraphflag  && $wordgraphlist eq '-'){ unlink("${wordgraphfile}$$"); };
@@ -1033,30 +958,8 @@ sub safesystem {
 sub getPwdCmd(){
 	my $pwdcmd="pwd";
 	my $a;
-	chomp($a=`which pawd 2>/dev/null | head -1 | awk '{print $1}'`);
+	chomp($a=`which pawd | head -1 | awk '{print $1}'`);
 	if ($a && -e $a){	$pwdcmd=$a;	}
 	return $pwdcmd;
 }
 
-
-sub calculateIdxRanges() {
-    @idxstarts=();
-    @idxends=();
-
-    $idxranges=-1;
-
-    foreach my $idx (@idx_todo) {
-
-	if ($idxranges < 0) {
-	    $idxranges += 1;
-	    push(@idxstarts,$idx);
-	    push(@idxends,$idx);
-	} elsif ($idxends[$idxranges]+1==$idx) {
-	    $idxends[$idxranges]=$idx;
-	} else {
-	    $idxranges += 1;
-	    push(@idxstarts,$idx);
-	    push(@idxends,$idx);
-	}
-    }
-}

@@ -1,7 +1,7 @@
 /*
  * ReorderingStack.h
  ** Author: Ankit K. Srivastava
- ** Date: Jan 26, 2010 
+ ** Date: Jan 26, 2010
  */
 
 #pragma once
@@ -19,20 +19,20 @@
 namespace Moses
 {
 
- class ReorderingStack
- {
- private:
-	
-   std::vector<WordsRange> m_stack;
+class ReorderingStack
+{
+private:
 
- public:
-	
-   int Compare(const ReorderingStack& o) const;
-   int ShiftReduce(WordsRange input_span);
-                
- private:
-   void Reduce(WordsRange input_span);
- };	
+  std::vector<WordsRange> m_stack;
+
+public:
+
+  int Compare(const ReorderingStack& o) const;
+  int ShiftReduce(WordsRange input_span);
+
+private:
+  void Reduce(WordsRange input_span);
+};
 
 
 }

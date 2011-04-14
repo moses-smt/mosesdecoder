@@ -1,4 +1,4 @@
-/* Class modified by ADL for randlm namespace on Feb 15th, 2008. 
+/* Class modified by ADL for randlm namespace on Feb 15th, 2008.
  *
  * The following code declares classes to read from and write to
  * file descriptore or file handles.
@@ -47,7 +47,7 @@
 #endif
 
 
-// BEGIN namespace 
+// BEGIN namespace
 //namespace randlm {
 
 /************************************************************
@@ -55,91 +55,92 @@
  * - a stream that reads on a file descriptor
  ************************************************************/
 
-class fdstreambuf : public std::streambuf {
+class fdstreambuf : public std::streambuf
+{
 protected:
-	int fd;		// file descriptor
+  int fd;		// file descriptor
 protected:
-	/* data buffer:
-	 * - at most, pbSize characters in putback area plus
-	 * - at most, bufSize characters in ordinary read buffer
-	 */
-	static const int pbSize = 4;				// size of putback area
-	static const int bufSize = 1024;		// size of the data buffer
-	char buffer[bufSize+pbSize];				// data buffer
+  /* data buffer:
+   * - at most, pbSize characters in putback area plus
+   * - at most, bufSize characters in ordinary read buffer
+   */
+  static const int pbSize = 4;				// size of putback area
+  static const int bufSize = 1024;		// size of the data buffer
+  char buffer[bufSize+pbSize];				// data buffer
 
 public:
-	/* constructor
-	 * - initialize file descriptor
-	 * - initialize empty data buffer
-	 * - no putback area
-	 * => force underflow()
-	 */
-	fdstreambuf (int _fd) : fd(_fd) {
-		setg (buffer+pbSize,		 // beginning of putback area
-		buffer+pbSize,		 // read position
-		buffer+pbSize);		// end position
-	}
+  /* constructor
+   * - initialize file descriptor
+   * - initialize empty data buffer
+   * - no putback area
+   * => force underflow()
+   */
+  fdstreambuf (int _fd) : fd(_fd) {
+    setg (buffer+pbSize,		 // beginning of putback area
+          buffer+pbSize,		 // read position
+          buffer+pbSize);		// end position
+  }
 protected:
-	// insert new characters into the buffer
-	virtual int_type underflow () {
+  // insert new characters into the buffer
+  virtual int_type underflow () {
 #ifndef _MSC_VER
-		using std::memmove;
+    using std::memmove;
 #endif
 
-		// is read position before end of buffer?
-		if (gptr() < egptr()) {
-			return traits_type::to_int_type(*gptr());
-		}
-		/* process size of putback area
-		 * - use number of characters read
-		 * - but at most size of putback area
-		 */
-		int numPutback;
-		numPutback = gptr() - eback();
-		if (numPutback > pbSize) {
-			numPutback = pbSize;
-		}
+    // is read position before end of buffer?
+    if (gptr() < egptr()) {
+      return traits_type::to_int_type(*gptr());
+    }
+    /* process size of putback area
+     * - use number of characters read
+     * - but at most size of putback area
+     */
+    int numPutback;
+    numPutback = gptr() - eback();
+    if (numPutback > pbSize) {
+      numPutback = pbSize;
+    }
 
-		/* copy up to pbSize characters previously read into
-		 * the putback area
-		 */
-		memmove (buffer+(pbSize-numPutback), gptr()-numPutback,
-			numPutback);
+    /* copy up to pbSize characters previously read into
+     * the putback area
+     */
+    memmove (buffer+(pbSize-numPutback), gptr()-numPutback,
+             numPutback);
 
-		// read at most bufSize new characters
-		int num;
-		num = read (fd, buffer+pbSize, bufSize);
-		if (num <= 0) {
-			// ERROR or EOF
-			return EOF;
-		}
+    // read at most bufSize new characters
+    int num;
+    num = read (fd, buffer+pbSize, bufSize);
+    if (num <= 0) {
+      // ERROR or EOF
+      return EOF;
+    }
 
-		// reset buffer pointers
-		setg (buffer+(pbSize-numPutback),	// beginning of putback area
-			buffer+pbSize,			// read position
-			buffer+pbSize+num);		// end of buffer
+    // reset buffer pointers
+    setg (buffer+(pbSize-numPutback),	// beginning of putback area
+          buffer+pbSize,			// read position
+          buffer+pbSize+num);		// end of buffer
 
-		// return next character
-		return traits_type::to_int_type(*gptr());
-	}
+    // return next character
+    return traits_type::to_int_type(*gptr());
+  }
 
-	// write one character
-	virtual int_type overflow (int_type c) {
-		if (c != EOF) {
-			char z = c;
-			if (write (fd, &z, 1) != 1) {
-				return EOF;
-			}
-		}
-		return c;
-	}
-	// write multiple characters
-	virtual
-	std::streamsize xsputn (const char* s,
-		std::streamsize num) {
-		return write(fd,s,num);
-	}
+  // write one character
+  virtual int_type overflow (int_type c) {
+    if (c != EOF) {
+      char z = c;
+      if (write (fd, &z, 1) != 1) {
+        return EOF;
+      }
+    }
+    return c;
+  }
+  // write multiple characters
+  virtual
+  std::streamsize xsputn (const char* s,
+                          std::streamsize num) {
+    return write(fd,s,num);
+  }
 };
-//} // END namespace 
+//} // END namespace
 
 #endif

@@ -12,8 +12,8 @@
  */
 double Timer::elapsed_time()
 {
-	time_t now;
-	time(&now);
+  time_t now;
+  time(&now);
   return difftime(now, start_time);
 }
 
@@ -36,7 +36,7 @@ double Timer::get_elapsed_time()
 void Timer::start(const char* msg)
 {
   // Print an optional message, something like "Starting timer t";
-	if (msg) TRACE_ERR( msg << std::endl);
+  if (msg) TRACE_ERR( msg << std::endl);
 
   // Return immediately if the timer is already running
   if (running) return;

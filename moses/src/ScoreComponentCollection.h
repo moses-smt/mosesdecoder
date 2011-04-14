@@ -43,7 +43,7 @@ namespace Moses
  * than 15), for a given model.
  *
  * The values contained in ScoreComponentCollection objects are unweighted scores (log-probs).
- * 
+ *
  * ScoreComponentCollection objects can be added and subtracted, which makes them appropriate
  * to be the datatype used to return the result of a score computations (in this case they will
  * have most values set to zero, except for the ones that are results of the indivudal computation
@@ -52,157 +52,150 @@ namespace Moses
  * representing that score must extend the ScoreProducer abstract base class.  For an example
  * refer to the DistortionScoreProducer class.
  */
-class ScoreComponentCollection {
+class ScoreComponentCollection
+{
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
-	friend class ScoreIndexManager;
+  friend class ScoreIndexManager;
 private:
-	std::vector<float> m_scores;
-	const ScoreIndexManager* m_sim;
+  std::vector<float> m_scores;
+  const ScoreIndexManager* m_sim;
 
 public:
   //! Create a new score collection with all values set to 0.0
-	ScoreComponentCollection();
+  ScoreComponentCollection();
 
   //! Clone a score collection
-	ScoreComponentCollection(const ScoreComponentCollection& rhs)
-	: m_scores(rhs.m_scores)
-	, m_sim(rhs.m_sim)
-	{}
+  ScoreComponentCollection(const ScoreComponentCollection& rhs)
+    : m_scores(rhs.m_scores)
+    , m_sim(rhs.m_sim)
+  {}
 
-	inline size_t size() const { return m_scores.size(); }
-	const float& operator[](size_t x) const { return m_scores[x]; }
+  inline size_t size() const {
+    return m_scores.size();
+  }
+  const float& operator[](size_t x) const {
+    return m_scores[x];
+  }
 
   //! Set all values to 0.0
-	void ZeroAll()
-	{
-		for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
-			*i = 0.0f;
-	}
+  void ZeroAll() {
+    for (std::vector<float>::iterator i=m_scores.begin(); i!=m_scores.end(); ++i)
+      *i = 0.0f;
+  }
 
   //! add the score in rhs
-	void PlusEquals(const ScoreComponentCollection& rhs)
-	{
-		assert(m_scores.size() >= rhs.m_scores.size());
-		const size_t l = rhs.m_scores.size();
-		for (size_t i=0; i<l; i++) { m_scores[i] += rhs.m_scores[i]; }  
-	}
+  void PlusEquals(const ScoreComponentCollection& rhs) {
+    assert(m_scores.size() >= rhs.m_scores.size());
+    const size_t l = rhs.m_scores.size();
+    for (size_t i=0; i<l; i++) {
+      m_scores[i] += rhs.m_scores[i];
+    }
+  }
 
   //! subtract the score in rhs
-	void MinusEquals(const ScoreComponentCollection& rhs)
-	{
-		assert(m_scores.size() >= rhs.m_scores.size());
-		const size_t l = rhs.m_scores.size();
-		for (size_t i=0; i<l; i++) { m_scores[i] -= rhs.m_scores[i]; }  
-	}
+  void MinusEquals(const ScoreComponentCollection& rhs) {
+    assert(m_scores.size() >= rhs.m_scores.size());
+    const size_t l = rhs.m_scores.size();
+    for (size_t i=0; i<l; i++) {
+      m_scores[i] -= rhs.m_scores[i];
+    }
+  }
 
-	//! Add scores from a single ScoreProducer only
-	//! The length of scores must be equal to the number of score components
-	//! produced by sp
-	void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
-	{
-		assert(scores.size() == sp->GetNumScoreComponents());
-		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		for (std::vector<float>::const_iterator vi = scores.begin();
-		     vi != scores.end(); ++vi)
-		{
-			m_scores[i++] += *vi;
-		}  
-	}
+  //! Add scores from a single ScoreProducer only
+  //! The length of scores must be equal to the number of score components
+  //! produced by sp
+  void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores) {
+    assert(scores.size() == sp->GetNumScoreComponents());
+    size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+    for (std::vector<float>::const_iterator vi = scores.begin();
+         vi != scores.end(); ++vi) {
+      m_scores[i++] += *vi;
+    }
+  }
 
-	//! Add scores from a single ScoreProducer only
-	//! The length of scores must be equal to the number of score components
-	//! produced by sp
-	void PlusEquals(const ScoreProducer* sp, const ScoreComponentCollection& scores)
-	{
-		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		const size_t end = m_sim->GetEndIndex(sp->GetScoreBookkeepingID());
-		for (; i < end; ++i)
-		{
-			m_scores[i] += scores.m_scores[i];
-		}  
-	}
+  //! Add scores from a single ScoreProducer only
+  //! The length of scores must be equal to the number of score components
+  //! produced by sp
+  void PlusEquals(const ScoreProducer* sp, const ScoreComponentCollection& scores) {
+    size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+    const size_t end = m_sim->GetEndIndex(sp->GetScoreBookkeepingID());
+    for (; i < end; ++i) {
+      m_scores[i] += scores.m_scores[i];
+    }
+  }
 
-	//! Special version PlusEquals(ScoreProducer, vector<float>)
-	//! to add the score from a single ScoreProducer that produces
-	//! a single value
-	void PlusEquals(const ScoreProducer* sp, float score)
-	{
-		assert(1 == sp->GetNumScoreComponents());
-		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		m_scores[i] += score;
-	}
+  //! Special version PlusEquals(ScoreProducer, vector<float>)
+  //! to add the score from a single ScoreProducer that produces
+  //! a single value
+  void PlusEquals(const ScoreProducer* sp, float score) {
+    assert(1 == sp->GetNumScoreComponents());
+    const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+    m_scores[i] += score;
+  }
 
-	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
-	{
-		assert(scores.size() == sp->GetNumScoreComponents());
-		size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		for (std::vector<float>::const_iterator vi = scores.begin();
-		     vi != scores.end(); ++vi)
-		{
-			m_scores[i++] = *vi;
-		}  
-	}
+  void Assign(const ScoreProducer* sp, const std::vector<float>& scores) {
+    assert(scores.size() == sp->GetNumScoreComponents());
+    size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+    for (std::vector<float>::const_iterator vi = scores.begin();
+         vi != scores.end(); ++vi) {
+      m_scores[i++] = *vi;
+    }
+  }
 
-	void Assign(const ScoreComponentCollection &copy)
-	{
-		m_scores =  copy.m_scores;
-	}
-	
-	//! Special version PlusEquals(ScoreProducer, vector<float>)
-	//! to add the score from a single ScoreProducer that produces
-	//! a single value
-	void Assign(const ScoreProducer* sp, float score)
-	{
-		assert(1 == sp->GetNumScoreComponents());
-		const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-		m_scores[i] = score;
-	}
+  void Assign(const ScoreComponentCollection &copy) {
+    m_scores =  copy.m_scores;
+  }
+
+  //! Special version PlusEquals(ScoreProducer, vector<float>)
+  //! to add the score from a single ScoreProducer that produces
+  //! a single value
+  void Assign(const ScoreProducer* sp, float score) {
+    assert(1 == sp->GetNumScoreComponents());
+    const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
+    m_scores[i] = score;
+  }
 
   //! Used to find the weighted total of scores.  rhs should contain a vector of weights
   //! of the same length as the number of scores.
-	float InnerProduct(const std::vector<float>& rhs) const
-	{
-		return std::inner_product(m_scores.begin(), m_scores.end(), rhs.begin(), 0.0f);
-	}
-	
-	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
-	{
-		std::vector<float> lhs = GetScoresForProducer(sp);
-		assert(lhs.size() == rhs.size());
-		return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
-	}
+  float InnerProduct(const std::vector<float>& rhs) const {
+    return std::inner_product(m_scores.begin(), m_scores.end(), rhs.begin(), 0.0f);
+  }
 
-	//! return a vector of all the scores associated with a certain ScoreProducer
-	std::vector<float> GetScoresForProducer(const ScoreProducer* sp) const
-	{
-		size_t id = sp->GetScoreBookkeepingID();
-		const size_t begin = m_sim->GetBeginIndex(id);
-		const size_t end = m_sim->GetEndIndex(id);
-		std::vector<float> res(end-begin);
-		size_t j = 0;
-		for (size_t i = begin; i < end; i++) {
-			res[j++] = m_scores[i];
-		}
-		return res;  
-	}
+  float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const {
+    std::vector<float> lhs = GetScoresForProducer(sp);
+    assert(lhs.size() == rhs.size());
+    return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
+  }
 
-	//! if a ScoreProducer produces a single score (for example, a language model score)
-	//! this will return it.  If not, this method will throw
-	float GetScoreForProducer(const ScoreProducer* sp) const
-	{
-		size_t id = sp->GetScoreBookkeepingID();
-		const size_t begin = m_sim->GetBeginIndex(id);
+  //! return a vector of all the scores associated with a certain ScoreProducer
+  std::vector<float> GetScoresForProducer(const ScoreProducer* sp) const {
+    size_t id = sp->GetScoreBookkeepingID();
+    const size_t begin = m_sim->GetBeginIndex(id);
+    const size_t end = m_sim->GetEndIndex(id);
+    std::vector<float> res(end-begin);
+    size_t j = 0;
+    for (size_t i = begin; i < end; i++) {
+      res[j++] = m_scores[i];
+    }
+    return res;
+  }
+
+  //! if a ScoreProducer produces a single score (for example, a language model score)
+  //! this will return it.  If not, this method will throw
+  float GetScoreForProducer(const ScoreProducer* sp) const {
+    size_t id = sp->GetScoreBookkeepingID();
+    const size_t begin = m_sim->GetBeginIndex(id);
 #ifndef NDEBUG
-		const size_t end = m_sim->GetEndIndex(id);
-		assert(end-begin == 1);
+    const size_t end = m_sim->GetEndIndex(id);
+    assert(end-begin == 1);
 #endif
-		return m_scores[begin];
-	}
+    return m_scores[begin];
+  }
 
-	float GetWeightedScore() const;
+  float GetWeightedScore() const;
 
-    void ZeroAllLM(const LMList& lmList);
-    void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
+  void ZeroAllLM(const LMList& lmList);
+  void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
 
 };
 

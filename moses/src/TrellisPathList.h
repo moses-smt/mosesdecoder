@@ -33,48 +33,50 @@ namespace Moses
 class TrellisPathList
 {
 protected:
-	 std::list<const TrellisPath*> m_collection;
+  std::list<const TrellisPath*> m_collection;
 public:
-	// iters
-	typedef std::list<const TrellisPath*>::iterator iterator;
-	typedef std::list<const TrellisPath*>::const_iterator const_iterator;
-	
-	iterator begin() { return m_collection.begin(); }
-	iterator end() { return m_collection.end(); }
-	const_iterator begin() const { return m_collection.begin(); }
-	const_iterator end() const { return m_collection.end(); }
+  // iters
+  typedef std::list<const TrellisPath*>::iterator iterator;
+  typedef std::list<const TrellisPath*>::const_iterator const_iterator;
 
-	~TrellisPathList()
-	{
-		// clean up
-		RemoveAllInColl(m_collection);
-	}
+  iterator begin() {
+    return m_collection.begin();
+  }
+  iterator end() {
+    return m_collection.end();
+  }
+  const_iterator begin() const {
+    return m_collection.begin();
+  }
+  const_iterator end() const {
+    return m_collection.end();
+  }
 
-	//! add a new entry into collection
-	void Add(TrellisPath *trellisPath)
-	{
-		m_collection.push_back(trellisPath);
-	}
-  
-  const TrellisPath *pop()
-	{
-		const TrellisPath *top = m_collection.front();
+  ~TrellisPathList() {
+    // clean up
+    RemoveAllInColl(m_collection);
+  }
 
-		// Detach
-		m_collection.pop_front();
-		return top;
-	}
+  //! add a new entry into collection
+  void Add(TrellisPath *trellisPath) {
+    m_collection.push_back(trellisPath);
+  }
 
-	size_t GetSize() const
-	{
-		return m_collection.size();
-	}
+  const TrellisPath *pop() {
+    const TrellisPath *top = m_collection.front();
 
-  const TrellisPath at(size_t position) const
-  {
+    // Detach
+    m_collection.pop_front();
+    return top;
+  }
+
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+
+  const TrellisPath at(size_t position) const {
     const_iterator iter = m_collection.begin();
-    for(size_t i = position; i>0; i--) 
-    {
+    for(size_t i = position; i>0; i--) {
       iter++;
     }
     return **iter;

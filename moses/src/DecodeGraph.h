@@ -37,50 +37,54 @@ class DecodeStep;
 class DecodeGraph
 {
 protected:
-	std::list<const DecodeStep*> m_steps;
-  size_t m_position;   
-	size_t m_maxChartSpan;
+  std::list<const DecodeStep*> m_steps;
+  size_t m_position;
+  size_t m_maxChartSpan;
 
 public:
-    /**
-      * position: The position of this graph within the decode sequence.
-      **/
-	DecodeGraph(size_t position)
-	: m_position(position) 
-	, m_maxChartSpan(NOT_FOUND)
-	{}
+  /**
+    * position: The position of this graph within the decode sequence.
+    **/
+  DecodeGraph(size_t position)
+    : m_position(position)
+    , m_maxChartSpan(NOT_FOUND)
+  {}
 
-	// for chart decoding
-	DecodeGraph(size_t position, size_t maxChartSpan)
-	: m_position(position) 
-	, m_maxChartSpan(maxChartSpan)
-	{}
-	
-	//! iterators
-	typedef std::list<const DecodeStep*>::iterator iterator;
-	typedef std::list<const DecodeStep*>::const_iterator const_iterator;
-	const_iterator begin() const { return m_steps.begin(); }
-	const_iterator end() const { return m_steps.end(); }
-	    
-	virtual ~DecodeGraph();
+  // for chart decoding
+  DecodeGraph(size_t position, size_t maxChartSpan)
+    : m_position(position)
+    , m_maxChartSpan(maxChartSpan)
+  {}
 
-	//! Add another decode step to the graph
-	void Add(const DecodeStep *decodeStep)
-	{
-		m_steps.push_back(decodeStep);
-	}
-	
-	size_t GetSize() const
-	{ return m_steps.size(); }
+  //! iterators
+  typedef std::list<const DecodeStep*>::iterator iterator;
+  typedef std::list<const DecodeStep*>::const_iterator const_iterator;
+  const_iterator begin() const {
+    return m_steps.begin();
+  }
+  const_iterator end() const {
+    return m_steps.end();
+  }
 
-	size_t GetMaxChartSpan() const
-	{
-		assert(m_maxChartSpan != NOT_FOUND);
-		return m_maxChartSpan; 
-	}
+  virtual ~DecodeGraph();
 
-	size_t GetPosition() const
-	{ return m_position; }   
+  //! Add another decode step to the graph
+  void Add(const DecodeStep *decodeStep) {
+    m_steps.push_back(decodeStep);
+  }
+
+  size_t GetSize() const {
+    return m_steps.size();
+  }
+
+  size_t GetMaxChartSpan() const {
+    assert(m_maxChartSpan != NOT_FOUND);
+    return m_maxChartSpan;
+  }
+
+  size_t GetPosition() const {
+    return m_position;
+  }
 
 };
 

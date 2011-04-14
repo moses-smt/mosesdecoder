@@ -52,7 +52,8 @@ float Hypo::CalcGlobal(Weights &w)
 }
 
 // this is actually a "greater than" since we want to sort in descending order
-bool Hypo::operator< (const Hypo &h2) const {
+bool Hypo::operator< (const Hypo &h2) const
+{
   return (this->s > h2.s);
 }
 

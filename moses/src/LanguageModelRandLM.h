@@ -36,26 +36,30 @@ class Phrase;
 
 // RandLM wrapper (single factor LM)
 
-class LanguageModelRandLM : public LanguageModelPointerState {
+class LanguageModelRandLM : public LanguageModelPointerState
+{
 public:
   LanguageModelRandLM()
     : m_lm(0) {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL, unsigned int* len=0) const;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   ~LanguageModelRandLM() {
     delete m_lm;
   }
   void CleanUpAfterSentenceProcessing() {
     m_lm->clearCaches(); // clear caches
   }
-  void InitializeBeforeSentenceProcessing() {} // nothing to do
- protected:
+  void InitializeBeforeSentenceProcessing() {
+    m_lm->initThreadSpecificData(); // Creates thread specific data iff
+                                    // compiled with multithreading.
+  }
+protected:
   std::vector<randlm::WordID> m_randlm_ids_vec;
   randlm::RandLM* m_lm;
   randlm::WordID m_oov_id;
   void CreateFactors(FactorCollection &factorCollection);
   randlm::WordID GetLmID( const std::string &str ) const;
-  randlm::WordID GetLmID( const Factor *factor ) const{
+  randlm::WordID GetLmID( const Factor *factor ) const {
     size_t factorId = factor->GetId();
     return ( factorId >= m_randlm_ids_vec.size()) ? m_oov_id : m_randlm_ids_vec[factorId];
   };

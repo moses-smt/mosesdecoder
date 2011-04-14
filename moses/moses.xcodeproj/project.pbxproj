@@ -7,8 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */; };
+		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
+		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
+		1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */; };
+		1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */; };
 		1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */; };
 		1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */; };
+		1E2E161A132A890D00ED4085 /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1604132A890D00ED4085 /* ChartCell.cpp */; };
+		1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1605132A890D00ED4085 /* ChartCell.h */; };
+		1E2E161C132A890D00ED4085 /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */; };
+		1E2E161D132A890D00ED4085 /* ChartCellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1607132A890D00ED4085 /* ChartCellCollection.h */; };
+		1E2E161E132A890D00ED4085 /* ChartHypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1608132A890D00ED4085 /* ChartHypothesis.cpp */; };
+		1E2E161F132A890D00ED4085 /* ChartHypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1609132A890D00ED4085 /* ChartHypothesis.h */; };
+		1E2E1620132A890D00ED4085 /* ChartHypothesisCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E160A132A890D00ED4085 /* ChartHypothesisCollection.cpp */; };
+		1E2E1621132A890D00ED4085 /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E160B132A890D00ED4085 /* ChartHypothesisCollection.h */; };
+		1E2E1622132A890D00ED4085 /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E160C132A890D00ED4085 /* ChartManager.cpp */; };
+		1E2E1623132A890D00ED4085 /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E160D132A890D00ED4085 /* ChartManager.h */; };
+		1E2E1624132A890D00ED4085 /* ChartTranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E160E132A890D00ED4085 /* ChartTranslationOptionCollection.cpp */; };
+		1E2E1625132A890D00ED4085 /* ChartTranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E160F132A890D00ED4085 /* ChartTranslationOptionCollection.h */; };
+		1E2E1626132A890D00ED4085 /* ChartTrellisNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1610132A890D00ED4085 /* ChartTrellisNode.cpp */; };
+		1E2E1627132A890D00ED4085 /* ChartTrellisNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1611132A890D00ED4085 /* ChartTrellisNode.h */; };
+		1E2E1628132A890D00ED4085 /* ChartTrellisPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1612132A890D00ED4085 /* ChartTrellisPath.cpp */; };
+		1E2E1629132A890D00ED4085 /* ChartTrellisPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1613132A890D00ED4085 /* ChartTrellisPath.h */; };
+		1E2E162A132A890D00ED4085 /* ChartTrellisPathCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1614132A890D00ED4085 /* ChartTrellisPathCollection.cpp */; };
+		1E2E162B132A890D00ED4085 /* ChartTrellisPathCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1615132A890D00ED4085 /* ChartTrellisPathCollection.h */; };
+		1E2E162C132A890D00ED4085 /* ChartTrellisPathList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1616132A890D00ED4085 /* ChartTrellisPathList.cpp */; };
+		1E2E162D132A890D00ED4085 /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */; };
+		1E2E162E132A890D00ED4085 /* CoveredChartSpan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1618132A890D00ED4085 /* CoveredChartSpan.cpp */; };
+		1E2E162F132A890D00ED4085 /* CoveredChartSpan.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1619132A890D00ED4085 /* CoveredChartSpan.h */; };
+		1E2E1639132A892800ED4085 /* OutputCollector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1632132A892800ED4085 /* OutputCollector.h */; };
+		1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1633132A892800ED4085 /* RuleCube.cpp */; };
+		1E2E163B132A892800ED4085 /* RuleCube.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1634132A892800ED4085 /* RuleCube.h */; };
+		1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */; };
+		1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1636132A892800ED4085 /* RuleCubeQueue.h */; };
+		1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1637132A892800ED4085 /* ThreadPool.cpp */; };
+		1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1638132A892800ED4085 /* ThreadPool.h */; };
 		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
 		1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */; };
 		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
@@ -85,7 +119,6 @@
 		1ED0FE73124BB9380029177F /* InputType.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD97124BB9380029177F /* InputType.h */; };
 		1ED0FE74124BB9380029177F /* LanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD98124BB9380029177F /* LanguageModel.cpp */; };
 		1ED0FE75124BB9380029177F /* LanguageModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD99124BB9380029177F /* LanguageModel.h */; };
-		1ED0FE76124BB9380029177F /* LanguageModelDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */; };
 		1ED0FE77124BB9380029177F /* LanguageModelFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */; };
 		1ED0FE78124BB9380029177F /* LanguageModelFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */; };
 		1ED0FE79124BB9380029177F /* LanguageModelInternal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */; };
@@ -146,9 +179,7 @@
 		1ED0FEB3124BB9380029177F /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */; };
 		1ED0FEB4124BB9380029177F /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */; };
 		1ED0FEB5124BB9380029177F /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */; };
-		1ED0FEB6124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */; };
 		1ED0FEB7124BB9380029177F /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */; };
-		1ED0FEB8124BB9380029177F /* PhraseDictionarySCFGChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */; };
 		1ED0FEB9124BB9380029177F /* PhraseDictionaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */; };
 		1ED0FEBA124BB9380029177F /* PhraseDictionaryTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */; };
 		1ED0FEBB124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */; };
@@ -213,8 +244,6 @@
 		1ED0FEF6124BB9380029177F /* Util.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE1D124BB9380029177F /* Util.h */; };
 		1ED0FEF7124BB9380029177F /* Word.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE1E124BB9380029177F /* Word.cpp */; };
 		1ED0FEF8124BB9380029177F /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE1F124BB9380029177F /* Word.h */; };
-		1ED0FEF9124BB9380029177F /* WordConsumed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE20124BB9380029177F /* WordConsumed.cpp */; };
-		1ED0FEFA124BB9380029177F /* WordConsumed.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE21124BB9380029177F /* WordConsumed.h */; };
 		1ED0FEFB124BB9380029177F /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE22124BB9380029177F /* WordLattice.cpp */; };
 		1ED0FEFC124BB9380029177F /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE23124BB9380029177F /* WordLattice.h */; };
 		1ED0FEFD124BB9380029177F /* WordsBitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FE24124BB9380029177F /* WordsBitmap.cpp */; };
@@ -225,12 +254,48 @@
 		1ED0FF02124BB9380029177F /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE29124BB9380029177F /* XmlOption.h */; };
 		1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */; };
 		1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */; };
+		1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EE58D9D133726C700D93158 /* NonTerminal.cpp */; };
+		1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE58D9E133726C700D93158 /* NonTerminal.h */; };
 		1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
+		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
+		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
+		1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
+		1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerOnDisk.h; path = src/ChartRuleLookupManagerOnDisk.h; sourceTree = "<group>"; };
 		1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
 		1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
+		1E2E1604132A890D00ED4085 /* ChartCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCell.cpp; path = src/ChartCell.cpp; sourceTree = "<group>"; };
+		1E2E1605132A890D00ED4085 /* ChartCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCell.h; path = src/ChartCell.h; sourceTree = "<group>"; };
+		1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCellCollection.cpp; path = src/ChartCellCollection.cpp; sourceTree = "<group>"; };
+		1E2E1607132A890D00ED4085 /* ChartCellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCellCollection.h; path = src/ChartCellCollection.h; sourceTree = "<group>"; };
+		1E2E1608132A890D00ED4085 /* ChartHypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesis.cpp; path = src/ChartHypothesis.cpp; sourceTree = "<group>"; };
+		1E2E1609132A890D00ED4085 /* ChartHypothesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesis.h; path = src/ChartHypothesis.h; sourceTree = "<group>"; };
+		1E2E160A132A890D00ED4085 /* ChartHypothesisCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartHypothesisCollection.cpp; path = src/ChartHypothesisCollection.cpp; sourceTree = "<group>"; };
+		1E2E160B132A890D00ED4085 /* ChartHypothesisCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesisCollection.h; path = src/ChartHypothesisCollection.h; sourceTree = "<group>"; };
+		1E2E160C132A890D00ED4085 /* ChartManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartManager.cpp; path = src/ChartManager.cpp; sourceTree = "<group>"; };
+		1E2E160D132A890D00ED4085 /* ChartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartManager.h; path = src/ChartManager.h; sourceTree = "<group>"; };
+		1E2E160E132A890D00ED4085 /* ChartTranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionCollection.cpp; path = src/ChartTranslationOptionCollection.cpp; sourceTree = "<group>"; };
+		1E2E160F132A890D00ED4085 /* ChartTranslationOptionCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionCollection.h; path = src/ChartTranslationOptionCollection.h; sourceTree = "<group>"; };
+		1E2E1610132A890D00ED4085 /* ChartTrellisNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisNode.cpp; path = src/ChartTrellisNode.cpp; sourceTree = "<group>"; };
+		1E2E1611132A890D00ED4085 /* ChartTrellisNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisNode.h; path = src/ChartTrellisNode.h; sourceTree = "<group>"; };
+		1E2E1612132A890D00ED4085 /* ChartTrellisPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPath.cpp; path = src/ChartTrellisPath.cpp; sourceTree = "<group>"; };
+		1E2E1613132A890D00ED4085 /* ChartTrellisPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPath.h; path = src/ChartTrellisPath.h; sourceTree = "<group>"; };
+		1E2E1614132A890D00ED4085 /* ChartTrellisPathCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPathCollection.cpp; path = src/ChartTrellisPathCollection.cpp; sourceTree = "<group>"; };
+		1E2E1615132A890D00ED4085 /* ChartTrellisPathCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathCollection.h; path = src/ChartTrellisPathCollection.h; sourceTree = "<group>"; };
+		1E2E1616132A890D00ED4085 /* ChartTrellisPathList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPathList.cpp; path = src/ChartTrellisPathList.cpp; sourceTree = "<group>"; };
+		1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathList.h; path = src/ChartTrellisPathList.h; sourceTree = "<group>"; };
+		1E2E1618132A890D00ED4085 /* CoveredChartSpan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CoveredChartSpan.cpp; path = src/CoveredChartSpan.cpp; sourceTree = "<group>"; };
+		1E2E1619132A890D00ED4085 /* CoveredChartSpan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CoveredChartSpan.h; path = src/CoveredChartSpan.h; sourceTree = "<group>"; };
+		1E2E1632132A892800ED4085 /* OutputCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OutputCollector.h; path = src/OutputCollector.h; sourceTree = "<group>"; };
+		1E2E1633132A892800ED4085 /* RuleCube.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCube.cpp; path = src/RuleCube.cpp; sourceTree = "<group>"; };
+		1E2E1634132A892800ED4085 /* RuleCube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCube.h; path = src/RuleCube.h; sourceTree = "<group>"; };
+		1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCubeQueue.cpp; path = src/RuleCubeQueue.cpp; sourceTree = "<group>"; };
+		1E2E1636132A892800ED4085 /* RuleCubeQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeQueue.h; path = src/RuleCubeQueue.h; sourceTree = "<group>"; };
+		1E2E1637132A892800ED4085 /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadPool.cpp; path = src/ThreadPool.cpp; sourceTree = "<group>"; };
+		1E2E1638132A892800ED4085 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = src/ThreadPool.h; sourceTree = "<group>"; };
 		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
 		1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelImplementation.h; path = src/LanguageModelImplementation.h; sourceTree = "<group>"; };
 		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
@@ -308,7 +373,6 @@
 		1ED0FD97124BB9380029177F /* InputType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputType.h; path = src/InputType.h; sourceTree = "<group>"; };
 		1ED0FD98124BB9380029177F /* LanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModel.cpp; path = src/LanguageModel.cpp; sourceTree = "<group>"; };
 		1ED0FD99124BB9380029177F /* LanguageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModel.h; path = src/LanguageModel.h; sourceTree = "<group>"; };
-		1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelDelegate.h; path = src/LanguageModelDelegate.h; sourceTree = "<group>"; };
 		1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelFactory.cpp; path = src/LanguageModelFactory.cpp; sourceTree = "<group>"; };
 		1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelFactory.h; path = src/LanguageModelFactory.h; sourceTree = "<group>"; };
 		1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelInternal.cpp; path = src/LanguageModelInternal.cpp; sourceTree = "<group>"; };
@@ -369,9 +433,7 @@
 		1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
 		1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
 		1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
-		1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDiskChart.cpp; path = src/PhraseDictionaryOnDiskChart.cpp; sourceTree = "<group>"; };
 		1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
-		1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFGChart.cpp; path = src/PhraseDictionarySCFGChart.cpp; sourceTree = "<group>"; };
 		1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTree.cpp; path = src/PhraseDictionaryTree.cpp; sourceTree = "<group>"; };
 		1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTree.h; path = src/PhraseDictionaryTree.h; sourceTree = "<group>"; };
 		1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTreeAdaptor.cpp; path = src/PhraseDictionaryTreeAdaptor.cpp; sourceTree = "<group>"; };
@@ -437,8 +499,6 @@
 		1ED0FE1D124BB9380029177F /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = src/Util.h; sourceTree = "<group>"; };
 		1ED0FE1E124BB9380029177F /* Word.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Word.cpp; path = src/Word.cpp; sourceTree = "<group>"; };
 		1ED0FE1F124BB9380029177F /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = src/Word.h; sourceTree = "<group>"; };
-		1ED0FE20124BB9380029177F /* WordConsumed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordConsumed.cpp; path = src/WordConsumed.cpp; sourceTree = "<group>"; };
-		1ED0FE21124BB9380029177F /* WordConsumed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordConsumed.h; path = src/WordConsumed.h; sourceTree = "<group>"; };
 		1ED0FE22124BB9380029177F /* WordLattice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice.cpp; path = src/WordLattice.cpp; sourceTree = "<group>"; };
 		1ED0FE23124BB9380029177F /* WordLattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordLattice.h; path = src/WordLattice.h; sourceTree = "<group>"; };
 		1ED0FE24124BB9380029177F /* WordsBitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordsBitmap.cpp; path = src/WordsBitmap.cpp; sourceTree = "<group>"; };
@@ -449,6 +509,8 @@
 		1ED0FE29124BB9380029177F /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 		1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
 		1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
+		1EE58D9D133726C700D93158 /* NonTerminal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NonTerminal.cpp; path = src/NonTerminal.cpp; sourceTree = "<group>"; };
+		1EE58D9E133726C700D93158 /* NonTerminal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonTerminal.h; path = src/NonTerminal.h; sourceTree = "<group>"; };
 		1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = src/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -477,6 +539,37 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EE58D9D133726C700D93158 /* NonTerminal.cpp */,
+				1EE58D9E133726C700D93158 /* NonTerminal.h */,
+				1E2E1632132A892800ED4085 /* OutputCollector.h */,
+				1E2E1633132A892800ED4085 /* RuleCube.cpp */,
+				1E2E1634132A892800ED4085 /* RuleCube.h */,
+				1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */,
+				1E2E1636132A892800ED4085 /* RuleCubeQueue.h */,
+				1E2E1637132A892800ED4085 /* ThreadPool.cpp */,
+				1E2E1638132A892800ED4085 /* ThreadPool.h */,
+				1E2E1604132A890D00ED4085 /* ChartCell.cpp */,
+				1E2E1605132A890D00ED4085 /* ChartCell.h */,
+				1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */,
+				1E2E1607132A890D00ED4085 /* ChartCellCollection.h */,
+				1E2E1608132A890D00ED4085 /* ChartHypothesis.cpp */,
+				1E2E1609132A890D00ED4085 /* ChartHypothesis.h */,
+				1E2E160A132A890D00ED4085 /* ChartHypothesisCollection.cpp */,
+				1E2E160B132A890D00ED4085 /* ChartHypothesisCollection.h */,
+				1E2E160C132A890D00ED4085 /* ChartManager.cpp */,
+				1E2E160D132A890D00ED4085 /* ChartManager.h */,
+				1E2E160E132A890D00ED4085 /* ChartTranslationOptionCollection.cpp */,
+				1E2E160F132A890D00ED4085 /* ChartTranslationOptionCollection.h */,
+				1E2E1610132A890D00ED4085 /* ChartTrellisNode.cpp */,
+				1E2E1611132A890D00ED4085 /* ChartTrellisNode.h */,
+				1E2E1612132A890D00ED4085 /* ChartTrellisPath.cpp */,
+				1E2E1613132A890D00ED4085 /* ChartTrellisPath.h */,
+				1E2E1614132A890D00ED4085 /* ChartTrellisPathCollection.cpp */,
+				1E2E1615132A890D00ED4085 /* ChartTrellisPathCollection.h */,
+				1E2E1616132A890D00ED4085 /* ChartTrellisPathList.cpp */,
+				1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */,
+				1E2E1618132A890D00ED4085 /* CoveredChartSpan.cpp */,
+				1E2E1619132A890D00ED4085 /* CoveredChartSpan.h */,
 				1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */,
 				1ED0FD4D124BB9380029177F /* AlignmentInfo.h */,
 				1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */,
@@ -484,6 +577,11 @@
 				1ED0FD50124BB9380029177F /* BitmapContainer.cpp */,
 				1ED0FD51124BB9380029177F /* BitmapContainer.h */,
 				1ED0FD52124BB9380029177F /* CellCollection.h */,
+				1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */,
+				1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */,
+				1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */,
+				1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */,
+				1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */,
 				1ED00034124BC2690029177F /* ChartTranslationOption.cpp */,
 				1ED00035124BC2690029177F /* ChartTranslationOption.h */,
 				1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */,
@@ -509,7 +607,6 @@
 				1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */,
 				1ED0FD6A124BB9380029177F /* DummyScoreProducers.h */,
 				1ED0FD6B124BB9380029177F /* DynSAInclude */,
-				1ED4FC7C11BDC0D2004E826A /* DynSAInclude */,
 				1ED0FD73124BB9380029177F /* DynSuffixArray.cpp */,
 				1ED0FD74124BB9380029177F /* DynSuffixArray.h */,
 				1ED0FD75124BB9380029177F /* Factor.cpp */,
@@ -549,7 +646,6 @@
 				1ED0FD97124BB9380029177F /* InputType.h */,
 				1ED0FD98124BB9380029177F /* LanguageModel.cpp */,
 				1ED0FD99124BB9380029177F /* LanguageModel.h */,
-				1ED0FD9A124BB9380029177F /* LanguageModelDelegate.h */,
 				1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */,
 				1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */,
 				1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */,
@@ -614,10 +710,8 @@
 				1ED0FDD9124BB9380029177F /* PhraseDictionaryNodeSCFG.h */,
 				1ED0FDDA124BB9380029177F /* PhraseDictionaryOnDisk.cpp */,
 				1ED0FDDB124BB9380029177F /* PhraseDictionaryOnDisk.h */,
-				1ED0FDDC124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp */,
 				1ED0FDDD124BB9380029177F /* PhraseDictionarySCFG.cpp */,
 				1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */,
-				1ED0FDDE124BB9380029177F /* PhraseDictionarySCFGChart.cpp */,
 				1ED0FDDF124BB9380029177F /* PhraseDictionaryTree.cpp */,
 				1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */,
 				1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */,
@@ -683,8 +777,6 @@
 				1ED0FE1D124BB9380029177F /* Util.h */,
 				1ED0FE1E124BB9380029177F /* Word.cpp */,
 				1ED0FE1F124BB9380029177F /* Word.h */,
-				1ED0FE20124BB9380029177F /* WordConsumed.cpp */,
-				1ED0FE21124BB9380029177F /* WordConsumed.h */,
 				1ED0FE22124BB9380029177F /* WordLattice.cpp */,
 				1ED0FE23124BB9380029177F /* WordLattice.h */,
 				1ED0FE24124BB9380029177F /* WordsBitmap.cpp */,
@@ -715,14 +807,6 @@
 				1ED0FD70124BB9380029177F /* utils.h */,
 				1ED0FD71124BB9380029177F /* vocab.cpp */,
 				1ED0FD72124BB9380029177F /* vocab.h */,
-			);
-			name = DynSAInclude;
-			path = src/DynSAInclude;
-			sourceTree = "<group>";
-		};
-		1ED4FC7C11BDC0D2004E826A /* DynSAInclude */ = {
-			isa = PBXGroup;
-			children = (
 			);
 			name = DynSAInclude;
 			path = src/DynSAInclude;
@@ -781,7 +865,6 @@
 				1ED0FE71124BB9380029177F /* InputFileStream.h in Headers */,
 				1ED0FE73124BB9380029177F /* InputType.h in Headers */,
 				1ED0FE75124BB9380029177F /* LanguageModel.h in Headers */,
-				1ED0FE76124BB9380029177F /* LanguageModelDelegate.h in Headers */,
 				1ED0FE78124BB9380029177F /* LanguageModelFactory.h in Headers */,
 				1ED0FE7A124BB9380029177F /* LanguageModelInternal.h in Headers */,
 				1ED0FE7C124BB9380029177F /* LanguageModelIRST.h in Headers */,
@@ -847,7 +930,6 @@
 				1ED0FEF4124BB9380029177F /* UserMessage.h in Headers */,
 				1ED0FEF6124BB9380029177F /* Util.h in Headers */,
 				1ED0FEF8124BB9380029177F /* Word.h in Headers */,
-				1ED0FEFA124BB9380029177F /* WordConsumed.h in Headers */,
 				1ED0FEFC124BB9380029177F /* WordLattice.h in Headers */,
 				1ED0FEFE124BB9380029177F /* WordsBitmap.h in Headers */,
 				1ED0FF00124BB9380029177F /* WordsRange.h in Headers */,
@@ -857,6 +939,25 @@
 				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
 				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
 				1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */,
+				1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */,
+				1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */,
+				1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */,
+				1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */,
+				1E2E161D132A890D00ED4085 /* ChartCellCollection.h in Headers */,
+				1E2E161F132A890D00ED4085 /* ChartHypothesis.h in Headers */,
+				1E2E1621132A890D00ED4085 /* ChartHypothesisCollection.h in Headers */,
+				1E2E1623132A890D00ED4085 /* ChartManager.h in Headers */,
+				1E2E1625132A890D00ED4085 /* ChartTranslationOptionCollection.h in Headers */,
+				1E2E1627132A890D00ED4085 /* ChartTrellisNode.h in Headers */,
+				1E2E1629132A890D00ED4085 /* ChartTrellisPath.h in Headers */,
+				1E2E162B132A890D00ED4085 /* ChartTrellisPathCollection.h in Headers */,
+				1E2E162D132A890D00ED4085 /* ChartTrellisPathList.h in Headers */,
+				1E2E162F132A890D00ED4085 /* CoveredChartSpan.h in Headers */,
+				1E2E1639132A892800ED4085 /* OutputCollector.h in Headers */,
+				1E2E163B132A892800ED4085 /* RuleCube.h in Headers */,
+				1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */,
+				1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */,
+				1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -971,9 +1072,7 @@
 				1ED0FEB0124BB9380029177F /* PhraseDictionaryNode.cpp in Sources */,
 				1ED0FEB2124BB9380029177F /* PhraseDictionaryNodeSCFG.cpp in Sources */,
 				1ED0FEB4124BB9380029177F /* PhraseDictionaryOnDisk.cpp in Sources */,
-				1ED0FEB6124BB9380029177F /* PhraseDictionaryOnDiskChart.cpp in Sources */,
 				1ED0FEB7124BB9380029177F /* PhraseDictionarySCFG.cpp in Sources */,
-				1ED0FEB8124BB9380029177F /* PhraseDictionarySCFGChart.cpp in Sources */,
 				1ED0FEB9124BB9380029177F /* PhraseDictionaryTree.cpp in Sources */,
 				1ED0FEBB124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp in Sources */,
 				1ED0FEBE124BB9380029177F /* PrefixTreeMap.cpp in Sources */,
@@ -1004,7 +1103,6 @@
 				1ED0FEF3124BB9380029177F /* UserMessage.cpp in Sources */,
 				1ED0FEF5124BB9380029177F /* Util.cpp in Sources */,
 				1ED0FEF7124BB9380029177F /* Word.cpp in Sources */,
-				1ED0FEF9124BB9380029177F /* WordConsumed.cpp in Sources */,
 				1ED0FEFB124BB9380029177F /* WordLattice.cpp in Sources */,
 				1ED0FEFD124BB9380029177F /* WordsBitmap.cpp in Sources */,
 				1ED0FEFF124BB9380029177F /* WordsRange.cpp in Sources */,
@@ -1013,6 +1111,23 @@
 				1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */,
 				1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */,
 				1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */,
+				1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */,
+				1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */,
+				1E2E161A132A890D00ED4085 /* ChartCell.cpp in Sources */,
+				1E2E161C132A890D00ED4085 /* ChartCellCollection.cpp in Sources */,
+				1E2E161E132A890D00ED4085 /* ChartHypothesis.cpp in Sources */,
+				1E2E1620132A890D00ED4085 /* ChartHypothesisCollection.cpp in Sources */,
+				1E2E1622132A890D00ED4085 /* ChartManager.cpp in Sources */,
+				1E2E1624132A890D00ED4085 /* ChartTranslationOptionCollection.cpp in Sources */,
+				1E2E1626132A890D00ED4085 /* ChartTrellisNode.cpp in Sources */,
+				1E2E1628132A890D00ED4085 /* ChartTrellisPath.cpp in Sources */,
+				1E2E162A132A890D00ED4085 /* ChartTrellisPathCollection.cpp in Sources */,
+				1E2E162C132A890D00ED4085 /* ChartTrellisPathList.cpp in Sources */,
+				1E2E162E132A890D00ED4085 /* CoveredChartSpan.cpp in Sources */,
+				1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */,
+				1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */,
+				1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */,
+				1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1028,6 +1143,24 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					LM_RAND,
+					HAVE_CONFIG_H,
+				);
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					../,
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = moses;
 			};
@@ -1039,6 +1172,24 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					LM_SRI,
+					LM_IRST,
+					LM_INTERNAL,
+					LM_KEN,
+					LM_IRST,
+					LM_RAND,
+					HAVE_CONFIG_H,
+				);
+				HEADER_SEARCH_PATHS = (
+					../irstlm/include,
+					../srilm/include,
+					../kenlm,
+					../randlm/include,
+					../,
+					/usr/local/include,
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = moses;
 			};

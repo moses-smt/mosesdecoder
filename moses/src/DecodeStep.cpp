@@ -27,24 +27,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* prev) :
-    m_decodeFeature(decodeFeature)
+  m_decodeFeature(decodeFeature)
 {
-	FactorMask prevOutputFactors;
-	if (prev) prevOutputFactors = prev->m_outputFactors;
-	m_outputFactors = prevOutputFactors;
-	FactorMask conflictMask = (m_outputFactors & decodeFeature->GetOutputFactorMask());
-	m_outputFactors |= decodeFeature->GetOutputFactorMask();
-	FactorMask newOutputFactorMask = m_outputFactors ^ prevOutputFactors;  //xor
+  FactorMask prevOutputFactors;
+  if (prev) prevOutputFactors = prev->m_outputFactors;
+  m_outputFactors = prevOutputFactors;
+  FactorMask conflictMask = (m_outputFactors & decodeFeature->GetOutputFactorMask());
+  m_outputFactors |= decodeFeature->GetOutputFactorMask();
+  FactorMask newOutputFactorMask = m_outputFactors ^ prevOutputFactors;  //xor
   m_newOutputFactors.resize(newOutputFactorMask.count());
-	m_conflictFactors.resize(conflictMask.count());
-	size_t j=0, k=0;
+  m_conflictFactors.resize(conflictMask.count());
+  size_t j=0, k=0;
   for (size_t i = 0; i < MAX_NUM_FACTORS; i++) {
     if (newOutputFactorMask[i]) m_newOutputFactors[j++] = i;
-		if (conflictMask[i]) m_conflictFactors[k++] = i;
-	}
+    if (conflictMask[i]) m_conflictFactors[k++] = i;
+  }
   VERBOSE(2,"DecodeStep():\n\toutputFactors=" << m_outputFactors
-	  << "\n\tconflictFactors=" << conflictMask
-	  << "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl);
+          << "\n\tconflictFactors=" << conflictMask
+          << "\n\tnewOutputFactors=" << newOutputFactorMask << std::endl);
 }
 
 DecodeStep::~DecodeStep() {}

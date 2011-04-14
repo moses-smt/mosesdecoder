@@ -292,7 +292,39 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ChartCell.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartCellCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartHypothesis.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartHypothesisCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleLookupManagerMemory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleLookupManagerOnDisk.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ChartTranslationOption.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTranslationOptionCollection.cpp"
 				>
 			</File>
 			<File
@@ -300,7 +332,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ChartTrellisNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTrellisPath.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTrellisPathCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTrellisPathList.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CoveredChartSpan.cpp"
 				>
 			</File>
 			<File
@@ -357,6 +409,10 @@
 			</File>
 			<File
 				RelativePath=".\src\FFState.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\File.cpp"
 				>
 			</File>
 			<File
@@ -592,15 +648,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PhraseDictionaryOnDiskChart.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PhraseDictionarySCFG.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\PhraseDictionarySCFGChart.cpp"
 				>
 			</File>
 			<File
@@ -621,6 +669,14 @@
 			</File>
 			<File
 				RelativePath=".\src\ReorderingStack.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RuleCube.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RuleCubeQueue.cpp"
 				>
 			</File>
 			<File
@@ -669,6 +725,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TargetPhraseCollection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ThreadPool.cpp"
 				>
 			</File>
 			<File
@@ -724,10 +784,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\WordConsumed.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\WordLattice.cpp"
 				>
 			</File>
@@ -754,6 +810,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\BilingualDynSuffixArray.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BitmapContainer.h"
 				>
 			</File>
@@ -762,7 +822,43 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ChartCell.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartCellCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartHypothesis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartHypothesisCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleLookupManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleLookupManagerMemory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartRuleLookupManagerOnDisk.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ChartTranslationOption.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTranslationOptionCollection.h"
 				>
 			</File>
 			<File
@@ -770,7 +866,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ChartTrellisNode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTrellisPath.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTrellisPathCollection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ChartTrellisPathList.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConfusionNet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CoveredChartSpan.h"
 				>
 			</File>
 			<File
@@ -810,6 +926,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DynSuffixArray.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Factor.h"
 				>
 			</File>
@@ -835,6 +955,10 @@
 			</File>
 			<File
 				RelativePath=".\src\FilePtr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FloydWarshall.h"
 				>
 			</File>
 			<File
@@ -898,11 +1022,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelIRST.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelJoint.h"
 				>
 			</File>
 			<File
+				RelativePath=".\src\LanguageModelKen.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LanguageModelMultiFactor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelParallelBackoff.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelRandLM.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LanguageModelRemote.h"
 				>
 			</File>
 			<File
@@ -950,7 +1094,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\NonTerminal.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ObjectPool.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\OutputCollector.h"
 				>
 			</File>
 			<File
@@ -1026,6 +1178,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RuleCube.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RuleCubeQueue.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ScoreComponentCollection.h"
 				>
 			</File>
@@ -1074,6 +1234,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ThreadPool.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Timer.h"
 				>
 			</File>
@@ -1119,6 +1283,10 @@
 			</File>
 			<File
 				RelativePath=".\src\TypeDef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UniqueObject.h"
 				>
 			</File>
 			<File

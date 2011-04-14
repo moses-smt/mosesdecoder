@@ -951,6 +951,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis$/) {
 	    &define_evaluation_analysis($1,$i);
 	}
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis-precision$/) {
+	    &define_evaluation_analysis_precision($1,$i);
+	}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):analysis-coverage$/) {
 	    &define_evaluation_analysis_coverage($1,$i);
 	}
@@ -1686,13 +1689,16 @@ sub define_training_build_ttable {
     my ($step_id) = @_;
 
     my ($phrase_table, $extract,$lex) = &get_output_and_input($step_id);
+    my $report_precision_by_coverage = &backoff_and_get("EVALUATION:report-precision-by-coverage");
+
     my $cmd = &get_training_setting(6);
     $cmd .= "-extract-file $extract ";
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    my $score_settings = &get("TRAINING:score-settings");
-    $cmd .= "-score-options '".$score_settings."' " if defined($score_settings);
+    if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
+      $cmd .= "-phrase-word-alignment ";
+    }
 
     &create_step($step_id,$cmd);
 }
@@ -1730,6 +1736,7 @@ sub define_training_create_config {
 
     my $cmd = &get_training_setting(9);
 
+    # additional settings for factored models
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
@@ -1737,12 +1744,13 @@ sub define_training_create_config {
 	if $generation_table;
     $cmd .= "-config $config ";
 
-    my $interpolated = &get("INTERPOLATED-LM:script"); # flag
+    my $decoding_graph_backoff = &get("TRAINING:decoding-graph-backoff");
+    if ($decoding_graph_backoff) {
+      $cmd .= "-decoding-graph-backoff \"$decoding_graph_backoff\" ";
+    }
 
-    # 
-    
+    # additional settings for hierarchical models
     my $extract_version = $VERSION;
-
     if (&get("TRAINING:hierarchical-rule-set")) {
       $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
 	  if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
@@ -1752,15 +1760,18 @@ sub define_training_create_config {
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
 
+    # additional settings for syntax models
     if (&get("GENERAL:output-parser") && &get("TRAINING:use-unknown-word-labels")) {
 	my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""),$extract_version);
 	$cmd .= "-unknown-word-label $unknown_word_label ";
     }
 
+    # find out which language model files have been built
     my @LM_SETS = &get_sets("LM");
     my %OUTPUT_FACTORS;
     %OUTPUT_FACTORS = &get_factor_id("output") if &backoff_and_get("TRAINING:output-factors");
 
+    my $interpolated = &get("INTERPOLATED-LM:script"); # flag
     if ($interpolated) {
 	my $type = 0;
 	# binarizing the lm?
@@ -1869,6 +1880,8 @@ sub get_training_setting {
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $source_syntax = &get("GENERAL:input-parser");
     my $target_syntax = &get("GENERAL:output-parser");
+    my $score_settings = &get("TRAINING:score-settings");
+
     my $xml = $source_syntax || $target_syntax;
 
     my $cmd = "$training_script ";
@@ -1879,7 +1892,7 @@ sub get_training_setting {
     $cmd .= "-scripts-root-dir $scripts ";
     $cmd .= "-f $input_extension -e $output_extension ";
     $cmd .= "-alignment $alignment ";
-    $cmd .= "-max-phrase-length $phrase_length " if ($phrase_length);
+    $cmd .= "-max-phrase-length $phrase_length " if $phrase_length;
     $cmd .= "-parts $parts " if $parts;
     $cmd .= "-reordering $reordering " if $reordering;
     $cmd .= "-temp-dir /disk/scratch2 " if `hostname` =~ /townhill/;
@@ -1888,6 +1901,7 @@ sub get_training_setting {
     $cmd .= "-target-syntax " if $target_syntax;
     $cmd .= "-source-syntax " if $source_syntax;
     $cmd .= "-glue-grammar " if $hierarchical;
+    $cmd .= "-score-options '".$score_settings."' " if $score_settings;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2008,8 +2022,13 @@ sub define_evaluation_decode {
     my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     
+    if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
+      $settings .= " -use-alignment-info -alignment-output-file $system_output.wa";
+      $report_segmentation = "yes";
+    }
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
       if ($hierarchical) {
         $settings .= " -T $system_output.trace";
@@ -2029,6 +2048,7 @@ sub define_evaluation_decode {
 
     my $filter = "$scripts/training/filter-model-given-input.pl";
     $filter .= " $dir/evaluation/filtered.$set.$VERSION $config $input_filter";
+    $binarizer .= " -alignment-info" if $binarizer && $report_precision_by_coverage;
     $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
 
     if (&get("TRAINING:hierarchical-rule-set")) {
@@ -2098,15 +2118,21 @@ sub define_evaluation_analysis {
     &create_step($step_id,$cmd);
 }
 
-sub define_evaluation_analysis_coverage {
+sub define_evaluation_analysis_precision {
     my ($set,$step_id) = @_;
 
     my ($analysis,
-	$input,$corpus,$ttable) = &get_output_and_input($step_id);
+	$output,$reference,$input,$corpus,$ttable) = &get_output_and_input($step_id);
     my $script = &backoff_and_get("EVALUATION:$set:analysis");
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
 
-    # translation table name
+    my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis -precision-by-coverage";
+
+    my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
+    $cmd .= " -segmentation $segmentation_file";
+    $cmd .= " -system-alignment $segmentation_file.wa";
+
+    # get table with surface factors
     if (&backoff_and_get("TRAINING:input-factors")) {
       my %IN = &get_factor_id("input");
       my %OUT = &get_factor_id("output");
@@ -2116,8 +2142,8 @@ sub define_evaluation_analysis_coverage {
       if (&backoff_and_get("TRAINING:phrase-translation-table")) {
         @SPECIFIED_NAME = @{$CONFIG{"TRAINING:phrase-translation-table"}};
       }
-      for(my $i=0;$i<scalar(@FACTOR);$i++) {
-	if ($FACTOR[$i] =~ /^0-/) {
+      for(my $i=0;$i<scalar(split(/\+/,$factors));$i++) {
+        if ($FACTOR[$i] =~ /^0-/) {
 	  if (scalar(@SPECIFIED_NAME) > $i) {
             $ttable = $SPECIFIED_NAME[$i];
 	  }
@@ -2125,11 +2151,65 @@ sub define_evaluation_analysis_coverage {
 	    $ttable .= ".".$FACTOR[$i];
 	  }
 	  last;
+        }
+      }
+      my $subreport = &backoff_and_get("EVALUATION:precision-by-coverage-factor");
+      if (defined($subreport)) {
+        die("unknown factor $subreport specified in EVALUATION:precision-by-coverage-factor") unless defined($IN{$subreport});
+        $cmd .= " -precision-by-coverage-factor ".$IN{$subreport};
+      }
+    }
+    $cmd .= " -ttable $ttable -input-corpus $corpus.$input_extension";
+
+    &create_step($step_id,$cmd);
+}
+
+sub define_evaluation_analysis_coverage {
+    my ($set,$step_id) = @_;
+
+    my ($analysis,
+	$input,$corpus,$ttable) = &get_output_and_input($step_id);
+    my $script = &backoff_and_get("EVALUATION:$set:analysis");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $score_settings = &get("TRAINING:score-settings");
+
+    my $ttable_config;
+
+    # translation tables for un-factored
+    if (!&backoff_and_get("TRAINING:input-factors")) {
+      $ttable_config = "-ttable $ttable";
+    }
+    # translation tables for factored
+    else {
+      my %IN = &get_factor_id("input");
+      $ttable_config = "-input-factors ".(scalar(keys %IN));
+      my %OUT = &get_factor_id("output");
+      my $factors = &encode_factor_definition("translation-factors",\%IN,\%OUT);
+      my @FACTOR = split(/\+/,$factors);
+      my @SPECIFIED_NAME;
+      if (&backoff_and_get("TRAINING:phrase-translation-table")) {
+        @SPECIFIED_NAME = @{$CONFIG{"TRAINING:phrase-translation-table"}};
+      }
+      my $surface_ttable;
+      for(my $i=0;$i<scalar(@FACTOR);$i++) {
+	$FACTOR[$i] =~ /^([\d\,]+)/;
+	my $input_factors = $1;
+
+	my $ttable_name = $ttable.".".$FACTOR[$i];
+	if (scalar(@SPECIFIED_NAME) > $i) {
+	  $ttable_name = $SPECIFIED_NAME[$i];
+	}
+
+	$ttable_config .= " -factored-ttable $input_factors:".$ttable_name;
+	if ($input_factors eq "0" && !defined($surface_ttable)) {
+	    $surface_ttable = $ttable_name;
+	    $ttable_config .= " -ttable $surface_ttable";
 	}
       }
     }
 
-    my $cmd = "$script -input $input -input-corpus $corpus.$input_extension -ttable $ttable -dir $analysis";
+    my $cmd = "$script -input $input -input-corpus $corpus.$input_extension $ttable_config -dir $analysis";
+    $cmd .= " -score-options '$score_settings'" if $score_settings;
     &create_step($step_id,$cmd);
 }
 

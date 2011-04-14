@@ -24,7 +24,8 @@ using namespace std;
 #define NBEST_DELIM "|||"
 #define NBEST_DELIM2 " ||| "
 
-class Hypo {
+class Hypo
+{
   int id;
   string trg;  // translation
   vector<float> f;  // feature function scores

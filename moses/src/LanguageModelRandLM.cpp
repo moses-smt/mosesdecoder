@@ -32,8 +32,9 @@ namespace Moses
 {
 using namespace std;
 
-bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType, 
-			       size_t nGramOrder) {
+bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType,
+                               size_t nGramOrder)
+{
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_filePath = filePath;
@@ -45,16 +46,18 @@ bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorTyp
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);
+  m_lm->initThreadSpecificData();
   return true;
 }
 
-void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection) { // add factors which have randlm id
+void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection)   // add factors which have randlm id
+{
   // code copied & paste from SRI LM class. should do template function
   // first get all bf vocab in map
   std::map<size_t, randlm::WordID> randlm_ids_map; // map from factor id -> randlm id
   size_t maxFactorId = 0; // to create lookup vector later on
   for(std::map<randlm::Word, randlm::WordID>::const_iterator vIter = m_lm->vocabStart();
-      vIter != m_lm->vocabEnd(); vIter++){
+      vIter != m_lm->vocabEnd(); vIter++) {
     // get word from randlm vocab and associate with (new) factor id
     size_t factorId=factorCollection.AddFactor(Output,m_factorType,vIter->first)->GetId();
     randlm_ids_map[factorId] = vIter->second;
@@ -83,14 +86,14 @@ void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection) { //
 
 }
 
-randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const {
+randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
+{
   return m_lm->getWordID(str);
 }
 
-float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
-				    State* finalState, unsigned int* len) const {
-  unsigned int dummy;   // is this needed ?
-  if (!len) { len = &dummy; }
+LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
+                                    State* finalState) const
+{
   FactorType factorType = GetFactorType();
   // set up context
   randlm::WordID ngram[MAX_NGRAM_SIZE];
@@ -100,13 +103,14 @@ float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
     //std::cerr << m_lm->getWord(ngram[i]) << " ";
   }
   int found = 0;
-  float logprob = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
-  *len = 0; // not available
+  LMResult ret;
+  ret.score = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
+  ret.unknown = count && (ngram[count - 1] == m_oov_id);
   //if (finalState)
-  //  std::cerr << " = " << logprob << "(" << *finalState << ", " << *len <<")"<< std::endl;
+  //  std::cerr << " = " << logprob << "(" << *finalState << ", " <<")"<< std::endl;
   //else
   //  std::cerr << " = " << logprob << std::endl;
-  return logprob;
+  return ret;
 }
 
 }

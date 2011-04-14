@@ -49,41 +49,43 @@ typedef std::set<std::string> StringSet;
  */
 class FactorCollection
 {
-	friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
+  friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
 protected:
-	static FactorCollection s_instance;
-#ifdef WITH_THREADS   
-    //reader-writer lock
-    boost::shared_mutex m_accessLock;
+  static FactorCollection s_instance;
+#ifdef WITH_THREADS
+  //reader-writer lock
+  boost::shared_mutex m_accessLock;
 #endif
 
-	size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */	
-	FactorSet m_collection; /**< collection of all factors */
-	StringSet m_factorStringCollection; /**< collection of unique string used by factors */
+  size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */
+  FactorSet m_collection; /**< collection of all factors */
+  StringSet m_factorStringCollection; /**< collection of unique string used by factors */
 
-	//! constructor. only the 1 static variable can be created
-	FactorCollection()
-	:m_factorId(0)
-	{}
+  //! constructor. only the 1 static variable can be created
+  FactorCollection()
+    :m_factorId(0)
+  {}
 
-public:		
-	static FactorCollection& Instance() { return s_instance; }
+public:
+  static FactorCollection& Instance() {
+    return s_instance;
+  }
 
-	//! Destructor
-	~FactorCollection();
+  //! Destructor
+  ~FactorCollection();
 
-	//! Test to see whether a factor exists
-	bool Exists(FactorDirection direction, FactorType factorType, const std::string &factorString);	
-	/** returns a factor with the same direction, factorType and factorString. 
-	*	If a factor already exist in the collection, return the existing factor, if not create a new 1
-	*/
-	const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);	
-	//! Load list of factors. Deprecated
-	void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &filePath);
-	
-	TO_STRING();
-	
+  //! Test to see whether a factor exists
+  bool Exists(FactorDirection direction, FactorType factorType, const std::string &factorString);
+  /** returns a factor with the same direction, factorType and factorString.
+  *	If a factor already exist in the collection, return the existing factor, if not create a new 1
+  */
+  const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);
+  //! Load list of factors. Deprecated
+  void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &filePath);
+
+  TO_STRING();
+
 };
 
 

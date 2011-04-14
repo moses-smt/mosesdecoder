@@ -12,7 +12,6 @@
 		1E9DA31611BDC84A00F4DBD1 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA30C11BDC84A00F4DBD1 /* Main.cpp */; };
 		1E9DA31811BDC84A00F4DBD1 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA31111BDC84A00F4DBD1 /* mbr.cpp */; };
 		1E9DA31911BDC84A00F4DBD1 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DA31311BDC84A00F4DBD1 /* TranslationAnalysis.cpp */; };
-		1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */; };
 		1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */; };
 		1ED8B842124B98A60030CCF4 /* libkenlm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E60D2A212496B1900D15873 /* libkenlm.a */; };
 /* End PBXBuildFile section */
@@ -46,13 +45,6 @@
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = moses;
 		};
-		1E9DA34011BDC8CA00F4DBD1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D2AAC046055464E500DB518D;
-			remoteInfo = "moses-chart";
-		};
 		1E9DA34E11BDC96A00F4DBD1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */;
@@ -66,13 +58,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = D2AAC045055464E500DB518D;
 			remoteInfo = OnDiskPt;
-		};
-		1E9DA36711BDC9B200F4DBD1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = "moses-chart";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -99,7 +84,6 @@
 		1E9DA31311BDC84A00F4DBD1 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
 		1E9DA31411BDC84A00F4DBD1 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
 		1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
-		1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		8DD76F6C0486A84900D96B5E /* moses-chart-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-chart-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -112,7 +96,6 @@
 				1ED8B842124B98A60030CCF4 /* libkenlm.a in Frameworks */,
 				1E87F09311BDCD2E0033951C /* libmoses.a in Frameworks */,
 				1E9DA35011BDC97100F4DBD1 /* libOnDiskPt.a in Frameworks */,
-				1E9DA34211BDC8DB00F4DBD1 /* libmoses-chart.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,7 +107,6 @@
 			children = (
 				1E60D29A12496B1900D15873 /* kenlm.xcodeproj */,
 				1E9DA34A11BDC96A00F4DBD1 /* OnDiskPt.xcodeproj */,
-				1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */,
 				1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
@@ -172,14 +154,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1E9DA33A11BDC8CA00F4DBD1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		1E9DA34B11BDC96A00F4DBD1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -210,7 +184,6 @@
 			);
 			dependencies = (
 				1E9DA36411BDC9B200F4DBD1 /* PBXTargetDependency */,
-				1E9DA36811BDC9B200F4DBD1 /* PBXTargetDependency */,
 				1E87F09511BDCD390033951C /* PBXTargetDependency */,
 				1E60D2A912496B4F00D15873 /* PBXTargetDependency */,
 			);
@@ -243,10 +216,6 @@
 					ProjectRef = 1E60D29A12496B1900D15873 /* kenlm.xcodeproj */;
 				},
 				{
-					ProductGroup = 1E9DA33A11BDC8CA00F4DBD1 /* Products */;
-					ProjectRef = 1E9DA33911BDC8CA00F4DBD1 /* moses-chart.xcodeproj */;
-				},
-				{
 					ProductGroup = 1E9DA33411BDC8BB00F4DBD1 /* Products */;
 					ProjectRef = 1E9DA33311BDC8BB00F4DBD1 /* moses.xcodeproj */;
 				},
@@ -275,13 +244,6 @@
 			fileType = archive.ar;
 			path = libmoses.a;
 			remoteRef = 1E87F08C11BDCD1B0033951C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1E9DA34111BDC8CA00F4DBD1 /* libmoses-chart.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libmoses-chart.a";
-			remoteRef = 1E9DA34011BDC8CA00F4DBD1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1E9DA34F11BDC96A00F4DBD1 /* libOnDiskPt.a */ = {
@@ -322,11 +284,6 @@
 			isa = PBXTargetDependency;
 			name = OnDiskPt;
 			targetProxy = 1E9DA36311BDC9B200F4DBD1 /* PBXContainerItemProxy */;
-		};
-		1E9DA36811BDC9B200F4DBD1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "moses-chart";
-			targetProxy = 1E9DA36711BDC9B200F4DBD1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -399,7 +356,10 @@
 				GCC_PREPROCESSOR_DEFINITIONS = TRACE_ENABLE;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../,
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;
@@ -414,7 +374,10 @@
 				GCC_PREPROCESSOR_DEFINITIONS = TRACE_ENABLE;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../,
+				);
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				SDKROOT = macosx10.6;

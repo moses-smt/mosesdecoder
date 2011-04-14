@@ -24,37 +24,43 @@ class FFState;
 class ScoreProducer
 {
 private:
-	static unsigned int s_globalScoreBookkeepingIdCounter;
-	unsigned int m_scoreBookkeepingId;
+  static unsigned int s_globalScoreBookkeepingIdCounter;
+  unsigned int m_scoreBookkeepingId;
 
-	ScoreProducer(const ScoreProducer&);  // don't implement
-	
-	 #define UNASSIGNED std::numeric_limits<unsigned int>::max()
-	
+  ScoreProducer(const ScoreProducer&);  // don't implement
+
+#define UNASSIGNED std::numeric_limits<unsigned int>::max()
+
 protected:
-	// it would be nice to force registration here, but some Producer objects
-	// are constructed before they know how many scores they have
-	ScoreProducer();
-	virtual ~ScoreProducer();
+  // it would be nice to force registration here, but some Producer objects
+  // are constructed before they know how many scores they have
+  ScoreProducer();
+  virtual ~ScoreProducer();
 
 public:
-	//! contiguous id
-	unsigned int GetScoreBookkeepingID() const { return m_scoreBookkeepingId; }
-	void CreateScoreBookkeepingID()	{	m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;}
-	//! returns the number of scores that a subclass produces.
-	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
-	virtual size_t GetNumScoreComponents() const = 0;
+  //! contiguous id
+  unsigned int GetScoreBookkeepingID() const {
+    return m_scoreBookkeepingId;
+  }
+  void CreateScoreBookkeepingID()	{
+    m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;
+  }
+  //! returns the number of scores that a subclass produces.
+  //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
+  virtual size_t GetNumScoreComponents() const = 0;
 
-	//! returns a string description of this producer
-	virtual std::string GetScoreProducerDescription() const = 0;
+  //! returns a string description of this producer
+  virtual std::string GetScoreProducerDescription() const = 0;
 
-	//! returns the weight parameter name of this producer (used in n-best list)
-	virtual std::string GetScoreProducerWeightShortName() const = 0;
+  //! returns the weight parameter name of this producer (used in n-best list)
+  virtual std::string GetScoreProducerWeightShortName() const = 0;
 
-	//! returns the number of scores gathered from the input (0 by default)
-	virtual size_t GetNumInputScores() const { return 0; };
+  //! returns the number of scores gathered from the input (0 by default)
+  virtual size_t GetNumInputScores() const {
+    return 0;
+  };
 
-	virtual bool IsStateless() const = 0;
+  virtual bool IsStateless() const = 0;
 
 };
 

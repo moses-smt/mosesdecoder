@@ -109,7 +109,7 @@ my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt is relevant only to JHU workshop
-my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
+my $___JOBS = undef; # if parallel, number of jobs to use (undef or 0 -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
 my $continue = 0; # should we try to continue from the last saved step?
@@ -580,7 +580,7 @@ if ($___FILTER_PHRASE_TABLE){
   my $___FILTER_F  = $___DEV_F;
   $___FILTER_F = $filterfile if (defined $filterfile);
   my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
       or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
   } else {
@@ -656,7 +656,7 @@ while(1) {
 
   $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
       or die "Failed to submit extraction to queue (via $qsubwrapper)";
   } else {
@@ -721,7 +721,7 @@ while(1) {
 
   $cmd = $cmd." --ifile run$run.$weights_in_file";
 
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
@@ -901,7 +901,7 @@ sub run_decoder {
 	my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
 
-    if (defined $___JOBS) {
+    if (defined $___JOBS && $___JOBS > 0) {
 	my $times_params="-timesfile run$run.times";
 	if ($run>1) {
 	    my $prevrun=$run-1;
@@ -1200,22 +1200,26 @@ sub scan_config {
             || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)
         && (!defined $additional_tripes_loop->{$shortname})
         ) {
-        print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
-          .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
-        $error = 1;
-      } else {
-        # note: models may use less parameters than the maximum number
-        # of triples, but it is actually bad, because then the ranges
-        # may be meant for another parameter
-        my @triplets = @{$additional_triples->{$shortname}};
-        for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
-          my $triplet = $lambda;
-          $triplet %= scalar(@triplets)
-            if $additional_tripes_loop->{$shortname};
-          my ($start, $min, $max) 
-              = @{$triplets[$triplet]};
-          push @{$used_triples{$shortname}}, [$start, $min, $max];
+        # Add triples with default values
+        if (!defined $additional_triples->{$shortname}) {
+            $additional_triples->{$shortname} = ();
         }
+        while (scalar(@{$additional_triples->{$shortname}}) < $needlambdas) {
+            push @{$additional_triples->{$shortname}}, [1,-1,1];
+        }
+
+      }
+      # note: models may use less parameters than the maximum number
+      # of triples, but it is actually bad, because then the ranges
+      # may be meant for another parameter
+      my @triplets = @{$additional_triples->{$shortname}};
+      for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
+        my $triplet = $lambda;
+        $triplet %= scalar(@triplets)
+          if $additional_tripes_loop->{$shortname};
+        my ($start, $min, $max) 
+            = @{$triplets[$triplet]};
+        push @{$used_triples{$shortname}}, [$start, $min, $max];
       }
     }
   }

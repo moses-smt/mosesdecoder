@@ -43,102 +43,94 @@ class FactorCollection;
 class LanguageModelJoint : public LanguageModelMultiFactor
 {
 protected:
-	LanguageModelSingleFactor *m_lmImpl;
-	std::vector<FactorType> m_factorTypesOrdered;
-	
-	size_t m_implFactor;
+  LanguageModelSingleFactor *m_lmImpl;
+  std::vector<FactorType> m_factorTypesOrdered;
+
+  size_t m_implFactor;
 public:
-	LanguageModelJoint(LanguageModelSingleFactor *lmImpl)
-	{
-		m_lmImpl = lmImpl;
-	}
-	
-	~LanguageModelJoint()
-	{
-		delete m_lmImpl;
-	}
-	
-	bool Load(const std::string &filePath
-					, const std::vector<FactorType> &factorTypes
-					, size_t nGramOrder)
-	{
-		m_factorTypes				= FactorMask(factorTypes);
-		m_filePath 					= filePath;
-		m_nGramOrder 				= nGramOrder;
-	
-		m_factorTypesOrdered= factorTypes;
-		m_implFactor				= 0;
-		
-		FactorCollection &factorCollection = FactorCollection::Instance();
+  LanguageModelJoint(LanguageModelSingleFactor *lmImpl) {
+    m_lmImpl = lmImpl;
+  }
 
-		// sentence markers
-		for (size_t index = 0 ; index < factorTypes.size() ; ++index)
-		{
-			FactorType factorType = factorTypes[index];
-			m_sentenceStartArray[factorType] 	= factorCollection.AddFactor(Output, factorType, BOS_);
-			m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
-		}
-	
-		return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);
-	}
-	
-	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = NULL) const
-	{
-		if (contextFactor.size() == 0)
-		{
-			return 0;
-		}
+  ~LanguageModelJoint() {
+    delete m_lmImpl;
+  }
 
-		// joint context for internal LM
-		std::vector<const Word*> jointContext;
-		
-		for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos )
-		{
-			const Word &word = *contextFactor[currPos];
+  bool Load(const std::string &filePath
+            , const std::vector<FactorType> &factorTypes
+            , size_t nGramOrder) {
+    m_factorTypes				= FactorMask(factorTypes);
+    m_filePath 					= filePath;
+    m_nGramOrder 				= nGramOrder;
 
-			// add word to chunked context
-			std::stringstream stream("");
+    m_factorTypesOrdered= factorTypes;
+    m_implFactor				= 0;
 
-			const Factor *factor = word[ m_factorTypesOrdered[0] ];
-			stream << factor->GetString();
+    FactorCollection &factorCollection = FactorCollection::Instance();
 
-			for (size_t index = 1 ; index < m_factorTypesOrdered.size() ; ++index)
-			{
-				FactorType factorType = m_factorTypesOrdered[index];
-				const Factor *factor = word[factorType];
-				stream << "|" << factor->GetString();
-			}
-			
-			factor = FactorCollection::Instance().AddFactor(Output, m_implFactor, stream.str());
+    // sentence markers
+    for (size_t index = 0 ; index < factorTypes.size() ; ++index) {
+      FactorType factorType = factorTypes[index];
+      m_sentenceStartArray[factorType] 	= factorCollection.AddFactor(Output, factorType, BOS_);
+      m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
+    }
 
-			Word* jointWord = new Word;
-			jointWord->SetFactor(m_implFactor, factor);
-			jointContext.push_back(jointWord);
-		}
-	
-		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValueForgotState(jointContext, outState, len);
+    return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);
+  }
 
-		RemoveAllInColl(jointContext);
-		
-		return ret;
-	}
+  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+    if (contextFactor.size() == 0) {
+      LMResult ret;
+      ret.score = 0.0;
+      ret.unknown = false;
+      return ret;
+    }
 
-  FFState *GetNullContextState() const
-  {
+    // joint context for internal LM
+    std::vector<const Word*> jointContext;
+
+    for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos ) {
+      const Word &word = *contextFactor[currPos];
+
+      // add word to chunked context
+      std::stringstream stream("");
+
+      const Factor *factor = word[ m_factorTypesOrdered[0] ];
+      stream << factor->GetString();
+
+      for (size_t index = 1 ; index < m_factorTypesOrdered.size() ; ++index) {
+        FactorType factorType = m_factorTypesOrdered[index];
+        const Factor *factor = word[factorType];
+        stream << "|" << factor->GetString();
+      }
+
+      factor = FactorCollection::Instance().AddFactor(Output, m_implFactor, stream.str());
+
+      Word* jointWord = new Word;
+      jointWord->SetFactor(m_implFactor, factor);
+      jointContext.push_back(jointWord);
+    }
+
+    // calc score on chunked phrase
+    LMResult ret = m_lmImpl->GetValueForgotState(jointContext, outState);
+
+    RemoveAllInColl(jointContext);
+
+    return ret;
+  }
+
+  FFState *GetNullContextState() const {
     return m_lmImpl->GetNullContextState();
   }
 
-  FFState *GetBeginSentenceState() const
-  {
+  FFState *GetBeginSentenceState() const {
     return m_lmImpl->GetBeginSentenceState();
   }
 
-  FFState *NewState(const FFState *from) const
-  {
+  FFState *NewState(const FFState *from) const {
     return m_lmImpl->NewState(from);
   }
-	
+
 };
 
 }

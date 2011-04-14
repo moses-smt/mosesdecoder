@@ -57,102 +57,95 @@ namespace Moses
 namespace LanguageModelFactory
 {
 
-	LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
-																		, const std::vector<FactorType> &factorTypes
-																		, size_t nGramOrder
-																		, const std::string &languageModelFile
-																		, ScoreIndexManager &scoreIndexManager
-																		, int dub)
-	{
-	  LanguageModelImplementation *lm = NULL;
-	  switch (lmImplementation)
-	  {
-		  case RandLM:
-			#ifdef LM_RAND
-			lm = new LanguageModelRandLM();
-			#endif
-			break;
-		  case Remote:
-			#ifdef LM_REMOTE
-			lm = new LanguageModelRemote();
-			#endif
-			break;
+LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
+                                   , const std::vector<FactorType> &factorTypes
+                                   , size_t nGramOrder
+                                   , const std::string &languageModelFile
+                                   , ScoreIndexManager &scoreIndexManager
+                                   , int dub )
+{
+  LanguageModelImplementation *lm = NULL;
+  switch (lmImplementation) {
+  case RandLM:
+#ifdef LM_RAND
+    lm = new LanguageModelRandLM();
+#endif
+    break;
+  case Remote:
+#ifdef LM_REMOTE
+    lm = new LanguageModelRemote();
+#endif
+    break;
 
-	  	case SRI:
-				#ifdef LM_SRI
-				  lm = new LanguageModelSRI();
-			  #endif
-			  break;
-			case IRST:
-				#ifdef LM_IRST
-	     		lm = new LanguageModelIRST(dub);
-			  #endif
-				break;
-			case Skip:
-				#ifdef LM_SRI
-	     		lm = new LanguageModelSkip(new LanguageModelSRI());
-				#elif LM_INTERNAL
-     			lm = new LanguageModelSkip(new LanguageModelInternal());
-				#endif
-				break;
-			case Ken:
-				#ifdef LM_KEN
-					lm = ConstructKenLM(languageModelFile, false);
-				#endif
-				break;
-			case LazyKen:
-				#ifdef LM_KEN
-					lm = ConstructKenLM(languageModelFile, true);
-				#endif
-				break;
-			case Joint:
-				#ifdef LM_SRI
-	     		lm = new LanguageModelJoint(new LanguageModelSRI());
-				#elif LM_INTERNAL
-	     		lm = new LanguageModelJoint(new LanguageModelInternal());
-				#endif
-				break;
-			case ParallelBackoff:
-				#ifdef LM_SRI
-					lm = new LanguageModelParallelBackoff();
-				#endif
-					break;
-	  	case Internal:
-				#ifdef LM_INTERNAL
-					lm = new LanguageModelInternal();
-			  #endif
-			  break;
-	  }
+  case SRI:
+#ifdef LM_SRI
+    lm = new LanguageModelSRI();
+#endif
+    break;
+  case IRST:
+#ifdef LM_IRST
+    lm = new LanguageModelIRST(dub);
+#endif
+    break;
+  case Skip:
+#ifdef LM_SRI
+    lm = new LanguageModelSkip(new LanguageModelSRI());
+#elif LM_INTERNAL
+    lm = new LanguageModelSkip(new LanguageModelInternal());
+#endif
+    break;
+  case Ken:
+#ifdef LM_KEN
+    lm = ConstructKenLM(languageModelFile, false);
+#endif
+    break;
+  case LazyKen:
+#ifdef LM_KEN
+    lm = ConstructKenLM(languageModelFile, true);
+#endif
+    break;
+  case Joint:
+#ifdef LM_SRI
+    lm = new LanguageModelJoint(new LanguageModelSRI());
+#elif LM_INTERNAL
+    lm = new LanguageModelJoint(new LanguageModelInternal());
+#endif
+    break;
+  case ParallelBackoff:
+#ifdef LM_SRI
+    lm = new LanguageModelParallelBackoff();
+#endif
+    break;
+  case Internal:
+#ifdef LM_INTERNAL
+    lm = new LanguageModelInternal();
+#endif
+    break;
+  }
 
-	  if (lm == NULL)
-	  {
-	  	UserMessage::Add("Language model type unknown. Probably not compiled into library");
-	  }
-	  else
-	  {
-	  	switch (lm->GetLMType())
-	  	{
-	  	case SingleFactor:
-	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], nGramOrder))
-				{
-					cerr << "single factor model failed" << endl;
-					delete lm;
-					lm = NULL;
-				}
-	  		break;
-	  	case MultiFactor:
-  			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder))
-				{
-					cerr << "multi factor model failed" << endl;
-					delete lm;
-					lm = NULL;
-				}
-  			break;
-	  	}
-	  }
+  if (lm == NULL) {
+    UserMessage::Add("Language model type unknown. Probably not compiled into library");
+  } else {
+    switch (lm->GetLMType()) {
+    case SingleFactor:
+      if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], nGramOrder)) {
+        cerr << "single factor model failed" << endl;
+        delete lm;
+        lm = NULL;
+      }
+      break;
+    case MultiFactor:
+      if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder)) {
+        cerr << "multi factor model failed" << endl;
+        delete lm;
+        lm = NULL;
+      }
+      break;
+    }
+  }
 
-	  return new LanguageModel(scoreIndexManager, lm);
-	}
+  return new LanguageModel(scoreIndexManager, lm);
+}
 }
 
 }

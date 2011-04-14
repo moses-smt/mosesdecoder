@@ -30,17 +30,18 @@ namespace Moses
 class Sentence;
 class LMList;
 
-class TranslationOptionCollectionText : public TranslationOptionCollection {
- public:
-	void ProcessUnknownWord(size_t sourcePos);
-	
-    TranslationOptionCollectionText(const TranslationSystem* system, Sentence const& inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
-	
-	bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
-	
-	void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
-	
-	
+class TranslationOptionCollectionText : public TranslationOptionCollection
+{
+public:
+  void ProcessUnknownWord(size_t sourcePos);
+
+  TranslationOptionCollectionText(const TranslationSystem* system, Sentence const& inputSentence, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+
+  bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
+
+  void CreateXmlOptionsForRange(size_t startPosition, size_t endPosition);
+
+
 };
 
 }

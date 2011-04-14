@@ -21,61 +21,60 @@
 #ifndef RULEEXTRACTIONOPTIONS_H_INCLUDED_
 #define RULEEXTRACTIONOPTIONS_H_INCLUDED_
 
-struct RuleExtractionOptions
-{
-    public:
-        int maxSpan;
-        int minHoleSource;
-        int minHoleTarget;
-        int minWords;
-        int maxSymbolsTarget;
-        int maxSymbolsSource;
-        int maxNonTerm;
-        int maxScope;
-        bool onlyDirectFlag;
-        bool glueGrammarFlag;
-        bool unknownWordLabelFlag;
-        bool onlyOutputSpanInfo;
-        bool noFileLimit;
-        bool properConditioning;
-        bool nonTermFirstWord;
-        bool nonTermConsecTarget;
-        bool nonTermConsecSource;
-        bool requireAlignedWord;
-        bool sourceSyntax;
-        bool targetSyntax;
-        bool duplicateRules;
-        bool fractionalCounting;
-        bool mixed;
+struct RuleExtractionOptions {
+public:
+  int maxSpan;
+  int minHoleSource;
+  int minHoleTarget;
+  int minWords;
+  int maxSymbolsTarget;
+  int maxSymbolsSource;
+  int maxNonTerm;
+  int maxScope;
+  bool onlyDirectFlag;
+  bool glueGrammarFlag;
+  bool unknownWordLabelFlag;
+  bool onlyOutputSpanInfo;
+  bool noFileLimit;
+  bool properConditioning;
+  bool nonTermFirstWord;
+  bool nonTermConsecTarget;
+  bool nonTermConsecSource;
+  bool requireAlignedWord;
+  bool sourceSyntax;
+  bool targetSyntax;
+  bool duplicateRules;
+  bool fractionalCounting;
+  bool mixed;
 
-        RuleExtractionOptions()
-          : maxSpan(10)
-          , minHoleSource(2)
-          , minHoleTarget(1)
-          , minWords(1)
-          , maxSymbolsTarget(999)
-          , maxSymbolsSource(5)
-          , maxNonTerm(2)
-          , maxScope(3)
-          // int minHoleSize(1)
-          // int minSubPhraseSize(1) // minimum size of a remaining lexical phrase 
-          , onlyDirectFlag(false)
-          , glueGrammarFlag(false)
-          , unknownWordLabelFlag(false)
-          , onlyOutputSpanInfo(false)
-          , noFileLimit(false)
-          //bool zipFiles(false)
-          , properConditioning(false)
-          , nonTermFirstWord(true)
-          , nonTermConsecTarget(true)
-          , nonTermConsecSource(false)
-          , requireAlignedWord(true)
-          , sourceSyntax(false)
-          , targetSyntax(false)
-          , duplicateRules(true)
-          , fractionalCounting(true)
-          , mixed(false)
-        {}
+  RuleExtractionOptions()
+    : maxSpan(10)
+    , minHoleSource(2)
+    , minHoleTarget(1)
+    , minWords(1)
+    , maxSymbolsTarget(999)
+    , maxSymbolsSource(5)
+    , maxNonTerm(2)
+    , maxScope(3)
+    // int minHoleSize(1)
+    // int minSubPhraseSize(1) // minimum size of a remaining lexical phrase
+    , onlyDirectFlag(false)
+    , glueGrammarFlag(false)
+    , unknownWordLabelFlag(false)
+    , onlyOutputSpanInfo(false)
+    , noFileLimit(false)
+    //bool zipFiles(false)
+    , properConditioning(false)
+    , nonTermFirstWord(true)
+    , nonTermConsecTarget(true)
+    , nonTermConsecSource(false)
+    , requireAlignedWord(true)
+    , sourceSyntax(false)
+    , targetSyntax(false)
+    , duplicateRules(true)
+    , fractionalCounting(true)
+    , mixed(false)
+  {}
 };
 
 #endif

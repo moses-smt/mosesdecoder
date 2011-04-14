@@ -37,59 +37,56 @@ namespace Moses
 class FactorCollection;
 
 typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
-		// 1st = output phrase
-		// 2nd = log probability (score)
+// 1st = output phrase
+// 2nd = log probability (score)
 
-/** Implementation of a generation table in a trie.  
+/** Implementation of a generation table in a trie.
  */
 class GenerationDictionary : public Dictionary, public DecodeFeature
 {
-	typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
+  typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
-	Collection m_collection;
-	// 1st = source
-	// 2nd = target
-	std::string						m_filePath;
+  Collection m_collection;
+  // 1st = source
+  // 2nd = target
+  std::string						m_filePath;
 
 public:
-	/** constructor.
-	* \param numFeatures number of score components, as specified in ini file
-	*/
+  /** constructor.
+  * \param numFeatures number of score components, as specified in ini file
+  */
   GenerationDictionary(
-        size_t numFeatures, 
-        ScoreIndexManager &scoreIndexManager,
-        const std::vector<FactorType> &input,
-        const std::vector<FactorType> &output);
-	virtual ~GenerationDictionary();
+    size_t numFeatures,
+    ScoreIndexManager &scoreIndexManager,
+    const std::vector<FactorType> &input,
+    const std::vector<FactorType> &output);
+  virtual ~GenerationDictionary();
 
-	// returns Generate
-	DecodeType GetDecodeType() const
-	{
-		return Generate;
-	}
-	
-	//! load data file
-	bool Load(const std::string &filePath, FactorDirection direction);
+  // returns Generate
+  DecodeType GetDecodeType() const {
+    return Generate;
+  }
 
-	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerDescription() const;
-	std::string GetScoreProducerWeightShortName() const
-	{
-		return "g";
-	}
+  //! load data file
+  bool Load(const std::string &filePath, FactorDirection direction);
 
-	/** number of unique input entries in the generation table. 
-	* NOT the number of lines in the generation table
-	*/
-	size_t GetSize() const
-	{
-		return m_collection.size();
-	}
-	/** returns a bag of output words, OutputWordCollection, for a particular input word. 
-	*	Or NULL if the input word isn't found. The search function used is the WordComparer functor
-	*/
-	const OutputWordCollection *FindWord(const Word &word) const;
-	virtual bool ComputeValueInTranslationOption() const;
+  size_t GetNumScoreComponents() const;
+  std::string GetScoreProducerDescription() const;
+  std::string GetScoreProducerWeightShortName() const {
+    return "g";
+  }
+
+  /** number of unique input entries in the generation table.
+  * NOT the number of lines in the generation table
+  */
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+  /** returns a bag of output words, OutputWordCollection, for a particular input word.
+  *	Or NULL if the input word isn't found. The search function used is the WordComparer functor
+  */
+  const OutputWordCollection *FindWord(const Word &word) const;
+  virtual bool ComputeValueInTranslationOption() const;
 };
 
 
