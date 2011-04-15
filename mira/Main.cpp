@@ -128,6 +128,7 @@ int main(int argc, char** argv) {
 	float slack_max;
 	size_t maxNumberOracles;
 	bool accumulateMostViolatedConstraints;
+	bool averageWeights;
 	bool pastAndCurrentConstraints;
 	bool weightConvergence;
 	bool controlUpdates;
@@ -141,12 +142,12 @@ int main(int argc, char** argv) {
 	float decrease_sentence_update;
 	bool devBleu;
 	bool normaliseWeights;
+	bool one_constraint;
 	bool print_feature_values;
 	bool stop_dev_bleu;
 	bool stop_approx_dev_bleu;
-	int updates_per_epoch;
-	bool averageWeights;
 	bool stop_optimal;
+	int updates_per_epoch;
 	po::options_description desc("Allowed options");
 	desc.add_options()("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
 			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -182,7 +183,8 @@ int main(int argc, char** argv) {
 			("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
 			("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 			("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
-	    ("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
+			("one-constraint", po::value<bool>(&one_constraint)->default_value(false), "Forget about hope and fear and consider only the 1best model translation to formulate a constraint")
+			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
@@ -447,6 +449,34 @@ int main(int argc, char** argv) {
 				featureValues.push_back(newFeatureValues);
 				bleuScores.push_back(newBleuScores);
 
+				if (one_constraint) {
+					cerr << "Rank " << rank << ", run decoder to get 1best wrt model score" << endl;
+					vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0,
+							1.0, featureValues[batchPosition], bleuScores[batchPosition], true,
+							distinctNbest, rank);
+					inputLengths.push_back(decoder->getCurrentInputLength());
+					ref_ids.push_back(*sid);
+					all_ref_ids.push_back(*sid);
+					allBestModelScore.push_back(bestModel);
+					decoder->cleanup();
+					cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+
+					// HOPE
+					cerr << "Rank " << rank << ", run decoder to get nbest hope translations" << endl;
+					size_t oraclePos = featureValues[batchPosition].size();
+					oraclePositions.push_back(oraclePos);
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0,
+							1.0, featureValues[batchPosition], bleuScores[batchPosition], true,
+							distinctNbest, rank);
+					decoder->cleanup();
+					oracles.push_back(oracle);
+					cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+
+					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
+					float oracleBleuScore = bleuScores[batchPosition][oraclePos];
+					oracleBleuScores.push_back(oracleBleuScore);
+				}
+				else {
 				// MODEL
 				cerr << "Rank " << rank << ", run decoder to get nbest wrt model score" << endl;
 				vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0,
@@ -488,6 +518,7 @@ int main(int argc, char** argv) {
 				//			  }
 				for (size_t i = 0; i < fear.size(); ++i) {
 					delete fear[i];
+				}
 				}
 
 				cerr << "Rank " << rank << ", " << *sid << ", best model Bleu (approximate sentence bleu): "  << bleuScores[batchPosition][0] << endl;
@@ -550,9 +581,17 @@ int main(int argc, char** argv) {
 			// run optimiser on batch
 			cerr << "\nRank " << rank << ", run optimiser:" << endl;
 			ScoreComponentCollection oldWeights(mosesWeights);
-			vector<int> update_status = optimiser->updateWeights(mosesWeights, featureValues,
+			vector<int> update_status;
+			if (one_constraint) {
+				update_status = optimiser->updateWeightsAnalytically(mosesWeights, featureValues[0][0],
+							    losses[0][0], oracleFeatureValues[0], oracleBleuScores[0], ref_ids[0],
+							    learning_rate, max_sentence_update, rank, epoch, controlUpdates);
+			}
+			else {
+			 update_status = optimiser->updateWeights(mosesWeights, featureValues,
 			    losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
 			    learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
+			}
 
 			if (update_status[0] == 1) {
 				cerr << "Rank " << rank << ", no update for batch" << endl;

@@ -6,11 +6,123 @@ using namespace std;
 
 namespace Mira {
 
+vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
+    const ScoreComponentCollection& featureValues,
+    float loss,
+    const ScoreComponentCollection& oracleFeatureValues,
+    float oracleBleuScore,
+    size_t sentenceId,
+    float learning_rate,
+    float max_sentence_update,				     
+    size_t rank,
+    size_t epoch,
+    bool controlUpdates) {
+
+  float epsilon = 0.0001;
+  float oldDistanceFromOptimum = 0;
+  bool constraintViolatedBefore = false;
+  ScoreComponentCollection weightUpdate;
+	
+  ScoreComponentCollection featureValueDiff = oracleFeatureValues;
+  featureValueDiff.MinusEquals(featureValues);
+  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+  float diff = loss - modelScoreDiff;
+  // approximate comparison between floats
+  if (diff > epsilon) {
+    // constraint violated
+    oldDistanceFromOptimum += (loss - modelScoreDiff);
+    constraintViolatedBefore = true;
+    float lossMinusModelScoreDiff = loss - modelScoreDiff;
+    
+    // compute alpha for given constraint: (loss - model score diff) / || feature value diff ||^2
+    // featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm() == featureValueDiff.InnerProduct(featureValueDiff)
+    cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
+    float squaredNorm = featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm();
+    if (squaredNorm > 0) {
+    	float alpha = (lossMinusModelScoreDiff) / squaredNorm;
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
+    	featureValueDiff.MultiplyEquals(alpha);
+    	weightUpdate.PlusEquals(featureValueDiff);
+    }
+    else {
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", no update because squared norm is 0, can only happen if oracle == hypothesis, are bleu scores equal as well?" << endl;
+    }
+  }
+  
+
+  if (m_max_number_oracles == 1) {
+    m_oracles[sentenceId].clear();
+  }
+  
+  if (!constraintViolatedBefore) {
+    // constraint satisfied, nothing to do
+    cerr << "Rank " << rank << ", epoch " << epoch << ", check, constraint already satisfied" << endl;
+    vector<int> status(3);
+    status[0] = 1;
+    status[1] = 0;
+    status[2] = 0;
+    return status;
+  }
+
+  // sanity check: constraint still violated after optimisation?
+  ScoreComponentCollection newWeights(currWeights);
+  newWeights.PlusEquals(weightUpdate);
+	
+  bool constraintViolatedAfter = false;
+  float newDistanceFromOptimum = 0;
+  featureValueDiff = oracleFeatureValues;
+  featureValueDiff.MinusEquals(featureValues);
+  modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
+  diff = loss - modelScoreDiff;
+  // approximate comparison between floats!
+  if (diff > epsilon) {
+    constraintViolatedAfter = true;
+    newDistanceFromOptimum += (loss - modelScoreDiff);
+  }
+  
+  cerr << "Rank " << rank << ", epoch " << epoch << ", check, constraint violated before? " << constraintViolatedBefore << ", after? " << constraintViolatedAfter << endl;
+  cerr << "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl;
+
+  float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
+  if (controlUpdates && constraintViolatedAfter && distanceChange < 0) {
+    vector<int> statusPlus(3);
+    statusPlus[0] = -1;
+    statusPlus[1] = 1;
+    statusPlus[2] = 1;
+    return statusPlus;
+  }
+
+  // apply learning rate
+  if (learning_rate != 1) {
+    cerr << "Rank " << rank << ", update before applying learning rate: " << weightUpdate << endl;
+    weightUpdate.MultiplyEquals(learning_rate);
+    cerr << "Rank " << rank << ", update after applying learning rate: " << weightUpdate << endl;
+  }
+
+  // apply threshold scaling
+  if (max_sentence_update != -1) {
+    cerr << "Rank " << rank << ", update before scaling to max-sentence-update: " << weightUpdate << endl;
+    weightUpdate.ThresholdScaling(max_sentence_update);
+    cerr << "Rank " << rank << ", update after scaling to max-sentence-update: " << weightUpdate << endl;
+  }
+
+  // apply update to weight vector
+  cerr << "Rank " << rank << ", weights before update: " << currWeights << endl;
+  currWeights.PlusEquals(weightUpdate);
+  cerr << "Rank " << rank << ", weights after update: " << currWeights << endl;
+  
+  vector<int> statusPlus(3);
+  statusPlus[0] = 0;
+  statusPlus[1] = 1;
+  statusPlus[2] = constraintViolatedAfter ? 1 : 0;
+  return statusPlus;
+}
+
 vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
     const vector<vector<ScoreComponentCollection> >& featureValues,
     const vector<vector<float> >& losses,
-    const vector<std::vector<float> >& bleuScores, const vector<
-        ScoreComponentCollection>& oracleFeatureValues,
+    const vector<vector<float> >& bleuScores,
+    const vector<ScoreComponentCollection>& oracleFeatureValues,
     const vector<float> oracleBleuScores, const vector<size_t> sentenceIds,
     float learning_rate, float max_sentence_update, size_t rank, size_t epoch,
     int updates_per_epoch,
@@ -56,7 +168,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	// vector of feature values differences for all created constraints
 	vector<ScoreComponentCollection> featureValueDiffs;
 	int violatedConstraintsBefore = 0;
-	vector<float> lossMinusModelScoreDiff;
+	vector<float> lossMinusModelScoreDiffs;
 
 	// find most violated constraint
 	float maxViolationLossMarginDistance;
@@ -90,36 +202,34 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 //				cerr << "Rank " << rank << ", model score diff: " << modelScoreDiff << ", loss: " << loss << endl;
 
 				bool addConstraint = true;
-				if (modelScoreDiff < loss) {
-					float diff = loss - modelScoreDiff;
-					// approximate comparison between floats
-					if (diff > epsilon) {
-						// constraint violated
-						++violatedConstraintsBefore;
-						oldDistanceFromOptimum += (loss - modelScoreDiff);
-					}
+				float diff = loss - modelScoreDiff;
+				// approximate comparison between floats
+				if (diff > epsilon) {
+					// constraint violated
+					++violatedConstraintsBefore;
+					oldDistanceFromOptimum += (loss - modelScoreDiff);
 				} else if (m_onlyViolatedConstraints) {
 					// constraint not violated
 					addConstraint = false;
 				}
 
 				if (addConstraint) {
-					float lossMarginDistance = loss - modelScoreDiff;
+					float lossMinusModelScoreDiff = loss - modelScoreDiff;
 
 					if (m_accumulateMostViolatedConstraints
 					    && !m_pastAndCurrentConstraints) {
-						if (lossMarginDistance > maxViolationLossMarginDistance) {
-							maxViolationLossMarginDistance = lossMarginDistance;
+						if (lossMinusModelScoreDiff > maxViolationLossMarginDistance) {
+							maxViolationLossMarginDistance = lossMinusModelScoreDiff;
 							maxViolationfeatureValueDiff = featureValueDiff;
 						}
 					} else if (m_pastAndCurrentConstraints) {
-						if (lossMarginDistance > maxViolationLossMarginDistance) {
-							maxViolationLossMarginDistance = lossMarginDistance;
+						if (lossMinusModelScoreDiff > maxViolationLossMarginDistance) {
+							maxViolationLossMarginDistance = lossMinusModelScoreDiff;
 							maxViolationfeatureValueDiff = featureValueDiff;
 						}
 
 						featureValueDiffs.push_back(featureValueDiff);
-						lossMinusModelScoreDiff.push_back(lossMarginDistance);
+						lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 					} else {
 						// Objective: 1/2 * ||w' - w||^2 + C * SUM_1_m[ max_1_n (l_ij - Delta_h_ij.w')]
 						// To add a constraint for the optimiser for each sentence i and hypothesis j, we need:
@@ -127,7 +237,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 						// 2. loss_ij - difference in model scores (Delta_h_ij.w') (oracle - hypothesis)
 						featureValueDiffs.push_back(featureValueDiff);
 //						cerr << "feature value diff (A): " << featureValueDiff << endl;
-						lossMinusModelScoreDiff.push_back(lossMarginDistance);
+						lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 //						cerr << "loss - model score diff (b): " << lossMarginDistance << endl << endl;
 					}
 				}
@@ -174,7 +284,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			// add all (most violated) past constraints to the list of current constraints
 			for (size_t i = 0; i < m_featureValueDiffs.size(); ++i) {
 				featureValueDiffs.push_back(m_featureValueDiffs[i]);
-				lossMinusModelScoreDiff.push_back(m_lossMarginDistances[i]);
+				lossMinusModelScoreDiffs.push_back(m_lossMarginDistances[i]);
 			}
 
 			// add new most violated constraint to list
@@ -183,9 +293,9 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 
 		if (m_slack != 0) {
-			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiff, m_slack);
+			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
 		} else {
-			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiff);
+			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
 		}
 
 //		for (size_t i=0; i < alphas.size(); ++i) {
@@ -225,13 +335,11 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			float modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
 			float loss = losses[i][j] * m_marginScaleFactor;
 //				cerr << "Rank " << rank  << ", new model score diff: " << modelScoreDiff << ", loss: " << loss << endl;
-			if (modelScoreDiff < loss) {
-				float diff = loss - modelScoreDiff;
-				// approximate comparison between floats!
-				if (diff > epsilon) {
-					++violatedConstraintsAfter;
-					newDistanceFromOptimum += (loss - modelScoreDiff);
-				}
+			float diff = loss - modelScoreDiff;
+			// approximate comparison between floats!
+			if (diff > epsilon) {
+				++violatedConstraintsAfter;
+				newDistanceFromOptimum += (loss - modelScoreDiff);
 			}
 		}
 	}

@@ -29,6 +29,17 @@ namespace Mira {
   class Optimiser {
     public:
       Optimiser() {}
+      virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& weights,
+							 const Moses::ScoreComponentCollection& featureValues,
+							 float loss,
+							 const Moses::ScoreComponentCollection& oracleFeatureValues,
+							 float oracleBleuScore,
+							 size_t sentenceId,
+							 float learning_rate,
+							 float max_sentence_update,
+							 size_t rank,
+							 size_t epoch,
+							 bool controlUpdates) = 0;
       virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& weights,
             						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
             						  const std::vector< std::vector<float> >& losses,
@@ -46,6 +57,17 @@ namespace Mira {
  
   class Perceptron : public Optimiser {
     public:
+    virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& weights,
+						       const Moses::ScoreComponentCollection& featureValues,
+						       float loss,
+						       const Moses::ScoreComponentCollection& oracleFeatureValues,
+						       float oracleBleuScore,
+						       size_t sentenceId,
+						       float learning_rate,
+						       float max_sentence_update,
+						       size_t rank,
+						       size_t epoch,
+						       bool controlUpdates);
 			virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& weights,
                          const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
                          const std::vector< std::vector<float> >& losses,
@@ -82,6 +104,17 @@ namespace Mira {
 
      ~MiraOptimiser() {}
    
+     virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& weights,
+							const Moses::ScoreComponentCollection& featureValues,
+							float loss,
+							const Moses::ScoreComponentCollection& oracleFeatureValues,
+							float oracleBleuScores,
+							size_t sentenceId,
+							float learning_rate,
+							float max_sentence_update,
+							size_t rank,
+							size_t epoch,
+							bool controlUpdates);
      virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& weights,
       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector< std::vector<float> >& losses,
