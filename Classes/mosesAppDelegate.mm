@@ -41,12 +41,12 @@ extern "C" {
 	{
 		NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
 		bundlePath = [bundlePath stringByAppendingPathComponent:@"/en-ht.zip"];
-		NSLog(bundlePath);
+		NSLog(@"%@",bundlePath);
 		
 		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 		NSString *documentsDirectoryNS = [paths objectAtIndex:0];      
 		NSString *fullPathNS = [documentsDirectoryNS stringByAppendingPathComponent:@"/en-ht.zip"];
-		NSLog(fullPathNS);
+		NSLog(@"%@",fullPathNS);
 
 		[[NSFileManager defaultManager] copyItemAtPath:bundlePath toPath:fullPathNS error:nil];
 		
