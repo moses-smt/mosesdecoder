@@ -177,6 +177,7 @@ namespace Moses {
 		
     float get(size_t index) const;
     void set(size_t index, float value);
+    void set(const FName& name, const FValue& value);
     void applyLog(size_t baseOfLog);
 
 #ifdef MPI_ENABLE
@@ -188,7 +189,7 @@ namespace Moses {
     /** Internal get and set. Note that the get() doesn't include the
      default value */
     const FValue& get(const FName& name) const;
-    void set(const FName& name, const FValue& value);
+//    void set(const FName& name, const FValue& value);
     
 		
     FNVmap m_features;
