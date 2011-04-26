@@ -50,7 +50,7 @@ void initMoses(const std::string& inifile, int debuglevel,  int argc, std::vecto
  **/
 class MosesDecoder {
   public:
-    MosesDecoder(const std::vector<std::vector<std::string> >& refs, bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing);
+    MosesDecoder(bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing);
 	
     //returns the best sentence
     std::vector<const Moses::Word*> getNBest(const std::string& source,
@@ -66,10 +66,13 @@ class MosesDecoder {
     std::vector<float> getBleuAndScore(const std::string& source,
 													size_t sentenceid,
 													float bleuObjectiveWeight,
+													float bleuScoreWeight,
 													bool distinct);
     size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
+    void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
+    void printBleuFeatureHistory(std::ostream& out);
     std::vector<float> calculateBleuOfCorpus(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& ref_ids, size_t epoch, size_t rank);
     void setBPfactor(float factor);
     Moses::ScoreComponentCollection getWeights();

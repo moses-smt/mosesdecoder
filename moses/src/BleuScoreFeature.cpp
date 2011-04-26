@@ -95,8 +95,20 @@ BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLen
                                  m_BP_factor(BPfactor),
                                  m_historySmoothing(historySmoothing) {}
 
+
+void BleuScoreFeature::PrintHistory(std::ostream& out) const {
+	out << "source length history=" << m_source_length_history << endl;
+	out << "target length history=" << m_target_length_history << endl;
+	out << "ref length history=" << m_ref_length_history << endl;
+
+  for (size_t i = 0; i < BleuScoreState::bleu_order; ++i) {
+    out << "match history/count history (" << i << "):" << m_match_history[i] << "/" << m_count_history[i] << endl;
+  }
+}
+
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
+		m_refs.clear();
     FactorCollection& fc = FactorCollection::Instance();
     for (size_t file_id = 0; file_id < refs.size(); file_id++) {
       for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {

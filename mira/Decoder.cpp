@@ -68,7 +68,7 @@ namespace Mira {
     delete[] mosesargv;
   }
  
-  MosesDecoder::MosesDecoder(const vector<vector<string> >& refs, bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing)
+  MosesDecoder::MosesDecoder(bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing)
 		: m_manager(NULL) {
 			// force initialisation of the phrase dictionary (TODO: what for?)
 			const StaticData &staticData = StaticData::Instance();
@@ -84,7 +84,6 @@ namespace Mira {
       // Add the bleu feature
       m_bleuScoreFeature = new BleuScoreFeature(useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
       (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
-      m_bleuScoreFeature->LoadReferences(refs);
   }
   
   void MosesDecoder::cleanup() {
@@ -113,7 +112,7 @@ namespace Mira {
 
     // set the weight for the bleu feature
     ostringstream bleuWeightStr;
-    bleuWeightStr << bleuObjectiveWeight;
+    bleuWeightStr << (bleuObjectiveWeight * bleuScoreWeight);
     PARAM_VEC bleuWeight(1,bleuWeightStr.str());
 
     staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
@@ -137,7 +136,7 @@ namespace Mira {
     	bleuScores.push_back(bleuScore);
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
-    	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
+    	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
     	cerr << "Rank " << rank << ", total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
 
     	Phrase bestPhrase = path.GetTargetPhrase();
@@ -179,6 +178,7 @@ namespace Mira {
   vector<float> MosesDecoder::getBleuAndScore(const std::string& source,
                                 size_t sentenceid,
                                 float bleuObjectiveWeight,
+                                float bleuScoreWeight,
                                 bool distinct)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
@@ -191,7 +191,7 @@ namespace Mira {
 
   	// set the weight for the bleu feature
   	ostringstream bleuWeightStr;
-  	bleuWeightStr << bleuObjectiveWeight;
+  	bleuWeightStr << (bleuObjectiveWeight * bleuScoreWeight);
   	PARAM_VEC bleuWeight(1,bleuWeightStr.str());
 
   	staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
@@ -211,7 +211,7 @@ namespace Mira {
   	vector<float> bleuAndScore;
   	const Moses::TrellisPath &path = **iter;
   	float bleuScore = getBleuScore(path.GetScoreBreakdown());
-  	float scoreWithoutBleu = path.GetTotalScore() - bleuObjectiveWeight * bleuScore;
+  	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
   	bleuAndScore.push_back(bleuScore);
   	bleuAndScore.push_back(scoreWithoutBleu);
   	return bleuAndScore;
@@ -244,6 +244,14 @@ namespace Mira {
 
   void MosesDecoder::updateHistory(const vector< vector< const Word*> >& words, vector<size_t>& sourceLengths, vector<size_t>& ref_ids, size_t rank, size_t epoch) {
 	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids, rank, epoch);
+  }
+
+  void MosesDecoder::loadReferenceSentences(const vector<vector<string> >& refs) {
+  	m_bleuScoreFeature->LoadReferences(refs);
+  }
+
+  void MosesDecoder::printBleuFeatureHistory(std::ostream& out) {
+  	m_bleuScoreFeature->PrintHistory(out);
   }
 
   vector<float> MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {

@@ -62,6 +62,7 @@ public:
         return 1;
     }
 
+    void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentSourceLength(size_t);
     void SetCurrentReference(size_t);
