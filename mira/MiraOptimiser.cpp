@@ -18,7 +18,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	// add every oracle in batch to list of oracles (under certain conditions)
 	for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
-		float newWeightedScore = oracleFeatureValues[i].GetWeightedScore();
+		float newWeightedScore = oracleFeatureValues[i].InnerProduct(currWeights);
 		size_t sentenceId = sentenceIds[i];
 
 		// compare new oracle with existing oracles:
@@ -28,7 +28,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		size_t indexOfWorst = 0;
 		float worstWeightedScore = 0;
 		for (size_t j = 0; j < m_oracles[sentenceId].size(); ++j) {
-			float currentWeightedScore = m_oracles[sentenceId][j].GetWeightedScore();
+			float currentWeightedScore = m_oracles[sentenceId][j].InnerProduct(currWeights);
 			if (currentWeightedScore == newWeightedScore) {
 			  cerr << "Rank " << rank << ", Bleu score of oracle updated at batch position " << i << ", " << m_bleu_of_oracles[sentenceId][j] << " --> " << oracleBleuScores[j] << endl;
 				m_bleu_of_oracles[sentenceId][j] = oracleBleuScores[j];
@@ -94,6 +94,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				bool violated = false;
 				bool addConstraint = true;
 				float diff = loss - modelScoreDiff;
+//				cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
 				if (diff > epsilon) {
 					violated = true;
 				}
@@ -106,6 +107,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 					if (m_accumulateMostViolatedConstraints || m_pastAndCurrentConstraints) {
 						// find the most violated constraint per batch
 						if (lossMinusModelScoreDiff > max_batch_lossMinusModelScoreDiff) {
+							max_batch_lossMinusModelScoreDiff = lossMinusModelScoreDiff;
 							max_batch_featureValueDiff = featureValueDiff;
 							max_batch_loss = loss;
 					  }
@@ -119,7 +121,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 					if (violated) {
 						++violatedConstraintsBefore;
-						oldDistanceFromOptimum += (loss - modelScoreDiff);
+						oldDistanceFromOptimum += diff;
 					}
 				}
 			}
@@ -160,6 +162,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	    	featureValueDiffs.push_back(m_featureValueDiffs[i]);
 	    	lossMinusModelScoreDiffs.push_back(m_losses[i] - modelScoreDiff);
 	    	all_losses.push_back(m_losses[i]);
+//	    	cerr << "old constraint: " << modelScoreDiff << " >= " << m_losses[i] << endl;
 
 	    	if (violated) {
 	    		++violatedConstraintsBefore;
@@ -181,19 +184,32 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			float modelScoreDiff = max_batch_featureValueDiff.InnerProduct(currWeights);
 			float diff = max_batch_loss - modelScoreDiff;
     	++violatedConstraintsBefore;
-    	++pastViolatedConstraints;
-    	oldDistanceFromOptimum += (diff);
+    	oldDistanceFromOptimum += diff;
 
     	featureValueDiffs.push_back(max_batch_featureValueDiff);
     	lossMinusModelScoreDiffs.push_back(max_batch_loss - modelScoreDiff);
     	all_losses.push_back(max_batch_loss);
+//    	cerr << "new constraint: " << modelScoreDiff << " !>= " << max_batch_loss << endl;
 		}
 	}
 
 	// Update the list of accumulated most violated constraints
 	if (max_batch_loss != -1) {
-		m_featureValueDiffs.push_back(max_batch_featureValueDiff);
-		m_losses.push_back(max_batch_loss);
+		bool updated = false;
+		for (size_t i = 0; i < m_featureValueDiffs.size(); ++i) {
+			float oldScore = m_featureValueDiffs[i].InnerProduct(currWeights);
+			float newScore = max_batch_featureValueDiff.InnerProduct(currWeights);
+			if (abs(oldScore-newScore) < epsilon) {
+				m_losses[i] = max_batch_loss;
+				updated = true;
+				break;
+			}
+		}
+
+		if (!updated) {
+			m_featureValueDiffs.push_back(max_batch_featureValueDiff);
+			m_losses.push_back(max_batch_loss);
+		}
 	}
 
 	// run optimisation: compute alphas for all given constraints
