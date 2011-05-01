@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
 	float min_sentence_update;
 	size_t weightedLossFunction;
 	size_t n;
+	size_t nbest_first;
 	size_t batchSize;
 	bool distinctNbest;
 	bool onlyViolatedConstraints;
@@ -226,6 +227,7 @@ int main(int argc, char** argv) {
 			("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
 	    ("multiplyA", po::value<bool>(&multiplyA)->default_value(true), "Multiply A with outcome before passing to Hildreth")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
+	    ("nbest-first", po::value<size_t>(&nbest_first)->default_value(0), "Number of translations in nbest list in the first epoch")
 			("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
@@ -588,6 +590,10 @@ int main(int argc, char** argv) {
 	  return 1;
 	}
 
+	if (nbest_first == 0) {
+		nbest_first = n;
+	}
+
 	// load input and references
 	vector<string> inputSentences;
 	if (!loadSentences(inputFile, inputSentences)) {
@@ -769,6 +775,7 @@ int main(int argc, char** argv) {
 	cerr << "msf-min: " << marginScaleFactorMin << endl;
 	cerr << "weighted-loss-function: " << weightedLossFunction << endl;
 	cerr << "nbest: " << n << endl;
+	cerr << "nbest-first: " << nbest_first << endl;
 	cerr << "batch-size: " << batchSize << endl;
 	cerr << "distinct-nbest: " << distinctNbest << endl;
 	cerr << "only-violated-constraints: " << onlyViolatedConstraints << endl;
@@ -908,9 +915,11 @@ int main(int argc, char** argv) {
 				featureValues.push_back(newFeatureValues);
 				bleuScores.push_back(newBleuScores);
 
+				size_t pass_n = (epoch == 0)? nbest_first : n;
+
 				// MODEL
-				cerr << "Rank " << rank << ", run decoder to get nbest wrt model score" << endl;
-				vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
+				cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best wrt model score" << endl;
+				vector<const Word*> bestModel = decoder->getNBest(input, *sid, pass_n, 0.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
 				inputLengths.push_back(decoder->getCurrentInputLength());
@@ -922,10 +931,10 @@ int main(int argc, char** argv) {
 				cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
 				// HOPE
-				cerr << "Rank " << rank << ", run decoder to get nbest hope translations" << endl;
+				cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best hope translations" << endl;
 				size_t oraclePos = featureValues[batchPosition].size();
 				oraclePositions.push_back(oraclePos);
-				vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight,
+				vector<const Word*> oracle = decoder->getNBest(input, *sid, pass_n, 1.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
 				decoder->cleanup();
@@ -937,9 +946,9 @@ int main(int argc, char** argv) {
 				oracleBleuScores.push_back(oracleBleuScore);
 
 				// FEAR
-				cerr << "Rank " << rank << ", run decoder to get nbest fear translations" << endl;
+				cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best fear translations" << endl;
 				size_t fearPos = featureValues[batchPosition].size();
-				vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight,
+				vector<const Word*> fear = decoder->getNBest(input, *sid, pass_n, -1.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
 				decoder->cleanup();
