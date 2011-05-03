@@ -1027,10 +1027,10 @@ int main(int argc, char** argv) {
 			    learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
 
 			if (update_status[0] == 1) {
-				cerr << "Rank " << rank << ", no update for batch" << endl;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", no update for batch" << endl;
 			}
 			else if (update_status[0] == -1) {
-				cerr << "Rank " << rank << ", update ignored" << endl;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", update ignored" << endl;
 			}
 			else {
 				sumConstraintChangeAbs += abs(update_status[1] - update_status[2]);
