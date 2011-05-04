@@ -186,6 +186,7 @@ int main(int argc, char** argv) {
 	vector<string> burnInReferenceFiles;
 	bool sentenceLevelBleu;
 	float bleuScoreWeight;
+	float precision;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 			("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
@@ -231,6 +232,7 @@ int main(int argc, char** argv) {
 			("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
+	    ("precision", po::value<float>(&precision)->default_value(0), "Precision when comparing left and right hand side of constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
@@ -811,7 +813,7 @@ int main(int argc, char** argv) {
 		cerr << "Optimising using Mira" << endl;
 		optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor,
 		    onlyViolatedConstraints, slack, weightedLossFunction, maxNumberOracles,
-					      accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size());
+					      accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size(), precision);
 		if (hildreth) {
 			cerr << "Using Hildreth's optimisation algorithm.." << endl;
 		}
@@ -1009,7 +1011,7 @@ int main(int argc, char** argv) {
 
 			// optionally print out the feature values
 			if (print_feature_values) {
-				cerr << "\nRank " << rank << ", feature values: " << endl;
+				cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
 				for (size_t i = 0; i < featureValues.size(); ++i) {
 					for (size_t j = 0; j < featureValues[i].size(); ++j) {
 						cerr << featureValues[i][j] << endl;
@@ -1019,7 +1021,7 @@ int main(int argc, char** argv) {
 			}
 
 			// run optimiser on batch
-			cerr << "\nRank " << rank << ", run optimiser:" << endl;
+			cerr << "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl;
 			ScoreComponentCollection oldWeights(mosesWeights);
 			vector<int> update_status;
 			update_status = optimiser->updateWeights(mosesWeights, featureValues,
@@ -1054,10 +1056,10 @@ int main(int argc, char** argv) {
 						}
 
 						mosesWeights = averageWeights;
-						cerr << "Rank " << rank << ", set new average weights: " << mosesWeights << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", set new average weights: " << mosesWeights << endl;
 					}
 					else {
-						cerr << "Rank " << rank << ", set new weights: " << mosesWeights << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", set new weights: " << mosesWeights << endl;
 					}
 
 					// set new Moses weights (averaged or not)
@@ -1066,7 +1068,7 @@ int main(int argc, char** argv) {
 					// compute difference to old weights
 					ScoreComponentCollection weightDifference(mosesWeights);
 					weightDifference.MinusEquals(oldWeights);
-					cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl;
 
 					// get 1best model results with new weights (for each sentence in batch)
 					vector<float> bestModelNew;
@@ -1084,13 +1086,13 @@ int main(int argc, char** argv) {
 				// update history (for approximate document Bleu)
 				if (historyOf1best) {
 					for (size_t i = 0; i < oneBests.size(); ++i) {
-						cerr << "Rank " << rank << ", 1best length: " << oneBests[i].size() << " ";
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best length: " << oneBests[i].size() << " ";
 					}
 					decoder->updateHistory(oneBests, inputLengths, ref_ids, rank, epoch);
 				}
 				else {
 					for (size_t i = 0; i < oracles.size(); ++i) {
-						cerr << "Rank " << rank << ", oracle length: " << oracles[i].size() << " ";
+						cerr << "Rank " << rank << ", epoch " << epoch << ", oracle length: " << oracles[i].size() << " ";
 					}
 					decoder->updateHistory(oracles, inputLengths, ref_ids, rank, epoch);
 				}
@@ -1109,7 +1111,7 @@ int main(int argc, char** argv) {
 			if (makeUpdate && typeid(*optimiser) == typeid(MiraOptimiser)) {
 				mosesWeights = decoder->getWeights();
 				ScoreComponentCollection accumulatedUpdates = ((MiraOptimiser*) optimiser)->getAccumulatedUpdates();
-				cerr << "\nRank " << rank << ", updates to apply during epoch " << epoch << ": " << accumulatedUpdates << endl;
+				cerr << "\nRank " << rank << ", epoch " << epoch << ", updates to apply during epoch " << epoch << ": " << accumulatedUpdates << endl;
 				if (accumulatedUpdates.GetWeightedScore() != 0) {
 					mosesWeights.PlusEquals(accumulatedUpdates);
 					((MiraOptimiser*) optimiser)->resetAccumulatedUpdates();
@@ -1131,10 +1133,10 @@ int main(int argc, char** argv) {
 						}
 
 						mosesWeights = averageWeights;
-						cerr << "Rank " << rank << ", set new average weights after applying cumulative update: " << mosesWeights << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", set new average weights after applying cumulative update: " << mosesWeights << endl;
 					}
 					else {
-						cerr << "Rank " << rank << ", set new weights after applying cumulative update: " << mosesWeights << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", set new weights after applying cumulative update: " << mosesWeights << endl;
 					}
 
 					decoder->setWeights(mosesWeights);
@@ -1142,10 +1144,10 @@ int main(int argc, char** argv) {
 					// compute difference to old weights
 					ScoreComponentCollection weightDifference(mosesWeights);
 					weightDifference.MinusEquals(oldWeights);
-					cerr << "Rank " << rank << ", weight difference: " << weightDifference << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl;
 				}
 				else {
-					cerr << "Rank " << rank << ", cumulative update is empty.." << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", cumulative update is empty.." << endl;
 				}
 			}
 

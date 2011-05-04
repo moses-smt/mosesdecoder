@@ -88,7 +88,7 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float slack, size_t weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize) :
+  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float slack, size_t weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize, float precision) :
 		  Optimiser(),
 		  m_n(n),
 		  m_hildreth(hildreth),
@@ -100,7 +100,8 @@ namespace Mira {
 		  m_accumulateMostViolatedConstraints(accumulateMostViolatedConstraints),
 		  m_pastAndCurrentConstraints(pastAndCurrentConstraints),
 		  m_oracles(exampleSize),
-		  m_bleu_of_oracles(exampleSize) { }
+		  m_bleu_of_oracles(exampleSize),
+		  m_precision(precision) { }
 
      ~MiraOptimiser() {}
    
@@ -187,6 +188,8 @@ namespace Mira {
       bool m_pastAndCurrentConstraints;
 
       Moses::ScoreComponentCollection m_accumulatedUpdates;
+
+      float m_precision;
   };
 }
 

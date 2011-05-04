@@ -30,7 +30,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		for (size_t j = 0; j < m_oracles[sentenceId].size(); ++j) {
 			float currentWeightedScore = m_oracles[sentenceId][j].InnerProduct(currWeights);
 			if (currentWeightedScore == newWeightedScore) {
-			  cerr << "Rank " << rank << ", Bleu score of oracle updated at batch position " << i << ", " << m_bleu_of_oracles[sentenceId][j] << " --> " << oracleBleuScores[j] << endl;
+			  cerr << "Rank " << rank << ", epoch " << epoch << ", bleu score of oracle updated at batch position " << i << ", " << m_bleu_of_oracles[sentenceId][j] << " --> " << oracleBleuScores[j] << endl;
 				m_bleu_of_oracles[sentenceId][j] = oracleBleuScores[j];
 				updated = true;
 				break;
@@ -95,8 +95,9 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				bool addConstraint = true;
 				float diff = loss - modelScoreDiff;
 //				cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
-				if (diff > epsilon) {
+				if (diff > (epsilon + m_precision)) {
 					violated = true;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << diff << " (loss: " << loss << ")" << endl;
 				}
 				else if (m_onlyViolatedConstraints) {
 					addConstraint = false;
@@ -151,8 +152,9 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			bool violated = false;
 			bool addConstraint = true;
 			float diff = m_losses[i] - modelScoreDiff;
-			if (diff > epsilon) {
+			if (diff > (epsilon + m_precision)) {
 				violated = true;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", past violation: " << diff << " (loss: " << m_losses[i] << ")" << endl;
 			}
 			else if (m_onlyViolatedConstraints) {
 				addConstraint = false;
@@ -254,7 +256,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(newWeights);
 		float loss = all_losses[i];
 		float diff = loss - modelScoreDiff;
-		if (diff > epsilon) {
+		if (diff > (epsilon + m_precision)) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;
 		}
@@ -264,38 +266,38 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	if (controlUpdates && violatedConstraintsAfter > 0) {
 		float distanceChange = oldDistanceFromOptimum - newDistanceFromOptimum;
-		if ((violatedConstraintsBefore - violatedConstraintsAfter) < 0 && distanceChange < 0) {
+		if ((violatedConstraintsBefore - violatedConstraintsAfter) <= 0 && distanceChange < 0) {
 			vector<int> statusPlus(3);
 			statusPlus[0] = -1;
-			statusPlus[1] = violatedConstraintsBefore;
-			statusPlus[2] = violatedConstraintsAfter;
+			statusPlus[1] = -1;
+			statusPlus[2] = -1;
 			return statusPlus;
 	  }
 	}
 
 	// Apply learning rate (fixed or flexible)
 	if (learning_rate != 1) {
-		cerr << "Rank " << rank << ", update before applying learning rate: " << summedUpdate << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl;
 		summedUpdate.MultiplyEquals(learning_rate);
-		cerr << "Rank " << rank << ", update after applying learning rate: " << summedUpdate << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", update after applying learning rate: " << summedUpdate << endl;
 	}
 
 	// Apply threshold scaling
 	if (max_sentence_update != -1) {
-		cerr << "Rank " << rank << ", update before scaling to max-sentence-update: " << summedUpdate << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", update before scaling to max-sentence-update: " << summedUpdate << endl;
 		summedUpdate.ThresholdScaling(max_sentence_update);
-		cerr << "Rank " << rank << ", update after scaling to max-sentence-update: " << summedUpdate << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", update after scaling to max-sentence-update: " << summedUpdate << endl;
 	}
 
 	// Apply update to weight vector or store it for later
 	if (updates_per_epoch > 0) {
 		m_accumulatedUpdates.PlusEquals(summedUpdate);
-		cerr << "Rank " << rank << ", new accumulated updates:" << m_accumulatedUpdates << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", new accumulated updates:" << m_accumulatedUpdates << endl;
 	} else {
 		// apply update to weight vector
-		cerr << "Rank " << rank << ", weights before update: " << currWeights << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl;
 		currWeights.PlusEquals(summedUpdate);
-		cerr << "Rank " << rank << ", weights after update: " << currWeights << endl;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl;
 	}
 
 	vector<int> statusPlus(3);
