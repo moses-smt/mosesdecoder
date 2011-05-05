@@ -1145,6 +1145,16 @@ int main(int argc, char** argv) {
 					ScoreComponentCollection weightDifference(mosesWeights);
 					weightDifference.MinusEquals(oldWeights);
 					cerr << "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl;
+
+					// get 1best model results with new weights (for each sentence in batch)
+					vector<float> bestModelNew;
+					for (size_t i = 0; i < actualBatchSize; ++i) {
+						string& input = inputSentences[*current_sid_start + i];
+						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest);
+						decoder->cleanup();
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
+					}
 				}
 				else {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", cumulative update is empty.." << endl;
