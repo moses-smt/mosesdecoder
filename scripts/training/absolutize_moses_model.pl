@@ -24,7 +24,7 @@ while (<$inih>) {
       chomp;
       my ($type, $b, $c, $d, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
-      die "File not found or empty: $fn (interpreted as $abs)"
+      die "File not found or empty: $fn (searched for $abs or $abs.binphr.idx)"
         if ! -s $abs && ! -s $abs.".binphr.idx"; # accept binarized ttables
       $_ = "$type $b $c $d $abs\n";
     }
@@ -32,7 +32,7 @@ while (<$inih>) {
       chomp;
       my ($a, $b, $c, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
-      die "File not found or empty: $fn (interpreted as $abs)"
+      die "File not found or empty: $fn (searched for $abs)"
         if ! -s $abs;
       $_ = "$a $b $c $abs\n";
     }
@@ -40,8 +40,8 @@ while (<$inih>) {
       chomp;
       my ($a, $b, $c, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
-      die "File not found or empty: $fn (interpreted as $abs)"
-        if ! -s $abs;
+      die "File not found or empty: $fn (searched for $abs or $abs.binlexr.idx)"
+        if ! -s $abs && ! -s $abs.".binlexr.idx"; # accept binarized lexro models
       $_ = "$a $b $c $abs\n";
     }
   }
