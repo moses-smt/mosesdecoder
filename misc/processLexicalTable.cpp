@@ -49,6 +49,7 @@ int main(int argc, char** argv)
   } else {
     std::cerr << "processing " << inFilePath<< " to " << outFilePath << ".*\n";
     InputFileStream file(inFilePath);
-    return LexicalReorderingTableTree::Create(file, outFilePath);
+    bool success = LexicalReorderingTableTree::Create(file, outFilePath);
+    return (success ? 0 : 1);
   }
 }
