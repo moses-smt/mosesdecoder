@@ -30,9 +30,9 @@ namespace Mira {
     public:
       Optimiser() {}
       virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& weights,
-							 const Moses::ScoreComponentCollection& featureValues,
+							 Moses::ScoreComponentCollection& featureValues,
 							 float loss,
-							 const Moses::ScoreComponentCollection& oracleFeatureValues,
+							 Moses::ScoreComponentCollection& oracleFeatureValues,
 							 float oracleBleuScore,
 							 size_t sentenceId,
 							 float learning_rate,
@@ -58,9 +58,9 @@ namespace Mira {
   class Perceptron : public Optimiser {
     public:
     virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& weights,
-						       const Moses::ScoreComponentCollection& featureValues,
+						       Moses::ScoreComponentCollection& featureValues,
 						       float loss,
-						       const Moses::ScoreComponentCollection& oracleFeatureValues,
+						       Moses::ScoreComponentCollection& oracleFeatureValues,
 						       float oracleBleuScore,
 						       size_t sentenceId,
 						       float learning_rate,
@@ -106,9 +106,9 @@ namespace Mira {
      ~MiraOptimiser() {}
    
      virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& weights,
-							const Moses::ScoreComponentCollection& featureValues,
+							Moses::ScoreComponentCollection& featureValues,
 							float loss,
-							const Moses::ScoreComponentCollection& oracleFeatureValues,
+							Moses::ScoreComponentCollection& oracleFeatureValues,
 							float oracleBleuScores,
 							size_t sentenceId,
 							float learning_rate,

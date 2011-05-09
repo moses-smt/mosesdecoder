@@ -25,9 +25,9 @@ using namespace std;
 namespace Mira {
 
   vector<int> Perceptron::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
-						       const ScoreComponentCollection& featureValues,
+						       ScoreComponentCollection& featureValues,
 						       float loss,
-						       const ScoreComponentCollection& oracleFeatureValues,
+						       ScoreComponentCollection& oracleFeatureValues,
 						       float oracleBleuScore,
 						       size_t sentenceId,
 						       float learning_rate,

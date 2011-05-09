@@ -214,6 +214,17 @@ namespace Mira {
   	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
   	bleuAndScore.push_back(bleuScore);
   	bleuAndScore.push_back(scoreWithoutBleu);
+
+  	cerr << "1best translation: ";
+  	Phrase phrase = path.GetTargetPhrase();
+  	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+  		const Word &word = phrase.GetWord(pos);
+  		Word *newWord = new Word(word);
+  		cerr << *newWord;
+  	}
+
+  	cerr << endl;
+
   	return bleuAndScore;
   }
 

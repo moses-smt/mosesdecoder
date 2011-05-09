@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
 	bool adapt_BPfactor;
 	float slack;
 	float slack_step;
-	float slack_max;
+	float slack_min;
 	size_t maxNumberOracles;
 	bool accumulateMostViolatedConstraints;
 	bool averageWeights;
@@ -176,7 +176,6 @@ int main(int argc, char** argv) {
 	bool print_feature_values;
 	bool stop_dev_bleu;
 	bool stop_approx_dev_bleu;
-	bool stop_optimal;
 	bool train_linear_classifier;
 	int updates_per_epoch;
 	bool multiplyA;
@@ -187,11 +186,15 @@ int main(int argc, char** argv) {
 	bool sentenceLevelBleu;
 	float bleuScoreWeight;
 	float precision;
+	float min_bleu_change;
+	bool analytical_update;
+	size_t constraints;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 			("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
 			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 			("adapt-BP-factor", po::value<bool>(&adapt_BPfactor)->default_value(0), "Set factor to 1 when optimal translation length in reached")
+			("analytical-update",  po::value<bool>(&analytical_update)->default_value(0), "Use one best lists and compute the update analytically")
 			("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 			("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 			("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
@@ -201,6 +204,7 @@ int main(int argc, char** argv) {
 			("burn-in-input-file", po::value<string>(&burnInInputFile), "Input file for burn-in phase of BLEU history")
 			("burn-in-reference-files", po::value<vector<string> >(&burnInReferenceFiles), "Reference file for burn-in phase of BLEU history")
 			("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
+			("constraints", po::value<size_t>(&constraints)->default_value(1), "Number of constraints used for analytical update")
 			("control-updates", po::value<bool>(&controlUpdates)->default_value(true), "Ignore updates that increase number of violated constraints AND increase the error")
 			("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 			("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
@@ -218,6 +222,7 @@ int main(int argc, char** argv) {
 			("learning-rate", po::value<float>(&learning_rate)->default_value(1), "Learning rate (fixed or flexible)")
 			("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 			("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
+			("min-bleu-change", po::value<float>(&min_bleu_change)->default_value(0), "Minimum BLEU change of 1best translations of one epoch")
 			("min-sentence-update", po::value<float>(&min_sentence_update)->default_value(0), "Set a minimum weight update per sentence")
 			("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
 			("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(-1), "Set a maximum weight update per sentence")
@@ -232,20 +237,19 @@ int main(int argc, char** argv) {
 			("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
-	    ("precision", po::value<float>(&precision)->default_value(0), "Precision when comparing left and right hand side of constraints")
+	    ("precision", po::value<float>(&precision)->default_value(1.0), "Precision when comparing left and right hand side of constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 	    ("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(false), "Use a sentences level bleu scoring function")
 	    ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
-	    ("slack-max", po::value<float>(&slack_max)->default_value(0), "Maximum slack used")
+	    ("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases (or no more increases)")
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases (or no more increases)")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
-	    ("stop-optimal", po::value<bool>(&stop_optimal)->default_value(true), "Stop when the results of optimization do not improve further")
-			("train-linear-classifier", po::value<bool>(&train_linear_classifier)->default_value(false), "Test algorithm for linear classification")
+	    ("train-linear-classifier", po::value<bool>(&train_linear_classifier)->default_value(false), "Test algorithm for linear classification")
 	    ("updates-per-epoch", po::value<int>(&updates_per_epoch)->default_value(-1), "Accumulate updates and apply them to the weight vector the specified number of times per epoch")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
@@ -258,311 +262,6 @@ int main(int argc, char** argv) {
 	po::store(
 	    po::command_line_parser(argc, argv). options(cmdline_options).run(), vm);
 	po::notify(vm);
-
-	if (train_linear_classifier) {
-		FName name_x("x");
-		FName name_y("y");
-		FVector weights;
-		weights.set(name_x, 0);
-		weights.set(name_y, 0);
-
-		vector<FVector> examples;
-		vector<int> outcomes;
-
-		FVector pos1;
-		pos1.set(name_x, 1);
-		pos1.set(name_y, 1);
-		FVector pos2;
-		pos2.set(name_x, 2);
-		pos2.set(name_y, 1);
-		FVector pos3;
-		pos3.set(name_x, 3);
-		pos3.set(name_y, 1);
-		FVector pos4;
-		pos4.set(name_x, 8);
-		pos4.set(name_y, 1);
-		FVector neg1;
-		neg1.set(name_x, 1);
-		neg1.set(name_y, -1);
-		FVector neg2;
-		neg2.set(name_x, 2);
-		neg2.set(name_y, -1);
-		FVector neg3;
-		neg3.set(name_x, 3);
-		neg3.set(name_y, -1);
-		FVector neg4;
-		neg4.set(name_x, 8);
-		neg4.set(name_y, -1);
-		examples.push_back(pos1);
-		examples.push_back(neg1);
-		examples.push_back(pos2);
-		examples.push_back(neg2);
-		examples.push_back(pos3);
-		examples.push_back(neg3);
-		examples.push_back(pos4);
-		examples.push_back(neg4);
-		outcomes.push_back(1);
-		outcomes.push_back(-1);
-		outcomes.push_back(1);
-		outcomes.push_back(-1);
-		outcomes.push_back(1);
-		outcomes.push_back(-1);
-		outcomes.push_back(1);
-		outcomes.push_back(-1);
-
-		// add outlier
-		FVector pos5;
-		pos5.set(name_x, 2.5);
-		pos5.set(name_y, -1.5);
-		examples.push_back(pos5);
-		outcomes.push_back(1);
-
-		FVector neg5;
-		neg5.set(name_x, 0);
-		neg5.set(name_y, -1);
-		examples.push_back(neg5);
-		outcomes.push_back(-1);
-		
-		// create order
-		vector<size_t> order;
-		if (rank == 0) {
-			for (size_t i = 0; i < examples.size(); ++i) {
-				order.push_back(i);
-			}
-		}
-
-		cerr << "weights: " << weights << endl;
-		cerr << "slack: " << slack << endl;
-		bool stop = false;
-		FVector prevFinalWeights;
-		FVector prevPrevFinalWeights;
-		//		float epsilon = 0.0001;
-		float epsilon = 0.001;
-		for (size_t epoch = 0; !stop && epoch < epochs; ++epoch) {
-			cerr << "\nEpoch " << epoch << endl;
-			size_t updatesThisEpoch = 0;
-
-			// optionally shuffle the input data --> change order
-			if (shuffle && rank == 0) {
-				shuffleInput(order, size, examples.size());
-			}
-
-			// create shard
-			vector<size_t> shard;
-			createShard(order, size, rank, shard);
-
-			cerr << "\nBefore: y * x_i . w >= 1 ?" << endl;
-			size_t numberUnsatisfiedConstraintsBefore = 0;
-			float errorSumBefore = 0;
-			// outcome_i (x_i . w + b) >= +1  (b = 0 in this example)
-			for (size_t i = 0; i < examples.size(); ++i) {
-				float innerProduct = examples[i].inner_product(weights);
-				float leftHandSide = outcomes[i] * innerProduct;
-				cerr << outcomes[i] << " * " << innerProduct << " >= " << 1 << "? " << (leftHandSide >= 1) << " (error: " << 1 - leftHandSide << ")" << endl;
-				float diff = 1 - leftHandSide;
-				if (diff > epsilon) {
-					++numberUnsatisfiedConstraintsBefore;
-					errorSumBefore += 1 - leftHandSide;
-				}
-			}
-			cerr << "unsatisfied constraints before: " << numberUnsatisfiedConstraintsBefore << endl;
-			cerr << "error sum before: " << errorSumBefore << endl;
-
-			// iterate over training data
-			size_t shardPosition = 0;
-			vector<size_t>::const_iterator sid = shard.begin();
-
-			// Use updatedWeights during one epoch
-			FVector updatedWeights(weights);
-			while (sid != shard.end()) {
-				vector<FVector> A;
-				vector<FVector> A_mult;
-				vector<float> b;
-				vector<float> batch_outcomes;
-
-				// collect constraints for batch
-				size_t actualBatchSize = 0;
-				for (size_t batchPosition = 0; batchPosition < batchSize && sid != shard.end(); ++batchPosition) {
-				        A.push_back(examples[*sid]);
-					A_mult.push_back(outcomes[*sid]* examples[*sid]);
-					b.push_back(1);
-					batch_outcomes.push_back(outcomes[*sid]);
-
-					// next input sentence
-					++sid;
-					++actualBatchSize;
-					++shardPosition;
-				}
-
-				// check if constraints are already satisfied for batch
-				size_t batch_numberUnsatisfiedConstraintsBefore = 0;
-				float batch_errorSumBefore = 0;
-				for (size_t i = 0; i < A.size(); ++i) {
-					float innerProduct = A[i].inner_product(updatedWeights);
-					float leftHandSide = batch_outcomes[i] * innerProduct;
-					cerr << batch_outcomes[i] << " * " << innerProduct << " >= " << 1 << "? " << (leftHandSide >= 1) << " (error: " << 1 - leftHandSide << ")" << endl;
-					float diff = 1 - leftHandSide;
-					if (diff > epsilon) {
-						++batch_numberUnsatisfiedConstraintsBefore;
-						batch_errorSumBefore += 1 - leftHandSide;
-					}
-				}
-				cerr << "batch: unsatisfied constraints before: " << batch_numberUnsatisfiedConstraintsBefore << endl;
-				cerr << "batch: error sum before: " << batch_errorSumBefore << endl;
-
-				if (batch_numberUnsatisfiedConstraintsBefore != 0) {
-					// pass constraints to optimizer
-					for (size_t j = 0; j < A.size(); ++j){
-					  if (multiplyA) {
-					    cerr << "A: " << A_mult[j] << endl;
-					  }
-					  else {
-					    cerr << "A: " << A[j] << endl;
-					  }
-					}
-
-					vector<float> alphas;
-					if (slack == 0) {
-					  if (multiplyA) {
-					    alphas = Hildreth::optimise(A_mult, b);
-					  }
-					  else {
-					    alphas = Hildreth::optimise(A, b);
-					  }
-					}
-					else {
-					  if (multiplyA) {
-					    alphas = Hildreth::optimise(A_mult, b, slack);
-					  }
-					  else{
-					    alphas = Hildreth::optimise(A, b, slack);
-					  }
-					}
-					
-					for (size_t j = 0; j < alphas.size(); ++j) {
-						cerr << "alpha:" << alphas[j] << endl;
-						updatedWeights += batch_outcomes[j] * A[j] * alphas[j];						
-					}
-					cerr << "potential new weights: " << updatedWeights << endl;
-
-					// check if constraints are satisfied after processing batch
-					size_t batch_numberUnsatisfiedConstraintsAfter = 0;
-					float batch_errorSumAfter = 0;
-					for (size_t i = 0; i < A.size(); ++i) {
-						float innerProduct = A[i].inner_product(updatedWeights);
-						float leftHandSide = batch_outcomes[i] * innerProduct;
-						cerr << batch_outcomes[i] << " * " << innerProduct << " >= " << 1 << "? " << (leftHandSide >= 1) << " (error: " << 1 - leftHandSide << ")" << endl;
-						float diff = 1 - leftHandSide;
-						if (diff > epsilon) {
-							++batch_numberUnsatisfiedConstraintsAfter;
-							batch_errorSumAfter += 1 - leftHandSide;
-						}
-					}
-					cerr << "batch: unsatisfied constraints after: " << batch_numberUnsatisfiedConstraintsAfter << endl;
-					cerr << "batch: error sum after: " << batch_errorSumAfter << endl << endl;
-				}
-				else {
-					cerr << "batch: all constraints satisfied." << endl;
-				}
-			} // end of epoch */
-
-			cerr << "After: y * x_i . w >= 1 ?" << endl;
-			size_t numberUnsatisfiedConstraintsAfter = 0;
-
-			float errorSumAfter = 0;
-			for (size_t i = 0; i < examples.size(); ++i) {
-				float innerProduct = examples[i].inner_product(updatedWeights);
-				float leftHandSide = outcomes[i] * innerProduct;
-				cerr << outcomes[i] << " * " << innerProduct << " >= " << 1 << "? " << (leftHandSide >= 1) << " (error: " << 1 - leftHandSide << ")" << endl;
-				float diff = 1 - leftHandSide;
-				if (diff > epsilon) {
-					++numberUnsatisfiedConstraintsAfter;
-					errorSumAfter += 1 - leftHandSide;
-				}
-			}
-			cerr << "unsatisfied constraints after: " << numberUnsatisfiedConstraintsAfter << endl;
-			cerr << "error sum after: " << errorSumAfter << endl;
-
-			float epsilon = 0.0001;
-			float diff = errorSumAfter - errorSumBefore;
-			if (numberUnsatisfiedConstraintsAfter == 0) {
-				weights = updatedWeights;
-				cerr << "All constraints satisfied during this epoch, stop." << endl;
-				cerr << "new weights: " << weights << endl;
-				++updatesThisEpoch;
-				stop = true;
-			}
-			else if (numberUnsatisfiedConstraintsAfter < numberUnsatisfiedConstraintsBefore) {
-				cerr << "Constraints improved during this epoch." << endl;
-				weights = updatedWeights;
-				cerr << "new weights: " << weights << endl;
-				++updatesThisEpoch;
-			}
-			else if (numberUnsatisfiedConstraintsAfter == numberUnsatisfiedConstraintsBefore && errorSumAfter < errorSumBefore) {
-				cerr << "Error improved during this epoch." << endl;
-				weights = updatedWeights;
-				cerr << "new weights: " << weights << endl;
-				++updatesThisEpoch;
-			}
-			else if(numberUnsatisfiedConstraintsAfter == numberUnsatisfiedConstraintsBefore && (diff < epsilon && diff > epsilon * -1)) {
-				cerr << "No changes to constraints or error during this epoch." << endl;
-			}
-			else {
-				cerr << "Constraints/error got worse during this epoch." << endl;
-			}
-
-			if (updatesThisEpoch == 0) {
-				stop = true;
-				cerr << "No more updates, stop." << endl;
-			}
-			else if(prevFinalWeights == weights) {
-				stop = true;
-				cerr << "Final weights not changing anymore, stop." << endl;
-			}
-			else if(prevPrevFinalWeights == weights) {
-				stop = true;
-				cerr << "Final weights changing back to previous final weights, take average and stop." << endl;
-				weights = prevFinalWeights;
-				weights += prevPrevFinalWeights;
-				weights /= 2;
-			}
-
-			prevPrevFinalWeights = prevFinalWeights;
-			prevFinalWeights = weights;
-		}
-
-		cerr << "\nFinal: " << endl;
-		cerr << weights << endl;
-
-		// classify new examples
-		cerr << "\nTest examples:" << endl;
-		FVector test_pos1;
-		test_pos1.set(name_x, 7);
-		test_pos1.set(name_y, 1);
-		cerr << "pos1 (7, 1): " << test_pos1.inner_product(weights) << endl;
-		FVector test_pos2;
-		test_pos2.set(name_x, 6);
-		test_pos2.set(name_y, 2);
-		cerr << "pos2 (2, 2): " << test_pos2.inner_product(weights) << endl;
-/*		FVector test_pos3;
-		test_pos3.set(name_x, 1);
-		test_pos3.set(name_y, 0.5);
-		cerr << "pos3 (1, 0.5): " << test_pos3.inner_product(weights) << endl;*/
-		FVector test_neg1;
-		test_neg1.set(name_x, 7);
-		test_neg1.set(name_y, -1);
-		cerr << "neg1 (7, -1): " << test_neg1.inner_product(weights) << endl;
-		FVector test_neg2;
-		test_neg2.set(name_x, 6);
-		test_neg2.set(name_y, -2);
-		cerr << "neg2 (2, -2): " << test_neg2.inner_product(weights) << endl;
-/*		FVector test_neg3;
-		test_neg3.set(name_x, 1);
-		test_neg3.set(name_y, -0.5);
-		cerr << "neg3 (1, -0.5): " << test_neg3.inner_product(weights) << endl;*/
-
-		exit(0);
-	}
 
 	if (help) {
 		std::cout << "Usage: " + string(argv[0])
@@ -631,6 +330,12 @@ int main(int argc, char** argv) {
 
 	if (sentenceLevelBleu) {
 		burnIn = false;
+		cerr << "Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
+	}
+
+	if (analytical_update) {
+		batchSize = 1;
+		cerr << "Setting batch size to 1 for analytical update" << endl;
 	}
 
 	if (burnIn) {
@@ -674,7 +379,7 @@ int main(int argc, char** argv) {
 			order.push_back(i);
 		}
 
-		cerr << "Start burn-in phase for approx. BLEU history.." << endl;
+		cerr << "Rank " << rank << ", starting burn-in phase for approx. BLEU history.." << endl;
 		if (historyOf1best) {
 			// get 1best translations for the burn-in sentences
 			vector<size_t>::const_iterator sid = order.begin();
@@ -788,7 +493,7 @@ int main(int argc, char** argv) {
 	cerr << "BP-factor: " << BPfactor << endl;
 	cerr << "slack: " << slack << endl;
 	cerr << "slack-step: " << slack_step << endl;
-	cerr << "slack-max: " << slack_max << endl;
+	cerr << "slack-min: " << slack_min << endl;
 	cerr << "max-number-oracles: " << maxNumberOracles << endl;
 	cerr << "accumulate-most-violated-constraints: "
 	    << accumulateMostViolatedConstraints << endl;
@@ -804,10 +509,14 @@ int main(int argc, char** argv) {
 	cerr << "print-feature-values: " << print_feature_values << endl;
 	cerr << "stop-dev-bleu: " << stop_dev_bleu << endl;
 	cerr << "stop-approx-dev-bleu: " << stop_approx_dev_bleu << endl;
-	cerr << "stop-optimal: " << stop_optimal << endl;
 	cerr << "stop-weights: " << weightConvergence << endl;
 	cerr << "updates-per-epoch: " << updates_per_epoch << endl;
-	cerr << "use-total-weights-for-pruning: " << averageWeights << endl;
+	cerr << "average-weights: " << averageWeights << endl;
+	cerr << "history-of-1best: " << historyOf1best <<  endl;
+	cerr << "sentence-level-bleu: " << sentenceLevelBleu << endl;
+	cerr << "bleu-score-weight: " << bleuScoreWeight << endl;
+	cerr << "precision: " << precision << endl;
+	cerr << "min-bleu-change: " << min_bleu_change << endl;
 
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
@@ -842,19 +551,20 @@ int main(int argc, char** argv) {
 	ScoreComponentCollection mixedAverageWeightsPrevious;
 	ScoreComponentCollection mixedAverageWeightsBeforePrevious;
 
-	float averageRatio = 0;
+/*	float averageRatio = 0;
 	float averageBleu = 0;
 	float prevAverageBleu = 0;
 	float beforePrevAverageBleu = 0;
 	float summedApproxBleu = 0;
 	float averageApproxBleu = 0;
 	float prevAverageApproxBleu = 0;
-	float beforePrevAverageApproxBleu = 0;
+	float beforePrevAverageApproxBleu = 0;*/
 	bool stop = false;
-	size_t sumStillViolatedConstraints;
-	size_t sumStillViolatedConstraints_lastEpoch = 0;
-	size_t sumConstraintChangeAbs;
-	size_t sumConstraintChangeAbs_lastEpoch = 0;
+	int sumStillViolatedConstraints;
+	int sumStillViolatedConstraints_lastEpoch = 0;
+	int sumConstraintChangeAbs;
+	int sumConstraintChangeAbs_lastEpoch = 0;
+	size_t sumBleuChangeAbs;
 	float *sendbuf, *recvbuf;
 	sendbuf = (float *) malloc(sizeof(float));
 	recvbuf = (float *) malloc(sizeof(float));
@@ -865,9 +575,10 @@ int main(int argc, char** argv) {
 		// sum of violated constraints
 		sumStillViolatedConstraints = 0;
 		sumConstraintChangeAbs = 0;
+		sumBleuChangeAbs = 0;
 
 		// sum of approx. sentence bleu scores per epoch
-		summedApproxBleu = 0;
+//		summedApproxBleu = 0;
 
 		numberOfUpdatesThisEpoch = 0;
 		// Sum up weights over one epoch, final average uses weights from last epoch
@@ -919,52 +630,88 @@ int main(int argc, char** argv) {
 
 				size_t pass_n = (epoch == 0)? nbest_first : n;
 
-				// MODEL
-				cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best wrt model score" << endl;
-				vector<const Word*> bestModel = decoder->getNBest(input, *sid, pass_n, 0.0, bleuScoreWeight,
+				if (analytical_update) {
+					if (constraints == 1) {
+						// MODEL
+						cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
+						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
+										featureValues[batchPosition], bleuScores[batchPosition], true,
+										distinctNbest, rank);
+						inputLengths.push_back(decoder->getCurrentInputLength());
+						ref_ids.push_back(*sid);
+						all_ref_ids.push_back(*sid);
+						allBestModelScore.push_back(bestModel);
+						decoder->cleanup();
+						oneBests.push_back(bestModel);
+						cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+
+						// HOPE
+						cerr << "Rank " << rank << ", run decoder to get " << 1 << "best hope translations" << endl;
+						size_t oraclePos = featureValues[batchPosition].size();
+						oraclePositions.push_back(oraclePos);
+						vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
+										featureValues[batchPosition], bleuScores[batchPosition], true,
+										distinctNbest, rank);
+						decoder->cleanup();
+						oracles.push_back(oracle);
+						cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+
+						oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
+						float oracleBleuScore = bleuScores[batchPosition][oraclePos];
+						oracleBleuScores.push_back(oracleBleuScore);
+					}
+					else {
+						// TODO:
+					}
+				}
+				else {
+					// MODEL
+					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best wrt model score" << endl;
+					vector<const Word*> bestModel = decoder->getNBest(input, *sid, pass_n, 0.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
-				inputLengths.push_back(decoder->getCurrentInputLength());
-				ref_ids.push_back(*sid);
-				all_ref_ids.push_back(*sid);
-				allBestModelScore.push_back(bestModel);
-				decoder->cleanup();
-				oneBests.push_back(bestModel);
-				cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+					inputLengths.push_back(decoder->getCurrentInputLength());
+					ref_ids.push_back(*sid);
+					all_ref_ids.push_back(*sid);
+					allBestModelScore.push_back(bestModel);
+					decoder->cleanup();
+					oneBests.push_back(bestModel);
+					cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
-				// HOPE
-				cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best hope translations" << endl;
-				size_t oraclePos = featureValues[batchPosition].size();
-				oraclePositions.push_back(oraclePos);
-				vector<const Word*> oracle = decoder->getNBest(input, *sid, pass_n, 1.0, bleuScoreWeight,
+					// HOPE
+					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best hope translations" << endl;
+					size_t oraclePos = featureValues[batchPosition].size();
+					oraclePositions.push_back(oraclePos);
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, pass_n, 1.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
-				decoder->cleanup();
-				oracles.push_back(oracle);
-				cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+					decoder->cleanup();
+					oracles.push_back(oracle);
+					cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
-				oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
-				float oracleBleuScore = bleuScores[batchPosition][oraclePos];
-				oracleBleuScores.push_back(oracleBleuScore);
+					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
+					float oracleBleuScore = bleuScores[batchPosition][oraclePos];
+					oracleBleuScores.push_back(oracleBleuScore);
 
-				// FEAR
-				cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best fear translations" << endl;
-				size_t fearPos = featureValues[batchPosition].size();
-				vector<const Word*> fear = decoder->getNBest(input, *sid, pass_n, -1.0, bleuScoreWeight,
+					// FEAR
+					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best fear translations" << endl;
+					size_t fearPos = featureValues[batchPosition].size();
+					vector<const Word*> fear = decoder->getNBest(input, *sid, pass_n, -1.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
-				decoder->cleanup();
-				cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
+					decoder->cleanup();
+					cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
 
-				//			  for (size_t i = 0; i < bestModel.size(); ++i) {
-				//					 delete bestModel[i];
-				//			  }
-				for (size_t i = 0; i < fear.size(); ++i) {
-					delete fear[i];
+					//			  for (size_t i = 0; i < bestModel.size(); ++i) {
+					//					 delete bestModel[i];
+					//			  }
+					for (size_t i = 0; i < fear.size(); ++i) {
+						delete fear[i];
+					}
 				}
 
-				cerr << "Rank " << rank << ", sentence " << *sid << ", best model Bleu (approximate sentence bleu): "  << bleuScores[batchPosition][0] << endl;
-				summedApproxBleu += bleuScores[batchPosition][0];
+//				cerr << "Rank " << rank << ", sentence " << *sid << ", best model Bleu (approximate sentence bleu): "  << bleuScores[batchPosition][0] << endl;
+//				summedApproxBleu += bleuScores[batchPosition][0];
 
 				// next input sentence
 				++sid;
@@ -1024,9 +771,16 @@ int main(int argc, char** argv) {
 			cerr << "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl;
 			ScoreComponentCollection oldWeights(mosesWeights);
 			vector<int> update_status;
-			update_status = optimiser->updateWeights(mosesWeights, featureValues,
+			if (analytical_update) {
+				update_status = optimiser->updateWeightsAnalytically(mosesWeights, featureValues[0][0],
+			    losses[0][0], oracleFeatureValues[0], oracleBleuScores[0], ref_ids[0],
+			    learning_rate, max_sentence_update, rank, epoch, controlUpdates);
+			}
+			else {
+				update_status = optimiser->updateWeights(mosesWeights, featureValues,
 			    losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
 			    learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
+			}
 
 			if (update_status[0] == 1) {
 				cerr << "Rank " << rank << ", epoch " << epoch << ", no update for batch" << endl;
@@ -1076,14 +830,15 @@ int main(int argc, char** argv) {
 						string& input = inputSentences[*current_sid_start + i];
 						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest);
 						decoder->cleanup();
+						sumBleuChangeAbs += abs(bestModelOld_batch[i][0] - bestModelNew[0]);
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
 					}
 				}
 			}
 
+			// update history (for approximate document Bleu)
 			if (!sentenceLevelBleu) {
-				// update history (for approximate document Bleu)
 				if (historyOf1best) {
 					for (size_t i = 0; i < oneBests.size(); ++i) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best length: " << oneBests[i].size() << " ";
@@ -1152,6 +907,7 @@ int main(int argc, char** argv) {
 						string& input = inputSentences[*current_sid_start + i];
 						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest);
 						decoder->cleanup();
+						sumBleuChangeAbs += abs(bestModelOld_batch[i][0] - bestModelNew[0]);
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
 					}
@@ -1249,6 +1005,7 @@ int main(int argc, char** argv) {
 		cerr << "Bleu feature history after epoch " <<  epoch << endl;
 		decoder->printBleuFeatureHistory(cerr);
 
+		// Check whether there were any weight updates during this epoch
 		size_t sumUpdates;
 		size_t *sendbuf_uint, *recvbuf_uint;
 		sendbuf_uint = (size_t *) malloc(sizeof(size_t));
@@ -1271,25 +1028,33 @@ int main(int argc, char** argv) {
 #endif
 		}
 
-		if (stop_optimal) {
-			if (epoch > 0) {
-				if (sumConstraintChangeAbs_lastEpoch == sumConstraintChangeAbs && sumStillViolatedConstraints_lastEpoch == sumStillViolatedConstraints) {
-					cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl;
-				}
-				else {
-					cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << ", sum of constraint changes " <<  sumConstraintChangeAbs << endl;
-				}
+		if (epoch > 0) {
+			if ((sumConstraintChangeAbs_lastEpoch == sumConstraintChangeAbs) && (sumStillViolatedConstraints_lastEpoch == sumStillViolatedConstraints)) {
+				cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl;
 			}
 			else {
-				cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << endl;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << ", sum of constraint changes " <<  sumConstraintChangeAbs << endl;
 			}
+		}
+		else {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << endl;
+		}
 
-			sumConstraintChangeAbs_lastEpoch = sumConstraintChangeAbs;
-			sumStillViolatedConstraints_lastEpoch = sumStillViolatedConstraints;
+		sumConstraintChangeAbs_lastEpoch = sumConstraintChangeAbs;
+		sumStillViolatedConstraints_lastEpoch = sumStillViolatedConstraints;
+
+		if (min_bleu_change > 0) {
+			if (sumBleuChangeAbs < min_bleu_change) {
+				cerr << "Rank " << rank << ", epoch " << epoch << ", sum of BLEU score changes was smaller than " << min_bleu_change << " (" << sumBleuChangeAbs << ")." << endl;
+				stop = true;
+			}
+			else {
+				cerr << "Rank " << rank << ", epoch " << epoch << ", sum of BLEU score changes: " << sumBleuChangeAbs << "." << endl;
+			}
 		}
 		
 		if (!stop) {
-			if (devBleu) {
+/*			if (devBleu) {
 				// calculate bleu score of dev set
 				vector<float> bleuAndRatio = decoder->calculateBleuOfCorpus(allBestModelScore, all_ref_ids, epoch, rank);
 				float bleu = bleuAndRatio[0];
@@ -1388,7 +1153,7 @@ int main(int argc, char** argv) {
 #ifdef MPI_ENABLE
 				mpi::broadcast(world, stop, 0);
 #endif
-			} // end if (dev_bleu)
+			} // end if (dev_bleu) */
 
 			// Test if weights have converged
 			if (weightConvergence) {
@@ -1447,11 +1212,11 @@ int main(int argc, char** argv) {
 				}
 			}
 
-			// if using flexible slack, increase slack for next epoch
+			// if using flexible regularization, decrease regularization parameter for next epoch
 			if (slack_step > 0) {
-				if (slack + slack_step <= slack_max) {
+				if (slack - slack_step >= slack_min) {
 					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-						slack += slack_step;
+						slack -= slack_step;
 						cerr << "Change slack to: " << slack << endl;
 						((MiraOptimiser*) optimiser)->setSlack(slack);
 					}

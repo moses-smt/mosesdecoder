@@ -94,7 +94,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				bool violated = false;
 				bool addConstraint = true;
 				float diff = loss - modelScoreDiff;
-//				cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
+				cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
 				if (diff > (epsilon + m_precision)) {
 					violated = true;
 					cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << diff << " (loss: " << loss << ")" << endl;
@@ -308,9 +308,9 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 }
 
 vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
-    const ScoreComponentCollection& featureValues,
+    ScoreComponentCollection& featureValues,
     float loss,
-    const ScoreComponentCollection& oracleFeatureValues,
+    ScoreComponentCollection& oracleFeatureValues,
     float oracleBleuScore,
     size_t sentenceId,
     float learning_rate,
@@ -329,11 +329,11 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float diff = loss - modelScoreDiff;
   // approximate comparison between floats
-  if (diff > epsilon) {
+	cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
+  if (diff > (epsilon + m_precision)) {
     // constraint violated
-    oldDistanceFromOptimum += (loss - modelScoreDiff);
+    oldDistanceFromOptimum += diff;
     constraintViolatedBefore = true;
-    float lossMinusModelScoreDiff = loss - modelScoreDiff;
 
     // compute alpha for given constraint: (loss - model score diff) / || feature value diff ||^2
     // featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm() == featureValueDiff.InnerProduct(featureValueDiff)
@@ -342,9 +342,14 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
     float squaredNorm = featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm();
 
     if (squaredNorm > 0) {
-    	float alpha = (lossMinusModelScoreDiff) / squaredNorm;
-    	if (m_slack > 0 && alpha > m_slack) {
-    		alpha = m_slack;
+    	float alpha = diff / squaredNorm;
+    	if (m_slack > 0 ) {
+    		if (alpha > m_slack) {
+    			alpha = m_slack;
+    		}
+    		else if (alpha < m_slack*(-1)) {
+    			alpha = m_slack*(-1);
+    		}
     	}
 
     	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
@@ -374,7 +379,6 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   // sanity check: constraint still violated after optimisation?
   ScoreComponentCollection newWeights(currWeights);
   newWeights.PlusEquals(weightUpdate);
-
   bool constraintViolatedAfter = false;
   float newDistanceFromOptimum = 0;
   featureValueDiff = oracleFeatureValues;
