@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
 #include "SentenceStats.h"
+#include "PhraseBoundaryFeature.h"
 #include "PhraseDictionary.h"
 #include "PhrasePairFeature.h"
 #include "UserMessage.h"
@@ -69,6 +70,7 @@ StaticData StaticData::s_instance;
 
 StaticData::StaticData()
 :m_targetBigramFeature(NULL)
+,m_phraseBoundaryFeature(NULL)
 ,m_phrasePairFeature(NULL)
 ,m_numLinkParams(1)
 ,m_fLMsLoaded(false)
@@ -459,6 +461,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadReferences()) return  false;
   if (!LoadDiscrimLMFeature()) return false;
   if (!LoadPhrasePairFeature()) return false;
+  if (!LoadPhraseBoundaryFeature()) return false;
 
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
@@ -549,6 +552,9 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_phrasePairFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phrasePairFeature);
     }
+    if (m_phraseBoundaryFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phraseBoundaryFeature);
+    }
     
   }
 
@@ -630,6 +636,7 @@ StaticData::~StaticData()
 	delete m_unknownWordPenaltyProducer;
 	delete m_targetBigramFeature;
   delete m_phrasePairFeature;
+  delete m_phraseBoundaryFeature;
 
 	//delete m_parameter;
 
@@ -1304,6 +1311,37 @@ bool StaticData::LoadDiscrimLMFeature()
 	}
 
 	return true;
+}
+
+bool StaticData::LoadPhraseBoundaryFeature() 
+{
+  const vector<string> &phraseBoundarySourceFactors = 
+    m_parameter->GetParam("phrase-boundary-source-feature");
+  const vector<string> &phraseBoundaryTargetFactors = 
+    m_parameter->GetParam("phrase-boundary-target-feature");
+  if (phraseBoundarySourceFactors.size() == 0 && phraseBoundaryTargetFactors.size() == 0) {
+    return true;
+  }
+  if (phraseBoundarySourceFactors.size() > 1) {
+    UserMessage::Add("Need to specify comma separated list of source factors for phrase boundary");
+    return false;
+  }
+  if (phraseBoundaryTargetFactors.size() > 1) {
+    UserMessage::Add("Need to specify comma separated list of target factors for phrase boundary");
+    return false;
+  }
+  FactorList sourceFactors;
+  FactorList targetFactors;
+  if (phraseBoundarySourceFactors.size()) {
+    sourceFactors = Tokenize<FactorType>(phraseBoundarySourceFactors[0],",");
+  }
+  if (phraseBoundaryTargetFactors.size()) {
+    targetFactors = Tokenize<FactorType>(phraseBoundaryTargetFactors[0],",");
+  }
+  //cerr << "source "; for (size_t i = 0; i < sourceFactors.size(); ++i) cerr << sourceFactors[i] << " "; cerr << endl;
+  //cerr << "target "; for (size_t i = 0; i < targetFactors.size(); ++i) cerr << targetFactors[i] << " "; cerr << endl;
+  m_phraseBoundaryFeature = new PhraseBoundaryFeature(sourceFactors,targetFactors);
+  return true;
 }
 
 bool StaticData::LoadPhrasePairFeature() 

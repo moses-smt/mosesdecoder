@@ -140,6 +140,8 @@ Parameter::Parameter()
 	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
 	AddParam("discrim-lmodel-file", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
+  AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
+  AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
 
     AddParam("show-weights", "print feature weights and exit");
 }

@@ -56,6 +56,7 @@ namespace Moses
 class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
+class PhraseBoundaryFeature;
 class PhraseDictionaryFeature;
 class PhrasePairFeature;
 class BleuScoreFeature;
@@ -90,6 +91,7 @@ protected:
 		// Other		= 1 = used to calculate LM score once all steps have been processed
     std::map<std::string, TranslationSystem> m_translationSystems;
 	TargetBigramFeature *m_targetBigramFeature;
+  PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhrasePairFeature *m_phrasePairFeature;
 	float
 		m_beamWidth,
@@ -233,6 +235,7 @@ protected:
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
 	bool LoadDiscrimLMFeature();
+  bool LoadPhraseBoundaryFeature();
   bool LoadPhrasePairFeature();
   
   void ReduceTransOptCache() const;
