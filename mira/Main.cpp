@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
 	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases (or no more increases)")
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases (or no more increases)")
-	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(false), "Stop when weights converge")
+	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 	    ("train-linear-classifier", po::value<bool>(&train_linear_classifier)->default_value(false), "Test algorithm for linear classification")
 	    ("updates-per-epoch", po::value<int>(&updates_per_epoch)->default_value(-1), "Accumulate updates and apply them to the weight vector the specified number of times per epoch")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
