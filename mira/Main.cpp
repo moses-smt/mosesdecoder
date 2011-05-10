@@ -188,6 +188,7 @@ int main(int argc, char** argv) {
 	float precision;
 	float min_bleu_change;
 	bool analytical_update;
+	bool perceptron_update;
 	size_t constraints;
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -237,6 +238,7 @@ int main(int argc, char** argv) {
 			("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
+	    ("perceptron-update", po::value<bool>(&perceptron_update)->default_value(false), "Do a simple perceptron style update")
 	    ("precision", po::value<float>(&precision)->default_value(1.0), "Precision when comparing left and right hand side of constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
@@ -333,9 +335,9 @@ int main(int argc, char** argv) {
 		cerr << "Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
 	}
 
-	if (analytical_update) {
+	if (perceptron_update || analytical_update) {
 		batchSize = 1;
-		cerr << "Setting batch size to 1 for analytical update" << endl;
+		cerr << "Setting batch size to 1 for perceptron/analytical update" << endl;
 	}
 
 	if (burnIn) {
@@ -517,6 +519,8 @@ int main(int argc, char** argv) {
 	cerr << "bleu-score-weight: " << bleuScoreWeight << endl;
 	cerr << "precision: " << precision << endl;
 	cerr << "min-bleu-change: " << min_bleu_change << endl;
+	cerr << "perceptron-update: " << perceptron_update << endl;
+	cerr << "analytical-update: " << analytical_update << endl;
 
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
@@ -630,9 +634,9 @@ int main(int argc, char** argv) {
 
 				size_t pass_n = (epoch == 0)? nbest_first : n;
 
-				if (analytical_update) {
+				if (perceptron_update || analytical_update) {
 					if (constraints == 1) {
-						// MODEL
+/*						// MODEL
 						cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
 						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 										featureValues[batchPosition], bleuScores[batchPosition], true,
@@ -644,21 +648,40 @@ int main(int argc, char** argv) {
 						decoder->cleanup();
 						oneBests.push_back(bestModel);
 						cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+*/
+
 
 						// HOPE
-						cerr << "Rank " << rank << ", run decoder to get " << 1 << "best hope translations" << endl;
+						cerr << "Rank " << rank << ", run decoder to get 1best hope translations" << endl;
 						size_t oraclePos = featureValues[batchPosition].size();
 						oraclePositions.push_back(oraclePos);
 						vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
 										featureValues[batchPosition], bleuScores[batchPosition], true,
 										distinctNbest, rank);
+						//
+						inputLengths.push_back(decoder->getCurrentInputLength());
+						ref_ids.push_back(*sid);
+						//
+
 						decoder->cleanup();
 						oracles.push_back(oracle);
-						cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
 						oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
 						float oracleBleuScore = bleuScores[batchPosition][oraclePos];
 						oracleBleuScores.push_back(oracleBleuScore);
+						featureValues[batchPosition].clear();
+						bleuScores[batchPosition].clear();
+
+						// FEAR
+						cerr << "Rank " << rank << ", run decoder to get 1best fear translations" << endl;
+						size_t fearPos = featureValues[batchPosition].size();
+						vector<const Word*> fear = decoder->getNBest(input, *sid, 1, -1.0, bleuScoreWeight,
+										featureValues[batchPosition], bleuScores[batchPosition], true,
+										distinctNbest, rank);
+						decoder->cleanup();
+						for (size_t i = 0; i < fear.size(); ++i) {
+							delete fear[i];
+						}
 					}
 					else {
 						// TODO:
@@ -767,11 +790,26 @@ int main(int argc, char** argv) {
 				cerr << endl;
 			}
 
-			// run optimiser on batch
+			// Run optimiser on batch:
 			cerr << "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl;
 			ScoreComponentCollection oldWeights(mosesWeights);
 			vector<int> update_status;
-			if (analytical_update) {
+			if (perceptron_update) {
+				// w += 0.01 (hope-fear)
+				cerr << "hope: " << oracleFeatureValues[0] << endl;
+				cerr << "fear: " << featureValues[0][0] << endl;
+				ScoreComponentCollection featureValueDiff = oracleFeatureValues[0];
+				featureValueDiff.MinusEquals(featureValues[0][0]);
+				cerr << "hope - fear: " << featureValueDiff << endl;
+				featureValueDiff.MultiplyEquals(0.01);
+				cerr << "update: " << featureValueDiff << endl;
+				mosesWeights.PlusEquals(featureValueDiff);
+
+				update_status.push_back(0);
+				update_status.push_back(0);
+				update_status.push_back(0);
+			}
+			else if (analytical_update) {
 				update_status = optimiser->updateWeightsAnalytically(mosesWeights, featureValues[0][0],
 			    losses[0][0], oracleFeatureValues[0], oracleBleuScores[0], ref_ids[0],
 			    learning_rate, max_sentence_update, rank, epoch, controlUpdates);

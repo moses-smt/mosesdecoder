@@ -324,8 +324,11 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   bool constraintViolatedBefore = false;
   ScoreComponentCollection weightUpdate;
 
+  cerr << "hope: " << oracleFeatureValues << endl;
+  cerr << "fear: " << featureValues << endl;
   ScoreComponentCollection featureValueDiff = oracleFeatureValues;
   featureValueDiff.MinusEquals(featureValues);
+  cerr << "hope - fear: " << featureValueDiff << endl;
   float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float diff = loss - modelScoreDiff;
   // approximate comparison between floats
@@ -338,7 +341,6 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
     // compute alpha for given constraint: (loss - model score diff) / || feature value diff ||^2
     // featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm() == featureValueDiff.InnerProduct(featureValueDiff)
     // from Crammer&Singer 2006: alpha = min {C , l_t/ ||x||^2}
-    cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
     float squaredNorm = featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm();
 
     if (squaredNorm > 0) {
