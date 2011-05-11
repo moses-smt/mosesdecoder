@@ -602,6 +602,7 @@ int main(int argc, char** argv) {
 		while (sid != shard.end()) {
 			// feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 			vector<vector<ScoreComponentCollection> > featureValues;
+			vector<vector<ScoreComponentCollection> > dummy;
 			vector<vector<float> > bleuScores;
 
 			// get moses weights
@@ -630,47 +631,43 @@ int main(int argc, char** argv) {
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newBleuScores;
 				featureValues.push_back(newFeatureValues);
+				dummy.push_back(newFeatureValues);
 				bleuScores.push_back(newBleuScores);
 
 				size_t pass_n = (epoch == 0)? nbest_first : n;
 
 				if (perceptron_update || analytical_update) {
 					if (constraints == 1) {
-/*						// MODEL
-						cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
-						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
-										featureValues[batchPosition], bleuScores[batchPosition], true,
-										distinctNbest, rank);
-						inputLengths.push_back(decoder->getCurrentInputLength());
-						ref_ids.push_back(*sid);
-						all_ref_ids.push_back(*sid);
-						allBestModelScore.push_back(bestModel);
-						decoder->cleanup();
-						oneBests.push_back(bestModel);
-						cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
-*/
-
+						if (historyOf1best) {
+							// MODEL (for updating the history)
+							cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
+							vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
+									dummy[batchPosition], bleuScores[batchPosition], true,
+									distinctNbest, rank);
+							decoder->cleanup();
+							oneBests.push_back(bestModel);
+							cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+						}
 
 						// HOPE
 						cerr << "Rank " << rank << ", run decoder to get 1best hope translations" << endl;
-						size_t oraclePos = featureValues[batchPosition].size();
+						size_t oraclePos = dummy[batchPosition].size();
 						oraclePositions.push_back(oraclePos);
 						vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
-										featureValues[batchPosition], bleuScores[batchPosition], true,
+										dummy[batchPosition], bleuScores[batchPosition], true,
 										distinctNbest, rank);
-						//
+						// needed for history
 						inputLengths.push_back(decoder->getCurrentInputLength());
 						ref_ids.push_back(*sid);
-						//
-
 						decoder->cleanup();
 						oracles.push_back(oracle);
+						cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
-						oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
+						oracleFeatureValues.push_back(dummy[batchPosition][oraclePos]);
 						float oracleBleuScore = bleuScores[batchPosition][oraclePos];
 						oracleBleuScores.push_back(oracleBleuScore);
-						featureValues[batchPosition].clear();
-						bleuScores[batchPosition].clear();
+						// clear out dummy
+						dummy[batchPosition].clear();
 
 						// FEAR
 						cerr << "Rank " << rank << ", run decoder to get 1best fear translations" << endl;
@@ -679,6 +676,7 @@ int main(int argc, char** argv) {
 										featureValues[batchPosition], bleuScores[batchPosition], true,
 										distinctNbest, rank);
 						decoder->cleanup();
+						cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
 						for (size_t i = 0; i < fear.size(); ++i) {
 							delete fear[i];
 						}
@@ -693,11 +691,13 @@ int main(int argc, char** argv) {
 					vector<const Word*> bestModel = decoder->getNBest(input, *sid, pass_n, 0.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
+					// needed for history
 					inputLengths.push_back(decoder->getCurrentInputLength());
 					ref_ids.push_back(*sid);
+					decoder->cleanup();
+					// needed for calculating bleu of dev (1best translations)
 					all_ref_ids.push_back(*sid);
 					allBestModelScore.push_back(bestModel);
-					decoder->cleanup();
 					oneBests.push_back(bestModel);
 					cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
 
@@ -724,10 +724,6 @@ int main(int argc, char** argv) {
 									distinctNbest, rank);
 					decoder->cleanup();
 					cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
-
-					//			  for (size_t i = 0; i < bestModel.size(); ++i) {
-					//					 delete bestModel[i];
-					//			  }
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
 					}
@@ -802,7 +798,6 @@ int main(int argc, char** argv) {
 				featureValueDiff.MinusEquals(featureValues[0][0]);
 				cerr << "hope - fear: " << featureValueDiff << endl;
 				featureValueDiff.MultiplyEquals(0.01);
-				cerr << "update: " << featureValueDiff << endl;
 				mosesWeights.PlusEquals(featureValueDiff);
 
 				update_status.push_back(0);
@@ -879,22 +874,27 @@ int main(int argc, char** argv) {
 			if (!sentenceLevelBleu) {
 				if (historyOf1best) {
 					for (size_t i = 0; i < oneBests.size(); ++i) {
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best length: " << oneBests[i].size() << " ";
+						cerr << "Rank " << rank << ", epoch " << epoch << ", update history with 1best length: " << oneBests[i].size() << " ";
 					}
 					decoder->updateHistory(oneBests, inputLengths, ref_ids, rank, epoch);
 				}
 				else {
 					for (size_t i = 0; i < oracles.size(); ++i) {
-						cerr << "Rank " << rank << ", epoch " << epoch << ", oracle length: " << oracles[i].size() << " ";
+						cerr << "Rank " << rank << ", epoch " << epoch << ", update history with oracle length: " << oracles[i].size() << " ";
 					}
 					decoder->updateHistory(oracles, inputLengths, ref_ids, rank, epoch);
 				}
 			}
 
-			// clean up oracle translations after updating history
+			// clean up oracle and 1best translations after updating history
 			for (size_t i = 0; i < oracles.size(); ++i) {
 				for (size_t j = 0; j < oracles[i].size(); ++j) {
 					delete oracles[i][j];
+				}
+			}
+			for (size_t i = 0; i < oneBests.size(); ++i) {
+				for (size_t j = 0; j < oneBests[i].size(); ++j) {
+					delete oneBests[i][j];
 				}
 			}
 
