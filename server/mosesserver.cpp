@@ -113,6 +113,8 @@ public:
     bool addGraphInfo = (si != params.end());
     si = params.find("topt");
     bool addTopts = (si != params.end());
+    si = params.find("report-all-factors");
+    bool reportAllFactors = (si != params.end());
 
     const StaticData &staticData = StaticData::Instance();
 
@@ -133,7 +135,7 @@ public:
 
     vector<xmlrpc_c::value> alignInfo;
     stringstream out, graphInfo, transCollOpts;
-    outputHypo(out,hypo,addAlignInfo,alignInfo);
+    outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
 
     map<string, xmlrpc_c::value> retData;
     pair<string, xmlrpc_c::value>
@@ -154,15 +156,19 @@ public:
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
-  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo) {
+  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
-      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo);
-      TargetPhrase p = hypo->GetTargetPhrase();
-      for (size_t pos = 0 ; pos < p.GetSize() ; pos++) {
-        const Factor *factor = p.GetFactor(pos, 0);
-        out << *factor << " ";
-
+      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
+      Phrase p = hypo->GetTargetPhrase();
+      if(reportAllFactors) {
+        out << p << " ";
+      } else {
+        for (size_t pos = 0 ; pos < p.GetSize() ; pos++) {
+          const Factor *factor = p.GetFactor(pos, 0);
+          out << *factor << " ";
+        }
       }
+
       if (addAlignmentInfo) {
         /**
          * Add the alignment info to the array. This is in target order and consists of
