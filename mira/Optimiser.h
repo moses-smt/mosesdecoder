@@ -130,10 +130,6 @@ namespace Mira {
 										int updates_per_epoch,
 										bool controlUpdates);
 
-      void setOracleIndices(std::vector<size_t> oracleIndices) {
-    	  m_oracleIndices= oracleIndices;
-      }
-
       void setSlack(float slack) {
       	m_slack = slack;
       }
@@ -167,9 +163,6 @@ namespace Mira {
       float m_slack;
 
       size_t m_weightedLossFunction;
-
-      // index of oracle translation in hypothesis matrix
-      std::vector<size_t> m_oracleIndices;
 
       // keep a list of oracle translations over epochs
       std::vector < std::vector< Moses::ScoreComponentCollection> > m_oracles;

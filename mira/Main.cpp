@@ -602,8 +602,9 @@ int main(int argc, char** argv) {
 		while (sid != shard.end()) {
 			// feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 			vector<vector<ScoreComponentCollection> > featureValues;
-			vector<vector<ScoreComponentCollection> > dummy;
+			vector<vector<ScoreComponentCollection> > dummyFeatureValues;
 			vector<vector<float> > bleuScores;
+			vector<vector<float> > dummyBleuScores;
 
 			// get moses weights
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
@@ -611,7 +612,6 @@ int main(int argc, char** argv) {
 			cerr << "Rank " << rank << ", weights: " << mosesWeights << endl;
 
 			// BATCHING: produce nbest lists for all input sentences in batch
-			vector<size_t> oraclePositions;
 			vector<float> oracleBleuScores;
 			vector<vector<const Word*> > oracles;
 			vector<vector<const Word*> > oneBests;
@@ -631,8 +631,9 @@ int main(int argc, char** argv) {
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newBleuScores;
 				featureValues.push_back(newFeatureValues);
-				dummy.push_back(newFeatureValues);
+				dummyFeatureValues.push_back(newFeatureValues);
 				bleuScores.push_back(newBleuScores);
+				dummyBleuScores.push_back(newBleuScores);
 
 				size_t pass_n = (epoch == 0)? nbest_first : n;
 
@@ -642,32 +643,31 @@ int main(int argc, char** argv) {
 							// MODEL (for updating the history)
 							cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
 							vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
-									dummy[batchPosition], bleuScores[batchPosition], true,
+									dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
 									distinctNbest, rank);
 							decoder->cleanup();
 							oneBests.push_back(bestModel);
-							cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+							cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl;
 						}
 
 						// HOPE
 						cerr << "Rank " << rank << ", run decoder to get 1best hope translations" << endl;
-						size_t oraclePos = dummy[batchPosition].size();
-						oraclePositions.push_back(oraclePos);
+						size_t oraclePos = dummyFeatureValues[batchPosition].size();
 						vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
-										dummy[batchPosition], bleuScores[batchPosition], true,
+										dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
 										distinctNbest, rank);
 						// needed for history
 						inputLengths.push_back(decoder->getCurrentInputLength());
 						ref_ids.push_back(*sid);
 						decoder->cleanup();
 						oracles.push_back(oracle);
-						cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
+						cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << dummyBleuScores[batchPosition][oraclePos] << endl;
 
-						oracleFeatureValues.push_back(dummy[batchPosition][oraclePos]);
-						float oracleBleuScore = bleuScores[batchPosition][oraclePos];
-						oracleBleuScores.push_back(oracleBleuScore);
-						// clear out dummy
-						dummy[batchPosition].clear();
+						oracleFeatureValues.push_back(dummyFeatureValues[batchPosition][oraclePos]);
+						oracleBleuScores.push_back(dummyBleuScores[batchPosition][oraclePos]);
+						// clear dummies
+						dummyFeatureValues[batchPosition].clear();
+						dummyBleuScores[batchPosition].clear();
 
 						// FEAR
 						cerr << "Rank " << rank << ", run decoder to get 1best fear translations" << endl;
@@ -704,7 +704,6 @@ int main(int argc, char** argv) {
 					// HOPE
 					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
-					oraclePositions.push_back(oraclePos);
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, pass_n, 1.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
@@ -713,8 +712,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
-					float oracleBleuScore = bleuScores[batchPosition][oraclePos];
-					oracleBleuScores.push_back(oracleBleuScore);
+					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
 
 					// FEAR
 					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best fear translations" << endl;
@@ -751,10 +749,6 @@ int main(int argc, char** argv) {
 			const vector<const ScoreProducer*> featureFunctions =
 			    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 			mosesWeights.Assign(featureFunctions.back(), 0);
-
-			if (!hildreth && typeid(*optimiser) == typeid(MiraOptimiser)) {
-				((MiraOptimiser*) optimiser)->setOracleIndices(oraclePositions);
-			}
 
 			if (logFeatureValues) {
 				for (size_t i = 0; i < featureValues.size(); ++i) {
