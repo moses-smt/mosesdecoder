@@ -78,6 +78,10 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				ScoreComponentCollection featureValueDiff = m_oracles[sentenceId][k];
 				featureValueDiff.MinusEquals(featureValues[i][j]);
 				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+				if (modelScoreDiff == 0) {
+					continue;
+				}
+
 				float loss = losses[i][j];
 				loss *= m_marginScaleFactor;
 		    if (m_weightedLossFunction == 1) {
@@ -230,6 +234,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	  // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
 	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 	  	float alpha = alphas[k];
+	  	cerr << "alpha: " << alpha << endl;
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 	    

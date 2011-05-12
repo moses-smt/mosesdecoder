@@ -189,6 +189,7 @@ int main(int argc, char** argv) {
 	float min_bleu_change;
 	bool analytical_update;
 	bool perceptron_update;
+	bool hope_fear;
 	size_t constraints;
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -218,6 +219,7 @@ int main(int argc, char** argv) {
 			("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
 			("history-of-1best", po::value<bool>(&historyOf1best)->default_value(0), "Use the 1best translation to update the history")
 			("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
+			("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations (not model)")
 			("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
 			("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
 			("learning-rate", po::value<float>(&learning_rate)->default_value(1), "Learning rate (fixed or flexible)")
@@ -239,7 +241,7 @@ int main(int argc, char** argv) {
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
 	    ("perceptron-update", po::value<bool>(&perceptron_update)->default_value(false), "Do a simple perceptron style update")
-	    ("precision", po::value<float>(&precision)->default_value(1.0), "Precision when comparing left and right hand side of constraints")
+	    ("precision", po::value<float>(&precision)->default_value(0), "Precision when comparing left and right hand side of constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
@@ -497,8 +499,7 @@ int main(int argc, char** argv) {
 	cerr << "slack-step: " << slack_step << endl;
 	cerr << "slack-min: " << slack_min << endl;
 	cerr << "max-number-oracles: " << maxNumberOracles << endl;
-	cerr << "accumulate-most-violated-constraints: "
-	    << accumulateMostViolatedConstraints << endl;
+	cerr << "accumulate-most-violated-constraints: " << accumulateMostViolatedConstraints << endl;
 	cerr << "past-and-current-constraints: " << pastAndCurrentConstraints << endl;
 	cerr << "log-feature-values: " << logFeatureValues << endl;
 	cerr << "base-of-log: " << baseOfLog << endl;
@@ -521,6 +522,7 @@ int main(int argc, char** argv) {
 	cerr << "min-bleu-change: " << min_bleu_change << endl;
 	cerr << "perceptron-update: " << perceptron_update << endl;
 	cerr << "analytical-update: " << analytical_update << endl;
+	cerr << "hope-fear: " << hope_fear << endl;
 
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
@@ -686,20 +688,29 @@ int main(int argc, char** argv) {
 					}
 				}
 				else {
-					// MODEL
-					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best wrt model score" << endl;
-					vector<const Word*> bestModel = decoder->getNBest(input, *sid, pass_n, 0.0, bleuScoreWeight,
+					if (!hope_fear) {
+						// MODEL
+						cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best wrt model score" << endl;
+						vector<const Word*> bestModel = decoder->getNBest(input, *sid, pass_n, 0.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
-					// needed for history
-					inputLengths.push_back(decoder->getCurrentInputLength());
-					ref_ids.push_back(*sid);
-					decoder->cleanup();
-					// needed for calculating bleu of dev (1best translations)
-					all_ref_ids.push_back(*sid);
-					allBestModelScore.push_back(bestModel);
-					oneBests.push_back(bestModel);
-					cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+						decoder->cleanup();
+						oneBests.push_back(bestModel);
+						// needed for calculating bleu of dev (1best translations) // todo:
+						all_ref_ids.push_back(*sid);
+						allBestModelScore.push_back(bestModel);
+						cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl;
+					}
+					else if (historyOf1best) {
+						// MODEL (for updating the history only, using dummy vectors)
+						cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
+						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
+								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
+								distinctNbest, rank);
+						decoder->cleanup();
+						oneBests.push_back(bestModel);
+						cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl;
+					}
 
 					// HOPE
 					cerr << "Rank " << rank << ", run decoder to get " << pass_n << "best hope translations" << endl;
@@ -707,6 +718,9 @@ int main(int argc, char** argv) {
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, pass_n, 1.0, bleuScoreWeight,
 									featureValues[batchPosition], bleuScores[batchPosition], true,
 									distinctNbest, rank);
+					// needed for history
+					inputLengths.push_back(decoder->getCurrentInputLength());
+					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
 					cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl;
