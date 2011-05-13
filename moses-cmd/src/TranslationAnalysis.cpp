@@ -16,14 +16,17 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
 {
   os << std::endl << "TRANSLATION HYPOTHESIS DETAILS:" << std::endl;
   std::vector<const Hypothesis*> translationPath;
+
   while (hypo) {
     translationPath.push_back(hypo);
     hypo = hypo->GetPrevHypo();
   }
-  std::reverse(translationPath.begin(), translationPath.end());
 
+  std::reverse(translationPath.begin(), translationPath.end());
   std::vector<std::string> droppedWords;
   std::vector<const Hypothesis*>::iterator tpi = translationPath.begin();
+  if(tpi == translationPath.end())
+    return;
   ++tpi;  // skip initial translation state
   std::vector<std::string> sourceMap;
   std::vector<std::string> targetMap;
@@ -39,9 +42,7 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
     std::string source = (*tpi)->GetSourcePhraseStringRep();
     WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
     WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
-
     const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignmentInfo();
-
     // language model backoff stats,
     if (doLMStats) {
       std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->GetLMStats();
@@ -56,7 +57,7 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
         }
       }
     }
-
+    
     bool epsilon = false;
     if (target == "") {
       target="<EPSILON>";
