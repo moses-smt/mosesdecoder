@@ -215,6 +215,10 @@ protected:
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
   //! load all language models as specified in ini file
   bool LoadLanguageModels();
+#ifdef HAVE_SYNLM
+  //! load syntactic language model
+	bool LoadSyntacticLanguageModel();
+#endif
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
