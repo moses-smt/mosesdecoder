@@ -2,6 +2,7 @@
 
 # NOTE:
 # Versions 1.9 (or higher) of aclocal and automake are required.
+# And version >=2.6 of autoconf
 
 # For Mac OSX users:
 # Standard distribution usually includes versions 1.6.
