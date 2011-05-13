@@ -41,6 +41,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 
+#ifdef HAVE_SYNLM
+#include "SyntacticLanguageModel.h"
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -409,6 +413,12 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+#ifdef HAVE_SYNLM
+	if (m_parameter->GetParam("slmodel-file").size() > 0) {
+	  if (!LoadSyntacticLanguageModel()) return false;
+	}
+#endif
+
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
@@ -508,6 +518,11 @@ bool StaticData::LoadData(Parameter *parameter)
 
 
     //Add any other features here.
+#ifdef HAVE_SYNLM
+    if (m_syntacticLanguageModel != NULL) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
+    }
+#endif
 
   }
 
@@ -538,651 +553,709 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
 
 StaticData::~StaticData()
 {
-  RemoveAllInColl(m_phraseDictionary);
-  RemoveAllInColl(m_generationDictionary);
-  RemoveAllInColl(m_reorderModels);
-  RemoveAllInColl(m_globalLexicalModels);
-  RemoveAllInColl(m_decodeGraphs);
-  RemoveAllInColl(m_wordPenaltyProducers);
-  RemoveAllInColl(m_distortionScoreProducers);
-  m_languageModel.CleanUp();
-
-  // delete trans opt
-  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
-  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
-    TranslationOptionList *transOptList = iterCache->second.first;
-    delete transOptList;
-  }
-
-  // small score producers
-  delete m_unknownWordPenaltyProducer;
-
-  //delete m_parameter;
-
-  // memory pools
-  Phrase::FinalizeMemPool();
-
-}
-
-bool StaticData::LoadLexicalReorderingModel()
-{
-  VERBOSE(1, "Loading lexical distortion models...");
-  const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
-  bool hasWeightlr = (m_parameter->GetParam("weight-lr").size() != 0);
-  vector<string> weightsStr;
-  if (hasWeightlr) {
-    weightsStr = m_parameter->GetParam("weight-lr");
-  } else {
-    weightsStr = m_parameter->GetParam("weight-d");
-  }
-
-  std::vector<float>   weights;
-  size_t w = 1; //cur weight
-  if (hasWeightlr) {
-    w = 0; // if reading from weight-lr, don't have to count first as distortion penalty
-  }
-  size_t f = 0; //cur file
-  //get weights values
-  VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
-  for(size_t j = 0; j < weightsStr.size(); ++j) {
-    weights.push_back(Scan<float>(weightsStr[j]));
-  }
-  //load all models
-  for(size_t i = 0; i < fileStr.size(); ++i) {
-    vector<string> spec = Tokenize<string>(fileStr[f], " ");
-    ++f; //mark file as consumed
-    if(spec.size() != 4) {
-      UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[f]);
-      return false;
-    }
-
-    // spec[0] = factor map
-    // spec[1] = name
-    // spec[2] = num weights
-    // spec[3] = fileName
-
-    // decode factor map
-
-    vector<FactorType> input, output;
-    vector<string> inputfactors = Tokenize(spec[0],"-");
-    if(inputfactors.size() == 2) {
-      input  = Tokenize<FactorType>(inputfactors[0],",");
-      output = Tokenize<FactorType>(inputfactors[1],",");
-    } else if(inputfactors.size() == 1) {
-      //if there is only one side assume it is on e side... why?
-      output = Tokenize<FactorType>(inputfactors[0],",");
-    } else {
-      //format error
-      return false;
-    }
-
-    string modelType = spec[1];
-
-    // decode num weights and fetch weights from array
-    std::vector<float> mweights;
-    size_t numWeights = atoi(spec[2].c_str());
-    for(size_t k = 0; k < numWeights; ++k, ++w) {
-      if(w >= weights.size()) {
-        UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
-        return false;
-      } else
-        mweights.push_back(weights[w]);
-    }
-
-    string filePath = spec[3];
-
-    m_reorderModels.push_back(new LexicalReordering(input, output, modelType, filePath, mweights));
-  }
-  return true;
-}
-
-bool StaticData::LoadGlobalLexicalModel()
-{
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lex"));
-  const vector<string> &file = m_parameter->GetParam("global-lexical-file");
-
-  if (weight.size() != file.size()) {
-    std::cerr << "number of weights and models for the global lexical model does not match ("
-              << weight.size() << " != " << file.size() << ")" << std::endl;
-    return false;
-  }
-
-  for (size_t i = 0; i < weight.size(); i++ ) {
-    vector<string> spec = Tokenize<string>(file[i], " ");
-    if ( spec.size() != 2 ) {
-      std::cerr << "wrong global lexical model specification: " << file[i] << endl;
-      return false;
-    }
-    vector< string > factors = Tokenize(spec[0],"-");
-    if ( factors.size() != 2 ) {
-      std::cerr << "wrong factor definition for global lexical model: " << spec[0] << endl;
-      return false;
-    }
-    vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
-    vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], weight[i], inputFactors, outputFactors ) );
-  }
-  return true;
-}
-
-bool StaticData::LoadLanguageModels()
-{
-  if (m_parameter->GetParam("lmodel-file").size() > 0) {
-    // weights
-    vector<float> weightAll = Scan<float>(m_parameter->GetParam("weight-l"));
-
-    for (size_t i = 0 ; i < weightAll.size() ; i++) {
-      m_allWeights.push_back(weightAll[i]);
-    }
-
-    // dictionary upper-bounds fo all IRST LMs
-    vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
-    if (m_parameter->GetParam("lmodel-dub").size() == 0) {
-      for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
-        LMdub.push_back(0);
-    }
-
-    // initialize n-gram order for each factor. populated only by factored lm
-    const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
-    //prevent language models from being loaded twice
-    map<string,LanguageModel*> languageModelsLoaded;
-
-    for(size_t i=0; i<lmVector.size(); i++) {
-      LanguageModel* lm = NULL;
-      if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = new LanguageModel(m_scoreIndexManager, languageModelsLoaded[lmVector[i]]);
-      } else {
-        vector<string>	token		= Tokenize(lmVector[i]);
-        if (token.size() != 4 && token.size() != 5 ) {
-          UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-          return false;
-        }
-        // type = implementation, SRI, IRST etc
-        LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
-
-        // factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
-        vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-
-        // nGramOrder = 2 = bigram, 3 = trigram, etc
-        size_t nGramOrder = Scan<int>(token[2]);
-
-        string &languageModelFile = token[3];
-        if (token.size() == 5) {
-          if (lmImplementation==IRST)
-            languageModelFile += " " + token[4];
-          else {
-            UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-            return false;
-          }
-        }
-        IFVERBOSE(1)
-        PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
-
-        lm = LanguageModelFactory::CreateLanguageModel(
-               lmImplementation
-               , factorTypes
-               , nGramOrder
-               , languageModelFile
-               , m_scoreIndexManager
-               , LMdub[i]);
-        if (lm == NULL) {
-          UserMessage::Add("no LM created. We probably don't have it compiled");
-          return false;
-        }
-        languageModelsLoaded[lmVector[i]] = lm;
-      }
-
-      m_languageModel.Add(lm);
-    }
-  }
-  // flag indicating that language models were loaded,
-  // since phrase table loading requires their presence
-  m_fLMsLoaded = true;
-  IFVERBOSE(1)
-  PrintUserTime("Finished loading LanguageModels");
-  return true;
-}
-
-bool StaticData::LoadGenerationTables()
-{
-  if (m_parameter->GetParam("generation-file").size() > 0) {
-    const vector<string> &generationVector = m_parameter->GetParam("generation-file");
-    const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-generation"));
-
-    IFVERBOSE(1) {
-      TRACE_ERR( "weight-generation: ");
-      for (size_t i = 0 ; i < weight.size() ; i++) {
-        TRACE_ERR( weight[i] << "\t");
-      }
-      TRACE_ERR(endl);
-    }
-    size_t currWeightNum = 0;
-
-    for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) {
-      vector<string>			token		= Tokenize(generationVector[currDict]);
-      vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
-                                    ,output	= Tokenize<FactorType>(token[1], ",");
-      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
-      string							filePath;
-      size_t							numFeatures;
-
-      numFeatures = Scan<size_t>(token[2]);
-      filePath = token[3];
-
-      if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
-        filePath += ".gz";
-      }
-
-      VERBOSE(1, filePath << endl);
-
-      m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager, input,output));
-      assert(m_generationDictionary.back() && "could not create GenerationDictionary");
-      if (!m_generationDictionary.back()->Load(filePath, Output)) {
-        delete m_generationDictionary.back();
-        return false;
-      }
-      for(size_t i = 0; i < numFeatures; i++) {
-        assert(currWeightNum < weight.size());
-        m_allWeights.push_back(weight[currWeightNum++]);
-      }
-    }
-    if (currWeightNum != weight.size()) {
-      TRACE_ERR( "  [WARNING] config file has " << weight.size() << " generation weights listed, but the configuration for generation files indicates there should be " << currWeightNum << "!\n");
-    }
-  }
-
-  return true;
-}
-
-/* Doesn't load phrase tables any more. Just creates the features. */
-bool StaticData::LoadPhraseTables()
-{
-  VERBOSE(2,"Creating phrase table features" << endl);
-
-  // language models must be loaded prior to loading phrase tables
-  assert(m_fLMsLoaded);
-  // load phrase translation tables
-  if (m_parameter->GetParam("ttable-file").size() > 0) {
-    // weights
-    vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
-
-    const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
-    vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
-
-    if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
-      VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
-      for(size_t i = 1; i < translationVector.size(); i++)
-        maxTargetPhrase.push_back(maxTargetPhrase[0]);
-    } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
-      stringstream strme;
-      strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
-      UserMessage::Add(strme.str());
-      return false;
-    }
-
-    size_t index = 0;
-    size_t weightAllOffset = 0;
-    bool oldFileFormat = false;
-    for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      vector<string>                  token           = Tokenize(translationVector[currDict]);
-
-      if(currDict == 0 && token.size() == 4) {
-        VERBOSE(1, "Warning: Phrase table specification in old 4-field format. Assuming binary phrase tables (type 1)!" << endl);
-        oldFileFormat = true;
-      }
-
-      if((!oldFileFormat && token.size() < 5) || (oldFileFormat && token.size() != 4)) {
-        UserMessage::Add("invalid phrase table specification");
-        return false;
-      }
-
-      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-      if(oldFileFormat) {
-        token.push_back(token[3]);
-        token[3] = token[2];
-        token[2] = token[1];
-        token[1] = token[0];
-        token[0] = "1";
-        implementation = Binary;
-      } else
-        implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-
-      assert(token.size() >= 5);
-      //characteristics of the phrase table
-
-      vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
-                                    ,output = Tokenize<FactorType>(token[2], ",");
-      m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
-      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
-      m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-      size_t numScoreComponent = Scan<size_t>(token[3]);
-      string filePath= token[4];
-
-      assert(weightAll.size() >= weightAllOffset + numScoreComponent);
-
-      // weights for this phrase dictionary
-      // first InputScores (if any), then translation scores
-      vector<float> weight;
-
-      if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput)) {
-        // TODO. find what the assumptions made by confusion network about phrase table output which makes
-        // it only work with binrary file. This is a hack
-
-        m_numInputScores=m_parameter->GetParam("weight-i").size();
-        for(unsigned k=0; k<m_numInputScores; ++k)
-          weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
-
-        if(m_parameter->GetParam("link-param-count").size())
-          m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
-
-        //print some info about this interaction:
-        if (m_numLinkParams == m_numInputScores) {
-          VERBOSE(1,"specified equal numbers of link parameters and insertion weights, not using non-epsilon 'real' word link count.\n");
-        } else if ((m_numLinkParams + 1) == m_numInputScores) {
-          VERBOSE(1,"WARN: "<< m_numInputScores << " insertion weights found and only "<< m_numLinkParams << " link parameters specified, applying non-epsilon 'real' word link count for last feature weight.\n");
-        } else {
-          stringstream strme;
-          strme << "You specified " << m_numInputScores
-                << " input weights (weight-i), but you specified " << m_numLinkParams << " link parameters (link-param-count)!";
-          UserMessage::Add(strme.str());
-          return false;
-        }
-
-      }
-      if (!m_inputType) {
-        m_numInputScores=0;
-      }
-      //this number changes depending on what phrase table we're talking about: only 0 has the weights on it
-      size_t tableInputScores = (currDict == 0 ? m_numInputScores : 0);
-
-      for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
-        weight.push_back(weightAll[weightAllOffset + currScore]);
-
-
-      if(weight.size() - tableInputScores != numScoreComponent) {
-        stringstream strme;
-        strme << "Your phrase table has " << numScoreComponent
-              << " scores, but you specified " << (weight.size() - tableInputScores) << " weights!";
-        UserMessage::Add(strme.str());
-        return false;
-      }
-
-      weightAllOffset += numScoreComponent;
-      numScoreComponent += tableInputScores;
-
-      string targetPath, alignmentsFile;
-      if (implementation == SuffixArray) {
-        targetPath		= token[5];
-        alignmentsFile= token[6];
-      }
-
-      assert(numScoreComponent==weight.size());
-
-      std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
-
-      //This is needed for regression testing, but the phrase table
-      //might not really be loading here
-      IFVERBOSE(1)
-      PrintUserTime(string("Start loading PhraseTable ") + filePath);
-      VERBOSE(1,"filePath: " << filePath <<endl);
-
-      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-        implementation
-        , numScoreComponent
-        , (currDict==0 ? m_numInputScores : 0)
-        , input
-        , output
-        , filePath
-        , weight
-        , maxTargetPhrase[index]
-        , targetPath, alignmentsFile);
-
-      m_phraseDictionary.push_back(pdf);
-
-
-
-
-
-      index++;
-    }
-  }
-
-  IFVERBOSE(1)
-  PrintUserTime("Finished loading phrase tables");
-  return true;
-}
-
-void StaticData::LoadNonTerminals()
-{
-  string defaultNonTerminals;
-
-  if (m_parameter->GetParam("non-terminals").size() == 0) {
-    defaultNonTerminals = "X";
-  } else {
-    vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
-    defaultNonTerminals = tokens[0];
-  }
-
-  FactorCollection &factorCollection = FactorCollection::Instance();
-
-  m_inputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
-  m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
-
-  m_outputDefaultNonTerminal.SetIsNonTerminal(true);
-  const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
-  m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
-
-  // for unknwon words
-  if (m_parameter->GetParam("unknown-lhs").size() == 0) {
-    UnknownLHSEntry entry(defaultNonTerminals, 0.0f);
-    m_unknownLHS.push_back(entry);
-  } else {
-    const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
-
-    InputFileStream inStream(filePath);
-    string line;
-    while(getline(inStream, line)) {
-      vector<string> tokens = Tokenize(line);
-      assert(tokens.size() == 2);
-      UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
-      m_unknownLHS.push_back(entry);
-    }
-
-  }
-
-}
-
-void StaticData::LoadChartDecodingParameters()
-{
-  LoadNonTerminals();
-
-  // source label overlap
-  if (m_parameter->GetParam("source-label-overlap").size() > 0) {
-    m_sourceLabelOverlap = (SourceLabelOverlap) Scan<int>(m_parameter->GetParam("source-label-overlap")[0]);
-  } else {
-    m_sourceLabelOverlap = SourceLabelOverlapAdd;
-  }
-
-  m_ruleLimit = (m_parameter->GetParam("rule-limit").size() > 0)
-                ? Scan<size_t>(m_parameter->GetParam("rule-limit")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
-}
-
-void StaticData::LoadPhraseBasedParameters()
-{
-  const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
-  size_t distortionWeightCount = distortionWeights.size();
-  //if there's a lex-reordering model, and no separate weight set, then
-  //take just one of these weights for linear distortion
-  if (!m_parameter->GetParam("weight-lr").size() && m_parameter->GetParam("distortion-file").size()) {
-    distortionWeightCount = 1;
-  }
-  for (size_t i = 0; i < distortionWeightCount; ++i) {
-    float weightDistortion = Scan<float>(distortionWeights[i]);
-    m_distortionScoreProducers.push_back(new DistortionScoreProducer(m_scoreIndexManager));
-    m_allWeights.push_back(weightDistortion);
-  }
-}
-
-bool StaticData::LoadDecodeGraphs()
-{
-  const vector<string> &mappingVector = m_parameter->GetParam("mapping");
-  const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
-
-  DecodeStep *prev = 0;
-  size_t prevDecodeGraphInd = 0;
-  for(size_t i=0; i<mappingVector.size(); i++) {
-    vector<string>	token		= Tokenize(mappingVector[i]);
-    size_t decodeGraphInd;
-    DecodeType decodeType;
-    size_t index;
-    if (token.size() == 2) {
-      decodeGraphInd = 0;
-      decodeType = token[0] == "T" ? Translate : Generate;
-      index = Scan<size_t>(token[1]);
-    } else if (token.size() == 3) {
-      // For specifying multiple translation model
-      decodeGraphInd = Scan<size_t>(token[0]);
-      //the vectorList index can only increment by one
-      assert(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
-      if (decodeGraphInd > prevDecodeGraphInd) {
-        prev = NULL;
-      }
-      decodeType = token[1] == "T" ? Translate : Generate;
-      index = Scan<size_t>(token[2]);
-    } else {
-      UserMessage::Add("Malformed mapping!");
-      assert(false);
-    }
-
-    DecodeStep* decodeStep = NULL;
-    switch (decodeType) {
-    case Translate:
-      if(index>=m_phraseDictionary.size()) {
-        stringstream strme;
-        strme << "No phrase dictionary with index "
-              << index << " available!";
-        UserMessage::Add(strme.str());
-        assert(false);
-      }
-      decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
-      break;
-    case Generate:
-      if(index>=m_generationDictionary.size()) {
-        stringstream strme;
-        strme << "No generation dictionary with index "
-              << index << " available!";
-        UserMessage::Add(strme.str());
-        assert(false);
-      }
-      decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
-      break;
-    case InsertNullFertilityWord:
-      assert(!"Please implement NullFertilityInsertion.");
-      break;
-    }
-
-    assert(decodeStep);
-    if (m_decodeGraphs.size() < decodeGraphInd + 1) {
-      DecodeGraph *decodeGraph;
-      if (m_searchAlgorithm == ChartDecoding) {
-        size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-        decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
-      } else {
-        decodeGraph = new DecodeGraph(m_decodeGraphs.size());
-      }
-
-      m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
-    }
-
-    m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
-    prev = decodeStep;
-    prevDecodeGraphInd = decodeGraphInd;
-  }
-
-  // set maximum n-gram size for backoff approach to decoding paths
-  // default is always use subsequent paths (value = 0)
-  for(size_t i=0; i<m_decodeGraphs.size(); i++) {
-    m_decodeGraphBackoff.push_back( 0 );
-  }
-  // if specified, record maxmimum unseen n-gram size
-  const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
-  for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
-    m_decodeGraphBackoff[i] = Scan<size_t>(backoffVector[i]);
-  }
-
-  return true;
-}
-
-
-void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
-{
-  const size_t id = sp->GetScoreBookkeepingID();
-  const size_t begin = m_scoreIndexManager.GetBeginIndex(id);
-  const size_t end = m_scoreIndexManager.GetEndIndex(id);
-  assert(end - begin == weights.size());
-  if (m_allWeights.size() < end)
-    m_allWeights.resize(end);
-  std::vector<float>::const_iterator weightIter = weights.begin();
-  for (size_t i = begin; i < end; i++)
-    m_allWeights[i] = *weightIter++;
-}
-
-const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
-{
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_transOptCacheMutex);
-#endif
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
-  = m_transOptCache.find(key);
-  if (iter == m_transOptCache.end())
-    return NULL;
-  iter->second.second = clock(); // update last used time
-  return iter->second.first;
-}
-
-void StaticData::ReduceTransOptCache() const
-{
-  if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
-  clock_t t = clock();
-
-  // find cutoff for last used time
-  priority_queue< clock_t > lastUsedTimes;
-  std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
-  iter = m_transOptCache.begin();
-  while( iter != m_transOptCache.end() ) {
-    lastUsedTimes.push( iter->second.second );
-    iter++;
-  }
-  for( size_t i=0; i < lastUsedTimes.size()-m_transOptCacheMaxSize/2; i++ )
-    lastUsedTimes.pop();
-  clock_t cutoffLastUsedTime = lastUsedTimes.top();
-
-  // remove all old entries
-  iter = m_transOptCache.begin();
-  while( iter != m_transOptCache.end() ) {
-    if (iter->second.second < cutoffLastUsedTime) {
-      std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
-      delete iterRemove->second.first;
-      m_transOptCache.erase(iterRemove);
-    } else iter++;
-  }
-  VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
-}
-
-void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
-{
-  if (m_transOptCacheMaxSize == 0) return;
-  std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
-  TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_transOptCacheMutex);
-#endif
-  m_transOptCache[key] = make_pair( storedTransOptList, clock() );
-  ReduceTransOptCache();
-}
-
-}
+//   RemoveAllInColl(m_phraseDictionary);
+//   RemoveAllInColl(m_generationDictionary);
+//   RemoveAllInColl(m_reorderModels);
+//   RemoveAllInColl(m_globalLexicalModels);
+//   RemoveAllInColl(m_decodeGraphs);
+//   RemoveAllInColl(m_wordPenaltyProducers);
+//   RemoveAllInColl(m_distortionScoreProducers);
+//   m_languageModel.CleanUp();
+// #ifdef HAVE_SYNLM
+// 	delete m_syntacticLanguageModel;
+// #endif
+
+//   // delete trans opt
+//   map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
+//   for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
+//     TranslationOptionList *transOptList = iterCache->second.first;
+//     delete transOptList;
+//   }
+
+//   // small score producers
+//   delete m_unknownWordPenaltyProducer;
+
+//   //delete m_parameter;
+
+//   // memory pools
+//   Phrase::FinalizeMemPool();
+
+// }
+
+// #ifdef HAVE_SYNLM
+//   bool StaticData::LoadSyntacticLanguageModel() {
+//     cerr << "Loading syntactic language models..." << std::endl;
+    
+//     const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
+//     const vector<string> files = m_parameter->GetParam("slmodel-file");
+    
+//     const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
+//       TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
+//       : 0;
+
+//     const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
+//       TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
+//       : 500;
+
+//     if (files.size() < 1) {
+//       cerr << "No syntactic language model files specified!" << std::endl;
+//       return false;
+//     }
+
+//     // check if feature is used
+//     if (weights.size() >= 1) {
+
+//       //cout.setf(ios::scientific,ios::floatfield);
+//       //cerr.setf(ios::scientific,ios::floatfield);
+      
+//       // create the feature
+//       m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
+
+//       /* 
+//       /////////////////////////////////////////
+//       // BEGIN LANE's UNSTABLE EXPERIMENT :)
+//       //
+
+//       double ppl = m_syntacticLanguageModel->perplexity();
+//       cerr << "Probability is " << ppl << endl;
+
+
+//       //
+//       // END LANE's UNSTABLE EXPERIMENT
+//       /////////////////////////////////////////
+//       */
+
+
+//       if (m_syntacticLanguageModel==NULL) {
+// 	return false;
+//       }
+
+//     }
+    
+//     return true;
+
+//   }
+// #endif
+
+// bool StaticData::LoadLexicalReorderingModel()
+// {
+//   VERBOSE(1, "Loading lexical distortion models...");
+//   const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
+//   bool hasWeightlr = (m_parameter->GetParam("weight-lr").size() != 0);
+//   vector<string> weightsStr;
+//   if (hasWeightlr) {
+//     weightsStr = m_parameter->GetParam("weight-lr");
+//   } else {
+//     weightsStr = m_parameter->GetParam("weight-d");
+//   }
+
+//   std::vector<float>   weights;
+//   size_t w = 1; //cur weight
+//   if (hasWeightlr) {
+//     w = 0; // if reading from weight-lr, don't have to count first as distortion penalty
+//   }
+//   size_t f = 0; //cur file
+//   //get weights values
+//   VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
+//   for(size_t j = 0; j < weightsStr.size(); ++j) {
+//     weights.push_back(Scan<float>(weightsStr[j]));
+//   }
+//   //load all models
+//   for(size_t i = 0; i < fileStr.size(); ++i) {
+//     vector<string> spec = Tokenize<string>(fileStr[f], " ");
+//     ++f; //mark file as consumed
+//     if(spec.size() != 4) {
+//       UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[f]);
+//       return false;
+//     }
+
+//     // spec[0] = factor map
+//     // spec[1] = name
+//     // spec[2] = num weights
+//     // spec[3] = fileName
+
+//     // decode factor map
+
+//     vector<FactorType> input, output;
+//     vector<string> inputfactors = Tokenize(spec[0],"-");
+//     if(inputfactors.size() == 2) {
+//       input  = Tokenize<FactorType>(inputfactors[0],",");
+//       output = Tokenize<FactorType>(inputfactors[1],",");
+//     } else if(inputfactors.size() == 1) {
+//       //if there is only one side assume it is on e side... why?
+//       output = Tokenize<FactorType>(inputfactors[0],",");
+//     } else {
+//       //format error
+//       return false;
+//     }
+
+//     string modelType = spec[1];
+
+//     // decode num weights and fetch weights from array
+//     std::vector<float> mweights;
+//     size_t numWeights = atoi(spec[2].c_str());
+//     for(size_t k = 0; k < numWeights; ++k, ++w) {
+//       if(w >= weights.size()) {
+//         UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
+//         return false;
+//       } else
+//         mweights.push_back(weights[w]);
+//     }
+
+//     string filePath = spec[3];
+
+//     m_reorderModels.push_back(new LexicalReordering(input, output, modelType, filePath, mweights));
+//   }
+//   return true;
+// }
+
+// bool StaticData::LoadGlobalLexicalModel()
+// {
+//   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lex"));
+//   const vector<string> &file = m_parameter->GetParam("global-lexical-file");
+
+//   if (weight.size() != file.size()) {
+//     std::cerr << "number of weights and models for the global lexical model does not match ("
+//               << weight.size() << " != " << file.size() << ")" << std::endl;
+//     return false;
+//   }
+
+//   for (size_t i = 0; i < weight.size(); i++ ) {
+//     vector<string> spec = Tokenize<string>(file[i], " ");
+//     if ( spec.size() != 2 ) {
+//       std::cerr << "wrong global lexical model specification: " << file[i] << endl;
+//       return false;
+//     }
+//     vector< string > factors = Tokenize(spec[0],"-");
+//     if ( factors.size() != 2 ) {
+//       std::cerr << "wrong factor definition for global lexical model: " << spec[0] << endl;
+//       return false;
+//     }
+//     vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
+//     vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
+//     m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], weight[i], inputFactors, outputFactors ) );
+//   }
+//   return true;
+// }
+
+// bool StaticData::LoadLanguageModels()
+// {
+//   if (m_parameter->GetParam("lmodel-file").size() > 0) {
+//     // weights
+//     vector<float> weightAll = Scan<float>(m_parameter->GetParam("weight-l"));
+
+//     for (size_t i = 0 ; i < weightAll.size() ; i++) {
+//       m_allWeights.push_back(weightAll[i]);
+//     }
+
+//     // dictionary upper-bounds fo all IRST LMs
+//     vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
+//     if (m_parameter->GetParam("lmodel-dub").size() == 0) {
+//       for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
+//         LMdub.push_back(0);
+//     }
+
+//     // initialize n-gram order for each factor. populated only by factored lm
+//     const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
+//     //prevent language models from being loaded twice
+//     map<string,LanguageModel*> languageModelsLoaded;
+
+//     for(size_t i=0; i<lmVector.size(); i++) {
+//       LanguageModel* lm = NULL;
+//       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
+//         lm = new LanguageModel(m_scoreIndexManager, languageModelsLoaded[lmVector[i]]);
+//       } else {
+//         vector<string>	token		= Tokenize(lmVector[i]);
+//         if (token.size() != 4 && token.size() != 5 ) {
+//           UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
+//           return false;
+//         }
+//         // type = implementation, SRI, IRST etc
+//         LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
+
+//         // factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
+//         vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
+
+//         // nGramOrder = 2 = bigram, 3 = trigram, etc
+//         size_t nGramOrder = Scan<int>(token[2]);
+
+//         string &languageModelFile = token[3];
+//         if (token.size() == 5) {
+//           if (lmImplementation==IRST)
+//             languageModelFile += " " + token[4];
+//           else {
+//             UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
+//             return false;
+//           }
+//         }
+//         IFVERBOSE(1)
+//         PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
+
+//         lm = LanguageModelFactory::CreateLanguageModel(
+//                lmImplementation
+//                , factorTypes
+//                , nGramOrder
+//                , languageModelFile
+//                , m_scoreIndexManager
+//                , LMdub[i]);
+//         if (lm == NULL) {
+//           UserMessage::Add("no LM created. We probably don't have it compiled");
+//           return false;
+//         }
+//         languageModelsLoaded[lmVector[i]] = lm;
+//       }
+
+//       m_languageModel.Add(lm);
+//     }
+//   }
+//   // flag indicating that language models were loaded,
+//   // since phrase table loading requires their presence
+//   m_fLMsLoaded = true;
+//   IFVERBOSE(1)
+//   PrintUserTime("Finished loading LanguageModels");
+//   return true;
+// }
+
+// bool StaticData::LoadGenerationTables()
+// {
+//   if (m_parameter->GetParam("generation-file").size() > 0) {
+//     const vector<string> &generationVector = m_parameter->GetParam("generation-file");
+//     const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-generation"));
+
+//     IFVERBOSE(1) {
+//       TRACE_ERR( "weight-generation: ");
+//       for (size_t i = 0 ; i < weight.size() ; i++) {
+//         TRACE_ERR( weight[i] << "\t");
+//       }
+//       TRACE_ERR(endl);
+//     }
+//     size_t currWeightNum = 0;
+
+//     for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) {
+//       vector<string>			token		= Tokenize(generationVector[currDict]);
+//       vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
+//                                     ,output	= Tokenize<FactorType>(token[1], ",");
+//       m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
+//       string							filePath;
+//       size_t							numFeatures;
+
+//       numFeatures = Scan<size_t>(token[2]);
+//       filePath = token[3];
+
+//       if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
+//         filePath += ".gz";
+//       }
+
+//       VERBOSE(1, filePath << endl);
+
+//       m_generationDictionary.push_back(new GenerationDictionary(numFeatures, m_scoreIndexManager, input,output));
+//       assert(m_generationDictionary.back() && "could not create GenerationDictionary");
+//       if (!m_generationDictionary.back()->Load(filePath, Output)) {
+//         delete m_generationDictionary.back();
+//         return false;
+//       }
+//       for(size_t i = 0; i < numFeatures; i++) {
+//         assert(currWeightNum < weight.size());
+//         m_allWeights.push_back(weight[currWeightNum++]);
+//       }
+//     }
+//     if (currWeightNum != weight.size()) {
+//       TRACE_ERR( "  [WARNING] config file has " << weight.size() << " generation weights listed, but the configuration for generation files indicates there should be " << currWeightNum << "!\n");
+//     }
+//   }
+
+//   return true;
+// }
+
+// /* Doesn't load phrase tables any more. Just creates the features. */
+// bool StaticData::LoadPhraseTables()
+// {
+//   VERBOSE(2,"Creating phrase table features" << endl);
+
+//   // language models must be loaded prior to loading phrase tables
+//   assert(m_fLMsLoaded);
+//   // load phrase translation tables
+//   if (m_parameter->GetParam("ttable-file").size() > 0) {
+//     // weights
+//     vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
+
+//     const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
+//     vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
+
+//     if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
+//       VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
+//       for(size_t i = 1; i < translationVector.size(); i++)
+//         maxTargetPhrase.push_back(maxTargetPhrase[0]);
+//     } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
+//       stringstream strme;
+//       strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
+//       UserMessage::Add(strme.str());
+//       return false;
+//     }
+
+//     size_t index = 0;
+//     size_t weightAllOffset = 0;
+//     bool oldFileFormat = false;
+//     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
+//       vector<string>                  token           = Tokenize(translationVector[currDict]);
+
+//       if(currDict == 0 && token.size() == 4) {
+//         VERBOSE(1, "Warning: Phrase table specification in old 4-field format. Assuming binary phrase tables (type 1)!" << endl);
+//         oldFileFormat = true;
+//       }
+
+//       if((!oldFileFormat && token.size() < 5) || (oldFileFormat && token.size() != 4)) {
+//         UserMessage::Add("invalid phrase table specification");
+//         return false;
+//       }
+
+//       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+//       if(oldFileFormat) {
+//         token.push_back(token[3]);
+//         token[3] = token[2];
+//         token[2] = token[1];
+//         token[1] = token[0];
+//         token[0] = "1";
+//         implementation = Binary;
+//       } else
+//         implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+
+//       assert(token.size() >= 5);
+//       //characteristics of the phrase table
+
+//       vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
+//                                     ,output = Tokenize<FactorType>(token[2], ",");
+//       m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
+//       m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
+//       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
+//       size_t numScoreComponent = Scan<size_t>(token[3]);
+//       string filePath= token[4];
+
+//       assert(weightAll.size() >= weightAllOffset + numScoreComponent);
+
+//       // weights for this phrase dictionary
+//       // first InputScores (if any), then translation scores
+//       vector<float> weight;
+
+//       if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput)) {
+//         // TODO. find what the assumptions made by confusion network about phrase table output which makes
+//         // it only work with binrary file. This is a hack
+
+//         m_numInputScores=m_parameter->GetParam("weight-i").size();
+//         for(unsigned k=0; k<m_numInputScores; ++k)
+//           weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
+
+//         if(m_parameter->GetParam("link-param-count").size())
+//           m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
+
+//         //print some info about this interaction:
+//         if (m_numLinkParams == m_numInputScores) {
+//           VERBOSE(1,"specified equal numbers of link parameters and insertion weights, not using non-epsilon 'real' word link count.\n");
+//         } else if ((m_numLinkParams + 1) == m_numInputScores) {
+//           VERBOSE(1,"WARN: "<< m_numInputScores << " insertion weights found and only "<< m_numLinkParams << " link parameters specified, applying non-epsilon 'real' word link count for last feature weight.\n");
+//         } else {
+//           stringstream strme;
+//           strme << "You specified " << m_numInputScores
+//                 << " input weights (weight-i), but you specified " << m_numLinkParams << " link parameters (link-param-count)!";
+//           UserMessage::Add(strme.str());
+//           return false;
+//         }
+
+//       }
+//       if (!m_inputType) {
+//         m_numInputScores=0;
+//       }
+//       //this number changes depending on what phrase table we're talking about: only 0 has the weights on it
+//       size_t tableInputScores = (currDict == 0 ? m_numInputScores : 0);
+
+//       for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
+//         weight.push_back(weightAll[weightAllOffset + currScore]);
+
+
+//       if(weight.size() - tableInputScores != numScoreComponent) {
+//         stringstream strme;
+//         strme << "Your phrase table has " << numScoreComponent
+//               << " scores, but you specified " << (weight.size() - tableInputScores) << " weights!";
+//         UserMessage::Add(strme.str());
+//         return false;
+//       }
+
+//       weightAllOffset += numScoreComponent;
+//       numScoreComponent += tableInputScores;
+
+//       string targetPath, alignmentsFile;
+//       if (implementation == SuffixArray) {
+//         targetPath		= token[5];
+//         alignmentsFile= token[6];
+//       }
+
+//       assert(numScoreComponent==weight.size());
+
+//       std::copy(weight.begin(),weight.end(),std::back_inserter(m_allWeights));
+
+//       //This is needed for regression testing, but the phrase table
+//       //might not really be loading here
+//       IFVERBOSE(1)
+//       PrintUserTime(string("Start loading PhraseTable ") + filePath);
+//       VERBOSE(1,"filePath: " << filePath <<endl);
+
+//       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
+//         implementation
+//         , numScoreComponent
+//         , (currDict==0 ? m_numInputScores : 0)
+//         , input
+//         , output
+//         , filePath
+//         , weight
+//         , maxTargetPhrase[index]
+//         , targetPath, alignmentsFile);
+
+//       m_phraseDictionary.push_back(pdf);
+
+
+
+
+
+//       index++;
+//     }
+//   }
+
+//   IFVERBOSE(1)
+//   PrintUserTime("Finished loading phrase tables");
+//   return true;
+// }
+
+// void StaticData::LoadNonTerminals()
+// {
+//   string defaultNonTerminals;
+
+//   if (m_parameter->GetParam("non-terminals").size() == 0) {
+//     defaultNonTerminals = "X";
+//   } else {
+//     vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
+//     defaultNonTerminals = tokens[0];
+//   }
+
+//   FactorCollection &factorCollection = FactorCollection::Instance();
+
+//   m_inputDefaultNonTerminal.SetIsNonTerminal(true);
+//   const Factor *sourceFactor = factorCollection.AddFactor(Input, 0, defaultNonTerminals);
+//   m_inputDefaultNonTerminal.SetFactor(0, sourceFactor);
+
+//   m_outputDefaultNonTerminal.SetIsNonTerminal(true);
+//   const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals);
+//   m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
+
+//   // for unknwon words
+//   if (m_parameter->GetParam("unknown-lhs").size() == 0) {
+//     UnknownLHSEntry entry(defaultNonTerminals, 0.0f);
+//     m_unknownLHS.push_back(entry);
+//   } else {
+//     const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
+
+//     InputFileStream inStream(filePath);
+//     string line;
+//     while(getline(inStream, line)) {
+//       vector<string> tokens = Tokenize(line);
+//       assert(tokens.size() == 2);
+//       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
+//       m_unknownLHS.push_back(entry);
+//     }
+
+//   }
+
+// }
+
+// void StaticData::LoadChartDecodingParameters()
+// {
+//   LoadNonTerminals();
+
+//   // source label overlap
+//   if (m_parameter->GetParam("source-label-overlap").size() > 0) {
+//     m_sourceLabelOverlap = (SourceLabelOverlap) Scan<int>(m_parameter->GetParam("source-label-overlap")[0]);
+//   } else {
+//     m_sourceLabelOverlap = SourceLabelOverlapAdd;
+//   }
+
+//   m_ruleLimit = (m_parameter->GetParam("rule-limit").size() > 0)
+//                 ? Scan<size_t>(m_parameter->GetParam("rule-limit")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
+// }
+
+// void StaticData::LoadPhraseBasedParameters()
+// {
+//   const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
+//   size_t distortionWeightCount = distortionWeights.size();
+//   //if there's a lex-reordering model, and no separate weight set, then
+//   //take just one of these weights for linear distortion
+//   if (!m_parameter->GetParam("weight-lr").size() && m_parameter->GetParam("distortion-file").size()) {
+//     distortionWeightCount = 1;
+//   }
+//   for (size_t i = 0; i < distortionWeightCount; ++i) {
+//     float weightDistortion = Scan<float>(distortionWeights[i]);
+//     m_distortionScoreProducers.push_back(new DistortionScoreProducer(m_scoreIndexManager));
+//     m_allWeights.push_back(weightDistortion);
+//   }
+// }
+
+// bool StaticData::LoadDecodeGraphs()
+// {
+//   const vector<string> &mappingVector = m_parameter->GetParam("mapping");
+//   const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+
+//   DecodeStep *prev = 0;
+//   size_t prevDecodeGraphInd = 0;
+//   for(size_t i=0; i<mappingVector.size(); i++) {
+//     vector<string>	token		= Tokenize(mappingVector[i]);
+//     size_t decodeGraphInd;
+//     DecodeType decodeType;
+//     size_t index;
+//     if (token.size() == 2) {
+//       decodeGraphInd = 0;
+//       decodeType = token[0] == "T" ? Translate : Generate;
+//       index = Scan<size_t>(token[1]);
+//     } else if (token.size() == 3) {
+//       // For specifying multiple translation model
+//       decodeGraphInd = Scan<size_t>(token[0]);
+//       //the vectorList index can only increment by one
+//       assert(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
+//       if (decodeGraphInd > prevDecodeGraphInd) {
+//         prev = NULL;
+//       }
+//       decodeType = token[1] == "T" ? Translate : Generate;
+//       index = Scan<size_t>(token[2]);
+//     } else {
+//       UserMessage::Add("Malformed mapping!");
+//       assert(false);
+//     }
+
+//     DecodeStep* decodeStep = NULL;
+//     switch (decodeType) {
+//     case Translate:
+//       if(index>=m_phraseDictionary.size()) {
+//         stringstream strme;
+//         strme << "No phrase dictionary with index "
+//               << index << " available!";
+//         UserMessage::Add(strme.str());
+//         assert(false);
+//       }
+//       decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
+//       break;
+//     case Generate:
+//       if(index>=m_generationDictionary.size()) {
+//         stringstream strme;
+//         strme << "No generation dictionary with index "
+//               << index << " available!";
+//         UserMessage::Add(strme.str());
+//         assert(false);
+//       }
+//       decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
+//       break;
+//     case InsertNullFertilityWord:
+//       assert(!"Please implement NullFertilityInsertion.");
+//       break;
+//     }
+
+//     assert(decodeStep);
+//     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
+//       DecodeGraph *decodeGraph;
+//       if (m_searchAlgorithm == ChartDecoding) {
+//         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
+//         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
+//       } else {
+//         decodeGraph = new DecodeGraph(m_decodeGraphs.size());
+//       }
+
+//       m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
+//     }
+
+//     m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
+//     prev = decodeStep;
+//     prevDecodeGraphInd = decodeGraphInd;
+//   }
+
+//   // set maximum n-gram size for backoff approach to decoding paths
+//   // default is always use subsequent paths (value = 0)
+//   for(size_t i=0; i<m_decodeGraphs.size(); i++) {
+//     m_decodeGraphBackoff.push_back( 0 );
+//   }
+//   // if specified, record maxmimum unseen n-gram size
+//   const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
+//   for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
+//     m_decodeGraphBackoff[i] = Scan<size_t>(backoffVector[i]);
+//   }
+
+//   return true;
+// }
+
+
+// void StaticData::SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights)
+// {
+//   const size_t id = sp->GetScoreBookkeepingID();
+//   const size_t begin = m_scoreIndexManager.GetBeginIndex(id);
+//   const size_t end = m_scoreIndexManager.GetEndIndex(id);
+//   assert(end - begin == weights.size());
+//   if (m_allWeights.size() < end)
+//     m_allWeights.resize(end);
+//   std::vector<float>::const_iterator weightIter = weights.begin();
+//   for (size_t i = begin; i < end; i++)
+//     m_allWeights[i] = *weightIter++;
+// }
+
+// const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
+// {
+//   std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+// #ifdef WITH_THREADS
+//   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+// #endif
+//   std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter
+//   = m_transOptCache.find(key);
+//   if (iter == m_transOptCache.end())
+//     return NULL;
+//   iter->second.second = clock(); // update last used time
+//   return iter->second.first;
+// }
+
+// void StaticData::ReduceTransOptCache() const
+// {
+//   if (m_transOptCache.size() <= m_transOptCacheMaxSize) return; // not full
+//   clock_t t = clock();
+
+//   // find cutoff for last used time
+//   priority_queue< clock_t > lastUsedTimes;
+//   std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iter;
+//   iter = m_transOptCache.begin();
+//   while( iter != m_transOptCache.end() ) {
+//     lastUsedTimes.push( iter->second.second );
+//     iter++;
+//   }
+//   for( size_t i=0; i < lastUsedTimes.size()-m_transOptCacheMaxSize/2; i++ )
+//     lastUsedTimes.pop();
+//   clock_t cutoffLastUsedTime = lastUsedTimes.top();
+
+//   // remove all old entries
+//   iter = m_transOptCache.begin();
+//   while( iter != m_transOptCache.end() ) {
+//     if (iter->second.second < cutoffLastUsedTime) {
+//       std::map<std::pair<size_t, Phrase>, std::pair<TranslationOptionList*,clock_t> >::iterator iterRemove = iter++;
+//       delete iterRemove->second.first;
+//       m_transOptCache.erase(iterRemove);
+//     } else iter++;
+//   }
+//   VERBOSE(2,"Reduced persistent translation option cache in " << ((clock()-t)/(float)CLOCKS_PER_SEC) << " seconds." << std::endl);
+// }
+
+// void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const
+// {
+//   if (m_transOptCacheMaxSize == 0) return;
+//   std::pair<size_t, Phrase> key(decodeGraph.GetPosition(), sourcePhrase);
+//   TranslationOptionList* storedTransOptList = new TranslationOptionList(transOptList);
+// #ifdef WITH_THREADS
+//   boost::mutex::scoped_lock lock(m_transOptCacheMutex);
+// #endif
+//   m_transOptCache[key] = make_pair( storedTransOptList, clock() );
+//   ReduceTransOptCache();
+// }
+
+// }
 
 

@@ -63,6 +63,9 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+#ifdef HAVE_SYNLM
+class SyntacticLanguageModel;
+#endif
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
@@ -95,6 +98,11 @@ protected:
   m_earlyDiscardingThreshold,
   m_translationOptionThreshold,
   m_wordDeletionWeight;
+#ifdef HAVE_SYNLM
+	SyntacticLanguageModel* m_syntacticLanguageModel;
+#endif
+
+
 
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
@@ -205,10 +213,16 @@ protected:
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
 
+
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
   //! load all language models as specified in ini file
   bool LoadLanguageModels();
+#ifdef HAVE_SYNLM
+  //! load syntactic language model
+	bool LoadSyntacticLanguageModel();
+#endif
+
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
@@ -219,6 +233,7 @@ protected:
   bool LoadGlobalLexicalModel();
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
+
 
 public:
 

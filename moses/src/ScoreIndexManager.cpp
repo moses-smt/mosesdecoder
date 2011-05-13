@@ -23,6 +23,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 
   m_producers.push_back(sp);
 
+
   m_begins.push_back(m_last);
   size_t numScoreCompsProduced = sp->GetNumScoreComponents();
   assert(numScoreCompsProduced > 0);
@@ -32,6 +33,7 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
   					<< " " << sp->GetScoreProducerDescription()
   					<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
   */
+
 }
 
 void ScoreIndexManager::PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scores) const
