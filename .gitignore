@@ -1,4 +1,6 @@
 *.[oa]
+*.Po
+*~
 Makefile
 Makefile.in
 aclocal.m4
@@ -18,6 +20,7 @@ misc/Makefile.in
 misc/processLexicalTable
 misc/processPhraseTable
 misc/queryLexicalTable
+moses-chart/src/.deps/
 moses-cmd/src/.deps/
 moses-cmd/src/Makefile
 moses-cmd/src/Makefile.in
