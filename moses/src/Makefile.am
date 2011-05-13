@@ -149,6 +149,10 @@ libmoses_la_HEADERS += LanguageModelInternal.h \
 		      NGramNode.h
 endif
 
+if SYN_LM
+libmoses_la_HEADERS += SyntacticLanguageModel.h
+endif
+
 libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
@@ -304,6 +308,10 @@ if INTERNAL_LM
 libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
+endif
+
+if SYN_LM
+libmoses_la_SOURCES += SyntacticLanguageModel.cpp
 endif
 
 if KEN_LM

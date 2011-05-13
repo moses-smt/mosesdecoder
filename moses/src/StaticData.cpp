@@ -41,6 +41,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 
+#ifdef HAVE_SYNLM
+#include "SyntacticLanguageModel.h"
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -420,6 +424,12 @@ bool StaticData::LoadData(Parameter *parameter)
     return false;
   }
 
+#ifdef HAVE_SYNLM
+	if (m_parameter->GetParam("slmodel-file").size() > 0) {
+	  if (!LoadSyntacticLanguageModel()) return false;
+	}
+#endif
+	
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -542,6 +552,12 @@ StaticData::~StaticData()
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
   RemoveAllInColl(m_globalLexicalModels);
+	
+#ifdef HAVE_SYNLM
+	delete m_syntacticLanguageModel;
+#endif
+
+
   RemoveAllInColl(m_decodeGraphs);
   RemoveAllInColl(m_wordPenaltyProducers);
   RemoveAllInColl(m_distortionScoreProducers);
@@ -563,6 +579,61 @@ StaticData::~StaticData()
   Phrase::FinalizeMemPool();
 
 }
+
+#ifdef HAVE_SYNLM
+  bool StaticData::LoadSyntacticLanguageModel() {
+    cerr << "Loading syntactic language models..." << std::endl;
+    
+    const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
+    const vector<string> files = m_parameter->GetParam("slmodel-file");
+    
+    const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
+      : 0;
+
+    const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
+      : 500;
+
+    if (files.size() < 1) {
+      cerr << "No syntactic language model files specified!" << std::endl;
+      return false;
+    }
+
+    // check if feature is used
+    if (weights.size() >= 1) {
+
+      //cout.setf(ios::scientific,ios::floatfield);
+      //cerr.setf(ios::scientific,ios::floatfield);
+      
+      // create the feature
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
+
+      /* 
+      /////////////////////////////////////////
+      // BEGIN LANE's UNSTABLE EXPERIMENT :)
+      //
+
+      double ppl = m_syntacticLanguageModel->perplexity();
+      cerr << "Probability is " << ppl << endl;
+
+
+      //
+      // END LANE's UNSTABLE EXPERIMENT
+      /////////////////////////////////////////
+      */
+
+
+      if (m_syntacticLanguageModel==NULL) {
+	return false;
+      }
+
+    }
+    
+    return true;
+
+  }
+#endif
 
 bool StaticData::LoadLexicalReorderingModel()
 {

@@ -63,6 +63,9 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+#ifdef HAVE_SYNLM
+class SyntacticLanguageModel;
+#endif
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
@@ -81,6 +84,9 @@ protected:
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
+#ifdef HAVE_SYNLM
+	SyntacticLanguageModel* m_syntacticLanguageModel;
+#endif
   ScoreIndexManager				m_scoreIndexManager;
   std::vector<float>			m_allWeights;
   std::vector<LexicalReordering*>  m_reorderModels;
