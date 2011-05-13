@@ -34,13 +34,6 @@ AC_ARG_WITH(srilm-dynamic,
             [with_srilm_dynamic=no]
             )
 
-AC_ARG_WITH(srilm-arch,
-            [AC_HELP_STRING([--with-srilm-arch=ARCH], [(optional) architecture for which SRILM was built])],
-            [with_srilm_arch=$withval],
-            [with_srilm_arch=no]
-           )
-
-
 AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
@@ -58,12 +51,6 @@ AC_ARG_WITH(randlm,
             [with_randlm=$withval],
             [with_randlm=no]
            )
-
-AC_ARG_WITH(synlm,
-	   [AC_HELP_STRING([--with-synlm=PATH], [(optional) path to syntactic language model parser])],
-	   [with_synlm=$withval],
-	   [with_synlm=no]
-	   )
 
 AC_ARG_WITH(notrace,
             [AC_HELP_STRING([--notrace], [disable trace])],
@@ -95,7 +82,7 @@ AC_ARG_ENABLE(boost,
         )
 
 AC_ARG_WITH(zlib,
-boost            [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
+            [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
             [with_zlib=$withval],
             [with_zlib=no]
            )
@@ -107,7 +94,7 @@ AC_ARG_WITH(tcmalloc,
            )
 
 require_boost=no
-if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno' || test "x$with_synlm" != 'xno'
+if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno'
 then
   require_boost=yes
 fi
@@ -124,7 +111,6 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([KEN_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
-AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
 AM_CONDITIONAL([WITH_THREADS],false)
@@ -138,13 +124,13 @@ else
     CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
 fi
 
-if test "x$require_boost" = 'xyes' || test "x$with_synlm"
+if test "x$require_boost" = 'xyes'
 then
     AC_MSG_NOTICE([Using Boost library])
     BOOST_REQUIRE([1.36.0])
 fi
 
-if test "x$enable_threads" = 'xyes' || test "x$with_synlm"
+if test "x$enable_threads" = 'xyes'
 then
     AC_MSG_NOTICE([Building threaded moses])
     BOOST_THREADS
@@ -186,12 +172,7 @@ then
     # ROOT/lib/i686-m64/liboolm.a
     # ROOT/lib/i686-m64/libdstruct.a
     # ROOT/lib/i686-m64/libmisc.a
-    if test "x$with_srilm_arch" != 'xno'
-    then
-	MY_ARCH=${with_srilm_arch}    
-    else
-        MY_ARCH=`${with_srilm}/sbin/machine-type`
-    fi
+    MY_ARCH=`${with_srilm}/sbin/machine-type`
     LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH} -L${with_srilm}/flm/obj/${MY_ARCH}"
     LIBS="$LIBS $LIB_SRILM"
     FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
@@ -278,20 +259,6 @@ then
                   [AC_MSG_WARN([Cannot find boost/pool/object_pool.hpp])]
                  )
 fi
-
-
-if test "x$with_synlm" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS" 
-  CPPFLAGS="$CPPFLAGS -DWITH_THREADS -I${with_synlm}/rvtl/include -I${with_synlm}/wsjparse/include -lm"
-
-  AC_CHECK_HEADERS(nl-cpt.h,
-	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])])
-
-  AM_CONDITIONAL([SYN_LM], true)
-
-fi
-
 
 AM_CONDITIONAL([WITH_MERT],false)
 AC_CHECK_HEADERS([getopt.h],
