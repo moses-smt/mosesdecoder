@@ -138,7 +138,7 @@ else
     CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
 fi
 
-if test "x$require_boost" = 'xyes'
+if test "x$require_boost" = 'xyes' || test "x$with_synlm"
 then
     AC_MSG_NOTICE([Using Boost library])
     BOOST_REQUIRE([1.36.0])
