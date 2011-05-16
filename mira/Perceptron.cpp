@@ -24,21 +24,40 @@ using namespace std;
 
 namespace Mira {
 
-  vector<int> Perceptron::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
-						       ScoreComponentCollection& featureValues,
-						       float loss,
-						       ScoreComponentCollection& oracleFeatureValues,
-						       float oracleBleuScore,
-						       size_t sentenceId,
-						       float learning_rate,
-						       float max_sentence_update,
-						       size_t rank,
-						       size_t epoch,
-						       bool controlUpdates) {
-    vector<int> status(1);
-    status[0] = 0;
-    return status;
-  }
+vector<int> Perceptron::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
+		ScoreComponentCollection& featureValues,
+		float loss,
+		ScoreComponentCollection& oracleFeatureValues,
+		float oracleBleuScore,
+		size_t sentenceId,
+		float learning_rate,
+		float max_sentence_update,
+		size_t rank,
+		size_t epoch,
+		bool controlUpdates) {
+
+			vector<int> status(1);
+			status[0] = 0;
+			return status;
+}
+
+vector<int> Perceptron::updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
+		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
+		const std::vector<std::vector<float> >& bleuScoresHope,
+		const std::vector<std::vector<float> >& bleuScoresFear,
+		const std::vector< size_t> sentenceId,
+		float learning_rate,
+		float max_sentence_update,
+		size_t rank,
+		size_t epoch,
+		int updates_per_epoch,
+		bool controlUpdates) {
+
+	vector<int> status(1);
+	status[0] = 0;
+	return status;
+}
 
 vector<int> Perceptron::updateWeights(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValues,
