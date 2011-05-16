@@ -355,7 +355,10 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   }
 
   // words !!
-  outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
+//  outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
+
+  // output both source and target phrases in the word graph
+  outputWordGraphStream << "\tw=" << hypo->GetSourcePhraseStringRep() << "|" << hypo->GetCurrTargetPhrase();
 
   outputWordGraphStream << endl;
 }
@@ -539,8 +542,9 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
                           searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
                           << "-" <<
                           searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
-
-  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+  outputSearchGraphStream << " out=" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
+		  searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+//  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }
 
 void Manager::GetConnectedGraph(
@@ -559,14 +563,13 @@ void Manager::GetConnectedGraph(
     connected[ hypo->GetId() ] = true;
     connectedList.push_back( hypo );
   }
-
   // move back from known connected hypotheses
   for(size_t i=0; i<connectedList.size(); i++) {
     const Hypothesis *hypo = connectedList[i];
 
     // add back pointer
     const Hypothesis *prevHypo = hypo->GetPrevHypo();
-    if (prevHypo->GetId() > 0 // don't add empty hypothesis
+    if (prevHypo && prevHypo->GetId() > 0 // don't add empty hypothesis
         && connected.find( prevHypo->GetId() ) == connected.end()) { // don't add already added
       connected[ prevHypo->GetId() ] = true;
       connectedList.push_back( prevHypo );
