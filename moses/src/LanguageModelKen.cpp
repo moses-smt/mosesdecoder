@@ -254,8 +254,6 @@ LanguageModelSingleFactor *ConstructKenLM(const std::string &file, bool lazy)
     switch(model_type) {
     case lm::ngram::HASH_PROBING:
       return new LanguageModelKen<lm::ngram::ProbingModel>(lazy);
-    case lm::ngram::HASH_SORTED:
-      return new LanguageModelKen<lm::ngram::SortedModel>(lazy);
     case lm::ngram::TRIE_SORTED:
       return new LanguageModelKen<lm::ngram::TrieModel>(lazy);
     default:
