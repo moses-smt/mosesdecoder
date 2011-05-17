@@ -147,7 +147,6 @@ typedef ProbingModel Model;
 
 // Smaller implementation.
 typedef ::lm::ngram::SortedVocabulary SortedVocabulary;
-typedef detail::GenericModel<detail::SortedHashedSearch, SortedVocabulary> SortedModel;
 typedef detail::GenericModel<trie::TrieSearch, SortedVocabulary> TrieModel;
 
 } // namespace ngram
