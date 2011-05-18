@@ -648,10 +648,11 @@ int main(int argc, char** argv) {
 				}
 				else {
 					featureValues.push_back(newFeatureValues);
-					dummyFeatureValues.push_back(newFeatureValues);
 					bleuScores.push_back(newBleuScores);
-					dummyBleuScores.push_back(newBleuScores);
 				}
+
+				dummyFeatureValues.push_back(newFeatureValues);
+				dummyBleuScores.push_back(newBleuScores);
 
 				if (perceptron_update || analytical_update) {
 					if (historyOf1best) {
