@@ -702,9 +702,12 @@ int main(int argc, char** argv) {
 						if (historyOf1best) {
 							// MODEL (for updating the history only, using dummy vectors)
 							cerr << "Rank " << rank << ", run decoder to get " << 1 << "best wrt model score" << endl;
+							cerr << "dummyFeatureValues.size: " << dummyFeatureValues.size() << endl;
+							cerr << "batch position: " << batchPosition << endl;
 							vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 									dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
 									distinctNbest, rank);
+							cerr << "finished decoding." << endl;
 							decoder->cleanup();
 							oneBests.push_back(bestModel);
 							cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl;
