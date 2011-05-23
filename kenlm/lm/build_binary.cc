@@ -91,10 +91,10 @@ int main(int argc, char *argv[]) {
           config.building_memory = ParseUInt(optarg) * 1048576;
           break;
         case 's':
-          config.sentence_marker_missing = lm::NOTHING;
+          config.sentence_marker_missing = lm::SILENT;
           break;
         case 'i':
-          config.positive_log_probability = lm::NOTHING;
+          config.positive_log_probability = lm::SILENT;
           break;
         default:
           Usage(argv[0]);

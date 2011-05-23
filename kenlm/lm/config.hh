@@ -34,7 +34,7 @@ struct Config {
   // If THROW_UP, the exception will be of type util::SpecialWordMissingException.  
   WarningAction sentence_marker_missing;
 
-  // What to do with a positive log probability.  For COMPLAIN and NOTHING, map
+  // What to do with a positive log probability.  For COMPLAIN and SILENT, map
   // to 0.  
   WarningAction positive_log_probability;
 

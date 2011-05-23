@@ -189,7 +189,7 @@ void ProbingVocabulary::LoadedBinary(int fd, EnumerateVocab *to) {
 
 void MissingUnknown(const Config &config) throw(SpecialWordMissingException) {
   switch(config.unknown_missing) {
-    case NOTHING:
+    case SILENT:
       return;
     case COMPLAIN:
       if (config.messages) *config.messages << "The ARPA file is missing <unk>.  Substituting log10 probability " << config.unknown_missing_logprob << "." << std::endl;
@@ -201,7 +201,7 @@ void MissingUnknown(const Config &config) throw(SpecialWordMissingException) {
 
 void MissingSentenceMarker(const Config &config, const char *str) throw(SpecialWordMissingException) {
   switch (config.sentence_marker_missing) {
-    case NOTHING:
+    case SILENT:
       return;
     case COMPLAIN:
       if (config.messages) *config.messages << "Missing special word " << str << "; will treat it as <unk>.";

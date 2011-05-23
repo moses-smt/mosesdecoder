@@ -11,7 +11,7 @@
 
 namespace lm {
 
-typedef enum {THROW_UP, COMPLAIN, NOTHING} WarningAction;
+typedef enum {THROW_UP, COMPLAIN, SILENT} WarningAction;
 
 class ConfigException : public util::Exception {
   public:
@@ -47,4 +47,4 @@ class SpecialWordMissingException : public VocabLoadException {
 
 } // namespace lm
 
-#endif // LM_LM_EXCEPTION__
+#endif // LM_LM_EXCEPTION
