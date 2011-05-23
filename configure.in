@@ -144,7 +144,7 @@ then
     BOOST_REQUIRE([1.36.0])
 fi
 
-if test "x$with_threads" = 'xyes' || test "x$with_synlm" = "xyes"
+if test "x$enable_threads" = 'xyes' || test "x$with_synlm" = "xyes"
 then
     AC_MSG_NOTICE([Building threaded moses])
     BOOST_THREADS
