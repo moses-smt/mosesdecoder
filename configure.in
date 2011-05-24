@@ -107,7 +107,7 @@ AC_ARG_WITH(tcmalloc,
            )
 
 require_boost=no
-if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno' || test "x$with_synlm" != 'xno'
+if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno'
 then
   require_boost=yes
 fi
@@ -144,7 +144,7 @@ then
     BOOST_REQUIRE([1.36.0])
 fi
 
-if test "x$enable_threads" = 'xyes' || test "x$with_synlm" = "xyes"
+if test "x$enable_threads" = 'xyes'
 then
     AC_MSG_NOTICE([Building threaded moses])
     BOOST_THREADS
@@ -283,10 +283,7 @@ fi
 if test "x$with_synlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS" 
-  CPPFLAGS="$CPPFLAGS -DWITH_THREADS -I${PWD}/synlm/hhmm/rvtl/include -I${PWD}/synlm/hhmm/wsjparse/include -lm"
-
-
-
+  CPPFLAGS="$CPPFLAGS -I${PWD}/synlm/hhmm/rvtl/include -I${PWD}/synlm/hhmm/wsjparse/include -lm"
 
   AC_CHECK_HEADERS(nl-cpt.h,
 	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])],
