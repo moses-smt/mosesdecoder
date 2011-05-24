@@ -60,7 +60,7 @@ AC_ARG_WITH(randlm,
            )
 
 AC_ARG_WITH(synlm,
-	   [AC_HELP_STRING([--with-synlm=PATH], [(optional) path to syntactic language model parser])],
+	   [AC_HELP_STRING([--with-synlm], [(optional) Include syntactic language model parser; default is no])],
 	   [with_synlm=$withval],
 	   [with_synlm=no]
 	   )
@@ -283,13 +283,14 @@ fi
 if test "x$with_synlm" != 'xno'
 then
   SAVE_CPPFLAGS="$CPPFLAGS" 
-  CPPFLAGS="$CPPFLAGS -DWITH_THREADS -I${with_synlm}/rvtl/include -I${with_synlm}/wsjparse/include -lm"
+  CPPFLAGS="$CPPFLAGS -DWITH_THREADS -I${PWD}/synlm/hhmm/rvtl/include -I${PWD}/synlm/hhmm/wsjparse/include -lm"
 
 
 
 
   AC_CHECK_HEADERS(nl-cpt.h,
-	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])])
+	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])],
+	[AC_MSG_ERROR([Cannot find SYNLM in ${PWD}/synlm/hhmm])])
 
   AM_CONDITIONAL([SYN_LM], true)
 
