@@ -102,17 +102,17 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		  	// check if constraint is violated
 				bool violated = false;
 				bool addConstraint = true;
-				float diff = loss - modelScoreDiff;
-				cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
-				if (diff > (epsilon + m_precision)) {
+				float diff = loss - (modelScoreDiff + m_precision);
+				cerr << "constraint: " << (modelScoreDiff + m_precision) << " >= " << loss << endl;
+				if (diff > epsilon) {
 					violated = true;
-					cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << diff << " (loss: " << loss << ")" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << diff << endl;
 				}
 				else if (m_onlyViolatedConstraints) {
 					addConstraint = false;
 				}
 
-				float lossMinusModelScoreDiff = loss - modelScoreDiff;
+				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_precision);
 				if (violated) {
 					if (m_accumulateMostViolatedConstraints || m_pastAndCurrentConstraints) {
 						// find the most violated constraint per batch
@@ -160,10 +160,10 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	  	// check if constraint is violated
 			bool violated = false;
 			bool addConstraint = true;
-			float diff = m_losses[i] - modelScoreDiff;
-			if (diff > (epsilon + m_precision)) {
+			float diff = m_losses[i] - (modelScoreDiff + m_precision);
+			if (diff > epsilon) {
 				violated = true;
-				cerr << "Rank " << rank << ", epoch " << epoch << ", past violation: " << diff << " (loss: " << m_losses[i] << ")" << endl;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", past violation: " << diff << endl;
 			}
 			else if (m_onlyViolatedConstraints) {
 				addConstraint = false;
@@ -171,9 +171,9 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	    if (addConstraint) {
 	    	featureValueDiffs.push_back(m_featureValueDiffs[i]);
-	    	lossMinusModelScoreDiffs.push_back(m_losses[i] - modelScoreDiff);
+	    	lossMinusModelScoreDiffs.push_back(m_losses[i] - (modelScoreDiff + m_precision));
 	    	all_losses.push_back(m_losses[i]);
-//	    	cerr << "old constraint: " << modelScoreDiff << " >= " << m_losses[i] << endl;
+//	    	cerr << "old constraint: " << (modelScoreDiff + m_precision) << " >= " << m_losses[i] << endl;
 
 	    	if (violated) {
 	    		++violatedConstraintsBefore;
@@ -193,14 +193,14 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	if (m_accumulateMostViolatedConstraints) {
 		if (max_batch_loss != -1) {
 			float modelScoreDiff = max_batch_featureValueDiff.InnerProduct(currWeights);
-			float diff = max_batch_loss - modelScoreDiff;
+			float diff = max_batch_loss - (modelScoreDiff + m_precision);
     	++violatedConstraintsBefore;
     	oldDistanceFromOptimum += diff;
 
     	featureValueDiffs.push_back(max_batch_featureValueDiff);
-    	lossMinusModelScoreDiffs.push_back(max_batch_loss - modelScoreDiff);
+    	lossMinusModelScoreDiffs.push_back(max_batch_loss - (modelScoreDiff + m_precision));
     	all_losses.push_back(max_batch_loss);
-//    	cerr << "new constraint: " << modelScoreDiff << " !>= " << max_batch_loss << endl;
+//    	cerr << "new constraint: " << (modelScoreDiff + m_precision) << " !>= " << max_batch_loss << endl;
 		}
 	}
 
@@ -265,8 +265,8 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(newWeights);
 		float loss = all_losses[i];
-		float diff = loss - modelScoreDiff;
-		if (diff > (epsilon + m_precision)) {
+		float diff = loss - (modelScoreDiff + m_precision);
+		if (diff > epsilon) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;
 		}
@@ -376,17 +376,17 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 		  	// check if constraint is violated
 				bool violated = false;
 				bool addConstraint = true;
-				float diff = loss - modelScoreDiff;
-				cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
-				if (diff > (epsilon + m_precision)) {
+				float diff = loss - (modelScoreDiff + m_precision);
+				cerr << "constraint: " << (modelScoreDiff + m_precision) << " >= " << loss << endl;
+				if (diff > epsilon) {
 					violated = true;
-					cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << diff << " (loss: " << loss << ")" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << diff << endl;
 				}
 				else if (m_onlyViolatedConstraints) {
 					addConstraint = false;
 				}
 
-				float lossMinusModelScoreDiff = loss - modelScoreDiff;
+				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_precision);
 				if (violated) {
 					if (m_accumulateMostViolatedConstraints || m_pastAndCurrentConstraints) {
 						// find the most violated constraint per batch
@@ -434,10 +434,10 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	  	// check if constraint is violated
 			bool violated = false;
 			bool addConstraint = true;
-			float diff = m_losses[i] - modelScoreDiff;
-			if (diff > (epsilon + m_precision)) {
+			float diff = m_losses[i] - (modelScoreDiff + m_precision);
+			if (diff > epsilon) {
 				violated = true;
-				cerr << "Rank " << rank << ", epoch " << epoch << ", past violation: " << diff << " (loss: " << m_losses[i] << ")" << endl;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", past violation: " << diff << endl;
 			}
 			else if (m_onlyViolatedConstraints) {
 				addConstraint = false;
@@ -445,9 +445,9 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 
 	    if (addConstraint) {
 	    	featureValueDiffs.push_back(m_featureValueDiffs[i]);
-	    	lossMinusModelScoreDiffs.push_back(m_losses[i] - modelScoreDiff);
+	    	lossMinusModelScoreDiffs.push_back(m_losses[i] - (modelScoreDiff + m_precision));
 	    	all_losses.push_back(m_losses[i]);
-//	    	cerr << "old constraint: " << modelScoreDiff << " >= " << m_losses[i] << endl;
+//	    	cerr << "old constraint: " << (modelScoreDiff + m_precision) << " >= " << m_losses[i] << endl;
 
 	    	if (violated) {
 	    		++violatedConstraintsBefore;
@@ -467,14 +467,14 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	if (m_accumulateMostViolatedConstraints) {
 		if (max_batch_loss != -1) {
 			float modelScoreDiff = max_batch_featureValueDiff.InnerProduct(currWeights);
-			float diff = max_batch_loss - modelScoreDiff;
+			float diff = max_batch_loss - (modelScoreDiff + m_precision);
     	++violatedConstraintsBefore;
     	oldDistanceFromOptimum += diff;
 
     	featureValueDiffs.push_back(max_batch_featureValueDiff);
-    	lossMinusModelScoreDiffs.push_back(max_batch_loss - modelScoreDiff);
+    	lossMinusModelScoreDiffs.push_back(max_batch_loss - (modelScoreDiff + m_precision));
     	all_losses.push_back(max_batch_loss);
-//    	cerr << "new constraint: " << modelScoreDiff << " !>= " << max_batch_loss << endl;
+//    	cerr << "new constraint: " << (modelScoreDiff + m_precision) << " !>= " << max_batch_loss << endl;
 		}
 	}
 
@@ -539,8 +539,8 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(newWeights);
 		float loss = all_losses[i];
-		float diff = loss - modelScoreDiff;
-		if (diff > (epsilon + m_precision)) {
+		float diff = loss - (modelScoreDiff + m_precision);
+		if (diff > epsilon) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;
 		}
@@ -614,10 +614,10 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   featureValueDiff.MinusEquals(featureValues);
   cerr << "hope - fear: " << featureValueDiff << endl;
   float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-  float diff = loss - modelScoreDiff;
+  float diff = loss - (modelScoreDiff + m_precision);
   // approximate comparison between floats
-	cerr << "constraint: " << modelScoreDiff << " >= " << loss << endl;
-  if (diff > (epsilon + m_precision)) {
+	cerr << "constraint: " << (modelScoreDiff + m_precision) << " >= " << loss << endl;
+  if (diff > epsilon) {
     // constraint violated
     oldDistanceFromOptimum += diff;
     constraintViolatedBefore = true;
@@ -670,11 +670,11 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   featureValueDiff = oracleFeatureValues;
   featureValueDiff.MinusEquals(featureValues);
   modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
-  diff = loss - modelScoreDiff;
+  diff = loss - (modelScoreDiff + m_precision);
   // approximate comparison between floats!
   if (diff > epsilon) {
     constraintViolatedAfter = true;
-    newDistanceFromOptimum += (loss - modelScoreDiff);
+    newDistanceFromOptimum += (loss - (modelScoreDiff + m_precision));
   }
 
   cerr << "Rank " << rank << ", epoch " << epoch << ", check, constraint violated before? " << constraintViolatedBefore << ", after? " << constraintViolatedAfter << endl;
