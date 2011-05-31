@@ -68,7 +68,7 @@ namespace Mira {
     delete[] mosesargv;
   }
  
-  MosesDecoder::MosesDecoder(bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing)
+  MosesDecoder::MosesDecoder(bool useScaledReference, bool scaleByInputLength, float historySmoothing)
 		: m_manager(NULL) {
 			// force initialisation of the phrase dictionary (TODO: what for?)
 			const StaticData &staticData = StaticData::Instance();
@@ -82,7 +82,7 @@ namespace Mira {
       m_manager->ProcessSentence();
 
       // Add the bleu feature
-      m_bleuScoreFeature = new BleuScoreFeature(useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
+      m_bleuScoreFeature = new BleuScoreFeature(useScaledReference, scaleByInputLength, historySmoothing);
       (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
   }
   
@@ -290,8 +290,5 @@ namespace Mira {
 	  }
   }
 
-  void MosesDecoder::setBPfactor(float factor) {
-  	m_bleuScoreFeature->SetBPfactor(factor);
-  }
 } 
 

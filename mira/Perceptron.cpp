@@ -24,67 +24,32 @@ using namespace std;
 
 namespace Mira {
 
-vector<int> Perceptron::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
-		ScoreComponentCollection& featureValues,
-		float loss,
-		ScoreComponentCollection& oracleFeatureValues,
-		float oracleBleuScore,
-		size_t sentenceId,
-		float learning_rate,
-		float max_sentence_update,
+vector<int> Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeights,
+		const vector< vector<ScoreComponentCollection> >& featureValuesHope,
+		const vector< vector<ScoreComponentCollection> >& featureValuesFear,
+		const vector< vector<float> >& dummy1,
+		const vector< vector<float> >& dummy2,
+		const vector< size_t> dummy3,
+		float perceptron_learning_rate,
+		float dummy4,
 		size_t rank,
 		size_t epoch,
-		bool controlUpdates) {
-
-			vector<int> status(1);
-			status[0] = 0;
-			return status;
-}
-
-vector<int> Perceptron::updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
-		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-		const std::vector<std::vector<float> >& bleuScoresHope,
-		const std::vector<std::vector<float> >& bleuScoresFear,
-		const std::vector< size_t> sentenceId,
-		float learning_rate,
-		float max_sentence_update,
-		size_t rank,
-		size_t epoch,
-		int updates_per_epoch,
-		bool controlUpdates) {
-
-	vector<int> status(1);
-	status[0] = 0;
-	return status;
-}
-
-vector<int> Perceptron::updateWeights(ScoreComponentCollection& currWeights,
-		const vector< vector<ScoreComponentCollection> >& featureValues,
-		const vector< vector<float> >& losses,
-		const vector< vector<float> >& bleuScores,
-		const vector< ScoreComponentCollection>& oracleFeatureValues,
-		const vector< float> oracleBleuScores,
-		const vector< size_t> dummy,
-		float learning_rate,
-		float max_sentence_update,
-		size_t rank,
-		size_t epoch,
-		int updates_per_epoch,
-		bool controlUpdates)
+		bool dummy5)
 {
-	for (size_t i = 0; i < featureValues.size(); ++i) {
-		for (size_t j = 0; j < featureValues[i].size(); ++j) {
-			if (losses[i][j] > 0) {
-				currWeights.MinusEquals(featureValues[i][j]);
-				currWeights.PlusEquals(oracleFeatureValues[i]);
-			}
-		}
-	}
+	cerr << "hope: " << featureValuesHope[0][0] << endl;
+	cerr << "fear: " << featureValuesFear[0][0] << endl;
+	ScoreComponentCollection featureValueDiff = featureValuesHope[0][0];
+	featureValueDiff.MinusEquals(featureValuesFear[0][0]);
+	cerr << "hope - fear: " << featureValueDiff << endl;
+	featureValueDiff.MultiplyEquals(perceptron_learning_rate);
+	currWeights.PlusEquals(featureValueDiff);
 
-	vector<int> status(1);
-	status[0] = 0;
-	return status;
+	vector<int> update_status;
+	update_status.push_back(0);
+	update_status.push_back(0);
+	update_status.push_back(0);
+	return update_status;
 }
+
 }
 

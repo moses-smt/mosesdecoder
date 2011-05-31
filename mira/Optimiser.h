@@ -29,82 +29,33 @@ namespace Mira {
   class Optimiser {
     public:
       Optimiser() {}
-      virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
-							 Moses::ScoreComponentCollection& featureValues,
-							 float loss,
-							 Moses::ScoreComponentCollection& oracleFeatureValues,
-							 float oracleBleuScore,
-							 size_t sentenceId,
-							 float learning_rate,
-							 float max_sentence_update,
-							 size_t rank,
-							 size_t epoch,
-							 bool controlUpdates) = 0;
-      virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
-            						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
-            						  const std::vector< std::vector<float> >& losses,
-            						  const std::vector<std::vector<float> >& bleuScores,
-            						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
-            						  const std::vector< float> oracleBleuScores,
-            						  const std::vector< size_t> sentenceIds,
-      										float learning_rate,
-      										float max_sentence_update,
-      										size_t rank,
-													size_t epoch,
-      										int updates_per_epoch,
-      										bool controlUpdates) = 0;
+
       virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
-       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-       						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-       						  const std::vector<std::vector<float> >& bleuScoresHope,
-       						  const std::vector<std::vector<float> >& bleuScoresFear,
-       						  const std::vector< size_t> sentenceIds,
- 										float learning_rate,
- 										float max_sentence_update,
- 										size_t rank,
- 										size_t epoch,
- 										int updates_per_epoch,
- 										bool controlUpdates) = 0;
+				  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
+				  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
+				  const std::vector<std::vector<float> >& bleuScoresHope,
+				  const std::vector<std::vector<float> >& bleuScoresFear,
+				  const std::vector< size_t> sentenceIds,
+					float learning_rate,
+					float max_sentence_update,
+					size_t rank,
+					size_t epoch,
+					bool controlUpdates) = 0;
   };
  
   class Perceptron : public Optimiser {
     public:
-			virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
-						       Moses::ScoreComponentCollection& featureValues,
-						       float loss,
-						       Moses::ScoreComponentCollection& oracleFeatureValues,
-						       float oracleBleuScore,
-						       size_t sentenceId,
-						       float learning_rate,
-						       float max_sentence_update,
-						       size_t rank,
-						       size_t epoch,
-						       bool controlUpdates);
-			virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
-                         const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
-                         const std::vector< std::vector<float> >& losses,
-                         const std::vector<std::vector<float> >& bleuScores,
-                         const std::vector<Moses::ScoreComponentCollection>& oracleFeatureValues,
-                         const std::vector< float> oracleBleuScores,
-                         const std::vector< size_t> sentenceIds,
-                         float learning_rate,
-                         float max_sentence_update,
-                         size_t rank,
-                         size_t epoch,
-                         int updates_per_epoch,
-                         bool controlUpdates);
-	     virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
-	      						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-	      						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-	      						  const std::vector<std::vector<float> >& bleuScoresHope,
-	      						  const std::vector<std::vector<float> >& bleuScoresFear,
-	      						  const std::vector< size_t> sentenceIds,
-											float learning_rate,
-											float max_sentence_update,
-											size_t rank,
-											size_t epoch,
-											int updates_per_epoch,
-											bool controlUpdates);
+			virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+					const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
+					const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
+					const std::vector<std::vector<float> >& bleuScoresHope,
+					const std::vector<std::vector<float> >& bleuScoresFear,
+					const std::vector< size_t> sentenceIds,
+					float learning_rate,
+  				float max_sentence_update,
+  				size_t rank,
+  				size_t epoch,
+  				bool controlUpdates);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -112,10 +63,8 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-  MiraOptimiser(size_t n, bool hildreth, float marginScaleFactor, bool onlyViolatedConstraints, float slack, size_t weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize, float precision) :
+  MiraOptimiser(float marginScaleFactor, bool onlyViolatedConstraints, float slack, size_t weightedLossFunction, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize, float precision) :
 		  Optimiser(),
-		  m_n(n),
-		  m_hildreth(hildreth),
 		  m_marginScaleFactor(marginScaleFactor),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
@@ -126,23 +75,21 @@ namespace Mira {
 		  m_oracles(exampleSize),
 		  m_bleu_of_oracles(exampleSize),
 		  m_precision(precision) { }
-
-     ~MiraOptimiser() {}
    
-     virtual std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
-							Moses::ScoreComponentCollection& featureValues,
-							float loss,
-							Moses::ScoreComponentCollection& oracleFeatureValues,
-							float oracleBleuScores,
+     std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
+							Moses::ScoreComponentCollection& featureValuesHope,
+							Moses::ScoreComponentCollection& featureValuesFear,
+							float bleuScoresHope,
+							float bleuScoresFear,
 							size_t sentenceId,
 							float learning_rate,
 							float max_sentence_update,
 							size_t rank,
 							size_t epoch,
 							bool controlUpdates);
-     virtual std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
-      						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
-      						  const std::vector< std::vector<float> >& losses,
+     std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
+      						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
+      						  const std::vector<std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
       						  const std::vector< float> oracleBleuScores,
@@ -151,11 +98,10 @@ namespace Mira {
 										float max_sentence_update,
 										size_t rank,
 										size_t epoch,
-										int updates_per_epoch,
 										bool controlUpdates);
      virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
-      						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-      						  const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
+      						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
+      						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
       						  const std::vector<std::vector<float> >& bleuScoresHope,
       						  const std::vector<std::vector<float> >& bleuScoresFear,
       						  const std::vector< size_t> sentenceIds,
@@ -163,32 +109,17 @@ namespace Mira {
 										float max_sentence_update,
 										size_t rank,
 										size_t epoch,
-										int updates_per_epoch,
 										bool controlUpdates);
 
-      void setSlack(float slack) {
-      	m_slack = slack;
-      }
+     void setSlack(float slack) {
+    	 m_slack = slack;
+     }
 
-      void setMarginScaleFactor(float msf) {
-      	m_marginScaleFactor = msf;
-      }
+     void setMarginScaleFactor(float msf) {
+    	 m_marginScaleFactor = msf;
+     }
 
-      Moses::ScoreComponentCollection getAccumulatedUpdates() {
-					return m_accumulatedUpdates;
-      }
-
-      void resetAccumulatedUpdates() {
-      	m_accumulatedUpdates.ZeroAll();
-      }
-  
    private:
-      // number of hypotheses used for each nbest list (number of hope, fear, best model translations)
-      size_t m_n;
-
-      // whether or not to use the Hildreth algorithm in the optimisation step
-      bool m_hildreth;
-
       // scaling the margin to regularise updates
       float m_marginScaleFactor;
 
@@ -211,12 +142,9 @@ namespace Mira {
       std::vector< Moses::ScoreComponentCollection> m_featureValueDiffs;
       std::vector< float> m_losses;
 
-
       bool m_accumulateMostViolatedConstraints;
 
       bool m_pastAndCurrentConstraints;
-
-      Moses::ScoreComponentCollection m_accumulatedUpdates;
 
       float m_precision;
   };

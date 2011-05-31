@@ -17,7 +17,6 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
     float max_sentence_update,
     size_t rank,
     size_t epoch,
-    int updates_per_epoch,
     bool controlUpdates) {
 
 	// add every oracle in batch to list of oracles (under certain conditions)
@@ -300,16 +299,10 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		cerr << "Rank " << rank << ", epoch " << epoch << ", update after scaling to max-sentence-update: " << summedUpdate << endl;
 	}
 
-	// Apply update to weight vector or store it for later
-	if (updates_per_epoch > 0) {
-		m_accumulatedUpdates.PlusEquals(summedUpdate);
-		cerr << "Rank " << rank << ", epoch " << epoch << ", new accumulated updates:" << m_accumulatedUpdates << endl;
-	} else {
-		// apply update to weight vector
-		cerr << "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl;
-		currWeights.PlusEquals(summedUpdate);
-		cerr << "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl;
-	}
+	// apply update to weight vector
+	cerr << "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl;
+	currWeights.PlusEquals(summedUpdate);
+	cerr << "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl;
 
 	vector<int> statusPlus(3);
 	statusPlus[0] = 0;
@@ -328,7 +321,6 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 		float max_sentence_update,
 		size_t rank,
 		size_t epoch,
-		int updates_per_epoch,
 		bool controlUpdates) {
 
 	// vector of feature values differences for all created constraints
@@ -574,16 +566,10 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 		cerr << "Rank " << rank << ", epoch " << epoch << ", update after scaling to max-sentence-update: " << summedUpdate << endl;
 	}
 
-	// Apply update to weight vector or store it for later
-	if (updates_per_epoch > 0) {
-		m_accumulatedUpdates.PlusEquals(summedUpdate);
-		cerr << "Rank " << rank << ", epoch " << epoch << ", new accumulated updates:" << m_accumulatedUpdates << endl;
-	} else {
-		// apply update to weight vector
-		cerr << "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl;
-		currWeights.PlusEquals(summedUpdate);
-		cerr << "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl;
-	}
+	// apply update to weight vector
+	cerr << "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl;
+	currWeights.PlusEquals(summedUpdate);
+	cerr << "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl;
 
 	vector<int> statusPlus(3);
 	statusPlus[0] = 0;
@@ -593,10 +579,10 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 }
 
 vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
-    ScoreComponentCollection& featureValues,
-    float loss,
-    ScoreComponentCollection& oracleFeatureValues,
-    float oracleBleuScore,
+		ScoreComponentCollection& featureValuesHope,
+    ScoreComponentCollection& featureValuesFear,
+    float bleuScoreHope,
+    float bleuScoreFear,
     size_t sentenceId,
     float learning_rate,
     float max_sentence_update,
@@ -609,12 +595,13 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   bool constraintViolatedBefore = false;
   ScoreComponentCollection weightUpdate;
 
-  cerr << "hope: " << oracleFeatureValues << endl;
-  cerr << "fear: " << featureValues << endl;
-  ScoreComponentCollection featureValueDiff = oracleFeatureValues;
-  featureValueDiff.MinusEquals(featureValues);
+  cerr << "hope: " << featureValuesHope << endl;
+  cerr << "fear: " << featureValuesFear << endl;
+  ScoreComponentCollection featureValueDiff = featureValuesHope;
+  featureValueDiff.MinusEquals(featureValuesFear);
   cerr << "hope - fear: " << featureValueDiff << endl;
   float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+  float loss = bleuScoreHope - bleuScoreFear;
   float diff = loss - (modelScoreDiff + m_precision);
   // approximate comparison between floats
 	cerr << "constraint: " << (modelScoreDiff + m_precision) << " >= " << loss << endl;
@@ -668,8 +655,8 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
   newWeights.PlusEquals(weightUpdate);
   bool constraintViolatedAfter = false;
   float newDistanceFromOptimum = 0;
-  featureValueDiff = oracleFeatureValues;
-  featureValueDiff.MinusEquals(featureValues);
+  featureValueDiff = featureValuesHope;
+  featureValueDiff.MinusEquals(featureValuesFear);
   modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
   diff = loss - (modelScoreDiff + m_precision);
   // approximate comparison between floats!

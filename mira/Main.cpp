@@ -168,7 +168,6 @@ int main(int argc, char** argv) {
 	size_t epochs;
 	string learner;
 	bool shuffle;
-	bool hildreth;
 	size_t mixingFrequency;
 	size_t weightDumpFrequency;
 	string weightDumpStem;
@@ -186,8 +185,6 @@ int main(int argc, char** argv) {
 	float historySmoothing;
 	bool useScaledReference;
 	bool scaleByInputLength;
-	float BPfactor;
-	bool adapt_BPfactor;
 	float slack;
 	float slack_step;
 	float slack_min;
@@ -198,6 +195,8 @@ int main(int argc, char** argv) {
 	bool weightConvergence;
 	bool controlUpdates;
 	float learning_rate;
+	float mira_learning_rate;
+	float perceptron_learning_rate;
 	bool logFeatureValues;
 	size_t baseOfLog;
 	string decoder_settings;
@@ -211,7 +210,6 @@ int main(int argc, char** argv) {
 	bool stop_dev_bleu;
 	bool stop_approx_dev_bleu;
 	bool train_linear_classifier;
-	int updates_per_epoch;
 	bool multiplyA;
 	bool historyOf1best;
 	bool burnIn;
@@ -224,19 +222,18 @@ int main(int argc, char** argv) {
 	bool analytical_update;
 	bool perceptron_update;
 	bool hope_fear;
+	bool model_hope_fear;
 	int hope_n;
 	int fear_n;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 			("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
 			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
-			("adapt-BP-factor", po::value<bool>(&adapt_BPfactor)->default_value(0), "Set factor to 1 when optimal translation length in reached")
 			("analytical-update",  po::value<bool>(&analytical_update)->default_value(0), "Use one best lists and compute the update analytically")
 			("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 			("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 			("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 			("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the bleu objective weight)")
-			("BP-factor", po::value<float>(&BPfactor)->default_value(1.0), "Increase penalty for short translations")
 			("burn-in", po::value<bool>(&burnIn)->default_value(false), "Do a burn-in of the BLEU history before training")
 			("burn-in-input-file", po::value<string>(&burnInInputFile), "Input file for burn-in phase of BLEU history")
 			("burn-in-reference-files", po::value<vector<string> >(&burnInReferenceFiles), "Reference file for burn-in phase of BLEU history")
@@ -252,14 +249,13 @@ int main(int argc, char** argv) {
 			("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
 			("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 			("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-			("hildreth", po::value<bool>(&hildreth)->default_value(true), "Use Hildreth's optimisation algorithm")
 			("history-of-1best", po::value<bool>(&historyOf1best)->default_value(0), "Use the 1best translation to update the history")
 			("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
-			("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations (not model)")
+			("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimization (not model)")
 			("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
 			("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
 			("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
-			("learning-rate", po::value<float>(&learning_rate)->default_value(1), "Learning rate (fixed or flexible)")
+			("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 			("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 			("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
 			("min-bleu-change", po::value<float>(&min_bleu_change)->default_value(0), "Minimum BLEU change of 1best translations of one epoch")
@@ -268,15 +264,15 @@ int main(int argc, char** argv) {
 			("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(-1), "Set a maximum weight update per sentence")
 			("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 			("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+			("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimization")
 			("msf", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
 			("msf-min", po::value<float>(&marginScaleFactorMin)->default_value(1.0), "Minimum value that margin is scaled by")
 			("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
-	    ("multiplyA", po::value<bool>(&multiplyA)->default_value(true), "Multiply A with outcome before passing to Hildreth")
 	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
-	    ("perceptron-update", po::value<bool>(&perceptron_update)->default_value(false), "Do a simple perceptron style update")
+	    ("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 	    ("precision", po::value<float>(&precision)->default_value(0), "Precision when comparing left and right hand side of constraints")
 	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
@@ -290,7 +286,6 @@ int main(int argc, char** argv) {
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases (or no more increases)")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 	    ("train-linear-classifier", po::value<bool>(&train_linear_classifier)->default_value(false), "Test algorithm for linear classification")
-	    ("updates-per-epoch", po::value<int>(&updates_per_epoch)->default_value(-1), "Accumulate updates and apply them to the weight vector the specified number of times per epoch")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 	    ("weighted-loss-function", po::value<size_t>(&weightedLossFunction)->default_value(0), "Weight the loss of a hypothesis by its Bleu score")
@@ -347,16 +342,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	if (accumulateMostViolatedConstraints && pastAndCurrentConstraints) {
-	  cerr << "Error: the parameters --accumulate-most-violated-constraints and --past-and-current-constraints are mutually exclusive" << endl;
-	  return 1;
-	}
-
-	if (hope_n == -1 && fear_n == -1) {
-		hope_n = n;
-		fear_n = n;
-	}
-
 	// load input and references
 	vector<string> inputSentences;
 	if (!loadSentences(inputFile, inputSentences)) {
@@ -383,21 +368,82 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	MosesDecoder* decoder = new MosesDecoder(useScaledReference, scaleByInputLength, BPfactor, historySmoothing);
+	MosesDecoder* decoder = new MosesDecoder(useScaledReference, scaleByInputLength, historySmoothing);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
 		decoder->setWeights(startWeights);
 	}
 
-	if (sentenceLevelBleu) {
-		burnIn = false;
-		cerr << "Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
+	// Optionally shuffle the sentences
+	vector<size_t> order;
+	if (rank == 0) {
+		for (size_t i = 0; i < inputSentences.size(); ++i) {
+			order.push_back(i);
+		}
+
+		if (shuffle) {
+			cerr << "Shuffling input sentences.." << endl;
+			RandomIndex rindex;
+			random_shuffle(order.begin(), order.end(), rindex);
+		}
+	}
+
+	// initialise optimizer
+	Optimiser* optimiser = NULL;
+	if (learner == "mira") {
+		cerr << "Optimising using Mira" << endl;
+		optimiser = new MiraOptimiser(marginScaleFactor, onlyViolatedConstraints, slack, weightedLossFunction,
+				maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size(), precision);
+		learning_rate = mira_learning_rate;
+		perceptron_update = false;
+	} else if (learner == "perceptron") {
+		cerr << "Optimising using Perceptron" << endl;
+		optimiser = new Perceptron();
+		learning_rate = perceptron_learning_rate;
+		perceptron_update = true;
+		model_hope_fear = false; // mira only
+		hope_fear = false; // mira only
+		analytical_update = false; // mira only
+	} else {
+		cerr << "Error: Unknown optimiser: " << learner << endl;
+		return 1;
+	}
+
+	// resolve parameter dependencies
+
+	if (accumulateMostViolatedConstraints && pastAndCurrentConstraints) {
+	  cerr << "Error: the parameters --accumulate-most-violated-constraints and --past-and-current-constraints are mutually exclusive" << endl;
+	  return 1;
 	}
 
 	if (perceptron_update || analytical_update) {
 		batchSize = 1;
 		cerr << "Setting batch size to 1 for perceptron/analytical update" << endl;
+	}
+
+	if (hope_n == -1 && fear_n == -1) {
+		hope_n = n;
+		fear_n = n;
+	}
+
+	if (model_hope_fear && hope_fear) {
+		hope_fear = false; // is true by default
+	}
+
+	if (hope_fear && analytical_update) {
+		cerr << "Error: must choose between hope-fear and analytical update" << endl;
+		return 1;
+	}
+
+	if (model_hope_fear && analytical_update) {
+		cerr << "Error: must choose between model-hope-fear and analytical update" << endl;
+		return 1;
+	}
+
+	if (sentenceLevelBleu) {
+		burnIn = false;
+		cerr << "Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
 	}
 
 	if (burnIn) {
@@ -501,20 +547,6 @@ int main(int argc, char** argv) {
 		decoder->loadReferenceSentences(referenceSentences);
 	}
 
-	// Optionally shuffle the sentences
-	vector<size_t> order;
-	if (rank == 0) {
-		for (size_t i = 0; i < inputSentences.size(); ++i) {
-			order.push_back(i);
-		}
-
-		if (shuffle) {
-			cerr << "Shuffling input sentences.." << endl;
-			RandomIndex rindex;
-			random_shuffle(order.begin(), order.end(), rindex);
-		}
-	}
-
 #ifdef MPI_ENABLE
 	mpi::broadcast(world, order, 0);
 #endif
@@ -530,74 +562,6 @@ int main(int argc, char** argv) {
 	VERBOSE(1, "Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
 	shard.resize(shardSize);
 	copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
-
-	Optimiser* optimiser = NULL;
-	cerr << "adapt-BP-factor: " << adapt_BPfactor << endl;
-	cerr << "control-updates: " << controlUpdates << endl;
-	cerr << "mix-frequency: " << mixingFrequency << endl;
-	cerr << "weight-dump-frequency: " << weightDumpFrequency << endl;
-	cerr << "weight-dump-stem: " << weightDumpStem << endl;
-	cerr << "shuffle: " << shuffle << endl;
-	cerr << "hildreth: " << hildreth << endl;
-	cerr << "msf: " << marginScaleFactor << endl;
-	cerr << "msf-step: " << marginScaleFactorStep << endl;
-	cerr << "msf-min: " << marginScaleFactorMin << endl;
-	cerr << "weighted-loss-function: " << weightedLossFunction << endl;
-	cerr << "nbest: " << n << endl;
-	cerr << "batch-size: " << batchSize << endl;
-	cerr << "distinct-nbest: " << distinctNbest << endl;
-	cerr << "only-violated-constraints: " << onlyViolatedConstraints << endl;
-	cerr << "accumulate-weights: " << accumulateWeights << endl;
-	cerr << "history-smoothing: " << historySmoothing << endl;
-	cerr << "use-scaled-reference: " << useScaledReference << endl;
-	cerr << "scale-by-input-length: " << scaleByInputLength << endl;
-	cerr << "BP-factor: " << BPfactor << endl;
-	cerr << "slack: " << slack << endl;
-	cerr << "slack-step: " << slack_step << endl;
-	cerr << "slack-min: " << slack_min << endl;
-	cerr << "max-number-oracles: " << maxNumberOracles << endl;
-	cerr << "accumulate-most-violated-constraints: " << accumulateMostViolatedConstraints << endl;
-	cerr << "past-and-current-constraints: " << pastAndCurrentConstraints << endl;
-	cerr << "log-feature-values: " << logFeatureValues << endl;
-	cerr << "base-of-log: " << baseOfLog << endl;
-	cerr << "decoder-settings: " << decoder_settings << endl;
-	cerr << "min-weight-change: " << min_weight_change << endl;
-	cerr << "max-sentence-update: " << max_sentence_update << endl;
-	cerr << "decr-learning-rate: " << decrease_learning_rate << endl;
-	cerr << "dev-bleu: " << devBleu << endl;
-	cerr << "normalise: " << normaliseWeights << endl;
-	cerr << "print-feature-values: " << print_feature_values << endl;
-	cerr << "stop-dev-bleu: " << stop_dev_bleu << endl;
-	cerr << "stop-approx-dev-bleu: " << stop_approx_dev_bleu << endl;
-	cerr << "stop-weights: " << weightConvergence << endl;
-	cerr << "updates-per-epoch: " << updates_per_epoch << endl;
-	cerr << "average-weights: " << averageWeights << endl;
-	cerr << "history-of-1best: " << historyOf1best <<  endl;
-	cerr << "sentence-level-bleu: " << sentenceLevelBleu << endl;
-	cerr << "bleu-score-weight: " << bleuScoreWeight << endl;
-	cerr << "precision: " << precision << endl;
-	cerr << "min-bleu-change: " << min_bleu_change << endl;
-	cerr << "perceptron-update: " << perceptron_update << endl;
-	cerr << "analytical-update: " << analytical_update << endl;
-	cerr << "hope-fear: " << hope_fear << endl;
-	cerr << "hope-n: " << hope_n << endl;
-	cerr << "fear-n: " << fear_n << endl;
-
-	if (learner == "mira") {
-		cerr << "Optimising using Mira" << endl;
-		optimiser = new MiraOptimiser(n, hildreth, marginScaleFactor,
-		    onlyViolatedConstraints, slack, weightedLossFunction, maxNumberOracles,
-					      accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size(), precision);
-		if (hildreth) {
-			cerr << "Using Hildreth's optimisation algorithm.." << endl;
-		}
-
-	} else if (learner == "perceptron") {
-		cerr << "Optimising using Perceptron" << endl;
-		optimiser = new Perceptron();
-	} else {
-		cerr << "Error: Unknown optimiser: " << learner << endl;
-	}
 
 	// set core weights
 	const vector<const ScoreProducer*> featureFunctions =
@@ -711,15 +675,15 @@ int main(int argc, char** argv) {
 
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newBleuScores;
-				if (hope_fear) {
+				if (model_hope_fear) {
+					featureValues.push_back(newFeatureValues);
+					bleuScores.push_back(newBleuScores);
+				}
+				else {
 					featureValuesHope.push_back(newFeatureValues);
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newBleuScores);
 					bleuScoresFear.push_back(newBleuScores);
-				}
-				else {
-					featureValues.push_back(newFeatureValues);
-					bleuScores.push_back(newBleuScores);
 				}
 
 				dummyFeatureValues.push_back(newFeatureValues);
@@ -737,33 +701,31 @@ int main(int argc, char** argv) {
 						cerr << "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl;
 					}
 
+					// clear dummies
+					dummyFeatureValues[batchPosition].clear();
+					dummyBleuScores[batchPosition].clear();
+
 					// HOPE
 					cerr << "Rank " << rank << ", run decoder to get 1best hope translations" << endl;
-					size_t oraclePos = dummyFeatureValues[batchPosition].size();
+					size_t oraclePos = 0;
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
-							dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
+							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
 							distinctNbest, rank);
 					// needed for history
 					inputLengths.push_back(decoder->getCurrentInputLength());
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
-					cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << dummyBleuScores[batchPosition][oraclePos] << endl;
-
-					oracleFeatureValues.push_back(dummyFeatureValues[batchPosition][oraclePos]);
-					oracleBleuScores.push_back(dummyBleuScores[batchPosition][oraclePos]);
-					// clear dummies
-					dummyFeatureValues[batchPosition].clear();
-					dummyBleuScores[batchPosition].clear();
+					cerr << "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScoresHope[batchPosition][oraclePos] << endl;
 
 					// FEAR
 					cerr << "Rank " << rank << ", run decoder to get 1best fear translations" << endl;
-					size_t fearPos = featureValues[batchPosition].size();
+					size_t fearPos = 0;
 					vector<const Word*> fear = decoder->getNBest(input, *sid, 1, -1.0, bleuScoreWeight,
-							featureValues[batchPosition], bleuScores[batchPosition], true,
+							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
 							distinctNbest, rank);
 					decoder->cleanup();
-					cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl;
+					cerr << "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScoresFear[batchPosition][fearPos] << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
 					}
@@ -860,7 +822,7 @@ int main(int argc, char** argv) {
 			} // end of batch loop
 
 			vector<vector<float> > losses(actualBatchSize);
-			if (!hope_fear) {
+			if (model_hope_fear) {
 				// Set loss for each sentence as BLEU(oracle) - BLEU(hypothesis)
 				for (size_t batchPosition = 0; batchPosition < actualBatchSize; ++batchPosition) {
 					for (size_t j = 0; j < bleuScores[batchPosition].size(); ++j) {
@@ -904,7 +866,15 @@ int main(int argc, char** argv) {
 			// optionally print out the feature values
 			if (print_feature_values) {
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
-				if (hope_fear) {
+				if (model_hope_fear) {
+					for (size_t i = 0; i < featureValues.size(); ++i) {
+						for (size_t j = 0; j < featureValues[i].size(); ++j) {
+							cerr << featureValues[i][j] << endl;
+						}
+					}
+					cerr << endl;
+				}
+				else {
 					cerr << "hope: " << endl;
 					for (size_t i = 0; i < featureValuesHope.size(); ++i) {
 						for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
@@ -919,14 +889,6 @@ int main(int argc, char** argv) {
 					}
 					cerr << endl;
 				}
-				else {
-					for (size_t i = 0; i < featureValues.size(); ++i) {
-						for (size_t j = 0; j < featureValues[i].size(); ++j) {
-							cerr << featureValues[i][j] << endl;
-						}
-					}
-					cerr << endl;
-				}
 			}
 
 			// Run optimiser on batch:
@@ -934,26 +896,22 @@ int main(int argc, char** argv) {
 			ScoreComponentCollection oldWeights(mosesWeights);
 			vector<int> update_status;
 			if (perceptron_update) {
-				// w += 0.01 (hope-fear)
-				cerr << "hope: " << oracleFeatureValues[0] << endl;
-				cerr << "fear: " << featureValues[0][0] << endl;
-				ScoreComponentCollection featureValueDiff = oracleFeatureValues[0];
-				featureValueDiff.MinusEquals(featureValues[0][0]);
-				cerr << "hope - fear: " << featureValueDiff << endl;
-				featureValueDiff.MultiplyEquals(0.01);
-				mosesWeights.PlusEquals(featureValueDiff);
-
-				update_status.push_back(0);
-				update_status.push_back(0);
-				update_status.push_back(0);
+				cerr << "case 1 " << endl;
+				vector<vector<float> > dummy1;
+				vector<size_t> dummy2;
+				update_status = optimiser->updateWeightsHopeFear(mosesWeights,
+						featureValuesHope, featureValuesFear,	dummy1, dummy1, dummy2,
+						learning_rate, 0, rank, epoch, 0);
 			}
 			else if (analytical_update) {
-				update_status = optimiser->updateWeightsAnalytically(mosesWeights, featureValues[0][0],
-			    losses[0][0], oracleFeatureValues[0], oracleBleuScores[0], ref_ids[0],
-			    learning_rate, max_sentence_update, rank, epoch, controlUpdates);
+				cerr << "case 2 " << endl;
+					update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights,
+							featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
+							ref_ids[0], learning_rate, max_sentence_update, rank, epoch, controlUpdates);
 			}
 			else {
 				if (hope_fear) {
+					cerr << "case 3 " << endl;
 					if (coreWeightMap.size() > 0) {
 						// set core features to 0 to avoid updating the feature weights
 						for (size_t i = 0; i < featureValuesHope.size(); ++i) {
@@ -983,12 +941,14 @@ int main(int argc, char** argv) {
 
 					update_status = optimiser->updateWeightsHopeFear(mosesWeights,
 							featureValuesHope, featureValuesFear,	bleuScoresHope, bleuScoresFear, ref_ids,
-							learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
+							learning_rate, max_sentence_update, rank, epoch, controlUpdates);
 				}
 				else {
-					update_status = optimiser->updateWeights(mosesWeights, featureValues,
+					// model_hope_fear
+					cerr << "case 4 " << endl;
+					update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights, featureValues,
 							losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
-							learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
+							learning_rate, max_sentence_update, rank, epoch, controlUpdates);
 				}
 			}
 
@@ -1002,48 +962,46 @@ int main(int argc, char** argv) {
 				sumConstraintChangeAbs += abs(update_status[1] - update_status[2]);
 				sumStillViolatedConstraints += update_status[2];
 
-				if (updates_per_epoch == -1) {
-					// pass new weights to decoder
-					if (normaliseWeights) {
-						mosesWeights.L1Normalise();
+				// pass new weights to decoder
+				if (normaliseWeights) {
+					mosesWeights.L1Normalise();
+				}
+
+				cumulativeWeights.PlusEquals(mosesWeights);
+				++numberOfUpdates;
+				++numberOfUpdatesThisEpoch;
+				if (averageWeights) {
+					ScoreComponentCollection averageWeights(cumulativeWeights);
+					if (accumulateWeights) {
+						averageWeights.DivideEquals(numberOfUpdates);
+					} else {
+						averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
 					}
 
-					cumulativeWeights.PlusEquals(mosesWeights);
-					++numberOfUpdates;
-					++numberOfUpdatesThisEpoch;
-					if (averageWeights) {
-						ScoreComponentCollection averageWeights(cumulativeWeights);
-						if (accumulateWeights) {
-							averageWeights.DivideEquals(numberOfUpdates);
-						} else {
-							averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
-						}
+					mosesWeights = averageWeights;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", set new average weights: " << mosesWeights << endl;
+				}
+				else {
+					cerr << "Rank " << rank << ", epoch " << epoch << ", set new weights: " << mosesWeights << endl;
+				}
 
-						mosesWeights = averageWeights;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", set new average weights: " << mosesWeights << endl;
-					}
-					else {
-						cerr << "Rank " << rank << ", epoch " << epoch << ", set new weights: " << mosesWeights << endl;
-					}
+				// set new Moses weights (averaged or not)
+				decoder->setWeights(mosesWeights);
 
-					// set new Moses weights (averaged or not)
-					decoder->setWeights(mosesWeights);
+				// compute difference to old weights
+				ScoreComponentCollection weightDifference(mosesWeights);
+				weightDifference.MinusEquals(oldWeights);
+				cerr << "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl;
 
-					// compute difference to old weights
-					ScoreComponentCollection weightDifference(mosesWeights);
-					weightDifference.MinusEquals(oldWeights);
-					cerr << "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl;
-
-					// get 1best model results with new weights (for each sentence in batch)
-					vector<float> bestModelNew;
-					for (size_t i = 0; i < actualBatchSize; ++i) {
-						string& input = inputSentences[*current_sid_start + i];
-						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest);
-						decoder->cleanup();
-						sumBleuChangeAbs += abs(bestModelOld_batch[i][0] - bestModelNew[0]);
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
-					}
+				// get 1best model results with new weights (for each sentence in batch)
+				vector<float> bestModelNew;
+				for (size_t i = 0; i < actualBatchSize; ++i) {
+					string& input = inputSentences[*current_sid_start + i];
+					bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest);
+					decoder->cleanup();
+					sumBleuChangeAbs += abs(bestModelOld_batch[i][0] - bestModelNew[0]);
+					cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
 				}
 			}
 
@@ -1069,7 +1027,6 @@ int main(int argc, char** argv) {
 				}
 			}
 
-
 			// clean up oracle and 1best translations after updating history
 			for (size_t i = 0; i < oracles.size(); ++i) {
 				for (size_t j = 0; j < oracles[i].size(); ++j) {
@@ -1079,63 +1036,6 @@ int main(int argc, char** argv) {
 			for (size_t i = 0; i < oneBests.size(); ++i) {
 				for (size_t j = 0; j < oneBests[i].size(); ++j) {
 					delete oneBests[i][j];
-				}
-			}
-
-			bool makeUpdate = updates_per_epoch == -1 ? 0 : (shardPosition % (shard.size() / updates_per_epoch) == 0);
-
-			// apply accumulated updates
-			if (makeUpdate && typeid(*optimiser) == typeid(MiraOptimiser)) {
-				mosesWeights = decoder->getWeights();
-				ScoreComponentCollection accumulatedUpdates = ((MiraOptimiser*) optimiser)->getAccumulatedUpdates();
-				cerr << "\nRank " << rank << ", epoch " << epoch << ", updates to apply during epoch " << epoch << ": " << accumulatedUpdates << endl;
-				if (accumulatedUpdates.GetWeightedScore() != 0) {
-					mosesWeights.PlusEquals(accumulatedUpdates);
-					((MiraOptimiser*) optimiser)->resetAccumulatedUpdates();
-
-					if (normaliseWeights) {
-						mosesWeights.L1Normalise();
-					}
-
-					cumulativeWeights.PlusEquals(mosesWeights);
-					++numberOfUpdates;
-					++numberOfUpdatesThisEpoch;
-
-					if (averageWeights) {
-						ScoreComponentCollection averageWeights(cumulativeWeights);
-						if (accumulateWeights) {
-							averageWeights.DivideEquals(numberOfUpdates);
-						} else {
-							averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
-						}
-
-						mosesWeights = averageWeights;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", set new average weights after applying cumulative update: " << mosesWeights << endl;
-					}
-					else {
-						cerr << "Rank " << rank << ", epoch " << epoch << ", set new weights after applying cumulative update: " << mosesWeights << endl;
-					}
-
-					decoder->setWeights(mosesWeights);
-
-					// compute difference to old weights
-					ScoreComponentCollection weightDifference(mosesWeights);
-					weightDifference.MinusEquals(oldWeights);
-					cerr << "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl;
-
-					// get 1best model results with new weights (for each sentence in batch)
-					vector<float> bestModelNew;
-					for (size_t i = 0; i < actualBatchSize; ++i) {
-						string& input = inputSentences[*current_sid_start + i];
-						bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest);
-						decoder->cleanup();
-						sumBleuChangeAbs += abs(bestModelOld_batch[i][0] - bestModelNew[0]);
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl;
-					}
-				}
-				else {
-					cerr << "Rank " << rank << ", epoch " << epoch << ", cumulative update is empty.." << endl;
 				}
 			}
 
@@ -1318,16 +1218,6 @@ int main(int argc, char** argv) {
 					// divide by number of processes
 					averageRatio /= size;
 					cerr << "Average ratio (dev) after epoch " << epoch << ": " << averageRatio << endl;
-					if (averageRatio > 1.008 && adapt_BPfactor) {
-						BPfactor -= 0.05;
-						decoder->setBPfactor(BPfactor);
-						cerr << "Change BPfactor to " << BPfactor << ".." << endl;
-					}
-					else if (averageRatio > 1.0 && adapt_BPfactor) {
-						BPfactor = 1;
-						decoder->setBPfactor(BPfactor);
-						cerr << "Change BPfactor to 1.." << endl;
-					}
 				}
 
 				// average approximate sentence bleu across processes

@@ -80,10 +80,9 @@ BleuScoreFeature::BleuScoreFeature():
                                  m_ref_length_history(0),
                                  m_use_scaled_reference(true),
                                  m_scale_by_input_length(true),
-                                 m_BP_factor(1.0),
                                  m_historySmoothing(0.9) {}
 
-BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float BPfactor, float historySmoothing):
+BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float historySmoothing):
                                  StatefulFeatureFunction("BleuScore"),      
                                  m_count_history(BleuScoreState::bleu_order),
                                  m_match_history(BleuScoreState::bleu_order),
@@ -92,7 +91,6 @@ BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLen
                                  m_ref_length_history(0),
                                  m_use_scaled_reference(useScaledReference),
                                  m_scale_by_input_length(scaleByInputLength),
-                                 m_BP_factor(BPfactor),
                                  m_historySmoothing(historySmoothing) {}
 
 
@@ -142,11 +140,6 @@ void BleuScoreFeature::SetCurrentSourceLength(size_t source_length) {
 void BleuScoreFeature::SetCurrentReference(size_t ref_id) {
     m_cur_ref_length = m_refs[ref_id].first;
     m_cur_ref_ngrams = m_refs[ref_id].second;
-}
-
-void BleuScoreFeature::SetBPfactor(float factor) {
-	m_BP_factor = factor;
-	std::cerr << "New BP factor: " << m_BP_factor << std::endl;
 }
 
 /*
@@ -417,7 +410,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 	    if (state->m_target_length < state->m_scaled_ref_length) {
 	    	float smoothed_target_length = m_target_length_history + state->m_target_length;
 	    	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-	    	precision *= exp(1 - ((m_BP_factor * smoothed_ref_length)/ smoothed_target_length));
+	    	precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
 	    }
 	}
 	else {
@@ -426,7 +419,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 			if (state->m_target_length < state->m_scaled_ref_length) {
 				float smoothed_target_length = m_target_length_history + state->m_target_length;
 				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-		    	precision *= exp(1 - ((m_BP_factor * smoothed_ref_length)/ smoothed_target_length));
+		    	precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
 			}
 		}
 		else {
@@ -434,7 +427,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 			if (state->m_target_length < state->m_source_phrase_length) {
 				float smoothed_target_length = m_target_length_history + state->m_target_length;
 				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-				precision *= exp(1 - ((m_BP_factor * smoothed_ref_length)/ smoothed_target_length));
+				precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
 			}
 		}
 	}
