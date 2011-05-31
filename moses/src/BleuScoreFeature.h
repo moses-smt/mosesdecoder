@@ -69,6 +69,7 @@ public:
     void SetBPfactor(float);
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
+    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,

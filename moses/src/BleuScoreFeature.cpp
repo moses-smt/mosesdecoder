@@ -225,6 +225,16 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 }
 
 /*
+ * Update history with a batch of oracle translations
+ */
+void BleuScoreFeature::PrintReferenceLength(const vector<size_t>& ref_ids) {
+	for (size_t batchPosition = 0; batchPosition < ref_ids.size(); ++batchPosition){
+	    size_t cur_ref_length = m_refs[ref_ids[batchPosition]].first;
+	    cerr << "reference length: " << cur_ref_length << endl;
+	}
+}
+
+/*
  * Given a phrase (current translation) calculate its ngram counts and
  * its ngram matches against the ngrams in the reference translation
  */

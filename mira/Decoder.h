@@ -73,6 +73,7 @@ class MosesDecoder {
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
     void printBleuFeatureHistory(std::ostream& out);
+    void printReferenceLength(const std::vector<size_t>& ref_ids);
     std::vector<float> calculateBleuOfCorpus(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& ref_ids, size_t epoch, size_t rank);
     void setBPfactor(float factor);
     Moses::ScoreComponentCollection getWeights();

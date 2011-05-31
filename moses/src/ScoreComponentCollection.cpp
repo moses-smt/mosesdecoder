@@ -57,6 +57,10 @@ void ScoreComponentCollection::L1Normalise() {
   m_scores /= m_scores.l1norm();
 }
 
+float ScoreComponentCollection::GetL1Norm() {
+  return m_scores.l1norm();
+}
+
 float ScoreComponentCollection::GetL2Norm() {
   return m_scores.l2norm();
 }

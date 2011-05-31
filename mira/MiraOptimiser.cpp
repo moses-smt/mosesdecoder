@@ -81,9 +81,9 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			for (size_t k = 0; k < m_oracles[sentenceId].size(); ++k) {
 				ScoreComponentCollection featureValueDiff = m_oracles[sentenceId][k];
 				featureValueDiff.MinusEquals(featureValues[i][j]);
-				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-				if (modelScoreDiff == 0) {
-					cerr << "equal feature values, constraint skipped.." << endl;
+				cerr << "feature value diff: " << featureValueDiff << endl;
+				if (featureValueDiff.GetL1Norm() == 0) {
+					cerr << "Equal feature values, constraint skipped.." << endl;
 					continue;
 				}
 
@@ -102,6 +102,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		  	// check if constraint is violated
 				bool violated = false;
 				bool addConstraint = true;
+				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				float diff = loss - (modelScoreDiff + m_precision);
 				cerr << "constraint: " << (modelScoreDiff + m_precision) << " >= " << loss << endl;
 				if (diff > epsilon) {
@@ -355,9 +356,8 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 				ScoreComponentCollection featureValueDiff = featureValuesHope[i][j];
 				featureValueDiff.MinusEquals(featureValuesFear[i][k]);
 				cerr << "feature value diff: " << featureValueDiff << endl;
-				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-				if (modelScoreDiff == 0) {
-					cerr << "equal feature values, constraint skipped.." << endl;
+				if (featureValueDiff.GetL1Norm() == 0) {
+					cerr << "Equal feature values, constraint skipped.." << endl;
 					continue;
 				}
 
@@ -376,6 +376,7 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 		  	// check if constraint is violated
 				bool violated = false;
 				bool addConstraint = true;
+				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				float diff = loss - (modelScoreDiff + m_precision);
 				cerr << "constraint: " << (modelScoreDiff + m_precision) << " >= " << loss << endl;
 				if (diff > epsilon) {

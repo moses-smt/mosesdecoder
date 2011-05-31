@@ -265,6 +265,10 @@ namespace Mira {
   	m_bleuScoreFeature->PrintHistory(out);
   }
 
+  void MosesDecoder::printReferenceLength(const vector<size_t>& ref_ids) {
+  	m_bleuScoreFeature->PrintReferenceLength(ref_ids);
+  }
+
   vector<float> MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {
   	  vector<float> bleu = m_bleuScoreFeature->CalculateBleuOfCorpus(words, ref_ids);
 	  if (bleu.size() > 0) {

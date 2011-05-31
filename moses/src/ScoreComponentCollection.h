@@ -262,6 +262,7 @@ public:
   void ZeroAllLM(const LMList& lmList);
   void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
   void L1Normalise();
+  float GetL1Norm();
   float GetL2Norm();
   void Save(std::string filename) {m_scores.save(filename);}
 

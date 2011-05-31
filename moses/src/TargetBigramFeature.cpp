@@ -61,10 +61,14 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
 {
   const TargetBigramState* tbState = dynamic_cast<const TargetBigramState*>(prev_state);
   assert(tbState);
+
+  // current hypothesis target phrase
   const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   if (targetPhrase.GetSize() == 0) {
     return new TargetBigramState(*tbState);
   }
+
+  // extract all bigrams w1 w2 from current hypothesis
   for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
     const Factor* f1 = NULL;
     if (i == 0) {
@@ -75,16 +79,19 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
     const Factor* f2 = targetPhrase.GetWord(i).GetFactor(m_factorType);
     const string& w1 = f1->GetString();
     const string& w2 = f2->GetString();
+
+    // skip bigrams if they don't belong to a given restricted vocabulary
     if (m_vocab.size() && 
         (m_vocab.find(w1) == m_vocab.end() || m_vocab.find(w2) == m_vocab.end())) {
       continue;
     }
+
     string name(w1 +":"+w2);
     accumulator->PlusEquals(this,name,1);
   }
+
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
-    const string& w1 = targetPhrase.GetWord(targetPhrase.GetSize()-1) 
-        .GetFactor(m_factorType)->GetString();
+    const string& w1 = targetPhrase.GetWord(targetPhrase.GetSize()-1).GetFactor(m_factorType)->GetString();
     const string& w2 = EOS_;
     if (m_vocab.empty() || (m_vocab.find(w1) != m_vocab.end())) {
       string name(w1 +":"+w2);

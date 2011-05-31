@@ -22,6 +22,7 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
@@ -40,10 +41,22 @@ namespace mpi = boost::mpi;
 #include "Optimiser.h"
 #include "Hildreth.h"
 
+typedef std::map<std::string, float> StrFloatMap;
+typedef std::pair<std::string, float> StrFloatPair;
+
 using namespace Mira;
 using namespace std;
 using namespace Moses;
 namespace po = boost::program_options;
+
+template <class T>
+bool from_string(T& t,
+                 const std::string& s,
+                 std::ios_base& (*f)(std::ios_base&))
+{
+  std::istringstream iss(s);
+  return !(iss >> f >> t).fail();
+}
 
 void OutputNBestList(const MosesChart::TrellisPathList &nBestList,
     const TranslationSystem* system, long translationId);
@@ -55,6 +68,27 @@ bool loadSentences(const string& filename, vector<string>& sentences) {
 	string line;
 	while (getline(in, line)) {
 		sentences.push_back(line);
+	}
+	return true;
+}
+
+bool loadWeights(const string& filename, StrFloatMap& coreWeightMap) {
+	ifstream in(filename.c_str());
+	if (!in)
+		return false;
+	string line;
+	while (getline(in, line)) {
+		// split weight name from value
+		vector<string> split_line;
+		boost::split(split_line, line, boost::is_any_of(" "));
+
+		float weight;
+		if(!from_string<float>(weight, split_line[1], std::dec))
+		{
+			cerr << "from_string failed" << endl;
+			return false;
+		}
+		coreWeightMap.insert(StrFloatPair(split_line[0], weight));
 	}
 	return true;
 }
@@ -130,6 +164,7 @@ int main(int argc, char** argv) {
 	string mosesConfigFile;
 	string inputFile;
 	vector<string> referenceFiles;
+	string coreWeightFile;
 	size_t epochs;
 	string learner;
 	bool shuffle;
@@ -207,6 +242,7 @@ int main(int argc, char** argv) {
 			("burn-in-reference-files", po::value<vector<string> >(&burnInReferenceFiles), "Reference file for burn-in phase of BLEU history")
 			("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
 			("control-updates", po::value<bool>(&controlUpdates)->default_value(true), "Ignore updates that increase number of violated constraints AND increase the error")
+			("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 			("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 			("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 			("decr-sentence-update", po::value<float>(&decrease_sentence_update)->default_value(0), "Decrease maximum weight update by the given value after every epoch")
@@ -288,6 +324,27 @@ int main(int argc, char** argv) {
 	if (!referenceFiles.size()) {
 		cerr << "Error: No reference files specified" << endl;
 		return 1;
+	}
+
+	StrFloatMap coreWeightMap;
+	if (!coreWeightFile.empty()) {
+		if (!hope_fear) {
+			cerr << "Error: using pre-tuned core weights is only implemented for hope/fear updates at the moment" << endl;
+			return 1;
+		}
+
+		if (!loadWeights(coreWeightFile, coreWeightMap)) {
+				cerr << "Error: Failed to load core weights from " << coreWeightFile << endl;
+				return 1;
+		}
+		else {
+			cerr << "Loaded core weights from " << coreWeightFile << ": " << endl;
+			StrFloatMap::iterator p;
+			for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+			{
+				cerr << p->first << ": " << p->second << endl;
+			}
+		}
 	}
 
 	if (accumulateMostViolatedConstraints && pastAndCurrentConstraints) {
@@ -542,9 +599,23 @@ int main(int argc, char** argv) {
 		cerr << "Error: Unknown optimiser: " << learner << endl;
 	}
 
+	// set core weights
+	const vector<const ScoreProducer*> featureFunctions =
+	    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+	ScoreComponentCollection initialWeights = decoder->getWeights();
+	if (coreWeightMap.size() > 0) {
+		for (size_t f = 0; f < featureFunctions.size(); ++f) {
+			string featureName = featureFunctions[f]->GetScoreProducerDescription();
+			if (coreWeightMap[featureName] != 0) {
+				initialWeights.Assign(featureFunctions[f], coreWeightMap[featureName]);
+			}
+		}
+	}
+	decoder->setWeights(initialWeights);
+
 	//Main loop:
 	// print initial weights
-	cerr << "Rank " << rank << ", initial weights: " << decoder->getWeights() << endl;
+	cerr << "Rank " << rank << ", initial weights: " << initialWeights << endl;
 	ScoreComponentCollection cumulativeWeights; // collect weights per epoch to produce an average
 	size_t numberOfUpdates = 0;
 	size_t numberOfUpdatesThisEpoch = 0;
@@ -799,8 +870,6 @@ int main(int argc, char** argv) {
 			}
 
 			// set weight for bleu feature to 0
-			const vector<const ScoreProducer*> featureFunctions =
-			    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 			mosesWeights.Assign(featureFunctions.back(), 0);
 
 			if (logFeatureValues) {
@@ -885,6 +954,33 @@ int main(int argc, char** argv) {
 			}
 			else {
 				if (hope_fear) {
+					if (coreWeightMap.size() > 0) {
+						// set core features to 0 to avoid updating the feature weights
+						for (size_t i = 0; i < featureValuesHope.size(); ++i) {
+							for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
+								// set all core features to 0
+								for (size_t f = 0; f < featureFunctions.size(); ++f) {
+									string featureName = featureFunctions[f]->GetScoreProducerDescription();
+									if (coreWeightMap[featureName] != 0) {
+										featureValuesHope[i][j].Assign(featureFunctions[f], 0);
+									}
+								}
+							}
+						}
+
+						for (size_t i = 0; i < featureValuesFear.size(); ++i) {
+							for (size_t j = 0; j < featureValuesFear[i].size(); ++j) {
+								// set all core features to 0
+								for (size_t f = 0; f < featureFunctions.size(); ++f) {
+									string featureName = featureFunctions[f]->GetScoreProducerDescription();
+									if (coreWeightMap[featureName] != 0) {
+										featureValuesFear[i][j].Assign(featureFunctions[f], 0);
+									}
+								}
+							}
+						}
+					}
+
 					update_status = optimiser->updateWeightsHopeFear(mosesWeights,
 							featureValuesHope, featureValuesFear,	bleuScoresHope, bleuScoresFear, ref_ids,
 							learning_rate, max_sentence_update, rank, epoch, updates_per_epoch, controlUpdates);
@@ -952,7 +1048,13 @@ int main(int argc, char** argv) {
 			}
 
 			// update history (for approximate document Bleu)
-			if (!sentenceLevelBleu) {
+			if (sentenceLevelBleu) {
+				for (size_t i = 0; i < oracles.size(); ++i) {
+					cerr << "Rank " << rank << ", epoch " << epoch << ", oracle length: " << oracles[i].size() << " ";
+					decoder->printReferenceLength(ref_ids);
+				}
+			}
+			else {
 				if (historyOf1best) {
 					for (size_t i = 0; i < oneBests.size(); ++i) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", update history with 1best length: " << oneBests[i].size() << " ";
@@ -966,6 +1068,7 @@ int main(int argc, char** argv) {
 					decoder->updateHistory(oracles, inputLengths, ref_ids, rank, epoch);
 				}
 			}
+
 
 			// clean up oracle and 1best translations after updating history
 			for (size_t i = 0; i < oracles.size(); ++i) {
