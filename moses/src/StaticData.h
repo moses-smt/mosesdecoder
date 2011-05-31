@@ -538,6 +538,8 @@ public:
 
   void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
 
+  void ClearTransOptionCache() const;
+
 
   const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
 

@@ -568,11 +568,7 @@ StaticData::~StaticData()
   m_languageModel.CleanUp();
 
   // delete trans opt
-  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
-  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
-    TranslationOptionList *transOptList = iterCache->second.first;
-    delete transOptList;
-  }
+  ClearTransOptionCache();
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
@@ -1256,6 +1252,13 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 #endif
   m_transOptCache[key] = make_pair( storedTransOptList, clock() );
   ReduceTransOptCache();
+}
+void StaticData::ClearTransOptionCache() const {
+  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
+  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
+    TranslationOptionList *transOptList = iterCache->second.first;
+    delete transOptList;
+  }
 }
 
 }
