@@ -216,7 +216,7 @@ bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
   //find longer phrases if they exist
   for(size_t i = lwrBnd; i < uprBnd; ++i) {
     size_t crpIdx = m_SA->at(i);
-    if((crpIdx + phrasesize) >= m_corpus->size()) continue; // past end of corpus
+    if((crpIdx + phrasesize) > m_corpus->size()) continue; // past end of corpus
     for(size_t pos = 1; pos < phrasesize; ++pos) { // for all following words
       if(m_corpus->at(crpIdx + pos) != phrase->at(pos)) {  // if word doesn't match
         if(indices->size() > 0) i = uprBnd;  // past the phrases since SA is ordered
