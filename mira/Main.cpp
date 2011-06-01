@@ -891,7 +891,6 @@ int main(int argc, char** argv) {
 			ScoreComponentCollection oldWeights(mosesWeights);
 			vector<int> update_status;
 			if (perceptron_update) {
-				cerr << "case 1 " << endl;
 				vector<vector<float> > dummy1;
 				vector<size_t> dummy2;
 				update_status = optimiser->updateWeightsHopeFear(mosesWeights,
@@ -899,14 +898,12 @@ int main(int argc, char** argv) {
 						learning_rate, 0, rank, epoch, 0);
 			}
 			else if (analytical_update) {
-				cerr << "case 2 " << endl;
 					update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights,
 							featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
 							ref_ids[0], learning_rate, max_sentence_update, rank, epoch, controlUpdates);
 			}
 			else {
 				if (hope_fear) {
-					cerr << "case 3 " << endl;
 					if (coreWeightMap.size() > 0) {
 						// set core features to 0 to avoid updating the feature weights
 						for (size_t i = 0; i < featureValuesHope.size(); ++i) {
@@ -940,7 +937,6 @@ int main(int argc, char** argv) {
 				}
 				else {
 					// model_hope_fear
-					cerr << "case 4 " << endl;
 					update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights, featureValues,
 							losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
 							learning_rate, max_sentence_update, rank, epoch, controlUpdates);

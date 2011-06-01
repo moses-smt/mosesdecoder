@@ -410,13 +410,6 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 		cerr << "Rank " << rank << ", epoch " << epoch << ", number of current violated constraints: " << violatedConstraintsBefore << endl;
 	}
 
-	if (m_max_number_oracles == 1) {
-		for (size_t k = 0; k < sentenceIds.size(); ++k) {
-			size_t sentenceId = sentenceIds[k];
-			m_oracles[sentenceId].clear();
-		}
-	}
-
 	size_t pastViolatedConstraints = 0;
 	// Add constraints from past iterations (BEFORE updating that list)
 	if (m_pastAndCurrentConstraints || m_accumulateMostViolatedConstraints) {
