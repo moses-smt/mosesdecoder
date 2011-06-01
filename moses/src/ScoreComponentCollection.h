@@ -184,6 +184,12 @@ public:
     m_scores[fname] = score;
   }
 
+  // shortcut: setting the value directly using the feature name
+  void Assign(const std::string name, float score)
+  {
+  	FName fname(name);
+  	m_scores[fname] = score;
+  }
 
 	float InnerProduct(const ScoreComponentCollection& rhs) const
 	{

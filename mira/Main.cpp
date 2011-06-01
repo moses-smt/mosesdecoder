@@ -41,8 +41,8 @@ namespace mpi = boost::mpi;
 #include "Optimiser.h"
 #include "Hildreth.h"
 
-typedef std::map<std::string, float> StrFloatMap;
-typedef std::pair<std::string, float> StrFloatPair;
+typedef std::map<const std::string, float> StrFloatMap;
+typedef std::pair<const std::string, float> StrFloatPair;
 
 using namespace Mira;
 using namespace std;
@@ -563,11 +563,10 @@ int main(int argc, char** argv) {
 	    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 	ScoreComponentCollection initialWeights = decoder->getWeights();
 	if (coreWeightMap.size() > 0) {
-		for (size_t f = 0; f < featureFunctions.size(); ++f) {
-			string featureName = featureFunctions[f]->GetScoreProducerDescription();
-			if (coreWeightMap[featureName] != 0) {
-				initialWeights.Assign(featureFunctions[f], coreWeightMap[featureName]);
-			}
+		StrFloatMap::iterator p;
+		for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+		{
+			initialWeights.Assign(p->first, p->second);
 		}
 	}
 	decoder->setWeights(initialWeights);
@@ -909,11 +908,10 @@ int main(int argc, char** argv) {
 						for (size_t i = 0; i < featureValuesHope.size(); ++i) {
 							for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
 								// set all core features to 0
-								for (size_t f = 0; f < featureFunctions.size(); ++f) {
-									string featureName = featureFunctions[f]->GetScoreProducerDescription();
-									if (coreWeightMap[featureName] != 0) {
-										featureValuesHope[i][j].Assign(featureFunctions[f], 0);
-									}
+								StrFloatMap::iterator p;
+								for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+								{
+									featureValuesHope[i][j].Assign(p->first, 0);
 								}
 							}
 						}
@@ -921,11 +919,10 @@ int main(int argc, char** argv) {
 						for (size_t i = 0; i < featureValuesFear.size(); ++i) {
 							for (size_t j = 0; j < featureValuesFear[i].size(); ++j) {
 								// set all core features to 0
-								for (size_t f = 0; f < featureFunctions.size(); ++f) {
-									string featureName = featureFunctions[f]->GetScoreProducerDescription();
-									if (coreWeightMap[featureName] != 0) {
-										featureValuesFear[i][j].Assign(featureFunctions[f], 0);
-									}
+								StrFloatMap::iterator p;
+								for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+								{
+									featureValuesFear[i][j].Assign(p->first, 0);
 								}
 							}
 						}
