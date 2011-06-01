@@ -427,13 +427,8 @@ int main(int argc, char** argv) {
 		fear_n = n;
 	}
 
-	if (model_hope_fear && hope_fear) {
+	if ((model_hope_fear || analytical_update) && hope_fear) {
 		hope_fear = false; // is true by default
-	}
-
-	if (hope_fear && analytical_update) {
-		cerr << "Error: must choose between hope-fear and analytical update" << endl;
-		return 1;
 	}
 
 	if (model_hope_fear && analytical_update) {
@@ -441,7 +436,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	if (sentenceLevelBleu) {
+	if (burnIn && sentenceLevelBleu) {
 		burnIn = false;
 		cerr << "Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
 	}
