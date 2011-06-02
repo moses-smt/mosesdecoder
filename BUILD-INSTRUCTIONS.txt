@@ -76,17 +76,6 @@ If you don't want Ken's LM, ./configure --without-kenlm
 
 ALTERNATIVE WAYS TO BUILD ON UNIX AND OTHER PLATFORMS
 
-Using Eclipse
--------------
-Tested on 32-bit Linux on x86 machines. 
-Please refer to the earlier instruction manual by Hieu Hoang which can be downloaded from
-    http://homepages.inf.ed.ac.uk/s0565741/papers/developers-manual.pdf
-Most of the manual is out of date, but the step-by-step instructions, with diagrams, for 
-building using Eclipse is still generally correct.
-
-Eclipse 3.2 with SVN and CDT plugins are required. Get them yourself, or download the binaries from
-   http://www.statmt.org/moses/sample-data/library/eclipse.tgz
-
 Microsoft Windows
 -----------------
 Tested on 32-bit Windows XP and Vista using Visual Studio 2005.
