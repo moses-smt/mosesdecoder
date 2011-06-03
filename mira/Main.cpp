@@ -171,12 +171,10 @@ int main(int argc, char** argv) {
 	size_t mixingFrequency;
 	size_t weightDumpFrequency;
 	string weightDumpStem;
-	float marginScaleFactor;
-	float marginScaleFactorStep;
-	float marginScaleFactorMin;
 	float min_learning_rate;
 	float min_sentence_update;
-	size_t weightedLossFunction;
+	size_t scale_margin;
+	bool scale_update;
 	size_t n;
 	size_t batchSize;
 	bool distinctNbest;
@@ -265,10 +263,7 @@ int main(int argc, char** argv) {
 			("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 			("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
 			("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimization")
-			("msf", po::value<float>(&marginScaleFactor)->default_value(1.0), "Margin scale factor, regularises the update by scaling the enforced margin")
-			("msf-min", po::value<float>(&marginScaleFactorMin)->default_value(1.0), "Minimum value that margin is scaled by")
-			("msf-step", po::value<float>(&marginScaleFactorStep)->default_value(0), "Decrease margin scale factor iteratively by the value provided")
-	    ("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
+			("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
 	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
@@ -288,7 +283,8 @@ int main(int argc, char** argv) {
 	    ("train-linear-classifier", po::value<bool>(&train_linear_classifier)->default_value(false), "Test algorithm for linear classification")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-	    ("weighted-loss-function", po::value<size_t>(&weightedLossFunction)->default_value(0), "Weight the loss of a hypothesis by its Bleu score")
+	    ("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
+	    ("scale-update", po::value<bool>(&scale_update)->default_value(false), "Scale the update by the Bleu score of the oracle translation")
 	    ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
 	po::options_description cmdline_options;
@@ -393,7 +389,7 @@ int main(int argc, char** argv) {
 	Optimiser* optimiser = NULL;
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
-		optimiser = new MiraOptimiser(marginScaleFactor, onlyViolatedConstraints, slack, weightedLossFunction,
+		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update,
 				maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size(), precision);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
@@ -1300,17 +1296,6 @@ int main(int argc, char** argv) {
 				mpi::broadcast(world, stop, 0);
 #endif
 			} //end if (weightConvergence)
-
-			// if using flexible margin scale factor, increase scaling (decrease value) for next epoch
-			if (marginScaleFactorStep > 0) {
-				if (marginScaleFactor - marginScaleFactorStep >= marginScaleFactorMin) {
-					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-								marginScaleFactor -= marginScaleFactorStep;
-								cerr << "Change margin scale factor to: " << marginScaleFactor << endl;
-								((MiraOptimiser*) optimiser)->setMarginScaleFactor(marginScaleFactor);
-					}
-				}
-			}
 
 			// if using flexible regularization, decrease regularization parameter for next epoch
 			if (slack_step > 0) {

@@ -87,15 +87,17 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 				}
 
 				float loss = losses[i][j];
-				loss *= m_marginScaleFactor;
-		    if (m_weightedLossFunction == 1) {
-		    	loss *= bleuScores[i][j];
+		    if (m_scale_margin == 1) {
+		    	loss *= oracleBleuScores[i];
+		    	cerr << "Scaling margin with oracle bleu score "  << oracleBleuScores[i] << endl;
 		    }
-		    else if (m_weightedLossFunction == 2) {
-		    	loss *= log2(bleuScores[i][j]);
+		    else if (m_scale_margin == 2) {
+		    	loss *= log2(oracleBleuScores[i]);
+		    	cerr << "Scaling margin with log2 oracle bleu score "  << log2(oracleBleuScores[i]) << endl;
 		    }
-		    else if (m_weightedLossFunction == 10) {
-		    	loss *= log10(bleuScores[i][j]);
+		    else if (m_scale_margin == 10) {
+		    	loss *= log10(oracleBleuScores[i]);
+		    	cerr << "Scaling margin with log10 oracle bleu score "  << log10(oracleBleuScores[i]) << endl;
 		    }
 
 		  	// check if constraint is violated
@@ -285,18 +287,24 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	  }
 	}
 
-	// Apply learning rate (fixed or flexible)
+	// apply learning rate
 	if (learning_rate != 1) {
 		cerr << "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl;
 		summedUpdate.MultiplyEquals(learning_rate);
 		cerr << "Rank " << rank << ", epoch " << epoch << ", update after applying learning rate: " << summedUpdate << endl;
 	}
 
-	// Apply threshold scaling
+	// apply threshold scaling
 	if (max_sentence_update != -1) {
 		cerr << "Rank " << rank << ", epoch " << epoch << ", update before scaling to max-sentence-update: " << summedUpdate << endl;
 		summedUpdate.ThresholdScaling(max_sentence_update);
 		cerr << "Rank " << rank << ", epoch " << epoch << ", update after scaling to max-sentence-update: " << summedUpdate << endl;
+	}
+
+	// scale update by BLEU of oracle
+	if (oracleBleuScores.size() == 1 && m_max_number_oracles == 1 && m_scale_update) { // scale only if just 1 oracle is used
+		cerr << "Scaling summed update with log10 oracle bleu score " << log10(oracleBleuScores[0]) << endl;
+		summedUpdate.MultiplyEquals(log10(oracleBleuScores[0]));
 	}
 
 	// apply update to weight vector
@@ -354,15 +362,17 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 				}
 
 				float loss = bleuScoresHope[i][j] - bleuScoresFear[i][k];
-				loss *= m_marginScaleFactor;
-		    if (m_weightedLossFunction == 1) {
+		    if (m_scale_margin == 1) {
 		    	loss *= bleuScoresHope[i][j];
+		    	cerr << "Scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl;
 		    }
-		    else if (m_weightedLossFunction == 2) {
+		    else if (m_scale_margin == 2) {
 		    	loss *= log2(bleuScoresHope[i][j]);
+		    	cerr << "Scaling margin with log2 oracle bleu score "  << log2(bleuScoresHope[i][j]) << endl;
 		    }
-		    else if (m_weightedLossFunction == 10) {
+		    else if (m_scale_margin == 10) {
 		    	loss *= log10(bleuScoresHope[i][j]);
+		    	cerr << "Scaling margin with log10 oracle bleu score "  << log10(bleuScoresHope[i][j]) << endl;
 		    }
 
 		  	// check if constraint is violated
@@ -503,6 +513,17 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 
+	  	// scale update by BLEU of hope translation (only two cases defined at the moment)
+	    if (featureValuesHope.size() == 1 && m_scale_update) { // only defined for batch size 1)
+	    		if (featureValuesHope[0].size() == 1) {
+	    			cerr << "Scaling update with log10 oracle bleu score "  << log10(bleuScoresHope[0][0]) << endl; // only 1 oracle
+	    			update.MultiplyEquals(log10(bleuScoresHope[0][0]));
+	    		} else if (featureValuesFear[0].size() == 1) {
+	    			cerr << "Scaling update with log10 oracle bleu score "  << log10(bleuScoresHope[0][k]) << endl; // k oracles
+	    			update.MultiplyEquals(log10(bleuScoresHope[0][k]));
+	    		}
+			}
+
 	    // sum up update
 	    summedUpdate.PlusEquals(update);
 	  }
@@ -628,11 +649,6 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
     }
   }
 
-
-  if (m_max_number_oracles == 1) {
-    m_oracles[sentenceId].clear();
-  }
-
   if (!constraintViolatedBefore) {
     // constraint satisfied, nothing to do
     cerr << "Rank " << rank << ", epoch " << epoch << ", check, constraint already satisfied" << endl;
@@ -668,20 +684,6 @@ vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& c
     statusPlus[1] = 1;
     statusPlus[2] = 1;
     return statusPlus;
-  }
-
-  // apply learning rate
-  if (learning_rate != 1) {
-    cerr << "Rank " << rank << ", update before applying learning rate: " << weightUpdate << endl;
-    weightUpdate.MultiplyEquals(learning_rate);
-    cerr << "Rank " << rank << ", update after applying learning rate: " << weightUpdate << endl;
-  }
-
-  // apply threshold scaling
-  if (max_sentence_update != -1) {
-    cerr << "Rank " << rank << ", update before scaling to max-sentence-update: " << weightUpdate << endl;
-    weightUpdate.ThresholdScaling(max_sentence_update);
-    cerr << "Rank " << rank << ", update after scaling to max-sentence-update: " << weightUpdate << endl;
   }
 
   // apply update to weight vector
