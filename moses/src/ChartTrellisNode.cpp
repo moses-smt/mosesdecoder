@@ -62,7 +62,7 @@ ChartTrellisNode::ChartTrellisNode(const ChartTrellisNode &origNode
     scoreChange.MinusEquals(origNode.GetHypothesis().GetScoreBreakdown());
 
     float deltaScore = scoreChange.GetWeightedScore();
-    assert(deltaScore <= 0.0005);
+    assert(deltaScore <= 0.005);
 
     // follow prev hypos back to beginning
     const std::vector<const ChartHypothesis*> &prevHypos = replacementHypo.GetPrevHypos();
