@@ -53,8 +53,6 @@ my $queue = &param("general.queue", "inf_iccs_smt");
 my $mpienv = &param("general.mpienv", "openmpi_smp8_mark2");
 my $vmem = &param("general.vmem", "6");
 my $decoder_settings = &param("general.decoder-settings", "");
-
-#
 # Create the training script
 #
 
@@ -65,8 +63,10 @@ my $train_script = "$name-train";
 my $job_name = "$name-t";
 my $hours = &param("train.hours",48);
 
-#required training parameters
+# Check if a weight file with core weights was given
+my $core_weight_file = &param("core.weightfile");
 
+#required training parameters
 my $moses_ini_file = &param_required("train.moses-ini-file");
 &check_exists ("moses ini file", $moses_ini_file);
 my $input_file = &param_required("train.input-file");
@@ -91,6 +91,7 @@ my $weight_dump_frequency = &param("train.weight-dump-frequency",0);
 my $burn_in = &param("train.burn-in",0);
 my $burn_in_input_file = &param("train.burn-in-input-file");
 my $burn_in_reference_files = &param("train.burn-in-reference-files");
+my $skipTrain = &param("train.skip", 0);
 
 #test configuration
 my ($test_input_file, $test_reference_file,$test_ini_file,$bleu_script,$use_moses);
@@ -167,30 +168,41 @@ if ($weight_dump_frequency != 0) {
 my $train_script_file = $working_dir . "/" . $train_script . ".sh"; 
 my $train_out = $train_script . ".out";
 my $train_err = $train_script . ".err";
+my $train_job_id = 0;
 
-#write the script
-open TRAIN, ">$train_script_file" or die "Unable to open \"$train_script_file\" for writing";
-
-&header(*TRAIN,$job_name,$working_dir,$slots,$jobs,$hours,$vmem,$train_out,$train_err);
-if ($by_node) {
-    print TRAIN "mpirun -np $jobs --bynode $trainer_exe \\\n";
-}
-else {
-    print TRAIN "mpirun -np \$NSLOTS $trainer_exe \\\n";
-}
-print TRAIN "-f $moses_ini_file \\\n";
-print TRAIN "-i $input_file \\\n";
 my @refs;
 if (ref($reference_files) eq 'ARRAY') {
     @refs = @$reference_files;
 } else {
     @refs = glob $reference_files;
 }
+
+if (!$skipTrain) {
+#write the script
+open TRAIN, ">$train_script_file" or die "Unable to open \"$train_script_file\" for writing";
+
+&header(*TRAIN,$job_name,$working_dir,$slots,$jobs,$hours,$vmem,$train_out,$train_err);
+if ($jobs == 1) {
+    print TRAIN "$trainer_exe ";
+}
+else {
+    if ($by_node) {
+	print TRAIN "mpirun -np $jobs --bynode $trainer_exe \\\n";
+    }
+    else {
+	print TRAIN "mpirun -np \$NSLOTS $trainer_exe \\\n";
+    }
+}
+
+print TRAIN "-f $moses_ini_file \\\n";
+print TRAIN "-i $input_file \\\n";
+
 for my $ref (@refs) {
     &check_exists("train ref file",  $ref);
     print TRAIN "-r $ref ";
 }
 print TRAIN "\\\n";
+
 if ($burn_in) {
     print TRAIN "--burn-in 1 \\\n";
     print TRAIN "--burn-in-input-file $burn_in_input_file \\\n";
@@ -209,6 +221,9 @@ if ($burn_in) {
 #if ($weights_file) {
 #    print TRAIN "-w $weights_file \\\n";
 #}
+if (defined $core_weight_file) {
+    print TRAIN "--core-weights $core_weight_file \\\n"; 
+}
 print TRAIN "-l $learner \\\n";
 print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
 print TRAIN "--mixing-frequency $mixing_frequency \\\n";
@@ -220,7 +235,12 @@ print TRAIN "-b $batch \\\n";
 print TRAIN "--decoder-settings \"$decoder_settings\" \\\n";
 print TRAIN $extra_args;
 print TRAIN "\n";
-print TRAIN "echo \"mpirun finished.\"\n";
+if ($jobs == 1) {
+    print TRAIN "echo \"mira finished.\"\n";
+}
+else {
+    print TRAIN "echo \"mpirun finished.\"\n";
+}
 close TRAIN;
 
 if (! $execute) {
@@ -229,7 +249,6 @@ if (! $execute) {
 }
 
 #submit the training job
-my $train_job_id;
 if ($have_sge) {
     $train_job_id = &submit_job_sge($train_script_file);
     
@@ -238,19 +257,20 @@ if ($have_sge) {
 }
 
 die "Failed to submit training job" unless $train_job_id;
+}
 
 #wait for the next weights file to appear, or the training job to end
 my $train_iteration = -1;
 
 # optionally continue from a later epoch (if $continue_from_epoch > 0)
 if ($continue_from_epoch > 0) {
-    $train_iteration += $continue_from_epoch;
+    $train_iteration = $continue_from_epoch - 1;
     print "Continuing training from epoch $continue_from_epoch, with weights from ini file $moses_ini_file.\n";  
 }
 
 while(1) {
     my($epoch, $epoch_slice);
-    $train_iteration += 1;
+    $train_iteration += 1;   # starts at 0
     my $new_weight_file = "$working_dir/$weight_file_stem" . "_";
     if ($weight_dump_frequency == 0) {
 	print "No weights, no testing..\n";
@@ -282,8 +302,10 @@ while(1) {
     }
     else {
 	print "Waiting for $new_weight_file\n";
-	while ((! -e $new_weight_file) && &check_running($train_job_id)) {
-	    sleep 10;
+	if (!$skipTrain) {
+	    while ((! -e $new_weight_file) && &check_running($train_job_id)) {
+		sleep 10;
+	    }
 	}
 	if (! -e $new_weight_file ) {
 	    print "Training finished at " . scalar(localtime()) . "\n";
@@ -293,6 +315,7 @@ while(1) {
 
     #new weight file written. create test script and submit    
     my $suffix = "";
+    print "weight file exists? ".(-e $new_weight_file)."\n";
     if (!$skip_test) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "test", $test_ini_file, $test_input_file, $test_reference_file);
     }
@@ -356,23 +379,9 @@ sub createTestScriptAndSubmit {
 
     # Splice the weights into the moses ini file.
     my ($default_weight,$wordpenalty_weight,@phrasemodel_weights,$lm_weight,$lm2_weight,$distortion_weight,@lexicalreordering_weights);
-    # Check if there's a feature file, and a core feature. If there
-    # is, then we read the core weights from there
-    my $core_weight_file = $new_weight_file;
-    my $have_core = 0;
-    #if ($feature_file) {
-    #  my $feature_config;
-    #  if (!($feature_config = new Config::Simple($feature_file))) {
-    #      print "Warning: unable to read feature file \"$feature_file\"";
-    #      next;
-    #  }
-    #  if ($feature_config->param("core.weightfile")) {
-    #    $core_weight_file = $feature_config->param("core.weightfile");
-    #    $have_core = 1;
-    #  }
-    #}
-    if (! (open WEIGHTS, "$core_weight_file")) {
-        die "Unable to open weights file $core_weight_file\n";
+
+    if (! (open WEIGHTS, "$new_weight_file")) {
+	die "Unable to open weights file $new_weight_file\n";
     }
 
     my $readCoreWeights = 0;
@@ -391,7 +400,7 @@ sub createTestScriptAndSubmit {
 	      $readCoreWeights += 1;
             } elsif ($name =~ /^PhraseModel/) {
               push @phrasemodel_weights,$value;
-	      $readCoreWeights += scalar @phrasemodel_weights;
+	      $readCoreWeights += 1;
 	    } elsif ($name =~ /^LM\:2/) {
               $lm2_weight = $value;
 	      $readCoreWeights += 1;
@@ -404,7 +413,7 @@ sub createTestScriptAndSubmit {
 	      $readCoreWeights += 1;
             } elsif ($name =~ /^LexicalReordering/) {
               push @lexicalreordering_weights,$value;
-	      $readCoreWeights += scalar @lexicalreordering_weights;
+	      $readCoreWeights += 1;
             } else {
               $extra_weights{$name} = $value;
 	      $readExtraWeights += 1;
@@ -412,27 +421,59 @@ sub createTestScriptAndSubmit {
         }
     }
     close WEIGHTS;
-
-    print "Number of extra weights read: ".$readExtraWeights."\n";
-
-    if ($readCoreWeights == 0) {
-	print "No core weights defined.. skipping weight file\n";
-	return;
-    }
     
-    # If there was a core weight file, then we have to load the weights
-    # from the new weight file
-    if ($core_weight_file ne $new_weight_file) {
-      if (! (open WEIGHTS, "$new_weight_file")) {
-        die "Unable to open weights file $new_weight_file\n";
-      }
-      while(<WEIGHTS>) {
-        chomp;
-        my ($name,$value) = split;
-        $extra_weights{$name} = $value;
-      }
+    if (!defined $core_weight_file) {
+	print "Number of core weights read: ".$readCoreWeights."\n";
     }
-      
+    print "Number of extra weights read: ".$readExtraWeights."\n";
+    
+    # If there is a core weight file, we have to load the core weights from that file (NOTE: this is not necessary if the core weights are also printed to the weights file)
+    if (defined $core_weight_file) {
+	@phrasemodel_weights = ();
+	@lexicalreordering_weights = ();
+	$readCoreWeights = 0;
+	if (! (open CORE_WEIGHTS, "$core_weight_file")) {
+	    die "Unable to open core weights file $core_weight_file\n";
+	}
+	print "Reading core weights from file..\n";
+	while(<CORE_WEIGHTS>) {
+	    chomp;
+	    my ($name,$value) = split;
+	    next if ($name =~ /^!Unknown/);
+	    next if ($name =~ /^BleuScore/);
+	    if ($name eq "DEFAULT_") {
+		$default_weight = $value;
+	    } 
+	    else {
+		if ($name eq "WordPenalty") {
+		    $wordpenalty_weight = $value;
+		    $readCoreWeights += 1;
+		} elsif ($name =~ /^PhraseModel/) {
+		    push @phrasemodel_weights,$value;
+		    $readCoreWeights += 1;
+		} elsif ($name =~ /^LM\:2/) {
+		    $lm2_weight = $value;
+		    $readCoreWeights += 1;
+		}  
+		elsif ($name =~ /^LM/) {
+		    $lm_weight = $value;
+		    $readCoreWeights += 1;
+		} elsif ($name eq "Distortion") {
+		    $distortion_weight = $value;
+		    $readCoreWeights += 1;
+		} elsif ($name =~ /^LexicalReordering/) {
+		    push @lexicalreordering_weights,$value;	      
+		    $readCoreWeights += 1;
+		} else {
+		    # there should be no extra weights in the core weights file
+		    print "weight not matched: $name:$value\n";
+		}
+	    }
+	}
+	close CORE_WEIGHTS;
+	print "Number of core weights read: ".$readCoreWeights."\n";
+    }
+          
     # Create new ini file
     my $new_ini_file = $working_dir."/".$test_script.".".$train_iteration.$suffix.".ini";
     if (! (open NEWINI, ">$new_ini_file" )) {
@@ -494,19 +535,19 @@ sub createTestScriptAndSubmit {
         print "Warning: unable to create extra weights file $extra_weight_file";
         next;
       }
-      my $core_weight = 1;
-      if ($have_core) {
-        $default_weight = $extra_weights{"DEFAULT_"};
-        $core_weight = $extra_weights{"core"};
-      }
+#      my $core_weight = 1;
+#      if ($have_core) {
+#        $default_weight = $extra_weights{"DEFAULT_"};
+#        $core_weight = $extra_weights{"core"};
+#      }
       foreach my $name (sort keys %extra_weights) {
         next if ($name eq "core");
         next if ($name eq "DEFAULT_");
         my $value = $extra_weights{$name};
 	
-	# print only non-zero feature weights to file
+	# write only non-zero feature weights to file
 	if ($value) {
-	    $value /= $core_weight;
+#	    $value /= $core_weight;
 	    print EXTRAWEIGHT "$name $value\n";
 	    $writtenExtraWeights += 1;
 	} 
@@ -574,7 +615,9 @@ sub header {
     if ($have_sge) {
       print $OUT "#\$ -N $name\n";
       print $OUT "#\$ -wd $working_dir\n";
-      print $OUT "#\$ -pe $mpienv $slots\n";
+      if ($jobs != 1) {
+	  print $OUT "#\$ -pe $mpienv $slots\n";
+      }
       print $OUT "#\$ -l h_rt=$hours:00:00\n";
       print $OUT "#\$ -l h_vmem=$vmem" . "G" . "\n";
       print $OUT "#\$ -o $out\n";
