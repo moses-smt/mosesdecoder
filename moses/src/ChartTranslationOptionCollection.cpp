@@ -107,6 +107,11 @@ void ChartTranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_
     return;
   }
 
+  if (startPos == 0 || startPos == m_source.GetSize() - 1)
+  { // don't create unknown words for <S> or </S> tags. Otherwise they can be moved. Should only be translated by glue rules
+    return;
+  }
+
   ChartTranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
   const WordsRange &wordsRange = fullList.GetSourceRange();
 
