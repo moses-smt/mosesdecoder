@@ -58,6 +58,11 @@ AC_ARG_WITH(randlm,
             [with_randlm=$withval],
             [with_randlm=no]
            )
+AC_ARG_WITH(orlm,
+            [AC_HELP_STRING([--with-orlm=PATH], [(optional) path to ORLM])],
+            [with_orlm=$withval],
+            [with_orlm=no]
+           )
 
 AC_ARG_WITH(synlm,
 	   [AC_HELP_STRING([--with-synlm], [(optional) Include syntactic language model parser; default is no])],
@@ -124,6 +129,7 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([KEN_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
+AM_CONDITIONAL([ORLM_LM], false)
 AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
@@ -266,6 +272,19 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+if test "x$with_orlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_orlm}/"
+
+  AC_CHECK_HEADER(onlineRLM.h,
+#AC_CHECK_HEADER(multiOnlineRLM.h,
+                 [AC_DEFINE([HAVE_ORLM], [], [flag for ORLM])],
+                 [AC_MSG_ERROR([Cannot find ORLM!])])
+
+  MY_ARCH=`uname -m`
+  AM_CONDITIONAL([ORLM_LM], true)
+fi
 if test "x$with_tcmalloc" != 'xno'
 then
   AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_ERROR([Cannot find tcmalloc])])

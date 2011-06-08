@@ -143,6 +143,15 @@ if RAND_LM
 libmoses_la_HEADERS += LanguageModelRandLM.h
 endif
 
+if ORLM_LM
+libmoses_la_HEADERS += LanguageModelORLM.h \
+		       DynSAInclude/params.h \
+		       DynSAInclude/hash.h \
+		       DynSAInclude/quantizer.h \
+		       DynSAInclude/RandLMFilter.h \
+		       DynSAInclude/RandLMCache.h
+endif
+
 if INTERNAL_LM
 libmoses_la_HEADERS += LanguageModelInternal.h \
 		      NGramCollection.h \
@@ -302,6 +311,13 @@ endif
 
 if RAND_LM
 libmoses_la_SOURCES += LanguageModelRandLM.cpp
+endif
+
+if ORLM_LM
+libmoses_la_SOURCES += LanguageModelORLM.cpp \
+		       DynSAInclude/onlineRLM.h \
+		       DynSAInclude/perfecthash.h \
+		       DynSAInclude/params.cpp 
 endif
 
 if INTERNAL_LM

@@ -49,6 +49,11 @@ public:
     bool ret = Load(fin, direction, factors, closed);
     assert(ret);
   }
+  Vocab(FileHandler *fin):
+    m_kOOVWordID(0),
+    m_kBOSWordID(1) {
+    Load(fin);
+  }
   ~Vocab() {}
   // parse 'word' into factored Word and get id
   wordID_t GetWordID(const std::string& word, const FactorDirection& direction,
@@ -92,7 +97,15 @@ public:
             const FactorList& factors, bool closed = true);
   bool Load(FileHandler* fin, const FactorDirection& direction,
             const FactorList& factors, bool closed = true);
+  bool Load(FileHandler* fin);
   void PrintVocab();
+  Word2Id::const_iterator VocabStart() {
+    return m_words2ids.begin();
+  }
+  Word2Id::const_iterator VocabEnd() {
+    return m_words2ids.end();
+  }
+
 protected:
   bool m_closed;	// can more words be added
 

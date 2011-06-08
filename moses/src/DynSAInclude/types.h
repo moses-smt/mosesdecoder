@@ -7,6 +7,10 @@
 #include <vector>
 #include <typeinfo>
 #include <stdint.h>
+#define iterate(c, i) for(typeof(c.begin()) i = c.begin(); i != c.end(); ++i)
+#define piterate(c, i) for(typeof(c->begin()) i = c->begin(); i != c->end(); ++i)
+#define riterate(c, i) for(typeof(c.rbegin()) i = c.rbegin(); i != c.rend(); ++i)
+
 
 #define THREADED false
 #define THREAD_MAX 2

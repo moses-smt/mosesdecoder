@@ -33,6 +33,9 @@
 /* Define to 1 if you have the <nl-cpt.h> header file. */
 #undef HAVE_NL_CPT_H
 
+/* flag for ORLM */
+#undef HAVE_ORLM
+
 /* flag for protobuf */
 #undef HAVE_PROTOBUF
 
