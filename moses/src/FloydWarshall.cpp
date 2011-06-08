@@ -6,6 +6,8 @@
 
 //#include "FloydWarshall.h"
 
+using namespace std;
+
 // All-pairs shortest path algorithm
 void floyd_warshall(const std::vector<std::vector<bool> >& edges, std::vector<std::vector<int> >& dist)
 {

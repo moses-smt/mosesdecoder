@@ -56,7 +56,7 @@ public:
 
   virtual ~ChartTrellisPathList();
 
-  size_t GetSize() const {
+  std::size_t GetSize() const {
     return m_collection.size();
   }
 
