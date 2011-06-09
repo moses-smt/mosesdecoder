@@ -420,6 +420,9 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
+  LMList GetLMList() const { 
+    return m_languageModel; 
+  }
   size_t GetNumInputScores() const {
     return m_numInputScores;
   }

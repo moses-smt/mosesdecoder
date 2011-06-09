@@ -206,6 +206,8 @@ bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
   // bounds holds first and (last + 1) index of phrase[0] in m_SA
   size_t lwrBnd = size_t(bounds.first - m_F->begin());
   size_t uprBnd = size_t(bounds.second - m_F->begin());
+  //cerr << "phrasesize = " << phrasesize << "\tuprBnd = " << uprBnd << "\tlwrBnd = " << lwrBnd;
+  //cerr << "\tcorpus size =  " << m_corpus->size() << endl;
   if(uprBnd - lwrBnd == 0) return false;  // not found
   if(phrasesize == 1) {
     for(size_t i=lwrBnd; i < uprBnd; ++i) {

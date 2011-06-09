@@ -30,7 +30,6 @@ public:
     cerr << "Initialzing auxillary bit filters...\n";
     bPrefix_ = new BitFilter(this->cells_);
     bHit_ = new BitFilter(this->cells_);
-    //bConsensus_ = new BitFilter(this->cells_);
   }
   OnlineRLM(FileHandler* fin, count_t order): 
     PerfectHash<T>(fin), bAdapting_(true), order_(order), corpusSize_(0) {
@@ -39,7 +38,6 @@ public:
     alpha_ = new float[order_ + 1];
     for(count_t i = 0; i <= order_; ++i) 
       alpha_[i] = i * log10(0.4);
-    //bConsensus_ = new BitFilter(this->cells_);
   }
   ~OnlineRLM() {
     if(alpha_) delete[] alpha_;
@@ -48,7 +46,6 @@ public:
     if(cache_) delete cache_;
     delete bPrefix_;
     delete bHit_;
-    //delete bConsensus_;
   }
   float getProb(const wordID_t* ngram, int len, const void** state);
   //float getProb2(const wordID_t* ngram, int len, const void** state);
@@ -88,7 +85,6 @@ private:
   Cache<float>* cache_;
   BitFilter* bPrefix_;
   BitFilter* bHit_;
-  //BitFilter* bConsensus_;
 };
 template<typename T>
 bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value) {
@@ -113,6 +109,7 @@ bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
   wordID_t wrdIDs[len];
   uint64_t index(this->cells_ + 1);
   hpdEntry_t hpdItr;
+  vocab_->MakeOpen();
   for(int i = 0; i < len; ++i) 
     wrdIDs[i] = vocab_->GetWordID(ngram[i]);
   // if updating, minimize false positives by pre-checking if context already in model 
@@ -120,10 +117,9 @@ bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
   if(value > 1 && len < (int)order_)
     bIncluded = markPrefix(wrdIDs, ngram.size(), true); // mark context
   if(bIncluded) { // if context found 
-    bIncluded = PerfectHash<T>::update(wrdIDs, len, value, hpdItr, index);
+    bIncluded = PerfectHash<T>::update2(wrdIDs, len, value, hpdItr, index);
     if(index < this->cells_) {
       markQueried(index);
-      //bConsensus_->setBit(index); // update implies 2nd stream 
     }
     else if(hpdItr != this->dict_.end()) markQueried(hpdItr);
   }
@@ -207,7 +203,6 @@ count_t OnlineRLM<T>::heurDelete(count_t num2del, count_t order) {
           last = first + this->bucketRange_;
         for(uint64_t row = first; row < last; ++row) {  // check each row 
           if(!(bHit_->testBit(row) || bPrefix_->testBit(row) )) {
-            //|| bConsensus_->testBit(row))) { // if not hit or prefix or consensus
             if(this->filter_->read(row) != 0) {
               PerfectHash<T>::remove(row);  // remove from filter
               ++deleted;
@@ -377,7 +372,6 @@ void OnlineRLM<T>::clearMarkings() {
     value = &itr->second;
     *value -= ((*value & this->hitMask_) != 0) ? this->hitMask_ : 0;
   }
-  //bConsensus_->reset();
 }
 template<typename T>
 void OnlineRLM<T>::save(FileHandler* fout) {
@@ -412,8 +406,8 @@ void OnlineRLM<T>::removeNonMarked() {
   cerr << "deleting all unused events\n";
   int deleted(0);
   for(uint64_t i = 0; i < this->cells_; ++i) {
-    if(!(bHit_->testBit(i) || bPrefix_->testBit(i) /*|| 
-      bConsensus_->testBit(i)*/) && (this->filter_->read(i) != 0)) {
+    if(!(bHit_->testBit(i) || bPrefix_->testBit(i)) 
+      && (this->filter_->read(i) != 0)) {
       PerfectHash<T>::remove(i);
       ++deleted;
     }

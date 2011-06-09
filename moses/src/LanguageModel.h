@@ -125,6 +125,15 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
+#ifdef WITH_THREADS
+  // if multi-threaded return boost ptr 
+  boost::shared_ptr<LanguageModelImplementation> 
+#else // return normal LM ptr
+  LanguageModelImplementation* 
+#endif
+  GetLMImplementation() const {
+    return m_implementation;
+  }
 };
 
 }

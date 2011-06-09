@@ -71,12 +71,15 @@ LMResult LanguageModelORLM::GetValue(const std::vector<const Word*> &contextFact
     State* finalState) const {
   FactorType factorType = GetFactorType();
   // set up context
+  //std::vector<long unsigned int> factor(1,0);
+  //std::vector<string> sngram;
   wordID_t ngram[MAX_NGRAM_SIZE];
   int count = contextFactor.size();
   for (int i = 0; i < count; i++) {
     ngram[i] = GetLmID((*contextFactor[i])[factorType]);
+    //sngram.push_back(contextFactor[i]->GetString(factor, false));
   }
-  //float logprob = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, finalState)));
+  //float logprob = FloorScore(TransformLMScore(lm_->getProb(sngram, count, finalState)));
   LMResult ret;
   ret.score = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, finalState)));
   ret.unknown = count && (ngram[count - 1] == m_oov_id);
@@ -86,5 +89,15 @@ LMResult LanguageModelORLM::GetValue(const std::vector<const Word*> &contextFact
     std::cout << " = " << logprob << std::endl;
   */
   return ret;
+}
+bool LanguageModelORLM::UpdateORLM(const std::vector<string>& ngram, const int value) {
+  /*cerr << "Inserting into ORLM: \"";
+  iterate(ngram, nit)
+    cerr << *nit << " ";
+  cerr << "\"\t" << value << endl; */
+  m_lm->vocab_->MakeOpen();
+  bool res = m_lm->update(ngram, value); 
+  m_lm->vocab_->MakeClosed();
+  return res;
 }
 }

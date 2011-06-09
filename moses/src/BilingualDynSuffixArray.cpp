@@ -341,6 +341,7 @@ TargetPhrase* BilingualDynSuffixArray::GetMosesFactorIDs(const SAPhrase& phrase)
 
 void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> > & target) const 
 {
+  //cerr << "phrase is \"" << src << endl;
 	size_t sourceSize = src.GetSize();
 	SAPhrase localIDs(sourceSize);
 	if(!GetLocalVocabIDs(src, localIDs)) return; 
@@ -348,11 +349,9 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	std::map<SAPhrase, int> phraseCounts;
 	std::map<SAPhrase, pair<float, float> > lexicalWeights;
 	std::map<SAPhrase, pair<float, float> >::iterator itrLexW;
-	std::vector<unsigned> wrdIndices(0);	
+	std::vector<unsigned> wrdIndices;	
 	// extract sentence IDs from SA and return rightmost index of phrases
 	if(!m_srcSA->GetCorpusIndex(&(localIDs.words), &wrdIndices)) return;
-	//if(wrdIndices.size() > m_maxSampleSize) // select only first samples 
-          //wrdIndices = SampleSelection(wrdIndices);
 	std::vector<int> sntIndexes = GetSntIndexes(wrdIndices, sourceSize);	
 	// for each sentence with this phrase
 	for(size_t snt = 0; snt < sntIndexes.size(); ++snt) {

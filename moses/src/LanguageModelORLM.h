@@ -35,6 +35,7 @@ public:
     //m_lm->initThreadSpecificData(); // Creates thread specific data iff
                                     // compiled with multithreading.
   }
+  bool UpdateORLM(const std::vector<string>& ngram, const int value);
  protected:
   OnlineRLM<T>* m_lm;
   //MultiOnlineRLM<T>* m_lm;

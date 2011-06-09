@@ -400,7 +400,7 @@ bool PerfectHash<T>::update2(const wordID_t* IDs, const int len,
     }
     ++index;
   }
-  // could add if it gets here. 
+  // add if it gets here. 
   insert(IDs, len, value);
   return false;
 }
