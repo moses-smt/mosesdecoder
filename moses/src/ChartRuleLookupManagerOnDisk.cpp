@@ -85,7 +85,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   ChartTranslationOptionList &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
-  size_t rulesLimit = StaticData::Instance().GetRuleLimit();
+  size_t rulesLimit = staticData.GetRuleLimit();
 
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
@@ -95,14 +95,11 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
   // sort save nodes so only do nodes with most counts
   expandableDottedRuleList.SortSavedNodes();
-  size_t numDerivations = 0
-                          ,maxDerivations = 999999; // staticData.GetMaxDerivations();
-  bool overThreshold = true;
 
   const DottedRuleStackOnDisk::SavedNodeColl &savedNodeColl = expandableDottedRuleList.GetSavedNodeColl();
   //cerr << "savedNodeColl=" << savedNodeColl.size() << " ";
 
-  for (size_t ind = 0; ind < (savedNodeColl.size()) && ((numDerivations < maxDerivations) || overThreshold) ; ++ind) {
+  for (size_t ind = 0; ind < (savedNodeColl.size()) ; ++ind) {
     const SavedNodeOnDisk &savedNode = *savedNodeColl[ind];
 
     const DottedRuleOnDisk &prevDottedRule = savedNode.GetDottedRule();
@@ -250,9 +247,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           UINT64 tpCollFilePos = node->GetValue();
           std::map<UINT64, const TargetPhraseCollection*>::const_iterator iterCache = m_cache.find(tpCollFilePos);
           if (iterCache == m_cache.end()) {
-            // not in case
-            overThreshold = node->GetCount(0) > staticData.GetRuleCountThreshold();
-            //cerr << node->GetCount(0) << " ";
 
             const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
 
@@ -276,8 +270,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           assert(targetPhraseCollection);
           outColl.Add(*targetPhraseCollection, *coveredChartSpan,
                       GetCellCollection(), adhereTableLimit, rulesLimit);
-
-          numDerivations++;
 
         } // if (node)
 
