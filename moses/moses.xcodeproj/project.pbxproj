@@ -43,8 +43,18 @@
 		1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1636132A892800ED4085 /* RuleCubeQueue.h */; };
 		1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1637132A892800ED4085 /* ThreadPool.cpp */; };
 		1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1638132A892800ED4085 /* ThreadPool.h */; };
+		1E528B9913A12ACC00E9A67E /* LanguageModelORLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9813A12ACC00E9A67E /* LanguageModelORLM.cpp */; };
+		1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9B13A12B2D00E9A67E /* params.cpp */; };
+		1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */; };
 		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
 		1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */; };
+		1EBB262913A12DB500B51840 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262213A12DB500B51840 /* hash.h */; };
+		1EBB262A13A12DB500B51840 /* onlineRLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262313A12DB500B51840 /* onlineRLM.h */; };
+		1EBB262B13A12DB500B51840 /* params.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262413A12DB500B51840 /* params.h */; };
+		1EBB262C13A12DB500B51840 /* perfectHash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262513A12DB500B51840 /* perfectHash.h */; };
+		1EBB262D13A12DB500B51840 /* quantizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262613A12DB500B51840 /* quantizer.h */; };
+		1EBB262E13A12DB500B51840 /* RandLMCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262713A12DB500B51840 /* RandLMCache.h */; };
+		1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262813A12DB500B51840 /* RandLMFilter.h */; };
 		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
 		1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED00035124BC2690029177F /* ChartTranslationOption.h */; };
 		1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */; };
@@ -296,8 +306,18 @@
 		1E2E1636132A892800ED4085 /* RuleCubeQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeQueue.h; path = src/RuleCubeQueue.h; sourceTree = "<group>"; };
 		1E2E1637132A892800ED4085 /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadPool.cpp; path = src/ThreadPool.cpp; sourceTree = "<group>"; };
 		1E2E1638132A892800ED4085 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = src/ThreadPool.h; sourceTree = "<group>"; };
+		1E528B9813A12ACC00E9A67E /* LanguageModelORLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelORLM.cpp; path = src/LanguageModelORLM.cpp; sourceTree = "<group>"; };
+		1E528B9B13A12B2D00E9A67E /* params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = params.cpp; path = src/DynSAInclude/params.cpp; sourceTree = "<group>"; };
+		1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SyntacticLanguageModel.cpp; path = src/SyntacticLanguageModel.cpp; sourceTree = "<group>"; };
 		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
 		1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelImplementation.h; path = src/LanguageModelImplementation.h; sourceTree = "<group>"; };
+		1EBB262213A12DB500B51840 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = src/DynSAInclude/hash.h; sourceTree = "<group>"; };
+		1EBB262313A12DB500B51840 /* onlineRLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = onlineRLM.h; path = src/DynSAInclude/onlineRLM.h; sourceTree = "<group>"; };
+		1EBB262413A12DB500B51840 /* params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = params.h; path = src/DynSAInclude/params.h; sourceTree = "<group>"; };
+		1EBB262513A12DB500B51840 /* perfectHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = perfectHash.h; path = src/DynSAInclude/perfectHash.h; sourceTree = "<group>"; };
+		1EBB262613A12DB500B51840 /* quantizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = quantizer.h; path = src/DynSAInclude/quantizer.h; sourceTree = "<group>"; };
+		1EBB262713A12DB500B51840 /* RandLMCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RandLMCache.h; path = src/DynSAInclude/RandLMCache.h; sourceTree = "<group>"; };
+		1EBB262813A12DB500B51840 /* RandLMFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RandLMFilter.h; path = src/DynSAInclude/RandLMFilter.h; sourceTree = "<group>"; };
 		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
 		1ED00035124BC2690029177F /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
 		1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
@@ -539,6 +559,16 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EBB262213A12DB500B51840 /* hash.h */,
+				1EBB262313A12DB500B51840 /* onlineRLM.h */,
+				1EBB262413A12DB500B51840 /* params.h */,
+				1EBB262513A12DB500B51840 /* perfectHash.h */,
+				1EBB262613A12DB500B51840 /* quantizer.h */,
+				1EBB262713A12DB500B51840 /* RandLMCache.h */,
+				1EBB262813A12DB500B51840 /* RandLMFilter.h */,
+				1E528B9B13A12B2D00E9A67E /* params.cpp */,
+				1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */,
+				1E528B9813A12ACC00E9A67E /* LanguageModelORLM.cpp */,
 				1EE58D9D133726C700D93158 /* NonTerminal.cpp */,
 				1EE58D9E133726C700D93158 /* NonTerminal.h */,
 				1E2E1632132A892800ED4085 /* OutputCollector.h */,
@@ -958,6 +988,13 @@
 				1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */,
 				1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */,
 				1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */,
+				1EBB262913A12DB500B51840 /* hash.h in Headers */,
+				1EBB262A13A12DB500B51840 /* onlineRLM.h in Headers */,
+				1EBB262B13A12DB500B51840 /* params.h in Headers */,
+				1EBB262C13A12DB500B51840 /* perfectHash.h in Headers */,
+				1EBB262D13A12DB500B51840 /* quantizer.h in Headers */,
+				1EBB262E13A12DB500B51840 /* RandLMCache.h in Headers */,
+				1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1128,6 +1165,9 @@
 				1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */,
 				1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */,
 				1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */,
+				1E528B9913A12ACC00E9A67E /* LanguageModelORLM.cpp in Sources */,
+				1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */,
+				1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1160,6 +1200,8 @@
 					../randlm/include,
 					../,
 					/usr/local/include,
+					../synlm/hhmm/wsjparse/include,
+					../synlm/hhmm/rvtl/include/,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = moses;
@@ -1189,6 +1231,8 @@
 					../randlm/include,
 					../,
 					/usr/local/include,
+					../synlm/hhmm/wsjparse/include,
+					../synlm/hhmm/rvtl/include/,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = moses;
