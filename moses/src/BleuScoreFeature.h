@@ -44,8 +44,27 @@ typedef std::map< Phrase, size_t > NGrams;
 
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
-	BleuScoreFeature();
-    BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float historySmoothing);
+	BleuScoreFeature():
+	                                 StatefulFeatureFunction("BleuScore"),
+	                                 m_count_history(BleuScoreState::bleu_order),
+	                                 m_match_history(BleuScoreState::bleu_order),
+	                                 m_source_length_history(0),
+	                                 m_target_length_history(0),
+	                                 m_ref_length_history(0),
+	                                 m_use_scaled_reference(true),
+	                                 m_scale_by_input_length(true),
+	                                 m_historySmoothing(0.9) {}
+
+	BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float historySmoothing):
+	                                 StatefulFeatureFunction("BleuScore"),
+	                                 m_count_history(BleuScoreState::bleu_order),
+	                                 m_match_history(BleuScoreState::bleu_order),
+	                                 m_source_length_history(0),
+	                                 m_target_length_history(0),
+	                                 m_ref_length_history(0),
+	                                 m_use_scaled_reference(useScaledReference),
+	                                 m_scale_by_input_length(scaleByInputLength),
+	                                 m_historySmoothing(historySmoothing) {}
 
     std::string GetScoreProducerDescription() const
     {
@@ -88,6 +107,13 @@ public:
     const FFState* EmptyHypothesisState(const InputType&) const;
 
 private:
+    // counts for pseudo-document big_O
+    std::vector< float > m_count_history;
+    std::vector< float > m_match_history;
+    float m_source_length_history;
+    float m_target_length_history;
+    float m_ref_length_history;
+
     size_t m_cur_source_length;
     std::map< size_t, std::pair< size_t, NGrams > > m_refs;
     NGrams m_cur_ref_ngrams;
@@ -100,13 +126,6 @@ private:
     bool m_scale_by_input_length;
 
     float m_historySmoothing;
-
-    // counts for pseudo-document big_O
-    std::vector< float > m_count_history;
-    std::vector< float > m_match_history;
-    float m_source_length_history;
-    float m_target_length_history;
-    float m_ref_length_history;
 };
 
 } // Namespace.

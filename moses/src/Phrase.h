@@ -176,6 +176,7 @@ public:
 	
 	//! create new phrase class that is a substring of this phrase
 	Phrase GetSubString(const WordsRange &wordsRange) const;
+	Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
 	
 	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 

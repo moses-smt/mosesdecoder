@@ -120,10 +120,10 @@ namespace Mira {
 
       size_t m_scale_margin;
 
-      float m_precision;
-
       // scale update with log 10 of oracle BLEU score
       bool m_scale_update;
+
+      float m_precision;
   };
 }
 

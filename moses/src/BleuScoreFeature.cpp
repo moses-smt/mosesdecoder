@@ -71,29 +71,6 @@ void BleuScoreState::print(std::ostream& out) const {
     
 }
 
-BleuScoreFeature::BleuScoreFeature():
-                                 StatefulFeatureFunction("BleuScore"),
-                                 m_count_history(BleuScoreState::bleu_order),
-                                 m_match_history(BleuScoreState::bleu_order),
-                                 m_source_length_history(0),
-                                 m_target_length_history(0),
-                                 m_ref_length_history(0),
-                                 m_use_scaled_reference(true),
-                                 m_scale_by_input_length(true),
-                                 m_historySmoothing(0.9) {}
-
-BleuScoreFeature::BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float historySmoothing):
-                                 StatefulFeatureFunction("BleuScore"),      
-                                 m_count_history(BleuScoreState::bleu_order),
-                                 m_match_history(BleuScoreState::bleu_order),
-                                 m_source_length_history(0),
-                                 m_target_length_history(0),
-                                 m_ref_length_history(0),
-                                 m_use_scaled_reference(useScaledReference),
-                                 m_scale_by_input_length(scaleByInputLength),
-                                 m_historySmoothing(historySmoothing) {}
-
-
 void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 	out << "source length history=" << m_source_length_history << endl;
 	out << "target length history=" << m_target_length_history << endl;
@@ -106,7 +83,7 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
-		m_refs.clear();
+	m_refs.clear();
     FactorCollection& fc = FactorCollection::Instance();
     for (size_t file_id = 0; file_id < refs.size(); file_id++) {
       for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
@@ -248,9 +225,7 @@ void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
             ngram_end_idx = end_idx;
             ngram_start_idx = end_idx - order;
 
-            Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx,
-                                                          ngram_end_idx));
-
+            Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
             ret_counts[order]++;
 
             ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -277,8 +252,7 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
 			ngram_end_idx = end_idx;
 			ngram_start_idx = end_idx - order;
 
-			Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx));
-			string ngramString = ngram.ToString();
+			Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
 			ret_counts[order]++;
 
 			ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
