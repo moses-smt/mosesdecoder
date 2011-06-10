@@ -63,17 +63,12 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, bool scale_update, size_t maxNumberOracles, bool accumulateMostViolatedConstraints, bool pastAndCurrentConstraints, size_t exampleSize, float precision) :
+	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, bool scale_update, float precision) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
 		  m_scale_update(scale_update),
-		  m_max_number_oracles(maxNumberOracles),
-		  m_accumulateMostViolatedConstraints(accumulateMostViolatedConstraints),
-		  m_pastAndCurrentConstraints(pastAndCurrentConstraints),
-		  m_oracles(exampleSize),
-		  m_bleu_of_oracles(exampleSize),
 		  m_precision(precision) { }
    
      std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
@@ -124,21 +119,6 @@ namespace Mira {
       float m_slack;
 
       size_t m_scale_margin;
-
-      // keep a list of oracle translations over epochs
-      std::vector < std::vector< Moses::ScoreComponentCollection> > m_oracles;
-
-      std::vector < std::vector< float> > m_bleu_of_oracles;
-
-      size_t m_max_number_oracles;
-
-      // accumulate most violated constraints for every example
-      std::vector< Moses::ScoreComponentCollection> m_featureValueDiffs;
-      std::vector< float> m_losses;
-
-      bool m_accumulateMostViolatedConstraints;
-
-      bool m_pastAndCurrentConstraints;
 
       float m_precision;
 

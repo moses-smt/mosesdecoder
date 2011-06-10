@@ -120,34 +120,6 @@ struct RandomIndex {
 	}
 };
 
-void shuffleInput(vector<size_t>& order, size_t size, size_t inputSize) {
-	cerr << "Shuffling input examples.." << endl;
-//	RandomIndex rindex;
-//	random_shuffle(order.begin(), order.end(), rindex);
-
-	// remove first element and put it in the back
-	size_t first = order.at(0);
-	size_t index = 0;
-	order.erase(order.begin());
-	order.push_back(first);
-}
-
-void createShard(vector<size_t>& order, size_t size, size_t rank, vector<size_t>& shard) {
-	// Create the shards according to the number of processes used
-	float shardSize = (float) (order.size()) / size;
-	size_t shardStart = (size_t) (shardSize * rank);
-	size_t shardEnd = (size_t) (shardSize * (rank + 1));
-	if (rank == size - 1)
-		shardEnd = order.size();
-	shard.resize(shardSize);
-	copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
-	cerr << "order: ";
-	for (size_t i = 0; i < shard.size(); ++i) {
-		cerr << shard[i] << " ";
-	}
-	cerr << endl;
-}
-
 int main(int argc, char** argv) {
 	size_t rank = 0;
 	size_t size = 1;
@@ -186,10 +158,7 @@ int main(int argc, char** argv) {
 	float slack;
 	float slack_step;
 	float slack_min;
-	size_t maxNumberOracles;
-	bool accumulateMostViolatedConstraints;
 	bool averageWeights;
-	bool pastAndCurrentConstraints;
 	bool weightConvergence;
 	bool controlUpdates;
 	float learning_rate;
@@ -225,62 +194,58 @@ int main(int argc, char** argv) {
 	int fear_n;
 	po::options_description desc("Allowed options");
 	desc.add_options()
-			("accumulate-most-violated-constraints", po::value<bool>(&accumulateMostViolatedConstraints)->default_value(false),"Accumulate most violated constraint per example")
-			("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
-			("analytical-update",  po::value<bool>(&analytical_update)->default_value(0), "Use one best lists and compute the update analytically")
-			("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
-			("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
-			("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-			("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the bleu objective weight)")
-			("burn-in", po::value<bool>(&burnIn)->default_value(false), "Do a burn-in of the BLEU history before training")
-			("burn-in-input-file", po::value<string>(&burnInInputFile), "Input file for burn-in phase of BLEU history")
-			("burn-in-reference-files", po::value<vector<string> >(&burnInReferenceFiles), "Reference file for burn-in phase of BLEU history")
-			("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
-			("control-updates", po::value<bool>(&controlUpdates)->default_value(true), "Ignore updates that increase number of violated constraints AND increase the error")
-			("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
-			("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
-			("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
-			("decr-sentence-update", po::value<float>(&decrease_sentence_update)->default_value(0), "Decrease maximum weight update by the given value after every epoch")
-			("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
-			("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use nbest list with distinct translations in inference step")
-			("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
-			("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
-			("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
-			("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-			("history-of-1best", po::value<bool>(&historyOf1best)->default_value(0), "Use the 1best translation to update the history")
-			("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
-			("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimization (not model)")
-			("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
-			("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
-			("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
-			("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
-			("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
-			("max-number-oracles", po::value<size_t>(&maxNumberOracles)->default_value(1), "Set a maximum number of oracles to use per example")
-			("min-bleu-change", po::value<float>(&min_bleu_change)->default_value(0), "Minimum BLEU change of 1best translations of one epoch")
-			("min-sentence-update", po::value<float>(&min_sentence_update)->default_value(0), "Set a minimum weight update per sentence")
-			("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
-			("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(-1), "Set a maximum weight update per sentence")
-			("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
-			("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
-			("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimization")
-			("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
-	    ("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
-			("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
-	    ("past-and-current-constraints", po::value<bool>(&pastAndCurrentConstraints)->default_value(false), "Accumulate most violated constraint per example and use them along all current constraints")
-	    ("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
-	    ("precision", po::value<float>(&precision)->default_value(0), "Precision when comparing left and right hand side of constraints")
-	    ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
-	    ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
-	    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
-	    ("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(false), "Use a sentences level bleu scoring function")
-	    ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
+		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
+		("analytical-update",  po::value<bool>(&analytical_update)->default_value(0), "Use one best lists and compute the update analytically")
+		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
+		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
+		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
+		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the bleu objective weight)")
+		("burn-in", po::value<bool>(&burnIn)->default_value(false), "Do a burn-in of the BLEU history before training")
+		("burn-in-input-file", po::value<string>(&burnInInputFile), "Input file for burn-in phase of BLEU history")
+		("burn-in-reference-files", po::value<vector<string> >(&burnInReferenceFiles), "Reference file for burn-in phase of BLEU history")
+		("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
+		("control-updates", po::value<bool>(&controlUpdates)->default_value(true), "Ignore updates that increase number of violated constraints AND increase the error")
+		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
+		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
+		("decr-sentence-update", po::value<float>(&decrease_sentence_update)->default_value(0), "Decrease maximum weight update by the given value after every epoch")
+		("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
+		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use nbest list with distinct translations in inference step")
+		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
+		("epochs,e", po::value<size_t>(&epochs)->default_value(5), "Number of epochs")
+		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
+		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+		("history-of-1best", po::value<bool>(&historyOf1best)->default_value(0), "Use the 1best translation to update the history")
+		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
+		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimization (not model)")
+		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
+		("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
+		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
+		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
+		("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
+		("min-bleu-change", po::value<float>(&min_bleu_change)->default_value(0), "Minimum BLEU change of 1best translations of one epoch")
+		("min-sentence-update", po::value<float>(&min_sentence_update)->default_value(0), "Set a minimum weight update per sentence")
+		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
+		("max-sentence-update", po::value<float>(&max_sentence_update)->default_value(-1), "Set a maximum weight update per sentence")
+		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimization")
+		("nbest,n", po::value<size_t>(&n)->default_value(10), "Number of translations in nbest list")
+		("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
+		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
+		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
+		("precision", po::value<float>(&precision)->default_value(0), "Precision when comparing left and right hand side of constraints")
+		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
+		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(false), "Use a sentences level bleu scoring function")
+		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
 	    ("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 	    ("stop-dev-bleu", po::value<bool>(&stop_dev_bleu)->default_value(false), "Stop when average Bleu (dev) decreases (or no more increases)")
 	    ("stop-approx-dev-bleu", po::value<bool>(&stop_approx_dev_bleu)->default_value(false), "Stop when average approx. sentence Bleu (dev) decreases (or no more increases)")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
-	    ("train-linear-classifier", po::value<bool>(&train_linear_classifier)->default_value(false), "Test algorithm for linear classification")
 	    ("use-scaled-reference", po::value<bool>(&useScaledReference)->default_value(true), "Use scaled reference length for comparing target and reference length of phrases")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 	    ("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
@@ -389,8 +354,7 @@ int main(int argc, char** argv) {
 	Optimiser* optimiser = NULL;
 	if (learner == "mira") {
 		cerr << "Optimising using Mira" << endl;
-		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update,
-				maxNumberOracles, accumulateMostViolatedConstraints, pastAndCurrentConstraints, order.size(), precision);
+		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, precision);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {
@@ -407,12 +371,6 @@ int main(int argc, char** argv) {
 	}
 
 	// resolve parameter dependencies
-
-	if (accumulateMostViolatedConstraints && pastAndCurrentConstraints) {
-	  cerr << "Error: the parameters --accumulate-most-violated-constraints and --past-and-current-constraints are mutually exclusive" << endl;
-	  return 1;
-	}
-
 	if (perceptron_update || analytical_update) {
 		batchSize = 1;
 		cerr << "Setting batch size to 1 for perceptron/analytical update" << endl;
@@ -542,7 +500,7 @@ int main(int argc, char** argv) {
 	mpi::broadcast(world, order, 0);
 #endif
 
-	// Create the shards according to the number of processes used
+	// Create shards according to the number of processes used
 	vector<size_t> shard;
 	float shardSize = (float) (order.size()) / size;
 	VERBOSE(1, "Shard size: " << shardSize << endl);
