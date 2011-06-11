@@ -267,6 +267,18 @@ bool Parameter::Validate()
 {
   bool noErrorFlag = true;
 
+  PARAM_MAP::const_iterator iterParams;
+  for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
+    const std::string &key = iterParams->first;
+    
+    if (m_valid.find(key) == m_valid.end())
+    {
+      UserMessage::Add("Unknown parameter " + key);
+      noErrorFlag = false;
+    }
+  }
+  
+
   // required parameters
   if (m_setting["ttable-file"].size() == 0) {
     UserMessage::Add("No phrase translation table (ttable-file)");
