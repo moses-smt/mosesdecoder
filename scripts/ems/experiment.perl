@@ -1809,6 +1809,9 @@ sub define_training_create_config {
 			  &backoff_and_get("LM:$set:rlm-training") ||
 			  &backoff_and_get("LM:$set:lm-randomizer"));
 
+      #manually set type 
+      $type = &get("LM:$set:type") if (&get("LM:$set:type"));
+
 	    # which factor is the model trained on?
 	    my $factor = 0;
 	    if (&backoff_and_get("TRAINING:output-factors") &&
