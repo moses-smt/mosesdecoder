@@ -112,7 +112,7 @@ my $weight_file_stem = "$name-weights";
 my $extra_memory_test = &param("test.extra-memory",0);
 my $skip_test = &param("test.skip-test",0);
 my $skip_dev = &param("test.skip-dev",0);
-
+my $skip_submit_test = &param("test.skip-submit",1);
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
@@ -317,10 +317,10 @@ while(1) {
     my $suffix = "";
     print "weight file exists? ".(-e $new_weight_file)."\n";
     if (!$skip_test) {
-	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "test", $test_ini_file, $test_input_file, $test_reference_file);
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "test", $test_ini_file, $test_input_file, $test_reference_file, $skip_submit_test);
     }
     if (!$skip_dev) {
-	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $refs[0]);
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $refs[0], $skip_submit_test);
     }
 }
 
@@ -333,6 +333,7 @@ sub createTestScriptAndSubmit {
     my $old_ini_file = $_[5];
     my $input_file = $_[6];
     my $reference_file = $_[7];
+    my $skip_submit = $_[8];
 
     #file names
     my $job_name = $name."_".$testtype."_".$train_iteration.$suffix;
@@ -579,17 +580,19 @@ sub createTestScriptAndSubmit {
     close TEST;
 
     #launch testing
-    if ($have_sge) {
-	if ($extra_memory_test) {
-	    print "Extra memory for test job: $extra_memory_test \n";
-	    &submit_job_sge_extra_memory($test_script_file,$extra_memory_test);
+    if(!$skip_submit) {
+	if ($have_sge) {
+	    if ($extra_memory_test) {
+		print "Extra memory for test job: $extra_memory_test \n";
+		&submit_job_sge_extra_memory($test_script_file,$extra_memory_test);
+	    }
+	    else {
+		&submit_job_sge($test_script_file);
+	    }
+	} else {
+	    &submit_job_no_sge($test_script_file, $test_out,$test_err);
 	}
-	else {
-	    &submit_job_sge($test_script_file);
-	}
-    } else {
-      &submit_job_no_sge($test_script_file, $test_out,$test_err);
-  }
+    }
 }
 
 sub param {
