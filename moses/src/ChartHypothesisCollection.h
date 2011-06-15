@@ -46,16 +46,10 @@ public:
                                       , &rangeB	= hypoB->GetCurrSourceRange();
     assert(rangeA == rangeB);
 
-    /*
-    int ret = Word::Compare(hypoA->GetTargetLHS(), hypoB->GetTargetLHS());
-    if (ret != 0)
-    	return (ret < 0);
-    */
-
     // shouldn't be mixing hypos with different lhs
     assert(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
 
-    int ret = hypoA->LMContextCompare(*hypoB);
+    int ret = hypoA->RecombineCompare(*hypoB);
     if (ret != 0)
       return (ret < 0);
 

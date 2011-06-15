@@ -55,6 +55,7 @@ protected:
   Phrase m_contextPrefix, m_contextSuffix;
   const std::vector<size_t> &m_coveredChartSpanListTargetOrder; // same size as target phrase ?
   WordsRange					m_currSourceWordsRange;
+	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   ,m_lmNGram
   ,m_lmPrefix;
@@ -70,8 +71,6 @@ protected:
 
   size_t CalcPrefix(Phrase &ret, size_t size) const;
   size_t CalcSuffix(Phrase &ret, size_t size) const;
-
-  void CalcLMScore();
 
   ChartHypothesis(); // not implemented
   ChartHypothesis(const ChartHypothesis &copy); // not implemented
@@ -117,11 +116,15 @@ public:
   inline const ChartArcList* GetArcList() const {
     return m_arcList;
   }
+	inline const FFState* GetFFState( size_t featureID ) const {
+		return m_ffStates[ featureID ];
+	}
+	inline const ChartManager& GetManager() const { return m_manager; }
 
   void CreateOutputPhrase(Phrase &outPhrase) const;
   Phrase GetOutputPhrase() const;
 
-  int LMContextCompare(const ChartHypothesis &other) const;
+	int RecombineCompare(const ChartHypothesis &compare) const;
 
   const Phrase &GetPrefix() const {
     return m_contextPrefix;
@@ -146,6 +149,10 @@ public:
   const std::vector<const ChartHypothesis*> &GetPrevHypos() const {
     return m_prevHypos;
   }
+
+	const ChartHypothesis* GetPrevHypo(size_t pos) const {
+		return m_prevHypos[pos];
+	}
 
   size_t GetCoveredChartSpanTargetOrder(size_t pos) const {
     assert(pos < m_coveredChartSpanListTargetOrder.size());

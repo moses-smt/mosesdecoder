@@ -58,6 +58,7 @@ libmoses_la_HEADERS = \
         LMList.h \
         LVoc.h \
         LanguageModel.h \
+        LanguageModelChartState.h \
         LanguageModelJoint.h \
         LanguageModelFactory.h \
         LanguageModelImplementation.h \

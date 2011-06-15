@@ -32,6 +32,12 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
+  virtual FFState* EvaluateChart(
+    const ChartHypothesis&,
+    int /* featureID */,
+    ScoreComponentCollection*) const {
+		assert(0); // feature function not valid in chart decoder
+	}
 };
 
 /** Doesn't do anything but provide a key into the global
@@ -50,7 +56,6 @@ public:
   virtual void Evaluate(
     const TargetPhrase& phrase,
     ScoreComponentCollection* out) const;
-
 };
 
 /** unknown word penalty */

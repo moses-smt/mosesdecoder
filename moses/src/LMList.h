@@ -45,10 +45,6 @@ public:
 
   void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const;
 
-  void CalcAllLMScores(const Phrase &phrase
-                       , ScoreComponentCollection &nGramOnly
-                       , ScoreComponentCollection *beginningBitsOnly) const ;
-
   void Add(LanguageModel *lm);
 
   size_t GetMaxNGramOrder() const {

@@ -31,6 +31,7 @@
 #include "DummyScoreProducers.h"
 #include "LMList.h"
 #include "ChartTranslationOption.h"
+#include "FFState.h"
 
 using namespace std;
 using namespace Moses;
@@ -49,6 +50,7 @@ ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager
   ,m_coveredChartSpanListTargetOrder(ruleCube.GetTranslationOption().GetCoveredChartSpanTargetOrder())
   ,m_id(++s_HypothesesCreated)
   ,m_currSourceWordsRange(ruleCube.GetTranslationOption().GetSourceWordsRange())
+	,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
   ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_arcList(NULL)
@@ -85,6 +87,11 @@ ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager
 
 ChartHypothesis::~ChartHypothesis()
 {
+	// delete feature function states
+  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
+    delete m_ffStates[i];
+  }
+
   // delete hypotheses that are not in the chart (recombined away)
   if (m_arcList) {
     ChartArcList::iterator iter;
@@ -202,29 +209,29 @@ size_t ChartHypothesis::CalcSuffix(Phrase &ret, size_t size) const
   }
 }
 
-/** Check recombinability due to language model context
- * if two hypotheses match in their edge phrases, they are indistinguishable
- * in terms of future search, so the weaker one can be dropped.
- * \param other other hypothesis for comparison
- */
-int ChartHypothesis::LMContextCompare(const ChartHypothesis &other) const
+/** check, if two hypothesis can be recombined.
+    this is actually a sorting function that allows us to
+    keep an ordered list of hypotheses. This makes recombination
+    much quicker.
+*/
+int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 {
-  // prefix
-  if (m_currSourceWordsRange.GetStartPos() > 0) {
-    int ret = GetPrefix().Compare(other.GetPrefix());
-    if (ret != 0)
-      return ret;
+	int comp = 0;
+  // -1 = this < compare
+  // +1 = this > compare
+  // 0	= this ==compare
+
+  for (unsigned i = 0; i < m_ffStates.size(); ++i) 
+	{
+    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) 
+      comp = m_ffStates[i] - compare.m_ffStates[i];
+		else 
+      comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
+
+		if (comp != 0) 
+			return comp;
   }
 
-  // suffix
-  size_t inputSize = m_manager.GetSource().GetSize();
-  if (m_currSourceWordsRange.GetEndPos() < inputSize - 1) {
-    int ret = GetSuffix().Compare(other.GetSuffix());
-    if (ret != 0)
-      return ret;
-  }
-
-  // they're the same
   return 0;
 }
 
@@ -243,107 +250,23 @@ void ChartHypothesis::CalcScore()
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
-  CalcLMScore();
+	// compute values of stateless feature functions that were not
+  // cached in the translation option-- there is no principled distinction
+
+  //const vector<const StatelessFeatureFunction*>& sfs =
+  //  m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
+	// TODO!
+  //for (unsigned i = 0; i < sfs.size(); ++i) {
+  //  sfs[i]->ChartEvaluate(m_targetPhrase, &m_scoreBreakdown);
+  //}
+
+  const vector<const StatefulFeatureFunction*>& ffs =
+    m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+  for (unsigned i = 0; i < ffs.size(); ++i) {
+		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+  }
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
-}
-
-// compute languane model score for the hypothesis
-void ChartHypothesis::CalcLMScore()
-{
-  // get the language models involved
-  const LMList& lmList = m_manager.GetTranslationSystem()->GetLanguageModels();
-  assert(m_lmNGram.GetWeightedScore() == 0);
-
-  // start scores with 0
-  m_scoreBreakdown.ZeroAllLM(lmList);
-
-  // initialize output string (empty)
-  Phrase outPhrase(Output, ARRAY_SIZE_INCR);
-  bool firstPhrase = true; // flag for first word
-
-  // loop over rule
-  for (size_t targetPhrasePos = 0; targetPhrasePos < GetCurrTargetPhrase().GetSize(); ++targetPhrasePos) 
-  {
-    // consult rule for either word or non-terminal
-    const Word &targetWord = GetCurrTargetPhrase().GetWord(targetPhrasePos);
-
-    // just a word, add it to phrase for lm scoring
-    if (!targetWord.IsNonTerminal()) 
-    {
-      outPhrase.AddWord(targetWord);
-    } 
-    // non-terminal, add phrase from underlying hypothesis
-    else 
-    {
-      // look up underlying hypothesis
-      size_t nonTermInd = m_coveredChartSpanListTargetOrder[targetPhrasePos];
-      const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
-      size_t numTargetTerminals = prevHypo->GetNumTargetTerminals();
-
-      // check if we are dealing with a large sub-phrase
-      // (large sub-phrases have internal language model scores)
-      if (numTargetTerminals < lmList.GetMaxNGramOrder() - 1) 
-      {
-        // small sub-phrase (for trigram lm, 1 or 2-word hypos).
-        // add target phrase to temp phrase and continue, but don't score yet
-        outPhrase.Append(prevHypo->GetPrefix());
-      }
-      else {
-        // large sub-phrase
-        // we add the internal scores
-        m_lmNGram.PlusEqualsAllLM(lmList, prevHypo->m_lmNGram);
-
-        // we will still have to score the prefix
-        outPhrase.Append(prevHypo->GetPrefix());
-
-        // preliminary language model scoring
-
-        // special case: rule starts with non-terminal
-        if (targetPhrasePos == 0 && numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) {
-          // get from other prev hypo. faster
-          m_lmPrefix.Assign(prevHypo->m_lmPrefix);
-          m_lmNGram.Assign(prevHypo->m_lmNGram);
-        } 
-        // general case
-        else {
-          // score everything we got so far
-          lmList.CalcAllLMScores(outPhrase
-                                 , m_lmNGram
-                                 , (firstPhrase) ? &m_lmPrefix : NULL);
-        }
-
-        // create new phrase from suffix. score later when appended with next words
-        outPhrase.Clear();
-        outPhrase.Append(prevHypo->GetSuffix());
-
-        firstPhrase = false;
-      } // if long sub-phrase
-    } // if (!targetWord.IsNonTerminal())
-  } // for (size_t targetPhrasePos
-
-  lmList.CalcAllLMScores(outPhrase
-                         , m_lmNGram
-                         , (firstPhrase) ? &m_lmPrefix : NULL);
-
-  // add score estimate for prefix
-  m_scoreBreakdown.PlusEqualsAllLM(lmList, m_lmPrefix);
-  // add real score for words with full history
-  m_scoreBreakdown.PlusEqualsAllLM(lmList, m_lmNGram);
-
-  /*
-  	// lazy way. keep for comparison
-  	Phrase outPhrase = GetOutputPhrase();
-  //	cerr << outPhrase << " ";
-
-  	float retFullScore, retNGramScore;
-  	StaticData::Instance().GetAllLM().CalcScore(outPhrase
-  																						, retFullScore
-  																						, retNGramScore
-  																						, m_scoreBreakdown
-  																						, &m_lmNGram
-  																						, false);
-  */
 }
 
 void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)

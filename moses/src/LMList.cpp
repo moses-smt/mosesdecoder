@@ -60,35 +60,6 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
   }
 }
 
-void LMList::CalcAllLMScores(const Phrase &phrase
-                             , ScoreComponentCollection &nGramOnly
-                             , ScoreComponentCollection *beginningBitsOnly) const
-{
-  assert(phrase.GetNumTerminals() == phrase.GetSize());
-
-  const_iterator lmIter;
-  for (lmIter = begin(); lmIter != end(); ++lmIter) {
-    const LanguageModel &lm = **lmIter;
-
-    // do not process, if factors not defined yet (happens in partial translation options)
-    if (!lm.Useable(phrase))
-      continue;
-
-    float beginningScore, nGramScore;
-    lm.CalcScoreChart(phrase, beginningScore, nGramScore);
-    beginningScore = UntransformLMScore(beginningScore);
-    nGramScore = UntransformLMScore(nGramScore);
-
-    nGramOnly.PlusEquals(&lm, nGramScore);
-
-    if (beginningBitsOnly)
-      beginningBitsOnly->PlusEquals(&lm, beginningScore);
-
-  }
-
-}
-
-
 void LMList::Add(LanguageModel *lm)
 {
   m_coll.push_back(lm);

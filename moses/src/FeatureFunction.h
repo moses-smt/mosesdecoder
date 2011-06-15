@@ -10,6 +10,7 @@ namespace Moses
 
 class TargetPhrase;
 class Hypothesis;
+class ChartHypothesis;
 class FFState;
 class InputType;
 class ScoreComponentCollection;
@@ -56,6 +57,11 @@ public:
   virtual FFState* Evaluate(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const = 0;
+
+  virtual FFState* EvaluateChart(
+    const ChartHypothesis& /* cur_hypo */,
+    int /* featureID */,
     ScoreComponentCollection* accumulator) const = 0;
 
   //! return the state associated with the empty hypothesis for a given sentence
