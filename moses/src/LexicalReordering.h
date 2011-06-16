@@ -44,6 +44,7 @@ public:
                                  int /* featureID */,
 																 ScoreComponentCollection*) const {
 		assert(0); // not valid for chart decoder
+		return NULL;
 	}
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
