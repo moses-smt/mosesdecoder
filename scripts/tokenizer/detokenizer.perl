@@ -78,6 +78,9 @@ sub detokenize {
 			$text = $text.$prependSpace.$words[$i];
 			$prependSpace = "";
 		} elsif ($words[$i] =~ /^[\,\.\?\!\:\;\\\%\}\]\)]+$/){
+		    if (($language eq "fr") && ($words[$i] =~ /^[\?\!\:\;\\\%]$/)) {
+			#these punctuations are prefixed with a non-breakable space in french
+			$text .= " "; }
 			#perform left shift on punctuation items
 			$text=$text.$words[$i];
 			$prependSpace = " ";
