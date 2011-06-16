@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "Util.h"
 #include "DummyScoreProducers.h"
+#include "AlignmentInfoCollection.h"
 
 using namespace std;
 
@@ -44,6 +45,7 @@ bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
   :Phrase(direction, 0),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
   //ACAT
@@ -60,6 +62,7 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
   , m_ngramScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
+  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
   wordalignflag=StaticData::Instance().UseAlignmentInfo();
   printalign=StaticData::Instance().PrintAlignmentInfo();
@@ -280,8 +283,9 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
 void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
 {
-  list<pair<size_t,size_t> > alignmentInfo;
-  vector<string> alignVec = Tokenize(alignString);
+  set<pair<size_t,size_t> > alignmentInfo;
+  vector<string> alignVec;
+  Tokenize(alignVec, alignString);
 
   vector<string>::const_iterator iter;
   for (iter = alignVec.begin(); iter != alignVec.end(); ++iter) {
@@ -291,15 +295,15 @@ void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
     size_t &sourcePos	= alignPos[0]
                         ,&targetPos	= alignPos[1];
 
-    alignmentInfo.push_back(pair<size_t,size_t>(sourcePos, targetPos));
+    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
   }
 
   SetAlignmentInfo(alignmentInfo);
 }
 
-void TargetPhrase::SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
 {
-  m_alignmentInfo.AddAlignment(alignmentInfo);
+  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
 }
 
 void TargetPhrase::CreateCountInfo(const std::string &countStr)

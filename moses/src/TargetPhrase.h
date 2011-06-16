@@ -70,7 +70,7 @@ protected:
   float m_transScore, m_ngramScore, m_fullScore;
   //float m_ngramScore, m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
-  AlignmentInfo m_alignmentInfo;
+  const AlignmentInfo *m_alignmentInfo;
 
   // in case of confusion net, ptr to source phrase
   Phrase const* m_sourcePhrase;
@@ -167,13 +167,10 @@ public:
   }
 
   void SetAlignmentInfo(const std::string &alignString);
-  void SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
+  void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
 
-  AlignmentInfo &GetAlignmentInfo() {
-    return m_alignmentInfo;
-  }
   const AlignmentInfo &GetAlignmentInfo() const {
-    return m_alignmentInfo;
+    return *m_alignmentInfo;
   }
 
   void UseWordAlignment(bool a) {

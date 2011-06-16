@@ -244,7 +244,6 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
           , *coveredChartSpanList->back()
           , range
           , m_hypoStackColl);
-      chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);
     } // for (iterLHS
   } else {
@@ -279,7 +278,6 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
           , *coveredChartSpanList->back()
           , range
           , m_hypoStackColl);
-      chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);
     }
   }

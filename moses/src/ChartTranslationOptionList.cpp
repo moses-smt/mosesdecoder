@@ -126,12 +126,6 @@ void ChartTranslationOptionList::CreateChartRules(size_t ruleLimit)
     }
     m_collection.resize(ruleLimit);
   }
-
-  // finalise creation of chart rules
-  for (size_t ind = 0; ind < m_collection.size(); ++ind) {
-    ChartTranslationOption &rule = *m_collection[ind];
-    rule.CreateNonTermIndex();
-  }
 }
 
 

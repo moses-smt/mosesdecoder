@@ -296,6 +296,10 @@ FFState* LanguageModel::EvaluateChart(
 	float prefixScore = 0.0;    // not yet final for initial words (lack context)
 	float finalizedScore = 0.0; // finalized, has sufficient context
 
+  // get index map for underlying hypotheses
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+
 	// loop over rule
   for (size_t phrasePos = 0, wordPos = 0; 
 			 phrasePos < hypo.GetCurrTargetPhrase().GetSize(); 
@@ -327,7 +331,7 @@ FFState* LanguageModel::EvaluateChart(
     else 
     {
 			// look up underlying hypothesis
-      size_t nonTermIndex = hypo.GetCoveredChartSpanTargetOrder(phrasePos);
+      size_t nonTermIndex = nonTermIndexMap[phrasePos];
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
       size_t subPhraseLength = prevHypo->GetNumTargetTerminals();
 

@@ -29,28 +29,6 @@ using namespace std;
 namespace Moses
 {
 
-void ChartTranslationOption::CreateNonTermIndex()
-{
-  m_coveredChartSpanListTargetOrder.resize(m_targetPhrase.GetSize(), NOT_FOUND);
-  const AlignmentInfo &alignInfo = m_targetPhrase.GetAlignmentInfo();
-
-  size_t nonTermInd = 0;
-  size_t prevSourcePos = 0;
-  AlignmentInfo::const_iterator iter;
-  for (iter = alignInfo.begin(); iter != alignInfo.end(); ++iter) {
-    // alignment pairs must be ordered by source index
-    size_t sourcePos = iter->first;
-    if (nonTermInd > 0) {
-      assert(sourcePos > prevSourcePos);
-    }
-    prevSourcePos = sourcePos;
-
-    size_t targetPos = iter->second;
-    m_coveredChartSpanListTargetOrder[targetPos] = nonTermInd;
-    nonTermInd++;
-  }
-}
-
 void ChartTranslationOption::CalcEstimateOfBestScore(
   const CoveredChartSpan *coveredChartSpan,
   const ChartCellCollection &allChartCells)

@@ -17,39 +17,39 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#pragma once
+
 #include "AlignmentInfo.h"
 
-#include "TypeDef.h"
+#include <set>
 
 namespace Moses
 {
 
-void AlignmentInfo::BuildNonTermIndexMap()
+// Singleton collection of all AlignmentInfo objects.
+class AlignmentInfoCollection
 {
-  if (m_collection.empty()) {
-    return;
-  }
-  const_iterator p = begin();
-  size_t maxIndex = p->second;
-  for (++p;  p != end(); ++p) {
-    if (p->second > maxIndex) {
-      maxIndex = p->second;
-    }
-  }
-  m_nonTermIndexMap.resize(maxIndex+1, NOT_FOUND);
-  size_t i = 0;
-  for (p = begin(); p != end(); ++p) {
-    m_nonTermIndexMap[p->second] = i++;
-  }
-}
+ public:
+  static AlignmentInfoCollection &Instance() { return s_instance; }
 
-std::ostream& operator<<(std::ostream &out, const AlignmentInfo &alignmentInfo)
-{
-  AlignmentInfo::const_iterator iter;
-  for (iter = alignmentInfo.begin(); iter != alignmentInfo.end(); ++iter) {
-    out << iter->first << "-" << iter->second << " ";
-  }
-  return out;
-}
+  // Returns a pointer to an AlignmentInfo object with the same source-target
+  // alignment pairs as given in the argument.  If the collection already
+  // contains such an object then returns a pointer to it; otherwise a new
+  // one is inserted.
+  const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &);
+
+  // Returns a pointer to an empty AlignmentInfo object.
+  const AlignmentInfo &GetEmptyAlignmentInfo() const;
+
+ private:
+  typedef std::set<AlignmentInfo, AlignmentInfoOrderer> AlignmentInfoSet;
+
+  // Only a single static variable should be created.
+  AlignmentInfoCollection();
+
+  static AlignmentInfoCollection s_instance;
+  AlignmentInfoSet m_collection;
+  const AlignmentInfo *m_emptyAlignmentInfo;
+};
 
 }

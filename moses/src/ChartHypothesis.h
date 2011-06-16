@@ -53,7 +53,6 @@ protected:
   const ChartTranslationOption &m_transOpt;
 
   Phrase m_contextPrefix, m_contextSuffix;
-  const std::vector<size_t> &m_coveredChartSpanListTargetOrder; // same size as target phrase ?
   WordsRange					m_currSourceWordsRange;
 	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
@@ -153,11 +152,6 @@ public:
 	const ChartHypothesis* GetPrevHypo(size_t pos) const {
 		return m_prevHypos[pos];
 	}
-
-  size_t GetCoveredChartSpanTargetOrder(size_t pos) const {
-    assert(pos < m_coveredChartSpanListTargetOrder.size());
-    return m_coveredChartSpanListTargetOrder[pos];
-  }
 
   const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();

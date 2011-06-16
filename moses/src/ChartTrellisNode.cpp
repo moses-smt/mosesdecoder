@@ -106,11 +106,13 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
   VERBOSE(3, "Trans Opt:" << transOpt << std::endl);
     
   const Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    m_hypo->GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {
     const Word &word = currTargetPhrase.GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = m_hypo->GetCoveredChartSpanTargetOrder(pos);
+      size_t nonTermInd = nonTermIndexMap[pos];
       const ChartTrellisNode &childNode = GetChild(nonTermInd);
       Phrase childPhrase = childNode.GetOutputPhrase();
       ret.Append(childPhrase);

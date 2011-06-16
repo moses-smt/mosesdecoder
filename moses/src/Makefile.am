@@ -5,6 +5,7 @@ libmoses_ladir = ${includedir}
 
 libmoses_la_HEADERS = \
         AlignmentInfo.h \
+        AlignmentInfoCollection.h \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
         CellCollection.h \
@@ -165,6 +166,7 @@ endif
 
 libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
+        AlignmentInfoCollection.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
 	ChartCell.cpp \

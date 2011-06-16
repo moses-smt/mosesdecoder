@@ -43,11 +43,6 @@ protected:
   		1. a word in the input sentence, if the pt word is a terminal
   		2. a 1+ phrase in the input sentence, if the pt word is a non-terminal
   */
-  std::vector<size_t> m_coveredChartSpanListTargetOrder;
-  /* size is the size of the target phrase.
-  	Usually filled with NOT_KNOWN, unless the pos is a non-term, in which case its filled
-  	with its index
-  */
   const WordsRange	&m_wordsRange;
 
     float m_estimateOfBestScore;
@@ -76,11 +71,6 @@ public:
   const CoveredChartSpan &GetLastCoveredChartSpan() const {
     return m_lastCoveredChartSpan;
   }
-  const std::vector<size_t> &GetCoveredChartSpanTargetOrder() const {
-    return m_coveredChartSpanListTargetOrder;
-  }
-
-  void CreateNonTermIndex();
 
   const WordsRange &GetSourceWordsRange() const {
     return m_wordsRange;

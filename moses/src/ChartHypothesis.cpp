@@ -47,7 +47,6 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 /** Create a hypothesis from a rule */
 ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager)
   :m_transOpt(ruleCube.GetTranslationOption())
-  ,m_coveredChartSpanListTargetOrder(ruleCube.GetTranslationOption().GetCoveredChartSpanTargetOrder())
   ,m_id(++s_HypothesesCreated)
   ,m_currSourceWordsRange(ruleCube.GetTranslationOption().GetSourceWordsRange())
 	,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
@@ -56,7 +55,6 @@ ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager
   ,m_arcList(NULL)
   ,m_manager(manager)
 {
-  assert(GetCurrTargetPhrase().GetSize() == m_coveredChartSpanListTargetOrder.size());
   //TRACE_ERR(m_targetPhrase << endl);
 
   // underlying hypotheses for sub-spans
@@ -110,11 +108,14 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = m_coveredChartSpanListTargetOrder[pos];
+      size_t nonTermInd = nonTermIndexMap[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
@@ -138,13 +139,16 @@ Phrase ChartHypothesis::GetOutputPhrase() const
  */
 size_t ChartHypothesis::CalcPrefix(Phrase &ret, size_t size) const
 {
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+
   // loop over the rule that is being applied
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
 
     // for non-terminals, retrieve it from underlying hypothesis
     if (word.IsNonTerminal()) {
-      size_t nonTermInd = m_coveredChartSpanListTargetOrder[pos];
+      size_t nonTermInd = nonTermIndexMap[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       size = prevHypo->CalcPrefix(ret, size);
     } 
@@ -188,11 +192,13 @@ size_t ChartHypothesis::CalcSuffix(Phrase &ret, size_t size) const
   } 
   // construct suffix analogous to prefix
   else {
+    const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+      GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
     for (int pos = (int) GetCurrTargetPhrase().GetSize() - 1; pos >= 0 ; --pos) {
       const Word &word = GetCurrTargetPhrase().GetWord(pos);
 
       if (word.IsNonTerminal()) {
-        size_t nonTermInd = m_coveredChartSpanListTargetOrder[pos];
+        size_t nonTermInd = nonTermIndexMap[pos];
         const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
         size = prevHypo->CalcSuffix(ret, size);
       } 

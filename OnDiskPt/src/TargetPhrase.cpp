@@ -216,10 +216,10 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   ret->SetScoreChart(phraseDict.GetFeature(), m_scores, weightT, lmList, wpProducer);
 
   // alignments
-  std::list<std::pair<size_t, size_t> > alignmentInfo;
+  std::set<std::pair<size_t, size_t> > alignmentInfo;
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const std::pair<size_t, size_t> &entry = m_align[ind];
-    alignmentInfo.push_back(entry);
+    alignmentInfo.insert(entry);
   }
   ret->SetAlignmentInfo(alignmentInfo);
 
