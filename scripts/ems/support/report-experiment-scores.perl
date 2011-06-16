@@ -101,7 +101,7 @@ sub extract_multi_bleu {
     my ($bleu,$ratio);
     foreach (`cat $file`) {
 	$bleu = $1 if /BLEU = (\S+), /;
-	$ratio = $1 if / ration?=(\S+)\)/;
+	$ratio = $1 if / ration?=(\S+),/;
     }
     my $output = sprintf("%.02f ",$bleu);
     $output .= sprintf("(%.03f) ",$ratio) if $ratio;

@@ -128,10 +128,11 @@ train
 
 [LM] multiple
 get-corpus
-	in: get-corpus-script
+  in: get-corpus-script
 	out: raw-corpus
+	pass-unless: get-corpus-script
 	default-name: lm/txt
-	template: IN > OUT
+	template: $get-corpus-script > OUT
 tokenize
 	in: raw-corpus
 	out: tokenized-corpus
@@ -156,6 +157,7 @@ lowercase
 	ignore-if: output-truecaser
 	only-factor-0: yes
 	template: $output-lowercaser < IN > OUT
+	parallelizable: yes
 truecase
 	in: factorized-corpus TRUECASER:truecase-model
 	out: lowercased-corpus
@@ -163,7 +165,8 @@ truecase
 	default-name: lm/truecased
 	ignore-unless: output-truecaser
 	only-factor-0: yes
-        template: $output-truecaser -model IN1.$output-extension < IN > OUT
+  template: $output-truecaser -model IN1.$output-extension < IN > OUT
+	parallelizable: yes
 split
 	in: lowercased-corpus SPLITTER:splitter-model
 	out: split-corpus
@@ -351,13 +354,20 @@ build-reordering
 build-ttable
 	in: extracted-phrases lexical-translation-table
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script report-precision-by-coverage
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
 	default-name: model/phrase-table
 build-generation
 	in: corpus
 	out: generation-table
 	rerun-on-change: generation-factors generation-type training-options script
 	ignore-unless: generation-factors
+  ignore-if: generation-corpus
+	default-name: model/generation-table
+build-generation-custom
+	in: generation-corpus
+	out: generation-table
+	rerun-on-change: generation-factors generation-type training-options script generation-corpus
+	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 create-config
 	in: reordering-table phrase-translation-table generation-table LM:binlm biconcor-model
@@ -514,8 +524,14 @@ split-reference
 	pass-unless: output-splitter
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
+filter
+	in: TRAINING:config input
+	out: filtered-config
+	default-name: tuning/moses.filtered.ini
+  pass-if: TRAINING:binarize-all
+	ignore-if: use-hiero
 tune
-	in: TRAINING:config input reference
+	in: filtered-config input reference
 	out: weight-config
 	ignore-if: use-hiero
 	qsub-script: yes
@@ -602,8 +618,14 @@ split-input
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
-decode
+filter
 	in: TUNING:config-with-reused-weights input
+	out: filtered-config
+	default-name: evaluation/filtered.ini
+	pass-if: TRAINING:binarize-all
+	rerun-on-change: report-precision-by-coverage
+decode
+	in: filtered-config input
 	out: system-output
 	default-name: evaluation/output
 	qsub-script: yes
@@ -747,10 +769,11 @@ analysis-coverage
 	ignore-unless: AND analysis analyze-coverage
 	rerun-on-change: score-settings
 analysis-precision
-	in: recased-output reference input TRAINING:corpus TRAINING:phrase-translation-table
+	in: recased-output reference input TRAINING:corpus TRAINING:phrase-translation-table analysis-coverage
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage
+  rerun-on-change: precision-by-coverage-base
 
 [REPORTING] single
 report

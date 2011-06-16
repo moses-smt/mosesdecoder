@@ -10,25 +10,31 @@ function show_analysis() {
 ?><script>
 function show(field,sort,count) {
   var url = '?analysis=' + field + '_show'
-            + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
-            + '&sort=' + sort
-            + '&count=' + count;
+      + '&setup=<?php print $setup ?>'
+      + '&id=<?php print $id ?>'
+      + '&set=<?php print $set ?>'
+      + '&sort=' + sort
+      + '&count=' + count;
   new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function ngram_show(type,order,count,sort,smooth) {
   var url = '?analysis=ngram_' + type + '_show'
-            + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
-            + '&order=' + order
-            + '&smooth=' + smooth
-            + '&sort=' + sort
-            + '&count=' + count;
+      + '&setup=<?php print $setup ?>'
+      + '&id=<?php print $id ?>'
+      + '&set=<?php print $set ?>'
+      + '&order=' + order
+      + '&smooth=' + smooth
+      + '&sort=' + sort
+      + '&count=' + count;
   var field = (type == "precision" ? "nGramPrecision" : "nGramRecall") + order;
   new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function generic_show(field,parameters) {
   var url = '?analysis=' + field + '_show'
-            + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
-            + '&' + parameters;
+      + '&setup=<?php print $setup ?>'
+      + '&id=<?php print $id ?>'
+      + '&set=<?php print $set ?>'
+      + '&' + parameters;
   new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function highlight_phrase(sentence,phrase) {
@@ -73,6 +79,7 @@ function close_biconcor(sentence) {
 <body>
 <div id="nGramSummary"><?php ngram_summary()  ?></div>
 <div id="CoverageDetails"></div>
+<div id="PrecisionByCoverage"></div>
 <div id="PrecisionRecallDetails"></div>
 <div id="bleu">(loading...)</div>
 <script language="javascript">
@@ -80,6 +87,278 @@ show('bleu','',5);
 </script>
 </body></html>
 <?php
+}
+
+function precision_by_coverage() {
+  global $experiment,$evalset,$dir,$set,$id;
+  $img_width = 1000;
+
+  print "<h3>Precision by Coverage</h3>";
+  print "The graphs display what ratio of words of a specific type are translated correctly (yellow), and what ratio is deleted (blue).";
+  print " The extend of the boxes is scaled on the x-axis by the number of tokens of the displayed type.";
+
+  // load data
+  $data = file("$dir/evaluation/$set.analysis.$id/precision-by-corpus-coverage");
+  $total = 0;
+  for($i=0;$i<count($data);$i++) {
+    $item = split("\t",$data[$i]);
+    $info[$item[0]]["precision"] = $item[1];
+    $info[$item[0]]["delete"] = $item[2];
+    $info[$item[0]]["length"] = $item[3];
+    $info[$item[0]]["total"] = $item[4];
+    $total += $item[4];
+    $log_count = -1;
+    if ($item[0]>0) {
+	$log_count = (int) (log($item[0])/log(2));
+    }
+    if (!array_key_exists($log_count,$log_info)) {
+	$log_info[$log_count]["precision"] = 0;
+	$log_info[$log_count]["delete"] = 0;
+	$log_info[$log_count]["length"] = 0;
+	$log_info[$log_count]["total"] = 0;
+    }
+    $log_info[$log_count]["precision"] += $item[1];
+    $log_info[$log_count]["delete"] += $item[2];
+    $log_info[$log_count]["length"] += $item[3];
+    $log_info[$log_count]["total"] += $item[4];    
+  }
+  print "<h4>By log<sub>2</sub>-count in the training corpus</h4>";
+  precision_by_coverage_graph("byCoverage",$log_info,$total,$img_width,SORT_NUMERIC);
+
+  // load factored data
+  $d = dir("$dir/evaluation/$set.analysis.$id");
+  while (false !== ($file = $d->read())) {
+    if (preg_match('/precision-by-corpus-coverage.(.+)$/',$file, $match)) {
+      precision_by_coverage_factored($img_width,$total,$file,$match[1]);
+    }
+  }
+}
+
+function precision_by_coverage_factored($img_width,$total,$file,$factor_id) {
+  global $dir,$set,$id;
+  $data = file("$dir/evaluation/$set.analysis.$id/$file");
+  for($i=0;$i<count($data);$i++) {
+    $item = split("\t",$data[$i]);
+    $factor = $item[0];
+    $count = $item[1];
+    $info_factored[$factor][$count]["precision"] = $item[2];
+    $info_factored[$factor][$count]["delete"] = $item[3];
+    $info_factored[$factor][$count]["length"] = $item[4];
+    $info_factored[$factor][$count]["total"] = $item[5];
+    $info_factored_sum[$factor]["precision"] += $item[2];
+    $info_factored_sum[$factor]["delete"] += $item[3];
+    $info_factored_sum[$factor]["length"] += $item[4];
+    $info_factored_sum[$factor]["total"] += $item[5];
+    $total_factored[$factor] += $item[5];
+    $log_count = -1;
+    if ($count>0) {
+	$log_count = (int) (log($count)/log(2));
+    }
+    $log_info_factored[$factor][$log_count]["precision"] += $item[2];
+    $log_info_factored[$factor][$log_count]["delete"] += $item[3];
+    $log_info_factored[$factor][$log_count]["length"] += $item[4];
+    $log_info_factored[$factor][$log_count]["total"] += $item[5];    
+  }
+  print "<h4>By factor ".factor_name("input",$factor_id)."</h4>";
+  precision_by_coverage_graph("byFactor",$info_factored_sum,$total,$img_width,SORT_STRING);
+
+  print "<h4>For each factor, by log<sub>2</sub>-count in the corpus</h4>";
+  foreach ($log_info_factored as $factor => $info) {
+    if ($total_factored[$factor]/$total > 0.01) {
+      print "<table style=\"display:inline;\"><tr><td align=center><font size=-2><b>$factor</b></font></td></tr><tr><td align=center>";
+      precision_by_coverage_graph("byCoverageFactor$factor",$info,$total_factored[$factor],10+2*$img_width*$total_factored[$factor]/$total,SORT_NUMERIC);
+      print "</td></tr></table>";
+    }
+  }
+}
+
+function precision_by_word($type) {
+  global $dir,$set,$id;
+  $byCoverage = -2;
+  $byFactor = "false";
+  if ($type == "byCoverage") {
+      $byCoverage = (int) $_GET["type"];
+  }
+  else if ($type == "byFactor") {
+      $byFactor = $_GET["type"];
+  }
+  else if (preg_match("/byCoverageFactor(.+)/",$type,$match)) {
+      $byCoverage = (int) $_GET["type"];
+      $byFactor = $match[1];
+  }
+
+  $data = file("$dir/evaluation/$set.analysis.$id/precision-by-input-word");
+  for($i=0;$i<count($data);$i++) {
+    $line = rtrim($data[$i]);
+    $item = split("\t",$line);
+
+    //# filter for count
+    $count = $item[4];
+    $log_count = -1;
+    if ($count>0) {
+	$log_count = (int) (log($count)/log(2));
+    }
+    if ($byCoverage != -2 && $byCoverage != $log_count) {
+	continue;
+    }
+   
+    //# filter for factor
+    $word = $item[5];
+    $factor = $item[6];
+    if ($byFactor != "false" && $byFactor != $factor) {
+	continue;
+    }
+
+    $info[$word]["precision"] = $item[0];
+    $info[$word]["delete"] = $item[1];
+    $info[$word]["length"] = $item[2];
+    $info[$word]["total"] = $item[3];
+    $total += $item[3];
+  }
+
+  print "<table border=1><tr><td align=center>Count</td><td align=center colspan=2>Precision</td><td align=center colspan=2>Delete</td><td align=center>Length</td></tr>\n";
+  foreach ($info as $word => $wordinfo) {
+      print "<tr><td align=center>$word</td>";
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%.1f/%d</font></td>",$wordinfo["precision"]/$wordinfo["total"]*100,"%",$wordinfo["precision"],$wordinfo["total"]);
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%d/%d</font></td>",$wordinfo["delete"]/$wordinfo["total"]*100,"%",$wordinfo["delete"],$wordinfo["total"]);
+      printf("<td align=right>%.3f</td>",$wordinfo["length"]/$wordinfo["total"]);
+      print "</tr>";
+  }
+  print "</table>\n";
+}
+
+function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_type) {
+  $keys = array_keys($log_info);
+  sort($keys,$sort_type);
+  
+  $img_width /= 100;
+  print "<div id=\"LatexToggle$name\" onClick=\"document.getElementById('Latex$name').style.display = 'block'; this.style.display = 'none';\" style=\"display:none;\"><font size=-2>(show LaTeX)</font></div>\n";
+  print "<div id=\"Latex$name\" style=\"display:none;\">\n";
+  print "<code>\\begin{tikzpicture}<br>";
+
+  print "% co-ordinates for precision<br>";
+  for($line=0;$line<=9;$line++) {
+      $height = 1.8-$line/10*1.8;
+      print "\\draw[thin,lightgray] (0.2,-$height) ";
+      print "node[anchor=east,black] {".$line."0\\%} -- ";
+      print "($img_width,-$height) ;<br>\n"; 
+  }
+  print "% co-ordinates for deletion<br>\n";
+  for($line=0;$line<=3;$line++) {
+      $height = 2+$line/10*1.80;
+      print "\\draw[thin,lightgray] (0.2,-$height) ";
+      if ($line != 0) {
+	  print "node[anchor=east,black] {".$line."0\\%} ";
+      }
+      print "-- ($img_width,-$height) ;<br>\n"; 
+  }
+
+  print "% boxes<br>\n";
+  $total_so_far = 0;
+  foreach ($keys as $i) {
+    $prec_ratio = $log_info[$i]["precision"]/$log_info[$i]["total"];
+    $x = .2+($img_width-.2) * $total_so_far/$total;
+    $y = 1.80-($prec_ratio*1.80);
+    $width = $img_width * $log_info[$i]["total"]/$total;
+    $height = $prec_ratio*1.80;
+
+    $width += $x;
+    $height += $y;
+    
+    print "\\filldraw[very thin,gray] ($x,-$y) rectangle($width,-$height) ;<br>";
+    print "\\draw[very thin,black] ($x,-$y) rectangle($width,-$height);<br>";
+    if ($width-$x>.1) {
+	print "\\draw (".(($x+$width)/2).",-1.8) node[anchor=north,black] {".$i."};<br>";
+    }
+ 
+
+    $del_ratio = $log_info[$i]["delete"]/$log_info[$i]["total"];
+    $height = $del_ratio*1.80;
+
+    $height += 2;
+
+    print "\\filldraw[very thin,lightgray] ($x,-2) rectangle($width,-$height);<br>\n";
+    print "\\draw[very thin,black] ($x,-2) rectangle($width,-$height);<br>\n";
+
+    $total_so_far += $log_info[$i]["total"];   
+  }
+  print "\\end{tikzpicture}</code>";
+  print "</div>"; 
+}
+
+function precision_by_coverage_graph($name,$log_info,$total,$img_width,$sort_type) {
+
+  $keys = array_keys($log_info);
+  sort($keys,$sort_type);
+
+  print "<div id=\"Toggle$name\" onClick=\"document.getElementById('Table$name').style.display = 'none'; document.getElementById('LatexToggle$name').style.display = 'none'; document.getElementById('Latex$name').style.display = 'none'; this.style.display = 'none';\" style=\"display:none;\"><font size=-2>(hide table)</font></div>\n";
+  precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_type);
+
+  print "<div id=\"Table$name\" style=\"display:none;\">\n";
+  print "<table border=1><tr><td align=center>Count</td><td align=center colspan=2>Precision</td><td align=center colspan=2>Delete</td><td align=center>Length</td></tr>\n";
+  foreach ($keys as $i) {
+    if (array_key_exists($i,$log_info)) {
+      print "<tr><td align=center>$i</td>";
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%.1f/%d</font></td>",$log_info[$i]["precision"]/$log_info[$i]["total"]*100,"%",$log_info[$i]["precision"],$log_info[$i]["total"]);
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%d/%d</font></td>",$log_info[$i]["delete"]/$log_info[$i]["total"]*100,"%",$log_info[$i]["delete"],$log_info[$i]["total"]);
+      printf("<td align=right>%.3f</td>",$log_info[$i]["length"]/$log_info[$i]["total"]);
+      print "<td><A HREF=\"javascript:generic_show('PrecisionByWord$name','type=$i')\">&#x24BE;</A></td>";
+      print "</tr>";
+   }
+  }
+  print "</table><div id=\"PrecisionByWord$name\"></div></div>";
+
+  print "<div id=\"Graph$name\" onClick=\"document.getElementById('Table$name').style.display = 'block'; document.getElementById('LatexToggle$name').style.display = 'block'; document.getElementById('Toggle$name').style.display = 'block';\">";
+  print "<canvas id=\"$name\" width=$img_width height=300></canvas></div>";
+  print "<script language=\"javascript\">
+var canvas = document.getElementById(\"$name\");
+var ctx = canvas.getContext(\"2d\");
+ctx.lineWidth = 0.5;
+ctx.font = '9px serif';
+";
+  for($line=0;$line<=9;$line++) {
+      $height = 180-$line/10*180;
+      print "ctx.moveTo(20, $height);\n";
+      print "ctx.lineTo($img_width, $height);\n";
+      if ($line != 0) {
+	  print "ctx.fillText(\"${line}0\%\", 0, $height+4);";
+      }
+  }
+  for($line=0;$line<=3;$line++) {
+      $height = 200+$line/10*180;
+      print "ctx.moveTo(20, $height);\n";
+      print "ctx.lineTo($img_width, $height);\n";
+      if ($line != 0) {
+	  print "ctx.fillText(\"${line}0\%\", 0, $height+4);";
+      }
+  }
+  print "ctx.strokeStyle = \"rgb(100,100,100)\"; ctx.stroke();\n";
+
+  $total_so_far = 0;
+  foreach ($keys as $i) {
+    $prec_ratio = $log_info[$i]["precision"]/$log_info[$i]["total"];
+    $x = (int)(20+($img_width-20) * $total_so_far / $total);
+    $y = (int)(180-($prec_ratio*180));
+    $width = (int)($img_width * $log_info[$i]["total"]/$total);
+    $height = (int)($prec_ratio*180);
+    print "ctx.fillStyle = \"rgb(200,200,0)\";";
+    print "ctx.fillRect ($x, $y, $width, $height);";
+
+    $del_ratio = $log_info[$i]["delete"]/$log_info[$i]["total"];
+    $height = (int)($del_ratio*180);
+    print "ctx.fillStyle = \"rgb(100,100,255)\";";
+    print "ctx.fillRect ($x, 200, $width, $height);";
+
+    $total_so_far += $log_info[$i]["total"];
+   
+    if ($width>3) {
+      print "ctx.fillStyle = \"rgb(0,0,0)\";";
+      // print "ctx.rotate(-1.5707);";
+      print "ctx.fillText(\"$i\", $x+$width/2-3, 190);";
+      //print "ctx.rotate(1.5707);";
+    }
+  }
+  print "</script>";
 }
 
 // stats on precision and recall
@@ -145,6 +424,9 @@ function ngram_summary() {
   //}
 
   print "<A HREF=\"javascript:generic_show('PrecisionRecallDetails','')\">details</A> ";
+  if (file_exists("$dir/evaluation/$set.analysis.$id/precision-by-corpus-coverage")) {
+    print "| <A HREF=\"javascript:generic_show('PrecisionByCoverage','')\">breakdown by coverage</A> ";
+  }
 
  print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
 
@@ -290,7 +572,7 @@ function coverage_details() {
         $total[$corpus][$b][$i] = 0;
       }
     }
-    $data = file("$dir/evaluation/$set.analysis.$id/$corpus-coverage-summary");
+    $data = file(filename_fallback_to_factored("$dir/evaluation/$set.analysis.$id/$corpus-coverage-summary"));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
       if ($item[1]>5) {
@@ -332,7 +614,7 @@ function coverage_details() {
   }
   print "</tr></table>\n";
 
-  $data = file("$dir/evaluation/$set.analysis.$id/ttable-unknown");
+  $data = file(filename_fallback_to_factored("$dir/evaluation/$set.analysis.$id/ttable-unknown"));
   for($i=0;$i<count($data);$i++) {
     list($word,$count) = split("\t",$data[$i]);
     $item["word"] = $word;
@@ -354,7 +636,7 @@ function coverage_details() {
 
   usort($unknown, 'cmp');
 
-  print "<b>unknown words</b><br>\n";
+  print "<b>unknown words (to model)</b><br>\n";
   print "<table><tr><td valign=top><table>";
   $state = 5;
   foreach ($unknown as $item) {
@@ -377,6 +659,35 @@ function coverage_details() {
   print "</font></td></tr></table>\n";
 }
 
+function filename_fallback_to_factored($file) {
+  if (file_exists($file)) {
+    return $file;
+  }
+  $path = pathinfo($file);
+  $dh = opendir($path['dirname']);
+  while (($factored_file = readdir($dh)) !== false) {
+    if (strlen($factored_file) > strlen($path['basename']) &&
+	substr($factored_file,0,strlen($path['basename'])) == $path['basename'] &&
+	preg_match("/0/",substr($factored_file,strlen($path['basename'])))) {
+      return $path['dirname']."/".$factored_file;
+    }
+  }
+  // found nothing...
+  return $file;
+}
+
+function factor_name($input_output,$factor_id) {
+  global $dir,$set,$id;
+  $coverage_id = get_coverage_analysis_version($dir,$set,$id);
+  $file = "$dir/evaluation/$set.analysis.$coverage_id/factor-names";
+  if (!file_exists($file)) {
+    return $factor_id;
+  }
+  $in_out_names = file($file);
+  $names = explode(",",trim($in_out_names[($input_output == "input")?0:1]));
+  return "'".$names[$factor_id]."' ($factor_id)";
+}
+
 // stats on ngram coverage
 function coverage_summary() {
   global $dir,$set,$id,$corpus;
@@ -393,7 +704,7 @@ function coverage_summary() {
       $total[$corpus][$b] = 0;
     }
     $coverage_id = get_coverage_analysis_version($dir,$set,$id);
-    $data = file("$dir/evaluation/$set.analysis.$coverage_id/$corpus-coverage-summary");
+    $data = file(filename_fallback_to_factored("$dir/evaluation/$set.analysis.$coverage_id/$corpus-coverage-summary"));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
       if ($item[0] == 1) {

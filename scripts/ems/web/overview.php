@@ -11,7 +11,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit setup";
+  print "<P>To add experiment, edit setup file on web server";
 }
 
 function overview() {
@@ -315,6 +315,7 @@ function output_score($id,$info) {
 function tune_status($id) {
   global $dir;
   $max_iteration = 0;
+  if (! file_exists($dir."/tuning/tmp.".$id)) { return ""; }
   $d = dir($dir."/tuning/tmp.".$id);
   while (false !== ($entry = $d->read())) {
     if (preg_match('/run(\d+).moses.ini/',$entry,$match) 

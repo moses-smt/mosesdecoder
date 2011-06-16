@@ -12,6 +12,7 @@ function head($title) {
 <script language="javascript" src="/javascripts/prototype.js"></script>
 <script language="javascript" src="/javascripts/scriptaculous.js"></script>
 <script language="javascript" src="hierarchical-segmentation.js"></script>
+<link href="general.css" rel="stylesheet" type="text/css">
 <link href="hierarchical-segmentation.css" rel="stylesheet" type="text/css">
 <link href="bilingual-concordance.css" rel="stylesheet" type="text/css">
 </head>
@@ -28,12 +29,18 @@ if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
     $action = $_GET["analysis"];
     $set = $_GET["set"];
     $id = $_GET["id"];
+    $id2 = $_GET["id2"];
     if ($action == "show") { show_analysis(); }
     else if ($action == "bleu_show") { bleu_show(); }
     else if ($action == "ngram_precision_show") { ngram_show("precision");}
     else if ($action == "ngram_recall_show") { ngram_show("recall"); }
     else if ($action == "CoverageSummary_show") { coverage_summary(); }
     else if ($action == "PrecisionRecallDetails_show") { precision_recall_details(); }
+    else if ($action == "PrecisionRecallDetailsDiff_show") { precision_recall_details_diff(); }
+    else if ($action == "PrecisionByCoverage_show") { precision_by_coverage(); }
+    else if ($action == "PrecisionByCoverageDiff_show") { precision_by_coverage_diff(); }
+    else if (preg_match("/PrecisionByWordDiff(.+)_show/",$action,$match)) { precision_by_word_diff($match[1]); }
+    else if (preg_match("/PrecisionByWord(.+)_show/",$action,$match)) { precision_by_word($match[1]); }
     else if ($action == "CoverageDetails_show") { coverage_details(); }
     else if ($action == "SegmentationSummary_show") { segmentation_summary(); }
     else if ($action == "biconcor") { biconcor($_GET["phrase"]); }
