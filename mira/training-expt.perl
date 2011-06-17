@@ -112,7 +112,7 @@ my $weight_file_stem = "$name-weights";
 my $extra_memory_test = &param("test.extra-memory",0);
 my $skip_test = &param("test.skip-test",0);
 my $skip_dev = &param("test.skip-dev",0);
-my $skip_submit_test = &param("test.skip-submit",1);
+my $skip_submit_test = &param("test.skip-submit",0);
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
