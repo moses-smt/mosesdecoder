@@ -15,6 +15,8 @@ my $numParallel	= $ARGV[6];
 my $splitCmd		= $ARGV[7];
 my $sortCmd			= $ARGV[8];
 
+print "Started ".localtime() ."\n";
+
 my $TMPDIR="./tmp";
 mkdir $TMPDIR;
 
@@ -63,8 +65,6 @@ for (my $i = 0; $i < $numParallel; ++$i)
 	}
 }
 
-print "second\n";
-
 # wait for everything is finished
 if ($isParent)
 {
@@ -76,8 +76,6 @@ else
 {
   exit();
 }
-
-print "third\n";
 
 # merge
 my $extractCmd = "LC_ALL=C $sortCmd -m ";
@@ -95,6 +93,9 @@ print $extractCmd;
 print $extractInvCmd;
 `$extractCmd`;
 `$extractInvCmd`;
+
+print "Finished ".localtime() ."\n";
+
 
 sub NumStr($)
 {
