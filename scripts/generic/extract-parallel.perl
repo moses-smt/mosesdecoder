@@ -1,11 +1,14 @@
 #! /usr/bin/perl
 
 # example
-# ./extract-parallel.perl ./extract-rules target.txt source.txt align.txt extracted "" 3  /opt/local/bin/gsplit  "/opt/local/bin/gsort --batch-size=253"
+#  ../extract-parallel.perl ../extract-rules target.txt source.txt align.txt extracted "" 4 gsplit "gsort --batch-size=253"
 
 use strict;
+use File::Basename;
 
 sub NumStr($);
+
+print "Started ".localtime() ."\n";
 
 my $extractCmd	= $ARGV[0];
 my $target			= $ARGV[1];
@@ -17,9 +20,7 @@ my $numParallel	= $ARGV[6];
 my $splitCmd		= $ARGV[7];
 my $sortCmd			= $ARGV[8];
 
-print "Started ".localtime() ."\n";
-
-my $TMPDIR="./tmp";
+my $TMPDIR=dirname($extract)  ."/tmp.$$";
 mkdir $TMPDIR;
 
 my $totalLines = int(`wc -l $align`);
@@ -59,7 +60,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
 		print $cmd;
 		`$cmd`;
 		
-		last;
+		exit();
 	}
 	else
 	{ # parent
@@ -76,7 +77,7 @@ if ($isParent)
 }
 else
 {
-  exit();
+  die "shouldn't be here";
 }
 
 # merge
@@ -95,6 +96,9 @@ print $extractCmd;
 print $extractInvCmd;
 `$extractCmd`;
 `$extractInvCmd`;
+
+$cmd = "rm -rf $TMPDIR";
+`$cmd`;
 
 print "Finished ".localtime() ."\n";
 
