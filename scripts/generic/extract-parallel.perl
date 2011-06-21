@@ -1,7 +1,8 @@
 #! /usr/bin/perl
 
 # example
-#  ../extract-parallel.perl ../extract-rules target.txt source.txt align.txt extracted "" 4 gsplit "gsort --batch-size=253"
+#  ../extract-parallel.perl ../extract-rules target.txt source.txt align.txt extract.hiero "" 4 gsplit "gsort --batch-size=253"
+# ../extract-parallel.perl ../extract target.txt source.txt align.txt extract.pb " 7 " 4 gsplit "gsort --batch-size=253"
 
 use strict;
 use File::Basename;
