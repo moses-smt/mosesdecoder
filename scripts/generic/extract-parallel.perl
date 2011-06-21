@@ -9,10 +9,11 @@ my $extractCmd	= $ARGV[0];
 my $target			= $ARGV[1];
 my $source			= $ARGV[2];
 my $align				= $ARGV[3];
-my $extractArgs	= $ARGV[4];
-my $numParallel	= $ARGV[5];
-my $splitCmd		= $ARGV[6];
-my $sortCmd			= $ARGV[7];
+my $extract			= $ARGV[4];
+my $extractArgs	= $ARGV[5];
+my $numParallel	= $ARGV[6];
+my $splitCmd		= $ARGV[7];
+my $sortCmd			= $ARGV[8];
 
 my $TMPDIR="./tmp";
 mkdir $TMPDIR;
@@ -46,11 +47,11 @@ for (my $i = 0; $i < $numParallel; ++$i)
 		print $cmd;
 		`$cmd`;
 		
-		$cmd = "LC_ALL=C sort -T $TMPDIR $TMPDIR/extract.$numStr > $TMPDIR/extract.$numStr.sorted \n";
+		$cmd = "LC_ALL=C $sortCmd -T $TMPDIR $TMPDIR/extract.$numStr > $TMPDIR/extract.$numStr.sorted \n";
 		print $cmd;
 		`$cmd`;
 		
-		$cmd = "LC_ALL=C sort -T $TMPDIR $TMPDIR/extract.$numStr.inv > $TMPDIR/extract.$numStr.inv.sorted \n";
+		$cmd = "LC_ALL=C $sortCmd -T $TMPDIR $TMPDIR/extract.$numStr.inv > $TMPDIR/extract.$numStr.inv.sorted \n";
 		print $cmd;
 		`$cmd`;
 		
@@ -64,15 +65,36 @@ for (my $i = 0; $i < $numParallel; ++$i)
 
 print "second\n";
 
+# wait for everything is finished
 if ($isParent)
 {
   foreach (@childs) {
     waitpid($_, 0);
   }
 }
+else
+{
+  exit();
+}
 
 print "third\n";
 
+# merge
+my $extractCmd = "LC_ALL=C $sortCmd -m ";
+my $extractInvCmd = "LC_ALL=C $sortCmd -m ";
+for (my $i = 0; $i < $numParallel; ++$i)
+{
+		my $numStr = NumStr($i);
+		$extractCmd 		.= "$TMPDIR/extract.$numStr.sorted ";
+		$extractInvCmd 	.= "$TMPDIR/extract.$numStr.inv.sorted ";
+}
+
+$extractCmd .= "> $extract.sorted \n";
+$extractInvCmd .= "> $extract.inv.sorted \n";
+print $extractCmd;
+print $extractInvCmd;
+`$extractCmd`;
+`$extractInvCmd`;
 
 sub NumStr($)
 {
