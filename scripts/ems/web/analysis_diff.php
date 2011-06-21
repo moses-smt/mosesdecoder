@@ -73,8 +73,9 @@ function precision_by_coverage_diff() {
   print "The graphs display what ratio of words of a specific type are translated correctly (yellow), and what ratio is deleted (blue).";
   print " The extend of the boxes is scaled on the x-axis by the number of tokens of the displayed type.";
   // load data
-  $data = file("$dir/evaluation/$set.analysis.$id2/precision-by-corpus-coverage");
+  $data = file(get_current_analysis_filename2("precision","precision-by-corpus-coverage"));
   $total = 0;
+  $log_info = array();
   for($i=0;$i<count($data);$i++) {
     $item = split("\t",$data[$i]);
     $info[$item[0]]["precision"] = $item[1];
@@ -100,7 +101,7 @@ function precision_by_coverage_diff() {
   $log_info_new = $log_info;  
 
   // load base data
-  $data = file("$dir/evaluation/$set.analysis.$id/precision-by-corpus-coverage");
+  $data = file(get_current_analysis_filename("precision","precision-by-corpus-coverage"));
   for($i=0;$i<count($data);$i++) {
     $item = split("\t",$data[$i]);
     $info[$item[0]]["precision"] -= $item[1];
@@ -119,10 +120,10 @@ function precision_by_coverage_diff() {
   precision_by_coverage_diff_graph("byCoverage",$log_info,$log_info_new,$total,$img_width,SORT_NUMERIC);
 
   // load factored data
-  $d = dir("$dir/evaluation/$set.analysis.$id");
+  $d = dir("$dir/evaluation/$set.analysis.".get_precision_analysis_version($dir,$set,$id));
   while (false !== ($file = $d->read())) {
     if (preg_match('/precision-by-corpus-coverage.(.+)$/',$file, $match) &&
-	file_exists("$dir/evaluation/$set.analysis.$id2/precision-by-corpus-coverage.$match[1]")) {
+	file_exists(get_current_analysis_filename2("precision","precision-by-corpus-coverage.$match[1]"))) {
       precision_by_coverage_diff_factored($img_width,$total,$file,$match[1]);
     }
   }
@@ -130,7 +131,7 @@ function precision_by_coverage_diff() {
 
 function precision_by_coverage_diff_factored($img_width,$total,$file,$factor_id) {
   global $dir,$set,$id,$id2;
-  $data = file("$dir/evaluation/$set.analysis.$id2/$file");
+  $data = file(get_current_analysis_filename2("precision",$file));
   for($i=0;$i<count($data);$i++) {
     $item = split("\t",$data[$i]);
     $factor = $item[0];
@@ -158,7 +159,7 @@ function precision_by_coverage_diff_factored($img_width,$total,$file,$factor_id)
   $log_info_factored_new = $log_info_factored;
 
   // baseline data
-  $data = file("$dir/evaluation/$set.analysis.$id/$file");
+  $data = file(get_current_analysis_filename("precision",$file));
   for($i=0;$i<count($data);$i++) {
     $item = split("\t",$data[$i]);
     $factor = $item[0];
@@ -205,7 +206,9 @@ function precision_by_word_diff($type) {
       $byFactor = $match[1];
   }
 
-  $data = file("$dir/evaluation/$set.analysis.$id2/precision-by-input-word");
+  $data = file(get_current_analysis_filename2("precision","precision-by-input-word"));
+  $total = 0;
+  $info = array();
   for($i=0;$i<count($data);$i++) {
     $line = rtrim($data[$i]);
     $item = split("\t",$line);
@@ -215,19 +218,23 @@ function precision_by_word_diff($type) {
     $count = $item[4];
     $log_count = -1;
     if ($count>0) {
-	$log_count = (int) (log($count)/log(2));
+      $log_count = (int) (log($count)/log(2));
     }
     if ($byCoverage != -2 && $byCoverage != $log_count) {
-	continue;
+      continue;
     }
    
     //# filter for factor
     $word = $item[5];
-    $factor = $item[6];
-    if ($byFactor != "false" && $byFactor != $factor) {
-	continue;
+    if ($byFactor != "false" && $byFactor != $item[6]) {
+      continue;
     }
-
+    if (!array_key_exists($word,$info)) {
+      $info[$word]["precision"] = 0;
+      $info[$word]["delete"] = 0;
+      $info[$word]["length"] = 0;
+      $info[$word]["total"] = 0;
+    }
     $info[$word]["precision"] += $item[0];
     $info[$word]["delete"] += $item[1];
     $info[$word]["length"] += $item[2];
@@ -235,7 +242,7 @@ function precision_by_word_diff($type) {
   }
   $info_new = $info;
 
-  $data = file("$dir/evaluation/$set.analysis.$id/precision-by-input-word");
+  $data = file(get_current_analysis_filename("precision","precision-by-input-word"));
   for($i=0;$i<count($data);$i++) {
     $line = rtrim($data[$i]);
     $item = split("\t",$line);
@@ -252,11 +259,19 @@ function precision_by_word_diff($type) {
    
     //# filter for factor
     $word = $item[5];
-    $factor = $item[6];
-    if ($byFactor != "false" && $byFactor != $factor) {
+    if ($byFactor != "false" && $byFactor != $item[6]) {
 	continue;
     }
-   
+    if (!array_key_exists($word,$info)) {
+      $info[$word]["precision"] = 0;
+      $info[$word]["delete"] = 0;
+      $info[$word]["length"] = 0;
+      $info_new[$word]["length"] = 0;
+      $info_new[$word]["delete"] = 0;
+      $info_new[$word]["precision"] = 0;
+      $info_new[$word]["total"] = 0;
+      $info[$word]["total"] = -$item[3];
+    }
     $info[$word]["precision"] -= $item[0];
     $info[$word]["delete"] -= $item[1];
     $info[$word]["length"] -= $item[2];
@@ -308,14 +323,14 @@ ctx.font = '9px serif';
       $height = 90-$line/2*180;
       print "ctx.moveTo(20, $height);\n";
       print "ctx.lineTo($img_width, $height);\n";
-      print "ctx.fillText(\"".sprintf("%d",10*${line}*1.001)."\%\", 0, $height+4);";
+      print "ctx.fillText(\"".sprintf("%d",10 * $line * 1.001)."\%\", 0, $height+4);";
   }
   for($line=-0.4;$line<=0.4;$line+=.2) {
       $height = 250+$line/2*180;
       print "ctx.moveTo(20, $height);\n";
       print "ctx.lineTo($img_width, $height);\n";
       if ($line != 0) {
-	  print "ctx.fillText(\"".sprintf("%d",10*${line}*1.001)."\%\", 0, $height+4);";
+	  print "ctx.fillText(\"".sprintf("%d",10 * $line * 1.001)."\%\", 0, $height+4);";
       }
   }
   print "ctx.strokeStyle = \"rgb(100,100,100)\"; ctx.stroke();\n";
@@ -385,7 +400,7 @@ function ngram_summary_diff() {
 
   // load data
   for($idx=0;$idx<2;$idx++) {
-    $data = file("$dir/evaluation/$set.analysis.".($idx?$id2:$id)."/summary");
+    $data = file(get_analysis_filename($dir,$set,$idx?$id2:$id,"basic","summary"));
     for($i=0;$i<count($data);$i++) {
       $item = split(": ",$data[$i]);
       $info[$idx][$item[0]] = $item[1];
@@ -393,7 +408,7 @@ function ngram_summary_diff() {
   }
 
   print "<table cellspacing=5 width=100%><tr><td valign=top align=center bgcolor=#eeeeee>";
-  print "<b>Precision</b><br>";
+  print "<b>Precision of Output</b><br>";
   //foreach (array("precision","recall") as $type) {
   $type = "precision";
   print "<table><tr><td>$type</td><td>1-gram</td><td>2-gram</td><td>3-gram</td><td>4-gram</td></tr>\n";
@@ -416,11 +431,10 @@ function ngram_summary_diff() {
   //}
 
   print "<A HREF=\"javascript:generic_show_diff('PrecisionRecallDetailsDiff','')\">details</A> ";
-  if (file_exists("$dir/evaluation/$set.analysis.$id/precision-by-corpus-coverage") &&
-      file_exists("$dir/evaluation/$set.analysis.$id2/precision-by-corpus-coverage")) {
-    print "| <A HREF=\"javascript:generic_show_diff('PrecisionByCoverageDiff','')\">breakdown by coverage</A> ";
+  if (file_exists(get_current_analysis_filename("precision","precision-by-corpus-coverage")) &&
+      file_exists(get_current_analysis_filename2("precision","precision-by-corpus-coverage"))) {
+    print "| <A HREF=\"javascript:generic_show_diff('PrecisionByCoverageDiff','')\">precision of input by coverage</A> ";
   }
-
 
   print "</td><td valign=top align=center bgcolor=#eeeeee>";
   print "<b>Metrics</b><br>\n";
@@ -434,6 +448,7 @@ function ngram_summary_diff() {
       }
     }
   }
+  $header = ""; $score_line = ""; $diff_line = "";
   foreach ($score as $name => $value) {
     $header .= "<td>$name</td>";
     $score_line .= "<td>".$score[$name][1]."</td>";
@@ -494,7 +509,7 @@ function bleu_diff_annotation() {
 
   // load data
   for($idx=0;$idx<2;$idx++) {
-    $data = file("$dir/evaluation/$set.analysis.".($idx?$id2:$id)."/bleu-annotation");
+    $data = file(get_analysis_filename($dir,$set,$idx?$id2:$id,"basic","bleu-annotation"));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
       $annotation[$item[1]]["bleu$idx"] = $item[0]; 
@@ -505,6 +520,7 @@ function bleu_diff_annotation() {
   }
   $data = array();
 
+  $identical=0; $same=0; $better=0; $worse=0;
   for($i=0;$i<count($annotation);$i++) {
     if ($annotation[$i]["system1"] == $annotation[$i]["system0"]) {
       $identical++;
@@ -609,7 +625,7 @@ function ngram_diff($type) {
   $order = $_GET['order'];
   
   for($idx=0;$idx<2;$idx++) {
-    $data = file("$dir/evaluation/$set.analysis.".($idx?$id2:$id)."/n-gram-$type.$order");
+    $data = file(get_analysis_filename($dir,$set,$idx?$id2:$id,"basic","n-gram-$type.$order"));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
       $ngram_hash[$item[2]]["total$idx"] = $item[0]; 

@@ -1730,7 +1730,6 @@ sub define_training_create_config {
     my ($config,
 	$reordering_table,$phrase_translation_table,$generation_table,@LM)
 	= &get_output_and_input($step_id);
-    if ($LM[$#LM] =~ /biconcor/ || $LM[$#LM] eq '') { pop @LM; }
 
     my $cmd = &get_training_setting(9);
 

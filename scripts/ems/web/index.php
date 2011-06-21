@@ -12,6 +12,7 @@ function head($title) {
 <script language="javascript" src="/javascripts/prototype.js"></script>
 <script language="javascript" src="/javascripts/scriptaculous.js"></script>
 <script language="javascript" src="hierarchical-segmentation.js"></script>
+<script language="javascript" src="base64.js"></script>
 <link href="general.css" rel="stylesheet" type="text/css">
 <link href="hierarchical-segmentation.css" rel="stylesheet" type="text/css">
 <link href="bilingual-concordance.css" rel="stylesheet" type="text/css">
@@ -29,7 +30,7 @@ if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
     $action = $_GET["analysis"];
     $set = $_GET["set"];
     $id = $_GET["id"];
-    $id2 = $_GET["id2"];
+    if (array_key_exists("id2",$_GET)) { $id2 = $_GET["id2"]; }
     if ($action == "show") { show_analysis(); }
     else if ($action == "bleu_show") { bleu_show(); }
     else if ($action == "ngram_precision_show") { ngram_show("precision");}
@@ -43,7 +44,7 @@ if (array_key_exists("setup",$_POST) || array_key_exists("setup",$_GET)) {
     else if (preg_match("/PrecisionByWord(.+)_show/",$action,$match)) { precision_by_word($match[1]); }
     else if ($action == "CoverageDetails_show") { coverage_details(); }
     else if ($action == "SegmentationSummary_show") { segmentation_summary(); }
-    else if ($action == "biconcor") { biconcor($_GET["phrase"]); }
+    else if ($action == "biconcor") { biconcor(base64_decode($_GET["phrase"])); }
     else { print "ERROR! $action"; }
   }
   else if (array_key_exists("analysis_diff_home",$_GET)) {
