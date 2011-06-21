@@ -1,6 +1,8 @@
 #! /usr/bin/perl
 
-# do not use. not yet complete
+# example
+# ./extract-parallel.perl ./extract-rules target.txt source.txt align.txt extracted "" 3  /opt/local/bin/gsplit  "/opt/local/bin/gsort --batch-size=253"
+
 use strict;
 
 sub NumStr($);
