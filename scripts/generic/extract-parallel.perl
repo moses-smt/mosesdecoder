@@ -97,7 +97,8 @@ print $extractInvCmd;
 `$extractCmd`;
 `$extractInvCmd`;
 
-$cmd = "rm -rf $TMPDIR";
+$cmd = "rm -rf $TMPDIR \n";
+print $cmd;
 `$cmd`;
 
 print "Finished ".localtime() ."\n";
