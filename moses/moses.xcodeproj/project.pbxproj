@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */; };
+		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
 		1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */; };
 		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
 		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
@@ -270,6 +272,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
+		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
 		1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
 		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
 		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
@@ -559,6 +563,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */,
+				1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */,
 				1EBB262213A12DB500B51840 /* hash.h */,
 				1EBB262313A12DB500B51840 /* onlineRLM.h */,
 				1EBB262413A12DB500B51840 /* params.h */,
@@ -995,6 +1001,7 @@
 				1EBB262D13A12DB500B51840 /* quantizer.h in Headers */,
 				1EBB262E13A12DB500B51840 /* RandLMCache.h in Headers */,
 				1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */,
+				1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1168,6 +1175,7 @@
 				1E528B9913A12ACC00E9A67E /* LanguageModelORLM.cpp in Sources */,
 				1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */,
 				1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */,
+				1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
