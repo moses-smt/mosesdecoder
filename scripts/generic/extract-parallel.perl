@@ -1,8 +1,7 @@
 #! /usr/bin/perl
 
 # example
-#  ../extract-parallel.perl ../extract-rules target.txt source.txt align.txt extract.hiero "" 4 gsplit "gsort --batch-size=253"
-# ../extract-parallel.perl ../extract target.txt source.txt align.txt extract.pb " 7 " 4 gsplit "gsort --batch-size=253"
+#  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation 
 
 use strict;
 use File::Basename;
@@ -11,15 +10,21 @@ sub NumStr($);
 
 print "Started ".localtime() ."\n";
 
-my $extractCmd	= $ARGV[0];
-my $target			= $ARGV[1];
-my $source			= $ARGV[2];
-my $align				= $ARGV[3];
-my $extract			= $ARGV[4];
-my $extractArgs	= $ARGV[5];
-my $numParallel	= $ARGV[6];
-my $splitCmd		= $ARGV[7];
-my $sortCmd			= $ARGV[8];
+my $numParallel	= $ARGV[0];
+my $splitCmd		= $ARGV[1];
+my $sortCmd			= $ARGV[2];
+my $extractCmd	= $ARGV[3];
+
+my $target = $ARGV[4]; # 1st arg of extract argument
+my $source = $ARGV[5]; # 2nd arg of extract argument
+my $align = $ARGV[6]; # 3rd arg of extract argument
+my $extract = $ARGV[7]; # 4th arg of extract argument
+
+my $otherExtractArgs	= "";
+for (my $i = 8; $i < $#ARGV + 1; ++$i)
+{
+  $otherExtractArgs .= $ARGV[$i] ." ";
+}
 
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
 mkdir $TMPDIR;
@@ -49,7 +54,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
 	{ # child
 	  $isParent = 0;
 		my $numStr = NumStr($i);
-		my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $extractArgs \n";
+		my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs \n";
 		print $cmd;
 		`$cmd`;
 		
@@ -61,6 +66,10 @@ for (my $i = 0; $i < $numParallel; ++$i)
 		print $cmd;
 		`$cmd`;
 		
+		$cmd = "LC_ALL=C $sortCmd -T $TMPDIR $TMPDIR/extract.$numStr.o > $TMPDIR/extract.$numStr.o.sorted \n";
+		print $cmd;
+		`$cmd`;
+
 		exit();
 	}
 	else
@@ -84,19 +93,24 @@ else
 # merge
 my $extractCmd = "LC_ALL=C $sortCmd -m ";
 my $extractInvCmd = "LC_ALL=C $sortCmd -m ";
+my $extractOrderingCmd = "LC_ALL=C $sortCmd -m ";
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
 		$extractCmd 		.= "$TMPDIR/extract.$numStr.sorted ";
 		$extractInvCmd 	.= "$TMPDIR/extract.$numStr.inv.sorted ";
+		$extractOrderingCmd 	.= "$TMPDIR/extract.$numStr.o.sorted ";
 }
 
 $extractCmd .= "> $extract.sorted \n";
 $extractInvCmd .= "> $extract.inv.sorted \n";
+$extractOrderingCmd .= "> $extract.o.sorted \n";
 print $extractCmd;
 print $extractInvCmd;
+print $extractOrderingCmd;
 `$extractCmd`;
 `$extractInvCmd`;
+`$extractOrderingCmd`;
 
 $cmd = "rm -rf $TMPDIR \n";
 print $cmd;
@@ -126,3 +140,4 @@ sub NumStr($)
   }
   return $numStr;
 }
+
