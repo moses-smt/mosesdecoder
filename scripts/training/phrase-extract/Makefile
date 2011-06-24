@@ -16,7 +16,7 @@ extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o S
 score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o InputFileStream.o
 	$(CXX) $^ -lz -o score
 
-consolidate: consolidate.o
+consolidate: consolidate.o tables-core.o
 	$(CXX) $^ -o consolidate
 
 consolidate-direct: consolidate-direct.o InputFileStream.o

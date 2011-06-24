@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "tables-core.h"
 #include "SafeGetline.h"
 
 #define LINE_MAX_LENGTH 10000
@@ -118,23 +119,6 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // indirect: source target probabilities
 
     // consistency checks
-    /*
-    size_t expectedSize = (hierarchicalFlag ? 5 : 4);
-    if (itemDirect.size() != expectedSize)
-    {
-      cerr << "ERROR: expected " << expectedSize << " items in file "
-        << fileNameDirect << ", line " << i << endl;
-      exit(1);
-    }
-
-    if (itemIndirect.size() != 4)
-    {
-      cerr << "ERROR: expected 4 items in file "
-        << fileNameIndirect << ", line " << i << endl;
-      exit(1);
-    }
-    */
-
     if (itemDirect[0].compare( itemIndirect[0] ) != 0) {
       cerr << "ERROR: target phrase does not match in line " << i << ": '"
            << itemDirect[0] << "' != '" << itemIndirect[0] << "'" << endl;
@@ -164,8 +148,15 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     fileConsolidated << " ||| " << itemDirect[3];
 
     // counts, for debugging
-    fileConsolidated << "||| " << itemIndirect[4] << " " // indirect
-                     << itemDirect[4]; // direct
+    vector<string> directCounts = tokenize(itemDirect[4].c_str());
+    vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
+    fileConsolidated << "||| " << indirectCounts[0] << " " << directCounts[0];
+    // output rule count if present in either file
+    if (directCounts.size() > 1) {
+      fileConsolidated << " " << directCounts[1];
+    } else if (indirectCounts.size() > 1) {
+      fileConsolidated << " " << indirectCounts[1];
+    }
 
     fileConsolidated << endl;
   }
