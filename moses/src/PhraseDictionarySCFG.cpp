@@ -166,10 +166,6 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 
     targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels,wpProducer);
 
-    // count info for backoff
-    if (tokens.size() >= 6)
-      targetPhrase->CreateCountInfo(tokens[5]);
-
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(sourcePhrase, *targetPhrase);
     AddEquivPhrase(phraseColl, targetPhrase);
 

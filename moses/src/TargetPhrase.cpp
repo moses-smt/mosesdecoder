@@ -44,7 +44,7 @@ bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 //bool TargetPhrase::printalign;
 
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
-  :Phrase(direction, 0),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+  :Phrase(direction, 0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
@@ -59,7 +59,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
 TargetPhrase::TargetPhrase(FactorDirection direction)
   :Phrase(direction, ARRAY_SIZE_INCR)
   , m_transScore(0.0)
-  , m_ngramScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -75,7 +74,7 @@ TargetPhrase::~TargetPhrase()
 void TargetPhrase::SetScore(const TranslationSystem* system)
 {
   // used when creating translations of unknown words:
-  m_transScore = m_ngramScore = 0;
+  m_transScore = 0;
   m_fullScore = - system->GetWeightWordPenalty();
 }
 
@@ -180,7 +179,6 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 
     }
   }
-  m_ngramScore = totalNgramScore;
 
   m_fullScore = m_transScore + totalFutureScore + totalFullScore
                 - (this->GetSize() * weightWP);	 // word penalty
@@ -235,7 +233,7 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 {
   // used when creating translations of unknown words (chart decoding)
   m_scoreBreakdown.Assign(producer, scoreVector);
-  m_transScore = m_ngramScore = 0;
+  m_transScore = 0;
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
@@ -255,7 +253,7 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
 
 void TargetPhrase::ResetScore()
 {
-  m_fullScore = m_ngramScore = 0;
+  m_fullScore = 0;
   m_scoreBreakdown.ZeroAll();
 }
 
@@ -304,13 +302,6 @@ void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
 {
   m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
-}
-
-void TargetPhrase::CreateCountInfo(const std::string &countStr)
-{
-  vector<float> count = Tokenize<float>(countStr);
-  assert(count.size() == 2);
-  m_countInfo = CountInfo(count[1], count[0]);
 }
 
 

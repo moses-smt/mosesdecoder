@@ -39,27 +39,9 @@ namespace Moses
 {
 
 class LMList;
-class PhraseDictionary;
-class GenerationDictionary;
 class ScoreProducer;
 class TranslationSystem;
 class WordPenaltyProducer;
-
-class CountInfo
-{
-public:
-  CountInfo()
-  {}
-  CountInfo(float countSource, float countTarget)
-    :m_countSource(countSource)
-    ,m_countTarget(countTarget)
-  {	}
-
-  float m_countSource;
-  float m_countTarget;
-
-};
-
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -67,15 +49,14 @@ class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-  float m_transScore, m_ngramScore, m_fullScore;
-  //float m_ngramScore, m_fullScore;
+  float m_transScore;
+  float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
   const AlignmentInfo *m_alignmentInfo;
 
   // in case of confusion net, ptr to source phrase
   Phrase const* m_sourcePhrase;
   Word m_lhsTarget;
-  CountInfo m_countInfo;
 
   static bool wordalignflag;
   static bool printalign;
@@ -185,8 +166,6 @@ public:
   bool PrintAlignmentInfo() const {
     return printalign;
   }
-
-  void CreateCountInfo(const std::string &countStr);
 
   TO_STRING();
 };
