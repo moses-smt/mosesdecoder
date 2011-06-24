@@ -360,6 +360,10 @@ nbest = 100
 #
 # lambda = 
 
+### additional flags for the filter script
+#
+filter-settings = ""
+
 ### additional flags for the decoder
 #
 decoder-settings = ""
@@ -411,6 +415,10 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 ## EVALUATION: translating a test set using the tuned system and score it
 
 [EVALUATION]
+
+### additional flags for the filter script
+#
+#filter-settings = ""
 
 ### additional decoder settings
 # switches for the Moses decoder

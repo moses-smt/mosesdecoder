@@ -2030,12 +2030,17 @@ sub define_tuningevaluation_filter {
     my $filter_dir = "$dir/tuning/filtered.$VERSION";
     $filter_dir = "$dir/evaluation/filtered.$set.$VERSION" unless $tuning_flag;
 
-    my $cmd = "$scripts/training/filter-model-given-input.pl";
-    $cmd .= " $filter_dir $config $input_filter";
+    my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
+    $settings = &get("TUNING:filter-settings") if $tuning_flag;
+    $settings = "" unless $settings;
+
     $binarizer .= " -alignment-info" 
-	if !$tuning_flag && $binarizer && $report_precision_by_coverage;
-    $cmd .= " -Binarizer \"$binarizer\"" if $binarizer;
-    $cmd .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
+        if !$tuning_flag && $binarizer && $report_precision_by_coverage;
+    $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
+    $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
+
+    my $cmd = "$scripts/training/filter-model-given-input.pl";
+    $cmd .= " $filter_dir $config $input_filter $settings";
 
     # copy moses.ini into specified file location
     $cmd .= "\ncp $filter_dir/moses.ini $filter_config\n";

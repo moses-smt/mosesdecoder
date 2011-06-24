@@ -2,7 +2,7 @@
 
 # Author: Phil Williams
 
-# Usage: filter-rule-table.py INPUT
+# Usage: filter-rule-table.py [--min-non-initial-rule-count=N] INPUT
 #
 # Given a rule table (on stdin) and an input text, filter out rules that
 # couldn't be used in parsing the input and write the resulting rule table
@@ -21,6 +21,7 @@
 # including JJ, with varying probabilities, so removing the rule would
 # be a bad idea.)
 
+import optparse
 import sys
 
 class NGram(tuple):
@@ -34,19 +35,25 @@ class Gap:
         return self.minSpan
 
 def printUsage():
-    sys.stderr.write("Usage: filter-rule-table.py INPUT")
+    sys.stderr.write("Usage: filter-rule-table.py [--min-non-initial-rule-count=N] INPUT")
 
 def main():
-    if len(sys.argv) != 2:
+    parser = optparse.OptionParser()
+    parser.add_option("-c", "--min-non-initial-rule-count",
+                      action="store", dest="minCount", type="int", default="1",
+                      help="prune non-initial rules where count is below N",
+                      metavar="N")
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
         printUsage()
         sys.exit(1)
     N = 7
     inputSentences = []
-    for line in open(sys.argv[1]):
+    for line in open(args[0]):
         inputSentences.append(line.split())
-    filterRuleTable(sys.stdin, inputSentences, N)
+    filterRuleTable(sys.stdin, inputSentences, N, options)
 
-def filterRuleTable(ruleTable, inputSentences, N):
+def filterRuleTable(ruleTable, inputSentences, N, options):
     # Map each input n-gram (n = 1..N) to a map from sentence indices to
     # lists of intra-sentence indices.
     occurrences = {}
@@ -61,8 +68,16 @@ def filterRuleTable(ruleTable, inputSentences, N):
     prevRHS = None
     prevRuleIncluded = None
     for line in ruleTable:
-        rhs = parseRule(line)
-        if rhs == prevRHS:
+        rhs, count = parseRule(line)
+        # Prune non-initial rule if count is below threshold.
+        if count != None and count < options.minCount and isNonInitialRule(rhs):
+            if prevRHS != rhs:
+                prevRuleIncluded = None
+                prevRHS = rhs
+            continue
+        # If source RHS is same as last rule's then we already know whether to
+        # filter or not (unless it was pruned before checking).
+        if rhs == prevRHS and prevRuleIncluded != None:
             if prevRuleIncluded:
                 print line,
             continue
@@ -95,13 +110,26 @@ def filterRuleTable(ruleTable, inputSentences, N):
                 break
         prevRuleIncluded = match
 
-# Parse a line of the rule table and return the list of RHS source symbols.
+# Parse a line of the rule table and return a tuple containing two items,
+# the list of RHS source symbols and the rule count (if present).
 def parseRule(line):
-    cols = line.split(" ||| ")
-    return cols[0].split()[:-1]
+    cols = line.split("|||")
+    rhsSourceSymbols = cols[0].split()[:-1]
+    ruleCount = None
+    if len(cols) > 4:
+        counts = cols[4].split()
+        if len(counts) == 3:
+            ruleCount = int(counts[2])
+    return (rhsSourceSymbols, ruleCount)
 
 def isNT(symbol):
     return symbol[0] == '[' and symbol[-1] == ']'
+
+def isNonInitialRule(rhs):
+    for symbol in rhs:
+        if isNT(symbol):
+            return True
+    return False
 
 def segmentRHS(rhs, N):
     segments = []

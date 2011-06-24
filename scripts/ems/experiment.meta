@@ -528,6 +528,7 @@ filter
 	in: TRAINING:config input
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
+  rerun-on-change: filter-settings
   pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
 tune
@@ -623,7 +624,7 @@ filter
 	out: filtered-config
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
-	rerun-on-change: report-precision-by-coverage
+	rerun-on-change: filter-settings report-precision-by-coverage
 decode
 	in: filtered-config input
 	out: system-output
