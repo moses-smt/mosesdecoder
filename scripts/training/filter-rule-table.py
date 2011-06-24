@@ -119,7 +119,7 @@ def parseRule(line):
     if len(cols) > 4:
         counts = cols[4].split()
         if len(counts) == 3:
-            ruleCount = int(counts[2])
+            ruleCount = float(counts[2])
     return (rhsSourceSymbols, ruleCount)
 
 def isNT(symbol):
