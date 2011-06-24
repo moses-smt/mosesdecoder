@@ -1798,7 +1798,6 @@ sub create_ini {
   if ($_HIERARCHICAL) {
     print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
     print INI "[cube-pruning-pop-limit]\n1000\n\n";
-    print INI "[glue-rule-type]\n0\n\n";
     print INI "[non-terminals]\nX\n\n";
     print INI "[search-algorithm]\n3\n\n";
     print INI "[inputtype]\n3\n\n";
