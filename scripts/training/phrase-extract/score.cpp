@@ -74,7 +74,7 @@ bool lexFlag = true;
 int countOfCounts[GT_MAX+1];
 float discountFactor[GT_MAX+1];
 int maxLinesGTDiscount = -1;
-bool ruleCountFlag = false;
+bool phrasePairCountFlag = false;
 
 int main(int argc, char* argv[])
 {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--WordAlignment] [--MaxLinesGTDiscount num] [--RuleCount]\n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--WordAlignment] [--MaxLinesGTDiscount num] [--PhrasePairCount]\n";
     exit(1);
   }
   char* fileNameExtract = argv[1];
@@ -116,9 +116,9 @@ int main(int argc, char* argv[])
       ++i;
       maxLinesGTDiscount = atoi(argv[i]);
       cerr << "maxLinesGTDiscount=" << maxLinesGTDiscount << endl;
-    } else if (strcmp(argv[i],"--RuleCount") == 0) {
-      ruleCountFlag = true;
-      cerr << "outputting rule counts" << endl;
+    } else if (strcmp(argv[i],"--PhrasePairCount") == 0) {
+      phrasePairCountFlag = true;
+      cerr << "outputting phrase pair counts" << endl;
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -423,7 +423,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   }
 
   phraseTableFile << " ||| " << totalCount;
-  if (ruleCountFlag) {
+  if (phrasePairCountFlag) {
     phraseTableFile << " " << originalCount;
   }
   phraseTableFile << endl;
