@@ -9,7 +9,9 @@ namespace Moses {
 int PhraseBoundaryState::Compare(const FFState& other) const 
 {
   const PhraseBoundaryState& rhs = dynamic_cast<const PhraseBoundaryState&>(other);
-  return Word::Compare(*m_word,*(rhs.m_word));
+  int tgt = Word::Compare(*m_targetWord,*(rhs.m_targetWord));
+  if (tgt) return tgt;
+  return Word::Compare(*m_sourceWord,*(rhs.m_sourceWord));
 }
 
 
@@ -37,7 +39,7 @@ size_t PhraseBoundaryFeature::GetNumInputScores() const
 
 const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &input) const 
 {
-  return new PhraseBoundaryState(NULL);
+  return new PhraseBoundaryState(NULL,NULL);
 }
 
 
@@ -74,20 +76,25 @@ FFState* PhraseBoundaryFeature::Evaluate
   if (targetPhrase.GetSize() == 0) {
     return new PhraseBoundaryState(*pbState);
   }
-  const Word* leftWord = pbState->GetWord();
-  const Word* rightWord = &(targetPhrase.GetWord(0));
-  AddFeatures(leftWord,rightWord,m_sourceFactors,"src",scores);
-  AddFeatures(leftWord,rightWord,m_targetFactors,"tgt",scores);
+  const Word* leftTargetWord = pbState->GetTargetWord();
+  const Word* rightTargetWord = &(targetPhrase.GetWord(0));
+  AddFeatures(leftTargetWord,rightTargetWord,m_targetFactors,"tgt",scores);
 
-  const Word* endWord = &(targetPhrase.GetWord(targetPhrase.GetSize()-1));
+  const Phrase* sourcePhrase = cur_hypo.GetSourcePhrase();
+  const Word* leftSourceWord = pbState->GetSourceWord();
+  const Word* rightSourceWord = &(sourcePhrase->GetWord(0));
+  AddFeatures(leftSourceWord,rightSourceWord,m_sourceFactors,"src",scores);
+
+  const Word* endSourceWord = &(sourcePhrase->GetWord(sourcePhrase->GetSize()-1));
+  const Word* endTargetWord = &(targetPhrase.GetWord(targetPhrase.GetSize()-1));
 
   //if end of sentence add EOS
   if (cur_hypo.IsSourceCompleted()) {
-    AddFeatures(endWord,NULL,m_sourceFactors,"src",scores);
-    AddFeatures(endWord,NULL,m_targetFactors,"tgt",scores);
+    AddFeatures(endSourceWord,NULL,m_sourceFactors,"src",scores);
+    AddFeatures(endTargetWord,NULL,m_targetFactors,"tgt",scores);
   }
 
-  return new PhraseBoundaryState(endWord);
+  return new PhraseBoundaryState(endSourceWord,endTargetWord);
 }
 
 

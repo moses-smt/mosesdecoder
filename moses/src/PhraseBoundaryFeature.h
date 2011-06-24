@@ -13,13 +13,16 @@ namespace Moses
 
 class PhraseBoundaryState : public FFState {
 public:
-  PhraseBoundaryState(const Word* word) : m_word(word) {}
-  const Word* GetWord() const {return m_word;}
+  PhraseBoundaryState(const Word* sourceWord, const Word* targetWord) :
+     m_sourceWord(sourceWord), m_targetWord(targetWord) {}
+  const Word* GetSourceWord() const {return m_sourceWord;}
+  const Word* GetTargetWord() const {return m_targetWord;}
   virtual int Compare(const FFState& other) const;
 
 
 private:
-  const Word* m_word;
+  const Word* m_sourceWord;
+  const Word* m_targetWord;
 };
 
 
