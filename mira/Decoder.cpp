@@ -68,7 +68,7 @@ namespace Mira {
     delete[] mosesargv;
   }
  
-  MosesDecoder::MosesDecoder(bool useScaledReference, bool scaleByInputLength, float historySmoothing)
+  MosesDecoder::MosesDecoder(bool scaleByInputLength, float historySmoothing)
 		: m_manager(NULL) {
 			// force initialisation of the phrase dictionary (TODO: what for?)
 			const StaticData &staticData = StaticData::Instance();
@@ -82,7 +82,7 @@ namespace Mira {
       m_manager->ProcessSentence();
 
       // Add the bleu feature
-      m_bleuScoreFeature = new BleuScoreFeature(useScaledReference, scaleByInputLength, historySmoothing);
+      m_bleuScoreFeature = new BleuScoreFeature(scaleByInputLength, historySmoothing);
       (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
   }
   
@@ -100,7 +100,8 @@ namespace Mira {
                               vector< float>& bleuScores,
                               bool oracle,
                               bool distinct,
-                              size_t rank)
+                              size_t rank,
+                              size_t epoch)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
 
@@ -137,11 +138,11 @@ namespace Mira {
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
-    	cerr << "Rank " << rank << ", total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
 
     	Phrase bestPhrase = path.GetTargetPhrase();
 
-    	cerr << "Rank " << rank << ": ";
+    	cerr << "Rank " << rank << ", epoch " << epoch << ": ";
     	Phrase phrase = path.GetTargetPhrase();
     	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
     		const Word &word = phrase.GetWord(pos);
@@ -179,7 +180,9 @@ namespace Mira {
                                 size_t sentenceid,
                                 float bleuObjectiveWeight,
                                 float bleuScoreWeight,
-                                bool distinct)
+                                bool distinct,
+                                size_t rank,
+                                size_t epoch)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
 
@@ -215,15 +218,15 @@ namespace Mira {
   	bleuAndScore.push_back(bleuScore);
   	bleuAndScore.push_back(scoreWithoutBleu);
 
-  	cerr << "1best translation: ";
+  	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", 1best translation: ");
   	Phrase phrase = path.GetTargetPhrase();
   	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
   		const Word &word = phrase.GetWord(pos);
   		Word *newWord = new Word(word);
-  		cerr << *newWord;
+  		VERBOSE(1, *newWord);
   	}
 
-  	cerr << endl;
+  	VERBOSE(1, endl);
 
   	return bleuAndScore;
   }
@@ -245,7 +248,6 @@ namespace Mira {
   }
 
   void MosesDecoder::setWeights(const ScoreComponentCollection& weights) {
-    //cerr << "New weights: " << weights << endl;
     StaticData::InstanceNonConst().SetAllWeights(weights);
   }
 

@@ -36,11 +36,9 @@ namespace Mira {
 				  const std::vector<std::vector<float> >& bleuScoresHope,
 				  const std::vector<std::vector<float> >& bleuScoresFear,
 				  const std::vector< size_t> sentenceIds,
-					float learning_rate,
-					float max_sentence_update,
-					size_t rank,
-					size_t epoch,
-					bool controlUpdates) = 0;
+				  float learning_rate,
+				  size_t rank,
+				  size_t epoch) = 0;
   };
  
   class Perceptron : public Optimiser {
@@ -52,10 +50,8 @@ namespace Mira {
 					const std::vector<std::vector<float> >& bleuScoresFear,
 					const std::vector< size_t> sentenceIds,
 					float learning_rate,
-  				float max_sentence_update,
-  				size_t rank,
-  				size_t epoch,
-  				bool controlUpdates);
+					size_t rank,
+					size_t epoch);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -63,13 +59,13 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, bool scale_update, float precision) :
+	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, bool scale_update, float margin_slack) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
 		  m_scale_update(scale_update),
-		  m_precision(precision) { }
+		  m_margin_slack(margin_slack) { }
    
      std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
 							Moses::ScoreComponentCollection& featureValuesHope,
@@ -78,10 +74,8 @@ namespace Mira {
 							float bleuScoresFear,
 							size_t sentenceId,
 							float learning_rate,
-							float max_sentence_update,
 							size_t rank,
-							size_t epoch,
-							bool controlUpdates);
+							size_t epoch);
      std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector<std::vector<float> >& losses,
@@ -89,25 +83,25 @@ namespace Mira {
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
       						  const std::vector< float> oracleBleuScores,
       						  const std::vector< size_t> sentenceIds,
-										float learning_rate,
-										float max_sentence_update,
-										size_t rank,
-										size_t epoch,
-										bool controlUpdates);
+      						  float learning_rate,
+      						  size_t rank,
+      						  size_t epoch);
      virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
       						  const std::vector<std::vector<float> >& bleuScoresHope,
       						  const std::vector<std::vector<float> >& bleuScoresFear,
       						  const std::vector< size_t> sentenceIds,
-										float learning_rate,
-										float max_sentence_update,
-										size_t rank,
-										size_t epoch,
-										bool controlUpdates);
+      						  float learning_rate,
+      						  size_t rank,
+      						  size_t epoch);
 
      void setSlack(float slack) {
     	 m_slack = slack;
+     }
+
+     void setMarginSlack(float margin_slack) {
+    	 m_margin_slack = margin_slack;
      }
 
    private:
@@ -123,7 +117,7 @@ namespace Mira {
       // scale update with log 10 of oracle BLEU score
       bool m_scale_update;
 
-      float m_precision;
+      float m_margin_slack;
   };
 }
 

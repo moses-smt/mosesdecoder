@@ -31,10 +31,8 @@ vector<int> Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeig
 		const vector< vector<float> >& dummy2,
 		const vector< size_t> dummy3,
 		float perceptron_learning_rate,
-		float dummy4,
 		size_t rank,
-		size_t epoch,
-		bool dummy5)
+		size_t epoch)
 {
 	cerr << "hope: " << featureValuesHope[0][0] << endl;
 	cerr << "fear: " << featureValuesFear[0][0] << endl;
