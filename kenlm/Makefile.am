@@ -3,14 +3,15 @@ bin_PROGRAMS = query build_binary
 
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES $(BOOST_CPPFLAGS)
 libkenlm_la_SOURCES = \
-	lm/lm_exception.cc \
+	lm/binary_format.cc \
 	lm/config.cc \
+	lm/lm_exception.cc \
 	lm/model.cc \
 	lm/search_hashed.cc \
 	lm/search_trie.cc \
-	lm/trie.cc \
-	lm/binary_format.cc \
+	lm/quantize.cc \
 	lm/read_arpa.cc \
+	lm/trie.cc \
 	lm/virtual_interface.cc \
 	lm/vocab.cc \
 	util/scoped.cc \

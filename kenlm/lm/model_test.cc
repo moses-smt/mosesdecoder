@@ -243,11 +243,12 @@ BOOST_AUTO_TEST_CASE(probing) {
   LoadingTest<Model>();
 }
 
-/*BOOST_AUTO_TEST_CASE(sorted) {
-  LoadingTest<SortedModel>();
-}*/
 BOOST_AUTO_TEST_CASE(trie) {
   LoadingTest<TrieModel>();
+}
+
+BOOST_AUTO_TEST_CASE(quant) {
+  LoadingTest<QuantTrieModel>();
 }
 
 template <class ModelT> void BinaryTest() {
@@ -275,11 +276,11 @@ template <class ModelT> void BinaryTest() {
 BOOST_AUTO_TEST_CASE(write_and_read_probing) {
   BinaryTest<Model>();
 }
-/*BOOST_AUTO_TEST_CASE(write_and_read_sorted) {
-  BinaryTest<SortedModel>();
-}*/
 BOOST_AUTO_TEST_CASE(write_and_read_trie) {
   BinaryTest<TrieModel>();
+}
+BOOST_AUTO_TEST_CASE(write_and_read_quant_trie) {
+  BinaryTest<QuantTrieModel>();
 }
 
 } // namespace

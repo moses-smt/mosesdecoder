@@ -256,6 +256,8 @@ LanguageModelSingleFactor *ConstructKenLM(const std::string &file, bool lazy)
       return new LanguageModelKen<lm::ngram::ProbingModel>(lazy);
     case lm::ngram::TRIE_SORTED:
       return new LanguageModelKen<lm::ngram::TrieModel>(lazy);
+    case lm::ngram::QUANT_TRIE_SORTED:
+      return new LanguageModelKen<lm::ngram::QuantTrieModel>(lazy);
     default:
       std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
       abort();
