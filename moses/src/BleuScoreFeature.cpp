@@ -380,30 +380,10 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // where
     // c: length of the candidate translation
     // r: effective reference length (sum of best match lengths for each candidate sentence)
-	if (m_use_scaled_reference) {
-	    if (state->m_target_length < state->m_scaled_ref_length) {
-	    	float smoothed_target_length = m_target_length_history + state->m_target_length;
-	    	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-	    	precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
-	    }
-	}
-	else {
-		if (state->m_scaled_ref_length == m_cur_ref_length) {
-			// apply brevity penalty for complete sentence if necessary
-			if (state->m_target_length < state->m_scaled_ref_length) {
-				float smoothed_target_length = m_target_length_history + state->m_target_length;
-				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-		    	precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
-			}
-		}
-		else {
-			// for unfinished hypotheses, apply BP if hypo is shorter than source
-			if (state->m_target_length < state->m_source_phrase_length) {
-				float smoothed_target_length = m_target_length_history + state->m_target_length;
-				float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-				precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
-			}
-		}
+	if (state->m_target_length < state->m_scaled_ref_length) {
+		float smoothed_target_length = m_target_length_history + state->m_target_length;
+		float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
+		precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
 	}
 
     // Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:

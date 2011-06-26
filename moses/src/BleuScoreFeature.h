@@ -51,18 +51,16 @@ public:
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
-	                                 m_use_scaled_reference(true),
 	                                 m_scale_by_input_length(true),
 	                                 m_historySmoothing(0.9) {}
 
-	BleuScoreFeature(bool useScaledReference, bool scaleByInputLength, float historySmoothing):
+	BleuScoreFeature(bool scaleByInputLength, float historySmoothing):
 	                                 StatefulFeatureFunction("BleuScore"),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
-	                                 m_use_scaled_reference(useScaledReference),
 	                                 m_scale_by_input_length(scaleByInputLength),
 	                                 m_historySmoothing(historySmoothing) {}
 
@@ -118,9 +116,6 @@ private:
     std::map< size_t, std::pair< size_t, NGrams > > m_refs;
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
-
-    // whether or not to use the scaled reference
-    bool m_use_scaled_reference;
 
     // whether or not to scale the BLEU score by a history of the input size
     bool m_scale_by_input_length;
