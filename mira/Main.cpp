@@ -170,6 +170,7 @@ int main(int argc, char** argv) {
 	bool normaliseWeights;
 	bool print_feature_values;
 	bool historyOf1best;
+	bool historyOfOracles;
 	bool burnIn;
 	string burnInInputFile;
 	vector<string> burnInReferenceFiles;
@@ -206,7 +207,8 @@ int main(int argc, char** argv) {
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-		("history-of-1best", po::value<bool>(&historyOf1best)->default_value(false), "Use the 1best translation to update the history")
+		("history-of-1best", po::value<bool>(&historyOf1best)->default_value(false), "Use 1best translations to update the history")
+		("history-of-oracles", po::value<bool>(&historyOfOracles)->default_value(false), "Use oracle translations to update the history")
 		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.7), "Adjust the factor for history smoothing")
 		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimization (not model)")
 		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
@@ -381,6 +383,12 @@ int main(int argc, char** argv) {
 	if (model_hope_fear && analytical_update) {
 		cerr << "Error: Must choose between model-hope-fear and analytical update" << endl;
 		return 1;
+	}
+
+	if (!sentenceLevelBleu) {
+		if (!historyOf1best && !historyOfOracles) {
+			historyOf1best = true;
+		}
 	}
 
 	if (burnIn && sentenceLevelBleu) {
