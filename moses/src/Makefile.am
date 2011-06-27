@@ -92,8 +92,9 @@ libmoses_la_HEADERS = \
         PrefixTreeMap.h \
         ReorderingConstraint.h \
         ReorderingStack.h \
-	RuleCube.h \
-	RuleCubeQueue.h \
+        RuleCube.h \
+        RuleCubeItem.h \
+        RuleCubeQueue.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
         ScoreProducer.h \
@@ -245,8 +246,9 @@ libmoses_la_SOURCES = \
         PrefixTreeMap.cpp \
         ReorderingConstraint.cpp \
         ReorderingStack.cpp \
-	RuleCube.cpp \
-	RuleCubeQueue.cpp \
+        RuleCube.cpp \
+        RuleCubeItem.cpp \
+        RuleCubeQueue.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
         ScoreProducer.cpp \

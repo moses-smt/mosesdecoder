@@ -19,138 +19,87 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "RuleCube.h"
 #include "ChartCell.h"
-#include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
-#include "RuleCubeQueue.h"
-#include "WordsRange.h"
 #include "ChartTranslationOption.h"
-#include "Util.h"
+#include "ChartTranslationOptionCollection.h"
 #include "CoveredChartSpan.h"
+#include "RuleCube.h"
+#include "RuleCubeQueue.h"
+#include "StaticData.h"
+#include "Util.h"
+#include "WordsRange.h"
 
 #ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
 #endif
 
-using namespace std;
-using namespace Moses;
-
 namespace Moses
 {
 
-// create a cube for a rule
-RuleCube::RuleCube(const ChartTranslationOption &transOpt
-                       , const ChartCellCollection &allChartCells)
-  :m_transOpt(transOpt)
+// initialise the RuleCube by creating the top-left corner item
+RuleCube::RuleCube(const ChartTranslationOption &transOpt,
+                   const ChartCellCollection &allChartCells,
+                   ChartManager &manager)
+  : m_transOpt(transOpt)
 {
-  const CoveredChartSpan *coveredChartSpan = &transOpt.GetLastCoveredChartSpan();
-  CreateRuleCubeDimension(coveredChartSpan, allChartCells);
-  CalcScore();
-}
-
-// for each non-terminal, create a ordered list of matching hypothesis from the chart
-void RuleCube::CreateRuleCubeDimension(const CoveredChartSpan *coveredChartSpan, const ChartCellCollection &allChartCells)
-{
-  // recurse through the linked list of source side non-terminals and terminals
-  const CoveredChartSpan *prevCoveredChartSpan = coveredChartSpan->GetPrevCoveredChartSpan();
-  if (prevCoveredChartSpan)
-    CreateRuleCubeDimension(prevCoveredChartSpan, allChartCells);
-
-  // only deal with non-terminals
-  if (coveredChartSpan->IsNonTerminal()) 
-  {
-    // get the essential information about the non-terminal
-    const WordsRange &childRange = coveredChartSpan->GetWordsRange(); // span covered by child
-    const ChartCell &childCell = allChartCells.Get(childRange);    // list of all hypos for that span
-    const Word &nonTerm = coveredChartSpan->GetSourceWord();          // target (sic!) non-terminal label 
-
-    // there have to be hypothesis with the desired non-terminal
-    // (otherwise the rule would not be considered)
-    assert(!childCell.GetSortedHypotheses(nonTerm).empty());
-
-    // create a list of hypotheses that match the non-terminal
-    RuleCubeDimension ruleCubeDimension(0, childCell.GetSortedHypotheses(nonTerm));
-    // add them to the vector for such lists
-    m_cube.push_back(ruleCubeDimension);
+  RuleCubeItem *item = new RuleCubeItem(transOpt, allChartCells);
+  m_covered.insert(item);
+  if (StaticData::Instance().GetCubePruningLazyScoring()) {
+    item->EstimateScore();
+  } else {
+    item->CreateHypothesis(transOpt, manager);
   }
-}
-
-// create the RuleCube from an existing one, differing only in one child hypothesis
-RuleCube::RuleCube(const RuleCube &copy, size_t ruleCubeDimensionIncr)
-  :m_transOpt(copy.m_transOpt)
-  ,m_cube(copy.m_cube)
-{
-  RuleCubeDimension &ruleCubeDimension = m_cube[ruleCubeDimensionIncr];
-  ruleCubeDimension.IncrementPos();
-  CalcScore();
+  m_queue.push(item);
 }
 
 RuleCube::~RuleCube()
 {
-  //RemoveAllInColl(m_cube);
+  RemoveAllInColl(m_covered);
+}
+
+RuleCubeItem *RuleCube::Pop(ChartManager &manager)
+{
+  RuleCubeItem *item = m_queue.top();
+  m_queue.pop();
+  CreateNeighbors(*item, manager);
+  return item;
 }
 
 // create new RuleCube for neighboring principle rules
-// (duplicate detection is handled in RuleCubeQueue)
-void RuleCube::CreateNeighbors(RuleCubeQueue &queue) const
+void RuleCube::CreateNeighbors(const RuleCubeItem &item, ChartManager &manager)
 {
-  // loop over all child hypotheses
-  for (size_t ind = 0; ind < m_cube.size(); ind++) {
-    const RuleCubeDimension &ruleCubeDimension = m_cube[ind];
+  // create neighbor along translation dimension
+  const TranslationDimension &translationDimension =
+    item.GetTranslationDimension();
+  if (translationDimension.HasMoreTranslations()) {
+    CreateNeighbor(item, -1, manager);
+  }
 
-    if (ruleCubeDimension.HasMoreHypo()) {
-      RuleCube *newEntry = new RuleCube(*this, ind);
-      queue.Add(newEntry);
+  // create neighbors along all hypothesis dimensions
+  for (size_t i = 0; i < item.GetHypothesisDimensions().size(); ++i) {
+    const HypothesisDimension &dimension = item.GetHypothesisDimensions()[i];
+    if (dimension.HasMoreHypo()) {
+      CreateNeighbor(item, i, manager);
     }
   }
 }
 
-// compute an estimated cost of the principle rule
-// (consisting of rule translation scores plus child hypotheses scores)
-void RuleCube::CalcScore()
+void RuleCube::CreateNeighbor(const RuleCubeItem &item, int dimensionIndex,
+                              ChartManager &manager)
 {
-  m_combinedScore = m_transOpt.GetTargetPhrase().GetFutureScore();
-  for (size_t ind = 0; ind < m_cube.size(); ind++) {
-    const RuleCubeDimension &ruleCubeDimension = m_cube[ind];
-
-    const ChartHypothesis *hypo = ruleCubeDimension.GetHypothesis();
-    m_combinedScore += hypo->GetTotalScore();
+  RuleCubeItem *newItem = new RuleCubeItem(item, dimensionIndex);
+  std::pair<ItemSet::iterator, bool> result = m_covered.insert(newItem);
+  if (!result.second) {
+    delete newItem;  // already seen it
+  } else {
+    if (StaticData::Instance().GetCubePruningLazyScoring()) {
+      newItem->EstimateScore();
+    } else {
+      newItem->CreateHypothesis(m_transOpt, manager);
+    }
+    m_queue.push(newItem);
   }
 }
 
-bool RuleCube::operator<(const RuleCube &compare) const
-{
-  if (&m_transOpt != &compare.m_transOpt)
-    return &m_transOpt < &compare.m_transOpt;
-
-  bool ret = m_cube < compare.m_cube;
-  return ret;
 }
-
-#ifdef HAVE_BOOST
-std::size_t hash_value(const RuleCubeDimension & ruleCubeDimension)
-{
-  boost::hash<const ChartHypothesis*> hasher;
-  return hasher(ruleCubeDimension.GetHypothesis());
-}
-
-#endif
-std::ostream& operator<<(std::ostream &out, const RuleCubeDimension &ruleCubeDimension)
-{
-  out << *ruleCubeDimension.GetHypothesis();
-  return out;
-}
-
-std::ostream& operator<<(std::ostream &out, const RuleCube &ruleCube)
-{
-  out << ruleCube.GetTranslationOption() << endl;
-  std::vector<RuleCubeDimension>::const_iterator iter;
-  for (iter = ruleCube.GetCube().begin(); iter != ruleCube.GetCube().end(); ++iter) {
-    out << *iter << endl;
-  }
-  return out;
-}
-
-}
-

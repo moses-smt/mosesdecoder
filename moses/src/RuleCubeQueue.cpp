@@ -21,42 +21,48 @@
 
 #include "RuleCubeQueue.h"
 
-#include "Util.h"
-
-using namespace std;
+#include "RuleCubeItem.h"
+#include "StaticData.h"
 
 namespace Moses
 {
+
 RuleCubeQueue::~RuleCubeQueue()
 {
-  RemoveAllInColl(m_uniqueEntry);
+  while (!m_queue.empty()) {
+    RuleCube *cube = m_queue.top();
+    m_queue.pop();
+    delete cube;
+  }
 }
 
-bool RuleCubeQueue::Add(RuleCube *ruleCube)
+void RuleCubeQueue::Add(RuleCube *ruleCube)
 {
-  pair<UniqueCubeEntry::iterator, bool> inserted = m_uniqueEntry.insert(ruleCube);
+  m_queue.push(ruleCube);
+}
 
-  if (inserted.second) {
-    // inserted
-    m_sortedByScore.push(ruleCube);
+ChartHypothesis *RuleCubeQueue::Pop()
+{
+  // pop the most promising rule cube
+  RuleCube *cube = m_queue.top();
+  m_queue.pop();
+
+  // pop the most promising item from the cube and get the corresponding
+  // hypothesis
+  RuleCubeItem *item = cube->Pop(m_manager);
+  if (StaticData::Instance().GetCubePruningLazyScoring()) {
+    item->CreateHypothesis(cube->GetTranslationOption(), m_manager);
+  }
+  ChartHypothesis *hypo = item->ReleaseHypothesis();
+
+  // if the cube contains more items then push it back onto the queue
+  if (!cube->IsEmpty()) {
+    m_queue.push(cube);
   } else {
-    // already there
-    //cerr << "already there\n";
-    delete ruleCube;
+    delete cube;
   }
 
-  //assert(m_uniqueEntry.size() == m_sortedByScore.size());
-
-  return inserted.second;
-}
-
-RuleCube *RuleCubeQueue::Pop()
-{
-  RuleCube *ruleCube = m_sortedByScore.top();
-  m_sortedByScore.pop();
-
-  return ruleCube;
+  return hypo;
 }
 
 }
-

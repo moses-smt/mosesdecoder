@@ -21,6 +21,7 @@
 
 #include "ChartTrellisNode.h"
 #include "ChartHypothesis.h"
+#include "CoveredChartSpan.h"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 
@@ -103,8 +104,8 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
 
   const ChartTranslationOption &transOpt = m_hypo->GetTranslationOption();
   
-  VERBOSE(3, "Trans Opt:" << transOpt << std::endl);
-    
+  VERBOSE(3, "Trans Opt:" << transOpt.GetLastCoveredChartSpan() << ": " << m_hypo->GetCurrTargetPhrase().GetTargetLHS() << "->" << m_hypo->GetCurrTargetPhrase() << std::endl);
+
   const Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     m_hypo->GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();

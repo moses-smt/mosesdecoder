@@ -32,7 +32,6 @@
 #include "ChartTranslationOptionList.h"
 
 using namespace std;
-using namespace Moses;
 
 namespace Moses
 {
@@ -83,14 +82,14 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   const StaticData &staticData = StaticData::Instance();
 
   // priority queue for applicable rules with selected hypotheses
-  RuleCubeQueue queue;
+  RuleCubeQueue queue(m_manager);
 
   // add all trans opt into queue. using only 1st child node.
   ChartTranslationOptionList::const_iterator iterList;
   for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) 
   {
     const ChartTranslationOption &transOpt = **iterList;
-    RuleCube *ruleCube = new RuleCube(transOpt, allChartCells);
+    RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);
   }
 
@@ -98,16 +97,8 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   const size_t popLimit = staticData.GetCubePruningPopLimit();
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
   {
-    RuleCube *ruleCube = queue.Pop();
-
-    // create hypothesis from RuleCube
-    ChartHypothesis *hypo = new ChartHypothesis(*ruleCube, m_manager);
-    assert(hypo);
-    hypo->CalcScore();
+    ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);
-
-    // add neighbors to the queue
-    ruleCube->CreateNeighbors(queue);
   }
 }
 
@@ -223,5 +214,3 @@ std::ostream& operator<<(std::ostream &out, const ChartCell &cell)
 }
 
 } // namespace
-
-

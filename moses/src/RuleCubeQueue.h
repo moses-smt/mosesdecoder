@@ -18,85 +18,49 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
-#include <queue>
-#include <vector>
-#include <set>
+
+#pragma once
+
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "RuleCube.h"
 
-#ifdef HAVE_BOOST
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_set.hpp>
-#include <boost/version.hpp>
-#endif
+#include <queue>
+#include <vector>
 
 namespace Moses
 {
 
-#ifdef HAVE_BOOST
-class RuleCubeUniqueHasher
+class ChartManager;
+
+// Define an ordering between RuleCube based on their best item scores.  This
+// is used to order items in the priority queue.
+class RuleCubeOrderer
 {
-public:
-  size_t operator()(const RuleCube * p) const {
-    size_t seed = 0;
-    boost::hash_combine(seed, &(p->GetTranslationOption()));
-    boost::hash_combine(seed, p->GetCube());
-    return seed;
+ public:
+  bool operator()(const RuleCube *p, const RuleCube *q) const {
+    return p->GetTopScore() < q->GetTopScore();
   }
 };
-
-class RuleCubeUniqueEqualityPred
-{
-public:
-  bool operator()(const RuleCube * p, const RuleCube * q) const {
-    return ((&(p->GetTranslationOption()) == &(q->GetTranslationOption()))
-            && (p->GetCube() == q->GetCube()));
-  }
-};
-#endif
-
-class RuleCubeUniqueOrderer
-{
-public:
-  bool operator()(const RuleCube* entryA, const RuleCube* entryB) const {
-    return (*entryA) < (*entryB);
-  }
-};
-
-class RuleCubeScoreOrderer
-{
-public:
-  bool operator()(const RuleCube* entryA, const RuleCube* entryB) const {
-    return (entryA->GetCombinedScore() < entryB->GetCombinedScore());
-  }
-};
-
 
 class RuleCubeQueue
 {
-protected:
-#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
-  typedef boost::unordered_set<RuleCube*,
-          RuleCubeUniqueHasher,
-          RuleCubeUniqueEqualityPred> UniqueCubeEntry;
-#else
-  typedef std::set<RuleCube*, RuleCubeUniqueOrderer> UniqueCubeEntry;
-#endif
-  UniqueCubeEntry m_uniqueEntry;
-
-  typedef std::priority_queue<RuleCube*, std::vector<RuleCube*>, RuleCubeScoreOrderer> SortedByScore;
-  SortedByScore m_sortedByScore;
-
-
-public:
+ public:
+  RuleCubeQueue(ChartManager &manager) : m_manager(manager) {}
   ~RuleCubeQueue();
-  bool IsEmpty() const {
-    return m_sortedByScore.empty();
-  }
 
-  RuleCube *Pop();
-  bool Add(RuleCube *ruleCube);
+  void Add(RuleCube *);
+  ChartHypothesis *Pop();
+  bool IsEmpty() const { return m_queue.empty(); }
+
+ private:
+  typedef std::priority_queue<RuleCube*, std::vector<RuleCube*>,
+                              RuleCubeOrderer > Queue;
+
+  Queue m_queue;
+  ChartManager &m_manager;
 };
 
-
-};
-
+}

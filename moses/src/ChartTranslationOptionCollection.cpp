@@ -30,7 +30,6 @@
 #include "Util.h"
 
 using namespace std;
-using namespace Moses;
 
 namespace Moses
 {
@@ -43,8 +42,8 @@ ChartTranslationOptionCollection::ChartTranslationOptionCollection(InputType con
   ,m_system(system)
   ,m_decodeGraphList(system->GetDecodeGraphs())
   ,m_hypoStackColl(hypoStackColl)
-  ,m_collection(source.GetSize())
   ,m_ruleLookupManagers(ruleLookupManagers)
+  ,m_collection(source.GetSize())
 {
   // create 2-d vector
   size_t size = source.GetSize();
@@ -59,7 +58,7 @@ ChartTranslationOptionCollection::ChartTranslationOptionCollection(InputType con
 ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
 {
   RemoveAllInColl(m_unksrcs);
-  RemoveAllInColl(m_cacheTargetPhrase);
+  RemoveAllInColl(m_cacheTargetPhraseCollection);
 
   std::list<std::vector<CoveredChartSpan*>* >::iterator iterOuter;
   for (iterOuter = m_coveredChartSpanCache.begin(); iterOuter != m_coveredChartSpanCache.end(); ++iterOuter) {
@@ -225,8 +224,10 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase(Output);
+      TargetPhraseCollection *tpc = new TargetPhraseCollection;
+      tpc->Add(targetPhrase);
 
-      m_cacheTargetPhrase.push_back(targetPhrase);
+      m_cacheTargetPhraseCollection.push_back(tpc);
       Word &targetWord = targetPhrase->AddWord();
       targetWord.CreateUnknownWord(sourceWord);
 
@@ -240,7 +241,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       targetPhrase->SetTargetLHS(targetLHS);
 
       // chart rule
-      ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
+      ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
           , *coveredChartSpanList->back()
           , range
           , m_hypoStackColl);
@@ -251,6 +252,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
     vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
 
     TargetPhrase *targetPhrase = new TargetPhrase(Output);
+    TargetPhraseCollection *tpc = new TargetPhraseCollection;
+    tpc->Add(targetPhrase);
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;
@@ -262,7 +265,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
       assert(targetLHS.GetFactor(0) != NULL);
 
-      m_cacheTargetPhrase.push_back(targetPhrase);
+      m_cacheTargetPhraseCollection.push_back(tpc);
       targetPhrase->SetSourcePhrase(m_unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
@@ -274,7 +277,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
       // chart rule
       assert(coveredChartSpanList->size());
-      ChartTranslationOption *chartRule = new ChartTranslationOption(*targetPhrase
+      ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
           , *coveredChartSpanList->back()
           , range
           , m_hypoStackColl);
@@ -302,7 +305,4 @@ void ChartTranslationOptionCollection::Sort(size_t startPos, size_t endPos)
   list.Sort();
 }
 
-
 }  // namespace
-
-

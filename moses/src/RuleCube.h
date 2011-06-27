@@ -21,105 +21,119 @@
 
 #pragma once
 
-#include <vector>
-#include <map>
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "RuleCubeItem.h"
+
+#ifdef HAVE_BOOST
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_set.hpp>
+#include <boost/version.hpp>
+#endif
+
+#include <cassert>
 #include <queue>
 #include <set>
-#include <iostream>
-#include "WordsRange.h"
-#include "Word.h"
-#include "ChartHypothesis.h"
+#include <vector>
 
 namespace Moses
 {
-class CoveredChartSpan;
-class ChartTranslationOption;
-extern bool g_debug;
-class TranslationOptionCollection;
-class TranslationOptionList;
-class ChartCell;
+
 class ChartCellCollection;
-class RuleCube;
-class RuleCubeQueue;
+class ChartManager;
+class ChartTranslationOption;
 
-typedef std::vector<const ChartHypothesis*> HypoList;
-
-// wrapper around list of hypothese for a particular non-term of a trans opt
-class RuleCubeDimension
+// Define an ordering between RuleCubeItems based on their scores.  This
+// is used to order items in the cube's priority queue.
+class RuleCubeItemScoreOrderer
 {
-  friend std::ostream& operator<<(std::ostream&, const RuleCubeDimension&);
-
-protected:
-  size_t m_pos;
-  const HypoList *m_orderedHypos;
-
-public:
-  RuleCubeDimension(size_t pos, const HypoList &orderedHypos)
-    :m_pos(pos)
-    ,m_orderedHypos(&orderedHypos)
-  {}
-
-  size_t IncrementPos() {
-    return m_pos++;
-  }
-
-  bool HasMoreHypo() const {
-    return m_pos + 1 < m_orderedHypos->size();
-  }
-
-  const ChartHypothesis *GetHypothesis() const {
-    return (*m_orderedHypos)[m_pos];
-  }
-
-  //! transitive comparison used for adding objects into FactorCollection
-  bool operator<(const RuleCubeDimension &compare) const {
-    return GetHypothesis() < compare.GetHypothesis();
-  }
-
-  bool operator==(const RuleCubeDimension & compare) const {
-    return GetHypothesis() == compare.GetHypothesis();
+ public:
+  bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
+    return p->GetScore() < q->GetScore();
   }
 };
 
-// Stores one dimension in the cube
-// (all the hypotheses that match one non terminal)
+// Define an ordering between RuleCubeItems based on their positions in the
+// cube.  This is used to record which positions in the cube have been covered
+// during search.
+class RuleCubeItemPositionOrderer
+{
+ public:
+  bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
+    return *p < *q;
+  }
+};
+
+#ifdef HAVE_BOOST
+class RuleCubeItemHasher
+{
+ public:
+  size_t operator()(const RuleCubeItem *p) const {
+    size_t seed = 0;
+    boost::hash_combine(seed, p->GetHypothesisDimensions());
+    boost::hash_combine(seed, p->GetTranslationDimension().GetTargetPhrase());
+    return seed;
+  }
+};
+
+class RuleCubeItemEqualityPred
+{
+ public:
+  bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
+    return p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
+           p->GetTranslationDimension() == q->GetTranslationDimension();
+  }
+};
+#endif
+
 class RuleCube
 {
-  friend std::ostream& operator<<(std::ostream&, const RuleCube&);
-protected:
-  const ChartTranslationOption &m_transOpt;
-  std::vector<RuleCubeDimension> m_cube;
+ public:
+  RuleCube(const ChartTranslationOption &, const ChartCellCollection &,
+           ChartManager &);
 
-  float m_combinedScore;
-
-  RuleCube(const RuleCube &copy, size_t ruleCubeDimensionIncr);
-  void CreateRuleCubeDimension(const CoveredChartSpan *coveredChartSpan, const ChartCellCollection &allChartCells);
-
-  void CalcScore();
-
-public:
-  RuleCube(const ChartTranslationOption &transOpt
-             , const ChartCellCollection &allChartCells);
   ~RuleCube();
+
+  float GetTopScore() const {
+    assert(!m_queue.empty());
+    RuleCubeItem *item = m_queue.top();
+    return item->GetScore();
+  }
+
+  RuleCubeItem *Pop(ChartManager &);
+
+  bool IsEmpty() const { return m_queue.empty(); }
 
   const ChartTranslationOption &GetTranslationOption() const {
     return m_transOpt;
   }
-  const std::vector<RuleCubeDimension> &GetCube() const {
-    return m_cube;
-  }
-  float GetCombinedScore() const {
-    return m_combinedScore;
-  }
 
-  void CreateNeighbors(RuleCubeQueue &) const;
-
-  bool operator<(const RuleCube &compare) const;
-
-};
-
-#ifdef HAVE_BOOST
-std::size_t hash_value(const RuleCubeDimension &);
+ private:
+#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
+  typedef boost::unordered_set<RuleCubeItem*,
+                               RuleCubeItemHasher,
+                               RuleCubeItemEqualityPred
+                              > ItemSet;
+#else
+  typedef std::set<RuleCubeItem*, RuleCubeItemPositionOrderer> ItemSet;
 #endif
+
+  typedef std::priority_queue<RuleCubeItem*,
+                              std::vector<RuleCubeItem*>,
+                              RuleCubeItemScoreOrderer
+                             > Queue;
+
+  RuleCube(const RuleCube &);  // Not implemented
+  RuleCube &operator=(const RuleCube &);  // Not implemented
+
+  void CreateNeighbors(const RuleCubeItem &, ChartManager &);
+  void CreateNeighbor(const RuleCubeItem &, int, ChartManager &);
+
+  const ChartTranslationOption &m_transOpt;
+  ItemSet m_covered;
+  Queue m_queue;
+};
 
 }

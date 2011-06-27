@@ -40,15 +40,15 @@ class ChartTranslationOptionCollection
 {
   friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionCollection&);
 protected:
-  const InputType		&m_source;
+  const InputType &m_source;
   const TranslationSystem* m_system;
   std::vector <DecodeGraph*> m_decodeGraphList;
   const ChartCellCollection &m_hypoStackColl;
   const std::vector<ChartRuleLookupManager*> &m_ruleLookupManagers;
 
-  std::vector< std::vector< ChartTranslationOptionList > >	m_collection; /*< contains translation options */
+  std::vector< std::vector< ChartTranslationOptionList > > m_collection; /*< contains translation options */
   std::vector<Phrase*> m_unksrcs;
-  std::list<TargetPhrase*> m_cacheTargetPhrase;
+  std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
   std::list<std::vector<CoveredChartSpan*>* > m_coveredChartSpanCache;
 
   // for adding 1 trans opt in unknown word proc

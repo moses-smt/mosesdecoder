@@ -31,9 +31,10 @@
 
 namespace Moses
 {
-class RuleCube;
+
 class ChartHypothesis;
 class ChartManager;
+class RuleCubeItem;
 
 typedef std::vector<ChartHypothesis*> ChartArcList;
 
@@ -50,6 +51,7 @@ protected:
   static unsigned int s_HypothesesCreated;
 
   int m_id; /**< numeric ID of this hypothesis, used for logging */
+  const TargetPhrase &m_targetPhrase;
   const ChartTranslationOption &m_transOpt;
 
   Phrase m_contextPrefix, m_contextSuffix;
@@ -97,7 +99,9 @@ public:
   }
 #endif
 
-  explicit ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager);
+  ChartHypothesis(const ChartTranslationOption &, const RuleCubeItem &item,
+                  ChartManager &manager);
+
   ~ChartHypothesis();
 
   int GetId()const {
@@ -107,7 +111,7 @@ public:
     return m_transOpt;
   }
   const TargetPhrase &GetCurrTargetPhrase()const {
-    return m_transOpt.GetTargetPhrase();
+    return m_targetPhrase;
   }
   const WordsRange &GetCurrSourceRange()const {
     return m_currSourceWordsRange;

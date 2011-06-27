@@ -333,6 +333,8 @@ bool StaticData::LoadData(Parameter *parameter)
   m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
                            ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
 
+  SetBooleanParameter(&m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
+
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 

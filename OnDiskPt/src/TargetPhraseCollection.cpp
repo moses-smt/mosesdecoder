@@ -144,7 +144,7 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
     ret->Add(mosesPhrase);
   }
 
-  ret->Prune(true, phraseDict.GetTableLimit());
+  ret->Sort(true, phraseDict.GetTableLimit());
 
   return ret;
 

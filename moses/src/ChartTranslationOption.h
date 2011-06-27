@@ -20,56 +20,46 @@
 
 #pragma once
 
+#include "TargetPhrase.h"
+#include "TargetPhraseCollection.h"
+#include "WordsRange.h"
+
 #include <cassert>
 #include <vector>
-#include "Word.h"
-#include "WordsRange.h"
-#include "TargetPhrase.h"
 
 namespace Moses
 {
+
 class CoveredChartSpan;
 class ChartCellCollection;
 
-// basically a phrase translation and the vector of words consumed to map each word
+// Similar to a DottedRule, but contains a direct reference to a list
+// of translations and provdes an estimate of the best score.
 class ChartTranslationOption
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
-
-protected:
-  const TargetPhrase &m_targetPhrase;
-  const CoveredChartSpan &m_lastCoveredChartSpan;
-  /* map each source word in the phrase table to:
-  		1. a word in the input sentence, if the pt word is a terminal
-  		2. a 1+ phrase in the input sentence, if the pt word is a non-terminal
-  */
-  const WordsRange	&m_wordsRange;
-
-    float m_estimateOfBestScore;
-
-  ChartTranslationOption &operator=(const ChartTranslationOption &);  // not implemented
-
-  void CalcEstimateOfBestScore(const CoveredChartSpan *, const ChartCellCollection &);
-
-public:
-  ChartTranslationOption(const TargetPhrase &targetPhrase, const CoveredChartSpan &lastCoveredChartSpan, const WordsRange	&wordsRange, const ChartCellCollection &allChartCells)
-    :m_targetPhrase(targetPhrase)
-    ,m_lastCoveredChartSpan(lastCoveredChartSpan)
-    ,m_wordsRange(wordsRange)
-    ,m_estimateOfBestScore(m_targetPhrase.GetFutureScore())
+ public:
+  ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
+                         const CoveredChartSpan &lastCoveredChartSpan,
+                         const WordsRange &wordsRange,
+                         const ChartCellCollection &allChartCells)
+    : m_lastCoveredChartSpan(lastCoveredChartSpan)
+    , m_targetPhraseCollection(targetPhraseColl)
+    , m_wordsRange(wordsRange)
+    , m_estimateOfBestScore(0)
   {
+    const TargetPhrase &targetPhrase = **(m_targetPhraseCollection.begin());
+    m_estimateOfBestScore = targetPhrase.GetFutureScore();
     CalcEstimateOfBestScore(&m_lastCoveredChartSpan, allChartCells);
   }
 
-  ~ChartTranslationOption()
-  {}
-
-  const TargetPhrase &GetTargetPhrase() const {
-    return m_targetPhrase;
-  }
+  ~ChartTranslationOption() {}
 
   const CoveredChartSpan &GetLastCoveredChartSpan() const {
     return m_lastCoveredChartSpan;
+  }
+
+  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+    return m_targetPhraseCollection;
   }
 
   const WordsRange &GetSourceWordsRange() const {
@@ -77,13 +67,21 @@ public:
   }
 
   // return an estimate of the best score possible with this translation option.
-  // the estimate is the sum of the target phrase's estimated score plus the
-  // scores of the best child hypotheses.  (the same as the ordering criterion
-  // currently used in RuleCubeQueue.)
-  inline float GetEstimateOfBestScore() const {
-    return m_estimateOfBestScore;
-  }
+  // the estimate is the sum of the top target phrase's estimated score plus the
+  // scores of the best child hypotheses.
+  inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
 
+ private:
+  // not implemented
+  ChartTranslationOption &operator=(const ChartTranslationOption &);
+
+  void CalcEstimateOfBestScore(const CoveredChartSpan *,
+                               const ChartCellCollection &);
+
+  const CoveredChartSpan &m_lastCoveredChartSpan;
+  const TargetPhraseCollection &m_targetPhraseCollection;
+  const WordsRange &m_wordsRange;
+  float m_estimateOfBestScore;
 };
 
 }

@@ -19,12 +19,12 @@
  ***********************************************************************/
 
 #include "ChartTranslationOption.h"
-#include "TargetPhrase.h"
-#include "AlignmentInfo.h"
-#include "CoveredChartSpan.h"
-#include "ChartCellCollection.h"
 
-using namespace std;
+#include "AlignmentInfo.h"
+#include "ChartCellCollection.h"
+#include "CoveredChartSpan.h"
+
+#include <vector>
 
 namespace Moses
 {
@@ -54,18 +54,11 @@ void ChartTranslationOption::CalcEstimateOfBestScore(
     assert(!childCell.GetSortedHypotheses(nonTerm).empty());
 
     // create a list of hypotheses that match the non-terminal
-    const vector<const ChartHypothesis *> &stack =
+    const std::vector<const ChartHypothesis *> &stack =
       childCell.GetSortedHypotheses(nonTerm);
     const ChartHypothesis *hypo = stack[0];
     m_estimateOfBestScore += hypo->GetTotalScore();
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const ChartTranslationOption &rule)
-{
-  out << rule.m_lastCoveredChartSpan << ": " << rule.m_targetPhrase.GetTargetLHS() << "->" << rule.m_targetPhrase;
-  return out;
 }
-
-} // namespace
-

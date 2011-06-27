@@ -268,8 +268,10 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           }
 
           assert(targetPhraseCollection);
-          outColl.Add(*targetPhraseCollection, *coveredChartSpan,
-                      GetCellCollection(), adhereTableLimit, rulesLimit);
+          if (!targetPhraseCollection->IsEmpty()) {
+            outColl.Add(*targetPhraseCollection, *coveredChartSpan,
+                        GetCellCollection(), adhereTableLimit, rulesLimit);
+          }
 
         } // if (node)
 

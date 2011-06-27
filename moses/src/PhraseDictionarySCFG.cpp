@@ -176,7 +176,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 
   // prune each target phrase collection
   if (m_tableLimit) {
-    m_collection.Prune(m_tableLimit);
+    m_collection.Sort(m_tableLimit);
   }
 
   return true;

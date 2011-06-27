@@ -43,6 +43,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "PhraseDictionary.h"
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
+#include "ChartTranslationOption.h"
+#include "ChartHypothesis.h"
+#include "CoveredChartSpan.h"
+
 
 using namespace std;
 using namespace Moses;
@@ -223,7 +227,11 @@ void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, lo
 {
   // recursive
   if (hypo != NULL) {
-    out << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetTranslationOption()
+    out << "Trans Opt " << translationId
+        << " " << hypo->GetCurrSourceRange()
+        << ": " << hypo->GetTranslationOption().GetLastCoveredChartSpan()
+        << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+        << "->" << hypo->GetCurrTargetPhrase()
         << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
         << endl;
   }

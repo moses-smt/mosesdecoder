@@ -195,6 +195,7 @@ protected:
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
+  bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
 
@@ -312,6 +313,9 @@ public:
   }
   size_t GetCubePruningDiversity() const {
     return m_cubePruningDiversity;
+  }
+  bool GetCubePruningLazyScoring() const {
+    return m_cubePruningLazyScoring;
   }
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;

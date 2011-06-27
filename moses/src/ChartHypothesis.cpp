@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <vector>
 #include "ChartHypothesis.h"
-#include "RuleCube.h"
+#include "RuleCubeItem.h"
 #include "ChartCell.h"
 #include "ChartManager.h"
 #include "TargetPhrase.h"
@@ -33,9 +33,6 @@
 #include "ChartTranslationOption.h"
 #include "FFState.h"
 
-using namespace std;
-using namespace Moses;
-
 namespace Moses
 {
 unsigned int ChartHypothesis::s_HypothesesCreated = 0;
@@ -45,32 +42,33 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 #endif
 
 /** Create a hypothesis from a rule */
-ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager)
-  :m_transOpt(ruleCube.GetTranslationOption())
-  ,m_id(++s_HypothesesCreated)
-  ,m_currSourceWordsRange(ruleCube.GetTranslationOption().GetSourceWordsRange())
-	,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
+ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
+                                 const RuleCubeItem &item,
+                                 ChartManager &manager)
+  :m_id(++s_HypothesesCreated)
+  ,m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
+  ,m_transOpt(transOpt)
   ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
+  ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
+  ,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)
 	,m_winningHypo(NULL)
   ,m_manager(manager)
 {
-  //TRACE_ERR(m_targetPhrase << endl);
-
   // underlying hypotheses for sub-spans
   m_numTargetTerminals = GetCurrTargetPhrase().GetNumTerminals();
-  const std::vector<RuleCubeDimension> &childEntries = ruleCube.GetCube();
+  const std::vector<HypothesisDimension> &childEntries = item.GetHypothesisDimensions();
 
   // ... are stored
   assert(m_prevHypos.empty());
   m_prevHypos.reserve(childEntries.size());
 
-  vector<RuleCubeDimension>::const_iterator iter;
+  std::vector<HypothesisDimension>::const_iterator iter;
   for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
   {
-    const RuleCubeDimension &ruleCubeDimension = *iter;
-    const ChartHypothesis *prevHypo = ruleCubeDimension.GetHypothesis();
+    const HypothesisDimension &dimension = *iter;
+    const ChartHypothesis *prevHypo = dimension.GetHypothesis();
 
     // keep count of words (= length of generated string)
     m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
@@ -179,8 +177,8 @@ size_t ChartHypothesis::CalcSuffix(Phrase &ret, size_t size) const
   // special handling for small hypotheses
   // does the prefix match the entire hypothesis string? -> just copy prefix
   if (m_contextPrefix.GetSize() == m_numTargetTerminals) {
-    size_t maxCount = min(m_contextPrefix.GetSize(), size)
-                      , pos			= m_contextPrefix.GetSize() - 1;
+    size_t maxCount = std::min(m_contextPrefix.GetSize(), size);
+    size_t pos= m_contextPrefix.GetSize() - 1;
 
     for (size_t ind = 0; ind < maxCount; ++ind) {
       const Word &word = m_contextPrefix.GetWord(pos);
@@ -267,7 +265,7 @@ void ChartHypothesis::CalcScore()
   //  sfs[i]->ChartEvaluate(m_targetPhrase, &m_scoreBreakdown);
   //}
 
-  const vector<const StatefulFeatureFunction*>& ffs =
+  const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
 		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
@@ -361,7 +359,7 @@ void ChartHypothesis::SetWinningHypo(const ChartHypothesis *hypo)
 TO_STRING_BODY(ChartHypothesis)
 
 // friend
-ostream& operator<<(ostream& out, const ChartHypothesis& hypo)
+std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 {
 
   out << hypo.GetId();
@@ -392,4 +390,3 @@ ostream& operator<<(ostream& out, const ChartHypothesis& hypo)
 }
 
 }
-
