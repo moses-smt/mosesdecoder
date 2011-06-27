@@ -648,8 +648,6 @@ sub check_exists {
 
 sub submit_job_sge {
     my($script_file) = @_;
-#    my $qsub_result = `qsub -q ecdf\@\@westmere_ge_hosts -P $queue $script_file`;
-#    print "SUBMIT CMD: qsub -q ecdf\@\@westmere_ge_hosts -P $queue $script_file\n";
     my $qsub_result = `qsub -P $queue $script_file`;
     print "SUBMIT CMD: qsub -P $queue $script_file\n";
     if ($qsub_result !~ /Your job (\d+)/) {
@@ -664,8 +662,6 @@ sub submit_job_sge {
 
 sub submit_job_sge_extra_memory {
     my($script_file,$extra_memory) = @_;
-#    my $qsub_result = `qsub -q ecdf\@\@westmere_ge_hosts -pe $extra_memory -P $queue $script_file`;
-#    print "SUBMIT CMD: qsub -q ecdf\@\@westmere_ge_hosts -pe $extra_memory -P $queue $script_file \n";
     my $qsub_result = `qsub -pe $extra_memory -P $queue $script_file`;                                                                                
     print "SUBMIT CMD: qsub -pe $extra_memory -P $queue $script_file \n";
     if ($qsub_result !~ /Your job (\d+)/) {
