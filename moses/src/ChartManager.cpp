@@ -199,18 +199,56 @@ void ChartManager::CalcDecoderStatistics() const
 void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
   size_t size = m_source.GetSize();
+
+	// which hypotheses are reachable?
+	std::map<int,bool> reachable;
+	WordsRange fullRange(0, size-1);
+	const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
+  const ChartHypothesis *hypo = lastCell.GetBestHypothesis();
+
+  if (hypo == NULL) {
+    // no hypothesis
+    return;
+  }
+	FindReachableHypotheses( hypo, reachable);
+
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
       TRACE_ERR(" " << range << "=");
 
-
       const ChartCell &cell = m_hypoStackColl.Get(range);
-      cell.GetSearchGraph(translationId, outputSearchGraphStream);
+      cell.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
     }
   }
+}
 
+void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<int,bool> &reachable ) const
+{
+	// do not recurse, if already visited
+	if (reachable.find(hypo->GetId()) != reachable.end())
+	{
+		return;
+	}
+
+	// recurse
+	reachable[ hypo->GetId() ] = true;
+	const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
+	for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i)
+	{
+		FindReachableHypotheses( *i, reachable );
+	}	
+
+	// also loop over recombined hypotheses (arcs)
+	const ChartArcList *arcList = hypo->GetArcList();
+	if (arcList) {
+		ChartArcList::const_iterator iterArc;
+		for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
+			const ChartHypothesis &arc = **iterArc;
+			FindReachableHypotheses( &arc, reachable );
+		}
+	}
 }
 
 } // namespace

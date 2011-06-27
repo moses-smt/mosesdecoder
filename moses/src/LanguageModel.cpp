@@ -127,54 +127,6 @@ void LanguageModel::CalcScore(const Phrase &phrase
   }
 }
 
-void LanguageModel::CalcScoreChart(const Phrase &phrase
-                                   , float &beginningBitsOnly
-                                   , float &ngramScore) const
-{
-  // TODO - get rid of this function
-
-  beginningBitsOnly	= 0;
-  ngramScore	= 0;
-
-  size_t phraseSize = phrase.GetSize();
-  if (!phraseSize) return;
-
-	// data structure for factored context phrase (history and predicted word)
-  vector<const Word*> contextFactor;
-  contextFactor.reserve(GetNGramOrder());
-
-	// initialize state to BeginSentenceStat or NullContextState
-  std::auto_ptr<FFState> state(m_implementation->NewState((phrase.GetWord(0) == m_implementation->GetSentenceStartArray()) ?
-                               m_implementation->GetBeginSentenceState() : m_implementation->GetNullContextState()));
-
-	// score each word
-	for (size_t currPos = 0; currPos < phraseSize; currPos++) 
-	{
-		// add word to context
-    const Word &word = phrase.GetWord(currPos);
-    assert(!word.IsNonTerminal());
-
-    ShiftOrPush(contextFactor, word);
-    assert(contextFactor.size() <= GetNGramOrder());
-
-		// score
-    if (word == m_implementation->GetSentenceStartArray()) {
-      // do nothing, don't include prob for <s> unigram
-      assert(currPos == 0);
-    } 
-		else {
-			// compute score for this word and update state
-      float partScore = m_implementation->GetValueGivenState(contextFactor, *state).score;
-
-			// add to nGramScore or prefixScore, depending on context size
-      if (contextFactor.size() == GetNGramOrder())
-        ngramScore += partScore;
-      else
-        beginningBitsOnly += partScore;
-    }
-  }
-}
-
 void LanguageModel::ShiftOrPush(vector<const Word*> &contextFactor, const Word &word) const
 {
   if (contextFactor.size() < GetNGramOrder()) {

@@ -161,6 +161,10 @@ public:
     return m_numTargetTerminals;
   }
 
+	const ChartHypothesis* GetWinningHypothesis() const {
+		return m_winningHypo;
+	}
+
   TO_STRING();
 
 }; // class ChartHypothesis

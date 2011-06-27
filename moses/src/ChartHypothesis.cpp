@@ -53,6 +53,7 @@ ChartHypothesis::ChartHypothesis(const RuleCube &ruleCube, ChartManager &manager
   ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_arcList(NULL)
+	,m_winningHypo(NULL)
   ,m_manager(manager)
 {
   //TRACE_ERR(m_targetPhrase << endl);
@@ -362,15 +363,19 @@ TO_STRING_BODY(ChartHypothesis)
 // friend
 ostream& operator<<(ostream& out, const ChartHypothesis& hypo)
 {
-  //Phrase outPhrase(Output);
-  //hypo.CreateOutputPhrase(outPhrase);
 
-  // words bitmap
-  out << " " << hypo.GetId()
-      << " " << hypo.GetCurrTargetPhrase()
+  out << hypo.GetId();
+	
+	// recombination
+	if (hypo.GetWinningHypothesis() != NULL &&
+			hypo.GetWinningHypothesis()->GetId() != hypo.GetId())
+	{
+		out << "->" << hypo.GetWinningHypothesis()->GetId();
+	}
+
+  out << " " << hypo.GetCurrTargetPhrase()
       //<< " " << outPhrase
       << " " << hypo.GetCurrSourceRange();
-  //<< " " << hypo.m_currSourceWordsRange
 
   HypoList::const_iterator iter;
   for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) {

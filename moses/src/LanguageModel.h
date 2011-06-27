@@ -90,11 +90,6 @@ public:
     float &fullScore,
     float &ngramScore) const;
 
-  void CalcScoreChart(
-    const Phrase &phrase,
-    float &beginningBitsOnly,
-    float &ngramScore) const;
-
   //! max n-gram order of LM
   size_t GetNGramOrder() const {
     return m_implementation->GetNGramOrder();

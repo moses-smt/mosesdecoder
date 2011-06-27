@@ -82,7 +82,7 @@ public:
     return m_coverage < compare.m_coverage;
   }
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<int,bool> &reachable) const;
 
 };
 

@@ -113,7 +113,7 @@ public:
     return m_hyposOrdered;
   }
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<int,bool> &reachable) const;
 
 };
 
