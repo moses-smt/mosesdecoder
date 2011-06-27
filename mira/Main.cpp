@@ -183,9 +183,11 @@ int main(int argc, char** argv) {
 	bool model_hope_fear;
 	int hope_n;
 	int fear_n;
+	size_t adapt_after_epoch;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
+		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("analytical-update",  po::value<bool>(&analytical_update)->default_value(0), "Use one best lists and compute the update analytically")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
@@ -1111,37 +1113,40 @@ int main(int argc, char** argv) {
 #endif
 			} //end if (weightConvergence)
 
-			// if using flexible slack, decrease slack parameter for next epoch
-			if (slack_step > 0) {
-				if (slack - slack_step >= slack_min) {
-					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-						slack -= slack_step;
-						VERBOSE(1, "Change slack to: " << slack << endl);
-						((MiraOptimiser*) optimiser)->setSlack(slack);
+			// adjust flexible parameters
+			if (!stop && epoch >= adapt_after_epoch) {
+				// if using flexible slack, decrease slack parameter for next epoch
+				if (slack_step > 0) {
+					if (slack - slack_step >= slack_min) {
+						if (typeid(*optimiser) == typeid(MiraOptimiser)) {
+							slack -= slack_step;
+							VERBOSE(1, "Change slack to: " << slack << endl);
+							((MiraOptimiser*) optimiser)->setSlack(slack);
+						}
 					}
 				}
-			}
 
-			// if using flexible margin slack, decrease margin slack parameter for next epoch
-			if (margin_slack_incr > 0.0001) {
-				if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-					margin_slack += margin_slack_incr;
-					VERBOSE(1, "Change margin slack to: " << margin_slack << endl);
-					((MiraOptimiser*) optimiser)->setMarginSlack(margin_slack);
+				// if using flexible margin slack, decrease margin slack parameter for next epoch
+				if (margin_slack_incr > 0.0001) {
+					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
+						margin_slack += margin_slack_incr;
+						VERBOSE(1, "Change margin slack to: " << margin_slack << endl);
+						((MiraOptimiser*) optimiser)->setMarginSlack(margin_slack);
+					}
 				}
-			}
 
-			// change learning rate
-			if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate >= min_learning_rate)) {
-				learning_rate -= decrease_learning_rate;
-				if (learning_rate <= 0.0001) {
-					learning_rate = 0;
-					stop = true;
+				// change learning rate
+				if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate >= min_learning_rate)) {
+					learning_rate -= decrease_learning_rate;
+					if (learning_rate <= 0.0001) {
+						learning_rate = 0;
+						stop = true;
 #ifdef MPI_ENABLE
-					mpi::broadcast(world, stop, 0);
+						mpi::broadcast(world, stop, 0);
 #endif
+					}
+					VERBOSE(1, "Change learning rate to " << learning_rate << endl);
 				}
-				VERBOSE(1, "Change learning rate to " << learning_rate << endl);
 			}
 		}
 	} // end of epoch loop
