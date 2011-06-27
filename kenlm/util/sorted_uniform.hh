@@ -67,7 +67,7 @@ template <class Iterator, class Accessor, class Pivot> bool BoundedSortedUniform
     Iterator before_it, typename Accessor::Key before_v,
     Iterator after_it, typename Accessor::Key after_v,
     const typename Accessor::Key key, Iterator &out) {
-  while (after_it > before_it + 1) {
+  while (after_it - before_it > 1) {
     Iterator pivot(before_it + (1 + Pivot::Calc(key - before_v, after_v - before_v, after_it - before_it - 1)));
     typename Accessor::Key mid(accessor(pivot));
     if (mid < key) {
