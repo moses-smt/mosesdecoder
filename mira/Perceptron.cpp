@@ -45,7 +45,6 @@ vector<int> Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeig
 	vector<int> update_status;
 	update_status.push_back(0);
 	update_status.push_back(0);
-	update_status.push_back(0);
 	return update_status;
 }
 

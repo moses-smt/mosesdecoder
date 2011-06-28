@@ -166,7 +166,6 @@ int main(int argc, char** argv) {
 	string decoder_settings;
 	float min_weight_change;
 	float decrease_learning_rate;
-	bool devBleu;
 	bool normaliseWeights;
 	bool print_feature_values;
 	bool historyOf1best;
@@ -178,7 +177,6 @@ int main(int argc, char** argv) {
 	float bleuScoreWeight;
 	float margin_slack;
 	float margin_slack_incr;
-	bool analytical_update;
 	bool perceptron_update;
 	bool hope_fear;
 	bool model_hope_fear;
@@ -189,7 +187,6 @@ int main(int argc, char** argv) {
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
-		("analytical-update",  po::value<bool>(&analytical_update)->default_value(0), "Use one best lists and compute the update analytically")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
@@ -201,9 +198,7 @@ int main(int argc, char** argv) {
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
-		("dev-bleu", po::value<bool>(&devBleu)->default_value(true), "Compute BLEU score of oracle translations of the whole tuning set")
 		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use nbest list with distinct translations in inference step")
-		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -214,12 +209,12 @@ int main(int argc, char** argv) {
 		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
 		("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
 		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
-		("margin-slack", po::value<float>(&margin_slack)->default_value(0), "Slack when comparing left and right hand side of constraints")
-		("margin-incr", po::value<float>(&margin_slack_incr)->default_value(0), "Increment margin slack after every epoch by this amount")
-		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
+		("margin-incr", po::value<float>(&margin_slack_incr)->default_value(0), "Increment margin slack after every epoch by this amount")
+		("margin-slack", po::value<float>(&margin_slack)->default_value(0), "Slack when comparing left and right hand side of constraints")
 		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
 		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(5), "How often per epoch to mix weights, when using mpi")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimization")
 		("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in nbest list")
@@ -229,6 +224,8 @@ int main(int argc, char** argv) {
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
+		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
+		("scale-update", po::value<bool>(&scale_update)->default_value(false), "Scale the update by the Bleu score of the oracle translation")
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level bleu scoring function")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
@@ -236,8 +233,7 @@ int main(int argc, char** argv) {
 	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-	    ("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
-	    ("scale-update", po::value<bool>(&scale_update)->default_value(false), "Scale the update by the Bleu score of the oracle translation")
+	    ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 	    ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
 	po::options_description cmdline_options;
@@ -355,42 +351,31 @@ int main(int argc, char** argv) {
 		perceptron_update = true;
 		model_hope_fear = false; // mira only
 		hope_fear = false; // mira only
-		analytical_update = false; // mira only
 	} else {
 		cerr << "Error: Unknown optimiser: " << learner << endl;
 		return 1;
 	}
 
 	// resolve parameter dependencies
-	if (perceptron_update || analytical_update) {
+	if (batchSize > 1 && perceptron_update) {
 		batchSize = 1;
-		cerr << "Info: Setting batch size to 1 for perceptron/analytical update" << endl;
+		cerr << "Info: Setting batch size to 1 for perceptron update" << endl;
 	}
-
 	if (hope_n == -1 && fear_n == -1) {
 		hope_n = n;
 		fear_n = n;
 	}
-
-	if ((model_hope_fear || analytical_update) && hope_fear) {
+	if (model_hope_fear && hope_fear) {
 		hope_fear = false; // is true by default
 	}
-
-	if (!hope_fear && !analytical_update) {
+	if (!hope_fear) {
 		model_hope_fear = true;
 	}
-
-	if (model_hope_fear && analytical_update) {
-		cerr << "Error: Must choose between model-hope-fear and analytical update" << endl;
-		return 1;
-	}
-
 	if (!sentenceLevelBleu) {
 		if (!historyOf1best && !historyOfOracles) {
 			historyOf1best = true;
 		}
 	}
-
 	if (burnIn && sentenceLevelBleu) {
 		burnIn = false;
 		cerr << "Info: Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
@@ -545,7 +530,6 @@ int main(int argc, char** argv) {
 	int sumStillViolatedConstraints_lastEpoch = 0;
 	int sumConstraintChangeAbs;
 	int sumConstraintChangeAbs_lastEpoch = 0;
-//	size_t sumBleuChangeAbs;
 	float *sendbuf, *recvbuf;
 	sendbuf = (float *) malloc(sizeof(float));
 	recvbuf = (float *) malloc(sizeof(float));
@@ -553,7 +537,6 @@ int main(int argc, char** argv) {
 		// sum of violated constraints
 		sumStillViolatedConstraints = 0;
 		sumConstraintChangeAbs = 0;
-//		sumBleuChangeAbs = 0;
 
 		numberOfUpdatesThisEpoch = 0;
 		// Sum up weights over one epoch, final average uses weights from last epoch
@@ -619,7 +602,7 @@ int main(int argc, char** argv) {
 				dummyFeatureValues.push_back(newFeatureValues);
 				dummyBleuScores.push_back(newBleuScores);
 
-				if (perceptron_update || analytical_update) {
+				if (perceptron_update) {
 					if (historyOf1best) {
 						// MODEL (for updating the history)
 						cerr << "Rank " << rank << ", run decoder to get 1best wrt model score (for history)" << endl;
@@ -778,15 +761,6 @@ int main(int argc, char** argv) {
 				}
 			}
 
-/*			// get 1best model results with old weights
-			vector< vector <float > > bestModelOld_batch;
-			for (size_t i = 0; i < actualBatchSize; ++i) {
-				string& input = inputSentences[*current_sid_start + i];
-				vector <float> bestModelOld = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest, rank, epoch);
-				bestModelOld_batch.push_back(bestModelOld);
-				decoder->cleanup();
-			}*/
-
 			// optionally print out the feature values
 			if (print_feature_values) {
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
@@ -823,13 +797,8 @@ int main(int argc, char** argv) {
 				vector<vector<float> > dummy1;
 				vector<size_t> dummy2;
 				update_status = optimiser->updateWeightsHopeFear(mosesWeights,
-						featureValuesHope, featureValuesFear,	dummy1, dummy1, dummy2,
+						featureValuesHope, featureValuesFear, dummy1, dummy1, dummy2,
 						learning_rate, rank, epoch);
-			}
-			else if (analytical_update) {
-					update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights,
-							featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
-							ref_ids[0], learning_rate, rank, epoch);
 			}
 			else {
 				if (hope_fear) {
@@ -859,7 +828,7 @@ int main(int argc, char** argv) {
 					}
 
 					update_status = optimiser->updateWeightsHopeFear(mosesWeights,
-							featureValuesHope, featureValuesFear,	bleuScoresHope, bleuScoresFear, ref_ids,
+							featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, ref_ids,
 							learning_rate, rank, epoch);
 				}
 				else {
@@ -899,17 +868,6 @@ int main(int argc, char** argv) {
 			ScoreComponentCollection weightDifference(mosesWeights);
 			weightDifference.MinusEquals(oldWeights);
 			VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl);
-
-/*			// get 1best model results with new weights (for each sentence in batch)
-			vector<float> bestModelNew;
-			for (size_t i = 0; i < actualBatchSize; ++i) {
-				string& input = inputSentences[*current_sid_start + i];
-				bestModelNew = decoder->getBleuAndScore(input, *current_sid_start + i, 0.0, bleuScoreWeight, distinctNbest, rank, epoch);
-				decoder->cleanup();
-				sumBleuChangeAbs += abs(bestModelOld_batch[i][0] - bestModelNew[0]);
-				VERBOSE(2, "Rank " << rank << ", epoch " << epoch << ", 1best model bleu, old: " << bestModelOld_batch[i][0] << ", new: " << bestModelNew[0] << endl);
-				VERBOSE(2, "Rank " << rank << ", epoch " << epoch << ", 1best model score, old: " << bestModelOld_batch[i][1] << ", new: " << bestModelNew[1] << endl);
-			}*/
 
 			// update history (for approximate document Bleu)
 			if (sentenceLevelBleu) {

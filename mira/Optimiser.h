@@ -67,15 +67,6 @@ namespace Mira {
 		  m_scale_update(scale_update),
 		  m_margin_slack(margin_slack) { }
    
-     std::vector<int> updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
-							Moses::ScoreComponentCollection& featureValuesHope,
-							Moses::ScoreComponentCollection& featureValuesFear,
-							float bleuScoresHope,
-							float bleuScoresFear,
-							size_t sentenceId,
-							float learning_rate,
-							size_t rank,
-							size_t epoch);
      std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector<std::vector<float> >& losses,
@@ -117,6 +108,7 @@ namespace Mira {
       // scale update with log 10 of oracle BLEU score
       bool m_scale_update;
 
+      // slack when comparing losses to model scores
       float m_margin_slack;
   };
 }

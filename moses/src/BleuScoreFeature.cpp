@@ -94,14 +94,12 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
           for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {
               for (size_t end_idx = order; end_idx <= refTokens.size(); end_idx++) {
                   Phrase ngram(Output);
-                  //cerr << "start: " << end_idx-order << " end: " << end_idx << endl;
                   for (size_t s_idx = end_idx - order; s_idx < end_idx; s_idx++) {
                       const Factor* f = fc.AddFactor(Output, 0, refTokens[s_idx]);
                       Word w;
                       w.SetFactor(0, f);
                       ngram.AddWord(w);
                   }
-                  //cerr << "Ref: " << ngram << endl;
                   ref_pair.second[ngram] += 1;
               }
           }
@@ -120,10 +118,10 @@ void BleuScoreFeature::SetCurrentReference(size_t ref_id) {
 }
 
 /*
- * Update the pseudo-document big_O after each translation of a source sentence.
- * (big_O is an exponentially-weighted moving average of vectors c(e;{r_k}))
- * big_O = 0.9 * (big_O + c(e_oracle))
- * big_O_f = 0.9 * (big_O_f + |f|)		input length of document big_O
+ * Update the pseudo-document O after each translation of a source sentence.
+ * (O is an exponentially-weighted moving average of vectors c(e;{r_k}))
+ * O = m_historySmoothing * (O + c(e_oracle))
+ * O_f = m_historySmoothing * (O_f + |f|)		input length of pseudo-document
  */
 void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
     Phrase phrase(Output, hypo);
@@ -138,7 +136,6 @@ void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
     for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
         m_count_history[i] = m_historySmoothing * (m_count_history[i] + ngram_counts[i]);
         m_match_history[i] = m_historySmoothing * (m_match_history[i] + ngram_matches[i]);
-        //cerr << "precisionHistory " << i + 1 << ": " << (m_match_history[i]/m_count_history[i]) << " (" << m_match_history[i] << "/" << m_count_history[i] << ")" << endl;
     }
 
     // update counts for reference and target length
@@ -148,7 +145,7 @@ void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
 }
 
 /*
- * Update history with a batch of oracle translations
+ * Update history with a batch of translations
  */
 void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypos, vector<size_t>& sourceLengths, vector<size_t>& ref_ids, size_t rank, size_t epoch) {
 	for (size_t batchPosition = 0; batchPosition < hypos.size(); ++batchPosition){
@@ -195,7 +192,7 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 }
 
 /*
- * Update history with a batch of oracle translations
+ * Print batch of reference translations
  */
 void BleuScoreFeature::PrintReferenceLength(const vector<size_t>& ref_ids) {
 	for (size_t batchPosition = 0; batchPosition < ref_ids.size(); ++batchPosition){
@@ -325,7 +322,6 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     }
 
     new_state->m_source_length = cur_hypo.GetWordsBitmap().GetSize();
-    new_state->m_source_phrase_length = cur_hypo.GetCurrSourceWordsRange().GetNumWordsCovered(); // todo: delete
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_end_idx));
     new_state->m_target_length += cur_hypo.GetTargetPhrase().GetSize();
@@ -337,7 +333,6 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
     // Calculate new bleu.
     new_bleu = CalculateBleu(new_state);
-    //cerr << "NS: " << *new_state << " NB " << new_bleu << endl;
 
     // Set score to new Bleu score
     accumulator->PlusEquals(this, new_bleu - old_bleu);
@@ -394,82 +389,6 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 	}
 
     return precision;
-}
-
-vector<float> BleuScoreFeature::CalculateBleuOfCorpus(const vector< vector< const Word* > >& oracles, const vector<size_t>& ref_ids) {
-	// get ngram matches and counts for all oracle sentences and their references
-	vector<size_t> sumOfClippedNgramMatches(BleuScoreState::bleu_order);
-	vector<size_t> sumOfNgramCounts(BleuScoreState::bleu_order);
-	size_t ref_length = 0;
-	size_t target_length = 0;
-
-	for (size_t batchPosition = 0; batchPosition < oracles.size(); ++batchPosition){
-		Phrase phrase(Output, oracles[batchPosition]);
-		size_t ref_id = ref_ids[batchPosition];
-		size_t cur_ref_length = m_refs[ref_id].first;
-		NGrams cur_ref_ngrams = m_refs[ref_id].second;
-
-		ref_length += cur_ref_length;
-		target_length += oracles[batchPosition].size();
-
-		std::vector< size_t > ngram_counts(BleuScoreState::bleu_order);
-		std::vector< size_t > clipped_ngram_matches(BleuScoreState::bleu_order);
-		GetClippedNgramMatchesAndCounts(phrase, cur_ref_ngrams, ngram_counts, clipped_ngram_matches, 0);
-
-		// add clipped ngram matches and ngram counts to corpus sums
-		for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
-			sumOfClippedNgramMatches[i] += clipped_ngram_matches[i];
-			sumOfNgramCounts[i] += ngram_counts[i];
-		}
-	}
-
-	if (!sumOfNgramCounts[0]) {
-		vector<float> empty(0);
-		return empty;
-	}
-	if (!sumOfClippedNgramMatches[0]) {
-		vector<float> empty(0);
-		return empty;			// if we have no unigram matches, score should be 0
-	}
-
-	// calculate bleu score
-	float precision = 1.0;
-
-	vector<float> bleu;
-	// Calculate geometric mean of modified ngram precisions
-	// BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
-	// 		  = BP * 4th root(PRODUCT_1_4 p_n)
-	for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
-		if (sumOfNgramCounts[i]) {
-			precision *= 1.0*sumOfClippedNgramMatches[i] / sumOfNgramCounts[i];
-			bleu.push_back(1.0*sumOfClippedNgramMatches[i] / sumOfNgramCounts[i]);
-		}
-	}
-
-	// take geometric mean
-	precision = pow(precision, (float)1/4);
-
-	// Apply brevity penalty if applicable.
-	// BP = 1 				if c > r
-	// BP = e^(1- r/c))		if c <= r
-	// where
-	// c: length of the candidate translation
-	// r: effective reference length (sum of best match lengths for each candidate sentence)
-	float BP;
-	if (target_length < ref_length) {
-		precision *= exp(1 - (1.0*ref_length/target_length));
-		BP = exp(1 - (1.0*ref_length/target_length));
-	}
-	else {
-		BP = 1.0;
-  }
-
-	bleu.push_back(precision);
-	bleu.push_back(BP);
-	bleu.push_back(1.0*target_length/ref_length);
-	bleu.push_back(target_length);
-	bleu.push_back(ref_length);
-	return bleu;
 }
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const

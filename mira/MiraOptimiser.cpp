@@ -110,7 +110,7 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 	    
-	    // sum up update
+	    // sum updates
 	    summedUpdate.PlusEquals(update);
 	  }
 	} 
@@ -121,24 +121,6 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	  status[1] = 0;
 	  return status;
 	}
-
-	ScoreComponentCollection newWeights(currWeights);
-	newWeights.PlusEquals(summedUpdate);
-
-	// Sanity check: are there still violated constraints after optimisation?
-	int violatedConstraintsAfter = 0;
-	float newDistanceFromOptimum = 0;
-	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
-		float modelScoreDiff = featureValueDiffs[i].InnerProduct(newWeights);
-		float loss = all_losses[i];
-		float diff = loss - (modelScoreDiff + m_margin_slack);
-		if (diff > epsilon) {
-			++violatedConstraintsAfter;
-			newDistanceFromOptimum += diff;
-		}
-	}
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
 
 	// apply learning rate
 	if (learning_rate != 1) {
@@ -157,6 +139,21 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl);
 	currWeights.PlusEquals(summedUpdate);
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl);
+
+	// Sanity check: are there still violated constraints after optimisation?
+	int violatedConstraintsAfter = 0;
+	float newDistanceFromOptimum = 0;
+	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
+		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
+		float loss = all_losses[i];
+		float diff = loss - (modelScoreDiff + m_margin_slack);
+		if (diff > epsilon) {
+			++violatedConstraintsAfter;
+			newDistanceFromOptimum += diff;
+		}
+	}
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
 
 	vector<int> status(2);
 	status[0] = violatedConstraintsBefore;
@@ -291,25 +288,7 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	  return status;
 	}
 
-	ScoreComponentCollection newWeights(currWeights);
-	newWeights.PlusEquals(summedUpdate);
-
-	// Sanity check: are there still violated constraints after optimisation?
-	int violatedConstraintsAfter = 0;
-	float newDistanceFromOptimum = 0;
-	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
-		float modelScoreDiff = featureValueDiffs[i].InnerProduct(newWeights);
-		float loss = all_losses[i];
-		float diff = loss - (modelScoreDiff + m_margin_slack);
-		if (diff > epsilon) {
-			++violatedConstraintsAfter;
-			newDistanceFromOptimum += diff;
-		}
-	}
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-
-	// Apply learning rate (fixed or flexible)
+	// apply learning rate
 	if (learning_rate != 1) {
 		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl);
 		summedUpdate.MultiplyEquals(learning_rate);
@@ -321,106 +300,26 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	currWeights.PlusEquals(summedUpdate);
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl);
 
+	// Sanity check: are there still violated constraints after optimisation?
+	int violatedConstraintsAfter = 0;
+	float newDistanceFromOptimum = 0;
+	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
+		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
+		float loss = all_losses[i];
+		float diff = loss - (modelScoreDiff + m_margin_slack);
+		if (diff > epsilon) {
+			++violatedConstraintsAfter;
+			newDistanceFromOptimum += diff;
+		}
+	}
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
+
+
 	vector<int> statusPlus(2);
 	statusPlus[0] = violatedConstraintsBefore;
 	statusPlus[1] = violatedConstraintsAfter;
 	return statusPlus;
-}
-
-vector<int> MiraOptimiser::updateWeightsAnalytically(ScoreComponentCollection& currWeights,
-	ScoreComponentCollection& featureValuesHope,
-    ScoreComponentCollection& featureValuesFear,
-    float bleuScoreHope,
-    float bleuScoreFear,
-    size_t sentenceId,
-    float learning_rate,
-    size_t rank,
-    size_t epoch) {
-
-  float epsilon = 0.0001;
-  float oldDistanceFromOptimum = 0;
-  bool constraintViolatedBefore = false;
-  ScoreComponentCollection weightUpdate;
-
- // cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << featureValuesHope << endl;
- // cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear << endl;
-  ScoreComponentCollection featureValueDiff = featureValuesHope;
-  featureValueDiff.MinusEquals(featureValuesFear);
-  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
-  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-  float loss = bleuScoreHope - bleuScoreFear;
-  float diff = 0;
-  if (loss > (modelScoreDiff + m_margin_slack)) {
-	  diff = loss - (modelScoreDiff + m_margin_slack);
-  }
-  cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
-
-  if (diff > epsilon) {
-    // constraint violated
-    oldDistanceFromOptimum += diff;
-    constraintViolatedBefore = true;
-
-    // compute alpha for given constraint: (loss - model score diff) / || feature value diff ||^2
-    // featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm() == featureValueDiff.InnerProduct(featureValueDiff)
-    // from Crammer&Singer 2006: alpha = min {C , l_t/ ||x||^2}
-    float squaredNorm = featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm();
-
-    if (squaredNorm > 0) {
-    	float alpha = diff / squaredNorm;
-    	if (m_slack > 0 ) {
-    		if (alpha > m_slack) {
-    			alpha = m_slack;
-    		}
-    		else if (alpha < m_slack*(-1)) {
-    			alpha = m_slack*(-1);
-    		}
-    	}
-
-    	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
-    	featureValueDiff.MultiplyEquals(alpha);
-    	weightUpdate.PlusEquals(featureValueDiff);
-    }
-    else {
-    	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", no update because squared norm is 0" << endl);
-    }
-  }
-
-  if (!constraintViolatedBefore) {
-    // constraint satisfied, nothing to do
-	cerr << "Rank " << rank << ", epoch " << epoch << ", constraint already satisfied" << endl;
-    vector<int> status(2);
-    status[0] = 0;
-    status[1] = 0;
-    return status;
-  }
-
-  // sanity check: constraint still violated after optimisation?
-  ScoreComponentCollection newWeights(currWeights);
-  newWeights.PlusEquals(weightUpdate);
-  bool constraintViolatedAfter = false;
-  float newDistanceFromOptimum = 0;
-  featureValueDiff = featureValuesHope;
-  featureValueDiff.MinusEquals(featureValuesFear);
-  modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
-  diff = loss - (modelScoreDiff + m_margin_slack);
-  // approximate comparison between floats!
-  if (diff > epsilon) {
-    constraintViolatedAfter = true;
-    newDistanceFromOptimum += (loss - modelScoreDiff);
-  }
-
-  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, constraint violated before? " << constraintViolatedBefore << ", after? " << constraintViolatedAfter << endl);
-  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-
-  // apply update to weight vector
-  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl);
-  currWeights.PlusEquals(weightUpdate);
-  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl);
-
-  vector<int> status(2);
-  status[0] = 1;
-  status[1] = constraintViolatedAfter ? 1 : 0;
-  return status;
 }
 
 }

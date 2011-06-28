@@ -32,8 +32,6 @@ using namespace Moses;
 
 namespace Mira {
 
-  //Decoder::~Decoder() {}
-
   /**
     * Allocates a char* and copies string into it.
   **/
@@ -70,8 +68,8 @@ namespace Mira {
  
   MosesDecoder::MosesDecoder(bool scaleByInputLength, float historySmoothing)
 		: m_manager(NULL) {
-			// force initialisation of the phrase dictionary (TODO: what for?)
-			const StaticData &staticData = StaticData::Instance();
+	  // force initialisation of the phrase dictionary (TODO: why?)
+	  const StaticData &staticData = StaticData::Instance();
       m_sentence = new Sentence(Input);
       stringstream in("Initialising decoder..\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
@@ -176,61 +174,6 @@ namespace Mira {
     return best;
   }
 
-  vector<float> MosesDecoder::getBleuAndScore(const std::string& source,
-                                size_t sentenceid,
-                                float bleuObjectiveWeight,
-                                float bleuScoreWeight,
-                                bool distinct,
-                                size_t rank,
-                                size_t epoch)
-  {
-  	StaticData &staticData = StaticData::InstanceNonConst();
-
-  	m_sentence = new Sentence(Input);
-  	stringstream in(source + "\n");
-  	const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-  	m_sentence->Read(in,inputFactorOrder);
-  	const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-
-  	// set the weight for the bleu feature
-  	ostringstream bleuWeightStr;
-  	bleuWeightStr << (bleuObjectiveWeight * bleuScoreWeight);
-  	PARAM_VEC bleuWeight(1,bleuWeightStr.str());
-
-  	staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
-  	staticData.ReLoadBleuScoreFeatureParameter();
-
-  	m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
-  	m_bleuScoreFeature->SetCurrentReference(sentenceid);
-
-  	//run the decoder
-  	m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
-  	m_manager->ProcessSentence();
-  	TrellisPathList sentences;
-  	m_manager->CalcNBest(1, sentences, distinct);
-
-  	// read off the feature values and bleu scores for each sentence in the nbest list
-  	Moses::TrellisPathList::const_iterator iter = sentences.begin();
-  	vector<float> bleuAndScore;
-  	const Moses::TrellisPath &path = **iter;
-  	float bleuScore = getBleuScore(path.GetScoreBreakdown());
-  	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
-  	bleuAndScore.push_back(bleuScore);
-  	bleuAndScore.push_back(scoreWithoutBleu);
-
-  	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", 1best translation: ");
-  	Phrase phrase = path.GetTargetPhrase();
-  	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
-  		const Word &word = phrase.GetWord(pos);
-  		Word *newWord = new Word(word);
-  		VERBOSE(1, *newWord);
-  	}
-
-  	VERBOSE(1, endl);
-
-  	return bleuAndScore;
-  }
-
   size_t MosesDecoder::getCurrentInputLength() {
 	  return (*m_sentence).GetSize();
   }
@@ -270,27 +213,5 @@ namespace Mira {
   void MosesDecoder::printReferenceLength(const vector<size_t>& ref_ids) {
   	m_bleuScoreFeature->PrintReferenceLength(ref_ids);
   }
-
-  vector<float> MosesDecoder::calculateBleuOfCorpus(const vector< vector< const Word*> >& words, vector<size_t>& ref_ids, size_t epoch, size_t rank) {
-  	  vector<float> bleu = m_bleuScoreFeature->CalculateBleuOfCorpus(words, ref_ids);
-	  if (bleu.size() > 0) {
-	    cerr << "\nRank " << rank << ", BLEU after epoch " << epoch << ": " << bleu[4]*100 << ", "
-	   << bleu[0]*100 << "/" << bleu[1]*100 << "/" << bleu[2]*100 << "/" << bleu[3]*100 << " "
-		 << "(BP=" << bleu[5] << ", " << "ratio=" << bleu[6] << ", "
-		 << "hyp_len=" << bleu[7] << ", ref_len=" << bleu[8] << ")" << endl;
-	    vector<float> bleuAndRatio(2);
-	    bleuAndRatio[0] = bleu[4]*100;
-	    bleuAndRatio[1] = bleu[6];
-	    return bleuAndRatio;
-	  }
-	  else {
-	  	cerr << "\nRank " << rank << ", BLEU after epoch " << epoch << ": 0" << endl;
-	  	vector<float> bleuAndRatio(2);
-	  	bleuAndRatio[0] = 0;
-	  	bleuAndRatio[1] = 0;
-	  	return bleuAndRatio;
-	  }
-  }
-
 } 
 

@@ -29,8 +29,6 @@ private:
     size_t m_source_length;
     size_t m_target_length;
 
-    size_t m_source_phrase_length; // todo: delete
-
     // scaled reference length is needed for scoring incomplete hypotheses against reference translation
     float m_scaled_ref_length;
 
@@ -52,7 +50,7 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
-	                                 m_historySmoothing(0.9) {}
+	                                 m_historySmoothing(0.7) {}
 
 	BleuScoreFeature(bool scaleByInputLength, float historySmoothing):
 	                                 StatefulFeatureFunction("BleuScore"),
@@ -101,11 +99,10 @@ public:
                        const FFState* prev_state, 
                        ScoreComponentCollection* accumulator) const;
     float CalculateBleu(BleuScoreState*) const;
-    std::vector<float> CalculateBleuOfCorpus(const std::vector< std::vector< const Word* > >& hypos, const std::vector<size_t>& ref_ids);
     const FFState* EmptyHypothesisState(const InputType&) const;
 
 private:
-    // counts for pseudo-document big_O
+    // counts for pseudo-document
     std::vector< float > m_count_history;
     std::vector< float > m_match_history;
     float m_source_length_history;
@@ -117,9 +114,10 @@ private:
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
 
-    // whether or not to scale the BLEU score by a history of the input size
+    // scale BLEU score by history of input size
     bool m_scale_by_input_length;
 
+    // smoothing factor for history counts
     float m_historySmoothing;
 };
 
