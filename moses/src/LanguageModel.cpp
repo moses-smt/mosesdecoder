@@ -39,20 +39,23 @@ using namespace std;
 
 namespace Moses
 {
-LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation) :
-	m_implementation(implementation)
+
+template class FeatureNameCounter<LanguageModel>;
+
+LanguageModel::LanguageModel(LanguageModelImplementation *implementation) :
+	StatefulFeatureFunction(FeatureNameCounter<LanguageModel>::Name("LM")),
+  m_implementation(implementation)
 {
-	scoreIndexManager.AddScoreProducer(this);
 #ifndef WITH_THREADS
 	// ref counting handled by boost otherwise
 	m_implementation->IncrementReferenceCount();
 #endif
 }
 
-LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *loadedLM) :
+LanguageModel::LanguageModel(LanguageModel *loadedLM) :
+  StatefulFeatureFunction(FeatureNameCounter<LanguageModel>::Name("LM")),
 	m_implementation(loadedLM->m_implementation)
 {
-	scoreIndexManager.AddScoreProducer(this);
 #ifndef WITH_THREADS
 	// ref counting handled by boost otherwise
 	m_implementation->IncrementReferenceCount();
@@ -71,12 +74,6 @@ LanguageModel::~LanguageModel()
 size_t LanguageModel::GetNumScoreComponents() const
 {
 	return 1;
-}
-
-float LanguageModel::GetWeight() const {
-	size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
-        	GetBeginIndex(GetScoreBookkeepingID());
-	return StaticData::Instance().GetAllWeights()[lmIndex];
 }
 
 void LanguageModel::CalcScore(const Phrase &phrase
@@ -273,4 +270,8 @@ FFState* LanguageModel::Evaluate(
 	return res;
 }
 
+float LanguageModel::GetWeight() const {
+	return StaticData::Instance().GetAllWeights().GetScoreForProducer(this);
+}
+	
 }

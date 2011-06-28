@@ -40,14 +40,6 @@ namespace Moses
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 
-std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
-{
-	std::ostringstream oss;
-	// what about LMs that are over multiple factors at once, POS + stem, for example?
-	oss << "LM_" << GetNGramOrder() << "gram";
-	return oss.str();
-} 
-
 struct PointerState : public FFState {
   const void* lmstate;
   PointerState(const void* lms) { lmstate = lms; }

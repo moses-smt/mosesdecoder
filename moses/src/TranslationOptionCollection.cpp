@@ -241,7 +241,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 	TranslationOption *transOpt;
 	TargetPhrase targetPhrase(Output);
-	targetPhrase.SetSourcePhrase(m_unksrc);
+	targetPhrase.SetSourcePhrase(*m_unksrc);
 	if (inputScores != NULL) {
 		targetPhrase.SetScore(m_system,*inputScores);
 	} else {

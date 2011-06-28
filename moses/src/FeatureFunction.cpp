@@ -18,5 +18,7 @@ void StatelessFeatureFunction::Evaluate(
 
 bool StatefulFeatureFunction::IsStateless() const { return false; }
 
+
+
 }
 

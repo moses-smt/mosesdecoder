@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LanguageModel.h"
 #include "StaticData.h"
-#include "ScoreIndexManager.h"
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
@@ -43,7 +42,7 @@ bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 //bool TargetPhrase::printalign;
 
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
-	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(direction)
 {
 
 		//ACAT
@@ -58,8 +57,8 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
 	:Phrase(direction)
 	, m_transScore(0.0)
 	, m_ngramScore(0.0)
-	, m_fullScore(0.0)
-	, m_sourcePhrase(0)
+	,m_fullScore(0.0)
+  ,m_sourcePhrase(direction)
 {
 		wordalignflag=StaticData::Instance().UseAlignmentInfo();
 		printalign=StaticData::Instance().PrintAlignmentInfo();
@@ -93,17 +92,8 @@ void TargetPhrase::SetScore(float score)
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
 	const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
 	
-	//get the weight list
-	unsigned int id = prod->GetScoreBookkeepingID();
-	
-	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
+	vector<float> weights = StaticData::Instance().GetWeights(prod);
 
-	size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
-	size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
-
-	vector<float> weights;
-
-	std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
 	
 	//find out how many items are in the score vector for this producer	
 	size_t numScores = prod->GetNumScoreComponents();
@@ -125,13 +115,7 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
 
     const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
 
-	//get the weight list
-	unsigned int id = prod->GetScoreBookkeepingID();
-	const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
-	size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
-	size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
-	vector<float> weights;
-	std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
+	vector<float> weights = StaticData::Instance().GetWeights(prod);
 	
 	//expand the input weight vector
 	assert(scoreVector.size() <= prod->GetNumScoreComponents());

@@ -48,17 +48,12 @@ private:
 
 public:
 	GlobalLexicalModel(const std::string &filePath,
-	                   const float weight,
 	                   const std::vector< FactorType >& inFactors,
 	                   const std::vector< FactorType >& outFactors);
 	virtual ~GlobalLexicalModel();
 
 	virtual size_t GetNumScoreComponents() const {
 		return 1;
-	};
-
-	virtual std::string GetScoreProducerDescription() const {
-		return "GlobalLexicalModel";
 	};
 
 	virtual std::string GetScoreProducerWeightShortName() const {

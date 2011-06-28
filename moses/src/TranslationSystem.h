@@ -89,11 +89,10 @@ class TranslationSystem {
       void InitializeBeforeSentenceProcessing(const InputType& source) const;
       void CleanUpAfterSentenceProcessing() const;
       
-      
-        
-      static const  std::string DEFAULT;
+			const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
 
         
+      static const  std::string DEFAULT;
         
         
     private:
@@ -114,6 +113,9 @@ class TranslationSystem {
         const WordPenaltyProducer* m_wpProducer;
         const UnknownWordPenaltyProducer* m_unknownWpProducer;
         const DistortionScoreProducer* m_distortionScoreProducer;
+	
+				std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
+
 };
 
 

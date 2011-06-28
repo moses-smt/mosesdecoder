@@ -53,7 +53,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
                             , size_t tableLimit
 							, const std::string &targetFile  // default param
                             , const std::string &alignmentsFile) // default param
-  :DecodeFeature(input,output)
+  :DecodeFeature("PhraseModel",input,output)
 ,   m_numScoreComponent(numScoreComponent),
 	m_numInputScores(numInputScores),
 	m_filePath(filePath),
@@ -64,7 +64,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
     m_alignmentsFile(alignmentsFile)
 {
     const StaticData& staticData = StaticData::Instance();
-	const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
     if (implementation == Memory || implementation == SCFG || implementation == OnDisk || implementation == SuffixArray) {
         m_useThreadSafePhraseDictionary = true;
     } else {
@@ -227,16 +226,22 @@ const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const {
   return dict;
 }
 
-
+PhraseDictionary* PhraseDictionaryFeature::GetDictionary() {
+	PhraseDictionary* dict;
+	if (m_useThreadSafePhraseDictionary) {
+		dict = m_threadSafePhraseDictionary.get();
+	} else {
+		dict = m_threadUnsafePhraseDictionary.get();
+	}
+	assert(dict);
+	return dict;
+}
+	
 
 PhraseDictionaryFeature::~PhraseDictionaryFeature() 
 {}
 	
 
-std::string PhraseDictionaryFeature::GetScoreProducerDescription() const
-{
-	return "PhraseModel";
-}
 
 size_t PhraseDictionaryFeature::GetNumScoreComponents() const
 {

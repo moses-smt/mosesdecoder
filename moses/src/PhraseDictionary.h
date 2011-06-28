@@ -64,6 +64,7 @@ class PhraseDictionary: public Dictionary {
     DecodeType GetDecodeType() const    {   return Translate;   }
     const PhraseDictionaryFeature* GetFeature() const;
 
+
     //! find list of translations that can translates src. Only for phrase input
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
     //! find list of translations that can translates a portion of src. Used by confusion network decoding
@@ -107,7 +108,6 @@ class PhraseDictionaryFeature :  public DecodeFeature
 	
     virtual bool ComputeValueInTranslationOption() const; 
 
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const
 	{
 		return "tm";
@@ -124,6 +124,7 @@ class PhraseDictionaryFeature :  public DecodeFeature
     
     //Get the dictionary. Be sure to initialise it first.
     const PhraseDictionary* GetDictionary() const;
+		PhraseDictionary* GetDictionary();
 	
  private:
      /** Load the appropriate phrase table */

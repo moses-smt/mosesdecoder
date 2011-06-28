@@ -125,6 +125,9 @@ public:
     const TranslationSystem* GetTranslationSystem() {return m_system;}
   
 	void ProcessSentence();
+        const TranslationOptionCollection* GetTranslationOptionCollection() const {
+		return m_transOptColl;
+	}
 	const Hypothesis *GetBestHypothesis() const;
 	const Hypothesis *GetActualBestHypothesis() const;
 	void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;

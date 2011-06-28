@@ -29,7 +29,9 @@ using namespace std;
 
 namespace Moses {
 
-  DecodeFeature::DecodeFeature(const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
+  DecodeFeature::DecodeFeature(const std::string& description,
+  const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
+      StatelessFeatureFunction(description),
       m_input(input), m_output(output){
 
     m_inputFactors = FactorMask(input);

@@ -61,7 +61,6 @@ namespace LanguageModelFactory
 																		, const std::vector<FactorType> &factorTypes
 																		, size_t nGramOrder
 																		, const std::string &languageModelFile
-																		, ScoreIndexManager &scoreIndexManager
 																		, int dub)
 	{
 	  LanguageModelImplementation *lm = NULL;
@@ -135,7 +134,7 @@ namespace LanguageModelFactory
 	  	case SingleFactor:
 	  		if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], nGramOrder))
 				{
-					cerr << "single factor model failed" << endl;
+          std::cerr << "single factor model failed" << std::endl;
 					delete lm;
 					lm = NULL;
 				}
@@ -143,7 +142,7 @@ namespace LanguageModelFactory
 	  	case MultiFactor:
   			if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder))
 				{
-					cerr << "multi factor model failed" << endl;
+          std::cerr << "multi factor model failed" << std::endl;
 					delete lm;
 					lm = NULL;
 				}
@@ -151,7 +150,7 @@ namespace LanguageModelFactory
 	  	}
 	  }
 
-	  return new LanguageModel(scoreIndexManager, lm);
+	  return new LanguageModel(lm);
 	}
 }
 

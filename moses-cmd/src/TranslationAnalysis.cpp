@@ -110,7 +110,8 @@ namespace TranslationAnalysis {
     }
   }
 	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
-  StaticData::Instance().GetScoreIndexManager().PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
+  os << translationPath.back()->GetScoreBreakdown();
+  os << " weighted(TODO)";
 	os << std::endl;
 }
 

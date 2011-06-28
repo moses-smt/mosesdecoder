@@ -628,6 +628,16 @@ AC_DEFUN([BOOST_REGEX],
                 [boost::regex exp("*"); boost::regex_match("foo", exp);])
 ])# BOOST_REGEX
 
+# BOOST_MPI([PREFERRED-RT-OPT])
+# -------------------------------
+# Look for Boost.MPI.  For the documentation of PREFERRED-RT-OPT, see the
+# documentation of BOOST_FIND_LIB above.
+AC_DEFUN([BOOST_MPI],
+[BOOST_FIND_LIB([mpi], [$1],
+                [boost/mpi/communicator.hpp],
+                [boost::mpi::communicator world;])
+])# BOOST_MPI
+
 
 # BOOST_SERIALIZATION([PREFERRED-RT-OPT])
 # ---------------------------------------

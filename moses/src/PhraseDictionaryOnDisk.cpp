@@ -66,6 +66,8 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 	return true;
 }
 
+// PhraseDictionary impl
+
 //! find list of translations that can translates src. Only for phrase input
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& src) const
 {

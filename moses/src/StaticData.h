@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "TypeDef.h"
-#include "ScoreIndexManager.h"
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LanguageModel.h"
@@ -44,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
+#include "ScoreComponentCollection.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -57,10 +57,16 @@ class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseDictionaryFeature;
+class PhraseBoundaryFeature;
+class PhrasePairFeature;
+class DiscriminativeReorderingFeature;
+class BleuScoreFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
+class RandomFeature;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class TargetBigramFeature;
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;	
@@ -79,14 +85,17 @@ protected:
 	Parameter			*m_parameter;
 	std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
 	LMList									m_languageModel;
-	ScoreIndexManager				m_scoreIndexManager;
-	std::vector<float>			m_allWeights;
+	ScoreComponentCollection m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
     std::vector<DecodeGraph*> m_decodeGraphs;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
     std::map<std::string, TranslationSystem> m_translationSystems;
+	TargetBigramFeature *m_targetBigramFeature;
+  PhraseBoundaryFeature *m_phraseBoundaryFeature;
+  PhrasePairFeature *m_phrasePairFeature;
+  DiscriminativeReorderingFeature *m_discriminativeReorderingFeature;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -127,6 +136,7 @@ protected:
 	bool m_sourceStartPosMattersForRecombination;
 	bool m_recoverPath;
 	bool m_outputHypoScore;
+	bool m_enableOnlineCommand; //! flag indicating whether online commands to change some decoder parameters are enable; if yes, the persistent translation option cache is disabled
 
 	SearchAlgorithm m_searchAlgorithm;
 	InputTypeEnum m_inputType;
@@ -136,6 +146,8 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
 	std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
 	UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  BleuScoreFeature* m_bleuScoreFeature;
+  RandomFeature *m_randomFeature;
 	bool m_reportSegmentation;
 	bool m_reportAllFactors;
 	bool m_reportAllFactorsNBest;
@@ -144,6 +156,7 @@ protected:
 	bool m_UseAlignmentInfo;
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
+  bool m_PrintFeatureVectorNbest;
 		
 	
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
@@ -200,6 +213,8 @@ protected:
 
 	StaticData();
 
+
+
 	void LoadPhraseBasedParameters();
 	void LoadChartDecodingParameters();
 	void LoadNonTerminals();
@@ -219,10 +234,17 @@ protected:
 	//! load all generation tables as specified in ini file
 	bool LoadGenerationTables();
 	//! load decoding steps
-    bool LoadDecodeGraphs();
+  bool LoadDecodeGraphs();
 	bool LoadLexicalReorderingModel();
 	bool LoadGlobalLexicalModel();
-    void ReduceTransOptCache() const;
+  //References used for scoring feature (eg BleuScoreFeature) for online training
+  bool LoadReferences();
+	bool LoadDiscrimLMFeature();
+  bool LoadPhraseBoundaryFeature();
+  bool LoadPhrasePairFeature();
+  bool LoadDiscriminativeReorderingFeature();
+  
+  void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
 	
 public:
@@ -232,9 +254,13 @@ public:
 	}
 	//! destructor
 	~StaticData();
+
 	//! return static instance for use like global variable
 	static const StaticData& Instance() { return s_instance; }
-	
+
+	//! do NOT call unless you know what you're doing
+	static StaticData& InstanceNonConst() { return s_instance; }
+
 	/** delete current static instance and replace with another. 
 		* Used by gui front end
 		*/
@@ -355,27 +381,18 @@ public:
 	{
 		return m_translationOptionThreshold;
 	}
-	//! returns the total number of score components across all types, all factors
-	size_t GetTotalScoreComponents() const
-	{
-		return m_scoreIndexManager.GetTotalNumberOfScores();
-	}
-	const ScoreIndexManager& GetScoreIndexManager() const
-	{
-		return m_scoreIndexManager;
-	}
 
-    const TranslationSystem& GetTranslationSystem(std::string id) const {
-        std::map<std::string, TranslationSystem>::const_iterator iter = 
-                m_translationSystems.find(id);
-        VERBOSE(2, "Looking for translation system id " << id << std::endl);
-        if (iter == m_translationSystems.end()) {
-          VERBOSE(1, "Translation system not found " << id << std::endl);
-            throw std::runtime_error("Unknown translation system id");
-        } else {
-          return iter->second;
-        }
+  const TranslationSystem& GetTranslationSystem(std::string id) const {
+    std::map<std::string, TranslationSystem>::const_iterator iter = 
+            m_translationSystems.find(id);
+    VERBOSE(2, "Looking for translation system id " << id << std::endl);
+    if (iter == m_translationSystems.end()) {
+      VERBOSE(1, "Translation system not found " << id << std::endl);
+        throw std::runtime_error("Unknown translation system id");
+    } else {
+      return iter->second;
     }
+  }
 	size_t GetVerboseLevel() const
 	{
 		return m_verboseLevel;
@@ -443,20 +460,46 @@ public:
 	{ return m_outputWordGraph; }
 
 	//! Sets the global score vector weights for a given ScoreProducer.
-	void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
 	InputTypeEnum GetInputType() const {return m_inputType;}
 	SearchAlgorithm GetSearchAlgorithm() const {return m_searchAlgorithm;}
 	size_t GetNumInputScores() const {return m_numInputScores;}
 	
-	const std::vector<float>& GetAllWeights() const
+	const ScoreComponentCollection& GetAllWeights() const
 	{
 		return m_allWeights;
 	}
+	 
+  void SetAllWeights(const ScoreComponentCollection& weights) 
+  {
+    m_allWeights = weights;
+  }
+
+  //Weight for a single-valued feature
+  float GetWeight(const ScoreProducer* sp) const 
+  {
+    return m_allWeights.GetScoreForProducer(sp);
+  }
+
+  //Weight for a single-valued feature
+  void SetWeight(const ScoreProducer* sp, float weight) ;
+
+
+  //Weights for feature with fixed number of values
+  std::vector<float> GetWeights(const ScoreProducer* sp) const
+  {
+    return m_allWeights.GetScoresForProducer(sp);
+  }
+
+  //Weights for feature with fixed number of values
+  void SetWeights(const ScoreProducer* sp, const std::vector<float>& weights); 
+
 
 	bool UseAlignmentInfo() const {	return m_UseAlignmentInfo;}
 	void UseAlignmentInfo(bool a){ m_UseAlignmentInfo=a; };
 	bool PrintAlignmentInfo() const { return m_PrintAlignmentInfo; }
 	bool PrintAlignmentInfoInNbest() const {return m_PrintAlignmentInfoNbest;}
+  bool PrintFeatureVectorInNbest() const {return m_PrintFeatureVectorNbest;}
+
 	bool GetDistinctNBest() const {return m_onlyDistinctNBest;}
 	const std::string& GetFactorDelimiter() const {return m_factorDelimiter;}
 	size_t GetMaxNumFactors(FactorDirection direction) const { return m_maxFactorIdx[(size_t)direction]+1; }
@@ -535,6 +578,15 @@ public:
 	
 
 	bool ContinuePartialTranslation() const { return m_continuePartialTranslation; }
+	
+	void ReLoadParameter();
+	void ReLoadBleuScoreFeatureParameter();
+	Parameter* GetParameter()
+	{
+		return m_parameter;
+	}
+	void SetAllWeightsScoreComponentCollection(const ScoreComponentCollection &weightsScoreComponentCollection);
+
 };
 
 }

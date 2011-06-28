@@ -77,6 +77,8 @@ namespace Moses {
     
     
     void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff) {
+			m_producers.push_back(ff);
+
       if (ff->IsStateless()) {
         const StatelessFeatureFunction* statelessFF = static_cast<const StatelessFeatureFunction*>(ff);
         if (!statelessFF->ComputeValueInTranslationOption()) {
@@ -151,22 +153,16 @@ namespace Moses {
      }
     
     float TranslationSystem::GetWeightWordPenalty() const {
-      //const ScoreComponentCollection weights = StaticData::Instance().GetAllWeights();
-      size_t wpIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(m_wpProducer->GetScoreBookkeepingID());
-      return StaticData::Instance().GetAllWeights()[wpIndex];
+      return StaticData::Instance().GetWeight(m_wpProducer);
     }
     
     float TranslationSystem::GetWeightUnknownWordPenalty() const {
-      size_t uwpIndex = StaticData::Instance().GetScoreIndexManager().
-              GetBeginIndex(m_unknownWpProducer->GetScoreBookkeepingID());
-      return StaticData::Instance().GetAllWeights()[uwpIndex];
+      return StaticData::Instance().GetWeight(m_unknownWpProducer);
     }
     
     float TranslationSystem::GetWeightDistortion() const {
       assert(m_distortionScoreProducer);
-      size_t distIndex = StaticData::Instance().GetScoreIndexManager().
-              GetBeginIndex(m_distortionScoreProducer->GetScoreBookkeepingID());
-      return StaticData::Instance().GetAllWeights()[distIndex];
+      return StaticData::Instance().GetWeight(m_distortionScoreProducer);
     }
 
 };

@@ -564,8 +564,7 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
 
 	ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
 	scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
-	outputSearchGraphStream << " [ ";
-	StaticData::Instance().GetScoreIndexManager().PrintLabeledScores( outputSearchGraphStream, scoreBreakdown );
+	outputSearchGraphStream << " [ " << StaticData::Instance().GetAllWeights();
 	outputSearchGraphStream << " ]";
 
 	outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;

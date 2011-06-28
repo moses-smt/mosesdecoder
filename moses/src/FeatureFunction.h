@@ -16,6 +16,8 @@ class ScoreComponentCollection;
 class FeatureFunction: public ScoreProducer {
 
 public:
+  FeatureFunction(const std::string& description) :
+    ScoreProducer(description) {}
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
 
@@ -24,6 +26,8 @@ public:
 class StatelessFeatureFunction: public FeatureFunction {
 
 public:
+  StatelessFeatureFunction(const std::string& description) :
+    FeatureFunction(description) {}
   //! Evaluate for stateless feature functions. Implement this.
   virtual void Evaluate(
     const TargetPhrase& cur_hypo,
@@ -41,6 +45,8 @@ public:
 class StatefulFeatureFunction: public FeatureFunction {
 
 public:
+  StatefulFeatureFunction(const std::string& description) :
+    FeatureFunction(description) {}
 
   /**
    * \brief This interface should be implemented.
@@ -59,6 +65,29 @@ public:
 
   bool IsStateless() const;
 };
+
+/**
+  * Mixin used to help name features like language models which may have several
+  * instances, LM_0, LM_1, etc
+  **/
+template<typename T>
+struct FeatureNameCounter {
+  FeatureNameCounter() {
+    ++s_created;
+  }
+
+  static std::string Name(const std::string& stem) {
+    std::ostringstream oss;
+    oss << stem;
+    oss << "_";
+    oss << s_created;
+    return oss.str();
+  }
+
+  static size_t s_created;
+};
+
+template <typename T> size_t FeatureNameCounter<T>::s_created(0);
 
 }
 

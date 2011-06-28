@@ -44,6 +44,15 @@ namespace Moses
 //global variable
 Timer g_timer;
 
+static float logbasefactor = 1;
+void SetLogBaseFactor(float factor) {
+    logbasefactor = factor;
+}
+
+float GetLogBaseFactor() {
+    return logbasefactor;
+}
+
 string GetTempFolder()
 {	
 #ifdef _WIN32

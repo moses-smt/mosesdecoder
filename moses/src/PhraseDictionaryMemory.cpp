@@ -112,7 +112,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 		sourcePhrase.CreateFromString( input, phraseVector);
 		//target
 		TargetPhrase targetPhrase(Output);
-		targetPhrase.SetSourcePhrase(&sourcePhrase);
+		targetPhrase.SetSourcePhrase(sourcePhrase);
 		targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
 
 		if (tokens.size() > 3)

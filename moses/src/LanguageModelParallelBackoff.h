@@ -78,8 +78,9 @@ private:
   WidMatrix *widMatrix;
 
 public:
+	LanguageModelParallelBackoff(){}
+	
 	~LanguageModelParallelBackoff();
-
 	bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
 
 VocabIndex GetLmID( const std::string &str ) const;

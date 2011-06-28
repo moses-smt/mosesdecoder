@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "UserMessage.h"
+#include "StaticData.h"
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -76,6 +77,8 @@ Parameter::Parameter()
 	AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
 	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
 	AddParam("verbose", "v", "verbosity level of the logging");
+  AddParam("references", "Reference file(s) - used for bleu score feature");
+  AddParam("weight-bl", "bl", "weight for bleu score feature");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
   AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
@@ -86,6 +89,7 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
+  AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
@@ -122,6 +126,7 @@ Parameter::Parameter()
 	AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
 	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  AddParam("print-feature-vector-in-n-best", "Include the feature vectors of each hypothesis in the n-best list. This includes sparse features");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
 
@@ -131,8 +136,19 @@ Parameter::Parameter()
 	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
-    AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
+  AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
+
+	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
+	AddParam("discrim-lmodel-file", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
+  AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
+  AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
+  AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
+
     AddParam("show-weights", "print feature weights and exit");
+    AddParam("random-feature-count", "Add specified number of random features (default 0)");
+    AddParam("random-feature-scaling", "Scaling for random feature (default 0)");
+    AddParam("discrim-reordering-feature", "Configuration of discriminative reordering feature (type,factor,source/target,prev/curr)");
+    AddParam("discrim-reordering-vocab", "Vocabulary for a discriminative reordering feature (factor,source/target,filename");
 }
 
 Parameter::~Parameter()
@@ -152,6 +168,7 @@ void Parameter::AddParam(const string &paramName, const string &abbrevName, cons
 	m_valid[paramName] = true;
 	m_valid[abbrevName] = true;
 	m_abbreviation[paramName] = abbrevName;
+	m_fullname[abbrevName] = paramName;
 	m_description[paramName] = description;
 }
 
@@ -597,6 +614,30 @@ void Parameter::PrintCredit()
 	cerr <<  endl << endl;
 }
 
+/** update parameter settings with command line switches
+ * \param paramName full name of parameter
+ * \param values inew values for paramName */
+void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
+{
+	VERBOSE(2,"Overwriting parameter " << paramName);
+	
+	m_setting[paramName]; // defines the parameter, important for boolean switches
+	if (m_setting[paramName].size() > 1){
+		VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
+		assert(m_setting[paramName].size() == values.size());
+	}else{
+		VERBOSE(2," (the parameter does not have previous values)");
+		m_setting[paramName].resize(values.size());
+	}
+	VERBOSE(2," with the following values:");
+	int i=0;
+	for (PARAM_VEC::iterator iter = values.begin(); iter != values.end() ; iter++, i++){
+		m_setting[paramName][i] = *iter;
+		VERBOSE(2, " " << *iter);
+	}
+	VERBOSE(2, std::endl);
+}
+	
 }
 
 

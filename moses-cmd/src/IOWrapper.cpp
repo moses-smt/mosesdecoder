@@ -320,6 +320,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 	bool reportAllFactors = staticData.GetReportAllFactorsNBest();
 	bool includeAlignment = staticData.NBestIncludesAlignment();
 	bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
+  bool includeFeatureVector = staticData.PrintFeatureVectorInNbest();
 	
 	TrellisPathList::const_iterator iter;
 	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
@@ -473,6 +474,11 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 					}
 			}
 		}
+    
+    if (includeFeatureVector) {
+      out << " ||| ";
+      out <<  path.GetScoreBreakdown();
+    }
 	
 		if (StaticData::Instance().IsPathRecoveryEnabled()) {
 			out << "|||";

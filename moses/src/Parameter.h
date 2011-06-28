@@ -45,6 +45,7 @@ protected:
 	PARAM_BOOL m_valid;
 	PARAM_STRING m_abbreviation;
 	PARAM_STRING m_description;
+	PARAM_STRING m_fullname;
 
 	std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
 	void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
@@ -76,6 +77,31 @@ public:
 	  return  m_setting.find( paramName ) != m_setting.end();
 	}
 
+	bool isParamShortNameSpecified(const std::string &paramName)
+	{
+		return  m_setting.find( GetFullName(paramName) ) != m_setting.end();
+	}
+		
+	const std::string GetFullName(std::string abbr)
+	{
+		return m_fullname[abbr];
+	}
+	
+	const std::string GetAbbreviation(std::string full)
+	{
+		return m_abbreviation[full];
+	}
+	const PARAM_VEC &GetParamShortName(const std::string &paramName)
+	{
+		return GetParam(GetFullName(paramName));
+	}
+	
+	void OverwriteParam(const std::string &paramName, PARAM_VEC values);
+
+	void OverwriteParamShortName(const std::string &paramShortName, PARAM_VEC values){
+		OverwriteParam(GetFullName(paramShortName),values);
+	}
+	
 };
 
 }

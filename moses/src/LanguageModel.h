@@ -43,7 +43,7 @@ class Factor;
 class Phrase;
 
 //! Abstract base class which represent a language model on a contiguous phrase
-class LanguageModel : public StatefulFeatureFunction
+class LanguageModel : public StatefulFeatureFunction, FeatureNameCounter<LanguageModel>
 {
 protected:	
 #ifdef WITH_THREADS
@@ -53,20 +53,25 @@ protected:
 	LanguageModelImplementation *m_implementation;
 #endif
 
+public:
+
 	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
-public:
 	/**
 	 * Create a new language model
 	 */
-	LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation);
+	LanguageModel(LanguageModelImplementation* implementation);
 
 	/**
 	 * Create a new language model reusing an already loaded implementation
 	 */
-	LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *implementation);
+	LanguageModel(LanguageModel *implementation);
 
 	virtual ~LanguageModel();
+
+  const LanguageModelImplementation* GetImplementation() const {
+    return m_implementation;
+  }
 
 	//! see ScoreProducer.h
 	size_t GetNumScoreComponents() const;
@@ -101,15 +106,11 @@ public:
 		return m_implementation->GetNGramOrder();
 	}
 	
-	virtual std::string GetScoreProducerDescription() const
-	{
-		return m_implementation->GetScoreProducerDescription();
-	}
-
+	
 	float GetWeight() const;
 
 	std::string GetScoreProducerWeightShortName() const 
-	{ 
+    {
 		return "lm";
 	}
   

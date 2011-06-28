@@ -1,4 +1,4 @@
-// $Id: MainMT.cpp 3045 2010-04-05 13:07:29Z hieuhoang1972 $
+// $Id: Main.cpp 3495 2011-06-09 17:08:42Z bhaddow $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -295,11 +295,17 @@ class TranslationTask : public Task {
 
 static void PrintFeatureWeight(const FeatureFunction* ff) {
   
-  size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
-  size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
-  for (size_t i = weightStart; i < weightEnd; ++i) {
-    cout << ff->GetScoreProducerDescription() <<  " " << ff->GetScoreProducerWeightShortName() << " " 
-        << StaticData::Instance().GetAllWeights()[i] << endl;
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    for (size_t i = 0; i < numScoreComps; ++i) {
+      cout << ff->GetScoreProducerDescription() <<  " " 
+           << ff->GetScoreProducerWeightShortName() << " " 
+           << values[i] << endl;
+    }
+  } else {
+    cout << ff->GetScoreProducerDescription() << " " <<
+      ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
   }
 }
 
@@ -385,17 +391,11 @@ int main(int argc, char** argv) {
     }
     
     // check on weights
-    vector<float> weights = staticData.GetAllWeights();
+    const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
-        TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-        TRACE_ERR("The global weight vector looks like this:");
-        for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+        TRACE_ERR("The global weight vector looks like this: ");
+        TRACE_ERR(weights);
         TRACE_ERR("\n");
-    }
-    // every score must have a weight!  check that here:
-    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-        TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-        exit(1);
     }
     
 

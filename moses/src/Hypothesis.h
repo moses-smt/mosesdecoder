@@ -67,6 +67,9 @@ protected:
 	static ObjectPool<Hypothesis> s_objectPool;
 	
 	const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
+	Hypothesis* m_nextHypo; /*! backpointer to previous hypothesis (from which this one was created) */
+	Hypothesis* m_sourcePrevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
+	Hypothesis* m_sourceNextHypo; /*! backpointer to previous hypothesis (from which this one was created) */
 //	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
 	const TargetPhrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
 	Phrase const*     m_sourcePhrase; /*! input sentence */
@@ -135,6 +138,11 @@ public:
 	{
 		return m_currTargetWordsRange;
 	}
+
+  inline  WordsRange &GetCurrTargetWordsRange() 
+	{
+		return m_currTargetWordsRange;
+	}
   
   Manager& GetManager() const 
   {
@@ -160,6 +168,26 @@ public:
 	}
 
 	const Hypothesis* GetPrevHypo() const;
+	const Hypothesis* GetNextHypo() const;
+  const Hypothesis* GetSourcePrevHypo() const;
+  const Hypothesis* GetSourceNextHypo() const;
+ 
+  void SetNextHypo(Hypothesis *next) {
+    m_nextHypo = next;
+  }
+  
+  void SetPrevHypo(Hypothesis *prev) {
+    m_prevHypo = prev;
+  }
+  
+  void SetSourceNextHypo(Hypothesis *next) {
+    m_sourceNextHypo = next;
+  }
+  
+  void SetSourcePrevHypo(Hypothesis *prev) {
+    m_sourcePrevHypo = prev;
+  }
+
 
 	/** length of the partial translation (from the start of the sentence) */
 	inline size_t GetSize() const
@@ -209,6 +237,11 @@ public:
 	 * \return The bitmap of source words we cover
 	 */
 	inline const WordsBitmap &GetWordsBitmap() const
+	{
+		return m_sourceCompleted;
+	}
+
+	inline WordsBitmap &GetWordsBitmap() 
 	{
 		return m_sourceCompleted;
 	}
@@ -270,6 +303,8 @@ public:
 
 	const TranslationOption &GetTranslationOption() const
 	{ return *m_transOpt; }
+
+	void GetTranslation(std::vector<const Factor*>* trans, const FactorType ft) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);

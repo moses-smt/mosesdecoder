@@ -52,6 +52,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordLattice.h"
 #include "TreeInput.h"
 #include "TranslationAnalysis.h"
+#include "OnlineCommand.h"
 #include "mbr.h"
 #include "../../moses-chart/src/ChartManager.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
@@ -68,28 +69,35 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChart;
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source, const string &line) 
 {
 	delete source;
 	switch(inputType)
 	{
-		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
-		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
-		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
-		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input));break;
+		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input), line); break;
+		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet, line);    break;
+		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice, line);     break;
+		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input), line);break;
 		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
 	}
 	return (source ? true : false);
 }
 
 static void PrintFeatureWeight(const FeatureFunction* ff) {
-  
-  size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
-  size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
-  for (size_t i = weightStart; i < weightEnd; ++i) {
-    cout << ff->GetScoreProducerDescription() <<  " " << ff->GetScoreProducerWeightShortName() << " " 
-        << StaticData::Instance().GetAllWeights()[i] << endl;
+ 
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    for (size_t i = 0; i < numScoreComps; ++i) {
+      cout << ff->GetScoreProducerDescription() <<  " " 
+           << ff->GetScoreProducerWeightShortName() << " " 
+           << values[i] << endl;
+    }
+  } else {
+    cout << ff->GetScoreProducerDescription() << " " <<
+      ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
   }
+  
 }
 
 
@@ -152,28 +160,33 @@ int main(int argc, char* argv[])
 	IOWrapper *ioWrapper = GetIODevice(staticData);
 
 	// check on weights
-	vector<float> weights = staticData.GetAllWeights();
+	const ScoreComponentCollection& weights = staticData.GetAllWeights();
 	IFVERBOSE(2) {
-	  TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-	  TRACE_ERR("The global weight vector looks like this:");
-	  for (size_t j=0; j<weights.size(); j++) { TRACE_ERR(" " << weights[j]); }
+	  TRACE_ERR("The global weight vector looks like this: ");
+    TRACE_ERR(weights);
 	  TRACE_ERR("\n");
 	}
-	// every score must have a weight!  check that here:
-	if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-	  TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-	  return EXIT_FAILURE;
-	}
-
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
 	InputType *source=0;
 	size_t lineCount = 0;
-	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
+	
+	string line;	
+	while((line = ioWrapper->GetInput()) != "")
 	{
-			// note: source is only valid within this while loop!
+		OnlineCommand oc;
+		if (oc.Parse(line)){//an online command
+			oc.Execute();
+			oc.Clean();
+			continue;
+    }
+		else {
+			line += "\n";
+			ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
+		}
+		
 		IFVERBOSE(1)
 			ResetUserTime();
 			

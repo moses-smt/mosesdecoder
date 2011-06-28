@@ -38,6 +38,8 @@ protected:
 	const Factor *m_sentenceStart, *m_sentenceEnd;
 	FactorType	m_factorType;
 
+	LanguageModelSingleFactor() {}
+
 public:
 	virtual ~LanguageModelSingleFactor();
 	virtual bool Load(const std::string &filePath
@@ -66,7 +68,6 @@ public:
 	{
 		return m_factorType;
 	}
-	std::string GetScoreProducerDescription() const;
 };
 
 // Single factor LM that uses a null pointer state.  

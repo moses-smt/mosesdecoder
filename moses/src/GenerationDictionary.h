@@ -57,7 +57,6 @@ public:
 	*/
   GenerationDictionary(
         size_t numFeatures, 
-        ScoreIndexManager &scoreIndexManager,
         const std::vector<FactorType> &input,
         const std::vector<FactorType> &output);
 	virtual ~GenerationDictionary();
@@ -72,7 +71,6 @@ public:
 	bool Load(const std::string &filePath, FactorDirection direction);
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerDescription() const;
 	std::string GetScoreProducerWeightShortName() const
 	{
 		return "g";

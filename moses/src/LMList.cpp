@@ -54,6 +54,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 			continue;
 
 		lm.CalcScore(phrase, fullScore, nGramScore);
+    //cerr << "LM " << phrase <<  " " << fullScore << " " << nGramScore << " " << weightLM << endl;
 
 		breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
 		retFullScore   += fullScore * weightLM;
@@ -95,13 +96,6 @@ void LMList::Add(LanguageModel *lm)
 {
 	m_coll.push_back(lm);
 	m_maxNGramOrder = (lm->GetNGramOrder() > m_maxNGramOrder) ? lm->GetNGramOrder() : m_maxNGramOrder;
-
-	const ScoreIndexManager &scoreMgr = StaticData::Instance().GetScoreIndexManager();
-	size_t startInd = scoreMgr.GetBeginIndex(lm->GetScoreBookkeepingID())
-				,endInd		= scoreMgr.GetEndIndex(lm->GetScoreBookkeepingID()) - 1;
-	
-	m_minInd = min(m_minInd, startInd);
-	m_maxInd = max(m_maxInd, endInd);
 }
 	
 }

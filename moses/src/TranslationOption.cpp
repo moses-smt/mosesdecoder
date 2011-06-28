@@ -51,7 +51,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	}
 	else
 	{ // TODO lex reordering with confusion network
-		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
+		m_sourcePhrase = new Phrase(targetPhrase.GetSourcePhrase());
 	}
 }
 
@@ -78,7 +78,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 	}
 	else
 	{ // TODO lex reordering with confusion network
-		m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
+		m_sourcePhrase = new Phrase(targetPhrase.GetSourcePhrase());
 		//the target phrase from a confusion network/lattice has input scores that we want to keep
 		m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
 
@@ -151,6 +151,10 @@ void TranslationOption::CalcScore(const TranslationSystem* system)
 	m_futureScore = retFullScore - ngramScore
 								+ m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize *
         system->GetWeightWordPenalty();
+  //cerr << GetTargetPhrase() << endl;
+  //cerr << "TO " << m_scoreBreakdown << endl;
+  //cerr << "FS " << m_futureScore << " " << retFullScore << " " <<  ngramScore << " " << m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) << " " <<  phraseSize <<   " " <<  StaticData::Instance().GetWeightWordPenalty() << endl;
+
 }
 
 TO_STRING_BODY(TranslationOption);

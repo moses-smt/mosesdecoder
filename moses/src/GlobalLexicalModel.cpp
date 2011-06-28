@@ -9,17 +9,12 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
-                                       const float weight,
                                        const vector< FactorType >& inFactors,
                                        const vector< FactorType >& outFactors)
+  : StatelessFeatureFunction("GlobalLexicalModel")
 {
 	std::cerr << "Creating global lexical model...\n";
 
-	// register as score producer
-	const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-	std::vector< float > weights;
-	weights.push_back( weight );
-	const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 
 	// load model
 	LoadData( filePath, inFactors, outFactors );

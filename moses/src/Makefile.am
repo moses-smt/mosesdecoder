@@ -7,6 +7,7 @@ libmoses_la_HEADERS = \
         AlignmentInfo.h \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
+	BleuScoreFeature.h \
         CellCollection.h \
         ChartRuleLookupManager.h \
         ChartRuleLookupManagerMemory.h \
@@ -20,6 +21,7 @@ libmoses_la_HEADERS = \
         DecodeStepGeneration.h \
         DecodeStepTranslation.h \
         Dictionary.h \
+        DiscriminativeReorderingFeature.h \
         DotChart.h \
         DotChartOnDisk.h \
         DummyScoreProducers.h \
@@ -31,6 +33,7 @@ libmoses_la_HEADERS = \
         FactorCollection.h \
         FactorTypeSet.h \
         FeatureFunction.h \
+        FeatureVector.h \
         File.h \
         FilePtr.h \
         FloydWarshall.h \
@@ -61,11 +64,13 @@ libmoses_la_HEADERS = \
         Manager.h \
         NonTerminal.h \
         ObjectPool.h \
+        OnlineCommand.h \
         PCNTools.h \
         PDTAimp.h \
         Parameter.h \
         PartialTranslOptColl.h \
         Phrase.h \
+        PhraseBoundaryFeature.h \
         PhraseDictionary.h \
         PhraseDictionaryDynSuffixArray.h \
         PhraseDictionaryMemory.h \
@@ -75,12 +80,13 @@ libmoses_la_HEADERS = \
         PhraseDictionaryOnDisk.h \
         PhraseDictionaryTree.h \
         PhraseDictionaryTreeAdaptor.h \
+        PhrasePairFeature.h \
         PrefixTree.h \
         PrefixTreeMap.h \
+        RandomFeature.h \
         ReorderingConstraint.h \
         ReorderingStack.h \
         ScoreComponentCollection.h \
-        ScoreIndexManager.h \
         ScoreProducer.h \
         Search.h \
         SearchCubePruning.h \
@@ -90,6 +96,7 @@ libmoses_la_HEADERS = \
         SquareMatrix.h \
         StaticData.h \
         TargetPhrase.h \
+		TargetBigramFeature.h \
         TargetPhraseCollection.h \
         Timer.h \
         TranslationOption.h \
@@ -140,6 +147,7 @@ libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
+	      BleuScoreFeature.cpp \
         ChartRuleLookupManagerMemory.cpp \
         ChartRuleLookupManagerOnDisk.cpp \
         ChartTranslationOption.cpp \
@@ -151,6 +159,7 @@ libmoses_la_SOURCES = \
         DecodeStepGeneration.cpp \
         DecodeStepTranslation.cpp \
         Dictionary.cpp \
+        DiscriminativeReorderingFeature.cpp \
         DotChart.cpp \
         DotChartOnDisk.cpp \
         DummyScoreProducers.cpp \
@@ -162,6 +171,7 @@ libmoses_la_SOURCES = \
         FactorCollection.cpp \
         FactorTypeSet.cpp \
         FeatureFunction.cpp \
+        FeatureVector.cpp \
         FloydWarshall.cpp \
         GenerationDictionary.cpp \
         GlobalLexicalModel.cpp \
@@ -189,10 +199,12 @@ libmoses_la_SOURCES = \
         Manager.cpp \
         NGramCollection.cpp \
         NGramNode.cpp \
+        OnlineCommand.cpp \
         PCNTools.cpp \
         Parameter.cpp \
         PartialTranslOptColl.cpp \
         Phrase.cpp \
+        PhraseBoundaryFeature.cpp \
         PhraseDictionary.cpp \
         PhraseDictionaryDynSuffixArray.cpp \
         PhraseDictionaryMemory.cpp \
@@ -202,11 +214,12 @@ libmoses_la_SOURCES = \
         PhraseDictionaryOnDisk.cpp \
         PhraseDictionaryTree.cpp \
         PhraseDictionaryTreeAdaptor.cpp \
+        PhrasePairFeature.cpp \
         PrefixTreeMap.cpp \
+        RandomFeature.cpp \
         ReorderingConstraint.cpp \
         ReorderingStack.cpp \
         ScoreComponentCollection.cpp \
-        ScoreIndexManager.cpp \
         ScoreProducer.cpp \
         Search.cpp \
         SearchCubePruning.cpp \
@@ -215,6 +228,7 @@ libmoses_la_SOURCES = \
         SentenceStats.cpp \
         SquareMatrix.cpp \
         StaticData.cpp \
+		TargetBigramFeature.cpp \
         TargetPhrase.cpp \
         TargetPhraseCollection.cpp \
         Timer.cpp \

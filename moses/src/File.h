@@ -81,6 +81,7 @@ inline void fReadString(FILE* f,std::string& e)  {
   if(fread(a,sizeof(char),s,f)!=s) {TRACE_ERR("ERROR: fread!\n");abort();}
 	a[s]='\0';
 	e.assign(a);
+  delete[](a);
 }
 
 inline size_t fWriteStringVector(FILE* f,const std::vector<std::string>& v) {

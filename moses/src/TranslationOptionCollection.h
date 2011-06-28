@@ -89,7 +89,6 @@ protected:
 	void Sort();
 
 	//! list of trans opt for a particular span
-	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
 	const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 	void Add(TranslationOption *translationOption);
 
@@ -132,6 +131,8 @@ public:
 	{
 		return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
 	}
+
+	TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
 
 	TO_STRING();		
 };

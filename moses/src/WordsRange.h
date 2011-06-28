@@ -53,6 +53,15 @@ public:
 		return m_endPos;
 	}
 
+  inline void SetStartPos(size_t newStartPos) 
+	{
+		m_startPos = newStartPos;
+	}
+	inline void SetEndPos(size_t newEndPos) 
+	{
+		m_endPos = newEndPos;
+	}
+  
 	//! count of words translated
 	inline size_t GetNumWordsCovered() const
 	{
@@ -65,6 +74,14 @@ public:
 		return (m_startPos<x.m_startPos 
 						|| (m_startPos==x.m_startPos && m_endPos<x.m_endPos));
 	}
+  
+  //! transitive comparison
+	inline bool operator>(const WordsRange& x) const 
+	{
+		return (m_startPos > x.m_startPos 
+                   || (m_startPos==x.m_startPos && m_endPos > x.m_endPos));
+	}
+	
 
 	// equality operator
 	inline bool operator==(const WordsRange& x) const 
@@ -92,6 +109,15 @@ public:
 	}
 
 
+  //Whether two ranges are equal or not
+	inline bool operator!=(const WordsRange& x) const 
+	{
+		return  
+    m_startPos!=x.m_startPos || m_endPos!=x.m_endPos;
+	} 
+
+    inline bool covers(size_t x) const { return x >= m_startPos && x <= m_endPos; }
+    
 	TO_STRING();
 };
 

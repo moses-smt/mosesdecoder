@@ -73,6 +73,11 @@ public:
 		return m_path;
 	}
 
+	inline size_t GetSize() const
+	{
+		return m_path.size();
+	}
+	
 	//! create a set of next best paths by wiggling 1 of the node at a time. 
 	void CreateDeviantPaths(TrellisPathCollection &pathColl) const;
   

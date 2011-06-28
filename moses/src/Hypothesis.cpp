@@ -361,6 +361,18 @@ const Hypothesis* Hypothesis::GetPrevHypo()const{
 	return m_prevHypo;
 }
 
+const Hypothesis* Hypothesis::GetNextHypo() const {
+  return m_nextHypo;
+}
+
+const Hypothesis* Hypothesis::GetSourcePrevHypo()const{
+  return m_sourcePrevHypo;
+}
+
+const Hypothesis* Hypothesis::GetSourceNextHypo() const {
+  return m_sourceNextHypo;
+}
+
 /**
  * print hypothesis information for pharaoh-style logging
  */
@@ -505,6 +517,14 @@ std::string Hypothesis::GetTargetPhraseStringRep() const
 	}
 	return GetTargetPhraseStringRep(allFactors);
 }
+
+
+void Hypothesis::GetTranslation(std::vector<const Factor*>* trans, const FactorType ft) const {
+	if (m_prevHypo) m_prevHypo->GetTranslation(trans, ft);
+	for (unsigned i = 0; i < m_targetPhrase.GetSize(); ++i)
+		trans->push_back(m_targetPhrase.GetFactor(i, ft));
+}
+
 
 }
 
