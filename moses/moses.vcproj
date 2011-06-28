@@ -288,6 +288,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\AlignmentInfoCollection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BitmapContainer.cpp"
 				>
 			</File>
@@ -811,6 +815,10 @@
 			>
 			<File
 				RelativePath=".\src\AlignmentInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlignmentInfoCollection.h"
 				>
 			</File>
 			<File
