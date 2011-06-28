@@ -676,6 +676,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RuleCubeItem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RuleCubeQueue.cpp"
 				>
 			</File>
@@ -1179,6 +1183,10 @@
 			</File>
 			<File
 				RelativePath=".\src\RuleCube.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RuleCubeItem.h"
 				>
 			</File>
 			<File

@@ -37,6 +37,7 @@ public:
     int /* featureID */,
     ScoreComponentCollection*) const {
 		assert(0); // feature function not valid in chart decoder
+		return NULL;
 	}
 };
 
