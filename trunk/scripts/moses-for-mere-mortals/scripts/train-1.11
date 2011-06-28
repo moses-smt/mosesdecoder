@@ -1,0 +1,1538 @@
+#!/usr/bin/env bash
+# train-1.11
+# copyright 2009,2010, João L. A. C. Rosas
+# licenced under the GPL licence, version 3
+# the Mosesdecoder (http://sourceforge.net/projects/mosesdecoder/), is a tool upon which this script depends that is licenced under the GNU Library or Lesser General Public License (LGPL)
+# date: 25/08/2010
+# Special thanks to Hilário Leal Fontes and Maria José Machado, who helped to test the script and made very helpful suggestions
+# This script is based on instructions from several sources, especially the http://www.dlsi.ua.es/~mlf/fosmt-moses.html and the http://www.statmt.org/moses_steps.html web pages and the Moses, IRSTLM, RandLM, giza-pp and MGIZA documentation, as well as on research on the available literature on Moses, namely the Moses mailing list (http://news.gmane.org/gmane.comp.nlp.moses.user). The comments transcribe parts of the manuals of all the tools used.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#THIS SCRIPT ASSUMES THAT A IRSTLM AND RANDLM ENABLED MOSES HAS ALREADY BEEN INSTALLED WITH THE create script IN $mosesdir (BY DEFAULT $HOME/moses-irstlm-randlm); CHANGE THIS VARIABLE ACCORDING TO YOUR NEEDS
+# IT ALSO ASSUMES THAT THE PACKAGES UPON WHICH IT DEPENDS, INDICATED IN THE create script, HAVE BEEN INSTALLED
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+# ***Purpose***: given a Moses installation made with the create script, this script trains a bilingual corpus consisting of at least 1 file with segments in the source language and 1 file perfectly aligned with it with segments in the target language; it also uses 1 file in the target language to train a language model and another file in the target language for training recasing, and optionally 2 files (one in the source and one in the target language) for tuning and for testing the trained corpus (though not recommended, the corpus files can also be used for all these purposes); the trained corpus can then be used by the translate script in order to get actual translations of real texts; this script allows you to configure (see below) many of the corpus training parameters.
+
+##########################################################################################################################################################
+#                             The values of the variables that follow should be filled according to your needs:                                          # ##########################################################################################################################################################
+
+#Full path of the base directory location of your Moses system 
+mosesdir=$HOME/moses-irstlm-randlm
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#NOTE 1: The corpus that you want to train, together with the respective tuning files (if different), the testing files (if different), the file used for recasing, and the file used to build the language model (if different) should be placed in $mosesdir/corpora_for_training !!!
+#NOTE 2: After the script is executed, you will find a summary of what has been done (the corpus summary file) in $mosesdir/logs
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#=========================================================== 1. LANGUAGES ===============================================================================
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# !!! The names of the languages should not include spaces, as well as special characters, like asterisks, backslashes or question marks. Try to stick with letters, numbers, and the underscore, dash and dot if you want to avoid surprises. Avoid using a dash and the dot as the first character of the name. A 2 letter abbreviation is probably the ideal setting  !!!
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Abbreviation of language 1 (source language) 
+lang1=pt
+#Abbreviation of language 2 (target language) 
+lang2=en
+#=========================================================== 2. FILES ===================================================================================
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# !!! The names of the files should not include spaces, as well as special characters, like asterisks, backslashes or question marks. Try to stick with letters, numbers, and the dash, dot, and underscore if you want to avoid Bash surprises. Avoid using a dash as the first character of a file name, because most Linux commands will treat it as a switch. If your files start with a dot, they'll become hidden files.!!!  The $corpusbasename, $lmbasename and $recaserbasename parameters that follow MUST be filled in!!! The $tuningbasename and the $testbasename only need to be filled in if you want to do a tuning or a test of the trained corpus, respectively.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Basename of the corpus placed in $mosesdir/corpora_for_training (the example that follows refers to the 2 files 200000.for_train.en and 200000.for_train.pt, whose basename is 200000.for_train)
+corpusbasename=200000.for_train 
+#Basename of the file used to build the language model (LM), placed in $mosesdir/corpora_for_training (!!! this is a file in the target language !!!)
+lmbasename=300000
+#Basename of the recaser training file, placed in $mosesdir/corpora_for_training
+recaserbasename=300000
+#Basename of the tuning corpus, placed in $mosesdir/corpora_for_training
+tuningbasename=800
+#Basename of the test set files (used for testing the trained corpus), placed in $mosesdir/corpora_for_training
+testbasename=200000.for_test
+#======================================================= 3. TRAINING STEPS ==============================================================================
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+#Reuse all relevant files that have already been created in previous trainings: 1= Do ; Any other value=Don't
+reuse=1
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#NOTE 1: If in doubt, leave the settings that follow as they are; you will do a full training with memory mapping, tuning, a training test and scoring of the training test of the demo corpus; the results will appear in $mosesdir/corpora_trained and a log file will be available in $mosesdir/logs.
+
+#NOTE 2: You can also proceed step by step (e.g., first doing just LM building and corpus training and then testing), so as to better control the whole process. 
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+#Do parallel corpus training: 1= Do ; Any other value=Don't !!!
+paralleltraining=1
+#Number of the first training step (possible values: 1-9); choose 1 for a completely new corpus
+firsttrainingstep=1
+#Number of the last training step (possible values: 1-9); choose 9 for a completely new corpus
+lasttrainingstep=9
+#Do memory mapping: 1 = Do ; Any other value = Don't
+memmapping=1
+#Do tuning: 1= Do ; Any other value=Don't; can lead, but does not always lead, to better results; takes much more time
+tuning=1
+#Do a test (with scoring) of the training: 1 = Do ; Any other value = Don't
+runtrainingtest=1
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# If you are new to Moses, stop here for the time being
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#======================================================= 4. LANGUAGE MODEL PARAMETERS  ==================================================================
+# Use IRSTLM (1) or RandLM (5)
+lngmdl=1
+#Order of ngrams - the higher the better, but more memory required (choose between 3 and 9; good value: 5)
+Gram=5
+#----------------------------------------------------*** 4.1. IRSTLM PARAMETERS ***----------------------------------------------------------------------
+# Distributed language model: 1= Yes; Any other value = No (splits the file used to build the language model into parts, processes each part separately and finally merges the parts)
+distributed=1
+# Number of parts to split dictionary into balanced n-gram prefix lists (in the creation of a distributed language model); default: 5; !!! Only used if distributed = 1 !!!
+dictnumparts=20
+# Smoothing possible values: witten-bell (default); kneser-ney, improved-kneser-ney
+s='witten-bell'
+# Quantize LM (Reduces memory comsumption at the cost of some loss of performance); 1 = Do ; Any other value = Don't. May induce some accuracy loss. Reduces the size of the LM.
+quantize=0
+# Memory-mapping of the LM. 1 = Do; Any other value = Don't. Avoids the creation of the binary LM directly in RAM (allows bigger LM at the cost of lower speed; often necessary when LM file is very big) !!!
+lmmemmapping=1
+#-----------------------------------------------------*** 4.2. RandLM PARAMETERS ***---------------------------------------------------------------------
+# The format of the input data. The following formats are supported: for a CountRandLM, "corpus" (tokenised text corpora, one sentence per line); for a BackoffRandLM, 'arpa' (an ARPA backoff language model)
+inputtype=corpus
+# The false positive rate of the randomised data structure on an inverse log scale so '-falsepos 8' produces a false positive rate of 1/2^8
+falsepos=8
+# The quantisation range used by the model. For a CountRandLM, quantisation is performed by taking a logarithm. The base of the logarithm is set as 2^{1/'values'}. For a BackoffRandLM, a binning quantisation algorithm is used. The size of the codebook is set as 2^{'values'}
+values=8
+#======================================================= 5. TRAINING PARAMETERS ========================================================================
+#----------------------------------------------------*** 5.1. TRAINING STEP 1 ***----------------------------------------------------------------------
+#********** mkcls options
+#Number of mkcls interations (default:2)
+nummkclsiterations=2
+#Number of word classes
+numclasses=50
+#----------------------------------------------------*** 5.2. TRAINING STEP 2 ***----------------------------------------------------------------------
+#....................................................... 5.2.1. MGIZA parameters .......................................................................
+#Number of processors of your computer that will be used by MGIZA (if you use all the processors available, the training will be considerably speeded) 
+mgizanumprocessors=1
+#....................................................... 5.2.2. GIZA parameters .......................................................................
+#maximum sentence length; !!! never exceed 101 !!!
+ml=101
+#No. of iterations:
+#-------------------
+#number of iterations for Model 1
+model1iterations=5
+#number of iterations for Model 2
+model2iterations=0
+#number of iterations for HMM (substitutes model 2)
+hmmiterations=5
+#number of iterations for Model 3
+model3iterations=3
+#number of iterations for Model 4
+model4iterations=3
+#number of iterations for Model 5
+model5iterations=0
+#number of iterations for Model 6
+model6iterations=0
+#
+#parameters for various heuristics in GIZA++ for efficient training:
+#------------------------------------------------------------------
+#Counts increment cutoff threshold
+countincreasecutoff=1e-06
+#Counts increment cutoff threshold for alignments in training of fertility models
+countincreasecutoffal=1e-05
+#minimal count increase
+mincountincrease=1e-07
+#relative cutoff probability for alignment-centers in pegging
+peggedcutoff=0.03
+#Probability cutoff threshold for lexicon probabilities
+probcutoff=1e-07
+#probability smoothing (floor) value
+probsmooth=1e-07
+#
+#parameters for describing the type and amount of output:
+#-----------------------------------------------------------
+#0: detailled alignment format, 1: compact alignment format
+compactalignmentformat=0
+#dump frequency of Model 1
+model1dumpfrequency=0
+#dump frequency of Model 2
+model2dumpfrequency=0
+#dump frequency of HMM
+hmmdumpfrequency=0
+#output: dump of transfer from Model 2 to 3
+transferdumpfrequency=0
+#dump frequency of Model 3/4/5
+model345dumpfrequency=0
+#for printing the n best alignments
+nbestalignments=0
+#1: do not write any files
+nodumps=1
+#1: write alignment files only
+onlyaldumps=1
+#0: not verbose; 1: verbose
+verbose=0
+#number of sentence for which a lot of information should be printed (negative: no output)
+verbosesentence=-10
+#
+#smoothing parameters:
+#---------------------
+#f-b-trn: smoothing factor for HMM alignment model #can be ignored by -emSmoothHMM
+emalsmooth=0.2
+#smoothing parameter for IBM-2/3 (interpolation with constant))
+model23smoothfactor=0
+#smooting parameter for alignment probabilities in Model 4)
+model4smoothfactor=0.4
+#smooting parameter for distortion probabilities in Model 5 (linear interpolation with constant
+model5smoothfactor=0.1
+#smoothing for fertility parameters (good value: 64): weight for wordlength-dependent fertility parameters
+nsmooth=4
+#smoothing for fertility parameters (default: 0): weight for word-independent fertility parameters
+nsmoothgeneral=0
+#
+#parameters modifying the models:
+#--------------------------------
+#0 = IBM-3/IBM-4 as described in (Brown et al. 1993); 1: distortion model of empty word is deficient; 2: distoriton model of empty word is deficient (differently); setting this parameter also helps to avoid that during IBM-3 and IBM-4 training too many words are aligned with the empty word); 1 = only 3-dimensional alignment table for IBM-2 and IBM-3
+compactadtable=1
+deficientdistortionforemptyword=0
+#d_{=1}: &1:l, &2:m, &4:F, &8:E, d_{>1}&16:l, &32:m, &64:F, &128:E)
+depm4=76
+#d_{=1}: &1:l, &2:m, &4:F, &8:E, d_{>1}&16:l, &32:m, &64:F, &128:E)
+depm5=68
+#lextrain: dependencies in the HMM alignment model.  &1: sentence length; &2: previous class; &4: previous position;  &8: French position; &16: French class)
+emalignmentdependencies=2
+#f-b-trn: probability for empty word
+emprobforempty=0.4
+#
+#parameters modifying the EM-algorithm:
+#--------------------------------------
+#fixed value for parameter p_0 in IBM-5 (if negative then it is determined in training)
+m5p0=-1
+manlexfactor1=0
+manlexfactor2=0
+manlexmaxmultiplicity=20
+#maximum fertility for fertility models
+maxfertility=10
+#fixed value for parameter p_0 in IBM-3/4 (if negative then it is determined in training)
+p0=0.999
+#0: no pegging; 1: do pegging
+pegging=0
+#-----------------------------------------------------*** 5.3. TRAINING SCRIPT PARAMETERS ***------------------------------------------------------------
+#Heuristic used for word alignment; possible values: intersect (intersection seems to be a synonym), union, grow, grow-final, grow-diag, grow-diag-final-and (default value), srctotgt, tgttosrc 
+alignment=grow-diag-final-and
+#Reordering model; possible values: msd-bidirectional-fe (default), msd-bidirectional-f, msd-fe, msd-f, monotonicity-bidirectional-fe, monotonicity-bidirectional-f, monotonicity-fe,  monotonicity-f
+reordering=msd-bidirectional-fe
+#Minimum length of the sentences (used by clean)
+MinLen=1
+#Maximum length of the sentences (used by clean)
+MaxLen=60
+#Maximum length of phrases entered into phrase table (max: 7; choose a lower value if phrase size length is an issue)
+MaxPhraseLength=7
+#-----------------------------------------------------*** 5.4. DECODER PARAMETERS  ***--------------------------------------------------------------------
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# !!! Only used in the training evaluation, and only if tuning = 0 !!!
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#***** QUALITY TUNING:
+# Weights for phrase translation table (good values: 0.1-1; default: 1); ensures that the phrases are good translations of each other
+weight_t=1
+# Weights for language model (good values: 0.1-1; default: 1); ensures that output is fluent in target language
+weight_l=1
+# Weights for reordering model (good values: 0.1-1; default: 1); allows reordering of the input sentence
+weight_d=1
+# Weights for word penalty (good values: -3 to 3; default: 0; negative values favor large output; positive values favour short output); ensures translations do not get too long or too short
+weight_w=0
+#------------------------------------------
+# Use Minumum Bayes Risk (MBR) decoding (1 = Do; Any other value = do not); instead of outputting the translation with the highest probability, MBR decoding outputs the translation that is most similar to the most likely translations.
+mbr=0
+# Number of translation candidates consider. MBR decoding uses by default the top 200 distinct candidate translations to find the translation with minimum Bayes risk
+mbrsize=200
+# Scaling factor used to adjust the translation scores (default = 1.0)
+mbrscale=1.0
+# Adds walls around punctuation ,.!?:;". 1= Do; Any other value = do not. Specifying reordering constraints around punctuation is often a good idea. TODO not sure it does not require annotation of the corpus to be trained
+monotoneatpunctuation=0
+#***** SPEED TUNING:
+# Fixed limit for how many translation options are retrieved for each input phrase (0 = no limit; positive value = number of translation options per phrase)
+ttablelimit=20
+# Use the relative scores of hypothesis for pruning, instead of a fixed limit (0= no pruning; decimal value = more pruning)
+beamthreshold=0
+# Threshold for constructing hypotheses based on estimate cost (default: 0 = not used).During the beam search, many hypotheses are created that are too bad to be even entered on a stack. For many of them, it is even clear before the construction of the hypothesis that it would be not useful. Early discarding of such hypotheses hazards a guess about their viability. This is based on correct score except for the actual language model costs which are very expensive to compute. Hypotheses that, according to this estimate, are worse than the worst hypothesis of the target stack, even given an additional specified threshold as cushion, are not constructed at all. This often speeds up decoding significantly. Try threshold factors between 0.5 and 1
+earlydiscardingthreshold=0
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#To get faster performance than the default Moses setting at roughly the same performance, use the parameter settings $searchalgorithm=1, $cubepruningpoplimit=2000 and $stack=2000. With cube pruning, the size of the stack has little impact on performance, so it should be set rather high. The speed/quality trade-off is mostly regulated by the -cube-pruning-pop-limit, i.e. the number of hypotheses added to each stack
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+# Search algorithm; cube pruning is faster than the traditional search at comparable levels of search errors; 0 = default; 1 = turns on cube pruning
+searchalgorithm=0
+# Number of hypotheses added to each stack; only a fixed number of hypotheses are generated for each span; default is 1000, higher numbers slow down the decoder, may result in better quality
+cubepruningpoplimit=1000
+# Reduce size of hypothesis stack, that keeps the best partial translations (=beam); default: 100
+stack=100
+# Maximum phrase length (default: 20)
+maxphraselen=20
+# ****** SPEED AND QUALITY TUNING
+# Minimum number of hypotheses from each coverage pattern; you may also require that a minimum number of hypotheses is added for each word coverage (they may be still pruned out, however). This is done using the switch -cube-pruning-diversity, which sets the minimum. The default is 0
+cubepruningdiversity=0
+# Distortion (reordering) limit in maximum number of words (0 = monotone; -1 = unlimited ; any other positive value = maximal number of words; default:6)); limiting distortion often increases speed and quality
+distortionlimit=6
+#======================================================= 6. TUNING PARAMETERS ===========================================================================
+# Maximum number of runs of tuning ( -1 = no limit; Any positive number = maximum number of runs)
+maxruns=10
+##########################################################################################################################################################
+#                               DO NOT CHANGE THE LINES THAT FOLLOW ... unless you know what you are doing!                                              #
+##########################################################################################################################################################
+
+#=========================================================================================================================================================
+# 1. Do some preparatory work
+#=========================================================================================================================================================
+# Register start date and time of corpus training 
+startdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+
+echo "********************** DO PREPARATORY WORK:"
+#to avoid *** glibc detected *** errors with moses compiler
+export MALLOC_CHECK_=0
+
+echo "****** build names of parameters that will dictate the directory structure of the trained corpus files"
+if [ "$lngmdl" = "1" ]; then
+	lngmdlparameters="LM-$lmbasename-IRSTLM-$Gram-$distributed-$s-$quantize-$lmmemmapping"
+elif [ "$lngmdl" = "5" ]; then
+	lngmdlparameters="LM-$lmbasename-RandLM-$Gram-$inputtype-$falsepos-$values"
+fi
+
+#Use numeric codes in order to avoid file name length to exceed the limit
+case "$alignment" in
+'intersect')
+alignmentcode="1";
+;;
+'intersection')
+alignmentcode="9";
+;;
+'union')
+alignmentcode="2";
+;;
+'grow')
+alignmentcode="3";
+;;
+'grow-final')
+alignmentcode="4";
+;;
+'grow-diag')
+alignmentcode="5";
+;;
+'grow-diag-final-and')
+alignmentcode="6";
+;;
+'srctotgt')
+alignmentcode="7";
+;;
+'tgttosrc')
+alignmentcode="8";
+;;
+*)
+echo "The Moses training script parameter \$alignment has an illegal value. Exiting ...";
+exit 0;
+;;
+esac
+
+#Reordering model; possible values: msd-bidirectional-fe (default), msd-bidirectional-f, msd-fe, msd-f, monotonicity-bidirectional-fe, monotonicity-bidirectional-f, monotonicity-fe, monotonicity-f 
+#Use numeric codes in order to avoid file name length to exceed the limit
+case "$reordering" in
+'msd-bidirectional-fe')
+reorderingcode="1";
+param=wbe-$reordering;
+;;
+'msd-bidirectional-f')
+reorderingcode="2";
+param=wbe-$reordering;
+;;
+'msd-fe')
+reorderingcode="3";
+param=wbe-msd-backward-fe;
+;;
+'msd-f')
+reorderingcode="4";
+param=wbe-msd-backward-f;
+;;
+'monotonicity-bidirectional-fe')
+reorderingcode="5";
+param=wbe-$reordering;
+;;
+'monotonicity-bidirectional-f')
+reorderingcode="6";
+param=wbe-$reordering;
+;;
+'monotonicity-fe')
+reorderingcode="7";
+param=wbe-monotonicity-backward-fe;
+;;
+'monotonicity-f')
+reorderingcode="8";
+param=wbe-monotonicity-backward-f;
+;;
+*)
+echo "The Moses training script parameter \$reordering has an illegal value. Exiting ...";
+exit 0;
+;;
+esac
+
+trainingparameters="T-$paralleltraining-$firsttrainingstep-$lasttrainingstep-MKCLS-$nummkclsiterations-$numclasses-MGIZA-$mgizanumprocessors-GIZA-$ml-$model1iterations-$model2iterations-$hmmiterations-$model3iterations-$model4iterations-$model5iterations-$model6iterations-$countincreasecutoff-$countincreasecutoffal-$mincountincrease-$peggedcutoff-$probcutoff-$probsmooth-$compactalignmentformat-$model1dumpfrequency-$model2dumpfrequency-$hmmdumpfrequency-$transferdumpfrequency-$model345dumpfrequency-$nbestalignments-$nodumps-$onlyaldumps-$verbose-$verbosesentence-$emalsmooth-$model23smoothfactor-$model4smoothfactor-$model5smoothfactor-$nsmooth-$nsmoothgeneral-$compactadtable-$deficientdistortionforemptyword-$depm4-$depm5-$emalignmentdependencies-$emprobforempty-$m5p0-$manlexfactor1-$manlexfactor2-$manlexmaxmultiplicity-$maxfertility-$p0-$pegging-MOSES-$alignmentcode-$reorderingcode-$MinLen-$MaxLen-$MaxPhraseLength-$Gram-$weight_t-$weight_l-$weight_d-$weight_w-$mbr-$mbrsize-$mbrscale-$monotoneatpunctuation-$ttablelimit-$beamthreshold-$earlydiscardingthreshold-$searchalgorithm-$cubepruningpoplimit-$stack-$maxphraselen-$cubepruningdiversity-$distortionlimit"
+if [ "$memmapping" = "1" ]; then
+	mmparameters="M-1"
+else
+	mmparameters="M-0"
+fi
+if [ "$tuning" = "1" ]; then
+	tuningparameters="Tu-$tuningbasename-$maxruns"
+else
+	tuningparameters="Tu-0"
+fi
+if [ "$runtrainingtest" = "1" ]; then
+	evaluationparameters="E-$testbasename-$recaserbasename"
+else
+	evaluationparameters="E-0"
+fi
+
+echo "****** build name of directories where corpus trained files will be located"
+#Full path of the tools directory (giza, irstlm, moses, scripts, ...)
+toolsdir="$mosesdir/tools"
+#Full path of the tools subdirectory where modified scripts are located
+modifiedscriptsdir="$toolsdir/modified-scripts"
+#Full path of the files used for training (corpus, language model, recaser, tuning, evaluation) 
+datadir="$mosesdir/corpora_for_training"
+#Full path of the training logs 
+logdir="$mosesdir/logs"
+#Full path of the base directory where your corpus will be processed (corpus, model, lm, evaluation, recaser)
+workdir="$mosesdir/corpora_trained"
+#Full path of the language model directory
+lmdir="$workdir/lm/$lang2/$lngmdlparameters"
+#Full path of the tokenized files directory
+tokdir="$workdir/tok"
+#Full path of the cleaned files directory
+cleandir="$workdir/clean/MinLen-$MinLen.MaxLen-$MaxLen"
+#Full path of the lowercased (after cleaning) files directory
+lc_clean_dir="$workdir/lc_clean/MinLen-$MinLen.MaxLen-$MaxLen"
+#Full path of the lowercased (and not cleaned) files directory
+lc_no_clean_dir="$workdir/lc_no_clean"
+#Full path of the recaser files directory
+recaserdir="$workdir/recaser/$lang2/$recaserbasename-IRSTLM"
+#Full path of the trained corpus files directory
+modeldir="$workdir/model/$lang1-$lang2-$corpusbasename.$lngmdlparameters/$trainingparameters"
+#Root-dir parameter of Moses
+rootdir=$modeldir
+#Full path of the memory-mapped files directory
+memmapsdir="$workdir/memmaps/$lang1-$lang2-$corpusbasename.$lngmdlparameters/$trainingparameters"
+#Full path of the tuning files directory
+tuningdir="$workdir/tuning/$lang1-$lang2-$corpusbasename.$lngmdlparameters.$mmparameters.$tuningparameters/$trainingparameters"
+#Full path of the training test files directory
+testdir="$workdir/evaluation/$lang1-$lang2-$corpusbasename.$lngmdlparameters.$mmparameters.$tuningparameters.$evaluationparameters/$trainingparameters"
+#Full path of the detokenized files directory
+detokdir="$workdir/detok/$lang2/$testbasename"
+#Full path of the detokenized files directory
+mgizanewdir="mgiza"
+
+#Avoid a nasty mistake that does not lead to an error message
+if [ ! -f $datadir/$lmbasename.$lang2 ]; then
+	echo "A corpus training has to specify a valid language model file (parameter \$lmbasename, whose value is set to $lmbasename). If the LM has already been built, then it will not be redone. For example, if you want to use the 1000.pt file, set this parameter to 1000 and that file should be placed in $datadir. Exiting ..."
+	exit 0
+fi
+
+if [ "$lngmdl" != "1" -a "$lngmdl" != "5" ]; then
+	echo "The language model builder parameter (\$lngmdl, whose value is set to $lngmdl) can only have the following values: 1 <-- IRSTLM or 5 <-- RandLM. Exiting ..."
+	exit 0
+fi
+
+if [ ! -f $datadir/$corpusbasename.$lang1 -o ! -f $datadir/$corpusbasename.$lang2 ]; then
+	echo "$datadir/$corpusbasename.$lang1"
+	echo "A corpus training has to specify a valid corpus file (parameter \$corpusbasename, whose value is set to $corpusbasename). For instance, if you want to use the files 1000.en and 1000.pt as the corpus files, this parameter should be set to 1000 and those files should be placed in $datadir. Exiting ..."
+	exit 0
+fi
+
+echo "****** create directories where training and translation files will be located"
+#create the directory where you will put the documents to be translated
+if [ ! -d $mosesdir/translation_input ] ; then mkdir -p $mosesdir/translation_input ; fi
+
+#create the directory where you will put the documents that have been translated
+if [ ! -d $mosesdir/translation_output ] ; then mkdir -p $mosesdir/translation_output ; fi
+
+#create the directory where you will put the human translations that will be used for scoring the documents that have been translated
+if [ ! -d $mosesdir/translation_reference ] ; then mkdir -p $mosesdir/translation_reference ; fi
+
+#Create logs directory (where will be stored info about the training done)
+if [ ! -d $mosesdir/logs ] ; then mkdir -p $mosesdir/logs ; fi
+
+#Create, if it does not exist, the modified-scripts subdirectory of $toolsdir 
+if [ ! -d $modifiedscriptsdir ]; then mkdir -p $modifiedscriptsdir; fi
+
+#Create work directory (where the training files will be located) if it does not exist
+if [ ! -d $workdir ]; then mkdir -p $workdir; fi
+
+#Create base language model directory if it does not exist ("base" means for all trained corpora;
+#"current" means for the presently trained corpus; "current" is a subdirectory of "base")
+if [ ! -d $workdir/lm ]; then mkdir -p $workdir/lm; fi
+#Create current language model directory if it does not exist
+if [ ! -d $lmdir ]; then mkdir -p $lmdir; fi
+
+#Create tokenized files directory if it does not exist
+if [ ! -d $tokdir ]; then mkdir -p $tokdir; fi
+
+#Create base cleaned files directory if it does not exist
+if [ ! -d $cleandir ]; then mkdir -p $cleandir; fi
+
+#Create current lowercased (after cleaning) files directory if it does not exist
+if [ ! -d $lc_clean_dir ]; then mkdir -p $lc_clean_dir; fi
+
+#Create current lowercased (and not cleaned) files directory if it does not exist
+if [ ! -d $lc_no_clean_dir ]; then mkdir -p $lc_no_clean_dir; fi
+
+#Create base trained corpus files directory if it does not exist
+if [ ! -d $workdir/model ]; then mkdir -p $workdir/model; fi
+#Create current trained corpus files directory if it does not exist
+if [ ! -d $modeldir ]; then mkdir -p $modeldir; fi
+
+if [ "$memmapping" = "1" ]; then
+	#Create base memory-mapping files directory if it does not exist
+	if [ ! -d $workdir/memmaps ]; then mkdir -p $workdir/memmaps; fi
+	#Create current memory-mapping files directory if it does not exist
+	if [ ! -d $memmapsdir ]; then mkdir -p $memmapsdir; fi
+fi
+
+if [ "$tuning" = "1" ]; then
+	#Create base tuning files directory if it does not exist
+	if [ ! -d $workdir/tuning ]; then mkdir -p $workdir/tuning; fi
+	#Create current tuning files directory if it does not exist
+	if [ ! -d $tuningdir ]; then mkdir -p $tuningdir; fi
+fi
+
+if [ "$runtrainingtest" = "1" ]; then
+	#Create base evaluation files directory if it does not exist
+	if [ ! -d $workdir/evaluation ]; then mkdir -p $workdir/evaluation; fi
+	#Create current evaluation files directory if it does not exist
+	if [ ! -d $testdir ]; then mkdir -p $testdir; fi
+
+	#Create base recaser files directory if it does not exist
+	if [ ! -d $workdir/recaser ]; then mkdir -p $workdir/recaser; fi
+	#Create current recaser files directory if it does not exist
+	if [ ! -d $recaserdir ]; then mkdir -p $recaserdir; fi
+
+	#Create base detokenized files directory if it does not exist
+	if [ ! -d $workdir/detok ]; then mkdir -p $workdir/detok; fi
+	#Create base detokenized files directory if it does not exist
+	if [ ! -d $detokdir ]; then mkdir -p $detokdir; fi
+fi
+
+#define name of the logfile
+logfile="$lang1-$lang2.C-$corpusbasename-$MaxLen-$MinLen.LM-$lmbasename.MM-$memmapping.`date +day-%d-%m-%y-time-%H-%M-%S`.txt"
+log=$logdir/$logfile
+#Create corpus training log file
+echo "" > $log
+
+echo "****** create some auxiliary functions"
+#function that checks whether a trained corpus exists already
+checktrainedcorpusexists() {
+	if [ ! -f $modeldir/moses.ini ]; then
+		echo -n "A previously trained corpus does not exist. You have to train a corpus first. Exiting..."
+		exit 0
+	fi
+}
+
+makeTrainingSummary() {
+	dontuse=0
+	echo "***************** Writing training summary"
+
+	echo "*** Script version ***: train-1.11" > $log
+	if [ ! -f $modeldir/moses.ini ]; then
+		echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" >> $log
+		echo "@ !!! THIS IS NOT A VALIDLY TRAINED CORPUS !!! DO NOT USE IT FOR TRANSLATION !!! @" >> $log
+		echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" >> $log
+		dontuse=1
+	fi
+	echo "========================================================================" >> $log
+	echo "*** Duration ***: " >> $log
+	echo "========================================================================" >> $log
+	echo "Start time:				$startdate" >> $log
+	echo "Start language model building:		$startLMdate" >> $log
+	echo "Start recaser training:			$startrecasertrainingdate" >> $log
+	echo "Start corpus training:			$starttrainingdate" >> $log
+	echo "Start memory-mapping:			$startmmpdate" >> $log
+	echo "Start tuning:				$starttuningdate" >> $log
+	echo "Start test:				$starttestdate" >> $log
+	echo "Start scoring:				$startscoringdate" >> $log
+	echo "End time:				`date +day:%d/%m/%y-time:%H:%M:%S`" >> $log
+	echo "========================================================================" >> $log
+	echo "*** Languages*** :" >> $log
+	echo "========================================================================" >> $log
+	echo "Source language: $lang1" >> $log
+	echo "Target language: $lang2" >> $log
+	echo "========================================================================" >> $log
+	echo "*** Training steps in fact executed *** :" >> $log
+	echo "========================================================================" >> $log
+	if [ -f $lmdir/$lang2.$lngmdlparameters.blm.mm -o -f $lmdir/$lang2.$lngmdlparameters.BloomMap ]; then
+		echo "Language model building executed=yes" >> $log
+	else
+		echo "Language model building executed=no. !!! THIS CORPUS CANNOT BE USED FOR TRANSLATION !!! Retrain it." >> $log
+		dontuse=1
+	fi
+	if [ -f $recaserdir/moses.ini ]; then
+		echo "Recaser training executed=yes" >> $log
+	else
+		echo "Recaser training executed=no. !!! THIS CORPUS CANNOT BE USED FOR TRANSLATION !!! Retrain it." >> $log
+		dontuse=1
+	fi
+	if [ -f $modeldir/moses.ini ]; then
+		echo "Corpus training executed=yes" >> $log
+	else
+		echo "Corpus training executed=no. !!! THIS CORPUS CANNOT BE USED FOR TRANSLATION !!! Retrain it." >> $log
+		dontuse=1
+	fi
+	if [ "$paralleltraining" = "1" -a  -f $modeldir/moses.ini ]; then
+		echo "Parallel training executed=yes" >> $log
+	else
+		echo "Parallel training executed=no" >> $log
+	fi
+	echo "First training step=$frsttrainingstep" >> $log
+	echo "Last training step=$lasttrainingstep" >> $log
+	if [ -f $memmapsdir/reordering-table.$corpusbasename.$lang1-$lang2.$param.binlexr.srctree ]; then
+		echo "Corpus memmapping executed=yes" >> $log
+	else
+		echo "Corpus memmapping executed=no" >> $log
+		if [ "$memmapping" = "1" ]; then
+			echo "Memory-mapping was not successfully finished. Erase the $memmapsdir and retrain the corpus." >> $log
+			dontuse=1
+		fi
+	fi
+	if [ -f $tuningdir/moses.ini ]; then
+		echo "Tuning executed=yes" >> $log
+	else
+		echo "Tuning executed=no" >> $log
+	fi
+	if [ -f $testdir/$testbasename-src.$lang1.sgm ]; then
+		echo "Training test executed=yes" >> $log
+	else
+		echo "Training test executed=no" >> $log
+	fi
+	if [ "$score" != "" ]; then
+		echo "Scoring executed=yes" >> $log
+	else
+		echo "Scoring executed=no" >> $log
+	fi
+	if [ "$score" != "" ]; then
+		echo "========================================================================" >> $log
+		echo "*** Score ***:" >> $log
+		echo "========================================================================" >> $log
+		echo "$score" >> $log
+	fi
+	echo "========================================================================" >> $log
+	echo "*** Files and directories used:" >> $log
+	echo "========================================================================" >> $log
+	echo "*** Moses base directory ***:" >> $log
+	echo "$mosesdir" >> $log
+	echo "------------------------------------------------------------------------" >> $log
+	if [ -f $lmdir/$lang2.$lngmdlparameters.blm.mm -o -f $lmdir/$lang2.$lngmdlparameters.BloomMap ]; then
+		echo "*** File used to build language model ***: " >> $log
+		echo "------------------------------------------------------------------------" >> $log
+		echo "$lmdir/$lmbasename.$lang2" >> $log
+	fi
+	if [ -f $recaserdir/moses.ini ]; then
+		echo "------------------------------------------------------------------------" >> $log
+		echo "*** File used to build recasing model ***:" >> $log
+		echo "$recaserdir/$lang2.$recaserbasename/$lang2.$recaserbasename" >> $log
+	fi
+	if [ -f $modeldir/moses.ini ]; then
+		echo "------------------------------------------------------------------------" >> $log
+		echo "*** File used for corpus training ***: " >> $log
+		echo "$modeldir/$corpusbasename.$lang1" >> $log
+		echo "$modeldir/$corpusbasename.$lang2" >> $log
+	fi
+	if [ "$tuning" = "1" ]; then
+		if [ -f $tuningdir/moses.ini ]; then
+			echo "------------------------------------------------------------------------" >> $log
+			echo "*** Files used for tuning ***:" >> $log 
+			echo "$workdir/tuning/$tuningbasename.$lang1" >> $log
+			echo "$workdir/tuning/$tuningbasename.$lang2" >> $log
+		fi
+	fi
+	if [ "$runtrainingtest" = "1" ]; then
+		echo "*** Files used for testing training ***:" >> $log 
+		if [ -f $testdir/$testbasename-src.$lang1.xml ]; then
+			echo "------------------------------------------------------------------------" >> $log
+			echo "$testdir/$testbasename.$lang1" >> $log
+			echo "$testdir/$testbasename.$lang2" >> $log
+		fi
+	fi
+	echo "========================================================================" >> $log
+	echo "*** Specific settings ***:" >> $log
+	echo "========================================================================" >> $log
+	if [ "$reuse" = "1" ]; then
+		echo "Reuse relevant files created in previous trainings=yes" >> $log
+	else
+		echo "Reuse relevant files created in previous trainings=no" >> $log
+	fi
+	echo "------------------------------------------------------------------------" >> $log
+	echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" >> $log
+	echo "+ Language model (LM) parameters:" >> $log
+	echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" >> $log
+	echo "------------------------ General parameters ----------------------------" >> $log
+	echo "Language model builder=$lngmdl (0 = SRILM, 1 = IRSTLM; 5 = RandLM)" >> $log
+	echo "Gram=$Gram" >> $log
+	if [ "$lngmdl" = "1" ]; then
+		echo "--------------------- IRSTLM parameters ------------------------" >> $log
+		echo "distributed=$distributed" >> $log
+		if [ "$distributed" = "1" ]; then
+			echo "dictnumparts=$dictnumparts" >> $log
+		fi
+		echo "smoothing=$s" >> $log
+		echo "quantized=$quantize" >> $log
+		echo "memory-mmapped=$lmmemmapping" >> $log
+	elif [ "$lngmdl" = "5" ]; then
+		echo "--------------------- RandLM parameters ------------------------" >> $log
+		echo "inputtype=$inputtype" >> $log
+		echo "false positives=$falsepos" >> $log
+		echo "values=$values" >> $log
+	fi
+	echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" >> $log
+	echo "+ Training Settings ***:" >> $log
+	echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" >> $log
+	echo "*************** mkcls options *********************************" >> $log
+	echo "nummkclsiterations=$nummkclsiterations" >> $log
+	echo "numclasses=$numclasses" >> $log
+	echo "*************** MGIZA option **********************************" >> $log
+	echo "mgizanumprocessors=$mgizanumprocessors" >> $log
+	echo "*************** GIZA options **********************************" >> $log
+	echo "maximum sentence length=$ml" >> $log
+	echo "No. of iterations:" >> $log
+	echo "m1=$model1iterations" >> $log
+	echo "m2=$model2iterations" >> $log
+	echo "mh=$hmmiterations" >> $log
+	echo "m3=$model3iterations" >> $log
+	echo "m4=$model4iterations" >> $log
+	echo "m5=$model5iterations" >> $log
+	echo "m6=$model6iterations" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "Parameters for various heuristics in GIZA++ for efficient training:" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "countincreasecutoff=$countincreasecutoff" >> $log
+	echo "countincreasecutoffal=$countincreasecutoffal" >> $log
+	echo "mincountincrease=$mincountincrease" >> $log
+	echo "peggedcutoff=$peggedcutoff" >> $log
+	echo "probcutoff=$probcutoff" >> $log
+	echo "probsmooth=$probsmooth" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "Parameters describing the type and amount of output:" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "compactalignmentformat=$compactalignmentformat" >> $log
+	echo "t1=$model1dumpfrequency" >> $log
+	echo "t2=$model2dumpfrequency" >> $log
+	echo "th=$hmmdumpfrequency" >> $log
+	echo "t2to3=$transferdumpfrequency" >> $log
+	echo "t345=$model345dumpfrequency" >> $log
+	echo "nbestalignments=$nbestalignments" >> $log
+	echo "nodumps=$nodumps" >> $log
+	echo "onlyaldumps=$onlyaldumps" >> $log
+	echo "verbose=$verbose" >> $log
+	echo "verbosesentence=$verbosesentence" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "Smoothing parameters:" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "emalsmooth=$emalsmooth" >> $log
+	echo "model23smoothfactor=$model23smoothfactor" >> $log
+	echo "model4smoothfactor=$model4smoothfactor" >> $log
+	echo "model5smoothfactor=$model5smoothfactor" >> $log
+	echo "nsmooth=$nsmooth" >> $log
+	echo "nsmoothgeneral=$nsmoothgeneral" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "Parameters modifying the models:" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "compactadtable=$compactadtable" >> $log
+	echo "deficientdistortionforemptyword=$deficientdistortionforemptyword" >> $log
+	echo "depm4=$depm4" >> $log
+	echo "depm5=$depm5" >> $log
+	echo "emalignmentdependencies=$emalignmentdependencies" >> $log
+	echo "emprobforempty=$emprobforempty" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "Parameters modifying the EM-algorithm:" >> $log
+	echo "---------------------------------------------------------------" >> $log
+	echo "m5p0=$m5p0" >> $log
+	echo "manlexfactor1=$manlexfactor1" >> $log
+	echo "manlexfactor2=$manlexfactor2" >> $log
+	echo "manlexmaxmultiplicity=$manlexmaxmultiplicity" >> $log
+	echo "maxfertility=$maxfertility" >> $log
+	echo "p0=$p0" >> $log
+	echo "pegging=$pegging" >> $log
+	echo "********************* Training script parameters **************" >> $log
+	echo "alignment=$alignment" >> $log
+	echo "reordering=$reordering" >> $log
+	echo "MinLen=$MinLen" >> $log
+	echo "MaxLen=$MaxLen" >> $log
+	echo "MaxPhraseLength=$MaxPhraseLength" >> $log
+	echo "********************* Moses decoder parameters **************" >> $log
+	echo "NOTE: only used in testing if \$tuning = 0" >> $log
+	echo "********** Quality parameters **************" >> $log
+	echo "weight-t=$weight_t" >> $log
+	echo "weight-l=$weight_l" >> $log
+	echo "weight-d=$weight_d" >> $log
+	echo "weight-w=$weight_w" >> $log
+	echo "mbr=$mbr" >> $log
+	echo "mbr-size=$mbrsize" >> $log
+	echo "mbr-scale=$mbrscale" >> $log
+	echo "monotone-at-punctuation=$monotoneatpunctuation" >> $log
+	echo "********** Speed parameters ****************" >> $log
+	echo "ttable-limit=$ttablelimit" >> $log
+	echo "beam-threshold=$beamthreshold" >> $log
+	echo "stack=$stack" >> $log
+	echo "early-discarding-threshold=$earlydiscardingthreshold" >> $log
+	echo "search-algorithm=$searchalgorithm" >> $log
+	echo "cube-pruning-pop-limit=$cubepruningpoplimit" >> $log
+	echo "max-phrase-length=$maxphraselen" >> $log
+	echo "********** Quality and speed parameters ****" >> $log
+	echo "cube-pruning-diversity=$cubepruningdiversity" >> $log
+	echo "distortion-limit=$distortionlimit" >> $log
+	echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" >> $log
+	echo "+ Tuning Settings ***:" >> $log
+	echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" >> $log
+	echo "Maximum number of tunning runs=$maxruns" >> $log
+	echo "###########################################################################################" >> $log
+	echo "*** Parameters that will be used by other scripts ***:" >> $log
+	echo "###########################################################################################" >> $log
+	echo "In order to use this trained corpus for translation, please set the value of the \$logfile " >> $log
+	echo "parameter of translate script as follows:" >> $log
+	echo "logfile=$logfile" >> $log
+	echo "The next parameters will be automatically filled in if you choose the right \$logfile name:" >> $log
+	echo "lang1=$lang1" >> $log
+	echo "lang2=$lang2" >> $log
+	echo "corpusbasename=$corpusbasename" >> $log
+	echo "language-model-parameters=$lngmdlparameters" >> $log
+	echo "training-parameters=$trainingparameters" >> $log
+	echo "memory-mapping-parameters=$memmapping" >> $log
+	echo "memory-mapping-extra-parameters=$param" >> $log
+	echo "tuning-parameters=$tuningparameters" >> $log
+	echo "evaluation-parameters=$evaluationparameters" >> $log
+	echo "minlen=$MinLen" >> $log
+	echo "maxlen=$MaxLen" >> $log
+	echo "recaserbasename=$recaserbasename" >> $log
+	echo "###########################################################################################" >> $log
+	echo "========================================================================" >> $log
+	echo "*** List of files created by the training ***:" >> $log
+	echo "========================================================================" >> $log
+	sort $logdir/corpus-files.txt | uniq > $logdir/corpus-files-sorted.txt
+	cat $logdir/corpus-files-sorted.txt >> $log
+	if [ "$dontuse" = "1" ]; then
+		mv -f $log $logdir/!!!INVALID!!!$logfile
+	fi
+	rm $logdir/corpus-files.txt
+	rm $logdir/corpus-files-sorted.txt
+}
+
+#function that avoids some unwanted effects of interrupting training
+control_c() {
+	makeTrainingSummary	
+	echo "****** Script interrupted by CTRL + C."
+	exit 0
+}
+
+trap control_c SIGINT
+#--------------------------------------------------------------------------------------------------------------------------
+echo "****** export several variables"
+#full path to your moses scripts directory
+export SCRIPTS_ROOTDIR=$toolsdir/moses/scripts*
+export IRSTLM=$toolsdir/irstlm
+export PATH=$toolsdir/irstlm/bin/i686:$toolsdir/irstlm/bin:$PATH
+export RANDLM=$toolsdir/randlm
+export PATH=$toolsdir/randlm/bin:$PATH
+export PATH=$toolsdir/mgiza:$PATH
+export QMT_HOME=$toolsdir/mgiza
+export corpusbasename
+export lmbasename
+export lang1
+export lang2
+
+#=========================================================================================================================================================
+#2. DO LANGUAGE MODEL
+#=========================================================================================================================================================
+startLMdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+echo "********************** BUILD LANGUAGE MODEL (LM):"
+
+if [ -f $datadir/$lmbasename.$lang2 ]; then
+	echo "****** substitute problematic characters in LM file"
+	if [ "$reuse" != "1" -o ! -f $tokdir/$lmbasename.$lang2.ctrl ]; then
+		tr '\a\b\f\r\v|' '     /' < $datadir/$lmbasename.$lang2 > $tokdir/$lmbasename.$lang2.ctrl
+	else
+		echo "Substituting problematic characters in the $datadir/$lmbasename.$lang2 file already done. Reusing it."
+	fi
+	echo "****** tokenize LM file"
+	if [ "$reuse" != "1" -o ! -f $tokdir/$lmbasename.tok.$lang2 ]; then
+		$toolsdir/scripts/tokenizer.perl -l $lang2 < $tokdir/$lmbasename.$lang2.ctrl > $tokdir/$lmbasename.tok.$lang2
+	else
+		echo "Tokenizing of the $tokdir/$lmbasename.$lang2.ctrl file already done. Reusing it."
+	fi
+else
+	echo "The $datadir/$lmbasename.$lang2 file, used for the language model (LM) building, does not exist. Please review the \$lmbasename and/or the \$lang2 settings of this script. LM building is done with a target language file. Exiting ..."
+	exit 0
+fi
+echo "$tokdir/$lmbasename.$lang2.ctrl" >> $logdir/corpus-files.txt
+echo "$tokdir/$lmbasename.tok.$lang2" >> $logdir/corpus-files.txt
+
+echo "****** lowercase LM file"
+if [ "$reuse" != "1" -o ! -f $lc_no_clean_dir/$lmbasename.lowercase.$lang2 ]; then
+	$toolsdir/scripts/lowercase.perl < $tokdir/$lmbasename.tok.$lang2 > $lc_no_clean_dir/$lmbasename.lowercase.$lang2
+else
+	echo "Lowercasing of the $tokdir/$lmbasename.tok.$lang2 file already done. Reusing it."
+fi
+echo "$lc_no_clean_dir/$lmbasename.lowercase.$lang2" >> $logdir/corpus-files.txt
+
+echo "****** building LM"
+# If LM built with IRSTLM ...
+if [ "$lngmdl" = "1" ]; then
+	if [ "$reuse" != "1" -o ! -f $lmdir/$lang2.$lngmdlparameters.blm.mm ]; then
+		#if this operation was previously unsuccessful
+		if [ -f $lmdir/$lang2.$lngmdlparameters.lm.gz ]; then
+			rm -rf $lmdir
+			mkdir -p $lmdir
+		fi
+		echo "****** build corpus IRSTLM language model (LM)"
+		echo "*** build iARPA LM file"
+		datestamp=`date +day-%d-%m-%y-time-%H-%M-%S`
+		if [ ! -d /tmp/$datestamp ]; then mkdir -p /tmp/$datestamp; fi
+		if [ ! -f $lmdir/$lang2.$lngmdlparameters.lm.gz -a "$distributed" = "1" ]; then
+			echo "*** distributed building of LM file; training procedure split into $k parts"
+			$toolsdir/irstlm/bin/build-lm.sh -t /tmp/$datestamp -i $lc_no_clean_dir/$lmbasename.lowercase.$lang2 -o $lmdir/$lang2.$lngmdlparameters.lm.gz -n $Gram -k $dictnumparts -s $s
+		elif [ ! -f $lmdir/$lang2.$lngmdlparameters.lm.gz ]; then
+			echo "*** non-distributed building of LM file"
+			$toolsdir/irstlm/bin/build-lm.sh -t /tmp/$datestamp -i $lc_no_clean_dir/$lmbasename.lowercase.$lang2 -o $lmdir/$lang2.$lngmdlparameters.lm.gz -n $Gram -s $s
+		fi
+		rm -rf /tmp/$datestamp
+		if [ ! -f $lmdir/$lang2.$lngmdlparameters.blm.mm ]; then
+			if [ "$quantize" = "1" ]; then
+				echo "*** quantize language model"
+				$toolsdir/irstlm/bin/quantize-lm $lmdir/$lang2.$lngmdlparameters.lm.gz $lmdir/$lang2.$lngmdlparameters.qlm.gz
+				echo "*** binarize language model"
+				$toolsdir/irstlm/bin/compile-lm --memmap $lmmemmapping $lmdir/$lang2.$lngmdlparameters.qlm.gz $lmdir/$lang2.$lngmdlparameters.blm.mm
+			else
+				echo "*** binarize language model"
+				$toolsdir/irstlm/bin/compile-lm --memmap $lmmemmapping $lmdir/$lang2.$lngmdlparameters.lm.gz $lmdir/$lang2.$lngmdlparameters.blm.mm
+			fi
+		fi
+	else
+		echo "Language model already exists in $lmdir/$lang2.$lngmdlparameters.blm.mm. Reusing it."
+	fi
+#... else if LM built with RandLM ...
+elif [ "$lngmdl" = "5" ]; then
+	if [ "$reuse" != "1" -o ! -f $lmdir/$lang2.$lngmdlparameters.BloomMap ]; then
+		#if this operation was previously unsuccessful
+		if [ -f $lmdir/$lang2.$lngmdlparameters.counts.sorted.gz -o -f $lmdir/$lang2.$lngmdlparameters.gz ]; then
+			rm -rf $lmdir
+			mkdir -p $lmdir
+		fi
+
+		if [ "$inputtype" = "corpus" ]; then
+			echo "****** build corpus RandLM language model"
+			cd $lmdir
+			if [ ! -f $lc_no_clean_dir/$lmbasename.lowercase.$lang2.gz ]; then
+				gzip -f < $lc_no_clean_dir/$lmbasename.lowercase.$lang2 > $lc_no_clean_dir/$lmbasename.lowercase.$lang2.gz
+			fi
+			echo "$lc_no_clean_dir/$lmbasename.lowercase.$lang2.gz" >> $logdir/corpus-files.txt
+			$toolsdir/randlm/bin/buildlm -struct BloomMap -order $Gram -falsepos $falsepos -values $values -output-prefix $lang2.$lngmdlparameters -input-type $inputtype -input-path $lc_no_clean_dir/$lmbasename.lowercase.$lang2.gz
+		elif [ "$inputtype" = "arpa" ]; then
+			echo "****** build ARPA RandLM language model"
+			cd $lmdir
+			$toolsdir/irstlm/bin/build-lm.sh -i $lc_no_clean_dir/$lmbasename.lowercase.$lang2 -n $Gram -o $lmdir/$lang2.$lngmdlparameters.gz -k $dictnumparts
+			cd $lmdir
+			$toolsdir/randlm/bin/buildlm -struct BloomMap -order $Gram -falsepos $falsepos -values $values -output-prefix $lang2.$lngmdlparameters -input-type $inputtype -input-path $lmdir/$lang2.$lngmdlparameters.gz
+		fi
+	else
+		echo "Language model already exists in $lmdir/$lang2.$lngmdlparameters.BloomMap. Reusing it."
+	fi
+fi
+for createdfile in `ls $lmdir`; do
+	echo "$lmdir/$createdfile" >> $logdir/corpus-files.txt
+done
+if [ -d $lmdir/stat ]; then
+	for createdfile in `ls $lmdir/stat`; do
+		echo "$lmdir/stat/$createdfile" >> $logdir/corpus-files.txt
+	done
+fi
+
+if [ ! -f $lmdir/$lang2.$lngmdlparameters.blm.mm -a ! -f $lmdir/$lang2.$lngmdlparameters.BloomMap ]; then
+	makeTrainingSummary
+	echo "Linguistic model not correctly trained. Exiting..."
+	exit 0
+fi
+
+cd $workdir
+#=========================================================================================================================================================
+#3. RECASER TRAINING
+#=========================================================================================================================================================
+
+startrecasertrainingdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+echo "********************** TRAIN RECASER WITH IRSTLM:"
+
+if [ "$reuse" != "1" -o ! -f $recaserdir/phrase-table.$lang2.$recaserbasename.binphr.tgtvoc ]; then
+	if [ -f $recaserdir/cased.irstlm.$lang2.$recaserbasename.gz ]; then
+		rm -rf $recaserdir
+		mkdir -p $recaserdir
+	fi
+	echo "****** Check recaser file exists"
+	if [ ! -f $datadir/$recaserbasename.$lang2 ]; then
+		echo "The file $datadir/$recaserbasename.$lang2, used for recaser training, does not exist. Please review the \$recaserbasename and possibly the \$lang2 settings of this script. Exiting ..."
+		exit 0
+	fi
+
+	cd $toolsdir/moses/script*
+	cd recaser
+	echo "****** patch train-recaser.perl"
+	sed -e 's#^.*my \$cmd.*NGRAM_COUNT.*$#\tmy $cmd = "toolsdir/irstlm/bin/build-lm.sh -t /tmp/datestamp -i $CORPUS -n 3 -o $DIR/cased.irstlm.gz";#g' -e "s#toolsdir#$toolsdir#g" -e "s#datestamp#$datestamp#g" train-recaser.perl > train-recaser.perl.out
+	sed -e 's#^.*my \$cmd.*TRAIN\_SCRIPT.*$#\tmy $cmd = "$TRAIN_SCRIPT --root-dir $DIR --model-dir $DIR --first-step $first --alignment a --corpus $DIR/aligned --f lowercased --e cased --max-phrase-length $MAX_LEN --lm 0:3:$DIR/cased.irstlm.gz:1";#g' train-recaser.perl.out > train-recaser.perl
+	chmod +x train-recaser.perl
+	echo "****** substitute control characters by space"
+	if [ "$reuse" != "1" -o ! -f $tokdir/$recaserbasename.$lang2.ctrl ]; then
+		tr '\a\b\f\r\v' '     ' < $datadir/$recaserbasename.$lang2 > $tokdir/$recaserbasename.$lang2.ctrl
+	else
+		echo "Substitute control characters by a space in the $datadir/$recaserbasename.$lang2 file already done. Reusing it."
+	fi
+	echo "$tokdir/$recaserbasename.$lang2.ctrl" >> $logdir/corpus-files.txt
+	echo "****** tokenize recaser file"
+	if [ "$reuse" != "1" -o ! -f $tokdir/$recaserbasename.tok.$lang2 ]; then
+		$toolsdir/scripts/tokenizer.perl -l $lang2 < $tokdir/$recaserbasename.$lang2.ctrl > $tokdir/$recaserbasename.tok.$lang2
+	else
+		echo "Tokenizing of the $tokdir/$recaserbasename.$lang2.ctrl already done. Reusing it."
+	fi
+	echo "$tokdir/$recaserbasename.tok.$lang2" >> $logdir/corpus-files.txt
+
+	echo "****** train recaser"
+	$toolsdir/moses/script*/recaser/train-recaser.perl -train-script $toolsdir/moses/script*/training/train-model.perl -corpus $tokdir/$recaserbasename.tok.$lang2 -dir $recaserdir -scripts-root-dir $toolsdir/moses/scripts*
+	mv $recaserdir/cased.irstlm.gz $recaserdir/cased.irstlm.$lang2.$recaserbasename.gz
+
+	echo "****** binarize recaser language model"
+	$toolsdir/irstlm/bin/compile-lm --memmap 1 $recaserdir/cased.irstlm.$lang2.$recaserbasename.gz $recaserdir/cased.irstlm.$lang2.$recaserbasename.blm.mm
+
+
+	echo "****** create binary phrase table"
+	cd $recaserdir
+	gzip -cd $recaserdir/phrase-table.gz | LC_ALL=C sort | $toolsdir/moses/misc/processPhraseTable -ttable 0 0 - -nscores 5 -out $recaserdir/phrase-table.$lang2.$recaserbasename
+
+	echo "****** patch recaser's moses.ini"
+	if (( $lngmdl == 1 )) ; then
+		sed -e 's#^.*cased.*$#1 0 1 workdir/recaser/lang2/recaserbasename-IRSTLM/cased.irstlm.lang2.recaserbasename.blm.mm#g' -e "s#workdir#$workdir#g" -e "s#recaserbasename#$recaserbasename#g" -e "s#lang2#$lang2#g" $recaserdir/moses.ini > $recaserdir/moses.ini.out
+		sed -e 's#^.*phrase-table.0-0.gz$#0 0 5 workdir/recaser/lang2/recaserbasename-IRSTLM/phrase-table.lang2.recaserbasename#g' -e "s#workdir#$workdir#g" -e "s#recaserbasename#$recaserbasename#g" -e "s#lang2#$lang2#g" $recaserdir/moses.ini.out > $recaserdir/moses.ini
+		rm -f moses.ini.out
+	fi
+else
+	echo "Recaser training already done. Reusing it."
+fi
+
+for createdfile in `ls $recaserdir`; do
+	echo "$recaserdir/$createdfile" >> $logdir/corpus-files.txt
+done
+
+if [ ! -f $recaserdir/phrase-table.$lang2.$recaserbasename.binphr.tgtvoc ]; then
+	makeTrainingSummary
+	echo "Recaser not correctly trained. Exiting..."
+	exit 0
+fi
+#=========================================================================================================================================================
+#4. TRAIN CORPUS
+#=========================================================================================================================================================
+starttrainingdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+echo "********************** CORPUS TRAINING:"
+if [ "$reuse" = "1" ]; then
+	if [ ! -f $modeldir/moses.ini ]; then
+		if [ -f $modeldir/aligned.grow-diag-final-and ]; then
+			rm -rf $modeldir
+			mkdir -p $modeldir
+		fi
+		if [ -f $workdir/model/$lang2-$lang1-$corpusbasename.$lngmdlparameters/$trainingparameters/$lang1-$lang2.A3.final.gz -a -f $workdir/model/$lang2-$lang1-$corpusbasename.$lngmdlparameters/$trainingparameters/$lang2-$lang1.A3.final.gz ]; then
+			echo "****** Reusing an already trained inverted corpus"
+			frsttrainingstep=3 
+			cp -fR $workdir/model/$lang2-$lang1-$corpusbasename.$lngmdlparameters/$trainingparameters $workdir/model/$lang1-$lang2-$corpusbasename.$lngmdlparameters
+			rm $modeldir/moses.ini 2>/dev/null
+			rm $modeldir/aligned.grow-diag-final-and 2>/dev/null
+			rm $modeldir/aligned.intersect 2>/dev/null
+			rm $modeldir/aligned.union 2>/dev/null
+			rm $modeldir/aligned.grow-diag 2>/dev/null
+			rm $modeldir/aligned.grow 2>/dev/null
+			rm $modeldir/aligned.grow-final 2>/dev/null
+			rm $modeldir/lex.e2f 2>/dev/null
+			rm $modeldir/lex.f2e 2>/dev/null
+			rm $modeldir/extract.gz 2>/dev/null
+			rm $modeldir/extract.inv.gz 2>/dev/null
+			rm $modeldir/extract.o.gz 2>/dev/null
+			rm $modeldir/phrase-table.$corpusbasename.$lang2-$lang1.gz 2>/dev/null
+			rm $modeldir/reordering-table.$corpusbasename.$lang2-$lang1.$param.gz 2>/dev/null
+		else
+			frsttrainingstep=$firsttrainingstep
+		fi
+	fi
+else
+	frsttrainingstep=$firsttrainingstep
+fi
+#------------------------------------------------------------------------------------------------------------------------------------------------
+if [ "$reuse" != "1" -o ! -f $modeldir/moses.ini ]; then
+	echo "****** substitute control characters by space in corpus files"
+	if [ "$reuse" != "1" -o ! -f $tokdir/$corpusbasename.$lang1.ctrl ]; then
+		tr '\a\b\f\r\v' '     ' < $datadir/$corpusbasename.$lang1 > $tokdir/$corpusbasename.$lang1.ctrl
+		echo "$lang1 file ($datadir/$corpusbasename.$lang1) done"
+	else
+		echo "Substitute control characters by a space in the $lang1 file ($datadir/$corpusbasename.$lang1) already done. Reusing it."
+	fi
+	echo "$tokdir/$corpusbasename.$lang1.ctrl" >> $logdir/corpus-files.txt
+	if [ "$reuse" != "1" -o ! -f $tokdir/$corpusbasename.$lang2.ctrl ]; then
+		tr '\a\b\f\r\v' '     ' < $datadir/$corpusbasename.$lang2 > $tokdir/$corpusbasename.$lang2.ctrl
+		echo "$lang2 file ($datadir/$corpusbasename.$lang2) done"
+	else
+		echo "Substitute control characters by a space in the $lang2 file ($datadir/$corpusbasename.$lang2) already done. Reusing it."
+	fi
+	echo "$tokdir/$corpusbasename.$lang2.ctrl" >> $logdir/corpus-files.txt
+	echo "****** tokenize corpus files"
+	if [ "$reuse" != "1" -o ! -f $tokdir/$corpusbasename.tok.$lang1 ]; then
+		$toolsdir/scripts/tokenizer.perl -l $lang1 < $tokdir/$corpusbasename.$lang1.ctrl > $tokdir/$corpusbasename.tok.$lang1
+	else
+		echo "The $tokdir/$corpusbasename.$lang1.ctrl file was already tokenized. Reusing it."
+	fi
+	echo "$tokdir/$corpusbasename.tok.$lang1" >> $logdir/corpus-files.txt
+	if [ "$reuse" != "1" -o ! -f $tokdir/$corpusbasename.tok.$lang2 ]; then
+		$toolsdir/scripts/tokenizer.perl -l $lang2 < $tokdir/$corpusbasename.$lang2.ctrl > $tokdir/$corpusbasename.tok.$lang2
+	else
+		echo "The $tokdir/$corpusbasename.$lang2.ctrl file was already tokenized. Reusing it."
+	fi
+	echo "$tokdir/$corpusbasename.tok.$lang2" >> $logdir/corpus-files.txt
+	#----------------------------------------------------------------------------------------------------------------------------------------
+	echo "****** clean corpus files" 
+	if [ "$reuse" != "1" -o ! -f $cleandir/$corpusbasename.clean.$lang1 -o ! -f $cleandir/$corpusbasename.clean.$lang2 ]; then
+		$toolsdir/moses/scripts*/training/clean-corpus-n.perl $tokdir/$corpusbasename.tok $lang1 $lang2 $cleandir/$corpusbasename.clean $MinLen $MaxLen
+	else
+		echo "The $cleandir/$corpusbasename.clean.$lang1 and $cleandir/$corpusbasename.clean.$lang2 files already exist. Reusing them."
+	fi
+	echo "$cleandir/$corpusbasename.clean.$lang1" >> $logdir/corpus-files.txt
+	echo "$cleandir/$corpusbasename.clean.$lang2" >> $logdir/corpus-files.txt
+	#----------------------------------------------------------------------------------------------------------------------------------------
+	echo "****** lowercase corpus files"
+	if [ "$reuse" != "1" -o ! -f $lc_clean_dir/$corpusbasename.lowercase.$lang1 ]; then
+		$toolsdir/scripts/lowercase.perl < $cleandir/$corpusbasename.clean.$lang1 > $lc_clean_dir/$corpusbasename.lowercase.$lang1
+	else
+		echo "The $lc_clean_dir/$corpusbasename.lowercase.$lang1 file already exists. Reusing it."
+	fi
+	echo "$lc_clean_dir/$corpusbasename.lowercase.$lang1" >> $logdir/corpus-files.txt
+	if [ "$reuse" != "1" -o ! -f $lc_clean_dir/$corpusbasename.lowercase.$lang2 ]; then
+		$toolsdir/scripts/lowercase.perl < $cleandir/$corpusbasename.clean.$lang2 > $lc_clean_dir/$corpusbasename.lowercase.$lang2
+	else
+		echo "The $lc_clean_dir/$corpusbasename.lowercase.$lang2 file already exists. Reusing it."
+	fi
+	echo "$lc_clean_dir/$corpusbasename.lowercase.$lang2" >> $logdir/corpus-files.txt
+	#----------------------------------------------------------------------------------------------------------------------------------------
+	#create data to be used in moses.ini
+	if [ "$lngmdl" = "1" ]; then
+		lmstr="0:$Gram:$lmdir/$lang2.$lngmdlparameters.blm.mm:1"
+	elif [ "$lngmdl" = "5" ]; then
+		lmstr="0:$Gram:$lmdir/$lang2.$lngmdlparameters.BloomMap:5"
+	fi
+	if [ "$frsttrainingstep" -lt "3" ]; then
+		#------------------------------------------------------------------------------------------------------------------------
+		echo "****** phase 1 of training"
+		cd $toolsdir/moses/scripts*/training
+		sed -e 's#^.*my \$cmd.*\$MKCLS.*opt.*$#\tmy $cmd = "$MKCLS -cnumclasses -nnummkclsiterations -p$corpus -V$classes opt";#g' -e "s#numclasses#$numclasses#g" -e "s#nummkclsiterations#$nummkclsiterations#g" train-model.perl > train-model.modif.perl
+		sed -e 's#BINDIR=\"\"#BINDIR="toolsdir/mgizanewdir/bin"#g' -e "s#toolsdir#$toolsdir#g" -e "s#mgizanewdir#$mgizanewdir#g" train-model.modif.perl > train-model.perl
+		rm -f train-model.modif.perl
+		chmod +x train-model.perl
+		if [ "$paralleltraining" = "1" ]; then
+			$toolsdir/moses/scripts*/training/train-model.perl -parallel -scripts-root-dir $toolsdir/moses/scripts* -root-dir $workdir -corpus $lc_clean_dir/$corpusbasename.lowercase -f $lang1 -e $lang2 -alignment $alignment -reordering $reordering -lm $lmstr -phrase-translation-table $modeldir/phrase-table.$corpusbasename.$lang1-$lang2 -reordering-table $modeldir/reordering-table.$corpusbasename.$lang1-$lang2 -max-phrase-length $MaxPhraseLength -first-step 1 -last-step 1 -model-dir $modeldir -corpus-dir $modeldir -giza-f2e $modeldir -giza-e2f $modeldir
+		else
+			$toolsdir/moses/scripts*/training/train-model.perl -scripts-root-dir $toolsdir/moses/scripts* -root-dir $workdir -corpus $lc_clean_dir/$corpusbasename.lowercase -f $lang1 -e $lang2 -alignment $alignment -reordering $reordering -lm $lmstr -phrase-translation-table $modeldir/phrase-table.$corpusbasename.$lang1-$lang2 -reordering-table $modeldir/reordering-table.$corpusbasename.$lang1-$lang2 -max-phrase-length $MaxPhraseLength -first-step 1 -last-step 1 -model-dir $modeldir -corpus-dir $modeldir -giza-f2e $modeldir -giza-e2f $modeldir
+		fi
+		#------------------------------------------------------------------------------------------------------------------------
+		echo "****** phase 2 of training: MGIZA alignment"
+		$toolsdir/mgiza/bin/snt2cooc $modeldir/$lang2-$lang1.cooc $modeldir/$lang2.vcb $modeldir/$lang1.vcb $modeldir/$lang1-$lang2-int-train.snt  
+		$toolsdir/mgiza/bin/snt2cooc $modeldir/$lang1-$lang2.cooc $modeldir/$lang1.vcb $modeldir/$lang2.vcb $modeldir/$lang2-$lang1-int-train.snt
+		$toolsdir/mgiza/bin/mgiza -ncpus $mgizanumprocessors -c $modeldir/$lang2-$lang1-int-train.snt -o $modeldir/$lang2-$lang1 -s $modeldir/$lang1.vcb -t $modeldir/$lang2.vcb -coocurrencefile $modeldir/$lang1-$lang2.cooc -ml $ml -countincreasecutoff $countincreasecutoff -countincreasecutoffal $countincreasecutoffal -mincountincrease $mincountincrease -peggedcutoff $peggedcutoff -probcutoff $probcutoff -probsmooth $probsmooth -m1 $model1iterations -m2 $model2iterations -mh $hmmiterations -m3 $model3iterations -m4 $model4iterations -m5 $model5iterations -m6 $model6iterations -t1 $model1dumpfrequency -t2 $model2dumpfrequency -t2to3 $transferdumpfrequency -t345 $model345dumpfrequency -th $hmmdumpfrequency -onlyaldumps $onlyaldumps -nodumps $nodumps -compactadtable $compactadtable -model4smoothfactor $model4smoothfactor -compactalignmentformat $compactalignmentformat -verbose $verbose -verbosesentence $verbosesentence -emalsmooth $emalsmooth -model23smoothfactor $model23smoothfactor -model4smoothfactor $model4smoothfactor -model5smoothfactor $model5smoothfactor -nsmooth $nsmooth -nsmoothgeneral $nsmoothgeneral -deficientdistortionforemptyword $deficientdistortionforemptyword -depm4 $depm4 -depm5 $depm5 -emalignmentdependencies $emalignmentdependencies -emprobforempty $emprobforempty -m5p0 $m5p0 -manlexfactor1 $manlexfactor1 -manlexfactor2 $manlexfactor2 -manlexmaxmultiplicity $manlexmaxmultiplicity -maxfertility $maxfertility -p0 $p0 -pegging $pegging
+		$toolsdir/mgiza/bin/mgiza -ncpus $mgizanumprocessors -c $modeldir/$lang1-$lang2-int-train.snt -o $modeldir/$lang1-$lang2 -s $modeldir/$lang2.vcb -t $modeldir/$lang1.vcb -coocurrencefile $modeldir/$lang2-$lang1.cooc  -ml $ml -countincreasecutoff $countincreasecutoff -countincreasecutoffal $countincreasecutoffal -mincountincrease $mincountincrease -peggedcutoff $peggedcutoff -probcutoff $probcutoff -probsmooth $probsmooth -m1 $model1iterations -m2 $model2iterations -mh $hmmiterations -m3 $model3iterations -m4 $model4iterations -m5 $model5iterations -m6 $model6iterations -t1 $model1dumpfrequency -t2 $model2dumpfrequency -t2to3 $transferdumpfrequency -t345 $model345dumpfrequency -th $hmmdumpfrequency -onlyaldumps $onlyaldumps -nodumps $nodumps -compactadtable $compactadtable -model4smoothfactor $model4smoothfactor -compactalignmentformat $compactalignmentformat -verbose $verbose -verbosesentence $verbosesentence -emalsmooth $emalsmooth -model23smoothfactor $model23smoothfactor -model4smoothfactor $model4smoothfactor -model5smoothfactor $model5smoothfactor -nsmooth $nsmooth -nsmoothgeneral $nsmoothgeneral -deficientdistortionforemptyword $deficientdistortionforemptyword -depm4 $depm4 -depm5 $depm5 -emalignmentdependencies $emalignmentdependencies -emprobforempty $emprobforempty -m5p0 $m5p0 -manlexfactor1 $manlexfactor1 -manlexfactor2 $manlexfactor2 -manlexmaxmultiplicity $manlexmaxmultiplicity -maxfertility $maxfertility -p0 $p0 -pegging $pegging
+		echo "****** phase 2.1 of training (merge alignments)"
+		$toolsdir/mgiza/scripts/merge_alignment.py $modeldir/$lang1-$lang2.A3.final.part* > $modeldir/$lang1-$lang2.A3.final
+		$toolsdir/mgiza/scripts/merge_alignment.py $modeldir/$lang2-$lang1.A3.final.part* > $modeldir/$lang2-$lang1.A3.final
+		gzip -f $modeldir/$lang1-$lang2.A3.final > $modeldir/$lang1-$lang2.A3.final.gz
+		gzip -f $modeldir/$lang2-$lang1.A3.final > $modeldir/$lang2-$lang1.A3.final.gz
+		if [ -f $modeldir/$lang1-$lang2.A3.final ]; then
+			rm -f $modeldir/$lang1-$lang2.A3.final
+		fi
+		if [ -f $modeldir/$lang2-$lang1.A3.final ]; then
+			rm -f $modeldir/$lang2-$lang1.A3.final
+		fi
+		rm -f $modeldir/$lang1-$lang2.A3.final.part* 2>/dev/null
+		rm -f $modeldir/$lang2-$lang1.A3.final.part* 2>/dev/null
+	fi
+	#-------------------------------------------------------------------------------------------------------------------------------
+	if [ "$paralleltraining" = "1" ]; then
+		echo "****** Rest of parallel training"
+		$toolsdir/moses/scripts*/training/train-model.perl -parallel -scripts-root-dir $toolsdir/moses/scripts* -root-dir $workdir -corpus $lc_clean_dir/$corpusbasename.lowercase -f $lang1 -e $lang2 -alignment $alignment -reordering $reordering -lm $lmstr -phrase-translation-table $modeldir/phrase-table.$corpusbasename.$lang1-$lang2 -reordering-table $modeldir/reordering-table.$corpusbasename.$lang1-$lang2 -max-phrase-length $MaxPhraseLength -first-step 3 -last-step $lasttrainingstep -model-dir $modeldir -corpus-dir $modeldir -giza-f2e $modeldir -giza-e2f $modeldir
+	else
+		echo "****** Rest of non-parallel training"
+		$toolsdir/moses/scripts*/training/train-model.perl -scripts-root-dir $toolsdir/moses/scripts* -root-dir $workdir -corpus $lc_clean_dir/$corpusbasename.lowercase -f $lang1 -e $lang2 -alignment $alignment -reordering $reordering -lm $lmstr -phrase-translation-table $modeldir/phrase-table.$corpusbasename.$lang1-$lang2 -reordering-table $modeldir/reordering-table.$corpusbasename.$lang1-$lang2 -max-phrase-length $MaxPhraseLength -first-step 3 -last-step $lasttrainingstep -model-dir $modeldir -corpus-dir $modeldir -giza-f2e $modeldir -giza-e2f $modeldir
+	fi
+	#-------------------------------------------------------------------------------------------------------------------------------
+	if [ "$memmapping" = "1" ]; then
+		cp $modeldir/moses.ini $memmapsdir
+		echo "$memmapsdir/moses.ini" >> $logdir/corpus-files.txt
+	fi
+	cp $modeldir/moses.ini $modeldir/moses.ini.bak.train
+else
+	echo "Training already done. Reusing it."
+fi
+
+for createdfile in `ls $modeldir`; do
+	echo "$modeldir/$createdfile" >> $logdir/corpus-files.txt
+done
+
+if [ ! -f $modeldir/moses.ini ]; then
+	makeTrainingSummary
+	echo "Corpus not correctly trained. Exiting..."
+	exit 0
+fi
+
+cd $workdir
+#=========================================================================================================================================================
+#5. CORPUS MEMORY-MAPPING
+#=========================================================================================================================================================
+if (( $memmapping == 1 )) ; then
+	echo "********************** MEMORY-MAPPING:"
+	#If you have no trained corpus, then alert that you should create it
+	checktrainedcorpusexists
+
+	startmmpdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+
+
+	if [ "$reuse" != "1" -o "$domemmapping" = "1" -o ! -f $memmapsdir/reordering-table.$corpusbasename.$lang1-$lang2.$param.binlexr.srctree ]; then
+		if [ -f $memmapsdir/phrase-table.$corpusbasename.$lang1-$lang2.binphr.idx ]; then
+			rm -rf $memmapsdir
+			mkdir -p $memmapsdir
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** create binary phrase table"
+		gzip -cd $modeldir/phrase-table.$corpusbasename.$lang1-$lang2.gz | LC_ALL=C sort | $toolsdir/moses/misc/processPhraseTable -ttable 0 0 - -nscores 5 -out $memmapsdir/phrase-table.$corpusbasename.$lang1-$lang2
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** create binary reordering table"
+
+		gzip -cd $modeldir/reordering-table.$corpusbasename.$lang1-$lang2.$param.gz | LC_ALL=C sort | $toolsdir/moses/misc/processLexicalTable -out $memmapsdir/reordering-table.$corpusbasename.$lang1-$lang2.$param
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		#Save the present moses.ini just in case it is erased if you interrupt one of the subsequent steps
+		cp $modeldir/moses.ini $modeldir/moses.ini.bak.memmap
+		echo "$modeldir/moses.ini.bak.memmap" >> $logdir/corpus-files.txt
+		cp $modeldir/moses.ini $memmapsdir/moses.ini
+		sed -e "s#$modeldir#$memmapsdir#g" -e "s#wbe\-$reordering\.gz#wbe-$reordering#g" -e "s#wbe\-msd\-backward\-fe\.gz#wbe-msd-backward-fe#g" -e "s#wbe\-msd\-backward\-f\.gz#wbe-msd-backward-f#g" -e "s#wbe\-monotonicity\-backward\-fe\.gz#wbe-monotonicity-backward-fe#g"  -e "s#wbe\-monotonicity\-backward\-f\.gz#wbe-monotonicity-backward-f#g" -e "s#0 0 0 5 $memmapsdir\/phrase\-table\.$corpusbasename\.$lang1\-$lang2#1 0 0 5 $memmapsdir/phrase-table.$corpusbasename.$lang1-$lang2#g" $memmapsdir/moses.ini > $memmapsdir/moses.ini.memmap
+		mv $memmapsdir/moses.ini.memmap $memmapsdir/moses.ini
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+	else
+		echo "Memory-mapping already done. Reusing it."
+	fi
+
+	for createdfile in `ls $memmapsdir`; do
+		echo "$memmapsdir/$createdfile" >> $logdir/corpus-files.txt
+	done
+
+	if [ ! -f $memmapsdir/reordering-table.$corpusbasename.$lang1-$lang2.$param.binlexr.srctree ]; then
+		makeTrainingSummary
+		echo "Memory-mapping not correctly done. Exiting..."
+		exit 0
+	fi
+fi
+cd $workdir
+
+#=========================================================================================================================================================
+#6. TUNING
+#=========================================================================================================================================================
+if (( $tuning == 1 )) ; then
+	echo "********************** TUNING:"
+	#If you have no trained corpus, then alert that you should create it
+	checktrainedcorpusexists
+
+	starttuningdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+
+	if [ "$reuse" != "1" -o "$dotuning" = "1" -o ! -f $tuningdir/moses.ini ]; then
+		if [ -f $tuningdir/run1.moses.ini ]; then
+			rm -rf $tuningdir
+			mkdir -p $tuningdir
+			dotrainingtest=1
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** tokenize language 1 tuning data"
+		if [ "$reuse" != "1" -o ! -f $tokdir/$tuningbasename.tok.$lang1 ]; then
+			if [ -f $datadir/$tuningbasename.$lang1 ]; then
+				tr '\a\b\f\r\v' '     ' < $datadir/$tuningbasename.$lang1 > $datadir/$tuningbasename.$lang1.tmp
+				$toolsdir/scripts/tokenizer.perl -l $lang1 < $datadir/$tuningbasename.$lang1.tmp > $tokdir/$tuningbasename.tok.$lang1
+			else
+				echo "The $datadir/$tuningbasename.$lang1 file, used for tuning, does not exist. Please review the tuningbasename setting of this script. Exiting ..."
+				exit 0
+			fi		
+		else
+			echo "The $tokdir/$tuningbasename.tok.$lang1 file already exists. Reusing it."
+		fi
+		echo "$tokdir/$tuningbasename.tok.$lang1" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** tokenize language 2 tuning data"
+		if [ "$reuse" != "1" -o ! -f $tokdir/$tuningbasename.tok.$lang2 ]; then
+			if [ -f $datadir/$tuningbasename.$lang2 ]; then
+				tr '\a\b\f\r\v' '     ' < $datadir/$tuningbasename.$lang2 > $datadir/$tuningbasename.$lang2.tmp
+				$toolsdir/scripts/tokenizer.perl -l $lang2 < $datadir/$tuningbasename.$lang2.tmp > $tokdir/$tuningbasename.tok.$lang2
+			else
+				echo "The $datadir/$tuningbasename.$lang2 file, used for tuning, does not exist. Please review the tuningbasename setting of this script. Exiting ..."
+				exit 0
+			fi		
+		else
+			echo "The $tokdir/$tuningbasename.tok.$lang2 file already exists. Reusing it."
+		fi
+		echo "$tokdir/$tuningbasename.tok.$lang2" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** lowercase language 1 tuning data"
+		if [ "$reuse" != "1" -o ! -f $lc_no_clean_dir/$tuningbasename.lowercase.$lang1 ]; then
+			$toolsdir/scripts/lowercase.perl < $tokdir/$tuningbasename.tok.$lang1 > $lc_no_clean_dir/$tuningbasename.lowercase.$lang1
+		else
+			echo "The $lc_no_clean_dir/$tuningbasename.lowercase.$lang1 file already exists. Reusing it."
+		fi
+		echo "$lc_no_clean_dir/$tuningbasename.lowercase.$lang1" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** lowercase language 2 tuning data"
+		if [ "$reuse" != "1" -o ! -f $lc_no_clean_dir/$tuningbasename.lowercase.$lang2 ]; then
+			$toolsdir/scripts/lowercase.perl < $tokdir/$tuningbasename.tok.$lang2 > $lc_no_clean_dir/$tuningbasename.lowercase.$lang2
+		else
+			echo "The $lc_no_clean_dir/$tuningbasename.lowercase.$lang2 file already exists. Reusing it."
+		fi
+		echo "$lc_no_clean_dir/$tuningbasename.lowercase.$lang2" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+
+		echo "****** tuning!!!"
+		cd $workdir/tuning/
+		# if corpus was memory-mapped
+		if [ "$memmapping" = "1" ]; then
+			#use memory-mapping
+			mosesinidir1=$memmapsdir
+		else
+			mosesinidir1=$modeldir
+		fi
+		$modifiedscriptsdir/mert-moses-new-modif.pl $lc_no_clean_dir/$tuningbasename.lowercase.$lang1 $lc_no_clean_dir/$tuningbasename.lowercase.$lang2 $toolsdir/moses/moses-cmd/src/moses $mosesinidir1/moses.ini --mertdir $toolsdir/moses/mert --rootdir $toolsdir/moses/scripts* --no-filter-phrase-table --working-dir $tuningdir --max-runs $maxruns
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** insert tuning weights in moses.ini"
+		$toolsdir/scripts/reuse-weights.perl $tuningdir/moses.ini < $mosesinidir1/moses.ini > $tuningdir/moses.weight-reused.ini
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+	else
+		echo "Tuning already done. Reusing it."
+	fi
+
+	for createdfile in `ls $tuningdir`; do
+		echo "$tuningdir/$createdfile" >> $logdir/corpus-files.txt
+	done
+
+	if [ ! -f $tuningdir/moses.ini ]; then
+		makeTrainingSummary
+		echo "Tuning not correctly done. Exiting..."
+		exit 0
+	fi
+fi
+#=========================================================================================================================================================
+#7. TRAINING TEST
+#=========================================================================================================================================================
+if (( $runtrainingtest == 1 )) ; then
+
+	echo "********************** RUN TRAINING TEST:"
+	#If you have no trained corpus, then alert that you should create it
+	checktrainedcorpusexists
+
+	starttestdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+
+	if [ "$reuse" != "1" -o "$dotrainingtest" = "1" -o ! -d $testdir -o ! -f $testdir/$testbasename.moses.sgm ]; then
+		echo $dotrainingtest
+		if [ -f $testdir/$testbasename.moses.$lang2 ]; then
+			rm -rf $testdir
+			mkdir -p $testdir
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** tokenize language 1 training test data"
+		if [ "$reuse" != "1" -o ! -f $tokdir/$testbasename.tok.$lang1 ]; then
+			if [ -f $datadir/$testbasename.$lang1 ]; then
+				tr '\a\b\f\r\v' '     ' < $datadir/$testbasename.$lang1 > $datadir/$testbasename.$lang1.tmp
+				$toolsdir/scripts/tokenizer.perl -l $lang1 < $datadir/$testbasename.$lang1.tmp > $tokdir/$testbasename.tok.$lang1
+			else
+				echo "The $datadir/$testbasename.$lang1 file, used for testing the trained corpus, does not exist. Please review the \$testbasename and possibly the \$lang1 settings of this script. Exiting ..."
+				exit 0
+			fi
+		else
+			echo "The $tokdir/$testbasename.tok.$lang1 file already exists. Reusing it."
+		fi
+		echo "$tokdir/$testbasename.tok.$lang1" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** tokenize language 2 training test data"
+		if [ "$reuse" != "1" -o ! -f $tokdir/$testbasename.tok.$lang2 ]; then
+			if [ -f $datadir/$testbasename.$lang2 ]; then
+				tr '\a\b\f\r\v' '     ' < $datadir/$testbasename.$lang2 > $datadir/$testbasename.$lang2.tmp
+				$toolsdir/scripts/tokenizer.perl -l $lang1 < $datadir/$testbasename.$lang2.tmp > $tokdir/$testbasename.tok.$lang2
+			else
+				echo "The $datadir/$testbasename.$lang2 file, used for testing the trained corpus, does not exist. Please review the \$testbasename and possibly the \$lang1 settings of this script. Exiting ..."
+				exit 0
+			fi
+		else
+			echo "The $tokdir/$testbasename.tok.$lang2 file already exists. Reusing it."
+		fi
+		echo "$tokdir/$testbasename.tok.$lang2" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** lowercase training test data"
+		if [ "$reuse" != "1" -o ! -f $lc_no_clean_dir/$testbasename.lowercase.$lang1 ]; then
+			$toolsdir/scripts/lowercase.perl < $tokdir/$testbasename.tok.$lang1 > $lc_no_clean_dir/$testbasename.lowercase.$lang1
+		else
+			echo "The $lc_no_clean_dir/$testbasename.lowercase.$lang1 file already exists. Reusing it."
+		fi
+		echo "$lc_no_clean_dir/$testbasename.lowercase.$lang1" >> $logdir/corpus-files.txt
+		if [ "$reuse" != "1" -o ! -f $lc_no_clean_dir/$testbasename.lowercase.$lang2 ]; then
+			$toolsdir/scripts/lowercase.perl < $tokdir/$testbasename.tok.$lang2 > $lc_no_clean_dir/$testbasename.lowercase.$lang2
+		else
+			echo "The $lc_no_clean_dir/$testbasename.lowercase.$lang2 file already exists. Reusing it."
+		fi
+		echo "$lc_no_clean_dir/$testbasename.lowercase.$lang2" >> $logdir/corpus-files.txt
+		cp $modeldir/moses.ini $testdir/
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+
+		echo "****** run decoder test"
+			if [ "$reuse" != "1" -o ! -f $testdir/$testbasename.moses.$lang2 ]; then
+			#Choose the moses.ini file that best reflects the type of training done
+			if [ "$tuning" = "1" ]; then
+				mosesinidir2=$tuningdir/moses.weight-reused.ini
+			elif [ "$memmapping" = "1" ]; then
+				mosesinidir2=$memmapsdir/moses.ini
+			else
+				mosesinidir2=$modeldir/moses.ini
+			fi
+			if [ "$tuning" = "0" ]; then
+				$toolsdir/moses/moses-cmd/src/moses -f $mosesinidir2 -weight-t $weight_t -weight-l $weight_l -weight-d $weight_d -weight-w $weight_w -mbr $mbr -mbr-size $mbrsize -mbr-scale $mbrscale -monotone-at-punctuation $monotoneatpunctuation -ttable-limit $ttablelimit -b $beamthreshold -early-discarding-threshold $earlydiscardingthreshold -search-algorithm $searchalgorithm -cube-pruning-pop-limit $cubepruningpoplimit -s $stack -max-phrase-length $maxphraselen -cube-pruning-diversity $cubepruningdiversity -distortion-limit $distortionlimit  < $lc_no_clean_dir/$testbasename.lowercase.$lang1  > $testdir/$testbasename.moses.$lang2
+			else
+				$toolsdir/moses/moses-cmd/src/moses -f $mosesinidir2 < $lc_no_clean_dir/$testbasename.lowercase.$lang1  > $testdir/$testbasename.moses.$lang2
+			fi
+		else
+			echo "The $testdir/$testbasename.moses.$lang2 file already exists. Reusing it."
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** recase the output"
+		if [ "$reuse" != "1" -o ! -f $testdir/$testbasename.moses.recased.$lang2 ]; then
+			$toolsdir/moses/script*/recaser/recase.perl -model $recaserdir/moses.ini -in $testdir/$testbasename.moses.$lang2 -moses $toolsdir/moses/moses-cmd/src/moses > $testdir/$testbasename.moses.recased.$lang2
+		else
+			echo "The $testdir/$testbasename.moses.recased.$lang2 file already exists. Reusing it."
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** detokenize test results"
+		$toolsdir/scripts/detokenizer.perl -l $lang2 < $testdir/$testbasename.moses.recased.$lang2 > $detokdir/$testbasename.moses.detok.$lang2
+		echo "$detokdir/$testbasename.moses.detok.$lang2" >> $logdir/corpus-files.txt
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** wrap test result in SGM"
+		echo "*** wrap source file"
+		if [ "$reuse" != "1" -o ! -f $testdir/$testbasename-src.$lang1.sgm ]; then
+			exec<$datadir/$testbasename.$lang1
+			echo '<srcset setid="'$testbasename'" srclang="'$lang1'">' > $testdir/$testbasename-src.$lang1.sgm
+			echo '<DOC docid="'$testbasename'">' >> $testdir/$testbasename-src.$lang1.sgm
+			numseg=0
+			while read line
+			   do
+				if [ "$line" != "" ]; then
+					numseg=$(($numseg+1))
+			   		echo "<seg id=$numseg>"$line"</seg>" >> $testdir/$testbasename-src.$lang1.sgm
+				fi
+			   done
+			echo "</DOC>" >> $testdir/$testbasename-src.$lang1.sgm
+			echo "</srcset>" >> $testdir/$testbasename-src.$lang1.sgm
+		else
+			echo "The $testdir/$testbasename-src.$lang1.sgm file already exists. Reusing it."
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "*** wrap reference (human-made) translation"
+		if [ "$reuse" != "1" -o ! -f $testdir/$testbasename-ref.$lang2.sgm ]; then
+			exec<$datadir/$testbasename.$lang2
+			echo '<refset setid="'$testbasename'" srclang="'$lang1'" trglang="'$lang2'">' > $testdir/$testbasename-ref.$lang2.sgm
+			echo '<DOC docid="'$testbasename'" sysid="ref">' >> $testdir/$testbasename-ref.$lang2.sgm
+			numseg=0
+			while read line
+			   do
+				if [ "$line" != "" ]; then
+					numseg=$(($numseg+1))
+				   	echo "<seg id=$numseg>"$line"</seg>" >> $testdir/$testbasename-ref.$lang2.sgm
+				fi
+			   done
+			echo "</DOC>" >> $testdir/$testbasename-ref.$lang2.sgm
+			echo "</refset>" >> $testdir/$testbasename-ref.$lang2.sgm
+		else
+			echo "The $testdir/$testbasename-ref.$lang2.sgm file already exists. Reusing it."
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "*** wrap Moses translation"
+		if [ "$reuse" != "1" -o ! -f $testdir/$testbasename.moses.sgm ]; then
+			exec<$detokdir/$testbasename.moses.detok.$lang2
+			echo '<tstset setid="'$testbasename'" srclang="'$lang1'" trglang="'$lang2'">' > $testdir/$testbasename.moses.sgm
+			echo '<DOC docid="'$testbasename'" sysid="moses">' >> $testdir/$testbasename.moses.sgm
+			numseg=0
+			while read line
+			   do
+				if [ "$line" != "" ]; then
+					numseg=$(($numseg+1))
+				   	echo "<seg id=$numseg>"$line"</seg>" >> $testdir/$testbasename.moses.sgm
+				fi
+			   done
+			echo "</DOC>" >> $testdir/$testbasename.moses.sgm
+			echo "</tstset>" >> $testdir/$testbasename.moses.sgm
+		else
+			echo "The $testdir/$testbasename.moses.sgm file already exists. Reusing it."
+		fi
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+	else
+		echo "Training test already done. Reusing it."
+	fi
+
+	for createdfile in `ls $testdir`; do
+		echo "$testdir/$createdfile" >> $logdir/corpus-files.txt
+	done
+
+	if [ ! -f $testdir/$testbasename.moses.sgm ]; then
+		makeTrainingSummary
+		echo "Corpus training test not correctly done. Exiting..."
+		exit 0
+	fi
+
+	echo "***************** GET SCORE:"
+	#check if a trained corpus exists and react appropriately
+	checktrainedcorpusexists
+
+	#If a training test was not done before, alert for that and exit
+	if [ ! -f $testdir/$testbasename.moses.sgm ]; then
+		echo "In order to get a training test score, you must have done a training test first. Please set the \$runtrainingtest variable of this script to 1 in order to run a training test. Exiting..."
+		exit 0
+	else
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+		echo "****** scoring"
+		startscoringdate=`date +day:%d/%m/%y-time:%H:%M:%S`
+		score=`$toolsdir/mteval-v11b.pl -s $testdir/$testbasename-src.$lang1.sgm -r $testdir/$testbasename-ref.$lang2.sgm -t $testdir/$testbasename.moses.sgm -c`
+		echo $score
+		#-----------------------------------------------------------------------------------------------------------------------------------------
+	fi
+fi
+
+makeTrainingSummary
+
+echo "!!! Corpus training finished. A summary of it is located in $mosesdir/logs !!!"
+
+#=================================================================================================================================================
+# Changes in version 1.11
+#=================================================================================================================================================
+# Uses new Moses decoder (published on August 13, 2010 and updated on August 14, 2010)
+# Protects users better from mistakes (namely from a deficiently trained inverse corpus and from the deletion of a training in a previously trained corpus)
+# Reuses previous work better
+# Stops with an informative message if the products of one training phase (LM building, recaser training, corpus training, memmory-mapping, tuning or training test)
+# do not produce the expected results
+# Much more informative and accurate training log file that now reflects the work actually done, even if it is interrupted by CTRL+C; continues to show
+# the settings chosen by the user too
+#=================================================================================================================================================
+# Changes in version 1.01
+#=================================================================================================================================================
+# Uses new Moses decoder (published on August 9, 2010)
+# Works in Ubuntu 10.04 LTS (and, if you adapt the package dependencies, with Ubuntu 9.10 and 9.04
+# Appends to the end of the name of the translated files ".$lang2.moses"
+# Does not translate files already translated
+# Indicates to user what to do if the $logfile parameter wasn't set
+# Special treatment of files translated for being used in TMX translation memories
+#=================================================================================================================================================
+#Changes in version 0.992
+#=================================================================================================================================================
+# Scripts adapted to both Ubuntu 10.04 and to the new Moses (version published on April 26, 2010)
+#=================================================================================================================================================
+#Changes in version 0.99
+#=================================================================================================================================================
+# ***training steps*** chosen by the user cannot be illogical (for instance, it is not possible to tune or to evaluate a corpus not yet trained); user can still enter illegal parameters values, though)
+# does not overwrite files previously created in trainings with different settings
+# does not redo work previously done with the same settings, or parts of work that share the same settings 
+# can reuse phases 1 and 2 of training previously made with a lang2-lang1 corpus when a new lang1-lang2 (inverted corpus) corpus is being trained
+# can limit tuning duration
+# parallel training works  (in 64 bits Ubuntu 9.04 version)
+# no segmentation fault with RandLM (in 64 bits Ubuntu 9.04 version)
+# can compile-lm --memmap IRSTLM (in 64 bits Ubuntu 9.04 version)
+# creates a log of all the files created
+# work directory renamed corpora_trained directory
+

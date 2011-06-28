@@ -1,0 +1,1 @@
+cat phrase-table  | ~/moses/mosesdecoder-lattice/misc/processPhraseTable -ttable 0 0 - -nscores 2 -out phrase-table

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+pwd 2> /dev/null > /dev/null
+bin=`dirname $0` 2> /dev/null
+
+pars=`$bin/modify-pars.pl $*`
+#echo "pars:|$pars|" 
+
+#echo "$bin/moses-virtual.pl $pars"
+$bin/moses-virtual.pl $pars
+
