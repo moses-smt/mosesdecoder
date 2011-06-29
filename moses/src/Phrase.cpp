@@ -173,7 +173,8 @@ vector< vector<string> > Phrase::Parse(const std::string &phraseString, const st
     //    to
     // "KOMMA" "none"
     if (factorStrVector.size() != factorOrder.size()) {
-      TRACE_ERR( "[ERROR] Malformed input at " << /*StaticData::Instance().GetCurrentInputPosition() <<*/ std::endl
+      TRACE_ERR( "[ERROR] Malformed input: '" << annotatedWord << "'" <<  std::endl
+                 << "In '" << phraseString << "'" << endl
                  << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
                  << "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
       abort();
