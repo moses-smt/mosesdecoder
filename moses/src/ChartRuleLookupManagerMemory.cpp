@@ -78,6 +78,8 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
 
+  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+
   // loop through the rules
   // (note that expandableDottedRuleList can be expanded as the loop runs 
   //  through calls to ExtendPartialRuleApplication())
@@ -99,7 +101,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
       // look up in rule dictionary, if the current rule can be extended
       // with the source word in the last position
-      const Word &sourceWord = GetSentence().GetWord(absEndPos);
+      const Word &sourceWord = sourceWordLabel.GetLabel();
       const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord);
 
       // if we found a new rule -> create it and add it to the list
@@ -107,14 +109,11 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 				// create the rule
 #ifdef USE_BOOST_POOL
         CoveredChartSpan *newCoveredChartSpan = m_coveredChartSpanPool.malloc();
-        new (newCoveredChartSpan) CoveredChartSpan(absEndPos, absEndPos, sourceWord,
-                                           prevCoveredChartSpan);
+        new (newCoveredChartSpan) CoveredChartSpan(sourceWordLabel, prevCoveredChartSpan);
         DottedRule *dottedRule = m_dottedRulePool.malloc();
         new (dottedRule) DottedRule(*node, newCoveredChartSpan);
 #else
-        CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(absEndPos, absEndPos,
-            sourceWord,
-            prevCoveredChartSpan);
+        CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(sourceWordLabel, prevCoveredChartSpan);
         DottedRule *dottedRule = new DottedRule(*node,
             newCoveredChartSpan);
 #endif
@@ -175,6 +174,9 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
                   GetCellCollection(), adhereTableLimit, rulesLimit);
     }
   }
+
+  dottedRuleCol.Clear(relEndPos+1);
+
   outColl.CreateChartRules(rulesLimit);
 }
 
@@ -195,8 +197,8 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
     GetSentence().GetLabelSet(startPos, endPos);
 
   // target non-terminal labels for the remainder
-  const NonTerminalSet &targetNonTerms =
-    GetCellCollection().GetConstituentLabelSet(WordsRange(startPos, endPos));
+  const ChartCellLabelSet &targetNonTerms =
+    GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
 
   const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
     node.GetNonTerminalMap();
@@ -206,7 +208,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
     return;
   }
   const size_t numSourceNonTerms = sourceNonTerms.size();
-  const size_t numTargetNonTerms = targetNonTerms.size();
+  const size_t numTargetNonTerms = targetNonTerms.GetSize();
   const size_t numCombinations = numSourceNonTerms * numTargetNonTerms;
 
   // We can search by either:
@@ -225,14 +227,14 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       const Word & sourceNonTerm = *p;
 
       // loop over possible target non-terminal labels (as found in chart)
-      NonTerminalSet::const_iterator q = targetNonTerms.begin();
-      NonTerminalSet::const_iterator tEnd = targetNonTerms.end();
+      ChartCellLabelSet::const_iterator q = targetNonTerms.begin();
+      ChartCellLabelSet::const_iterator tEnd = targetNonTerms.end();
       for (; q != tEnd; ++q) {
-        const Word & targetNonTerm = *q;
+        const ChartCellLabel &cellLabel = *q;
 
         // try to match both source and target non-terminal
         const PhraseDictionaryNodeSCFG * child =
-          node.GetChild(sourceNonTerm, targetNonTerm);
+          node.GetChild(sourceNonTerm, cellLabel.GetLabel());
 
         // nothing found? then we are done
         if (child == NULL) {
@@ -242,14 +244,11 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         // create new rule
 #ifdef USE_BOOST_POOL
         CoveredChartSpan *wc = m_coveredChartSpanPool.malloc();
-        new (wc) CoveredChartSpan(startPos, endPos, targetNonTerm,
-                              prevCoveredChartSpan);
+        new (wc) CoveredChartSpan(cellLabel, prevCoveredChartSpan);
         DottedRule *rule = m_dottedRulePool.malloc();
         new (rule) DottedRule(*child, wc);
 #else
-        CoveredChartSpan * wc = new CoveredChartSpan(startPos, endPos,
-                                             targetNonTerm,
-                                             prevCoveredChartSpan);
+        CoveredChartSpan * wc = new CoveredChartSpan(cellLabel, prevCoveredChartSpan);
         DottedRule * rule = new DottedRule(*child, wc);
 #endif
         dottedRuleColl.Add(stackInd, rule);
@@ -270,7 +269,8 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         continue;
       }
       const Word & targetNonTerm = key.second;
-      if (targetNonTerms.find(targetNonTerm) == targetNonTerms.end()) {
+      const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
+      if (!cellLabel) {
         continue;
       }
 
@@ -278,14 +278,11 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       const PhraseDictionaryNodeSCFG & child = p->second;
 #ifdef USE_BOOST_POOL
       CoveredChartSpan *wc = m_coveredChartSpanPool.malloc();
-      new (wc) CoveredChartSpan(startPos, endPos, targetNonTerm,
-                            prevCoveredChartSpan);
+      new (wc) CoveredChartSpan(*cellLabel, prevCoveredChartSpan);
       DottedRule *rule = m_dottedRulePool.malloc();
       new (rule) DottedRule(child, wc);
 #else
-      CoveredChartSpan * wc = new CoveredChartSpan(startPos, endPos,
-                                           targetNonTerm,
-                                           prevCoveredChartSpan);
+      CoveredChartSpan * wc = new CoveredChartSpan(*cellLabel, prevCoveredChartSpan);
       DottedRule * rule = new DottedRule(child, wc);
 #endif
       dottedRuleColl.Add(stackInd, rule);

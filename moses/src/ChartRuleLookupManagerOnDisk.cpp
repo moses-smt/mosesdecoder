@@ -99,6 +99,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const DottedRuleStackOnDisk::SavedNodeColl &savedNodeColl = expandableDottedRuleList.GetSavedNodeColl();
   //cerr << "savedNodeColl=" << savedNodeColl.size() << " ";
 
+  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+
   for (size_t ind = 0; ind < (savedNodeColl.size()) ; ++ind) {
     const SavedNodeOnDisk &savedNode = *savedNodeColl[ind];
 
@@ -109,8 +111,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // search for terminal symbol
     if (startPos == absEndPos) {
-      const Word &sourceWord = GetSentence().GetWord(absEndPos);
-      OnDiskPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceWord);
+      OnDiskPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(Input, m_inputFactorsVec, sourceWordLabel.GetLabel());
 
       if (sourceWordBerkeleyDb != NULL) {
         const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceWordBerkeleyDb, m_dbWrapper);
@@ -118,9 +119,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           // TODO figure out why source word is needed from node, not from sentence
           // prob to do with factors or non-term
           //const Word &sourceWord = node->GetSourceWord();
-          CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(absEndPos, absEndPos
-              , sourceWord
-              , prevCoveredChartSpan);
+          CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(sourceWordLabel, prevCoveredChartSpan);
           DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newCoveredChartSpan);
           expandableDottedRuleList.Add(relEndPos+1, dottedRule);
 
@@ -148,7 +147,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
     // size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
     // get target nonterminals in this span from chart
-    const NonTerminalSet &chartNonTermSet = GetCellCollection().GetConstituentLabelSet(WordsRange(startPos, endPos));
+    const ChartCellLabelSet &chartNonTermSet =
+      GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
 
     //const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
     //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
@@ -174,9 +174,9 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         continue; // didn't find source node
 
       // go through each TARGET lhs
-      NonTerminalSet::const_iterator iterChartNonTerm;
+      ChartCellLabelSet::const_iterator iterChartNonTerm;
       for (iterChartNonTerm = chartNonTermSet.begin(); iterChartNonTerm != chartNonTermSet.end(); ++iterChartNonTerm) {
-        const Word &chartNonTerm = *iterChartNonTerm;
+        const ChartCellLabel &cellLabel = *iterChartNonTerm;
 
         //cerr << sourceLHS << " " << defaultSourceNonTerm << " " << chartNonTerm << " " << defaultTargetNonTerm << endl;
 
@@ -186,7 +186,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
         if (doSearch) {
 
-          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(Output, m_outputFactorsVec, chartNonTerm);
+          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(Output, m_outputFactorsVec, cellLabel.GetLabel());
 
           if (chartNonTermBerkeleyDb == NULL)
             continue;
@@ -199,10 +199,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
           // found matching entry
           //const Word &sourceWord = node->GetSourceWord();
-          CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(startPos, endPos
-              , chartNonTerm
-              , prevCoveredChartSpan);
-
+          CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(cellLabel, prevCoveredChartSpan);
           DottedRuleOnDisk *dottedRule = new DottedRuleOnDisk(*node, newCoveredChartSpan);
           expandableDottedRuleList.Add(stackInd, dottedRule);
 

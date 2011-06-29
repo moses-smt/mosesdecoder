@@ -30,7 +30,9 @@
 #include "NonTerminal.h"
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
+#include "CoveredChartSpan.h"
 #include "RuleCube.h"
+#include "ChartCellLabelSet.h"
 
 namespace Moses
 {
@@ -46,15 +48,18 @@ public:
 
 protected:
   std::map<Word, ChartHypothesisCollection> m_hypoColl;
-  NonTerminalSet m_constituentLabelSet;
 
   WordsRange m_coverage;
+
+  ChartCellLabel *m_sourceWordLabel;
+  ChartCellLabelSet m_targetLabelSet;
 
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
   ChartManager &m_manager;
 
 public:
   ChartCell(size_t startPos, size_t endPos, ChartManager &manager);
+  ~ChartCell();
 
   void ProcessSentence(const ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
@@ -67,9 +72,13 @@ public:
 
   const ChartHypothesis *GetBestHypothesis() const;
 
-  bool ConstituentLabelExists(const Word &constituentLabel) const;
-  const NonTerminalSet &GetConstituentLabelSet() const {
-    return m_constituentLabelSet;
+  const ChartCellLabel &GetSourceWordLabel() const {
+    assert(m_coverage.GetNumWordsCovered() == 1);
+    return *m_sourceWordLabel;
+  }
+
+  const ChartCellLabelSet &GetTargetLabelSet() const {
+    return m_targetLabelSet;
   }
 
   void CleanupArcList();

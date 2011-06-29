@@ -19,6 +19,10 @@
  ***********************************************************************/
 #pragma once
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <vector>
 #include <cassert>
 #include "PhraseDictionaryNodeSCFG.h"
@@ -110,6 +114,12 @@ public:
     if (!dottedRule->GetLastNode().IsLeaf()) {
       m_expandableDottedRuleList.push_back(dottedRule);
     }
+  }
+
+  void Clear(size_t pos) {
+#ifdef USE_BOOST_POOL
+    m_coll[pos].clear();
+#endif
   }
 
   const DottedRuleList &GetExpandableDottedRuleList() const {

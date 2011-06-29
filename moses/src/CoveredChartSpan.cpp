@@ -26,7 +26,8 @@ namespace Moses
 
 std::ostream& operator<<(std::ostream &out, const CoveredChartSpan &coveredChartSpan)
 {
-  out << coveredChartSpan.m_coverage << "=" << coveredChartSpan.m_sourceWord << " ";
+  out << coveredChartSpan.GetWordsRange()
+      << "=" << coveredChartSpan.GetSourceWord() << " ";
   if (coveredChartSpan.m_prevCoveredChartSpan)
     out << " " << *coveredChartSpan.m_prevCoveredChartSpan;
 

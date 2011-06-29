@@ -30,6 +30,7 @@
 #include "StaticData.h"
 #include "ChartTranslationOption.h"
 #include "ChartTranslationOptionList.h"
+#include "ChartManager.h"
 
 using namespace std;
 
@@ -39,10 +40,21 @@ extern bool g_debug;
 
 ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager)
   :m_coverage(startPos, endPos)
+  ,m_sourceWordLabel(NULL)
+  ,m_targetLabelSet(m_coverage)
   ,m_manager(manager)
 {
   const StaticData &staticData = StaticData::Instance();
   m_nBestIsEnabled = staticData.IsNBestEnabled();
+  if (startPos == endPos) {
+    const Word &sourceWord = manager.GetSource().GetWord(startPos);
+    m_sourceWordLabel = new ChartCellLabel(m_coverage, sourceWord);
+  }
+}
+
+ChartCell::~ChartCell()
+{
+  delete m_sourceWordLabel;
 }
 
 /** Get all hypotheses in the cell that have the specified constituent label */
@@ -105,11 +117,10 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 void ChartCell::SortHypotheses()
 {
   // sort each mini cells & fill up target lhs list
-  assert(m_constituentLabelSet.empty());
+  assert(m_targetLabelSet.Empty());
   std::map<Word, ChartHypothesisCollection>::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
-    m_constituentLabelSet.insert(iter->first);
-
+    m_targetLabelSet.Add(iter->first);
     ChartHypothesisCollection &coll = iter->second;
     coll.SortHypotheses();
   }
@@ -134,14 +145,6 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   }
 
   return ret;
-}
-
-/** Is there a hypothesis in the cell that has the specified constituent label? */
-bool ChartCell::ConstituentLabelExists(const Word &constituentLabel) const
-{
-  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
-  iter = m_hypoColl.find(constituentLabel);
-  return (iter != m_hypoColl.end());
 }
 
 void ChartCell::CleanupArcList()

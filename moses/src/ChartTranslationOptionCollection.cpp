@@ -182,6 +182,9 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
   ChartTranslationOptionList &transOptColl = GetTranslationOptionList(sourcePos, sourcePos);
   const WordsRange &range = transOptColl.GetSourceRange();
 
+  const ChartCell &chartCell = m_hypoStackColl.Get(range);
+  const ChartCellLabel &sourceWordLabel = chartCell.GetSourceWordLabel();
+
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
@@ -204,7 +207,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
     std::vector<CoveredChartSpan*> *coveredChartSpanList = new std::vector<CoveredChartSpan*>();
     m_coveredChartSpanCache.push_back(coveredChartSpanList);
 
-    CoveredChartSpan *wc = new CoveredChartSpan(sourcePos, sourcePos, sourceWord, NULL);
+    CoveredChartSpan *wc = new CoveredChartSpan(sourceWordLabel, NULL);
     coveredChartSpanList->push_back(wc);
     assert(coveredChartSpanList->size());
 
@@ -273,7 +276,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       // words consumed
       std::vector<CoveredChartSpan*> *coveredChartSpanList = new std::vector<CoveredChartSpan*>;
       m_coveredChartSpanCache.push_back(coveredChartSpanList);
-      coveredChartSpanList->push_back(new CoveredChartSpan(sourcePos, sourcePos, sourceWord, NULL));
+      coveredChartSpanList->push_back(new CoveredChartSpan(sourceWordLabel, NULL));
 
       // chart rule
       assert(coveredChartSpanList->size());

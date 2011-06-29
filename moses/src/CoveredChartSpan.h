@@ -21,6 +21,7 @@
 #pragma once
 
 #include <iostream>
+#include "ChartCellLabel.h"
 #include "WordsRange.h"
 #include "Word.h"
 
@@ -32,27 +33,23 @@ class CoveredChartSpan
   friend std::ostream& operator<<(std::ostream&, const CoveredChartSpan&);
 
 protected:
-  WordsRange	m_coverage;
-  const Word &m_sourceWord; // can be non-term or term
+  const ChartCellLabel &m_cellLabel;
   const CoveredChartSpan *m_prevCoveredChartSpan;
 public:
   CoveredChartSpan(); // not implmented
-  CoveredChartSpan(size_t startPos, size_t endPos, const Word &sourceWord, const CoveredChartSpan *prevCoveredChartSpan)
-    :m_coverage(startPos, endPos)
-    ,m_sourceWord(sourceWord)
+  CoveredChartSpan(const ChartCellLabel &cellLabel,
+                   const CoveredChartSpan *prevCoveredChartSpan)
+    :m_cellLabel(cellLabel)
     ,m_prevCoveredChartSpan(prevCoveredChartSpan)
   {}
   const WordsRange &GetWordsRange() const {
-    return m_coverage;
+    return m_cellLabel.GetCoverage();
   }
   const Word &GetSourceWord() const {
-    return m_sourceWord;
-  }
-  WordsRange &GetWordsRange() {
-    return m_coverage;
+    return m_cellLabel.GetLabel();
   }
   bool IsNonTerminal() const {
-    return m_sourceWord.IsNonTerminal();
+    return m_cellLabel.GetLabel().IsNonTerminal();
   }
 
   const CoveredChartSpan *GetPrevCoveredChartSpan() const {
@@ -64,7 +61,7 @@ public:
     if (IsNonTerminal() < compare.IsNonTerminal())
       return true;
     else if (IsNonTerminal() == compare.IsNonTerminal())
-      return m_coverage < compare.m_coverage;
+      return m_cellLabel.GetCoverage() < compare.m_cellLabel.GetCoverage();
 
     return false;
   }
