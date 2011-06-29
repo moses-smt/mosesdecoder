@@ -32,6 +32,7 @@
 namespace mpi = boost::mpi;
 #endif
 
+#include "Main.h"
 #include "FeatureVector.h"
 #include "StaticData.h"
 #include "ChartTrellisPathList.h"
@@ -41,84 +42,10 @@ namespace mpi = boost::mpi;
 #include "Optimiser.h"
 #include "Hildreth.h"
 
-typedef std::map<const std::string, float> StrFloatMap;
-typedef std::pair<const std::string, float> StrFloatPair;
-
 using namespace Mira;
 using namespace std;
 using namespace Moses;
 namespace po = boost::program_options;
-
-template <class T>
-bool from_string(T& t,
-                 const std::string& s,
-                 std::ios_base& (*f)(std::ios_base&))
-{
-  std::istringstream iss(s);
-  return !(iss >> f >> t).fail();
-}
-
-void OutputNBestList(const MosesChart::TrellisPathList &nBestList,
-    const TranslationSystem* system, long translationId);
-
-bool loadSentences(const string& filename, vector<string>& sentences) {
-	ifstream in(filename.c_str());
-	if (!in)
-		return false;
-	string line;
-	while (getline(in, line)) {
-		sentences.push_back(line);
-	}
-	return true;
-}
-
-bool loadWeights(const string& filename, StrFloatMap& coreWeightMap) {
-	ifstream in(filename.c_str());
-	if (!in)
-		return false;
-	string line;
-	while (getline(in, line)) {
-		// split weight name from value
-		vector<string> split_line;
-		boost::split(split_line, line, boost::is_any_of(" "));
-
-		float weight;
-		if(!from_string<float>(weight, split_line[1], std::dec))
-		{
-			cerr << "from_string failed" << endl;
-			return false;
-		}
-		coreWeightMap.insert(StrFloatPair(split_line[0], weight));
-	}
-	return true;
-}
-
-bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size) {
-	if (mix_or_dump_base == 0) return 0;
-	if (actual_batch_size > 1) {
-		bool mix_or_dump = false;
-		size_t numberSubtracts = actual_batch_size;
-		do {
-			if (shard_position % mix_or_dump_base == 0) {
-				mix_or_dump = true;
-				break;
-			}
-			--shard_position;
-			--numberSubtracts;
-		} while (numberSubtracts > 0);
-		return mix_or_dump;
-	}
-	else {
-		return ((shard_position % mix_or_dump_base) == 0);
-	}
-}
-
-struct RandomIndex {
-	ptrdiff_t operator()(ptrdiff_t max) {
-		srand(time(0));  // Initialize random number generator with current time.
-		return static_cast<ptrdiff_t> (rand() % max);
-	}
-};
 
 int main(int argc, char** argv) {
 	size_t rank = 0;
@@ -1126,5 +1053,95 @@ int main(int argc, char** argv) {
 
 	delete decoder;
 	exit(0);
+}
+
+bool loadSentences(const string& filename, vector<string>& sentences) {
+	ifstream in(filename.c_str());
+	if (!in)
+		return false;
+	string line;
+	while (getline(in, line)) {
+		sentences.push_back(line);
+	}
+	return true;
+}
+
+bool loadWeights(const string& filename, StrFloatMap& coreWeightMap) {
+	ifstream in(filename.c_str());
+	if (!in)
+		return false;
+	string line;
+	while (getline(in, line)) {
+		// split weight name from value
+		vector<string> split_line;
+		boost::split(split_line, line, boost::is_any_of(" "));
+
+		float weight;
+		if(!from_string<float>(weight, split_line[1], std::dec))
+		{
+			cerr << "from_string failed" << endl;
+			return false;
+		}
+		coreWeightMap.insert(StrFloatPair(split_line[0], weight));
+	}
+	return true;
+}
+
+bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size) {
+	if (mix_or_dump_base == 0) return 0;
+	if (actual_batch_size > 1) {
+		bool mix_or_dump = false;
+		size_t numberSubtracts = actual_batch_size;
+		do {
+			if (shard_position % mix_or_dump_base == 0) {
+				mix_or_dump = true;
+				break;
+			}
+			--shard_position;
+			--numberSubtracts;
+		} while (numberSubtracts > 0);
+		return mix_or_dump;
+	}
+	else {
+		return ((shard_position % mix_or_dump_base) == 0);
+	}
+}
+
+void printFeatureValues(vector<vector<ScoreComponentCollection> > &featureValues) {
+	for (size_t i = 0; i < featureValues.size(); ++i) {
+		for (size_t j = 0; j < featureValues[i].size(); ++j) {
+			cerr << featureValues[i][j] << endl;
+		}
+	}
+	cerr << endl;
+}
+
+void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues, StrFloatMap &coreWeightMap) {
+	for (size_t i = 0; i < featureValues.size(); ++i) {
+		for (size_t j = 0; j < featureValues[i].size(); ++j) {
+			// set all core features to 0
+			StrFloatMap::iterator p;
+			for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+			{
+				featureValues[i][j].Assign(p->first, 0);
+			}
+		}
+	}
+}
+
+void takeLogs(vector<vector<ScoreComponentCollection> > &featureValues, size_t base) {
+	for (size_t i = 0; i < featureValues.size(); ++i) {
+		for (size_t j = 0; j < featureValues[i].size(); ++j) {
+			featureValues[i][j].ApplyLog(base);
+		}
+	}
+}
+
+void deleteTranslations(vector<vector<const Word*> > &translations) {
+	for (size_t i = 0; i < translations.size(); ++i) {
+		for (size_t j = 0; j < translations[i].size(); ++j) {
+			delete translations[i][j];
+		}
+	}
 }
 
