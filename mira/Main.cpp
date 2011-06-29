@@ -97,9 +97,6 @@ int main(int argc, char** argv) {
 	bool print_feature_values;
 	bool historyOf1best;
 	bool historyOfOracles;
-	bool burnIn;
-	string burnInInputFile;
-	vector<string> burnInReferenceFiles;
 	bool sentenceLevelBleu;
 	float bleuScoreWeight;
 	float margin_slack;
@@ -118,9 +115,6 @@ int main(int argc, char** argv) {
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the bleu objective weight)")
-		("burn-in", po::value<bool>(&burnIn)->default_value(false), "Do a burn-in of the BLEU history before training")
-		("burn-in-input-file", po::value<string>(&burnInInputFile), "Input file for burn-in phase of BLEU history")
-		("burn-in-reference-files", po::value<vector<string> >(&burnInReferenceFiles), "Reference file for burn-in phase of BLEU history")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
@@ -307,110 +301,8 @@ int main(int argc, char** argv) {
 			historyOf1best = true;
 		}
 	}
-	if (burnIn && sentenceLevelBleu) {
-		burnIn = false;
-		cerr << "Info: Burn-in not needed when using sentence-level BLEU, deactivating burn-in." << endl;
-	}
 
-	if (burnIn) {
-		// load burn-in input and references
-		vector<string> burnInInputSentences;
-		if (!loadSentences(burnInInputFile, burnInInputSentences)) {
-			cerr << "Error: Failed to load burn-in input sentences from " << burnInInputFile << endl;
-			return 1;
-		}
-
-		vector<vector<string> > burnInReferenceSentences(burnInReferenceFiles.size());
-		for (size_t i = 0; i < burnInReferenceFiles.size(); ++i) {
-			if (!loadSentences(burnInReferenceFiles[i], burnInReferenceSentences[i])) {
-				cerr << "Error: Failed to load burn-in reference sentences from "
-				    << burnInReferenceFiles[i] << endl;
-				return 1;
-			}
-			if (burnInReferenceSentences[i].size() != burnInInputSentences.size()) {
-				cerr << "Error: Burn-in input file length (" << burnInInputSentences.size() << ") != ("
-				    << burnInReferenceSentences[i].size() << ") length of burn-in reference file " << i
-				    << endl;
-				return 1;
-			}
-		}
-		decoder->loadReferenceSentences(burnInReferenceSentences);
-
-		vector<size_t> inputLengths;
-		vector<size_t> ref_ids;
-		vector<vector<const Word*> > oracles;
-		vector<vector<const Word*> > oneBests;
-
-		vector<vector<ScoreComponentCollection> > featureValues;
-		vector<vector<float> > bleuScores;
-		vector<ScoreComponentCollection> newFeatureValues;
-		vector<float> newBleuScores;
-		featureValues.push_back(newFeatureValues);
-		bleuScores.push_back(newBleuScores);
-
-		vector<size_t> order;
-		for (size_t i = 0; i < burnInInputSentences.size(); ++i) {
-			order.push_back(i);
-		}
-
-		VERBOSE(1, "Rank " << rank << ", starting burn-in phase for approx. BLEU history.." << endl);
-		if (historyOf1best) {
-			// get 1best translations for the burn-in sentences
-			vector<size_t>::const_iterator sid = order.begin();
-			while (sid != order.end()) {
-				string& input = burnInInputSentences[*sid];
-				vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
-						featureValues[0], bleuScores[0], true,
-						distinctNbest, rank, -1);
-				inputLengths.push_back(decoder->getCurrentInputLength());
-				ref_ids.push_back(*sid);
-				decoder->cleanup();
-				oneBests.push_back(bestModel);
-				++sid;
-			}
-
-			// update history
-			decoder->updateHistory(oneBests, inputLengths, ref_ids, rank, 0);
-
-			// clean up 1best translations after updating history
-			for (size_t i = 0; i < oracles.size(); ++i) {
-				for (size_t j = 0; j < oracles[i].size(); ++j) {
-					delete oracles[i][j];
-				}
-			}
-		}
-		else {
-			// get oracle translations for the burn-in sentences
-			vector<size_t>::const_iterator sid = order.begin();
-			while (sid != order.end()) {
-				string& input = burnInInputSentences[*sid];
-				vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
-						featureValues[0], bleuScores[0], true, distinctNbest, rank, -1);
-				inputLengths.push_back(decoder->getCurrentInputLength());
-				ref_ids.push_back(*sid);
-				decoder->cleanup();
-				oracles.push_back(oracle);
-				++sid;
-			}
-
-			// update history
-			decoder->updateHistory(oracles, inputLengths, ref_ids, rank, 0);
-
-			// clean up oracle translations after updating history
-			for (size_t i = 0; i < oracles.size(); ++i) {
-				for (size_t j = 0; j < oracles[i].size(); ++j) {
-					delete oracles[i][j];
-				}
-			}
-		}
-
-		VERBOSE(1, "Bleu feature history after burn-in: " << endl);
-		decoder->printBleuFeatureHistory(cerr);
-		decoder->loadReferenceSentences(referenceSentences);
-	}
-	else {
-		decoder->loadReferenceSentences(referenceSentences);
-	}
+	decoder->loadReferenceSentences(referenceSentences);
 
 #ifdef MPI_ENABLE
 	mpi::broadcast(world, order, 0);
@@ -458,16 +350,12 @@ int main(int argc, char** argv) {
 
 	bool stop = false;
 	int sumStillViolatedConstraints;
-	int sumStillViolatedConstraints_lastEpoch = 0;
-	int sumConstraintChangeAbs;
-	int sumConstraintChangeAbs_lastEpoch = 0;
 	float *sendbuf, *recvbuf;
 	sendbuf = (float *) malloc(sizeof(float));
 	recvbuf = (float *) malloc(sizeof(float));
 	for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
-		// sum of violated constraints
+		// sum of violated constraints in an epoch
 		sumStillViolatedConstraints = 0;
-		sumConstraintChangeAbs = 0;
 
 		numberOfUpdatesThisEpoch = 0;
 		// Sum up weights over one epoch, final average uses weights from last epoch
@@ -516,10 +404,6 @@ int main(int argc, char** argv) {
 				string& input = inputSentences[*sid];
 				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
-
-				cerr << "model-hope-fear: " << model_hope_fear << endl;
-				cerr << "hope-fear: " << hope_fear << endl;
-				cerr << "perceptron: " << perceptron_update << endl;
 
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newBleuScores;
@@ -634,58 +518,39 @@ int main(int argc, char** argv) {
 			// set weight for bleu feature to 0
 			mosesWeights.Assign(featureFunctions.back(), 0);
 
+			// take logs of feature values
 			if (logFeatureValues) {
-				for (size_t i = 0; i < featureValues.size(); ++i) {
-					if (hope_fear) {
-						for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
-							featureValuesHope[i][j].ApplyLog(baseOfLog);
-						}
-						for (size_t j = 0; j < featureValuesFear[i].size(); ++j) {
-							featureValuesFear[i][j].ApplyLog(baseOfLog);
-						}
-					}
-					else {
-						for (size_t j = 0; j < featureValues[i].size(); ++j) {
-							featureValues[i][j].ApplyLog(baseOfLog);
-						}
-
-						oracleFeatureValues[i].ApplyLog(baseOfLog);
-					}
+				takeLogs(featureValuesHope, baseOfLog);
+				takeLogs(featureValuesFear, baseOfLog);
+				takeLogs(featureValues, baseOfLog);
+				for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
+					oracleFeatureValues[i].ApplyLog(baseOfLog);
 				}
 			}
 
-			// optionally print out the feature values
+			// print out the feature values
 			if (print_feature_values) {
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
-				if (model_hope_fear) {
-					for (size_t i = 0; i < featureValues.size(); ++i) {
-						for (size_t j = 0; j < featureValues[i].size(); ++j) {
-							cerr << featureValues[i][j] << endl;
-						}
-					}
-					cerr << endl;
-				}
+				if (model_hope_fear) printFeatureValues(featureValues);
 				else {
 					cerr << "hope: " << endl;
-					for (size_t i = 0; i < featureValuesHope.size(); ++i) {
-						for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
-							cerr << featureValuesHope[i][j] << endl;
-						}
-					}
+					printFeatureValues(featureValuesHope);
 					cerr << "fear: " << endl;
-					for (size_t i = 0; i < featureValuesFear.size(); ++i) {
-						for (size_t j = 0; j < featureValuesFear[i].size(); ++j) {
-							cerr << featureValuesFear[i][j] << endl;
-						}
-					}
-					cerr << endl;
+					printFeatureValues(featureValuesFear);
 				}
+			}
+
+			// set core features to 0 to avoid updating the feature weights
+			if (coreWeightMap.size() > 0) {
+				ignoreCoreFeatures(featureValues, coreWeightMap);
+				ignoreCoreFeatures(featureValuesHope, coreWeightMap);
+				ignoreCoreFeatures(featureValuesFear, coreWeightMap);
 			}
 
 			// Run optimiser on batch:
 			VERBOSE(1, "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl);
 			ScoreComponentCollection oldWeights(mosesWeights);
-			vector<int> update_status;
+			size_t update_status;
 			if (perceptron_update) {
 				vector<vector<float> > dummy1;
 				vector<size_t> dummy2;
@@ -693,47 +558,19 @@ int main(int argc, char** argv) {
 						featureValuesHope, featureValuesFear, dummy1, dummy1, dummy2,
 						learning_rate, rank, epoch);
 			}
+			else if (hope_fear) {
+				update_status = optimiser->updateWeightsHopeFear(mosesWeights,
+						featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, ref_ids,
+						learning_rate, rank, epoch);
+			}
 			else {
-				if (hope_fear) {
-					if (coreWeightMap.size() > 0) {
-						// set core features to 0 to avoid updating the feature weights
-						for (size_t i = 0; i < featureValuesHope.size(); ++i) {
-							for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
-								// set all core features to 0
-								StrFloatMap::iterator p;
-								for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-								{
-									featureValuesHope[i][j].Assign(p->first, 0);
-								}
-							}
-						}
-
-						for (size_t i = 0; i < featureValuesFear.size(); ++i) {
-							for (size_t j = 0; j < featureValuesFear[i].size(); ++j) {
-								// set all core features to 0
-								StrFloatMap::iterator p;
-								for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-								{
-									featureValuesFear[i][j].Assign(p->first, 0);
-								}
-							}
-						}
-					}
-
-					update_status = optimiser->updateWeightsHopeFear(mosesWeights,
-							featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, ref_ids,
-							learning_rate, rank, epoch);
-				}
-				else {
-					// model_hope_fear
-					update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights, featureValues,
-							losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
-							learning_rate, rank, epoch);
-				}
+				// model_hope_fear
+				update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights,
+						featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, ref_ids,
+						learning_rate, rank, epoch);
 			}
 
-			sumConstraintChangeAbs += abs(update_status[0] - update_status[1]);
-			sumStillViolatedConstraints += update_status[1];
+			sumStillViolatedConstraints += update_status;
 
 			// pass new weights to decoder
 			if (normaliseWeights) {
@@ -754,7 +591,7 @@ int main(int argc, char** argv) {
 				mosesWeights = averageWeights;
 			}
 
-			// set new Moses weights (averaged or not)
+			// set new Moses weights
 			decoder->setWeights(mosesWeights);
 
 			// compute difference to old weights
@@ -764,9 +601,9 @@ int main(int argc, char** argv) {
 
 			// update history (for approximate document Bleu)
 			if (sentenceLevelBleu) {
-				for (size_t i = 0; i < oracles.size(); ++i) {
-					VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", oracle length: " << oracles[i].size() << " ");
-					if (verbosity > 0) {
+				if (verbosity > 0) {
+					for (size_t i = 0; i < oracles.size(); ++i) {
+						cerr << "Rank " << rank << ", epoch " << epoch << ", oracle length: " << oracles[i].size() << " ";
 						decoder->printReferenceLength(ref_ids);
 					}
 				}
@@ -787,16 +624,8 @@ int main(int argc, char** argv) {
 			}
 
 			// clean up oracle and 1best translations after updating history
-			for (size_t i = 0; i < oracles.size(); ++i) {
-				for (size_t j = 0; j < oracles[i].size(); ++j) {
-					delete oracles[i][j];
-				}
-			}
-			for (size_t i = 0; i < oneBests.size(); ++i) {
-				for (size_t j = 0; j < oneBests[i].size(); ++j) {
-					delete oneBests[i][j];
-				}
-			}
+			deleteTranslations(oracles);
+			deleteTranslations(oneBests);
 
 			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
 			size_t dumping_base = weightDumpFrequency ==0 ? 0 : shard.size() / weightDumpFrequency;
@@ -886,6 +715,7 @@ int main(int argc, char** argv) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;
 			decoder->printBleuFeatureHistory(cerr);
 		}
+		cerr << "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << endl;
 
 		// Check whether there were any weight updates during this epoch
 		size_t sumUpdates;
@@ -910,21 +740,6 @@ int main(int argc, char** argv) {
 #endif
 		}
 
-		if (epoch > 0) {
-			if ((sumConstraintChangeAbs_lastEpoch == sumConstraintChangeAbs) && (sumStillViolatedConstraints_lastEpoch == sumStillViolatedConstraints)) {
-				VERBOSE(2, "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints and constraint changes has stayed the same: " << sumStillViolatedConstraints << ", " <<  sumConstraintChangeAbs << endl);
-			}
-			else {
-				VERBOSE(2, "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << ", sum of constraint changes " <<  sumConstraintChangeAbs << endl);
-			}
-		}
-		else {
-			VERBOSE(2, "Rank " << rank << ", epoch " << epoch << ", sum of violated constraints: " << sumStillViolatedConstraints << endl);
-		}
-
-		sumConstraintChangeAbs_lastEpoch = sumConstraintChangeAbs;
-		sumStillViolatedConstraints_lastEpoch = sumStillViolatedConstraints;
-		
 		if (!stop) {
 			// Test if weights have converged
 			if (weightConvergence) {
@@ -1110,4 +925,3 @@ void deleteTranslations(vector<vector<const Word*> > &translations) {
 		}
 	}
 }
-

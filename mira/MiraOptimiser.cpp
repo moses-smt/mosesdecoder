@@ -7,7 +7,7 @@ using namespace std;
 
 namespace Mira {
 
-vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
+size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
     const vector<vector<ScoreComponentCollection> >& featureValues,
     const vector<vector<float> >& losses,
     const vector<vector<float> >& bleuScores,
@@ -115,18 +115,14 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	  }
 	} 
 	else {
-		cerr << "Rank " << rank << ", epoch " << epoch << ", check, no constraint violated for this batch" << endl;
-	  vector<int> status(2);
-	  status[0] = 0;
-	  status[1] = 0;
-	  return status;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", no constraint violated for this batch" << endl;
+	  return 0;
 	}
 
 	// apply learning rate
 	if (learning_rate != 1) {
 		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl);
 		summedUpdate.MultiplyEquals(learning_rate);
-		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update after applying learning rate: " << summedUpdate << endl);
 	}
 
 	// scale update by BLEU of oracle
@@ -134,6 +130,8 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log10 oracle bleu score " << log10(oracleBleuScores[0]) << endl);
 		summedUpdate.MultiplyEquals(log10(oracleBleuScores[0]));
 	}
+
+	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
 
 	// apply update to weight vector
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl);
@@ -154,14 +152,10 @@ vector<int> MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	}
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-
-	vector<int> status(2);
-	status[0] = violatedConstraintsBefore;
-	status[1] = violatedConstraintsAfter;
-	return status;
+	return violatedConstraintsAfter;
 }
 
-vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
 		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
 		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 		const std::vector<std::vector<float> >& bleuScoresHope,
@@ -282,18 +276,16 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	}
 	else {
 		cerr << "Rank " << rank << ", epoch " << epoch << ", check, no constraint violated for this batch" << endl;
-	  vector<int> status(2);
-	  status[0] = 0;
-	  status[1] = 0;
-	  return status;
+	  return 0;
 	}
 
 	// apply learning rate
 	if (learning_rate != 1) {
 		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl);
 		summedUpdate.MultiplyEquals(learning_rate);
-		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update after applying learning rate: " << summedUpdate << endl);
 	}
+
+	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
 
 	// apply update to weight vector
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl);
@@ -314,12 +306,7 @@ vector<int> MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection
 	}
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-
-
-	vector<int> statusPlus(2);
-	statusPlus[0] = violatedConstraintsBefore;
-	statusPlus[1] = violatedConstraintsAfter;
-	return statusPlus;
+	return violatedConstraintsAfter;
 }
 
 }

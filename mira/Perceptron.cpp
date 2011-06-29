@@ -24,7 +24,7 @@ using namespace std;
 
 namespace Mira {
 
-vector<int> Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeights,
+size_t Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeights,
 		const vector< vector<ScoreComponentCollection> >& featureValuesHope,
 		const vector< vector<ScoreComponentCollection> >& featureValuesFear,
 		const vector< vector<float> >& dummy1,
@@ -34,18 +34,15 @@ vector<int> Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeig
 		size_t rank,
 		size_t epoch)
 {
-	cerr << "hope: " << featureValuesHope[0][0] << endl;
-	cerr << "fear: " << featureValuesFear[0][0] << endl;
+	cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << featureValuesHope[0][0] << endl;
+	cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear[0][0] << endl;
 	ScoreComponentCollection featureValueDiff = featureValuesHope[0][0];
 	featureValueDiff.MinusEquals(featureValuesFear[0][0]);
-	cerr << "hope - fear: " << featureValueDiff << endl;
+	cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
 	featureValueDiff.MultiplyEquals(perceptron_learning_rate);
 	currWeights.PlusEquals(featureValueDiff);
-
-	vector<int> update_status;
-	update_status.push_back(0);
-	update_status.push_back(0);
-	return update_status;
+	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << featureValueDiff << endl;
+	return 0;
 }
 
 }

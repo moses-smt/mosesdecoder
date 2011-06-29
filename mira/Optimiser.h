@@ -30,7 +30,7 @@ namespace Mira {
     public:
       Optimiser() {}
 
-      virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+      virtual size_t updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
 				  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
 				  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 				  const std::vector<std::vector<float> >& bleuScoresHope,
@@ -43,7 +43,7 @@ namespace Mira {
  
   class Perceptron : public Optimiser {
     public:
-			virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+			virtual size_t updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
 					const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
 					const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 					const std::vector<std::vector<float> >& bleuScoresHope,
@@ -67,7 +67,7 @@ namespace Mira {
 		  m_scale_update(scale_update),
 		  m_margin_slack(margin_slack) { }
    
-     std::vector<int> updateWeights(Moses::ScoreComponentCollection& currWeights,
+	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector<std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,
@@ -77,7 +77,7 @@ namespace Mira {
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);
-     virtual std::vector<int> updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+     virtual size_t updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
       						  const std::vector<std::vector<float> >& bleuScoresHope,
