@@ -278,6 +278,9 @@ int main(int argc, char** argv) {
 		perceptron_update = true;
 		model_hope_fear = false; // mira only
 		hope_fear = false; // mira only
+		n = 1;
+		hope_n = 1;
+		fear_n = 1;
 	} else {
 		cerr << "Error: Unknown optimiser: " << learner << endl;
 		return 1;
@@ -295,8 +298,9 @@ int main(int argc, char** argv) {
 	if (model_hope_fear && hope_fear) {
 		hope_fear = false; // is true by default
 	}
-	if (!hope_fear) {
-		model_hope_fear = true;
+	if (learner == "mira" && !(hope_fear || model_hope_fear)) {
+		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
+		return 1;
 	}
 	if (!sentenceLevelBleu) {
 		if (!historyOf1best && !historyOfOracles) {
@@ -483,15 +487,15 @@ int main(int argc, char** argv) {
 		while (sid != shard.end()) {
 			// feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 			vector<vector<ScoreComponentCollection> > featureValues;
-			vector<vector<ScoreComponentCollection> > dummyFeatureValues;
 			vector<vector<float> > bleuScores;
-			vector<vector<float> > dummyBleuScores;
 
-			// variables for hope-fear setting
+			// variables for hope-fear/perceptron setting
 			vector<vector<ScoreComponentCollection> > featureValuesHope;
 			vector<vector<ScoreComponentCollection> > featureValuesFear;
 			vector<vector<float> > bleuScoresHope;
 			vector<vector<float> > bleuScoresFear;
+			vector<vector<ScoreComponentCollection> > dummyFeatureValues;
+			vector<vector<float> > dummyBleuScores;
 
 			// get moses weights
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
@@ -513,6 +517,10 @@ int main(int argc, char** argv) {
 				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
 
+				cerr << "model-hope-fear: " << model_hope_fear << endl;
+				cerr << "hope-fear: " << hope_fear << endl;
+				cerr << "perceptron: " << perceptron_update << endl;
+
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newBleuScores;
 				if (model_hope_fear) {
@@ -524,14 +532,15 @@ int main(int argc, char** argv) {
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newBleuScores);
 					bleuScoresFear.push_back(newBleuScores);
+					if (historyOf1best) {
+						dummyFeatureValues.push_back(newFeatureValues);
+						dummyBleuScores.push_back(newBleuScores);
+					}
 				}
 
-				dummyFeatureValues.push_back(newFeatureValues);
-				dummyBleuScores.push_back(newBleuScores);
-
-				if (perceptron_update) {
+				if (hope_fear || perceptron_update) {
 					if (historyOf1best) {
-						// MODEL (for updating the history)
+						// MODEL (for updating the history only, using dummy vectors)
 						cerr << "Rank " << rank << ", run decoder to get 1best wrt model score (for history)" << endl;
 						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
@@ -541,14 +550,9 @@ int main(int argc, char** argv) {
 						VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl);
 					}
 
-					// clear dummies
-					dummyFeatureValues[batchPosition].clear();
-					dummyBleuScores[batchPosition].clear();
-
 					// HOPE
-					cerr << "Rank " << rank << ", run decoder to get 1best hope translations" << endl;
-					size_t oraclePos = 0;
-					vector<const Word*> oracle = decoder->getNBest(input, *sid, 1, 1.0, bleuScoreWeight,
+					cerr << "Rank " << rank << ", run decoder to get " << hope_n << "best hope translations" << endl;
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
 							distinctNbest, rank, epoch);
 					// needed for history
@@ -556,96 +560,58 @@ int main(int argc, char** argv) {
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
-					VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScoresHope[batchPosition][oraclePos] << endl);
+					VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScoresHope[batchPosition][0] << endl);
 
 					// FEAR
-					cerr << "Rank " << rank << ", run decoder to get 1best fear translations" << endl;
-					size_t fearPos = 0;
-					vector<const Word*> fear = decoder->getNBest(input, *sid, 1, -1.0, bleuScoreWeight,
+					cerr << "Rank " << rank << ", run decoder to get " << fear_n << "best fear translations" << endl;
+					vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScoresFear[batchPosition][fearPos] << endl);
+					VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScoresFear[batchPosition][0] << endl);
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
 					}
 				}
 				else {
-					if (hope_fear) {
-						if (historyOf1best) {
-							// MODEL (for updating the history only, using dummy vectors)
-							cerr << "Rank " << rank << ", run decoder to get 1best wrt model score (for history)" << endl;
-							vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
-									dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
-									distinctNbest, rank, epoch);
-							decoder->cleanup();
-							oneBests.push_back(bestModel);
-							VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl);
-						}
+					// MODEL
+					cerr << "Rank " << rank << ", run decoder to get " << n << "best wrt model score" << endl;
+					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
+							featureValues[batchPosition], bleuScores[batchPosition], true,
+							distinctNbest, rank, epoch);
+					decoder->cleanup();
+					oneBests.push_back(bestModel);
+					// needed for calculating bleu of dev (1best translations) // todo:
+					all_ref_ids.push_back(*sid);
+					allBestModelScore.push_back(bestModel);
+					VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl);
 
-						// HOPE
-						cerr << "Rank " << rank << ", run decoder to get " << hope_n << "best hope translations" << endl;
-						vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight,
-										featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
-										distinctNbest, rank, epoch);
-						// needed for history
-						inputLengths.push_back(decoder->getCurrentInputLength());
-						ref_ids.push_back(*sid);
-						decoder->cleanup();
-						oracles.push_back(oracle);
-						VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScoresHope[batchPosition][0] << endl);
+					// HOPE
+					cerr << "Rank " << rank << ", run decoder to get " << n << "best hope translations" << endl;
+					size_t oraclePos = featureValues[batchPosition].size();
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight,
+							featureValues[batchPosition], bleuScores[batchPosition], true,
+							distinctNbest, rank, epoch);
+					// needed for history
+					inputLengths.push_back(decoder->getCurrentInputLength());
+					ref_ids.push_back(*sid);
+					decoder->cleanup();
+					oracles.push_back(oracle);
+					VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl);
 
-						// FEAR
-						cerr << "Rank " << rank << ", run decoder to get " << fear_n << "best fear translations" << endl;
-						vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight,
-										featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
-										distinctNbest, rank, epoch);
-						decoder->cleanup();
-						VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScoresFear[batchPosition][0] << endl);
-						for (size_t i = 0; i < fear.size(); ++i) {
-							delete fear[i];
-						}
-					}
-					else {
-						// MODEL
-						cerr << "Rank " << rank << ", run decoder to get " << n << "best wrt model score" << endl;
-						vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
-									featureValues[batchPosition], bleuScores[batchPosition], true,
-									distinctNbest, rank, epoch);
-						decoder->cleanup();
-						oneBests.push_back(bestModel);
-						// needed for calculating bleu of dev (1best translations) // todo:
-						all_ref_ids.push_back(*sid);
-						allBestModelScore.push_back(bestModel);
-						VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl);
+					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
+					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
 
-						// HOPE
-						cerr << "Rank " << rank << ", run decoder to get " << n << "best hope translations" << endl;
-						size_t oraclePos = featureValues[batchPosition].size();
-						vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight,
-										featureValues[batchPosition], bleuScores[batchPosition], true,
-										distinctNbest, rank, epoch);
-						// needed for history
-						inputLengths.push_back(decoder->getCurrentInputLength());
-						ref_ids.push_back(*sid);
-						decoder->cleanup();
-						oracles.push_back(oracle);
-						VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl);
-
-						oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
-						oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
-
-						// FEAR
-						cerr << "Rank " << rank << ", run decoder to get " << n << "best fear translations" << endl;
-						size_t fearPos = featureValues[batchPosition].size();
-						vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight,
-										featureValues[batchPosition], bleuScores[batchPosition], true,
-										distinctNbest, rank, epoch);
-						decoder->cleanup();
-						VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl);
-						for (size_t i = 0; i < fear.size(); ++i) {
-							delete fear[i];
-						}
+					// FEAR
+					cerr << "Rank " << rank << ", run decoder to get " << n << "best fear translations" << endl;
+					size_t fearPos = featureValues[batchPosition].size();
+					vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight,
+							featureValues[batchPosition], bleuScores[batchPosition], true,
+							distinctNbest, rank, epoch);
+					decoder->cleanup();
+					VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl);
+					for (size_t i = 0; i < fear.size(); ++i) {
+						delete fear[i];
 					}
 				}
 
