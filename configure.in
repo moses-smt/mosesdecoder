@@ -63,6 +63,11 @@ AC_ARG_WITH(orlm,
             [with_orlm=$withval],
             [with_orlm=no]
            )
+AC_ARG_WITH(dmaplm,
+            [AC_HELP_STRING([--with-dmaplm=PATH], [(optional) path to DMapLM])],
+            [with_dmaplm=$withval],
+            [with_dmaplm=no]
+           )
 
 AC_ARG_WITH(synlm,
 	   [AC_HELP_STRING([--with-synlm], [(optional) Include syntactic language model parser; default is no])],
@@ -130,6 +135,7 @@ AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([KEN_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
 AM_CONDITIONAL([ORLM_LM], false)
+AM_CONDITIONAL([DMAP_LM], false)
 AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
@@ -270,6 +276,21 @@ then
   LIBS="$LIBS $LIB_RANDLM"
   FMTLIBS="$FMTLIBS librandlm.a"
   AM_CONDITIONAL([RAND_LM], true)
+fi
+
+if test "x$with_dmaplm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_dmaplm}/src/DMap"
+
+  AC_CHECK_HEADER(StructLanguageModel.h,
+                 [AC_DEFINE([HAVE_DMAPLM], [], [flag for DMapLM])],
+                 [AC_MSG_ERROR([Cannot find DMapLM!])])
+
+  LDFLAGS="$LDFLAGS -L${with_dmaplm}/src/DMap"
+  LIBS="$LIBS -lDMap"
+  FMTLIBS="FMTLIBS libdmap.la"
+  AM_CONDITIONAL([DMAP_LM], true)
 fi
 
 if test "x$with_orlm" != 'xno'
