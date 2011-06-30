@@ -100,6 +100,10 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 #    define LM_KEN 1
 #  endif
 
+#  ifdef HAVE_DMAPLM
+#    define LM_DMAP
+#  endif
+
 #endif
 /////////////////////////////////////////////////
 
@@ -157,6 +161,7 @@ enum LMImplementation {
   ,Ken			= 8
   ,LazyKen	= 9
   ,ORLM = 10
+  ,DMapLM = 11
 };
 
 enum PhraseTableImplementation {

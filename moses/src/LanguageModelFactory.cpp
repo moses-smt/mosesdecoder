@@ -51,6 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
+#include "LanguageModelDMapLM.h"
 
 using namespace std;
 
@@ -127,6 +128,11 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
   case Internal:
 #ifdef LM_INTERNAL
     lm = new LanguageModelInternal();
+#endif
+    break;
+  case DMapLM:
+#ifdef LM_DMAP
+    lm = new LanguageModelDMapLM();
 #endif
     break;
   }
