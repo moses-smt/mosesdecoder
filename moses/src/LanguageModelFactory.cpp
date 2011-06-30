@@ -46,12 +46,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_KEN
 #	include "LanguageModelKen.h"
 #endif
+#ifdef LM_DMAP
+#   include "LanguageModelDMapLM.h"
+#endif
 
 #include "LanguageModel.h"
 #include "LanguageModelInternal.h"
 #include "LanguageModelSkip.h"
 #include "LanguageModelJoint.h"
-#include "LanguageModelDMapLM.h"
 
 using namespace std;
 
