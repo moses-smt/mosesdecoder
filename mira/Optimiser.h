@@ -59,7 +59,7 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, bool scale_update, float margin_slack) :
+	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, size_t scale_update, float margin_slack) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
@@ -103,13 +103,13 @@ namespace Mira {
       // regularise Hildreth updates
       float m_slack;
 
+      // slack when comparing losses to model scores
+      float m_margin_slack;
+
       size_t m_scale_margin;
 
       // scale update with log 10 of oracle BLEU score
-      bool m_scale_update;
-
-      // slack when comparing losses to model scores
-      float m_margin_slack;
+      size_t m_scale_update;
   };
 }
 

@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 	string weightDumpStem;
 	float min_learning_rate;
 	size_t scale_margin;
-	bool scale_update;
+	size_t scale_update;
 	size_t n;
 	size_t batchSize;
 	bool distinctNbest;
@@ -146,16 +146,16 @@ int main(int argc, char** argv) {
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
-		("scale-update", po::value<bool>(&scale_update)->default_value(false), "Scale the update by the Bleu score of the oracle translation")
+		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level bleu scoring function")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-	    ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
-	    ("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
-	    ("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
-	    ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
-	    ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-	    ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
-	    ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
+		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimizer")
+		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
+		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
+		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
+		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
+		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
+		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
 	po::options_description cmdline_options;
 	cmdline_options.add(desc);
@@ -425,7 +425,7 @@ int main(int argc, char** argv) {
 				if (hope_fear || perceptron_update) {
 					if (historyOf1best) {
 						// MODEL (for updating the history only, using dummy vectors)
-						cerr << "Rank " << rank << ", run decoder to get 1best wrt model score (for history)" << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get 1best wrt model score (for history)" << endl;
 						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
 								distinctNbest, rank, epoch);
@@ -435,7 +435,7 @@ int main(int argc, char** argv) {
 					}
 
 					// HOPE
-					cerr << "Rank " << rank << ", run decoder to get " << hope_n << "best hope translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << hope_n << "best hope translations" << endl;
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
 							distinctNbest, rank, epoch);
@@ -447,7 +447,7 @@ int main(int argc, char** argv) {
 					VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScoresHope[batchPosition][0] << endl);
 
 					// FEAR
-					cerr << "Rank " << rank << ", run decoder to get " << fear_n << "best fear translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << fear_n << "best fear translations" << endl;
 					vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
 							distinctNbest, rank, epoch);
@@ -459,7 +459,7 @@ int main(int argc, char** argv) {
 				}
 				else {
 					// MODEL
-					cerr << "Rank " << rank << ", run decoder to get " << n << "best wrt model score" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best wrt model score" << endl;
 					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
 							distinctNbest, rank, epoch);
@@ -471,7 +471,7 @@ int main(int argc, char** argv) {
 					VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl);
 
 					// HOPE
-					cerr << "Rank " << rank << ", run decoder to get " << n << "best hope translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
@@ -487,7 +487,7 @@ int main(int argc, char** argv) {
 					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
 
 					// FEAR
-					cerr << "Rank " << rank << ", run decoder to get " << n << "best fear translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best fear translations" << endl;
 					size_t fearPos = featureValues[batchPosition].size();
 					vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
@@ -549,7 +549,6 @@ int main(int argc, char** argv) {
 
 			// Run optimiser on batch:
 			VERBOSE(1, "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl);
-			ScoreComponentCollection oldWeights(mosesWeights);
 			size_t update_status;
 			if (perceptron_update) {
 				vector<vector<float> > dummy1;
@@ -593,11 +592,6 @@ int main(int argc, char** argv) {
 
 			// set new Moses weights
 			decoder->setWeights(mosesWeights);
-
-			// compute difference to old weights
-			ScoreComponentCollection weightDifference(mosesWeights);
-			weightDifference.MinusEquals(oldWeights);
-			VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weight difference: " << weightDifference << endl);
 
 			// update history (for approximate document Bleu)
 			if (sentenceLevelBleu) {

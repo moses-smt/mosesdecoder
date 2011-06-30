@@ -48,15 +48,15 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 			float loss = losses[i][j];
 		    if (m_scale_margin == 1) {
 		    	loss *= oracleBleuScores[i];
-		    	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << oracleBleuScores[i] << endl);
+		    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << oracleBleuScores[i] << endl;
 		    }
 		    else if (m_scale_margin == 2) {
 		    	loss *= log2(oracleBleuScores[i]);
-		    	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling margin with log2 oracle bleu score "  << log2(oracleBleuScores[i]) << endl);
+		    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log2 oracle bleu score "  << log2(oracleBleuScores[i]) << endl;
 		    }
 		    else if (m_scale_margin == 10) {
 		    	loss *= log10(oracleBleuScores[i]);
-		    	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling margin with log10 oracle bleu score "  << log10(oracleBleuScores[i]) << endl)
+		    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log10 oracle bleu score "  << log10(oracleBleuScores[i]) << endl;
 		    }
 
 		  	// check if constraint is violated
@@ -121,22 +121,30 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 
 	// apply learning rate
 	if (learning_rate != 1) {
-		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl);
+		cerr << "Rank " << rank << ", epoch " << epoch << ", apply learning rate " << learning_rate << " to update." << endl;
 		summedUpdate.MultiplyEquals(learning_rate);
 	}
 
-	// scale update by BLEU of oracle
-	if (oracleBleuScores.size() == 1 && m_scale_update) {
-		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log10 oracle bleu score " << log10(oracleBleuScores[0]) << endl);
-		summedUpdate.MultiplyEquals(log10(oracleBleuScores[0]));
+	// scale update by BLEU of oracle (for batch size 1 only)
+	if (oracleBleuScores.size() == 1) {
+		if (m_scale_update == 1) {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with oracle bleu score " << oracleBleuScores[0] << endl;
+			summedUpdate.MultiplyEquals(oracleBleuScores[0]);
+		}
+		else if (m_scale_update == 2) {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log2 oracle bleu score " << log2(oracleBleuScores[0]) << endl;
+			summedUpdate.MultiplyEquals(log2(oracleBleuScores[0]));
+		}
+		else if (m_scale_update == 10) {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log10 oracle bleu score " << log10(oracleBleuScores[0]) << endl;
+			summedUpdate.MultiplyEquals(log10(oracleBleuScores[0]));
+		}
 	}
 
 	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
 
 	// apply update to weight vector
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl);
 	currWeights.PlusEquals(summedUpdate);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl);
 
 	// Sanity check: are there still violated constraints after optimisation?
 	int violatedConstraintsAfter = 0;
@@ -196,15 +204,15 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 				float loss = bleuScoresHope[i][j] - bleuScoresFear[i][k];
 				if (m_scale_margin == 1) {
 					loss *= bleuScoresHope[i][j];
-					VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl);
+					cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl;
 				}
 				else if (m_scale_margin == 2) {
 					loss *= log2(bleuScoresHope[i][j]);
-					VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling margin with log2 oracle bleu score "  << log2(bleuScoresHope[i][j]) << endl);
+					cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log2 oracle bleu score "  << log2(bleuScoresHope[i][j]) << endl;
 				}
 				else if (m_scale_margin == 10) {
 					loss *= log10(bleuScoresHope[i][j]);
-					VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling margin with log10 oracle bleu score "  << log10(bleuScoresHope[i][j]) << endl);
+					cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log10 oracle bleu score "  << log10(bleuScoresHope[i][j]) << endl;
 				}
 
 				// check if constraint is violated
@@ -259,18 +267,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 
-	  	// scale update by BLEU of hope translation (only two cases defined at the moment)
-	    if (featureValuesHope.size() == 1 && m_scale_update) { // only defined for batch size 1)
-	    	if (featureValuesHope[0].size() == 1) {
-	    		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling update with log10 oracle bleu score "  << log10(bleuScoresHope[0][0]) << endl); // only 1 oracle
-	    		update.MultiplyEquals(log10(bleuScoresHope[0][0]));
-	    	} else if (featureValuesFear[0].size() == 1) {
-	    		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", scaling update with log10 oracle bleu score "  << log10(bleuScoresHope[0][k]) << endl); // k oracles
-	    		update.MultiplyEquals(log10(bleuScoresHope[0][k]));
-			}
-		}
-
-	    // sum up update
+	    // sum updates
 	    summedUpdate.PlusEquals(update);
 	  }
 	}
@@ -281,16 +278,30 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 
 	// apply learning rate
 	if (learning_rate != 1) {
-		VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", update before applying learning rate: " << summedUpdate << endl);
+		cerr << "Rank " << rank << ", epoch " << epoch << ", apply learning rate " << learning_rate << " to update." << endl;
 		summedUpdate.MultiplyEquals(learning_rate);
+	}
+
+	// scale update by BLEU of oracle (for batch size 1 only)
+	if (featureValuesHope.size() == 1) {
+		if (m_scale_update == 1) {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with oracle bleu score " << bleuScoresHope[0][0] << endl;
+			summedUpdate.MultiplyEquals(bleuScoresHope[0][0]);
+		}
+		else if (m_scale_update == 2) {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log2 oracle bleu score " << log2(bleuScoresHope[0][0]) << endl;
+			summedUpdate.MultiplyEquals(log2(bleuScoresHope[0][0]));
+		}
+		else if (m_scale_update == 10) {
+			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log10 oracle bleu score " << log10(bleuScoresHope[0][0]) << endl;
+			summedUpdate.MultiplyEquals(log10(bleuScoresHope[0][0]));
+		}
 	}
 
 	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
 
 	// apply update to weight vector
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights before update: " << currWeights << endl);
 	currWeights.PlusEquals(summedUpdate);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", weights after update: " << currWeights << endl);
 
 	// Sanity check: are there still violated constraints after optimisation?
 	int violatedConstraintsAfter = 0;
@@ -304,8 +315,8 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 			newDistanceFromOptimum += diff;
 		}
 	}
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
 	return violatedConstraintsAfter;
 }
 
