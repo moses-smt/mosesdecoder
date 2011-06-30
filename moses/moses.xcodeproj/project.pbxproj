@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */; };
 		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
-		1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */; };
 		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
 		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
 		1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */; };
@@ -52,6 +51,8 @@
 		1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */; };
 		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
 		1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */; };
+		1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */; };
+		1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */; };
 		1EBB262913A12DB500B51840 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262213A12DB500B51840 /* hash.h */; };
 		1EBB262A13A12DB500B51840 /* onlineRLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262313A12DB500B51840 /* onlineRLM.h */; };
 		1EBB262B13A12DB500B51840 /* params.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262413A12DB500B51840 /* params.h */; };
@@ -276,7 +277,6 @@
 /* Begin PBXFileReference section */
 		1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
 		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
-		1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
 		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
 		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
 		1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
@@ -319,6 +319,8 @@
 		1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SyntacticLanguageModel.cpp; path = src/SyntacticLanguageModel.cpp; sourceTree = "<group>"; };
 		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
 		1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelImplementation.h; path = src/LanguageModelImplementation.h; sourceTree = "<group>"; };
+		1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManager.cpp; path = src/ChartRuleLookupManager.cpp; sourceTree = "<group>"; };
+		1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
 		1EBB262213A12DB500B51840 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = src/DynSAInclude/hash.h; sourceTree = "<group>"; };
 		1EBB262313A12DB500B51840 /* onlineRLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = onlineRLM.h; path = src/DynSAInclude/onlineRLM.h; sourceTree = "<group>"; };
 		1EBB262413A12DB500B51840 /* params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = params.h; path = src/DynSAInclude/params.h; sourceTree = "<group>"; };
@@ -619,7 +621,8 @@
 				1ED0FD50124BB9380029177F /* BitmapContainer.cpp */,
 				1ED0FD51124BB9380029177F /* BitmapContainer.h */,
 				1ED0FD52124BB9380029177F /* CellCollection.h */,
-				1E1C588F12F310A70067DEB7 /* ChartRuleLookupManager.h */,
+				1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */,
+				1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */,
 				1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */,
 				1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */,
 				1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */,
@@ -981,7 +984,6 @@
 				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
 				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
 				1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */,
-				1E1C589412F310A70067DEB7 /* ChartRuleLookupManager.h in Headers */,
 				1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */,
 				1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */,
 				1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */,
@@ -1009,6 +1011,7 @@
 				1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */,
 				1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */,
 				1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */,
+				1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1184,6 +1187,7 @@
 				1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */,
 				1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */,
 				1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */,
+				1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -175,6 +175,7 @@ libmoses_la_SOURCES = \
 	ChartHypothesis.cpp \
 	ChartHypothesisCollection.cpp \
 	ChartManager.cpp \
+				ChartRuleLookupManager.cpp \
         ChartRuleLookupManagerMemory.cpp \
         ChartRuleLookupManagerOnDisk.cpp \
         ChartTranslationOption.cpp \
