@@ -41,13 +41,13 @@ typedef std::vector<const ChartHypothesis*> HypoList;
 class TranslationDimension
 {
  public:
-  TranslationDimension(size_t pos,
+  TranslationDimension(std::size_t pos,
                        const std::vector<TargetPhrase*> &orderedTargetPhrases)
     : m_pos(pos)
     , m_orderedTargetPhrases(&orderedTargetPhrases)
   {}
 
-  size_t IncrementPos() { return m_pos++; }
+  std::size_t IncrementPos() { return m_pos++; }
 
   bool HasMoreTranslations() const {
     return m_pos+1 < m_orderedTargetPhrases->size();
@@ -66,7 +66,7 @@ class TranslationDimension
   }
 
  private:
-  size_t m_pos;
+  std::size_t m_pos;
   const std::vector<TargetPhrase*> *m_orderedTargetPhrases;
 };
 
@@ -75,12 +75,12 @@ class TranslationDimension
 class HypothesisDimension
 {
 public:
-  HypothesisDimension(size_t pos, const HypoList &orderedHypos)
+  HypothesisDimension(std::size_t pos, const HypoList &orderedHypos)
     : m_pos(pos)
     , m_orderedHypos(&orderedHypos)
   {}
 
-  size_t IncrementPos() { return m_pos++; }
+  std::size_t IncrementPos() { return m_pos++; }
 
   bool HasMoreHypo() const {
     return m_pos+1 < m_orderedHypos->size();
@@ -99,7 +99,7 @@ public:
   }
 
 private:
-  size_t m_pos;
+  std::size_t m_pos;
   const HypoList *m_orderedHypos;
 };
 
