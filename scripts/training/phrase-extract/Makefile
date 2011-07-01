@@ -13,6 +13,9 @@ extract: tables-core.o SentenceAlignment.o extract.o
 extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o SyntaxTree.o XmlTree.o HoleCollection.o extract-rules.o 
 	$(CXX) $^ -o extract-rules
 
+extract-lex: extract-lex
+	$(CXX) $^ -o extract-lex
+
 score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o InputFileStream.o
 	$(CXX) $^ -lz -o score
 
@@ -27,3 +30,5 @@ relax-parse: tables-core.o SyntaxTree.o XmlTree.o relax-parse.o
 
 statistics: tables-core.o AlignmentPhrase.o statistics.o
 	$(CXX) $^ -o statistics
+
+
