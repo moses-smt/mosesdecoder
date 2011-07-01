@@ -461,9 +461,11 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   Phrase sphrase(Input, ARRAY_SIZE_INCR);
   sphrase.CreateFromString(m_inputFactors, source, factorDelimiter);
   m_srcVocab->MakeOpen();
+  wordID_t sIDs[sphrase.GetSize()];
   // store words in vocabulary and corpus
   for(size_t i = 0; i < sphrase.GetSize(); ++i) {
-    srcFactor.push_back(m_srcVocab->GetWordID(sphrase.GetWord(i)));  // get vocab id
+    sIDs[i] = m_srcVocab->GetWordID(sphrase.GetWord(i));  // get vocab id
+    srcFactor.push_back(sIDs[i]);
     cerr << "srcFactor[" << (srcFactor.size() - 1) << "] = " << srcFactor.back() << endl;
     m_srcCorpus->push_back(srcFactor.back()); // add word to corpus
   }
@@ -482,6 +484,25 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   //m_trgSA->Insert(&trgFactor, oldTrgCrpSize);
   LoadRawAlignments(alignment);
   m_trgVocab->MakeClosed();
+  for(size_t i=0; i < sphrase.GetSize(); ++i)
+    ClearWordInCache(sIDs[i]);
+  
+}
+void BilingualDynSuffixArray::ClearWordInCache(wordID_t srcWord) {
+  if(m_freqWordsCached.find(srcWord) != m_freqWordsCached.end())
+    return;
+	std::map<std::pair<wordID_t, wordID_t>, std::pair<float, float> >::iterator it,
+    first, last;
+  for(it = m_wordPairCache.begin(); it != m_wordPairCache.end(); ++it) {
+    if(it->first.first == srcWord) {  // all source words grouped 
+      first = it; // copy first entry of srcWord
+      last = it++;
+      while(it != m_wordPairCache.end() && (it->first.first == srcWord)) {
+        last = it++;
+      }
+    }
+    m_wordPairCache.erase(first, last);
+  }
 }
 SentenceAlignment::SentenceAlignment(int sntIndex, int sourceSize, int targetSize) 
 	:m_sntIndex(sntIndex)

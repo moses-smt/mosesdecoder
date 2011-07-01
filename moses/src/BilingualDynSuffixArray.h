@@ -125,6 +125,7 @@ private:
 	bool GetLocalVocabIDs(const Phrase&, SAPhrase &) const;
 	void CacheWordProbs(wordID_t) const;
   void CacheFreqWords() const;
+  void ClearWordInCache(wordID_t);
 	std::pair<float, float> GetLexicalWeight(const PhrasePair&) const;
 
 	int GetSourceSentenceSize(size_t sentenceId) const
