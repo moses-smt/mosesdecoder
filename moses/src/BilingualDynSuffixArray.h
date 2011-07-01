@@ -105,6 +105,7 @@ private:
 	std::vector<std::vector<short> > m_rawAlignments;
 
 	mutable std::map<std::pair<wordID_t, wordID_t>, std::pair<float, float> > m_wordPairCache; 
+  mutable std::set<wordID_t> m_freqWordsCached;
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
 	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
@@ -116,13 +117,14 @@ private:
 
 	bool ExtractPhrases(const int&, const int&, const int&, std::vector<PhrasePair*>&, bool=false) const;
 	SentenceAlignment GetSentenceAlignment(const int, bool=false) const; 
-	std::vector<unsigned> SampleSelection(std::vector<unsigned>) const;
+	int SampleSelection(std::vector<unsigned>&, int = 300) const;
 
-	std::vector<int> GetSntIndexes(std::vector<unsigned>&, const int) const;	
+	std::vector<int> GetSntIndexes(std::vector<unsigned>&, int, const std::vector<unsigned>&) const;	
 	TargetPhrase* GetMosesFactorIDs(const SAPhrase&) const;
 	SAPhrase TrgPhraseFromSntIdx(const PhrasePair&) const;
 	bool GetLocalVocabIDs(const Phrase&, SAPhrase &) const;
 	void CacheWordProbs(wordID_t) const;
+  void CacheFreqWords() const;
 	std::pair<float, float> GetLexicalWeight(const PhrasePair&) const;
 
 	int GetSourceSentenceSize(size_t sentenceId) const
