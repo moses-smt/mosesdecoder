@@ -32,9 +32,13 @@ int main(int argc, char* argv[])
 
   ExtractLex extractSingleton;
 
+  size_t lineCount = 0;
   string lineTarget, lineSource, lineAlign;
   while (getline(streamTarget, lineTarget))
   {
+    if (lineCount % 10000 == 0)
+      cerr << lineCount << " ";
+
     istream &isSource = getline(streamSource, lineSource);
     assert(isSource);
     istream &isAlign = getline(streamAlign, lineAlign);
@@ -45,13 +49,16 @@ int main(int argc, char* argv[])
     Tokenize(toksSource, lineSource);
     Tokenize(toksAlign, lineAlign);
 
+    /*
     cerr  << endl
           << toksTarget.size() << " " << lineTarget << endl
           << toksSource.size() << " " << lineSource << endl 
           << toksAlign.size() << " " << lineAlign << endl;
+    */
 
     extractSingleton.Process(toksTarget, toksSource, toksAlign);
-    
+   
+    ++lineCount; 
   }
 
   extractSingleton.Output(streamLexS2T, streamLexT2S);
@@ -59,7 +66,7 @@ int main(int argc, char* argv[])
   streamLexS2T.close();
   streamLexT2S.close();
 
-  cerr << "Finished\n";
+  cerr << "\nFinished\n";
 }
 
 const std::string *Vocab::GetOrAdd(const std::string &word)
@@ -135,9 +142,7 @@ void ExtractLex::Output(const std::map<const std::string*, WordCount> &coll, std
       const WordCount &outWC = iterInner->second;
 
       float prob = outWC.GetCount() / inWC.GetCount();
-      outStream << inStr << " "  << outStr
-              << " " << inWC.GetCount() << " " << outWC.GetCount() << " " << prob
-              << endl;
+      outStream << inStr << " "  << outStr << " " << prob << endl;
     }
   }
 }
@@ -151,7 +156,6 @@ std::ostream& operator<<(std::ostream &out, const WordCount &obj)
 void WordCount::AddCount(float incr)
 {
   m_count += incr;
-  cerr << *this << endl;
 }
 
 
