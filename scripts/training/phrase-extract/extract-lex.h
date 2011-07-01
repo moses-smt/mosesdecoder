@@ -64,26 +64,30 @@ class WordCount
 {
 	friend std::ostream& operator<<(std::ostream&, const WordCount&);
 public:
-  const std::string *m_str;
-  mutable float m_count;
+  float m_count;
 
-  WordCount(const std::string *str, float count)
-  :m_str(str)
-  ,m_count(count)
+  std::map<const std::string*, WordCount> m_coll;
+
+  WordCount()
+    :m_count(0)
   {}
 
-  void AddCount(float incr) const;
+  //WordCount(const WordCount &copy);
 
-  const std::string GetString() const
-  { return *m_str; }
+  WordCount(float count)
+    :m_count(count)
+  {}
+
+  void AddCount(float incr);
+
+  std::map<const std::string*, WordCount> &GetColl()
+  { return m_coll; }
+  const std::map<const std::string*, WordCount> &GetColl() const
+  { return m_coll; }
+
   const float GetCount() const
   { return m_count; }
 
-	//! transitive comparison used for adding objects into FactorCollection
-	inline bool operator<(const WordCount &other) const
-	{ 
-		return m_str < other.m_str;
-	}
 };
 
 class Vocab
@@ -93,16 +97,15 @@ public:
   const std::string *GetOrAdd(const std::string &word);
 };
 
-typedef std::set<WordCount> WordCountColl;
-
 class ExtractLex
 {
   Vocab m_vocab;
-  std::map<WordCount, WordCountColl> m_collS2T, m_collT2S;
+  std::map<const std::string*, WordCount> m_collS2T, m_collT2S;
 
   void Process(const std::string *target, const std::string *source);
-  void Process(const WordCount &in, const WordCount &out, std::map<WordCount, WordCountColl> &coll);
-  void Output(const std::map<WordCount, WordCountColl> &coll, std::ofstream &outStream);
+  void ExtractLex::Process(WordCount &wcIn, const std::string *out);
+
+  void Output(const std::map<const std::string*, WordCount> &coll, std::ofstream &outStream);
 
 public:
   void Process(std::vector<std::string> &toksTarget, std::vector<std::string> &toksSource, std::vector<std::string> &toksAlign);

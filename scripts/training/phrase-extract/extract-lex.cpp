@@ -6,6 +6,8 @@
 
 using namespace std;
 
+float COUNT_INCR = 1;
+
 int main(int argc, char* argv[])
 {
   cerr << "Starting...\n";
@@ -91,45 +93,23 @@ void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource,
 
 }
 
-float COUNT_INCR = 1;
-
 void ExtractLex::Process(const std::string *target, const std::string *source)
 {
-  WordCount tmpWCTarget(target, COUNT_INCR);
-  WordCount tmpWCSource(source, COUNT_INCR);
+  WordCount &wcS2T = m_collS2T[source];
+  WordCount &wcT2S = m_collT2S[target];
 
-  Process(tmpWCSource, tmpWCTarget, m_collS2T);
-  Process(tmpWCTarget, tmpWCSource, m_collT2S);
+  wcS2T.AddCount(COUNT_INCR);
+  wcT2S.AddCount(COUNT_INCR);
+
+  Process(wcS2T, target);
+  Process(wcT2S, source);
 }
 
-void ExtractLex::Process(const WordCount &in, const WordCount &out, std::map<WordCount, WordCountColl> &coll)
+void ExtractLex::Process(WordCount &wcIn, const std::string *out)
 {
-  std::map<WordCount, WordCountColl>::iterator iterMap;
-  // s2t
-  WordCountColl *wcColl = NULL;
-  iterMap = coll.find(in);
-  if (iterMap == coll.end())
-  {
-    wcColl = &coll[in];
-  }
-  else
-  {
-    const WordCount &wcIn = iterMap->first;
-
-    //cerr << wcIn << endl;
-    wcIn.AddCount(COUNT_INCR);
-    //cerr << wcIn << endl;
-
-    wcColl = &iterMap->second;
-  }
-  
-  assert(in.GetCount() == COUNT_INCR);
-  assert(out.GetCount() == COUNT_INCR);
-  assert(wcColl);
-
-  pair<WordCountColl::iterator, bool> iterSet = wcColl->insert(out);
-  const WordCount &outWC = *iterSet.first;
-  outWC.AddCount(COUNT_INCR);
+  std::map<const std::string*, WordCount> &collOut = wcIn.GetColl();
+  WordCount &wcOut = collOut[out];
+  wcOut.AddCount(COUNT_INCR);
 }
 
 void ExtractLex::Output(std::ofstream &streamLexS2T, std::ofstream &streamLexT2S)
@@ -138,20 +118,25 @@ void ExtractLex::Output(std::ofstream &streamLexS2T, std::ofstream &streamLexT2S
   Output(m_collT2S, streamLexT2S);
 }
 
-void ExtractLex::Output(const std::map<WordCount, WordCountColl> &coll, std::ofstream &outStream)
+void ExtractLex::Output(const std::map<const std::string*, WordCount> &coll, std::ofstream &outStream)
 {
-  std::map<WordCount, WordCountColl>::const_iterator iterOuter;
+  std::map<const std::string*, WordCount>::const_iterator iterOuter;
   for (iterOuter = coll.begin(); iterOuter != coll.end(); ++iterOuter)
   {
-    const WordCount &in = iterOuter->first;
-    const WordCountColl &outColl = iterOuter->second;
+    const string &inStr = *iterOuter->first;
+    const WordCount &inWC = iterOuter->second;
 
-    WordCountColl::const_iterator iterInner;
+    const std::map<const std::string*, WordCount> &outColl = inWC.GetColl();
+
+    std::map<const std::string*, WordCount>::const_iterator iterInner;
     for (iterInner = outColl.begin(); iterInner != outColl.end(); ++iterInner)
     {
-      const WordCount &out = *iterInner;
-      outStream << in.GetString() << " " << out.GetString() 
-              << " " << in.GetCount() << " " << out.GetCount()
+      const string &outStr = *iterInner->first;
+      const WordCount &outWC = iterInner->second;
+
+      float prob = outWC.GetCount() / inWC.GetCount();
+      outStream << inStr << " "  << outStr
+              << " " << inWC.GetCount() << " " << outWC.GetCount() << " " << prob
               << endl;
     }
   }
@@ -159,11 +144,11 @@ void ExtractLex::Output(const std::map<WordCount, WordCountColl> &coll, std::ofs
 
 std::ostream& operator<<(std::ostream &out, const WordCount &obj)
 {
-  out << obj.GetString() << "(" << obj.GetCount() << ")";
+  out << "(" << obj.GetCount() << ")";
   return out;
 }
 
-void WordCount::AddCount(float incr) const
+void WordCount::AddCount(float incr)
 {
   m_count += incr;
   cerr << *this << endl;
