@@ -103,7 +103,7 @@ class ExtractLex
   std::map<const std::string*, WordCount> m_collS2T, m_collT2S;
 
   void Process(const std::string *target, const std::string *source);
-  void ExtractLex::Process(WordCount &wcIn, const std::string *out);
+  void Process(WordCount &wcIn, const std::string *out);
 
   void Output(const std::map<const std::string*, WordCount> &coll, std::ofstream &outStream);
 
