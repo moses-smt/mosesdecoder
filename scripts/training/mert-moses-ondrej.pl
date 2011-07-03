@@ -118,7 +118,7 @@ my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt was relevant only to JHU 2006 workshop
-my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
+my $___JOBS = undef; # if parallel, number of jobs to use (undef or 0 -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
@@ -456,7 +456,7 @@ if ($___FILTER_PHRASE_TABLE) {
     my $___FILTER_F  = $___DEV_F;
     $___FILTER_F = $filterfile if (defined $filterfile);
     my $cmd = "$filtercmd ./$outdir $___CONFIG $___FILTER_F";
-    if (defined $___JOBS) {
+    if (defined $___JOBS && $___JOBS > 0) {
       safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
         or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
     } else {
@@ -654,7 +654,7 @@ while(1) {
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
       or die "Failed to submit extraction to queue (via $qsubwrapper)";
   } else {
@@ -703,7 +703,7 @@ while(1) {
 
   $cmd = $cmd." --ifile run$run.$weights_in_file";
 
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
   } else {
     safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
@@ -842,7 +842,7 @@ sub run_decoder {
     my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
 
-    if (defined $___JOBS) {
+    if (defined $___JOBS && $___JOBS > 0) {
       $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
       $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
