@@ -88,6 +88,10 @@ int main (int argc, char **argv)
   string tooptimizestr("");
   vector<unsigned> tooptimize;
   vector<parameter_t> start;
+  vector<parameter_t> min;
+  vector<parameter_t> max;
+  //note: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
+
 
   while ((c=getopt_long (argc, argv, "o:r:d:n:t:s:S:F:v:", long_options, &option_index)) != -1) {
     switch (c) {
@@ -150,7 +154,22 @@ int main (int argc, char **argv)
   for( j=0; j<pdim&&!opt.fail(); j++)
     opt>>start[j];
   if(j<pdim) {
+    cerr<<initfile<<":Too few starting weights." << endl;
+    exit(3);
+  }
+  min.resize(pdim);
+  for( j=0; j<pdim&&!opt.fail(); j++)
+    opt>>min[j];
+  if(j<pdim) {
+    cerr<<initfile<<":Too few minimum weights." << endl;
     cerr<<"error could not initialize start point with " << initfile << endl;
+    exit(3);
+  }
+  max.resize(pdim);
+  for( j=0; j<pdim&&!opt.fail(); j++)
+    opt>>max[j];
+  if(j<pdim) {
+    cerr<<initfile<<":Too few maximum weights." << endl;
     exit(3);
   }
 
@@ -220,7 +239,7 @@ int main (int argc, char **argv)
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);
   O->SetFData(D.getFeatureData());
-  Point P(start);//Generate from the full feature set. Warning: must be done after Optimizer initialization
+  Point P(start, min, max);//Generate from the full feature set. Warning: must be done after Optimizer initialization
   statscore_t best=O->Run(P);
   Point bestP=P;
   statscore_t mean=best;
@@ -231,18 +250,8 @@ int main (int argc, char **argv)
 
   PrintUserTime(oss.str());
 
-  vector<parameter_t> min(Point::getdim());
-  vector<parameter_t> max(Point::getdim());
-
-  for(unsigned int d=0; d<Point::getdim(); d++) {
-    min[d]=0.0;
-    max[d]=1.0;
-  }
-  //note: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
-
-
   for(int i=1; i<ntry; i++) {
-    P.Randomize(min,max);
+    P.Randomize(); // randomize within min and max as given to the constructor
     statscore_t score=O->Run(P);
     if(score>best) {
       best=score;

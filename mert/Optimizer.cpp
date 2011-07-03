@@ -423,13 +423,7 @@ Just return a random point*/
 
 statscore_t RandomOptimizer::TrueRun(Point& P)const
 {
-  vector<parameter_t> min(Point::getdim());
-  vector<parameter_t> max(Point::getdim());
-  for(unsigned int d=0; d<Point::getdim(); d++) {
-    min[d]=0.0;
-    max[d]=1.0;
-  }
-  P.Randomize(min,max);
+  P.Randomize();
   statscore_t score=GetStatScore(P);
   P.score=score;
   return score;
