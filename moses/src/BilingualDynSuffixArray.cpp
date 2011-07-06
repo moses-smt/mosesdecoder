@@ -463,8 +463,10 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   m_srcVocab->MakeOpen();
   wordID_t sIDs[sphrase.GetSize()];
   // store words in vocabulary and corpus
+  for(int i = sphrase.GetSize()-1; i >= 0; --i) {
+    sIDs[i] = m_srcVocab->GetWordID(sphrase.GetWord(i));  // get vocab id backwards
+  }
   for(size_t i = 0; i < sphrase.GetSize(); ++i) {
-    sIDs[i] = m_srcVocab->GetWordID(sphrase.GetWord(i));  // get vocab id
     srcFactor.push_back(sIDs[i]);
     cerr << "srcFactor[" << (srcFactor.size() - 1) << "] = " << srcFactor.back() << endl;
     m_srcCorpus->push_back(srcFactor.back()); // add word to corpus
@@ -474,18 +476,25 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   Phrase tphrase(Output, ARRAY_SIZE_INCR);
   tphrase.CreateFromString(m_outputFactors, target, factorDelimiter);
   m_trgVocab->MakeOpen();
+  wordID_t tIDs[tphrase.GetSize()];
+  for(int i = tphrase.GetSize()-1; i >= 0; --i) {
+    tIDs[i] = m_trgVocab->GetWordID(tphrase.GetWord(i));  // get vocab id
+  }
   for(size_t i = 0; i < tphrase.GetSize(); ++i) {
-    trgFactor.push_back(m_trgVocab->GetWordID(tphrase.GetWord(i)));  // get vocab id
+    trgFactor.push_back(tIDs[i]);
     cerr << "trgFactor[" << (trgFactor.size() - 1) << "] = " << trgFactor.back() << endl;
     m_trgCorpus->push_back(trgFactor.back());
   }
+  cerr << "gets to 1\n";
   m_trgSntBreaks.push_back(oldTrgCrpSize);
+  cerr << "gets to 2\n";
   m_srcSA->Insert(&srcFactor, oldSrcCrpSize);
+  cerr << "gets to 3\n";
   //m_trgSA->Insert(&trgFactor, oldTrgCrpSize);
   LoadRawAlignments(alignment);
   m_trgVocab->MakeClosed();
-  for(size_t i=0; i < sphrase.GetSize(); ++i)
-    ClearWordInCache(sIDs[i]);
+  //for(size_t i=0; i < sphrase.GetSize(); ++i)
+    //ClearWordInCache(sIDs[i]);
   
 }
 void BilingualDynSuffixArray::ClearWordInCache(wordID_t srcWord) {

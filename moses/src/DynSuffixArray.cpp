@@ -72,6 +72,14 @@ int DynSuffixArray::Rank(unsigned word, unsigned idx)
 int DynSuffixArray::F_firstIdx(unsigned word)
 {
   // return index of first row where word is found in m_F
+  /*for(int i=0; i < m_F->size(); ++i) {
+    if(m_F->at(i) == word) {
+      return i; 
+    }
+  }
+  return -1;*/
+  //NOTE: lower_bound  is faster than linear search above but may cause issues 
+  //      if ordering of vocab is not consecutive (ie..after deletions) 
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
   //cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
   if(low >= m_F->size())
@@ -132,6 +140,7 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex)
   }
   // Begin stage 4
   Reorder(true_pos, LastFirstFunc(kprime)); // actual position vs computed position of cycle (newIndex-1)
+  cerr << "GETS HERE 13\n";
 }
 
 void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
@@ -141,6 +150,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
     //cerr << "j=" << j << "\tj'=" << jprime << endl;
     int tmp, isaIdx(-1);
     int new_j = LastFirstFunc(j);
+    cerr << "new_j = " << new_j << endl;
     // for SA, L, and F, the element at pos j is moved to j'
     tmp = m_L->at(j); // L
     m_L->at(j) = m_L->at(jprime);
@@ -161,6 +171,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
     j = new_j;
     jprime = LastFirstFunc(jprime);
   }
+  //cerr << "j=" << j << "\tj'=" << jprime << endl;
 }
 
 void DynSuffixArray::Delete(unsigned index, unsigned num2del)
