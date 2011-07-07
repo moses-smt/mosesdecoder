@@ -1365,7 +1365,7 @@ sub score_phrase_phrase_extract {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
-    my $PHRASE_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS !~ /NoPhraseCount/);
+    my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
     my $CORE_SCORE_OPTIONS = defined($_SCORE_OPTIONS) ? $_SCORE_OPTIONS : "";
     $CORE_SCORE_OPTIONS =~ s/\-+OnlyDirect//i;
     $CORE_SCORE_OPTIONS =~ s/\-+NoPhraseCount//i;
@@ -1681,9 +1681,9 @@ sub create_ini {
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
      my $basic_weight_count = 4; # both directions, lex and phrase
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /OnlyDirect/;
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /NoLex/;
-     $basic_weight_count++ unless $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
+     $basic_weight_count++ unless defined($_SCORE_OPTIONS) &&  $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
      print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
    }
    if ($_GLUE_GRAMMAR) {
@@ -1776,9 +1776,9 @@ sub create_ini {
   print INI "\n\n# translation model weights\n[weight-t]\n";
   foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      my $basic_weight_count = 4; # both directions, lex and phrase
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /OnlyDirect/;
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /NoLex/;
-     $basic_weight_count++ unless $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
+     $basic_weight_count++ unless defined($_SCORE_OPTIONS) &&  $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
      for(1..$basic_weight_count) {
        printf INI "%.2f\n", 1/$basic_weight_count;
      }
