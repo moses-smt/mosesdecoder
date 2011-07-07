@@ -104,6 +104,8 @@ class ExtractLex
 
   void Process(const std::string *target, const std::string *source);
   void Process(WordCount &wcIn, const std::string *out);
+  void ProcessUnaligned(std::vector<std::string> &toksTarget, std::vector<std::string> &toksSource
+                        , const std::vector<bool> &m_sourceAligned, const std::vector<bool> &m_targetAligned);
 
   void Output(const std::map<const std::string*, WordCount> &coll, std::ofstream &outStream);
 

@@ -8,6 +8,12 @@ using namespace std;
 
 float COUNT_INCR = 1;
 
+void fix(std::ostream& stream) 
+{
+    stream.setf(std::ios::fixed);
+    stream.precision(7);
+}
+
 int main(int argc, char* argv[])
 {
   cerr << "Starting...\n";
@@ -29,6 +35,9 @@ int main(int argc, char* argv[])
   ofstream streamLexT2S;
   streamLexS2T.open(filePathLexS2T);
   streamLexT2S.open(filePathLexT2S);
+
+  fix(streamLexS2T);
+  fix(streamLexT2S);
 
   ExtractLex extractSingleton;
 
@@ -77,6 +86,9 @@ const std::string *Vocab::GetOrAdd(const std::string &word)
 
 void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource, vector<string> &toksAlign)
 {
+  std::vector<bool> m_sourceAligned(toksSource.size(), false)
+                    , m_targetAligned(toksTarget.size(), false);
+
   vector<string>::const_iterator iterAlign;
   for (iterAlign = toksAlign.begin(); iterAlign != toksAlign.end(); ++iterAlign)
   {
@@ -88,6 +100,9 @@ void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource,
     assert(alignPos[0] < toksSource.size());
     assert(alignPos[1] < toksTarget.size());
 
+    m_sourceAligned[ alignPos[0] ] = true;
+    m_targetAligned[ alignPos[1] ] = true;
+
     const string &tmpSource = toksSource[ alignPos[0] ];
     const string &tmpTarget = toksTarget[ alignPos[1] ];
  
@@ -98,6 +113,7 @@ void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource,
     
   }
 
+  ProcessUnaligned(toksTarget, toksSource, m_sourceAligned, m_targetAligned);
 }
 
 void ExtractLex::Process(const std::string *target, const std::string *source)
@@ -117,6 +133,37 @@ void ExtractLex::Process(WordCount &wcIn, const std::string *out)
   std::map<const std::string*, WordCount> &collOut = wcIn.GetColl();
   WordCount &wcOut = collOut[out];
   wcOut.AddCount(COUNT_INCR);
+}
+
+void ExtractLex::ProcessUnaligned(vector<string> &toksTarget, vector<string> &toksSource
+                                , const std::vector<bool> &m_sourceAligned, const std::vector<bool> &m_targetAligned)
+{
+  const string *nullWord = m_vocab.GetOrAdd("NULL"); 
+
+  for (size_t pos = 0; pos < m_sourceAligned.size(); ++pos)
+  {
+    bool isAlignedCurr = m_sourceAligned[pos];
+    if (!isAlignedCurr)
+    {
+      const string &tmpWord = toksSource[pos];
+      const string *sourceWord = m_vocab.GetOrAdd(tmpWord);
+
+      Process(nullWord, sourceWord);
+    }
+  }
+
+  for (size_t pos = 0; pos < m_targetAligned.size(); ++pos)
+  {
+    bool isAlignedCurr = m_targetAligned[pos];
+    if (!isAlignedCurr)
+    {
+      const string &tmpWord = toksTarget[pos];
+      const string *targetWord = m_vocab.GetOrAdd(tmpWord);
+
+      Process(targetWord, nullWord);
+    }
+  }
+
 }
 
 void ExtractLex::Output(std::ofstream &streamLexS2T, std::ofstream &streamLexT2S)
@@ -142,7 +189,7 @@ void ExtractLex::Output(const std::map<const std::string*, WordCount> &coll, std
       const WordCount &outWC = iterInner->second;
 
       float prob = outWC.GetCount() / inWC.GetCount();
-      outStream << inStr << " "  << outStr << " " << prob << endl;
+      outStream << outStr << " "  << inStr << " " << prob << endl;
     }
   }
 }
