@@ -57,7 +57,7 @@ $dir = ensure_full_path($dir);
 
 # buggy directory in place?
 if (-d $dir && ! -e "$dir/info") {
-    print STDERR "The directory $dir exists but does not belong to me. Delete $dir!\n";
+    print STDERR "The directory $dir already exists. Please delete $dir and rerun!\n";
     exit(1);
 }
 
