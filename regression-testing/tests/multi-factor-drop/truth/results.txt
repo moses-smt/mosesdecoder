@@ -1,0 +1,5 @@
+TRANSLATION_1=there are different opinions 
+LMLOAD_TIME ~ 10.00
+PTLOAD_TIME ~ 11.00
+SCORE_1 = -12.675
+TOTAL_WALLTIME ~ 11
