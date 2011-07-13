@@ -3,6 +3,7 @@ bin_PROGRAMS = query build_binary
 
 AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES $(BOOST_CPPFLAGS)
 libkenlm_la_SOURCES = \
+  lm/bhiksha.cc \
 	lm/binary_format.cc \
 	lm/config.cc \
 	lm/lm_exception.cc \

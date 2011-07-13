@@ -1,6 +1,7 @@
 #ifndef LM_MODEL__
 #define LM_MODEL__
 
+#include "lm/bhiksha.hh"
 #include "lm/binary_format.hh"
 #include "lm/config.hh"
 #include "lm/facade.hh"
@@ -71,6 +72,9 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
   private:
     typedef base::ModelFacade<GenericModel<Search, VocabularyT>, State, VocabularyT> P;
   public:
+    // This is the model type returned by RecognizeBinary.
+    static const ModelType kModelType;
+
     /* Get the size of memory that will be mapped given ngram counts.  This
      * does not include small non-mapped control structures, such as this class
      * itself.  
@@ -131,8 +135,6 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
 
     Backing &MutableBacking() { return backing_; }
 
-    static const ModelType kModelType = Search::kModelType;
-
     Backing backing_;
     
     VocabularyT vocab_;
@@ -152,9 +154,11 @@ typedef ProbingModel Model;
 
 // Smaller implementation.
 typedef ::lm::ngram::SortedVocabulary SortedVocabulary;
-typedef detail::GenericModel<trie::TrieSearch<DontQuantize>, SortedVocabulary> TrieModel; // TRIE_SORTED
+typedef detail::GenericModel<trie::TrieSearch<DontQuantize, trie::DontBhiksha>, SortedVocabulary> TrieModel; // TRIE_SORTED
+typedef detail::GenericModel<trie::TrieSearch<DontQuantize, trie::ArrayBhiksha>, SortedVocabulary> ArrayTrieModel;
 
-typedef detail::GenericModel<trie::TrieSearch<SeparatelyQuantize>, SortedVocabulary> QuantTrieModel; // QUANT_TRIE_SORTED
+typedef detail::GenericModel<trie::TrieSearch<SeparatelyQuantize, trie::DontBhiksha>, SortedVocabulary> QuantTrieModel; // QUANT_TRIE_SORTED
+typedef detail::GenericModel<trie::TrieSearch<SeparatelyQuantize, trie::ArrayBhiksha>, SortedVocabulary> QuantArrayTrieModel;
 
 } // namespace ngram
 } // namespace lm

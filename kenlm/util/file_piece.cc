@@ -41,8 +41,8 @@ GZException::GZException(void *file) {
 const bool kSpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 int OpenReadOrThrow(const char *name) {
-  int ret = open(name, O_RDONLY);
-  if (ret == -1) UTIL_THROW(ErrnoException, "in open (" << name << ") for reading");
+  int ret;
+  UTIL_THROW_IF(-1 == (ret = open(name, O_RDONLY)), ErrnoException, "while opening " << name);
   return ret;
 }
 
@@ -52,13 +52,13 @@ off_t SizeFile(int fd) {
   return sb.st_size;
 }
 
-FilePiece::FilePiece(const char *name, std::ostream *show_progress, off_t min_buffer) throw (GZException) : 
+FilePiece::FilePiece(const char *name, std::ostream *show_progress, off_t min_buffer) : 
   file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())), page_(sysconf(_SC_PAGE_SIZE)),
   progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
   Initialize(name, show_progress, min_buffer);
 }
 
-FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, off_t min_buffer) throw (GZException) : 
+FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, off_t min_buffer)  : 
   file_(fd), total_size_(SizeFile(file_.get())), page_(sysconf(_SC_PAGE_SIZE)),
   progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
   Initialize(name, show_progress, min_buffer);
@@ -78,7 +78,7 @@ FilePiece::~FilePiece() {
 #endif
 }
 
-StringPiece FilePiece::ReadLine(char delim) throw (GZException, EndOfFileException) {
+StringPiece FilePiece::ReadLine(char delim) {
   size_t skip = 0;
   while (true) {
     for (const char *i = position_ + skip; i < position_end_; ++i) {
@@ -97,20 +97,20 @@ StringPiece FilePiece::ReadLine(char delim) throw (GZException, EndOfFileExcepti
   }
 }
 
-float FilePiece::ReadFloat() throw(GZException, EndOfFileException, ParseNumberException) {
+float FilePiece::ReadFloat() {
   return ReadNumber<float>();
 }
-double FilePiece::ReadDouble() throw(GZException, EndOfFileException, ParseNumberException) {
+double FilePiece::ReadDouble() {
   return ReadNumber<double>();
 }
-long int FilePiece::ReadLong() throw(GZException, EndOfFileException, ParseNumberException) {
+long int FilePiece::ReadLong() {
   return ReadNumber<long int>();
 }
-unsigned long int FilePiece::ReadULong() throw(GZException, EndOfFileException, ParseNumberException) {
+unsigned long int FilePiece::ReadULong() {
   return ReadNumber<unsigned long int>();
 }
 
-void FilePiece::Initialize(const char *name, std::ostream *show_progress, off_t min_buffer) throw (GZException) {
+void FilePiece::Initialize(const char *name, std::ostream *show_progress, off_t min_buffer)  {
 #ifdef HAVE_ZLIB
   gz_file_ = NULL;
 #endif
@@ -163,7 +163,7 @@ void ParseNumber(const char *begin, char *&end, unsigned long int &out) {
 }
 } // namespace
 
-template <class T> T FilePiece::ReadNumber() throw(GZException, EndOfFileException, ParseNumberException) {
+template <class T> T FilePiece::ReadNumber() {
   SkipSpaces();
   while (last_space_ < position_) {
     if (at_end_) {
@@ -186,7 +186,7 @@ template <class T> T FilePiece::ReadNumber() throw(GZException, EndOfFileExcepti
   return ret;
 }
 
-const char *FilePiece::FindDelimiterOrEOF(const bool *delim) throw (GZException, EndOfFileException) {
+const char *FilePiece::FindDelimiterOrEOF(const bool *delim)  {
   size_t skip = 0;
   while (true) {
     for (const char *i = position_ + skip; i < position_end_; ++i) {
@@ -201,7 +201,7 @@ const char *FilePiece::FindDelimiterOrEOF(const bool *delim) throw (GZException,
   }
 }
 
-void FilePiece::Shift() throw(GZException, EndOfFileException) {
+void FilePiece::Shift() {
   if (at_end_) {
     progress_.Finished();
     throw EndOfFileException();
@@ -217,7 +217,7 @@ void FilePiece::Shift() throw(GZException, EndOfFileException) {
   }
 }
 
-void FilePiece::MMapShift(off_t desired_begin) throw() {
+void FilePiece::MMapShift(off_t desired_begin) {
   // Use mmap.  
   off_t ignore = desired_begin % page_;
   // Duplicate request for Shift means give more data.  
@@ -259,25 +259,23 @@ void FilePiece::MMapShift(off_t desired_begin) throw() {
   progress_.Set(desired_begin);
 }
 
-void FilePiece::TransitionToRead() throw (GZException) {
+void FilePiece::TransitionToRead() {
   assert(!fallback_to_read_);
   fallback_to_read_ = true;
   data_.reset();
   data_.reset(malloc(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
-  if (!data_.get()) UTIL_THROW(ErrnoException, "malloc failed for " << default_map_size_);
+  UTIL_THROW_IF(!data_.get(), ErrnoException, "malloc failed for " << default_map_size_);
   position_ = data_.begin();
   position_end_ = position_;
 
 #ifdef HAVE_ZLIB
   assert(!gz_file_);
   gz_file_ = gzdopen(file_.get(), "r");
-  if (!gz_file_) {
-    UTIL_THROW(GZException, "zlib failed to open " << file_name_);
-  }
+  UTIL_THROW_IF(!gz_file_, GZException, "zlib failed to open " << file_name_);
 #endif
 }
 
-void FilePiece::ReadShift() throw(GZException, EndOfFileException) {
+void FilePiece::ReadShift() {
   assert(fallback_to_read_);
   // Bytes [data_.begin(), position_) have been consumed.  
   // Bytes [position_, position_end_) have been read into the buffer.  
@@ -297,7 +295,7 @@ void FilePiece::ReadShift() throw(GZException, EndOfFileException) {
       std::size_t valid_length = position_end_ - position_;
       default_map_size_ *= 2;
       data_.call_realloc(default_map_size_);
-      if (!data_.get()) UTIL_THROW(ErrnoException, "realloc failed for " << default_map_size_);
+      UTIL_THROW_IF(!data_.get(), ErrnoException, "realloc failed for " << default_map_size_);
       position_ = data_.begin();
       position_end_ = position_ + valid_length;
     } else {
@@ -320,7 +318,7 @@ void FilePiece::ReadShift() throw(GZException, EndOfFileException) {
   }
 #else
   read_return = read(file_.get(), static_cast<char*>(data_.get()) + already_read, default_map_size_ - already_read);
-  if (read_return == -1) UTIL_THROW(ErrnoException, "read failed");
+  UTIL_THROW_IF(read_return == -1, ErrnoException, "read failed");
   progress_.Set(mapped_offset_);
 #endif
   if (read_return == 0) {

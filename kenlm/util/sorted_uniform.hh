@@ -12,7 +12,7 @@ namespace util {
 template <class T> class IdentityAccessor {
   public:
     typedef T Key;
-    T operator()(const uint64_t *in) const { return *in; }
+    T operator()(const T *in) const { return *in; }
 };
 
 struct Pivot64 {
@@ -99,6 +99,27 @@ template <class Iterator, class Accessor, class Pivot> bool SortedUniformFind(co
     return false;
   }
   return BoundedSortedUniformFind<Iterator, Accessor, Pivot>(accessor, begin, below, end, above, key, out);
+}
+
+// May return begin - 1.
+template <class Iterator, class Accessor> Iterator BinaryBelow(
+    const Accessor &accessor,
+    Iterator begin,
+    Iterator end,
+    const typename Accessor::Key key) {
+  while (end > begin) {
+    Iterator pivot(begin + (end - begin) / 2);
+    typename Accessor::Key mid(accessor(pivot));
+    if (mid < key) {
+      begin = pivot + 1;
+    } else if (mid > key) {
+      end = pivot;
+    } else {
+      for (++pivot; (pivot < end) && accessor(pivot) == mid; ++pivot) {}
+      return pivot - 1;
+    }
+  }
+  return begin - 1;
 }
 
 // To use this template, you need to define a Pivot function to match Key.  
