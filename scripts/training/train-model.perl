@@ -1132,11 +1132,11 @@ sub get_lexical {
     my $alignment_id = 0;
     while(my $e = <E>) {
         if (($alignment_id++ % 1000) == 0) { print STDERR "!"; }
-        chomp($e);
+        chomp($e); fix_spaces(\$e);
         my @ENGLISH = split(/ /,$e);
-        my $f = <F>; chomp($f);
+        my $f = <F>; chomp($f); fix_spaces(\$f);
         my @FOREIGN = split(/ /,$f);
-        my $a = <A>; chomp($a);
+        my $a = <A>; chomp($a); fix_spaces(\$a);
 
         my (%FOREIGN_ALIGNED,%ENGLISH_ALIGNED);
         foreach (split(/ /,$a)) {
@@ -1869,5 +1869,10 @@ sub open_or_zcat {
   my $hdl;
   open($hdl,$read) or die "Can't read $fn ($read)";
   return $hdl;
+}
+
+sub fix_spaces(){
+        my ($in) = @_;
+        $$in =~ s/[ \t]+/ /g; $$in =~ s/[ \t]$//; $$in =~ s/^[ \t]//;    
 }
 
