@@ -30,6 +30,8 @@
 		1E8BF79D1278A443009F10C1 /* trie.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7951278A443009F10C1 /* trie.cc */; };
 		1E8BF79E1278A443009F10C1 /* trie.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E8BF7961278A443009F10C1 /* trie.hh */; };
 		1E8BF7D51278A600009F10C1 /* bit_packing.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E8BF7D41278A600009F10C1 /* bit_packing.cc */; };
+		1E91441413D065490005055B /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E91441213D065490005055B /* bhiksha.cc */; };
+		1E91441513D065490005055B /* bhiksha.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E91441313D065490005055B /* bhiksha.hh */; };
 		1EBB16D7126C158600AE6102 /* ersatz_progress.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16BF126C158600AE6102 /* ersatz_progress.cc */; };
 		1EBB16D8126C158600AE6102 /* ersatz_progress.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16C0126C158600AE6102 /* ersatz_progress.hh */; };
 		1EBB16D9126C158600AE6102 /* exception.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16C1126C158600AE6102 /* exception.cc */; };
@@ -90,6 +92,8 @@
 		1E8BF7951278A443009F10C1 /* trie.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trie.cc; path = lm/trie.cc; sourceTree = "<group>"; };
 		1E8BF7961278A443009F10C1 /* trie.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = trie.hh; path = lm/trie.hh; sourceTree = "<group>"; };
 		1E8BF7D41278A600009F10C1 /* bit_packing.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bit_packing.cc; path = util/bit_packing.cc; sourceTree = "<group>"; };
+		1E91441213D065490005055B /* bhiksha.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bhiksha.cc; path = lm/bhiksha.cc; sourceTree = "<group>"; };
+		1E91441313D065490005055B /* bhiksha.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = bhiksha.hh; path = lm/bhiksha.hh; sourceTree = "<group>"; };
 		1EBB16BF126C158600AE6102 /* ersatz_progress.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ersatz_progress.cc; path = util/ersatz_progress.cc; sourceTree = "<group>"; };
 		1EBB16C0126C158600AE6102 /* ersatz_progress.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ersatz_progress.hh; path = util/ersatz_progress.hh; sourceTree = "<group>"; };
 		1EBB16C1126C158600AE6102 /* exception.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exception.cc; path = util/exception.cc; sourceTree = "<group>"; };
@@ -152,6 +156,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E91441213D065490005055B /* bhiksha.cc */,
+				1E91441313D065490005055B /* bhiksha.hh */,
 				1E46B5A013BA5C050084F898 /* quantize.cc */,
 				1E46B5A113BA5C050084F898 /* quantize.hh */,
 				1E46B59D13BA5BE10084F898 /* blank.hh */,
@@ -265,6 +271,7 @@
 				1E8A95071288BD570022C4EB /* search_trie.hh in Headers */,
 				1E46B59E13BA5BE10084F898 /* blank.hh in Headers */,
 				1E46B5A313BA5C050084F898 /* quantize.hh in Headers */,
+				1E91441513D065490005055B /* bhiksha.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +352,7 @@
 				1E8A95041288BD570022C4EB /* search_hashed.cc in Sources */,
 				1E8A95061288BD570022C4EB /* search_trie.cc in Sources */,
 				1E46B5A213BA5C050084F898 /* quantize.cc in Sources */,
+				1E91441413D065490005055B /* bhiksha.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
