@@ -19,8 +19,8 @@ extract-lex: extract-lex.o
 score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o InputFileStream.o
 	$(CXX) $^ -lz -o score
 
-consolidate: consolidate.o tables-core.o
-	$(CXX) $^ -o consolidate
+consolidate: consolidate.o tables-core.o InputFileStream.o
+	$(CXX) $^ -lz -o consolidate
 
 consolidate-direct: consolidate-direct.o InputFileStream.o
 	$(CXX) $^ -lz -o consolidate-direct

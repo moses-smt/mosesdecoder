@@ -17,7 +17,8 @@ void fix(std::ostream& stream)
 int main(int argc, char* argv[])
 {
   cerr << "Starting...\n";
-
+  
+  assert(argc == 6);
   char* &filePathTarget = argv[1];
   char* &filePathSource = argv[2];
   char* &filePathAlign  = argv[3];

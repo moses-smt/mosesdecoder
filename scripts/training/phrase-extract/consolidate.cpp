@@ -27,6 +27,7 @@
 
 #include "tables-core.h"
 #include "SafeGetline.h"
+#include "InputFileStream.h"
 
 #define LINE_MAX_LENGTH 10000
 
@@ -80,16 +81,15 @@ int main(int argc, char* argv[])
 void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameConsolidated )
 {
   // open input files
-  ifstream fileDirect,fileIndirect;
+  Moses::InputFileStream fileDirect(fileNameDirect);
+  Moses::InputFileStream fileIndirect(fileNameIndirect);
 
-  fileDirect.open(fileNameDirect);
   if (fileDirect.fail()) {
     cerr << "ERROR: could not open phrase table file " << fileNameDirect << endl;
     exit(1);
   }
   istream &fileDirectP = fileDirect;
 
-  fileIndirect.open(fileNameIndirect);
   if (fileIndirect.fail()) {
     cerr << "ERROR: could not open phrase table file " << fileNameIndirect << endl;
     exit(1);
@@ -160,8 +160,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
 
     fileConsolidated << endl;
   }
-  fileDirect.close();
-  fileIndirect.close();
+  fileDirect.Close();
+  fileIndirect.Close();
   fileConsolidated.close();
 }
 
