@@ -22,7 +22,7 @@
 
 #include "AlignmentInfo.h"
 #include "ChartCellCollection.h"
-#include "CoveredChartSpan.h"
+#include "DotChart.h"
 
 #include <vector>
 
@@ -30,34 +30,32 @@ namespace Moses
 {
 
 void ChartTranslationOption::CalcEstimateOfBestScore(
-  const CoveredChartSpan *coveredChartSpan,
-  const ChartCellCollection &allChartCells)
+    const ChartCellCollection &allChartCells)
 {
-  // recurse through the linked list of source side non-terminals and terminals
-  const CoveredChartSpan *prevCoveredChartSpan =
-    coveredChartSpan->GetPrevCoveredChartSpan();
-  if (prevCoveredChartSpan)
-  {
-    CalcEstimateOfBestScore(prevCoveredChartSpan, allChartCells);
-  }
+  const TargetPhrase &targetPhrase = **(m_targetPhraseCollection.begin());
+  m_estimateOfBestScore = targetPhrase.GetFutureScore();
+
+  const DottedRule *rule = &m_dottedRule;
 
   // only deal with non-terminals
-  if (coveredChartSpan->IsNonTerminal())
-  {
-    // get the essential information about the non-terminal
-    const WordsRange &childRange = coveredChartSpan->GetWordsRange();
-    const ChartCell &childCell = allChartCells.Get(childRange);
-    const Word &nonTerm = coveredChartSpan->GetSourceWord();
+  while (!rule->IsRoot()) {
+    if (rule->IsNonTerminal()) {
+      // get the essential information about the non-terminal
+      const WordsRange &childRange = rule->GetWordsRange();
+      const ChartCell &childCell = allChartCells.Get(childRange);
+      const Word &nonTerm = rule->GetSourceWord();
 
-    // there have to be hypotheses with the desired non-terminal
-    // (otherwise the rule would not be considered)
-    assert(!childCell.GetSortedHypotheses(nonTerm).empty());
+      // there have to be hypotheses with the desired non-terminal
+      // (otherwise the rule would not be considered)
+      assert(!childCell.GetSortedHypotheses(nonTerm).empty());
 
-    // create a list of hypotheses that match the non-terminal
-    const std::vector<const ChartHypothesis *> &stack =
-      childCell.GetSortedHypotheses(nonTerm);
-    const ChartHypothesis *hypo = stack[0];
-    m_estimateOfBestScore += hypo->GetTotalScore();
+      // create a list of hypotheses that match the non-terminal
+      const std::vector<const ChartHypothesis *> &stack =
+        childCell.GetSortedHypotheses(nonTerm);
+      const ChartHypothesis *hypo = stack[0];
+      m_estimateOfBestScore += hypo->GetTotalScore();
+    }
+    rule = rule->GetPrev();
   }
 }
 

@@ -100,7 +100,7 @@ public:
   }
 
   void Add(const TargetPhraseCollection &targetPhraseCollection
-           , const CoveredChartSpan &coveredChartSpan
+           , const DottedRule &dottedRule
            , const ChartCellCollection &
            , bool ruleLimit
            , size_t tableLimit);

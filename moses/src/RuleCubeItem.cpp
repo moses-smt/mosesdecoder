@@ -21,7 +21,7 @@
 #include "ChartCellCollection.h"
 #include "ChartTranslationOption.h"
 #include "ChartTranslationOptionCollection.h"
-#include "CoveredChartSpan.h"
+#include "DotChart.h"
 #include "RuleCubeItem.h"
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"
@@ -48,8 +48,7 @@ RuleCubeItem::RuleCubeItem(const ChartTranslationOption &transOpt,
                            transOpt.GetTargetPhraseCollection().GetCollection())
   , m_hypothesis(0)
 {
-  const CoveredChartSpan *lastCCS = &transOpt.GetLastCoveredChartSpan();
-  CreateHypothesisDimensions(lastCCS, allChartCells);
+  CreateHypothesisDimensions(transOpt.GetDottedRule(), allChartCells);
 }
 
 // create the RuleCube from an existing one, differing only in one dimension
@@ -100,24 +99,25 @@ ChartHypothesis *RuleCubeItem::ReleaseHypothesis()
 // for each non-terminal, create a ordered list of matching hypothesis from the
 // chart
 void RuleCubeItem::CreateHypothesisDimensions(
-  const CoveredChartSpan *coveredChartSpan,
+  const DottedRule &dottedRule,
   const ChartCellCollection &allChartCells)
 {
-  // recurse through the linked list of source side non-terminals and terminals
-  const CoveredChartSpan *prev = coveredChartSpan->GetPrevCoveredChartSpan();
-  if (prev) {
-    CreateHypothesisDimensions(prev, allChartCells);
+  assert(!dottedRule.IsRoot());
+
+  const DottedRule *prev = dottedRule.GetPrev();
+  if (!prev->IsRoot()) {
+    CreateHypothesisDimensions(*prev, allChartCells);
   }
 
   // only deal with non-terminals
-  if (coveredChartSpan->IsNonTerminal()) {
+  if (dottedRule.IsNonTerminal()) {
     // get the essential information about the non-terminal:
     // span covered by child
-    const WordsRange &childRange = coveredChartSpan->GetWordsRange();
+    const WordsRange &childRange = dottedRule.GetWordsRange();
     // list of all hypos for that span
     const ChartCell &childCell = allChartCells.Get(childRange);
     // target (sic!) non-terminal label 
-    const Word &nonTerm = coveredChartSpan->GetSourceWord();
+    const Word &nonTerm = dottedRule.GetSourceWord();
 
     // there have to be hypothesis with the desired non-terminal
     // (otherwise the rule would not be considered)

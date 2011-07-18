@@ -45,7 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTranslationOption.h"
 #include "ChartHypothesis.h"
-#include "CoveredChartSpan.h"
+#include "DotChart.h"
 
 
 using namespace std;
@@ -229,7 +229,7 @@ void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, lo
   if (hypo != NULL) {
     out << "Trans Opt " << translationId
         << " " << hypo->GetCurrSourceRange()
-        << ": " << hypo->GetTranslationOption().GetLastCoveredChartSpan()
+        << ": " << hypo->GetTranslationOption().GetDottedRule()
         << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
         << "->" << hypo->GetCurrTargetPhrase()
         << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()

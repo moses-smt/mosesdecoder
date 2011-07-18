@@ -30,7 +30,6 @@
 #include "NonTerminal.h"
 #include "ChartHypothesis.h"
 #include "ChartHypothesisCollection.h"
-#include "CoveredChartSpan.h"
 #include "RuleCube.h"
 #include "ChartCellLabelSet.h"
 

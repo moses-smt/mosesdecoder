@@ -32,7 +32,7 @@ class ChartCellCollection;
 class ChartHypothesis;
 class ChartManager;
 class ChartTranslationOption;
-class CoveredChartSpan;
+class DottedRule;
 class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
@@ -136,7 +136,7 @@ class RuleCubeItem
   RuleCubeItem(const RuleCubeItem &);  // Not implemented
   RuleCubeItem &operator=(const RuleCubeItem &);  // Not implemented
 
-  void CreateHypothesisDimensions(const CoveredChartSpan *,
+  void CreateHypothesisDimensions(const DottedRule &,
                                   const ChartCellCollection &);
 
   TranslationDimension m_translationDimension;

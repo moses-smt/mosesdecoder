@@ -32,7 +32,7 @@ namespace Moses
 class DecodeGraph;
 class Word;
 class ChartTranslationOption;
-class CoveredChartSpan;
+class DottedRule;
 class WordPenaltyProducer;
 class ChartCellCollection;
 
@@ -49,7 +49,7 @@ protected:
   std::vector< std::vector< ChartTranslationOptionList > > m_collection; /*< contains translation options */
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
-  std::list<std::vector<CoveredChartSpan*>* > m_coveredChartSpanCache;
+  std::list<std::vector<DottedRule*>* > m_dottedRuleCache;
 
   // for adding 1 trans opt in unknown word proc
   void Add(ChartTranslationOption *transOpt, size_t pos);

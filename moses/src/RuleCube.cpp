@@ -23,7 +23,6 @@
 #include "ChartCellCollection.h"
 #include "ChartTranslationOption.h"
 #include "ChartTranslationOptionCollection.h"
-#include "CoveredChartSpan.h"
 #include "RuleCube.h"
 #include "RuleCubeQueue.h"
 #include "StaticData.h"

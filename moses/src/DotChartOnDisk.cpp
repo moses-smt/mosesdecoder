@@ -54,14 +54,6 @@ void DottedRuleStackOnDisk::SortSavedNodes()
   sort(m_savedNode.begin(), m_savedNode.end(), SavedNodesOderer());
 }
 
-std::ostream& operator<<(std::ostream &out, const DottedRuleOnDisk & /* rule */)
-{
-  //const MosesBerkeleyPt::SourcePhraseNode &node = rule.GetLastNode();
-  //out << node;
-
-  return out;
-}
-
 std::ostream& operator<<(std::ostream &out, const DottedRuleCollOnDisk &coll)
 {
   DottedRuleCollOnDisk::CollType::const_iterator iter;

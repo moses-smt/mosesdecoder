@@ -23,110 +23,35 @@
 #include "config.h"
 #endif
 
-#include <vector>
-#include <cassert>
-#include "PhraseDictionaryNodeSCFG.h"
-#include "ChartTranslationOption.h"
-#include "CoveredChartSpan.h"
+#include "ChartCellLabel.h"
 
 namespace Moses
 {
 
 class DottedRule
 {
-  friend std::ostream& operator<<(std::ostream&, const DottedRule&);
+  friend std::ostream& operator<<(std::ostream &, const DottedRule &);
 
-protected:
-  const PhraseDictionaryNodeSCFG &m_lastNode;
-  const CoveredChartSpan *m_coveredChartSpan; // usually contains something, unless its the init processed rule
-public:
+ public:
   // used only to init dot stack.
-  explicit DottedRule(const PhraseDictionaryNodeSCFG &lastNode)
-    :m_lastNode(lastNode)
-    ,m_coveredChartSpan(NULL)
-  {}
-  DottedRule(const PhraseDictionaryNodeSCFG &lastNode, const CoveredChartSpan *coveredChartSpan)
-    :m_lastNode(lastNode)
-    ,m_coveredChartSpan(coveredChartSpan)
-  {}
-  ~DottedRule() {
-#ifdef USE_BOOST_POOL
-    // Do nothing.  CoveredChartSpan objects are stored in object pools owned by
-    // the sentence-specific ChartRuleLookupManagers.
-#else
-    delete m_coveredChartSpan;
-#endif
-  }
-  const PhraseDictionaryNodeSCFG &GetLastNode() const {
-    return m_lastNode;
-  }
-  const CoveredChartSpan *GetLastCoveredChartSpan() const {
-    return m_coveredChartSpan;
-  }
-};
+  DottedRule()
+      : m_cellLabel(NULL)
+      , m_prev(NULL) {}
 
-typedef std::vector<const DottedRule*> DottedRuleList;
+  DottedRule(const ChartCellLabel &ccl, const DottedRule &prev)
+      : m_cellLabel(&ccl)
+      , m_prev(&prev) {}
 
-// Collection of all DottedRules that share a common start point,
-// grouped by end point.  Additionally, maintains a list of all
-// DottedRules that could be expanded further, i.e. for which the
-// corresponding PhraseDictionaryNodeSCFG is not a leaf.
-class DottedRuleColl
-{
-protected:
-  typedef std::vector<DottedRuleList> CollType;
-  CollType m_coll;
-  DottedRuleList m_expandableDottedRuleList;
+  const WordsRange &GetWordsRange() const { return m_cellLabel->GetCoverage(); }
+  const Word &GetSourceWord() const { return m_cellLabel->GetLabel(); }
+  bool IsNonTerminal() const { return m_cellLabel->GetLabel().IsNonTerminal(); }
+  const DottedRule *GetPrev() const { return m_prev; }
+  bool IsRoot() const { return m_prev == NULL; }
 
-public:
-  typedef CollType::iterator iterator;
-  typedef CollType::const_iterator const_iterator;
-
-  const_iterator begin() const {
-    return m_coll.begin();
-  }
-  const_iterator end() const {
-    return m_coll.end();
-  }
-  iterator begin() {
-    return m_coll.begin();
-  }
-  iterator end() {
-    return m_coll.end();
-  }
-
-  DottedRuleColl(size_t size)
-    : m_coll(size)
-  {}
-
-  ~DottedRuleColl();
-
-  const DottedRuleList &Get(size_t pos) const {
-    return m_coll[pos];
-  }
-  DottedRuleList &Get(size_t pos) {
-    return m_coll[pos];
-  }
-
-  void Add(size_t pos, const DottedRule *dottedRule) {
-    assert(dottedRule);
-    m_coll[pos].push_back(dottedRule);
-    if (!dottedRule->GetLastNode().IsLeaf()) {
-      m_expandableDottedRuleList.push_back(dottedRule);
-    }
-  }
-
-  void Clear(size_t pos) {
-#ifdef USE_BOOST_POOL
-    m_coll[pos].clear();
-#endif
-  }
-
-  const DottedRuleList &GetExpandableDottedRuleList() const {
-    return m_expandableDottedRuleList;
-  }
-
+ private:
+  const ChartCellLabel *m_cellLabel; // usually contains something, unless
+                                     // it's the init processed rule
+  const DottedRule *m_prev;
 };
 
 }
-

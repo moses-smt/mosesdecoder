@@ -31,11 +31,10 @@
 #endif
 
 #include "ChartRuleLookupManager.h"
-#include "DotChart.h"
+#include "DotChartInMemory.h"
 #include "NonTerminal.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "PhraseDictionarySCFG.h"
-#include "CoveredChartSpan.h"
 
 namespace Moses
 {
@@ -61,8 +60,7 @@ public:
 
 private:
   void ExtendPartialRuleApplication(
-    const PhraseDictionaryNodeSCFG &node,
-    const CoveredChartSpan *prevCoveredChartSpan,
+    const DottedRuleInMemory &prevDottedRule,
     size_t startPos,
     size_t endPos,
     size_t stackInd,
@@ -71,11 +69,10 @@ private:
   std::vector<DottedRuleColl*> m_dottedRuleColls;
   const PhraseDictionarySCFG &m_ruleTable;
 #ifdef USE_BOOST_POOL
-  // Use object pools to allocate the DottedRule and CoveredChartSpan objects
-  // for this sentence.  We allocate a lot of them and this has been seen to
-  // significantly improve performance, especially for multithreaded decoding.
-  boost::object_pool<DottedRule> m_dottedRulePool;
-  boost::object_pool<CoveredChartSpan> m_coveredChartSpanPool;
+  // Use an object pool to allocate the dotted rules for this sentence.  We
+  // allocate a lot of them and this has been seen to significantly improve
+  // performance, especially for multithreaded decoding.
+  boost::object_pool<DottedRuleInMemory> m_dottedRulePool;
 #endif
 };
 

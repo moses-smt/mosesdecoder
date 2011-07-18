@@ -23,7 +23,7 @@
 #include "InputType.h"
 #include "ChartTranslationOptionList.h"
 #include "CellCollection.h"
-#include "DotChart.h"
+#include "DotChartInMemory.h"
 #include "StaticData.h"
 #include "NonTerminal.h"
 #include "ChartCellCollection.h"
@@ -46,10 +46,10 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
 
   for (size_t ind = 0; ind < m_dottedRuleColls.size(); ++ind) {
 #ifdef USE_BOOST_POOL
-    DottedRule *initDottedRule = m_dottedRulePool.malloc();
-    new (initDottedRule) DottedRule(rootNode);
+    DottedRuleInMemory *initDottedRule = m_dottedRulePool.malloc();
+    new (initDottedRule) DottedRuleInMemory(rootNode);
 #else
-    DottedRule *initDottedRule = new DottedRule(rootNode);
+    DottedRuleInMemory *initDottedRule = new DottedRuleInMemory(rootNode);
 #endif
 
     DottedRuleColl *dottedRuleColl = new DottedRuleColl(sourceSize - ind + 1);
@@ -85,15 +85,11 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   //  through calls to ExtendPartialRuleApplication())
   for (size_t ind = 0; ind < expandableDottedRuleList.size(); ++ind) {
     // rule we are about to extend
-    const DottedRule &prevDottedRule = *expandableDottedRuleList[ind];
-    // note where it was found in the prefix tree of the rule dictionary
-    const PhraseDictionaryNodeSCFG &prevNode = prevDottedRule.GetLastNode();
-    // look up end position of the span it covers
-    const CoveredChartSpan *prevCoveredChartSpan = prevDottedRule.GetLastCoveredChartSpan();
+    const DottedRuleInMemory &prevDottedRule = *expandableDottedRuleList[ind];
     // we will now try to extend it, starting after where it ended
-    // (note: prevCoveredChartSpan == NULL matches for the dummy rule 
-    //  at root of the prefix tree)
-    size_t startPos = (prevCoveredChartSpan == NULL) ? range.GetStartPos() : prevCoveredChartSpan->GetWordsRange().GetEndPos() + 1;
+    size_t startPos = prevDottedRule.IsRoot()
+                    ? range.GetStartPos()
+                    : prevDottedRule.GetWordsRange().GetEndPos() + 1;
 
     // search for terminal symbol
     // (if only one more word position needs to be covered)
@@ -102,20 +98,19 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
       // look up in rule dictionary, if the current rule can be extended
       // with the source word in the last position
       const Word &sourceWord = sourceWordLabel.GetLabel();
-      const PhraseDictionaryNodeSCFG *node = prevNode.GetChild(sourceWord);
+      const PhraseDictionaryNodeSCFG *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
 
       // if we found a new rule -> create it and add it to the list
       if (node != NULL) {
 				// create the rule
 #ifdef USE_BOOST_POOL
-        CoveredChartSpan *newCoveredChartSpan = m_coveredChartSpanPool.malloc();
-        new (newCoveredChartSpan) CoveredChartSpan(sourceWordLabel, prevCoveredChartSpan);
-        DottedRule *dottedRule = m_dottedRulePool.malloc();
-        new (dottedRule) DottedRule(*node, newCoveredChartSpan);
+        DottedRuleInMemory *dottedRule = m_dottedRulePool.malloc();
+        new (dottedRule) DottedRuleInMemory(*node, sourceWordLabel,
+                                            prevDottedRule);
 #else
-        CoveredChartSpan *newCoveredChartSpan = new CoveredChartSpan(sourceWordLabel, prevCoveredChartSpan);
-        DottedRule *dottedRule = new DottedRule(*node,
-            newCoveredChartSpan);
+        DottedRuleInMemory *dottedRule = new DottedRuleInMemory(*node,
+                                                                sourceWordLabel,
+                                                                prevDottedRule);
 #endif
         dottedRuleCol.Add(relEndPos+1, dottedRule);
       }
@@ -149,8 +144,8 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
     }
 
 
-    ExtendPartialRuleApplication(prevNode, prevCoveredChartSpan, startPos,
-                                 endPos, stackInd, dottedRuleCol);
+    ExtendPartialRuleApplication(prevDottedRule, startPos, endPos, stackInd,
+                                 dottedRuleCol);
   }
 
   // list of rules that that cover the entire span
@@ -160,17 +155,15 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   size_t rulesLimit = StaticData::Instance().GetRuleLimit();
   DottedRuleList::const_iterator iterRule;
   for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
-    const DottedRule &dottedRule = **iterRule;
+    const DottedRuleInMemory &dottedRule = **iterRule;
     const PhraseDictionaryNodeSCFG &node = dottedRule.GetLastNode();
-    const CoveredChartSpan *coveredChartSpan = dottedRule.GetLastCoveredChartSpan();
-    assert(coveredChartSpan);
 
     // look up target sides
     const TargetPhraseCollection *targetPhraseCollection = node.GetTargetPhraseCollection();
 
     // add the fully expanded rule (with lexical target side)
     if (targetPhraseCollection != NULL) {
-      outColl.Add(*targetPhraseCollection, *coveredChartSpan,
+      outColl.Add(*targetPhraseCollection, dottedRule,
                   GetCellCollection(), adhereTableLimit, rulesLimit);
     }
   }
@@ -185,8 +178,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 // determines the full or partial rule applications that can be produced through
 // extending the current rule application by a single non-terminal.
 void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
-  const PhraseDictionaryNodeSCFG & node,
-  const CoveredChartSpan *prevCoveredChartSpan,
+  const DottedRuleInMemory &prevDottedRule,
   size_t startPos,
   size_t endPos,
   size_t stackInd,
@@ -199,6 +191,9 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   // target non-terminal labels for the remainder
   const ChartCellLabelSet &targetNonTerms =
     GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+
+  // note where it was found in the prefix tree of the rule dictionary
+  const PhraseDictionaryNodeSCFG &node = prevDottedRule.GetLastNode();
 
   const PhraseDictionaryNodeSCFG::NonTerminalMap & nonTermMap =
     node.GetNonTerminalMap();
@@ -243,13 +238,11 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
 
         // create new rule
 #ifdef USE_BOOST_POOL
-        CoveredChartSpan *wc = m_coveredChartSpanPool.malloc();
-        new (wc) CoveredChartSpan(cellLabel, prevCoveredChartSpan);
-        DottedRule *rule = m_dottedRulePool.malloc();
-        new (rule) DottedRule(*child, wc);
+        DottedRuleInMemory *rule = m_dottedRulePool.malloc();
+        new (rule) DottedRuleInMemory(*child, cellLabel, prevDottedRule);
 #else
-        CoveredChartSpan * wc = new CoveredChartSpan(cellLabel, prevCoveredChartSpan);
-        DottedRule * rule = new DottedRule(*child, wc);
+        DottedRuleInMemory *rule = new DottedRuleInMemory(*child, cellLabel,
+                                                          prevDottedRule);
 #endif
         dottedRuleColl.Add(stackInd, rule);
       }
@@ -263,27 +256,25 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       nonTermMap.end();
     for (p = nonTermMap.begin(); p != end; ++p) {
       // does it match possible source and target non-terminals?
-      const PhraseDictionaryNodeSCFG::NonTerminalMapKey & key = p->first;
-      const Word & sourceNonTerm = key.first;
+      const PhraseDictionaryNodeSCFG::NonTerminalMapKey &key = p->first;
+      const Word &sourceNonTerm = key.first;
       if (sourceNonTerms.find(sourceNonTerm) == sourceNonTerms.end()) {
         continue;
       }
-      const Word & targetNonTerm = key.second;
+      const Word &targetNonTerm = key.second;
       const ChartCellLabel *cellLabel = targetNonTerms.Find(targetNonTerm);
       if (!cellLabel) {
         continue;
       }
 
       // create new rule
-      const PhraseDictionaryNodeSCFG & child = p->second;
+      const PhraseDictionaryNodeSCFG &child = p->second;
 #ifdef USE_BOOST_POOL
-      CoveredChartSpan *wc = m_coveredChartSpanPool.malloc();
-      new (wc) CoveredChartSpan(*cellLabel, prevCoveredChartSpan);
-      DottedRule *rule = m_dottedRulePool.malloc();
-      new (rule) DottedRule(child, wc);
+      DottedRuleInMemory *rule = m_dottedRulePool.malloc();
+      new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);
 #else
-      CoveredChartSpan * wc = new CoveredChartSpan(*cellLabel, prevCoveredChartSpan);
-      DottedRule * rule = new DottedRule(child, wc);
+      DottedRuleInMemory *rule = new DottedRuleInMemory(child, *cellLabel,
+                                                        prevDottedRule);
 #endif
       dottedRuleColl.Add(stackInd, rule);
     }

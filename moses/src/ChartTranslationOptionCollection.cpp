@@ -26,7 +26,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
-#include "CoveredChartSpan.h"
+#include "DotChart.h"
 #include "Util.h"
 
 using namespace std;
@@ -60,13 +60,13 @@ ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhraseCollection);
 
-  std::list<std::vector<CoveredChartSpan*>* >::iterator iterOuter;
-  for (iterOuter = m_coveredChartSpanCache.begin(); iterOuter != m_coveredChartSpanCache.end(); ++iterOuter) {
-    std::vector<CoveredChartSpan*> &inner = **iterOuter;
+  std::list<std::vector<DottedRule*>* >::iterator iterOuter;
+  for (iterOuter = m_dottedRuleCache.begin(); iterOuter != m_dottedRuleCache.end(); ++iterOuter) {
+    std::vector<DottedRule*> &inner = **iterOuter;
     RemoveAllInColl(inner);
   }
 
-  RemoveAllInColl(m_coveredChartSpanCache);
+  RemoveAllInColl(m_dottedRuleCache);
 
 }
 
@@ -203,13 +203,11 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
   //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
-    // words consumed
-    std::vector<CoveredChartSpan*> *coveredChartSpanList = new std::vector<CoveredChartSpan*>();
-    m_coveredChartSpanCache.push_back(coveredChartSpanList);
-
-    CoveredChartSpan *wc = new CoveredChartSpan(sourceWordLabel, NULL);
-    coveredChartSpanList->push_back(wc);
-    assert(coveredChartSpanList->size());
+    // create dotted rules
+    std::vector<DottedRule*> *dottedRuleList = new std::vector<DottedRule*>();
+    m_dottedRuleCache.push_back(dottedRuleList);
+    dottedRuleList->push_back(new DottedRule());
+    dottedRuleList->push_back(new DottedRule(sourceWordLabel, *(dottedRuleList->back())));
 
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
@@ -245,7 +243,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
       // chart rule
       ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
-          , *coveredChartSpanList->back()
+          , *dottedRuleList->back()
           , range
           , m_hypoStackColl);
       transOptColl.Add(chartRule);
@@ -274,14 +272,14 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       targetPhrase->SetTargetLHS(targetLHS);
 
       // words consumed
-      std::vector<CoveredChartSpan*> *coveredChartSpanList = new std::vector<CoveredChartSpan*>;
-      m_coveredChartSpanCache.push_back(coveredChartSpanList);
-      coveredChartSpanList->push_back(new CoveredChartSpan(sourceWordLabel, NULL));
+      std::vector<DottedRule*> *dottedRuleList = new std::vector<DottedRule*>();
+      m_dottedRuleCache.push_back(dottedRuleList);
+      dottedRuleList->push_back(new DottedRule());
+      dottedRuleList->push_back(new DottedRule(sourceWordLabel, *(dottedRuleList->back())));
 
       // chart rule
-      assert(coveredChartSpanList->size());
       ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
-          , *coveredChartSpanList->back()
+          , *dottedRuleList->back()
           , range
           , m_hypoStackColl);
       transOptColl.Add(chartRule);

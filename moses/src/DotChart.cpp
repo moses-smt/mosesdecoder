@@ -17,44 +17,21 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
+
 #include "DotChart.h"
-#include "Util.h"
-
-#include <algorithm>
-
-using namespace std;
 
 namespace Moses
 {
-DottedRuleColl::~DottedRuleColl()
+
+std::ostream &operator<<(std::ostream &out, const DottedRule &rule)
 {
-#ifdef USE_BOOST_POOL
-  // Do nothing.  DottedRule objects are stored in object pools owned by
-  // the sentence-specific ChartRuleLookupManagers.
-#else
-  std::for_each(m_coll.begin(), m_coll.end(),
-                RemoveAllInColl<CollType::value_type>);
-#endif
-}
-
-std::ostream& operator<<(std::ostream &out, const DottedRule& /* rule */)
-{
-  //const PhraseDictionaryNode &node = rule.GetLastNode();
-  //out << node;
-
-  return out;
-}
-
-std::ostream& operator<<(std::ostream &out, const DottedRuleList &coll)
-{
-  DottedRuleList::const_iterator iter;
-  for (iter = coll.begin(); iter != coll.end(); ++iter) {
-    const DottedRule &rule = **iter;
-    out << rule << endl;
-
+  if (!rule.IsRoot()) {
+    out << rule.GetWordsRange() << "=" << rule.GetSourceWord() << " ";
+    if (!rule.m_prev->IsRoot()) {
+      out << " " << *rule.m_prev;
+    }
   }
-
   return out;
 }
 
-};
+}

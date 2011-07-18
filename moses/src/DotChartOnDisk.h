@@ -21,8 +21,8 @@
 
 #include <vector>
 #include <cassert>
-#include "ChartTranslationOption.h"
-#include "CoveredChartSpan.h"
+
+#include "DotChart.h"
 
 namespace OnDiskPt
 {
@@ -32,63 +32,30 @@ class PhraseNode;
 
 namespace Moses
 {
-class DottedRuleOnDisk
+class DottedRuleOnDisk : public DottedRule
 {
-  friend std::ostream& operator<<(std::ostream&, const DottedRuleOnDisk&);
-
-protected:
-  const OnDiskPt::PhraseNode &m_lastNode;
-  const CoveredChartSpan *m_coveredChartSpan; // usually contains something, unless its the init processed rule
-  mutable bool m_done;
-public:
+ public:
   // used only to init dot stack.
   explicit DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode)
-    :m_lastNode(lastNode)
-    ,m_coveredChartSpan(NULL)
-    ,m_done(false)
-  {}
-  DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode, const CoveredChartSpan *coveredChartSpan)
-    :m_lastNode(lastNode)
-    ,m_coveredChartSpan(coveredChartSpan)
-    ,m_done(false)
-  {}
-  ~DottedRuleOnDisk() {
-    delete m_coveredChartSpan;
-  }
-  const OnDiskPt::PhraseNode &GetLastNode() const {
-    return m_lastNode;
-  }
-  const CoveredChartSpan *GetLastCoveredChartSpan() const {
-    return m_coveredChartSpan;
-  }
+      : DottedRule()
+      , m_lastNode(lastNode)
+      , m_done(false) {}
 
-  bool IsCurrNonTerminal() const {
-    assert(m_coveredChartSpan);
-    return m_coveredChartSpan->IsNonTerminal();
-  }
+  DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode,
+                   const ChartCellLabel &cellLabel,
+                   const DottedRuleOnDisk &prev)
+      : DottedRule(cellLabel, prev)
+      , m_lastNode(lastNode)
+      , m_done(false) {}
 
-  bool Done() const {
-    return m_done;
-  }
-  void Done(bool value) const {
-    m_done = value;
-  }
+  const OnDiskPt::PhraseNode &GetLastNode() const { return m_lastNode; }
 
-  /*
-  inline int Compare(const DottedRule &compare) const
-  {
-  	if (m_lastNode < compare.m_lastNode)
-  		return -1;
-  	if (m_lastNode > compare.m_lastNode)
-  		return 1;
+  bool Done() const { return m_done; }
+  void Done(bool value) const { m_done = value; }
 
-  	return m_coveredChartSpan < compare.m_coveredChartSpan;
-  }
-  inline bool operator<(const DottedRule &compare) const
-  {
-  	return Compare(compare) < 0;
-  }
-  */
+ private:
+  const OnDiskPt::PhraseNode &m_lastNode;
+  mutable bool m_done;
 };
 
 class DottedRuleCollOnDisk

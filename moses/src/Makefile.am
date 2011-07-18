@@ -25,7 +25,6 @@ libmoses_la_HEADERS = \
 	ChartTrellisPathCollection.h \
 	ChartTrellisPathList.h \
         ConfusionNet.h \
-        CoveredChartSpan.h \
         DecodeFeature.h \
         DecodeGraph.h \
         DecodeStep.h \
@@ -33,6 +32,7 @@ libmoses_la_HEADERS = \
         DecodeStepTranslation.h \
         Dictionary.h \
         DotChart.h \
+        DotChartInMemory.h \
         DotChartOnDisk.h \
         DummyScoreProducers.h \
 	DynSAInclude/file.h \
@@ -186,7 +186,6 @@ libmoses_la_SOURCES = \
 	ChartTrellisPathCollection.cpp \
 	ChartTrellisPathList.cpp \
         ConfusionNet.cpp \
-        CoveredChartSpan.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
         DecodeStep.cpp \
@@ -194,6 +193,7 @@ libmoses_la_SOURCES = \
         DecodeStepTranslation.cpp \
         Dictionary.cpp \
         DotChart.cpp \
+        DotChartInMemory.cpp \
         DotChartOnDisk.cpp \
         DummyScoreProducers.cpp \
 	DynSAInclude/file.cpp \

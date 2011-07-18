@@ -30,7 +30,7 @@
 namespace Moses
 {
 
-class CoveredChartSpan;
+class DottedRule;
 class ChartCellCollection;
 
 // Similar to a DottedRule, but contains a direct reference to a list
@@ -39,24 +39,20 @@ class ChartTranslationOption
 {
  public:
   ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
-                         const CoveredChartSpan &lastCoveredChartSpan,
+                         const DottedRule &dottedRule,
                          const WordsRange &wordsRange,
                          const ChartCellCollection &allChartCells)
-    : m_lastCoveredChartSpan(lastCoveredChartSpan)
+    : m_dottedRule(dottedRule)
     , m_targetPhraseCollection(targetPhraseColl)
     , m_wordsRange(wordsRange)
     , m_estimateOfBestScore(0)
   {
-    const TargetPhrase &targetPhrase = **(m_targetPhraseCollection.begin());
-    m_estimateOfBestScore = targetPhrase.GetFutureScore();
-    CalcEstimateOfBestScore(&m_lastCoveredChartSpan, allChartCells);
+    CalcEstimateOfBestScore(allChartCells);
   }
 
   ~ChartTranslationOption() {}
 
-  const CoveredChartSpan &GetLastCoveredChartSpan() const {
-    return m_lastCoveredChartSpan;
-  }
+  const DottedRule &GetDottedRule() const { return m_dottedRule; }
 
   const TargetPhraseCollection &GetTargetPhraseCollection() const { 
     return m_targetPhraseCollection;
@@ -75,10 +71,9 @@ class ChartTranslationOption
   // not implemented
   ChartTranslationOption &operator=(const ChartTranslationOption &);
 
-  void CalcEstimateOfBestScore(const CoveredChartSpan *,
-                               const ChartCellCollection &);
+  void CalcEstimateOfBestScore(const ChartCellCollection &);
 
-  const CoveredChartSpan &m_lastCoveredChartSpan;
+  const DottedRule &m_dottedRule;
   const TargetPhraseCollection &m_targetPhraseCollection;
   const WordsRange &m_wordsRange;
   float m_estimateOfBestScore;

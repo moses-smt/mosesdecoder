@@ -1,38 +1,40 @@
-// $Id$
-// vim:tabstop=2
 /***********************************************************************
- Moses - factored phrase-based language decoder
- Copyright (C) 2010 Hieu Hoang
-
+ Moses - statistical machine translation system
+ Copyright (C) 2006-2011 University of Edinburgh
+ 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
-
+ 
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
-
+ 
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************************/
+***********************************************************************/
 
-#include "CoveredChartSpan.h"
+#include "DotChartInMemory.h"
+
+#include "Util.h"
+
+#include <algorithm>
 
 namespace Moses
 {
 
-std::ostream& operator<<(std::ostream &out, const CoveredChartSpan &coveredChartSpan)
+DottedRuleColl::~DottedRuleColl()
 {
-  out << coveredChartSpan.GetWordsRange()
-      << "=" << coveredChartSpan.GetSourceWord() << " ";
-  if (coveredChartSpan.m_prevCoveredChartSpan)
-    out << " " << *coveredChartSpan.m_prevCoveredChartSpan;
-
-  return out;
+#ifdef USE_BOOST_POOL
+  // Do nothing.  DottedRule objects are stored in object pools owned by
+  // the sentence-specific ChartRuleLookupManagers.
+#else
+  std::for_each(m_coll.begin(), m_coll.end(),
+                RemoveAllInColl<CollType::value_type>);
+#endif
 }
 
-
-} // namespace
+}
