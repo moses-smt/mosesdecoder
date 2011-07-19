@@ -40,20 +40,11 @@ void ChartTranslationOption::CalcEstimateOfBestScore(
   // only deal with non-terminals
   while (!rule->IsRoot()) {
     if (rule->IsNonTerminal()) {
-      // get the essential information about the non-terminal
-      const WordsRange &childRange = rule->GetWordsRange();
-      const ChartCell &childCell = allChartCells.Get(childRange);
-      const Word &nonTerm = rule->GetSourceWord();
-
-      // there have to be hypotheses with the desired non-terminal
-      // (otherwise the rule would not be considered)
-      assert(!childCell.GetSortedHypotheses(nonTerm).empty());
-
-      // create a list of hypotheses that match the non-terminal
-      const std::vector<const ChartHypothesis *> &stack =
-        childCell.GetSortedHypotheses(nonTerm);
-      const ChartHypothesis *hypo = stack[0];
-      m_estimateOfBestScore += hypo->GetTotalScore();
+      // add the score of the best underlying hypothesis
+      const ChartCellLabel &cellLabel = rule->GetChartCellLabel();
+      const ChartHypothesisCollection *hypoColl = cellLabel.GetStack();
+      assert(hypoColl);
+      m_estimateOfBestScore += hypoColl->GetBestScore();
     }
     rule = rule->GetPrev();
   }

@@ -113,6 +113,8 @@ public:
     return m_hyposOrdered;
   }
 
+  float GetBestScore() const { return m_bestScore; }
+
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<int,bool> &reachable) const;
 
 };

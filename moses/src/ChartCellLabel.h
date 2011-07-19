@@ -29,21 +29,27 @@
 namespace Moses
 {
 
+class ChartHypothesisCollection;
 class Word;
 
 class ChartCellLabel
 {
  public:
-  ChartCellLabel(const WordsRange &coverage, const Word &label)
+  ChartCellLabel(const WordsRange &coverage, const Word &label,
+                 const ChartHypothesisCollection *stack=NULL)
     : m_coverage(coverage)
     , m_label(label)
+    , m_stack(stack)
   {}
 
   const WordsRange &GetCoverage() const { return m_coverage; }
   const Word &GetLabel() const { return m_label; }
+  const ChartHypothesisCollection *GetStack() const { return m_stack; }
 
   bool operator<(const ChartCellLabel &other) const
   {
+    // m_coverage and m_label uniquely identify a ChartCellLabel, so don't
+    // need to compare m_stack.
     if (m_coverage == other.m_coverage) {
       return m_label < other.m_label;
     }
@@ -53,6 +59,7 @@ class ChartCellLabel
  private:
   const WordsRange &m_coverage;
   const Word &m_label;
+  const ChartHypothesisCollection *m_stack;
 };
 
 }

@@ -47,6 +47,7 @@ class DottedRule
   bool IsNonTerminal() const { return m_cellLabel->GetLabel().IsNonTerminal(); }
   const DottedRule *GetPrev() const { return m_prev; }
   bool IsRoot() const { return m_prev == NULL; }
+  const ChartCellLabel &GetChartCellLabel() const { return *m_cellLabel; }
 
  private:
   const ChartCellLabel *m_cellLabel; // usually contains something, unless

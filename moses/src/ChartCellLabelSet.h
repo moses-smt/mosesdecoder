@@ -30,6 +30,8 @@
 namespace Moses
 {
 
+class ChartHypothesisCollection;
+
 class ChartCellLabelSet
 {
  private:
@@ -43,10 +45,16 @@ class ChartCellLabelSet
   const_iterator begin() const { return m_set.begin(); }
   const_iterator end() const { return m_set.end(); }
 
-  void Add(const Word &w)
+  void AddWord(const Word &w)
   {
-    ChartCellLabel edge(m_coverage, w);
-    m_set.insert(edge);
+    ChartCellLabel cellLabel(m_coverage, w);
+    m_set.insert(cellLabel);
+  }
+
+  void AddConstituent(const Word &w, const ChartHypothesisCollection &stack)
+  {
+    ChartCellLabel cellLabel(m_coverage, w, &stack);
+    m_set.insert(cellLabel);
   }
 
   bool Empty() const { return m_set.empty(); }

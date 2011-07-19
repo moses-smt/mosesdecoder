@@ -120,8 +120,8 @@ void ChartCell::SortHypotheses()
   assert(m_targetLabelSet.Empty());
   std::map<Word, ChartHypothesisCollection>::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
-    m_targetLabelSet.Add(iter->first);
     ChartHypothesisCollection &coll = iter->second;
+    m_targetLabelSet.AddConstituent(iter->first, coll);
     coll.SortHypotheses();
   }
 }

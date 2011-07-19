@@ -111,20 +111,18 @@ void RuleCubeItem::CreateHypothesisDimensions(
 
   // only deal with non-terminals
   if (dottedRule.IsNonTerminal()) {
-    // get the essential information about the non-terminal:
-    // span covered by child
-    const WordsRange &childRange = dottedRule.GetWordsRange();
-    // list of all hypos for that span
-    const ChartCell &childCell = allChartCells.Get(childRange);
-    // target (sic!) non-terminal label 
-    const Word &nonTerm = dottedRule.GetSourceWord();
+    // get a sorted list of the underlying hypotheses
+    const ChartCellLabel &cellLabel = dottedRule.GetChartCellLabel();
+    const ChartHypothesisCollection *hypoColl = cellLabel.GetStack();
+    assert(hypoColl);
+    const HypoList &hypoList = hypoColl->GetSortedHypotheses();
 
     // there have to be hypothesis with the desired non-terminal
     // (otherwise the rule would not be considered)
-    assert(!childCell.GetSortedHypotheses(nonTerm).empty());
+    assert(!hypoList.empty());
 
     // create a list of hypotheses that match the non-terminal
-    HypothesisDimension dimension(0, childCell.GetSortedHypotheses(nonTerm));
+    HypothesisDimension dimension(0, hypoList);
     // add them to the vector for such lists
     m_hypothesisDimensions.push_back(dimension);
   }
