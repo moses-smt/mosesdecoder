@@ -1,49 +1,29 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processLexicalTable", "misc\processLexicalTable.vcproj", "{9834EABB-2033-4607-9DAC-36D16E0725B5}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8B07671B-CBAF-4514-AFFD-CE238CD427E9} = {8B07671B-CBAF-4514-AFFD-CE238CD427E9}
-		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
-	EndProjectSection
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processLexicalTable", "misc\processLexicalTable.vcxproj", "{9834EABB-2033-4607-9DAC-36D16E0725B5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processPhraseTable", "misc\processPhraseTable.vcproj", "{AA230564-6DF1-4662-9BF9-7AD73DE53B76}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8B07671B-CBAF-4514-AFFD-CE238CD427E9} = {8B07671B-CBAF-4514-AFFD-CE238CD427E9}
-		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "processPhraseTable", "misc\processPhraseTable.vcxproj", "{AA230564-6DF1-4662-9BF9-7AD73DE53B76}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses", "moses\moses.vcproj", "{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses", "moses\moses.vcxproj", "{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-chart-cmd", "moses-chart-cmd\moses-chart-cmd.vcproj", "{C3AF5C05-D4EC-41D2-8319-D1E69B9B5820}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8B07671B-CBAF-4514-AFFD-CE238CD427E9} = {8B07671B-CBAF-4514-AFFD-CE238CD427E9}
-		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-chart-cmd", "moses-chart-cmd\moses-chart-cmd.vcxproj", "{C3AF5C05-D4EC-41D2-8319-D1E69B9B5820}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cmd", "moses-cmd\moses-cmd.vcproj", "{E2233DB1-5592-46FE-9420-E529420612FA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8B07671B-CBAF-4514-AFFD-CE238CD427E9} = {8B07671B-CBAF-4514-AFFD-CE238CD427E9}
-		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "moses-cmd", "moses-cmd\moses-cmd.vcxproj", "{E2233DB1-5592-46FE-9420-E529420612FA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OnDiskPt", "OnDiskPt\OnDiskPt.vcproj", "{8B07671B-CBAF-4514-AFFD-CE238CD427E9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OnDiskPt", "OnDiskPt\OnDiskPt.vcxproj", "{8B07671B-CBAF-4514-AFFD-CE238CD427E9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateOnDisk", "CreateOnDisk\CreateOnDisk.vcproj", "{88AE90C9-72D2-42ED-8389-770ACDCD4308}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8B07671B-CBAF-4514-AFFD-CE238CD427E9} = {8B07671B-CBAF-4514-AFFD-CE238CD427E9}
-		{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF} = {8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateOnDisk", "CreateOnDisk\CreateOnDisk.vcxproj", "{88AE90C9-72D2-42ED-8389-770ACDCD4308}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "consolidate", "scripts\training\phrase-extract\consolidate.vcproj", "{45410EFE-65C0-4078-82E4-D636258F9225}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "consolidate", "scripts\training\phrase-extract\consolidate.vcxproj", "{45410EFE-65C0-4078-82E4-D636258F9225}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "consolidate-direct", "scripts\training\phrase-extract\consolidate-direct.vcproj", "{33775109-60CF-4C1C-A869-5450B3DD88B3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "consolidate-direct", "scripts\training\phrase-extract\consolidate-direct.vcxproj", "{33775109-60CF-4C1C-A869-5450B3DD88B3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extract", "scripts\training\phrase-extract\extract.vcproj", "{2475F8E8-A5C9-4785-8B09-5F4E120FC518}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extract", "scripts\training\phrase-extract\extract.vcxproj", "{2475F8E8-A5C9-4785-8B09-5F4E120FC518}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extract-rules", "scripts\training\phrase-extract\extract-rules.vcproj", "{3C5CFAEC-6830-4491-9008-1C9E8C381C50}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extract-rules", "scripts\training\phrase-extract\extract-rules.vcxproj", "{3C5CFAEC-6830-4491-9008-1C9E8C381C50}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "score", "scripts\training\phrase-extract\score.vcproj", "{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "score", "scripts\training\phrase-extract\score.vcxproj", "{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
