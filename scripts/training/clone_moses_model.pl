@@ -39,14 +39,41 @@ while (<INI>) {
   if (/^[0-9]/) {
     if ($section eq "ttable-file") {
       chomp;
-      my ($a, $b, $c, $d, $fn) = split / /;
+      my ($a, $b, $c, $d, $fn) = split(/ /, $_, 5);
       $cnt{$section}++;
-      $fn = fixpath($fn);
-      $fn = ensure_relative_from_origin($fn, $ini);
-      $fn = ensure_exists_or_gzipped_exists($fn);
-      my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
-      clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
-      $_ = "$a $b $c $d ./$section.$cnt{$section}$suffix\n";
+
+		if ( $a eq '8' ) {
+			# suffix arrays model: <src-corpus> <tgt-corpus> <alignment>.
+			my ($src, $tgt, $align) = split(/ /, $fn);
+
+			$src = fixpath($src);
+			$src = ensure_relative_from_origin($src, $ini);
+			$src = ensure_exists_or_gzipped_exists($src);
+			my $src_suffix = ($src =~ /\.gz$/ ? ".gz" : "");
+		 	clone_file_or_die($src, "./sa.src.$cnt{$section}$src_suffix");
+
+			$tgt = fixpath($tgt);
+			$tgt = ensure_relative_from_origin($tgt, $ini);
+			$tgt = ensure_exists_or_gzipped_exists($tgt);
+			my $tgt_suffix = ($tgt =~ /\.gz$/ ? ".gz" : "");
+			clone_file_or_die($tgt, "./sa.tgt.$cnt{$section}$tgt_suffix");
+
+			$align = fixpath($align);
+			$align = ensure_relative_from_origin($align, $ini);
+			$align = ensure_exists_or_gzipped_exists($align);
+			my $align_suffix = ($align =~ /\.gz$/ ? ".gz" : "");
+		  	clone_file_or_die($align, "./sa.align.$cnt{$section}$align_suffix");
+
+			$_ = "$a $b $c $d ./sa.src.$cnt{$section}$src_suffix ./sa.tgt.$cnt{$section}$tgt_suffix ./sa.align.$cnt{$section}$align_suffix\n";
+		}
+		else {
+		  $fn = fixpath($fn);
+		  $fn = ensure_relative_from_origin($fn, $ini);
+		  $fn = ensure_exists_or_gzipped_exists($fn);
+		  my $suffix = ($fn =~ /\.gz$/ ? ".gz" : "");
+		  clone_file_or_die($fn, "./$section.$cnt{$section}$suffix");
+		  $_ = "$a $b $c $d ./$section.$cnt{$section}$suffix\n";
+		}
     }
     if ($section eq "generation-file" || $section eq "lmodel-file") {
       chomp;

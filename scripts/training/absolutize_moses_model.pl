@@ -22,11 +22,32 @@ while (<$inih>) {
   if (/^[0-9]/) {
     if ($section eq "ttable-file") {
       chomp;
-      my ($type, $b, $c, $d, $fn) = split / /;
-      $abs = ensure_absolute($fn, $ini);
-      die "File not found or empty: $fn (searched for $abs or $abs.binphr.idx)"
-        if ! -s $abs && ! -s $abs.".binphr.idx"; # accept binarized ttables
-      $_ = "$type $b $c $d $abs\n";
+      my ($type, $b, $c, $d, $fn) = split(/ /, $_, 5);
+
+		if ( $type eq '8' ) {
+			# suffix arrays model: <src-corpus> <tgt-corpus> <alignment>.
+			my ($src, $tgt, $align) = split(/ /, $fn);
+
+			my $abs_src = ensure_absolute($src, $ini);
+			die "File not found or empty: $src (searched for $abs_src or $abs_src.binphr.idx)"
+				if ! -s $abs_src && ! -s $abs_src.".binphr.idx"; # accept binarized ttables
+
+			my $abs_tgt = ensure_absolute($tgt, $ini);
+			die "File not found or empty: $tgt (searched for $abs_tgt or $abs_tgt.binphr.idx)"
+				if ! -s $abs_tgt && ! -s $abs_tgt.".binphr.idx"; # accept binarized ttables
+
+			my $abs_align = ensure_absolute($align, $ini);
+			die "File not found or empty: $align (searched for $abs_align or $abs_align.binphr.idx)"
+				if ! -s $abs_align && ! -s $abs_align.".binphr.idx"; # accept binarized ttables
+
+			$_ = "$type $b $c $d $abs_src $abs_tgt $abs_align\n";
+		}
+		else {
+		  $abs = ensure_absolute($fn, $ini);
+		  die "File not found or empty: $fn (searched for $abs or $abs.binphr.idx)"
+		    if ! -s $abs && ! -s $abs.".binphr.idx"; # accept binarized ttables
+		  $_ = "$type $b $c $d $abs\n";
+		}	
     }
     if ($section eq "generation-file" || $section eq "lmodel-file") {
       chomp;
