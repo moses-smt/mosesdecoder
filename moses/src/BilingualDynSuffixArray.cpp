@@ -181,7 +181,7 @@ int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorLis
 {
 	std::string line, word;
 	int sntIdx(0);
-	corpus.seekg(0);
+//	corpus.seekg(0); Seems needless -> commented out to allow loading of gzipped corpora (gzfilebuf doesn't support seeking).
 	const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	while(getline(corpus, line)) {
 		sntArray.push_back(sntIdx);
