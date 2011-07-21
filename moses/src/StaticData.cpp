@@ -457,7 +457,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_distortionScoreProducers.assign(tsConfig.size(), NULL);
   } else {
     if (m_distortionScoreProducers.size() != tsConfig.size()) {
-      UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems"));
+      UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems. Or [search-algorithm] has been set to a phrase-based algorithm when it should be chart decoding"));
       return false;
     }
   }
