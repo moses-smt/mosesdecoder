@@ -70,6 +70,10 @@ for (my $i = 0; $i < $numParallel; ++$i)
 		print $cmd;
 		`$cmd`;
 
+		$cmd = "rm -f $TMPDIR/extract.$numStr $TMPDIR/extract.$numStr.inv $TMPDIR/extract.$numStr.o \n";
+		print $cmd;
+		`$cmd`;
+
 		exit();
 	}
 	else
@@ -112,9 +116,9 @@ print $extractOrderingCmd;
 `$extractInvCmd`;
 `$extractOrderingCmd`;
 
-$cmd = "rm -rf $TMPDIR \n";
-print $cmd;
-`$cmd`;
+#$cmd = "rm -rf $TMPDIR \n";
+#print $cmd;
+#`$cmd`;
 
 print "Finished ".localtime() ."\n";
 
