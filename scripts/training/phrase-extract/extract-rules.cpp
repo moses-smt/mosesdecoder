@@ -32,7 +32,7 @@
 
 #ifdef WIN32
 // Include Visual Leak Detector
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #include "ExtractedRule.h"
