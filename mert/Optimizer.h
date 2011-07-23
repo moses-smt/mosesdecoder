@@ -11,8 +11,6 @@
 
 typedef float featurescore;
 
-
-
 using namespace std;
 /**abstract virtual class*/
 class Optimizer
@@ -20,8 +18,9 @@ class Optimizer
 protected:
   Scorer * scorer; //no accessor for them only child can use them
   FeatureData * FData;//no accessor for them only child can use them
+  unsigned int number_of_random_directions;
 public:
-  Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start);
+  Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom);
   void SetScorer(Scorer *S);
   void SetFData(FeatureData *F);
   virtual ~Optimizer();
@@ -46,24 +45,33 @@ public:
 };
 
 
-/**default basic  optimizer*/
+/**default basic optimizer*/
 class SimpleOptimizer: public Optimizer
 {
 private:
-  static  float eps;
+  static float eps;
 public:
-  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start):Optimizer(dim,i2O,start) {};
+  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom):Optimizer(dim,i2O,start,nrandom) {};
   virtual statscore_t  TrueRun(Point&)const;
 };
 
+/**optimizer with random directions*/
+class RandomDirectionOptimizer: public Optimizer
+{
+private:
+  static float eps;
+public:
+  RandomDirectionOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom):Optimizer(dim,i2O,start,nrandom) {};
+  virtual statscore_t  TrueRun(Point&)const;
+};
+
+/**dumb baseline optimizer: just picks a random point and quits*/
 class RandomOptimizer: public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start):Optimizer(dim,i2O,start) {};
+  RandomOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start, unsigned int nrandom):Optimizer(dim,i2O,start,nrandom) {};
   virtual statscore_t  TrueRun(Point&)const;
 };
-
-
 
 class OptimizerFactory
 {
@@ -71,9 +79,9 @@ public:
   // unsigned dim;
   //Point Start;
   static vector<string> GetTypeNames();
-  static Optimizer* BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,vector<parameter_t> start,string type);
+  static Optimizer* BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,vector<parameter_t> start,string type,unsigned int nrandom);
 private:
-  enum OptType {POWELL=0,RANDOM,NOPTIMIZER}; //Add new optimizer here BEFORE NOPTIMZER
+  enum OptType {POWELL=0,RANDOM_DIRECTION=1,RANDOM,NOPTIMIZER}; //Add new optimizer here BEFORE NOPTIMZER
   static OptType GetOType(string);
   static vector<string> typenames;
   static void SetTypeNames();

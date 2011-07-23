@@ -115,7 +115,9 @@ my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 my $___PREDICTABLE_SEEDS = 0;
-
+my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iterations as starting points [Foster&Kuhn,2009]
+my $___RANDOM_DIRECTIONS = 0; # search in random directions only
+my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
 
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
@@ -193,6 +195,9 @@ GetOptions(
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
   "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
+  "historic-bests" => \$___START_WITH_HISTORIC_BESTS, # use best settings from all previous iterations as starting points
+  "random-directions" => \$___RANDOM_DIRECTIONS, # search only in random directions
+  "number-of-random-directions=i" => \$___NUM_RANDOM_DIRECTIONS, # number of random directions
   "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
@@ -273,6 +278,9 @@ Options:
                                   the starting weights (and also as the fixed
                                   weights if --activate-features is used).
                                   default: yes (used to be 'no')
+  --random-directions               ... search only in random directions
+  --number-of-random-directions=int ... number of random directions
+                                        (also works with regular optimizer, default: 0)
 ";
   exit 1;
 }
@@ -481,6 +489,7 @@ my $devbleu = undef;
 
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
+my $prev_init_file = undef;
 
 if ($continue) {
   # getting the last finished step
@@ -528,6 +537,16 @@ if ($continue) {
 	else{
 	  $prev_score_file = "run$prevstep.scores.dat";
 	}
+      }
+      if (! -e "run$prevstep.${weights_in_file}"){
+	die "Can't start from step $step, because run$prevstep.${weights_in_file} was not found!";
+      }else{
+        if (defined $prev_init_file){
+          $prev_init_file = "${prev_init_file},run$prevstep.${weights_in_file}";
+        }
+        else{
+          $prev_init_file = "run$prevstep.${weights_in_file}";
+        }
       }
     }
     if (! -e "run$step.weights.txt"){
@@ -706,6 +725,15 @@ while(1) {
       my $seed = $run * 1000;
       $cmd = $cmd." -r $seed";
   }
+  if ($___RANDOM_DIRECTIONS) {
+    if ($___NUM_RANDOM_DIRECTIONS == 0) {
+      $cmd .= " -m 50";
+    }
+    $cmd = $cmd." -t random-direction";
+  }
+  if ($___NUM_RANDOM_DIRECTIONS) {
+    $cmd .= " -m $___NUM_RANDOM_DIRECTIONS";
+  }
 
   if (defined $prev_feature_file) {
     $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
@@ -719,8 +747,12 @@ while(1) {
   else{
     $cmd = $cmd." --scfile $score_file";
   }
-
-  $cmd = $cmd." --ifile run$run.$weights_in_file";
+  if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
+    $cmd = $cmd." --ifile $prev_init_file,run$run.$weights_in_file";
+  }
+  else{
+    $cmd = $cmd." --ifile run$run.$weights_in_file";
+  }
 
   if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
@@ -793,6 +825,7 @@ while(1) {
   print "loading data from $firstrun to $run (prev_aggregate_nbl_size=$prev_aggregate_nbl_size)\n";
   $prev_feature_file = undef;
   $prev_score_file = undef;
+  $prev_init_file = undef;
   for (my $i=$firstrun;$i<=$run;$i++){ 
     if (defined $prev_feature_file){
       $prev_feature_file = "${prev_feature_file},run${i}.${base_feature_file}";
@@ -806,9 +839,16 @@ while(1) {
     else{
       $prev_score_file = "run${i}.${base_score_file}";
     }
+    if (defined $prev_init_file){
+      $prev_init_file = "${prev_init_file},run${i}.${weights_in_file}";
+    }
+    else{
+      $prev_init_file = "run${i}.${weights_in_file}";
+    }
   }
   print "loading data from $prev_feature_file\n" if defined($prev_feature_file);
   print "loading data from $prev_score_file\n" if defined($prev_score_file);
+  print "loading data from $prev_init_file\n" if defined($prev_init_file);
 }
 print "Training finished at ".`date`;
 
