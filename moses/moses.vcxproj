@@ -139,6 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\AlignmentInfo.cpp" />
+    <ClCompile Include="src\AlignmentInfoCollection.cpp" />
     <ClCompile Include="src\BitmapContainer.cpp" />
     <ClCompile Include="src\ChartCell.cpp" />
     <ClCompile Include="src\ChartCellCollection.cpp" />
@@ -155,7 +156,6 @@
     <ClCompile Include="src\ChartTrellisPathCollection.cpp" />
     <ClCompile Include="src\ChartTrellisPathList.cpp" />
     <ClCompile Include="src\ConfusionNet.cpp" />
-    <ClCompile Include="src\CoveredChartSpan.cpp" />
     <ClCompile Include="src\DecodeFeature.cpp" />
     <ClCompile Include="src\DecodeGraph.cpp" />
     <ClCompile Include="src\DecodeStep.cpp" />
@@ -163,6 +163,7 @@
     <ClCompile Include="src\DecodeStepTranslation.cpp" />
     <ClCompile Include="src\Dictionary.cpp" />
     <ClCompile Include="src\DotChart.cpp" />
+    <ClCompile Include="src\DotChartInMemory.cpp" />
     <ClCompile Include="src\DotChartOnDisk.cpp" />
     <ClCompile Include="src\DummyScoreProducers.cpp" />
     <ClCompile Include="src\Factor.cpp" />
@@ -213,6 +214,7 @@
     <ClCompile Include="src\Parameter.cpp" />
     <ClCompile Include="src\PartialTranslOptColl.cpp" />
     <ClCompile Include="src\PCNTools.cpp" />
+    <ClCompile Include="src\PDTAimp.cpp" />
     <ClCompile Include="src\Phrase.cpp" />
     <ClCompile Include="src\PhraseDictionary.cpp" />
     <ClCompile Include="src\PhraseDictionaryMemory.cpp" />
@@ -235,6 +237,7 @@
     <ClCompile Include="src\ReorderingConstraint.cpp" />
     <ClCompile Include="src\ReorderingStack.cpp" />
     <ClCompile Include="src\RuleCube.cpp" />
+    <ClCompile Include="src\RuleCubeItem.cpp" />
     <ClCompile Include="src\RuleCubeQueue.cpp" />
     <ClCompile Include="src\ScoreComponentCollection.cpp" />
     <ClCompile Include="src\ScoreIndexManager.cpp" />
@@ -269,6 +272,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AlignmentInfo.h" />
+    <ClInclude Include="src\AlignmentInfoCollection.h" />
     <ClInclude Include="src\BilingualDynSuffixArray.h" />
     <ClInclude Include="src\BitmapContainer.h" />
     <ClInclude Include="src\CellCollection.h" />
@@ -288,7 +292,6 @@
     <ClInclude Include="src\ChartTrellisPathCollection.h" />
     <ClInclude Include="src\ChartTrellisPathList.h" />
     <ClInclude Include="src\ConfusionNet.h" />
-    <ClInclude Include="src\CoveredChartSpan.h" />
     <ClInclude Include="src\DecodeFeature.h" />
     <ClInclude Include="src\DecodeGraph.h" />
     <ClInclude Include="src\DecodeStep.h" />
@@ -296,6 +299,7 @@
     <ClInclude Include="src\DecodeStepTranslation.h" />
     <ClInclude Include="src\Dictionary.h" />
     <ClInclude Include="src\DotChart.h" />
+    <ClInclude Include="src\DotChartInMemory.h" />
     <ClInclude Include="src\DotChartOnDisk.h" />
     <ClInclude Include="src\DummyScoreProducers.h" />
     <ClInclude Include="src\DynSuffixArray.h" />
@@ -362,6 +366,7 @@
     <ClInclude Include="src\ReorderingConstraint.h" />
     <ClInclude Include="src\ReorderingStack.h" />
     <ClInclude Include="src\RuleCube.h" />
+    <ClInclude Include="src\RuleCubeItem.h" />
     <ClInclude Include="src\RuleCubeQueue.h" />
     <ClInclude Include="src\ScoreComponentCollection.h" />
     <ClInclude Include="src\ScoreIndexManager.h" />

@@ -60,7 +60,9 @@ public:
     if(i==keys.end() || *i!=*b) {
       keys.insert(i,*b);
       data.insert(data.begin()+pos,def);
-      ptr.insert(ptr.begin()+pos,0);
+
+	  Self *self = NULL;
+      ptr.insert(ptr.begin()+pos, self);
     }
     if(++b!=e) {
       if(!ptr[pos]) ptr[pos]=new Self;
