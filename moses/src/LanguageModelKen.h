@@ -29,6 +29,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+  // kenlm specific score value
+  struct LMKenResult {
+    LMResult lmResult;
+    unsigned char ngram_length;
+  };
+
+  namespace {
+    // base-class for the actual LanguageModelKen; only here to provide a specific behaviour without exposing the implementation
+    class LanguageModelKenBase : public LanguageModelSingleFactor {
+    public:
+      // scoring functions which provide more info than the common interface of LanguageModel
+	virtual LMKenResult GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const = 0;
+	virtual LMKenResult GetKenFullScoreForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
+    };
+  }
+
 class ScoreIndexManager;
 
 // Doesn't actually load; moses wants the Load method for that.  It needs the file to autodetect binary format.
