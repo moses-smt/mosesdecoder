@@ -383,7 +383,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graph > 0 && // only skip subsequent graphs
             decodeGraphBackoff[graph] != 0 && // use of backoff specified
-            (endPos-startPos+1 > decodeGraphBackoff[graph] || // size exceeds backoff limit or ...
+            (endPos-startPos+1 >= decodeGraphBackoff[graph] || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graph << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options

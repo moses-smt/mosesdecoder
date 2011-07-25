@@ -35,8 +35,6 @@
 		1E2E162B132A890D00ED4085 /* ChartTrellisPathCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1615132A890D00ED4085 /* ChartTrellisPathCollection.h */; };
 		1E2E162C132A890D00ED4085 /* ChartTrellisPathList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1616132A890D00ED4085 /* ChartTrellisPathList.cpp */; };
 		1E2E162D132A890D00ED4085 /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */; };
-		1E2E162E132A890D00ED4085 /* CoveredChartSpan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1618132A890D00ED4085 /* CoveredChartSpan.cpp */; };
-		1E2E162F132A890D00ED4085 /* CoveredChartSpan.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1619132A890D00ED4085 /* CoveredChartSpan.h */; };
 		1E2E1639132A892800ED4085 /* OutputCollector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1632132A892800ED4085 /* OutputCollector.h */; };
 		1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1633132A892800ED4085 /* RuleCube.cpp */; };
 		1E2E163B132A892800ED4085 /* RuleCube.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1634132A892800ED4085 /* RuleCube.h */; };
@@ -269,6 +267,8 @@
 		1ED0FF02124BB9380029177F /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FE29124BB9380029177F /* XmlOption.h */; };
 		1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */; };
 		1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */; };
+		1ED22EE513DD96B0000DE8C9 /* DotChartInMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED22EE313DD96B0000DE8C9 /* DotChartInMemory.cpp */; };
+		1ED22EE613DD96B0000DE8C9 /* DotChartInMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED22EE413DD96B0000DE8C9 /* DotChartInMemory.h */; };
 		1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EE58D9D133726C700D93158 /* NonTerminal.cpp */; };
 		1EE58DA0133726C700D93158 /* NonTerminal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE58D9E133726C700D93158 /* NonTerminal.h */; };
 		1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */; };
@@ -303,8 +303,6 @@
 		1E2E1615132A890D00ED4085 /* ChartTrellisPathCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathCollection.h; path = src/ChartTrellisPathCollection.h; sourceTree = "<group>"; };
 		1E2E1616132A890D00ED4085 /* ChartTrellisPathList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisPathList.cpp; path = src/ChartTrellisPathList.cpp; sourceTree = "<group>"; };
 		1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathList.h; path = src/ChartTrellisPathList.h; sourceTree = "<group>"; };
-		1E2E1618132A890D00ED4085 /* CoveredChartSpan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CoveredChartSpan.cpp; path = src/CoveredChartSpan.cpp; sourceTree = "<group>"; };
-		1E2E1619132A890D00ED4085 /* CoveredChartSpan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CoveredChartSpan.h; path = src/CoveredChartSpan.h; sourceTree = "<group>"; };
 		1E2E1632132A892800ED4085 /* OutputCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OutputCollector.h; path = src/OutputCollector.h; sourceTree = "<group>"; };
 		1E2E1633132A892800ED4085 /* RuleCube.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCube.cpp; path = src/RuleCube.cpp; sourceTree = "<group>"; };
 		1E2E1634132A892800ED4085 /* RuleCube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCube.h; path = src/RuleCube.h; sourceTree = "<group>"; };
@@ -539,6 +537,8 @@
 		1ED0FE29124BB9380029177F /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = src/XmlOption.h; sourceTree = "<group>"; };
 		1ED0FFD1124BC0BF0029177F /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
 		1ED0FFD2124BC0BF0029177F /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
+		1ED22EE313DD96B0000DE8C9 /* DotChartInMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartInMemory.cpp; path = src/DotChartInMemory.cpp; sourceTree = "<group>"; };
+		1ED22EE413DD96B0000DE8C9 /* DotChartInMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartInMemory.h; path = src/DotChartInMemory.h; sourceTree = "<group>"; };
 		1EE58D9D133726C700D93158 /* NonTerminal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NonTerminal.cpp; path = src/NonTerminal.cpp; sourceTree = "<group>"; };
 		1EE58D9E133726C700D93158 /* NonTerminal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonTerminal.h; path = src/NonTerminal.h; sourceTree = "<group>"; };
 		1EEB43ED1264A6F200739BA5 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = src/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
@@ -610,8 +610,6 @@
 				1E2E1617132A890D00ED4085 /* ChartTrellisPathList.h */,
 				1ED0FD57124BB9380029177F /* ConfusionNet.cpp */,
 				1ED0FD58124BB9380029177F /* ConfusionNet.h */,
-				1E2E1618132A890D00ED4085 /* CoveredChartSpan.cpp */,
-				1E2E1619132A890D00ED4085 /* CoveredChartSpan.h */,
 				1ED0FD59124BB9380029177F /* DecodeFeature.cpp */,
 				1ED0FD5A124BB9380029177F /* DecodeFeature.h */,
 				1ED0FD5B124BB9380029177F /* DecodeGraph.cpp */,
@@ -626,6 +624,8 @@
 				1ED0FD64124BB9380029177F /* Dictionary.h */,
 				1ED0FD65124BB9380029177F /* DotChart.cpp */,
 				1ED0FD66124BB9380029177F /* DotChart.h */,
+				1ED22EE313DD96B0000DE8C9 /* DotChartInMemory.cpp */,
+				1ED22EE413DD96B0000DE8C9 /* DotChartInMemory.h */,
 				1ED0FD67124BB9380029177F /* DotChartOnDisk.cpp */,
 				1ED0FD68124BB9380029177F /* DotChartOnDisk.h */,
 				1ED0FD69124BB9380029177F /* DummyScoreProducers.cpp */,
@@ -830,7 +830,6 @@
 				1EBB262513A12DB500B51840 /* perfectHash.h */,
 				1EBB262613A12DB500B51840 /* quantizer.h */,
 				1ED0FDEA124BB9380029177F /* rule.proto */,
-
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -997,7 +996,6 @@
 				1E2E1629132A890D00ED4085 /* ChartTrellisPath.h in Headers */,
 				1E2E162B132A890D00ED4085 /* ChartTrellisPathCollection.h in Headers */,
 				1E2E162D132A890D00ED4085 /* ChartTrellisPathList.h in Headers */,
-				1E2E162F132A890D00ED4085 /* CoveredChartSpan.h in Headers */,
 				1E2E1639132A892800ED4085 /* OutputCollector.h in Headers */,
 				1E2E163B132A892800ED4085 /* RuleCube.h in Headers */,
 				1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */,
@@ -1013,6 +1011,7 @@
 				1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */,
 				1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */,
 				1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */,
+				1ED22EE613DD96B0000DE8C9 /* DotChartInMemory.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1178,7 +1177,6 @@
 				1E2E1628132A890D00ED4085 /* ChartTrellisPath.cpp in Sources */,
 				1E2E162A132A890D00ED4085 /* ChartTrellisPathCollection.cpp in Sources */,
 				1E2E162C132A890D00ED4085 /* ChartTrellisPathList.cpp in Sources */,
-				1E2E162E132A890D00ED4085 /* CoveredChartSpan.cpp in Sources */,
 				1E2E163A132A892800ED4085 /* RuleCube.cpp in Sources */,
 				1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */,
 				1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */,
@@ -1189,6 +1187,7 @@
 				1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */,
 				1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */,
 				1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */,
+				1ED22EE513DD96B0000DE8C9 /* DotChartInMemory.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
