@@ -1,4 +1,4 @@
-all: consolidate consolidate-direct extract extract-rules relax-parse \
+all: consolidate consolidate-direct consolidate-reverse extract extract-rules relax-parse \
      score statistics extract-lex
 
 clean: 
@@ -24,6 +24,9 @@ consolidate: consolidate.o tables-core.o InputFileStream.o
 
 consolidate-direct: consolidate-direct.o InputFileStream.o
 	$(CXX) $^ -lz -o consolidate-direct
+
+consolidate-reverse: consolidate-reverse.o tables-core.o InputFileStream.o
+	$(CXX) $^ -lz -o consolidate-reverse
 
 relax-parse: tables-core.o SyntaxTree.o XmlTree.o relax-parse.o
 	$(CXX) $^ -o relax-parse
