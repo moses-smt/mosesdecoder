@@ -1,5 +1,5 @@
 all: consolidate consolidate-direct consolidate-reverse extract extract-rules relax-parse \
-     score statistics extract-lex
+     score score2 statistics extract-lex
 
 clean: 
 	rm -f *.o
@@ -18,6 +18,9 @@ extract-lex: extract-lex.o
 
 score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o InputFileStream.o
 	$(CXX) $^ -lz -o score
+
+score2: tables-core.o AlignmentPhrase.o score2.o PhraseAlignment.o InputFileStream.o
+	$(CXX) $^ -lz -o score2
 
 consolidate: consolidate.o tables-core.o InputFileStream.o
 	$(CXX) $^ -lz -o consolidate
