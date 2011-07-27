@@ -30,6 +30,12 @@ public:
   bool equals( const PhraseAlignment& );
   bool match( const PhraseAlignment& );
 
+	int Compare(const PhraseAlignment &compare) const;
+	inline bool operator<(const PhraseAlignment &compare) const
+	{ 
+		return Compare(compare) < 0;
+	}
+
   const PHRASE &GetSource() const {
     return phraseS;
   }

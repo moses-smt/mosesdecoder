@@ -125,4 +125,25 @@ bool PhraseAlignment::match( const PhraseAlignment& other )
   return true;
 }
 
+int PhraseAlignment::Compare(const PhraseAlignment &other) const
+{
+  if (this == &other) // comparing with itself
+    return 0;
+
+  if (GetTarget() != other.GetTarget()) 
+    return ( GetTarget() < other.GetTarget() ) ? -1 : +1;
+
+  if (GetSource() != other.GetSource())
+   return ( GetSource() < other.GetSource() ) ? -1 : +1;
+
+  if (alignedToT != other.alignedToT)
+    return (alignedToT < other.alignedToT) ? -1 : +1;
+
+  if (alignedToS != other.alignedToS)
+    return (alignedToS != other.alignedToS) ? -1 : +1;
+
+  return 0;
+  
+}
+
 
