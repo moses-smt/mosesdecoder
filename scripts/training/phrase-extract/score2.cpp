@@ -299,7 +299,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
   PhrasePairGroup phrasePairGroup;
   float totalSource = 0;
 
-  cerr << "phrasePair.size() = " << phrasePair.size() << endl;
+  //cerr << "phrasePair.size() = " << phrasePair.size() << endl;
 
   // loop through phrase pairs
   for(size_t i=0; i<phrasePair.size(); i++) {
