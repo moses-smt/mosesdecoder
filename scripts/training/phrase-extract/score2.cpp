@@ -197,8 +197,7 @@ int main(int argc, char* argv[])
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
-      cerr << "writing out.New line is: " << line << endl;
-
+      
       processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
       phrasePairsWithSameF.clear();
       lastPhrasePair = NULL;
