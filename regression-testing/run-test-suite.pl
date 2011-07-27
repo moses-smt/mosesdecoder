@@ -3,6 +3,8 @@
 # $Id$
 
 use strict;
+use FindBin qw($Bin);
+
 my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, $script_dir; }
 use Getopt::Long;
 
@@ -37,8 +39,8 @@ use MosesRegressionTesting;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );
 
-my $decoderPhrase;
-my $decoderChart;
+my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
+my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
 my $test_dir;
 my $BIN_TEST = $script_dir;
 my $data_dir;
@@ -47,6 +49,7 @@ GetOptions(	"decoder-phrase=s" => \$decoderPhrase,
 			"decoder-chart=s" => \$decoderChart,
            	"data-dir=s" => \$data_dir,
           ) or exit 1;
+
 
 $data_dir = MosesRegressionTesting::find_data_directory($BIN_TEST, $data_dir);
 
