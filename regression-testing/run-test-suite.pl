@@ -10,6 +10,9 @@ use Getopt::Long;
 
 ############################################################
 my @tests = qw (
+  score.phrase-based
+  score.phrase-based-with-alignment
+  score.hierarchical
   chart.target-syntax
   chart.hierarchical
   chart.target-syntax.ondisk
@@ -41,6 +44,7 @@ use POSIX qw ( strftime );
 
 my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
 my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
+my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
 my $test_dir;
 my $BIN_TEST = $script_dir;
 my $data_dir;
@@ -79,17 +83,25 @@ foreach my $test (@tests)
   if ($model_type eq 'phrase')
   {
   	$cmd .= "$test_run --decoder=$decoderPhrase";
+    $cmd .= " --test=$test";
   }
   elsif ($model_type eq 'chart.')
   {
   	$cmd .= "$test_run --decoder=$decoderChart";
+    $cmd .= " --test=$test";
+  }
+  elsif ($model_type eq 'score.')
+  {
+    $cmd = "$Bin/tests/$test/run-test.pl $scoreExe";
   }
   else 
   {
   	print "FAIL";	
   }
   
-  $cmd .= " --test=$test";
+  
+print STDERR "cmd = $cmd\n";
+
   my ($res, $output, $results_path) = do_test($cmd);
   format STDOUT =
 @<<<<<<<<<<<<<<<<<<<<<< @<<<<<<<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
