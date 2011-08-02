@@ -28,6 +28,14 @@ namespace TERCpp
     {
         return sysId;
     }
+//     float documentStructure::getAverageLength()
+//     {
+// 	return averageLength;
+//     }
+//     void documentStructure::setAverageLength(float f)
+//     {
+// 	averageLength=f;
+//     }
 
     void documentStructure::addSegments ( segmentStructure s )
     {

@@ -150,26 +150,57 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 		copy(stats.begin(),stats.end(),ostream_iterator<float>(sout," "));
 		//TRACE_ERR(sout.str() << endl);
 		string stats_str = sout.str();
+// 		cerr << "BLEU RETURNS : " + stats_str << endl;
 		entry.set(stats_str);
 }
 
 float BleuScorer::calculateScore(const vector<int>& comps) {
-    //cerr << "BLEU: ";
-    //copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
+//     cerr << "BLEU: "<< LENGTH<<" : ";
+//     copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
 	float logbleu = 0.0;
+	
 	for (int i = 0; i < LENGTH; ++i) {
+// 	  cerr << "comps[2*i] :"<< comps[2*i] <<endl;
 		if (comps[2*i] == 0) {
 			return 0.0;
 		}
 		logbleu += log(comps[2*i]) - log(comps[2*i+1]);
 		
 	}
-	logbleu /= LENGTH;
+	logbleu /= (float)LENGTH;
+//     cerr << "R1 " << exp(logbleu) << endl;
 	float brevity = 1.0 - (float)comps[LENGTH*2]/comps[1];//reflength divided by test length
 	if (brevity < 0.0) {
 		logbleu += brevity;
 	}
-    //cerr << " " << exp(logbleu) << endl;
+//     cerr << "R2 " << exp(logbleu) << endl;
+	return exp(logbleu);
+}
+
+
+float BleuScorer::calculateScore(const vector<float>& comps) {
+//     cerr << "BLEU: "<< LENGTH<<" : ";
+//     copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
+//     cerr <<endl;
+	float logbleu = 0.0;
+	
+	for (int i = 0; i < LENGTH; ++i) {
+// 	  cerr << "comps[2*i] :"<< comps[2*i] <<endl;
+		if (comps[2*i] == 0) {
+// 			cerr <<"BleuScorer::calculateScore returns : "<< 0.0 <<endl;
+			return 0.0;
+		}
+		logbleu += log(comps[2*i]) - log(comps[2*i+1]);
+		
+	}
+	logbleu /= (float)LENGTH;
+//     cerr << "R1 " << exp(logbleu) << endl;
+	float brevity = 1.0 - (float)comps[LENGTH*2]/comps[1];//reflength divided by test length
+	if (brevity < 0.0) {
+		logbleu += brevity;
+	}
+//     cerr << "R2 " << exp(logbleu) << endl;
+// 			cerr <<"BleuScorer::calculateScore returns : "<< exp(logbleu) <<endl;
 	return exp(logbleu);
 }
 

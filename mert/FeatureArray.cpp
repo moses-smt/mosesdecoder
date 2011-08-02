@@ -150,3 +150,10 @@ bool FeatureArray::check_consistency()
 	return true;
 }
 
+void FeatureArray::applyLambda(float f)
+{
+        for ( int i = 0; i < ( int ) array_.size(); i++ )
+        {
+                 (array_.at ( i ) ).applyLambda ( f);
+        }
+}

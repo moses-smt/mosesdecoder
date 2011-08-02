@@ -35,6 +35,9 @@ namespace TERCpp
 // 		xmlStructure getStructure();
             void addDocument ( documentStructure doc );
             documentStructure* getLastDocument();
+            documentStructure* getFirstDocument();
+	    int getSize();
+	    documentStructure* getDocument(string docId);
 
         private:
             string docType;

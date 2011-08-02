@@ -1,3 +1,4 @@
+#define NDEBUG
 #include "FeatureFunction.h"
 
 #include <cassert>

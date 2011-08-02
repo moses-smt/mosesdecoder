@@ -15,6 +15,8 @@
 #include "BleuScorer.h"
 #include "PerScorer.h"
 #include "TerScorer.h"
+#include "JavaTerScorer.h"
+#include "MergeScorer.h"
 
 using namespace std;
 
@@ -26,6 +28,8 @@ class ScorerFactory {
             types.push_back(string("BLEU"));
             types.push_back(string("PER"));
             types.push_back(string("TER"));
+            types.push_back(string("JAVATER"));
+            types.push_back(string("MERGE"));
             return types;
         }
 
@@ -36,6 +40,10 @@ class ScorerFactory {
 							return (PerScorer*) new PerScorer(config);
             } else if (type == "TER") {
 							return (TerScorer*) new TerScorer(config);
+            } else if (type == "JAVATER") {
+							return (JavaTerScorer*) new JavaTerScorer(config);
+            } else if (type == "MERGE") {
+							return (MergeScorer*) new MergeScorer(config);
             } else {
                 throw runtime_error("Unknown scorer type: " + type);
             }

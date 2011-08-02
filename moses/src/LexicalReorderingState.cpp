@@ -1,3 +1,4 @@
+#define NDEBUG
 
 #include <vector>
 #include <string>

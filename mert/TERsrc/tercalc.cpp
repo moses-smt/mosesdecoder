@@ -30,13 +30,6 @@ namespace TERCpp
         BEAM_WIDTH = 20;
         MAX_SHIFT_DIST = 50;
         PRINT_DEBUG = false;
-//  	for (int init_i = 0 ; init_i< ARRAY_MAX_SIZE; init_i++)
-// 	{
-// 	  for (int init_j = 0 ; init_j< ARRAY_MAX_SIZE; init_j++)
-// 	  {
-// 	    P[init_i][init_j]=' ';
-// 	  }
-// 	}
     }
 
 
@@ -552,17 +545,11 @@ namespace TERCpp
 // 		}
         for ( i = 0; i <= ( int ) ref.size(); i++ )
         {
-	    vecDouble tmpS;
-	    vecChar tmpP;
             for ( j = 0; j <= ( int ) hyp.size(); j++ )
             {
-		tmpS.push_back(-1.0);
-		tmpP.push_back('0');
-//                 S[i][j] = -1.0;
-//                 P[i][j] = '0';
+                S[i][j] = -1.0;
+                P[i][j] = '0';
             }
-            S.push_back(tmpS);
-            P.push_back(tmpP);
         }
         S[0][0] = 0.0;
         for ( j = 0; j <= ( int ) hyp.size(); j++ )
@@ -694,7 +681,7 @@ namespace TERCpp
                         }
                         else
                         {
-                            cerr << "ERROR : terCalc::MinEditDist : Invalid path : at position " << i <<","<<j<<": "<< P[i][j] << endl;
+                            cerr << "ERROR : terCalc::MinEditDist : Invalid path : " << P[i][j] << endl;
                             exit ( -1 );
                         }
         }

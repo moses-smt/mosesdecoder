@@ -231,7 +231,48 @@ namespace TERCpp
                     documentStructure * l_tmp_doc = sgmlDoc->getLastDocument();
                     segmentStructure * l_tmp_seg = l_tmp_doc->getLastSegments();
                     string l_text = pText->Value();
-                    l_tmp_seg->addContent ( l_text );
+		    string line_mod=l_text;
+		                    if ( !xmlParams.tercomLike )
+                {
+                if ( xmlParams.debugMode )
+                {
+                    cerr << "DEBUG xmlStructure::copy_to_SGMLDocument : line NOT tokenized |" << line_mod << "|" << endl << "END DEBUG" << endl;
+                }
+                if ( xmlParams.debugMode )
+                    {
+                        cerr << "DEBUG tercpp : xmlStructure::copy_to_SGMLDocument : " << endl << "TERCOM AT FALSE " << endl << "END DEBUG" << endl;
+                    }
+
+                    line_mod = tokenizePunct ( line_mod );
+                }
+                if ( !xmlParams.caseOn )
+                {
+                    if ( xmlParams.debugMode )
+                    {
+                        cerr << "DEBUG tercpp : xmlStructure::copy_to_SGMLDocument : " << endl << "CASEON AT FALSE " << endl << "END DEBUG" << endl;
+                    }
+                    line_mod = lowerCase ( line_mod );
+                }
+                if ( xmlParams.noPunct )
+                {
+                    if ( xmlParams.debugMode )
+                    {
+                        cerr << "DEBUG tercpp : xmlStructure::copy_to_SGMLDocument : " << endl << "NOPUNCT AT TRUE " << endl << "END DEBUG" << endl;
+                    }
+                    if ( !xmlParams.tercomLike )
+                    {
+                        line_mod = removePunctTercom ( line_mod );
+                    }
+                    else
+                    {
+                        line_mod = removePunct ( line_mod );
+                    }
+                }
+                if ( xmlParams.debugMode )
+                {
+                    cerr << "DEBUG xmlStructure::copy_to_SGMLDocument : line tokenized |" << line_mod << "|" << endl << "END DEBUG" << endl;
+                }
+                    l_tmp_seg->addContent ( line_mod );
                 }
                 break;
 

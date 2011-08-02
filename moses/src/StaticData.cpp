@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: StaticData.cpp 3719 2010-11-17 14:06:21Z chardmeier $
 // vim:tabstop=2
 
@@ -964,7 +965,7 @@ bool StaticData::LoadPhraseTables()
 			
             //This is needed for regression testing, but the phrase table
             //might not really be loading here
-			IFVERBOSE(1)
+			IFVERBOSE(0)
 				PrintUserTime(string("Start loading PhraseTable ") + filePath);
 			VERBOSE(1,"filePath: " << filePath <<endl);
             
@@ -989,7 +990,7 @@ bool StaticData::LoadPhraseTables()
 		}
 	}
 	
-	IFVERBOSE(1)
+	IFVERBOSE(0)
 		PrintUserTime("Finished loading phrase tables");
 	return true;
 }
@@ -1027,7 +1028,6 @@ void StaticData::LoadNonTerminals()
 	else
 	{
 		const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
-		
 		InputFileStream inStream(filePath);
 		string line;
 		while(getline(inStream, line))

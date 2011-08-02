@@ -1,3 +1,4 @@
+#define NDEBUG
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh

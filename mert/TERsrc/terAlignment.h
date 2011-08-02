@@ -31,6 +31,7 @@ namespace TERCpp
 
             double numEdits;
             double numWords;
+	    double averageWords;
             vector<char> alignment;
             string bestRef;
 
@@ -43,6 +44,7 @@ namespace TERCpp
 
             string join ( string delim, vector<string> arr );
             double score();
+            double scoreAv();
     };
 
 }

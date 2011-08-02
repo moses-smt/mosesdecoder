@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: ChartTranslationOption.h 3561 2010-09-23 17:39:32Z hieuhoang1972 $
 /***********************************************************************
  Moses - factored phrase-based language decoder

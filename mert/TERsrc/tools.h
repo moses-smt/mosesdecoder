@@ -47,9 +47,14 @@ struct param
     string vectorToString ( vector<string> vec );
     string vectorToString ( vector<string> vec, string s );
     vector<string> subVector ( vector<string> vec, int start, int end );
+    vector<int> subVector ( vector<int> vec, int start, int end );
+    vector<float> subVector ( vector<float> vec, int start, int end );
     vector<string> copyVector ( vector<string> vec );
+    vector<int> copyVector ( vector<int> vec );
+    vector<float> copyVector ( vector<float> vec );
     vector<string> stringToVector ( string s, string tok );
     vector<int> stringToVectorInt ( string s, string tok );
+    vector<float> stringToVectorFloat ( string s, string tok );
     string lowerCase(string str);
     string removePunct(string str);
     string tokenizePunct(string str);

@@ -52,10 +52,22 @@ Optimizer::~Optimizer(){
 }
 
 statscore_t Optimizer::GetStatScore(const Point& param)const{
-  vector<unsigned> bests;
+  vector<float> bests;
   Get1bests(param,bests);
-  //copy(bests.begin(),bests.end(),ostream_iterator<unsigned>(cerr," "));
+//   cerr << "Optimizer::GetStatScore  BEST :";
+//   copy(bests.begin(),bests.end(),ostream_iterator<float>(cerr," "));cerr <<endl;
+  
   statscore_t score = GetStatScore(bests);
+//   if (scorer->getName())
+     if (scorer->getName().compare("MERGE")==0)
+     {
+//        cerr << "Score "+scorer->getName()+" : " <<score <<"/"<< bests.size() <<endl;
+	score = score / bests.size();
+//        cerr << "REScore "+scorer->getName()+" : " <<score <<endl;
+     }
+//     cerr << scorer->getName() <<endl;
+//   cerr << "Optimizer::GetStatScore Returns : " << score <<endl;
+//   exit(0);
   return score;
 };
 
@@ -95,7 +107,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 	
   map<float,diff_t> thresholdmap;
   thresholdmap[MIN_FLOAT]=diff_t();
-  vector<unsigned> first1best;//the vector of nbests for x=-inf
+  vector<float> first1best;//the vector of nbests for x=-inf
   for(unsigned int S=0;S<size();S++){
     map<float,diff_t >::iterator previnserted=thresholdmap.begin();
     //first we determine the translation with the best feature score for each sentence and each value of x
@@ -285,7 +297,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 };
 
 
-void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const{
+void  Optimizer::Get1bests(const Point& P,vector<float>& bests)const{
   assert(FData);
   bests.clear();
   bests.resize(size());
@@ -315,17 +327,23 @@ statscore_t Optimizer::Run(Point& P)const{
     cerr<<"error trying to optimize without a Scorer loaded"<<endl;
     exit(2);
   }
+  cerr << "Scorer Size : "<< scorer->getReferenceSize() <<"|FeatureData size :" <<FData->size()<<endl;
   if (scorer->getReferenceSize()!=FData->size()){
-    cerr<<"error length mismatch between feature file and score file"<<endl;
+    cerr<<"error size mismatch between FeatureData and Scorer" <<endl;
     exit(2);
   }
 
+//   cerr << "*********************************** Optimizer::Run GetStatScore Call " << P.getdim() <<"***********************************"<<endl;
 	statscore_t score=GetStatScore(P);
+//   cerr << "*********************************** Optimizer::Run GetStatScore Call ends " << P.getdim() <<"***********************************"<<endl;
 	P.score=score;
   
 	if(verboselevel()>2)
     cerr<<"Starting point: "<< P << " => "<< P.score << endl;
+//   cerr << "*********************************** Optimizer::Run TrueRun Call " << P.getdim() <<"***********************************"<<endl;
+//  exit(0);
   statscore_t s=TrueRun(P);
+//   cerr << "*********************************** Optimizer::Run TrueRun Call ends ***********************************"<<endl;
   P.score=s;//just in case its not done in TrueRun
   if (verboselevel()>2)
     cerr<<"Ending point: "<< P <<" => "<< s << endl;
@@ -333,7 +351,7 @@ statscore_t Optimizer::Run(Point& P)const{
 }
  
 
-vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<vector <pair<unsigned,unsigned> > > thediffs)const{
+vector<statscore_t> Optimizer::GetIncStatScore(vector<float> thefirst,vector<vector <pair<float,float> > > thediffs)const{
   assert(scorer);
 
   vector<statscore_t> theres;
@@ -361,6 +379,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
 	}
 	
   int nrun=0;
+//   cerr << "*********************************** Optimizer::TrueRun loop begins ***********************************"<<endl;
   do{
     ++nrun;    
     if(verboselevel()>2&&nrun>1)
@@ -369,7 +388,8 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
     
     Point  linebest;
     
-    for(unsigned int d=0;d<Point::getdim();d++){
+//    cerr << "*********************************** Optimizer::TrueRun second loop begins "<< Point::getdim() <<"***********************************"<<endl;
+   for(unsigned int d=0;d<Point::getdim();d++){
       if(verboselevel()>4){
 				//	cerr<<"minimizing along direction "<<d<<endl;
 				cerr<<"starting point: " << P << " => " << prevscore << endl;
@@ -378,7 +398,9 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
       for(unsigned int i=0;i<Point::getdim();i++)
 				direction[i];
       direction[d]=1.0;
+//       cerr << "*********************************** Optimizer::TrueRun LineOptimize call ***********************************"<<endl;
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
+//       cerr << "*********************************** Optimizer::TrueRun LineOptimize call ends ***********************************"<<endl;
 				if(verboselevel()>5){
 					cerr<<"direction: "<< d << " => " << curscore << endl;
 					cerr<<"\tending point: "<< linebest << " => " << curscore << endl;
@@ -396,6 +418,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const{
 			if(verboselevel()>3)
 				cerr<<nrun<<"\t"<<P<<endl;
 	}while(bestscore-prevscore>eps);
+//   cerr << "*********************************** Optimizer::TrueRun loop ends ***********************************"<<endl;
 	
   if(verboselevel()>2){
     cerr<<"end Powell Algo, nrun="<<nrun<<endl;

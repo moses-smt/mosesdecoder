@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: LanguageModelImplementation.cpp 3719 2010-11-17 14:06:21Z chardmeier $
 
 /***********************************************************************

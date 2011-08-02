@@ -68,8 +68,13 @@ void ScoreStats::set(std::string &theString)
 	
 	while (!theString.empty()){         
 		getNextPound(theString, substring);
-		add(ATOSST(substring.c_str()));
+// 		cerr << substring.c_str()<<"|["<<atof(substring.c_str())<<"]|";
+		add(atof(substring.c_str()));
 	}
+// 	cerr <<endl;
+// 	copy(array_.begin(),array_.end(),ostream_iterator<float>(cerr," "));
+// 	cerr <<endl;
+
 }
 
 void ScoreStats::loadbin(std::ifstream& inFile)

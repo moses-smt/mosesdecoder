@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: ScoreIndexManager.cpp 3394 2010-08-10 13:12:00Z bhaddow $
 
 #include <iostream>

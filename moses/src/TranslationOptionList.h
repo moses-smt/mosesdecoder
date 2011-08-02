@@ -1,3 +1,4 @@
+#define NDEBUG
 #ifndef moses_TranslationOptionList_h
 #define moses_TranslationOptionList_h
 

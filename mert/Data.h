@@ -41,12 +41,12 @@ public:
 	
 	ScoreData* getScoreData() { return scoredata; };
 	FeatureData* getFeatureData() { return featdata; };
-	
+	void setScoreData(Scorer& sc);
 	inline size_t NumberOfFeatures() const{ return featdata->NumberOfFeatures(); }
 	inline void NumberOfFeatures(size_t v){ featdata->NumberOfFeatures(v); }
 	inline std::string Features() const{ return featdata->Features(); }
 	inline void Features(const std::string f){ featdata->Features(f); }
-
+	inline void applyLambda(float f){featdata->applyLambda(f);}
 	void loadnbest(const std::string &file);
 
   void load(const std::string &featfile,const std::string &scorefile){

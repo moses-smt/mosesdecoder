@@ -64,6 +64,27 @@ namespace TERCpp
     {
       return &(documents.at((int)documents.size()-1));
     }
+    documentStructure* SGMLDocument::getFirstDocument()
+    {
+	  return &(documents.at(0));
+    }
+    int SGMLDocument::getSize()
+    {
+      return (int)documents.size();
+    }
+    documentStructure* SGMLDocument::getDocument(string docId)
+    {
+        for ( int i = 0; i < ( int ) documents.size(); i++ )
+        {
+            if ( docId.compare ( documents.at ( i ).getDocId() ) == 0 )
+            {
+                return & ( documents.at ( i ) );
+            }
+        }
+        cerr << "ERROR : SGMLDocument::getDocument : document " << docId << " does not exist !" << endl;
+        exit ( 0 );
+    }
+
 
 
 

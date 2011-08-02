@@ -135,8 +135,9 @@ int main (int argc, char **argv) {
       cerr << "Seeding random numbers with " << seed << endl;
       srandom(seed);
   } else {
-      cerr << "Seeding random numbers with system clock " << endl;
-      srandom(time(NULL));
+	time_t t = time(NULL);
+      cerr << "Seeding random numbers with system clock " << t << endl;
+      srandom(t);
   }
   
   ifstream opt(initfile.c_str());
@@ -210,11 +211,19 @@ int main (int argc, char **argv) {
     tooptimize.resize(pdim);//We'll optimize on everything
     for(int  i=0;i<pdim;i++){ tooptimize[i]=1; }
   }
+  cerr <<"tooptimize "<<tooptimize.size()<<endl;
 
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start,type);
   O->SetScorer(TheScorer);
   O->SetFData(D.getFeatureData());
-  Point P(start);//Generate from the full feature set. Warning: must be done after Optimizer initialization
+//   cerr << "*********************************** start :"<< start.size()<<endl;
+//   		for (vector<parameter_t>::iterator iterpram=start.begin(); iterpram!=start.end();iterpram++)
+// 		{
+// 		  cerr << (*iterpram)<<endl;
+// 		}
+Point P(start);//Generate from the full feature set. Warning: must be done after Optimizer initialization
+//   cerr << "*********************************** Optimizer Runs Point " << P.getdim() <<"***********************************" << endl;
+
   statscore_t best=O->Run(P);
   Point bestP=P;  
   statscore_t mean=best;
@@ -248,6 +257,8 @@ int main (int argc, char **argv) {
 	 oss.str(""); 
 	 oss << "Try number " << (i+1);
 	 PrintUserTime(oss.str());
+ if (verboselevel()>1)
+	 cerr<<"best score for try number "<<i<<": "<< best <<endl;
  }
  mean/=(float)ntry;
  var/=(float)ntry;

@@ -23,6 +23,16 @@ theScorer(&ptr)
   scoredata=new ScoreData(*theScorer);
 };
 
+void Data::setScoreData(Scorer& ptr)
+{
+	score_type = (*theScorer).getName();
+	TRACE_ERR("Data::score_type " << score_type << std::endl);  
+	
+	TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
+  featdata=new FeatureData;
+  scoredata=new ScoreData(*theScorer);
+};
+
 void Data::loadnbest(const std::string &file)
 {
 	TRACE_ERR("loading nbest from " << file << std::endl);  
@@ -39,11 +49,16 @@ void Data::loadnbest(const std::string &file)
 	std::string substring, subsubstring, stringBuf;
 	std::string theSentence;
 	std::string::size_type loc;
+	int l_cpt=0;
 
 
 	while (getline(inp,stringBuf,'\n')){
 		if (stringBuf.empty()) continue;
-
+		l_cpt++;
+		if (l_cpt % 100 == 0)
+		{
+			TRACE_ERR(".");
+		}
 //		TRACE_ERR("stringBuf: " << stringBuf << std::endl); 
 
 		getNextPound(stringBuf, substring, "|||"); //first field

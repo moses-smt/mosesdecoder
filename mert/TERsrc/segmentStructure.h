@@ -22,10 +22,14 @@ namespace TERCpp
             vecString content;
             terAlignment evaluation;
             string bestDocId;
+    	    float averageLength;
+
         public:
             segmentStructure();
             segmentStructure ( string id, vecString vecS );
             segmentStructure ( string id, string txt );
+	    void setAverageLength(float f);
+	    float getAverageLength();
             string getSegId();
             terAlignment getAlignment();
             void setAlignment(terAlignment& l_align);
@@ -34,6 +38,7 @@ namespace TERCpp
             string getBestDocId();
             void addContent ( vecString vecS );
             void addContent ( string s );
+	    int getSize();
 // 	  {
 // 	    return segId;
 // 	  }

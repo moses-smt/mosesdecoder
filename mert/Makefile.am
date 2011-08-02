@@ -1,73 +1,140 @@
-bin_PROGRAMS = mert extractor
-mert_SOURCES = Util.cpp \
+bin_PROGRAMS = mert extractor mergeWeights mergeWeightsNew
+mert_SOURCES = TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/segmentStructure.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/tinyxml.cpp \
+TERsrc/tinyxmlparser.cpp \
+TERsrc/documentStructure.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tinystr.cpp \
+TERsrc/tinyxmlerror.cpp \
+TERsrc/tools.cpp \
+Util.cpp \
 Timer.cpp \
 ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
 FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
 Data.cpp \
+MergeScorer.cpp \
 BleuScorer.cpp \
-Point.cpp \
-TERsrc/alignmentStruct.cpp \
-TERsrc/documentStructure.cpp \
-TERsrc/hashMap.cpp \
-TERsrc/hashMapInfos.cpp \
-TERsrc/hashMapStringInfos.cpp \
-TERsrc/infosHasher.cpp \
-TERsrc/multiEvaluation.cpp \
-TERsrc/multiTxtDocument.cpp \
-TERsrc/segmentStructure.cpp \
-TERsrc/sgmlDocument.cpp \
-TERsrc/stringHasher.cpp \
-TERsrc/stringInfosHasher.cpp \
-TERsrc/terAlignment.cpp \
-TERsrc/tercalc.cpp \
-TERsrc/terShift.cpp \
-TERsrc/tinystr.cpp \
-TERsrc/tinyxml.cpp \
-TERsrc/tinyxmlerror.cpp \
-TERsrc/tinyxmlparser.cpp \
-TERsrc/tools.cpp \
+JavaTerScorer.cpp \
 TerScorer.cpp \
+Point.cpp \
 PerScorer.cpp \
 Scorer.cpp \
 Optimizer.cpp \
-mert.cpp
+mert.cpp 
 
-extractor_SOURCES = Util.cpp \
+
+mergeWeightsNew_SOURCES = TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/segmentStructure.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/tinyxml.cpp \
+TERsrc/tinyxmlparser.cpp \
+TERsrc/documentStructure.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tinystr.cpp \
+TERsrc/tinyxmlerror.cpp \
+TERsrc/tools.cpp \
+Util.cpp \
 Timer.cpp \
 ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
 FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
 Data.cpp \
+MergeScorer.cpp \
 BleuScorer.cpp \
-Point.cpp \
-TERsrc/alignmentStruct.cpp \
-TERsrc/documentStructure.cpp \
-TERsrc/hashMap.cpp \
-TERsrc/hashMapInfos.cpp \
-TERsrc/hashMapStringInfos.cpp \
-TERsrc/infosHasher.cpp \
-TERsrc/multiEvaluation.cpp \
-TERsrc/multiTxtDocument.cpp \
-TERsrc/segmentStructure.cpp \
-TERsrc/sgmlDocument.cpp \
-TERsrc/stringHasher.cpp \
-TERsrc/stringInfosHasher.cpp \
-TERsrc/terAlignment.cpp \
-TERsrc/tercalc.cpp \
-TERsrc/terShift.cpp \
-TERsrc/tinystr.cpp \
-TERsrc/tinyxml.cpp \
-TERsrc/tinyxmlerror.cpp \
-TERsrc/tinyxmlparser.cpp \
-TERsrc/tools.cpp \
+JavaTerScorer.cpp \
 TerScorer.cpp \
+Point.cpp \
 PerScorer.cpp \
 Scorer.cpp \
 Optimizer.cpp \
-extractor.cpp
+mergeWeightsNew.cpp 
+
+mergeWeights_SOURCES = TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/segmentStructure.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/tinyxml.cpp \
+TERsrc/tinyxmlparser.cpp \
+TERsrc/documentStructure.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tinystr.cpp \
+TERsrc/tinyxmlerror.cpp \
+TERsrc/tools.cpp \
+Util.cpp \
+Timer.cpp \
+ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
+FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
+Data.cpp \
+MergeScorer.cpp \
+BleuScorer.cpp \
+JavaTerScorer.cpp \
+TerScorer.cpp \
+Point.cpp \
+PerScorer.cpp \
+Scorer.cpp \
+Optimizer.cpp \
+mergeWeights.cpp 
+
+extractor_SOURCES = TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/segmentStructure.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/tinyxml.cpp \
+TERsrc/tinyxmlparser.cpp \
+TERsrc/documentStructure.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tinystr.cpp \
+TERsrc/tinyxmlerror.cpp \
+TERsrc/tools.cpp \
+Util.cpp \
+Timer.cpp \
+ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
+FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
+Data.cpp \
+MergeScorer.cpp \
+BleuScorer.cpp \
+JavaTerScorer.cpp \
+TerScorer.cpp \
+Point.cpp \
+PerScorer.cpp \
+Scorer.cpp \
+Optimizer.cpp \
+extractor.cpp 
 
 
 mert_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
 extractor_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
+mergeWeights_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
+mergeWeightsNew_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
 
 extractor_LDADD = -lm -lz
 mert_LDADD = -lm -lz
+mergeWeights_LDADD = -lm -lz
+mergeWeightsNew_LDADD = -lm -lz

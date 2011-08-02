@@ -13,6 +13,7 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles) {
     if (!in) {
         throw runtime_error("Unable to open " + referenceFiles[0]);
     }
+    cerr << "openning "+ referenceFiles[0] <<endl;
     string line;
     int sid = 0;
     while (getline(in,line)) {
@@ -54,12 +55,23 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry) 
     ostringstream stats;
     stats << correct << " " << testtokens.size() << " " << _reflengths[sid] << " " ;
     string stats_str = stats.str();
+//     cerr << "PER RETURNS : " + stats_str << endl;
     entry.set(stats_str);
 }
 
 float PerScorer::calculateScore(const vector<int>& comps) {
     float denom = comps[2];
     float num = comps[0] - max(0,comps[1]-comps[2]);
+    if (denom == 0) {
+        //shouldn't happen!
+        return 0.0;
+    } else {
+        return num/denom;
+    }
+}
+float PerScorer::calculateScore(const vector<float>& comps) {
+    float denom = comps[2];
+    float num = comps[0] - max(0,(int)(comps[1]-comps[2]));
     if (denom == 0) {
         //shouldn't happen!
         return 0.0;

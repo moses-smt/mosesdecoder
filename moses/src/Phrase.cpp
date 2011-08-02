@@ -1,3 +1,4 @@
+#define NDEBUG
  // $Id: Phrase.cpp 3600 2010-10-01 10:37:10Z pjwilliams $
 // vim:tabstop=2
 

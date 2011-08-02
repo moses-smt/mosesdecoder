@@ -1,133 +1,216 @@
-SentenceStats.lo: SentenceStats.cpp /usr/include/c++/4.4/iostream \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/c++config.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/os_defines.h \
- /usr/include/features.h /usr/include/bits/predefs.h \
- /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
- /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/cpu_defines.h \
- /usr/include/c++/4.4/ostream /usr/include/c++/4.4/ios \
- /usr/include/c++/4.4/iosfwd /usr/include/c++/4.4/bits/stringfwd.h \
- /usr/include/c++/4.4/bits/postypes.h /usr/include/c++/4.4/cwchar \
- /usr/include/c++/4.4/cstddef \
- /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stddef.h \
+SentenceStats.lo: SentenceStats.cpp \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/iostream \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++config.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/os_defines.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/cpu_defines.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ostream \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ios \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/iosfwd \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stringfwd.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/postypes.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cwchar \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstddef \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/include/stddef.h \
  /usr/include/wchar.h /usr/include/stdio.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stdarg.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/include/stdarg.h \
  /usr/include/bits/wchar.h /usr/include/xlocale.h \
- /usr/include/bits/wchar2.h /usr/include/c++/4.4/exception \
- /usr/include/c++/4.4/bits/char_traits.h \
- /usr/include/c++/4.4/bits/stl_algobase.h \
- /usr/include/c++/4.4/bits/functexcept.h \
- /usr/include/c++/4.4/exception_defines.h \
- /usr/include/c++/4.4/bits/cpp_type_traits.h \
- /usr/include/c++/4.4/ext/type_traits.h \
- /usr/include/c++/4.4/ext/numeric_traits.h \
- /usr/include/c++/4.4/bits/stl_pair.h /usr/include/c++/4.4/bits/move.h \
- /usr/include/c++/4.4/bits/concept_check.h \
- /usr/include/c++/4.4/bits/stl_iterator_base_types.h \
- /usr/include/c++/4.4/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/4.4/bits/stl_iterator.h \
- /usr/include/c++/4.4/debug/debug.h /usr/include/c++/4.4/bits/localefwd.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/c++locale.h \
- /usr/include/c++/4.4/clocale /usr/include/locale.h \
- /usr/include/bits/locale.h /usr/include/c++/4.4/cctype \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/exception \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/char_traits.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_algobase.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/functexcept.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/exception_defines.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/cpp_type_traits.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/type_traits.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/numeric_traits.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_pair.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/move.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/concept_check.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_iterator_base_types.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_iterator_base_funcs.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_iterator.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/debug/debug.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/localefwd.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++locale.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/clocale \
+ /usr/include/locale.h /usr/include/bits/locale.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cctype \
  /usr/include/ctype.h /usr/include/bits/types.h \
  /usr/include/bits/typesizes.h /usr/include/endian.h \
  /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
- /usr/include/c++/4.4/bits/ios_base.h \
- /usr/include/c++/4.4/ext/atomicity.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/gthr.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/gthr-default.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/ios_base.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/atomicity.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/gthr.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/gthr-default.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/time.h \
- /usr/include/bits/sched.h /usr/include/bits/time.h /usr/include/signal.h \
- /usr/include/bits/sigset.h /usr/include/bits/pthreadtypes.h \
- /usr/include/bits/setjmp.h /usr/include/unistd.h \
- /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
- /usr/include/bits/confname.h /usr/include/getopt.h \
- /usr/include/bits/unistd.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/atomic_word.h \
- /usr/include/c++/4.4/bits/locale_classes.h /usr/include/c++/4.4/string \
- /usr/include/c++/4.4/bits/allocator.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/c++allocator.h \
- /usr/include/c++/4.4/ext/new_allocator.h /usr/include/c++/4.4/new \
- /usr/include/c++/4.4/bits/ostream_insert.h \
- /usr/include/c++/4.4/cxxabi-forced.h \
- /usr/include/c++/4.4/bits/stl_function.h \
- /usr/include/c++/4.4/backward/binders.h \
- /usr/include/c++/4.4/bits/basic_string.h \
- /usr/include/c++/4.4/initializer_list \
- /usr/include/c++/4.4/bits/basic_string.tcc \
- /usr/include/c++/4.4/bits/locale_classes.tcc \
- /usr/include/c++/4.4/streambuf /usr/include/c++/4.4/bits/streambuf.tcc \
- /usr/include/c++/4.4/bits/basic_ios.h \
- /usr/include/c++/4.4/bits/locale_facets.h /usr/include/c++/4.4/cwctype \
+ /usr/include/bits/sched.h /usr/include/bits/time.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/setjmp.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/atomic_word.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_classes.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/string \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/allocator.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++allocator.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/new_allocator.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/new \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/ostream_insert.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cxxabi-forced.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_function.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/backward/binders.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_string.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/initializer_list \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_string.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_classes.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/streambuf \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/streambuf.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_ios.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_facets.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cwctype \
  /usr/include/wctype.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/ctype_base.h \
- /usr/include/c++/4.4/bits/streambuf_iterator.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/ctype_inline.h \
- /usr/include/c++/4.4/bits/locale_facets.tcc \
- /usr/include/c++/4.4/bits/basic_ios.tcc \
- /usr/include/c++/4.4/bits/ostream.tcc /usr/include/c++/4.4/istream \
- /usr/include/c++/4.4/bits/istream.tcc SentenceStats.h \
- /usr/include/c++/4.4/vector /usr/include/c++/4.4/bits/stl_construct.h \
- /usr/include/c++/4.4/bits/stl_uninitialized.h \
- /usr/include/c++/4.4/bits/stl_vector.h \
- /usr/include/c++/4.4/bits/stl_bvector.h \
- /usr/include/c++/4.4/bits/vector.tcc Phrase.h /usr/include/c++/4.4/list \
- /usr/include/c++/4.4/bits/stl_list.h /usr/include/c++/4.4/bits/list.tcc \
- Word.h /usr/include/c++/4.4/cstring /usr/include/string.h \
- /usr/include/bits/string3.h TypeDef.h /usr/include/c++/4.4/limits \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/ctype_base.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/streambuf_iterator.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/ctype_inline.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_facets.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_ios.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/ostream.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/istream \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/istream.tcc \
+ SentenceStats.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/vector \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_construct.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_uninitialized.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_vector.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_bvector.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/vector.tcc \
+ Phrase.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/list \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_list.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/list.tcc \
+ Word.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstring \
+ /usr/include/string.h TypeDef.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/limits \
  /usr/include/stdint.h ../../config.h Factor.h \
- /usr/include/c++/4.4/sstream /usr/include/c++/4.4/bits/sstream.tcc \
- /usr/include/c++/4.4/map /usr/include/c++/4.4/bits/stl_tree.h \
- /usr/include/c++/4.4/bits/stl_map.h \
- /usr/include/c++/4.4/bits/stl_multimap.h Util.h \
- /usr/include/c++/4.4/cassert /usr/include/assert.h \
- /usr/include/c++/4.4/fstream /usr/include/c++/4.4/bits/codecvt.h \
- /usr/include/c++/4.4/cstdio /usr/include/libio.h \
- /usr/include/_G_config.h /usr/include/bits/stdio_lim.h \
- /usr/include/bits/sys_errlist.h /usr/include/bits/stdio.h \
- /usr/include/bits/stdio2.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/basic_file.h \
- /usr/include/c++/4.4/x86_64-linux-gnu/bits/c++io.h \
- /usr/include/c++/4.4/bits/fstream.tcc /usr/include/c++/4.4/cmath \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/sstream \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/sstream.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/map \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_tree.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_map.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_multimap.h \
+ Util.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cassert \
+ /usr/include/assert.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/fstream \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/codecvt.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstdio \
+ /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/basic_file.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++io.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/fstream.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cmath \
  /usr/include/math.h /usr/include/bits/huge_val.h \
  /usr/include/bits/huge_valf.h /usr/include/bits/huge_vall.h \
  /usr/include/bits/inf.h /usr/include/bits/nan.h \
  /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h \
- /usr/include/bits/mathinline.h /usr/include/c++/4.4/bits/cmath.tcc \
- /usr/include/c++/4.4/cstdlib /usr/include/stdlib.h \
- /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
- /usr/include/sys/types.h /usr/include/sys/select.h \
- /usr/include/bits/select.h /usr/include/sys/sysmacros.h \
- /usr/include/alloca.h /usr/include/bits/stdlib.h hash.h WordsBitmap.h \
- WordsRange.h Hypothesis.h Sentence.h InputType.h \
- TargetPhraseCollection.h TargetPhrase.h ScoreComponentCollection.h \
- /usr/include/c++/4.4/numeric /usr/include/c++/4.4/bits/stl_numeric.h \
+ /usr/include/bits/mathinline.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/cmath.tcc \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstdlib \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/sys/types.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h \
+ /usr/include/alloca.h hash.h WordsBitmap.h WordsRange.h Hypothesis.h \
+ Sentence.h InputType.h TargetPhraseCollection.h TargetPhrase.h \
+ ScoreComponentCollection.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/numeric \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_numeric.h \
  LMList.h LanguageModel.h FeatureFunction.h ScoreProducer.h \
- LanguageModelImplementation.h ScoreIndexManager.h AlignmentInfo.h \
- ReorderingConstraint.h NonTerminal.h /usr/include/c++/4.4/set \
- /usr/include/c++/4.4/bits/stl_set.h \
- /usr/include/c++/4.4/bits/stl_multiset.h XmlOption.h \
- PhraseDictionaryMemory.h PhraseDictionary.h /usr/include/c++/4.4/memory \
- /usr/include/c++/4.4/bits/stl_tempbuf.h \
- /usr/include/c++/4.4/bits/stl_raw_storage_iter.h \
- /usr/include/c++/4.4/backward/auto_ptr.h Dictionary.h FactorTypeSet.h \
- /usr/include/c++/4.4/bitset DecodeFeature.h PhraseDictionaryNode.h \
- /usr/include/c++/4.4/iterator \
- /usr/include/c++/4.4/bits/stream_iterator.h GenerationDictionary.h \
- LanguageModelSingleFactor.h ObjectPool.h /usr/include/c++/4.4/deque \
- /usr/include/c++/4.4/bits/stl_deque.h \
- /usr/include/c++/4.4/bits/deque.tcc
+ LanguageModelImplementation.h \
+ /lium/buster1/servan/Tools/include/boost/shared_ptr.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/shared_ptr.hpp \
+ /lium/buster1/servan/Tools/include/boost/config.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/user.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/select_compiler_config.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/compiler/gcc.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/select_stdlib_config.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/no_tr1/utility.hpp \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/utility \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_relops.h \
+ /lium/buster1/servan/Tools/include/boost/config/stdlib/libstdcpp3.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/select_platform_config.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/platform/linux.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/posix_features.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/suffix.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/no_tr1/memory.hpp \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/memory \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_tempbuf.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_raw_storage_iter.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/backward/auto_ptr.h \
+ /lium/buster1/servan/Tools/include/boost/assert.hpp \
+ /lium/buster1/servan/Tools/include/boost/checked_delete.hpp \
+ /lium/buster1/servan/Tools/include/boost/throw_exception.hpp \
+ /lium/buster1/servan/Tools/include/boost/exception/detail/attribute_noreturn.hpp \
+ /lium/buster1/servan/Tools/include/boost/detail/workaround.hpp \
+ /lium/buster1/servan/Tools/include/boost/exception/exception.hpp \
+ /lium/buster1/servan/Tools/include/boost/current_function.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/shared_count.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/bad_weak_ptr.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_counted_base.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_has_sync.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_counted_base_gcc_x86.hpp \
+ /lium/buster1/servan/Tools/include/boost/detail/sp_typeinfo.hpp \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/typeinfo \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_counted_impl.hpp \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/functional \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_convertible.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/spinlock_pool.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/spinlock.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/spinlock_sync.hpp \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/yield_k.hpp \
+ /lium/buster1/servan/Tools/include/boost/memory_order.hpp \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/algorithm \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_algo.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/algorithmfwd.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_heap.h \
+ /lium/buster1/servan/Tools/include/boost/smart_ptr/detail/operator_bool.hpp \
+ ScoreIndexManager.h AlignmentInfo.h ReorderingConstraint.h NonTerminal.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/set \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_set.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_multiset.h \
+ XmlOption.h PhraseDictionaryMemory.h PhraseDictionary.h \
+ /lium/buster1/servan/Tools/include/boost/thread/tss.hpp \
+ /lium/buster1/servan/Tools/include/boost/thread/detail/config.hpp \
+ /lium/buster1/servan/Tools/include/boost/thread/detail/platform.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/requires_threads.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/auto_link.hpp \
+ /lium/buster1/servan/Tools/include/boost/thread/detail/thread_heap_alloc.hpp \
+ /lium/buster1/servan/Tools/include/boost/thread/detail/platform.hpp \
+ /lium/buster1/servan/Tools/include/boost/thread/pthread/thread_heap_alloc.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/abi_prefix.hpp \
+ /lium/buster1/servan/Tools/include/boost/config/abi_suffix.hpp \
+ Dictionary.h FactorTypeSet.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bitset \
+ DecodeFeature.h PhraseDictionaryNode.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/iterator \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stream_iterator.h \
+ GenerationDictionary.h LanguageModelSingleFactor.h ObjectPool.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/deque \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_deque.h \
+ /lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/deque.tcc
 
-/usr/include/c++/4.4/iostream:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/iostream:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/c++config.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++config.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/os_defines.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/os_defines.h:
 
 /usr/include/features.h:
-
-/usr/include/bits/predefs.h:
 
 /usr/include/sys/cdefs.h:
 
@@ -137,77 +220,75 @@ SentenceStats.lo: SentenceStats.cpp /usr/include/c++/4.4/iostream \
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/cpu_defines.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/cpu_defines.h:
 
-/usr/include/c++/4.4/ostream:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ostream:
 
-/usr/include/c++/4.4/ios:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ios:
 
-/usr/include/c++/4.4/iosfwd:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/iosfwd:
 
-/usr/include/c++/4.4/bits/stringfwd.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stringfwd.h:
 
-/usr/include/c++/4.4/bits/postypes.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/postypes.h:
 
-/usr/include/c++/4.4/cwchar:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cwchar:
 
-/usr/include/c++/4.4/cstddef:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstddef:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stddef.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/include/stddef.h:
 
 /usr/include/wchar.h:
 
 /usr/include/stdio.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stdarg.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/include/stdarg.h:
 
 /usr/include/bits/wchar.h:
 
 /usr/include/xlocale.h:
 
-/usr/include/bits/wchar2.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/exception:
 
-/usr/include/c++/4.4/exception:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/char_traits.h:
 
-/usr/include/c++/4.4/bits/char_traits.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_algobase.h:
 
-/usr/include/c++/4.4/bits/stl_algobase.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/functexcept.h:
 
-/usr/include/c++/4.4/bits/functexcept.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/exception_defines.h:
 
-/usr/include/c++/4.4/exception_defines.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/cpp_type_traits.h:
 
-/usr/include/c++/4.4/bits/cpp_type_traits.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/type_traits.h:
 
-/usr/include/c++/4.4/ext/type_traits.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/numeric_traits.h:
 
-/usr/include/c++/4.4/ext/numeric_traits.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_pair.h:
 
-/usr/include/c++/4.4/bits/stl_pair.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/move.h:
 
-/usr/include/c++/4.4/bits/move.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/concept_check.h:
 
-/usr/include/c++/4.4/bits/concept_check.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_iterator_base_types.h:
 
-/usr/include/c++/4.4/bits/stl_iterator_base_types.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_iterator_base_funcs.h:
 
-/usr/include/c++/4.4/bits/stl_iterator_base_funcs.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_iterator.h:
 
-/usr/include/c++/4.4/bits/stl_iterator.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/debug/debug.h:
 
-/usr/include/c++/4.4/debug/debug.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/localefwd.h:
 
-/usr/include/c++/4.4/bits/localefwd.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++locale.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/c++locale.h:
-
-/usr/include/c++/4.4/clocale:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/clocale:
 
 /usr/include/locale.h:
 
 /usr/include/bits/locale.h:
 
-/usr/include/c++/4.4/cctype:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cctype:
 
 /usr/include/ctype.h:
 
@@ -221,13 +302,13 @@ SentenceStats.lo: SentenceStats.cpp /usr/include/c++/4.4/iostream \
 
 /usr/include/bits/byteswap.h:
 
-/usr/include/c++/4.4/bits/ios_base.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/ios_base.h:
 
-/usr/include/c++/4.4/ext/atomicity.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/atomicity.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/gthr.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/gthr.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/gthr-default.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/gthr-default.h:
 
 /usr/include/pthread.h:
 
@@ -238,10 +319,6 @@ SentenceStats.lo: SentenceStats.cpp /usr/include/c++/4.4/iostream \
 /usr/include/bits/sched.h:
 
 /usr/include/bits/time.h:
-
-/usr/include/signal.h:
-
-/usr/include/bits/sigset.h:
 
 /usr/include/bits/pthreadtypes.h:
 
@@ -257,99 +334,95 @@ SentenceStats.lo: SentenceStats.cpp /usr/include/c++/4.4/iostream \
 
 /usr/include/getopt.h:
 
-/usr/include/bits/unistd.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/atomic_word.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/atomic_word.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_classes.h:
 
-/usr/include/c++/4.4/bits/locale_classes.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/string:
 
-/usr/include/c++/4.4/string:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/allocator.h:
 
-/usr/include/c++/4.4/bits/allocator.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++allocator.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/c++allocator.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/ext/new_allocator.h:
 
-/usr/include/c++/4.4/ext/new_allocator.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/new:
 
-/usr/include/c++/4.4/new:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/ostream_insert.h:
 
-/usr/include/c++/4.4/bits/ostream_insert.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cxxabi-forced.h:
 
-/usr/include/c++/4.4/cxxabi-forced.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_function.h:
 
-/usr/include/c++/4.4/bits/stl_function.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/backward/binders.h:
 
-/usr/include/c++/4.4/backward/binders.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_string.h:
 
-/usr/include/c++/4.4/bits/basic_string.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/initializer_list:
 
-/usr/include/c++/4.4/initializer_list:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_string.tcc:
 
-/usr/include/c++/4.4/bits/basic_string.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_classes.tcc:
 
-/usr/include/c++/4.4/bits/locale_classes.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/streambuf:
 
-/usr/include/c++/4.4/streambuf:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/streambuf.tcc:
 
-/usr/include/c++/4.4/bits/streambuf.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_ios.h:
 
-/usr/include/c++/4.4/bits/basic_ios.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_facets.h:
 
-/usr/include/c++/4.4/bits/locale_facets.h:
-
-/usr/include/c++/4.4/cwctype:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cwctype:
 
 /usr/include/wctype.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/ctype_base.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/ctype_base.h:
 
-/usr/include/c++/4.4/bits/streambuf_iterator.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/streambuf_iterator.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/ctype_inline.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/ctype_inline.h:
 
-/usr/include/c++/4.4/bits/locale_facets.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/locale_facets.tcc:
 
-/usr/include/c++/4.4/bits/basic_ios.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/basic_ios.tcc:
 
-/usr/include/c++/4.4/bits/ostream.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/ostream.tcc:
 
-/usr/include/c++/4.4/istream:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/istream:
 
-/usr/include/c++/4.4/bits/istream.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/istream.tcc:
 
 SentenceStats.h:
 
-/usr/include/c++/4.4/vector:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/vector:
 
-/usr/include/c++/4.4/bits/stl_construct.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_construct.h:
 
-/usr/include/c++/4.4/bits/stl_uninitialized.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_uninitialized.h:
 
-/usr/include/c++/4.4/bits/stl_vector.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_vector.h:
 
-/usr/include/c++/4.4/bits/stl_bvector.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_bvector.h:
 
-/usr/include/c++/4.4/bits/vector.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/vector.tcc:
 
 Phrase.h:
 
-/usr/include/c++/4.4/list:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/list:
 
-/usr/include/c++/4.4/bits/stl_list.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_list.h:
 
-/usr/include/c++/4.4/bits/list.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/list.tcc:
 
 Word.h:
 
-/usr/include/c++/4.4/cstring:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstring:
 
 /usr/include/string.h:
 
-/usr/include/bits/string3.h:
-
 TypeDef.h:
 
-/usr/include/c++/4.4/limits:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/limits:
 
 /usr/include/stdint.h:
 
@@ -357,29 +430,29 @@ TypeDef.h:
 
 Factor.h:
 
-/usr/include/c++/4.4/sstream:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/sstream:
 
-/usr/include/c++/4.4/bits/sstream.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/sstream.tcc:
 
-/usr/include/c++/4.4/map:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/map:
 
-/usr/include/c++/4.4/bits/stl_tree.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_tree.h:
 
-/usr/include/c++/4.4/bits/stl_map.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_map.h:
 
-/usr/include/c++/4.4/bits/stl_multimap.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_multimap.h:
 
 Util.h:
 
-/usr/include/c++/4.4/cassert:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cassert:
 
 /usr/include/assert.h:
 
-/usr/include/c++/4.4/fstream:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/fstream:
 
-/usr/include/c++/4.4/bits/codecvt.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/codecvt.h:
 
-/usr/include/c++/4.4/cstdio:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstdio:
 
 /usr/include/libio.h:
 
@@ -391,15 +464,13 @@ Util.h:
 
 /usr/include/bits/stdio.h:
 
-/usr/include/bits/stdio2.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/basic_file.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/basic_file.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/x86_64-unknown-linux-gnu/bits/c++io.h:
 
-/usr/include/c++/4.4/x86_64-linux-gnu/bits/c++io.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/fstream.tcc:
 
-/usr/include/c++/4.4/bits/fstream.tcc:
-
-/usr/include/c++/4.4/cmath:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cmath:
 
 /usr/include/math.h:
 
@@ -419,9 +490,9 @@ Util.h:
 
 /usr/include/bits/mathinline.h:
 
-/usr/include/c++/4.4/bits/cmath.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/cmath.tcc:
 
-/usr/include/c++/4.4/cstdlib:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/cstdlib:
 
 /usr/include/stdlib.h:
 
@@ -435,11 +506,11 @@ Util.h:
 
 /usr/include/bits/select.h:
 
+/usr/include/bits/sigset.h:
+
 /usr/include/sys/sysmacros.h:
 
 /usr/include/alloca.h:
-
-/usr/include/bits/stdlib.h:
 
 hash.h:
 
@@ -459,9 +530,9 @@ TargetPhrase.h:
 
 ScoreComponentCollection.h:
 
-/usr/include/c++/4.4/numeric:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/numeric:
 
-/usr/include/c++/4.4/bits/stl_numeric.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_numeric.h:
 
 LMList.h:
 
@@ -473,6 +544,100 @@ ScoreProducer.h:
 
 LanguageModelImplementation.h:
 
+/lium/buster1/servan/Tools/include/boost/shared_ptr.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/shared_ptr.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/user.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/select_compiler_config.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/compiler/gcc.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/select_stdlib_config.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/no_tr1/utility.hpp:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/utility:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_relops.h:
+
+/lium/buster1/servan/Tools/include/boost/config/stdlib/libstdcpp3.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/select_platform_config.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/platform/linux.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/posix_features.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/suffix.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/no_tr1/memory.hpp:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/memory:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_tempbuf.h:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_raw_storage_iter.h:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/backward/auto_ptr.h:
+
+/lium/buster1/servan/Tools/include/boost/assert.hpp:
+
+/lium/buster1/servan/Tools/include/boost/checked_delete.hpp:
+
+/lium/buster1/servan/Tools/include/boost/throw_exception.hpp:
+
+/lium/buster1/servan/Tools/include/boost/exception/detail/attribute_noreturn.hpp:
+
+/lium/buster1/servan/Tools/include/boost/detail/workaround.hpp:
+
+/lium/buster1/servan/Tools/include/boost/exception/exception.hpp:
+
+/lium/buster1/servan/Tools/include/boost/current_function.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/shared_count.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/bad_weak_ptr.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_counted_base.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_has_sync.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_counted_base_gcc_x86.hpp:
+
+/lium/buster1/servan/Tools/include/boost/detail/sp_typeinfo.hpp:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/typeinfo:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_counted_impl.hpp:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/functional:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/sp_convertible.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/spinlock_pool.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/spinlock.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/spinlock_sync.hpp:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/yield_k.hpp:
+
+/lium/buster1/servan/Tools/include/boost/memory_order.hpp:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/algorithm:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_algo.h:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/algorithmfwd.h:
+
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_heap.h:
+
+/lium/buster1/servan/Tools/include/boost/smart_ptr/detail/operator_bool.hpp:
+
 ScoreIndexManager.h:
 
 AlignmentInfo.h:
@@ -481,11 +646,11 @@ ReorderingConstraint.h:
 
 NonTerminal.h:
 
-/usr/include/c++/4.4/set:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/set:
 
-/usr/include/c++/4.4/bits/stl_set.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_set.h:
 
-/usr/include/c++/4.4/bits/stl_multiset.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_multiset.h:
 
 XmlOption.h:
 
@@ -493,27 +658,39 @@ PhraseDictionaryMemory.h:
 
 PhraseDictionary.h:
 
-/usr/include/c++/4.4/memory:
+/lium/buster1/servan/Tools/include/boost/thread/tss.hpp:
 
-/usr/include/c++/4.4/bits/stl_tempbuf.h:
+/lium/buster1/servan/Tools/include/boost/thread/detail/config.hpp:
 
-/usr/include/c++/4.4/bits/stl_raw_storage_iter.h:
+/lium/buster1/servan/Tools/include/boost/thread/detail/platform.hpp:
 
-/usr/include/c++/4.4/backward/auto_ptr.h:
+/lium/buster1/servan/Tools/include/boost/config/requires_threads.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/auto_link.hpp:
+
+/lium/buster1/servan/Tools/include/boost/thread/detail/thread_heap_alloc.hpp:
+
+/lium/buster1/servan/Tools/include/boost/thread/detail/platform.hpp:
+
+/lium/buster1/servan/Tools/include/boost/thread/pthread/thread_heap_alloc.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/abi_prefix.hpp:
+
+/lium/buster1/servan/Tools/include/boost/config/abi_suffix.hpp:
 
 Dictionary.h:
 
 FactorTypeSet.h:
 
-/usr/include/c++/4.4/bitset:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bitset:
 
 DecodeFeature.h:
 
 PhraseDictionaryNode.h:
 
-/usr/include/c++/4.4/iterator:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/iterator:
 
-/usr/include/c++/4.4/bits/stream_iterator.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stream_iterator.h:
 
 GenerationDictionary.h:
 
@@ -521,8 +698,8 @@ LanguageModelSingleFactor.h:
 
 ObjectPool.h:
 
-/usr/include/c++/4.4/deque:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/deque:
 
-/usr/include/c++/4.4/bits/stl_deque.h:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/stl_deque.h:
 
-/usr/include/c++/4.4/bits/deque.tcc:
+/lium/buster1/servan/Tools/lib/gcc/x86_64-unknown-linux-gnu/4.4.5/../../../../include/c++/4.4.5/bits/deque.tcc:

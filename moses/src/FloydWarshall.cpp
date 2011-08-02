@@ -1,3 +1,4 @@
+#define NDEBUG
 #include <cassert>
 #include <climits>
 #include <vector>

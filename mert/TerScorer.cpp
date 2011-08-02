@@ -2,7 +2,7 @@
 #include "TERsrc/tercalc.h"
 #include "TERsrc/terAlignment.h"
 
-const int TerScorer::LENGTH = 4;
+const int TerScorer::LENGTH = 2;
 using namespace TERCpp;
 using namespace std;
 
@@ -63,23 +63,39 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
                 }
                 m_multi_references.push_back ( m_references );
         }
+	
         TRACE_ERR ( endl );
+	m_references=m_multi_references.at(0);
 }
 
 void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry )
 {
-//     cerr << "test de "<<sid<<endl;
-        if ( sid >= m_references.size() )
-        {
-                stringstream msg;
-                msg << "Sentence id (" << sid << ") not found in reference set";
-                throw runtime_error ( msg.str() );
-        }
+//  	cerr << "test de "<<sid<< m_references.size()  <<endl;
+	
+//        if ( sid >= m_references.size() )
+//        {
+//                stringstream msg;
+//                msg << "Sentence id (" << sid << ") not found in reference set";
+//                throw runtime_error ( msg.str() );
+//        }
 
         terAlignment result;
+	result.numEdits = 0.0 ;
+	result.numWords = 0.0 ;
+	result.averageWords = 0.0;
+
+//                vector<int> testtokens;
+//                vector<int> reftokens;
+//                reftokens = m_references.at ( sid );
+//                encode ( text, testtokens );
+//                terCalc evaluation;
+//                evaluation.setDebugMode ( false );
+//                terAlignment result = evaluation.TER ( reftokens, testtokens );
+//exit(0);
+	
         for ( int incRefs = 0; incRefs < ( int ) m_multi_references.size(); incRefs++ )
         {
-	        if ( sid >= ( int ) m_multi_references.at(incRefs).size() )
+	        if ( sid >= m_multi_references.at(incRefs).size() )
 	        {
 	                stringstream msg;
 	                msg << "Sentence id (" << sid << ") not found in reference set";
@@ -89,23 +105,36 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
                 vector<int> testtokens;
                 vector<int> reftokens;
                 reftokens = m_multi_references.at ( incRefs ).at ( sid );
+		double averageLength=0.0;
+	        for ( int incRefsBis = 0; incRefsBis < ( int ) m_multi_references.size(); incRefsBis++ )
+	        {
+        	        if ( sid >= m_multi_references.at(incRefsBis).size() )
+                	{
+	                        stringstream msg;
+        	                msg << "Sentence id (" << sid << ") not found in reference set";
+                	        throw runtime_error ( msg.str() );
+	                }
+			averageLength+=(double)m_multi_references.at ( incRefsBis ).at ( sid ).size();
+		}
+		averageLength=averageLength/( double ) m_multi_references.size();
                 encode ( text, testtokens );
-                terCalc evaluation;
-                evaluation.setDebugMode ( false );
-                terAlignment tmp_result = evaluation.TER ( reftokens, testtokens );
-                if ( ( result.numEdits == 0.0 ) && ( result.numWords == 0.0 ) )
+                terCalc * evaluation=new terCalc();
+                evaluation->setDebugMode ( false );
+                terAlignment tmp_result = evaluation->TER ( reftokens, testtokens );
+		tmp_result.averageWords=averageLength;
+                if ( ( result.numEdits == 0.0 ) && ( result.averageWords == 0.0 ) )
                 {
                         result = tmp_result;
                 }
                 else
-                        if ( result.score() > tmp_result.score() )
+                        if ( result.scoreAv() > tmp_result.scoreAv() )
                         {
                                 result = tmp_result;
                         }
-        }
 
+        }
         ostringstream stats;
-        stats << result.numEdits << " " << result.numWords << " " << result.score() << " " ;
+        stats << result.numEdits << " " << result.averageWords << " " << result.scoreAv() << " " ;
 //     stats << correct << " " << testtokens.size() << " " << _reflengths[sid] << " " ;
 //     stats << l_return;
         string stats_str = stats.str();
@@ -122,7 +151,7 @@ float TerScorer::calculateScore ( const vector<int>& comps )
         {
 //         shouldn't happen!
 //                cerr << "CalculateScore Gives : " << num << "/" << denom << "=0.0" << endl;
-                return 0.0;
+                return 1.0;
         }
         else
         {
@@ -139,7 +168,7 @@ float TerScorer::calculateScore ( const vector<float>& comps )
         {
 //         shouldn't happen!
 //                cerr << "CalculateScore Gives : " << num << "/" << denom << "=0.0" << endl;
-                return 0.0;
+                return 1.0;
         }
         else
         {

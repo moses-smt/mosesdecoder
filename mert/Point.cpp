@@ -46,10 +46,13 @@ void Point::NormalizeL1(){
 //Can initialize from a vector of dim or pdim
 Point::Point(const vector<parameter_t>& init):vector<parameter_t>(Point::dim){
   if(init.size()==dim){
+    cerr << "test 1"<<endl;
     for (unsigned int i=0; i<Point::dim; i++)
       operator[](i)=init[i];
   }else{
+    cerr << "else 1"<<endl;
     assert(init.size()==pdim);
+    cerr << "else 1"<<endl;
     for (unsigned int i=0; i<Point::dim; i++)
       operator[](i)=init[optindices[i]];
   }

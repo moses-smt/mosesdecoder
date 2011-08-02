@@ -19,6 +19,7 @@ namespace TERCpp
     void segmentStructure::addContent ( vecString vecS )
     {
         content = vecS;
+	averageLength=0.0;
     }
     void segmentStructure::setSegId ( string s )
     {
@@ -28,15 +29,18 @@ namespace TERCpp
     {
         segId = id;
         content = vecS;
+	averageLength=0.0;
     }
     segmentStructure::segmentStructure ( string id, string txt )
     {
         segId = id;
         content = stringToVector ( txt, " " );
+	averageLength=0.0;
     }
     void segmentStructure::addContent ( string s )
     {
         content = stringToVector ( s, " " );
+	averageLength=0.0;
     }
     segmentStructure::segmentStructure()
     {
@@ -59,6 +63,19 @@ namespace TERCpp
     {
         bestDocId = s;
     }
+    float segmentStructure::getAverageLength()
+    {
+	return averageLength;
+    }
+    void segmentStructure::setAverageLength(float f)
+    {
+	averageLength=f;
+    }
+    int segmentStructure::getSize()
+    {
+	return (int)content.size();
+    }
+
 
 
 

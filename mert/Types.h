@@ -15,10 +15,10 @@ class ScoreData;
 
 typedef float parameter_t;
 //typedef vector<parameter_t> parameters_t;confusing; use vector<parameter_t>
-typedef vector<pair<unsigned int, unsigned int> > diff_t;
+typedef vector<pair<float, float> > diff_t;
 typedef pair<float,diff_t > threshold;
 typedef vector<diff_t> diffs_t;
-typedef vector<unsigned int> candidates_t;
+typedef vector<float> candidates_t;
 
 typedef float statscore_t;
 typedef vector<statscore_t> statscores_t;
@@ -30,7 +30,7 @@ typedef FeatureStatsType* featstats_t;
 typedef vector<FeatureStats> featarray_t;
 typedef vector<FeatureArray> featdata_t;
 
-typedef int ScoreStatsType;
+typedef float ScoreStatsType;
 typedef ScoreStatsType* scorestats_t;
 //typedef vector<ScoreStatsType> scorestats_t;
 typedef vector<ScoreStats> scorearray_t;

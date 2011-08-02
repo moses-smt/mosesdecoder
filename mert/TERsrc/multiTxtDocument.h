@@ -37,12 +37,15 @@ namespace TERCpp
             void addDocument ( documentStructure doc );
             documentStructure* getLastDocument();
             documentStructure* getDocument ( string docId );
+	    vector<documentStructure> getDocuments ();
+	    vector<string> getListDocuments ();
             void loadFile ( string fileName, bool caseOn,  bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike );
             void loadFiles ( string fileName, bool caseOn,  bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike );
             void loadRefFile ( param p );
             void loadRefFiles ( param p );
             void loadHypFile ( param p );
             void loadHypFiles ( param p );
+	    void setAverageLength();
             int getSize();
 
 

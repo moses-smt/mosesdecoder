@@ -1,3 +1,4 @@
+#define NDEBUG
 #ifndef moses_FFState_h
 #define moses_FFState_h
 

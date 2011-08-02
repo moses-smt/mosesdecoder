@@ -5,6 +5,8 @@
 #include "tools.h"
 #include <iostream>
 #include <string>
+#include "xmlStructure.h"
+#include "sgmlDocument.h"
 
 using namespace Tools;
 namespace TERCpp
@@ -22,14 +24,19 @@ namespace TERCpp
 //     void setHypothesis(documentStructure doc);
             void addReferences();
             void setHypothesis();
+            void addSGMLReferences();
+            void setSGMLHypothesis();
             void setParameters ( param p );
             void launchTxtEvaluation();
-            void evaluate ( documentStructure& docStructReference, documentStructure& docStructhypothesis );
+            void launchSGMLEvaluation();
+            void evaluate ( documentStructure & docStructReference, documentStructure & docStructhypothesis );
             string scoreTER ( vector<float> numEdits, vector<float> numWords );
         private:
             param evalParameters;
             multiTxtDocument referencesTxt;
             documentStructure hypothesisTxt;
+	    SGMLDocument referencesSGML;
+            documentStructure hypothesisSGML;
 
 
     };

@@ -37,8 +37,9 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/pkoehn/statmt/bin";
-
+#my $BINDIR="/home/pkoehn/statmt/bin";
+#my $BINDIR="/lium/buster1/servan/Tools/bin";
+my $BINDIR="/usr/local/bin/";
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
 		       'bin-dir=s' => \$BINDIR, # allow to override default bindir path
@@ -1425,9 +1426,11 @@ sub get_reordering_factored {
 sub get_reordering {
     my ($extract_file,$reo_model_path) = @_;
     if (-e "$extract_file.o.gz") {
+	print STDERR "FILE : $extract_file.o.gz exist\n";
 	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
     }
     else {
+	print STDERR "FILE : $extract_file.o.gz does not exist\n";
         safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
     }
 

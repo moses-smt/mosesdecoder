@@ -34,9 +34,10 @@ class PerScorer: public StatisticsBasedScorer {
 		
 		size_t NumberOfScores(){ cerr << "PerScorer: 3" << endl; return 3; };
 		
-    protected:
+//     protected:
         
         virtual float calculateScore(const vector<int>& comps) ;
+        float calculateScore(const vector<float>& comps);
 		
 	private:
         

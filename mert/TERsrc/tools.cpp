@@ -54,9 +54,58 @@ namespace Tools
         }
         return retour;
     }
+    
+    vector<int> subVector ( vector<int> vec, int start, int end )
+    {
+        vector<int> retour;
+        if ( start > end )
+        {
+            cerr << "ERREUR : TERcalc::subVector : end > start" << endl;
+            exit ( 0 );
+        }
+        for ( int i = start; ( ( i < end ) && ( i < ( int ) vec.size() ) ); i++ )
+        {
+            retour.push_back ( vec.at ( i ) );
+        }
+        return retour;
+    }
+    
+    vector<float> subVector ( vector<float> vec, int start, int end )
+    {
+        vector<float> retour;
+        if ( start > end )
+        {
+            cerr << "ERREUR : TERcalc::subVector : end > start" << endl;
+            exit ( 0 );
+        }
+        for ( int i = start; ( ( i < end ) && ( i < ( int ) vec.size() ) ); i++ )
+        {
+            retour.push_back ( vec.at ( i ) );
+        }
+        return retour;
+    }
+    
     vector<string> copyVector ( vector<string> vec )
     {
         vector<string> retour;
+        for ( int i = 0; i < ( int ) vec.size(); i++ )
+        {
+            retour.push_back ( vec.at ( i ) );
+        }
+        return retour;
+    }
+    vector<int> copyVector ( vector<int> vec )
+    {
+        vector<int> retour;
+        for ( int i = 0; i < ( int ) vec.size(); i++ )
+        {
+            retour.push_back ( vec.at ( i ) );
+        }
+        return retour;
+    }
+    vector<float> copyVector ( vector<float> vec )
+    {
+        vector<float> retour;
         for ( int i = 0; i < ( int ) vec.size(); i++ )
         {
             retour.push_back ( vec.at ( i ) );
@@ -121,6 +170,39 @@ namespace Tools
         }
         return to_return;
     }
+    vector<float> stringToVectorFloat ( string s, string tok )
+    {
+        vector<float> to_return;
+        string to_push ( "" );
+        bool pushed = false;
+        string::iterator sIt;
+        for ( sIt = s.begin(); sIt < s.end(); sIt++ )
+        {
+            pushed = false;
+            for ( string::iterator sTok = tok.begin(); sTok < tok.end(); sTok++ )
+            {
+                if ( ( *sIt ) == ( *sTok ) )
+                {
+                    if ( ( int ) to_push.length() > 0 )
+                    {
+                        to_return.push_back ( atof ( to_push.c_str() ) );
+                    }
+                    to_push = "";
+                    pushed = true;
+                }
+            }
+            if ( !pushed )
+            {
+                to_push.push_back ( ( *sIt ) );
+            }
+        }
+        if ( ( int ) to_push.length() > 0 )
+        {
+            to_return.push_back ( atoi ( to_push.c_str() ) );
+        }
+        return to_return;
+    }
+
     string lowerCase ( string str )
     {
         for ( int i = 0;i < ( int ) str.size();i++ )
@@ -277,12 +359,28 @@ namespace Tools
     string tokenizePunct ( string str )
     {
         string str_mod = str;
-        sregex rex = sregex::compile ( "[,]" );
-        string replace ( " , " );
+        sregex rex = sregex::compile ( "(([^0-9])([\\,])([^0-9]))" );
+        string replace ( "$2 $3 $4" );
         str_mod = regex_replace ( str_mod, rex, replace );
 
-        rex = sregex::compile ( "([^0-9][\\.][^0-9])" );
-        replace = ( " . " );
+        rex = sregex::compile ( "(([^0-9])([\\.])([^0-9]))" );
+        replace = ( "$2 $3 $4" );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([A-Z]|[a-z]) ([\\.]) )" );
+        replace = ( " $2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([A-Z]|[a-z]) ([\\.])$)" );
+        replace = ( " $2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(^([A-Z]|[a-z]) ([\\.]) )" );
+        replace = ( " $2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(([A-Z]|[a-z])([\\.]) ([A-Z]|[a-z])([\\.]) )" );
+        replace = ( "$2.$4. " );
         str_mod = regex_replace ( str_mod, rex, replace );
 
         rex = sregex::compile ( "[\\?]" );
@@ -293,8 +391,8 @@ namespace Tools
         replace = ( " ; " );
         str_mod = regex_replace ( str_mod, rex, replace );
 
-        rex = sregex::compile ( "[\\:]" );
-        replace = ( " : " );
+        rex = sregex::compile ( "(([^0-9])([\\:])([^0-9]))" );
+        replace = ( "$2 $3 $4" );
         str_mod = regex_replace ( str_mod, rex, replace );
 
         rex = sregex::compile ( "[\\!]" );
@@ -313,7 +411,87 @@ namespace Tools
         replace = ( " \" " );
         str_mod = regex_replace ( str_mod, rex, replace );
 
-        rex = sregex::compile ( "[ ]+" );
+        rex = sregex::compile ( "(num_ \\( ([^\\)]+) \\))" );
+        replace = ( "num_($2)" );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(ordinal_ \\( ([^\\)]*) \\))" );
+        replace = ( "ordinal_($2)" );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(^([Mm]) \\.)" );
+        replace = ( "$2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([Mm]) \\.)" );
+        replace = ( " $2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(^([Dd]r) \\.)" );
+        replace = ( "$2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([Dd]r) \\.)" );
+        replace = ( " $2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(^([Mm]r) \\.)" );
+        replace = ( "$2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([Mm]r) \\.)" );
+        replace = ( " $2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "(^([Mm]rs) \\.)" );
+        replace = ( "$2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([Mm]rs) \\.)" );
+        replace = ( " $2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+	rex = sregex::compile ( "(^([Nn]o) \\.)" );
+        replace = ( "$2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+        rex = sregex::compile ( "( ([Nn]o) \\.)" );
+        replace = ( " $2." );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+// 	rex = sregex::compile ( "(^(([Jj]an)|([Ff]ev)|([Mm]ar)|([Aa]pr)|([Jj]un)|([Jj]ul)|([Aa]ug)|([Ss]ept)|([Oo]ct)|([Nn]ov)|([Dd]ec)) \\.)" );
+//         replace = ( "$2." );
+//         str_mod = regex_replace ( str_mod, rex, replace );
+// 
+//         rex = sregex::compile ( "( (([Jj]an)|([Ff]ev)|([Mm]ar)|([Aa]pr)|([Jj]un)|([Jj]ul)|([Aa]ug)|([Ss]ept)|([Oo]ct)|([Nn]ov)|([Dd]ec)) \\.)" );
+//         replace = ( " $2." );
+//         str_mod = regex_replace ( str_mod, rex, replace );
+// 
+// 	rex = sregex::compile ( "(^(([Gg]en)|([Cc]ol)) \\.)" );
+//         replace = ( "$2." );
+//         str_mod = regex_replace ( str_mod, rex, replace );
+// 
+//         rex = sregex::compile ( "( (([Gg]en)|([Cc]ol)) \\.)" );
+//         replace = ( " $2." );
+//         str_mod = regex_replace ( str_mod, rex, replace );
+
+	rex = sregex::compile ( "(^(([A-Z][a-z])) \\. )" );
+        replace = ( "$2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+	rex = sregex::compile ( "( (([A-Z][a-z])) \\. )" );
+        replace = ( " $2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+	rex = sregex::compile ( "(^(([A-Z][a-z][a-z])) \\. )" );
+        replace = ( "$2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+	rex = sregex::compile ( "( (([A-Z][a-z][a-z])) \\. )" );
+        replace = ( " $2. " );
+        str_mod = regex_replace ( str_mod, rex, replace );
+
+	rex = sregex::compile ( "[ ]+" );
         replace = " ";
         str_mod = regex_replace ( str_mod, rex, replace );
 

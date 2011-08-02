@@ -195,6 +195,7 @@ int main(int argc, char** argv) {
 	//computing score statistics of each nbest file
 		for (size_t i=0;i < nbestFiles.size(); i++){
 			data.loadnbest(nbestFiles.at(i));
+// 			cerr << "----------------------------->" <<nbestFiles.at(i) <<endl;
 		}
 
 		PrintUserTime("Nbest entries loaded and scored");

@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: PhraseDictionaryTreeAdaptor.h 3561 2010-09-23 17:39:32Z hieuhoang1972 $
 
 #ifndef moses_PhraseDictionaryTreeAdaptor_h

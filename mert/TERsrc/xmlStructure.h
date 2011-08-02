@@ -30,7 +30,7 @@ namespace TERCpp
             void dump_to_stdout ( const char* pFilename );
             void copy_to_SGMLDocument ( SGMLDocument* sgmlDoc , TiXmlNode* pParent, unsigned int indent );
             SGMLDocument dump_to_SGMLDocument ( string FileName );
-
+	    param xmlParams;
     };
 
 

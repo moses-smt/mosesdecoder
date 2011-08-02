@@ -31,12 +31,12 @@ class Optimizer{
 /**main function that perform an optimization*/  
   virtual  statscore_t  TrueRun(Point&)const=0;
   /**given a set of lambdas, get the nbest for each sentence*/
-  void Get1bests(const Point& param,vector<unsigned>& bests)const;
+  void Get1bests(const Point& param,vector<float>& bests)const;
   /**given a set of nbests, get the Statistical score*/
-  statscore_t  GetStatScore(const vector<unsigned>& nbests)const{return scorer->score(nbests);};
+  statscore_t  GetStatScore(const vector<float>& nbests)const{/*cerr << "Optimizer::GetStatScore(vector<float>)"<<endl;*/ return scorer->score(nbests);};
   /**given a set of lambdas, get the total statistical score*/
   statscore_t  GetStatScore(const Point& param)const;  
-  vector<statscore_t > GetIncStatScore(vector<unsigned> ref,vector<vector <pair<unsigned,unsigned> > >)const;
+  vector<statscore_t > GetIncStatScore(vector<float> ref,vector<vector <pair<float,float> > >)const;
   statscore_t  LineOptimize(const Point& start,const Point& direction,Point& best)const;//Get the optimal Lambda and the best score in a particular direction from a given Point
 };
 

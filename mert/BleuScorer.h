@@ -43,7 +43,7 @@ class BleuScorer: public StatisticsBasedScorer {
     } else {
         throw runtime_error("Unknown reference length strategy: " + reflen);
     }
-    cerr << "Using reference length strategy: " << reflen << endl;
+//     cerr << "Using reference length strategy: " << reflen << endl;
 }
 		virtual void setReferenceFiles(const vector<string>& referenceFiles);
 		virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
@@ -52,8 +52,9 @@ class BleuScorer: public StatisticsBasedScorer {
 		size_t NumberOfScores(){ cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl; return (2 * LENGTH + 1); };
 		
 		
-    protected:
+//     protected:
         float calculateScore(const vector<int>& comps);
+        float calculateScore(const vector<float>& comps);
 		
 	private:
 		//no copy

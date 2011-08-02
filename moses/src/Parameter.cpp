@@ -232,7 +232,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
 	if (m_setting.find("verbose") != m_setting.end() &&
 	    m_setting["verbose"].size() > 0)
 	  verbose = Scan<int>(m_setting["verbose"][0]);
-	if (verbose >= 1) { // only if verbose
+	if (verbose >= 0) { // only if verbose
 	  TRACE_ERR( "Defined parameters (per moses.ini or switch):" << endl);
 	  for(PARAM_MAP::const_iterator iterParam = m_setting.begin() ; iterParam != m_setting.end(); iterParam++) {
 	    TRACE_ERR( "\t" << iterParam->first << ": ");

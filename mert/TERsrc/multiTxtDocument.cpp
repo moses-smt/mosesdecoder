@@ -64,6 +64,20 @@ namespace TERCpp
     {
         return & ( documents.at ( ( int ) documents.size() - 1 ) );
     }
+    vector< documentStructure > multiTxtDocument::getDocuments()
+    {
+      return documents;
+    }
+    vector< string > multiTxtDocument::getListDocuments()
+    {
+      vector< string > to_return;
+      for (vector< documentStructure >::iterator iter=documents.begin(); iter!=documents.end(); iter++)
+      {
+	 string l_id=(*iter).getDocId();
+	 to_return.push_back(l_id);
+      }
+      return to_return;
+    }
 
     documentStructure* multiTxtDocument::getDocument ( string docId )
     {
@@ -82,7 +96,7 @@ namespace TERCpp
     {
         if ( multiTxtDocumentParams.debugMode )
         {
-            cerr << "DEBUG tercpp : multiTxtDocument::loadFiles : loading files  " << endl << fileName << endl << "END DEBUG" << endl;
+            cerr << "DEBUG tercpp : multiTxtDocument::loadFile : loading files  " << endl << fileName << endl << "END DEBUG" << endl;
             cerr << "DEBUG tercpp : multiTxtDocument::loadFile : testing params  " << endl << Tools::printParams ( multiTxtDocumentParams ) << endl << "END DEBUG" << endl;
             cerr << "DEBUG tercpp : multiTxtDocument::loadFile : testing others params  " << endl << "caseOn : " << caseOn << endl << "noPunct : " << noPunct << endl << "debugMode : " << debugMode << endl << "noTxtIds : " << noTxtIds << endl << "tercomLike : " << tercomLike << endl << "END DEBUG" << endl;
         }
@@ -109,14 +123,23 @@ namespace TERCpp
                 }
                 else
                 {
+		    if ((int)line.rfind ( "(" )==-1)
+		    {
+			cerr << "ERROR : multiTxtDocument::loadFile : Id not found, maybe you should use the --noTxtIds Option ? " << endl;
+			exit ( 0 );
+		    }
                     l_key = line.substr ( line.rfind ( "(" ), line.size() - 1 );
                     line_mod = line.substr ( 0, line.rfind ( "(" ) - 1 );
+                }
+                if ( multiTxtDocumentParams.debugMode )
+                {
+                    cerr << "DEBUG multiTxtDocument::loadFile : line NOT tokenized |" << line_mod << "|" << endl << "END DEBUG" << endl;
                 }
                 if ( !tercomLike )
                 {
                     if ( multiTxtDocumentParams.debugMode )
                     {
-                        cerr << "DEBUG tercpp : multiTxtDocument::loadFiles : " << endl << "TERCOM AT FALSE " << endl << "END DEBUG" << endl;
+                        cerr << "DEBUG tercpp : multiTxtDocument::loadFile : " << endl << "TERCOM AT FALSE " << endl << "END DEBUG" << endl;
                     }
 
                     line_mod = tokenizePunct ( line_mod );
@@ -125,7 +148,7 @@ namespace TERCpp
                 {
                     if ( multiTxtDocumentParams.debugMode )
                     {
-                        cerr << "DEBUG tercpp : multiTxtDocument::loadFiles : " << endl << "CASEON AT FALSE " << endl << "END DEBUG" << endl;
+                        cerr << "DEBUG tercpp : multiTxtDocument::loadFile : " << endl << "CASEON AT FALSE " << endl << "END DEBUG" << endl;
                     }
                     line_mod = lowerCase ( line_mod );
                 }
@@ -133,7 +156,7 @@ namespace TERCpp
                 {
                     if ( multiTxtDocumentParams.debugMode )
                     {
-                        cerr << "DEBUG tercpp : multiTxtDocument::loadFiles : " << endl << "NOPUNCT AT TRUE " << endl << "END DEBUG" << endl;
+                        cerr << "DEBUG tercpp : multiTxtDocument::loadFile : " << endl << "NOPUNCT AT TRUE " << endl << "END DEBUG" << endl;
                     }
                     if ( !tercomLike )
                     {
@@ -239,18 +262,80 @@ namespace TERCpp
     	return sw;
     }*/
 
+    void multiTxtDocument::setAverageLength()
+    {
+      if ( multiTxtDocumentParams.debugMode )
+      {
+	  cerr << "DEBUG tercpp : multiTxtDocument::setAverageLength : Starting calculate Average length  " << endl << "END DEBUG" << endl;
+      }
+      
+      vecFloat l_avLength((*documents.begin()).getSize(),0.0);
+      vector< documentStructure >::iterator iter=documents.begin();
+//       for (vector< documentStructure >::iterator iter=documents.begin(); iter!=documents.end(); iter++)
+//       {
+// 	 string l_id=(*iter).getDocId();
+// 	 to_return.push_back(l_id);
+      vector< segmentStructure > * l_vecSeg=(*iter).getSegments();
+//       vector< segmentStructure >::iterator iterSeg=l_vecSeg->begin();
+      for (vector< segmentStructure >::iterator iterSeg=l_vecSeg->begin(); iterSeg!=l_vecSeg->end(); iterSeg++)
+      {
+	  segmentStructure l_seg=(*iterSeg);
+// 	  if ( multiTxtDocumentParams.debugMode )
+// 	  {
+// 	      cerr << "DEBUG tercpp : multiTxtDocument::setAverageLength : Average length: " << l_seg.getAverageLength() << endl << "END DEBUG" << endl;
+// 	  }
+	  if (l_seg.getAverageLength()==0.0)
+	  {
+	      float l_average=0.0;
+	      for (int l_iter =0; l_iter < (int)documents.size(); l_iter++)
+	      {
+		  l_average+=(float)(documents.at(l_iter).getSegment(l_seg.getSegId()))->getSize();
+	      }
+	      l_average=l_average/(float)documents.size();
+	      l_seg.setAverageLength(l_average);
+	      for (iter=documents.begin(); iter!=documents.end(); iter++)
+	      {
+// 		  if ( multiTxtDocumentParams.debugMode )
+// 		  {
+// 		      cerr << "DEBUG tercpp : multiTxtDocument::setAverageLength : average length BEFORE assignation: DocId, SegId, Average: " << (*iter).getDocId() << "\t"<< (*iter).getSegment(l_seg.getSegId())->getSegId() << "\t"<< (*iter).getSegment(l_seg.getSegId())->getAverageLength() << endl << "END DEBUG" << endl;
+// 		  }
+		  (*iter).getSegment(l_seg.getSegId())->setAverageLength(l_average);
+		  if ( multiTxtDocumentParams.debugMode )
+		  {
+		      cerr << "DEBUG tercpp : multiTxtDocument::setAverageLength : average length AFTER  assignation: DocId, SegId, Average: " << (*iter).getDocId() << "\t"<< (*iter).getSegment(l_seg.getSegId())->getSegId() << "\t"<< (*iter).getSegment(l_seg.getSegId())->getAverageLength() << endl << "END DEBUG" << endl;
+		  }
+	      }
+	  }
+	  iter=documents.begin();
+// 	  if ( multiTxtDocumentParams.debugMode )
+// 	  {
+// 	      cerr << "DEBUG tercpp : multiTxtDocument::setAverageLength : average length verification: DocId, SegId, Average: " << (*iter).getDocId() << "\t"<< (*iter).getSegment(l_seg.getSegId())->getSegId() << "\t"<< (*iter).getSegment(l_seg.getSegId())->getAverageLength() << endl << "END DEBUG" << endl;
+// 	  }
+      }
+      if ( multiTxtDocumentParams.debugMode )
+      {
+	  cerr << "DEBUG tercpp : multiTxtDocument::setAverageLength : End calculate Average length  " << endl << "END DEBUG" << endl;
+      }
+      
+	 
+//       }
+
+    }
+
+    
     void multiTxtDocument::loadFiles ( string fileName, bool caseOn, bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike )
     {
-        vector<string> vecFiles = stringToVector ( fileName, "," );
         if ( multiTxtDocumentParams.debugMode )
         {
             cerr << "DEBUG tercpp : multiTxtDocument::loadFiles : loading files  " << endl << fileName << endl << "END DEBUG" << endl;
 
         }
+        vector<string> vecFiles = stringToVector ( fileName, "," );	
         for ( int i = 0; i < ( int ) vecFiles.size(); i++ )
         {
             loadFile ( vecFiles.at ( i ), caseOn, noPunct, debugMode, noTxtIds, tercomLike );
         }
+        setAverageLength();
     }
 
     void multiTxtDocument::loadRefFile ( param p )

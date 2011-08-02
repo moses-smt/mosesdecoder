@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: PhraseDictionaryTree.cpp 3686 2010-11-03 18:43:18Z bhaddow $
 // vim:tabstop=2
 #include "PhraseDictionaryTree.h"

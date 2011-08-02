@@ -19,8 +19,6 @@ using namespace Tools;
 using namespace HashMapSpace;
 namespace TERCpp
 {
-#define ARRAY_MAX_SIZE 1000
-
 // typedef size_t WERelement[2];
 // Vecteur d'alignement contenant le hash du mot et son evaluation (0=ok, 1=sub, 2=ins, 3=del)
     typedef vector<terShift> vecTerShift;
@@ -43,10 +41,8 @@ namespace TERCpp
             bool PRINT_DEBUG;
 
             /* These are resized by the MIN_EDIT_DIST code if they aren't big enough */
-//             double S[ARRAY_MAX_SIZE][ARRAY_MAX_SIZE];
-//             char P[ARRAY_MAX_SIZE][ARRAY_MAX_SIZE];
-	    vector<vecDouble> S;
-	    vector<vecChar> P;
+            double S[1000][1000];
+            char P[1000][1000];
             vector<vecInt> refSpans;
             vector<vecInt> hypSpans;
             int BEAM_WIDTH;
@@ -71,6 +67,7 @@ namespace TERCpp
             hashMapInfos BuildWordMatches ( vector<string> hyp, vector<string> ref );
             terAlignment MinEditDist ( vector<string> hyp, vector<string> ref, vector<vecInt> curHypSpans );
             bool spanIntersection ( vecInt refSpan, vecInt hypSpan );
+            terAlignment TER ( vector<string> hyp, vector<string> ref , float avRefLength );
             terAlignment TER ( vector<string> hyp, vector<string> ref );
             terAlignment TER ( vector<int> hyp, vector<int> ref );
             bestShiftStruct CalcBestShift ( vector<string> cur, vector<string> hyp, vector<string> ref, hashMapInfos rloc, terAlignment cur_align );

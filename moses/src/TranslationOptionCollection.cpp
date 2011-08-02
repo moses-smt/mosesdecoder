@@ -264,6 +264,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 			else
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 		}
+		cerr << "Unknown Word : "<<s <<endl;
 		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation		
 
 

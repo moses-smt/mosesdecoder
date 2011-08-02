@@ -60,7 +60,7 @@ namespace TERCpp
 // 				s += "\n  " + allshifts[i];
             }
         }
-        s << endl << "Score: " << score() << " (" << numEdits << "/" << numWords << ")";
+        s << endl << "Score: " << scoreAv() << " (" << numEdits << "/" << averageWords << ")";
 // 		s += "\nScore: " + score() + " (" + numEdits + "/" + numWords + ")";
         return s.str();
 
@@ -97,6 +97,18 @@ namespace TERCpp
             return 0.0;
         }
         return ( double ) numEdits / numWords;
+    }
+    double terAlignment::scoreAv()
+    {
+        if ( ( averageWords <= 0.0 ) && ( numEdits > 0.0 ) )
+        {
+            return 1.0;
+        }
+        if ( averageWords <= 0.0 )
+        {
+            return 0.0;
+        }
+        return ( double ) numEdits / averageWords;
     }
 
   void terAlignment::scoreDetails() 

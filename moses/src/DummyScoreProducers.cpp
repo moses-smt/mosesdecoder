@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: DummyScoreProducers.cpp 3222 2010-05-03 21:41:28Z bojar $
 
 #include <cassert>

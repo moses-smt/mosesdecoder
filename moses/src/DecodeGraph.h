@@ -1,3 +1,4 @@
+#define NDEBUG
 // $Id: DecodeGraph.h 3360 2010-07-17 23:23:09Z hieuhoang1972 $
 // vim:tabstop=2
 

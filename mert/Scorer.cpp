@@ -26,6 +26,7 @@ static float score_average(const statscores_t& scores, size_t start, size_t end)
 
 void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t& diffs,
             statscores_t& scores) {
+//   cerr << "Scorer::score called"<<endl;
 	if (!_scoreData) {
 		throw runtime_error("Score data not loaded");
 	}
@@ -36,10 +37,16 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
     if (candidates.size() == 0) {
         throw runtime_error("No candidates supplied");
     }
+//     copy(candidates.begin(),candidates.end(),ostream_iterator<float>(cerr," "));
+//     cerr <<endl;
+
+    int test_cpt=0;
     int numCounts = _scoreData->get(0,candidates[0]).size();
-	vector<int> totals(numCounts);
+	vector<float> totals(numCounts);
 	for (size_t i = 0; i < candidates.size(); ++i) {
 		ScoreStats stats = _scoreData->get(i,candidates[i]);
+// 		cerr << "_scoreData->get(i,candidates[i])" << i <<endl;
+		
 		if (stats.size() != totals.size()) {
 			stringstream msg;
 			msg << "Statistics for (" << "," << candidates[i] << ") have incorrect "
@@ -49,8 +56,13 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
 		}
 		for (size_t k = 0; k < totals.size(); ++k) {
 			totals[k] += stats.get(k);	
+// 			cerr << "stats.get("<<k<<"): "<<stats.get(k) <<" : Total :" << totals[k] <<endl;
 		}
+		test_cpt++;
 	}
+// 	cerr <<"Total : " << candidates.size() << " : "<< test_cpt <<" : " ;
+// 	  copy(totals.begin(),totals.end(),ostream_iterator<float>(cerr," "));cerr <<endl;
+// 	cerr << endl;
     scores.push_back(calculateScore(totals));
 
     candidates_t last_candidates(candidates);
@@ -74,6 +86,7 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
     //Cer, Jurafsky and Manning at WMT08
     if (_regularisationStrategy == REG_NONE || _regularisationWindow <= 0) {
         //no regularisation
+// 	cerr<<"StatisticsBasedScorer::score : no regularisation !!!"<<endl;
         return;
     }
 
