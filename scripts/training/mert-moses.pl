@@ -118,6 +118,7 @@ my $___PREDICTABLE_SEEDS = 0;
 my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iterations as starting points [Foster&Kuhn,2009]
 my $___RANDOM_DIRECTIONS = 0; # search in random directions only
 my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
+my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use Hopkins&May[2011]
 
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
@@ -203,6 +204,7 @@ GetOptions(
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
   "starting-weights-from-ini!" => \$starting_weights_from_ini,
+  "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -310,6 +312,15 @@ my $mert_mert_cmd = "$mertdir/mert";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
+
+my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
+if ($___PAIRWISE_RANKED_OPTIMIZER && ! -x $pro_optimizer) {
+  print "did not find $pro_optimizer, installing it in $mertdir\n";
+  `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
+  `gunzip $pro_optimizer.gz`;
+  `chmod +x $pro_optimizer`;
+  die("ERROR: Installation of megam_i686.opt failed! Install by hand from http://www.cs.utah.edu/~hal/megam/") unless -x $pro_optimizer;
+}
 
 $mertargs = "" if !defined $mertargs;
 
@@ -754,9 +765,14 @@ while(1) {
     $cmd = $cmd." --ifile run$run.$weights_in_file";
   }
 
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+      $cmd .= " --pro pro.data ; echo 'not used' > $weights_out_file; ~/statmt/project/megam/megam_i686.opt -fvals -maxi 30 -nobias binary pro.data";
+  }
+
   if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
-  } else {
+  } 
+  else {
     safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
   }
   die "Optimization failed, file $weights_out_file does not exist or is empty"
@@ -766,6 +782,7 @@ while(1) {
  # backup copies
   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
+  if ($___PAIRWISE_RANKED_OPTIMIZER) { safesystem ("\\cp -f pro.data run$run.pro.data") or die; }
   safesystem ("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
@@ -775,15 +792,32 @@ while(1) {
 
   $bestpoint = undef;
   $devbleu = undef;
-  open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
-  while (<IN>) {
-    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
-      $bestpoint = $1;
-      $devbleu = $2;
-      last;
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+    open(IN,"run$run.$mert_outfile") or die "Can't open run$run.$mert_outfile";
+    my (@WEIGHT,$sum);
+    foreach (@CURR) { push @WEIGHT, 0; }
+    while(<IN>) {
+      if (/^F(\d+) ([\-\.\de]+)/) {
+	$WEIGHT[$1] = $2;
+	$sum += abs($2);
+      }
     }
+    $devbleu = "unknown";
+    foreach (@WEIGHT) { $_ /= $sum; }
+    $bestpoint = join(" ",@WEIGHT);
+    close IN;
   }
-  close IN;
+  else {
+    open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+        $bestpoint = $1;
+        $devbleu = $2;
+        last;
+      }
+    }
+    close IN;
+  }
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
   print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
@@ -807,7 +841,6 @@ while(1) {
   open F, "> finished_step.txt" or die "Can't mark finished step";
   print F $run."\n";
   close F;
-
 
   if ($shouldstop) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
@@ -939,7 +972,7 @@ sub run_decoder {
     print "decoder_config = $decoder_config\n";
 
     # run the decoder
-	my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
+    my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
 
     if (defined $___JOBS && $___JOBS > 0) {

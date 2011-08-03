@@ -31,11 +31,12 @@ using namespace std;
 void usage(void)
 {
   cerr<<"usage: mert -d <dimensions> (mandatory )"<<endl;
-  cerr<<"[-n retry ntimes (default 1)]"<<endl;
-  cerr<<"[-m number of random directions in powell (default 0)]"<<endl;
-  cerr<<"[-o\tthe indexes to optimize(default all)]"<<endl;
-  cerr<<"[-t\tthe optimizer(default powell)]"<<endl;
-  cerr<<"[-r\tthe random seed (defaults to system clock)"<<endl;
+  cerr<<"[-n] retry ntimes (default 1)"<<endl;
+  cerr<<"[-m] number of random directions in powell (default 0)"<<endl;
+  cerr<<"[-o] the indexes to optimize(default all)"<<endl;
+  cerr<<"[-t] the optimizer(default powell)"<<endl;
+  cerr<<"[-r] the random seed (defaults to system clock)"<<endl;
+	cerr<<"[-p] only create data for paired ranked optimizer"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
@@ -52,6 +53,7 @@ static struct option long_options[] = {
   {"nrandom",1,0,'m'},
   {"rseed",required_argument,0,'r'},
   {"optimize",1,0,'o'},
+	{"pro",required_argument,0,'p'},
   {"type",1,0,'t'},
   {"sctype",1,0,'s'},
   {"scconfig",required_argument,0,'c'},
@@ -87,6 +89,7 @@ int main (int argc, char **argv)
   string scorerfile("statscore.data");
   string featurefile("features.data");
   string initfile("init.opt");
+	string pairedrankfile("");
 
   string tooptimizestr("");
   vector<unsigned> tooptimize;
@@ -95,11 +98,14 @@ int main (int argc, char **argv)
   vector<parameter_t> max;
   //note: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
 
-  while ((c=getopt_long (argc, argv, "o:r:d:n:m:t:s:S:F:v:", long_options, &option_index)) != -1) {
+  while ((c=getopt_long (argc, argv, "o:r:d:n:m:t:s:S:F:v:p:", long_options, &option_index)) != -1) {
     switch (c) {
     case 'o':
       tooptimizestr = string(optarg);
       break;
+		case 'p':
+			pairedrankfile = string(optarg);
+			break;
     case 'd':
       pdim = strtol(optarg, NULL, 10);
       break;
@@ -249,6 +255,12 @@ int main (int argc, char **argv)
       tooptimize[i]=1;
     }
   }
+
+	if (pairedrankfile.compare("") != 0) {
+		D.sample_ranked_pairs(pairedrankfile);
+		PrintUserTime("Stopping...");
+		exit(0);
+	}
 
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
   O->SetScorer(TheScorer);

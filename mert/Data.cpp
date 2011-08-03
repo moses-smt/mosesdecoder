@@ -103,3 +103,109 @@ void Data::loadnbest(const std::string &file)
   inp.close();
 }
 
+// really not the right place...
+float sentenceLevelBleuPlusOne( ScoreStats &stats ) {
+	float logbleu = 0.0;
+	const unsigned int bleu_order = 4;
+	for (unsigned int j=0; j<bleu_order; j++) {
+		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
+		logbleu += log(stats.get(2*j)+1) - log(stats.get(2*j+1)+1);
+	}
+	logbleu /= bleu_order;
+	float brevity = 1.0 - (float)stats.get(bleu_order*2)/stats.get(1);
+	if (brevity < 0.0) {
+		logbleu += brevity;
+	}
+	//cerr << brevity << " -> " << exp(logbleu) << endl;
+	return exp(logbleu);
+}
+
+class SampledPair {
+private:
+	unsigned int translation1;
+	unsigned int translation2;
+	float scoreDiff;
+public:
+	SampledPair( unsigned int t1, unsigned int t2, float diff ) {
+		if (diff > 0) {
+			translation1 = t1;
+			translation2 = t2;
+			scoreDiff = diff;
+		}
+		else {
+			translation1 = t2;
+			translation2 = t1;
+			scoreDiff = -diff;
+		}			
+	}
+	float getDiff() { return scoreDiff; }
+	unsigned int getTranslation1() { return translation1; }
+	unsigned int getTranslation2() { return translation2; }
+};
+	
+
+void Data::sample_ranked_pairs( const std::string &rankedpairfile ) {
+	cout << "Sampling ranked pairs." << endl;
+
+	ofstream *outFile = new ofstream();
+	outFile->open( rankedpairfile.c_str() );
+	ostream *out = outFile;
+
+	const unsigned int n_samplings = 5000;
+	const unsigned int n_samples = 50;
+	const float min_diff = 0.05;
+
+	// loop over all sentences
+  for(unsigned int S=0; S<featdata->size(); S++) {
+		unsigned int n_translations = featdata->get(S).size();
+		// sample a fixed number of times
+		vector< SampledPair* > samples;
+		vector< float > scores;
+		for(unsigned int i=0; i<n_samplings; i++) {
+			unsigned int translation1 = rand() % n_translations;
+			float bleu1 = sentenceLevelBleuPlusOne(scoredata->get(S,translation1));
+
+			unsigned int translation2 = rand() % n_translations;
+			float bleu2 = sentenceLevelBleuPlusOne(scoredata->get(S,translation2));
+			
+			if (abs(bleu1-bleu2) < min_diff)
+				continue;
+			
+			samples.push_back( new SampledPair( translation1, translation2, bleu1-bleu2) );
+			scores.push_back( 1.0 - abs(bleu1-bleu2) );
+		}
+		//cerr << "sampled " << samples.size() << " pairs\n";
+
+		float min_diff = -1.0;
+		if (samples.size() > n_samples) {
+			nth_element(scores.begin(), scores.begin()+(n_samples-1), scores.end());
+			min_diff = 0.99999-scores[n_samples-1];
+			//cerr << "min_diff = " << min_diff << endl;
+		}
+
+		unsigned int collected = 0;
+		for(unsigned int i=0; i<samples.size() && collected < n_samples; i++) {
+			if (samples[i]->getDiff() >= min_diff) {
+				collected++;
+				FeatureStats &f1 = featdata->get(S,samples[i]->getTranslation1());
+				FeatureStats &f2 = featdata->get(S,samples[i]->getTranslation2());
+
+				*out << "1";
+				for(unsigned int j=0; j<f1.size(); j++)
+					if (abs(f1.get(j)-f2.get(j)) > 0.00001)
+						*out << " F" << j << " " << (f1.get(j)-f2.get(j));
+				*out << endl;
+
+				*out << "0";
+				for(unsigned int j=0; j<f1.size(); j++)
+					if (abs(f1.get(j)-f2.get(j)) > 0.00001)
+						*out << " F" << j << " " << (f2.get(j)-f1.get(j));
+				*out << endl;
+			}
+			delete samples[i];
+		}
+		//cerr << "collected " << collected << endl;
+	}
+	out->flush();
+	outFile->close();
+}
