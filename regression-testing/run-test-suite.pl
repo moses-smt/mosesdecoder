@@ -14,10 +14,13 @@ my @tests = qw (
   score.phrase-based-with-alignment
   score.hierarchical
   chart.target-syntax
-  chart.hierarchical
   chart.target-syntax.ondisk
+  chart.hierarchical
+  chart.hierarchical-withsrilm
   chart.hierarchical.ondisk
   phrase.basic-surface-only
+  phrase.basic-surface-only-withirstlm
+  phrase.basic-surface-only-withirstlm-binlm
   phrase.ptable-filtering
   phrase.multi-factor
   phrase.multi-factor-drop

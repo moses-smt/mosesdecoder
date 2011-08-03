@@ -1,13 +1,13 @@
-TRANSLATION_1=Prag Stock Market 0,90 ohne Ende Handel Tag
-TRANSLATION_2=nach abrupten Rückgang morgens die Prager an Market korrigiert .
-TRANSLATION_3=Transaktionen mit Aktien der Tschechiens Enterprise ( ČEZ ) erreicht beinahe halb regelmäßigen tägliche .
-TRANSLATION_4=die Prag Stock Market sofort ihren von Montag Anfang Tuesday Handel bei um beinahe sechs Prozent .
-TRANSLATION_5=diesmal Rückgang Aktien Luftblasen-Theorie ist der .
-LMLOAD_TIME ~ 1
-PTLOAD_TIME ~ 93
-SCORE_1 = -84.121
-SCORE_2 = -105.710
-SCORE_3 = -248.783
-SCORE_4 = -269.594
-SCORE_5 = -76.063
-TOTAL_WALLTIME ~ 14
+TRANSLATION_1=Prag an Market fällt zu ohne am Ende des Handel Tag
+TRANSLATION_2=nach einem steilen Rückgang der Morgen , die Prag Stock Market korrigiert ihre Verluste .
+TRANSLATION_3=Geschäfte mit Aktien aus der tschechischen Energy Enterprise ( ČEZ ) erreicht beinahe die Hälfte der regelmäßigen Tageszeitung Handel .
+TRANSLATION_4=durch die Prag Stock Market sofort ihren fallen aus Montag Anfang Tuesday der Handel , als es um beinahe sechs Prozent .
+TRANSLATION_5=dieses Mal den Rückgang der Aktien an der Wall Street verantwortlich ist für den Einbruch .
+LMLOAD_TIME ~ 1.000
+PTLOAD_TIME ~ 1.000
+SCORE_1 = -9.173
+SCORE_2 = -9.857
+SCORE_3 = -113.066
+SCORE_4 = -117.916
+SCORE_5 = -7.325
+TOTAL_WALLTIME ~ 51
