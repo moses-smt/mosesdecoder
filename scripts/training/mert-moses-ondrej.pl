@@ -124,8 +124,11 @@ my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 my $___PREDICTABLE_SEEDS = 0;
+my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iterations as starting points [Foster&Kuhn,2009]
+my $___RANDOM_DIRECTIONS = 0; # search in random directions only
+my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
+my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use Hopkins&May[2011]
 my $___RANDOM_RESTARTS = 20;
-
 
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
@@ -198,12 +201,16 @@ GetOptions(
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # (dis)allow of phrase tables
-  "random-restarts=i" => \$___RANDOM_RESTARTS, # number of random restarts
   "predictable-seeds" => \$___PREDICTABLE_SEEDS, # make random restarts deterministic
+  "historic-bests" => \$___START_WITH_HISTORIC_BESTS, # use best settings from all previous iterations as starting points
+  "random-directions" => \$___RANDOM_DIRECTIONS, # search only in random directions
+  "number-of-random-directions=i" => \$___NUM_RANDOM_DIRECTIONS, # number of random directions
+  "random-restarts=i" => \$___RANDOM_RESTARTS, # number of random restarts
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "range=s@" => \$___RANGES,
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
+  "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -278,6 +285,9 @@ Options:
                                      N means this and N previous iterations
 
   --maximum-iterations=ITERS ... Maximum number of iterations. Default: $maximum_iterations
+  --random-directions               ... search only in random directions
+  --number-of-random-directions=int ... number of random directions
+                                        (also works with regular optimizer, default: 0)
 ";
   exit 1;
 }
@@ -313,6 +323,15 @@ my $mert_mert_cmd = "$mertdir/mert";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
+
+my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
+if ($___PAIRWISE_RANKED_OPTIMIZER && ! -x $pro_optimizer) {
+  print "did not find $pro_optimizer, installing it in $mertdir\n";
+  `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
+  `gunzip $pro_optimizer.gz`;
+  `chmod +x $pro_optimizer`;
+  die("ERROR: Installation of megam_i686.opt failed! Install by hand from http://www.cs.utah.edu/~hal/megam/") unless -x $pro_optimizer;
+}
 
 $mertargs = "" if !defined $mertargs;
 
@@ -444,6 +463,7 @@ my $devbleu = undef;
 
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
+my $prev_init_file = undef;
 
 
 if ($___FILTER_PHRASE_TABLE) {
@@ -559,6 +579,16 @@ if ($continue) {
 	else{
 	  $prev_score_file = "run$prevstep.scores.dat";
 	}
+      }
+      if (! -e "run$prevstep.${weights_in_file}"){
+	die "Can't start from step $step, because run$prevstep.${weights_in_file} was not found!";
+      }else{
+        if (defined $prev_init_file){
+          $prev_init_file = "${prev_init_file},run$prevstep.${weights_in_file}";
+        }
+        else{
+          $prev_init_file = "run$prevstep.${weights_in_file}";
+        }
       }
     }
     if (! -e "run$step.weights.txt"){
@@ -687,6 +717,15 @@ while(1) {
       my $seed = $run * 1000;
       $cmd = $cmd." -r $seed";
   }
+  if ($___RANDOM_DIRECTIONS) {
+    if ($___NUM_RANDOM_DIRECTIONS == 0) {
+      $cmd .= " -m 50";
+    }
+    $cmd = $cmd." -t random-direction";
+  }
+  if ($___NUM_RANDOM_DIRECTIONS) {
+    $cmd .= " -m $___NUM_RANDOM_DIRECTIONS";
+  }
 
   if (defined $prev_feature_file) {
     $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
@@ -700,12 +739,21 @@ while(1) {
   else{
     $cmd = $cmd." --scfile $score_file";
   }
+  if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
+    $cmd = $cmd." --ifile $prev_init_file,run$run.$weights_in_file";
+  }
+  else{
+    $cmd = $cmd." --ifile run$run.$weights_in_file";
+  }
 
-  $cmd = $cmd." --ifile run$run.$weights_in_file";
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+      $cmd .= " --pro pro.data ; echo 'not used' > $weights_out_file; ~/statmt/project/megam/megam_i686.opt -fvals -maxi 30 -nobias binary pro.data";
+  }
 
   if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
-  } else {
+  } 
+  else {
     safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
   }
   die "Optimization failed, file $weights_out_file does not exist or is empty"
@@ -715,6 +763,7 @@ while(1) {
  # backup copies
   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
+  if ($___PAIRWISE_RANKED_OPTIMIZER) { safesystem ("\\cp -f pro.data run$run.pro.data") or die; }
   safesystem ("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
@@ -724,15 +773,32 @@ while(1) {
 
   $bestpoint = undef;
   $devbleu = undef;
-  open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
-  while (<IN>) {
-    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
-      $bestpoint = $1;
-      $devbleu = $2;
-      last;
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+    open(IN,"run$run.$mert_outfile") or die "Can't open run$run.$mert_outfile";
+    my (@WEIGHT,$sum);
+    foreach (@CURR) { push @WEIGHT, 0; }
+    while(<IN>) {
+      if (/^F(\d+) ([\-\.\de]+)/) {
+	$WEIGHT[$1] = $2;
+	$sum += abs($2);
+      }
     }
+    $devbleu = "unknown";
+    foreach (@WEIGHT) { $_ /= $sum; }
+    $bestpoint = join(" ",@WEIGHT);
+    close IN;
   }
-  close IN;
+  else {
+    open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+        $bestpoint = $1;
+        $devbleu = $2;
+        last;
+      }
+    }
+    close IN;
+  }
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
   print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
@@ -757,7 +823,6 @@ while(1) {
   print F $run."\n";
   close F;
 
-
   if ($shouldstop) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
     last;
@@ -774,6 +839,7 @@ while(1) {
   print "loading data from $firstrun to $run (prev_aggregate_nbl_size=$prev_aggregate_nbl_size)\n";
   $prev_feature_file = undef;
   $prev_score_file = undef;
+  $prev_init_file = undef;
   for (my $i=$firstrun;$i<=$run;$i++){ 
     if (defined $prev_feature_file){
       $prev_feature_file = "${prev_feature_file},run${i}.${base_feature_file}";
@@ -787,9 +853,16 @@ while(1) {
     else{
       $prev_score_file = "run${i}.${base_score_file}";
     }
+    if (defined $prev_init_file){
+      $prev_init_file = "${prev_init_file},run${i}.${weights_in_file}";
+    }
+    else{
+      $prev_init_file = "run${i}.${weights_in_file}";
+    }
   }
   print "loading data from $prev_feature_file\n" if defined($prev_feature_file);
   print "loading data from $prev_score_file\n" if defined($prev_score_file);
+  print "loading data from $prev_init_file\n" if defined($prev_init_file);
 }
 print "Training finished at ".`date`;
 
