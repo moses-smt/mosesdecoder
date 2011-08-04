@@ -214,7 +214,6 @@
     <ClCompile Include="src\Parameter.cpp" />
     <ClCompile Include="src\PartialTranslOptColl.cpp" />
     <ClCompile Include="src\PCNTools.cpp" />
-    <ClCompile Include="src\PDTAimp.cpp" />
     <ClCompile Include="src\Phrase.cpp" />
     <ClCompile Include="src\PhraseDictionary.cpp" />
     <ClCompile Include="src\PhraseDictionaryMemory.cpp" />
