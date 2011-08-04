@@ -86,22 +86,21 @@ foreach my $test (@tests)
   if ($model_type eq 'phrase')
   {
   	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderPhrase";
-    $cmd .= " --test=$test";
   }
   elsif ($model_type eq 'chart.')
   {
   	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderChart";
-    $cmd .= " --test=$test";
   }
   elsif ($model_type eq 'score.')
   {
-    $cmd = "$Bin/run-test-scorer.perl $scoreExe $Bin/tests/$test";
+    $cmd .= "$Bin/run-test-scorer.perl $test_run --scorer=$scoreExe";
   }
   else 
   {
   	print "FAIL";	
   }
   
+  $cmd .= " --test=$test";
   
 print STDERR "cmd = $cmd\n";
 
