@@ -85,17 +85,17 @@ foreach my $test (@tests)
 
   if ($model_type eq 'phrase')
   {
-  	$cmd .= "$test_run --decoder=$decoderPhrase";
+  	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderPhrase";
     $cmd .= " --test=$test";
   }
   elsif ($model_type eq 'chart.')
   {
-  	$cmd .= "$test_run --decoder=$decoderChart";
+  	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderChart";
     $cmd .= " --test=$test";
   }
   elsif ($model_type eq 'score.')
   {
-    $cmd = "$Bin/tests/$test/run-test.pl $scoreExe";
+    $cmd = "$Bin/run-test-scorer.perl $scoreExe $Bin/tests/$test";
   }
   else 
   {
