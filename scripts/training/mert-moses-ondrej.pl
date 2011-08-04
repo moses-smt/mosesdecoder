@@ -373,7 +373,7 @@ $___DEV_F = $input_abs;
 my $pass_old_sge = $old_sge ? "-old-sge" : "";
 
 my $decoder_abs = ensure_full_path($___DECODER);
-die "File not found: $___DECODER (interpreted as $decoder_abs)."
+die "File not executable: $___DECODER (interpreted as $decoder_abs)."
   if ! -x $decoder_abs;
 $___DECODER = $decoder_abs;
 
@@ -916,7 +916,7 @@ sub get_featlist_from_moses {
   if (-e $featlistfn) {
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
-    print STDERR "Asking moses to for feature names and values from $___CONFIG\n";
+    print STDERR "Asking moses for feature names and values from $___CONFIG\n";
     my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
@@ -951,7 +951,7 @@ sub get_order_of_scores_from_nbestlist {
   # read the first line and interpret the ||| label: num num num label2: num ||| column in nbestlist
   # return the score labels in order
   my $fname_or_source = shift;
-  print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
+  # print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
   open IN, $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source'";
   my $line = <IN>;
   close IN;
