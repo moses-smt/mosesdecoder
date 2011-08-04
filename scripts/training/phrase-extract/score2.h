@@ -32,8 +32,31 @@ public:
 };
 
 
-typedef std::set<PhraseAlignmentCollection, PhraseAlignmentCollectionOrderer> PhrasePairGroup;
+//typedef std::set<PhraseAlignmentCollection, PhraseAlignmentCollectionOrderer> PhrasePairGroup;
 
+class PhrasePairGroup
+{
+private:
+  typedef std::set<PhraseAlignmentCollection, PhraseAlignmentCollectionOrderer> Coll;
+  Coll m_coll;
+
+
+public:
+  typedef Coll::iterator iterator;
+  typedef Coll::const_iterator const_iterator;
+  typedef std::vector<const PhraseAlignmentCollection *> SortedColl;
+
+  std::pair<Coll::iterator,bool> insert ( const PhraseAlignmentCollection& obj );
+
+  const SortedColl &GetSortedColl() const
+  { return m_sortedColl; }
+
+private:
+  SortedColl m_sortedColl;
+
+};
+
+// other functions *********************************************
 inline bool isNonTerminal( std::string &word )
 {
   return (word.length()>=3 &&

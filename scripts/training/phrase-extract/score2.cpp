@@ -311,10 +311,10 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
     // check for matches
     //cerr << "phrasePairGroup.size() = " << phrasePairGroup.size() << endl;
 
-    PhraseAlignmentCollection dummyColl;
-    dummyColl.push_back(&currPhrasePair);
+    PhraseAlignmentCollection phraseAlignColl;
+    phraseAlignColl.push_back(&currPhrasePair);
     pair<PhrasePairGroup::iterator, bool> retInsert;
-    retInsert = phrasePairGroup.insert(dummyColl);
+    retInsert = phrasePairGroup.insert(phraseAlignColl);
     if (!retInsert.second)
     { // already exist. Add to that collection instead
       PhraseAlignmentCollection &existingColl = const_cast<PhraseAlignmentCollection&>(*retInsert.first);
@@ -323,10 +323,12 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
 
   }
 
-  PhrasePairGroup::iterator iter;
-  for(iter = phrasePairGroup.begin(); iter != phrasePairGroup.end(); ++iter) 
+  const PhrasePairGroup::SortedColl &sortedColl = phrasePairGroup.GetSortedColl();
+  PhrasePairGroup::SortedColl::const_iterator iter;
+  
+  for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
   {
-    const PhraseAlignmentCollection &group = *iter;
+    const PhraseAlignmentCollection &group = **iter;
     outputPhrasePair( group, totalSource, phraseTableFile );
   }
 }
@@ -495,4 +497,19 @@ void LexicalTable::load( char *fileName )
   }
   cerr << endl;
 }
+
+
+std::pair<PhrasePairGroup::Coll::iterator,bool> PhrasePairGroup::insert ( const PhraseAlignmentCollection& obj )
+{
+  std::pair<iterator,bool> ret = m_coll.insert(obj);
+
+  if (ret.second)
+  { // obj inserted. Also add to sorted vector
+    const PhraseAlignmentCollection &insertedObj = *ret.first;
+    m_sortedColl.push_back(&insertedObj);
+  }
+
+  return ret;
+}
+
 
