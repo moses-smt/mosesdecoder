@@ -20,34 +20,35 @@
 
 using namespace std;
 
-class ScorerFactory {
+class ScorerFactory
+{
 
-    public:
-        vector<string> getTypes() {
-            vector<string> types;
-            types.push_back(string("BLEU"));
-            types.push_back(string("PER"));
-            types.push_back(string("TER"));
-            types.push_back(string("JAVATER"));
-            types.push_back(string("MERGE"));
-            return types;
-        }
+public:
+  vector<string> getTypes() {
+    vector<string> types;
+    types.push_back(string("BLEU"));
+    types.push_back(string("PER"));
+    types.push_back(string("TER"));
+    types.push_back(string("JAVATER"));
+    types.push_back(string("MERGE"));
+    return types;
+  }
 
-        Scorer* getScorer(const string& type, const string& config = "") {
-						if (type == "BLEU") {
-							return (BleuScorer*) new BleuScorer(config);
-            } else if (type == "PER") {
-							return (PerScorer*) new PerScorer(config);
-            } else if (type == "TER") {
-							return (TerScorer*) new TerScorer(config);
-            } else if (type == "JAVATER") {
-							return (JavaTerScorer*) new JavaTerScorer(config);
-            } else if (type == "MERGE") {
-							return (MergeScorer*) new MergeScorer(config);
-            } else {
-                throw runtime_error("Unknown scorer type: " + type);
-            }
-       }
+  Scorer* getScorer(const string& type, const string& config = "") {
+    if (type == "BLEU") {
+      return (BleuScorer*) new BleuScorer(config);
+    } else if (type == "PER") {
+      return (PerScorer*) new PerScorer(config);
+    } else if (type == "TER") {
+      return (TerScorer*) new TerScorer(config);
+    } else if (type == "JAVATER") {
+      return (JavaTerScorer*) new JavaTerScorer(config);
+    } else if (type == "MERGE") {
+      return (MergeScorer*) new MergeScorer(config);
+    } else {
+      throw runtime_error("Unknown scorer type: " + type);
+    }
+  }
 };
 
 #endif //__SCORER_FACTORY_H

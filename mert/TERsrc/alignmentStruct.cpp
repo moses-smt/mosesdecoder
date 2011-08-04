@@ -3,15 +3,15 @@
 using namespace std;
 namespace TERCpp
 {
-    string alignmentStruct::toString()
-    {
-        stringstream s;
+string alignmentStruct::toString()
+{
+  stringstream s;
 // 	s << "nword : " << vectorToString(nwords)<<endl;
 // 	s << "alignment" << vectorToString(alignment)<<endl;
 // 	s << "afterShift" << vectorToString(alignment)<<endl;
-        s << "Nothing to be printed" <<endl;
-        return s.str();
-    }
+  s << "Nothing to be printed" <<endl;
+  return s.str();
+}
 
 // 	alignmentStruct::alignmentStruct()
 // 	{
@@ -79,7 +79,7 @@ namespace TERCpp
 // 		return s.str();
 // 	}
 
-    /* The distance of the shift. */
+/* The distance of the shift. */
 // 	int alignmentStruct::distance()
 // 	{
 // 		if (moveto < start)

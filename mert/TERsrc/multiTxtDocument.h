@@ -10,10 +10,10 @@
 namespace TERCpp
 {
 
-    class multiTxtDocument
-    {
-        public:
-            multiTxtDocument();
+class multiTxtDocument
+{
+public:
+  multiTxtDocument();
 // 		multiTxtDocument(string FileName);
 // 		multiTxtDocument(const std::string &bread, const std::string &cheese, const std::string &meat, const bool pickle):
 // 			m_bread(bread), m_cheese(cheese), m_meat(meat), m_pickle(pickle){};
@@ -34,29 +34,29 @@ namespace TERCpp
 // 		string getSrcLang();
 // 		string getTgtLang();
 // 		xmlStructure getStructure();
-            void addDocument ( documentStructure doc );
-            documentStructure* getLastDocument();
-            documentStructure* getDocument ( string docId );
-	    vector<documentStructure> getDocuments ();
-	    vector<string> getListDocuments ();
-            void loadFile ( string fileName, bool caseOn,  bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike );
-            void loadFiles ( string fileName, bool caseOn,  bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike );
-            void loadRefFile ( param p );
-            void loadRefFiles ( param p );
-            void loadHypFile ( param p );
-            void loadHypFiles ( param p );
-	    void setAverageLength();
-            int getSize();
+  void addDocument ( documentStructure doc );
+  documentStructure* getLastDocument();
+  documentStructure* getDocument ( string docId );
+  vector<documentStructure> getDocuments ();
+  vector<string> getListDocuments ();
+  void loadFile ( string fileName, bool caseOn,  bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike );
+  void loadFiles ( string fileName, bool caseOn,  bool noPunct, bool debugMode, bool noTxtIds, bool tercomLike );
+  void loadRefFile ( param p );
+  void loadRefFiles ( param p );
+  void loadHypFile ( param p );
+  void loadHypFiles ( param p );
+  void setAverageLength();
+  int getSize();
 
 
-        private:
+private:
 // 		string docType;
 // 		string setId;
 // 		string srcLang;
 // 		string tgtLang;
 // 		xmlStructure xmlStruct;
-	    param multiTxtDocumentParams;
-            vector<documentStructure> documents;
+  param multiTxtDocumentParams;
+  vector<documentStructure> documents;
 // 		vector<string> bestDocumentId;
 // 		std::string m_bread, m_cheese, m_meat;
 // 		bool m_pickle;
@@ -76,6 +76,6 @@ namespace TERCpp
 // 		ar & make_nvp("HasPickle", m_pickle);
 // 		// Also note: strings in the first parameter of make_nvp cannot contain spaces!
 // 	}
-    };
+};
 }
 #endif //SANDWICH_DEFINED

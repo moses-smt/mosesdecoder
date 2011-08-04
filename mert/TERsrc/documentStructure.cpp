@@ -4,30 +4,30 @@ using namespace std;
 namespace TERCpp
 {
 
-    string documentStructure::toString()
-    {
-        stringstream s;
+string documentStructure::toString()
+{
+  stringstream s;
 // 	s << "nword : " << vectorToString(nwords)<<endl;
 // 	s << "alignment" << vectorToString(alignment)<<endl;
 // 	s << "afterShift" << vectorToString(alignment)<<endl;
-        s << "Nothing to be printed" << endl;
-        return s.str();
-    }
+  s << "Nothing to be printed" << endl;
+  return s.str();
+}
 
-    string documentStructure::getDocId()
-    {
-        return docId;
-    }
+string documentStructure::getDocId()
+{
+  return docId;
+}
 
-    vector< segmentStructure >* documentStructure::getSegments()
-    {
-        return &seg;
-    }
+vector< segmentStructure >* documentStructure::getSegments()
+{
+  return &seg;
+}
 
-    string documentStructure::getSysId()
-    {
-        return sysId;
-    }
+string documentStructure::getSysId()
+{
+  return sysId;
+}
 //     float documentStructure::getAverageLength()
 //     {
 // 	return averageLength;
@@ -37,49 +37,46 @@ namespace TERCpp
 // 	averageLength=f;
 //     }
 
-    void documentStructure::addSegments ( segmentStructure s )
-    {
-        seg.push_back ( s );
-    }
-    void documentStructure::addSegments ( string id, string text )
-    {
-        segmentStructure tmp_seg ( id, text );
-        seg.push_back ( tmp_seg );
-    }
-    segmentStructure* documentStructure::getLastSegments()
-    {
-        return & seg.at ( ( int ) seg.size() - 1 );
-    }
-    void documentStructure::setDocId ( string s )
-    {
-        docId = s;
-    }
-    void documentStructure::setSysId ( string s )
-    {
-        sysId = s;
-    }
+void documentStructure::addSegments ( segmentStructure s )
+{
+  seg.push_back ( s );
+}
+void documentStructure::addSegments ( string id, string text )
+{
+  segmentStructure tmp_seg ( id, text );
+  seg.push_back ( tmp_seg );
+}
+segmentStructure* documentStructure::getLastSegments()
+{
+  return & seg.at ( ( int ) seg.size() - 1 );
+}
+void documentStructure::setDocId ( string s )
+{
+  docId = s;
+}
+void documentStructure::setSysId ( string s )
+{
+  sysId = s;
+}
 
-    segmentStructure* documentStructure::getSegment ( string id )
-    {
-        for ( int i = 0; i < ( int ) seg.size(); i++ )
-        {
-            if ( id.compare ( seg.at ( i ).getSegId() ) == 0 )
-            {
-                return & ( seg.at ( i ) );
-            }
-        }
-        cerr << "ERROR : documentStructure::getSegment : Segment " << id << " does not exist" <<endl;
-        cerr << "Segment size " << seg.size()<< endl;
-	for (int i=0;i<(int)seg.size(); i++)
-	{
-	  cerr <<seg.at(i).getSegId()<<endl;
-	}
-	exit(0);
+segmentStructure* documentStructure::getSegment ( string id )
+{
+  for ( int i = 0; i < ( int ) seg.size(); i++ ) {
+    if ( id.compare ( seg.at ( i ).getSegId() ) == 0 ) {
+      return & ( seg.at ( i ) );
     }
-    int documentStructure::getSize()
-    {
-        return ( int ) seg.size();
-    }
+  }
+  cerr << "ERROR : documentStructure::getSegment : Segment " << id << " does not exist" <<endl;
+  cerr << "Segment size " << seg.size()<< endl;
+  for (int i=0; i<(int)seg.size(); i++) {
+    cerr <<seg.at(i).getSegId()<<endl;
+  }
+  exit(0);
+}
+int documentStructure::getSize()
+{
+  return ( int ) seg.size();
+}
 
 
 // 	documentStructure::documentStructure()
@@ -148,7 +145,7 @@ namespace TERCpp
 // 		return s.str();
 // 	}
 
-    /* The distance of the shift. */
+/* The distance of the shift. */
 // 	int documentStructure::distance()
 // 	{
 // 		if (moveto < start)

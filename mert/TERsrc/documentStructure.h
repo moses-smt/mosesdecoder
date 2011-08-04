@@ -15,23 +15,23 @@ using namespace Tools;
 
 namespace TERCpp
 {
-    class documentStructure
-    {
-        private:
-            string docId;
-            string sysId;
-            vector<segmentStructure> seg;
-        public:
-            string getDocId();
-            string getSysId();
-            vector<segmentStructure>* getSegments();
-            segmentStructure* getLastSegments();
-            void setDocId ( string s );
-            void setSysId ( string s );
-            void addSegments ( segmentStructure s );
-            void addSegments ( string id, string text );
-            segmentStructure* getSegment ( string id );
-            int getSize();
+class documentStructure
+{
+private:
+  string docId;
+  string sysId;
+  vector<segmentStructure> seg;
+public:
+  string getDocId();
+  string getSysId();
+  vector<segmentStructure>* getSegments();
+  segmentStructure* getLastSegments();
+  void setDocId ( string s );
+  void setSysId ( string s );
+  void addSegments ( segmentStructure s );
+  void addSegments ( string id, string text );
+  segmentStructure* getSegment ( string id );
+  int getSize();
 
 // 	alignmentStruct();
 // 	alignmentStruct (int _start, int _end, int _moveto, int _newloc);
@@ -50,11 +50,11 @@ namespace TERCpp
 //             vector<string> nwords; // The words we shifted
 //             vector<char> alignment ; // for pra_more output
 //             vector<vecInt> aftershift; // for pra_more output
-            // This is used to store the cost of a shift, so we don't have to
-            // calculate it multiple times.
+  // This is used to store the cost of a shift, so we don't have to
+  // calculate it multiple times.
 //             double cost;
-            string toString();
-    };
+  string toString();
+};
 
 }
 #endif

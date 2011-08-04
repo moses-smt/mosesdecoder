@@ -18,175 +18,160 @@ FeatureData::FeatureData() {};
 
 void FeatureData::save ( std::ofstream& outFile, bool bin )
 {
-        for ( featdata_t::iterator i = array_.begin(); i != array_.end(); i++ )
-                i->save ( outFile, bin );
+  for ( featdata_t::iterator i = array_.begin(); i != array_.end(); i++ )
+    i->save ( outFile, bin );
 }
 
 void FeatureData::save ( const std::string &file, bool bin )
 {
-        if ( file.empty() ) return;
+  if ( file.empty() ) return;
 
-        TRACE_ERR ( "saving the array into " << file << std::endl );
+  TRACE_ERR ( "saving the array into " << file << std::endl );
 
-        std::ofstream outFile ( file.c_str(), std::ios::out ); // matches a stream with a file. Opens the file
+  std::ofstream outFile ( file.c_str(), std::ios::out ); // matches a stream with a file. Opens the file
 
-        save ( outFile, bin );
+  save ( outFile, bin );
 
-        outFile.close();
+  outFile.close();
 }
 
 void FeatureData::load ( ifstream& inFile )
 {
-        FeatureArray entry;
+  FeatureArray entry;
 
-        while ( !inFile.eof() )
-        {
+  while ( !inFile.eof() ) {
 
-                if ( !inFile.good() )
-                {
-                        std::cerr << "ERROR FeatureData::load inFile.good()" << std::endl;
-                }
+    if ( !inFile.good() ) {
+      std::cerr << "ERROR FeatureData::load inFile.good()" << std::endl;
+    }
 
-                entry.clear();
-                entry.load ( inFile );
+    entry.clear();
+    entry.load ( inFile );
 
-                if ( entry.size() == 0 )
-                        break;
+    if ( entry.size() == 0 )
+      break;
 
-                if ( size() == 0 )
-                {
-                        setFeatureMap ( entry.Features() );
-                }
-                add ( entry );
-        }
+    if ( size() == 0 ) {
+      setFeatureMap ( entry.Features() );
+    }
+    add ( entry );
+  }
 }
 
 
 void FeatureData::load ( const std::string &file )
 {
-        TRACE_ERR ( "loading feature data from " << file << std::endl );
+  TRACE_ERR ( "loading feature data from " << file << std::endl );
 
-        inputfilestream inFile ( file ); // matches a stream with a file. Opens the file
+  inputfilestream inFile ( file ); // matches a stream with a file. Opens the file
 
-        if ( !inFile )
-        {
-                throw runtime_error ( "Unable to open feature file: " + file );
-        }
+  if ( !inFile ) {
+    throw runtime_error ( "Unable to open feature file: " + file );
+  }
 
-        load ( ( ifstream& ) inFile );
+  load ( ( ifstream& ) inFile );
 
-        inFile.close();
+  inFile.close();
 }
 
 void FeatureData::add ( FeatureArray& e )
 {
-        if ( exists ( e.getIndex() ) )   // array at position e.getIndex() already exists
-        {
-                //enlarge array at position e.getIndex()
-                size_t pos = getIndex ( e.getIndex() );
-                array_.at ( pos ).merge ( e );
-        }
-        else
-        {
-                array_.push_back ( e );
-                setIndex();
-        }
+  if ( exists ( e.getIndex() ) ) { // array at position e.getIndex() already exists
+    //enlarge array at position e.getIndex()
+    size_t pos = getIndex ( e.getIndex() );
+    array_.at ( pos ).merge ( e );
+  } else {
+    array_.push_back ( e );
+    setIndex();
+  }
 }
 
 void FeatureData::add ( FeatureStats& e, const std::string & sent_idx )
 {
-        if ( exists ( sent_idx ) )   // array at position e.getIndex() already exists
-        {
-                //enlarge array at position e.getIndex()
-                size_t pos = getIndex ( sent_idx );
+  if ( exists ( sent_idx ) ) { // array at position e.getIndex() already exists
+    //enlarge array at position e.getIndex()
+    size_t pos = getIndex ( sent_idx );
 //		TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
-                array_.at ( pos ).add ( e );
-        }
-        else
-        {
+    array_.at ( pos ).add ( e );
+  } else {
 //		TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
-                FeatureArray a;
-                a.NumberOfFeatures ( number_of_features );
-                a.Features ( features );
-                a.setIndex ( sent_idx );
-                a.add ( e );
-                add ( a );
-        }
+    FeatureArray a;
+    a.NumberOfFeatures ( number_of_features );
+    a.Features ( features );
+    a.setIndex ( sent_idx );
+    a.add ( e );
+    add ( a );
+  }
 }
 
 bool FeatureData::check_consistency()
 {
-        if ( array_.size() == 0 )
-                return true;
+  if ( array_.size() == 0 )
+    return true;
 
-        for ( featdata_t::iterator i = array_.begin(); i != array_.end(); i++ )
-                if ( !i->check_consistency() ) return false;
+  for ( featdata_t::iterator i = array_.begin(); i != array_.end(); i++ )
+    if ( !i->check_consistency() ) return false;
 
-        return true;
+  return true;
 }
 
 void FeatureData::setIndex()
 {
-        size_t j = 0;
-        for ( featdata_t::iterator i = array_.begin(); i != array_.end(); i++ )
-        {
-                idx2arrayname_[j] = ( *i ).getIndex();
-                arrayname2idx_[ ( *i ).getIndex() ] = j;
-                j++;
-        }
+  size_t j = 0;
+  for ( featdata_t::iterator i = array_.begin(); i != array_.end(); i++ ) {
+    idx2arrayname_[j] = ( *i ).getIndex();
+    arrayname2idx_[ ( *i ).getIndex() ] = j;
+    j++;
+  }
 }
 
 
 void FeatureData::setFeatureMap ( const std::string feat )
 {
-        number_of_features = 0;
-        features = feat;
+  number_of_features = 0;
+  features = feat;
 
-        std::string substring, stringBuf;
-        stringBuf = features;
-        while ( !stringBuf.empty() )
-        {
-                getNextPound ( stringBuf, substring );
+  std::string substring, stringBuf;
+  stringBuf = features;
+  while ( !stringBuf.empty() ) {
+    getNextPound ( stringBuf, substring );
 
-                featname2idx_[substring] = idx2featname_.size();
-                idx2featname_[idx2featname_.size() ] = substring;
-                number_of_features++;
-        }
+    featname2idx_[substring] = idx2featname_.size();
+    idx2featname_[idx2featname_.size() ] = substring;
+    number_of_features++;
+  }
 }
 
 void FeatureData::applyLambda ( float f )
 {
-        for ( int i = 0; i < ( int ) array_.size(); i++ )
-        {
-                 (array_.at ( i ) ).applyLambda ( f);
-        }
+  for ( int i = 0; i < ( int ) array_.size(); i++ ) {
+    (array_.at ( i ) ).applyLambda ( f);
+  }
 }
 void FeatureData::mergeWithOtherData(FeatureData* feat)
 {
-	if (array_.size()!=feat->array_.size()) {
-            cerr << "ERROR : FeatureData::mergeWithOtherData : different size "<<endl;
-            exit(0);
-	}
-	vector<FeatureArray> tmp;
-        vector<FeatureArray>::iterator iterFeatureArray2=feat->array_.begin();
-	FeatureArray tmp01;
-	FeatureArray tmp02;
-        for (vector<FeatureArray>::iterator iterFeatureArray=array_.begin(); iterFeatureArray!=array_.end(); iterFeatureArray++)
-	{
-	  if (iterFeatureArray2!=feat->array_.end())
-	  {
-	    tmp01=(*iterFeatureArray);
-	    tmp02=(*iterFeatureArray2);
-	    tmp.push_back(tmp01+tmp02);
-	  }
-	}
-	array_=tmp;
+  if (array_.size()!=feat->array_.size()) {
+    cerr << "ERROR : FeatureData::mergeWithOtherData : different size "<<endl;
+    exit(0);
+  }
+  vector<FeatureArray> tmp;
+  vector<FeatureArray>::iterator iterFeatureArray2=feat->array_.begin();
+  FeatureArray tmp01;
+  FeatureArray tmp02;
+  for (vector<FeatureArray>::iterator iterFeatureArray=array_.begin(); iterFeatureArray!=array_.end(); iterFeatureArray++) {
+    if (iterFeatureArray2!=feat->array_.end()) {
+      tmp01=(*iterFeatureArray);
+      tmp02=(*iterFeatureArray2);
+      tmp.push_back(tmp01+tmp02);
+    }
+  }
+  array_=tmp;
 //         for (int i =0; i< (int)array_.size(); i++) {
 // 	  FeatureArray tmp01=array_.at(i);
 // 	  FeatureArray tmp02=feat->array_.at(i);
 // 	  array_.at(i)=tmp01+tmp02;
 // //             array_.at(i)=+;
-//         } 
+//         }
 // 	F.features=features;
 // 	F.idx=idx;
 // 	F.number_of_features=number_of_features;

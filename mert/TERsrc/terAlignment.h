@@ -14,38 +14,38 @@ using namespace std;
 namespace TERCpp
 {
 
-    class terAlignment
-    {
-        private:
-        public:
+class terAlignment
+{
+private:
+public:
 
-            terAlignment();
-            string toString();
-	    void scoreDetails(); 
+  terAlignment();
+  string toString();
+  void scoreDetails();
 
-            vector<string> ref;
-            vector<string> hyp;
-            vector<string> aftershift;
+  vector<string> ref;
+  vector<string> hyp;
+  vector<string> aftershift;
 
-            vector<terShift> allshifts;
+  vector<terShift> allshifts;
 
-            double numEdits;
-            double numWords;
-	    double averageWords;
-            vector<char> alignment;
-            string bestRef;
+  double numEdits;
+  double numWords;
+  double averageWords;
+  vector<char> alignment;
+  string bestRef;
 
-            int numIns;
-            int numDel;
-            int numSub;
-            int numSft;
-            int numWsf;
+  int numIns;
+  int numDel;
+  int numSub;
+  int numSft;
+  int numWsf;
 
 
-            string join ( string delim, vector<string> arr );
-            double score();
-            double scoreAv();
-    };
+  string join ( string delim, vector<string> arr );
+  double score();
+  double scoreAv();
+};
 
 }
 #endif

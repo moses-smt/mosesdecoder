@@ -51,45 +51,49 @@ int getNextPound(std::string &theString, std::string &substring, const std::stri
 template<typename T>
 inline T Scan(const std::string &input)
 {
-	 std::stringstream stream(input);
-	 T ret;
-	 stream >> ret;
-	 return ret;
+  std::stringstream stream(input);
+  T ret;
+  stream >> ret;
+  return ret;
 };
 
 class inputfilestream : public std::istream
 {
 protected:
-        std::streambuf *m_streambuf;
-	bool _good;
+  std::streambuf *m_streambuf;
+  bool _good;
 public:
-  
-        inputfilestream(const std::string &filePath);
-        ~inputfilestream();
-	bool good(){return _good;}
-        void close();
+
+  inputfilestream(const std::string &filePath);
+  ~inputfilestream();
+  bool good() {
+    return _good;
+  }
+  void close();
 };
 
 class outputfilestream : public std::ostream
 {
 protected:
-        std::streambuf *m_streambuf;
-	bool _good;
+  std::streambuf *m_streambuf;
+  bool _good;
 public:
-  
-        outputfilestream(const std::string &filePath);
-        ~outputfilestream();
-	bool good(){return _good;}
-        void close();
+
+  outputfilestream(const std::string &filePath);
+  ~outputfilestream();
+  bool good() {
+    return _good;
+  }
+  void close();
 };
 
 template<typename T>
 inline std::string stringify(T x)
 {
-	std::ostringstream o;
-	if (!(o << x))
-		throw std::runtime_error("stringify(template<typename T>)");
-	return o.str();
+  std::ostringstream o;
+  if (!(o << x))
+    throw std::runtime_error("stringify(template<typename T>)");
+  return o.str();
 }
 
 // Utilities to measure decoding time

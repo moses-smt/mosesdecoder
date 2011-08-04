@@ -9,10 +9,10 @@
 namespace TERCpp
 {
 
-    class SGMLDocument
-    {
-        public:
-            SGMLDocument();
+class SGMLDocument
+{
+public:
+  SGMLDocument();
 // 		SGMLDocument(string FileName);
 // 		SGMLDocument(const std::string &bread, const std::string &cheese, const std::string &meat, const bool pickle):
 // 			m_bread(bread), m_cheese(cheese), m_meat(meat), m_pickle(pickle){};
@@ -24,28 +24,28 @@ namespace TERCpp
 // 				", Meat = " << m_meat << ", Has Pickle = " << m_pickle << std::endl;
 //
 // 		}
-            void setDocType ( string s );
-            void setSetId ( string s );
-            void setSrcLang ( string s );
-            void setTgtLang ( string s );
-            string getDocType();
-            string getSetId();
-            string getSrcLang();
-            string getTgtLang();
+  void setDocType ( string s );
+  void setSetId ( string s );
+  void setSrcLang ( string s );
+  void setTgtLang ( string s );
+  string getDocType();
+  string getSetId();
+  string getSrcLang();
+  string getTgtLang();
 // 		xmlStructure getStructure();
-            void addDocument ( documentStructure doc );
-            documentStructure* getLastDocument();
-            documentStructure* getFirstDocument();
-	    int getSize();
-	    documentStructure* getDocument(string docId);
+  void addDocument ( documentStructure doc );
+  documentStructure* getLastDocument();
+  documentStructure* getFirstDocument();
+  int getSize();
+  documentStructure* getDocument(string docId);
 
-        private:
-            string docType;
-            string setId;
-            string srcLang;
-            string tgtLang;
+private:
+  string docType;
+  string setId;
+  string srcLang;
+  string tgtLang;
 // 		xmlStructure xmlStruct;
-            vector<documentStructure> documents;
+  vector<documentStructure> documents;
 // 		std::string m_bread, m_cheese, m_meat;
 // 		bool m_pickle;
 //
@@ -64,6 +64,6 @@ namespace TERCpp
 // 		ar & make_nvp("HasPickle", m_pickle);
 // 		// Also note: strings in the first parameter of make_nvp cannot contain spaces!
 // 	}
-    };
+};
 }
 #endif //SANDWICH_DEFINED

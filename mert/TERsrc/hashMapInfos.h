@@ -14,28 +14,28 @@ using namespace std;
 
 namespace HashMapSpace
 {
-    class hashMapInfos
-    {
-        private:
-            vector<infosHasher> m_hasher;
+class hashMapInfos
+{
+private:
+  vector<infosHasher> m_hasher;
 
-        public:
+public:
 //     ~hashMap();
-            long hashValue ( string key );
-            int trouve ( long searchKey );
-            int trouve ( string key );
-            void addHasher ( string key, vector<int>  value );
-            void addValue ( string key, vector<int>  value );
-            infosHasher getHasher ( string key );
-            vector<int> getValue ( string key );
+  long hashValue ( string key );
+  int trouve ( long searchKey );
+  int trouve ( string key );
+  void addHasher ( string key, vector<int>  value );
+  void addValue ( string key, vector<int>  value );
+  infosHasher getHasher ( string key );
+  vector<int> getValue ( string key );
 //         string searchValue ( string key );
-            void setValue ( string key , vector<int>  value );
-            void printHash();
-            vector<infosHasher> getHashMap();
-            string printStringHash();
-            string printStringHash2();
-            string printStringHashForLexicon();
-    };
+  void setValue ( string key , vector<int>  value );
+  void printHash();
+  vector<infosHasher> getHashMap();
+  string printStringHash();
+  string printStringHash2();
+  string printStringHashForLexicon();
+};
 
 
 }

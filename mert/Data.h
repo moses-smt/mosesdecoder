@@ -24,49 +24,72 @@ class Scorer;
 class Data
 {
 protected:
-	ScoreData* scoredata;
-	FeatureData* featdata;
-		
+  ScoreData* scoredata;
+  FeatureData* featdata;
+
 private:
-  Scorer* theScorer;       
+  Scorer* theScorer;
   std::string score_type;
-	size_t number_of_scores; //number of scores
-		
+  size_t number_of_scores; //number of scores
+
 public:
-	Data(Scorer& sc);
-	
-	~Data(){};
-		
-	inline void clear() { scoredata->clear(); featdata->clear(); }
-	
-	ScoreData* getScoreData() { return scoredata; };
-	FeatureData* getFeatureData() { return featdata; };
-	void setScoreData(Scorer& sc);
-	inline size_t NumberOfFeatures() const{ return featdata->NumberOfFeatures(); }
-	inline void NumberOfFeatures(size_t v){ featdata->NumberOfFeatures(v); }
-	inline std::string Features() const{ return featdata->Features(); }
-	inline void Features(const std::string f){ featdata->Features(f); }
-	inline void applyLambda(float f){featdata->applyLambda(f);}
-	void loadnbest(const std::string &file);
+  Data(Scorer& sc);
 
-  void load(const std::string &featfile,const std::string &scorefile){
-		featdata->load(featfile);
-		scoredata->load(scorefile);
+  ~Data() {};
+
+  inline void clear() {
+    scoredata->clear();
+    featdata->clear();
   }
-	
-	void save(const std::string &featfile,const std::string &scorefile, bool bin=false){
-		
-		if (bin) cerr << "Binary write mode is selected" << endl;
-		else cerr << "Binary write mode is NOT selected" << endl;
-		
-		featdata->save(featfile, bin);
-		scoredata->save(scorefile, bin);
-	}
 
-	inline bool existsFeatureNames(){ return featdata->existsFeatureNames(); };
-	
-	inline std::string getFeatureName(size_t idx){ return featdata->getFeatureName(idx); };
-	inline size_t getFeatureIndex(const std::string& name){ return featdata->getFeatureIndex(name); };
+  ScoreData* getScoreData() {
+    return scoredata;
+  };
+  FeatureData* getFeatureData() {
+    return featdata;
+  };
+  void setScoreData(Scorer& sc);
+  inline size_t NumberOfFeatures() const {
+    return featdata->NumberOfFeatures();
+  }
+  inline void NumberOfFeatures(size_t v) {
+    featdata->NumberOfFeatures(v);
+  }
+  inline std::string Features() const {
+    return featdata->Features();
+  }
+  inline void Features(const std::string f) {
+    featdata->Features(f);
+  }
+  inline void applyLambda(float f) {
+    featdata->applyLambda(f);
+  }
+  void loadnbest(const std::string &file);
+
+  void load(const std::string &featfile,const std::string &scorefile) {
+    featdata->load(featfile);
+    scoredata->load(scorefile);
+  }
+
+  void save(const std::string &featfile,const std::string &scorefile, bool bin=false) {
+
+    if (bin) cerr << "Binary write mode is selected" << endl;
+    else cerr << "Binary write mode is NOT selected" << endl;
+
+    featdata->save(featfile, bin);
+    scoredata->save(scorefile, bin);
+  }
+
+  inline bool existsFeatureNames() {
+    return featdata->existsFeatureNames();
+  };
+
+  inline std::string getFeatureName(size_t idx) {
+    return featdata->getFeatureName(idx);
+  };
+  inline size_t getFeatureIndex(const std::string& name) {
+    return featdata->getFeatureIndex(name);
+  };
 };
 
 

@@ -14,32 +14,32 @@ using namespace Tools;
 
 namespace TERCpp
 {
-    class terShift
-    {
-        private:
-        public:
+class terShift
+{
+private:
+public:
 
-            terShift();
-            terShift ( int _start, int _end, int _moveto, int _newloc );
-            terShift ( int _start, int _end, int _moveto, int _newloc, vector<string> _shifted );
-            string toString();
-            int distance() ;
-            bool leftShift();
-            int size();
+  terShift();
+  terShift ( int _start, int _end, int _moveto, int _newloc );
+  terShift ( int _start, int _end, int _moveto, int _newloc, vector<string> _shifted );
+  string toString();
+  int distance() ;
+  bool leftShift();
+  int size();
 // 	terShift operator=(terShift t);
 // 	string vectorToString(vector<string> vec);
 
-            int start;
-            int end;
-            int moveto;
-            int newloc;
-            vector<string> shifted; // The words we shifted
-            vector<char> alignment ; // for pra_more output
-            vector<string> aftershift; // for pra_more output
-            // This is used to store the cost of a shift, so we don't have to
-            // calculate it multiple times.
-            double cost;
-    };
+  int start;
+  int end;
+  int moveto;
+  int newloc;
+  vector<string> shifted; // The words we shifted
+  vector<char> alignment ; // for pra_more output
+  vector<string> aftershift; // for pra_more output
+  // This is used to store the cost of a shift, so we don't have to
+  // calculate it multiple times.
+  double cost;
+};
 
 }
 #endif

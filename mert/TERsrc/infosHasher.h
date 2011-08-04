@@ -9,22 +9,22 @@
 using namespace std;
 namespace HashMapSpace
 {
-    class infosHasher
-    {
-        private:
-            long m_hashKey;
-            string m_key;
-            vector<int> m_value;
+class infosHasher
+{
+private:
+  long m_hashKey;
+  string m_key;
+  vector<int> m_value;
 
-        public:
-            infosHasher ( long cle, string cleTxt, vector<int> valueVecInt );
-            long getHashKey();
-            string getKey();
-            vector<int> getValue();
-            void setValue ( vector<int> value );
+public:
+  infosHasher ( long cle, string cleTxt, vector<int> valueVecInt );
+  long getHashKey();
+  string getKey();
+  vector<int> getValue();
+  void setValue ( vector<int> value );
 
 
-    };
+};
 
 
 }

@@ -24,36 +24,39 @@ using namespace std;
 /**
   * TER scoring
  **/
-class JavaTerScorer: public StatisticsBasedScorer {
-	public:
-		JavaTerScorer(const string& config = "") : StatisticsBasedScorer("JAVATER",config){}
-		virtual void setReferenceFiles(const vector<string>& referenceFiles);
-		virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-		static const int LENGTH;	
-		virtual void whoami() 
-		{
-			cerr << "I AM a JAVA TerScorer" << std::endl;
-		}
-		size_t NumberOfScores(){ cerr << "TerScorer: " << (2 * LENGTH + 1) << endl; return (2 * LENGTH + 1); };
-		
-		
+class JavaTerScorer: public StatisticsBasedScorer
+{
+public:
+  JavaTerScorer(const string& config = "") : StatisticsBasedScorer("JAVATER",config) {}
+  virtual void setReferenceFiles(const vector<string>& referenceFiles);
+  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
+  static const int LENGTH;
+  virtual void whoami() {
+    cerr << "I AM a JAVA TerScorer" << std::endl;
+  }
+  size_t NumberOfScores() {
+    cerr << "TerScorer: " << (2 * LENGTH + 1) << endl;
+    return (2 * LENGTH + 1);
+  };
+
+
 //     protected:
-        float calculateScore(const vector<int>& comps);
-        float calculateScore(const vector<float>& comps);
-		
-	private:
-		string javaEnv;
-		string tercomEnv;
-		//no copy
-		JavaTerScorer(const JavaTerScorer&);
-		~JavaTerScorer(){};
-		JavaTerScorer& operator=(const JavaTerScorer&);
-		// data extracted from reference files
-		vector<size_t> _reflengths;
-		vector<multiset<int> > _reftokens;
-		vector<vector<int> > m_references;
-		string m_pid;
-  
+  float calculateScore(const vector<int>& comps);
+  float calculateScore(const vector<float>& comps);
+
+private:
+  string javaEnv;
+  string tercomEnv;
+  //no copy
+  JavaTerScorer(const JavaTerScorer&);
+  ~JavaTerScorer() {};
+  JavaTerScorer& operator=(const JavaTerScorer&);
+  // data extracted from reference files
+  vector<size_t> _reflengths;
+  vector<multiset<int> > _reftokens;
+  vector<vector<int> > m_references;
+  string m_pid;
+
 };
 
 
