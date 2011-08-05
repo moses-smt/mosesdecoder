@@ -105,7 +105,7 @@ if($NBEST > 0){
   run_command("gzip $results/run.nbest");
 }
 
-($o, $ec, $sig) = run_command("$BIN_TEST/compare-results.pl $results $truth");
+($o, $ec, $sig) = run_command("$BIN_TEST/compare-results.perl $results $truth");
 print $o;
 if ($ec) {
   print STDERR "FAILURE, for debugging, local moses.ini=$local_moses_ini\n";

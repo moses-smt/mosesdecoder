@@ -58,8 +58,8 @@ vector<string> tokenize( const char [] );
 
 void computeCountOfCounts( char* fileNameExtract, int maxLines );
 void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
-PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > & );
-void outputPhrasePair( vector< PhraseAlignment * > &, float, ostream &phraseTableFile );
+PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection & );
+void outputPhrasePair(const PhraseAlignmentCollection &, float, ostream &phraseTableFile );
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
 
 LexicalTable lexTable;
@@ -168,7 +168,11 @@ int main(int argc, char* argv[])
   PhraseAlignment *lastPhrasePair = NULL;
   while(true) {
     if (extractFileP.eof()) break;
-    if (++i % 100000 == 0) cerr << "." << flush;
+    if (++i % 100000 == 0)
+    {
+      cerr << i << " " << flush;
+    }
+
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extractFileP.eof())	break;
 
@@ -193,6 +197,7 @@ int main(int argc, char* argv[])
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
+      
       processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
       phrasePairsWithSameF.clear();
       lastPhrasePair = NULL;
@@ -291,39 +296,44 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
 
   // group phrase pairs based on alignments that matter
   // (i.e. that re-arrange non-terminals)
-  vector< vector< PhraseAlignment * > > phrasePairGroup;
+  PhrasePairGroup phrasePairGroup;
   float totalSource = 0;
+
+  //cerr << "phrasePair.size() = " << phrasePair.size() << endl;
 
   // loop through phrase pairs
   for(size_t i=0; i<phrasePair.size(); i++) {
     // add to total count
+    PhraseAlignment &currPhrasePair = phrasePair[i];
+    
     totalSource += phrasePair[i].count;
 
-    bool matched = false;
     // check for matches
-    for(size_t g=0; g<phrasePairGroup.size(); g++) {
-      vector< PhraseAlignment* > &group = phrasePairGroup[g];
-      // matched? place into same group
-      if ( group[0]->match( phrasePair[i] )) {
-        group.push_back( &phrasePair[i] );
-        matched = true;
-      }
+    //cerr << "phrasePairGroup.size() = " << phrasePairGroup.size() << endl;
+
+    PhraseAlignmentCollection phraseAlignColl;
+    phraseAlignColl.push_back(&currPhrasePair);
+    pair<PhrasePairGroup::iterator, bool> retInsert;
+    retInsert = phrasePairGroup.insert(phraseAlignColl);
+    if (!retInsert.second)
+    { // already exist. Add to that collection instead
+      PhraseAlignmentCollection &existingColl = const_cast<PhraseAlignmentCollection&>(*retInsert.first);
+      existingColl.push_back(&currPhrasePair);
     }
-    // not matched? create new group
-    if (! matched) {
-      vector< PhraseAlignment* > newGroup;
-      newGroup.push_back( &phrasePair[i] );
-      phrasePairGroup.push_back( newGroup );
-    }
+
   }
 
-  for(size_t g=0; g<phrasePairGroup.size(); g++) {
-    vector< PhraseAlignment* > &group = phrasePairGroup[g];
+  const PhrasePairGroup::SortedColl &sortedColl = phrasePairGroup.GetSortedColl();
+  PhrasePairGroup::SortedColl::const_iterator iter;
+  
+  for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
+  {
+    const PhraseAlignmentCollection &group = **iter;
     outputPhrasePair( group, totalSource, phraseTableFile );
   }
 }
 
-PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > &phrasePair )
+PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair )
 {
   float bestAlignmentCount = -1;
   PhraseAlignment* bestAlignment;
@@ -338,7 +348,7 @@ PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > &phrasePair )
   return bestAlignment;
 }
 
-void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount, ostream &phraseTableFile )
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, ostream &phraseTableFile )
 {
   if (phrasePair.size() == 0) return;
 
@@ -487,4 +497,19 @@ void LexicalTable::load( char *fileName )
   }
   cerr << endl;
 }
+
+
+std::pair<PhrasePairGroup::Coll::iterator,bool> PhrasePairGroup::insert ( const PhraseAlignmentCollection& obj )
+{
+  std::pair<iterator,bool> ret = m_coll.insert(obj);
+
+  if (ret.second)
+  { // obj inserted. Also add to sorted vector
+    const PhraseAlignmentCollection &insertedObj = *ret.first;
+    m_sortedColl.push_back(&insertedObj);
+  }
+
+  return ret;
+}
+
 
