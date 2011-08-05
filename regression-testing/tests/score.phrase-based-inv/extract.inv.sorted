@@ -1,0 +1,2222 @@
+! ! ! ) , ||| ! ! ! ) bezeichnet wird , ||| 0-0 1-1 2-2 3-3 4-6
+! ! ! ) ||| ! ! ! ) bezeichnet wird ||| 0-0 1-1 2-2 3-3
+! ! ! ) ||| ! ! ! ) bezeichnet ||| 0-0 1-1 2-2 3-3
+! ! ! ) ||| ! ! ! ) ||| 0-0 1-1 2-2 3-3
+! ! ! ) ||| ! ! ! ) ||| 0-0 1-1 2-2 3-3
+! ! ! ||| ! ! ! ||| 0-0 1-1 2-2
+! ! ! ||| ! ! ! ||| 0-0 1-1 2-2
+! ! ! ||| ! ! ! ||| 0-0 1-1 2-2
+! ! ) , has ||| ! ! ) bezeichnet wird , hat ||| 0-0 1-1 2-2 3-5 4-6
+! ! ) , ||| ! ! ) bezeichnet wird , ||| 0-0 1-1 2-2 3-5
+! ! ) ||| ! ! ) bezeichnet wird ||| 0-0 1-1 2-2
+! ! ) ||| ! ! ) bezeichnet ||| 0-0 1-1 2-2
+! ! ) ||| ! ! ) ||| 0-0 1-1 2-2
+! ! ) ||| ! ! ) ||| 0-0 1-1 2-2
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| erforderlich ! ||| 0-0 0-1 1-1
+! " ) Mr Ferber , ||| ! ) Herr Kollege Ferber , ||| 0-0 2-1 3-2 4-3 4-4 5-5
+! " ) Mr Ferber ||| ! ) Herr Kollege Ferber ||| 0-0 2-1 3-2 4-3 4-4
+! " ) Mr ||| ! ) Herr ||| 0-0 2-1 3-2
+! " ) ||| ! ) ||| 0-0 2-1
+! " , cried the shepherd boy ||| ! " , schrie der Hirtenjunge ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! " , cried the ||| ! " , schrie der ||| 0-0 1-1 2-2 3-3 4-4
+! " , cried ||| ! " , schrie ||| 0-0 1-1 2-2 3-3
+! " , ||| ! " , ||| 0-0 1-1 2-2
+! " , ||| ! " , ||| 0-0 1-1 2-2
+! " . ||| ! " ||| 0-0 1-1 2-0
+! " I said to her ||| ! " , sagte ich zu ihr ||| 0-0 1-1 2-4 3-3 4-5 5-6
+! " I said to ||| ! " , sagte ich zu ||| 0-0 1-1 2-4 3-3 4-5
+! " I said ||| ! " , sagte ich ||| 0-0 1-1 2-4 3-3
+! " but a ||| ! " , doch der ||| 0-0 1-1 2-3 3-4
+! " but a ||| vermag ! " , doch der ||| 0-1 1-2 2-4 3-5
+! " but ||| ! " , doch ||| 0-0 1-1 2-3
+! " but ||| vermag ! " , doch ||| 0-1 1-2 2-4
+! " can no longer continue ||| ! " geht nicht mehr weiter ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! " can no longer ||| ! " geht nicht mehr ||| 0-0 1-1 2-2 3-3 4-4
+! " can no ||| ! " geht nicht ||| 0-0 1-1 2-2 3-3
+! " can ||| ! " geht ||| 0-0 1-1 2-2
+! " did little to ||| ! , war ebenfalls kein Beitrag zur ||| 0-0 4-6
+! " did little ||| ! , war ebenfalls kein Beitrag ||| 0-0
+! " did little ||| ! , war ebenfalls kein ||| 0-0
+! " did little ||| ! , war ebenfalls ||| 0-0
+! " did little ||| ! , war ||| 0-0
+! " did little ||| ! , ||| 0-0
+! " did little ||| ! ||| 0-0
+! " did ||| ! , war ebenfalls kein Beitrag ||| 0-0
+! " did ||| ! , war ebenfalls kein ||| 0-0
+! " did ||| ! , war ebenfalls ||| 0-0
+! " did ||| ! , war ||| 0-0
+! " did ||| ! , ||| 0-0
+! " did ||| ! ||| 0-0
+! " replied the President . ||| ! " , antwortete der Präsident . ||| 0-0 1-1 2-3 3-4 4-5 5-6
+! " replied the President ||| ! " , antwortete der Präsident ||| 0-0 1-1 2-3 3-4 4-5
+! " replied the ||| ! " , antwortete der ||| 0-0 1-1 2-3 3-4
+! " replied ||| ! " , antwortete ||| 0-0 1-1 2-3
+! " summoned all ||| auf sein ||| 0-1
+! " summoned all ||| sein ||| 0-0
+! " summoned ||| auf sein ||| 0-1
+! " summoned ||| sein ||| 0-0
+! " ||| ! " , ||| 0-0 1-1
+! " ||| ! " , ||| 0-0 1-1
+! " ||| ! " , ||| 0-0 1-1
+! " ||| ! " ? ||| 0-0 1-1 1-2
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! , war ebenfalls kein Beitrag ||| 0-0
+! " ||| ! , war ebenfalls kein ||| 0-0
+! " ||| ! , war ebenfalls ||| 0-0
+! " ||| ! , war ||| 0-0
+! " ||| ! , ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0 1-0
+! " ||| Staatsflagge " ||| 0-0 1-1
+! " ||| auf sein ||| 0-1
+! " ||| sein ||| 0-0
+! " ||| serviert ! " ||| 0-1 1-2
+! " ||| vermag ! " , ||| 0-1 1-2
+! " ||| vermag ! " ||| 0-1 1-2
+! ' ' I know , ||| , ||| 5-0
+! ' ' really ? ' ||| ! " ||| 0-0 1-1 2-1 3-0 4-0 5-1
+! ' ) We ||| ! " ) Heute ||| 0-0 1-1 2-2 3-3
+! ' ) said that the ||| ! " ) sagte er , die ||| 0-0 1-1 2-2 3-3 4-5 5-6
+! ' ) said that ||| ! " ) sagte er , ||| 0-0 1-1 2-2 3-3 4-5
+! ' ) said ||| ! " ) sagte er ||| 0-0 1-1 2-2 3-3
+! ' ) said ||| ! " ) sagte ||| 0-0 1-1 2-2 3-3
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' ) ||| ! " ) ||| 0-0 1-1 2-2
+! ' , Parliament has already ||| ! " hat das Parlament bereits ||| 0-0 1-1 2-2 3-3 3-4 4-5 5-5
+! ' , Parliament ||| ! " hat das Parlament ||| 0-0 1-1 2-2 3-3 3-4
+! ' , and those ||| ! " gehört , und denen ||| 0-0 1-1 2-3 3-4 4-5
+! ' , and to Mrs Harms ||| ! " oder zu Kollegin Harms ||| 0-0 1-1 3-2 4-3 5-4 6-5
+! ' , and to Mrs ||| ! " oder zu Kollegin ||| 0-0 1-1 3-2 4-3 5-4
+! ' , and to ||| ! " oder zu ||| 0-0 1-1 3-2 4-3
+! ' , and ||| ! " gehört , und ||| 0-0 1-1 2-3 3-4
+! ' , and ||| ! " oder ||| 0-0 1-1 3-2
+! ' , and ||| ! ' ||| 0-0 1-1 2-0
+! ' , but so that they ||| ! " , sondern damit es ||| 0-0 1-1 2-2 3-3 4-4 5-4 6-5
+! ' , but so that ||| ! " , sondern damit ||| 0-0 1-1 2-2 3-3 4-4 5-4
+! ' , but that 2.7 % ||| aber diese 2,7 % ||| 3-0 4-1 5-2 6-3
+! ' , but that 2.7 ||| aber diese 2,7 ||| 3-0 4-1 5-2
+! ' , but that ||| aber diese ||| 3-0 4-1
+! ' , but there are widely ||| ! ' . aber dort gibt ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' , but there are ||| ! ' . aber dort gibt ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' , but there ||| ! ' . aber dort ||| 0-0 1-1 2-2 3-3 4-4
+! ' , but ||| ! " , sondern ||| 0-0 1-1 2-2 3-3
+! ' , but ||| ! ' . aber ||| 0-0 1-1 2-2 3-3
+! ' , but ||| aber ||| 3-0
+! ' , that ||| , ||| 2-0
+! ' , that ||| Ziel kommen , ||| 2-2
+! ' , that ||| kommen , ||| 2-1
+! ' , that ||| zum Ziel kommen , ||| 2-3
+! ' , which ||| ! " , der ||| 0-0 1-1 2-2 3-3
+! ' , ||| ! " , ||| 0-0 1-1 2-2
+! ' , ||| ! " , ||| 0-0 1-1 2-2
+! ' , ||| ! " gehört , ||| 0-0 1-1 2-3
+! ' , ||| ! " hat ||| 0-0 1-1 2-2
+! ' , ||| ! " ||| 0-0 1-1
+! ' , ||| ! ' , womit ||| 0-0 1-1 2-2
+! ' , ||| ! ' , ||| 0-0 1-1 2-2
+! ' , ||| ! ' . ||| 0-0 1-1 2-2
+! ' , ||| ! ' Stand , ||| 0-0 1-1 2-3
+! ' , ||| ! ' ||| 0-0 1-1 2-0
+! ' , ||| , ||| 2-0
+! ' , ||| Ziel kommen , ||| 2-2
+! ' , ||| kommen , ||| 2-1
+! ' , ||| zum Ziel kommen , ||| 2-3
+! ' - and what is more ||| ! " - und dies übrigens ||| 0-0 1-1 2-2 3-3 4-4 5-4 6-5
+! ' - and what is ||| ! " - und dies ||| 0-0 1-1 2-2 3-3 4-4 5-4
+! ' - and ||| ! " - und ||| 0-0 1-1 2-2 3-3
+! ' - ||| ! " - ||| 0-0 1-1 2-2
+! ' . nevertheless , ||| ! “ ||| 0-0 1-1
+! ' . nevertheless ||| ! “ ||| 0-0 1-1
+! ' . ||| ! " . ||| 0-0 1-1 2-2
+! ' . ||| ! " . ||| 0-0 1-1 2-2
+! ' . ||| ! " . ||| 0-0 1-1 2-2
+! ' . ||| ! " . ||| 0-0 1-1 2-2
+! ' . ||| ! " ||| 0-0 1-1
+! ' . ||| ! " ||| 0-0 1-1
+! ' . ||| ! " ||| 0-0 1-1 2-0
+! ' . ||| ! " ||| 0-0 1-1 2-0
+! ' . ||| ! ' ||| 0-0 1-1
+! ' . ||| ! ||| 0-0
+! ' . ||| ! “ ||| 0-0 1-1
+! ' ; Spinelli , who ||| ! " . und Spinelli , der ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-5 5-6
+! ' ; Spinelli ||| ! " . und Spinelli ||| 0-0 1-1 2-2 2-3 3-4
+! ' ; ||| ! " . und ||| 0-0 1-1 2-2 2-3
+! ' ? ||| ! " ? ||| 0-0 1-1 2-2
+! ' I replied ||| ! " , gab ich zur Antwort ||| 0-0 1-1 2-4 3-3 3-5 3-6
+! ' ] ||| Parlaments ||| 0-0
+! ' and Nice II ? ||| ! " und Nizza II ? ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' and Nice II ||| ! " und Nizza II ||| 0-0 1-1 2-2 3-3 4-4
+! ' and Nice ||| ! " und Nizza ||| 0-0 1-1 2-2 3-3
+! ' and beat our ||| ! " und schlagen uns an die ||| 0-0 1-1 2-2 3-3 4-4
+! ' and beat our ||| ! " und schlagen uns an ||| 0-0 1-1 2-2 3-3 4-4
+! ' and beat our ||| ! " und schlagen uns ||| 0-0 1-1 2-2 3-3 4-4
+! ' and beat ||| ! " und schlagen ||| 0-0 1-1 2-2 3-3
+! ' and then murder ||| ! ' rufen , ||| 0-0 1-1 2-3
+! ' and then ||| ! ' rufen , ||| 0-0 1-1 2-3
+! ' and ||| ! " , und fuhr fort , ||| 0-0 1-1 2-3
+! ' and ||| ! " , und fuhr fort ||| 0-0 1-1 2-3
+! ' and ||| ! " , und fuhr ||| 0-0 1-1 2-3
+! ' and ||| ! " , und ||| 0-0 1-1 2-3
+! ' and ||| ! " und ||| 0-0 1-1 2-2
+! ' and ||| ! " und ||| 0-0 1-1 2-2
+! ' and ||| ! ' rufen , ||| 0-0 1-1 2-3
+! ' but ||| " ! aber ||| 0-1 1-0 2-2
+! ' exactly ||| ! " ) Sie haben vollkommen recht ||| 0-0 1-1 2-5
+! ' exactly ||| ! " ) Sie haben vollkommen ||| 0-0 1-1 2-5
+! ' from members of the IND ||| ! " rufe vonseiten der IND ||| 0-0 1-1 2-3 5-4 6-5
+! ' from members of the ||| ! " rufe vonseiten der ||| 0-0 1-1 2-3 5-4
+! ' from members of ||| ! " rufe vonseiten ||| 0-0 1-1 2-3
+! ' from members ||| ! " rufe vonseiten ||| 0-0 1-1 2-3
+! ' from ||| ! " rufe vonseiten ||| 0-0 1-1 2-3
+! ' is the Presidency-in-Office ||| ! “ Ist sich der amtierende Ratspräsident ||| 0-0 1-1 2-2 2-3 3-4 4-5 4-6
+! ' is the message ||| ! ' , diese Aufforderung ||| 0-0 1-1 3-3 4-4
+! ' is the ||| ! ' , diese ||| 0-0 1-1 3-3
+! ' is the ||| ! “ Ist sich der ||| 0-0 1-1 2-2 2-3 3-4
+! ' is ||| ! ' , ||| 0-0 1-1
+! ' is ||| ! ' ||| 0-0 1-1
+! ' is ||| ! “ Ist sich ||| 0-0 1-1 2-2 2-3
+! ' or alternatively ||| beglückwünschen Sie dazu ! " oder ||| 0-3 1-4 2-5 3-0
+! ' or alternatively ||| wir beglückwünschen Sie dazu ! " oder ||| 0-4 1-5 2-6 3-1
+! ' or ||| ! " oder ||| 0-0 1-1 2-2
+! ' or ||| Sie dazu ! " oder ||| 0-2 1-3 2-4
+! ' or ||| dazu ! " oder ||| 0-1 1-2 2-3
+! ' say the federalists , and ||| ! " rufen die Föderalisten , und ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! ' say the federalists , ||| ! " rufen die Föderalisten , ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' say the federalists ||| ! " rufen die Föderalisten ||| 0-0 1-1 2-2 3-3 4-4
+! ' say the ||| ! " rufen die ||| 0-0 1-1 2-2 3-3
+! ' say ||| ! " rufen ||| 0-0 1-1 2-2
+! ' she shrieked , ' not ||| " , schrie sie , " nicht ||| 0-2 1-0 2-3 4-4 5-5 6-6
+! ' she shrieked , ' ||| " , schrie sie , " ||| 0-2 1-0 2-3 4-4 5-5
+! ' she shrieked , ||| " , schrie sie , ||| 0-2 1-0 2-3 4-4
+! ' she shrieked ||| " , schrie sie ||| 0-2 1-0 2-3
+! ' she ||| " , schrie sie ||| 0-2 1-0 2-3
+! ' to all forms of protectionism ||| ! " zu allen Formen des Protektionismus ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! ' to all forms of ||| ! " zu allen Formen des ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' to all forms ||| ! " zu allen Formen ||| 0-0 1-1 2-2 3-3 4-4
+! ' to all ||| ! " zu allen ||| 0-0 1-1 2-2 3-3
+! ' to openness and competition ||| ! " zur Offenheit und zum Wettbewerb ||| 0-0 1-1 2-2 3-3 4-4 5-6
+! ' to openness and ||| ! " zur Offenheit und zum ||| 0-0 1-1 2-2 3-3 4-4
+! ' to openness and ||| ! " zur Offenheit und ||| 0-0 1-1 2-2 3-3 4-4
+! ' to openness ||| ! " zur Offenheit ||| 0-0 1-1 2-2 3-3
+! ' to ||| ! " zu ||| 0-0 1-1 2-2
+! ' to ||| ! " zur ||| 0-0 1-1 2-2
+! ' was what the communities ||| " war auch der Ruf der Menschen ||| 1-0 2-1 3-3 4-5 5-6
+! ' was what the ||| " war auch der Ruf der ||| 1-0 2-1 3-3 4-5
+! ' was what ||| " war auch der Ruf ||| 1-0 2-1 3-3
+! ' was what ||| " war auch der ||| 1-0 2-1 3-3
+! ' was ||| " war auch ||| 1-0 2-1
+! ' was ||| " war ||| 1-0 2-1
+! ' ||| ! " ( Europa war gut zu ||| 0-0 1-1 1-2
+! ' ||| ! " ( Europa war gut ||| 0-0 1-1 1-2
+! ' ||| ! " ( Europa war ||| 0-0 1-1 1-2
+! ' ||| ! " ( Europa ||| 0-0 1-1 1-2
+! ' ||| ! " ( ||| 0-0 1-1 1-2
+! ' ||| ! " ) Sie haben ||| 0-0 1-1
+! ' ||| ! " ) Sie ||| 0-0 1-1
+! ' ||| ! " ) ||| 0-0 1-1
+! ' ||| ! " , ||| 0-0 1-1
+! ' ||| ! " , ||| 0-0 1-1
+! ' ||| ! " , ||| 0-0 1-1
+! ' ||| ! " . ||| 0-0 1-1
+! ' ||| ! " . ||| 0-0 1-1
+! ' ||| ! " . ||| 0-0 1-1
+! ' ||| ! " . ||| 0-0 1-1
+! ' ||| ! " . ||| 0-0 1-1 1-2
+! ' ||| ! " . ||| 0-0 1-1 1-2
+! ' ||| ! " . ||| 0-0 1-1 1-2
+! ' ||| ! " . ||| 0-0 1-1 1-2
+! ' ||| ! " . ||| 0-0 1-1 1-2
+! ' ||| ! " begrüßt ||| 0-0 1-1
+! ' ||| ! " gehört ||| 0-0 1-1
+! ' ||| ! " rufe ||| 0-0 1-1
+! ' ||| ! " steht . ||| 0-0 1-1
+! ' ||| ! " steht ||| 0-0 1-1
+! ' ||| ! " vereinen ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! " ||| 0-0 1-1
+! ' ||| ! ' , ||| 0-0 1-1
+! ' ||| ! ' - wir lassen uns ||| 0-0 1-1
+! ' ||| ! ' - wir lassen ||| 0-0 1-1
+! ' ||| ! ' - wir ||| 0-0 1-1
+! ' ||| ! ' - ||| 0-0 1-1
+! ' ||| ! ' . ||| 0-0 1-1 1-2
+! ' ||| ! ' Stand ||| 0-0 1-1
+! ' ||| ! ' rufen ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0
+! ' ||| ! ||| 0-0 1-0
+! ' ||| ! ||| 0-0 1-0
+! ' ||| ! “ ||| 0-0 1-1
+! ' ||| ! “ ||| 0-0 1-1
+! ' ||| ! “ ||| 0-0 1-1
+! ' ||| " ! ||| 0-1 1-0
+! ' ||| " ! ||| 0-1 1-0
+! ' ||| " ! ||| 0-1 1-0
+! ' ||| " ! ||| 0-1 1-0
+! ' ||| " , schrie ||| 0-2 1-0
+! ' ||| " . ||| 0-1 1-0
+! ' ||| " ||| 1-0
+! ' ||| ' ||| 1-0
+! ' ||| , Rassismus ' ||| 1-2
+! ' ||| . " ||| 0-0 1-1
+! ' ||| . " ||| 0-0 1-1
+! ' ||| . " ||| 0-0 1-1
+! ' ||| . " ||| 0-0 1-1
+! ' ||| . " ||| 0-0 1-1
+! ' ||| . ' ||| 0-0 1-1
+! ' ||| . ||| 0-0
+! ' ||| . ||| 0-0
+! ' ||| : " ||| 1-0 1-1
+! ' ||| ? ' ||| 0-0 1-1
+! ' ||| Ihr müßt ||| 0-1
+! ' ||| Parlaments ||| 0-0
+! ' ||| Rassismus ' ||| 1-1
+! ' ||| Sie dazu ! " ||| 0-2 1-3
+! ' ||| Sonnenergie ! ||| 0-1 1-0
+! ' ||| aufgreifen . ||| 0-1
+! ' ||| befassen ! ' ||| 0-1 1-2
+! ' ||| das tun ! " ||| 0-2 1-3
+! ' ||| dazu ! " ||| 0-1 1-2
+! ' ||| den ||| 1-0
+! ' ||| erschaffen ! ' ||| 0-1 1-2
+! ' ||| gehabt ! ' ||| 0-1 1-2
+! ' ||| geschehen ! " ||| 0-1 1-2
+! ' ||| müßt ||| 0-0
+! ' ||| stellen ! ||| 0-1
+! ' ||| tun ! " ||| 0-1 1-2
+! ' ||| verabschieden ! ||| 0-1
+! ' ||| zu erschaffen ! ' ||| 0-2 1-3
+! ) , has ||| ! ) bezeichnet wird , hat ||| 0-0 1-1 2-4 3-5
+! ) , or rather their egonet ||| ! ) oder ihr Egonet ||| 0-0 1-1 3-2 4-4 5-3 6-4
+! ) , or ||| ! ) oder ||| 0-0 1-1 3-2
+! ) , research , competitiveness and ||| ! ) , Forschung , Wettbewerbsfähigkeit und ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! ) , research , competitiveness ||| ! ) , Forschung , Wettbewerbsfähigkeit ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ) , research , ||| ! ) , Forschung , ||| 0-0 1-1 2-2 3-3 4-4
+! ) , research ||| ! ) , Forschung ||| 0-0 1-1 2-2 3-3
+! ) , the grubbing-up of ||| ! ) , mit der Rodung von ||| 0-0 1-1 2-2 3-4 4-5 5-6
+! ) , the grubbing-up ||| ! ) , mit der Rodung ||| 0-0 1-1 2-2 3-4 4-5
+! ) , the ||| ! ) , mit der ||| 0-0 1-1 2-2 3-4
+! ) , we see ||| ! - , ist zu ersehen ||| 0-0 1-1 2-2 3-4 4-5
+! ) , we ||| ! - , ist zu ||| 0-0 1-1 2-2 3-4
+! ) , while over 100 ||| ! ) , während über 100 ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ) , while over 100 ||| aus ! ) , während über 100 ||| 0-1 1-2 2-3 3-4 4-5 5-6
+! ) , while over ||| ! ) , während über ||| 0-0 1-1 2-2 3-3 4-4
+! ) , while over ||| aus ! ) , während über ||| 0-1 1-2 2-3 3-4 4-5
+! ) , while over ||| leer aus ! ) , während über ||| 0-2 1-3 2-4 3-5 4-6
+! ) , while ||| ! ) , während ||| 0-0 1-1 2-2 3-3
+! ) , while ||| aus ! ) , während ||| 0-1 1-2 2-3 3-4
+! ) , while ||| leer aus ! ) , während ||| 0-2 1-3 2-4 3-5
+! ) , while ||| völlig leer aus ! ) , während ||| 0-3 1-4 2-5 3-6
+! ) , ||| ! ) , mit ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) bezeichnet wird , ||| 0-0 1-1 2-4
+! ) , ||| ! ) ||| 0-0 1-1
+! ) , ||| ! - , ist ||| 0-0 1-1 2-2
+! ) , ||| ! - , ||| 0-0 1-1 2-2
+! ) , ||| aus ! ) , ||| 0-1 1-2 2-3
+! ) , ||| ging völlig leer aus ! ) , ||| 0-4 1-5 2-6
+! ) , ||| leer aus ! ) , ||| 0-2 1-3 2-4
+! ) , ||| völlig leer aus ! ) , ||| 0-3 1-4 2-5
+! ) - in fact neither is ||| durch ||| 3-0
+! ) - in fact neither ||| durch ||| 3-0
+! ) - in fact ||| durch ||| 3-0
+! ) - in ||| durch ||| 3-0
+! ) . ||| ! ) . ||| 0-0 1-1 2-2
+! ) . ||| ! ) . ||| 0-0 1-1 2-2
+! ) amending budget in the current ||| Berichtigungshaushalts im laufenden ||| 2-0 3-0 4-1 5-1 6-2
+! ) amending budget in the ||| Berichtigungshaushalts im ||| 2-0 3-0 4-1 5-1
+! ) amending budget ||| Berichtigungshaushalts ||| 2-0 3-0
+! ) and , finally , ||| ! ) , und schließlich ||| 0-0 1-1 2-3 3-2 4-4 5-4
+! ) and , ||| ! ) , und ||| 0-0 1-1 2-3 3-2
+! ) and create national financial markets ||| ! ) und die Schaffung nationaler Finanzmärkte ||| 0-0 1-1 2-2 3-4 4-5 5-6 6-6
+! ) and create national ||| ! ) und die Schaffung nationaler ||| 0-0 1-1 2-2 3-4 4-5
+! ) and create ||| ! ) und die Schaffung ||| 0-0 1-1 2-2 3-4
+! ) and often unreadable ||| ! ) und häufig unverständliche ||| 0-0 1-1 2-2 3-3 4-4
+! ) and often unreadable ||| ankündigen ! ) und häufig unverständliche ||| 0-1 1-2 2-3 3-4 4-5
+! ) and often unreadable – ||| ! ) und häufig unverständliche ||| 0-0 1-1 2-2 3-3 4-4
+! ) and often unreadable – ||| ankündigen ! ) und häufig unverständliche ||| 0-1 1-2 2-3 3-4 4-5
+! ) and often ||| ! ) und häufig ||| 0-0 1-1 2-2 3-3
+! ) and often ||| ankündigen ! ) und häufig ||| 0-1 1-2 2-3 3-4
+! ) and ||| ! ) und die ||| 0-0 1-1 2-2
+! ) and ||| ! ) und ||| 0-0 1-1 2-2
+! ) and ||| ! ) und ||| 0-0 1-1 2-2
+! ) and ||| ankündigen ! ) und ||| 0-1 1-2 2-3
+! ) before they apply the ||| ! ) für die Umsetzung der ||| 0-0 1-1 3-3 4-4 5-5
+! ) before they apply ||| ! ) für die Umsetzung ||| 0-0 1-1 3-3 4-4
+! ) before they ||| ! ) für die ||| 0-0 1-1 3-3
+! ) before ||| ! ) für ||| 0-0 1-1
+! ) before ||| ! ) ||| 0-0 1-1
+! ) can ||| ! ||| 0-0 1-0
+! ) cannot be used ( misused ||| ! ) dürfen nicht verwendet ( missbraucht ||| 0-0 1-1 2-2 2-3 3-3 4-4 5-5 6-6
+! ) cannot be used ( ||| ! ) dürfen nicht verwendet ( ||| 0-0 1-1 2-2 2-3 3-3 4-4 5-5
+! ) cannot be used ||| ! ) dürfen nicht verwendet ||| 0-0 1-1 2-2 2-3 3-3 4-4
+! ) cannot be ||| ! ) dürfen nicht ||| 0-0 1-1 2-2 2-3 3-3
+! ) high level of need ||| ! ) großen Not ||| 0-0 1-1 2-2 3-3 5-3
+! ) high ||| ! ) großen ||| 0-0 1-1 2-2
+! ) holocaust of the Jews ||| ) fiktiven Holocaust an den Juden im ||| 1-0 2-2 3-3 4-4 5-5
+! ) holocaust of the Jews ||| ) fiktiven Holocaust an den Juden ||| 1-0 2-2 3-3 4-4 5-5
+! ) holocaust of the ||| ) fiktiven Holocaust an den ||| 1-0 2-2 3-3 4-4
+! ) holocaust of ||| ) fiktiven Holocaust an ||| 1-0 2-2 3-3
+! ) holocaust ||| ) fiktiven Holocaust ||| 1-0 2-2
+! ) in the event that we ||| ! ) für den Fall der ||| 0-0 1-1 2-2 3-3 4-4 6-5
+! ) in the event that ||| ! ) für den Fall ||| 0-0 1-1 2-2 3-3 4-4
+! ) in the event ||| ! ) für den Fall ||| 0-0 1-1 2-2 3-3 4-4
+! ) in the ||| ! ) für den ||| 0-0 1-1 2-2 3-3
+! ) in ||| ! ) für ||| 0-0 1-1 2-2
+! ) just for ||| ! ) allein für ||| 0-0 1-1 2-2 3-3
+! ) just ||| ! ) allein ||| 0-0 1-1 2-2
+! ) market economy ||| ! ) Marktwirtschaft , die von einem ||| 0-0 1-1 2-2 3-2
+! ) market economy ||| ! ) Marktwirtschaft , die von ||| 0-0 1-1 2-2 3-2
+! ) market economy ||| ! ) Marktwirtschaft , die ||| 0-0 1-1 2-2 3-2
+! ) market economy ||| ! ) Marktwirtschaft , ||| 0-0 1-1 2-2 3-2
+! ) market economy ||| ! ) Marktwirtschaft ||| 0-0 1-1 2-2 3-2
+! ) nuclear power stations built ||| ! - Kernkraftwerke errichtet werden ||| 0-0 1-1 2-2 3-2 4-2 5-3
+! ) nuclear power stations built ||| ! - Kernkraftwerke errichtet ||| 0-0 1-1 2-2 3-2 4-2 5-3
+! ) nuclear power stations built ||| sichere ! - Kernkraftwerke errichtet werden ||| 0-1 1-2 2-3 3-3 4-3 5-4
+! ) nuclear power stations built ||| sichere ! - Kernkraftwerke errichtet ||| 0-1 1-2 2-3 3-3 4-3 5-4
+! ) nuclear power stations ||| ! - Kernkraftwerke ||| 0-0 1-1 2-2 3-2 4-2
+! ) nuclear power stations ||| sichere ! - Kernkraftwerke ||| 0-1 1-2 2-3 3-3 4-3
+! ) on the amendment of ||| ! ) über die Änderung der ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ) on the amendment ||| ! ) über die Änderung ||| 0-0 1-1 2-2 3-3 4-4
+! ) on the ||| ! ) über die ||| 0-0 1-1 2-2 3-3
+! ) on ||| ! ) über ||| 0-0 1-1 2-2
+! ) to be wise enough ||| klug . ||| 0-1 4-0 5-0
+! ) to be ||| . ||| 0-0
+! ) to ||| . ||| 0-0
+! ) which unemployment benefit ||| ! ) , die die Arbeitslosenunterstützung ||| 0-0 1-1 2-3 2-4 3-4 3-5 4-5
+! ) ||| ! ! ! ) ||| 0-0 0-1 0-2 1-3
+! ) ||| ! ) , geht . ||| 0-0 1-1
+! ) ||| ! ) , geht ||| 0-0 1-1
+! ) ||| ! ) , ||| 0-0 1-1
+! ) ||| ! ) , ||| 0-0 1-1
+! ) ||| ! ) . ||| 0-0 1-1 1-2
+! ) ||| ! ) bezeichnet wird ||| 0-0 1-1
+! ) ||| ! ) bezeichnet ||| 0-0 1-1
+! ) ||| ! ) für ||| 0-0 1-1
+! ) ||| ! ) vertritt ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! - ||| 0-0 1-1
+! ) ||| ! - ||| 0-0 1-1
+! ) ||| ! ||| 0-0 1-0
+! ) ||| ) fiktiven ||| 1-0
+! ) ||| ) ||| 1-0
+! ) ||| , ging völlig leer aus ! ) ||| 0-5 1-6
+! ) ||| - ||| 1-0
+! ) ||| . ||| 0-0
+! ) ||| . ||| 0-0
+! ) ||| ? ) ||| 0-0 1-1
+! ) ||| ankündigen ! ) ||| 0-1 1-2
+! ) ||| aus ! ) ||| 0-1 1-2
+! ) ||| ging völlig leer aus ! ) ||| 0-4 1-5
+! ) ||| leer aus ! ) ||| 0-2 1-3
+! ) ||| sichere ! - ||| 0-1 1-2
+! ) ||| völlig leer aus ! ) ||| 0-3 1-4
+! , he was entirely unaware ||| , er hatte überhaupt nicht zur Kenntnis ||| 1-0 2-1 3-2 5-4
+! , he was entirely unaware ||| , er hatte überhaupt nicht zur ||| 1-0 2-1 3-2 5-4
+! , he was entirely unaware ||| , er hatte überhaupt nicht ||| 1-0 2-1 3-2 5-4
+! , he was entirely ||| , er hatte ||| 1-0 2-1 3-2
+! , he was entirely ||| , er hatte überhaupt ||| 1-0 2-1 3-2
+! , he was ||| , er hatte ||| 1-0 2-1 3-2
+! , he was ||| , er hatte überhaupt ||| 1-0 2-1 3-2
+! , he ||| , er ||| 1-0 2-1
+! , the Sakharov Prize winner in ||| ! , dem Gewinner des Sacharow-Preises in ||| 0-0 1-1 2-2 3-5 4-4 4-5 5-3 6-6
+! , the Sakharov Prize winner ||| ! , dem Gewinner des Sacharow-Preises ||| 0-0 1-1 2-2 3-5 4-4 4-5 5-3
+! , the ||| ! , dem ||| 0-0 1-1 2-2
+! , ||| ! , ||| 0-0 1-1
+! , ||| , ||| 1-0
+! - ' Enough is enough ' ||| ! - ' Es reicht ' ||| 0-0 1-1 2-2 3-3 4-4 5-4 6-5
+! - ' Enough is enough ||| ! - ' Es reicht ||| 0-0 1-1 2-2 3-3 4-4 5-4
+! - ' Enough ||| ! - ' Es ||| 0-0 1-1 2-2 3-3
+! - ' ||| ! - ' ||| 0-0 1-1 2-2
+! - I can also tell you ||| ! ich kann auch mitteilen ||| 0-0 1-0 2-1 3-2 4-3 5-4 6-4
+! - I can also ||| ! ich kann auch ||| 0-0 1-0 2-1 3-2 4-3
+! - I can ||| ! ich kann ||| 0-0 1-0 2-1 3-2
+! - I do not see ||| ja auch tun ! warum sollte ||| 0-3 1-0 1-3 2-1 2-4 3-2 4-5
+! - I do not ||| ja auch tun ! warum sollte ||| 0-3 1-0 1-3 2-1 2-4 3-2 4-5
+! - I do ||| ! - ||| 0-0 1-1
+! - I do ||| ja auch tun ! warum ||| 0-3 1-0 1-3 2-1 2-4 3-2
+! - I recognise ||| ! - räume ich ein , ||| 0-0 1-1 2-3 3-2 3-4
+! - I recognise ||| ! - räume ich ein ||| 0-0 1-1 2-3 3-2 3-4
+! - I would like to ||| ! - , möchte ich meinerseits ||| 0-0 1-1 2-4 3-3 4-3 5-3
+! - I would like to ||| ! - , möchte ich ||| 0-0 1-1 2-4 3-3 4-3 5-3
+! - I would say ||| ! - sage ich ||| 0-0 1-1 2-3 3-2 4-2
+! - I ||| ! - ||| 0-0 1-1
+! - I ||| ! ich ||| 0-0 1-0 2-1
+! - Madam President , I was ||| ! - Frau Präsidentin , ich wurde ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! - Madam President , I ||| ! - Frau Präsidentin , ich ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - Madam President , ||| ! - Frau Präsidentin , ||| 0-0 1-1 2-2 3-3 4-4
+! - Madam President ||| ! - Frau Präsidentin ||| 0-0 1-1 2-2 3-3
+! - Madam ||| ! - Frau ||| 0-0 1-1 2-2
+! - a statute with a capital ||| ! ein Statut mit einem großen ||| 0-0 1-0 2-1 3-2 4-3 5-4 6-5
+! - a statute with a ||| ! ein Statut mit einem ||| 0-0 1-0 2-1 3-2 4-3 5-4
+! - a statute with ||| ! ein Statut mit ||| 0-0 1-0 2-1 3-2 4-3
+! - a statute ||| ! ein Statut ||| 0-0 1-0 2-1 3-2
+! - a ||| ! ein ||| 0-0 1-0 2-1
+! - all , ||| ! - quer durch alle Fraktionen , ||| 0-0 1-1 2-4 3-6
+! - all ||| ! - quer durch alle Fraktionen ||| 0-0 1-1 2-4
+! - all ||| ! - quer durch alle ||| 0-0 1-1 2-4
+! - and borders on ideological manipulation ||| ! - und ideologischer Manipulation ||| 0-0 1-1 2-2 3-3 4-3 5-3 6-4
+! - and borders on ideological ||| ! - und ideologischer ||| 0-0 1-1 2-2 3-3 4-3 5-3
+! - and we saw the first ||| ! - und zum ersten ||| 0-0 1-1 2-2 5-3 6-4
+! - and we saw the ||| ! - und zum ||| 0-0 1-1 2-2 5-3
+! - and we saw ||| ! - und ||| 0-0 1-1 2-2
+! - and we ||| ! - und ||| 0-0 1-1 2-2
+! - and ||| ! - und ||| 0-0 1-1 2-2
+! - and ||| ! - und ||| 0-0 1-1 2-2
+! - as a reaffirmation of ||| ! - um zu bekräftigen , daß ||| 0-0 1-1 2-2 3-2 4-4
+! - as a reaffirmation of ||| ! - um zu bekräftigen , ||| 0-0 1-1 2-2 3-2 4-4
+! - as a reaffirmation of ||| ! - um zu bekräftigen ||| 0-0 1-1 2-2 3-2 4-4
+! - as a reaffirmation ||| ! - um zu bekräftigen , daß ||| 0-0 1-1 2-2 3-2 4-4
+! - as a reaffirmation ||| ! - um zu bekräftigen , ||| 0-0 1-1 2-2 3-2 4-4
+! - as a reaffirmation ||| ! - um zu bekräftigen ||| 0-0 1-1 2-2 3-2 4-4
+! - as a ||| ! - um zu ||| 0-0 1-1 2-2 3-2
+! - as a ||| ! - um ||| 0-0 1-1 2-2 3-2
+! - but , ||| ! aber ||| 0-0 1-0 2-1 3-0
+! - but the British Government ||| ! - , doch die britische Regierung ||| 0-0 1-1 2-3 3-4 4-5 5-6
+! - but the British ||| ! - , doch die britische ||| 0-0 1-1 2-3 3-4 4-5
+! - but the ||| ! - , doch die ||| 0-0 1-1 2-3 3-4
+! - but ||| ! - , doch ||| 0-0 1-1 2-3
+! - in favour ||| ! - , von dem ||| 0-0 1-1 2-3
+! - in favour ||| ! - , von ||| 0-0 1-1 2-3
+! - in ||| ! - , von dem ||| 0-0 1-1 2-3
+! - in ||| ! - , von ||| 0-0 1-1 2-3
+! - is for the troops ||| . ||| 0-0
+! - is for the ||| . ||| 0-0
+! - is for ||| . ||| 0-0
+! - is ||| . ||| 0-0
+! - just as planned and improved ||| ! ebenso wie die anvisierte bessere ||| 0-0 1-1 2-1 3-2 4-4 6-5
+! - just as planned and ||| ! ebenso wie die anvisierte ||| 0-0 1-1 2-1 3-2 4-4
+! - just as planned ||| ! ebenso wie die anvisierte ||| 0-0 1-1 2-1 3-2 4-4
+! - just as ||| ! ebenso wie die ||| 0-0 1-1 2-1 3-2
+! - just as ||| ! ebenso wie ||| 0-0 1-1 2-1 3-2
+! - just ||| ! ebenso ||| 0-0 1-1 2-1
+! - of operational expenses are managed ||| ! - der operativen Ausgaben werden ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - of operational expenses are managed ||| Herren ! - der operativen Ausgaben werden ||| 0-1 1-2 2-3 3-4 4-5 5-6
+! - of operational expenses are ||| ! - der operativen Ausgaben werden ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - of operational expenses are ||| Herren ! - der operativen Ausgaben werden ||| 0-1 1-2 2-3 3-4 4-5 5-6
+! - of operational expenses ||| ! - der operativen Ausgaben ||| 0-0 1-1 2-2 3-3 4-4
+! - of operational expenses ||| Herren ! - der operativen Ausgaben ||| 0-1 1-2 2-3 3-4 4-5
+! - of operational expenses ||| und Herren ! - der operativen Ausgaben ||| 0-2 1-3 2-4 3-5 4-6
+! - of operational ||| ! - der operativen ||| 0-0 1-1 2-2 3-3
+! - of operational ||| Damen und Herren ! - der operativen ||| 0-3 1-4 2-5 3-6
+! - of operational ||| Herren ! - der operativen ||| 0-1 1-2 2-3 3-4
+! - of operational ||| und Herren ! - der operativen ||| 0-2 1-3 2-4 3-5
+! - of referendums and popular initiatives ||| ! - Referenden und Volksinitiativen zu stellen ||| 0-0 1-1 3-2 4-3 5-4 6-4
+! - of referendums and popular initiatives ||| ! - Referenden und Volksinitiativen zu ||| 0-0 1-1 3-2 4-3 5-4 6-4
+! - of referendums and popular initiatives ||| ! - Referenden und Volksinitiativen ||| 0-0 1-1 3-2 4-3 5-4 6-4
+! - of referendums and ||| ! - Referenden und ||| 0-0 1-1 3-2 4-3
+! - of referendums ||| ! - Referenden ||| 0-0 1-1 3-2
+! - of the energy before ||| ! - der Energie vergeudet , bevor ||| 0-0 1-1 2-2 3-2 4-3 5-6
+! - of the energy ||| ! - der Energie vergeudet , ||| 0-0 1-1 2-2 3-2 4-3
+! - of the energy ||| ! - der Energie vergeudet ||| 0-0 1-1 2-2 3-2 4-3
+! - of the energy ||| ! - der Energie ||| 0-0 1-1 2-2 3-2 4-3
+! - of the ||| ! - der ||| 0-0 1-1 2-2 3-2
+! - of ||| ! - der ||| 0-0 1-1 2-2
+! - of ||| ! - ||| 0-0 1-1
+! - of ||| Damen und Herren ! - der ||| 0-3 1-4 2-5
+! - of ||| Herren ! - der ||| 0-1 1-2 2-3
+! - of ||| Höhepunkt ist - , ||| 0-1 1-2
+! - of ||| Höhepunkt ist - ||| 0-1 1-2
+! - of ||| der Höhepunkt ist - , ||| 0-2 1-3
+! - of ||| der Höhepunkt ist - ||| 0-2 1-3
+! - of ||| ist - , ||| 0-0 1-1
+! - of ||| ist - ||| 0-0 1-1
+! - of ||| meine Damen und Herren ! - der ||| 0-4 1-5 2-6
+! - of ||| und Herren ! - der ||| 0-2 1-3 2-4
+! - or return to ||| ! oder zugunsten der Rückkehr auf den ||| 0-0 1-0 2-1 3-4 4-5 4-6
+! - or return ||| ! oder zugunsten der Rückkehr ||| 0-0 1-0 2-1 3-4
+! - or ||| ! oder zugunsten der ||| 0-0 1-0 2-1
+! - or ||| ! oder zugunsten ||| 0-0 1-0 2-1
+! - or ||| ! oder ||| 0-0 1-0 2-1
+! - proposing powerful measures ||| ! - energische Maßnahmen vorgeschlagen hat , ||| 0-0 1-1 2-4 3-2 4-3
+! - proposing powerful measures ||| ! - energische Maßnahmen vorgeschlagen hat ||| 0-0 1-1 2-4 3-2 4-3
+! - proposing powerful measures ||| ! - energische Maßnahmen vorgeschlagen ||| 0-0 1-1 2-4 3-2 4-3
+! - say ' thank you ||| sage ich Dank ||| 0-0 1-1 2-0 3-0 4-2 5-2
+! - say ' ||| sage ich ||| 0-0 1-1 2-0 3-0
+! - stipulate that access ||| ! - besagen , dass der Zugang ||| 0-0 1-1 2-2 3-3 3-4 4-5 4-6
+! - stipulate that ||| ! - besagen , dass ||| 0-0 1-1 2-2 3-3 3-4
+! - stipulate ||| ! - besagen ||| 0-0 1-1 2-2
+! - that have been treated with ||| ! - , die mit ||| 0-0 1-1 2-2 2-3 3-3 5-4 6-4
+! - that have been treated with ||| Munde zusammen ! - , die mit ||| 0-2 1-3 2-4 2-5 3-5 5-6 6-6
+! - that have been treated with ||| zusammen ! - , die mit ||| 0-1 1-2 2-3 2-4 3-4 5-5 6-5
+! - that have been ||| ! - , die ||| 0-0 1-1 2-2 2-3 3-3
+! - that have been ||| Munde zusammen ! - , die ||| 0-2 1-3 2-4 2-5 3-5
+! - that have been ||| im Munde zusammen ! - , die ||| 0-3 1-4 2-5 2-6 3-6
+! - that have been ||| zusammen ! - , die ||| 0-1 1-2 2-3 2-4 3-4
+! - that have ||| ! - , die ||| 0-0 1-1 2-2 2-3 3-3
+! - that have ||| Munde zusammen ! - , die ||| 0-2 1-3 2-4 2-5 3-5
+! - that have ||| im Munde zusammen ! - , die ||| 0-3 1-4 2-5 2-6 3-6
+! - that have ||| zusammen ! - , die ||| 0-1 1-2 2-3 2-4 3-4
+! - the EU seems ||| ! - scheint die Europäische Union jetzt ||| 0-0 1-1 2-3 3-4 3-5 4-2
+! - the EU seems ||| ! - scheint die Europäische Union ||| 0-0 1-1 2-3 3-4 3-5 4-2
+! - thereby restricting the ||| ! - und begrenzt somit die ||| 0-0 1-1 2-2 2-4 3-3 3-5 4-5
+! - took timely action : it ||| ! - rechtzeitig reagiert : sie hat ||| 0-0 1-1 2-2 3-2 4-3 5-4 6-5
+! - took timely action : it ||| ! - rechtzeitig reagiert : sie ||| 0-0 1-1 2-2 3-2 4-3 5-4 6-5
+! - took timely action : ||| ! - rechtzeitig reagiert : ||| 0-0 1-1 2-2 3-2 4-3 5-4
+! - took timely action ||| ! - rechtzeitig reagiert ||| 0-0 1-1 2-2 3-2 4-3
+! - took timely ||| ! - rechtzeitig ||| 0-0 1-1 2-2 3-2
+! - whereas one ||| ! - , wohingegen man ||| 0-0 1-1 2-3 3-4
+! - whereas ||| ! - , wohingegen ||| 0-0 1-1 2-3
+! - which ||| ! - , die ||| 0-0 1-1 2-2 2-3
+! - while those responsible for the ||| ! - , während diejenigen , die ||| 0-0 1-1 2-3 3-4 4-4 6-6
+! - while those responsible for ||| ! - , während diejenigen , ||| 0-0 1-1 2-3 3-4 4-4
+! - while those responsible for ||| ! - , während diejenigen ||| 0-0 1-1 2-3 3-4 4-4
+! - while those responsible ||| ! - , während diejenigen , ||| 0-0 1-1 2-3 3-4 4-4
+! - while those responsible ||| ! - , während diejenigen ||| 0-0 1-1 2-3 3-4 4-4
+! - while ||| ! - , während ||| 0-0 1-1 2-3
+! - who would ||| - , so frage ||| 0-2 1-0 2-1 3-3
+! - who ||| ! - , die ||| 0-0 1-1 2-2 2-3
+! - who ||| - , so ||| 0-2 1-0 2-1
+! - why the rules on the ||| hinsichtlich des ||| 5-0 6-1
+! - why the rules on ||| hinsichtlich ||| 5-0
+! - will have ||| aufbewahren - müssen ||| 0-0 1-1 3-2
+! - will ||| aufbewahren - ||| 0-0 1-1
+! - ||| ! ) ||| 0-0 1-1
+! - ||| ! - , die ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - , ||| 0-0 1-1
+! - ||| ! - quer durch ||| 0-0 1-1
+! - ||| ! - quer ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! ||| 0-0 1-0
+! - ||| ! ||| 0-0 1-0
+! - ||| ! ||| 0-0 1-0
+! - ||| ! ||| 0-0 1-0
+! - ||| , meine Damen und Herren ! - ||| 0-5 1-6
+! - ||| . ||| 0-0
+! - ||| . ||| 0-0
+! - ||| Damen und Herren ! - ||| 0-3 1-4
+! - ||| Herren ! - ||| 0-1 1-2
+! - ||| Höhepunkt ist - , ||| 0-1 1-2
+! - ||| Höhepunkt ist - ||| 0-1 1-2
+! - ||| Munde zusammen ! - ||| 0-2 1-3
+! - ||| aufbewahren - ||| 0-0 1-1
+! - ||| bleibt - ||| 0-0 1-1
+! - ||| der Höhepunkt ist - , ||| 0-2 1-3
+! - ||| der Höhepunkt ist - ||| 0-2 1-3
+! - ||| im Munde zusammen ! - ||| 0-3 1-4
+! - ||| ist - , ||| 0-0 1-1
+! - ||| ist - ||| 0-0 1-1
+! - ||| meine Damen und Herren ! - ||| 0-4 1-5
+! - ||| und Herren ! - ||| 0-2 1-3
+! - ||| zusammen ! - ||| 0-1 1-2
+! . ||| ! " . ||| 0-0 1-2
+! . ||| ! ||| 0-0 1-0
+! ... ||| ! ... und , hier war ich ||| 0-0 1-1
+! ... ||| ! ... und , hier war ||| 0-0 1-1
+! ... ||| ! ... und , hier ||| 0-0 1-1
+! ... ||| ! ... und , ||| 0-0 1-1
+! ... ||| ! ... und ||| 0-0 1-1
+! ... ||| ! ... ||| 0-0 1-1
+! ... ||| ! ... ||| 0-0 1-1
+! ... ||| ! ... ||| 0-0 1-1
+! ... ||| Ausnahme machen ! ... und , hier ||| 0-2 1-3
+! ... ||| Ausnahme machen ! ... und , ||| 0-2 1-3
+! ... ||| Ausnahme machen ! ... und ||| 0-2 1-3
+! ... ||| Ausnahme machen ! ... ||| 0-2 1-3
+! ... ||| machen ! ... und , hier war ||| 0-1 1-2
+! ... ||| machen ! ... und , hier ||| 0-1 1-2
+! ... ||| machen ! ... und , ||| 0-1 1-2
+! ... ||| machen ! ... und ||| 0-1 1-2
+! ... ||| machen ! ... ||| 0-1 1-2
+! .... ' ||| ! " ||| 0-0 2-1
+! .... ||| ! ||| 0-0
+! 14.5 % is ||| ! 14,5 % Feuchte ist ||| 0-0 1-1 1-3 2-2 3-4
+! 14.5 % ||| ! 14,5 % Feuchte ||| 0-0 1-1 1-3 2-2
+! 173 contract killings since 1990 ||| ! 173 Auftragsmorde seit 1990 ||| 0-0 1-1 2-2 3-2 4-3 5-4
+! 173 contract killings since 1990 – ||| ! 173 Auftragsmorde seit 1990 – ||| 0-0 1-1 2-2 3-2 4-3 5-4 6-5
+! 173 contract killings since ||| ! 173 Auftragsmorde seit ||| 0-0 1-1 2-2 3-2 4-3
+! 173 contract killings ||| ! 173 Auftragsmorde ||| 0-0 1-1 2-2 3-2
+! 173 ||| ! 173 ||| 0-0 1-1
+! 2004 may ||| ! 2004 ||| 0-0 1-1
+! 2004 ||| ! 2004 ||| 0-0 1-1
+! ; and from Angola , Dom ||| ! ; und aus Angola , Dom ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! ; and from Angola , ||| ! ; und aus Angola , ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ; and from Angola ||| ! ; und aus Angola ||| 0-0 1-1 2-2 3-3 4-4
+! ; and from ||| ! ; und aus ||| 0-0 1-1 2-2 3-3
+! ; and ||| ! ; und ||| 0-0 1-1 2-2
+! ; ||| ! ; ||| 0-0 1-1
+! ECU 100 m ||| ! 100 Mio. ECU ||| 0-0 1-3 2-1 3-2
+! ECU 100 m ||| so ! 100 Mio. ECU ||| 0-1 1-4 2-2 3-3
+! I have been ||| wie ich es bereits ||| 0-0 1-1 2-2 3-3
+! I have ||| wie ich es ||| 0-0 1-1 2-2
+! I may not agree with ||| ich nicht einer Meinung mit ||| 1-0 3-1 4-2 4-3 5-4
+! I may not agree ||| ich nicht einer Meinung ||| 1-0 3-1 4-2 4-3
+! I may not ||| ich nicht ||| 1-0 3-1
+! I may ||| ich ||| 1-0
+! I think that ||| das meines Erachtens ||| 0-0 1-1 2-2 3-2
+! I want it ||| und möchte zu ||| 1-0 2-1
+! I want it ||| und möchte ||| 1-0 2-1
+! I want ||| und möchte zu ||| 1-0 2-1
+! I want ||| und möchte ||| 1-0 2-1
+! I ||| ! ||| 0-0
+! I ||| das meines ||| 0-0 1-1
+! I ||| ich ||| 1-0
+! I ||| und ||| 1-0
+! I ||| wie ich ||| 0-0 1-1
+! Scotch beef is ||| ! schottisches Rindfleisch ist ||| 0-0 1-1 2-2 3-3
+! Scotch beef ||| ! schottisches Rindfleisch ||| 0-0 1-1 2-2
+! Scotch ||| ! schottisches ||| 0-0 1-1
+! ] This is the relevant phrase ||| dies ist der Wahlspruch ||| 2-0 3-1 4-2 6-3
+! ] This is the relevant ||| dies ist der ||| 2-0 3-1 4-2
+! ] This is the ||| dies ist der ||| 2-0 3-1 4-2
+! ] This is ||| dies ist ||| 2-0 3-1
+! ] This ||| dies ||| 2-0
+! ] ||| ! ) ||| 0-0 1-1
+! all our countries , to ||| alle unsere Länder , wenn auch in ||| 1-0 2-1 3-2 4-3 5-6
+! all our countries , ||| alle unsere Länder , wenn auch ||| 1-0 2-1 3-2 4-3
+! all our countries , ||| alle unsere Länder , wenn ||| 1-0 2-1 3-2 4-3
+! all our countries , ||| alle unsere Länder , ||| 1-0 2-1 3-2 4-3
+! all our countries ||| alle unsere Länder ||| 1-0 2-1 3-2
+! all our ||| alle unsere ||| 1-0 2-1
+! all this ||| all ||| 1-0
+! all ||| , denn alle nehmen ||| 0-1 1-2
+! all ||| , denn alle ||| 0-1 1-2
+! all ||| all ||| 1-0
+! all ||| alle ||| 1-0
+! all ||| denn alle nehmen ||| 0-0 1-1
+! all ||| denn alle ||| 0-0 1-1
+! and dare to adopt the ||| und traut euch doch , etwa die ||| 0-3 1-0 2-1 2-2 3-4 5-6
+! and dare to adopt ||| und traut euch doch , etwa ||| 0-3 1-0 2-1 2-2 3-4
+! and dare to adopt ||| und traut euch doch , ||| 0-3 1-0 2-1 2-2 3-4
+! and dare to ||| und traut euch doch , etwa ||| 0-3 1-0 2-1 2-2 3-4
+! and dare to ||| und traut euch doch , ||| 0-3 1-0 2-1 2-2 3-4
+! and dare ||| und traut euch doch ||| 0-3 1-0 2-1 2-2
+! another example : when I ||| anderes Beispiel : wenn ich ||| 1-0 2-1 3-2 4-3 5-4
+! another example : when ||| anderes Beispiel : wenn ||| 1-0 2-1 3-2 4-3
+! another example : ||| anderes Beispiel : ||| 1-0 2-1 3-2
+! another example ||| anderes Beispiel ||| 1-0 2-1
+! another ||| anderes ||| 1-0
+! be firm , or be ||| werden Sie hart , oder seien Sie ||| 0-6 1-0 2-1 2-2 3-3 4-4 5-5
+! can the Council even begin to ||| hat der Rat so ||| 0-0 2-1 3-2 4-3
+! can the Council even begin ||| hat der Rat so ||| 0-0 2-1 3-2 4-3
+! can the Council even ||| hat der Rat so ||| 0-0 2-1 3-2 4-3
+! can the Council ||| hat der Rat ||| 0-0 2-1 3-2
+! can the ||| hat der ||| 0-0 2-1
+! can ||| hat ||| 0-0
+! create ||| so ||| 0-0
+! each state tries ||| jeder Staat versucht ||| 1-0 2-1 3-2
+! each state ||| jeder Staat ||| 1-0 2-1
+! each ||| jeder ||| 1-0
+! enough of words ||| immer nur zu reden und zu ||| 0-0 1-1 3-3
+! enough of words ||| immer nur zu reden und ||| 0-0 1-1 3-3
+! enough of words ||| immer nur zu reden ||| 0-0 1-1 3-3
+! enough of ||| immer nur zu ||| 0-0 1-1
+! enough of ||| immer nur ||| 0-0 1-1
+! enough ||| immer nur zu ||| 0-0 1-1
+! enough ||| immer nur ||| 0-0 1-1
+! for many of you - you ||| für viele von Ihnen - Sie ||| 1-0 2-1 3-2 4-3 5-4 6-5
+! for many of you - ||| für viele von Ihnen - ||| 1-0 2-1 3-2 4-3 5-4
+! for many of you ||| für viele von Ihnen ||| 1-0 2-1 3-2 4-3
+! for many of ||| für viele von ||| 1-0 2-1 3-2
+! for many ||| für viele ||| 1-0 2-1
+! for ||| für ||| 1-0
+! from mad cow disease to biocides ||| tun vom Rinderwahn bis zu Bioziden , ||| 0-2 1-1 2-2 3-2 3-3 4-2 5-3 5-4 6-5
+! from mad cow disease to biocides ||| tun vom Rinderwahn bis zu Bioziden ||| 0-2 1-1 2-2 3-2 3-3 4-2 5-3 5-4 6-5
+! from mad cow disease to biocides ||| vom Rinderwahn bis zu Bioziden , ||| 0-1 1-0 2-1 3-1 3-2 4-1 5-2 5-3 6-4
+! from mad cow disease to biocides ||| vom Rinderwahn bis zu Bioziden ||| 0-1 1-0 2-1 3-1 3-2 4-1 5-2 5-3 6-4
+! from mad cow disease to ||| tun vom Rinderwahn bis zu ||| 0-2 1-1 2-2 3-2 3-3 4-2 5-3 5-4
+! from mad cow disease to ||| vom Rinderwahn bis zu ||| 0-1 1-0 2-1 3-1 3-2 4-1 5-2 5-3
+! good legislation is fine ||| : gute Rechtsvorschriften sind schön und gut ||| 0-0 1-1 2-2 3-3 4-4 4-6
+! good legislation is ||| : gute Rechtsvorschriften sind ||| 0-0 1-1 2-2 3-3
+! good legislation ||| : gute Rechtsvorschriften ||| 0-0 1-1 2-2
+! good ||| : gute ||| 0-0 1-1
+! here , we have to ||| Probleme anzupacken : wir müssen hier ||| 1-5 2-2 3-3 4-4 5-1
+! here , we have to ||| anzupacken : wir müssen hier ||| 1-4 2-1 3-2 4-3 5-0
+! here , we have ||| : wir müssen hier ||| 1-3 2-0 3-1 4-2
+! here ||| hier ||| 1-0
+! however , these solutions are being ||| - all diese Möglichkeiten werden derzeit ||| 2-0 3-1 3-2 4-3 5-4 6-5
+! however , these solutions are ||| - all diese Möglichkeiten werden ||| 2-0 3-1 3-2 4-3 5-4
+! however , these solutions ||| - all diese Möglichkeiten ||| 2-0 3-1 3-2 4-3
+! however , these ||| - all diese ||| 2-0 3-1 3-2
+! however , ||| - ||| 2-0
+! if this inquiry ||| wenn diese Untersuchung ||| 1-0 2-1 3-2
+! if this ||| wenn diese ||| 1-0 2-1
+! if we ||| wirklich : wenn es ||| 0-0 1-2 2-3
+! if ||| wenn ||| 1-0
+! if ||| wirklich : wenn ||| 0-0 1-2
+! in 1962 , did they not ||| ! 1962 haben sie dies ||| 0-0 1-1 2-1 4-2 5-3
+! in 1962 , did they not ||| ! 1962 haben sie ||| 0-0 1-1 2-1 4-2 5-3
+! in 1962 , did they ||| ! 1962 haben sie dies ||| 0-0 1-1 2-1 4-2 5-3
+! in 1962 , did they ||| ! 1962 haben sie ||| 0-0 1-1 2-1 4-2 5-3
+! in 1962 , did ||| ! 1962 haben ||| 0-0 1-1 2-1 4-2
+! in 1962 , ||| ! 1962 ||| 0-0 1-1 2-1
+! in 1962 ||| ! 1962 ||| 0-0 1-1 2-1
+! in 1996 , four million people ||| ! 1996 haben vier Millionen Menschen ||| 0-0 1-1 2-1 3-2 4-3 5-4 6-5
+! in 1996 , four million ||| ! 1996 haben vier Millionen ||| 0-0 1-1 2-1 3-2 4-3 5-4
+! in 1996 , four ||| ! 1996 haben vier ||| 0-0 1-1 2-1 3-2 4-3
+! in 1996 , ||| ! 1996 haben ||| 0-0 1-1 2-1 3-2
+! in 1996 ||| ! 1996 ||| 0-0 1-1 2-1
+! in ||| dies einfach ||| 0-1 1-0
+! instead , because we ||| wirklich ||| 0-0
+! instead , because ||| wirklich ||| 0-0
+! instead , ||| wirklich ||| 0-0
+! instead ||| wirklich ||| 0-0
+! it has ||| wurde ! ||| 0-1 1-0 2-0
+! let us say yes to a ||| , und befürworte ein ||| 0-2 5-0 6-3
+! let us say yes to ||| , und befürworte ||| 0-2 5-0
+! let us say yes ||| befürworte ||| 0-0
+! let us say yes ||| und befürworte ||| 0-1
+! let us say ||| befürworte ||| 0-0
+! let us say ||| und befürworte ||| 0-1
+! let us ||| befürworte ||| 0-0
+! let us ||| tun wir doch um ||| 0-0 1-2 2-1
+! let us ||| tun wir doch ||| 0-0 1-2 2-1
+! let us ||| und befürworte ||| 0-1
+! let ||| befürworte ||| 0-0
+! let ||| und befürworte ||| 0-1
+! malaria and tuberculosis can be cured ||| ! Malaria und Tuberkulose sind heilbar ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! malaria and tuberculosis can ||| ! Malaria und Tuberkulose sind ||| 0-0 1-1 2-2 3-3 4-4
+! malaria and tuberculosis ||| ! Malaria und Tuberkulose ||| 0-0 1-1 2-2 3-3
+! malaria and ||| ! Malaria und ||| 0-0 1-1 2-2
+! malaria ||| ! Malaria ||| 0-0 1-1
+! maybe you will put me right ||| vielleicht können Sie mich ja berichtigen ||| 0-4 1-0 1-1 2-2 3-1 4-5 5-3 6-5
+! moreover , it ||| , und ||| 1-1 2-0 3-1
+! my dear colleague , we could ||| Kollegin , man könnte ||| 3-0 4-1 5-2 6-3
+! my dear colleague , we ||| Kollegin , man ||| 3-0 4-1 5-2
+! my dear colleague , ||| Kollegin , ||| 3-0 4-1
+! my dear colleague ||| Kollegin ||| 3-0
+! no ! ||| und nochmals Nein ! ||| 0-0 0-1 1-2 2-3
+! no ! ’ , because , ||| und nochmals Nein ! “ , denn ||| 0-0 0-1 1-2 2-3 3-4 4-5 5-6
+! no ! ’ , because ||| und nochmals Nein ! “ , denn ||| 0-0 0-1 1-2 2-3 3-4 4-5 5-6
+! no ! ’ , ||| und nochmals Nein ! “ , ||| 0-0 0-1 1-2 2-3 3-4 4-5
+! no ! ’ ||| und nochmals Nein ! “ ||| 0-0 0-1 1-2 2-3 3-4
+! no ||| und nochmals Nein ||| 0-0 0-1 1-2
+! on behalf of the Green Group ||| auch im Namen der Fraktion Die Grünen ||| 1-1 2-2 3-3 4-3 5-5 5-6 6-4
+! on behalf of the Green Group ||| im Namen der Fraktion Die Grünen ||| 1-0 2-1 3-2 4-2 5-4 5-5 6-3
+! on behalf of the ||| Vorredner auch im Namen der ||| 1-2 2-3 3-4 4-4
+! on behalf of the ||| auch im Namen der ||| 1-1 2-2 3-3 4-3
+! on behalf of the ||| im Namen der ||| 1-0 2-1 3-2 4-2
+! on behalf ||| Vorredner auch im Namen ||| 1-2 2-3
+! on behalf ||| auch im Namen ||| 1-1 2-2
+! on behalf ||| im Namen ||| 1-0 2-1
+! on ||| Vorredner auch im ||| 1-2
+! on ||| auch im ||| 1-1
+! on ||| im ||| 1-0
+! once everything that ||| wenn das alles ||| 1-0 2-2 3-1
+! once ||| wenn ||| 1-0
+! politically and economically united ||| ein politisch und wirtschaftlich vereintes ||| 0-0 1-1 2-2 3-3 4-4
+! politically and economically ||| ein politisch und wirtschaftlich ||| 0-0 1-1 2-2 3-3
+! politically and ||| ein politisch und ||| 0-0 1-1 2-2
+! politically ||| ein politisch ||| 0-0 1-1
+! should we rejoice at this ? ||| aber sollen wir darüber erfreut sein ? ||| 1-1 2-2 3-3 3-4 3-5 4-3 5-3 6-6
+! should we rejoice at this ? ||| sollen wir darüber erfreut sein ? ||| 1-0 2-1 3-2 3-3 3-4 4-2 5-2 6-5
+! should we rejoice at this ||| , aber sollen wir darüber erfreut sein ||| 1-2 2-3 3-4 3-5 3-6 4-4 5-4
+! should we rejoice at this ||| aber sollen wir darüber erfreut sein ||| 1-1 2-2 3-3 3-4 3-5 4-3 5-3
+! should we rejoice at this ||| sollen wir darüber erfreut sein ||| 1-0 2-1 3-2 3-3 3-4 4-2 5-2
+! should we ||| , aber sollen wir ||| 1-2 2-3
+! should we ||| aber sollen wir ||| 1-1 2-2
+! should we ||| sein , aber sollen wir ||| 1-3 2-4
+! should we ||| sollen wir ||| 1-0 2-1
+! should ||| , aber sollen ||| 1-2
+! should ||| aber sollen ||| 1-1
+! should ||| sein , aber sollen ||| 1-3
+! should ||| sollen ||| 1-0
+! social coherence ||| Elementen ||| 2-0
+! sometimes I really miss Margaret Thatcher ||| Margaret Thatcher ||| 3-0 4-1 5-1 6-0 6-1
+! that is extraordinary and I am ||| das ist wunderbar , und ich bin ||| 1-0 2-1 3-2 4-4 5-5 6-6
+! that is extraordinary and I ||| das ist wunderbar , und ich ||| 1-0 2-1 3-2 4-4 5-5
+! that is extraordinary and ||| das ist wunderbar , und ||| 1-0 2-1 3-2 4-4
+! that is extraordinary ||| das ist wunderbar , ||| 1-0 2-1 3-2
+! that is extraordinary ||| das ist wunderbar ||| 1-0 2-1 3-2
+! that is ||| das ist ||| 1-0 2-1
+! that ||| das ||| 1-0
+! the Commission can accept all the ||| der Kommission bewirken wird , denn dies ||| 1-0 2-1 3-3 5-5 6-6
+! the Commission can accept all ||| der Kommission bewirken wird , denn ||| 1-0 2-1 3-3 5-5
+! the Commission can accept ||| der Kommission bewirken wird , ||| 1-0 2-1 3-3
+! the Commission can accept ||| der Kommission bewirken wird ||| 1-0 2-1 3-3
+! the Commission can ||| der Kommission bewirken wird , ||| 1-0 2-1 3-3
+! the Commission can ||| der Kommission bewirken wird ||| 1-0 2-1 3-3
+! the Commission ||| der Kommission bewirken ||| 1-0 2-1
+! the Commission ||| der Kommission ||| 1-0 2-1
+! the EU , the ||| ! “ Die EU , die ||| 0-0 1-2 2-3 3-4 4-5
+! the EU , ||| ! “ Die EU , ||| 0-0 1-2 2-3 3-4
+! the EU ||| ! “ Die EU ||| 0-0 1-2 2-3
+! the European ||| , die ||| 1-1
+! the European ||| die ||| 1-0
+! the truth is that ||| , und ||| 4-0
+! the truth is that ||| , ||| 4-0
+! the ||| ! “ Die ||| 0-0 1-2
+! the ||| , die ||| 1-1
+! the ||| der ||| 1-0
+! the ||| die ||| 1-0
+! there is a great big flag ||| ich doch eine große Flagge ||| 0-0 2-1 3-2 4-3 5-3 6-4
+! there is a great big flag ||| mir sehe ich doch eine große Flagge ||| 0-2 2-3 3-4 4-5 5-5 6-6
+! there is a great big flag ||| sehe ich doch eine große Flagge ||| 0-1 2-2 3-3 4-4 5-4 6-5
+! there is a great big ||| ich doch eine große ||| 0-0 2-1 3-2 4-3 5-3
+! there is a great big ||| mir sehe ich doch eine große ||| 0-2 2-3 3-4 4-5 5-5
+! there is a great big ||| sehe ich doch eine große ||| 0-1 2-2 3-3 4-4 5-4
+! there is a ||| ich doch eine ||| 0-0 2-1 3-2
+! there is a ||| mir sehe ich doch eine ||| 0-2 2-3 3-4
+! there is a ||| sehe ich doch eine ||| 0-1 2-2 3-3
+! there is ||| ich doch ||| 0-0 2-1
+! there is ||| mir sehe ich doch ||| 0-2 2-3
+! there is ||| sehe ich doch ||| 0-1 2-2
+! there ||| ich ||| 0-0
+! there ||| mir sehe ich ||| 0-2
+! there ||| sehe ich ||| 0-1
+! this is our duty ||| , denn das ist unsere Pflicht ||| 0-1 1-2 2-3 3-4 4-5
+! this is our duty ||| denn das ist unsere Pflicht ||| 0-0 1-1 2-2 3-3 4-4
+! this is our duty ||| nehmen , denn das ist unsere Pflicht ||| 0-2 1-3 2-4 3-5 4-6
+! this is our ||| , denn das ist unsere ||| 0-1 1-2 2-3 3-4
+! this is our ||| Angriff nehmen , denn das ist unsere ||| 0-3 1-4 2-5 3-6
+! this is our ||| denn das ist unsere ||| 0-0 1-1 2-2 3-3
+! this is our ||| nehmen , denn das ist unsere ||| 0-2 1-3 2-4 3-5
+! this is ||| , denn das ist ||| 0-1 1-2 2-3
+! this is ||| Angriff nehmen , denn das ist ||| 0-3 1-4 2-5
+! this is ||| denn das ist ||| 0-0 1-1 2-2
+! this is ||| in Angriff nehmen , denn das ist ||| 0-4 1-5 2-6
+! this is ||| nehmen , denn das ist ||| 0-2 1-3 2-4
+! this ||| , denn das ||| 0-1 1-2
+! this ||| Angriff nehmen , denn das ||| 0-3 1-4
+! this ||| denn das ||| 0-0 1-1
+! this ||| in Angriff nehmen , denn das ||| 0-4 1-5
+! this ||| nehmen , denn das ||| 0-2 1-3
+! unfortunately accompanied , this time , ||| ! – dieses Mal leider flankiert ||| 0-0 1-4 2-5 3-1 4-2 5-3
+! unfortunately accompanied , this time ||| ! – dieses Mal leider flankiert ||| 0-0 1-4 2-5 3-1 4-2 5-3
+! unfortunately ||| leider ||| 1-0
+! we can only make progress here ||| , und hier kommen wir nur weiter ||| 0-3 1-4 2-3 3-5 4-6 5-6 6-2
+! we can only make progress here ||| hier kommen wir nur weiter , ||| 0-1 1-2 2-1 3-3 4-4 5-4 6-0
+! we can only make progress here ||| hier kommen wir nur weiter ||| 0-1 1-2 2-1 3-3 4-4 5-4 6-0
+! we can only make progress here ||| und hier kommen wir nur weiter , ||| 0-2 1-3 2-2 3-4 4-5 5-5 6-1
+! we can only make progress here ||| und hier kommen wir nur weiter ||| 0-2 1-3 2-2 3-4 4-5 5-5 6-1
+! we can only make progress ||| kommen wir nur weiter , ||| 0-0 1-1 2-0 3-2 4-3 5-3
+! we can only make progress ||| kommen wir nur weiter ||| 0-0 1-1 2-0 3-2 4-3 5-3
+! we can only ||| kommen wir nur ||| 0-0 1-1 2-0 3-2
+! we can ||| kommen wir ||| 0-0 1-1 2-0
+! we know quite well that ||| , und wir wissen genau , dass ||| 0-1 1-2 2-3 3-4 4-4 5-5 5-6
+! we know quite well that ||| und wir wissen genau , dass ||| 0-0 1-1 2-2 3-3 4-3 5-4 5-5
+! we know quite well ||| , und wir wissen genau ||| 0-1 1-2 2-3 3-4 4-4
+! we know quite well ||| und wir wissen genau ||| 0-0 1-1 2-2 3-3 4-3
+! we know ||| , und wir wissen ||| 0-1 1-2 2-3
+! we know ||| und wir wissen ||| 0-0 1-1 2-2
+! we want more ||| ! - , dass wir mehr wollen ||| 0-0 1-4 2-3 2-6 3-5
+! we ||| , und wir ||| 0-1 1-2
+! we ||| ebenfalls mangelnde Vorsicht ||| 0-0 1-2
+! we ||| eine größere ||| 1-0
+! we ||| eine ||| 1-0
+! we ||| ist ebenfalls mangelnde Vorsicht ||| 0-1 1-3
+! we ||| oh Gott , wir ||| 0-0 1-3
+! we ||| und wir ||| 0-0 1-1
+! we ||| wird eine größere ||| 1-1
+! we ||| wird eine ||| 1-1
+! well ! ||| . ||| 0-0
+! well ||| . ||| 0-0
+! what ||| eben solch eine ||| 0-1 1-0
+! what ||| eben solch ||| 0-1 1-0
+! when are you finally going ||| wann wollen Sie endlich ||| 1-0 2-1 3-2 4-3
+! when are you finally ||| wann wollen Sie endlich ||| 1-0 2-1 3-2 4-3
+! when are you ||| wann wollen Sie ||| 1-0 2-1 3-2
+! when are ||| wann wollen ||| 1-0 2-1
+! when ||| wann ||| 1-0
+! why ? ||| . ||| 2-0
+! won the Sakharov Prize ||| ! den Sacharow-Preis , ||| 0-0 2-1 3-2 4-2
+! won the Sakharov Prize ||| ! den Sacharow-Preis ||| 0-0 2-1 3-2 4-2
+! won the ||| ! den ||| 0-0 2-1
+! won ||| ! ||| 0-0
+! you have the power to do ||| es steht in Ihrer Macht ! ||| 0-5 1-3 2-1 3-0 4-4
+! you have the power to ||| es steht in Ihrer Macht ! ||| 0-5 1-3 2-1 3-0 4-4
+! you have the power ||| es steht in Ihrer Macht ! ||| 0-5 1-3 2-1 3-0 4-4
+! you will never be ||| sie werden nie eine frei gewählte Abgeordnete ||| 1-0 2-1 3-2 4-4
+! you will never be ||| sie werden nie eine frei gewählte ||| 1-0 2-1 3-2 4-4
+! you will never be ||| sie werden nie eine frei ||| 1-0 2-1 3-2 4-4
+! you will never ||| sie werden nie eine ||| 1-0 2-1 3-2
+! you will never ||| sie werden nie ||| 1-0 2-1 3-2
+! you will ||| sie werden ||| 1-0 2-1
+! you ||| sie ||| 1-0
+! ||| ! ! ! ||| 0-0 0-1 0-2
+! ||| ! ! ! ||| 0-0 0-1 0-2
+! ||| ! ! ! ||| 0-0 0-1 0-2
+! ||| ! ! ! ||| 0-0 0-1 0-2
+! ||| ! ! ! ||| 0-0 0-1 0-2
+! ||| ! ! ||| 0-0 0-1
+! ||| ! ! ||| 0-0 0-1
+! ||| ! " ||| 0-0
+! ||| ! " ||| 0-0
+! ||| ! " ||| 0-0
+! ||| ! " ||| 0-0
+! ||| ! " ||| 0-0
+! ||| ! " ||| 0-0
+! ||| ! " ||| 0-0
+! ||| ! ) . ||| 0-0
+! ||| ! ) ||| 0-0
+! ||| ! ) ||| 0-0
+! ||| ! , war ebenfalls kein Beitrag ||| 0-0
+! ||| ! , war ebenfalls kein ||| 0-0
+! ||| ! , war ebenfalls ||| 0-0
+! ||| ! , war ||| 0-0
+! ||| ! , ||| 0-0
+! ||| ! - , ||| 0-0
+! ||| ! - ||| 0-0
+! ||| ! - ||| 0-0
+! ||| ! . ||| 0-0 0-1
+! ||| ! . ||| 0-0 0-1
+! ||| ! . ||| 0-0 0-1
+! ||| ! 2004 war die UKIP die einzige ||| 0-0 0-1
+! ||| ! 2004 war die UKIP die ||| 0-0 0-1
+! ||| ! 2004 war die UKIP ||| 0-0 0-1
+! ||| ! 2004 war die ||| 0-0 0-1
+! ||| ! 2004 war ||| 0-0 0-1
+! ||| ! 2004 ||| 0-0 0-1
+! ||| ! ? ? ||| 0-0 0-1 0-2
+! ||| ! die Opfer der Kriminalität in Europa ||| 0-0
+! ||| ! die Opfer der Kriminalität in ||| 0-0
+! ||| ! die Opfer der Kriminalität ||| 0-0
+! ||| ! die Opfer der ||| 0-0
+! ||| ! die Opfer ||| 0-0
+! ||| ! die ||| 0-0
+! ||| ! es ist nicht ||| 0-0
+! ||| ! es ist ||| 0-0
+! ||| ! es ||| 0-0
+! ||| ! ich weiß , ||| 0-0
+! ||| ! ich weiß ||| 0-0
+! ||| ! ich ||| 0-0
+! ||| ! ich ||| 0-0
+! ||| ! ich ||| 0-0 0-1
+! ||| ! und deshalb halte ich den Vorschlag ||| 0-0
+! ||| ! und deshalb halte ich den ||| 0-0
+! ||| ! und deshalb halte ich ||| 0-0
+! ||| ! und deshalb halte ||| 0-0
+! ||| ! und deshalb ||| 0-0
+! ||| ! und ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0
+! ||| ! ||| 0-0

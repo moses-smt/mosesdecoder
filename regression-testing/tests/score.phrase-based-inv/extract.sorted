@@ -1,0 +1,2222 @@
+! ! ! ) bezeichnet wird , ||| ! ! ! ) , ||| 0-0 1-1 2-2 3-3 6-4
+! ! ! ) bezeichnet wird ||| ! ! ! ) ||| 0-0 1-1 2-2 3-3
+! ! ! ) bezeichnet ||| ! ! ! ) ||| 0-0 1-1 2-2 3-3
+! ! ! ) ||| ! ! ! ) ||| 0-0 1-1 2-2 3-3
+! ! ! ) ||| ! ! ! ) ||| 0-0 1-1 2-2 3-3
+! ! ! ) ||| ! ) ||| 0-0 1-0 2-0 3-1
+! ! ! ||| ! ! ! ||| 0-0 1-1 2-2
+! ! ! ||| ! ! ! ||| 0-0 1-1 2-2
+! ! ! ||| ! ! ! ||| 0-0 1-1 2-2
+! ! ! ||| ! ||| 0-0 1-0 2-0
+! ! ! ||| ! ||| 0-0 1-0 2-0
+! ! ! ||| ! ||| 0-0 1-0 2-0
+! ! ! ||| ! ||| 0-0 1-0 2-0
+! ! ! ||| ! ||| 0-0 1-0 2-0
+! ! ) bezeichnet wird , hat ||| ! ! ) , has ||| 0-0 1-1 2-2 5-3 6-4
+! ! ) bezeichnet wird , ||| ! ! ) , ||| 0-0 1-1 2-2 5-3
+! ! ) bezeichnet wird ||| ! ! ) ||| 0-0 1-1 2-2
+! ! ) bezeichnet ||| ! ! ) ||| 0-0 1-1 2-2
+! ! ) ||| ! ! ) ||| 0-0 1-1 2-2
+! ! ) ||| ! ! ) ||| 0-0 1-1 2-2
+! ! die Bilanz , die wir ||| and we ||| 4-0 6-1
+! ! die Bilanz , die ||| and ||| 4-0
+! ! die Bilanz , ||| and ||| 4-0
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ! ||| 0-0 1-1
+! ! ||| ! ||| 0-0 1-0
+! ! ||| ! ||| 0-0 1-0
+! ! ||| . ||| 0-0 1-0
+! ! ||| unemployment ! ||| 0-1 1-1
+! " ( Europa war gut zu ||| ! ' ||| 0-0 1-1 2-1
+! " ( Europa war gut ||| ! ' ||| 0-0 1-1 2-1
+! " ( Europa war ||| ! ' ||| 0-0 1-1 2-1
+! " ( Europa ||| ! ' ||| 0-0 1-1 2-1
+! " ( es ist die Sonne ||| the sun ||| 5-0 6-1
+! " ( es ist die ||| the ||| 5-0
+! " ( ||| ! ' ||| 0-0 1-1 2-1
+! " ) Heute ||| ! ' ) We ||| 0-0 1-1 2-2 3-3
+! " ) Sie haben vollkommen recht ||| ! ' exactly ||| 0-0 1-1 5-2
+! " ) Sie haben vollkommen ||| ! ' exactly ||| 0-0 1-1 5-2
+! " ) Sie haben ||| ! ' ||| 0-0 1-1
+! " ) Sie ||| ! ' ||| 0-0 1-1
+! " ) sagte er , die ||| ! ' ) said that the ||| 0-0 1-1 2-2 3-3 5-4 6-5
+! " ) sagte er , ||| ! ' ) said that ||| 0-0 1-1 2-2 3-3 5-4
+! " ) sagte er ||| ! ' ) said ||| 0-0 1-1 2-2 3-3
+! " ) sagte ||| ! ' ) said ||| 0-0 1-1 2-2 3-3
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ) ||| 0-0 1-1 2-2
+! " ) ||| ! ' ||| 0-0 1-1
+! " ) ||| common ||| 0-0
+! " ) ||| more common ||| 0-1
+! " , aber natürlich unter der ||| ' , but of course on ||| 0-0 1-0 2-1 3-2 4-3 4-4 5-5
+! " , aber natürlich unter ||| ' , but of course on ||| 0-0 1-0 2-1 3-2 4-3 4-4 5-5
+! " , aber natürlich ||| ' , but of course ||| 0-0 1-0 2-1 3-2 4-3 4-4
+! " , aber ||| ' , but ||| 0-0 1-0 2-1 3-2
+! " , also ||| ' , i.e. , ||| 1-0 2-1 3-2 0-3
+! " , antwortete der Präsident . ||| ! " replied the President . ||| 0-0 1-1 3-2 4-3 5-4 6-5
+! " , antwortete der Präsident ||| ! " replied the President ||| 0-0 1-1 3-2 4-3 5-4
+! " , antwortete der ||| ! " replied the ||| 0-0 1-1 3-2 4-3
+! " , antwortete ||| ! " replied ||| 0-0 1-1 3-2
+! " , der ||| ! ' , which ||| 0-0 1-1 2-2 3-3
+! " , doch der ||| ! " but a ||| 0-0 1-1 3-2 4-3
+! " , doch ||| ! " but ||| 0-0 1-1 3-2
+! " , entgegnete der Pilot ||| ' flying is the safest form of ||| 0-0 1-0 4-0 3-1 4-3 5-4 5-5
+! " , entgegnete der Pilot ||| ' flying is the safest form ||| 0-0 1-0 4-0 3-1 4-3 5-4 5-5
+! " , entgegnete der ||| ' flying is the ||| 0-0 1-0 4-0 3-1 4-3
+! " , gab ich zur Antwort ||| ! ' I replied ||| 0-0 1-1 4-2 3-3 5-3 6-3
+! " , muss ||| is ! ' ||| 3-0 0-1 1-2
+! " , rief Alice ' . ||| ! ” cried Alice ' . ||| 0-0 1-1 3-2 4-3 5-4 6-5
+! " , rief Alice ' ||| ! ” cried Alice ' ||| 0-0 1-1 3-2 4-3 5-4
+! " , rief Alice ||| ! ” cried Alice ||| 0-0 1-1 3-2 4-3
+! " , rief ich aus , ||| , ||| 0-0
+! " , rief ich aus , ||| done , ||| 0-1
+! " , rief ich aus ||| , ||| 0-0
+! " , rief ich aus ||| done , ||| 0-1
+! " , rief ich ||| , ||| 0-0
+! " , rief ich ||| done , ||| 0-1
+! " , rief ||| ! ” cried ||| 0-0 1-1 3-2
+! " , rief ||| , ||| 0-0
+! " , rief ||| done , ||| 0-1
+! " , sagte die andere Kuh ||| , " replied the other cow ||| 0-0 1-1 3-2 4-3 5-4 6-5
+! " , sagte die andere ||| , " replied the other ||| 0-0 1-1 3-2 4-3 5-4
+! " , sagte die ||| , " replied the ||| 0-0 1-1 3-2 4-3
+! " , sagte ich zu ihr ||| ! " I said to her ||| 0-0 1-1 4-2 3-3 5-4 6-5
+! " , sagte ich zu ||| ! " I said to ||| 0-0 1-1 4-2 3-3 5-4
+! " , sagte ich ||| ! " I said ||| 0-0 1-1 4-2 3-3
+! " , sagte ||| , " replied ||| 0-0 1-1 3-2
+! " , schrie der Hirtenjunge ||| ! " , cried the shepherd boy ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! " , schrie der ||| ! " , cried the ||| 0-0 1-1 2-2 3-3 4-4
+! " , schrie ||| ! " , cried ||| 0-0 1-1 2-2 3-3
+! " , sondern damit es ||| ! ' , but so that they ||| 0-0 1-1 2-2 3-3 4-4 4-5 5-6
+! " , sondern damit ||| ! ' , but so that ||| 0-0 1-1 2-2 3-3 4-4 4-5
+! " , sondern ||| ! ' , but ||| 0-0 1-1 2-2 3-3
+! " , und fuhr fort , ||| ! ' and ||| 0-0 1-1 3-2
+! " , und fuhr fort ||| ! ' and ||| 0-0 1-1 3-2
+! " , und fuhr ||| ! ' and ||| 0-0 1-1 3-2
+! " , und ||| ! ' and ||| 0-0 1-1 3-2
+! " , weil insgesamt fünf Kollegen ||| , " because altogether five colleagues ||| 0-0 1-1 3-2 4-3 5-4 6-5
+! " , weil insgesamt fünf ||| , " because altogether five ||| 0-0 1-1 3-2 4-3 5-4
+! " , weil insgesamt ||| , " because altogether ||| 0-0 1-1 3-2 4-3
+! " , weil ||| , " because ||| 0-0 1-1 3-2
+! " , worauf Eric antwortet : ||| , ' and Eric says , ||| 0-0 1-1 2-2 3-2 4-3 5-3 5-4 6-4 6-5
+! " , worauf ||| , ' and ||| 0-0 1-1 2-2 3-2
+! " , ||| ! " , ||| 0-0 1-1 2-2
+! " , ||| ! " , ||| 0-0 1-1 2-2
+! " , ||| ! " ||| 0-0 1-1
+! " , ||| ! " ||| 0-0 1-1
+! " , ||| ! " ||| 0-0 1-1
+! " , ||| ! ' , ||| 0-0 1-1 2-2
+! " , ||| ! ' , ||| 0-0 1-1 2-2
+! " , ||| ! ' ||| 0-0 1-1
+! " , ||| ! ' ||| 0-0 1-1
+! " , ||| ! ' ||| 0-0 1-1
+! " , ||| ! ” ||| 0-0 1-1
+! " , ||| ' , ||| 0-0 1-0 2-1
+! " , ||| , " ||| 0-0 1-1
+! " , ||| , " ||| 0-0 1-1
+! " , ||| , ||| 0-0
+! " , ||| ? ' ||| 0-0 1-1
+! " , ||| any fish ? ' ||| 0-2 1-3
+! " , ||| done , ||| 0-1
+! " , ||| fish ? ' ||| 0-1 1-2
+! " , ||| give you " , ||| 0-1 1-2 2-3
+! " , ||| to give you " , ||| 0-2 1-3 2-4
+! " , ||| you " , ||| 0-0 1-1 2-2
+! " - obwohl wir doch wissen ||| ' . whereas we know ||| 0-0 1-0 2-1 3-2 4-3 5-4 6-4
+! " - obwohl wir ||| ' . whereas we ||| 0-0 1-0 2-1 3-2 4-3
+! " - obwohl ||| ' . whereas ||| 0-0 1-0 2-1 3-2
+! " - und dies ||| ! ' - and what is ||| 0-0 1-1 2-2 3-3 4-4 4-5
+! " - und dies übrigens ||| ! ' - and what is more ||| 0-0 1-1 2-2 3-3 4-4 4-5 5-6
+! " - und ||| ! ' - and ||| 0-0 1-1 2-2 3-3
+! " - ||| ! ' - ||| 0-0 1-1 2-2
+! " - ||| ' . ||| 0-0 1-0 2-1
+! " . und Spinelli , der ||| ! ' ; Spinelli , who ||| 0-0 1-1 2-2 3-2 4-3 5-4 5-5 6-5
+! " . und Spinelli ||| ! ' ; Spinelli ||| 0-0 1-1 2-2 3-2 4-3
+! " . und ||| ! ' ; ||| 0-0 1-1 2-2 3-2
+! " . ||| ! ' . ||| 0-0 1-1 2-2
+! " . ||| ! ' . ||| 0-0 1-1 2-2
+! " . ||| ! ' . ||| 0-0 1-1 2-2
+! " . ||| ! ' . ||| 0-0 1-1 2-2
+! " . ||| ! ' ||| 0-0 1-1
+! " . ||| ! ' ||| 0-0 1-1
+! " . ||| ! ' ||| 0-0 1-1
+! " . ||| ! ' ||| 0-0 1-1
+! " . ||| ! ' ||| 0-0 1-1 2-1
+! " . ||| ! ' ||| 0-0 1-1 2-1
+! " . ||| ! ' ||| 0-0 1-1 2-1
+! " . ||| ! ' ||| 0-0 1-1 2-1
+! " . ||| ! ' ||| 0-0 1-1 2-1
+! " . ||| ! . ||| 0-0 2-1
+! " . ||| ' . ||| 1-0 2-1
+! " . ||| . ” ||| 2-0 0-1 1-1
+! " . ||| a living ! ' . ||| 0-2 1-3 2-4
+! " . ||| living ! ' . ||| 0-1 1-2 2-3
+! " : mit der linken Hand ||| ' - ||| 0-0 1-0 2-1
+! " : mit der linken ||| ' - ||| 0-0 1-0 2-1
+! " : mit der ||| ' - ||| 0-0 1-0 2-1
+! " : mit ||| ' - ||| 0-0 1-0 2-1
+! " : ||| ' - ||| 0-0 1-0 2-1
+! " ? ||| ! " ||| 0-0 1-1 2-1
+! " ? ||| ! ' ? ||| 0-0 1-1 2-2
+! " Europa gelingt gemeinsam ! " ||| . ||| 0-0
+! " Europa gelingt gemeinsam ! ||| . ||| 0-0
+! " Europa gelingt gemeinsam ||| . ||| 0-0
+! " Europa gelingt ||| . ||| 0-0
+! " Europa ||| . ||| 0-0
+! " Le nationalisme , c ||| : ' Le nationalisme , c ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! " Le nationalisme , ||| : ' Le nationalisme , ||| 0-0 1-1 2-2 3-3 4-4
+! " Le nationalisme ||| : ' Le nationalisme ||| 0-0 1-1 2-2 3-3
+! " Le ||| : ' Le ||| 0-0 1-1 2-2
+! " an die Eurokraten in Brüssel ||| ' to the Brussels Eurocrats ||| 0-0 1-0 2-1 3-2 6-3 4-4
+! " an die ||| ' to the ||| 0-0 1-0 2-1 3-2
+! " an ||| ' to ||| 0-0 1-0 2-1
+! " begrüßt ||| ! ' ||| 0-0 1-1
+! " das war die Antwort ||| their reply was that ||| 4-0 5-1 3-2 2-3
+! " das war ||| was that ||| 3-0 2-1
+! " das ||| that ||| 2-0
+! " die Milch macht ' s ||| , ' milk is good for you ||| 0-0 1-1 3-2 4-3 4-4 6-6
+! " die Milch macht ' ||| , ' milk is good for ||| 0-0 1-1 3-2 4-3 4-4
+! " die Milch macht ' ||| , ' milk is good ||| 0-0 1-1 3-2 4-3 4-4
+! " die Milch macht ||| , ' milk is good for ||| 0-0 1-1 3-2 4-3 4-4
+! " die Milch macht ||| , ' milk is good ||| 0-0 1-1 3-2 4-3 4-4
+! " die Milch ||| , ' milk ||| 0-0 1-1 3-2
+! " die ||| , ' ||| 0-0 1-1
+! " diese Botschaft ||| a message ||| 2-0 3-1
+! " diese ||| a ||| 2-0
+! " geht nicht mehr weiter ||| ! " can no longer continue ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! " geht nicht mehr ||| ! " can no longer ||| 0-0 1-1 2-2 3-3 4-4
+! " geht nicht ||| ! " can no ||| 0-0 1-1 2-2 3-3
+! " geht ||| ! " can ||| 0-0 1-1 2-2
+! " gehört , und denen ||| ! ' , and those ||| 0-0 1-1 3-2 4-3 5-4
+! " gehört , und denen ||| kill ! ' , and those ||| 0-1 1-2 3-3 4-4 5-5
+! " gehört , und ||| ! ' , and ||| 0-0 1-1 3-2 4-3
+! " gehört , und ||| kill ! ' , and ||| 0-1 1-2 3-3 4-4
+! " gehört , ||| ! ' , ||| 0-0 1-1 3-2
+! " gehört , ||| kill ! ' , ||| 0-1 1-2 3-3
+! " gehört ||| ! ' ||| 0-0 1-1
+! " gehört ||| kill ! ' ||| 0-1 1-2
+! " hat das Parlament bereits ||| ! ' , Parliament has already ||| 0-0 1-1 2-2 3-3 4-3 5-4 5-5
+! " hat das Parlament ||| ! ' , Parliament ||| 0-0 1-1 2-2 3-3 4-3
+! " hat ||| ! ' , ||| 0-0 1-1 2-2
+! " kommen ||| " ||| 0-0 1-0
+! " mögen ||| ' , may ||| 1-0 0-1 2-2
+! " nicht nur in bezug ||| ' does not just ||| 1-0 2-1 2-2 3-3
+! " nicht nur in ||| ' does not just ||| 1-0 2-1 2-2 3-3
+! " nicht nur ||| ' does not just ||| 1-0 2-1 2-2 3-3
+! " nicht ||| ' does not ||| 1-0 2-1 2-2
+! " oder zu Kollegin Harms ||| ! ' , and to Mrs Harms ||| 0-0 1-1 2-3 3-4 4-5 5-6
+! " oder zu Kollegin ||| ! ' , and to Mrs ||| 0-0 1-1 2-3 3-4 4-5
+! " oder zu ||| ! ' , and to ||| 0-0 1-1 2-3 3-4
+! " oder ||| ! ' , and ||| 0-0 1-1 2-3
+! " oder ||| ! ' or ||| 0-0 1-1 2-2
+! " rufe vonseiten der IND ||| ! ' from members of the IND ||| 0-0 1-1 3-2 4-5 5-6
+! " rufe vonseiten der ||| ! ' from members of the ||| 0-0 1-1 3-2 4-5
+! " rufe vonseiten ||| ! ' from members of ||| 0-0 1-1 3-2
+! " rufe vonseiten ||| ! ' from members ||| 0-0 1-1 3-2
+! " rufe vonseiten ||| ! ' from ||| 0-0 1-1 3-2
+! " rufe ||| ! ' ||| 0-0 1-1
+! " rufen , würden wir ||| ' , we would ||| 1-0 3-1 5-2 4-3
+! " rufen , ||| ' , ||| 1-0 3-1
+! " rufen die Föderalisten , und ||| ! ' say the federalists , and ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! " rufen die Föderalisten , ||| ! ' say the federalists , ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! " rufen die Föderalisten ||| ! ' say the federalists ||| 0-0 1-1 2-2 3-3 4-4
+! " rufen die ||| ! ' say the ||| 0-0 1-1 2-2 3-3
+! " rufen ||| ! ' say ||| 0-0 1-1 2-2
+! " rufen ||| ' ||| 1-0
+! " sagen die ||| , ' say the people on the ||| 0-0 1-1 2-2 3-6
+! " sagen ||| , ' say the people on ||| 0-0 1-1 2-2
+! " sagen ||| , ' say the people ||| 0-0 1-1 2-2
+! " sagen ||| , ' say the ||| 0-0 1-1 2-2
+! " sagen ||| , ' say ||| 0-0 1-1 2-2
+! " steht . ||| ! ' ||| 0-0 1-1
+! " steht ||| ! ' ||| 0-0 1-1
+! " und Nizza II ? ||| ! ' and Nice II ? ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! " und Nizza II ||| ! ' and Nice II ||| 0-0 1-1 2-2 3-3 4-4
+! " und Nizza ||| ! ' and Nice ||| 0-0 1-1 2-2 3-3
+! " und schlagen uns an die ||| ! ' and beat our ||| 0-0 1-1 2-2 3-3 4-4
+! " und schlagen uns an ||| ! ' and beat our ||| 0-0 1-1 2-2 3-3 4-4
+! " und schlagen uns ||| ! ' and beat our ||| 0-0 1-1 2-2 3-3 4-4
+! " und schlagen ||| ! ' and beat ||| 0-0 1-1 2-2 3-3
+! " und ||| ! ' and ||| 0-0 1-1 2-2
+! " und ||| ! ' and ||| 0-0 1-1 2-2
+! " vereinen ||| ! ' ||| 0-0 1-1
+! " zu allen Formen des Protektionismus ||| ! ' to all forms of protectionism ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! " zu allen Formen des ||| ! ' to all forms of ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! " zu allen Formen ||| ! ' to all forms ||| 0-0 1-1 2-2 3-3 4-4
+! " zu allen ||| ! ' to all ||| 0-0 1-1 2-2 3-3
+! " zu ||| ! ' to ||| 0-0 1-1 2-2
+! " zur Offenheit und zum Wettbewerb ||| ! ' to openness and competition ||| 0-0 1-1 2-2 3-3 4-4 6-5
+! " zur Offenheit und zum ||| ! ' to openness and ||| 0-0 1-1 2-2 3-3 4-4
+! " zur Offenheit und ||| ! ' to openness and ||| 0-0 1-1 2-2 3-3 4-4
+! " zur Offenheit ||| ! ' to openness ||| 0-0 1-1 2-2 3-3
+! " zur ||| ! ' to ||| 0-0 1-1 2-2
+! " ||| ! " . ||| 0-0 1-1 0-2
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! " ||| 0-0 1-1
+! " ||| ! ' ' really ? ' ||| 0-0 1-1 1-2 0-3 0-4 1-5
+! " ||| ! ' , ||| 0-0 1-1
+! " ||| ! ' . ||| 0-0 1-1
+! " ||| ! ' . ||| 0-0 1-1
+! " ||| ! ' . ||| 0-0 1-1 0-2
+! " ||| ! ' . ||| 0-0 1-1 0-2
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! ' ||| 0-0 1-1
+! " ||| ! .... ' ||| 0-0 1-2
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ||| 0-0
+! " ||| ! ” ||| 0-0 1-1
+! " ||| ! ” ||| 0-0 1-1
+! " ||| " . ||| 1-0 0-1
+! " ||| " . ||| 1-0 0-1
+! " ||| " ||| 0-0 1-0
+! " ||| " ||| 1-0
+! " ||| ' ! ||| 1-0 0-1
+! " ||| ' ! ||| 1-0 0-1
+! " ||| ' , ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1
+! " ||| ' . ||| 1-0 0-1 1-1
+! " ||| ' ||| 0-0 1-0
+! " ||| ' ||| 0-0 1-0
+! " ||| ' ||| 0-0 1-0
+! " ||| ' ||| 0-0 1-0
+! " ||| ' ||| 0-0 1-0
+! " ||| ' ||| 1-0
+! " ||| ' ||| 1-0
+! " ||| ' ||| 1-0
+! " ||| , " ||| 0-0 1-1
+! " ||| , " ||| 0-0 1-1
+! " ||| , ' ||| 0-0 1-1
+! " ||| , ' ||| 0-0 1-1
+! " ||| , ' ||| 0-0 1-1
+! " ||| , ' ||| 0-0 1-1
+! " ||| , that ||| 0-0
+! " ||| , ||| 0-0
+! " ||| , ||| 0-0
+! " ||| , ||| 0-0
+! " ||| , ||| 0-0
+! " ||| , ||| 0-0
+! " ||| . " ! ||| 0-0 1-1 0-2
+! " ||| . " ||| 0-0 1-1
+! " ||| . " ||| 0-0 1-1
+! " ||| . " ||| 0-0 1-1
+! " ||| . ' ||| 0-0 1-1
+! " ||| . ' ||| 0-0 1-1
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| . ||| 0-0
+! " ||| : ' ||| 0-0 1-1
+! " ||| ? ' ||| 0-0 1-1
+! " ||| ? ' ||| 0-0 1-1
+! " ||| Commission to ||| 0-0
+! " ||| Commission ||| 0-0
+! " ||| a living ! ' ||| 0-2 1-3
+! " ||| any fish ? ' ||| 0-2 1-3
+! " ||| asked the Commission to ||| 0-2
+! " ||| asked the Commission ||| 0-2
+! " ||| bearing the ||| 0-1
+! " ||| common ||| 0-0
+! " ||| done , ||| 0-1
+! " ||| face ! " ||| 0-1 1-2
+! " ||| fish ? ' ||| 0-1 1-2
+! " ||| give you " ||| 0-1 1-2
+! " ||| kill ! ' ||| 0-1 1-2
+! " ||| living ! ' ||| 0-1 1-2
+! " ||| may ||| 0-0
+! " ||| more common ||| 0-1
+! " ||| of products bearing the ||| 0-3
+! " ||| one ' . ||| 0-0 1-1 0-2
+! " ||| products bearing the ||| 0-2
+! " ||| term , ' ||| 0-1 1-2
+! " ||| the Commission to ||| 0-1
+! " ||| the Commission ||| 0-1
+! " ||| the ||| 0-0
+! " ||| the ||| 0-0
+! " ||| to give you " ||| 0-2 1-3
+! " ||| uneven ' . ||| 1-1 0-2
+! " ||| you " ||| 0-0 1-1
+! " ||| ” ||| 0-0 1-0
+! ' , dann sage ich ||| ' . I would ||| 1-0 0-1 5-2 4-3
+! ' , dann ||| ' . ||| 1-0 0-1
+! ' , diese Aufforderung ||| ! ' is the message ||| 0-0 1-1 3-3 4-4
+! ' , diese ||| ! ' is the ||| 0-0 1-1 3-3
+! ' , sollte Gegenstand von ||| ' , should ||| 0-0 1-0 2-1 3-2
+! ' , sollte Gegenstand ||| ' , should ||| 0-0 1-0 2-1 3-2
+! ' , sollte ||| ' , should ||| 0-0 1-0 2-1 3-2
+! ' , womit ||| ! ' , ||| 0-0 1-1 2-2
+! ' , ||| ! ' , ||| 0-0 1-1 2-2
+! ' , ||| ! ' is ||| 0-0 1-1
+! ' , ||| ! ' ||| 0-0 1-1
+! ' , ||| ' , ||| 0-0 1-0 2-1
+! ' , ||| ' . ||| 1-0 0-1
+! ' - wir lassen uns ||| ! ' ||| 0-0 1-1
+! ' - wir lassen ||| ! ' ||| 0-0 1-1
+! ' - wir ||| ! ' ||| 0-0 1-1
+! ' - ||| ! ' ||| 0-0 1-1
+! ' . aber dort gibt ||| ! ' , but there are widely ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' . aber dort gibt ||| ! ' , but there are ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ' . aber dort ||| ! ' , but there ||| 0-0 1-1 2-2 3-3 4-4
+! ' . aber ||| ! ' , but ||| 0-0 1-1 2-2 3-3
+! ' . ||| ! ' , ||| 0-0 1-1 2-2
+! ' . ||| ! ' ||| 0-0 1-1 2-1
+! ' . ||| . ||| 2-0
+! ' Stand , ||| ! ' , ||| 0-0 1-1 3-2
+! ' Stand ||| ! ' ||| 0-0 1-1
+! ' rufen , ||| ! ' and then murder ||| 0-0 1-1 3-2
+! ' rufen , ||| ! ' and then ||| 0-0 1-1 3-2
+! ' rufen , ||| ! ' and ||| 0-0 1-1 3-2
+! ' rufen ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' , and ||| 0-0 1-1 0-2
+! ' ||| ! ' , ||| 0-0 1-1 0-2
+! ' ||| ! ' . ||| 0-0 1-1
+! ' ||| ! ' is ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ! ' ||| 0-0 1-1
+! ' ||| ' ! ||| 1-0 0-1
+! ' ||| ' , and ||| 1-0 0-1
+! ' ||| ' , ||| 1-0 0-1
+! ' ||| ' . ||| 1-0 0-1
+! ' ||| ' . ||| 1-0 0-1
+! ' ||| ' . ||| 1-0 0-1
+! ' ||| ' . ||| 1-0 0-1
+! ' ||| ' ||| 0-0 1-0
+! ' ||| ' ||| 0-0 1-0
+! ' ||| 't . ' ||| 0-1 1-2
+! ' ||| . ' ||| 0-0 1-1
+! ' ||| . ' ||| 0-0 1-1
+! ' ||| . ' ||| 0-0 1-1
+! ' ||| . ' ||| 0-0 1-1
+! ' ||| . ||| 0-0
+! ' ||| ? " ||| 0-0 1-1
+! ' ||| ? ' ||| 0-0 1-1
+! ' ||| ? ||| 0-0
+! ' ||| hook ' ! ||| 1-1 0-2
+! ' ||| in 't . ' ||| 0-2 1-3
+! ' ||| luck ! ' ||| 0-1 1-2
+! ' ||| of . ' ||| 0-1 1-2
+! ( 1 ) ||| . ( 1 ) ||| 0-0 1-1 2-2 3-3
+! ( 1 ||| . ( 1 ||| 0-0 1-1 2-2
+! ( ||| . ( ||| 0-0 1-1
+! ) , Forschung , Wettbewerbsfähigkeit und ||| ! ) , research , competitiveness and ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! ) , Forschung , Wettbewerbsfähigkeit ||| ! ) , research , competitiveness ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ) , Forschung , ||| ! ) , research , ||| 0-0 1-1 2-2 3-3 4-4
+! ) , Forschung ||| ! ) , research ||| 0-0 1-1 2-2 3-3
+! ) , die die Arbeitslosenunterstützung ||| ! ) which unemployment benefit ||| 0-0 1-1 3-2 4-2 4-3 5-3 5-4
+! ) , geht . ||| ! ) ||| 0-0 1-1
+! ) , geht ||| ! ) ||| 0-0 1-1
+! ) , mit der Rodung von ||| ! ) , the grubbing-up of ||| 0-0 1-1 2-2 4-3 5-4 6-5
+! ) , mit der Rodung ||| ! ) , the grubbing-up ||| 0-0 1-1 2-2 4-3 5-4
+! ) , mit der ||| ! ) , the ||| 0-0 1-1 2-2 4-3
+! ) , mit ||| ! ) , ||| 0-0 1-1 2-2
+! ) , und schließlich ||| ! ) and , finally , ||| 0-0 1-1 3-2 2-3 4-4 4-5
+! ) , und ||| ! ) and , ||| 0-0 1-1 3-2 2-3
+! ) , während ||| ! ) , while ||| 0-0 1-1 2-2 3-3
+! ) , während über 100 ||| ! ) , while over 100 ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ) , während über ||| ! ) , while over ||| 0-0 1-1 2-2 3-3 4-4
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) , ||| 0-0 1-1 2-2
+! ) , ||| ! ) ||| 0-0 1-1
+! ) , ||| ! ) ||| 0-0 1-1
+! ) . seit einigen Jahren ||| , and for a number of years ||| 0-0 2-1 3-2 4-3 4-4 5-6
+! ) . seit einigen Jahren ||| , and for a number of years ||| 0-0 2-1 3-2 4-3 4-4 5-6
+! ) . seit einigen ||| , and for a number of ||| 0-0 2-1 3-2 4-3 4-4
+! ) . seit einigen ||| , and for a number of ||| 0-0 2-1 3-2 4-3 4-4
+! ) . seit einigen ||| , and for a number ||| 0-0 2-1 3-2 4-3 4-4
+! ) . seit einigen ||| , and for a number ||| 0-0 2-1 3-2 4-3 4-4
+! ) . seit einigen ||| recycled , and for a number of ||| 0-1 2-2 3-3 4-4 4-5
+! ) . seit einigen ||| recycled , and for a number of ||| 0-1 2-2 3-3 4-4 4-5
+! ) . seit einigen ||| recycled , and for a number ||| 0-1 2-2 3-3 4-4 4-5
+! ) . seit einigen ||| recycled , and for a number ||| 0-1 2-2 3-3 4-4 4-5
+! ) . seit ||| , and for ||| 0-0 2-1 3-2
+! ) . seit ||| , and for ||| 0-0 2-1 3-2
+! ) . seit ||| recycled , and for ||| 0-1 2-2 3-3
+! ) . seit ||| recycled , and for ||| 0-1 2-2 3-3
+! ) . ||| ! ) . ||| 0-0 1-1 2-2
+! ) . ||| ! ) . ||| 0-0 1-1 2-2
+! ) . ||| ! ) ||| 0-0 1-1 2-1
+! ) . ||| ! ||| 0-0
+! ) . ||| ) . ||| 1-0 0-1 2-1
+! ) . ||| , and ||| 0-0 2-1
+! ) . ||| , and ||| 0-0 2-1
+! ) . ||| recycled , and ||| 0-1 2-2
+! ) . ||| recycled , and ||| 0-1 2-2
+! ) Herr Kollege Ferber , ||| ! " ) Mr Ferber , ||| 0-0 1-2 2-3 3-4 4-4 5-5
+! ) Herr Kollege Ferber ||| ! " ) Mr Ferber ||| 0-0 1-2 2-3 3-4 4-4
+! ) Herr ||| ! " ) Mr ||| 0-0 1-2 2-3
+! ) Marktwirtschaft , die von einem ||| ! ) market economy ||| 0-0 1-1 2-2 2-3
+! ) Marktwirtschaft , die von ||| ! ) market economy ||| 0-0 1-1 2-2 2-3
+! ) Marktwirtschaft , die ||| ! ) market economy ||| 0-0 1-1 2-2 2-3
+! ) Marktwirtschaft , ||| ! ) market economy ||| 0-0 1-1 2-2 2-3
+! ) Marktwirtschaft ||| ! ) market economy ||| 0-0 1-1 2-2 2-3
+! ) allein für ||| ! ) just for ||| 0-0 1-1 2-2 3-3
+! ) allein ||| ! ) just ||| 0-0 1-1 2-2
+! ) bei . ||| ) . ||| 1-0 3-1
+! ) bei ||| ) ||| 1-0
+! ) bezeichnet wird , hat ||| ! ) , has ||| 0-0 1-1 4-2 5-3
+! ) bezeichnet wird , ||| ! ) , ||| 0-0 1-1 4-2
+! ) bezeichnet wird ||| ! ) ||| 0-0 1-1
+! ) bezeichnet ||| ! ) ||| 0-0 1-1
+! ) das ||| the ||| 2-0
+! ) dürfen nicht verwendet ( missbraucht ||| ! ) cannot be used ( misused ||| 0-0 1-1 2-2 3-2 3-3 4-4 5-5 6-6
+! ) dürfen nicht verwendet ( ||| ! ) cannot be used ( ||| 0-0 1-1 2-2 3-2 3-3 4-4 5-5
+! ) dürfen nicht verwendet ||| ! ) cannot be used ||| 0-0 1-1 2-2 3-2 3-3 4-4
+! ) dürfen nicht ||| ! ) cannot be ||| 0-0 1-1 2-2 3-2 3-3
+! ) für den Fall der ||| ! ) in the event that we ||| 0-0 1-1 2-2 3-3 4-4 5-6
+! ) für den Fall ||| ! ) in the event that ||| 0-0 1-1 2-2 3-3 4-4
+! ) für den Fall ||| ! ) in the event ||| 0-0 1-1 2-2 3-3 4-4
+! ) für den ||| ! ) in the ||| 0-0 1-1 2-2 3-3
+! ) für die Umsetzung der ||| ! ) before they apply the ||| 0-0 1-1 3-3 4-4 5-5
+! ) für die Umsetzung ||| ! ) before they apply ||| 0-0 1-1 3-3 4-4
+! ) für die ||| ! ) before they ||| 0-0 1-1 3-3
+! ) für ||| ! ) before ||| 0-0 1-1
+! ) für ||| ! ) in ||| 0-0 1-1 2-2
+! ) für ||| ! ) ||| 0-0 1-1
+! ) großen Not ||| ! ) high level of need ||| 0-0 1-1 2-2 3-3 3-5
+! ) großen ||| ! ) high ||| 0-0 1-1 2-2
+! ) oder ihr Egonet ||| ! ) , or rather their egonet ||| 0-0 1-1 2-3 4-4 3-5 4-6
+! ) oder ||| ! ) , or ||| 0-0 1-1 2-3
+! ) und die Schaffung nationaler Finanzmärkte ||| ! ) and create national financial markets ||| 0-0 1-1 2-2 4-3 5-4 6-5 6-6
+! ) und die Schaffung nationaler ||| ! ) and create national ||| 0-0 1-1 2-2 4-3 5-4
+! ) und die Schaffung ||| ! ) and create ||| 0-0 1-1 2-2 4-3
+! ) und die ||| ! ) and ||| 0-0 1-1 2-2
+! ) und häufig unverständliche ||| ! ) and often unreadable ||| 0-0 1-1 2-2 3-3 4-4
+! ) und häufig unverständliche ||| ! ) and often unreadable – ||| 0-0 1-1 2-2 3-3 4-4
+! ) und häufig ||| ! ) and often ||| 0-0 1-1 2-2 3-3
+! ) und ||| ! ) and ||| 0-0 1-1 2-2
+! ) und ||| ! ) and ||| 0-0 1-1 2-2
+! ) vertritt ||| ! ) ||| 0-0 1-1
+! ) ||| ! " ) ||| 0-0 1-2
+! ) ||| ! ) , ||| 0-0 1-1
+! ) ||| ! ) before ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! ) ||| 0-0 1-1
+! ) ||| ! - ||| 0-0 1-1
+! ) ||| ! ] ||| 0-0 1-1
+! ) ||| ! ||| 0-0
+! ) ||| ! ||| 0-0
+! ) ||| ) ||| 1-0
+! ) ||| , ||| 0-0
+! ) ||| , ||| 0-0
+! ) ||| , ||| 0-0
+! ) ||| , ||| 0-0
+! ) ||| , ||| 0-0
+! ) ||| Latin ! ) ||| 0-1 1-2
+! ) ||| arrival ! ) ||| 0-1 1-2
+! ) ||| recycled , ||| 0-1
+! ) ||| recycled , ||| 0-1
+! ) ||| the ||| 0-0
+! ) über die ||| ! ) on the ||| 0-0 1-1 2-2 3-3
+! ) über die Änderung der ||| ! ) on the amendment of ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ) über die Änderung ||| ! ) on the amendment ||| 0-0 1-1 2-2 3-3 4-4
+! ) über ||| ! ) on ||| 0-0 1-1 2-2
+! , dem Gewinner des Sacharow-Preises in ||| ! , the Sakharov Prize winner in ||| 0-0 1-1 2-2 5-3 4-4 5-4 3-5 6-6
+! , dem Gewinner des Sacharow-Preises ||| ! , the Sakharov Prize winner ||| 0-0 1-1 2-2 5-3 4-4 5-4 3-5
+! , dem ||| ! , the ||| 0-0 1-1 2-2
+! , war ebenfalls kein Beitrag zur ||| ! " did little to ||| 0-0 6-4
+! , war ebenfalls kein Beitrag ||| ! " did little ||| 0-0
+! , war ebenfalls kein Beitrag ||| ! " did ||| 0-0
+! , war ebenfalls kein Beitrag ||| ! " ||| 0-0
+! , war ebenfalls kein Beitrag ||| ! ||| 0-0
+! , war ebenfalls kein ||| ! " did little ||| 0-0
+! , war ebenfalls kein ||| ! " did ||| 0-0
+! , war ebenfalls kein ||| ! " ||| 0-0
+! , war ebenfalls kein ||| ! ||| 0-0
+! , war ebenfalls ||| ! " did little ||| 0-0
+! , war ebenfalls ||| ! " did ||| 0-0
+! , war ebenfalls ||| ! " ||| 0-0
+! , war ebenfalls ||| ! ||| 0-0
+! , war ||| ! " did little ||| 0-0
+! , war ||| ! " did ||| 0-0
+! , war ||| ! " ||| 0-0
+! , war ||| ! ||| 0-0
+! , ||| ! " did little ||| 0-0
+! , ||| ! " did ||| 0-0
+! , ||| ! " ||| 0-0
+! , ||| ! , ||| 0-0 1-1
+! , ||| ! ||| 0-0
+! , ||| , ||| 0-0
+! - ' Es reicht ' ||| ! - ' Enough is enough ' ||| 0-0 1-1 2-2 3-3 4-4 4-5 5-6
+! - ' Es reicht ||| ! - ' Enough is enough ||| 0-0 1-1 2-2 3-3 4-4 4-5
+! - ' Es ||| ! - ' Enough ||| 0-0 1-1 2-2 3-3
+! - ' ||| ! - ' ||| 0-0 1-1 2-2
+! - , dass wir mehr wollen ||| ! we want more ||| 0-0 4-1 3-2 6-2 5-3
+! - , die mit ||| ! - that have been treated with ||| 0-0 1-1 2-2 3-2 3-3 4-5 4-6
+! - , die ||| ! - that have been ||| 0-0 1-1 2-2 3-2 3-3
+! - , die ||| ! - that have ||| 0-0 1-1 2-2 3-2 3-3
+! - , die ||| ! - which ||| 0-0 1-1 2-2 3-2
+! - , die ||| ! - who ||| 0-0 1-1 2-2 3-2
+! - , die ||| ! - ||| 0-0 1-1
+! - , doch die britische Regierung ||| ! - but the British Government ||| 0-0 1-1 3-2 4-3 5-4 6-5
+! - , doch die britische ||| ! - but the British ||| 0-0 1-1 3-2 4-3 5-4
+! - , doch die ||| ! - but the ||| 0-0 1-1 3-2 4-3
+! - , doch ||| ! - but ||| 0-0 1-1 3-2
+! - , ist zu ersehen ||| ! ) , we see ||| 0-0 1-1 2-2 4-3 5-4
+! - , ist zu ||| ! ) , we ||| 0-0 1-1 2-2 4-3
+! - , ist ||| ! ) , ||| 0-0 1-1 2-2
+! - , möchte ich meinerseits ||| ! - I would like to ||| 0-0 1-1 4-2 3-3 3-4 3-5
+! - , möchte ich meinerseits ||| surprise ! - I would like to ||| 0-1 1-2 4-3 3-4 3-5 3-6
+! - , möchte ich ||| ! - I would like to ||| 0-0 1-1 4-2 3-3 3-4 3-5
+! - , möchte ich ||| surprise ! - I would like to ||| 0-1 1-2 4-3 3-4 3-5 3-6
+! - , so wie es ja ||| . this is ||| 0-0 5-1 6-2
+! - , so wie es ja ||| indeed . this is ||| 0-1 5-2 6-3
+! - , so wie es ||| . this ||| 0-0 5-1
+! - , so wie es ||| indeed . this ||| 0-1 5-2
+! - , so wie ||| . ||| 0-0
+! - , so wie ||| indeed . ||| 0-1
+! - , so ||| . ||| 0-0
+! - , so ||| indeed . ||| 0-1
+! - , sondern daß sogar geradezu ||| ? - but that ||| 0-0 1-1 3-2 2-3 4-3
+! - , sondern daß sogar ||| ? - but that ||| 0-0 1-1 3-2 2-3 4-3
+! - , sondern daß ||| ? - but that ||| 0-0 1-1 3-2 2-3 4-3
+! - , um uns dann , ||| it - and then , ||| 0-0 1-1 2-2 5-3 6-4
+! - , um uns dann ||| it - and then ||| 0-0 1-1 2-2 5-3
+! - , um uns ||| it - and ||| 0-0 1-1 2-2
+! - , um ||| it - and ||| 0-0 1-1 2-2
+! - , von dem ||| ! - in favour ||| 0-0 1-1 3-2
+! - , von dem ||| ! - in ||| 0-0 1-1 3-2
+! - , von ||| ! - in favour ||| 0-0 1-1 3-2
+! - , von ||| ! - in ||| 0-0 1-1 3-2
+! - , wohingegen man ||| ! - whereas one ||| 0-0 1-1 3-2 4-3
+! - , wohingegen ||| ! - whereas ||| 0-0 1-1 3-2
+! - , während diejenigen , die ||| ! - while those responsible for the ||| 0-0 1-1 3-2 4-3 4-4 6-6
+! - , während diejenigen , ||| ! - while those responsible for ||| 0-0 1-1 3-2 4-3 4-4
+! - , während diejenigen , ||| ! - while those responsible ||| 0-0 1-1 3-2 4-3 4-4
+! - , während diejenigen ||| ! - while those responsible for ||| 0-0 1-1 3-2 4-3 4-4
+! - , während diejenigen ||| ! - while those responsible ||| 0-0 1-1 3-2 4-3 4-4
+! - , während ||| ! - while ||| 0-0 1-1 3-2
+! - , ||| ! ) , ||| 0-0 1-1 2-2
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! - ||| 0-0 1-1
+! - , ||| ! ||| 0-0
+! - , ||| - which ||| 1-0 2-1
+! - , ||| - ||| 0-0 1-0
+! - , ||| . ||| 0-0
+! - , ||| indeed . ||| 0-1
+! - , ||| it - and ||| 0-0 1-1 2-2
+! - , ||| surprise ! - ||| 0-1 1-2
+! - , ||| we ||| 0-0
+! - Die ||| - the United Nations ||| 0-0 1-0 2-1
+! - Die ||| - the United ||| 0-0 1-0 2-1
+! - Die ||| - the ||| 0-0 1-0 2-1
+! - Es sind ||| the two draftsmen have presented ||| 0-0 2-1 2-2 3-3 2-4
+! - Frage von Unvereinbarkeiten ||| ! – incompatibilities arise ||| 0-0 1-1 2-2 4-2 4-3
+! - Frau Präsidentin , ich wurde ||| ! - Madam President , I was ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! - Frau Präsidentin , ich ||| ! - Madam President , I ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - Frau Präsidentin , ||| ! - Madam President , ||| 0-0 1-1 2-2 3-3 4-4
+! - Frau Präsidentin ||| ! - Madam President ||| 0-0 1-1 2-2 3-3
+! - Frau ||| ! - Madam ||| 0-0 1-1 2-2
+! - Kernkraftwerke errichtet werden ||| ! ) nuclear power stations built ||| 0-0 1-1 2-2 2-3 2-4 3-5
+! - Kernkraftwerke errichtet ||| ! ) nuclear power stations built ||| 0-0 1-1 2-2 2-3 2-4 3-5
+! - Kernkraftwerke ||| ! ) nuclear power stations ||| 0-0 1-1 2-2 2-3 2-4
+! - Referenden und Volksinitiativen zu stellen ||| ! - of referendums and popular initiatives ||| 0-0 1-1 2-3 3-4 4-5 4-6
+! - Referenden und Volksinitiativen zu ||| ! - of referendums and popular initiatives ||| 0-0 1-1 2-3 3-4 4-5 4-6
+! - Referenden und Volksinitiativen ||| ! - of referendums and popular initiatives ||| 0-0 1-1 2-3 3-4 4-5 4-6
+! - Referenden und ||| ! - of referendums and ||| 0-0 1-1 2-3 3-4
+! - Referenden ||| ! - of referendums ||| 0-0 1-1 2-3
+! - Rücksicht ||| into consideration ||| 2-0 2-1
+! - bedeutet eine derart anmaßende ||| , such an arrogant ||| 0-0 1-0 4-1 3-2 4-2 2-3 4-3 5-3
+! - besagen , dass der Zugang ||| ! - stipulate that access ||| 0-0 1-1 2-2 3-3 4-3 5-4 6-4
+! - besagen , dass ||| ! - stipulate that ||| 0-0 1-1 2-2 3-3 4-3
+! - besagen ||| ! - stipulate ||| 0-0 1-1 2-2
+! - besteht , wie ||| , via ||| 0-0 1-0 2-1
+! - besteht , ||| , via ||| 0-0 1-0 2-1
+! - besteht ||| , via ||| 0-0 1-0 2-1
+! - der Energie vergeudet , bevor ||| ! - of the energy before ||| 0-0 1-1 2-2 2-3 3-4 6-5
+! - der Energie vergeudet , ||| ! - of the energy ||| 0-0 1-1 2-2 2-3 3-4
+! - der Energie vergeudet ||| ! - of the energy ||| 0-0 1-1 2-2 2-3 3-4
+! - der Energie ||| ! - of the energy ||| 0-0 1-1 2-2 2-3 3-4
+! - der betreffenden Minderheiten ||| , - of the relevant minorities ||| 0-0 1-1 2-2 2-3 3-4 4-5
+! - der betreffenden ||| , - of the relevant ||| 0-0 1-1 2-2 2-3 3-4
+! - der operativen Ausgaben werden ||| ! - of operational expenses are managed ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - der operativen Ausgaben werden ||| ! - of operational expenses are ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - der operativen Ausgaben ||| ! - of operational expenses ||| 0-0 1-1 2-2 3-3 4-4
+! - der operativen ||| ! - of operational ||| 0-0 1-1 2-2 3-3
+! - der ||| ! - of the ||| 0-0 1-1 2-2 2-3
+! - der ||| ! - of ||| 0-0 1-1 2-2
+! - der ||| , - of the ||| 0-0 1-1 2-2 2-3
+! - die ||| , ||| 0-0
+! - direkte ||| - direct ||| 1-0 2-1
+! - direkte Übertragung , aber auch ||| - direct transmission but also ||| 1-0 2-1 3-2 5-3 6-4
+! - direkte Übertragung , aber ||| - direct transmission but ||| 1-0 2-1 3-2 5-3
+! - direkte Übertragung , ||| - direct transmission ||| 1-0 2-1 3-2
+! - direkte Übertragung ||| - direct transmission ||| 1-0 2-1 3-2
+! - energische Maßnahmen vorgeschlagen hat , ||| ! - proposing powerful measures ||| 0-0 1-1 4-2 2-3 3-4
+! - energische Maßnahmen vorgeschlagen hat ||| ! - proposing powerful measures ||| 0-0 1-1 4-2 2-3 3-4
+! - energische Maßnahmen vorgeschlagen ||| ! - proposing powerful measures ||| 0-0 1-1 4-2 2-3 3-4
+! - im Lauf dieser Woche begonnen ||| - set in motion this week ||| 1-0 6-1 2-2 3-3 4-4 5-5
+! - ist ein klares und durchsichtiges ||| - is a clear , transparent ||| 1-0 2-1 3-2 4-3 5-4 6-5
+! - ist ein klares und ||| - is a clear , ||| 1-0 2-1 3-2 4-3 5-4
+! - ist ein klares ||| - is a clear ||| 1-0 2-1 3-2 4-3
+! - ist ein ||| - is a ||| 1-0 2-1 3-2
+! - ist ||| - is ||| 1-0 2-1
+! - mit beeindruckender Hellsichtigkeit den ||| - with ||| 1-0 2-1
+! - mit beeindruckender Hellsichtigkeit ||| - with ||| 1-0 2-1
+! - mit beeindruckender ||| - with ||| 1-0 2-1
+! - mit ||| - with ||| 1-0 2-1
+! - quer durch alle Fraktionen , ||| ! - all , ||| 0-0 1-1 4-2 6-3
+! - quer durch alle Fraktionen ||| ! - all ||| 0-0 1-1 4-2
+! - quer durch alle ||| ! - all ||| 0-0 1-1 4-2
+! - quer durch ||| ! - ||| 0-0 1-1
+! - quer ||| ! - ||| 0-0 1-1
+! - rechtzeitig reagiert : sie hat ||| ! - took timely action : it ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-6
+! - rechtzeitig reagiert : sie ||| ! - took timely action : it ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-6
+! - rechtzeitig reagiert : ||| ! - took timely action : ||| 0-0 1-1 2-2 2-3 3-4 4-5
+! - rechtzeitig reagiert ||| ! - took timely action ||| 0-0 1-1 2-2 2-3 3-4
+! - rechtzeitig ||| ! - took timely ||| 0-0 1-1 2-2 2-3
+! - räume ich ein , ||| ! - I recognise ||| 0-0 1-1 3-2 2-3 4-3
+! - räume ich ein ||| ! - I recognise ||| 0-0 1-1 3-2 2-3 4-3
+! - sage ich ||| ! - I would say ||| 0-0 1-1 3-2 2-3 2-4
+! - scheint die Europäische Union jetzt ||| ! - the EU seems ||| 0-0 1-1 3-2 4-3 5-3 2-4
+! - scheint die Europäische Union ||| ! - the EU seems ||| 0-0 1-1 3-2 4-3 5-3 2-4
+! - um zu bekräftigen , daß ||| ! - as a reaffirmation of ||| 0-0 1-1 2-2 2-3 4-4
+! - um zu bekräftigen , daß ||| ! - as a reaffirmation ||| 0-0 1-1 2-2 2-3 4-4
+! - um zu bekräftigen , ||| ! - as a reaffirmation of ||| 0-0 1-1 2-2 2-3 4-4
+! - um zu bekräftigen , ||| ! - as a reaffirmation ||| 0-0 1-1 2-2 2-3 4-4
+! - um zu bekräftigen ||| ! - as a reaffirmation of ||| 0-0 1-1 2-2 2-3 4-4
+! - um zu bekräftigen ||| ! - as a reaffirmation ||| 0-0 1-1 2-2 2-3 4-4
+! - um zu ||| ! - as a ||| 0-0 1-1 2-2 2-3
+! - um ||| ! - as a ||| 0-0 1-1 2-2 2-3
+! - um ||| , ||| 0-0
+! - und begrenzt somit die ||| ! - thereby restricting the ||| 0-0 1-1 2-2 4-2 3-3 5-3 5-4
+! - und dass die landwirtschaftliche Produktivität ||| - and that agricultural productivity ||| 0-0 1-0 2-1 3-2 4-2 5-3 6-4
+! - und dass die landwirtschaftliche ||| - and that agricultural ||| 0-0 1-0 2-1 3-2 4-2 5-3
+! - und dass die ||| - and that ||| 0-0 1-0 2-1 3-2 4-2
+! - und ideologischer Manipulation ||| ! - and borders on ideological manipulation ||| 0-0 1-1 2-2 3-3 3-4 3-5 4-6
+! - und ideologischer ||| ! - and borders on ideological ||| 0-0 1-1 2-2 3-3 3-4 3-5
+! - und nationale Präferenz entschieden ||| - and national preference ||| 0-0 1-0 2-1 3-2 4-3 5-3
+! - und nationale ||| - and national ||| 0-0 1-0 2-1 3-2
+! - und zum ersten ||| ! - and we saw the first ||| 0-0 1-1 2-2 3-5 4-6
+! - und zum ||| ! - and we saw the ||| 0-0 1-1 2-2 3-5
+! - und ||| ! - and we saw ||| 0-0 1-1 2-2
+! - und ||| ! - and we ||| 0-0 1-1 2-2
+! - und ||| ! - and ||| 0-0 1-1 2-2
+! - und ||| ! - and ||| 0-0 1-1 2-2
+! - und ||| - and ||| 0-0 1-0 2-1
+! - und ||| - and ||| 0-0 1-0 2-1
+! - ungefähr 18 Millionen Arbeitslose . ||| , some 18 million unemployed . ||| 0-0 1-0 2-1 3-2 4-3 5-4 6-5
+! - ungefähr 18 Millionen Arbeitslose ||| , some 18 million unemployed ||| 0-0 1-0 2-1 3-2 4-3 5-4
+! - ungefähr 18 Millionen ||| , some 18 million ||| 0-0 1-0 2-1 3-2 4-3
+! - ungefähr 18 ||| , some 18 ||| 0-0 1-0 2-1 3-2
+! - ungefähr ||| , some ||| 0-0 1-0 2-1
+! - unter Anlegung objektiver Maßstäbe erfolgen ||| emphasize , from an objective viewpoint ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! - unter Anlegung objektiver Maßstäbe erfolgen ||| would emphasize , from an objective viewpoint ||| 0-1 1-2 2-3 3-4 4-5 5-6 6-6
+! - unter Anlegung objektiver ||| emphasize , from an objective ||| 0-0 1-1 2-2 3-3 4-4
+! - unter Anlegung objektiver ||| would emphasize , from an objective ||| 0-1 1-2 2-3 3-4 4-5
+! - unter Anlegung ||| emphasize , from an ||| 0-0 1-1 2-2 3-3
+! - unter Anlegung ||| would emphasize , from an ||| 0-1 1-2 2-3 3-4
+! - unter vielen anderen . ||| , one among many others . ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! - unter vielen anderen ||| , one among many others ||| 0-0 1-1 2-2 3-3 4-4
+! - unter vielen ||| , one among many ||| 0-0 1-1 2-2 3-3
+! - unter ||| , one among ||| 0-0 1-1 2-2
+! - unter ||| emphasize , from ||| 0-0 1-1 2-2
+! - unter ||| would emphasize , from ||| 0-1 1-2 2-3
+! - weiß ich nicht , ||| - I do not know , but ||| 0-0 1-0 3-1 2-2 4-3 2-4 5-5
+! - weiß ich nicht , ||| - I do not know , ||| 0-0 1-0 3-1 2-2 4-3 2-4 5-5
+! - weiß ich nicht ||| - I do not know ||| 0-0 1-0 3-1 2-2 4-3 2-4
+! - zugab ||| saying something – admitted ||| 2-0 2-1 0-2 1-2 2-2 2-3
+! - zur Koordination im ||| - relating to applying coordination in the ||| 0-0 1-0 2-1 2-2 3-3 3-4 4-5 4-6
+! - zur Koordination ||| - relating to applying coordination ||| 0-0 1-0 2-1 2-2 3-3 3-4
+! - zur ||| - relating to ||| 0-0 1-0 2-1 2-2
+! - ||| ! ) ||| 0-0 1-1
+! - ||| ! ) ||| 0-0 1-1
+! - ||| ! - I do ||| 0-0 1-1
+! - ||| ! - I ||| 0-0 1-1
+! - ||| ! - of ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! - ||| 0-0 1-1
+! - ||| ! ||| 0-0
+! - ||| ! ||| 0-0
+! - ||| ! – ||| 0-0 1-1
+! - ||| , - ||| 0-0 1-1
+! - ||| , and ||| 0-0 1-1
+! - ||| , and ||| 0-0 1-1
+! - ||| , mind you - ||| 0-0 1-3
+! - ||| , one ||| 0-0 1-1
+! - ||| , ||| 0-0
+! - ||| , ||| 0-0
+! - ||| , ||| 0-0 1-0
+! - ||| , ||| 0-0 1-0
+! - ||| , ||| 0-0 1-0
+! - ||| , ||| 0-0 1-0
+! - ||| , ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 0-0 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| - ||| 1-0
+! - ||| . at ||| 0-0 1-1
+! - ||| . indeed ||| 0-0
+! - ||| . ||| 0-0
+! - ||| . ||| 0-0
+! - ||| . ||| 0-0
+! - ||| ? - ||| 0-0 1-1
+! - ||| emphasize , ||| 0-0 1-1
+! - ||| indeed . ||| 0-1
+! - ||| is , ||| 0-1 1-1
+! - ||| it - ||| 0-0 1-1
+! - ||| it everybody - ||| 0-0 1-2
+! - ||| one ||| 0-0
+! - ||| sake , ||| 0-1 1-1
+! - ||| surprise ! - ||| 0-1 1-2
+! - ||| the ||| 0-0
+! - ||| want . ||| 0-1
+! - ||| we ||| 0-0
+! - ||| would be ||| 0-0
+! - ||| would emphasize , ||| 0-1 1-2
+! - ||| would ||| 0-0
+! - über 10 Milliarden dänische ||| it everybody - over 10 billion Danish ||| 0-0 1-2 2-3 3-4 4-5 5-6
+! - über 10 Milliarden ||| it everybody - over 10 billion ||| 0-0 1-2 2-3 3-4 4-5
+! - über 10 ||| it everybody - over 10 ||| 0-0 1-2 2-3 3-4
+! - über ||| it everybody - over ||| 0-0 1-2 2-3
+! . ||| ! ||| 0-0 1-0
+! . ||| ! ||| 0-0 1-0
+! . ||| ! ||| 0-0 1-0
+! . ||| . ||| 0-0 1-0
+! . ||| . ||| 0-0 1-0
+! . ||| in this . ||| 0-1 0-2 1-2
+! . ||| misunderstandings . ||| 0-0 1-1
+! . ||| point . ||| 0-0 0-1 1-1
+! . ||| this . ||| 0-0 0-1 1-1
+! ... und , hier war ich ||| ! ... ||| 0-0 1-1
+! ... und , hier war ||| ! ... ||| 0-0 1-1
+! ... und , hier ||| ! ... ||| 0-0 1-1
+! ... und , ||| ! ... ||| 0-0 1-1
+! ... und ||| ! ... ||| 0-0 1-1
+! ... ||| ! ... ||| 0-0 1-1
+! ... ||| ! ... ||| 0-0 1-1
+! ... ||| ! ... ||| 0-0 1-1
+! 100 Mio. ECU ||| ! ECU 100 m ||| 0-0 3-1 1-2 2-3
+! 14,5 % Feuchte ist ||| ! 14.5 % is ||| 0-0 1-1 3-1 2-2 4-3
+! 14,5 % Feuchte ||| ! 14.5 % ||| 0-0 1-1 3-1 2-2
+! 173 Auftragsmorde seit 1990 ||| ! 173 contract killings since 1990 ||| 0-0 1-1 2-2 2-3 3-4 4-5
+! 173 Auftragsmorde seit 1990 – ||| ! 173 contract killings since 1990 – ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-6
+! 173 Auftragsmorde seit ||| ! 173 contract killings since ||| 0-0 1-1 2-2 2-3 3-4
+! 173 Auftragsmorde ||| ! 173 contract killings ||| 0-0 1-1 2-2 2-3
+! 173 ||| ! 173 ||| 0-0 1-1
+! 1962 haben sie dies ||| ! in 1962 , did they not ||| 0-0 1-1 1-2 2-4 3-5
+! 1962 haben sie dies ||| ! in 1962 , did they ||| 0-0 1-1 1-2 2-4 3-5
+! 1962 haben sie ||| ! in 1962 , did they not ||| 0-0 1-1 1-2 2-4 3-5
+! 1962 haben sie ||| ! in 1962 , did they ||| 0-0 1-1 1-2 2-4 3-5
+! 1962 haben ||| ! in 1962 , did ||| 0-0 1-1 1-2 2-4
+! 1962 ||| ! in 1962 , ||| 0-0 1-1 1-2
+! 1962 ||| ! in 1962 ||| 0-0 1-1 1-2
+! 1991 habe ich ||| , in 1991 , I joined ||| 0-0 1-1 1-2 3-4 2-5
+! 1991 ||| , in 1991 , ||| 0-0 1-1 1-2
+! 1991 ||| , in 1991 ||| 0-0 1-1 1-2
+! 1996 haben vier Millionen Menschen ||| ! in 1996 , four million people ||| 0-0 1-1 1-2 2-3 3-4 4-5 5-6
+! 1996 haben vier Millionen ||| ! in 1996 , four million ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! 1996 haben vier ||| ! in 1996 , four ||| 0-0 1-1 1-2 2-3 3-4
+! 1996 haben ||| ! in 1996 , ||| 0-0 1-1 1-2 2-3
+! 1996 ||| ! in 1996 ||| 0-0 1-1 1-2
+! 20 % des ||| . twenty per cent of the territory ||| 0-0 1-1 2-2 2-3 3-4 3-5
+! 20 % des ||| . twenty per cent of the ||| 0-0 1-1 2-2 2-3 3-4 3-5
+! 20 % ||| . twenty per cent ||| 0-0 1-1 2-2 2-3
+! 20 Prozent der jungen Frauen ||| . 20 % of young women ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! 20 Prozent der jungen ||| . 20 % of young ||| 0-0 1-1 2-2 3-3 4-4
+! 20 Prozent der ||| . 20 % of ||| 0-0 1-1 2-2 3-3
+! 20 Prozent ||| . 20 % ||| 0-0 1-1 2-2
+! 20 ||| . 20 ||| 0-0 1-1
+! 20 ||| . twenty ||| 0-0 1-1
+! 2002 wird ein entscheidendes Jahr ||| , 2002 will be a crucial year ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-6
+! 2002 wird ein entscheidendes ||| , 2002 will be a crucial ||| 0-0 1-1 2-2 2-3 3-4 4-5
+! 2002 wird ein ||| , 2002 will be a ||| 0-0 1-1 2-2 2-3 3-4
+! 2002 wird ||| , 2002 will be ||| 0-0 1-1 2-2 2-3
+! 2002 ||| , 2002 ||| 0-0 1-1
+! 2003 ||| 2003 ||| 1-0
+! 2004 war die UKIP die einzige ||| ! ||| 0-0 1-0
+! 2004 war die UKIP die ||| ! ||| 0-0 1-0
+! 2004 war die UKIP ||| ! ||| 0-0 1-0
+! 2004 war die ||| ! ||| 0-0 1-0
+! 2004 war ||| ! ||| 0-0 1-0
+! 2004 war ||| , 2004 was ||| 0-0 1-1 2-2
+! 2004 ||| ! 2004 may ||| 0-0 1-1
+! 2004 ||| ! 2004 ||| 0-0 1-1
+! 2004 ||| ! ||| 0-0 1-0
+! 2004 ||| , 2004 ||| 0-0 1-1
+! 2005 war ||| , 2005 has ||| 0-0 1-1 2-2
+! 2005 wird ||| , 2005 will ||| 0-0 1-1 2-2
+! 2005 ||| , 2005 ||| 0-0 1-1
+! 2005 ||| , 2005 ||| 0-0 1-1
+! 2010 ist eigentlich schon morgen ||| , 2010 is just round the corner ||| 0-0 1-1 2-2 3-3 4-3 4-4 5-6
+! 2010 ist eigentlich schon ||| , 2010 is just round the ||| 0-0 1-1 2-2 3-3 4-3 4-4
+! 2010 ist eigentlich schon ||| , 2010 is just round ||| 0-0 1-1 2-2 3-3 4-3 4-4
+! 2010 ist ||| , 2010 is ||| 0-0 1-1 2-2
+! 2010 ||| , 2010 ||| 0-0 1-1
+! 91 % gehen an Rechtsinhaber , ||| the other 91 % goes to holders ||| 0-0 1-2 2-3 3-4 4-5 5-6
+! 91 % gehen an Rechtsinhaber ||| the other 91 % goes to holders ||| 0-0 1-2 2-3 3-4 4-5 5-6
+! 91 % gehen an ||| the other 91 % goes to ||| 0-0 1-2 2-3 3-4 4-5
+! 91 % gehen ||| the other 91 % goes ||| 0-0 1-2 2-3 3-4
+! 91 % ||| the other 91 % ||| 0-0 1-2 2-3
+! 91 ||| the other 91 ||| 0-0 1-2
+! 99 % ||| 99 % ||| 1-0 2-1
+! 99 ||| 99 ||| 1-0
+! ; und aus Angola , Dom ||| ! ; and from Angola , Dom ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! ; und aus Angola , ||| ! ; and from Angola , ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! ; und aus Angola ||| ! ; and from Angola ||| 0-0 1-1 2-2 3-3 4-4
+! ; und aus ||| ! ; and from ||| 0-0 1-1 2-2 3-3
+! ; und ||| ! ; and ||| 0-0 1-1 2-2
+! ; ||| ! ; ||| 0-0 1-1
+! ? " ||| ? " ||| 1-0 2-1
+! ? ? ||| ! ||| 0-0 1-0 2-0
+! ? ? ||| ! ’ ||| 0-0 1-0 2-0
+! ? Inshaallah . ' ||| , ' inshallah ' . ||| 0-0 2-1 1-2 2-2 4-3 3-4
+! ? Inshaallah ||| , ' inshallah ||| 0-0 2-1 1-2 2-2
+! ? ||| . ' ||| 0-0 1-1
+! ? ||| ? ! ||| 1-0 0-1
+! ? ||| ? ||| 1-0
+! Airbus ist eine europäische Erfolgsgeschichte ||| , Airbus is a European success story ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! Airbus ist eine europäische ||| , Airbus is a European ||| 0-0 1-1 2-2 3-3 4-4
+! Airbus ist eine ||| , Airbus is a ||| 0-0 1-1 2-2 3-3
+! Airbus ist ||| , Airbus is ||| 0-0 1-1 2-2
+! Airbus ||| , Airbus ||| 0-0 1-1
+! Algerien ist schwerkrank ||| , Algeria is a very ill country ||| 0-0 1-1 2-2 3-4
+! Algerien ist schwerkrank ||| , Algeria is a very ill ||| 0-0 1-1 2-2 3-4
+! Algerien ist schwerkrank ||| , Algeria is a very ||| 0-0 1-1 2-2 3-4
+! Algerien ist ||| , Algeria is a ||| 0-0 1-1 2-2
+! Algerien ist ||| , Algeria is ||| 0-0 1-1 2-2
+! Algerien ||| , Algeria ||| 0-0 1-1
+! Alkoholkonsum ist eine Gewohnheit , die ||| , alcohol consumption is a habit ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Alkoholkonsum ist eine Gewohnheit , ||| , alcohol consumption is a habit ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Alkoholkonsum ist eine Gewohnheit ||| , alcohol consumption is a habit ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Alkoholkonsum ist eine ||| , alcohol consumption is a ||| 0-0 1-1 1-2 2-3 3-4
+! Alkoholkonsum ist ||| , alcohol consumption is ||| 0-0 1-1 1-2 2-3
+! Alkoholkonsum ||| , alcohol consumption ||| 0-0 1-1 1-2
+! Anfang Juli hat sich Filip ||| , at the beginning of July Filip ||| 0-0 1-1 1-2 1-3 2-5 5-6
+! Anfang Juli hat sich ||| , at the beginning of July ||| 0-0 1-1 1-2 1-3 2-5
+! Anfang Juli hat ||| , at the beginning of July ||| 0-0 1-1 1-2 1-3 2-5
+! Anfang Juli ||| , at the beginning of July ||| 0-0 1-1 1-2 1-3 2-5
+! Anfang dieses Jahres haben sich die ||| , earlier this year the ||| 0-0 1-1 2-2 3-3 6-4
+! Anfang dieses Jahres haben sich ||| , earlier this year ||| 0-0 1-1 2-2 3-3
+! Anfang dieses Jahres haben ||| , earlier this year ||| 0-0 1-1 2-2 3-3
+! Anfang dieses Jahres ||| , earlier this year ||| 0-0 1-1 2-2 3-3
+! Anfang dieses ||| , earlier this ||| 0-0 1-1 2-2
+! Anfang ||| , at the beginning of ||| 0-0 1-1 1-2 1-3
+! Anfang ||| , at the beginning ||| 0-0 1-1 1-2 1-3
+! Anfang ||| , earlier ||| 0-0 1-1
+! Anlass ||| , the occasion ||| 0-0 1-1 1-2
+! Armut hat ||| , poverty has ||| 0-0 1-1 2-2
+! Armut und soziale Ausgrenzung ||| , poverty and social exclusion ||| 0-0 1-1 2-2 3-3 4-4
+! Armut und soziale ||| , poverty and social ||| 0-0 1-1 2-2 3-3
+! Armut und ||| , poverty and ||| 0-0 1-1 2-2
+! Armut ||| , poverty ||| 0-0 1-1
+! Armut ||| , poverty ||| 0-0 1-1
+! Aufgabe der Konferenz von Bali ||| , the remit of the Bali Conference ||| 0-0 1-2 2-3 2-4 4-5 5-5 3-6
+! Aufgabe der ||| , the remit of the ||| 0-0 1-2 2-3 2-4
+! Aufgabe ||| , the remit ||| 0-0 1-2
+! Aus- und Fortbildung wird ||| , training and education will be a ||| 0-0 1-1 2-2 3-3 4-4 4-5
+! Aus- und Fortbildung wird ||| , training and education will be ||| 0-0 1-1 2-2 3-3 4-4 4-5
+! Aus- und Fortbildung ||| , training and education ||| 0-0 1-1 2-2 3-3
+! Aus- und ||| , training and ||| 0-0 1-1 2-2
+! Aus- ||| , training ||| 0-0 1-1
+! Außenpolitik muß ||| and gentlemen , foreign policy needs to ||| 0-1 0-2 1-3 1-4 2-5 2-6
+! Außenpolitik muß ||| gentlemen , foreign policy needs to ||| 0-0 0-1 1-2 1-3 2-4 2-5
+! Außenpolitik ||| , ladies and gentlemen , foreign policy ||| 0-3 0-4 1-5 1-6
+! Außenpolitik ||| and gentlemen , foreign policy ||| 0-1 0-2 1-3 1-4
+! Außenpolitik ||| gentlemen , foreign policy ||| 0-0 0-1 1-2 1-3
+! Außenpolitik ||| ladies and gentlemen , foreign policy ||| 0-2 0-3 1-4 1-5
+! Beifall an den tschechischen ||| , let us applaud the Czech ||| 0-0 0-1 0-2 1-3 3-4 4-5
+! Beifall an den ||| , let us applaud the ||| 0-0 0-1 0-2 1-3 3-4
+! Beifall an ||| , let us applaud ||| 0-0 0-1 0-2 1-3
+! Beifall ||| , let us applaud ||| 0-0 0-1 0-2 1-3
+! Belarus gehörte im Laufe der Geschichte ||| , throughout history , Belarus has belonged ||| 3-1 4-1 6-2 0-3 1-4 2-5 2-6
+! Belarus gehörte im Laufe der Geschichte ||| throughout history , Belarus has belonged ||| 3-0 4-0 6-1 0-2 1-3 2-4 2-5
+! Belarus gehörte ||| , Belarus has belonged ||| 0-0 1-1 2-2 2-3
+! Belarus ||| , Belarus ||| 0-0 1-1
+! Belgien hat offenbar ||| , it does seem that Belgium has ||| 0-0 3-1 3-2 3-3 3-4 1-5 2-6
+! Beschäftigungspolitik und soziale Sicherheit gehören ||| , employment policy and social security go ||| 0-0 1-1 1-2 2-3 3-4 4-5 5-6
+! Beschäftigungspolitik und soziale Sicherheit ||| , employment policy and social security ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Beschäftigungspolitik und soziale ||| , employment policy and social ||| 0-0 1-1 1-2 2-3 3-4
+! Beschäftigungspolitik und ||| , employment policy and ||| 0-0 1-1 1-2 2-3
+! Beschäftigungspolitik ||| , employment policy ||| 0-0 1-1 1-2
+! Betriebsstilllegungen wie jetzt in ||| , plant closures like this one in ||| 0-0 1-1 1-2 2-3 3-4 4-6
+! Betriebsstilllegungen wie jetzt ||| , plant closures like this one ||| 0-0 1-1 1-2 2-3 3-4
+! Betriebsstilllegungen wie jetzt ||| , plant closures like this ||| 0-0 1-1 1-2 2-3 3-4
+! Betriebsstilllegungen wie ||| , plant closures like ||| 0-0 1-1 1-2 2-3
+! Betriebsstilllegungen ||| , plant closures ||| 0-0 1-1 1-2
+! Beziehungen zu Nachbarn sind ||| , links with neighbours are ||| 0-0 1-1 2-2 3-3 4-4
+! Beziehungen zu Nachbarn ||| , links with neighbours ||| 0-0 1-1 2-2 3-3
+! Beziehungen zu ||| , links with ||| 0-0 1-1 2-2
+! Beziehungen ||| , links ||| 0-0 1-1
+! Bezug ||| the ||| 0-0
+! Biozide , das sind Produkte , ||| , biocides are products that ||| 0-0 2-0 1-1 4-2 5-3 6-4
+! Biozide , das sind Produkte ||| , biocides are products ||| 0-0 2-0 1-1 4-2 5-3
+! Biozide , das sind ||| , biocides are ||| 0-0 2-0 1-1 4-2
+! Biozide , das ||| , biocides ||| 0-0 2-0 1-1
+! Biozide , ||| , biocides ||| 0-0 2-0 1-1
+! Birma ||| , Burma ||| 0-0 1-1
+! Bosnien-Herzegowina ist im Grunde ||| , Bosnia-Herzegovina is , in fact , ||| 0-0 1-1 2-2 3-4 4-5 4-6
+! Bosnien-Herzegowina ist im ||| , Bosnia-Herzegovina is , in ||| 0-0 1-1 2-2 3-4
+! Bosnien-Herzegowina ist ||| , Bosnia-Herzegovina is , ||| 0-0 1-1 2-2
+! Bosnien-Herzegowina ist ||| , Bosnia-Herzegovina is ||| 0-0 1-1 2-2
+! Bosnien-Herzegowina ||| , Bosnia-Herzegovina ||| 0-0 1-1
+! Bovine spongiforme Enzephalopathie , Dioxin , ||| , bovine spongiform encephalopathy , dioxin , ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Bovine spongiforme Enzephalopathie , Dioxin ||| , bovine spongiform encephalopathy , dioxin ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Bovine spongiforme Enzephalopathie , ||| , bovine spongiform encephalopathy , ||| 0-0 1-1 2-2 3-3 4-4
+! Bovine spongiforme Enzephalopathie ||| , bovine spongiform encephalopathy ||| 0-0 1-1 2-2 3-3
+! Bovine spongiforme ||| , bovine spongiform ||| 0-0 1-1 2-2
+! Bovine ||| , bovine ||| 0-0 1-1
+! Burma taucht regelmäßig als Thema ||| , Burma is a regular theme ||| 0-0 1-1 2-2 4-3 3-4 5-5
+! Burma taucht regelmäßig als ||| , Burma is a regular ||| 0-0 1-1 2-2 4-3 3-4
+! Burma taucht ||| , Burma is ||| 0-0 1-1 2-2
+! Burma ||| , Burma ||| 0-0 1-1
+! Bücher sind ein wichtiges Medium ||| , books are an important instrument ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Bücher sind ein wichtiges ||| , books are an important ||| 0-0 1-1 2-2 3-3 4-4
+! Bücher sind ein ||| , books are an ||| 0-0 1-1 2-2 3-3
+! Bücher sind ||| , books are ||| 0-0 1-1 2-2
+! Bücher ||| , books ||| 0-0 1-1
+! Cancún ist ebenso ein Misserfolg wie ||| , Cancún was a failure just like ||| 0-0 1-1 2-2 4-3 5-4 6-5 6-6
+! Cancún ist ebenso ein Misserfolg ||| , Cancún was a failure ||| 0-0 1-1 2-2 4-3 5-4
+! Cancún ist ebenso ein ||| , Cancún was a ||| 0-0 1-1 2-2 4-3
+! Cancún ist ebenso ||| , Cancún was ||| 0-0 1-1 2-2
+! Cancún ist ||| , Cancún was ||| 0-0 1-1 2-2
+! Cancún ||| , Cancún ||| 0-0 1-1
+! Chaos , wie es vom ||| ' to the chaos that the ||| 0-2 1-3 2-4 4-4 5-5
+! Chaos , wie es vom ||| no ' to the chaos that the ||| 0-3 1-4 2-5 4-5 5-6
+! Chaos , wie es vom ||| the chaos that the ||| 0-0 1-1 2-2 4-2 5-3
+! Chaos , wie es vom ||| to the chaos that the ||| 0-1 1-2 2-3 4-3 5-4
+! Chaos , wie es ||| ' no ' to the chaos that ||| 0-4 1-5 2-6 4-6
+! Chaos , wie es ||| ' to the chaos that ||| 0-2 1-3 2-4 4-4
+! Chaos , wie es ||| no ' to the chaos that ||| 0-3 1-4 2-5 4-5
+! Chaos , wie es ||| the chaos that ||| 0-0 1-1 2-2 4-2
+! Chaos , wie es ||| to the chaos that ||| 0-1 1-2 2-3 4-3
+! Chaos ||| ' no ' to the chaos ||| 0-4 1-5
+! Chaos ||| ' to the chaos ||| 0-2 1-3
+! Chaos ||| no ' to the chaos ||| 0-3 1-4
+! Chaos ||| the chaos ||| 0-0 1-1
+! Chaos ||| to the chaos ||| 0-1 1-2
+! Clearing und Abrechnung sind ein wesentliches ||| , clearing and settlement are an essential ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Clearing und Abrechnung sind ein ||| , clearing and settlement are an ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Clearing und Abrechnung sind ||| , clearing and settlement are ||| 0-0 1-1 2-2 3-3 4-4
+! Clearing und Abrechnung ||| , clearing and settlement ||| 0-0 1-1 2-2 3-3
+! Clearing und ||| , clearing and ||| 0-0 1-1 2-2
+! Clearing ||| , clearing ||| 0-0 1-1
+! Dank an Constanze ||| I am obliged to ||| 0-0 1-1 1-2 3-2 2-3
+! Dank der Arbeit Ihres ||| , thanks to the work of your ||| 0-0 1-1 2-3 3-4 4-5 4-6
+! Dank der Arbeit ||| , thanks to the work ||| 0-0 1-1 2-3 3-4
+! Dank der ||| , thanks to the ||| 0-0 1-1 2-3
+! Dank ||| , thanks to ||| 0-0 1-1
+! Dank ||| , thanks ||| 0-0 1-1
+! Dogan gehört zu den Köpfen ||| , Dogan is one of the heads ||| 0-0 1-1 2-2 2-3 3-3 4-5 5-6
+! Dogan gehört zu den ||| , Dogan is one of the ||| 0-0 1-1 2-2 2-3 3-3 4-5
+! Dogan gehört zu ||| , Dogan is one of ||| 0-0 1-1 2-2 2-3 3-3
+! Dogan gehört zu ||| , Dogan is one ||| 0-0 1-1 2-2 2-3 3-3
+! Dogan ||| , Dogan ||| 0-0 1-1
+! Doris Pack hat ||| , Mrs Pack has ||| 0-0 1-1 2-2 3-3
+! Doris Pack ||| , Mrs Pack ||| 0-0 1-1 2-2
+! Doris ||| , Mrs ||| 0-0 1-1
+! Echelon existiert ||| , ECHELON exists , as has already ||| 0-0 1-1 2-2
+! Echelon existiert ||| , ECHELON exists , as has ||| 0-0 1-1 2-2
+! Echelon existiert ||| , ECHELON exists , as ||| 0-0 1-1 2-2
+! Echelon existiert ||| , ECHELON exists , ||| 0-0 1-1 2-2
+! Echelon existiert ||| , ECHELON exists ||| 0-0 1-1 2-2
+! Echelon ||| , ECHELON ||| 0-0 1-1
+! Emissionsrechte sind keine ||| , emission allowances are not ||| 0-0 1-1 1-2 2-3 3-4
+! Emissionsrechte sind ||| , emission allowances are ||| 0-0 1-1 1-2 2-3
+! Emissionsrechte ||| , emission allowances ||| 0-0 1-1 1-2
+! Energie stellt einen entscheidenden Faktor in ||| , energy is a crucial factor as ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Energie stellt einen entscheidenden Faktor ||| , energy is a crucial factor ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Energie stellt einen entscheidenden ||| , energy is a crucial ||| 0-0 1-1 2-2 3-3 4-4
+! Energie stellt einen ||| , energy is a ||| 0-0 1-1 2-2 3-3
+! Energie stellt ||| , energy is ||| 0-0 1-1 2-2
+! Energie ||| , energy ||| 0-0 1-1
+! Energieabhängigkeit ist das Thema Nummer eins ||| , energy dependence is priority number one ||| 0-0 1-1 1-2 2-3 4-4 5-4 5-5 6-6
+! Energieabhängigkeit ist das Thema Nummer ||| , energy dependence is priority number ||| 0-0 1-1 1-2 2-3 4-4 5-4 5-5
+! Energieabhängigkeit ist das ||| , energy dependence is ||| 0-0 1-1 1-2 2-3
+! Energieabhängigkeit ist ||| , energy dependence is ||| 0-0 1-1 1-2 2-3
+! Energieabhängigkeit ||| , energy dependence ||| 0-0 1-1 1-2
+! Entschuldigung , ||| , and I apologise ||| 0-0 1-3
+! Entschuldigung , ||| of the tongue , and I apologise ||| 0-3 1-6
+! Entschuldigung , ||| the tongue , and I apologise ||| 0-2 1-5
+! Entschuldigung , ||| tongue , and I apologise ||| 0-1 1-4
+! Entschuldigung ||| , and I apologise ||| 0-0 1-3
+! Entschuldigung ||| of the tongue , and I apologise ||| 0-3 1-6
+! Entschuldigung ||| the tongue , and I apologise ||| 0-2 1-5
+! Entschuldigung ||| tongue , and I apologise ||| 0-1 1-4
+! Entwicklungszusammenarbeit und Handel sind ||| , development cooperation and trade are ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Entwicklungszusammenarbeit und Handel ||| , development cooperation and trade ||| 0-0 1-1 1-2 2-3 3-4
+! Entwicklungszusammenarbeit und ||| , development cooperation and ||| 0-0 1-1 1-2 2-3
+! Entwicklungszusammenarbeit ||| , development cooperation ||| 0-0 1-1 1-2
+! Erfahrungen sind nicht wirklichkeitsfremd ||| , there is nothing fanciful about experience ||| 0-0 2-2 3-3 4-4 4-5 1-6
+! Erzeugnisse aus den besetzten Gebieten sind ||| , products from the Occupied Territories are ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Erzeugnisse aus den besetzten Gebieten ||| , products from the Occupied Territories ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Erzeugnisse aus den besetzten ||| , products from the Occupied ||| 0-0 1-1 2-2 3-3 4-4
+! Erzeugnisse aus den ||| , products from the ||| 0-0 1-1 2-2 3-3
+! Erzeugnisse aus ||| , products from ||| 0-0 1-1 2-2
+! Erzeugnisse ||| , products ||| 0-0 1-1
+! Europa befindet sich gegenwärtig in einer ||| , Europe is currently going through a ||| 0-0 1-1 2-2 3-2 4-3 5-5 6-6
+! Europa befindet sich gegenwärtig in ||| , Europe is currently going through ||| 0-0 1-1 2-2 3-2 4-3 5-5
+! Europa befindet sich gegenwärtig ||| , Europe is currently going ||| 0-0 1-1 2-2 3-2 4-3
+! Europa befindet sich gegenwärtig ||| , Europe is currently ||| 0-0 1-1 2-2 3-2 4-3
+! Europa befindet sich ||| , Europe is ||| 0-0 1-1 2-2 3-2
+! Europa hat ||| , Europe has ||| 0-0 1-1 2-2
+! Europa ist ein großes Ideal : ||| , Europe is a great ideal : ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Europa ist ein großes Ideal ||| , Europe is a great ideal ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Europa ist ein großes ||| , Europe is a great ||| 0-0 1-1 2-2 3-3 4-4
+! Europa ist ein ||| , Europe is a ||| 0-0 1-1 2-2 3-3
+! Europa ist ||| , Europe is ||| 0-0 1-1 2-2
+! Europa muss ||| , Europe must ||| 0-0 1-1 2-2
+! Europa und das Europäische Parlament ||| , Europe and the European Parliament ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Europa und das Europäische ||| , Europe and the European ||| 0-0 1-1 2-2 3-3 4-4
+! Europa und das ||| , Europe and the ||| 0-0 1-1 2-2 3-3
+! Europa und ||| , Europe and ||| 0-0 1-1 2-2
+! Europa unter Wasser , Europa im ||| , Europe under water , Europe under ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Europa unter Wasser , Europa ||| , Europe under water , Europe ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Europa unter Wasser , ||| , Europe under water , ||| 0-0 1-1 2-2 3-3 4-4
+! Europa unter Wasser ||| , Europe under water ||| 0-0 1-1 2-2 3-3
+! Europa unter ||| , Europe under ||| 0-0 1-1 2-2
+! Europa verdient Besseres als dieses ||| , Europeans deserve more than the ||| 0-0 1-1 2-2 3-2 3-3 4-4 5-5
+! Europa verdient Besseres als ||| , Europeans deserve more than ||| 0-0 1-1 2-2 3-2 3-3 4-4
+! Europa verdient Besseres ||| , Europeans deserve more ||| 0-0 1-1 2-2 3-2 3-3
+! Europa wurde gebeten ||| , Europe has been asked ||| 0-0 1-1 2-2 2-3 3-4
+! Europa wurde ||| , Europe has been ||| 0-0 1-1 2-2 2-3
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europe ||| 0-0 1-1
+! Europa ||| , Europeans ||| 0-0 1-1
+! Europas Zukunft ist in hohem Maße ||| that Europe 's future is largely ||| 0-0 1-1 1-2 2-3 3-4 5-5 6-5
+! Europas Zukunft ist in ||| that Europe 's future is ||| 0-0 1-1 1-2 2-3 3-4
+! Europas Zukunft ist ||| that Europe 's future is ||| 0-0 1-1 1-2 2-3 3-4
+! Europas Zukunft ||| that Europe 's future ||| 0-0 1-1 1-2 2-3
+! Europas modernisierte Industriepolitik , ||| , Europe 's updated industrial policy , ||| 0-0 1-1 1-2 2-3 3-4 3-5 4-6
+! Europas modernisierte Industriepolitik ||| , Europe 's updated industrial policy ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! Europas modernisierte ||| , Europe 's updated ||| 0-0 1-1 1-2 2-3
+! Europas ||| , Europe 's ||| 0-0 1-1 1-2
+! Europas ||| that Europe 's ||| 0-0 1-1 1-2
+! Europäische Solidarität wird greifbar ||| , European solidarity is within our grasp ||| 0-0 1-1 2-2 3-3 4-4 4-5 4-6
+! Europäische Solidarität wird ||| , European solidarity is ||| 0-0 1-1 2-2 3-3
+! Europäische Solidarität ||| , European solidarity ||| 0-0 1-1 2-2
+! Europäische ||| , European ||| 0-0 1-1
+! Feinstaubemissionen ||| , particulate-matter emissions ||| 0-0 0-1 1-1 1-2
+! Feinstaubemissionen ||| Commission , particulate-matter emissions ||| 0-1 0-2 1-2 1-3
+! Feinstaubemissionen ||| of the Commission , particulate-matter emissions ||| 0-3 0-4 1-4 1-5
+! Feinstaubemissionen ||| the Commission , particulate-matter emissions ||| 0-2 0-3 1-3 1-4
+! Finnland hat ||| , Finland is ||| 0-0 1-1 2-2
+! Finnland ||| , Finland ||| 0-0 1-1
+! Finnland ||| , Finland ||| 0-0 1-1
+! Finnland übernimmt ||| , Finland is taking over ||| 0-0 1-1 2-2 2-3 2-4
+! Francis Bacon hat gesagt : " ||| , Francis Bacon said that whoever ||| 0-0 1-1 2-2 5-2 6-2 3-3 4-3 5-4
+! Francis Bacon hat gesagt : " ||| , Francis Bacon said that ||| 0-0 1-1 2-2 5-2 6-2 3-3 4-3 5-4
+! Francis ||| , Francis ||| 0-0 1-1
+! Frau Angelilli führte aus , daß ||| Representative , Mrs Angelilli commented that ||| 0-0 0-1 1-2 2-3 3-3 2-4 5-5 6-5
+! Frau Angelilli führte aus ||| Representative , Mrs Angelilli commented ||| 0-0 0-1 1-2 2-3 3-3 2-4
+! Frau Angelilli führte ||| Representative , Mrs Angelilli commented ||| 0-0 0-1 1-2 2-3 3-3 2-4
+! Frau Doyle hat bei ||| , as Mrs Doyle has ||| 0-0 4-1 1-2 2-3 3-4
+! Frau Ferrero-Waldner kann an ||| , Mrs Ferrero-Waldner is unable to ||| 0-0 1-1 2-2 3-3 3-4 4-5
+! Frau Ferrero-Waldner kann ||| , Mrs Ferrero-Waldner is unable ||| 0-0 1-1 2-2 3-3 3-4
+! Frau Ferrero-Waldner ||| , Mrs Ferrero-Waldner ||| 0-0 1-1 2-2
+! Frau Flautre , ||| , Mrs Flautre ||| 0-0 1-1 2-2
+! Frau Flautre ||| , Mrs Flautre ||| 0-0 1-1 2-2
+! Frau Kommissarin , ||| ; Commissioner , ||| 0-0 1-1 2-1 3-2
+! Frau Kommissarin Wallström hat am Ende ||| , Commissioner Wallström ended ||| 0-0 1-1 2-1 3-2 4-3 5-3 6-3
+! Frau Kommissarin Wallström ||| , Commissioner Wallström ||| 0-0 1-1 2-1 3-2
+! Frau Kommissarin ||| , Commissioner ||| 0-0 1-1 2-1
+! Frau Kommissarin ||| ; Commissioner ||| 0-0 1-1 2-1
+! Frau Martens hat ||| , Mrs Martens has ||| 0-0 1-1 2-2 3-3
+! Frau Martens ||| , Mrs Martens ||| 0-0 1-1 2-2
+! Frau Plooij-van Gorsel zeichnet ein ||| , Mrs Plooij-van Gorsel is painting a ||| 0-0 1-1 2-2 3-3 4-4 4-5 5-6
+! Frau Plooij-van Gorsel zeichnet ||| , Mrs Plooij-van Gorsel is painting ||| 0-0 1-1 2-2 3-3 4-4 4-5
+! Frau Plooij-van Gorsel ||| , Mrs Plooij-van Gorsel ||| 0-0 1-1 2-2 3-3
+! Frau Plooij-van ||| , Mrs Plooij-van ||| 0-0 1-1 2-2
+! Frau Torres Marques hat sehr ||| , Mrs Torres Marques has done an ||| 0-0 1-1 2-2 3-3 4-4 5-6
+! Frau Torres Marques hat ||| , Mrs Torres Marques has done ||| 0-0 1-1 2-2 3-3 4-4
+! Frau Torres Marques hat ||| , Mrs Torres Marques has ||| 0-0 1-1 2-2 3-3 4-4
+! Frau Torres Marques ||| , Mrs Torres Marques ||| 0-0 1-1 2-2 3-3
+! Frau Torres ||| , Mrs Torres ||| 0-0 1-1 2-2
+! Frau in ' t Veld hat ||| , Mrs in ' t Veld is ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Frau in ' t Veld ||| , Mrs in ' t Veld ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Frau in ' t ||| , Mrs in ' t ||| 0-0 1-1 2-2 3-3 4-4
+! Frau in ' ||| , Mrs in ' ||| 0-0 1-1 2-2 3-3
+! Frau in ||| , Mrs in ||| 0-0 1-1 2-2
+! Frau ||| , Mrs ||| 0-0 1-1
+! Frau ||| , Mrs ||| 0-0 1-1
+! Frau ||| , Mrs ||| 0-0 1-1
+! Frau ||| , Mrs ||| 0-0 1-1
+! Frau ||| , Mrs ||| 0-0 1-1
+! Frau ||| , Mrs ||| 0-0 1-1
+! Frau ||| Representative , Mrs ||| 0-0 0-1 1-2
+! Galileo könnte auch den Untertitel " ||| , Galileo could also be subtitled ' ||| 0-0 1-1 2-2 3-3 5-4 4-5 5-5 6-6
+! Galileo könnte auch den Untertitel ||| , Galileo could also be subtitled ||| 0-0 1-1 2-2 3-3 5-4 4-5 5-5
+! Galileo könnte auch ||| , Galileo could also ||| 0-0 1-1 2-2 3-3
+! Galileo könnte ||| , Galileo could ||| 0-0 1-1 2-2
+! Galileo ||| , Galileo ||| 0-0 1-1
+! General de Gaulle sagte ||| , General de Gaulle said ||| 0-0 1-1 2-2 3-3 4-4
+! General de Gaulle sagte über Valéry ||| , General de Gaulle said of Valéry ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! General de Gaulle sagte über ||| , General de Gaulle said of ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! General de Gaulle ||| , General de Gaulle ||| 0-0 1-1 2-2 3-3
+! General de ||| , General de ||| 0-0 1-1 2-2
+! General ||| , General ||| 0-0 1-1
+! Genozid ist auch , wenn ||| : it is also genocide to deprive ||| 0-0 2-2 3-3 1-4 4-5 5-6
+! Genozid ist auch , ||| : it is also genocide to ||| 0-0 2-2 3-3 1-4 4-5
+! Genozid ist auch ||| : it is also genocide ||| 0-0 2-2 3-3 1-4
+! Gesundheit und Verbraucherschutz sind zwei ||| , health and consumer protection are two ||| 0-0 1-1 2-2 3-3 3-4 4-5 5-6
+! Gesundheit und Verbraucherschutz sind ||| , health and consumer protection are ||| 0-0 1-1 2-2 3-3 3-4 4-5
+! Gesundheit und Verbraucherschutz ||| , health and consumer protection ||| 0-0 1-1 2-2 3-3 3-4
+! Gesundheit und ||| , health and ||| 0-0 1-1 2-2
+! Gesundheit ||| , health ||| 0-0 1-1
+! Gewissens- ||| , conscience ||| 0-0 1-1
+! Gleichstellung von Frauen und Männern ist ||| , equality between women and men is ||| 0-0 1-1 1-2 2-2 3-3 4-4 5-5 6-6
+! Gleichstellung von Frauen und Männern ||| , equality between women and men ||| 0-0 1-1 1-2 2-2 3-3 4-4 5-5
+! Gleichstellung von Frauen und ||| , equality between women and ||| 0-0 1-1 1-2 2-2 3-3 4-4
+! Gleichstellung von Frauen ||| , equality between women ||| 0-0 1-1 1-2 2-2 3-3
+! Gleichstellung von ||| , equality between ||| 0-0 1-1 1-2 2-2
+! Griechenland hat ||| , Greece was not ||| 0-0 1-1 2-2
+! Griechenland hat ||| , Greece was ||| 0-0 1-1 2-2
+! Griechenland ||| , Greece ||| 0-0 1-1
+! Heizen und Kühlen machen 49 ||| , heating and cooling accounts for 49 ||| 0-0 1-1 2-2 3-3 3-4 4-4 4-5 5-6
+! Heizen und Kühlen machen ||| , heating and cooling accounts for ||| 0-0 1-1 2-2 3-3 3-4 4-4 4-5
+! Heizen und ||| , heating and ||| 0-0 1-1 2-2
+! Heizen ||| , heating ||| 0-0 1-1
+! Herr Blair , Sie haben erklärt ||| , you have , Mr Blair ||| 3-0 4-1 5-2 0-3 1-4 2-5 6-5
+! Herr Bösch , ich ||| , Mr Bösch , I ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Bösch , ||| , Mr Bösch , ||| 0-0 1-1 2-2 3-3
+! Herr Bösch ||| , Mr Bösch ||| 0-0 1-1 2-2
+! Herr Friedrich , eine Staatsbürgerschaft ist ||| , Mr Friedrich , citizenship must ||| 0-0 1-1 2-2 3-3 5-4 6-5
+! Herr Friedrich , eine Staatsbürgerschaft ||| , Mr Friedrich , citizenship ||| 0-0 1-1 2-2 3-3 5-4
+! Herr Friedrich , eine ||| , Mr Friedrich , ||| 0-0 1-1 2-2 3-3
+! Herr Friedrich , ||| , Mr Friedrich , ||| 0-0 1-1 2-2 3-3
+! Herr Friedrich ||| , Mr Friedrich ||| 0-0 1-1 2-2
+! Herr Galeote Quecedo unterstreicht in ||| , Mr Galeote Quecedo emphasises , in ||| 0-0 1-1 2-2 3-3 4-4 5-6
+! Herr Galeote Quecedo unterstreicht ||| , Mr Galeote Quecedo emphasises , ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Galeote Quecedo unterstreicht ||| , Mr Galeote Quecedo emphasises ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Galeote Quecedo ||| , Mr Galeote Quecedo ||| 0-0 1-1 2-2 3-3
+! Herr Galeote ||| , Mr Galeote ||| 0-0 1-1 2-2
+! Herr Jarzembowski , ich danke Ihnen ||| , Mr Jarzembowski , thank you ||| 0-0 1-1 2-2 3-3 4-4 5-4 6-5
+! Herr Jarzembowski , ich danke ||| , Mr Jarzembowski , thank ||| 0-0 1-1 2-2 3-3 4-4 5-4
+! Herr Jarzembowski , ||| , Mr Jarzembowski , ||| 0-0 1-1 2-2 3-3
+! Herr Jarzembowski ||| , Mr Jarzembowski ||| 0-0 1-1 2-2
+! Herr Kommissar ! ||| . ||| 3-0
+! Herr Kommissar , welche Bereiche ||| , Commissioner , which sectors ||| 0-0 1-1 2-1 3-2 4-3 5-4
+! Herr Kommissar , welche ||| , Commissioner , which ||| 0-0 1-1 2-1 3-2 4-3
+! Herr Kommissar , ||| , Commissioner , ||| 0-0 1-1 2-1 3-2
+! Herr Kommissar Frattini ||| , Commissioner Fratini ||| 0-0 1-1 2-1 3-2
+! Herr Kommissar ||| , Commissioner ||| 0-0 1-1 2-1
+! Herr Kommissar ||| , Commissioner ||| 0-0 1-1 2-1
+! Herr Kommissionspräsident , ||| ) Mr President , ||| 0-0 1-1 2-2 3-3
+! Herr Kommissionspräsident Romano Prodi erhielt ||| , President Prodi was ||| 0-0 0-1 1-1 2-1 3-2 4-2 5-3
+! Herr Kommissionspräsident Romano Prodi ||| , President Prodi ||| 0-0 0-1 1-1 2-1 3-2 4-2
+! Herr Kommissionspräsident ||| ) Mr President ||| 0-0 1-1 2-2
+! Herr Kommissionspräsident ||| , Mr President of the Commission , ||| 0-0 1-1 1-2 2-2 2-3 2-4 2-5
+! Herr Kommissionspräsident ||| , Mr President of the Commission ||| 0-0 1-1 1-2 2-2 2-3 2-4 2-5
+! Herr Kommissionspräsident ||| , President ||| 0-0 0-1 1-1 2-1
+! Herr Kreissl-Dörfler ging ||| , Mr Kreissl-Dörfler went ||| 0-0 1-1 2-2 3-3
+! Herr Kreissl-Dörfler ||| , Mr Kreissl-Dörfler ||| 0-0 1-1 2-2
+! Herr Lannoye hat soeben gesagt ||| , Mr Lannoye stated a moment ago ||| 0-0 1-1 2-2 5-3 4-4 4-5 3-6 4-6
+! Herr Lannoye ||| , Mr Lannoye ||| 0-0 1-1 2-2
+! Herr Morris verdient sicher eine Antwort ||| , Mr Morris certainly deserves an answer ||| 0-0 1-1 2-2 4-3 3-4 5-5 6-6
+! Herr Morris verdient sicher eine ||| , Mr Morris certainly deserves an ||| 0-0 1-1 2-2 4-3 3-4 5-5
+! Herr Morris verdient sicher ||| , Mr Morris certainly deserves ||| 0-0 1-1 2-2 4-3 3-4
+! Herr Morris ||| , Mr Morris ||| 0-0 1-1 2-2
+! Herr Nisticò hat ||| , the report Mr Nisticò has ||| 0-0 0-2 1-3 2-4 3-5
+! Herr Nisticò ||| , the report Mr Nisticò ||| 0-0 0-2 1-3 2-4
+! Herr Palko ist ein führender Vertreter ||| , Mr Palko is a senior representative ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Herr Palko ist ein führender ||| , Mr Palko is a senior ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Herr Palko ist ein ||| , Mr Palko is a ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Palko ist ||| , Mr Palko is ||| 0-0 1-1 2-2 3-3
+! Herr Palko ||| , Mr Palko ||| 0-0 1-1 2-2
+! Herr Peter hat ||| , Mr Peter has ||| 0-0 1-1 2-2 3-3
+! Herr Peter ||| , Mr Peter ||| 0-0 1-1 2-2
+! Herr Piecyk , zunächst mein ||| , Mr Piecyk , I should first ||| 0-0 1-1 2-2 3-3 5-4 4-6
+! Herr Piecyk , ||| , Mr Piecyk , ||| 0-0 1-1 2-2 3-3
+! Herr Piecyk ||| , Mr Piecyk ||| 0-0 1-1 2-2
+! Herr Pohjamo hat in seinen Entschließungsantrag ||| , Mr Pohjamo ' s resolution included ||| 0-0 1-1 2-2 5-4 6-5
+! Herr Pohjamo hat in seinen Entschließungsantrag ||| , Mr Pohjamo ' s resolution ||| 0-0 1-1 2-2 5-4 6-5
+! Herr Pohjamo hat in seinen ||| , Mr Pohjamo ' s ||| 0-0 1-1 2-2 5-4
+! Herr Pohjamo hat in ||| , Mr Pohjamo ' ||| 0-0 1-1 2-2
+! Herr Pohjamo hat in ||| , Mr Pohjamo ||| 0-0 1-1 2-2
+! Herr Pohjamo hat ||| , Mr Pohjamo ' ||| 0-0 1-1 2-2
+! Herr Pohjamo hat ||| , Mr Pohjamo ||| 0-0 1-1 2-2
+! Herr Pohjamo ||| , Mr Pohjamo ' ||| 0-0 1-1 2-2
+! Herr Pohjamo ||| , Mr Pohjamo ||| 0-0 1-1 2-2
+! Herr Poignant weist ||| , as Mr Poignant points out ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! Herr Poignant ||| , as Mr Poignant ||| 0-0 1-1 1-2 2-3
+! Herr Professor Prodi , Sie stellen ||| , Professor Prodi , you are ||| 0-0 2-1 3-2 4-3 5-4 6-5
+! Herr Professor Prodi , Sie ||| , Professor Prodi , you ||| 0-0 2-1 3-2 4-3 5-4
+! Herr Professor Prodi , ||| , Professor Prodi , ||| 0-0 2-1 3-2 4-3
+! Herr Professor Prodi ||| , Professor Prodi ||| 0-0 2-1 3-2
+! Herr Professor ||| , Professor ||| 0-0 2-1
+! Herr Präsident , leider hat der ||| ) Mr President , unfortunately , the ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Herr Präsident , leider hat ||| ) Mr President , unfortunately , ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Herr Präsident , leider ||| ) Mr President , unfortunately ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Präsident , ||| ) Mr President , ||| 0-0 1-1 2-2 3-3
+! Herr Präsident ||| ) Mr President ||| 0-0 1-1 2-2
+! Herr Präsident ||| , Dear Mr. Chairman ||| 0-0 0-1 1-2 2-3
+! Herr Ratspräsident ||| , Mr President ||| 0-0 1-1 2-2
+! Herr Schmid , ich danke Ihnen ||| , Mr Schmid , thank you ||| 0-0 1-1 2-2 3-3 4-4 5-4 6-5
+! Herr Schmid , ich danke ||| , Mr Schmid , thank ||| 0-0 1-1 2-2 3-3 4-4 5-4
+! Herr Schmid , ||| , Mr Schmid , ||| 0-0 1-1 2-2 3-3
+! Herr Schmid ||| , Mr Schmid ||| 0-0 1-1 2-2
+! Herr Schnellhardt hat ||| , Mr Schnellhardt has ||| 0-0 1-1 2-2 3-3
+! Herr Schnellhardt ||| , Mr Schnellhardt ||| 0-0 1-1 2-2
+! Herr Schwab ||| , Mr Schwab 's ||| 0-0 1-1 2-2
+! Herr Schwab ||| , Mr Schwab ||| 0-0 1-1 2-2
+! Herr Swoboda gelangt in seinem Bericht ||| , Mr Swoboda 's report ||| 0-0 1-1 2-2 3-2 4-3 5-3 6-4
+! Herr Swoboda gelangt in seinem ||| , Mr Swoboda 's ||| 0-0 1-1 2-2 3-2 4-3 5-3
+! Herr Swoboda gelangt ||| , Mr Swoboda ||| 0-0 1-1 2-2 3-2
+! Herr Trakatellis und Frau Scheele haben ||| , Mr Trakatellis and Mrs Scheele have ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Herr Trakatellis und Frau Scheele ||| , Mr Trakatellis and Mrs Scheele ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Herr Trakatellis und Frau ||| , Mr Trakatellis and Mrs ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Trakatellis und ||| , Mr Trakatellis and ||| 0-0 1-1 2-2 3-3
+! Herr Trakatellis ||| , Mr Trakatellis ||| 0-0 1-1 2-2
+! Herr Verheugen , Sie ||| , Mr Verheugen , you ||| 0-0 1-1 2-2 3-3 4-4
+! Herr Verheugen , ||| , Mr Verheugen , ||| 0-0 1-1 2-2 3-3
+! Herr Verheugen ||| , Mr Verheugen ||| 0-0 1-1 2-2
+! Herr Whitehead hat ||| , Mr Whitehead has ||| 0-0 1-1 2-2 3-3
+! Herr Whitehead ||| , Mr Whitehead ||| 0-0 1-1 2-2
+! Herr ||| ) Mr ||| 0-0 1-1
+! Herr ||| ) Mr ||| 0-0 1-1
+! Herr ||| , Dear Mr. ||| 0-0 0-1 1-2
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , Mr ||| 0-0 1-1
+! Herr ||| , as Mr ||| 0-0 1-1 1-2
+! Herr ||| , the report Mr ||| 0-0 0-2 1-3
+! Herr ||| , ||| 0-0
+! Herrn Berlatos Bericht befasst sich mit ||| , Mr Berlato 's report deals with ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-5 6-6
+! Herrn Berlatos Bericht befasst sich ||| , Mr Berlato 's report deals ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-5
+! Herrn Berlatos Bericht ||| , Mr Berlato 's report ||| 0-0 1-1 2-2 2-3 3-4
+! Herrn Berlatos ||| , Mr Berlato 's ||| 0-0 1-1 2-2 2-3
+! Herrn ||| , Mr ||| 0-0 1-1
+! Härte auf der einen Seite , ||| ; rigour on the one hand , ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Härte auf der einen Seite ||| ; rigour on the one hand ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Härte auf der einen ||| ; rigour on the one ||| 0-0 1-1 2-2 3-3 4-4
+! Härte auf der ||| ; rigour on the ||| 0-0 1-1 2-2 3-3
+! Härte auf ||| ; rigour on ||| 0-0 1-1 2-2
+! Härte ||| ; rigour ||| 0-0 1-1
+! Ihnen allen ist die Sachlage bekannt ||| , you all know the position ||| 0-0 1-1 2-2 6-3 4-4 5-5
+! Ihnen allen ist ||| , you all ||| 0-0 1-1 2-2
+! Ihnen allen ||| , you all ||| 0-0 1-1 2-2
+! Ihnen dürfte bekannt sein , dass ||| , as you will know , ||| 0-0 1-2 2-3 3-4 5-5
+! Ihnen dürfte bekannt sein , ||| , as you will know , ||| 0-0 1-2 2-3 3-4 5-5
+! Ihnen dürfte bekannt sein ||| , as you will know ||| 0-0 1-2 2-3 3-4
+! Ihnen dürfte bekannt ||| , as you will know ||| 0-0 1-2 2-3 3-4
+! Ihnen dürfte ||| , as you will ||| 0-0 1-2 2-3
+! Ihnen gilt meine Solidarität . ||| and express my solidarity with them . ||| 0-0 1-1 2-1 3-2 4-3 5-6
+! Ihnen gilt meine Solidarität ||| and express my solidarity with them ||| 0-0 1-1 2-1 3-2 4-3
+! Ihnen gilt meine Solidarität ||| and express my solidarity with ||| 0-0 1-1 2-1 3-2 4-3
+! Ihnen gilt meine Solidarität ||| and express my solidarity ||| 0-0 1-1 2-1 3-2 4-3
+! Ihnen gilt meine ||| and express my ||| 0-0 1-1 2-1 3-2
+! Ihnen gilt ||| and express ||| 0-0 1-1 2-1
+! Ihnen ist durchaus bewusst , dass ||| , you are well aware that ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! Ihnen ist durchaus bewusst ||| , you are well aware ||| 0-0 1-1 2-2 3-3 4-4
+! Ihnen ist durchaus ||| , you are well ||| 0-0 1-1 2-2 3-3
+! Ihnen ist ||| , you are ||| 0-0 1-1 2-2
+! Ihnen werden ||| , you will ||| 0-0 1-1 2-2
+! Ihnen ||| , as you ||| 0-0 1-2
+! Ihnen ||| , you ||| 0-0 1-1
+! Ihnen ||| , you ||| 0-0 1-1
+! Ihnen ||| , you ||| 0-0 1-1
+! Information und Wissen bilden die Grundlage ||| , knowledge and know-how are the basis ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Information und Wissen bilden die ||| , knowledge and know-how are the ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Information und Wissen bilden ||| , knowledge and know-how are ||| 0-0 1-1 2-2 3-3 4-4
+! Information und Wissen ||| , knowledge and know-how ||| 0-0 1-1 2-2 3-3
+! Information und ||| , knowledge and ||| 0-0 1-1 2-2
+! Information ||| , knowledge ||| 0-0 1-1
+! Israel hat die militärische Macht und ||| Israel has the military power and ||| 1-0 2-1 3-2 4-3 5-4 6-5
+! Israel hat die militärische Macht ||| Israel has the military power ||| 1-0 2-1 3-2 4-3 5-4
+! Israel hat die militärische ||| Israel has the military ||| 1-0 2-1 3-2 4-3
+! Israel hat die ||| Israel has the ||| 1-0 2-1 3-2
+! Israel hat ||| Israel has ||| 1-0 2-1
+! Israel ||| Israel ||| 1-0
+! Jacques Barrot gehört ja ||| although Mr Barrot belongs ||| 0-0 1-1 1-2 2-2 3-3 4-3
+! Jacques Barrot ||| although Mr Barrot ||| 0-0 1-1 1-2 2-2
+! Joaquim Miranda , vielen Dank ||| , thank you , Mr Miranda , ||| 0-0 4-1 5-1 5-2 0-3 1-4 1-5 2-5 3-6
+! Kleinunternehmen gehören zu ||| , small enterprises ||| 0-0 1-1 1-2 2-2
+! Kleinunternehmen gehören ||| , small enterprises ||| 0-0 1-1 1-2 2-2
+! Kollege Davies sprach von ||| , Mr Davies has been talking about ||| 0-0 1-1 2-2 3-3 3-5 4-6
+! Kollege Davies sprach ||| , Mr Davies has been talking ||| 0-0 1-1 2-2 3-3 3-5
+! Kollege Davies ||| , Mr Davies ||| 0-0 1-1 2-2
+! Kollege Sarlis , ||| , Mr Sarlis , ||| 0-0 1-1 2-2 3-3
+! Kollege Sarlis ||| , Mr Sarlis ||| 0-0 1-1 2-2
+! Kollege ||| , Mr ||| 0-0 1-1
+! Kollege ||| , Mr ||| 0-0 1-1
+! Kommissar Barroso befand sich kürzlich zu ||| , Commissioner Barroso was on a ||| 0-0 1-1 2-2 3-3 6-4 5-5
+! Kommissar Barroso befand sich ||| , Commissioner Barroso was ||| 0-0 1-1 2-2 3-3
+! Kommissar Barroso befand ||| , Commissioner Barroso was ||| 0-0 1-1 2-2 3-3
+! Kommissar Barroso ||| , Commissioner Barroso ||| 0-0 1-1 2-2
+! Kommissar Mandelson ||| , Commissioner Mandelson ||| 0-0 1-1 2-2
+! Kommissar Patten hat ||| , Commissioner Patten has ||| 0-0 0-1 1-1 2-2 3-3
+! Kommissar Patten meinte , wir sollten ||| , Commissioner Patten said that we should ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Kommissar Patten meinte , wir ||| , Commissioner Patten said that we ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Kommissar Patten meinte , ||| , Commissioner Patten said that ||| 0-0 1-1 2-2 3-3 4-4
+! Kommissar Patten meinte ||| , Commissioner Patten said ||| 0-0 1-1 2-2 3-3
+! Kommissar Patten ||| , Commissioner Patten ||| 0-0 0-1 1-1 2-2
+! Kommissar Patten ||| , Commissioner Patten ||| 0-0 1-1 2-2
+! Kommissar Verheugen hat soeben ||| , Commissioner Verheugen has just ||| 0-0 1-1 2-2 3-3 4-4
+! Kommissar Verheugen hat ||| , Commissioner Verheugen has ||| 0-0 1-1 2-2 3-3
+! Kommissar Verheugen ||| , Commissioner Verheugen ||| 0-0 1-1 2-2
+! Kommissar ||| , Commissioner ||| 0-0 0-1 1-1
+! Kommissar ||| , Commissioner ||| 0-0 1-1
+! Kommissar ||| , Commissioner ||| 0-0 1-1
+! Kommissar ||| , Commissioner ||| 0-0 1-1
+! Kommissar ||| , Commissioner ||| 0-0 1-1
+! Kommissarin Ferrero-Waldner hatte Recht , als ||| , Commissioner Ferrero-Waldner was right at the ||| 0-0 1-1 2-2 3-3 4-4 6-6
+! Kommissarin Ferrero-Waldner hatte Recht , ||| , Commissioner Ferrero-Waldner was right at ||| 0-0 1-1 2-2 3-3 4-4
+! Kommissarin Ferrero-Waldner hatte Recht , ||| , Commissioner Ferrero-Waldner was right ||| 0-0 1-1 2-2 3-3 4-4
+! Kommissarin Ferrero-Waldner hatte Recht ||| , Commissioner Ferrero-Waldner was right at ||| 0-0 1-1 2-2 3-3 4-4
+! Kommissarin Ferrero-Waldner hatte Recht ||| , Commissioner Ferrero-Waldner was right ||| 0-0 1-1 2-2 3-3 4-4
+! Kommissarin Ferrero-Waldner hatte ||| , Commissioner Ferrero-Waldner was ||| 0-0 1-1 2-2 3-3
+! Kommissarin Ferrero-Waldner ||| , Commissioner Ferrero-Waldner ||| 0-0 1-1 2-2
+! Kommissarin ||| , Commissioner ||| 0-0 1-1
+! Kommissionspräsident Prodi hat heute vormittag unter ||| , this morning President Prodi , among ||| 0-0 5-1 4-2 5-2 1-3 1-4 2-4 3-5 6-6
+! Kommissionspräsident Prodi hat heute vormittag ||| , this morning President Prodi , ||| 0-0 5-1 4-2 5-2 1-3 1-4 2-4 3-5
+! Kommissionspräsident Prodi hatte ||| , President of the Commission Prodi was ||| 0-0 0-1 1-1 1-2 1-3 1-4 2-5 3-6
+! Kommissionspräsident Prodi ||| , President of the Commission Prodi ||| 0-0 0-1 1-1 1-2 1-3 1-4 2-5
+! Kommissionspräsident ||| , President of the Commission ||| 0-0 0-1 1-1 1-2 1-3 1-4
+! Kyoto ist nicht mehr ||| , this is no longer ||| 0-0 1-1 2-2 3-3 4-4
+! Kyoto ist nicht ||| , this is no ||| 0-0 1-1 2-2 3-3
+! Kyoto ist ||| , this is ||| 0-0 1-1 2-2
+! Kyoto ||| , this ||| 0-0 1-1
+! LIFE + ||| , the intention is that LIFE + ||| 0-0 1-5 2-6
+! LIFE ||| , the intention is that LIFE ||| 0-0 1-5
+! Leidenschaft und ||| ' passion and ||| 0-0 1-1 2-2
+! Leidenschaft und Überzeugung haben unseren ||| ' passion and conviction have ||| 0-0 1-1 2-2 3-3 4-4
+! Leidenschaft und Überzeugung haben ||| ' passion and conviction have ||| 0-0 1-1 2-2 3-3 4-4
+! Leidenschaft und Überzeugung ||| ' passion and conviction ||| 0-0 1-1 2-2 3-3
+! Leidenschaft ||| ' passion ||| 0-0 1-1
+! Mahmoud ||| , so far President Mahmoud ||| 0-0 0-3 1-4
+! Mal sehen , was Sie ||| , let us see what you ||| 0-0 3-0 2-1 2-2 2-3 4-4 5-5
+! Mal sehen , was ||| , let us see what ||| 0-0 3-0 2-1 2-2 2-3 4-4
+! Mal sehen , ||| , let us see ||| 0-0 3-0 2-1 2-2 2-3
+! Malaria und Tuberkulose sind heilbar ||| ! malaria and tuberculosis can be cured ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! Malaria und Tuberkulose sind ||| ! malaria and tuberculosis can ||| 0-0 1-1 2-2 3-3 4-4
+! Malaria und Tuberkulose ||| ! malaria and tuberculosis ||| 0-0 1-1 2-2 3-3
+! Malaria und ||| ! malaria and ||| 0-0 1-1 2-2
+! Malaria ||| ! malaria ||| 0-0 1-1
+! Menschenhandel , wie wir ||| , human trafficking , as we ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Menschenhandel , wie ||| , human trafficking , as ||| 0-0 1-1 1-2 2-3 3-4
+! Menschenhandel , ||| , human trafficking , ||| 0-0 1-1 1-2 2-3
+! Menschenhandel ist ||| , trafficking in human beings is ||| 0-0 1-1 1-2 1-3 1-4 2-5
+! Menschenhandel ||| , human trafficking ||| 0-0 1-1 1-2
+! Menschenhandel ||| , trafficking in human beings ||| 0-0 1-1 1-2 1-3 1-4
+! Minister Sasi hat soeben ||| , Mr Sasi has just ||| 0-0 1-1 2-2 3-3 4-4
+! Minister Sasi hat ||| , Mr Sasi has ||| 0-0 1-1 2-2 3-3
+! Minister Sasi ||| , Mr Sasi ||| 0-0 1-1 2-2
+! Minister ||| , Mr ||| 0-0 1-1
+! Ministerpräsident Meciar spielt mit dem Feuer ||| , President Meciar is playing with fire ||| 0-0 0-1 1-1 2-2 3-3 3-4 4-5 5-6 6-6
+! Ministerpräsident Meciar spielt mit ||| , President Meciar is playing with ||| 0-0 0-1 1-1 2-2 3-3 3-4 4-5
+! Ministerpräsident Meciar spielt ||| , President Meciar is playing ||| 0-0 0-1 1-1 2-2 3-3 3-4
+! Ministerpräsident Meciar ||| , President Meciar ||| 0-0 0-1 1-1 2-2
+! Ministerpräsident ||| , President ||| 0-0 0-1 1-1
+! Mobiltelefon und Internet ||| , the mobile telephone and the Internet ||| 0-0 0-1 1-2 1-3 2-4 3-6
+! Mobiltelefon und ||| , the mobile telephone and the ||| 0-0 0-1 1-2 1-3 2-4
+! Mobiltelefon und ||| , the mobile telephone and ||| 0-0 0-1 1-2 1-3 2-4
+! Mobiltelefon ||| , the mobile telephone ||| 0-0 0-1 1-2 1-3
+! Mosambik ist ein junger afrikanischer Staat ||| , Mozambique is a young African country ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Mosambik ist ein junger afrikanischer ||| , Mozambique is a young African ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Mosambik ist ein junger ||| , Mozambique is a young ||| 0-0 1-1 2-2 3-3 4-4
+! Mosambik ist ein ||| , Mozambique is a ||| 0-0 1-1 2-2 3-3
+! Mosambik ist ||| , Mozambique is ||| 0-0 1-1 2-2
+! Mosambik ||| , Mozambique ||| 0-0 1-1
+! Multiple Sklerose sollte - und muss ||| , multiple sclerosis should - and must ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Multiple Sklerose sollte - und ||| , multiple sclerosis should - and ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Multiple Sklerose sollte - ||| , multiple sclerosis should - ||| 0-0 1-1 2-2 3-3 4-4
+! Multiple Sklerose sollte ||| , multiple sclerosis should ||| 0-0 1-1 2-2 3-3
+! Multiple Sklerose ||| , multiple sclerosis ||| 0-0 1-1 2-2
+! Multiple ||| , multiple ||| 0-0 1-1
+! Nachahmungen und Produktpiraterie sind eben gerade ||| : counterfeiting and product piracy certainly are ||| 0-0 1-1 2-2 3-3 3-4 3-5 5-5 6-5 4-6
+! Nachahmungen und ||| : counterfeiting and ||| 0-0 1-1 2-2
+! Nachahmungen ||| : counterfeiting ||| 0-0 1-1
+! Natura 2000 ist eine der ||| , Natura 2000 is one of the ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! Natura 2000 ist eine ||| , Natura 2000 is one ||| 0-0 1-1 2-2 3-3 4-4
+! Natura 2000 ist ||| , Natura 2000 is ||| 0-0 1-1 2-2 3-3
+! Natura 2000 ||| , Natura 2000 ||| 0-0 1-1 2-2
+! Natura ||| , Natura ||| 0-0 1-1
+! Nein , das ||| but no , it is ||| 0-0 1-0 1-1 2-2 3-3
+! Nein , das ||| but no , it ||| 0-0 1-0 1-1 2-2 3-3
+! Nein , wir wollen keine ||| ; no , we do not want ||| 0-0 1-1 2-2 3-3 4-4 5-5 4-6
+! Nein , wir ||| ; no , we ||| 0-0 1-1 2-2 3-3
+! Nein , ||| ; no , ||| 0-0 1-1 2-2
+! Nein , ||| but no , ||| 0-0 1-0 1-1 2-2
+! Nein ||| ; no ||| 0-0 1-1
+! Nein ||| but no ||| 0-0 1-0 1-1
+! Nepal verdient mehr als eine ||| , Nepal deserves more than ||| 0-0 1-1 2-2 3-3 4-4
+! Nepal verdient mehr als ||| , Nepal deserves more than ||| 0-0 1-1 2-2 3-3 4-4
+! Nepal verdient mehr ||| , Nepal deserves more ||| 0-0 1-1 2-2 3-3
+! Nepal verdient ||| , Nepal deserves ||| 0-0 1-1 2-2
+! Nepal ||| , Nepal ||| 0-0 1-1
+! Olivenöl ist eines der ||| , olive oil is one of the ||| 0-0 1-1 1-2 2-3 3-4 3-5 4-6
+! Olivenöl ist eines ||| , olive oil is one of ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! Olivenöl ist ||| , olive oil is ||| 0-0 1-1 1-2 2-3
+! Olivenöl ||| , olive oil ||| 0-0 1-1 1-2
+! Organtransplantationen retten tatsächlich ||| , organ transplants do indeed save ||| 0-0 1-1 1-2 3-3 3-4 2-5
+! Organtransplantationen ||| , organ transplants ||| 0-0 1-1 1-2
+! Ortega y Gasset sagte , daß ||| Ortega y Gasset said that ||| 1-0 2-1 3-2 4-3 5-4 6-4
+! Ortega y Gasset sagte ||| Ortega y Gasset said ||| 1-0 2-1 3-2 4-3
+! Ortega y Gasset ||| Ortega y Gasset ||| 1-0 2-1 3-2
+! Ortega y ||| Ortega y ||| 1-0 2-1
+! Ortega ||| Ortega ||| 1-0
+! Parlament , Rat und ||| , Parliament , the Council and ||| 0-0 1-1 2-2 3-4 4-5
+! Parlament , Rat ||| , Parliament , the Council ||| 0-0 1-1 2-2 3-4
+! Parlament , ||| , Parliament , the ||| 0-0 1-1 2-2
+! Parlament , ||| , Parliament , ||| 0-0 1-1 2-2
+! Parlament , ||| , this House , ||| 0-0 0-1 1-2 2-3
+! Parlament ||| , Parliament ||| 0-0 1-1
+! Parlament ||| , this House ||| 0-0 0-1 1-2
+! Pascal Lamy und ich ||| , Mr Lamy and I ||| 0-0 1-2 2-2 3-3 4-4
+! Pascal Lamy und ||| , Mr Lamy and ||| 0-0 1-2 2-2 3-3
+! Pascal Lamy ||| , Mr Lamy ||| 0-0 1-2 2-2
+! Patente ||| , ||| 0-0
+! Paul Rübig hat gesagt , ||| , as Mr Rübig said , ||| 0-0 1-1 1-2 2-3 3-4 4-4 5-5
+! Paul Rübig hat gesagt ||| , as Mr Rübig said ||| 0-0 1-1 1-2 2-3 3-4 4-4
+! Paul Rübig ||| , as Mr Rübig ||| 0-0 1-1 1-2 2-3
+! Paul ||| , as Mr ||| 0-0 1-1 1-2
+! Postdienste sind ||| , postal services are ||| 0-0 1-1 1-2 2-3
+! Postdienste ||| , postal services ||| 0-0 1-1 1-2
+! Professor Ukshin Hoti ist eine von ||| , Professor Ukshin Hoti is one of ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Professor Ukshin Hoti ist eine ||| , Professor Ukshin Hoti is one ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Professor Ukshin Hoti ist ||| , Professor Ukshin Hoti is ||| 0-0 1-1 2-2 3-3 4-4
+! Professor Ukshin Hoti ||| , Professor Ukshin Hoti ||| 0-0 1-1 2-2 3-3
+! Professor Ukshin ||| , Professor Ukshin ||| 0-0 1-1 2-2
+! Professor ||| , Professor ||| 0-0 1-1
+! Präsident Barroso spricht immer von einem ||| , President Barroso always speaks of a ||| 0-0 1-1 2-2 4-3 3-4 5-5 6-6
+! Präsident Barroso spricht immer von ||| , President Barroso always speaks of ||| 0-0 1-1 2-2 4-3 3-4 5-5
+! Präsident Barroso spricht immer ||| , President Barroso always speaks ||| 0-0 1-1 2-2 4-3 3-4
+! Präsident Barroso ||| , President Barroso ||| 0-0 1-1 2-2
+! Präsident Chirac hat sich ||| , President Chirac says he would ||| 0-0 1-1 2-2 2-3 3-3 2-4 4-5
+! Präsident Chirac hat ||| , President Chirac says he ||| 0-0 1-1 2-2 2-3 3-3 2-4
+! Präsident ||| , President ||| 0-0 1-1
+! Präsident ||| , President ||| 0-0 1-1
+! Rassismus und Fremdenfeindlichkeit haben selbst ||| , racism and xenophobia have even ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Rassismus und Fremdenfeindlichkeit haben ||| , racism and xenophobia have ||| 0-0 1-1 2-2 3-3 4-4
+! Rassismus und Fremdenfeindlichkeit ||| , racism and xenophobia ||| 0-0 1-1 2-2 3-3
+! Rassismus und ||| , racism and ||| 0-0 1-1 2-2
+! Rassismus ||| , racism ||| 0-0 1-1
+! Rat und Kommission sollten ||| the Council and the Commission should ||| 0-0 1-1 2-2 3-4 4-5
+! Rat und Kommission ||| the Council and the Commission ||| 0-0 1-1 2-2 3-4
+! Rat und ||| the Council and the ||| 0-0 1-1 2-2
+! Rat und ||| the Council and ||| 0-0 1-1 2-2
+! Rat ||| the Council ||| 0-0 1-1
+! Rauchen ist schädlich - sowohl für ||| , smoking is dangerous both for ||| 0-0 1-1 2-2 3-3 5-4 6-5
+! Rauchen ist schädlich - sowohl ||| , smoking is dangerous both ||| 0-0 1-1 2-2 3-3 5-4
+! Rauchen ist schädlich - ||| , smoking is dangerous ||| 0-0 1-1 2-2 3-3
+! Rauchen ist schädlich ||| , smoking is dangerous ||| 0-0 1-1 2-2 3-3
+! Rauchen ist ||| , smoking is ||| 0-0 1-1 2-2
+! Rauchen ||| , smoking ||| 0-0 1-1
+! Rentenpolitik , Armutsbekämpfung ||| , pension policy , poverty reduction ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! Rentenpolitik , ||| , pension policy , ||| 0-0 1-1 1-2 2-3
+! Rentenpolitik ||| , pension policy ||| 0-0 1-1 1-2
+! Rohöl ist teurer als ||| , crude oil is more expensive than ||| 0-0 1-1 1-2 2-3 3-4 3-5 4-6
+! Rohöl ist teurer ||| , crude oil is more expensive ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! Rohöl ist ||| , crude oil is ||| 0-0 1-1 1-2 2-3
+! Rohöl ||| , crude oil ||| 0-0 1-1 1-2
+! Russland verweigert die Unterzeichnung ||| , Russia is refusing to sign up ||| 0-0 1-1 2-3 3-3 2-4 4-5 4-6
+! Russland verweigert die ||| , Russia is refusing to ||| 0-0 1-1 2-3 3-3 2-4
+! Russland ||| , Russia is ||| 0-0 1-1
+! Russland ||| , Russia ||| 0-0 1-1
+! Russland ||| , Russia ||| 0-0 1-1
+! Schlepperkriminalität und Menschenhandel ||| , organising illegal immigration and people trafficking ||| 0-0 1-1 1-2 1-3 2-4 3-5 3-6
+! Schlepperkriminalität und ||| , organising illegal immigration and ||| 0-0 1-1 1-2 1-3 2-4
+! Schlepperkriminalität ||| , organising illegal immigration ||| 0-0 1-1 1-2 1-3
+! Schreiben Sie Ihren Blauen Brief , ||| and write your warning letter , ||| 0-0 1-1 2-2 3-2 4-3 5-4 6-5
+! Schreiben Sie Ihren Blauen Brief ||| and write your warning letter ||| 0-0 1-1 2-2 3-2 4-3 5-4
+! Schreiben Sie Ihren Blauen ||| and write your warning ||| 0-0 1-1 2-2 3-2 4-3
+! Schreiben Sie Ihren ||| and write your ||| 0-0 1-1 2-2 3-2
+! Schreiben ||| and write ||| 0-0 1-1
+! Schule , Gesundheit , Postdienste ||| , education , health , postal services ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! Schule , Gesundheit , ||| , education , health , ||| 0-0 1-1 2-2 3-3 4-4
+! Schule , Gesundheit ||| , education , health ||| 0-0 1-1 2-2 3-3
+! Schule , ||| , education , ||| 0-0 1-1 2-2
+! Schule ||| , education ||| 0-0 1-1
+! Schweden hat ||| , Sweden has ||| 0-0 1-1 2-2
+! Schweden ||| , Sweden ||| 0-0 1-1
+! Schwindel , Schwund und Betrügereien und ||| ; fraud , wastage and ||| 0-0 1-1 5-1 2-2 4-2 3-3 6-4
+! Schwindel , Schwund und Betrügereien ||| ; fraud , wastage ||| 0-0 1-1 5-1 2-2 4-2 3-3
+! Sicherheit ist nach wie vor ein ||| , safety remains an ||| 0-0 1-1 2-2 3-2 4-2 5-2 6-3
+! Sicherheit ist nach wie vor ||| , safety remains ||| 0-0 1-1 2-2 3-2 4-2 5-2
+! Sicherheit ||| , safety ||| 0-0 1-1
+! Sinn und Zweck der ||| , the purpose of the ||| 0-0 1-1 3-2 4-3 4-4
+! Sinn und Zweck der Überarbeitung ||| , the purpose of the revision ||| 0-0 1-1 3-2 4-3 4-4 5-5
+! Sinn und Zweck ||| , the purpose ||| 0-0 1-1 3-2
+! Sinn und ||| , the ||| 0-0 1-1
+! Sinn ||| , the ||| 0-0 1-1
+! Small is beautiful , vor allem ||| , small is beautiful , especially ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! Small is beautiful , ||| , small is beautiful , ||| 0-0 1-1 2-2 3-3 4-4
+! Small is beautiful ||| , small is beautiful ||| 0-0 1-1 2-2 3-3
+! Small is ||| , small is ||| 0-0 1-1 2-2
+! Small ||| , small ||| 0-0 1-1
+! Solidarität mit den Opfern der ||| , solidarity with the victims of the ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! Solidarität mit den Opfern ||| , solidarity with the victims ||| 0-0 1-1 2-2 3-3 4-4
+! Solidarität mit den ||| , solidarity with the ||| 0-0 1-1 2-2 3-3
+! Solidarität mit ||| , solidarity with ||| 0-0 1-1 2-2
+! Solidarität ||| , solidarity ||| 0-0 1-1
+! Spanien ||| , Spain ||| 0-0 1-1
+! Spanien übernimmt ||| , Spain will ||| 0-0 1-1 2-2
+! Stichwort : Verbraucherkreditrichtlinie ; ||| the Consumer Credit Directive ; ||| 0-0 3-1 3-2 3-3 4-4
+! Stichwort : Verbraucherkreditrichtlinie ; ||| with the Consumer Credit Directive ; ||| 0-1 3-2 3-3 3-4 4-5
+! Stichwort : Verbraucherkreditrichtlinie ||| the Consumer Credit Directive ||| 0-0 3-1 3-2 3-3
+! Stichwort : Verbraucherkreditrichtlinie ||| with the Consumer Credit Directive ||| 0-1 3-2 3-3 3-4
+! Stichwort : ||| the ||| 0-0
+! Stichwort : ||| with the ||| 0-1
+! Stichwort ||| the ||| 0-0
+! Stichwort ||| with the ||| 0-1
+! Stringenz ist eine Sache , aber ||| , stringency is one thing , but ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Stringenz ist eine Sache , ||| , stringency is one thing , ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Stringenz ist eine Sache ||| , stringency is one thing ||| 0-0 1-1 2-2 3-3 4-4
+! Stringenz ist eine ||| , stringency is one ||| 0-0 1-1 2-2 3-3
+! Stringenz ist ||| , stringency is ||| 0-0 1-1 2-2
+! Stringenz ||| , stringency ||| 0-0 1-1
+! Tampere ist ||| , Tampere has ||| 0-0 1-1 2-2
+! Tampere ||| , Tampere ||| 0-0 1-1
+! Tatsache ist , dass ||| it is true that , ||| 0-0 2-1 1-2 4-3 3-4
+! Tatsache ist ||| it is true ||| 0-0 2-1 1-2
+! Tausende Zivilpersonen sind ||| , thousands of civilians have ||| 0-0 1-1 2-3 3-4
+! Tausende Zivilpersonen ||| , thousands of civilians ||| 0-0 1-1 2-3
+! Tausende ||| , thousands of ||| 0-0 1-1
+! Tausende ||| , thousands ||| 0-0 1-1
+! Terrorismus ist ein Verbrechen gegen ||| , terrorism is a crime against ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Terrorismus ist ein Verbrechen ||| , terrorism is a crime ||| 0-0 1-1 2-2 3-3 4-4
+! Terrorismus ist ein ||| , terrorism is a ||| 0-0 1-1 2-2 3-3
+! Terrorismus ist ||| , terrorism is ||| 0-0 1-1 2-2
+! Terrorismus ||| , terrorism ||| 0-0 1-1
+! Tierversuche gehören bei ||| , animal experiments in the field of ||| 0-0 1-1 1-2 3-3
+! Tierversuche gehören bei ||| , animal experiments in the field ||| 0-0 1-1 1-2 3-3
+! Tierversuche gehören bei ||| , animal experiments in the ||| 0-0 1-1 1-2 3-3
+! Tierversuche gehören bei ||| , animal experiments in ||| 0-0 1-1 1-2 3-3
+! Tierversuche gehören ||| , animal experiments ||| 0-0 1-1 1-2
+! Tierversuche ||| , animal experiments ||| 0-0 1-1 1-2
+! Tunesien ist ein Land , in ||| , Tunisia is a country in ||| 0-0 1-1 2-2 3-3 4-4 6-5
+! Tunesien ist ein Land , ||| , Tunisia is a country ||| 0-0 1-1 2-2 3-3 4-4
+! Tunesien ist ein Land ||| , Tunisia is a country ||| 0-0 1-1 2-2 3-3 4-4
+! Tunesien ist ein ||| , Tunisia is a ||| 0-0 1-1 2-2 3-3
+! Tunesien ist ||| , Tunisia is ||| 0-0 1-1 2-2
+! Tunesien ||| , Tunisia ||| 0-0 1-1
+! Umwelt- , Sozial- und Steuerrecht ||| , environmental , social and tax legislation ||| 0-0 1-1 2-2 3-3 4-4 5-5 5-6
+! Umwelt- , Sozial- und ||| , environmental , social and ||| 0-0 1-1 2-2 3-3 4-4
+! Umwelt- , Sozial- ||| , environmental , social ||| 0-0 1-1 2-2 3-3
+! Umwelt- , ||| , environmental , ||| 0-0 1-1 2-2
+! Umwelt- ||| , environmental ||| 0-0 1-1
+! Umweltfragen werden am besten gelöst , ||| , environmental issues are handled best ||| 0-0 1-1 1-2 2-3 5-4 3-5 4-5
+! Umweltfragen werden am besten gelöst ||| , environmental issues are handled best ||| 0-0 1-1 1-2 2-3 5-4 3-5 4-5
+! Umweltfragen werden ||| , environmental issues are ||| 0-0 1-1 1-2 2-3
+! Umweltfragen ||| , environmental issues ||| 0-0 1-1 1-2
+! Umweltvereinbarungen in der Europäischen Gemeinschaft ||| , environmental agreements in the European Community ||| 0-0 1-1 1-2 2-3 3-4 4-5 5-6
+! Umweltvereinbarungen in der Europäischen ||| , environmental agreements in the European ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! Umweltvereinbarungen in der ||| , environmental agreements in the ||| 0-0 1-1 1-2 2-3 3-4
+! Umweltvereinbarungen in ||| , environmental agreements in ||| 0-0 1-1 1-2 2-3
+! Umweltvereinbarungen ||| , environmental agreements ||| 0-0 1-1 1-2
+! Usted no es una persona loca ||| , usted no es una persona loca ||| 0-0 1-1 2-1 2-2 1-3 3-3 4-4 5-5 6-6
+! Usted no es una persona ||| , usted no es una persona ||| 0-0 1-1 2-1 2-2 1-3 3-3 4-4 5-5
+! Usted no es una ||| , usted no es una ||| 0-0 1-1 2-1 2-2 1-3 3-3 4-4
+! Usted no es ||| , usted no es ||| 0-0 1-1 2-1 2-2 1-3 3-3
+! Verletzungen des Rechts auf geistiges Eigentum ||| , infringements of intellectual property rights ||| 0-0 1-1 2-2 5-3 6-4 6-5
+! Verletzungen des Rechts auf geistiges ||| , infringements of intellectual ||| 0-0 1-1 2-2 5-3
+! Verletzungen des Rechts auf ||| , infringements of ||| 0-0 1-1 2-2
+! Verletzungen des Rechts ||| , infringements of ||| 0-0 1-1 2-2
+! Verletzungen des ||| , infringements of ||| 0-0 1-1 2-2
+! Verletzungen ||| , infringements ||| 0-0 1-1
+! Vertrauen ist gut , Kontrolle ist ||| , trust is good , control is ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! Vertrauen ist gut , Kontrolle ||| , trust is good , control ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! Vertrauen ist gut , ||| , trust is good , ||| 0-0 1-1 2-2 3-3 4-4
+! Vertrauen ist gut ||| , trust is good ||| 0-0 1-1 2-2 3-3
+! Vertrauen ist ||| , trust is ||| 0-0 1-1 2-2
+! Vertrauen ||| , trust ||| 0-0 1-1
+! Vietnam ist ||| , both in ||| 0-0 1-1
+! Vietnam ist ||| , both ||| 0-0 1-1
+! Vietnam ||| , both in ||| 0-0 1-1
+! Vietnam ||| , both ||| 0-0 1-1
+! Walter ||| , Mr Walter 's ||| 0-0 1-1 1-2 1-3
+! Wechsel ist ||| you are right in ||| 0-0 2-1
+! Wechsel ist ||| you are right ||| 0-0 2-1
+! Wechsel ist ||| you are ||| 0-0 2-1
+! Wechsel ||| you ||| 0-0
+! Wettbewerb ist gut , wenn ||| , competition is a good thing when ||| 0-0 1-1 2-2 3-3 3-4 3-5 5-6
+! Wettbewerb ist gut , ||| , competition is a good thing ||| 0-0 1-1 2-2 3-3 3-4 3-5
+! Wettbewerb ist gut ||| , competition is a good thing ||| 0-0 1-1 2-2 3-3 3-4 3-5
+! Wettbewerb ist ||| , competition is ||| 0-0 1-1 2-2
+! Wettbewerb ||| , competition ||| 0-0 1-1
+! Wwir beraten heute ||| , this morning we are ||| 0-0 1-1 1-2 1-3 3-4
+! Wwir beraten heute über die ||| , this morning we are examining the ||| 0-0 1-1 1-2 1-3 3-4 4-5 5-6
+! Wwir beraten heute über ||| , this morning we are examining ||| 0-0 1-1 1-2 1-3 3-4 4-5
+! Wwir beraten ||| , this morning we ||| 0-0 1-1 1-2 1-3
+! Wwir ||| , this morning we ||| 0-0 1-1 1-2 1-3
+! Ziel des ||| , the objective of the ||| 0-0 1-1 1-2 2-3 2-4
+! Ziel ||| , the objective ||| 0-0 1-1 1-2
+! Ziel ||| aiming ||| 1-0
+! Zypern ist vergangene Woche ||| , last week Cyprus was ||| 0-0 3-1 4-2 1-3 2-4
+! aber - ich bin Ihnen ||| , and I am much ||| 0-0 1-1 2-2 3-2 4-3 5-4
+! aber - ich bin ||| , and I am ||| 0-0 1-1 2-2 3-2 4-3
+! aber - ich ||| , and I ||| 0-0 1-1 2-2 3-2
+! aber - wie ein Humorist sagte ||| , but as the joke goes ||| 0-0 1-1 2-2 3-2 4-3 5-4 6-4 5-5
+! aber - wie ein ||| , but as the ||| 0-0 1-1 2-2 3-2 4-3
+! aber - wie ||| , but as ||| 0-0 1-1 2-2 3-2
+! aber Herr ||| , but I ask you , ||| 0-0 1-1 2-2
+! aber Herr ||| , but I ask you ||| 0-0 1-1 2-2
+! aber Herr ||| , but I ask ||| 0-0 1-1 2-2
+! aber Herr ||| , but I ||| 0-0 1-1 2-2
+! aber Sie werden ||| , but you will ||| 0-0 1-1 2-2 3-3
+! aber Sie ||| , but you ||| 0-0 1-1 2-2
+! aber da liegt ein Missverständnis vor ||| , but there is a misunderstanding here ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5 5-6
+! aber da liegt ein ||| , but there is a ||| 0-0 1-1 2-2 3-3 4-4
+! aber da liegt ||| , but there is ||| 0-0 1-1 2-2 3-3
+! aber da ||| , but there ||| 0-0 1-1 2-2
+! aber dann ||| , but then ||| 0-0 1-1 2-2
+! aber darum geht es eigentlich nicht ||| , but that is not my point ||| 0-0 1-1 2-2 3-3 6-4
+! aber darum geht es eigentlich nicht ||| , but that is not my ||| 0-0 1-1 2-2 3-3 6-4
+! aber darum geht es eigentlich nicht ||| , but that is not ||| 0-0 1-1 2-2 3-3 6-4
+! aber darum geht es eigentlich ||| , but that is ||| 0-0 1-1 2-2 3-3
+! aber darum geht es ||| , but that is ||| 0-0 1-1 2-2 3-3
+! aber darum geht ||| , but that is ||| 0-0 1-1 2-2 3-3
+! aber darum ||| , but that ||| 0-0 1-1 2-2
+! aber das kann man ja schon ||| , but one can ||| 0-0 1-1 2-2 4-2 3-3
+! aber das kann man ja schon ||| control , but one can ||| 0-1 1-2 2-3 4-3 3-4
+! aber das kann man ja schon ||| supervisory control , but one can ||| 0-2 1-3 2-4 4-4 3-5
+! aber das kann man ja ||| , but one can ||| 0-0 1-1 2-2 4-2 3-3
+! aber das kann man ja ||| control , but one can ||| 0-1 1-2 2-3 4-3 3-4
+! aber das kann man ja ||| supervisory control , but one can ||| 0-2 1-3 2-4 4-4 3-5
+! aber das kann man ||| , but one can ||| 0-0 1-1 2-2 4-2 3-3
+! aber das kann man ||| control , but one can ||| 0-1 1-2 2-3 4-3 3-4
+! aber das kann man ||| supervisory control , but one can ||| 0-2 1-3 2-4 4-4 3-5
+! aber die ||| , but the ||| 0-0 1-1 2-2
+! aber diese Freundschaft soll ||| , but this friendship should bear fruit ||| 0-0 1-1 2-2 3-3 4-4
+! aber diese Freundschaft soll ||| , but this friendship should bear ||| 0-0 1-1 2-2 3-3 4-4
+! aber diese Freundschaft soll ||| , but this friendship should ||| 0-0 1-1 2-2 3-3 4-4
+! aber diese Freundschaft ||| , but this friendship ||| 0-0 1-1 2-2 3-3
+! aber diese ||| , but this ||| 0-0 1-1 2-2
+! aber dieses Fenster der Gelegenheit ||| , but this window of opportunity ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! aber dieses Fenster der ||| , but this window of ||| 0-0 1-1 2-2 3-3 4-4
+! aber dieses Fenster ||| , but this window ||| 0-0 1-1 2-2 3-3
+! aber dieses ||| , but this ||| 0-0 1-1 2-2
+! aber eine ||| , but there ||| 0-0 1-1 2-2
+! aber eine ||| from , but there ||| 0-1 1-2 2-3
+! aber es gilt ||| , but ||| 0-0 1-1
+! aber es muss ||| , but there need to ||| 0-0 1-1 2-2 3-3 3-4
+! aber es ||| , but there ||| 0-0 1-1 2-2
+! aber es ||| , but ||| 0-0 1-1
+! aber ich glaube , die Bürger ||| , but I think our citizens ||| 0-0 1-1 2-2 3-3 5-4 6-5
+! aber ich glaube , die ||| , but I think our ||| 0-0 1-1 2-2 3-3 5-4
+! aber ich glaube , ||| , but I think ||| 0-0 1-1 2-2 3-3
+! aber ich glaube ||| , but I think ||| 0-0 1-1 2-2 3-3
+! aber ich ||| , but I ||| 0-0 1-1 2-2
+! aber man muss in Betracht ziehen ||| , but we have to consider the ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! aber man muss in Betracht ziehen ||| , but we have to consider ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-5
+! aber man muss in Betracht ziehen ||| taken , but we have to consider ||| 0-1 1-2 2-3 3-4 4-5 5-6 6-6
+! aber man muss in ||| , but we have to ||| 0-0 1-1 2-2 3-3 4-4
+! aber man muss in ||| been taken , but we have to ||| 0-2 1-3 2-4 3-5 4-6
+! aber man muss in ||| taken , but we have to ||| 0-1 1-2 2-3 3-4 4-5
+! aber man muss ||| , but we have ||| 0-0 1-1 2-2 3-3
+! aber man muss ||| been taken , but we have ||| 0-2 1-3 2-4 3-5
+! aber man muss ||| have been taken , but we have ||| 0-3 1-4 2-5 3-6
+! aber man muss ||| taken , but we have ||| 0-1 1-2 2-3 3-4
+! aber man ||| , but we ||| 0-0 1-1 2-2
+! aber man ||| been taken , but we ||| 0-2 1-3 2-4
+! aber man ||| have been taken , but we ||| 0-3 1-4 2-5
+! aber man ||| taken , but we ||| 0-1 1-2 2-3
+! aber mein besonderer Dank gilt ||| , but I am particularly obliged , ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-6
+! aber mein besonderer Dank ||| , but I am particularly obliged ||| 0-0 1-1 2-2 2-3 3-4 4-5
+! aber mein besonderer ||| , but I am particularly ||| 0-0 1-1 2-2 2-3 3-4
+! aber mein ||| , but I am ||| 0-0 1-1 2-2 2-3
+! aber meine Antwort wird leider ||| , but my answer is ||| 0-0 1-1 2-2 3-3 4-4
+! aber meine Antwort wird ||| , but my answer is ||| 0-0 1-1 2-2 3-3 4-4
+! aber meine Antwort ||| , but my answer ||| 0-0 1-1 2-2 3-3
+! aber meine ||| , but my ||| 0-0 1-1 2-2
+! aber wenn Sie ||| , but if you ||| 0-0 1-1 2-2 3-3
+! aber wenn ||| , but if ||| 0-0 1-1 2-2
+! aber wer macht sie ||| , but exactly who is making them ||| 0-0 1-1 2-3 3-4 3-5 4-6
+! aber wer macht ||| , but exactly who is making ||| 0-0 1-1 2-3 3-4 3-5
+! aber wer ||| , but exactly who ||| 0-0 1-1 2-3
+! aber wir haben gehört ||| , but we have learned ||| 0-0 1-1 2-2 3-3 3-4 4-4
+! aber wir hätten ||| , but we would have preferred ||| 0-0 1-1 2-2 3-3 3-4 3-5
+! aber wir hätten ||| EU , but we would have preferred ||| 0-1 1-2 2-3 3-4 3-5 3-6
+! aber wir sind ||| , but we have great ||| 0-0 1-1 2-2 3-3
+! aber wir sind ||| , but we have ||| 0-0 1-1 2-2 3-3
+! aber wir sollten nicht anfangen ||| , but we should not start ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! aber wir sollten nicht ||| , but we should not ||| 0-0 1-1 2-2 3-3 4-4
+! aber wir sollten ||| , but we should ||| 0-0 1-1 2-2 3-3
+! aber wir ||| , but we ||| 0-0 1-1 2-2
+! aber wir ||| , but we ||| 0-0 1-1 2-2
+! aber wir ||| , but we ||| 0-0 1-1 2-2
+! aber wir ||| , but we ||| 0-0 1-1 2-2
+! aber wir ||| , but we ||| 0-0 1-1 2-2
+! aber wir ||| EU , but we ||| 0-1 1-2 2-3
+! aber wir ||| the EU , but we ||| 0-2 1-3 2-4
+! aber ||| ! - but , ||| 0-0 0-1 1-2 0-3
+! aber ||| , and ||| 0-0 1-1
+! aber ||| , but exactly ||| 0-0 1-1
+! aber ||| , but its prospects ||| 0-0 1-1
+! aber ||| , but its ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| , but ||| 0-0 1-1
+! aber ||| EU , but ||| 0-1 1-2
+! aber ||| am saying ||| 0-0 1-1
+! aber ||| been taken , but ||| 0-2 1-3
+! aber ||| control , but ||| 0-1 1-2
+! aber ||| from , but ||| 0-1 1-2
+! aber ||| have been taken , but ||| 0-3 1-4
+! aber ||| supervisory control , but ||| 0-2 1-3
+! aber ||| taken , but ||| 0-1 1-2
+! aber ||| the EU , but ||| 0-2 1-3
+! abgesehen von der Technik der Mittelzuweisungen ||| , beyond its technique on envelopes ||| 0-0 1-1 2-1 3-2 4-3 5-4 6-5
+! abgesehen von der Technik der ||| , beyond its technique on ||| 0-0 1-1 2-1 3-2 4-3 5-4
+! abgesehen von der Technik ||| , beyond its technique ||| 0-0 1-1 2-1 3-2 4-3
+! abgesehen von der ||| , beyond its ||| 0-0 1-1 2-1 3-2
+! abgesehen von ||| , beyond ||| 0-0 1-1 2-1
+! abschließend möchte ich noch ||| , I should like to conclude by ||| 0-0 3-1 2-2 2-3 2-4 1-5 1-6
+! abschließend möchte ich ||| , I should like to conclude by ||| 0-0 3-1 2-2 2-3 2-4 1-5 1-6
+! abschließend möchte ich ||| to conclude , ||| 1-0 1-1 2-1 3-1 0-2
+! abschließend ||| , by way of conclusion , ||| 0-0 1-1 1-4
+! abschließend ||| , by way of conclusion ||| 0-0 1-1 1-4
+! all dies ist ||| that all these things should ||| 0-0 1-1 2-2 2-3 3-4
+! all dies ||| that all these things ||| 0-0 1-1 2-2 2-3
+! all ||| that all ||| 0-0 1-1
+! alle , die mich kennen , ||| , those who know me can ||| 0-0 1-1 2-2 3-2 6-2 5-3 4-4 5-5
+! alle Arten landwirtschaftlicher Tätigkeit und ||| , all types of agricultural activity and ||| 0-0 1-1 2-2 3-3 3-4 4-5 5-6
+! alle Arten landwirtschaftlicher Tätigkeit ||| , all types of agricultural activity ||| 0-0 1-1 2-2 3-3 3-4 4-5
+! alle Arten landwirtschaftlicher ||| , all types of agricultural ||| 0-0 1-1 2-2 3-3 3-4
+! alle Arten ||| , all types ||| 0-0 1-1 2-2
+! alle Mittel aus dem europäischen Haushalt ||| , all funds from the European Budget ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! alle Mittel aus dem europäischen ||| , all funds from the European ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! alle Mittel aus dem ||| , all funds from the ||| 0-0 1-1 2-2 3-3 4-4
+! alle Mittel aus ||| , all funds from ||| 0-0 1-1 2-2 3-3
+! alle Mittel ||| , all funds ||| 0-0 1-1 2-2
+! alle singen heute ||| , everyone is proclaiming today ||| 0-0 1-1 2-3 3-4
+! alle singen ||| , everyone is proclaiming ||| 0-0 1-1 2-3
+! alle wissen um die ||| , no one is unaware of the ||| 0-0 1-1 3-3 2-4 4-6
+! alle wissen um ||| , no one is unaware of ||| 0-0 1-1 3-3 2-4
+! alle wissen um ||| , no one is unaware ||| 0-0 1-1 3-3 2-4
+! alle ||| , all ||| 0-0 1-1
+! alle ||| , all ||| 0-0 1-1
+! alle ||| , everyone is ||| 0-0 1-1
+! alle ||| , everyone ||| 0-0 1-1
+! alle ||| , no one ||| 0-0 1-1
+! alle ||| , no ||| 0-0 1-1
+! alle ||| , those ||| 0-0 1-1
+! allerdings gehört das ||| , but unfortunately that has ||| 0-0 1-1 1-2 3-3 2-4
+! allerdings muss sie mit ||| , but the opinion must accord with ||| 0-0 1-1 3-2 2-4 4-6
+! allerdings muss sie ||| , but the opinion must accord ||| 0-0 1-1 3-2 2-4
+! allerdings muss sie ||| , but the opinion must ||| 0-0 1-1 3-2 2-4
+! allerdings ||| , but unfortunately ||| 0-0 1-1 1-2
+! allerdings ||| , but ||| 0-0 1-1
+! alles an diesen Informationen ist in ||| , all of this information is ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! alles an diesen Informationen ist ||| , all of this information is ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! alles an diesen Informationen ||| , all of this information ||| 0-0 1-1 2-2 3-3 4-4
+! alles an diesen ||| , all of this ||| 0-0 1-1 2-2 3-3
+! alles an ||| , all of ||| 0-0 1-1 2-2
+! alles ist bereits gesagt worden . ||| , everything has been said . ||| 0-0 1-1 2-2 5-3 3-4 4-4 6-5
+! alles ist bereits gesagt worden ||| , everything has been said ||| 0-0 1-1 2-2 5-3 3-4 4-4
+! alles ist ||| , everything has ||| 0-0 1-1 2-2
+! alles ||| , all ||| 0-0 1-1
+! alles ||| , everything ||| 0-0 1-1
+! allgemein gesagt , halte ich diese ||| , generally speaking I consider this ||| 0-0 1-1 1-2 2-2 5-3 4-4 6-5
+! allgemein gesagt , halte ich ||| , generally speaking I consider ||| 0-0 1-1 1-2 2-2 5-3 4-4
+! allgemein gesagt , ||| , generally speaking ||| 0-0 1-1 1-2 2-2
+! allgemein gesagt ||| , generally speaking ||| 0-0 1-1 1-2 2-2
+! allzu viele ||| , there are too many ||| 0-0 0-1 1-3 2-4
+! allzu ||| , there are too ||| 0-0 0-1 1-3
+! als Abgeordneter aus ||| , as a member of parliament from ||| 0-0 1-1 2-2 2-3 2-5 3-6
+! als Abgeordneter des ||| , as a Member for the ||| 0-0 1-1 2-2 2-3 3-4 3-5
+! als Abgeordneter von der französischen ||| , as a Member for the French ||| 0-0 1-1 2-2 2-3 3-4 4-5 5-6
+! als Abgeordneter von der ||| , as a Member for the ||| 0-0 1-1 2-2 2-3 3-4 4-5
+! als Abgeordneter von ||| , as a Member for ||| 0-0 1-1 2-2 2-3 3-4
+! als Abgeordneter ||| , as a Member ||| 0-0 1-1 2-2 2-3
+! als Abgeordneter ||| , as a Member ||| 0-0 1-1 2-2 2-3
+! als Abgeordneter ||| , as a member of parliament ||| 0-0 1-1 2-2 2-3 2-5
+! als Beobachter des Europäischen Parlaments ||| , as European Parliament observers , ||| 0-0 1-1 4-2 3-3 5-3 2-4
+! als Beobachter des Europäischen Parlaments ||| , as European Parliament observers ||| 0-0 1-1 4-2 3-3 5-3 2-4
+! als Berichterstatter bedaure ich es eigentlich ||| , as rapporteur I regret the fact ||| 0-0 1-1 2-2 4-3 3-4 5-5 6-6
+! als Berichterstatter bedaure ich es ||| , as rapporteur I regret the ||| 0-0 1-1 2-2 4-3 3-4 5-5
+! als Berichterstatter bedaure ich ||| , as rapporteur I regret ||| 0-0 1-1 2-2 4-3 3-4
+! als Berichterstatter für Estland ||| , as rapporteur for Estonia ||| 0-0 1-1 2-2 3-3 4-4
+! als Berichterstatter für ||| , as rapporteur for ||| 0-0 1-1 2-2 3-3
+! als Berichterstatter zu ||| , in the capacity of rapporteur for ||| 0-0 1-1 1-2 1-3 2-5 3-6
+! als Berichterstatter zum Beitritt ||| , as rapporteur for the accession of ||| 0-0 1-1 2-2 3-3 3-4 4-5
+! als Berichterstatter zum Beitritt ||| , as rapporteur for the accession ||| 0-0 1-1 2-2 3-3 3-4 4-5
+! als Berichterstatter zum ||| , as rapporteur for the ||| 0-0 1-1 2-2 3-3 3-4
+! als Berichterstatter ||| , as rapporteur ||| 0-0 1-1 2-2
+! als Berichterstatter ||| , as rapporteur ||| 0-0 1-1 2-2
+! als Berichterstatter ||| , as rapporteur ||| 0-0 1-1 2-2
+! als Berichterstatter ||| , in the capacity of rapporteur ||| 0-0 1-1 1-2 1-3 2-5
+! als Berichterstatterin meiner Fraktion für ||| , as my group 's rapporteur for ||| 0-0 1-1 3-2 4-3 2-5 5-6
+! als Berichterstatterin meiner Fraktion ||| , as my group 's rapporteur ||| 0-0 1-1 3-2 4-3 2-5
+! als Berichterstatterin ||| , as rapporteur ||| 0-0 1-1 2-2
+! als Berichterstatterin über die Entlastung betreffend ||| , as rapporteur on the discharge for ||| 0-0 1-1 2-2 3-3 4-4 5-5 6-6
+! als Berichterstatterin über die Entlastung ||| , as rapporteur on the discharge ||| 0-0 1-1 2-2 3-3 4-4 5-5
+! als Berichterstatterin über die ||| , as rapporteur on the ||| 0-0 1-1 2-2 3-3 4-4
+! als Berichterstatterin über ||| , as rapporteur on ||| 0-0 1-1 2-2 3-3
+! als Beweis dafür , daß dieses ||| , as proof that this ||| 0-0 1-1 2-2 3-2 4-3 5-3 6-4
+! als Beweis dafür , daß ||| , as proof that ||| 0-0 1-1 2-2 3-2 4-3 5-3
+! als Beweis dafür ||| , as proof ||| 0-0 1-1 2-2 3-2
+! als Bürgerbeauftragter vertreten Sie die 450 ||| , as Ombudsman you represent the 450 ||| 0-0 1-1 2-2 4-3 3-4 5-5 6-6
+! als Bürgerbeauftragter vertreten Sie die ||| , as Ombudsman you represent the ||| 0-0 1-1 2-2 4-3 3-4 5-5
+! als Bürgerbeauftragter vertreten Sie ||| , as Ombudsman you represent ||| 0-0 1-1 2-2 4-3 3-4
+! als Bürgerbeauftragter ||| , as Ombudsman ||| 0-0 1-1 2-2
+! als China ||| , when China ||| 0-0 1-1 2-2
+! als Christdemokrat und schwedischer ||| , as a Christian Democrat and Swedish ||| 0-0 1-1 2-2 2-3 2-4 3-5 4-6
+! als Christdemokrat und ||| , as a Christian Democrat and ||| 0-0 1-1 2-2 2-3 2-4 3-5
+! als Christdemokrat ||| , as a Christian Democrat ||| 0-0 1-1 2-2 2-3 2-4
+! als Deutscher ist man hier in ||| , any German in this House will ||| 0-0 1-1 2-1 2-2 6-3 4-4 5-4 5-5 3-6
+! als Deutscher ||| , any German ||| 0-0 1-1 2-1 2-2
+! als Einwohner der ||| , as a resident of the ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! als Einwohner ||| , as a resident ||| 0-0 1-1 1-2 2-3
+! als Ergebnis der Beratungen auf ||| , as a result of consultations at ||| 0-0 1-1 1-2 2-3 3-4 4-5 5-6
+! als Ergebnis der Beratungen ||| , as a result of consultations ||| 0-0 1-1 1-2 2-3 3-4 4-5
+! als Ergebnis der ||| , as a result of ||| 0-0 1-1 1-2 2-3 3-4
+! als Ergebnis ||| , as a result ||| 0-0 1-1 1-2 2-3
+! als Ergänzung zu meiner ||| , further to the question that I ||| 0-0 2-1 3-2 1-3 4-6
+! als Ergänzung zu ||| , further to the question that ||| 0-0 2-1 3-2 1-3
+! als Ergänzung zu ||| , further to the question ||| 0-0 2-1 3-2 1-3
+! als Ergänzung zu ||| , further to the ||| 0-0 2-1 3-2 1-3
+! als Erstes möchte ich ||| , I should like to start by ||| 0-0 4-1 3-2 3-3 3-4 2-5 2-6
+! als Erstes möchte ich ||| , firstly I would like to ||| 0-0 1-1 2-1 4-2 3-3 3-4 3-5
+! als Erstes ||| , first of all , ||| 0-0 1-1 2-1
+! als Erstes ||| , first of all ||| 0-0 1-1 2-1
+! als Erstes ||| , first of all ||| 0-0 1-1 2-1
+! als Erstes ||| , first of all ||| 0-0 1-1 2-1
+! als Erstes ||| , first of ||| 0-0 1-1 2-1
+! als Erstes ||| , first of ||| 0-0 1-1 2-1
+! als Erstes ||| , first of ||| 0-0 1-1 2-1
+! als Erstes ||| , first ||| 0-0 1-1 2-1
+! als Erstes ||| , first ||| 0-0 1-1 2-1
+! als Erstes ||| , first ||| 0-0 1-1 2-1
+! als Erstes ||| , firstly ||| 0-0 1-1 2-1
+! als Erstes ||| , the first message ||| 0-0 1-1 2-2 2-3
+! als Föderalisten haben ||| , as a pro-federalist party ||| 0-0 1-1 1-2 2-3 3-3 2-4
+! als Grüne bin ich ||| , as a Green I am ||| 0-0 1-1 1-2 2-3 4-4 3-5
+! als Grüne ||| , as a Green ||| 0-0 1-1 1-2 2-3
+! als Leiter der Delegation ||| , as the leader of the delegation ||| 0-0 1-1 1-2 2-3 3-4 3-5 4-6
+! als Leiter der ||| , as the leader of the ||| 0-0 1-1 1-2 2-3 3-4 3-5
+! als Leiter ||| , as the leader ||| 0-0 1-1 1-2 2-3
+! als Mitberichterstatter dieser ||| , as co-rapporteur for this , ||| 0-0 1-1 2-2 3-4
+! als Mitberichterstatter dieser ||| , as co-rapporteur for this ||| 0-0 1-1 2-2 3-4
+! als Mitberichterstatter ||| , as co-rapporteur for ||| 0-0 1-1 2-2
+! als Mitberichterstatter ||| , as co-rapporteur ||| 0-0 1-1 2-2
+! als Mitglied des ||| , as a member of the ||| 0-0 1-1 2-2 2-3 3-4 3-5
+! als Mitglied ||| , as a member ||| 0-0 1-1 2-2 2-3
+! als Präsident der Europäischen Union ||| , as President-in-Office of the European Union ||| 0-0 1-1 2-2 3-3 3-4 4-5 5-6
+! als Präsident der Europäischen ||| , as President-in-Office of the European ||| 0-0 1-1 2-2 3-3 3-4 4-5
+! als Präsident der ||| , as President-in-Office of the ||| 0-0 1-1 2-2 3-3 3-4
+! als Präsident ||| , as President-in-Office ||| 0-0 1-1 2-2
+! als Schotte und Ihr Landsmann bin ||| , as a fellow Scot , ||| 0-0 1-1 2-2 3-3 2-4 4-4 5-4 6-4
+! als Schotte und Ihr Landsmann bin ||| , as a fellow Scot ||| 0-0 1-1 2-2 3-3 2-4 4-4 5-4 6-4
+! als Sie ||| , when ||| 0-0 1-1
+! als Skandinavierin verwende ich ||| , as a Scandinavian , I ||| 0-0 1-1 1-2 2-3 4-5
+! als Skandinavierin verwende ||| , as a Scandinavian , ||| 0-0 1-1 1-2 2-3
+! als Skandinavierin verwende ||| , as a Scandinavian ||| 0-0 1-1 1-2 2-3
+! als Skandinavierin ||| , as a Scandinavian , ||| 0-0 1-1 1-2 2-3

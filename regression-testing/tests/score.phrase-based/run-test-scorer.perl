@@ -30,7 +30,10 @@ unless (defined $results_dir)
 `mkdir -p $results_dir`;
 
 my $outPath = "$results_dir/phrase-table.4.half.f2e";
+
+my $scoreArgs = `cat $test_dir/$test_name/args.txt`;
 my $cmdMain = "$scoreExe $test_dir/$test_name/extract.sorted $test_dir/$test_name/lex.f2e $outPath  --GoodTuring \n";
+#my $cmdMain = "$scoreExe $scoreArgs \n";
 
 `$cmdMain`;
 
@@ -42,6 +45,7 @@ $numDiff = `$cmd`;
 
 if ($numDiff == 0)
 {
+  #  print STDERR "FAILURE. Ran $cmdMain\n";
   print STDERR "SUCCESS\n";
   exit 0;
 }

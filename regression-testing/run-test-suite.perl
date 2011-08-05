@@ -9,10 +9,11 @@ my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir 
 use Getopt::Long;
 
 ############################################################
+  #score.phrase-based-with-alignment
+  #score.hierarchical
 my @tests = qw (
   score.phrase-based
-  score.phrase-based-with-alignment
-  score.hierarchical
+  score.phrase-based-inv
   chart.target-syntax
   chart.target-syntax.ondisk
   chart.hierarchical
@@ -93,7 +94,7 @@ foreach my $test (@tests)
   }
   elsif ($model_type eq 'score.')
   {
-    $cmd .= "$Bin/run-test-scorer.perl $test_run --scorer=$scoreExe";
+    $cmd .= "$test_dir/$test/run-test-scorer.perl $test_run --scorer=$scoreExe";
   }
   else 
   {
