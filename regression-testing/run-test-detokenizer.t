@@ -49,15 +49,50 @@ This one is no more difficult, but, hey, it is on a new line.
 EXP
 );
 
+# An English test involving double-quotes
+&runDetokenizerTest("TEST_ENGLISH_DOUBLEQUOTES", "en",
+<<'TOK',
+This is a somewhat " less simple " test .
+TOK
+<<'EXP'
+This is a somewhat "less simple" test.
+EXP
+);
+
 # A simple French test
 &runDetokenizerTest("TEST_FRENCH_EASY", "fr",
 <<'TOK',
-Ici une phrase simple .
+Voici une phrase simple .
 TOK
 <<'EXP'
-Ici une phrase simple.
+Voici une phrase simple.
 EXP
 );
+
+# A French test involving an apostrophe
+&runDetokenizerTest("TEST_FRENCH_APOSTROPHE", "fr",
+<<'TOK',
+Moi , j' ai une apostrophe .
+TOK
+<<'EXP'
+Moi, j'ai une apostrophe.
+EXP
+);
+
+TODO: {
+    local $TODO = "A bug is causing this to be detokenized wrong.";
+
+# A French test involving an apostrophe on the second-last word
+&runDetokenizerTest("TEST_FRENCH_APOSTROPHE_PENULTIMATE", "fr",
+<<'TOK',
+de musique rap issus de l' immigration
+TOK
+<<'EXP'
+de musique rap issus de l'immigration
+EXP
+);
+
+}
 
 ######################################
 # end of individual test cases
