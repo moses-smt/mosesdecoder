@@ -98,6 +98,20 @@ EXP
 $testCase->setExpectedToFail("A bug is causing this to be detokenized wrong.");
 }
 
+# A German test involving non-ASCII characters
+# Note: We don't specify a language because the detokenizer errors if you pass in a language for which it has no special rules, of which German is an example.
+&addDetokenizerTest("TEST_GERMAN_NONASCII", undef,
+<<'TOK'
+Ich hoffe , daß Sie schöne Ferien hatten .
+Frau Präsidentin ! Frau Díez González und ich hatten einige Anfragen
+TOK
+,
+<<'EXP'
+Ich hoffe, daß Sie schöne Ferien hatten.
+Frau Präsidentin! Frau Díez González und ich hatten einige Anfragen
+EXP
+);
+
 ######################################
 # Now run those babies ...
 ######################################
@@ -145,7 +159,7 @@ sub runDetokenizerTest {
     close TRUTH;
 
     &runTest($testCase->getName(), $testOutputDir, $tokenizedFile, sub {
-	return [$detokenizer, "-l", $testCase->getLanguage()];
+	return defined($testCase->getLanguage())? [$detokenizer, "-l", $testCase->getLanguage()] : [$detokenizer];
     }, sub {
 	&verifyIdentical($testCase->getName(), $expectedFile, catfile($testOutputDir, "stdout.txt"))
     }, 1, $testCase->getFailureExplanation());
