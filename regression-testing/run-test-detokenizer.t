@@ -13,6 +13,7 @@ use File::Spec::Functions;
 use File::Basename ('dirname');
 use IPC::Run3;
 use Getopt::Long;
+use Test::More;
 
 GetOptions("detokenizer=s" => \(my $detokenizer),
            "results-dir=s"=> \(my $results_dir)
@@ -29,14 +30,14 @@ $detokenizer = catfile(dirname(dirname(abs_path($0))), "scripts", "tokenizer", "
 die "ERROR: Detokenizer script ".$detokenizer." does not exist. Dying" unless -f $detokenizer;
 
 
-use Test::More;
+my @testCases = ();
 
 ######################################
 # Definitions of individual test cases
 ######################################
 
 # A simple English test
-&runDetokenizerTest("TEST_ENGLISH_EASY", "en",
+&addDetokenizerTest("TEST_ENGLISH_EASY", "en",
 <<'TOK'
 This sentence is really simple , so it should not be hard to detokenize .
 This one is no more difficult , but , hey , it is on a new line .
@@ -49,7 +50,7 @@ EXP
 );
 
 # An English test involving double-quotes
-&runDetokenizerTest("TEST_ENGLISH_DOUBLEQUOTES", "en",
+&addDetokenizerTest("TEST_ENGLISH_DOUBLEQUOTES", "en",
 <<'TOK'
 This is a somewhat " less simple " test .
 TOK
@@ -60,7 +61,7 @@ EXP
 );
 
 # A simple French test
-&runDetokenizerTest("TEST_FRENCH_EASY", "fr",
+&addDetokenizerTest("TEST_FRENCH_EASY", "fr",
 <<'TOK'
 Voici une phrase simple .
 TOK
@@ -71,7 +72,7 @@ EXP
 );
 
 # A French test involving an apostrophe
-&runDetokenizerTest("TEST_FRENCH_APOSTROPHE", "fr",
+&addDetokenizerTest("TEST_FRENCH_APOSTROPHE", "fr",
 <<'TOK'
 Moi , j' ai une apostrophe .
 TOK
@@ -81,11 +82,10 @@ Moi, j'ai une apostrophe.
 EXP
 );
 
-TODO: {
-    local $TODO = "A bug is causing this to be detokenized wrong.";
-
-# A French test involving an apostrophe on the second-last word
-&runDetokenizerTest("TEST_FRENCH_APOSTROPHE_PENULTIMATE", "fr",
+# A (failing) French test involving an apostrophe on the second-last word
+{
+my $testCase =
+&addDetokenizerTest("TEST_FRENCH_APOSTROPHE_PENULTIMATE", "fr",
 <<'TOK'
 de musique rap issus de l' immigration
 TOK
@@ -95,60 +95,77 @@ de musique rap issus de l'immigration
 EXP
 );
 
+$testCase->setExpectedToFail("A bug is causing this to be detokenized wrong.");
 }
 
 ######################################
-# end of individual test cases
+# Now run those babies ...
 ######################################
 
-done_testing();
+plan tests => scalar(@testCases);
 
+foreach my $testCase (@testCases) {
+    &runDetokenizerTest($testCase);
+}
 
 ############
 ## Utilities
 ############
 
-sub runDetokenizerTest {
-    my ($testName, $language, $tokenizedString, $expectedString) = @_;
+# Creates a new detokenizer test case, adds it to the array of test cases to be run, and returns it.
+sub addDetokenizerTest {
+    my ($testName, $language, $tokenizedText, $rightAnswer) = @_;
 
-    my $testOutputDir = catfile($results_dir, $testName);
+    my $testCase = new DetokenizerTestCase($testName, $language, $tokenizedText, $rightAnswer);
+    push(@testCases, $testCase);
+    return $testCase;
+}
+
+sub runDetokenizerTest {
+    my ($testCase) = @_;
+
+    my $testOutputDir = catfile($results_dir, $testCase->getName());
     my $tokenizedFile = catfile($testOutputDir, "input.txt");
     my $expectedFile = catfile($testOutputDir, "expected.txt");
 
     # Fail if we can't make the test output directory
     unless (mkdir($testOutputDir)) {
-	fail($testName.": Failed to create output directory ".$testOutputDir." [".$!."]");
+	fail($testCase->getName().": Failed to create output directory ".$testOutputDir." [".$!."]");
 	exit;
     }
     
     open TOK, ">".$tokenizedFile;
     binmode TOK, ":utf8";
-    print TOK $tokenizedString;
+    print TOK $testCase->getTokenizedText();
     close TOK;
     
     open TRUTH, ">".$expectedFile;
     binmode TRUTH, ":utf8";
-    print TRUTH $expectedString;
+    print TRUTH $testCase->getRightAnswer();
     close TRUTH;
 
-    &runTest($testName, $testOutputDir, $tokenizedFile, sub {
-	return [$detokenizer, "-l", $language];
+    &runTest($testCase->getName(), $testOutputDir, $tokenizedFile, sub {
+	return [$detokenizer, "-l", $testCase->getLanguage()];
     }, sub {
-	&verifyIdentical($testName, $expectedFile, catfile($testOutputDir, "stdout.txt"))
-    }, 1);
+	&verifyIdentical($testCase->getName(), $expectedFile, catfile($testOutputDir, "stdout.txt"))
+    }, 1, $testCase->getFailureExplanation());
 }
 
 # $stdinFile, if defined, is a file to send to the command via STDIN
 # $buildCommandRoutineReference is a reference to a zero-argument subroutine that returns the
-#                               command to run in the form of an array reference
+#                               system command to run in the form of an array reference
 # $validationRoutineReference is a reference to a zero-argument subroutine that makes some calls
 #                             to ok() or similar to validate the contents of the output directory
 # $separateStdoutFromStderr is an optional boolean argument; if omitted or false, the command's
 #                           STDOUT and STDERR are mixed together in out output file called
 #                           stdout-and-stderr.txt; otherwise, they are printed to separate output
 #                           files called stdout.txt and stderr.txt, respectively
+# $failureExplanation is an explanation of why the test is expected to fail.  If the test is expected
+#                     to pass, then this should be left undefined.  Even in the case of a test that
+#                     is expected to fail, the system command is still expected to exit normally --
+#                     only the validation routine is expected to fail.
 sub runTest {
-    my ($testName, $outputDir, $stdinFile, $buildCommandRoutineReference, $validationRoutineReference, $separateStdoutFromStderr) = @_;
+    my ($testName, $outputDir, $stdinFile, $buildCommandRoutineReference, $validationRoutineReference, $separateStdoutFromStderr, $failureExplanation) = @_;
 
     # Note: You may need to upgrade your version of the Perl module Test::Simple in order to get this 'subtest' thing to work. (Perl modules are installed/upgraded using CPAN; google 'how do I upgrade a perl module')
     subtest $testName => sub {
@@ -165,7 +182,15 @@ sub runTest {
 	my $exitStatus = &runVerbosely($commandRef, $stdinFile, $stdoutFile, $stderrFile);
 	return unless is($exitStatus, 0, $testName.": command exited with status 0");
 
-	$validationRoutineReference->();
+	if (defined $failureExplanation) {
+	  TODO: {
+	      local $TODO = $failureExplanation;
+	      $validationRoutineReference->();
+	    }
+	} else {
+	    $validationRoutineReference->();
+
+	}
     };
 }
 
@@ -196,4 +221,59 @@ sub verifyIdentical {
     close(REF);
     close(OUT);
     is_deeply(\@outputFileAsArray, \@referenceFileAsArray, $testName.": Output file ".$outputFile." matches reference file ".$referenceFile.".");
+}
+
+
+##%%%%%%%%%%%%%%%%%%%%%%%%%%%##
+## DetokenizerTestCase class ##
+
+package DetokenizerTestCase;
+
+# Constructor
+sub new {
+    my $class = shift;
+    my $self = {
+	_name                 => shift,
+	_language             => shift,
+	_tokenizedText        => shift,
+	_rightAnswer       => shift,
+
+	_failureExplanation   => undef
+    };
+    bless $self, $class;
+}
+
+sub getName {
+    my ($self) = @_;
+    return $self->{_name};
+}
+
+sub getLanguage {
+    my ($self) = @_;
+    return $self->{_language};
+}
+
+sub getTokenizedText {
+    my ($self) = @_;
+    return $self->{_tokenizedText};
+}
+
+sub getRightAnswer {
+    my ($self) = @_;
+    return $self->{_rightAnswer};
+}
+
+# Call this routine to indicate that this test case is expected to fail.
+# (The detokenizer script is still expected to exit normally, but the output is not expected to
+# match the right answer because of a bug or unimplemented use case.)
+sub setExpectedToFail {
+    my ($self, $failureExplanation) = @_;
+    $self->{_failureExplanation} = $failureExplanation || "This test is expected to fail.";
+}
+
+# Returns a string explaining why this test is expected to fail, or undef if this test is expected
+# to pass.
+sub getFailureExplanation {
+    my ($self) = @_;
+    return $self->{_failureExplanation};
 }
