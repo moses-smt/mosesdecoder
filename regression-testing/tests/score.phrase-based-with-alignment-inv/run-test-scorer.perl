@@ -29,19 +29,15 @@ unless (defined $results_dir)
 
 `mkdir -p $results_dir`;
 
-my $outPath = "$results_dir/phrase-table.4.half.f2e";
+my $outPath = "$results_dir/phrase-table.4.half.e2f";
 
-my $scoreArgs = `cat $test_dir/$test_name/args.txt`;
-my $cmdMain = "$scoreExe $test_dir/$test_name/extract.sorted $test_dir/$test_name/lex.f2e $outPath  --GoodTuring \n";
-#my $cmdMain = "$scoreExe $scoreArgs \n";
-
+my $cmdMain = "$scoreExe $test_dir/$test_name/extract.inv.sorted $test_dir/$test_name/lex.e2f $outPath  --Inverse --GoodTuring \n";
 `$cmdMain`;
 
 my $truthPath = "$test_dir/$test_name/truth/results.txt";
 my $cmd = "diff $outPath $truthPath | wc -l";
 
-my $numDiff = 554;
-$numDiff = `$cmd`;
+my $numDiff = `$cmd`;
 
 if ($numDiff == 0)
 {
