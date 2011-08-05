@@ -91,7 +91,7 @@ bool StaticData::LoadData(Parameter *parameter)
 {
   ResetUserTime();
   m_parameter = parameter;
-  //yanggao20110805 to test checkin, shall delete this
+
   // verbose level
   m_verboseLevel = 1;
   if (m_parameter->GetParam("verbose").size() == 1) {
