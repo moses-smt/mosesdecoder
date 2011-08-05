@@ -1,0 +1,15 @@
+TRANSLATION_1=Prag an Market fällt zu ohne am Ende des Handel Tag
+TRANSLATION_2=nach einem steilen Rückgang der Morgen , die Prag Stock Market korrigiert ihre Verluste .
+TRANSLATION_3=Geschäfte mit Aktien aus der tschechischen Energy Enterprise ( ČEZ ) erreicht beinahe die Hälfte der regelmäßigen Tageszeitung Handel .
+TRANSLATION_4=bei der Prag Stock Market sofort ihren fallen aus Montag Anfang Tuesday Handel , wenn es um beinahe sechs Prozent .
+TRANSLATION_5=an der Zeit in diesem Herbst in Aktien an der Wall Street dafür verantwortlich ist , die Einbruch .
+LMLOAD_TIME ~ 0.000
+PTLOAD_TIME ~ 0.000
+PTLOAD_TIME ~ 7.000
+PTLOAD_TIME ~ 7.000
+SCORE_1 = -9.173
+SCORE_2 = -9.857
+SCORE_3 = -113.066
+SCORE_4 = -117.959
+SCORE_5 = -7.223
+TOTAL_WALLTIME ~ 23

@@ -1,0 +1,58 @@
+#! /bin/sh
+
+moses_scripts_dir=$1; shift
+mert_dir=$1; shift
+decoder=$1; shift
+data_dir=$1; shift
+testdir=$1; shift
+
+cwd=`pwd`
+cwd=$moses_scripts_dir/regression-testing/
+
+pushd $testdir 2> /dev/null > /dev/null
+
+rm actual_index 2> /dev/null > /dev/null
+
+local_moses_ini=`perl $cwd/create_localized_moses_ini.pl $data_dir ./moses.ini 2> /dev/null`
+
+nbest=200
+#if you want distinct nbest change this:
+nbestdistinct=""
+
+devset="input"
+reference="reference."
+config=$local_moses_ini
+
+#1-LM, 1-TM, 1-lex-RM
+lambdas="d:0.4,0-2;0.15,0-2;0.15,0-2;0.15,0-2;0.15,0-2;0.15,0-2;0.15,0-2 lm:0.5,0-2 tm:0.2,0-2;0.2,0-2;0.2,0-2;0.2,0-2;0.2,-1-1 w:-1,-1-1"
+
+rm -r working_dir 2> /dev/null > /dev/null
+mkdir working_dir 2> /dev/null
+
+cp $0 working_dir/ 2> /dev/null
+cp ./data/archive.list working_dir/ 2> /dev/null
+cp ./data/run* working_dir/ 2> /dev/null
+gzip -d working_dir/run*.NBEST.out.gz 2> /dev/null
+
+parameters="--nonorm --closest --no-filter-phrase-table --efficient_scorenbest_flag  --predictable-seeds --nocase"
+
+$moses_scripts_dir/training/mert-moses-new.pl $devset $reference $decoder $config --mertdir $mert_dir --mertargs "--binary" --working-dir working_dir --nbest $nbest $nbestdistinct --lambdas "$lambdas" $parameters > working_dir/MERT.out 2> working_dir/MERT.err
+
+# checking for weights.opt files
+cat working_dir/run[0-9].weights.txt | awk '{a++; print "weights_"a": "$0}' > tmpout$$ 
+
+# checking for bleu scores
+cat working_dir/run[0-9].mert.log | grep -i ^Best | cut -d'>' -f2 | awk '{a++; print "best_"a": "$0}' >> tmpout$$
+
+# checking for translations
+cat working_dir/run[0-9].out | awk '{a++; print "translation_"a": "$0}' >> tmpout$$ 
+
+cat tmpout$$ > /dev/stdout
+
+rm $config 2> /dev/null > /dev/null
+rm tmpout$$ tmperr$$ 2> /dev/null > /dev/null
+rm -r working_dir 2> /dev/null > /dev/null
+
+popd 2> /dev/null > /dev/null
+
+exit

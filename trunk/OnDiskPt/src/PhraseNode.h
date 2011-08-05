@@ -1,0 +1,103 @@
+#pragma once
+// $Id$
+/***********************************************************************
+ Moses - factored phrase-based, hierarchical and syntactic language decoder
+ Copyright (C) 2009 Hieu Hoang
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ ***********************************************************************/
+#include <fstream>
+#include <vector>
+#include <map>
+#include "Word.h"
+#include "TargetPhraseCollection.h"
+
+namespace OnDiskPt
+{
+
+class OnDiskWrapper;
+class SourcePhrase;
+
+class PhraseNode
+{
+  friend std::ostream& operator<<(std::ostream&, const PhraseNode&);
+protected:
+  UINT64 m_filePos, m_value;
+
+  typedef std::map<Word, PhraseNode> ChildColl;
+  ChildColl m_children;
+  PhraseNode *m_currChild;
+  bool m_saved;
+  size_t m_pos;
+  std::vector<float> m_counts;
+
+  TargetPhraseCollection m_targetPhraseColl;
+
+  char *m_memLoad, *m_memLoadLast;
+  UINT64 m_numChildrenLoad;
+
+  void AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
+                       , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
+                       , size_t tableLimit, const std::vector<float> &counts);
+  size_t ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem, size_t numFactors) const;
+  void GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnDiskWrapper &onDiskWrapper) const;
+
+public:
+  static size_t GetNodeSize(size_t numChildren, size_t wordSize, size_t countSize);
+
+  PhraseNode(); // unsaved node
+  PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper); // load saved node
+  ~PhraseNode();
+
+  void Add(const Word &word, UINT64 nextFilePos, size_t wordSize);
+  void Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimit);
+
+  void AddTargetPhrase(const SourcePhrase &sourcePhrase, TargetPhrase *targetPhrase
+                       , OnDiskWrapper &onDiskWrapper, size_t tableLimit
+                       , const std::vector<float> &counts);
+
+  UINT64 GetFilePos() const {
+    return m_filePos;
+  }
+  UINT64 GetValue() const {
+    return m_value;
+  }
+  void SetValue(UINT64 value) {
+    m_value = value;
+  }
+  size_t GetSize() const {
+    return m_children.size();
+  }
+
+  bool Saved() const {
+    return m_saved;
+  }
+
+  void SetPos(size_t pos) {
+    m_pos = pos;
+  }
+
+  const PhraseNode *GetChild(const Word &wordSought, OnDiskWrapper &onDiskWrapper) const;
+  const TargetPhraseCollection *GetTargetPhraseCollection(size_t tableLimit, OnDiskWrapper &onDiskWrapper) const;
+
+  void AddCounts(const std::vector<float> &counts) {
+    m_counts = counts;
+  }
+  float GetCount(size_t ind) const;
+
+};
+
+}
+

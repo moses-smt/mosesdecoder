@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# $Id$
+
+function die() {
+  echo "$@"
+  exit 1
+}
+
+[ -d $WORKSPACE ] || die "Failed to find workspace: $WORKSPACE"
+echo "Workspace: $WORKSPACE"
+
+bindir=$WORKSPACE/bin
+[ -d $bindir ] || die "Please create $WORKSPACE/bin and put GIZA++ and such there"
+
+export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
+
+
+echo "fake" > lm0.3gr
+echo "fake" > lm0.4gr
+
+mkdir model || die "Can't create blank model"
+
+echo "Starting training script."
+
+$SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
+  --bin-dir $bindir \
+  --f src --e tgt \
+  --lm 0:3:lm0.3gr \
+  --lm 0:4:lm0.4gr \
+  --decoding-steps t0,g0,t1,g1,g2 \
+  --translation-factors 0-0+1-1 \
+  --generation-factors 0-0+0-1+0,1-2 \
+  --first-step 9 \
+  || die "Creation of moses.ini failed"
+
+echo "Success"
