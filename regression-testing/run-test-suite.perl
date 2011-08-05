@@ -9,12 +9,13 @@ my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir 
 use Getopt::Long;
 
 ############################################################
-  #score.hierarchical
 my @tests = qw (
   score.phrase-based
   score.phrase-based-inv
   score.phrase-based-with-alignment
   score.phrase-based-with-alignment-inv
+  score.hierarchical
+  score.hierarchical-inv
   chart.target-syntax
   chart.target-syntax.ondisk
   chart.hierarchical
