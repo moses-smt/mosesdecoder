@@ -14,8 +14,6 @@ use File::Basename ('dirname');
 use IPC::Run3;
 use Getopt::Long;
 
-use MosesRegressionTesting;
-
 GetOptions("detokenizer=s" => \(my $detokenizer),
            "results-dir=s"=> \(my $results_dir)
           ) or exit 1;
@@ -39,10 +37,11 @@ use Test::More;
 
 # A simple English test
 &runDetokenizerTest("TEST_ENGLISH_EASY", "en",
-<<'TOK',
+<<'TOK'
 This sentence is really simple , so it should not be hard to detokenize .
 This one is no more difficult , but , hey , it is on a new line .
 TOK
+,
 <<'EXP'
 This sentence is really simple, so it should not be hard to detokenize.
 This one is no more difficult, but, hey, it is on a new line.
@@ -51,9 +50,10 @@ EXP
 
 # An English test involving double-quotes
 &runDetokenizerTest("TEST_ENGLISH_DOUBLEQUOTES", "en",
-<<'TOK',
+<<'TOK'
 This is a somewhat " less simple " test .
 TOK
+,
 <<'EXP'
 This is a somewhat "less simple" test.
 EXP
@@ -61,9 +61,10 @@ EXP
 
 # A simple French test
 &runDetokenizerTest("TEST_FRENCH_EASY", "fr",
-<<'TOK',
+<<'TOK'
 Voici une phrase simple .
 TOK
+,
 <<'EXP'
 Voici une phrase simple.
 EXP
@@ -71,9 +72,10 @@ EXP
 
 # A French test involving an apostrophe
 &runDetokenizerTest("TEST_FRENCH_APOSTROPHE", "fr",
-<<'TOK',
+<<'TOK'
 Moi , j' ai une apostrophe .
 TOK
+,
 <<'EXP'
 Moi, j'ai une apostrophe.
 EXP
@@ -84,9 +86,10 @@ TODO: {
 
 # A French test involving an apostrophe on the second-last word
 &runDetokenizerTest("TEST_FRENCH_APOSTROPHE_PENULTIMATE", "fr",
-<<'TOK',
+<<'TOK'
 de musique rap issus de l' immigration
 TOK
+,
 <<'EXP'
 de musique rap issus de l'immigration
 EXP
