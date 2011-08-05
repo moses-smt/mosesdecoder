@@ -12,6 +12,7 @@ class Hypothesis;
 class FFState;
 class InputType;
 class ScoreComponentCollection;
+class TranslationOption;
 
 class FeatureFunction: public ScoreProducer {
 
@@ -88,6 +89,29 @@ struct FeatureNameCounter {
 };
 
 template <typename T> size_t FeatureNameCounter<T>::s_created(0);
+
+
+/**
+  * Stateful feature function that just requires a TranslationOption, rather
+  * than a Hypothesis. This is the way all feature functions should be, but
+  * for historical reasons the LM uses the Hypothesis.
+  **/
+class OptionStatefulFeatureFunction : public StatefulFeatureFunction {
+
+  public:
+    OptionStatefulFeatureFunction(const std::string& description) :
+      StatefulFeatureFunction(description) {}
+
+    virtual FFState* Evaluate(
+      const Hypothesis& cur_hypo,
+      const FFState* prev_state,
+      ScoreComponentCollection* accumulator) const;
+
+    virtual FFState* Evaluate(
+      const TranslationOption& cur_option,
+      const FFState* prev_state,
+      ScoreComponentCollection* accumulator) const = 0;
+};
 
 }
 

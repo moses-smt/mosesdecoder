@@ -13,7 +13,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      const std::string &modelType,
                                      const std::string &filePath, 
                                      const std::vector<float>& weights)
-        : StatefulFeatureFunction("LexicalReordering_" + modelType),
+        : OptionStatefulFeatureFunction("LexicalReordering_" + modelType),
           m_configuration(this, modelType) {
     std::cerr << "Creating lexical reordering...\n";
     std::cerr << "weights: ";
@@ -71,12 +71,12 @@ Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const {
     return m_table->GetScore(f, e, Phrase(Output));
 }
 
-FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
+FFState* LexicalReordering::Evaluate(const TranslationOption& option,
                                      const FFState* prev_state,
                                      ScoreComponentCollection* out) const {
     Scores score(GetNumScoreComponents(), 0);
     const LexicalReorderingState *prev = dynamic_cast<const LexicalReorderingState *>(prev_state);
-    LexicalReorderingState *next_state = prev->Expand(hypo.GetTranslationOption(), score);
+    LexicalReorderingState *next_state = prev->Expand(option, score);
 
     out->PlusEquals(this, score);
     

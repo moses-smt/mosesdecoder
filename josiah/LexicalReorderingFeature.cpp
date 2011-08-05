@@ -83,7 +83,7 @@ void LexicalReorderingFeatureFunction::updateTarget() {
   const Hypothesis * currHypo = getSample().GetTargetTail();
   LRStateHandle prevState(dynamic_cast<const LexicalReorderingState*>(m_mosesLexReorder->EmptyHypothesisState(currHypo->GetInput())));
   while ((currHypo = (currHypo->GetNextHypo()))) {
-    LRStateHandle currState(dynamic_cast<const LexicalReorderingState*>(m_mosesLexReorder->Evaluate(*currHypo,prevState.get(),&m_accumulator)));
+    LRStateHandle currState(dynamic_cast<const LexicalReorderingState*>(m_mosesLexReorder->Evaluate(currHypo->GetTranslationOption(),prevState.get(),&m_accumulator)));
     for (size_t i = 0; i < currHypo->GetCurrTargetWordsRange().GetNumWordsCovered(); ++i) {
       m_prevStates.push_back(prevState);
     }

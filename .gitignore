@@ -1,5 +1,11 @@
+*.lo
 *.o
 *~
+.libs
+.deps
+*.la
+*.a
+*.swp
 Makefile
 Makefile.in
 aclocal.m4
@@ -8,6 +14,7 @@ config.h
 config.log
 config.status
 configure
+ltmain.sh
 misc/.deps
 misc/Makefile
 misc/Makefile.in

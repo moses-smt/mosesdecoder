@@ -40,6 +40,7 @@ then
     fi
 fi
 
+touch ltmain.sh
 
 echo "Calling $ACLOCAL..."
 $ACLOCAL -I m4 || die "aclocal failed"

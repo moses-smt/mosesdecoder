@@ -85,7 +85,7 @@ public:
       }
   }
 
-  FVector GetScoresVector()
+  const FVector& GetScoresVector()
   {
 	  return m_scores;
   }

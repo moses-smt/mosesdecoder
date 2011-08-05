@@ -31,6 +31,7 @@ libjosiah_a_SOURCES = \
   SampleCollector.cpp \
   Sampler.cpp \
   Selector.cpp \
+  SingleStateFeature.cpp \
   SourceToTargetRatio.cpp \
   StatelessFeature.cpp \
 	TrainingSource.cpp \

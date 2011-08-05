@@ -19,10 +19,10 @@ namespace Moses
 
 class Factor;
 class Phrase;
-class Hypothesis;
+class TranslatuionOption;
 class InputType;
 
-class LexicalReordering : public StatefulFeatureFunction {
+class LexicalReordering : public OptionStatefulFeatureFunction {
 public:   
     LexicalReordering(std::vector<FactorType>& f_factors, 
                       std::vector<FactorType>& e_factors,
@@ -35,7 +35,7 @@ public:
         return m_configuration.GetNumScoreComponents(); 
     }
     
-    virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+    virtual FFState* Evaluate(const TranslationOption& cur_option,
                               const FFState* prev_state,
                               ScoreComponentCollection* accumulator) const;
     

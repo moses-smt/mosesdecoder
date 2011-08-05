@@ -39,7 +39,8 @@ namespace Moses {
 
 class TranslationOption;
 
-typedef boost::unordered_set<std::string> vocab_t;
+typedef boost::unordered_set<std::string> Vocab_t;
+enum DreoPosition_t {dreo_curr, dreo_prev, dreo_both};
 
 /*
  * The reordering feature is made up of several subfeatures (Templates)
@@ -58,19 +59,19 @@ class ReorderingFeatureTemplate {
   public:
     ReorderingFeatureTemplate(): m_vocab(NULL) {}
     virtual TemplateStateHandle Evaluate(
-            const Hypothesis& cur_hypo,
+            const TranslationOption& cur_option,
             const TemplateStateHandle  state,
             const std::string& stem,
             FVector& accumulator) const = 0;
     virtual TemplateStateHandle EmptyState(const InputType &input) const = 0;
 
-    void SetVocab(vocab_t* vocab) {m_vocab = vocab;}
+    void SetVocab(Vocab_t* vocab) {m_vocab = vocab;}
   protected:
     bool CheckVocab(const std::string& token) const;
     virtual ~ReorderingFeatureTemplate() {}
 
   private:
-    vocab_t* m_vocab;
+    Vocab_t* m_vocab;
 };
 
 class EdgeReorderingFeatureTemplateState: public ReorderingFeatureTemplateState {
@@ -92,11 +93,31 @@ class EdgeReorderingFeatureTemplateState: public ReorderingFeatureTemplateState 
 
 class EdgeReorderingFeatureTemplate : public ReorderingFeatureTemplate {
   public:
-    EdgeReorderingFeatureTemplate(size_t factor, bool source, bool curr)
-     : m_factor(factor), m_source(source), m_curr(curr) {}
+    EdgeReorderingFeatureTemplate(size_t factor, bool source, DreoPosition_t pos)
+     : m_factor(factor), m_source(source), m_pos(pos) 
+     {
+       if (source) {
+         if (m_pos == dreo_curr) {
+           m_posString = "s:c";
+         } else if (m_pos == dreo_prev) {
+           m_posString = "s:p";
+         } else if (m_pos == dreo_both) {
+           m_posString = "s:b";
+         }
+       } else {
+         if (m_pos == dreo_curr) {
+           m_posString = "t:c";
+         } else if (m_pos == dreo_prev) {
+           m_posString = "t:p";
+         } else if (m_pos == dreo_both) {
+           m_posString = "t:b";
+         }
+       }
+     }
+
 
     virtual TemplateStateHandle Evaluate(
-            const Hypothesis& cur_hypo,
+            const TranslationOption& cur_option,
             const TemplateStateHandle state,
             const std::string& stem,
             FVector& accumulator) const;
@@ -105,7 +126,8 @@ class EdgeReorderingFeatureTemplate : public ReorderingFeatureTemplate {
   private:
     size_t m_factor;
     bool m_source; //source or target?
-    bool m_curr; //curr of prev?
+    DreoPosition_t m_pos; 
+    std::string m_posString;
 };
 
 
@@ -114,7 +136,6 @@ class DiscriminativeReorderingState: public FFState {
     DiscriminativeReorderingState();
     DiscriminativeReorderingState(const WordsRange* prevWordsRange);
     virtual int Compare(const FFState& other) const;
-    //Implemented to here.
     void AddTemplateState(TemplateStateHandle templateState);
     TemplateStateHandle GetTemplateState(size_t index) const;
     const std::string& GetMsd(const WordsRange& currWordsRange) const;
@@ -124,7 +145,7 @@ class DiscriminativeReorderingState: public FFState {
     const WordsRange* m_prevWordsRange;
 };
 
-class DiscriminativeReorderingFeature : public StatefulFeatureFunction {
+class DiscriminativeReorderingFeature : public OptionStatefulFeatureFunction {
   public:
     DiscriminativeReorderingFeature(const std::vector<std::string>& featureConfig,
                                     const std::vector<std::string>& vocabConfig);
@@ -135,16 +156,16 @@ class DiscriminativeReorderingFeature : public StatefulFeatureFunction {
 
   	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-	  virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+	  virtual FFState* Evaluate(const TranslationOption& cur_option,
                               const FFState* prev_state,
 	                            ScoreComponentCollection* accumulator) const;
 
   private:
    std::vector<ReorderingFeatureTemplate*> m_templates;
-   std::map<FactorType,vocab_t> m_sourceVocabs;
-   std::map<FactorType,vocab_t> m_targetVocabs;
+   std::map<FactorType,Vocab_t> m_sourceVocabs;
+   std::map<FactorType,Vocab_t> m_targetVocabs;
 
-   void LoadVocab(std::string filename, vocab_t* vocab);
+   void LoadVocab(std::string filename, Vocab_t* vocab);
 
 
 };

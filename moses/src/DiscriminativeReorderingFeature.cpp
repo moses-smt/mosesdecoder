@@ -65,51 +65,54 @@ TemplateStateHandle EdgeReorderingFeatureTemplate::EmptyState(const InputType&) 
 }
 
 TemplateStateHandle EdgeReorderingFeatureTemplate::Evaluate(
-        const Hypothesis& cur_hypo,
+        const TranslationOption& currOption,
         const TemplateStateHandle state,
         const string& prefix,
         FVector& accumulator) const 
 {
-  static const string sourcePrev = "s:p:";
-  static const string sourceCurr = "s:c:";
-  static const string targetPrev = "t:p:";
-  static const string targetCurr = "t:c:";
-
   const EdgeReorderingFeatureTemplateState* edgeState = 
     dynamic_cast<const EdgeReorderingFeatureTemplateState*>(state.get());
   assert(edgeState);
 
-  const TranslationOption& currOption = cur_hypo.GetTranslationOption();
-
-  const Factor* edge = NULL;
-  const string* position = NULL;
-  if (m_source && m_curr) {
-    edge = currOption.GetSourcePhrase()->GetWord(0).GetFactor(m_factor);
-    position = &sourceCurr;
-  } else if (m_source && !m_curr) {
-    edge = edgeState->GetLastFactor(); 
-    position = &sourcePrev;
-  } else if (!m_source && m_curr) {
-    edge = currOption.GetTargetPhrase().GetWord(0).GetFactor(m_factor);
-    position = &targetCurr;
-  } else {
-    edge = edgeState->GetLastFactor(); 
-    position = &targetPrev;
-  }
-
-  if (!edge || CheckVocab(edge->GetString())) {
-    ostringstream namestr;
-    namestr << *position;
-    namestr << m_factor;
-    namestr << ":";
+  ostringstream namestr;
+  namestr << m_posString;
+  namestr << m_factor;
+  namestr << ":";
+  vector<string> edges;
+  //TODO: do these three on ctor
+  if (m_pos == dreo_prev || m_pos == dreo_both) {
+    const Factor* edge = edgeState->GetLastFactor(); 
     if (edge) {
       const string& word = edge->GetString();
-      namestr << word;
+      edges.push_back(word);
     } else {
-      namestr << BOS_;
+      edges.push_back(BOS_);
     }
-    FName name(prefix,namestr.str());
-    ++accumulator[name];
+  }
+  if (m_pos == dreo_curr || m_pos == dreo_both) {
+    const Factor* edge = NULL;
+    if (m_source) {
+      edge = currOption.GetSourcePhrase()->GetWord(0).GetFactor(m_factor);
+    } else {
+      edge = currOption.GetTargetPhrase().GetWord(0).GetFactor(m_factor);
+    }
+    if (edge) {
+      const string& word = edge->GetString();
+      edges.push_back(word);
+    } else {
+      edges.push_back(BOS_);
+    }
+  }
+
+  if (CheckVocab(edges[0])) {
+    if (edges.size() == 1 || CheckVocab(edges[1])) {
+      namestr << edges[0];
+      if (edges.size() == 2) {
+        namestr << ":" << edges[1];
+      }
+      FName name(prefix,namestr.str());
+      ++accumulator[name];
+    }
   }
   return TemplateStateHandle
     (new EdgeReorderingFeatureTemplateState(&currOption,m_source,m_factor));
@@ -190,12 +193,13 @@ const string& DiscriminativeReorderingState::GetMsd(const WordsRange& currWordsR
 DiscriminativeReorderingFeature::DiscriminativeReorderingFeature
   (const vector<string>& featureConfig,
     const vector<string>& vocabConfig) :
-    StatefulFeatureFunction("dreo") 
+    OptionStatefulFeatureFunction("dreo") 
 {
   const static string SOURCE = "source";
   const static string TARGET = "target";
   const static string PREV = "prev";
   const static string CURR = "curr";
+  const static string BOTH = "both";
 
   //load vocabularies
   for (vector<string>::const_iterator i = vocabConfig.begin(); i != vocabConfig.end();
@@ -214,7 +218,7 @@ DiscriminativeReorderingFeature::DiscriminativeReorderingFeature
       throw runtime_error("Discrim reordering vocab config has invalid source/target identifier");
     }
     string filename = vc[2];
-    vocab_t* vocab = NULL;
+    Vocab_t* vocab = NULL;
     if (source) {
       vocab = &(m_sourceVocabs[factorId]);
     } else {
@@ -238,14 +242,16 @@ DiscriminativeReorderingFeature::DiscriminativeReorderingFeature
     } else if (fc[2] != SOURCE) {
       throw runtime_error("Discrim reordering feature config has invalid source/target identifier");
     }
-    bool curr = true;
+    DreoPosition_t pos = dreo_curr;
     if (fc[3] == PREV) {
-      curr = false;
+      pos = dreo_prev;
+    } else if (fc[3] == BOTH) {
+      pos = dreo_both;
     } else if (fc[3] != CURR) {
       throw runtime_error("Discrim reordering config has invalid curr/prev identifier");
     }
     if (fc[0] == "edge") {
-      m_templates.push_back(new EdgeReorderingFeatureTemplate(factorId,source,curr));
+      m_templates.push_back(new EdgeReorderingFeatureTemplate(factorId,source,pos));
     } else {
       ostringstream errmsg;
       errmsg << "Unknown msd feature type '" << fc[0] << "'" << endl;
@@ -253,7 +259,7 @@ DiscriminativeReorderingFeature::DiscriminativeReorderingFeature
     }
 
     //set vocabulary, if necessary
-    vocab_t* vocab = NULL;
+    Vocab_t* vocab = NULL;
     if (source) {
       if (m_sourceVocabs.find(factorId) != m_sourceVocabs.end()) {
         vocab = &(m_sourceVocabs[factorId]);
@@ -295,7 +301,8 @@ const FFState* DiscriminativeReorderingFeature::EmptyHypothesisState
   return state;
 }
 
-FFState* DiscriminativeReorderingFeature::Evaluate(const Hypothesis& cur_hypo,
+FFState* DiscriminativeReorderingFeature::Evaluate(
+                          const TranslationOption& option,
                           const FFState* prev_state,
                           ScoreComponentCollection* accumulator) const
 {
@@ -304,17 +311,17 @@ FFState* DiscriminativeReorderingFeature::Evaluate(const Hypothesis& cur_hypo,
   assert(state);
   FVector scores;
   DiscriminativeReorderingState* newState = new DiscriminativeReorderingState
-    (&(cur_hypo.GetCurrSourceWordsRange()));
-  string stem = state->GetMsd(cur_hypo.GetCurrSourceWordsRange());
+    (&(option.GetSourceWordsRange()));
+  string stem = state->GetMsd(option.GetSourceWordsRange());
   for (size_t i = 0; i < m_templates.size(); ++i) {
     newState->AddTemplateState(m_templates[i]->Evaluate(
-        cur_hypo, state->GetTemplateState(i), stem, scores));
+        option, state->GetTemplateState(i), stem, scores));
   }
   accumulator->PlusEquals(scores);
   return newState;
 }
 
-void DiscriminativeReorderingFeature::LoadVocab(string filename, vocab_t* vocab) 
+void DiscriminativeReorderingFeature::LoadVocab(string filename, Vocab_t* vocab) 
 {
   VERBOSE(1, "Loading vocabulary for reordering feature from " << filename << endl);
   vocab->clear();

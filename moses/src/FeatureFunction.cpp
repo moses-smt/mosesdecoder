@@ -1,4 +1,5 @@
 #include "FeatureFunction.h"
+#include "Hypothesis.h"
 
 #include <cassert>
 
@@ -18,6 +19,15 @@ void StatelessFeatureFunction::Evaluate(
 
 bool StatefulFeatureFunction::IsStateless() const { return false; }
 
+FFState* OptionStatefulFeatureFunction::Evaluate(
+  const Hypothesis& cur_hypo,
+  const FFState* prev_state,
+  ScoreComponentCollection* accumulator) const {
+    return Evaluate(
+      cur_hypo.GetTranslationOption(),
+      prev_state,
+      accumulator);
+  }
 
 
 }

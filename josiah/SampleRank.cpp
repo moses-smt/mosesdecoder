@@ -69,6 +69,7 @@ static void MixWeights(size_t size, size_t rank) {
 #endif
 }
 
+
 int main(int argc, char** argv) {
   int rank = 0, size = 1;
 #ifdef MPI_ENABLED

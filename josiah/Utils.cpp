@@ -1,9 +1,11 @@
 #include <boost/program_options.hpp>
 
+
 #include "Utils.h"
 #include "Pos.h"
 #include "Dependency.h"
 #include "DiscriminativeLMFeature.h"
+#include "DiscriminativeReorderingFeature.h"
 #include "DistortionPenaltyFeature.h"
 #include "LanguageModelFeature.h"
 #include "LexicalReorderingFeature.h"
@@ -17,6 +19,7 @@
 #include "ReorderingFeature.h"
 #include "SourceToTargetRatio.h"
 #include "StatelessFeature.h"
+#include "SingleStateFeature.h"
 #include "WordPenaltyFeature.h"
 
 using namespace std;
@@ -25,6 +28,8 @@ namespace po = boost::program_options;
 namespace Josiah {
   
   
+//  template class SingleStateFeature
+//    <Moses::DiscriminativeReorderingFeature,DiscriminativeReorderingState>;
   
 
   
@@ -47,7 +52,8 @@ namespace Josiah {
     fv.push_back(FeatureHandle(new DistortionPenaltyFeature()));
     const std::vector<LexicalReordering*>& reorderModels = system.GetReorderModels();
     for (size_t i = 0; i < reorderModels.size(); ++i) {
-      fv.push_back(FeatureHandle(new LexicalReorderingFeature(reorderModels[i],i)));
+      fv.push_back(FeatureHandle(new SingleStateFeature(reorderModels[i])));
+//      fv.push_back(FeatureHandle(new LexicalReorderingFeature(reorderModels[i],i)));
     }
     
     if (filename.empty()) return;
@@ -158,7 +164,9 @@ namespace Josiah {
       fv.push_back(FeatureHandle(new DiscriminativeLMBigramFeature(discrimlmFactor,discrimlmVocab)));
     }
     if (msdConfig.size()) {
-      fv.push_back(FeatureHandle(new ReorderingFeature(msdConfig,msdVocab)));
+      //TODO
+      fv.push_back(FeatureHandle(new SingleStateFeature
+        (new Moses::DiscriminativeReorderingFeature(msdConfig,msdVocab))));
     }
     if (phrasePairSourceTarget) {
       fv.push_back(FeatureHandle(
