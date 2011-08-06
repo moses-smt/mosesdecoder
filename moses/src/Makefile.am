@@ -79,6 +79,7 @@ libmoses_la_HEADERS = \
         PhraseDictionaryOnDisk.h \
         PhraseDictionaryTree.h \
         PhraseDictionaryTreeAdaptor.h \
+        PhraseLengthFeature.h \
         PhrasePairFeature.h \
         PrefixTree.h \
         PrefixTreeMap.h \
@@ -211,6 +212,7 @@ libmoses_la_SOURCES = \
         PhraseDictionaryOnDisk.cpp \
         PhraseDictionaryTree.cpp \
         PhraseDictionaryTreeAdaptor.cpp \
+        PhraseLengthFeature.cpp \
         PhrasePairFeature.cpp \
         PrefixTreeMap.cpp \
         ReorderingConstraint.cpp \

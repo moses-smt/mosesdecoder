@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseBoundaryFeature.h"
 #include "PhraseDictionary.h"
 #include "PhrasePairFeature.h"
+#include "PhraseLengthFeature.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "TargetBigramFeature.h"
@@ -72,6 +73,7 @@ StaticData::StaticData()
 :m_targetBigramFeature(NULL)
 ,m_phraseBoundaryFeature(NULL)
 ,m_phrasePairFeature(NULL)
+,m_phraseLengthFeature(NULL)
 ,m_numLinkParams(1)
 ,m_fLMsLoaded(false)
 ,m_sourceStartPosMattersForRecombination(false)
@@ -128,9 +130,6 @@ bool StaticData::LoadData(Parameter *parameter)
 		}
 	}
     
-    
-    
-
 	// factor delimiter
 	if (m_parameter->GetParam("factor-delimiter").size() > 0) {
 		m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -306,7 +305,6 @@ bool StaticData::LoadData(Parameter *parameter)
     SetWeight(m_wordPenaltyProducers.back(), weightWordPenalty);
   }
 	
-
 	float weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
 	m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
@@ -462,6 +460,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadDiscrimLMFeature()) return false;
   if (!LoadPhrasePairFeature()) return false;
   if (!LoadPhraseBoundaryFeature()) return false;
+  if (!LoadPhraseLengthFeature()) return false;
 
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
@@ -539,8 +538,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     //Instigate dictionary loading
     m_translationSystems.find(config[0])->second.ConfigDictionaries();
-
-
     
     //Add any other features here.
     if (m_bleuScoreFeature) {
@@ -554,6 +551,9 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     if (m_phraseBoundaryFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phraseBoundaryFeature);
+    }
+    if (m_phraseLengthFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phraseLengthFeature);
     }
     
   }
@@ -637,6 +637,7 @@ StaticData::~StaticData()
 	delete m_targetBigramFeature;
   delete m_phrasePairFeature;
   delete m_phraseBoundaryFeature;
+	delete m_phraseLengthFeature;
 
 	//delete m_parameter;
 
@@ -1275,22 +1276,24 @@ bool StaticData::LoadReferences() {
 
 bool StaticData::LoadDiscrimLMFeature()
 {
+  // only load if specified
 	const vector<string> &wordFile = m_parameter->GetParam("discrim-lmodel-file");
 	if (wordFile.empty())
   {
 		return true;
   }
 
-
 	if (wordFile.size() != 1) {
 		UserMessage::Add("Can only have one discrim-lmodel-file");
 		return false;
 	}
+
 	vector<string> tokens = Tokenize(wordFile[0]);
   if (tokens.size() != 2 && tokens.size() != 3) {
-    UserMessage::Add("Format of discriminative language model parametr is <order> [factor] <filename>");
+    UserMessage::Add("Format of discriminative language model parameter is <order> [factor] <filename>");
     return false;
   }
+
   size_t order = Scan<size_t>(tokens[0]);
   if (order != 2) {
     UserMessage::Add("Only bigrams are supported by the discriminative LM");
@@ -1361,6 +1364,14 @@ bool StaticData::LoadPhrasePairFeature()
   size_t sourceFactorId = Scan<FactorType>(tokens[0]);
   size_t targetFactorId = Scan<FactorType>(tokens[1]);
   m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId);
+  return true;
+}
+
+bool StaticData::LoadPhraseLengthFeature()
+{
+  if (m_parameter->isParamSpecified("phrase-length-feature")) {
+    m_phraseLengthFeature = new PhraseLengthFeature();
+  }
   return true;
 }
 

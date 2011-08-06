@@ -142,6 +142,7 @@ Parameter::Parameter()
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
   AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
+  AddParam("phrase-length-feature", "Binary features for source length, target length, both of each phrase");
 
     AddParam("show-weights", "print feature weights and exit");
 }

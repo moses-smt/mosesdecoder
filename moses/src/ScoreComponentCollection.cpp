@@ -31,7 +31,6 @@ void ScoreComponentCollection::PlusEqualsAllLM(const LMList& lmList, const Score
   }
 }
 
-	
 void ScoreComponentCollection::MultiplyEquals(float scalar)
 {
 	m_scores *= scalar;
@@ -41,8 +40,7 @@ void ScoreComponentCollection::DivideEquals(float scalar)
 {
 	m_scores /= scalar;
 }
-	
-	
+
 void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rhs)
 {
 	m_scores *= rhs.m_scores;

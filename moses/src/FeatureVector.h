@@ -54,7 +54,6 @@ namespace Moses {
     static Name2Id name2id;
     static std::vector<std::string> id2name;
     
-    
     //A feature name can either be initialised as a pair of strings,
     //which will be concatenated with a SEP between them, or as
     //a single string, which will be used as-is.
@@ -68,16 +67,12 @@ namespace Moses {
     
     size_t hash() const;
 
-    
     bool operator==(const FName& rhs) const ;
     bool operator!=(const FName& rhs) const ;
-		
 		
   private:
     void init(const std::string& name);
     size_t m_id;
-    
-    
 	};
 	
 	std::ostream& operator<<(std::ostream& out,const FName& name);

@@ -60,6 +60,7 @@ class PhraseBoundaryFeature;
 class PhraseDictionaryFeature;
 class PhrasePairFeature;
 class BleuScoreFeature;
+class PhraseLengthFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
@@ -93,6 +94,7 @@ protected:
 	TargetBigramFeature *m_targetBigramFeature;
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhrasePairFeature *m_phrasePairFeature;
+  PhraseLengthFeature* m_phraseLengthFeature;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -237,6 +239,7 @@ protected:
 	bool LoadDiscrimLMFeature();
   bool LoadPhraseBoundaryFeature();
   bool LoadPhrasePairFeature();
+  bool LoadPhraseLengthFeature();
   
   void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;
