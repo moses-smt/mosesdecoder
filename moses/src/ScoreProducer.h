@@ -21,6 +21,7 @@ class ScoreProducer
 private:
   mutable  std::vector<FName> m_names; //for features with fixed number of values
   std::string m_description;
+  bool m_reportSparseFeatures;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 	ScoreProducer(const ScoreProducer&);  // don't implement
@@ -51,6 +52,8 @@ public:
 
 	virtual bool IsStateless() const = 0;
 
+  void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }
+  bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; } 
 };
 
 

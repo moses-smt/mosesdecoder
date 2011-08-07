@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <numeric>
 #include <cassert>
+#include <sstream>
 
 #ifdef MPI_ENABLE
 #include <boost/serialization/access.hpp>
@@ -79,7 +80,7 @@ public:
       return m_scores.load(filename);
   }
 
-  FVector GetScoresVector()
+  FVector GetScoresVector() const
   {
 	  return m_scores;
   }
@@ -216,6 +217,20 @@ public:
     return res;
 	}
 
+  //! get subset of scores that belong to a certain sparse ScoreProducer
+  FVector GetVectorForProducer(const ScoreProducer* sp) const
+  {
+    FVector fv;
+    std::string prefix = sp->GetScoreProducerWeightShortName() + FName::SEP;
+    for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
+      std::stringstream name;
+      name << i->first;
+      if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+        fv[i->first] = i->second;
+    }
+    return fv;
+  }
+
 	void ApplyLog(size_t baseOfLog) {
 		m_scores.applyLog(baseOfLog);
 	}
@@ -289,11 +304,9 @@ public:
 
     }
 
-		
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 		
 #endif
-  
 
 };
 

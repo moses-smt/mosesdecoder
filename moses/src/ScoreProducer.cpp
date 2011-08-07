@@ -13,7 +13,8 @@ namespace Moses
 multiset<string> ScoreProducer::description_counts;
 const size_t ScoreProducer::unlimited = -1;
 
-ScoreProducer::ScoreProducer(const std::string& description) 
+ScoreProducer::ScoreProducer(const std::string& description)
+  : m_reportSparseFeatures(false)
 {
   description_counts.insert(description);
   size_t count = description_counts.count(description);

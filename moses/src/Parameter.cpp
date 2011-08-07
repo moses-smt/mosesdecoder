@@ -143,8 +143,8 @@ Parameter::Parameter()
   AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
   AddParam("phrase-length-feature", "Binary features for source length, target length, both of each phrase");
-
-    AddParam("show-weights", "print feature weights and exit");
+  AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
+  AddParam("show-weights", "print feature weights and exit");
 }
 
 Parameter::~Parameter()

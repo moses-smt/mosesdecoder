@@ -65,7 +65,6 @@ void fix(std::ostream& stream, size_t size) {
     stream.precision(size);
 }
 
-
 /**
   * Makes sure output goes in the correct order.
   **/
@@ -73,7 +72,6 @@ class OutputCollector {
     public:
         OutputCollector(std::ostream* outStream= &cout, std::ostream* debugStream=&cerr) :
             m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
-
 
         /**
           * Write or cache the output, as appropriate.

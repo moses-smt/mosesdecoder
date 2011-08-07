@@ -249,7 +249,6 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
     {
 		  ret.Add(path);
     }
- 
 
 		if(onlyDistinct)
 		{

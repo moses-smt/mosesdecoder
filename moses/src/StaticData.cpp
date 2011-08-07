@@ -231,7 +231,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	// print all factors of output translations
 	SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
 
-	// 
+	// caching of translation options
 	if (m_inputType == SentenceInput)
 	{
 		SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
@@ -462,6 +462,15 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadPhraseBoundaryFeature()) return false;
   if (!LoadPhraseLengthFeature()) return false;
 
+  // report individual sparse features in n-best list
+  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+    for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
+      const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
+      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName()) == 0)
+        m_phraseLengthFeature->SetSparseFeatureReporting();
+    }
+  }
+
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
   if (!tsConfig.size()) {
@@ -555,9 +564,8 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_phraseLengthFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phraseLengthFeature);
     }
-    
   }
-
+    
   //Load extra feature weights
   //NB: These are common to all translation systems (at the moment!)
   vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
@@ -577,7 +585,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_allWeights.PlusEquals(extraWeights);
   }
 
-  
 	return true;
 }
 

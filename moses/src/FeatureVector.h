@@ -92,11 +92,7 @@ namespace Moses {
 		}
 	};
 	
-	
 	class ProxyFVector;
-	
-	
-	
 	
 	/**
 	 * A sparse feature (or weight) vector.
@@ -120,9 +116,7 @@ namespace Moses {
     static FName DEFAULT_NAME;
     static const FValue DEFAULT;
     
-    
     void clear();
-    
     
 		bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
     
@@ -143,8 +137,6 @@ namespace Moses {
     bool operator!= (const FVector& rhs) const;
 
     FValue inner_product(const FVector& rhs) const;
-    
-    
     
     friend class ProxyFVector;
     

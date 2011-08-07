@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TrellisPathList.h"
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
+#include "FeatureVector.h"
 #include "InputFileStream.h"
 
 using namespace std;
@@ -310,9 +311,6 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
 	}
 }
 
-
-
-
 void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder, const TranslationSystem* system, long translationId)
 {
 	const StaticData &staticData = StaticData::Instance();
@@ -336,38 +334,8 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		}
 		out << " |||";
 
-		std::string lastName = "";
-		const vector<const StatefulFeatureFunction*>& sff =
-			system->GetStatefulFeatureFunctions();
-		for( size_t i=0; i<sff.size(); i++ )
-		{
-			if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() )
-			{
-				lastName = sff[i]->GetScoreProducerWeightShortName();
-				out << " " << lastName << ":";
-			}
-			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( sff[i] );
-			for (size_t j = 0; j<scores.size(); ++j) 
-			{
-		  		out << " " << scores[j];
-			}
-		}
-
-		const vector<const StatelessFeatureFunction*>& slf =
-			system->GetStatelessFeatureFunctions();
-		for( size_t i=0; i<slf.size(); i++ )
-		{
-			if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() )
-			{
-				lastName = slf[i]->GetScoreProducerWeightShortName();
-				out << " " << lastName << ":";
-			}
-			vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( slf[i] );
-			for (size_t j = 0; j<scores.size(); ++j) 
-			{
-		  		out << " " << scores[j];
-			}
-		}
+    // print scores with feature names
+    OutputAllFeatureScores( out, system, path );
 
 		// translation components
 		if (StaticData::Instance().GetInputType()==SentenceInput){  
@@ -482,8 +450,62 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 		out << endl;
 	}
 
+	out << std::flush;
+}
 
-	out <<std::flush;
+void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system, const TrellisPath &path ) {
+	std::string lastName = "";
+  const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
+	for( size_t i=0; i<sff.size(); i++ )
+    OutputFeatureScores( out, path, sff[i], lastName );
+
+  const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
+	for( size_t i=0; i<slf.size(); i++ )
+    OutputFeatureScores( out, path, slf[i], lastName );
+}
+
+void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const FeatureFunction *ff, std::string &lastName )
+{
+	const StaticData &staticData = StaticData::Instance();
+  bool labeledOutput = staticData.IsLabeledNBestList();
+
+  // regular features (not sparse)
+  if (ff->GetNumScoreComponents() != ScoreProducer::unlimited) {
+	  if( labeledOutput && lastName != ff->GetScoreProducerWeightShortName() )
+		{
+		  lastName = ff->GetScoreProducerWeightShortName();
+		  out << " " << lastName << ":";
+		}
+		vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( ff );
+		for (size_t j = 0; j<scores.size(); ++j) 
+		{
+	  	out << " " << scores[j];
+		}
+  }
+
+  // sparse features
+  else {
+    const FVector scores = path.GetScoreBreakdown().GetVectorForProducer( ff );
+
+    // report weighted aggregate
+    if (! ff->GetSparseFeatureReporting()) {
+      const FVector &weights = staticData.GetAllWeights().GetScoresVector();
+      if (labeledOutput) 
+        out << " " << ff->GetScoreProducerWeightShortName() << ":";
+      out << " " << scores.inner_product(weights);
+    }
+
+    // report each feature
+    else {
+      for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+        if (i->second != 0) { // do not report zero-valued features
+          if (labeledOutput) 
+            out << " " << i->first << ":";
+          out << " " << i->second;
+        }
+      } 
+    }
+  }
 }
 
 void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId) {

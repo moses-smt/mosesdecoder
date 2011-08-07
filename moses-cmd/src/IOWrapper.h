@@ -117,6 +117,8 @@ bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::Inpu
 void OutputSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder ,bool reportSegmentation, bool reportAllFactors);
 void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&,
                   const TranslationSystem* system, long translationId);
+void OutputAllFeatureScores(std::ostream& out, const TranslationSystem* system, const TrellisPath &path);
+void OutputFeatureScores(std::ostream& out, const TrellisPath &path, const FeatureFunction *ff, std::string &lastName);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/, 
                         bool reportSegmentation, bool reportAllFactors, std::ostream& out);
