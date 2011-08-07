@@ -466,6 +466,12 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
+      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName()) == 0)
+        m_targetBigramFeature->SetSparseFeatureReporting();
+      if (m_phrasePairFeature && name.compare(m_phrasePairFeature->GetScoreProducerWeightShortName()) == 0)
+        m_phrasePairFeature->SetSparseFeatureReporting();
+      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName()) == 0)
+        m_phraseBoundaryFeature->SetSparseFeatureReporting();
       if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName()) == 0)
         m_phraseLengthFeature->SetSparseFeatureReporting();
     }
