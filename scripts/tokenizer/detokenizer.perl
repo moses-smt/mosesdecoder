@@ -92,7 +92,7 @@ sub detokenize {
 			#left-shift floats in Czech
 			$text=$text.$words[$i];
 			$prependSpace = " ";
-		}  elsif ((($language eq "fr") ||($language eq "it")) && ($i<(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
+		}  elsif ((($language eq "fr") ||($language eq "it")) && ($i<=(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
 			#right-shift the contraction for French and Italian
 			$text = $text.$prependSpace.$words[$i];
 			$prependSpace = "";

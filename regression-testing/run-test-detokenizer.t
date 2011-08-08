@@ -82,9 +82,7 @@ Moi, j'ai une apostrophe.
 EXP
 );
 
-# A (failing) French test involving an apostrophe on the second-last word
-{
-my $testCase =
+# A French test involving an apostrophe on the second-last word
 &addDetokenizerTest("TEST_FRENCH_APOSTROPHE_PENULTIMATE", "fr",
 <<'TOK'
 de musique rap issus de l' immigration
@@ -94,9 +92,6 @@ TOK
 de musique rap issus de l'immigration
 EXP
 );
-
-$testCase->setExpectedToFail("A bug is causing this to be detokenized wrong.");
-}
 
 # A German test involving non-ASCII characters
 # Note: We don't specify a language because the detokenizer errors if you pass in a language for which it has no special rules, of which German is an example.
