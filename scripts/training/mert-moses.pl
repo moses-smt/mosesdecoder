@@ -766,7 +766,7 @@ while(1) {
   }
 
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
-      $cmd .= " --pro pro.data ; echo 'not used' > $weights_out_file; ~/statmt/project/megam/megam_i686.opt -fvals -maxi 30 -nobias binary pro.data";
+      $cmd .= " --pro pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary pro.data";
   }
 
   if (defined $___JOBS && $___JOBS > 0) {
