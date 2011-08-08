@@ -164,8 +164,7 @@ sub runDetokenizerTest {
 
     # Fail if we can't make the test output directory
     unless (mkdir($testOutputDir)) {
-	fail($testCase->getName().": Failed to create output directory ".$testOutputDir." [".$!."]");
-	exit;
+	return fail($testCase->getName().": Failed to create output directory ".$testOutputDir." [".$!."]");
     }
     
     open TOK, ">".$tokenizedFile;
