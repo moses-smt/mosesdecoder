@@ -112,6 +112,41 @@ Frau Präsidentin! Frau Díez González und ich hatten einige Anfragen
 EXP
 );
 
+# A (failing) simple Chinese test
+{
+my $testCase =
+&addDetokenizerTest("TEST_CHINESE_EASY", undef,
+<<'TOK'
+这 是 一个 简单 的的 汉语 句子 。
+TOK
+,
+<<'EXP'
+这是一个简单的的汉语句子。
+EXP
+);
+
+$testCase->setExpectedToFail("Chinese detokenization is not implemented yet.");
+}
+
+# A (failing) simple Japanese test
+{
+my $testCase =
+&addDetokenizerTest("TEST_JAPANESE_EASY", undef,
+<<'TOK'
+どう しょ う か な 。
+どこ で 食べ たい 。
+TOK
+,
+<<'EXP'
+どうしょうかな。
+どこで食べたい。
+EXP
+);
+
+$testCase->setExpectedToFail("Japanese detokenization is not implemented yet.");
+}
+
+
 ######################################
 # Now run those babies ...
 ######################################
@@ -159,7 +194,7 @@ sub runDetokenizerTest {
     close TRUTH;
 
     &runTest($testCase->getName(), $testOutputDir, $tokenizedFile, sub {
-	return defined($testCase->getLanguage())? [$detokenizer, "-l", $testCase->getLanguage()] : [$detokenizer];
+	return defined($testCase->getLanguage()) ? [$detokenizer, "-l", $testCase->getLanguage()] : [$detokenizer];
     }, sub {
 	&verifyIdentical($testCase->getName(), $expectedFile, catfile($testOutputDir, "stdout.txt"))
     }, 1, $testCase->getFailureExplanation());
@@ -250,7 +285,7 @@ sub new {
 	_name                 => shift,
 	_language             => shift,
 	_tokenizedText        => shift,
-	_rightAnswer       => shift,
+	_rightAnswer          => shift,
 
 	_failureExplanation   => undef
     };
