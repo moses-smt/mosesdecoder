@@ -107,9 +107,7 @@ Frau Präsidentin! Frau Díez González und ich hatten einige Anfragen
 EXP
 );
 
-# A (failing) simple Chinese test
-{
-my $testCase =
+# A simple Chinese test
 &addDetokenizerTest("TEST_CHINESE_EASY", undef,
 <<'TOK'
 这 是 一个 简单 的的 汉语 句子 。
@@ -120,12 +118,7 @@ TOK
 EXP
 );
 
-$testCase->setExpectedToFail("Chinese detokenization is not implemented yet.");
-}
-
-# A (failing) simple Japanese test
-{
-my $testCase =
+# A simple Japanese test
 &addDetokenizerTest("TEST_JAPANESE_EASY", undef,
 <<'TOK'
 どう しょ う か な 。
@@ -137,9 +130,6 @@ TOK
 どこで食べたい。
 EXP
 );
-
-$testCase->setExpectedToFail("Japanese detokenization is not implemented yet.");
-}
 
 
 ######################################
