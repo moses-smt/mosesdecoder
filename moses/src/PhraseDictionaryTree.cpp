@@ -1,5 +1,6 @@
 // $Id$
 // vim:tabstop=2
+#include <boost/shared_ptr.hpp>
 #include "PhraseDictionaryTree.h"
 #include <map>
 #include <cassert>
@@ -121,18 +122,19 @@ typedef LVoc<std::string> WordVoc;
 
 static WordVoc* ReadVoc(const std::string& filename)
 {
-  static std::map<std::string,WordVoc*> vocs;
+  static std::map<std::string,boost::shared_ptr<WordVoc> > vocs;
 #ifdef WITH_THREADS
   boost::mutex mutex;
   boost::mutex::scoped_lock lock(mutex);
 #endif
-  std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
+  std::map<std::string,boost::shared_ptr<WordVoc> >::iterator vi = vocs.find(filename);
   if (vi == vocs.end()) {
-    WordVoc* voc = new WordVoc();
-    voc->Read(filename);
-    vocs[filename] = voc;
+    boost::shared_ptr<WordVoc> p(new WordVoc());
+    // WordVoc* voc = new WordVoc();
+    p.get()->Read(filename);
+    vocs[filename] = p;
   }
-  return vocs[filename];
+  return vocs[filename].get();
 }
 
 

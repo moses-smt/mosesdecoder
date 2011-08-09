@@ -127,12 +127,14 @@ template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vec
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool lazy)
-  :m_ngram(NULL), m_lazy(lazy)
+  :m_ngram(NULL), m_lazy(lazy), m_nullContextState(NULL), m_beginSentenceState(NULL)
 {
 }
 
 template <class Model> LanguageModelKen<Model>::~LanguageModelKen()
 {
+  delete m_nullContextState;
+  delete m_beginSentenceState;
   delete m_ngram;
 }
 
