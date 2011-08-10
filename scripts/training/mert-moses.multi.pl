@@ -742,7 +742,7 @@ while(1) {
   safesystem("date");
   print STDERR "\n";
 
-  $cmd="$mertdir/mergeWeightsNew -c merge.init -s $score_file -f $feature_file";
+  $cmd="$mertdir/mergeWeights -c merge.init -s $score_file -f $feature_file";
   print STDERR "executing : $cmd\n";
 
   if (defined $___JOBS) {
