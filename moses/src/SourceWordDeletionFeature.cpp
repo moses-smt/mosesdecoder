@@ -53,7 +53,6 @@ void SourceWordDeletionFeature::Evaluate(const TargetPhrase& targetPhrase,
   for(size_t i=0; i<sourceLength; i++) {
     if (!aligned[i]) {
       const string &word = targetPhrase.GetSourcePhrase().GetWord(i).GetFactor(m_factorType)->GetString();
-      stringstream featureName;
       if (!m_unrestricted && m_vocab.find( word ) == m_vocab.end()) {
         accumulator->PlusEquals(this,"OTHER",1);
       }

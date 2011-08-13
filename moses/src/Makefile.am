@@ -117,6 +117,7 @@ libmoses_la_HEADERS = \
         Word.h \
         WordConsumed.h \
         WordLattice.h \
+        WordTranslationFeature.h \
         WordsBitmap.h \
         WordsRange.h \
         XmlOption.h
@@ -248,6 +249,7 @@ libmoses_la_SOURCES = \
         Word.cpp \
         WordConsumed.cpp \
         WordLattice.cpp \
+        WordTranslationFeature.cpp \
         WordsBitmap.cpp \
         WordsRange.cpp \
         XmlOption.cpp

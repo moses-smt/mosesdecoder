@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseLengthFeature.h"
 #include "TargetWordInsertionFeature.h"
 #include "SourceWordDeletionFeature.h"
+#include "WordTranslationFeature.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "TargetBigramFeature.h"
@@ -78,6 +79,7 @@ StaticData::StaticData()
 ,m_phraseLengthFeature(NULL)
 ,m_targetWordInsertionFeature(NULL)
 ,m_sourceWordDeletionFeature(NULL)
+,m_wordTranslationFeature(NULL)
 ,m_numLinkParams(1)
 ,m_fLMsLoaded(false)
 ,m_sourceStartPosMattersForRecombination(false)
@@ -467,6 +469,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadPhraseLengthFeature()) return false;
   if (!LoadTargetWordInsertionFeature()) return false;
   if (!LoadSourceWordDeletionFeature()) return false;
+  if (!LoadWordTranslationFeature()) return false;
 
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
@@ -484,6 +487,8 @@ bool StaticData::LoadData(Parameter *parameter)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
       if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName()) == 0)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
+      if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName()) == 0)
+        m_wordTranslationFeature->SetSparseFeatureReporting();
     }
   }
 
@@ -586,6 +591,9 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_sourceWordDeletionFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sourceWordDeletionFeature);
     }
+    if (m_wordTranslationFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_wordTranslationFeature);
+    }
   }
     
   //Load extra feature weights
@@ -667,7 +675,9 @@ StaticData::~StaticData()
   delete m_phrasePairFeature;
   delete m_phraseBoundaryFeature;
 	delete m_phraseLengthFeature;
+  delete m_targetWordInsertionFeature;
   delete m_sourceWordDeletionFeature;
+  delete m_wordTranslationFeature;
 
 	//delete m_parameter;
 
@@ -1476,6 +1486,47 @@ bool StaticData::LoadSourceWordDeletionFeature()
     cerr << "loading source word deletion word list from " << filename << endl;
 	  if (!m_sourceWordDeletionFeature->Load(filename)) {
 		  UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
+		  return false;
+    }
+	}
+
+  return true;
+}
+
+bool StaticData::LoadWordTranslationFeature()
+{
+	const vector<string> &parameters = m_parameter->GetParam("word-translation-feature");
+	if (parameters.empty())
+		return true;
+
+	if (parameters.size() != 1) {
+		UserMessage::Add("Can only have one word-translation-feature");
+		return false;
+	}
+
+	vector<string> tokens = Tokenize(parameters[0]);
+  if (tokens.size() != 2 && tokens.size() != 4) {
+    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [filename-src filename-tgt]");
+    return false;
+  }
+
+  if (!m_UseAlignmentInfo) {
+    UserMessage::Add("Word translation feature needs word alignments in phrase table.");
+    return false;
+  }
+
+  // set factor
+  FactorType factorIdSource = Scan<size_t>(tokens[0]);
+  FactorType factorIdTarget = Scan<size_t>(tokens[1]);
+  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource,factorIdTarget);
+
+  // load word list for restricted feature set
+  if (tokens.size() == 4) {
+    string filenameSource = tokens[2];
+    string filenameTarget = tokens[3];
+    cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
+	  if (!m_wordTranslationFeature->Load(filenameSource, filenameTarget)) {
+		  UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
 		  return false;
     }
 	}

@@ -145,6 +145,7 @@ Parameter::Parameter()
   AddParam("phrase-length-feature", "Count features for source length, target length, both of each phrase");
   AddParam("target-word-insertion-feature", "Count feature for each unaligned target word");
   AddParam("source-word-deletion-feature", "Count feature for each unaligned source word");
+  AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
   AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
   AddParam("show-weights", "print feature weights and exit");
 }
