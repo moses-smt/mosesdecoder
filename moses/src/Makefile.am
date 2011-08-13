@@ -92,6 +92,7 @@ libmoses_la_HEADERS = \
         SearchNormal.h \
         Sentence.h \
         SentenceStats.h \
+        SourceWordDeletionFeature.h \
         SquareMatrix.h \
         StaticData.h \
         TargetBigramFeature.h \
@@ -225,6 +226,7 @@ libmoses_la_SOURCES = \
         SearchNormal.cpp \
         Sentence.cpp \
         SentenceStats.cpp \
+        SourceWordDeletionFeature.cpp \
         SquareMatrix.cpp \
         StaticData.cpp \
         TargetBigramFeature.cpp \

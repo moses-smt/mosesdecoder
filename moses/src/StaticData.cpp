@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
 #include "TargetWordInsertionFeature.h"
+#include "SourceWordDeletionFeature.h"
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "TargetBigramFeature.h"
@@ -76,6 +77,7 @@ StaticData::StaticData()
 ,m_phrasePairFeature(NULL)
 ,m_phraseLengthFeature(NULL)
 ,m_targetWordInsertionFeature(NULL)
+,m_sourceWordDeletionFeature(NULL)
 ,m_numLinkParams(1)
 ,m_fLMsLoaded(false)
 ,m_sourceStartPosMattersForRecombination(false)
@@ -464,7 +466,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadPhraseBoundaryFeature()) return false;
   if (!LoadPhraseLengthFeature()) return false;
   if (!LoadTargetWordInsertionFeature()) return false;
-  cerr << "alright!\n";
+  if (!LoadSourceWordDeletionFeature()) return false;
 
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
@@ -480,9 +482,10 @@ bool StaticData::LoadData(Parameter *parameter)
         m_phraseLengthFeature->SetSparseFeatureReporting();
       if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerWeightShortName()) == 0)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
+      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName()) == 0)
+        m_sourceWordDeletionFeature->SetSparseFeatureReporting();
     }
   }
-  cerr << "alright!!\n";
 
   //configure the translation systems with these tables
   vector<string> tsConfig = m_parameter->GetParam("translation-systems");
@@ -580,6 +583,9 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_targetWordInsertionFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetWordInsertionFeature);
     }
+    if (m_sourceWordDeletionFeature) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sourceWordDeletionFeature);
+    }
   }
     
   //Load extra feature weights
@@ -661,7 +667,7 @@ StaticData::~StaticData()
   delete m_phrasePairFeature;
   delete m_phraseBoundaryFeature;
 	delete m_phraseLengthFeature;
-  delete m_targetWordInsertionFeature;
+  delete m_sourceWordDeletionFeature;
 
 	//delete m_parameter;
 
@@ -1412,7 +1418,7 @@ bool StaticData::LoadTargetWordInsertionFeature()
 
 	vector<string> tokens = Tokenize(parameters[0]);
   if (tokens.size() != 1 && tokens.size() != 2) {
-    UserMessage::Add("Format of target word insertion feature parameter is [factor] <filename>");
+    UserMessage::Add("Format of target word insertion feature parameter is: --target-word-insertion-feature <factor> [filename]");
     return false;
   }
 
@@ -1420,19 +1426,60 @@ bool StaticData::LoadTargetWordInsertionFeature()
     UserMessage::Add("Target word insertion feature needs word alignments in phrase table.");
     return false;
   }
-  FactorType factorId = 0;
-  string filename = tokens[0];
-  if (tokens.size() == 2) {
-    factorId = Scan<size_t>(tokens[0]);
-    filename = tokens[1];
-  }
 
+  // set factor
+  FactorType factorId = Scan<size_t>(tokens[0]);
   m_targetWordInsertionFeature = new TargetWordInsertionFeature(factorId);
-  cerr << "loading from " << filename << endl;
-	if (!m_targetWordInsertionFeature->Load(filename)) {
-		UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
+
+  // load word list for restricted feature set
+  if (tokens.size() == 2) {
+    string filename = tokens[1];
+    cerr << "loading target word insertion word list from " << filename << endl;
+	  if (!m_targetWordInsertionFeature->Load(filename)) {
+		  UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
+		  return false;
+    }
+	}
+
+  return true;
+}
+
+bool StaticData::LoadSourceWordDeletionFeature()
+{
+	const vector<string> &parameters = m_parameter->GetParam("source-word-deletion-feature");
+	if (parameters.empty())
+		return true;
+
+	if (parameters.size() != 1) {
+		UserMessage::Add("Can only have one source-word-deletion-feature");
 		return false;
 	}
+
+	vector<string> tokens = Tokenize(parameters[0]);
+  if (tokens.size() != 1 && tokens.size() != 2) {
+    UserMessage::Add("Format of source word deletion feature parameter is: --source-word-deletion-feature <factor> [filename]");
+    return false;
+  }
+
+  if (!m_UseAlignmentInfo) {
+    UserMessage::Add("Source word deletion feature needs word alignments in phrase table.");
+    return false;
+  }
+
+  // set factor
+  FactorType factorId = Scan<size_t>(tokens[0]);
+  m_sourceWordDeletionFeature = new SourceWordDeletionFeature(factorId);
+
+  // load word list for restricted feature set
+  if (tokens.size() == 2) {
+    string filename = tokens[1];
+    cerr << "loading source word deletion word list from " << filename << endl;
+	  if (!m_sourceWordDeletionFeature->Load(filename)) {
+		  UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
+		  return false;
+    }
+	}
+
   return true;
 }
 
