@@ -61,6 +61,7 @@ class PhraseDictionaryFeature;
 class PhrasePairFeature;
 class BleuScoreFeature;
 class PhraseLengthFeature;
+class TargetWordInsertionFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
@@ -95,6 +96,7 @@ protected:
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhrasePairFeature *m_phrasePairFeature;
   PhraseLengthFeature* m_phraseLengthFeature;
+  TargetWordInsertionFeature* m_targetWordInsertionFeature;
 	float
 		m_beamWidth,
 		m_earlyDiscardingThreshold,
@@ -240,6 +242,7 @@ protected:
   bool LoadPhraseBoundaryFeature();
   bool LoadPhrasePairFeature();
   bool LoadPhraseLengthFeature();
+  bool LoadTargetWordInsertionFeature();
   
   void ReduceTransOptCache() const;
 	bool m_continuePartialTranslation;

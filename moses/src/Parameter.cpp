@@ -124,7 +124,7 @@ Parameter::Parameter()
 	AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
 	AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
 	AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
-	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
+	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are taken from the phrase table if any. Default is false");
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
@@ -142,7 +142,8 @@ Parameter::Parameter()
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
   AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
-  AddParam("phrase-length-feature", "Binary features for source length, target length, both of each phrase");
+  AddParam("phrase-length-feature", "Count features for source length, target length, both of each phrase");
+  AddParam("target-word-insertion-feature", "Count feature for unaligned target words");
   AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
   AddParam("show-weights", "print feature weights and exit");
 }
