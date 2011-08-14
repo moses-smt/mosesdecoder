@@ -21,7 +21,7 @@
 
 #include "../phrase-extract/SentenceAlignment.h"
 
-#include "config.h"
+#include "typedefs.h"
 
 
 //////// Types definitions /////////////////////////////////////////////////////

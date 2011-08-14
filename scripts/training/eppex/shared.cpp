@@ -12,7 +12,7 @@
 #include <boost/tokenizer.hpp>
 #include <iostream>
 
-#include "config.h"
+#include "typedefs.h"
 #include "phrase-extract.h"
 #include "shared.h"
 
