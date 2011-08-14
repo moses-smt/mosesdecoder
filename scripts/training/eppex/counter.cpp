@@ -66,16 +66,16 @@ int main(int argc, char** argv) {
     aFile.close();
 
     std::cout
-        << "#########################" << std::endl
-        << "# # # Phrase pairs count #" << std::endl
-        << "#########################" << std::endl;
+        << "############################" << std::endl
+        << "# len # phrase pairs count #" << std::endl
+        << "############################" << std::endl;
 
     for ( size_t i = 1; i < phrasePairsCounters.size(); ++i ) {
-        std::cout << "# " << i << " # " << std::setw(18) << phrasePairsCounters[i] << " #" << std::endl;
+        std::cout << "# " << std::setw(3) << i << " # " << std::setw(18) << phrasePairsCounters[i] << " #" << std::endl;
     }
 
     std::cout
-        << "#########################" << std::endl;
+        << "############################" << std::endl;
 
 }
 

@@ -25,9 +25,9 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 all: compile
 
 SUBDIRS=training/phrase-extract training/symal training/mbr training/lexical-reordering ems/biconcor
-SUBDIRS_CLEAN=$(SUBDIRS) training/memscore
+SUBDIRS_CLEAN=$(SUBDIRS) training/memscore training/eppex
 
-compile: compile-memscore
+compile: compile-memscore compile-eppex
 	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
@@ -45,6 +45,14 @@ compile-memscore:
 	  || ( echo "WARNING: Building memscore failed."; \
 	       echo 'training/memscore/memscore' >> ../../release-exclude )
 
+compile-eppex:
+	# Building eppex may fail e.g. if boost is not available.
+	# We ignore this because traditional extraction will still work and eppex isn't used by default.
+	cd training/eppex ; \
+	  ./configure && $(MAKE) \
+	  || ( echo "WARNING: Building eppex failed."; \
+	       echo 'training/eppex/counter' >> ../../release-exclude; \
+	       echo 'training/eppex/eppex' >> ../../release-exclude )
 clean:
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS_CLEAN); do \

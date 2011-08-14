@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string.h>
 
+#include "config.h"
 #include "phrase-extract.h"
 #include "shared.h"
 
@@ -51,7 +52,7 @@ bool compactOutputFlag = false; // Generate compact output:
 
 void program_info(void) {
     std::cerr
-        << "Epochal Phrase Extraction written by Ceslav Przywara (based on PhraseExtract v1.4 by Philipp Koehn).\n"
+        << "Epochal Phrase Extraction (" << PACKAGE_STRING << ") written by Ceslav Przywara (based on PhraseExtract v1.4 by Philipp Koehn).\n"
         << "Compiled with "
 #ifdef USE_UNORDERED_MAP
         << "std::tr1::unordered_map"
