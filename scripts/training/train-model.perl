@@ -34,7 +34,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
-   $_DICTIONARY);
+   $_DICTIONARY, $_EPPEX);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -109,6 +109,7 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
+		       'eppex:s' => \$_EPPEX,
                );
 
 if ($_HELP) {
@@ -195,6 +196,7 @@ my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
 my $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
+my $EPPEX = "$SCRIPTS_ROOTDIR/training/eppex/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
@@ -1302,11 +1304,17 @@ sub extract_phrase {
     }
     else
     {
+		if ( $_EPPEX ) {
+			# eppex sets max_phrase_length itself (as the maximum phrase length for which any Lossy Counter is defined)
+      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $_EPPEX";
+		}
+		else {
       my $max_length = &get_max_phrase_length($table_number);
       print "MAX $max_length $reordering_flag $table_number\n";
       $max_length = &get_max_phrase_length(-1) if $reordering_flag;
 
       $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
+		}
       if ($reordering_flag) {
 	$cmd .= " orientation";
 	$cmd .= get_extract_reordering_flags();
