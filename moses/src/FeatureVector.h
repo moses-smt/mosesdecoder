@@ -38,6 +38,10 @@
 #include <boost/serialization/vector.hpp>
 #endif
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
 namespace Moses {
 	
 	typedef float FValue;
@@ -73,6 +77,10 @@ namespace Moses {
   private:
     void init(const std::string& name);
     size_t m_id;
+#ifdef WITH_THREADS
+    //reader-writer lock
+    static boost::shared_mutex m_idLock;
+#endif
 	};
 	
 	std::ostream& operator<<(std::ostream& out,const FName& name);

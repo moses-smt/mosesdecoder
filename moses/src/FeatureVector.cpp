@@ -36,15 +36,34 @@ namespace Moses {
   const string FName::SEP = "_";
   FName::Name2Id FName::name2id;
   vector<string> FName::id2name;
+#ifdef WITH_THREADS
+  boost::shared_mutex FName::m_idLock;
+#endif
   
   void FName::init(const string& name)  {
+#ifdef WITH_THREADS
+    //reader lock
+    boost::shared_lock<boost::shared_mutex> lock(m_idLock);
+#endif
     Name2Id::iterator i = name2id.find(name);
     if (i != name2id.end()) {
       m_id = i->second;
     } else {
-      m_id = name2id.size();
-      name2id[name] = m_id;
-      id2name.push_back(name);
+#ifdef WITH_THREADS
+      //release the reader lock, and upgrade to writer lock
+      lock.unlock();
+      boost::upgrade_lock<boost::shared_mutex> upgradeLock(m_idLock);
+      boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(upgradeLock);
+#endif
+      //Need to check again if the id is in the map, as someone may have added
+      //it while we were waiting on the writer lock.
+      if (i != name2id.end()) {
+        m_id = i->second;
+      } else {
+        m_id = name2id.size();
+        name2id[name] = m_id;
+        id2name.push_back(name);
+      }
     }
   }
   
