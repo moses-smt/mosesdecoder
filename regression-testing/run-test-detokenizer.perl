@@ -187,7 +187,7 @@ sub runDetokenizerTest {
 # $stdinFile, if defined, is a file to send to the command via STDIN
 # $buildCommandRoutineReference is a reference to a zero-argument subroutine that returns the
 #                               system command to run in the form of an array reference
-# $validationRoutineReference is a reference to a zero-argument subroutine that makes some calls
+# $validationRoutineReference is a reference to a zero-argument subroutine that makes exactly one call
 #                             to ok() or similar to validate the contents of the output directory
 # $separateStdoutFromStderr is an optional boolean argument; if omitted or false, the command's
 #                           STDOUT and STDERR are mixed together in out output file called
@@ -200,31 +200,27 @@ sub runDetokenizerTest {
 sub runTest {
     my ($testName, $outputDir, $stdinFile, $buildCommandRoutineReference, $validationRoutineReference, $separateStdoutFromStderr, $failureExplanation) = @_;
 
-    # Note: You may need to upgrade your version of the Perl module Test::Simple in order to get this 'subtest' thing to work. (Perl modules are installed/upgraded using CPAN; google 'how do I upgrade a perl module')
-    subtest $testName => sub {
-	my ($stdoutFile, $stderrFile);
-	if ($separateStdoutFromStderr) {
-	    $stdoutFile = catfile($outputDir, "stdout.txt");
-	    $stderrFile = catfile($outputDir, "stderr.txt");
-	} else {
-	    $stdoutFile = catfile($outputDir, "stdout-and-stderr.txt");
-	    $stderrFile = $stdoutFile;
+    my ($stdoutFile, $stderrFile);
+    if ($separateStdoutFromStderr) {
+	$stdoutFile = catfile($outputDir, "stdout.txt");
+	$stderrFile = catfile($outputDir, "stderr.txt");
+    } else {
+	$stdoutFile = catfile($outputDir, "stdout-and-stderr.txt");
+	$stderrFile = $stdoutFile;
+    }
+
+    my $commandRef = $buildCommandRoutineReference->();
+    my $exitStatus = &runVerbosely($commandRef, $stdinFile, $stdoutFile, $stderrFile);
+    return fail($testName.": command exited with status ".$exitStatus) unless $exitStatus == 0;
+
+    if (defined $failureExplanation) {
+      TODO: {
+	  local $TODO = $failureExplanation;
+	  $validationRoutineReference->();
 	}
-
-	my $commandRef = $buildCommandRoutineReference->();
-	my $exitStatus = &runVerbosely($commandRef, $stdinFile, $stdoutFile, $stderrFile);
-	return unless is($exitStatus, 0, $testName.": command exited with status 0");
-
-	if (defined $failureExplanation) {
-	  TODO: {
-	      local $TODO = $failureExplanation;
-	      $validationRoutineReference->();
-	    }
-	} else {
-	    $validationRoutineReference->();
-
-	}
-    };
+    } else {
+	$validationRoutineReference->();
+    }
 }
 
 # Announce that we're going to run the given command, then run it.
