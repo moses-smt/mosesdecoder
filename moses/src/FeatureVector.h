@@ -162,10 +162,9 @@ namespace Moses {
     /** printing */
     std::ostream& print(std::ostream& out) const;
 		
-    float get(size_t index) const;
-    void set(size_t index, float value);
-    void set(const FName& name, const FValue& value);
     void applyLog(size_t baseOfLog);
+    //scale so that abs. value is less than maxvalue
+    void thresholdScale(float maxValue );
 
 #ifdef MPI_ENABLE
     friend class boost::serialization::access;
@@ -176,7 +175,7 @@ namespace Moses {
     /** Internal get and set. Note that the get() doesn't include the
      default value */
     const FValue& get(const FName& name) const;
-//    void set(const FName& name, const FValue& value);
+    void set(const FName& name, const FValue& value);
     
 		
     FNVmap m_features;

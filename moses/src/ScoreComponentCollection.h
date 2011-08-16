@@ -240,25 +240,7 @@ public:
 		// find (smallest) factor for which all weights are <= maxValue
 		// 0.1 / 0.14 = 0.714285714
 		// 0.1 / 0.17 = 0.588235294
-		float factor = 1.0;
-		float tmp_factor = 1.0;
-		for (size_t i = 0; i < m_scores.size(); ++i) {
-			if (m_scores.get(i) > maxValue) {
-				tmp_factor = maxValue / m_scores.get(i);
-			}
-			else if (m_scores.get(i) < maxValue*-1) {
-				tmp_factor = maxValue / m_scores.get(i);
-				tmp_factor *= -1;
-			}
-
-			if (tmp_factor < factor)
-				factor = tmp_factor;
-		}
-
-		// apply factor
-		for (size_t i = 0; i < m_scores.size(); ++i) {
-			m_scores.set(i, m_scores.get(i)*factor);
-		}
+    m_scores.thresholdScale(maxValue);
 	}
 
 	//! if a ScoreProducer produces a single score (for example, a language model score)

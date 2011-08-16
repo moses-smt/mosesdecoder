@@ -202,32 +202,21 @@ namespace Moses {
     }
   }
 
-  float FVector::get(size_t index) const {
-	  size_t pos = 0;
-	  for (const_iterator i = cbegin(); i != cend(); ++i) {
-		  FValue value = i->second;
-		  if (pos == index) {
-			  return value;
-		  }
-		  ++pos;
-	  }
+  void FVector::thresholdScale(FValue maxValue ) {
+    FValue factor = 1.0;
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
+      FValue value = i->second;
+      if (abs(value)*factor > maxValue) {
+        factor = abs(value) / maxValue;
+      }
+    }
+    operator*=(factor);
   }
-	
+
   void FVector::set(const FName& name, const FValue& value) {
     m_features[name] = value;
   }
   
-  void FVector::set(size_t index, float value) {
-	  size_t pos = 0;
-	  for (const_iterator i = cbegin(); i != cend(); ++i) {
-		  if (pos == index) {
-			  m_features[i->first] = value;
-			  break;
-		  }
-		  ++pos;
-	  }
-  }
-
   void FVector::applyLog(size_t baseOfLog) {
 	  for (const_iterator i = cbegin(); i != cend(); ++i) {
 		  FValue value = i->second;
