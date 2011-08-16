@@ -1,7 +1,6 @@
 #include "lm/bhiksha.hh"
 #include "lm/config.hh"
 
-#include <iostream>
 #include <limits>
 
 namespace lm {
@@ -50,9 +49,7 @@ std::size_t ArrayCount(uint64_t max_offset, uint64_t max_next, const Config &con
 } // namespace
 
 std::size_t ArrayBhiksha::Size(uint64_t max_offset, uint64_t max_next, const Config &config) {
-  std::size_t ret = sizeof(uint64_t) * (1 /* header */ + ArrayCount(max_offset, max_next, config)) + 7 /* 8-byte alignment */;
-  std::cout << ret << std::endl;
-  return ret;
+  return sizeof(uint64_t) * (1 /* header */ + ArrayCount(max_offset, max_next, config)) + 7 /* 8-byte alignment */;
 }
 
 uint8_t ArrayBhiksha::InlineBits(uint64_t max_offset, uint64_t max_next, const Config &config) {
