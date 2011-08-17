@@ -52,8 +52,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordLattice.h"
 #include "TreeInput.h"
 #include "TranslationAnalysis.h"
-#include "OnlineCommand.h"
 #include "mbr.h"
+#include "ThreadPool.h"
 #include "../../moses-chart/src/ChartManager.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
 #include "../../moses-chart/src/ChartTrellisPathList.h"
@@ -69,35 +69,106 @@ using namespace std;
 using namespace Moses;
 using namespace MosesChart;
 
-bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source, const string &line) 
+/**
+  * Translates a sentence.
+ **/
+class TranslationTask : public Task
+{
+ public:
+  TranslationTask(InputType *source, IOWrapper &ioWrapper)
+    : m_source(source)
+    , m_ioWrapper(ioWrapper)
+  {}
+
+  ~TranslationTask() { delete m_source; }
+
+  void Run()
+  {
+    const StaticData &staticData = StaticData::Instance();
+    const TranslationSystem &system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+    const size_t lineNumber = m_source->GetTranslationId();
+
+    VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
+
+    MosesChart::Manager manager(*m_source, &system);
+    manager.ProcessSentence();
+
+    assert(!staticData.UseMBR());
+
+    // 1-best
+    const MosesChart::Hypothesis *bestHypo = manager.GetBestHypothesis();
+    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber,
+                               staticData.GetReportSegmentation(),
+                               staticData.GetReportAllFactors());
+    IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
+
+    if (staticData.IsDetailedTranslationReportingEnabled())
+    {
+      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, lineNumber);
+    }
+  
+    // n-best
+    size_t nBestSize = staticData.GetNBestSize();
+    if (nBestSize > 0)
+    {
+      VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
+      MosesChart::TrellisPathList nBestList;
+      manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
+      m_ioWrapper.OutputNBestList(nBestList, bestHypo, &system, lineNumber);
+      IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
+    }
+  
+    if (staticData.GetOutputSearchGraph())
+    {
+      std::ostringstream out;
+      manager.GetSearchGraph(lineNumber, out);
+      OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
+      assert(oc);
+      oc->Write(lineNumber, out.str());
+    }
+
+    IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
+    manager.CalcDecoderStatistics();
+  }
+
+ private:
+  // Non-copyable: copy constructor and assignment operator not implemented.
+  TranslationTask(const TranslationTask &);
+  TranslationTask &operator=(const TranslationTask &);
+
+  InputType *m_source;
+  IOWrapper &m_ioWrapper;
+};
+
+bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source) 
 {
 	delete source;
 	switch(inputType)
 	{
-		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input), line); break;
-		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet, line);    break;
-		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice, line);     break;
-		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input), line);break;
+		case SentenceInput:         source = ioWrapper.GetInput(new Sentence(Input)); break;
+		case ConfusionNetworkInput: source = ioWrapper.GetInput(new ConfusionNet);    break;
+		case WordLatticeInput:      source = ioWrapper.GetInput(new WordLattice);     break;
+		case TreeInputType:					source = ioWrapper.GetInput(new TreeInput(Input));break;
 		default: TRACE_ERR("Unknown input type: " << inputType << "\n");
 	}
 	return (source ? true : false);
 }
 
 static void PrintFeatureWeight(const FeatureFunction* ff) {
- 
+
   size_t numScoreComps = ff->GetNumScoreComponents();
   if (numScoreComps != ScoreProducer::unlimited) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     for (size_t i = 0; i < numScoreComps; ++i) {
-      cout << ff->GetScoreProducerDescription() <<  " " 
-           << ff->GetScoreProducerWeightShortName() << " " 
+      cout << ff->GetScoreProducerDescription() <<  " "
+           << ff->GetScoreProducerWeightShortName() << " "
            << values[i] << endl;
     }
   } else {
     cout << ff->GetScoreProducerDescription() << " " <<
       ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
   }
-  
+
 }
 
 
@@ -133,10 +204,8 @@ int main(int argc, char* argv[])
 		TRACE_ERR(endl);
 	}
 
-	cout.setf(std::ios::fixed); 
-	cout.precision(3);
-	cerr.setf(std::ios::fixed); 
-	cerr.precision(3);
+  IOWrapper::FixPrecision(cout);
+  IOWrapper::FixPrecision(cerr);
 
 	// load data structures
 	Parameter parameter;
@@ -144,6 +213,26 @@ int main(int argc, char* argv[])
 	{
 		return EXIT_FAILURE;		
 	}
+
+  // create threadpool, if necessary
+  int threadcount = (parameter.GetParam("threads").size() > 0) ?
+                    Scan<size_t>(parameter.GetParam("threads")[0]) : 1;
+
+#ifdef WITH_THREADS
+  if (threadcount < 1)
+  {
+    cerr << "Error: Need to specify a positive number of threads" << endl;
+    exit(1);
+  }
+  ThreadPool pool(threadcount);
+#else
+  if (threadcount > 1)
+  {
+    cerr << "Error: Thread count of " << threadcount
+         << " but moses not built with thread support" << endl;
+    exit(1);
+  }
+#endif
 
 	const StaticData &staticData = StaticData::Instance();
 	if (!StaticData::LoadDataStatic(&parameter))
@@ -160,100 +249,35 @@ int main(int argc, char* argv[])
 	IOWrapper *ioWrapper = GetIODevice(staticData);
 
 	// check on weights
-	const ScoreComponentCollection& weights = staticData.GetAllWeights();
-	IFVERBOSE(2) {
-	  TRACE_ERR("The global weight vector looks like this: ");
+  const ScoreComponentCollection& weights = staticData.GetAllWeights();
+  IFVERBOSE(2) {
+    TRACE_ERR("The global weight vector looks like this: ");
     TRACE_ERR(weights);
-	  TRACE_ERR("\n");
-	}
+    TRACE_ERR("\n");
+  }
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 
 	// read each sentence & decode
 	InputType *source=0;
-	size_t lineCount = 0;
-	
-	string line;	
-	while((line = ioWrapper->GetInput()) != "")
+	while(ReadInput(*ioWrapper,staticData.GetInputType(),source))
 	{
-		OnlineCommand oc;
-		if (oc.Parse(line)){//an online command
-			oc.Execute();
-			oc.Clean();
-			continue;
-    }
-		else {
-			line += "\n";
-			ReadInput(*ioWrapper,staticData.GetInputType(),source, line);
-		}
-		
 		IFVERBOSE(1)
 			ResetUserTime();
-			
-    VERBOSE(2,"\nTRANSLATING(" << ++lineCount << "): " << *source);
-		//cerr << *source << endl;
-		
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-		MosesChart::Manager manager(*source, &system);
-		manager.ProcessSentence();
+    TranslationTask *task = new TranslationTask(source, *ioWrapper);
+    source = NULL;  // task will delete source
+#ifdef WITH_THREADS
+    pool.Submit(task);  // pool will delete task
+#else
+    task->Run();
+    delete task;
+#endif
+  }
 
-		assert(!staticData.UseMBR());
+#ifdef WITH_THREADS
+  pool.Stop(true);  // flush remaining jobs
+#endif
 
-		if (!staticData.UseMBR()){
-			ioWrapper->OutputBestHypo(manager.GetBestHypothesis(), source->GetTranslationId(),
-													 staticData.GetReportSegmentation(),
-													 staticData.GetReportAllFactors()
-													 );
-			IFVERBOSE(2) { PrintUserTime("Best Hypothesis Generation Time:"); }
-			
-			// n-best
-			size_t nBestSize = staticData.GetNBestSize();
-			if (nBestSize > 0)
-			{
-			  	VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-					MosesChart::TrellisPathList nBestList;
-					manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-					ioWrapper->OutputNBestList(nBestList, &system, source->GetTranslationId());
-			
-					IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
-			}
-			
-			if (staticData.GetOutputSearchGraph())
-				manager.GetSearchGraph(source->GetTranslationId(), ioWrapper->GetOutputSearchGraphStream());
-
-		}
-		else {
-			/*
-			size_t nBestSize = staticData.GetNBestSize();
-			cerr << "NBEST SIZE : " << nBestSize << endl;
-			assert(nBestSize > 0);
-			
-		  if (nBestSize > 0)
-			{
-			  VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-				MosesChart::TrellisPathList nBestList;
-				manager.CalcNBest(nBestSize, nBestList,true);
-				std::vector<const Factor*> mbrBestHypo = doMBR(nBestList);
-				ioWrapper->OutputBestHypo(mbrBestHypo, source->GetTranslationId(),
-													 staticData.GetReportSegmentation(),
-													 staticData.GetReportAllFactors()
-													 );
-				IFVERBOSE(2) { PrintUserTime("N-Best Hypotheses Generation Time:"); }
-		  }
-			*/
-
-		}	
-		/*		 
-		if (staticData.IsDetailedTranslationReportingEnabled()) {
-			TranslationAnalysis::PrintTranslationAnalysis(std::cerr, manager.GetBestHypothesis());
-		}
-		*/
-
-		IFVERBOSE(2) { PrintUserTime("Sentence Decoding Time:"); }
-    
-		manager.CalcDecoderStatistics();
-	} // while(ReadInput
-	
 	delete ioWrapper;
 
 	IFVERBOSE(1)

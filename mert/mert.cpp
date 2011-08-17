@@ -256,7 +256,9 @@ int main (int argc, char **argv) {
 	 cerr<<"best score: "<< best << " variance of the score (for "<<ntry<<" try): "<<var<<endl;
 
  //L1-Normalization of the best Point
- bestP.NormalizeL1();
+if (tooptimize.size() == pdim)
+    bestP.NormalizeL1();
+
  
  cerr << "Best point: " << bestP << " => " << best << endl;
  ofstream res("weights.txt");

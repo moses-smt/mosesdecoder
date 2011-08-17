@@ -32,6 +32,8 @@
 using namespace std;
 
 bool hierarchicalFlag = false;
+bool onlyDirectFlag = false;
+bool phraseCountFlag = true;
 bool logProbFlag = false;
 char line[LINE_MAX_LENGTH];
 
@@ -45,7 +47,7 @@ int main(int argc, char* argv[])
     << "consolidating direct and indirect rule tables\n";
 
   if (argc < 4) {
-    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical]\n";
+    cerr << "syntax: consolidate phrase-table.direct phrase-table.indirect phrase-table.consolidated [--Hierarchical] [--OnlyDirect]\n";
     exit(1);
   }
   char* &fileNameDirect = argv[1];
@@ -56,6 +58,14 @@ int main(int argc, char* argv[])
     if (strcmp(argv[i],"--Hierarchical") == 0) {
       hierarchicalFlag = true;
       cerr << "processing hierarchical rules\n";
+    }
+    else if (strcmp(argv[i],"--OnlyDirect") == 0) {
+      onlyDirectFlag = true;
+      cerr << "only including direct translation scores p(e|f)\n";
+    }
+    else if (strcmp(argv[i],"--NoPhraseCount") == 0) {
+      phraseCountFlag = false;
+      cerr << "not including the phrase count feature\n";
     }
     else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
@@ -146,13 +156,18 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // output hierarchical phrase pair (with separated labels)
     fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1];
 
-		// probs
-		fileConsolidated	<< " ||| " << itemIndirect[2]      // prob indirect
-											<< " " << itemDirect[2] // prob direct
-											<< " " << (logProbFlag ? 1 : 2.718); // phrase count feature
+    // probs
+    fileConsolidated << " ||| ";
+    if (!onlyDirectFlag) {
+      fileConsolidated << itemIndirect[2];    // prob indirect
+    }
+    fileConsolidated << " " << itemDirect[2]; // prob direct
+    if (phraseCountFlag) {
+      fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
+    }
 		
     // alignment 
-		fileConsolidated << " ||| " << itemDirect[3];
+    fileConsolidated << " ||| " << itemDirect[3];
 
     // counts, for debugging
     fileConsolidated << "||| " << itemIndirect[4] << " " // indirect

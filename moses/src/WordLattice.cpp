@@ -30,40 +30,33 @@ void WordLattice::Print(std::ostream& out) const {
 	out<<"\n\n";
 }
 
-int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int WordLattice::InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line)
 {
-	Clear();
-	std::string line;
-	if(!getline(in,line)) return 0;
-	std::map<std::string, std::string> meta=ProcessAndStripSGML(line);
-	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
 	size_t numLinkParams = StaticData::Instance().GetNumLinkParams();
 	size_t numLinkWeights = StaticData::Instance().GetNumInputScores();
 	size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
 	
 	//when we have one more weight than params, we add a word count feature
 	bool addRealWordCount = ((numLinkParams + 1) == numLinkWeights);
-
-	PCN::CN cn = PCN::parsePCN(line);
 	data.resize(cn.size());
 	next_nodes.resize(cn.size());
 	for(size_t i=0;i<cn.size();++i) {
-		PCN::CNCol& col = cn[i];
+		const PCN::CNCol& col = cn[i];
 		if (col.empty()) return false;
 		data[i].resize(col.size());
 		next_nodes[i].resize(col.size());
 		for (size_t j=0;j<col.size();++j) {
-			PCN::CNAlt& alt = col[j];
+			const PCN::CNAlt& alt = col[j];
 			
 			
 			//check for correct number of link parameters
 			if (alt.first.second.size() != numLinkParams) {
-				TRACE_ERR("ERROR: need " << numLinkParams << " link parameters, found " << alt.first.second.size() << " while reading column " << i << " from " << line << "\n");
+				TRACE_ERR("ERROR: need " << numLinkParams << " link parameters, found " << alt.first.second.size() << " while reading column " << i << " from " << debug_line << "\n");
 				return false;
 			}
 			
 			//check each element for bounds
-			std::vector<float>::iterator probsIterator;
+			std::vector<float>::const_iterator probsIterator;
 			data[i][j].second = std::vector<float>(0);
 			for(probsIterator = alt.first.second.begin(); probsIterator < alt.first.second.end(); probsIterator++) {
 				IFVERBOSE(1) {
@@ -112,6 +105,18 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
 		}
 	}
 	return !cn.empty();
+}
+
+int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+{
+	Clear();
+	std::string line;
+	if(!getline(in,line)) return 0;
+	std::map<std::string, std::string> meta=ProcessAndStripSGML(line);
+	if (meta.find("id") != meta.end()) { this->SetTranslationId(atol(meta["id"].c_str())); }
+
+	PCN::CN cn = PCN::parsePCN(line);
+        return InitializeFromPCNDataType(cn, factorOrder, line);
 }
 
 void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const

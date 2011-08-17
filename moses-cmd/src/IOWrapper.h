@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "FactorTypeSet.h"
 #include "FactorCollection.h"
 #include "Hypothesis.h"
+#include "OutputCollector.h"
 #include "TrellisPathList.h"
 #include "InputFileStream.h"
 #include "InputType.h"
@@ -65,6 +66,7 @@ protected:
 	std::ostream 									*m_nBestStream
 																,*m_outputWordGraphStream,*m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
+    std::ofstream *m_alignmentOutputStream;
 	bool													m_surpressSingleBestOutput;
 	
 	void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -96,6 +98,11 @@ public:
 
 	void ResetTranslationId() { m_translationId = 0; }
 
+	std::ofstream *GetAlignmentOutputStream()
+	{
+		return m_alignmentOutputStream;
+	}
+
 	std::ostream &GetOutputWordGraphStream()
 	{
 		return *m_outputWordGraphStream;
@@ -124,5 +131,7 @@ void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*transla
                         bool reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out);
 void OutputInput(std::ostream& os, const Hypothesis* hypo);
+void OutputAlignment(OutputCollector* collector, size_t lineNo, const Hypothesis *hypo);
+void OutputAlignment(OutputCollector* collector, size_t lineNo,  const TrellisPath &path);
 
 #endif

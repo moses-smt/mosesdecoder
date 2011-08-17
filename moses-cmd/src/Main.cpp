@@ -32,14 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vld.h>
 #endif
 
-#ifdef WITH_THREADS
-#include <boost/thread/mutex.hpp>
-#endif
-
-#ifdef BOOST_HAS_PTHREADS
-#include <pthread.h>
-#endif
-
 #include "Hypothesis.h"
 #include "IOWrapper.h"
 #include "LatticeMBR.h"
@@ -49,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "mbr.h"
 #include "ThreadPool.h"
 #include "TranslationAnalysis.h"
+#include "OutputCollector.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -66,56 +59,6 @@ void fix(std::ostream& stream, size_t size) {
 }
 
 /**
-  * Makes sure output goes in the correct order.
-  **/
-class OutputCollector {
-    public:
-        OutputCollector(std::ostream* outStream= &cout, std::ostream* debugStream=&cerr) :
-            m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
-
-        /**
-          * Write or cache the output, as appropriate.
-          **/
-        void Write(int sourceId,const string& output,const string& debug="") {
-#ifdef WITH_THREADS
-            boost::mutex::scoped_lock lock(m_mutex);
-#endif
-            if (sourceId == m_nextOutput) {
-                //This is the one we were expecting
-                *m_outStream << output << flush;
-                *m_debugStream << debug << flush;
-                ++m_nextOutput;
-                //see if there's any more
-                map<int,string>::iterator iter;
-                while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
-                    *m_outStream << iter->second << flush;
-                    m_outputs.erase(iter);
-                    ++m_nextOutput;
-                    map<int,string>::iterator debugIter = m_debugs.find(iter->first);
-                    if (debugIter != m_debugs.end()) {
-                      *m_debugStream << debugIter->second << flush;
-                      m_debugs.erase(debugIter);
-                    }
-                }
-            } else {
-                //save for later
-                m_outputs[sourceId] = output;
-                m_debugs[sourceId] = debug;
-            }
-        }
-        
-     private:
-        map<int,string> m_outputs;
-        map<int,string> m_debugs;
-        int m_nextOutput;
-        ostream* m_outStream;
-        ostream* m_debugStream;
-#ifdef WITH_THREADS
-        boost::mutex m_mutex;
-#endif
-};
-
-/**
   * Translates a sentence.
   **/
 class TranslationTask : public Task {
@@ -125,11 +68,13 @@ class TranslationTask : public Task {
         TranslationTask(size_t lineNumber,
              InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
                        OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
-                       OutputCollector* detailedTranslationCollector) :
+                       OutputCollector* detailedTranslationCollector,
+                       OutputCollector* alignmentInfoCollector ) :
              m_source(source), m_lineNumber(lineNumber),
                 m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
                 m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
-                m_detailedTranslationCollector(detailedTranslationCollector) {}
+                m_detailedTranslationCollector(detailedTranslationCollector),
+                m_alignmentInfoCollector(alignmentInfoCollector) {}
 
         void Run() 
         {
@@ -196,6 +141,7 @@ class TranslationTask : public Task {
                                 staticData.GetOutputFactorOrder(), 
                                 staticData.GetReportSegmentation(),
                                 staticData.GetReportAllFactors());
+                        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, bestHypo);
                         IFVERBOSE(1) {
                             debug << "BEST TRANSLATION: " << *bestHypo << endl;
                         }
@@ -241,6 +187,7 @@ class TranslationTask : public Task {
                         OutputBestHypo(conBestHypo, m_lineNumber,
                                        staticData.GetReportSegmentation(),
                                        staticData.GetReportAllFactors(),out);
+                        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, conBestHypo);
                         IFVERBOSE(2) { PrintUserTime("finished Consensus decoding"); }
                     } 
                     else
@@ -250,6 +197,7 @@ class TranslationTask : public Task {
                         OutputBestHypo(mbrBestHypo, m_lineNumber,
                                     staticData.GetReportSegmentation(),
                                     staticData.GetReportAllFactors(),out);
+                        OutputAlignment(m_alignmentInfoCollector, m_lineNumber, mbrBestHypo);
                         IFVERBOSE(2) { PrintUserTime("finished MBR decoding"); }
                         
                     }
@@ -287,18 +235,20 @@ class TranslationTask : public Task {
         OutputCollector* m_wordGraphCollector;
         OutputCollector* m_searchGraphCollector;
         OutputCollector* m_detailedTranslationCollector;
+        OutputCollector* m_alignmentInfoCollector;
+        std::ofstream *m_alignmentStream;
         
 
 };
 
 static void PrintFeatureWeight(const FeatureFunction* ff) {
-  
+
   size_t numScoreComps = ff->GetNumScoreComponents();
   if (numScoreComps != ScoreProducer::unlimited) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     for (size_t i = 0; i < numScoreComps; ++i) {
-      cout << ff->GetScoreProducerDescription() <<  " " 
-           << ff->GetScoreProducerWeightShortName() << " " 
+      cout << ff->GetScoreProducerDescription() <<  " "
+           << ff->GetScoreProducerWeightShortName() << " "
            << values[i] << endl;
     }
   } else {
@@ -395,7 +345,7 @@ int main(int argc, char** argv) {
         TRACE_ERR(weights);
         TRACE_ERR("\n");
     }
-    
+
 
     InputType* source = NULL;
     size_t lineCount = 0;
@@ -433,14 +383,21 @@ int main(int argc, char** argv) {
     if (staticData.IsDetailedTranslationReportingEnabled()) {
         detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
     }
+    auto_ptr<OutputCollector> alignmentInfoCollector;
+    if (!staticData.GetAlignmentOutputFile().empty()) {
+        alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
+    }
     
 	while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
         IFVERBOSE(1) {
                 ResetUserTime();
         }
         TranslationTask* task = 
-                new TranslationTask(lineCount,source, outputCollector.get(), nbestCollector.get(), wordGraphCollector.get(),
-                                    searchGraphCollector.get(), detailedTranslationCollector.get());
+                new TranslationTask(lineCount,source, outputCollector.get(),
+                 nbestCollector.get(), wordGraphCollector.get(),
+                                     searchGraphCollector.get(),
+                                     detailedTranslationCollector.get(),
+                                     alignmentInfoCollector.get() );
 #ifdef WITH_THREADS
         pool.Submit(task);
 
@@ -461,7 +418,3 @@ int main(int argc, char** argv) {
 		return EXIT_SUCCESS;
 #endif
 }
-
-
-
-

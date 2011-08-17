@@ -1193,22 +1193,26 @@ sub scan_config {
             || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)
         && (!defined $additional_tripes_loop->{$shortname})
         ) {
-        print STDERR "$inishortname:$nr:Your model $shortname needs $needlambdas weights but we define the default ranges for only "
-          .scalar(@{$additional_triples->{$shortname}})." weights. Cannot use the default, you must supply lambdas by hand.\n";
-        $error = 1;
-      } else {
-        # note: models may use less parameters than the maximum number
-        # of triples, but it is actually bad, because then the ranges
-        # may be meant for another parameter
-        my @triplets = @{$additional_triples->{$shortname}};
-        for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
-          my $triplet = $lambda;
-          $triplet %= scalar(@triplets)
-            if $additional_tripes_loop->{$shortname};
-          my ($start, $min, $max) 
-              = @{$triplets[$triplet]};
-          push @{$used_triples{$shortname}}, [$start, $min, $max];
+        # Add triples with default values
+        if (!defined $additional_triples->{$shortname}) {
+            $additional_triples->{$shortname} = ();
         }
+        while (scalar(@{$additional_triples->{$shortname}}) < $needlambdas) {
+            push @{$additional_triples->{$shortname}}, [1,-1,1];
+        }
+
+      }
+      # note: models may use less parameters than the maximum number
+      # of triples, but it is actually bad, because then the ranges
+      # may be meant for another parameter
+      my @triplets = @{$additional_triples->{$shortname}};
+      for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
+        my $triplet = $lambda;
+        $triplet %= scalar(@triplets)
+          if $additional_tripes_loop->{$shortname};
+        my ($start, $min, $max) 
+            = @{$triplets[$triplet]};
+        push @{$used_triples{$shortname}}, [$start, $min, $max];
       }
     }
   }

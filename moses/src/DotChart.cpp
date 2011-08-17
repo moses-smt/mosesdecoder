@@ -28,7 +28,13 @@ namespace Moses
 {
 ProcessedRuleColl::~ProcessedRuleColl()
 {
-    std::for_each(m_coll.begin(), m_coll.end(), RemoveAllInColl<CollType::value_type>);
+#ifdef USE_BOOST_POOL
+  // Do nothing.  ProcessedRule objects are stored in object pools owned by
+  // the sentence-specific ChartRuleLookupManagers.
+#else
+  std::for_each(m_coll.begin(), m_coll.end(),
+                RemoveAllInColl<CollType::value_type>);
+#endif
 }
 
 std::ostream& operator<<(std::ostream &out, const ProcessedRule &/*rule*/)

@@ -29,7 +29,6 @@
 		1ED4FBCC11BDBC9F004E826A /* ChartTrellisPathList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBAD11BDBC9F004E826A /* ChartTrellisPathList.h */; };
 		1ED4FBCD11BDBC9F004E826A /* Cube.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBAE11BDBC9F004E826A /* Cube.cpp */; };
 		1ED4FBCE11BDBC9F004E826A /* Cube.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBAF11BDBC9F004E826A /* Cube.h */; };
-		1ED4FBCF11BDBC9F004E826A /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBB011BDBC9F004E826A /* Makefile */; };
 		1ED4FBD011BDBC9F004E826A /* QueueEntry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FBB311BDBC9F004E826A /* QueueEntry.cpp */; };
 		1ED4FBD111BDBC9F004E826A /* QueueEntry.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED4FBB411BDBC9F004E826A /* QueueEntry.h */; };
 /* End PBXBuildFile section */
@@ -57,9 +56,6 @@
 		1ED4FBAD11BDBC9F004E826A /* ChartTrellisPathList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTrellisPathList.h; path = src/ChartTrellisPathList.h; sourceTree = "<group>"; };
 		1ED4FBAE11BDBC9F004E826A /* Cube.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Cube.cpp; path = src/Cube.cpp; sourceTree = "<group>"; };
 		1ED4FBAF11BDBC9F004E826A /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Cube.h; path = src/Cube.h; sourceTree = "<group>"; };
-		1ED4FBB011BDBC9F004E826A /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = src/Makefile; sourceTree = "<group>"; };
-		1ED4FBB111BDBC9F004E826A /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
-		1ED4FBB211BDBC9F004E826A /* Makefile.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.in; path = src/Makefile.in; sourceTree = "<group>"; };
 		1ED4FBB311BDBC9F004E826A /* QueueEntry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QueueEntry.cpp; path = src/QueueEntry.cpp; sourceTree = "<group>"; };
 		1ED4FBB411BDBC9F004E826A /* QueueEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = QueueEntry.h; path = src/QueueEntry.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses-chart.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libmoses-chart.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -111,9 +107,6 @@
 				1ED4FBAD11BDBC9F004E826A /* ChartTrellisPathList.h */,
 				1ED4FBAE11BDBC9F004E826A /* Cube.cpp */,
 				1ED4FBAF11BDBC9F004E826A /* Cube.h */,
-				1ED4FBB011BDBC9F004E826A /* Makefile */,
-				1ED4FBB111BDBC9F004E826A /* Makefile.am */,
-				1ED4FBB211BDBC9F004E826A /* Makefile.in */,
 				1ED4FBB311BDBC9F004E826A /* QueueEntry.cpp */,
 				1ED4FBB411BDBC9F004E826A /* QueueEntry.h */,
 			);
@@ -184,7 +177,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "moses-chart" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-chart */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -210,7 +210,6 @@
 				1ED4FBC911BDBC9F004E826A /* ChartTrellisPathCollection.cpp in Sources */,
 				1ED4FBCB11BDBC9F004E826A /* ChartTrellisPathList.cpp in Sources */,
 				1ED4FBCD11BDBC9F004E826A /* Cube.cpp in Sources */,
-				1ED4FBCF11BDBC9F004E826A /* Makefile in Sources */,
 				1ED4FBD011BDBC9F004E826A /* QueueEntry.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

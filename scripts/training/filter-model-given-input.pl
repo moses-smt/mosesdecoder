@@ -265,7 +265,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       }
       # reordering model
       else {
-        my $lexbin = $binarizer; $lexbin =~ s/PhraseTable/LexicalTable/;
+        my $lexbin = $binarizer; 
+        $lexbin =~ s/PhraseTable/LexicalTable/;
+        $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
         my $cmd = "$lexbin -in $new_file -out $new_file";
         print STDERR $cmd."\n";
         print STDERR `$cmd`;

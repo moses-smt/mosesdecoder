@@ -64,7 +64,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
     m_alignmentsFile(alignmentsFile)
 {
     const StaticData& staticData = StaticData::Instance();
-    if (implementation == Memory || implementation == SCFG || implementation == OnDisk || implementation == SuffixArray) {
+    if (implementation == Memory || implementation == SCFG || implementation == SuffixArray) {
         m_useThreadSafePhraseDictionary = true;
     } else {
         m_useThreadSafePhraseDictionary = false;
@@ -141,19 +141,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
               , system->GetWordPenaltyProducer());
 		assert(ret);
 		return pdta;
-	}
-	else if (m_implementation == Binary)
-	{   
-		PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
-		bool ret = pdta->Load(GetInput()
-								, GetOutput()
-								, m_filePath
-								, m_weight
-								, m_tableLimit
-								, system->GetLanguageModels()
-								, system->GetWeightWordPenalty());
-		assert(ret);
-    return pdta;
 	}
 	else if (m_implementation == SuffixArray)
 	{   

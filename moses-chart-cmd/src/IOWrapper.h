@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "FactorTypeSet.h"
 #include "TranslationSystem.h"
 #include "TrellisPathList.h"
+#include "OutputCollector.h"
 #include "../../moses-chart/src/ChartHypothesis.h"
 
 namespace Moses
@@ -56,6 +57,7 @@ class TrellisPathList;
 class IOWrapper
 {
 protected:
+
 	long m_translationId;
 
 	const std::vector<Moses::FactorType>	&m_inputFactorOrder;
@@ -66,7 +68,11 @@ protected:
 	std::string										m_inputFilePath;
 	std::istream									*m_inputStream;
 	bool													m_surpressSingleBestOutput;
-	
+  Moses::OutputCollector                *m_detailOutputCollector;
+  Moses::OutputCollector                *m_nBestOutputCollector;
+  Moses::OutputCollector                *m_searchGraphOutputCollector;
+  Moses::OutputCollector                *m_singleBestOutputCollector;
+
 public:
 	IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
 				, const std::vector<Moses::FactorType>	&outputFactorOrder
@@ -76,16 +82,17 @@ public:
 				, const std::string							&inputFilePath="");
 	~IOWrapper();
 
-	std::string GetInput();
-	Moses::InputType* GetInput(Moses::InputType *inputType, const std::string &line);
+	Moses::InputType* GetInput(Moses::InputType *inputType);
 	void OutputBestHypo(const MosesChart::Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
 	void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-    void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
+    void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const MosesChart::Hypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
+  void OutputDetailedTranslationReport(const MosesChart::Hypothesis *hypo, long translationId);
 	void Backtrack(const MosesChart::Hypothesis *hypo);
 
 	void ResetTranslationId() { m_translationId = 0; }
 
-	std::ostream &GetOutputSearchGraphStream()
-	{ return *m_outputSearchGraphStream; }
+	Moses::OutputCollector *GetSearchGraphOutputCollector()
+	{ return m_searchGraphOutputCollector; }
 	
+  static void FixPrecision(std::ostream &, size_t size=3);
 };

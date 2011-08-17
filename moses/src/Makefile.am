@@ -99,6 +99,7 @@ libmoses_la_HEADERS = \
         TargetPhrase.h \
         TargetPhraseCollection.h \
         TargetWordInsertionFeature.h \
+        ThreadPool.h \
         Timer.h \
         TranslationOption.h \
         TranslationOptionCollection.h \
@@ -234,6 +235,7 @@ libmoses_la_SOURCES = \
         TargetPhrase.cpp \
         TargetPhraseCollection.cpp \
         TargetWordInsertionFeature.cpp \
+        ThreadPool.cpp \
         Timer.cpp \
         TranslationOption.cpp \
         TranslationOptionCollection.cpp \

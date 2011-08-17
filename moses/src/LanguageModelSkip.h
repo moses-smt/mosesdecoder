@@ -87,7 +87,7 @@ public:
     return m_lmImpl->NewState(from);
   }
 			
-	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len = 0) const
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
 	{
 		if (contextFactor.size() == 0)
 		{
@@ -126,7 +126,7 @@ public:
 		std::reverse(chunkContext.begin(), chunkContext.end());
 
 		// calc score on chunked phrase
-		float ret = m_lmImpl->GetValueForgotState(chunkContext, outState, len);
+		float ret = m_lmImpl->GetValueForgotState(chunkContext, outState);
 
 		RemoveAllInColl(chunkContext);
 

@@ -19,8 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_cmd_ThreadPool_h
-#define moses_cmd_ThreadPool_h
+#ifndef moses_ThreadPool_h
+#define moses_ThreadPool_h
 
 #include <iostream>
 #include <queue>

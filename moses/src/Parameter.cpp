@@ -44,6 +44,7 @@ Parameter::Parameter()
 	AddParam("beam-threshold", "b", "threshold for threshold pruning");
 	AddParam("config", "f", "location of the configuration file");
 	AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
+	AddParam("decode-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
 	AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
 	AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
@@ -148,6 +149,7 @@ Parameter::Parameter()
   AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
   AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
   AddParam("show-weights", "print feature weights and exit");
+    AddParam("alignment-output-file", "print output word alignments into given file");
 }
 
 Parameter::~Parameter()

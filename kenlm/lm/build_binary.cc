@@ -21,10 +21,10 @@ void Usage(const char *name) {
 "memory and is still faster than SRI or IRST.  Building the trie format uses an\n"
 "on-disk sort to save memory.\n"
 "-t is the temporary directory prefix.  Default is the output file name.\n"
-"-m is the amount of memory to use, in MB.  Default is 1024MB (1GB).\n\n"
-"sorted is like probing but uses a sorted uniform map instead of a hash table.\n"
+"-m limits memory use for sorting.  Measured in MB.  Default is 1024MB.\n\n"
+/*"sorted is like probing but uses a sorted uniform map instead of a hash table.\n"
 "It uses more memory than trie and is also slower, so there's no real reason to\n"
-"use it.\n\n"
+"use it.\n\n"*/
 "See http://kheafield.com/code/kenlm/benchmark/ for data structure benchmarks.\n"
 "Passing only an input file will print memory usage of each data structure.\n"
 "If the ARPA file does not have <unk>, -u sets <unk>'s probability; default 0.0.\n";
@@ -52,13 +52,13 @@ void ShowSizes(const char *file, const lm::ngram::Config &config) {
   std::size_t probing_size = ProbingModel::Size(counts, config);
   // probing is always largest so use it to determine number of columns.  
   long int length = std::max<long int>(5, lrint(ceil(log10(probing_size))));
-  std::cout << "Memory usage:\ntype    ";
+  std::cout << "Memory estimate:\ntype    ";
   // right align bytes.  
   for (long int i = 0; i < length - 5; ++i) std::cout << ' ';
   std::cout << "bytes\n"
     "probing " << std::setw(length) << probing_size << " assuming -p " << config.probing_multiplier << "\n"
-    "trie    " << std::setw(length) << TrieModel::Size(counts, config) << "\n"
-    "sorted  " << std::setw(length) << SortedModel::Size(counts, config) << "\n";
+    "trie    " << std::setw(length) << TrieModel::Size(counts, config) << "\n";
+/*    "sorted  " << std::setw(length) << SortedModel::Size(counts, config) << "\n";*/
 }
 
 } // namespace ngram
@@ -66,48 +66,56 @@ void ShowSizes(const char *file, const lm::ngram::Config &config) {
 } // namespace
 
 int main(int argc, char *argv[]) {
-  using namespace lm::ngram;
+  try {
+    using namespace lm::ngram;
 
-  lm::ngram::Config config;
-  int opt;
-  while ((opt = getopt(argc, argv, "u:p:t:m:")) != -1) {
-    switch(opt) {
-      case 'u':
-        config.unknown_missing_prob = ParseFloat(optarg);
-        break;
-      case 'p':
-        config.probing_multiplier = ParseFloat(optarg);
-        break;
-      case 't':
-        config.temporary_directory_prefix = optarg;
-        break;
-      case 'm':
-        config.building_memory = ParseUInt(optarg) * 1048576;
-        break;
-      default:
-        Usage(argv[0]);
+    lm::ngram::Config config;
+    int opt;
+    while ((opt = getopt(argc, argv, "u:p:t:m:")) != -1) {
+      switch(opt) {
+        case 'u':
+          config.unknown_missing_prob = ParseFloat(optarg);
+          break;
+        case 'p':
+          config.probing_multiplier = ParseFloat(optarg);
+          break;
+        case 't':
+          config.temporary_directory_prefix = optarg;
+          break;
+        case 'm':
+          config.building_memory = ParseUInt(optarg) * 1048576;
+          break;
+        default:
+          Usage(argv[0]);
+      }
     }
-  }
-  if (optind + 1 == argc) {
-    ShowSizes(argv[optind], config);
-  } else if (optind + 2 == argc) {
-    config.write_mmap = argv[optind + 1];
-    ProbingModel(argv[optind], config);
-  } else if (optind + 3 == argc) {
-    const char *model_type = argv[optind];
-    const char *from_file = argv[optind + 1];
-    config.write_mmap = argv[optind + 2];
-    if (!strcmp(model_type, "probing")) {
-      ProbingModel(from_file, config);
-    } else if (!strcmp(model_type, "sorted")) {
-      SortedModel(from_file, config);
-    } else if (!strcmp(model_type, "trie")) {
-      TrieModel(from_file, config);
+    if (optind + 1 == argc) {
+      ShowSizes(argv[optind], config);
+    } else if (optind + 2 == argc) {
+      config.write_mmap = argv[optind + 1];
+      ProbingModel(argv[optind], config);
+    } else if (optind + 3 == argc) {
+      const char *model_type = argv[optind];
+      const char *from_file = argv[optind + 1];
+      config.write_mmap = argv[optind + 2];
+      if (!strcmp(model_type, "probing")) {
+        ProbingModel(from_file, config);
+      } else if (!strcmp(model_type, "sorted")) {
+        SortedModel(from_file, config);
+      } else if (!strcmp(model_type, "trie")) {
+        TrieModel(from_file, config);
+      } else {
+        Usage(argv[0]);
+      }
     } else {
       Usage(argv[0]);
     }
-  } else {
-    Usage(argv[0]);
+    return 0;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    return 1;
+  } catch (...) {
+    std::cerr << "An exception occurred." << std::endl;
+    return 1;
   }
-  return 0;
 }

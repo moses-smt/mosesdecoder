@@ -172,20 +172,19 @@ void TranslationOptionCollection::Prune()
 
 void TranslationOptionCollection::ProcessUnknownWord()
 {
-    const vector<DecodeGraph*>& decodeStepVL = m_system->GetDecodeGraphs();
+	const vector<DecodeGraph*>& decodeGraphList = m_system->GetDecodeGraphs();
 	size_t size = m_source.GetSize();
 	// try to translation for coverage with no trans by expanding table limit
-	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
+	for (size_t graph = 0 ; graph < decodeGraphList.size() ; graph++)
 	{
-	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
+		const DecodeGraph &decodeGraph = *decodeGraphList[graph];
 		for (size_t pos = 0 ; pos < size ; ++pos)
 		{
 				TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
 				size_t numTransOpt = fullList.size();
 				if (numTransOpt == 0)
 				{
-					CreateTranslationOptionsForRange(decodeStepList
-																				, pos, pos, false);
+					CreateTranslationOptionsForRange(decodeGraph, pos, pos, false);
 				}
 		}
 	}
@@ -264,11 +263,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 			else
 				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
 		}
-		//create a one-to-one aignment between UNKNOWN_FACTOR and its verbatim translation		
-
-
-
-		
+		//create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation	
+        
+		targetPhrase.SetAlignmentInfo("0-0");
 		
 	}
 	else 
@@ -386,21 +383,44 @@ void TranslationOptionCollection::CreateTranslationOptions()
 	// table loaded on initialization), generate TranslationOption objects
 	// for all phrases
   
-    const vector <DecodeGraph*> &decodeStepVL = m_system->GetDecodeGraphs();
+	// there may be multiple decoding graphs (factorizations of decoding)
+	const vector <DecodeGraph*> &decodeGraphList = m_system->GetDecodeGraphs();
+	const vector <size_t> &decodeGraphBackoff = m_system->GetDecodeGraphBackoff();
 
+	// length of the sentence
 	size_t size = m_source.GetSize();
-	for (size_t startVL = 0 ; startVL < decodeStepVL.size() ; startVL++)
+
+	// loop over all decoding graphs, each generates translation options
+	for (size_t graph = 0 ; graph < decodeGraphList.size() ; graph++)
 	{
-	  const DecodeGraph &decodeStepList = *decodeStepVL[startVL];
+		if (decodeGraphList.size() > 1)
+		{
+			VERBOSE(3,"Creating translation options from decoding graph " << graph << endl);
+		}
+
+		const DecodeGraph &decodeGraph = *decodeGraphList[graph];
+		// generate phrases that start at startPos ...
 		for (size_t startPos = 0 ; startPos < size; startPos++)
 		{
-      size_t maxSize = size - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, maxSizePhrase);
+			size_t maxSize = size - startPos; // don't go over end of sentence
+			size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+			maxSize = std::min(maxSize, maxSizePhrase);
 
+			// ... and that end at endPos
 			for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++)
 			{
-				CreateTranslationOptionsForRange( decodeStepList, startPos, endPos, true);
+				if (graph > 0 && // only skip subsequent graphs
+				    decodeGraphBackoff[graph] != 0 && // use of backoff specified 
+				    (endPos-startPos+1 > decodeGraphBackoff[graph] || // size exceeds backoff limit or ...
+		    		     m_collection[startPos][endPos-startPos].size() > 0)) // no phrases found so far
+				{
+					VERBOSE(3,"No backoff to graph " << graph << " for span [" << startPos << ";" << endPos << "]" << endl);
+					// do not create more options
+					continue;
+				}
+
+				// create translation options for that range
+				CreateTranslationOptionsForRange( decodeGraph, startPos, endPos, true);
  			}
 		}
 	}
@@ -441,7 +461,7 @@ void TranslationOptionCollection::Sort()
 
 /** create translation options that exactly cover a specific input span.
  * Called by CreateTranslationOptions() and ProcessUnknownWord()
- * \param decodeStepList list of decoding steps
+ * \param decodeGraph list of decoding steps
  * \param factorCollection input sentence with all factors
  * \param startPos first position in input sentence
  * \param lastPos last position in input sentence

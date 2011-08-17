@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <memory>
 #include <utility>
+#include <fstream>
+#include <string>
 
 #ifdef WITH_THREADS
 #include <boost/thread/mutex.hpp>
@@ -90,10 +92,11 @@ protected:
 	ScoreComponentCollection m_allWeights;
 	std::vector<LexicalReordering*>                   m_reorderModels;
 	std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
-    std::vector<DecodeGraph*> m_decodeGraphs;
+	std::vector<DecodeGraph*> m_decodeGraphs;
+	std::vector<size_t> m_decodeGraphBackoff;
 		// Initial	= 0 = can be used when creating poss trans
 		// Other		= 1 = used to calculate LM score once all steps have been processed
-    std::map<std::string, TranslationSystem> m_translationSystems;
+	std::map<std::string, TranslationSystem> m_translationSystems;
 	TargetBigramFeature *m_targetBigramFeature;
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhrasePairFeature *m_phrasePairFeature;
@@ -160,7 +163,8 @@ protected:
 	bool m_UseAlignmentInfo;
 	bool m_PrintAlignmentInfo;
 	bool m_PrintAlignmentInfoNbest;
-		
+
+    std::string m_alignmentOutputFile;
 	
 	std::string m_factorDelimiter; //! by default, |, but it can be changed
 	size_t m_maxFactorIdx[2];  //! number of factors on source and target side
@@ -206,6 +210,7 @@ protected:
 	size_t m_cubePruningPopLimit;
 	size_t m_cubePruningDiversity;
 	size_t m_ruleLimit;
+
 
 	// Initial = 0 = can be used when creating poss trans
 	// Other = 1 = used to calculate LM score once all steps have been processed
@@ -424,6 +429,11 @@ public:
 	{
 		return m_detailedTranslationReportingFilePath;
 	}
+
+    const std::string &GetAlignmentOutputFile() const
+    {
+        return m_alignmentOutputFile;
+    }
 	
 	bool IsLabeledNBestList() const
 	{

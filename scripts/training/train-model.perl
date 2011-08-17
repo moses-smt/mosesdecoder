@@ -26,6 +26,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
    $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
    $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
+   $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
@@ -48,7 +49,7 @@ $_HELP = 1
 		       'e=s' => \$_E,
 		       'giza-e2f=s' => \$_GIZA_E2F,
 		       'giza-f2e=s' => \$_GIZA_F2E,
-		       'max-phrase-length=i' => \$_MAX_PHRASE_LENGTH,
+		       'max-phrase-length=s' => \$_MAX_PHRASE_LENGTH,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'model-dir=s' => \$_MODEL_DIR,
@@ -82,6 +83,7 @@ $_HELP = 1
 		       'reordering-factors=s' => \$_REORDERING_FACTORS,
 		       'generation-factors=s' => \$_GENERATION_FACTORS,
 		       'decoding-steps=s' => \$_DECODING_STEPS,
+		       'decoding-graph-backoff=s' => \$_DECODING_GRAPH_BACKOFF,
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
 		       'factor-delimiter=s' => \$_FACTOR_DELIMITER,
 		       'phrase-translation-table=s' => \@_PHRASE_TABLE,
@@ -284,7 +286,7 @@ $___TEMP_DIR = $_TEMP_DIR if $_TEMP_DIR;
 my $___CONTINUE = 0; 
 $___CONTINUE = $_CONTINUE if $_CONTINUE;
 
-my $___MAX_PHRASE_LENGTH = 7;
+my $___MAX_PHRASE_LENGTH = "7";
 my $___LEXICAL_WEIGHTING = 1;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
@@ -438,6 +440,7 @@ for my $mtype ( keys %REORDERING_MODEL_TYPES) {
 
 ### Factored translation models
 my $___NOT_FACTORED = !$_FORCE_FACTORED_FILENAMES;
+$___NOT_FACTORED = 0 if $_INPUT_FACTOR_MAX;
 my $___ALIGNMENT_FACTORS = "0-0";
 $___ALIGNMENT_FACTORS = $_ALIGNMENT_FACTORS if defined($_ALIGNMENT_FACTORS);
 die("ERROR: format for alignment factors is \"0-0\" or \"0,1,2-0,1\", you provided $___ALIGNMENT_FACTORS\n") if $___ALIGNMENT_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*$/;
@@ -1191,16 +1194,31 @@ sub extract_phrase_factored {
     if ($___NOT_FACTORED) {
 	&extract_phrase($___CORPUS.".".$___F,
 			$___CORPUS.".".$___E,
-			$___EXTRACT_FILE);
+			$___EXTRACT_FILE,
+			0,1,$REORDERING_LEXICAL);
     }
     else {
-	my %ALREADY;
-	foreach my $factor (split(/\+/,"$___TRANSLATION_FACTORS"
-				  .($REORDERING_LEXICAL ? "+$___REORDERING_FACTORS" : ""))) {
-	    # we extract phrases for all translation steps and also for reordering factors (if lexicalized reordering is used)
-	    print STDERR "(5) [$factor] extract phrases @ ".`date`;
-	    next if $ALREADY{$factor};
-	    $ALREADY{$factor} = 1;
+	my %EXTRACT_FOR_FACTOR = ();
+	my $table_number = 0;
+	my @FACTOR_LIST = ();
+	foreach my $factor (split(/\+/,"$___TRANSLATION_FACTORS")) {
+	    my $factor_key = $factor.":".&get_max_phrase_length($table_number++);
+	    push @FACTOR_LIST, $factor_key;
+	    $EXTRACT_FOR_FACTOR{$factor_key}{"translation"}++;
+	}
+	if ($REORDERING_LEXICAL) {
+	    foreach my $factor (split(/\+/,"$___REORDERING_FACTORS")) {
+		my $factor_key = $factor.":".&get_max_phrase_length(-1); # max
+		if (!defined($EXTRACT_FOR_FACTOR{$factor_key}{"translation"})) {
+		    push @FACTOR_LIST, $factor_key;	    
+		}
+		$EXTRACT_FOR_FACTOR{$factor_key}{"reordering"}++;
+	    }
+	}
+	$table_number = 0;
+	foreach my $factor_key (@FACTOR_LIST) {
+	    my ($factor,$max_length) = split(/:/,$factor_key);
+	    print STDERR "(5) [$factor] extract phrases (max length $max_length)@ ".`date`;
 	    my ($factor_f,$factor_e) = split(/\-/,$factor);
 	    
 	    &reduce_factors($___CORPUS.".".$___F,
@@ -1212,9 +1230,39 @@ sub extract_phrase_factored {
 	    
 	    &extract_phrase($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
-			    $___EXTRACT_FILE.".".$factor);
+			    $___EXTRACT_FILE.".".$factor,
+			    $table_number++,
+			    defined($EXTRACT_FOR_FACTOR{$factor_key}{"translation"}),
+			    defined($EXTRACT_FOR_FACTOR{$factor_key}{"reordering"}));
 	}
     }
+}
+
+sub get_max_phrase_length {
+    my ($table_number) = @_;
+    
+    # single length? that's it then
+    if ($___MAX_PHRASE_LENGTH =~ /^\d+$/) {
+	return $___MAX_PHRASE_LENGTH;
+    }
+
+    my $max_length = 0;
+    my @max = split(/,/,$___MAX_PHRASE_LENGTH);
+
+    # maximum of specified lengths
+    if ($table_number == -1) {
+	foreach (@max) {
+	    $max_length = $_ if $_ > $max_length;
+	}
+	return $max_length;
+    }
+
+    # look up length for table 
+    $max_length = $max[0]; # fallback: first specified length
+    if ($#max >= $table_number) {
+	$max_length = $max[$table_number];
+    }
+    return $max_length;
 }
 
 sub get_extract_reordering_flags {
@@ -1230,7 +1278,7 @@ sub get_extract_reordering_flags {
 }
 
 sub extract_phrase {
-    my ($alignment_file_f,$alignment_file_e,$extract_file) = @_;
+    my ($alignment_file_f,$alignment_file_e,$extract_file,$table_number,$ttable_flag,$reordering_flag) = @_;
     my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
     # Make sure the corpus exists in unzipped form
     my @tempfiles = ();
@@ -1252,9 +1300,16 @@ sub extract_phrase {
     }
     else
     {
-      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $___MAX_PHRASE_LENGTH";
-      $cmd .= " orientation" if $REORDERING_LEXICAL;
-      $cmd .= get_extract_reordering_flags();
+      my $max_length = &get_max_phrase_length($table_number);
+      print "MAX $max_length $reordering_flag $table_number\n";
+      $max_length = &get_max_phrase_length(-1) if $reordering_flag;
+
+      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
+      if ($reordering_flag) {
+	$cmd .= " orientation";
+	$cmd .= get_extract_reordering_flags();
+	$cmd .= " --NoTTable" if !$ttable_flag;
+      }
     }
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
@@ -1264,8 +1319,10 @@ sub extract_phrase {
     }
     if (! $___DONT_ZIP) { 
       safesystem("gzip $extract_file.o") if -e "$extract_file.o";
-      safesystem("gzip $extract_file.inv") or die("ERROR");
-      safesystem("gzip $extract_file") or die("ERROR");
+      if ($ttable_flag) {
+        safesystem("gzip $extract_file.inv") or die("ERROR");
+        safesystem("gzip $extract_file") or die("ERROR");
+      }
     }
 }
 
@@ -1305,6 +1362,11 @@ sub score_phrase {
 sub score_phrase_phrase_extract {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
+    my $ONLY_DIRECT = ($_SCORE_OPTIONS =~ /OnlyDirect/);
+    my $PHRASE_COUNT = ($_SCORE_OPTIONS !~ /NoPhraseCount/);
+    my $CORE_SCORE_OPTIONS = $_SCORE_OPTIONS;
+    $CORE_SCORE_OPTIONS =~ s/\-+OnlyDirect//i;
+    $CORE_SCORE_OPTIONS =~ s/\-+NoPhraseCount//i;
     my $substep = 1;
     for my $direction ("f2e","e2f") {
 	next if $___CONTINUE && -e "$ttable_file.half.$direction";
@@ -1333,7 +1395,7 @@ sub score_phrase_phrase_extract {
         my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
-        $cmd .= " $_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
+        $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
         if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
@@ -1351,6 +1413,8 @@ sub score_phrase_phrase_extract {
     return if $___CONTINUE && -e "$ttable_file.gz";
     my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
+    $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
+    $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
     if (! $___DONT_ZIP) {
@@ -1572,18 +1636,32 @@ sub create_ini {
     print INI "\n# mapping steps
 [mapping]\n";
    my $path = 0;
+   my %FIRST_TTABLE;
    foreach (split(/:/,$___DECODING_STEPS)) {
+     my $first_ttable_flag = 1;
      foreach (split(/,/,$_)) {
        s/t/T /g; 
        s/g/G /g;
        my ($type, $num) = split /\s+/;
+       if ($first_ttable_flag && $type eq "T") {
+         $FIRST_TTABLE{$num}++;
+         $first_ttable_flag = 0;
+       }
        $stepsused{$type} = $num+1 if !defined $stepsused{$type} || $stepsused{$type} < $num+1;
        print INI $path." ".$_."\n";
      }
      $path++;
    }
-   print INI "1 T 1\n" if $_GLUE_GRAMMAR;;
+   print INI "1 T 1\n" if $_GLUE_GRAMMAR;
 
+   if (defined($_DECODING_GRAPH_BACKOFF)) {
+     $_DECODING_GRAPH_BACKOFF =~ s/\s+/ /g;
+     $_DECODING_GRAPH_BACKOFF =~ s/^ //;
+     print INI "\n[decoding-graph-backoff]\n";
+     foreach (split(/ /,$_DECODING_GRAPH_BACKOFF)) {
+       print INI "$_\n";
+     }
+   }
    print INI "\n# translation tables: table type (hierarchical(0), textual (0), binary (1)), source-factors, target-factors, number of scores, file 
 # OLD FORMAT is still handled for back-compatibility
 # OLD FORMAT translation tables: source-factors, target-factors, number of scores, file 
@@ -1598,7 +1676,11 @@ sub create_ini {
      my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
-     print INI "$phrase_table_impl $ff 5 $file\n";
+     my $basic_weight_count = 4; # both directions, lex and phrase
+     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /OnlyDirect/;
+     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /NoLex/;
+     $basic_weight_count++ unless $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+     print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
    }
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
@@ -1645,8 +1727,8 @@ sub create_ini {
   }
 
   print INI "\n\n\# limit on how many phrase translations e for each phrase f are loaded\n# 0 = all elements loaded\n[ttable-limit]\n20\n";
-  foreach(2..$num_of_ttables) {
-    print INI "0\n";
+  foreach(1 .. ($num_of_ttables-1)) {
+    print INI (defined($FIRST_TTABLE{$_})?"20":"0")."\n";
   }
   print INI "\n";
 
@@ -1689,7 +1771,13 @@ sub create_ini {
 
   print INI "\n\n# translation model weights\n[weight-t]\n";
   foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-     print INI "0.2\n0.2\n0.2\n0.2\n0.2\n";
+     my $basic_weight_count = 4; # both directions, lex and phrase
+     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /OnlyDirect/;
+     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /NoLex/;
+     $basic_weight_count++ unless $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+     for(1..$basic_weight_count) {
+       printf INI "%.2f\n", 1/$basic_weight_count;
+     }
   }
   print INI "1.0\n" if $_HIERARCHICAL; # glue grammar
 

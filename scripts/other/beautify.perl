@@ -10,7 +10,7 @@ foreach $name (@names) {
    next if ($name eq "..");  # skip the parent  directory entry
 
    if (-d $name){            # is this a directory?
-      `astyle --style="k&r" -s2 --recursive -v $name/*h $name/*.cpp`;
+      `astyle --style="k&r" -s2 --recursive -v $name/*.h $name/*.cpp`;
       next;                  # can skip to the next name in the for loop 
    }
 }

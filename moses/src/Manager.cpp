@@ -565,6 +565,12 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
 	scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
 	outputSearchGraphStream << " [ " << StaticData::Instance().GetAllWeights();
 	outputSearchGraphStream << " ]";
+    // added this so that we will have the span in the input covered
+    // (DNM, 19 Nov 2010)
+    outputSearchGraphStream << " covered=" <<
+    searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+                               << "-" <<
+    searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
 
 	outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }

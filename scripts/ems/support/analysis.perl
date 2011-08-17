@@ -5,20 +5,26 @@ use Getopt::Long "GetOptions";
 
 my $MAX_LENGTH = 4;
 
-my ($system,$segmentation,$reference,$dir,$input,$corpus,$ttable,$hierarchical,$output_corpus,$alignment,$biconcor);
+my ($system,$system_alignment,$segmentation,$reference,$dir,$input,$corpus,$ttable,@FACTORED_TTABLE,$score_options,$hierarchical,$output_corpus,$alignment,$biconcor,$input_factors,$precision_by_coverage,$precision_by_coverage_factor);
 if (!&GetOptions('system=s' => \$system, # raw output from decoder
+		 'system-alignment=s' => \$system_alignment, # word alignment of system output
                  'reference=s' => \$reference, # tokenized reference
                  'dir=s' => \$dir, # directory for storing results
+		 'input-factors=i' => \$input_factors, # list of input factors
+		 'precision-by-coverage' => \$precision_by_coverage, # added report for input words
+		 'precision-by-coverage-factor=i' => \$precision_by_coverage_factor, # sub-reports
                  'input=s' => \$input, # tokenized input (as for decoder)
                  'segmentation=s' => \$segmentation, # system output with segmentation markup
                  'input-corpus=s' => \$corpus, # input side of parallel training corpus
                  'ttable=s' => \$ttable, # phrase translation table used for decoding
+		 'factored-ttable=s' => \@FACTORED_TTABLE, # factored phrase translation table
+		 'score-options=s' => \$score_options, # score options to detect p(e|f) score
                  'output-corpus=s' => \$output_corpus, # output side of parallel training corpus
                  'alignment-file=s' => \$alignment, # alignment of parallel corpus
                  'biconcor=s' => \$biconcor, # binary for bilingual concordancer
 		 'hierarchical' => \$hierarchical) || # hierarchical model?
     !defined($dir)) {
-	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-segmentation FILE] [-output-corpus FILE] [-alignment-file FILE] [-biconcor BIN]");	
+	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-score-options SETTINGS] [-segmentation FILE] [-output-corpus FILE] [-alignment-file FILE] [-biconcor BIN]");	
 }
 
 `mkdir -p $dir`;
@@ -76,15 +82,38 @@ if (defined($segmentation)) {
 
 # coverage analysis
 my (%INPUT_PHRASE,%CORPUS_COVERED,%TTABLE_COVERED,%TTABLE_ENTROPY);
-if (defined($ttable) || defined($corpus)) {	
+if (!defined($system_alignment) && (defined($ttable) || defined($corpus))) {	
   if (!defined($input)) {
     die("ERROR: when specifying either ttable or input-corpus, please also specify input\n");
   }
   $MAX_LENGTH = 7;
   &input_phrases();
-  &ttable_coverage() if defined($ttable);
+  &ttable_coverage(0,$ttable) if defined($ttable);
   &corpus_coverage() if defined($corpus);
   &input_annotation();
+
+  # corpus coverage for non-surface factors
+  if (defined($input_factors)) {
+    for(my $factor=1;$factor<$input_factors;$factor++) {
+      &input_phrases($factor);
+      &corpus_coverage($factor);
+    }
+  }
+
+  # factored ttable coverage
+  foreach my $ttable (@FACTORED_TTABLE) {
+      die("factored ttable must be specified as factor:file -- $ttable")
+	unless $ttable =~ /^(\d+)\:(.+)/; #  factor:ttable
+      my ($factor,$file) = ($1,$2);
+      next unless $file eq $ttable; # no need to do this twice
+      &input_phrases($factor);
+      &ttable_coverage($factor,$file);
+  }
+}
+
+if (defined($precision_by_coverage)) {
+  &precision_by_coverage("ttable");
+  &precision_by_coverage("corpus");
 }
 
 # bilingual concordance -- not used by experiment.perl
@@ -112,13 +141,63 @@ sub best_matches {
     }
 }
 
+# get all the n-grams from the input corpus
 sub input_phrases {
+  my ($factor) = (@_);
+  %INPUT_PHRASE = ();
+
   open(INPUT,$input) or die "Can't read input $input";
   while(my $line = <INPUT>) {
-    $line =~ s/\|\S+//g;
+    chop($line);
+    $line = &get_factor_phrase($factor,$line);
     &extract_n_grams($line,\%INPUT_PHRASE);
   }
   close(INPUT);  
+}
+
+# reduce a factorized phrase into the factors of interest
+sub get_factor_phrase {
+  my ($factor,$line) = @_;
+
+  # clean line
+  $line =~ s/[\r\n]+//g;
+  $line =~ s/\s+/ /;
+  $line =~ s/^ //;
+  $line =~ s/ $//;
+
+  # only surface? delete remaining factors
+  if (!defined($factor) || $factor == 0) {
+    $line =~ s/\|\S+//g;
+    return $line;
+  }
+  my $factored_line = "";
+
+  # reduce each word
+  foreach (split(/ /,$line)) {
+    $factored_line .= &get_factor_word($factor,$_) . " ";
+  }
+
+  chop($factored_line);
+  return $factored_line;
+}
+
+# reduce a factorized word into the factors of interest
+sub get_factor_word {
+  my ($factor,$word) = @_;
+
+  my @WORD = split(/\|/,$word);
+  my $fword = "";
+  foreach (split(/,/,$factor)) {
+    $fword .= $WORD[$_]."|";
+  }
+  chop($fword);
+  return $fword;
+}
+
+sub factor_ext {
+  my ($factor) = @_;
+  return "" if !defined($factor) || $factor == 0;
+  return ".".$factor;
 }
 
 sub bleu_annotation {
@@ -213,6 +292,9 @@ sub add_match {
 }
 
 sub ttable_coverage {
+  my ($factor,$ttable) = @_;
+
+  # open file
   if (! -e $ttable && -e $ttable.".gz") {
     open(TTABLE,"gzip -cd $ttable.gz|");
   }
@@ -222,17 +304,30 @@ sub ttable_coverage {
   else {
     open(TTABLE,$ttable) or die "Can't read ttable $ttable";
   }
-  open(REPORT,">$dir/ttable-coverage-by-phrase");
+
+  # create report file
+  open(REPORT,">$dir/ttable-coverage-by-phrase".&factor_ext($factor));
   my ($last_in,$last_size,$size) = ("",0);
+
+  my $p_e_given_f_score = 2;
+  if ($score_options) {
+    if ($score_options =~ /OnlyDirect/) {
+      $p_e_given_f_score = 0;
+    }
+    elsif ($score_options =~ /NoLex/) {
+      $p_e_given_f_score = 1;
+    }
+  }
+
   my @DISTRIBUTION = ();
   while(<TTABLE>) {
     chop;
-    my @COLUMN = split(/ \|\|\| /);
+    my @COLUMN = split(/ +\|\|\| +/);
     my ($in,$out,$scores) = @COLUMN;
     # handling hierarchical
     $in =~ s/ \[[^ \]]+\]$//; # remove lhs nt
     next if $in =~ /\[[^ \]]+\]\[[^ \]]+\]/; # only consider flat rules
-    $scores = $COLUMN[4] if scalar @COLUMN == 5;
+    $scores = $COLUMN[4] if defined($hierarchical); #scalar @COLUMN == 5;
     my @IN = split(/ /,$in);
     $size = scalar @IN;
     next unless defined($INPUT_PHRASE{$size}{$in});
@@ -248,7 +343,7 @@ sub ttable_coverage {
       $last_in = $in;
       $last_size = $size;
     }
-    push @DISTRIBUTION, $SCORE[2]; # forward probability
+    push @DISTRIBUTION, $SCORE[$p_e_given_f_score]; # forward probability
   }
   my $entropy = &compute_entropy(@DISTRIBUTION);
   print REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
@@ -256,7 +351,7 @@ sub ttable_coverage {
   close(REPORT);
   close(TTABLE);
 
-  &additional_coverage_reports("ttable",\%TTABLE_COVERED);
+  &additional_coverage_reports($factor,"ttable",\%TTABLE_COVERED);
 }
 
 sub compute_entropy {
@@ -273,11 +368,14 @@ sub compute_entropy {
 }
 
 sub corpus_coverage {
+  my ($factor) = @_;
+  %CORPUS_COVERED = ();
+
   # compute how often input phrases occur in the corpus
   open(CORPUS,$corpus) or die "Can't read corpus $corpus";
   while(<CORPUS>) {
-    s/\|\S+//g;
-    my @WORD = split;
+    my $line = &get_factor_phrase($factor,$_);
+    my @WORD = split(/ /,$line);
     my $sentence_length = scalar @WORD;
     for(my $start=0;$start < $sentence_length;$start++) {
       my $phrase = "";
@@ -292,7 +390,7 @@ sub corpus_coverage {
   close(CORPUS);
 
   # report occurrence counts for all known input phrases
-  open(REPORT,">$dir/corpus-coverage-by-phrase");
+  open(REPORT,">$dir/corpus-coverage-by-phrase".&factor_ext($factor));
   foreach my $size (sort {$a <=> $b} keys %INPUT_PHRASE) {
     foreach my $phrase (keys %{$INPUT_PHRASE{$size}}) {
       next unless defined $CORPUS_COVERED{$size}{$phrase};
@@ -301,14 +399,14 @@ sub corpus_coverage {
   }
   close(REPORT);
 
-  &additional_coverage_reports("corpus",\%CORPUS_COVERED);
+  &additional_coverage_reports($factor,"corpus",\%CORPUS_COVERED);
 }
 
 sub additional_coverage_reports {
-  my ($name,$COVERED) = @_;
+  my ($factor,$name,$COVERED) = @_;
 
   # unknown word report ---- TODO: extend to rare words?
-  open(REPORT,">$dir/$name-unknown");
+  open(REPORT,">$dir/$name-unknown".&factor_ext($factor));
   foreach my $phrase (keys %{$INPUT_PHRASE{1}}) {
     next if defined($$COVERED{1}{$phrase});
     printf REPORT "%s\t%d\n",$phrase,$INPUT_PHRASE{1}{$phrase};
@@ -316,7 +414,7 @@ sub additional_coverage_reports {
   close(REPORT);
 
   # summary report
-  open(REPORT,">$dir/$name-coverage-summary");
+  open(REPORT,">$dir/$name-coverage-summary".&factor_ext($factor) );
   foreach my $size (sort {$a <=> $b} keys %INPUT_PHRASE) {
     my (%COUNT_TYPE,%COUNT_TOKEN);
     foreach my $phrase (keys %{$INPUT_PHRASE{$size}}) {
@@ -411,6 +509,7 @@ sub extract_n_grams_arrayopt {
 sub extract_n_grams {
     my ($sentence,$NGRAM) = @_;
 
+    $sentence =~ s/[\r\n]+//g;
     $sentence =~ s/\s+/ /g;
     $sentence =~ s/^ //;
     $sentence =~ s/ $//;
@@ -426,6 +525,154 @@ sub extract_n_grams {
 	    $$NGRAM{$length}{$ngram}++;
 	}
     }
+}
+
+sub precision_by_coverage {
+  my ($coverage_type) = @_;
+  my (%PREC_BY_WORD,%TOTAL_BY_WORD,%LENGTH_BY_WORD,%DELETED_BY_WORD);
+  my (%PREC_BY_COVERAGE,%TOTAL_BY_COVERAGE,%LENGTH_BY_COVERAGE,%DELETED_BY_COVERAGE);
+  my (%PREC_BY_FACTOR,%TOTAL_BY_FACTOR,%LENGTH_BY_FACTOR,%DELETED_BY_FACTOR);
+  my (%PREC_BY_FACTOR_COVERAGE,%TOTAL_BY_FACTOR_COVERAGE,%LENGTH_BY_FACTOR_COVERAGE,%DELETED_BY_FACTOR_COVERAGE);
+
+  # get coverage statistics
+  my %COVERAGE;
+  open(COVERAGE,"$dir/$coverage_type-coverage-by-phrase");
+  while(<COVERAGE>) {
+    chop;
+    my ($phrase,$count) = split(/\t/);
+    $COVERAGE{$phrase} = $count;
+  }
+  close(COVERAGE);
+
+  # go through each line...
+  open(FILE,$segmentation) || die("ERROR: could not open segmentation file $segmentation");
+  open(INPUT,$input) or die "Can't read input $input";
+  open(ALIGNMENT,$system_alignment) or die "Can't read output alignment file $system_alignment";
+
+  # get marked up output
+  my $line_count = 0;
+  while(my $line = <FILE>) {
+    chop($line);
+
+    # get corresponding input line
+    my $input = <INPUT>;
+    my @INPUT = split(/ /,&get_factor_phrase(0,$input)); # surface
+    my @FACTOR = split(/ /,&get_factor_phrase($precision_by_coverage_factor,$input));
+
+    # word alignment
+    my $alignment = <ALIGNMENT>;
+    my %ALIGNED;
+    foreach (split(/ /,$alignment)) {
+      my ($input_pos,$output_pos) = split(/\-/,$_);
+      push @{$ALIGNED{$input_pos}}, $output_pos;
+    }
+
+    # output words
+    # @SYSTEM is already collected
+    my @OUTPUT = split(/ /,$SYSTEM[$line_count]);
+
+    # compute precision of each ngram
+    # @REFERENCE (possibly multiple) is already collected
+    my (%SYS_NGRAM,%REF_NGRAM,%PREC_NGRAM);
+    &extract_n_grams( $SYSTEM[$line_count], \%SYS_NGRAM );
+    &extract_n_grams_arrayopt( $REFERENCE[$line_count++], \%REF_NGRAM, "max" );
+    foreach my $ngram (keys %{$SYS_NGRAM{1}}) { # note: only interested in unigram precision
+      $PREC_NGRAM{1}{$ngram} = 0;
+      if (defined($REF_NGRAM{1}) &&
+	  defined($REF_NGRAM{1}{$ngram})) {
+	my $ref_count = $REF_NGRAM{1}{$ngram};
+        my $sys_count = $SYS_NGRAM{1}{$ngram};
+	$PREC_NGRAM{1}{$ngram} = 
+	  ($ref_count >= $sys_count) ? 1 : $ref_count/$sys_count;	    
+      }
+    }
+    close(REPORT);
+
+    # process one phrase at a time
+    my $output_pos = 0;
+    while($line =~ /([^|]+) \|(\d+)\-(\d+)\|\s*(.*)$/) {
+      my ($output,$from,$to) = ($1,$2,$3);
+      $line = $4;
+        
+      # bug fix: 1-1 unknown word mappings get alignment point
+      if ($from == $to &&                         # one
+	  scalar(split(/ /,$output)) == 1 &&      # to one 
+	  !defined($ALIGNED{$from})) {             # but not aligned
+	push @{$ALIGNED{$from}},$output_pos;
+      }
+      $output_pos += scalar(split(/ /,$output));
+
+      # compute precision for each word
+      for(my $i=$from; $i<=$to; $i++) {
+	my $coverage = 0;
+	$coverage = $COVERAGE{$INPUT[$i]} if defined($COVERAGE{$INPUT[$i]});
+
+	my ($precision,$deleted,$length) = (0,0,0);
+
+	# unaligned? note as deleted	
+	if (!defined($ALIGNED{$i})) {
+	  $deleted = 1;
+	}
+	# aligned 
+	else {
+	  foreach my $o (@{$ALIGNED{$i}}) {
+	    $precision += $PREC_NGRAM{1}{$OUTPUT[$o]};
+	  }
+	  $precision /= scalar(@{$ALIGNED{$i}}); # average, if multi-aligned
+	  $length = scalar(@{$ALIGNED{$i}});
+	}
+
+	my $word = $INPUT[$i];
+	$word .= "\t".$FACTOR[$i] if $precision_by_coverage_factor;
+	$DELETED_BY_WORD{$word} += $deleted;
+	$PREC_BY_WORD{$word} += $precision;
+	$LENGTH_BY_WORD{$word} += $length;
+	$TOTAL_BY_WORD{$word}++;	
+
+	$DELETED_BY_COVERAGE{$coverage} += $deleted;
+	$PREC_BY_COVERAGE{$coverage} += $precision;
+	$LENGTH_BY_COVERAGE{$coverage} += $length;
+	$TOTAL_BY_COVERAGE{$coverage}++;	
+
+	if ($precision_by_coverage_factor) {
+	  $DELETED_BY_FACTOR{$FACTOR[$i]} += $deleted;
+	  $DELETED_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage} += $deleted;
+	  $PREC_BY_FACTOR{$FACTOR[$i]} += $precision;
+	  $PREC_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage} += $precision;
+	  $LENGTH_BY_FACTOR{$FACTOR[$i]} += $length;
+	  $LENGTH_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage} += $length;	
+	  $TOTAL_BY_FACTOR{$FACTOR[$i]}++;	    
+	  $TOTAL_BY_FACTOR_COVERAGE{$FACTOR[$i]}{$coverage}++;	
+        }
+      }
+    }
+  }
+  close(FILE);
+      
+  open(REPORT,">$dir/precision-by-$coverage_type-coverage");
+  foreach my $coverage (sort {$a <=> $b} keys %TOTAL_BY_COVERAGE) {
+    printf REPORT "%d\t%.3f\t%d\t%d\t%d\n", $coverage, $PREC_BY_COVERAGE{$coverage}, $DELETED_BY_COVERAGE{$coverage}, $LENGTH_BY_COVERAGE{$coverage}, $TOTAL_BY_COVERAGE{$coverage};
+  }
+  close(REPORT);
+
+  open(REPORT,">$dir/precision-by-input-word");
+  foreach my $word (keys %TOTAL_BY_WORD) {
+    my ($w,$f) = split(/\t/,$word);
+    my $coverage = 0;
+    $coverage = $COVERAGE{$w} if defined($COVERAGE{$w});
+   printf REPORT "%.3f\t%d\t%d\t%d\t%d\t%s\n", $PREC_BY_WORD{$word}, $DELETED_BY_WORD{$word}, $LENGTH_BY_WORD{$word}, $TOTAL_BY_WORD{$word},$coverage,$word;
+  }
+  close(REPORT);
+
+  if ($precision_by_coverage_factor) {
+    open(REPORT,">$dir/precision-by-$coverage_type-coverage.$precision_by_coverage_factor");
+    foreach my $factor (sort keys %TOTAL_BY_FACTOR_COVERAGE) {
+      foreach my $coverage (sort {$a <=> $b} keys %{$TOTAL_BY_FACTOR_COVERAGE{$factor}}) {
+        printf REPORT "%s\t%d\t%.3f\t%d\t%d\t%d\n", $factor, $coverage, $PREC_BY_FACTOR_COVERAGE{$factor}{$coverage}, $DELETED_BY_FACTOR_COVERAGE{$factor}{$coverage}, $LENGTH_BY_FACTOR_COVERAGE{$factor}{$coverage}, $TOTAL_BY_FACTOR_COVERAGE{$factor}{$coverage};
+      }
+    }
+    close(REPORT);
+  }
 }
 
 sub segmentation {

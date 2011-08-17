@@ -137,8 +137,9 @@ bool ReorderingConstraint::Check( const WordsBitmap &bitmap, size_t startPos, si
 
 	// monotone -> no violation possible
 	size_t lastPos = bitmap.GetLastPos();
-	if ((lastPos == NOT_FOUND && startPos == 0) || 
-	    (firstGapPos > lastPos && firstGapPos == startPos))
+	if ((lastPos == NOT_FOUND && startPos == 0) || // nothing translated
+	    (firstGapPos > lastPos &&  // no gaps
+			 firstGapPos == startPos)) // translating first empty word
 	{
 		VERBOSE(3," montone, fine." << std::endl);
 		return true;
@@ -199,8 +200,10 @@ bool ReorderingConstraint::Check( const WordsBitmap &bitmap, size_t startPos, si
 		// * the phrase is in the zone (at least partially)
 		// * either zone is already active, or it becomes active now
 
+
     // check, if we are setting us up for a dead end due to distortion limits
-		if (startPos != firstGapPos && endZone-firstGapPos >= StaticData::Instance().GetMaxDistortion()) {
+		int distortionLimit = StaticData::Instance().GetMaxDistortion();
+		if (startPos != firstGapPos && endZone-firstGapPos >= distortionLimit) {
 			VERBOSE(3," dead end due to distortion limit" << std::endl);
 			return false;
 		}

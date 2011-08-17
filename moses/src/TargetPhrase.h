@@ -84,10 +84,6 @@ public:
 	TargetPhrase(FactorDirection direction=Output);
 	TargetPhrase(FactorDirection direction, std::string out_string);
 	~TargetPhrase();
-	/** used by the unknown word handler.
-		* Set alignment to 0
-		*/
-	void SetAlignment();
 
 	//! used by the unknown word handler- these targets
 	//! don't have a translation score, so wp is the only thing used

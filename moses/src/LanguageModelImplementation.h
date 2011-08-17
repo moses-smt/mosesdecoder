@@ -74,22 +74,16 @@ public:
 	 * Specific implementation can return State and len data to be used in hypothesis pruning
 	 * \param contextFactor n-gram to be scored
 	 * \param state LM state.  Input and output.  state must be initialized.  If state isn't initialized, you want GetValueWithoutState.
-	 * \param len If non-null, the n-gram length is written here.  
 	 */
-	virtual float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
+	virtual float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
 
   // Like GetValueGivenState but state may not be initialized (however it is non-NULL). 
   // For example, state just came from NewState(NULL).   
-	virtual float GetValueForgotState(
-      const std::vector<const Word*> &contextFactor,
-      FFState &outState,
-      unsigned int* len = 0) const = 0;
+	virtual float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
 
 	//! get State for a particular n-gram.  We don't care what the score is.  
   // This is here so models can implement a shortcut to GetValueAndState.  
-  virtual void GetState(
-      const std::vector<const Word*> &contextFactor,
-      FFState &outState) const;
+  virtual void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
 	virtual FFState *GetNullContextState() const = 0;
 	virtual FFState *GetBeginSentenceState() const = 0;

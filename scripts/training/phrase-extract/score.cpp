@@ -69,7 +69,6 @@ LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool wordAlignmentFlag = false;
-bool onlyDirectFlag = false;
 bool goodTuringFlag = false;
 #define GT_MAX 10
 bool logProbFlag = false;
@@ -85,7 +84,7 @@ int main(int argc, char* argv[])
 	     << "scoring methods for extracted rules\n";
 
 	if (argc < 4) {
-		cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--OnlyDirect] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--WordAlignment file]\n";
+		cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--WordAlignment file]\n";
 		exit(1);
 	}
 	char* fileNameExtract = argv[1];
@@ -100,10 +99,6 @@ int main(int argc, char* argv[])
 		else if (strcmp(argv[i],"--Hierarchical") == 0) {
 			hierarchicalFlag = true;
 			cerr << "processing hierarchical rules\n";
-		}
-		else if (strcmp(argv[i],"--OnlyDirect") == 0) {
-			onlyDirectFlag = true;
-			cerr << "outputing in correct phrase table format (no merging with inverse)\n";
 		}
 		else if (strcmp(argv[i],"--WordAlignment") == 0) {
 			wordAlignmentFlag = true;

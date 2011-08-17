@@ -5,7 +5,7 @@ AM_CPPFLAGS = -W -Wall -ffor-scope -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -DUSE_H
 checkplf_SOURCES = checkplf.cpp
 checkplf_LDADD = $(top_builddir)/moses/src/libmoses.la  -L$(top_srcdir)/OnDiskPt/src -lOnDiskPt @KENLM_LDFLAGS@ $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS) 
 
-moses_SOURCES = Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMBR.cpp ThreadPool.cpp
+moses_SOURCES = Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMBR.cpp
 moses_LDADD = $(top_builddir)/moses/src/libmoses.la  -L$(top_srcdir)/OnDiskPt/src -lOnDiskPt @KENLM_LDFLAGS@  $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS) 
 
 

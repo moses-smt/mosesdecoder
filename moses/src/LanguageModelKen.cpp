@@ -95,8 +95,8 @@ public:
 					, FactorType factorType
 					, size_t nGramOrder);
 
-	float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len = 0) const;
-	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState, unsigned int* len=0) const;
+	float GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
+	float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 	void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
 	FFState *GetNullContextState() const;
@@ -169,7 +169,7 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
 	return true;
 }
 
-template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, unsigned int* len) const
+template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const
 {
 	if (contextFactor.empty())
 	{
@@ -181,14 +181,10 @@ template <class Model> float LanguageModelKen<Model>::GetValueGivenState(const s
 	lm::ngram::State copied(realState);
 	lm::FullScoreReturn ret(m_ngram->FullScore(copied, new_word, realState));
 
-	if (len)
-	{
-		*len = ret.ngram_length;
-	}
 	return TransformLMScore(ret.prob);
 }
 
-template <class Model> float LanguageModelKen<Model>::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState, unsigned int* len) const
+template <class Model> float LanguageModelKen<Model>::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState) const
 {
 	if (contextFactor.empty())
 	{
@@ -200,10 +196,6 @@ template <class Model> float LanguageModelKen<Model>::GetValueForgotState(const 
 	TranslateIDs(contextFactor, indices);
 
 	lm::FullScoreReturn ret(m_ngram->FullScoreForgotState(indices + 1, indices + contextFactor.size(), indices[0], static_cast<KenLMState&>(outState).state));
-	if (len)
-	{
-		*len = ret.ngram_length;
-	}
 	return TransformLMScore(ret.prob);
 }
 

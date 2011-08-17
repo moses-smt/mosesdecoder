@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include <iostream>
+#include <stack>
 #include "TypeDef.h"
 #include "Util.h"
 #include "IOWrapper.h"
@@ -62,6 +63,7 @@ IOWrapper::IOWrapper(
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
 ,m_detailedTranslationReportingStream(NULL)
+,m_alignmentOutputStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -83,6 +85,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 ,m_outputWordGraphStream(NULL)
 ,m_outputSearchGraphStream(NULL)
 ,m_detailedTranslationReportingStream(NULL)
+,m_alignmentOutputStream(NULL)
 {
 	Initialization(inputFactorOrder, outputFactorOrder
 								, inputFactorUsed
@@ -108,6 +111,7 @@ IOWrapper::~IOWrapper()
 	  delete m_outputSearchGraphStream;
 	}
   delete m_detailedTranslationReportingStream;
+    delete m_alignmentOutputStream;
 }
 
 void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
@@ -145,7 +149,8 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
 		file->open(fileName.c_str());
 	}
 
-	// search graph output
+
+// search graph output
 	if (staticData.GetOutputSearchGraph())
 	{
 		string fileName;
@@ -165,6 +170,14 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     assert(m_detailedTranslationReportingStream->good());
   }
+    
+  // sentence alignment output
+  if (! staticData.GetAlignmentOutputFile().empty())
+  {
+      m_alignmentOutputStream = new ofstream(staticData.GetAlignmentOutputFile().c_str());
+      assert(m_alignmentOutputStream->good());
+  }
+
 }
 
 InputType*IOWrapper::GetInput(InputType* inputType)
@@ -211,14 +224,60 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
 	}
 }
 
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+{
+    ostringstream out;
+    size_t targetOffset = 0;
+
+	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
+	{
+		const Hypothesis &edge = *edges[currEdge];
+        const TargetPhrase &tp = edge.GetCurrTargetPhrase();
+        size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
+        AlignmentInfo::const_iterator it;
+        for (it = tp.GetAlignmentInfo().begin(); it != tp.GetAlignmentInfo().end(); ++it)
+        {
+            out << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
+        }
+        targetOffset += tp.GetSize();
+	}
+    out << std::endl;
+    collector->Write(lineNo,out.str());
+}
+
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const Hypothesis *hypo)
+{
+    if (collector)
+    {
+        std::vector<const Hypothesis *> edges;
+        const Hypothesis *currentHypo = hypo;
+        while (currentHypo)
+        {
+            edges.push_back(currentHypo);
+            currentHypo = currentHypo->GetPrevHypo();
+        }
+        
+        OutputAlignment(collector,lineNo, edges);
+    }
+}
+
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPath &path)
+{
+    if (collector)
+    {
+        OutputAlignment(collector,lineNo, path.GetEdges());
+    }
+}
+
 void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
 									 ,bool reportSegmentation, bool reportAllFactors)
 {
 	if ( hypo != NULL)
 	{
-		OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
+        OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
 		OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
+		// trace option "-t"
 		if (reportSegmentation == true
 		    && hypo->GetCurrTargetPhrase().GetSize() > 0) {
 			out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
@@ -234,6 +293,7 @@ void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool 
 	for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--)
 	{
 		const Hypothesis &edge = *edges[currEdge];
+
 		OutputSurface(out, edge.GetCurrTargetPhrase(), StaticData::Instance().GetOutputFactorOrder(), reportAllFactors);
 		if (reportSegmentation == true
 		    && edge.GetCurrTargetPhrase().GetSize() > 0) {

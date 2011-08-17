@@ -93,12 +93,14 @@ AC_ARG_ENABLE(optimization,
 
 AC_ARG_ENABLE(threads,
             [AC_HELP_STRING([--enable-threads], [compile threadsafe library and multi-threaded moses (mosesmt)])],
-            [with_threads=yes]
+            [],
+            [enable_threads=no]
         )
 
 AC_ARG_ENABLE(boost,
             [AC_HELP_STRING([--enable-boost], [use Boost library])],
-            [enable_boost=yes]
+            [],
+            [enable_boost=no]
         )
 
 AC_ARG_ENABLE(unittest,
@@ -111,6 +113,25 @@ AC_ARG_WITH(zlib,
             [with_zlib=$withval],
             [with_zlib=no]
            )
+
+AC_ARG_WITH(tcmalloc,
+            [AC_HELP_STRING([--with-tcmalloc], [(optional) link with tcmalloc; default is no])],
+            [with_tcmalloc=$withval],
+            [with_tcmalloc=no]
+           )
+
+require_boost=no
+if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno'
+then
+  require_boost=yes
+fi
+
+AC_ARG_ENABLE(boost-pool,
+              [AC_HELP_STRING([--enable-boost-pool], [(optional) try to improve speed by selectively using Boost pool allocation (may increase total memory use); default is yes if Boost enabled])],
+              [],
+              [enable_boost_pool=$require_boost]
+             )
+
 
 AM_CONDITIONAL([INTERNAL_LM], false)
 AM_CONDITIONAL([SRI_LM], false)
@@ -130,13 +151,13 @@ else
     CPPFLAGS="$CPPFLAGS -DTRACE_ENABLE=1" 
 fi
 
-if test "x$with_threads" = 'xyes' || test "x$enable_boost" = 'xyes'
+if test "x$require_boost" = 'xyes'
 then
     AC_MSG_NOTICE([Using Boost library])
     BOOST_REQUIRE([1.36.0])
 fi
 
-if test "x$with_threads" = 'xyes'
+if test "x$enable_threads" = 'xyes'
 then
     AC_MSG_NOTICE([Building threaded moses])
     BOOST_THREADS
@@ -261,7 +282,18 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+if test "x$with_tcmalloc" != 'xno'
+then
+  AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_ERROR([Cannot find tcmalloc])])
+fi
 
+if test "x$enable_boost_pool" != 'xno'
+then
+  AC_CHECK_HEADER(boost/pool/object_pool.hpp,
+                  [AC_DEFINE([USE_BOOST_POOL], [], [Flag to enable use of Boost pool])],
+                  [AC_MSG_WARN([Cannot find boost/pool/object_pool.hpp])]
+                 )
+fi
 
 AM_CONDITIONAL([WITH_MERT],false)
 AC_CHECK_HEADERS([getopt.h],
@@ -269,7 +301,7 @@ AC_CHECK_HEADERS([getopt.h],
             [AC_MSG_WARN([Cannot find getopt.h - disabling new mert])])
 
 AM_CONDITIONAL([WITH_SERVER],false)
-if test "x$have_xmlrpc_c" = "xyes" && test "x$with_threads" = "xyes"; then
+if test "x$have_xmlrpc_c" = "xyes" && test "x$enable_threads" = "xyes"; then
     AM_CONDITIONAL([WITH_SERVER],true)
 else
    AC_MSG_NOTICE([Disabling server])

@@ -20,11 +20,6 @@ namespace Moses
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
-/*TODO: we'd only have to return a vector of XML options if we dropped linking. 2-d vector
- is so we can link things up afterwards. We can't create TranslationOptions as we
- parse because we don't have the completed source parsed until after this function
- removes all the markup from it (CreateFromString in Sentence::Read).
- */
 bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels)
 {
 	//parse XML markup in translation line
@@ -42,9 +37,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 	vector< OpenedTag > tagStack; // stack that contains active opened tags
 	
 	string cleanLine; // return string (text without xml)
-	vector<XmlOption*> linkedOptions;
 	size_t wordPos = 0; // position in sentence (in terms of number of words)
-	bool isLinked = false;
 	const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 	const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 	
@@ -111,16 +104,6 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 			
 			if (isOpen || isUnary)
 			{
-				// special case: linked tag turns on linked flag
-				if (tagName == "linked")
-				{
-					if (isLinked)
-					{
-						TRACE_ERR("ERROR: second linked tag opened before first one closed: " << line << endl);
-						return false;
-					}
-					isLinked = true;
-				}
 				// put the tag on the tag stack
 				OpenedTag openedTag = make_pair( tagName, make_pair( wordPos, tagContent ) );
 				tagStack.push_back( openedTag );
