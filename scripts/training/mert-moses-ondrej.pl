@@ -10,8 +10,10 @@
 
 # Excerpts from revision history
 
-# Jul 2011    simplifications (Ondrej Bojar), based on mert-moses.pl rev. 3887
+# Jul 2011    simplifications (Ondrej Bojar)
 #             -- rely on moses' -show-weights instead of parsing moses.ini 
+#                ... so moses is also run once *before* mert starts, checking
+#                    the model to some extent
 #             -- got rid of the 'triples' mess;
 #                use --range to supply bounds for random starting values:
 #                --range tm:-3..3 --range lm:-3..3
@@ -51,22 +53,7 @@ $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
 ## We preserve this bit of comments to keep the traditional weight ranges.
-#
-# # for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
-# # of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
-# # but the translation model has currently 5 features
-# 
-# # defaults for initial values and ranges are:
-# 
-# my $default_triples = {
-#     # these basic models exist even if not specified, they are
-#     # not associated with any model file
 #     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
-# };
-# 
-# my $additional_triples = {
-#     # if the more lambda parameters for the weights are needed
-#     # (due to additional tables) use the following values for them
 #     "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
 #     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
 #     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
@@ -78,11 +65,6 @@ $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 # 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
 #     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
 #     "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
-# };
-#     # the following models (given by shortname) use same triplet
-#     # for any number of lambdas, the number of the lambdas is determined
-#     # by the ini file
-# my $additional_tripes_loop = { map { ($_, 1) } qw/ d I / };
 
 
 
@@ -92,18 +74,6 @@ my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
   g=weight-generation lex=weight-lex I=weight-i);
 my %ABBR2FULL = map {split/=/,$_,2} @ABBR_FULL_MAP;
 my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} @ABBR_FULL_MAP;
-
-# # We parse moses.ini to figure out how many weights do we need to optimize.
-# # For this, we must know the correspondence between options defining files
-# # for models and options assigning weights to these models.
-# my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex link-param-count=I";
-# my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
-# 
-# # There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
-# #my $extra_lambdas_for_model = {
-# #  "w" => 1,  # word penalty
-# #  "d" => 1,  # basic distortion
-# #};
 
 my $minimum_required_change_in_weights = 0.00001;
     # stop if no lambda changes more than this
