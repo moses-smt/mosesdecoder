@@ -29,7 +29,7 @@ namespace MosesChart
 {
 
 TrellisNode::TrellisNode(const Hypothesis *hypo)
-    :m_hypo(hypo)
+  :m_hypo(hypo)
 {
   const std::vector<const Hypothesis*> &prevHypos = hypo->GetPrevHypos();
 

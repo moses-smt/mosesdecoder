@@ -31,11 +31,11 @@ namespace MosesChart
 {
 
 TrellisPath::TrellisPath(const Hypothesis *hypo)
-    :m_finalNode(new TrellisNode(hypo))
-    ,m_scoreBreakdown(hypo->GetScoreBreakdown())
-    ,m_totalScore(hypo->GetTotalScore())
-    ,m_prevNodeChanged(NULL)
-    ,m_prevPath(NULL)
+  :m_finalNode(new TrellisNode(hypo))
+  ,m_scoreBreakdown(hypo->GetScoreBreakdown())
+  ,m_totalScore(hypo->GetTotalScore())
+  ,m_prevNodeChanged(NULL)
+  ,m_prevPath(NULL)
 {
 }
 
@@ -43,8 +43,8 @@ TrellisPath::TrellisPath(const TrellisPath &origPath
                          , const TrellisNode &soughtNode
                          , const Hypothesis &replacementHypo
                          , Moses::ScoreComponentCollection	&scoreChange)
-    :m_scoreBreakdown(origPath.GetScoreBreakdown())
-    ,m_prevPath(&origPath)
+  :m_scoreBreakdown(origPath.GetScoreBreakdown())
+  ,m_prevPath(&origPath)
 {
   m_finalNode = new TrellisNode(origPath.GetFinalNode()
                                 , soughtNode

@@ -41,11 +41,11 @@ namespace MosesChart
 {
 
 Manager::Manager(InputType const& source, const TranslationSystem* system)
-    :m_source(source)
-    ,m_hypoStackColl(source, *this)
-    ,m_transOptColl(source, system, m_hypoStackColl, m_ruleLookupManagers)
-    ,m_system(system)
-    ,m_start(clock())
+  :m_source(source)
+  ,m_hypoStackColl(source, *this)
+  ,m_transOptColl(source, system, m_hypoStackColl, m_ruleLookupManagers)
+  ,m_system(system)
+  ,m_start(clock())
 {
   m_system->InitializeBeforeSentenceProcessing(source);
   const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();

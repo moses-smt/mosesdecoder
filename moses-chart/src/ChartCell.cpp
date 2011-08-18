@@ -43,8 +43,8 @@ namespace MosesChart
 {
 
 ChartCell::ChartCell(size_t startPos, size_t endPos, Manager &manager)
-    :m_coverage(startPos, endPos)
-    ,m_manager(manager)
+  :m_coverage(startPos, endPos)
+  ,m_manager(manager)
 {
   const StaticData &staticData = StaticData::Instance();
   m_nBestIsEnabled = staticData.IsNBestEnabled();

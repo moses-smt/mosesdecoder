@@ -39,12 +39,12 @@ TranslationOptionCollection::TranslationOptionCollection(InputType const& source
     , const Moses::TranslationSystem* system
     , const ChartCellCollection &hypoStackColl
     , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers)
-    :m_source(source)
-    ,m_system(system)
-    ,m_decodeGraphList(system->GetDecodeGraphs())
-    ,m_hypoStackColl(hypoStackColl)
-    ,m_collection(source.GetSize())
-    ,m_ruleLookupManagers(ruleLookupManagers)
+  :m_source(source)
+  ,m_system(system)
+  ,m_decodeGraphList(system->GetDecodeGraphs())
+  ,m_hypoStackColl(hypoStackColl)
+  ,m_collection(source.GetSize())
+  ,m_ruleLookupManagers(ruleLookupManagers)
 {
   // create 2-d vector
   size_t size = source.GetSize();

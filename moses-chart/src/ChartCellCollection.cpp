@@ -26,7 +26,7 @@
 namespace MosesChart
 {
 ChartCellCollection::ChartCellCollection(const Moses::InputType &input, Manager &manager)
-    :m_hypoStackColl(input.GetSize())
+  :m_hypoStackColl(input.GetSize())
 {
   size_t size = input.GetSize();
   for (size_t startPos = 0; startPos < size; ++startPos) {

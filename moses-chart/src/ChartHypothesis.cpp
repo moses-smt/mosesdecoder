@@ -44,14 +44,14 @@ ObjectPool<Hypothesis> Hypothesis::s_objectPool("Hypothesis", 300000);
 #endif
 
 Hypothesis::Hypothesis(const QueueEntry &queueEntry, Manager &manager)
-    :m_transOpt(queueEntry.GetTranslationOption())
-    ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
-    ,m_id(++s_HypothesesCreated)
-    ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
-    ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
-    ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
-    ,m_arcList(NULL)
-    ,m_manager(manager)
+  :m_transOpt(queueEntry.GetTranslationOption())
+  ,m_wordsConsumedTargetOrder(queueEntry.GetTranslationOption().GetWordsConsumedTargetOrder())
+  ,m_id(++s_HypothesesCreated)
+  ,m_currSourceWordsRange(queueEntry.GetTranslationOption().GetSourceWordsRange())
+  ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
+  ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
+  ,m_arcList(NULL)
+  ,m_manager(manager)
 {
   assert(GetCurrTargetPhrase().GetSize() == m_wordsConsumedTargetOrder.size());
   //TRACE_ERR(m_targetPhrase << endl);
@@ -374,9 +374,9 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
 
   // words bitmap
   out << " " << hypo.GetId()
-  << " " << hypo.GetCurrTargetPhrase()
-  //<< " " << outPhrase
-  << " " << hypo.GetCurrSourceRange();
+      << " " << hypo.GetCurrTargetPhrase()
+      //<< " " << outPhrase
+      << " " << hypo.GetCurrSourceRange();
   //<< " " << hypo.m_currSourceWordsRange
 
   HypoList::const_iterator iter;

@@ -41,7 +41,7 @@ namespace MosesChart
 
 QueueEntry::QueueEntry(const Moses::ChartTranslationOption &transOpt
                        , const ChartCellCollection &allChartCells)
-    :m_transOpt(transOpt)
+  :m_transOpt(transOpt)
 {
   const WordConsumed *wordsConsumed = &transOpt.GetLastWordConsumed();
   CreateChildEntry(wordsConsumed, allChartCells);
@@ -70,8 +70,8 @@ void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, cons
 }
 
 QueueEntry::QueueEntry(const QueueEntry &copy, size_t childEntryIncr)
-    :m_transOpt(copy.m_transOpt)
-    ,m_childEntries(copy.m_childEntries)
+  :m_transOpt(copy.m_transOpt)
+  ,m_childEntries(copy.m_childEntries)
 {
   ChildEntry &childEntry = m_childEntries[childEntryIncr];
   childEntry.IncrementPos();
