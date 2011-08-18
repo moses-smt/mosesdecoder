@@ -15,6 +15,7 @@
 #include "BleuScorer.h"
 #include "PerScorer.h"
 #include "TerScorer.h"
+#include "CderScorer.h"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ public:
     types.push_back(string("BLEU"));
     types.push_back(string("PER"));
     types.push_back(string("TER"));
+    types.push_back(string("CDER"));
     return types;
   }
 
@@ -37,6 +39,8 @@ public:
       return (PerScorer*) new PerScorer(config);
     } else if (type == "TER") {
       return (TerScorer*) new TerScorer(config);
+    } else if (type == "CDER") {
+      return (CderScorer*) new CderScorer(config);
     } else {
       throw runtime_error("Unknown scorer type: " + type);
     }
