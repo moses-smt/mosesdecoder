@@ -50,12 +50,40 @@ void LanguageModelDMapLM::CreateFactor(FactorCollection& factorCollection)
   // Don't know what this is for.
 }
 
-LMResult LanguageModelDMapLM::GetValue(
+LMResult LanguageModelDMapLM::GetValueGivenState(
     const std::vector<const Word*>& contextFactor,
-    State* finalState) const
+    FFState& state) const
+{
+  DMapLMState& cast_state = static_cast<DMapLMState&>(state);
+  LMResult result;
+  size_t succeeding_order;
+  size_t target_order = std::min((size_t)cast_state.m_last_succeeding_order + 1,
+                                 GetNGramOrder());
+  result.score = GetValue(contextFactor, target_order, &succeeding_order);
+  cast_state.m_last_succeeding_order = succeeding_order;
+  return result;
+}
+
+LMResult LanguageModelDMapLM::GetValueForgotState(
+    const std::vector<const Word*>& contextFactor,
+    FFState& outState) const
+{
+  DMapLMState& cast_state = static_cast<DMapLMState&>(outState);
+  LMResult result;
+  size_t succeeding_order;
+  size_t target_order = GetNGramOrder();
+  result.score = GetValue(contextFactor, target_order, &succeeding_order);
+  cast_state.m_last_succeeding_order = succeeding_order;
+  return result;
+}
+
+float LanguageModelDMapLM::GetValue(
+    const std::vector<const Word*>& contextFactor,
+    size_t target_order,
+    size_t* succeeding_order) const
 {
   FactorType factorType = GetFactorType();
-  LMResult result;
+  float score;
   
   std::string ngram_string("");
   ngram_string.append(((*contextFactor[0])[factorType])->GetString());
@@ -64,13 +92,40 @@ LMResult LanguageModelDMapLM::GetValue(
     ngram_string.append(((*contextFactor[i])[factorType])->GetString());
   }
   //std::cout << "ngram: X" << ngram_string << "X" << std::endl;
-  result.score = FloorScore(TransformLMScore(m_lm->calcScore(ngram_string.c_str())));
-  return result;
+  score = m_lm->calcScore(ngram_string.c_str(), target_order, succeeding_order);
+  score = FloorScore(TransformLMScore(score));
+  return score;
+}
+
+FFState* LanguageModelDMapLM::GetNullContextState() const {
+    DMapLMState* state = new DMapLMState();
+    state->m_last_succeeding_order = GetNGramOrder();
+    return state;
+}
+
+FFState* LanguageModelDMapLM::GetNewSentenceState() const {
+    DMapLMState* state = new DMapLMState();
+    state->m_last_succeeding_order = GetNGramOrder();
+    return state;
+}
+
+FFState* LanguageModelDMapLM::GetBeginSentenceState() const {
+    DMapLMState* state = new DMapLMState();
+    state->m_last_succeeding_order = GetNGramOrder();
+    return state;
+}
+
+FFState* LanguageModelDMapLM::NewState(const FFState* state) const {
+    DMapLMState* new_state = new DMapLMState();
+    const DMapLMState* cast_state = static_cast<const DMapLMState*>(state);
+    new_state->m_last_succeeding_order = cast_state->m_last_succeeding_order;
+    return new_state;
 }
 
 void LanguageModelDMapLM::CleanUpAfterSentenceProcessing() {
   m_lm->printStats();
   m_lm->resetStats();
+  m_lm->clearCaches();
 }
 
 void LanguageModelDMapLM::InitializeBeforeSentenceProcessing() {
