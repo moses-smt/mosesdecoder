@@ -136,7 +136,6 @@ Parameter::Parameter()
 	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
-  AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
 
 	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
 	AddParam("discrim-lmodel-file", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
@@ -149,6 +148,9 @@ Parameter::Parameter()
   AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
   AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
   AddParam("show-weights", "print feature weights and exit");
+
+    AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
+    AddParam("show-weights", "print feature weights and exit");
     AddParam("alignment-output-file", "print output word alignments into given file");
 }
 
