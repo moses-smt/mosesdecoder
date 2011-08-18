@@ -76,8 +76,8 @@ class Cube
 protected:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_set<QueueEntry*,
-  QueueEntryUniqueHasher,
-  QueueEntryUniqueEqualityPred> UniqueCubeEntry;
+          QueueEntryUniqueHasher,
+          QueueEntryUniqueEqualityPred> UniqueCubeEntry;
 #else
   typedef std::set<QueueEntry*, QueueEntryUniqueOrderer> UniqueCubeEntry;
 #endif
