@@ -153,7 +153,6 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 	}
 	return (source ? true : false);
 }
-
 static void PrintFeatureWeight(const FeatureFunction* ff) {
 
   size_t numScoreComps = ff->GetNumScoreComponents();
@@ -168,9 +167,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff) {
     cout << ff->GetScoreProducerDescription() << " " <<
       ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
   }
-
 }
-
 
 static void ShowWeights() {
   cout.precision(6);
@@ -255,6 +252,7 @@ int main(int argc, char* argv[])
     TRACE_ERR(weights);
     TRACE_ERR("\n");
   }
+
 	if (ioWrapper == NULL)
 		return EXIT_FAILURE;
 

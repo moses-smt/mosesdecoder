@@ -49,70 +49,60 @@ using namespace Moses;
 using namespace MosesChart;
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-						 , const std::vector<FactorType>	&outputFactorOrder
-							, const FactorMask							&inputFactorUsed
-							, size_t												nBestSize
-							, const std::string							&nBestFilePath
-							, const std::string							&inputFilePath)
-:m_inputFactorOrder(inputFactorOrder)
-,m_outputFactorOrder(outputFactorOrder)
-,m_inputFactorUsed(inputFactorUsed)
-,m_nBestStream(NULL)
-,m_outputSearchGraphStream(NULL)
-,m_detailedTranslationReportingStream(NULL)
-,m_inputFilePath(inputFilePath)
-,m_detailOutputCollector(NULL)
-,m_nBestOutputCollector(NULL)
-,m_searchGraphOutputCollector(NULL)
-,m_singleBestOutputCollector(NULL)
+                     , const std::vector<FactorType>	&outputFactorOrder
+                     , const FactorMask							&inputFactorUsed
+                     , size_t												nBestSize
+                     , const std::string							&nBestFilePath
+                     , const std::string							&inputFilePath)
+  :m_inputFactorOrder(inputFactorOrder)
+  ,m_outputFactorOrder(outputFactorOrder)
+  ,m_inputFactorUsed(inputFactorUsed)
+  ,m_nBestStream(NULL)
+  ,m_outputSearchGraphStream(NULL)
+  ,m_detailedTranslationReportingStream(NULL)
+  ,m_inputFilePath(inputFilePath)
+  ,m_detailOutputCollector(NULL)
+  ,m_nBestOutputCollector(NULL)
+  ,m_searchGraphOutputCollector(NULL)
+  ,m_singleBestOutputCollector(NULL)
 {
-	const StaticData &staticData = StaticData::Instance();
+  const StaticData &staticData = StaticData::Instance();
 
-  if (m_inputFilePath.empty())
-  {
+  if (m_inputFilePath.empty()) {
     m_inputStream = &std::cin;
-  }
-  else
-  {
+  } else {
     m_inputStream = new InputFileStream(inputFilePath);
   }
 
-	m_surpressSingleBestOutput = false;
+  m_surpressSingleBestOutput = false;
 
-	if (nBestSize > 0)
-	{
-		if (nBestFilePath == "-")
-		{
-			m_nBestStream = &std::cout;
-			m_surpressSingleBestOutput = true;
-		}
-		else
-		{
-			std::ofstream *nBestFile = new std::ofstream;
-			m_nBestStream = nBestFile;
-			nBestFile->open(nBestFilePath.c_str());
-		}
+  if (nBestSize > 0) {
+    if (nBestFilePath == "-") {
+      m_nBestStream = &std::cout;
+      m_surpressSingleBestOutput = true;
+    } else {
+      std::ofstream *nBestFile = new std::ofstream;
+      m_nBestStream = nBestFile;
+      nBestFile->open(nBestFilePath.c_str());
+    }
     m_nBestOutputCollector = new Moses::OutputCollector(m_nBestStream);
-	}
+  }
 
-  if (!m_surpressSingleBestOutput)
-  {
+  if (!m_surpressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
-	// search graph output
-	if (staticData.GetOutputSearchGraph())
-	{
-	  string fileName = staticData.GetParam("output-search-graph")[0];
-	  std::ofstream *file = new std::ofstream;
-	  m_outputSearchGraphStream = file;
-	  file->open(fileName.c_str());
+  // search graph output
+  if (staticData.GetOutputSearchGraph()) {
+    string fileName = staticData.GetParam("output-search-graph")[0];
+    std::ofstream *file = new std::ofstream;
+    m_outputSearchGraphStream = file;
+    file->open(fileName.c_str());
     m_searchGraphOutputCollector = new Moses::OutputCollector(m_outputSearchGraphStream);
-	}
+  }
 
   // detailed translation reporting
-  if (staticData.IsDetailedTranslationReportingEnabled())
-  {
+  if (staticData.IsDetailedTranslationReportingEnabled()) {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
@@ -121,15 +111,14 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
 
 IOWrapper::~IOWrapper()
 {
-  if (!m_inputFilePath.empty())
-  {
+  if (!m_inputFilePath.empty()) {
     delete m_inputStream;
   }
-	if (!m_surpressSingleBestOutput)
-	{ // outputting n-best to file, rather than stdout. need to close file and delete obj
-		delete m_nBestStream;
-	}
-	delete m_outputSearchGraphStream;
+  if (!m_surpressSingleBestOutput) {
+    // outputting n-best to file, rather than stdout. need to close file and delete obj
+    delete m_nBestStream;
+  }
+  delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
@@ -158,69 +147,60 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
-	assert(outputFactorOrder.size() > 0);
-	if (reportAllFactors == true)
-	{
-		out << phrase;
-	}
-	else
-	{
-		size_t size = phrase.GetSize();
-		for (size_t pos = 0 ; pos < size ; pos++)
-		{
-			const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-			out << *factor;
+  assert(outputFactorOrder.size() > 0);
+  if (reportAllFactors == true) {
+    out << phrase;
+  } else {
+    size_t size = phrase.GetSize();
+    for (size_t pos = 0 ; pos < size ; pos++) {
+      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+      out << *factor;
 
-			for (size_t i = 1 ; i < outputFactorOrder.size() ; i++)
-			{
-				const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-				out << "|" << *factor;
-			}
-			out << " ";
-		}
-	}
+      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
+        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+        out << "|" << *factor;
+      }
+      out << " ";
+    }
+  }
 }
 
 void OutputSurface(std::ostream &out, const MosesChart::Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
-									 ,bool reportSegmentation, bool reportAllFactors)
+                   ,bool reportSegmentation, bool reportAllFactors)
 {
-	if ( hypo != NULL)
-	{
-		//OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
+  if ( hypo != NULL) {
+    //OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
 
-		const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+    const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
 
-		vector<const MosesChart::Hypothesis*>::const_iterator iter;
-		for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)
-		{
-			const MosesChart::Hypothesis *prevHypo = *iter;
+    vector<const MosesChart::Hypothesis*>::const_iterator iter;
+    for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+      const MosesChart::Hypothesis *prevHypo = *iter;
 
-			OutputSurface(out, prevHypo, outputFactorOrder, reportSegmentation, reportAllFactors);
-		}
-	}
+      OutputSurface(out, prevHypo, outputFactorOrder, reportSegmentation, reportAllFactors);
+    }
+  }
 }
 
 void IOWrapper::Backtrack(const MosesChart::Hypothesis *hypo)
 {
-	const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+  const vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
 
-	vector<const MosesChart::Hypothesis*>::const_iterator iter;
-	for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)
-	{
-		const MosesChart::Hypothesis *prevHypo = *iter;
+  vector<const MosesChart::Hypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const MosesChart::Hypothesis *prevHypo = *iter;
 
-		VERBOSE(3,prevHypo->GetId() << " <= ");
-		Backtrack(prevHypo);
-	}
+    VERBOSE(3,prevHypo->GetId() << " <= ");
+    Backtrack(prevHypo);
+  }
 }
 
 void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
 {
-	for (size_t i = 0 ; i < mbrBestHypo.size() ; i++)
-			{
-				const Factor *factor = mbrBestHypo[i];
-				cout << *factor << " ";
-			}
+  for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
+    const Factor *factor = mbrBestHypo[i];
+    cout << *factor << " ";
+  }
 }
 /*
 void OutputInput(std::vector<const Phrase*>& map, const MosesChart::Hypothesis* hypo)
@@ -243,29 +223,27 @@ void OutputInput(std::ostream& os, const MosesChart::Hypothesis* hypo)
 */
 
 void OutputTranslationOptions(std::ostream &out, const MosesChart::Hypothesis *hypo, long translationId)
-{ // recursive
-	if (hypo != NULL)
-	{
-	  out << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetTranslationOption() 
-				<< " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
-				<< endl;
-	}
-	
-	const std::vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
-	std::vector<const MosesChart::Hypothesis*>::const_iterator iter;
-	for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter)
-	{
-		const MosesChart::Hypothesis *prevHypo = *iter;
-		OutputTranslationOptions(out, prevHypo, translationId);
-	}
+{
+  // recursive
+  if (hypo != NULL) {
+    out << "Trans Opt " << translationId << " " << hypo->GetCurrSourceRange() << ": " <<  hypo->GetTranslationOption()
+        << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
+        << endl;
+  }
+
+  const std::vector<const MosesChart::Hypothesis*> &prevHypos = hypo->GetPrevHypos();
+  std::vector<const MosesChart::Hypothesis*>::const_iterator iter;
+  for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+    const MosesChart::Hypothesis *prevHypo = *iter;
+    OutputTranslationOptions(out, prevHypo, translationId);
+  }
 }
 
 void IOWrapper::OutputDetailedTranslationReport(
-    const MosesChart::Hypothesis *hypo,
-    long translationId)
+  const MosesChart::Hypothesis *hypo,
+  long translationId)
 {
-  if (hypo == NULL)
-  {
+  if (hypo == NULL) {
     return;
   }
   std::ostringstream out;
@@ -278,51 +256,44 @@ void IOWrapper::OutputBestHypo(const MosesChart::Hypothesis *hypo, long translat
 {
   std::ostringstream out;
   IOWrapper::FixPrecision(out);
-	if (hypo != NULL)
-	{
-		VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);		
-		VERBOSE(3,"Best path: ");
-		Backtrack(hypo);
-		VERBOSE(3,"0" << std::endl);
+  if (hypo != NULL) {
+    VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
+    VERBOSE(3,"Best path: ");
+    Backtrack(hypo);
+    VERBOSE(3,"0" << std::endl);
 
-		if (StaticData::Instance().GetOutputHypoScore())
-		{
-			out << hypo->GetTotalScore() << " " 
-					<< MosesChart::Hypothesis::GetHypoCount() << " ";
-		}
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << hypo->GetTotalScore() << " "
+          << MosesChart::Hypothesis::GetHypoCount() << " ";
+    }
 
-		if (!m_surpressSingleBestOutput)
-		{
-			if (StaticData::Instance().IsPathRecoveryEnabled()) {
-				out << "||| ";
-			}
-			Phrase outPhrase(Output);
-			hypo->CreateOutputPhrase(outPhrase);
+    if (!m_surpressSingleBestOutput) {
+      if (StaticData::Instance().IsPathRecoveryEnabled()) {
+        out << "||| ";
+      }
+      Phrase outPhrase(Output);
+      hypo->CreateOutputPhrase(outPhrase);
 
-			// delete 1st & last
-			assert(outPhrase.GetSize() >= 2);
-			outPhrase.RemoveWord(0);
-			outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+      // delete 1st & last
+      assert(outPhrase.GetSize() >= 2);
+      outPhrase.RemoveWord(0);
+      outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
-			const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-			string output = outPhrase.GetStringRep(outputFactorOrder);
-			out << output << endl;
-		}
-	}
-	else
-	{
-		VERBOSE(1, "NO BEST TRANSLATION" << endl);
-		
-		if (StaticData::Instance().GetOutputHypoScore())
-		{
-			out << "0 ";
-		}
-		
-		out << endl;
-	}
+      const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+      string output = outPhrase.GetStringRep(outputFactorOrder);
+      out << output << endl;
+    }
+  } else {
+    VERBOSE(1, "NO BEST TRANSLATION" << endl);
 
-  if (m_singleBestOutputCollector)
-  {
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      out << "0 ";
+    }
+
+    out << endl;
+  }
+
+  if (m_singleBestOutputCollector) {
     m_singleBestOutputCollector->Write(translationId, out.str());
   }
 }
@@ -332,162 +303,155 @@ void IOWrapper::OutputNBestList(const MosesChart::TrellisPathList &nBestList, co
   std::ostringstream out;
 
   // Check if we're writing to std::cout.
-  if (m_surpressSingleBestOutput)
-  {
+  if (m_surpressSingleBestOutput) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
     IOWrapper::FixPrecision(out);
 
     // The output from -output-hypo-score is always written to std::cout.
-    if (StaticData::Instance().GetOutputHypoScore())
-    {
-      if (bestHypo != NULL)
-      {
+    if (StaticData::Instance().GetOutputHypoScore()) {
+      if (bestHypo != NULL) {
         out << bestHypo->GetTotalScore() << " "
             << MosesChart::Hypothesis::GetHypoCount() << " ";
-      }
-      else
-      {
+      } else {
         out << "0 ";
       }
     }
   }
 
-	bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
-	//bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
+  bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
+  //bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
 
-	MosesChart::TrellisPathList::const_iterator iter;
-	for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter)
-	{
-		const MosesChart::TrellisPath &path = **iter;
-		//cerr << path << endl << endl;
+  MosesChart::TrellisPathList::const_iterator iter;
+  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
+    const MosesChart::TrellisPath &path = **iter;
+    //cerr << path << endl << endl;
 
-		Moses::Phrase outputPhrase = path.GetOutputPhrase();
+    Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
-		// delete 1st & last
-		assert(outputPhrase.GetSize() >= 2);
-		outputPhrase.RemoveWord(0);
-		outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
+    // delete 1st & last
+    assert(outputPhrase.GetSize() >= 2);
+    outputPhrase.RemoveWord(0);
+    outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
 
-		// print the surface factor of the translation
-		out << translationId << " ||| ";
-		OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-		out << " ||| ";
+    // print the surface factor of the translation
+    out << translationId << " ||| ";
+    OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
+    out << " ||| ";
 
-		// print the scores in a hardwired order
+    // print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
     // MERT script relies on this
 
-		// lm
-		const LMList& lml = system->GetLanguageModels();
+    // lm
+    const LMList& lml = system->GetLanguageModels();
     if (lml.size() > 0) {
-			if (labeledOutput)
-	      out << "lm: ";
-		  LMList::const_iterator lmi = lml.begin();
-		  for (; lmi != lml.end(); ++lmi) {
-			  out << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
-		  }
+      if (labeledOutput)
+        out << "lm: ";
+      LMList::const_iterator lmi = lml.begin();
+      for (; lmi != lml.end(); ++lmi) {
+        out << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
+      }
     }
 
-		// translation components
-		if (StaticData::Instance().GetInputType()==SentenceInput){
-			// translation components	for text input
-			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
-			if (pds.size() > 0) {
-				if (labeledOutput)
-					out << "tm: ";
-				vector<PhraseDictionaryFeature*>::iterator iter;
-				for (iter = pds.begin(); iter != pds.end(); ++iter) {
-					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-					for (size_t j = 0; j<scores.size(); ++j)
-						out << scores[j] << " ";
-				}
-			}
-		}
-		else{
-			// translation components for Confusion Network input
-			// first translation component has GetNumInputScores() scores from the input Confusion Network
-			// at the beginning of the vector
-			vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
-			if (pds.size() > 0) {
-				vector<PhraseDictionaryFeature*>::iterator iter;
+    // translation components
+    if (StaticData::Instance().GetInputType()==SentenceInput) {
+      // translation components	for text input
+      vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
+      if (pds.size() > 0) {
+        if (labeledOutput)
+          out << "tm: ";
+        vector<PhraseDictionaryFeature*>::iterator iter;
+        for (iter = pds.begin(); iter != pds.end(); ++iter) {
+          vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+          for (size_t j = 0; j<scores.size(); ++j)
+            out << scores[j] << " ";
+        }
+      }
+    } else {
+      // translation components for Confusion Network input
+      // first translation component has GetNumInputScores() scores from the input Confusion Network
+      // at the beginning of the vector
+      vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
+      if (pds.size() > 0) {
+        vector<PhraseDictionaryFeature*>::iterator iter;
 
-				iter = pds.begin();
-				vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+        iter = pds.begin();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 
-				size_t pd_numinputscore = (*iter)->GetNumInputScores();
+        size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
-				if (pd_numinputscore){
+        if (pd_numinputscore) {
 
-					if (labeledOutput)
-						out << "I: ";
+          if (labeledOutput)
+            out << "I: ";
 
-					for (size_t j = 0; j < pd_numinputscore; ++j)
-						out << scores[j] << " ";
-				}
-
-
-				for (iter = pds.begin() ; iter != pds.end(); ++iter) {
-					vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-
-					size_t pd_numinputscore = (*iter)->GetNumInputScores();
-
-					if (iter == pds.begin() && labeledOutput)
-						out << "tm: ";
-					for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-						out << scores[j] << " ";
-				}
-			}
-		}
+          for (size_t j = 0; j < pd_numinputscore; ++j)
+            out << scores[j] << " ";
+        }
 
 
+        for (iter = pds.begin() ; iter != pds.end(); ++iter) {
+          vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
 
-		// word penalty
-		if (labeledOutput)
-	    out << "w: ";
-		out << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
+          size_t pd_numinputscore = (*iter)->GetNumInputScores();
 
-		// generation
-		const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
+          if (iter == pds.begin() && labeledOutput)
+            out << "tm: ";
+          for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
+            out << scores[j] << " ";
+        }
+      }
+    }
+
+
+
+    // word penalty
+    if (labeledOutput)
+      out << "w: ";
+    out << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
+
+    // generation
+    const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
-			if (labeledOutput)
-	      out << "g: ";
-		  vector<GenerationDictionary*>::const_iterator iter;
-		  for (iter = gds.begin(); iter != gds.end(); ++iter) {
-			  vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-			  for (size_t j = 0; j<scores.size(); j++) {
-				  out << scores[j] << " ";
-			  }
-		  }
+      if (labeledOutput)
+        out << "g: ";
+      vector<GenerationDictionary*>::const_iterator iter;
+      for (iter = gds.begin(); iter != gds.end(); ++iter) {
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+        for (size_t j = 0; j<scores.size(); j++) {
+          out << scores[j] << " ";
+        }
+      }
     }
 
-		// total
+    // total
     out << "||| " << path.GetTotalScore();
 
-		/*
+    /*
     if (includeAlignment) {
-			*m_nBestStream << " |||";
-			for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
-			{
-				const MosesChart::Hypothesis &edge = *edges[currEdge];
-				WordsRange sourceRange = edge.GetCurrSourceWordsRange();
-				WordsRange targetRange = edge.GetCurrTargetWordsRange();
-				*m_nBestStream << " " << sourceRange.GetStartPos();
-				if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
-					*m_nBestStream << "-" << sourceRange.GetEndPos();
-				}
-				*m_nBestStream << "=" << targetRange.GetStartPos();
-				if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
-					*m_nBestStream << "-" << targetRange.GetEndPos();
-				}
-			}
+    	*m_nBestStream << " |||";
+    	for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--)
+    	{
+    		const MosesChart::Hypothesis &edge = *edges[currEdge];
+    		WordsRange sourceRange = edge.GetCurrSourceWordsRange();
+    		WordsRange targetRange = edge.GetCurrTargetWordsRange();
+    		*m_nBestStream << " " << sourceRange.GetStartPos();
+    		if (sourceRange.GetStartPos() < sourceRange.GetEndPos()) {
+    			*m_nBestStream << "-" << sourceRange.GetEndPos();
+    		}
+    		*m_nBestStream << "=" << targetRange.GetStartPos();
+    		if (targetRange.GetStartPos() < targetRange.GetEndPos()) {
+    			*m_nBestStream << "-" << targetRange.GetEndPos();
+    		}
+    	}
     }
-		*/
+    */
 
     out << endl;
-	}
+  }
 
-	out <<std::flush;
+  out <<std::flush;
 
   assert(m_nBestOutputCollector);
   m_nBestOutputCollector->Write(translationId, out.str());
