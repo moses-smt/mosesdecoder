@@ -11,7 +11,7 @@
 //     - Added Unicode support
 //
 //     Version 1.1 - 2002 March 10
-//     - Added example to XGetopt.cpp module header 
+//     - Added example to XGetopt.cpp module header
 //
 // This software is released into the public domain.
 // You are free to use it in any way you like.
@@ -159,78 +159,73 @@ int		optind = 0; 	// global argv index
 
 int getopt(int argc, char *argv[], char *optstring)
 {
-	static char *next = NULL;
-	if (optind == 0)
-		next = NULL;
+  static char *next = NULL;
+  if (optind == 0)
+    next = NULL;
 
-	optarg = NULL;
+  optarg = NULL;
 
-	if (next == NULL || *next =='\0')
-	{
-		if (optind == 0)
-			optind++;
+  if (next == NULL || *next =='\0') {
+    if (optind == 0)
+      optind++;
 
-		if (optind >= argc || argv[optind][0] != ('-') || argv[optind][1] == ('\0'))
-		{
-			optarg = NULL;
-			if (optind < argc)
-				optarg = argv[optind];
-			return EOF;
-		}
+    if (optind >= argc || argv[optind][0] != ('-') || argv[optind][1] == ('\0')) {
+      optarg = NULL;
+      if (optind < argc)
+        optarg = argv[optind];
+      return EOF;
+    }
 
-		if (strcmp(argv[optind], "--") == 0)
-		{
-			optind++;
-			optarg = NULL;
-			if (optind < argc)
-				optarg = argv[optind];
-			return EOF;
-		}
+    if (strcmp(argv[optind], "--") == 0) {
+      optind++;
+      optarg = NULL;
+      if (optind < argc)
+        optarg = argv[optind];
+      return EOF;
+    }
 
-		next = argv[optind];
-		next++;		// skip past -
-		optind++;
-	}
+    next = argv[optind];
+    next++;		// skip past -
+    optind++;
+  }
 
-	char c = *next++;
-	char *cp = strchr(optstring, c);
+  char c = *next++;
+  char *cp = strchr(optstring, c);
 
-	if (cp == NULL || c == (':'))
-		return ('?');
+  if (cp == NULL || c == (':'))
+    return ('?');
 
-	cp++;
-	if (*cp == (':'))
-	{
-		if (*next != ('\0'))
-		{
-			optarg = next;
-			next = NULL;
-		}
-		else if (optind < argc)
-		{
-			optarg = argv[optind];
-			optind++;
-		}
-		else
-		{
-			return ('?');
-		}
-	}
+  cp++;
+  if (*cp == (':')) {
+    if (*next != ('\0')) {
+      optarg = next;
+      next = NULL;
+    } else if (optind < argc) {
+      optarg = argv[optind];
+      optind++;
+    } else {
+      return ('?');
+    }
+  }
 
-	return c;
+  return c;
 }
 
- // for an overview, see 	 
- //    W. Press, S. Teukolsky and W. Vetterling. (1992) Numerical Recipes in C. Chapter 6.1. 	 
- double lgamma(int x) 	 
- { 	 
-   // size_t xx=(size_t)x; xx--; size_t sum=1; while (xx) { sum *= xx--; } return log((double)(sum)); 	 
-   if (x <= 2) { return 0.0; } 	 
-   static double coefs[6] = {76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5}; 	 
-   double tmp=(double)x+5.5; 	 
-   tmp -= (((double)x)+0.5)*log(tmp); 	 
-   double y=(double)x; 	 
-   double sum = 1.000000000190015; 	 
-   for (size_t j=0;j<6;++j) { sum += coefs[j]/++y; } 	 
-   return -tmp+log(2.5066282746310005*sum/(double)x); 	 
- }
+// for an overview, see
+//    W. Press, S. Teukolsky and W. Vetterling. (1992) Numerical Recipes in C. Chapter 6.1.
+double lgamma(int x)
+{
+  // size_t xx=(size_t)x; xx--; size_t sum=1; while (xx) { sum *= xx--; } return log((double)(sum));
+  if (x <= 2) {
+    return 0.0;
+  }
+  static double coefs[6] = {76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5};
+  double tmp=(double)x+5.5;
+  tmp -= (((double)x)+0.5)*log(tmp);
+  double y=(double)x;
+  double sum = 1.000000000190015;
+  for (size_t j=0; j<6; ++j) {
+    sum += coefs[j]/++y;
+  }
+  return -tmp+log(2.5066282746310005*sum/(double)x);
+}
