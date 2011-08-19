@@ -29,44 +29,40 @@
 
 bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID)
 {
-    if (!m_options.targetSyntax) {
-        return SentenceAlignment::processTargetSentence(targetString, sentenceID);
-    }
+  if (!m_options.targetSyntax) {
+    return SentenceAlignment::processTargetSentence(targetString, sentenceID);
+  }
 
-    string targetStringCPP(targetString);
-    try {
-        ProcessAndStripXMLTags(targetStringCPP, targetTree,
-                               m_targetLabelCollection,
-                               m_targetTopLabelCollection);
-    }
-    catch (const XmlException & e)
-    {
-        std::cerr << "WARNING: failed to process target sentence at line "
-                  << sentenceID << ": " << e.getMsg() << std::endl;
-        return false;
-    }
-    target = tokenize(targetStringCPP.c_str());
-    return true;
+  string targetStringCPP(targetString);
+  try {
+    ProcessAndStripXMLTags(targetStringCPP, targetTree,
+                           m_targetLabelCollection,
+                           m_targetTopLabelCollection);
+  } catch (const XmlException & e) {
+    std::cerr << "WARNING: failed to process target sentence at line "
+              << sentenceID << ": " << e.getMsg() << std::endl;
+    return false;
+  }
+  target = tokenize(targetStringCPP.c_str());
+  return true;
 }
 
 bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID)
 {
-    if (!m_options.sourceSyntax) {
-        return SentenceAlignment::processSourceSentence(sourceString, sentenceID);
-    }
+  if (!m_options.sourceSyntax) {
+    return SentenceAlignment::processSourceSentence(sourceString, sentenceID);
+  }
 
-    string sourceStringCPP(sourceString);
-    try {
-        ProcessAndStripXMLTags(sourceStringCPP, sourceTree,
-                               m_sourceLabelCollection ,
-                               m_sourceTopLabelCollection);
-    }
-    catch (const XmlException & e)
-    {
-        std::cerr << "WARNING: failed to process source sentence at line "
-                  << sentenceID << ": " << e.getMsg() << std::endl;
-        return false;
-    }
-    source = tokenize(sourceStringCPP.c_str());
-    return true;
+  string sourceStringCPP(sourceString);
+  try {
+    ProcessAndStripXMLTags(sourceStringCPP, sourceTree,
+                           m_sourceLabelCollection ,
+                           m_sourceTopLabelCollection);
+  } catch (const XmlException & e) {
+    std::cerr << "WARNING: failed to process source sentence at line "
+              << sentenceID << ": " << e.getMsg() << std::endl;
+    return false;
+  }
+  source = tokenize(sourceStringCPP.c_str());
+  return true;
 }

@@ -2,7 +2,7 @@
  *  nbest: tool to process moses n-best lists
  *
  *  File: Tools.cpp
- *        basic utility functions 
+ *        basic utility functions
  *
  *  Created by Holger Schwenk, University of Le Mans, 05/16/2008
  *
@@ -18,16 +18,17 @@ using namespace std;
 #include <fstream>
 #include <vector>
 
-class Weights {
+class Weights
+{
   vector<float> val;
- public:
+public:
   Weights() {};
   ~Weights() {};
   int Read(const char *);
   friend class Hypo;
 };
 
-//****************************************************** 
+//******************************************************
 
 /*
 template<typename T>
@@ -40,14 +41,15 @@ inline T Scan(const std::string &input)
 }
 */
 
-//****************************************************** 
+//******************************************************
 
-inline void Error (char *msg) {
+inline void Error (char *msg)
+{
   cerr << "ERROR: " << msg << endl;
   exit(1);
 }
 
-//****************************************************** 
+//******************************************************
 // From Moses code:
 
 

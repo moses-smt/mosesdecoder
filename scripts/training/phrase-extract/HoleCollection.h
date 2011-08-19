@@ -28,70 +28,69 @@
 
 class HoleCollection
 {
-    protected:
-        HoleList m_holes;
-        std::vector<Hole*> m_sortedSourceHoles;
-        std::set<int> m_sourceHoleStartPoints;
-        std::set<int> m_sourceHoleEndPoints;
-        int m_scope;
-        int m_sourcePhraseStart;
-        int m_sourcePhraseEnd;
+protected:
+  HoleList m_holes;
+  std::vector<Hole*> m_sortedSourceHoles;
+  std::set<int> m_sourceHoleStartPoints;
+  std::set<int> m_sourceHoleEndPoints;
+  int m_scope;
+  int m_sourcePhraseStart;
+  int m_sourcePhraseEnd;
 
-    public:
-        HoleCollection(int sourcePhraseStart, int sourcePhraseEnd)
-          : m_scope(0)
-          , m_sourcePhraseStart(sourcePhraseStart)
-          , m_sourcePhraseEnd(sourcePhraseEnd)
-        {}
+public:
+  HoleCollection(int sourcePhraseStart, int sourcePhraseEnd)
+    : m_scope(0)
+    , m_sourcePhraseStart(sourcePhraseStart)
+    , m_sourcePhraseEnd(sourcePhraseEnd)
+  {}
 
-        HoleCollection(const HoleCollection &copy)
-          : m_holes(copy.m_holes)
-          , m_sourceHoleStartPoints(copy.m_sourceHoleStartPoints)
-          , m_sourceHoleEndPoints(copy.m_sourceHoleEndPoints)
-          , m_scope(copy.m_scope)
-          , m_sourcePhraseStart(copy.m_sourcePhraseStart)
-          , m_sourcePhraseEnd(copy.m_sourcePhraseEnd)
-        {} // don't copy sorted target holes. messes up sorting fn
+  HoleCollection(const HoleCollection &copy)
+    : m_holes(copy.m_holes)
+    , m_sourceHoleStartPoints(copy.m_sourceHoleStartPoints)
+    , m_sourceHoleEndPoints(copy.m_sourceHoleEndPoints)
+    , m_scope(copy.m_scope)
+    , m_sourcePhraseStart(copy.m_sourcePhraseStart)
+    , m_sourcePhraseEnd(copy.m_sourcePhraseEnd)
+  {} // don't copy sorted target holes. messes up sorting fn
 
-        const HoleList &GetHoles() const
-            { return m_holes; }
+  const HoleList &GetHoles() const {
+    return m_holes;
+  }
 
-        HoleList &GetHoles()
-            { return m_holes; }
+  HoleList &GetHoles() {
+    return m_holes;
+  }
 
-        std::vector<Hole*> &GetSortedSourceHoles()
-            { return m_sortedSourceHoles; }
+  std::vector<Hole*> &GetSortedSourceHoles() {
+    return m_sortedSourceHoles;
+  }
 
-        void Add(int startT, int endT, int startS, int endS);
+  void Add(int startT, int endT, int startS, int endS);
 
-        bool OverlapSource(const Hole &sourceHole) const
-        {
-            HoleList::const_iterator iter;
-            for (iter = m_holes.begin(); iter != m_holes.end(); ++iter)
-            {
-                const Hole &currHole = *iter;
-                if (currHole.Overlap(sourceHole, 0))
-                    return true;
-            }
-            return false;
-        }
+  bool OverlapSource(const Hole &sourceHole) const {
+    HoleList::const_iterator iter;
+    for (iter = m_holes.begin(); iter != m_holes.end(); ++iter) {
+      const Hole &currHole = *iter;
+      if (currHole.Overlap(sourceHole, 0))
+        return true;
+    }
+    return false;
+  }
 
-        bool ConsecSource(const Hole &sourceHole) const
-        {
-            HoleList::const_iterator iter;
-            for (iter = m_holes.begin(); iter != m_holes.end(); ++iter)
-            {
-                const Hole &currHole = *iter;
-                if (currHole.Neighbor(sourceHole, 0))
-                    return true;
-            }
-            return false;
-        }
+  bool ConsecSource(const Hole &sourceHole) const {
+    HoleList::const_iterator iter;
+    for (iter = m_holes.begin(); iter != m_holes.end(); ++iter) {
+      const Hole &currHole = *iter;
+      if (currHole.Neighbor(sourceHole, 0))
+        return true;
+    }
+    return false;
+  }
 
-        // Determine the scope that would result from adding the given hole.
-        int Scope(const Hole &proposedHole) const;
+  // Determine the scope that would result from adding the given hole.
+  int Scope(const Hole &proposedHole) const;
 
-        void SortSourceHoles();
+  void SortSourceHoles();
 
 };
 

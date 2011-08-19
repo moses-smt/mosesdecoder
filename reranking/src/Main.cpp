@@ -19,18 +19,18 @@
 
 using namespace std;
 
-int main (int argc, char *argv[]) {
-    // parse parameters
+int main (int argc, char *argv[])
+{
+  // parse parameters
   ParameterNBest *parameter = new ParameterNBest();
-  if (!parameter->LoadParam(argc, argv))
-  {
-          parameter->Explain();
-          delete parameter;
-          return 1;
+  if (!parameter->LoadParam(argc, argv)) {
+    parameter->Explain();
+    delete parameter;
+    return 1;
   }
 
-    // read input
-  ifstream inpf; 
+  // read input
+  ifstream inpf;
   PARAM_VEC p=parameter->GetParam("input-file");
   if (p.size()<1 || p.size()>2) Error("The option -input-file requires one or two arguments");
   int in_n=p.size()>1 ? Scan<int>(p[1]) : 0;
@@ -39,9 +39,12 @@ int main (int argc, char *argv[]) {
   if (in_n>0) cout << " (limited to the first " << in_n << " hypothesis)";
   cout << endl;
   inpf.open(p[0].c_str());
-  if (inpf.fail()) { perror ("ERROR"); exit(1); }
+  if (inpf.fail()) {
+    perror ("ERROR");
+    exit(1);
+  }
 
-    // open output
+  // open output
   ofstream outf;
   p=parameter->GetParam("output-file");
   if (p.size()<1 || p.size()>2) Error("The option -output-file requires one or two arguments");
@@ -50,9 +53,12 @@ int main (int argc, char *argv[]) {
   if (out_n>0) cout << " (limited to the first " << out_n << " hypothesis)";
   cout << endl;
   outf.open(p[0].c_str());
-  if (outf.fail()) { perror ("ERROR"); exit(1); }
+  if (outf.fail()) {
+    perror ("ERROR");
+    exit(1);
+  }
 
-    // eventually read weights
+  // eventually read weights
   Weights w;
   int do_calc=false;
   if (parameter->isParamSpecified("weights")) {
@@ -65,11 +71,11 @@ int main (int argc, char *argv[]) {
     cout << " - recalculating global scores" << endl;
   }
 
-    // shall we sort ?
+  // shall we sort ?
   bool do_sort = parameter->isParamSpecified("sort");
   if (do_sort) cout << " - sorting global scores" << endl;
 
-   // main loop
+  // main loop
   int nb_sent=0, nb_nbest=0;
   while (!inpf.eof()) {
     NBest nbest(inpf, in_n);
@@ -84,7 +90,7 @@ int main (int argc, char *argv[]) {
   inpf.close();
   outf.close();
 
-    // display final statistics
+  // display final statistics
   cout << " - processed " << nb_nbest << " n-best hypotheses in " << nb_sent << " sentences"
        << " (average " << (float) nb_nbest/nb_sent << ")" << endl;
 

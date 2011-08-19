@@ -26,44 +26,50 @@
 
 class ParseTree
 {
-    public:
-        ParseTree(const std::string & label)
-          : m_label(label)
-          , m_children()
-          , m_parent()
-        {}
+public:
+  ParseTree(const std::string & label)
+    : m_label(label)
+    , m_children()
+    , m_parent()
+  {}
 
-        ~ParseTree();
+  ~ParseTree();
 
-        const std::string &
-        getLabel() const { return m_label; }
+  const std::string &
+  getLabel() const {
+    return m_label;
+  }
 
-        const std::vector<ParseTree*> &
-        getChildren() const { return m_children; }
+  const std::vector<ParseTree*> &
+  getChildren() const {
+    return m_children;
+  }
 
-        const ParseTree *
-        getParent() const { return m_parent; }
+  const ParseTree *
+  getParent() const {
+    return m_parent;
+  }
 
-        void
-        setParent(ParseTree *);
+  void
+  setParent(ParseTree *);
 
-        void
-        setChildren(const std::vector<ParseTree*> &);
+  void
+  setChildren(const std::vector<ParseTree*> &);
 
-        void
-        addChild(ParseTree *);
+  void
+  addChild(ParseTree *);
 
-        bool
-        isLeaf() const;
+  bool
+  isLeaf() const;
 
-    private:
-        std::string m_label;
-        std::vector<ParseTree*> m_children;
-        ParseTree * m_parent;
+private:
+  std::string m_label;
+  std::vector<ParseTree*> m_children;
+  ParseTree * m_parent;
 
-        // Disallow copying
-        ParseTree(const ParseTree &);
-        ParseTree & operator=(const ParseTree &);
+  // Disallow copying
+  ParseTree(const ParseTree &);
+  ParseTree & operator=(const ParseTree &);
 };
 
 #endif

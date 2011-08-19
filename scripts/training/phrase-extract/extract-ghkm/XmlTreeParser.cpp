@@ -27,66 +27,60 @@
 
 namespace
 {
-    std::auto_ptr<ParseTree>
-    parseXmlTree(std::vector<std::string>::const_iterator & p,
-                 const std::vector<std::string>::const_iterator & end)
-    {
-        std::auto_ptr<ParseTree> t;
+std::auto_ptr<ParseTree>
+parseXmlTree(std::vector<std::string>::const_iterator & p,
+             const std::vector<std::string>::const_iterator & end)
+{
+  std::auto_ptr<ParseTree> t;
 
-        if (p == end)
-        {
-            return t;
-        }
+  if (p == end) {
+    return t;
+  }
 
-        std::string s(Trim(*p));
+  std::string s(Trim(*p));
 
-        while (s.empty())
-        {
-            s = Trim(*++p);
-        }
+  while (s.empty()) {
+    s = Trim(*++p);
+  }
 
-        if (!isXmlTag(s))
-        {
-            p++;
-            t.reset(new ParseTree(s));
-            return t;
-        }
+  if (!isXmlTag(s)) {
+    p++;
+    t.reset(new ParseTree(s));
+    return t;
+  }
 
-        const std::string & tag = s;
+  const std::string & tag = s;
 
-        if (tag[1] == '/')
-        {
-            // Closing tag.  Don't advance p -- let caller handle it.
-            return t;
-        }
+  if (tag[1] == '/') {
+    // Closing tag.  Don't advance p -- let caller handle it.
+    return t;
+  }
 
-        std::string label = ParseXmlTagAttribute(tag, "label");
-        t.reset(new ParseTree(label));
+  std::string label = ParseXmlTagAttribute(tag, "label");
+  t.reset(new ParseTree(label));
 
-        if (tag[tag.size()-2] == '/')
-        {
-            // Unary tag.
-            p++;
-            return t;
-        }
+  if (tag[tag.size()-2] == '/') {
+    // Unary tag.
+    p++;
+    return t;
+  }
 
-        p++;
-        while (ParseTree * c = parseXmlTree(p, end).release())
-        {
-            t->addChild(c);
-            c->setParent(t.get());
-        }
-        p++;  // Skip over closing tag
+  p++;
+  while (ParseTree * c = parseXmlTree(p, end).release()) {
+    t->addChild(c);
+    c->setParent(t.get());
+  }
+  p++;  // Skip over closing tag
 
-        return t;
-    }
+  return t;
+}
 }
 
 std::auto_ptr<ParseTree>
 parseXmlTree(const std::string & line)
 {
-    std::vector<std::string> xmlTokens(TokenizeXml(line));
-    std::vector<std::string>::const_iterator begin(xmlTokens.begin());
-    std::vector<std::string>::const_iterator end(xmlTokens.end());
-    return parseXmlTree(begin, end);
+  std::vector<std::string> xmlTokens(TokenizeXml(line));
+  std::vector<std::string>::const_iterator begin(xmlTokens.begin());
+  std::vector<std::string>::const_iterator end(xmlTokens.end());
+  return parseXmlTree(begin, end);
 }

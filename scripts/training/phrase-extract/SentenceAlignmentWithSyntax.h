@@ -32,32 +32,32 @@
 
 class SentenceAlignmentWithSyntax : public SentenceAlignment
 {
-    public:
-        SyntaxTree targetTree;
-        SyntaxTree sourceTree;
-        std::set<std::string> & m_targetLabelCollection;
-        std::set<std::string> & m_sourceLabelCollection;
-        std::map<std::string, int> & m_targetTopLabelCollection;
-        std::map<std::string, int> & m_sourceTopLabelCollection;
-        const RuleExtractionOptions & m_options;
+public:
+  SyntaxTree targetTree;
+  SyntaxTree sourceTree;
+  std::set<std::string> & m_targetLabelCollection;
+  std::set<std::string> & m_sourceLabelCollection;
+  std::map<std::string, int> & m_targetTopLabelCollection;
+  std::map<std::string, int> & m_sourceTopLabelCollection;
+  const RuleExtractionOptions & m_options;
 
-        SentenceAlignmentWithSyntax(std::set<std::string> & tgtLabelColl,
-                                    std::set<std::string> & srcLabelColl,
-                                    std::map<std::string,int> & tgtTopLabelColl,
-                                    std::map<std::string,int> & srcTopLabelColl,
-                                    const RuleExtractionOptions & options)
-          : m_targetLabelCollection(tgtLabelColl)
-          , m_sourceLabelCollection(srcLabelColl)
-          , m_targetTopLabelCollection(tgtTopLabelColl)
-          , m_sourceTopLabelCollection(srcTopLabelColl)
-          , m_options(options)
-        {}
+  SentenceAlignmentWithSyntax(std::set<std::string> & tgtLabelColl,
+                              std::set<std::string> & srcLabelColl,
+                              std::map<std::string,int> & tgtTopLabelColl,
+                              std::map<std::string,int> & srcTopLabelColl,
+                              const RuleExtractionOptions & options)
+    : m_targetLabelCollection(tgtLabelColl)
+    , m_sourceLabelCollection(srcLabelColl)
+    , m_targetTopLabelCollection(tgtTopLabelColl)
+    , m_sourceTopLabelCollection(srcTopLabelColl)
+    , m_options(options)
+  {}
 
-        bool
-        processTargetSentence(const char *, int);
+  bool
+  processTargetSentence(const char *, int);
 
-        bool
-        processSourceSentence(const char *, int);
+  bool
+  processSourceSentence(const char *, int);
 };
 
 #endif

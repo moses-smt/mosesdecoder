@@ -26,18 +26,18 @@
 
 class SentenceAlignment
 {
-    public:
-        std::vector<std::string> target;
-        std::vector<std::string> source;
-        std::vector<int> alignedCountS;
-        std::vector<std::vector<int> > alignedToT;
+public:
+  std::vector<std::string> target;
+  std::vector<std::string> source;
+  std::vector<int> alignedCountS;
+  std::vector<std::vector<int> > alignedToT;
 
-        virtual bool processTargetSentence(const char *, int);
+  virtual bool processTargetSentence(const char *, int);
 
-        virtual bool processSourceSentence(const char *, int);
+  virtual bool processSourceSentence(const char *, int);
 
-        bool create(char targetString[], char sourceString[],
-                    char alignmentString[], int sentenceID);
+  bool create(char targetString[], char sourceString[],
+              char alignmentString[], int sentenceID);
 };
 
 #endif

@@ -13,31 +13,33 @@
 
 class lmtable;
 
-class PhraseLanguageModel : public PhraseStatistic {
+class PhraseLanguageModel : public PhraseStatistic
+{
 protected:
-	String lmfile_;
-	Count score_idx_;
+  String lmfile_;
+  Count score_idx_;
 
-	PhraseInfoList *phrase_info_list_;
+  PhraseInfoList *phrase_info_list_;
 
-	void compute_lmscores(PhraseInfoList &phrase_info_list, bool closed_world);
+  void compute_lmscores(PhraseInfoList &phrase_info_list, bool closed_world);
 
 public:
-	PhraseLanguageModel(String lmfile) : lmfile_(lmfile) {}
+  PhraseLanguageModel(String lmfile) : lmfile_(lmfile) {}
 
-	virtual void attach(PhraseInfoList &pilist);
-	virtual void compute_statistic();
+  virtual void attach(PhraseInfoList &pilist);
+  virtual void compute_statistic();
 
-	virtual Score get_score(PhraseInfo &pi) {
-		assert(computation_done_);
-		return pi.data(score_idx_);
-	}
+  virtual Score get_score(PhraseInfo &pi) {
+    assert(computation_done_);
+    return pi.data(score_idx_);
+  }
 };
 
-class ClosedPhraseLanguageModel : public PhraseLanguageModel {
+class ClosedPhraseLanguageModel : public PhraseLanguageModel
+{
 public:
-	ClosedPhraseLanguageModel(String lmfile) : PhraseLanguageModel(lmfile) {}
-	virtual void compute_statistic();
+  ClosedPhraseLanguageModel(String lmfile) : PhraseLanguageModel(lmfile) {}
+  virtual void compute_statistic();
 };
 
 #endif

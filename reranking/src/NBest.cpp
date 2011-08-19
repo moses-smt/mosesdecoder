@@ -17,11 +17,12 @@
 #include <algorithm>
 
 //NBest::NBest() {
-  //cerr << "NBEST: constructor called" << endl;
+//cerr << "NBEST: constructor called" << endl;
 //}
 
 
-bool NBest::ParseLine(ifstream &inpf, const int n) {
+bool NBest::ParseLine(ifstream &inpf, const int n)
+{
   static string line; // used internally to buffer an input line
   static int prev_id=-1; // used to detect a change of the n-best ID
   int id;
@@ -36,7 +37,7 @@ bool NBest::ParseLine(ifstream &inpf, const int n) {
     if (inpf.eof()) return false;
   }
 
-    // split line into blocks
+  // split line into blocks
   //cerr << "PARSE line: " << line << endl;
   while ((epos=line.find(NBEST_DELIM,pos))!=string::npos) {
     blocks.push_back(line.substr(pos,epos-pos));
@@ -51,9 +52,12 @@ bool NBest::ParseLine(ifstream &inpf, const int n) {
     Error("can't parse the above line");
   }
 
-    // parse ID
+  // parse ID
   id=Scan<int>(blocks[0]);
-  if (prev_id>=0 && id!=prev_id) {prev_id=id; return false;} // new nbest list has started
+  if (prev_id>=0 && id!=prev_id) {
+    prev_id=id;  // new nbest list has started
+    return false;
+  }
   prev_id=id;
   //cerr << "same ID " << id << endl;
 
@@ -63,7 +67,7 @@ bool NBest::ParseLine(ifstream &inpf, const int n) {
     return true; // skip parsing of unused hypos
   }
 
-    // parse feature function scores
+  // parse feature function scores
   //cerr << "PARSE features: '" << blocks[2] << "' size: " << blocks[2].size() << endl;
   pos=blocks[2].find_first_not_of(' ');
   while (pos<blocks[2].size() && (epos=blocks[2].find(" ",pos))!=string::npos) {
@@ -71,15 +75,14 @@ bool NBest::ParseLine(ifstream &inpf, const int n) {
     //cerr << " feat: '" << feat << "', pos: " << pos << ", " << epos << endl;
     if (feat.find(":",0)!=string::npos) {
       //cerr << "  name: " << feat << endl;
-    }
-    else { 
+    } else {
       f.push_back(Scan<float>(feat));
       //cerr << "  value: " << f.back() << endl;
     }
     pos=epos+1;
   }
 
-    // eventually parse segmentation
+  // eventually parse segmentation
   if (blocks.size()>4) {
     Error("parsing segmentation not yet supported");
   }
@@ -92,14 +95,16 @@ bool NBest::ParseLine(ifstream &inpf, const int n) {
 }
 
 
-NBest::NBest(ifstream &inpf, const int n) {
+NBest::NBest(ifstream &inpf, const int n)
+{
   //cerr << "NBEST: constructor with file called" << endl;
   while (ParseLine(inpf,n));
   //cerr << "NBEST: found " << nbest.size() << " lines" << endl;
 }
 
 
-NBest::~NBest() {
+NBest::~NBest()
+{
   //cerr << "NBEST: destructor called" << endl;
 }
 
@@ -119,7 +124,8 @@ float NBest::CalcGlobal(Weights &w)
 }
 
 
-void NBest::Sort() {
+void NBest::Sort()
+{
   sort(nbest.begin(),nbest.end());
 }
 

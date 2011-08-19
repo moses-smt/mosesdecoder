@@ -10,9 +10,9 @@
 #include <string>
 
 
-inline bool isNonTerminal( std::string &word ) 
+inline bool isNonTerminal( std::string &word )
 {
-	return (word.length()>=3 &&
-					word.substr(0,1).compare("[") == 0 && 
-					word.substr(word.length()-1,1).compare("]") == 0);
+  return (word.length()>=3 &&
+          word.substr(0,1).compare("[") == 0 &&
+          word.substr(word.length()-1,1).compare("]") == 0);
 }

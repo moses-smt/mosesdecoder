@@ -26,32 +26,32 @@
 // sentence-level collection of rules
 class ExtractedRule
 {
-    public:
-        std::string source;
-        std::string target;
-        std::string alignment;
-        std::string alignmentInv;
-        std::string orientation;
-        std::string orientationForward;
-        int startT;
-        int endT;
-        int startS;
-        int endS;
-        float count;
+public:
+  std::string source;
+  std::string target;
+  std::string alignment;
+  std::string alignmentInv;
+  std::string orientation;
+  std::string orientationForward;
+  int startT;
+  int endT;
+  int startS;
+  int endS;
+  float count;
 
-        ExtractedRule(int sT, int eT, int sS, int eS)
-          : source()
-          , target()
-          , alignment()
-          , alignmentInv()
-          , orientation()
-          , orientationForward()
-          , startT(sT)
-          , endT(eT)
-          , startS(sS)
-          , endS(eS)
-          , count(0)
-        {}
+  ExtractedRule(int sT, int eT, int sS, int eS)
+    : source()
+    , target()
+    , alignment()
+    , alignmentInv()
+    , orientation()
+    , orientationForward()
+    , startT(sT)
+    , endT(eT)
+    , startS(sS)
+    , endS(eS)
+    , count(0)
+  {}
 };
 
 #endif

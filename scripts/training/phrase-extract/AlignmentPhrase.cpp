@@ -26,19 +26,17 @@ using namespace std;
 
 void AlignmentElement::Merge(size_t align)
 {
-	m_elements.insert(align);
+  m_elements.insert(align);
 }
 
 void AlignmentPhrase::Merge(const std::vector< std::vector<size_t> > &source)
 {
-	for (size_t idx = 0 ; idx < source.size() ; ++idx)
-	{
-		AlignmentElement &currElement = m_elements[idx];
-		const vector<size_t> &newElement = source[idx];
+  for (size_t idx = 0 ; idx < source.size() ; ++idx) {
+    AlignmentElement &currElement = m_elements[idx];
+    const vector<size_t> &newElement = source[idx];
 
-		for (size_t pos = 0 ; pos < newElement.size() ; ++pos)
-		{
-			currElement.Merge(newElement[pos]);
-		}
-	}
+    for (size_t pos = 0 ; pos < newElement.size() ; ++pos) {
+      currElement.Merge(newElement[pos]);
+    }
+  }
 }

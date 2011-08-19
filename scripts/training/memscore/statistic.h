@@ -9,17 +9,18 @@
 
 class PhraseInfoList;
 
-class PhraseStatistic {
+class PhraseStatistic
+{
 protected:
-	bool computation_done_;
+  bool computation_done_;
 
 public:
-	PhraseStatistic() : computation_done_(false) {}
-	virtual ~PhraseStatistic() {}
+  PhraseStatistic() : computation_done_(false) {}
+  virtual ~PhraseStatistic() {}
 
-	virtual void attach(PhraseInfoList &pilist) = 0;
-	virtual void compute_statistic() = 0;
-	virtual Score get_score(PhraseInfo &pi) = 0;
+  virtual void attach(PhraseInfoList &pilist) = 0;
+  virtual void compute_statistic() = 0;
+  virtual Score get_score(PhraseInfo &pi) = 0;
 };
 
 #endif

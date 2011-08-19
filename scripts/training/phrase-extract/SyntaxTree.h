@@ -21,63 +21,72 @@
  ***********************************************************************/
 
 
-#pragma once 
+#pragma once
 #include <string>
 #include <vector>
 #include <map>
 #include <sstream>
 
-class SyntaxNode {
+class SyntaxNode
+{
 protected:
-	int m_start, m_end;
-	std::string m_label;
-	std::vector< SyntaxNode* > m_children;
-	SyntaxNode* m_parent;
+  int m_start, m_end;
+  std::string m_label;
+  std::vector< SyntaxNode* > m_children;
+  SyntaxNode* m_parent;
 public:
-SyntaxNode( int startPos, int endPos, std::string label )
-	:m_start(startPos)
-		,m_end(endPos)
-		,m_label(label)
-	{}
-	int GetStart() const
-	{ return m_start; }
-	int GetEnd() const
-	{ return m_end; }
-	std::string GetLabel() const
-	{ return m_label; }
+  SyntaxNode( int startPos, int endPos, std::string label )
+    :m_start(startPos)
+    ,m_end(endPos)
+    ,m_label(label)
+  {}
+  int GetStart() const {
+    return m_start;
+  }
+  int GetEnd() const {
+    return m_end;
+  }
+  std::string GetLabel() const {
+    return m_label;
+  }
 };
 
 
 typedef std::vector< int > SplitPoints;
 typedef std::vector< SplitPoints > ParentNodes;
 
-class SyntaxTree {
+class SyntaxTree
+{
 protected:
-	std::vector< SyntaxNode* > m_nodes;
-	SyntaxNode* m_top;
+  std::vector< SyntaxNode* > m_nodes;
+  SyntaxNode* m_top;
 
-	typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
-	typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
-	typedef std::map< int, SyntaxTreeIndex2 > SyntaxTreeIndex;
-	typedef SyntaxTreeIndex::const_iterator SyntaxTreeIndexIterator;
-	SyntaxTreeIndex m_index;
-	std::vector< SyntaxNode* > m_emptyNode;
+  typedef std::map< int, std::vector< SyntaxNode* > > SyntaxTreeIndex2;
+  typedef SyntaxTreeIndex2::const_iterator SyntaxTreeIndexIterator2;
+  typedef std::map< int, SyntaxTreeIndex2 > SyntaxTreeIndex;
+  typedef SyntaxTreeIndex::const_iterator SyntaxTreeIndexIterator;
+  SyntaxTreeIndex m_index;
+  std::vector< SyntaxNode* > m_emptyNode;
 
-	friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
+  friend std::ostream& operator<<(std::ostream&, const SyntaxTree&);
 
 public:
-	SyntaxTree() {
-			m_emptyNode.clear();
-	}
-	~SyntaxTree();
-	
-	void AddNode( int startPos, int endPos, std::string label );
-	ParentNodes Parse();
-	bool HasNode( int startPos, int endPos ) const;
-	const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
-	const std::vector< SyntaxNode* >& GetAllNodes() { return m_nodes; };
-	size_t GetNumWords() const { return m_index.size(); }
-	std::string ToString() const;
+  SyntaxTree() {
+    m_emptyNode.clear();
+  }
+  ~SyntaxTree();
+
+  void AddNode( int startPos, int endPos, std::string label );
+  ParentNodes Parse();
+  bool HasNode( int startPos, int endPos ) const;
+  const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
+  const std::vector< SyntaxNode* >& GetAllNodes() {
+    return m_nodes;
+  };
+  size_t GetNumWords() const {
+    return m_index.size();
+  }
+  std::string ToString() const;
 };
 
 std::ostream& operator<<(std::ostream&, const SyntaxTree&);

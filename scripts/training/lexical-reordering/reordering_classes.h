@@ -16,19 +16,20 @@
 enum ORIENTATION {MONO, SWAP, DRIGHT, DLEFT, OTHER, NOMONO};
 
 
-//Keeps the counts for the different reordering types 
+//Keeps the counts for the different reordering types
 //(Instantiated in 1-3 instances, one for each type of model (hier, phrase, wbe))
-class ModelScore {
- private:
+class ModelScore
+{
+private:
   std::vector<double> count_fe_prev;
   std::vector<double> count_fe_next;
   std::vector<double> count_f_prev;
   std::vector<double> count_f_next;
 
- protected:
-  virtual ORIENTATION getType(const std::string& s); 
+protected:
+  virtual ORIENTATION getType(const std::string& s);
 
- public:
+public:
   ModelScore();
   void add_example(const std::string& previous, std::string& next);
   void reset_fe();
@@ -41,70 +42,80 @@ class ModelScore {
   static ModelScore* createModelScore(const std::string& modeltype);
 };
 
-class ModelScoreMSLR : public ModelScore {
- protected:
+class ModelScoreMSLR : public ModelScore
+{
+protected:
   virtual ORIENTATION getType(const std::string& s);
 };
 
-class ModelScoreLR : public ModelScore {
- protected:
+class ModelScoreLR : public ModelScore
+{
+protected:
   virtual ORIENTATION getType(const std::string& s);
 };
 
-class ModelScoreMSD : public ModelScore {
- protected:
+class ModelScoreMSD : public ModelScore
+{
+protected:
   virtual ORIENTATION getType(const std::string& s);
 };
 
-class ModelScoreMonotonicity : public ModelScore {
- protected:
+class ModelScoreMonotonicity : public ModelScore
+{
+protected:
   virtual ORIENTATION getType(const std::string& s);
 };
 
 //Class for calculating total counts, and to calculate smoothing
-class Scorer {
- public:
+class Scorer
+{
+public:
   ~Scorer() {}
   virtual void score(const std::vector<double>&, std::vector<double>&) const = 0;
   virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const = 0;
   virtual void createConstSmoothing(double, std::vector<double>&) const = 0;
 };
 
-class ScorerMSLR : public Scorer {
- public:
+class ScorerMSLR : public Scorer
+{
+public:
   virtual void score(const std::vector<double>&, std::vector<double>&) const;
   virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
   virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
-class ScorerMSD : public Scorer {
- public:
+class ScorerMSD : public Scorer
+{
+public:
   virtual void score(const std::vector<double>&, std::vector<double>&) const;
   virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
   virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
-class ScorerMonotonicity : public Scorer {
- public:
+class ScorerMonotonicity : public Scorer
+{
+public:
   virtual void score(const std::vector<double>&, std::vector<double>&) const;
   virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
   virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
-class ScorerLR : public Scorer {
- public:
+class ScorerLR : public Scorer
+{
+public:
   virtual void score(const std::vector<double>&, std::vector<double>&) const;
   virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const;
   virtual void createConstSmoothing(double, std::vector<double>&) const;
 };
 
 
-//Class for representing each model 
+//Class for representing each model
 //Contains a modelscore and scorer (which can be of different model types (mslr, msd...)),
-//and file handling. 
+//and file handling.
 //This class also keeps track of bidirectionality, and which language to condition on
-class Model {
- private:
+class Model
+{
+private:
   ModelScore* modelscore;
   Scorer* scorer;
 
@@ -118,11 +129,11 @@ class Model {
   std::vector<double> smoothing_prev;
   std::vector<double> smoothing_next;
 
-  static void split_config(const std::string& config, std::string& dir, 
-			   std::string& lang, std::string& orient);
- public:
-  Model(ModelScore* ms, Scorer* sc, const std::string& dir, 
-	const std::string& lang, const std::string& fn);
+  static void split_config(const std::string& config, std::string& dir,
+                           std::string& lang, std::string& orient);
+public:
+  Model(ModelScore* ms, Scorer* sc, const std::string& dir,
+        const std::string& lang, const std::string& fn);
   ~Model();
   static Model* createModel(ModelScore*, const std::string&, const std::string&);
   void createSmoothing(double w);
