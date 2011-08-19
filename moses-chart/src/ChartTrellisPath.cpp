@@ -96,9 +96,11 @@ void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl, const Trel
 
 void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl) const
 {
-  if (m_prevNodeChanged == NULL) { // initial enumeration from a pure hypo
+  if (m_prevNodeChanged == NULL) {
+    // initial enumeration from a pure hypo
     CreateDeviantPaths(pathColl, GetFinalNode());
-  } else { // don't change m_prevNodeChanged, just it's children
+  } else {
+    // don't change m_prevNodeChanged, just its children
     const TrellisNode::NodeChildren &children = m_prevNodeChanged->GetChildren();
 
     TrellisNode::NodeChildren::const_iterator iter;

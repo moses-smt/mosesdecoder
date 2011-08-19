@@ -102,7 +102,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 //! Force a creation of a translation option where there are none for a particular source position.
 void TranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t endPos)
 {
-  if (startPos != endPos) { // only for 1 word phrases
+  if (startPos != endPos) {
+    // only for 1 word phrases
     return;
   }
 
@@ -240,7 +241,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Moses::Word &sourc
       chartRule->CreateNonTermIndex();
       transOptColl.Add(chartRule);
     } // for (iterLHS
-  } else { // drop source word. create blank trans opt
+  } else {
+    // drop source word. create blank trans opt
     vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
 
     TargetPhrase *targetPhrase = new TargetPhrase(Output);

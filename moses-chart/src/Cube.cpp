@@ -36,10 +36,11 @@ bool Cube::Add(QueueEntry *queueEntry)
 {
   pair<UniqueCubeEntry::iterator, bool> inserted = m_uniqueEntry.insert(queueEntry);
 
-  if (inserted.second) { // inserted
+  if (inserted.second) {
+    // inserted
     m_sortedByScore.push(queueEntry);
-  } else { // already there
-    //cerr << "already there\n";
+  } else {
+    // already there
     delete queueEntry;
   }
 

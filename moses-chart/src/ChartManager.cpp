@@ -118,7 +118,7 @@ void Manager::ProcessSentence()
     }
     cerr << endl;
     for (size_t width = 1; width <= size; width++) {
-      for ( size_t space = 0; space < width-1; space++ ) {
+      for( size_t space = 0; space < width-1; space++ ) {
         cerr << "  ";
       }
       for (size_t startPos = 0; startPos <= size-width; ++startPos) {
@@ -158,7 +158,8 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   const ChartCell &lastCell = m_hypoStackColl.Get(range);
   const Hypothesis *hypo = lastCell.GetBestHypothesis();
 
-  if (hypo == NULL) { // no hypothesis
+  if (hypo == NULL) {
+    // no hypothesis
     return;
   }
 
@@ -178,7 +179,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
     // create deviations from current best
     path->CreateDeviantPaths(contenders);
 
-    if (onlyDistinct) {
+    if(onlyDistinct) {
       Phrase tgtPhrase = path->GetOutputPhrase();
       if (distinctHyps.insert(tgtPhrase).second)
         ret.Add(path);

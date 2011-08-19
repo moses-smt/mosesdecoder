@@ -33,11 +33,5 @@ TrellisPathList::~TrellisPathList()
   Moses::RemoveAllInColl(m_collection);
 }
 
-const TrellisPath &TrellisPathList::Get(size_t ind) const
-{
-  assert(ind < m_collection.size());
-  return *m_collection[ind];
-}
-
 } // namespace
 

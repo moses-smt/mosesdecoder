@@ -49,7 +49,8 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
                          , Moses::ScoreComponentCollection	&scoreChange
                          , const TrellisNode *&nodeChanged)
 {
-  if (&origNode.GetHypothesis() == &soughtNode.GetHypothesis()) { // this node should be replaced
+  if (&origNode.GetHypothesis() == &soughtNode.GetHypothesis()) {
+    // this node should be replaced
     m_hypo = &replacementHypo;
     nodeChanged = this;
 
@@ -73,7 +74,8 @@ TrellisNode::TrellisNode(const TrellisNode &origNode
       m_edge.push_back(prevNode);
     }
 
-  } else { // not the node we're looking for. Copy as-is and continue finding node
+  } else {
+    // not the node we're looking for. Copy as-is and continue finding node
     m_hypo = &origNode.GetHypothesis();
     NodeChildren::const_iterator iter;
     assert(m_edge.empty());
@@ -101,7 +103,8 @@ Moses::Phrase TrellisNode::GetOutputPhrase() const
   const Moses::Phrase &currTargetPhrase = m_hypo->GetCurrTargetPhrase();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {
     const Moses::Word &word = currTargetPhrase.GetWord(pos);
-    if (word.IsNonTerminal()) { // non-term. fill out with prev hypo
+    if (word.IsNonTerminal()) {
+      // non-term. fill out with prev hypo
       size_t nonTermInd = m_hypo->GetWordsConsumedTargetOrder(pos);
       const TrellisNode &childNode = GetChild(nonTermInd);
       Moses::Phrase childPhrase = childNode.GetOutputPhrase();

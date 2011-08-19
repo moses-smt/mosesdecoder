@@ -55,7 +55,8 @@ void QueueEntry::CreateChildEntry(const Moses::WordConsumed *wordsConsumed, cons
   if (prevWordsConsumed)
     CreateChildEntry(prevWordsConsumed, allChartCells);
 
-  if (wordsConsumed->IsNonTerminal()) { // non-term
+  if (wordsConsumed->IsNonTerminal()) {
+    // non-term
     const WordsRange &childRange = wordsConsumed->GetWordsRange();
     const ChartCell &childCell = allChartCells.Get(childRange);
     const Word &headWord = wordsConsumed->GetSourceWord();

@@ -59,7 +59,6 @@ public:
   size_t GetSize() const {
     return m_collection.size();
   }
-  const TrellisPath &Get(size_t ind) const;
 
   //! add a new entry into collection
   void Add(TrellisPath *trellisPath) {

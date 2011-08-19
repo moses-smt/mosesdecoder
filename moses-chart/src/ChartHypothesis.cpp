@@ -94,7 +94,8 @@ void Hypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
-    if (word.IsNonTerminal()) { // non-term. fill out with prev hypo
+    if (word.IsNonTerminal()) {
+      // non-term. fill out with prev hypo
       size_t nonTermInd = m_wordsConsumedTargetOrder[pos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
@@ -136,7 +137,8 @@ size_t Hypothesis::CalcSuffix(Phrase &ret, size_t size) const
 {
   assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
-  if (m_contextPrefix.GetSize() == m_numTargetTerminals) { // small hypo. the prefix will contains the whole hypo
+  if (m_contextPrefix.GetSize() == m_numTargetTerminals) {
+    // small hypo. the prefix will contains the whole hypo
     size_t maxCount = min(m_contextPrefix.GetSize(), size)
                       , pos			= m_contextPrefix.GetSize() - 1;
 
@@ -222,30 +224,35 @@ void Hypothesis::CalcLMScore()
 
   for (size_t targetPhrasePos = 0; targetPhrasePos < GetCurrTargetPhrase().GetSize(); ++targetPhrasePos) {
     const Word &targetWord = GetCurrTargetPhrase().GetWord(targetPhrasePos);
-    if (!targetWord.IsNonTerminal()) { // just a word, add to phrase for lm scoring
+    if (!targetWord.IsNonTerminal()) {
+      // just a word, add to phrase for lm scoring
       outPhrase.AddWord(targetWord);
     } else {
       size_t nonTermInd = m_wordsConsumedTargetOrder[targetPhrasePos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       size_t numTargetTerminals = prevHypo->GetNumTargetTerminals();
 
-      if (numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) { // large hypo (for trigram lm, another hypo equal or over 2 words). just take the prefix & suffix
+      if (numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) {
+        // large hypo (for trigram lm, another hypo equal or over 2 words). just take the prefix & suffix
         m_lmNGram.PlusEqualsAllLM(lmList, prevHypo->m_lmNGram);
 
         // calc & add overlapping lm scores
         // prefix
         outPhrase.Append(prevHypo->GetPrefix());
         calcNow = true;
-      } else { // small hypo (for trigram lm, 1-word hypos).
+      } else {
+        // small hypo (for trigram lm, 1-word hypos).
         // add target phrase to temp phrase and continue, but don't score yet
         outPhrase.Append(prevHypo->GetPrefix());
       }
 
       if (calcNow) {
-        if (targetPhrasePos == 0 && numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) { // get from other prev hypo. faster
+        if (targetPhrasePos == 0 && numTargetTerminals >= lmList.GetMaxNGramOrder() - 1) {
+          // get from other prev hypo. faster
           m_lmPrefix = prevHypo->m_lmPrefix;
           m_lmNGram = prevHypo->m_lmNGram;
-        } else { // calc
+        } else {
+          // calc
           lmList.CalcAllLMScores(outPhrase
                                  , m_lmNGram
                                  , (firstPhrase) ? &m_lmPrefix : NULL);
@@ -329,7 +336,8 @@ void Hypothesis::CleanupArcList()
   size_t nBestSize = staticData.GetNBestSize();
   bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph();
 
-  if (!distinctNBest && m_arcList->size() > nBestSize) { // prune arc list only if there too many arcs
+  if (!distinctNBest && m_arcList->size() > nBestSize) {
+    // prune arc list only if there too many arcs
     nth_element(m_arcList->begin()
                 , m_arcList->begin() + nBestSize - 1
                 , m_arcList->end()

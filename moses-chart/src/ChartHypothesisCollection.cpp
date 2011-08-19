@@ -53,7 +53,8 @@ HypothesisCollection::~HypothesisCollection()
 
 bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 {
-  if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) { // really bad score. don't bother adding hypo into collection
+  if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {
+    // really bad score. don't bother adding hypo into collection
     manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
     Hypothesis::Delete(hypo);
@@ -62,7 +63,8 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 
   // over threshold, try to add to collection
   std::pair<HCType::iterator, bool> addRet = Add(hypo, manager);
-  if (addRet.second) { // nothing found. add to collection
+  if (addRet.second) {
+    // nothing found. add to collection
     return true;
   }
 
@@ -75,7 +77,8 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 
   // found existing hypo with same target ending.
   // keep the best 1
-  if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) { // incoming hypo is better than the one we have
+  if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) {
+    // incoming hypo is better than the one we have
     VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
     if (m_nBestIsEnabled) {
       hypo->AddArc(hypoExisting);
@@ -91,7 +94,8 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
       abort();
     }
     return false;
-  } else { // already storing the best hypo. discard current hypo
+  } else {
+    // already storing the best hypo. discard current hypo
     VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
@@ -105,7 +109,8 @@ bool HypothesisCollection::AddHypothesis(Hypothesis *hypo, Manager &manager)
 pair<HypothesisCollection::HCType::iterator, bool> HypothesisCollection::Add(Hypothesis *hypo, Manager &manager)
 {
   std::pair<HCType::iterator, bool> ret = m_hypos.insert(hypo);
-  if (ret.second) { // equiv hypo doesn't exists
+  if (ret.second) {
+    // equiv hypo doesn't exists
     VERBOSE(3,"added hyp to stack");
 
     // Update best score, if this hypothesis is new best
@@ -197,7 +202,7 @@ void HypothesisCollection::PruneToSize(Manager &manager)
 
     IFVERBOSE(3) {
       TRACE_ERR("stack now contains: ");
-      for (iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
+      for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
         Hypothesis *hypo = *iter;
         TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
       }
