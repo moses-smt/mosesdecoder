@@ -1,4 +1,8 @@
 *.[oa]
+*.lo
+.deps
+*.orig
+*.la
 Makefile
 Makefile.in
 aclocal.m4
@@ -8,6 +12,7 @@ config.log
 config.status
 configure
 mert/.deps/
+kenlm/build_binary
 mert/Makefile
 mert/Makefile.in
 mert/extractor
@@ -18,6 +23,7 @@ misc/Makefile.in
 misc/processLexicalTable
 misc/processPhraseTable
 misc/queryLexicalTable
+mira/mira
 moses-cmd/src/.deps/
 moses-cmd/src/Makefile
 moses-cmd/src/Makefile.in
@@ -31,3 +37,14 @@ scripts/training/phrase-extract/extract
 scripts/training/phrase-extract/score
 scripts/training/symal/symal
 stamp-h1
+CreateOnDisk/src/CreateOnDiskPt
+.libs
+kenlm/query
+libtool
+m4/libtool.m4
+m4/lt*
+misc/queryPhraseTable
+moses-chart-cmd/src/moses_chart
+moses-cmd/src/checkplf
+moses-cmd/src/lmbrgrid
+regression-testing/moses-reg-test-data-*
