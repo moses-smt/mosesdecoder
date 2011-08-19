@@ -37,24 +37,24 @@ namespace Moses
 class FactorCollection;
 
 typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
-		// 1st = output phrase
-		// 2nd = log probability (score)
+// 1st = output phrase
+// 2nd = log probability (score)
 
-/** Implementation of a generation table in a trie.  
+/** Implementation of a generation table in a trie.
  */
 class GenerationDictionary : public Dictionary, public DecodeFeature
 {
-	typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
+  typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
-	Collection m_collection;
-	// 1st = source
-	// 2nd = target
-	std::string						m_filePath;
+  Collection m_collection;
+  // 1st = source
+  // 2nd = target
+  std::string						m_filePath;
 
 public:
-	/** constructor.
-	* \param numFeatures number of score components, as specified in ini file
-	*/
+  /** constructor.
+  * \param numFeatures number of score components, as specified in ini file
+  */
   GenerationDictionary(
         size_t numFeatures, 
         const std::vector<FactorType> &input,

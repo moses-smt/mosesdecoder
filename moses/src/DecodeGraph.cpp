@@ -29,7 +29,7 @@ namespace Moses
 {
 DecodeGraph::~DecodeGraph()
 {
-	RemoveAllInColl(m_steps);
+  RemoveAllInColl(m_steps);
 }
 
 }

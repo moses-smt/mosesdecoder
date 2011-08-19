@@ -42,11 +42,13 @@ public:
 	//! returns a string description of this producer
 	const std::string& GetScoreProducerDescription() const {return m_description;}
 
-	//! returns the weight parameter name of this producer (used in n-best list)
-	virtual std::string GetScoreProducerWeightShortName() const = 0;
+  //! returns the weight parameter name of this producer (used in n-best list)
+  virtual std::string GetScoreProducerWeightShortName() const = 0;
 
-	//! returns the number of scores gathered from the input (0 by default)
-	virtual size_t GetNumInputScores() const { return 0; };
+  //! returns the number of scores gathered from the input (0 by default)
+  virtual size_t GetNumInputScores() const {
+    return 0;
+  };
 
   const std::vector<FName>& GetFeatureNames() const;
 

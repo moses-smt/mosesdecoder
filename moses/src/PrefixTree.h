@@ -19,7 +19,8 @@ namespace Moses
 {
 
 template<typename T,typename D>
-class PrefixTreeSA {
+class PrefixTreeSA
+{
 public:
   typedef T Key;
   typedef D Data;
@@ -38,10 +39,16 @@ public:
 public:
   PrefixTreeSA() {}
 
-  ~PrefixTreeSA() {for(size_t i=0;i<ptr.size();++i) delete ptr[i];}
+  ~PrefixTreeSA() {
+    for(size_t i=0; i<ptr.size(); ++i) delete ptr[i];
+  }
 
-  static const Data& getDefault() {return def;}
-  static void setDefault(const Data& x) {def=x;}
+  static const Data& getDefault() {
+    return def;
+  }
+  static void setDefault(const Data& x) {
+    def=x;
+  }
 
 
   // insert sequence
@@ -58,17 +65,25 @@ public:
     if(++b!=e) {
       if(!ptr[pos]) ptr[pos]=new Self;
       return ptr[pos]->insert(b,e);
-    }
-    else return data[pos];
+    } else return data[pos];
   }
   // insert container
   template<typename cont> Data& insert(const cont& c) {
-    return insert(c.begin(),c.end());}
+    return insert(c.begin(),c.end());
+  }
 
-  size_t size() const {return keys.size();}
-  const Key& getKey(size_t i) const {return keys[i];}
-  const Data& getData(size_t i) const {return data[i];}
-  const Self* getPtr(size_t i) const {return ptr[i];}
+  size_t size() const {
+    return keys.size();
+  }
+  const Key& getKey(size_t i) const {
+    return keys[i];
+  }
+  const Data& getData(size_t i) const {
+    return data[i];
+  }
+  const Self* getPtr(size_t i) const {
+    return ptr[i];
+  }
 
   size_t findKey(const Key& k) const {
     typename VT::const_iterator i=std::lower_bound(keys.begin(),keys.end(),k);
@@ -81,24 +96,31 @@ public:
     size_t pos=findKey(*b);
     if(pos==keys.size()) return 0;
     if(++b==e) return &data[pos];
-    if(ptr[pos]) return ptr[pos]->findPtr(b,e); else return 0;
+    if(ptr[pos]) return ptr[pos]->findPtr(b,e);
+    else return 0;
   }
   // find container
   template<typename cont> const Data* findPtr(const cont& c) const {
-    return findPtr(c.begin(),c.end());}
+    return findPtr(c.begin(),c.end());
+  }
 
 
   // find sequence
   template<typename fwiter> const Data& find(fwiter b,fwiter e) const {
-    if(const Data* p=findPtr(b,e)) return *p; else return def;
+    if(const Data* p=findPtr(b,e)) return *p;
+    else return def;
   }
 
   // find container
   template<typename cont> const Data& find(const cont& c) const {
-    return find(c.begin(),c.end());}
+    return find(c.begin(),c.end());
+  }
 
   void shrink() {
-    ShrinkToFit(keys); ShrinkToFit(ptr); ShrinkToFit(data);}
+    ShrinkToFit(keys);
+    ShrinkToFit(ptr);
+    ShrinkToFit(data);
+  }
 
 };
 template<typename T,typename D> D PrefixTreeSA<T,D>::def;
@@ -106,7 +128,8 @@ template<typename T,typename D> D PrefixTreeSA<T,D>::def;
 /////////////////////////////////////////////////////////////////////////////
 
 template<typename T,typename D>
-class PrefixTreeF {
+class PrefixTreeF
+{
 public:
   typedef T Key;
   typedef D Data;
@@ -129,42 +152,57 @@ private:
   FILE* f;
 public:
 
-  PrefixTreeF(FILE* f_=0) : f(f_) {if(f) read();}
+  PrefixTreeF(FILE* f_=0) : f(f_) {
+    if(f) read();
+  }
 
-  ~PrefixTreeF() {free();}
+  ~PrefixTreeF() {
+    free();
+  }
 
   void read() {
     startPos=fTell(f);
     fReadVector(f,keys);
     fReadVector(f,data);
-    ptr.clear();ptr.resize(keys.size());
+    ptr.clear();
+    ptr.resize(keys.size());
     std::vector<OFF_T> rawOffs(keys.size());
     fread(&rawOffs[0], sizeof(OFF_T), keys.size(), f);
-    for(size_t i=0;i<ptr.size();++i)
+    for(size_t i=0; i<ptr.size(); ++i)
       if (rawOffs[i]) ptr[i].set(f, rawOffs[i]);
   }
-				      
+
   void free() {
-    for(typename VP::iterator i=ptr.begin();i!=ptr.end();++i) i->free();}
+    for(typename VP::iterator i=ptr.begin(); i!=ptr.end(); ++i) i->free();
+  }
 
   void reserve(size_t s) {
-    keys.reserve(s);data.reserve(s);ptr.reserve(s);}
+    keys.reserve(s);
+    data.reserve(s);
+    ptr.reserve(s);
+  }
 
   template<typename fwiter>
   void changeData(fwiter b,fwiter e,const Data& d) {
     typename VK::const_iterator i=std::lower_bound(keys.begin(),keys.end(),*b);
     if(i==keys.end() || *i!=*b) {
-      TRACE_ERR("ERROR: key not found in changeData!\n"); return;}
+      TRACE_ERR("ERROR: key not found in changeData!\n");
+      return;
+    }
     typename VK::const_iterator kb=keys.begin();
     size_t pos=std::distance(kb,i);
     if(++b==e) {
       OFF_T p=startPos+keys.size()*sizeof(Key)+2*sizeof(unsigned)+pos*sizeof(Data);
       TRACE_ERR("elem found at pos "<<p<<" old val: "<<data[pos]<<"  startpos: "<<startPos<<"\n");
       if(data[pos]!=d) {
-        data[pos]=d;fSeek(f,p);fWrite(f,d);}
+        data[pos]=d;
+        fSeek(f,p);
+        fWrite(f,d);
+      }
       return;
     }
-    if(ptr[pos]) ptr[pos]->changeData(b,e,d); else {
+    if(ptr[pos]) ptr[pos]->changeData(b,e,d);
+    else {
       TRACE_ERR("ERROR: seg not found!in changeData\n");
     }
   }
@@ -190,7 +228,8 @@ public:
     while(queue.size()) {
       if(verbose && queue.size()>ns) {
         TRACE_ERR("stack size in PF create: "<<queue.size()<<"\n");
-        while(ns<queue.size()) ns*=2;}
+        while(ns<queue.size()) ns*=2;
+      }
       const P& pp=queue.back();
       const PrefixTreeSA<Key,Data>& p=*pp.first;
       OFF_T pos=pp.second;
@@ -207,7 +246,7 @@ public:
       s+=fWriteVector(f,p.keys);
       s+=fWriteVector(f,p.data);
 
-      for(size_t i=0;i<p.ptr.size();++i) {
+      for(size_t i=0; i<p.ptr.size(); ++i) {
         if(p.ptr[i])
           queue.push_back(P(p.ptr[i],fTell(f)));
         OFF_T ppos=0;
@@ -216,10 +255,18 @@ public:
     }
   }
 
-  size_t size() const {return keys.size();}
-  const Key& getKey(size_t i) const {return keys[i];}
-  const Data& getData(size_t i) const {return data[i];}
-  const Self* getPtr(size_t i) const {return ptr[i];}
+  size_t size() const {
+    return keys.size();
+  }
+  const Key& getKey(size_t i) const {
+    return keys[i];
+  }
+  const Data& getData(size_t i) const {
+    return data[i];
+  }
+  const Self* getPtr(size_t i) const {
+    return ptr[i];
+  }
 
   size_t findKey(const Key& k) const {
     typename VK::const_iterator i=std::lower_bound(keys.begin(),keys.end(),k);
@@ -229,7 +276,7 @@ public:
 
   Ptr const* findKeyPtr(const Key& k) const {
     size_t pos=findKey(k);
-		return (pos<keys.size() ? &ptr[pos] : 0);
+    return (pos<keys.size() ? &ptr[pos] : 0);
   }
 
   // find sequence
@@ -238,32 +285,41 @@ public:
     if(i==keys.end() || *i!=*b) return 0;
     size_t pos=std::distance(keys.begin(),i);
     if(++b==e) return &data[pos];
-    if(ptr[pos]) return ptr[pos]->findPtr(b,e); else return 0;
+    if(ptr[pos]) return ptr[pos]->findPtr(b,e);
+    else return 0;
   }
   // find container
   template<typename cont> const Data* findPtr(const cont& c) const {
-    return findPtr(c.begin(),c.end());}
+    return findPtr(c.begin(),c.end());
+  }
 
 
   // find sequence
   template<typename fwiter> const Data& find(fwiter b,fwiter e) const {
-    if(const Data* p=findPtr(b,e)) return *p; else return def;} //return (p?*p:def);}
+    if(const Data* p=findPtr(b,e)) return *p;
+    else return def;
+  } //return (p?*p:def);}
 
   // find container
   template<typename cont> const Data& find(const cont& c) const {
-    return find(c.begin(),c.end());}
+    return find(c.begin(),c.end());
+  }
 
-  static void setDefault(const Data& d) {def=d;}
-  static const Data& getDefault() {return def;}
+  static void setDefault(const Data& d) {
+    def=d;
+  }
+  static const Data& getDefault() {
+    return def;
+  }
 
 
   void print(std::ostream& out,const std::string s="") const {
 
     out<<s<<"startpos: "<<startPos<<"  size: "<<keys.size()<<"\n";
-    for(size_t i=0;i<keys.size();++i) {
+    for(size_t i=0; i<keys.size(); ++i) {
       out<<s<<i<<" - "<<keys[i]<<" "<<data[i]<<"\n";
     }
-    for(size_t i=0;i<ptr.size();++i)
+    for(size_t i=0; i<ptr.size(); ++i)
       if(ptr[i])
         ptr[i]->print(out,s+"  ");
   }

@@ -34,54 +34,56 @@
 #include <ostream>
 #include <string>
 
-namespace Moses {
+namespace Moses
+{
 /**
   * Makes sure output goes in the correct order.
   **/
-class OutputCollector {
-    public:
-        OutputCollector(std::ostream* outStream= &std::cout, std::ostream* debugStream=&std::cerr) :
-            m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
+class OutputCollector
+{
+public:
+  OutputCollector(std::ostream* outStream= &std::cout, std::ostream* debugStream=&std::cerr) :
+    m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
 
 
-        /**
-          * Write or cache the output, as appropriate.
-          **/
-        void Write(int sourceId,const std::string& output,const std::string& debug="") {
+  /**
+    * Write or cache the output, as appropriate.
+    **/
+  void Write(int sourceId,const std::string& output,const std::string& debug="") {
 #ifdef WITH_THREADS
-            boost::mutex::scoped_lock lock(m_mutex);
+    boost::mutex::scoped_lock lock(m_mutex);
 #endif
-            if (sourceId == m_nextOutput) {
-                //This is the one we were expecting
-                *m_outStream << output << std::flush;
-                *m_debugStream << debug << std::flush;
-                ++m_nextOutput;
-                //see if there's any more
-                std::map<int,std::string>::iterator iter;
-                while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
-                    *m_outStream << iter->second << std::flush;
-                    m_outputs.erase(iter);
-                    ++m_nextOutput;
-                    std::map<int,std::string>::iterator debugIter = m_debugs.find(iter->first);
-                    if (debugIter != m_debugs.end()) {
-                      *m_debugStream << debugIter->second << std::flush;
-                      m_debugs.erase(debugIter);
-                    }
-                }
-            } else {
-                //save for later
-                m_outputs[sourceId] = output;
-                m_debugs[sourceId] = debug;
-            }
+    if (sourceId == m_nextOutput) {
+      //This is the one we were expecting
+      *m_outStream << output << std::flush;
+      *m_debugStream << debug << std::flush;
+      ++m_nextOutput;
+      //see if there's any more
+      std::map<int,std::string>::iterator iter;
+      while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
+        *m_outStream << iter->second << std::flush;
+        m_outputs.erase(iter);
+        ++m_nextOutput;
+        std::map<int,std::string>::iterator debugIter = m_debugs.find(iter->first);
+        if (debugIter != m_debugs.end()) {
+          *m_debugStream << debugIter->second << std::flush;
+          m_debugs.erase(debugIter);
         }
-     private:
-        std::map<int,std::string> m_outputs;
-        std::map<int,std::string> m_debugs;
-        int m_nextOutput;
-        std::ostream* m_outStream;
-        std::ostream* m_debugStream;
-#ifdef WITH_THREADS        
-        boost::mutex m_mutex;
+      }
+    } else {
+      //save for later
+      m_outputs[sourceId] = output;
+      m_debugs[sourceId] = debug;
+    }
+  }
+private:
+  std::map<int,std::string> m_outputs;
+  std::map<int,std::string> m_debugs;
+  int m_nextOutput;
+  std::ostream* m_outStream;
+  std::ostream* m_debugStream;
+#ifdef WITH_THREADS
+  boost::mutex m_mutex;
 #endif
 };
 

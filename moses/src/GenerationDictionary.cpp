@@ -39,86 +39,80 @@ namespace Moses
   : Dictionary(numFeatures), DecodeFeature("Generation",input,output) {}
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
-{	
-	FactorCollection &factorCollection = FactorCollection::Instance();
+{
+  FactorCollection &factorCollection = FactorCollection::Instance();
 
-	const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
+  const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
 
-	
-	// data from file
-	InputFileStream inFile(filePath);
-	if (!inFile.good()) {
-		UserMessage::Add(string("Couldn't read ") + filePath);
-		return false;
-	}
 
-	m_filePath = filePath;
-	string line;
-	size_t lineNum = 0;
-	while(getline(inFile, line)) 
-	{
-		++lineNum;
-		vector<string> token = Tokenize( line );
-		
-		// add each line in generation file into class
-		Word *inputWord = new Word();  // deleted in destructor
-		Word outputWord;
+  // data from file
+  InputFileStream inFile(filePath);
+  if (!inFile.good()) {
+    UserMessage::Add(string("Couldn't read ") + filePath);
+    return false;
+  }
 
-		// create word with certain factors filled out
+  m_filePath = filePath;
+  string line;
+  size_t lineNum = 0;
+  while(getline(inFile, line)) {
+    ++lineNum;
+    vector<string> token = Tokenize( line );
 
-		// inputs
-		vector<string> factorString = Tokenize( token[0], "|" );
-        for (size_t i = 0 ; i < GetInput().size() ; i++)
-		{
-            FactorType factorType = GetInput()[i];
-			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
-			inputWord->SetFactor(factorType, factor);
-		}
+    // add each line in generation file into class
+    Word *inputWord = new Word();  // deleted in destructor
+    Word outputWord;
 
-		factorString = Tokenize( token[1], "|" );
-        for (size_t i = 0 ; i < GetOutput().size() ; i++)
-		{
-            FactorType factorType = GetOutput()[i];
-			
-			const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
-			outputWord.SetFactor(factorType, factor);
-		}
+    // create word with certain factors filled out
 
-		size_t numFeaturesInFile = token.size() - 2;
-		if (numFeaturesInFile < numFeatureValuesInConfig) {
-			stringstream strme;
-			strme << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
-								<< " feature values, but found " << numFeaturesInFile << std::endl;
-			UserMessage::Add(strme.str());
-			return false;
-		}
-		std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
-		for (size_t i = 0; i < numFeatureValuesInConfig; i++)
-			scores[i] = FloorScore(TransformScore(Scan<float>(token[2+i])));
-		
-		Collection::iterator iterWord = m_collection.find(inputWord);
-		if (iterWord == m_collection.end())
-		{
-			m_collection[inputWord][outputWord].Assign(this, scores);
-		}
-		else
-		{ // source word already in there. delete input word to avoid mem leak
-			(iterWord->second)[outputWord].Assign(this, scores);
-			delete inputWord;
-		}
-	}
+    // inputs
+    vector<string> factorString = Tokenize( token[0], "|" );
+    for (size_t i = 0 ; i < GetInput().size() ; i++) {
+      FactorType factorType = GetInput()[i];
+      const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
+      inputWord->SetFactor(factorType, factor);
+    }
 
-	inFile.Close();
-	return true;
+    factorString = Tokenize( token[1], "|" );
+    for (size_t i = 0 ; i < GetOutput().size() ; i++) {
+      FactorType factorType = GetOutput()[i];
+
+      const Factor *factor = factorCollection.AddFactor( direction, factorType, factorString[i]);
+      outputWord.SetFactor(factorType, factor);
+    }
+
+    size_t numFeaturesInFile = token.size() - 2;
+    if (numFeaturesInFile < numFeatureValuesInConfig) {
+      stringstream strme;
+      strme << filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
+            << " feature values, but found " << numFeaturesInFile << std::endl;
+      UserMessage::Add(strme.str());
+      return false;
+    }
+    std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
+    for (size_t i = 0; i < numFeatureValuesInConfig; i++)
+      scores[i] = FloorScore(TransformScore(Scan<float>(token[2+i])));
+
+    Collection::iterator iterWord = m_collection.find(inputWord);
+    if (iterWord == m_collection.end()) {
+      m_collection[inputWord][outputWord].Assign(this, scores);
+    } else {
+      // source word already in there. delete input word to avoid mem leak
+      (iterWord->second)[outputWord].Assign(this, scores);
+      delete inputWord;
+    }
+  }
+
+  inFile.Close();
+  return true;
 }
 
 GenerationDictionary::~GenerationDictionary()
 {
-	Collection::const_iterator iter;
-	for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter)
-	{
-		delete iter->first;
-	}
+  Collection::const_iterator iter;
+  for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter) {
+    delete iter->first;
+  }
 }
 
 size_t GenerationDictionary::GetNumScoreComponents() const
@@ -128,22 +122,21 @@ size_t GenerationDictionary::GetNumScoreComponents() const
 
 const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) const
 {
-	const OutputWordCollection *ret;
-	
-	Collection::const_iterator iter = m_collection.find(&word);
-	if (iter == m_collection.end())
-	{ // can't find source phrase
-		ret = NULL;
-	}
-	else
-	{
-		ret = &iter->second;
-	}
-	return ret;
+  const OutputWordCollection *ret;
+
+  Collection::const_iterator iter = m_collection.find(&word);
+  if (iter == m_collection.end()) {
+    // can't find source phrase
+    ret = NULL;
+  } else {
+    ret = &iter->second;
+  }
+  return ret;
 }
 
-bool GenerationDictionary::ComputeValueInTranslationOption() const {
-	return true;
+bool GenerationDictionary::ComputeValueInTranslationOption() const
+{
+  return true;
 }
 
 

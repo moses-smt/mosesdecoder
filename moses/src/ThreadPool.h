@@ -43,76 +43,82 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   * Classes to implement a ThreadPool.
   **/
 
-namespace Moses {
+namespace Moses
+{
 
 
 /**
 * A task to be executed by the ThreadPool
 **/
-class Task {
-    public:
-        virtual void Run() = 0;
-        virtual ~Task() {}
+class Task
+{
+public:
+  virtual void Run() = 0;
+  virtual ~Task() {}
 };
 
 #ifdef WITH_THREADS
 
-class ThreadPool {
-    public:
-        /**
-          * Construct a thread pool of a fixed size.
-          **/
-        ThreadPool(size_t numThreads);
+class ThreadPool
+{
+public:
+  /**
+    * Construct a thread pool of a fixed size.
+    **/
+  ThreadPool(size_t numThreads);
 
 
-         /**
-          * Add a job to the threadpool.
-          **/
-        void Submit(Task* task);
-        
-        /**
-          * Wait until all queued jobs have completed, and shut down
-          * the ThreadPool.
-          **/
-        void Stop(bool processRemainingJobs = false);  
-          
-        ~ThreadPool() { Stop(); }
-        
-        
-        
-    private:
-        /**
-          * The main loop executed by each thread.
-          **/
-        void Execute();
-        
-        std::queue<Task*> m_tasks;
-        boost::thread_group m_threads;
-        boost::mutex m_mutex;
-        boost::condition_variable m_threadNeeded;
-        boost::condition_variable m_threadAvailable;
-        bool m_stopped;
-        bool m_stopping;
-        
+  /**
+   * Add a job to the threadpool.
+   **/
+  void Submit(Task* task);
+
+  /**
+    * Wait until all queued jobs have completed, and shut down
+    * the ThreadPool.
+    **/
+  void Stop(bool processRemainingJobs = false);
+
+  ~ThreadPool() {
+    Stop();
+  }
+
+
+
+private:
+  /**
+    * The main loop executed by each thread.
+    **/
+  void Execute();
+
+  std::queue<Task*> m_tasks;
+  boost::thread_group m_threads;
+  boost::mutex m_mutex;
+  boost::condition_variable m_threadNeeded;
+  boost::condition_variable m_threadAvailable;
+  bool m_stopped;
+  bool m_stopping;
+
 };
 
 
-class TestTask : public Task {
-    public:
-        TestTask(int id) : m_id(id) {}
-        virtual void Run() {
+class TestTask : public Task
+{
+public:
+  TestTask(int id) : m_id(id) {}
+  virtual void Run() {
 #ifdef BOOST_HAS_PTHREADS
-            pthread_t tid = pthread_self();
+    pthread_t tid = pthread_self();
 #else
-            pthread_t tid = 0;
+    pthread_t tid = 0;
 #endif
-            std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;
-        }
-        
-        virtual ~TestTask() {}
-        
-    private:
-        int m_id;
+    std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;
+  }
+
+  virtual ~TestTask() {}
+
+private:
+  int m_id;
 };
 
 #endif //WITH_THREADS

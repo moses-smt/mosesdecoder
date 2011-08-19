@@ -36,27 +36,24 @@ queue<string> UserMessage::m_msgQueue;
 
 void UserMessage::Add(const string &msg)
 {
-	if (m_toStderr)
-	{
-		cerr << "ERROR:" << msg << endl;
-	}
-	if (m_toQueue)
-	{
-		if (m_msgQueue.size() >= MAX_MSG_QUEUE)
-			m_msgQueue.pop();
-		m_msgQueue.push(msg);
-	}
+  if (m_toStderr) {
+    cerr << "ERROR:" << msg << endl;
+  }
+  if (m_toQueue) {
+    if (m_msgQueue.size() >= MAX_MSG_QUEUE)
+      m_msgQueue.pop();
+    m_msgQueue.push(msg);
+  }
 }
 
 string UserMessage::GetQueue()
 {
-	stringstream strme("");
-	while (!m_msgQueue.empty())
-	{
-		strme << m_msgQueue.front() << endl;
-		m_msgQueue.pop();
-	}
-	return strme.str();
+  stringstream strme("");
+  while (!m_msgQueue.empty()) {
+    strme << m_msgQueue.front() << endl;
+    m_msgQueue.pop();
+  }
+  return strme.str();
 }
 
 }

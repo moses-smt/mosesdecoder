@@ -14,7 +14,7 @@
 #define MAX_STR_LEN 300
 #define PRIME 8589935681ULL
 #define MAX_HASH_FUNCS 1000
-//#define PRIME 409 
+//#define PRIME 409
 
 using std::string;
 using std::cout;
@@ -22,9 +22,9 @@ using std::cerr;
 using std::endl;
 
 //typedefs for projects
-typedef std::string word_t;     // word as string 
+typedef std::string word_t;     // word as string
 typedef unsigned int wordID_t;      // word mapped to integer
 typedef std::string date_t;     // a date marker
-typedef unsigned int count_t;   // for 64-bit to 32-bit compatibility 
+typedef unsigned int count_t;   // for 64-bit to 32-bit compatibility
 
 #endif

@@ -33,52 +33,50 @@ namespace Moses
 {
 
 /** Contains partial translation options, while these are constructed in the class TranslationOption.
- *  The factored translation model allows for multiple translation and 
- *  generation steps during a single Hypothesis expansion. For efficiency, 
+ *  The factored translation model allows for multiple translation and
+ *  generation steps during a single Hypothesis expansion. For efficiency,
  *  all these expansions are precomputed and stored as TranslationOption.
  *  The expansion process itself may be still explode, so efficient handling
- *  of partial translation options during expansion is required. 
- *  This class assists in this tasks by implementing pruning. 
+ *  of partial translation options during expansion is required.
+ *  This class assists in this tasks by implementing pruning.
  *  This implementation is similar to the one in HypothesisStack. */
 
 class PartialTranslOptColl
 {
- protected:
-	std::vector<TranslationOption*> m_list;
-	float m_bestScore; /**< score of the best translation option */
-	float m_worstScore; /**< score of the worse translation option */
-	size_t m_maxSize; /**< maximum number of translation options allowed */
-	size_t m_totalPruned; /**< number of options pruned */
+protected:
+  std::vector<TranslationOption*> m_list;
+  float m_bestScore; /**< score of the best translation option */
+  float m_worstScore; /**< score of the worse translation option */
+  size_t m_maxSize; /**< maximum number of translation options allowed */
+  size_t m_totalPruned; /**< number of options pruned */
 
 public:
   PartialTranslOptColl();
 
-	/** destructor, cleans out list */
-	~PartialTranslOptColl()
-	{
-		RemoveAllInColl( m_list );
-	}
-	
-    void AddNoPrune(const TranslationSystem* system, TranslationOption *partialTranslOpt);
-    void Add(const TranslationSystem* system, TranslationOption *partialTranslOpt);
-	void Prune();
+  /** destructor, cleans out list */
+  ~PartialTranslOptColl() {
+    RemoveAllInColl( m_list );
+  }
 
-	/** returns list of translation options */
-	const std::vector<TranslationOption*>& GetList() const {
-		return m_list;
-	}
+  void AddNoPrune(const TranslationSystem* system, TranslationOption *partialTranslOpt);
+  void Add(const TranslationSystem* system, TranslationOption *partialTranslOpt);
+  void Prune();
 
-	/** clear out the list */
-	void DetachAll()
-	{
-		m_list.clear();
-	}
+  /** returns list of translation options */
+  const std::vector<TranslationOption*>& GetList() const {
+    return m_list;
+  }
 
-	/** return number of pruned partial hypotheses */
-	size_t GetPrunedCount() {
-		return m_totalPruned;
-	}
-	
+  /** clear out the list */
+  void DetachAll() {
+    m_list.clear();
+  }
+
+  /** return number of pruned partial hypotheses */
+  size_t GetPrunedCount() {
+    return m_totalPruned;
+  }
+
 };
 
 }

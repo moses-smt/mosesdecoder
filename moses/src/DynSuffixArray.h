@@ -9,11 +9,13 @@
 #include "File.h"
 #include "DynSAInclude/types.h"
 
-namespace Moses {
+namespace Moses
+{
 
 typedef std::vector<unsigned> vuint_t;
 
-class DynSuffixArray {
+class DynSuffixArray
+{
 
 public:
   DynSuffixArray();
@@ -22,11 +24,11 @@ public:
   bool GetCorpusIndex(const vuint_t*, vuint_t*);
   void Load(FILE*);
   void Save(FILE*);
-  void Insert(vuint_t*, unsigned);  
+  void Insert(vuint_t*, unsigned);
   void Delete(unsigned, unsigned);
   void Substitute(vuint_t*, unsigned);
 
-private: 
+private:
   vuint_t* m_SA;
   vuint_t* m_ISA;
   vuint_t* m_F;

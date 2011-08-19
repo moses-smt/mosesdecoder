@@ -30,7 +30,7 @@ namespace Moses
 {
 // Doesn't actually load; moses wants the Load method for that.  It needs the file to autodetect binary format.  
 LanguageModelSingleFactor *ConstructKenLM(const std::string &file, bool lazy);
-	
+
 };
 
 

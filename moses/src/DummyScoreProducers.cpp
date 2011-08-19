@@ -11,49 +11,50 @@ namespace Moses
 {
 
 struct DistortionState_traditional : public FFState {
- WordsRange range;
- int first_gap;
- DistortionState_traditional(const WordsRange& wr, int fg) : range(wr), first_gap(fg) {}
- int Compare(const FFState& other) const {
-   const DistortionState_traditional& o =
-     static_cast<const DistortionState_traditional&>(other);
+  WordsRange range;
+  int first_gap;
+  DistortionState_traditional(const WordsRange& wr, int fg) : range(wr), first_gap(fg) {}
+  int Compare(const FFState& other) const {
+    const DistortionState_traditional& o =
+      static_cast<const DistortionState_traditional&>(other);
     if (range.GetEndPos() < o.range.GetEndPos()) return -1;
     if (range.GetEndPos() > o.range.GetEndPos()) return 1;
     return 0;
- }
+  }
 };
 
-const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &input) const {
-	// fake previous translated phrase start and end
-	size_t start = NOT_FOUND;
-	size_t end = NOT_FOUND;
-	if (input.m_frontSpanCoveredLength > 0) {
-		// can happen with --continue-partial-translation
-		start = 0;
-		end = input.m_frontSpanCoveredLength -1;
-	}
-	return new DistortionState_traditional(
-		WordsRange(start, end),
-		NOT_FOUND);
+const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &input) const
+{
+  // fake previous translated phrase start and end
+  size_t start = NOT_FOUND;
+  size_t end = NOT_FOUND;
+  if (input.m_frontSpanCoveredLength > 0) {
+    // can happen with --continue-partial-translation
+    start = 0;
+    end = input.m_frontSpanCoveredLength -1;
+  }
+  return new DistortionState_traditional(
+           WordsRange(start, end),
+           NOT_FOUND);
 }
 
 
 size_t DistortionScoreProducer::GetNumScoreComponents() const
 {
-	return 1;
+  return 1;
 }
 
 std::string DistortionScoreProducer::GetScoreProducerWeightShortName() const
 {
-	return "d";
+  return "d";
 }
 
-float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo, 
-      const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
+float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
+    const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
   const int USE_OLD = 1;
   if (USE_OLD) {
-	return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
+    return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
   }
 
   // Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
@@ -75,18 +76,22 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
   return (float) -2*(curr.GetNumWordsBetween(prev) + curr.GetNumWordsCovered());
 }
 
-size_t DistortionScoreProducer::GetNumInputScores() const { return 0;}
+size_t DistortionScoreProducer::GetNumInputScores() const
+{
+  return 0;
+}
 
 FFState* DistortionScoreProducer::Evaluate(
-    const Hypothesis& hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* out) const {
+  const Hypothesis& hypo,
+  const FFState* prev_state,
+  ScoreComponentCollection* out) const
+{
   const DistortionState_traditional* prev = static_cast<const DistortionState_traditional*>(prev_state);
-	const float distortionScore = CalculateDistortionScore(
-		hypo,
-		prev->range,
-		hypo.GetCurrSourceWordsRange(),
-		prev->first_gap);
+  const float distortionScore = CalculateDistortionScore(
+                                  hypo,
+                                  prev->range,
+                                  hypo.GetCurrSourceWordsRange(),
+                                  prev->first_gap);
   out->PlusEquals(this, distortionScore);
   DistortionState_traditional* res = new DistortionState_traditional(
     hypo.GetCurrSourceWordsRange(),
@@ -97,15 +102,18 @@ FFState* DistortionScoreProducer::Evaluate(
 
 size_t WordPenaltyProducer::GetNumScoreComponents() const
 {
-	return 1;
+  return 1;
 }
 
 std::string WordPenaltyProducer::GetScoreProducerWeightShortName() const
 {
-	return "w";
+  return "w";
 }
 
-size_t WordPenaltyProducer::GetNumInputScores() const { return 0;}
+size_t WordPenaltyProducer::GetNumInputScores() const
+{
+  return 0;
+}
 
 void WordPenaltyProducer::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
@@ -114,18 +122,22 @@ void WordPenaltyProducer::Evaluate(const TargetPhrase& tp, ScoreComponentCollect
 
 size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
 {
-	return 1;
+  return 1;
 }
 
 
 std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName() const
 {
-	return "u";
+  return "u";
 }
 
-size_t UnknownWordPenaltyProducer::GetNumInputScores() const { return 0;}
+size_t UnknownWordPenaltyProducer::GetNumInputScores() const
+{
+  return 0;
+}
 
-bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const {
+bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
+{
   return true;
 }
 

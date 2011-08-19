@@ -16,12 +16,12 @@ class TranslationOption;
  */
 struct XmlOption {
 
-	WordsRange range;
-	TargetPhrase targetPhrase;
+  WordsRange range;
+  TargetPhrase targetPhrase;
 
-	XmlOption(const WordsRange &r, const TargetPhrase &tp)
-	: range(r), targetPhrase(tp) 
-	{}
+  XmlOption(const WordsRange &r, const TargetPhrase &tp)
+    : range(r), targetPhrase(tp)
+  {}
 
 };
 

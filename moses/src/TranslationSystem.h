@@ -29,16 +29,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureFunction.h"
 #include "LMList.h"
 
-namespace Moses {
+namespace Moses
+{
 
-  class DecodeGraph;
-  class LexicalReordering;
-  class PhraseDictionaryFeature;
-  class GenerationDictionary;
-  class WordPenaltyProducer;
-  class DistortionScoreProducer;
-  class UnknownWordPenaltyProducer;
-  class GlobalLexicalModel;
+class DecodeGraph;
+class LexicalReordering;
+class PhraseDictionaryFeature;
+class GenerationDictionary;
+class WordPenaltyProducer;
+class DistortionScoreProducer;
+class UnknownWordPenaltyProducer;
+class GlobalLexicalModel;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -100,7 +101,7 @@ class TranslationSystem {
         std::string m_id;
         
         std::vector<DecodeGraph*> m_decodeGraphs;
-	std::vector<size_t> m_decodeGraphBackoff;
+      	std::vector<size_t> m_decodeGraphBackoff;
         std::vector<LexicalReordering*> m_reorderingTables;
         std::vector<PhraseDictionaryFeature*> m_phraseDictionaries;
         std::vector<GenerationDictionary*> m_generationDictionaries;

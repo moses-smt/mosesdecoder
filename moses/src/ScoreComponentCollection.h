@@ -51,7 +51,7 @@ namespace Moses
  * than 15), for a given model.
  *
  * The values contained in ScoreComponentCollection objects are unweighted scores (log-probs).
- * 
+ *
  * ScoreComponentCollection objects can be added and subtracted, which makes them appropriate
  * to be the datatype used to return the result of a score computations (in this case they will
  * have most values set to zero, except for the ones that are results of the indivudal computation
@@ -60,14 +60,15 @@ namespace Moses
  * representing that score must extend the ScoreProducer abstract base class.  For an example
  * refer to the DistortionScoreProducer class.
  */
-class ScoreComponentCollection {
+class ScoreComponentCollection
+{
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
 private:
 	FVector m_scores;
 
 public:
   //! Create a new score collection with all values set to 0.0
-	ScoreComponentCollection();
+  ScoreComponentCollection();
 
   //! Clone a score collection
 	ScoreComponentCollection(const ScoreComponentCollection& rhs)

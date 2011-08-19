@@ -28,10 +28,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureFunction.h"
 #include "TypeDef.h"
 
-namespace Moses {
+namespace Moses
+{
 
 /**
-  * A feature on the decoding path (Generation or Translation) 
+  * A feature on the decoding path (Generation or Translation)
  **/
 class DecodeFeature : public StatelessFeatureFunction {
 

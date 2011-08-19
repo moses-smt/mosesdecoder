@@ -33,23 +33,22 @@ namespace Moses
 
 class Phrase;
 
-//! Abstract class for for multi factor LM 
+//! Abstract class for for multi factor LM
 class LanguageModelMultiFactor : public LanguageModelImplementation
 {
 protected:
-	FactorMask m_factorTypes;
+  FactorMask m_factorTypes;
 
 	LanguageModelMultiFactor(){}
 	
 public:
-	virtual bool Load(const std::string &filePath
-					, const std::vector<FactorType> &factorTypes
-					, size_t nGramOrder) = 0;
+  virtual bool Load(const std::string &filePath
+                    , const std::vector<FactorType> &factorTypes
+                    , size_t nGramOrder) = 0;
 
-	LMType GetLMType() const
-	{
-		return MultiFactor;
-	}
+  LMType GetLMType() const {
+    return MultiFactor;
+  }
 
 	bool Useable(const Phrase &phrase) const;	
 };

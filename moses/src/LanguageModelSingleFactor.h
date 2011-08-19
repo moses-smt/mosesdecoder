@@ -31,12 +31,12 @@ namespace Moses
 class FactorCollection;
 class Factor;
 
-//! Abstract class for for single factor LM 
+//! Abstract class for for single factor LM
 class LanguageModelSingleFactor : public LanguageModelImplementation
 {
-protected:	
-	const Factor *m_sentenceStart, *m_sentenceEnd;
-	FactorType	m_factorType;
+protected:
+  const Factor *m_sentenceStart, *m_sentenceEnd;
+  FactorType	m_factorType;
 
 	LanguageModelSingleFactor() {}
 
@@ -70,7 +70,7 @@ public:
 	}
 };
 
-// Single factor LM that uses a null pointer state.  
+// Single factor LM that uses a null pointer state.
 class LanguageModelPointerState : public LanguageModelSingleFactor
 {
 private:

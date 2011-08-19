@@ -46,26 +46,26 @@ class TranslationSystem;
 class WordPenaltyProducer;
 
 class CountInfo
-	{
-	public:
-		CountInfo()
-		{}
-		CountInfo(float countSource, float countTarget)
-		:m_countSource(countSource)
-		,m_countTarget(countTarget)
-		{	}
-		
-		float m_countSource;
-		float m_countTarget;
-		
-	};
+{
+public:
+  CountInfo()
+  {}
+  CountInfo(float countSource, float countTarget)
+    :m_countSource(countSource)
+    ,m_countTarget(countTarget)
+  {	}
 
-	
+  float m_countSource;
+  float m_countTarget;
+
+};
+
+
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
 {
-	friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
+  friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
 	float m_transScore, m_ngramScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
@@ -81,22 +81,22 @@ protected:
 	static bool printalign;
 	
 public:
-	TargetPhrase(FactorDirection direction=Output);
-	TargetPhrase(FactorDirection direction, std::string out_string);
-	~TargetPhrase();
+  TargetPhrase(FactorDirection direction=Output);
+  TargetPhrase(FactorDirection direction, std::string out_string);
+  ~TargetPhrase();
 
-	//! used by the unknown word handler- these targets
-	//! don't have a translation score, so wp is the only thing used
-	void SetScore(const TranslationSystem* system);
-	
-	//!Set score for Sentence XML target options
-	void SetScore(float score);
-	
-	//! Set score for unknown words with input weights
-	void SetScore(const TranslationSystem* system, const Scores &scoreVector); 
+  //! used by the unknown word handler- these targets
+  //! don't have a translation score, so wp is the only thing used
+  void SetScore(const TranslationSystem* system);
 
-	
-	/*** Called immediately after creation to initialize scores.
+  //!Set score for Sentence XML target options
+  void SetScore(float score);
+
+  //! Set score for unknown words with input weights
+  void SetScore(const TranslationSystem* system, const Scores &scoreVector);
+
+
+  /*** Called immediately after creation to initialize scores.
    *
    * @param translationScoreProducer The PhraseDictionaryMemory that this TargetPhrase is contained by.
    *        Used to identify where the scores for this phrase belong in the list of all scores.
@@ -106,46 +106,45 @@ public:
    * @param weightWP the weight of the word penalty
    *
    * @TODO should this be part of the constructor?  If not, add explanation why not.
-		*/
-	void SetScore(const ScoreProducer* translationScoreProducer,
-								const Scores &scoreVector,
-								const std::vector<float> &weightT,
-								float weightWP,
-								const LMList &languageModels);
-	
-	void SetScoreChart(const ScoreProducer* translationScoreProducer
-										 ,const Scores &scoreVector
-										 ,const std::vector<float> &weightT
-										 ,const LMList &languageModels
+  	*/
+  void SetScore(const ScoreProducer* translationScoreProducer,
+                const Scores &scoreVector,
+                const std::vector<float> &weightT,
+                float weightWP,
+                const LMList &languageModels);
+
+  void SetScoreChart(const ScoreProducer* translationScoreProducer
+                     ,const Scores &scoreVector
+                     ,const std::vector<float> &weightT
+                     ,const LMList &languageModels
                      ,const WordPenaltyProducer* wpProducer);
-	
-	// used by for unknown word proc in chart decoding
-	void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 
-	
-	// used when creating translations of unknown words:
-	void ResetScore();
-	void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
+  // used by for unknown word proc in chart decoding
+  void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 
-	TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
-		// used for translation step
-	
+
+  // used when creating translations of unknown words:
+  void ResetScore();
+  void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
+
+  TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
+  // used for translation step
+
 #ifdef HAVE_PROTOBUF
-	void WriteToRulePB(hgmert::Rule* pb) const;
+  void WriteToRulePB(hgmert::Rule* pb) const;
 #endif
 
-/*  inline float GetTranslationScore() const
-  {
-    return m_transScore;
-  }*/
+  /*  inline float GetTranslationScore() const
+    {
+      return m_transScore;
+    }*/
   /***
    * return the estimated score resulting from our being added to a sentence
    * (it's an estimate because we don't have full n-gram info for the language model
    *  without using the (unknown) full sentence)
-   * 
+   *
    */
-  inline float GetFutureScore() const
-  {
+  inline float GetFutureScore() const {
     return m_fullScore;
   }
 	inline const ScoreComponentCollection &GetScoreBreakdown() const

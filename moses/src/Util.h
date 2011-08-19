@@ -61,31 +61,31 @@ namespace Moses
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 const std::string ToLower(const std::string& str);
-	
+
 //! get string representation of any object/variable, as long as it can pipe to a stream
 template<typename T>
 inline std::string SPrint(const T &input)
 {
-	std::stringstream stream("");
-	stream << input;
-	return stream.str();
+  std::stringstream stream("");
+  stream << input;
+  return stream.str();
 }
 
 //! convert string to variable of type T. Used to reading floats, int etc from files
 template<typename T>
 inline T Scan(const std::string &input)
 {
-	std::stringstream stream(input);
-	T ret;
-	stream >> ret;
-	return ret;
+  std::stringstream stream(input);
+  T ret;
+  stream >> ret;
+  return ret;
 }
 
 //! just return input
 template<>
 inline std::string Scan<std::string>(const std::string &input)
 {
-	return input;
+  return input;
 }
 
 //! Specialisation to understand yes/no y/n true/false 0/1
@@ -96,210 +96,207 @@ bool Scan<bool>(const std::string &input);
 template<typename T>
 inline std::vector<T> Scan(const std::vector< std::string > &input)
 {
-	std::vector<T> output(input.size());
-	for (size_t i = 0 ; i < input.size() ; i++)
-	{
-		output[i] = Scan<T>( input[i] );
-	}
-	return output;
+  std::vector<T> output(input.size());
+  for (size_t i = 0 ; i < input.size() ; i++) {
+    output[i] = Scan<T>( input[i] );
+  }
+  return output;
 }
 
 //! speeded up version of above
 template<typename T>
 inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
 {
-	output.resize(input.size());
-	for (size_t i = 0 ; i < input.size() ; i++)
-	{
-		output[i] = Scan<T>( input[i] );
-	}
-}
-	
-/** replace all occurrences of todelStr in str with the string toaddStr */
-inline std::string Replace(const std::string& str,
-													 const std::string& todelStr,
-													 const std::string& toaddStr)
-{
-	size_t pos=0;
-	std::string newStr=str;	
-	while ((pos=newStr.find(todelStr,pos))!=std::string::npos){		newStr.replace(pos++,todelStr.size(),toaddStr);	}
-	return newStr;
+  output.resize(input.size());
+  for (size_t i = 0 ; i < input.size() ; i++) {
+    output[i] = Scan<T>( input[i] );
+  }
 }
 
-/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument. 
+/** replace all occurrences of todelStr in str with the string toaddStr */
+inline std::string Replace(const std::string& str,
+                           const std::string& todelStr,
+                           const std::string& toaddStr)
+{
+  size_t pos=0;
+  std::string newStr=str;
+  while ((pos=newStr.find(todelStr,pos))!=std::string::npos) {
+    newStr.replace(pos++,todelStr.size(),toaddStr);
+  }
+  return newStr;
+}
+
+/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
 		The separator can only be 1 character long. The default delimiters are space or tab
 */
 inline std::vector<std::string> Tokenize(const std::string& str,
-																				 const std::string& delimiters = " \t")
+    const std::string& delimiters = " \t")
 {
-	std::vector<std::string> tokens;
-	// Skip delimiters at beginning.
-	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-	// Find first "non-delimiter".
-	std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+  std::vector<std::string> tokens;
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
 
-	while (std::string::npos != pos || std::string::npos != lastPos)
-	{
-		// Found a token, add it to the vector.
-		tokens.push_back(str.substr(lastPos, pos - lastPos));
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
-	}
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
 
-	return tokens;
+  return tokens;
 }
 
 // speeded up version of above
 inline void Tokenize(std::vector<std::string> &output
-										 , const std::string& str
-										 , const std::string& delimiters = " \t")
+                     , const std::string& str
+                     , const std::string& delimiters = " \t")
 {
-	// Skip delimiters at beginning.
-	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-	// Find first "non-delimiter".
-	std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-	
-	while (std::string::npos != pos || std::string::npos != lastPos)
-	{
-		// Found a token, add it to the vector.
-		output.push_back(str.substr(lastPos, pos - lastPos));
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
-	}
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    output.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
 }
-	
+
 //! tokenise input string to vector of type T
 template<typename T>
 inline std::vector<T> Tokenize( const std::string &input
-															 , const std::string& delimiters = " \t") 
+                                , const std::string& delimiters = " \t")
 {
-	std::vector<std::string> stringVector = Tokenize(input, delimiters);
-	return Scan<T>( stringVector );
+  std::vector<std::string> stringVector = Tokenize(input, delimiters);
+  return Scan<T>( stringVector );
 }
 
 // speeded up version of above
 template<typename T>
 inline void Tokenize( std::vector<T> &output
-										 , const std::string &input
-										 , const std::string& delimiters = " \t")
+                      , const std::string &input
+                      , const std::string& delimiters = " \t")
 {
-	std::vector<std::string> stringVector;
-	Tokenize(stringVector, input, delimiters);
-	return Scan<T>(output, stringVector );
+  std::vector<std::string> stringVector;
+  Tokenize(stringVector, input, delimiters);
+  return Scan<T>(output, stringVector );
 }
-	
+
 inline std::vector<std::string> TokenizeMultiCharSeparator(
-																				const std::string& str,
-																				const std::string& separator)
+  const std::string& str,
+  const std::string& separator)
 {
-	std::vector<std::string> tokens;
+  std::vector<std::string> tokens;
 
-	size_t pos = 0;
-	// Find first "non-delimiter".
-	std::string::size_type nextPos     = str.find(separator, pos);
+  size_t pos = 0;
+  // Find first "non-delimiter".
+  std::string::size_type nextPos     = str.find(separator, pos);
 
-	while (nextPos != std::string::npos)
-	{
-		// Found a token, add it to the vector.
-		tokens.push_back(str.substr(pos, nextPos - pos));
-		// Skip delimiters.  Note the "not_of"
-		pos = nextPos + separator.size();
-		// Find next "non-delimiter"
-		nextPos	= str.find(separator, pos);
-	}
-	tokens.push_back(str.substr(pos, nextPos - pos));
+  while (nextPos != std::string::npos) {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(pos, nextPos - pos));
+    // Skip delimiters.  Note the "not_of"
+    pos = nextPos + separator.size();
+    // Find next "non-delimiter"
+    nextPos	= str.find(separator, pos);
+  }
+  tokens.push_back(str.substr(pos, nextPos - pos));
 
-	return tokens;
+  return tokens;
 }
 
 // speeded up version of above
 inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
-																			 ,const std::string& str
-																			 ,const std::string& separator)
+                                       ,const std::string& str
+                                       ,const std::string& separator)
 {
-	size_t pos = 0;
-	// Find first "non-delimiter".
-	std::string::size_type nextPos     = str.find(separator, pos);
-	
-	while (nextPos != std::string::npos)
-	{
-		// Found a token, add it to the vector.
-		output.push_back(Trim(str.substr(pos, nextPos - pos)));
-		// Skip delimiters.  Note the "not_of"
-		pos = nextPos + separator.size();
-		// Find next "non-delimiter"
-		nextPos	= str.find(separator, pos);
-	}
-	output.push_back(Trim(str.substr(pos, nextPos - pos)));
+  size_t pos = 0;
+  // Find first "non-delimiter".
+  std::string::size_type nextPos     = str.find(separator, pos);
+
+  while (nextPos != std::string::npos) {
+    // Found a token, add it to the vector.
+    output.push_back(Trim(str.substr(pos, nextPos - pos)));
+    // Skip delimiters.  Note the "not_of"
+    pos = nextPos + separator.size();
+    // Find next "non-delimiter"
+    nextPos	= str.find(separator, pos);
+  }
+  output.push_back(Trim(str.substr(pos, nextPos - pos)));
 }
 
-	
+
 /**
  * Convert vector of type T to string
  */
 template <typename T>
 std::string Join(const std::string& delimiter, const std::vector<T>& items)
 {
-	std::ostringstream outstr;
-	if(items.size() == 0) return "";
-	outstr << items[0];
-	for(unsigned int i = 1; i < items.size(); i++) 
-		outstr << delimiter << items[i];
-	return outstr.str();
+  std::ostringstream outstr;
+  if(items.size() == 0) return "";
+  outstr << items[0];
+  for(unsigned int i = 1; i < items.size(); i++)
+    outstr << delimiter << items[i];
+  return outstr.str();
 }
 
-	//! transform prob to natural log score
+//! transform prob to natural log score
 inline float TransformScore(float prob)
 {
-	return log(prob);
+  return log(prob);
 }
 
-//! transform natural log score to prob. Not currently used 
+//! transform natural log score to prob. Not currently used
 inline float UntransformScore(float score)
 {
-	return exp(score);
+  return exp(score);
 }
 
 //! irst number are in log 10, transform to natural log
 inline float TransformLMScore(float irstScore)
-{ 
-	return irstScore * 2.30258509299405f;
+{
+  return irstScore * 2.30258509299405f;
 }
 
 inline float UntransformLMScore(float logNScore)
-{ // opposite of above
-	return logNScore / 2.30258509299405f;
+{
+  // opposite of above
+  return logNScore / 2.30258509299405f;
 }
 
 //! make sure score doesn't fall below LOWEST_SCORE
 inline float FloorScore(float logScore)
 {
-	return (std::max)(logScore , LOWEST_SCORE);
+  return (std::max)(logScore , LOWEST_SCORE);
 }
 
 /** convert prob vector to log prob and calc inner product with weight vector.
  * At least, that's what I think it does, fn is only 9 lines but can't figure out what it does.
  * Not sure whether give zens a medal for being a genius, or shoot him for writing unreadable code. Mabe both...
  */
-inline float CalcTranslationScore(const std::vector<float> &probVector, 
-																	const std::vector<float> &weightT) 
+inline float CalcTranslationScore(const std::vector<float> &probVector,
+                                  const std::vector<float> &weightT)
 {
-	assert(weightT.size()==probVector.size());
-	float rv=0.0;
-	for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
-			sb!=se; ++sb, ++wb)
-		rv += TransformScore(*sb) * (*wb);
-	return rv;
+  assert(weightT.size()==probVector.size());
+  float rv=0.0;
+  for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
+      sb!=se; ++sb, ++wb)
+    rv += TransformScore(*sb) * (*wb);
+  return rv;
 }
 
-/** declaration of ToString() function to go in header for each class. 
- *	This function, as well as the operator<< fn for each class, is 
- *	for debugging purposes only. The output format is likely to change from 
- *	time-to-time as classes are updated so shouldn't be relied upon 
+/** declaration of ToString() function to go in header for each class.
+ *	This function, as well as the operator<< fn for each class, is
+ *	for debugging purposes only. The output format is likely to change from
+ *	time-to-time as classes are updated so shouldn't be relied upon
  *	for any decoding algorithm
 */
 #define TO_STRING()	 std::string ToString() const;
@@ -312,16 +309,15 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 		out << *this;								\
 		return out.str();						\
 	}															\
-
+ 
 //! delete and remove every element of a collection object such as map, set, list etc
 template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
-	for (typename COLL::const_iterator iter = coll.begin() ; iter != coll.end() ; ++iter)
-	{
-		delete (*iter);
-	}
-	coll.clear();
+  for (typename COLL::const_iterator iter = coll.begin() ; iter != coll.end() ; ++iter) {
+    delete (*iter);
+  }
+  coll.clear();
 }
 
 //! x-platform reference to temp folder
@@ -332,11 +328,11 @@ void CreateTempFile(std::ofstream  &fileStream, std::string &filePath);
 std::string GetMD5Hash(const std::string &filePath);
 
 //! save memory by getting rid of spare, unused elements in a collection
-template<typename T> 
-inline void ShrinkToFit(T& v) 
+template<typename T>
+inline void ShrinkToFit(T& v)
 {
-  if(v.capacity()>v.size()) 
-  	T(v).swap(v);
+  if(v.capacity()>v.size())
+    T(v).swap(v);
   assert(v.capacity()==v.size());
 }
 

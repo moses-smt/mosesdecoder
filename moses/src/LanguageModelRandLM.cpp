@@ -32,8 +32,9 @@ namespace Moses
 {
 using namespace std;
 
-bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType, 
-                               size_t nGramOrder) {
+bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorType,
+                               size_t nGramOrder)
+{
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_filePath = filePath;
@@ -48,13 +49,14 @@ bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorTyp
   return true;
 }
 
-void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection) { // add factors which have randlm id
+void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection)   // add factors which have randlm id
+{
   // code copied & paste from SRI LM class. should do template function
   // first get all bf vocab in map
   std::map<size_t, randlm::WordID> randlm_ids_map; // map from factor id -> randlm id
   size_t maxFactorId = 0; // to create lookup vector later on
   for(std::map<randlm::Word, randlm::WordID>::const_iterator vIter = m_lm->vocabStart();
-      vIter != m_lm->vocabEnd(); vIter++){
+      vIter != m_lm->vocabEnd(); vIter++) {
     // get word from randlm vocab and associate with (new) factor id
     size_t factorId=factorCollection.AddFactor(Output,m_factorType,vIter->first)->GetId();
     randlm_ids_map[factorId] = vIter->second;
@@ -83,12 +85,14 @@ void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection) { //
 
 }
 
-randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const {
+randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
+{
   return m_lm->getWordID(str);
 }
 
 float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
-				    State* finalState) const {
+                                    State* finalState) const
+{
   FactorType factorType = GetFactorType();
   // set up context
   randlm::WordID ngram[MAX_NGRAM_SIZE];

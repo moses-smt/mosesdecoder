@@ -1,6 +1,7 @@
 #include "FFState.h"
 
-namespace Moses {
+namespace Moses
+{
 
 FFState::~FFState() {}
 

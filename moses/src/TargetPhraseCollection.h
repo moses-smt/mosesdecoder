@@ -33,43 +33,47 @@ namespace Moses
 class TargetPhraseCollection
 {
 protected:
-	std::vector<TargetPhrase*> m_collection;
-	
-public:	
-	// iters
-	typedef std::vector<TargetPhrase*>::iterator iterator;
-	typedef std::vector<TargetPhrase*>::const_iterator const_iterator;
-	
-	iterator begin() { return m_collection.begin(); }
-	iterator end() { return m_collection.end(); }
-	const_iterator begin() const { return m_collection.begin(); }
-	const_iterator end() const { return m_collection.end(); }
-	
-	~TargetPhraseCollection()
-	{
-			RemoveAllInColl(m_collection);
-	}
+  std::vector<TargetPhrase*> m_collection;
 
-	//! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
-	void NthElement(size_t tableLimit);
+public:
+  // iters
+  typedef std::vector<TargetPhrase*>::iterator iterator;
+  typedef std::vector<TargetPhrase*>::const_iterator const_iterator;
 
-	//! number of target phrases in this collection
-	size_t GetSize() const
-	{
-		return m_collection.size();
-	}
-	//! wether collection has any phrases
-	bool IsEmpty() const
-	{ 
-		return m_collection.empty();
-	}	
-	//! add a new entry into collection
-	void Add(TargetPhrase *targetPhrase)
-	{
-		m_collection.push_back(targetPhrase);
-	}
-	
-	void Prune(bool adhereTableLimit, size_t tableLimit);
+  iterator begin() {
+    return m_collection.begin();
+  }
+  iterator end() {
+    return m_collection.end();
+  }
+  const_iterator begin() const {
+    return m_collection.begin();
+  }
+  const_iterator end() const {
+    return m_collection.end();
+  }
+
+  ~TargetPhraseCollection() {
+    RemoveAllInColl(m_collection);
+  }
+
+  //! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
+  void NthElement(size_t tableLimit);
+
+  //! number of target phrases in this collection
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+  //! wether collection has any phrases
+  bool IsEmpty() const {
+    return m_collection.empty();
+  }
+  //! add a new entry into collection
+  void Add(TargetPhrase *targetPhrase) {
+    m_collection.push_back(targetPhrase);
+  }
+
+  void Prune(bool adhereTableLimit, size_t tableLimit);
 
 };
 

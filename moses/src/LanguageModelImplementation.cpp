@@ -39,17 +39,17 @@ using namespace std;
 namespace Moses
 {
 float LanguageModelImplementation::GetValueGivenState(
-	const std::vector<const Word*> &contextFactor,
-	FFState &state) const
+  const std::vector<const Word*> &contextFactor,
+  FFState &state) const
 {
-	return GetValueForgotState(contextFactor, state);
+  return GetValueForgotState(contextFactor, state);
 }
 
 void LanguageModelImplementation::GetState(
-	const std::vector<const Word*> &contextFactor,
-	FFState &state) const
+  const std::vector<const Word*> &contextFactor,
+  FFState &state) const
 {
-	GetValueForgotState(contextFactor, state);
+  GetValueForgotState(contextFactor, state);
 }
-	
+
 }

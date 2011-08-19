@@ -34,45 +34,45 @@ namespace Moses
  */
 class PhraseDictionaryMemory : public PhraseDictionary
 {
-	typedef PhraseDictionary MyBase;
-	friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
+  typedef PhraseDictionary MyBase;
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryMemory&);
 
 protected:
-	PhraseDictionaryNode m_collection;
+  PhraseDictionaryNode m_collection;
 
-	TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
-	
+  TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
+
 public:
-	PhraseDictionaryMemory(size_t numScoreComponent, PhraseDictionaryFeature* feature) 
-       : PhraseDictionary(numScoreComponent,feature) {}
-	virtual ~PhraseDictionaryMemory();
+  PhraseDictionaryMemory(size_t numScoreComponent, PhraseDictionaryFeature* feature)
+    : PhraseDictionary(numScoreComponent,feature) {}
+  virtual ~PhraseDictionaryMemory();
 
-	bool Load(const std::vector<FactorType> &input
-								, const std::vector<FactorType> &output
-								, const std::string &filePath
-								, const std::vector<float> &weight
-								, size_t tableLimit
-								, const LMList &languageModels
-						    , float weightWP);
-	
-	const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
+  bool Load(const std::vector<FactorType> &input
+            , const std::vector<FactorType> &output
+            , const std::string &filePath
+            , const std::vector<float> &weight
+            , size_t tableLimit
+            , const LMList &languageModels
+            , float weightWP);
 
-	void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
+  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
-	// for mert
-  virtual void InitializeForInput(InputType const&) 
-    {/* Don't do anything source specific here as this object is shared between threads.*/}
-  
+  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
+
+  // for mert
+  virtual void InitializeForInput(InputType const&) {
+    /* Don't do anything source specific here as this object is shared between threads.*/
+  }
+
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
-      const InputType &,
-      const CellCollection &)
-  {
+    const InputType &,
+    const CellCollection &) {
     assert(false);
     return 0;
   }
 
-	TO_STRING();
-	
+  TO_STRING();
+
 };
 
 }

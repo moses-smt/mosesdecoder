@@ -45,66 +45,66 @@ namespace Moses
 Timer g_timer;
 
 string GetTempFolder()
-{	
+{
 #ifdef _WIN32
-	char *tmpPath = getenv("TMP");
-	string str(tmpPath);
-	if (str.substr(str.size() - 1, 1) != "\\")
-		str += "\\";
-	return str;
+  char *tmpPath = getenv("TMP");
+  string str(tmpPath);
+  if (str.substr(str.size() - 1, 1) != "\\")
+    str += "\\";
+  return str;
 #else
-	return "/tmp/";
+  return "/tmp/";
 #endif
 }
 
 void CreateTempFile(ofstream  &fileStream, string &filePath)
-{	
+{
 #ifdef _WIN32
-	char buffer[BUFSIZ];
-	::GetTempFileNameA(GetTempFolder().c_str(), "", 0, buffer);
-	filePath = buffer;
+  char buffer[BUFSIZ];
+  ::GetTempFileNameA(GetTempFolder().c_str(), "", 0, buffer);
+  filePath = buffer;
 #else
-	char buffer[L_tmpnam];
-	strcpy(buffer, GetTempFolder().c_str());
-	strcat(buffer, PROJECT_NAME);
-	strcat(buffer, "--XXXXXX");
-	mkstemp(buffer);
-	filePath = buffer;
+  char buffer[L_tmpnam];
+  strcpy(buffer, GetTempFolder().c_str());
+  strcat(buffer, PROJECT_NAME);
+  strcat(buffer, "--XXXXXX");
+  mkstemp(buffer);
+  filePath = buffer;
 #endif
-	fileStream.open(filePath.c_str(), ofstream::out | ofstream::app);
+  fileStream.open(filePath.c_str(), ofstream::out | ofstream::app);
 }
 
 
 const std::string ToLower(const std::string& str)
 {
-	std::string lc(str);
-	std::transform(lc.begin(), lc.end(), lc.begin(), (int(*)(int))std::tolower);
-	return lc;
+  std::string lc(str);
+  std::transform(lc.begin(), lc.end(), lc.begin(), (int(*)(int))std::tolower);
+  return lc;
 }
 
 template<>
 bool Scan<bool>(const std::string &input)
 {
-	std::string lc = ToLower(input);
-	if (lc == "yes" || lc == "y" || lc == "true" || lc == "1")
-		return true;
-	if (lc == "no" || lc == "n" || lc =="false" || lc == "0")
-		return false;
-	TRACE_ERR( "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl);
-	return false;
+  std::string lc = ToLower(input);
+  if (lc == "yes" || lc == "y" || lc == "true" || lc == "1")
+    return true;
+  if (lc == "no" || lc == "n" || lc =="false" || lc == "0")
+    return false;
+  TRACE_ERR( "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl);
+  return false;
 }
 
 bool FileExists(const std::string& filePath)
 {
   ifstream ifs(filePath.c_str());
-	return !ifs.fail();
+  return !ifs.fail();
 }
 
 const std::string Trim(const std::string& str, const std::string dropChars)
 {
-	std::string res = str;
-	res.erase(str.find_last_not_of(dropChars)+1);
-	return res.erase(0, res.find_first_not_of(dropChars));
+  std::string res = str;
+  res.erase(str.find_last_not_of(dropChars)+1);
+  return res.erase(0, res.find_first_not_of(dropChars));
 }
 
 void ResetUserTime()
@@ -113,70 +113,74 @@ void ResetUserTime()
 };
 
 void PrintUserTime(const std::string &message)
-{ 
-	g_timer.check(message.c_str());
+{
+  g_timer.check(message.c_str());
 }
 
 double GetUserTime()
 {
-        return g_timer.get_elapsed_time();
+  return g_timer.get_elapsed_time();
 }
 
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
 {
-	std::map<std::string, std::string> meta;
-	std::string lline = ToLower(line);
-	if (lline.find("<seg")!=0) return meta;
-	size_t close = lline.find(">");
-	if (close == std::string::npos) return meta; // error
-	size_t end = lline.find("</seg>");
-	std::string seg = Trim(lline.substr(4, close-4));
-	std::string text = line.substr(close+1, end - close - 1);
-	for (size_t i = 1; i < seg.size(); i++) {
-		if (seg[i] == '=' && seg[i-1] == ' ') {
-			std::string less = seg.substr(0, i-1) + seg.substr(i);
-			seg = less; i = 0; continue;
-		}
-		if (seg[i] == '=' && seg[i+1] == ' ') {
-			std::string less = seg.substr(0, i+1);
-			if (i+2 < seg.size()) less += seg.substr(i+2);
-			seg = less; i = 0; continue;
-		}
-	}
-	line = Trim(text);
-	if (seg == "") return meta;
-	for (size_t i = 1; i < seg.size(); i++) {
-		if (seg[i] == '=') {
-			std::string label = seg.substr(0, i);
-			std::string val = seg.substr(i+1);
-			if (val[0] == '"') {
-				val = val.substr(1);
-				size_t close = val.find('"');
-				if (close == std::string::npos) {
-					TRACE_ERR("SGML parse error: missing \"\n");
-					seg = "";
-					i = 0;
-				} else {
-					seg = val.substr(close+1);
-					val = val.substr(0, close);
-					i = 0;
-				}
-			} else {
-				size_t close = val.find(' ');
-				if (close == std::string::npos) {
-					seg = "";
-					i = 0;
-				} else {
-					seg = val.substr(close+1);
-					val = val.substr(0, close);
-				}
-			}
-			label = Trim(label);
-			seg = Trim(seg);
-			meta[label] = val;
-		}
-	}
-	return meta;
+  std::map<std::string, std::string> meta;
+  std::string lline = ToLower(line);
+  if (lline.find("<seg")!=0) return meta;
+  size_t close = lline.find(">");
+  if (close == std::string::npos) return meta; // error
+  size_t end = lline.find("</seg>");
+  std::string seg = Trim(lline.substr(4, close-4));
+  std::string text = line.substr(close+1, end - close - 1);
+  for (size_t i = 1; i < seg.size(); i++) {
+    if (seg[i] == '=' && seg[i-1] == ' ') {
+      std::string less = seg.substr(0, i-1) + seg.substr(i);
+      seg = less;
+      i = 0;
+      continue;
+    }
+    if (seg[i] == '=' && seg[i+1] == ' ') {
+      std::string less = seg.substr(0, i+1);
+      if (i+2 < seg.size()) less += seg.substr(i+2);
+      seg = less;
+      i = 0;
+      continue;
+    }
+  }
+  line = Trim(text);
+  if (seg == "") return meta;
+  for (size_t i = 1; i < seg.size(); i++) {
+    if (seg[i] == '=') {
+      std::string label = seg.substr(0, i);
+      std::string val = seg.substr(i+1);
+      if (val[0] == '"') {
+        val = val.substr(1);
+        size_t close = val.find('"');
+        if (close == std::string::npos) {
+          TRACE_ERR("SGML parse error: missing \"\n");
+          seg = "";
+          i = 0;
+        } else {
+          seg = val.substr(close+1);
+          val = val.substr(0, close);
+          i = 0;
+        }
+      } else {
+        size_t close = val.find(' ');
+        if (close == std::string::npos) {
+          seg = "";
+          i = 0;
+        } else {
+          seg = val.substr(close+1);
+          val = val.substr(0, close);
+        }
+      }
+      label = Trim(label);
+      seg = Trim(seg);
+      meta[label] = val;
+    }
+  }
+  return meta;
 }
 
 }

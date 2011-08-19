@@ -16,7 +16,7 @@ float ScoreComponentCollection::GetWeightedScore() const
 {
 	return m_scores.inner_product(StaticData::Instance().GetAllWeights().m_scores);
 }
-		
+
 void ScoreComponentCollection::ZeroAllLM(const LMList& lmList)
 {
   for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) {

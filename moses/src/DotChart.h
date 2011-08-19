@@ -2,17 +2,17 @@
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -30,36 +30,35 @@ namespace Moses
 
 class ProcessedRule
 {
-	friend std::ostream& operator<<(std::ostream&, const ProcessedRule&);
+  friend std::ostream& operator<<(std::ostream&, const ProcessedRule&);
 
 protected:
-	const PhraseDictionaryNodeSCFG &m_lastNode;
-	const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
+  const PhraseDictionaryNodeSCFG &m_lastNode;
+  const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
 public:
-	// used only to init dot stack.
-	explicit ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode)
-		:m_lastNode(lastNode)
-		,m_wordsConsumed(NULL)
-	{}
-	ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
-		:m_lastNode(lastNode)
-		,m_wordsConsumed(wordsConsumed)
-	{}
-	~ProcessedRule()
-	{
+  // used only to init dot stack.
+  explicit ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode)
+    :m_lastNode(lastNode)
+    ,m_wordsConsumed(NULL)
+  {}
+  ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
+    :m_lastNode(lastNode)
+    ,m_wordsConsumed(wordsConsumed)
+  {}
+  ~ProcessedRule() {
 #ifdef USE_BOOST_POOL
     // Do nothing.  WordConsumed objects are stored in object pools owned by
     // the sentence-specific ChartRuleLookupManagers.
 #else
-		delete m_wordsConsumed;
+    delete m_wordsConsumed;
 #endif
-	}
-	const PhraseDictionaryNodeSCFG &GetLastNode() const
-	{ return m_lastNode; }
-	const WordConsumed *GetLastWordConsumed() const
-	{
-		return m_wordsConsumed;
-	}
+  }
+  const PhraseDictionaryNodeSCFG &GetLastNode() const {
+    return m_lastNode;
+  }
+  const WordConsumed *GetLastWordConsumed() const {
+    return m_wordsConsumed;
+  }
 };
 
 typedef std::vector<const ProcessedRule*> ProcessedRuleList;
@@ -71,42 +70,51 @@ typedef std::vector<const ProcessedRule*> ProcessedRuleList;
 class ProcessedRuleColl
 {
 protected:
-	typedef std::vector<ProcessedRuleList> CollType;
-	CollType m_coll;
-    ProcessedRuleList m_runningNodes;
+  typedef std::vector<ProcessedRuleList> CollType;
+  CollType m_coll;
+  ProcessedRuleList m_runningNodes;
 
 public:
-	typedef CollType::iterator iterator;
-	typedef CollType::const_iterator const_iterator;
+  typedef CollType::iterator iterator;
+  typedef CollType::const_iterator const_iterator;
 
-	const_iterator begin() const { return m_coll.begin(); }
-	const_iterator end() const { return m_coll.end(); }
-	iterator begin() { return m_coll.begin(); }
-	iterator end() { return m_coll.end(); }
+  const_iterator begin() const {
+    return m_coll.begin();
+  }
+  const_iterator end() const {
+    return m_coll.end();
+  }
+  iterator begin() {
+    return m_coll.begin();
+  }
+  iterator end() {
+    return m_coll.end();
+  }
 
-	ProcessedRuleColl(size_t size)
-      : m_coll(size)
-    {}
+  ProcessedRuleColl(size_t size)
+    : m_coll(size)
+  {}
 
-	~ProcessedRuleColl();
+  ~ProcessedRuleColl();
 
-	const ProcessedRuleList &Get(size_t pos) const
-	{ return m_coll[pos]; }
-	ProcessedRuleList &Get(size_t pos)
-	{ return m_coll[pos]; }
+  const ProcessedRuleList &Get(size_t pos) const {
+    return m_coll[pos];
+  }
+  ProcessedRuleList &Get(size_t pos) {
+    return m_coll[pos];
+  }
 
-	void Add(size_t pos, const ProcessedRule *processedRule)
-	{
-		assert(processedRule);
-		m_coll[pos].push_back(processedRule);
-        if (!processedRule->GetLastNode().IsLeaf())
-        {
-		    m_runningNodes.push_back(processedRule);
-        }
-	}
+  void Add(size_t pos, const ProcessedRule *processedRule) {
+    assert(processedRule);
+    m_coll[pos].push_back(processedRule);
+    if (!processedRule->GetLastNode().IsLeaf()) {
+      m_runningNodes.push_back(processedRule);
+    }
+  }
 
-	const ProcessedRuleList &GetRunningNodes() const
-	{ return m_runningNodes; }
+  const ProcessedRuleList &GetRunningNodes() const {
+    return m_runningNodes;
+  }
 
 };
 

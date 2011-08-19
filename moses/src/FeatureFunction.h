@@ -5,7 +5,8 @@
 
 #include "ScoreProducer.h"
 
-namespace Moses {
+namespace Moses
+{
 
 class TargetPhrase;
 class Hypothesis;
@@ -13,7 +14,8 @@ class FFState;
 class InputType;
 class ScoreComponentCollection;
 
-class FeatureFunction: public ScoreProducer {
+class FeatureFunction: public ScoreProducer
+{
 
 public:
   FeatureFunction(const std::string& description) :
@@ -23,7 +25,8 @@ public:
 
 };
 
-class StatelessFeatureFunction: public FeatureFunction {
+class StatelessFeatureFunction: public FeatureFunction
+{
 
 public:
   StatelessFeatureFunction(const std::string& description) :
@@ -42,7 +45,8 @@ public:
   bool IsStateless() const;
 };
 
-class StatefulFeatureFunction: public FeatureFunction {
+class StatefulFeatureFunction: public FeatureFunction
+{
 
 public:
   StatefulFeatureFunction(const std::string& description) :
@@ -59,7 +63,7 @@ public:
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const = 0;
-  
+
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 

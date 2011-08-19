@@ -39,22 +39,22 @@ namespace Moses
 class LanguageModelSRI : public LanguageModelPointerState
 {
 protected:
-	std::vector<VocabIndex> m_lmIdLookup;
-	::Vocab			*m_srilmVocab;
-	Ngram 			*m_srilmModel;
-	VocabIndex	m_unknownId;
+  std::vector<VocabIndex> m_lmIdLookup;
+  ::Vocab			*m_srilmVocab;
+  Ngram 			*m_srilmModel;
+  VocabIndex	m_unknownId;
 
-	float GetValue(VocabIndex wordId, VocabIndex *context) const;
-	void CreateFactors();
-	VocabIndex GetLmID( const std::string &str ) const;
-	VocabIndex GetLmID( const Factor *factor ) const;
-	
+  float GetValue(VocabIndex wordId, VocabIndex *context) const;
+  void CreateFactors();
+  VocabIndex GetLmID( const std::string &str ) const;
+  VocabIndex GetLmID( const Factor *factor ) const;
+
 public:
-	LanguageModelSRI();
-	~LanguageModelSRI();
-	bool Load(const std::string &filePath
-					, FactorType factorType
-					, size_t nGramOrder);
+  LanguageModelSRI();
+  ~LanguageModelSRI();
+  bool Load(const std::string &filePath
+            , FactorType factorType
+            , size_t nGramOrder);
 
   virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 };

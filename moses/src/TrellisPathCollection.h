@@ -29,12 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-struct CompareTrellisPathCollection
-{
-	bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const
-	{
-		return (pathA->GetTotalScore() > pathB->GetTotalScore());
-	}
+struct CompareTrellisPathCollection {
+  bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const {
+    return (pathA->GetTotalScore() > pathB->GetTotalScore());
+  }
 };
 
 /** priority queue used in Manager to store list of contenders for N-Best list.
@@ -42,53 +40,48 @@ struct CompareTrellisPathCollection
 	*/
 class TrellisPathCollection
 {
-	friend std::ostream& operator<<(std::ostream&, const TrellisPathCollection&);
+  friend std::ostream& operator<<(std::ostream&, const TrellisPathCollection&);
 
 protected:
-	typedef std::multiset<TrellisPath*, CompareTrellisPathCollection> CollectionType;
-	CollectionType m_collection;
+  typedef std::multiset<TrellisPath*, CompareTrellisPathCollection> CollectionType;
+  CollectionType m_collection;
 
-public:	
-	//iterator begin() { return m_collection.begin(); }
-	TrellisPath *pop()
-	{
-		TrellisPath *top = *m_collection.begin();
+public:
+  //iterator begin() { return m_collection.begin(); }
+  TrellisPath *pop() {
+    TrellisPath *top = *m_collection.begin();
 
-		// Detach
-		m_collection.erase(m_collection.begin());
-		return top;
-	}
+    // Detach
+    m_collection.erase(m_collection.begin());
+    return top;
+  }
 
-	~TrellisPathCollection()
-	{
-		// clean up
-		RemoveAllInColl(m_collection);
-	}
-	
-	//! add a new entry into collection
-	void Add(TrellisPath *trellisPath)
-	{
-		m_collection.insert(trellisPath);
-	}
-	
-	size_t GetSize() const
-	{
-		return m_collection.size();
-	}
+  ~TrellisPathCollection() {
+    // clean up
+    RemoveAllInColl(m_collection);
+  }
 
-	void Prune(size_t newSize);
+  //! add a new entry into collection
+  void Add(TrellisPath *trellisPath) {
+    m_collection.insert(trellisPath);
+  }
+
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+
+  void Prune(size_t newSize);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const TrellisPathCollection& pathColl)
 {
-	TrellisPathCollection::CollectionType::const_iterator iter;
-	
-	for (iter = pathColl.m_collection.begin() ; iter != pathColl.m_collection.end() ; ++iter)
-	{
-		const TrellisPath &path = **iter;
-		out << path << std::endl;
-	}
-	return out;
+  TrellisPathCollection::CollectionType::const_iterator iter;
+
+  for (iter = pathColl.m_collection.begin() ; iter != pathColl.m_collection.end() ; ++iter) {
+    const TrellisPath &path = **iter;
+    out << path << std::endl;
+  }
+  return out;
 }
 
 }

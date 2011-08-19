@@ -34,68 +34,66 @@ LMList::~LMList()
 {
 }
 
-void LMList::CleanUp() 
+void LMList::CleanUp()
 {
-	RemoveAllInColl(m_coll);
+  RemoveAllInColl(m_coll);
 }
-	
+
 void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, ScoreComponentCollection* breakdown) const
-{ 
-	const_iterator lmIter;
-	for (lmIter = begin(); lmIter != end(); ++lmIter)
-	{
-		const LanguageModel &lm = **lmIter;
-        const float weightLM = lm.GetWeight();
+{
+  const_iterator lmIter;
+  for (lmIter = begin(); lmIter != end(); ++lmIter) {
+    const LanguageModel &lm = **lmIter;
+    const float weightLM = lm.GetWeight();
 
-		float fullScore, nGramScore;
+    float fullScore, nGramScore;
 
-		// do not process, if factors not defined yet (happens in partial translation options)
-		if (!lm.Useable(phrase))
-			continue;
+    // do not process, if factors not defined yet (happens in partial translation options)
+    if (!lm.Useable(phrase))
+      continue;
 
-		lm.CalcScore(phrase, fullScore, nGramScore);
+    lm.CalcScore(phrase, fullScore, nGramScore);
 
-		breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
-		retFullScore   += fullScore * weightLM;
-		retNGramScore	+= nGramScore * weightLM;
-	}	
+    breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
+    retFullScore   += fullScore * weightLM;
+    retNGramScore	+= nGramScore * weightLM;
+  }
 }
 
 void LMList::CalcAllLMScores(const Phrase &phrase
-											 , ScoreComponentCollection &nGramOnly
-											 , ScoreComponentCollection *beginningBitsOnly) const
+                             , ScoreComponentCollection &nGramOnly
+                             , ScoreComponentCollection *beginningBitsOnly) const
 {
-	assert(phrase.GetNumTerminals() == phrase.GetSize());
-	
-	const_iterator lmIter;
-	for (lmIter = begin(); lmIter != end(); ++lmIter)
-	{
-		const LanguageModel &lm = **lmIter;
-		
-		// do not process, if factors not defined yet (happens in partial translation options)
-		if (!lm.Useable(phrase))
-			continue;
-		
-		float beginningScore, nGramScore;
-		lm.CalcScoreChart(phrase, beginningScore, nGramScore);
-		beginningScore = UntransformLMScore(beginningScore);
-		nGramScore = UntransformLMScore(nGramScore);
-		
-		nGramOnly.PlusEquals(&lm, nGramScore);
-		
-		if (beginningBitsOnly)
-			beginningBitsOnly->PlusEquals(&lm, beginningScore);
-		
-	}	
-	
+  assert(phrase.GetNumTerminals() == phrase.GetSize());
+
+  const_iterator lmIter;
+  for (lmIter = begin(); lmIter != end(); ++lmIter) {
+    const LanguageModel &lm = **lmIter;
+
+    // do not process, if factors not defined yet (happens in partial translation options)
+    if (!lm.Useable(phrase))
+      continue;
+
+    float beginningScore, nGramScore;
+    lm.CalcScoreChart(phrase, beginningScore, nGramScore);
+    beginningScore = UntransformLMScore(beginningScore);
+    nGramScore = UntransformLMScore(nGramScore);
+
+    nGramOnly.PlusEquals(&lm, nGramScore);
+
+    if (beginningBitsOnly)
+      beginningBitsOnly->PlusEquals(&lm, beginningScore);
+
+  }
+
 }
 
-	
+
 void LMList::Add(LanguageModel *lm)
 {
 	m_coll.push_back(lm);
 	m_maxNGramOrder = (lm->GetNGramOrder() > m_maxNGramOrder) ? lm->GetNGramOrder() : m_maxNGramOrder;
 }
-	
+
 }
 

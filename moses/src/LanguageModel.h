@@ -45,12 +45,12 @@ class Phrase;
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction
 {
-protected:	
+protected:
 #ifdef WITH_THREADS
-	// if we have threads, we also have boost and can let it handle thread-safe reference counting
-	boost::shared_ptr<LanguageModelImplementation> m_implementation;
+  // if we have threads, we also have boost and can let it handle thread-safe reference counting
+  boost::shared_ptr<LanguageModelImplementation> m_implementation;
 #else
-	LanguageModelImplementation *m_implementation;
+  LanguageModelImplementation *m_implementation;
 #endif
 
 public:
