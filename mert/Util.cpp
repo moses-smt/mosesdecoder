@@ -46,6 +46,14 @@ int getNextPound(std::string &theString, std::string &substring, const std::stri
   return (pos);
 };
 
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+  std::stringstream ss(s);
+  std::string item;
+  while(std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+}
+
 inputfilestream::inputfilestream(const std::string &filePath)
   : std::istream(0),
     m_streambuf(0)

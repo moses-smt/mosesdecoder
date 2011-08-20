@@ -34,7 +34,7 @@ public:
   }
 
   size_t NumberOfScores() {
-    cerr << "PerScorer: 3" << endl;
+    // cerr << "PerScorer: 3" << endl;
     return 3;
   };
 

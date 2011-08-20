@@ -51,7 +51,7 @@ public:
   static const int LENGTH;
 
   size_t NumberOfScores() {
-    cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl;
+    // cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl;
     return (2 * LENGTH + 1);
   };
 
