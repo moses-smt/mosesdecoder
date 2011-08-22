@@ -27,7 +27,8 @@ TERsrc/tercalc.cpp \
 TERsrc/tinystr.cpp \
 TERsrc/tinyxmlerror.cpp \
 TERsrc/tools.cpp \
-TerScorer.cpp
+TerScorer.cpp \
+CderScorer.cpp
 
 extractor_SOURCES = Util.cpp \
      Timer.cpp \
@@ -57,7 +58,8 @@ TERsrc/tercalc.cpp \
 TERsrc/tinystr.cpp \
 TERsrc/tinyxmlerror.cpp \
 TERsrc/tools.cpp \
-TerScorer.cpp
+TerScorer.cpp \
+CderScorer.cpp
 
 mert_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
 extractor_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
