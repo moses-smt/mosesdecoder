@@ -1,6 +1,15 @@
 #!/usr/bin/perl -w
 
 use strict;
+
+BEGIN {
+use Cwd qw/ abs_path /; 
+use File::Basename; 
+my $script_dir = dirname(abs_path($0));
+print STDERR  "script_dir=$script_dir\n";
+push @INC, $script_dir;
+}
+
 use FindBin qw($Bin);
 use MosesRegressionTesting;
 use Getopt::Long;
