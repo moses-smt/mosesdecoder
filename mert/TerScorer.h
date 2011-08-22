@@ -38,7 +38,7 @@ public:
     cerr << "I AM TerScorer" << std::endl;
   }
   size_t NumberOfScores() {
-    cerr << "TerScorer: " << (LENGTH + 1) << endl;
+    // cerr << "TerScorer: " << (LENGTH + 1) << endl;
     return (LENGTH + 1);
   };
 

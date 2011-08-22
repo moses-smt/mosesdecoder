@@ -18,7 +18,7 @@ ScoreData::ScoreData(Scorer& ptr):
   score_type = theScorer->getName();
   theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData
   number_of_scores = theScorer->NumberOfScores();
-  TRACE_ERR("ScoreData: number_of_scores: " << number_of_scores << std::endl);
+  // TRACE_ERR("ScoreData: number_of_scores: " << number_of_scores << std::endl);
 };
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
