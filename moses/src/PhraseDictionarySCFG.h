@@ -24,16 +24,14 @@
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryNodeSCFG.h"
-#include "CellCollection.h"
 #include "InputType.h"
-#include "WordConsumed.h"
 #include "NonTerminal.h"
 
 namespace Moses
 {
 class ChartTranslationOptionList;
-class ProcessedRuleStack;
-class ProcessedRuleColl;
+class DottedRuleStack;
+class DottedRuleColl;
 
 /*** Implementation of a phrase table in a trie.  Looking up a phrase of
  * length n words requires n look-ups to find the TargetPhraseCollection.
@@ -106,7 +104,7 @@ public:
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const CellCollection &);
+    const ChartCellCollection &);
 };
 
 }  // namespace Moses

@@ -93,18 +93,12 @@ FullScoreReturn Model::FullScore(const State &in_state, const WordIndex new_word
     const_history = local_history;
   }
   FullScoreReturn ret;
-  if (new_word != not_found_) {
-    ret.ngram_length = MatchedLength(*sri_, new_word, const_history);
-    out_state.history_[0] = new_word;
-    out_state.valid_length_ = std::min<unsigned char>(ret.ngram_length, Order() - 1);
-    std::copy(const_history, const_history + out_state.valid_length_ - 1, out_state.history_ + 1);
-    if (out_state.valid_length_ < kMaxOrder - 1) {
-      out_state.history_[out_state.valid_length_] = Vocab_None;
-    }
-  } else {
-    ret.ngram_length = 0;
-    if (kMaxOrder > 1) out_state.history_[0] = Vocab_None;
-    out_state.valid_length_ = 0;
+  ret.ngram_length = MatchedLength(*sri_, new_word, const_history);
+  out_state.history_[0] = new_word;
+  out_state.valid_length_ = std::min<unsigned char>(ret.ngram_length, Order() - 1);
+  std::copy(const_history, const_history + out_state.valid_length_ - 1, out_state.history_ + 1);
+  if (out_state.valid_length_ < kMaxOrder - 1) {
+    out_state.history_[out_state.valid_length_] = Vocab_None;
   }
   ret.prob = sri_->wordProb(new_word, const_history);
   return ret;

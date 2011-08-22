@@ -64,13 +64,19 @@ Parameter::Parameter()
   AddParam("n-best-list", "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   AddParam("n-best-factor", "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
   AddParam("print-all-derivations", "to print all derivations in search graph");
-	AddParam("output-factors", "list of factors in the output");
-	AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
-	AddParam("report-all-factors", "report all factors in output, not just first");
-	AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
-	AddParam("report-segmentation", "t", "report phrase segmentation in the output");
-	AddParam("stack", "s", "maximum stack size for histogram pruning");
-	AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
+  AddParam("output-factors", "list of factors in the output");
+  AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
+  AddParam("report-all-factors", "report all factors in output, not just first");
+  AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
+  AddParam("report-segmentation", "t", "report phrase segmentation in the output");
+#ifdef HAVE_SYNLM
+	AddParam("slmodel-file", "location of the syntactic language model file(s)");
+	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
+	AddParam("slmodel-factor", "factor to use with syntactic language model");
+	AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
+#endif
+  AddParam("stack", "s", "maximum stack size for histogram pruning");
+  AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
 	AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
 	AddParam("ttable-file", "location and properties of the translation tables");
@@ -129,14 +135,12 @@ Parameter::Parameter()
 	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
-
 	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
 	AddParam("non-terminals", "list of non-term symbols, space separated");
 	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
 	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
-
 	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
 	AddParam("discrim-lmodel-file", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
@@ -147,11 +151,10 @@ Parameter::Parameter()
   AddParam("source-word-deletion-feature", "Count feature for each unaligned source word");
   AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
   AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
+  AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
+  AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
   AddParam("show-weights", "print feature weights and exit");
-
-    AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
-    AddParam("show-weights", "print feature weights and exit");
-    AddParam("alignment-output-file", "print output word alignments into given file");
+  AddParam("alignment-output-file", "print output word alignments into given file");
 }
 
 Parameter::~Parameter()
@@ -278,6 +281,18 @@ bool Parameter::LoadParam(int argc, char* argv[])
 bool Parameter::Validate()
 {
   bool noErrorFlag = true;
+
+  PARAM_MAP::const_iterator iterParams;
+  for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
+    const std::string &key = iterParams->first;
+    
+    if (m_valid.find(key) == m_valid.end())
+    {
+      UserMessage::Add("Unknown parameter " + key);
+      noErrorFlag = false;
+    }
+  }
+  
 
   // required parameters
   if (m_setting["ttable-file"].size() == 0) {

@@ -8,7 +8,7 @@ namespace Moses {
 
 size_t BleuScoreState::bleu_order = 4;
 
-BleuScoreState::BleuScoreState(): m_words(Output),
+BleuScoreState::BleuScoreState(): m_words(Output,1),
                                   m_source_length(0),
                                   m_target_length(0),
                                   m_scaled_ref_length(0),
@@ -93,7 +93,7 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
           ref_pair.first = refTokens.size();
           for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {
               for (size_t end_idx = order; end_idx <= refTokens.size(); end_idx++) {
-                  Phrase ngram(Output);
+                  Phrase ngram(Output,1);
                   for (size_t s_idx = end_idx - order; s_idx < end_idx; s_idx++) {
                       const Factor* f = fc.AddFactor(Output, 0, refTokens[s_idx]);
                       Word w;

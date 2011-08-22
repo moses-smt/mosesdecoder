@@ -18,20 +18,31 @@ function diff() {
 }
 
 function compute_diff($base,$change) {
+  print "<H3>Experiment $change</H3><TABLE>";
+
+  // get parameter values for the two runs
   $parameter_base = load_parameter($base);
   $parameter_change = load_parameter($change);
-  print "<H3>Experiment $change</H3><TABLE>";
-  while (list($parameter,$base_value) = each($parameter_base)) {
+
+  // get parameters and sort them
+  $all_parameters = array_keys($parameter_base);
+  foreach (array_keys($parameter_change) as $parameter) {
+    if (!array_key_exists($parameter,$parameter_base)) {
+      $all_parameters[] = $parameter;
+    }
+  }
+  sort($all_parameters);
+
+  // display differences
+  foreach ($all_parameters as $parameter) {
+    if (!array_key_exists($parameter,$parameter_base)) {
+      $parameter_base[$parameter] = "";
+    } 
     if (!array_key_exists($parameter,$parameter_change)) {
       $parameter_change[$parameter] = "";
     }
-    if ($base_value != $parameter_change[$parameter]) {
-      output_diff_line($parameter,$base_value,$parameter_change[$parameter]);
-    }
-  }
-  while (list($parameter,$change_value) = each($parameter_change)) {
-    if (!array_key_exists($parameter,$parameter_base)) {
-      output_diff_line($parameter,"",$change_value);
+    if ($parameter_base[$parameter] != $parameter_change[$parameter]) {
+      output_diff_line($parameter,$parameter_base[$parameter],$parameter_change[$parameter]);
     }
   }
   print "</TABLE>\n";

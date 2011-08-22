@@ -21,7 +21,7 @@
 #ifndef moses_ChartRuleLookupManager_h
 #define moses_ChartRuleLookupManager_h
 
-#include "CellCollection.h"
+#include "ChartCellCollection.h"
 #include "InputType.h"
 
 namespace Moses
@@ -39,7 +39,7 @@ class ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManager(const InputType &sentence,
-                         const CellCollection &cellColl)
+                         const ChartCellCollection &cellColl)
     : m_sentence(sentence)
     , m_cellCollection(cellColl) {}
 
@@ -48,7 +48,7 @@ public:
   const InputType &GetSentence() const {
     return m_sentence;
   }
-  const CellCollection &GetCellCollection() const {
+  const ChartCellCollection &GetCellCollection() const {
     return m_cellCollection;
   }
 
@@ -63,7 +63,7 @@ private:
   ChartRuleLookupManager &operator=(const ChartRuleLookupManager &);
 
   const InputType &m_sentence;
-  const CellCollection &m_cellCollection;
+  const ChartCellCollection &m_cellCollection;
 };
 
 }  // namespace Moses

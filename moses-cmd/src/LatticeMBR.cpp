@@ -36,7 +36,7 @@ void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngr
 {
   for (int k = 0; k < (int)bleu_order; k++) {
     for(int i =0; i < max((int)sentence.size()-k,0); i++) {
-      Phrase ngram(Output);
+      Phrase ngram(Output, k+1);
       for ( int j = i; j<= i+k; j++) {
         ngram.AddWord(sentence[j]);
       }
@@ -402,7 +402,7 @@ const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & inco
   for (size_t start = 0; start < currPhrase.GetSize(); ++start) {
     for (size_t end = start; end < start + bleu_order; ++end) {
       if (end < currPhrase.GetSize()) {
-        Phrase edgeNgram(Output);
+        Phrase edgeNgram(Output, end-start+1);
         for (size_t index = start; index <= end; ++index) {
           edgeNgram.AddWord(currPhrase.GetWord(index));
         }
@@ -433,8 +433,8 @@ const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & inco
           cerr << "edgeInNgram: " << edgeIncomingNgram << endl;
         }
 
-        Phrase edgeSuffix(Output);
-        Phrase ngramSuffix(Output);
+        Phrase edgeSuffix(Output, ARRAY_SIZE_INCR);
+        Phrase ngramSuffix(Output, ARRAY_SIZE_INCR);
         GetPhraseSuffix(edgeWords,back,edgeSuffix);
         GetPhraseSuffix(edgeIncomingNgram,back,ngramSuffix);
 

@@ -36,10 +36,12 @@ my $ZCAT = "gzip -cd";
 # get optional parameters
 my $opt_hierarchical = 0;
 my $binarizer = undef;
+my $opt_min_non_initial_rule_count = undef;
 
 GetOptions(
     "Hierarchical" => \$opt_hierarchical,
-    "Binarizer=s" => \$binarizer
+    "Binarizer=s" => \$binarizer,
+    "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
 ) or exit(1);
 
 # get command line parameters
@@ -55,7 +57,7 @@ $dir = ensure_full_path($dir);
 
 # buggy directory in place?
 if (-d $dir && ! -e "$dir/info") {
-    print STDERR "The directory $dir exists but does not belong to me. Delete $dir!\n";
+    print STDERR "The directory $dir already exists. Please delete $dir and rerun!\n";
     exit(1);
 }
 
@@ -225,7 +227,9 @@ for(my $i=0;$i<=$#TABLE;$i++) {
 
     if ($opt_hierarchical) {
         my $tmp_input = $TMP_INPUT_FILENAME{$factors};
-        open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $tmp_input |");
+        my $options = "";
+        $options .= "--min-non-initial-rule-count=$opt_min_non_initial_rule_count" if defined($opt_min_non_initial_rule_count);
+        open(PIPE,"$openstring $SCRIPTS_ROOTDIR/training/filter-rule-table.py $options $tmp_input |");
         while (my $line = <PIPE>) {
             print FILE_OUT $line
         }

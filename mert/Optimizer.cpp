@@ -28,7 +28,7 @@ void Optimizer::SetFData(FeatureData *F)
   FData=F;
 };
 
-Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start):scorer(NULL),FData(NULL)
+Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start, unsigned int nrandom):scorer(NULL),FData(NULL),number_of_random_directions(nrandom)
 {
   //warning: the init vector is a full set of parameters, of dimension pdim!
 
@@ -381,15 +381,20 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const
 
     Point  linebest;
 
-    for(unsigned int d=0; d<Point::getdim(); d++) {
+    for(unsigned int d=0; d<Point::getdim()+number_of_random_directions; d++) {
       if(verboselevel()>4) {
         //	cerr<<"minimizing along direction "<<d<<endl;
         cerr<<"starting point: " << P << " => " << prevscore << endl;
       }
       Point direction;
-      for(unsigned int i=0; i<Point::getdim(); i++)
-        direction[i];
-      direction[d]=1.0;
+      if (d<Point::getdim()) { // regular updates along one dimension
+        for(unsigned int i=0; i<Point::getdim(); i++)
+          direction[i]=0.0;
+        direction[d]=1.0;
+      }
+      else { // random direction update
+        direction.Randomize();
+      }
       statscore_t curscore=LineOptimize(P,direction,linebest);//find the minimum on the line
       if(verboselevel()>5) {
         cerr<<"direction: "<< d << " => " << curscore << endl;
@@ -417,19 +422,46 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const
   return bestscore;
 }
 
+//---------------- code for the optimizer with random directions
+float RandomDirectionOptimizer::eps=0.0001;
+statscore_t RandomDirectionOptimizer::TrueRun(Point& P)const
+{
+  statscore_t prevscore=P.score;
+
+  // do specified number of random direction optimizations
+  unsigned int nrun = 0;
+  unsigned int nrun_no_change = 0;
+  for(; nrun_no_change<number_of_random_directions; nrun++, nrun_no_change++)
+  {
+    // choose a random direction in which to optimize
+    Point direction;
+    direction.Randomize();
+
+    //find the minimum on the line
+    statscore_t score=LineOptimize(P,direction,P);
+    if(verboselevel()>4) {
+      cerr<<"direction: "<< direction << " => " << score;
+      cerr<<" ("<< (score-prevscore) << ")" << endl;
+      cerr<<"\tending point: "<< P << " => " << score << endl;
+    }
+
+    if (score-prevscore > eps)
+      nrun_no_change=0;
+    prevscore = score;
+  }
+
+  if(verboselevel()>2) {
+    cerr<<"end Powell Algo, nrun="<<nrun<<endl;
+  }
+  return prevscore;
+}
 
 /**RandomOptimizer to use as beaseline and test.\n
 Just return a random point*/
 
 statscore_t RandomOptimizer::TrueRun(Point& P)const
 {
-  vector<parameter_t> min(Point::getdim());
-  vector<parameter_t> max(Point::getdim());
-  for(unsigned int d=0; d<Point::getdim(); d++) {
-    min[d]=0.0;
-    max[d]=1.0;
-  }
-  P.Randomize(min,max);
+  P.Randomize();
   statscore_t score=GetStatScore(P);
   P.score=score;
   return score;
@@ -442,6 +474,7 @@ void OptimizerFactory::SetTypeNames()
   if(typenames.empty()) {
     typenames.resize(NOPTIMIZER);
     typenames[POWELL]="powell";
+    typenames[RANDOM_DIRECTION]="random-direction";
     typenames[RANDOM]="random";
     //add new type there
   }
@@ -464,9 +497,8 @@ OptimizerFactory::OptType OptimizerFactory::GetOType(string type)
   return((OptType)thetype);
 };
 
-Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,vector<parameter_t> start,string type)
+Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,vector<parameter_t> start,string type, unsigned int nrandom)
 {
-
   OptType T=GetOType(type);
   if(T==NOPTIMIZER) {
     cerr<<"Error: unknown Optimizer type "<<type<<endl;
@@ -479,10 +511,13 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,ve
 
   switch((OptType)T) {
   case POWELL:
-    return new SimpleOptimizer(dim,i2o,start);
+    return new SimpleOptimizer(dim,i2o,start,nrandom);
+    break;
+  case RANDOM_DIRECTION:
+    return new RandomDirectionOptimizer(dim,i2o,start,nrandom);
     break;
   case RANDOM:
-    return new RandomOptimizer(dim,i2o,start);
+    return new RandomOptimizer(dim,i2o,start,nrandom);
     break;
   default:
     cerr<<"Error: unknown optimizer"<<type<<endl;

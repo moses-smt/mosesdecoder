@@ -2,6 +2,8 @@
 
 # NOTE:
 # Versions 1.9 (or higher) of aclocal and automake are required.
+# And version >=2.60 of autoconf
+# And version >=1.4.7 of m4
 
 # For Mac OSX users:
 # Standard distribution usually includes versions 1.6.
@@ -53,7 +55,7 @@ $LIBTOOLIZE || die "libtoolize failed"
 
 echo
 echo "You should now be able to configure and build:"
-echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
+echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
 echo "   make -j 4"
 echo
 

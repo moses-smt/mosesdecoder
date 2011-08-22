@@ -34,17 +34,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef WIN32
 // Include Visual Leak Detector
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #include <fstream>
 #include "Main.h"
-#include "TrellisPath.h"
 #include "FactorCollection.h"
 #include "Manager.h"
 #include "Phrase.h"
 #include "Util.h"
-#include "TrellisPathList.h"
 #include "Timer.h"
 #include "IOWrapper.h"
 #include "Sentence.h"
@@ -54,9 +52,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TranslationAnalysis.h"
 #include "mbr.h"
 #include "ThreadPool.h"
-#include "../../moses-chart/src/ChartManager.h"
-#include "../../moses-chart/src/ChartHypothesis.h"
-#include "../../moses-chart/src/ChartTrellisPathList.h"
+#include "ChartManager.h"
+#include "ChartHypothesis.h"
+#include "ChartTrellisPath.h"
+#include "ChartTrellisPathList.h"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -67,7 +66,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
-using namespace MosesChart;
 
 /**
   * Translates a sentence.
@@ -91,13 +89,13 @@ public:
 
     VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
 
-    MosesChart::Manager manager(*m_source, &system);
+    ChartManager manager(*m_source, &system);
     manager.ProcessSentence();
 
     assert(!staticData.UseMBR());
 
     // 1-best
-    const MosesChart::Hypothesis *bestHypo = manager.GetBestHypothesis();
+    const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
     m_ioWrapper.OutputBestHypo(bestHypo, lineNumber,
                                staticData.GetReportSegmentation(),
                                staticData.GetReportAllFactors());
@@ -113,7 +111,7 @@ public:
     size_t nBestSize = staticData.GetNBestSize();
     if (nBestSize > 0) {
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
-      MosesChart::TrellisPathList nBestList;
+      ChartTrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
       m_ioWrapper.OutputNBestList(nBestList, bestHypo, &system, lineNumber);
       IFVERBOSE(2) {

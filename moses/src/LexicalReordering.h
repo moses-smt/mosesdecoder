@@ -52,6 +52,13 @@ public:
     
     Scores GetProb(const Phrase& f, const Phrase& e) const;
     
+  virtual FFState* EvaluateChart(const ChartHypothesis&,
+                                 int /* featureID */,
+																 ScoreComponentCollection*) const {
+		assert(0); // not valid for chart decoder
+		return NULL;
+	}
+
 private:
     bool DecodeCondition(std::string s);
     bool DecodeDirection(std::string s);

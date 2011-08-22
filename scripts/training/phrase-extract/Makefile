@@ -1,5 +1,5 @@
-all: consolidate consolidate-direct extract extract-rules relax-parse \
-     score statistics
+all: consolidate consolidate-direct consolidate-reverse extract extract-rules relax-parse \
+     score statistics extract-lex
 
 clean: 
 	rm -f *.o
@@ -13,17 +13,25 @@ extract: tables-core.o SentenceAlignment.o extract.o
 extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o SyntaxTree.o XmlTree.o HoleCollection.o extract-rules.o 
 	$(CXX) $^ -o extract-rules
 
+extract-lex: extract-lex.o
+	$(CXX) $^ -o extract-lex
+
 score: tables-core.o AlignmentPhrase.o score.o PhraseAlignment.o InputFileStream.o
 	$(CXX) $^ -lz -o score
 
-consolidate: consolidate.o
-	$(CXX) $^ -o consolidate
+consolidate: consolidate.o tables-core.o InputFileStream.o
+	$(CXX) $^ -lz -o consolidate
 
 consolidate-direct: consolidate-direct.o InputFileStream.o
 	$(CXX) $^ -lz -o consolidate-direct
+
+consolidate-reverse: consolidate-reverse.o tables-core.o InputFileStream.o
+	$(CXX) $^ -lz -o consolidate-reverse
 
 relax-parse: tables-core.o SyntaxTree.o XmlTree.o relax-parse.o
 	$(CXX) $^ -o relax-parse
 
 statistics: tables-core.o AlignmentPhrase.o statistics.o
 	$(CXX) $^ -o statistics
+
+

@@ -71,14 +71,15 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
 
 void PhraseDictionaryDynSuffixArray::insertSnt(string& source, string& target, string& alignment)
 {
-  m_biSA->addSntPair(source, target, alignment);
+  m_biSA->addSntPair(source, target, alignment); // insert sentence pair into suffix arrays
+  //StaticData::Instance().ClearTransOptionCache(); // clear translation option cache 
 }
-void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned idx, unsigned num2Del)
+void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* num2Del */)
 {
   // need to implement --
 }
 
-ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const CellCollection&)
+ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollection&)
 {
   assert(false);
   return 0;

@@ -14,12 +14,16 @@ map<unsigned,statscore_t> Point::fixedweights;
 unsigned Point::pdim=0;
 unsigned Point::ncall=0;
 
-void Point::Randomize(const vector<parameter_t>& min,const vector<parameter_t>& max)
+vector<parameter_t> Point::m_min;
+vector<parameter_t> Point::m_max;
+
+void Point::Randomize()
 {
-  assert(min.size()==Point::dim);
-  assert(max.size()==Point::dim);
+  assert(m_min.size()==Point::dim);
+  assert(m_max.size()==Point::dim);
   for (unsigned int i=0; i<size(); i++)
-    operator[](i)= min[i] + (float)random()/(float)RAND_MAX * (float)(max[i]-min[i]);
+    operator[](i)= m_min[i]
+      + (float)random()/(float)RAND_MAX * (float)(m_max[i]-m_min[i]);
 }
 
 void Point::NormalizeL2()
@@ -47,15 +51,26 @@ void Point::NormalizeL1()
 }
 
 //Can initialize from a vector of dim or pdim
-Point::Point(const vector<parameter_t>& init):vector<parameter_t>(Point::dim)
+Point::Point(const vector<parameter_t>& init,
+    const vector<parameter_t>& min,
+    const vector<parameter_t>& max
+  ):vector<parameter_t>(Point::dim)
 {
+  m_min.resize(Point::dim);
+  m_max.resize(Point::dim);
   if(init.size()==dim) {
-    for (unsigned int i=0; i<Point::dim; i++)
+    for (unsigned int i=0; i<Point::dim; i++) {
       operator[](i)=init[i];
+      m_min[i] = min[i];
+      m_max[i] = max[i];
+    }
   } else {
     assert(init.size()==pdim);
-    for (unsigned int i=0; i<Point::dim; i++)
+    for (unsigned int i=0; i<Point::dim; i++) {
       operator[](i)=init[optindices[i]];
+      m_min[i] = min[optindices[i]];
+      m_max[i] = max[optindices[i]];
+    }
   }
 };
 

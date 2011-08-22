@@ -16,8 +16,8 @@ bool StatelessFeatureFunction::ComputeValueInTranslationOption() const
   return false;
 }
 void StatelessFeatureFunction::Evaluate(
-  const TargetPhrase& cur_hypo,
-  ScoreComponentCollection* accumulator) const
+  const TargetPhrase& /* cur_hypo */,
+  ScoreComponentCollection* /* accumulator */) const
 {
   assert(!"Please implement Evaluate or set ComputeValueInTranslationOption to true");
 }

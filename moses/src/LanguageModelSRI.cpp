@@ -121,20 +121,25 @@ VocabIndex LanguageModelSRI::GetLmID( const Factor *factor ) const
   return ( factorId >= m_lmIdLookup.size()) ? m_unknownId : m_lmIdLookup[factorId];
 }
 
-float LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
+LMResult LanguageModelSRI::GetValue(VocabIndex wordId, VocabIndex *context) const
 {
-  float p = m_srilmModel->wordProb( wordId, context );
-  return FloorScore(TransformLMScore(p));  // log10->log
+  LMResult ret;
+  ret.score = FloorScore(TransformLMScore(m_srilmModel->wordProb( wordId, context)));
+  ret.unknown = (wordId == m_unknownId);
+  return ret;
 }
 
-float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
+LMResult LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
+  LMResult ret;
   FactorType	factorType = GetFactorType();
   size_t count = contextFactor.size();
   if (count <= 0) {
     if(finalState)
       *finalState = NULL;
-    return 0;
+    ret.score = 0.0;
+    ret.unknown = false;
+    return ret;
   }
 
   // set up context
@@ -147,7 +152,7 @@ float LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, State
   assert((*contextFactor[count-1])[factorType] != NULL);
   // call sri lm fn
   VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
-  float ret = GetValue(lmId, ngram+1);
+  ret = GetValue(lmId, ngram+1);
 
   if (finalState) {
     ngram[0] = lmId;

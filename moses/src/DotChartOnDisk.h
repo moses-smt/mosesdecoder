@@ -21,8 +21,8 @@
 
 #include <vector>
 #include <cassert>
-#include "ChartTranslationOption.h"
-#include "WordConsumed.h"
+
+#include "DotChart.h"
 
 namespace OnDiskPt
 {
@@ -32,71 +32,38 @@ class PhraseNode;
 
 namespace Moses
 {
-class ProcessedRuleOnDisk
+class DottedRuleOnDisk : public DottedRule
 {
-  friend std::ostream& operator<<(std::ostream&, const ProcessedRuleOnDisk&);
-
-protected:
-  const OnDiskPt::PhraseNode &m_lastNode;
-  const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
-  mutable bool m_done;
-public:
+ public:
   // used only to init dot stack.
-  explicit ProcessedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode)
-    :m_lastNode(lastNode)
-    ,m_wordsConsumed(NULL)
-    ,m_done(false)
-  {}
-  ProcessedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode, const WordConsumed *wordsConsumed)
-    :m_lastNode(lastNode)
-    ,m_wordsConsumed(wordsConsumed)
-    ,m_done(false)
-  {}
-  ~ProcessedRuleOnDisk() {
-    delete m_wordsConsumed;
-  }
-  const OnDiskPt::PhraseNode &GetLastNode() const {
-    return m_lastNode;
-  }
-  const WordConsumed *GetLastWordConsumed() const {
-    return m_wordsConsumed;
-  }
+  explicit DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode)
+      : DottedRule()
+      , m_lastNode(lastNode)
+      , m_done(false) {}
 
-  bool IsCurrNonTerminal() const {
-    assert(m_wordsConsumed);
-    return m_wordsConsumed->IsNonTerminal();
-  }
+  DottedRuleOnDisk(const OnDiskPt::PhraseNode &lastNode,
+                   const ChartCellLabel &cellLabel,
+                   const DottedRuleOnDisk &prev)
+      : DottedRule(cellLabel, prev)
+      , m_lastNode(lastNode)
+      , m_done(false) {}
 
-  bool Done() const {
-    return m_done;
-  }
-  void Done(bool value) const {
-    m_done = value;
-  }
+  const OnDiskPt::PhraseNode &GetLastNode() const { return m_lastNode; }
 
-  /*
-  inline int Compare(const ProcessedRule &compare) const
-  {
-  	if (m_lastNode < compare.m_lastNode)
-  		return -1;
-  	if (m_lastNode > compare.m_lastNode)
-  		return 1;
+  bool Done() const { return m_done; }
+  void Done(bool value) const { m_done = value; }
 
-  	return m_wordsConsumed < compare.m_wordsConsumed;
-  }
-  inline bool operator<(const ProcessedRule &compare) const
-  {
-  	return Compare(compare) < 0;
-  }
-  */
+ private:
+  const OnDiskPt::PhraseNode &m_lastNode;
+  mutable bool m_done;
 };
 
-class ProcessedRuleCollOnDisk
+class DottedRuleCollOnDisk
 {
-  friend std::ostream& operator<<(std::ostream&, const ProcessedRuleCollOnDisk&);
+  friend std::ostream& operator<<(std::ostream&, const DottedRuleCollOnDisk&);
 
 protected:
-  typedef std::vector<const ProcessedRuleOnDisk*> CollType;
+  typedef std::vector<const DottedRuleOnDisk*> CollType;
   CollType m_coll;
 
 public:
@@ -116,12 +83,12 @@ public:
     return m_coll.end();
   }
 
-  const ProcessedRuleOnDisk &Get(size_t ind) const {
+  const DottedRuleOnDisk &Get(size_t ind) const {
     return *m_coll[ind];
   }
 
-  void Add(const ProcessedRuleOnDisk *processedRule) {
-    m_coll.push_back(processedRule);
+  void Add(const DottedRuleOnDisk *dottedRule) {
+    m_coll.push_back(dottedRule);
   }
   void Delete(size_t ind) {
     //delete m_coll[ind];
@@ -136,31 +103,31 @@ public:
 
 class SavedNodeOnDisk
 {
-  const ProcessedRuleOnDisk *m_processedRule;
+  const DottedRuleOnDisk *m_dottedRule;
 
 public:
-  SavedNodeOnDisk(const ProcessedRuleOnDisk *processedRule)
-    :m_processedRule(processedRule) {
-    assert(m_processedRule);
+  SavedNodeOnDisk(const DottedRuleOnDisk *dottedRule)
+    :m_dottedRule(dottedRule) {
+    assert(m_dottedRule);
   }
 
   ~SavedNodeOnDisk() {
-    delete m_processedRule;
+    delete m_dottedRule;
   }
 
-  const ProcessedRuleOnDisk &GetProcessedRule() const {
-    return *m_processedRule;
+  const DottedRuleOnDisk &GetDottedRule() const {
+    return *m_dottedRule;
   }
 };
 
-class ProcessedRuleStackOnDisk
+class DottedRuleStackOnDisk
 {
   // coll of coll of processed rules
 public:
   typedef std::vector<SavedNodeOnDisk*> SavedNodeColl;
 
 protected:
-  typedef std::vector<ProcessedRuleCollOnDisk*> CollType;
+  typedef std::vector<DottedRuleCollOnDisk*> CollType;
   CollType m_coll;
 
   SavedNodeColl m_savedNode;
@@ -182,25 +149,25 @@ public:
     return m_coll.end();
   }
 
-  ProcessedRuleStackOnDisk(size_t size);
-  ~ProcessedRuleStackOnDisk();
+  DottedRuleStackOnDisk(size_t size);
+  ~DottedRuleStackOnDisk();
 
-  const ProcessedRuleCollOnDisk &Get(size_t pos) const {
+  const DottedRuleCollOnDisk &Get(size_t pos) const {
     return *m_coll[pos];
   }
-  ProcessedRuleCollOnDisk &Get(size_t pos) {
+  DottedRuleCollOnDisk &Get(size_t pos) {
     return *m_coll[pos];
   }
 
-  const ProcessedRuleCollOnDisk &back() const {
+  const DottedRuleCollOnDisk &back() const {
     return *m_coll.back();
   }
 
-  void Add(size_t pos, const ProcessedRuleOnDisk *processedRule) {
-    assert(processedRule);
+  void Add(size_t pos, const DottedRuleOnDisk *dottedRule) {
+    assert(dottedRule);
 
-    m_coll[pos]->Add(processedRule);
-    m_savedNode.push_back(new SavedNodeOnDisk(processedRule));
+    m_coll[pos]->Add(dottedRule);
+    m_savedNode.push_back(new SavedNodeOnDisk(dottedRule));
   }
 
   const SavedNodeColl &GetSavedNodeColl() const {

@@ -87,9 +87,9 @@ protected:
   virtual FFState *GetBeginSentenceState() const;
   virtual FFState *NewState(const FFState *from = NULL) const;
 
-  virtual float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+  virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const = 0;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const = 0;
 };
 
 

@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 
+#include "lm/lm_exception.hh"
 #include "util/mmap.hh"
 
 /* Configuration for ngram model.  Separate header to reduce pollution. */
@@ -28,12 +29,18 @@ struct Config {
   // ONLY EFFECTIVE WHEN READING ARPA
 
   // What to do when <unk> isn't in the provided model. 
-  typedef enum {THROW_UP, COMPLAIN, SILENT} UnknownMissing;
-  UnknownMissing unknown_missing;
+  WarningAction unknown_missing;
+  // What to do when <s> or </s> is missing from the model. 
+  // If THROW_UP, the exception will be of type util::SpecialWordMissingException.  
+  WarningAction sentence_marker_missing;
+
+  // What to do with a positive log probability.  For COMPLAIN and SILENT, map
+  // to 0.  
+  WarningAction positive_log_probability;
 
   // The probability to substitute for <unk> if it's missing from the model.  
   // No effect if the model has <unk> or unknown_missing == THROW_UP.
-  float unknown_missing_prob;
+  float unknown_missing_logprob;
 
   // Size multiplier for probing hash table.  Must be > 1.  Space is linear in
   // this.  Time is probing_multiplier / (probing_multiplier - 1).  No effect
@@ -63,6 +70,14 @@ struct Config {
 
   // Include the vocab in the binary file?  Only effective if write_mmap != NULL.  
   bool include_vocab;
+
+  // Quantization options.  Only effective for QuantTrieModel.  One value is
+  // reserved for each of prob and backoff, so 2^bits - 1 buckets will be used
+  // to quantize (and one of the remaining backoffs will be 0).  
+  uint8_t prob_bits, backoff_bits;
+
+  // Bhiksha compression (simple form).  Only works with trie.
+  uint8_t pointer_bhiksha_bits;
 
   
   

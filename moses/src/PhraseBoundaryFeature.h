@@ -37,10 +37,18 @@ public:
   std::string GetScoreProducerWeightShortName() const;
   size_t GetNumInputScores() const;
 
-  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+  virtual const FFState* EmptyHypothesisState(const InputType &) const;
 
   virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
                           ScoreComponentCollection* accumulator) const;
+
+  virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
+                                  int /* featureID */,
+                                  ScoreComponentCollection* ) const
+                                  {
+                                    /* Not implemented */
+                                    assert(0);
+                                  }
 
 private:
   void AddFeatures(

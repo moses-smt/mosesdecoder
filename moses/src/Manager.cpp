@@ -355,7 +355,10 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   }
 
   // words !!
-  outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
+//  outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
+
+  // output both source and target phrases in the word graph
+  outputWordGraphStream << "\tw=" << hypo->GetSourcePhraseStringRep() << "|" << hypo->GetCurrTargetPhrase();
 
   outputWordGraphStream << endl;
 }
@@ -501,46 +504,46 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
 
   const Hypothesis *prevHypo = searchNode.hypo->GetPrevHypo();
 
-	// output in traditional format
-	if (!extendedFormat)
-	{
-		outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId()
-			<< " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
-		  << " back=" << prevHypo->GetId()
-		  << " score=" << searchNode.hypo->GetScore()
-			<< " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
+  // output in traditional format
+  if (!extendedFormat) {
+    outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId()
+                            << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
+                            << " back=" << prevHypo->GetId()
+                            << " score=" << searchNode.hypo->GetScore()
+                            << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
 
-		if (searchNode.recombinationHypo != NULL)
-		  outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
-		
-		outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
-		  << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos() 
-			<< "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos()
-			<< " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
-			<< endl;
-		return;
-	}
-	
-	// output in extended format
-	if (searchNode.recombinationHypo != NULL) 
-		outputSearchGraphStream << " hyp=" << searchNode.recombinationHypo->GetId();
-	else
-		outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
+    if (searchNode.recombinationHypo != NULL)
+      outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
 
-	outputSearchGraphStream << " back=" << prevHypo->GetId();
+    outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+                            << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+                            << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos()
+                            << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder)
+                            << endl;
+    return;
+  }
 
-	ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
-	scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
+  // output in extended format
+  if (searchNode.recombinationHypo != NULL)
+    outputSearchGraphStream << " hyp=" << searchNode.recombinationHypo->GetId();
+  else
+    outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
+
+  outputSearchGraphStream << " back=" << prevHypo->GetId();
+
+  ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
+  scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
 	outputSearchGraphStream << " [ " << StaticData::Instance().GetAllWeights();
-	outputSearchGraphStream << " ]";
-    // added this so that we will have the span in the input covered
-    // (DNM, 19 Nov 2010)
-    outputSearchGraphStream << " covered=" <<
-    searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
-                               << "-" <<
-    searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
-
-	outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+  outputSearchGraphStream << " ]";
+  // added this so that we will have the span in the input covered
+  // (DNM, 19 Nov 2010)
+  outputSearchGraphStream << " covered=" <<
+                          searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+                          << "-" <<
+                          searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
+  outputSearchGraphStream << " out=" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
+		  searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+//  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }
 
 void Manager::GetConnectedGraph(
@@ -559,14 +562,13 @@ void Manager::GetConnectedGraph(
     connected[ hypo->GetId() ] = true;
     connectedList.push_back( hypo );
   }
-
   // move back from known connected hypotheses
   for(size_t i=0; i<connectedList.size(); i++) {
     const Hypothesis *hypo = connectedList[i];
 
     // add back pointer
     const Hypothesis *prevHypo = hypo->GetPrevHypo();
-    if (prevHypo->GetId() > 0 // don't add empty hypothesis
+    if (prevHypo && prevHypo->GetId() > 0 // don't add empty hypothesis
         && connected.find( prevHypo->GetId() ) == connected.end()) { // don't add already added
       connected[ prevHypo->GetId() ] = true;
       connectedList.push_back( prevHypo );

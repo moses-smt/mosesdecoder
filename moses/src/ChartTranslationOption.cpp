@@ -19,42 +19,35 @@
  ***********************************************************************/
 
 #include "ChartTranslationOption.h"
-#include "TargetPhrase.h"
-#include "AlignmentInfo.h"
-#include "WordConsumed.h"
 
-using namespace std;
+#include "AlignmentInfo.h"
+#include "ChartCellCollection.h"
+#include "DotChart.h"
+
+#include <vector>
 
 namespace Moses
 {
 
-void ChartTranslationOption::CreateNonTermIndex()
+void ChartTranslationOption::CalcEstimateOfBestScore(
+    const ChartCellCollection &allChartCells)
 {
-  m_wordsConsumedTargetOrder.resize(m_targetPhrase.GetSize(), NOT_FOUND);
-  const AlignmentInfo &alignInfo = m_targetPhrase.GetAlignmentInfo();
+  const TargetPhrase &targetPhrase = **(m_targetPhraseCollection.begin());
+  m_estimateOfBestScore = targetPhrase.GetFutureScore();
 
-  size_t nonTermInd = 0;
-  size_t prevSourcePos = 0;
-  AlignmentInfo::const_iterator iter;
-  for (iter = alignInfo.begin(); iter != alignInfo.end(); ++iter) {
-    // alignment pairs must be ordered by source index
-    size_t sourcePos = iter->first;
-    if (nonTermInd > 0) {
-      assert(sourcePos > prevSourcePos);
+  const DottedRule *rule = &m_dottedRule;
+
+  // only deal with non-terminals
+  while (!rule->IsRoot()) {
+    if (rule->IsNonTerminal()) {
+      // add the score of the best underlying hypothesis
+      const ChartCellLabel &cellLabel = rule->GetChartCellLabel();
+      const ChartHypothesisCollection *hypoColl = cellLabel.GetStack();
+      assert(hypoColl);
+      m_estimateOfBestScore += hypoColl->GetBestScore();
     }
-    prevSourcePos = sourcePos;
-
-    size_t targetPos = iter->second;
-    m_wordsConsumedTargetOrder[targetPos] = nonTermInd;
-    nonTermInd++;
+    rule = rule->GetPrev();
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const ChartTranslationOption &rule)
-{
-  out << rule.m_lastWordConsumed << ": " << rule.m_targetPhrase.GetTargetLHS() << "->" << rule.m_targetPhrase;
-  return out;
 }
-
-} // namespace
-

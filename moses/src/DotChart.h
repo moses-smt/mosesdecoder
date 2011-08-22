@@ -19,104 +19,40 @@
  ***********************************************************************/
 #pragma once
 
-#include <vector>
-#include <cassert>
-#include "PhraseDictionaryNodeSCFG.h"
-#include "ChartTranslationOption.h"
-#include "WordConsumed.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "ChartCellLabel.h"
 
 namespace Moses
 {
 
-class ProcessedRule
+class DottedRule
 {
-  friend std::ostream& operator<<(std::ostream&, const ProcessedRule&);
+  friend std::ostream& operator<<(std::ostream &, const DottedRule &);
 
-protected:
-  const PhraseDictionaryNodeSCFG &m_lastNode;
-  const WordConsumed *m_wordsConsumed; // usually contains something, unless its the init processed rule
-public:
+ public:
   // used only to init dot stack.
-  explicit ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode)
-    :m_lastNode(lastNode)
-    ,m_wordsConsumed(NULL)
-  {}
-  ProcessedRule(const PhraseDictionaryNodeSCFG &lastNode, const WordConsumed *wordsConsumed)
-    :m_lastNode(lastNode)
-    ,m_wordsConsumed(wordsConsumed)
-  {}
-  ~ProcessedRule() {
-#ifdef USE_BOOST_POOL
-    // Do nothing.  WordConsumed objects are stored in object pools owned by
-    // the sentence-specific ChartRuleLookupManagers.
-#else
-    delete m_wordsConsumed;
-#endif
-  }
-  const PhraseDictionaryNodeSCFG &GetLastNode() const {
-    return m_lastNode;
-  }
-  const WordConsumed *GetLastWordConsumed() const {
-    return m_wordsConsumed;
-  }
-};
+  DottedRule()
+      : m_cellLabel(NULL)
+      , m_prev(NULL) {}
 
-typedef std::vector<const ProcessedRule*> ProcessedRuleList;
+  DottedRule(const ChartCellLabel &ccl, const DottedRule &prev)
+      : m_cellLabel(&ccl)
+      , m_prev(&prev) {}
 
-// Collection of all ProcessedRules that share a common start point,
-// grouped by end point.  Additionally, maintains a list of all
-// ProcessedRules that could be expanded further, i.e. for which the
-// corresponding PhraseDictionaryNodeSCFG is not a leaf.
-class ProcessedRuleColl
-{
-protected:
-  typedef std::vector<ProcessedRuleList> CollType;
-  CollType m_coll;
-  ProcessedRuleList m_runningNodes;
+  const WordsRange &GetWordsRange() const { return m_cellLabel->GetCoverage(); }
+  const Word &GetSourceWord() const { return m_cellLabel->GetLabel(); }
+  bool IsNonTerminal() const { return m_cellLabel->GetLabel().IsNonTerminal(); }
+  const DottedRule *GetPrev() const { return m_prev; }
+  bool IsRoot() const { return m_prev == NULL; }
+  const ChartCellLabel &GetChartCellLabel() const { return *m_cellLabel; }
 
-public:
-  typedef CollType::iterator iterator;
-  typedef CollType::const_iterator const_iterator;
-
-  const_iterator begin() const {
-    return m_coll.begin();
-  }
-  const_iterator end() const {
-    return m_coll.end();
-  }
-  iterator begin() {
-    return m_coll.begin();
-  }
-  iterator end() {
-    return m_coll.end();
-  }
-
-  ProcessedRuleColl(size_t size)
-    : m_coll(size)
-  {}
-
-  ~ProcessedRuleColl();
-
-  const ProcessedRuleList &Get(size_t pos) const {
-    return m_coll[pos];
-  }
-  ProcessedRuleList &Get(size_t pos) {
-    return m_coll[pos];
-  }
-
-  void Add(size_t pos, const ProcessedRule *processedRule) {
-    assert(processedRule);
-    m_coll[pos].push_back(processedRule);
-    if (!processedRule->GetLastNode().IsLeaf()) {
-      m_runningNodes.push_back(processedRule);
-    }
-  }
-
-  const ProcessedRuleList &GetRunningNodes() const {
-    return m_runningNodes;
-  }
-
+ private:
+  const ChartCellLabel *m_cellLabel; // usually contains something, unless
+                                     // it's the init processed rule
+  const DottedRule *m_prev;
 };
 
 }
-

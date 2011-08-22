@@ -96,7 +96,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
                                 , const std::vector<FactorType> &output
                                 , std::istream &inStream
                                 , const std::vector<float> &weight
-                                , size_t tableLimit
+                                , size_t /* tableLimit */
                                 , const LMList &languageModels
                                 , const WordPenaltyProducer* wpProducer)
 {
@@ -122,10 +122,10 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
       abort();
     }
 
-    const string &sourcePhraseString	= tokens[0]
-                                        , &targetPhraseString	= tokens[1]
-                                            , &scoreString				= tokens[2]
-                                                , &alignString				= tokens[3];
+    const string &sourcePhraseString = tokens[0]
+               , &targetPhraseString = tokens[1]
+               , &scoreString        = tokens[2]
+               , &alignString        = tokens[3];
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -144,11 +144,11 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 
     // parse source & find pt node
 
-    // head word
+    // constituent labels
     Word sourceLHS, targetLHS;
 
     // source
-    Phrase sourcePhrase(Input);
+    Phrase sourcePhrase(Input, 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     // create target phrase obj
@@ -166,10 +166,6 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 
     targetPhrase->SetScoreChart(GetFeature(), scoreVector, weight, languageModels,wpProducer);
 
-    // count info for backoff
-    if (tokens.size() >= 6)
-      targetPhrase->CreateCountInfo(tokens[5]);
-
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(sourcePhrase, *targetPhrase);
     AddEquivPhrase(phraseColl, targetPhrase);
 
@@ -180,7 +176,7 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
 
   // prune each target phrase collection
   if (m_tableLimit) {
-    m_collection.Prune(m_tableLimit);
+    m_collection.Sort(m_tableLimit);
   }
 
   return true;
@@ -224,7 +220,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
   return *currNode;
 }
 
-void PhraseDictionarySCFG::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
+void PhraseDictionarySCFG::AddEquivPhrase(const Phrase & /* source */, const TargetPhrase & /* targetPhrase */)
 {
   assert(false); // TODO
 }
@@ -235,7 +231,7 @@ void PhraseDictionarySCFG::AddEquivPhrase(TargetPhraseCollection	&targetPhraseCo
 }
 
 
-const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase &source) const
+const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(const Phrase & /* source */) const
 {
   // exactly like CreateTargetPhraseCollection, but don't create
   assert(false);
@@ -256,7 +252,7 @@ const TargetPhraseCollection *PhraseDictionarySCFG::GetTargetPhraseCollection(co
    */
 }
 
-void PhraseDictionarySCFG::InitializeForInput(const InputType& input)
+void PhraseDictionarySCFG::InitializeForInput(const InputType& /* input */)
 {
   // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
@@ -273,7 +269,7 @@ void PhraseDictionarySCFG::CleanUp()
 
 ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(
   const InputType &sentence,
-  const CellCollection &cellCollection)
+  const ChartCellCollection &cellCollection)
 {
   return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
 }

@@ -127,6 +127,22 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
+  virtual FFState* EvaluateChart(
+    const ChartHypothesis& cur_hypo,
+    int featureID,
+    ScoreComponentCollection* accumulator) const;	
+
+  void updateChartScore( float *prefixScore, float *finalScore, float score, size_t wordPos ) const;
+
+#ifdef WITH_THREADS
+  // if multi-threaded return boost ptr 
+  boost::shared_ptr<LanguageModelImplementation> 
+#else // return normal LM ptr
+  LanguageModelImplementation* 
+#endif
+  GetLMImplementation() const {
+    return m_implementation;
+  }
 };
 
 }

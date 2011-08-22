@@ -128,10 +128,15 @@ order = 5
 #
 #rlm-training = "$moses-src-dir/randlm/bin/buildlm -falsepos 8 -values 8"
 
-### script to use for binary table format for irstlm
+### script to use for binary table format for irstlm or kenlm
 # (default: no binarization)
-#
+
+# irstlm
 #lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
+
+# kenlm, also set type to 8
+#lm-binarizer = $moses-src-dir/kenlm/build_binary
+#type = 8
 
 ### script to create quantized language model format (irstlm)
 # (default: no quantization)
@@ -188,10 +193,15 @@ raw-corpus = $toy-data/nc-5k.$output-extension
 #lowercased-tuning = 
 #split-tuning = 
 
-### script to use for binary table format for irstlm
+### script to use for binary table format for irstlm or kenlm
 # (default: no binarization)
-#
+
+# irstlm
 #lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
+
+# kenlm, also set type to 8
+#lm-binarizer = $moses-src-dir/kenlm/build_binary
+#type = 8
 
 ### script to create quantized language model format (irstlm)
 # (default: no quantization)
@@ -290,6 +300,10 @@ lexicalized-reordering = msd-bidirectional-fe
 #
 score-settings = "--GoodTuring"
 
+### include word alignment in phrase table
+#
+#include-word-alignment-in-rules = yes
+
 ### if phrase table training should be skipped,
 # point to phrase translation table
 #
@@ -346,6 +360,10 @@ nbest = 100
 #
 # lambda = 
 
+### additional flags for the filter script
+#
+filter-settings = ""
+
 ### additional flags for the decoder
 #
 decoder-settings = ""
@@ -398,6 +416,10 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 
 [EVALUATION]
 
+### additional flags for the filter script
+#
+#filter-settings = ""
+
 ### additional decoder settings
 # switches for the Moses decoder
 #
@@ -409,7 +431,7 @@ decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
 
 ### multiple reference translations
 #
-multiref = yes
+#multiref = yes
 
 ### prepare system output for scoring 
 # this may include detokenization and wrapping output in sgm 
@@ -418,7 +440,7 @@ multiref = yes
 detokenizer = "$moses-script-dir/tokenizer/detokenizer.perl -l $output-extension"
 #recaser = $moses-script-dir/recaser/recase.perl
 wrapping-script = "$moses-script-dir/ems/support/wrap-xml.perl $output-extension"
-# output-sgm = 
+#output-sgm = 
 
 ### BLEU
 #
@@ -446,6 +468,13 @@ analyze-coverage = yes
 #
 # also report on phrase mappings used
 report-segmentation = yes
+#
+# report precision of translations for each input word, broken down by
+# count of input word in corpus and model
+#report-precision-by-coverage = yes
+#
+# further precision breakdown by factor
+#precision-by-coverage-factor = pos
 
 [EVALUATION:test]
 
@@ -463,6 +492,12 @@ reference-sgm = $toy-data/test-ref.$output-extension.sgm
 # raw-reference =
 # tokenized-reference = 
 # reference = 
+
+### analysis settings 
+# may contain any of the general evaluation analysis settings
+# specific setting: base coverage statistics on earlier run
+#
+#precision-by-coverage-base = $working-dir/evaluation/test.analysis.5
 
 ### wrapping frame
 # for nist-bleu and other scoring scripts, the output needs to be wrapped 

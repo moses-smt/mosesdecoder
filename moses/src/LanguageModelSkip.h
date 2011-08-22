@@ -43,7 +43,7 @@ protected:
 
 public:
   /** Constructor
-  * \param lmImpl SRI or IRST LM which this LM can use to load data
+  * \param lmImpl SRI, IRST, or Ken LM which this LM can use to load data
   */
   LanguageModelSkip(LanguageModelSingleFactor *lmImpl) {
     m_lmImpl = lmImpl;
@@ -81,16 +81,22 @@ public:
     return m_lmImpl->NewState(from);
   }
 
-  float GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+    LMResult ret;
     if (contextFactor.size() == 0) {
-      return 0;
+      ret.score = 0.0;
+      ret.unknown = false;
+      return ret;
     }
 
     // only process context where last word is a word we want
     const Factor *factor = (*contextFactor.back())[m_factorType];
     std::string strWord = factor->GetString();
-    if (strWord.find("---") == 0)
-      return 0;
+    if (strWord.find("---") == 0) {
+      ret.score = 0.0;
+      ret.unknown = false;
+      return ret;
+    }
 
     // add last word
     std::vector<const Word*> chunkContext;
@@ -117,7 +123,7 @@ public:
     std::reverse(chunkContext.begin(), chunkContext.end());
 
     // calc score on chunked phrase
-    float ret = m_lmImpl->GetValueForgotState(chunkContext, outState);
+    ret = m_lmImpl->GetValueForgotState(chunkContext, outState);
 
     RemoveAllInColl(chunkContext);
 

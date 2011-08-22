@@ -11,6 +11,10 @@
 #include "StaticData.h"
 #include "PhraseDictionaryDynSuffixArray.h"
 #include "TranslationSystem.h"
+#include "LMList.h"
+#ifdef LM_ORLM
+#  include "LanguageModelORLM.h"
+#endif
 
 using namespace Moses;
 using namespace std;
@@ -49,6 +53,9 @@ public:
     PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary();
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
+    if(add2ORLM_) {       
+      updateORLM();
+    }
     cerr << "Done inserting\n";
     //PhraseDictionary* pdsa = (PhraseDictionary*) pdf->GetDictionary(*dummy);
     map<string, xmlrpc_c::value> retData;
@@ -58,7 +65,56 @@ public:
     *retvalP = xmlrpc_c::value_string("Phrase table updated");
   }
   string source_, target_, alignment_;
-  bool bounded_;
+  bool bounded_, add2ORLM_;
+  void updateORLM() {
+#ifdef LM_ORLM
+    vector<string> vl;
+    map<vector<string>, int> ngSet;
+    LMList lms = StaticData::Instance().GetLMList(); // get LM
+    LMList::const_iterator lmIter = lms.begin();
+    const LanguageModel* lm = *lmIter; 
+    /* currently assumes a single LM that is a ORLM */
+#ifdef WITH_THREADS
+    boost::shared_ptr<LanguageModelORLM> orlm; 
+    orlm = boost::dynamic_pointer_cast<LanguageModelORLM>(lm->GetLMImplementation()); 
+#else 
+    LanguageModelORLM* orlm; 
+    orlm = (LanguageModelORLM*)lm->GetLMImplementation(); 
+#endif
+    if(orlm == 0) {
+      cerr << "WARNING: Unable to add target sentence to ORLM\n";
+      return;
+    }
+    // break out new ngrams from sentence
+    const int ngOrder(orlm->GetNGramOrder());
+    const std::string sBOS = orlm->GetSentenceStart()->GetString();
+    const std::string sEOS = orlm->GetSentenceEnd()->GetString();
+    Utils::splitToStr(target_, vl, " ");
+    // insert BOS and EOS 
+    vl.insert(vl.begin(), sBOS); 
+    vl.insert(vl.end(), sEOS);
+    for(int j=0; j < vl.size(); ++j) {
+      int i = (j<ngOrder) ? 0 : j-ngOrder+1;
+      for(int t=j; t >= i; --t) {
+        vector<string> ngVec;
+        for(int s=t; s<=j; ++s) {
+          ngVec.push_back(vl[s]);
+          //cerr << vl[s] << " ";
+        }
+        ngSet[ngVec]++;
+        //cerr << endl;
+      }
+    }
+    // insert into LM in order from 1grams up (for LM well-formedness)
+    cerr << "Inserting " << ngSet.size() << " ngrams into ORLM...\n";
+    for(int i=1; i <= ngOrder; ++i) {
+      iterate(ngSet, it) {
+        if(it->first.size() == i)
+          orlm->UpdateORLM(it->first, it->second);
+      }
+    }
+#endif
+  }
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
     if(si == params.end())
@@ -77,6 +133,8 @@ public:
     cerr << "alignment = " << alignment_ << endl;
     si = params.find("bounded");
     bounded_ = (si != params.end());
+    si = params.find("updateORLM");
+    add2ORLM_ = (si != params.end());
   }
 };
 
@@ -113,6 +171,8 @@ public:
     bool addGraphInfo = (si != params.end());
     si = params.find("topt");
     bool addTopts = (si != params.end());
+    si = params.find("report-all-factors");
+    bool reportAllFactors = (si != params.end());
 
     const StaticData &staticData = StaticData::Instance();
 
@@ -133,7 +193,7 @@ public:
 
     vector<xmlrpc_c::value> alignInfo;
     stringstream out, graphInfo, transCollOpts;
-    outputHypo(out,hypo,addAlignInfo,alignInfo);
+    outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
 
     map<string, xmlrpc_c::value> retData;
     pair<string, xmlrpc_c::value>
@@ -154,15 +214,19 @@ public:
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
-  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo) {
+  void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
-      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo);
-      TargetPhrase p = hypo->GetTargetPhrase();
-      for (size_t pos = 0 ; pos < p.GetSize() ; pos++) {
-        const Factor *factor = p.GetFactor(pos, 0);
-        out << *factor << " ";
-
+      outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
+      Phrase p = hypo->GetTargetPhrase();
+      if(reportAllFactors) {
+        out << p << " ";
+      } else {
+        for (size_t pos = 0 ; pos < p.GetSize() ; pos++) {
+          const Factor *factor = p.GetFactor(pos, 0);
+          out << *factor << " ";
+        }
       }
+
       if (addAlignmentInfo) {
         /**
          * Add the alignment info to the array. This is in target order and consists of

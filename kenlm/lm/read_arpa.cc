@@ -3,9 +3,11 @@
 #include "lm/blank.hh"
 
 #include <cstdlib>
+#include <iostream>
 #include <vector>
 
 #include <ctype.h>
+#include <string.h>
 #include <inttypes.h>
 
 namespace lm {
@@ -22,18 +24,22 @@ bool IsEntirelyWhiteSpace(const StringPiece &line) {
   return true;
 }
 
+const char kBinaryMagic[] = "mmap lm http://kheafield.com/code";
+
 } // namespace
 
 void ReadARPACounts(util::FilePiece &in, std::vector<uint64_t> &number) {
   number.clear();
   StringPiece line;
-  if (!IsEntirelyWhiteSpace(line = in.ReadLine())) {
+  while (IsEntirelyWhiteSpace(line = in.ReadLine())) {}
+  if (line != "\\data\\") {
     if ((line.size() >= 2) && (line.data()[0] == 0x1f) && (static_cast<unsigned char>(line.data()[1]) == 0x8b)) {
       UTIL_THROW(FormatLoadException, "Looks like a gzip file.  If this is an ARPA file, pipe " << in.FileName() << " through zcat.  If this already in binary format, you need to decompress it because mmap doesn't work on top of gzip.");
     }
-    UTIL_THROW(FormatLoadException, "First line was \"" << static_cast<int>(line.data()[1]) << "\" not blank");
+    if (static_cast<size_t>(line.size()) >= strlen(kBinaryMagic) && StringPiece(line.data(), strlen(kBinaryMagic)) == kBinaryMagic) 
+      UTIL_THROW(FormatLoadException, "This looks like a binary file but got sent to the ARPA parser.  Did you compress the binary file or pass a binary file where only ARPA files are accepted?");
+    UTIL_THROW(FormatLoadException, "first non-empty line was \"" << line << "\" not \\data\\.");
   }
-  if ((line = in.ReadLine()) != "\\data\\") UTIL_THROW(FormatLoadException, "second line was \"" << line << "\" not \\data\\.");
   while (!IsEntirelyWhiteSpace(line = in.ReadLine())) {
     if (line.size() < 6 || strncmp(line.data(), "ngram ", 6)) UTIL_THROW(FormatLoadException, "count line \"" << line << "\"doesn't begin with \"ngram \"");
     // So strtol doesn't go off the end of line.  
@@ -108,6 +114,19 @@ void ReadEnd(util::FilePiece &in) {
       if (!IsEntirelyWhiteSpace(line)) UTIL_THROW(FormatLoadException, "Trailing line " << line);
     }
   } catch (const util::EndOfFileException &e) {}
+}
+
+void PositiveProbWarn::Warn(float prob) {
+  switch (action_) {
+    case THROW_UP:
+      UTIL_THROW(FormatLoadException, "Positive log probability " << prob << " in the model.  This is a bug in IRSTLM; you can set config.positive_log_probability = SILENT or pass -i to build_binary to substitute 0.0 for the log probability.  Error");
+    case COMPLAIN:
+      std::cerr << "There's a positive log probability " << prob << " in the APRA file, probably because of a bug in IRSTLM.  This and subsequent entires will be mapepd to 0 log probability." << std::endl;
+      action_ = SILENT;
+      break;
+    case SILENT:
+      break;
+  }
 }
 
 } // namespace lm

@@ -56,6 +56,13 @@ AC_ARG_WITH(srilm-dynamic,
             [with_srilm_dynamic=no]
             )
 
+AC_ARG_WITH(srilm-arch,
+            [AC_HELP_STRING([--with-srilm-arch=ARCH], [(optional) architecture for which SRILM was built])],
+            [with_srilm_arch=$withval],
+            [with_srilm_arch=no]
+           )
+
+
 AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
@@ -73,6 +80,22 @@ AC_ARG_WITH(randlm,
             [with_randlm=$withval],
             [with_randlm=no]
            )
+AC_ARG_WITH(orlm,
+            [AC_HELP_STRING([--with-orlm=PATH], [(optional) path to ORLM])],
+            [with_orlm=$withval],
+            [with_orlm=no]
+           )
+AC_ARG_WITH(dmaplm,
+            [AC_HELP_STRING([--with-dmaplm=PATH], [(optional) path to DMapLM])],
+            [with_dmaplm=$withval],
+            [with_dmaplm=no]
+           )
+
+AC_ARG_WITH(synlm,
+	   [AC_HELP_STRING([--with-synlm], [(optional) Include syntactic language model parser; default is no])],
+	   [with_synlm=$withval],
+	   [with_synlm=no]
+	   )
 
 AC_ARG_WITH(notrace,
             [AC_HELP_STRING([--notrace], [disable trace])],
@@ -138,6 +161,9 @@ AM_CONDITIONAL([SRI_LM], false)
 AM_CONDITIONAL([IRST_LM], false)
 AM_CONDITIONAL([KEN_LM], false)
 AM_CONDITIONAL([RAND_LM], false)
+AM_CONDITIONAL([ORLM_LM], false)
+AM_CONDITIONAL([DMAP_LM], false)
+AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
 AM_CONDITIONAL([WITH_THREADS],false)
@@ -207,7 +233,12 @@ then
     # ROOT/lib/i686-m64/liboolm.a
     # ROOT/lib/i686-m64/libdstruct.a
     # ROOT/lib/i686-m64/libmisc.a
-    MY_ARCH=`${with_srilm}/sbin/machine-type`
+    if test "x$with_srilm_arch" != 'xno'
+    then
+	MY_ARCH=${with_srilm_arch}    
+    else
+        MY_ARCH=`${with_srilm}/sbin/machine-type`
+    fi
     LDFLAGS="$LDFLAGS -L${with_srilm}/lib/${MY_ARCH} -L${with_srilm}/flm/obj/${MY_ARCH}"
     LIBS="$LIBS $LIB_SRILM"
     FMTLIBS="$FMTLIBS liboolm.a libdstruct.a libmisc.a"
@@ -282,10 +313,39 @@ then
   AM_CONDITIONAL([RAND_LM], true)
 fi
 
+if test "x$with_dmaplm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_dmaplm}/src/DMap"
+
+  AC_CHECK_HEADER(StructLanguageModel.h,
+                 [AC_DEFINE([HAVE_DMAPLM], [], [flag for DMapLM])],
+                 [AC_MSG_ERROR([Cannot find DMapLM!])])
+
+  LDFLAGS="$LDFLAGS -L${with_dmaplm}/src/DMap"
+  LIBS="$LIBS -lDMap"
+  FMTLIBS="FMTLIBS libdmap.la"
+  AM_CONDITIONAL([DMAP_LM], true)
+fi
+
+if test "x$with_orlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS -I${with_orlm}/"
+
+  AC_CHECK_HEADER(onlineRLM.h,
+#AC_CHECK_HEADER(multiOnlineRLM.h,
+                 [AC_DEFINE([HAVE_ORLM], [], [flag for ORLM])],
+                 [AC_MSG_ERROR([Cannot find ORLM!])])
+
+  MY_ARCH=`uname -m`
+  AM_CONDITIONAL([ORLM_LM], true)
+fi
 if test "x$with_tcmalloc" != 'xno'
 then
   AC_CHECK_LIB([tcmalloc], [malloc], [], [AC_MSG_ERROR([Cannot find tcmalloc])])
 fi
+
 
 if test "x$enable_boost_pool" != 'xno'
 then
@@ -294,6 +354,20 @@ then
                   [AC_MSG_WARN([Cannot find boost/pool/object_pool.hpp])]
                  )
 fi
+
+if test "x$with_synlm" != 'xno'
+then
+  SAVE_CPPFLAGS="$CPPFLAGS" 
+  CPPFLAGS="$CPPFLAGS -I${PWD}/synlm/hhmm/rvtl/include -I${PWD}/synlm/hhmm/wsjparse/include -lm"
+
+  AC_CHECK_HEADERS(nl-cpt.h,
+	[AC_DEFINE([HAVE_SYNLM], [], [flag for Syntactic Parser])],
+	[AC_MSG_ERROR([Cannot find SYNLM in ${PWD}/synlm/hhmm])])
+
+  AM_CONDITIONAL([SYN_LM], true)
+
+fi
+
 
 AM_CONDITIONAL([WITH_MERT],false)
 AC_CHECK_HEADERS([getopt.h],
@@ -316,6 +390,6 @@ fi
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-chart/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile mira/Makefile kenlm/Makefile unittest/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile mira/Makefile kenlm/Makefile unittest/Makefile)
 
 AC_OUTPUT()

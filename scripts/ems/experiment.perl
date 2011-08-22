@@ -939,12 +939,18 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TUNING:factorize-input') {
             &define_tuningevaluation_factorize($i);
         }	
+ 	elsif ($DO_STEP[$i] eq 'TUNING:filter') {
+	    &define_tuningevaluation_filter(undef,$i);
+	}
  	elsif ($DO_STEP[$i] eq 'TUNING:tune') {
 	    &define_tuning_tune($i);
 	}
         elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):factorize-input$/) {
             &define_tuningevaluation_factorize($i);
         }	
+	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):filter$/) {
+	    &define_tuningevaluation_filter($1,$i);
+	}
 	elsif ($DO_STEP[$i] =~ /^EVALUATION:(.+):decode$/) {
 	    &define_evaluation_decode($1,$i);
 	}
@@ -1532,41 +1538,20 @@ sub define_tuning_tune {
     my $lambda = &backoff_and_get("TUNING:lambda");
     my $tune_continue = &backoff_and_get("TUNING:continue");
     my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
-    my $tune_inputfilter =  &backoff_and_get("TUNING:input-filter");
-
-    print "define_tuning_tuning ($tuned_config,$config,$input)\n" if $VERBOSE;
-
     my $jobs = &backoff_and_get("TUNING:jobs");
     my $decoder = &check_backoff_and_get("TUNING:decoder");
-    my $binarizer = &get("GENERAL:ttable-binarizer");
-    my $lex_binarizer = &get("GENERAL:rtable-binarizer");
+
     my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
     $decoder_settings = "" unless $decoder_settings;
     $decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
+
     my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
     $tuning_settings = "" unless $tuning_settings;
 
-    my $filter = "$scripts/training/filter-model-given-input.pl";
-    $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
-    if (&get("TRAINING:hierarchical-rule-set")) {
-	$filter .= " --Hierarchical";
-	#$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
-   }
-    
-    my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
-
-    my $cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings";
-
-    if ($binarize_all) {
-	$cmd .= " --no-filter-phrase-table";
-    } else {
-	$cmd .= " --filtercmd '$filter'";
-    }
-    
+    my $cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
     $cmd .= " --lambdas \"$lambda\"" if $lambda;
     $cmd .= " --continue" if $tune_continue;
     $cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
-    $cmd .= " --filterfile $tune_inputfilter" if $tune_inputfilter;
 
     my $qsub_args = &get_qsub_args("TUNING");
     $cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
@@ -1689,14 +1674,16 @@ sub define_training_build_ttable {
     my ($step_id) = @_;
 
     my ($phrase_table, $extract,$lex) = &get_output_and_input($step_id);
-    my $report_precision_by_coverage = &backoff_and_get("EVALUATION:report-precision-by-coverage");
+    my $word_report = &backoff_and_get("EVALUATION:report-precision-by-coverage");
+    my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
 
     my $cmd = &get_training_setting(6);
     $cmd .= "-extract-file $extract ";
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
+    if ((defined($word_report) && $word_report eq "yes") ||
+	(defined($word_alignment) && $word_alignment eq "yes")) {
       $cmd .= "-phrase-word-alignment ";
     }
 
@@ -1726,13 +1713,23 @@ sub define_training_build_generation {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_build_custom_generation {
+    my ($step_id) = @_;
+
+    my ($generation_table, $generation_corpus) = &get_output_and_input($step_id);
+    my $cmd = &get_training_setting(8);
+    $cmd .= "-generation-corpus $generation_corpus ";
+    $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table);
+
+    &create_step($step_id,$cmd);
+}
+
 sub define_training_create_config {
     my ($step_id) = @_;
 
     my ($config,
 	$reordering_table,$phrase_translation_table,$generation_table,@LM)
 	= &get_output_and_input($step_id);
-    if ($LM[$#LM] =~ /biconcor/ || $LM[$#LM] eq '') { pop @LM; }
 
     my $cmd = &get_training_setting(9);
 
@@ -1781,6 +1778,9 @@ sub define_training_create_config {
 	$type = 5 if (&get("INTERPOLATED-LM:rlm") ||
 		      &backoff_and_get("INTERPOLATED-LM:lm-randomizer"));
 
+  # manually set type 
+  $type = &get("INTERPOLATED-LM:type") if (&get("INTERPOLATED-LM:type"));
+
 	# order and factor inherited from individual LMs
 	my $set = shift @LM_SETS;
 	my $order = &check_backoff_and_get("LM:$set:order");
@@ -1804,10 +1804,13 @@ sub define_training_create_config {
 	    $type = 1 if (&get("LM:$set:binlm") ||
 			  &backoff_and_get("LM:$set:lm-binarizer"));
 
-	    #  using a randomized lm?
+	    # using a randomized lm?
 	    $type = 5 if (&get("LM:$set:rlm") ||
 			  &backoff_and_get("LM:$set:rlm-training") ||
 			  &backoff_and_get("LM:$set:lm-randomizer"));
+
+      # manually set type 
+      $type = &backoff_and_get("LM:$set:type") if (&backoff_and_get("LM:$set:type"));
 
 	    # which factor is the model trained on?
 	    my $factor = 0;
@@ -2003,28 +2006,67 @@ sub encode_factor_list {
     return $id;
 }
 
+sub define_tuningevaluation_filter {
+    my ($set,$step_id) = @_;
+    my $scripts = &check_and_get("GENERAL:moses-script-dir");
+    my $dir = &check_and_get("GENERAL:working-dir");
+    my $tuning_flag = !defined($set);
+
+    my ($filter_config,
+	$config,$input) = &get_output_and_input($step_id);
+
+    my $binarizer = &get("GENERAL:ttable-binarizer");
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    my $report_precision_by_coverage = !$tuning_flag && &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
+    
+    # occasionally, lattices and conf nets need to be able 
+    # to filter phrase tables, we can provide sentences/ngrams 
+    # in a separate file
+    my $input_filter;
+    $input_filter = &get("EVALUATION:$set:input-filter") unless $tuning_flag;
+    $input_filter = &get("TUNING:input-filter") if $tuning_flag;
+    $input_filter = $input unless $input_filter;
+
+    my $filter_dir = "$dir/tuning/filtered.$VERSION";
+    $filter_dir = "$dir/evaluation/filtered.$set.$VERSION" unless $tuning_flag;
+
+    my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
+    $settings = &get("TUNING:filter-settings") if $tuning_flag;
+    $settings = "" unless $settings;
+
+    $binarizer .= " -alignment-info" 
+        if !$tuning_flag && $binarizer && $report_precision_by_coverage;
+    $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
+    $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
+
+    my $cmd = "$scripts/training/filter-model-given-input.pl";
+    $cmd .= " $filter_dir $config $input_filter $settings";
+
+    # copy moses.ini into specified file location
+    $cmd .= "\ncp $filter_dir/moses.ini $filter_config\n";
+ 
+    &create_step($step_id,$cmd);
+}
+
 sub define_evaluation_decode {
     my ($set,$step_id) = @_;
     my $scripts = &check_and_get("GENERAL:moses-script-dir");
     my $dir = &check_and_get("GENERAL:working-dir");
     
     my ($system_output,
-	$config,$input,$reference) = &get_output_and_input($step_id);
+	$config,$input) = &get_output_and_input($step_id);
 
     my $jobs = &backoff_and_get("EVALUATION:$set:jobs");
     my $decoder = &check_backoff_and_get("EVALUATION:$set:decoder");
-    my $binarizer = &get("GENERAL:ttable-binarizer");
-    my $lex_binarizer = &get("GENERAL:rtable-binarizer");
     my $settings = &backoff_and_get("EVALUATION:$set:decoder-settings");
     $settings = "" unless $settings;
     my $nbest = &backoff_and_get("EVALUATION:$set:nbest");
-    my $do_filter = &get("GENERAL:do_filter");
-    my $binarize_all = &backoff_and_get("TRAINING:binarize-all");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     
+    # specify additional output for analysis
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
       $settings .= " -use-alignment-info -alignment-output-file $system_output.wa";
       $report_segmentation = "yes";
@@ -2038,46 +2080,10 @@ sub define_evaluation_decode {
       }
     }
 
-    my $qsub_filter = 0;
-    if ($jobs && $CLUSTER) {
-	$qsub_filter = 1;
-    }
-    #occasionally, lattices and conf nets need to be able filter phrase tables, we can provide sentences/ngrams in a separate file
-    my $input_filter = &get("EVALUATION:$set:input-filter");
-    $input_filter = $input unless ($input_filter);
-
-    my $filter = "$scripts/training/filter-model-given-input.pl";
-    $filter .= " $dir/evaluation/filtered.$set.$VERSION $config $input_filter";
-    $binarizer .= " -alignment-info" if $binarizer && $report_precision_by_coverage;
-    $filter .= " -Binarizer \"$binarizer\"" if $binarizer;
-
-    if (&get("TRAINING:hierarchical-rule-set")) {
-	$filter .= " --Hierarchical";
-	#$filter .= " --MaxSpan 9999" if &get("GENERAL:input-parser") || &get("GENERAL:output-parser");
-	# set number of non terminals, phrase length
-    }
- 
-    if (!$do_filter && $binarize_all) {
-	$filter = "mkdir -p $config $dir/evaluation/filtered.$set.$VERSION\n"
-	    ."cp $config $dir/evaluation/filtered.$set.$VERSION/moses.ini \n";
-       $qsub_filter = 0;
-    }
-
+    # create command
     my $cmd;
-    my $nbest_size;
-    if ($nbest) {
-	$nbest =~ /(\d+)/;
-	$nbest_size = $1;
-    }
+    $nbest =~ s/[^\d]//g if $nbest;
     if ($jobs && $CLUSTER) {
-	if ($qsub_filter) {
-	    $cmd = "qsub $filter\n";
-	    $cmd .= "perl -e 'while(! -e \"$dir/evaluation/filtered.$set.$VERSION/info\") { sleep(10); }'\n";
-	}
-	else {
-	    $cmd = $filter."\n";
-	}
-	
 	$cmd .= "mkdir -p $dir/evaluation/tmp.$set.$VERSION\n";
 	$cmd .= "cd $dir/evaluation/tmp.$set.$VERSION\n";
 	if (defined $moses_parallel) {
@@ -2087,13 +2093,16 @@ sub define_evaluation_decode {
 	}
 	my $qsub_args = &get_qsub_args($DO_STEP[$step_id]);
 	$cmd .= " -queue-parameters \"$qsub_args\"" if ($CLUSTER && $qsub_args);
-	$cmd .= " -decoder $decoder -config $dir/evaluation/filtered.$set.$VERSION/moses.ini -input-file $input --jobs $jobs  -decoder-parameters \"$settings\" > $system_output";
-	
-	$cmd .= " -n-best-file $system_output.best$nbest_size -n-best-size $nbest" if $nbest;
+	$cmd .= " -decoder $decoder";
+	$cmd .= " -config $config";
+	$cmd .= " -input-file $input";
+	$cmd .= " --jobs $jobs";
+	$cmd .= " -decoder-parameters \"$settings\" > $system_output";	
+	$cmd .= " -n-best-file $system_output.best$nbest -n-best-size $nbest" if $nbest;
     }
     else {
-	$cmd = $filter."\n$decoder $settings -v 0 -f $dir/evaluation/filtered.$set.$VERSION/moses.ini < $input > $system_output";
-	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
+	$cmd = "$decoder $settings -v 0 -f $config < $input > $system_output";
+	$cmd .= " -n-best-list $system_output.best$nbest $nbest" if $nbest;
     }
 
     &create_step($step_id,$cmd);
@@ -2122,15 +2131,17 @@ sub define_evaluation_analysis_precision {
     my ($set,$step_id) = @_;
 
     my ($analysis,
-	$output,$reference,$input,$corpus,$ttable) = &get_output_and_input($step_id);
+	$output,$reference,$input,$corpus,$ttable,$coverage) = &get_output_and_input($step_id);
     my $script = &backoff_and_get("EVALUATION:$set:analysis");
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
-
+    my $coverage_base = &backoff_and_get("EVALUATION:$set:precision-by-coverage-base");
     my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis -precision-by-coverage";
 
     my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
     $cmd .= " -segmentation $segmentation_file";
     $cmd .= " -system-alignment $segmentation_file.wa";
+    $coverage = $coverage_base if defined($coverage_base);
+    $cmd .= " -coverage $coverage";
 
     # get table with surface factors
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2184,6 +2195,8 @@ sub define_evaluation_analysis_coverage {
       my %IN = &get_factor_id("input");
       $ttable_config = "-input-factors ".(scalar(keys %IN));
       my %OUT = &get_factor_id("output");
+      $ttable_config .= " -input-factor-names '".join(",",keys %IN)."'";
+      $ttable_config .= " -output-factor-names '".join(",",keys %OUT)."'";
       my $factors = &encode_factor_definition("translation-factors",\%IN,\%OUT);
       my @FACTOR = split(/\+/,$factors);
       my @SPECIFIED_NAME;
@@ -2554,7 +2567,6 @@ sub get_default_file {
 sub long_file_name {
     my ($file,$module,$set) = @_;
     return $file if $file =~ /^\//;
-#    print "\t\tlong_file_name($file,$module,$set)\n";
 
     if ($file !~ /\//) {
 	my $dir = $module;

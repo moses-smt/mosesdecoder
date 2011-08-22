@@ -32,7 +32,7 @@
 
 #ifdef WIN32
 // Include Visual Leak Detector
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #include "ExtractedRule.h"
@@ -69,7 +69,6 @@ void addHieroRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, 
 
 inline string IntToString( int i )
 {
-  string s;
   stringstream out;
   out << i;
   return out.str();
@@ -463,7 +462,7 @@ string printTargetHieroPhrase(SentenceAlignmentWithSyntax &sentence
                            sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
       hole.SetLabel(targetLabel, 1);
 
-      out += " [" + sourceLabel + "][" + targetLabel + "]";
+      out += "[" + sourceLabel + "][" + targetLabel + "] ";
 
       currPos = hole.GetEnd(1);
       hole.SetPos(outPos, 1);
@@ -471,14 +470,14 @@ string printTargetHieroPhrase(SentenceAlignmentWithSyntax &sentence
       holeCount++;
     } else {
       indexT[currPos] = outPos;
-      out += " " + sentence.target[currPos];
+      out += sentence.target[currPos] + " ";
     }
 
     outPos++;
   }
 
   assert(iterHoleList == holeColl.GetHoles().end());
-  return out.substr(1);
+  return out.erase(out.size()-1);
 }
 
 string printSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
@@ -505,21 +504,21 @@ string printSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
       assert(targetLabel != "");
 
       const string &sourceLabel =  hole.GetLabel(0);
-      out += " [" + sourceLabel + "][" + targetLabel + "]";
+      out += "[" + sourceLabel + "][" + targetLabel + "] ";
 
       currPos = hole.GetEnd(0);
       hole.SetPos(outPos, 0);
       ++iterHoleList;
       ++holeCount;
     } else {
-      out += " " + sentence.source[currPos];
+      out += sentence.source[currPos] + " ";
     }
 
     outPos++;
   }
 
   assert(iterHoleList == holeColl.GetSortedSourceHoles().end());
-  return out.substr(1);
+  return out.erase(out.size()-1);
 }
 
 void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
@@ -528,12 +527,15 @@ void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
 {
   // print alignment of words
   for(int ti=startT; ti<=endT; ti++) {
-    if (indexT.find(ti) != indexT.end()) { // does word still exist?
+    WordIndex::const_iterator p = indexT.find(ti);
+    if (p != indexT.end()) { // does word still exist?
       for(int i=0; i<sentence.alignedToT[ti].size(); i++) {
         int si = sentence.alignedToT[ti][i];
-        rule.alignment      += " " + IntToString(indexS.find(si)->second) + "-" + IntToString(indexT.find(ti)->second);
+        std::string sourceSymbolIndex = IntToString(indexS.find(si)->second);
+        std::string targetSymbolIndex = IntToString(p->second);
+        rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
         if (! options.onlyDirectFlag)
-          rule.alignmentInv += " " + IntToString(indexT.find(ti)->second) + "-" + IntToString(indexS.find(si)->second);
+          rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
       }
     }
   }
@@ -541,14 +543,17 @@ void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
   // print alignment of non terminals
   HoleList::const_iterator iterHole;
   for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
-    rule.alignment      += " " + IntToString(iterHole->GetPos(0)) + "-" + IntToString(iterHole->GetPos(1));
+    std::string sourceSymbolIndex = IntToString(iterHole->GetPos(0));
+    std::string targetSymbolIndex = IntToString(iterHole->GetPos(1));
+    rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
     if (!options.onlyDirectFlag)
-      rule.alignmentInv += " " + IntToString(iterHole->GetPos(1)) + "-" + IntToString(iterHole->GetPos(0));
+      rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
   }
 
-  rule.alignment = rule.alignment.substr(1);
-  if (!options.onlyDirectFlag)
-    rule.alignmentInv = rule.alignmentInv.substr(1);
+  rule.alignment.erase(rule.alignment.size()-1);
+  if (!options.onlyDirectFlag) {
+    rule.alignmentInv.erase(rule.alignmentInv.size()-1);
+  }
 }
 
 void printHieroPhrase( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int startS, int endS
@@ -783,29 +788,30 @@ void addRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int s
   // source
   rule.source = "";
   for(int si=startS; si<=endS; si++)
-    rule.source += " " + sentence.source[si];
-  rule.source += " [" + sourceLabel + "]";
-  rule.source = rule.source.substr(1);
+    rule.source += sentence.source[si] + " ";
+  rule.source += "[" + sourceLabel + "]";
 
   // target
   rule.target = "";
   for(int ti=startT; ti<=endT; ti++)
-    rule.target += " " + sentence.target[ti];
-  rule.target += " [" + targetLabel + "]";
-  rule.target = rule.target.substr(1);
+    rule.target += sentence.target[ti] + " ";
+  rule.target += "[" + targetLabel + "]";
 
   // alignment
   for(int ti=startT; ti<=endT; ti++) {
     for(int i=0; i<sentence.alignedToT[ti].size(); i++) {
       int si = sentence.alignedToT[ti][i];
-      rule.alignment += " " + IntToString(si-startS) + "-" + IntToString(ti-startT);
+      std::string sourceSymbolIndex = IntToString(si-startS);
+      std::string targetSymbolIndex = IntToString(ti-startT);
+      rule.alignment += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
       if (!options.onlyDirectFlag)
-        rule.alignmentInv += " " + IntToString(ti-startT) + "-" + IntToString(si-startS);
+        rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
     }
   }
-  rule.alignment = rule.alignment.substr(1);
+
+  rule.alignment.erase(rule.alignment.size()-1);
   if (!options.onlyDirectFlag)
-    rule.alignmentInv = rule.alignmentInv.substr(1);
+    rule.alignmentInv.erase(rule.alignmentInv.size()-1);
 
   addRuleToCollection( rule );
 }

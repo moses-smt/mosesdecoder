@@ -20,67 +20,63 @@
 
 #pragma once
 
+#include "TargetPhrase.h"
+#include "TargetPhraseCollection.h"
+#include "WordsRange.h"
+
 #include <cassert>
 #include <vector>
-#include "Word.h"
-#include "WordsRange.h"
-#include "TargetPhrase.h"
 
 namespace Moses
 {
-class WordConsumed;
 
-// basically a phrase translation and the vector of words consumed to map each word
+class DottedRule;
+class ChartCellCollection;
+
+// Similar to a DottedRule, but contains a direct reference to a list
+// of translations and provdes an estimate of the best score.
 class ChartTranslationOption
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOption&);
-
-protected:
-  const Moses::TargetPhrase &m_targetPhrase;
-  const WordConsumed &m_lastWordConsumed;
-  /* map each source word in the phrase table to:
-  		1. a word in the input sentence, if the pt word is a terminal
-  		2. a 1+ phrase in the input sentence, if the pt word is a non-terminal
-  */
-  std::vector<size_t> m_wordsConsumedTargetOrder;
-  /* size is the size of the target phrase.
-  	Usually filled with NOT_KNOWN, unless the pos is a non-term, in which case its filled
-  	with its index
-  */
-  const WordsRange	&m_wordsRange;
-
-  ChartTranslationOption(const ChartTranslationOption &copy); // not implmenented
-
-public:
-  ChartTranslationOption(const TargetPhrase &targetPhrase, const WordConsumed &lastWordConsumed, const WordsRange	&wordsRange)
-    :m_targetPhrase(targetPhrase)
-    ,m_lastWordConsumed(lastWordConsumed)
-    ,m_wordsRange(wordsRange)
-  {}
-  ~ChartTranslationOption()
-  {}
-
-  const TargetPhrase &GetTargetPhrase() const {
-    return m_targetPhrase;
+ public:
+  ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
+                         const DottedRule &dottedRule,
+                         const WordsRange &wordsRange,
+                         const ChartCellCollection &allChartCells)
+    : m_dottedRule(dottedRule)
+    , m_targetPhraseCollection(targetPhraseColl)
+    , m_wordsRange(wordsRange)
+    , m_estimateOfBestScore(0)
+  {
+    CalcEstimateOfBestScore(allChartCells);
   }
 
-  const WordConsumed &GetLastWordConsumed() const {
-    return m_lastWordConsumed;
-  }
-  const std::vector<size_t> &GetWordsConsumedTargetOrder() const {
-    return m_wordsConsumedTargetOrder;
+  ~ChartTranslationOption() {}
+
+  const DottedRule &GetDottedRule() const { return m_dottedRule; }
+
+  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+    return m_targetPhraseCollection;
   }
 
-  void CreateNonTermIndex();
-
-  const Moses::WordsRange &GetSourceWordsRange() const {
+  const WordsRange &GetSourceWordsRange() const {
     return m_wordsRange;
   }
 
-  inline float GetTotalScore() const {
-    return m_targetPhrase.GetFutureScore();
-  }
+  // return an estimate of the best score possible with this translation option.
+  // the estimate is the sum of the top target phrase's estimated score plus the
+  // scores of the best child hypotheses.
+  inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
 
+ private:
+  // not implemented
+  ChartTranslationOption &operator=(const ChartTranslationOption &);
+
+  void CalcEstimateOfBestScore(const ChartCellCollection &);
+
+  const DottedRule &m_dottedRule;
+  const TargetPhraseCollection &m_targetPhraseCollection;
+  const WordsRange &m_wordsRange;
+  float m_estimateOfBestScore;
 };
 
 }

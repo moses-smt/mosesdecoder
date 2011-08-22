@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "Util.h"
 #include "DummyScoreProducers.h"
+#include "AlignmentInfoCollection.h"
 
 using namespace std;
 
@@ -42,7 +43,8 @@ bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
 //bool TargetPhrase::printalign;
 
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
-	:Phrase(direction),m_transScore(0.0), m_ngramScore(0.0), m_fullScore(0.0), m_sourcePhrase(direction)
+  :Phrase(direction, 0),m_transScore(0.0),  m_fullScore(0.0), m_sourcePhrase(direction,0)
+  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
   //ACAT
@@ -54,11 +56,11 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
 
 
 TargetPhrase::TargetPhrase(FactorDirection direction)
-	:Phrase(direction)
-	, m_transScore(0.0)
-	, m_ngramScore(0.0)
-	,m_fullScore(0.0)
-  ,m_sourcePhrase(direction)
+  :Phrase(direction, ARRAY_SIZE_INCR)
+  , m_transScore(0.0)
+  , m_fullScore(0.0)
+  ,m_sourcePhrase(direction, 0)
+  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
   wordalignflag=StaticData::Instance().UseAlignmentInfo();
   printalign=StaticData::Instance().PrintAlignmentInfo();
@@ -71,7 +73,7 @@ TargetPhrase::~TargetPhrase()
 void TargetPhrase::SetScore(const TranslationSystem* system)
 {
   // used when creating translations of unknown words:
-  m_transScore = m_ngramScore = 0;
+  m_transScore = 0;
   m_fullScore = - system->GetWeightWordPenalty();
 }
 
@@ -161,7 +163,6 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 
     }
   }
-  m_ngramScore = totalNgramScore;
 
   m_fullScore = m_transScore + totalFutureScore + totalFullScore
                 - (this->GetSize() * weightWP);	 // word penalty
@@ -216,7 +217,7 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 {
   // used when creating translations of unknown words (chart decoding)
   m_scoreBreakdown.Assign(producer, scoreVector);
-  m_transScore = m_ngramScore = 0;
+  m_transScore = 0;
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
@@ -236,7 +237,7 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
 
 void TargetPhrase::ResetScore()
 {
-  m_fullScore = m_ngramScore = 0;
+  m_fullScore = 0;
   m_scoreBreakdown.ZeroAll();
 }
 
@@ -264,8 +265,9 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
 void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
 {
-  list<pair<size_t,size_t> > alignmentInfo;
-  vector<string> alignVec = Tokenize(alignString);
+  set<pair<size_t,size_t> > alignmentInfo;
+  vector<string> alignVec;
+  Tokenize(alignVec, alignString);
 
   vector<string>::const_iterator iter;
   for (iter = alignVec.begin(); iter != alignVec.end(); ++iter) {
@@ -275,22 +277,15 @@ void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
     size_t &sourcePos	= alignPos[0]
                         ,&targetPos	= alignPos[1];
 
-    alignmentInfo.push_back(pair<size_t,size_t>(sourcePos, targetPos));
+    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
   }
 
   SetAlignmentInfo(alignmentInfo);
 }
 
-void TargetPhrase::SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo)
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
 {
-  m_alignmentInfo.AddAlignment(alignmentInfo);
-}
-
-void TargetPhrase::CreateCountInfo(const std::string &countStr)
-{
-  vector<float> count = Moses::Tokenize<float>(countStr);
-  assert(count.size() == 2);
-  m_countInfo = Moses::CountInfo(count[1], count[0]);
+  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
 }
 
 

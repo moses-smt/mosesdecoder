@@ -50,6 +50,8 @@ int main (int argc, char * const argv[])
                                 , numScores					= Moses::Scan<int>(argv[3])
                                     , tableLimit				= Moses::Scan<int>(argv[4]);
   TargetPhraseCollection::s_sortScoreInd			= Moses::Scan<int>(argv[5]);
+  assert(TargetPhraseCollection::s_sortScoreInd < numScores);
+  
   const string filePath = argv[6]
                           ,destPath = argv[7];
 

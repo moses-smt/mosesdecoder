@@ -27,7 +27,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Moses;
 
-Moses::ThreadPool::ThreadPool( size_t numThreads )
+namespace Moses
+{
+
+ThreadPool::ThreadPool( size_t numThreads )
   : m_stopped(false), m_stopping(false)
 {
   for (size_t i = 0; i < numThreads; ++i) {
@@ -35,7 +38,7 @@ Moses::ThreadPool::ThreadPool( size_t numThreads )
   }
 }
 
-void Moses::ThreadPool::Execute()
+void ThreadPool::Execute()
 {
   do {
     Task* task = NULL;
@@ -62,7 +65,7 @@ void Moses::ThreadPool::Execute()
 #endif
 }
 
-void Moses::ThreadPool::Submit( Task* task )
+void ThreadPool::Submit( Task* task )
 {
   boost::mutex::scoped_lock lock(m_mutex);
   if (m_stopping) {
@@ -73,7 +76,7 @@ void Moses::ThreadPool::Submit( Task* task )
 
 }
 
-void Moses::ThreadPool::Stop(bool processRemainingJobs)
+void ThreadPool::Stop(bool processRemainingJobs)
 {
   {
     //prevent more jobs from being added to the queue
@@ -98,4 +101,7 @@ void Moses::ThreadPool::Stop(bool processRemainingJobs)
 
   m_threads.join_all();
 }
+
+}
 #endif //WITH_THREADS
+

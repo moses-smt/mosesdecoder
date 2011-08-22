@@ -23,7 +23,6 @@
 
 #include "../../OnDiskPt/src/OnDiskWrapper.h"
 
-#include "CellCollection.h"
 #include "ChartRuleLookupManager.h"
 #include "ChartTranslationOptionList.h"
 #include "DotChartOnDisk.h"
@@ -38,7 +37,7 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerOnDisk(const InputType &sentence,
-                               const CellCollection &cellColl,
+                               const ChartCellCollection &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,
                                const LMList *languageModels,
@@ -63,7 +62,7 @@ private:
   const std::vector<FactorType> &m_outputFactorsVec;
   const std::vector<float> &m_weight;
   const std::string &m_filePath;
-  std::vector<ProcessedRuleStackOnDisk*> m_runningNodesVec;
+  std::vector<DottedRuleStackOnDisk*> m_expandableDottedRuleListVec;
   std::map<UINT64, const TargetPhraseCollection*> m_cache;
   std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
 };

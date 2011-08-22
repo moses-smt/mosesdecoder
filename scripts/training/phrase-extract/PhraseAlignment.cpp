@@ -125,4 +125,37 @@ bool PhraseAlignment::match( const PhraseAlignment& other )
   return true;
 }
 
+int PhraseAlignment::Compare(const PhraseAlignment &other) const
+{
+  if (this == &other) // comparing with itself
+    return 0;
+
+  if (GetTarget() != other.GetTarget()) 
+    return ( GetTarget() < other.GetTarget() ) ? -1 : +1;
+
+  if (GetSource() != other.GetSource())
+   return ( GetSource() < other.GetSource() ) ? -1 : +1;
+
+  if (!hierarchicalFlag) 
+    return 0;
+
+  // loop over all words (note: 0 = left hand side of rule)
+  for(int i=0; i<phraseT.size()-1; i++) {
+    if (isNonTerminal( vcbT.getWord( phraseT[i] ) )) {
+      size_t thisAlign = *(alignedToT[i].begin());
+      size_t otherAlign = *(other.alignedToT[i].begin());
+
+      if (alignedToT[i].size() != 1 ||
+          other.alignedToT[i].size() != 1 ||
+          thisAlign != otherAlign)
+      {
+        int ret = (thisAlign < otherAlign) ? -1 : +1;
+        return ret;
+      }
+    }
+  }
+  return 0;
+  
+}
+
 

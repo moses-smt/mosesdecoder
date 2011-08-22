@@ -31,17 +31,16 @@
 #endif
 
 #include "ChartRuleLookupManager.h"
-#include "DotChart.h"
+#include "DotChartInMemory.h"
 #include "NonTerminal.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "PhraseDictionarySCFG.h"
-#include "WordConsumed.h"
 
 namespace Moses
 {
 
 class ChartTranslationOptionList;
-class ProcessedRuleColl;
+class DottedRuleColl;
 class WordsRange;
 
 // Implementation of ChartRuleLookupManager for in-memory rule tables.
@@ -49,7 +48,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
-                               const CellCollection &cellColl,
+                               const ChartCellCollection &cellColl,
                                const PhraseDictionarySCFG &ruleTable);
 
   ~ChartRuleLookupManagerMemory();
@@ -61,23 +60,19 @@ public:
 
 private:
   void ExtendPartialRuleApplication(
-    const PhraseDictionaryNodeSCFG &node,
-    const WordConsumed *prevWordConsumed,
+    const DottedRuleInMemory &prevDottedRule,
     size_t startPos,
     size_t endPos,
     size_t stackInd,
-    const NonTerminalSet &sourceNonTerms,
-    const NonTerminalSet &targetNonTerms,
-    ProcessedRuleColl &processedRuleColl);
+    DottedRuleColl &dottedRuleColl);
 
-  std::vector<ProcessedRuleColl*> m_processedRuleColls;
+  std::vector<DottedRuleColl*> m_dottedRuleColls;
   const PhraseDictionarySCFG &m_ruleTable;
 #ifdef USE_BOOST_POOL
-  // Use object pools to allocate the ProcessedRule and WordConsumed objects
-  // for this sentence.  We allocate a lot of them and this has been seen to
-  // significantly improve performance, especially for multithreaded decoding.
-  boost::object_pool<ProcessedRule> m_processedRulePool;
-  boost::object_pool<WordConsumed> m_wordConsumedPool;
+  // Use an object pool to allocate the dotted rules for this sentence.  We
+  // allocate a lot of them and this has been seen to significantly improve
+  // performance, especially for multithreaded decoding.
+  boost::object_pool<DottedRuleInMemory> m_dottedRulePool;
 #endif
 };
 

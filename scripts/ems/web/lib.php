@@ -124,48 +124,136 @@ function process_file_entry($dir,$entry) {
   }
 }
 
-function get_coverage_analysis_version($dir,$set,$id) {
-  if (file_exists("$dir/evaluation/$set.analysis.$id/input-annotation")) {
-    return $id;
+function get_analysis_version($dir,$set,$id) {
+  global $analysis_version;
+  if ($analysis_version
+      && array_key_exists($id,$analysis_version)
+      && array_key_exists($set,$analysis_version[$id])) {
+    #reset($analysis_version[$id][$set]);
+    #print "$id,$set ( ";
+    #while(list($type,$i) = each($analysis_version[$id][$set])) {
+    #  print "$type=$i ";
+    #}
+    #print ") FROM CACHE<br>"; 
+    return $analysis_version[$id][$set];
   }
+  $analysis_version[$id][$set]["basic"] = 0;
+  $analysis_version[$id][$set]["biconcor"] = 0;
+  $analysis_version[$id][$set]["coverage"] = 0;
+  $analysis_version[$id][$set]["precision"] = 0;
+  $prefix = "$dir/evaluation/$set.analysis";
+
+  # produced by the run itself ?
+  if (file_exists("$prefix.$id/summary")) {
+    $analysis_version[$id][$set]["basic"] = $id;
+  }
+  if (file_exists("$prefix.$id/input-annotation")) {
+    $analysis_version[$id][$set]["coverage"] = $id;
+  }
+  if (file_exists("$prefix.$id/precision-by-input-word")) {
+    $analysis_version[$id][$set]["precision"] = $id;
+  }
+  if (file_exists("$dir/model/biconcor.$id")) {
+    $analysis_version[$id][$set]["biconcor"] = $id;
+  }
+
+  # re-use ?
   if (file_exists("$dir/steps/$id/re-use.$id")) {
     $re_use = file("$dir/steps/$id/re-use.$id");
     foreach($re_use as $line) {
-      if (preg_match("/EVALUATION:(.+):analysis-coverage (\d+)/",$line,$match) &&
+      if (preg_match("/EVALUATION:(.+):analysis (\d+)/",$line,$match) &&
 	  $match[1] == $set &&
-	  file_exists("$dir/evaluation/$set.analysis.$match[2]/input-annotation")) {
-	return $match[2];
+	  file_exists("$prefix.$match[2]/summary")) {
+	$analysis_version[$id][$set]["basic"] = $match[2];
+      }
+      else if (preg_match("/EVALUATION:(.+):analysis-coverage (\d+)/",$line,$match) &&
+	  $match[1] == $set &&
+	  file_exists("$prefix.$match[2]/input-annotation")) {
+	$analysis_version[$id][$set]["coverage"] = $match[2];
+      }
+      else if (preg_match("/EVALUATION:(.+):analysis-precision (\d+)/",$line,$match) &&
+	  $match[1] == $set &&
+	  file_exists("$prefix.$match[2]/precision-by-input-word")) {
+	$analysis_version[$id][$set]["precision"] = $match[2];
+      }
+      else if (preg_match("/TRAINING:build-biconcor (\d+)/",$line,$match) &&
+        file_exists("$dir/model/biconcor.$match[1]")) {
+	$analysis_version[$id][$set]["biconcor"] = $match[1];
       }
     } 
   }
+
   # legacy stuff below...
-  if (! file_exists("$dir/steps/$id/REPORTING_report.$id")) {
-    return 0;
-  }
-  $report = file("$dir/steps/$id/REPORTING_report.$id.INFO");
-  foreach ($report as $line) {
-    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis-coverage/",$line,$match) &&
+  if (file_exists("$dir/steps/$id/REPORTING_report.$id")) {
+   $report = file("$dir/steps/$id/REPORTING_report.$id.INFO");
+   foreach ($report as $line) {
+    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis/",$line,$match) &&
         $match[2] == $set) {
-      $reuse_id = $match[1];
-      if (file_exists("$dir/evaluation/$set.analysis.$reuse_id/input-annotation")) {
-        return $reuse_id;
+      if (file_exists("$prefix.$match[1]/summary")) {
+        $analysis_version[$id][$set]["basic"] = $match[1];
       }
     }
-  }
-  return 0;
-}
-
-function get_biconcor_version($dir,$id) {
-  if (file_exists("$dir/model/biconcor.$id")) {
-    return $id;
-  }
-  $re_use = file("$dir/steps/$id/re-use.$id");
-  foreach($re_use as $line) {
-    if (preg_match("/TRAINING:build-biconcor (\d+)/",$line,$match) &&
-        file_exists("$dir/model/biconcor.$match[1]")) {
-      return $match[1];
+    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis-coverage/",$line,$match) &&
+        $match[2] == $set) {
+      if (file_exists("$prefix.$match[1]/input-annotation")) {
+        $analysis_version[$id][$set]["coverage"] = $match[1];
+      }
     }
+    if (preg_match("/\# reuse run (\d+) for EVALUATION:(.+):analysis-precision/",$line,$match) &&
+        $match[2] == $set) {
+      if (file_exists("$prefix.$match[1]/precision-by-input-word")) {
+        $analysis_version[$id][$set]["precision"] = $match[1];
+      }
+    }
+    if (preg_match("/\# reuse run (\d+) for TRAINING:biconcor/",$line,$match)){
+      if (file_exists("$dir/model/biconcor.$match[1]")) {
+	$analysis_version[$id][$set]["biconcor"] = $match[1];
+      }
+    }
+   }
   }
-  return 0;
+  #print "$id,$set ( ";
+  #reset($analysis_version[$id][$set]);
+  #while(list($type,$i) = each($analysis_version[$id][$set])) {
+  #    print "$type=$i ";
+  #}
+  #print ") ZZ<br>"; 
+  return $analysis_version[$id][$set];
 }
 
+function get_precision_analysis_version($dir,$set,$id) {
+  $version = get_analysis_version($dir,$set,$id);
+  return $version["precision"];
+}
+
+function get_basic_analysis_version($dir,$set,$id) {
+  $version = get_analysis_version($dir,$set,$id);
+  return $version["basic"];
+}
+
+function get_coverage_analysis_version($dir,$set,$id) {
+  $version = get_analysis_version($dir,$set,$id);
+  return $version["coverage"];
+}
+
+function get_biconcor_version($dir,$set,$id) {
+  $version = get_analysis_version($dir,$set,$id);
+  return $version["biconcor"];
+}
+
+function get_analysis_filename($dir,$set,$id,$type,$file) {
+  $version = get_analysis_version($dir,$set,$id);
+  return "$dir/evaluation/$set.analysis.".$version[$type]."/".$file;
+}
+
+function get_current_analysis_filename($type,$file) {
+  global $dir,$set,$id;
+  $version = get_analysis_version($dir,$set,$id);
+  return "$dir/evaluation/$set.analysis.".$version[$type]."/".$file;
+}
+
+function get_current_analysis_filename2($type,$file) {
+  global $dir,$set,$id2;
+  $version = get_analysis_version($dir,$set,$id2);
+  return "$dir/evaluation/$set.analysis.".$version[$type]."/".$file;
+}

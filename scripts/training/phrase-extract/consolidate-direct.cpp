@@ -17,6 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include <string.h>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -86,13 +87,22 @@ int main(int argc, char* argv[])
   istream &fileDirectP = fileDirect;
 
   char* &fileNameConsolidated = argv[2];
-  ofstream fileConsolidated;
-  fileConsolidated.open(fileNameConsolidated);
-  if (fileConsolidated.fail()) {
-    cerr << "ERROR: could not open output file " << fileNameConsolidated << endl;
-    exit(1);
-  }
-
+  ostream *fileConsolidated;
+	
+	if (strcmp(fileNameConsolidated, "-") == 0) {
+		fileConsolidated = &cout;
+	}
+	else {
+		ofstream *outputFile = new ofstream();
+		outputFile->open(fileNameConsolidated);
+		if (outputFile->fail()) {
+			cerr << "ERROR: could not open file phrase table file "
+			<< fileNameConsolidated << endl;
+			exit(1);
+		}
+		fileConsolidated = outputFile;
+	}
+	
   int i=0;
   while(true) {
     i++;
@@ -104,19 +114,25 @@ int main(int argc, char* argv[])
     if (! getLine(fileDirectP,  itemDirect  ))
       break;
 
-    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
+    (*fileConsolidated) << itemDirect[0] << " ||| " << itemDirect[1] << " ||| ";
 
     // output alignment and probabilities
-    fileConsolidated	<< itemDirect[2]						// prob direct
+    (*fileConsolidated)	<< itemDirect[2]						// prob direct
                       << " 2.718" // phrase count feature
                       << " ||| " << itemDirect[3];	// alignment
 
     // counts
-    fileConsolidated << "||| 0 " << itemDirect[4]; // indirect
-    fileConsolidated << endl;
+    (*fileConsolidated) << "||| 0 " << itemDirect[4]; // indirect
+    (*fileConsolidated) << endl;
 
   }
 
+	fileConsolidated->flush();
+	if (fileConsolidated != &cout) {
+		(dynamic_cast<ofstream*>(fileConsolidated))->close();
+		delete fileConsolidated;
+	}
+	
   cerr << "Finished" << endl;
 }
 

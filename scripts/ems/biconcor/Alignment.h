@@ -14,7 +14,7 @@ private:
   INDEX *m_sentenceEnd;
   INDEX m_size;
   INDEX m_sentenceCount;
-  char m_unaligned[ 256 ];
+  char m_unaligned[ 256 ]; // here for speed (local to PhraseAlignment)
 
 public:
   ~Alignment();
@@ -27,4 +27,18 @@ public:
   void Load( string fileName );
   void Save( string fileName );
   vector<string> Tokenize( const char input[] );
+
+	INDEX GetSentenceStart( INDEX sentence ) {
+		if (sentence == 0) return 0;
+		return m_sentenceEnd[ sentence-1 ] + 2;
+	}
+	INDEX GetNumberOfAlignmentPoints( INDEX sentence ) {
+		return ( m_sentenceEnd[ sentence ] - GetSentenceStart( sentence ) ) / 2;
+	}
+	char GetSourceWord( INDEX sentence, INDEX alignment_point ) {
+		return m_array[ GetSentenceStart( sentence ) + alignment_point*2 ];
+	}
+	char GetTargetWord( INDEX sentence, INDEX alignment_point ) {
+		return m_array[ GetSentenceStart( sentence ) + alignment_point*2 + 1 ];
+	}
 };

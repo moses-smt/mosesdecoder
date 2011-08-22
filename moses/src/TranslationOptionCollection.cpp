@@ -221,7 +221,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		// modify the starting bitmap
 	}
 	
-	Phrase* m_unksrc = new Phrase(Input); m_unksrc->AddWord() = sourceWord;
+	Phrase* m_unksrc = new Phrase(Input,1);
+  m_unksrc->AddWord() = sourceWord;
 	m_unksrcs.push_back(m_unksrc);
 
 	TranslationOption *transOpt;
@@ -265,6 +266,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
   , m_system->GetUnknownWordPenaltyProducer());	
 	transOpt->CalcScore(m_system);
 	Add(transOpt);
+
+
 }
 
 /** compute future score matrix in a dynamic programming fashion.
@@ -387,7 +390,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
         if (graph > 0 && // only skip subsequent graphs
             decodeGraphBackoff[graph] != 0 && // use of backoff specified
-            (endPos-startPos+1 > decodeGraphBackoff[graph] || // size exceeds backoff limit or ...
+            (endPos-startPos+1 >= decodeGraphBackoff[graph] || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
           VERBOSE(3,"No backoff to graph " << graph << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options

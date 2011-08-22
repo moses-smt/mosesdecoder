@@ -5,12 +5,14 @@ use Getopt::Long "GetOptions";
 
 my $MAX_LENGTH = 4;
 
-my ($system,$system_alignment,$segmentation,$reference,$dir,$input,$corpus,$ttable,@FACTORED_TTABLE,$score_options,$hierarchical,$output_corpus,$alignment,$biconcor,$input_factors,$precision_by_coverage,$precision_by_coverage_factor);
+my ($system,$system_alignment,$segmentation,$reference,$dir,$input,$corpus,$ttable,@FACTORED_TTABLE,$score_options,$hierarchical,$output_corpus,$alignment,$biconcor,$input_factors,$input_factor_names,$output_factor_names,$precision_by_coverage,$precision_by_coverage_factor,$coverage_dir);
 if (!&GetOptions('system=s' => \$system, # raw output from decoder
 		 'system-alignment=s' => \$system_alignment, # word alignment of system output
                  'reference=s' => \$reference, # tokenized reference
                  'dir=s' => \$dir, # directory for storing results
 		 'input-factors=i' => \$input_factors, # list of input factors
+		 'input-factor-names=s' => \$input_factor_names,
+		 'output-factor-names=s' => \$output_factor_names,
 		 'precision-by-coverage' => \$precision_by_coverage, # added report for input words
 		 'precision-by-coverage-factor=i' => \$precision_by_coverage_factor, # sub-reports
                  'input=s' => \$input, # tokenized input (as for decoder)
@@ -21,6 +23,7 @@ if (!&GetOptions('system=s' => \$system, # raw output from decoder
 		 'score-options=s' => \$score_options, # score options to detect p(e|f) score
                  'output-corpus=s' => \$output_corpus, # output side of parallel training corpus
                  'alignment-file=s' => \$alignment, # alignment of parallel corpus
+		 'coverage=s' => \$coverage_dir, # already computed coverage, stored in this dir
                  'biconcor=s' => \$biconcor, # binary for bilingual concordancer
 		 'hierarchical' => \$hierarchical) || # hierarchical model?
     !defined($dir)) {
@@ -28,6 +31,14 @@ if (!&GetOptions('system=s' => \$system, # raw output from decoder
 }
 
 `mkdir -p $dir`;
+
+# factor names
+if (defined($input_factor_names) && defined($output_factor_names)) {
+  open(FACTOR,">$dir/factor-names");
+  print FACTOR $input_factor_names."\n";
+  print FACTOR $output_factor_names."\n";
+  close(FACTOR);
+}
 
 # compare system output against reference translation
 my(@SYSTEM,@REFERENCE);
@@ -82,13 +93,13 @@ if (defined($segmentation)) {
 
 # coverage analysis
 my (%INPUT_PHRASE,%CORPUS_COVERED,%TTABLE_COVERED,%TTABLE_ENTROPY);
-if (!defined($system_alignment) && (defined($ttable) || defined($corpus))) {	
+if (!defined($coverage_dir) && (defined($ttable) || defined($corpus))) {	
   if (!defined($input)) {
     die("ERROR: when specifying either ttable or input-corpus, please also specify input\n");
   }
   $MAX_LENGTH = 7;
   &input_phrases();
-  &ttable_coverage(0,$ttable) if defined($ttable);
+  &ttable_coverage("0",$ttable) if defined($ttable);
   &corpus_coverage() if defined($corpus);
   &input_annotation();
 
@@ -101,11 +112,11 @@ if (!defined($system_alignment) && (defined($ttable) || defined($corpus))) {
   }
 
   # factored ttable coverage
-  foreach my $ttable (@FACTORED_TTABLE) {
+  foreach my $factored_ttable (@FACTORED_TTABLE) {
       die("factored ttable must be specified as factor:file -- $ttable")
-	unless $ttable =~ /^(\d+)\:(.+)/; #  factor:ttable
+	unless $factored_ttable =~ /^([\d,]+)\:(.+)/; #  factor:ttable
       my ($factor,$file) = ($1,$2);
-      next unless $file eq $ttable; # no need to do this twice
+      next if defined($ttable) && $file eq $ttable; # no need to do this twice
       &input_phrases($factor);
       &ttable_coverage($factor,$file);
   }
@@ -166,7 +177,7 @@ sub get_factor_phrase {
   $line =~ s/ $//;
 
   # only surface? delete remaining factors
-  if (!defined($factor) || $factor == 0) {
+  if (!defined($factor) || $factor eq "0") {
     $line =~ s/\|\S+//g;
     return $line;
   }
@@ -196,7 +207,7 @@ sub get_factor_word {
 
 sub factor_ext {
   my ($factor) = @_;
-  return "" if !defined($factor) || $factor == 0;
+  return "" if !defined($factor) || $factor eq "0";
   return ".".$factor;
 }
 
@@ -327,6 +338,7 @@ sub ttable_coverage {
     # handling hierarchical
     $in =~ s/ \[[^ \]]+\]$//; # remove lhs nt
     next if $in =~ /\[[^ \]]+\]\[[^ \]]+\]/; # only consider flat rules
+    $in = &get_factor_phrase($factor,$in) unless !defined($factor) || $factor eq "0"; 
     $scores = $COLUMN[4] if defined($hierarchical); #scalar @COLUMN == 5;
     my @IN = split(/ /,$in);
     $size = scalar @IN;
@@ -536,7 +548,10 @@ sub precision_by_coverage {
 
   # get coverage statistics
   my %COVERAGE;
-  open(COVERAGE,"$dir/$coverage_type-coverage-by-phrase");
+  print STDERR "".(defined($coverage_dir)?$coverage_dir:$dir)
+      ."/$coverage_type-coverage-by-phrase";
+  open(COVERAGE,(defined($coverage_dir)?$coverage_dir:$dir)
+                ."/$coverage_type-coverage-by-phrase");
   while(<COVERAGE>) {
     chop;
     my ($phrase,$count) = split(/\t/);

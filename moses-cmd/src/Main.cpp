@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifdef WIN32
 // Include Visual Leak Detector
-#include <vld.h>
+//#include <vld.h>
 #endif
 
 #include "Hypothesis.h"
@@ -50,6 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace Moses;
 
+// output floats with three significant digits
 static const size_t PRECISION = 3;
 
 /** Enforce rounding */
@@ -59,8 +60,10 @@ void fix(std::ostream& stream, size_t size)
   stream.precision(size);
 }
 
-/**
-  * Translates a sentence.
+/** Translates a sentence.
+  * - calls the search (Manager)
+  * - applies the decision rule
+  * - outputs best translation and additional reporting
   **/
 class TranslationTask : public Task
 {
@@ -78,17 +81,29 @@ public:
     m_detailedTranslationCollector(detailedTranslationCollector),
     m_alignmentInfoCollector(alignmentInfoCollector) {}
 
+	/** Translate one sentence
+   * gets called by main function implemented at end of this source file */
   void Run() {
+
+    // report thread number
 #ifdef BOOST_HAS_PTHREADS
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
+
+    // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
+    // input sentence
     Sentence sentence(Input);
+    // set translation system
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+
+    // execute the translation
+    // note: this executes the search, resulting in a search graph
+    //       we still need to apply the decision rule (MAP, MBR, ...)
     Manager manager(*m_source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();
 
-    //Word Graph
+    // output word graph
     if (m_wordGraphCollector) {
       ostringstream out;
       fix(out,PRECISION);
@@ -96,7 +111,7 @@ public:
       m_wordGraphCollector->Write(m_lineNumber, out.str());
     }
 
-    //Search Graph
+    // output search graph
     if (m_searchGraphCollector) {
       ostringstream out;
       fix(out,PRECISION);
@@ -113,23 +128,23 @@ public:
         manager.SerializeSearchGraphPB(m_lineNumber, output);
       }
 #endif
-    }
+    }		
 
-
-
+    // apply decision rule and output best translation(s)
     if (m_outputCollector) {
       ostringstream out;
       ostringstream debug;
       fix(debug,PRECISION);
 
-      //All derivations - send them to debug stream
+      // all derivations - send them to debug stream
       if (staticData.PrintAllDerivations()) {
         manager.PrintAllDerivations(m_lineNumber, debug);
       }
 
-      //Best hypothesis
+      // MAP decoding: best hypothesis
       const Hypothesis* bestHypo = NULL;
-      if (!staticData.UseMBR()) {
+      if (!staticData.UseMBR()) 
+			{
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
           if (staticData.IsPathRecoveryEnabled()) {
@@ -148,7 +163,12 @@ public:
           }
         }
         out << endl;
-      } else {
+			}
+
+      // MBR decoding (n-best MBR, lattice MBR, consensus)
+      else 
+			{
+        // we first need the n-best translations
         size_t nBestSize = staticData.GetMBRSize();
         if (nBestSize <= 0) {
           cerr << "ERROR: negative size for number of MBR candidate translations not allowed (option mbr-size)" << endl;
@@ -161,6 +181,7 @@ public:
           PrintUserTime("calculated n-best list for (L)MBR decoding");
         }
 
+        // lattice MBR
         if (staticData.UseLatticeMBR()) {
           if (m_nbestCollector) {
             //lattice mbr nbest
@@ -179,7 +200,10 @@ public:
               PrintUserTime("finished Lattice MBR decoding");
             }
           }
-        } else if (staticData.UseConsensusDecoding()) {
+        }
+
+        // consensus decoding
+				else if (staticData.UseConsensusDecoding()) {
           const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
           OutputBestHypo(conBestHypo, m_lineNumber,
                          staticData.GetReportSegmentation(),
@@ -188,8 +212,10 @@ public:
           IFVERBOSE(2) {
             PrintUserTime("finished Consensus decoding");
           }
-        } else {
-          //MBR decoding
+				}
+				
+        // n-best MBR decoding
+        else {
           const Moses::TrellisPath &mbrBestHypo = doMBR(nBestList);
           OutputBestHypo(mbrBestHypo, m_lineNumber,
                          staticData.GetReportSegmentation(),
@@ -198,11 +224,14 @@ public:
           IFVERBOSE(2) {
             PrintUserTime("finished MBR decoding");
           }
-
         }
       }
+
+      // report best translation to output collector
       m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
     }
+
+    // output n-best list
     if (m_nbestCollector && !staticData.UseLatticeMBR()) {
       TrellisPathList nBestList;
       ostringstream out;
@@ -211,7 +240,7 @@ public:
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
 
-    //detailed translation reporting
+    // detailed translation reporting
     if (m_detailedTranslationCollector) {
       ostringstream out;
       fix(out,PRECISION);
@@ -219,10 +248,10 @@ public:
       m_detailedTranslationCollector->Write(m_lineNumber,out.str());
     }
 
+    // report additional statistics
     IFVERBOSE(2) {
       PrintUserTime("Sentence Decoding Time:");
     }
-
     manager.CalcDecoderStatistics();
   }
 
@@ -285,29 +314,36 @@ static void ShowWeights()
   }
 }
 
+/** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
 
 #ifdef HAVE_PROTOBUF
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
+
+  // echo command line, if verbose
   IFVERBOSE(1) {
     TRACE_ERR("command: ");
     for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
     TRACE_ERR(endl);
   }
 
+  // set number of significant decimals in output
   fix(cout,PRECISION);
   fix(cerr,PRECISION);
 
-
+  // load all the settings into the Parameter class
+  // (stores them as strings, or array of strings)
   Parameter* params = new Parameter();
   if (!params->LoadParam(argc,argv)) {
     params->Explain();
     exit(1);
   }
 
-  //create threadpool, if necessary
+  // create threadpool, if using multi-threaded decoding
+  // note: multi-threading is done on sentence-level,
+  // each thread translates one sentence
   int threadcount = (params->GetParam("threads").size() > 0) ?
                     Scan<size_t>(params->GetParam("threads")[0]) : 1;
 
@@ -324,20 +360,23 @@ int main(int argc, char** argv)
   }
 #endif
 
-
+  // initialize all "global" variables, which are stored in StaticData
+  // note: this also loads models such as the language model, etc.
   if (!StaticData::LoadDataStatic(params)) {
     exit(1);
   }
 
+  // setting "-show-weights" -> just dump out weights and exit
   if (params->isParamSpecified("show-weights")) {
     ShowWeights();
     exit(0);
   }
 
+  // shorthand for accessing information in StaticData
   const StaticData& staticData = StaticData::Instance();
+
   // set up read/writing class
   IOWrapper* ioWrapper = GetIODevice(staticData);
-
   if (!ioWrapper) {
     cerr << "Error; Failed to create IO object" << endl;
     exit(1);
@@ -351,20 +390,20 @@ int main(int argc, char** argv)
     TRACE_ERR("\n");
   }
 
-
-  InputType* source = NULL;
-  size_t lineCount = 0;
-  auto_ptr<OutputCollector> outputCollector;//for translations
-  auto_ptr<OutputCollector> nbestCollector;
+  // initialize output streams
+  // note: we can't just write to STDOUT or files
+  // because multithreading may return sentences in shuffled order
+  auto_ptr<OutputCollector> outputCollector; // for translations
+  auto_ptr<OutputCollector> nbestCollector;  // for n-best lists
   auto_ptr<ofstream> nbestOut;
   size_t nbestSize = staticData.GetNBestSize();
   string nbestFile = staticData.GetNBestFilePath();
   if (nbestSize) {
     if (nbestFile == "-" || nbestFile == "/dev/stdout") {
-      //nbest to stdout, no 1-best
+      // nbest to stdout, no 1-best
       nbestCollector.reset(new OutputCollector());
     } else {
-      //nbest to file, 1-best to stdout
+      // nbest to file, 1-best to stdout
       nbestOut.reset(new ofstream(nbestFile.c_str()));
       assert(nbestOut->good());
       nbestCollector.reset(new OutputCollector(nbestOut.get()));
@@ -374,44 +413,57 @@ int main(int argc, char** argv)
     outputCollector.reset(new OutputCollector());
   }
 
+  // initialize stream for word graph (aka: output lattice)
   auto_ptr<OutputCollector> wordGraphCollector;
   if (staticData.GetOutputWordGraph()) {
     wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
   }
 
+  // initialize stream for search graph
+  // note: this is essentially the same as above, but in a different format
   auto_ptr<OutputCollector> searchGraphCollector;
   if (staticData.GetOutputSearchGraph()) {
     searchGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputSearchGraphStream())));
   }
 
+  // initialize stram for details about the decoder run
   auto_ptr<OutputCollector> detailedTranslationCollector;
   if (staticData.IsDetailedTranslationReportingEnabled()) {
     detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
   }
+
+  // initialize stram for word alignment between input and output
   auto_ptr<OutputCollector> alignmentInfoCollector;
   if (!staticData.GetAlignmentOutputFile().empty()) {
     alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
   }
 
+  // main loop over set of input sentences
+  InputType* source = NULL;
+  size_t lineCount = 0;
   while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
     IFVERBOSE(1) {
       ResetUserTime();
     }
+    // set up task of translating one sentence
     TranslationTask* task =
       new TranslationTask(lineCount,source, outputCollector.get(),
                           nbestCollector.get(), wordGraphCollector.get(),
                           searchGraphCollector.get(),
                           detailedTranslationCollector.get(),
                           alignmentInfoCollector.get() );
+    // execute task
 #ifdef WITH_THREADS
     pool.Submit(task);
-
 #else
     task->Run();
 #endif
+
     source = NULL; //make sure it doesn't get deleted
     ++lineCount;
   }
+
+  // we are done, finishing up
 #ifdef WITH_THREADS
   pool.Stop(true); //flush remaining jobs
 #endif

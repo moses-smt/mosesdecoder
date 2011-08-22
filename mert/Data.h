@@ -85,9 +85,12 @@ public:
   inline std::string getFeatureName(size_t idx) {
     return featdata->getFeatureName(idx);
   };
+
   inline size_t getFeatureIndex(const std::string& name) {
     return featdata->getFeatureIndex(name);
   };
+
+	void sample_ranked_pairs( const std::string &rankedPairFile );
 };
 
 

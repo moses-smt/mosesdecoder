@@ -8,7 +8,7 @@
 #define _TRANSLATION_ANALYSIS_H_
 
 #include <iostream>
-#include "Hypothesis.h"
+#include "ChartHypothesis.h"
 
 namespace TranslationAnalysis
 {

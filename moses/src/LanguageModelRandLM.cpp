@@ -46,6 +46,7 @@ bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorTyp
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);
+  m_lm->initThreadSpecificData();
   return true;
 }
 
@@ -90,7 +91,7 @@ randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
   return m_lm->getWordID(str);
 }
 
-float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
+LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
                                     State* finalState) const
 {
   FactorType factorType = GetFactorType();
@@ -102,12 +103,14 @@ float LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
     //std::cerr << m_lm->getWord(ngram[i]) << " ";
   }
   int found = 0;
-  float logprob = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
+  LMResult ret;
+  ret.score = FloorScore(TransformLMScore(m_lm->getProb(&ngram[0], count, &found, finalState)));
+  ret.unknown = count && (ngram[count - 1] == m_oov_id);
   //if (finalState)
   //  std::cerr << " = " << logprob << "(" << *finalState << ", " <<")"<< std::endl;
   //else
   //  std::cerr << " = " << logprob << std::endl;
-  return logprob;
+  return ret;
 }
 
 }

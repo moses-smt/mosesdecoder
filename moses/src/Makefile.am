@@ -5,15 +5,26 @@ libmoses_ladir = ${includedir}
 
 libmoses_la_HEADERS = \
         AlignmentInfo.h \
+        AlignmentInfoCollection.h \
         BilingualDynSuffixArray.h \
         BitmapContainer.h \
 	BleuScoreFeature.h \
         CellCollection.h \
+	ChartCell.h \
+	ChartCellCollection.h \
+	ChartHypothesis.h \
+	ChartHypothesisCollection.h \
+	ChartManager.h \
         ChartRuleLookupManager.h \
         ChartRuleLookupManagerMemory.h \
         ChartRuleLookupManagerOnDisk.h \
         ChartTranslationOption.h \
+	ChartTranslationOptionCollection.h \
         ChartTranslationOptionList.h \
+	ChartTrellisNode.h \
+	ChartTrellisPath.h \
+	ChartTrellisPathCollection.h \
+	ChartTrellisPathList.h \
         ConfusionNet.h \
         DecodeFeature.h \
         DecodeGraph.h \
@@ -22,6 +33,7 @@ libmoses_la_HEADERS = \
         DecodeStepTranslation.h \
         Dictionary.h \
         DotChart.h \
+        DotChartInMemory.h \
         DotChartOnDisk.h \
         DummyScoreProducers.h \
 	DynSAInclude/file.h \
@@ -49,6 +61,7 @@ libmoses_la_HEADERS = \
         LMList.h \
         LVoc.h \
         LanguageModel.h \
+        LanguageModelChartState.h \
         LanguageModelJoint.h \
         LanguageModelFactory.h \
         LanguageModelImplementation.h \
@@ -85,6 +98,9 @@ libmoses_la_HEADERS = \
         PrefixTreeMap.h \
         ReorderingConstraint.h \
         ReorderingStack.h \
+        RuleCube.h \
+        RuleCubeItem.h \
+        RuleCubeQueue.h \
         ScoreComponentCollection.h \
         ScoreProducer.h \
         Search.h \
@@ -116,7 +132,6 @@ libmoses_la_HEADERS = \
         UserMessage.h \
         Util.h \
         Word.h \
-        WordConsumed.h \
         WordLattice.h \
         WordTranslationFeature.h \
         WordsBitmap.h \
@@ -140,21 +155,46 @@ if RAND_LM
 libmoses_la_HEADERS += LanguageModelRandLM.h
 endif
 
+if ORLM_LM
+libmoses_la_HEADERS += LanguageModelORLM.h \
+		       DynSAInclude/params.h \
+		       DynSAInclude/hash.h \
+		       DynSAInclude/quantizer.h \
+		       DynSAInclude/RandLMFilter.h \
+		       DynSAInclude/RandLMCache.h
+endif
+
 if INTERNAL_LM
 libmoses_la_HEADERS += LanguageModelInternal.h \
 		      NGramCollection.h \
 		      NGramNode.h
 endif
 
+if SYN_LM
+libmoses_la_HEADERS += SyntacticLanguageModel.h
+endif
+
 libmoses_la_SOURCES = \
         AlignmentInfo.cpp \
+        AlignmentInfoCollection.cpp \
         BilingualDynSuffixArray.cpp \
         BitmapContainer.cpp \
 	      BleuScoreFeature.cpp \
+	      ChartCell.cpp \
+	      ChartCellCollection.cpp \
+	      ChartHypothesis.cpp \
+	      ChartHypothesisCollection.cpp \
+	      ChartManager.cpp \
+				ChartRuleLookupManager.cpp \
         ChartRuleLookupManagerMemory.cpp \
         ChartRuleLookupManagerOnDisk.cpp \
         ChartTranslationOption.cpp \
+	      ChartTranslationOptionCollection.cpp \
         ChartTranslationOptionList.cpp \
+	      ChartTrellisNode.cpp \
+      	ChartTrellisPath.cpp \
+	      ChartTrellisPathCollection.cpp \
+	      ChartTrellisPathList.cpp \
         ConfusionNet.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
@@ -163,10 +203,11 @@ libmoses_la_SOURCES = \
         DecodeStepTranslation.cpp \
         Dictionary.cpp \
         DotChart.cpp \
+        DotChartInMemory.cpp \
         DotChartOnDisk.cpp \
         DummyScoreProducers.cpp \
-	DynSAInclude/file.cpp \
-	DynSAInclude/vocab.cpp \
+	      DynSAInclude/file.cpp \
+	      DynSAInclude/vocab.cpp \
         DynSuffixArray.cpp \
         FFState.cpp \
         Factor.cpp \
@@ -221,6 +262,9 @@ libmoses_la_SOURCES = \
         PrefixTreeMap.cpp \
         ReorderingConstraint.cpp \
         ReorderingStack.cpp \
+        RuleCube.cpp \
+        RuleCubeItem.cpp \
+        RuleCubeQueue.cpp \
         ScoreComponentCollection.cpp \
         ScoreProducer.cpp \
         Search.cpp \
@@ -249,7 +293,6 @@ libmoses_la_SOURCES = \
         UserMessage.cpp \
         Util.cpp \
         Word.cpp \
-        WordConsumed.cpp \
         WordLattice.cpp \
         WordTranslationFeature.cpp \
         WordsBitmap.cpp \
@@ -294,10 +337,21 @@ if RAND_LM
 libmoses_la_SOURCES += LanguageModelRandLM.cpp
 endif
 
+if ORLM_LM
+libmoses_la_SOURCES += LanguageModelORLM.cpp \
+		       DynSAInclude/onlineRLM.h \
+		       DynSAInclude/perfecthash.h \
+		       DynSAInclude/params.cpp 
+endif
+
 if INTERNAL_LM
 libmoses_la_SOURCES += LanguageModelInternal.cpp \
 		      NGramCollection.cpp \
 		      NGramNode.cpp
+endif
+
+if SYN_LM
+libmoses_la_SOURCES += SyntacticLanguageModel.cpp
 endif
 
 if KEN_LM

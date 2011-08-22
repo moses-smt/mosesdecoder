@@ -45,6 +45,7 @@ public:
 	size_t GetMaxNGramOrder() const
 	{ return m_maxNGramOrder; }
 	
+
 };
 
 }

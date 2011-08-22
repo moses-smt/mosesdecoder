@@ -1,9 +1,11 @@
 /* This is where the trie is built.  It's on-disk.  */
 #include "lm/search_trie.hh"
 
+#include "lm/bhiksha.hh"
 #include "lm/blank.hh"
 #include "lm/lm_exception.hh"
 #include "lm/max_order.hh"
+#include "lm/quantize.hh"
 #include "lm/read_arpa.hh"
 #include "lm/trie.hh"
 #include "lm/vocab.hh"
@@ -21,6 +23,7 @@
 #include <cstdio>
 #include <deque>
 #include <limits>
+#include <numeric>
 #include <vector>
 
 #include <sys/mman.h>
@@ -293,7 +296,7 @@ class SortedFileReader {
       ReadOrThrow(file_.get(), &weights, sizeof(Weights));
     }
 
-    bool Ended() {
+    bool Ended() const {
       return ended_;
     }
 
@@ -480,7 +483,7 @@ void MergeContextFiles(const std::string &first_base, const std::string &second_
   CopyRestOrThrow(remaining.GetFile(), out.get());
 }
 
-void ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const std::vector<uint64_t> &counts, util::scoped_memory &mem, const std::string &file_prefix, unsigned char order) {
+void ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const std::vector<uint64_t> &counts, util::scoped_memory &mem, const std::string &file_prefix, unsigned char order, PositiveProbWarn &warn) {
   ReadNGramHeader(f, order);
   const size_t count = counts[order - 1];
   // Size of weights.  Does it include backoff?  
@@ -495,11 +498,11 @@ void ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const st
     uint8_t *out_end = out + std::min(count - done, batch_size) * entry_size;
     if (order == counts.size()) {
       for (; out != out_end; out += entry_size) {
-        ReadNGram(f, order, vocab, reinterpret_cast<WordIndex*>(out), *reinterpret_cast<Prob*>(out + words_size));
+        ReadNGram(f, order, vocab, reinterpret_cast<WordIndex*>(out), *reinterpret_cast<Prob*>(out + words_size), warn);
       }
     } else {
       for (; out != out_end; out += entry_size) {
-        ReadNGram(f, order, vocab, reinterpret_cast<WordIndex*>(out), *reinterpret_cast<ProbBackoff*>(out + words_size));
+        ReadNGram(f, order, vocab, reinterpret_cast<WordIndex*>(out), *reinterpret_cast<ProbBackoff*>(out + words_size), warn);
       }
     }
     // Sort full records by full n-gram.  
@@ -535,12 +538,17 @@ void ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const st
   }
 }
 
-void ARPAToSortedFiles(util::FilePiece &f, const std::vector<uint64_t> &counts, size_t buffer, const std::string &file_prefix, SortedVocabulary &vocab) {
+void ARPAToSortedFiles(const Config &config, util::FilePiece &f, std::vector<uint64_t> &counts, size_t buffer, const std::string &file_prefix, SortedVocabulary &vocab) {
+  PositiveProbWarn warn(config.positive_log_probability);
   {
     std::string unigram_name = file_prefix + "unigrams";
     util::scoped_fd unigram_file;
-    util::scoped_mmap unigram_mmap(util::MapZeroedWrite(unigram_name.c_str(), counts[0] * sizeof(ProbBackoff), unigram_file), counts[0] * sizeof(ProbBackoff));
-    Read1Grams(f, counts[0], vocab, reinterpret_cast<ProbBackoff*>(unigram_mmap.get()));
+    // In case <unk> appears.  
+    size_t file_out = (counts[0] + 1) * sizeof(ProbBackoff);
+    util::scoped_mmap unigram_mmap(util::MapZeroedWrite(unigram_name.c_str(), file_out, unigram_file), file_out);
+    Read1Grams(f, counts[0], vocab, reinterpret_cast<ProbBackoff*>(unigram_mmap.get()), warn);
+    CheckSpecials(config, vocab);
+    if (!vocab.SawUnk()) ++counts[0];
   }
 
   // Only use as much buffer as we need.  
@@ -556,7 +564,7 @@ void ARPAToSortedFiles(util::FilePiece &f, const std::vector<uint64_t> &counts, 
   if (!mem.get()) UTIL_THROW(util::ErrnoException, "malloc failed for sort buffer size " << buffer);
 
   for (unsigned char order = 2; order <= counts.size(); ++order) {
-    ConvertToSorted(f, vocab, counts, mem, file_prefix, order);
+    ConvertToSorted(f, vocab, counts, mem, file_prefix, order, warn);
   }
   ReadEnd(f);
 }
@@ -571,10 +579,10 @@ bool HeadMatch(const WordIndex *words, const WordIndex *const words_end, const W
   return true;
 }
 
-// Counting phrase
+// Phase to count n-grams, including blanks inserted because they were pruned but have extensions
 class JustCount {
   public:
-    JustCount(ContextReader * /*contexts*/, UnigramValue * /*unigrams*/, BitPackedMiddle * /*middle*/, BitPackedLongest &/*longest*/, uint64_t *counts, unsigned char order)
+    template <class Middle, class Longest> JustCount(ContextReader * /*contexts*/, UnigramValue * /*unigrams*/, Middle * /*middle*/, Longest &/*longest*/, uint64_t *counts, unsigned char order)
       : counts_(counts), longest_counts_(counts + order - 1) {}
 
     void Unigrams(WordIndex begin, WordIndex end) {
@@ -602,9 +610,10 @@ class JustCount {
     uint64_t *const counts_, *const longest_counts_;
 };
 
-class WriteEntries {
+// Phase to actually write n-grams to the trie.  
+template <class Quant, class Bhiksha> class WriteEntries {
   public:
-    WriteEntries(ContextReader *contexts, UnigramValue *unigrams, BitPackedMiddle *middle, BitPackedLongest &longest, const uint64_t * /*counts*/, unsigned char order) : 
+    WriteEntries(ContextReader *contexts, UnigramValue *unigrams, BitPackedMiddle<typename Quant::Middle, Bhiksha> *middle, BitPackedLongest<typename Quant::Longest> &longest, const uint64_t * /*counts*/, unsigned char order) : 
       contexts_(contexts),
       unigrams_(unigrams),
       middle_(middle),
@@ -641,14 +650,14 @@ class WriteEntries {
   private:
     ContextReader *contexts_;
     UnigramValue *const unigrams_;
-    BitPackedMiddle *const middle_;
-    BitPackedLongest &longest_;
+    BitPackedMiddle<typename Quant::Middle, Bhiksha> *const middle_;
+    BitPackedLongest<typename Quant::Longest> &longest_;
     BitPacked &bigram_pack_;
 };
 
 template <class Doing> class RecursiveInsert {
   public:
-    RecursiveInsert(SortedFileReader *inputs, ContextReader *contexts, UnigramValue *unigrams, BitPackedMiddle *middle, BitPackedLongest &longest, uint64_t *counts, unsigned char order) : 
+    template <class MiddleT, class LongestT> RecursiveInsert(SortedFileReader *inputs, ContextReader *contexts, UnigramValue *unigrams, MiddleT *middle, LongestT &longest, uint64_t *counts, unsigned char order) : 
       doing_(contexts, unigrams, middle, longest, counts, order), inputs_(inputs), inputs_end_(inputs + order - 1), order_minus_2_(order - 2) {
     }
 
@@ -763,15 +772,59 @@ template <class Doing> class RecursiveInsert {
 
 void SanityCheckCounts(const std::vector<uint64_t> &initial, const std::vector<uint64_t> &fixed) {
   if (fixed[0] != initial[0]) UTIL_THROW(util::Exception, "Unigram count should be constant but initial is " << initial[0] << " and recounted is " << fixed[0]);
-  if (fixed.back() != initial.back()) UTIL_THROW(util::Exception, "Longest count should be constant");
+  if (fixed.back() != initial.back()) UTIL_THROW(util::Exception, "Longest count should be constant but it changed from " << initial.back() << " to " << fixed.back());
   for (unsigned char i = 0; i < initial.size(); ++i) {
     if (fixed[i] < initial[i]) UTIL_THROW(util::Exception, "Counts came out lower than expected.  This shouldn't happen");
   }
 }
 
-void BuildTrie(const std::string &file_prefix, const std::vector<uint64_t> &counts, const Config &config, TrieSearch &out, Backing &backing) {
-  SortedFileReader inputs[counts.size() - 1];
-  ContextReader contexts[counts.size() - 1];
+bool IsDirectory(const char *path) {
+  struct stat info;
+  if (0 != stat(path, &info)) return false;
+  return S_ISDIR(info.st_mode);
+}
+
+template <class Quant> void TrainQuantizer(uint8_t order, uint64_t count, SortedFileReader &reader, util::ErsatzProgress &progress, Quant &quant) {
+  ProbBackoff weights;
+  std::vector<float> probs, backoffs;
+  probs.reserve(count);
+  backoffs.reserve(count);
+  for (reader.Rewind(); !reader.Ended(); reader.NextHeader()) {
+    uint64_t entries = reader.ReadCount();
+    for (uint64_t c = 0; c < entries; ++c) {
+      reader.ReadWord();
+      reader.ReadWeights(weights);
+      // kBlankProb isn't added yet.  
+      probs.push_back(weights.prob);
+      if (weights.backoff != 0.0) backoffs.push_back(weights.backoff);
+      ++progress;
+    }
+  }
+  quant.Train(order, probs, backoffs);
+}
+
+template <class Quant> void TrainProbQuantizer(uint8_t order, uint64_t count, SortedFileReader &reader, util::ErsatzProgress &progress, Quant &quant) {
+  Prob weights;
+  std::vector<float> probs, backoffs;
+  probs.reserve(count);
+  for (reader.Rewind(); !reader.Ended(); reader.NextHeader()) {
+    uint64_t entries = reader.ReadCount();
+    for (uint64_t c = 0; c < entries; ++c) {
+      reader.ReadWord();
+      reader.ReadWeights(weights);
+      // kBlankProb isn't added yet.  
+      probs.push_back(weights.prob);
+      ++progress;
+    }
+  }
+  quant.TrainProb(order, probs);
+}
+
+} // namespace
+
+template <class Quant, class Bhiksha> void BuildTrie(const std::string &file_prefix, std::vector<uint64_t> &counts, const Config &config, TrieSearch<Quant, Bhiksha> &out, Quant &quant, const SortedVocabulary &vocab, Backing &backing) {
+  std::vector<SortedFileReader> inputs(counts.size() - 1);
+  std::vector<ContextReader> contexts(counts.size() - 1);
 
   for (unsigned char i = 2; i <= counts.size(); ++i) {
     std::stringstream assembled;
@@ -785,12 +838,25 @@ void BuildTrie(const std::string &file_prefix, const std::vector<uint64_t> &coun
 
   std::vector<uint64_t> fixed_counts(counts.size());
   {
-    RecursiveInsert<JustCount> counter(inputs, contexts, NULL, &*out.middle.begin(), out.longest, &*fixed_counts.begin(), counts.size());
+    RecursiveInsert<JustCount> counter(&*inputs.begin(), &*contexts.begin(), NULL, out.middle_begin_, out.longest, &*fixed_counts.begin(), counts.size());
     counter.Apply(config.messages, "Counting n-grams that should not have been pruned", counts[0]);
   }
+  for (std::vector<SortedFileReader>::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+    if (!i->Ended()) UTIL_THROW(FormatLoadException, "There's a bug in the trie implementation: the " << (i - inputs.begin() + 2) << "-gram table did not complete reading");
+  }
   SanityCheckCounts(counts, fixed_counts);
+  counts = fixed_counts;
 
-  out.SetupMemory(GrowForSearch(config, TrieSearch::kModelType, fixed_counts, TrieSearch::Size(fixed_counts, config), backing), fixed_counts, config);
+  out.SetupMemory(GrowForSearch(config, vocab.UnkCountChangePadding(), TrieSearch<Quant, Bhiksha>::Size(fixed_counts, config), backing), fixed_counts, config);
+
+  if (Quant::kTrain) {
+    util::ErsatzProgress progress(config.messages, "Quantizing", std::accumulate(counts.begin() + 1, counts.end(), 0));
+    for (unsigned char i = 2; i < counts.size(); ++i) {
+      TrainQuantizer(i, counts[i-1], inputs[i-2], progress, quant);
+    }
+    TrainProbQuantizer(counts.size(), counts.back(), inputs[counts.size() - 2], progress, quant);
+    quant.FinishedLoading(config);
+  }
 
   for (unsigned char i = 2; i <= counts.size(); ++i) {
     inputs[i-2].Rewind();
@@ -798,12 +864,12 @@ void BuildTrie(const std::string &file_prefix, const std::vector<uint64_t> &coun
   UnigramValue *unigrams = out.unigram.Raw();
   // Fill entries except unigram probabilities.  
   {
-    RecursiveInsert<WriteEntries> inserter(inputs, contexts, unigrams, &*out.middle.begin(), out.longest, &*fixed_counts.begin(), counts.size());
+    RecursiveInsert<WriteEntries<Quant, Bhiksha> > inserter(&*inputs.begin(), &*contexts.begin(), unigrams, out.middle_begin_, out.longest, &*fixed_counts.begin(), counts.size());
     inserter.Apply(config.messages, "Building trie", fixed_counts[0]);
   }
 
   // Fill unigram probabilities.  
-  {
+  try {
     std::string name(file_prefix + "unigrams");
     util::scoped_FILE file(OpenOrThrow(name.c_str(), "r"));
     for (WordIndex i = 0; i < counts[0]; ++i) {
@@ -814,6 +880,9 @@ void BuildTrie(const std::string &file_prefix, const std::vector<uint64_t> &coun
       }
     }
     RemoveOrThrow(name.c_str());
+  } catch (util::Exception &e) {
+    e << " while re-reading unigram probabilities";
+    throw;
   }
 
   // Do not disable this error message or else too little state will be returned.  Both WriteEntries::Middle and returning state based on found n-grams will need to be fixed to handle this situation.   
@@ -825,30 +894,58 @@ void BuildTrie(const std::string &file_prefix, const std::vector<uint64_t> &coun
       for (const WordIndex *i = *context; i != *context + order - 1; ++i) {
         e << ' ' << *i;
       }
-      e << " so this context must appear in the model as a " << static_cast<unsigned int>(order - 1) << "-gram but it does not.";
+      e << " so this context must appear in the model as a " << static_cast<unsigned int>(order - 1) << "-gram but it does not";
       throw e;
     }
   }
 
   /* Set ending offsets so the last entry will be sized properly */
   // Last entry for unigrams was already set.  
-  if (!out.middle.empty()) {
-    for (size_t i = 0; i < out.middle.size() - 1; ++i) {
-      out.middle[i].FinishedLoading(out.middle[i+1].InsertIndex());
+  if (out.middle_begin_ != out.middle_end_) {
+    for (typename TrieSearch<Quant, Bhiksha>::Middle *i = out.middle_begin_; i != out.middle_end_ - 1; ++i) {
+      i->FinishedLoading((i+1)->InsertIndex(), config);
     }
-    out.middle.back().FinishedLoading(out.longest.InsertIndex());
+    (out.middle_end_ - 1)->FinishedLoading(out.longest.InsertIndex(), config);
+  }  
+}
+
+template <class Quant, class Bhiksha> uint8_t *TrieSearch<Quant, Bhiksha>::SetupMemory(uint8_t *start, const std::vector<uint64_t> &counts, const Config &config) {
+  quant_.SetupMemory(start, config);
+  start += Quant::Size(counts.size(), config);
+  unigram.Init(start);
+  start += Unigram::Size(counts[0]);
+  FreeMiddles();
+  middle_begin_ = static_cast<Middle*>(malloc(sizeof(Middle) * (counts.size() - 2)));
+  middle_end_ = middle_begin_ + (counts.size() - 2);
+  std::vector<uint8_t*> middle_starts(counts.size() - 2);
+  for (unsigned char i = 2; i < counts.size(); ++i) {
+    middle_starts[i-2] = start;
+    start += Middle::Size(Quant::MiddleBits(config), counts[i-1], counts[0], counts[i], config);
   }
+  // Crazy backwards thing so we initialize using pointers to ones that have already been initialized
+  for (unsigned char i = counts.size() - 1; i >= 2; --i) {
+    new (middle_begin_ + i - 2) Middle(
+        middle_starts[i-2],
+        quant_.Mid(i),
+        counts[i-1],
+        counts[0],
+        counts[i],
+        (i == counts.size() - 1) ? static_cast<const BitPacked&>(longest) : static_cast<const BitPacked &>(middle_begin_[i-1]),
+        config);
+  }
+  longest.Init(start, quant_.Long(counts.size()), counts[0]);
+  return start + Longest::Size(Quant::LongestBits(config), counts.back(), counts[0]);
 }
 
-bool IsDirectory(const char *path) {
-  struct stat info;
-  if (0 != stat(path, &info)) return false;
-  return S_ISDIR(info.st_mode);
+template <class Quant, class Bhiksha> void TrieSearch<Quant, Bhiksha>::LoadedBinary() {
+  unigram.LoadedBinary();
+  for (Middle *i = middle_begin_; i != middle_end_; ++i) {
+    i->LoadedBinary();
+  }
+  longest.LoadedBinary();
 }
 
-} // namespace
-
-void TrieSearch::InitializeFromARPA(const char *file, util::FilePiece &f, std::vector<uint64_t> &counts, const Config &config, SortedVocabulary &vocab, Backing &backing) {
+template <class Quant, class Bhiksha> void TrieSearch<Quant, Bhiksha>::InitializeFromARPA(const char *file, util::FilePiece &f, std::vector<uint64_t> &counts, const Config &config, SortedVocabulary &vocab, Backing &backing) {
   std::string temporary_directory;
   if (config.temporary_directory_prefix) {
     temporary_directory = config.temporary_directory_prefix;
@@ -870,13 +967,18 @@ void TrieSearch::InitializeFromARPA(const char *file, util::FilePiece &f, std::v
   // Add directory delimiter.  Assumes a real operating system.  
   temporary_directory += '/';
   // At least 1MB sorting memory.  
-  ARPAToSortedFiles(f, counts, std::max<size_t>(config.building_memory, 1048576), temporary_directory.c_str(), vocab);
+  ARPAToSortedFiles(config, f, counts, std::max<size_t>(config.building_memory, 1048576), temporary_directory.c_str(), vocab);
 
-  BuildTrie(temporary_directory, counts, config, *this, backing);
+  BuildTrie(temporary_directory, counts, config, *this, quant_, vocab, backing);
   if (rmdir(temporary_directory.c_str()) && config.messages) {
     *config.messages << "Failed to delete " << temporary_directory << std::endl;
   }
 }
+
+template class TrieSearch<DontQuantize, DontBhiksha>;
+template class TrieSearch<DontQuantize, ArrayBhiksha>;
+template class TrieSearch<SeparatelyQuantize, DontBhiksha>;
+template class TrieSearch<SeparatelyQuantize, ArrayBhiksha>;
 
 } // namespace trie
 } // namespace ngram

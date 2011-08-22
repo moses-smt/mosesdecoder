@@ -57,6 +57,8 @@ public:
     RemoveAllInColl(m_collection);
   }
 
+  const std::vector<TargetPhrase*> &GetCollection() const { return m_collection; }
+
   //! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
   void NthElement(size_t tableLimit);
 
@@ -74,6 +76,7 @@ public:
   }
 
   void Prune(bool adhereTableLimit, size_t tableLimit);
+  void Sort(bool adhereTableLimit, size_t tableLimit);
 
 };
 

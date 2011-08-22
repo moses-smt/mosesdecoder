@@ -72,6 +72,14 @@ int DynSuffixArray::Rank(unsigned word, unsigned idx)
 int DynSuffixArray::F_firstIdx(unsigned word)
 {
   // return index of first row where word is found in m_F
+  /*for(int i=0; i < m_F->size(); ++i) {
+    if(m_F->at(i) == word) {
+      return i; 
+    }
+  }
+  return -1;*/
+  //NOTE: lower_bound  is faster than linear search above but may cause issues 
+  //      if ordering of vocab is not consecutive (ie..after deletions) 
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
   //cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
   if(low >= m_F->size())
@@ -132,6 +140,7 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex)
   }
   // Begin stage 4
   Reorder(true_pos, LastFirstFunc(kprime)); // actual position vs computed position of cycle (newIndex-1)
+  cerr << "GETS HERE 13\n";
 }
 
 void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
@@ -141,6 +150,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
     //cerr << "j=" << j << "\tj'=" << jprime << endl;
     int tmp, isaIdx(-1);
     int new_j = LastFirstFunc(j);
+    cerr << "new_j = " << new_j << endl;
     // for SA, L, and F, the element at pos j is moved to j'
     tmp = m_L->at(j); // L
     m_L->at(j) = m_L->at(jprime);
@@ -161,6 +171,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
     j = new_j;
     jprime = LastFirstFunc(jprime);
   }
+  //cerr << "j=" << j << "\tj'=" << jprime << endl;
 }
 
 void DynSuffixArray::Delete(unsigned index, unsigned num2del)
@@ -190,7 +201,7 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del)
   PrintAuxArrays();
 }
 
-void DynSuffixArray::Substitute(vuint_t* newSents, unsigned newIndex)
+void DynSuffixArray::Substitute(vuint_t* /* newSents */, unsigned /* newIndex */)
 {
   std::cerr << "NEEDS TO IMPLEMENT SUBSITITUTE FACTOR\n";
   return;
@@ -206,6 +217,8 @@ bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
   // bounds holds first and (last + 1) index of phrase[0] in m_SA
   size_t lwrBnd = size_t(bounds.first - m_F->begin());
   size_t uprBnd = size_t(bounds.second - m_F->begin());
+  //cerr << "phrasesize = " << phrasesize << "\tuprBnd = " << uprBnd << "\tlwrBnd = " << lwrBnd;
+  //cerr << "\tcorpus size =  " << m_corpus->size() << endl;
   if(uprBnd - lwrBnd == 0) return false;  // not found
   if(phrasesize == 1) {
     for(size_t i=lwrBnd; i < uprBnd; ++i) {
@@ -216,7 +229,7 @@ bool DynSuffixArray::GetCorpusIndex(const vuint_t* phrase, vuint_t* indices)
   //find longer phrases if they exist
   for(size_t i = lwrBnd; i < uprBnd; ++i) {
     size_t crpIdx = m_SA->at(i);
-    if((crpIdx + phrasesize) >= m_corpus->size()) continue; // past end of corpus
+    if((crpIdx + phrasesize) > m_corpus->size()) continue; // past end of corpus
     for(size_t pos = 1; pos < phrasesize; ++pos) { // for all following words
       if(m_corpus->at(crpIdx + pos) != phrase->at(pos)) {  // if word doesn't match
         if(indices->size() > 0) i = uprBnd;  // past the phrases since SA is ordered

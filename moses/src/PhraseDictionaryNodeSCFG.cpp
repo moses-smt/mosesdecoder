@@ -46,6 +46,22 @@ void PhraseDictionaryNodeSCFG::Prune(size_t tableLimit)
     m_targetPhraseCollection->Prune(true, tableLimit);
 }
 
+void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
+{
+  // recusively sort
+  for (TerminalMap::iterator p = m_sourceTermMap.begin(); p != m_sourceTermMap.end(); ++p) {
+    p->second.Sort(tableLimit);
+  }
+  for (NonTerminalMap::iterator p = m_nonTermMap.begin(); p != m_nonTermMap.end(); ++p) {
+    p->second.Sort(tableLimit);
+  }
+
+  // prune TargetPhraseCollection in this node
+  if (m_targetPhraseCollection != NULL) {
+    m_targetPhraseCollection->Sort(true, tableLimit);
+  }
+}
+
 PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word &sourceTerm)
 {
   assert(!sourceTerm.IsNonTerminal());

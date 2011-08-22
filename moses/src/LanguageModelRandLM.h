@@ -41,14 +41,17 @@ class LanguageModelRandLM : public LanguageModelPointerState
 public:
   LanguageModelRandLM() : m_lm(0) {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
-  virtual float GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   ~LanguageModelRandLM() {
     delete m_lm;
   }
   void CleanUpAfterSentenceProcessing() {
     m_lm->clearCaches(); // clear caches
   }
-  void InitializeBeforeSentenceProcessing() {} // nothing to do
+  void InitializeBeforeSentenceProcessing() {
+    m_lm->initThreadSpecificData(); // Creates thread specific data iff
+                                    // compiled with multithreading.
+  }
 protected:
   std::vector<randlm::WordID> m_randlm_ids_vec;
   randlm::RandLM* m_lm;

@@ -101,7 +101,7 @@ bool LanguageModelInternal::Load(const std::string &filePath
   return true;
 }
 
-float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor
+LMResult LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFactor
                                       , State* finalState) const
 {
   const size_t ngram = contextFactor.size();
@@ -120,36 +120,41 @@ float LanguageModelInternal::GetValue(const std::vector<const Word*> &contextFac
     break;
   }
 
-  assert (false);
-  return 0;
+  assert(false);
+  return LMResult();
 }
 
-float LanguageModelInternal::GetValue(const Factor *factor0, State* finalState) const
+LMResult LanguageModelInternal::GetValue(const Factor *factor0, State* finalState) const
 {
-  float prob;
+  LMResult result;
   const NGramNode *nGram		= GetLmID(factor0);
   if (nGram == NULL) {
     if (finalState != NULL)
       *finalState = NULL;
-    prob = -numeric_limits<float>::infinity();
+    result.score = -numeric_limits<float>::infinity();
+    result.unknown = true;
   } else {
     if (finalState != NULL)
       *finalState = static_cast<const void*>(nGram);
-    prob = nGram->GetScore();
+    result.score = nGram->GetScore();
+    result.unknown = false;
   }
-  return FloorScore(prob);
+  result.score = FloorScore(result.score);
+  return result;
 }
-float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const
+LMResult LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, State* finalState) const
 {
-  float score;
+  LMResult result;
   const NGramNode *nGram[2];
 
   nGram[1]		= GetLmID(factor1);
   if (nGram[1] == NULL) {
     if (finalState != NULL)
       *finalState = NULL;
-    score = -numeric_limits<float>::infinity();
+    result.unknown = true;
+    result.score = -numeric_limits<float>::infinity();
   } else {
+    result.unknown = false;
     nGram[0] = nGram[1]->GetNGram(factor0);
     if (nGram[0] == NULL) {
       // something unigram
@@ -159,34 +164,36 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
       nGram[0]	= GetLmID(factor0);
       if (nGram[0] == NULL) {
         // stops at unigram
-        score = nGram[1]->GetScore();
+        result.score = nGram[1]->GetScore();
       } else {
         // unigram unigram
-        score = nGram[1]->GetScore() + nGram[0]->GetLogBackOff();
+        result.score = nGram[1]->GetScore() + nGram[0]->GetLogBackOff();
       }
     } else {
       // bigram
       if (finalState != NULL)
         *finalState = static_cast<const void*>(nGram[0]);
-      score			= nGram[0]->GetScore();
+      result.score			= nGram[0]->GetScore();
     }
   }
 
-  return FloorScore(score);
-
+  result.score = FloorScore(result.score);
+  return result;
 }
 
-float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const
+LMResult LanguageModelInternal::GetValue(const Factor *factor0, const Factor *factor1, const Factor *factor2, State* finalState) const
 {
-  float score;
+  LMResult result;
   const NGramNode *nGram[3];
 
   nGram[2]		= GetLmID(factor2);
   if (nGram[2] == NULL) {
     if (finalState != NULL)
       *finalState = NULL;
-    score = -numeric_limits<float>::infinity();
+    result.unknown = true;
+    result.score = -numeric_limits<float>::infinity();
   } else {
+    result.unknown = false;
     nGram[1] = nGram[2]->GetNGram(factor1);
     if (nGram[1] == NULL) {
       // something unigram
@@ -196,15 +203,15 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
       nGram[1]	= GetLmID(factor1);
       if (nGram[1] == NULL) {
         // stops at unigram
-        score = nGram[2]->GetScore();
+        result.score = nGram[2]->GetScore();
       } else {
         nGram[0] = nGram[1]->GetNGram(factor0);
         if (nGram[0] == NULL) {
           // unigram unigram
-          score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff();
+          result.score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff();
         } else {
           // unigram bigram
-          score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff() + nGram[0]->GetLogBackOff();
+          result.score = nGram[2]->GetScore() + nGram[1]->GetLogBackOff() + nGram[0]->GetLogBackOff();
         }
       }
     } else {
@@ -214,19 +221,19 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
         // trigram
         if (finalState != NULL)
           *finalState = static_cast<const void*>(nGram[0]);
-        score = nGram[0]->GetScore();
+        result.score = nGram[0]->GetScore();
       } else {
         if (finalState != NULL)
           *finalState = static_cast<const void*>(nGram[1]);
 
-        score			= nGram[1]->GetScore();
+        result.score			= nGram[1]->GetScore();
         nGram[1]	= nGram[1]->GetRootNGram();
         nGram[0]	= nGram[1]->GetNGram(factor0);
         if (nGram[0] == NULL) {
           // just bigram
           // do nothing
         } else {
-          score	+= nGram[0]->GetLogBackOff();
+          result.score	+= nGram[0]->GetLogBackOff();
         }
 
       }
@@ -234,7 +241,8 @@ float LanguageModelInternal::GetValue(const Factor *factor0, const Factor *facto
     }
   }
 
-  return FloorScore(score);
+  result.score = FloorScore(result.score);
+  return result;
 
 }
 

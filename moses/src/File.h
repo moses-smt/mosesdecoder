@@ -117,6 +117,7 @@ inline void fReadString(FILE* f,std::string& e)
   }
   a[s]='\0';
   e.assign(a);
+  delete[](a);
 }
 
 inline size_t fWriteStringVector(FILE* f,const std::vector<std::string>& v)

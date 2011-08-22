@@ -11,6 +11,8 @@
 
 namespace lm {
 
+typedef enum {THROW_UP, COMPLAIN, SILENT} WarningAction;
+
 class ConfigException : public util::Exception {
   public:
     ConfigException() throw();
@@ -39,7 +41,7 @@ class VocabLoadException : public LoadException {
 
 class SpecialWordMissingException : public VocabLoadException {
   public:
-    explicit SpecialWordMissingException(StringPiece which) throw();
+    explicit SpecialWordMissingException() throw();
     ~SpecialWordMissingException() throw();
 };
 

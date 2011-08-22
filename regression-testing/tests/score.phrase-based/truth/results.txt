@@ -1,0 +1,1739 @@
+! ! ! ) bezeichnet wird , ||| ! ! ! ) , ||| 0.0571221 0.000466119 |||  ||| 1
+! ! ! ) bezeichnet wird ||| ! ! ! ) ||| 0.0571221 0.000466119 |||  ||| 1
+! ! ! ) bezeichnet ||| ! ! ! ) ||| 0.0571221 0.000466119 |||  ||| 1
+! ! ! ) ||| ! ! ! ) ||| 0.2569 0.000466119 |||  ||| 3
+! ! ! ) ||| ! ) ||| 0.0190407 0.0775352 |||  ||| 3
+! ! ! ||| ! ! ! ||| 0.252066 0.000466119 |||  ||| 8
+! ! ! ||| ! ||| 0.625 0.0775352 |||  ||| 8
+! ! ) bezeichnet wird , hat ||| ! ! ) , has ||| 0.0571221 0.00601171 |||  ||| 1
+! ! ) bezeichnet wird , ||| ! ! ) , ||| 0.0571221 0.00601171 |||  ||| 1
+! ! ) bezeichnet wird ||| ! ! ) ||| 0.0571221 0.00601171 |||  ||| 1
+! ! ) bezeichnet ||| ! ! ) ||| 0.0571221 0.00601171 |||  ||| 1
+! ! ) ||| ! ! ) ||| 0.38535 0.00601171 |||  ||| 2
+! ! die Bilanz , die wir ||| and we ||| 0.0571221 1 |||  ||| 1
+! ! die Bilanz , die ||| and ||| 0.0571221 1 |||  ||| 1
+! ! die Bilanz , ||| and ||| 0.0571221 1 |||  ||| 1
+! ! ||| ! ! ||| 0.636364 0.00601171 |||  ||| 11
+! ! ||| ! ||| 0.0700637 0.0775352 |||  ||| 11
+! ! ||| . ||| 0.00519291 1 |||  ||| 11
+! ! ||| unemployment ! ||| 0.00519291 0.0775352 |||  ||| 11
+! " ( Europa war gut zu ||| ! ' ||| 0.0571221 0.022535 |||  ||| 1
+! " ( Europa war gut ||| ! ' ||| 0.0571221 0.022535 |||  ||| 1
+! " ( Europa war ||| ! ' ||| 0.0571221 0.022535 |||  ||| 1
+! " ( Europa ||| ! ' ||| 0.0571221 0.022535 |||  ||| 1
+! " ( es ist die Sonne ||| the sun ||| 0.0571221 1 |||  ||| 1
+! " ( es ist die ||| the ||| 0.0571221 1 |||  ||| 1
+! " ( ||| ! ' ||| 0.0571221 0.022535 |||  ||| 1
+! " ) Heute ||| ! ' ) We ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) Sie haben vollkommen recht ||| ! ' exactly ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) Sie haben vollkommen ||| ! ' exactly ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) Sie haben ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) Sie ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) sagte er , die ||| ! ' ) said that the ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) sagte er , ||| ! ' ) said that ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) sagte er ||| ! ' ) said ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) sagte ||| ! ' ) said ||| 0.0571221 0.0449274 |||  ||| 1
+! " ) ||| ! ' ) ||| 0.727273 0.0449274 |||  ||| 11
+! " ) ||| ! ' ||| 0.00519291 0.0449274 |||  ||| 11
+! " ) ||| common ||| 0.00519291 1 |||  ||| 11
+! " ) ||| more common ||| 0.00519291 1 |||  ||| 11
+! " , aber natürlich unter der ||| ' , but of course on ||| 0.0571221 0.289866 |||  ||| 1
+! " , aber natürlich unter ||| ' , but of course on ||| 0.0571221 0.289866 |||  ||| 1
+! " , aber natürlich ||| ' , but of course ||| 0.0571221 0.289866 |||  ||| 1
+! " , aber ||| ' , but ||| 0.0571221 0.289866 |||  ||| 1
+! " , also ||| ' , i.e. , ||| 0.0571221 0.579445 |||  ||| 1
+! " , antwortete der Präsident . ||| ! " replied the President . ||| 0.0571221 0.00917533 |||  ||| 1
+! " , antwortete der Präsident ||| ! " replied the President ||| 0.0571221 0.00917533 |||  ||| 1
+! " , antwortete der ||| ! " replied the ||| 0.0571221 0.00917533 |||  ||| 1
+! " , antwortete ||| ! " replied ||| 0.0571221 0.00917533 |||  ||| 1
+! " , der ||| ! ' , which ||| 0.0571221 0.0449274 |||  ||| 1
+! " , doch der ||| ! " but a ||| 0.0571221 0.00917533 |||  ||| 1
+! " , doch ||| ! " but ||| 0.0571221 0.00917533 |||  ||| 1
+! " , entgegnete der Pilot ||| ' flying is the safest form of ||| 0.028561 0.526578 |||  ||| 2
+! " , entgegnete der Pilot ||| ' flying is the safest form ||| 0.028561 0.526578 |||  ||| 2
+! " , entgegnete der ||| ' flying is the ||| 0.0571221 0.526578 |||  ||| 1
+! " , gab ich zur Antwort ||| ! ' I replied ||| 0.0571221 0.0449274 |||  ||| 1
+! " , muss ||| is ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " , rief Alice ' . ||| ! ” cried Alice ' . ||| 0.0571221 0.042258 |||  ||| 1
+! " , rief Alice ' ||| ! ” cried Alice ' ||| 0.0571221 0.042258 |||  ||| 1
+! " , rief Alice ||| ! ” cried Alice ||| 0.0571221 0.0775352 |||  ||| 1
+! " , rief ich aus , ||| , ||| 0.028561 1 |||  ||| 2
+! " , rief ich aus , ||| done , ||| 0.028561 1 |||  ||| 2
+! " , rief ich aus ||| , ||| 0.028561 1 |||  ||| 2
+! " , rief ich aus ||| done , ||| 0.028561 1 |||  ||| 2
+! " , rief ich ||| , ||| 0.028561 1 |||  ||| 2
+! " , rief ich ||| done , ||| 0.028561 1 |||  ||| 2
+! " , rief ||| ! ” cried ||| 0.0190407 0.0775352 |||  ||| 3
+! " , rief ||| , ||| 0.0190407 1 |||  ||| 3
+! " , rief ||| done , ||| 0.0190407 1 |||  ||| 3
+! " , sagte die andere Kuh ||| , " replied the other cow ||| 0.0571221 0.118338 |||  ||| 1
+! " , sagte die andere ||| , " replied the other ||| 0.0571221 0.118338 |||  ||| 1
+! " , sagte die ||| , " replied the ||| 0.0571221 0.118338 |||  ||| 1
+! " , sagte ich zu ihr ||| ! " I said to her ||| 0.0571221 0.00917533 |||  ||| 1
+! " , sagte ich zu ||| ! " I said to ||| 0.0571221 0.00917533 |||  ||| 1
+! " , sagte ich ||| ! " I said ||| 0.0571221 0.00917533 |||  ||| 1
+! " , sagte ||| , " replied ||| 0.0571221 0.118338 |||  ||| 1
+! " , schrie der Hirtenjunge ||| ! " , cried the shepherd boy ||| 0.0571221 0.00917533 |||  ||| 1
+! " , schrie der ||| ! " , cried the ||| 0.0571221 0.00917533 |||  ||| 1
+! " , schrie ||| ! " , cried ||| 0.0571221 0.00917533 |||  ||| 1
+! " , sondern damit es ||| ! ' , but so that they ||| 0.0571221 0.0449274 |||  ||| 1
+! " , sondern damit ||| ! ' , but so that ||| 0.0571221 0.0449274 |||  ||| 1
+! " , sondern ||| ! ' , but ||| 0.0571221 0.0449274 |||  ||| 1
+! " , und fuhr fort , ||| ! ' and ||| 0.0571221 0.0449274 |||  ||| 1
+! " , und fuhr fort ||| ! ' and ||| 0.0571221 0.0449274 |||  ||| 1
+! " , und fuhr ||| ! ' and ||| 0.0571221 0.0449274 |||  ||| 1
+! " , und ||| ! ' and ||| 0.0571221 0.0449274 |||  ||| 1
+! " , weil insgesamt fünf Kollegen ||| , " because altogether five colleagues ||| 0.0571221 0.118338 |||  ||| 1
+! " , weil insgesamt fünf ||| , " because altogether five ||| 0.0571221 0.118338 |||  ||| 1
+! " , weil insgesamt ||| , " because altogether ||| 0.0571221 0.118338 |||  ||| 1
+! " , weil ||| , " because ||| 0.0571221 0.118338 |||  ||| 1
+! " , worauf Eric antwortet : ||| , ' and Eric says , ||| 0.0571221 0.579445 |||  ||| 1
+! " , worauf ||| , ' and ||| 0.0571221 0.579445 |||  ||| 1
+! " , ||| ! " , ||| 0.0350318 0.00917533 |||  ||| 22
+! " , ||| ! " ||| 0.0916604 0.00917533 |||  ||| 22
+! " , ||| ! ' , ||| 0.0350318 0.0449274 |||  ||| 22
+! " , ||| ! ' ||| 0.0916604 0.0449274 |||  ||| 22
+! " , ||| ! ” ||| 0.00259646 0.0775352 |||  ||| 22
+! " , ||| ' , ||| 0.00259646 0.289866 |||  ||| 22
+! " , ||| , " ||| 0.0350318 0.118338 |||  ||| 22
+! " , ||| , ||| 0.00259646 1 |||  ||| 22
+! " , ||| ? ' ||| 0.00259646 0.579445 |||  ||| 22
+! " , ||| any fish ? ' ||| 0.00259646 0.579445 |||  ||| 22
+! " , ||| done , ||| 0.00259646 1 |||  ||| 22
+! " , ||| fish ? ' ||| 0.00259646 0.579445 |||  ||| 22
+! " , ||| give you " , ||| 0.00259646 0.118338 |||  ||| 22
+! " , ||| to give you " , ||| 0.00259646 0.118338 |||  ||| 22
+! " , ||| you " , ||| 0.00259646 0.118338 |||  ||| 22
+! " - obwohl wir doch wissen ||| ' . whereas we know ||| 0.0571221 0.289866 |||  ||| 1
+! " - obwohl wir ||| ' . whereas we ||| 0.0571221 0.289866 |||  ||| 1
+! " - obwohl ||| ' . whereas ||| 0.0571221 0.289866 |||  ||| 1
+! " - und dies ||| ! ' - and what is ||| 0.0571221 0.0449274 |||  ||| 1
+! " - und dies übrigens ||| ! ' - and what is more ||| 0.0571221 0.0449274 |||  ||| 1
+! " - und ||| ! ' - and ||| 0.0571221 0.0449274 |||  ||| 1
+! " - ||| ! ' - ||| 0.028561 0.0449274 |||  ||| 2
+! " - ||| ' . ||| 0.028561 0.289866 |||  ||| 2
+! " . und Spinelli , der ||| ! ' ; Spinelli , who ||| 0.0571221 0.0449274 |||  ||| 1
+! " . und Spinelli ||| ! ' ; Spinelli ||| 0.0571221 0.0449274 |||  ||| 1
+! " . und ||| ! ' ; ||| 0.0571221 0.0449274 |||  ||| 1
+! " . ||| ! ' . ||| 0.222222 0.0449274 |||  ||| 18
+! " . ||| ! ' ||| 0.5 0.0224666 |||  ||| 18
+! " . ||| ! . ||| 0.00317345 0.0775352 |||  ||| 18
+! " . ||| ' . ||| 0.00317345 0.579445 |||  ||| 18
+! " . ||| . ” ||| 0.00317345 1 |||  ||| 18
+! " . ||| a living ! ' . ||| 0.00317345 0.0449274 |||  ||| 18
+! " . ||| living ! ' . ||| 0.00317345 0.0449274 |||  ||| 18
+! " : mit der linken Hand ||| ' - ||| 0.0571221 0.289866 |||  ||| 1
+! " : mit der linken ||| ' - ||| 0.0571221 0.289866 |||  ||| 1
+! " : mit der ||| ' - ||| 0.0571221 0.289866 |||  ||| 1
+! " : mit ||| ' - ||| 0.0571221 0.289866 |||  ||| 1
+! " : ||| ' - ||| 0.0571221 0.289866 |||  ||| 1
+! " ? ||| ! " ||| 0.028561 0.00461275 |||  ||| 2
+! " ? ||| ! ' ? ||| 0.028561 0.0449274 |||  ||| 2
+! " Europa gelingt gemeinsam ! " ||| . ||| 0.0571221 1 |||  ||| 1
+! " Europa gelingt gemeinsam ! ||| . ||| 0.0571221 1 |||  ||| 1
+! " Europa gelingt gemeinsam ||| . ||| 0.0571221 1 |||  ||| 1
+! " Europa gelingt ||| . ||| 0.0571221 1 |||  ||| 1
+! " Europa ||| . ||| 0.0571221 1 |||  ||| 1
+! " Le nationalisme , c ||| : ' Le nationalisme , c ||| 0.0571221 0.579445 |||  ||| 1
+! " Le nationalisme , ||| : ' Le nationalisme , ||| 0.0571221 0.579445 |||  ||| 1
+! " Le nationalisme ||| : ' Le nationalisme ||| 0.0571221 0.579445 |||  ||| 1
+! " Le ||| : ' Le ||| 0.0571221 0.579445 |||  ||| 1
+! " an die Eurokraten in Brüssel ||| ' to the Brussels Eurocrats ||| 0.0571221 0.289866 |||  ||| 1
+! " an die ||| ' to the ||| 0.0571221 0.289866 |||  ||| 1
+! " an ||| ' to ||| 0.0571221 0.289866 |||  ||| 1
+! " begrüßt ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " das war die Antwort ||| their reply was that ||| 0.0571221 1 |||  ||| 1
+! " das war ||| was that ||| 0.0571221 1 |||  ||| 1
+! " das ||| that ||| 0.0571221 1 |||  ||| 1
+! " die Milch macht ' s ||| , ' milk is good for you ||| 0.0571221 0.579445 |||  ||| 1
+! " die Milch macht ' ||| , ' milk is good for ||| 0.028561 0.579445 |||  ||| 2
+! " die Milch macht ' ||| , ' milk is good ||| 0.028561 0.579445 |||  ||| 2
+! " die Milch macht ||| , ' milk is good for ||| 0.028561 0.579445 |||  ||| 2
+! " die Milch macht ||| , ' milk is good ||| 0.028561 0.579445 |||  ||| 2
+! " die Milch ||| , ' milk ||| 0.0571221 0.579445 |||  ||| 1
+! " die ||| , ' ||| 0.0571221 0.579445 |||  ||| 1
+! " diese Botschaft ||| a message ||| 0.0571221 1 |||  ||| 1
+! " diese ||| a ||| 0.0571221 1 |||  ||| 1
+! " geht nicht mehr weiter ||| ! " can no longer continue ||| 0.0571221 0.00917533 |||  ||| 1
+! " geht nicht mehr ||| ! " can no longer ||| 0.0571221 0.00917533 |||  ||| 1
+! " geht nicht ||| ! " can no ||| 0.0571221 0.00917533 |||  ||| 1
+! " geht ||| ! " can ||| 0.0571221 0.00917533 |||  ||| 1
+! " gehört , und denen ||| ! ' , and those ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört , und denen ||| kill ! ' , and those ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört , und ||| ! ' , and ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört , und ||| kill ! ' , and ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört , ||| ! ' , ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört , ||| kill ! ' , ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört ||| ! ' ||| 0.028561 0.0449274 |||  ||| 2
+! " gehört ||| kill ! ' ||| 0.028561 0.0449274 |||  ||| 2
+! " hat das Parlament bereits ||| ! ' , Parliament has already ||| 0.0571221 0.0449274 |||  ||| 1
+! " hat das Parlament ||| ! ' , Parliament ||| 0.0571221 0.0449274 |||  ||| 1
+! " hat ||| ! ' , ||| 0.0571221 0.0449274 |||  ||| 1
+! " kommen ||| " ||| 0.0571221 0.0592024 |||  ||| 1
+! " mögen ||| ' , may ||| 0.0571221 0.579445 |||  ||| 1
+! " nicht nur in bezug ||| ' does not just ||| 0.0571221 0.579445 |||  ||| 1
+! " nicht nur in ||| ' does not just ||| 0.0571221 0.579445 |||  ||| 1
+! " nicht nur ||| ' does not just ||| 0.0571221 0.579445 |||  ||| 1
+! " nicht ||| ' does not ||| 0.0571221 0.579445 |||  ||| 1
+! " oder zu Kollegin Harms ||| ! ' , and to Mrs Harms ||| 0.0571221 0.0449274 |||  ||| 1
+! " oder zu Kollegin ||| ! ' , and to Mrs ||| 0.0571221 0.0449274 |||  ||| 1
+! " oder zu ||| ! ' , and to ||| 0.0571221 0.0449274 |||  ||| 1
+! " oder ||| ! ' , and ||| 0.028561 0.0449274 |||  ||| 2
+! " oder ||| ! ' or ||| 0.028561 0.0449274 |||  ||| 2
+! " rufe vonseiten der IND ||| ! ' from members of the IND ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufe vonseiten der ||| ! ' from members of the ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufe vonseiten ||| ! ' from members of ||| 0.0190407 0.0449274 |||  ||| 3
+! " rufe vonseiten ||| ! ' from members ||| 0.0190407 0.0449274 |||  ||| 3
+! " rufe vonseiten ||| ! ' from ||| 0.0190407 0.0449274 |||  ||| 3
+! " rufe ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufen , würden wir ||| ' , we would ||| 0.0571221 0.579445 |||  ||| 1
+! " rufen , ||| ' , ||| 0.0571221 0.579445 |||  ||| 1
+! " rufen die Föderalisten , und ||| ! ' say the federalists , and ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufen die Föderalisten , ||| ! ' say the federalists , ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufen die Föderalisten ||| ! ' say the federalists ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufen die ||| ! ' say the ||| 0.0571221 0.0449274 |||  ||| 1
+! " rufen ||| ! ' say ||| 0.028561 0.0449274 |||  ||| 2
+! " rufen ||| ' ||| 0.028561 0.579445 |||  ||| 2
+! " sagen die ||| , ' say the people on the ||| 0.0571221 0.579445 |||  ||| 1
+! " sagen ||| , ' say the people on ||| 0.0142805 0.579445 |||  ||| 4
+! " sagen ||| , ' say the people ||| 0.0142805 0.579445 |||  ||| 4
+! " sagen ||| , ' say the ||| 0.0142805 0.579445 |||  ||| 4
+! " sagen ||| , ' say ||| 0.0142805 0.579445 |||  ||| 4
+! " steht . ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " steht ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " und Nizza II ? ||| ! ' and Nice II ? ||| 0.0571221 0.0449274 |||  ||| 1
+! " und Nizza II ||| ! ' and Nice II ||| 0.0571221 0.0449274 |||  ||| 1
+! " und Nizza ||| ! ' and Nice ||| 0.0571221 0.0449274 |||  ||| 1
+! " und schlagen uns an die ||| ! ' and beat our ||| 0.0571221 0.0449274 |||  ||| 1
+! " und schlagen uns an ||| ! ' and beat our ||| 0.0571221 0.0449274 |||  ||| 1
+! " und schlagen uns ||| ! ' and beat our ||| 0.0571221 0.0449274 |||  ||| 1
+! " und schlagen ||| ! ' and beat ||| 0.0571221 0.0449274 |||  ||| 1
+! " und ||| ! ' and ||| 0.38535 0.0449274 |||  ||| 2
+! " vereinen ||| ! ' ||| 0.0571221 0.0449274 |||  ||| 1
+! " zu allen Formen des Protektionismus ||| ! ' to all forms of protectionism ||| 0.0571221 0.0449274 |||  ||| 1
+! " zu allen Formen des ||| ! ' to all forms of ||| 0.0571221 0.0449274 |||  ||| 1
+! " zu allen Formen ||| ! ' to all forms ||| 0.0571221 0.0449274 |||  ||| 1
+! " zu allen ||| ! ' to all ||| 0.0571221 0.0449274 |||  ||| 1
+! " zu ||| ! ' to ||| 0.0571221 0.0449274 |||  ||| 1
+! " zur Offenheit und zum Wettbewerb ||| ! ' to openness and competition ||| 0.0571221 0.0449274 |||  ||| 1
+! " zur Offenheit und zum ||| ! ' to openness and ||| 0.0571221 0.0449274 |||  ||| 1
+! " zur Offenheit und ||| ! ' to openness and ||| 0.0571221 0.0449274 |||  ||| 1
+! " zur Offenheit ||| ! ' to openness ||| 0.0571221 0.0449274 |||  ||| 1
+! " zur ||| ! ' to ||| 0.0571221 0.0449274 |||  ||| 1
+! " ||| ! " . ||| 0.000245159 0.00917533 |||  ||| 233
+! " ||| ! " ||| 0.124464 0.00917533 |||  ||| 233
+! " ||| ! ' ' really ? ' ||| 0.000245159 0.0150846 |||  ||| 233
+! " ||| ! ' , ||| 0.000245159 0.0449274 |||  ||| 233
+! " ||| ! ' . ||| 0.0171674 0.0449274 |||  ||| 233
+! " ||| ! ' ||| 0.433476 0.0449274 |||  ||| 233
+! " ||| ! .... ' ||| 0.000245159 0.0449274 |||  ||| 233
+! " ||| ! ||| 0.0300429 0.0775352 |||  ||| 233
+! " ||| ! ” ||| 0.00330773 0.0775352 |||  ||| 233
+! " ||| " . ||| 0.00330773 0.118338 |||  ||| 233
+! " ||| " ||| 0.00330773 0.0592024 |||  ||| 233
+! " ||| ' ! ||| 0.00330773 0.0449274 |||  ||| 233
+! " ||| ' , ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| ' . ||| 0.0515021 0.579445 |||  ||| 233
+! " ||| ' ||| 0.0343348 0.289866 |||  ||| 233
+! " ||| , " ||| 0.00330773 0.118338 |||  ||| 233
+! " ||| , ' ||| 0.0171674 0.579445 |||  ||| 233
+! " ||| , that ||| 0.000245159 1 |||  ||| 233
+! " ||| , ||| 0.0214592 1 |||  ||| 233
+! " ||| . " ! ||| 0.000245159 0.00917533 |||  ||| 233
+! " ||| . " ||| 0.00865463 0.118338 |||  ||| 233
+! " ||| . ' ||| 0.00330773 0.579445 |||  ||| 233
+! " ||| . ||| 0.0429185 1 |||  ||| 233
+! " ||| : ' ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| ? ' ||| 0.00330773 0.579445 |||  ||| 233
+! " ||| Commission to ||| 0.000245159 1 |||  ||| 233
+! " ||| Commission ||| 0.000245159 1 |||  ||| 233
+! " ||| a living ! ' ||| 0.000245159 0.0449274 |||  ||| 233
+! " ||| any fish ? ' ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| asked the Commission to ||| 0.000245159 1 |||  ||| 233
+! " ||| asked the Commission ||| 0.000245159 1 |||  ||| 233
+! " ||| bearing the ||| 0.000245159 1 |||  ||| 233
+! " ||| common ||| 0.000245159 1 |||  ||| 233
+! " ||| done , ||| 0.000245159 1 |||  ||| 233
+! " ||| face ! " ||| 0.000245159 0.00917533 |||  ||| 233
+! " ||| fish ? ' ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| give you " ||| 0.000245159 0.118338 |||  ||| 233
+! " ||| kill ! ' ||| 0.000245159 0.0449274 |||  ||| 233
+! " ||| living ! ' ||| 0.000245159 0.0449274 |||  ||| 233
+! " ||| may ||| 0.000245159 1 |||  ||| 233
+! " ||| more common ||| 0.000245159 1 |||  ||| 233
+! " ||| of products bearing the ||| 0.000245159 1 |||  ||| 233
+! " ||| one ' . ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| products bearing the ||| 0.000245159 1 |||  ||| 233
+! " ||| term , ' ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| the Commission to ||| 0.000245159 1 |||  ||| 233
+! " ||| the Commission ||| 0.000245159 1 |||  ||| 233
+! " ||| the ||| 0.00330773 1 |||  ||| 233
+! " ||| to give you " ||| 0.000245159 0.118338 |||  ||| 233
+! " ||| uneven ' . ||| 0.000245159 0.579445 |||  ||| 233
+! " ||| you " ||| 0.000245159 0.118338 |||  ||| 233
+! " ||| ” ||| 0.000245159 1 |||  ||| 233
+! ' , dann sage ich ||| ' . I would ||| 0.0571221 0.545017 |||  ||| 1
+! ' , dann ||| ' . ||| 0.0571221 0.545017 |||  ||| 1
+! ' , diese Aufforderung ||| ! ' is the message ||| 0.0571221 0.042258 |||  ||| 1
+! ' , diese ||| ! ' is the ||| 0.0571221 0.042258 |||  ||| 1
+! ' , sollte Gegenstand von ||| ' , should ||| 0.0571221 0.272653 |||  ||| 1
+! ' , sollte Gegenstand ||| ' , should ||| 0.0571221 0.272653 |||  ||| 1
+! ' , sollte ||| ' , should ||| 0.0571221 0.272653 |||  ||| 1
+! ' , womit ||| ! ' , ||| 0.0571221 0.042258 |||  ||| 1
+! ' , ||| ! ' , ||| 0.0114244 0.042258 |||  ||| 5
+! ' , ||| ! ' is ||| 0.0114244 0.042258 |||  ||| 5
+! ' , ||| ! ' ||| 0.0114244 0.042258 |||  ||| 5
+! ' , ||| ' , ||| 0.0114244 0.272653 |||  ||| 5
+! ' , ||| ' . ||| 0.0114244 0.545017 |||  ||| 5
+! ' - wir lassen uns ||| ! ' ||| 0.0571221 0.042258 |||  ||| 1
+! ' - wir lassen ||| ! ' ||| 0.0571221 0.042258 |||  ||| 1
+! ' - wir ||| ! ' ||| 0.0571221 0.042258 |||  ||| 1
+! ' - ||| ! ' ||| 0.0571221 0.042258 |||  ||| 1
+! ' . aber dort gibt ||| ! ' , but there are widely ||| 0.028561 0.042258 |||  ||| 2
+! ' . aber dort gibt ||| ! ' , but there are ||| 0.028561 0.042258 |||  ||| 2
+! ' . aber dort ||| ! ' , but there ||| 0.0571221 0.042258 |||  ||| 1
+! ' . aber ||| ! ' , but ||| 0.0571221 0.042258 |||  ||| 1
+! ' . ||| ! ' , ||| 0.0190407 0.042258 |||  ||| 3
+! ' . ||| ! ' ||| 0.0190407 0.0211319 |||  ||| 3
+! ' . ||| . ||| 0.0190407 1 |||  ||| 3
+! ' Stand , ||| ! ' , ||| 0.0571221 0.042258 |||  ||| 1
+! ' Stand ||| ! ' ||| 0.0571221 0.042258 |||  ||| 1
+! ' rufen , ||| ! ' and then murder ||| 0.0190407 0.042258 |||  ||| 3
+! ' rufen , ||| ! ' and then ||| 0.0190407 0.042258 |||  ||| 3
+! ' rufen , ||| ! ' and ||| 0.0190407 0.042258 |||  ||| 3
+! ' rufen ||| ! ' ||| 0.0571221 0.042258 |||  ||| 1
+! ' ||| ! ' , and ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| ! ' , ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| ! ' . ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| ! ' is ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| ! ' ||| 0.490196 0.042258 |||  ||| 51
+! ' ||| ' ! ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| ' , and ||| 0.00112004 0.545017 |||  ||| 51
+! ' ||| ' , ||| 0.00112004 0.545017 |||  ||| 51
+! ' ||| ' . ||| 0.0784314 0.545017 |||  ||| 51
+! ' ||| ' ||| 0.0151118 0.272653 |||  ||| 51
+! ' ||| 't . ' ||| 0.00112004 0.545017 |||  ||| 51
+! ' ||| . ' ||| 0.0784314 0.545017 |||  ||| 51
+! ' ||| . ||| 0.00112004 1 |||  ||| 51
+! ' ||| ? " ||| 0.00112004 0.0291059 |||  ||| 51
+! ' ||| ? ' ||| 0.00112004 0.545017 |||  ||| 51
+! ' ||| ? ||| 0.00112004 1 |||  ||| 51
+! ' ||| hook ' ! ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| in 't . ' ||| 0.00112004 0.545017 |||  ||| 51
+! ' ||| luck ! ' ||| 0.00112004 0.042258 |||  ||| 51
+! ' ||| of . ' ||| 0.00112004 0.545017 |||  ||| 51
+! ( 1 ) ||| . ( 1 ) ||| 0.0571221 1 |||  ||| 1
+! ( 1 ||| . ( 1 ||| 0.0571221 1 |||  ||| 1
+! ( ||| . ( ||| 0.0571221 1 |||  ||| 1
+! ) , Forschung , Wettbewerbsfähigkeit und ||| ! ) , research , competitiveness and ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , Forschung , Wettbewerbsfähigkeit ||| ! ) , research , competitiveness ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , Forschung , ||| ! ) , research , ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , Forschung ||| ! ) , research ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , die die Arbeitslosenunterstützung ||| ! ) which unemployment benefit ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , geht . ||| ! ) ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , geht ||| ! ) ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , mit der Rodung von ||| ! ) , the grubbing-up of ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , mit der Rodung ||| ! ) , the grubbing-up ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , mit der ||| ! ) , the ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , mit ||| ! ) , ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , und schließlich ||| ! ) and , finally , ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , und ||| ! ) and , ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , während ||| ! ) , while ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , während über 100 ||| ! ) , while over 100 ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , während über ||| ! ) , while over ||| 0.0571221 0.0775352 |||  ||| 1
+! ) , ||| ! ) , ||| 0.666667 0.0775352 |||  ||| 6
+! ) , ||| ! ) ||| 0.12845 0.0775352 |||  ||| 6
+! ) . seit einigen Jahren ||| , and for a number of years ||| 0.38535 1 |||  ||| 2
+! ) . seit einigen ||| , and for a number of ||| 0.0963376 1 |||  ||| 8
+! ) . seit einigen ||| , and for a number ||| 0.0963376 1 |||  ||| 8
+! ) . seit einigen ||| recycled , and for a number of ||| 0.0963376 1 |||  ||| 8
+! ) . seit einigen ||| recycled , and for a number ||| 0.0963376 1 |||  ||| 8
+! ) . seit ||| , and for ||| 0.192675 1 |||  ||| 4
+! ) . seit ||| recycled , and for ||| 0.192675 1 |||  ||| 4
+! ) . ||| ! ) . ||| 0.0856334 0.0775352 |||  ||| 9
+! ) . ||| ! ) ||| 0.0063469 0.0775352 |||  ||| 9
+! ) . ||| ! ||| 0.0063469 0.0775352 |||  ||| 9
+! ) . ||| ) . ||| 0.0063469 1 |||  ||| 9
+! ) . ||| , and ||| 0.0856334 1 |||  ||| 9
+! ) . ||| recycled , and ||| 0.0856334 1 |||  ||| 9
+! ) Herr Kollege Ferber , ||| ! " ) Mr Ferber , ||| 0.0571221 1.7585e-05 |||  ||| 1
+! ) Herr Kollege Ferber ||| ! " ) Mr Ferber ||| 0.0571221 1.7585e-05 |||  ||| 1
+! ) Herr ||| ! " ) Mr ||| 0.0571221 1.7585e-05 |||  ||| 1
+! ) Marktwirtschaft , die von einem ||| ! ) market economy ||| 0.0571221 0.0775352 |||  ||| 1
+! ) Marktwirtschaft , die von ||| ! ) market economy ||| 0.0571221 0.0775352 |||  ||| 1
+! ) Marktwirtschaft , die ||| ! ) market economy ||| 0.0571221 0.0775352 |||  ||| 1
+! ) Marktwirtschaft , ||| ! ) market economy ||| 0.0571221 0.0775352 |||  ||| 1
+! ) Marktwirtschaft ||| ! ) market economy ||| 0.0571221 0.0775352 |||  ||| 1
+! ) allein für ||| ! ) just for ||| 0.0571221 0.0775352 |||  ||| 1
+! ) allein ||| ! ) just ||| 0.0571221 0.0775352 |||  ||| 1
+! ) bei . ||| ) . ||| 0.0571221 1 |||  ||| 1
+! ) bei ||| ) ||| 0.0571221 1 |||  ||| 1
+! ) bezeichnet wird , hat ||| ! ) , has ||| 0.0571221 0.0775352 |||  ||| 1
+! ) bezeichnet wird , ||| ! ) , ||| 0.0571221 0.0775352 |||  ||| 1
+! ) bezeichnet wird ||| ! ) ||| 0.0571221 0.0775352 |||  ||| 1
+! ) bezeichnet ||| ! ) ||| 0.0571221 0.0775352 |||  ||| 1
+! ) das ||| the ||| 0.0571221 1 |||  ||| 1
+! ) dürfen nicht verwendet ( missbraucht ||| ! ) cannot be used ( misused ||| 0.0571221 0.0775352 |||  ||| 1
+! ) dürfen nicht verwendet ( ||| ! ) cannot be used ( ||| 0.0571221 0.0775352 |||  ||| 1
+! ) dürfen nicht verwendet ||| ! ) cannot be used ||| 0.0571221 0.0775352 |||  ||| 1
+! ) dürfen nicht ||| ! ) cannot be ||| 0.0571221 0.0775352 |||  ||| 1
+! ) für den Fall der ||| ! ) in the event that we ||| 0.0571221 0.0775352 |||  ||| 1
+! ) für den Fall ||| ! ) in the event that ||| 0.028561 0.0775352 |||  ||| 2
+! ) für den Fall ||| ! ) in the event ||| 0.028561 0.0775352 |||  ||| 2
+! ) für den ||| ! ) in the ||| 0.0571221 0.0775352 |||  ||| 1
+! ) für die Umsetzung der ||| ! ) before they apply the ||| 0.0571221 0.0775352 |||  ||| 1
+! ) für die Umsetzung ||| ! ) before they apply ||| 0.0571221 0.0775352 |||  ||| 1
+! ) für die ||| ! ) before they ||| 0.0571221 0.0775352 |||  ||| 1
+! ) für ||| ! ) before ||| 0.0190407 0.0775352 |||  ||| 3
+! ) für ||| ! ) in ||| 0.0190407 0.0775352 |||  ||| 3
+! ) für ||| ! ) ||| 0.0190407 0.0775352 |||  ||| 3
+! ) großen Not ||| ! ) high level of need ||| 0.0571221 0.0775352 |||  ||| 1
+! ) großen ||| ! ) high ||| 0.0571221 0.0775352 |||  ||| 1
+! ) oder ihr Egonet ||| ! ) , or rather their egonet ||| 0.0571221 0.0775352 |||  ||| 1
+! ) oder ||| ! ) , or ||| 0.0571221 0.0775352 |||  ||| 1
+! ) und die Schaffung nationaler Finanzmärkte ||| ! ) and create national financial markets ||| 0.0571221 0.0775352 |||  ||| 1
+! ) und die Schaffung nationaler ||| ! ) and create national ||| 0.0571221 0.0775352 |||  ||| 1
+! ) und die Schaffung ||| ! ) and create ||| 0.0571221 0.0775352 |||  ||| 1
+! ) und die ||| ! ) and ||| 0.0571221 0.0775352 |||  ||| 1
+! ) und häufig unverständliche ||| ! ) and often unreadable ||| 0.028561 0.0775352 |||  ||| 2
+! ) und häufig unverständliche ||| ! ) and often unreadable – ||| 0.028561 0.0775352 |||  ||| 2
+! ) und häufig ||| ! ) and often ||| 0.0571221 0.0775352 |||  ||| 1
+! ) und ||| ! ) and ||| 0.38535 0.0775352 |||  ||| 2
+! ) vertritt ||| ! ) ||| 0.0571221 0.0775352 |||  ||| 1
+! ) ||| ! " ) ||| 0.000906699 1.7585e-05 |||  ||| 63
+! ) ||| ! ) , ||| 0.000906699 0.0775352 |||  ||| 63
+! ) ||| ! ) before ||| 0.000906699 0.0775352 |||  ||| 63
+! ) ||| ! ) ||| 0.714286 0.0775352 |||  ||| 63
+! ) ||| ! - ||| 0.000906699 0.0775352 |||  ||| 63
+! ) ||| ! ] ||| 0.000906699 0.0775352 |||  ||| 63
+! ) ||| ! ||| 0.0122333 0.0775352 |||  ||| 63
+! ) ||| ) ||| 0.000906699 1 |||  ||| 63
+! ) ||| , ||| 0.0793651 1 |||  ||| 63
+! ) ||| Latin ! ) ||| 0.000906699 0.0775352 |||  ||| 63
+! ) ||| arrival ! ) ||| 0.000906699 0.0775352 |||  ||| 63
+! ) ||| recycled , ||| 0.0122333 1 |||  ||| 63
+! ) ||| the ||| 0.000906699 1 |||  ||| 63
+! ) über die ||| ! ) on the ||| 0.0571221 0.0775352 |||  ||| 1
+! ) über die Änderung der ||| ! ) on the amendment of ||| 0.0571221 0.0775352 |||  ||| 1
+! ) über die Änderung ||| ! ) on the amendment ||| 0.0571221 0.0775352 |||  ||| 1
+! ) über ||| ! ) on ||| 0.0571221 0.0775352 |||  ||| 1
+! , dem Gewinner des Sacharow-Preises in ||| ! , the Sakharov Prize winner in ||| 0.0571221 0.0775352 |||  ||| 1
+! , dem Gewinner des Sacharow-Preises ||| ! , the Sakharov Prize winner ||| 0.0571221 0.0775352 |||  ||| 1
+! , dem ||| ! , the ||| 0.0571221 0.0775352 |||  ||| 1
+! , war ebenfalls kein Beitrag zur ||| ! " did little to ||| 0.0571221 1.7585e-05 |||  ||| 1
+! , war ebenfalls kein Beitrag ||| ! " did little ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls kein Beitrag ||| ! " did ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls kein Beitrag ||| ! " ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls kein Beitrag ||| ! ||| 0.0142805 0.0775352 |||  ||| 4
+! , war ebenfalls kein ||| ! " did little ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls kein ||| ! " did ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls kein ||| ! " ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls kein ||| ! ||| 0.0142805 0.0775352 |||  ||| 4
+! , war ebenfalls ||| ! " did little ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls ||| ! " did ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls ||| ! " ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ebenfalls ||| ! ||| 0.0142805 0.0775352 |||  ||| 4
+! , war ||| ! " did little ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ||| ! " did ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ||| ! " ||| 0.0142805 1.7585e-05 |||  ||| 4
+! , war ||| ! ||| 0.0142805 0.0775352 |||  ||| 4
+! , ||| ! " did little ||| 0.00952034 1.7585e-05 |||  ||| 6
+! , ||| ! " did ||| 0.00952034 1.7585e-05 |||  ||| 6
+! , ||| ! " ||| 0.00952034 1.7585e-05 |||  ||| 6
+! , ||| ! , ||| 0.00952034 0.0775352 |||  ||| 6
+! , ||| ! ||| 0.00952034 0.0775352 |||  ||| 6
+! , ||| , ||| 0.00952034 1 |||  ||| 6
+! - ' Es reicht ' ||| ! - ' Enough is enough ' ||| 0.0571221 0.0230313 |||  ||| 1
+! - ' Es reicht ||| ! - ' Enough is enough ||| 0.0571221 0.042258 |||  ||| 1
+! - ' Es ||| ! - ' Enough ||| 0.0571221 0.042258 |||  ||| 1
+! - ' ||| ! - ' ||| 0.0571221 0.042258 |||  ||| 1
+! - , dass wir mehr wollen ||| ! we want more ||| 0.0571221 0.0775352 |||  ||| 1
+! - , die mit ||| ! - that have been treated with ||| 0.0571221 0.0775352 |||  ||| 1
+! - , die ||| ! - that have been ||| 0.0114244 0.0775352 |||  ||| 5
+! - , die ||| ! - that have ||| 0.0114244 0.0775352 |||  ||| 5
+! - , die ||| ! - which ||| 0.0114244 0.0775352 |||  ||| 5
+! - , die ||| ! - who ||| 0.0114244 0.0775352 |||  ||| 5
+! - , die ||| ! - ||| 0.0114244 0.0775352 |||  ||| 5
+! - , doch die britische Regierung ||| ! - but the British Government ||| 0.0571221 0.0775352 |||  ||| 1
+! - , doch die britische ||| ! - but the British ||| 0.0571221 0.0775352 |||  ||| 1
+! - , doch die ||| ! - but the ||| 0.0571221 0.0775352 |||  ||| 1
+! - , doch ||| ! - but ||| 0.0571221 0.0775352 |||  ||| 1
+! - , ist zu ersehen ||| ! ) , we see ||| 0.0571221 0.0775352 |||  ||| 1
+! - , ist zu ||| ! ) , we ||| 0.0571221 0.0775352 |||  ||| 1
+! - , ist ||| ! ) , ||| 0.0571221 0.0775352 |||  ||| 1
+! - , möchte ich meinerseits ||| ! - I would like to ||| 0.028561 0.0775352 |||  ||| 2
+! - , möchte ich meinerseits ||| surprise ! - I would like to ||| 0.028561 0.0775352 |||  ||| 2
+! - , möchte ich ||| ! - I would like to ||| 0.028561 0.0775352 |||  ||| 2
+! - , möchte ich ||| surprise ! - I would like to ||| 0.028561 0.0775352 |||  ||| 2
+! - , so wie es ja ||| . this is ||| 0.028561 1 |||  ||| 2
+! - , so wie es ja ||| indeed . this is ||| 0.028561 1 |||  ||| 2
+! - , so wie es ||| . this ||| 0.028561 1 |||  ||| 2
+! - , so wie es ||| indeed . this ||| 0.028561 1 |||  ||| 2
+! - , so wie ||| . ||| 0.028561 1 |||  ||| 2
+! - , so wie ||| indeed . ||| 0.028561 1 |||  ||| 2
+! - , so ||| . ||| 0.028561 1 |||  ||| 2
+! - , so ||| indeed . ||| 0.028561 1 |||  ||| 2
+! - , sondern daß sogar geradezu ||| ? - but that ||| 0.0571221 1 |||  ||| 1
+! - , sondern daß sogar ||| ? - but that ||| 0.0571221 1 |||  ||| 1
+! - , sondern daß ||| ? - but that ||| 0.0571221 1 |||  ||| 1
+! - , um uns dann , ||| it - and then , ||| 0.0571221 1 |||  ||| 1
+! - , um uns dann ||| it - and then ||| 0.0571221 1 |||  ||| 1
+! - , um uns ||| it - and ||| 0.0571221 1 |||  ||| 1
+! - , um ||| it - and ||| 0.0571221 1 |||  ||| 1
+! - , von dem ||| ! - in favour ||| 0.028561 0.0775352 |||  ||| 2
+! - , von dem ||| ! - in ||| 0.028561 0.0775352 |||  ||| 2
+! - , von ||| ! - in favour ||| 0.028561 0.0775352 |||  ||| 2
+! - , von ||| ! - in ||| 0.028561 0.0775352 |||  ||| 2
+! - , wohingegen man ||| ! - whereas one ||| 0.0571221 0.0775352 |||  ||| 1
+! - , wohingegen ||| ! - whereas ||| 0.0571221 0.0775352 |||  ||| 1
+! - , während diejenigen , die ||| ! - while those responsible for the ||| 0.0571221 0.0775352 |||  ||| 1
+! - , während diejenigen , ||| ! - while those responsible for ||| 0.028561 0.0775352 |||  ||| 2
+! - , während diejenigen , ||| ! - while those responsible ||| 0.028561 0.0775352 |||  ||| 2
+! - , während diejenigen ||| ! - while those responsible for ||| 0.028561 0.0775352 |||  ||| 2
+! - , während diejenigen ||| ! - while those responsible ||| 0.028561 0.0775352 |||  ||| 2
+! - , während ||| ! - while ||| 0.0571221 0.0775352 |||  ||| 1
+! - , ||| ! ) , ||| 0.00357013 0.0775352 |||  ||| 16
+! - , ||| ! - ||| 0.4375 0.0775352 |||  ||| 16
+! - , ||| ! ||| 0.00357013 0.0775352 |||  ||| 16
+! - , ||| - which ||| 0.00357013 1 |||  ||| 16
+! - , ||| - ||| 0.00357013 1 |||  ||| 16
+! - , ||| . ||| 0.00357013 1 |||  ||| 16
+! - , ||| indeed . ||| 0.00357013 1 |||  ||| 16
+! - , ||| it - and ||| 0.00357013 1 |||  ||| 16
+! - , ||| surprise ! - ||| 0.00357013 0.0775352 |||  ||| 16
+! - , ||| we ||| 0.00357013 1 |||  ||| 16
+! - Die ||| - the United Nations ||| 0.0190407 1 |||  ||| 3
+! - Die ||| - the United ||| 0.0190407 1 |||  ||| 3
+! - Die ||| - the ||| 0.0190407 1 |||  ||| 3
+! - Es sind ||| the two draftsmen have presented ||| 0.0571221 1 |||  ||| 1
+! - Frage von Unvereinbarkeiten ||| ! – incompatibilities arise ||| 0.0571221 0.0775352 |||  ||| 1
+! - Frau Präsidentin , ich wurde ||| ! - Madam President , I was ||| 0.0571221 0.0775352 |||  ||| 1
+! - Frau Präsidentin , ich ||| ! - Madam President , I ||| 0.0571221 0.0775352 |||  ||| 1
+! - Frau Präsidentin , ||| ! - Madam President , ||| 0.0571221 0.0775352 |||  ||| 1
+! - Frau Präsidentin ||| ! - Madam President ||| 0.0571221 0.0775352 |||  ||| 1
+! - Frau ||| ! - Madam ||| 0.0571221 0.0775352 |||  ||| 1
+! - Kernkraftwerke errichtet werden ||| ! ) nuclear power stations built ||| 0.0571221 0.0775352 |||  ||| 1
+! - Kernkraftwerke errichtet ||| ! ) nuclear power stations built ||| 0.0571221 0.0775352 |||  ||| 1
+! - Kernkraftwerke ||| ! ) nuclear power stations ||| 0.0571221 0.0775352 |||  ||| 1
+! - Referenden und Volksinitiativen zu stellen ||| ! - of referendums and popular initiatives ||| 0.0571221 0.0775352 |||  ||| 1
+! - Referenden und Volksinitiativen zu ||| ! - of referendums and popular initiatives ||| 0.0571221 0.0775352 |||  ||| 1
+! - Referenden und Volksinitiativen ||| ! - of referendums and popular initiatives ||| 0.0571221 0.0775352 |||  ||| 1
+! - Referenden und ||| ! - of referendums and ||| 0.0571221 0.0775352 |||  ||| 1
+! - Referenden ||| ! - of referendums ||| 0.0571221 0.0775352 |||  ||| 1
+! - Rücksicht ||| into consideration ||| 0.0571221 1 |||  ||| 1
+! - bedeutet eine derart anmaßende ||| , such an arrogant ||| 0.0571221 1 |||  ||| 1
+! - besagen , dass der Zugang ||| ! - stipulate that access ||| 0.0571221 0.0775352 |||  ||| 1
+! - besagen , dass ||| ! - stipulate that ||| 0.0571221 0.0775352 |||  ||| 1
+! - besagen ||| ! - stipulate ||| 0.0571221 0.0775352 |||  ||| 1
+! - besteht , wie ||| , via ||| 0.0571221 1 |||  ||| 1
+! - besteht , ||| , via ||| 0.0571221 1 |||  ||| 1
+! - besteht ||| , via ||| 0.0571221 1 |||  ||| 1
+! - der Energie vergeudet , bevor ||| ! - of the energy before ||| 0.0571221 0.0775352 |||  ||| 1
+! - der Energie vergeudet , ||| ! - of the energy ||| 0.0571221 0.0775352 |||  ||| 1
+! - der Energie vergeudet ||| ! - of the energy ||| 0.0571221 0.0775352 |||  ||| 1
+! - der Energie ||| ! - of the energy ||| 0.0571221 0.0775352 |||  ||| 1
+! - der betreffenden Minderheiten ||| , - of the relevant minorities ||| 0.0571221 1 |||  ||| 1
+! - der betreffenden ||| , - of the relevant ||| 0.0571221 1 |||  ||| 1
+! - der operativen Ausgaben werden ||| ! - of operational expenses are managed ||| 0.028561 0.0775352 |||  ||| 2
+! - der operativen Ausgaben werden ||| ! - of operational expenses are ||| 0.028561 0.0775352 |||  ||| 2
+! - der operativen Ausgaben ||| ! - of operational expenses ||| 0.0571221 0.0775352 |||  ||| 1
+! - der operativen ||| ! - of operational ||| 0.0571221 0.0775352 |||  ||| 1
+! - der ||| ! - of the ||| 0.0190407 0.0775352 |||  ||| 3
+! - der ||| ! - of ||| 0.0190407 0.0775352 |||  ||| 3
+! - der ||| , - of the ||| 0.0190407 1 |||  ||| 3
+! - die ||| , ||| 0.0571221 1 |||  ||| 1
+! - direkte ||| - direct ||| 0.0571221 1 |||  ||| 1
+! - direkte Übertragung , aber auch ||| - direct transmission but also ||| 0.0571221 1 |||  ||| 1
+! - direkte Übertragung , aber ||| - direct transmission but ||| 0.0571221 1 |||  ||| 1
+! - direkte Übertragung , ||| - direct transmission ||| 0.0571221 1 |||  ||| 1
+! - direkte Übertragung ||| - direct transmission ||| 0.0571221 1 |||  ||| 1
+! - energische Maßnahmen vorgeschlagen hat , ||| ! - proposing powerful measures ||| 0.0571221 0.0775352 |||  ||| 1
+! - energische Maßnahmen vorgeschlagen hat ||| ! - proposing powerful measures ||| 0.0571221 0.0775352 |||  ||| 1
+! - energische Maßnahmen vorgeschlagen ||| ! - proposing powerful measures ||| 0.0571221 0.0775352 |||  ||| 1
+! - im Lauf dieser Woche begonnen ||| - set in motion this week ||| 0.0571221 1 |||  ||| 1
+! - ist ein klares und durchsichtiges ||| - is a clear , transparent ||| 0.0571221 1 |||  ||| 1
+! - ist ein klares und ||| - is a clear , ||| 0.0571221 1 |||  ||| 1
+! - ist ein klares ||| - is a clear ||| 0.0571221 1 |||  ||| 1
+! - ist ein ||| - is a ||| 0.0571221 1 |||  ||| 1
+! - ist ||| - is ||| 0.0571221 1 |||  ||| 1
+! - mit beeindruckender Hellsichtigkeit den ||| - with ||| 0.0571221 1 |||  ||| 1
+! - mit beeindruckender Hellsichtigkeit ||| - with ||| 0.0571221 1 |||  ||| 1
+! - mit beeindruckender ||| - with ||| 0.0571221 1 |||  ||| 1
+! - mit ||| - with ||| 0.0571221 1 |||  ||| 1
+! - quer durch alle Fraktionen , ||| ! - all , ||| 0.0571221 0.0775352 |||  ||| 1
+! - quer durch alle Fraktionen ||| ! - all ||| 0.0571221 0.0775352 |||  ||| 1
+! - quer durch alle ||| ! - all ||| 0.0571221 0.0775352 |||  ||| 1
+! - quer durch ||| ! - ||| 0.0571221 0.0775352 |||  ||| 1
+! - quer ||| ! - ||| 0.0571221 0.0775352 |||  ||| 1
+! - rechtzeitig reagiert : sie hat ||| ! - took timely action : it ||| 0.0571221 0.0775352 |||  ||| 1
+! - rechtzeitig reagiert : sie ||| ! - took timely action : it ||| 0.0571221 0.0775352 |||  ||| 1
+! - rechtzeitig reagiert : ||| ! - took timely action : ||| 0.0571221 0.0775352 |||  ||| 1
+! - rechtzeitig reagiert ||| ! - took timely action ||| 0.0571221 0.0775352 |||  ||| 1
+! - rechtzeitig ||| ! - took timely ||| 0.0571221 0.0775352 |||  ||| 1
+! - räume ich ein , ||| ! - I recognise ||| 0.0571221 0.0775352 |||  ||| 1
+! - räume ich ein ||| ! - I recognise ||| 0.0571221 0.0775352 |||  ||| 1
+! - sage ich ||| ! - I would say ||| 0.0571221 0.0775352 |||  ||| 1
+! - scheint die Europäische Union jetzt ||| ! - the EU seems ||| 0.0571221 0.0775352 |||  ||| 1
+! - scheint die Europäische Union ||| ! - the EU seems ||| 0.0571221 0.0775352 |||  ||| 1
+! - um zu bekräftigen , daß ||| ! - as a reaffirmation of ||| 0.028561 0.0775352 |||  ||| 2
+! - um zu bekräftigen , daß ||| ! - as a reaffirmation ||| 0.028561 0.0775352 |||  ||| 2
+! - um zu bekräftigen , ||| ! - as a reaffirmation of ||| 0.028561 0.0775352 |||  ||| 2
+! - um zu bekräftigen , ||| ! - as a reaffirmation ||| 0.028561 0.0775352 |||  ||| 2
+! - um zu bekräftigen ||| ! - as a reaffirmation of ||| 0.028561 0.0775352 |||  ||| 2
+! - um zu bekräftigen ||| ! - as a reaffirmation ||| 0.028561 0.0775352 |||  ||| 2
+! - um zu ||| ! - as a ||| 0.0571221 0.0775352 |||  ||| 1
+! - um ||| ! - as a ||| 0.028561 0.0775352 |||  ||| 2
+! - um ||| , ||| 0.028561 1 |||  ||| 2
+! - und begrenzt somit die ||| ! - thereby restricting the ||| 0.0571221 0.0775352 |||  ||| 1
+! - und dass die landwirtschaftliche Produktivität ||| - and that agricultural productivity ||| 0.0571221 1 |||  ||| 1
+! - und dass die landwirtschaftliche ||| - and that agricultural ||| 0.0571221 1 |||  ||| 1
+! - und dass die ||| - and that ||| 0.0571221 1 |||  ||| 1
+! - und ideologischer Manipulation ||| ! - and borders on ideological manipulation ||| 0.0571221 0.0775352 |||  ||| 1
+! - und ideologischer ||| ! - and borders on ideological ||| 0.0571221 0.0775352 |||  ||| 1
+! - und nationale Präferenz entschieden ||| - and national preference ||| 0.0571221 1 |||  ||| 1
+! - und nationale ||| - and national ||| 0.0571221 1 |||  ||| 1
+! - und zum ersten ||| ! - and we saw the first ||| 0.0571221 0.0775352 |||  ||| 1
+! - und zum ||| ! - and we saw the ||| 0.0571221 0.0775352 |||  ||| 1
+! - und ||| ! - and we saw ||| 0.00952034 0.0775352 |||  ||| 6
+! - und ||| ! - and we ||| 0.00952034 0.0775352 |||  ||| 6
+! - und ||| ! - and ||| 0.12845 0.0775352 |||  ||| 6
+! - und ||| - and ||| 0.12845 1 |||  ||| 6
+! - ungefähr 18 Millionen Arbeitslose . ||| , some 18 million unemployed . ||| 0.0571221 1 |||  ||| 1
+! - ungefähr 18 Millionen Arbeitslose ||| , some 18 million unemployed ||| 0.0571221 1 |||  ||| 1
+! - ungefähr 18 Millionen ||| , some 18 million ||| 0.0571221 1 |||  ||| 1
+! - ungefähr 18 ||| , some 18 ||| 0.0571221 1 |||  ||| 1
+! - ungefähr ||| , some ||| 0.0571221 1 |||  ||| 1
+! - unter Anlegung objektiver Maßstäbe erfolgen ||| emphasize , from an objective viewpoint ||| 0.028561 1 |||  ||| 2
+! - unter Anlegung objektiver Maßstäbe erfolgen ||| would emphasize , from an objective viewpoint ||| 0.028561 1 |||  ||| 2
+! - unter Anlegung objektiver ||| emphasize , from an objective ||| 0.028561 1 |||  ||| 2
+! - unter Anlegung objektiver ||| would emphasize , from an objective ||| 0.028561 1 |||  ||| 2
+! - unter Anlegung ||| emphasize , from an ||| 0.028561 1 |||  ||| 2
+! - unter Anlegung ||| would emphasize , from an ||| 0.028561 1 |||  ||| 2
+! - unter vielen anderen . ||| , one among many others . ||| 0.0571221 1 |||  ||| 1
+! - unter vielen anderen ||| , one among many others ||| 0.0571221 1 |||  ||| 1
+! - unter vielen ||| , one among many ||| 0.0571221 1 |||  ||| 1
+! - unter ||| , one among ||| 0.0190407 1 |||  ||| 3
+! - unter ||| emphasize , from ||| 0.0190407 1 |||  ||| 3
+! - unter ||| would emphasize , from ||| 0.0190407 1 |||  ||| 3
+! - weiß ich nicht , ||| - I do not know , but ||| 0.028561 1 |||  ||| 2
+! - weiß ich nicht , ||| - I do not know , ||| 0.028561 1 |||  ||| 2
+! - weiß ich nicht ||| - I do not know ||| 0.0571221 1 |||  ||| 1
+! - zugab ||| saying something – admitted ||| 0.0571221 1 |||  ||| 1
+! - zur Koordination im ||| - relating to applying coordination in the ||| 0.0571221 1 |||  ||| 1
+! - zur Koordination ||| - relating to applying coordination ||| 0.0571221 1 |||  ||| 1
+! - zur ||| - relating to ||| 0.0571221 1 |||  ||| 1
+! - ||| ! ) ||| 0.00819894 0.0775352 |||  ||| 94
+! - ||| ! - I do ||| 0.000607682 0.0775352 |||  ||| 94
+! - ||| ! - I ||| 0.000607682 0.0775352 |||  ||| 94
+! - ||| ! - of ||| 0.000607682 0.0775352 |||  ||| 94
+! - ||| ! - ||| 0.361702 0.0775352 |||  ||| 94
+! - ||| ! ||| 0.00819894 0.0775352 |||  ||| 94
+! - ||| ! – ||| 0.000607682 0.0775352 |||  ||| 94
+! - ||| , - ||| 0.000607682 1 |||  ||| 94
+! - ||| , and ||| 0.00819894 1 |||  ||| 94
+! - ||| , mind you - ||| 0.000607682 1 |||  ||| 94
+! - ||| , one ||| 0.000607682 1 |||  ||| 94
+! - ||| , ||| 0.0744681 1 |||  ||| 94
+! - ||| - ||| 0.212766 1 |||  ||| 94
+! - ||| . at ||| 0.000607682 1 |||  ||| 94
+! - ||| . indeed ||| 0.000607682 1 |||  ||| 94
+! - ||| . ||| 0.0214524 1 |||  ||| 94
+! - ||| ? - ||| 0.000607682 1 |||  ||| 94
+! - ||| emphasize , ||| 0.000607682 1 |||  ||| 94
+! - ||| indeed . ||| 0.000607682 1 |||  ||| 94
+! - ||| is , ||| 0.000607682 1 |||  ||| 94
+! - ||| it - ||| 0.000607682 1 |||  ||| 94
+! - ||| it everybody - ||| 0.000607682 1 |||  ||| 94
+! - ||| one ||| 0.000607682 1 |||  ||| 94
+! - ||| sake , ||| 0.000607682 1 |||  ||| 94
+! - ||| surprise ! - ||| 0.000607682 0.0775352 |||  ||| 94
+! - ||| the ||| 0.000607682 1 |||  ||| 94
+! - ||| want . ||| 0.000607682 1 |||  ||| 94
+! - ||| we ||| 0.000607682 1 |||  ||| 94
+! - ||| would be ||| 0.000607682 1 |||  ||| 94
+! - ||| would emphasize , ||| 0.000607682 1 |||  ||| 94
+! - ||| would ||| 0.000607682 1 |||  ||| 94
+! - über 10 Milliarden dänische ||| it everybody - over 10 billion Danish ||| 0.0571221 1 |||  ||| 1
+! - über 10 Milliarden ||| it everybody - over 10 billion ||| 0.0571221 1 |||  ||| 1
+! - über 10 ||| it everybody - over 10 ||| 0.0571221 1 |||  ||| 1
+! - über ||| it everybody - over ||| 0.0571221 1 |||  ||| 1
+! . ||| ! ||| 0.224059 0.0390177 |||  ||| 9
+! . ||| . ||| 0.0856334 1 |||  ||| 9
+! . ||| in this . ||| 0.0063469 1 |||  ||| 9
+! . ||| misunderstandings . ||| 0.0063469 1 |||  ||| 9
+! . ||| point . ||| 0.0063469 1 |||  ||| 9
+! . ||| this . ||| 0.0063469 1 |||  ||| 9
+! ... und , hier war ich ||| ! ... ||| 0.0571221 0.0775352 |||  ||| 1
+! ... und , hier war ||| ! ... ||| 0.0571221 0.0775352 |||  ||| 1
+! ... und , hier ||| ! ... ||| 0.0571221 0.0775352 |||  ||| 1
+! ... und , ||| ! ... ||| 0.0571221 0.0775352 |||  ||| 1
+! ... und ||| ! ... ||| 0.0571221 0.0775352 |||  ||| 1
+! ... ||| ! ... ||| 0.672176 0.0775352 |||  ||| 3
+! 100 Mio. ECU ||| ! ECU 100 m ||| 0.0571221 0.0775352 |||  ||| 1
+! 14,5 % Feuchte ist ||| ! 14.5 % is ||| 0.0571221 0.0733998 |||  ||| 1
+! 14,5 % Feuchte ||| ! 14.5 % ||| 0.0571221 0.0733998 |||  ||| 1
+! 173 Auftragsmorde seit 1990 ||| ! 173 contract killings since 1990 ||| 0.0571221 0.0775352 |||  ||| 1
+! 173 Auftragsmorde seit 1990 – ||| ! 173 contract killings since 1990 – ||| 0.0571221 0.0775352 |||  ||| 1
+! 173 Auftragsmorde seit ||| ! 173 contract killings since ||| 0.0571221 0.0775352 |||  ||| 1
+! 173 Auftragsmorde ||| ! 173 contract killings ||| 0.0571221 0.0775352 |||  ||| 1
+! 173 ||| ! 173 ||| 0.0571221 0.0775352 |||  ||| 1
+! 1962 haben sie dies ||| ! in 1962 , did they not ||| 0.028561 0.0775352 |||  ||| 2
+! 1962 haben sie dies ||| ! in 1962 , did they ||| 0.028561 0.0775352 |||  ||| 2
+! 1962 haben sie ||| ! in 1962 , did they not ||| 0.028561 0.0775352 |||  ||| 2
+! 1962 haben sie ||| ! in 1962 , did they ||| 0.028561 0.0775352 |||  ||| 2
+! 1962 haben ||| ! in 1962 , did ||| 0.0571221 0.0775352 |||  ||| 1
+! 1962 ||| ! in 1962 , ||| 0.028561 0.0775352 |||  ||| 2
+! 1962 ||| ! in 1962 ||| 0.028561 0.0775352 |||  ||| 2
+! 1991 habe ich ||| , in 1991 , I joined ||| 0.0571221 1 |||  ||| 1
+! 1991 ||| , in 1991 , ||| 0.028561 1 |||  ||| 2
+! 1991 ||| , in 1991 ||| 0.028561 1 |||  ||| 2
+! 1996 haben vier Millionen Menschen ||| ! in 1996 , four million people ||| 0.0571221 0.0775352 |||  ||| 1
+! 1996 haben vier Millionen ||| ! in 1996 , four million ||| 0.0571221 0.0775352 |||  ||| 1
+! 1996 haben vier ||| ! in 1996 , four ||| 0.0571221 0.0775352 |||  ||| 1
+! 1996 haben ||| ! in 1996 , ||| 0.0571221 0.0775352 |||  ||| 1
+! 1996 ||| ! in 1996 ||| 0.0571221 0.0775352 |||  ||| 1
+! 20 % des ||| . twenty per cent of the territory ||| 0.028561 1 |||  ||| 2
+! 20 % des ||| . twenty per cent of the ||| 0.028561 1 |||  ||| 2
+! 20 % ||| . twenty per cent ||| 0.0571221 1 |||  ||| 1
+! 20 Prozent der jungen Frauen ||| . 20 % of young women ||| 0.0571221 0.529412 |||  ||| 1
+! 20 Prozent der jungen ||| . 20 % of young ||| 0.0571221 0.529412 |||  ||| 1
+! 20 Prozent der ||| . 20 % of ||| 0.0571221 0.529412 |||  ||| 1
+! 20 Prozent ||| . 20 % ||| 0.0571221 0.529412 |||  ||| 1
+! 20 ||| . 20 ||| 0.028561 1 |||  ||| 2
+! 20 ||| . twenty ||| 0.028561 1 |||  ||| 2
+! 2002 wird ein entscheidendes Jahr ||| , 2002 will be a crucial year ||| 0.0571221 1 |||  ||| 1
+! 2002 wird ein entscheidendes ||| , 2002 will be a crucial ||| 0.0571221 1 |||  ||| 1
+! 2002 wird ein ||| , 2002 will be a ||| 0.0571221 1 |||  ||| 1
+! 2002 wird ||| , 2002 will be ||| 0.0571221 1 |||  ||| 1
+! 2002 ||| , 2002 ||| 0.0571221 1 |||  ||| 1
+! 2003 ||| 2003 ||| 0.0571221 1 |||  ||| 1
+! 2004 war die UKIP die einzige ||| ! ||| 0.0571221 0.0388843 |||  ||| 1
+! 2004 war die UKIP die ||| ! ||| 0.0571221 0.0388843 |||  ||| 1
+! 2004 war die UKIP ||| ! ||| 0.0571221 0.0388843 |||  ||| 1
+! 2004 war die ||| ! ||| 0.0571221 0.0388843 |||  ||| 1
+! 2004 war ||| ! ||| 0.028561 0.0388843 |||  ||| 2
+! 2004 war ||| , 2004 was ||| 0.028561 1 |||  ||| 2
+! 2004 ||| ! 2004 may ||| 0.0142805 0.0775352 |||  ||| 4
+! 2004 ||| ! 2004 ||| 0.0142805 0.0775352 |||  ||| 4
+! 2004 ||| ! ||| 0.0142805 0.0388843 |||  ||| 4
+! 2004 ||| , 2004 ||| 0.0142805 1 |||  ||| 4
+! 2005 war ||| , 2005 has ||| 0.0571221 1 |||  ||| 1
+! 2005 wird ||| , 2005 will ||| 0.0571221 1 |||  ||| 1
+! 2005 ||| , 2005 ||| 0.38535 1 |||  ||| 2
+! 2010 ist eigentlich schon morgen ||| , 2010 is just round the corner ||| 0.0571221 1 |||  ||| 1
+! 2010 ist eigentlich schon ||| , 2010 is just round the ||| 0.028561 1 |||  ||| 2
+! 2010 ist eigentlich schon ||| , 2010 is just round ||| 0.028561 1 |||  ||| 2
+! 2010 ist ||| , 2010 is ||| 0.0571221 1 |||  ||| 1
+! 2010 ||| , 2010 ||| 0.0571221 1 |||  ||| 1
+! 91 % gehen an Rechtsinhaber , ||| the other 91 % goes to holders ||| 0.0571221 0.946664 |||  ||| 1
+! 91 % gehen an Rechtsinhaber ||| the other 91 % goes to holders ||| 0.0571221 0.946664 |||  ||| 1
+! 91 % gehen an ||| the other 91 % goes to ||| 0.0571221 0.946664 |||  ||| 1
+! 91 % gehen ||| the other 91 % goes ||| 0.0571221 0.946664 |||  ||| 1
+! 91 % ||| the other 91 % ||| 0.0571221 0.946664 |||  ||| 1
+! 91 ||| the other 91 ||| 0.0571221 1 |||  ||| 1
+! 99 % ||| 99 % ||| 0.0571221 0.946664 |||  ||| 1
+! 99 ||| 99 ||| 0.0571221 1 |||  ||| 1
+! ; und aus Angola , Dom ||| ! ; and from Angola , Dom ||| 0.0571221 0.0775352 |||  ||| 1
+! ; und aus Angola , ||| ! ; and from Angola , ||| 0.0571221 0.0775352 |||  ||| 1
+! ; und aus Angola ||| ! ; and from Angola ||| 0.0571221 0.0775352 |||  ||| 1
+! ; und aus ||| ! ; and from ||| 0.0571221 0.0775352 |||  ||| 1
+! ; und ||| ! ; and ||| 0.0571221 0.0775352 |||  ||| 1
+! ; ||| ! ; ||| 0.0571221 0.0775352 |||  ||| 1
+! ? " ||| ? " ||| 0.0571221 0.118338 |||  ||| 1
+! ? ? ||| ! ||| 0.028561 0.0265065 |||  ||| 2
+! ? ? ||| ! ’ ||| 0.028561 0.0265065 |||  ||| 2
+! ? Inshaallah . ' ||| , ' inshallah ' . ||| 0.0571221 0.545017 |||  ||| 1
+! ? Inshaallah ||| , ' inshallah ||| 0.0571221 1 |||  ||| 1
+! ? ||| . ' ||| 0.0190407 0.0032785 |||  ||| 3
+! ? ||| ? ! ||| 0.0190407 0.0775352 |||  ||| 3
+! ? ||| ? ||| 0.0190407 1 |||  ||| 3
+! Airbus ist eine europäische Erfolgsgeschichte ||| , Airbus is a European success story ||| 0.0571221 1 |||  ||| 1
+! Airbus ist eine europäische ||| , Airbus is a European ||| 0.0571221 1 |||  ||| 1
+! Airbus ist eine ||| , Airbus is a ||| 0.0571221 1 |||  ||| 1
+! Airbus ist ||| , Airbus is ||| 0.0571221 1 |||  ||| 1
+! Airbus ||| , Airbus ||| 0.0571221 1 |||  ||| 1
+! Algerien ist schwerkrank ||| , Algeria is a very ill country ||| 0.0190407 1 |||  ||| 3
+! Algerien ist schwerkrank ||| , Algeria is a very ill ||| 0.0190407 1 |||  ||| 3
+! Algerien ist schwerkrank ||| , Algeria is a very ||| 0.0190407 1 |||  ||| 3
+! Algerien ist ||| , Algeria is a ||| 0.028561 1 |||  ||| 2
+! Algerien ist ||| , Algeria is ||| 0.028561 1 |||  ||| 2
+! Algerien ||| , Algeria ||| 0.0571221 1 |||  ||| 1
+! Alkoholkonsum ist eine Gewohnheit , die ||| , alcohol consumption is a habit ||| 0.0571221 1 |||  ||| 1
+! Alkoholkonsum ist eine Gewohnheit , ||| , alcohol consumption is a habit ||| 0.0571221 1 |||  ||| 1
+! Alkoholkonsum ist eine Gewohnheit ||| , alcohol consumption is a habit ||| 0.0571221 1 |||  ||| 1
+! Alkoholkonsum ist eine ||| , alcohol consumption is a ||| 0.0571221 1 |||  ||| 1
+! Alkoholkonsum ist ||| , alcohol consumption is ||| 0.0571221 1 |||  ||| 1
+! Alkoholkonsum ||| , alcohol consumption ||| 0.0571221 1 |||  ||| 1
+! Anfang Juli hat sich Filip ||| , at the beginning of July Filip ||| 0.0571221 1 |||  ||| 1
+! Anfang Juli hat sich ||| , at the beginning of July ||| 0.0571221 1 |||  ||| 1
+! Anfang Juli hat ||| , at the beginning of July ||| 0.0571221 1 |||  ||| 1
+! Anfang Juli ||| , at the beginning of July ||| 0.0571221 1 |||  ||| 1
+! Anfang dieses Jahres haben sich die ||| , earlier this year the ||| 0.0571221 1 |||  ||| 1
+! Anfang dieses Jahres haben sich ||| , earlier this year ||| 0.0571221 1 |||  ||| 1
+! Anfang dieses Jahres haben ||| , earlier this year ||| 0.0571221 1 |||  ||| 1
+! Anfang dieses Jahres ||| , earlier this year ||| 0.0571221 1 |||  ||| 1
+! Anfang dieses ||| , earlier this ||| 0.0571221 1 |||  ||| 1
+! Anfang ||| , at the beginning of ||| 0.0190407 1 |||  ||| 3
+! Anfang ||| , at the beginning ||| 0.0190407 1 |||  ||| 3
+! Anfang ||| , earlier ||| 0.0190407 1 |||  ||| 3
+! Anlass ||| , the occasion ||| 0.0571221 1 |||  ||| 1
+! Armut hat ||| , poverty has ||| 0.0571221 1 |||  ||| 1
+! Armut und soziale Ausgrenzung ||| , poverty and social exclusion ||| 0.0571221 1 |||  ||| 1
+! Armut und soziale ||| , poverty and social ||| 0.0571221 1 |||  ||| 1
+! Armut und ||| , poverty and ||| 0.0571221 1 |||  ||| 1
+! Armut ||| , poverty ||| 0.38535 1 |||  ||| 2
+! Aufgabe der Konferenz von Bali ||| , the remit of the Bali Conference ||| 0.0571221 1 |||  ||| 1
+! Aufgabe der ||| , the remit of the ||| 0.0571221 1 |||  ||| 1
+! Aufgabe ||| , the remit ||| 0.0571221 1 |||  ||| 1
+! Aus- und Fortbildung wird ||| , training and education will be a ||| 0.028561 1 |||  ||| 2
+! Aus- und Fortbildung wird ||| , training and education will be ||| 0.028561 1 |||  ||| 2
+! Aus- und Fortbildung ||| , training and education ||| 0.0571221 1 |||  ||| 1
+! Aus- und ||| , training and ||| 0.0571221 1 |||  ||| 1
+! Aus- ||| , training ||| 0.0571221 1 |||  ||| 1
+! Außenpolitik muß ||| and gentlemen , foreign policy needs to ||| 0.028561 1 |||  ||| 2
+! Außenpolitik muß ||| gentlemen , foreign policy needs to ||| 0.028561 1 |||  ||| 2
+! Außenpolitik ||| , ladies and gentlemen , foreign policy ||| 0.0142805 1 |||  ||| 4
+! Außenpolitik ||| and gentlemen , foreign policy ||| 0.0142805 1 |||  ||| 4
+! Außenpolitik ||| gentlemen , foreign policy ||| 0.0142805 1 |||  ||| 4
+! Außenpolitik ||| ladies and gentlemen , foreign policy ||| 0.0142805 1 |||  ||| 4
+! Beifall an den tschechischen ||| , let us applaud the Czech ||| 0.0571221 1 |||  ||| 1
+! Beifall an den ||| , let us applaud the ||| 0.0571221 1 |||  ||| 1
+! Beifall an ||| , let us applaud ||| 0.0571221 1 |||  ||| 1
+! Beifall ||| , let us applaud ||| 0.0571221 1 |||  ||| 1
+! Belarus gehörte im Laufe der Geschichte ||| , throughout history , Belarus has belonged ||| 0.028561 1 |||  ||| 2
+! Belarus gehörte im Laufe der Geschichte ||| throughout history , Belarus has belonged ||| 0.028561 1 |||  ||| 2
+! Belarus gehörte ||| , Belarus has belonged ||| 0.0571221 1 |||  ||| 1
+! Belarus ||| , Belarus ||| 0.0571221 1 |||  ||| 1
+! Belgien hat offenbar ||| , it does seem that Belgium has ||| 0.0571221 1 |||  ||| 1
+! Beschäftigungspolitik und soziale Sicherheit gehören ||| , employment policy and social security go ||| 0.0571221 1 |||  ||| 1
+! Beschäftigungspolitik und soziale Sicherheit ||| , employment policy and social security ||| 0.0571221 1 |||  ||| 1
+! Beschäftigungspolitik und soziale ||| , employment policy and social ||| 0.0571221 1 |||  ||| 1
+! Beschäftigungspolitik und ||| , employment policy and ||| 0.0571221 1 |||  ||| 1
+! Beschäftigungspolitik ||| , employment policy ||| 0.0571221 1 |||  ||| 1
+! Betriebsstilllegungen wie jetzt in ||| , plant closures like this one in ||| 0.0571221 1 |||  ||| 1
+! Betriebsstilllegungen wie jetzt ||| , plant closures like this one ||| 0.028561 1 |||  ||| 2
+! Betriebsstilllegungen wie jetzt ||| , plant closures like this ||| 0.028561 1 |||  ||| 2
+! Betriebsstilllegungen wie ||| , plant closures like ||| 0.0571221 1 |||  ||| 1
+! Betriebsstilllegungen ||| , plant closures ||| 0.0571221 1 |||  ||| 1
+! Beziehungen zu Nachbarn sind ||| , links with neighbours are ||| 0.0571221 1 |||  ||| 1
+! Beziehungen zu Nachbarn ||| , links with neighbours ||| 0.0571221 1 |||  ||| 1
+! Beziehungen zu ||| , links with ||| 0.0571221 1 |||  ||| 1
+! Beziehungen ||| , links ||| 0.0571221 1 |||  ||| 1
+! Bezug ||| the ||| 0.0571221 1 |||  ||| 1
+! Biozide , das sind Produkte , ||| , biocides are products that ||| 0.0571221 1 |||  ||| 1
+! Biozide , das sind Produkte ||| , biocides are products ||| 0.0571221 1 |||  ||| 1
+! Biozide , das sind ||| , biocides are ||| 0.0571221 1 |||  ||| 1
+! Biozide , das ||| , biocides ||| 0.0571221 1 |||  ||| 1
+! Biozide , ||| , biocides ||| 0.0571221 1 |||  ||| 1
+! Birma ||| , Burma ||| 0.0571221 1 |||  ||| 1
+! Bosnien-Herzegowina ist im Grunde ||| , Bosnia-Herzegovina is , in fact , ||| 0.0571221 1 |||  ||| 1
+! Bosnien-Herzegowina ist im ||| , Bosnia-Herzegovina is , in ||| 0.0571221 1 |||  ||| 1
+! Bosnien-Herzegowina ist ||| , Bosnia-Herzegovina is , ||| 0.028561 1 |||  ||| 2
+! Bosnien-Herzegowina ist ||| , Bosnia-Herzegovina is ||| 0.028561 1 |||  ||| 2
+! Bosnien-Herzegowina ||| , Bosnia-Herzegovina ||| 0.0571221 1 |||  ||| 1
+! Bovine spongiforme Enzephalopathie , Dioxin , ||| , bovine spongiform encephalopathy , dioxin , ||| 0.0571221 1 |||  ||| 1
+! Bovine spongiforme Enzephalopathie , Dioxin ||| , bovine spongiform encephalopathy , dioxin ||| 0.0571221 1 |||  ||| 1
+! Bovine spongiforme Enzephalopathie , ||| , bovine spongiform encephalopathy , ||| 0.0571221 1 |||  ||| 1
+! Bovine spongiforme Enzephalopathie ||| , bovine spongiform encephalopathy ||| 0.0571221 1 |||  ||| 1
+! Bovine spongiforme ||| , bovine spongiform ||| 0.0571221 1 |||  ||| 1
+! Bovine ||| , bovine ||| 0.0571221 1 |||  ||| 1
+! Burma taucht regelmäßig als Thema ||| , Burma is a regular theme ||| 0.0571221 1 |||  ||| 1
+! Burma taucht regelmäßig als ||| , Burma is a regular ||| 0.0571221 1 |||  ||| 1
+! Burma taucht ||| , Burma is ||| 0.0571221 1 |||  ||| 1
+! Burma ||| , Burma ||| 0.0571221 1 |||  ||| 1
+! Bücher sind ein wichtiges Medium ||| , books are an important instrument ||| 0.0571221 1 |||  ||| 1
+! Bücher sind ein wichtiges ||| , books are an important ||| 0.0571221 1 |||  ||| 1
+! Bücher sind ein ||| , books are an ||| 0.0571221 1 |||  ||| 1
+! Bücher sind ||| , books are ||| 0.0571221 1 |||  ||| 1
+! Bücher ||| , books ||| 0.0571221 1 |||  ||| 1
+! Cancún ist ebenso ein Misserfolg wie ||| , Cancún was a failure just like ||| 0.0571221 1 |||  ||| 1
+! Cancún ist ebenso ein Misserfolg ||| , Cancún was a failure ||| 0.0571221 1 |||  ||| 1
+! Cancún ist ebenso ein ||| , Cancún was a ||| 0.0571221 1 |||  ||| 1
+! Cancún ist ebenso ||| , Cancún was ||| 0.0571221 1 |||  ||| 1
+! Cancún ist ||| , Cancún was ||| 0.0571221 1 |||  ||| 1
+! Cancún ||| , Cancún ||| 0.0571221 1 |||  ||| 1
+! Chaos , wie es vom ||| ' to the chaos that the ||| 0.0142805 1 |||  ||| 4
+! Chaos , wie es vom ||| no ' to the chaos that the ||| 0.0142805 1 |||  ||| 4
+! Chaos , wie es vom ||| the chaos that the ||| 0.0142805 1 |||  ||| 4
+! Chaos , wie es vom ||| to the chaos that the ||| 0.0142805 1 |||  ||| 4
+! Chaos , wie es ||| ' no ' to the chaos that ||| 0.0114244 1 |||  ||| 5
+! Chaos , wie es ||| ' to the chaos that ||| 0.0114244 1 |||  ||| 5
+! Chaos , wie es ||| no ' to the chaos that ||| 0.0114244 1 |||  ||| 5
+! Chaos , wie es ||| the chaos that ||| 0.0114244 1 |||  ||| 5
+! Chaos , wie es ||| to the chaos that ||| 0.0114244 1 |||  ||| 5
+! Chaos ||| ' no ' to the chaos ||| 0.0114244 1 |||  ||| 5
+! Chaos ||| ' to the chaos ||| 0.0114244 1 |||  ||| 5
+! Chaos ||| no ' to the chaos ||| 0.0114244 1 |||  ||| 5
+! Chaos ||| the chaos ||| 0.0114244 1 |||  ||| 5
+! Chaos ||| to the chaos ||| 0.0114244 1 |||  ||| 5
+! Clearing und Abrechnung sind ein wesentliches ||| , clearing and settlement are an essential ||| 0.0571221 1 |||  ||| 1
+! Clearing und Abrechnung sind ein ||| , clearing and settlement are an ||| 0.0571221 1 |||  ||| 1
+! Clearing und Abrechnung sind ||| , clearing and settlement are ||| 0.0571221 1 |||  ||| 1
+! Clearing und Abrechnung ||| , clearing and settlement ||| 0.0571221 1 |||  ||| 1
+! Clearing und ||| , clearing and ||| 0.0571221 1 |||  ||| 1
+! Clearing ||| , clearing ||| 0.0571221 1 |||  ||| 1
+! Dank an Constanze ||| I am obliged to ||| 0.0571221 1 |||  ||| 1
+! Dank der Arbeit Ihres ||| , thanks to the work of your ||| 0.0571221 1 |||  ||| 1
+! Dank der Arbeit ||| , thanks to the work ||| 0.0571221 1 |||  ||| 1
+! Dank der ||| , thanks to the ||| 0.0571221 1 |||  ||| 1
+! Dank ||| , thanks to ||| 0.028561 1 |||  ||| 2
+! Dank ||| , thanks ||| 0.028561 1 |||  ||| 2
+! Dogan gehört zu den Köpfen ||| , Dogan is one of the heads ||| 0.0571221 1 |||  ||| 1
+! Dogan gehört zu den ||| , Dogan is one of the ||| 0.0571221 1 |||  ||| 1
+! Dogan gehört zu ||| , Dogan is one of ||| 0.028561 1 |||  ||| 2
+! Dogan gehört zu ||| , Dogan is one ||| 0.028561 1 |||  ||| 2
+! Dogan ||| , Dogan ||| 0.0571221 1 |||  ||| 1
+! Doris Pack hat ||| , Mrs Pack has ||| 0.0571221 1 |||  ||| 1
+! Doris Pack ||| , Mrs Pack ||| 0.0571221 1 |||  ||| 1
+! Doris ||| , Mrs ||| 0.0571221 1 |||  ||| 1
+! Echelon existiert ||| , ECHELON exists , as has already ||| 0.0114244 1 |||  ||| 5
+! Echelon existiert ||| , ECHELON exists , as has ||| 0.0114244 1 |||  ||| 5
+! Echelon existiert ||| , ECHELON exists , as ||| 0.0114244 1 |||  ||| 5
+! Echelon existiert ||| , ECHELON exists , ||| 0.0114244 1 |||  ||| 5
+! Echelon existiert ||| , ECHELON exists ||| 0.0114244 1 |||  ||| 5
+! Echelon ||| , ECHELON ||| 0.0571221 1 |||  ||| 1
+! Emissionsrechte sind keine ||| , emission allowances are not ||| 0.0571221 1 |||  ||| 1
+! Emissionsrechte sind ||| , emission allowances are ||| 0.0571221 1 |||  ||| 1
+! Emissionsrechte ||| , emission allowances ||| 0.0571221 1 |||  ||| 1
+! Energie stellt einen entscheidenden Faktor in ||| , energy is a crucial factor as ||| 0.0571221 1 |||  ||| 1
+! Energie stellt einen entscheidenden Faktor ||| , energy is a crucial factor ||| 0.0571221 1 |||  ||| 1
+! Energie stellt einen entscheidenden ||| , energy is a crucial ||| 0.0571221 1 |||  ||| 1
+! Energie stellt einen ||| , energy is a ||| 0.0571221 1 |||  ||| 1
+! Energie stellt ||| , energy is ||| 0.0571221 1 |||  ||| 1
+! Energie ||| , energy ||| 0.0571221 1 |||  ||| 1
+! Energieabhängigkeit ist das Thema Nummer eins ||| , energy dependence is priority number one ||| 0.0571221 1 |||  ||| 1
+! Energieabhängigkeit ist das Thema Nummer ||| , energy dependence is priority number ||| 0.0571221 1 |||  ||| 1
+! Energieabhängigkeit ist das ||| , energy dependence is ||| 0.0571221 1 |||  ||| 1
+! Energieabhängigkeit ist ||| , energy dependence is ||| 0.0571221 1 |||  ||| 1
+! Energieabhängigkeit ||| , energy dependence ||| 0.0571221 1 |||  ||| 1
+! Entschuldigung , ||| , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung , ||| of the tongue , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung , ||| the tongue , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung , ||| tongue , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung ||| , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung ||| of the tongue , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung ||| the tongue , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entschuldigung ||| tongue , and I apologise ||| 0.0142805 1 |||  ||| 4
+! Entwicklungszusammenarbeit und Handel sind ||| , development cooperation and trade are ||| 0.0571221 1 |||  ||| 1
+! Entwicklungszusammenarbeit und Handel ||| , development cooperation and trade ||| 0.0571221 1 |||  ||| 1
+! Entwicklungszusammenarbeit und ||| , development cooperation and ||| 0.0571221 1 |||  ||| 1
+! Entwicklungszusammenarbeit ||| , development cooperation ||| 0.0571221 1 |||  ||| 1
+! Erfahrungen sind nicht wirklichkeitsfremd ||| , there is nothing fanciful about experience ||| 0.0571221 1 |||  ||| 1
+! Erzeugnisse aus den besetzten Gebieten sind ||| , products from the Occupied Territories are ||| 0.0571221 1 |||  ||| 1
+! Erzeugnisse aus den besetzten Gebieten ||| , products from the Occupied Territories ||| 0.0571221 1 |||  ||| 1
+! Erzeugnisse aus den besetzten ||| , products from the Occupied ||| 0.0571221 1 |||  ||| 1
+! Erzeugnisse aus den ||| , products from the ||| 0.0571221 1 |||  ||| 1
+! Erzeugnisse aus ||| , products from ||| 0.0571221 1 |||  ||| 1
+! Erzeugnisse ||| , products ||| 0.0571221 1 |||  ||| 1
+! Europa befindet sich gegenwärtig in einer ||| , Europe is currently going through a ||| 0.0571221 1 |||  ||| 1
+! Europa befindet sich gegenwärtig in ||| , Europe is currently going through ||| 0.0571221 1 |||  ||| 1
+! Europa befindet sich gegenwärtig ||| , Europe is currently going ||| 0.028561 1 |||  ||| 2
+! Europa befindet sich gegenwärtig ||| , Europe is currently ||| 0.028561 1 |||  ||| 2
+! Europa befindet sich ||| , Europe is ||| 0.0571221 1 |||  ||| 1
+! Europa hat ||| , Europe has ||| 0.0571221 1 |||  ||| 1
+! Europa ist ein großes Ideal : ||| , Europe is a great ideal : ||| 0.0571221 1 |||  ||| 1
+! Europa ist ein großes Ideal ||| , Europe is a great ideal ||| 0.0571221 1 |||  ||| 1
+! Europa ist ein großes ||| , Europe is a great ||| 0.0571221 1 |||  ||| 1
+! Europa ist ein ||| , Europe is a ||| 0.0571221 1 |||  ||| 1
+! Europa ist ||| , Europe is ||| 0.0571221 1 |||  ||| 1
+! Europa muss ||| , Europe must ||| 0.0571221 1 |||  ||| 1
+! Europa und das Europäische Parlament ||| , Europe and the European Parliament ||| 0.0571221 1 |||  ||| 1
+! Europa und das Europäische ||| , Europe and the European ||| 0.0571221 1 |||  ||| 1
+! Europa und das ||| , Europe and the ||| 0.0571221 1 |||  ||| 1
+! Europa und ||| , Europe and ||| 0.0571221 1 |||  ||| 1
+! Europa unter Wasser , Europa im ||| , Europe under water , Europe under ||| 0.0571221 1 |||  ||| 1
+! Europa unter Wasser , Europa ||| , Europe under water , Europe ||| 0.0571221 1 |||  ||| 1
+! Europa unter Wasser , ||| , Europe under water , ||| 0.0571221 1 |||  ||| 1
+! Europa unter Wasser ||| , Europe under water ||| 0.0571221 1 |||  ||| 1
+! Europa unter ||| , Europe under ||| 0.0571221 1 |||  ||| 1
+! Europa verdient Besseres als dieses ||| , Europeans deserve more than the ||| 0.0571221 1 |||  ||| 1
+! Europa verdient Besseres als ||| , Europeans deserve more than ||| 0.0571221 1 |||  ||| 1
+! Europa verdient Besseres ||| , Europeans deserve more ||| 0.0571221 1 |||  ||| 1
+! Europa wurde gebeten ||| , Europe has been asked ||| 0.0571221 1 |||  ||| 1
+! Europa wurde ||| , Europe has been ||| 0.0571221 1 |||  ||| 1
+! Europa ||| , Europe ||| 0.875 1 |||  ||| 8
+! Europa ||| , Europeans ||| 0.00714026 1 |||  ||| 8
+! Europas Zukunft ist in hohem Maße ||| that Europe 's future is largely ||| 0.0571221 1 |||  ||| 1
+! Europas Zukunft ist in ||| that Europe 's future is ||| 0.0571221 1 |||  ||| 1
+! Europas Zukunft ist ||| that Europe 's future is ||| 0.0571221 1 |||  ||| 1
+! Europas Zukunft ||| that Europe 's future ||| 0.0571221 1 |||  ||| 1
+! Europas modernisierte Industriepolitik , ||| , Europe 's updated industrial policy , ||| 0.0571221 1 |||  ||| 1
+! Europas modernisierte Industriepolitik ||| , Europe 's updated industrial policy ||| 0.0571221 1 |||  ||| 1
+! Europas modernisierte ||| , Europe 's updated ||| 0.0571221 1 |||  ||| 1
+! Europas ||| , Europe 's ||| 0.028561 1 |||  ||| 2
+! Europas ||| that Europe 's ||| 0.028561 1 |||  ||| 2
+! Europäische Solidarität wird greifbar ||| , European solidarity is within our grasp ||| 0.0571221 1 |||  ||| 1
+! Europäische Solidarität wird ||| , European solidarity is ||| 0.0571221 1 |||  ||| 1
+! Europäische Solidarität ||| , European solidarity ||| 0.0571221 1 |||  ||| 1
+! Europäische ||| , European ||| 0.0571221 1 |||  ||| 1
+! Feinstaubemissionen ||| , particulate-matter emissions ||| 0.0142805 1 |||  ||| 4
+! Feinstaubemissionen ||| Commission , particulate-matter emissions ||| 0.0142805 1 |||  ||| 4
+! Feinstaubemissionen ||| of the Commission , particulate-matter emissions ||| 0.0142805 1 |||  ||| 4
+! Feinstaubemissionen ||| the Commission , particulate-matter emissions ||| 0.0142805 1 |||  ||| 4
+! Finnland hat ||| , Finland is ||| 0.0571221 1 |||  ||| 1
+! Finnland ||| , Finland ||| 0.38535 1 |||  ||| 2
+! Finnland übernimmt ||| , Finland is taking over ||| 0.0571221 1 |||  ||| 1
+! Francis Bacon hat gesagt : " ||| , Francis Bacon said that whoever ||| 0.028561 1 |||  ||| 2
+! Francis Bacon hat gesagt : " ||| , Francis Bacon said that ||| 0.028561 1 |||  ||| 2
+! Francis ||| , Francis ||| 0.0571221 1 |||  ||| 1
+! Frau Angelilli führte aus , daß ||| Representative , Mrs Angelilli commented that ||| 0.0571221 1 |||  ||| 1
+! Frau Angelilli führte aus ||| Representative , Mrs Angelilli commented ||| 0.0571221 1 |||  ||| 1
+! Frau Angelilli führte ||| Representative , Mrs Angelilli commented ||| 0.0571221 1 |||  ||| 1
+! Frau Doyle hat bei ||| , as Mrs Doyle has ||| 0.0571221 1 |||  ||| 1
+! Frau Ferrero-Waldner kann an ||| , Mrs Ferrero-Waldner is unable to ||| 0.0571221 1 |||  ||| 1
+! Frau Ferrero-Waldner kann ||| , Mrs Ferrero-Waldner is unable ||| 0.0571221 1 |||  ||| 1
+! Frau Ferrero-Waldner ||| , Mrs Ferrero-Waldner ||| 0.0571221 1 |||  ||| 1
+! Frau Flautre , ||| , Mrs Flautre ||| 0.0571221 1 |||  ||| 1
+! Frau Flautre ||| , Mrs Flautre ||| 0.0571221 1 |||  ||| 1
+! Frau Kommissarin , ||| ; Commissioner , ||| 0.0571221 1 |||  ||| 1
+! Frau Kommissarin Wallström hat am Ende ||| , Commissioner Wallström ended ||| 0.0571221 1 |||  ||| 1
+! Frau Kommissarin Wallström ||| , Commissioner Wallström ||| 0.0571221 1 |||  ||| 1
+! Frau Kommissarin ||| , Commissioner ||| 0.028561 1 |||  ||| 2
+! Frau Kommissarin ||| ; Commissioner ||| 0.028561 1 |||  ||| 2
+! Frau Martens hat ||| , Mrs Martens has ||| 0.0571221 1 |||  ||| 1
+! Frau Martens ||| , Mrs Martens ||| 0.0571221 1 |||  ||| 1
+! Frau Plooij-van Gorsel zeichnet ein ||| , Mrs Plooij-van Gorsel is painting a ||| 0.0571221 1 |||  ||| 1
+! Frau Plooij-van Gorsel zeichnet ||| , Mrs Plooij-van Gorsel is painting ||| 0.0571221 1 |||  ||| 1
+! Frau Plooij-van Gorsel ||| , Mrs Plooij-van Gorsel ||| 0.0571221 1 |||  ||| 1
+! Frau Plooij-van ||| , Mrs Plooij-van ||| 0.0571221 1 |||  ||| 1
+! Frau Torres Marques hat sehr ||| , Mrs Torres Marques has done an ||| 0.0571221 1 |||  ||| 1
+! Frau Torres Marques hat ||| , Mrs Torres Marques has done ||| 0.028561 1 |||  ||| 2
+! Frau Torres Marques hat ||| , Mrs Torres Marques has ||| 0.028561 1 |||  ||| 2
+! Frau Torres Marques ||| , Mrs Torres Marques ||| 0.0571221 1 |||  ||| 1
+! Frau Torres ||| , Mrs Torres ||| 0.0571221 1 |||  ||| 1
+! Frau in ' t Veld hat ||| , Mrs in ' t Veld is ||| 0.0571221 0.545017 |||  ||| 1
+! Frau in ' t Veld ||| , Mrs in ' t Veld ||| 0.0571221 0.545017 |||  ||| 1
+! Frau in ' t ||| , Mrs in ' t ||| 0.0571221 0.545017 |||  ||| 1
+! Frau in ' ||| , Mrs in ' ||| 0.0571221 0.545017 |||  ||| 1
+! Frau in ||| , Mrs in ||| 0.0571221 1 |||  ||| 1
+! Frau ||| , Mrs ||| 0.857143 1 |||  ||| 7
+! Frau ||| Representative , Mrs ||| 0.00816029 1 |||  ||| 7
+! Galileo könnte auch den Untertitel " ||| , Galileo could also be subtitled ' ||| 0.0571221 0.579445 |||  ||| 1
+! Galileo könnte auch den Untertitel ||| , Galileo could also be subtitled ||| 0.0571221 1 |||  ||| 1
+! Galileo könnte auch ||| , Galileo could also ||| 0.0571221 1 |||  ||| 1
+! Galileo könnte ||| , Galileo could ||| 0.0571221 1 |||  ||| 1
+! Galileo ||| , Galileo ||| 0.0571221 1 |||  ||| 1
+! General de Gaulle sagte ||| , General de Gaulle said ||| 0.0571221 1 |||  ||| 1
+! General de Gaulle sagte über Valéry ||| , General de Gaulle said of Valéry ||| 0.0571221 1 |||  ||| 1
+! General de Gaulle sagte über ||| , General de Gaulle said of ||| 0.0571221 1 |||  ||| 1
+! General de Gaulle ||| , General de Gaulle ||| 0.0571221 1 |||  ||| 1
+! General de ||| , General de ||| 0.0571221 1 |||  ||| 1
+! General ||| , General ||| 0.0571221 1 |||  ||| 1
+! Genozid ist auch , wenn ||| : it is also genocide to deprive ||| 0.0571221 1 |||  ||| 1
+! Genozid ist auch , ||| : it is also genocide to ||| 0.0571221 1 |||  ||| 1
+! Genozid ist auch ||| : it is also genocide ||| 0.0571221 1 |||  ||| 1
+! Gesundheit und Verbraucherschutz sind zwei ||| , health and consumer protection are two ||| 0.0571221 1 |||  ||| 1
+! Gesundheit und Verbraucherschutz sind ||| , health and consumer protection are ||| 0.0571221 1 |||  ||| 1
+! Gesundheit und Verbraucherschutz ||| , health and consumer protection ||| 0.0571221 1 |||  ||| 1
+! Gesundheit und ||| , health and ||| 0.0571221 1 |||  ||| 1
+! Gesundheit ||| , health ||| 0.0571221 1 |||  ||| 1
+! Gewissens- ||| , conscience ||| 0.0571221 1 |||  ||| 1
+! Gleichstellung von Frauen und Männern ist ||| , equality between women and men is ||| 0.0571221 1 |||  ||| 1
+! Gleichstellung von Frauen und Männern ||| , equality between women and men ||| 0.0571221 1 |||  ||| 1
+! Gleichstellung von Frauen und ||| , equality between women and ||| 0.0571221 1 |||  ||| 1
+! Gleichstellung von Frauen ||| , equality between women ||| 0.0571221 1 |||  ||| 1
+! Gleichstellung von ||| , equality between ||| 0.0571221 1 |||  ||| 1
+! Griechenland hat ||| , Greece was not ||| 0.028561 1 |||  ||| 2
+! Griechenland hat ||| , Greece was ||| 0.028561 1 |||  ||| 2
+! Griechenland ||| , Greece ||| 0.0571221 1 |||  ||| 1
+! Heizen und Kühlen machen 49 ||| , heating and cooling accounts for 49 ||| 0.0571221 1 |||  ||| 1
+! Heizen und Kühlen machen ||| , heating and cooling accounts for ||| 0.0571221 1 |||  ||| 1
+! Heizen und ||| , heating and ||| 0.0571221 1 |||  ||| 1
+! Heizen ||| , heating ||| 0.0571221 1 |||  ||| 1
+! Herr Blair , Sie haben erklärt ||| , you have , Mr Blair ||| 0.0571221 1 |||  ||| 1
+! Herr Bösch , ich ||| , Mr Bösch , I ||| 0.0571221 1 |||  ||| 1
+! Herr Bösch , ||| , Mr Bösch , ||| 0.0571221 1 |||  ||| 1
+! Herr Bösch ||| , Mr Bösch ||| 0.0571221 1 |||  ||| 1
+! Herr Friedrich , eine Staatsbürgerschaft ist ||| , Mr Friedrich , citizenship must ||| 0.0571221 1 |||  ||| 1
+! Herr Friedrich , eine Staatsbürgerschaft ||| , Mr Friedrich , citizenship ||| 0.0571221 1 |||  ||| 1
+! Herr Friedrich , eine ||| , Mr Friedrich , ||| 0.0571221 1 |||  ||| 1
+! Herr Friedrich , ||| , Mr Friedrich , ||| 0.0571221 1 |||  ||| 1
+! Herr Friedrich ||| , Mr Friedrich ||| 0.0571221 1 |||  ||| 1
+! Herr Galeote Quecedo unterstreicht in ||| , Mr Galeote Quecedo emphasises , in ||| 0.0571221 1 |||  ||| 1
+! Herr Galeote Quecedo unterstreicht ||| , Mr Galeote Quecedo emphasises , ||| 0.028561 1 |||  ||| 2
+! Herr Galeote Quecedo unterstreicht ||| , Mr Galeote Quecedo emphasises ||| 0.028561 1 |||  ||| 2
+! Herr Galeote Quecedo ||| , Mr Galeote Quecedo ||| 0.0571221 1 |||  ||| 1
+! Herr Galeote ||| , Mr Galeote ||| 0.0571221 1 |||  ||| 1
+! Herr Jarzembowski , ich danke Ihnen ||| , Mr Jarzembowski , thank you ||| 0.0571221 1 |||  ||| 1
+! Herr Jarzembowski , ich danke ||| , Mr Jarzembowski , thank ||| 0.0571221 1 |||  ||| 1
+! Herr Jarzembowski , ||| , Mr Jarzembowski , ||| 0.0571221 1 |||  ||| 1
+! Herr Jarzembowski ||| , Mr Jarzembowski ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissar ! ||| . ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissar , welche Bereiche ||| , Commissioner , which sectors ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissar , welche ||| , Commissioner , which ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissar , ||| , Commissioner , ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissar Frattini ||| , Commissioner Fratini ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissar ||| , Commissioner ||| 0.38535 1 |||  ||| 2
+! Herr Kommissionspräsident , ||| ) Mr President , ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissionspräsident Romano Prodi erhielt ||| , President Prodi was ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissionspräsident Romano Prodi ||| , President Prodi ||| 0.0571221 1 |||  ||| 1
+! Herr Kommissionspräsident ||| ) Mr President ||| 0.0142805 1 |||  ||| 4
+! Herr Kommissionspräsident ||| , Mr President of the Commission , ||| 0.0142805 1 |||  ||| 4
+! Herr Kommissionspräsident ||| , Mr President of the Commission ||| 0.0142805 1 |||  ||| 4
+! Herr Kommissionspräsident ||| , President ||| 0.0142805 1 |||  ||| 4
+! Herr Kreissl-Dörfler ging ||| , Mr Kreissl-Dörfler went ||| 0.0571221 1 |||  ||| 1
+! Herr Kreissl-Dörfler ||| , Mr Kreissl-Dörfler ||| 0.0571221 1 |||  ||| 1
+! Herr Lannoye hat soeben gesagt ||| , Mr Lannoye stated a moment ago ||| 0.0571221 1 |||  ||| 1
+! Herr Lannoye ||| , Mr Lannoye ||| 0.0571221 1 |||  ||| 1
+! Herr Morris verdient sicher eine Antwort ||| , Mr Morris certainly deserves an answer ||| 0.0571221 1 |||  ||| 1
+! Herr Morris verdient sicher eine ||| , Mr Morris certainly deserves an ||| 0.0571221 1 |||  ||| 1
+! Herr Morris verdient sicher ||| , Mr Morris certainly deserves ||| 0.0571221 1 |||  ||| 1
+! Herr Morris ||| , Mr Morris ||| 0.0571221 1 |||  ||| 1
+! Herr Nisticò hat ||| , the report Mr Nisticò has ||| 0.0571221 1 |||  ||| 1
+! Herr Nisticò ||| , the report Mr Nisticò ||| 0.0571221 1 |||  ||| 1
+! Herr Palko ist ein führender Vertreter ||| , Mr Palko is a senior representative ||| 0.0571221 1 |||  ||| 1
+! Herr Palko ist ein führender ||| , Mr Palko is a senior ||| 0.0571221 1 |||  ||| 1
+! Herr Palko ist ein ||| , Mr Palko is a ||| 0.0571221 1 |||  ||| 1
+! Herr Palko ist ||| , Mr Palko is ||| 0.0571221 1 |||  ||| 1
+! Herr Palko ||| , Mr Palko ||| 0.0571221 1 |||  ||| 1
+! Herr Peter hat ||| , Mr Peter has ||| 0.0571221 1 |||  ||| 1
+! Herr Peter ||| , Mr Peter ||| 0.0571221 1 |||  ||| 1
+! Herr Piecyk , zunächst mein ||| , Mr Piecyk , I should first ||| 0.0571221 1 |||  ||| 1
+! Herr Piecyk , ||| , Mr Piecyk , ||| 0.0571221 1 |||  ||| 1
+! Herr Piecyk ||| , Mr Piecyk ||| 0.0571221 1 |||  ||| 1
+! Herr Pohjamo hat in seinen Entschließungsantrag ||| , Mr Pohjamo ' s resolution included ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo hat in seinen Entschließungsantrag ||| , Mr Pohjamo ' s resolution ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo hat in seinen ||| , Mr Pohjamo ' s ||| 0.0571221 1 |||  ||| 1
+! Herr Pohjamo hat in ||| , Mr Pohjamo ' ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo hat in ||| , Mr Pohjamo ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo hat ||| , Mr Pohjamo ' ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo hat ||| , Mr Pohjamo ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo ||| , Mr Pohjamo ' ||| 0.028561 1 |||  ||| 2
+! Herr Pohjamo ||| , Mr Pohjamo ||| 0.028561 1 |||  ||| 2
+! Herr Poignant weist ||| , as Mr Poignant points out ||| 0.0571221 1 |||  ||| 1
+! Herr Poignant ||| , as Mr Poignant ||| 0.0571221 1 |||  ||| 1
+! Herr Professor Prodi , Sie stellen ||| , Professor Prodi , you are ||| 0.0571221 1 |||  ||| 1
+! Herr Professor Prodi , Sie ||| , Professor Prodi , you ||| 0.0571221 1 |||  ||| 1
+! Herr Professor Prodi , ||| , Professor Prodi , ||| 0.0571221 1 |||  ||| 1
+! Herr Professor Prodi ||| , Professor Prodi ||| 0.0571221 1 |||  ||| 1
+! Herr Professor ||| , Professor ||| 0.0571221 1 |||  ||| 1
+! Herr Präsident , leider hat der ||| ) Mr President , unfortunately , the ||| 0.0571221 1 |||  ||| 1
+! Herr Präsident , leider hat ||| ) Mr President , unfortunately , ||| 0.0571221 1 |||  ||| 1
+! Herr Präsident , leider ||| ) Mr President , unfortunately ||| 0.0571221 1 |||  ||| 1
+! Herr Präsident , ||| ) Mr President , ||| 0.0571221 1 |||  ||| 1
+! Herr Präsident ||| ) Mr President ||| 0.028561 1 |||  ||| 2
+! Herr Präsident ||| , Dear Mr. Chairman ||| 0.028561 1 |||  ||| 2
+! Herr Ratspräsident ||| , Mr President ||| 0.0571221 1 |||  ||| 1
+! Herr Schmid , ich danke Ihnen ||| , Mr Schmid , thank you ||| 0.0571221 1 |||  ||| 1
+! Herr Schmid , ich danke ||| , Mr Schmid , thank ||| 0.0571221 1 |||  ||| 1
+! Herr Schmid , ||| , Mr Schmid , ||| 0.0571221 1 |||  ||| 1
+! Herr Schmid ||| , Mr Schmid ||| 0.0571221 1 |||  ||| 1
+! Herr Schnellhardt hat ||| , Mr Schnellhardt has ||| 0.0571221 1 |||  ||| 1
+! Herr Schnellhardt ||| , Mr Schnellhardt ||| 0.0571221 1 |||  ||| 1
+! Herr Schwab ||| , Mr Schwab 's ||| 0.028561 1 |||  ||| 2
+! Herr Schwab ||| , Mr Schwab ||| 0.028561 1 |||  ||| 2
+! Herr Swoboda gelangt in seinem Bericht ||| , Mr Swoboda 's report ||| 0.0571221 1 |||  ||| 1
+! Herr Swoboda gelangt in seinem ||| , Mr Swoboda 's ||| 0.0571221 1 |||  ||| 1
+! Herr Swoboda gelangt ||| , Mr Swoboda ||| 0.0571221 1 |||  ||| 1
+! Herr Trakatellis und Frau Scheele haben ||| , Mr Trakatellis and Mrs Scheele have ||| 0.0571221 1 |||  ||| 1
+! Herr Trakatellis und Frau Scheele ||| , Mr Trakatellis and Mrs Scheele ||| 0.0571221 1 |||  ||| 1
+! Herr Trakatellis und Frau ||| , Mr Trakatellis and Mrs ||| 0.0571221 1 |||  ||| 1
+! Herr Trakatellis und ||| , Mr Trakatellis and ||| 0.0571221 1 |||  ||| 1
+! Herr Trakatellis ||| , Mr Trakatellis ||| 0.0571221 1 |||  ||| 1
+! Herr Verheugen , Sie ||| , Mr Verheugen , you ||| 0.0571221 1 |||  ||| 1
+! Herr Verheugen , ||| , Mr Verheugen , ||| 0.0571221 1 |||  ||| 1
+! Herr Verheugen ||| , Mr Verheugen ||| 0.0571221 1 |||  ||| 1
+! Herr Whitehead hat ||| , Mr Whitehead has ||| 0.0571221 1 |||  ||| 1
+! Herr Whitehead ||| , Mr Whitehead ||| 0.0571221 1 |||  ||| 1
+! Herr ||| ) Mr ||| 0.0285445 1 |||  ||| 27
+! Herr ||| , Dear Mr. ||| 0.00211563 1 |||  ||| 27
+! Herr ||| , Mr ||| 0.777778 1 |||  ||| 27
+! Herr ||| , as Mr ||| 0.00211563 1 |||  ||| 27
+! Herr ||| , the report Mr ||| 0.00211563 1 |||  ||| 27
+! Herr ||| , ||| 0.00211563 1 |||  ||| 27
+! Herrn Berlatos Bericht befasst sich mit ||| , Mr Berlato 's report deals with ||| 0.0571221 1 |||  ||| 1
+! Herrn Berlatos Bericht befasst sich ||| , Mr Berlato 's report deals ||| 0.0571221 1 |||  ||| 1
+! Herrn Berlatos Bericht ||| , Mr Berlato 's report ||| 0.0571221 1 |||  ||| 1
+! Herrn Berlatos ||| , Mr Berlato 's ||| 0.0571221 1 |||  ||| 1
+! Herrn ||| , Mr ||| 0.0571221 1 |||  ||| 1
+! Härte auf der einen Seite , ||| ; rigour on the one hand , ||| 0.0571221 1 |||  ||| 1
+! Härte auf der einen Seite ||| ; rigour on the one hand ||| 0.0571221 1 |||  ||| 1
+! Härte auf der einen ||| ; rigour on the one ||| 0.0571221 1 |||  ||| 1
+! Härte auf der ||| ; rigour on the ||| 0.0571221 1 |||  ||| 1
+! Härte auf ||| ; rigour on ||| 0.0571221 1 |||  ||| 1
+! Härte ||| ; rigour ||| 0.0571221 1 |||  ||| 1
+! Ihnen allen ist die Sachlage bekannt ||| , you all know the position ||| 0.0571221 1 |||  ||| 1
+! Ihnen allen ist ||| , you all ||| 0.0571221 1 |||  ||| 1
+! Ihnen allen ||| , you all ||| 0.0571221 1 |||  ||| 1
+! Ihnen dürfte bekannt sein , dass ||| , as you will know , ||| 0.0571221 1 |||  ||| 1
+! Ihnen dürfte bekannt sein , ||| , as you will know , ||| 0.0571221 1 |||  ||| 1
+! Ihnen dürfte bekannt sein ||| , as you will know ||| 0.0571221 1 |||  ||| 1
+! Ihnen dürfte bekannt ||| , as you will know ||| 0.0571221 1 |||  ||| 1
+! Ihnen dürfte ||| , as you will ||| 0.0571221 1 |||  ||| 1
+! Ihnen gilt meine Solidarität . ||| and express my solidarity with them . ||| 0.0571221 1 |||  ||| 1
+! Ihnen gilt meine Solidarität ||| and express my solidarity with them ||| 0.0190407 1 |||  ||| 3
+! Ihnen gilt meine Solidarität ||| and express my solidarity with ||| 0.0190407 1 |||  ||| 3
+! Ihnen gilt meine Solidarität ||| and express my solidarity ||| 0.0190407 1 |||  ||| 3
+! Ihnen gilt meine ||| and express my ||| 0.0571221 1 |||  ||| 1
+! Ihnen gilt ||| and express ||| 0.0571221 1 |||  ||| 1
+! Ihnen ist durchaus bewusst , dass ||| , you are well aware that ||| 0.0571221 1 |||  ||| 1
+! Ihnen ist durchaus bewusst ||| , you are well aware ||| 0.0571221 1 |||  ||| 1
+! Ihnen ist durchaus ||| , you are well ||| 0.0571221 1 |||  ||| 1
+! Ihnen ist ||| , you are ||| 0.0571221 1 |||  ||| 1
+! Ihnen werden ||| , you will ||| 0.0571221 1 |||  ||| 1
+! Ihnen ||| , as you ||| 0.0142805 1 |||  ||| 4
+! Ihnen ||| , you ||| 0.504132 1 |||  ||| 4
+! Information und Wissen bilden die Grundlage ||| , knowledge and know-how are the basis ||| 0.0571221 1 |||  ||| 1
+! Information und Wissen bilden die ||| , knowledge and know-how are the ||| 0.0571221 1 |||  ||| 1
+! Information und Wissen bilden ||| , knowledge and know-how are ||| 0.0571221 1 |||  ||| 1
+! Information und Wissen ||| , knowledge and know-how ||| 0.0571221 1 |||  ||| 1
+! Information und ||| , knowledge and ||| 0.0571221 1 |||  ||| 1
+! Information ||| , knowledge ||| 0.0571221 1 |||  ||| 1
+! Israel hat die militärische Macht und ||| Israel has the military power and ||| 0.0571221 1 |||  ||| 1
+! Israel hat die militärische Macht ||| Israel has the military power ||| 0.0571221 1 |||  ||| 1
+! Israel hat die militärische ||| Israel has the military ||| 0.0571221 1 |||  ||| 1
+! Israel hat die ||| Israel has the ||| 0.0571221 1 |||  ||| 1
+! Israel hat ||| Israel has ||| 0.0571221 1 |||  ||| 1
+! Israel ||| Israel ||| 0.0571221 1 |||  ||| 1
+! Jacques Barrot gehört ja ||| although Mr Barrot belongs ||| 0.0571221 1 |||  ||| 1
+! Jacques Barrot ||| although Mr Barrot ||| 0.0571221 1 |||  ||| 1
+! Joaquim Miranda , vielen Dank ||| , thank you , Mr Miranda , ||| 0.0571221 1 |||  ||| 1
+! Kleinunternehmen gehören zu ||| , small enterprises ||| 0.0571221 1 |||  ||| 1
+! Kleinunternehmen gehören ||| , small enterprises ||| 0.0571221 1 |||  ||| 1
+! Kollege Davies sprach von ||| , Mr Davies has been talking about ||| 0.0571221 1 |||  ||| 1
+! Kollege Davies sprach ||| , Mr Davies has been talking ||| 0.0571221 1 |||  ||| 1
+! Kollege Davies ||| , Mr Davies ||| 0.0571221 1 |||  ||| 1
+! Kollege Sarlis , ||| , Mr Sarlis , ||| 0.0571221 1 |||  ||| 1
+! Kollege Sarlis ||| , Mr Sarlis ||| 0.0571221 1 |||  ||| 1
+! Kollege ||| , Mr ||| 0.38535 1 |||  ||| 2
+! Kommissar Barroso befand sich kürzlich zu ||| , Commissioner Barroso was on a ||| 0.0571221 1 |||  ||| 1
+! Kommissar Barroso befand sich ||| , Commissioner Barroso was ||| 0.0571221 1 |||  ||| 1
+! Kommissar Barroso befand ||| , Commissioner Barroso was ||| 0.0571221 1 |||  ||| 1
+! Kommissar Barroso ||| , Commissioner Barroso ||| 0.0571221 1 |||  ||| 1
+! Kommissar Mandelson ||| , Commissioner Mandelson ||| 0.0571221 1 |||  ||| 1
+! Kommissar Patten hat ||| , Commissioner Patten has ||| 0.0571221 1 |||  ||| 1
+! Kommissar Patten meinte , wir sollten ||| , Commissioner Patten said that we should ||| 0.0571221 1 |||  ||| 1
+! Kommissar Patten meinte , wir ||| , Commissioner Patten said that we ||| 0.0571221 1 |||  ||| 1
+! Kommissar Patten meinte , ||| , Commissioner Patten said that ||| 0.0571221 1 |||  ||| 1
+! Kommissar Patten meinte ||| , Commissioner Patten said ||| 0.0571221 1 |||  ||| 1
+! Kommissar Patten ||| , Commissioner Patten ||| 0.38535 1 |||  ||| 2
+! Kommissar Verheugen hat soeben ||| , Commissioner Verheugen has just ||| 0.0571221 1 |||  ||| 1
+! Kommissar Verheugen hat ||| , Commissioner Verheugen has ||| 0.0571221 1 |||  ||| 1
+! Kommissar Verheugen ||| , Commissioner Verheugen ||| 0.0571221 1 |||  ||| 1
+! Kommissar ||| , Commissioner ||| 1 1 |||  ||| 5
+! Kommissarin Ferrero-Waldner hatte Recht , als ||| , Commissioner Ferrero-Waldner was right at the ||| 0.0571221 1 |||  ||| 1
+! Kommissarin Ferrero-Waldner hatte Recht , ||| , Commissioner Ferrero-Waldner was right at ||| 0.028561 1 |||  ||| 2
+! Kommissarin Ferrero-Waldner hatte Recht , ||| , Commissioner Ferrero-Waldner was right ||| 0.028561 1 |||  ||| 2
+! Kommissarin Ferrero-Waldner hatte Recht ||| , Commissioner Ferrero-Waldner was right at ||| 0.028561 1 |||  ||| 2
+! Kommissarin Ferrero-Waldner hatte Recht ||| , Commissioner Ferrero-Waldner was right ||| 0.028561 1 |||  ||| 2
+! Kommissarin Ferrero-Waldner hatte ||| , Commissioner Ferrero-Waldner was ||| 0.0571221 1 |||  ||| 1
+! Kommissarin Ferrero-Waldner ||| , Commissioner Ferrero-Waldner ||| 0.0571221 1 |||  ||| 1
+! Kommissarin ||| , Commissioner ||| 0.0571221 1 |||  ||| 1
+! Kommissionspräsident Prodi hat heute vormittag unter ||| , this morning President Prodi , among ||| 0.0571221 1 |||  ||| 1
+! Kommissionspräsident Prodi hat heute vormittag ||| , this morning President Prodi , ||| 0.0571221 1 |||  ||| 1
+! Kommissionspräsident Prodi hatte ||| , President of the Commission Prodi was ||| 0.0571221 1 |||  ||| 1
+! Kommissionspräsident Prodi ||| , President of the Commission Prodi ||| 0.0571221 1 |||  ||| 1
+! Kommissionspräsident ||| , President of the Commission ||| 0.0571221 1 |||  ||| 1
+! Kyoto ist nicht mehr ||| , this is no longer ||| 0.0571221 1 |||  ||| 1
+! Kyoto ist nicht ||| , this is no ||| 0.0571221 1 |||  ||| 1
+! Kyoto ist ||| , this is ||| 0.0571221 1 |||  ||| 1
+! Kyoto ||| , this ||| 0.0571221 1 |||  ||| 1
+! LIFE + ||| , the intention is that LIFE + ||| 0.0571221 1 |||  ||| 1
+! LIFE ||| , the intention is that LIFE ||| 0.0571221 1 |||  ||| 1
+! Leidenschaft und ||| ' passion and ||| 0.0571221 0.000288 |||  ||| 1
+! Leidenschaft und Überzeugung haben unseren ||| ' passion and conviction have ||| 0.0571221 0.000288 |||  ||| 1
+! Leidenschaft und Überzeugung haben ||| ' passion and conviction have ||| 0.0571221 0.000288 |||  ||| 1
+! Leidenschaft und Überzeugung ||| ' passion and conviction ||| 0.0571221 0.000288 |||  ||| 1
+! Leidenschaft ||| ' passion ||| 0.0571221 0.000288 |||  ||| 1
+! Mahmoud ||| , so far President Mahmoud ||| 0.0571221 1 |||  ||| 1
+! Mal sehen , was Sie ||| , let us see what you ||| 0.0571221 1 |||  ||| 1
+! Mal sehen , was ||| , let us see what ||| 0.0571221 1 |||  ||| 1
+! Mal sehen , ||| , let us see ||| 0.0571221 1 |||  ||| 1
+! Malaria und Tuberkulose sind heilbar ||| ! malaria and tuberculosis can be cured ||| 0.0571221 0.0775352 |||  ||| 1
+! Malaria und Tuberkulose sind ||| ! malaria and tuberculosis can ||| 0.0571221 0.0775352 |||  ||| 1
+! Malaria und Tuberkulose ||| ! malaria and tuberculosis ||| 0.0571221 0.0775352 |||  ||| 1
+! Malaria und ||| ! malaria and ||| 0.0571221 0.0775352 |||  ||| 1
+! Malaria ||| ! malaria ||| 0.0571221 0.0775352 |||  ||| 1
+! Menschenhandel , wie wir ||| , human trafficking , as we ||| 0.0571221 1 |||  ||| 1
+! Menschenhandel , wie ||| , human trafficking , as ||| 0.0571221 1 |||  ||| 1
+! Menschenhandel , ||| , human trafficking , ||| 0.0571221 1 |||  ||| 1
+! Menschenhandel ist ||| , trafficking in human beings is ||| 0.0571221 1 |||  ||| 1
+! Menschenhandel ||| , human trafficking ||| 0.028561 1 |||  ||| 2
+! Menschenhandel ||| , trafficking in human beings ||| 0.028561 1 |||  ||| 2
+! Minister Sasi hat soeben ||| , Mr Sasi has just ||| 0.0571221 1 |||  ||| 1
+! Minister Sasi hat ||| , Mr Sasi has ||| 0.0571221 1 |||  ||| 1
+! Minister Sasi ||| , Mr Sasi ||| 0.0571221 1 |||  ||| 1
+! Minister ||| , Mr ||| 0.0571221 1 |||  ||| 1
+! Ministerpräsident Meciar spielt mit dem Feuer ||| , President Meciar is playing with fire ||| 0.0571221 1 |||  ||| 1
+! Ministerpräsident Meciar spielt mit ||| , President Meciar is playing with ||| 0.0571221 1 |||  ||| 1
+! Ministerpräsident Meciar spielt ||| , President Meciar is playing ||| 0.0571221 1 |||  ||| 1
+! Ministerpräsident Meciar ||| , President Meciar ||| 0.0571221 1 |||  ||| 1
+! Ministerpräsident ||| , President ||| 0.0571221 1 |||  ||| 1
+! Mobiltelefon und Internet ||| , the mobile telephone and the Internet ||| 0.0571221 1 |||  ||| 1
+! Mobiltelefon und ||| , the mobile telephone and the ||| 0.028561 1 |||  ||| 2
+! Mobiltelefon und ||| , the mobile telephone and ||| 0.028561 1 |||  ||| 2
+! Mobiltelefon ||| , the mobile telephone ||| 0.0571221 1 |||  ||| 1
+! Mosambik ist ein junger afrikanischer Staat ||| , Mozambique is a young African country ||| 0.0571221 1 |||  ||| 1
+! Mosambik ist ein junger afrikanischer ||| , Mozambique is a young African ||| 0.0571221 1 |||  ||| 1
+! Mosambik ist ein junger ||| , Mozambique is a young ||| 0.0571221 1 |||  ||| 1
+! Mosambik ist ein ||| , Mozambique is a ||| 0.0571221 1 |||  ||| 1
+! Mosambik ist ||| , Mozambique is ||| 0.0571221 1 |||  ||| 1
+! Mosambik ||| , Mozambique ||| 0.0571221 1 |||  ||| 1
+! Multiple Sklerose sollte - und muss ||| , multiple sclerosis should - and must ||| 0.0571221 1 |||  ||| 1
+! Multiple Sklerose sollte - und ||| , multiple sclerosis should - and ||| 0.0571221 1 |||  ||| 1
+! Multiple Sklerose sollte - ||| , multiple sclerosis should - ||| 0.0571221 1 |||  ||| 1
+! Multiple Sklerose sollte ||| , multiple sclerosis should ||| 0.0571221 1 |||  ||| 1
+! Multiple Sklerose ||| , multiple sclerosis ||| 0.0571221 1 |||  ||| 1
+! Multiple ||| , multiple ||| 0.0571221 1 |||  ||| 1
+! Nachahmungen und Produktpiraterie sind eben gerade ||| : counterfeiting and product piracy certainly are ||| 0.0571221 1 |||  ||| 1
+! Nachahmungen und ||| : counterfeiting and ||| 0.0571221 1 |||  ||| 1
+! Nachahmungen ||| : counterfeiting ||| 0.0571221 1 |||  ||| 1
+! Natura 2000 ist eine der ||| , Natura 2000 is one of the ||| 0.0571221 1 |||  ||| 1
+! Natura 2000 ist eine ||| , Natura 2000 is one ||| 0.0571221 1 |||  ||| 1
+! Natura 2000 ist ||| , Natura 2000 is ||| 0.0571221 1 |||  ||| 1
+! Natura 2000 ||| , Natura 2000 ||| 0.0571221 1 |||  ||| 1
+! Natura ||| , Natura ||| 0.0571221 1 |||  ||| 1
+! Nein , das ||| but no , it is ||| 0.028561 1 |||  ||| 2
+! Nein , das ||| but no , it ||| 0.028561 1 |||  ||| 2
+! Nein , wir wollen keine ||| ; no , we do not want ||| 0.0571221 1 |||  ||| 1
+! Nein , wir ||| ; no , we ||| 0.0571221 1 |||  ||| 1
+! Nein , ||| ; no , ||| 0.028561 1 |||  ||| 2
+! Nein , ||| but no , ||| 0.028561 1 |||  ||| 2
+! Nein ||| ; no ||| 0.028561 1 |||  ||| 2
+! Nein ||| but no ||| 0.028561 1 |||  ||| 2
+! Nepal verdient mehr als eine ||| , Nepal deserves more than ||| 0.0571221 1 |||  ||| 1
+! Nepal verdient mehr als ||| , Nepal deserves more than ||| 0.0571221 1 |||  ||| 1
+! Nepal verdient mehr ||| , Nepal deserves more ||| 0.0571221 1 |||  ||| 1
+! Nepal verdient ||| , Nepal deserves ||| 0.0571221 1 |||  ||| 1
+! Nepal ||| , Nepal ||| 0.0571221 1 |||  ||| 1
+! Olivenöl ist eines der ||| , olive oil is one of the ||| 0.0571221 1 |||  ||| 1
+! Olivenöl ist eines ||| , olive oil is one of ||| 0.0571221 1 |||  ||| 1
+! Olivenöl ist ||| , olive oil is ||| 0.0571221 1 |||  ||| 1
+! Olivenöl ||| , olive oil ||| 0.0571221 1 |||  ||| 1
+! Organtransplantationen retten tatsächlich ||| , organ transplants do indeed save ||| 0.0571221 1 |||  ||| 1
+! Organtransplantationen ||| , organ transplants ||| 0.0571221 1 |||  ||| 1
+! Ortega y Gasset sagte , daß ||| Ortega y Gasset said that ||| 0.0571221 1 |||  ||| 1
+! Ortega y Gasset sagte ||| Ortega y Gasset said ||| 0.0571221 1 |||  ||| 1
+! Ortega y Gasset ||| Ortega y Gasset ||| 0.0571221 1 |||  ||| 1
+! Ortega y ||| Ortega y ||| 0.0571221 1 |||  ||| 1
+! Ortega ||| Ortega ||| 0.0571221 1 |||  ||| 1
+! Parlament , Rat und ||| , Parliament , the Council and ||| 0.0571221 1 |||  ||| 1
+! Parlament , Rat ||| , Parliament , the Council ||| 0.0571221 1 |||  ||| 1
+! Parlament , ||| , Parliament , the ||| 0.0190407 1 |||  ||| 3
+! Parlament , ||| , Parliament , ||| 0.0190407 1 |||  ||| 3
+! Parlament , ||| , this House , ||| 0.0190407 1 |||  ||| 3
+! Parlament ||| , Parliament ||| 0.028561 1 |||  ||| 2
+! Parlament ||| , this House ||| 0.028561 1 |||  ||| 2
+! Pascal Lamy und ich ||| , Mr Lamy and I ||| 0.0571221 1 |||  ||| 1
+! Pascal Lamy und ||| , Mr Lamy and ||| 0.0571221 1 |||  ||| 1
+! Pascal Lamy ||| , Mr Lamy ||| 0.0571221 1 |||  ||| 1
+! Patente ||| , ||| 0.0571221 1 |||  ||| 1
+! Paul Rübig hat gesagt , ||| , as Mr Rübig said , ||| 0.0571221 1 |||  ||| 1
+! Paul Rübig hat gesagt ||| , as Mr Rübig said ||| 0.0571221 1 |||  ||| 1
+! Paul Rübig ||| , as Mr Rübig ||| 0.0571221 1 |||  ||| 1
+! Paul ||| , as Mr ||| 0.0571221 1 |||  ||| 1
+! Postdienste sind ||| , postal services are ||| 0.0571221 1 |||  ||| 1
+! Postdienste ||| , postal services ||| 0.0571221 1 |||  ||| 1
+! Professor Ukshin Hoti ist eine von ||| , Professor Ukshin Hoti is one of ||| 0.0571221 1 |||  ||| 1
+! Professor Ukshin Hoti ist eine ||| , Professor Ukshin Hoti is one ||| 0.0571221 1 |||  ||| 1
+! Professor Ukshin Hoti ist ||| , Professor Ukshin Hoti is ||| 0.0571221 1 |||  ||| 1
+! Professor Ukshin Hoti ||| , Professor Ukshin Hoti ||| 0.0571221 1 |||  ||| 1
+! Professor Ukshin ||| , Professor Ukshin ||| 0.0571221 1 |||  ||| 1
+! Professor ||| , Professor ||| 0.0571221 1 |||  ||| 1
+! Präsident Barroso spricht immer von einem ||| , President Barroso always speaks of a ||| 0.0571221 1 |||  ||| 1
+! Präsident Barroso spricht immer von ||| , President Barroso always speaks of ||| 0.0571221 1 |||  ||| 1
+! Präsident Barroso spricht immer ||| , President Barroso always speaks ||| 0.0571221 1 |||  ||| 1
+! Präsident Barroso ||| , President Barroso ||| 0.0571221 1 |||  ||| 1
+! Präsident Chirac hat sich ||| , President Chirac says he would ||| 0.0571221 1 |||  ||| 1
+! Präsident Chirac hat ||| , President Chirac says he ||| 0.0571221 1 |||  ||| 1
+! Präsident ||| , President ||| 0.38535 1 |||  ||| 2
+! Rassismus und Fremdenfeindlichkeit haben selbst ||| , racism and xenophobia have even ||| 0.0571221 1 |||  ||| 1
+! Rassismus und Fremdenfeindlichkeit haben ||| , racism and xenophobia have ||| 0.0571221 1 |||  ||| 1
+! Rassismus und Fremdenfeindlichkeit ||| , racism and xenophobia ||| 0.0571221 1 |||  ||| 1
+! Rassismus und ||| , racism and ||| 0.0571221 1 |||  ||| 1
+! Rassismus ||| , racism ||| 0.0571221 1 |||  ||| 1
+! Rat und Kommission sollten ||| the Council and the Commission should ||| 0.0571221 1 |||  ||| 1
+! Rat und Kommission ||| the Council and the Commission ||| 0.0571221 1 |||  ||| 1
+! Rat und ||| the Council and the ||| 0.028561 1 |||  ||| 2
+! Rat und ||| the Council and ||| 0.028561 1 |||  ||| 2
+! Rat ||| the Council ||| 0.0571221 1 |||  ||| 1
+! Rauchen ist schädlich - sowohl für ||| , smoking is dangerous both for ||| 0.0571221 1 |||  ||| 1
+! Rauchen ist schädlich - sowohl ||| , smoking is dangerous both ||| 0.0571221 1 |||  ||| 1
+! Rauchen ist schädlich - ||| , smoking is dangerous ||| 0.0571221 1 |||  ||| 1
+! Rauchen ist schädlich ||| , smoking is dangerous ||| 0.0571221 1 |||  ||| 1
+! Rauchen ist ||| , smoking is ||| 0.0571221 1 |||  ||| 1
+! Rauchen ||| , smoking ||| 0.0571221 1 |||  ||| 1
+! Rentenpolitik , Armutsbekämpfung ||| , pension policy , poverty reduction ||| 0.0571221 1 |||  ||| 1
+! Rentenpolitik , ||| , pension policy , ||| 0.0571221 1 |||  ||| 1
+! Rentenpolitik ||| , pension policy ||| 0.0571221 1 |||  ||| 1
+! Rohöl ist teurer als ||| , crude oil is more expensive than ||| 0.0571221 1 |||  ||| 1
+! Rohöl ist teurer ||| , crude oil is more expensive ||| 0.0571221 1 |||  ||| 1
+! Rohöl ist ||| , crude oil is ||| 0.0571221 1 |||  ||| 1
+! Rohöl ||| , crude oil ||| 0.0571221 1 |||  ||| 1
+! Russland verweigert die Unterzeichnung ||| , Russia is refusing to sign up ||| 0.0571221 1 |||  ||| 1
+! Russland verweigert die ||| , Russia is refusing to ||| 0.0571221 1 |||  ||| 1
+! Russland ||| , Russia is ||| 0.0190407 1 |||  ||| 3
+! Russland ||| , Russia ||| 0.2569 1 |||  ||| 3
+! Schlepperkriminalität und Menschenhandel ||| , organising illegal immigration and people trafficking ||| 0.0571221 1 |||  ||| 1
+! Schlepperkriminalität und ||| , organising illegal immigration and ||| 0.0571221 1 |||  ||| 1
+! Schlepperkriminalität ||| , organising illegal immigration ||| 0.0571221 1 |||  ||| 1
+! Schreiben Sie Ihren Blauen Brief , ||| and write your warning letter , ||| 0.0571221 1 |||  ||| 1
+! Schreiben Sie Ihren Blauen Brief ||| and write your warning letter ||| 0.0571221 1 |||  ||| 1
+! Schreiben Sie Ihren Blauen ||| and write your warning ||| 0.0571221 1 |||  ||| 1
+! Schreiben Sie Ihren ||| and write your ||| 0.0571221 1 |||  ||| 1
+! Schreiben ||| and write ||| 0.0571221 1 |||  ||| 1
+! Schule , Gesundheit , Postdienste ||| , education , health , postal services ||| 0.0571221 1 |||  ||| 1
+! Schule , Gesundheit , ||| , education , health , ||| 0.0571221 1 |||  ||| 1
+! Schule , Gesundheit ||| , education , health ||| 0.0571221 1 |||  ||| 1
+! Schule , ||| , education , ||| 0.0571221 1 |||  ||| 1
+! Schule ||| , education ||| 0.0571221 1 |||  ||| 1
+! Schweden hat ||| , Sweden has ||| 0.0571221 1 |||  ||| 1
+! Schweden ||| , Sweden ||| 0.0571221 1 |||  ||| 1
+! Schwindel , Schwund und Betrügereien und ||| ; fraud , wastage and ||| 0.0571221 1 |||  ||| 1
+! Schwindel , Schwund und Betrügereien ||| ; fraud , wastage ||| 0.0571221 1 |||  ||| 1
+! Sicherheit ist nach wie vor ein ||| , safety remains an ||| 0.0571221 1 |||  ||| 1
+! Sicherheit ist nach wie vor ||| , safety remains ||| 0.0571221 1 |||  ||| 1
+! Sicherheit ||| , safety ||| 0.0571221 1 |||  ||| 1
+! Sinn und Zweck der ||| , the purpose of the ||| 0.0571221 1 |||  ||| 1
+! Sinn und Zweck der Überarbeitung ||| , the purpose of the revision ||| 0.0571221 1 |||  ||| 1
+! Sinn und Zweck ||| , the purpose ||| 0.0571221 1 |||  ||| 1
+! Sinn und ||| , the ||| 0.0571221 1 |||  ||| 1
+! Sinn ||| , the ||| 0.0571221 1 |||  ||| 1
+! Small is beautiful , vor allem ||| , small is beautiful , especially ||| 0.0571221 1 |||  ||| 1
+! Small is beautiful , ||| , small is beautiful , ||| 0.0571221 1 |||  ||| 1
+! Small is beautiful ||| , small is beautiful ||| 0.0571221 1 |||  ||| 1
+! Small is ||| , small is ||| 0.0571221 1 |||  ||| 1
+! Small ||| , small ||| 0.0571221 1 |||  ||| 1
+! Solidarität mit den Opfern der ||| , solidarity with the victims of the ||| 0.0571221 1 |||  ||| 1
+! Solidarität mit den Opfern ||| , solidarity with the victims ||| 0.0571221 1 |||  ||| 1
+! Solidarität mit den ||| , solidarity with the ||| 0.0571221 1 |||  ||| 1
+! Solidarität mit ||| , solidarity with ||| 0.0571221 1 |||  ||| 1
+! Solidarität ||| , solidarity ||| 0.0571221 1 |||  ||| 1
+! Spanien ||| , Spain ||| 0.0571221 1 |||  ||| 1
+! Spanien übernimmt ||| , Spain will ||| 0.0571221 1 |||  ||| 1
+! Stichwort : Verbraucherkreditrichtlinie ; ||| the Consumer Credit Directive ; ||| 0.028561 1 |||  ||| 2
+! Stichwort : Verbraucherkreditrichtlinie ; ||| with the Consumer Credit Directive ; ||| 0.028561 1 |||  ||| 2
+! Stichwort : Verbraucherkreditrichtlinie ||| the Consumer Credit Directive ||| 0.028561 1 |||  ||| 2
+! Stichwort : Verbraucherkreditrichtlinie ||| with the Consumer Credit Directive ||| 0.028561 1 |||  ||| 2
+! Stichwort : ||| the ||| 0.028561 1 |||  ||| 2
+! Stichwort : ||| with the ||| 0.028561 1 |||  ||| 2
+! Stichwort ||| the ||| 0.028561 1 |||  ||| 2
+! Stichwort ||| with the ||| 0.028561 1 |||  ||| 2
+! Stringenz ist eine Sache , aber ||| , stringency is one thing , but ||| 0.0571221 1 |||  ||| 1
+! Stringenz ist eine Sache , ||| , stringency is one thing , ||| 0.0571221 1 |||  ||| 1
+! Stringenz ist eine Sache ||| , stringency is one thing ||| 0.0571221 1 |||  ||| 1
+! Stringenz ist eine ||| , stringency is one ||| 0.0571221 1 |||  ||| 1
+! Stringenz ist ||| , stringency is ||| 0.0571221 1 |||  ||| 1
+! Stringenz ||| , stringency ||| 0.0571221 1 |||  ||| 1
+! Tampere ist ||| , Tampere has ||| 0.0571221 1 |||  ||| 1
+! Tampere ||| , Tampere ||| 0.0571221 1 |||  ||| 1
+! Tatsache ist , dass ||| it is true that , ||| 0.0571221 1 |||  ||| 1
+! Tatsache ist ||| it is true ||| 0.0571221 1 |||  ||| 1
+! Tausende Zivilpersonen sind ||| , thousands of civilians have ||| 0.0571221 1 |||  ||| 1
+! Tausende Zivilpersonen ||| , thousands of civilians ||| 0.0571221 1 |||  ||| 1
+! Tausende ||| , thousands of ||| 0.028561 1 |||  ||| 2
+! Tausende ||| , thousands ||| 0.028561 1 |||  ||| 2
+! Terrorismus ist ein Verbrechen gegen ||| , terrorism is a crime against ||| 0.0571221 1 |||  ||| 1
+! Terrorismus ist ein Verbrechen ||| , terrorism is a crime ||| 0.0571221 1 |||  ||| 1
+! Terrorismus ist ein ||| , terrorism is a ||| 0.0571221 1 |||  ||| 1
+! Terrorismus ist ||| , terrorism is ||| 0.0571221 1 |||  ||| 1
+! Terrorismus ||| , terrorism ||| 0.0571221 1 |||  ||| 1
+! Tierversuche gehören bei ||| , animal experiments in the field of ||| 0.0142805 1 |||  ||| 4
+! Tierversuche gehören bei ||| , animal experiments in the field ||| 0.0142805 1 |||  ||| 4
+! Tierversuche gehören bei ||| , animal experiments in the ||| 0.0142805 1 |||  ||| 4
+! Tierversuche gehören bei ||| , animal experiments in ||| 0.0142805 1 |||  ||| 4
+! Tierversuche gehören ||| , animal experiments ||| 0.0571221 1 |||  ||| 1
+! Tierversuche ||| , animal experiments ||| 0.0571221 1 |||  ||| 1
+! Tunesien ist ein Land , in ||| , Tunisia is a country in ||| 0.0571221 1 |||  ||| 1
+! Tunesien ist ein Land , ||| , Tunisia is a country ||| 0.0571221 1 |||  ||| 1
+! Tunesien ist ein Land ||| , Tunisia is a country ||| 0.0571221 1 |||  ||| 1
+! Tunesien ist ein ||| , Tunisia is a ||| 0.0571221 1 |||  ||| 1
+! Tunesien ist ||| , Tunisia is ||| 0.0571221 1 |||  ||| 1
+! Tunesien ||| , Tunisia ||| 0.0571221 1 |||  ||| 1
+! Umwelt- , Sozial- und Steuerrecht ||| , environmental , social and tax legislation ||| 0.0571221 1 |||  ||| 1
+! Umwelt- , Sozial- und ||| , environmental , social and ||| 0.0571221 1 |||  ||| 1
+! Umwelt- , Sozial- ||| , environmental , social ||| 0.0571221 1 |||  ||| 1
+! Umwelt- , ||| , environmental , ||| 0.0571221 1 |||  ||| 1
+! Umwelt- ||| , environmental ||| 0.0571221 1 |||  ||| 1
+! Umweltfragen werden am besten gelöst , ||| , environmental issues are handled best ||| 0.0571221 1 |||  ||| 1
+! Umweltfragen werden am besten gelöst ||| , environmental issues are handled best ||| 0.0571221 1 |||  ||| 1
+! Umweltfragen werden ||| , environmental issues are ||| 0.0571221 1 |||  ||| 1
+! Umweltfragen ||| , environmental issues ||| 0.0571221 1 |||  ||| 1
+! Umweltvereinbarungen in der Europäischen Gemeinschaft ||| , environmental agreements in the European Community ||| 0.0571221 1 |||  ||| 1
+! Umweltvereinbarungen in der Europäischen ||| , environmental agreements in the European ||| 0.0571221 1 |||  ||| 1
+! Umweltvereinbarungen in der ||| , environmental agreements in the ||| 0.0571221 1 |||  ||| 1
+! Umweltvereinbarungen in ||| , environmental agreements in ||| 0.0571221 1 |||  ||| 1
+! Umweltvereinbarungen ||| , environmental agreements ||| 0.0571221 1 |||  ||| 1
+! Usted no es una persona loca ||| , usted no es una persona loca ||| 0.0571221 1 |||  ||| 1
+! Usted no es una persona ||| , usted no es una persona ||| 0.0571221 1 |||  ||| 1
+! Usted no es una ||| , usted no es una ||| 0.0571221 1 |||  ||| 1
+! Usted no es ||| , usted no es ||| 0.0571221 1 |||  ||| 1
+! Verletzungen des Rechts auf geistiges Eigentum ||| , infringements of intellectual property rights ||| 0.0571221 1 |||  ||| 1
+! Verletzungen des Rechts auf geistiges ||| , infringements of intellectual ||| 0.0571221 1 |||  ||| 1
+! Verletzungen des Rechts auf ||| , infringements of ||| 0.0571221 1 |||  ||| 1
+! Verletzungen des Rechts ||| , infringements of ||| 0.0571221 1 |||  ||| 1
+! Verletzungen des ||| , infringements of ||| 0.0571221 1 |||  ||| 1
+! Verletzungen ||| , infringements ||| 0.0571221 1 |||  ||| 1
+! Vertrauen ist gut , Kontrolle ist ||| , trust is good , control is ||| 0.0571221 1 |||  ||| 1
+! Vertrauen ist gut , Kontrolle ||| , trust is good , control ||| 0.0571221 1 |||  ||| 1
+! Vertrauen ist gut , ||| , trust is good , ||| 0.0571221 1 |||  ||| 1
+! Vertrauen ist gut ||| , trust is good ||| 0.0571221 1 |||  ||| 1
+! Vertrauen ist ||| , trust is ||| 0.0571221 1 |||  ||| 1
+! Vertrauen ||| , trust ||| 0.0571221 1 |||  ||| 1
+! Vietnam ist ||| , both in ||| 0.028561 1 |||  ||| 2
+! Vietnam ist ||| , both ||| 0.028561 1 |||  ||| 2
+! Vietnam ||| , both in ||| 0.028561 1 |||  ||| 2
+! Vietnam ||| , both ||| 0.028561 1 |||  ||| 2
+! Walter ||| , Mr Walter 's ||| 0.0571221 1 |||  ||| 1
+! Wechsel ist ||| you are right in ||| 0.0190407 1 |||  ||| 3
+! Wechsel ist ||| you are right ||| 0.0190407 1 |||  ||| 3
+! Wechsel ist ||| you are ||| 0.0190407 1 |||  ||| 3
+! Wechsel ||| you ||| 0.0571221 1 |||  ||| 1
+! Wettbewerb ist gut , wenn ||| , competition is a good thing when ||| 0.0571221 1 |||  ||| 1
+! Wettbewerb ist gut , ||| , competition is a good thing ||| 0.0571221 1 |||  ||| 1
+! Wettbewerb ist gut ||| , competition is a good thing ||| 0.0571221 1 |||  ||| 1
+! Wettbewerb ist ||| , competition is ||| 0.0571221 1 |||  ||| 1
+! Wettbewerb ||| , competition ||| 0.0571221 1 |||  ||| 1
+! Wwir beraten heute ||| , this morning we are ||| 0.0571221 1 |||  ||| 1
+! Wwir beraten heute über die ||| , this morning we are examining the ||| 0.0571221 1 |||  ||| 1
+! Wwir beraten heute über ||| , this morning we are examining ||| 0.0571221 1 |||  ||| 1
+! Wwir beraten ||| , this morning we ||| 0.0571221 1 |||  ||| 1
+! Wwir ||| , this morning we ||| 0.0571221 1 |||  ||| 1
+! Ziel des ||| , the objective of the ||| 0.0571221 1 |||  ||| 1
+! Ziel ||| , the objective ||| 0.028561 1 |||  ||| 2
+! Ziel ||| aiming ||| 0.028561 1 |||  ||| 2
+! Zypern ist vergangene Woche ||| , last week Cyprus was ||| 0.0571221 1 |||  ||| 1
+! aber - ich bin Ihnen ||| , and I am much ||| 0.0571221 1 |||  ||| 1
+! aber - ich bin ||| , and I am ||| 0.0571221 1 |||  ||| 1
+! aber - ich ||| , and I ||| 0.0571221 1 |||  ||| 1
+! aber - wie ein Humorist sagte ||| , but as the joke goes ||| 0.0571221 1 |||  ||| 1
+! aber - wie ein ||| , but as the ||| 0.0571221 1 |||  ||| 1
+! aber - wie ||| , but as ||| 0.0571221 1 |||  ||| 1
+! aber Herr ||| , but I ask you , ||| 0.0142805 1 |||  ||| 4
+! aber Herr ||| , but I ask you ||| 0.0142805 1 |||  ||| 4
+! aber Herr ||| , but I ask ||| 0.0142805 1 |||  ||| 4
+! aber Herr ||| , but I ||| 0.0142805 1 |||  ||| 4
+! aber Sie werden ||| , but you will ||| 0.0571221 1 |||  ||| 1
+! aber Sie ||| , but you ||| 0.0571221 1 |||  ||| 1
+! aber da liegt ein Missverständnis vor ||| , but there is a misunderstanding here ||| 0.0571221 1 |||  ||| 1
+! aber da liegt ein ||| , but there is a ||| 0.0571221 1 |||  ||| 1
+! aber da liegt ||| , but there is ||| 0.0571221 1 |||  ||| 1
+! aber da ||| , but there ||| 0.0571221 1 |||  ||| 1
+! aber dann ||| , but then ||| 0.0571221 1 |||  ||| 1
+! aber darum geht es eigentlich nicht ||| , but that is not my point ||| 0.0190407 1 |||  ||| 3
+! aber darum geht es eigentlich nicht ||| , but that is not my ||| 0.0190407 1 |||  ||| 3
+! aber darum geht es eigentlich nicht ||| , but that is not ||| 0.0190407 1 |||  ||| 3
+! aber darum geht es eigentlich ||| , but that is ||| 0.0571221 1 |||  ||| 1
+! aber darum geht es ||| , but that is ||| 0.0571221 1 |||  ||| 1
+! aber darum geht ||| , but that is ||| 0.0571221 1 |||  ||| 1
+! aber darum ||| , but that ||| 0.0571221 1 |||  ||| 1
+! aber das kann man ja schon ||| , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ja schon ||| control , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ja schon ||| supervisory control , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ja ||| , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ja ||| control , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ja ||| supervisory control , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ||| , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ||| control , but one can ||| 0.0190407 1 |||  ||| 3
+! aber das kann man ||| supervisory control , but one can ||| 0.0190407 1 |||  ||| 3
+! aber die ||| , but the ||| 0.0571221 1 |||  ||| 1
+! aber diese Freundschaft soll ||| , but this friendship should bear fruit ||| 0.0190407 1 |||  ||| 3
+! aber diese Freundschaft soll ||| , but this friendship should bear ||| 0.0190407 1 |||  ||| 3
+! aber diese Freundschaft soll ||| , but this friendship should ||| 0.0190407 1 |||  ||| 3
+! aber diese Freundschaft ||| , but this friendship ||| 0.0571221 1 |||  ||| 1
+! aber diese ||| , but this ||| 0.0571221 1 |||  ||| 1
+! aber dieses Fenster der Gelegenheit ||| , but this window of opportunity ||| 0.0571221 1 |||  ||| 1
+! aber dieses Fenster der ||| , but this window of ||| 0.0571221 1 |||  ||| 1
+! aber dieses Fenster ||| , but this window ||| 0.0571221 1 |||  ||| 1
+! aber dieses ||| , but this ||| 0.0571221 1 |||  ||| 1
+! aber eine ||| , but there ||| 0.028561 1 |||  ||| 2
+! aber eine ||| from , but there ||| 0.028561 1 |||  ||| 2
+! aber es gilt ||| , but ||| 0.0571221 1 |||  ||| 1
+! aber es muss ||| , but there need to ||| 0.0571221 1 |||  ||| 1
+! aber es ||| , but there ||| 0.028561 1 |||  ||| 2
+! aber es ||| , but ||| 0.028561 1 |||  ||| 2
+! aber ich glaube , die Bürger ||| , but I think our citizens ||| 0.0571221 1 |||  ||| 1
+! aber ich glaube , die ||| , but I think our ||| 0.0571221 1 |||  ||| 1
+! aber ich glaube , ||| , but I think ||| 0.0571221 1 |||  ||| 1
+! aber ich glaube ||| , but I think ||| 0.0571221 1 |||  ||| 1
+! aber ich ||| , but I ||| 0.0571221 1 |||  ||| 1
+! aber man muss in Betracht ziehen ||| , but we have to consider the ||| 0.0190407 1 |||  ||| 3
+! aber man muss in Betracht ziehen ||| , but we have to consider ||| 0.0190407 1 |||  ||| 3
+! aber man muss in Betracht ziehen ||| taken , but we have to consider ||| 0.0190407 1 |||  ||| 3
+! aber man muss in ||| , but we have to ||| 0.0190407 1 |||  ||| 3
+! aber man muss in ||| been taken , but we have to ||| 0.0190407 1 |||  ||| 3
+! aber man muss in ||| taken , but we have to ||| 0.0190407 1 |||  ||| 3
+! aber man muss ||| , but we have ||| 0.0142805 1 |||  ||| 4
+! aber man muss ||| been taken , but we have ||| 0.0142805 1 |||  ||| 4
+! aber man muss ||| have been taken , but we have ||| 0.0142805 1 |||  ||| 4
+! aber man muss ||| taken , but we have ||| 0.0142805 1 |||  ||| 4
+! aber man ||| , but we ||| 0.0142805 1 |||  ||| 4
+! aber man ||| been taken , but we ||| 0.0142805 1 |||  ||| 4
+! aber man ||| have been taken , but we ||| 0.0142805 1 |||  ||| 4
+! aber man ||| taken , but we ||| 0.0142805 1 |||  ||| 4
+! aber mein besonderer Dank gilt ||| , but I am particularly obliged , ||| 0.0571221 1 |||  ||| 1
+! aber mein besonderer Dank ||| , but I am particularly obliged ||| 0.0571221 1 |||  ||| 1
+! aber mein besonderer ||| , but I am particularly ||| 0.0571221 1 |||  ||| 1
+! aber mein ||| , but I am ||| 0.0571221 1 |||  ||| 1
+! aber meine Antwort wird leider ||| , but my answer is ||| 0.0571221 1 |||  ||| 1
+! aber meine Antwort wird ||| , but my answer is ||| 0.0571221 1 |||  ||| 1
+! aber meine Antwort ||| , but my answer ||| 0.0571221 1 |||  ||| 1
+! aber meine ||| , but my ||| 0.0571221 1 |||  ||| 1
+! aber wenn Sie ||| , but if you ||| 0.0571221 1 |||  ||| 1
+! aber wenn ||| , but if ||| 0.0571221 1 |||  ||| 1
+! aber wer macht sie ||| , but exactly who is making them ||| 0.0571221 1 |||  ||| 1
+! aber wer macht ||| , but exactly who is making ||| 0.0571221 1 |||  ||| 1
+! aber wer ||| , but exactly who ||| 0.0571221 1 |||  ||| 1
+! aber wir haben gehört ||| , but we have learned ||| 0.0571221 1 |||  ||| 1
+! aber wir hätten ||| , but we would have preferred ||| 0.028561 1 |||  ||| 2
+! aber wir hätten ||| EU , but we would have preferred ||| 0.028561 1 |||  ||| 2
+! aber wir sind ||| , but we have great ||| 0.028561 1 |||  ||| 2
+! aber wir sind ||| , but we have ||| 0.028561 1 |||  ||| 2
+! aber wir sollten nicht anfangen ||| , but we should not start ||| 0.0571221 1 |||  ||| 1
+! aber wir sollten nicht ||| , but we should not ||| 0.0571221 1 |||  ||| 1
+! aber wir sollten ||| , but we should ||| 0.0571221 1 |||  ||| 1
+! aber wir ||| , but we ||| 0.714286 1 |||  ||| 7
+! aber wir ||| EU , but we ||| 0.00816029 1 |||  ||| 7
+! aber wir ||| the EU , but we ||| 0.00816029 1 |||  ||| 7
+! aber ||| ! - but , ||| 0.00129823 0.0775352 |||  ||| 44
+! aber ||| , and ||| 0.00129823 1 |||  ||| 44
+! aber ||| , but exactly ||| 0.00129823 1 |||  ||| 44
+! aber ||| , but its prospects ||| 0.00129823 1 |||  ||| 44
+! aber ||| , but its ||| 0.00129823 1 |||  ||| 44
+! aber ||| , but ||| 0.681818 1 |||  ||| 44
+! aber ||| EU , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| am saying ||| 0.00129823 1 |||  ||| 44
+! aber ||| been taken , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| control , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| from , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| have been taken , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| supervisory control , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| taken , but ||| 0.00129823 1 |||  ||| 44
+! aber ||| the EU , but ||| 0.00129823 1 |||  ||| 44
+! abgesehen von der Technik der Mittelzuweisungen ||| , beyond its technique on envelopes ||| 0.0571221 1 |||  ||| 1
+! abgesehen von der Technik der ||| , beyond its technique on ||| 0.0571221 1 |||  ||| 1
+! abgesehen von der Technik ||| , beyond its technique ||| 0.0571221 1 |||  ||| 1
+! abgesehen von der ||| , beyond its ||| 0.0571221 1 |||  ||| 1
+! abgesehen von ||| , beyond ||| 0.0571221 1 |||  ||| 1
+! abschließend möchte ich noch ||| , I should like to conclude by ||| 0.0571221 1 |||  ||| 1
+! abschließend möchte ich ||| , I should like to conclude by ||| 0.028561 1 |||  ||| 2
+! abschließend möchte ich ||| to conclude , ||| 0.028561 1 |||  ||| 2
+! abschließend ||| , by way of conclusion , ||| 0.028561 1 |||  ||| 2
+! abschließend ||| , by way of conclusion ||| 0.028561 1 |||  ||| 2
+! all dies ist ||| that all these things should ||| 0.0571221 1 |||  ||| 1
+! all dies ||| that all these things ||| 0.0571221 1 |||  ||| 1
+! all ||| that all ||| 0.0571221 1 |||  ||| 1
+! alle , die mich kennen , ||| , those who know me can ||| 0.0571221 1 |||  ||| 1
+! alle Arten landwirtschaftlicher Tätigkeit und ||| , all types of agricultural activity and ||| 0.0571221 1 |||  ||| 1
+! alle Arten landwirtschaftlicher Tätigkeit ||| , all types of agricultural activity ||| 0.0571221 1 |||  ||| 1
+! alle Arten landwirtschaftlicher ||| , all types of agricultural ||| 0.0571221 1 |||  ||| 1
+! alle Arten ||| , all types ||| 0.0571221 1 |||  ||| 1
+! alle Mittel aus dem europäischen Haushalt ||| , all funds from the European Budget ||| 0.0571221 1 |||  ||| 1
+! alle Mittel aus dem europäischen ||| , all funds from the European ||| 0.0571221 1 |||  ||| 1
+! alle Mittel aus dem ||| , all funds from the ||| 0.0571221 1 |||  ||| 1
+! alle Mittel aus ||| , all funds from ||| 0.0571221 1 |||  ||| 1
+! alle Mittel ||| , all funds ||| 0.0571221 1 |||  ||| 1
+! alle singen heute ||| , everyone is proclaiming today ||| 0.0571221 1 |||  ||| 1
+! alle singen ||| , everyone is proclaiming ||| 0.0571221 1 |||  ||| 1
+! alle wissen um die ||| , no one is unaware of the ||| 0.0571221 1 |||  ||| 1
+! alle wissen um ||| , no one is unaware of ||| 0.028561 1 |||  ||| 2
+! alle wissen um ||| , no one is unaware ||| 0.028561 1 |||  ||| 2
+! alle ||| , all ||| 0.1101 1 |||  ||| 7
+! alle ||| , everyone is ||| 0.00816029 1 |||  ||| 7
+! alle ||| , everyone ||| 0.00816029 1 |||  ||| 7
+! alle ||| , no one ||| 0.00816029 1 |||  ||| 7
+! alle ||| , no ||| 0.00816029 1 |||  ||| 7
+! alle ||| , those ||| 0.00816029 1 |||  ||| 7
+! allerdings gehört das ||| , but unfortunately that has ||| 0.0571221 1 |||  ||| 1
+! allerdings muss sie mit ||| , but the opinion must accord with ||| 0.0571221 1 |||  ||| 1
+! allerdings muss sie ||| , but the opinion must accord ||| 0.028561 1 |||  ||| 2
+! allerdings muss sie ||| , but the opinion must ||| 0.028561 1 |||  ||| 2
+! allerdings ||| , but unfortunately ||| 0.028561 1 |||  ||| 2
+! allerdings ||| , but ||| 0.028561 1 |||  ||| 2
+! alles an diesen Informationen ist in ||| , all of this information is ||| 0.0571221 1 |||  ||| 1
+! alles an diesen Informationen ist ||| , all of this information is ||| 0.0571221 1 |||  ||| 1
+! alles an diesen Informationen ||| , all of this information ||| 0.0571221 1 |||  ||| 1
+! alles an diesen ||| , all of this ||| 0.0571221 1 |||  ||| 1
+! alles an ||| , all of ||| 0.0571221 1 |||  ||| 1
+! alles ist bereits gesagt worden . ||| , everything has been said . ||| 0.0571221 1 |||  ||| 1
+! alles ist bereits gesagt worden ||| , everything has been said ||| 0.0571221 1 |||  ||| 1
+! alles ist ||| , everything has ||| 0.0571221 1 |||  ||| 1
+! alles ||| , all ||| 0.028561 1 |||  ||| 2
+! alles ||| , everything ||| 0.028561 1 |||  ||| 2
+! allgemein gesagt , halte ich diese ||| , generally speaking I consider this ||| 0.0571221 1 |||  ||| 1
+! allgemein gesagt , halte ich ||| , generally speaking I consider ||| 0.0571221 1 |||  ||| 1
+! allgemein gesagt , ||| , generally speaking ||| 0.0571221 1 |||  ||| 1
+! allgemein gesagt ||| , generally speaking ||| 0.0571221 1 |||  ||| 1
+! allzu viele ||| , there are too many ||| 0.0571221 1 |||  ||| 1
+! allzu ||| , there are too ||| 0.0571221 1 |||  ||| 1
+! als Abgeordneter aus ||| , as a member of parliament from ||| 0.0571221 1 |||  ||| 1
+! als Abgeordneter des ||| , as a Member for the ||| 0.0571221 1 |||  ||| 1
+! als Abgeordneter von der französischen ||| , as a Member for the French ||| 0.0571221 1 |||  ||| 1
+! als Abgeordneter von der ||| , as a Member for the ||| 0.0571221 1 |||  ||| 1
+! als Abgeordneter von ||| , as a Member for ||| 0.0571221 1 |||  ||| 1
+! als Abgeordneter ||| , as a Member ||| 0.2569 1 |||  ||| 3
+! als Abgeordneter ||| , as a member of parliament ||| 0.0190407 1 |||  ||| 3
+! als Beobachter des Europäischen Parlaments ||| , as European Parliament observers , ||| 0.028561 1 |||  ||| 2
+! als Beobachter des Europäischen Parlaments ||| , as European Parliament observers ||| 0.028561 1 |||  ||| 2
+! als Berichterstatter bedaure ich es eigentlich ||| , as rapporteur I regret the fact ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter bedaure ich es ||| , as rapporteur I regret the ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter bedaure ich ||| , as rapporteur I regret ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter für Estland ||| , as rapporteur for Estonia ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter für ||| , as rapporteur for ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter zu ||| , in the capacity of rapporteur for ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter zum Beitritt ||| , as rapporteur for the accession of ||| 0.028561 1 |||  ||| 2
+! als Berichterstatter zum Beitritt ||| , as rapporteur for the accession ||| 0.028561 1 |||  ||| 2
+! als Berichterstatter zum ||| , as rapporteur for the ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatter ||| , as rapporteur ||| 0.504132 1 |||  ||| 4
+! als Berichterstatter ||| , in the capacity of rapporteur ||| 0.0142805 1 |||  ||| 4
+! als Berichterstatterin meiner Fraktion für ||| , as my group 's rapporteur for ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatterin meiner Fraktion ||| , as my group 's rapporteur ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatterin ||| , as rapporteur ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatterin über die Entlastung betreffend ||| , as rapporteur on the discharge for ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatterin über die Entlastung ||| , as rapporteur on the discharge ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatterin über die ||| , as rapporteur on the ||| 0.0571221 1 |||  ||| 1
+! als Berichterstatterin über ||| , as rapporteur on ||| 0.0571221 1 |||  ||| 1
+! als Beweis dafür , daß dieses ||| , as proof that this ||| 0.0571221 1 |||  ||| 1
+! als Beweis dafür , daß ||| , as proof that ||| 0.0571221 1 |||  ||| 1
+! als Beweis dafür ||| , as proof ||| 0.0571221 1 |||  ||| 1
+! als Bürgerbeauftragter vertreten Sie die 450 ||| , as Ombudsman you represent the 450 ||| 0.0571221 1 |||  ||| 1
+! als Bürgerbeauftragter vertreten Sie die ||| , as Ombudsman you represent the ||| 0.0571221 1 |||  ||| 1
+! als Bürgerbeauftragter vertreten Sie ||| , as Ombudsman you represent ||| 0.0571221 1 |||  ||| 1
+! als Bürgerbeauftragter ||| , as Ombudsman ||| 0.0571221 1 |||  ||| 1
+! als China ||| , when China ||| 0.0571221 1 |||  ||| 1
+! als Christdemokrat und schwedischer ||| , as a Christian Democrat and Swedish ||| 0.0571221 1 |||  ||| 1
+! als Christdemokrat und ||| , as a Christian Democrat and ||| 0.0571221 1 |||  ||| 1
+! als Christdemokrat ||| , as a Christian Democrat ||| 0.0571221 1 |||  ||| 1
+! als Deutscher ist man hier in ||| , any German in this House will ||| 0.0571221 1 |||  ||| 1
+! als Deutscher ||| , any German ||| 0.0571221 1 |||  ||| 1
+! als Einwohner der ||| , as a resident of the ||| 0.0571221 1 |||  ||| 1
+! als Einwohner ||| , as a resident ||| 0.0571221 1 |||  ||| 1
+! als Ergebnis der Beratungen auf ||| , as a result of consultations at ||| 0.0571221 1 |||  ||| 1
+! als Ergebnis der Beratungen ||| , as a result of consultations ||| 0.0571221 1 |||  ||| 1
+! als Ergebnis der ||| , as a result of ||| 0.0571221 1 |||  ||| 1
+! als Ergebnis ||| , as a result ||| 0.0571221 1 |||  ||| 1
+! als Ergänzung zu meiner ||| , further to the question that I ||| 0.0571221 1 |||  ||| 1
+! als Ergänzung zu ||| , further to the question that ||| 0.0190407 1 |||  ||| 3
+! als Ergänzung zu ||| , further to the question ||| 0.0190407 1 |||  ||| 3
+! als Ergänzung zu ||| , further to the ||| 0.0190407 1 |||  ||| 3
+! als Erstes möchte ich ||| , I should like to start by ||| 0.028561 1 |||  ||| 2
+! als Erstes möchte ich ||| , firstly I would like to ||| 0.028561 1 |||  ||| 2
+! als Erstes ||| , first of all , ||| 0.00476017 1 |||  ||| 12
+! als Erstes ||| , first of all ||| 0.168044 1 |||  ||| 12
+! als Erstes ||| , first of ||| 0.168044 1 |||  ||| 12
+! als Erstes ||| , first ||| 0.168044 1 |||  ||| 12
+! als Erstes ||| , firstly ||| 0.00476017 1 |||  ||| 12
+! als Erstes ||| , the first message ||| 0.00476017 1 |||  ||| 12
+! als Föderalisten haben ||| , as a pro-federalist party ||| 0.0571221 1 |||  ||| 1
+! als Grüne bin ich ||| , as a Green I am ||| 0.0571221 1 |||  ||| 1
+! als Grüne ||| , as a Green ||| 0.0571221 1 |||  ||| 1
+! als Leiter der Delegation ||| , as the leader of the delegation ||| 0.0571221 1 |||  ||| 1
+! als Leiter der ||| , as the leader of the ||| 0.0571221 1 |||  ||| 1
+! als Leiter ||| , as the leader ||| 0.0571221 1 |||  ||| 1
+! als Mitberichterstatter dieser ||| , as co-rapporteur for this , ||| 0.028561 1 |||  ||| 2
+! als Mitberichterstatter dieser ||| , as co-rapporteur for this ||| 0.028561 1 |||  ||| 2
+! als Mitberichterstatter ||| , as co-rapporteur for ||| 0.028561 1 |||  ||| 2
+! als Mitberichterstatter ||| , as co-rapporteur ||| 0.028561 1 |||  ||| 2
+! als Mitglied des ||| , as a member of the ||| 0.0571221 1 |||  ||| 1
+! als Mitglied ||| , as a member ||| 0.0571221 1 |||  ||| 1
+! als Präsident der Europäischen Union ||| , as President-in-Office of the European Union ||| 0.0571221 1 |||  ||| 1
+! als Präsident der Europäischen ||| , as President-in-Office of the European ||| 0.0571221 1 |||  ||| 1
+! als Präsident der ||| , as President-in-Office of the ||| 0.0571221 1 |||  ||| 1
+! als Präsident ||| , as President-in-Office ||| 0.0571221 1 |||  ||| 1
+! als Schotte und Ihr Landsmann bin ||| , as a fellow Scot , ||| 0.028561 1 |||  ||| 2
+! als Schotte und Ihr Landsmann bin ||| , as a fellow Scot ||| 0.028561 1 |||  ||| 2
+! als Sie ||| , when ||| 0.0571221 1 |||  ||| 1
+! als Skandinavierin verwende ich ||| , as a Scandinavian , I ||| 0.0571221 1 |||  ||| 1
+! als Skandinavierin verwende ||| , as a Scandinavian , ||| 0.028561 1 |||  ||| 2
+! als Skandinavierin verwende ||| , as a Scandinavian ||| 0.028561 1 |||  ||| 2
+! als Skandinavierin ||| , as a Scandinavian , ||| 0.0571221 1 |||  ||| 1

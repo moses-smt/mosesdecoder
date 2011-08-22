@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w 
-
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -9,8 +8,15 @@
 # <foreign> and <english> should be raw text files, one sentence per line
 # <english> can be a prefix, in which case the files are <english>0, <english>1, etc. are used
 
-# Revision history
+# Excerpts from revision history
 
+# Jul 2011    simplifications (Ondrej Bojar)
+#             -- rely on moses' -show-weights instead of parsing moses.ini 
+#                ... so moses is also run once *before* mert starts, checking
+#                    the model to some extent
+#             -- got rid of the 'triples' mess;
+#                use --range to supply bounds for random starting values:
+#                --range tm:-3..3 --range lm:-3..3
 # 5 Aug 2009  Handling with different reference length policies (shortest, average, closest) for BLEU 
 #             and case-sensistive/insensitive evaluation (Nicola Bertoldi)
 # 5 Jun 2008  Forked previous version to support new mert implementation.
@@ -41,59 +47,33 @@
 
 use FindBin qw($Bin);
 use File::Basename;
+use File::Path;
 my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-# for each _d_istortion, _l_anguage _m_odel, _t_ranslation _m_odel and _w_ord penalty, there is a list
-# of [ default value, lower bound, upper bound ]-triples. In most cases, only one triple is used,
-# but the translation model has currently 5 features
+## We preserve this bit of comments to keep the traditional weight ranges.
+#     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
+#     "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
+#     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
+#     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
+# 	      [ 1.0, 0.0, 2.0 ] ],
+#     "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
+# 	      [ 0.2, 0.0, 0.5 ],
+# 	      [ 0.3, 0.0, 0.5 ],
+# 	      [ 0.2, 0.0, 0.5 ],
+# 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
+#     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
+#     "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
 
-# defaults for initial values and ranges are:
 
-my $default_triples = {
-    # these basic models exist even if not specified, they are
-    # not associated with any model file
-    "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
-};
 
-my $additional_triples = {
-    # if the more lambda parameters for the weights are needed
-    # (due to additional tables) use the following values for them
-    "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
-    "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
-    "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
-	      [ 1.0, 0.0, 2.0 ] ],
-    "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
-	      [ 0.2, 0.0, 0.5 ],
-	      [ 0.3, 0.0, 0.5 ],
-	      [ 0.2, 0.0, 0.5 ],
-	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
-    "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
-    "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
-};
-    # the following models (given by shortname) use same triplet
-    # for any number of lambdas, the number of the lambdas is determined
-    # by the ini file
-my $additional_tripes_loop = { map { ($_, 1) } qw/ d I / };
-
-# moses.ini file uses FULL names for lambdas, while this training script internally (and on the command line)
-# uses ABBR names.
-my $ABBR_FULL_MAP = "d=weight-d lm=weight-l tm=weight-t w=weight-w g=weight-generation lex=weight-lex I=weight-i";
-my %ABBR2FULL = map {split/=/,$_,2} split /\s+/, $ABBR_FULL_MAP;
-my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} split /\s+/, $ABBR_FULL_MAP;
-
-# We parse moses.ini to figure out how many weights do we need to optimize.
-# For this, we must know the correspondence between options defining files
-# for models and options assigning weights to these models.
-my $TABLECONFIG_ABBR_MAP = "ttable-file=tm lmodel-file=lm distortion-file=d generation-file=g global-lexical-file=lex link-param-count=I";
-my %TABLECONFIG2ABBR = map {split(/=/,$_,2)} split /\s+/, $TABLECONFIG_ABBR_MAP;
-
-# There are weights that do not correspond to any input file, they just increase the total number of lambdas we optimize
-#my $extra_lambdas_for_model = {
-#  "w" => 1,  # word penalty
-#  "d" => 1,  # basic distortion
-#};
+# moses.ini file uses FULL names for lambdas, while this training script
+# internally (and on the command line) uses ABBR names.
+my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
+  g=weight-generation lex=weight-lex I=weight-i);
+my %ABBR2FULL = map {split/=/,$_,2} @ABBR_FULL_MAP;
+my %FULL2ABBR = map {my ($a, $b) = split/=/,$_,2; ($b, $a);} @ABBR_FULL_MAP;
 
 my $minimum_required_change_in_weights = 0.00001;
     # stop if no lambda changes more than this
@@ -107,15 +87,18 @@ my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
-      # the -l ws0ssmt is relevant only to JHU workshop
-my $___JOBS = undef; # if parallel, number of jobs to use (undef -> serial)
+      # the -l ws0ssmt was relevant only to JHU 2006 workshop
+my $___JOBS = undef; # if parallel, number of jobs to use (undef or 0 -> serial)
 my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
-my $___LAMBDA = undef; # string specifying the seed weights and boundaries of all lambdas
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
 my $___PREDICTABLE_SEEDS = 0;
-
+my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iterations as starting points [Foster&Kuhn,2009]
+my $___RANDOM_DIRECTIONS = 0; # search in random directions only
+my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
+my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use Hopkins&May[2011]
+my $___RANDOM_RESTARTS = 20;
 
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
@@ -145,19 +128,16 @@ my $filterfile = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
-my $___CONFIG_BAK = undef; # backup pathname to startup ini file
-my $efficient_scorenbest_flag = undef; # set to 1 to activate a time-efficient scoring of nbest lists
-                                  # (this method is more memory-consumptive)
+my $___CONFIG_ORIG = undef; # pathname to startup ini file before filtering
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
+my $___RANGES = undef;
 my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loading data (default =-1)
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
                                   # and so on 
-my $starting_weights_from_ini = 1;
-
 my $maximum_iterations = 25;
 
 use strict;
@@ -173,7 +153,6 @@ GetOptions(
   "queue-flags=s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
   "decoder-flags=s" => \$___DECODER_FLAGS,
-  "lambdas=s" => \$___LAMBDA,
   "continue" => \$continue,
   "skip-decoder" => \$skip_decoder,
   "shortest" => \$___SHORTEST,
@@ -191,13 +170,17 @@ GetOptions(
   "qsubwrapper=s" => \$qsubwrapper, # allow to override the default location
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
-  "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # allow (disallow)filtering of phrase tables
-  "predictable-seeds" => \$___PREDICTABLE_SEEDS, # allow (disallow) switch on/off reseeding of random restarts
-  "efficient_scorenbest_flag" => \$efficient_scorenbest_flag, # activate a time-efficient scoring of nbest lists
+  "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # (dis)allow of phrase tables
+  "predictable-seeds" => \$___PREDICTABLE_SEEDS, # make random restarts deterministic
+  "historic-bests" => \$___START_WITH_HISTORIC_BESTS, # use best settings from all previous iterations as starting points
+  "random-directions" => \$___RANDOM_DIRECTIONS, # search only in random directions
+  "number-of-random-directions=i" => \$___NUM_RANDOM_DIRECTIONS, # number of random directions
+  "random-restarts=i" => \$___RANDOM_RESTARTS, # number of random restarts
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
+  "range=s@" => \$___RANGES,
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
-  "starting-weights-from-ini!" => \$starting_weights_from_ini,
+  "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -211,7 +194,7 @@ if (scalar @ARGV == 4) {
 }
 
 if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER || !defined $___CONFIG) {
-  print STDERR "usage: mert-moses.pl input-text references decoder-executable decoder.ini
+  print STDERR "usage: $0 input-text references decoder-executable decoder.ini
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100            ... how big nbestlist to generate
@@ -223,12 +206,6 @@ Options:
                              --queue-flags=' '
                              (i.e. a space between the quotes).
   --decoder-flags=STRING ... extra parameters for the decoder
-  --lambdas=STRING       ... default values and ranges for lambdas, a
-                             complex string such as
-                             'd:1,0.5-1.5 lm:1,0.5-1.5 tm:0.3,0.25-0.75;0.2,0.25-0.75;0.2,0.25-0.75;0.3,0.25-0.75;0,-0.5-0.5 w:0,-0.5-0.5'
-  --allow-unknown-lambda ... keep going even if someone supplies a new
-                             lambda in the lambdas option (such as
-                             'superbmodel:1,0-1'); optimize it, too
   --continue             ... continue from the last successful iteration
   --skip-decoder         ... skip the decoder run for the first time,
                              assuming that we got interrupted during
@@ -253,10 +230,19 @@ Options:
                              default is 0)
   --no-filter-phrase-table ... disallow filtering of phrase tables
                               (useful if binary phrase tables are available)
+  --random-restarts=INT  ... number of random restarts (default: 20)
   --predictable-seeds    ... provide predictable seeds to mert so that random
                              restarts are the same on every run
-  --efficient_scorenbest_flag ... time-efficient scoring of nbest lists
-                                  (this method is more memory-consumptive)
+  --range=tm:0..1,-1..1  ... specify min and max value for some features
+                             --range can be repeated as needed.
+                             The order of the various --range specifications
+                             is important only within a feature name.
+                             E.g.:
+                               --range=tm:0..1,-1..1 --range=tm:0..2
+                             is identical to:
+                               --range=tm:0..1,-1..1,0..2
+                             but not to:
+                               --range=tm:0..2 --range=tm:0..1,-1..1 
   --activate-features=STRING  ... comma-separated list of features to optimize,
                                   others are fixed to the starting values
                                   default: optimize all features
@@ -269,10 +255,9 @@ Options:
                                      N means this and N previous iterations
 
   --maximum-iterations=ITERS ... Maximum number of iterations. Default: $maximum_iterations
-  --starting-weights-from-ini ... use the weights given in moses.ini file as
-                                  the starting weights (and also as the fixed
-                                  weights if --activate-features is used).
-                                  default: yes (used to be 'no')
+  --random-directions               ... search only in random directions
+  --number-of-random-directions=int ... number of random directions
+                                        (also works with regular optimizer, default: 0)
 ";
   exit 1;
 }
@@ -284,6 +269,12 @@ print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # path of script for filtering phrase tables and running the decoder
 $filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $filtercmd;
+
+if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
+  print STDERR "Filtering command not found: $filtercmd.\n";
+  print STDERR "Use --filtercmd=PATH to specify a valid one or --no-filter-phrase-table\n";
+  exit 1;
+}
 
 $qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper;
 
@@ -302,6 +293,15 @@ my $mert_mert_cmd = "$mertdir/mert";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
+
+my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
+if ($___PAIRWISE_RANKED_OPTIMIZER && ! -x $pro_optimizer) {
+  print "did not find $pro_optimizer, installing it in $mertdir\n";
+  `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
+  `gunzip $pro_optimizer.gz`;
+  `chmod +x $pro_optimizer`;
+  die("ERROR: Installation of megam_i686.opt failed! Install by hand from http://www.cs.utah.edu/~hal/megam/") unless -x $pro_optimizer;
+}
 
 $mertargs = "" if !defined $mertargs;
 
@@ -362,7 +362,7 @@ $___DEV_F = $input_abs;
 my $pass_old_sge = $old_sge ? "-old-sge" : "";
 
 my $decoder_abs = ensure_full_path($___DECODER);
-die "File not found: $___DECODER (interpreted as $decoder_abs)."
+die "File not executable: $___DECODER (interpreted as $decoder_abs)."
   if ! -x $decoder_abs;
 $___DECODER = $decoder_abs;
 
@@ -388,47 +388,6 @@ die "File not found: $___CONFIG (interpreted as $config_abs)."
   if ! -e $config_abs;
 $___CONFIG = $config_abs;
 
-
-
-# check validity of moses.ini and collect number of models and lambdas per model
-# need to make a copy of $extra_lambdas_for_model, scan_config spoils it
-#my %copy_of_extra_lambdas_for_model = %$extra_lambdas_for_model;
-my %used_triples = %{$default_triples};
-my ($models_used) = scan_config($___CONFIG);
-
-# Parse the lambda config string and convert it to a nice structure in the same format as $used_triples
-if (defined $___LAMBDA) {
-  my %specified_triples;
-  # interpreting lambdas from command line
-  foreach (split(/\s+/,$___LAMBDA)) {
-      my ($name,$values) = split(/:/);
-      die "Malformed setting: '$_', expected name:values\n" if !defined $name || !defined $values;
-      foreach my $startminmax (split/;/,$values) {
-	  if ($startminmax =~ /^(-?[\.\d]+),(-?[\.\d]+)-(-?[\.\d]+)$/) {
-	      my $start = $1;
-	      my $min = $2;
-	      my $max = $3;
-              push @{$specified_triples{$name}}, [$start, $min, $max];
-	  }
-	  else {
-	      die "Malformed feature range definition: $name => $startminmax\n";
-	  }
-      } 
-  }
-  # sanity checks for specified lambda triples
-  foreach my $name (keys %used_triples) {
-      die "No lambdas specified for '$name', but ".($#{$used_triples{$name}}+1)." needed.\n"
-	  unless defined($specified_triples{$name});
-      die "Number of lambdas specified for '$name' (".($#{$specified_triples{$name}}+1).") does not match number needed (".($#{$used_triples{$name}}+1).")\n"
-	  if (($#{$used_triples{$name}}) != ($#{$specified_triples{$name}}));
-  }
-  foreach my $name (keys %specified_triples) {
-      die "Lambdas specified for '$name' ".(@{$specified_triples{$name}}).", but none needed.\n"
-	  unless defined($used_triples{$name});
-  }
-  %used_triples = %specified_triples;
-}
-
 # moses should use our config
 if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 || $___DECODER_FLAGS =~ /(^|\s)-(ttable-file|t) /
@@ -446,20 +405,13 @@ my $need_to_normalize = 1;
 
 
 
-my @order_of_lambdas_from_decoder = ();
-# this will store the labels of scores coming out of the decoder (and hence the order of lambdas coming out of mert)
-# we will use the array to interpret the lambdas
-# the array gets filled with labels only after first nbestlist was generated
-
-
-
 
 #store current directory and create the working directory (if needed)
 my $cwd = `pawd 2>/dev/null`; 
 if(!$cwd){$cwd = `pwd`;}
 chomp($cwd);
 
-safesystem("mkdir -p $___WORKING_DIR") or die "Can't mkdir $___WORKING_DIR";
+mkpath($___WORKING_DIR);
 
 {
 # open local scope
@@ -481,6 +433,75 @@ my $devbleu = undef;
 
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
+my $prev_init_file = undef;
+
+
+if ($___FILTER_PHRASE_TABLE) {
+  my $outdir = "filtered";
+  if (-e "$outdir/moses.ini") {
+    print STDERR "Assuming the tables are already filtered, reusing $outdir/moses.ini\n";
+  } else {
+    # filter the phrase tables with respect to input, use --decoder-flags
+    print STDERR "filtering the phrase tables... ".`date`;
+    my $___FILTER_F  = $___DEV_F;
+    $___FILTER_F = $filterfile if (defined $filterfile);
+    my $cmd = "$filtercmd ./$outdir $___CONFIG $___FILTER_F";
+    if (defined $___JOBS && $___JOBS > 0) {
+      safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
+        or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
+    } else {
+      safesystem($cmd) or die "Failed to filter the tables.";
+    }
+  }
+
+  # make a backup copy of startup ini filepath
+  $___CONFIG_ORIG = $___CONFIG;
+  # the decoder should now use the filtered model
+  $___CONFIG = "$outdir/moses.ini";
+}
+else{
+  # do not filter phrase tables (useful if binary phrase tables are available)
+  # use the original configuration file
+  $___CONFIG_ORIG = $___CONFIG;
+}
+
+
+# we run moses to check validity of moses.ini and to obtain all the feature
+# names
+my $featlist = get_featlist_from_moses($___CONFIG);
+$featlist = insert_ranges_to_featlist($featlist, $___RANGES);
+
+# Mark which features are disabled:
+if (defined $___ACTIVATE_FEATURES) {
+  my %enabled = map { ($_, 1) } split /[, ]+/, $___ACTIVATE_FEATURES;
+  my %cnt;
+  for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    $cnt{$name} = 0 if !defined $cnt{$name};
+    $featlist->{"enabled"}->[$i] = $enabled{$name."_".$cnt{$name}};
+    $cnt{$name}++;
+  }
+} else {
+  # all enabled
+  for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+    $featlist->{"enabled"}->[$i] = 1;
+  }
+}
+
+print STDERR "MERT starting values and ranges for random generation:\n";
+for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+  my $name = $featlist->{"names"}->[$i];
+  my $val = $featlist->{"values"}->[$i];
+  my $min = $featlist->{"mins"}->[$i];
+  my $max = $featlist->{"maxs"}->[$i];
+  my $enabled = $featlist->{"enabled"}->[$i];
+  printf STDERR "  %5s = %7.3f", $name, $val;
+  if ($enabled) {
+    printf STDERR " (%5.2f .. %5.2f)\n", $min, $max;
+  } else {
+    print STDERR " --- inactive, not optimized ---\n";
+  }
+}
 
 if ($continue) {
   # getting the last finished step
@@ -529,6 +550,16 @@ if ($continue) {
 	  $prev_score_file = "run$prevstep.scores.dat";
 	}
       }
+      if (! -e "run$prevstep.${weights_in_file}"){
+	die "Can't start from step $step, because run$prevstep.${weights_in_file} was not found!";
+      }else{
+        if (defined $prev_init_file){
+          $prev_init_file = "${prev_init_file},run$prevstep.${weights_in_file}";
+        }
+        else{
+          $prev_init_file = "run$prevstep.${weights_in_file}";
+        }
+      }
     }
     if (! -e "run$step.weights.txt"){
       die "Can't start from step $step, because run$step.weights.txt was not found!";
@@ -557,57 +588,28 @@ if ($continue) {
     
     my @newweights = split /\s+/, $bestpoint;
     
-    
-    print STDERR "Reading last cached lambda values (result from step $step)\n";
-    @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
-    
+    # Sanity check: order of lambdas must match
+    sanity_check_order_of_lambdas($featlist,
+      "gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
     
     # update my cache of lambda values
-    store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+    $featlist->{"values"} = \@newweights;
     
   }
   else{
-    print STDERR "No pevious data are needed\n";
+    print STDERR "No previous data are needed\n";
   }
 
   $start_run = $step +1;
 }
 
-if ($___FILTER_PHRASE_TABLE){
-  # filter the phrase tables wih respect to input, use --decoder-flags
-  print "filtering the phrase tables... ".`date`;
-  my $___FILTER_F  = $___DEV_F;
-  $___FILTER_F = $filterfile if (defined $filterfile);
-  my $cmd = "$filtercmd ./filtered $___CONFIG $___FILTER_F";
-  if (defined $___JOBS) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
-      or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
-  } else {
-    safesystem($cmd) or die "Failed to filter the tables.";
-  }
-
-  # make a backup copy of startup ini file
-  $___CONFIG_BAK = $___CONFIG;
-  # the decoder should now use the filtered model
-  $___CONFIG = "filtered/moses.ini";
-}
-else{
-  # do not filter phrase tables (useful if binary phrase tables are available)
-  # use the original configuration file
-  $___CONFIG_BAK = $___CONFIG;
-}
-
-my $PARAMETERS;
-#$PARAMETERS = $___DECODER_FLAGS . " -config $___CONFIG -inputtype $___INPUTTYPE";
-$PARAMETERS = $___DECODER_FLAGS;
+###### MERT MAIN LOOP
 
 my $run=$start_run-1;
 
 my $oldallsorted = undef;
 my $allsorted = undef;
 
-my $cmd;
-# features and scores from the last run.
 my $nbest_file=undef;
 
 while(1) {
@@ -622,13 +624,13 @@ while(1) {
   print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
-  create_config($___CONFIG, "./run$run.moses.ini", \%used_triples, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
+  create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
 
 
   # skip if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      $nbest_file = run_decoder(\%used_triples, $PARAMETERS, $run, \@order_of_lambdas_from_decoder, $need_to_normalize);
+      $nbest_file = run_decoder($featlist, $run, $need_to_normalize);
       $need_to_normalize = 0;
       safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
       $nbest_file = $nbest_file.".gz";
@@ -636,9 +638,6 @@ while(1) {
   else {
       $nbest_file="run$run.best$___N_BEST_LIST_SIZE.out.gz";
       print "skipped decoder run $run\n";
-      if (0 == scalar @order_of_lambdas_from_decoder) {
-        @order_of_lambdas_from_decoder = get_order_of_scores_from_nbestlist("gunzip -dc $nbest_file | head -1 |");
-      }
       $skip_decoder = 0;
       $need_to_normalize = 0;
   }
@@ -653,45 +652,29 @@ while(1) {
   my $feature_file = "run$run.${base_feature_file}";
   my $score_file = "run$run.${base_score_file}";
 
-  $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
+  my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
 
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
       or die "Failed to submit extraction to queue (via $qsubwrapper)";
   } else {
     safesystem("$cmd > extract.out 2> extract.err") or die "Failed to do extraction of statistics.";
   }
 
-  # Create the initial weights file for mert, in init.opt
-  # mert reads in the file init.opt containing the current
-  # values of lambda.
+  # Create the initial weights file for mert: init.opt
 
-  # We need to prepare the files and **the order of the lambdas must
-  # correspond to the order @order_of_lambdas_from_decoder
-
-  my @MIN = ();   # lower bounds
-  my @MAX = ();   # upper bounds
-  my @CURR = ();   # the starting values
-  my @NAME = ();  # to which model does the lambda belong
+  my @MIN = @{$featlist->{"mins"}};
+  my @MAX = @{$featlist->{"maxs"}};
+  my @CURR = @{$featlist->{"values"}};
+  my @NAME = @{$featlist->{"names"}};
   
-  my %visited = ();
-  foreach my $name (@order_of_lambdas_from_decoder) {
-      if (!defined $visited{$name}) {
-          $visited{$name} = 0;
-      } else {
-          $visited{$name}++;
-      }
-      my ($val, $min, $max) = @{$used_triples{$name}->[$visited{$name}]};
-      push @CURR, $val;
-      push @MIN, $min;
-      push @MAX, $max;
-      push @NAME, $name;        
-  }
-
-  open(OUT,"> $weights_in_file") or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
+  open(OUT,"> $weights_in_file")
+    or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
   print OUT join(" ", @CURR)."\n";
+  print OUT join(" ", @MIN)."\n";  # this is where we could pass MINS
+  print OUT join(" ", @MAX)."\n";  # this is where we could pass MAXS
   close(OUT);
-  print join(" ", @NAME)."\n";
+  # print join(" ", @NAME)."\n";
   
   # make a backup copy labelled with this run number
   safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
@@ -699,10 +682,19 @@ while(1) {
   my $DIM = scalar(@CURR); # number of lambdas
 
   # run mert
-  $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n 20";
+  $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n $___RANDOM_RESTARTS";
   if ($___PREDICTABLE_SEEDS) {
       my $seed = $run * 1000;
       $cmd = $cmd." -r $seed";
+  }
+  if ($___RANDOM_DIRECTIONS) {
+    if ($___NUM_RANDOM_DIRECTIONS == 0) {
+      $cmd .= " -m 50";
+    }
+    $cmd = $cmd." -t random-direction";
+  }
+  if ($___NUM_RANDOM_DIRECTIONS) {
+    $cmd .= " -m $___NUM_RANDOM_DIRECTIONS";
   }
 
   if (defined $prev_feature_file) {
@@ -717,12 +709,21 @@ while(1) {
   else{
     $cmd = $cmd." --scfile $score_file";
   }
+  if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
+    $cmd = $cmd." --ifile $prev_init_file,run$run.$weights_in_file";
+  }
+  else{
+    $cmd = $cmd." --ifile run$run.$weights_in_file";
+  }
 
-  $cmd = $cmd." --ifile run$run.$weights_in_file";
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+      $cmd .= " --pro pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary pro.data";
+  }
 
-  if (defined $___JOBS) {
+  if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
-  } else {
+  } 
+  else {
     safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
   }
   die "Optimization failed, file $weights_out_file does not exist or is empty"
@@ -732,6 +733,7 @@ while(1) {
  # backup copies
   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
+  if ($___PAIRWISE_RANKED_OPTIMIZER) { safesystem ("\\cp -f pro.data run$run.pro.data") or die; }
   safesystem ("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
@@ -741,23 +743,40 @@ while(1) {
 
   $bestpoint = undef;
   $devbleu = undef;
-  open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
-  while (<IN>) {
-    if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
-      $bestpoint = $1;
-      $devbleu = $2;
-      last;
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+    open(IN,"run$run.$mert_outfile") or die "Can't open run$run.$mert_outfile";
+    my (@WEIGHT,$sum);
+    foreach (@CURR) { push @WEIGHT, 0; }
+    while(<IN>) {
+      if (/^F(\d+) ([\-\.\de]+)/) {
+	$WEIGHT[$1] = $2;
+	$sum += abs($2);
+      }
     }
+    $devbleu = "unknown";
+    foreach (@WEIGHT) { $_ /= $sum; }
+    $bestpoint = join(" ",@WEIGHT);
+    close IN;
   }
-  close IN;
+  else {
+    open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+        $bestpoint = $1;
+        $devbleu = $2;
+        last;
+      }
+    }
+    close IN;
+  }
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
   print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
 
+  # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
 
-  # update my cache of lambda values
-  store_new_lambda_values(\%used_triples, \@order_of_lambdas_from_decoder, \@newweights);
+  $featlist->{"values"} = \@newweights;
 
   ## additional stopping criterion: weights have not changed
   my $shouldstop = 1;
@@ -773,7 +792,6 @@ while(1) {
   open F, "> finished_step.txt" or die "Can't mark finished step";
   print F $run."\n";
   close F;
-
 
   if ($shouldstop) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
@@ -791,6 +809,7 @@ while(1) {
   print "loading data from $firstrun to $run (prev_aggregate_nbl_size=$prev_aggregate_nbl_size)\n";
   $prev_feature_file = undef;
   $prev_score_file = undef;
+  $prev_init_file = undef;
   for (my $i=$firstrun;$i<=$run;$i++){ 
     if (defined $prev_feature_file){
       $prev_feature_file = "${prev_feature_file},run${i}.${base_feature_file}";
@@ -804,9 +823,16 @@ while(1) {
     else{
       $prev_score_file = "run${i}.${base_score_file}";
     }
+    if (defined $prev_init_file){
+      $prev_init_file = "${prev_init_file},run${i}.${weights_in_file}";
+    }
+    else{
+      $prev_init_file = "run${i}.${weights_in_file}";
+    }
   }
   print "loading data from $prev_feature_file\n" if defined($prev_feature_file);
   print "loading data from $prev_score_file\n" if defined($prev_score_file);
+  print "loading data from $prev_init_file\n" if defined($prev_init_file);
 }
 print "Training finished at ".`date`;
 
@@ -815,7 +841,7 @@ if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_BAK, "./moses.ini", \%used_triples, $run, $devbleu);
+create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -828,99 +854,147 @@ chdir($cwd);
 
 } # end of local scope
 
-sub store_new_lambda_values {
-  # given new lambda values (in given order), replace the 'val' element in our triples
-  my $triples = shift;
-  my $names = shift;
-  my $values = shift;
-
-  my %idx = ();
-  foreach my $i (0..scalar(@$values)-1) {
-    my $name = $names->[$i];
-    die "Missed name for lambda $values->[$i] (in @$values; names: @$names)"
-      if !defined $name;
-    if (!defined $idx{$name}) {
-      $idx{$name} = 0;
-    } else {
-      $idx{$name}++;
-    }
-    die "We did not optimize '$name', but moses returned it back to us"
-      if !defined $triples->{$name};
-    die "Moses gave us too many lambdas for '$name', we had ".scalar(@{$triples->{$name}})
-      ." but we got at least ".$idx{$name}+1
-      if !defined $triples->{$name}->[$idx{$name}];
-
-    # set the corresponding field in triples
-    # print STDERR "Storing $i-th score as $name: $idx{$name}: $values->[$i]\n";
-    $triples->{$name}->[$idx{$name}]->[0] = $values->[$i];
-  }
-}
-
-sub dump_triples {
-  my $triples = shift;
-
-  foreach my $name (keys %$triples) {
-    foreach my $triple (@{$triples->{$name}}) {
-      my ($val, $min, $max) = @$triple;
-      print STDERR "Triples:  $name\t$val\t$min\t$max    ($triple)\n";
-    }
-  }
-}
-
-
 sub run_decoder {
-    my ($triples, $parameters, $run, $output_order_of_lambdas, $need_to_normalize) = @_;
+    my ($featlist, $run, $need_to_normalize) = @_;
     my $filename_template = "run%d.best$___N_BEST_LIST_SIZE.out";
     my $filename = sprintf($filename_template, $run);
     
-    print "params = $parameters\n";
-    # prepare the decoder config:
-    my $decoder_config = "";
-    my @vals = ();
-    foreach my $name (keys %$triples) {
-      $decoder_config .= "-$name ";
-      foreach my $triple (@{$triples->{$name}}) {
-        my ($val, $min, $max) = @$triple;
-        $decoder_config .= "%.6f ";
-        push @vals, $val;
-      }
-    }
+    # user-supplied parameters
+    print "params = $___DECODER_FLAGS\n";
+
+    # parameters to set all model weights (to override moses.ini)
+    my @vals = @{$featlist->{"values"}};
     if ($need_to_normalize) {
       print STDERR "Normalizing lambdas: @vals\n";
       my $totlambda=0;
       grep($totlambda+=abs($_),@vals);
       grep($_/=$totlambda,@vals);
     }
+    # moses now does not seem accept "-tm X -tm Y" but needs "-tm X Y"
+    my %model_weights;
+    for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+      my $name = $featlist->{"names"}->[$i];
+      $model_weights{$name} = "-$name" if !defined $model_weights{$name};
+      $model_weights{$name} .= sprintf " %.6f", $vals[$i];
+    }
+    my $decoder_config = join(" ", values %model_weights);
     print STDERR "DECODER_CFG = $decoder_config\n";
-    print STDERR "     values = @vals\n";
-    $decoder_config = sprintf($decoder_config, @vals);
     print "decoder_config = $decoder_config\n";
 
     # run the decoder
-	my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
+    my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
 
-    if (defined $___JOBS) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$parameters $decoder_config\" -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+    if (defined $___JOBS && $___JOBS > 0) {
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $parameters  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
-    if (0 == scalar @$output_order_of_lambdas) {
-      # we have to peek at the nbestlist
-      @$output_order_of_lambdas = get_order_of_scores_from_nbestlist($filename);
-    } 
-      # we have checked the nbestlist already, we trust the order of output scores does not change
-      return $filename;
+    sanity_check_order_of_lambdas($featlist, $filename);
+    return $filename;
 }
+
+
+sub insert_ranges_to_featlist {
+  my $featlist = shift;
+  my $ranges = shift;
+
+  $ranges = [] if !defined $ranges;
+
+  # first collect the ranges from options
+  my $niceranges;
+  foreach my $range (@$ranges) {
+    my $name = undef;
+    foreach my $namedpair (split /,/, $range) {
+      if ($namedpair =~ /^(.*?):/) {
+        $name = $1;
+        $namedpair =~ s/^.*?://;
+        die "Unrecognized name '$name' in --range=$range"
+          if !defined $ABBR2FULL{$name};
+      }
+      my ($min, $max) = split /\.\./, $namedpair;
+      die "Bad min '$min' in --range=$range" if $min !~ /^-?[0-9.]+$/;
+      die "Bad max '$max' in --range=$range" if $min !~ /^-?[0-9.]+$/;
+      die "No name given in --range=$range" if !defined $name;
+      push @{$niceranges->{$name}}, [$min, $max];
+    }
+  }
+
+  # now populate featlist
+  my $seen = undef;
+  for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    $seen->{$name} ++;
+    my $min = 0.0;
+    my $max = 1.0;
+    if (defined $niceranges->{$name}) {
+      my $minmax = shift @{$niceranges->{$name}};
+      ($min, $max) = @$minmax if defined $minmax;
+    }
+    $featlist->{"mins"}->[$i] = $min;
+    $featlist->{"maxs"}->[$i] = $max;
+  }
+  return $featlist;
+}
+
+sub sanity_check_order_of_lambdas {
+  my $featlist = shift;
+  my $filename_or_stream = shift;
+
+  my @expected_lambdas = @{$featlist->{"names"}};
+  my @got = get_order_of_scores_from_nbestlist($filename_or_stream);
+  die "Mismatched lambdas. Decoder returned @got, we expected @expected_lambdas"
+    if "@got" ne "@expected_lambdas";
+}
+    
+
+sub get_featlist_from_moses {
+  # run moses with the given config file and return the list of features and
+  # their initial values
+  my $configfn = shift;
+  my $featlistfn = "./features.list";
+  if (-e $featlistfn) {
+    print STDERR "Using cached features list: $featlistfn\n";
+  } else {
+    print STDERR "Asking moses for feature names and values from $___CONFIG\n";
+    my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
+    safesystem($cmd) or die "Failed to run moses with the config $configfn";
+  }
+
+  # read feature list
+  my @names = ();
+  my @startvalues = ();
+  open(INI,$featlistfn) or die "Can't read $featlistfn";
+  my $nr = 0;
+  my @errs = ();
+  while (<INI>) {
+    $nr++;
+    chomp;
+    my ($longname, $feature, $value) = split / /;
+    push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
+      if $value !~ /^[+-]?[0-9.e]+$/;
+    push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
+      if !defined $ABBR2FULL{$feature};
+    push @names, $feature;
+    push @startvalues, $value;
+  }
+  close INI;
+  if (scalar @errs) {
+    print STDERR join("", @errs);
+    exit 1;
+  }
+  return {"names"=>\@names, "values"=>\@startvalues};
+}
+
 
 sub get_order_of_scores_from_nbestlist {
   # read the first line and interpret the ||| label: num num num label2: num ||| column in nbestlist
   # return the score labels in order
   my $fname_or_source = shift;
-  print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
+  # print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
   open IN, $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source'";
   my $line = <IN>;
   close IN;
@@ -950,7 +1024,7 @@ sub get_order_of_scores_from_nbestlist {
 sub create_config {
     my $infn = shift; # source config
     my $outfn = shift; # where to save the config
-    my $triples = shift; # the lambdas we should write
+    my $featlist = shift; # the lambdas we should write
     my $iteration = shift;  # just for verbosity
     my $bleu_achieved = shift; # just for verbosity
 
@@ -975,17 +1049,21 @@ sub create_config {
 	}
     }
 
+    # First delete all weights params from the input, we're overwriting them.
+    # Delete both short and long-named version.
+    for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+      my $name = $featlist->{"names"}->[$i];
+      delete($P{$name});
+      delete($P{$ABBR2FULL{$name}});
+    }
+
     # Convert weights to elements in P
-    foreach my $abbr (keys %$triples) {
-      # First delete all weights params from the input, in short or long-named version
-      delete($P{$abbr});
-      delete($P{$ABBR2FULL{$abbr}});
-      # Then feed P with the current values
-      foreach my $feature (@{$used_triples{$abbr}}) {
-        my ($val, $min, $max) = @$feature;
-        my $name = defined $ABBR2FULL{$abbr} ? $ABBR2FULL{$abbr} : $abbr;
-        push @{$P{$name}}, $val;
-      }
+    for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
+      my $name = $featlist->{"names"}->[$i];
+      my $val = $featlist->{"values"}->[$i];
+      $name = defined $ABBR2FULL{$name} ? $ABBR2FULL{$name} : $name;
+        # ensure long name
+      push @{$P{$name}}, $val;
     }
 
     # create new moses.ini decoder config file by cloning and overriding the original one
@@ -1093,177 +1171,4 @@ $PATH =~ s/\/nfsmnt//;
 
 
 
-sub scan_config {
-  my $ini = shift;
-  my $inishortname = $ini; $inishortname =~ s/^.*\///; # for error reporting
-  # we get a pre-filled counts, because some lambdas are always needed (word penalty, for instance)
-  # as we walk though the ini file, we record how many extra lambdas do we need
-  # and finally, we report it
-
-  # in which field (counting from zero) is the filename to check?
-  my %where_is_filename = (
-    "ttable-file" => 4,
-    "generation-file" => 3,
-    "lmodel-file" => 3,
-    "distortion-file" => 3,
-    "global-lexical-file" => 1,
-  );
-  # by default, each line of each section means one lambda, but some sections
-  # explicitly state a custom number of lambdas
-  my %where_is_lambda_count = (
-    "ttable-file" => 3,
-    "generation-file" => 2,
-    "distortion-file" => 2,
-    "link-param-count" => 0,
-  );
-
-  my %weight_section_short_names = (%FULL2ABBR,
-         map { ($_, $_) } keys %ABBR2FULL);
-  # maps both long and short names of weight sections to the short names
-
-  my $config_weights;
-  # to collect all weight values from moses.ini
-  #   $config_weights->{shortname}  is a reference to array of features
-  
-  open INI, $ini or die "Can't read $ini";
-  my $section = undef;  # name of the section we are reading
-  my $shortname = undef;  # the corresponding short name
-  my $nr = 0;
-  my $error = 0;
-  my %defined_files;
-  my %defined_steps;  # check the ini file for compatible mapping steps and actually defined files
-  while (<INI>) {
-    $nr++;
-    chomp;
-    next if /^\s*#/; # skip comments
-    next if /^\s*$/; # skip blank lines
-    if (/^\[([^\]]*)\]\s*$/) {
-      $section = $1;
-      $shortname = $TABLECONFIG2ABBR{$section};
-      next;
-    }
-    if (defined $section && defined $weight_section_short_names{$section}) {
-      # this is a weight, store it
-      my $weightname = $weight_section_short_names{$section};
-      $config_weights->{$weightname} = []
-        if ! defined $config_weights->{$weightname};
-      push @{$config_weights->{$weightname}}, $_;
-    }
-    if (defined $section && $section eq "mapping") {
-      # keep track of mapping steps used
-      $defined_steps{$1}++ if /^([TG])/ || /^\d+ ([TG])/;
-    }
-    if (defined $section
-        && (defined $where_is_filename{$section}
-            || defined $where_is_lambda_count{$section})) {
-      # this ini section is relevant to lambdas
-      my @flds = split / +/;
-      my $filenamefield = $where_is_filename{$section};
-      if (defined $filenamefield) {
-        my $fn = $flds[$filenamefield];
-        print STDERR "Checking the filename in $section: $fn\n"
-          if $verbose;
-        if (defined $fn && $fn !~ /^\s+$/) {
-          # this is a filename! check it
-          if ($fn !~ /^\//) {
-            $error = 1;
-            print STDERR "$inishortname:$nr:Filename not absolute: $fn\n";
-          }
-          if (! -s $fn && ! -s "$fn.gz" && ! -s "$fn.binphr.idx"
-              && ! -s "$fn.binlexr.idx" ) {
-            $error = 1;
-            print STDERR "$inishortname:$nr:File does not exist or empty: $fn\n";
-          }
-          # remember the number of files used, to know how many lambdas do we need
-          die "No short name was defined for section $section!"
-            if ! defined $shortname;
-          $defined_files{$shortname}++;
-        }
-      }
-
-      my $lambdacountfield = $where_is_lambda_count{$section};
-      # how many lambdas does this model need?
-      # either specified explicitly, or the default, i.e. one
-      my $needlambdas = defined $lambdacountfield
-                        ? $flds[$lambdacountfield] : 1;
-  
-      print STDERR "Config needs $needlambdas lambdas for $section (i.e. $shortname)\n" if $verbose;
-      if (!defined $___LAMBDA # user provides all lambdas on his own
-        && (!defined $additional_triples->{$shortname}
-            || scalar(@{$additional_triples->{$shortname}}) < $needlambdas)
-        && (!defined $additional_tripes_loop->{$shortname})
-        ) {
-        # Add triples with default values
-        if (!defined $additional_triples->{$shortname}) {
-            $additional_triples->{$shortname} = ();
-        }
-        while (scalar(@{$additional_triples->{$shortname}}) < $needlambdas) {
-            push @{$additional_triples->{$shortname}}, [1,-1,1];
-        }
-
-      }
-      # note: models may use less parameters than the maximum number
-      # of triples, but it is actually bad, because then the ranges
-      # may be meant for another parameter
-      my @triplets = @{$additional_triples->{$shortname}};
-      for(my $lambda=0;$lambda<$needlambdas;$lambda++) {
-        my $triplet = $lambda;
-        $triplet %= scalar(@triplets)
-          if $additional_tripes_loop->{$shortname};
-        my ($start, $min, $max) 
-            = @{$triplets[$triplet]};
-        push @{$used_triples{$shortname}}, [$start, $min, $max];
-      }
-    }
-  }
-  die "$inishortname: File was empty!" if !$nr;
-  close INI;
-  for my $pair (qw/T=tm=translation G=g=generation/) {
-    my ($tg, $shortname, $label) = split /=/, $pair;
-    $defined_files{$shortname} = 0 if ! defined $defined_files{$shortname};
-    $defined_steps{$tg} = 0 if ! defined $defined_steps{$tg};
-
-    if ($defined_files{$shortname} != $defined_steps{$tg}) {
-      print STDERR "$inishortname: You defined $defined_files{$shortname} files for $label but use $defined_steps{$tg} in [mapping]!\n";
-      $error = 1;
-    }
-  }
-
-  # The distance-based reordering model is never mentioned in moses.ini,
-  # except there is one extra weight-d in the list. So if we spot this
-  # one extra weight-d, we actually insert the triple for it.
-  # Hierarchical moses has no distance-based reordering.
-  push @{$used_triples{"d"}}, [1.0, 0.0, 2.0]
-    if defined $config_weights->{"d"}
-      && (!defined $used_triples{"d"}
-         || scalar @{$config_weights->{"d"}}
-            == scalar @{$used_triples{"d"}} +1);
-
-  # check the weights provided in the ini file and plug them into the triples
-  # if --starting-weights-from_ini
-  foreach my $weightname (keys %used_triples) {
-    if (!defined $config_weights->{$weightname}) {
-      print STDERR "$inishortname:Model requires weights '$weightname' but none were found in the ini file.\n";
-      $error = 1;
-      next;
-    }
-    my $thesetriplets = $used_triples{$weightname};
-    my $theseconfig_weights = $config_weights->{$weightname};
-    if (scalar(@$thesetriplets) != scalar(@$theseconfig_weights)) {
-      print STDERR "$inishortname:Mismatched number of weights for '$weightname'. Expected "
-        .scalar(@$thesetriplets) .", got ".scalar(@$theseconfig_weights)."\n";
-      $error = 1;
-      next;
-    }
-    if ($starting_weights_from_ini) {
-      # copy weights from moses.ini to the starting value of used_triplets
-      for (my $i=0; $i < @$theseconfig_weights; $i++) {
-        $thesetriplets->[$i]->[0] = $theseconfig_weights->[$i];
-      }
-    }
-  }
-
-  exit(1) if $error;
-  return (\%defined_files);
-}
 

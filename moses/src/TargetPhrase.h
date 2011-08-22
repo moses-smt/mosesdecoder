@@ -39,27 +39,9 @@ namespace Moses
 {
 
 class LMList;
-class PhraseDictionary;
-class GenerationDictionary;
 class ScoreProducer;
 class TranslationSystem;
 class WordPenaltyProducer;
-
-class CountInfo
-{
-public:
-  CountInfo()
-  {}
-  CountInfo(float countSource, float countTarget)
-    :m_countSource(countSource)
-    ,m_countTarget(countTarget)
-  {	}
-
-  float m_countSource;
-  float m_countTarget;
-
-};
-
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
@@ -67,15 +49,14 @@ class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-	float m_transScore, m_ngramScore, m_fullScore;
+	float m_transScore, m_fullScore;
 	//float m_ngramScore, m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
-	AlignmentInfo m_alignmentInfo;
 
 	// in case of confusion net, ptr to source phrase
 	Phrase m_sourcePhrase; 
+	const AlignmentInfo* m_alignmentInfo;
 	Word m_lhsTarget;
-	CountInfo m_countInfo;
 
 	static bool wordalignflag;
 	static bool printalign;
@@ -168,12 +149,10 @@ public:
 	{ return m_lhsTarget; }
 	
 	void SetAlignmentInfo(const std::string &alignString);
-	void SetAlignmentInfo(const std::list<std::pair<size_t,size_t> > &alignmentInfo);
+	void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
 	
-	AlignmentInfo &GetAlignmentInfo()
-	{ return m_alignmentInfo; }
 	const AlignmentInfo &GetAlignmentInfo() const
-	{ return m_alignmentInfo; }
+	{ return *m_alignmentInfo; }
 	
 	void UseWordAlignment(bool a){
 		wordalignflag=a;
@@ -191,6 +170,7 @@ public:
 	void CreateCountInfo(const std::string &countStr);
 	
 	TO_STRING();
+
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);

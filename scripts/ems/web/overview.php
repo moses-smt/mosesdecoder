@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('Europe/London');
+
 function setup() {
   $setup = file("setup");
   head("All Experimental Setups");
@@ -11,7 +13,7 @@ function setup() {
     print "<TR><TD><A HREF=\"?setup=$dir[0]\">$dir[0]</A></TD><TD>$dir[1]</TD><TD>$dir[2]</TD><TD>$dir[3]</TD></TR>\n";
   }
   print "</TABLE>\n";
-  print "<P>To add experiment, edit setup";
+  print "<P>To add experiment, edit setup in web directory";
 }
 
 function overview() {
@@ -29,10 +31,14 @@ function overview() {
 
   print "<form action=\"\" method=get>\n";
   output_state_for_form();
+
+  // count how many analyses there are for each test set
   while (list($id,$info) = each($experiment)) {
     reset($evalset);
     while (list($set,$dummy) = each($evalset)) {
       $analysis = "$dir/evaluation/$set.analysis.$id";
+      $report_info = "$dir/steps/$id/REPORTING_report.$id.INFO";
+      // does the analysis file exist?
       if (file_exists($analysis)) {
 	if (!array_key_exists($set,$has_analysis)) { 
 	  $has_analysis[$set] = 0;
@@ -117,7 +123,7 @@ function overview() {
 	      list($score) = sscanf($info->result[$set],"%f%s");
 	      if ($score > 0) {
 	        print "score[$id][\"$set\"] = $score;\n";
-		if ($score > $best[$set]) {
+		if (!array_key_exists($set,$best) || $score > $best[$set]) {
 		    $best[$set] = $score;
 		}
 	      }
@@ -303,8 +309,8 @@ function output_score($id,$info) {
     if ($has_analysis && array_key_exists($set,$has_analysis)) {
       print "<td align=center>";
       global $dir;
-      $analysis = "$dir/evaluation/$set.analysis.$id";
-      if (file_exists($analysis)) {
+      $analysis = get_analysis_version($dir,$set,$id);
+      if ($analysis["basic"]) {
         print "<a href=\"?analysis=show&setup=$setup&set=$set&id=$id\">&#x24B6;</a> <input type=checkbox name=analysis-$id-$set value=1>";
       }
       print "</td>";
@@ -315,6 +321,7 @@ function output_score($id,$info) {
 function tune_status($id) {
   global $dir;
   $max_iteration = 0;
+  if (! file_exists($dir."/tuning/tmp.".$id)) { return ""; }
   $d = dir($dir."/tuning/tmp.".$id);
   while (false !== ($entry = $d->read())) {
     if (preg_match('/run(\d+).moses.ini/',$entry,$match) 

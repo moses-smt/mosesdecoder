@@ -14,4 +14,4 @@ endif
 if WITH_UNITTEST
   UNITTEST = unittest
 endif
-SUBDIRS = kenlm moses/src moses-chart/src OnDiskPt/src moses-cmd/src misc moses-chart-cmd/src CreateOnDisk/src mira $(MERT) $(SERVER) $(UNITTEST)
+SUBDIRS = kenlm moses/src OnDiskPt/src moses-cmd/src misc moses-chart-cmd/src CreateOnDisk/src mira $(MERT) $(SERVER) $(UNITTEST)

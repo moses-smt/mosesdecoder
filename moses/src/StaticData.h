@@ -71,6 +71,9 @@ class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class TargetBigramFeature;
+#ifdef HAVE_SYNLM
+class SyntacticLanguageModel;
+#endif
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
@@ -86,12 +89,15 @@ protected:
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
   std::vector<GenerationDictionary*>	m_generationDictionary;
-  Parameter			*m_parameter;
-  std::vector<FactorType>			m_inputFactorOrder, m_outputFactorOrder;
+  Parameter *m_parameter;
+  std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
   std::vector<LexicalReordering*>                   m_reorderModels;
   std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+#ifdef HAVE_SYNLM
+	SyntacticLanguageModel* m_syntacticLanguageModel;
+#endif
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
@@ -115,10 +121,10 @@ protected:
   // do it differently from old pharaoh
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
-  bool m_reorderingConstraint; // use additional reordering constraints
+  bool m_reorderingConstraint; //! use additional reordering constraints
   size_t
-  m_maxHypoStackSize //hypothesis-stack size that triggers pruning
-  , m_minHypoStackDiversity // minimum number of hypothesis in stack for each source word coverage
+  m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
+  , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
   , m_nBestSize
   , m_nBestFactor
   , m_maxNoTransOptPerCoverage
@@ -131,11 +137,7 @@ protected:
 
   std::string									m_nBestFilePath;
   bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
-  /***
-   * false = treat unknown words as unknowns, and translate them as themselves;
-   * true = drop (ignore) them
-   */
-  bool m_dropUnknown;
+  bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
@@ -209,6 +211,7 @@ protected:
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
+  bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
 
@@ -229,15 +232,13 @@ protected:
 
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
-
-  /***
-   * load all language models as specified in ini file
-   */
+  //! load all language models as specified in ini file
   bool LoadLanguageModels();
-  /***
-   * load not only the main phrase table but also any auxiliary tables that depend on which features are being used
-   * (eg word-deletion, word-insertion tables)
-   */
+#ifdef HAVE_SYNLM
+  //! load syntactic language model
+	bool LoadSyntacticLanguageModel();
+#endif
+  //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
   bool LoadGenerationTables();
@@ -285,16 +286,12 @@ public:
   }
 #endif
 
-  /** load data into static instance. This function is required
-  	* as LoadData() is not const
-  	*/
+  //! Load data into static instance. This function is required as LoadData() is not const
   static bool LoadDataStatic(Parameter *parameter) {
     return s_instance.LoadData(parameter);
   }
 
-  /** Main function to load everything.
-   * Also initialize the Parameter object
-   */
+  //! Main function to load everything. Also initialize the Parameter object
   bool LoadData(Parameter *parameter);
 
   const PARAM_VEC &GetParam(const std::string &paramName) const {
@@ -351,6 +348,9 @@ public:
   size_t GetCubePruningDiversity() const {
     return m_cubePruningDiversity;
   }
+  bool GetCubePruningLazyScoring() const {
+    return m_cubePruningLazyScoring;
+  }
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;
   }
@@ -376,7 +376,6 @@ public:
   const TranslationSystem& GetTranslationSystem(std::string id) const {
     std::map<std::string, TranslationSystem>::const_iterator iter =
       m_translationSystems.find(id);
-    VERBOSE(2, "Looking for translation system id " << id << std::endl);
     if (iter == m_translationSystems.end()) {
       VERBOSE(1, "Translation system not found " << id << std::endl);
       throw std::runtime_error("Unknown translation system id");
@@ -450,6 +449,9 @@ public:
   }
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
+  }
+  LMList GetLMList() const { 
+    return m_languageModel; 
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;
@@ -590,6 +592,8 @@ public:
   }
 
   void AddTransOptListToCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase, const TranslationOptionList &transOptList) const;
+
+  void ClearTransOptionCache() const;
 
 
   const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;

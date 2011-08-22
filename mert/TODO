@@ -1,0 +1,6 @@
+- check that mert-moses.pl emits devset score after every iteration
+  - correctly for whichever metric we are optimizing
+  - even when using --pairwise-ranked (PRO)
+    - this may make use of 'evaluator', soon to be added by Matous Machacek
+
+- check that --pairwise-ranked is compatible with all optimization metrics

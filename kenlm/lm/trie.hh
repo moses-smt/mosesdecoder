@@ -10,6 +10,7 @@
 
 namespace lm {
 namespace ngram {
+class Config;
 namespace trie {
 
 struct NodeRange {
@@ -46,13 +47,12 @@ class Unigram {
     
     void LoadedBinary() {}
 
-    bool Find(WordIndex word, float &prob, float &backoff, NodeRange &next) const {
+    void Find(WordIndex word, float &prob, float &backoff, NodeRange &next) const {
       UnigramValue *val = unigram_ + word;
       prob = val->weights.prob;
       backoff = val->weights.backoff;
       next.begin = val->next;
       next.end = (val+1)->next;
-      return true;
     }
 
   private:
@@ -67,62 +67,65 @@ class BitPacked {
       return insert_index_;
     }
 
-    void LoadedBinary() {}
-
   protected:
     static std::size_t BaseSize(uint64_t entries, uint64_t max_vocab, uint8_t remaining_bits);
 
     void BaseInit(void *base, uint64_t max_vocab, uint8_t remaining_bits);
 
-    uint8_t word_bits_, prob_bits_;
+    uint8_t word_bits_;
     uint8_t total_bits_;
     uint64_t word_mask_;
 
     uint8_t *base_;
 
-    uint64_t insert_index_;
+    uint64_t insert_index_, max_vocab_;
 };
 
-class BitPackedMiddle : public BitPacked {
+template <class Quant, class Bhiksha> class BitPackedMiddle : public BitPacked {
   public:
-    BitPackedMiddle() {}
-
-    static std::size_t Size(uint64_t entries, uint64_t max_vocab, uint64_t max_next);
+    static std::size_t Size(uint8_t quant_bits, uint64_t entries, uint64_t max_vocab, uint64_t max_next, const Config &config);
 
     // next_source need not be initialized.  
-    void Init(void *base, uint64_t max_vocab, uint64_t max_next, const BitPacked &next_source);
+    BitPackedMiddle(void *base, const Quant &quant, uint64_t entries, uint64_t max_vocab, uint64_t max_next, const BitPacked &next_source, const Config &config);
 
     void Insert(WordIndex word, float prob, float backoff);
+
+    void FinishedLoading(uint64_t next_end, const Config &config);
+
+    void LoadedBinary() { bhiksha_.LoadedBinary(); }
 
     bool Find(WordIndex word, float &prob, float &backoff, NodeRange &range) const;
 
     bool FindNoProb(WordIndex word, float &backoff, NodeRange &range) const;
 
-    void FinishedLoading(uint64_t next_end);
-
   private:
-    uint8_t backoff_bits_, next_bits_;
-    uint64_t next_mask_;
+    Quant quant_;
+    Bhiksha bhiksha_;
 
     const BitPacked *next_source_;
 };
 
-
-class BitPackedLongest : public BitPacked {
+template <class Quant> class BitPackedLongest : public BitPacked {
   public:
+    static std::size_t Size(uint8_t quant_bits, uint64_t entries, uint64_t max_vocab) {
+      return BaseSize(entries, max_vocab, quant_bits);
+    }
+
     BitPackedLongest() {}
 
-    static std::size_t Size(uint64_t entries, uint64_t max_vocab) {
-      return BaseSize(entries, max_vocab, 0);
+    void Init(void *base, const Quant &quant, uint64_t max_vocab) {
+      quant_ = quant;
+      BaseInit(base, max_vocab, quant_.TotalBits());
     }
 
-    void Init(void *base, uint64_t max_vocab) {
-      return BaseInit(base, max_vocab, 0);
-    }
+    void LoadedBinary() {}
 
     void Insert(WordIndex word, float prob);
 
     bool Find(WordIndex word, float &prob, const NodeRange &node) const;
+
+  private:
+    Quant quant_;
 };
 
 } // namespace trie

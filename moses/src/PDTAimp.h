@@ -5,22 +5,22 @@
 #define moses_PDTAimp_h
 
 #include "StaticData.h"  // needed for factor splitter
+#include "PhraseDictionaryTree.h"
+#include "UniqueObject.h"
+#include "InputFileStream.h"
+#include "PhraseDictionaryTreeAdaptor.h"
+#include "Util.h"
 
 namespace Moses
 {
-inline bool existsFile(const char* filePath)
-{
-  struct stat mystat;
-  return  (stat(filePath,&mystat)==0);
-}
 
-double addLogScale(double x,double y)
+inline double addLogScale(double x,double y)
 {
   if(x>y) return addLogScale(y,x);
   else return x+log(1.0+exp(y-x));
 }
 
-double Exp(double x)
+inline double Exp(double x)
 {
   return exp(x);
 }
@@ -211,7 +211,7 @@ public:
     m_dict->UseWordAlignment(staticData.UseAlignmentInfo());
 
     std::string binFname=filePath+".binphr.idx";
-    if(!existsFile(binFname.c_str())) {
+    if(!FileExists(binFname.c_str())) {
       TRACE_ERR( "bin ttable does not exist -> create it\n");
       InputFileStream in(filePath);
       m_dict->Create(in,filePath);
@@ -236,11 +236,11 @@ public:
     std::vector<float> scores;
     Phrase src;
 
-    State() : range(0,0),scores(0),src(Input) {}
+    State() : range(0,0),scores(0),src(Input, ARRAY_SIZE_INCR) {}
     State(Position b,Position e,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0))
-      : ptr(v),range(b,e),scores(sv),src(Input) {}
+      : ptr(v),range(b,e),scores(sv),src(Input, ARRAY_SIZE_INCR) {}
     State(Range const& r,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0))
-      : ptr(v),range(r),scores(sv),src(Input) {}
+      : ptr(v),range(r),scores(sv),src(Input, ARRAY_SIZE_INCR) {}
 
     Position begin() const {
       return range.first;

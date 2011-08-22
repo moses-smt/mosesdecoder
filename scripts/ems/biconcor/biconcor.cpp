@@ -3,6 +3,7 @@
 #include "Alignment.h"
 #include "PhrasePairCollection.h"
 #include <getopt.h>
+#include "base64.h"
 
 using namespace std;
 
@@ -32,7 +33,7 @@ int main(int argc, char* argv[])
       {0, 0, 0, 0}
     };
     int option_index = 0;
-    int c = getopt_long (argc, argv, "l:s:c:q:t:a:h", long_options, &option_index);
+    int c = getopt_long (argc, argv, "l:s:c:q:Q:t:a:h", long_options, &option_index);
     if (c == -1) break;
     switch (c) {
     case 'l':
@@ -52,6 +53,10 @@ int main(int argc, char* argv[])
     case 'c':
       fileNameSource = string(optarg);
       createFlag = true;
+      break;
+    case 'Q':
+      query = base64_decode(string(optarg));
+      queryFlag = true;
       break;
     case 'q':
       query = string(optarg);

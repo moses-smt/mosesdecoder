@@ -1,6 +1,6 @@
 <?php 
 
-// main page frame, triggers the loading of parts
+# main page frame, triggers the loading of parts
 function show_analysis() {
   global $task,$user,$setup,$id,$set;
   global $dir;
@@ -8,27 +8,34 @@ function show_analysis() {
   head("Analysis: $task ($user), Set $set, Run $id");
 
 ?><script>
-function show(field,sort,count) {
+function show(field,sort,count,filter) {
   var url = '?analysis=' + field + '_show'
-            + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
-            + '&sort=' + sort
-            + '&count=' + count;
+      + '&setup=<?php print $setup ?>'
+      + '&id=<?php print $id ?>'
+      + '&set=<?php print $set ?>'
+      + '&sort=' + sort
+      + '&count=' + count
+      + '&filter=' + filter;
   new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function ngram_show(type,order,count,sort,smooth) {
   var url = '?analysis=ngram_' + type + '_show'
-            + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
-            + '&order=' + order
-            + '&smooth=' + smooth
-            + '&sort=' + sort
-            + '&count=' + count;
+      + '&setup=<?php print $setup ?>'
+      + '&id=<?php print $id ?>'
+      + '&set=<?php print $set ?>'
+      + '&order=' + order
+      + '&smooth=' + smooth
+      + '&sort=' + sort
+      + '&count=' + count;
   var field = (type == "precision" ? "nGramPrecision" : "nGramRecall") + order;
   new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function generic_show(field,parameters) {
   var url = '?analysis=' + field + '_show'
-            + '&setup=<?php print $setup ?>&id=<?php print $id ?>&set=<?php print $set ?>'
-            + '&' + parameters;
+      + '&setup=<?php print $setup ?>'
+      + '&id=<?php print $id ?>'
+      + '&set=<?php print $set ?>'
+      + '&' + parameters;
   new Ajax.Updater(field, url, { method: 'get', evalScripts: true });
 }
 function highlight_phrase(sentence,phrase) {
@@ -55,7 +62,7 @@ function hide_word_info(sentence) {
 function show_biconcor(sentence,phrase) {
   var div = "biconcor-"+sentence;
   var url = '?analysis=biconcor'
-            + '&setup=<?php print $setup ?>&id=<?php print get_biconcor_version($dir,$id); ?>&set=<?php print $set ?>'
+            + '&setup=<?php print $setup ?>&id=<?php print get_biconcor_version($dir,$set,$id); ?>&set=<?php print $set ?>'
 	    + '&sentence=' + sentence
             + '&phrase=' + encodeURIComponent(phrase);
   document.getElementById(div).innerHTML = "<center><img src=\"spinner.gif\" width=48 height=48></center>";
@@ -73,16 +80,289 @@ function close_biconcor(sentence) {
 <body>
 <div id="nGramSummary"><?php ngram_summary()  ?></div>
 <div id="CoverageDetails"></div>
+<div id="PrecisionByCoverage"></div>
 <div id="PrecisionRecallDetails"></div>
 <div id="bleu">(loading...)</div>
 <script language="javascript">
-show('bleu','',5);
+show('bleu','',5,'');
 </script>
 </body></html>
 <?php
 }
 
-// stats on precision and recall
+function precision_by_coverage() {
+  global $experiment,$evalset,$dir,$set,$id;
+  $img_width = 1000;
+
+  print "<h3>Precision of Input Words by Coverage</h3>";
+  print "The graphs display what ratio of words of a specific type are translated correctly (yellow), and what ratio is deleted (blue).";
+  print " The extend of the boxes is scaled on the x-axis by the number of tokens of the displayed type.";
+
+  // load data
+  $data = file(get_current_analysis_filename("precision","precision-by-corpus-coverage"));
+  $total = 0;
+  $log_info = array();
+  for($i=0;$i<count($data);$i++) {
+    $item = split("\t",$data[$i]);
+    $info[$item[0]]["precision"] = $item[1];
+    $info[$item[0]]["delete"] = $item[2];
+    $info[$item[0]]["length"] = $item[3];
+    $info[$item[0]]["total"] = $item[4];
+    $total += $item[4];
+    $log_count = -1;
+    if ($item[0]>0) {
+	$log_count = (int) (log($item[0])/log(2));
+    }
+    if (!array_key_exists($log_count,$log_info)) {
+	$log_info[$log_count]["precision"] = 0;
+	$log_info[$log_count]["delete"] = 0;
+	$log_info[$log_count]["length"] = 0;
+	$log_info[$log_count]["total"] = 0;
+    }
+    $log_info[$log_count]["precision"] += $item[1];
+    $log_info[$log_count]["delete"] += $item[2];
+    $log_info[$log_count]["length"] += $item[3];
+    $log_info[$log_count]["total"] += $item[4];    
+  }
+  print "<h4>By log<sub>2</sub>-count in the training corpus</h4>";
+  precision_by_coverage_graph("byCoverage",$log_info,$total,$img_width,SORT_NUMERIC);
+
+  # load factored data
+  $d = dir("$dir/evaluation/$set.analysis.".get_precision_analysis_version($dir,$set,$id));
+  while (false !== ($file = $d->read())) {
+    if (preg_match('/precision-by-corpus-coverage.(.+)$/',$file, $match)) {
+      precision_by_coverage_factored($img_width,$total,$file,$match[1]);
+    }
+  }
+}
+
+function precision_by_coverage_factored($img_width,$total,$file,$factor_id) {
+  global $dir,$set,$id;
+  $data = file(get_current_analysis_filename("precision",$file));
+  for($i=0;$i<count($data);$i++) {
+    $item = split("\t",$data[$i]);
+    $factor = $item[0];
+    $count = $item[1];
+    $info_factored[$factor][$count]["precision"] = $item[2];
+    $info_factored[$factor][$count]["delete"] = $item[3];
+    $info_factored[$factor][$count]["length"] = $item[4];
+    $info_factored[$factor][$count]["total"] = $item[5];
+    $info_factored_sum[$factor]["precision"] += $item[2];
+    $info_factored_sum[$factor]["delete"] += $item[3];
+    $info_factored_sum[$factor]["length"] += $item[4];
+    $info_factored_sum[$factor]["total"] += $item[5];
+    $total_factored[$factor] += $item[5];
+    $log_count = -1;
+    if ($count>0) {
+	$log_count = (int) (log($count)/log(2));
+    }
+    $log_info_factored[$factor][$log_count]["precision"] += $item[2];
+    $log_info_factored[$factor][$log_count]["delete"] += $item[3];
+    $log_info_factored[$factor][$log_count]["length"] += $item[4];
+    $log_info_factored[$factor][$log_count]["total"] += $item[5];    
+  }
+  print "<h4>By factor ".factor_name("input",$factor_id)."</h4>";
+  precision_by_coverage_graph("byFactor",$info_factored_sum,$total,$img_width,SORT_STRING);
+
+  print "<h4>For each factor, by log<sub>2</sub>-count in the corpus</h4>";
+  foreach ($log_info_factored as $factor => $info) {
+    if ($total_factored[$factor]/$total > 0.01) {
+      print "<table style=\"display:inline;\"><tr><td align=center><font size=-2><b>$factor</b></font></td></tr><tr><td align=center>";
+      precision_by_coverage_graph("byCoverageFactor$factor",$info,$total_factored[$factor],10+2*$img_width*$total_factored[$factor]/$total,SORT_NUMERIC);
+      print "</td></tr></table>";
+    }
+  }
+}
+
+function precision_by_word($type) {
+  global $dir,$set,$id;
+  $byCoverage = -2;
+  $byFactor = "false";
+  if ($type == "byCoverage") {
+      $byCoverage = (int) $_GET["type"];
+  }
+  else if ($type == "byFactor") {
+      $byFactor = $_GET["type"];
+  }
+  else if (preg_match("/byCoverageFactor(.+)/",$type,$match)) {
+      $byCoverage = (int) $_GET["type"];
+      $byFactor = $match[1];
+  }
+
+  $data = file(get_current_analysis_filename("precision","precision-by-input-word"));
+  for($i=0;$i<count($data);$i++) {
+    $line = rtrim($data[$i]);
+    $item = split("\t",$line);
+
+    //# filter for count
+    $count = $item[4];
+    $log_count = -1;
+    if ($count>0) {
+	$log_count = (int) (log($count)/log(2));
+    }
+    if ($byCoverage != -2 && $byCoverage != $log_count) {
+	continue;
+    }
+   
+    //# filter for factor
+    $word = $item[5];
+    if ($byFactor != "false" && $byFactor != $item[6]) {
+	continue;
+    }
+
+    $info[$word]["precision"] = $item[0];
+    $info[$word]["delete"] = $item[1];
+    $info[$word]["length"] = $item[2];
+    $info[$word]["total"] = $item[3];
+    $total += $item[3];
+  }
+
+  print "<table border=1><tr><td align=center>Count</td><td align=center colspan=2>Precision</td><td align=center colspan=2>Delete</td><td align=center>Length</td></tr>\n";
+  foreach ($info as $word => $wordinfo) {
+      print "<tr><td align=center><a href=\"javascript:show('bleu','order',5,'".base64_encode($word)."')\">$word</a></td>";
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%.1f/%d</font></td>",$wordinfo["precision"]/$wordinfo["total"]*100,"%",$wordinfo["precision"],$wordinfo["total"]);
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%d/%d</font></td>",$wordinfo["delete"]/$wordinfo["total"]*100,"%",$wordinfo["delete"],$wordinfo["total"]);
+      printf("<td align=right>%.3f</td>",$wordinfo["length"]/$wordinfo["total"]);
+      print "</tr>";
+  }
+  print "</table>\n";
+}
+
+function precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_type) {
+  $keys = array_keys($log_info);
+  sort($keys,$sort_type);
+  
+  $img_width /= 100;
+  print "<div id=\"LatexToggle$name\" onClick=\"document.getElementById('Latex$name').style.display = 'block'; this.style.display = 'none';\" style=\"display:none;\"><font size=-2>(show LaTeX)</font></div>\n";
+  print "<div id=\"Latex$name\" style=\"display:none;\">\n";
+  print "<code>\\begin{tikzpicture}<br>";
+
+  print "% co-ordinates for precision<br>";
+  for($line=0;$line<=9;$line++) {
+      $height = 1.8-$line/10*1.8;
+      print "\\draw[thin,lightgray] (0.2,-$height) ";
+      print "node[anchor=east,black] {".$line."0\\%} -- ";
+      print "($img_width,-$height) ;<br>\n"; 
+  }
+  print "% co-ordinates for deletion<br>\n";
+  for($line=0;$line<=3;$line++) {
+      $height = 2+$line/10*1.80;
+      print "\\draw[thin,lightgray] (0.2,-$height) ";
+      if ($line != 0) {
+	  print "node[anchor=east,black] {".$line."0\\%} ";
+      }
+      print "-- ($img_width,-$height) ;<br>\n"; 
+  }
+
+  print "% boxes<br>\n";
+  $total_so_far = 0;
+  foreach ($keys as $i) {
+    $prec_ratio = $log_info[$i]["precision"]/$log_info[$i]["total"];
+    $x = .2+($img_width-.2) * $total_so_far/$total;
+    $y = 1.80-($prec_ratio*1.80);
+    $width = $img_width * $log_info[$i]["total"]/$total;
+    $height = $prec_ratio*1.80;
+
+    $width += $x;
+    $height += $y;
+    
+    print "\\filldraw[very thin,gray] ($x,-$y) rectangle($width,-$height) ;<br>";
+    print "\\draw[very thin,black] ($x,-$y) rectangle($width,-$height);<br>";
+    if ($width-$x>.1) {
+	print "\\draw (".(($x+$width)/2).",-1.8) node[anchor=north,black] {".$i."};<br>";
+    }
+ 
+
+    $del_ratio = $log_info[$i]["delete"]/$log_info[$i]["total"];
+    $height = $del_ratio*1.80;
+
+    $height += 2;
+
+    print "\\filldraw[very thin,lightgray] ($x,-2) rectangle($width,-$height);<br>\n";
+    print "\\draw[very thin,black] ($x,-2) rectangle($width,-$height);<br>\n";
+
+    $total_so_far += $log_info[$i]["total"];   
+  }
+  print "\\end{tikzpicture}</code>";
+  print "</div>"; 
+}
+
+function precision_by_coverage_graph($name,$log_info,$total,$img_width,$sort_type) {
+
+  $keys = array_keys($log_info);
+  sort($keys,$sort_type);
+
+  print "<div id=\"Toggle$name\" onClick=\"document.getElementById('Table$name').style.display = 'none'; document.getElementById('LatexToggle$name').style.display = 'none'; document.getElementById('Latex$name').style.display = 'none'; this.style.display = 'none';\" style=\"display:none;\"><font size=-2>(hide table)</font></div>\n";
+  precision_by_coverage_latex($name,$log_info,$total,$img_width,$sort_type);
+
+  print "<div id=\"Table$name\" style=\"display:none;\">\n";
+  print "<table border=1><tr><td align=center>Count</td><td align=center colspan=2>Precision</td><td align=center colspan=2>Delete</td><td align=center>Length</td></tr>\n";
+  foreach ($keys as $i) {
+    if (array_key_exists($i,$log_info)) {
+      print "<tr><td align=center>$i</td>";
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%.1f/%d</font></td>",$log_info[$i]["precision"]/$log_info[$i]["total"]*100,"%",$log_info[$i]["precision"],$log_info[$i]["total"]);
+      printf("<td align=right>%.1f%s</td><td align=right><font size=-1>%d/%d</font></td>",$log_info[$i]["delete"]/$log_info[$i]["total"]*100,"%",$log_info[$i]["delete"],$log_info[$i]["total"]);
+      printf("<td align=right>%.3f</td>",$log_info[$i]["length"]/$log_info[$i]["total"]);
+      print "<td><A HREF=\"javascript:generic_show('PrecisionByWord$name','type=$i')\">&#x24BE;</A></td>";
+      print "</tr>";
+   }
+  }
+  print "</table><div id=\"PrecisionByWord$name\"></div></div>";
+
+  print "<div id=\"Graph$name\" onClick=\"document.getElementById('Table$name').style.display = 'block'; document.getElementById('LatexToggle$name').style.display = 'block'; document.getElementById('Toggle$name').style.display = 'block';\">";
+  print "<canvas id=\"$name\" width=$img_width height=300></canvas></div>";
+  print "<script language=\"javascript\">
+var canvas = document.getElementById(\"$name\");
+var ctx = canvas.getContext(\"2d\");
+ctx.lineWidth = 0.5;
+ctx.font = '9px serif';
+";
+  for($line=0;$line<=9;$line++) {
+      $height = 180-$line/10*180;
+      print "ctx.moveTo(20, $height);\n";
+      print "ctx.lineTo($img_width, $height);\n";
+      if ($line != 0) {
+	  print "ctx.fillText(\"${line}0\%\", 0, $height+4);";
+      }
+  }
+  for($line=0;$line<=3;$line++) {
+      $height = 200+$line/10*180;
+      print "ctx.moveTo(20, $height);\n";
+      print "ctx.lineTo($img_width, $height);\n";
+      if ($line != 0) {
+	  print "ctx.fillText(\"${line}0\%\", 0, $height+4);";
+      }
+  }
+  print "ctx.strokeStyle = \"rgb(100,100,100)\"; ctx.stroke();\n";
+
+  $total_so_far = 0;
+  foreach ($keys as $i) {
+    $prec_ratio = $log_info[$i]["precision"]/$log_info[$i]["total"];
+    $x = (int)(20+($img_width-20) * $total_so_far / $total);
+    $y = (int)(180-($prec_ratio*180));
+    $width = (int)($img_width * $log_info[$i]["total"]/$total);
+    $height = (int)($prec_ratio*180);
+    print "ctx.fillStyle = \"rgb(200,200,0)\";";
+    print "ctx.fillRect ($x, $y, $width, $height);";
+
+    $del_ratio = $log_info[$i]["delete"]/$log_info[$i]["total"];
+    $height = (int)($del_ratio*180);
+    print "ctx.fillStyle = \"rgb(100,100,255)\";";
+    print "ctx.fillRect ($x, 200, $width, $height);";
+
+    $total_so_far += $log_info[$i]["total"];
+   
+    if ($width>3) {
+      print "ctx.fillStyle = \"rgb(0,0,0)\";";
+      // print "ctx.rotate(-1.5707);";
+      print "ctx.fillText(\"$i\", $x+$width/2-3, 190);";
+      //print "ctx.rotate(1.5707);";
+    }
+  }
+  print "</script>";
+}
+
+//# stats on precision and recall
 function precision_recall_details() {
 ?>
 <table width=100%>
@@ -110,20 +390,20 @@ ngram_show('recall',4,5,'',0);
 <?php
 }
 
-// stats on ngram precision
+//# stats on ngram precision
 function ngram_summary() {
   global $experiment,$evalset,$dir,$set,$id;
 
-  // load data
-  $data = file("$dir/evaluation/$set.analysis.$id/summary");
+  //# load data
+  $data = file(get_current_analysis_filename("basic","summary"));
   for($i=0;$i<count($data);$i++) {
     $item = split(": ",$data[$i]);
     $info[$item[0]] = $item[1];
   }
 
   print "<table cellspacing=5 width=100%><tr><td valign=top align=center bgcolor=#eeeeee>";
-  //foreach (array("precision","recall") as $type) {
-  print "<b>Precision</b>\n";
+  //#foreach (array("precision","recall") as $type) {
+  print "<b>Precision of Output</b>\n";
   $type = "precision";
   print "<table><tr><td>$type</td><td>1-gram</td><td>2-gram</td><td>3-gram</td><td>4-gram</td></tr>\n";
   printf("<tr><td>correct</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td></tr>\n",
@@ -145,6 +425,9 @@ function ngram_summary() {
   //}
 
   print "<A HREF=\"javascript:generic_show('PrecisionRecallDetails','')\">details</A> ";
+  if (file_exists(get_current_analysis_filename("precision","precision-by-corpus-coverage"))) {
+    print "| <A HREF=\"javascript:generic_show('PrecisionByCoverage','')\">precision of input by coverage</A> ";
+  }
 
  print "</td><td valign=top valign=top align=center bgcolor=#eeeeee>";
 
@@ -163,8 +446,7 @@ function ngram_summary() {
   printf("<p>length-diff: %d (%.1f%s)",$info["precision-1-total"]-$info["recall-1-total"],($info["precision-1-total"]-$info["recall-1-total"])/$info["recall-1-total"]*100,"%");
 
   // coverage
-  $coverage_id = get_coverage_analysis_version($dir,$set,$id);
-  if (file_exists("$dir/evaluation/$set.analysis.$coverage_id/corpus-coverage-summary")) {
+  if (file_exists(get_current_analysis_filename("coverage","corpus-coverage-summary"))) {
     print "</td><td valign=top align=center bgcolor=#eeeeee>";
     print "<div id=\"CoverageSummary\">";
     coverage_summary();
@@ -172,8 +454,8 @@ function ngram_summary() {
   }
 
   // phrase segmentation
-  if (file_exists("$dir/evaluation/$set.analysis.$id/segmentation") ||
-      file_exists("$dir/evaluation/$set.analysis.$id/rule")) {
+  if (file_exists(get_current_analysis_filename("basic","segmentation")) ||
+      file_exists(get_current_analysis_filename("basic","rule"))) {
     print "</td><td valign=top align=center bgcolor=#eeeeee>";
     print "<div id=\"SegmentationSummary\">";
     segmentation_summary();
@@ -181,7 +463,7 @@ function ngram_summary() {
   }
 
   // rules
-  if (file_exists("$dir/evaluation/$set.analysis.$id/rule")) {
+  if (file_exists(get_current_analysis_filename("basic","rule"))) {
     print "</td><td valign=top align=center bgcolor=#eeeeee>";
     print "<div id=\"RuleSummary\">";
     rule_summary();
@@ -197,7 +479,7 @@ function ngram_show($type) {
 
   // load data
   $order = $_GET['order'];
-  $data = file("$dir/evaluation/$set.analysis.$id/n-gram-$type.$order");
+  $data = file(get_current_analysis_filename("basic","n-gram-$type.$order"));
   for($i=0;$i<count($data);$i++) {
      $item = split("\t",$data[$i]);
      $line["total"] = $item[0]; 
@@ -290,7 +572,7 @@ function coverage_details() {
         $total[$corpus][$b][$i] = 0;
       }
     }
-    $data = file("$dir/evaluation/$set.analysis.$id/$corpus-coverage-summary");
+    $data = file(filename_fallback_to_factored(get_current_analysis_filename("coverage","$corpus-coverage-summary")));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
       if ($item[1]>5) {
@@ -332,7 +614,7 @@ function coverage_details() {
   }
   print "</tr></table>\n";
 
-  $data = file("$dir/evaluation/$set.analysis.$id/ttable-unknown");
+  $data = file(filename_fallback_to_factored(get_current_analysis_filename("coverage","ttable-unknown")));
   for($i=0;$i<count($data);$i++) {
     list($word,$count) = split("\t",$data[$i]);
     $item["word"] = $word;
@@ -354,7 +636,7 @@ function coverage_details() {
 
   usort($unknown, 'cmp');
 
-  print "<b>unknown words</b><br>\n";
+  print "<b>unknown words (to model)</b><br>\n";
   print "<table><tr><td valign=top><table>";
   $state = 5;
   foreach ($unknown as $item) {
@@ -377,6 +659,34 @@ function coverage_details() {
   print "</font></td></tr></table>\n";
 }
 
+function filename_fallback_to_factored($file) {
+  if (file_exists($file)) {
+    return $file;
+  }
+  $path = pathinfo($file);
+  $dh = opendir($path['dirname']);
+  while (($factored_file = readdir($dh)) !== false) {
+    if (strlen($factored_file) > strlen($path['basename']) &&
+	substr($factored_file,0,strlen($path['basename'])) == $path['basename'] &&
+	preg_match("/0/",substr($factored_file,strlen($path['basename'])))) {
+      return $path['dirname']."/".$factored_file;
+    }
+  }
+  // found nothing...
+  return $file;
+}
+
+function factor_name($input_output,$factor_id) {
+  global $dir,$set,$id;
+  $file = get_current_analysis_filename("coverage","factor-names");
+  if (!file_exists($file)) {
+    return $factor_id;
+  }
+  $in_out_names = file($file);
+  $names = explode(",",trim($in_out_names[($input_output == "input")?0:1]));
+  return "'".$names[$factor_id]."' ($factor_id)";
+}
+
 // stats on ngram coverage
 function coverage_summary() {
   global $dir,$set,$id,$corpus;
@@ -392,8 +702,7 @@ function coverage_summary() {
       }
       $total[$corpus][$b] = 0;
     }
-    $coverage_id = get_coverage_analysis_version($dir,$set,$id);
-    $data = file("$dir/evaluation/$set.analysis.$coverage_id/$corpus-coverage-summary");
+    $data = file(filename_fallback_to_factored(get_current_analysis_filename("coverage","$corpus-coverage-summary")));
     for($i=0;$i<count($data);$i++) {
       $item = split("\t",$data[$i]);
       if ($item[0] == 1) {
@@ -457,8 +766,9 @@ function segmentation_summary() {
   }
 
   $total = 0;
-  if (file_exists("$dir/evaluation/$set.analysis.$id/segmentation")) {
-    $data = file("$dir/evaluation/$set.analysis.$id/segmentation");
+  $file = get_current_analysis_filename("basic","segmentation");
+  if (file_exists($file)) {
+    $data = file($file);
     for($i=0;$i<count($data);$i++) {
       list($in,$out,$c) = split("\t",$data[$i]);
       if ($by == "word") { $c *= $in; }
@@ -469,9 +779,12 @@ function segmentation_summary() {
     }
   }
   else {
-    $data = file("$dir/evaluation/$set.analysis.$id/rule");
+    $data = file(get_current_analysis_filename("basic","rule"));
     for($i=0;$i<count($data);$i++) {
-      list($type,$rule,$c) = split("\t",$data[$i]);
+      $field = split("\t",$data[$i]);
+      $type = $field[0];
+      $rule = $field[1];
+      if (count($field) > 2) { $c = $field[2]; } else { $c = 0; }
       if ($type == "rule") {
         list($rule_in,$in,$nt,$rule_out,$out) = split(":",$rule);
         if ($by == "word") { $c *= $in; }
@@ -511,9 +824,14 @@ function segmentation_summary() {
 // hierarchical rules used in translation
 function rule_summary() {
   global $dir,$set,$id;
-  $data = file("$dir/evaluation/$set.analysis.$id/rule");
+  $data = file(get_current_analysis_filename("basic","rule"));
+  $rule = array(); $count = array(); $count_nt = array(); $count_w = array();
+  $nt_count = 0; $total = 0;
   foreach ($data as $item) {
-    list($type,$d,$d2) = split("\t",$item);
+    $field = split("\t",$item);
+    $type = $field[0];
+    $d = $field[1];
+    if (count($field) > 2) { $d2 = $field[2]; } else { $d2 = 0; }
     if ($type == "sentence-count") {
 	$sentence_count = $d;
     }
@@ -532,12 +850,16 @@ function rule_summary() {
 	$rule_out = preg_replace("/b/","y",$rule_out);
 	$rule_out = preg_replace("/c/","z",$rule_out);
 	$nt_count += $d2 * $nt;
+	if (!array_key_exists($d,$rule)) { $rule[$d] = 0; }
 	$rule[$d] += $d2;
+	if (!array_key_exists($nt,$count)) { $count[$nt] = 0; }
 	$count[$nt] += $d2;
 	$just_nt = preg_replace("/\d/","",$rule_in)."-".preg_replace("/\d/","",$rule_out);
 	$no_wc = preg_replace("/\d/","W",$rule_in)."-".preg_replace("/\d/","",$rule_out);
 	if ($just_nt == "-") { $just_nt = "lexical"; }
+	if (!array_key_exists($just_nt,$count_nt)) { $count_nt[$just_nt] = 0; }
 	$count_nt[$just_nt] += $d2;
+	if (!array_key_exists($no_wc,$count_w)) { $count_w[$no_wc] = 0; }
 	$count_w[$no_wc] += $d2;
 	$total += $d2;
     }
@@ -555,108 +877,189 @@ function rule_summary() {
 
 // annotated sentences, navigation
 function bleu_show() {
-  $count = $_GET['count'];
-  if ($count == 0) { $count = 5; }
-
-  print "<b>annotated sentences</b><br><font size=-1>sorted by ";
-
-  if ($_GET['sort'] == "order" || $_GET['sort'] == "") {
-    print "order ";
-  }
-  else {
-    print "<A HREF=\"javascript:show('bleu','order',$count)\">order</A> ";
-  }
-
-  if ($_GET['sort'] == "best") {
-    print "order ";
-  }
-  else {
-    print "<A HREF=\"javascript:show('bleu','best',$count)\">best</A> ";
-  }
-
-  if ($_GET['sort'] == "worst") {
-    print "order ";
-  }
-  else {
-    print "<A HREF=\"javascript:show('bleu','worst',$count)\">worst</A> ";
-  }
-
-  #print "display <A HREF=\"\">fullscreen</A> ";
 
   $count = $_GET['count'];
   if ($count == 0) { $count = 5; }
-  print "showing $count ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count)\">more</A> ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',9999)\">all</A> ";
 
-  print "</font><BR>\n";
+  $filter = ""; 
+  if (array_key_exists("filter",$_GET)) { 
+    $filter = base64_decode($_GET['filter']);
+  }
 
-  sentence_annotation();
-  print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count)\">5 more</A> | ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',10+$count)\">10 more</A> | ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',20+$count)\">20 more</A> | ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',50+$count)\">50 more</A> | ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',100+$count)\">100 more</A> | ";
-  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',9999)\">all</A> ";
+  print "<b>annotated sentences</b><br><font size=-1>sorted by: ";
+
+  if ($_GET['sort'] == "order" || $_GET['sort'] == "") { print "order "; }
+  else {
+    print "<A HREF=\"javascript:show('bleu','order',$count,'".base64_encode($filter)."')\">order</A> ";
+  }
+  if ($_GET['sort'] == "best") { print "best "; }
+  else {
+    print "<A HREF=\"javascript:show('bleu','best',$count,'".base64_encode($filter)."')\">best</A> ";
+  }
+  if ($_GET['sort'] == "25") { print "25% "; }
+  else {
+    print "<A HREF=\"javascript:show('bleu','25',$count,'".base64_encode($filter)."')\">25%</A> ";
+  }
+  if ($_GET['sort'] == "avg") { print "avg "; }
+  else {
+    print "<A HREF=\"javascript:show('bleu','avg',$count,'".base64_encode($filter)."')\">avg</A> ";
+  }
+  if ($_GET['sort'] == "75") { print "75% "; }
+  else {
+    print "<A HREF=\"javascript:show('bleu','75',$count,'".base64_encode($filter)."')\">75%</A> ";
+  }
+  if ($_GET['sort'] == "worst") { print "worst; "; }
+  else {
+    print "<A HREF=\"javascript:show('bleu','worst',$count,'".base64_encode($filter)."')\">worst</A>; ";
+  }
+
+  print "showing: $count ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count,'".base64_encode($filter)."')\">more</A> ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',9999,'".base64_encode($filter)."')\">all</A>";
+
+  if ($filter != "") {
+    print "; filter: '$filter'";
+  }
+  sentence_annotation($count,$filter);
+  print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count,'".base64_encode($filter)."')\">5 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',10+$count,'".base64_encode($filter)."')\">10 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',20+$count,'".base64_encode($filter)."')\">20 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',50+$count,'".base64_encode($filter)."')\">50 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',100+$count,'".base64_encode($filter)."')\">100 more</A> | ";
+  print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',9999,'".base64_encode($filter)."')\">all</A> ";
 }
 
 // annotated sentences core: reads data, sorts sentences, displays them
-function sentence_annotation() {
+function sentence_annotation($count,$filter) {
   global $set,$id,$dir,$biconcor;
 
-  // load data
-  $data = file("$dir/evaluation/$set.analysis.$id/bleu-annotation");
+  # get input
+  $filtered = array();
+  $file = get_current_analysis_filename("coverage","input-annotation");
+  if (file_exists($file)) {
+    $input = file($file);
+    # filter is so specified
+    if ($filter != "") {
+      for($i=0;$i<count($input);$i++) {
+        $item = explode("\t",$input[$i]);
+	$word = explode(" ",$item[0]);
+	$keep = 0;
+	for($j=0;$j<count($word);$j++) {
+	  if ($word[$j] == $filter) { 
+	    $keep = 1; 
+	  }
+	}
+	if (!$keep) { $filtered[$i] = 1; }	
+      }
+    }  
+  }
+  
+  # load bleu scores 
+  $data = file(get_current_analysis_filename("basic","bleu-annotation"));
   for($i=0;$i<count($data);$i++) {
-     $item = split("\t",$data[$i]);
-     $line["bleu"] = $item[0]; 
-     $line["id"] = $item[1]; 
-     $line["system"] = $item[2];
-     $line["reference"] = ""; 
-     for($j=3;$j<count($item);$j++) {
-       if ($j>3) { $line["reference"] .= "<br>"; };
-       $line["reference"] .= $item[$j];
-     } 
-     $bleu[] = $line;
+    $item = split("\t",$data[$i]);
+    if (! array_key_exists($item[1],$filtered)) {
+      $line["bleu"] = $item[0]; 
+      $line["id"] = $item[1]; 
+      $line["system"] = $item[2];
+      $line["reference"] = ""; 
+      for($j=3;$j<count($item);$j++) {
+        if ($j>3) { $line["reference"] .= "<br>"; };
+        $line["reference"] .= $item[$j];
+      } 
+      $bleu[] = $line;
+    }
   }
 
-  $coverage_id = get_coverage_analysis_version($dir,$set,$id);
-  if (file_exists("$dir/evaluation/$set.analysis.$coverage_id/input-annotation")) {
-    $input = file("$dir/evaluation/$set.analysis.$coverage_id/input-annotation");
+  # sort and label additional sentences as filtered
+  global $sort;
+  function cmp($a, $b) {
+    global $sort;
+    if ($sort == "order") {
+      $a_idx = $a["id"];
+      $b_idx = $b["id"];
+    }
+    else if ($sort == "worst" || $sort == "75") {
+      $a_idx = $a["bleu"];
+      $b_idx = $b["bleu"];
+      if ($a_idx == $b_idx) { 
+        $a_idx = $b["id"];
+        $b_idx = $a["id"];
+      }
+    }
+    else if ($sort == "best" || $sort == "avg" || $sort == "25") {
+      $a_idx = -$a["bleu"];
+      $b_idx = -$b["bleu"];
+      if ($a_idx == $b_idx) { 
+        $a_idx = $a["id"];
+        $b_idx = $b["id"];
+      }
+    }
+    if ($a_idx == $b_idx) {
+      return 0;
+    }
+    return ($a_idx < $b_idx) ? -1 : 1;
+  }
+  $sort = $_GET['sort'];
+  if ($sort == '') {
+    $sort = "order";
+  }
+  usort($bleu, 'cmp');
+
+  $offset = 0;
+  if ($sort == "25" || $sort == "75") {
+    $offset = (int) (count($bleu)/4);
+  }
+  else if ($sort == "avg") {
+    $offset = (int) (count($bleu)/2);
   }
 
-  if (file_exists("$dir/evaluation/$set.analysis.$id/segmentation-annotation")) {
-   $data = file("$dir/evaluation/$set.analysis.$id/segmentation-annotation");
-   for($i=0;$i<count($data);$i++) {
-      $segment = 0;
-      foreach (split(" ",$data[$i]) as $item) {
-	list($in_start,$in_end,$out_start,$out_end) = split(":",$item);
-	$segment++;
-        $segmentation[$i]["input_start"][$in_start] = $segment;
-        $segmentation[$i]["input_end"][$in_end] = $segment;
-        $segmentation[$i]["output_start"][$out_start] = $segment;
-        $segmentation[$i]["output_end"][$out_end+0] = $segment;
+  $retained = array();
+  for($i=$offset;$i<$count+$offset && $i<count($bleu);$i++) {
+    $line = $bleu[$i]; 
+    $retained[$line["id"]] = 1;
+  }
+
+  # get segmentation (phrase alignment)
+  $file = get_current_analysis_filename("basic","segmentation-annotation");
+  if (file_exists($file)) {
+    $data = file($file);
+    for($i=0;$i<count($data);$i++) {
+      if ($filter == "" || array_key_exists($i,$retained)) {
+	$segment = 0;
+	foreach (split(" ",$data[$i]) as $item) {
+	  list($in_start,$in_end,$out_start,$out_end) = split(":",$item);
+	  $segment++;
+	  $segmentation[$i]["input_start"][$in_start] = $segment;
+	  $segmentation[$i]["input_end"][$in_end] = $segment;
+	  $segmentation[$i]["output_start"][$out_start] = $segment;
+	  $segmentation[$i]["output_end"][$out_end+0] = $segment;
+	}
       }
     }
   }
 
-  // hierarchical data
+  # get hierarchical data
   $hierarchical = 0;
-  if (file_exists("$dir/evaluation/$set.analysis.$id/input-tree")) {
-      $data = file("$dir/evaluation/$set.analysis.$id/input-tree");
-      $span = 0;
-      $last_sentence = -1;
-      $nt_count = array();
-      for($i=0;$i<count($data);$i++) {
-	  list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
-	  if ($sentence != $last_sentence) { $span = 0; }
-	  $last_sentence = $sentence;
-	  $segmentation[$sentence][$span]["brackets"] = $brackets;
+  $file = get_current_analysis_filename("basic","input-tree");
+  if (file_exists($file)) {
+    $data = file($file);
+    $span = 0;
+    $last_sentence = -1;
+    $nt_count = array();
+    for($i=0;$i<count($data);$i++) {
+      list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
+      if ($sentence != $last_sentence) { $span = 0; }
+      $last_sentence = $sentence;
+      if ($filter == "" || array_key_exists($sentence,$retained)) {
+	$segmentation[$sentence][$span]["brackets"] = $brackets;
 #	  $segmentation[$sentence][$span]["nt"] = $nt;
-	  $segmentation[$sentence][$span]["words"] = rtrim($words);
-	  if ($nt != "") { $nt_count[$nt]++; }
-	  $span++;
+	$segmentation[$sentence][$span]["words"] = rtrim($words);
+	if ($nt != "") { $nt_count[$nt]=1; }
+	$span++;
       }
-      $hierarchical = 1;
+    }
+    $hierarchical = 1;
 #      if (count($nt_count) <= 2) {
 #	  foreach ($segmentation as $sentence => $segmentation_span) {
 #	      foreach ($segmentation_span as $span => $type) {
@@ -665,108 +1068,78 @@ function sentence_annotation() {
 #	  }
 #     }
   }
-  if (file_exists("$dir/evaluation/$set.analysis.$id/output-tree")) {
-      $data = file("$dir/evaluation/$set.analysis.$id/output-tree");
-      $span = 0;
-      $last_sentence = -1;
-      $nt_count = array();
-      for($i=0;$i<count($data);$i++) {
-	  list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
-	  if ($sentence != $last_sentence) { $span = 0; }
-	  $last_sentence = $sentence;
-	  $segmentation_out[$sentence][$span]["brackets"] = $brackets;
-	  $segmentation_out[$sentence][$span]["nt"] = $nt;
-	  $segmentation_out[$sentence][$span]["words"] = rtrim($words);
-	  if ($nt != "") { $nt_count[$nt]++; }
-	  $span++;
+  $file = get_current_analysis_filename("basic","output-tree");
+  if (file_exists($file)) {
+    $data = file($file);
+    $span = 0;
+    $last_sentence = -1;
+    $nt_count = array();
+    for($i=0;$i<count($data);$i++) {
+      list($sentence,$brackets,$nt,$words) = split("\t",$data[$i]);
+      if ($sentence != $last_sentence) { $span = 0; }
+      $last_sentence = $sentence;
+      if ($filter == "" || array_key_exists($sentence,$retained)) {      
+	$segmentation_out[$sentence][$span]["brackets"] = $brackets;
+	$segmentation_out[$sentence][$span]["nt"] = $nt;
+	$segmentation_out[$sentence][$span]["words"] = rtrim($words);
+	if ($nt != "") { $nt_count[$nt]=1; }
+	$span++;
       }
-      if (count($nt_count) <= 2) {
-	  foreach ($segmentation_out as $sentence => $segmentation_span) {
-	      foreach ($segmentation_span as $span => $type) {
-		  $segmentation_out[$sentence][$span]["nt"]="";
-	      }
-	  }
+    }
+    # no non-terminal markup, if there are two or less non-terminals (X,S)
+    if (count($nt_count) <= 2) {
+      foreach ($segmentation_out as $sentence => $segmentation_span) {
+	foreach ($segmentation_span as $span => $type) {
+	  $segmentation_out[$sentence][$span]["nt"]="";
+	}
       }
+    }
   }
-  if (file_exists("$dir/evaluation/$set.analysis.$id/node")) {
-      $data = file("$dir/evaluation/$set.analysis.$id/node");
-      $n = 0;
-      $last_sentence = -1;
-      for($i=0;$i<count($data);$i++) {
-	  list($sentence,$depth,$start_div,$end_div,$start_div_in,$end_div_in,$children) = split(" ",$data[$i]);
-	  if ($sentence != $last_sentence) { $n = 0; }
-	  $last_sentence = $sentence;
-	  $node[$sentence][$n]['depth'] = $depth;
-	  $node[$sentence][$n]['start_div'] = $start_div;
-	  $node[$sentence][$n]['end_div'] = $end_div;
-	  $node[$sentence][$n]['start_div_in'] = $start_div_in;
-	  $node[$sentence][$n]['end_div_in'] = $end_div_in;
-	  $node[$sentence][$n]['children'] = rtrim($children);
-	  $n++;
+  $file = get_current_analysis_filename("basic","node");
+  if (file_exists($file)) {
+    $data = file($file);
+    $n = 0;
+    $last_sentence = -1;
+    for($i=0;$i<count($data);$i++) {
+      list($sentence,$depth,$start_div,$end_div,$start_div_in,$end_div_in,$children) = split(" ",$data[$i]);
+      if ($sentence != $last_sentence) { $n = 0; }
+      $last_sentence = $sentence;
+      if ($filter == "" || array_key_exists($sentence,$retained)) {
+	$node[$sentence][$n]['depth'] = $depth;
+	$node[$sentence][$n]['start_div'] = $start_div;
+	$node[$sentence][$n]['end_div'] = $end_div;
+	$node[$sentence][$n]['start_div_in'] = $start_div_in;
+	$node[$sentence][$n]['end_div_in'] = $end_div_in;
+	$node[$sentence][$n]['children'] = rtrim($children);
+	$n++;
       }
+    }
   } 
 
-  $biconcor = get_biconcor_version($dir,$id);
-
-  // sort
-  global $sort;
-  $sort = $_GET['sort'];
-  if ($sort == '') {
-    $sort = "order";
+  # display
+  if ($filter != "") { 
+      print " (".(count($input)-count($filtered))." retaining)";
   }
-  function cmp($a, $b) {
-    global $sort;
-    if ($sort == "order") {
-      $a_idx = $a["id"];
-      $b_idx = $b["id"];
-    }
-    else if ($sort == "worst") {
-      $a_idx = $a["bleu"];
-      $b_idx = $b["bleu"];
-      if ($a_idx == $b_idx) { 
-        $a_idx = $b["id"];
-        $b_idx = $a["id"];
-      }
-    }
-    else if ($sort == "best") {
-      $a_idx = -$a["bleu"];
-      $b_idx = -$b["bleu"];
-      if ($a_idx == $b_idx) { 
-        $a_idx = $a["id"];
-        $b_idx = $b["id"];
-      }
-    }
+  print "</font><BR>\n";
 
-    if ($a_idx == $b_idx) {
-        return 0;
-    }
-    return ($a_idx < $b_idx) ? -1 : 1;
-  }
-
-  usort($bleu, 'cmp');
-
-  $count = $_GET['count'];
-  if ($count == 0) { $count = 5; }
-
-  // display
-  //print "<div id=\"debug\"></div>";
-  for($i=0;$i<$count && $i<count($bleu);$i++) {
+  $biconcor = get_biconcor_version($dir,$set,$id);
+  //print "<div id=\"debug\">$sort / $offset</div>";
+  for($i=$offset;$i<$count+$offset && $i<count($bleu);$i++) {
      $line = $bleu[$i]; 
      if ($hierarchical) {
 	 annotation_hierarchical($line["id"],$segmentation[$line["id"]],$segmentation_out[$line["id"]],$node[$line["id"]]);
      }
      if ($input) {
-       print "<div id=\"info-$i\" style=\"border-color:black; background:#ffff80; opacity:0; width:100%; border:1px;\">8364 occ. in corpus, 56 translations, entropy: 5.54</div>\n";
+       print "<div id=\"info-".$line["id"]."\" style=\"border-color:black; background:#ffff80; opacity:0; width:100%; border:1px;\">0 occ. in corpus, 0 translations, entropy: 0.00</div>\n";
        if ($biconcor) {
-	   //print "<div id=\"biconcor-$i\" style=\"display: none;\">xxx</div>";
-	   print "<div id=\"biconcor-$i\" class=\"biconcor\">xxx</div>";
+	   print "<div id=\"biconcor-".$line["id"]."\" class=\"biconcor\"><font size=-2>(click on input phrase for bilingual concordancer)</font></div>";
        }
        if ($hierarchical) {
          sentence_annotation_hierarchical("#".$line["id"],$line["id"],$input[$line["id"]],$segmentation[$line["id"]],"in");
        }
        else {
 	 print "<font size=-2>[#".$line["id"]."]</font> ";
-         input_annotation($line["id"],$input[$line["id"]],$segmentation[$line["id"]]);
+         input_annotation($line["id"],$input[$line["id"]],$segmentation[$line["id"]],$filter);
        }
      }
      //else {
@@ -788,19 +1161,20 @@ function coverage($coverage_vector) {
   $coverage = array();
   foreach (split(" ",$coverage_vector) as $item) {
     if (preg_match("/[\-:]/",$item)) {
-      list($from,$to,$corpus_count,$ttable_count,$ttable_entropy) = preg_split("/[\-:]/",$item);
-      $coverage[$from][$to]["corpus_count"] = $corpus_count;
-      $coverage[$from][$to]["ttable_count"] = $ttable_count;
-      $coverage[$from][$to]["ttable_entropy"] = $ttable_entropy;
+      $field = preg_split("/[\-:]/",$item);
+      $from = $field[0];
+      $to = $field[1];
+      if (count($field)>2){ $coverage[$from][$to]["corpus_count"]=$field[2]; }
+      if (count($field)>3){ $coverage[$from][$to]["ttable_count"]=$field[3]; }
+      if (count($field)>4){ $coverage[$from][$to]["ttabel_entropy"]=$field[4]; }
     }
   }
-  $word = split(" ",$words);
 
   return $coverage;
 }
 
 // annotate an inpute sentence
-function input_annotation($sentence,$input,$segmentation) {
+function input_annotation($sentence,$input,$segmentation,$filter) {
   global $biconcor;
   list($words,$coverage_vector) = split("\t",$input);
 
@@ -876,10 +1250,10 @@ function input_annotation($sentence,$input,$segmentation) {
 		for($j=$from;$j<=$to;$j++) {
 		  if ($j>$from) { $phrase .= " "; }
 		  $phrase .= $word[$j];
-                  $highlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='#ffff80';";
-                  $lowlightwords .= " document.getElementById('inputword-$sentence-$j').style.backgroundColor='".coverage_color($coverage[$j][$j])."';";
+                  $highlightwords .= " document.getElementById('inputword-$i-$j').style.backgroundColor='#ffff80';";
+                  $lowlightwords .= " document.getElementById('inputword-$i-$j').style.backgroundColor='".coverage_color($coverage[$j][$j])."';";
 		}
-	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,".$coverage[$from][$to]["corpus_count"].",".$coverage[$from][$to]["ttable_count"].",".$coverage[$from][$to]["ttable_entropy"]."); this.style.backgroundColor='#ffff80';$highlightwords\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';$lowlightwords;\"".($biconcor?" onclick=\"show_biconcor($sentence,'".htmlspecialchars($phrase)."');\"":"").">";
+	        print "<td colspan=$size><div style=\"background-color: $color; height:3px;\" onmouseover=\"show_word_info($sentence,".$coverage[$from][$to]["corpus_count"].",".$coverage[$from][$to]["ttable_count"].",".$coverage[$from][$to]["ttable_entropy"]."); this.style.backgroundColor='#ffff80';$highlightwords\" onmouseout=\"hide_word_info($sentence); this.style.backgroundColor='$color';$lowlightwords;\"".($biconcor?" onclick=\"show_biconcor($sentence,'".base64_encode($phrase)."');\"":"").">";
             }
             print "</div></td>";
 	    $from += $size-1;
@@ -907,7 +1281,14 @@ function input_annotation($sentence,$input,$segmentation) {
 	  $color = '#ffffff';
           $cc = 0; $tc = 0; $te = 0;
         }
-        print "<span id=\"inputword-$sentence-$j\" style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,$cc,$tc,$te); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\"".($biconcor?" onclick=\"show_biconcor($sentence,'".htmlspecialchars($word[$j])."');\"":"").">$word[$j]</span>";
+        print "<span id=\"inputword-$sentence-$j\" style=\"background-color: $color;\" onmouseover=\"show_word_info($sentence,$cc,$tc,$te); this.style.backgroundColor='#ffff80';\" onmouseout=\"hide_word_info($sentence);  this.style.backgroundColor='$color';\"".($biconcor?" onclick=\"show_biconcor($sentence,'".base64_encode($word[$j])."');\"":"").">";
+	if ($word[$j] == $filter) {
+	  print "<b><font color=#ff0000>".$word[$j]."</font></b>";
+	}
+	else {
+	  print $word[$j];
+	}
+	print "</span>";
         if ($segmentation && array_key_exists($j,$segmentation["input_end"])) {
           print "</span>";
         }
@@ -984,7 +1365,7 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
  function sentence_annotation_hierarchical($info,$sentence,$sequence,$segmentation,$in_out) {
     $In_Out = $in_out == "out" ? "Out" : "In";
 
-    list($words,$coverage_vector) = split("\t",$input);
+    #list($words,$coverage_vector) = split("\t",$input);
     $coverage = coverage($sequence);
     $word = preg_split("/\s/",$sequence);
 
@@ -1011,7 +1392,8 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
 	$words = $segmentation[$span]["words"];
 
 	# non terminal
-	if ($segmentation[$span]["nt"]) {
+	if (array_key_exists("nt",$segmentation[$span]) &&
+	    $segmentation[$span]["nt"] != "") {
 	    print $segmentation[$span]["nt"].": ";
 	}
 
@@ -1048,16 +1430,16 @@ function annotation_hierarchical($sentence,$segmentation,$segmentation_out,$node
 function biconcor($query) {
     global $set,$id,$dir;
     $sentence = $_GET['sentence'];
-    $biconcor = get_biconcor_version($dir,$id);
+    $biconcor = get_biconcor_version($dir,$set,$id);
     print "<center>
-<form action=\"...\" method=get>
+<form method=get id=\"BiconcorForm\">
 <img src=\"close.gif\" width=17 height=17 onClick=\"close_biconcor($sentence);\">
-<input width=20 value=\"$query\">
-<input type=submit value=\"look up\">
+<input width=20 id=\"BiconcorQuery\" value=\"$query\">
+<input type=submit onclick=\"show_biconcor($sentence,encodeBase64(document.getElementById('BiconcorQuery').value));\" value=\"look up\">
 </form>
 <div class=\"biconcor-content\">";
-    $cmd = "./biconcor -l $dir/model/biconcor.$biconcor -q ".escapeshellarg($query)." 2>/dev/null";
-    # print $cmd."<p>";
+    $cmd = "./biconcor -l $dir/model/biconcor.$biconcor -Q ".base64_encode($query)." 2>/dev/null";
+    #print $cmd."<p>";
     system($cmd);
     # print "<p>done.";
     print "</div></center>";

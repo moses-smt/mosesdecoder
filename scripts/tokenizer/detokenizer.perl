@@ -73,11 +73,23 @@ sub detokenize {
 	my %quoteCount =  ("\'"=>0,"\""=>0);
 	my $prependSpace = " ";
 	for ($i=0;$i<(scalar(@words));$i++) {		
-		if ($words[$i] =~ /^[\p{IsSc}\(\[\{\¿\¡]+$/) {
+		if (&startsWithCJKChar($words[$i])) {
+		    if ($i > 0 && &endsWithCJKChar($words[$i-1])) {
+			# perform left shift if this is a second consecutive CJK (Chinese/Japanese/Korean) word
+			$text=$text.$words[$i];
+		    } else {
+			# ... but do nothing special if this is a CJK word that doesn't follow a CJK word
+			$text=$text.$prependSpace.$words[$i];
+		    }
+		    $prependSpace = " ";
+		} elsif ($words[$i] =~ /^[\p{IsSc}\(\[\{\¿\¡]+$/) {
 			#perform right shift on currency and other random punctuation items
 			$text = $text.$prependSpace.$words[$i];
 			$prependSpace = "";
 		} elsif ($words[$i] =~ /^[\,\.\?\!\:\;\\\%\}\]\)]+$/){
+		    if (($language eq "fr") && ($words[$i] =~ /^[\?\!\:\;\\\%]$/)) {
+			#these punctuations are prefixed with a non-breakable space in french
+			$text .= " "; }
 			#perform left shift on punctuation items
 			$text=$text.$words[$i];
 			$prependSpace = " ";
@@ -89,7 +101,7 @@ sub detokenize {
 			#left-shift floats in Czech
 			$text=$text.$words[$i];
 			$prependSpace = " ";
-		}  elsif ((($language eq "fr") ||($language eq "it")) && ($i<(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
+		}  elsif ((($language eq "fr") ||($language eq "it")) && ($i<=(scalar(@words)-2)) && ($words[$i] =~ /[\p{IsAlpha}][\']$/) && ($words[$i+1] =~ /^[\p{IsAlpha}]/)) {
 			#right-shift the contraction for French and Italian
 			$text = $text.$prependSpace.$words[$i];
 			$prependSpace = "";
@@ -158,3 +170,82 @@ sub detokenize {
 	return $text;
 }
 
+sub startsWithCJKChar {
+    my ($str) = @_;
+    return 0 if length($str) == 0;
+    my $firstChar = substr($str, 0, 1);
+    return &charIsCJK($firstChar);
+}
+
+sub endsWithCJKChar {
+    my ($str) = @_;
+    return 0 if length($str) == 0;
+    my $lastChar = substr($str, length($str)-1, 1);
+    return &charIsCJK($lastChar);
+}
+
+# Given a string consisting of one character, returns true iff the character
+# is a CJK (Chinese/Japanese/Korean) character
+sub charIsCJK {
+    my ($char) = @_;
+    # $char should be a string of length 1
+    my $codepoint = &codepoint_dec($char);
+    
+    # The following is based on http://en.wikipedia.org/wiki/Basic_Multilingual_Plane#Basic_Multilingual_Plane
+
+    # Hangul Jamo (1100–11FF)
+    return 1 if (&between_hexes($codepoint, '1100', '11FF'));
+
+    # CJK Radicals Supplement (2E80–2EFF)
+    # Kangxi Radicals (2F00–2FDF)
+    # Ideographic Description Characters (2FF0–2FFF)
+    # CJK Symbols and Punctuation (3000–303F)
+    # Hiragana (3040–309F)
+    # Katakana (30A0–30FF)
+    # Bopomofo (3100–312F)
+    # Hangul Compatibility Jamo (3130–318F)
+    # Kanbun (3190–319F)
+    # Bopomofo Extended (31A0–31BF)
+    # CJK Strokes (31C0–31EF)
+    # Katakana Phonetic Extensions (31F0–31FF)
+    # Enclosed CJK Letters and Months (3200–32FF)
+    # CJK Compatibility (3300–33FF)
+    # CJK Unified Ideographs Extension A (3400–4DBF)
+    # Yijing Hexagram Symbols (4DC0–4DFF)
+    # CJK Unified Ideographs (4E00–9FFF)
+    # Yi Syllables (A000–A48F)
+    # Yi Radicals (A490–A4CF)
+    return 1 if (&between_hexes($codepoint, '2E80', 'A4CF'));
+
+    # Phags-pa (A840–A87F)
+    return 1 if (&between_hexes($codepoint, 'A840', 'A87F'));
+
+    # Hangul Syllables (AC00–D7AF)
+    return 1 if (&between_hexes($codepoint, 'AC00', 'D7AF'));
+
+    # CJK Compatibility Ideographs (F900–FAFF)
+    return 1 if (&between_hexes($codepoint, 'F900', 'FAFF'));
+
+    # CJK Compatibility Forms (FE30–FE4F)
+    return 1 if (&between_hexes($codepoint, 'FE30', 'FE4F'));
+
+    # Range U+FF65–FFDC encodes halfwidth forms, of Katakana and Hangul characters
+    return 1 if (&between_hexes($codepoint, 'FF65', 'FFDC'));
+
+    # Supplementary Ideographic Plane 20000–2FFFF
+    return 1 if (&between_hexes($codepoint, '20000', '2FFFF'));
+
+    return 0;
+}
+
+# Returns the code point of a Unicode char, represented as a decimal number
+sub codepoint_dec {
+    if (my $char = shift) {
+	return unpack('U0U*', $char);
+    }
+}
+
+sub between_hexes {
+    my ($num, $left, $right) = @_;
+    return $num >= hex($left) && $num <= hex($right);
+}

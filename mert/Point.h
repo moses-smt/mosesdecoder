@@ -23,6 +23,9 @@ private:
   /**total size of the parameter space; we have pdim=FixedWeight.size()+optinidices.size()*/
   static unsigned int pdim;
   static unsigned int ncall;
+  /**The limits for randomization, both vectors are of full length, pdim*/
+  static vector<parameter_t> m_min;
+  static vector<parameter_t> m_max;
 public:
   static unsigned int getdim() {
     return dim;
@@ -35,8 +38,11 @@ public:
   };
   statscore_t score;
   Point():vector<parameter_t>(dim) {};
-  Point(const vector<parameter_t>& init);
-  void Randomize(const vector<parameter_t>& min,const vector<parameter_t>& max);
+  Point(const vector<parameter_t>& init,
+    const vector<parameter_t>& min,
+    const vector<parameter_t>& max
+  );
+  void Randomize();
 
   double operator*(const FeatureStats&)const;//compute the feature function
   Point operator+(const Point&)const;

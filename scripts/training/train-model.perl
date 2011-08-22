@@ -28,12 +28,13 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-   @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
+   @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
-   $_DICTIONARY);
+   $_DICTIONARY, $_EPPEX);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -87,6 +88,7 @@ $_HELP = 1
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOTDIR,
 		       'factor-delimiter=s' => \$_FACTOR_DELIMITER,
 		       'phrase-translation-table=s' => \@_PHRASE_TABLE,
+		       'generation-corpus=s' => \$_GENERATION_CORPUS,
 		       'generation-table=s' => \@_GENERATION_TABLE,
 		       'reordering-table=s' => \@_REORDERING_TABLE,
 		       'generation-type=s' => \@_GENERATION_TYPE,
@@ -107,6 +109,7 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
+		       'eppex:s' => \$_EPPEX,
                );
 
 if ($_HELP) {
@@ -193,6 +196,7 @@ my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
 my $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
+my $EPPEX = "$SCRIPTS_ROOTDIR/training/eppex/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
@@ -1130,11 +1134,11 @@ sub get_lexical {
     my $alignment_id = 0;
     while(my $e = <E>) {
         if (($alignment_id++ % 1000) == 0) { print STDERR "!"; }
-        chomp($e);
+        chomp($e); fix_spaces(\$e);
         my @ENGLISH = split(/ /,$e);
-        my $f = <F>; chomp($f);
+        my $f = <F>; chomp($f); fix_spaces(\$f);
         my @FOREIGN = split(/ /,$f);
-        my $a = <A>; chomp($a);
+        my $a = <A>; chomp($a); fix_spaces(\$a);
 
         my (%FOREIGN_ALIGNED,%ENGLISH_ALIGNED);
         foreach (split(/ /,$a)) {
@@ -1300,11 +1304,17 @@ sub extract_phrase {
     }
     else
     {
+		if ( $_EPPEX ) {
+			# eppex sets max_phrase_length itself (as the maximum phrase length for which any Lossy Counter is defined)
+      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $_EPPEX";
+		}
+		else {
       my $max_length = &get_max_phrase_length($table_number);
       print "MAX $max_length $reordering_flag $table_number\n";
       $max_length = &get_max_phrase_length(-1) if $reordering_flag;
 
       $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
+		}
       if ($reordering_flag) {
 	$cmd .= " orientation";
 	$cmd .= get_extract_reordering_flags();
@@ -1362,9 +1372,9 @@ sub score_phrase {
 sub score_phrase_phrase_extract {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
-    my $ONLY_DIRECT = ($_SCORE_OPTIONS =~ /OnlyDirect/);
-    my $PHRASE_COUNT = ($_SCORE_OPTIONS !~ /NoPhraseCount/);
-    my $CORE_SCORE_OPTIONS = $_SCORE_OPTIONS;
+    my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
+    my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
+    my $CORE_SCORE_OPTIONS = defined($_SCORE_OPTIONS) ? $_SCORE_OPTIONS : "";
     $CORE_SCORE_OPTIONS =~ s/\-+OnlyDirect//i;
     $CORE_SCORE_OPTIONS =~ s/\-+NoPhraseCount//i;
     my $substep = 1;
@@ -1528,13 +1538,15 @@ sub get_generation_factored {
     if (defined $___GENERATION_FACTORS) {
 	my @SPECIFIED_TABLE = @_GENERATION_TABLE;
 	my @TYPE = @_GENERATION_TYPE;
+  my $corpus = $___CORPUS.".".$___E.$___CORPUS_COMPRESSION;
+  $corpus = $_GENERATION_CORPUS if defined($_GENERATION_CORPUS);
 	foreach my $factor (split(/\+/,$___GENERATION_FACTORS)) {
 	    my ($factor_e_source,$factor_e) = split(/\-/,$factor);
 	    my $file = "$___MODEL_DIR/generation.$factor";
 	    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
 	    my $type = "double";
 	    $type = shift @TYPE if scalar @TYPE;
-	    &get_generation($file,$type,$factor,$factor_e_source,$factor_e);
+	    &get_generation($file,$type,$factor,$factor_e_source,$factor_e,$corpus);
 	}
     } 
     else {
@@ -1543,7 +1555,7 @@ sub get_generation_factored {
 }
 
 sub get_generation {
-    my ($file,$type,$factor,$factor_e_source,$factor_e) = @_;
+    my ($file,$type,$factor,$factor_e_source,$factor_e,$corpus) = @_;
     print STDERR "(8) [$factor] generate generation table @ ".`date`;
     $file = "$___MODEL_DIR/generation.$factor" unless $file;
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
@@ -1558,7 +1570,7 @@ sub get_generation {
     }
 
     my (%GENERATION,%GENERATION_TOTAL_SOURCE,%GENERATION_TOTAL_TARGET);
-    *E = open_or_zcat($___CORPUS.".".$___E.$___CORPUS_COMPRESSION);
+    *E = open_or_zcat($corpus);
     while(<E>) {
 	chomp;
 	foreach (split) {
@@ -1677,9 +1689,9 @@ sub create_ini {
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
      my $basic_weight_count = 4; # both directions, lex and phrase
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /OnlyDirect/;
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /NoLex/;
-     $basic_weight_count++ unless $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
+     $basic_weight_count++ unless defined($_SCORE_OPTIONS) &&  $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
      print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
    }
    if ($_GLUE_GRAMMAR) {
@@ -1699,7 +1711,7 @@ sub create_ini {
       my @SPECIFIED_TABLE = @_GENERATION_TABLE;
       foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
         my $weights_per_generation_model = 2;
-        $weights_per_generation_model = 1 if (shift @TYPE) eq 'single';
+        $weights_per_generation_model = 1 if scalar(@TYPE) && (shift @TYPE) eq 'single';
         $cnt++;
         my $ff = $f;
         $ff =~ s/\-/ /;
@@ -1772,9 +1784,9 @@ sub create_ini {
   print INI "\n\n# translation model weights\n[weight-t]\n";
   foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      my $basic_weight_count = 4; # both directions, lex and phrase
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /OnlyDirect/;
-     $basic_weight_count /= 2 if $_SCORE_OPTIONS =~ /NoLex/;
-     $basic_weight_count++ unless $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
+     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
+     $basic_weight_count++ unless defined($_SCORE_OPTIONS) &&  $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
      for(1..$basic_weight_count) {
        printf INI "%.2f\n", 1/$basic_weight_count;
      }
@@ -1787,7 +1799,7 @@ sub create_ini {
       my @TYPE = @_GENERATION_TYPE;
       foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
         print INI "0.3\n";
-        print INI "0\n" unless (shift @TYPE) eq 'single';
+        print INI "0\n" unless scalar(@TYPE) && (shift @TYPE) eq 'single';
       }
     } else {
       print INI "\n# no generation models, no weight-generation section\n";
@@ -1798,7 +1810,6 @@ sub create_ini {
   if ($_HIERARCHICAL) {
     print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
     print INI "[cube-pruning-pop-limit]\n1000\n\n";
-    print INI "[glue-rule-type]\n0\n\n";
     print INI "[non-terminals]\nX\n\n";
     print INI "[search-algorithm]\n3\n\n";
     print INI "[inputtype]\n3\n\n";
@@ -1866,5 +1877,10 @@ sub open_or_zcat {
   my $hdl;
   open($hdl,$read) or die "Can't read $fn ($read)";
   return $hdl;
+}
+
+sub fix_spaces(){
+        my ($in) = @_;
+        $$in =~ s/[ \t]+/ /g; $$in =~ s/[ \t]$//; $$in =~ s/^[ \t]//;    
 }
 

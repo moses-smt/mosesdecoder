@@ -110,3 +110,4 @@ void TargetCorpus::Load( string fileName )
   fclose( pFile );
   m_vcb.Load( fileName + ".tgt-vcb" );
 }
+

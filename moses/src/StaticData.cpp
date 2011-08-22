@@ -50,6 +50,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "BleuScoreFeature.h"
 #include "ScoreComponentCollection.h"
 
+#ifdef HAVE_SYNLM
+#include "SyntacticLanguageModel.h"
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -350,6 +354,8 @@ bool StaticData::LoadData(Parameter *parameter)
   m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
                            ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
 
+  SetBooleanParameter(&m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
+
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
@@ -416,12 +422,12 @@ bool StaticData::LoadData(Parameter *parameter)
 
       if (vecStr.size() == 1) {
         sentenceID++;
-        Phrase phrase(Output);
+        Phrase phrase(Output, 0);
         phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else if (vecStr.size() == 2) {
         sentenceID = Scan<long>(vecStr[0]);
-        Phrase phrase(Output);
+        Phrase phrase(Output, 0);
         phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else {
@@ -441,6 +447,12 @@ bool StaticData::LoadData(Parameter *parameter)
     return false;
   }
 
+#ifdef HAVE_SYNLM
+	if (m_parameter->GetParam("slmodel-file").size() > 0) {
+	  if (!LoadSyntacticLanguageModel()) return false;
+	}
+#endif
+	
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -494,7 +506,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_distortionScoreProducers.assign(tsConfig.size(), NULL);
   } else {
     if (m_distortionScoreProducers.size() != tsConfig.size()) {
-      UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems"));
+      UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems. Or [search-algorithm] has been set to a phrase-based algorithm when it should be chart decoding"));
       return false;
     }
   }
@@ -579,6 +591,11 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_wordTranslationFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_wordTranslationFeature);
     }
+#ifdef HAVE_SYNLM
+    if (m_syntacticLanguageModel != NULL) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
+    }
+#endif
   }
 
   //Load extra feature weights
@@ -635,17 +652,19 @@ StaticData::~StaticData()
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
   RemoveAllInColl(m_globalLexicalModels);
+	
+#ifdef HAVE_SYNLM
+	delete m_syntacticLanguageModel;
+#endif
+
+
   RemoveAllInColl(m_decodeGraphs);
   RemoveAllInColl(m_wordPenaltyProducers);
   RemoveAllInColl(m_distortionScoreProducers);
   m_languageModel.CleanUp();
 
   // delete trans opt
-  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
-  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
-    TranslationOptionList *transOptList = iterCache->second.first;
-    delete transOptList;
-  }
+  ClearTransOptionCache();
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
@@ -663,6 +682,61 @@ StaticData::~StaticData()
   Phrase::FinalizeMemPool();
 
 }
+
+#ifdef HAVE_SYNLM
+  bool StaticData::LoadSyntacticLanguageModel() {
+    cerr << "Loading syntactic language models..." << std::endl;
+    
+    const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
+    const vector<string> files = m_parameter->GetParam("slmodel-file");
+    
+    const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
+      : 0;
+
+    const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
+      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
+      : 500;
+
+    if (files.size() < 1) {
+      cerr << "No syntactic language model files specified!" << std::endl;
+      return false;
+    }
+
+    // check if feature is used
+    if (weights.size() >= 1) {
+
+      //cout.setf(ios::scientific,ios::floatfield);
+      //cerr.setf(ios::scientific,ios::floatfield);
+      
+      // create the feature
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
+
+      /* 
+      /////////////////////////////////////////
+      // BEGIN LANE's UNSTABLE EXPERIMENT :)
+      //
+
+      double ppl = m_syntacticLanguageModel->perplexity();
+      cerr << "Probability is " << ppl << endl;
+
+
+      //
+      // END LANE's UNSTABLE EXPERIMENT
+      /////////////////////////////////////////
+      */
+
+
+      if (m_syntacticLanguageModel==NULL) {
+	return false;
+      }
+
+    }
+    
+    return true;
+
+  }
+#endif
 
 bool StaticData::LoadLexicalReorderingModel()
 {
@@ -1533,6 +1607,13 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
 #endif
   m_transOptCache[key] = make_pair( storedTransOptList, clock() );
   ReduceTransOptCache();
+}
+void StaticData::ClearTransOptionCache() const {
+  map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
+  for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
+    TranslationOptionList *transOptList = iterCache->second.first;
+    delete transOptList;
+  }
 }
 
 void StaticData::ReLoadParameter()
