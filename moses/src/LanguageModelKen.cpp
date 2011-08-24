@@ -84,8 +84,8 @@ private:
   Model *m_ngram;
   std::vector<lm::WordIndex> m_lmIdLookup;
   bool m_lazy;
-  FFState *m_nullContextState;
-  FFState *m_beginSentenceState;
+  KenLMState m_nullContextState;
+  KenLMState m_beginSentenceState;
 
   void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
 
@@ -101,8 +101,8 @@ public:
   LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
   void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  FFState *GetNullContextState() const;
-  FFState *GetBeginSentenceState() const;
+  const FFState *GetNullContextState() const;
+  const FFState *GetBeginSentenceState() const;
   FFState *NewState(const FFState *from = NULL) const;
 
   lm::WordIndex GetLmID(const std::string &str) const;
@@ -162,12 +162,8 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
   m_ngram = new Model(filePath.c_str(), config);
   m_nGramOrder  = m_ngram->Order();
 
-  KenLMState *tmp = new KenLMState();
-  tmp->state = m_ngram->NullContextState();
-  m_nullContextState = tmp;
-  tmp = new KenLMState();
-  tmp->state = m_ngram->BeginSentenceState();
-  m_beginSentenceState = tmp;
+  m_nullContextState.state = m_ngram->NullContextState();
+  m_beginSentenceState.state = m_ngram->BeginSentenceState();
   return true;
 }
 
@@ -221,14 +217,14 @@ template <class Model> void LanguageModelKen<Model>::GetState(const std::vector<
   m_ngram->GetState(indices, indices + contextFactor.size(), static_cast<KenLMState&>(outState).state);
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::GetNullContextState() const
+template <class Model> const FFState *LanguageModelKen<Model>::GetNullContextState() const
 {
-  return m_nullContextState;
+  return &m_nullContextState;
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::GetBeginSentenceState() const
+template <class Model> const FFState *LanguageModelKen<Model>::GetBeginSentenceState() const
 {
-  return m_beginSentenceState;
+  return &m_beginSentenceState;
 }
 
 template <class Model> FFState *LanguageModelKen<Model>::NewState(const FFState *from) const

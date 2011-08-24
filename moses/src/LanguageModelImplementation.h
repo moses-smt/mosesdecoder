@@ -92,8 +92,8 @@ public:
   // This is here so models can implement a shortcut to GetValueAndState.
   virtual void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  virtual FFState *GetNullContextState() const = 0;
-  virtual FFState *GetBeginSentenceState() const = 0;
+  virtual const FFState *GetNullContextState() const = 0;
+  virtual const FFState *GetBeginSentenceState() const = 0;
   virtual FFState *NewState(const FFState *from = NULL) const = 0;
 
   //! max n-gram order of LM
