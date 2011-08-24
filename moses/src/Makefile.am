@@ -68,6 +68,7 @@ libmoses_la_HEADERS = \
         LanguageModelRemote.h \
         LanguageModelSingleFactor.h \
         LanguageModelSkip.h \
+        LanguageModelKen.h \
         LexicalReordering.h \
         LexicalReorderingState.h \
         LexicalReorderingTable.h \
