@@ -120,7 +120,7 @@ namespace Moses {
     const_iterator cbegin() const {return m_features.cbegin();}
     const_iterator cend() const {return m_features.cend();}
 		
-    //defaults
+    //defaults - TODO remove
     static FName DEFAULT_NAME;
     static const FValue DEFAULT;
     
