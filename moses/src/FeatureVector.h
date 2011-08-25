@@ -26,6 +26,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <valarray>
 #include <vector>
 
 #include <boost/functional/hash.hpp>
@@ -109,7 +110,7 @@ namespace Moses {
 	{
   public:
     /** Empty feature vector */
-    FVector();
+    FVector(size_t coreFeatures = 0);
     
     typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     /** Iterators */
@@ -131,10 +132,14 @@ namespace Moses {
     
     /** Element access */
     ProxyFVector operator[](const FName& name);
+    FValue& operator[](size_t index);
     FValue operator[](const FName& name) const;
+    FValue operator[](size_t index) const;
 
     /** Size */
-    size_t size() const {return m_features.size();}
+    size_t size() const {
+      return m_features.size() + m_coreFeatures.size();
+    }
     
     /** Equality */
     bool operator== (const FVector& rhs) const;
@@ -180,6 +185,7 @@ namespace Moses {
     
 		
     FNVmap m_features;
+    std::valarray<FValue> m_coreFeatures;
 		
 #ifdef MPI_ENABLE
     //serialization

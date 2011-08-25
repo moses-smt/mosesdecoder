@@ -89,7 +89,8 @@ namespace Moses {
     return ! (*this == rhs);
   }
   
-	FVector::FVector() {}
+	FVector::FVector(size_t coreFeatures) :
+     m_coreFeatures(coreFeatures) {}
 	
 	void FVector::clear() {
     m_features.clear();
@@ -167,10 +168,20 @@ namespace Moses {
 		return ProxyFVector(this, name);
 		
 	}
+
+  /** Equivalent for core features. */
+  FValue& FVector::operator[](size_t index) {
+    return m_coreFeatures[index];
+  }
+
 	
 	FValue FVector::operator[](const FName& name) const {
 		return get(name);
 	}
+
+  FValue FVector::operator[](size_t index) const {
+    return m_coreFeatures[index];
+  }
 	
 	
 	
@@ -229,6 +240,7 @@ namespace Moses {
   }
 
   FVector& FVector::operator+= (const FVector& rhs) {
+    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second + rhs.get(i->first));
     }
@@ -237,6 +249,7 @@ namespace Moses {
         set(i->first,i->second);
       }
     }
+    m_coreFeatures += rhs.m_coreFeatures;
     return *this;
   }
   

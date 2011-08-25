@@ -114,5 +114,43 @@ BOOST_AUTO_TEST_CASE(vector_mult)
   BOOST_CHECK_CLOSE((FValue)quot[n4], 0, TOL);
 }
 
+BOOST_AUTO_TEST_CASE(core) 
+{
+  FVector f1(2);
+  f1[0] = 1.3;
+  f1[1] = -1.9;
+  BOOST_CHECK_CLOSE(f1[0],1.3,TOL);
+  BOOST_CHECK_CLOSE(f1[1],-1.9,TOL);
+  f1[1] = 0.1;
+  BOOST_CHECK_CLOSE(f1[1],0.1,TOL);
+  
+  BOOST_CHECK_EQUAL(f1.size(),2);
+
+  f1[FName("a")] = 1.2;
+  BOOST_CHECK_EQUAL(f1.size(),3);
+}
+
+BOOST_AUTO_TEST_CASE(core_arith)
+{
+  FVector f1(2);
+  FVector f2(2);
+  FName n1("a");
+  FName n2("b");
+  f1[0] = 1.1; f1[1] = 0.25; f1[n1] = 3.6; f1[n2] = -1.5;
+  f2[0] = 0.5; f2[1] = -0.1; f2[n1] = 1;
+
+  //vector ops
+  FVector sum = f1+f2;
+  FVector diff = f1-f2;
+  FVector prod = f1*f2;
+  FVector quot = f1/f2;
+
+  BOOST_CHECK_CLOSE((FValue)sum[0], 1.6 , TOL);
+  BOOST_CHECK_CLOSE((FValue)sum[1], 0.15 , TOL);
+  BOOST_CHECK_CLOSE((FValue)sum[n1], 4.6  , TOL);
+  BOOST_CHECK_CLOSE((FValue)sum[n2], -1.5 , TOL);
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
