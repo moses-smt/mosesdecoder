@@ -73,10 +73,6 @@ namespace Moses {
   }
   
   size_t FName::hash() const {
-    /*std::size_t seed = 0;
-		 boost::hash_combine(seed, m_root);
-		 boost::hash_combine(seed, m_name);
-		 return seed;*/
     return boost::hash_value(m_id);
   }
   
@@ -93,14 +89,10 @@ namespace Moses {
     return ! (*this == rhs);
   }
   
-	FVector::FVector( FValue defaultValue)  
-	{
-    m_features[DEFAULT_NAME] = defaultValue;
-	}
+	FVector::FVector() {}
 	
 	void FVector::clear() {
     m_features.clear();
-    m_features[DEFAULT_NAME] = DEFAULT;
 	}
 	
 	bool FVector::load(const std::string& filename) {
@@ -140,10 +132,6 @@ namespace Moses {
     }
   }
   
-  FName FVector::DEFAULT_NAME("DEFAULT","");
-  const FValue FVector::DEFAULT = 0;
-  
-  
   static bool equalsTolerance(FValue lhs, FValue rhs) {
     if (lhs == rhs) return true;
     static const FValue TOLERANCE = 1e-4;
@@ -157,7 +145,6 @@ namespace Moses {
     if (this == &rhs) {
       return true;
     }
-    if (get(DEFAULT_NAME) != rhs.get(DEFAULT_NAME)) return false;
     for (const_iterator i  = cbegin(); i != cend(); ++i) {
       if (!equalsTolerance(i->second,rhs.get(i->first))) return false;
     }
@@ -182,7 +169,7 @@ namespace Moses {
 	}
 	
 	FValue FVector::operator[](const FName& name) const {
-		return get(name) + get(DEFAULT_NAME);
+		return get(name);
 	}
 	
 	
@@ -190,19 +177,7 @@ namespace Moses {
   ostream& FVector::print(ostream& out) const {
     out << "{";
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-      FValue value = i->second;
-      if (i->first != DEFAULT_NAME) {
-        value += get(DEFAULT_NAME);
-      }
-/*      if (i->first != DEFAULT_NAME && i->second != 0.0) {
-          out << i->first << "=" << value << ", ";
-      }*/
-/*      if (i->first != DEFAULT_NAME) {
-      	out << i->first << "=" << value << ", ";
-      }*/
-      if (i->first != DEFAULT_NAME) {
-      	out << value << ", ";
-      }
+       out << i->first << "=" << i->second << ", ";
     }
     out << "}";
     return out;
@@ -213,6 +188,7 @@ namespace Moses {
   }
 	
   const FValue& FVector::get(const FName& name) const {
+    static const FValue DEFAULT = 0;
     const_iterator fi = m_features.find(name);
     if (fi == m_features.end()) {
       return DEFAULT;
@@ -253,7 +229,6 @@ namespace Moses {
   }
 
   FVector& FVector::operator+= (const FVector& rhs) {
-    //default value will take care of itself here.
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second + rhs.get(i->first));
     }
@@ -278,92 +253,37 @@ namespace Moses {
   }
   
   FVector& FVector::operator*= (const FVector& rhs) {
-    FValue lhsDefault = get(DEFAULT_NAME);
-    FValue rhsDefault = rhs.get(DEFAULT_NAME);
     for (iterator i = begin(); i != end(); ++i) {
-      if (i->first == DEFAULT_NAME) {
-        set(i->first,lhsDefault*rhsDefault);
-      } else {
-        FValue lhsValue = i->second;
-        FValue rhsValue = rhs.get(i->first);
-        set(i->first, lhsValue*rhsDefault + rhsValue*lhsDefault + lhsValue*rhsValue);
-      }
-    }
-    if (lhsDefault) {
-      //Features that have the default value in the lhs
-      for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-        if (!hasNonDefaultValue(i->first)) {
-          set(i->first, lhsDefault*i->second);
-        }
-      }
+      FValue lhsValue = i->second;
+      FValue rhsValue = rhs.get(i->first);
+      set(i->first,lhsValue*rhsValue);
     }
     return *this;
   }
   
   FVector& FVector::operator/= (const FVector& rhs) {
-    FValue lhsDefault = get(DEFAULT_NAME);
-    FValue rhsDefault = rhs.get(DEFAULT_NAME);
-    if (lhsDefault && !rhsDefault) {
-      throw runtime_error("Attempt to divide feature vectors where lhs has default and rhs does not");
-    }
-    FValue quotientDefault = 0;
-    if (rhsDefault) {
-      quotientDefault = lhsDefault / rhsDefault;
-    }
     for (iterator i = begin(); i != end(); ++i) {
-      if (i->first == DEFAULT_NAME) {
-        set(i->first, quotientDefault);
-      } else {
-        FValue lhsValue = i->second;
-        FValue rhsValue = rhs.get(i->first);
-        set(i->first, (lhsValue + lhsDefault) / (rhsValue + rhsDefault) - quotientDefault);
-      }
-    }
-    if (lhsDefault) {
-      //Features that have the default value in the lhs
-      for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-        if (!hasNonDefaultValue(i->first)) {
-          set(i->first, lhsDefault / (i->second + rhsDefault) - quotientDefault);
-        }
-      }
+      FValue lhsValue = i->second;
+      FValue rhsValue = rhs.get(i->first);
+      set(i->first, lhsValue / rhsValue) ;
     }
     return *this;
   }
   
 	FVector& FVector::max_equals(const FVector& rhs) {
-		FValue lhsDefault = get(DEFAULT_NAME);
-		FValue rhsDefault = rhs.get(DEFAULT_NAME);
-		FValue maxDefault = max(lhsDefault,rhsDefault);
 		for (iterator i = begin(); i != end(); ++i) {
-			if (i->first == DEFAULT_NAME) {
-				set(i->first, maxDefault);
-			} else {
-				set(i->first, max(i->second + lhsDefault, rhs.get(i->first) + rhsDefault) - maxDefault);
-			}
+		  set(i->first, max(i->second , rhs.get(i->first) ));
 		}
 		for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-			if (!hasNonDefaultValue(i->first)) {
-				set(i->first, max(lhsDefault, (i->second + rhsDefault)) - maxDefault);
-			}
+      if (!hasNonDefaultValue(i->first)) {
+			  set(i->first, i->second);
+      }
 		}
-		
-		
 		return *this;
 	}
   
-  FVector& FVector::operator+= (const FValue& rhs) {
-    set(DEFAULT_NAME, get(DEFAULT_NAME) + rhs);
-    return *this;
-  }
-  
-  FVector& FVector::operator-= (const FValue& rhs) {
-    set(DEFAULT_NAME, get(DEFAULT_NAME) - rhs);
-    return *this;
-  }
-  
   FVector& FVector::operator*= (const FValue& rhs) {
     //NB Could do this with boost::bind ?
-    //This multiplies the default value, which is what we want
     for (iterator i = begin(); i != end(); ++i) {
       i->second *= rhs;
     }
@@ -372,7 +292,6 @@ namespace Moses {
   
   
   FVector& FVector::operator/= (const FValue& rhs) {
-		//This dividess the default value, which is what we want
     for (iterator i = begin(); i != end(); ++i) {
       i->second /= rhs;
     }
@@ -382,9 +301,6 @@ namespace Moses {
   FValue FVector::l1norm() const {
     FValue norm = 0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-      if ((i->second) && i->first == DEFAULT_NAME) {
-        throw runtime_error("Cannot take l1norm with non-zero default values");
-      }
       norm += abs(i->second);
     }
     return norm;
@@ -393,9 +309,6 @@ namespace Moses {
   FValue FVector::sum() const {
     FValue sum = 0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-      if ((i->second) && i->first == DEFAULT_NAME) {
-        throw runtime_error("Cannot take sum with non-zero default values");
-      }
       sum += i->second;
     }
     return sum;
@@ -408,25 +321,9 @@ namespace Moses {
 	
   
   FValue FVector::inner_product(const FVector& rhs) const {
-    FValue lhsDefault = get(DEFAULT_NAME);
-    FValue rhsDefault = rhs.get(DEFAULT_NAME);
-    if (lhsDefault && rhsDefault) {
-      throw runtime_error("Cannot take inner product if both lhs and rhs have non-zero default values");
-    }
     FValue product = 0.0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-      if (i->first != DEFAULT_NAME) {
-        product += ((i->second + lhsDefault)*(rhs.get(i->first) + rhsDefault));
-      }
-    }
-    
-    if (lhsDefault) {
-      //Features that have the default value in the rhs
-      for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-        if (!hasNonDefaultValue(i->first)) {
-          product += (i->second + rhsDefault)*lhsDefault;
-        }
-      }
+        product += ((i->second)*(rhs.get(i->first)));
     }
     return product;
   }
@@ -447,13 +344,6 @@ namespace Moses {
     return FVector(lhs) /= rhs;
   }
   
-  const FVector operator+(const FVector& lhs, const FValue& rhs) {
-    return FVector(lhs) += rhs;
-  }
-  
-  const FVector operator-(const FVector& lhs, const FValue& rhs) {
-    return FVector(lhs) -= rhs;
-  }
   
   const FVector operator*(const FVector& lhs, const FValue& rhs) {
     return FVector(lhs) *= rhs;

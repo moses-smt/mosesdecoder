@@ -108,8 +108,8 @@ namespace Moses {
 	class FVector
 	{
   public:
-    /** Empty feature vector, possibly with default value */
-    FVector(FValue defaultValue = DEFAULT);
+    /** Empty feature vector */
+    FVector();
     
     typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     /** Iterators */
@@ -120,13 +120,9 @@ namespace Moses {
     const_iterator cbegin() const {return m_features.cbegin();}
     const_iterator cend() const {return m_features.cend();}
 		
-    //defaults - TODO remove
-    static FName DEFAULT_NAME;
-    static const FValue DEFAULT;
-    
+		bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
     void clear();
     
-		bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
     
     /** Load from file - each line should be 'root[_name] value' */
     bool load(const std::string& filename);
@@ -155,8 +151,6 @@ namespace Moses {
     FVector& operator*= (const FVector& rhs);
     FVector& operator/= (const FVector& rhs);
     //Scalar
-    FVector& operator+= (const FValue& rhs);
-    FVector& operator-= (const FValue& rhs);
     FVector& operator*= (const FValue& rhs);
     FVector& operator/= (const FValue& rhs);
     
@@ -180,8 +174,7 @@ namespace Moses {
     
   private:
     
-    /** Internal get and set. Note that the get() doesn't include the
-     default value */
+    /** Internal get and set. */
     const FValue& get(const FName& name) const;
     void set(const FName& name, const FValue& value);
     
@@ -231,8 +224,6 @@ namespace Moses {
 	const FVector operator/(const FVector& lhs, const FVector& rhs);
 	
 	//Scalar operations
-	const FVector operator+(const FVector& lhs, const FValue& rhs);
-	const FVector operator-(const FVector& lhs, const FValue& rhs);
 	const FVector operator*(const FVector& lhs, const FValue& rhs);
 	const FVector operator/(const FVector& lhs, const FValue& rhs);
 	
@@ -257,7 +248,7 @@ namespace Moses {
       // If we get here, we know that operator[] was called to perform a write access,
       // so we can insert an item in the vector if needed
       //std::cerr << "Inserting " << value << " into " << m_name << std::endl;
-      m_fv->set(m_name,value-m_fv->get(FVector::DEFAULT_NAME));
+      m_fv->set(m_name,value);
       return *this;
       
     }
@@ -265,7 +256,7 @@ namespace Moses {
     operator FValue() {
       // If we get here, we know that operator[] was called to perform a read access,
       // so we can simply return the value from the vector
-      return m_fv->get(m_name) + m_fv->get(FVector::DEFAULT_NAME);
+      return m_fv->get(m_name);
     }
     
     /*operator FValue&() {
@@ -273,11 +264,11 @@ namespace Moses {
 		 }*/
     
     FValue operator++() {
-      return ++m_fv->m_features[m_name] + m_fv->get(FVector::DEFAULT_NAME);
+      return ++m_fv->m_features[m_name];
     }
     
     FValue operator +=(FValue lhs) {
-      return (m_fv->m_features[m_name] += lhs) + m_fv->get(FVector::DEFAULT_NAME);
+      return (m_fv->m_features[m_name] += lhs);
     }
     
   private:
