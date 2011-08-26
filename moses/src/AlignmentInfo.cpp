@@ -70,9 +70,9 @@ std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignment
   {
     case NoSort:
       break;
+      
     case TargetOrder:
       std::sort(ret.begin(), ret.end(), compare_target);
-      
       break;
       
     default:
