@@ -127,9 +127,10 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-
-
-
+  if(m_parameter->GetParam("sort-word-alignment").size()) {
+    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
+  }
+  
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];

@@ -204,7 +204,7 @@ protected:
   Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
   SourceLabelOverlap m_sourceLabelOverlap;
   UnknownLHSList m_unknownLHS;
-
+  WordAlignmentSort m_wordAlignmentSort;
 
   StaticData();
 
@@ -579,9 +579,12 @@ public:
     return 999999; /* TODO wtf! */
   }
 
-
   bool ContinuePartialTranslation() const {
     return m_continuePartialTranslation;
+  }
+
+  WordAlignmentSort GetWordAlignmentSort() const {
+    return m_wordAlignmentSort;
   }
 };
 

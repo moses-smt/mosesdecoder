@@ -16,10 +16,11 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
-
+#include <algorithm>
+#include <cassert>
 #include "AlignmentInfo.h"
-
 #include "TypeDef.h"
+#include "StaticData.h"
 
 namespace Moses
 {
@@ -41,8 +42,47 @@ void AlignmentInfo::BuildNonTermIndexMap()
   for (p = begin(); p != end(); ++p) {
     m_nonTermIndexMap[p->second] = i++;
   }
+            
 }
 
+bool compare_target(const std::pair<size_t,size_t> *a, const std::pair<size_t,size_t> *b) {
+  if(a->second < b->second)  return true;
+  if(a->second == b->second) return (a->first < b->first);
+  return false;
+}
+
+
+std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignments() const
+{
+  std::vector< const std::pair<size_t,size_t>* > ret;
+  
+  CollType::const_iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter)
+  {
+    const std::pair<size_t,size_t> &alignPair = *iter;
+    ret.push_back(&alignPair);
+  }
+  
+  const StaticData &staticData = StaticData::Instance();
+  WordAlignmentSort wordAlignmentSort = staticData.GetWordAlignmentSort();
+  
+  switch (wordAlignmentSort)
+  {
+    case NoSort:
+      break;
+    case TargetOrder:
+      std::sort(ret.begin(), ret.end(), compare_target);
+      
+      break;
+      
+    default:
+      assert(false);
+  }
+  
+  return ret;
+  
+}
+  
 std::ostream& operator<<(std::ostream &out, const AlignmentInfo &alignmentInfo)
 {
   AlignmentInfo::const_iterator iter;

@@ -142,6 +142,7 @@ Parameter::Parameter()
   AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
   AddParam("show-weights", "print feature weights and exit");
   AddParam("alignment-output-file", "print output word alignments into given file");
+  AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
 }
 
 Parameter::~Parameter()

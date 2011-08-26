@@ -206,22 +206,40 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
   }
 }
 
-void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+void OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
 {
-  ostringstream out;
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments();
+  
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+  }
+  
+}
+
+void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+{
   size_t targetOffset = 0;
 
   for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
     const Hypothesis &edge = *edges[currEdge];
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-    AlignmentInfo::const_iterator it;
-    for (it = tp.GetAlignmentInfo().begin(); it != tp.GetAlignmentInfo().end(); ++it) {
-      out << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
-    }
+    
+    OutputAlignment(out, tp.GetAlignmentInfo(), sourceOffset, targetOffset);
+
     targetOffset += tp.GetSize();
   }
   out << std::endl;
+}
+
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+{
+  ostringstream out;
+  OutputAlignment(out, edges);
+  
   collector->Write(lineNo,out.str());
 }
 
@@ -484,11 +502,10 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
         WordsRange targetRange = path.GetTargetWordsRange(edge);
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
-        const AlignmentInfo AI = edge.GetCurrTargetPhrase().GetAlignmentInfo();
-        AlignmentInfo::const_iterator iter;
-        for (iter = AI.begin(); iter != AI.end(); ++iter) {
-          out << " " << iter->first+sourceOffset << "-" << iter->second+targetOffset;
-        }
+        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignmentInfo();
+        
+        OutputAlignment(out, ai, sourceOffset, targetOffset);
+
       }
     }
 
