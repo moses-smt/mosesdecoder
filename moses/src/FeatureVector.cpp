@@ -262,6 +262,7 @@ namespace Moses {
         set(i->first,-(i->second));
       }
     }
+    m_coreFeatures -= rhs.m_coreFeatures;
     return *this;
   }
   
@@ -271,6 +272,7 @@ namespace Moses {
       FValue rhsValue = rhs.get(i->first);
       set(i->first,lhsValue*rhsValue);
     }
+    m_coreFeatures *= rhs.m_coreFeatures;
     return *this;
   }
   
@@ -280,6 +282,7 @@ namespace Moses {
       FValue rhsValue = rhs.get(i->first);
       set(i->first, lhsValue / rhsValue) ;
     }
+    m_coreFeatures /= rhs.m_coreFeatures;
     return *this;
   }
   
@@ -300,6 +303,7 @@ namespace Moses {
     for (iterator i = begin(); i != end(); ++i) {
       i->second *= rhs;
     }
+    m_coreFeatures *= rhs;
     return *this;
   }
   
@@ -308,6 +312,7 @@ namespace Moses {
     for (iterator i = begin(); i != end(); ++i) {
       i->second /= rhs;
     }
+    m_coreFeatures /= rhs;
     return *this;
   }
   

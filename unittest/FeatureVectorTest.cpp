@@ -143,13 +143,61 @@ BOOST_AUTO_TEST_CASE(core_arith)
   FVector sum = f1+f2;
   FVector diff = f1-f2;
   FVector prod = f1*f2;
-  FVector quot = f1/f2;
+  FVector quot = f2/f1;
 
   BOOST_CHECK_CLOSE((FValue)sum[0], 1.6 , TOL);
   BOOST_CHECK_CLOSE((FValue)sum[1], 0.15 , TOL);
   BOOST_CHECK_CLOSE((FValue)sum[n1], 4.6  , TOL);
   BOOST_CHECK_CLOSE((FValue)sum[n2], -1.5 , TOL);
 
+  BOOST_CHECK_CLOSE((FValue)diff[0], 0.6 , TOL);
+  BOOST_CHECK_CLOSE((FValue)diff[1], 0.35 , TOL);
+  BOOST_CHECK_CLOSE((FValue)diff[n1], 2.6  , TOL);
+  BOOST_CHECK_CLOSE((FValue)diff[n2], -1.5 , TOL);
+
+  BOOST_CHECK_CLOSE((FValue)prod[0], 0.55 , TOL);
+  BOOST_CHECK_CLOSE((FValue)prod[1], -0.025 , TOL);
+  BOOST_CHECK_CLOSE((FValue)prod[n1], 3.6  , TOL);
+  BOOST_CHECK_CLOSE((FValue)prod[n2], 0 , TOL);
+
+  BOOST_CHECK_CLOSE((FValue)quot[0], 0.4545454545 , TOL);
+  BOOST_CHECK_CLOSE((FValue)quot[1], -0.4 , TOL);
+  BOOST_CHECK_CLOSE((FValue)quot[n1], 0.277777777  , TOL);
+  BOOST_CHECK_CLOSE((FValue)quot[n2], 0 , TOL);
+}
+
+BOOST_AUTO_TEST_CASE(core_scalar)
+{
+  FVector f1(3);
+  FName n1("a");
+  f1[0] = 1.5; f1[1] = 2.1; f1[2] = 4; f1[n1] = -0.5;
+
+  FVector prod = f1*2;
+  FVector quot = f1/5;
+
+  BOOST_CHECK_CLOSE((FValue)prod[0], 3 , TOL);
+  BOOST_CHECK_CLOSE((FValue)prod[1], 4.2 , TOL);
+  BOOST_CHECK_CLOSE((FValue)prod[2], 8 , TOL);
+  BOOST_CHECK_CLOSE((FValue)prod[n1],-1  , TOL);
+
+  BOOST_CHECK_CLOSE((FValue)quot[0], 0.3 , TOL);
+  BOOST_CHECK_CLOSE((FValue)quot[1], 0.42 , TOL);
+  BOOST_CHECK_CLOSE((FValue)quot[2], 0.8 , TOL);
+  BOOST_CHECK_CLOSE((FValue)quot[n1],-0.1  , TOL);
+
+}
+
+BOOST_AUTO_TEST_CASE(core_max) 
+{
+  FVector f1(2);
+  FVector f2(2);
+  FName n1("a");
+  FName n2("b");
+  FName n3("c");
+  f1[0] = 1.1; f1[1] = 0.25; ; f1[n2] = -1.5; f1[n3] = 2.2;
+  f2[0] = 0.5; f2[1] = -0.1; f2[n1] = 1; f2[n3] = 2.4;
+
+  FVector m = fvmax(f1,f2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
