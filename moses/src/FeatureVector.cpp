@@ -187,6 +187,14 @@ namespace Moses {
 	
   ostream& FVector::print(ostream& out) const {
     out << "{";
+    out << "core=(";
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      out << m_coreFeatures[i];
+      if (i + 1 < m_coreFeatures.size()) {
+        out << ",";
+      }
+    }
+    out << ") ";
     for (const_iterator i = cbegin(); i != cend(); ++i) {
        out << i->first << "=" << i->second << ", ";
     }
@@ -254,6 +262,7 @@ namespace Moses {
   }
   
   FVector& FVector::operator-= (const FVector& rhs) {
+    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second - rhs.get(i->first));
     }
@@ -267,6 +276,7 @@ namespace Moses {
   }
   
   FVector& FVector::operator*= (const FVector& rhs) {
+    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     for (iterator i = begin(); i != end(); ++i) {
       FValue lhsValue = i->second;
       FValue rhsValue = rhs.get(i->first);
@@ -277,6 +287,7 @@ namespace Moses {
   }
   
   FVector& FVector::operator/= (const FVector& rhs) {
+    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     for (iterator i = begin(); i != end(); ++i) {
       FValue lhsValue = i->second;
       FValue rhsValue = rhs.get(i->first);
@@ -287,6 +298,7 @@ namespace Moses {
   }
   
 	FVector& FVector::max_equals(const FVector& rhs) {
+    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
 		for (iterator i = begin(); i != end(); ++i) {
 		  set(i->first, max(i->second , rhs.get(i->first) ));
 		}
@@ -295,6 +307,9 @@ namespace Moses {
 			  set(i->first, i->second);
       }
 		}
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      m_coreFeatures[i] = max(m_coreFeatures[i], rhs.m_coreFeatures[i]);
+    }
 		return *this;
 	}
   
@@ -321,6 +336,9 @@ namespace Moses {
     for (const_iterator i = cbegin(); i != cend(); ++i) {
       norm += abs(i->second);
     }
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      norm += abs(m_coreFeatures[i]);
+    }
     return norm;
   }
   
@@ -329,6 +347,7 @@ namespace Moses {
     for (const_iterator i = cbegin(); i != cend(); ++i) {
       sum += i->second;
     }
+    sum += m_coreFeatures.sum();
     return sum;
   }
   
@@ -339,9 +358,13 @@ namespace Moses {
 	
   
   FValue FVector::inner_product(const FVector& rhs) const {
+    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     FValue product = 0.0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
         product += ((i->second)*(rhs.get(i->first)));
+    }
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      product += m_coreFeatures[i]*rhs.m_coreFeatures[i];
     }
     return product;
   }
