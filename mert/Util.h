@@ -51,45 +51,49 @@ int getNextPound(std::string &theString, std::string &substring, const std::stri
 template<typename T>
 inline T Scan(const std::string &input)
 {
-	 std::stringstream stream(input);
-	 T ret;
-	 stream >> ret;
-	 return ret;
+  std::stringstream stream(input);
+  T ret;
+  stream >> ret;
+  return ret;
 };
 
 class inputfilestream : public std::istream
 {
 protected:
-        std::streambuf *m_streambuf;
-	bool _good;
+  std::streambuf *m_streambuf;
+  bool _good;
 public:
-  
-        inputfilestream(const std::string &filePath);
-        ~inputfilestream();
-	bool good(){return _good;}
-        void close();
+
+  inputfilestream(const std::string &filePath);
+  ~inputfilestream();
+  bool good() {
+    return _good;
+  }
+  void close();
 };
 
 class outputfilestream : public std::ostream
 {
 protected:
-        std::streambuf *m_streambuf;
-	bool _good;
+  std::streambuf *m_streambuf;
+  bool _good;
 public:
-  
-        outputfilestream(const std::string &filePath);
-        ~outputfilestream();
-	bool good(){return _good;}
-        void close();
+
+  outputfilestream(const std::string &filePath);
+  ~outputfilestream();
+  bool good() {
+    return _good;
+  }
+  void close();
 };
 
 template<typename T>
 inline std::string stringify(T x)
 {
-	std::ostringstream o;
-	if (!(o << x))
-		throw std::runtime_error("stringify(template<typename T>)");
-	return o.str();
+  std::ostringstream o;
+  if (!(o << x))
+    throw std::runtime_error("stringify(template<typename T>)");
+  return o.str();
 }
 
 // Utilities to measure decoding time
@@ -99,11 +103,11 @@ double GetUserTime();
 
 inline std::string trimStr(const std::string& Src, const std::string& c = " \r\n")
 {
-    unsigned int p2 = Src.find_last_not_of(c);
-    if (p2 == std::string::npos) return std::string();
-    unsigned int p1 = Src.find_first_not_of(c);
-    if (p1 == std::string::npos) p1 = 0;
-    return Src.substr(p1, (p2-p1)+1);
+  unsigned int p2 = Src.find_last_not_of(c);
+  if (p2 == std::string::npos) return std::string();
+  unsigned int p1 = Src.find_first_not_of(c);
+  if (p1 == std::string::npos) p1 = 0;
+  return Src.substr(p1, (p2-p1)+1);
 }
 
 
