@@ -1,0 +1,27 @@
+A simple regular testing of Moses codebase, aka cruise control
+Started by Ondrej Bojar
+2011-08-28
+
+
+Usage:
+
+1. Checkout this directory somewhere on the computer where you want to run the
+   cruise control.
+2. Create as many config files as you wish, an example is ondrej-nb.config
+   ...hardcode all paths to you preferred external tools like LM toolkits.
+3. Run ./test_all_new_commits.sh <CONFIGFILE>
+
+
+
+TODO / KNOWN BUGS
+- regression tests are not run yet
+
+- regression tests always require SRILM, but we need to test all LMs that have
+  been compiled in
+  => add separate regression tests, one for each LM?
+  => modify regression tests to actually loop over all LMs?
+
+- final status is FAIL if any regression test fails, but we should actually
+  allow to expect failures for the given set of ./configure parameters
+  (e.g. regression test requiring irstlm is bound to fail if we're not linking
+  against irstlm)
