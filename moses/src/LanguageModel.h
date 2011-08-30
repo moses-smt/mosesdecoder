@@ -95,13 +95,13 @@ public:
     return m_implementation->GetNGramOrder();
   }
 
-  virtual std::string GetScoreProducerDescription() const {
-    return m_implementation->GetScoreProducerDescription();
+  virtual std::string GetScoreProducerDescription(unsigned idx=0) const {
+    return m_implementation->GetScoreProducerDescription(idx);
   }
 
   float GetWeight() const;
 
-  std::string GetScoreProducerWeightShortName() const {
+  std::string GetScoreProducerWeightShortName(unsigned) const {
     return "lm";
   }
 

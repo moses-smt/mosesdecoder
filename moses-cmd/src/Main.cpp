@@ -279,7 +279,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
   size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
   size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
   for (size_t i = weightStart; i < weightEnd; ++i) {
-    cout << ff->GetScoreProducerDescription() <<  " " << ff->GetScoreProducerWeightShortName() << " "
+    cout << ff->GetScoreProducerDescription(i-weightStart) <<  " " << ff->GetScoreProducerWeightShortName(i-weightStart) << " "
          << StaticData::Instance().GetAllWeights()[i] << endl;
   }
 }
@@ -334,6 +334,7 @@ int main(int argc, char** argv)
     params->Explain();
     exit(1);
   }
+
 
   // create threadpool, if using multi-threaded decoding
   // note: multi-threading is done on sentence-level,

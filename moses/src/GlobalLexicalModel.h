@@ -58,11 +58,11 @@ public:
     return 1;
   };
 
-  virtual std::string GetScoreProducerDescription() const {
+  virtual std::string GetScoreProducerDescription(unsigned) const {
     return "GlobalLexicalModel";
   };
 
-  virtual std::string GetScoreProducerWeightShortName() const {
+  virtual std::string GetScoreProducerWeightShortName(unsigned) const {
     return "lex";
   };
 

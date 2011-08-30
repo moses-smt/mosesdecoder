@@ -96,8 +96,7 @@ void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff)
 
 void TranslationSystem::ConfigDictionaries()
 {
-  for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
-       i != m_decodeGraphs.end(); ++i) {
+  for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin(); i != m_decodeGraphs.end(); ++i) {
     for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
       const DecodeStep* step = *j;
       PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());

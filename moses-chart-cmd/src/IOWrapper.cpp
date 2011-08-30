@@ -359,57 +359,28 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
       }
     }
 
+
+    std::string lastName = "";
+
     // translation components
-    if (StaticData::Instance().GetInputType()==SentenceInput) {
-      // translation components	for text input
-      vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
-      if (pds.size() > 0) {
-        if (labeledOutput)
-          out << "tm: ";
-        vector<PhraseDictionaryFeature*>::iterator iter;
-        for (iter = pds.begin(); iter != pds.end(); ++iter) {
-          vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-          for (size_t j = 0; j<scores.size(); ++j)
-            out << scores[j] << " ";
-        }
-      }
-    } else {
-      // translation components for Confusion Network input
-      // first translation component has GetNumInputScores() scores from the input Confusion Network
-      // at the beginning of the vector
-      vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
-      if (pds.size() > 0) {
-        vector<PhraseDictionaryFeature*>::iterator iter;
+    const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
+    if (pds.size() > 0) {
 
-        iter = pds.begin();
-        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+      for( size_t i=0; i<pds.size(); i++ ) {
+	size_t pd_numinputscore = pds[i]->GetNumInputScores();
+	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+	for (size_t j = 0; j<scores.size(); ++j){
 
-        size_t pd_numinputscore = (*iter)->GetNumInputScores();
-
-        if (pd_numinputscore) {
-
-          if (labeledOutput)
-            out << "I: ";
-
-          for (size_t j = 0; j < pd_numinputscore; ++j)
-            out << scores[j] << " ";
-        }
-
-
-        for (iter = pds.begin() ; iter != pds.end(); ++iter) {
-          vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-
-          size_t pd_numinputscore = (*iter)->GetNumInputScores();
-
-          if (iter == pds.begin() && labeledOutput)
-            out << "tm: ";
-          for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-            out << scores[j] << " ";
-        }
+	  if (labeledOutput && (i == 0) ){
+	    if ((j == 0) || (j == pd_numinputscore)){
+	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+	      out << " " << lastName << ":";
+	    }
+	  }
+	  out << " " << scores[j];
+	}
       }
     }
-
-
 
     // word penalty
     if (labeledOutput)
@@ -417,18 +388,25 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     out << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
 
     // generation
-    const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
+    const vector<GenerationDictionary*>& gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
-      if (labeledOutput)
-        out << "g: ";
-      vector<GenerationDictionary*>::const_iterator iter;
-      for (iter = gds.begin(); iter != gds.end(); ++iter) {
-        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-        for (size_t j = 0; j<scores.size(); j++) {
-          out << scores[j] << " ";
-        }
+
+      for( size_t i=0; i<gds.size(); i++ ) {
+	size_t pd_numinputscore = gds[i]->GetNumInputScores();
+	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+	for (size_t j = 0; j<scores.size(); ++j){
+
+	  if (labeledOutput && (i == 0) ){
+	    if ((j == 0) || (j == pd_numinputscore)){
+	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+	      out << " " << lastName << ":";
+	    }
+	  }
+	  out << " " << scores[j];
+	}
       }
     }
+
 
     // total
     out << "||| " << path.GetTotalScore();

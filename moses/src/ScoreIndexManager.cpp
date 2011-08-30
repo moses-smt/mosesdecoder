@@ -67,7 +67,7 @@ void ScoreIndexManager::InitFeatureNames()
     bool add_idx = (m_producers[cur_scoreType]->GetNumInputScores() > 1);
     while (nis_idx < m_producers[cur_scoreType]->GetNumInputScores()) {
       ostringstream os;
-      os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+      os << m_producers[cur_scoreType]->GetScoreProducerDescription(nis_idx);
       if (add_idx)
         os << '_' << (nis_idx+1);
       m_featureNames.push_back(os.str());
@@ -79,11 +79,11 @@ void ScoreIndexManager::InitFeatureNames()
     add_idx = (m_ends[cur_scoreType] - cur_i > 1);
     while (cur_i < m_ends[cur_scoreType]) {
       ostringstream os;
-      os << m_producers[cur_scoreType]->GetScoreProducerDescription();
+      os << m_producers[cur_scoreType]->GetScoreProducerDescription(nis_idx+ind-1);
       if (add_idx)
         os << '_' << ind;
       m_featureNames.push_back(os.str());
-      m_featureShortNames.push_back( m_producers[cur_scoreType]->GetScoreProducerWeightShortName() );
+      m_featureShortNames.push_back( m_producers[cur_scoreType]->GetScoreProducerWeightShortName(nis_idx+ind-1) );
       ++cur_i;
       ++ind;
     }

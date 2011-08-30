@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-std::string LanguageModelMultiFactor::GetScoreProducerDescription() const
+std::string LanguageModelMultiFactor::GetScoreProducerDescription(unsigned) const
 {
   std::ostringstream oss;
   // what about LMs that are over multiple factors at once, POS + stem, for example?

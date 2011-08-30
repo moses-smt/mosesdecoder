@@ -49,11 +49,11 @@ public:
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-  virtual std::string GetScoreProducerDescription() const {
+  virtual std::string GetScoreProducerDescription(unsigned) const {
     return "LexicalReordering_" + m_modelTypeString;
   }
 
-  std::string GetScoreProducerWeightShortName() const {
+  std::string GetScoreProducerWeightShortName(unsigned) const {
     return "d";
   };
 

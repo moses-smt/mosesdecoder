@@ -50,10 +50,10 @@ public:
   virtual size_t GetNumScoreComponents() const = 0;
 
   //! returns a string description of this producer
-  virtual std::string GetScoreProducerDescription() const = 0;
+  virtual std::string GetScoreProducerDescription(unsigned idx=0) const = 0;
 
   //! returns the weight parameter name of this producer (used in n-best list)
-  virtual std::string GetScoreProducerWeightShortName() const = 0;
+  virtual std::string GetScoreProducerWeightShortName(unsigned idx=0) const = 0;
 
   //! returns the number of scores gathered from the input (0 by default)
   virtual size_t GetNumInputScores() const {

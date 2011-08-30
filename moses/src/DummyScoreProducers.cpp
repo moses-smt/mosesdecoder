@@ -48,12 +48,12 @@ size_t DistortionScoreProducer::GetNumScoreComponents() const
   return 1;
 }
 
-std::string DistortionScoreProducer::GetScoreProducerDescription() const
+std::string DistortionScoreProducer::GetScoreProducerDescription(unsigned) const
 {
   return "Distortion";
 }
 
-std::string DistortionScoreProducer::GetScoreProducerWeightShortName() const
+std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "d";
 }
@@ -119,12 +119,12 @@ size_t WordPenaltyProducer::GetNumScoreComponents() const
   return 1;
 }
 
-std::string WordPenaltyProducer::GetScoreProducerDescription() const
+std::string WordPenaltyProducer::GetScoreProducerDescription(unsigned) const
 {
   return "WordPenalty";
 }
 
-std::string WordPenaltyProducer::GetScoreProducerWeightShortName() const
+std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "w";
 }
@@ -149,12 +149,12 @@ size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
   return 1;
 }
 
-std::string UnknownWordPenaltyProducer::GetScoreProducerDescription() const
+std::string UnknownWordPenaltyProducer::GetScoreProducerDescription(unsigned) const
 {
   return "!UnknownWordPenalty";
 }
 
-std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName() const
+std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "u";
 }

@@ -214,9 +214,22 @@ PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 
 
-std::string PhraseDictionaryFeature::GetScoreProducerDescription() const
+std::string PhraseDictionaryFeature::GetScoreProducerDescription(unsigned idx) const
 {
-  return "PhraseModel";
+  if (idx < GetNumInputScores()){
+    return "InputScore";
+  }else{
+    return "PhraseModel";
+  }
+}
+
+std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned idx) const
+{
+  if (idx < GetNumInputScores()){
+    return "I";
+  }else{
+    return "tm";
+  }
 }
 
 size_t PhraseDictionaryFeature::GetNumScoreComponents() const

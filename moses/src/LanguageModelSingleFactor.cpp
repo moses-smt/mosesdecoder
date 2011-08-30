@@ -40,7 +40,7 @@ namespace Moses
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
 
-std::string LanguageModelSingleFactor::GetScoreProducerDescription() const
+std::string LanguageModelSingleFactor::GetScoreProducerDescription(unsigned) const
 {
   std::ostringstream oss;
   // what about LMs that are over multiple factors at once, POS + stem, for example?
