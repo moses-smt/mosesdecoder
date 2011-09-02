@@ -469,7 +469,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     }
 
     if (includeWordAlignment) {
-      out << " |||";
+      out << " ||| ";
       for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];
         const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
