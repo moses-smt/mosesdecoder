@@ -104,12 +104,6 @@ AC_ARG_ENABLE(boost,
             [enable_boost=no]
         )
 
-AC_ARG_ENABLE(ter,
-            [AC_HELP_STRING([--enable-ter], [build ter scorer (requires boost)])],
-            [enable_ter=yes],
-            [enable_ter=no]
-        )
-
 AC_ARG_WITH(zlib,
             [AC_HELP_STRING([--with-zlib=PATH], [(optional) path to zlib])],
             [with_zlib=$withval],
@@ -123,7 +117,7 @@ AC_ARG_WITH(tcmalloc,
            )
 
 require_boost=no
-if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno' || test "x$enable_ter" != 'xno' 
+if test "x$enable_threads" != 'xno' || test "x$enable_boost" != 'xno'
 then
   require_boost=yes
 fi
@@ -146,7 +140,6 @@ AM_CONDITIONAL([SYN_LM], false)
 AM_CONDITIONAL([PROTOBUF], false)
 AM_CONDITIONAL([am__fastdepCC], false)
 AM_CONDITIONAL([WITH_THREADS],false)
-AM_CONDITIONAL([WITH_TER],false)
 
 
 if test "x$without_trace" = 'xyes'
@@ -161,12 +154,6 @@ if test "x$require_boost" = 'xyes'
 then
     AC_MSG_NOTICE([Using Boost library])
     BOOST_REQUIRE([1.36.0])
-fi
-
-if test "x$enable_ter" = 'xyes'
-  then
-    CPPFLAGS="$CPPFLAGS -DWITH_TER"
-    AM_CONDITIONAL([WITH_TER],true)
 fi
 
 if test "x$enable_threads" = 'xyes'

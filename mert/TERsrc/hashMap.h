@@ -3,7 +3,6 @@
  */
 #ifndef __HASHMAP_H__
 #define __HASHMAP_H__
-#include <boost/functional/hash.hpp>
 #include "stringHasher.h"
 #include <vector>
 #include <string>

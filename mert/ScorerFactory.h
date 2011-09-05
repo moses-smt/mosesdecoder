@@ -27,9 +27,7 @@ public:
     vector<string> types;
     types.push_back(string("BLEU"));
     types.push_back(string("PER"));
-#ifdef WITH_TER
     types.push_back(string("TER"));
-#endif
     types.push_back(string("CDER"));
     return types;
   }
@@ -39,13 +37,9 @@ public:
       return (BleuScorer*) new BleuScorer(config);
     } else if (type == "PER") {
       return (PerScorer*) new PerScorer(config);
-    }
-#ifdef WITH_TER
-     else if (type == "TER") {
+    } else if (type == "TER") {
       return (TerScorer*) new TerScorer(config);
-    }
-#endif
-     else if (type == "CDER") {
+    } else if (type == "CDER") {
       return (CderScorer*) new CderScorer(config);
     } else {
       throw runtime_error("Unknown scorer type: " + type);

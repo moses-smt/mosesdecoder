@@ -1,25 +1,4 @@
 bin_PROGRAMS = mert extractor evaluator
-if WITH_TER
-  TERSOURCES = \
-    TERsrc/alignmentStruct.cpp \
-    TERsrc/hashMap.cpp \
-    TERsrc/hashMapStringInfos.cpp \
-    TERsrc/segmentStructure.cpp \
-    TERsrc/stringHasher.cpp \
-    TERsrc/terAlignment.cpp \
-    TERsrc/terShift.cpp \
-    TERsrc/tinyxml.cpp \
-    TERsrc/tinyxmlparser.cpp \
-    TERsrc/documentStructure.cpp \
-    TERsrc/hashMapInfos.cpp \
-    TERsrc/infosHasher.cpp \
-    TERsrc/stringInfosHasher.cpp \
-    TERsrc/tercalc.cpp \
-    TERsrc/tinystr.cpp \
-    TERsrc/tinyxmlerror.cpp \
-    TERsrc/tools.cpp \
-    TerScorer.cpp 
-endif
 mert_SOURCES = Util.cpp \
      Timer.cpp \
 ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
@@ -31,7 +10,19 @@ PerScorer.cpp \
 Scorer.cpp \
 Optimizer.cpp \
 mert.cpp \
-CderScorer.cpp $(TERSOURCES)
+TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tools.cpp \
+TerScorer.cpp \
+CderScorer.cpp
 
 extractor_SOURCES = Util.cpp \
      Timer.cpp \
@@ -44,7 +35,19 @@ PerScorer.cpp \
 Scorer.cpp \
 Optimizer.cpp \
 extractor.cpp \
-CderScorer.cpp $(TERSOURCES)
+TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tools.cpp \
+TerScorer.cpp \
+CderScorer.cpp
 
 evaluator_SOURCES = Util.cpp \
 evaluator.cpp \
@@ -53,7 +56,19 @@ ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
 BleuScorer.cpp \
 PerScorer.cpp \
 Scorer.cpp \
-CderScorer.cpp $(TERSOURCES)
+TERsrc/alignmentStruct.cpp \
+TERsrc/hashMap.cpp \
+TERsrc/hashMapStringInfos.cpp \
+TERsrc/stringHasher.cpp \
+TERsrc/terAlignment.cpp \
+TERsrc/terShift.cpp \
+TERsrc/hashMapInfos.cpp \
+TERsrc/infosHasher.cpp \
+TERsrc/stringInfosHasher.cpp \
+TERsrc/tercalc.cpp \
+TERsrc/tools.cpp \
+TerScorer.cpp \
+CderScorer.cpp
 
 mert_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
 extractor_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
