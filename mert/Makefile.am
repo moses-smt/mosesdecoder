@@ -1,61 +1,18 @@
+lib_LTLIBRARIES = libmert.la
 bin_PROGRAMS = mert extractor evaluator
-mert_SOURCES = Util.cpp \
-     Timer.cpp \
-ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
-FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
-Data.cpp \
-BleuScorer.cpp \
-Point.cpp \
-PerScorer.cpp \
-Scorer.cpp \
-Optimizer.cpp \
-mert.cpp \
-TERsrc/alignmentStruct.cpp \
-TERsrc/hashMap.cpp \
-TERsrc/hashMapStringInfos.cpp \
-TERsrc/stringHasher.cpp \
-TERsrc/terAlignment.cpp \
-TERsrc/terShift.cpp \
-TERsrc/hashMapInfos.cpp \
-TERsrc/infosHasher.cpp \
-TERsrc/stringInfosHasher.cpp \
-TERsrc/tercalc.cpp \
-TERsrc/tools.cpp \
-TerScorer.cpp \
-CderScorer.cpp
+AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
 
-extractor_SOURCES = Util.cpp \
-     Timer.cpp \
-ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
-FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
-Data.cpp \
-BleuScorer.cpp \
-Point.cpp \
-PerScorer.cpp \
-Scorer.cpp \
-Optimizer.cpp \
-extractor.cpp \
-TERsrc/alignmentStruct.cpp \
-TERsrc/hashMap.cpp \
-TERsrc/hashMapStringInfos.cpp \
-TERsrc/stringHasher.cpp \
-TERsrc/terAlignment.cpp \
-TERsrc/terShift.cpp \
-TERsrc/hashMapInfos.cpp \
-TERsrc/infosHasher.cpp \
-TERsrc/stringInfosHasher.cpp \
-TERsrc/tercalc.cpp \
-TERsrc/tools.cpp \
-TerScorer.cpp \
-CderScorer.cpp
-
-evaluator_SOURCES = Util.cpp \
-evaluator.cpp \
+libmert_la_SOURCES =  \
+Util.cpp \
 Timer.cpp \
 ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
+FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
+Data.cpp \
 BleuScorer.cpp \
+Point.cpp \
 PerScorer.cpp \
 Scorer.cpp \
+Optimizer.cpp \
 TERsrc/alignmentStruct.cpp \
 TERsrc/hashMap.cpp \
 TERsrc/hashMapStringInfos.cpp \
@@ -70,10 +27,10 @@ TERsrc/tools.cpp \
 TerScorer.cpp \
 CderScorer.cpp
 
-mert_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
-extractor_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
-evaluator_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
+mert_SOURCES = mert.cpp 
+extractor_SOURCES  = extractor.cpp 
+evaluator_SOURCES = evaluator.cpp 
 
-extractor_LDADD = -lm -lz
-mert_LDADD = -lm -lz
-evaluator_LDADD = -lm -lz
+extractor_LDADD = libmert.la -lm -lz
+mert_LDADD = libmert.la -lm -lz
+evaluator_LDADD = libmert.la -lm -lz
