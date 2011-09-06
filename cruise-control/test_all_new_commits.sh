@@ -36,14 +36,14 @@ WORKDIR=$MCC_WORKDIR
 [ -d "$WORKDIR" ] || WORKDIR=$USE_TEMPDIR/workdir
 
 # this is where moses is taken from
-GITREPO=$MCC_GITREPO
-[ -d "$GITREPO" ] || GITREPO=/home/obo/moses-at-google-code
+GITREPO="$MCC_GITREPO"
+[ -n "$GITREPO" ] || GITREPO=/home/obo/moses-at-google-code
 
 
 if [ ! -d "$WORKDIR" ]; then
-  mkdir $(dirname "$WORKDIR") || die "Failed to create workdir $WORKDIR"
+  mkdir "$WORKDIR" || die "Failed to create workdir $WORKDIR"
   warn "Cloning $GITREPO into $WORKDIR"
-  git clone "$GITREPO" $WORKDIR \
+  git clone $GITREPO $WORKDIR \
     || die "Failed to git clone into workdir $WORKDIR"
 else
   ( cd "$WORKDIR" && git fetch ) \
@@ -57,11 +57,6 @@ mkdir -p $LOGDIR/logs/$configname \
 function run_single_test () {
   commit=$1
   longlog="$LOGDIR/logs/$configname/$commit"
-  if [ -e "$longlog" ]; then
-    # Commit already tested
-    return
-  fi
-
   warn "Testing commit $commit"
 
   # Get the version of this script
@@ -123,6 +118,10 @@ function run_single_test () {
 #### Main loop over all commits
 ( cd "$WORKDIR" && git rev-list $MCC_SCAN_BRANCHES ) \
 | while read commit; do
-  run_single_test $commit || die "Testing failed, stopping the loop."
+  if [ ! -e "$longlog" ]; then
+    run_single_test $commit || die "Testing failed, stopping the loop."
+  else
+    break # don't go further in the past (may be just for development) 
+  fi
 done
 
