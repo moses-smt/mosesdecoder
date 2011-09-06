@@ -230,7 +230,7 @@ FFState* LanguageModel::Evaluate(
     hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t );
   }
   return res;
-}
+} 
 
 FFState* LanguageModel::EvaluateChart(
   const ChartHypothesis& hypo,
@@ -239,6 +239,8 @@ FFState* LanguageModel::EvaluateChart(
 {
 	// data structure for factored context phrase (history and predicted word)
   vector<const Word*> contextFactor;
+  vector<void*> leftstates;
+
   contextFactor.reserve(GetNGramOrder());
 
 	// initialize language model context state
@@ -261,7 +263,7 @@ FFState* LanguageModel::EvaluateChart(
     const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
 
     // regular word
-    if (!word.IsNonTerminal()) 
+    if (!word.IsNonTerminal())
     {
 			ShiftOrPush(contextFactor, word);
 
@@ -275,7 +277,8 @@ FFState* LanguageModel::EvaluateChart(
 			// score a regular word added by the rule
 			else
 			{
-				updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(m_implementation->GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
+        float score = m_implementation->GetValueGivenState(contextFactor, *lmState).score;
+				updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(score), ++wordPos );
 			}
     }
 
@@ -322,7 +325,8 @@ FFState* LanguageModel::EvaluateChart(
 				{
 					const Word &word = prevHypo->GetPrefix().GetWord(prefixPos);
 					ShiftOrPush(contextFactor, word);
-					updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(m_implementation->GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
+          float score = m_implementation->GetValueGivenState(contextFactor, *lmState).score;
+					updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(score), ++wordPos );
 				}
 				
 				// check if we are dealing with a large sub-phrase
