@@ -218,6 +218,7 @@ libmoses_la_SOURCES = \
         LMList.cpp \
         LVoc.cpp \
         LanguageModel.cpp \
+        LanguageModelChartState.cpp \
         LanguageModelFactory.cpp \
         LanguageModelImplementation.cpp \
         LanguageModelInternal.cpp \
