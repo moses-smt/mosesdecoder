@@ -1212,6 +1212,8 @@
 					LM_IRST,
 					LM_RAND,
 					HAVE_CONFIG_H,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,
@@ -1243,6 +1245,8 @@
 					LM_IRST,
 					LM_RAND,
 					HAVE_CONFIG_H,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,

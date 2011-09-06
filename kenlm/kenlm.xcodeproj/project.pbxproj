@@ -368,6 +368,10 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					_LARGE_FILES,
+					"_FILE_OFFSET_BITS=64",
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = kenlm;
 			};
@@ -379,6 +383,10 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					_LARGE_FILES,
+					"_FILE_OFFSET_BITS=64",
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = kenlm;
 			};
