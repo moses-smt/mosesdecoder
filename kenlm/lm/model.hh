@@ -144,7 +144,6 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
 
     Search search_;
 
-    mutable std::fstream logger_;
 };
 
 } // namespace detail

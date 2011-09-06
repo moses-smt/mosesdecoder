@@ -11,9 +11,12 @@
 #include <functional>
 #include <numeric>
 #include <cmath>
+#include <fstream>
 
 namespace lm {
 namespace ngram {
+
+std::ofstream logger_;
 
 size_t hash_value(const State &state) {
   return util::MurmurHashNative(state.history_, sizeof(WordIndex) * state.valid_length_);
@@ -28,6 +31,9 @@ template <class Search, class VocabularyT> size_t GenericModel<Search, Vocabular
 }
 
 template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::SetupMemory(void *base, const std::vector<uint64_t> &counts, const Config &config) {
+  
+  logger_.open("lm.log");
+  
   uint8_t *start = static_cast<uint8_t*>(base);
   size_t allocated = VocabularyT::Size(counts[0], config);
   vocab_.SetupMemory(start, allocated, counts[0], config);
@@ -36,7 +42,7 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
   if (static_cast<std::size_t>(start - static_cast<uint8_t*>(base)) != Size(counts, config)) UTIL_THROW(FormatLoadException, "The data structures took " << (start - static_cast<uint8_t*>(base)) << " but Size says they should take " << Size(counts, config));
 }
 
-template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, const Config &config) : logger_("lm.log", std::ios_base::out) {
+template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, const Config &config) {
   LoadLM(file, config, *this);
 
   // g++ prints warnings unless these are fully initialized.  
