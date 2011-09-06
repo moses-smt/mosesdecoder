@@ -39,6 +39,10 @@ WORKDIR=$MCC_WORKDIR
 GITREPO="$MCC_GITREPO"
 [ -n "$GITREPO" ] || GITREPO=/home/obo/moses-at-google-code
 
+# location of moses regression test data archive (assumes url at the moment)
+REGTEST_ARCHIVE="$MCC_REGTEST_ARCHIVE"
+[ -n "$REGTEST_ARCHIVE" ] \
+  || REGTEST_ARCHIVE="http://www.statmt.org/moses/reg-testing/moses-reg-test-data-7.tgz"
 
 if [ ! -d "$WORKDIR" ]; then
   mkdir "$WORKDIR" || die "Failed to create workdir $WORKDIR"
@@ -95,7 +99,20 @@ function run_single_test () {
     || err="make"
 
   cd regression-testing
-  echo "## Not running any regression tests yet." >> $longlog
+  regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
+
+  # download data for regression tests if necessary
+  if [ ! -f $regtest_file ]; then
+    wget $REGTEST_ARCHIVE &> /dev/null \
+      || die "Failed to download data for regression tests"
+    tar xzf $regtest_file
+  fi
+
+  echo "## regression tests" >> $longlog
+  [ -z "$err" ] && ./run-test-suite.perl &>> $longlog \
+    || die "Failed to run regression tests"
+
+  # TODO check test-suite result
 
   echo "## Finished" >> $longlog
   date >> $longlog
