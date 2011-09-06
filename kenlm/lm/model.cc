@@ -36,7 +36,7 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
   if (static_cast<std::size_t>(start - static_cast<uint8_t*>(base)) != Size(counts, config)) UTIL_THROW(FormatLoadException, "The data structures took " << (start - static_cast<uint8_t*>(base)) << " but Size says they should take " << Size(counts, config));
 }
 
-template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, const Config &config) {
+template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, const Config &config) : logger_("lm.log", std::ios_base::out) {
   LoadLM(file, config, *this);
 
   // g++ prints warnings unless these are fully initialized.  
@@ -171,6 +171,9 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
     const WordIndex *context_rend,
     const WordIndex new_word,
     State &out_state) const {
+  for (const WordIndex *i = context_rend - 1; i >= context_rbegin; --i) logger_ << *i << ' ';
+  logger_ << new_word;
+  logger_ << ' ';
   FullScoreReturn ret;
   // ret.ngram_length contains the last known non-blank ngram length.  
   ret.ngram_length = 1;
@@ -182,7 +185,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
   out_state.valid_length_ = HasExtension(*backoff_out) ? 1 : 0;
   // We'll write the word anyway since it will probably be used and does no harm being there.  
   out_state.history_[0] = new_word;
-  if (context_rbegin == context_rend) return ret;
+  if (context_rbegin == context_rend) { logger_ << (int)out_state.valid_length_ << ' ' << ret.prob << '\n'; return ret; }
   ++backoff_out;
 
   // Ok now we now that the bigram contains known words.  Start by looking it up.
@@ -193,7 +196,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
       // Ran out of history.  Typically no backoff, but this could be a blank.  
       CopyRemainingHistory(context_rbegin, out_state);
       // ret.prob was already set.
-      return ret;
+      logger_ << (int)out_state.valid_length_ << ' ' << ret.prob << '\n'; return ret;
     }
 
     if (mid_iter == search_.MiddleEnd()) break;
@@ -203,7 +206,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
       // Didn't find an ngram using hist_iter.  
       CopyRemainingHistory(context_rbegin, out_state);
       // ret.prob was already set.  
-      return ret;
+      logger_ << (int)out_state.valid_length_ << ' ' << ret.prob << '\n'; return ret;
     }
     if (ret.prob == kBlankProb) {
       // It's a blank.  Go back to the old probability.  
@@ -222,13 +225,13 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
     // Failed to find a longest n-gram.  Fall back to the most recent non-blank.  
     CopyRemainingHistory(context_rbegin, out_state);
     // ret.prob was already set.  
-    return ret;
+    logger_ << (int)out_state.valid_length_ << ' ' << ret.prob << '\n'; return ret;
   }
   // It's an P::Order()-gram.  
   CopyRemainingHistory(context_rbegin, out_state);
   // There is no blank in longest_.
   ret.ngram_length = P::Order();
-  return ret;
+  logger_ << (int)out_state.valid_length_ << ' ' << ret.prob << '\n'; return ret;
 }
 
 template class GenericModel<ProbingHashedSearch, ProbingVocabulary>;  // HASH_PROBING
