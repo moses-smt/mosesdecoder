@@ -60,7 +60,8 @@ mkdir -p $LOGDIR/logs/$configname \
 #### How is one test performed
 function run_single_test () {
   commit=$1
-  longlog="$LOGDIR/logs/$configname/$commit"
+  longlog="$LOGDIR/logs/$configname/$commit.log"
+  git show $commit > "$LOGDIR/logs/$configname/$commit.info"
   warn "Testing commit $commit"
 
   # Get the version of this script
@@ -139,6 +140,9 @@ function run_single_test () {
   fi
 }
 
+for i in $MCC_SCAN_BRANCHES; do
+  git rev-list $i > $i.revlist
+done
 
 #### Main loop over all commits
 ( cd "$WORKDIR" && git rev-list $MCC_SCAN_BRANCHES ) \
