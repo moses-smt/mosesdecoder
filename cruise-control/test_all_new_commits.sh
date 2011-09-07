@@ -109,10 +109,12 @@ function run_single_test () {
   fi
 
   echo "## regression tests" >> $longlog
-  [ -z "$err" ] && ./run-test-suite.perl &>> $longlog \
-    || die "Failed to run regression tests"
-
-  # TODO check test-suite result
+  if [ -z "$err" ]; then
+    ./run-test-suite.perl &>> $longlog
+    regtest_status=$?
+    [ $regtest_status -eq 1 ] && die "Failed to run regression tests"
+    [ $regtest_status -eq 2 ] && err="regression tests"
+  fi
 
   echo "## Finished" >> $longlog
   date >> $longlog
@@ -129,16 +131,26 @@ function run_single_test () {
     >> "$LOGDIR/brief.log"
 
   popd > /dev/null 2> /dev/null
+
+  if [ -z "$err" ]; then
+    touch "$LOGDIR/logs/$configname/$commit.OK"
+  else
+    return 1;
+  fi
 }
 
 
 #### Main loop over all commits
 ( cd "$WORKDIR" && git rev-list $MCC_SCAN_BRANCHES ) \
 | while read commit; do
-  if [ ! -e "$longlog" ]; then
-    run_single_test $commit || die "Testing failed, stopping the loop."
+  test_ok="$LOGDIR/logs/$configname/$commit.OK"
+  if [ ! -e "$test_ok" ]; then
+    run_single_test $commit && warn "Commit $commit test ok, stooping" && break
+    warn "Commit $commit test failed, continuing"
   else
-    break # don't go further in the past (may be just for development) 
+    warn "Reached a successfully tested commit ($commit), stopping"
+    break
   fi
 done
+
 
