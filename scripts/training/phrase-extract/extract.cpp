@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define LINE_MAX_LENGTH 60000
+#define LINE_MAX_LENGTH 500000
 
 // HPhraseVertex represents a point in the alignment matrix
 typedef pair <int, int> HPhraseVertex;

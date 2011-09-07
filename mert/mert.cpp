@@ -278,6 +278,12 @@ int main (int argc, char **argv)
 
   PrintUserTime("Data loaded");
 
+  // starting point score over latest n-best, accumulative n-best
+  //vector<unsigned> bests;
+  //compute bests with sparse features needs to be implemented
+  //currently sparse weights are not even loaded
+  //statscore_t score = TheScorer->score(bests);
+
   if (tooptimizestr.length() > 0) {
     cerr << "Weights to optimize: " << tooptimizestr << endl;
 
@@ -305,15 +311,19 @@ int main (int argc, char **argv)
   }
 
 	if (pairedrankfile.compare("") != 0) {
-		D.sample_ranked_pairs(pairedrankfile);
+		D.sampleRankedPairs(pairedrankfile);
 		PrintUserTime("Stopping...");
 		exit(0);
 	}
 
+  // treat sparse features just like regular features
+  if (D.hasSparseFeatures()) {
+    D.mergeSparseFeatures();
+  }
+
   Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
   O->SetScorer(TheScorer);
   O->SetFData(D.getFeatureData());
-
 
 #ifdef WITH_THREADS
   cerr << "Creating a pool of " << threads << " threads" << endl;

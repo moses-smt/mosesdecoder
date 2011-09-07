@@ -11,6 +11,7 @@
 # Excerpts from revision history
 
 # Sept 2011   multi-threaded mert (Barry Haddow)
+# 3 Aug 2011  Added random directions, historic best, pairwise ranked (PK)
 # Jul 2011    simplifications (Ondrej Bojar)
 #             -- rely on moses' -show-weights instead of parsing moses.ini 
 #                ... so moses is also run once *before* mert starts, checking
@@ -287,8 +288,6 @@ $qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper
 $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
-
-
 if (!defined $mertdir) {
   $mertdir = "$SCRIPTS_ROOTDIR/../mert";
   print STDERR "Assuming --mertdir=$mertdir\n";
@@ -357,12 +356,10 @@ die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_par
 die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
 die "Not executable: $___DECODER" if ! -x $___DECODER;
 
-
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
   if ! -e $input_abs;
 $___DEV_F = $input_abs;
-
 
 # Option to pass to qsubwrapper and moses-parallel
 my $pass_old_sge = $old_sge ? "-old-sge" : "";
@@ -371,7 +368,6 @@ my $decoder_abs = ensure_full_path($___DECODER);
 die "File not executable: $___DECODER (interpreted as $decoder_abs)."
   if ! -x $decoder_abs;
 $___DECODER = $decoder_abs;
-
 
 my $ref_abs = ensure_full_path($___DEV_E);
 # check if English dev set (reference translations) exist and store a list of all references
@@ -409,9 +405,6 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 # normalize initial LAMBDAs, too
 my $need_to_normalize = 1;
 
-
-
-
 #store current directory and create the working directory (if needed)
 my $cwd = `pawd 2>/dev/null`; 
 if(!$cwd){$cwd = `pwd`;}
@@ -431,16 +424,15 @@ my $mert_logfile = "mert.log";
 my $weights_in_file = "init.opt";
 my $weights_out_file = "weights.txt";
 
-
 # set start run
 my $start_run = 1;
 my $bestpoint = undef;
 my $devbleu = undef;
+my $sparse_weights_file = undef;
 
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
 my $prev_init_file = undef;
-
 
 if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
@@ -470,7 +462,6 @@ else{
   # use the original configuration file
   $___CONFIG_ORIG = $___CONFIG;
 }
-
 
 # we run moses to check validity of moses.ini and to obtain all the feature
 # names
@@ -579,28 +570,19 @@ if ($continue) {
     print STDERR "All needed data are available\n";
 
     print STDERR "Loading information from last step ($step)\n";
-    open(IN,"run$step.$mert_logfile") or die "Can't open run$step.$mert_logfile";
-    while (<IN>) {
-      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
-	$bestpoint = $1;
-	$devbleu = $2;
-	last;
-      }
-    }
-    close IN;
+    my %dummy; # sparse features
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$step.$mert_outfile","run$step.$mert_logfile",scalar @{$featlist->{"names"}},\%dummy);
     die "Failed to parse mert.log, missed Best point there."
       if !defined $bestpoint || !defined $devbleu;
     print "($step) BEST at $step $bestpoint => $devbleu at ".`date`;
-    
     my @newweights = split /\s+/, $bestpoint;
     
     # Sanity check: order of lambdas must match
     sanity_check_order_of_lambdas($featlist,
       "gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
-    
+
     # update my cache of lambda values
     $featlist->{"values"} = \@newweights;
-    
   }
   else{
     print STDERR "No previous data are needed\n";
@@ -630,10 +612,10 @@ while(1) {
   print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
-  create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined$devbleu?$devbleu:"--not-estimated--"));
+  create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined$devbleu?$devbleu:"--not-estimated--"),$sparse_weights_file);
 
 
-  # skip if the user wanted
+  # skip running the decoder if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
       $nbest_file = run_decoder($featlist, $run, $need_to_normalize);
@@ -647,8 +629,6 @@ while(1) {
       $skip_decoder = 0;
       $need_to_normalize = 0;
   }
-
-
 
   # extract score statistics and features from the nbest lists
   print STDERR "Scoring the nbestlist.\n";
@@ -740,7 +720,7 @@ while(1) {
     if ! -s $weights_out_file;
 
 
- # backup copies
+  # backup copies
   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
   if ($___PAIRWISE_RANKED_OPTIMIZER) { safesystem ("\\cp -f pro.data run$run.pro.data") or die; }
@@ -751,34 +731,10 @@ while(1) {
 
   print "run $run end at ".`date`;
 
-  $bestpoint = undef;
-  $devbleu = undef;
-  if ($___PAIRWISE_RANKED_OPTIMIZER) {
-    open(IN,"run$run.$mert_outfile") or die "Can't open run$run.$mert_outfile";
-    my (@WEIGHT,$sum);
-    foreach (@CURR) { push @WEIGHT, 0; }
-    while(<IN>) {
-      if (/^F(\d+) ([\-\.\de]+)/) {
-	$WEIGHT[$1] = $2;
-	$sum += abs($2);
-      }
-    }
-    $devbleu = "unknown";
-    foreach (@WEIGHT) { $_ /= $sum; }
-    $bestpoint = join(" ",@WEIGHT);
-    close IN;
-  }
-  else {
-    open(IN,"run$run.$mert_logfile") or die "Can't open run$run.$mert_logfile";
-    while (<IN>) {
-      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
-        $bestpoint = $1;
-        $devbleu = $2;
-        last;
-      }
-    }
-    close IN;
-  }
+  my %sparse_weights; # sparse features
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+
+
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
   print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
@@ -787,6 +743,15 @@ while(1) {
   my @newweights = split /\s+/, $bestpoint;
 
   $featlist->{"values"} = \@newweights;
+
+  if (scalar keys %sparse_weights) {
+    $sparse_weights_file = "run".($run+1).".sparse-weights";
+    open(SPARSE,">".$sparse_weights_file);
+    foreach my $feature (keys %sparse_weights) {
+      print SPARSE "$feature $sparse_weights{$feature}\n";
+    }
+    close(SPARSE);
+  }
 
   ## additional stopping criterion: weights have not changed
   my $shouldstop = 1;
@@ -863,6 +828,43 @@ close F;
 chdir($cwd);
 
 } # end of local scope
+
+sub get_weights_from_mert {
+  my ($outfile,$logfile,$weight_count,$sparse_weights) = @_;
+  my ($bestpoint,$devbleu);
+  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+    open(IN,$outfile) or die "Can't open $outfile";
+    my (@WEIGHT,$sum);
+    for(my $i=0;$i<$weight_count;$i++) { push @WEIGHT, 0; }
+    while(<IN>) {
+      # regular features
+      if (/^F(\d+) ([\-\.\de]+)/) {
+        $WEIGHT[$1] = $2;
+        $sum += abs($2);
+      }
+      # sparse features
+      elsif(/^(.+_.+) ([\-\.\de]+)/) {
+        $$sparse_weights{$1} = $2;
+      }
+    }
+    $devbleu = "unknown";
+    foreach (@WEIGHT) { $_ /= $sum; }
+    $bestpoint = join(" ",@WEIGHT);
+    close IN;
+  }
+  else {
+    open(IN,$logfile) or die "Can't open $logfile";
+    while (<IN>) {
+      if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
+        $bestpoint = $1;
+        $devbleu = $2;
+        last;
+      }
+    }
+    close IN;
+  }
+  return ($bestpoint,$devbleu);
+}
 
 sub run_decoder {
     my ($featlist, $run, $need_to_normalize) = @_;
@@ -984,6 +986,7 @@ sub get_featlist_from_moses {
     $nr++;
     chomp;
     my ($longname, $feature, $value) = split / /;
+    next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
       if $value !~ /^[+-]?[0-9.e]+$/;
     push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
@@ -1015,14 +1018,20 @@ sub get_order_of_scores_from_nbestlist {
 
   my @order = ();
   my $label = undef;
+  my $sparse = 0; # we ignore sparse features here
   foreach my $tok (split /\s+/, $scores) {
-    if ($tok =~ /^([a-z][0-9a-z]*):/i) {
+    if ($tok =~ /.+_.+:/) {
+      $sparse = 1;
+    } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
     } elsif ($tok =~ /^-?[-0-9.e]+$/) {
-      # a score found, remember it
-      die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
-        if !defined $label;
-      push @order, $label;
+      if (!$sparse) {
+        # a score found, remember it
+        die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"
+          if !defined $label;
+        push @order, $label;
+      }
+      $sparse = 0;
     } else {
       die "Not a label, not a score '$tok'. Failed to parse the scores string: '$scores' of nbestlist '$fname_or_source'";
     }
@@ -1037,6 +1046,7 @@ sub create_config {
     my $featlist = shift; # the lambdas we should write
     my $iteration = shift;  # just for verbosity
     my $bleu_achieved = shift; # just for verbosity
+    my $sparse_weights_file = shift; # only defined when optimizing sparse features
 
     my %P; # the hash of all parameters we wish to override
 
@@ -1074,6 +1084,10 @@ sub create_config {
       $name = defined $ABBR2FULL{$name} ? $ABBR2FULL{$name} : $name;
         # ensure long name
       push @{$P{$name}}, $val;
+    }
+
+    if (defined($sparse_weights_file)) {
+      push @{$P{"weights-file"}}, $___WORKING_DIR."/".$sparse_weights_file;
     }
 
     # create new moses.ini decoder config file by cloning and overriding the original one

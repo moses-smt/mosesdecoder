@@ -45,7 +45,7 @@
 #include "tables-core.h"
 #include "XmlTree.h"
 
-#define LINE_MAX_LENGTH 60000
+#define LINE_MAX_LENGTH 500000
 
 using namespace std;
 

@@ -36,10 +36,15 @@ using namespace std;
 bool hierarchicalFlag = false;
 bool onlyDirectFlag = false;
 bool phraseCountFlag = true;
+bool lowCountFlag = false;
+bool goodTuringFlag = false;
+bool kneserNeyFlag = false;
 bool logProbFlag = false;
-char line[LINE_MAX_LENGTH];
+inline float maybeLogProb( float a ) { return logProbFlag ? log(a) : a; }
 
-void processFiles( char*, char*, char* );
+char line[LINE_MAX_LENGTH];
+void processFiles( char*, char*, char*, char* );
+void loadCountOfCounts( char* );
 bool getLine( istream &fileP, vector< string > &item );
 vector< string > splitLine();
 
@@ -55,6 +60,7 @@ int main(int argc, char* argv[])
   char* &fileNameDirect = argv[1];
   char* &fileNameIndirect = argv[2];
   char* &fileNameConsolidated = argv[3];
+  char* fileNameCountOfCounts;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"--Hierarchical") == 0) {
@@ -66,6 +72,25 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--NoPhraseCount") == 0) {
       phraseCountFlag = false;
       cerr << "not including the phrase count feature\n";
+    } else if (strcmp(argv[i],"--GoodTuring") == 0) {
+      goodTuringFlag = true;
+      if (i+1==argc) { 
+        cerr << "ERROR: specify count of count files for Good Turing discounting!\n";
+        exit(1);
+      }
+      fileNameCountOfCounts = argv[++i];
+      cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
+    } else if (strcmp(argv[i],"--KneserNey") == 0) {
+      kneserNeyFlag = true;
+      if (i+1==argc) { 
+        cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
+        exit(1);
+      }
+      fileNameCountOfCounts = argv[++i];
+      cerr << "adjusting phrase translation probabilities with Kneser Ney discounting\n";
+    } else if (strcmp(argv[i],"--LowCountFeature") == 0) {
+      lowCountFlag = true;
+      cerr << "including the low count feature\n";
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
@@ -75,11 +100,61 @@ int main(int argc, char* argv[])
     }
   }
 
-  processFiles( fileNameDirect, fileNameIndirect, fileNameConsolidated );
+  processFiles( fileNameDirect, fileNameIndirect, fileNameConsolidated, fileNameCountOfCounts );
 }
 
-void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameConsolidated )
+vector< float > countOfCounts;
+vector< float > goodTuringDiscount;
+float kneserNey_D1, kneserNey_D2, kneserNey_D3, totalCount = -1;
+void loadCountOfCounts( char* fileNameCountOfCounts )
 {
+  Moses::InputFileStream fileCountOfCounts(fileNameCountOfCounts);
+  if (fileCountOfCounts.fail()) {
+    cerr << "ERROR: could not open count of counts file " << fileNameCountOfCounts << endl;
+    exit(1);
+  }
+  istream &fileP = fileCountOfCounts;
+
+  countOfCounts.push_back(0.0);
+  while(1) {
+    if (fileP.eof()) break;
+    SAFE_GETLINE((fileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
+    if (fileP.eof()) break;
+    if (totalCount < 0)
+      totalCount = atof(line); // total number of distinct phrase pairs
+    else
+      countOfCounts.push_back( atof(line) );
+  }
+  fileCountOfCounts.Close();
+
+  // compute Good Turing discounts
+  if (goodTuringFlag) {
+    goodTuringDiscount.push_back(0.01); // floor value
+    for( size_t i=1; i<countOfCounts.size()-1; i++ ) {
+      goodTuringDiscount.push_back(((float)i+1)/(float)i*((countOfCounts[i+1]+0.1) / ((float)countOfCounts[i]+0.1))); 
+      if (goodTuringDiscount[i]>1)
+        goodTuringDiscount[i] = 1;
+      if (goodTuringDiscount[i]<goodTuringDiscount[i-1])
+        goodTuringDiscount[i] = goodTuringDiscount[i-1];
+    }
+  }
+
+  // compute Kneser Ney co-efficients [Chen&Goodman, 1998]
+  float Y = countOfCounts[1] / (countOfCounts[1] + 2*countOfCounts[2]);
+  kneserNey_D1 = 1 - 2*Y * countOfCounts[2] / countOfCounts[1];
+  kneserNey_D2 = 2 - 3*Y * countOfCounts[3] / countOfCounts[2];
+  kneserNey_D3 = 3 - 4*Y * countOfCounts[4] / countOfCounts[3];
+  // sanity constraints
+  if (kneserNey_D1 > 0.9) kneserNey_D1 = 0.9;
+  if (kneserNey_D2 > 1.9) kneserNey_D2 = 1.9;
+  if (kneserNey_D3 > 2.9) kneserNey_D3 = 2.9;
+}
+
+void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameConsolidated, char* fileNameCountOfCounts )
+{
+  if (goodTuringFlag || kneserNeyFlag)
+    loadCountOfCounts( fileNameCountOfCounts );
+
   // open input files
   Moses::InputFileStream fileDirect(fileNameDirect);
   Moses::InputFileStream fileIndirect(fileNameIndirect);
@@ -134,29 +209,67 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // output hierarchical phrase pair (with separated labels)
     fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1];
 
-    // probs
-    fileConsolidated << " ||| ";
-    if (!onlyDirectFlag) {
-      fileConsolidated << itemIndirect[2];    // prob indirect
+    // SCORES ...
+    fileConsolidated << " |||";
+    vector<string> directCounts = tokenize(itemDirect[4].c_str());
+    vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
+    float countF = atof(directCounts[0].c_str());
+    float countE = atof(indirectCounts[0].c_str());
+    float countEF = atof(indirectCounts[1].c_str());
+    float n1_F, n1_E;
+    if (kneserNeyFlag) {
+      n1_F = atof(directCounts[2].c_str());
+      n1_E = atof(indirectCounts[2].c_str());
     }
-    fileConsolidated << " " << itemDirect[2]; // prob direct
+
+    // Good Turing discounting
+    float adjustedCountEF = countEF;
+    if (goodTuringFlag && countEF+0.99999 < goodTuringDiscount.size()-1)
+      adjustedCountEF *= goodTuringDiscount[(int)(countEF+0.99998)];
+    float adjustedCountEF_indirect = adjustedCountEF;
+
+    // Kneser Ney discounting [Foster et al, 2006]
+   if (kneserNeyFlag) {
+     float D = kneserNey_D3;
+     if (countEF < 2) D = kneserNey_D1;
+     if (countEF < 3) D = kneserNey_D2;
+     if (D > countEF) D = countEF - 0.01; // sanity constraint
+
+     float p_b_E = n1_E / totalCount; // target phrase prob based on distinct
+     float alpha_F = D * n1_F / countF; // available mass
+     adjustedCountEF = countEF - D + countF * alpha_F * p_b_E;
+
+     // for indirect
+     float p_b_F = n1_F / totalCount; // target phrase prob based on distinct
+     float alpha_E = D * n1_E / countE; // available mass
+     adjustedCountEF_indirect = countEF - D + countE * alpha_E * p_b_F;
+   }
+
+    // prob indirect
+    if (!onlyDirectFlag) {
+      fileConsolidated << " " << maybeLogProb(adjustedCountEF_indirect/countE);
+      fileConsolidated << " " << itemIndirect[2];
+    }
+
+    // prob direct
+    fileConsolidated << " " << maybeLogProb(adjustedCountEF/countF);
+    fileConsolidated << " " << itemDirect[2];
+
+    // phrase count feature
     if (phraseCountFlag) {
-      fileConsolidated << " " << (logProbFlag ? 1 : 2.718); // phrase count feature
+      fileConsolidated << " " << maybeLogProb(2.718);
+    }
+
+    // low count feature
+    if (lowCountFlag) {
+      fileConsolidated << " " << maybeLogProb(exp(-1.0/countEF));
     }
 
     // alignment
     fileConsolidated << " ||| " << itemDirect[3];
 
     // counts, for debugging
-    vector<string> directCounts = tokenize(itemDirect[4].c_str());
-    vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
-    fileConsolidated << "||| " << indirectCounts[0] << " " << directCounts[0];
-    // output rule count if present in either file
-    if (directCounts.size() > 1) {
-      fileConsolidated << " " << directCounts[1];
-    } else if (indirectCounts.size() > 1) {
-      fileConsolidated << " " << indirectCounts[1];
-    }
+    fileConsolidated << "||| " << countE << " " << countF; // << " " << countEF;
 
     fileConsolidated << endl;
   }
@@ -164,6 +277,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   fileIndirect.Close();
   fileConsolidated.close();
 }
+
 
 bool getLine( istream &fileP, vector< string > &item )
 {
