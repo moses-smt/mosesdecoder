@@ -364,6 +364,7 @@ int main (int argc, char **argv)
       bestP = (*i)->getPoint();
       best = score;
     }
+    delete *i;
   }
 
   mean/=(float)ntry;
