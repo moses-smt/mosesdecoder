@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libmert.la
 bin_PROGRAMS = mert extractor evaluator
-AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE
+AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE $(BOOST_CPPFLAGS)
 
 libmert_la_SOURCES =  \
 Util.cpp \
@@ -27,10 +27,10 @@ TERsrc/tools.cpp \
 TerScorer.cpp \
 CderScorer.cpp
 
-mert_SOURCES = mert.cpp 
+mert_SOURCES = mert.cpp $(top_builddir)/moses/src/ThreadPool.cpp
 extractor_SOURCES  = extractor.cpp 
 evaluator_SOURCES = evaluator.cpp 
 
 extractor_LDADD = libmert.la -lm -lz
-mert_LDADD = libmert.la -lm -lz
+mert_LDADD = libmert.la -lm -lz $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)
 evaluator_LDADD = libmert.la -lm -lz

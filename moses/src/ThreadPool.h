@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 
-#include "Util.h"
+//#include "Util.h"
 
 
 /**
@@ -54,6 +54,7 @@ class Task
 {
 public:
   virtual void Run() = 0;
+  virtual bool DeleteAfterExecution() {return true;}
   virtual ~Task() {}
 };
 

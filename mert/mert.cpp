@@ -23,6 +23,8 @@
 #include "Timer.h"
 #include "Util.h"
 
+#include "../moses/src/ThreadPool.h"
+
 
 float min_interval = 1e-3;
 
@@ -42,6 +44,9 @@ void usage(void)
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
   cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
   cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
+#ifdef WITH_THREADS
+  cerr<<"[--threads|-T] use multiple threads for random restart (default 1)"<<endl;
+#endif
   cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
   exit(1);
@@ -60,11 +65,45 @@ static struct option long_options[] = {
   {"scfile",1,0,'S'},
   {"ffile",1,0,'F'},
   {"ifile",1,0,'i'},
+#ifdef WITH_THREADS
+  {"threads", required_argument,0,'T'},
+#endif
   {"verbose",1,0,'v'},
   {"help",no_argument,0,'h'},
   {0, 0, 0, 0}
 };
 int option_index;
+
+/**
+  * Runs an optimisation, or a random restart.
+**/
+class OptimizationTask : public Moses::Task 
+{
+  public:
+    OptimizationTask(Optimizer* optimizer, const Point& point) :
+       m_optimizer(optimizer), m_point(point) {}
+
+    bool DeleteAfterExecution() {
+      return false;
+    }
+
+    void Run() {
+      m_score = m_optimizer->Run(m_point);
+    }
+
+    statscore_t getScore() const {
+      return m_score;
+    }
+
+    const Point& getPoint() const  {
+      return m_point;
+    }
+
+  private:
+    Optimizer* m_optimizer;
+    Point m_point;
+    statscore_t m_score;
+};
 
 int main (int argc, char **argv)
 {
@@ -83,6 +122,9 @@ int main (int argc, char **argv)
   int nrandom=0;
   int seed=0;
   bool hasSeed = false;
+#ifdef WITH_THREADS
+  size_t threads=1;
+#endif
   string type("powell");
   string scorertype("BLEU");
   string scorerconfig("");
@@ -140,6 +182,12 @@ int main (int argc, char **argv)
     case 'v':
       setverboselevel(strtol(optarg,NULL,10));
       break;
+#ifdef WITH_THREADS
+    case 'T':
+      threads = strtol(optarg, NULL, 10);
+      if (threads < 1) threads = 1;
+      break;
+#endif
     default:
       usage();
     }
@@ -266,41 +314,58 @@ int main (int argc, char **argv)
   O->SetScorer(TheScorer);
   O->SetFData(D.getFeatureData());
 
+
+#ifdef WITH_THREADS
+  cerr << "Creating a pool of " << threads << " threads" << endl;
+  Moses::ThreadPool pool(threads);
+#endif
+
+  vector<OptimizationTask*> tasks;
+
   // run with specified starting points
-  stringstream oss;
-  statscore_t best=0, mean=0, var=0;
-  Point bestP;
-  for(int i=0;i<start_list.size();i++) {
-    Point P(start_list[i], min, max);//Generate from the full feature set. Warning: must be done after Optimizer initialization
-    statscore_t score=O->Run(P);
-    oss.str("");
-    oss << "Specified starting point number " << (1+i) << ", score: " << score;
-    if (i==0 || score>best) {
-      best=score;
-      bestP=P;
-      oss << " (new best)";
-    }
-    mean+=score;
-    var+=(score*score);
-    PrintUserTime(oss.str());
+  for(size_t i=0;i<start_list.size();i++) {
+    //Generate from the full feature set. Warning: must be done after Optimizer initialization
+    Point P(start_list[i], min, max);
+    OptimizationTask* task = new OptimizationTask(O,P);
+    tasks.push_back(task);
+#ifdef WITH_THREADS
+    pool.Submit(task);
+#else
+    task->Run();
+#endif
   }
 
-  // run with random starting points
-  for(int i=0; i<ntry; i++) {
+  //run with random starting points
+  for (int i = 0; i < ntry; ++i) {
     Point P(start_list[0], min, max);
     P.Randomize(); // randomize within min and max as given to the constructor
-    statscore_t score=O->Run(P);
-    oss.str("");
-    oss << "Randomized starting point number " << (1+i) << ", score: " << score;
-    if(score>best) {
-      best=score;
-      bestP=P;
-      oss << " (new best)";
-    }
-    mean+=score;
-    var+=(score*score);
-    PrintUserTime(oss.str());
+    OptimizationTask* task = new OptimizationTask(O,P);
+    tasks.push_back(task);
+#ifdef WITH_THREADS
+    pool.Submit(task);
+#else
+    task->Run();
+#endif
   }
+    
+  //wait for all threads to finish
+#ifdef WITH_THREADS
+  pool.Stop(true);
+#endif
+
+  //collect results
+  statscore_t best=0, mean=0, var=0;
+  Point bestP;
+  for (vector<OptimizationTask*>::const_iterator i = tasks.begin(); i != tasks.end(); ++i) {
+    statscore_t score = (*i)->getScore();
+    mean += score;
+    var += score*score;
+    if (score > best) {
+      bestP = (*i)->getPoint();
+      best = score;
+    }
+  }
+
   mean/=(float)ntry;
   var/=(float)ntry;
   var=sqrt(abs(var-mean*mean));

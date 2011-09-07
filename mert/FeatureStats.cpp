@@ -21,7 +21,7 @@ FeatureStats::FeatureStats()
 
 FeatureStats::~FeatureStats()
 {
-  delete array_;
+  delete[] array_;
 };
 
 FeatureStats::FeatureStats(const FeatureStats &stats)

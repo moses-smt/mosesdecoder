@@ -10,6 +10,7 @@
 
 # Excerpts from revision history
 
+# Sept 2011   multi-threaded mert (Barry Haddow)
 # Jul 2011    simplifications (Ondrej Bojar)
 #             -- rely on moses' -show-weights instead of parsing moses.ini 
 #                ... so moses is also run once *before* mert starts, checking
@@ -99,6 +100,7 @@ my $___RANDOM_DIRECTIONS = 0; # search in random directions only
 my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
 my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use Hopkins&May[2011]
 my $___RANDOM_RESTARTS = 20;
+my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
 # Default is to use shortest reference
@@ -180,7 +182,8 @@ GetOptions(
   "range=s@" => \$___RANGES,
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
-  "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER
+  "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
+  "threads=i" => \$__THREADS
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -258,6 +261,9 @@ Options:
   --random-directions               ... search only in random directions
   --number-of-random-directions=int ... number of random directions
                                         (also works with regular optimizer, default: 0)
+  --pairwise-ranked         ... Use PRO for optimisation (Hopkins and May, emnlp 2011)
+  --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
+
 ";
   exit 1;
 }
@@ -714,6 +720,10 @@ while(1) {
   }
   else{
     $cmd = $cmd." --ifile run$run.$weights_in_file";
+  }
+
+  if ($__THREADS) {
+    $cmd = $cmd." --threads $__THREADS";
   }
 
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
