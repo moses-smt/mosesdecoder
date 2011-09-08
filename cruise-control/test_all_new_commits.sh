@@ -99,6 +99,12 @@ function run_single_test () {
   [ -z "$err" ] && make  >> $longlog 2>&1 \
     || err="make"
 
+  echo "## make scripts" >> $longlog
+  cd scripts
+  [ -z "$err" ] && make  >> $longlog 2>&1 \
+    || err="make scripts"
+  cd ..
+
   cd regression-testing
   regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
 
@@ -141,7 +147,7 @@ function run_single_test () {
 }
 
 for i in $MCC_SCAN_BRANCHES; do
-  git rev-list $i > $i.revlist
+  git rev-list $i > $(echo -n $i | sed '/\//_/g').revlist
 done
 
 #### Main loop over all commits
