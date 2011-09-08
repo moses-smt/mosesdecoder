@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "StaticData.h"
 
+#include "LanguageModelKen.h"
+#include "kenlm/lm/left.hh"
+
 using namespace std;
 
 namespace Moses
@@ -254,6 +257,8 @@ FFState* LanguageModel::EvaluateChart(
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
+  lm::ngram::ChartState state;
+  
 	// loop over rule
   for (size_t phrasePos = 0, wordPos = 0; 
 			 phrasePos < hypo.GetCurrTargetPhrase().GetSize(); 
@@ -277,6 +282,9 @@ FFState* LanguageModel::EvaluateChart(
 			// score a regular word added by the rule
 			else
 			{
+        LanguageModelKenBase *ken = dynamic_cast<LanguageModelKenBase*>(m_implementation);
+        float scoreNew = ken->GetValueGivenState(contextFactor, *lmState, state).score;
+        
         float score = m_implementation->GetValueGivenState(contextFactor, *lmState).score;
 				updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(score), ++wordPos );
 			}

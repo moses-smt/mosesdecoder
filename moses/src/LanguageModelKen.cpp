@@ -119,7 +119,7 @@ public:
 
   void CleanUpAfterSentenceProcessing() {}
   void InitializeBeforeSentenceProcessing() {}
-
+  
 };
 
 template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const

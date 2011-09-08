@@ -66,6 +66,7 @@
 		1EBB1723126C15C500AE6102 /* weights.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB1715126C15C500AE6102 /* weights.hh */; };
 		1EBB1724126C15C500AE6102 /* word_index.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB1716126C15C500AE6102 /* word_index.hh */; };
 		1ED9988712783457006BBB6C /* file_piece_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1ED9988612783457006BBB6C /* file_piece_test.cc */; };
+		1EDA8CF01418E18B0006FFF2 /* left.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA8CEF1418E18B0006FFF2 /* left.hh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -129,6 +130,7 @@
 		1EBB1715126C15C500AE6102 /* weights.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = weights.hh; path = lm/weights.hh; sourceTree = "<group>"; };
 		1EBB1716126C15C500AE6102 /* word_index.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = word_index.hh; path = lm/word_index.hh; sourceTree = "<group>"; };
 		1ED9988612783457006BBB6C /* file_piece_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_piece_test.cc; path = util/file_piece_test.cc; sourceTree = "<group>"; };
+		1EDA8CEF1418E18B0006FFF2 /* left.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = left.hh; path = lm/left.hh; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libkenlm.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libkenlm.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -156,6 +158,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EDA8CEF1418E18B0006FFF2 /* left.hh */,
 				1E91441213D065490005055B /* bhiksha.cc */,
 				1E91441313D065490005055B /* bhiksha.hh */,
 				1E46B5A013BA5C050084F898 /* quantize.cc */,
@@ -272,6 +275,7 @@
 				1E46B59E13BA5BE10084F898 /* blank.hh in Headers */,
 				1E46B5A313BA5C050084F898 /* quantize.hh in Headers */,
 				1E91441513D065490005055B /* bhiksha.hh in Headers */,
+				1EDA8CF01418E18B0006FFF2 /* left.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

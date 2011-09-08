@@ -573,8 +573,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1E9CB84314166D4A00EDB7FC /* LanguageModelChartState.cpp */,
-				1E9CB84414166D4A00EDB7FC /* LanguageModelChartState.h */,
 				1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */,
 				1ED0FD4D124BB9380029177F /* AlignmentInfo.h */,
 				1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */,
@@ -676,6 +674,8 @@
 				1ED0FDBC124BB9380029177F /* LVoc.h */,
 				1ED0FD98124BB9380029177F /* LanguageModel.cpp */,
 				1ED0FD99124BB9380029177F /* LanguageModel.h */,
+				1E9CB84314166D4A00EDB7FC /* LanguageModelChartState.cpp */,
+				1E9CB84414166D4A00EDB7FC /* LanguageModelChartState.h */,
 				1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */,
 				1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */,
 				1ED0FD9F124BB9380029177F /* LanguageModelIRST.cpp */,

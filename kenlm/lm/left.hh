@@ -66,9 +66,9 @@ template <class M> class RuleScore {
 
     void Nonterminal(const ChartState &in, float prob) {
       prob_ += prob - in.left_est;
-      for (const WordIndex *i = in.left.words; i != in.left.words + in.valid_length; ++i) {
-        Terminal(*i);
-      }
+      //for (const WordIndex *i = in.left.words_; i != in.left.words_ + in.valid_length; ++i) {
+      //  Terminal(*i);
+      //}
       if (!in.small) out_.right = in.right;
     }
 
