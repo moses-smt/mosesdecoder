@@ -101,9 +101,9 @@ foreach my $test (@tests)
   {
     $cmd .= "$BIN_TEST/run-test-scorer.perl $test_run --scorer=$scoreExe";
   }
-  elsif ($test ~= /^mert/)
+  elsif ($test =~ /^mert/)
   {
-    $cmd .= "$BIN_TEST/run-test-mert.perl $test_run --data-dir=";
+    $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
   }
   else 
   {
