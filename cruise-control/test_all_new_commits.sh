@@ -60,8 +60,8 @@ mkdir -p $LOGDIR/logs/$configname \
 #### How is one test performed
 function run_single_test () {
   commit=$1
-  longlog="$LOGDIR/logs/$configname/$commit.log"
-  git show $commit > "$LOGDIR/logs/$configname/$commit.info"
+  first_char=$(echo $commit | grep -o '^.')
+  longlog="$LOGDIR/logs/$configname/$first_char/$commit.log"
   warn "Testing commit $commit"
 
   # Get the version of this script
@@ -140,20 +140,30 @@ function run_single_test () {
   popd > /dev/null 2> /dev/null
 
   if [ -z "$err" ]; then
-    touch "$LOGDIR/logs/$configname/$commit.OK"
+    touch "$LOGDIR/logs/$configname/$first_char/$commit.OK"
   else
     return 1;
   fi
 }
+
+# update the revision lists for all watched branches
 for i in $MCC_SCAN_BRANCHES; do
   git rev-list $i > "$LOGDIR/logs/$configname/$(echo -n $i | sed 's/\//_/g').revlist"
+done
+
+# create info files for new commits
+for i in $(git rev-list $MCC_SCAN_BRANCHES); do
+  first_char=$(echo $i | grep -o '^.')
+  [ -f "$LOGDIR/logs/$configname/$first_char/$i.info" ] && break;
+  git show $i | ./shorten_info.pl > "$LOGDIR/logs/$configname/$first_char/$i.info"
 done
 
 #### Main loop over all commits
 for i in $MCC_SCAN_BRANCHES; do
   git rev-list $i \
   | while read commit; do
-    test_ok="$LOGDIR/logs/$configname/$commit.OK"
+    first_char=$(echo $commit | grep -o '^.')
+    test_ok="$LOGDIR/logs/$configname/$first_char/$commit.OK"
     if [ ! -e "$test_ok" ]; then
       run_single_test $commit && warn "Commit $commit test ok, stopping" && break
       warn "Commit $commit test failed, continuing"
