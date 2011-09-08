@@ -155,7 +155,7 @@ done
 | while read commit; do
   test_ok="$LOGDIR/logs/$configname/$commit.OK"
   if [ ! -e "$test_ok" ]; then
-    run_single_test $commit && warn "Commit $commit test ok, stooping" && break
+    run_single_test $commit && warn "Commit $commit test ok, stopping" && break
     warn "Commit $commit test failed, continuing"
   else
     warn "Reached a successfully tested commit ($commit), stopping"
