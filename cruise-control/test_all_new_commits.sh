@@ -145,22 +145,21 @@ function run_single_test () {
     return 1;
   fi
 }
-
 for i in $MCC_SCAN_BRANCHES; do
-  git rev-list $i > $(echo -n $i | sed 's/\//_/g').revlist
+  git rev-list $i > "$LOGDIR/logs/$configname/$(echo -n $i | sed 's/\//_/g').revlist"
 done
 
 #### Main loop over all commits
-( cd "$WORKDIR" && git rev-list $MCC_SCAN_BRANCHES ) \
-| while read commit; do
-  test_ok="$LOGDIR/logs/$configname/$commit.OK"
-  if [ ! -e "$test_ok" ]; then
-    run_single_test $commit && warn "Commit $commit test ok, stopping" && break
-    warn "Commit $commit test failed, continuing"
-  else
-    warn "Reached a successfully tested commit ($commit), stopping"
-    break
-  fi
+for i in $MCC_SCAN_BRANCHES; do
+  git rev-list $i \
+  | while read commit; do
+    test_ok="$LOGDIR/logs/$configname/$commit.OK"
+    if [ ! -e "$test_ok" ]; then
+      run_single_test $commit && warn "Commit $commit test ok, stopping" && break
+      warn "Commit $commit test failed, continuing"
+    else
+      warn "Reached a successfully tested commit ($commit), stopping"
+      break
+    fi
+  done
 done
-
-
