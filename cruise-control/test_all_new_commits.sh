@@ -147,7 +147,7 @@ function run_single_test () {
 }
 
 for i in $MCC_SCAN_BRANCHES; do
-  git rev-list $i > $(echo -n $i | sed '/\//_/g').revlist
+  git rev-list $i > $(echo -n $i | sed 's/\//_/g').revlist
 done
 
 #### Main loop over all commits
