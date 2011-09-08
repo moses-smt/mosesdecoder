@@ -230,7 +230,7 @@ FFState* LanguageModel::Evaluate(
     hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t );
   }
   return res;
-} 
+}
 
 FFState* LanguageModel::EvaluateChart(
   const ChartHypothesis& hypo,
@@ -239,8 +239,6 @@ FFState* LanguageModel::EvaluateChart(
 {
 	// data structure for factored context phrase (history and predicted word)
   vector<const Word*> contextFactor;
-  vector<void*> leftstates;
-
   contextFactor.reserve(GetNGramOrder());
 
 	// initialize language model context state
@@ -253,7 +251,7 @@ FFState* LanguageModel::EvaluateChart(
   // get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-  
+
 	// loop over rule
   for (size_t phrasePos = 0, wordPos = 0; 
 			 phrasePos < hypo.GetCurrTargetPhrase().GetSize(); 
@@ -263,7 +261,7 @@ FFState* LanguageModel::EvaluateChart(
     const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
 
     // regular word
-    if (!word.IsNonTerminal())
+    if (!word.IsNonTerminal()) 
     {
 			ShiftOrPush(contextFactor, word);
 
@@ -276,9 +274,8 @@ FFState* LanguageModel::EvaluateChart(
 			}
 			// score a regular word added by the rule
 			else
-			{        
-        float score = m_implementation->GetValueGivenState(contextFactor, *lmState).score;
-				updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(score), ++wordPos );
+			{
+				updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(m_implementation->GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
 			}
     }
 
@@ -325,8 +322,7 @@ FFState* LanguageModel::EvaluateChart(
 				{
 					const Word &word = prevHypo->GetPrefix().GetWord(prefixPos);
 					ShiftOrPush(contextFactor, word);
-          float score = m_implementation->GetValueGivenState(contextFactor, *lmState).score;
-					updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(score), ++wordPos );
+					updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(m_implementation->GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
 				}
 				
 				// check if we are dealing with a large sub-phrase
