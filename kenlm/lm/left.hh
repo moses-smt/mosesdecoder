@@ -71,7 +71,7 @@ template <class M> class RuleScore {
     }
 
     float Finish() const {
-      out.small = (left_write_ < left_end_);
+      out_.small = (left_write_ < left_end_);
       return prob_;
     }
 
