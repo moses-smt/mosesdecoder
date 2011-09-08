@@ -11,19 +11,19 @@ namespace ngram {
 struct Left {
   bool operator==(const Left &other) const {
     return 
-      (valid_length_ == other.valid_length_) && 
-      !memcmp(words_, other.words_, sizeof(WordIndex) * valid_length_);
+      (valid_length == other.valid_length) && 
+      !memcmp(words, other.words, sizeof(WordIndex) * valid_length);
   }
 
   int Compare(const Left &other) const {
-    if (valid_length_ != other.valid_length_) {
-      return (int)valid_length_ - (int)other.valid_length_;
+    if (valid_length != other.valid_length) {
+      return (int)valid_length - (int)other.valid_length;
     }
-    return memcmp(words_, other.words_, sizeof(WordIndex) * valid_length_);
+    return memcmp(words, other.words, sizeof(WordIndex) * valid_length);
   }
 
-  WordIndex words_[kMaxOrder - 1];
-  unsigned char valid_length_;
+  WordIndex words[kMaxOrder - 1];
+  unsigned char valid_length;
 };
 
 struct ChartState {
@@ -47,8 +47,8 @@ struct ChartState {
 
 template <class M> class RuleScore {
   public:
-    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_write_(out.left.words_), left_end_(left_write_ + model.Order()), prob_(0.0) {
-      out.left.valid_length_ = 0;
+    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_write_(out.left.words), left_end_(left_write_ + model.Order()), prob_(0.0) {
+      out.left.valid_length = 0;
       out.right.valid_length_ = 0;
       out.left_est = 0.0;
       out.small = false;
@@ -66,13 +66,13 @@ template <class M> class RuleScore {
 
     void Nonterminal(const ChartState &in, float prob) {
       prob_ += prob - in.left_est;
-      for (const WordIndex *i = in.left.words_; i != in.left.words_ + in.valid_length; ++i) {
+      for (const WordIndex *i = in.left.words; i != in.left.words + in.valid_length; ++i) {
         Terminal(*i);
       }
       if (!in.small) out_.right = in.right;
     }
 
-    float Finish() const {
+    float Finish() {
       out_.small = (left_write_ < left_end_);
       return prob_;
     }
