@@ -47,6 +47,8 @@ void usage(void)
 #ifdef WITH_THREADS
   cerr<<"[--threads|-T] use multiple threads for random restart (default 1)"<<endl;
 #endif
+  cerr<<"[--shard-count] Split data into shards for restarts, using this many shards"<<endl;
+  cerr<<"[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards"<<endl;
   cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
   exit(1);
@@ -68,6 +70,8 @@ static struct option long_options[] = {
 #ifdef WITH_THREADS
   {"threads", required_argument,0,'T'},
 #endif
+  {"shard-count", required_argument, 0, 'a'},
+  {"shard-size", required_argument, 0, 'b'},
   {"verbose",1,0,'v'},
   {"help",no_argument,0,'h'},
   {0, 0, 0, 0}
@@ -125,6 +129,8 @@ int main (int argc, char **argv)
 #ifdef WITH_THREADS
   size_t threads=1;
 #endif
+  float shard_size = 0;
+  size_t shard_count = 0;
   string type("powell");
   string scorertype("BLEU");
   string scorerconfig("");
@@ -188,12 +194,29 @@ int main (int argc, char **argv)
       if (threads < 1) threads = 1;
       break;
 #endif
+    case 'a':
+      shard_count = strtol(optarg,NULL,10);
+      break;
+    case 'b':
+      shard_size = strtof(optarg,NULL);
+      break;
     default:
       usage();
     }
   }
   if (pdim < 0)
     usage();
+
+  cerr << "shard_size = " << shard_size << " shard_count = " << shard_count << endl;
+  if (shard_size > 1 || shard_size < 0) {
+    cerr << "Error: shard_size should be between 0 and 1" << endl;
+    exit(1);
+  }
+
+  if (shard_size > 0 && shard_count == 0) {
+    cerr << "Error: shard_size specified but no shard count" << endl;
+    exit(1);
+  }
 
   if (hasSeed) {
     cerr << "Seeding random numbers with " << seed << endl;
