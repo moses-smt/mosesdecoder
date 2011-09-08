@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "ChartHypothesis.h"
 
 using namespace std;
 
@@ -44,6 +45,34 @@ LanguageModelKenBase::~LanguageModelKenBase() {}
 
 namespace
 {
+
+  class LanguageModelChartStateKenLM : public FFState
+  {
+  private:
+    lm::ngram::ChartState m_state;
+    const ChartHypothesis *m_hypo;
+    
+  public:
+    explicit LanguageModelChartStateKenLM(const ChartHypothesis &hypo)
+		:m_hypo(&hypo) 
+    {}
+    
+    const ChartHypothesis* GetHypothesis() const { return m_hypo; }
+
+    const lm::ngram::ChartState &GetChartState() const 
+    { return m_state; }
+    lm::ngram::ChartState &GetChartState() 
+    { return m_state; }
+
+    int Compare(const FFState& o) const 
+    {
+      const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
+      int ret = m_state.Compare(other.m_state);
+      return ret;
+    }
+    
+  };
+  
 
 class MappingBuilder : public lm::ngram::EnumerateVocab
 {
@@ -120,7 +149,54 @@ public:
   void CleanUpAfterSentenceProcessing() {}
   void InitializeBeforeSentenceProcessing() {}
   
+  FFState* EvaluateChart(
+                                 const ChartHypothesis& cur_hypo,
+                                 int featureID,
+                                 ScoreComponentCollection* accumulator) const;	
+
 };
+
+template <class Model>
+FFState* LanguageModelKen<Model>::EvaluateChart(
+                       const ChartHypothesis& hypo,
+                       int featureID,
+                       ScoreComponentCollection* accumulator) const
+{
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);  
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+  hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+
+  for (size_t phrasePos = 0, wordPos = 0; 
+			 phrasePos < hypo.GetCurrTargetPhrase().GetSize(); 
+			 phrasePos++) 
+  {
+    
+    // consult rule for either word or non-terminal
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
+    std::size_t factor = word.GetFactor(GetFactorType())->GetId();
+
+    if (!word.IsNonTerminal())
+    {
+      lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+      ruleScore.Terminal(new_word);
+    }
+    else
+    {
+      size_t nonTermIndex = nonTermIndexMap[phrasePos];
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
+      const LanguageModelChartStateKenLM &prevState = *static_cast<const LanguageModelChartStateKenLM*>( prevHypo->GetFFState(featureID)) ;
+
+      float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0];
+
+      ruleScore.NonTerminal(prevState.GetChartState(), score);
+      
+    }
+  }
+  
+  accumulator->Assign(this, ruleScore.Finish() );
+  return newState;
+}
 
 template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const
 {
