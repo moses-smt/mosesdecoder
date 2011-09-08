@@ -9,17 +9,17 @@ namespace lm {
 namespace ngram {
 
 struct Left {
-  bool operator==(const Left &other_) const {
+  bool operator==(const Left &other) const {
     return 
-      (valid_length_ == other_.valid_length_) && 
-      !memcmp(words_, other_.words_, sizeof(WordIndex) * valid_length_);
+      (valid_length_ == other.valid_length_) && 
+      !memcmp(words_, other.words_, sizeof(WordIndex) * valid_length_);
   }
 
-  int Compare(const Left &other_) const {
-    if (valid_length_ != other_.valid_length_) {
-      return (int)valid_length_ - (int)other_.valid_length_;
+  int Compare(const Left &other) const {
+    if (valid_length_ != other.valid_length_) {
+      return (int)valid_length_ - (int)other.valid_length_;
     }
-    return memcmp(words_, other_.words_, sizeof(WordIndex) * valid_length_);
+    return memcmp(words_, other.words_, sizeof(WordIndex) * valid_length_);
   }
 
   WordIndex words_[kMaxOrder - 1];
