@@ -2,22 +2,24 @@
 #define LM_LEFT__
 
 #include "lm/virtual_interface.hh"
+#include "lm/max_order.hh"
+#include "lm/model.hh"
 
 namespace lm {
 namespace ngram {
 
 struct Left {
-  bool operator==(const Left &other) const {
+  bool operator==(const Left &other_) const {
     return 
-      (valid_length_ == other.valid_length_) && 
+      (valid_length_ == other_.valid_length_) && 
       !memcmp(words_, other_.words_, sizeof(WordIndex) * valid_length_);
   }
 
-  int Compare(const Left &other) const {
+  int Compare(const Left &other_) const {
     if (valid_length_ != other_.valid_length_) {
       return (int)valid_length_ - (int)other_.valid_length_;
     }
-    return memcmp(words_, other.words_, sizeof(WordIndex) * valid_length_);
+    return memcmp(words_, other_.words_, sizeof(WordIndex) * valid_length_);
   }
 
   WordIndex words_[kMaxOrder - 1];
@@ -53,18 +55,18 @@ template <class M> class RuleScore {
     }
 
     void Terminal(WordIndex word) {
-      State copy(out.right_);
-      float prob = model_.Score(copy, word, out.right_);
+      State copy(out_.right);
+      float prob = model_.Score(copy, word, out_.right);
       prob_ += prob;
       if (left_write_ < left_end_) {
         *(left_write_++) = word;
-        out.left_est += prob;
+        out_.left_est += prob;
       }
     }
 
     void Nonterminal(const ChartState &in, float prob) {
       prob_ += prob - in.left_est;
-      for (const WordIndex *i = in.left.words_; i != in.left.words_ + in.valid_length_; ++i) {
+      for (const WordIndex *i = in.left.words_; i != in.left.words_ + in.valid_length; ++i) {
         Terminal(*i);
       }
       if (!in.small) out_.right = in.right;
