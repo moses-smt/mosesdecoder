@@ -2,7 +2,7 @@
 
 use strict;
 my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, $script_dir; }
-use MertRegressionTesting;
+#use MertRegressionTesting;
 use Getopt::Long;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );
@@ -10,14 +10,14 @@ my @SIGS = qw ( SIGHUP SIGINT SIGQUIT SIGILL SIGTRAP SIGABRT SIGIOT SIGBUS SIGFP
 my ($decoder, $test_name);
 
 my $test_dir = "$script_dir/tests";
-my $mert_scripts_dir;
+my $mert_dir = "$script_dir/../mert";
 my $data_dir;
 my $BIN_TEST = $script_dir;
 my $results_dir;
 
 GetOptions("test=s"    => \$test_name,
            "data-dir=s"=> \$data_dir,
-           "mert-scripts-dir=s"=> \$mert_scripts_dir,
+           "mert-dir=s"=> \$mert_dir,
            "test-dir=s"=> \$test_dir,
            "results-dir=s"=> \$results_dir,
           ) or exit 1;
@@ -26,7 +26,7 @@ die "Please specify a test to run with --test\n" unless $test_name;
 
 die "Please specify the location of the data directory with --data-dir\n" unless $data_dir;
 
-die "Please specify the location of the mert directory with --mert-scripts-dir\n" unless $mert_scripts_dir;
+die "Please specify the location of the mert directory with --mert-dir\n" unless $mert_dir;
 
 die "Cannot locate test dir at $test_dir" unless (-d $test_dir);
 
@@ -68,19 +68,19 @@ if ($error) {
   exit 3;
 }
 
-($o, $ec, $sig) = run_command("$test_dir/filter-stdout $results/run.stdout > $results/results.dat");
+($o, $ec, $sig) = run_command("$test_dir/filter-stdout $results/run.stdout > $results/results.txt");
 warn "filter-stdout failed!" if ($ec > 0 || $sig);
-($o, $ec, $sig) = run_command("$test_dir/filter-stderr $results/run.stderr >> $results/results.dat");
+($o, $ec, $sig) = run_command("$test_dir/filter-stderr $results/run.stderr >> $results/results.txt");
 warn "filter-stderr failed!" if ($ec > 0 || $sig);
 
-open OUT, ">> $results/results.dat";
+open OUT, ">> $results/results.txt";
 print OUT "TOTAL_WALLTIME ~ $elapsed\n";
 close OUT;
 
 run_command("gzip $results/run.stdout");
 run_command("gzip $results/run.stderr");
 
-($o, $ec, $sig) = run_command("$BIN_TEST/compare-results.pl $results $truth");
+($o, $ec, $sig) = run_command("$BIN_TEST/compare-results.perl $results $truth");
 print $o;
 if ($ec) {
   print STDERR "FAILURE, for debugging see  $test_dir\n";
@@ -92,7 +92,7 @@ exit 0;
 sub exec_test {
   my ($test_dir,$results) = @_;
   my $start_time = time;
-  my ($o, $ec, $sig) = run_command("sh $test_dir/command $mert_scripts_dir $test_dir 1> $results/run.stdout 2> $results/run.stderr");
+  my ($o, $ec, $sig) = run_command("sh $test_dir/command $mert_dir $test_dir 1> $results/run.stdout 2> $results/run.stderr");
   my $elapsed = 0;
   $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);
