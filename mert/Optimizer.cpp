@@ -325,6 +325,7 @@ statscore_t Optimizer::Run(Point& P)const
     cerr<<"error trying to optimize without a Scorer loaded"<<endl;
     exit(2);
   }
+  //cerr << scorer->getReferenceSize() << " "  << FData->size() << endl;
   if (scorer->getReferenceSize()!=FData->size()) {
     cerr<<"error length mismatch between feature file and score file"<<endl;
     exit(2);

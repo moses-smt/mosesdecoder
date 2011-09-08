@@ -47,7 +47,7 @@ void usage(void)
 #ifdef WITH_THREADS
   cerr<<"[--threads|-T] use multiple threads for random restart (default 1)"<<endl;
 #endif
-  cerr<<"[--shard-count] Split data into shards for restarts, using this many shards"<<endl;
+  cerr<<"[--shard] Split data into shards for restarts"<<endl;
   cerr<<"[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards"<<endl;
   cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
@@ -70,7 +70,7 @@ static struct option long_options[] = {
 #ifdef WITH_THREADS
   {"threads", required_argument,0,'T'},
 #endif
-  {"shard-count", required_argument, 0, 'a'},
+  {"shard", 0, 0, 'a'},
   {"shard-size", required_argument, 0, 'b'},
   {"verbose",1,0,'v'},
   {"help",no_argument,0,'h'},
@@ -130,7 +130,7 @@ int main (int argc, char **argv)
   size_t threads=1;
 #endif
   float shard_size = 0;
-  size_t shard_count = 0;
+  bool shard = false;
   string type("powell");
   string scorertype("BLEU");
   string scorerconfig("");
@@ -195,7 +195,7 @@ int main (int argc, char **argv)
       break;
 #endif
     case 'a':
-      shard_count = strtol(optarg,NULL,10);
+      shard = true;
       break;
     case 'b':
       shard_size = strtof(optarg,NULL);
@@ -207,14 +207,9 @@ int main (int argc, char **argv)
   if (pdim < 0)
     usage();
 
-  cerr << "shard_size = " << shard_size << " shard_count = " << shard_count << endl;
+  cerr << "shard_size = " << shard_size << " shard = " << shard << endl;
   if (shard_size > 1 || shard_size < 0) {
     cerr << "Error: shard_size should be between 0 and 1" << endl;
-    exit(1);
-  }
-
-  if (shard_size > 0 && shard_count == 0) {
-    cerr << "Error: shard_size specified but no shard count" << endl;
     exit(1);
   }
 
@@ -344,22 +339,41 @@ int main (int argc, char **argv)
     D.mergeSparseFeatures();
   }
 
-  Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
-  O->SetScorer(TheScorer);
-  O->SetFData(D.getFeatureData());
 
 #ifdef WITH_THREADS
   cerr << "Creating a pool of " << threads << " threads" << endl;
   Moses::ThreadPool pool(threads);
 #endif
 
+  //optional sharding
+  vector<Optimizer*> optimizers(ntry + start_list.size());
+  if (shard) {
+    vector<Data> shards;
+    D.createShards(optimizers.size(), shard_size, scorerconfig, shards);
+    for (size_t i = 0; i < optimizers.size(); ++i) {
+      Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
+      O->SetScorer(shards[i].getScorer());
+      O->SetFData(shards[i].getFeatureData());
+      optimizers[i] = O;
+    }
+  } else {
+    Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
+    O->SetScorer(TheScorer);
+    O->SetFData(D.getFeatureData());
+    //same  data for all restarts
+    for (size_t i = 0; i < optimizers.size(); ++i) {
+      optimizers[i] = O;
+    }
+  }
+
   vector<OptimizationTask*> tasks;
+  size_t optIndex = 0;
 
   // run with specified starting points
   for(size_t i=0;i<start_list.size();i++) {
     //Generate from the full feature set. Warning: must be done after Optimizer initialization
     Point P(start_list[i], min, max);
-    OptimizationTask* task = new OptimizationTask(O,P);
+    OptimizationTask* task = new OptimizationTask(optimizers[optIndex++],P);
     tasks.push_back(task);
 #ifdef WITH_THREADS
     pool.Submit(task);
@@ -368,11 +382,12 @@ int main (int argc, char **argv)
 #endif
   }
 
+
   //run with random starting points
   for (int i = 0; i < ntry; ++i) {
     Point P(start_list[0], min, max);
     P.Randomize(); // randomize within min and max as given to the constructor
-    OptimizationTask* task = new OptimizationTask(O,P);
+    OptimizationTask* task = new OptimizationTask(optimizers[optIndex++],P);
     tasks.push_back(task);
 #ifdef WITH_THREADS
     pool.Submit(task);
