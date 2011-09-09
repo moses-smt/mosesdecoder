@@ -47,11 +47,10 @@ struct ChartState {
 
 template <class M> class RuleScore {
   public:
-    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_write_(out.left.words), left_end_(left_write_ + model.Order()), prob_(0.0) {
+    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_write_(out.left.words), left_end_(left_write_ + model.Order() - 1), prob_(0.0) {
       out.left.valid_length = 0;
       out.right.valid_length_ = 0;
       out.left_est = 0.0;
-      out.small = false;
     }
 
     void Terminal(WordIndex word) {
@@ -80,7 +79,7 @@ template <class M> class RuleScore {
 
     float Finish() {
       out_.small = (left_write_ < left_end_);
-      out_.left.valid_length = left_end_ - left_write_;
+      out_.left.valid_length = left_write_ - out_.left.words;
       return prob_;
     }
 
