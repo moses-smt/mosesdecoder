@@ -56,6 +56,7 @@ Parameter::Parameter()
   AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
   AddParam("lmodel-file", "location and properties of the language models");
   AddParam("lmodel-dub", "dictionary upper bounds of language models");
+  AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
   AddParam("mapping", "description of decoding steps");
   AddParam("max-partial-trans-opt", "maximum number of partial translation options per input span (during mapping steps)");
   AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
@@ -301,7 +302,8 @@ bool Parameter::Validate()
     }
   }
 
-  if (m_setting["lmodel-file"].size() != m_setting["weight-l"].size()) {
+  if (m_setting["lmodel-file"].size() * (m_setting["lmodel-oov-feature"].size() ? 2 : 1)
+         != m_setting["weight-l"].size()) {
     stringstream errorMsg("");
     errorMsg << "Config and parameters specify "
              << static_cast<int>(m_setting["lmodel-file"].size())
@@ -309,6 +311,7 @@ bool Parameter::Validate()
              << static_cast<int>(m_setting["weight-l"].size())
              << " weights (weight-l)";
     errorMsg << endl << "You might be giving '-lmodel-file TYPE FACTOR ORDER FILENAME' but you should be giving these four as a single argument, i.e. '-lmodel-file \"TYPE FACTOR ORDER FILENAME\"'";
+    errorMsg << endl << "You should also remember that each language model requires 2 weights, if and only if lmodel-oov-feature is on.";
     UserMessage::Add(errorMsg.str());
     noErrorFlag = false;
   }

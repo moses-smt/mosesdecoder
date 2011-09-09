@@ -77,6 +77,7 @@ StaticData::StaticData()
   ,m_numInputScores(0)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
+  ,m_lmEnableOOVFeature(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_isAlwaysCreateDirectTranslationOption(false)
 {
@@ -338,6 +339,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
+
+  SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
 
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
