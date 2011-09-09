@@ -86,9 +86,8 @@ void LanguageModel::CalcScore(const Phrase &phrase
                               , float &fullScore
                               , float &ngramScore) const
 {
-
-  fullScore	= 0;
-  ngramScore	= 0;
+  fullScore  = 0;
+  ngramScore = 0;
 
   size_t phraseSize = phrase.GetSize();
   if (!phraseSize) return;
@@ -153,19 +152,19 @@ FFState* LanguageModel::Evaluate(
 {
   // In this function, we only compute the LM scores of n-grams that overlap a
   // phrase boundary. Phrase-internal scores are taken directly from the
-  // translation option. 
+  // translation option.
 
 	// In the case of unigram language models, there is no overlap, so we don't
   // need to do anything.
   if(GetNGramOrder() <= 1)
     return NULL;
 
-  clock_t t=0;
+  clock_t t = 0;
   IFVERBOSE(2) {
-    t  = clock();  // track time
+    t = clock();  // track time
   }
 
-	// Empty phrase added? nothing to be done
+  // Empty phrase added? nothing to be done
   if (hypo.GetCurrTargetLength() == 0)
     return ps ? m_implementation->NewState(ps) : NULL;
 
@@ -196,7 +195,7 @@ FFState* LanguageModel::Evaluate(
     // add last factor
     contextFactor.back() = &hypo.GetWord(currPos);
 
-    lmScore	+= m_implementation->GetValueGivenState(contextFactor, *res).score;
+    lmScore += m_implementation->GetValueGivenState(contextFactor, *res).score;
   }
 
   // end of sentence
@@ -211,10 +210,10 @@ FFState* LanguageModel::Evaluate(
       else
         contextFactor[i] = &hypo.GetWord((size_t)currPos);
     }
-    lmScore	+= m_implementation->GetValueForgotState(contextFactor, *res).score;
-  } 
-	else 
-	{
+    lmScore += m_implementation->GetValueForgotState(contextFactor, *res).score;
+  }
+  else
+  {
     if (endPos < currEndPos) {
       //need to get the LM state (otherwise the last LM state is fine)
       for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {

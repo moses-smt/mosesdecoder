@@ -54,15 +54,13 @@ namespace
 
   public:
     explicit LanguageModelChartStateKenLM(const ChartHypothesis &hypo)
-		:m_hypo(&hypo)
+        :m_hypo(&hypo)
     {}
 
     const ChartHypothesis* GetHypothesis() const { return m_hypo; }
 
-    const lm::ngram::ChartState &GetChartState() const
-    { return m_state; }
-    lm::ngram::ChartState &GetChartState()
-    { return m_state; }
+    const lm::ngram::ChartState &GetChartState() const { return m_state; }
+    lm::ngram::ChartState &GetChartState() { return m_state; }
 
     int Compare(const FFState& o) const
     {
@@ -70,7 +68,6 @@ namespace
       int ret = m_state.Compare(other.m_state);
       return ret;
     }
-
   };
 
 
@@ -107,8 +104,9 @@ struct KenLMState : public FFState {
   }
 };
 
-/** Implementation of single factor LM using Ken's code.
-*/
+/*
+ * An implementation of single factor LM using Ken's code.
+ */
 template <class Model> class LanguageModelKen : public LanguageModelKenBase
 {
 private:
@@ -156,11 +154,11 @@ public:
 };
 
 template <class Model>
-FFState* LanguageModelKen<Model>::EvaluateChart(
-                       const ChartHypothesis& hypo,
-                       int featureID,
-                       ScoreComponentCollection* accumulator,
-                       const LanguageModel *feature) const
+FFState *LanguageModelKen<Model>::EvaluateChart(
+    const ChartHypothesis& hypo,
+    int featureID,
+    ScoreComponentCollection *accumulator,
+    const LanguageModel *feature) const
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
@@ -190,7 +188,6 @@ FFState* LanguageModelKen<Model>::EvaluateChart(
       float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0];
 
       ruleScore.NonTerminal(prevState.GetChartState(), score);
-
     }
   }
 
@@ -223,8 +220,8 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
     FactorType factorType,
     size_t /*nGramOrder*/)
 {
-  m_factorType  = factorType;
-  m_filePath    = filePath;
+  m_factorType = factorType;
+  m_filePath   = filePath;
 
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
