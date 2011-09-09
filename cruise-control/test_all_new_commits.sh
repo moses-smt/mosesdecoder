@@ -136,16 +136,16 @@ function run_single_test () {
       touch giza-pp.ok
     fi
     srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -E 's/.*--with-srilm=([^ ]+) .*/\1/')
-    mach_type=$(srilm_dir/sbin/machine-type)
+    mach_type=$($srilm_dir/sbin/machine-type)
     cat cruise-control/config.ems \
     | sed \
-      -e "s/WORKDIR/$WORKDIR/" \
-      -e "s/SRILMDIR/$srilm_dir/" \
-      -e "s/MACHINE_TYPE/$mach_type/" \
-    | ./config.ems
+      -e "s#WORKDIR#$WORKDIR#" \
+      -e "s#SRILMDIR#$srilm_dir#" \
+      -e "s#MACHINE_TYPE#$mach_type#" \
+    > ./config.ems
     scripts/ems/experiment.perl \
       -no-graph -config `pwd`/config.ems &>> $longlog \
-      || $err="ems"
+      || err="ems"
   fi
 
   echo "## Finished" >> $longlog

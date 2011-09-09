@@ -6,7 +6,7 @@
 
 ### directory in which experiment is run
 #
-working-dir = /home/pkoehn/experiment
+working-dir = WORKDIR
 
 # specification of the language pair
 input-extension = fr
