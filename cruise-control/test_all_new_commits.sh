@@ -109,10 +109,11 @@ function run_single_test () {
   regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
 
   # download data for regression tests if necessary
-  if [ ! -f $regtest_file ]; then
+  if [ ! -f $regtest_file.ok ]; then
     wget $REGTEST_ARCHIVE &> /dev/null \
       || die "Failed to download data for regression tests"
     tar xzf $regtest_file
+    touch $regtest_file.ok
   fi
 
   echo "## regression tests" >> $longlog
@@ -121,6 +122,30 @@ function run_single_test () {
     regtest_status=$?
     [ $regtest_status -eq 1 ] && die "Failed to run regression tests"
     [ $regtest_status -eq 2 ] && err="regression tests"
+  fi
+  cd ..
+
+  if [ -z $err ] && [ $MCC_RUN_EMS = "yes" ]; then
+    if [ ! -f "giza-pp.ok" ]; then # fetch & compile Giza++
+      svn checkout http://giza-pp.googlecode.com/svn/trunk/ giza-pp \
+      || die "Failed to fetch Giza++"
+      cd giza-pp && make || die "Failed to compile Giza++"
+      mkdir -p bin
+      ln -s ../GIZA++-v2/GIZA++ ../GIZA++-v2/snt2cooc.out ../mkcls-v2/mkcls bin/
+      cd ..
+      touch giza-pp.ok
+    fi
+    srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -E 's/.*--with-srilm=([^ ]+) .*/\1/')
+    mach_type=$(srilm_dir/sbin/machine-type)
+    cat cruise-control/config.ems \
+    | sed \
+      -e "s/WORKDIR/$WORKDIR/" \
+      -e "s/SRILMDIR/$srilm_dir/" \
+      -e "s/MACHINE_TYPE/$mach_type/" \
+    | ./config.ems
+    scripts/ems/experiment.perl \
+      -no-graph -config `pwd`/config.ems &>> $longlog \
+      || $err="ems"
   fi
 
   echo "## Finished" >> $longlog
@@ -154,6 +179,7 @@ done
 # create info files for new commits
 for i in $(git rev-list $MCC_SCAN_BRANCHES); do
   first_char=$(echo $i | grep -o '^.')
+  mkdir -p "$LOGDIR/logs/$configname/$first_char" 
   [ -f "$LOGDIR/logs/$configname/$first_char/$i.info" ] && break;
   git show $i | ./shorten_info.pl > "$LOGDIR/logs/$configname/$first_char/$i.info"
 done
