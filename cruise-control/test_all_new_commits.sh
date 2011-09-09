@@ -35,6 +35,8 @@ LOGDIR=$(readlink -f "$LOGDIR")
 WORKDIR=$MCC_WORKDIR
 [ -d "$WORKDIR" ] || WORKDIR=$USE_TEMPDIR/workdir
 
+MYDIR=$(pwd)
+
 # this is where moses is taken from
 GITREPO="$MCC_GITREPO"
 [ -n "$GITREPO" ] || GITREPO=/home/obo/moses-at-google-code
@@ -137,14 +139,14 @@ function run_single_test () {
     fi
     srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -E 's/.*--with-srilm=([^ ]+) .*/\1/')
     mach_type=$($srilm_dir/sbin/machine-type)
-    cat cruise-control/config.ems \
+    cat $MYDIR/config.ems \
     | sed \
       -e "s#WORKDIR#$WORKDIR#" \
       -e "s#SRILMDIR#$srilm_dir#" \
       -e "s#MACHINE_TYPE#$mach_type#" \
     > ./config.ems
     scripts/ems/experiment.perl \
-      -no-graph -config `pwd`/config.ems &>> $longlog \
+      -no-graph -config -exec `pwd`/config.ems &>> $longlog \
       || err="ems"
   fi
 
