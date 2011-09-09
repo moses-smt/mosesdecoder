@@ -55,6 +55,11 @@ template <class M> class RuleScore {
     }
 
     void Terminal(WordIndex word) {
+      if (word == model_.GetVocabulary().BeginSentence()) {
+        out_.right = model_.BeginSentenceState();
+        left_write_ = left_end_;
+        return;
+      }
       State copy(out_.right);
       float prob = model_.Score(copy, word, out_.right);
       prob_ += prob;
@@ -64,7 +69,7 @@ template <class M> class RuleScore {
       }
     }
 
-    void Nonterminal(const ChartState &in, float prob) {
+    void NonTerminal(const ChartState &in, float prob) {
       prob_ += prob - in.left_est;
       for (const WordIndex *i = in.left.words; i != in.left.words + in.left.valid_length; ++i) {
         Terminal(*i);
@@ -78,12 +83,12 @@ template <class M> class RuleScore {
     }
 
   private:
-    M &model_;
+    const M &model_;
 
     ChartState &out_;
 
     WordIndex *left_write_;
-    const WordIndex *const left_end_;
+    WordIndex *const left_end_;
 
     float prob_;
 };

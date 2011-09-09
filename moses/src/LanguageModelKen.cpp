@@ -152,7 +152,8 @@ public:
   FFState* EvaluateChart(
                                  const ChartHypothesis& cur_hypo,
                                  int featureID,
-                                 ScoreComponentCollection* accumulator) const;	
+                                 ScoreComponentCollection* accumulator,
+                                 const LanguageModel *feature) const;	
 
 };
 
@@ -160,14 +161,15 @@ template <class Model>
 FFState* LanguageModelKen<Model>::EvaluateChart(
                        const ChartHypothesis& hypo,
                        int featureID,
-                       ScoreComponentCollection* accumulator) const
+                       ScoreComponentCollection* accumulator,
+                       const LanguageModel *feature) const
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);  
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
   hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
-  for (size_t phrasePos = 0, wordPos = 0; 
+  for (size_t phrasePos = 0; 
 			 phrasePos < hypo.GetCurrTargetPhrase().GetSize(); 
 			 phrasePos++) 
   {
@@ -187,14 +189,14 @@ FFState* LanguageModelKen<Model>::EvaluateChart(
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
       const LanguageModelChartStateKenLM &prevState = *static_cast<const LanguageModelChartStateKenLM*>( prevHypo->GetFFState(featureID)) ;
 
-      float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0];
+      float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0];
 
       ruleScore.NonTerminal(prevState.GetChartState(), score);
       
     }
   }
   
-  accumulator->Assign(this, ruleScore.Finish() );
+  accumulator->Assign(feature, ruleScore.Finish() );
   return newState;
 }
 

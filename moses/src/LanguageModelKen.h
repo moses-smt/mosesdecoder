@@ -42,11 +42,6 @@ namespace Moses
       // scoring functions which provide more info than the common interface of LanguageModel
       virtual LMKenResult GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const = 0;
       virtual LMKenResult GetKenFullScoreForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
-
-      virtual LMKenResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state, lm::ngram::ChartState ) const
-      {
-        //return GetValueGivenState(contextFactor, state);
-      }
 };
 
 class ScoreIndexManager;

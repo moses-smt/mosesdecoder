@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+class LanguageModel;
+
 class FactorCollection;
 class Factor;
 class Phrase;
@@ -59,6 +61,7 @@ private:
 #else
   // default constructor is ok
 #endif
+  void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
 protected:
   std::string	m_filePath; //! for debugging purposes
@@ -95,6 +98,10 @@ public:
   virtual const FFState *GetNullContextState() const = 0;
   virtual const FFState *GetBeginSentenceState() const = 0;
   virtual FFState *NewState(const FFState *from = NULL) const = 0;
+
+  virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator, const LanguageModel *feature) const;
+
+  void updateChartScore( float *prefixScore, float *finalScore, float score, size_t wordPos ) const;
 
   //! max n-gram order of LM
   size_t GetNGramOrder() const {

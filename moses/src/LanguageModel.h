@@ -120,12 +120,12 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart(
+  FFState* EvaluateChart(
     const ChartHypothesis& cur_hypo,
     int featureID,
-    ScoreComponentCollection* accumulator) const;	
-
-  void updateChartScore( float *prefixScore, float *finalScore, float score, size_t wordPos ) const;
+    ScoreComponentCollection* accumulator) const {
+    return m_implementation->EvaluateChart(cur_hypo, featureID, accumulator, this);
+  }
 
 #ifdef WITH_THREADS
   // if multi-threaded return boost ptr 

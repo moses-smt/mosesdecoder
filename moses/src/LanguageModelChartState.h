@@ -29,24 +29,12 @@ namespace Moses
 class ChartHypothesis;
 class Phrase;
   
-class KenLMLeftState
-{
-  const Phrase &m_prefix;
-  
-public:
-  KenLMLeftState(const ChartHypothesis &hypo);
-  
-  int Compare(const KenLMLeftState& o) const ;
-
-};
-
 //! Abstract class for lexical reordering model states
 class LanguageModelChartState : public FFState
 {
 private:
 	float m_prefixScore;
 	FFState* m_lmRightContext;
-  KenLMLeftState m_kenLMLeftState;
 	const ChartHypothesis *m_hypo;
 
 public:
@@ -56,7 +44,6 @@ public:
 		:m_prefixScore(prefixScore)
 		,m_lmRightContext(lmRightContext)
 		,m_hypo(&hypo) 
-    ,m_kenLMLeftState(hypo)
 	{}
 	~LanguageModelChartState() {
     delete m_lmRightContext;

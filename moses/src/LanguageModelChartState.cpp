@@ -13,21 +13,6 @@
 namespace Moses
 {
 
-KenLMLeftState::KenLMLeftState(const ChartHypothesis &hypo)
-  :m_prefix(hypo.GetPrefix())
-{
-}
-
-int KenLMLeftState::Compare(const KenLMLeftState& other) const 
-{
-  int ret = m_prefix.Compare(other.m_prefix);
-  if (ret != 0)
-    return ret;
-  
-  return 0;
-}
-
-
 int LanguageModelChartState::Compare(const FFState& o) const 
 {
   const LanguageModelChartState &other =
@@ -36,8 +21,7 @@ int LanguageModelChartState::Compare(const FFState& o) const
   // prefix
   if (m_hypo->GetCurrSourceRange().GetStartPos() > 0) // not for "<s> ..."
   {
-    //int ret = m_hypo->GetPrefix().Compare(other.GetHypothesis()->GetPrefix());
-    int ret = m_kenLMLeftState.Compare(other.m_kenLMLeftState);
+    int ret = m_hypo->GetPrefix().Compare(other.GetHypothesis()->GetPrefix());
     if (ret != 0)
       return ret;
   }
