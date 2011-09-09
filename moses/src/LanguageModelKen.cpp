@@ -186,12 +186,11 @@ FFState *LanguageModelKen<Model>::EvaluateChart(
       const LanguageModelChartStateKenLM &prevState = *static_cast<const LanguageModelChartStateKenLM*>( prevHypo->GetFFState(featureID)) ;
 
       float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0];
-
       ruleScore.NonTerminal(prevState.GetChartState(), score);
     }
   }
 
-  accumulator->Assign(feature, ruleScore.Finish() );
+  accumulator->Assign(feature, TransformLMScore(ruleScore.Finish()));
   return newState;
 }
 
