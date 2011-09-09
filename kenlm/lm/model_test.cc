@@ -19,7 +19,7 @@ std::ostream &operator<<(std::ostream &o, const State &state) {
 
 namespace {
 
-#define StartTest(word, ngram, score) \
+#define StartTest(word, ngram, score, noleft) \
   ret = model.FullScore( \
       state, \
       model.GetVocabulary().Index(word), \
@@ -27,6 +27,7 @@ namespace {
   BOOST_CHECK_CLOSE(score, ret.prob, 0.001); \
   BOOST_CHECK_EQUAL(static_cast<unsigned int>(ngram), ret.ngram_length); \
   BOOST_CHECK_GE(std::min<unsigned char>(ngram, 5 - 1), out.valid_length_); \
+  BOOST_CHECK_EQUAL(noleft, ret.independent_left); \
   {\
     WordIndex context[state.valid_length_ + 1]; \
     context[0] = model.GetVocabulary().Index(word); \
@@ -36,8 +37,8 @@ namespace {
     BOOST_CHECK_EQUAL(out, get_state); \
   }
 
-#define AppendTest(word, ngram, score) \
-  StartTest(word, ngram, score) \
+#define AppendTest(word, ngram, score, no_left) \
+  StartTest(word, ngram, score, no_left) \
   state = out;
 
 template <class M> void Starters(const M &model) {
@@ -45,12 +46,12 @@ template <class M> void Starters(const M &model) {
   Model::State state(model.BeginSentenceState());
   Model::State out;
 
-  StartTest("looking", 2, -0.4846522);
+  StartTest("looking", 2, -0.4846522, true);
 
   // , probability plus <s> backoff
-  StartTest(",", 1, -1.383514 + -0.4149733);
+  StartTest(",", 1, -1.383514 + -0.4149733, true);
   // <unk> probability plus <s> backoff
-  StartTest("this_is_not_found", 1, -1.995635 + -0.4149733);
+  StartTest("this_is_not_found", 1, -1.995635 + -0.4149733, true);
 }
 
 template <class M> void Continuation(const M &model) {
@@ -58,23 +59,23 @@ template <class M> void Continuation(const M &model) {
   Model::State state(model.BeginSentenceState());
   Model::State out;
 
-  AppendTest("looking", 2, -0.484652);
-  AppendTest("on", 3, -0.348837);
-  AppendTest("a", 4, -0.0155266);
-  AppendTest("little", 5, -0.00306122);
+  AppendTest("looking", 2, -0.484652, true);
+  AppendTest("on", 3, -0.348837, true);
+  AppendTest("a", 4, -0.0155266, true);
+  AppendTest("little", 5, -0.00306122, true);
   State preserve = state;
-  AppendTest("the", 1, -4.04005);
-  AppendTest("biarritz", 1, -1.9889);
-  AppendTest("not_found", 1, -2.29666);
-  AppendTest("more", 1, -1.20632 - 20.0);
-  AppendTest(".", 2, -0.51363);
-  AppendTest("</s>", 3, -0.0191651);
+  AppendTest("the", 1, -4.04005, true);
+  AppendTest("biarritz", 1, -1.9889, true);
+  AppendTest("not_found", 1, -2.29666, true);
+  AppendTest("more", 1, -1.20632 - 20.0, true);
+  AppendTest(".", 2, -0.51363, true);
+  AppendTest("</s>", 3, -0.0191651, true);
   BOOST_CHECK_EQUAL(0, state.valid_length_);
 
   state = preserve;
-  AppendTest("more", 5, -0.00181395);
+  AppendTest("more", 5, -0.00181395, true);
   BOOST_CHECK_EQUAL(4, state.valid_length_);
-  AppendTest("loin", 5, -0.0432557);
+  AppendTest("loin", 5, -0.0432557, true);
   BOOST_CHECK_EQUAL(1, state.valid_length_);
 }
 
@@ -82,22 +83,37 @@ template <class M> void Blanks(const M &model) {
   FullScoreReturn ret;
   State state(model.NullContextState());
   State out;
-  AppendTest("also", 1, -1.687872);
-  AppendTest("would", 2, -2);
-  AppendTest("consider", 3, -3);
+  AppendTest("also", 1, -1.687872, false);
+  AppendTest("would", 2, -2, true);
+  AppendTest("consider", 3, -3, true);
   State preserve = state;
-  AppendTest("higher", 4, -4);
-  AppendTest("looking", 5, -5);
+  AppendTest("higher", 4, -4, true);
+  AppendTest("looking", 5, -5, true);
   BOOST_CHECK_EQUAL(1, state.valid_length_);
 
   state = preserve;
-  AppendTest("not_found", 1, -1.995635 - 7.0 - 0.30103);
+  // also would consider not_found
+  AppendTest("not_found", 1, -1.995635 - 7.0 - 0.30103, true);
 
   state = model.NullContextState();
   // higher looking is a blank.  
-  AppendTest("higher", 1, -1.509559);
-  AppendTest("looking", 1, -1.285941 - 0.30103);
-  AppendTest("not_found", 1, -1.995635 - 0.4771212);
+  AppendTest("higher", 1, -1.509559, false);
+  AppendTest("looking", 1, -1.285941 - 0.30103, false);
+
+  State higher_looking = state;
+
+  BOOST_CHECK_EQUAL(1, state.valid_length_);
+  AppendTest("not_found", 1, -1.995635 - 0.4771212, true);
+
+  state = higher_looking;
+  // higher looking consider
+  AppendTest("consider", 1, -1.687872 - 0.4771212, true);
+
+  state = model.NullContextState();
+  AppendTest("would", 1, -1.687872, false);
+  AppendTest("consider", 1, -1.687872 -0.30103, false);
+  AppendTest("higher", 1, -1.509559 - 0.30103, false);
+  AppendTest("looking", 1, -1.285941 - 0.30103, false);
 }
 
 template <class M> void Unknowns(const M &model) {
@@ -105,14 +121,14 @@ template <class M> void Unknowns(const M &model) {
   State state(model.NullContextState());
   State out;
 
-  AppendTest("not_found", 1, -1.995635);
+  AppendTest("not_found", 1, -1.995635, false);
   State preserve = state;
-  AppendTest("not_found2", 2, -15.0);
-  AppendTest("not_found3", 2, -15.0 - 2.0);
+  AppendTest("not_found2", 2, -15.0, true);
+  AppendTest("not_found3", 2, -15.0 - 2.0, true);
   
   state = preserve;
-  AppendTest("however", 2, -4);
-  AppendTest("not_found3", 3, -6);
+  AppendTest("however", 2, -4, true);
+  AppendTest("not_found3", 3, -6, true);
 }
 
 template <class M> void MinimalState(const M &model) {
@@ -120,22 +136,22 @@ template <class M> void MinimalState(const M &model) {
   State state(model.NullContextState());
   State out;
 
-  AppendTest("baz", 1, -6.535897);
+  AppendTest("baz", 1, -6.535897, true);
   BOOST_CHECK_EQUAL(0, state.valid_length_);
   state = model.NullContextState();
-  AppendTest("foo", 1, -3.141592);
+  AppendTest("foo", 1, -3.141592, true);
   BOOST_CHECK_EQUAL(1, state.valid_length_);
-  AppendTest("bar", 2, -6.0);
+  AppendTest("bar", 2, -6.0, true);
   // Has to include the backoff weight.  
   BOOST_CHECK_EQUAL(1, state.valid_length_);
-  AppendTest("bar", 1, -2.718281 + 3.0);
+  AppendTest("bar", 1, -2.718281 + 3.0, true);
   BOOST_CHECK_EQUAL(1, state.valid_length_);
 
   state = model.NullContextState();
-  AppendTest("to", 1, -1.687872);
-  AppendTest("look", 2, -0.2922095);
+  AppendTest("to", 1, -1.687872, false);
+  AppendTest("look", 2, -0.2922095, true);
   BOOST_CHECK_EQUAL(2, state.valid_length_);
-  AppendTest("good", 3, -7);
+  AppendTest("good", 3, -7, true);
 }
 
 #define StatelessTest(word, provide, ngram, score) \
@@ -166,17 +182,17 @@ template <class M> void Stateless(const M &model) {
   // looking
   StatelessTest(1, 2, 2, -0.484652);
   // on
-  AppendTest("on", 3, -0.348837);
+  AppendTest("on", 3, -0.348837, true);
   StatelessTest(2, 3, 3, -0.348837);
   StatelessTest(2, 2, 3, -0.348837);
   StatelessTest(2, 1, 2, -0.4638903);
   // a
   StatelessTest(3, 4, 4, -0.0155266);
   // little
-  AppendTest("little", 5, -0.00306122);
+  AppendTest("little", 5, -0.00306122, true);
   StatelessTest(4, 5, 5, -0.00306122);
   // the
-  AppendTest("the", 1, -4.04005);
+  AppendTest("the", 1, -4.04005, true);
   StatelessTest(5, 5, 1, -4.04005);
   // No context of the.  
   StatelessTest(5, 0, 1, -1.687872);
@@ -315,7 +331,7 @@ template <class ModelT> void BinaryTest() {
     enumerate.Check(binary.GetVocabulary());
     NoUnkCheck(binary);
   }
-  unlink("test.binary");
+  unlink("test_nounk.binary");
 }
 
 BOOST_AUTO_TEST_CASE(write_and_read_probing) {

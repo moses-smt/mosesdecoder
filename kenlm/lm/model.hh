@@ -14,7 +14,6 @@
 
 #include <algorithm>
 #include <vector>
-#include <fstream>
 
 #include <string.h>
 
@@ -143,7 +142,6 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
     typedef typename Search::Middle Middle;
 
     Search search_;
-
 };
 
 } // namespace detail

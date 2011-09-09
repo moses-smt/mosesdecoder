@@ -11,12 +11,9 @@
 #include <functional>
 #include <numeric>
 #include <cmath>
-#include <fstream>
 
 namespace lm {
 namespace ngram {
-
-std::ofstream Logger;
 
 size_t hash_value(const State &state) {
   return util::MurmurHashNative(state.history_, sizeof(WordIndex) * state.valid_length_);
@@ -31,9 +28,6 @@ template <class Search, class VocabularyT> size_t GenericModel<Search, Vocabular
 }
 
 template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::SetupMemory(void *base, const std::vector<uint64_t> &counts, const Config &config) {
-  
-  Logger.open("lm.log");
-  
   uint8_t *start = static_cast<uint8_t*>(base);
   size_t allocated = VocabularyT::Size(counts[0], config);
   vocab_.SetupMemory(start, allocated, counts[0], config);
@@ -140,9 +134,10 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
     out_state.valid_length_ = 0;
     return;
   }
+  bool ignored_extend;
   float ignored_prob;
   typename Search::Node node;
-  search_.LookupUnigram(*context_rbegin, ignored_prob, out_state.backoff_[0], node);
+  search_.LookupUnigram(*context_rbegin, ignored_prob, out_state.backoff_[0], node, ignored_extend);
   out_state.valid_length_ = HasExtension(out_state.backoff_[0]) ? 1 : 0;
   float *backoff_out = out_state.backoff_ + 1;
   const typename Search::Middle *mid = search_.MiddleBegin();
@@ -177,24 +172,21 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
     const WordIndex *context_rend,
     const WordIndex new_word,
     State &out_state) const {
-  for (const WordIndex *i = context_rend - 1; i >= context_rbegin; --i) Logger << *i << ' ';
-  Logger << new_word;
-  Logger << ' ';
   FullScoreReturn ret;
   // ret.ngram_length contains the last known non-blank ngram length.  
   ret.ngram_length = 1;
 
-  typename Search::Node node;
   float *backoff_out(out_state.backoff_);
-  search_.LookupUnigram(new_word, ret.prob, *backoff_out, node);
-  // This is the length of the context that should be used for continuation.  
+  typename Search::Node node;
+  search_.LookupUnigram(new_word, ret.prob, *backoff_out, node, ret.independent_left);
+  // This is the length of the context that should be used for continuation to the right.  
   out_state.valid_length_ = HasExtension(*backoff_out) ? 1 : 0;
   // We'll write the word anyway since it will probably be used and does no harm being there.  
   out_state.history_[0] = new_word;
-  if (context_rbegin == context_rend) { Logger << (int)out_state.valid_length_ << ' ' << (int)ret.ngram_length << ' ' << ret.prob << '\n'; return ret; }
+  if (context_rbegin == context_rend) return ret;
   ++backoff_out;
 
-  // Ok now we now that the bigram contains known words.  Start by looking it up.
+  // Ok start by looking up the bigram.
   const WordIndex *hist_iter = context_rbegin;
   const typename Search::Middle *mid_iter = search_.MiddleBegin();
   for (; ; ++mid_iter, ++hist_iter, ++backoff_out) {
@@ -202,17 +194,18 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
       // Ran out of history.  Typically no backoff, but this could be a blank.  
       CopyRemainingHistory(context_rbegin, out_state);
       // ret.prob was already set.
-      Logger << (int)out_state.valid_length_ << ' ' << (int) ret.ngram_length << ' ' << ret.prob << '\n'; return ret;
+      return ret;
     }
 
     if (mid_iter == search_.MiddleEnd()) break;
 
     float revert = ret.prob;
-    if (!search_.LookupMiddle(*mid_iter, *hist_iter, ret.prob, *backoff_out, node)) {
+    if (ret.independent_left || !search_.LookupMiddle(*mid_iter, *hist_iter, ret.prob, *backoff_out, node, ret.independent_left)) {
       // Didn't find an ngram using hist_iter.  
       CopyRemainingHistory(context_rbegin, out_state);
-      // ret.prob was already set.  
-      Logger << (int)out_state.valid_length_ << ' ' << (int) ret.ngram_length << ' ' << ret.prob << '\n'; return ret;
+      // ret.prob was already set.
+      ret.independent_left = true;
+      return ret;
     }
     if (ret.prob == kBlankProb) {
       // It's a blank.  Go back to the old probability.  
@@ -227,17 +220,20 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
 
   // It passed every lookup in search_.middle.  All that's left is to check search_.longest.  
   
-  if (!search_.LookupLongest(*hist_iter, ret.prob, node)) {
+  if (ret.independent_left || !search_.LookupLongest(*hist_iter, ret.prob, node)) {
     // Failed to find a longest n-gram.  Fall back to the most recent non-blank.  
     CopyRemainingHistory(context_rbegin, out_state);
+    ret.independent_left = true;
     // ret.prob was already set.  
-    Logger << (int)out_state.valid_length_ << ' ' << (int) ret.ngram_length << ' ' << ret.prob << '\n'; return ret;
+    return ret;
   }
+
   // It's an P::Order()-gram.  
+  ret.independent_left = true;
   CopyRemainingHistory(context_rbegin, out_state);
   // There is no blank in longest_.
   ret.ngram_length = P::Order();
-  Logger << (int)out_state.valid_length_ << ' ' << (int) ret.ngram_length << ' ' << ret.prob << '\n'; return ret;
+  return ret;
 }
 
 template class GenericModel<ProbingHashedSearch, ProbingVocabulary>;  // HASH_PROBING

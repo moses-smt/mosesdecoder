@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <stdlib.h>
 
 namespace util {
 
@@ -34,6 +35,34 @@ template <class T, class R, R (*Free)(T*)> class scoped_thing {
     scoped_thing &operator=(const scoped_thing &);
 };
 
+template <class T> class scoped_malloc {
+  public:
+    scoped_malloc() : p_(NULL) {}
+
+    scoped_malloc(T *p) : p_(p) {}
+
+    ~scoped_malloc() { free(p_); }
+
+    void reset(T *p) {
+      scoped_malloc other(p_);
+      p_ = p;
+    }
+
+    T &operator*() { return *p_; }
+    const T &operator*() const { return *p_; }
+    T &operator->() { return *p_; }
+    const T&operator->() const { return *p_; }
+
+    T *get() { return p_; }
+    const T *get() const { return p_; }
+
+  private:
+    T *p_;
+
+    scoped_malloc(const scoped_malloc &);
+    scoped_malloc &operator=(const scoped_malloc &);
+};
+
 class scoped_fd {
   public:
     scoped_fd() : fd_(-1) {}
@@ -56,6 +85,8 @@ class scoped_fd {
       fd_ = -1;
       return ret;
     }
+
+    operator bool() { return fd_ != -1; }
 
   private:
     int fd_;
