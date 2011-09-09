@@ -30,7 +30,7 @@ float min_interval = 1e-3;
 
 using namespace std;
 
-void usage(void)
+void usage(int ret)
 {
   cerr<<"usage: mert -d <dimensions> (mandatory )"<<endl;
   cerr<<"[-n] retry ntimes (default 1)"<<endl;
@@ -45,13 +45,13 @@ void usage(void)
   cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
   cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
 #ifdef WITH_THREADS
-  cerr<<"[--threads|-T] use multiple threads for random restart (default 1)"<<endl;
+  cerr<<"[--threads|-T] use multiple threads (default 1)"<<endl;
 #endif
-  cerr<<"[--shard] Split data into shards for restarts"<<endl;
+  cerr<<"[--shard-count] Split data into shards, optimize for each shard and average"<<endl;
   cerr<<"[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards"<<endl;
   cerr<<"[-v] verbose level"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
-  exit(1);
+  exit(ret);
 }
 
 static struct option long_options[] = {
@@ -70,7 +70,7 @@ static struct option long_options[] = {
 #ifdef WITH_THREADS
   {"threads", required_argument,0,'T'},
 #endif
-  {"shard", 0, 0, 'a'},
+  {"shard-count", required_argument, 0, 'a'},
   {"shard-size", required_argument, 0, 'b'},
   {"verbose",1,0,'v'},
   {"help",no_argument,0,'h'},
@@ -130,7 +130,7 @@ int main (int argc, char **argv)
   size_t threads=1;
 #endif
   float shard_size = 0;
-  bool shard = false;
+  size_t shard_count = 0;
   string type("powell");
   string scorertype("BLEU");
   string scorerconfig("");
@@ -195,21 +195,28 @@ int main (int argc, char **argv)
       break;
 #endif
     case 'a':
-      shard = true;
+      shard_count = strtof(optarg,NULL);
       break;
     case 'b':
       shard_size = strtof(optarg,NULL);
       break;
+    case 'h':
+      usage(0);
+      break;
     default:
-      usage();
+      usage(1);
     }
   }
   if (pdim < 0)
-    usage();
+    usage(1);
 
-  cerr << "shard_size = " << shard_size << " shard = " << shard << endl;
+  cerr << "shard_size = " << shard_size << " shard_count = " << shard_count << endl;
+  if (shard_size && !shard_count) {
+    cerr << "Error: shard-size provided without shard-count" << endl;
+    exit(1);
+  }
   if (shard_size > 1 || shard_size < 0) {
-    cerr << "Error: shard_size should be between 0 and 1" << endl;
+    cerr << "Error: shard-size should be between 0 and 1" << endl;
     exit(1);
   }
 
@@ -345,89 +352,100 @@ int main (int argc, char **argv)
   Moses::ThreadPool pool(threads);
 #endif
 
-  //optional sharding
-  vector<Optimizer*> optimizers(ntry + start_list.size());
-  if (shard) {
-    vector<Data> shards;
-    D.createShards(optimizers.size(), shard_size, scorerconfig, shards);
-    for (size_t i = 0; i < optimizers.size(); ++i) {
-      Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
-      O->SetScorer(shards[i].getScorer());
-      O->SetFData(shards[i].getFeatureData());
-      optimizers[i] = O;
-    }
-  } else {
-    Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
-    O->SetScorer(TheScorer);
-    O->SetFData(D.getFeatureData());
-    //same  data for all restarts
-    for (size_t i = 0; i < optimizers.size(); ++i) {
-      optimizers[i] = O;
-    }
+  Point::setpdim(pdim);
+  Point::setdim(tooptimize.size());
+
+  //starting points consist of specified points and random restarts
+  vector<Point> startingPoints;
+
+  for (size_t i = 0; i < start_list.size(); ++i) {
+    startingPoints.push_back(Point(start_list[i],min,max));
   }
-
-  vector<OptimizationTask*> tasks;
-  size_t optIndex = 0;
-
-  // run with specified starting points
-  for(size_t i=0;i<start_list.size();i++) {
-    //Generate from the full feature set. Warning: must be done after Optimizer initialization
-    Point P(start_list[i], min, max);
-    OptimizationTask* task = new OptimizationTask(optimizers[optIndex++],P);
-    tasks.push_back(task);
-#ifdef WITH_THREADS
-    pool.Submit(task);
-#else
-    task->Run();
-#endif
-  }
-
-
-  //run with random starting points
   for (int i = 0; i < ntry; ++i) {
-    Point P(start_list[0], min, max);
-    P.Randomize(); // randomize within min and max as given to the constructor
-    OptimizationTask* task = new OptimizationTask(optimizers[optIndex++],P);
-    tasks.push_back(task);
-#ifdef WITH_THREADS
-    pool.Submit(task);
-#else
-    task->Run();
-#endif
+    startingPoints.push_back(Point(start_list[0],min,max));
+    startingPoints.back().Randomize();
   }
+
+
+  vector<vector<OptimizationTask*> > allTasks(1);
+
+  //optional sharding
+  vector<Data> shards;
+  if (shard_count) {
+    D.createShards(shard_count, shard_size, scorerconfig, shards);
+    allTasks.resize(shard_count);
+  }
+
+  //launch tasks
+  for (size_t i = 0 ; i < allTasks.size(); ++i) {
+    Data& data = D;
+    if (shard_count) data = shards[i]; //use the sharded data if it exists
+    vector<OptimizationTask*>& tasks = allTasks[i];
+    Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
+    O->SetScorer(data.getScorer());
+    O->SetFData(data.getFeatureData());
+    //A task for each start point
+    for (size_t j = 0; j < startingPoints.size(); ++j) {
+      OptimizationTask* task = new OptimizationTask(O,startingPoints[j]);
+      tasks.push_back(task);
+#ifdef WITH_THREADS
+      pool.Submit(task);
+#else
+      task->Run();
+#endif
+    }
+  }
+
     
   //wait for all threads to finish
 #ifdef WITH_THREADS
   pool.Stop(true);
 #endif
 
+  statscore_t total = 0;
+  Point totalP;
+
   //collect results
-  statscore_t best=0, mean=0, var=0;
-  Point bestP;
-  for (vector<OptimizationTask*>::const_iterator i = tasks.begin(); i != tasks.end(); ++i) {
-    statscore_t score = (*i)->getScore();
-    mean += score;
-    var += score*score;
-    if (score > best) {
-      bestP = (*i)->getPoint();
-      best = score;
+  for (size_t i = 0; i < allTasks.size(); ++i) {
+    statscore_t best=0, mean=0, var=0;
+    Point bestP;
+    for (size_t j = 0; j < allTasks[i].size(); ++j) {
+      statscore_t score = allTasks[i][j]->getScore();
+      mean += score;
+      var += score*score;
+      if (score > best) {
+        bestP = allTasks[i][j]->getPoint();
+        best = score;
+      }
+      delete allTasks[i][j];
     }
-    delete *i;
+
+    mean/=(float)ntry;
+    var/=(float)ntry;
+    var=sqrt(abs(var-mean*mean));
+    if (verboselevel()>1)
+      cerr<<"shard " << i << " best score: "<< best << " variance of the score (for "<<ntry<<" try): "<<var<<endl;
+
+    totalP += bestP;
+    total += best;
+    if (verboselevel()>1)
+      cerr << "bestP " << bestP << endl;
   }
 
-  mean/=(float)ntry;
-  var/=(float)ntry;
-  var=sqrt(abs(var-mean*mean));
+  //cerr << "totalP: " << totalP << endl;
+  Point finalP = totalP * (1.0 / allTasks.size());
+  statscore_t final = total / allTasks.size();
+
   if (verboselevel()>1)
-    cerr<<"best score: "<< best << " variance of the score (for "<<ntry<<" try): "<<var<<endl;
+    cerr << "bestP: " << finalP << endl;
 
   // L1-Normalization of the best Point
   if ((int)tooptimize.size() == pdim)
-    bestP.NormalizeL1();
+    finalP.NormalizeL1();
 
-  cerr << "Best point: " << bestP << " => " << best << endl;
+  cerr << "Best point: " << finalP << " => " << final << endl;
   ofstream res("weights.txt");
-  res<<bestP<<endl;
+  res<<finalP<<endl;
 
   PrintUserTime("Stopping...");
 }

@@ -100,6 +100,15 @@ Point Point::operator+(const Point& p2)const
   return Res;
 };
 
+void Point::operator+=(const Point& p2)
+{
+  assert(p2.size()==size());
+  for(unsigned i=0; i<size(); i++)
+    operator[](i)+=p2[i];
+  score=numeric_limits<statscore_t>::max();
+};
+
+
 Point Point::operator*(float l)const
 {
   Point Res(*this);

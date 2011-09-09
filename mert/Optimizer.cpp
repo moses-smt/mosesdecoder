@@ -32,8 +32,6 @@ Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start,
 {
   //warning: the init vector is a full set of parameters, of dimension pdim!
 
-  Point::pdim=Pd;
-
   assert(start.size()==Pd);
   Point::dim=i2O.size();
   Point::optindices=i2O;

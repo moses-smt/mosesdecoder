@@ -293,8 +293,8 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     shards.back().number_of_scores = number_of_scores;
     shards.back()._sparse_flag = _sparse_flag;
     for (size_t i = 0; i < shard_contents.size(); ++i) {
-      shards.back().featdata->add(featdata->get(i));
-      shards.back().scoredata->add(scoredata->get(i));
+      shards.back().featdata->add(featdata->get(shard_contents[i]));
+      shards.back().scoredata->add(scoredata->get(shard_contents[i]));
     }
     //cerr << endl;
     
