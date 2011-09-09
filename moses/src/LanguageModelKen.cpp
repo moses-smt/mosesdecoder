@@ -190,7 +190,7 @@ FFState *LanguageModelKen<Model>::EvaluateChart(
     }
   }
 
-  accumulator->Assign(feature, TransformLMScore(ruleScore.Finish()));
+  accumulator->Assign(feature, ruleScore.Finish());
   return newState;
 }
 
