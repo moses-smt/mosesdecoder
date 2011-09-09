@@ -162,12 +162,16 @@ FFState *LanguageModelKen<Model>::EvaluateChart(
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-  hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
-  for (size_t phrasePos = 0;
-       phrasePos < hypo.GetCurrTargetPhrase().GetSize();
-       phrasePos++)
+  const size_t size = hypo.GetCurrTargetPhrase().GetSize();
+  size_t phrasePos = 0;
+  if (size && (hypo.GetCurrTargetPhrase().GetWord(phrasePos) == GetSentenceStartArray())) {
+    ruleScore.BeginSentence();
+    phrasePos++;
+  }
+
+  for (; phrasePos < size; phrasePos++)
   {
 
     // consult rule for either word or non-terminal

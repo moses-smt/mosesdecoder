@@ -28,7 +28,7 @@ struct Left {
 
 struct ChartState {
   bool operator==(const ChartState &other) {
-    return (left == other.left) && (right == other.right) && (small == other.small);
+    return (left == other.left) && (right == other.right) && (charge_backoff == other.charge_backoff);
   }
 
   int Compare(const ChartState &other) const {
@@ -36,37 +36,43 @@ struct ChartState {
     if (lres) return lres;
     int rres = right.Compare(other.right);
     if (rres) return rres;
-    return (int)small - (int)other.small;
+    return (int)charge_backoff - (int)other.charge_backoff;
   }
 
   Left left;
   State right;
+  bool charge_backoff;
   float left_est;
-  bool small;
 };
 
 template <class M> class RuleScore {
   public:
-    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_write_(out.left.words), left_end_(left_write_ + model.Order() - 1), prob_(0.0) {
+    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_done_(false), left_write_(out.left.words), prob_(0.0) {
       out.left.valid_length = 0;
       out.right.valid_length_ = 0;
+      out.charge_backoff = false;
       out.left_est = 0.0;
     }
 
+    void BeginSentence() {
+      out_.right = model_.BeginSentenceState();
+      // out_.left is empty.
+      left_done_ = true;
+    }
+
     void Terminal(WordIndex word) {
-      float prob;
-      if (word == model_.GetVocabulary().BeginSentence()) {
-        out_.right = model_.BeginSentenceState();
-        prob = 0.0;
-      } else {
-        State copy(out_.right);
-        prob = model_.Score(copy, word, out_.right);
-        prob_ += prob;
+      State copy(out_.right);
+      FullScoreReturn ret(model_.FullScore(copy, word, out_.right));
+      prob_ += ret.prob;
+      if (left_done_) return;
+
+      if (/*ret.independent_left*/ left_write_ == out_.left.words + model_.Order() - 1) {
+        out_.charge_backoff = true;
+        left_done_ = true;
+        return;
       }
-      if (left_write_ < left_end_) {
-        *(left_write_++) = word;
-        out_.left_est += prob;
-      }
+      *(left_write_++) = word;
+      out_.left_est += ret.prob;
     }
 
     void NonTerminal(const ChartState &in, float prob) {
@@ -74,11 +80,24 @@ template <class M> class RuleScore {
       for (const WordIndex *i = in.left.words; i != in.left.words + in.left.valid_length; ++i) {
         Terminal(*i);
       }
-      if (!in.small) out_.right = in.right;
+      if (in.charge_backoff) {
+        // The last word of the left state was eliminated for recombination purposes.  
+        // Charge backoff for n-grams that start before left state.  
+        float charges = 0.0;
+        for (const float *i = out_.right.backoff_ + in.left.valid_length; i < out_.right.backoff_ + out_.right.valid_length_; ++i)
+          charges += *i;
+        prob_ += charges;
+        if (!left_done_) {
+          out_.charge_backoff = true;
+          out_.left_est += charges;
+        }
+        out_.right = in.right;
+      } else {
+        if (in.left.valid_length == model_.Order() - 1) out_.right = in.right;
+      }
     }
 
     float Finish() {
-      out_.small = (left_write_ < left_end_);
       out_.left.valid_length = left_write_ - out_.left.words;
       return prob_;
     }
@@ -88,8 +107,9 @@ template <class M> class RuleScore {
 
     ChartState &out_;
 
+    bool left_done_;
+
     WordIndex *left_write_;
-    WordIndex *const left_end_;
 
     float prob_;
 };
