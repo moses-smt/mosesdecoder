@@ -55,14 +55,15 @@ template <class M> class RuleScore {
     }
 
     void Terminal(WordIndex word) {
+      float prob;
       if (word == model_.GetVocabulary().BeginSentence()) {
         out_.right = model_.BeginSentenceState();
-        left_write_ = left_end_;
-        return;
+        prob = 0.0;
+      } else {
+        State copy(out_.right);
+        prob = model_.Score(copy, word, out_.right);
+        prob_ += prob;
       }
-      State copy(out_.right);
-      float prob = model_.Score(copy, word, out_.right);
-      prob_ += prob;
       if (left_write_ < left_end_) {
         *(left_write_++) = word;
         out_.left_est += prob;
@@ -79,6 +80,7 @@ template <class M> class RuleScore {
 
     float Finish() {
       out_.small = (left_write_ < left_end_);
+      out_.left.valid_length = left_end_ - left_write_;
       return prob_;
     }
 
