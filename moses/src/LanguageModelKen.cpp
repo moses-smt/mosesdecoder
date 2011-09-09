@@ -51,28 +51,28 @@ namespace
   private:
     lm::ngram::ChartState m_state;
     const ChartHypothesis *m_hypo;
-    
+
   public:
     explicit LanguageModelChartStateKenLM(const ChartHypothesis &hypo)
-		:m_hypo(&hypo) 
+		:m_hypo(&hypo)
     {}
-    
+
     const ChartHypothesis* GetHypothesis() const { return m_hypo; }
 
-    const lm::ngram::ChartState &GetChartState() const 
+    const lm::ngram::ChartState &GetChartState() const
     { return m_state; }
-    lm::ngram::ChartState &GetChartState() 
+    lm::ngram::ChartState &GetChartState()
     { return m_state; }
 
-    int Compare(const FFState& o) const 
+    int Compare(const FFState& o) const
     {
       const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
       int ret = m_state.Compare(other.m_state);
       return ret;
     }
-    
+
   };
-  
+
 
 class MappingBuilder : public lm::ngram::EnumerateVocab
 {
@@ -148,13 +148,11 @@ public:
 
   void CleanUpAfterSentenceProcessing() {}
   void InitializeBeforeSentenceProcessing() {}
-  
-  FFState* EvaluateChart(
-                                 const ChartHypothesis& cur_hypo,
-                                 int featureID,
-                                 ScoreComponentCollection* accumulator,
-                                 const LanguageModel *feature) const;	
 
+  FFState *EvaluateChart(const ChartHypothesis& cur_hypo,
+                         int featureID,
+                         ScoreComponentCollection *accumulator,
+                         const LanguageModel *feature) const;
 };
 
 template <class Model>
@@ -164,16 +162,16 @@ FFState* LanguageModelKen<Model>::EvaluateChart(
                        ScoreComponentCollection* accumulator,
                        const LanguageModel *feature) const
 {
-  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);  
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
   hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
-  for (size_t phrasePos = 0; 
-			 phrasePos < hypo.GetCurrTargetPhrase().GetSize(); 
-			 phrasePos++) 
+  for (size_t phrasePos = 0;
+       phrasePos < hypo.GetCurrTargetPhrase().GetSize();
+       phrasePos++)
   {
-    
+
     // consult rule for either word or non-terminal
     const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
     std::size_t factor = word.GetFactor(GetFactorType())->GetId();
@@ -192,10 +190,10 @@ FFState* LanguageModelKen<Model>::EvaluateChart(
       float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0];
 
       ruleScore.NonTerminal(prevState.GetChartState(), score);
-      
+
     }
   }
-  
+
   accumulator->Assign(feature, ruleScore.Finish() );
   return newState;
 }

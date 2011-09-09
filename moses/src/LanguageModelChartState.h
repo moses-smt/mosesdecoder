@@ -28,33 +28,33 @@ namespace Moses
 
 class ChartHypothesis;
 class Phrase;
-  
+
 //! Abstract class for lexical reordering model states
 class LanguageModelChartState : public FFState
 {
 private:
-	float m_prefixScore;
-	FFState* m_lmRightContext;
-	const ChartHypothesis *m_hypo;
+  float m_prefixScore;
+  FFState* m_lmRightContext;
+  const ChartHypothesis *m_hypo;
 
 public:
-	LanguageModelChartState(float prefixScore, 
-													FFState *lmRightContext,
-													const ChartHypothesis &hypo)
-		:m_prefixScore(prefixScore)
-		,m_lmRightContext(lmRightContext)
-		,m_hypo(&hypo) 
-	{}
-	~LanguageModelChartState() {
+  LanguageModelChartState(float prefixScore,
+                          FFState *lmRightContext,
+                          const ChartHypothesis &hypo)
+      :m_prefixScore(prefixScore)
+      ,m_lmRightContext(lmRightContext)
+      ,m_hypo(&hypo)
+  {}
+
+  ~LanguageModelChartState() {
     delete m_lmRightContext;
   }
 
-	float GetPrefixScore() const { return m_prefixScore; }
-	FFState* GetRightContext() const { return m_lmRightContext; }
-	const ChartHypothesis* GetHypothesis() const { return m_hypo; }
+  float GetPrefixScore() const { return m_prefixScore; }
+  FFState* GetRightContext() const { return m_lmRightContext; }
+  const ChartHypothesis* GetHypothesis() const { return m_hypo; }
 
-  int Compare(const FFState& o) const ;
-
+  int Compare(const FFState& o) const;
 };
 
 }
