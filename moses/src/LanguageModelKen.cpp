@@ -166,31 +166,32 @@ FFState *LanguageModelKen<Model>::EvaluateChart(
 
   const size_t size = hypo.GetCurrTargetPhrase().GetSize();
   size_t phrasePos = 0;
-  if (size && (hypo.GetCurrTargetPhrase().GetWord(phrasePos) == GetSentenceStartArray())) {
-    ruleScore.BeginSentence();
-    phrasePos++;
+  // Special cases for first word.  
+  if (size) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(0);
+    if (word == GetSentenceStartArray()) {
+      // Begin of sentence
+      ruleScore.BeginSentence();
+      phrasePos++;
+    } else if (word.IsNonTerminal()) {
+      // Non-terminal is first so we can copy instead of rescoring.  
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
+      phrasePos++;
+    }
   }
 
-  for (; phrasePos < size; phrasePos++)
-  {
-
-    // consult rule for either word or non-terminal
+  for (; phrasePos < size; phrasePos++) {
     const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
-    std::size_t factor = word.GetFactor(GetFactorType())->GetId();
-
-    if (!word.IsNonTerminal())
-    {
+    if (word.IsNonTerminal()) {
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
+    } else {
+      std::size_t factor = word.GetFactor(GetFactorType())->GetId();
       lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
       ruleScore.Terminal(new_word);
-    }
-    else
-    {
-      size_t nonTermIndex = nonTermIndexMap[phrasePos];
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
-      const LanguageModelChartStateKenLM &prevState = *static_cast<const LanguageModelChartStateKenLM*>( prevHypo->GetFFState(featureID)) ;
-
-      float score = prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0];
-      ruleScore.NonTerminal(prevState.GetChartState(), score);
     }
   }
 

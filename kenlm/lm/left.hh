@@ -66,13 +66,21 @@ template <class M> class RuleScore {
       prob_ += ret.prob;
       if (left_done_) return;
 
-      if (ret.independent_left /* left_write_ == out_.left.words + model_.Order() - 1*/) {
+      if (ret.independent_left) {
         out_.charge_backoff = true;
         left_done_ = true;
         return;
       }
       *(left_write_++) = word;
       out_.left_est += ret.prob;
+    }
+
+    // Faster version of NonTerminal for the case where the rule begins with a non-terminal.  
+    void BeginNonTerminal(const ChartState &in, float prob) {
+      prob_ = prob;
+      out_ = in;
+      left_done_ = in.charge_backoff;
+      left_write_ = out_.left.words + out_.left.valid_length;
     }
 
     void NonTerminal(const ChartState &in, float prob) {
@@ -83,10 +91,8 @@ template <class M> class RuleScore {
       if (in.charge_backoff) {
         // The last word of the left state was eliminated for recombination purposes.  
         // Charge backoff for n-grams that start before left state.  
-        float charges = 0.0;
         for (const float *i = out_.right.backoff_ + in.left.valid_length; i < out_.right.backoff_ + out_.right.valid_length_; ++i)
-          charges += *i;
-        prob_ += charges;
+          prob_ += *i;
         if (!left_done_) {
           out_.charge_backoff = true;
           left_done_ = true;
