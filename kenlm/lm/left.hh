@@ -66,7 +66,7 @@ template <class M> class RuleScore {
       prob_ += ret.prob;
       if (left_done_) return;
 
-      if (/*ret.independent_left*/ left_write_ == out_.left.words + model_.Order() - 1) {
+      if (ret.independent_left /* left_write_ == out_.left.words + model_.Order() - 1*/) {
         out_.charge_backoff = true;
         left_done_ = true;
         return;
@@ -89,7 +89,7 @@ template <class M> class RuleScore {
         prob_ += charges;
         if (!left_done_) {
           out_.charge_backoff = true;
-          out_.left_est += charges;
+          left_done_ = true;
         }
         out_.right = in.right;
       } else {
