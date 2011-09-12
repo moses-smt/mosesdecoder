@@ -302,7 +302,7 @@ bool Parameter::Validate()
     }
   }
 
-  if (m_setting["lmodel-file"].size() * (m_setting["lmodel-oov-feature"].size() ? 2 : 1)
+  if (m_setting["lmodel-file"].size() * (m_setting.find("lmodel-oov-feature") != m_setting.end() ? 2 : 1)
          != m_setting["weight-l"].size()) {
     stringstream errorMsg("");
     errorMsg << "Config and parameters specify "
