@@ -435,6 +435,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -443,6 +444,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -450,13 +452,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -465,6 +470,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -473,6 +479,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = statistics;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -480,13 +487,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = statistics;
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -495,6 +505,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -505,6 +516,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = score;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -512,6 +524,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -521,6 +534,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = score;
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -529,6 +543,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -537,6 +552,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -544,13 +560,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -559,6 +578,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -568,6 +588,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "consolidate-direct";
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -575,14 +596,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "consolidate-direct";
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -591,6 +615,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -603,6 +628,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = extract;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -610,11 +636,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = extract;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};
