@@ -33,11 +33,10 @@
 		1C6A83051111F5A300059E7F /* AlignmentPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6A83031111F5A300059E7F /* AlignmentPhrase.cpp */; };
 		1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE2C0FC6EA0200924FEA /* extract.cpp */; };
 		1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
-		1CFE962511762A20006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
-		1CFE962611762A20006FF13B /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962411762A20006FF13B /* consolidate.cpp */; };
 		1CFE962711762A2A006FF13B /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962411762A20006FF13B /* consolidate.cpp */; };
 		1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
-		1E3EF2A013DBEAF300C1D54A /* extract-lex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3EF29E13DBEAF300C1D54A /* extract-lex.cpp */; };
+		1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */; };
 		1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1EB8A261129C04C700041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
@@ -191,8 +190,8 @@
 				1C05BA1F1174CEE8003585B2 /* XmlTree.cpp */,
 				1C05BA201174CEE8003585B2 /* XmlTree.h */,
 				1EB8A20C129C022000041956 /* gzfilebuf.h */,
-				1EB8A210129C024C00041956 /* InputFileStream.h */,
 				1EB8A211129C024C00041956 /* InputFileStream.cpp */,
+				1EB8A210129C024C00041956 /* InputFileStream.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -366,8 +365,6 @@
 				1C05BA1C1174CEC7003585B2 /* SentenceAlignmentWithSyntax.h in Sources */,
 				1C05BA161174CEA4003585B2 /* tables-core.cpp in Sources */,
 				1C05BA171174CEA4003585B2 /* tables-core.h in Sources */,
-				1CFE962511762A20006FF13B /* consolidate-direct.cpp in Sources */,
-				1CFE962611762A20006FF13B /* consolidate.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +399,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */,
+				1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */,
 				1CFE962711762A2A006FF13B /* consolidate.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -424,7 +423,6 @@
 				1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */,
 				1C05B9EC1174CC24003585B2 /* SentenceAlignment.cpp in Sources */,
 				1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */,
-				1E3EF2A013DBEAF300C1D54A /* extract-lex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -550,6 +548,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
 				SDKROOT = macosx10.6;
@@ -567,6 +566,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
 				SDKROOT = macosx10.6;
