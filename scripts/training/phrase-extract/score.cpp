@@ -65,6 +65,7 @@ double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment 
 set<string> functionWordList;
 void loadFunctionWords( const char* fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
+void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePair, map<size_t, pair<float, float> > &ntLengthsProb);
 
 LexicalTable lexTable;
 bool inverseFlag = false;
@@ -78,6 +79,7 @@ int negLogProb = 1;
 bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
+bool outputNTLengths = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
@@ -148,6 +150,8 @@ int main(int argc, char* argv[])
       minCountHierarchical = atof(argv[++i]);
       cerr << "dropping all phrase pairs occurring less than " << minCountHierarchical << " times\n";
       minCountHierarchical -= 0.00001; // account for rounding
+    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
+      outputNTLengths = true;
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -325,12 +329,17 @@ PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > &phrasePair )
   return bestAlignment;
 }
 
+void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePair, map<size_t, pair<float, float> > &ntLengthsProb)
+{
+  
+}
+
 void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile )
 {
   if (phrasePair.size() == 0) return;
 
   PhraseAlignment *bestAlignment = findBestAlignment( phrasePair );
-
+    
   // compute count
   float count = 0;
   for(size_t i=0; i<phrasePair.size(); i++) {
@@ -433,6 +442,14 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   phraseTableFile << " ||| " << totalCount << " " << count;
   if (kneserNeyFlag) 
     phraseTableFile << " " << distinctCount;
+  
+  // nt lengths
+  map<size_t, pair<float, float> > ntLengthsProb;
+  if (outputNTLengths)
+  {
+    calcNTLengthProb(phrasePair, ntLengthsProb);
+  }
+  
   phraseTableFile << endl;
 }
 

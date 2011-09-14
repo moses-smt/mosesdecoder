@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <set>
+#include <map>
 
 // data structure for a single phrase pair
 class PhraseAlignment
@@ -19,7 +20,10 @@ protected:
   PHRASE phraseS;
   PHRASE phraseT;
 
+  std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
+  
   void createAlignVec(size_t sourceSize, size_t targetSize);
+  void addNTLength(const std::string &tok);
 public:
   float count;
   std::vector< std::set<size_t> > alignedToT;
