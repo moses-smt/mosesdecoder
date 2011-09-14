@@ -65,8 +65,9 @@ double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment 
 set<string> functionWordList;
 void loadFunctionWords( const char* fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePair, map<size_t, pair<float, float> > &ntLengthsProb);
-
+void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
+                      , map<size_t, map<size_t, float> > &sourceProb
+                      , map<size_t, map<size_t, float> > &targetProb);
 LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
@@ -90,7 +91,7 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring coc-file] [--KneserNey coc-file] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count]\n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring coc-file] [--KneserNey coc-file] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] \n";
     exit(1);
   }
   char* fileNameExtract = argv[1];
@@ -329,9 +330,91 @@ PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > &phrasePair )
   return bestAlignment;
 }
 
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePair, map<size_t, pair<float, float> > &ntLengthsProb)
+void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
+                      , size_t total
+                      , map<size_t, map<size_t, float> > &probs)
 {
+  map<size_t, map<size_t, size_t> >::const_iterator iterOuter;
+  for (iterOuter = lengths.begin(); iterOuter != lengths.end(); ++iterOuter)
+  {
+    size_t sourcePos = iterOuter->first;
+    const map<size_t, size_t> &inner = iterOuter->second;
+    
+    map<size_t, size_t>::const_iterator iterInner;
+    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
+    {
+      size_t length = iterInner->first;
+      size_t count = iterInner->second;
+      float prob = (float) count / (float) total;
+      probs[sourcePos][length] = prob;
+    }
+  }
+}
+
+void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
+                      , map<size_t, map<size_t, float> > &sourceProb
+                      , map<size_t, map<size_t, float> > &targetProb)
+{
+  map<size_t, map<size_t, size_t> > sourceLengths, targetLengths;
+  // 1st = position in source phrase, 2nd = length, 3rd = count
+  map<size_t, size_t> totals;
+  // 1st = position in source phrase, 2nd = total counts
+  // each source pos should have same count?
   
+  vector< PhraseAlignment* >::const_iterator iterOuter;
+  for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter)
+  {
+    const PhraseAlignment &phrasePair = **iterOuter;
+    const std::map<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
+    
+    std::map<size_t, std::pair<size_t, size_t> >::const_iterator iterInner;
+    for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner)
+    {
+      size_t sourcePos = iterInner->first;
+      size_t sourceLength = iterInner->second.first;
+      size_t targetLength = iterInner->second.second;
+      
+      sourceLengths[sourcePos][sourceLength]++;
+      targetLengths[sourcePos][targetLength]++;
+
+      totals[sourcePos]++;
+    }
+  }
+    
+  if (totals.size() == 0)
+  { // no non-term. Don't bother
+    return;
+  }
+
+  size_t total = totals.begin()->second;
+  if (totals.size() > 1)
+  {
+    assert(total == (++totals.begin())->second );
+  }
+  
+  calcNTLengthProb(sourceLengths, total, sourceProb);
+  calcNTLengthProb(targetLengths, total, targetProb);
+  
+}
+
+void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
+{
+  map<size_t, map<size_t, float> >::const_iterator iterOuter;
+  for (iterOuter = probs.begin(); iterOuter != probs.end(); ++iterOuter)
+  {
+    size_t sourcePos = iterOuter->first;
+    const map<size_t, float> &inner = iterOuter->second;
+    
+    map<size_t, float>::const_iterator iterInner;
+    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
+    {
+      size_t length = iterInner->first;
+      float prob = iterInner->second;
+
+      phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
+    }
+  }
+
 }
 
 void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile )
@@ -443,11 +526,18 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   if (kneserNeyFlag) 
     phraseTableFile << " " << distinctCount;
   
-  // nt lengths
-  map<size_t, pair<float, float> > ntLengthsProb;
+  // nt lengths  
   if (outputNTLengths)
   {
-    calcNTLengthProb(phrasePair, ntLengthsProb);
+    map<size_t, map<size_t, float> > sourceProb, targetProb;
+    // 1st sourcePos, 2nd = length, 3rd = prob
+
+    calcNTLengthProb(phrasePair, sourceProb, targetProb);
+    
+    phraseTableFile << " ||| ";
+    outputNTLengthProbs(phraseTableFile, sourceProb, "S");
+    outputNTLengthProbs(phraseTableFile, targetProb, "T");
+    
   }
   
   phraseTableFile << endl;

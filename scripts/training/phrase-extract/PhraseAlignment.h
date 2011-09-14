@@ -46,4 +46,8 @@ public:
   const PHRASE &GetTarget() const {
     return phraseT;
   }
+  
+  const std::map<size_t, std::pair<size_t, size_t> > &GetNTLengths() const
+  { return m_ntLengths; }
+
 };
