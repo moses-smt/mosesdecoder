@@ -44,6 +44,7 @@
 		1EB8A29A129C06B300041956 /* gzfilebuf.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A20C129C022000041956 /* gzfilebuf.h */; };
 		1EB8A29B129C06B300041956 /* InputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A210129C024C00041956 /* InputFileStream.h */; };
 		1EB8A29C129C06B300041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1ED896C3141FFDF500F43F46 /* ExtractedRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED896C2141FFDF500F43F46 /* ExtractedRule.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -98,6 +99,7 @@
 		1EB8A20C129C022000041956 /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gzfilebuf.h; sourceTree = "<group>"; };
 		1EB8A210129C024C00041956 /* InputFileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputFileStream.h; sourceTree = "<group>"; };
 		1EB8A211129C024C00041956 /* InputFileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputFileStream.cpp; sourceTree = "<group>"; };
+		1ED896C2141FFDF500F43F46 /* ExtractedRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExtractedRule.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +170,7 @@
 				1C05B9DB1174CBF9003585B2 /* extract-rules.cpp */,
 				1CE8CE2C0FC6EA0200924FEA /* extract.cpp */,
 				1C05B9DD1174CC06003585B2 /* ExtractedRule.h */,
+				1ED896C2141FFDF500F43F46 /* ExtractedRule.cpp */,
 				1C05B9DE1174CC06003585B2 /* hierarchical.h */,
 				1C05B9DF1174CC06003585B2 /* Hole.h */,
 				1C05B9E01174CC06003585B2 /* HoleCollection.cpp */,
@@ -365,6 +368,7 @@
 				1C05BA1C1174CEC7003585B2 /* SentenceAlignmentWithSyntax.h in Sources */,
 				1C05BA161174CEA4003585B2 /* tables-core.cpp in Sources */,
 				1C05BA171174CEA4003585B2 /* tables-core.h in Sources */,
+				1ED896C3141FFDF500F43F46 /* ExtractedRule.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

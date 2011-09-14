@@ -45,7 +45,7 @@ public:
   bool targetSyntax;
   bool duplicateRules;
   bool fractionalCounting;
-  bool mixed;
+  bool outputNTLengths;
 
   RuleExtractionOptions()
     : maxSpan(10)
@@ -73,7 +73,7 @@ public:
     , targetSyntax(false)
     , duplicateRules(true)
     , fractionalCounting(true)
-    , mixed(false)
+    , outputNTLengths(false)
   {}
 };
 
