@@ -7,6 +7,7 @@
  *
  */
 
+#include <sstream>
 #include "PhraseAlignment.h"
 #include "SafeGetline.h"
 #include "tables-core.h"
@@ -18,6 +19,59 @@ extern Vocabulary vcbT;
 extern Vocabulary vcbS;
 
 extern bool hierarchicalFlag;
+
+//! convert string to variable of type T. Used to reading floats, int etc from files
+template<typename T>
+inline T Scan(const std::string &input)
+{
+	std::stringstream stream(input);
+	T ret;
+	stream >> ret;
+	return ret;
+}
+
+
+//! speeded up version of above
+template<typename T>
+inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
+{
+	output.resize(input.size());
+	for (size_t i = 0 ; i < input.size() ; i++)
+	{
+		output[i] = Scan<T>( input[i] );
+	}
+}
+
+
+inline void Tokenize(std::vector<std::string> &output
+                     , const std::string& str
+                     , const std::string& delimiters = " \t")
+{
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+  
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    output.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+}
+
+// speeded up version of above
+template<typename T>
+inline void Tokenize( std::vector<T> &output
+										 , const std::string &input
+										 , const std::string& delimiters = " \t")
+{
+	std::vector<std::string> stringVector;
+	Tokenize(stringVector, input, delimiters);
+	return Scan<T>(output, stringVector );
+}
 
 // read in a phrase pair and store it
 void PhraseAlignment::create( char line[], int lineID )
@@ -37,7 +91,6 @@ void PhraseAlignment::create( char line[], int lineID )
     else if (item == 2) { // target phrase
       phraseT.push_back( vcbT.storeIfNew( token[j] ) );
     }
-
     else if (item == 3) { // alignment
       int s,t;
       sscanf(token[j].c_str(), "%d-%d", &s, &t);
@@ -56,6 +109,9 @@ void PhraseAlignment::create( char line[], int lineID )
     } else if (item == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
     }
+    else if (item == 5) { // non-term lengths
+      addNTLength(token[j]);
+    }
   }
 
   createAlignVec(phraseS.size(), phraseT.size());
@@ -63,9 +119,26 @@ void PhraseAlignment::create( char line[], int lineID )
   if (item == 3) {
     count = 1.0;
   }
-  if (item < 3 || item > 4) {
+  if (item < 3 || item > 5) {
     cerr << "ERROR: faulty line " << lineID << ": " << line << endl;
   }
+}
+
+void PhraseAlignment::addNTLength(const std::string &tok)
+{
+  vector< string > tokens;
+  
+  Tokenize(tokens, tok, "=");
+  assert(tokens.size() == 2);
+  
+  size_t sourcePos = Scan<size_t>(tokens[0]);
+  assert(sourcePos < phraseS.size());
+  
+  vector< size_t > ntLengths;
+  Tokenize<size_t>(ntLengths, tokens[1], ",");
+  assert(ntLengths.size() == 2);
+  
+  m_ntLengths[sourcePos] = std::pair<size_t, size_t>(ntLengths[0], ntLengths[1]);
 }
 
 void PhraseAlignment::createAlignVec(size_t sourceSize, size_t targetSize)

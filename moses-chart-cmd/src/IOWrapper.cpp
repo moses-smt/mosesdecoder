@@ -384,7 +384,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
     // word penalty
     if (labeledOutput)
-      out << "w: ";
+      out << " w: ";
     out << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
 
     // generation

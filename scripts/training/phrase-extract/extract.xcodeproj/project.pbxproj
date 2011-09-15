@@ -33,11 +33,10 @@
 		1C6A83051111F5A300059E7F /* AlignmentPhrase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C6A83031111F5A300059E7F /* AlignmentPhrase.cpp */; };
 		1CE8CE2E0FC6EA0200924FEA /* extract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE2C0FC6EA0200924FEA /* extract.cpp */; };
 		1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
-		1CFE962511762A20006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
-		1CFE962611762A20006FF13B /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962411762A20006FF13B /* consolidate.cpp */; };
 		1CFE962711762A2A006FF13B /* consolidate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962411762A20006FF13B /* consolidate.cpp */; };
 		1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
-		1E3EF2A013DBEAF300C1D54A /* extract-lex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3EF29E13DBEAF300C1D54A /* extract-lex.cpp */; };
+		1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */; };
 		1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1EB8A261129C04C700041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
@@ -45,6 +44,7 @@
 		1EB8A29A129C06B300041956 /* gzfilebuf.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A20C129C022000041956 /* gzfilebuf.h */; };
 		1EB8A29B129C06B300041956 /* InputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A210129C024C00041956 /* InputFileStream.h */; };
 		1EB8A29C129C06B300041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1ED896C3141FFDF500F43F46 /* ExtractedRule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED896C2141FFDF500F43F46 /* ExtractedRule.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -99,6 +99,7 @@
 		1EB8A20C129C022000041956 /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gzfilebuf.h; sourceTree = "<group>"; };
 		1EB8A210129C024C00041956 /* InputFileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputFileStream.h; sourceTree = "<group>"; };
 		1EB8A211129C024C00041956 /* InputFileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputFileStream.cpp; sourceTree = "<group>"; };
+		1ED896C2141FFDF500F43F46 /* ExtractedRule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExtractedRule.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +170,7 @@
 				1C05B9DB1174CBF9003585B2 /* extract-rules.cpp */,
 				1CE8CE2C0FC6EA0200924FEA /* extract.cpp */,
 				1C05B9DD1174CC06003585B2 /* ExtractedRule.h */,
+				1ED896C2141FFDF500F43F46 /* ExtractedRule.cpp */,
 				1C05B9DE1174CC06003585B2 /* hierarchical.h */,
 				1C05B9DF1174CC06003585B2 /* Hole.h */,
 				1C05B9E01174CC06003585B2 /* HoleCollection.cpp */,
@@ -191,8 +193,8 @@
 				1C05BA1F1174CEE8003585B2 /* XmlTree.cpp */,
 				1C05BA201174CEE8003585B2 /* XmlTree.h */,
 				1EB8A20C129C022000041956 /* gzfilebuf.h */,
-				1EB8A210129C024C00041956 /* InputFileStream.h */,
 				1EB8A211129C024C00041956 /* InputFileStream.cpp */,
+				1EB8A210129C024C00041956 /* InputFileStream.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -366,8 +368,7 @@
 				1C05BA1C1174CEC7003585B2 /* SentenceAlignmentWithSyntax.h in Sources */,
 				1C05BA161174CEA4003585B2 /* tables-core.cpp in Sources */,
 				1C05BA171174CEA4003585B2 /* tables-core.h in Sources */,
-				1CFE962511762A20006FF13B /* consolidate-direct.cpp in Sources */,
-				1CFE962611762A20006FF13B /* consolidate.cpp in Sources */,
+				1ED896C3141FFDF500F43F46 /* ExtractedRule.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -402,6 +403,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */,
+				1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */,
 				1CFE962711762A2A006FF13B /* consolidate.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -424,7 +427,6 @@
 				1CE8CE4D0FC6EAA200924FEA /* tables-core.cpp in Sources */,
 				1C05B9EC1174CC24003585B2 /* SentenceAlignment.cpp in Sources */,
 				1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */,
-				1E3EF2A013DBEAF300C1D54A /* extract-lex.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -435,6 +437,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -443,6 +446,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -450,13 +454,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -465,6 +472,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -473,6 +481,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = statistics;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -480,13 +489,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				PRODUCT_NAME = statistics;
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -495,6 +507,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -505,6 +518,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = score;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -512,6 +526,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -521,6 +536,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = score;
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -529,14 +545,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -544,13 +563,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -559,6 +582,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -568,6 +592,7 @@
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "consolidate-direct";
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -575,14 +600,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "consolidate-direct";
+				SDKROOT = macosx10.6;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -591,6 +619,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -603,6 +632,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = extract;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -610,37 +640,41 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_NAME = extract;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
 		1DEB923708733DC60010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
 			};
 			name = Release;
 		};

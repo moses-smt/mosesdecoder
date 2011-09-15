@@ -171,6 +171,7 @@ protected:
   float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
+  bool m_lmEnableOOVFeature;
 
   bool m_timeout; //! use timeout
   size_t m_timeout_threshold; //! seconds after which time out is activated
@@ -518,6 +519,10 @@ public:
 
   size_t GetLMCacheCleanupThreshold() const {
     return m_lmcache_cleanup_threshold;
+  }
+
+  bool GetLMEnableOOVFeature() const {
+    return m_lmEnableOOVFeature;
   }
 
   bool GetOutputSearchGraph() const {

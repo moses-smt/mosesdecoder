@@ -44,6 +44,7 @@ namespace Moses
 LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation) :
   m_implementation(implementation)
 {
+  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
   scoreIndexManager.AddScoreProducer(this);
 #ifndef WITH_THREADS
   // ref counting handled by boost otherwise
@@ -54,6 +55,7 @@ LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel
 LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *loadedLM) :
   m_implementation(loadedLM->m_implementation)
 {
+  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
   scoreIndexManager.AddScoreProducer(this);
 #ifndef WITH_THREADS
   // ref counting handled by boost otherwise
@@ -72,7 +74,11 @@ LanguageModel::~LanguageModel()
 // don't inline virtual funcs...
 size_t LanguageModel::GetNumScoreComponents() const
 {
-  return 1;
+  if (m_enableOOVFeature) {
+    return 2;
+  } else {
+    return 1;
+  }
 }
 
 float LanguageModel::GetWeight() const
@@ -82,13 +88,24 @@ float LanguageModel::GetWeight() const
   return StaticData::Instance().GetAllWeights()[lmIndex];
 }
 
+float LanguageModel::GetOOVWeight() const
+{
+  if (!m_enableOOVFeature) return 0;
+  size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
+                   GetBeginIndex(GetScoreBookkeepingID());
+  return StaticData::Instance().GetAllWeights()[lmIndex+1];
+  
+}
+
 void LanguageModel::CalcScore(const Phrase &phrase
                               , float &fullScore
-                              , float &ngramScore) const
+                              , float &ngramScore
+                              , size_t &oovCount) const
 {
 
   fullScore	= 0;
   ngramScore	= 0;
+  oovCount = 0;
 
   size_t phraseSize = phrase.GetSize();
   if (!phraseSize) return;
@@ -116,10 +133,13 @@ void LanguageModel::CalcScore(const Phrase &phrase
         // do nothing, don't include prob for <s> unigram
         assert(currPos == 0);
       } else {
-        float partScore = m_implementation->GetValueGivenState(contextFactor, *state).score;
-        fullScore += partScore;
+        LMResult result = m_implementation->GetValueGivenState(contextFactor, *state);
+        fullScore += result.score;
         if (contextFactor.size() == GetNGramOrder())
-          ngramScore += partScore;
+          ngramScore += result.score;
+        if (contextFactor.size() == 1 && result.unknown)
+          ++oovCount; 
+          
       }
     }
 
@@ -225,7 +245,16 @@ FFState* LanguageModel::Evaluate(
       m_implementation->GetState(contextFactor, *res);
     }
   }
-  out->PlusEquals(this, lmScore);
+  if (m_enableOOVFeature) {
+    vector<float> scores(2);
+    scores[0] = lmScore;
+    scores[1] = 0;
+    out->PlusEquals(this, scores);
+  } else {
+	  out->PlusEquals(this, lmScore);
+  }
+
+
   IFVERBOSE(2) {
     hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t );
   }
