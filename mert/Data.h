@@ -49,6 +49,10 @@ public:
     return featdata;
   };
 
+  Scorer* getScorer() {
+    return theScorer;
+  }
+
   inline size_t NumberOfFeatures() const {
     return featdata->NumberOfFeatures();
   }
@@ -97,7 +101,15 @@ public:
 
 	void sampleRankedPairs( const std::string &rankedPairFile );
   void outputSample( std::ostream &out, const FeatureStats &f1, const FeatureStats &f2 );
-};
 
+  /**
+   *  Create shard_count shards. If shard_size == 0, then the shards are non-overlapping
+   *  and exhaust the data. If 0 < shard_size <= 1, then shards are chosen by sampling 
+   *  the data (with replacement) and shard_size is interpreted as the proportion
+   * of the total size.
+   */
+  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig, 
+       std::vector<Data>& shards);
+};
 
 #endif

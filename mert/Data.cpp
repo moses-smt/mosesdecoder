@@ -6,8 +6,11 @@
  *
  */
 
+#include <cassert>
 #include <fstream>
+
 #include "Scorer.h"
+#include "ScorerFactory.h"
 #include "Data.h"
 #include "Util.h"
 
@@ -252,3 +255,49 @@ void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStat
       out << " " << i->first << " " << (- i->second);
   }
 }
+
+
+void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
+      std::vector<Data>& shards) 
+{
+  assert(shard_count);
+  assert(shard_size >=0);
+  assert(shard_size <= 1);
+
+  size_t data_size = scoredata->size();
+  assert(data_size == featdata->size());
+
+  shard_size *=  data_size;
+
+  for (size_t shard_id = 0; shard_id < shard_count; ++shard_id) {
+    vector<size_t> shard_contents;
+    if (shard_size == 0) {
+      //split into roughly equal size shards
+      size_t shard_start = floor(0.5 + shard_id * (float)data_size / shard_count);
+      size_t shard_end = floor(0.5 + (shard_id+1) * (float)data_size / shard_count);
+      for (size_t i = shard_start; i < shard_end; ++i) {
+        shard_contents.push_back(i);
+      }
+    } else {
+      //create shards by randomly sampling
+      for (size_t i = 0; i < floor(shard_size+0.5); ++i) {
+        shard_contents.push_back(rand() % data_size);
+      }
+    }
+    
+    ScorerFactory SF;
+    Scorer* scorer = SF.getScorer(score_type, scorerconfig);
+
+    shards.push_back(Data(*scorer));
+    shards.back().score_type = score_type;
+    shards.back().number_of_scores = number_of_scores;
+    shards.back()._sparse_flag = _sparse_flag;
+    for (size_t i = 0; i < shard_contents.size(); ++i) {
+      shards.back().featdata->add(featdata->get(shard_contents[i]));
+      shards.back().scoredata->add(scoredata->get(shard_contents[i]));
+    }
+    //cerr << endl;
+    
+  }
+}
+
