@@ -1317,9 +1317,10 @@ sub extract_phrase {
       $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
 		}
       if ($reordering_flag) {
-	$cmd .= " orientation";
-	$cmd .= get_extract_reordering_flags();
-	$cmd .= " --NoTTable" if !$ttable_flag;
+        $cmd .= " orientation";
+        $cmd .= get_extract_reordering_flags();
+        $cmd .= " --NoTTable" if !$ttable_flag;
+        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
     }
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
@@ -1330,6 +1331,7 @@ sub extract_phrase {
     }
     if (! $___DONT_ZIP) { 
       safesystem("gzip $extract_file.o") if -e "$extract_file.o";
+      safesystem("gzip $extract_file.sid") if -e "$extract_file.sid";
       if ($ttable_flag) {
         safesystem("gzip $extract_file.inv") or die("ERROR");
         safesystem("gzip $extract_file") or die("ERROR");

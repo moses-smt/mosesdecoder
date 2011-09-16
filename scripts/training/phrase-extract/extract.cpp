@@ -84,9 +84,11 @@ REO_MODEL_TYPE hierType = REO_MSD;
 ofstream extractFile;
 ofstream extractFileInv;
 ofstream extractFileOrientation;
+ofstream extractFileSentenceId;
 int maxPhraseLength;
 bool orientationFlag = false;
 bool translationFlag = true;
+bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
 
 int main(int argc, char* argv[])
@@ -95,7 +97,7 @@ int main(int argc, char* argv[])
         << "phrase extraction from an aligned parallel corpus\n";
 
   if (argc < 6) {
-    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo]\n";
+    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoTTable | --SentenceId]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
@@ -111,6 +113,8 @@ int main(int argc, char* argv[])
       orientationFlag = true;
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
+    } else if (strcmp(argv[i], "--SentenceId") == 0) {
+      sentenceIdFlag = true;  
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -199,6 +203,11 @@ int main(int argc, char* argv[])
     extractFileOrientation.open(fileNameExtractOrientation.c_str());
   }
 
+  if (sentenceIdFlag) {
+    string fileNameExtractSentenceId = fileNameExtract + ".sid";
+    extractFileSentenceId.open(fileNameExtractSentenceId.c_str());
+  }
+
   int i=0;
   while(true) {
     i++;
@@ -235,6 +244,9 @@ int main(int argc, char* argv[])
       extractFileInv.close();
     }
     if (orientationFlag) extractFileOrientation.close();
+    if (sentenceIdFlag) {
+      extractFileSentenceId.close();
+    }
   }
 }
 
@@ -605,19 +617,23 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   for(int fi=startF; fi<=endF; fi++) {
     if (translationFlag) extractFile << sentence.source[fi] << " ";
     if (orientationFlag) extractFileOrientation << sentence.source[fi] << " ";
+    if (sentenceIdFlag) extractFileSentenceId << sentence.source[fi] << " ";
   }
   if (translationFlag) extractFile << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
+  if (sentenceIdFlag) extractFileSentenceId << "||| ";
 
   // target
   for(int ei=startE; ei<=endE; ei++) {
     if (translationFlag) extractFile << sentence.target[ei] << " ";
     if (translationFlag) extractFileInv << sentence.target[ei] << " ";
     if (orientationFlag) extractFileOrientation << sentence.target[ei] << " ";
+    if (sentenceIdFlag) extractFileSentenceId << sentence.target[ei] << " ";
   }
   if (translationFlag) extractFile << "|||";
   if (translationFlag) extractFileInv << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
+  if (sentenceIdFlag) extractFileSentenceId << "||| ";
 
   // source (for inverse)
   if (translationFlag) {
@@ -640,9 +656,14 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (orientationFlag)
     extractFileOrientation << orientationInfo;
 
+  if (sentenceIdFlag) {
+    extractFileSentenceId << sentence.sentenceID;
+  }
+
   if (translationFlag) extractFile << "\n";
   if (translationFlag) extractFileInv << "\n";
   if (orientationFlag) extractFileOrientation << "\n";
+  if (sentenceIdFlag) extractFileSentenceId << "\n";
 }
 
 // if proper conditioning, we need the number of times a source phrase occured
