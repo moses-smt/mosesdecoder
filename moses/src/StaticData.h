@@ -193,6 +193,7 @@ protected:
 #ifdef HAVE_PROTOBUF
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
+  bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
@@ -539,6 +540,9 @@ public:
     return m_outputSearchGraphPB;
   }
 #endif
+  bool GetUnprunedSearchGraph() const {
+    return m_unprunedSearchGraph;
+  }
 
   XmlInputType GetXmlInputType() const {
     return m_xmlInputType;

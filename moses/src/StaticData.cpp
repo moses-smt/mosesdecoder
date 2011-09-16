@@ -210,6 +210,7 @@ bool StaticData::LoadData(Parameter *parameter)
   } else
     m_outputSearchGraphPB = false;
 #endif
+  SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", true );
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
