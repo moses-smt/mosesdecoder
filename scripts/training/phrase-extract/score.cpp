@@ -529,15 +529,18 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   // nt lengths  
   if (outputNTLengths)
   {
-    map<size_t, map<size_t, float> > sourceProb, targetProb;
-    // 1st sourcePos, 2nd = length, 3rd = prob
-
-    calcNTLengthProb(phrasePair, sourceProb, targetProb);
-    
     phraseTableFile << " ||| ";
-    outputNTLengthProbs(phraseTableFile, sourceProb, "S");
-    outputNTLengthProbs(phraseTableFile, targetProb, "T");
-    
+
+    if (!inverseFlag)
+    {
+      map<size_t, map<size_t, float> > sourceProb, targetProb;
+      // 1st sourcePos, 2nd = length, 3rd = prob
+
+      calcNTLengthProb(phrasePair, sourceProb, targetProb);
+      
+      outputNTLengthProbs(phraseTableFile, sourceProb, "S");
+      outputNTLengthProbs(phraseTableFile, targetProb, "T");
+    }    
   }
   
   phraseTableFile << endl;
