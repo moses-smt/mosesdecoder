@@ -100,7 +100,9 @@ my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iter
 my $___RANDOM_DIRECTIONS = 0; # search in random directions only
 my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
 my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use Hopkins&May[2011]
+my $___PRO_STARTING_POINT = 0; # get a starting point from pairwise ranked optimizer
 my $___RANDOM_RESTARTS = 20;
+my $___HISTORIC_INTERPOLATION = 0; # interpolate optimize weights with previous iteration's weights [Hopkins&May,2011,5.4.3]
 my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
@@ -186,6 +188,8 @@ GetOptions(
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
   "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
+  "pro-starting-point" => \$___PRO_STARTING_POINT,
+  "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -266,8 +270,10 @@ Options:
   --number-of-random-directions=int ... number of random directions
                                         (also works with regular optimizer, default: 0)
   --pairwise-ranked         ... Use PRO for optimisation (Hopkins and May, emnlp 2011)
+  --pro-starting-point      ... Use PRO to get a starting point for MERT
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
-
+  --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
+                                (parameter sets factor [0;1] given to current weights)
 ";
   exit 1;
 }
@@ -303,7 +309,7 @@ die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
 
 my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
-if ($___PAIRWISE_RANKED_OPTIMIZER && ! -x $pro_optimizer) {
+if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
   print "did not find $pro_optimizer, installing it in $mertdir\n";
   `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
   `gunzip $pro_optimizer.gz`;
@@ -443,18 +449,14 @@ if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
     print STDERR "Assuming the tables are already filtered, reusing $outdir/moses.ini\n";
-  } else {
+  } 
+  else {
     # filter the phrase tables with respect to input, use --decoder-flags
     print STDERR "filtering the phrase tables... ".`date`;
     my $___FILTER_F  = $___DEV_F;
     $___FILTER_F = $filterfile if (defined $filterfile);
     my $cmd = "$filtercmd ./$outdir $___CONFIG $___FILTER_F";
-    if (defined $___JOBS && $___JOBS > 0) {
-      safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=filterphrases.out -stderr=filterphrases.err" )
-        or die "Failed to submit filtering of tables to the queue (via $qsubwrapper)";
-    } else {
-      safesystem($cmd) or die "Failed to filter the tables.";
-    }
+    &submit_or_exec($cmd,"filterphrases.out","filterphrases.err");
   }
 
   # make a backup copy of startup ini filepath
@@ -644,13 +646,7 @@ while(1) {
   my $score_file = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
-
-  if (defined $___JOBS && $___JOBS > 0) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out -stderr=extract.err" )
-      or die "Failed to submit extraction to queue (via $qsubwrapper)";
-  } else {
-    safesystem("$cmd > extract.out 2> extract.err") or die "Failed to do extraction of statistics.";
-  }
+  &submit_or_exec($cmd,"extract.out","extract.err");
 
   # Create the initial weights file for mert: init.opt
 
@@ -673,62 +669,79 @@ while(1) {
   my $DIM = scalar(@CURR); # number of lambdas
 
   # run mert
-  $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args -n $___RANDOM_RESTARTS";
+  $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args";
+  
+  my $mert_settings = " -n $___RANDOM_RESTARTS";
   if ($___PREDICTABLE_SEEDS) {
       my $seed = $run * 1000;
-      $cmd = $cmd." -r $seed";
+      $mert_settings .= " -r $seed";
   }
   if ($___RANDOM_DIRECTIONS) {
     if ($___NUM_RANDOM_DIRECTIONS == 0) {
-      $cmd .= " -m 50";
+      $mert_settings .= " -m 50";
     }
-    $cmd = $cmd." -t random-direction";
+    $mert_settings .= " -t random-direction";
   }
   if ($___NUM_RANDOM_DIRECTIONS) {
-    $cmd .= " -m $___NUM_RANDOM_DIRECTIONS";
+    $mert_settings .= " -m $___NUM_RANDOM_DIRECTIONS";
+  }
+  if ($__THREADS) {
+    $mert_settings .= " --threads $__THREADS";
   }
 
+  my $file_settings = "";
   if (defined $prev_feature_file) {
-    $cmd = $cmd." --ffile $prev_feature_file,$feature_file";
+    $file_settings .= " --ffile $prev_feature_file,$feature_file";
   }
   else{
-    $cmd = $cmd." --ffile $feature_file";
+    $file_settings .= " --ffile $feature_file";
   }
   if (defined $prev_score_file) {
-    $cmd = $cmd." --scfile $prev_score_file,$score_file";
+    $file_settings .= " --scfile $prev_score_file,$score_file";
   }
   else{
-    $cmd = $cmd." --scfile $score_file";
+    $file_settings .= " --scfile $score_file";
   }
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
-    $cmd = $cmd." --ifile $prev_init_file,run$run.$weights_in_file";
+    $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   }
   else{
-    $cmd = $cmd." --ifile run$run.$weights_in_file";
+    $file_settings .= " --ifile run$run.$weights_in_file";
   }
 
-  if ($__THREADS) {
-    $cmd = $cmd." --threads $__THREADS";
-  }
+  $cmd .= $file_settings;
 
+  # pro optimization
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
-      $cmd .= " --pro pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary pro.data";
+    $cmd .= " --pro run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    &submit_or_exec($cmd,$mert_outfile,$mert_logfile);
+  }
+  # first pro, then mert
+  elsif ($___PRO_STARTING_POINT) {
+    # run pro...
+    my $pro_cmd = $cmd." --pro run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    &submit_or_exec($pro_cmd,"run$run.pro.out","run$run.pro.err");
+    # ... get results ...
+    my %dummy;
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%dummy);
+    open(PRO_START,">run$run.init.pro");
+    print PRO_START $bestpoint."\n";
+    close(PRO_START);
+    # ... and run mert
+    $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
+    &submit_or_exec($cmd.$mert_settings,$mert_outfile,$mert_logfile);
+  }
+  # just mert
+  else {
+    &submit_or_exec($cmd.$mert_settings,$mert_outfile,$mert_logfile);
   }
 
-  if (defined $___JOBS && $___JOBS > 0) {
-    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -stdout=$mert_outfile -stderr=$mert_logfile -queue-parameter=\"$queue_flags\"") or die "Failed to start mert (via qsubwrapper $qsubwrapper)";
-  } 
-  else {
-    safesystem("$cmd > $mert_outfile 2> $mert_logfile") or die "Failed to run mert";
-  }
   die "Optimization failed, file $weights_out_file does not exist or is empty"
     if ! -s $weights_out_file;
-
 
   # backup copies
   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
-  if ($___PAIRWISE_RANKED_OPTIMIZER) { safesystem ("\\cp -f pro.data run$run.pro.data") or die; }
   safesystem ("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
@@ -739,13 +752,45 @@ while(1) {
   my %sparse_weights; # sparse features
   ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
 
-
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
+
   print "($run) BEST at $run: $bestpoint => $devbleu at ".`date`;
 
   # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
+
+  # interpolate with prior's interation weight, if historic-interpolation is specified
+  if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
+    my %historic_sparse_weights;
+    if (-e "run$run.sparse-weights") {
+      open(SPARSE,"run$run.sparse-weights");
+      while(<SPARSE>) {
+        chop;
+        my ($feature,$weight) = split;
+        $historic_sparse_weights{$feature} = $weight;
+      }
+    }
+    my $prev = $run-1;
+    my @historic_weights = split /\s+/, `cat run$prev.$weights_out_file`;
+    for(my $i=0;$i<scalar(@newweights);$i++) {
+      $newweights[$i] = $___HISTORIC_INTERPOLATION * $newweights[$i] + (1-$___HISTORIC_INTERPOLATION) * $historic_weights[$i];
+    }
+    print "interpolate with ".join(",",@historic_weights)." to ".join(",",@newweights);
+    foreach (keys %sparse_weights) {
+      $sparse_weights{$_} *= $___HISTORIC_INTERPOLATION;
+      #print STDERR "sparse_weights{$_} *= $___HISTORIC_INTERPOLATION -> $sparse_weights{$_}\n";
+    }
+    foreach (keys %historic_sparse_weights) {
+      $sparse_weights{$_} += (1-$___HISTORIC_INTERPOLATION) * $historic_sparse_weights{$_};
+      #print STDERR "sparse_weights{$_} += (1-$___HISTORIC_INTERPOLATION) * $historic_sparse_weights{$_} -> $sparse_weights{$_}\n";
+    }
+  }
+  if ($___HISTORIC_INTERPOLATION>0) {
+    open(WEIGHTS,">run$run.$weights_out_file");
+    print WEIGHTS join(" ",@newweights);
+    close(WEIGHTS);
+  }
 
   $featlist->{"values"} = \@newweights;
 
@@ -837,7 +882,7 @@ chdir($cwd);
 sub get_weights_from_mert {
   my ($outfile,$logfile,$weight_count,$sparse_weights) = @_;
   my ($bestpoint,$devbleu);
-  if ($___PAIRWISE_RANKED_OPTIMIZER) {
+  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)) {
     open(IN,$outfile) or die "Can't open $outfile";
     my (@WEIGHT,$sum);
     for(my $i=0;$i<$weight_count;$i++) { push @WEIGHT, 0; }
@@ -854,6 +899,7 @@ sub get_weights_from_mert {
     }
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
+    foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ",@WEIGHT);
     close IN;
   }
@@ -990,7 +1036,8 @@ sub get_featlist_from_moses {
   while (<INI>) {
     $nr++;
     chomp;
-    my ($longname, $feature, $value) = split / /;
+    /^(.+) (\S+) (\S+)$/ || die("invalid feature: $_");
+    my ($longname, $feature, $value) = ($1,$2,$3);
     next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
       if $value !~ /^[+-]?[0-9.e]+$/;
@@ -1197,7 +1244,14 @@ $PATH =~ s/\/nfsmnt//;
     return $PATH;
 }
 
-
-
-
-
+sub submit_or_exec {
+  my ($cmd,$stdout,$stderr) = @_;
+  print STDERR "exec: $cmd\n";
+  if (defined $___JOBS && $___JOBS > 0) {
+    safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$stdout -stderr=$stderr" )
+      or die "ERROR: Failed to submit '$cmd' (via $qsubwrapper)";
+  } 
+  else {
+    safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
+  }
+}
