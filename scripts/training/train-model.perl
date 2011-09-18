@@ -37,7 +37,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_ADDITIONAL_INI,
    $_DICTIONARY, $_EPPEX);
 
-my $debug = 1; # debug this script, do not delete any files in debug mode
+my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
 my $BINDIR="/home/pkoehn/statmt/bin";
