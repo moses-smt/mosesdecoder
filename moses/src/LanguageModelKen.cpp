@@ -98,9 +98,9 @@ struct KenLMState : public FFState {
   lm::ngram::State state;
   int Compare(const FFState &o) const {
     const KenLMState &other = static_cast<const KenLMState &>(o);
-    if (state.valid_length_ < other.state.valid_length_) return -1;
-    if (state.valid_length_ > other.state.valid_length_) return 1;
-    return std::memcmp(state.history_, other.state.history_, sizeof(lm::WordIndex) * state.valid_length_);
+    if (state.length < other.state.length) return -1;
+    if (state.length > other.state.length) return 1;
+    return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
   }
 };
 

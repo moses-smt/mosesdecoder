@@ -1,9 +1,10 @@
 #ifndef LM_SEARCH_HASHED__
 #define LM_SEARCH_HASHED__
 
-#include "lm/binary_format.hh"
+#include "lm/model_type.hh"
 #include "lm/config.hh"
 #include "lm/read_arpa.hh"
+#include "lm/return.hh"
 #include "lm/weights.hh"
 
 #include "util/bit_packing.hh"
@@ -11,6 +12,7 @@
 #include "util/probing_hash_table.hh"
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 
 namespace util { class FilePiece; }
@@ -53,13 +55,14 @@ struct HashedSearch {
 
   Unigram unigram;
 
-  void LookupUnigram(WordIndex word, float &prob, float &backoff, Node &next, bool &no_left) const {
+  void LookupUnigram(WordIndex word, float &backoff, Node &next, FullScoreReturn &ret) const {
     const ProbBackoff &entry = unigram.Lookup(word);
-    union { float f; uint32_t i; } val;
+    util::FloatEnc val;
     val.f = entry.prob;
-    no_left = val.i & util::kSignBit;
+    ret.independent_left = (val.i & util::kSignBit);
+    ret.extend_left = static_cast<uint64_t>(word);
     val.i |= util::kSignBit;
-    prob = val.f;
+    ret.prob = val.f;
     backoff = entry.backoff;
     next = static_cast<Node>(word);
   }
@@ -71,6 +74,8 @@ template <class MiddleT, class LongestT> class TemplateHashedSearch : public Has
 
     typedef LongestT Longest;
     Longest longest;
+
+    static const unsigned int kVersion = 0;
 
     // TODO: move probing_multiplier here with next binary file format update.  
     static void UpdateConfigFromBinary(int, const std::vector<uint64_t> &, Config &) {}
@@ -90,15 +95,33 @@ template <class MiddleT, class LongestT> class TemplateHashedSearch : public Has
     const Middle *MiddleBegin() const { return &*middle_.begin(); }
     const Middle *MiddleEnd() const { return &*middle_.end(); }
 
-    bool LookupMiddle(const Middle &middle, WordIndex word, float &prob, float &backoff, Node &node, bool &no_left) const {
+    Node Unpack(uint64_t extend_pointer, unsigned char extend_length, float &prob) const {
+      util::FloatEnc val;
+      if (extend_length == 1) {
+        val.f = unigram.Lookup(static_cast<uint64_t>(extend_pointer)).prob;
+      } else {
+        typename Middle::ConstIterator found;
+        if (!middle_[extend_length - 2].Find(extend_pointer, found)) {
+          std::cerr << "Extend pointer " << extend_pointer << " should have been found for length " << (unsigned) extend_length << std::endl;
+          abort();
+        }
+        val.f = found->GetValue().prob;
+      }
+      val.i |= util::kSignBit;
+      prob = val.f;
+      return extend_pointer;
+    }
+
+    bool LookupMiddle(const Middle &middle, WordIndex word, float &backoff, Node &node, FullScoreReturn &ret) const {
       node = CombineWordHash(node, word);
       typename Middle::ConstIterator found;
       if (!middle.Find(node, found)) return false;
       util::FloatEnc enc;
       enc.f = found->GetValue().prob;
-      no_left = enc.i & util::kSignBit;
+      ret.independent_left = (enc.i & util::kSignBit);
+      ret.extend_left = node;
       enc.i |= util::kSignBit;
-      prob = enc.f;
+      ret.prob = enc.f;
       backoff = found->GetValue().backoff;
       return true;
     }

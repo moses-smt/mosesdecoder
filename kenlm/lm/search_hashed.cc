@@ -1,5 +1,6 @@
 #include "lm/search_hashed.hh"
 
+#include "lm/binary_format.hh"
 #include "lm/blank.hh"
 #include "lm/lm_exception.hh"
 #include "lm/read_arpa.hh"
@@ -49,13 +50,41 @@ class ActivateUnigram {
     ProbBackoff *modify_;
 };
 
+template <class Middle> void FixSRI(int lower, float negative_lower_prob, unsigned int n, const uint64_t *keys, const WordIndex *vocab_ids, ProbBackoff *unigrams, std::vector<Middle> &middle) {
+  ProbBackoff blank;
+  blank.backoff = kBlankBackoff;
+  // Fix SRI's stupidity. 
+  // Note that negative_lower_prob is the negative of the probability (so it's currently >= 0).  We still want the sign bit off to indicate left extension, so I just do -= on the backoffs.  
+  blank.prob = negative_lower_prob;
+  // An entry was found at lower (order lower + 2).  
+  // We need to insert blanks starting at lower + 1 (order lower + 3).
+  unsigned int fix = static_cast<unsigned int>(lower + 1);
+  uint64_t backoff_hash = detail::CombineWordHash(static_cast<uint64_t>(vocab_ids[1]), vocab_ids[2]);
+  if (fix == 0) {
+    // Insert a missing bigram.  
+    blank.prob -= unigrams[vocab_ids[1]].backoff;
+    SetExtension(unigrams[vocab_ids[1]].backoff);
+    // Bigram including a unigram's backoff
+    middle[0].Insert(Middle::Packing::Make(keys[0], blank));
+    fix = 1;
+  } else {
+    for (unsigned int i = 3; i < fix + 2; ++i) backoff_hash = detail::CombineWordHash(backoff_hash, vocab_ids[i]);
+  }
+  // fix >= 1.  Insert trigrams and above.  
+  for (; fix <= n - 3; ++fix) {
+    typename Middle::MutableIterator gotit;
+    if (middle[fix - 1].UnsafeMutableFind(backoff_hash, gotit)) {
+      float &backoff = gotit->MutableValue().backoff;
+      SetExtension(backoff);
+      blank.prob -= backoff;
+    }
+    middle[fix].Insert(Middle::Packing::Make(keys[fix], blank));
+    backoff_hash = detail::CombineWordHash(backoff_hash, vocab_ids[fix + 2]);
+  }
+}
+
 template <class Voc, class Store, class Middle, class Activate> void ReadNGrams(util::FilePiece &f, const unsigned int n, const size_t count, const Voc &vocab, ProbBackoff *unigrams, std::vector<Middle> &middle, Activate activate, Store &store, PositiveProbWarn &warn) {
   ReadNGramHeader(f, n);
-  ProbBackoff blank;
-  blank.prob = kBlankProb;
-  // Unset sign bit of kBlankProb to indicate it extends left.
-  util::UnsetSign(blank.prob);
-  blank.backoff = kBlankBackoff;
 
   // vocab ids of words in reverse order
   WordIndex vocab_ids[n];
@@ -72,20 +101,26 @@ template <class Voc, class Store, class Middle, class Activate> void ReadNGrams(
     // Initially the sign bit is on, indicating it does not extend left.  Most already have this but there might +0.0.  
     util::SetSign(value.prob);
     store.Insert(Store::Packing::Make(keys[n-2], value));
-    // Go back and insert blanks and set sign to indicate that entries extend left.  
-    for (int lower = n - 3; ; --lower) {
+    // Go back and find the longest right-aligned entry, informing it that it extends left.  Normally this will match immediately, but sometimes SRI is dumb.  
+    int lower;
+    util::FloatEnc fix_prob;
+    for (lower = n - 3; ; --lower) {
       if (lower == -1) {
-        util::UnsetSign(unigrams[vocab_ids[0]].prob);
+        fix_prob.f = unigrams[vocab_ids[0]].prob;
+        fix_prob.i &= ~util::kSignBit;
+        unigrams[vocab_ids[0]].prob = fix_prob.f;
         break;
       }
       if (middle[lower].UnsafeMutableFind(keys[lower], found)) {
         // Turn off sign bit to indicate that it extends left.  
-        util::UnsetSign(found->MutableValue().prob);
+        fix_prob.f = found->MutableValue().prob;
+        fix_prob.i &= ~util::kSignBit;
+        found->MutableValue().prob = fix_prob.f;
         // We don't need to recurse further down because this entry already set the bits for lower entries.  
         break;
       }
-      middle[lower].Insert(Middle::Packing::Make(keys[lower], blank));
     }
+    if (lower != static_cast<int>(n) - 3) FixSRI(lower, fix_prob.f, n, keys, vocab_ids, unigrams, middle);
     activate(vocab_ids, n);
   }
 
