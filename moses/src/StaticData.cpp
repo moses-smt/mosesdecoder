@@ -495,6 +495,11 @@ bool StaticData::LoadData(Parameter *parameter)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_wordTranslationFeature->SetSparseFeatureReporting();
+      for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
+        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerWeightShortName(0)) == 0) {
+          m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();          
+        }
+      }
     }
   }
 
@@ -605,6 +610,11 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
+    for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
+      if (m_sparsePhraseDictionary[i]) {
+        m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sparsePhraseDictionary[i]);
+      }
+    }
   }
 
   //Load extra feature weights
