@@ -19,12 +19,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <iostream>
-#include <fstream>
+#include <ostream>
 #include <string>
-#include <vector>
 #include "FactorCollection.h"
-#include "LanguageModel.h"
 #include "Util.h"
 
 using namespace std;
@@ -63,14 +60,7 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
   return &ret.first->second;
 }
 
-FactorCollection::~FactorCollection()
-{
-  //FactorSet::iterator iter;
-  //for (iter = m_collection.begin() ; iter != m_collection.end() ; iter++)
-  //{
-  //	delete (*iter);
-  //}
-}
+FactorCollection::~FactorCollection() {}
 
 TO_STRING_BODY(FactorCollection);
 

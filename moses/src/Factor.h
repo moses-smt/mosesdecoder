@@ -22,27 +22,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_Factor_h
 #define moses_Factor_h
 
-#include <sstream>
-#include <iostream>
-#include <list>
-#include <vector>
-#include <map>
+#include <ostream>
 #include <string>
 #include "TypeDef.h"
 #include "Util.h"
-#include "hash.h"
 
 namespace Moses
 {
 
 class FactorCollection;
 
-/** Represents a factor (word, POS, etc) on the E or F side
+/** Represents a factor (word, POS, etc).  
  *
- * A Factor object is a tuple of direction (Input or Output,
- * corresponding to French or English), a type (surface form,
- * POS, stem, etc), and the value of the factor.
- *
+ * A Factor has a contiguous identifier and string value.  
  */
 class Factor
 {
@@ -76,15 +68,15 @@ public:
   *	0	= same
   */
   inline int Compare(const Factor &compare) const {
-    if (m_ptrString < compare.m_ptrString)
+    if (this < &compare)
       return -1;
-    if (m_ptrString > compare.m_ptrString)
+    if (this > &compare)
       return 1;
     return 0;
   }
   //! transitive comparison used for adding objects into FactorCollection
   inline bool operator<(const Factor &compare) const {
-    return m_ptrString < compare.m_ptrString;
+    return this < &compare;
   }
 
   // quick equality comparison. Not used
