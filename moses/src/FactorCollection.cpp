@@ -33,19 +33,12 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
+bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString) const
 {
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
-  // find string id
-  const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-
-  FactorSet::const_iterator iterFactor;
-  Factor search(direction, factorType, ptrString); // id not used for searching
-
-  iterFactor = m_collection.find(search);
-  return iterFactor != m_collection.end();
+  return m_map.find(factorString) != m_map.end();
 }
 
 const Factor *FactorCollection::AddFactor(FactorDirection direction
@@ -53,17 +46,21 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
     , const string 		&factorString)
 {
 #ifdef WITH_THREADS
-  boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
-  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  {
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+    Map::const_iterator i = m_map.find(factorString);
+    if (i != m_map.end()) return &i->second;
+  }
+  boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
-  // find string id
-  const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-  pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );
-  if (ret.second)
-    ++m_factorId; // new factor, make sure next new factor has diffrernt id
-
-  const Factor *factor = &(*ret.first);
-  return factor;
+  std::pair<std::string, Factor> to_ins(factorString, Factor());
+  std::pair<Map::iterator, bool> ret(m_map.insert(to_ins));
+  if (ret.second) {
+    Factor &factor = ret.first->second;
+    factor.m_id = m_factorId++;
+    factor.m_ptrString = &ret.first->first;
+  }
+  return &ret.first->second;
 }
 
 FactorCollection::~FactorCollection()
@@ -80,13 +77,12 @@ TO_STRING_BODY(FactorCollection);
 // friend
 ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
 {
-  FactorSet::const_iterator iterFactor;
-
-  for (iterFactor = factorCollection.m_collection.begin() ; iterFactor != factorCollection.m_collection.end() ; ++iterFactor) {
-    const Factor &factor 	= *iterFactor;
-    out << factor;
+#ifdef WITH_THREADS
+  boost::shared_lock<boost::shared_mutex> lock(factorCollection.m_accessLock);
+#endif
+  for (FactorCollection::Map::const_iterator i = factorCollection.m_map.begin(); i != factorCollection.m_map.end(); ++i) {
+    out << i->second;
   }
-
   return out;
 }
 

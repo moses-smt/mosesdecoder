@@ -22,22 +22,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_FactorCollection_h
 #define moses_FactorCollection_h
 
-#include <set>
-#include <string>
+#include "config.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
 #endif
 
+#ifdef HAVE_BOOST
+#include <boost/unordered_map.hpp>
+#else
+#include <map>
+#endif
+
+#include <string>
+
 #include "Factor.h"
 
 namespace Moses
 {
-
-class LanguageModel;
-
-typedef std::set<Factor> FactorSet;
-typedef std::set<std::string> StringSet;
 
 /** collection of factors
  *
@@ -51,16 +53,20 @@ class FactorCollection
 {
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
-protected:
+#ifdef HAVE_BOOST
+  typedef boost::unordered_map<std::string, Factor> Map;
+#else
+  typedef std::map<std::string, Factor> Map;
+#endif
+  Map m_map;
+
   static FactorCollection s_instance;
 #ifdef WITH_THREADS
   //reader-writer lock
-  boost::shared_mutex m_accessLock;
+  mutable boost::shared_mutex m_accessLock;
 #endif
 
-  size_t		m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */
-  FactorSet m_collection; /**< collection of all factors */
-  StringSet m_factorStringCollection; /**< collection of unique string used by factors */
+  size_t m_factorId; /**< unique, contiguous ids, starting from 0, for each factor */
 
   //! constructor. only the 1 static variable can be created
   FactorCollection()
@@ -72,11 +78,10 @@ public:
     return s_instance;
   }
 
-  //! Destructor
   ~FactorCollection();
 
   //! Test to see whether a factor exists
-  bool Exists(FactorDirection direction, FactorType factorType, const std::string &factorString);
+  bool Exists(FactorDirection direction, FactorType factorType, const std::string &factorString) const;
   /** returns a factor with the same direction, factorType and factorString.
   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
   */

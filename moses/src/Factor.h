@@ -53,27 +53,14 @@ class Factor
 
 protected:
 
-  //FactorDirection		m_direction;
-  //FactorType				m_factorType;
+  // FactorCollection writes here.  
   const std::string	*m_ptrString;
-  const size_t			m_id;
+  size_t			m_id;
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
-  Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, size_t id);
-  //! no id set. do not used to create new factors, only used for seeing if factor exists
-  Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
+  Factor() {}
 
 public:
-  //! returns whether this factor is part of the source ('Input') or target ('Output') language
-  //inline FactorDirection GetFactorDirection() const
-  //{
-  //	return m_direction;
-  //}
-  //! index, FactorType. For example, 0=surface, 1=POS. The actual mapping is user defined
-  //inline FactorType GetFactorType() const
-  //{
-  //	return m_factorType;
-  //}
   //! original string representation of the factor
   inline const std::string &GetString() const {
     return *m_ptrString;
@@ -83,44 +70,21 @@ public:
     return m_id;
   }
 
-  /*
-  //! Alternative comparison between factors. Not yet used
-  inline unsigned int GetHash() const
-  {
-  	unsigned int h=quick_hash((const char*)&m_direction, sizeof(FactorDirection), 0xc7e7f2fd);
-  	h=quick_hash((const char*)&m_factorType, sizeof(FactorType), h);
-  	h=quick_hash((const char*)&m_ptrString, sizeof(const std::string *), h);
-  	return h;
-  }
-  */
-
   /** transitive comparison between 2 factors.
   *	-1 = less than
   *	+1 = more than
   *	0	= same
-  *	Used by operator< & operator==, as well as other classes
   */
   inline int Compare(const Factor &compare) const {
     if (m_ptrString < compare.m_ptrString)
       return -1;
     if (m_ptrString > compare.m_ptrString)
       return 1;
-    /*
-    		if (m_direction < compare.m_direction)
-    			return -1;
-    		if (m_direction > compare.m_direction)
-    			return 1;
-
-    		if (m_factorType < compare.m_factorType)
-    			return -1;
-    		if (m_factorType > compare.m_factorType)
-    			return 1;
-    */
     return 0;
   }
   //! transitive comparison used for adding objects into FactorCollection
   inline bool operator<(const Factor &compare) const {
-    return Compare(compare) < 0;
+    return m_ptrString < compare.m_ptrString;
   }
 
   // quick equality comparison. Not used
