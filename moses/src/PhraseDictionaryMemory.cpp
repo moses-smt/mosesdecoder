@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
+#include "SparsePhraseDictionaryFeature.h"
 
 using namespace std;
 
@@ -115,11 +116,21 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     if (tokens.size() > 3)
       targetPhrase.SetAlignmentInfo(tokens[3]);
 
+    ScoreComponentCollection sparse;
+    if (tokens.size() > 5) {
+      //sparse features
+      SparsePhraseDictionaryFeature* spdf = 
+        GetFeature()->GetSparsePhraseDictionaryFeature();
+      if (spdf) {
+        sparse.Assign(spdf,tokens[5]);
+      }
+    }
+
     // component score, for n-best output
     std::vector<float> scv(scoreVector.size());
     std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
     std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
-    targetPhrase.SetScore(m_feature, scv, weight, weightWP, languageModels);
+    targetPhrase.SetScore(m_feature, scv, sparse, weight, weightWP, languageModels);
 
     AddEquivPhrase(sourcePhrase, targetPhrase);
 

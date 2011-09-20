@@ -186,6 +186,9 @@ public:
     m_scores[fname] = score;
   }
 
+  //Read sparse features from string
+  void Assign(const ScoreProducer* sp, const std::string line);
+
   // shortcut: setting the value directly using the feature name
   void Assign(const std::string name, float score)
   {

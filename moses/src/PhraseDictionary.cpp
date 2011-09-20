@@ -45,6 +45,7 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 
 PhraseDictionaryFeature::PhraseDictionaryFeature
 (PhraseTableImplementation implementation
+ , SparsePhraseDictionaryFeature* spdf
  , size_t numScoreComponent
  , unsigned numInputScores
  , const std::vector<FactorType> &input
@@ -62,7 +63,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_tableLimit(tableLimit),
   m_implementation(implementation),
   m_targetFile(targetFile),
-  m_alignmentsFile(alignmentsFile)
+  m_alignmentsFile(alignmentsFile),
+  m_sparsePhraseDictionaryFeature(spdf)
 {
   const StaticData& staticData = StaticData::Instance();
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray) {

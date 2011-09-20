@@ -126,7 +126,7 @@ namespace Moses {
     write(out);
     out.close();
   }
-  
+
   void FVector::write(ostream& out) const {
     for (const_iterator i = cbegin(); i != cend(); ++i) {
       out << i->first << " " << i->second << endl;
@@ -145,6 +145,12 @@ namespace Moses {
   bool FVector::operator== (const FVector& rhs) const {
     if (this == &rhs) {
       return true;
+    }
+    if (m_coreFeatures.size() != rhs.m_coreFeatures.size()) {
+      return false;
+    }
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      if (!equalsTolerance(m_coreFeatures[i], rhs.m_coreFeatures[i])) return false;
     }
     for (const_iterator i  = cbegin(); i != cend(); ++i) {
       if (!equalsTolerance(i->second,rhs.get(i->first))) return false;

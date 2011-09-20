@@ -106,7 +106,7 @@ void TargetPhrase::SetScore(float score)
 	vector <float> scoreVector(numScores,score/numScores);
 	
 	//Now we have what we need to call the full SetScore method
-	SetScore(prod,scoreVector,weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
+	SetScore(prod,scoreVector, ScoreComponentCollection(), weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
 }
 
 /**
@@ -126,11 +126,12 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
 	Scores sizedScoreVector = scoreVector;
 	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-	SetScore(prod,sizedScoreVector,weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
+	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
                             const Scores &scoreVector,
+                            const ScoreComponentCollection &sparseScoreVector,
                             const vector<float> &weightT,
                             float weightWP, const LMList &languageModels)
 {
@@ -139,6 +140,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 
   m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
+  m_scoreBreakdown.PlusEquals(sparseScoreVector);
 
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;

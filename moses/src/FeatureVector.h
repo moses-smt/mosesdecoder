@@ -166,9 +166,9 @@ namespace Moses {
     FValue l2norm() const;
     FValue sum() const;
     
-    /** printing */
+    /** pretty printing */
     std::ostream& print(std::ostream& out) const;
-		
+
     void applyLog(size_t baseOfLog);
     //scale so that abs. value is less than maxvalue
     void thresholdScale(float maxValue );
@@ -201,6 +201,7 @@ namespace Moses {
 			}
 			ar << names;
 			ar << values;
+      ar << m_coreFeatures;
     }
 		
     template<class Archive>
@@ -210,6 +211,7 @@ namespace Moses {
 			std::vector<FValue> values;
 			ar >> names;
 			ar >> values;
+      ar >> m_coreFeatures;
 			assert (names.size() == values.size());
 			for (size_t i = 0; i < names.size(); ++i) {
 				set(FName(names[i]), values[i]);

@@ -63,6 +63,20 @@ float ScoreComponentCollection::GetL2Norm() {
   return m_scores.l2norm();
 }
 
+void ScoreComponentCollection::Assign(const ScoreProducer* sp, const string line) {
+  assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+  istringstream istr(line);
+  while(istr) {
+    string namestring;
+    FValue value;
+    istr >> namestring;
+    if (!istr) break;
+    istr >> value;
+    FName fname(sp->GetScoreProducerDescription(), namestring);
+    m_scores[fname] = value;
+  }
+}
+
 }
 
 

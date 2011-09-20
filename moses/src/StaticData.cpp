@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
 #include "PhraseDictionary.h"
+#include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
 #include "TargetWordInsertionFeature.h"
@@ -656,6 +657,7 @@ void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& w
 
 StaticData::~StaticData()
 {
+  RemoveAllInColl(m_sparsePhraseDictionary);
   RemoveAllInColl(m_phraseDictionary);
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
@@ -1107,8 +1109,17 @@ bool StaticData::LoadPhraseTables()
       PrintUserTime(string("Start loading PhraseTable ") + filePath);
       VERBOSE(1,"filePath: " << filePath <<endl);
 
+      //optional create sparse phrase feature
+      SparsePhraseDictionaryFeature* spdf = NULL; 
+      if (token.size() >= 6 && token[5] == "sparse") {
+          spdf = new SparsePhraseDictionaryFeature();
+      }
+      m_sparsePhraseDictionary.push_back(spdf);
+
+
       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
         implementation
+        , spdf
         , numScoreComponent
         , (currDict==0 ? m_numInputScores : 0)
         , input

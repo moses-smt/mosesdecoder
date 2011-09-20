@@ -60,6 +60,7 @@ class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseBoundaryFeature;
 class PhraseDictionaryFeature;
+class SparsePhraseDictionaryFeature;
 class PhrasePairFeature;
 class BleuScoreFeature;
 class PhraseLengthFeature;
@@ -88,6 +89,7 @@ protected:
 
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
+  std::vector<SparsePhraseDictionaryFeature*>	m_sparsePhraseDictionary;
   std::vector<GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;

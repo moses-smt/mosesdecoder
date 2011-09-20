@@ -90,6 +90,7 @@ public:
   	*/
   void SetScore(const ScoreProducer* translationScoreProducer,
                 const Scores &scoreVector,
+                const ScoreComponentCollection &sparseScoreVector,
                 const std::vector<float> &weightT,
                 float weightWP,
                 const LMList &languageModels);
