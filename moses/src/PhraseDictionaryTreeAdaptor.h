@@ -60,10 +60,8 @@ public:
   // this function can be only used for UNKNOWN source phrases
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 
-  std::string GetScoreProducerDescription() const;
-  std::string GetScoreProducerWeightShortName() const {
-    return "tm";
-  }
+  std::string GetScoreProducerDescription(unsigned idx=0) const;
+  std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
 
   size_t GetNumInputScores() const;
   virtual void InitializeForInput(InputType const& source);

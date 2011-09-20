@@ -3,7 +3,6 @@
  */
 #ifndef __HASHMAPSTRINGINFOS_H__
 #define __HASHMAPSTRINGINFOS_H__
-#include <boost/functional/hash.hpp>
 #include "stringInfosHasher.h"
 #include <vector>
 #include <string>

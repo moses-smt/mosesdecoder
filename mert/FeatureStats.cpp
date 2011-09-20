@@ -21,7 +21,7 @@ FeatureStats::FeatureStats()
 
 FeatureStats::~FeatureStats()
 {
-  delete array_;
+  delete[] array_;
 };
 
 FeatureStats::FeatureStats(const FeatureStats &stats)
@@ -30,6 +30,7 @@ FeatureStats::FeatureStats(const FeatureStats &stats)
   entries_ = stats.size();
   array_ = new FeatureStatsType[available_];
   memcpy(array_,stats.getArray(),featbytes_);
+  map_ = stats.getSparse();
 };
 
 FeatureStats::FeatureStats(const size_t size)
@@ -61,6 +62,11 @@ void FeatureStats::add(FeatureStatsType v)
   array_[entries_++]=v;
 }
 
+void FeatureStats::addSparse(string name, FeatureStatsType v)
+{
+  map_[name]=v;
+}
+
 void FeatureStats::set(std::string &theString)
 {
   std::string substring, stringBuf;
@@ -68,7 +74,15 @@ void FeatureStats::set(std::string &theString)
 
   while (!theString.empty()) {
     getNextPound(theString, substring);
-    add(ATOFST(substring.c_str()));
+    // regular feature
+    if (substring.find(":") == string::npos) {
+      add(ATOFST(substring.c_str()));
+    }
+    // sparse feature
+    else {
+      size_t separator = substring.find_last_of(":");
+      addSparse(substring.substr(0,separator), atof(substring.substr(separator+1).c_str()) );
+    }
   }
 }
 
@@ -123,6 +137,7 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
   entries_ = stats.size();
   array_ = new FeatureStatsType[available_];
   memcpy(array_,stats.getArray(),featbytes_);
+  map_ = stats.getSparse();
 
   return *this;
 }
@@ -131,7 +146,14 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 /**write the whole object to a stream*/
 ostream& operator<<(ostream& o, const FeatureStats& e)
 {
-  for (size_t i=0; i< e.size(); i++)
+  // print regular features
+  for (size_t i=0; i< e.size(); i++) {
     o << e.get(i) << " ";
+  }
+  // sparse features
+  const sparse_featstats_t &sparse = e.getSparse();
+  for(sparse_featstats_t::const_iterator i = sparse.begin(); i != sparse.end(); i++) {
+    o << i->first << i->second << " ";
+  }
   return o;
 }

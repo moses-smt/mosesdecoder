@@ -10,7 +10,7 @@ clean:
 extract: tables-core.o SentenceAlignment.o extract.o
 	$(CXX) $^ -o extract
 
-extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o SyntaxTree.o XmlTree.o HoleCollection.o extract-rules.o 
+extract-rules: tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.o SyntaxTree.o XmlTree.o HoleCollection.o extract-rules.o ExtractedRule.o
 	$(CXX) $^ -o extract-rules
 
 extract-lex: extract-lex.o

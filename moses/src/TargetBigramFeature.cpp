@@ -39,7 +39,7 @@ size_t TargetBigramFeature::GetNumScoreComponents() const
 }
 
 
-string TargetBigramFeature::GetScoreProducerWeightShortName() const
+string TargetBigramFeature::GetScoreProducerWeightShortName(unsigned) const
 {
 	return "dlmb";
 }

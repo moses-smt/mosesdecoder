@@ -254,7 +254,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
             delete tpcollBerkeleyDb;
             m_cache[tpCollFilePos] = targetPhraseCollection;
           } else {
-            // jsut get out of cache
+            // just get out of cache
             targetPhraseCollection = iterCache->second;
           }
 

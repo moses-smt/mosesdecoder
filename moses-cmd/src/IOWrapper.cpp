@@ -207,22 +207,40 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
   }
 }
 
-void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+void OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
 {
-  ostringstream out;
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments();
+  
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+  }
+  
+}
+
+void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
+{
   size_t targetOffset = 0;
 
   for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
     const Hypothesis &edge = *edges[currEdge];
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-    AlignmentInfo::const_iterator it;
-    for (it = tp.GetAlignmentInfo().begin(); it != tp.GetAlignmentInfo().end(); ++it) {
-      out << it->first + sourceOffset << "-" << it->second + targetOffset << " ";
-    }
+    
+    OutputAlignment(out, tp.GetAlignmentInfo(), sourceOffset, targetOffset);
+
     targetOffset += tp.GetSize();
   }
   out << std::endl;
+}
+
+void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
+{
+  ostringstream out;
+  OutputAlignment(out, edges);
+  
   collector->Write(lineNo,out.str());
 }
 
@@ -364,68 +382,45 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
     // print scores with feature names
     OutputAllFeatureScores( out, system, path );
+    string lastName;
 
     // translation components
-    if (StaticData::Instance().GetInputType()==SentenceInput) {
-      // translation components	for text input
-      vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
-      if (pds.size() > 0) {
-        if (labeledOutput)
-          out << " tm:";
-        vector<PhraseDictionaryFeature*>::iterator iter;
-        for (iter = pds.begin(); iter != pds.end(); ++iter) {
-          vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-          for (size_t j = 0; j<scores.size(); ++j)
-            out << " " << scores[j];
-        }
-      }
-    } else {
-      // translation components for Confusion Network input
-      // first translation component has GetNumInputScores() scores from the input Confusion Network
-      // at the beginning of the vector
-      vector<PhraseDictionaryFeature*> pds = system->GetPhraseDictionaries();
-      if (pds.size() > 0) {
-        vector<PhraseDictionaryFeature*>::iterator iter;
+    const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
+    if (pds.size() > 0) {
 
-        iter = pds.begin();
-        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
+      for( size_t i=0; i<pds.size(); i++ ) {
+	size_t pd_numinputscore = pds[i]->GetNumInputScores();
+	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+	for (size_t j = 0; j<scores.size(); ++j){
 
-        size_t pd_numinputscore = (*iter)->GetNumInputScores();
-
-        if (pd_numinputscore) {
-
-          if (labeledOutput)
-            out << " I:";
-
-          for (size_t j = 0; j < pd_numinputscore; ++j)
-            out << " " << scores[j];
-        }
-
-
-        for (iter = pds.begin() ; iter != pds.end(); ++iter) {
-          vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-
-          size_t pd_numinputscore = (*iter)->GetNumInputScores();
-
-          if (iter == pds.begin() && labeledOutput)
-            out << " tm:";
-          for (size_t j = pd_numinputscore; j < scores.size() ; ++j)
-            out << " " << scores[j];
-        }
+	  if (labeledOutput && (i == 0) ){
+	    if ((j == 0) || (j == pd_numinputscore)){
+	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+	      out << " " << lastName << ":";
+	    }
+	  }
+	  out << " " << scores[j];
+	}
       }
     }
 
     // generation
-    const vector<GenerationDictionary*> gds = system->GetGenerationDictionaries();
+    const vector<GenerationDictionary*>& gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
-      if (labeledOutput)
-        out << " g: ";
-      vector<GenerationDictionary*>::const_iterator iter;
-      for (iter = gds.begin(); iter != gds.end(); ++iter) {
-        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(*iter);
-        for (size_t j = 0; j<scores.size(); j++) {
-          out << scores[j] << " ";
-        }
+
+      for( size_t i=0; i<gds.size(); i++ ) {
+	size_t pd_numinputscore = gds[i]->GetNumInputScores();
+	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+	for (size_t j = 0; j<scores.size(); ++j){
+
+	  if (labeledOutput && (i == 0) ){
+	    if ((j == 0) || (j == pd_numinputscore)){
+	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+	      out << " " << lastName << ":";
+	    }
+	  }
+	  out << " " << scores[j];
+	}
       }
     }
 
@@ -451,18 +446,17 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     }
 
     if (includeWordAlignment) {
-      out << " |||";
+      out << " ||| ";
       for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];
         const WordsRange &sourceRange = edge.GetCurrSourceWordsRange();
         WordsRange targetRange = path.GetTargetWordsRange(edge);
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
-        const AlignmentInfo AI = edge.GetCurrTargetPhrase().GetAlignmentInfo();
-        AlignmentInfo::const_iterator iter;
-        for (iter = AI.begin(); iter != AI.end(); ++iter) {
-          out << " " << iter->first+sourceOffset << "-" << iter->second+targetOffset;
-        }
+        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignmentInfo();
+        
+        OutputAlignment(out, ai, sourceOffset, targetOffset);
+
       }
     }
 

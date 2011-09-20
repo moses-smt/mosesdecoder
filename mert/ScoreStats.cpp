@@ -21,7 +21,7 @@ ScoreStats::ScoreStats()
 
 ScoreStats::~ScoreStats()
 {
-  delete array_;
+  delete[] array_;
 };
 
 ScoreStats::ScoreStats(const ScoreStats &stats)

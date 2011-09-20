@@ -37,9 +37,9 @@ public:
   LMResult GetValueGivenState(const std::vector<const Word*>&, FFState&) const;
   LMResult GetValueForgotState(const std::vector<const Word*>&, FFState&) const;
   float GetValue(const std::vector<const Word*>&, size_t, size_t*) const;
-  FFState* GetNullContextState() const;
+  const FFState* GetNullContextState() const;
   FFState* GetNewSentenceState() const;
-  FFState* GetBeginSentenceState() const;
+  const FFState* GetBeginSentenceState() const;
   FFState* NewState(const FFState*) const;
   void CleanUpAfterSentenceProcessing();
   void InitializeBeforeSentenceProcessing();

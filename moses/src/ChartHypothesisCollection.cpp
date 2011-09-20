@@ -259,7 +259,8 @@ void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream 
   HCType::const_iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     ChartHypothesis &mainHypo = **iter;
-		if (reachable.find(mainHypo.GetId()) != reachable.end()) {
+		if (StaticData::Instance().GetUnprunedSearchGraph() ||
+        reachable.find(mainHypo.GetId()) != reachable.end()) {
 			outputSearchGraphStream << translationId << " " << mainHypo << endl;
 		}
 

@@ -286,12 +286,12 @@ FFState *LanguageModelParallelBackoff::NewState(const FFState * /*from*/) const
   return NULL;
 }
 
-FFState *LanguageModelParallelBackoff::GetNullContextState() const
+const FFState *LanguageModelParallelBackoff::GetNullContextState() const
 {
   return NULL;
 }
 
-FFState *LanguageModelParallelBackoff::GetBeginSentenceState() const
+const FFState *LanguageModelParallelBackoff::GetBeginSentenceState() const
 {
   return NULL;
 }

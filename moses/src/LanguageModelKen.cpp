@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <stdlib.h>
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/model.hh"
@@ -39,6 +40,8 @@ using namespace std;
 
 namespace Moses
 {
+
+LanguageModelKenBase::~LanguageModelKenBase() {}
 
 namespace
 {
@@ -78,14 +81,14 @@ struct KenLMState : public FFState {
 
 /** Implementation of single factor LM using Ken's code.
 */
-template <class Model> class LanguageModelKen : public LanguageModelSingleFactor
+template <class Model> class LanguageModelKen : public LanguageModelKenBase
 {
 private:
   Model *m_ngram;
   std::vector<lm::WordIndex> m_lmIdLookup;
   bool m_lazy;
-  FFState *m_nullContextState;
-  FFState *m_beginSentenceState;
+  KenLMState m_nullContextState;
+  KenLMState m_beginSentenceState;
 
   void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
 
@@ -97,12 +100,20 @@ public:
             , FactorType factorType
             , size_t nGramOrder);
 
-  LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
-  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+  LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const {
+    return GetKenFullScoreGivenState(contextFactor, state);
+  }
+  LMKenResult GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
+
+  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+    return GetKenFullScoreForgotState(contextFactor, outState);
+  }
+  LMKenResult GetKenFullScoreForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+
   void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  FFState *GetNullContextState() const;
-  FFState *GetBeginSentenceState() const;
+  const FFState *GetNullContextState() const;
+  const FFState *GetBeginSentenceState() const;
   FFState *NewState(const FFState *from = NULL) const;
 
   lm::WordIndex GetLmID(const std::string &str) const;
@@ -159,24 +170,26 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
   config.enumerate_vocab = &builder;
   config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
-  m_ngram = new Model(filePath.c_str(), config);
+  try {
+    m_ngram = new Model(filePath.c_str(), config);
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    abort();
+  }
   m_nGramOrder  = m_ngram->Order();
 
-  KenLMState *tmp = new KenLMState();
-  tmp->state = m_ngram->NullContextState();
-  m_nullContextState = tmp;
-  tmp = new KenLMState();
-  tmp->state = m_ngram->BeginSentenceState();
-  m_beginSentenceState = tmp;
+  m_nullContextState.state = m_ngram->NullContextState();
+  m_beginSentenceState.state = m_ngram->BeginSentenceState();
   return true;
 }
 
-template <class Model> LMResult LanguageModelKen<Model>::GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const
+template <class Model> LMKenResult LanguageModelKen<Model>::GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const
 {
-  LMResult result;
+  LMKenResult result;
   if (contextFactor.empty()) {
     result.score = 0.0;
     result.unknown = false;
+    result.ngram_length = 0;
     return result;
   }
   lm::ngram::State &realState = static_cast<KenLMState&>(state).state;
@@ -187,16 +200,18 @@ template <class Model> LMResult LanguageModelKen<Model>::GetValueGivenState(cons
 
   result.score = TransformLMScore(ret.prob);
   result.unknown = (new_word == 0);
+  result.ngram_length = ret.ngram_length;
   return result;
 }
 
-template <class Model> LMResult LanguageModelKen<Model>::GetValueForgotState(const vector<const Word*> &contextFactor, FFState &outState) const
+template <class Model> LMKenResult LanguageModelKen<Model>::GetKenFullScoreForgotState(const vector<const Word*> &contextFactor, FFState &outState) const
 {
-  LMResult result;
+  LMKenResult result;
   if (contextFactor.empty()) {
     static_cast<KenLMState&>(outState).state = m_ngram->NullContextState();
     result.score = 0.0;
     result.unknown = false;
+    result.ngram_length = 0;
     return result;
   }
 
@@ -207,6 +222,7 @@ template <class Model> LMResult LanguageModelKen<Model>::GetValueForgotState(con
 
   result.score = TransformLMScore(ret.prob);
   result.unknown = (indices[0] == 0);
+  result.ngram_length = ret.ngram_length;
   return result;
 }
 
@@ -221,14 +237,14 @@ template <class Model> void LanguageModelKen<Model>::GetState(const std::vector<
   m_ngram->GetState(indices, indices + contextFactor.size(), static_cast<KenLMState&>(outState).state);
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::GetNullContextState() const
+template <class Model> const FFState *LanguageModelKen<Model>::GetNullContextState() const
 {
-  return m_nullContextState;
+  return &m_nullContextState;
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::GetBeginSentenceState() const
+template <class Model> const FFState *LanguageModelKen<Model>::GetBeginSentenceState() const
 {
-  return m_beginSentenceState;
+  return &m_beginSentenceState;
 }
 
 template <class Model> FFState *LanguageModelKen<Model>::NewState(const FFState *from) const

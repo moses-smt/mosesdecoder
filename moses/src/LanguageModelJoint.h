@@ -119,11 +119,11 @@ public:
     return ret;
   }
 
-  FFState *GetNullContextState() const {
+  const FFState *GetNullContextState() const {
     return m_lmImpl->GetNullContextState();
   }
 
-  FFState *GetBeginSentenceState() const {
+  const FFState *GetBeginSentenceState() const {
     return m_lmImpl->GetBeginSentenceState();
   }
 
