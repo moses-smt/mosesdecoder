@@ -81,8 +81,6 @@ public:
   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
   */
   const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);
-  //! Load list of factors. Deprecated
-  void LoadVocab(FactorDirection direction, FactorType factorType, const std::string &filePath);
 
   TO_STRING();
 
