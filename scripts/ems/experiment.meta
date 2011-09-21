@@ -356,6 +356,18 @@ build-ttable
 	out: phrase-translation-table
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
 	default-name: model/phrase-table
+build-pairs-to-sids
+  in: extracted-phrases
+  out: pairs-to-sids
+  ignore-unless: sparse-phrase-scripts-dir
+  default-name: model/pairs-to-sids
+  template: $sparse-phrase-scripts-dir/assign-pairs-to-sids.perl IN > OUT.gz
+build-sparse-ttable
+  in: corpus phrase-translation-table pairs-to-sids
+  out: sparse-phrase-translation-table
+  default-name: model/phrase-table-sparse
+  ignore-unless: sparse-phrase-scripts-dir
+  template: $sparse-phrase-scripts-dir/extract-features.py -f $input-extension -e $output-extension -c IN -t IN1 -p IN2 -x $sparse-phrase-features | gzip -c > OUT.gz
 build-generation
 	in: corpus
 	out: generation-table
@@ -370,14 +382,14 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 create-config
-	in: reordering-table phrase-translation-table generation-table LM:binlm
+	in: reordering-table phrase-translation-table generation-table sparse-phrase-translation-table LM:binlm 
 	out: config
 	ignore-if: use-hiero INTERPOLATED-LM:script
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
 	default-name: model/moses.ini
 	error: Unknown option
 create-config-interpolated-lm
-	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm
+	in: reordering-table phrase-translation-table sparse-phrase-translation-table generation-table INTERPOLATED-LM:binlm
 	out: config
 	ignore-if: use-hiero
 	ignore-unless: INTERPOLATED-LM:script
