@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+class FactorFriend;
 class FactorCollection;
 
 /** Represents a factor (word, POS, etc).  
@@ -42,8 +43,7 @@ class Factor
 
   // only these classes are allowed to instantiate this class
   friend class FactorCollection;
-
-protected:
+  friend class FactorFriend;
 
   // FactorCollection writes here.  
   std::string m_string;
@@ -51,6 +51,12 @@ protected:
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
   Factor() {}
+
+  // Needed for STL containers.  They'll delegate through FactorFriend, which is never exposed publicly.  
+  Factor(const Factor &factor) : m_string(factor.m_string), m_id(factor.m_id) {}
+
+  // Not implemented.  Shouldn't be called.  
+  Factor &operator=(const Factor &factor);
 
 public:
   //! original string representation of the factor

@@ -43,6 +43,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+/* We don't want Factor to be copyable by anybody.  But we also want to store
+ * it in an STL container.  The solution is that Factor's copy constructor is
+ * private and friended to FactorFriend.  The STL containers can delegate
+ * copying, so friending the container isn't sufficient.  STL containers see
+ * FactorFriend's public copy constructor and everybody else sees Factor's
+ * private copy constructor.  
+ */
+struct FactorFriend {
+  Factor in;
+};
+
 /** collection of factors
  *
  * All Factors in moses are accessed and created by a FactorCollection.
@@ -56,33 +67,33 @@ class FactorCollection
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
 #ifdef HAVE_BOOST
-  struct HashFactor : public std::unary_function<const Factor &, std::size_t> {
+  struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
     std::size_t operator()(const std::string &str) const {
       return util::MurmurHashNative(str.data(), str.size());
     }
-    std::size_t operator()(const Factor &factor) const {
-      return (*this)(factor.GetString());
+    std::size_t operator()(const FactorFriend &factor) const {
+      return (*this)(factor.in.GetString());
     }
   };
-  struct EqualsFactor : public std::binary_function<const Factor &, const Factor &, bool> {
-    bool operator()(const Factor &left, const Factor &right) const {
-      return left.GetString() == right.GetString();
+  struct EqualsFactor : public std::binary_function<const FactorFriend &, const Factor &, bool> {
+    bool operator()(const Factor &left, const FactorFriend &right) const {
+      return left.in.GetString() == right.in.GetString();
     }
-    bool operator()(const Factor &left, const std::string &right) const {
-      return left.GetString() == right;
+    bool operator()(const FactorFriend &left, const std::string &right) const {
+      return left.in.GetString() == right;
     }
-    bool operator()(const std::string &left, const Factor &right) const {
-      return left == right.GetString();
+    bool operator()(const std::string &left, const FactorFriend &right) const {
+      return left == right.in.GetString();
     }
   };
-  typedef boost::unordered_set<Factor, HashFactor, EqualsFactor> Set;
+  typedef boost::unordered_set<FactorFriend, HashFactor, EqualsFactor> Set;
 #else
-  struct LessFactor : public std::binary_function<const Factor &, const Factor &, bool> {
-    bool operator()(const Factor &left, const Factor &right) const {
-      return left.GetString() < right.GetString();
+  struct LessFactor : public std::binary_function<const FactorFriend &, const FactorFriend &, bool> {
+    bool operator()(const FactorFriend &left, const FactorFriend &right) const {
+      return left.in.GetString() < right.in.GetString();
     }
   };
-  typedef std::set<Factor, LessFactor> Set;
+  typedef std::set<FactorFriend, LessFactor> Set;
 #endif
   Set m_set;
 
