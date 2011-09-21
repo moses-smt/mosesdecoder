@@ -19,6 +19,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#ifdef HAVE_BOOST
+#include <boost/version.hpp>
+#endif
 #include <ostream>
 #include <string>
 #include "FactorCollection.h"
@@ -30,34 +33,41 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString) const
-{
-#ifdef WITH_THREADS
-  boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
-#endif
-  return m_map.find(factorString) != m_map.end();
-}
-
 const Factor *FactorCollection::AddFactor(FactorDirection direction
     , FactorType 			factorType
     , const string 		&factorString)
 {
+// Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS
+#if BOOST_VERSION < 104200
+  Factor to_ins;
+  to_ins.m_string = factorString;
+#endif // BOOST_VERSION
   {
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-    Map::const_iterator i = m_map.find(factorString);
-    if (i != m_map.end()) return &i->second;
+#if BOOST_VERSION >= 104200
+    // If this line doesn't compile, upgrade your Boost.  
+    Set::const_iterator i = m_set.find(factorString, HashFactor(), EqualsFactor());
+#else // BOOST_VERSION
+    Set::const_iterator i = m_set.find(to_ins);
+#endif // BOOST_VERSION
+    if (i != m_set.end()) return &*i;
   }
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-#endif
-  std::pair<std::string, Factor> to_ins(factorString, Factor());
-  std::pair<Map::iterator, bool> ret(m_map.insert(to_ins));
+#if BOOST_VERSION >= 102400
+  Factor to_ins;
+  to_ins.m_string = factorString;
+#endif // BOOST_VERSION
+#else // WITH_THREADS
+  Factor to_ins;
+  to_ins.m_string = factorString;
+#endif // WITH_THREADS
+  to_ins.m_id = m_factorId;
+  std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));
   if (ret.second) {
-    Factor &factor = ret.first->second;
-    factor.m_id = m_factorId++;
-    factor.m_ptrString = &ret.first->first;
+    m_factorId++;
   }
-  return &ret.first->second;
+  return &*ret.first;
 }
 
 FactorCollection::~FactorCollection() {}
@@ -70,8 +80,8 @@ ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(factorCollection.m_accessLock);
 #endif
-  for (FactorCollection::Map::const_iterator i = factorCollection.m_map.begin(); i != factorCollection.m_map.end(); ++i) {
-    out << i->second;
+  for (FactorCollection::Set::const_iterator i = factorCollection.m_set.begin(); i != factorCollection.m_set.end(); ++i) {
+    out << *i;
   }
   return out;
 }

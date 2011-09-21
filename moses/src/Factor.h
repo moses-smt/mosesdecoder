@@ -46,7 +46,7 @@ class Factor
 protected:
 
   // FactorCollection writes here.  
-  const std::string	*m_ptrString;
+  std::string m_string;
   size_t			m_id;
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
@@ -55,7 +55,7 @@ protected:
 public:
   //! original string representation of the factor
   inline const std::string &GetString() const {
-    return *m_ptrString;
+    return m_string;
   }
   //! contiguous ID
   inline size_t GetId() const {

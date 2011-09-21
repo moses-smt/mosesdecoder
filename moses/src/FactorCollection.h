@@ -29,11 +29,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #ifdef HAVE_BOOST
-#include <boost/unordered_map.hpp>
+#include "util/murmur_hash.hh"
+#include <boost/unordered_set.hpp>
 #else
-#include <map>
+#include <set>
 #endif
 
+#include <functional>
 #include <string>
 
 #include "Factor.h"
@@ -54,11 +56,35 @@ class FactorCollection
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
 #ifdef HAVE_BOOST
-  typedef boost::unordered_map<std::string, Factor> Map;
+  struct HashFactor : public std::unary_function<const Factor &, std::size_t> {
+    std::size_t operator()(const std::string &str) const {
+      return util::MurmurHashNative(str.data(), str.size());
+    }
+    std::size_t operator()(const Factor &factor) const {
+      return (*this)(factor.GetString());
+    }
+  };
+  struct EqualsFactor : public std::binary_function<const Factor &, const Factor &, bool> {
+    bool operator()(const Factor &left, const Factor &right) const {
+      return left.GetString() == right.GetString();
+    }
+    bool operator()(const Factor &left, const std::string &right) const {
+      return left.GetString() == right;
+    }
+    bool operator()(const std::string &left, const Factor &right) const {
+      return left == right.GetString();
+    }
+  };
+  typedef boost::unordered_set<Factor, HashFactor, EqualsFactor> Set;
 #else
-  typedef std::map<std::string, Factor> Map;
+  struct LessFactor : public std::binary_function<const Factor &, const Factor &, bool> {
+    bool operator()(const Factor &left, const Factor &right) const {
+      return left.GetString() < right.GetString();
+    }
+  };
+  typedef std::set<Factor, LessFactor> Set;
 #endif
-  Map m_map;
+  Set m_set;
 
   static FactorCollection s_instance;
 #ifdef WITH_THREADS
@@ -80,8 +106,6 @@ public:
 
   ~FactorCollection();
 
-  //! Test to see whether a factor exists
-  bool Exists(FactorDirection direction, FactorType factorType, const std::string &factorString) const;
   /** returns a factor with the same direction, factorType and factorString.
   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
   */
