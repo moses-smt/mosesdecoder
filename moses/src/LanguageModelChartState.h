@@ -22,68 +22,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "FFState.h"
-#include "ChartManager.h"
-#include "ChartHypothesis.h"
 
 namespace Moses
 {
+
+class ChartHypothesis;
+class Phrase;
 
 //! Abstract class for lexical reordering model states
 class LanguageModelChartState : public FFState
 {
 private:
-	float m_prefixScore;
-	FFState* m_lmRightContext;
-	const ChartHypothesis *m_hypo;
+  float m_prefixScore;
+  FFState* m_lmRightContext;
+  const ChartHypothesis *m_hypo;
 
 public:
-	LanguageModelChartState(float prefixScore, 
-													FFState *lmRightContext,
-													const ChartHypothesis &hypo)
-		:m_prefixScore(prefixScore)
-		,m_lmRightContext(lmRightContext)
-		,m_hypo(&hypo) 
-	{}
-	~LanguageModelChartState() {
+  LanguageModelChartState(float prefixScore,
+                          FFState *lmRightContext,
+                          const ChartHypothesis &hypo)
+      :m_prefixScore(prefixScore)
+      ,m_lmRightContext(lmRightContext)
+      ,m_hypo(&hypo)
+  {}
+
+  ~LanguageModelChartState() {
     delete m_lmRightContext;
   }
 
-	float GetPrefixScore() const { return m_prefixScore; }
-	FFState* GetRightContext() const { return m_lmRightContext; }
-	const ChartHypothesis* GetHypothesis() const { return m_hypo; }
+  float GetPrefixScore() const { return m_prefixScore; }
+  FFState* GetRightContext() const { return m_lmRightContext; }
+  const ChartHypothesis* GetHypothesis() const { return m_hypo; }
 
-  int Compare(const FFState& o) const 
-	{
-		const LanguageModelChartState &other =
-			dynamic_cast<const LanguageModelChartState &>( o );
-
-		// prefix
-		if (m_hypo->GetCurrSourceRange().GetStartPos() > 0) // not for "<s> ..."
-		{
-			int ret = m_hypo->GetPrefix().Compare(other.GetHypothesis()->GetPrefix());
-			if (ret != 0)
-				return ret;
-		}
-		
-		// suffix
-		size_t inputSize = m_hypo->GetManager().GetSource().GetSize();
-		if (m_hypo->GetCurrSourceRange().GetEndPos() < inputSize - 1)// not for "... </s>"
-		{
-			int ret = other.GetRightContext()->Compare( *m_lmRightContext );
-			if (ret != 0)
-				return ret;
-		}
-
-//		size_t inputSize = m_hypo->GetManager().GetSource().GetSize();
-//		if (m_hypo->GetCurrSourceRange().GetEndPos() < inputSize - 1) 
-//		{
-//			int ret2 = m_hypo->GetSuffix().Compare(other.GetHypothesis()->GetSuffix());
-//			if (ret != 0)
-//				return ret;
-//		}
-
-		return 0;
-	}
+  int Compare(const FFState& o) const;
 };
 
 }

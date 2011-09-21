@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "ChartHypothesis.h"
 
 using namespace std;
 
@@ -45,6 +46,31 @@ LanguageModelKenBase::~LanguageModelKenBase() {}
 
 namespace
 {
+
+  class LanguageModelChartStateKenLM : public FFState
+  {
+  private:
+    lm::ngram::ChartState m_state;
+    const ChartHypothesis *m_hypo;
+
+  public:
+    explicit LanguageModelChartStateKenLM(const ChartHypothesis &hypo)
+        :m_hypo(&hypo)
+    {}
+
+    const ChartHypothesis* GetHypothesis() const { return m_hypo; }
+
+    const lm::ngram::ChartState &GetChartState() const { return m_state; }
+    lm::ngram::ChartState &GetChartState() { return m_state; }
+
+    int Compare(const FFState& o) const
+    {
+      const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
+      int ret = m_state.Compare(other.m_state);
+      return ret;
+    }
+  };
+
 
 class MappingBuilder : public lm::ngram::EnumerateVocab
 {
@@ -73,14 +99,15 @@ struct KenLMState : public FFState {
   lm::ngram::State state;
   int Compare(const FFState &o) const {
     const KenLMState &other = static_cast<const KenLMState &>(o);
-    if (state.valid_length_ < other.state.valid_length_) return -1;
-    if (state.valid_length_ > other.state.valid_length_) return 1;
-    return std::memcmp(state.history_, other.state.history_, sizeof(lm::WordIndex) * state.valid_length_);
+    if (state.length < other.state.length) return -1;
+    if (state.length > other.state.length) return 1;
+    return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
   }
 };
 
-/** Implementation of single factor LM using Ken's code.
-*/
+/*
+ * An implementation of single factor LM using Ken's code.
+ */
 template <class Model> class LanguageModelKen : public LanguageModelKenBase
 {
 private:
@@ -121,7 +148,57 @@ public:
   void CleanUpAfterSentenceProcessing() {}
   void InitializeBeforeSentenceProcessing() {}
 
+  FFState *EvaluateChart(const ChartHypothesis& cur_hypo,
+                         int featureID,
+                         ScoreComponentCollection *accumulator,
+                         const LanguageModel *feature) const;
 };
+
+template <class Model>
+FFState *LanguageModelKen<Model>::EvaluateChart(
+    const ChartHypothesis& hypo,
+    int featureID,
+    ScoreComponentCollection *accumulator,
+    const LanguageModel *feature) const
+{
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+
+  const size_t size = hypo.GetCurrTargetPhrase().GetSize();
+  size_t phrasePos = 0;
+  // Special cases for first word.  
+  if (size) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(0);
+    if (word == GetSentenceStartArray()) {
+      // Begin of sentence
+      ruleScore.BeginSentence();
+      phrasePos++;
+    } else if (word.IsNonTerminal()) {
+      // Non-terminal is first so we can copy instead of rescoring.  
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
+      phrasePos++;
+    }
+  }
+
+  for (; phrasePos < size; phrasePos++) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
+    if (word.IsNonTerminal()) {
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
+    } else {
+      std::size_t factor = word.GetFactor(GetFactorType())->GetId();
+      lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+      ruleScore.Terminal(new_word);
+    }
+  }
+
+  accumulator->Assign(feature, ruleScore.Finish());
+  return newState;
+}
 
 template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const
 {
@@ -148,8 +225,8 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
     FactorType factorType,
     size_t /*nGramOrder*/)
 {
-  m_factorType  = factorType;
-  m_filePath    = filePath;
+  m_factorType = factorType;
+  m_filePath   = filePath;
 
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
