@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_FactorCollection_h
 #define moses_FactorCollection_h
 
-#include "config.h"
+#include "../../config.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
