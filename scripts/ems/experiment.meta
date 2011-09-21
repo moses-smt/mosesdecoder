@@ -361,7 +361,7 @@ build-pairs-to-sids
   out: pairs-to-sids
   ignore-unless: sparse-phrase-scripts-dir
   default-name: model/pairs-to-sids
-  template: $sparse-phrase-scripts-dir/assign-pairs-to-sids.perl IN > OUT.gz
+  template: $sparse-phrase-scripts-dir/assign-pairs-to-sids.perl IN | gzip -c >  OUT.gz
 build-sparse-ttable
   in: corpus phrase-translation-table pairs-to-sids
   out: sparse-phrase-translation-table
