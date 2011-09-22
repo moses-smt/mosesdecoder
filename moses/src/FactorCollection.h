@@ -75,8 +75,8 @@ class FactorCollection
       return (*this)(factor.in.GetString());
     }
   };
-  struct EqualsFactor : public std::binary_function<const FactorFriend &, const Factor &, bool> {
-    bool operator()(const Factor &left, const FactorFriend &right) const {
+  struct EqualsFactor : public std::binary_function<const FactorFriend &, const FactorFriend &, bool> {
+    bool operator()(const FactorFriend &left, const FactorFriend &right) const {
       return left.in.GetString() == right.in.GetString();
     }
     bool operator()(const FactorFriend &left, const std::string &right) const {

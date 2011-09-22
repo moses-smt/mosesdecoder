@@ -51,7 +51,7 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
 #else // BOOST_VERSION
     Set::const_iterator i = m_set.find(to_ins);
 #endif // BOOST_VERSION
-    if (i != m_set.end()) return &*i;
+    if (i != m_set.end()) return &i->in;
   }
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #if BOOST_VERSION >= 102400
