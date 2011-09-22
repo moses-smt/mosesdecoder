@@ -217,24 +217,6 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  // create threadpool, if necessary
-  int threadcount = (parameter.GetParam("threads").size() > 0) ?
-                    Scan<size_t>(parameter.GetParam("threads")[0]) : 1;
-
-#ifdef WITH_THREADS
-  if (threadcount < 1) {
-    cerr << "Error: Need to specify a positive number of threads" << endl;
-    exit(1);
-  }
-  ThreadPool pool(threadcount);
-#else
-  if (threadcount > 1) {
-    cerr << "Error: Thread count of " << threadcount
-         << " but moses not built with thread support" << endl;
-    exit(1);
-  }
-#endif
-
   const StaticData &staticData = StaticData::Instance();
   if (!StaticData::LoadDataStatic(&parameter))
     return EXIT_FAILURE;
@@ -267,6 +249,10 @@ int main(int argc, char* argv[])
 
   if (ioWrapper == NULL)
     return EXIT_FAILURE;
+
+#ifdef WITH_THREADS
+  ThreadPool pool(staticData.ThreadCount());
+#endif
 
   // read each sentence & decode
   InputType *source=0;

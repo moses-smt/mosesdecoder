@@ -208,6 +208,8 @@ protected:
   UnknownLHSList m_unknownLHS;
   WordAlignmentSort m_wordAlignmentSort;
 
+  int m_threadCount;
+
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -594,6 +596,10 @@ public:
 
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;
+  }
+
+  int ThreadCount() const {
+    return m_threadCount;
   }
 };
 
