@@ -31,6 +31,7 @@ public:
   std::vector<std::string> source;
   std::vector<int> alignedCountS;
   std::vector<std::vector<int> > alignedToT;
+  int sentenceID;
 
   virtual bool processTargetSentence(const char *, int);
 

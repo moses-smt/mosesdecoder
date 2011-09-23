@@ -30,6 +30,7 @@ protected:
   featarray_t array_;
   size_t number_of_features;
   std::string features;
+  bool _sparse_flag;
 
 private:
   std::string idx; // idx to identify the utterance, it can differ from the index inside the vector
@@ -41,6 +42,10 @@ public:
 
   inline void clear() {
     array_.clear();
+  }
+
+  inline bool hasSparseFeatures() const {
+    return _sparse_flag;
   }
 
   inline std::string getIndex() {

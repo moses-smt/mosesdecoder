@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "n_gram.h"
 #include "lmtable.h"
 #include "lmmacro.h"
+#include "lmclass.h"
 
 
 #include "LanguageModelIRST.h"
@@ -82,6 +83,13 @@ bool LanguageModelIRST::Load(const std::string &filePath,
     d=((lmmacro *)m_lmtb)->getDict();
 
     ((lmmacro*) m_lmtb)->load(m_filePath);
+  } else if (lmtype == _IRSTLM_LMCLASS) {
+    // case lmclass: LM is of type lmclass, create an object of lmclass
+
+    m_lmtb = new lmclass();
+    d=((lmclass *)m_lmtb)->getDict();
+
+    ((lmclass*) m_lmtb)->load(m_filePath);
   } else if (lmtype == _IRSTLM_LMTABLE) {
     // case (standard) lmmacro: LM is of type lmtable: create an object of lmtable
     std::cerr << "Loading LM file (no MAP)\n";
@@ -98,7 +106,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
     if (m_filePath.compare(m_filePath.size()-3,3,".mm")==0)
       m_lmtb->load(inp,m_filePath.c_str(),NULL,1);
     else
-      m_lmtb->load(inp,m_filePath.c_str(),NULL,0);
+      m_lmtb->load(inp);
 #endif
 
   } else {
@@ -106,7 +114,7 @@ bool LanguageModelIRST::Load(const std::string &filePath,
     exit(1);
   }
 
-  if (lmtype == _IRSTLM_LMMACRO) {
+  if ((lmtype == _IRSTLM_LMMACRO) || ((lmtype == _IRSTLM_LMCLASS))){
     m_lmtb->getDict()->incflag(1);
   }
 

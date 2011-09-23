@@ -336,25 +336,6 @@ int main(int argc, char** argv)
   }
 
 
-  // create threadpool, if using multi-threaded decoding
-  // note: multi-threading is done on sentence-level,
-  // each thread translates one sentence
-  int threadcount = (params->GetParam("threads").size() > 0) ?
-                    Scan<size_t>(params->GetParam("threads")[0]) : 1;
-
-#ifdef WITH_THREADS
-  if (threadcount < 1) {
-    cerr << "Error: Need to specify a positive number of threads" << endl;
-    exit(1);
-  }
-  ThreadPool pool(threadcount);
-#else
-  if (threadcount > 1) {
-    cerr << "Error: Thread count of " << threadcount << " but moses not built with thread support" << endl;
-    exit(1);
-  }
-#endif
-
   // initialize all "global" variables, which are stored in StaticData
   // note: this also loads models such as the language model, etc.
   if (!StaticData::LoadDataStatic(params)) {
@@ -369,6 +350,7 @@ int main(int argc, char** argv)
 
   // shorthand for accessing information in StaticData
   const StaticData& staticData = StaticData::Instance();
+
 
   // set up read/writing class
   IOWrapper* ioWrapper = GetIODevice(staticData);
@@ -441,6 +423,10 @@ int main(int argc, char** argv)
     alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
   }
 
+#ifdef WITH_THREADS
+  ThreadPool pool(staticData.ThreadCount());
+#endif
+
   // main loop over set of input sentences
   InputType* source = NULL;
   size_t lineCount = 0;
@@ -457,7 +443,7 @@ int main(int argc, char** argv)
                           alignmentInfoCollector.get() );
     // execute task
 #ifdef WITH_THREADS
-    pool.Submit(task);
+  pool.Submit(task);
 #else
     task->Run();
 #endif

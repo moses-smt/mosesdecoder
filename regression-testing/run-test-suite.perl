@@ -16,6 +16,9 @@ my @tests = qw (
   score.phrase-based-with-alignment-inv
   score.hierarchical
   score.hierarchical-inv
+  mert.basic
+  mert.extractor-txt
+  mert.extractor-bin
   chart.target-syntax
   chart.target-syntax.ondisk
   chart.hierarchical
@@ -97,6 +100,10 @@ foreach my $test (@tests)
   elsif ($model_type eq 'score.')
   {
     $cmd .= "$BIN_TEST/run-test-scorer.perl $test_run --scorer=$scoreExe";
+  }
+  elsif ($test =~ /^mert/)
+  {
+    $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
   }
   else 
   {

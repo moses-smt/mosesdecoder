@@ -45,6 +45,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SyntacticLanguageModel.h"
 #endif
 
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -77,6 +81,7 @@ StaticData::StaticData()
   ,m_numInputScores(0)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
+  ,m_lmEnableOOVFeature(false)
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_isAlwaysCreateDirectTranslationOption(false)
 {
@@ -209,6 +214,7 @@ bool StaticData::LoadData(Parameter *parameter)
   } else
     m_outputSearchGraphPB = false;
 #endif
+  SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", true );
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -339,6 +345,8 @@ bool StaticData::LoadData(Parameter *parameter)
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
+  SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
+
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
@@ -382,6 +390,35 @@ bool StaticData::LoadData(Parameter *parameter)
 
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
+
+  m_threadCount = 1;
+  const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
+  if (!threadInfo.empty()) {
+    if (threadInfo[0] == "all") {
+#ifdef WITH_THREADS
+      m_threadCount = boost::thread::hardware_concurrency();
+      if (!m_threadCount) {
+        UserMessage::Add("-threads all specified but Boost doesn't know how many cores there are");
+        return false;
+      }
+#else
+      UserMessage::Add("-threads all specified but moses not built with thread support");
+      return false;
+#endif
+    } else {
+      m_threadCount = Scan<int>(threadInfo[0]);
+      if (m_threadCount < 1) {
+        UserMessage::Add("Specify at least one thread.");
+        return false;
+      }
+#ifndef WITH_THREADS
+      if (m_threadCount > 1) {
+        UserMessage::Add(std::string("Error: Thread count of ") + threadInfo[0] + " but moses not built with thread support");
+        return false;
+      }
+#endif
+    }
+  }
 
   // Read in constraint decoding file, if provided
   if(m_parameter->GetParam("constraint").size()) {

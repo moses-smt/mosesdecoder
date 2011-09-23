@@ -33,6 +33,12 @@ public:
   static unsigned int getpdim() {
     return pdim;
   }
+  static void setpdim(size_t pd) {
+    pdim = pd;
+  }
+  static void setdim(size_t d) {
+    dim = d;
+  }
   static bool OptimizeAll() {
     return fixedweights.empty();
   };
@@ -46,6 +52,7 @@ public:
 
   double operator*(const FeatureStats&)const;//compute the feature function
   Point operator+(const Point&)const;
+  void operator+=(const Point&);
   Point operator*(float)const;
   /**write the Whole featureweight to a stream (ie pdim float)*/
   friend ostream& operator<<(ostream& o,const Point& P);

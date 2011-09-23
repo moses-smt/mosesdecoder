@@ -11,7 +11,7 @@
 #include "Util.h"
 
 
-FeatureArray::FeatureArray(): idx("")
+FeatureArray::FeatureArray(): idx(""), _sparse_flag(false)
 {};
 
 void FeatureArray::savetxt(std::ofstream& outFile)
@@ -69,6 +69,8 @@ void FeatureArray::loadtxt(ifstream& inFile, size_t n)
   for (size_t i=0 ; i < n; i++) {
     entry.loadtxt(inFile);
     add(entry);
+    if (entry.getSparse().size()>0)
+      _sparse_flag = true;
   }
 }
 

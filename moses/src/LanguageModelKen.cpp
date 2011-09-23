@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <stdlib.h>
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/model.hh"
@@ -246,7 +247,12 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
   config.enumerate_vocab = &builder;
   config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
-  m_ngram = new Model(filePath.c_str(), config);
+  try {
+    m_ngram = new Model(filePath.c_str(), config);
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    abort();
+  }
   m_nGramOrder  = m_ngram->Order();
 
   m_nullContextState.state = m_ngram->NullContextState();

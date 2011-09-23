@@ -1,7 +1,6 @@
 #include "tools.h"
 
 using namespace std;
-using namespace boost::xpressive;
 namespace Tools
 {
 
@@ -179,6 +178,8 @@ string lowerCase ( string str )
   }
   return str;
 }
+
+/*
 string removePunctTercom ( string str )
 {
   string str_mod = str;
@@ -504,6 +505,7 @@ string normalizeStd ( string str )
 
   return str_mod;
 }
+*/
 
 param copyParam ( param p )
 {

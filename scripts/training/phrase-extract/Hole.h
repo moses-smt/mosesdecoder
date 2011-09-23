@@ -66,6 +66,10 @@ public:
     return m_end[direction];
   }
 
+  int GetSize(size_t direction) const {
+    return m_end[direction] - m_start[direction] + 1;
+  }
+  
   void SetPos(int pos, size_t direction) {
     m_pos[direction] = pos;
   }

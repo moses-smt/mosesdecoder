@@ -29,19 +29,6 @@ using namespace std;
 
 namespace Moses
 {
-Factor::Factor(FactorDirection /* direction */, FactorType /* factorType */, const std::string *factorString, size_t id)
-  ://m_direction(direction)
-//,m_factorType(factorType)
-  m_ptrString(factorString)
-  ,m_id(id)
-{}
-
-Factor::Factor(FactorDirection /* direction */, FactorType /* factorType */, const std::string *factorString)
-//:m_direction(direction)
-//,m_factorType(factorType)
-  :m_ptrString(factorString)
-  ,m_id(NOT_FOUND)
-{}
 
 TO_STRING_BODY(Factor)
 

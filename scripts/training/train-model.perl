@@ -34,6 +34,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
+   $_ADDITIONAL_INI,
    $_DICTIONARY, $_EPPEX);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -109,7 +110,7 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
-		       'eppex:s' => \$_EPPEX,
+           'additional-ini=s' => \$_ADDITIONAL_INI
                );
 
 if ($_HELP) {
@@ -1316,9 +1317,10 @@ sub extract_phrase {
       $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
 		}
       if ($reordering_flag) {
-	$cmd .= " orientation";
-	$cmd .= get_extract_reordering_flags();
-	$cmd .= " --NoTTable" if !$ttable_flag;
+        $cmd .= " orientation";
+        $cmd .= get_extract_reordering_flags();
+        $cmd .= " --NoTTable" if !$ttable_flag;
+        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
     }
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
@@ -1329,6 +1331,7 @@ sub extract_phrase {
     }
     if (! $___DONT_ZIP) { 
       safesystem("gzip $extract_file.o") if -e "$extract_file.o";
+      safesystem("gzip $extract_file.sid") if -e "$extract_file.sid";
       if ($ttable_flag) {
         safesystem("gzip $extract_file.inv") or die("ERROR");
         safesystem("gzip $extract_file") or die("ERROR");
@@ -1372,11 +1375,28 @@ sub score_phrase {
 sub score_phrase_phrase_extract {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
+    # remove consolidation options
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
     my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
-    my $CORE_SCORE_OPTIONS = defined($_SCORE_OPTIONS) ? $_SCORE_OPTIONS : "";
-    $CORE_SCORE_OPTIONS =~ s/\-+OnlyDirect//i;
-    $CORE_SCORE_OPTIONS =~ s/\-+NoPhraseCount//i;
+    my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
+    my $UNALIGNED_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/);
+    my ($UNALIGNED_FW_COUNT,$UNALIGNED_FW_F,$UNALIGNED_FW_E);
+    if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty +(\S+) +(\S+)/) {
+      $UNALIGNED_FW_COUNT = 1;
+      $UNALIGNED_FW_F = $1;
+      $UNALIGNED_FW_E = $2;
+    }
+    my $GOOD_TURING = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /GoodTuring/);
+    my $KNESER_NEY = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /KneserNey/);
+    my $LOG_PROB = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LogProb/);
+    my $NEG_LOG_PROB = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NegLogProb/);
+    my $NO_LEX = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/);
+    my $MIN_COUNT_HIERARCHICAL = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinCountHierarchical ([\d\.]+)/) ? $1 : undef;
+    my $CORE_SCORE_OPTIONS = "";
+    $CORE_SCORE_OPTIONS .= " --LogProb" if $LOG_PROB;
+    $CORE_SCORE_OPTIONS .= " --NegLogProb" if $NEG_LOG_PROB;
+    $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
+
     my $substep = 1;
     for my $direction ("f2e","e2f") {
 	next if $___CONTINUE && -e "$ttable_file.half.$direction";
@@ -1405,6 +1425,11 @@ sub score_phrase_phrase_extract {
         my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
+        $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
+        $cmd .= " --GoodTuring $ttable_file.coc" if $GOOD_TURING && $inverse eq "";
+        $cmd .= " --UnalignedPenalty" if $UNALIGNED_COUNT;
+        $cmd .= " --UnalignedFunctionWordPenalty ".($inverse ? $UNALIGNED_FW_F : $UNALIGNED_FW_E) if $UNALIGNED_FW_COUNT;
+        $cmd .= " --MinCountHierarchical $MIN_COUNT_HIERARCHICAL" if $MIN_COUNT_HIERARCHICAL;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
@@ -1423,8 +1448,13 @@ sub score_phrase_phrase_extract {
     return if $___CONTINUE && -e "$ttable_file.gz";
     my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
+    $cmd .= " --LogProb" if $LOG_PROB;
+    $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
     $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
+    $cmd .= " --LowCountFeature" if $LOW_COUNT;
+    $cmd .= " --GoodTuring $ttable_file.coc" if $GOOD_TURING;
+    $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
     if (! $___DONT_ZIP) {
@@ -1681,6 +1711,13 @@ sub create_ini {
 [ttable-file]\n";
    my $num_of_ttables = 0;
    my @SPECIFIED_TABLE = @_PHRASE_TABLE;
+   my $basic_weight_count = 4; # both directions, lex and phrase
+   $basic_weight_count-=2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
+   $basic_weight_count+=2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/; # word ins/del
+   $basic_weight_count+=2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty/;
+   $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
+   $basic_weight_count++ unless defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
+   $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      $num_of_ttables++;
      my $ff = $f;
@@ -1688,10 +1725,6 @@ sub create_ini {
      my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
-     my $basic_weight_count = 4; # both directions, lex and phrase
-     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
-     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
-     $basic_weight_count++ unless defined($_SCORE_OPTIONS) &&  $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
      print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
    }
    if ($_GLUE_GRAMMAR) {
@@ -1783,10 +1816,6 @@ sub create_ini {
 
   print INI "\n\n# translation model weights\n[weight-t]\n";
   foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-     my $basic_weight_count = 4; # both directions, lex and phrase
-     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
-     $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/;
-     $basic_weight_count++ unless defined($_SCORE_OPTIONS) &&  $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
      for(1..$basic_weight_count) {
        printf INI "%.2f\n", 1/$basic_weight_count;
      }
@@ -1824,6 +1853,11 @@ sub create_ini {
   # only set the factor delimiter if it is non-standard
   unless ($___FACTOR_DELIMITER eq '|') {
     print INI "\n# delimiter between factors in input\n[factor-delimiter]\n$___FACTOR_DELIMITER\n\n"
+  }
+
+  if ($_ADDITIONAL_INI) {
+    print INI "\n# additional settings\n\n";
+    foreach (split(/<br>/i,$_ADDITIONAL_INI)) { print INI $_."\n"; }
   }
 
   close(INI);

@@ -157,9 +157,9 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
-  float totalFutureScore = 0;
   float totalNgramScore  = 0;
   float totalFullScore   = 0;
+  float totalOOVScore    = 0;
 
   LMList::const_iterator lmIter;
   for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter) {
@@ -168,10 +168,22 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
     if (lm.Useable(*this)) {
       // contains factors used by this LM
       const float weightLM = lm.GetWeight();
+      const float oovWeightLM = lm.GetOOVWeight();
       float fullScore, nGramScore;
+      size_t oovCount;
 
-      lm.CalcScore(*this, fullScore, nGramScore);
-      m_scoreBreakdown.Assign(&lm, nGramScore);
+      lm.CalcScore(*this, fullScore, nGramScore, oovCount);
+
+      if (StaticData::Instance().GetLMEnableOOVFeature()) {
+        vector<float> scores(2);
+        scores[0] = nGramScore;
+        scores[1] = oovCount;
+        m_scoreBreakdown.Assign(&lm, scores);
+        totalOOVScore += oovCount * oovWeightLM;
+      } else {
+        m_scoreBreakdown.Assign(&lm, nGramScore);
+      }
+
 
       // total LM score so far
       totalNgramScore  += nGramScore * weightLM;
@@ -180,7 +192,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
     }
   }
 
-  m_fullScore = m_transScore + totalFutureScore + totalFullScore
+  m_fullScore = m_transScore + totalFullScore + totalOOVScore
                 - (this->GetSize() * weightWP);	 // word penalty
 }
 
@@ -200,6 +212,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;
   float totalFullScore   = 0;
+  float totalOOVScore    = 0;
 
   LMList::const_iterator lmIter;
   for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter) {
@@ -208,13 +221,23 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
     if (lm.Useable(*this)) {
       // contains factors used by this LM
       const float weightLM = lm.GetWeight();
+      const float oovWeightLM = lm.GetOOVWeight();
       float fullScore, nGramScore;
+      size_t oovCount;
 
-      lm.CalcScore(*this, fullScore, nGramScore);
+      lm.CalcScore(*this, fullScore, nGramScore, oovCount);
       fullScore = UntransformLMScore(fullScore);
       nGramScore = UntransformLMScore(nGramScore);
 
-      m_scoreBreakdown.Assign(&lm, nGramScore);
+      if (StaticData::Instance().GetLMEnableOOVFeature()) {
+        vector<float> scores(2);
+        scores[0] = nGramScore;
+        scores[1] = oovCount;
+        m_scoreBreakdown.Assign(&lm, scores);
+        totalOOVScore += oovCount * oovWeightLM;
+      } else {
+        m_scoreBreakdown.Assign(&lm, nGramScore);
+      }
 
       // total LM score so far
       totalNgramScore  += nGramScore * weightLM;
@@ -226,7 +249,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
   size_t wordCount = GetNumTerminals();
   m_scoreBreakdown.Assign(wpProducer, - (float) wordCount * 0.434294482); // TODO log -> ln ??
 
-  m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore;
+  m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)

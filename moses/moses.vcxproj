@@ -183,6 +183,7 @@
     <ClCompile Include="src\InputFileStream.cpp" />
     <ClCompile Include="src\InputType.cpp" />
     <ClCompile Include="src\LanguageModel.cpp" />
+    <ClCompile Include="src\LanguageModelChartState.cpp" />
     <ClCompile Include="src\LanguageModelFactory.cpp" />
     <ClCompile Include="src\LanguageModelImplementation.cpp" />
     <ClCompile Include="src\LanguageModelInternal.cpp">
@@ -321,6 +322,7 @@
     <ClInclude Include="src\InputFileStream.h" />
     <ClInclude Include="src\InputType.h" />
     <ClInclude Include="src\LanguageModel.h" />
+    <ClInclude Include="src\LanguageModelChartState.h" />
     <ClInclude Include="src\LanguageModelDelegate.h" />
     <ClInclude Include="src\LanguageModelFactory.h" />
     <ClInclude Include="src\LanguageModelImplementation.h" />
