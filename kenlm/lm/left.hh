@@ -58,7 +58,7 @@ public:
 	void CreatePreAndSuffices(const Moses::ChartHypothesis &hypo) const;
 	
 protected:
-  mutable Moses::Phrase *prefix, *suffix;
+  mutable const Moses::Phrase *prefix, *suffix;
   
 };
 
