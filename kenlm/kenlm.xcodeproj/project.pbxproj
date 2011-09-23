@@ -49,7 +49,6 @@
 		1EBB16E6126C158600AE6102 /* probing_hash_table_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16CE126C158600AE6102 /* probing_hash_table_test.cc */; };
 		1EBB16E7126C158600AE6102 /* probing_hash_table.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16CF126C158600AE6102 /* probing_hash_table.hh */; };
 		1EBB16E8126C158600AE6102 /* proxy_iterator.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16D0126C158600AE6102 /* proxy_iterator.hh */; };
-		1EBB16E9126C158600AE6102 /* scoped.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16D1126C158600AE6102 /* scoped.cc */; };
 		1EBB16EA126C158600AE6102 /* scoped.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16D2126C158600AE6102 /* scoped.hh */; };
 		1EBB16EB126C158600AE6102 /* sorted_uniform_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBB16D3126C158600AE6102 /* sorted_uniform_test.cc */; };
 		1EBB16EC126C158600AE6102 /* sorted_uniform.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB16D4126C158600AE6102 /* sorted_uniform.hh */; };
@@ -112,7 +111,6 @@
 		1EBB16CE126C158600AE6102 /* probing_hash_table_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = probing_hash_table_test.cc; path = util/probing_hash_table_test.cc; sourceTree = "<group>"; };
 		1EBB16CF126C158600AE6102 /* probing_hash_table.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = probing_hash_table.hh; path = util/probing_hash_table.hh; sourceTree = "<group>"; };
 		1EBB16D0126C158600AE6102 /* proxy_iterator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = proxy_iterator.hh; path = util/proxy_iterator.hh; sourceTree = "<group>"; };
-		1EBB16D1126C158600AE6102 /* scoped.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scoped.cc; path = util/scoped.cc; sourceTree = "<group>"; };
 		1EBB16D2126C158600AE6102 /* scoped.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = scoped.hh; path = util/scoped.hh; sourceTree = "<group>"; };
 		1EBB16D3126C158600AE6102 /* sorted_uniform_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sorted_uniform_test.cc; path = util/sorted_uniform_test.cc; sourceTree = "<group>"; };
 		1EBB16D4126C158600AE6102 /* sorted_uniform.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sorted_uniform.hh; path = util/sorted_uniform.hh; sourceTree = "<group>"; };
@@ -210,7 +208,6 @@
 				1EBB16CE126C158600AE6102 /* probing_hash_table_test.cc */,
 				1EBB16CF126C158600AE6102 /* probing_hash_table.hh */,
 				1EBB16D0126C158600AE6102 /* proxy_iterator.hh */,
-				1EBB16D1126C158600AE6102 /* scoped.cc */,
 				1EBB16D2126C158600AE6102 /* scoped.hh */,
 				1EBB16D3126C158600AE6102 /* sorted_uniform_test.cc */,
 				1EBB16D4126C158600AE6102 /* sorted_uniform.hh */,
@@ -338,7 +335,6 @@
 				1EBB16E2126C158600AE6102 /* mmap.cc in Sources */,
 				1EBB16E4126C158600AE6102 /* murmur_hash.cc in Sources */,
 				1EBB16E6126C158600AE6102 /* probing_hash_table_test.cc in Sources */,
-				1EBB16E9126C158600AE6102 /* scoped.cc in Sources */,
 				1EBB16EB126C158600AE6102 /* sorted_uniform_test.cc in Sources */,
 				1EBB171A126C15C500AE6102 /* ngram_query.cc in Sources */,
 				1EBB171C126C15C500AE6102 /* read_arpa.cc in Sources */,

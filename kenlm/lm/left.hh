@@ -7,6 +7,12 @@
 
 #include <algorithm>
 
+namespace Moses
+{
+  class Phrase;
+  class ChartHypothesis;
+}
+
 namespace lm {
 namespace ngram {
 
@@ -30,22 +36,30 @@ struct Left {
   unsigned char length;
 };
 
-struct ChartState {
+class ChartState {
+
+public:
+	ChartState()
+	:prefix(NULL)
+	,suffix(NULL)
+	{}
+	~ChartState();
+	
   bool operator==(const ChartState &other) {
     return (left == other.left) && (right == other.right) && (full == other.full);
   }
 
-  int Compare(const ChartState &other) const {
-    int lres = left.Compare(other.left);
-    if (lres) return lres;
-    int rres = right.Compare(other.right);
-    if (rres) return rres;
-    return (int)full - (int)other.full;
-  }
+  int Compare(const ChartState &other) const;
 
   Left left;
   State right;
   bool full;
+
+	void CreatePreAndSuffices(const Moses::ChartHypothesis &hypo) const;
+	
+protected:
+  mutable Moses::Phrase *prefix, *suffix;
+  
 };
 
 template <class M> class RuleScore {

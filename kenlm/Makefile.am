@@ -6,6 +6,7 @@ libkenlm_la_SOURCES = \
   lm/bhiksha.cc \
 	lm/binary_format.cc \
 	lm/config.cc \
+	lm/left.cc \
 	lm/lm_exception.cc \
 	lm/model.cc \
 	lm/search_hashed.cc \

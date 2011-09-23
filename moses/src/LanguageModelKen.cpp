@@ -162,6 +162,10 @@ FFState *LanguageModelKen<Model>::EvaluateChart(
     const LanguageModel *feature) const
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);
+
+  const lm::ngram::ChartState &chartState = newState->GetChartState();
+  chartState.CreatePreAndSuffices(hypo); 
+  
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
