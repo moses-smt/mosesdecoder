@@ -54,7 +54,7 @@ protected:
   const TargetPhrase &m_targetPhrase;
   const ChartTranslationOption &m_transOpt;
 
-  Phrase m_contextPrefix, m_contextSuffix;
+  //Phrase m_contextPrefix, m_contextSuffix;
   WordsRange					m_currSourceWordsRange;
 	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
@@ -128,13 +128,6 @@ public:
   Phrase GetOutputPhrase() const;
 
 	int RecombineCompare(const ChartHypothesis &compare) const;
-
-  const Phrase &GetPrefix() const {
-    return m_contextPrefix;
-  }
-  const Phrase &GetSuffix() const {
-    return m_contextSuffix;
-  }
 
   void CalcScore();
 
