@@ -115,7 +115,7 @@ public:
 
   float GetBestScore() const { return m_bestScore; }
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<int,bool> &reachable) const;
+  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<const ChartHypothesis *,bool> &reachable) const;
 
 };
 

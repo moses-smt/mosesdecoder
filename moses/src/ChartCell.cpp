@@ -183,7 +183,7 @@ size_t ChartCell::GetSize() const
   return ret;
 }
 
-void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<int,bool> &reachable) const
+void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<const ChartHypothesis *,bool> &reachable) const
 {
   std::map<Word, ChartHypothesisCollection>::const_iterator iterOutside;
   for (iterOutside = m_hypoColl.begin(); iterOutside != m_hypoColl.end(); ++iterOutside) {

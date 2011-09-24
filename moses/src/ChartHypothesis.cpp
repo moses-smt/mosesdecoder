@@ -35,10 +35,6 @@
 
 namespace Moses
 {
-unsigned int ChartHypothesis::s_HypothesesCreated = 0;
-#ifdef WITH_THREADS
-boost::shared_mutex ChartHypothesis::s_HypothesesCreatedMutex;
-#endif
 
 #ifdef USE_HYPO_POOL
 ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
@@ -48,8 +44,7 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
-  :m_id(GetNextId())
-  ,m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
+  :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
   ,m_transOpt(transOpt)
   ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
@@ -365,13 +360,13 @@ TO_STRING_BODY(ChartHypothesis)
 std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 {
 
-  out << hypo.GetId();
+  out << &hypo;
 	
 	// recombination
 	if (hypo.GetWinningHypothesis() != NULL &&
-			hypo.GetWinningHypothesis()->GetId() != hypo.GetId())
+			hypo.GetWinningHypothesis() != &hypo)
 	{
-		out << "->" << hypo.GetWinningHypothesis()->GetId();
+		out << "->" << hypo.GetWinningHypothesis();
 	}
 
   out << " " << hypo.GetCurrTargetPhrase()
@@ -381,7 +376,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
   HypoList::const_iterator iter;
   for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) {
     const ChartHypothesis &prevHypo = **iter;
-    out << " " << prevHypo.GetId();
+    out << " " << &prevHypo;
   }
 
   out << " [total=" << hypo.GetTotalScore() << "]";

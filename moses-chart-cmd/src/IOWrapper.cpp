@@ -268,8 +268,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
     VERBOSE(3,"0" << std::endl);
 
     if (StaticData::Instance().GetOutputHypoScore()) {
-      out << hypo->GetTotalScore() << " "
-          << ChartHypothesis::GetHypoCount() << " ";
+      out << hypo->GetTotalScore() << " ";
     }
 
     if (!m_surpressSingleBestOutput) {
@@ -316,8 +315,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // The output from -output-hypo-score is always written to std::cout.
     if (StaticData::Instance().GetOutputHypoScore()) {
       if (bestHypo != NULL) {
-        out << bestHypo->GetTotalScore() << " "
-            << ChartHypothesis::GetHypoCount() << " ";
+        out << bestHypo->GetTotalScore() << " ";
       } else {
         out << "0 ";
       }
