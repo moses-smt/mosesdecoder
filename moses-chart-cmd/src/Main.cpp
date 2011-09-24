@@ -56,6 +56,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartHypothesis.h"
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
+#include "kenlm/lm/left.hh"
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -278,6 +279,16 @@ int main(int argc, char* argv[])
   IFVERBOSE(1)
   PrintUserTime("End.");
 
+  cerr << "recomb_stats\t";
+  vector<int> &recombCount = lm::ngram::ChartState::recombCount;
+  
+  for (int i = 0; i < recombCount.size(); ++i)
+  {
+    int count = recombCount[i];
+    cerr << count << "\t";
+  }
+  cerr << endl;
+  
 #ifdef HACK_EXIT
   //This avoids that detructors are called (it can take a long time)
   exit(EXIT_SUCCESS);

@@ -57,6 +57,8 @@ public:
 
 	void CreatePreAndSuffices(const Moses::ChartHypothesis &hypo) const;
 	
+  static std::vector<int> recombCount;
+  
 protected:
   mutable const Moses::Phrase *prefix, *suffix;
   

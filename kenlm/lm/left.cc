@@ -10,6 +10,8 @@ using namespace Moses;
 namespace lm {
 namespace ngram {
 
+std::vector<int> ChartState::recombCount(4,0);
+  
 ChartState::~ChartState()
 {
 	//delete prefix;
@@ -32,9 +34,24 @@ int ChartState::Compare(const ChartState &other) const {
 	{
 		int comparePre = prefix->Compare(*other.prefix);
 		int compareSuf = suffix->Compare(*other.suffix);
+
+    if (comparePre)
+    {
+      if (compareSuf)
+        recombCount[1]++; // both. middle
+      else
+        recombCount[0]++; // only prefix. left
+    }
+    else if (compareSuf)
+      recombCount[2]++; // only suffix. right
+    else
+      recombCount[3]++; // nothing. last
+    
+    /*
 		cerr << "recomb_stats " << comparePre << " " << compareSuf << endl
 				<< *prefix << " ||| " << *other.prefix << endl
 				<< *suffix << " ||| " << *other.suffix << endl;
+     */
 	}
 	
 	return ret;
