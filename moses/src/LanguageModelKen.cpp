@@ -75,12 +75,11 @@ namespace
 class MappingBuilder : public lm::ngram::EnumerateVocab
 {
 public:
-  MappingBuilder(FactorType factorType, FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
-    : m_factorType(factorType), m_factorCollection(factorCollection), m_mapping(mapping) {}
+  MappingBuilder(FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
+    : m_factorCollection(factorCollection), m_mapping(mapping) {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-    m_word.assign(str.data(), str.size());
-    std::size_t factorId = m_factorCollection.AddFactor(Output, m_factorType, m_word)->GetId();
+    std::size_t factorId = m_factorCollection.AddFactor(str)->GetId();
     if (m_mapping.size() <= factorId) {
       // 0 is <unk> :-)
       m_mapping.resize(factorId + 1);
@@ -89,8 +88,6 @@ public:
   }
 
 private:
-  std::string m_word;
-  FactorType m_factorType;
   FactorCollection &m_factorCollection;
   std::vector<lm::WordIndex> &m_mapping;
 };
@@ -229,12 +226,12 @@ template <class Model> bool LanguageModelKen<Model>::Load(const std::string &fil
   m_filePath   = filePath;
 
   FactorCollection &factorCollection = FactorCollection::Instance();
-  m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
+  m_sentenceStart = factorCollection.AddFactor(BOS_);
   m_sentenceStartArray[m_factorType] = m_sentenceStart;
-  m_sentenceEnd = factorCollection.AddFactor(Output, m_factorType, EOS_);
+  m_sentenceEnd = factorCollection.AddFactor(EOS_);
   m_sentenceEndArray[m_factorType] = m_sentenceEnd;
 
-  MappingBuilder builder(m_factorType, factorCollection, m_lmIdLookup);
+  MappingBuilder builder(factorCollection, m_lmIdLookup);
   lm::ngram::Config config;
 
   IFVERBOSE(1) {

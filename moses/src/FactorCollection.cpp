@@ -33,15 +33,13 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-const Factor *FactorCollection::AddFactor(FactorDirection direction
-    , FactorType 			factorType
-    , const string 		&factorString)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
 // Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS
 #if BOOST_VERSION < 104200
   FactorFriend to_ins;
-  to_ins.in.m_string = factorString;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
 #endif // BOOST_VERSION
   {
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
@@ -56,11 +54,11 @@ const Factor *FactorCollection::AddFactor(FactorDirection direction
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #if BOOST_VERSION >= 102400
   FactorFriend to_ins;
-  to_ins.in.m_string = factorString;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
 #endif // BOOST_VERSION
 #else // WITH_THREADS
   FactorFriend to_ins;
-  to_ins.in.m_string = factorString;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
 #endif // WITH_THREADS
   to_ins.in.m_id = m_factorId;
   std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));

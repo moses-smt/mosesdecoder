@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #endif
 
+#include "util/string_piece.hh"
+
 #include <functional>
 #include <string>
 
@@ -68,7 +70,7 @@ class FactorCollection
 
 #ifdef HAVE_BOOST
   struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
-    std::size_t operator()(const std::string &str) const {
+    std::size_t operator()(const StringPiece &str) const {
       return util::MurmurHashNative(str.data(), str.size());
     }
     std::size_t operator()(const FactorFriend &factor) const {
@@ -79,10 +81,10 @@ class FactorCollection
     bool operator()(const FactorFriend &left, const FactorFriend &right) const {
       return left.in.GetString() == right.in.GetString();
     }
-    bool operator()(const FactorFriend &left, const std::string &right) const {
+    bool operator()(const FactorFriend &left, const StringPiece &right) const {
       return left.in.GetString() == right;
     }
-    bool operator()(const std::string &left, const FactorFriend &right) const {
+    bool operator()(const StringPiece &left, const FactorFriend &right) const {
       return left == right.in.GetString();
     }
   };
@@ -120,7 +122,12 @@ public:
   /** returns a factor with the same direction, factorType and factorString.
   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
   */
-  const Factor *AddFactor(FactorDirection direction, FactorType factorType, const std::string &factorString);
+  const Factor *AddFactor(const StringPiece &factorString);
+
+  // TODO: remove calls to this function, replacing them with the simpler AddFactor(factorString)
+  const Factor *AddFactor(FactorDirection /*direction*/, FactorType /*factorType*/, const StringPiece &factorString) {
+    return AddFactor(factorString);
+  }
 
   TO_STRING();
 
