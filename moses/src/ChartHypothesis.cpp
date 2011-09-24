@@ -36,6 +36,9 @@
 namespace Moses
 {
 unsigned int ChartHypothesis::s_HypothesesCreated = 0;
+#ifdef WITH_THREADS
+boost::shared_mutex ChartHypothesis::s_HypothesesCreatedMutex;
+#endif
 
 #ifdef USE_HYPO_POOL
 ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
@@ -45,7 +48,7 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
 ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
-  :m_id(++s_HypothesesCreated)
+  :m_id(GetNextId())
   ,m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
   ,m_transOpt(transOpt)
   ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())

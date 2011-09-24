@@ -21,6 +21,12 @@
 
 #pragma once
 
+#include "config.h"
+
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
 #include <vector>
 #include "Util.h"
 #include "WordsRange.h"
@@ -44,11 +50,22 @@ class ChartHypothesis
 
 protected:
 
+  static int GetNextId() {
+#ifdef WITH_THREADS
+    boost::unique_lock<boost::shared_mutex> lock(s_HypothesesCreatedMutex);
+#endif
+    return ++s_HypothesesCreated;
+  }
+
 #ifdef USE_HYPO_POOL
   static ObjectPool<ChartHypothesis> s_objectPool;
 #endif
 
   static unsigned int s_HypothesesCreated;
+#ifdef WITH_THREADS
+  // mutex to control access to s_HypothesesCreated
+  static boost::shared_mutex s_HypothesesCreatedMutex;
+#endif
 
   int m_id; /**< numeric ID of this hypothesis, used for logging */
   const TargetPhrase &m_targetPhrase;
@@ -78,9 +95,15 @@ protected:
 
 public:
   static void ResetHypoCount() {
+#ifdef WITH_THREADS
+    boost::unique_lock<boost::shared_mutex> lock(s_HypothesesCreatedMutex);
+#endif
     s_HypothesesCreated = 0;
   }
   static unsigned int GetHypoCount() {
+#ifdef WITH_THREADS
+    boost::shared_lock<boost::shared_mutex> lock(s_HypothesesCreatedMutex);
+#endif
     return s_HypothesesCreated;
   }
 
