@@ -1219,7 +1219,6 @@
 					LM_KEN,
 					LM_IRST,
 					LM_RAND,
-					HAVE_CONFIG_H,
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
 				);
@@ -1252,7 +1251,6 @@
 					LM_KEN,
 					LM_IRST,
 					LM_RAND,
-					HAVE_CONFIG_H,
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
 				);

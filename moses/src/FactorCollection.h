@@ -22,7 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_FactorCollection_h
 #define moses_FactorCollection_h
 
-#include "../../config.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
@@ -35,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <set>
 #endif
 
-#include "util/string_piece.hh"
+#include "../../kenlm/util/string_piece.hh"
 
 #include <functional>
 #include <string>
