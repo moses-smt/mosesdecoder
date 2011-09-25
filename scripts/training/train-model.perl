@@ -110,6 +110,7 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
+		       'eppex:s' => \$_EPPEX,
            'additional-ini=s' => \$_ADDITIONAL_INI
                );
 
