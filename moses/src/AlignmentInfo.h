@@ -51,6 +51,8 @@ class AlignmentInfo
     return m_nonTermIndexMap;
   }
 
+  std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+  
  private:
   // AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs)

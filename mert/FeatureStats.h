@@ -26,6 +26,7 @@ class FeatureStats
 {
 private:
   featstats_t array_;
+  sparse_featstats_t map_;
   size_t entries_;
   size_t available_;
 
@@ -43,9 +44,11 @@ public:
   }
   void expand();
   void add(FeatureStatsType v);
+  void addSparse(string name, FeatureStatsType v);
 
   inline void clear() {
     memset((void*) array_,0,featbytes_);
+    map_.clear();
   }
 
   inline FeatureStatsType get(size_t i) {
@@ -56,6 +59,9 @@ public:
   }
   inline featstats_t getArray() const {
     return array_;
+  }
+  inline sparse_featstats_t getSparse() const {
+    return map_;
   }
 
   void set(std::string &theString);

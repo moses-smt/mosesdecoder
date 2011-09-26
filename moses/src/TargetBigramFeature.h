@@ -40,7 +40,7 @@ public:
 	bool Load(const std::string &filePath);
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerWeightShortName() const;
+	std::string GetScoreProducerWeightShortName(unsigned) const;
 	size_t GetNumInputScores() const;
 
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;

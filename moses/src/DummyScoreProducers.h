@@ -21,7 +21,7 @@ public:
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerWeightShortName() const;
+	std::string GetScoreProducerWeightShortName(unsigned) const;
 	size_t GetNumInputScores() const;
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
@@ -49,7 +49,7 @@ public:
 	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty") {}
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerWeightShortName() const;
+	std::string GetScoreProducerWeightShortName(unsigned) const;
 	size_t GetNumInputScores() const;
 
   virtual void Evaluate(
@@ -64,7 +64,7 @@ public:
 	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty") {}
 
 	size_t GetNumScoreComponents() const;
-	std::string GetScoreProducerWeightShortName() const;
+	std::string GetScoreProducerWeightShortName(unsigned) const;
 	size_t GetNumInputScores() const;
 
   virtual bool ComputeValueInTranslationOption() const;

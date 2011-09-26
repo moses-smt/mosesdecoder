@@ -57,7 +57,7 @@ public:
     return 1;
   };
 
-  virtual std::string GetScoreProducerWeightShortName() const {
+  virtual std::string GetScoreProducerWeightShortName(unsigned) const {
     return "lex";
   };
 

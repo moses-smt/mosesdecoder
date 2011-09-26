@@ -187,6 +187,7 @@ protected:
   float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
+  bool m_lmEnableOOVFeature;
 
   bool m_timeout; //! use timeout
   size_t m_timeout_threshold; //! seconds after which time out is activated
@@ -208,6 +209,7 @@ protected:
 #ifdef HAVE_PROTOBUF
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
+  bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
@@ -220,7 +222,7 @@ protected:
   Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
   SourceLabelOverlap m_sourceLabelOverlap;
   UnknownLHSList m_unknownLHS;
-
+  WordAlignmentSort m_wordAlignmentSort;
 
   StaticData();
 
@@ -568,6 +570,10 @@ public:
     return m_lmcache_cleanup_threshold;
   }
 
+  bool GetLMEnableOOVFeature() const {
+    return m_lmEnableOOVFeature;
+  }
+
   bool GetOutputSearchGraph() const {
     return m_outputSearchGraph;
   }
@@ -582,6 +588,9 @@ public:
     return m_outputSearchGraphPB;
   }
 #endif
+  bool GetUnprunedSearchGraph() const {
+    return m_unprunedSearchGraph;
+  }
 
   XmlInputType GetXmlInputType() const {
     return m_xmlInputType;
@@ -627,7 +636,6 @@ public:
     return 999999; /* TODO wtf! */
   }
 
-
   bool ContinuePartialTranslation() const {
     return m_continuePartialTranslation;
   }
@@ -639,6 +647,9 @@ public:
   }
   void SetAllWeightsScoreComponentCollection(const ScoreComponentCollection &weightsScoreComponentCollection);
 
+  WordAlignmentSort GetWordAlignmentSort() const {
+    return m_wordAlignmentSort;
+  }
 };
 
 }

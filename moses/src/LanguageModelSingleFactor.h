@@ -83,8 +83,8 @@ protected:
 
   virtual ~LanguageModelPointerState();
 
-  virtual FFState *GetNullContextState() const;
-  virtual FFState *GetBeginSentenceState() const;
+  virtual const FFState *GetNullContextState() const;
+  virtual const FFState *GetBeginSentenceState() const;
   virtual FFState *NewState(const FFState *from = NULL) const;
 
   virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;

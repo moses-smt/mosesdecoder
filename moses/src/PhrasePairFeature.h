@@ -23,7 +23,7 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 
     
     size_t GetNumScoreComponents() const;
-    std::string GetScoreProducerWeightShortName() const;
+    std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumInputScores() const;
 
 

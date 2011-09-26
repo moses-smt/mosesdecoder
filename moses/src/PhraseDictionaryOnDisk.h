@@ -68,7 +68,7 @@ public:
             const LMList& languageModels,
             const WordPenaltyProducer* wpProducer);
 
-  std::string GetScoreProducerDescription() const {
+  std::string GetScoreProducerDescription(unsigned) const {
     return "BerkeleyPt";
   }
 

@@ -19,7 +19,7 @@ size_t PhrasePairFeature::GetNumScoreComponents() const
   return ScoreProducer::unlimited;
 }
 
-string PhrasePairFeature::GetScoreProducerWeightShortName() const
+string PhrasePairFeature::GetScoreProducerWeightShortName(unsigned) const
 {
   return "pp";
 }

@@ -97,7 +97,7 @@ float LanguageModelDMapLM::GetValue(
   return score;
 }
 
-FFState* LanguageModelDMapLM::GetNullContextState() const {
+const FFState* LanguageModelDMapLM::GetNullContextState() const {
     DMapLMState* state = new DMapLMState();
     state->m_last_succeeding_order = GetNGramOrder();
     return state;
@@ -109,7 +109,7 @@ FFState* LanguageModelDMapLM::GetNewSentenceState() const {
     return state;
 }
 
-FFState* LanguageModelDMapLM::GetBeginSentenceState() const {
+const FFState* LanguageModelDMapLM::GetBeginSentenceState() const {
     DMapLMState* state = new DMapLMState();
     state->m_last_succeeding_order = GetNGramOrder();
     return state;
