@@ -352,6 +352,11 @@ then
   LDFLAGS="$LDFLAGS -L${with_zlib}/lib"
 fi
 
+# zlib is always required (see ./moses/src/gzfilebuf.h)
+# TODO: This shouldn't be presented to the user as a config option if it isn't actually an option
+AC_CHECK_HEADER([zlib.h],
+            [AC_DEFINE([HAVE_ZLIB])],
+            [AC_MSG_ERROR([zlib not found. Please install it. (Under debian, try 'sudo aptutide install zlib1g-dev')])])
 LIBS="$LIBS -lz"
 
 
