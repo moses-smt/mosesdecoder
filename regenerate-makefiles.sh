@@ -14,34 +14,50 @@
 
 function die () {
   echo "$@" >&2
+
+  # Try to be as helpful as possible by detecting OS and making recommendations
+  if (( $(lsb_release -a | fgrep -ci "ubuntu") > 0 )); then
+      echo >&2
+      echo >&2 "Need to install build autotools on Ubuntu? Use:"
+      echo >&2 "sudo aptitude install autoconf automake libtool build-essential"
+  fi
+  if (( $(uname -a | fgrep -ci "darwin") > 0 )); then
+      echo >&2
+      echo >&2 "Having problems on Mac OSX?"
+      echo >&2 "You might have an old version of aclocal/automake. You'll need to upgrade these."
+  fi
   exit 1
 }
 
-if [ -z "$ACLOCAL" ]
-then
+if [ -z "$ACLOCAL" ]; then
     ACLOCAL=`which aclocal`
+    [ -n "$ACLOCAL" ] || die "aclocal not found on your system. Please install it or set $ACLOCAL"
 fi
 
-if [ -z "$AUTOMAKE" ]
-then
+if [ -z "$AUTOMAKE" ]; then
     AUTOMAKE=`which automake`
+    [ -n "$AUTOMAKE" ] || die "automake not found on your system. Please install it or set $AUTOMAKE"
 fi
 
-if [ -z "$AUTOCONF" ]
-then
+if [ -z "$AUTOCONF" ]; then
     AUTOCONF=`which autoconf`
+    [ -n "$AUTOCONF" ] || die "autoconf not found on your system. Please install it or set $AUTOCONF"
 fi
 
-if [ -z "$LIBTOOLIZE" ]
-then
+if [ -z "$LIBTOOLIZE" ]; then
     LIBTOOLIZE=`which libtoolize`
     
-    if [ -z "$LIBTOOLIZE" ]
-    then
+    if [ -z "$LIBTOOLIZE" ]; then
         LIBTOOLIZE=`which glibtoolize`
     fi
+
+    [ -n "$LIBTOOLIZE" ] || die "libtoolize/glibtoolize not found on your system. Please install it or set $LIBTOOLIZE"
 fi
 
+echo >&2 "Detected aclocal: $($ACLOCAL --version | head -n1)"
+echo >&2 "Detected autoconf: $($AUTOCONF --version | head -n1)"
+echo >&2 "Detected automake: $($AUTOMAKE --version | head -n1)"
+echo >&2 "Detected libtoolize: $($LIBTOOLIZE --version | head -n1)"
 
 echo "Calling $ACLOCAL..."
 $ACLOCAL -I m4 || die "aclocal failed"
