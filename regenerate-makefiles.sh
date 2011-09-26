@@ -69,9 +69,17 @@ echo "Calling $LIBTOOLIZE"
 $LIBTOOLIZE || die "libtoolize failed"
 
 
+cores=$(cat /proc/cpuinfo | fgrep -c processor)
+if [ -z "$cores" ]; then
+    cores=2 # assume 2 cores if we can't figure it out
+    echo >&2 "Assuming 2 cores"
+else
+    echo >&2 "Detected $cores cores"
+fi
+
 echo
 echo "You should now be able to configure and build:"
 echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
-echo "   make -j 4"
+echo "   make -j ${cores}"
 echo
 
