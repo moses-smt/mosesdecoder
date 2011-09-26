@@ -5,7 +5,7 @@ namespace Mira {
 
   class Hildreth {
     public :
-      static std::vector<Moses::FValue> optimise (const std::vector<Moses::ScoreComponentCollection>& a, const std::vector<Moses::FValue>& b );
-      static std::vector<Moses::FValue> optimise (const std::vector<Moses::ScoreComponentCollection>& a, const std::vector<Moses::FValue>& b, Moses::FValue C);
+      static std::vector<float> optimise (const std::vector<Moses::ScoreComponentCollection>& a, const std::vector<float>& b );
+      static std::vector<float> optimise (const std::vector<Moses::ScoreComponentCollection>& a, const std::vector<float>& b, float C);
   };
 }

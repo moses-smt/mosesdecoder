@@ -5,16 +5,16 @@ using namespace std;
 
 namespace Mira {
 
-  vector<FValue> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<FValue>& b) {
+  vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
 
     size_t i;
     int max_iter = 10000;
     float eps = 0.00000001;
     float zero = 0.000000000001;
 
-    vector<FValue> alpha ( b.size() );
-    vector<FValue> F ( b.size() );
-    vector<FValue> kkt ( b.size() );
+    vector<float> alpha ( b.size() );
+    vector<float> F ( b.size() );
+    vector<float> kkt ( b.size() );
 
     float max_kkt = -1e100;
 
@@ -43,9 +43,9 @@ namespace Mira {
     }
 
     int iter = 0;
-    FValue diff_alpha;
-    FValue try_alpha;
-    FValue add_alpha;
+    float diff_alpha;
+    float try_alpha;
+    float add_alpha;
 
     while ( max_kkt >= eps && iter < max_iter )
     {
@@ -93,16 +93,16 @@ namespace Mira {
     return alpha;
   }
 
-  vector<FValue> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<FValue>& b, FValue C) {
+  vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b, float C) {
 
     size_t i;
     int max_iter = 10000;
-    FValue eps = 0.00000001;
-    FValue zero = 0.000000000001;
+    float eps = 0.00000001;
+    float zero = 0.000000000001;
 
-    vector<FValue> alpha ( b.size() );
-    vector<FValue> F ( b.size() );
-    vector<FValue> kkt ( b.size() );
+    vector<float> alpha ( b.size() );
+    vector<float> F ( b.size() );
+    vector<float> kkt ( b.size() );
 
     float max_kkt = -1e100;
 
@@ -131,9 +131,9 @@ namespace Mira {
     }
 
     int iter = 0;
-    FValue diff_alpha;
-    FValue try_alpha;
-    FValue add_alpha;
+    float diff_alpha;
+    float try_alpha;
+    float add_alpha;
 
     while ( max_kkt >= eps && iter < max_iter )
     {

@@ -41,6 +41,7 @@ namespace mpi = boost::mpi;
 #include "Decoder.h"
 #include "Optimiser.h"
 #include "Hildreth.h"
+#include "ThreadPool.h"
 
 using namespace Mira;
 using namespace std;
@@ -106,6 +107,7 @@ int main(int argc, char** argv) {
 	bool model_hope_fear;
 	int hope_n;
 	int fear_n;
+	int threadcount;
 	size_t adapt_after_epoch;
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -153,6 +155,7 @@ int main(int argc, char** argv) {
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
+		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
@@ -170,6 +173,22 @@ int main(int argc, char** argv) {
 		std::cout << desc << std::endl;
 		return 0;
 	}
+
+  // create threadpool, if using multi-threaded decoding
+  // note: multi-threading is done on sentence-level,
+  // each thread translates one sentence
+#ifdef WITH_THREADS
+  if (threadcount < 1) {
+    cerr << "Error: Need to specify a positive number of threads" << endl;
+    exit(1);
+  }
+  ThreadPool pool(threadcount);
+#else
+  if (threadcount > 1) {
+    cerr << "Error: Thread count of " << threadcount << " but moses not built with thread support" << endl;
+    exit(1);
+  }
+#endif
 
 	if (mosesConfigFile.empty()) {
 		cerr << "Error: No moses ini file specified" << endl;
@@ -366,10 +385,6 @@ int main(int argc, char** argv) {
 		// number of weight dumps this epoch
 		size_t weightEpochDump = 0;
 
-		// collect best model score translations for computing bleu on dev set
-		vector<vector<const Word*> > allBestModelScore;
-		vector<size_t> all_ref_ids;
-
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
 		while (sid != shard.end()) {
@@ -465,9 +480,6 @@ int main(int argc, char** argv) {
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
-					// needed for calculating bleu of dev (1best translations) // todo:
-					all_ref_ids.push_back(*sid);
-					allBestModelScore.push_back(bestModel);
 					VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl);
 
 					// HOPE
