@@ -67,6 +67,17 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
   printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
+TargetPhrase::TargetPhrase(const Phrase &phrase)
+  : Phrase(phrase)
+  , m_transScore(0.0)
+  , m_fullScore(0.0)
+  , m_sourcePhrase(0)
+  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+{
+  wordalignflag=StaticData::Instance().UseAlignmentInfo();
+  printalign=StaticData::Instance().PrintAlignmentInfo();
+}
+
 TargetPhrase::~TargetPhrase()
 {
 }

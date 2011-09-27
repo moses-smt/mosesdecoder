@@ -64,6 +64,7 @@ protected:
 public:
   TargetPhrase(FactorDirection direction=Output);
   TargetPhrase(FactorDirection direction, std::string out_string);
+  TargetPhrase(const Phrase &);
   ~TargetPhrase();
 
   //! used by the unknown word handler- these targets
@@ -149,6 +150,9 @@ public:
 
   void SetAlignmentInfo(const std::string &alignString);
   void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
+  void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
+    m_alignmentInfo = alignmentInfo;
+  }
 
   const AlignmentInfo &GetAlignmentInfo() const {
     return *m_alignmentInfo;

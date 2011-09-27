@@ -96,6 +96,10 @@ libmoses_la_HEADERS = \
         RuleCube.h \
         RuleCubeItem.h \
         RuleCubeQueue.h \
+        RuleTableLoader.h \
+        RuleTableLoaderCompact.h \
+        RuleTableLoaderFactory.h \
+        RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
         ScoreProducer.h \
@@ -252,6 +256,9 @@ libmoses_la_SOURCES = \
         RuleCube.cpp \
         RuleCubeItem.cpp \
         RuleCubeQueue.cpp \
+        RuleTableLoaderCompact.cpp \
+        RuleTableLoaderFactory.cpp \
+        RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
         ScoreProducer.cpp \
