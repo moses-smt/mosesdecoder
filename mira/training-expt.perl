@@ -93,26 +93,26 @@ my $burn_in_input_file = &param("train.burn-in-input-file");
 my $burn_in_reference_files = &param("train.burn-in-reference-files");
 my $skipTrain = &param("train.skip", 0);
 
-#test configuration
-my ($test_input_file, $test_reference_file,$test_ini_file,$bleu_script,$use_moses);
-my $test_exe = &param("test.moses");
-&check_exists("test  executable", $test_exe);
-$bleu_script  = &param_required("test.bleu");
+#devtest configuration
+my ($devtest_input_file, $devtest_reference_file,$test_ini_file,$bleu_script,$use_moses);
+my $test_exe = &param("devtest.moses");
+&check_exists("test executable", $test_exe);
+$bleu_script  = &param_required("devtest.bleu");
 &check_exists("multi-bleu script", $bleu_script);
-$test_input_file = &param_required("test.input-file");
-$test_reference_file = &param_required("test.reference-file");
-&check_exists ("test input file", $test_input_file);
+$devtest_input_file = &param_required("devtest.input-file");
+$devtest_reference_file = &param_required("devtest.reference-file");
+&check_exists ("devtest input file", $devtest_input_file);
 
-for my $ref (glob $test_reference_file . "*") {
-    &check_exists ("test ref file", $ref);
+for my $ref (glob $devtest_reference_file . "*") {
+    &check_exists ("devtest ref file", $ref);
 }
-$test_ini_file = &param_required("test.moses-ini-file");
-&check_exists ("test ini file", $test_ini_file);
+$devtest_ini_file = &param_required("devtest.moses-ini-file");
+&check_exists ("devtest ini file", $devtest_ini_file);
 my $weight_file_stem = "$name-weights";
-my $extra_memory_test = &param("test.extra-memory",0);
-my $skip_test = &param("test.skip-test",0);
-my $skip_dev = &param("test.skip-dev",0);
-my $skip_submit_test = &param("test.skip-submit",0);
+my $extra_memory_test = &param("devtest.extra-memory",0);
+my $skip_devtest = &param("devtest.skip-devtest",0);
+my $skip_dev = &param("devtest.skip-dev",0);
+my $skip_submit_test = &param("devtest.skip-submit",0);
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
@@ -316,8 +316,8 @@ while(1) {
     #new weight file written. create test script and submit    
     my $suffix = "";
     print "weight file exists? ".(-e $new_weight_file)."\n";
-    if (!$skip_test) {
-	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "test", $test_ini_file, $test_input_file, $test_reference_file, $skip_submit_test);
+    if (!$skip_devtest) {
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "devtest", $devtest_ini_file, $devtest_input_file, $devtest_reference_file, $skip_submit_test);
     }
     if (!$skip_dev) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $refs[0], $skip_submit_test);
@@ -582,9 +582,9 @@ sub createTestScriptAndSubmit {
     #launch testing
     if(!$skip_submit) {
 	if ($have_sge) {
-	    if ($extra_memory_test) {
-		print "Extra memory for test job: $extra_memory_test \n";
-		&submit_job_sge_extra_memory($test_script_file,$extra_memory_test);
+	    if ($extra_memory_devtest) {
+		print "Extra memory for test job: $extra_memory_devtest \n";
+		&submit_job_sge_extra_memory($test_script_file,$extra_memory_devtest);
 	    }
 	    else {
 		&submit_job_sge($test_script_file);
