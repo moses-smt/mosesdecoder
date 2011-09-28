@@ -47,7 +47,8 @@ protected:
   mutable std::vector<int> m_lmIdLookup;
   lmtable* m_lmtb;
 
-  int m_unknownId;
+  int m_unknownId;  //code of OOV
+  int m_empty;  //code of an empty position
   int m_lmtb_sentenceStart; //lmtb symbols to initialize ngram with
   int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with
   int m_lmtb_size;          //max ngram stored in the table

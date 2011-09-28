@@ -124,6 +124,8 @@ bool LanguageModelIRST::Load(const std::string &filePath,
 
   // Mauro: in the original, the following two instructions are wrongly switched:
   m_unknownId = d->oovcode(); // at the level of micro tags
+  m_empty = -1; // code for an empty position
+
   CreateFactors(factorCollection);
 
   VERBOSE(1, "IRST: m_unknownId=" << m_unknownId << std::endl);
@@ -169,7 +171,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   // add to lookup vector in object
   m_lmIdLookup.resize(maxFactorId+1);
 
-  fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_unknownId);
+  fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_empty);
 
   map<size_t, int>::iterator iterMap;
   for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap) {
@@ -185,14 +187,26 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
 }
 
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
-{
+{  
   size_t factorId = factor->GetId();
 
-  if  (factorId >= m_lmIdLookup.size()) {
+  if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
       std::string s = factor->GetString();
       int code = d->encode(s.c_str());
 
+      //////////
+      ///poiche' non c'e' distinzione tra i factorIDs delle parole sorgenti
+      ///e delle parole target in Moses, puo' accadere che una parola target 
+      ///di cui non sia stato ancora calcolato il suo codice target abbia
+      ///comunque un factorID noto (e quindi minore di m_lmIdLookup.size())
+      ///E' necessario dunque identificare questi casi di indeterminatezza
+      ///del codice target. Attualamente, questo controllo e' stato implementato
+      ///impostando a    m_empty     tutti i termini che non hanno ancora 
+      //ricevuto un codice target effettivo
+      ///////////
+
+      ///OLD PROBLEM - SOLVED
 ////////////
 /// IL PPROBLEMA ERA QUI
 /// m_lmIdLookup.push_back(code);
@@ -200,7 +214,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 /// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
 /// Cosi' funziona ....
 /// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
-/// quindi controllo
+/// quindi 
 /// e scopro che rimane vuota una entry ogni due
 /// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
 /// non da problemi di correttezza, ma solo di "spreco" di memoria
@@ -210,12 +224,14 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 ////////////////
 
 
-      //resize and fill with m_unknownId
-      m_lmIdLookup.resize(factorId+1, m_unknownId);
+      if (factorId >= m_lmIdLookup.size()){
+	//resize and fill with m_empty  
+	//increment the array more than needed to avoid too many resizing operation.
+	m_lmIdLookup.resize(factorId+10, m_empty); 
+      }
 
       //insert new code
       m_lmIdLookup[factorId] = code;
-
       return code;
 
     } else {
