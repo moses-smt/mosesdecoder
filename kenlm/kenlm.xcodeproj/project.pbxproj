@@ -526,6 +526,12 @@
 					_LARGE_FILES,
 					"_FILE_OFFSET_BITS=64",
 				);
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include/,
+					/Users/hieuhoang/workspace/sourceforge/trunk/kenlm,
+					/usr/local/include,
+					../srilm/include,
+				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = kenlm;
 			};
@@ -540,6 +546,12 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					_LARGE_FILES,
 					"_FILE_OFFSET_BITS=64",
+				);
+				HEADER_SEARCH_PATHS = (
+					/opt/local/include/,
+					/Users/hieuhoang/workspace/sourceforge/trunk/kenlm,
+					/usr/local/include,
+					../srilm/include,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = kenlm;
