@@ -19,7 +19,7 @@ if ($SCRIPTS_ROOTDIR eq '') {
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_CORPUS,
+my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_CORPUS,
    $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
    $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
    $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
@@ -56,6 +56,7 @@ $_HELP = 1
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
+           'sort-buffer-size=s' => \$_SORT_BUFFER_SIZE,
 		       'extract-file=s' => \$_EXTRACT_FILE,
 		       'alignment=s' => \$_ALIGNMENT,
 		       'alignment-file=s' => \$_ALIGNMENT_FILE,
@@ -288,6 +289,9 @@ $_DONT_ZIP = $___DONT_ZIP unless $___DONT_ZIP;
 
 my $___TEMP_DIR = $___MODEL_DIR;
 $___TEMP_DIR = $_TEMP_DIR if $_TEMP_DIR;
+
+my $__SORT_BUFFER_SIZE = "";
+$__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
 
 my $___CONTINUE = 0; 
 $___CONTINUE = $_CONTINUE if $_CONTINUE;
@@ -1414,10 +1418,10 @@ sub score_phrase_phrase_extract {
 	    # sorting
 	    print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
 	    if (-e "$extract_filename.gz") {
-		safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+		safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
 	    }
 	    else {
-		safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+		safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
 	    }
         }
 
@@ -1440,7 +1444,7 @@ sub score_phrase_phrase_extract {
     # sorting inverse phrase-table-half to sync up with regular one
     print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
     if (! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
-	safesystem("LC_ALL=C sort -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
+	safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
 	if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
     }
 
@@ -1474,7 +1478,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1530,7 +1534,7 @@ sub get_reordering_factored {
 sub get_reordering {
     my ($extract_file,$reo_model_path) = @_;
     if (-e "$extract_file.o.gz") {
-	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
+	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
     }
     else {
         safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
