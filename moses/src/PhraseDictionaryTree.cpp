@@ -1,5 +1,6 @@
 // $Id$
 // vim:tabstop=2
+#include "FeatureVector.h"
 #include "PhraseDictionaryTree.h"
 #include <map>
 #include <cassert>
@@ -8,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
 
 namespace Moses
 {
@@ -28,6 +30,9 @@ class TgtCand
   IPhrase e;
   Scores sc;
   std::string m_alignment;
+  IPhrase fnames;
+  std::vector<FValue> fvalues;
+
 public:
   TgtCand() {}
 
@@ -47,6 +52,10 @@ public:
   void writeBin(FILE* f) const {
     fWriteVector(f,e);
     fWriteVector(f,sc);
+    if (fnames.size()) {
+      fWriteVector(f,fnames);
+      fWriteVector(f,fvalues);
+    }
   }
 
   void readBin(FILE* f) {
@@ -55,14 +64,12 @@ public:
   }
 
   void writeBinWithAlignment(FILE* f) const {
-    fWriteVector(f,e);
-    fWriteVector(f,sc);
+    writeBin(f);
     fWriteString(f, m_alignment.c_str(), m_alignment.size());
   }
 
   void readBinWithAlignment(FILE* f) {
-    fReadVector(f,e);
-    fReadVector(f,sc);
+    readBin(f);
     fReadString(f, m_alignment);
   }
 
@@ -74,6 +81,14 @@ public:
   }
   const std::string& GetAlignment() const {
     return m_alignment;
+  }
+
+  const IPhrase& GetFeatureNames() const {
+    return fnames;
+  }
+
+  const std::vector<FValue> GetFeatureValues() const {
+    return fvalues;
   }
 };
 
@@ -478,7 +493,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (numElement == NOT_FOUND) {
       // init numElement
       numElement = tokens.size();
-      assert(numElement == 3 || numElement == 5);
+      assert(numElement == 3 || numElement >= 5);
     }
 
     if (tokens.size() != numElement) {
