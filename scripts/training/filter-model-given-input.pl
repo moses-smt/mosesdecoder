@@ -90,11 +90,12 @@ while(<INI>) {
     if (/ttable-file\]/) {
       while(1) {	       
     	my $table_spec = <INI>;
-    	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)$/) {
+    	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)( \S+)?$/) {
     	    print INI_OUT $table_spec;
     	    last;
     	}
-    	my ($phrase_table_impl,$source_factor,$t,$w,$file) = ($1,$2,$3,$4,$5);
+    	my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag) = ($1,$2,$3,$4,$5,$6);
+      $table_flag = "" if (!defined($table_flag));
 
         if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
             # Only Memory ("0") and NewFormat ("6") can be filtered.
@@ -113,12 +114,12 @@ while(<INI>) {
         $new_name .= ".$cnt";
         $new_name_used{$new_name} = 1;
 	if ($binarizer && $phrase_table_impl == 6) {
-    	  print INI_OUT "2 $source_factor $t $w $new_name.bin\n";
+    	  print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
         }
         elsif ($binarizer && $phrase_table_impl == 0) {
-    	  print INI_OUT "1 $source_factor $t $w $new_name\n";
+    	  print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
         } else {
-    	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
+    	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
         }
     	push @TABLE_NEW_NAME,$new_name;
 
