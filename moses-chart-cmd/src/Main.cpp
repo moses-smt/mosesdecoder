@@ -268,6 +268,17 @@ int main(int argc, char* argv[])
     task->Run();
     delete task;
 #endif
+
+    cerr << endl << "recomb_stats\t";
+    vector<int> &recombCount = lm::ngram::ChartState::recombCount;
+
+    for (int i = 0; i < recombCount.size(); ++i)
+    {
+	int count = recombCount[i];
+	cerr << count << "\t";
+    }
+    cerr << endl;
+
   }
 
 #ifdef WITH_THREADS
@@ -279,7 +290,7 @@ int main(int argc, char* argv[])
   IFVERBOSE(1)
   PrintUserTime("End.");
 
-  cerr << "recomb_stats\t";
+  cerr << endl << "recomb_stats\t";
   vector<int> &recombCount = lm::ngram::ChartState::recombCount;
   
   for (int i = 0; i < recombCount.size(); ++i)
