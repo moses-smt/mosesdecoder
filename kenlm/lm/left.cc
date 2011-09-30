@@ -10,7 +10,7 @@ using namespace Moses;
 namespace lm {
 namespace ngram {
 
-std::vector<int> ChartState::recombCount(4,0);
+std::vector<int> ChartState::recombCount(8,0);
   
 ChartState::~ChartState()
 {
@@ -29,7 +29,20 @@ int ChartState::Compare(const ChartState &other) const {
 	int rres = right.Compare(other.right);
 	if (rres) return rres;
 	int ret = (int)full - (int)other.full;
-	
+
+	if (lres == 0 && rres != 0)
+	    recombCount[4]++;
+	else if (lres == 0 && rres == 0)
+	    recombCount[5]++;
+	else if (lres != 0 && rres == 0)
+	    recombCount[6]++;
+	else
+	{
+	    assert(lres);
+	    assert(rres);
+	    recombCount[7]++;
+	}
+
 	if (ret == 0)
 	{
 		int comparePre = prefix->Compare(*other.prefix);
