@@ -111,7 +111,7 @@ foreach my $test (@tests)
   {
     $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
   }
-  elsif ($test = /^kenlmbin/)
+  elsif ($test =~ /^kenlmbin/)
   {
   	$cmd .= "$BIN_TEST/run-kenlm-binarizer.perl --binarizer=$kenlmBinarizer";
   }
