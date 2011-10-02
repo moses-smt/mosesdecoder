@@ -59,21 +59,21 @@ struct Left {
   bool operator==(const Left &other) const {
     return 
       (length == other.length) && 
-      pointers[length - 1] == other.pointers[length - 1];
+      (!length || pointers[length - 1] == other.pointers[length - 1]);
   }
 
   int Compare(const Left &other) const {
     if (length != other.length) {
       return (int)length - (int)other.length;
     }
+    if (!length) return 0;
     if (pointers[length - 1] > other.pointers[length - 1]) return 1;
     if (pointers[length - 1] < other.pointers[length - 1]) return -1;
     return 0;
   }
 
   bool operator<(const Left &other) const {
-    if (length != other.length) return length < other.length;
-    return pointers[length - 1] < other.pointers[length - 1];
+    return Compare(other) == -1;
   }
 
   void ZeroRemaining() {
@@ -86,7 +86,7 @@ struct Left {
 };
 
 inline size_t hash_value(const Left &left) {
-  return util::MurmurHashNative(&left.length, 1, left.pointers[left.length - 1]);
+  return util::MurmurHashNative(&left.length, 1, left.length ? left.pointers[left.length - 1] : 0);
 }
 
 class ChartState {
@@ -117,12 +117,13 @@ public:
   State right;
   bool full;
 
-	void CreatePreAndSuffices(const Moses::ChartHypothesis &hypo) const;
+	void CreatePreAndSuffices(const Moses::ChartHypothesis &hyp);
 	
   static std::vector<int> recombCount;
   
 protected:
-  mutable const Moses::Phrase *prefix, *suffix;  
+  const Moses::ChartHypothesis *hypo;
+  const Moses::Phrase *prefix, *suffix;  
 };
 
 inline size_t hash_value(const ChartState &state) {
@@ -197,21 +198,21 @@ template <class M> class RuleScore {
       ProcessRet(model_.ExtendLeft(out_.right.words, out_.right.words + out_.right.length, out_.right.backoff, in.left.pointers[0], 1, back, next_use));
       if (next_use != out_.right.length) {
         left_done_ = true;
-	if (!next_use) {
+        if (!next_use) {
           out_.right = in.right;
           return;
-	}
+        }
       }
       unsigned char extend_length = 2;
       for (const uint64_t *i = in.left.pointers + 1; i < in.left.pointers + in.left.length; ++i, ++extend_length) {
         ProcessRet(model_.ExtendLeft(out_.right.words, out_.right.words + next_use, back, *i, extend_length, back2, next_use));
-	if (next_use != out_.right.length) {
-	  left_done_ = true;
-	  if (!next_use) {
-	    out_.right = in.right;
-	    return;
-	  }
-	}
+        if (next_use != out_.right.length) {
+          left_done_ = true;
+          if (!next_use) {
+            out_.right = in.right;
+            return;
+          }
+        }
         std::swap(back, back2);
       }
 
