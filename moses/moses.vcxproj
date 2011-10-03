@@ -239,6 +239,9 @@
     <ClCompile Include="src\RuleCube.cpp" />
     <ClCompile Include="src\RuleCubeItem.cpp" />
     <ClCompile Include="src\RuleCubeQueue.cpp" />
+    <ClCompile Include="src\RuleTableLoaderCompact.cpp" />
+    <ClCompile Include="src\RuleTableLoaderFactory.cpp" />
+    <ClCompile Include="src\RuleTableLoaderStandard.cpp" />
     <ClCompile Include="src\ScoreComponentCollection.cpp" />
     <ClCompile Include="src\ScoreIndexManager.cpp" />
     <ClCompile Include="src\ScoreProducer.cpp" />
@@ -369,6 +372,10 @@
     <ClInclude Include="src\RuleCube.h" />
     <ClInclude Include="src\RuleCubeItem.h" />
     <ClInclude Include="src\RuleCubeQueue.h" />
+    <ClInclude Include="src\RuleTableLoader.h" />
+    <ClInclude Include="src\RuleTableLoaderCompact.h" />
+    <ClInclude Include="src\RuleTableLoaderFactory.h" />
+    <ClInclude Include="src\RuleTableLoaderStandard.h" />
     <ClInclude Include="src\ScoreComponentCollection.h" />
     <ClInclude Include="src\ScoreIndexManager.h" />
     <ClInclude Include="src\ScoreProducer.h" />
