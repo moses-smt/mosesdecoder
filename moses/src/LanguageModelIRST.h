@@ -29,8 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "LanguageModelSingleFactor.h"
 
-class lmtable;  // irst lm table
-class lmmacro;  // irst lm for macro tags
+class lmContainer;  // irst lm container for any lm type
 class ngram;
 class dictionary;
 
@@ -45,7 +44,7 @@ class LanguageModelIRST : public LanguageModelPointerState
 {
 protected:
   mutable std::vector<int> m_lmIdLookup;
-  lmtable* m_lmtb;
+  lmContainer* m_lmtb;
 
   int m_unknownId;  //code of OOV
   int m_empty;  //code of an empty position

@@ -223,7 +223,7 @@ then
   
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
-  AC_MSG_NOTICE([!!! You are linking the IRSTLM library; be sure the release is >= 5.70.01 !!!])
+  AC_MSG_NOTICE([!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!])
   AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
   AC_MSG_NOTICE([])
 
