@@ -340,7 +340,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // print the surface factor of the translation
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-    out << " ||| ";
+    out << " |||";
 
     // print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
@@ -350,10 +350,10 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     const LMList& lml = system->GetLanguageModels();
     if (lml.size() > 0) {
       if (labeledOutput)
-        out << "lm: ";
+        out << "lm:";
       LMList::const_iterator lmi = lml.begin();
       for (; lmi != lml.end(); ++lmi) {
-        out << path.GetScoreBreakdown().GetScoreForProducer(*lmi) << " ";
+        out << " " << path.GetScoreBreakdown().GetScoreForProducer(*lmi);
       }
     }
 
@@ -382,8 +382,8 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
     // word penalty
     if (labeledOutput)
-      out << " w: ";
-    out << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer()) << " ";
+      out << " w:";
+    out << " " << path.GetScoreBreakdown().GetScoreForProducer(system->GetWordPenaltyProducer());
 
     // generation
     const vector<GenerationDictionary*>& gds = system->GetGenerationDictionaries();
@@ -407,7 +407,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
 
     // total
-    out << "||| " << path.GetTotalScore();
+    out << " |||" << path.GetTotalScore();
 
     /*
     if (includeAlignment) {
