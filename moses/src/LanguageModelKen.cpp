@@ -79,7 +79,7 @@ public:
     : m_factorCollection(factorCollection), m_mapping(mapping) {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-    std::size_t factorId = m_factorCollection.AddFactor(str)->GetId();
+    std::size_t factorId = m_factorCollection.AddFactor(str.data())->GetId();
     if (m_mapping.size() <= factorId) {
       // 0 is <unk> :-)
       m_mapping.resize(factorId + 1);
