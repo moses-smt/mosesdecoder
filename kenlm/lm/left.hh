@@ -120,11 +120,37 @@ public:
 	void CreatePreAndSuffices(const Moses::ChartHypothesis &hyp);
 	
   static std::vector<int> recombCount;
-  
+ 
 protected:
   const Moses::ChartHypothesis *hypo;
   const Moses::Phrase *prefix, *suffix;  
 };
+
+
+extern std::vector<size_t> left_revisit_count, left_revisit_count_partial;
+extern std::vector<double> left_revisit_change, left_revisit_change_partial;
+
+class Counters {
+  public:
+    Counters() { memset(full, 0, sizeof(full)); memset(partial, 0, sizeof(partial)); }
+
+    ~Counters() {
+      for (unsigned char i = 0; i < kMaxOrder; ++i) {
+        std::cerr << "Left: " << (unsigned)i << std::endl;
+        for (unsigned char j = 0; j < kMaxOrder; ++j) {
+          std::cerr << (unsigned)j << ' ' << full[i][j] << ' ' << partial[i][j] << std::endl;
+        }
+      }
+    }
+
+    void Add(const ChartState &final) {
+      ++(final.full ? full : partial)[final.left.length][final.right.length];
+    }
+
+    uint64_t full[kMaxOrder][kMaxOrder], partial[kMaxOrder][kMaxOrder];
+};
+
+extern Counters global_left_counters;
 
 inline size_t hash_value(const ChartState &state) {
   size_t hashes[2];
@@ -169,11 +195,13 @@ template <class M> class RuleScore {
     }
 
     void NonTerminal(const ChartState &in, float prob) {
+      ++(in.full ? left_revisit_count : left_revisit_count_partial)[in.left.length];
+      double &revisit_change = (in.full ? left_revisit_change : left_revisit_change_partial)[in.left.length];
       prob_ += prob;
       
       if (!in.left.length) {
         if (in.full) {
-          for (const float *i = out_.right.backoff; i < out_.right.backoff + out_.right.length; ++i) prob_ += *i;
+          for (const float *i = out_.right.backoff; i < out_.right.backoff + out_.right.length; ++i)  { prob_ += *i; revisit_change += *i; }
           left_done_ = true;
           out_.right = in.right;
         }
@@ -195,7 +223,7 @@ template <class M> class RuleScore {
       float backoffs[kMaxOrder - 1], backoffs2[kMaxOrder - 1];
       float *back = backoffs, *back2 = backoffs2;
       unsigned char next_use;
-      ProcessRet(model_.ExtendLeft(out_.right.words, out_.right.words + out_.right.length, out_.right.backoff, in.left.pointers[0], 1, back, next_use));
+      ProcessRet(model_.ExtendLeft(out_.right.words, out_.right.words + out_.right.length, out_.right.backoff, in.left.pointers[0], 1, back, next_use), revisit_change);
       if (next_use != out_.right.length) {
         left_done_ = true;
         if (!next_use) {
@@ -205,7 +233,7 @@ template <class M> class RuleScore {
       }
       unsigned char extend_length = 2;
       for (const uint64_t *i = in.left.pointers + 1; i < in.left.pointers + in.left.length; ++i, ++extend_length) {
-        ProcessRet(model_.ExtendLeft(out_.right.words, out_.right.words + next_use, back, *i, extend_length, back2, next_use));
+        ProcessRet(model_.ExtendLeft(out_.right.words, out_.right.words + next_use, back, *i, extend_length, back2, next_use), revisit_change);
         if (next_use != out_.right.length) {
           left_done_ = true;
           if (!next_use) {
@@ -217,7 +245,7 @@ template <class M> class RuleScore {
       }
 
       if (in.full) {
-        for (const float *i = back; i != back + next_use; ++i) prob_ += *i;
+        for (const float *i = back; i != back + next_use; ++i) { prob_ += *i; revisit_change += *i; }
         left_done_ = true;
         out_.right = in.right;
         return;
@@ -245,12 +273,14 @@ template <class M> class RuleScore {
     float Finish() {
       // A N-1-gram might extend left and right but we should still set full to true because it's an N-1-gram.  
       out_.full = left_done_ || (out_.left.length == model_.Order() - 1);
+      global_left_counters.Add(out_);
       return prob_;
     }
 
   private:
-    void ProcessRet(const FullScoreReturn &ret) {
+    void ProcessRet(const FullScoreReturn &ret, double &revisit_change) {
       prob_ += ret.prob;
+      revisit_change += ret.prob;
       if (left_done_) return;
       if (ret.independent_left) {
         left_done_ = true;

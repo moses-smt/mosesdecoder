@@ -12,6 +12,12 @@ namespace lm {
 namespace ngram {
 
 std::vector<int> ChartState::recombCount(8,0);
+std::vector<size_t> left_revisit_count(5,0);
+std::vector<double> left_revisit_change(5,0);
+std::vector<size_t> left_revisit_count_partial(5,0);
+std::vector<double> left_revisit_change_partial(5,0);
+
+Counters global_left_counters = Counters();
   
 ChartState::~ChartState()
 {

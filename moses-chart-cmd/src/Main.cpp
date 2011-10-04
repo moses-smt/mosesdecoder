@@ -272,13 +272,25 @@ int main(int argc, char* argv[])
     cerr << endl << "recomb_stats\t";
     vector<int> &recombCount = lm::ngram::ChartState::recombCount;
 
-    for (int i = 0; i < recombCount.size(); ++i)
+    for (unsigned i = 0; i < recombCount.size(); ++i)
     {
 	int count = recombCount[i];
 	cerr << count << "\t";
     }
-    cerr << endl;
+    cerr << "\nLeft adjustments";
+    for (unsigned i = 0; i < 5; ++i)
+      cerr << ' ' << (lm::ngram::left_revisit_change[i] / static_cast<double>(lm::ngram::left_revisit_count[i]));
+    cerr << "\nLeft revisits";
+    for (unsigned i = 0; i < 5; ++i)
+      cerr << ' ' << lm::ngram::left_revisit_count[i];
+    cerr << "\nPartial left adjustments";
+    for (unsigned i = 0; i < 5; ++i)
+      cerr << ' ' << (lm::ngram::left_revisit_change_partial[i] / static_cast<double>(lm::ngram::left_revisit_count_partial[i]));
+    cerr << "\nPartial left revisits";
+    for (unsigned i = 0; i < 5; ++i)
+      cerr << ' ' << lm::ngram::left_revisit_count_partial[i];
 
+    cerr << endl;
   }
 
 #ifdef WITH_THREADS
@@ -299,6 +311,12 @@ int main(int argc, char* argv[])
     cerr << count << "\t";
   }
   cerr << endl;
+
+  std::ifstream proc_stat("/proc/self/status");
+  std::string line;
+  while (getline(proc_stat, line)) {
+    std::cerr << line << '\n';
+  }
   
 #ifdef HACK_EXIT
   //This avoids that detructors are called (it can take a long time)
