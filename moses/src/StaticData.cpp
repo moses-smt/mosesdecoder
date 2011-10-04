@@ -81,8 +81,8 @@ StaticData::StaticData()
   ,m_numInputScores(0)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
-  ,m_lmEnableOOVFeature(false)
   ,m_factorDelimiter("|") // default delimiter between factors
+  ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
 {
   m_maxFactorIdx[0] = 0;  // source side
@@ -169,7 +169,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
     m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
   } else if (m_parameter->GetParam("n-best-list").size() == 1) {
-    UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
+    UserMessage::Add(string("wrong format for switch -n-best-list file size"));
     return false;
   } else {
     m_nBestSize = 0;
@@ -178,6 +178,17 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
   } else {
     m_nBestFactor = 20;
+  }
+
+  //lattice samples
+  if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
+    m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
+    m_latticeSamplesSize = Scan<size_t>(m_parameter->GetParam("lattice-samples")[1]);
+  } else if (m_parameter->GetParam("lattice-samples").size() != 0 ) {
+    UserMessage::Add(string("wrong format for switch -lattice-samples file size"));
+    return false;
+  } else {
+    m_latticeSamplesSize = 0;
   }
 
   // word graph

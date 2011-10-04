@@ -112,6 +112,7 @@ protected:
   m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
   , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
   , m_nBestSize
+  , m_latticeSamplesSize
   , m_nBestFactor
   , m_maxNoTransOptPerCoverage
   , m_maxNoPartTransOpt
@@ -121,7 +122,7 @@ protected:
   std::string
   m_constraintFileName;
 
-  std::string									m_nBestFilePath;
+  std::string									m_nBestFilePath, m_latticeSamplesFilePath;
   bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_wordDeletionEnabled;
@@ -407,12 +408,20 @@ public:
     return m_nBestFilePath;
   }
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_useConsensusDecoding
+    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
 #ifdef HAVE_PROTOBUF
            || m_outputSearchGraphPB
 #endif
            ;
   }
+  size_t GetLatticeSamplesSize() const {
+    return m_latticeSamplesSize;
+  }
+
+  const std::string& GetLatticeSamplesFilePath() const {
+    return m_latticeSamplesFilePath;
+  }
+
   size_t GetNBestFactor() const {
     return m_nBestFactor;
   }

@@ -62,6 +62,7 @@ Parameter::Parameter()
   AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
   AddParam("max-phrase-length", "maximum phrase length (default 20)");
   AddParam("n-best-list", "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
+  AddParam("lattice-samples", "generate samples from lattice, in same format as nbest list. Uses the file and size arguments, as in n-best-list");
   AddParam("n-best-factor", "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
   AddParam("print-all-derivations", "to print all derivations in search graph");
   AddParam("output-factors", "list of factors in the output");

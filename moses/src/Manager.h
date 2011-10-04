@@ -130,6 +130,7 @@ public:
   const Hypothesis *GetBestHypothesis() const;
   const Hypothesis *GetActualBestHypothesis() const;
   void CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct=0) const;
+  void CalcLatticeSamples(size_t count, TrellisPathList &ret) const;
   void PrintAllDerivations(long translationId, std::ostream& outputStream) const;
   void printDivergentHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase*> & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
   void printThisHypothesis(long translationId, const Hypothesis* hypo, const std::vector <const TargetPhrase* > & remainingPhrases, float remainingScore , std::ostream& outputStream) const;
