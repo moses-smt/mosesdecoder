@@ -43,7 +43,7 @@ public:
   };
 
 
-protected:
+//protected:
   float calculateScore(const vector<int>& comps);
 //  float calculateScore(const vector<float>& comps);
 

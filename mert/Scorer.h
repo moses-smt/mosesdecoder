@@ -33,7 +33,7 @@ private:
 public:
 
   Scorer(const string& name, const string& config): _name(name), _scoreData(0), _preserveCase(true) {
-    cerr << "Scorer config string: " << config << endl;
+//    cerr << "Scorer config string: " << config << endl;
     size_t start = 0;
     while (start < config.size()) {
       size_t end = config.find(",",start);
@@ -220,11 +220,11 @@ public:
     } else {
       throw runtime_error("Unknown scorer regularisation strategy: " + type);
     }
-    cerr << "Using scorer regularisation strategy: " << type << endl;
+//    cerr << "Using scorer regularisation strategy: " << type << endl;
 
     string window = getConfig(KEY_WINDOW,"0");
     _regularisationWindow = atoi(window.c_str());
-    cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
+//    cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
 
     string preservecase = getConfig(KEY_CASE,TRUE);
     if (preservecase == TRUE) {
@@ -232,7 +232,7 @@ public:
     } else if (preservecase == FALSE) {
       _preserveCase = false;
     }
-    cerr << "Using case preservation: " << _preserveCase << endl;
+//    cerr << "Using case preservation: " << _preserveCase << endl;
 
 
   }

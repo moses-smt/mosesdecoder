@@ -25,7 +25,8 @@ TERsrc/stringInfosHasher.cpp \
 TERsrc/tercalc.cpp \
 TERsrc/tools.cpp \
 TerScorer.cpp \
-CderScorer.cpp
+CderScorer.cpp \
+MergeScorer.cpp
 
 mert_SOURCES = mert.cpp $(top_builddir)/moses/src/ThreadPool.cpp
 extractor_SOURCES  = extractor.cpp 

@@ -38,7 +38,7 @@ public:
     return 3;
   };
 
-protected:
+//protected:
 
   virtual float calculateScore(const vector<int>& comps) ;
 
