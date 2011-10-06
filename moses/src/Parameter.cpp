@@ -454,7 +454,7 @@ bool Parameter::ReadConfigFile(const string &filePath )
     line = Trim(line);
 
     if (line.size() == 0) {
-      // do nothing 
+      // blank line. do nothing.
     }
     else if (line[0]=='[') {
       // new parameter
