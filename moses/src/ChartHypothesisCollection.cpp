@@ -254,24 +254,24 @@ void ChartHypothesisCollection::CleanupArcList()
   }
 }
 
-void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<const ChartHypothesis *, bool> &reachable) const
+void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
 {
   HCType::const_iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     ChartHypothesis &mainHypo = **iter;
-		if (StaticData::Instance().GetUnprunedSearchGraph() ||
+    if (StaticData::Instance().GetUnprunedSearchGraph() ||
         reachable.find(mainHypo.GetId()) != reachable.end()) {
-			outputSearchGraphStream << translationId << " " << mainHypo << endl;
-		}
+      outputSearchGraphStream << translationId << " " << mainHypo << endl;
+    }
 
     const ChartArcList *arcList = mainHypo.GetArcList();
     if (arcList) {
       ChartArcList::const_iterator iterArc;
       for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
         const ChartHypothesis &arc = **iterArc;
-				if (reachable.find(arc.GetId()) != reachable.end()) {
-					outputSearchGraphStream << translationId << " " << arc << endl;
-				}
+        if (reachable.find(arc.GetId()) != reachable.end()) {
+          outputSearchGraphStream << translationId << " " << arc << endl;
+        }
       }
     }
   }

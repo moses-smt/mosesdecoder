@@ -70,6 +70,8 @@ protected:
 
   ChartManager& m_manager;
 
+  unsigned m_id; /* pkoehn wants to log the order in which hypotheses were generated */
+
   size_t CalcPrefix(Phrase &ret, size_t size) const;
   size_t CalcSuffix(Phrase &ret, size_t size) const;
 
@@ -97,7 +99,7 @@ public:
 
   ~ChartHypothesis();
 
-  const ChartHypothesis *GetId() const { return this; }
+  unsigned GetId() const { return m_id; }
 
   const ChartTranslationOption &GetTranslationOption()const {
     return m_transOpt;

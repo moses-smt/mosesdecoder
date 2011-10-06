@@ -51,8 +51,9 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
   ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   ,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)
-	,m_winningHypo(NULL)
+  ,m_winningHypo(NULL)
   ,m_manager(manager)
+  ,m_id(manager.GetNextHypoId())
 {
   // underlying hypotheses for sub-spans
   m_numTargetTerminals = GetCurrTargetPhrase().GetNumTerminals();
