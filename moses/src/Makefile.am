@@ -59,7 +59,6 @@ libmoses_la_HEADERS = \
         LMList.h \
         LVoc.h \
         LanguageModel.h \
-        LanguageModelChartState.h \
         LanguageModelJoint.h \
         LanguageModelFactory.h \
         LanguageModelImplementation.h \
@@ -222,7 +221,6 @@ libmoses_la_SOURCES = \
         LMList.cpp \
         LVoc.cpp \
         LanguageModel.cpp \
-        LanguageModelChartState.cpp \
         LanguageModelFactory.cpp \
         LanguageModelImplementation.cpp \
         LanguageModelInternal.cpp \
