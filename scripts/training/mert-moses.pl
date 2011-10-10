@@ -663,6 +663,8 @@ while(1) {
   my $score_file = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
+  $cmd = create_extractor_script($cmd, $___WORKING_DIR);
+
   &submit_or_exec($cmd,"extract.out","extract.err");
 
   # Create the initial weights file for mert: init.opt
@@ -1282,3 +1284,23 @@ sub submit_or_exec {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
   }
 }
+
+sub create_extractor_script()
+{
+  my ($cmd, $outdir) = @_;
+
+  my $script_path = $outdir."/extractor.sh";
+
+  open(OUT,"> $script_path")
+    or die "Can't write $script_path";
+  print OUT "#!/bin/bash\n";
+  print OUT "cd $outdir\n";
+  print OUT $cmd."\n";
+  close(OUT);
+
+  `chmod +x $script_path`;
+
+  return $script_path;  
+}
+
+
