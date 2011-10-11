@@ -525,7 +525,7 @@ template <class Quant, class Bhiksha> void BuildTrie(const std::string &file_pre
     const RecordReader &context = contexts[order - 2];
     if (context) {
       FormatLoadException e;
-      e << "An " << static_cast<unsigned int>(order) << "-gram has context";
+      e << "A " << static_cast<unsigned int>(order) << "-gram has context";
       const WordIndex *ctx = reinterpret_cast<const WordIndex*>(context.Data());
       for (const WordIndex *i = ctx; i != ctx + order - 1; ++i) {
         e << ' ' << *i;
