@@ -54,9 +54,6 @@ protected:
 #endif
   bool m_enableOOVFeature;
   
-
-  void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
-
 public:
   /**
    * Create a new language model
@@ -88,11 +85,9 @@ public:
    * \param ngramScore score of only n-gram of order m_nGramOrder
    * \param oovCount number of LM OOVs
    */
-  void CalcScore(
-    const Phrase &phrase,
-    float &fullScore,
-    float &ngramScore,
-    size_t &oovCount) const;
+  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+    return m_implementation->CalcScore(phrase, fullScore, ngramScore, oovCount);
+  }
 
   //! max n-gram order of LM
   size_t GetNGramOrder() const {
@@ -101,6 +96,10 @@ public:
 
   virtual std::string GetScoreProducerDescription(unsigned idx=0) const {
     return m_implementation->GetScoreProducerDescription(idx);
+  }
+
+  bool OOVFeatureEnabled() const {
+    return m_enableOOVFeature;
   }
 
   float GetWeight() const;
@@ -120,10 +119,12 @@ public:
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-  virtual FFState* Evaluate(
+  FFState* Evaluate(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const;
+    ScoreComponentCollection* accumulator) const {
+    return m_implementation->Evaluate(cur_hypo, prev_state, accumulator, this);
+  }
 
   FFState* EvaluateChart(
     const ChartHypothesis& cur_hypo,

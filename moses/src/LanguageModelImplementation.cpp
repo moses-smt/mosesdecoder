@@ -68,6 +68,144 @@ void LanguageModelImplementation::GetState(
   GetValueForgotState(contextFactor, state);
 }
 
+// Calculate score of a phrase.  
+void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+  fullScore  = 0;
+  ngramScore = 0;
+
+  oovCount = 0;
+
+  size_t phraseSize = phrase.GetSize();
+  if (!phraseSize) return;
+
+  vector<const Word*> contextFactor;
+  contextFactor.reserve(GetNGramOrder());
+  std::auto_ptr<FFState> state(NewState((phrase.GetWord(0) == GetSentenceStartArray()) ?
+                               GetBeginSentenceState() : GetNullContextState()));
+  size_t currPos = 0;
+  while (currPos < phraseSize) {
+    const Word &word = phrase.GetWord(currPos);
+
+    if (word.IsNonTerminal()) {
+      // do nothing. reset ngram. needed to score target phrases during pt loading in chart decoding
+      if (!contextFactor.empty()) {
+        // TODO: state operator= ?
+        state.reset(NewState(GetNullContextState()));
+        contextFactor.clear();
+      }
+    } else {
+      ShiftOrPush(contextFactor, word);
+      assert(contextFactor.size() <= GetNGramOrder());
+
+      if (word == GetSentenceStartArray()) {
+        // do nothing, don't include prob for <s> unigram
+        assert(currPos == 0);
+      } else {
+        LMResult result = GetValueGivenState(contextFactor, *state);
+        fullScore += result.score;
+        if (contextFactor.size() == GetNGramOrder())
+          ngramScore += result.score;
+        if (contextFactor.size() == 1 && result.unknown)
+          ++oovCount; 
+          
+      }
+    }
+
+    currPos++;
+  }
+}
+
+FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const {
+  // In this function, we only compute the LM scores of n-grams that overlap a
+  // phrase boundary. Phrase-internal scores are taken directly from the
+  // translation option.
+
+  // In the case of unigram language models, there is no overlap, so we don't
+  // need to do anything.
+  if(GetNGramOrder() <= 1)
+    return NULL;
+
+  clock_t t = 0;
+  IFVERBOSE(2) {
+    t = clock();  // track time
+  }
+
+  // Empty phrase added? nothing to be done
+  if (hypo.GetCurrTargetLength() == 0)
+    return ps ? NewState(ps) : NULL;
+
+  const size_t currEndPos = hypo.GetCurrTargetWordsRange().GetEndPos();
+  const size_t startPos = hypo.GetCurrTargetWordsRange().GetStartPos();
+
+  // 1st n-gram
+  vector<const Word*> contextFactor(GetNGramOrder());
+  size_t index = 0;
+  for (int currPos = (int) startPos - (int) GetNGramOrder() + 1 ; currPos <= (int) startPos ; currPos++) {
+    if (currPos >= 0)
+      contextFactor[index++] = &hypo.GetWord(currPos);
+    else {
+      contextFactor[index++] = &GetSentenceStartArray();
+    }
+  }
+  FFState *res = NewState(ps);
+  float lmScore = ps ? GetValueGivenState(contextFactor, *res).score : GetValueForgotState(contextFactor, *res).score;
+
+  // main loop
+  size_t endPos = std::min(startPos + GetNGramOrder() - 2
+                           , currEndPos);
+  for (size_t currPos = startPos + 1 ; currPos <= endPos ; currPos++) {
+    // shift all args down 1 place
+    for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i++)
+      contextFactor[i] = contextFactor[i + 1];
+
+    // add last factor
+    contextFactor.back() = &hypo.GetWord(currPos);
+
+    lmScore += GetValueGivenState(contextFactor, *res).score;
+  }
+
+  // end of sentence
+  if (hypo.IsSourceCompleted()) {
+    const size_t size = hypo.GetSize();
+    contextFactor.back() = &GetSentenceEndArray();
+
+    for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i ++) {
+      int currPos = (int)(size - GetNGramOrder() + i + 1);
+      if (currPos < 0)
+        contextFactor[i] = &GetSentenceStartArray();
+      else
+        contextFactor[i] = &hypo.GetWord((size_t)currPos);
+    }
+    lmScore += GetValueForgotState(contextFactor, *res).score;
+  }
+  else
+  {
+    if (endPos < currEndPos) {
+      //need to get the LM state (otherwise the last LM state is fine)
+      for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
+        for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i++)
+          contextFactor[i] = contextFactor[i + 1];
+        contextFactor.back() = &hypo.GetWord(currPos);
+      }
+      GetState(contextFactor, *res);
+    }
+  }
+  if (feature->OOVFeatureEnabled()) {
+    vector<float> scores(2);
+    scores[0] = lmScore;
+    scores[1] = 0;
+    out->PlusEquals(feature, scores);
+  } else {
+    out->PlusEquals(feature, lmScore);
+  }
+
+
+  IFVERBOSE(2) {
+    hypo.GetManager().GetSentenceStats().AddTimeCalcLM( clock()-t );
+  }
+  return res;
+}
+
 namespace {
 
 // This is the FFState used by LanguageModelImplementation::EvaluateChart.  
@@ -364,7 +502,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   return ret;
 }
 
-void LanguageModelImplementation::updateChartScore( float *prefixScore, float *finalizedScore, float score, size_t wordPos ) const {
+void LanguageModelImplementation::updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const {
   if (wordPos < GetNGramOrder()) {
     *prefixScore += score;
   }
