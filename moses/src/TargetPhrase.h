@@ -58,9 +58,6 @@ protected:
   Phrase const* m_sourcePhrase;
   Word m_lhsTarget;
 
-  static bool wordalignflag;
-  static bool printalign;
-
 public:
   TargetPhrase(FactorDirection direction=Output);
   TargetPhrase(FactorDirection direction, std::string out_string);
@@ -156,19 +153,6 @@ public:
 
   const AlignmentInfo &GetAlignmentInfo() const {
     return *m_alignmentInfo;
-  }
-
-  void UseWordAlignment(bool a) {
-    wordalignflag=a;
-  };
-  bool UseWordAlignment() const {
-    return wordalignflag;
-  };
-  void PrintAlignmentInfo(bool a) {
-    printalign=a;
-  }
-  bool PrintAlignmentInfo() const {
-    return printalign;
   }
 
   TO_STRING();

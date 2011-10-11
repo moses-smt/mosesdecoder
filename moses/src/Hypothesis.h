@@ -215,14 +215,6 @@ public:
     out << (Phrase) GetCurrTargetPhrase();
   }
 
-  inline bool PrintAlignmentInfo() const {
-    return GetCurrTargetPhrase().PrintAlignmentInfo();
-  }
-
-
-
-
-
   TO_STRING();
 
   inline void SetWinningHypo(const Hypothesis *hypo) {

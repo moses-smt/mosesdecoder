@@ -37,12 +37,6 @@ using namespace std;
 
 namespace Moses
 {
-bool TargetPhrase::wordalignflag=StaticData::Instance().UseAlignmentInfo();
-bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
-
-//bool TargetPhrase::wordalignflag;
-//bool TargetPhrase::printalign;
-
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
   :Phrase(direction, 0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -51,8 +45,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   CreateFromString(staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
-  wordalignflag=StaticData::Instance().UseAlignmentInfo();
-  printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 
@@ -63,8 +55,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
-  wordalignflag=StaticData::Instance().UseAlignmentInfo();
-  printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 TargetPhrase::TargetPhrase(const Phrase &phrase)
@@ -74,8 +64,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
-  wordalignflag=StaticData::Instance().UseAlignmentInfo();
-  printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 TargetPhrase::~TargetPhrase()
