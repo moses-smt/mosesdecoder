@@ -52,6 +52,8 @@ protected:
 #else
   LanguageModelImplementation *m_implementation;
 #endif
+  bool m_enableOOVFeature;
+  
 
 public:
 
@@ -85,11 +87,13 @@ public:
 	 * Useable() should be called beforehand on the phrase
 	 * \param fullScore scores of all unigram, bigram... of contiguous n-gram of the phrase
 	 * \param ngramScore score of only n-gram of order m_nGramOrder
+   * \param oovCount number of LM OOVs
 	 */
 	void CalcScore(
       const Phrase &phrase,
 			float &fullScore,
-			float &ngramScore) const;
+			float &ngramScore,
+      size_t &oovCount) const;
 	
 	void CalcScoreChart(
       const Phrase &phrase,
@@ -104,8 +108,9 @@ public:
 	
 	
 	float GetWeight() const;
+	float GetOOVWeight() const;
 
-	std::string GetScoreProducerWeightShortName() const 
+	std::string GetScoreProducerWeightShortName(unsigned) const 
     {
 		return "lm";
 	}

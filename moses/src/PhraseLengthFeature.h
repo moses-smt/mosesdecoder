@@ -25,7 +25,7 @@ public:
 
   // basic properties
 	size_t GetNumScoreComponents() const { return ScoreProducer::unlimited; }
-	std::string GetScoreProducerWeightShortName() const { return "pl"; }
+	std::string GetScoreProducerWeightShortName(unsigned) const { return "pl"; }
 	size_t GetNumInputScores() const { return 0; }
 };
 

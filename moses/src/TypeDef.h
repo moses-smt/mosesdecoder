@@ -208,6 +208,11 @@ enum SourceLabelOverlap {
   ,SourceLabelOverlapDiscard = 2
 };
 
+enum WordAlignmentSort {
+  NoSort = 0
+  ,TargetOrder = 1
+};
+
 // typedef
 typedef size_t FactorType;
 

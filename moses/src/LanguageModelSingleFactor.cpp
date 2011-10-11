@@ -61,12 +61,12 @@ LanguageModelPointerState::LanguageModelPointerState()
 
 LanguageModelPointerState::~LanguageModelPointerState() {}
 
-FFState *LanguageModelPointerState::GetNullContextState() const
+const FFState *LanguageModelPointerState::GetNullContextState() const
 {
   return m_nullContextState;
 }
 
-FFState *LanguageModelPointerState::GetBeginSentenceState() const
+const FFState *LanguageModelPointerState::GetBeginSentenceState() const
 {
   return m_beginSentenceState;
 }

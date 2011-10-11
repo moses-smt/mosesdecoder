@@ -341,6 +341,7 @@ int main(int argc, char** argv)
     exit(1);
   }
 
+
   // create threadpool, if using multi-threaded decoding
   // note: multi-threading is done on sentence-level,
   // each thread translates one sentence

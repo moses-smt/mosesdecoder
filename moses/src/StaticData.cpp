@@ -95,6 +95,7 @@ StaticData::StaticData()
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_factorDelimiter("|") // default delimiter between factors
+  ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
 
 {
@@ -145,6 +146,10 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  if(m_parameter->GetParam("sort-word-alignment").size()) {
+    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
+  }
+  
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -223,6 +228,7 @@ bool StaticData::LoadData(Parameter *parameter)
   } else
     m_outputSearchGraphPB = false;
 #endif
+  SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", true );
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -359,6 +365,8 @@ bool StaticData::LoadData(Parameter *parameter)
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
+  SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
+
   // minimum Bayes risk decoding
   SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
   m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
@@ -472,19 +480,19 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_targetBigramFeature->SetSparseFeatureReporting();
-      if (m_phrasePairFeature && name.compare(m_phrasePairFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_phrasePairFeature && name.compare(m_phrasePairFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_phrasePairFeature->SetSparseFeatureReporting();
-      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
-      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_phraseLengthFeature->SetSparseFeatureReporting();
-      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
-      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
-      if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_wordTranslationFeature->SetSparseFeatureReporting();
     }
   }

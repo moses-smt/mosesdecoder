@@ -27,7 +27,7 @@ size_t PhraseBoundaryFeature::GetNumScoreComponents() const
   return ScoreProducer::unlimited;
 }
 
-string PhraseBoundaryFeature::GetScoreProducerWeightShortName() const 
+string PhraseBoundaryFeature::GetScoreProducerWeightShortName(unsigned) const 
 {
   return "pb";
 }

@@ -113,9 +113,8 @@ public:
 
   virtual bool ComputeValueInTranslationOption() const;
 
-  std::string GetScoreProducerWeightShortName() const {
-    return "tm";
-  }
+  std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
+
   size_t GetNumScoreComponents() const;
 
   size_t GetNumInputScores() const;

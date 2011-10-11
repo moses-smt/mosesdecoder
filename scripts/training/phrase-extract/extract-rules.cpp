@@ -45,7 +45,7 @@
 #include "tables-core.h"
 #include "XmlTree.h"
 
-#define LINE_MAX_LENGTH 60000
+#define LINE_MAX_LENGTH 500000
 
 using namespace std;
 
@@ -91,6 +91,7 @@ int main(int argc, char* argv[])
          << " [ --GlueGrammar FILE"
          << " | --UnknownWordLabel FILE"
          << " | --OnlyDirect"
+         << " | --OutputNTLengths"
          << " | --MaxSpan[" << options.maxSpan << "]"
          << " | --MinHoleTarget[" << options.minHoleTarget << "]"
          << " | --MinHoleSource[" << options.minHoleSource << "]"
@@ -214,8 +215,8 @@ int main(int argc, char* argv[])
     // if an source phrase is paired with two target phrases, then count(t|s) = 0.5
     else if (strcmp(argv[i],"--NoFractionalCounting") == 0) {
       options.fractionalCounting = false;
-    } else if (strcmp(argv[i],"--Mixed") == 0) {
-      options.mixed = true;
+    } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
+      options.outputNTLengths = true;
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -543,11 +544,16 @@ void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
   // print alignment of non terminals
   HoleList::const_iterator iterHole;
   for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
-    std::string sourceSymbolIndex = IntToString(iterHole->GetPos(0));
-    std::string targetSymbolIndex = IntToString(iterHole->GetPos(1));
+    const Hole &hole = *iterHole;
+        
+    std::string sourceSymbolIndex = IntToString(hole.GetPos(0));
+    std::string targetSymbolIndex = IntToString(hole.GetPos(1));
     rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
     if (!options.onlyDirectFlag)
       rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
+  
+    rule.SetSpanLength(hole.GetPos(0), hole.GetSize(0), hole.GetSize(1) ) ;
+
   }
 
   rule.alignment.erase(rule.alignment.size()-1);
@@ -875,14 +881,19 @@ void writeRulesToFile()
     extractFile << rule->source << " ||| "
                 << rule->target << " ||| "
                 << rule->alignment << " ||| "
-                << rule->count << "\n";
+                << rule->count;
+    if (options.outputNTLengths) {
+      extractFile << " ||| ";
+      rule->OutputNTLengths(extractFile); 
+    }
+    extractFile << "\n";
 
-    if (!options.onlyDirectFlag)
+    if (!options.onlyDirectFlag) {
       extractFileInv << rule->target << " ||| "
                      << rule->source << " ||| "
                      << rule->alignmentInv << " ||| "
-                     << rule->count << "\n";
-
+                      << rule->count << "\n";
+    }
   }
 }
 

@@ -60,7 +60,7 @@ void DynSuffixArray::BuildAuxArrays()
 int DynSuffixArray::Rank(unsigned word, unsigned idx)
 {
   /* use Gerlach's code to make rank faster */
-  // the number of word in L[0..i]
+  // the number of words in L[0..i] (minus 1 which is why 'i < idx', not '<=')
   int r(0);
   for(unsigned i=0; i < idx; ++i)
     if(m_L->at(i) == word) ++r;
@@ -140,25 +140,33 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex)
   }
   // Begin stage 4
   Reorder(true_pos, LastFirstFunc(kprime)); // actual position vs computed position of cycle (newIndex-1)
-  cerr << "GETS HERE 13\n";
 }
 
 void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
 {
-  //cerr << "j=" << j << "\tj'=" << jprime << endl;
+  set<pair<unsigned, unsigned> > seen;
   while(j != jprime) {
+    // this 'seenit' check added for data with many loops. will remove after double 
+    // checking.  
+    bool seenit = seen.insert(std::make_pair(j, jprime)).second;
+    if(seenit) {
+      for(int i=1; i < m_SA->size(); ++i) {
+        if(m_corpus->at(m_SA->at(i)) < m_corpus->at(m_SA->at(i-1))) {
+          cerr << "PROBLEM WITH SUFFIX ARRAY REORDERING. EXITING...\n";
+          exit(1);
+        }
+      }
+      return;
+    }
     //cerr << "j=" << j << "\tj'=" << jprime << endl;
-    int tmp, isaIdx(-1);
+    int isaIdx(-1);
     int new_j = LastFirstFunc(j);
-    cerr << "new_j = " << new_j << endl;
-    // for SA, L, and F, the element at pos j is moved to j'
-    tmp = m_L->at(j); // L
-    m_L->at(j) = m_L->at(jprime);
-    m_L->at(jprime) = tmp;
-    tmp = m_SA->at(j);  // SA
-    m_SA->at(j) = m_SA->at(jprime);
-    m_SA->at(jprime) = tmp;
-
+    assert(j <= jprime);
+    // for SA and L, the element at pos j is moved to pos j'
+    m_L->insert(m_L->begin() + jprime + 1, m_L->at(j)); 
+    m_L->erase(m_L->begin() + j);
+    m_SA->insert(m_SA->begin() + jprime + 1, m_SA->at(j)); 
+    m_SA->erase(m_SA->begin() + j);
     // all ISA values between (j...j'] decremented
     for(size_t i = 0; i < m_ISA->size(); ++i) {
       if((m_ISA->at(i) == j) && (isaIdx == -1))
@@ -180,8 +188,8 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del)
   int true_pos = LastFirstFunc(m_ISA->at(index)); // track cycle shift (newIndex - 1)
   for(size_t q = 0; q < num2del; ++q) {
     int row = m_ISA->at(index); // gives the position of index in SA and m_F
-    std::cerr << "row = " << row << std::endl;
-    std::cerr << "SA[r]/index = " << m_SA->at(row) << "/" << index << std::endl;
+    //std::cerr << "row = " << row << std::endl;
+    //std::cerr << "SA[r]/index = " << m_SA->at(row) << "/" << index << std::endl;
     true_pos -= (row <= true_pos ? 1 : 0); // track changes
     m_L->erase(m_L->begin() + row);
     m_F->erase(m_F->begin() + row);
@@ -198,7 +206,7 @@ void DynSuffixArray::Delete(unsigned index, unsigned num2del)
   }
   m_L->at(m_ISA->at(index))= ltmp;
   Reorder(LastFirstFunc(m_ISA->at(index)), true_pos);
-  PrintAuxArrays();
+  //PrintAuxArrays();
 }
 
 void DynSuffixArray::Substitute(vuint_t* /* newSents */, unsigned /* newIndex */)

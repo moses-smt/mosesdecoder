@@ -51,9 +51,12 @@ void FeatureData::load(ifstream& inFile)
     if (entry.size() == 0)
       break;
 
-    if (size() == 0) {
+    if (size() == 0)
       setFeatureMap(entry.Features());
-    }
+
+    if (entry.hasSparseFeatures())
+      _sparse_flag = true;
+
     add(entry);
   }
 }

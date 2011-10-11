@@ -190,7 +190,6 @@ void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGra
     const ChartHypothesisCollection &coll = iterOutside->second;
     coll.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
   }
-
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartCell &cell)

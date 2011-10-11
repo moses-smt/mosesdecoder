@@ -26,10 +26,10 @@ protected:
   idx2name idx2arrayname_; //map from index to name of array
   name2idx arrayname2idx_; //map from name to index of array
 
-
 private:
   size_t number_of_features;
   std::string features;
+  bool _sparse_flag;
 
   map<std::string, size_t> featname2idx_; //map from name to index of features
   map<size_t, std::string> idx2featname_; //map from index to name of features
@@ -43,6 +43,9 @@ public:
     array_.clear();
   }
 
+  inline bool hasSparseFeatures() const { 
+    return _sparse_flag; 
+  }
   inline FeatureArray get(const std::string& idx) {
     return array_.at(getIndex(idx));
   }

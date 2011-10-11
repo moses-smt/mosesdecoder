@@ -92,8 +92,8 @@ public:
   // This is here so models can implement a shortcut to GetValueAndState.
   virtual void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
-  virtual FFState *GetNullContextState() const = 0;
-  virtual FFState *GetBeginSentenceState() const = 0;
+  virtual const FFState *GetNullContextState() const = 0;
+  virtual const FFState *GetBeginSentenceState() const = 0;
   virtual FFState *NewState(const FFState *from = NULL) const = 0;
 
   //! max n-gram order of LM
@@ -107,6 +107,11 @@ public:
   }
   const Word &GetSentenceEndArray() const {
     return m_sentenceEndArray;
+  }
+
+
+  std::string GetScoreProducerWeightShortName(unsigned) const {
+    return "lm";
   }
 
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading

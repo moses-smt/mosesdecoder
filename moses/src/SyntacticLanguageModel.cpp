@@ -36,11 +36,11 @@ namespace Moses
     return m_NumScoreComponents;
   }
 
-  std::string SyntacticLanguageModel::GetScoreProducerDescription() const {
+  std::string SyntacticLanguageModel::GetScoreProducerDescription(unsigned) const {
     return "Syntactic Language Model";
   }
 
-  std::string SyntacticLanguageModel::GetScoreProducerWeightShortName() const {
+  std::string SyntacticLanguageModel::GetScoreProducerWeightShortName(unsigned) const {
     return "slm";
   }
 

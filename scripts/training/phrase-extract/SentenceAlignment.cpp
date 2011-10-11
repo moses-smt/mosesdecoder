@@ -40,6 +40,7 @@ bool SentenceAlignment::processSourceSentence(const char * sourceString, int)
 bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID)
 {
   using namespace std;
+  this->sentenceID = sentenceID;
 
   // process sentence strings and store in target and source members.
   if (!processTargetSentence(targetString, sentenceID)) {

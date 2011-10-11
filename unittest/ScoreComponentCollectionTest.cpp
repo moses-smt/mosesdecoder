@@ -33,21 +33,21 @@ BOOST_AUTO_TEST_SUITE(scc)
 class MockSingleFeature : public StatelessFeatureFunction {
   public:
     MockSingleFeature(): StatelessFeatureFunction("MockSingle") {}
-    std::string GetScoreProducerWeightShortName() const {return "sf";}
+    std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
     size_t GetNumScoreComponents() const {return 1;}
 };
 
 class MockMultiFeature : public StatelessFeatureFunction {
   public:
     MockMultiFeature(): StatelessFeatureFunction("MockMulti") {}
-    std::string GetScoreProducerWeightShortName() const {return "mf";}
+    std::string GetScoreProducerWeightShortName(unsigned) const {return "mf";}
     size_t GetNumScoreComponents() const {return 5;}
 };
 
 class MockSparseFeature : public StatelessFeatureFunction {
   public:
     MockSparseFeature(): StatelessFeatureFunction("MockSparse") {}
-    std::string GetScoreProducerWeightShortName() const {return "sf";}
+    std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
     size_t GetNumScoreComponents() const {return ScoreProducer::unlimited;}
 };
 

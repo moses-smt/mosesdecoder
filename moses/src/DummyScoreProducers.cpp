@@ -44,7 +44,7 @@ size_t DistortionScoreProducer::GetNumScoreComponents() const
   return 1;
 }
 
-std::string DistortionScoreProducer::GetScoreProducerWeightShortName() const
+std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "d";
 }
@@ -105,7 +105,7 @@ size_t WordPenaltyProducer::GetNumScoreComponents() const
   return 1;
 }
 
-std::string WordPenaltyProducer::GetScoreProducerWeightShortName() const
+std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "w";
 }
@@ -126,7 +126,7 @@ size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
 }
 
 
-std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName() const
+std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "u";
 }

@@ -56,13 +56,12 @@ void ThreadPool::Execute()
     //Execute job
     if (task) {
       task->Run();
-      delete task;
+      if (task->DeleteAfterExecution()) {
+        delete task;
+      }
     }
     m_threadAvailable.notify_all();
   } while (!m_stopped);
-#ifdef BOOST_HAS_PTHREADS
-  TRACE_ERR("Thread " << pthread_self() << " exiting" << endl);
-#endif
 }
 
 void ThreadPool::Submit( Task* task )

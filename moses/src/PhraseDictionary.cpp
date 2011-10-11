@@ -224,6 +224,14 @@ PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 
 
+std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned idx) const
+{
+  if (idx < GetNumInputScores()){
+    return "I";
+  }else{
+    return "tm";
+  }
+}
 
 size_t PhraseDictionaryFeature::GetNumScoreComponents() const
 {

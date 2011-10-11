@@ -66,7 +66,7 @@ public:
   }
   virtual ~PhraseDictionarySCFG();
 
-  std::string GetScoreProducerDescription() const {
+  std::string GetScoreProducerDescription(unsigned) const {
     return "Hieu's Reordering Model";
   }
 

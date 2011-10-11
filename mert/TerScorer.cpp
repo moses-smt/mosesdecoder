@@ -78,7 +78,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
 
   }
   ostringstream stats;
-  stats << result.numEdits << " " << result.averageWords << " " << result.scoreAv() << " " ;
+  stats << result.numEdits*100.0 << " " << result.averageWords*100.0 << " " << result.scoreAv()*100.0 << " " ;
   string stats_str = stats.str();
   entry.set ( stats_str );
 }
@@ -94,6 +94,8 @@ float TerScorer::calculateScore ( const vector<int>& comps )
     return (1.0+(num / denom));
   }
 }
+
+/*
 float TerScorer::calculateScore ( const vector<float>& comps )
 {
   float denom = 1.0 * comps[1];
@@ -105,3 +107,4 @@ float TerScorer::calculateScore ( const vector<float>& comps )
     return (1.0+(num / denom));
   }
 }
+*/
