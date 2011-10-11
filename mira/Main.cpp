@@ -321,8 +321,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	decoder->loadReferenceSentences(referenceSentences);
-
 #ifdef MPI_ENABLE
 	mpi::broadcast(world, order, 0);
 #endif

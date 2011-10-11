@@ -1290,7 +1290,7 @@ bool StaticData::LoadDecodeGraphs()
 
 bool StaticData::LoadReferences()
 {
-  vector<string> bleuWeightStr = m_parameter->GetParam("weight-b");
+  vector<string> bleuWeightStr = m_parameter->GetParam("weight-bl");
   vector<string> referenceFiles = m_parameter->GetParam("references");
   if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
     UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
@@ -1330,7 +1330,6 @@ bool StaticData::LoadReferences()
   }
   //Set the references in the bleu feature
   m_bleuScoreFeature->LoadReferences(references);
-  m_bleuScoreFeature->SetCurrentReference(0); //TODO: Temporary, for testing
 
   return true;
 }
