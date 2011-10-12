@@ -75,7 +75,6 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 void LMList::Add(LanguageModel *lm)
 {
   m_coll.push_back(lm);
-  m_maxNGramOrder = (lm->GetNGramOrder() > m_maxNGramOrder) ? lm->GetNGramOrder() : m_maxNGramOrder;
 
   const ScoreIndexManager &scoreMgr = StaticData::Instance().GetScoreIndexManager();
   size_t startInd = scoreMgr.GetBeginIndex(lm->GetScoreBookkeepingID())

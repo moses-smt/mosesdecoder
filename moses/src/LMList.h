@@ -18,7 +18,6 @@ protected:
   typedef std::list < LanguageModel* > CollType;
   CollType m_coll;
 
-  size_t m_maxNGramOrder;
   size_t m_minInd, m_maxInd;
 
 public:
@@ -36,8 +35,7 @@ public:
   }
 
   LMList()
-    :m_maxNGramOrder(0)
-    ,m_minInd(std::numeric_limits<size_t>::max())
+    :m_minInd(std::numeric_limits<size_t>::max())
     ,m_maxInd(0)
   {}
   void CleanUp();
@@ -47,9 +45,6 @@ public:
 
   void Add(LanguageModel *lm);
 
-  size_t GetMaxNGramOrder() const {
-    return m_maxNGramOrder;
-  }
   size_t GetMinIndex() const {
     return m_minInd;
   }

@@ -89,11 +89,6 @@ public:
     return m_implementation->CalcScore(phrase, fullScore, ngramScore, oovCount);
   }
 
-  //! max n-gram order of LM
-  size_t GetNGramOrder() const {
-    return m_implementation->GetNGramOrder();
-  }
-
   virtual std::string GetScoreProducerDescription(unsigned idx=0) const {
     return m_implementation->GetScoreProducerDescription(idx);
   }
