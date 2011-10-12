@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <stdlib.h>
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
@@ -39,40 +40,102 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace Moses
-{
+namespace Moses {
 
 LanguageModelKenBase::~LanguageModelKenBase() {}
 
-namespace
-{
+namespace {
 
-class LanguageModelChartStateKenLM : public FFState {
-  private:
-    lm::ngram::ChartState m_state;
-    const ChartHypothesis *m_hypo;
+struct KenLMState : public FFState {
+  lm::ngram::State state;
+  int Compare(const FFState &o) const {
+    const KenLMState &other = static_cast<const KenLMState &>(o);
+    if (state.length < other.state.length) return -1;
+    if (state.length > other.state.length) return 1;
+    return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
+  }
+};
 
+/*
+ * An implementation of single factor LM using Ken's code.
+ */
+template <class Model> class LanguageModelKen : public LanguageModelKenBase {
   public:
-    explicit LanguageModelChartStateKenLM(const ChartHypothesis &hypo)
-      :m_hypo(&hypo)
-    {}
+    LanguageModelKen(bool lazy);
+    ~LanguageModelKen();
 
-    const ChartHypothesis* GetHypothesis() const { return m_hypo; }
+    bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
 
-    const lm::ngram::ChartState &GetChartState() const { return m_state; }
-    lm::ngram::ChartState &GetChartState() { return m_state; }
+    LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const {
+      return GetKenFullScoreGivenState(contextFactor, state);
+    }
+    LMKenResult GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
 
-    int Compare(const FFState& o) const
-    {
-      const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
-      int ret = m_state.Compare(other.m_state);
-      return ret;
+    LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
+      return GetKenFullScoreForgotState(contextFactor, outState);
+    }
+    LMKenResult GetKenFullScoreForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+
+    void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
+
+    const FFState *GetNullContextState() const;
+    const FFState *GetBeginSentenceState() const;
+    FFState *NewState(const FFState *from = NULL) const;
+
+    void CleanUpAfterSentenceProcessing() {}
+    void InitializeBeforeSentenceProcessing() {}
+
+    FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const;
+
+    FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator, const LanguageModel *feature) const;
+
+    void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+
+  private:
+    Model *m_ngram;
+    std::vector<lm::WordIndex> m_lmIdLookup;
+    bool m_lazy;
+    KenLMState m_nullContextState;
+    KenLMState m_beginSentenceState;
+
+    lm::WordIndex TranslateID(const Word &word) const {
+      std::size_t factor = word.GetFactor(GetFactorType())->GetId();
+      return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+    }
+
+    void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const {
+      for (size_t i = 0 ; i < contextFactor.size(); i++) {
+        indices[contextFactor.size() - 1 - i] = TranslateID(*contextFactor[i]);
+      }
+    }
+
+    // Convert last words of hypothesis into vocab ids, returning an end pointer.  
+    lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
+      lm::WordIndex *index = indices;
+      lm::WordIndex *end = indices + m_ngram->Order() - 1;
+      int position = hypo.GetCurrTargetWordsRange().GetEndPos();
+      for (; ; ++index, --position) {
+        if (position == -1) {
+          *index = m_ngram->GetVocabulary().BeginSentence();
+          return index + 1;
+        }
+        if (index == end) return index;
+        *index = TranslateID(hypo.GetWord(position));
+      }
     }
 };
 
-
-class MappingBuilder : public lm::EnumerateVocab
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool lazy)
+  :m_ngram(NULL), m_lazy(lazy)
 {
+}
+
+template <class Model> LanguageModelKen<Model>::~LanguageModelKen()
+{
+  delete m_ngram;
+}
+
+class MappingBuilder : public lm::EnumerateVocab {
 public:
   MappingBuilder(FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
     : m_factorCollection(factorCollection), m_mapping(mapping) {}
@@ -93,171 +156,6 @@ private:
 
   std::string str_;
 };
-
-struct KenLMState : public FFState {
-  lm::ngram::State state;
-  int Compare(const FFState &o) const {
-    const KenLMState &other = static_cast<const KenLMState &>(o);
-    if (state.length < other.state.length) return -1;
-    if (state.length > other.state.length) return 1;
-    return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
-  }
-};
-
-/*
- * An implementation of single factor LM using Ken's code.
- */
-template <class Model> class LanguageModelKen : public LanguageModelKenBase
-{
-private:
-  Model *m_ngram;
-  std::vector<lm::WordIndex> m_lmIdLookup;
-  bool m_lazy;
-  KenLMState m_nullContextState;
-  KenLMState m_beginSentenceState;
-
-  void TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const;
-
-public:
-  LanguageModelKen(bool lazy);
-  ~LanguageModelKen();
-
-  bool Load(const std::string &filePath
-            , FactorType factorType
-            , size_t nGramOrder);
-
-  LMResult GetValueGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const {
-    return GetKenFullScoreGivenState(contextFactor, state);
-  }
-  LMKenResult GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const;
-
-  LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {
-    return GetKenFullScoreForgotState(contextFactor, outState);
-  }
-  LMKenResult GetKenFullScoreForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
-
-  void GetState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
-
-  const FFState *GetNullContextState() const;
-  const FFState *GetBeginSentenceState() const;
-  FFState *NewState(const FFState *from = NULL) const;
-
-  lm::WordIndex GetLmID(const std::string &str) const;
-
-  void CleanUpAfterSentenceProcessing() {}
-  void InitializeBeforeSentenceProcessing() {}
-
-  FFState *EvaluateChart(const ChartHypothesis& cur_hypo,
-                         int featureID,
-                         ScoreComponentCollection *accumulator,
-                         const LanguageModel *feature) const;
-
-  void CalcScore(const Phrase &phrase, float  &fullScore, float &ngramScore, size_t &oovCount) const;
-};
-
-template <class Model>
-FFState *LanguageModelKen<Model>::EvaluateChart(
-    const ChartHypothesis& hypo,
-    int featureID,
-    ScoreComponentCollection *accumulator,
-    const LanguageModel *feature) const
-{
-  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM(hypo);
-  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-
-  const size_t size = hypo.GetCurrTargetPhrase().GetSize();
-  size_t phrasePos = 0;
-  // Special cases for first word.  
-  if (size) {
-    const Word &word = hypo.GetCurrTargetPhrase().GetWord(0);
-    if (word == GetSentenceStartArray()) {
-      // Begin of sentence
-      ruleScore.BeginSentence();
-      phrasePos++;
-    } else if (word.IsNonTerminal()) {
-      // Non-terminal is first so we can copy instead of rescoring.  
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
-      phrasePos++;
-    }
-  }
-
-  for (; phrasePos < size; phrasePos++) {
-    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
-    if (word.IsNonTerminal()) {
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
-    } else {
-      std::size_t factor = word.GetFactor(GetFactorType())->GetId();
-      lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-      ruleScore.Terminal(new_word);
-    }
-  }
-
-  accumulator->Assign(feature, ruleScore.Finish());
-  return newState;
-}
-
-template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
-  fullScore = 0;
-  ngramScore = 0;
-  oovCount = 0;
-
-  if (!phrase.GetSize()) return;
-
-  typename Model::State state_backing[2];
-  typename Model::State *state0 = &state_backing[0], *state1 = &state_backing[1];
-  size_t position;
-  if (phrase.GetWord(0) == GetSentenceStartArray()) {
-    *state0 = m_ngram->BeginSentenceState();
-    position = 1;
-  } else {
-    *state0 = m_ngram->NullContextState();
-    position = 0;
-  }
-  
-  FactorType factorType = GetFactorType();
-  size_t ngramBoundary = m_ngram->Order() - 1;
-
-  for (; position < phrase.GetSize(); ++position) {
-    const Word &word = phrase.GetWord(position);
-    if (word.IsNonTerminal()) {
-      *state0 = m_ngram->NullContextState();
-    } else {
-      std::size_t factor = word.GetFactor(factorType)->GetId();
-      lm::WordIndex index = factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor];
-      float score = TransformLMScore(m_ngram->Score(*state0, index, *state1));
-      std::swap(state0, state1);
-      if (position >= ngramBoundary) ngramScore += score;
-      fullScore += score;
-      if (!index) ++oovCount;
-    }
-  }
-}
-
-template <class Model> void LanguageModelKen<Model>::TranslateIDs(const std::vector<const Word*> &contextFactor, lm::WordIndex *indices) const
-{
-  FactorType factorType = GetFactorType();
-  // set up context
-  for (size_t i = 0 ; i < contextFactor.size(); i++) {
-    std::size_t factor = contextFactor[i]->GetFactor(factorType)->GetId();
-    lm::WordIndex new_word = (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-    indices[contextFactor.size() - 1 - i] = new_word;
-  }
-}
-
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(bool lazy)
-  :m_ngram(NULL), m_lazy(lazy)
-{
-}
-
-template <class Model> LanguageModelKen<Model>::~LanguageModelKen()
-{
-  delete m_ngram;
-}
 
 template <class Model> bool LanguageModelKen<Model>::Load(const std::string &filePath,
     FactorType factorType,
@@ -371,9 +269,156 @@ template <class Model> FFState *LanguageModelKen<Model>::NewState(const FFState 
   return ret;
 }
 
-template <class Model> lm::WordIndex LanguageModelKen<Model>::GetLmID(const std::string &str) const
-{
-  return m_ngram->GetVocabulary().Index(str);
+template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const {
+  const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
+
+  std::auto_ptr<KenLMState> ret(new KenLMState());
+  
+  if (!hypo.GetCurrTargetLength()) {
+    ret->state = in_state;
+    return ret.release();
+  }
+
+  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
+  //[begin, end) in STL-like fashion.
+  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
+  const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
+
+  std::size_t position = begin;
+  typename Model::State aux_state;
+  typename Model::State *state0 = &ret->state, *state1 = &aux_state;
+
+  float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
+  ++position;
+  for (; position < adjust_end; ++position) {
+    score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
+    std::swap(state0, state1);
+  }
+
+  if (hypo.IsSourceCompleted()) {
+    // Score end of sentence.  
+    std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
+    const lm::WordIndex *last = LastIDs(hypo, &indices.front());
+    score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), ret->state).prob;
+  } else if (adjust_end < end) {
+    // Get state after adding a long phrase.  
+    std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
+    const lm::WordIndex *last = LastIDs(hypo, &indices.front());
+    m_ngram->GetState(&indices.front(), last, ret->state);
+  } else if (state0 != &ret->state) {
+    // Short enough phrase that we can just reuse the state.  
+    ret->state = *state0;
+  }
+
+  score = TransformLMScore(score);
+
+  if (feature->OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    out->PlusEquals(feature, scores);
+  } else {
+    out->PlusEquals(feature, score);
+  }
+
+  return ret.release();
+}
+
+class LanguageModelChartStateKenLM : public FFState {
+  public:
+    LanguageModelChartStateKenLM() {}
+
+    const lm::ngram::ChartState &GetChartState() const { return m_state; }
+    lm::ngram::ChartState &GetChartState() { return m_state; }
+
+    int Compare(const FFState& o) const
+    {
+      const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
+      int ret = m_state.Compare(other.m_state);
+      return ret;
+    }
+
+  private:
+    lm::ngram::ChartState m_state;
+};
+
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(
+    const ChartHypothesis& hypo,
+    int featureID,
+    ScoreComponentCollection *accumulator,
+    const LanguageModel *feature) const {
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+
+  const size_t size = hypo.GetCurrTargetPhrase().GetSize();
+  size_t phrasePos = 0;
+  // Special cases for first word.  
+  if (size) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(0);
+    if (word == GetSentenceStartArray()) {
+      // Begin of sentence
+      ruleScore.BeginSentence();
+      phrasePos++;
+    } else if (word.IsNonTerminal()) {
+      // Non-terminal is first so we can copy instead of rescoring.  
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
+      phrasePos++;
+    }
+  }
+
+  for (; phrasePos < size; phrasePos++) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
+    if (word.IsNonTerminal()) {
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(feature)[0]);
+    } else {
+      ruleScore.Terminal(TranslateID(word));
+    }
+  }
+
+  accumulator->Assign(feature, ruleScore.Finish());
+  return newState;
+}
+
+template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+  fullScore = 0;
+  ngramScore = 0;
+  oovCount = 0;
+
+  if (!phrase.GetSize()) return;
+
+  typename Model::State state_backing[2];
+  typename Model::State *state0 = &state_backing[0], *state1 = &state_backing[1];
+  size_t position;
+  if (phrase.GetWord(0) == GetSentenceStartArray()) {
+    *state0 = m_ngram->BeginSentenceState();
+    position = 1;
+  } else {
+    *state0 = m_ngram->NullContextState();
+    position = 0;
+  }
+  
+  FactorType factorType = GetFactorType();
+  size_t ngramBoundary = m_ngram->Order() - 1;
+
+  for (; position < phrase.GetSize(); ++position) {
+    const Word &word = phrase.GetWord(position);
+    if (word.IsNonTerminal()) {
+      *state0 = m_ngram->NullContextState();
+    } else {
+      std::size_t factor = word.GetFactor(factorType)->GetId();
+      lm::WordIndex index = factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor];
+      float score = TransformLMScore(m_ngram->Score(*state0, index, *state1));
+      std::swap(state0, state1);
+      if (position >= ngramBoundary) ngramScore += score;
+      fullScore += score;
+      if (!index) ++oovCount;
+    }
+  }
 }
 
 } // namespace
