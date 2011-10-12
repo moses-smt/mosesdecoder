@@ -105,9 +105,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
         fullScore += result.score;
         if (contextFactor.size() == GetNGramOrder())
           ngramScore += result.score;
-        if (contextFactor.size() == 1 && result.unknown)
-          ++oovCount; 
-          
+        if (result.unknown) ++oovCount;  
       }
     }
 
