@@ -72,7 +72,7 @@ namespace
   };
 
 
-class MappingBuilder : public lm::ngram::EnumerateVocab
+class MappingBuilder : public lm::EnumerateVocab
 {
 public:
   MappingBuilder(FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
