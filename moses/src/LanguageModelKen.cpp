@@ -79,7 +79,8 @@ public:
     : m_factorCollection(factorCollection), m_mapping(mapping) {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-    std::size_t factorId = m_factorCollection.AddFactor(str.data())->GetId();
+    str_.assign(str.data(), str.size());
+    std::size_t factorId = m_factorCollection.AddFactor(str_)->GetId();
     if (m_mapping.size() <= factorId) {
       // 0 is <unk> :-)
       m_mapping.resize(factorId + 1);
@@ -90,6 +91,8 @@ public:
 private:
   FactorCollection &m_factorCollection;
   std::vector<lm::WordIndex> &m_mapping;
+
+  std::string str_;
 };
 
 struct KenLMState : public FFState {
