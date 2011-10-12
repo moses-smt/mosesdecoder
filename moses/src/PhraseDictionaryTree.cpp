@@ -478,7 +478,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (numElement == NOT_FOUND) {
       // init numElement
       numElement = tokens.size();
-      assert(numElement == 3 || numElement == 5);
+      assert(numElement >= 3);
     }
 
     if (tokens.size() != numElement) {
