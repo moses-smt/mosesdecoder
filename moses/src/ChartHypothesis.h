@@ -21,6 +21,10 @@
 
 #pragma once
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <vector>
 #include "Util.h"
 #include "WordsRange.h"
@@ -43,14 +47,10 @@ class ChartHypothesis
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesis&);
 
 protected:
-
 #ifdef USE_HYPO_POOL
   static ObjectPool<ChartHypothesis> s_objectPool;
 #endif
 
-  static unsigned int s_HypothesesCreated;
-
-  int m_id; /**< numeric ID of this hypothesis, used for logging */
   const TargetPhrase &m_targetPhrase;
   const ChartTranslationOption &m_transOpt;
 
@@ -77,13 +77,6 @@ protected:
   ChartHypothesis(const ChartHypothesis &copy); // not implemented
 
 public:
-  static void ResetHypoCount() {
-    s_HypothesesCreated = 0;
-  }
-  static unsigned int GetHypoCount() {
-    return s_HypothesesCreated;
-  }
-
 #ifdef USE_HYPO_POOL
   void *operator new(size_t /* num_bytes */) {
     void *ptr = s_objectPool.getPtr();
@@ -104,9 +97,8 @@ public:
 
   ~ChartHypothesis();
 
-  int GetId()const {
-    return m_id;
-  }
+  const ChartHypothesis *GetId() const { return this; }
+
   const ChartTranslationOption &GetTranslationOption()const {
     return m_transOpt;
   }

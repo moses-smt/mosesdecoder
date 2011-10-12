@@ -254,7 +254,7 @@ void ChartHypothesisCollection::CleanupArcList()
   }
 }
 
-void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<int,bool> &reachable) const
+void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<const ChartHypothesis *, bool> &reachable) const
 {
   HCType::const_iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {

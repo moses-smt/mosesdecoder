@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 
 #include "LanguageModelSingleFactor.h"
+#include "kenlm/lm/left.hh"
 
 namespace Moses
 {
@@ -41,7 +42,7 @@ namespace Moses
       // scoring functions which provide more info than the common interface of LanguageModel
       virtual LMKenResult GetKenFullScoreGivenState(const std::vector<const Word*> &contextFactor, FFState &state) const = 0;
       virtual LMKenResult GetKenFullScoreForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const = 0;
-  };
+};
 
 
 // Doesn't actually load; moses wants the Load method for that.  It needs the file to autodetect binary format.

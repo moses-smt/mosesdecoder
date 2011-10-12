@@ -102,6 +102,10 @@ libmoses_la_HEADERS = \
         RuleCube.h \
         RuleCubeItem.h \
         RuleCubeQueue.h \
+        RuleTableLoader.h \
+        RuleTableLoaderCompact.h \
+        RuleTableLoaderFactory.h \
+        RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreProducer.h \
         Search.h \
@@ -230,6 +234,7 @@ libmoses_la_SOURCES = \
         LMList.cpp \
         LVoc.cpp \
         LanguageModel.cpp \
+        LanguageModelChartState.cpp \
         LanguageModelFactory.cpp \
         LanguageModelImplementation.cpp \
         LanguageModelInternal.cpp \
@@ -267,6 +272,9 @@ libmoses_la_SOURCES = \
         RuleCube.cpp \
         RuleCubeItem.cpp \
         RuleCubeQueue.cpp \
+        RuleTableLoaderCompact.cpp \
+        RuleTableLoaderFactory.cpp \
+        RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreProducer.cpp \
         Search.cpp \

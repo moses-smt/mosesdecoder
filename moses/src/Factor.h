@@ -22,27 +22,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_Factor_h
 #define moses_Factor_h
 
-#include <sstream>
-#include <iostream>
-#include <list>
-#include <vector>
-#include <map>
+#include <ostream>
 #include <string>
 #include "TypeDef.h"
 #include "Util.h"
-#include "hash.h"
 
 namespace Moses
 {
 
+class FactorFriend;
 class FactorCollection;
 
-/** Represents a factor (word, POS, etc) on the E or F side
+/** Represents a factor (word, POS, etc).  
  *
- * A Factor object is a tuple of direction (Input or Output,
- * corresponding to French or English), a type (surface form,
- * POS, stem, etc), and the value of the factor.
- *
+ * A Factor has a contiguous identifier and string value.  
  */
 class Factor
 {
@@ -50,77 +43,46 @@ class Factor
 
   // only these classes are allowed to instantiate this class
   friend class FactorCollection;
+  friend class FactorFriend;
 
-protected:
-
-  //FactorDirection		m_direction;
-  //FactorType				m_factorType;
-  const std::string	*m_ptrString;
-  const size_t			m_id;
+  // FactorCollection writes here.  
+  std::string m_string;
+  size_t			m_id;
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
-  Factor(FactorDirection direction, FactorType factorType, const std::string *factorString, size_t id);
-  //! no id set. do not used to create new factors, only used for seeing if factor exists
-  Factor(FactorDirection direction, FactorType factorType, const std::string *factorString);
+  Factor() {}
+
+  // Needed for STL containers.  They'll delegate through FactorFriend, which is never exposed publicly.  
+  Factor(const Factor &factor) : m_string(factor.m_string), m_id(factor.m_id) {}
+
+  // Not implemented.  Shouldn't be called.  
+  Factor &operator=(const Factor &factor);
 
 public:
-  //! returns whether this factor is part of the source ('Input') or target ('Output') language
-  //inline FactorDirection GetFactorDirection() const
-  //{
-  //	return m_direction;
-  //}
-  //! index, FactorType. For example, 0=surface, 1=POS. The actual mapping is user defined
-  //inline FactorType GetFactorType() const
-  //{
-  //	return m_factorType;
-  //}
   //! original string representation of the factor
   inline const std::string &GetString() const {
-    return *m_ptrString;
+    return m_string;
   }
   //! contiguous ID
   inline size_t GetId() const {
     return m_id;
   }
 
-  /*
-  //! Alternative comparison between factors. Not yet used
-  inline unsigned int GetHash() const
-  {
-  	unsigned int h=quick_hash((const char*)&m_direction, sizeof(FactorDirection), 0xc7e7f2fd);
-  	h=quick_hash((const char*)&m_factorType, sizeof(FactorType), h);
-  	h=quick_hash((const char*)&m_ptrString, sizeof(const std::string *), h);
-  	return h;
-  }
-  */
-
   /** transitive comparison between 2 factors.
   *	-1 = less than
   *	+1 = more than
   *	0	= same
-  *	Used by operator< & operator==, as well as other classes
   */
   inline int Compare(const Factor &compare) const {
-    if (m_ptrString < compare.m_ptrString)
+    if (this < &compare)
       return -1;
-    if (m_ptrString > compare.m_ptrString)
+    if (this > &compare)
       return 1;
-    /*
-    		if (m_direction < compare.m_direction)
-    			return -1;
-    		if (m_direction > compare.m_direction)
-    			return 1;
-
-    		if (m_factorType < compare.m_factorType)
-    			return -1;
-    		if (m_factorType > compare.m_factorType)
-    			return 1;
-    */
     return 0;
   }
   //! transitive comparison used for adding objects into FactorCollection
   inline bool operator<(const Factor &compare) const {
-    return Compare(compare) < 0;
+    return this < &compare;
   }
 
   // quick equality comparison. Not used

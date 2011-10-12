@@ -72,11 +72,13 @@ public:
 
   TranslationTask(size_t lineNumber,
                   InputType* source, OutputCollector* outputCollector, OutputCollector* nbestCollector,
+                  OutputCollector* latticeSamplesCollector,
                   OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                   OutputCollector* detailedTranslationCollector,
                   OutputCollector* alignmentInfoCollector ) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
+    m_latticeSamplesCollector(latticeSamplesCollector),
     m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
     m_detailedTranslationCollector(detailedTranslationCollector),
     m_alignmentInfoCollector(alignmentInfoCollector) {}
@@ -240,6 +242,15 @@ public:
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
 
+    //lattice samples
+    if (m_latticeSamplesCollector) {
+      TrellisPathList latticeSamples;
+      ostringstream out;
+      manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
+      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber);
+      m_latticeSamplesCollector->Write(m_lineNumber, out.str());
+    }
+
     // detailed translation reporting
     if (m_detailedTranslationCollector) {
       ostringstream out;
@@ -264,6 +275,7 @@ private:
   size_t m_lineNumber;
   OutputCollector* m_outputCollector;
   OutputCollector* m_nbestCollector;
+  OutputCollector* m_latticeSamplesCollector;
   OutputCollector* m_wordGraphCollector;
   OutputCollector* m_searchGraphCollector;
   OutputCollector* m_detailedTranslationCollector;
@@ -342,25 +354,6 @@ int main(int argc, char** argv)
   }
 
 
-  // create threadpool, if using multi-threaded decoding
-  // note: multi-threading is done on sentence-level,
-  // each thread translates one sentence
-  int threadcount = (params->GetParam("threads").size() > 0) ?
-                    Scan<size_t>(params->GetParam("threads")[0]) : 1;
-
-#ifdef WITH_THREADS
-  if (threadcount < 1) {
-    cerr << "Error: Need to specify a positive number of threads" << endl;
-    exit(1);
-  }
-  ThreadPool pool(threadcount);
-#else
-  if (threadcount > 1) {
-    cerr << "Error: Thread count of " << threadcount << " but moses not built with thread support" << endl;
-    exit(1);
-  }
-#endif
-
   // initialize all "global" variables, which are stored in StaticData
   // note: this also loads models such as the language model, etc.
   if (!StaticData::LoadDataStatic(params)) {
@@ -375,6 +368,10 @@ int main(int argc, char** argv)
 
   // shorthand for accessing information in StaticData
   const StaticData& staticData = StaticData::Instance();
+
+
+  //initialise random numbers
+  srand(time(NULL));
 
   // set up read/writing class
   IOWrapper* ioWrapper = GetIODevice(staticData);
@@ -396,21 +393,43 @@ int main(int argc, char** argv)
   // because multithreading may return sentences in shuffled order
   auto_ptr<OutputCollector> outputCollector; // for translations
   auto_ptr<OutputCollector> nbestCollector;  // for n-best lists
+  auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
   auto_ptr<ofstream> nbestOut;
+  auto_ptr<ofstream> latticeSamplesOut;
   size_t nbestSize = staticData.GetNBestSize();
   string nbestFile = staticData.GetNBestFilePath();
+  bool output1best = true;
   if (nbestSize) {
     if (nbestFile == "-" || nbestFile == "/dev/stdout") {
       // nbest to stdout, no 1-best
       nbestCollector.reset(new OutputCollector());
+      output1best = false;
     } else {
       // nbest to file, 1-best to stdout
       nbestOut.reset(new ofstream(nbestFile.c_str()));
-      assert(nbestOut->good());
+      if (!nbestOut->good()) {
+        TRACE_ERR("ERROR: Failed to open " << nbestFile << " for nbest lists" << endl);
+        exit(1);
+      }
       nbestCollector.reset(new OutputCollector(nbestOut.get()));
-      outputCollector.reset(new OutputCollector());
     }
-  } else {
+  }
+  size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
+  string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
+  if (latticeSamplesSize) {
+    if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
+      latticeSamplesCollector.reset(new OutputCollector());
+      output1best = false;
+    } else {
+      latticeSamplesOut.reset(new ofstream(latticeSamplesFile.c_str()));
+      if (!latticeSamplesOut->good()) {
+        TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
+        exit(1);
+      }
+      latticeSamplesCollector.reset(new OutputCollector(latticeSamplesOut.get()));
+    }
+  }
+  if (output1best) {
     outputCollector.reset(new OutputCollector());
   }
 
@@ -439,6 +458,10 @@ int main(int argc, char** argv)
     alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
   }
 
+#ifdef WITH_THREADS
+  ThreadPool pool(staticData.ThreadCount());
+#endif
+
   // main loop over set of input sentences
   InputType* source = NULL;
   size_t lineCount = 0;
@@ -449,13 +472,15 @@ int main(int argc, char** argv)
     // set up task of translating one sentence
     TranslationTask* task =
       new TranslationTask(lineCount,source, outputCollector.get(),
-                          nbestCollector.get(), wordGraphCollector.get(),
+                          nbestCollector.get(),
+                          latticeSamplesCollector.get(),
+                          wordGraphCollector.get(),
                           searchGraphCollector.get(),
                           detailedTranslationCollector.get(),
                           alignmentInfoCollector.get() );
     // execute task
 #ifdef WITH_THREADS
-    pool.Submit(task);
+  pool.Submit(task);
 #else
     task->Run();
 #endif

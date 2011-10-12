@@ -84,6 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="extract-rules.cpp" />
+    <ClCompile Include="ExtractedRule.cpp" />
     <ClCompile Include="HoleCollection.cpp" />
     <ClCompile Include="SentenceAlignment.cpp" />
     <ClCompile Include="SentenceAlignmentWithSyntax.cpp" />
@@ -92,6 +93,7 @@
     <ClCompile Include="XmlTree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExtractedRule.h" />
     <ClInclude Include="Hole.h" />
     <ClInclude Include="HoleCollection.h" />
     <ClInclude Include="SentenceAlignment.h" />

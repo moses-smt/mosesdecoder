@@ -258,7 +258,7 @@ then
   
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
-  AC_MSG_NOTICE([!!! You are linking the IRSTLM library; be sure the release is >= 5.50.01 !!!])
+  AC_MSG_NOTICE([!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!])
   AC_MSG_NOTICE([!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!])
   AC_MSG_NOTICE([])
 
@@ -387,6 +387,11 @@ then
   LDFLAGS="$LDFLAGS -L${with_zlib}/lib"
 fi
 
+# zlib is always required (see ./moses/src/gzfilebuf.h)
+# TODO: This shouldn't be presented to the user as a config option if it isn't actually an option
+AC_CHECK_HEADER(zlib.h,
+               [AC_DEFINE([HAVE_ZLIB], [], [flag for zlib])],
+               [AC_MSG_ERROR([Cannot find zlib.h. Please install it. For Debian, try 'sudo aptitude install zlib1g-dev'])]) 
 LIBS="$LIBS -lz"
 
 

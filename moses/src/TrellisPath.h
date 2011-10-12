@@ -41,6 +41,7 @@ class TrellisPathList;
 class TrellisPath
 {
   friend std::ostream& operator<<(std::ostream&, const TrellisPath&);
+  friend class Manager;
 
 protected:
   std::vector<const Hypothesis *> m_path; //< list of hypotheses/arcs
@@ -50,6 +51,11 @@ protected:
 
   ScoreComponentCollection	m_scoreBreakdown;
   float m_totalScore;
+
+  //Used by Manager::LatticeSample()
+  TrellisPath(const std::vector<const Hypothesis*> edges);
+
+  void InitScore();
 
 public:
 	TrellisPath(); // not implemented

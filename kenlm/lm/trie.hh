@@ -94,9 +94,18 @@ template <class Quant, class Bhiksha> class BitPackedMiddle : public BitPacked {
 
     void LoadedBinary() { bhiksha_.LoadedBinary(); }
 
-    bool Find(WordIndex word, float &prob, float &backoff, NodeRange &range) const;
+    bool Find(WordIndex word, float &prob, float &backoff, NodeRange &range, uint64_t &pointer) const;
 
     bool FindNoProb(WordIndex word, float &backoff, NodeRange &range) const;
+
+    NodeRange ReadEntry(uint64_t pointer, float &prob) {
+      uint64_t addr = pointer * total_bits_;
+      addr += word_bits_;
+      quant_.ReadProb(base_, addr, prob);
+      NodeRange ret;
+      bhiksha_.ReadNext(base_, addr + quant_.TotalBits(), pointer, total_bits_, ret);
+      return ret;
+    }
 
   private:
     Quant quant_;

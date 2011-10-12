@@ -76,6 +76,9 @@ training/absolutize_moses_model.pl
 training/build-generation-table.perl
 training/clean-corpus-n.perl
 training/clone_moses_model.pl
+training/compact-rule-table/tools/compactify
+training/eppex/counter
+training/eppex/eppex
 training/mbr/mbr
 training/filter-model-given-input.pl
 training/filter-rule-table.py

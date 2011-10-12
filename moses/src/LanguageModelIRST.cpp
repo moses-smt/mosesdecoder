@@ -25,9 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fstream>
 #include "dictionary.h"
 #include "n_gram.h"
-#include "lmtable.h"
-#include "lmmacro.h"
-
+#include "lmContainer.h"
 
 #include "LanguageModelIRST.h"
 #include "TypeDef.h"
@@ -71,58 +69,26 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   m_nGramOrder	 = nGramOrder;
   m_filePath = filePath;
 
-  //checking the language model type
-  int lmtype = getLanguageModelType(m_filePath);
-  std::cerr << "IRSTLM Language Model Type of " << filePath << " is " << lmtype << std::endl;
 
-  if (lmtype == _IRSTLM_LMMACRO) {
-    // case lmmacro: LM is of type lmmacro, create an object of lmmacro
-
-    m_lmtb = new lmmacro();
-    d=((lmmacro *)m_lmtb)->getDict();
-
-    ((lmmacro*) m_lmtb)->load(m_filePath);
-  } else if (lmtype == _IRSTLM_LMTABLE) {
-    // case (standard) lmmacro: LM is of type lmtable: create an object of lmtable
-    std::cerr << "Loading LM file (no MAP)\n";
-    m_lmtb  = (lmtable *)new lmtable();
-    d=((lmtable *)m_lmtb)->getDict();
-
-    // Load the (possibly binary) model
-    // Open the input file (possibly gzipped)
-    InputFileStream inp(m_filePath);
-
-#ifdef WIN32
-    m_lmtb->load(inp); //don't use memory map
-#else
-    if (m_filePath.compare(m_filePath.size()-3,3,".mm")==0)
-      m_lmtb->load(inp,m_filePath.c_str(),NULL,1);
-    else
-      m_lmtb->load(inp,m_filePath.c_str(),NULL,0);
-#endif
-
-  } else {
-    std::cerr << "This language model type is unknown!" << std::endl;
-    exit(1);
-  }
-
-  if (lmtype == _IRSTLM_LMMACRO) {
-    m_lmtb->getDict()->incflag(1);
-  }
+  m_lmtb = m_lmtb->CreateLanguageModel(m_filePath); 
+  m_lmtb->setMaxLoadedLevel(1000);
+  m_lmtb->load(m_filePath);
+  d=m_lmtb->getDict();
+  d->incflag(1);
 
   m_lmtb_size=m_lmtb->maxlevel();
 
   // LM can be ok, just outputs warnings
-
   // Mauro: in the original, the following two instructions are wrongly switched:
   m_unknownId = d->oovcode(); // at the level of micro tags
+  m_empty = -1; // code for an empty position
+
   CreateFactors(factorCollection);
 
   VERBOSE(1, "IRST: m_unknownId=" << m_unknownId << std::endl);
 
   //install caches to save time (only if PS_CACHE_ENABLE is defined through compilation flags)
-  int ml = ((lmtable *)m_lmtb)->maxlevel();
-  m_lmtb->init_caches(ml>2?ml-1:2);
+  m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
 
@@ -135,6 +101,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   // code copied & paste from SRI LM class. should do template function
   std::map<size_t, int> lmIdMap;
   size_t maxFactorId = 0; // to create lookup vector later on
+  m_empty = -1; // code for an empty position
 
   dict_entry *entry;
   dictionary_iter iter(d); // at the level of micro tags
@@ -160,15 +127,12 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
   // add to lookup vector in object
   m_lmIdLookup.resize(maxFactorId+1);
-
-  fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_unknownId);
+  fill(m_lmIdLookup.begin(), m_lmIdLookup.end(), m_empty);
 
   map<size_t, int>::iterator iterMap;
   for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap) {
     m_lmIdLookup[iterMap->first] = iterMap->second;
   }
-
-
 }
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
@@ -177,14 +141,26 @@ int LanguageModelIRST::GetLmID( const std::string &str ) const
 }
 
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
-{
+{  
   size_t factorId = factor->GetId();
 
-  if  (factorId >= m_lmIdLookup.size()) {
+  if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
       std::string s = factor->GetString();
       int code = d->encode(s.c_str());
 
+      //////////
+      ///poiche' non c'e' distinzione tra i factorIDs delle parole sorgenti
+      ///e delle parole target in Moses, puo' accadere che una parola target 
+      ///di cui non sia stato ancora calcolato il suo codice target abbia
+      ///comunque un factorID noto (e quindi minore di m_lmIdLookup.size())
+      ///E' necessario dunque identificare questi casi di indeterminatezza
+      ///del codice target. Attualamente, questo controllo e' stato implementato
+      ///impostando a    m_empty     tutti i termini che non hanno ancora 
+      //ricevuto un codice target effettivo
+      ///////////
+
+      ///OLD PROBLEM - SOLVED
 ////////////
 /// IL PPROBLEMA ERA QUI
 /// m_lmIdLookup.push_back(code);
@@ -192,7 +168,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 /// IN POSIZIONE (factorID-1) invece che in posizione factrID dove dopo andiamo a leggerlo (vedi caso C
 /// Cosi' funziona ....
 /// ho un dubbio su cosa c'e' nelle prime posizioni di m_lmIdLookup
-/// quindi controllo
+/// quindi 
 /// e scopro che rimane vuota una entry ogni due
 /// perche' factorID cresce di due in due (perche' codifica sia source che target) "vuota" la posizione (factorID-1)
 /// non da problemi di correttezza, ma solo di "spreco" di memoria
@@ -202,12 +178,14 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 ////////////////
 
 
-      //resize and fill with m_unknownId
-      m_lmIdLookup.resize(factorId+1, m_unknownId);
+      if (factorId >= m_lmIdLookup.size()){
+	//resize and fill with m_empty  
+	//increment the array more than needed to avoid too many resizing operation.
+	m_lmIdLookup.resize(factorId+10, m_empty); 
+      }
 
       //insert new code
       m_lmIdLookup[factorId] = code;
-
       return code;
 
     } else {

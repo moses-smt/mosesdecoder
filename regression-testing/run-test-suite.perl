@@ -23,10 +23,15 @@ my @tests = qw (
   chart.target-syntax.ondisk
   chart.hierarchical
   chart.hierarchical-withsrilm
+  #chart.hierarchical-withkenlm
   chart.hierarchical.ondisk
   phrase.basic-surface-only
   phrase.basic-surface-only-withirstlm
   phrase.basic-surface-only-withirstlm-binlm
+  #phrase.basic-surface-only-withkenlm
+  #phrase.basic-surface-only-withkenlm.bin
+  phrase.basic-lm-oov
+  #phrase.basic-lm-oov-withkenlm
   phrase.ptable-filtering
   phrase.multi-factor
   phrase.multi-factor-drop
@@ -54,6 +59,7 @@ use POSIX qw ( strftime );
 my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
 my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
 my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
+my $kenlmBinarizer = "$Bin/../kenlm/build_binary";
 my $test_dir;
 my $BIN_TEST = $script_dir;
 my $data_dir;
@@ -104,6 +110,10 @@ foreach my $test (@tests)
   elsif ($test =~ /^mert/)
   {
     $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
+  }
+  elsif ($test =~ /^kenlmbin/)
+  {
+  	$cmd .= "$BIN_TEST/run-kenlm-binarizer.perl --binarizer=$kenlmBinarizer";
   }
   else 
   {

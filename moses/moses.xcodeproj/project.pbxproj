@@ -49,6 +49,8 @@
 		1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */; };
 		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
 		1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */; };
+		1E9CB84514166D4A00EDB7FC /* LanguageModelChartState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9CB84314166D4A00EDB7FC /* LanguageModelChartState.cpp */; };
+		1E9CB84614166D4A00EDB7FC /* LanguageModelChartState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E9CB84414166D4A00EDB7FC /* LanguageModelChartState.h */; };
 		1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */; };
 		1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */; };
 		1EBB262913A12DB500B51840 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262213A12DB500B51840 /* hash.h */; };
@@ -60,6 +62,12 @@
 		1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262813A12DB500B51840 /* RandLMFilter.h */; };
 		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
 		1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED00035124BC2690029177F /* ChartTranslationOption.h */; };
+		1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */; };
+		1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */; };
+		1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */; };
+		1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */; };
+		1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */; };
+		1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */; };
 		1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */; };
 		1ED0FE2B124BB9380029177F /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD4D124BB9380029177F /* AlignmentInfo.h */; };
 		1ED0FE2C124BB9380029177F /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */; };
@@ -317,6 +325,8 @@
 		1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SyntacticLanguageModel.cpp; path = src/SyntacticLanguageModel.cpp; sourceTree = "<group>"; };
 		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
 		1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelImplementation.h; path = src/LanguageModelImplementation.h; sourceTree = "<group>"; };
+		1E9CB84314166D4A00EDB7FC /* LanguageModelChartState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelChartState.cpp; path = src/LanguageModelChartState.cpp; sourceTree = "<group>"; };
+		1E9CB84414166D4A00EDB7FC /* LanguageModelChartState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelChartState.h; path = src/LanguageModelChartState.h; sourceTree = "<group>"; };
 		1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManager.cpp; path = src/ChartRuleLookupManager.cpp; sourceTree = "<group>"; };
 		1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
 		1EBB262213A12DB500B51840 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = src/DynSAInclude/hash.h; sourceTree = "<group>"; };
@@ -328,6 +338,12 @@
 		1EBB262813A12DB500B51840 /* RandLMFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RandLMFilter.h; path = src/DynSAInclude/RandLMFilter.h; sourceTree = "<group>"; };
 		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
 		1ED00035124BC2690029177F /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
+		1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderCompact.cpp; path = src/RuleTableLoaderCompact.cpp; sourceTree = "<group>"; };
+		1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderCompact.h; path = src/RuleTableLoaderCompact.h; sourceTree = "<group>"; };
+		1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderFactory.cpp; path = src/RuleTableLoaderFactory.cpp; sourceTree = "<group>"; };
+		1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderFactory.h; path = src/RuleTableLoaderFactory.h; sourceTree = "<group>"; };
+		1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderStandard.cpp; path = src/RuleTableLoaderStandard.cpp; sourceTree = "<group>"; };
+		1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderStandard.h; path = src/RuleTableLoaderStandard.h; sourceTree = "<group>"; };
 		1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1ED0FD4D124BB9380029177F /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BilingualDynSuffixArray.cpp; path = src/BilingualDynSuffixArray.cpp; sourceTree = "<group>"; };
@@ -670,6 +686,8 @@
 				1ED0FDBC124BB9380029177F /* LVoc.h */,
 				1ED0FD98124BB9380029177F /* LanguageModel.cpp */,
 				1ED0FD99124BB9380029177F /* LanguageModel.h */,
+				1E9CB84314166D4A00EDB7FC /* LanguageModelChartState.cpp */,
+				1E9CB84414166D4A00EDB7FC /* LanguageModelChartState.h */,
 				1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */,
 				1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */,
 				1ED0FD9F124BB9380029177F /* LanguageModelIRST.cpp */,
@@ -755,6 +773,12 @@
 				1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */,
 				1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */,
 				1E2E1636132A892800ED4085 /* RuleCubeQueue.h */,
+				1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */,
+				1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */,
+				1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */,
+				1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */,
+				1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */,
+				1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */,
 				1ED0FDEB124BB9380029177F /* ScoreComponentCollection.cpp */,
 				1ED0FDEC124BB9380029177F /* ScoreComponentCollection.h */,
 				1ED0FDED124BB9380029177F /* ScoreIndexManager.cpp */,
@@ -1012,6 +1036,10 @@
 				1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */,
 				1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */,
 				1ED22EE613DD96B0000DE8C9 /* DotChartInMemory.h in Headers */,
+				1E9CB84614166D4A00EDB7FC /* LanguageModelChartState.h in Headers */,
+				1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */,
+				1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */,
+				1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1188,6 +1216,10 @@
 				1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */,
 				1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */,
 				1ED22EE513DD96B0000DE8C9 /* DotChartInMemory.cpp in Sources */,
+				1E9CB84514166D4A00EDB7FC /* LanguageModelChartState.cpp in Sources */,
+				1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */,
+				1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */,
+				1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1211,7 +1243,8 @@
 					LM_KEN,
 					LM_IRST,
 					LM_RAND,
-					HAVE_CONFIG_H,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,
@@ -1242,7 +1275,8 @@
 					LM_KEN,
 					LM_IRST,
 					LM_RAND,
-					HAVE_CONFIG_H,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
 					../irstlm/include,

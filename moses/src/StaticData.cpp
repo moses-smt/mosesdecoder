@@ -55,6 +55,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SyntacticLanguageModel.h"
 #endif
 
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -184,7 +188,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
     m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
   } else if (m_parameter->GetParam("n-best-list").size() == 1) {
-    UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
+    UserMessage::Add(string("wrong format for switch -n-best-list file size"));
     return false;
   } else {
     m_nBestSize = 0;
@@ -193,6 +197,17 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
   } else {
     m_nBestFactor = 20;
+  }
+
+  //lattice samples
+  if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
+    m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
+    m_latticeSamplesSize = Scan<size_t>(m_parameter->GetParam("lattice-samples")[1]);
+  } else if (m_parameter->GetParam("lattice-samples").size() != 0 ) {
+    UserMessage::Add(string("wrong format for switch -lattice-samples file size"));
+    return false;
+  } else {
+    m_latticeSamplesSize = 0;
   }
 
   // word graph
@@ -411,6 +426,35 @@ bool StaticData::LoadData(Parameter *parameter)
 
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
+
+  m_threadCount = 1;
+  const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
+  if (!threadInfo.empty()) {
+    if (threadInfo[0] == "all") {
+#ifdef WITH_THREADS
+      m_threadCount = boost::thread::hardware_concurrency();
+      if (!m_threadCount) {
+        UserMessage::Add("-threads all specified but Boost doesn't know how many cores there are");
+        return false;
+      }
+#else
+      UserMessage::Add("-threads all specified but moses not built with thread support");
+      return false;
+#endif
+    } else {
+      m_threadCount = Scan<int>(threadInfo[0]);
+      if (m_threadCount < 1) {
+        UserMessage::Add("Specify at least one thread.");
+        return false;
+      }
+#ifndef WITH_THREADS
+      if (m_threadCount > 1) {
+        UserMessage::Add(std::string("Error: Thread count of ") + threadInfo[0] + " but moses not built with thread support");
+        return false;
+      }
+#endif
+    }
+  }
 
   // Read in constraint decoding file, if provided
   if(m_parameter->GetParam("constraint").size()) {
