@@ -29,11 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FeatureFunction.h"
 #include "Word.h"
-#include "LanguageModelImplementation.h"
-
-#ifdef WITH_THREADS
-#include <boost/shared_ptr.hpp>
-#endif
 
 namespace Moses
 {
@@ -43,55 +38,23 @@ class Factor;
 class Phrase;
 
 //! Abstract base class which represent a language model on a contiguous phrase
-class LanguageModel : public StatefulFeatureFunction
-{
+class LanguageModel : public StatefulFeatureFunction {
 protected:
-#ifdef WITH_THREADS
-  // if we have threads, we also have boost and can let it handle thread-safe reference counting
-  boost::shared_ptr<LanguageModelImplementation> m_implementation;
-#else
-  LanguageModelImplementation *m_implementation;
-#endif
+  LanguageModel();
+
+  // This can't be in the constructor for virual function dispatch reasons
+  void Init(ScoreIndexManager &scoreIndexManager);
+
   bool m_enableOOVFeature;
   
 public:
-  /**
-   * Create a new language model
-   */
-  LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation);
-
-  /**
-   * Create a new language model reusing an already loaded implementation
-   */
-  LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *implementation);
-
   virtual ~LanguageModel();
+
+  // Make another feature without copying the underlying model data.  
+  virtual LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const = 0;
 
   //! see ScoreProducer.h
   size_t GetNumScoreComponents() const;
-
-  /* whether this LM can be used on a particular phrase.
-   * Should return false if phrase size = 0 or factor types required don't exists
-   */
-  bool Useable(const Phrase &phrase) const {
-    return m_implementation->Useable(phrase);
-  }
-
-  /* calc total unweighted LM score of this phrase and return score via arguments.
-   * Return scores should always be in natural log, regardless of representation with LM implementation.
-   * Uses GetValue() of inherited class.
-   * Useable() should be called beforehand on the phrase
-   * \param fullScore scores of all unigram, bigram... of contiguous n-gram of the phrase
-   * \param ngramScore score of only n-gram of order m_nGramOrder
-   * \param oovCount number of LM OOVs
-   */
-  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
-    return m_implementation->CalcScore(phrase, fullScore, ngramScore, oovCount);
-  }
-
-  virtual std::string GetScoreProducerDescription(unsigned idx=0) const {
-    return m_implementation->GetScoreProducerDescription(idx);
-  }
 
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
@@ -104,29 +67,26 @@ public:
     return "lm";
   }
 
-  void InitializeBeforeSentenceProcessing() {
-    m_implementation->InitializeBeforeSentenceProcessing();
-  }
+  virtual void InitializeBeforeSentenceProcessing() {}
 
-  void CleanUpAfterSentenceProcessing() {
-    m_implementation->CleanUpAfterSentenceProcessing();
-  }
+  virtual void CleanUpAfterSentenceProcessing() {}
 
-  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+  virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
-  FFState* Evaluate(
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const {
-    return m_implementation->Evaluate(cur_hypo, prev_state, accumulator, this);
-  }
+  /* whether this LM can be used on a particular phrase.
+   * Should return false if phrase size = 0 or factor types required don't exists
+   */
+  virtual bool Useable(const Phrase &phrase) const = 0;
 
-  FFState* EvaluateChart(
-    const ChartHypothesis& cur_hypo,
-    int featureID,
-    ScoreComponentCollection* accumulator) const {
-    return m_implementation->EvaluateChart(cur_hypo, featureID, accumulator, this);
-  }
+  /* calc total unweighted LM score of this phrase and return score via arguments.
+   * Return scores should always be in natural log, regardless of representation with LM implementation.
+   * Uses GetValue() of inherited class.
+   * Useable() should be called beforehand on the phrase
+   * \param fullScore scores of all unigram, bigram... of contiguous n-gram of the phrase
+   * \param ngramScore score of only n-gram of order m_nGramOrder
+   * \param oovCount number of LM OOVs
+   */
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const = 0;
 };
 
 }

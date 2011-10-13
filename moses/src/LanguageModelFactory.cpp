@@ -70,6 +70,14 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                                    , ScoreIndexManager &scoreIndexManager
                                    , int dub )
 {
+  if (lmImplementation == Ken || lmImplementation == LazyKen) {
+#ifdef LM_KEN
+    return ConstructKenLM(languageModelFile, scoreIndexManager, factorTypes[0], lmImplementation == LazyKen);
+#else
+    UserMessage::Add("KenLM isn't compiled in but your config asked for it");
+    return NULL;
+#endif
+  }
   LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
   case RandLM:
@@ -105,16 +113,6 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     lm = new LanguageModelSkip(new LanguageModelInternal());
 #endif
     break;
-  case Ken:
-#ifdef LM_KEN
-    lm = ConstructKenLM(languageModelFile, false);
-#endif
-    break;
-  case LazyKen:
-#ifdef LM_KEN
-    lm = ConstructKenLM(languageModelFile, true);
-#endif
-    break;
   case Joint:
 #ifdef LM_SRI
     lm = new LanguageModelJoint(new LanguageModelSRI());
@@ -137,10 +135,13 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     lm = new LanguageModelDMapLM();
 #endif
     break;
+  default:
+    break;
   }
 
   if (lm == NULL) {
     UserMessage::Add("Language model type unknown. Probably not compiled into library");
+    return NULL;
   } else {
     switch (lm->GetLMType()) {
     case SingleFactor:
@@ -160,7 +161,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     }
   }
 
-  return new LanguageModel(scoreIndexManager, lm);
+  return new LMRefCount(scoreIndexManager, lm);
 }
 }
 

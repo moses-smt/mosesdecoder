@@ -812,7 +812,7 @@ bool StaticData::LoadLanguageModels()
     for(size_t i=0; i<lmVector.size(); i++) {
       LanguageModel* lm = NULL;
       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = new LanguageModel(m_scoreIndexManager, languageModelsLoaded[lmVector[i]]);
+        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager); 
       } else {
         vector<string>	token		= Tokenize(lmVector[i]);
         if (token.size() != 4 && token.size() != 5 ) {

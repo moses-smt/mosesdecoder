@@ -19,15 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
-#include <limits>
-#include <iostream>
-#include <memory>
-#include <sstream>
-
-#include "FFState.h"
 #include "LanguageModel.h"
-#include "LanguageModelImplementation.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "Manager.h"
@@ -38,41 +30,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace Moses
-{
-LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *implementation) :
-  m_implementation(implementation)
-{
+namespace Moses {
+
+LanguageModel::LanguageModel() {
   m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
-  scoreIndexManager.AddScoreProducer(this);
-#ifndef WITH_THREADS
-  // ref counting handled by boost otherwise
-  m_implementation->IncrementReferenceCount();
-#endif
 }
 
-LanguageModel::LanguageModel(ScoreIndexManager &scoreIndexManager, LanguageModel *loadedLM) :
-  m_implementation(loadedLM->m_implementation)
-{
-  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
+void LanguageModel::Init(ScoreIndexManager &scoreIndexManager) {
   scoreIndexManager.AddScoreProducer(this);
-#ifndef WITH_THREADS
-  // ref counting handled by boost otherwise
-  m_implementation->IncrementReferenceCount();
-#endif
 }
 
-LanguageModel::~LanguageModel()
-{
-#ifndef WITH_THREADS
-  if(m_implementation->DecrementReferenceCount() == 0)
-    delete m_implementation;
-#endif
-}
+LanguageModel::~LanguageModel() {}
 
 // don't inline virtual funcs...
-size_t LanguageModel::GetNumScoreComponents() const
-{
+size_t LanguageModel::GetNumScoreComponents() const {
   if (m_enableOOVFeature) {
     return 2;
   } else {
@@ -80,26 +51,17 @@ size_t LanguageModel::GetNumScoreComponents() const
   }
 }
 
-float LanguageModel::GetWeight() const
-{
+float LanguageModel::GetWeight() const {
   size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
                    GetBeginIndex(GetScoreBookkeepingID());
   return StaticData::Instance().GetAllWeights()[lmIndex];
 }
 
-float LanguageModel::GetOOVWeight() const
-{
+float LanguageModel::GetOOVWeight() const {
   if (!m_enableOOVFeature) return 0;
   size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
                    GetBeginIndex(GetScoreBookkeepingID());
   return StaticData::Instance().GetAllWeights()[lmIndex+1];
-  
 }
 
-const FFState* LanguageModel::EmptyHypothesisState(const InputType &/*input*/) const
-{
-  // This is actually correct.  The empty _hypothesis_ has <s> in it.  Phrases use m_emptyContextState.
-  return m_implementation->NewState(m_implementation->GetBeginSentenceState());
-}
-
-}
+} // namespace Moses
