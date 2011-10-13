@@ -62,11 +62,9 @@ libmoses_la_HEADERS = \
         LM/Joint.h \
         LM/Factory.h \
         LM/Implementation.h \
-        LM/Internal.h \
         LM/MultiFactor.h \
         LM/Remote.h \
         LM/SingleFactor.h \
-        LM/Skip.h \
         LM/Ken.h \
         LexicalReordering.h \
         LexicalReorderingState.h \
@@ -159,12 +157,6 @@ libmoses_la_HEADERS += LM/ORLM.h \
 		       DynSAInclude/RandLMCache.h
 endif
 
-if INTERNAL_LM
-libmoses_la_HEADERS += LM/Internal.h \
-		      NGramCollection.h \
-		      NGramNode.h
-endif
-
 if SYN_LM
 libmoses_la_HEADERS += SyntacticLanguageModel.h
 endif
@@ -223,18 +215,14 @@ libmoses_la_SOURCES = \
         LM/Base.cpp \
         LM/Factory.cpp \
         LM/Implementation.cpp \
-        LM/Internal.cpp \
         LM/Joint.cpp \
         LM/MultiFactor.cpp \
         LM/Remote.cpp \
         LM/SingleFactor.cpp \
-        LM/Skip.cpp \
         LexicalReordering.cpp \
         LexicalReorderingState.cpp \
         LexicalReorderingTable.cpp \
         Manager.cpp \
-        NGramCollection.cpp \
-        NGramNode.cpp \
         PCNTools.cpp \
         Parameter.cpp \
         PartialTranslOptColl.cpp \
@@ -331,12 +319,6 @@ libmoses_la_SOURCES += LM/ORLM.cpp \
 		       DynSAInclude/onlineRLM.h \
 		       DynSAInclude/perfecthash.h \
 		       DynSAInclude/params.cpp 
-endif
-
-if INTERNAL_LM
-libmoses_la_SOURCES += LM/Internal.cpp \
-		      NGramCollection.cpp \
-		      NGramNode.cpp
 endif
 
 if SYN_LM

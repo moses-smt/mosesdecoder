@@ -152,9 +152,9 @@ enum LMType {
 enum LMImplementation {
   SRI			= 0
   ,IRST		= 1
-  ,Skip		= 2
+//  ,Skip		= 2
   ,Joint		= 3
-  ,Internal	= 4
+//  ,Internal	= 4
   ,RandLM 	= 5
   ,Remote 	= 6
   ,ParallelBackoff	= 7

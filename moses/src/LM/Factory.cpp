@@ -51,8 +51,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "LM/Base.h"
-#include "LM/Internal.h"
-#include "LM/Skip.h"
 #include "LM/Joint.h"
 
 using namespace std;
@@ -106,28 +104,14 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     lm = new LanguageModelIRST(dub);
 #endif
     break;
-  case Skip:
-#ifdef LM_SRI
-    lm = new LanguageModelSkip(new LanguageModelSRI());
-#elif LM_INTERNAL
-    lm = new LanguageModelSkip(new LanguageModelInternal());
-#endif
-    break;
   case Joint:
 #ifdef LM_SRI
     lm = new LanguageModelJoint(new LanguageModelSRI());
-#elif LM_INTERNAL
-    lm = new LanguageModelJoint(new LanguageModelInternal());
 #endif
     break;
   case ParallelBackoff:
 #ifdef LM_SRI
     lm = new LanguageModelParallelBackoff();
-#endif
-    break;
-  case Internal:
-#ifdef LM_INTERNAL
-    lm = new LanguageModelInternal();
 #endif
     break;
   case DMapLM:
