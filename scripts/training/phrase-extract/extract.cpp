@@ -21,6 +21,7 @@
 #include "SafeGetline.h"
 #include "SentenceAlignment.h"
 #include "tables-core.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -182,12 +183,10 @@ int main(int argc, char* argv[])
   }
 
   // open input files
-  ifstream eFile;
-  ifstream fFile;
-  ifstream aFile;
-  eFile.open(fileNameE);
-  fFile.open(fileNameF);
-  aFile.open(fileNameA);
+  Moses::InputFileStream eFile(fileNameE);
+  Moses::InputFileStream fFile(fileNameF);
+  Moses::InputFileStream aFile(fileNameA);
+
   istream *eFileP = &eFile;
   istream *fFileP = &fFile;
   istream *aFileP = &aFile;
@@ -234,9 +233,9 @@ int main(int argc, char* argv[])
     }
     if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
-  eFile.close();
-  fFile.close();
-  aFile.close();
+  eFile.Close();
+  fFile.Close();
+  aFile.Close();
   //az: only close if we actually opened it
   if (!onlyOutputSpanInfo) {
     if (translationFlag) {
