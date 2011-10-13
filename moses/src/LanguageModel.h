@@ -127,16 +127,6 @@ public:
     ScoreComponentCollection* accumulator) const {
     return m_implementation->EvaluateChart(cur_hypo, featureID, accumulator, this);
   }
-
-#ifdef WITH_THREADS
-  // if multi-threaded return boost ptr 
-  boost::shared_ptr<LanguageModelImplementation> 
-#else // return normal LM ptr
-  LanguageModelImplementation* 
-#endif
-  GetLMImplementation() const {
-    return m_implementation;
-  }
 };
 
 }
