@@ -968,7 +968,14 @@ bool StaticData::LoadLanguageModels()
       }
 
       m_languageModel.Add(lm);
-      SetWeight(lm,weightAll[i]);
+      if (m_lmEnableOOVFeature) {
+        vector<float> weights(2);
+        weights[0] = weightAll.at(i*2);
+        weights[1] = weightAll.at(i*2+1);
+        SetWeights(lm,weights);
+      } else {
+        SetWeight(lm,weightAll[i]);
+      }
     }
   }
   // flag indicating that language models were loaded,
