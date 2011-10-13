@@ -33,15 +33,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Phrase.h"
 
-#include "FNgramSpecs.h"
 #include "FNgramStats.h"
 #include "FactoredVocab.h"
 #include "FNgram.h"
 #include "wmatrix.h"
 #include "Vocab.h"
-
-
-
 
 using namespace std;
 
@@ -52,9 +48,6 @@ using namespace std;
 
 namespace Moses
 {
-
-
-
 
 /** LM of multiple factors. A simple extension of single factor LM - factors backoff together.
  *	Rather slow as this uses string concatenation/split
