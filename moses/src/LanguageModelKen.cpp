@@ -141,8 +141,7 @@ public:
     : m_factorCollection(factorCollection), m_mapping(mapping) {}
 
   void Add(lm::WordIndex index, const StringPiece &str) {
-    str_.assign(str.data(), str.size());
-    std::size_t factorId = m_factorCollection.AddFactor(str_)->GetId();
+    std::size_t factorId = m_factorCollection.AddFactor(str)->GetId();
     if (m_mapping.size() <= factorId) {
       // 0 is <unk> :-)
       m_mapping.resize(factorId + 1);
@@ -153,8 +152,6 @@ public:
 private:
   FactorCollection &m_factorCollection;
   std::vector<lm::WordIndex> &m_mapping;
-
-  std::string str_;
 };
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy) : m_factorType(factorType) {

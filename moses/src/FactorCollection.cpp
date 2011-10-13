@@ -33,7 +33,7 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-const Factor *FactorCollection::AddFactor(const string &factorString)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
 // Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS
