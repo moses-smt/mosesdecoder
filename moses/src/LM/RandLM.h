@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Factor.h"
 #include "Util.h"
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 #include "RandLM.h"
 
 class randlm::RandLM;

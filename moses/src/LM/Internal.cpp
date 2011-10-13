@@ -1,5 +1,5 @@
 
-#include "LanguageModelInternal.h"
+#include "LM/Internal.h"
 #include "FactorCollection.h"
 #include "NGramNode.h"
 #include "InputFileStream.h"

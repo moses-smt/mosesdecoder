@@ -29,8 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "lm/left.hh"
 #include "lm/model.hh"
 
-#include "LanguageModelKen.h"
-#include "LanguageModel.h"
+#include "LM/Ken.h"
+#include "LM/Base.h"
 #include "FFState.h"
 #include "TypeDef.h"
 #include "Util.h"

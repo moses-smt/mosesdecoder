@@ -2,7 +2,7 @@
 #define moses_LMList_h
 
 #include <list>
-#include "LanguageModel.h"
+#include "LM/Base.h"
 
 namespace Moses
 {

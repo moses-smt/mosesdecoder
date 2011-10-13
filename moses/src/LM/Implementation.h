@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FeatureFunction.h"
 #include "Word.h"
-#include "LanguageModel.h"
+#include "LM/Base.h"
 
 #ifdef WITH_THREADS
 #include <boost/shared_ptr.hpp>

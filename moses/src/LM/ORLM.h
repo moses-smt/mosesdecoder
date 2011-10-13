@@ -4,7 +4,7 @@
 #include <vector>
 #include "Factor.h"
 #include "Util.h"
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 #include "onlineRLM.h"
 //#include "multiOnlineRLM.h"
 #include "DynSAInclude/file.h"

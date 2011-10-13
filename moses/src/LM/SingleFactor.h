@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_LanguageModelSingleFactor_h
 #define moses_LanguageModelSingleFactor_h
 
-#include "LanguageModelImplementation.h"
+#include "LM/Implementation.h"
 #include "Phrase.h"
 
 namespace Moses

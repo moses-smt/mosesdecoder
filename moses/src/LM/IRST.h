@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Factor.h"
 #include "TypeDef.h"
 #include "Util.h"
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 
 class lmContainer;  // irst lm container for any lm type
 class ngram;

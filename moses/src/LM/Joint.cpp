@@ -19,38 +19,4 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_LanguageModelMultiFactor_h
-#define moses_LanguageModelMultiFactor_h
-
-#include <vector>
-#include <string>
-#include "LanguageModelImplementation.h"
-#include "Word.h"
-#include "FactorTypeSet.h"
-
-namespace Moses
-{
-
-class Phrase;
-
-//! Abstract class for for multi factor LM
-class LanguageModelMultiFactor : public LanguageModelImplementation
-{
-protected:
-  FactorMask m_factorTypes;
-
-public:
-  virtual bool Load(const std::string &filePath
-                    , const std::vector<FactorType> &factorTypes
-                    , size_t nGramOrder) = 0;
-
-  LMType GetLMType() const {
-    return MultiFactor;
-  }
-
-  std::string GetScoreProducerDescription(unsigned) const;
-  bool Useable(const Phrase &phrase) const;
-};
-
-}
-#endif
+#include "LM/Joint.h"

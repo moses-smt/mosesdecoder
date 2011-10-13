@@ -21,39 +21,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <iostream>
-#include "LanguageModelFactory.h"
+#include "LM/Factory.h"
 #include "UserMessage.h"
 #include "TypeDef.h"
 #include "FactorCollection.h"
 
 // include appropriate header
 #ifdef LM_SRI
-#  include "LanguageModelSRI.h"
-#include "LanguageModelParallelBackoff.h"
+#  include "LM/SRI.h"
+#include "LM/ParallelBackoff.h"
 #endif
 #ifdef LM_IRST
-#  include "LanguageModelIRST.h"
+#  include "LM/IRST.h"
 #endif
 #ifdef LM_RAND
-#  include "LanguageModelRandLM.h"
+#  include "LM/RandLM.h"
 #endif
 #ifdef LM_ORLM
-#  include "LanguageModelORLM.h"
+#  include "LM/ORLM.h"
 #endif
 #ifdef LM_REMOTE
-#	include "LanguageModelRemote.h"
+#	include "LM/Remote.h"
 #endif
 #ifdef LM_KEN
-#	include "LanguageModelKen.h"
+#	include "LM/Ken.h"
 #endif
 #ifdef LM_DMAP
-#   include "LanguageModelDMapLM.h"
+#   include "LM/DMapLM.h"
 #endif
 
-#include "LanguageModel.h"
-#include "LanguageModelInternal.h"
-#include "LanguageModelSkip.h"
-#include "LanguageModelJoint.h"
+#include "LM/Base.h"
+#include "LM/Internal.h"
+#include "LM/Skip.h"
+#include "LM/Joint.h"
 
 using namespace std;
 

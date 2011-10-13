@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 
 #include "FFState.h"
-#include "LanguageModelImplementation.h"
+#include "LM/Implementation.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "Manager.h"

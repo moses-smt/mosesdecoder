@@ -7,7 +7,7 @@
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
-#include "LanguageModelORLM.h"
+#include "LM/ORLM.h"
 
 using std::map;
 namespace Moses 

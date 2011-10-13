@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "n_gram.h"
 #include "lmContainer.h"
 
-#include "LanguageModelIRST.h"
+#include "LM/IRST.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"

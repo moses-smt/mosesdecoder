@@ -19,46 +19,38 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_LanguageModelSRI_h
-#define moses_LanguageModelSRI_h
+#ifndef moses_LanguageModelMultiFactor_h
+#define moses_LanguageModelMultiFactor_h
 
-#include <string>
 #include <vector>
-#include "Factor.h"
-#include "TypeDef.h"
-#include "Vocab.h"
-#include "Ngram.h"
-#include "LanguageModelSingleFactor.h"
-
-class Factor;
-class Phrase;
+#include <string>
+#include "LM/Implementation.h"
+#include "Word.h"
+#include "FactorTypeSet.h"
 
 namespace Moses
 {
 
-class LanguageModelSRI : public LanguageModelPointerState
+class Phrase;
+
+//! Abstract class for for multi factor LM
+class LanguageModelMultiFactor : public LanguageModelImplementation
 {
 protected:
-  std::vector<VocabIndex> m_lmIdLookup;
-  ::Vocab			*m_srilmVocab;
-  Ngram 			*m_srilmModel;
-  VocabIndex	m_unknownId;
-
-  LMResult GetValue(VocabIndex wordId, VocabIndex *context) const;
-  void CreateFactors();
-  VocabIndex GetLmID( const std::string &str ) const;
-  VocabIndex GetLmID( const Factor *factor ) const;
+  FactorMask m_factorTypes;
 
 public:
-  LanguageModelSRI();
-  ~LanguageModelSRI();
-  bool Load(const std::string &filePath
-            , FactorType factorType
-            , size_t nGramOrder);
+  virtual bool Load(const std::string &filePath
+                    , const std::vector<FactorType> &factorTypes
+                    , size_t nGramOrder) = 0;
 
-  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
+  LMType GetLMType() const {
+    return MultiFactor;
+  }
+
+  std::string GetScoreProducerDescription(unsigned) const;
+  bool Useable(const Phrase &phrase) const;
 };
-
 
 }
 #endif

@@ -6,7 +6,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include "LanguageModelRemote.h"
+#include "LM/Remote.h"
 #include "Factor.h"
 
 namespace Moses

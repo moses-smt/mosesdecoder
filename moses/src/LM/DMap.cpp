@@ -5,7 +5,7 @@
 #include <Config.h>
 
 #include "FactorCollection.h"
-#include "LanguageModelDMapLM.h"
+#include "LM/DMapLM.h"
 
 namespace Moses
 {

@@ -1,7 +1,7 @@
 #ifndef moses_LanguageModelRemote_h
 #define moses_LanguageModelRemote_h
 
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 #include "TypeDef.h"
 #include "Factor.h"
 #include <sys/socket.h>

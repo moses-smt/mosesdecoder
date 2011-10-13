@@ -9,7 +9,7 @@
 
 #include "Factor.h"
 #include "FFState.h"
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 #include "Util.h"
 
 namespace Moses {

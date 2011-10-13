@@ -23,12 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_LanguageModel_h
 
 #include <string>
-#include <vector>
-#include "Factor.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "FeatureFunction.h"
-#include "Word.h"
+#include <cstddef>
+#include "../FeatureFunction.h"
 
 namespace Moses
 {
@@ -36,6 +32,7 @@ namespace Moses
 class FactorCollection;
 class Factor;
 class Phrase;
+class ScoreIndexManager;
 
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction {
@@ -54,7 +51,7 @@ public:
   virtual LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const = 0;
 
   //! see ScoreProducer.h
-  size_t GetNumScoreComponents() const;
+  std::size_t GetNumScoreComponents() const;
 
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
@@ -86,7 +83,7 @@ public:
    * \param ngramScore score of only n-gram of order m_nGramOrder
    * \param oovCount number of LM OOVs
    */
-  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const = 0;
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
 };
 
 }

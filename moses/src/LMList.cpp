@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "LMList.h"
 #include "Phrase.h"
-#include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
 
 using namespace std;

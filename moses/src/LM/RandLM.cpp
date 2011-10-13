@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <fstream>
 
-#include "LanguageModelRandLM.h"
+#include "LM/RandLM.h"
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "InputFileStream.h"

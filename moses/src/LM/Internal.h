@@ -1,7 +1,7 @@
 #ifndef moses_LanguageModelInternal_h
 #define moses_LanguageModelInternal_h
 
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 #include "NGramCollection.h"
 
 namespace Moses

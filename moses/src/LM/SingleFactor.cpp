@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <sstream>
 
-#include "LanguageModelSingleFactor.h"
+#include "LM/SingleFactor.h"
 #include "TypeDef.h"
 #include "Util.h"
 #include "FactorCollection.h"

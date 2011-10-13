@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "LanguageModelFactory.h"
+#include "LM/Factory.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
 #include "SentenceStats.h"
