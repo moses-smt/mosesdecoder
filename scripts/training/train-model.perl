@@ -112,8 +112,8 @@ $_HELP = 1
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
            'additional-ini=s' => \$_ADDITIONAL_INI,
-           'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES
-		       'eppex:s' => \$_EPPEX,
+           'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES,
+		       'eppex:s' => \$_EPPEX
                );
 
 if ($_HELP) {
