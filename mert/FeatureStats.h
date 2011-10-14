@@ -22,11 +22,37 @@ using namespace std;
 
 #define featbytes_ (entries_*sizeof(FeatureStatsType))
 
+//Minimal sparse vector
+class SparseVector {
+
+  public:
+    typedef std::map<size_t,FeatureStatsType> fvector_t;
+    typedef std::map<std::string, size_t> name2id_t;
+    typedef std::vector<std::string> id2name_t;
+
+    FeatureStatsType get(std::string name) const;
+    FeatureStatsType get(size_t id) const;
+    void set(std::string name, FeatureStatsType value);
+    void clear();
+    size_t size() const;
+
+    void write(std::ostream& out) const;
+
+    SparseVector& operator-=(const SparseVector& rhs);
+
+  private:
+    static name2id_t name2id_;
+    static id2name_t id2name_;
+    fvector_t fvector_;
+};
+
+SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
+
 class FeatureStats
 {
 private:
   featstats_t array_;
-  sparse_featstats_t map_;
+  SparseVector map_;
   size_t entries_;
   size_t available_;
 
@@ -60,7 +86,7 @@ public:
   inline featstats_t getArray() const {
     return array_;
   }
-  inline sparse_featstats_t getSparse() const {
+  inline const SparseVector& getSparse() const {
     return map_;
   }
 
