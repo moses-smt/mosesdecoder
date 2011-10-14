@@ -15,7 +15,6 @@ if (scalar @PART == 1) {
     exit;
 }
 
-my $part_id = 0;
 foreach my $part (@PART) {
     die("ERROR: no part $part.$in or $part.$out")
 	if (! -e "$part.$in" || ! -e "$part.$out");
@@ -25,6 +24,4 @@ foreach my $part (@PART) {
 	if $in_size != $out_size;
     `cat $part.$in >> $consolidated.$in`;
     `cat $part.$out >> $consolidated.$out`;
-  print "$part_id $in_size";
-  ++$part_id;
 }

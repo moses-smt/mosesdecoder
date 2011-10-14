@@ -80,6 +80,7 @@ training/compact-rule-table/tools/compactify
 training/eppex/counter
 training/eppex/eppex
 training/mbr/mbr
+training/corpus-sizes.perl
 training/filter-model-given-input.pl
 training/filter-rule-table.py
 training/lexical-reordering/score
