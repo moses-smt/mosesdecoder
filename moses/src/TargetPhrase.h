@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
 
+#include "util/string_piece.hh"
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -145,7 +147,7 @@ public:
     return m_lhsTarget;
   }
 
-  void SetAlignmentInfo(const std::string &alignString);
+  void SetAlignmentInfo(const StringPiece &alignString);
   void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
   void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
     m_alignmentInfo = alignmentInfo;
