@@ -36,7 +36,7 @@ class SparseVector {
     void clear();
     size_t size() const;
 
-    void write(std::ostream& out) const;
+    void write(std::ostream& out, const std::string& sep = " ") const;
 
     SparseVector& operator-=(const SparseVector& rhs);
 

@@ -238,6 +238,8 @@ void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStat
   if (!hasSparseFeatures())
     return;
 
+  out << " ";
+
   // sparse features
   const SparseVector &s1 = f1.getSparse();
   const SparseVector &s2 = f2.getSparse();

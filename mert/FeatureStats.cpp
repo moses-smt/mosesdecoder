@@ -42,11 +42,11 @@ void SparseVector::set(string name, FeatureStatsType value) {
   fvector_[id] = value;
 }
 
-void SparseVector::write(ostream& out) const {
+void SparseVector::write(ostream& out, const string& sep) const {
   for (fvector_t::const_iterator i = fvector_.begin(); i != fvector_.end(); ++i) {
     if (abs((float)(i->second)) < 0.00001) continue;
     string name = id2name_[i->first];
-    out << name << " " << i->second << " ";
+    out << name << sep << i->second << " ";
   }
 }
 
@@ -220,7 +220,7 @@ ostream& operator<<(ostream& o, const FeatureStats& e)
     o << e.get(i) << " ";
   }
   // sparse features
-  e.getSparse().write(o);
+  e.getSparse().write(o,"");
 
   return o;
 }
