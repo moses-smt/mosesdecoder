@@ -55,6 +55,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>zlib.lib;$(OutDir)moses.lib;$(OutDir)OnDiskPt.lib</AdditionalDependencies>
@@ -74,6 +75,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>zlib.lib;$(OutDir)moses.lib;$(OutDir)OnDiskPt.lib</AdditionalDependencies>

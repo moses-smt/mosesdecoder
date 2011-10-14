@@ -72,7 +72,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -91,7 +91,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -108,7 +108,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;LM_SRI;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
@@ -123,7 +123,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;LM_SRI;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -182,36 +182,18 @@
     <ClCompile Include="src\HypothesisStackNormal.cpp" />
     <ClCompile Include="src\InputFileStream.cpp" />
     <ClCompile Include="src\InputType.cpp" />
-    <ClCompile Include="src\LanguageModel.cpp" />
-    <ClCompile Include="src\LanguageModelChartState.cpp" />
-    <ClCompile Include="src\LanguageModelFactory.cpp" />
-    <ClCompile Include="src\LanguageModelImplementation.cpp" />
-    <ClCompile Include="src\LanguageModelInternal.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-    </ClCompile>
-    <ClCompile Include="src\LanguageModelJoint.cpp" />
-    <ClCompile Include="src\LanguageModelMultiFactor.cpp" />
-    <ClCompile Include="src\LanguageModelSingleFactor.cpp" />
-    <ClCompile Include="src\LanguageModelSkip.cpp" />
-    <ClCompile Include="src\LanguageModelSRI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="src\LexicalReordering.cpp" />
     <ClCompile Include="src\LexicalReorderingState.cpp" />
     <ClCompile Include="src\LexicalReorderingTable.cpp" />
     <ClCompile Include="src\LMList.cpp" />
+    <ClCompile Include="src\LM\Base.cpp" />
+    <ClCompile Include="src\LM\Factory.cpp" />
+    <ClCompile Include="src\LM\Implementation.cpp" />
+    <ClCompile Include="src\LM\Joint.cpp" />
+    <ClCompile Include="src\LM\MultiFactor.cpp" />
+    <ClCompile Include="src\LM\SingleFactor.cpp" />
     <ClCompile Include="src\LVoc.cpp" />
     <ClCompile Include="src\Manager.cpp" />
-    <ClCompile Include="src\NGramCollection.cpp" />
-    <ClCompile Include="src\NGramNode.cpp" />
     <ClCompile Include="src\Parameter.cpp" />
     <ClCompile Include="src\PartialTranslOptColl.cpp" />
     <ClCompile Include="src\PCNTools.cpp" />
@@ -324,26 +306,16 @@
     <ClInclude Include="src\HypothesisStackNormal.h" />
     <ClInclude Include="src\InputFileStream.h" />
     <ClInclude Include="src\InputType.h" />
-    <ClInclude Include="src\LanguageModel.h" />
-    <ClInclude Include="src\LanguageModelChartState.h" />
-    <ClInclude Include="src\LanguageModelDelegate.h" />
-    <ClInclude Include="src\LanguageModelFactory.h" />
-    <ClInclude Include="src\LanguageModelImplementation.h" />
-    <ClInclude Include="src\LanguageModelInternal.h" />
-    <ClInclude Include="src\LanguageModelIRST.h" />
-    <ClInclude Include="src\LanguageModelJoint.h" />
-    <ClInclude Include="src\LanguageModelKen.h" />
-    <ClInclude Include="src\LanguageModelMultiFactor.h" />
-    <ClInclude Include="src\LanguageModelParallelBackoff.h" />
-    <ClInclude Include="src\LanguageModelRandLM.h" />
-    <ClInclude Include="src\LanguageModelRemote.h" />
-    <ClInclude Include="src\LanguageModelSingleFactor.h" />
-    <ClInclude Include="src\LanguageModelSkip.h" />
-    <ClInclude Include="src\LanguageModelSRI.h" />
     <ClInclude Include="src\LexicalReordering.h" />
     <ClInclude Include="src\LexicalReorderingState.h" />
     <ClInclude Include="src\LexicalReorderingTable.h" />
     <ClInclude Include="src\LMList.h" />
+    <ClInclude Include="src\LM\Base.h" />
+    <ClInclude Include="src\LM\Factory.h" />
+    <ClInclude Include="src\LM\Implementation.h" />
+    <ClInclude Include="src\LM\Joint.h" />
+    <ClInclude Include="src\LM\MultiFactor.h" />
+    <ClInclude Include="src\LM\SingleFactor.h" />
     <ClInclude Include="src\LVoc.h" />
     <ClInclude Include="src\Manager.h" />
     <ClInclude Include="src\NGramCollection.h" />
