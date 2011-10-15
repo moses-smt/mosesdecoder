@@ -43,6 +43,7 @@ my @tests = qw (
   phrase.lattice-surface
   phrase.lattice-distortion
   phrase.lexicalized-reordering
+  phrase.lexicalized-reordering-bin
   phrase.lexicalized-reordering-cn
   phrase.consensus-decoding-surface
   phrase.continue-partial-translation
