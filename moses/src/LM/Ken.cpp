@@ -40,9 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "ChartHypothesis.h"
 
-#ifdef WITH_THREADS
-#include <boost/scoped_ptr.hpp>
-#endif
+#include <boost/shared_ptr.hpp>
 
 using namespace std;
 
@@ -65,15 +63,6 @@ struct KenLMState : public FFState {
 template <class Model> class LanguageModelKen : public LanguageModel {
   public:
     LanguageModelKen(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy);
-
-    ~LanguageModelKen() {
-#ifndef WITH_THREADS
-      if (!--*m_refcount) {
-        delete m_ngram;
-        delete m_refcount;
-      }
-#endif
-    }
 
     LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const;
 
@@ -122,12 +111,8 @@ template <class Model> class LanguageModelKen : public LanguageModel {
       }
     }
 
-#ifdef WITH_THREADS
     boost::shared_ptr<Model> m_ngram;
-#else
-    Model *m_ngram;
-    mutable unsigned int *m_refcount;
-#endif
+    
     std::vector<lm::WordIndex> m_lmIdLookup;
 
     FactorType m_factorType;
@@ -166,18 +151,7 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   config.enumerate_vocab = &builder;
   config.load_method = lazy ? util::LAZY : util::POPULATE_OR_READ;
 
-  try {
-#ifdef WITH_THREADS
-    m_ngram.reset(new Model(file.c_str(), config));
-#else
-    m_ngram = new Model(file.c_str(), config);
-    m_refcount = new unsigned int();
-    *m_refcount = 1;
-#endif
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    abort();
-  }
+  m_ngram.reset(new Model(file.c_str(), config));
 
   m_beginSentenceFactor = collection.AddFactor(BOS_);
   Init(manager);
@@ -193,10 +167,6 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(ScoreIndexManag
     m_lmIdLookup(copy_from.m_lmIdLookup),
     m_factorType(copy_from.m_factorType),
     m_beginSentenceFactor(copy_from.m_beginSentenceFactor) {
-#ifndef WITH_THREADS
-  m_refcount = copy_from.m_refcount;
-  ++*m_refcount;
-#endif
   Init(manager);
 }
 
@@ -349,25 +319,30 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 } // namespace
 
 LanguageModel *ConstructKenLM(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy) {
-  lm::ngram::ModelType model_type;
-  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-    switch(model_type) {
-    case lm::ngram::HASH_PROBING:
+  try {
+    lm::ngram::ModelType model_type;
+    if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+      switch(model_type) {
+        case lm::ngram::HASH_PROBING:
+          return new LanguageModelKen<lm::ngram::ProbingModel>(file, manager, factorType, lazy);
+        case lm::ngram::TRIE_SORTED:
+          return new LanguageModelKen<lm::ngram::TrieModel>(file, manager, factorType, lazy);
+        case lm::ngram::QUANT_TRIE_SORTED:
+          return new LanguageModelKen<lm::ngram::QuantTrieModel>(file, manager, factorType, lazy);
+        case lm::ngram::ARRAY_TRIE_SORTED:
+          return new LanguageModelKen<lm::ngram::ArrayTrieModel>(file, manager, factorType, lazy);
+        case lm::ngram::QUANT_ARRAY_TRIE_SORTED:
+          return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(file, manager, factorType, lazy);
+        default:
+          std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
+          abort();
+      }
+    } else {
       return new LanguageModelKen<lm::ngram::ProbingModel>(file, manager, factorType, lazy);
-    case lm::ngram::TRIE_SORTED:
-      return new LanguageModelKen<lm::ngram::TrieModel>(file, manager, factorType, lazy);
-    case lm::ngram::QUANT_TRIE_SORTED:
-      return new LanguageModelKen<lm::ngram::QuantTrieModel>(file, manager, factorType, lazy);
-    case lm::ngram::ARRAY_TRIE_SORTED:
-      return new LanguageModelKen<lm::ngram::ArrayTrieModel>(file, manager, factorType, lazy);
-    case lm::ngram::QUANT_ARRAY_TRIE_SORTED:
-      return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(file, manager, factorType, lazy);
-    default:
-      std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
-      abort();
     }
-  } else {
-    return new LanguageModelKen<lm::ngram::ProbingModel>(file, manager, factorType, lazy);
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    abort();
   }
 }
 

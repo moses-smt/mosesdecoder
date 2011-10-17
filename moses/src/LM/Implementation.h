@@ -31,9 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "LM/Base.h"
 
-#ifdef WITH_THREADS
 #include <boost/shared_ptr.hpp>
-#endif
 
 namespace Moses
 {
@@ -54,18 +52,8 @@ struct LMResult {
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModelImplementation
 {
-#ifndef WITH_THREADS
-protected:
-  /** constructor to be called by inherited class
-   */
-  LanguageModelImplementation() : m_referenceCount(0) {}
-
-private:
-  // ref counting handled by boost if we have threads
-  unsigned int m_referenceCount;
-#else
   // default constructor is ok
-#endif
+
   void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 
 protected:
@@ -136,33 +124,12 @@ public:
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
   virtual void InitializeBeforeSentenceProcessing() {};
   virtual void CleanUpAfterSentenceProcessing() {};
-
-#ifndef WITH_THREADS
-  // ref counting handled by boost otherwise
-
-  unsigned int IncrementReferenceCount() {
-    return ++m_referenceCount;
-  }
-
-  unsigned int DecrementReferenceCount() {
-    return --m_referenceCount;
-  }
-#endif
 };
 
 class LMRefCount : public LanguageModel {
   public:
     LMRefCount(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *impl) : m_impl(impl) {
-#ifndef WITH_THREADS
-      impl->IncrementReferenceCount();
-#endif
       Init(scoreIndexManager);
-    }
-
-    ~LMRefCount() {
-#ifndef WITH_THREADS
-      if (!m_impl->DecrementReferenceCount()) delete m_impl;
-#endif
     }
 
     LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const {
@@ -203,17 +170,10 @@ class LMRefCount : public LanguageModel {
 
   private:
     LMRefCount(ScoreIndexManager &scoreIndexManager, const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {
-#ifndef WITH_THREADS
-      m_impl->IncrementReferenceCount();
-#endif
       Init(scoreIndexManager);
     }
 
-#ifdef WITH_THREADS
     boost::shared_ptr<LanguageModelImplementation> m_impl;
-#else
-    LanguageModelImplementation *m_impl;
-#endif
 };
 
 }
