@@ -30,12 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/shared_mutex.hpp>
 #endif
 
-#ifdef HAVE_BOOST
 #include "util/murmur_hash.hh"
 #include <boost/unordered_set.hpp>
-#else
-#include <set>
-#endif
 
 #include <functional>
 #include <string>
@@ -69,7 +65,6 @@ class FactorCollection
 {
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
-#ifdef HAVE_BOOST
   struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
     std::size_t operator()(const StringPiece &str) const {
       return util::MurmurHashNative(str.data(), str.size());
@@ -90,14 +85,6 @@ class FactorCollection
     }
   };
   typedef boost::unordered_set<FactorFriend, HashFactor, EqualsFactor> Set;
-#else
-  struct LessFactor : public std::binary_function<const FactorFriend &, const FactorFriend &, bool> {
-    bool operator()(const FactorFriend &left, const FactorFriend &right) const {
-      return left.in.GetString() < right.in.GetString();
-    }
-  };
-  typedef std::set<FactorFriend, LessFactor> Set;
-#endif
   Set m_set;
 
   static FactorCollection s_instance;
