@@ -1,4 +1,4 @@
-// $Id$
+// $Id: PhraseDictionaryMemory.cpp 4365 2011-10-14 16:40:30Z heafield $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <iterator>
 #include <algorithm>
+#include <memory>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include "util/file_piece.hh"
@@ -74,6 +75,13 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
+  Phrase sourcePhrase(Input, 0);
+  std::vector<float> scv;
+  scv.reserve(m_numScoreComponent);
+
+  TargetPhraseCollection *preSourceNode = NULL;
+  std::string preSourceString;
+
   while(true) {
     ++line_num;
     StringPiece line;
@@ -94,17 +102,12 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       continue;
     }
  
-    // source
-    Phrase sourcePhrase(Input, 0);
-    sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
-
     //target
-    TargetPhrase targetPhrase(Output);
-    targetPhrase.SetSourcePhrase(&sourcePhrase);
-    targetPhrase.CreateFromString(output, targetPhraseString, factorDelimiter);
+    std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
+    targetPhrase->SetSourcePhrase(&sourcePhrase); // TODO(bhaddow): This is a dangling pointer
+    targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
 
-    std::vector<float> scv;
-    scv.reserve(m_numScoreComponent);
+    scv.clear();
     for (util::TokenIter<util::AnyCharacter, true> token(scoreString, util::AnyCharacter(" \t")); token; ++token) {
       char *err_ind;
       // Token is always delimited by some form of space.  Also, apparently strtod is portable but strtof isn't.  
@@ -123,15 +126,13 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       abort();
     }
     // scv good to go sir!
-
-    targetPhrase.SetScore(m_feature, scv, weight, weightWP, languageModels);
+    targetPhrase->SetScore(m_feature, scv, weight, weightWP, languageModels);
 
     size_t consumed = 3;
     if (pipes) {
-      targetPhrase.SetAlignmentInfo(*pipes++);
+      targetPhrase->SetAlignmentInfo(*pipes++);
       ++consumed;
     }
-
     // Check number of entries delimited by ||| agrees across all lines.  
     for (; pipes; ++pipes, ++consumed) {}
     if (numElement != consumed) {
@@ -145,7 +146,16 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
 
-    AddEquivPhrase(sourcePhrase, targetPhrase);
+    // Reuse source if possible.  Otherwise, create node for it.  
+    if (preSourceString == sourcePhraseString && preSourceNode) {
+      preSourceNode->Add(targetPhrase.release());
+    } else {
+      sourcePhrase.Clear();
+      sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
+      preSourceNode = CreateTargetPhraseCollection(sourcePhrase);
+      preSourceNode->Add(targetPhrase.release());
+      preSourceString.assign(sourcePhraseString.data(), sourcePhraseString.size());
+    }
   }
 
   // sort each target phrase collection
