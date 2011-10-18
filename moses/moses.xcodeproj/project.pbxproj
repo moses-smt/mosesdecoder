@@ -9,6 +9,26 @@
 /* Begin PBXBuildFile section */
 		1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */; };
 		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
+		1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D087144DAA6C00B60B4F /* Base.cpp */; };
+		1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D088144DAA6C00B60B4F /* Base.h */; };
+		1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08B144DAA6C00B60B4F /* Factory.cpp */; };
+		1E16D0A8144DAA6C00B60B4F /* Factory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D08C144DAA6C00B60B4F /* Factory.h */; };
+		1E16D0A9144DAA6C00B60B4F /* Implementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08D144DAA6C00B60B4F /* Implementation.cpp */; };
+		1E16D0AA144DAA6C00B60B4F /* Implementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D08E144DAA6C00B60B4F /* Implementation.h */; };
+		1E16D0AB144DAA6C00B60B4F /* IRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08F144DAA6C00B60B4F /* IRST.cpp */; };
+		1E16D0AC144DAA6C00B60B4F /* IRST.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D090144DAA6C00B60B4F /* IRST.h */; };
+		1E16D0AD144DAA6C00B60B4F /* Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D091144DAA6C00B60B4F /* Joint.cpp */; };
+		1E16D0AE144DAA6C00B60B4F /* Joint.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D092144DAA6C00B60B4F /* Joint.h */; };
+		1E16D0AF144DAA6C00B60B4F /* Ken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D093144DAA6C00B60B4F /* Ken.cpp */; };
+		1E16D0B0144DAA6C00B60B4F /* Ken.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D094144DAA6C00B60B4F /* Ken.h */; };
+		1E16D0B1144DAA6C00B60B4F /* MultiFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */; };
+		1E16D0B2144DAA6C00B60B4F /* MultiFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D096144DAA6C00B60B4F /* MultiFactor.h */; };
+		1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */; };
+		1E16D0B6144DAA6C00B60B4F /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */; };
+		1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */; };
+		1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */; };
+		1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D0A1144DAA6C00B60B4F /* SRI.cpp */; };
+		1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D0A2144DAA6C00B60B4F /* SRI.h */; };
 		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
 		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
 		1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */; };
@@ -250,6 +270,26 @@
 /* Begin PBXFileReference section */
 		1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
 		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
+		1E16D087144DAA6C00B60B4F /* Base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base.cpp; path = src/LM/Base.cpp; sourceTree = "<group>"; };
+		1E16D088144DAA6C00B60B4F /* Base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Base.h; path = src/LM/Base.h; sourceTree = "<group>"; };
+		1E16D08B144DAA6C00B60B4F /* Factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Factory.cpp; path = src/LM/Factory.cpp; sourceTree = "<group>"; };
+		1E16D08C144DAA6C00B60B4F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Factory.h; path = src/LM/Factory.h; sourceTree = "<group>"; };
+		1E16D08D144DAA6C00B60B4F /* Implementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Implementation.cpp; path = src/LM/Implementation.cpp; sourceTree = "<group>"; };
+		1E16D08E144DAA6C00B60B4F /* Implementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Implementation.h; path = src/LM/Implementation.h; sourceTree = "<group>"; };
+		1E16D08F144DAA6C00B60B4F /* IRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IRST.cpp; path = src/LM/IRST.cpp; sourceTree = "<group>"; };
+		1E16D090144DAA6C00B60B4F /* IRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IRST.h; path = src/LM/IRST.h; sourceTree = "<group>"; };
+		1E16D091144DAA6C00B60B4F /* Joint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Joint.cpp; path = src/LM/Joint.cpp; sourceTree = "<group>"; };
+		1E16D092144DAA6C00B60B4F /* Joint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Joint.h; path = src/LM/Joint.h; sourceTree = "<group>"; };
+		1E16D093144DAA6C00B60B4F /* Ken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ken.cpp; path = src/LM/Ken.cpp; sourceTree = "<group>"; };
+		1E16D094144DAA6C00B60B4F /* Ken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ken.h; path = src/LM/Ken.h; sourceTree = "<group>"; };
+		1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiFactor.cpp; path = src/LM/MultiFactor.cpp; sourceTree = "<group>"; };
+		1E16D096144DAA6C00B60B4F /* MultiFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MultiFactor.h; path = src/LM/MultiFactor.h; sourceTree = "<group>"; };
+		1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParallelBackoff.cpp; path = src/LM/ParallelBackoff.cpp; sourceTree = "<group>"; };
+		1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParallelBackoff.h; path = src/LM/ParallelBackoff.h; sourceTree = "<group>"; };
+		1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SingleFactor.cpp; path = src/LM/SingleFactor.cpp; sourceTree = "<group>"; };
+		1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SingleFactor.h; path = src/LM/SingleFactor.h; sourceTree = "<group>"; };
+		1E16D0A1144DAA6C00B60B4F /* SRI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SRI.cpp; path = src/LM/SRI.cpp; sourceTree = "<group>"; };
+		1E16D0A2144DAA6C00B60B4F /* SRI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SRI.h; path = src/LM/SRI.h; sourceTree = "<group>"; };
 		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
 		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
 		1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
@@ -515,6 +555,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E16D086144DAA3F00B60B4F /* LM */,
 				1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */,
 				1ED0FD4D124BB9380029177F /* AlignmentInfo.h */,
 				1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */,
@@ -761,6 +802,33 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1E16D086144DAA3F00B60B4F /* LM */ = {
+			isa = PBXGroup;
+			children = (
+				1E16D087144DAA6C00B60B4F /* Base.cpp */,
+				1E16D088144DAA6C00B60B4F /* Base.h */,
+				1E16D08B144DAA6C00B60B4F /* Factory.cpp */,
+				1E16D08C144DAA6C00B60B4F /* Factory.h */,
+				1E16D08D144DAA6C00B60B4F /* Implementation.cpp */,
+				1E16D08E144DAA6C00B60B4F /* Implementation.h */,
+				1E16D08F144DAA6C00B60B4F /* IRST.cpp */,
+				1E16D090144DAA6C00B60B4F /* IRST.h */,
+				1E16D091144DAA6C00B60B4F /* Joint.cpp */,
+				1E16D092144DAA6C00B60B4F /* Joint.h */,
+				1E16D093144DAA6C00B60B4F /* Ken.cpp */,
+				1E16D094144DAA6C00B60B4F /* Ken.h */,
+				1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */,
+				1E16D096144DAA6C00B60B4F /* MultiFactor.h */,
+				1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */,
+				1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */,
+				1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */,
+				1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */,
+				1E16D0A1144DAA6C00B60B4F /* SRI.cpp */,
+				1E16D0A2144DAA6C00B60B4F /* SRI.h */,
+			);
+			name = LM;
+			sourceTree = "<group>";
+		};
 		1ED0FD6B124BB9380029177F /* DynSAInclude */ = {
 			isa = PBXGroup;
 			children = (
@@ -918,6 +986,16 @@
 				1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */,
 				1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */,
 				1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */,
+				1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */,
+				1E16D0A8144DAA6C00B60B4F /* Factory.h in Headers */,
+				1E16D0AA144DAA6C00B60B4F /* Implementation.h in Headers */,
+				1E16D0AC144DAA6C00B60B4F /* IRST.h in Headers */,
+				1E16D0AE144DAA6C00B60B4F /* Joint.h in Headers */,
+				1E16D0B0144DAA6C00B60B4F /* Ken.h in Headers */,
+				1E16D0B2144DAA6C00B60B4F /* MultiFactor.h in Headers */,
+				1E16D0B6144DAA6C00B60B4F /* ParallelBackoff.h in Headers */,
+				1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */,
+				1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1080,6 +1158,16 @@
 				1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */,
 				1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */,
 				1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */,
+				1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */,
+				1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */,
+				1E16D0A9144DAA6C00B60B4F /* Implementation.cpp in Sources */,
+				1E16D0AB144DAA6C00B60B4F /* IRST.cpp in Sources */,
+				1E16D0AD144DAA6C00B60B4F /* Joint.cpp in Sources */,
+				1E16D0AF144DAA6C00B60B4F /* Ken.cpp in Sources */,
+				1E16D0B1144DAA6C00B60B4F /* MultiFactor.cpp in Sources */,
+				1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */,
+				1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */,
+				1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1102,11 +1190,11 @@
 					LM_INTERNAL,
 					LM_KEN,
 					LM_IRST,
-					LM_RAND,
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
+					src,
 					../irstlm/include,
 					../srilm/include,
 					../kenlm,
@@ -1134,11 +1222,11 @@
 					LM_INTERNAL,
 					LM_KEN,
 					LM_IRST,
-					LM_RAND,
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
+					src,
 					../irstlm/include,
 					../srilm/include,
 					../kenlm,
