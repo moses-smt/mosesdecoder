@@ -26,18 +26,13 @@
 		1E69E6DB142EED56004E4D93 /* key_value_packing_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E69E6B4142EED56004E4D93 /* key_value_packing_test.cc */; };
 		1E69E6DC142EED56004E4D93 /* mmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E69E6B5142EED56004E4D93 /* mmap.cc */; };
 		1E69E6DD142EED56004E4D93 /* mmap.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6B6142EED56004E4D93 /* mmap.hh */; };
-		1E69E6DE142EED56004E4D93 /* mmap.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E69E6B7142EED56004E4D93 /* mmap.o */; };
 		1E69E6DF142EED56004E4D93 /* murmur_hash.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E69E6B8142EED56004E4D93 /* murmur_hash.cc */; };
 		1E69E6E0142EED56004E4D93 /* murmur_hash.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6B9142EED56004E4D93 /* murmur_hash.hh */; };
-		1E69E6E1142EED56004E4D93 /* murmur_hash.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E69E6BA142EED56004E4D93 /* murmur_hash.o */; };
 		1E69E6E2142EED56004E4D93 /* probing_hash_table.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6BB142EED56004E4D93 /* probing_hash_table.hh */; };
-		1E69E6E3142EED57004E4D93 /* probing_hash_table_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E69E6BD142EED56004E4D93 /* probing_hash_table_test.cc */; };
 		1E69E6E4142EED57004E4D93 /* proxy_iterator.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6BE142EED56004E4D93 /* proxy_iterator.hh */; };
 		1E69E6E5142EED57004E4D93 /* scoped.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6BF142EED56004E4D93 /* scoped.hh */; };
-		1E69E6E6142EED57004E4D93 /* scoped.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E69E6C0142EED56004E4D93 /* scoped.o */; };
 		1E69E6E7142EED57004E4D93 /* sized_iterator.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6C1142EED56004E4D93 /* sized_iterator.hh */; };
 		1E69E6E8142EED57004E4D93 /* sorted_uniform.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6C2142EED56004E4D93 /* sorted_uniform.hh */; };
-		1E69E6E9142EED57004E4D93 /* sorted_uniform_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E69E6C4142EED56004E4D93 /* sorted_uniform_test.cc */; };
 		1E69E6EA142EED57004E4D93 /* string_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6C5142EED56004E4D93 /* string_piece.hh */; };
 		1E69E6EB142EED57004E4D93 /* tokenize_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E69E6C6142EED56004E4D93 /* tokenize_piece.hh */; };
 		1E69E725142EEDA8004E4D93 /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E69E6EE142EEDA8004E4D93 /* bhiksha.cc */; };
@@ -102,20 +97,13 @@
 		1E69E6B4142EED56004E4D93 /* key_value_packing_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = key_value_packing_test.cc; sourceTree = "<group>"; };
 		1E69E6B5142EED56004E4D93 /* mmap.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mmap.cc; sourceTree = "<group>"; };
 		1E69E6B6142EED56004E4D93 /* mmap.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mmap.hh; sourceTree = "<group>"; };
-		1E69E6B7142EED56004E4D93 /* mmap.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = mmap.o; sourceTree = "<group>"; };
 		1E69E6B8142EED56004E4D93 /* murmur_hash.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = murmur_hash.cc; sourceTree = "<group>"; };
 		1E69E6B9142EED56004E4D93 /* murmur_hash.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = murmur_hash.hh; sourceTree = "<group>"; };
-		1E69E6BA142EED56004E4D93 /* murmur_hash.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = murmur_hash.o; sourceTree = "<group>"; };
 		1E69E6BB142EED56004E4D93 /* probing_hash_table.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = probing_hash_table.hh; sourceTree = "<group>"; };
-		1E69E6BC142EED56004E4D93 /* probing_hash_table_test */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = probing_hash_table_test; sourceTree = "<group>"; };
-		1E69E6BD142EED56004E4D93 /* probing_hash_table_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = probing_hash_table_test.cc; sourceTree = "<group>"; };
 		1E69E6BE142EED56004E4D93 /* proxy_iterator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = proxy_iterator.hh; sourceTree = "<group>"; };
 		1E69E6BF142EED56004E4D93 /* scoped.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = scoped.hh; sourceTree = "<group>"; };
-		1E69E6C0142EED56004E4D93 /* scoped.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; path = scoped.o; sourceTree = "<group>"; };
 		1E69E6C1142EED56004E4D93 /* sized_iterator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sized_iterator.hh; sourceTree = "<group>"; };
 		1E69E6C2142EED56004E4D93 /* sorted_uniform.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sorted_uniform.hh; sourceTree = "<group>"; };
-		1E69E6C3142EED56004E4D93 /* sorted_uniform_test */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = sorted_uniform_test; sourceTree = "<group>"; };
-		1E69E6C4142EED56004E4D93 /* sorted_uniform_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sorted_uniform_test.cc; sourceTree = "<group>"; };
 		1E69E6C5142EED56004E4D93 /* string_piece.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = string_piece.hh; sourceTree = "<group>"; };
 		1E69E6C6142EED56004E4D93 /* tokenize_piece.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tokenize_piece.hh; sourceTree = "<group>"; };
 		1E69E6EE142EEDA8004E4D93 /* bhiksha.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bhiksha.cc; sourceTree = "<group>"; };
@@ -166,9 +154,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E69E6DE142EED56004E4D93 /* mmap.o in Frameworks */,
-				1E69E6E1142EED56004E4D93 /* murmur_hash.o in Frameworks */,
-				1E69E6E6142EED57004E4D93 /* scoped.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,20 +209,13 @@
 				1E69E6B4142EED56004E4D93 /* key_value_packing_test.cc */,
 				1E69E6B5142EED56004E4D93 /* mmap.cc */,
 				1E69E6B6142EED56004E4D93 /* mmap.hh */,
-				1E69E6B7142EED56004E4D93 /* mmap.o */,
 				1E69E6B8142EED56004E4D93 /* murmur_hash.cc */,
 				1E69E6B9142EED56004E4D93 /* murmur_hash.hh */,
-				1E69E6BA142EED56004E4D93 /* murmur_hash.o */,
 				1E69E6BB142EED56004E4D93 /* probing_hash_table.hh */,
-				1E69E6BC142EED56004E4D93 /* probing_hash_table_test */,
-				1E69E6BD142EED56004E4D93 /* probing_hash_table_test.cc */,
 				1E69E6BE142EED56004E4D93 /* proxy_iterator.hh */,
 				1E69E6BF142EED56004E4D93 /* scoped.hh */,
-				1E69E6C0142EED56004E4D93 /* scoped.o */,
 				1E69E6C1142EED56004E4D93 /* sized_iterator.hh */,
 				1E69E6C2142EED56004E4D93 /* sorted_uniform.hh */,
-				1E69E6C3142EED56004E4D93 /* sorted_uniform_test */,
-				1E69E6C4142EED56004E4D93 /* sorted_uniform_test.cc */,
 				1E69E6C5142EED56004E4D93 /* string_piece.hh */,
 				1E69E6C6142EED56004E4D93 /* tokenize_piece.hh */,
 			);
@@ -410,8 +388,6 @@
 				1E69E6DB142EED56004E4D93 /* key_value_packing_test.cc in Sources */,
 				1E69E6DC142EED56004E4D93 /* mmap.cc in Sources */,
 				1E69E6DF142EED56004E4D93 /* murmur_hash.cc in Sources */,
-				1E69E6E3142EED57004E4D93 /* probing_hash_table_test.cc in Sources */,
-				1E69E6E9142EED57004E4D93 /* sorted_uniform_test.cc in Sources */,
 				1E69E725142EEDA8004E4D93 /* bhiksha.cc in Sources */,
 				1E69E727142EEDA8004E4D93 /* binary_format.cc in Sources */,
 				1E69E72B142EEDA8004E4D93 /* build_binary.cc in Sources */,
