@@ -63,6 +63,7 @@ echo "Calling $ACLOCAL..."
 $ACLOCAL -I m4 || die "aclocal failed"
 echo "Calling $AUTOCONF..."
 $AUTOCONF  || die "autoconf failed"
+touch ltmain.sh
 echo "Calling $AUTOMAKE..."
 $AUTOMAKE || die "automake failed"
 echo "Calling $LIBTOOLIZE"
