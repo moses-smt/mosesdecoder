@@ -100,6 +100,7 @@ int main(int argc, char** argv) {
 	bool historyOfOracles;
 	bool sentenceLevelBleu;
 	float bleuScoreWeight;
+	float bleuScoreWeight_hope;
 	float margin_slack;
 	float margin_slack_incr;
 	bool perceptron_update;
@@ -117,6 +118,7 @@ int main(int argc, char** argv) {
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the bleu objective weight)")
+		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
@@ -320,6 +322,9 @@ int main(int argc, char** argv) {
 			historyOf1best = true;
 		}
 	}
+	if (bleuScoreWeight_hope == -1) {
+		bleuScoreWeight_hope = bleuScoreWeight;
+	}
 
 	decoder->loadReferenceSentences(referenceSentences);
 
@@ -451,7 +456,7 @@ int main(int argc, char** argv) {
 
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << hope_n << "best hope translations" << endl;
-					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight,
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
 							distinctNbest, rank, epoch);
 					// needed for history
@@ -485,7 +490,7 @@ int main(int argc, char** argv) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
-					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight,
+					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
 							distinctNbest, rank, epoch);
 					// needed for history
