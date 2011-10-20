@@ -70,14 +70,14 @@ namespace Mira {
 		: m_manager(NULL) {
 	  // force initialisation of the phrase dictionary (TODO: why?)
 	  const StaticData &staticData = StaticData::Instance();
-      /*m_sentence = new Sentence(Input);
+      m_sentence = new Sentence(Input);
       stringstream in("Initialising decoder..\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      m_sentence->Read(in,inputFactorOrder);*/
+      m_sentence->Read(in,inputFactorOrder);
 
       const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-      /*m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
-      m_manager->ProcessSentence();*/
+      m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
+      m_manager->ProcessSentence();
 
       // Add the bleu feature
       m_bleuScoreFeature = new BleuScoreFeature(scaleByInputLength, historySmoothing);
@@ -200,6 +200,10 @@ namespace Mira {
 
   void MosesDecoder::updateHistory(const vector< vector< const Word*> >& words, vector<size_t>& sourceLengths, vector<size_t>& ref_ids, size_t rank, size_t epoch) {
 	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids, rank, epoch);
+  }
+
+  void MosesDecoder::loadReferenceSentences(const vector<vector<string> >& refs) {
+  	m_bleuScoreFeature->LoadReferences(refs);
   }
 
   void MosesDecoder::printBleuFeatureHistory(std::ostream& out) {
