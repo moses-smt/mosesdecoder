@@ -77,13 +77,11 @@ function run_single_test () {
   echo "## Cruise Control version" >> $longlog
   echo $ccversion >> $longlog
   echo "## Parameters" >> $longlog
-  cat $configf >> $longlog
+  cat $MYDIR/$configf >> $longlog
   echo "## Envinronment" >> $longlog
   uname -a >> $longlog
   env >> $longlog
 
-
-  pushd $WORKDIR 2>/dev/null >/dev/null || die "Failed to chdir to $WORKDIR"
   git checkout --force $commit 2>/dev/null || die "Failed to checkout commit $commit"
 
   err=""
@@ -94,17 +92,20 @@ function run_single_test () {
   make clean >> $longlog 2>&1 || warn "make clean failed, suspicious"
 
   echo "## ./configure $MCC_CONFIGURE_ARGS" >> $longlog
-  [ -z "$err" ] && ./configure $MCC_CONFIGURE_ARGS  >> $longlog 2>&1 \
-    || err="configure"
+  if [ -z "$err" ]; then
+    ./configure $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="configure"
+  fi
 
   echo "## make" >> $longlog
-  [ -z "$err" ] && make  >> $longlog 2>&1 \
-    || err="make"
+  if [ -z "$err" ]; then
+    make >> $longlog 2>&1 || err="make"
+  fi
 
   echo "## make scripts" >> $longlog
   cd scripts
-  [ -z "$err" ] && make  >> $longlog 2>&1 \
-    || err="make scripts"
+  if [ -z "$err" ]; then
+    make >> $longlog 2>&1 || err="make scripts"
+  fi
   cd ..
 
   cd regression-testing
@@ -127,7 +128,8 @@ function run_single_test () {
   fi
   cd ..
 
-  if [ -z $err ] && [ $MCC_RUN_EMS = "yes" ]; then
+  if [ -z "$err" ] && [ "$MCC_RUN_EMS" = "yes" ]; then
+    echo "## EMS" >> $longlog
     if [ ! -f "giza-pp.ok" ]; then # fetch & compile Giza++
       svn checkout http://giza-pp.googlecode.com/svn/trunk/ giza-pp \
       || die "Failed to fetch Giza++"
@@ -137,8 +139,12 @@ function run_single_test () {
       cd ..
       touch giza-pp.ok
     fi
+    sed -i 's#^my \$BINDIR\s*=.*#my \$BINDIR="'$(pwd)/giza-pp/bin/'";#' \
+      scripts/training/train-model.perl
     srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -E 's/.*--with-srilm=([^ ]+) .*/\1/')
     mach_type=$($srilm_dir/sbin/machine-type)
+    mkdir -p "$WORKDIR/ems_workdir"
+    rm -rf "$WORKDIR/ems_workdir/"* # clean any previous experiments
     cat $MYDIR/config.ems \
     | sed \
       -e "s#WORKDIR#$WORKDIR#" \
@@ -146,8 +152,9 @@ function run_single_test () {
       -e "s#MACHINE_TYPE#$mach_type#" \
     > ./config.ems
     scripts/ems/experiment.perl \
-      -no-graph -config -exec `pwd`/config.ems &>> $longlog \
-      || err="ems"
+      -no-graph -exec -config $(pwd)/config.ems &>> $longlog \
+      || die "Running EMS failed"
+    [ -f $WORKDIR/ems_workdir/steps/1/REPORTING_report.1.DONE ] || err="ems"
   fi
 
   echo "## Finished" >> $longlog
@@ -164,14 +171,14 @@ function run_single_test () {
   echo "$commit	$status	$configname	$ccversion	$nicedate" \
     >> "$LOGDIR/brief.log"
 
-  popd > /dev/null 2> /dev/null
-
   if [ -z "$err" ]; then
     touch "$LOGDIR/logs/$configname/$first_char/$commit.OK"
   else
     return 1;
   fi
 }
+
+cd $WORKDIR || die "Failed to chdir to $WORKDIR"
 
 # update the revision lists for all watched branches
 for i in $MCC_SCAN_BRANCHES; do
@@ -183,11 +190,12 @@ for i in $(git rev-list $MCC_SCAN_BRANCHES); do
   first_char=$(echo $i | grep -o '^.')
   mkdir -p "$LOGDIR/logs/$configname/$first_char" 
   [ -f "$LOGDIR/logs/$configname/$first_char/$i.info" ] && break;
-  git show $i | ./shorten_info.pl > "$LOGDIR/logs/$configname/$first_char/$i.info"
+  git show $i | $MYDIR/shorten_info.pl > "$LOGDIR/logs/$configname/$first_char/$i.info"
 done
 
 #### Main loop over all commits
 for i in $MCC_SCAN_BRANCHES; do
+  warn "On brach $i"
   git rev-list $i \
   | while read commit; do
     first_char=$(echo $commit | grep -o '^.')

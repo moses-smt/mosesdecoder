@@ -6,7 +6,7 @@
 
 ### directory in which experiment is run
 #
-working-dir = WORKDIR
+working-dir = WORKDIR/ems_workdir
 
 # specification of the language pair
 input-extension = fr
