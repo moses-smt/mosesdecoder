@@ -83,6 +83,7 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
+	cerr << "BleuScoreFeature: loading reference sentences.. " << endl;
 	m_refs.clear();
     FactorCollection& fc = FactorCollection::Instance();
     for (size_t file_id = 0; file_id < refs.size(); file_id++) {
