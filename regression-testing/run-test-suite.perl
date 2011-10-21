@@ -149,6 +149,7 @@ my $pass_percentage = int(100 * ($total-$fail) / $total);
 print "\n$pass_percentage% of the tests passed.\n";
 print "$fail_percentage% of the tests failed.\n";
 if ($fail_percentage>0) { print "\nPLEASE INVESTIGATE THESE FAILED TESTS: @failed\n"; }
+exit 2 if $fail > 0;
 
 sub do_test {
   my ($test) = @_;
