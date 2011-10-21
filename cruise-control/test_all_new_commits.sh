@@ -5,7 +5,7 @@
 #
 # A commit is assumed to be tested, if logs/CONFIGNAME/commit exists
 #
-# Ondrej Bojar, 2011
+# Ondrej Bojar, Ales Tamchyna, 2011
 
 function warn() { echo "$@" >&2; }
 function die() { echo "$@" >&2; exit 1; }
@@ -44,7 +44,7 @@ GITREPO="$MCC_GITREPO"
 # location of moses regression test data archive (assumes url at the moment)
 REGTEST_ARCHIVE="$MCC_REGTEST_ARCHIVE"
 [ -n "$REGTEST_ARCHIVE" ] \
-  || REGTEST_ARCHIVE="http://www.statmt.org/moses/reg-testing/moses-reg-test-data-7.tgz"
+  || REGTEST_ARCHIVE="http://www.statmt.org/moses/reg-testing/moses-reg-test-data-8.tgz"
 
 if [ ! -d "$WORKDIR" ]; then
   mkdir "$WORKDIR" || die "Failed to create workdir $WORKDIR"
@@ -141,7 +141,7 @@ function run_single_test () {
     fi
     sed -i 's#^my \$BINDIR\s*=.*#my \$BINDIR="'$(pwd)/giza-pp/bin/'";#' \
       scripts/training/train-model.perl
-    srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -E 's/.*--with-srilm=([^ ]+) .*/\1/')
+    srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -r 's/.*--with-srilm=([^ ]+) .*/\1/')
     mach_type=$($srilm_dir/sbin/machine-type)
     mkdir -p "$WORKDIR/ems_workdir"
     rm -rf "$WORKDIR/ems_workdir/"* # clean any previous experiments
@@ -182,7 +182,7 @@ cd $WORKDIR || die "Failed to chdir to $WORKDIR"
 
 # update the revision lists for all watched branches
 for i in $MCC_SCAN_BRANCHES; do
-  git rev-list $i > "$LOGDIR/logs/$configname/$(echo -n $i | sed 's/\//_/g').revlist"
+  git rev-list $i > "$LOGDIR/logs/$configname/$(echo -n $i | sed 's/^.*\///').revlist"
 done
 
 # create info files for new commits
