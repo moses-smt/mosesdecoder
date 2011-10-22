@@ -202,6 +202,15 @@ void BleuScoreFeature::PrintReferenceLength(const vector<size_t>& ref_ids) {
 	}
 }
 
+size_t BleuScoreFeature::GetReferenceLength(size_t ref_id) {
+	size_t cur_ref_length = m_refs[ref_id].first;
+	return cur_ref_length;
+}
+
+void BleuScoreFeature::SetBleuSmoothingScheme(size_t scheme) {
+	m_smoothing_scheme = (SmoothingScheme)scheme;
+}
+
 /*
  * Given a phrase (current translation) calculate its ngram counts and
  * its ngram matches against the ngrams in the reference translation
@@ -349,23 +358,45 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     if (!state->m_ngram_matches[0]) return 0;      	// if we have no unigram matches, score should be 0
 
     float precision = 1.0;
+    float smooth = 1;
     float smoothed_count, smoothed_matches;
 
     // Calculate geometric mean of modified ngram precisions
-	// BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
+    // BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
     // 		= BP * 4th root(PRODUCT_1_4 p_n)
-    for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
-        if (state->m_ngram_counts[i]) {
-            smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
-            smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
-            if (i > 0) {
-            	// smoothing for all n > 1
-            	smoothed_matches += 1;
-            	smoothed_count += 1;
-            }
+    for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
+    	if (state->m_ngram_counts[i]) {
+    		smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
+    		smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
 
-            precision *= smoothed_matches / smoothed_count;
-        }
+    		switch (m_smoothing_scheme) {
+    			case PLUS_ONE:
+    			default:
+    				if (i > 0) {
+    					// smoothing for all n > 1
+    					smoothed_matches += 1;
+    					smoothed_count += 1;
+    				}
+    				break;
+    			case LIGHT:
+      			if (i > 0) {
+      				// smoothing for all n > 1
+      				smoothed_matches += 0.1;
+      				smoothed_count += 0.1;
+      			}
+    				break;
+    			case PAPINENI:
+      			if (state->m_ngram_matches[i] == 0) {
+      				smooth *= 0.5;
+      				smoothed_matches += smooth;
+      				smoothed_count += smooth;
+      			}
+    				break;
+    		}
+
+    		precision *= smoothed_matches / smoothed_count;
+      }
+    }
 
     // take geometric mean
     precision = pow(precision, (float)1/4);

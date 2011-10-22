@@ -50,7 +50,8 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
-	                                 m_historySmoothing(0.7) {}
+	                                 m_historySmoothing(0.7),
+	                                 m_smoothing_scheme(PLUS_ONE) {}
 
 	BleuScoreFeature(bool scaleByInputLength, float historySmoothing):
 	                                 StatefulFeatureFunction("BleuScore"),
@@ -60,7 +61,8 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(scaleByInputLength),
-	                                 m_historySmoothing(historySmoothing) {}
+	                                 m_historySmoothing(historySmoothing),
+	                                 m_smoothing_scheme(PLUS_ONE) {}
 
     std::string GetScoreProducerDescription() const
     {
@@ -84,6 +86,8 @@ public:
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void PrintReferenceLength(const std::vector<size_t>& ref_ids);
+    size_t GetReferenceLength(size_t ref_id);
+    void SetBleuSmoothingScheme(size_t scheme);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,
@@ -126,6 +130,9 @@ private:
 
     // smoothing factor for history counts
     float m_historySmoothing;
+
+    enum SmoothingScheme { PLUS_ONE = 1, LIGHT = 2, PAPINENI = 3 };
+    SmoothingScheme m_smoothing_scheme;
 };
 
 } // Namespace.

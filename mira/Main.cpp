@@ -110,6 +110,7 @@ int main(int argc, char** argv) {
 	int fear_n;
 	int threadcount;
 	size_t adapt_after_epoch;
+	size_t bleu_smoothing_scheme;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -119,6 +120,7 @@ int main(int argc, char** argv) {
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the bleu objective weight)")
 		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
+		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1, papineni (2) (default:1)")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
@@ -326,7 +328,10 @@ int main(int argc, char** argv) {
 		bleuScoreWeight_hope = bleuScoreWeight;
 	}
 
+	// References are loaded by StaticData::LoadReferences() when the parameter "references" is specified in the ini file.
+	// To be sure they are available, load explicitly here.
 	decoder->loadReferenceSentences(referenceSentences);
+	decoder->setBleuSmoothingScheme(bleu_smoothing_scheme);
 
 #ifdef MPI_ENABLE
 	mpi::broadcast(world, order, 0);
@@ -442,9 +447,10 @@ int main(int argc, char** argv) {
 					}
 				}
 
+				size_t reference_length = decoder->getReferenceLength(*sid);
 				if (hope_fear || perceptron_update) {
 					// HOPE
-					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << hope_n << "best hope translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
 							distinctNbest, rank, epoch);
@@ -453,33 +459,38 @@ int main(int argc, char** argv) {
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
-					VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScoresHope[batchPosition][0] << endl);
+					float hope_length_ratio = (float)oracle.size()/reference_length;
+					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 
 					if (historyOf1best) {
 						// MODEL (for updating the history only, using dummy vectors)
-						cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get 1best wrt model score (for history)" << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history)" << endl;
 						vector<const Word*> bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
 								distinctNbest, rank, epoch);
 						decoder->cleanup();
 						oneBests.push_back(bestModel);
-						VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << dummyBleuScores[batchPosition][0] << endl);
+						float model_length_ratio = (float)bestModel.size()/reference_length;
+						cerr << ", l-ratio model: " << model_length_ratio << endl;
 					}
 
 					// FEAR
-					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << fear_n << "best fear translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 					vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScoresFear[batchPosition][0] << endl);
+					float fear_length_ratio = (float)fear.size()/reference_length;
+					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
 					}
+
+					cerr << "Rank " << rank << ", epoch " << epoch << ", length hope-fear: " << oracle.size() - fear.size() << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
 				}
 				else {
 					// HOPE
-					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best hope translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
@@ -489,28 +500,31 @@ int main(int argc, char** argv) {
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
-					VERBOSE(1, "Rank " << rank << ", oracle length: " << oracle.size() << " Bleu: " << bleuScores[batchPosition][oraclePos] << endl);
+					float hope_length_ratio = (float)oracle.size()/reference_length;
+					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
 					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
 
 					// MODEL
-					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best wrt model score" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
 					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
-					VERBOSE(1, "Rank " << rank << ", model length: " << bestModel.size() << " Bleu: " << bleuScores[batchPosition][0] << endl);
+					float model_length_ratio = (float)bestModel.size()/reference_length;
+					cerr << ", l-ratio model: " << model_length_ratio << endl;
 
 					// FEAR
-					cerr << "Rank " << rank << ", epoch " << epoch << ", run decoder to get " << n << "best fear translations" << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
 					size_t fearPos = featureValues[batchPosition].size();
 					vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					VERBOSE(1, "Rank " << rank << ", fear length: " << fear.size() << " Bleu: " << bleuScores[batchPosition][fearPos] << endl);
+					float fear_length_ratio = (float)fear.size()/reference_length;
+					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
 					}

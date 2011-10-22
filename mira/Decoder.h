@@ -70,6 +70,8 @@ class MosesDecoder {
     void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
     void printBleuFeatureHistory(std::ostream& out);
     void printReferenceLength(const std::vector<size_t>& ref_ids);
+    size_t getReferenceLength(size_t ref_id);
+    void setBleuSmoothingScheme(size_t scheme);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
 	void cleanup();
