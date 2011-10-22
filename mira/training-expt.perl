@@ -94,7 +94,7 @@ my $burn_in_reference_files = &param("train.burn-in-reference-files");
 my $skipTrain = &param("train.skip", 0);
 
 #devtest configuration
-my ($devtest_input_file, $devtest_reference_file,$test_ini_file,$bleu_script,$use_moses);
+my ($devtest_input_file, $devtest_reference_file,$devtest_ini_file,$bleu_script,$use_moses);
 my $test_exe = &param("devtest.moses");
 &check_exists("test executable", $test_exe);
 $bleu_script  = &param_required("devtest.bleu");
@@ -109,7 +109,7 @@ for my $ref (glob $devtest_reference_file . "*") {
 $devtest_ini_file = &param_required("devtest.moses-ini-file");
 &check_exists ("devtest ini file", $devtest_ini_file);
 my $weight_file_stem = "$name-weights";
-my $extra_memory_test = &param("devtest.extra-memory",0);
+my $extra_memory_devtest = &param("devtest.extra-memory",0);
 my $skip_devtest = &param("devtest.skip-devtest",0);
 my $skip_dev = &param("devtest.skip-dev",0);
 my $skip_submit_test = &param("devtest.skip-submit",0);
