@@ -199,12 +199,12 @@ for i in $MCC_SCAN_BRANCHES; do
   git rev-list $i \
   | while read commit; do
     first_char=$(echo $commit | grep -o '^.')
-    test_ok="$LOGDIR/logs/$configname/$first_char/$commit.OK"
-    if [ ! -e "$test_ok" ]; then
+    test_done="$LOGDIR/logs/$configname/$first_char/$commit.log"
+    if [ ! -e "$test_done" ]; then
       run_single_test $commit && warn "Commit $commit test ok, stopping" && break
       warn "Commit $commit test failed, continuing"
     else
-      warn "Reached a successfully tested commit ($commit), stopping"
+      warn "Reached a previously tested commit ($commit), stopping"
       break
     fi
   done
