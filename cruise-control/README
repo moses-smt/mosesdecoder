@@ -26,7 +26,9 @@ How to set up the web interface:
 
 1) Install Apache and PHP
 
-2) Point StaticData::logs_path to correct directory, e.g. /home/cruise/logs/example/
+2) Copy files from cruise-control/web into Apache's www directory
+
+3) Point StaticData::logs_path to correct directory, e.g. /home/cruise/logs/example/
    Default value is 'data', you might want to just create a symlink.
 
 Written by Ondrej Bojar, Ales Tamchyna, Barry Haddow, Rimas Blazaitis
