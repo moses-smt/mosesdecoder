@@ -1200,7 +1200,7 @@
 					../kenlm,
 					../randlm/include,
 					../,
-					/usr/local/include,
+					/opt/local/include,
 					../synlm/hhmm/wsjparse/include,
 					../synlm/hhmm/rvtl/include/,
 				);
@@ -1232,7 +1232,7 @@
 					../kenlm,
 					../randlm/include,
 					../,
-					/usr/local/include,
+					/opt/local/include,
 					../synlm/hhmm/wsjparse/include,
 					../synlm/hhmm/rvtl/include/,
 				);
