@@ -8,14 +8,15 @@
 
 #include <ctype.h>
 
-#include <sys/resource.h>
-#include <sys/time.h>
+#include "util/portability.hh"
 
 float FloatSec(const struct timeval &tv) {
   return static_cast<float>(tv.tv_sec) + (static_cast<float>(tv.tv_usec) / 1000000000.0);
 }
 
 void PrintUsage(const char *message) {
+#ifdef WIN32
+#else
   struct rusage usage;
   if (getrusage(RUSAGE_SELF, &usage)) {
     perror("getrusage");
@@ -23,6 +24,7 @@ void PrintUsage(const char *message) {
   }
   std::cerr << message;
   std::cerr << "user\t" << FloatSec(usage.ru_utime) << "\nsys\t" << FloatSec(usage.ru_stime) << '\n';
+#endif
 
   // Linux doesn't set memory usage :-(.  
   std::ifstream status("/proc/self/status", std::ios::in);

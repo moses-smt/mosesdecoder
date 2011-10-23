@@ -24,10 +24,8 @@
 #include <limits>
 #include <numeric>
 #include <vector>
+#include "util/portability.hh"
 
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 namespace lm {
 namespace ngram {

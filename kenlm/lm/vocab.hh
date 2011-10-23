@@ -8,6 +8,7 @@
 #include "util/probing_hash_table.hh"
 #include "util/sorted_uniform.hh"
 #include "util/string_piece.hh"
+#include "util/portability.hh"
 
 #include <limits>
 #include <string>
@@ -36,7 +37,7 @@ class WriteWordsWrapper : public EnumerateVocab {
     
     void Add(WordIndex index, const StringPiece &str);
 
-    void Write(int fd);
+    void Write(FD fd);
 
   private:
     EnumerateVocab *inner_;
@@ -84,7 +85,7 @@ class SortedVocabulary : public base::Vocabulary {
 
     bool SawUnk() const { return saw_unk_; }
 
-    void LoadedBinary(int fd, EnumerateVocab *to);
+    void LoadedBinary(FD fd, EnumerateVocab *to);
 
   private:
     uint64_t *begin_, *end_;
@@ -127,7 +128,7 @@ class ProbingVocabulary : public base::Vocabulary {
 
     bool SawUnk() const { return saw_unk_; }
 
-    void LoadedBinary(int fd, EnumerateVocab *to);
+    void LoadedBinary(FD fd, EnumerateVocab *to);
 
   private:
     // std::identity is an SGI extension :-(

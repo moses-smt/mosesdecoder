@@ -8,11 +8,13 @@
 #include <architecture/byte_order.h>
 #elif __linux__
 #include <endian.h>
+#elif WIN32
+	// TODO WIN32
 #else
 #include <arpa/nameser_compat.h>
 #endif 
 
-#include <inttypes.h>
+#include <stdint.h>
 
 namespace util {
 
