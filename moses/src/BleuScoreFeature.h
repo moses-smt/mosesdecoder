@@ -50,10 +50,11 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
+	                                 m_scale_by_target_length(false),
 	                                 m_historySmoothing(0.7),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
 
-	BleuScoreFeature(bool scaleByInputLength, float historySmoothing):
+	BleuScoreFeature(bool scaleByInputLength, bool scaleByTargetLength, float historySmoothing):
 	                                 StatefulFeatureFunction("BleuScore"),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
@@ -61,6 +62,7 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(scaleByInputLength),
+	                                 m_scale_by_target_length(scaleByTargetLength),
 	                                 m_historySmoothing(historySmoothing),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
 
@@ -125,8 +127,11 @@ private:
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
 
-    // scale BLEU score by history of input size
+    // scale BLEU score by history of input length
     bool m_scale_by_input_length;
+
+    // scale BLEU score by (history of) candidate length
+    bool m_scale_by_target_length;
 
     // smoothing factor for history counts
     float m_historySmoothing;

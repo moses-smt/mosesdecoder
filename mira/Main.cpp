@@ -81,6 +81,7 @@ int main(int argc, char** argv) {
 	bool accumulateWeights;
 	float historySmoothing;
 	bool scaleByInputLength;
+	bool scaleByTargetLength;
 	float slack;
 	float slack_step;
 	float slack_min;
@@ -150,7 +151,8 @@ int main(int argc, char** argv) {
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
-		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by a history of the input lengths")
+		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
+		("scale-by-target-length", po::value<bool>(&scaleByTargetLength)->default_value(false), "Scale the BLEU score by (a history of) the candidate length")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level bleu scoring function")
@@ -252,11 +254,15 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	if (scaleByTargetLength) {
+		scaleByInputLength = false;
+	}
+
 	// initialise Moses
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, historySmoothing);
+	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByTargetLength, historySmoothing);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();

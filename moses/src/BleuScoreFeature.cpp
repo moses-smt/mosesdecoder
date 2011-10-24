@@ -419,8 +419,11 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 	if (m_scale_by_input_length) {
 		precision *= m_source_length_history + state->m_source_length;
 	}
+	else if (m_scale_by_target_length) {
+		precision *= m_target_length_history + state->m_target_length;
+	}
 
-    return precision;
+	return precision;
 }
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
