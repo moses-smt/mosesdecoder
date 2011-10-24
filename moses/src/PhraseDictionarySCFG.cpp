@@ -107,6 +107,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
   //currNode = currNode->GetOrCreateChild(sourceLHS);
   //assert(currNode != NULL);
 
+  
   return *currNode;
 }
 
