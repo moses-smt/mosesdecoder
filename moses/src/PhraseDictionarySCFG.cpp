@@ -63,13 +63,18 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
   return ret;
 }
 
-TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target)
+TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
+                                                                                const Phrase &source
+                                                                                , const TargetPhrase &target
+                                                                                , const Word &sourceLHS)
 {
-  PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target);
+  PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
-PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
+PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source
+                                                                , const TargetPhrase &target
+                                                                , const Word &sourceLHS)
 {
   const size_t size = source.GetSize();
 
@@ -97,6 +102,10 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
 
     assert(currNode != NULL);
   }
+  
+  // finally, the source LHS
+  currNode = currNode->GetOrCreateChild(sourceLHS);
+  assert(currNode != NULL);
 
   return *currNode;
 }

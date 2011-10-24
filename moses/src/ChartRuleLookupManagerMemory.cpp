@@ -78,6 +78,11 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
 
+  if (range.GetStartPos() == 2 && range.GetEndPos() == 3)
+  {
+    std::cerr << "hhh";
+  }
+  
   const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
 
   // loop through the rules
