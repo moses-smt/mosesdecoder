@@ -82,6 +82,7 @@ int main(int argc, char** argv) {
 	float historySmoothing;
 	bool scaleByInputLength;
 	bool scaleByTargetLength;
+	float scaleByX;
 	float slack;
 	float slack_step;
 	float slack_min;
@@ -153,6 +154,7 @@ int main(int argc, char** argv) {
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
 		("scale-by-target-length", po::value<bool>(&scaleByTargetLength)->default_value(false), "Scale the BLEU score by (a history of) the candidate length")
+		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level bleu scoring function")
@@ -262,7 +264,7 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByTargetLength, historySmoothing);
+	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByTargetLength, scaleByX, historySmoothing);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();

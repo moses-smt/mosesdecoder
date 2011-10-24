@@ -51,10 +51,11 @@ public:
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
 	                                 m_scale_by_target_length(false),
+	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.7),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
 
-	BleuScoreFeature(bool scaleByInputLength, bool scaleByTargetLength, float historySmoothing):
+	BleuScoreFeature(bool scaleByInputLength, bool scaleByTargetLength, float scaleByX, float historySmoothing):
 	                                 StatefulFeatureFunction("BleuScore"),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
@@ -63,6 +64,7 @@ public:
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(scaleByInputLength),
 	                                 m_scale_by_target_length(scaleByTargetLength),
+	                                 m_scale_by_x(scaleByX),
 	                                 m_historySmoothing(historySmoothing),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
 
@@ -132,6 +134,8 @@ private:
 
     // scale BLEU score by (history of) candidate length
     bool m_scale_by_target_length;
+
+    float m_scale_by_x;
 
     // smoothing factor for history counts
     float m_historySmoothing;

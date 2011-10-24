@@ -407,23 +407,24 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // where
     // c: length of the candidate translation
     // r: effective reference length (sum of best match lengths for each candidate sentence)
-	if (state->m_target_length < state->m_scaled_ref_length) {
-		float smoothed_target_length = m_target_length_history + state->m_target_length;
-		float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-		precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
-	}
+    if (state->m_target_length < state->m_scaled_ref_length) {
+    	float smoothed_target_length = m_target_length_history + state->m_target_length;
+    	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
+    	precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
+    }
 
     // Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
     // B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
     // where c(e;) is a vector of reference length, ngram counts and ngram matches
-	if (m_scale_by_input_length) {
-		precision *= m_source_length_history + state->m_source_length;
-	}
-	else if (m_scale_by_target_length) {
-		precision *= m_target_length_history + state->m_target_length;
-	}
 
-	return precision;
+    if (m_scale_by_input_length) {
+    	precision *= m_source_length_history + state->m_source_length;
+		}
+    else if (m_scale_by_target_length) {
+    	precision *= m_target_length_history + state->m_target_length;
+    }
+
+    return precision*m_scale_by_x;
 }
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
