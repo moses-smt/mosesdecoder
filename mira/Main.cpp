@@ -492,7 +492,7 @@ int main(int argc, char** argv) {
 						delete fear[i];
 					}
 
-					cerr << "Rank " << rank << ", epoch " << epoch << ", length hope-fear: " << oracle.size() - fear.size() << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", abs-length hope-fear: " << abs((int)oracle.size() - (int)fear.size()) << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
 				}
 				else {
 					// HOPE
