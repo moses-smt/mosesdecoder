@@ -78,10 +78,11 @@ class PhraseDictionarySCFG : public PhraseDictionary
 
  private:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      const Phrase &source, const TargetPhrase &target);
+      const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
 
-  PhraseDictionaryNodeSCFG &GetOrCreateNode(const Phrase &source,
-                                            const TargetPhrase &target);
+  PhraseDictionaryNodeSCFG &GetOrCreateNode(const Phrase &source
+                                            , const TargetPhrase &target
+                                            , const Word &sourceLHS);
 
   void SortAndPrune();
 

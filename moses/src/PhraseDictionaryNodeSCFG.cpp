@@ -64,7 +64,7 @@ void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
 
 PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word &sourceTerm)
 {
-  assert(!sourceTerm.IsNonTerminal());
+  //assert(!sourceTerm.IsNonTerminal());
 
   std::pair <TerminalMap::iterator,bool> insResult;
   insResult = m_sourceTermMap.insert( std::make_pair(sourceTerm, PhraseDictionaryNodeSCFG()) );

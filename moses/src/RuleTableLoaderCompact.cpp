@@ -202,6 +202,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const Phrase &sourcePhrase = sourcePhrases[sourcePhraseId];
     const Phrase &targetPhrasePhrase = targetPhrases[targetPhraseId];
     const Word &targetLhs = vocab[targetLhsIds[targetPhraseId]];
+    Word sourceLHS("X"); // TODO not implemented for compact
     const AlignmentInfo *alignmentInfo = alignmentSets[alignmentSetId];
 
     // Then there should be one score for each score component.
@@ -229,7 +230,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-        ruleTable, sourcePhrase, *targetPhrase);
+        ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     coll.Add(targetPhrase);
   }
 

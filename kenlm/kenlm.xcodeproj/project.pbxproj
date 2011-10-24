@@ -426,8 +426,7 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include/,
-					/Users/hieuhoang/workspace/sourceforge/trunk/kenlm,
-					/usr/local/include,
+					../kenlm,
 					../srilm/include,
 				);
 				INSTALL_PATH = /usr/local/lib;
@@ -447,8 +446,7 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include/,
-					/Users/hieuhoang/workspace/sourceforge/trunk/kenlm,
-					/usr/local/include,
+					../kenlm,
 					../srilm/include,
 				);
 				INSTALL_PATH = /usr/local/lib;
