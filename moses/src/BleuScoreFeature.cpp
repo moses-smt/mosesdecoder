@@ -331,11 +331,13 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
       ctx_start_idx = 0;
     }
 
-    new_state->m_source_length = cur_hypo.GetWordsBitmap().GetSize();
+    //new_state->m_source_length = cur_hypo.GetWordsBitmap().GetSize();
+    WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
+    new_state->m_source_length = coverageVector.GetNumWordsCovered();
+
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_end_idx));
     new_state->m_target_length += cur_hypo.GetTargetPhrase().GetSize();
-    WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
 
     // we need a scaled reference length to compare the current target phrase to the corresponding reference phrase
     new_state->m_scaled_ref_length = m_cur_ref_length * 
