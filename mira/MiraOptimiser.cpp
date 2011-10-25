@@ -13,7 +13,6 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
     const vector<vector<float> >& bleuScores,
     const vector<ScoreComponentCollection>& oracleFeatureValues,
     const vector<float> oracleBleuScores,
-    const vector<size_t> sentenceIds,
     float learning_rate,
     size_t rank,
     size_t epoch) {
@@ -116,7 +115,8 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	} 
 	else {
 		cerr << "Rank " << rank << ", epoch " << epoch << ", no constraint violated for this batch" << endl;
-	  return 0;
+//		return 0;
+		return 1;
 	}
 
 	// apply learning rate
@@ -147,7 +147,7 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	currWeights.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
-	int violatedConstraintsAfter = 0;
+/*	int violatedConstraintsAfter = 0;
 	float newDistanceFromOptimum = 0;
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
@@ -159,8 +159,9 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 		}
 	}
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-	return violatedConstraintsAfter;
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);*/
+//	return violatedConstraintsAfter;
+	return 0;
 }
 
 size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
@@ -168,7 +169,6 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 		const std::vector<std::vector<float> >& bleuScoresHope,
 		const std::vector<std::vector<float> >& bleuScoresFear,
-		const std::vector< size_t> sentenceIds,
 		float learning_rate,
 		size_t rank,
 		size_t epoch) {
@@ -189,7 +189,6 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 
 	// iterate over input sentences (1 (online) or more (batch))
 	for (size_t i = 0; i < featureValuesHope.size(); ++i) {
-		size_t sentenceId = sentenceIds[i];							// keep sentenceId for storing more than 1 oracle..
 		// Pair all hope translations with all fear translations for one input sentence
 		for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
 			for (size_t k = 0; k < featureValuesFear[i].size(); ++k) {
@@ -272,8 +271,9 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 	  }
 	}
 	else {
-		cerr << "Rank " << rank << ", epoch " << epoch << ", check, no constraint violated for this batch" << endl;
-	  return 0;
+		cerr << "Rank " << rank << ", epoch " << epoch << ", no constraint violated for this batch" << endl;
+//	  return 0;
+		return 1;
 	}
 
 	// apply learning rate
@@ -304,7 +304,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 	currWeights.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
-	int violatedConstraintsAfter = 0;
+/*	int violatedConstraintsAfter = 0;
 	float newDistanceFromOptimum = 0;
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
@@ -316,8 +316,9 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 		}
 	}
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-	return violatedConstraintsAfter;
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);*/
+//	return violatedConstraintsAfter;
+	return 0;
 }
 
 }
