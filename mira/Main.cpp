@@ -82,6 +82,7 @@ int main(int argc, char** argv) {
 	float historySmoothing;
 	bool scaleByInputLength;
 	bool scaleByReferenceLength;
+	bool scaleByAvgLength;
 	float scaleByX;
 	float slack;
 	float slack_step;
@@ -155,7 +156,8 @@ int main(int argc, char** argv) {
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
-		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale the BLEU score by (a history of) the candidate length")
+		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale BLEU by (a history of) the reference length")
+		("scale-by-avg-length", po::value<bool>(&scaleByAvgLength)->default_value(false), "Scale BLEU by (a history of) the average of input and reference length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")
@@ -261,12 +263,16 @@ int main(int argc, char** argv) {
 	if (scaleByReferenceLength) {
 		scaleByInputLength = false;
 	}
+	if (scaleByAvgLength) {
+		scaleByInputLength = false;
+		scaleByReferenceLength = false;
+	}
 
 	// initialise Moses
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByReferenceLength, scaleByX, historySmoothing);
+	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength, scaleByX, historySmoothing);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();

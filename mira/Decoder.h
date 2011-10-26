@@ -50,7 +50,7 @@ void initMoses(const std::string& inifile, int debuglevel,  int argc, std::vecto
  **/
 class MosesDecoder {
   public:
-    MosesDecoder(bool scaleByInputLength, bool scaleByTargetLength, float scaleByX, float historySmoothing);
+    MosesDecoder(bool scaleByInputLength, bool scaleByTargetLength, bool scaleByAvgLength, float scaleByX, float historySmoothing);
 	
     //returns the best sentence
     std::vector<const Moses::Word*> getNBest(const std::string& source,
