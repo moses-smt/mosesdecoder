@@ -50,7 +50,7 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
-	                                 m_scale_by_target_length(false),
+	                                 m_scale_by_ref_length(false),
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.7),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
@@ -63,7 +63,7 @@ public:
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(scaleByInputLength),
-	                                 m_scale_by_target_length(scaleByTargetLength),
+	                                 m_scale_by_ref_length(scaleByTargetLength),
 	                                 m_scale_by_x(scaleByX),
 	                                 m_historySmoothing(historySmoothing),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
@@ -132,8 +132,8 @@ private:
     // scale BLEU score by history of input length
     bool m_scale_by_input_length;
 
-    // scale BLEU score by (history of) candidate length
-    bool m_scale_by_target_length;
+    // scale BLEU score by (history of) reference length
+    bool m_scale_by_ref_length;
 
     float m_scale_by_x;
 

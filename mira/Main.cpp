@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 	bool accumulateWeights;
 	float historySmoothing;
 	bool scaleByInputLength;
-	bool scaleByTargetLength;
+	bool scaleByReferenceLength;
 	float scaleByX;
 	float slack;
 	float slack_step;
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
-		("scale-by-target-length", po::value<bool>(&scaleByTargetLength)->default_value(false), "Scale the BLEU score by (a history of) the candidate length")
+		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale the BLEU score by (a history of) the candidate length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")
@@ -258,7 +258,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	if (scaleByTargetLength) {
+	if (scaleByReferenceLength) {
 		scaleByInputLength = false;
 	}
 
@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByTargetLength, scaleByX, historySmoothing);
+	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByReferenceLength, scaleByX, historySmoothing);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
@@ -677,7 +677,7 @@ int main(int argc, char** argv) {
 				}
 				deleteTranslations(oracles);
 				deleteTranslations(oneBests);
-			}
+			} // END TRANSLATE AND UPDATE OF BATCH
 
 			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
 			size_t dumping_base = weightDumpFrequency ==0 ? 0 : shard.size() / weightDumpFrequency;

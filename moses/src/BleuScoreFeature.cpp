@@ -9,7 +9,7 @@ namespace Moses {
 size_t BleuScoreState::bleu_order = 4;
 
 BleuScoreState::BleuScoreState(): m_words(Output,1),
-                                  m_source_length(0),
+//                                  m_source_length(0),
                                   m_target_length(0),
                                   m_scaled_ref_length(0),
                                   m_ngram_counts(bleu_order),
@@ -24,10 +24,10 @@ int BleuScoreState::Compare(const FFState& o) const
 
     const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
 
-    if (m_source_length < other.m_source_length)
-    	return -1;
-    if (m_source_length > other.m_source_length)
-    	return 1;
+//    if (m_source_length < other.m_source_length)
+//    	return -1;
+//    if (m_source_length > other.m_source_length)
+//    	return 1;
 
     if (m_target_length < other.m_target_length)
         return -1;
@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& out, const BleuScoreState& state) {
 }
 
 void BleuScoreState::print(std::ostream& out) const {
-  out << "ref=" << m_scaled_ref_length << ";source=" << m_source_length
+  out << "ref=" << m_scaled_ref_length //<< ";source=" << m_source_length
 	  << ";target=" << m_target_length << ";counts=";
   for (size_t i = 0; i < bleu_order; ++i) {
     out << m_ngram_matches[i] << "/" << m_ngram_counts[i] << ",";
@@ -331,7 +331,6 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
       ctx_start_idx = 0;
     }
 
-    //new_state->m_source_length = cur_hypo.GetWordsBitmap().GetSize();
     WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
     new_state->m_source_length = coverageVector.GetNumWordsCovered();
 
@@ -420,10 +419,10 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // where c(e;) is a vector of reference length, ngram counts and ngram matches
 
     if (m_scale_by_input_length) {
-    	precision *= m_source_length_history + state->m_source_length;
+    	precision *= m_source_length_history + m_cur_source_length;
 		}
-    else if (m_scale_by_target_length) {
-    	precision *= m_target_length_history + state->m_target_length;
+    else if (m_scale_by_ref_length) {
+    	precision *= m_ref_length_history + m_cur_ref_length;
     }
 
     return precision*m_scale_by_x;
