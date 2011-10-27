@@ -504,7 +504,7 @@ int main(int argc, char** argv) {
 					size_t length_diff_hope_fear = abs((int)oracle.size() - (int)fear.size());
 					cerr << "Rank " << rank << ", epoch " << epoch << ", abs-length hope-fear: " << length_diff_hope_fear << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
 
-					if (max_length_deviation != -1 && (length_diff_hope >= max_length_deviation || length_diff_fear >= max_length_deviation || length_diff_hope_fear >= reference_length * max_length_deviation)) {
+					if (max_length_deviation != -1 && (length_diff_hope > max_length_deviation || length_diff_fear > max_length_deviation || length_diff_hope_fear > reference_length * max_length_deviation)) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << fear_length_ratio << ", " << length_diff_hope_fear << ").. " << endl;
 						featureValuesHope[batchPosition].clear();
 						featureValuesFear[batchPosition].clear();
