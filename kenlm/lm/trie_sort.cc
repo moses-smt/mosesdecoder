@@ -146,7 +146,7 @@ template <class Combine> void MergeSortedFiles(const std::string &first_name, co
       ++first; ++second;
     }
   }
-  for (RecordReader &remains = (first ? second : first); remains; ++remains) {
+  for (RecordReader &remains = (first ? first : second); remains; ++remains) {
     WriteOrThrow(out_file.get(), remains.Data(), entry_size);
   }
 }
@@ -191,7 +191,7 @@ void ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const st
     assembled << file_prefix << static_cast<unsigned int>(order) << "_merge_" << (merge_count++);
     files.push_back(assembled.str());
     MergeSortedFiles(files[0], files[1], files.back(), weights_size, order, ThrowCombine());
-    MergeSortedFiles(files[0] + kContextSuffix, files[1] + kContextSuffix, files.back() + kContextSuffix, 0, order, FirstCombine());
+    MergeSortedFiles(files[0] + kContextSuffix, files[1] + kContextSuffix, files.back() + kContextSuffix, 0, order - 1, FirstCombine());
     files.pop_front();
     files.pop_front();
   }

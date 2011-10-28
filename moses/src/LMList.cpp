@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "LMList.h"
 #include "Phrase.h"
-#include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
 
 using namespace std;
@@ -75,7 +74,6 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 void LMList::Add(LanguageModel *lm)
 {
 	m_coll.push_back(lm);
-	m_maxNGramOrder = (lm->GetNGramOrder() > m_maxNGramOrder) ? lm->GetNGramOrder() : m_maxNGramOrder;
 }
 
 }

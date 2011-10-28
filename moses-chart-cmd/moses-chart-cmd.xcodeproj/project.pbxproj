@@ -310,7 +310,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
+					../kenlm,
 					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
@@ -346,7 +346,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
+					../kenlm,
 					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (

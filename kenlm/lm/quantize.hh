@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <inttypes.h>
+#include <stdint.h>
 
 #include <iostream>
 
@@ -22,7 +22,7 @@ class Config;
 class DontQuantize {
   public:
     static const ModelType kModelTypeAdd = static_cast<ModelType>(0);
-    static void UpdateConfigFromBinary(int, const std::vector<uint64_t> &, Config &) {}
+    static void UpdateConfigFromBinary(FD, const std::vector<uint64_t> &, Config &) {}
     static std::size_t Size(uint8_t /*order*/, const Config &/*config*/) { return 0; }
     static uint8_t MiddleBits(const Config &/*config*/) { return 63; }
     static uint8_t LongestBits(const Config &/*config*/) { return 31; }
@@ -113,7 +113,7 @@ class SeparatelyQuantize {
   public:
     static const ModelType kModelTypeAdd = kQuantAdd;
 
-    static void UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config);
+    static void UpdateConfigFromBinary(FD fd, const std::vector<uint64_t> &counts, Config &config);
 
     static std::size_t Size(uint8_t order, const Config &config) {
       size_t longest_table = (static_cast<size_t>(1) << static_cast<size_t>(config.prob_bits)) * sizeof(float);

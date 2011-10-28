@@ -467,7 +467,10 @@ bool Parameter::ReadConfigFile(const string &filePath )
     // trim leading and trailing spaces/tabs
     line = Trim(line);
 
-    if (line[0]=='[') {
+    if (line.size() == 0) {
+      // blank line. do nothing.
+    }
+    else if (line[0]=='[') {
       // new parameter
       for (size_t currPos = 0 ; currPos < line.size() ; currPos++) {
         if (line[currPos] == ']') {
@@ -475,7 +478,7 @@ bool Parameter::ReadConfigFile(const string &filePath )
           break;
         }
       }
-    } else if (line != "") {
+    } else {
       // add value to parameter
       m_setting[paramName].push_back(line);
     }

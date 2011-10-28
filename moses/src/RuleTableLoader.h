@@ -56,9 +56,11 @@ class RuleTableLoader
   // Provide access to PhraseDictionarySCFG's private
   // GetOrCreateTargetPhraseCollection function.
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      PhraseDictionarySCFG &ruleTable, const Phrase &source,
-      const TargetPhrase &target) {
-    return ruleTable.GetOrCreateTargetPhraseCollection(source, target);
+      PhraseDictionarySCFG &ruleTable
+      , const Phrase &source
+      , const TargetPhrase &target
+      , const Word &sourceLHS) {
+    return ruleTable.GetOrCreateTargetPhraseCollection(source, target, sourceLHS);
   }
 };
 

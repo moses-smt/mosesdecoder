@@ -14,6 +14,7 @@
 #include "AlignmentPhrase.h"
 #include "SafeGetline.h"
 #include "tables-core.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -78,9 +79,8 @@ int main(int argc, char* argv[])
   lexTable.load( fileNameLex );
 
   // sorted phrase extraction file
-  ifstream extractFile;
+  Moses::InputFileStream extractFile(fileNameExtract);
 
-  extractFile.open(fileNameExtract);
   if (extractFile.fail()) {
     cerr << "ERROR: could not open extract file " << fileNameExtract << endl;
     exit(1);

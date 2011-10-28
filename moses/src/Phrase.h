@@ -32,6 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+#include "util/string_piece.hh"
+
 namespace Moses
 {
 
@@ -65,30 +67,12 @@ public:
   /** destructor */
   virtual ~Phrase();
 
-  /** parse a string from phrase table or sentence input and create a 2D vector of strings
-  *	\param phraseString string to parse
-  *	\param factorOrder factors in the parse string. This argument is not fully used, only as a check to make ensure
-  *											number of factors is what was promised
-  *	\param factorDelimiter what char to use to separate factor strings from each other. Usually use '|'. Can be multi-char
-  */
-  static std::vector< std::vector<std::string> > Parse(
-    const std::string &phraseString
-    , const std::vector<FactorType> &factorOrder
-    , const std::string& factorDelimiter);
-  /** Fills phrase with words from 2D string vector
-  	* \param factorOrder factor types of each element in 2D string vector
-  	* \param phraseVector 2D string vector
-  */
-  void CreateFromString(const std::vector<FactorType> &factorOrder
-                        , const std::vector< std::vector<std::string> > &phraseVector);
   /** Fills phrase with words from format string, typically from phrase table or sentence input
   	* \param factorOrder factor types of each element in 2D string vector
   	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter, as used by Parse()
+  	*	\param factorDelimiter delimiter between factors.  
   */
-  void CreateFromString(const std::vector<FactorType> &factorOrder
-                        , const std::string &phraseString
-                        , const std::string &factorDelimiter);
+  void CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter);
 
   void CreateFromStringNewFormat(FactorDirection direction
                                  , const std::vector<FactorType> &factorOrder

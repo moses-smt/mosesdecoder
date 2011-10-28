@@ -3,6 +3,7 @@
 #include <cassert>
 #include <vector>
 #include "extract-lex.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
@@ -25,12 +26,9 @@ int main(int argc, char* argv[])
   char* &filePathLexS2T = argv[4];
   char* &filePathLexT2S = argv[5];
 
-  ifstream streamTarget;
-  ifstream streamSource;
-  ifstream streamAlign;
-  streamTarget.open(filePathTarget);
-  streamSource.open(filePathSource);
-  streamAlign.open(filePathAlign);
+  Moses::InputFileStream streamTarget(filePathTarget);
+  Moses::InputFileStream streamSource(filePathSource);
+  Moses::InputFileStream streamAlign(filePathAlign);
 
   ofstream streamLexS2T;
   ofstream streamLexT2S;
@@ -73,6 +71,9 @@ int main(int argc, char* argv[])
 
   extractSingleton.Output(streamLexS2T, streamLexT2S);
 
+  streamTarget.Close();
+  streamSource.Close();
+  streamAlign.Close();
   streamLexS2T.close();
   streamLexT2S.close();
 

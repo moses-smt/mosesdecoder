@@ -2,37 +2,37 @@
 #define UTIL_FILE__
 
 #include <cstdio>
-#include <unistd.h>
+#include "util/portability.hh"
 
 namespace util {
 
 class scoped_fd {
   public:
-    scoped_fd() : fd_(-1) {}
+    scoped_fd() : fd_(kBadFD) {}
 
-    explicit scoped_fd(int fd) : fd_(fd) {}
+    explicit scoped_fd(FD fd) : fd_(fd) {}
 
     ~scoped_fd();
 
-    void reset(int to) {
+    void reset(FD to) {
       scoped_fd other(fd_);
       fd_ = to;
     }
 
-    int get() const { return fd_; }
+    FD get() const { return fd_; }
 
-    int operator*() const { return fd_; }
+    FD operator*() const { return fd_; }
 
-    int release() {
-      int ret = fd_;
-      fd_ = -1;
+    FD release() {
+      FD ret = fd_;
+      fd_ = kBadFD;
       return ret;
     }
 
-    operator bool() { return fd_ != -1; }
+    operator bool() { return fd_ != kBadFD; }
 
   private:
-    int fd_;
+    FD fd_;
 
     scoped_fd(const scoped_fd &);
     scoped_fd &operator=(const scoped_fd &);
@@ -56,16 +56,16 @@ class scoped_FILE {
     std::FILE *file_;
 };
 
-int OpenReadOrThrow(const char *name);
+FD OpenReadOrThrow(const char *name);
 
-int CreateOrThrow(const char *name);
+FD CreateOrThrow(const char *name);
 
 // Return value for SizeFile when it can't size properly.  
 const off_t kBadSize = -1;
-off_t SizeFile(int fd);
+off_t SizeFile(FD fd);
 
-void ReadOrThrow(int fd, void *to, std::size_t size);
-void WriteOrThrow(int fd, const void *data_void, std::size_t size);
+void ReadOrThrow(FD fd, void *to, std::size_t size);
+void WriteOrThrow(FD fd, const void *data_void, std::size_t size);
 
 void RemoveOrThrow(const char *name);
 

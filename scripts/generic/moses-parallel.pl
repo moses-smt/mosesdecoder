@@ -454,8 +454,8 @@ while ($robust && scalar @idx_todo) {
   open (IN,"${jobscript}${idx}.log")
     or die "Can't read id of job ${jobscript}${idx}.log";
   chomp($res=<IN>);
-  split(/\s+/,$res);
-  $id=$_[2];
+  my @arrayStr = split(/\s+/,$res);
+  $id=$arrayStr[2];
   die "Failed to guess job id from $jobscript$idx.log, got: $res"
     if $id !~ /^[0-9]+$/;
   close(IN);

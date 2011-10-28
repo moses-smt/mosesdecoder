@@ -10,10 +10,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 namespace lm {
 namespace ngram {
@@ -46,10 +44,14 @@ std::size_t TotalHeaderSize(unsigned char order) {
   return Align8(sizeof(Sanity) + sizeof(FixedWidthParameters) + sizeof(uint64_t) * order);
 }
 
-void ReadLoop(int fd, void *to_void, std::size_t size) {
+void ReadLoop(FD fd, void *to_void, std::size_t size) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   while (size) {
+#ifdef WIN32
+	ssize_t ret;
+#else
     ssize_t ret = read(fd, to, size);
+#endif
     if (ret == -1) UTIL_THROW(util::ErrnoException, "Failed to read from binary file");
     if (ret == 0) UTIL_THROW(util::ErrnoException, "Binary file too short");
     to += ret;
@@ -74,12 +76,18 @@ void WriteHeader(void *to, const Parameters &params) {
 
 } // namespace
 
-void SeekOrThrow(int fd, off_t off) {
+void SeekOrThrow(FD fd, off_t off) {
+#ifdef WIN32
+#else
   if ((off_t)-1 == lseek(fd, off, SEEK_SET)) UTIL_THROW(util::ErrnoException, "Seek failed");
+#endif
 }
 
-void AdvanceOrThrow(int fd, off_t off) {
+void AdvanceOrThrow(FD fd, off_t off) {
+#ifdef WIN32
+#else
   if ((off_t)-1 == lseek(fd, off, SEEK_CUR)) UTIL_THROW(util::ErrnoException, "Seek failed");
+#endif
 }
 
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing) {
@@ -131,7 +139,7 @@ void FinishFile(const Config &config, ModelType model_type, unsigned int search_
 
 namespace detail {
 
-bool IsBinaryFormat(int fd) {
+bool IsBinaryFormat(FD fd) {
   const off_t size = util::SizeFile(fd);
   if (size == util::kBadSize || (size <= static_cast<off_t>(sizeof(Sanity)))) return false;
   // Try reading the header.  
@@ -159,7 +167,7 @@ bool IsBinaryFormat(int fd) {
   return false;
 }
 
-void ReadHeader(int fd, Parameters &out) {
+void ReadHeader(FD fd, Parameters &out) {
   SeekOrThrow(fd, sizeof(Sanity));
   ReadLoop(fd, &out.fixed, sizeof(out.fixed));
   if (out.fixed.probing_multiplier < 1.0)
@@ -178,7 +186,7 @@ void MatchCheck(ModelType model_type, unsigned int search_version, const Paramet
   UTIL_THROW_IF(search_version != params.fixed.search_version, FormatLoadException, "The binary file has " << kModelNames[params.fixed.model_type] << " version " << params.fixed.search_version << " but this code expects " << kModelNames[params.fixed.model_type] << " version " << search_version);
 }
 
-void SeekPastHeader(int fd, const Parameters &params) {
+void SeekPastHeader(FD fd, const Parameters &params) {
   SeekOrThrow(fd, TotalHeaderSize(params.counts.size()));
 }
 

@@ -8,11 +8,12 @@
 #include "util/file_piece.hh"
 #include "util/mmap.hh"
 #include "util/scoped.hh"
+#include "util/portability.hh"
 
 #include <cstddef>
 #include <vector>
 
-#include <inttypes.h>
+#include <stdint.h>
 
 namespace lm {
 namespace ngram {
@@ -53,9 +54,9 @@ struct Backing {
   util::scoped_memory search;
 };
 
-void SeekOrThrow(int fd, off_t off);
+void SeekOrThrow(FD fd, off_t off);
 // Seek forward
-void AdvanceOrThrow(int fd, off_t off);
+void AdvanceOrThrow(FD fd, off_t off);
 
 // Create just enough of a binary file to write vocabulary to it.  
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing);
@@ -68,13 +69,13 @@ void FinishFile(const Config &config, ModelType model_type, unsigned int search_
 
 namespace detail {
 
-bool IsBinaryFormat(int fd);
+bool IsBinaryFormat(FD fd);
 
-void ReadHeader(int fd, Parameters &params);
+void ReadHeader(FD fd, Parameters &params);
 
 void MatchCheck(ModelType model_type, unsigned int search_version, const Parameters &params);
 
-void SeekPastHeader(int fd, const Parameters &params);
+void SeekPastHeader(FD fd, const Parameters &params);
 
 uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t memory_size, Backing &backing);
 

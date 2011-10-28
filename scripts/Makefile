@@ -76,7 +76,7 @@ clean:
 ## That is for each script (listed below in MAIN_SCRIPTS),
 ## we create a date-stamped version in MAIN_SCRIPTS_TARGET_DIR
 
-MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-model.perl clean-corpus-n.perl
+MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl mert-moses-multi.pl  mert-moses.pl train-model.perl clean-corpus-n.perl
 # Make trick to add directory name to all of them:
 MAIN_TRAINING_SCRIPTS=$(MAIN_TRAINING_SCRIPTS_NAMES:%=training/%)
 

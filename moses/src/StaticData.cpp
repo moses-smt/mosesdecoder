@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "LanguageModelFactory.h"
+#include "LM/Factory.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
 #include "SentenceStats.h"
@@ -925,8 +925,7 @@ bool StaticData::LoadLanguageModels()
     for(size_t i=0; i<lmVector.size(); i++) {
       LanguageModel* lm = NULL;
       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = new LanguageModel(
-          (languageModelsLoaded[lmVector[i]]));
+        lm = languageModelsLoaded[lmVector[i]]->Duplicate(); 
       } else {
         vector<string>	token		= Tokenize(lmVector[i]);
         if (token.size() != 4 && token.size() != 5 ) {
@@ -1138,12 +1137,13 @@ bool StaticData::LoadPhraseTables()
         m_numInputScores=0;
       }
       //this number changes depending on what phrase table we're talking about: only 0 has the weights on it
-      size_t tableInputScores = (currDict == 0 ? m_numInputScores : 0);
+      size_t tableInputScores = (currDict == 0 && implementation == Binary) ? m_numInputScores : 0;
 
       for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
         weight.push_back(weightAll[weightAllOffset + currScore]);
 
-
+      cerr << weight.size() << endl;
+      
       if(weight.size() - tableInputScores != numScoreComponent) {
         stringstream strme;
         strme << "Your phrase table has " << numScoreComponent

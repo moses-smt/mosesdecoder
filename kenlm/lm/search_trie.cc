@@ -24,10 +24,8 @@
 #include <limits>
 #include <numeric>
 #include <vector>
+#include "util/portability.hh"
 
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 namespace lm {
 namespace ngram {
@@ -151,6 +149,11 @@ class BackoffMessages {
   private:
     void FinishedAdding() {
       Resize(current_ - (uint8_t*)backing_.get());
+      // Sort requests in same order as files.  
+      std::sort(
+          util::SizedIterator(util::SizedProxy(backing_.get(), entry_size_)),
+          util::SizedIterator(util::SizedProxy(current_, entry_size_)),
+          util::SizedCompare<EntryCompare>(EntryCompare((entry_size_ - sizeof(ProbPointer)) / sizeof(WordIndex))));
       current_ = (uint8_t*)backing_.get();
     }
 
@@ -488,7 +491,7 @@ template <class Quant, class Bhiksha> void BuildTrie(const std::string &file_pre
   util::scoped_FILE unigram_file;
   {
     std::string name(file_prefix + "unigrams");
-    unigram_file.reset(OpenOrThrow(name.c_str(), "r"));
+    unigram_file.reset(OpenOrThrow(name.c_str(), "r+"));
     util::RemoveOrThrow(name.c_str());
   }
   sri.ObtainBackoffs(counts.size(), unigram_file.get(), inputs);
@@ -525,7 +528,7 @@ template <class Quant, class Bhiksha> void BuildTrie(const std::string &file_pre
     const RecordReader &context = contexts[order - 2];
     if (context) {
       FormatLoadException e;
-      e << "An " << static_cast<unsigned int>(order) << "-gram has context";
+      e << "A " << static_cast<unsigned int>(order) << "-gram has context";
       const WordIndex *ctx = reinterpret_cast<const WordIndex*>(context.Data());
       for (const WordIndex *i = ctx; i != ctx + order - 1; ++i) {
         e << ' ' << *i;

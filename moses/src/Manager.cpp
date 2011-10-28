@@ -676,18 +676,25 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
   else
     outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
 
-  outputSearchGraphStream << " back=" << prevHypo->GetId();
+    outputSearchGraphStream << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
+                            << " back=" << prevHypo->GetId()
+                            << " score=" << searchNode.hypo->GetScore()
+                            << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
 
+    if (searchNode.recombinationHypo != NULL)
+      outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
+
+    outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+                            << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+                            << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
+
+  // Modified so that -osgx is a superset of -osg (GST Oct 2011)
   ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
   scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
-	outputSearchGraphStream << " [ " << StaticData::Instance().GetAllWeights();
+	outputSearchGraphStream << " scores = [ " << StaticData::Instance().GetAllWeights();
   outputSearchGraphStream << " ]";
-  // added this so that we will have the span in the input covered
-  // (DNM, 19 Nov 2010)
-  outputSearchGraphStream << " covered=" <<
-                          searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
-                          << "-" <<
-                          searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
+                            
+
   outputSearchGraphStream << " out=" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
 		  searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 //  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;

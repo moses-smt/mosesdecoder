@@ -44,7 +44,7 @@ public:
     } else {
       throw runtime_error("Unknown reference length strategy: " + reflen);
     }
-    cerr << "Using reference length strategy: " << reflen << endl;
+//    cerr << "Using reference length strategy: " << reflen << endl;
   }
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
@@ -56,7 +56,7 @@ public:
   };
 
 
-protected:
+//protected:
   float calculateScore(const vector<int>& comps);
 
 private:

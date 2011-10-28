@@ -87,6 +87,7 @@ training/lexical-reordering/score
 training/memscore/memscore
 training/zmert-moses.pl
 training/mert-moses.pl
+training/mert-moses-multi.pl
 training/phrase-extract/extract
 training/phrase-extract/extract-rules
 training/phrase-extract/score

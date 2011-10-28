@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
-#include "LanguageModelSingleFactor.h"
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
 #include "ObjectPool.h"
@@ -214,14 +213,6 @@ public:
     }
     out << (Phrase) GetCurrTargetPhrase();
   }
-
-  inline bool PrintAlignmentInfo() const {
-    return GetCurrTargetPhrase().PrintAlignmentInfo();
-  }
-
-
-
-
 
   TO_STRING();
 

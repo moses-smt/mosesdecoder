@@ -19,9 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifdef HAVE_BOOST
 #include <boost/version.hpp>
-#endif
 #include <ostream>
 #include <string>
 #include "FactorCollection.h"
@@ -33,7 +31,7 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-const Factor *FactorCollection::AddFactor(const string &factorString)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
 // Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS

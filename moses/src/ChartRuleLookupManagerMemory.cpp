@@ -77,7 +77,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // get list of all rules that apply to spans at same starting position
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
-
+  
   const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
 
   // loop through the rules

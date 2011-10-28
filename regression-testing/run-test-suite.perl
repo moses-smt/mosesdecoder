@@ -23,15 +23,11 @@ my @tests = qw (
   chart.target-syntax.ondisk
   chart.hierarchical
   chart.hierarchical-withsrilm
-  #chart.hierarchical-withkenlm
   chart.hierarchical.ondisk
   phrase.basic-surface-only
   phrase.basic-surface-only-withirstlm
   phrase.basic-surface-only-withirstlm-binlm
-  #phrase.basic-surface-only-withkenlm
-  #phrase.basic-surface-only-withkenlm.bin
   phrase.basic-lm-oov
-  #phrase.basic-lm-oov-withkenlm
   phrase.ptable-filtering
   phrase.multi-factor
   phrase.multi-factor-drop
@@ -43,6 +39,7 @@ my @tests = qw (
   phrase.lattice-surface
   phrase.lattice-distortion
   phrase.lexicalized-reordering
+  phrase.lexicalized-reordering-bin
   phrase.lexicalized-reordering-cn
   phrase.consensus-decoding-surface
   phrase.continue-partial-translation
@@ -50,6 +47,10 @@ my @tests = qw (
   phrase.show-weights
   phrase.xml-markup
 );
+  #phrase.basic-lm-oov-withkenlm
+  #phrase.basic-surface-only-withkenlm
+  #phrase.basic-surface-only-withkenlm.bin
+  #chart.hierarchical-withkenlm
 
 ############################################################
 use MosesRegressionTesting;
@@ -148,6 +149,7 @@ my $pass_percentage = int(100 * ($total-$fail) / $total);
 print "\n$pass_percentage% of the tests passed.\n";
 print "$fail_percentage% of the tests failed.\n";
 if ($fail_percentage>0) { print "\nPLEASE INVESTIGATE THESE FAILED TESTS: @failed\n"; }
+exit 2 if $fail > 0;
 
 sub do_test {
   my ($test) = @_;

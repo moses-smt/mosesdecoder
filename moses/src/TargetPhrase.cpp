@@ -21,10 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <cassert>
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
+#include "util/tokenize_piece.hh"
+
 #include "TargetPhrase.h"
 #include "PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
-#include "LanguageModel.h"
+#include "LM/Base.h"
 #include "StaticData.h"
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
@@ -36,12 +39,6 @@ using namespace std;
 
 namespace Moses
 {
-bool TargetPhrase::wordalignflag=StaticData::Instance().UseAlignmentInfo();
-bool TargetPhrase::printalign=StaticData::Instance().PrintAlignmentInfo();
-
-//bool TargetPhrase::wordalignflag;
-//bool TargetPhrase::printalign;
-
 TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
   :Phrase(direction, 0),m_transScore(0.0),  m_fullScore(0.0), m_sourcePhrase(direction,0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -50,8 +47,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   CreateFromString(staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
-  wordalignflag=StaticData::Instance().UseAlignmentInfo();
-  printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 
@@ -62,8 +57,6 @@ TargetPhrase::TargetPhrase(FactorDirection direction)
   ,m_sourcePhrase(direction, 0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
-  wordalignflag=StaticData::Instance().UseAlignmentInfo();
-  printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 TargetPhrase::TargetPhrase(const Phrase &phrase)
@@ -73,8 +66,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_sourcePhrase(phrase.GetDirection(),0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
-  wordalignflag=StaticData::Instance().UseAlignmentInfo();
-  printalign=StaticData::Instance().PrintAlignmentInfo();
 }
 
 TargetPhrase::~TargetPhrase()
@@ -299,19 +290,25 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
   return clone;
 }
 
-void TargetPhrase::SetAlignmentInfo(const std::string &alignString)
+namespace {
+void MosesShouldUseExceptions(bool value) {
+  if (!value) {
+    std::cerr << "Could not parse alignment info" << std::endl;
+    abort();
+  }
+}
+} // namespace
+
+void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
   set<pair<size_t,size_t> > alignmentInfo;
-  vector<string> alignVec;
-  Tokenize(alignVec, alignString);
-
-  vector<string>::const_iterator iter;
-  for (iter = alignVec.begin(); iter != alignVec.end(); ++iter) {
-    const string &align1 = *iter;
-    vector<size_t> alignPos = Tokenize<size_t>(align1, "-");
-    assert(alignPos.size() == 2);
-    size_t &sourcePos	= alignPos[0]
-                        ,&targetPos	= alignPos[1];
+  for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
+    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
+    MosesShouldUseExceptions(dash);
+    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(dash);
+    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(!dash);
 
     alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
   }

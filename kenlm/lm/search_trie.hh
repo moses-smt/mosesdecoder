@@ -8,6 +8,7 @@
 #include "lm/weights.hh"
 
 #include "util/file_piece.hh"
+#include "util/portability.hh"
 
 #include <vector>
 
@@ -36,9 +37,9 @@ template <class Quant, class Bhiksha> class TrieSearch {
 
     static const ModelType kModelType = static_cast<ModelType>(TRIE_SORTED + Quant::kModelTypeAdd + Bhiksha::kModelTypeAdd);
 
-    static const unsigned int kVersion = 0;
+    static const unsigned int kVersion = 1;
 
-    static void UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config) {
+    static void UpdateConfigFromBinary(FD fd, const std::vector<uint64_t> &counts, Config &config) {
       Quant::UpdateConfigFromBinary(fd, counts, config);
       AdvanceOrThrow(fd, Quant::Size(counts.size(), config) + Unigram::Size(counts[0]));
       Bhiksha::UpdateConfigFromBinary(fd, config);

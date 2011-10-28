@@ -663,6 +663,8 @@ while(1) {
   my $score_file = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
+  $cmd = create_extractor_script($cmd, $___WORKING_DIR);
+
   &submit_or_exec($cmd,"extract.out","extract.err");
 
   # Create the initial weights file for mert: init.opt
@@ -883,7 +885,7 @@ if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu);
+create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -963,8 +965,10 @@ sub run_decoder {
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
     my $decoder_config = join(" ", values %model_weights);
+    $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
+
 
     # run the decoder
     my $decoder_cmd;
@@ -1164,7 +1168,7 @@ sub create_config {
     }
 
     if (defined($sparse_weights_file)) {
-      push @{$P{"weights-file"}}, $___WORKING_DIR."/".$sparse_weights_file;
+      push @{$P{"weight-file"}}, $___WORKING_DIR."/".$sparse_weights_file;
     }
 
     # create new moses.ini decoder config file by cloning and overriding the original one
@@ -1280,3 +1284,23 @@ sub submit_or_exec {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
   }
 }
+
+sub create_extractor_script()
+{
+  my ($cmd, $outdir) = @_;
+
+  my $script_path = $outdir."/extractor.sh";
+
+  open(OUT,"> $script_path")
+    or die "Can't write $script_path";
+  print OUT "#!/bin/bash\n";
+  print OUT "cd $outdir\n";
+  print OUT $cmd."\n";
+  close(OUT);
+
+  `chmod +x $script_path`;
+
+  return $script_path;  
+}
+
+

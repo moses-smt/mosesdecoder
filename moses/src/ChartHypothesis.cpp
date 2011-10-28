@@ -46,38 +46,21 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
                                  ChartManager &manager)
   :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
   ,m_transOpt(transOpt)
-  ,m_contextPrefix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
-  ,m_contextSuffix(Output, manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder())
   ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   ,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)
-	,m_winningHypo(NULL)
+  ,m_winningHypo(NULL)
   ,m_manager(manager)
+  ,m_id(manager.GetNextHypoId())
 {
   // underlying hypotheses for sub-spans
-  m_numTargetTerminals = GetCurrTargetPhrase().GetNumTerminals();
   const std::vector<HypothesisDimension> &childEntries = item.GetHypothesisDimensions();
-
-  // ... are stored
-  assert(m_prevHypos.empty());
   m_prevHypos.reserve(childEntries.size());
-
   std::vector<HypothesisDimension>::const_iterator iter;
   for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
   {
-    const HypothesisDimension &dimension = *iter;
-    const ChartHypothesis *prevHypo = dimension.GetHypothesis();
-
-    // keep count of words (= length of generated string)
-    m_numTargetTerminals += prevHypo->GetNumTargetTerminals();
-
-    m_prevHypos.push_back(prevHypo);
+    m_prevHypos.push_back(iter->GetHypothesis());
   }
-
-  // compute the relevant context for language model scoring (prefix and suffix strings)
-  size_t maxNGram = manager.GetTranslationSystem()->GetLanguageModels().GetMaxNGramOrder();
-  CalcPrefix(m_contextPrefix, maxNGram - 1);
-  CalcSuffix(m_contextSuffix, maxNGram - 1);
 }
 
 ChartHypothesis::~ChartHypothesis()
@@ -128,88 +111,6 @@ Phrase ChartHypothesis::GetOutputPhrase() const
   Phrase outPhrase(Output, ARRAY_SIZE_INCR);
   CreateOutputPhrase(outPhrase);
   return outPhrase;
-}
-
-/** Construct the prefix string of up to specified size 
- * \param ret prefix string
- * \param size maximum size (typically max lm context window)
- */
-size_t ChartHypothesis::CalcPrefix(Phrase &ret, size_t size) const
-{
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-
-  // loop over the rule that is being applied
-  for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
-    const Word &word = GetCurrTargetPhrase().GetWord(pos);
-
-    // for non-terminals, retrieve it from underlying hypothesis
-    if (word.IsNonTerminal()) {
-      size_t nonTermInd = nonTermIndexMap[pos];
-      const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
-      size = prevHypo->CalcPrefix(ret, size);
-    } 
-    // for words, add word
-    else {
-      ret.AddWord(GetCurrTargetPhrase().GetWord(pos));
-      size--;
-    }
-
-    // finish when maximum length reached
-    if (size==0)
-      break;
-  }
-
-  return size;
-}
-
-/** Construct the suffix phrase of up to specified size 
- * will always be called after the construction of prefix phrase
- * \param ret suffix phrase
- * \param size maximum size of suffix
- */
-size_t ChartHypothesis::CalcSuffix(Phrase &ret, size_t size) const
-{
-  assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
-
-  // special handling for small hypotheses
-  // does the prefix match the entire hypothesis string? -> just copy prefix
-  if (m_contextPrefix.GetSize() == m_numTargetTerminals) {
-    size_t maxCount = std::min(m_contextPrefix.GetSize(), size);
-    size_t pos= m_contextPrefix.GetSize() - 1;
-
-    for (size_t ind = 0; ind < maxCount; ++ind) {
-      const Word &word = m_contextPrefix.GetWord(pos);
-      ret.PrependWord(word);
-      --pos;
-    }
-
-    size -= maxCount;
-    return size;
-  } 
-  // construct suffix analogous to prefix
-  else {
-    const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-      GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-    for (int pos = (int) GetCurrTargetPhrase().GetSize() - 1; pos >= 0 ; --pos) {
-      const Word &word = GetCurrTargetPhrase().GetWord(pos);
-
-      if (word.IsNonTerminal()) {
-        size_t nonTermInd = nonTermIndexMap[pos];
-        const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
-        size = prevHypo->CalcSuffix(ret, size);
-      } 
-      else {
-        ret.PrependWord(GetCurrTargetPhrase().GetWord(pos));
-        size--;
-      }
-
-      if (size==0)
-        break;
-    }
-
-    return size;
-  }
 }
 
 /** check, if two hypothesis can be recombined.
@@ -348,10 +249,6 @@ void ChartHypothesis::CleanupArcList()
 void ChartHypothesis::SetWinningHypo(const ChartHypothesis *hypo)
 {
   m_winningHypo = hypo;
-
-  // never gonna use to recombine. clear prefix & suffix phrases to save mem
-  m_contextPrefix.Clear();
-  m_contextSuffix.Clear();
 }
 
 TO_STRING_BODY(ChartHypothesis)

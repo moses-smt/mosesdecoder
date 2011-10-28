@@ -10,13 +10,14 @@
  *  Currently only used for next pointers.  
  */
 
-#include <inttypes.h>
+#include <stdint.h>
 #include <assert.h>
 
 #include "lm/model_type.hh"
 #include "lm/trie.hh"
 #include "util/bit_packing.hh"
 #include "util/sorted_uniform.hh"
+#include "util/portability.hh"
 
 namespace lm {
 namespace ngram {
@@ -28,7 +29,7 @@ class DontBhiksha {
   public:
     static const ModelType kModelTypeAdd = static_cast<ModelType>(0);
 
-    static void UpdateConfigFromBinary(int /*fd*/, Config &/*config*/) {}
+    static void UpdateConfigFromBinary(FD /*fd*/, Config &/*config*/) {}
 
     static std::size_t Size(uint64_t /*max_offset*/, uint64_t /*max_next*/, const Config &/*config*/) { return 0; }
 
@@ -62,7 +63,7 @@ class ArrayBhiksha {
   public:
     static const ModelType kModelTypeAdd = kArrayAdd;
 
-    static void UpdateConfigFromBinary(int fd, Config &config);
+    static void UpdateConfigFromBinary(FD fd, Config &config);
 
     static std::size_t Size(uint64_t max_offset, uint64_t max_next, const Config &config);
 

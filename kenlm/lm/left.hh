@@ -117,7 +117,7 @@ inline size_t hash_value(const ChartState &state) {
 
 template <class M> class RuleScore {
   public:
-    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_done_(false), left_write_(out.left.pointers), prob_(0.0) {
+    explicit RuleScore(const M &model, ChartState &out) : model_(model), out_(out), left_done_(false), prob_(0.0) {
       out.left.length = 0;
       out.right.length = 0;
     }
@@ -130,15 +130,22 @@ template <class M> class RuleScore {
 
     void Terminal(WordIndex word) {
       State copy(out_.right);
-      ProcessRet(model_.FullScore(copy, word, out_.right));
-      if (out_.right.length != copy.length + 1) left_done_ = true;
+      FullScoreReturn ret(model_.FullScore(copy, word, out_.right));
+      prob_ += ret.prob;
+      if (left_done_) return;
+      if (ret.independent_left) {
+        left_done_ = true;
+        return;
+      }
+      out_.left.pointers[out_.left.length++] = ret.extend_left;
+      if (out_.right.length != copy.length + 1)
+        left_done_ = true;
     }
 
     // Faster version of NonTerminal for the case where the rule begins with a non-terminal.  
     void BeginNonTerminal(const ChartState &in, float prob) {
       prob_ = prob;
       out_ = in;
-      left_write_ = out_.left.pointers + out_.left.length;
       left_done_ = in.full;
     }
 
@@ -157,11 +164,10 @@ template <class M> class RuleScore {
       if (!out_.right.length) {
         out_.right = in.right;
         if (left_done_) return;
-        if (left_write_ != out_.left.pointers) {
+        if (out_.left.length) {
           left_done_ = true;
         } else {
           out_.left = in.left;
-          left_write_ = out_.left.pointers + in.left.length;
           left_done_ = in.full;
         }
         return;
@@ -169,22 +175,14 @@ template <class M> class RuleScore {
 
       float backoffs[kMaxOrder - 1], backoffs2[kMaxOrder - 1];
       float *back = backoffs, *back2 = backoffs2;
-      unsigned char next_use;
-      FullScoreReturn ret;
-      ProcessRet(ret = model_.ExtendLeft(out_.right.words, out_.right.words + out_.right.length, out_.right.backoff, in.left.pointers[0], 1, back, next_use));
-      if (!next_use) {
-        left_done_ = true;
-        out_.right = in.right;
-        return;
-      }
-      unsigned char extend_length = 2;
-      for (const uint64_t *i = in.left.pointers + 1; i < in.left.pointers + in.left.length; ++i, ++extend_length) {
-        ProcessRet(ret = model_.ExtendLeft(out_.right.words, out_.right.words + next_use, back, *i, extend_length, back2, next_use));
-        if (!next_use) {
-          left_done_ = true;
-          out_.right = in.right;
-          return;
-        }
+      unsigned char next_use = out_.right.length;
+
+      // First word
+      if (ExtendLeft(in, next_use, 1, out_.right.backoff, back)) return;
+
+      // Words after the first, so extending a bigram to begin with
+      for (unsigned char extend_length = 2; extend_length <= in.left.length; ++extend_length) {
+        if (ExtendLeft(in, next_use, extend_length, back, back2)) return;
         std::swap(back, back2);
       }
 
@@ -214,12 +212,31 @@ template <class M> class RuleScore {
     }
 
     float Finish() {
-      out_.left.length = left_write_ - out_.left.pointers;
-      out_.full = left_done_;
+      // A N-1-gram might extend left and right but we should still set full to true because it's an N-1-gram.  
+      out_.full = left_done_ || (out_.left.length == model_.Order() - 1);
       return prob_;
     }
 
   private:
+    bool ExtendLeft(const ChartState &in, unsigned char &next_use, unsigned char extend_length, const float *back_in, float *back_out) {
+      ProcessRet(model_.ExtendLeft(
+            out_.right.words, out_.right.words + next_use, // Words to extend into
+            back_in, // Backoffs to use
+            in.left.pointers[extend_length - 1], extend_length, // Words to be extended
+            back_out, // Backoffs for the next score
+            next_use)); // Length of n-gram to use in next scoring.  
+      if (next_use != out_.right.length) {
+        left_done_ = true;
+        if (!next_use) {
+          out_.right = in.right;
+          // Early exit.  
+          return true;
+        }
+      }
+      // Continue scoring.  
+      return false;
+    }
+
     void ProcessRet(const FullScoreReturn &ret) {
       prob_ += ret.prob;
       if (left_done_) return;
@@ -227,7 +244,7 @@ template <class M> class RuleScore {
         left_done_ = true;
         return;
       }
-      *(left_write_++) = ret.extend_left;
+      out_.left.pointers[out_.left.length++] = ret.extend_left;
     }
 
     const M &model_;
@@ -235,8 +252,6 @@ template <class M> class RuleScore {
     ChartState &out_;
 
     bool left_done_;
-
-    uint64_t *left_write_;
 
     float prob_;
 };

@@ -1,10 +1,7 @@
 #ifndef LM_BLANK__
 #define LM_BLANK__
 
-#include <limits>
-
-#include <inttypes.h>
-#include <math.h>
+#include <stdint.h>
 
 namespace lm {
 namespace ngram {

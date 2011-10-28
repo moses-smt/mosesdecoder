@@ -40,7 +40,7 @@ class ChartTrellisPathList;
 
 class ChartManager
 {
-protected:
+private:
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
@@ -48,6 +48,7 @@ protected:
   const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
   std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
+  unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
 
 public:
   ChartManager(InputType const& source, const TranslationSystem* system);
@@ -57,7 +58,7 @@ public:
   void CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct=0) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-	void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<const ChartHypothesis *,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
+	void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
 
   const InputType& GetSource() const {
     return m_source;
@@ -77,6 +78,7 @@ public:
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
   }
 
+  unsigned GetNextHypoId() { return m_hypothesisId++; }
 };
 
 }

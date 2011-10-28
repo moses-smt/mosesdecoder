@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "FactorCollection.h"
 #include "Parameter.h"
-#include "LanguageModel.h"
+#include "LM/Base.h"
 #include "LMList.h"
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
