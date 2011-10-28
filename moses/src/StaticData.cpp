@@ -1015,12 +1015,13 @@ bool StaticData::LoadPhraseTables()
         m_numInputScores=0;
       }
       //this number changes depending on what phrase table we're talking about: only 0 has the weights on it
-      size_t tableInputScores = (currDict == 0 ? m_numInputScores : 0);
+      size_t tableInputScores = (currDict == 0 && implementation == Binary) ? m_numInputScores : 0;
 
       for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
         weight.push_back(weightAll[weightAllOffset + currScore]);
 
-
+      cerr << weight.size() << endl;
+      
       if(weight.size() - tableInputScores != numScoreComponent) {
         stringstream strme;
         strme << "Your phrase table has " << numScoreComponent
