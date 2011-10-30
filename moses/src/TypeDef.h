@@ -181,6 +181,8 @@ enum InputTypeEnum {
   ,ConfusionNetworkInput	= 1
   ,WordLatticeInput				= 2
   ,TreeInputType					= 3
+  ,WordLatticeInput2			= 4
+  
 };
 
 enum XmlInputType {
