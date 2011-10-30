@@ -13,6 +13,7 @@ namespace Moses {
 
 class WeightedDirectedGraphNode
 {
+
   
 };
 
