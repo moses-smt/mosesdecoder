@@ -198,6 +198,10 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
       *state0 = m_ngram->NullContextState();
     } else {
       lm::WordIndex index = TranslateID(word);
+      if (index == m_ngram->GetVocabulary().BeginSentence()) {
+        std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+        abort();
+      }
       float score = TransformLMScore(m_ngram->Score(*state0, index, *state1));
       std::swap(state0, state1);
       if (position >= ngramBoundary) ngramScore += score;
