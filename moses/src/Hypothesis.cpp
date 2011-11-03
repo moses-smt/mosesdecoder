@@ -92,7 +92,6 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_wordDeleted(false)
   ,	m_totalScore(0.0f)
   ,	m_futureScore(0.0f)
-  , m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(&transOpt)
@@ -254,7 +253,8 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
 
 void Hypothesis::ResetScore()
 {
-  m_scoreBreakdown.ZeroAll();
+  m_currScoreBreakdown.ZeroAll();
+  m_scoreBreakdown.reset(0);
   m_futureScore = m_totalScore = 0.0f;
 }
 
@@ -267,7 +267,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // option: add these here
   // language model scores for n-grams completely contained within a target
   // phrase are also included here
-  m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+  m_currScoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
 
   const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
@@ -277,7 +277,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   const vector<const StatelessFeatureFunction*>& sfs =
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
-    sfs[i]->Evaluate(m_targetPhrase, &m_scoreBreakdown);
+    sfs[i]->Evaluate(m_targetPhrase, &m_currScoreBreakdown);
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
@@ -286,7 +286,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
     m_ffStates[i] = ffs[i]->Evaluate(
                       *this,
                       m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                      &m_scoreBreakdown);
+                      &m_currScoreBreakdown);
   }
 
   IFVERBOSE(2) {
@@ -297,7 +297,10 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
   // TOTAL
-  m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  m_totalScore = m_currScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  if (m_prevHypo) {
+    m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
+  }
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
@@ -328,7 +331,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore )
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
   // TOTAL
-  float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
+  float total = m_totalScore + estimatedLMScore;
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().AddTimeEstimateScore( clock()-t );
@@ -350,11 +353,14 @@ void Hypothesis::CalcRemainingScore()
   }
 
   // WORD PENALTY
-  m_scoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
+  m_currScoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
                               , - (float)m_currTargetWordsRange.GetNumWordsCovered());
 
   // TOTAL
-  m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  m_totalScore = m_currScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  if (m_prevHypo) {
+    m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
+  }
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
@@ -399,7 +405,7 @@ void Hypothesis::PrintHypothesis() const
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
   //	TRACE_ERR( "\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
   TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
-  TRACE_ERR(  "\tunweighted feature scores: " << m_scoreBreakdown << endl);
+  TRACE_ERR(  "\tunweighted feature scores: " << m_currScoreBreakdown << endl);
   //PrintLMScores();
 }
 
