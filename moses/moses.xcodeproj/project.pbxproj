@@ -11,6 +11,8 @@
 		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
 		1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */; };
 		1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */; };
+		1E078C21146440A900A707F4 /* RuleTableLoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E078C20146440A900A707F4 /* RuleTableLoaderHiero.h */; };
+		1E078C23146440F700A707F4 /* RuleTableLoaderHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E078C22146440F700A707F4 /* RuleTableLoaderHiero.cpp */; };
 		1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D087144DAA6C00B60B4F /* Base.cpp */; };
 		1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D088144DAA6C00B60B4F /* Base.h */; };
 		1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08B144DAA6C00B60B4F /* Factory.cpp */; };
@@ -279,6 +281,8 @@
 		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
 		1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryHiero.h; path = src/PhraseDictionaryHiero.h; sourceTree = "<group>"; };
 		1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryHiero.cpp; path = src/PhraseDictionaryHiero.cpp; sourceTree = "<group>"; };
+		1E078C20146440A900A707F4 /* RuleTableLoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderHiero.h; path = src/RuleTableLoaderHiero.h; sourceTree = "<group>"; };
+		1E078C22146440F700A707F4 /* RuleTableLoaderHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderHiero.cpp; path = src/RuleTableLoaderHiero.cpp; sourceTree = "<group>"; };
 		1E16D087144DAA6C00B60B4F /* Base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base.cpp; path = src/LM/Base.cpp; sourceTree = "<group>"; };
 		1E16D088144DAA6C00B60B4F /* Base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Base.h; path = src/LM/Base.h; sourceTree = "<group>"; };
 		1E16D08B144DAA6C00B60B4F /* Factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Factory.cpp; path = src/LM/Factory.cpp; sourceTree = "<group>"; };
@@ -736,6 +740,8 @@
 				1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */,
 				1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */,
 				1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */,
+				1E078C20146440A900A707F4 /* RuleTableLoaderHiero.h */,
+				1E078C22146440F700A707F4 /* RuleTableLoaderHiero.cpp */,
 				1ED0FDEB124BB9380029177F /* ScoreComponentCollection.cpp */,
 				1ED0FDEC124BB9380029177F /* ScoreComponentCollection.h */,
 				1ED0FDED124BB9380029177F /* ScoreIndexManager.cpp */,
@@ -1021,6 +1027,7 @@
 				1E3CBD3B145D755D00AF72FC /* WordLattice2.h in Headers */,
 				1E3CBD40145D75F300AF72FC /* WeightedDirectedGraph.h in Headers */,
 				1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */,
+				1E078C21146440A900A707F4 /* RuleTableLoaderHiero.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1199,6 +1206,7 @@
 				1E3CBD3A145D755D00AF72FC /* WordLattice2.cpp in Sources */,
 				1E3CBD3F145D75F300AF72FC /* WeightedDirectedGraph.cpp in Sources */,
 				1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */,
+				1E078C23146440F700A707F4 /* RuleTableLoaderHiero.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

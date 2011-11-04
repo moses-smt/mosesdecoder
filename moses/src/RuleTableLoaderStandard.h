@@ -23,9 +23,25 @@
 
 namespace Moses
 {
+  enum FormatType
+  {
+    MosesFormat
+    ,HieroFormat
+  };
 
 class RuleTableLoaderStandard : public RuleTableLoader
 {
+protected:
+
+  bool Load(FormatType format,
+            const std::vector<FactorType> &input,
+            const std::vector<FactorType> &output,
+            std::istream &inStream,
+            const std::vector<float> &weight,
+            size_t tableLimit,
+            const LMList &languageModels,
+            const WordPenaltyProducer* wpProducer,
+            PhraseDictionarySCFG &);
  public:
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
