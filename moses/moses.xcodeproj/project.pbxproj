@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */; };
 		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
+		1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */; };
+		1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */; };
 		1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D087144DAA6C00B60B4F /* Base.cpp */; };
 		1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D088144DAA6C00B60B4F /* Base.h */; };
 		1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08B144DAA6C00B60B4F /* Factory.cpp */; };
@@ -275,6 +277,8 @@
 /* Begin PBXFileReference section */
 		1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
 		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
+		1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryHiero.h; path = src/PhraseDictionaryHiero.h; sourceTree = "<group>"; };
+		1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryHiero.cpp; path = src/PhraseDictionaryHiero.cpp; sourceTree = "<group>"; };
 		1E16D087144DAA6C00B60B4F /* Base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base.cpp; path = src/LM/Base.cpp; sourceTree = "<group>"; };
 		1E16D088144DAA6C00B60B4F /* Base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Base.h; path = src/LM/Base.h; sourceTree = "<group>"; };
 		1E16D08B144DAA6C00B60B4F /* Factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Factory.cpp; path = src/LM/Factory.cpp; sourceTree = "<group>"; };
@@ -709,6 +713,8 @@
 				1ED0FDE0124BB9380029177F /* PhraseDictionaryTree.h */,
 				1ED0FDE1124BB9380029177F /* PhraseDictionaryTreeAdaptor.cpp */,
 				1ED0FDE2124BB9380029177F /* PhraseDictionaryTreeAdaptor.h */,
+				1E078C1E14643C2000A707F4 /* PhraseDictionaryHiero.cpp */,
+				1E078C1B14643AED00A707F4 /* PhraseDictionaryHiero.h */,
 				1ED0FDE3124BB9380029177F /* PrefixTree.h */,
 				1ED0FDE4124BB9380029177F /* PrefixTreeMap.cpp */,
 				1ED0FDE5124BB9380029177F /* PrefixTreeMap.h */,
@@ -1014,6 +1020,7 @@
 				1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */,
 				1E3CBD3B145D755D00AF72FC /* WordLattice2.h in Headers */,
 				1E3CBD40145D75F300AF72FC /* WeightedDirectedGraph.h in Headers */,
+				1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1191,6 +1198,7 @@
 				1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */,
 				1E3CBD3A145D755D00AF72FC /* WordLattice2.cpp in Sources */,
 				1E3CBD3F145D75F300AF72FC /* WeightedDirectedGraph.cpp in Sources */,
+				1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

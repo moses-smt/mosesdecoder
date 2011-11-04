@@ -231,6 +231,7 @@ libmoses_la_SOURCES = \
         Phrase.cpp \
         PhraseDictionary.cpp \
         PhraseDictionaryDynSuffixArray.cpp \
+        PhraseDictionaryHiero.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
         PhraseDictionaryNode.cpp \
