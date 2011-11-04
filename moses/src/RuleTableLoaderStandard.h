@@ -23,11 +23,12 @@
 
 namespace Moses
 {
-  enum FormatType
-  {
-    MosesFormat
-    ,HieroFormat
-  };
+
+enum FormatType
+{
+  MosesFormat
+  ,HieroFormat
+};
 
 class RuleTableLoaderStandard : public RuleTableLoader
 {
