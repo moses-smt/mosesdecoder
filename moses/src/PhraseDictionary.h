@@ -51,6 +51,7 @@ class TranslationSystem;
 class ChartRuleLookupManager;
 
 class PhraseDictionaryFeature;
+class SparsePhraseDictionaryFeature;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -98,6 +99,7 @@ class PhraseDictionaryFeature :  public DecodeFeature
 
 public:
   PhraseDictionaryFeature(  PhraseTableImplementation implementation
+                            , SparsePhraseDictionaryFeature* spdf
                             , size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
@@ -118,6 +120,10 @@ public:
   size_t GetNumScoreComponents() const;
 
   size_t GetNumInputScores() const;
+
+  SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
+    return m_sparsePhraseDictionaryFeature;
+  }
 
   //Initialises the dictionary (may involve loading from file)
   void InitDictionary(const TranslationSystem* system);
@@ -153,6 +159,7 @@ private:
   PhraseTableImplementation m_implementation;
   std::string m_targetFile;
   std::string m_alignmentsFile;
+  SparsePhraseDictionaryFeature* m_sparsePhraseDictionaryFeature;
 
 };
 

@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
 #include "PhraseDictionary.h"
+#include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
 #include "TargetWordInsertionFeature.h"
@@ -498,6 +499,11 @@ bool StaticData::LoadData(Parameter *parameter)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_wordTranslationFeature->SetSparseFeatureReporting();
+      for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
+        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerWeightShortName(0)) == 0) {
+          m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();          
+        }
+      }
     }
   }
 
@@ -611,6 +617,11 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
+    for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
+      if (m_sparsePhraseDictionary[i]) {
+        m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sparsePhraseDictionary[i]);
+      }
+    }
   }
 
   //Load extra feature weights
@@ -663,6 +674,7 @@ void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& w
 
 StaticData::~StaticData()
 {
+  RemoveAllInColl(m_sparsePhraseDictionary);
   RemoveAllInColl(m_phraseDictionary);
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
@@ -1115,8 +1127,17 @@ bool StaticData::LoadPhraseTables()
       PrintUserTime(string("Start loading PhraseTable ") + filePath);
       VERBOSE(1,"filePath: " << filePath <<endl);
 
+      //optional create sparse phrase feature
+      SparsePhraseDictionaryFeature* spdf = NULL; 
+      if (token.size() >= 6 && token[5] == "sparse") {
+          spdf = new SparsePhraseDictionaryFeature();
+      }
+      m_sparsePhraseDictionary.push_back(spdf);
+
+
       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
         implementation
+        , spdf
         , numScoreComponent
         , (currDict==0 ? m_numInputScores : 0)
         , input

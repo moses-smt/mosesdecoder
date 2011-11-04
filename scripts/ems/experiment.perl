@@ -1664,7 +1664,12 @@ sub define_training_extract_phrases {
       }
     }
 
+
     my $extract_settings = &get("TRAINING:extract-settings");
+    if (&get("TRAINING:sparse-phrase-scripts-dir")) {
+      $extract_settings = "" unless defined($extract_settings);
+      $extract_settings .= " --SentenceId ";
+    }
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
 
     &create_step($step_id,$cmd);
@@ -1728,8 +1733,10 @@ sub define_training_create_config {
     my ($step_id) = @_;
 
     my ($config,
-	$reordering_table,$phrase_translation_table,$generation_table,@LM)
+	$reordering_table,$phrase_translation_table,$generation_table,$sparse_phrase_translation_table,@LM)
 	= &get_output_and_input($step_id);
+
+    $phrase_translation_table = $sparse_phrase_translation_table if ($sparse_phrase_translation_table);
 
     my $cmd = &get_training_setting(9);
 
@@ -1821,6 +1828,10 @@ sub define_training_create_config {
 
 	    $cmd .= "-lm $factor:$order:$lm_file:$type ";
 	}
+    }
+
+    if (&get("TRAINING:sparse-phrase-scripts-dir")) {
+      $cmd .= "-sparse-phrase-features";
     }
 
     &create_step($step_id,$cmd);

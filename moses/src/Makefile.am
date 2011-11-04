@@ -110,6 +110,7 @@ libmoses_la_HEADERS = \
         Sentence.h \
         SentenceStats.h \
         SourceWordDeletionFeature.h \
+        SparsePhraseDictionaryFeature.h \
         SquareMatrix.h \
         StaticData.h \
         TargetBigramFeature.h \
@@ -275,6 +276,7 @@ libmoses_la_SOURCES = \
         Sentence.cpp \
         SentenceStats.cpp \
         SourceWordDeletionFeature.cpp \
+        SparsePhraseDictionaryFeature.cpp \
         SquareMatrix.cpp \
         StaticData.cpp \
         TargetBigramFeature.cpp \

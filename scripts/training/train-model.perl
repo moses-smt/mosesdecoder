@@ -35,7 +35,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    $_ADDITIONAL_INI,
-   $_DICTIONARY, $_EPPEX);
+   $_DICTIONARY, $_EPPEX, $_SPARSE_PHRASE_FEATURES);
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
@@ -110,7 +110,8 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
-           'additional-ini=s' => \$_ADDITIONAL_INI
+           'additional-ini=s' => \$_ADDITIONAL_INI,
+           'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES
                );
 
 if ($_HELP) {
@@ -1725,7 +1726,11 @@ sub create_ini {
      my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
      $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
      my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
-     print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
+     print INI "$phrase_table_impl $ff $basic_weight_count $file";
+     if ($_SPARSE_PHRASE_FEATURES) {
+       print INI " sparse";
+     }
+     print INI "\n";
    }
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
