@@ -233,7 +233,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     count++;
 
-    if (format == Hiero) { // reformat line
+    if (format == HieroFormat) { // reformat line
       delete line;
     }
     else

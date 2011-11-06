@@ -78,6 +78,7 @@ libmoses_la_HEADERS = \
         PartialTranslOptColl.h \
         Phrase.h \
         PhraseDictionary.h \
+        PhraseDictionaryALSuffixArray.h \
         PhraseDictionaryDynSuffixArray.h \
         PhraseDictionaryMemory.h \
         PhraseDictionarySCFG.h \
@@ -96,6 +97,7 @@ libmoses_la_HEADERS = \
         RuleTableLoader.h \
         RuleTableLoaderCompact.h \
         RuleTableLoaderFactory.h \
+        RuleTableLoaderHiero.h \
         RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
@@ -230,7 +232,8 @@ libmoses_la_SOURCES = \
         PartialTranslOptColl.cpp \
         Phrase.cpp \
         PhraseDictionary.cpp \
-        PhraseDictionaryDynSuffixArray.cpp \
+		PhraseDictionaryALSuffixArray.cpp \
+		PhraseDictionaryDynSuffixArray.cpp \
         PhraseDictionaryHiero.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
@@ -247,6 +250,7 @@ libmoses_la_SOURCES = \
         RuleCubeQueue.cpp \
         RuleTableLoaderCompact.cpp \
         RuleTableLoaderFactory.cpp \
+        RuleTableLoaderHiero.cpp \
         RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
