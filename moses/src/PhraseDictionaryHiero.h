@@ -9,15 +9,15 @@
 #ifndef moses_PhraseDictionaryHiero_h
 #define moses_PhraseDictionaryHiero_h
 
-#include "PhraseDictionaryMemory.h"
+#include "PhraseDictionarySCFG.h"
 
 namespace Moses {
 
-class PhraseDictionaryHiero : public PhraseDictionaryMemory
+class PhraseDictionaryHiero : public PhraseDictionarySCFG
 {
 public:
   PhraseDictionaryHiero(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-  : PhraseDictionaryMemory(numScoreComponent,feature) {}
+  : PhraseDictionarySCFG(numScoreComponent,feature) {}
 
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output

@@ -175,6 +175,7 @@ enum PhraseTableImplementation {
   //,BerkeleyDb	= 7
   ,SuffixArray	= 8
   ,Hiero        = 9
+  ,ALSuffixArray = 10
 };
 
 enum InputTypeEnum {

@@ -8,6 +8,10 @@
 
 #include <iostream>
 #include "PhraseDictionaryHiero.h"
+#include "PhraseDictionarySCFG.h"
+#include "InputFileStream.h"
+#include "RuleTableLoader.h"
+#include "RuleTableLoaderFactory.h"
 
 using namespace std;
 
@@ -21,9 +25,20 @@ bool PhraseDictionaryHiero::Load(const std::vector<FactorType> &input
             , const LMList &languageModels
             , const WordPenaltyProducer* wpProducer)
 {
-
+  m_filePath = filePath;
+  m_tableLimit = tableLimit;
+  
+  
+  // data from file
+  InputFileStream inFile(filePath);
+  
+  std::auto_ptr<RuleTableLoader> loader =
+  RuleTableLoaderFactory::Create(filePath);
+  bool ret = loader->Load(input, output, inFile, weight, tableLimit,
+                          languageModels, wpProducer, *this);
+  return ret;
 }
-
-}
+  
+} // namespace
 
 
