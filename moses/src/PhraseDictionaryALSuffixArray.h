@@ -16,9 +16,10 @@ namespace Moses {
 class PhraseDictionaryALSuffixArray : public PhraseDictionaryHiero
 {
 public:
-  PhraseDictionaryHiero(size_t numScoreComponent, PhraseDictionaryFeature* feature)
+  PhraseDictionaryALSuffixArray(size_t numScoreComponent, PhraseDictionaryFeature* feature)
   : PhraseDictionaryHiero(numScoreComponent,feature) {}
-}
+};
+  
 
 }
 

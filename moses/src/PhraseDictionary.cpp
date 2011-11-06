@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionarySCFG.h"
 #include "PhraseDictionaryOnDisk.h"
 #include "PhraseDictionaryHiero.h"
+#include "PhraseDictionaryALSuffixArray.h"
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
 #endif
@@ -137,6 +138,24 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     }
     
     PhraseDictionaryHiero* pdm  = new PhraseDictionaryHiero(m_numScoreComponent,this);
+    bool ret = pdm->Load(GetInput()
+                         , GetOutput()
+                         , m_filePath
+                         , m_weight
+                         , m_tableLimit
+                         , system->GetLanguageModels()
+                         , system->GetWordPenaltyProducer());
+    assert(ret);
+    return pdm;
+  } else if (m_implementation == ALSuffixArray) {
+    // memory phrase table
+    VERBOSE(2,"using Hiero format phrase tables" << std::endl);
+    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+      m_filePath += ".gz";
+      VERBOSE(2,"Using gzipped file" << std::endl);
+    }
+    
+    PhraseDictionaryALSuffixArray* pdm  = new PhraseDictionaryALSuffixArray(m_numScoreComponent,this);
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
