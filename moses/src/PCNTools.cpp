@@ -165,5 +165,11 @@ CN parsePCN(const std::string& in)
   return res;
 }
 
+Moses::WeightedDirectedGraph parseLattice(const std::string& in)
+{
+  return Moses::WeightedDirectedGraph();
+  
+}
+
 }
 

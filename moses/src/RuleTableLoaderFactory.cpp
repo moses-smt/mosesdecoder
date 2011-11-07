@@ -21,6 +21,7 @@
 
 #include "InputFileStream.h"
 #include "RuleTableLoaderCompact.h"
+#include "RuleTableLoaderHiero.h"
 #include "RuleTableLoaderStandard.h"
 #include "UserMessage.h"
 #include "Util.h"
@@ -49,6 +50,12 @@ std::auto_ptr<RuleTableLoader> RuleTableLoaderFactory::Create(
     UserMessage::Add(msg.str());
     return std::auto_ptr<RuleTableLoader>();
   }
+  else if (tokens[0] == "[X]" && tokens[1] == "|||") {
+    return std::auto_ptr<RuleTableLoader>(new 
+        RuleTableLoaderHiero());
+    
+  }
+  
   return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderStandard());
 }
 

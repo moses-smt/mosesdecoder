@@ -48,6 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Sentence.h"
 #include "ConfusionNet.h"
 #include "WordLattice.h"
+#include "WordLattice2.h"
 #include "TreeInput.h"
 #include "TranslationAnalysis.h"
 #include "mbr.h"
@@ -158,6 +159,9 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
   case TreeInputType:
     source = ioWrapper.GetInput(new TreeInput(Input));
     break;
+  case WordLatticeInput2:
+      source = ioWrapper.GetInput(new WordLattice2);
+      break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");
   }

@@ -305,13 +305,13 @@
 				HEADER_SEARCH_PATHS = (
 					../moses/src,
 					../kenlm,
+					/opt/local/include,
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib,
 					../srilm/lib/macosx,
 					../kenlm,
-					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -321,7 +321,6 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lrandlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 			};
@@ -341,13 +340,13 @@
 				HEADER_SEARCH_PATHS = (
 					../moses/src,
 					../kenlm,
+					/opt/local/include,
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib,
 					../srilm/lib/macosx,
 					../kenlm,
-					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -357,7 +356,6 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lrandlm",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 			};

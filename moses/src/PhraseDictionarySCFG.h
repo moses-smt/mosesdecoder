@@ -76,7 +76,7 @@ class PhraseDictionarySCFG : public PhraseDictionary
 
   TO_STRING();
 
- private:
+ protected:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
       const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
 

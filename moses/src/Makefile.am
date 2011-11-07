@@ -78,6 +78,7 @@ libmoses_la_HEADERS = \
         PartialTranslOptColl.h \
         Phrase.h \
         PhraseDictionary.h \
+        PhraseDictionaryALSuffixArray.h \
         PhraseDictionaryDynSuffixArray.h \
         PhraseDictionaryMemory.h \
         PhraseDictionarySCFG.h \
@@ -96,6 +97,7 @@ libmoses_la_HEADERS = \
         RuleTableLoader.h \
         RuleTableLoaderCompact.h \
         RuleTableLoaderFactory.h \
+        RuleTableLoaderHiero.h \
         RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
@@ -125,8 +127,10 @@ libmoses_la_HEADERS = \
         UniqueObject.h \
         UserMessage.h \
         Util.h \
+        WeightedDirectedGraph.h \
         Word.h \
         WordLattice.h \
+        WordLattice2.h \
         WordsBitmap.h \
         WordsRange.h \
         XmlOption.h
@@ -228,7 +232,9 @@ libmoses_la_SOURCES = \
         PartialTranslOptColl.cpp \
         Phrase.cpp \
         PhraseDictionary.cpp \
-        PhraseDictionaryDynSuffixArray.cpp \
+		PhraseDictionaryALSuffixArray.cpp \
+		PhraseDictionaryDynSuffixArray.cpp \
+        PhraseDictionaryHiero.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
         PhraseDictionaryNode.cpp \
@@ -244,6 +250,7 @@ libmoses_la_SOURCES = \
         RuleCubeQueue.cpp \
         RuleTableLoaderCompact.cpp \
         RuleTableLoaderFactory.cpp \
+        RuleTableLoaderHiero.cpp \
         RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
@@ -270,8 +277,10 @@ libmoses_la_SOURCES = \
         TrellisPathCollection.cpp \
         UserMessage.cpp \
         Util.cpp \
+        WeightedDirectedGraph.cpp \
         Word.cpp \
         WordLattice.cpp \
+        WordLattice2.cpp \
         WordsBitmap.cpp \
         WordsRange.cpp \
         XmlOption.cpp
