@@ -991,25 +991,31 @@ bool StaticData::LoadPhraseTables()
         // it only work with binrary file. This is a hack
 
         m_numInputScores=m_parameter->GetParam("weight-i").size();
-        for(unsigned k=0; k<m_numInputScores; ++k)
-          weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
-
+        
+        if (implementation == Binary)
+        {
+          for(unsigned k=0; k<m_numInputScores; ++k)
+            weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
+        }
+        
         if(m_parameter->GetParam("link-param-count").size())
           m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
 
         //print some info about this interaction:
-        if (m_numLinkParams == m_numInputScores) {
-          VERBOSE(1,"specified equal numbers of link parameters and insertion weights, not using non-epsilon 'real' word link count.\n");
-        } else if ((m_numLinkParams + 1) == m_numInputScores) {
-          VERBOSE(1,"WARN: "<< m_numInputScores << " insertion weights found and only "<< m_numLinkParams << " link parameters specified, applying non-epsilon 'real' word link count for last feature weight.\n");
-        } else {
-          stringstream strme;
-          strme << "You specified " << m_numInputScores
-                << " input weights (weight-i), but you specified " << m_numLinkParams << " link parameters (link-param-count)!";
-          UserMessage::Add(strme.str());
-          return false;
+        if (implementation == Binary) {
+          if (m_numLinkParams == m_numInputScores) {
+            VERBOSE(1,"specified equal numbers of link parameters and insertion weights, not using non-epsilon 'real' word link count.\n");
+          } else if ((m_numLinkParams + 1) == m_numInputScores) {
+            VERBOSE(1,"WARN: "<< m_numInputScores << " insertion weights found and only "<< m_numLinkParams << " link parameters specified, applying non-epsilon 'real' word link count for last feature weight.\n");
+          } else {
+            stringstream strme;
+            strme << "You specified " << m_numInputScores
+                  << " input weights (weight-i), but you specified " << m_numLinkParams << " link parameters (link-param-count)!";
+            UserMessage::Add(strme.str());
+            return false;
+          }
         }
-
+        
       }
       if (!m_inputType) {
         m_numInputScores=0;

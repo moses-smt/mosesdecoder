@@ -189,6 +189,8 @@ public:
     return m_nonTermMap;
   }
 
+  void Clear();
+  
   TO_STRING();
 };
 
