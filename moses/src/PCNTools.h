@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <utility>
 #include <cstdlib>
-#include "WeightedDirectedGraph.h"
 
 /** A couple of utilities to read .pcn files. A python-compatible format
   * for encoding confusion networks and word lattices.
@@ -42,7 +41,6 @@ typedef std::vector<CNCol> CN;
   * word lattice in PCN format, return a CN object representing the lattice
   */
 CN parsePCN(const std::string& in);
-Moses::WeightedDirectedGraph parseLattice(const std::string& in);
 
 };
 

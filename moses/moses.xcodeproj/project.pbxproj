@@ -66,10 +66,6 @@
 		1E2E163D132A892800ED4085 /* RuleCubeQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1636132A892800ED4085 /* RuleCubeQueue.h */; };
 		1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1637132A892800ED4085 /* ThreadPool.cpp */; };
 		1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1638132A892800ED4085 /* ThreadPool.h */; };
-		1E3CBD3A145D755D00AF72FC /* WordLattice2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3CBD38145D755D00AF72FC /* WordLattice2.cpp */; };
-		1E3CBD3B145D755D00AF72FC /* WordLattice2.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3CBD39145D755D00AF72FC /* WordLattice2.h */; };
-		1E3CBD3F145D75F300AF72FC /* WeightedDirectedGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3CBD3D145D75F300AF72FC /* WeightedDirectedGraph.cpp */; };
-		1E3CBD40145D75F300AF72FC /* WeightedDirectedGraph.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3CBD3E145D75F300AF72FC /* WeightedDirectedGraph.h */; };
 		1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */; };
 		1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */; };
 		1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E474E11145575CA00178AD5 /* RuleTableLoader.h */; };
@@ -338,10 +334,6 @@
 		1E2E1636132A892800ED4085 /* RuleCubeQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeQueue.h; path = src/RuleCubeQueue.h; sourceTree = "<group>"; };
 		1E2E1637132A892800ED4085 /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadPool.cpp; path = src/ThreadPool.cpp; sourceTree = "<group>"; };
 		1E2E1638132A892800ED4085 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = src/ThreadPool.h; sourceTree = "<group>"; };
-		1E3CBD38145D755D00AF72FC /* WordLattice2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice2.cpp; path = src/WordLattice2.cpp; sourceTree = "<group>"; };
-		1E3CBD39145D755D00AF72FC /* WordLattice2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordLattice2.h; path = src/WordLattice2.h; sourceTree = "<group>"; };
-		1E3CBD3D145D75F300AF72FC /* WeightedDirectedGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WeightedDirectedGraph.cpp; path = src/WeightedDirectedGraph.cpp; sourceTree = "<group>"; };
-		1E3CBD3E145D75F300AF72FC /* WeightedDirectedGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WeightedDirectedGraph.h; path = src/WeightedDirectedGraph.h; sourceTree = "<group>"; };
 		1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCubeItem.cpp; path = src/RuleCubeItem.cpp; sourceTree = "<group>"; };
 		1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeItem.h; path = src/RuleCubeItem.h; sourceTree = "<group>"; };
 		1E474E11145575CA00178AD5 /* RuleTableLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoader.h; path = src/RuleTableLoader.h; sourceTree = "<group>"; };
@@ -806,10 +798,6 @@
 				1ED0FE25124BB9380029177F /* WordsBitmap.h */,
 				1ED0FE26124BB9380029177F /* WordsRange.cpp */,
 				1ED0FE27124BB9380029177F /* WordsRange.h */,
-				1E3CBD3D145D75F300AF72FC /* WeightedDirectedGraph.cpp */,
-				1E3CBD3E145D75F300AF72FC /* WeightedDirectedGraph.h */,
-				1E3CBD38145D755D00AF72FC /* WordLattice2.cpp */,
-				1E3CBD39145D755D00AF72FC /* WordLattice2.h */,
 				1ED0FE28124BB9380029177F /* XmlOption.cpp */,
 				1ED0FE29124BB9380029177F /* XmlOption.h */,
 				1ED0FD88124BB9380029177F /* gzfilebuf.h */,
@@ -1030,8 +1018,6 @@
 				1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */,
 				1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */,
 				1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */,
-				1E3CBD3B145D755D00AF72FC /* WordLattice2.h in Headers */,
-				1E3CBD40145D75F300AF72FC /* WeightedDirectedGraph.h in Headers */,
 				1E078C1C14643AED00A707F4 /* PhraseDictionaryHiero.h in Headers */,
 				1E078C21146440A900A707F4 /* RuleTableLoaderHiero.h in Headers */,
 				1E2755B614667CC3009D1DF9 /* PhraseDictionaryALSuffixArray.h in Headers */,
@@ -1210,8 +1196,6 @@
 				1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */,
 				1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */,
 				1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */,
-				1E3CBD3A145D755D00AF72FC /* WordLattice2.cpp in Sources */,
-				1E3CBD3F145D75F300AF72FC /* WeightedDirectedGraph.cpp in Sources */,
 				1E078C1F14643C2000A707F4 /* PhraseDictionaryHiero.cpp in Sources */,
 				1E078C23146440F700A707F4 /* RuleTableLoaderHiero.cpp in Sources */,
 				1E2755B314667CA4009D1DF9 /* PhraseDictionaryALSuffixArray.cpp in Sources */,
