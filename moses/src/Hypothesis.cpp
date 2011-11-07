@@ -267,7 +267,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // option: add these here
   // language model scores for n-grams completely contained within a target
   // phrase are also included here
-  m_currScoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+  m_currScoreBreakdown = m_transOpt->GetScoreBreakdown();
 
   const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
