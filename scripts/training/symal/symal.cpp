@@ -16,8 +16,8 @@
 using namespace std;
 
 #define MAX_WORD 10000 // maximum lengthsource/target strings 
-#define MAX_M 200      // maximum length of source strings
-#define MAX_N 200      // maximum length of target strings 
+#define MAX_M 400      // maximum length of source strings
+#define MAX_N 400      // maximum length of target strings 
 
 #define UNION                      1
 #define INTERSECT                  2
