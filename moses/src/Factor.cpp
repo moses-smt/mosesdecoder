@@ -21,9 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Factor.h"
 
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
-#endif
 
 using namespace std;
 
@@ -39,13 +37,11 @@ ostream& operator<<(ostream& out, const Factor& factor)
   return out;
 }
 
-#ifdef HAVE_BOOST
 size_t hash_value(const Factor& f)
 {
   boost::hash<size_t> hasher;
   return hasher(f.GetId());
 }
-#endif
 
 }
 

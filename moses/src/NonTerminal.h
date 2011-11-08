@@ -22,19 +22,14 @@
 #include "Factor.h"
 #include "Word.h"
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_set.hpp>
-#endif
-#endif
 
 #include <set>
 
 namespace Moses
 {
-#ifdef HAVE_BOOST
+
 class NonTerminalHasher
 {
 public:
@@ -59,8 +54,5 @@ public:
 typedef boost::unordered_set<Word,
         NonTerminalHasher,
         NonTerminalEqualityPred> NonTerminalSet;
-#else
-typedef std::set<Word> NonTerminalSet;
-#endif
 
 }  // namespace Moses

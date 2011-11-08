@@ -29,9 +29,7 @@
 #include "Util.h"
 #include "WordsRange.h"
 
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
-#endif
 
 namespace Moses
 {
