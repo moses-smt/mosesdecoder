@@ -869,7 +869,7 @@ bool StaticData::LoadLexicalReorderingModel()
 
     string filePath = spec[3];
 
-    m_reorderModels.push_back(new LexicalReordering(input, output, modelType, filePath, mweights));
+    m_reorderModels.push_back(new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights));
   }
   return true;
 }

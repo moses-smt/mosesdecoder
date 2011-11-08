@@ -17,14 +17,13 @@ namespace Moses
 class PhraseLengthFeature : public StatelessFeatureFunction {
 public:
 	PhraseLengthFeature():
-     StatelessFeatureFunction("pl")
+     StatelessFeatureFunction("pl", ScoreProducer::unlimited)
   {}
       
   void Evaluate(const TargetPhrase& cur_phrase,
                 ScoreComponentCollection* accumulator) const;
 
   // basic properties
-	size_t GetNumScoreComponents() const { return ScoreProducer::unlimited; }
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "pl"; }
 	size_t GetNumInputScores() const { return 0; }
 };

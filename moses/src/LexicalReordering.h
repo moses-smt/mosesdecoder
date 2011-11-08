@@ -26,14 +26,10 @@ class LexicalReordering : public StatefulFeatureFunction {
 public:   
     LexicalReordering(std::vector<FactorType>& f_factors, 
                       std::vector<FactorType>& e_factors,
-                      const std::string &modelType,
+                      const LexicalReorderingConfiguration& configuration,
                       const std::string &filePath, 
                       const std::vector<float>& weights);
     virtual ~LexicalReordering();
-    
-    virtual size_t GetNumScoreComponents() const {
-        return m_configuration.GetNumScoreComponents(); 
-    }
     
     virtual FFState* Evaluate(const Hypothesis& cur_hypo,
                               const FFState* prev_state,

@@ -20,7 +20,7 @@ private:
 
 public:
 	TargetWordInsertionFeature(FactorType factorType = 0):
-     StatelessFeatureFunction("twi"),
+     StatelessFeatureFunction("twi", ScoreProducer::unlimited),
      m_factorType(factorType),
      m_unrestricted(true)
   {}
@@ -30,7 +30,6 @@ public:
                 ScoreComponentCollection* accumulator) const;
 
   // basic properties
-	size_t GetNumScoreComponents() const { return ScoreProducer::unlimited; }
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "twi"; }
 	size_t GetNumInputScores() const { return 0; }
 };

@@ -22,7 +22,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
     virtual bool ComputeValueInTranslationOption() const;
 
     
-    size_t GetNumScoreComponents() const;
     std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumInputScores() const;
 

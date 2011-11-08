@@ -16,16 +16,18 @@
 namespace Moses
 {
 class LexicalReorderingState;
+class LexicalReordering;
 
 //! Factory class for lexical reordering states
 class LexicalReorderingConfiguration
 {
 public:
+  friend class LexicalReordering;
   enum ModelType {Monotonic, MSD, MSLR, LeftRight, None};
   enum Direction {Forward, Backward, Bidirectional};
   enum Condition {F, E, FE};
 
-  LexicalReorderingConfiguration(ScoreProducer *scoreProducer, const std::string &modelType);
+  LexicalReorderingConfiguration(const std::string &modelType);
 
   LexicalReorderingState *CreateLexicalReorderingState(const InputType &input) const;
 
@@ -36,6 +38,7 @@ public:
   ScoreProducer *GetScoreProducer() const {
     return m_scoreProducer;
   }
+
 
   ModelType GetModelType() const {
     return m_modelType;
@@ -58,6 +61,15 @@ public:
   }
 
 private:
+  void SetScoreProducer(ScoreProducer* scoreProducer) {
+    m_scoreProducer = scoreProducer;
+  }
+
+  const std::string& GetModelString() const {
+    return m_modelString;
+  }
+
+  std::string m_modelString;
   ScoreProducer *m_scoreProducer;
   ModelType m_modelType;
   bool m_phraseBased;
@@ -71,7 +83,6 @@ private:
 class LexicalReorderingState : public FFState
 {
 public:
-
   virtual int Compare(const FFState& o) const = 0;
   virtual LexicalReorderingState* Expand(const TranslationOption& hypo, Scores& scores) const = 0;
 
@@ -80,6 +91,7 @@ public:
 
 protected:
   typedef int ReorderingType;
+
 
   const LexicalReorderingConfiguration &m_configuration;
   // The following is the true direction of the object, which can be Backward or Forward even if the Configuration has Bidirectional.

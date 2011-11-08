@@ -19,8 +19,8 @@ class FeatureFunction: public ScoreProducer
 {
 
 public:
-  FeatureFunction(const std::string& description) :
-    ScoreProducer(description) {}
+  FeatureFunction(const std::string& description, size_t numScoreComponents) :
+    ScoreProducer(description, numScoreComponents) {}
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
 
@@ -30,8 +30,8 @@ class StatelessFeatureFunction: public FeatureFunction
 {
 
 public:
-  StatelessFeatureFunction(const std::string& description) :
-    FeatureFunction(description) {}
+  StatelessFeatureFunction(const std::string& description, size_t numScoreComponents) :
+    FeatureFunction(description, numScoreComponents) {}
   //! Evaluate for stateless feature functions. Implement this.
   virtual void Evaluate(
     const TargetPhrase& cur_hypo,
@@ -50,8 +50,8 @@ class StatefulFeatureFunction: public FeatureFunction
 {
 
 public:
-  StatefulFeatureFunction(const std::string& description) :
-    FeatureFunction(description) {}
+  StatefulFeatureFunction(const std::string& description, size_t numScoreComponents) :
+    FeatureFunction(description,numScoreComponents) {}
 
   /**
    * \brief This interface should be implemented.

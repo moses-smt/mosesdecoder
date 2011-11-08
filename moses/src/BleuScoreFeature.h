@@ -43,7 +43,7 @@ typedef std::map< Phrase, size_t > NGrams;
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
 	BleuScoreFeature():
-	                                 StatefulFeatureFunction("BleuScore"),
+	                                 StatefulFeatureFunction("BleuScore",1),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
@@ -53,7 +53,7 @@ public:
 	                                 m_historySmoothing(0.7) {}
 
 	BleuScoreFeature(bool scaleByInputLength, float historySmoothing):
-	                                 StatefulFeatureFunction("BleuScore"),
+	                                 StatefulFeatureFunction("BleuScore",1),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
@@ -70,11 +70,6 @@ public:
     std::string GetScoreProducerWeightShortName(unsigned) const
     {
         return "bl";
-    }
-
-    size_t GetNumScoreComponents() const
-    {
-        return 1;
     }
 
     void PrintHistory(std::ostream& out) const;

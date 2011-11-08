@@ -22,12 +22,13 @@ private:
   mutable  std::vector<FName> m_names; //for features with fixed number of values
   std::string m_description;
   bool m_reportSparseFeatures;
+  size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 	ScoreProducer(const ScoreProducer&);  // don't implement
 	
 protected:
-	ScoreProducer(const std::string& description);
+	ScoreProducer(const std::string& description, size_t numScoreComponents);
 	virtual ~ScoreProducer();
 
 public:
@@ -37,7 +38,7 @@ public:
 	//! returns the number of scores that a subclass produces.
 	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
   //! sparse features returned unlimited
-	virtual size_t GetNumScoreComponents() const = 0;
+	size_t GetNumScoreComponents() const {return m_numScoreComponents;}
 
 	//! returns a string description of this producer
 	const std::string& GetScoreProducerDescription() const {return m_description;}

@@ -32,21 +32,13 @@ using namespace std;
 
 namespace Moses {
 
-LanguageModel::LanguageModel() : StatefulFeatureFunction("LM") {
+LanguageModel::LanguageModel() : 
+  StatefulFeatureFunction("LM", StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1 ) {
   m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
 }
 
 
 LanguageModel::~LanguageModel() {}
-
-// don't inline virtual funcs...
-size_t LanguageModel::GetNumScoreComponents() const {
-  if (m_enableOOVFeature) {
-    return 2;
-  } else {
-    return 1;
-  }
-}
 
 float LanguageModel::GetWeight() const {
   return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[0];

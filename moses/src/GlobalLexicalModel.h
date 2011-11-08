@@ -53,10 +53,6 @@ public:
 	                   const std::vector< FactorType >& outFactors);
 	virtual ~GlobalLexicalModel();
 
-  virtual size_t GetNumScoreComponents() const {
-    return 1;
-  };
-
   virtual std::string GetScoreProducerWeightShortName(unsigned) const {
     return "lex";
   };

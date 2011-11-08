@@ -44,8 +44,8 @@ void LexicalReorderingConfiguration::SetAdditionalScoreComponents(size_t number)
   m_additionalScoreComponents = number;
 }
 
-LexicalReorderingConfiguration::LexicalReorderingConfiguration(ScoreProducer *scoreProducer, const std::string &modelType)
-  : m_scoreProducer(scoreProducer), m_modelType(None), m_phraseBased(true), m_collapseScores(false), m_direction(Backward), m_additionalScoreComponents(0)
+LexicalReorderingConfiguration::LexicalReorderingConfiguration(const std::string &modelType)
+  : m_modelString(modelType), m_scoreProducer(NULL), m_modelType(None), m_phraseBased(true), m_collapseScores(false), m_direction(Backward), m_additionalScoreComponents(0)
 {
   std::vector<std::string> config = Tokenize<std::string>(modelType, "-");
 

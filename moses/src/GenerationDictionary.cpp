@@ -36,7 +36,7 @@ namespace Moses
   GenerationDictionary::GenerationDictionary(size_t numFeatures,
                                              const std::vector<FactorType> &input,
                                              const std::vector<FactorType> &output)
-  : Dictionary(numFeatures), DecodeFeature("Generation",input,output) {}
+  : Dictionary(numFeatures), DecodeFeature("Generation",numFeatures,input,output) {}
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {
@@ -113,11 +113,6 @@ GenerationDictionary::~GenerationDictionary()
   for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter) {
     delete iter->first;
   }
-}
-
-size_t GenerationDictionary::GetNumScoreComponents() const
-{
-  return m_numScoreComponent;
 }
 
 const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) const

@@ -70,7 +70,6 @@ public:
 	//! load data file
 	bool Load(const std::string &filePath, FactorDirection direction);
 
-	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerWeightShortName(unsigned) const
 	{
 		return "g";

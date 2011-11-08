@@ -48,9 +48,6 @@ public:
   // Make another feature without copying the underlying model data.  
   virtual LanguageModel *Duplicate() const = 0;
 
-  //! see ScoreProducer.h
-  std::size_t GetNumScoreComponents() const;
-
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
   }

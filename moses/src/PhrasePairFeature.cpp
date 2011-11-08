@@ -10,14 +10,9 @@ namespace Moses {
 
 PhrasePairFeature::PhrasePairFeature
   (FactorType sourceFactorId, FactorType targetFactorId) :
-  StatelessFeatureFunction("pp"),
+  StatelessFeatureFunction("pp", ScoreProducer::unlimited),
   m_sourceFactorId(sourceFactorId),
   m_targetFactorId(targetFactorId) {}
-
-size_t PhrasePairFeature::GetNumScoreComponents() const 
-{
-  return ScoreProducer::unlimited;
-}
 
 string PhrasePairFeature::GetScoreProducerWeightShortName(unsigned) const
 {

@@ -117,8 +117,6 @@ public:
 
   std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
 
-  size_t GetNumScoreComponents() const;
-
   size_t GetNumInputScores() const;
 
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
@@ -139,7 +137,6 @@ private:
   /** Load the appropriate phrase table */
   PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
 
-  size_t m_numScoreComponent;
   unsigned m_numInputScores;
   std::string m_filePath;
   std::vector<float> m_weight;

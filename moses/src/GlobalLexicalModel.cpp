@@ -11,7 +11,7 @@ namespace Moses
 GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
                                        const vector< FactorType >& inFactors,
                                        const vector< FactorType >& outFactors)
-  : StatelessFeatureFunction("GlobalLexicalModel")
+  : StatelessFeatureFunction("GlobalLexicalModel",1)
 {
 	std::cerr << "Creating global lexical model...\n";
 

@@ -22,7 +22,7 @@ private:
 
 public:
 	WordTranslationFeature(FactorType factorTypeSource = 0, FactorType factorTypeTarget = 0):
-     StatelessFeatureFunction("wt"),
+     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
      m_unrestricted(true)
@@ -33,7 +33,6 @@ public:
                 ScoreComponentCollection* accumulator) const;
 
   // basic properties
-	size_t GetNumScoreComponents() const { return ScoreProducer::unlimited; }
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "wt"; }
 	size_t GetNumInputScores() const { return 0; }
 };

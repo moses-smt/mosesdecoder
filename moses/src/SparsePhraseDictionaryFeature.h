@@ -14,13 +14,12 @@ class SparsePhraseDictionaryFeature : public StatelessFeatureFunction {
 
 public:
   SparsePhraseDictionaryFeature():
-    StatelessFeatureFunction("stm") {}
+    StatelessFeatureFunction("stm", ScoreProducer::unlimited) {}
 
   void Evaluate(const TargetPhrase& cur_phrase,
                 ScoreComponentCollection* accumulator) const;
   
   // basic properties
-	size_t GetNumScoreComponents() const { return ScoreProducer::unlimited; }
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "stm"; }
 	size_t GetNumInputScores() const { return 0; }
 

@@ -39,11 +39,6 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
 }
 
 
-size_t DistortionScoreProducer::GetNumScoreComponents() const
-{
-  return 1;
-}
-
 std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "d";
@@ -76,10 +71,6 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
   return (float) -2*(curr.GetNumWordsBetween(prev) + curr.GetNumWordsCovered());
 }
 
-size_t DistortionScoreProducer::GetNumInputScores() const
-{
-  return 0;
-}
 
 FFState* DistortionScoreProducer::Evaluate(
   const Hypothesis& hypo,
@@ -100,29 +91,14 @@ FFState* DistortionScoreProducer::Evaluate(
 }
 
 
-size_t WordPenaltyProducer::GetNumScoreComponents() const
-{
-  return 1;
-}
-
 std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "w";
 }
 
-size_t WordPenaltyProducer::GetNumInputScores() const
-{
-  return 0;
-}
-
 void WordPenaltyProducer::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
-}
-
-size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
-{
-  return 1;
 }
 
 
@@ -131,10 +107,6 @@ std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned
   return "u";
 }
 
-size_t UnknownWordPenaltyProducer::GetNumInputScores() const
-{
-  return 0;
-}
 
 bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
 {

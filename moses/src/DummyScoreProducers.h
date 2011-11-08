@@ -15,15 +15,12 @@ class WordsRange;
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
-	DistortionScoreProducer() : StatefulFeatureFunction("Distortion") {}
+	DistortionScoreProducer() : StatefulFeatureFunction("Distortion", 1) {}
 
   float CalculateDistortionScore(const Hypothesis& hypo,
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
 
-	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerWeightShortName(unsigned) const;
-	size_t GetNumInputScores() const;
-
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   virtual FFState* Evaluate(
@@ -46,11 +43,9 @@ public:
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty") {}
+	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty",1) {}
 
-	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerWeightShortName(unsigned) const;
-	size_t GetNumInputScores() const;
 
   virtual void Evaluate(
     const TargetPhrase& phrase,
@@ -61,11 +56,9 @@ public:
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty") {}
+	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty",1) {}
 
-	size_t GetNumScoreComponents() const;
 	std::string GetScoreProducerWeightShortName(unsigned) const;
-	size_t GetNumInputScores() const;
 
   virtual bool ComputeValueInTranslationOption() const;
 

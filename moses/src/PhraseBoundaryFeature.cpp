@@ -17,14 +17,9 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 
 PhraseBoundaryFeature::PhraseBoundaryFeature
   (const FactorList& sourceFactors, const FactorList& targetFactors) :
-    StatefulFeatureFunction("pb"), m_sourceFactors(sourceFactors),
+    StatefulFeatureFunction("pb", ScoreProducer::unlimited), m_sourceFactors(sourceFactors),
       m_targetFactors(targetFactors)
 {
-}
-
-size_t PhraseBoundaryFeature::GetNumScoreComponents() const 
-{
-  return ScoreProducer::unlimited;
 }
 
 string PhraseBoundaryFeature::GetScoreProducerWeightShortName(unsigned) const 

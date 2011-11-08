@@ -55,8 +55,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
  , size_t tableLimit
  , const std::string &targetFile  // default param
  , const std::string &alignmentsFile) // default param
-  :DecodeFeature("PhraseModel",input,output)
-  ,   m_numScoreComponent(numScoreComponent),
+  :DecodeFeature("PhraseModel",numScoreComponent,input,output),
   m_numInputScores(numInputScores),
   m_filePath(filePath),
   m_weight(weight),
@@ -66,7 +65,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_alignmentsFile(alignmentsFile),
   m_sparsePhraseDictionaryFeature(spdf)
 {
-  const StaticData& staticData = StaticData::Instance();
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray) {
     m_useThreadSafePhraseDictionary = true;
   } else {
@@ -89,7 +87,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
       assert(false);
     }
 
-    PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
+    PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(GetNumScoreComponents(),this);
     bool ret = pdm->Load(GetInput(), GetOutput()
                          , m_filePath
                          , m_weight
@@ -99,7 +97,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     assert(ret);
     return pdm;
   } else if (m_implementation == Binary) {
-    PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
+    PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(GetNumScoreComponents(), m_numInputScores,this);
     bool ret = pdta->Load(                    GetInput()
                , GetOutput()
                , m_filePath
@@ -117,7 +115,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
 
-    PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(m_numScoreComponent,this);
+    PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(GetNumScoreComponents(),this);
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
@@ -129,7 +127,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     return pdm;
   } else if (m_implementation == OnDisk) {
 
-    PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(m_numScoreComponent, this);
+    PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(GetNumScoreComponents(), this);
     bool ret = pdta->Load(GetInput()
                           , GetOutput()
                           , m_filePath
@@ -141,7 +139,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     return pdta;
   } else if (m_implementation == SuffixArray) {
 #ifndef WIN32
-    PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(m_numScoreComponent, this);
+    PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(GetNumScoreComponents(), this);
     if(!(pd->Load(
            GetInput()
            ,GetOutput()
@@ -235,10 +233,6 @@ std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned id
   }
 }
 
-size_t PhraseDictionaryFeature::GetNumScoreComponents() const
-{
-  return m_numScoreComponent;
-}
 
 size_t PhraseDictionaryFeature::GetNumInputScores() const
 {

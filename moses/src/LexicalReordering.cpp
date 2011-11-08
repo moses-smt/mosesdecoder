@@ -10,12 +10,14 @@ namespace Moses
 
 LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      std::vector<FactorType>& e_factors,
-                                     const std::string &modelType,
+                                     const LexicalReorderingConfiguration& configuration,
                                      const std::string &filePath,
                                      const std::vector<float>& weights)
-  : StatefulFeatureFunction("LexicalReordering_" + modelType),
-    m_configuration(this, modelType)
+  : StatefulFeatureFunction("LexicalReordering_" + configuration.GetModelString(),
+                            configuration.GetNumScoreComponents()),
+    m_configuration(configuration)
 {
+  m_configuration.SetScoreProducer(this);
   std::cerr << "Creating lexical reordering...\n";
   std::cerr << "weights: ";
   for(size_t w = 0; w < weights.size(); ++w) {
@@ -23,7 +25,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
   }
   std::cerr << "\n";
 
-  m_modelTypeString = modelType;
+  m_modelTypeString = m_configuration.GetModelString();
 
   switch(m_configuration.GetCondition()) {
   case LexicalReorderingConfiguration::FE:
@@ -52,7 +54,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     m_configuration.SetAdditionalScoreComponents(weights.size() - numberOfScoreComponents);
   } else if(weights.size() < numberOfScoreComponents) {
     std::ostringstream os;
-    os << "Lexical reordering model (type " << modelType << "): expected " << numberOfScoreComponents << " weights, got " << weights.size() << std::endl;
+    os << "Lexical reordering model (type " << m_modelTypeString << "): expected " << numberOfScoreComponents << " weights, got " << weights.size() << std::endl;
     UserMessage::Add(os.str());
     exit(1);
   }
