@@ -3,6 +3,12 @@
 /* Defined if the requested minimum BOOST version is satisfied */
 #undef HAVE_BOOST
 
+/* Define to 1 if you have <boost/scoped_ptr.hpp> */
+#undef HAVE_BOOST_SCOPED_PTR_HPP
+
+/* Define to 1 if you have <boost/shared_ptr.hpp> */
+#undef HAVE_BOOST_SHARED_PTR_HPP
+
 /* Define to 1 if you have <boost/thread.hpp> */
 #undef HAVE_BOOST_THREAD_HPP
 

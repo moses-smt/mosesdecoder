@@ -21,60 +21,49 @@
 
 #pragma once
 
-#include "ChartTrellisNode.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace Moses
 {
+
 class ChartHypothesis;
-class ChartTrellisPathCollection;
+class ChartTrellisDetour;
+class ChartTrellisDetourQueue;
+class ChartTrellisNode;
 
 class ChartTrellisPath
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTrellisPath&);
+ public:
+  ChartTrellisPath(const ChartHypothesis &hypo);
+  ChartTrellisPath(const ChartTrellisDetour &detour);
 
-protected:
-  // recursively point backwards
-  ChartTrellisNode *m_finalNode;
-  const ChartTrellisNode *m_prevNodeChanged;
-  const ChartTrellisPath *m_prevPath;
-
-  ScoreComponentCollection	m_scoreBreakdown;
-  float m_totalScore;
-
-  // deviate by 1 hypo
-  ChartTrellisPath(const ChartTrellisPath &origPath
-              , const ChartTrellisNode &soughtNode
-              , const ChartHypothesis &replacementHypo
-              , ScoreComponentCollection	&scoreChange);
-
-  void CreateDeviantPaths(ChartTrellisPathCollection &pathColl, const ChartTrellisNode &soughtNode) const;
-
-  const ChartTrellisNode &GetFinalNode() const {
-    assert (m_finalNode);
-    return *m_finalNode;
-  }
-
-public:
-  ChartTrellisPath(const ChartHypothesis *hypo);
   ~ChartTrellisPath();
 
+  const ChartTrellisNode &GetFinalNode() const { return *m_finalNode; }
+
+  const ChartTrellisNode *GetDeviationPoint() const { return m_deviationPoint; }
+
   //! get score for this path throught trellis
-  inline float GetTotalScore() const {
-    return m_totalScore;
-  }
+  float GetTotalScore() const { return m_totalScore; }
 
   Phrase GetOutputPhrase() const;
 
   /** returns detailed component scores */
-  inline const ScoreComponentCollection &GetScoreBreakdown() const {
+  const ScoreComponentCollection &GetScoreBreakdown() const {
     return m_scoreBreakdown;
   }
 
-  void CreateDeviantPaths(ChartTrellisPathCollection &pathColl) const;
+ private:
+  ChartTrellisPath(const ChartTrellisPath &);  // Not implemented
+  ChartTrellisPath &operator=(const ChartTrellisPath &);  // Not implemented
+
+  ChartTrellisNode *m_finalNode;
+  ChartTrellisNode *m_deviationPoint;
+  ScoreComponentCollection m_scoreBreakdown;
+  float m_totalScore;
 };
 
-
-}
-
+}  // namespace Moses

@@ -28,39 +28,39 @@ namespace Moses
 {
 class ScoreComponentCollection;
 class ChartHypothesis;
+class ChartTrellisDetour;
 
 class ChartTrellisNode
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTrellisNode&);
-public:
+ public:
   typedef std::vector<ChartTrellisNode*> NodeChildren;
 
-protected:
-  const ChartHypothesis *m_hypo;
-  NodeChildren m_edge;
+  ChartTrellisNode(const ChartHypothesis &hypo);
+  ChartTrellisNode(const ChartTrellisDetour &, ChartTrellisNode *&);
 
-public:
-  ChartTrellisNode(const ChartHypothesis *hypo);
-  ChartTrellisNode(const ChartTrellisNode &origNode
-              , const ChartTrellisNode &soughtNode
-              , const ChartHypothesis &replacementHypo
-              , ScoreComponentCollection	&scoreChange
-              , const ChartTrellisNode *&nodeChanged);
   ~ChartTrellisNode();
 
-  const ChartHypothesis &GetHypothesis() const {
-    return *m_hypo;
-  }
+  const ChartHypothesis &GetHypothesis() const { return m_hypo; }
 
-  const NodeChildren &GetChildren() const {
-    return m_edge;
-  }
+  const NodeChildren &GetChildren() const { return m_children; }
 
-  const ChartTrellisNode &GetChild(size_t ind) const {
-    return *m_edge[ind];
-  }
+  const ChartTrellisNode &GetChild(size_t i) const { return *m_children[i]; }
 
   Phrase GetOutputPhrase() const;
+
+ private:
+  ChartTrellisNode(const ChartTrellisNode &);  // Not implemented
+  ChartTrellisNode& operator=(const ChartTrellisNode &);  // Not implemented
+
+  ChartTrellisNode(const ChartTrellisNode &, const ChartTrellisNode &,
+                   const ChartHypothesis &, ChartTrellisNode *&);
+
+  void CreateChildren();
+  void CreateChildren(const ChartTrellisNode &, const ChartTrellisNode &,
+                      const ChartHypothesis &, ChartTrellisNode *&);
+
+  const ChartHypothesis &m_hypo;
+  NodeChildren m_children;
 };
 
 }

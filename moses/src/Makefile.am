@@ -20,9 +20,10 @@ libmoses_la_HEADERS = \
         ChartTranslationOption.h \
 	ChartTranslationOptionCollection.h \
         ChartTranslationOptionList.h \
+	ChartTrellisDetour.h \
+	ChartTrellisDetourQueue.h \
 	ChartTrellisNode.h \
 	ChartTrellisPath.h \
-	ChartTrellisPathCollection.h \
 	ChartTrellisPathList.h \
         ConfusionNet.h \
         DecodeFeature.h \
@@ -179,10 +180,10 @@ libmoses_la_SOURCES = \
         ChartTranslationOption.cpp \
 	ChartTranslationOptionCollection.cpp \
         ChartTranslationOptionList.cpp \
+	ChartTrellisDetour.cpp \
+	ChartTrellisDetourQueue.cpp \
 	ChartTrellisNode.cpp \
 	ChartTrellisPath.cpp \
-	ChartTrellisPathCollection.cpp \
-	ChartTrellisPathList.cpp \
         ConfusionNet.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
