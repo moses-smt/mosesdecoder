@@ -1,4 +1,5 @@
 #include "util/exception.hh"
+#include "util/portability.hh"
 
 #ifdef __GXX_RTTI
 #include <typeinfo>
@@ -68,6 +69,9 @@ ErrnoException::ErrnoException() throw() : errno_(errno) {
   buf[0] = 0;
 #ifdef sun
   const char *add = strerror(errno);
+#elif WIN32
+  // TODO WIN32
+  const char *add;
 #else
   const char *add = HandleStrerror(strerror_r(errno, buf, 200), buf);
 #endif
@@ -78,5 +82,10 @@ ErrnoException::ErrnoException() throw() : errno_(errno) {
 }
 
 ErrnoException::~ErrnoException() throw() {}
+
+EndOfFileException::EndOfFileException() throw() {
+  *this << "End of file";
+}
+EndOfFileException::~EndOfFileException() throw() {}
 
 } // namespace util

@@ -2,26 +2,21 @@
 #define LM_BINARY_FORMAT__
 
 #include "lm/config.hh"
+#include "lm/model_type.hh"
 #include "lm/read_arpa.hh"
 
 #include "util/file_piece.hh"
 #include "util/mmap.hh"
 #include "util/scoped.hh"
+#include "util/portability.hh"
 
 #include <cstddef>
 #include <vector>
 
-#include <inttypes.h>
+#include <stdint.h>
 
 namespace lm {
 namespace ngram {
-
-/* Not the best numbering system, but it grew this way for historical reasons
- * and I want to preserve existing binary files. */
-typedef enum {HASH_PROBING=0, HASH_SORTED=1, TRIE_SORTED=2, QUANT_TRIE_SORTED=3, ARRAY_TRIE_SORTED=4, QUANT_ARRAY_TRIE_SORTED=5} ModelType;
-
-const static ModelType kQuantAdd = static_cast<ModelType>(QUANT_TRIE_SORTED - TRIE_SORTED);
-const static ModelType kArrayAdd = static_cast<ModelType>(ARRAY_TRIE_SORTED - TRIE_SORTED);
 
 /*Inspect a file to determine if it is a binary lm.  If not, return false.  
  * If so, return true and set recognized to the type.  This is the only API in
@@ -36,7 +31,13 @@ struct FixedWidthParameters {
   ModelType model_type;
   // Does the end of the file have the actual strings in the vocabulary?   
   bool has_vocabulary;
+  unsigned int search_version;
 };
+
+inline std::size_t Align8(std::size_t in) {
+  std::size_t off = in % 8;
+  return off ? (in + 8 - off) : in;
+}
 
 // Parameters stored in the header of a binary file.  
 struct Parameters {
@@ -53,9 +54,9 @@ struct Backing {
   util::scoped_memory search;
 };
 
-void SeekOrThrow(int fd, off_t off);
+void SeekOrThrow(FD fd, off_t off);
 // Seek forward
-void AdvanceOrThrow(int fd, off_t off);
+void AdvanceOrThrow(FD fd, off_t off);
 
 // Create just enough of a binary file to write vocabulary to it.  
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing);
@@ -64,17 +65,17 @@ uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t 
 
 // Write header to binary file.  This is done last to prevent incomplete files
 // from loading.   
-void FinishFile(const Config &config, ModelType model_type, const std::vector<uint64_t> &counts, Backing &backing);
+void FinishFile(const Config &config, ModelType model_type, unsigned int search_version, const std::vector<uint64_t> &counts, Backing &backing);
 
 namespace detail {
 
-bool IsBinaryFormat(int fd);
+bool IsBinaryFormat(FD fd);
 
-void ReadHeader(int fd, Parameters &params);
+void ReadHeader(FD fd, Parameters &params);
 
-void MatchCheck(ModelType model_type, const Parameters &params);
+void MatchCheck(ModelType model_type, unsigned int search_version, const Parameters &params);
 
-void SeekPastHeader(int fd, const Parameters &params);
+void SeekPastHeader(FD fd, const Parameters &params);
 
 uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t memory_size, Backing &backing);
 
@@ -90,7 +91,7 @@ template <class To> void LoadLM(const char *file, const Config &config, To &to) 
     if (detail::IsBinaryFormat(backing.file.get())) {
       Parameters params;
       detail::ReadHeader(backing.file.get(), params);
-      detail::MatchCheck(To::kModelType, params);
+      detail::MatchCheck(To::kModelType, To::kVersion, params);
       // Replace the run-time configured probing_multiplier with the one in the file.  
       Config new_config(config);
       new_config.probing_multiplier = params.fixed.probing_multiplier;

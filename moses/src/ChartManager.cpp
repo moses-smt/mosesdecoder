@@ -42,6 +42,7 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
   ,m_transOptColl(source, system, m_hypoStackColl, m_ruleLookupManagers)
   ,m_system(system)
   ,m_start(clock())
+  ,m_hypothesisId(0)
 {
   m_system->InitializeBeforeSentenceProcessing(source);
   const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();
@@ -106,7 +107,6 @@ void ChartManager::ProcessSentence()
   }
 
   IFVERBOSE(1) {
-    cerr << "Num of hypo = " << ChartHypothesis::GetHypoCount() << " --- cells:" << endl;
 
     for (size_t startPos = 0; startPos < size; ++startPos) {
       cerr.width(3);
@@ -201,7 +201,7 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
   size_t size = m_source.GetSize();
 
 	// which hypotheses are reachable?
-	std::map<int,bool> reachable;
+	std::map<unsigned,bool> reachable;
 	WordsRange fullRange(0, size-1);
 	const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
   const ChartHypothesis *hypo = lastCell.GetBestHypothesis();
@@ -224,7 +224,7 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
   }
 }
 
-void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<int,bool> &reachable ) const
+void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const
 {
 	// do not recurse, if already visited
 	if (reachable.find(hypo->GetId()) != reachable.end())

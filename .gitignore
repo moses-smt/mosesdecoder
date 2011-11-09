@@ -67,7 +67,6 @@ CreateOnDisk/src/CreateOnDiskPt
 .libs
 kenlm/query
 libtool
-m4/libtool.m4
 m4/lt*
 misc/queryPhraseTable
 moses-chart-cmd/src/moses_chart
@@ -75,4 +74,4 @@ moses-cmd/src/checkplf
 moses-cmd/src/lmbrgrid
 regression-testing/moses-reg-test-data-*
 unittest/moses_test
-
+ltmain.sh

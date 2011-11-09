@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
-#include "LanguageModel.h"
+#include "LM/Base.h"
 #include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "InputType.h"

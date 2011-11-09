@@ -78,6 +78,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
 
   }
   ostringstream stats;
+//		multiplication by 100 in order to keep the average precision in the TER calculation
   stats << result.numEdits*100.0 << " " << result.averageWords*100.0 << " " << result.scoreAv()*100.0 << " " ;
   string stats_str = stats.str();
   entry.set ( stats_str );

@@ -237,6 +237,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         const ArcList *arcList = succHyp->GetArcList();
         if (arcList != NULL) {
           ArcList::const_iterator iterArcList;
+          //QUESTION: What happens if there's more than one loserPrevHypo?
           for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList) {
             const Hypothesis *loserHypo = *iterArcList;
             const Hypothesis* loserPrevHypo = loserHypo->GetPrevHypo();

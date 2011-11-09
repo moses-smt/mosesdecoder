@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
 
+#include "util/string_piece.hh"
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -49,8 +51,8 @@ class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-	float m_transScore, m_fullScore;
-	//float m_ngramScore, m_fullScore;
+	float m_transScore;
+  float  m_fullScore;
 	ScoreComponentCollection m_scoreBreakdown;
 
 	// in case of confusion net, ptr to source phrase
@@ -58,12 +60,10 @@ protected:
 	const AlignmentInfo* m_alignmentInfo;
 	Word m_lhsTarget;
 
-	static bool wordalignflag;
-	static bool printalign;
-	
 public:
   TargetPhrase(FactorDirection direction=Output);
   TargetPhrase(FactorDirection direction, std::string out_string);
+  TargetPhrase(const Phrase &);
   ~TargetPhrase();
 
   //! used by the unknown word handler- these targets
@@ -149,28 +149,18 @@ public:
 	const Word &GetTargetLHS() const
 	{ return m_lhsTarget; }
 	
-	void SetAlignmentInfo(const std::string &alignString);
+  void SetAlignmentInfo(const StringPiece &alignString);
 	void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
+  void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
+    m_alignmentInfo = alignmentInfo;
+  }
 	
 	const AlignmentInfo &GetAlignmentInfo() const
 	{ return *m_alignmentInfo; }
 	
-	void UseWordAlignment(bool a){
-		wordalignflag=a;
-	};
-	bool UseWordAlignment() const {
-		return wordalignflag;
-	};
-	void PrintAlignmentInfo(bool a) {
-		printalign=a; 
-	}
-	bool PrintAlignmentInfo() const {
-		return printalign;
-	}
 
-	void CreateCountInfo(const std::string &countStr);
+  TO_STRING();
 	
-	TO_STRING();
 
 };
 

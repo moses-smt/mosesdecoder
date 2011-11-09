@@ -6,10 +6,79 @@
  *
  */
 
+#include <cmath>
 #include <fstream>
 #include "FeatureStats.h"
 
 #define AVAILABLE_ 8;
+
+SparseVector::name2id_t SparseVector::name2id_;
+SparseVector::id2name_t SparseVector::id2name_;
+
+FeatureStatsType SparseVector::get(string name) const {
+  name2id_t::const_iterator name2id_iter = name2id_.find(name);
+  if (name2id_iter == name2id_.end()) return 0;
+  size_t id = name2id_iter->second;
+  return get(id);
+
+}
+
+FeatureStatsType SparseVector::get(size_t id) const {
+  fvector_t::const_iterator fvector_iter = fvector_.find(id);
+  if (fvector_iter == fvector_.end()) return 0;
+  return fvector_iter->second;
+}
+
+void SparseVector::set(string name, FeatureStatsType value) {
+  name2id_t::const_iterator name2id_iter = name2id_.find(name);
+  size_t id = 0;
+  if (name2id_iter == name2id_.end()) {
+    id = id2name_.size();
+    id2name_.push_back(name);
+    name2id_[name] = id;
+  } else {
+    id = name2id_iter->second;
+  }
+  fvector_[id] = value;
+}
+
+void SparseVector::write(ostream& out, const string& sep) const {
+  for (fvector_t::const_iterator i = fvector_.begin(); i != fvector_.end(); ++i) {
+    if (abs((float)(i->second)) < 0.00001) continue;
+    string name = id2name_[i->first];
+    out << name << sep << i->second << " ";
+  }
+}
+
+void SparseVector::clear() {
+  fvector_.clear();
+}
+
+size_t SparseVector::size() const {
+  return fvector_.size();
+}
+
+SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
+  //All the elements that have values in *this
+  for (fvector_t::iterator i = fvector_.begin(); i != fvector_.end(); ++i) {
+    fvector_[i->first] = i->second - rhs.get(i->first);
+  }
+
+  //Any elements in rhs, that have no value in *this
+  for (fvector_t::const_iterator i = rhs.fvector_.begin(); 
+      i != rhs.fvector_.end(); ++i) {
+    if (fvector_.find(i->first) == fvector_.end()) {
+      fvector_[i->first] = -(i->second);
+    }
+  }
+  return *this;
+}
+
+SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
+  SparseVector res(lhs);
+  res -= rhs;
+  return res;
+}
 
 
 FeatureStats::FeatureStats()
@@ -64,7 +133,7 @@ void FeatureStats::add(FeatureStatsType v)
 
 void FeatureStats::addSparse(string name, FeatureStatsType v)
 {
-  map_[name]=v;
+  map_.set(name,v);
 }
 
 void FeatureStats::set(std::string &theString)
@@ -151,9 +220,7 @@ ostream& operator<<(ostream& o, const FeatureStats& e)
     o << e.get(i) << " ";
   }
   // sparse features
-  const sparse_featstats_t &sparse = e.getSparse();
-  for(sparse_featstats_t::const_iterator i = sparse.begin(); i != sparse.end(); i++) {
-    o << i->first << i->second << " ";
-  }
+  e.getSparse().write(o,"");
+
   return o;
 }

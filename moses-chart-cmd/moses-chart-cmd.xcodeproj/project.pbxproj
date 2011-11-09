@@ -302,12 +302,15 @@
 					_LARGE_FILES,
 					"_FILE_OFFSET_BITS=64",
 				);
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../kenlm,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
+					../kenlm,
 					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
@@ -335,12 +338,15 @@
 					_LARGE_FILES,
 					"_FILE_OFFSET_BITS=64",
 				);
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../kenlm,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
+					../kenlm,
 					../randlm/lib,
 				);
 				OTHER_LDFLAGS = (

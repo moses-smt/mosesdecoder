@@ -88,6 +88,7 @@ my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
+my $___LATTICE_SAMPLES = 0;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt was relevant only to JHU 2006 workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef or 0 -> serial)
@@ -156,6 +157,7 @@ GetOptions(
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
   "nbest=i" => \$___N_BEST_LIST_SIZE,
+  "lattice-samples=i" => \$___LATTICE_SAMPLES,
   "queue-flags=s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
   "decoder-flags=s" => \$___DECODER_FLAGS,
@@ -208,6 +210,7 @@ if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER |
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100            ... how big nbestlist to generate
+  --lattice-samples      ... how many lattice samples (Chatterjee & Cancedda, emnlp 2010)
   --jobs=N               ... set this to anything to run moses in parallel
   --mosesparallelcmd=STR ... use a different script instead of moses-parallel
   --queue-flags=STRING   ... anything you with to pass to qsub, eg.
@@ -606,6 +609,8 @@ my $oldallsorted = undef;
 my $allsorted = undef;
 
 my $nbest_file=undef;
+my $lsamp_file=undef; #Lattice samples
+my $orig_nbest_file=undef; # replaced if lattice sampling
 
 while(1) {
   $run++;
@@ -625,8 +630,20 @@ while(1) {
   # skip running the decoder if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      $nbest_file = run_decoder($featlist, $run, $need_to_normalize);
+      ($nbest_file,$lsamp_file) = run_decoder($featlist, $run, $need_to_normalize);
       $need_to_normalize = 0;
+      if ($___LATTICE_SAMPLES) {
+        my $combined_file = "$nbest_file.comb";
+        safesystem("sort -k1,1n $nbest_file $lsamp_file > $combined_file") or
+          die("failed to merge nbest and lattice samples");
+        safesystem("gzip -f $nbest_file; gzip -f $lsamp_file") or 
+          die "Failed to gzip nbests and lattice samples";
+        $orig_nbest_file = "$nbest_file.gz";
+        $orig_nbest_file = "$nbest_file.gz";
+        $lsamp_file = "$lsamp_file.gz";
+        $lsamp_file = "$lsamp_file.gz";
+        $nbest_file = "$combined_file";
+      }
       safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
       $nbest_file = $nbest_file.".gz";
   }
@@ -646,6 +663,8 @@ while(1) {
   my $score_file = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
+  $cmd = create_extractor_script($cmd, $___WORKING_DIR);
+
   &submit_or_exec($cmd,"extract.out","extract.err");
 
   # Create the initial weights file for mert: init.opt
@@ -866,7 +885,7 @@ if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu);
+create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -921,6 +940,11 @@ sub run_decoder {
     my ($featlist, $run, $need_to_normalize) = @_;
     my $filename_template = "run%d.best$___N_BEST_LIST_SIZE.out";
     my $filename = sprintf($filename_template, $run);
+    my $lsamp_filename = undef;
+    if ($___LATTICE_SAMPLES) {
+      my $lsamp_filename_template = "run%d.lsamp$___LATTICE_SAMPLES.out";
+      $lsamp_filename = sprintf($lsamp_filename_template, $run);
+    }
     
     # user-supplied parameters
     print "params = $___DECODER_FLAGS\n";
@@ -941,23 +965,28 @@ sub run_decoder {
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
     my $decoder_config = join(" ", values %model_weights);
+    $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
 
+
     # run the decoder
-    my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
+    my $lsamp_cmd = "";
+    if ($___LATTICE_SAMPLES) {
+      $lsamp_cmd = " -lattice-samples $lsamp_filename $___LATTICE_SAMPLES ";
+    }
 
     if (defined $___JOBS && $___JOBS > 0) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
     sanity_check_order_of_lambdas($featlist, $filename);
-    return $filename;
+    return ($filename, $lsamp_filename);
 }
 
 
@@ -1139,7 +1168,7 @@ sub create_config {
     }
 
     if (defined($sparse_weights_file)) {
-      push @{$P{"weights-file"}}, $___WORKING_DIR."/".$sparse_weights_file;
+      push @{$P{"weight-file"}}, $___WORKING_DIR."/".$sparse_weights_file;
     }
 
     # create new moses.ini decoder config file by cloning and overriding the original one
@@ -1255,3 +1284,23 @@ sub submit_or_exec {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
   }
 }
+
+sub create_extractor_script()
+{
+  my ($cmd, $outdir) = @_;
+
+  my $script_path = $outdir."/extractor.sh";
+
+  open(OUT,"> $script_path")
+    or die "Can't write $script_path";
+  print OUT "#!/bin/bash\n";
+  print OUT "cd $outdir\n";
+  print OUT $cmd."\n";
+  close(OUT);
+
+  `chmod +x $script_path`;
+
+  return $script_path;  
+}
+
+

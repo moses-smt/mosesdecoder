@@ -2,14 +2,15 @@
 #define UTIL_MMAP__
 // Utilities for mmaped files.  
 
-#include "util/scoped.hh"
-
 #include <cstddef>
 
-#include <inttypes.h>
+#include "util/portability.hh"
+#include <stdint.h>
 #include <sys/types.h>
 
 namespace util {
+
+class scoped_fd;
 
 // (void*)-1 is MAP_FAILED; this is done to avoid including the mmap header here.  
 class scoped_mmap {
@@ -94,9 +95,9 @@ typedef enum {
 extern const int kFileFlags;
 
 // Wrapper around mmap to check it worked and hide some platform macros.  
-void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, int fd, off_t offset = 0);
+void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, FD fd, off_t offset = 0);
 
-void MapRead(LoadMethod method, int fd, off_t offset, std::size_t size, scoped_memory &out);
+void MapRead(LoadMethod method, FD fd, off_t offset, std::size_t size, scoped_memory &out);
 
 void *MapAnonymous(std::size_t size);
 

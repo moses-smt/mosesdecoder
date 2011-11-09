@@ -3,22 +3,17 @@
 
 #include "util/ersatz_progress.hh"
 #include "util/exception.hh"
+#include "util/file.hh"
 #include "util/have.hh"
 #include "util/mmap.hh"
-#include "util/scoped.hh"
 #include "util/string_piece.hh"
+#include "util/portability.hh"
 
 #include <string>
 
 #include <cstddef>
 
 namespace util {
-
-class EndOfFileException : public Exception {
-  public:
-    EndOfFileException() throw();
-    ~EndOfFileException() throw();
-};
 
 class ParseNumberException : public Exception {
   public:
@@ -33,13 +28,7 @@ class GZException : public Exception {
     ~GZException() throw() {}
 };
 
-int OpenReadOrThrow(const char *name);
-
 extern const bool kSpaces[256];
-
-// Return value for SizeFile when it can't size properly.  
-const off_t kBadSize = -1;
-off_t SizeFile(int fd);
 
 // Memory backing the returned StringPiece may vanish on the next call.  
 class FilePiece {
@@ -47,7 +36,7 @@ class FilePiece {
     // 32 MB default.
     explicit FilePiece(const char *file, std::ostream *show_progress = NULL, off_t min_buffer = 33554432);
     // Takes ownership of fd.  name is used for messages.  
-    explicit FilePiece(int fd, const char *name, std::ostream *show_progress = NULL, off_t min_buffer = 33554432);
+    explicit FilePiece(FD fd, const char *name, std::ostream *show_progress = NULL, off_t min_buffer = 33554432);
 
     ~FilePiece();
      

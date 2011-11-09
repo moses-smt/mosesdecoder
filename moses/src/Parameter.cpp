@@ -63,6 +63,7 @@ Parameter::Parameter()
   AddParam("max-trans-opt-per-coverage", "maximum number of translation options per input span (after applying mapping steps)");
   AddParam("max-phrase-length", "maximum phrase length (default 20)");
   AddParam("n-best-list", "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
+  AddParam("lattice-samples", "generate samples from lattice, in same format as nbest list. Uses the file and size arguments, as in n-best-list");
   AddParam("n-best-factor", "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
   AddParam("print-all-derivations", "to print all derivations in search graph");
   AddParam("output-factors", "list of factors in the output");
@@ -466,7 +467,10 @@ bool Parameter::ReadConfigFile(const string &filePath )
     // trim leading and trailing spaces/tabs
     line = Trim(line);
 
-    if (line[0]=='[') {
+    if (line.size() == 0) {
+      // blank line. do nothing.
+    }
+    else if (line[0]=='[') {
       // new parameter
       for (size_t currPos = 0 ; currPos < line.size() ; currPos++) {
         if (line[currPos] == ']') {
@@ -474,7 +478,7 @@ bool Parameter::ReadConfigFile(const string &filePath )
           break;
         }
       }
-    } else if (line != "") {
+    } else {
       // add value to parameter
       m_setting[paramName].push_back(line);
     }

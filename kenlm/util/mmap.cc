@@ -1,15 +1,15 @@
 #include "util/exception.hh"
+#include "util/file.hh"
 #include "util/mmap.hh"
-#include "util/scoped.hh"
+#include "util/portability.hh"
 
 #include <iostream>
 
 #include <assert.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include <sys/mman.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include "util/portability.hh"
 
 namespace util {
 
@@ -52,11 +52,14 @@ void scoped_memory::call_realloc(std::size_t size) {
   }
 }
 
-void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, int fd, off_t offset) {
+void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, FD fd, off_t offset) {
 #ifdef MAP_POPULATE // Linux specific
   if (prefault) {
     flags |= MAP_POPULATE;
   }
+#elif WIN32
+  // TODO WIN32
+
 #endif
   int protect = for_write ? (PROT_READ | PROT_WRITE) : PROT_READ;
   void *ret = mmap(NULL, size, protect, flags, fd, offset);
@@ -66,20 +69,6 @@ void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, int
   return ret;
 }
 
-namespace {
-void ReadAll(int fd, void *to_void, std::size_t amount) {
-  uint8_t *to = static_cast<uint8_t*>(to_void);
-  while (amount) {
-    ssize_t ret = read(fd, to, amount);
-    if (ret == -1) UTIL_THROW(ErrnoException, "Reading " << amount << " from fd " << fd << " failed.");
-    if (ret == 0) UTIL_THROW(Exception, "Hit EOF in fd " << fd << " but there should be " << amount << " more bytes to read.");
-    amount -= ret;
-    to += ret;
-  }
-}
-
-} // namespace
-
 const int kFileFlags =
 #ifdef MAP_FILE
   MAP_FILE | MAP_SHARED
@@ -88,7 +77,7 @@ const int kFileFlags =
 #endif
   ;
 
-void MapRead(LoadMethod method, int fd, off_t offset, std::size_t size, scoped_memory &out) {
+void MapRead(LoadMethod method, FD fd, off_t offset, std::size_t size, scoped_memory &out) {
   switch (method) {
     case LAZY:
       out.reset(MapOrThrow(size, false, kFileFlags, false, fd, offset), size, scoped_memory::MMAP_ALLOCATED);
@@ -105,8 +94,12 @@ void MapRead(LoadMethod method, int fd, off_t offset, std::size_t size, scoped_m
     case READ:
       out.reset(malloc(size), size, scoped_memory::MALLOC_ALLOCATED);
       if (!out.get()) UTIL_THROW(util::ErrnoException, "Allocating " << size << " bytes with malloc");
+#ifdef WIN32
+
+#else
       if (-1 == lseek(fd, offset, SEEK_SET)) UTIL_THROW(ErrnoException, "lseek to " << offset << " in fd " << fd << " failed.");
-      ReadAll(fd, out.get(), size);
+#endif
+      ReadOrThrow(fd, out.get(), size);
       break;
   }
 }
@@ -118,12 +111,17 @@ void *MapAnonymous(std::size_t size) {
 #else
       MAP_ANON // BSD
 #endif
-      | MAP_PRIVATE, false, -1, 0);
+	  | MAP_PRIVATE, false, kBadFD, 0);
 }
 
 void *MapZeroedWrite(const char *name, std::size_t size, scoped_fd &file) {
+#ifdef WIN32
+
+#else
   file.reset(open(name, O_CREAT | O_RDWR | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
-  if (-1 == file.get())
+#endif
+
+  if (kBadFD == file.get())
     UTIL_THROW(ErrnoException, "Failed to open " << name << " for writing");
   if (-1 == ftruncate(file.get(), size))
     UTIL_THROW(ErrnoException, "ftruncate on " << name << " to " << size << " failed");

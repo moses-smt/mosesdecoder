@@ -19,12 +19,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <iostream>
-#include <fstream>
+#include <boost/version.hpp>
+#include <ostream>
 #include <string>
-#include <vector>
 #include "FactorCollection.h"
-#include "LanguageModel.h"
 #include "Util.h"
 
 using namespace std;
@@ -33,79 +31,54 @@ namespace Moses
 {
 FactorCollection FactorCollection::s_instance;
 
-void FactorCollection::LoadVocab(FactorDirection direction, FactorType factorType, const string &filePath)
+const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
-  ifstream 	inFile(filePath.c_str());
-
-  string line;
+// Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS
-  boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
-  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
-#endif
-  while( !getline(inFile, line, '\n').eof()) {
-    vector<string> token = Tokenize( line );
-    if (token.size() < 2) {
-      continue;
-    }
-    // looks like good line
-    AddFactor(direction, factorType, token[1]);
+#if BOOST_VERSION < 104200
+  FactorFriend to_ins;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
+#endif // BOOST_VERSION
+  {
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#if BOOST_VERSION >= 104200
+    // If this line doesn't compile, upgrade your Boost.  
+    Set::const_iterator i = m_set.find(factorString, HashFactor(), EqualsFactor());
+#else // BOOST_VERSION
+    Set::const_iterator i = m_set.find(to_ins);
+#endif // BOOST_VERSION
+    if (i != m_set.end()) return &i->in;
   }
+  boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#if BOOST_VERSION >= 102400
+  FactorFriend to_ins;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
+#endif // BOOST_VERSION
+#else // WITH_THREADS
+  FactorFriend to_ins;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
+#endif // WITH_THREADS
+  to_ins.in.m_id = m_factorId;
+  std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));
+  if (ret.second) {
+    m_factorId++;
+  }
+  return &ret.first->in;
 }
 
-bool FactorCollection::Exists(FactorDirection direction, FactorType factorType, const string &factorString)
-{
-#ifdef WITH_THREADS
-  boost::shared_lock<boost::shared_mutex> lock(m_accessLock);
-#endif
-  // find string id
-  const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-
-  FactorSet::const_iterator iterFactor;
-  Factor search(direction, factorType, ptrString); // id not used for searching
-
-  iterFactor = m_collection.find(search);
-  return iterFactor != m_collection.end();
-}
-
-const Factor *FactorCollection::AddFactor(FactorDirection direction
-    , FactorType 			factorType
-    , const string 		&factorString)
-{
-#ifdef WITH_THREADS
-  boost::upgrade_lock<boost::shared_mutex> lock(m_accessLock);
-  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
-#endif
-  // find string id
-  const string *ptrString=&(*m_factorStringCollection.insert(factorString).first);
-  pair<FactorSet::iterator, bool> ret = m_collection.insert( Factor(direction, factorType, ptrString, m_factorId) );
-  if (ret.second)
-    ++m_factorId; // new factor, make sure next new factor has diffrernt id
-
-  const Factor *factor = &(*ret.first);
-  return factor;
-}
-
-FactorCollection::~FactorCollection()
-{
-  //FactorSet::iterator iter;
-  //for (iter = m_collection.begin() ; iter != m_collection.end() ; iter++)
-  //{
-  //	delete (*iter);
-  //}
-}
+FactorCollection::~FactorCollection() {}
 
 TO_STRING_BODY(FactorCollection);
 
 // friend
 ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
 {
-  FactorSet::const_iterator iterFactor;
-
-  for (iterFactor = factorCollection.m_collection.begin() ; iterFactor != factorCollection.m_collection.end() ; ++iterFactor) {
-    const Factor &factor 	= *iterFactor;
-    out << factor;
+#ifdef WITH_THREADS
+  boost::shared_lock<boost::shared_mutex> lock(factorCollection.m_accessLock);
+#endif
+  for (FactorCollection::Set::const_iterator i = factorCollection.m_set.begin(); i != factorCollection.m_set.end(); ++i) {
+    out << i->in;
   }
-
   return out;
 }
 

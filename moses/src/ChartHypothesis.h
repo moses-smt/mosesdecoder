@@ -21,6 +21,10 @@
 
 #pragma once
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <vector>
 #include "Util.h"
 #include "WordsRange.h"
@@ -43,25 +47,19 @@ class ChartHypothesis
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesis&);
 
 protected:
-
 #ifdef USE_HYPO_POOL
   static ObjectPool<ChartHypothesis> s_objectPool;
 #endif
 
-  static unsigned int s_HypothesesCreated;
-
-  int m_id; /**< numeric ID of this hypothesis, used for logging */
   const TargetPhrase &m_targetPhrase;
   const ChartTranslationOption &m_transOpt;
 
-  Phrase m_contextPrefix, m_contextSuffix;
   WordsRange					m_currSourceWordsRange;
 	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   ,m_lmNGram
   ,m_lmPrefix;
   float m_totalScore;
-  size_t m_numTargetTerminals;
 
   ChartArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
   const ChartHypothesis 	*m_winningHypo;
@@ -70,20 +68,12 @@ protected:
 
   ChartManager& m_manager;
 
-  size_t CalcPrefix(Phrase &ret, size_t size) const;
-  size_t CalcSuffix(Phrase &ret, size_t size) const;
+  unsigned m_id; /* pkoehn wants to log the order in which hypotheses were generated */
 
   ChartHypothesis(); // not implemented
   ChartHypothesis(const ChartHypothesis &copy); // not implemented
 
 public:
-  static void ResetHypoCount() {
-    s_HypothesesCreated = 0;
-  }
-  static unsigned int GetHypoCount() {
-    return s_HypothesesCreated;
-  }
-
 #ifdef USE_HYPO_POOL
   void *operator new(size_t /* num_bytes */) {
     void *ptr = s_objectPool.getPtr();
@@ -104,9 +94,8 @@ public:
 
   ~ChartHypothesis();
 
-  int GetId()const {
-    return m_id;
-  }
+  unsigned GetId() const { return m_id; }
+
   const ChartTranslationOption &GetTranslationOption()const {
     return m_transOpt;
   }
@@ -128,13 +117,6 @@ public:
   Phrase GetOutputPhrase() const;
 
 	int RecombineCompare(const ChartHypothesis &compare) const;
-
-  const Phrase &GetPrefix() const {
-    return m_contextPrefix;
-  }
-  const Phrase &GetSuffix() const {
-    return m_contextSuffix;
-  }
 
   void CalcScore();
 
@@ -159,10 +141,6 @@ public:
 
   const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();
-  }
-
-  size_t GetNumTargetTerminals() const {
-    return m_numTargetTerminals;
   }
 
 	const ChartHypothesis* GetWinningHypothesis() const {

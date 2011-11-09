@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ext/hash_set>
 #endif
 
+#include <algorithm>
 #include <limits>
 #include <cmath>
 #include "Manager.h"
@@ -257,6 +258,152 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   }
 }
 
+struct SGNReverseCompare {
+  bool operator() (const SearchGraphNode& s1, const SearchGraphNode& s2) const {
+    return s1.hypo->GetId() > s2.hypo->GetId();
+  }
+};
+
+/**
+  * Implements lattice sampling, as in Chatterjee & Cancedda, emnlp 2010
+  **/
+void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const {
+  
+  vector<SearchGraphNode> searchGraph;
+  GetSearchGraph(searchGraph);
+
+  //Calculation of the sigmas of each hypothesis and edge. In C&C notation this is
+  //the "log of the cumulative unnormalized probability of all the paths in the
+  // lattice for the hypothesis to a final node"
+  typedef pair<int, int> Edge;
+  map<const Hypothesis*, float> sigmas;
+  map<Edge, float> edgeScores;
+  map<const Hypothesis*, set<const Hypothesis*> > outgoingHyps;
+  map<int,const Hypothesis*> idToHyp;
+  map<int,float> fscores;
+
+  //Iterating through the hypos in reverse order of id gives  a reverse 
+  //topological order. We rely on the fact that hypo ids are given out 
+  //sequentially, as the search proceeds.
+  //NB: Could just sort by stack. 
+  sort(searchGraph.begin(), searchGraph.end(), SGNReverseCompare());
+
+  //first task is to fill in the outgoing hypos and edge scores.
+  for (vector<SearchGraphNode>::const_iterator i = searchGraph.begin();
+    i != searchGraph.end(); ++i) {
+    const Hypothesis* hypo = i->hypo;
+    idToHyp[hypo->GetId()] = hypo;
+    fscores[hypo->GetId()] = i->fscore;
+    if (hypo->GetId()) {
+      //back to  current
+      const Hypothesis* prevHypo = i->hypo->GetPrevHypo();
+      outgoingHyps[prevHypo].insert(hypo);
+      edgeScores[Edge(prevHypo->GetId(),hypo->GetId())] = 
+        hypo->GetScore() - prevHypo->GetScore();
+    }
+    //forward from current
+    if (i->forward >= 0) {
+      map<int,const Hypothesis*>::const_iterator idToHypIter = idToHyp.find(i->forward);
+      assert(idToHypIter != idToHyp.end());
+      const Hypothesis* nextHypo = idToHypIter->second;
+      outgoingHyps[hypo].insert(nextHypo);
+      map<int,float>::const_iterator fscoreIter = fscores.find(nextHypo->GetId());
+      assert(fscoreIter != fscores.end());
+      edgeScores[Edge(hypo->GetId(),nextHypo->GetId())] = 
+        i->fscore - fscoreIter->second;
+    }
+  }
+
+
+  //then run through again to calculate sigmas
+  for (vector<SearchGraphNode>::const_iterator i = searchGraph.begin();
+    i != searchGraph.end(); ++i) {
+
+    if (i->forward == -1) {
+      sigmas[i->hypo] = 0;
+    } else {
+      map<const Hypothesis*, set<const Hypothesis*> >::const_iterator outIter = 
+        outgoingHyps.find(i->hypo);
+      
+      assert(outIter != outgoingHyps.end());
+      float sigma = 0;
+      for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
+        j != outIter->second.end(); ++j) {
+        map<const Hypothesis*, float>::const_iterator succIter = sigmas.find(*j);
+        assert(succIter != sigmas.end());
+        map<Edge,float>::const_iterator edgeScoreIter = 
+          edgeScores.find(Edge(i->hypo->GetId(),(*j)->GetId()));
+        assert(edgeScoreIter != edgeScores.end());
+        float term = edgeScoreIter->second + succIter->second; // Add sigma(*j)
+        if (sigma == 0) {
+           sigma = term;
+        } else {
+          sigma = log_sum(sigma,term);
+        }
+      }
+      sigmas[i->hypo] = sigma;
+    }
+  }
+
+  //The actual sampling!
+  const Hypothesis* startHypo = searchGraph.back().hypo;
+  assert(startHypo->GetId() == 0);
+  for (size_t i = 0; i < count; ++i) {
+    vector<const Hypothesis*> path;
+    path.push_back(startHypo);
+    while(1) {
+      map<const Hypothesis*, set<const Hypothesis*> >::const_iterator outIter = 
+        outgoingHyps.find(path.back());
+      if (outIter == outgoingHyps.end() || !outIter->second.size()) {
+        //end of the path
+        break;
+      }
+      //score the possibles
+      vector<const Hypothesis*> candidates;
+      vector<float> candidateScores;
+      float scoreTotal = 0;
+      for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
+        j != outIter->second.end(); ++j) {
+        candidates.push_back(*j);
+        assert(sigmas.find(*j) != sigmas.end());
+        Edge edge(path.back()->GetId(),(*j)->GetId());
+        assert(edgeScores.find(edge) != edgeScores.end());
+        candidateScores.push_back(sigmas[*j]  + edgeScores[edge]);
+        if (scoreTotal == 0) {
+          scoreTotal = candidateScores.back();
+        } else {
+          scoreTotal = log_sum(candidateScores.back(), scoreTotal);
+        }
+      }
+
+      //normalise
+      transform(candidateScores.begin(), candidateScores.end(), candidateScores.begin(), bind2nd(minus<float>(),scoreTotal));
+      //copy(candidateScores.begin(),candidateScores.end(),ostream_iterator<float>(cerr," "));
+      //cerr << endl;
+
+      //draw the sample
+      float random = log((float)rand()/RAND_MAX);
+      size_t position = 1;
+      float sum = candidateScores[0];
+      for (; position < candidateScores.size() && sum < random; ++position) {
+        sum = log_sum(sum,candidateScores[position]);
+      }
+      //cerr << "Random: " << random << " Chose " << position-1 << endl;
+      const Hypothesis* chosen =  candidates[position-1];
+      path.push_back(chosen); 
+    }
+    //cerr << "Path: " << endl;
+    //for (size_t j = 0; j < path.size(); ++j) {
+     // cerr << path[j]->GetId() <<  " " << path[j]->GetScoreBreakdown() << endl;
+    //}
+    //cerr << endl;
+
+    //Convert the hypos to TrellisPath
+    ret.Add(new TrellisPath(path));
+    //cerr << ret.at(ret.GetSize()-1).GetScoreBreakdown() << endl;
+  } 
+
+}
 
 
 
@@ -529,18 +676,25 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
   else
     outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
 
-  outputSearchGraphStream << " back=" << prevHypo->GetId();
+    outputSearchGraphStream << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
+                            << " back=" << prevHypo->GetId()
+                            << " score=" << searchNode.hypo->GetScore()
+                            << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
 
+    if (searchNode.recombinationHypo != NULL)
+      outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
+
+    outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+                            << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
+                            << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
+
+  // Modified so that -osgx is a superset of -osg (GST Oct 2011)
   ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
   scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
-	outputSearchGraphStream << " [ " << StaticData::Instance().GetAllWeights();
+	outputSearchGraphStream << " scores = [ " << StaticData::Instance().GetAllWeights();
   outputSearchGraphStream << " ]";
-  // added this so that we will have the span in the input covered
-  // (DNM, 19 Nov 2010)
-  outputSearchGraphStream << " covered=" <<
-                          searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
-                          << "-" <<
-                          searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
+                            
+
   outputSearchGraphStream << " out=" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
 		  searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 //  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;

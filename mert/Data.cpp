@@ -238,22 +238,13 @@ void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStat
   if (!hasSparseFeatures())
     return;
 
+  out << " ";
+
   // sparse features
-  const sparse_featstats_t &s1 = f1.getSparse();
-  const sparse_featstats_t &s2 = f2.getSparse();
-  for( sparse_featstats_t::const_iterator i=s1.begin(); i!=s1.end(); i++) {
-    if (s2.find(i->first) == s2.end())
-      out << " " << i->first << " " << i->second;
-    else {
-      float diff = i->second - s2.find(i->first)->second;
-      if (abs(diff) > 0.00001)
-        out << " " << i->first << " " << diff;
-    }
-  }
-  for( sparse_featstats_t::const_iterator i=s2.begin(); i!=s2.end(); i++) {
-    if (s1.find(i->first) == s1.end())
-      out << " " << i->first << " " << (- i->second);
-  }
+  const SparseVector &s1 = f1.getSparse();
+  const SparseVector &s2 = f2.getSparse();
+  SparseVector diff = s1 - s2;
+  diff.write(out);
 }
 
 

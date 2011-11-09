@@ -122,7 +122,7 @@ for(my $i = 0; $i < scalar(@htmlColors); $i++)
 }
 $stylesheet .= "</style>\n";
 
-print "<html><head><meta http-equiv=\"Content-type: text/html; charset=utf-8\">\n";
+print "<html><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=UTF-8\">\n";
 print "<title>[" . join(', ', @sysoutfiles) . "] vs. [" . join(', ', @truthfiles) . "]: Sentence-by-Sentence Comparison</title>$stylesheet</head><body>\n";
 
 foreach my $systemScores (@bleuScores) {rankSentencesByBLEU($systemScores);}

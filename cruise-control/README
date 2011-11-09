@@ -1,27 +1,34 @@
 A simple regular testing of Moses codebase, aka cruise control
-Started by Ondrej Bojar
-2011-08-28
+--------------------------------------------------------------
+
+Features:
+
+- Checkout latest commits
+- Test configure, make, make scripts
+- Run regression tests
+- Run a sample EMS pipeline
+- Report results into logfiles
+- A simple web interface in PHP
+
+How to run cruise control:
+
+1) Download and compile SRILM
+
+2) Download, compile and install IRSTLM
+
+3) Edit the configuration file example.config. You can create as many
+   configuration files as you like.
+
+4) Execute ./test_all_new_commits.sh yourfile.config
 
 
-Usage:
+How to set up the web interface:
 
-1. Checkout this directory somewhere on the computer where you want to run the
-   cruise control.
-2. Create as many config files as you wish, an example is ondrej-nb.config
-   ...hardcode all paths to you preferred external tools like LM toolkits.
-3. Run ./test_all_new_commits.sh <CONFIGFILE>
+1) Install Apache and PHP
 
+2) Copy files from cruise-control/web into Apache's www directory
 
+3) Point StaticData::logs_path to correct directory, e.g. /home/cruise/logs/example/
+   Default value is 'data', you might want to just create a symlink.
 
-TODO / KNOWN BUGS
-- regression tests are not run yet
-
-- regression tests always require SRILM, but we need to test all LMs that have
-  been compiled in
-  => add separate regression tests, one for each LM?
-  => modify regression tests to actually loop over all LMs?
-
-- final status is FAIL if any regression test fails, but we should actually
-  allow to expect failures for the given set of ./configure parameters
-  (e.g. regression test requiring irstlm is bound to fail if we're not linking
-  against irstlm)
+Written by Ondrej Bojar, Ales Tamchyna, Barry Haddow, Rimas Blazaitis

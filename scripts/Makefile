@@ -25,9 +25,9 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 all: compile
 
 SUBDIRS=training/phrase-extract training/symal training/mbr training/lexical-reordering ems/biconcor
-SUBDIRS_CLEAN=$(SUBDIRS) training/memscore training/eppex
+SUBDIRS_CLEAN=$(SUBDIRS) training/memscore training/eppex training/compact-rule-table
 
-compile: compile-memscore compile-eppex
+compile: compile-memscore compile-eppex compile-compact-rule-table
 	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
@@ -53,6 +53,15 @@ compile-eppex:
 	  || ( echo "WARNING: Building eppex failed."; \
 	       echo 'training/eppex/counter' >> ../../release-exclude; \
 	       echo 'training/eppex/eppex' >> ../../release-exclude )
+
+compile-compact-rule-table:
+	# Building the compact rule table tools may fail e.g. if boost is not available.
+	# We ignore this because the tools aren't used by default.
+	cd training/compact-rule-table ; \
+	  ./configure && $(MAKE) \
+	  || ( echo "WARNING: Building compact rule table tools failed."; \
+	       echo 'training/compact-rule-table/tools/compactify' >> ../../release-exclude )
+
 clean:
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS_CLEAN); do \
@@ -67,7 +76,7 @@ clean:
 ## That is for each script (listed below in MAIN_SCRIPTS),
 ## we create a date-stamped version in MAIN_SCRIPTS_TARGET_DIR
 
-MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl  mert-moses.pl train-model.perl clean-corpus-n.perl
+MAIN_TRAINING_SCRIPTS_NAMES=filter-model-given-input.pl mert-moses-multi.pl  mert-moses.pl train-model.perl clean-corpus-n.perl
 # Make trick to add directory name to all of them:
 MAIN_TRAINING_SCRIPTS=$(MAIN_TRAINING_SCRIPTS_NAMES:%=training/%)
 

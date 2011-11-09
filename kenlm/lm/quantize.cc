@@ -1,11 +1,13 @@
 #include "lm/quantize.hh"
 
+#include "lm/binary_format.hh"
 #include "lm/lm_exception.hh"
 
 #include <algorithm>
 #include <numeric>
+#include <limits>
 
-#include <unistd.h>
+#include "util/portability.hh"
 
 namespace lm {
 namespace ngram {
@@ -38,10 +40,13 @@ const char kSeparatelyQuantizeVersion = 2;
 
 } // namespace
 
-void SeparatelyQuantize::UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &/*counts*/, Config &config) {
+void SeparatelyQuantize::UpdateConfigFromBinary(FD fd, const std::vector<uint64_t> &/*counts*/, Config &config) {
   char version;
+#ifdef WIN32
+#else
   if (read(fd, &version, 1) != 1 || read(fd, &config.prob_bits, 1) != 1 || read(fd, &config.backoff_bits, 1) != 1) 
     UTIL_THROW(util::ErrnoException, "Failed to read header for quantization.");
+#endif
   if (version != kSeparatelyQuantizeVersion) UTIL_THROW(FormatLoadException, "This file has quantization version " << (unsigned)version << " but the code expects version " << (unsigned)kSeparatelyQuantizeVersion);
   AdvanceOrThrow(fd, -3);
 }
@@ -70,8 +75,7 @@ void SeparatelyQuantize::Train(uint8_t order, std::vector<float> &prob, std::vec
 
 void SeparatelyQuantize::TrainProb(uint8_t order, std::vector<float> &prob) {
   float *centers = start_ + TableStart(order);
-  *(centers++) = kBlankProb;
-  MakeBins(&*prob.begin(), &*prob.end(), centers, (1ULL << prob_bits_) - 1);
+  MakeBins(&*prob.begin(), &*prob.end(), centers, (1ULL << prob_bits_));
 }
 
 void SeparatelyQuantize::FinishedLoading(const Config &config) {

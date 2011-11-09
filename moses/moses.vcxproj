@@ -1,16 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug-withSRILM|Win32">
-      <Configuration>Debug-withSRILM</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release-withSRILM|Win32">
-      <Configuration>Release-withSRILM</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -24,15 +16,6 @@
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
@@ -44,12 +27,6 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -64,15 +41,11 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -91,47 +64,13 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Lib>
-      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">
-    <ClCompile>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;LM_SRI;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-    </ClCompile>
-    <Lib>
-      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\mysqlpp\lib;$(SolutionDir)..\irstlm\src;$(SolutionDir)..\srilm\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;LM_SRI;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
@@ -182,35 +121,18 @@
     <ClCompile Include="src\HypothesisStackNormal.cpp" />
     <ClCompile Include="src\InputFileStream.cpp" />
     <ClCompile Include="src\InputType.cpp" />
-    <ClCompile Include="src\LanguageModel.cpp" />
-    <ClCompile Include="src\LanguageModelFactory.cpp" />
-    <ClCompile Include="src\LanguageModelImplementation.cpp" />
-    <ClCompile Include="src\LanguageModelInternal.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-    </ClCompile>
-    <ClCompile Include="src\LanguageModelJoint.cpp" />
-    <ClCompile Include="src\LanguageModelMultiFactor.cpp" />
-    <ClCompile Include="src\LanguageModelSingleFactor.cpp" />
-    <ClCompile Include="src\LanguageModelSkip.cpp" />
-    <ClCompile Include="src\LanguageModelSRI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="src\LexicalReordering.cpp" />
     <ClCompile Include="src\LexicalReorderingState.cpp" />
     <ClCompile Include="src\LexicalReorderingTable.cpp" />
     <ClCompile Include="src\LMList.cpp" />
+    <ClCompile Include="src\LM\Base.cpp" />
+    <ClCompile Include="src\LM\Factory.cpp" />
+    <ClCompile Include="src\LM\Implementation.cpp" />
+    <ClCompile Include="src\LM\Joint.cpp" />
+    <ClCompile Include="src\LM\MultiFactor.cpp" />
+    <ClCompile Include="src\LM\SingleFactor.cpp" />
     <ClCompile Include="src\LVoc.cpp" />
     <ClCompile Include="src\Manager.cpp" />
-    <ClCompile Include="src\NGramCollection.cpp" />
-    <ClCompile Include="src\NGramNode.cpp" />
     <ClCompile Include="src\Parameter.cpp" />
     <ClCompile Include="src\PartialTranslOptColl.cpp" />
     <ClCompile Include="src\PCNTools.cpp" />
@@ -218,12 +140,8 @@
     <ClCompile Include="src\PhraseDictionary.cpp" />
     <ClCompile Include="src\PhraseDictionaryMemory.cpp" />
     <ClCompile Include="src\PhraseDictionaryNode.cpp">
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug-withSRILM|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
-      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
-      <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release-withSRILM|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.obj</ObjectFileName>
       <XMLDocumentationFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename)1.xdc</XMLDocumentationFileName>
     </ClCompile>
@@ -238,6 +156,9 @@
     <ClCompile Include="src\RuleCube.cpp" />
     <ClCompile Include="src\RuleCubeItem.cpp" />
     <ClCompile Include="src\RuleCubeQueue.cpp" />
+    <ClCompile Include="src\RuleTableLoaderCompact.cpp" />
+    <ClCompile Include="src\RuleTableLoaderFactory.cpp" />
+    <ClCompile Include="src\RuleTableLoaderStandard.cpp" />
     <ClCompile Include="src\ScoreComponentCollection.cpp" />
     <ClCompile Include="src\ScoreIndexManager.cpp" />
     <ClCompile Include="src\ScoreProducer.cpp" />
@@ -320,25 +241,16 @@
     <ClInclude Include="src\HypothesisStackNormal.h" />
     <ClInclude Include="src\InputFileStream.h" />
     <ClInclude Include="src\InputType.h" />
-    <ClInclude Include="src\LanguageModel.h" />
-    <ClInclude Include="src\LanguageModelDelegate.h" />
-    <ClInclude Include="src\LanguageModelFactory.h" />
-    <ClInclude Include="src\LanguageModelImplementation.h" />
-    <ClInclude Include="src\LanguageModelInternal.h" />
-    <ClInclude Include="src\LanguageModelIRST.h" />
-    <ClInclude Include="src\LanguageModelJoint.h" />
-    <ClInclude Include="src\LanguageModelKen.h" />
-    <ClInclude Include="src\LanguageModelMultiFactor.h" />
-    <ClInclude Include="src\LanguageModelParallelBackoff.h" />
-    <ClInclude Include="src\LanguageModelRandLM.h" />
-    <ClInclude Include="src\LanguageModelRemote.h" />
-    <ClInclude Include="src\LanguageModelSingleFactor.h" />
-    <ClInclude Include="src\LanguageModelSkip.h" />
-    <ClInclude Include="src\LanguageModelSRI.h" />
     <ClInclude Include="src\LexicalReordering.h" />
     <ClInclude Include="src\LexicalReorderingState.h" />
     <ClInclude Include="src\LexicalReorderingTable.h" />
     <ClInclude Include="src\LMList.h" />
+    <ClInclude Include="src\LM\Base.h" />
+    <ClInclude Include="src\LM\Factory.h" />
+    <ClInclude Include="src\LM\Implementation.h" />
+    <ClInclude Include="src\LM\Joint.h" />
+    <ClInclude Include="src\LM\MultiFactor.h" />
+    <ClInclude Include="src\LM\SingleFactor.h" />
     <ClInclude Include="src\LVoc.h" />
     <ClInclude Include="src\Manager.h" />
     <ClInclude Include="src\NGramCollection.h" />
@@ -367,6 +279,10 @@
     <ClInclude Include="src\RuleCube.h" />
     <ClInclude Include="src\RuleCubeItem.h" />
     <ClInclude Include="src\RuleCubeQueue.h" />
+    <ClInclude Include="src\RuleTableLoader.h" />
+    <ClInclude Include="src\RuleTableLoaderCompact.h" />
+    <ClInclude Include="src\RuleTableLoaderFactory.h" />
+    <ClInclude Include="src\RuleTableLoaderStandard.h" />
     <ClInclude Include="src\ScoreComponentCollection.h" />
     <ClInclude Include="src\ScoreIndexManager.h" />
     <ClInclude Include="src\ScoreProducer.h" />

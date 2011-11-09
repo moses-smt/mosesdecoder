@@ -10,12 +10,14 @@
  *  Currently only used for next pointers.  
  */
 
-#include <inttypes.h>
+#include <stdint.h>
+#include <assert.h>
 
-#include "lm/binary_format.hh"
+#include "lm/model_type.hh"
 #include "lm/trie.hh"
 #include "util/bit_packing.hh"
 #include "util/sorted_uniform.hh"
+#include "util/portability.hh"
 
 namespace lm {
 namespace ngram {
@@ -27,7 +29,7 @@ class DontBhiksha {
   public:
     static const ModelType kModelTypeAdd = static_cast<ModelType>(0);
 
-    static void UpdateConfigFromBinary(int /*fd*/, Config &/*config*/) {}
+    static void UpdateConfigFromBinary(FD /*fd*/, Config &/*config*/) {}
 
     static std::size_t Size(uint64_t /*max_offset*/, uint64_t /*max_next*/, const Config &/*config*/) { return 0; }
 
@@ -61,7 +63,7 @@ class ArrayBhiksha {
   public:
     static const ModelType kModelTypeAdd = kArrayAdd;
 
-    static void UpdateConfigFromBinary(int fd, Config &config);
+    static void UpdateConfigFromBinary(FD fd, Config &config);
 
     static std::size_t Size(uint64_t max_offset, uint64_t max_next, const Config &config);
 
@@ -78,6 +80,7 @@ class ArrayBhiksha {
         util::ReadInt57(base, bit_offset, next_inline_.bits, next_inline_.mask);
       out.end = ((end_it - offset_begin_) << next_inline_.bits) | 
         util::ReadInt57(base, bit_offset + total_bits, next_inline_.bits, next_inline_.mask);
+      //assert(out.end >= out.begin);
     }
 
     void WriteNext(void *base, uint64_t bit_offset, uint64_t index, uint64_t value) {

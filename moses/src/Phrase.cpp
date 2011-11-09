@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "StaticData.h"  // GetMaxNumFactors
 
+#include "util/string_piece.hh"
+#include "util/tokenize_piece.hh"
+
 using namespace std;
 
 namespace Moses
@@ -165,64 +168,26 @@ void Phrase::PrependWord(const Word &newWord)
   m_words[0] = newWord;
 }
 
-vector< vector<string> > Phrase::Parse(const std::string &phraseString, const std::vector<FactorType> &factorOrder, const std::string& factorDelimiter)
-{
-  bool isMultiCharDelimiter = factorDelimiter.size() > 1;
-  // parse
-  vector< vector<string> > phraseVector;
-  vector<string> annotatedWordVector = Tokenize(phraseString);
-  // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
-  //		to
-  // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
-
-  for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() ; phrasePos++) {
-    string &annotatedWord = annotatedWordVector[phrasePos];
-    vector<string> factorStrVector;
-    if (isMultiCharDelimiter) {
-      factorStrVector = TokenizeMultiCharSeparator(annotatedWord, factorDelimiter);
-    } else {
-      factorStrVector = Tokenize(annotatedWord, factorDelimiter);
-    }
-    // KOMMA|none
-    //    to
-    // "KOMMA" "none"
-    if (factorStrVector.size() != factorOrder.size()) {
-      TRACE_ERR( "[ERROR] Malformed input: '" << annotatedWord << "'" <<  std::endl
-                 << "In '" << phraseString << "'" << endl
-                 << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-                 << "  but instead received input with " << factorStrVector.size() << " factor(s).\n");
-      abort();
-    }
-    phraseVector.push_back(factorStrVector);
-  }
-  return phraseVector;
-}
-
-void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
-                              , const vector< vector<string> > &phraseVector)
+void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 
-  m_words.reserve(phraseVector.size());
-
-  for (size_t phrasePos = 0 ; phrasePos < phraseVector.size() ; phrasePos++) {
-    // add word this phrase
+  for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
     Word &word = AddWord();
-    for (size_t currFactorIndex= 0 ; currFactorIndex < factorOrder.size() ; currFactorIndex++) {
-      FactorType factorType = factorOrder[currFactorIndex];
-      const string &factorStr = phraseVector[phrasePos][currFactorIndex];
-      const Factor *factor = factorCollection.AddFactor(m_direction, factorType, factorStr);
-      word[factorType] = factor;
+    size_t index = 0;
+    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
+        factor_it && (index < factorOrder.size()); 
+        ++factor_it, ++index) {
+      word[factorOrder[index]] = factorCollection.AddFactor(*factor_it);
+    }
+    if (index != factorOrder.size()) {
+      TRACE_ERR( "[ERROR] Malformed input: '" << *word_it << "'" <<  std::endl
+                 << "In '" << phraseString << "'" << endl
+                 << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
+                 << "  but instead received input with " << index << " factor(s).\n");
+      abort();
     }
   }
-}
-
-void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder
-                              , const string &phraseString
-                              , const string &factorDelimiter)
-{
-  vector< vector<string> > phraseVector = Parse(phraseString, factorOrder, factorDelimiter);
-  CreateFromString(factorOrder, phraseVector);
 }
 
 void Phrase::CreateFromStringNewFormat(FactorDirection direction

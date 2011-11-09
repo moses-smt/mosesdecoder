@@ -1,15 +1,15 @@
 #ifndef LM_QUANTIZE_H__
 #define LM_QUANTIZE_H__
 
-#include "lm/binary_format.hh" // for ModelType
 #include "lm/blank.hh"
 #include "lm/config.hh"
+#include "lm/model_type.hh"
 #include "util/bit_packing.hh"
 
 #include <algorithm>
 #include <vector>
 
-#include <inttypes.h>
+#include <stdint.h>
 
 #include <iostream>
 
@@ -22,7 +22,7 @@ class Config;
 class DontQuantize {
   public:
     static const ModelType kModelTypeAdd = static_cast<ModelType>(0);
-    static void UpdateConfigFromBinary(int, const std::vector<uint64_t> &, Config &) {}
+    static void UpdateConfigFromBinary(FD, const std::vector<uint64_t> &, Config &) {}
     static std::size_t Size(uint8_t /*order*/, const Config &/*config*/) { return 0; }
     static uint8_t MiddleBits(const Config &/*config*/) { return 63; }
     static uint8_t LongestBits(const Config &/*config*/) { return 31; }
@@ -35,6 +35,9 @@ class DontQuantize {
       void Read(const void *base, uint64_t bit_offset, float &prob, float &backoff) const {
         prob = util::ReadNonPositiveFloat31(base, bit_offset);
         backoff = util::ReadFloat32(base, bit_offset + 31);
+      }
+      void ReadProb(const void *base, uint64_t bit_offset, float &prob) const {
+        prob = util::ReadNonPositiveFloat31(base, bit_offset);
       }
       void ReadBackoff(const void *base, uint64_t bit_offset, float &backoff) const {
         backoff = util::ReadFloat32(base, bit_offset + 31);
@@ -77,7 +80,7 @@ class SeparatelyQuantize {
         Bins(uint8_t bits, const float *const begin) : begin_(begin), end_(begin_ + (1ULL << bits)), bits_(bits), mask_((1ULL << bits) - 1) {}
 
         uint64_t EncodeProb(float value) const {
-          return(value == kBlankProb ? kBlankProbQuant : Encode(value, 1));
+          return Encode(value, 0);
         }
 
         uint64_t EncodeBackoff(float value) const {
@@ -110,7 +113,7 @@ class SeparatelyQuantize {
   public:
     static const ModelType kModelTypeAdd = kQuantAdd;
 
-    static void UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config);
+    static void UpdateConfigFromBinary(FD fd, const std::vector<uint64_t> &counts, Config &config);
 
     static std::size_t Size(uint8_t order, const Config &config) {
       size_t longest_table = (static_cast<size_t>(1) << static_cast<size_t>(config.prob_bits)) * sizeof(float);
@@ -130,6 +133,10 @@ class SeparatelyQuantize {
         void Write(void *base, uint64_t bit_offset, float prob, float backoff) const {
           util::WriteInt57(base, bit_offset, total_bits_, 
               (prob_.EncodeProb(prob) << backoff_.Bits()) | backoff_.EncodeBackoff(backoff));
+        }
+
+        void ReadProb(const void *base, uint64_t bit_offset, float &prob) const {
+          prob = prob_.Decode(util::ReadInt25(base, bit_offset + backoff_.Bits(), prob_.Bits(), prob_.Mask()));
         }
 
         void Read(const void *base, uint64_t bit_offset, float &prob, float &backoff) const {
@@ -179,7 +186,7 @@ class SeparatelyQuantize {
     void SetupMemory(void *start, const Config &config);
 
     static const bool kTrain = true;
-    // Assumes kBlankProb is removed from prob and 0.0 is removed from backoff.  
+    // Assumes 0.0 is removed from backoff.  
     void Train(uint8_t order, std::vector<float> &prob, std::vector<float> &backoff);
     // Train just probabilities (for longest order).
     void TrainProb(uint8_t order, std::vector<float> &prob);

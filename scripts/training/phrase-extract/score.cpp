@@ -522,6 +522,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   }
 
   // counts
+  
   phraseTableFile << " ||| " << totalCount << " " << count;
   if (kneserNeyFlag) 
     phraseTableFile << " " << distinctCount;

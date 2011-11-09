@@ -362,12 +362,18 @@ build-pairs-to-sids
   ignore-unless: sparse-phrase-scripts-dir
   default-name: model/pairs-to-sids
   template: $sparse-phrase-scripts-dir/assign-pairs-to-sids.perl IN.sid | gzip -c >  OUT.gz
+get-corpus-sizes
+	in: CORPUS:clean-split-stem
+	out: corpus-sizes
+	default-name: corpus/corpus-sizes
+	template: $moses-script-dir/training/corpus-sizes.perl  $input-extension $output-extension IN > OUT
 build-sparse-ttable
-  in: corpus phrase-translation-table pairs-to-sids
+  in: corpus phrase-translation-table pairs-to-sids corpus-sizes
   out: sparse-phrase-translation-table
   default-name: model/phrase-table-sparse
   ignore-unless: sparse-phrase-scripts-dir
-  template: $sparse-phrase-scripts-dir/extract-features.py -f $input-extension -e $output-extension -c IN -t IN1 -p IN2 -x $sparse-phrase-features | gzip -c > OUT.gz
+  template: $sparse-phrase-scripts-dir/extract-features.py -f $input-extension -e $output-extension -c IN -t IN1 -p IN2 -x $sparse-phrase-features -s IN3 | gzip -c > OUT.gz
+  rerun-on-change: TRAINING:sparse-phrase-features
 build-generation
 	in: corpus
 	out: generation-table

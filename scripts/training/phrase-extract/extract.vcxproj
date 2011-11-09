@@ -63,6 +63,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,10 +84,12 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="extract.cpp" />
+    <ClCompile Include="InputFileStream.cpp" />
     <ClCompile Include="SentenceAlignment.cpp" />
     <ClCompile Include="tables-core.cpp" />
   </ItemGroup>

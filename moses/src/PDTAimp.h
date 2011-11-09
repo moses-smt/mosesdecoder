@@ -174,9 +174,11 @@ public:
       //sparse features.
       //These are already in log-space
       ScoreComponentCollection sparseFeatures;
-      for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
-        sparseFeatures.Assign(m_obj->GetFeature()->GetSparsePhraseDictionaryFeature(),
-          *(cands[i].fnames[j]), cands[i].fvalues[j]);
+      if (m_obj->GetFeature()->GetSparsePhraseDictionaryFeature()) {
+        for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
+          sparseFeatures.Assign(m_obj->GetFeature()->GetSparsePhraseDictionaryFeature(),
+            *(cands[i].fnames[j]), cands[i].fvalues[j]);
+        } 
       }
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, sparseFeatures, wacands[i],&src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));

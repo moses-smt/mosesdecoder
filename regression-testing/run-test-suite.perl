@@ -27,6 +27,7 @@ my @tests = qw (
   phrase.basic-surface-only
   phrase.basic-surface-only-withirstlm
   phrase.basic-surface-only-withirstlm-binlm
+  phrase.basic-lm-oov
   phrase.ptable-filtering
   phrase.multi-factor
   phrase.multi-factor-drop
@@ -38,6 +39,7 @@ my @tests = qw (
   phrase.lattice-surface
   phrase.lattice-distortion
   phrase.lexicalized-reordering
+  phrase.lexicalized-reordering-bin
   phrase.lexicalized-reordering-cn
   phrase.consensus-decoding-surface
   phrase.continue-partial-translation
@@ -45,6 +47,10 @@ my @tests = qw (
   phrase.show-weights
   phrase.xml-markup
 );
+  #phrase.basic-lm-oov-withkenlm
+  #phrase.basic-surface-only-withkenlm
+  #phrase.basic-surface-only-withkenlm.bin
+  #chart.hierarchical-withkenlm
 
 ############################################################
 use MosesRegressionTesting;
@@ -54,6 +60,7 @@ use POSIX qw ( strftime );
 my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
 my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
 my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
+my $kenlmBinarizer = "$Bin/../kenlm/build_binary";
 my $test_dir;
 my $BIN_TEST = $script_dir;
 my $data_dir;
@@ -105,6 +112,10 @@ foreach my $test (@tests)
   {
     $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
   }
+  elsif ($test =~ /^kenlmbin/)
+  {
+  	$cmd .= "$BIN_TEST/run-kenlm-binarizer.perl --binarizer=$kenlmBinarizer";
+  }
   else 
   {
   	print "FAIL";	
@@ -138,6 +149,7 @@ my $pass_percentage = int(100 * ($total-$fail) / $total);
 print "\n$pass_percentage% of the tests passed.\n";
 print "$fail_percentage% of the tests failed.\n";
 if ($fail_percentage>0) { print "\nPLEASE INVESTIGATE THESE FAILED TESTS: @failed\n"; }
+exit 2 if $fail > 0;
 
 sub do_test {
   my ($test) = @_;

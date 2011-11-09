@@ -60,17 +60,14 @@ libmoses_la_HEADERS = \
         InputType.h \
         LMList.h \
         LVoc.h \
-        LanguageModel.h \
-        LanguageModelChartState.h \
-        LanguageModelJoint.h \
-        LanguageModelFactory.h \
-        LanguageModelImplementation.h \
-        LanguageModelInternal.h \
-        LanguageModelMultiFactor.h \
-        LanguageModelRemote.h \
-        LanguageModelSingleFactor.h \
-        LanguageModelSkip.h \
-        LanguageModelKen.h \
+        LM/Base.h \
+        LM/Joint.h \
+        LM/Factory.h \
+        LM/Implementation.h \
+        LM/MultiFactor.h \
+        LM/Remote.h \
+        LM/SingleFactor.h \
+        LM/Ken.h \
         LexicalReordering.h \
         LexicalReorderingState.h \
         LexicalReorderingTable.h \
@@ -102,6 +99,10 @@ libmoses_la_HEADERS = \
         RuleCube.h \
         RuleCubeItem.h \
         RuleCubeQueue.h \
+        RuleTableLoader.h \
+        RuleTableLoaderCompact.h \
+        RuleTableLoaderFactory.h \
+        RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreProducer.h \
         Search.h \
@@ -146,31 +147,25 @@ libmoses_la_HEADERS += rule.pb.h hypergraph.pb.h
 endif
 
 if SRI_LM
-libmoses_la_HEADERS += LanguageModelSRI.h \
-                      LanguageModelParallelBackoff.h 
+libmoses_la_HEADERS += LM/SRI.h \
+                      LM/ParallelBackoff.h 
 endif
 
 if IRST_LM
-libmoses_la_HEADERS += LanguageModelIRST.h
+libmoses_la_HEADERS += LM/IRST.h
 endif
 
 if RAND_LM
-libmoses_la_HEADERS += LanguageModelRandLM.h
+libmoses_la_HEADERS += LM/RandLM.h
 endif
 
 if ORLM_LM
-libmoses_la_HEADERS += LanguageModelORLM.h \
+libmoses_la_HEADERS += LM/ORLM.h \
 		       DynSAInclude/params.h \
 		       DynSAInclude/hash.h \
 		       DynSAInclude/quantizer.h \
 		       DynSAInclude/RandLMFilter.h \
 		       DynSAInclude/RandLMCache.h
-endif
-
-if INTERNAL_LM
-libmoses_la_HEADERS += LanguageModelInternal.h \
-		      NGramCollection.h \
-		      NGramNode.h
 endif
 
 if SYN_LM
@@ -230,21 +225,17 @@ libmoses_la_SOURCES = \
         InputType.cpp \
         LMList.cpp \
         LVoc.cpp \
-        LanguageModel.cpp \
-        LanguageModelFactory.cpp \
-        LanguageModelImplementation.cpp \
-        LanguageModelInternal.cpp \
-        LanguageModelJoint.cpp \
-        LanguageModelMultiFactor.cpp \
-        LanguageModelRemote.cpp \
-        LanguageModelSingleFactor.cpp \
-        LanguageModelSkip.cpp \
+        LM/Base.cpp \
+        LM/Factory.cpp \
+        LM/Implementation.cpp \
+        LM/Joint.cpp \
+        LM/MultiFactor.cpp \
+        LM/Remote.cpp \
+        LM/SingleFactor.cpp \
         LexicalReordering.cpp \
         LexicalReorderingState.cpp \
         LexicalReorderingTable.cpp \
         Manager.cpp \
-        NGramCollection.cpp \
-        NGramNode.cpp \
         OnlineCommand.cpp \
         PCNTools.cpp \
         Parameter.cpp \
@@ -268,6 +259,9 @@ libmoses_la_SOURCES = \
         RuleCube.cpp \
         RuleCubeItem.cpp \
         RuleCubeQueue.cpp \
+        RuleTableLoaderCompact.cpp \
+        RuleTableLoaderFactory.cpp \
+        RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreProducer.cpp \
         Search.cpp \
@@ -329,30 +323,24 @@ libmoses_la_SOURCES += rule.pb.cc hypergraph.pb.cc
 endif
 
 if SRI_LM
-libmoses_la_SOURCES += LanguageModelSRI.cpp \
-                      LanguageModelParallelBackoff.cpp 
+libmoses_la_SOURCES += LM/SRI.cpp \
+                      LM/ParallelBackoff.cpp 
 
 endif
 
 if IRST_LM
-libmoses_la_SOURCES += LanguageModelIRST.cpp
+libmoses_la_SOURCES += LM/IRST.cpp
 endif
 
 if RAND_LM
-libmoses_la_SOURCES += LanguageModelRandLM.cpp
+libmoses_la_SOURCES += LM/RandLM.cpp
 endif
 
 if ORLM_LM
-libmoses_la_SOURCES += LanguageModelORLM.cpp \
+libmoses_la_SOURCES += LM/ORLM.cpp \
 		       DynSAInclude/onlineRLM.h \
 		       DynSAInclude/perfecthash.h \
 		       DynSAInclude/params.cpp 
-endif
-
-if INTERNAL_LM
-libmoses_la_SOURCES += LanguageModelInternal.cpp \
-		      NGramCollection.cpp \
-		      NGramNode.cpp
 endif
 
 if SYN_LM
@@ -360,7 +348,7 @@ libmoses_la_SOURCES += SyntacticLanguageModel.cpp
 endif
 
 if KEN_LM
-libmoses_la_SOURCES += LanguageModelKen.cpp
+libmoses_la_SOURCES += LM/Ken.cpp
 endif
 
 libmoses_la_LIBADD = $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)

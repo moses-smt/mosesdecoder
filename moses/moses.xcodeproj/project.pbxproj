@@ -3,18 +3,36 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */; };
 		1E07292013B3854D004454FD /* AlignmentInfoCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */; };
+		1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D087144DAA6C00B60B4F /* Base.cpp */; };
+		1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D088144DAA6C00B60B4F /* Base.h */; };
+		1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08B144DAA6C00B60B4F /* Factory.cpp */; };
+		1E16D0A8144DAA6C00B60B4F /* Factory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D08C144DAA6C00B60B4F /* Factory.h */; };
+		1E16D0A9144DAA6C00B60B4F /* Implementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08D144DAA6C00B60B4F /* Implementation.cpp */; };
+		1E16D0AA144DAA6C00B60B4F /* Implementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D08E144DAA6C00B60B4F /* Implementation.h */; };
+		1E16D0AB144DAA6C00B60B4F /* IRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D08F144DAA6C00B60B4F /* IRST.cpp */; };
+		1E16D0AC144DAA6C00B60B4F /* IRST.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D090144DAA6C00B60B4F /* IRST.h */; };
+		1E16D0AD144DAA6C00B60B4F /* Joint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D091144DAA6C00B60B4F /* Joint.cpp */; };
+		1E16D0AE144DAA6C00B60B4F /* Joint.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D092144DAA6C00B60B4F /* Joint.h */; };
+		1E16D0AF144DAA6C00B60B4F /* Ken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D093144DAA6C00B60B4F /* Ken.cpp */; };
+		1E16D0B0144DAA6C00B60B4F /* Ken.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D094144DAA6C00B60B4F /* Ken.h */; };
+		1E16D0B1144DAA6C00B60B4F /* MultiFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */; };
+		1E16D0B2144DAA6C00B60B4F /* MultiFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D096144DAA6C00B60B4F /* MultiFactor.h */; };
+		1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */; };
+		1E16D0B6144DAA6C00B60B4F /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */; };
+		1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */; };
+		1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */; };
+		1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E16D0A1144DAA6C00B60B4F /* SRI.cpp */; };
+		1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E16D0A2144DAA6C00B60B4F /* SRI.h */; };
 		1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */; };
 		1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */; };
 		1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */; };
 		1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */; };
-		1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */; };
-		1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */; };
 		1E2E161A132A890D00ED4085 /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1604132A890D00ED4085 /* ChartCell.cpp */; };
 		1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1605132A890D00ED4085 /* ChartCell.h */; };
 		1E2E161C132A890D00ED4085 /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */; };
@@ -44,11 +62,9 @@
 		1E2E163F132A892800ED4085 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2E1638132A892800ED4085 /* ThreadPool.h */; };
 		1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */; };
 		1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */; };
-		1E528B9913A12ACC00E9A67E /* LanguageModelORLM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9813A12ACC00E9A67E /* LanguageModelORLM.cpp */; };
+		1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E474E11145575CA00178AD5 /* RuleTableLoader.h */; };
 		1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9B13A12B2D00E9A67E /* params.cpp */; };
 		1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */; };
-		1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */; };
-		1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */; };
 		1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */; };
 		1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */; };
 		1EBB262913A12DB500B51840 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262213A12DB500B51840 /* hash.h */; };
@@ -60,6 +76,12 @@
 		1EBB262F13A12DB500B51840 /* RandLMFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBB262813A12DB500B51840 /* RandLMFilter.h */; };
 		1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED00034124BC2690029177F /* ChartTranslationOption.cpp */; };
 		1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED00035124BC2690029177F /* ChartTranslationOption.h */; };
+		1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */; };
+		1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */; };
+		1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */; };
+		1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */; };
+		1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */; };
+		1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */; };
 		1ED0FE2A124BB9380029177F /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */; };
 		1ED0FE2B124BB9380029177F /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD4D124BB9380029177F /* AlignmentInfo.h */; };
 		1ED0FE2C124BB9380029177F /* BilingualDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */; };
@@ -130,30 +152,6 @@
 		1ED0FE71124BB9380029177F /* InputFileStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD95124BB9380029177F /* InputFileStream.h */; };
 		1ED0FE72124BB9380029177F /* InputType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD96124BB9380029177F /* InputType.cpp */; };
 		1ED0FE73124BB9380029177F /* InputType.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD97124BB9380029177F /* InputType.h */; };
-		1ED0FE74124BB9380029177F /* LanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD98124BB9380029177F /* LanguageModel.cpp */; };
-		1ED0FE75124BB9380029177F /* LanguageModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD99124BB9380029177F /* LanguageModel.h */; };
-		1ED0FE77124BB9380029177F /* LanguageModelFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */; };
-		1ED0FE78124BB9380029177F /* LanguageModelFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */; };
-		1ED0FE79124BB9380029177F /* LanguageModelInternal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */; };
-		1ED0FE7A124BB9380029177F /* LanguageModelInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FD9E124BB9380029177F /* LanguageModelInternal.h */; };
-		1ED0FE7B124BB9380029177F /* LanguageModelIRST.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FD9F124BB9380029177F /* LanguageModelIRST.cpp */; };
-		1ED0FE7C124BB9380029177F /* LanguageModelIRST.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDA0124BB9380029177F /* LanguageModelIRST.h */; };
-		1ED0FE7D124BB9380029177F /* LanguageModelJoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDA1124BB9380029177F /* LanguageModelJoint.cpp */; };
-		1ED0FE7E124BB9380029177F /* LanguageModelJoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDA2124BB9380029177F /* LanguageModelJoint.h */; };
-		1ED0FE7F124BB9380029177F /* LanguageModelKen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDA3124BB9380029177F /* LanguageModelKen.cpp */; };
-		1ED0FE80124BB9380029177F /* LanguageModelKen.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDA4124BB9380029177F /* LanguageModelKen.h */; };
-		1ED0FE81124BB9380029177F /* LanguageModelMultiFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDA5124BB9380029177F /* LanguageModelMultiFactor.cpp */; };
-		1ED0FE82124BB9380029177F /* LanguageModelMultiFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDA6124BB9380029177F /* LanguageModelMultiFactor.h */; };
-		1ED0FE83124BB9380029177F /* LanguageModelParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDA7124BB9380029177F /* LanguageModelParallelBackoff.cpp */; };
-		1ED0FE84124BB9380029177F /* LanguageModelParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDA8124BB9380029177F /* LanguageModelParallelBackoff.h */; };
-		1ED0FE87124BB9380029177F /* LanguageModelRemote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDAB124BB9380029177F /* LanguageModelRemote.cpp */; };
-		1ED0FE88124BB9380029177F /* LanguageModelRemote.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDAC124BB9380029177F /* LanguageModelRemote.h */; };
-		1ED0FE89124BB9380029177F /* LanguageModelSingleFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDAD124BB9380029177F /* LanguageModelSingleFactor.cpp */; };
-		1ED0FE8A124BB9380029177F /* LanguageModelSingleFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDAE124BB9380029177F /* LanguageModelSingleFactor.h */; };
-		1ED0FE8B124BB9380029177F /* LanguageModelSkip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDAF124BB9380029177F /* LanguageModelSkip.cpp */; };
-		1ED0FE8C124BB9380029177F /* LanguageModelSkip.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDB0124BB9380029177F /* LanguageModelSkip.h */; };
-		1ED0FE8D124BB9380029177F /* LanguageModelSRI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB1124BB9380029177F /* LanguageModelSRI.cpp */; };
-		1ED0FE8E124BB9380029177F /* LanguageModelSRI.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDB2124BB9380029177F /* LanguageModelSRI.h */; };
 		1ED0FE8F124BB9380029177F /* LexicalReordering.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB3124BB9380029177F /* LexicalReordering.cpp */; };
 		1ED0FE90124BB9380029177F /* LexicalReordering.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDB4124BB9380029177F /* LexicalReordering.h */; };
 		1ED0FE91124BB9380029177F /* LexicalReorderingState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDB5124BB9380029177F /* LexicalReorderingState.cpp */; };
@@ -166,10 +164,6 @@
 		1ED0FE98124BB9380029177F /* LVoc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDBC124BB9380029177F /* LVoc.h */; };
 		1ED0FE9A124BB9380029177F /* Manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC0124BB9380029177F /* Manager.cpp */; };
 		1ED0FE9B124BB9380029177F /* Manager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC1124BB9380029177F /* Manager.h */; };
-		1ED0FE9C124BB9380029177F /* NGramCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC2124BB9380029177F /* NGramCollection.cpp */; };
-		1ED0FE9D124BB9380029177F /* NGramCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC3124BB9380029177F /* NGramCollection.h */; };
-		1ED0FE9E124BB9380029177F /* NGramNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC4124BB9380029177F /* NGramNode.cpp */; };
-		1ED0FE9F124BB9380029177F /* NGramNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC5124BB9380029177F /* NGramNode.h */; };
 		1ED0FEA0124BB9380029177F /* ObjectPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC6124BB9380029177F /* ObjectPool.h */; };
 		1ED0FEA1124BB9380029177F /* Parameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED0FDC7124BB9380029177F /* Parameter.cpp */; };
 		1ED0FEA2124BB9380029177F /* Parameter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ED0FDC8124BB9380029177F /* Parameter.h */; };
@@ -277,12 +271,30 @@
 /* Begin PBXFileReference section */
 		1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
 		1E07291E13B3854D004454FD /* AlignmentInfoCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfoCollection.h; path = src/AlignmentInfoCollection.h; sourceTree = "<group>"; };
+		1E16D087144DAA6C00B60B4F /* Base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base.cpp; path = src/LM/Base.cpp; sourceTree = "<group>"; };
+		1E16D088144DAA6C00B60B4F /* Base.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Base.h; path = src/LM/Base.h; sourceTree = "<group>"; };
+		1E16D08B144DAA6C00B60B4F /* Factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Factory.cpp; path = src/LM/Factory.cpp; sourceTree = "<group>"; };
+		1E16D08C144DAA6C00B60B4F /* Factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Factory.h; path = src/LM/Factory.h; sourceTree = "<group>"; };
+		1E16D08D144DAA6C00B60B4F /* Implementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Implementation.cpp; path = src/LM/Implementation.cpp; sourceTree = "<group>"; };
+		1E16D08E144DAA6C00B60B4F /* Implementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Implementation.h; path = src/LM/Implementation.h; sourceTree = "<group>"; };
+		1E16D08F144DAA6C00B60B4F /* IRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IRST.cpp; path = src/LM/IRST.cpp; sourceTree = "<group>"; };
+		1E16D090144DAA6C00B60B4F /* IRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IRST.h; path = src/LM/IRST.h; sourceTree = "<group>"; };
+		1E16D091144DAA6C00B60B4F /* Joint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Joint.cpp; path = src/LM/Joint.cpp; sourceTree = "<group>"; };
+		1E16D092144DAA6C00B60B4F /* Joint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Joint.h; path = src/LM/Joint.h; sourceTree = "<group>"; };
+		1E16D093144DAA6C00B60B4F /* Ken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ken.cpp; path = src/LM/Ken.cpp; sourceTree = "<group>"; };
+		1E16D094144DAA6C00B60B4F /* Ken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ken.h; path = src/LM/Ken.h; sourceTree = "<group>"; };
+		1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiFactor.cpp; path = src/LM/MultiFactor.cpp; sourceTree = "<group>"; };
+		1E16D096144DAA6C00B60B4F /* MultiFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MultiFactor.h; path = src/LM/MultiFactor.h; sourceTree = "<group>"; };
+		1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParallelBackoff.cpp; path = src/LM/ParallelBackoff.cpp; sourceTree = "<group>"; };
+		1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParallelBackoff.h; path = src/LM/ParallelBackoff.h; sourceTree = "<group>"; };
+		1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SingleFactor.cpp; path = src/LM/SingleFactor.cpp; sourceTree = "<group>"; };
+		1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SingleFactor.h; path = src/LM/SingleFactor.h; sourceTree = "<group>"; };
+		1E16D0A1144DAA6C00B60B4F /* SRI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SRI.cpp; path = src/LM/SRI.cpp; sourceTree = "<group>"; };
+		1E16D0A2144DAA6C00B60B4F /* SRI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SRI.h; path = src/LM/SRI.h; sourceTree = "<group>"; };
 		1E1C589012F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
 		1E1C589112F310A70067DEB7 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
 		1E1C589212F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
 		1E1C589312F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerOnDisk.h; path = src/ChartRuleLookupManagerOnDisk.h; sourceTree = "<group>"; };
-		1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRandLM.cpp; path = src/LanguageModelRandLM.cpp; sourceTree = "<group>"; };
-		1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRandLM.h; path = src/LanguageModelRandLM.h; sourceTree = "<group>"; };
 		1E2E1604132A890D00ED4085 /* ChartCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCell.cpp; path = src/ChartCell.cpp; sourceTree = "<group>"; };
 		1E2E1605132A890D00ED4085 /* ChartCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCell.h; path = src/ChartCell.h; sourceTree = "<group>"; };
 		1E2E1606132A890D00ED4085 /* ChartCellCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCellCollection.cpp; path = src/ChartCellCollection.cpp; sourceTree = "<group>"; };
@@ -312,11 +324,9 @@
 		1E2E1638132A892800ED4085 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = src/ThreadPool.h; sourceTree = "<group>"; };
 		1E46B5A413BA5C7F0084F898 /* RuleCubeItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCubeItem.cpp; path = src/RuleCubeItem.cpp; sourceTree = "<group>"; };
 		1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeItem.h; path = src/RuleCubeItem.h; sourceTree = "<group>"; };
-		1E528B9813A12ACC00E9A67E /* LanguageModelORLM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelORLM.cpp; path = src/LanguageModelORLM.cpp; sourceTree = "<group>"; };
+		1E474E11145575CA00178AD5 /* RuleTableLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoader.h; path = src/RuleTableLoader.h; sourceTree = "<group>"; };
 		1E528B9B13A12B2D00E9A67E /* params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = params.cpp; path = src/DynSAInclude/params.cpp; sourceTree = "<group>"; };
 		1E528B9C13A12B2D00E9A67E /* SyntacticLanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SyntacticLanguageModel.cpp; path = src/SyntacticLanguageModel.cpp; sourceTree = "<group>"; };
-		1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelImplementation.cpp; path = src/LanguageModelImplementation.cpp; sourceTree = "<group>"; };
-		1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelImplementation.h; path = src/LanguageModelImplementation.h; sourceTree = "<group>"; };
 		1EA6AB4813BCC838004465AF /* ChartRuleLookupManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManager.cpp; path = src/ChartRuleLookupManager.cpp; sourceTree = "<group>"; };
 		1EA6AB4913BCC838004465AF /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
 		1EBB262213A12DB500B51840 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = src/DynSAInclude/hash.h; sourceTree = "<group>"; };
@@ -328,6 +338,12 @@
 		1EBB262813A12DB500B51840 /* RandLMFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RandLMFilter.h; path = src/DynSAInclude/RandLMFilter.h; sourceTree = "<group>"; };
 		1ED00034124BC2690029177F /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
 		1ED00035124BC2690029177F /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = src/ChartTranslationOption.h; sourceTree = "<group>"; };
+		1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderCompact.cpp; path = src/RuleTableLoaderCompact.cpp; sourceTree = "<group>"; };
+		1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderCompact.h; path = src/RuleTableLoaderCompact.h; sourceTree = "<group>"; };
+		1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderFactory.cpp; path = src/RuleTableLoaderFactory.cpp; sourceTree = "<group>"; };
+		1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderFactory.h; path = src/RuleTableLoaderFactory.h; sourceTree = "<group>"; };
+		1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderStandard.cpp; path = src/RuleTableLoaderStandard.cpp; sourceTree = "<group>"; };
+		1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderStandard.h; path = src/RuleTableLoaderStandard.h; sourceTree = "<group>"; };
 		1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1ED0FD4D124BB9380029177F /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1ED0FD4E124BB9380029177F /* BilingualDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BilingualDynSuffixArray.cpp; path = src/BilingualDynSuffixArray.cpp; sourceTree = "<group>"; };
@@ -399,30 +415,6 @@
 		1ED0FD95124BB9380029177F /* InputFileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputFileStream.h; path = src/InputFileStream.h; sourceTree = "<group>"; };
 		1ED0FD96124BB9380029177F /* InputType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputType.cpp; path = src/InputType.cpp; sourceTree = "<group>"; };
 		1ED0FD97124BB9380029177F /* InputType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputType.h; path = src/InputType.h; sourceTree = "<group>"; };
-		1ED0FD98124BB9380029177F /* LanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModel.cpp; path = src/LanguageModel.cpp; sourceTree = "<group>"; };
-		1ED0FD99124BB9380029177F /* LanguageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModel.h; path = src/LanguageModel.h; sourceTree = "<group>"; };
-		1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelFactory.cpp; path = src/LanguageModelFactory.cpp; sourceTree = "<group>"; };
-		1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelFactory.h; path = src/LanguageModelFactory.h; sourceTree = "<group>"; };
-		1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelInternal.cpp; path = src/LanguageModelInternal.cpp; sourceTree = "<group>"; };
-		1ED0FD9E124BB9380029177F /* LanguageModelInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelInternal.h; path = src/LanguageModelInternal.h; sourceTree = "<group>"; };
-		1ED0FD9F124BB9380029177F /* LanguageModelIRST.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelIRST.cpp; path = src/LanguageModelIRST.cpp; sourceTree = "<group>"; };
-		1ED0FDA0124BB9380029177F /* LanguageModelIRST.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelIRST.h; path = src/LanguageModelIRST.h; sourceTree = "<group>"; };
-		1ED0FDA1124BB9380029177F /* LanguageModelJoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelJoint.cpp; path = src/LanguageModelJoint.cpp; sourceTree = "<group>"; };
-		1ED0FDA2124BB9380029177F /* LanguageModelJoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelJoint.h; path = src/LanguageModelJoint.h; sourceTree = "<group>"; };
-		1ED0FDA3124BB9380029177F /* LanguageModelKen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelKen.cpp; path = src/LanguageModelKen.cpp; sourceTree = "<group>"; };
-		1ED0FDA4124BB9380029177F /* LanguageModelKen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelKen.h; path = src/LanguageModelKen.h; sourceTree = "<group>"; };
-		1ED0FDA5124BB9380029177F /* LanguageModelMultiFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelMultiFactor.cpp; path = src/LanguageModelMultiFactor.cpp; sourceTree = "<group>"; };
-		1ED0FDA6124BB9380029177F /* LanguageModelMultiFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelMultiFactor.h; path = src/LanguageModelMultiFactor.h; sourceTree = "<group>"; };
-		1ED0FDA7124BB9380029177F /* LanguageModelParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelParallelBackoff.cpp; path = src/LanguageModelParallelBackoff.cpp; sourceTree = "<group>"; };
-		1ED0FDA8124BB9380029177F /* LanguageModelParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelParallelBackoff.h; path = src/LanguageModelParallelBackoff.h; sourceTree = "<group>"; };
-		1ED0FDAB124BB9380029177F /* LanguageModelRemote.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelRemote.cpp; path = src/LanguageModelRemote.cpp; sourceTree = "<group>"; };
-		1ED0FDAC124BB9380029177F /* LanguageModelRemote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelRemote.h; path = src/LanguageModelRemote.h; sourceTree = "<group>"; };
-		1ED0FDAD124BB9380029177F /* LanguageModelSingleFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelSingleFactor.cpp; path = src/LanguageModelSingleFactor.cpp; sourceTree = "<group>"; };
-		1ED0FDAE124BB9380029177F /* LanguageModelSingleFactor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelSingleFactor.h; path = src/LanguageModelSingleFactor.h; sourceTree = "<group>"; };
-		1ED0FDAF124BB9380029177F /* LanguageModelSkip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelSkip.cpp; path = src/LanguageModelSkip.cpp; sourceTree = "<group>"; };
-		1ED0FDB0124BB9380029177F /* LanguageModelSkip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelSkip.h; path = src/LanguageModelSkip.h; sourceTree = "<group>"; };
-		1ED0FDB1124BB9380029177F /* LanguageModelSRI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LanguageModelSRI.cpp; path = src/LanguageModelSRI.cpp; sourceTree = "<group>"; };
-		1ED0FDB2124BB9380029177F /* LanguageModelSRI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LanguageModelSRI.h; path = src/LanguageModelSRI.h; sourceTree = "<group>"; };
 		1ED0FDB3124BB9380029177F /* LexicalReordering.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReordering.cpp; path = src/LexicalReordering.cpp; sourceTree = "<group>"; };
 		1ED0FDB4124BB9380029177F /* LexicalReordering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReordering.h; path = src/LexicalReordering.h; sourceTree = "<group>"; };
 		1ED0FDB5124BB9380029177F /* LexicalReorderingState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingState.cpp; path = src/LexicalReorderingState.cpp; sourceTree = "<group>"; };
@@ -435,10 +427,6 @@
 		1ED0FDBC124BB9380029177F /* LVoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LVoc.h; path = src/LVoc.h; sourceTree = "<group>"; };
 		1ED0FDC0124BB9380029177F /* Manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Manager.cpp; path = src/Manager.cpp; sourceTree = "<group>"; };
 		1ED0FDC1124BB9380029177F /* Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Manager.h; path = src/Manager.h; sourceTree = "<group>"; };
-		1ED0FDC2124BB9380029177F /* NGramCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NGramCollection.cpp; path = src/NGramCollection.cpp; sourceTree = "<group>"; };
-		1ED0FDC3124BB9380029177F /* NGramCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NGramCollection.h; path = src/NGramCollection.h; sourceTree = "<group>"; };
-		1ED0FDC4124BB9380029177F /* NGramNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NGramNode.cpp; path = src/NGramNode.cpp; sourceTree = "<group>"; };
-		1ED0FDC5124BB9380029177F /* NGramNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NGramNode.h; path = src/NGramNode.h; sourceTree = "<group>"; };
 		1ED0FDC6124BB9380029177F /* ObjectPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjectPool.h; path = src/ObjectPool.h; sourceTree = "<group>"; };
 		1ED0FDC7124BB9380029177F /* Parameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Parameter.cpp; path = src/Parameter.cpp; sourceTree = "<group>"; };
 		1ED0FDC8124BB9380029177F /* Parameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Parameter.h; path = src/Parameter.h; sourceTree = "<group>"; };
@@ -569,6 +557,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E474E11145575CA00178AD5 /* RuleTableLoader.h */,
+				1E16D086144DAA3F00B60B4F /* LM */,
 				1ED0FD4C124BB9380029177F /* AlignmentInfo.cpp */,
 				1ED0FD4D124BB9380029177F /* AlignmentInfo.h */,
 				1E07291D13B3854D004454FD /* AlignmentInfoCollection.cpp */,
@@ -668,35 +658,6 @@
 				1ED0FDBA124BB9380029177F /* LMList.h */,
 				1ED0FDBB124BB9380029177F /* LVoc.cpp */,
 				1ED0FDBC124BB9380029177F /* LVoc.h */,
-				1ED0FD98124BB9380029177F /* LanguageModel.cpp */,
-				1ED0FD99124BB9380029177F /* LanguageModel.h */,
-				1ED0FD9B124BB9380029177F /* LanguageModelFactory.cpp */,
-				1ED0FD9C124BB9380029177F /* LanguageModelFactory.h */,
-				1ED0FD9F124BB9380029177F /* LanguageModelIRST.cpp */,
-				1ED0FDA0124BB9380029177F /* LanguageModelIRST.h */,
-				1E5AAF1312B25C9E0071864D /* LanguageModelImplementation.cpp */,
-				1E5AAF1412B25C9E0071864D /* LanguageModelImplementation.h */,
-				1ED0FD9D124BB9380029177F /* LanguageModelInternal.cpp */,
-				1ED0FD9E124BB9380029177F /* LanguageModelInternal.h */,
-				1ED0FDA1124BB9380029177F /* LanguageModelJoint.cpp */,
-				1ED0FDA2124BB9380029177F /* LanguageModelJoint.h */,
-				1ED0FDA3124BB9380029177F /* LanguageModelKen.cpp */,
-				1ED0FDA4124BB9380029177F /* LanguageModelKen.h */,
-				1ED0FDA5124BB9380029177F /* LanguageModelMultiFactor.cpp */,
-				1ED0FDA6124BB9380029177F /* LanguageModelMultiFactor.h */,
-				1E528B9813A12ACC00E9A67E /* LanguageModelORLM.cpp */,
-				1ED0FDA7124BB9380029177F /* LanguageModelParallelBackoff.cpp */,
-				1ED0FDA8124BB9380029177F /* LanguageModelParallelBackoff.h */,
-				1E2B861B12555F25000770D6 /* LanguageModelRandLM.cpp */,
-				1E2B861C12555F25000770D6 /* LanguageModelRandLM.h */,
-				1ED0FDAB124BB9380029177F /* LanguageModelRemote.cpp */,
-				1ED0FDAC124BB9380029177F /* LanguageModelRemote.h */,
-				1ED0FDB1124BB9380029177F /* LanguageModelSRI.cpp */,
-				1ED0FDB2124BB9380029177F /* LanguageModelSRI.h */,
-				1ED0FDAD124BB9380029177F /* LanguageModelSingleFactor.cpp */,
-				1ED0FDAE124BB9380029177F /* LanguageModelSingleFactor.h */,
-				1ED0FDAF124BB9380029177F /* LanguageModelSkip.cpp */,
-				1ED0FDB0124BB9380029177F /* LanguageModelSkip.h */,
 				1ED0FDB3124BB9380029177F /* LexicalReordering.cpp */,
 				1ED0FDB4124BB9380029177F /* LexicalReordering.h */,
 				1ED0FDB5124BB9380029177F /* LexicalReorderingState.cpp */,
@@ -705,10 +666,6 @@
 				1ED0FDB8124BB9380029177F /* LexicalReorderingTable.h */,
 				1ED0FDC0124BB9380029177F /* Manager.cpp */,
 				1ED0FDC1124BB9380029177F /* Manager.h */,
-				1ED0FDC2124BB9380029177F /* NGramCollection.cpp */,
-				1ED0FDC3124BB9380029177F /* NGramCollection.h */,
-				1ED0FDC4124BB9380029177F /* NGramNode.cpp */,
-				1ED0FDC5124BB9380029177F /* NGramNode.h */,
 				1EE58D9D133726C700D93158 /* NonTerminal.cpp */,
 				1EE58D9E133726C700D93158 /* NonTerminal.h */,
 				1ED0FDC6124BB9380029177F /* ObjectPool.h */,
@@ -755,6 +712,12 @@
 				1E46B5A513BA5C7F0084F898 /* RuleCubeItem.h */,
 				1E2E1635132A892800ED4085 /* RuleCubeQueue.cpp */,
 				1E2E1636132A892800ED4085 /* RuleCubeQueue.h */,
+				1ED0DE1D1432A0D100C20FBE /* RuleTableLoaderCompact.cpp */,
+				1ED0DE1E1432A0D100C20FBE /* RuleTableLoaderCompact.h */,
+				1ED0DE211432A0D100C20FBE /* RuleTableLoaderFactory.cpp */,
+				1ED0DE221432A0D100C20FBE /* RuleTableLoaderFactory.h */,
+				1ED0DE251432A0D100C20FBE /* RuleTableLoaderStandard.cpp */,
+				1ED0DE261432A0D100C20FBE /* RuleTableLoaderStandard.h */,
 				1ED0FDEB124BB9380029177F /* ScoreComponentCollection.cpp */,
 				1ED0FDEC124BB9380029177F /* ScoreComponentCollection.h */,
 				1ED0FDED124BB9380029177F /* ScoreIndexManager.cpp */,
@@ -842,6 +805,33 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1E16D086144DAA3F00B60B4F /* LM */ = {
+			isa = PBXGroup;
+			children = (
+				1E16D087144DAA6C00B60B4F /* Base.cpp */,
+				1E16D088144DAA6C00B60B4F /* Base.h */,
+				1E16D08B144DAA6C00B60B4F /* Factory.cpp */,
+				1E16D08C144DAA6C00B60B4F /* Factory.h */,
+				1E16D08D144DAA6C00B60B4F /* Implementation.cpp */,
+				1E16D08E144DAA6C00B60B4F /* Implementation.h */,
+				1E16D08F144DAA6C00B60B4F /* IRST.cpp */,
+				1E16D090144DAA6C00B60B4F /* IRST.h */,
+				1E16D091144DAA6C00B60B4F /* Joint.cpp */,
+				1E16D092144DAA6C00B60B4F /* Joint.h */,
+				1E16D093144DAA6C00B60B4F /* Ken.cpp */,
+				1E16D094144DAA6C00B60B4F /* Ken.h */,
+				1E16D095144DAA6C00B60B4F /* MultiFactor.cpp */,
+				1E16D096144DAA6C00B60B4F /* MultiFactor.h */,
+				1E16D099144DAA6C00B60B4F /* ParallelBackoff.cpp */,
+				1E16D09A144DAA6C00B60B4F /* ParallelBackoff.h */,
+				1E16D09F144DAA6C00B60B4F /* SingleFactor.cpp */,
+				1E16D0A0144DAA6C00B60B4F /* SingleFactor.h */,
+				1E16D0A1144DAA6C00B60B4F /* SRI.cpp */,
+				1E16D0A2144DAA6C00B60B4F /* SRI.h */,
+			);
+			name = LM;
+			sourceTree = "<group>";
+		};
 		1ED0FD6B124BB9380029177F /* DynSAInclude */ = {
 			isa = PBXGroup;
 			children = (
@@ -909,26 +899,12 @@
 				1ED0FE6F124BB9380029177F /* HypothesisStackNormal.h in Headers */,
 				1ED0FE71124BB9380029177F /* InputFileStream.h in Headers */,
 				1ED0FE73124BB9380029177F /* InputType.h in Headers */,
-				1ED0FE75124BB9380029177F /* LanguageModel.h in Headers */,
-				1ED0FE78124BB9380029177F /* LanguageModelFactory.h in Headers */,
-				1ED0FE7A124BB9380029177F /* LanguageModelInternal.h in Headers */,
-				1ED0FE7C124BB9380029177F /* LanguageModelIRST.h in Headers */,
-				1ED0FE7E124BB9380029177F /* LanguageModelJoint.h in Headers */,
-				1ED0FE80124BB9380029177F /* LanguageModelKen.h in Headers */,
-				1ED0FE82124BB9380029177F /* LanguageModelMultiFactor.h in Headers */,
-				1ED0FE84124BB9380029177F /* LanguageModelParallelBackoff.h in Headers */,
-				1ED0FE88124BB9380029177F /* LanguageModelRemote.h in Headers */,
-				1ED0FE8A124BB9380029177F /* LanguageModelSingleFactor.h in Headers */,
-				1ED0FE8C124BB9380029177F /* LanguageModelSkip.h in Headers */,
-				1ED0FE8E124BB9380029177F /* LanguageModelSRI.h in Headers */,
 				1ED0FE90124BB9380029177F /* LexicalReordering.h in Headers */,
 				1ED0FE92124BB9380029177F /* LexicalReorderingState.h in Headers */,
 				1ED0FE94124BB9380029177F /* LexicalReorderingTable.h in Headers */,
 				1ED0FE96124BB9380029177F /* LMList.h in Headers */,
 				1ED0FE98124BB9380029177F /* LVoc.h in Headers */,
 				1ED0FE9B124BB9380029177F /* Manager.h in Headers */,
-				1ED0FE9D124BB9380029177F /* NGramCollection.h in Headers */,
-				1ED0FE9F124BB9380029177F /* NGramNode.h in Headers */,
 				1ED0FEA0124BB9380029177F /* ObjectPool.h in Headers */,
 				1ED0FEA2124BB9380029177F /* Parameter.h in Headers */,
 				1ED0FEA4124BB9380029177F /* PartialTranslOptColl.h in Headers */,
@@ -981,9 +957,7 @@
 				1ED0FF02124BB9380029177F /* XmlOption.h in Headers */,
 				1ED0FFD4124BC0BF0029177F /* ChartTranslationOptionList.h in Headers */,
 				1ED00037124BC2690029177F /* ChartTranslationOption.h in Headers */,
-				1E2B861E12555F25000770D6 /* LanguageModelRandLM.h in Headers */,
 				1EEB43EE1264A6F200739BA5 /* PhraseDictionarySCFG.h in Headers */,
-				1E5AAF1612B25C9E0071864D /* LanguageModelImplementation.h in Headers */,
 				1E1C589612F310A70067DEB7 /* ChartRuleLookupManagerMemory.h in Headers */,
 				1E1C589812F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.h in Headers */,
 				1E2E161B132A890D00ED4085 /* ChartCell.h in Headers */,
@@ -1012,6 +986,20 @@
 				1E46B5A713BA5C7F0084F898 /* RuleCubeItem.h in Headers */,
 				1EA6AB4B13BCC838004465AF /* ChartRuleLookupManager.h in Headers */,
 				1ED22EE613DD96B0000DE8C9 /* DotChartInMemory.h in Headers */,
+				1ED0DE2A1432A0D200C20FBE /* RuleTableLoaderCompact.h in Headers */,
+				1ED0DE2D1432A0D200C20FBE /* RuleTableLoaderFactory.h in Headers */,
+				1ED0DE301432A0D200C20FBE /* RuleTableLoaderStandard.h in Headers */,
+				1E16D0A4144DAA6C00B60B4F /* Base.h in Headers */,
+				1E16D0A8144DAA6C00B60B4F /* Factory.h in Headers */,
+				1E16D0AA144DAA6C00B60B4F /* Implementation.h in Headers */,
+				1E16D0AC144DAA6C00B60B4F /* IRST.h in Headers */,
+				1E16D0AE144DAA6C00B60B4F /* Joint.h in Headers */,
+				1E16D0B0144DAA6C00B60B4F /* Ken.h in Headers */,
+				1E16D0B2144DAA6C00B60B4F /* MultiFactor.h in Headers */,
+				1E16D0B6144DAA6C00B60B4F /* ParallelBackoff.h in Headers */,
+				1E16D0BC144DAA6C00B60B4F /* SingleFactor.h in Headers */,
+				1E16D0BE144DAA6C00B60B4F /* SRI.h in Headers */,
+				1E474E12145575CA00178AD5 /* RuleTableLoader.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1040,8 +1028,11 @@
 /* Begin PBXProject section */
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0410;
+			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "moses" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -1096,26 +1087,12 @@
 				1ED0FE6E124BB9380029177F /* HypothesisStackNormal.cpp in Sources */,
 				1ED0FE70124BB9380029177F /* InputFileStream.cpp in Sources */,
 				1ED0FE72124BB9380029177F /* InputType.cpp in Sources */,
-				1ED0FE74124BB9380029177F /* LanguageModel.cpp in Sources */,
-				1ED0FE77124BB9380029177F /* LanguageModelFactory.cpp in Sources */,
-				1ED0FE79124BB9380029177F /* LanguageModelInternal.cpp in Sources */,
-				1ED0FE7B124BB9380029177F /* LanguageModelIRST.cpp in Sources */,
-				1ED0FE7D124BB9380029177F /* LanguageModelJoint.cpp in Sources */,
-				1ED0FE7F124BB9380029177F /* LanguageModelKen.cpp in Sources */,
-				1ED0FE81124BB9380029177F /* LanguageModelMultiFactor.cpp in Sources */,
-				1ED0FE83124BB9380029177F /* LanguageModelParallelBackoff.cpp in Sources */,
-				1ED0FE87124BB9380029177F /* LanguageModelRemote.cpp in Sources */,
-				1ED0FE89124BB9380029177F /* LanguageModelSingleFactor.cpp in Sources */,
-				1ED0FE8B124BB9380029177F /* LanguageModelSkip.cpp in Sources */,
-				1ED0FE8D124BB9380029177F /* LanguageModelSRI.cpp in Sources */,
 				1ED0FE8F124BB9380029177F /* LexicalReordering.cpp in Sources */,
 				1ED0FE91124BB9380029177F /* LexicalReorderingState.cpp in Sources */,
 				1ED0FE93124BB9380029177F /* LexicalReorderingTable.cpp in Sources */,
 				1ED0FE95124BB9380029177F /* LMList.cpp in Sources */,
 				1ED0FE97124BB9380029177F /* LVoc.cpp in Sources */,
 				1ED0FE9A124BB9380029177F /* Manager.cpp in Sources */,
-				1ED0FE9C124BB9380029177F /* NGramCollection.cpp in Sources */,
-				1ED0FE9E124BB9380029177F /* NGramNode.cpp in Sources */,
 				1ED0FEA1124BB9380029177F /* Parameter.cpp in Sources */,
 				1ED0FEA3124BB9380029177F /* PartialTranslOptColl.cpp in Sources */,
 				1ED0FEA5124BB9380029177F /* PCNTools.cpp in Sources */,
@@ -1163,8 +1140,6 @@
 				1ED0FF01124BB9380029177F /* XmlOption.cpp in Sources */,
 				1ED0FFD3124BC0BF0029177F /* ChartTranslationOptionList.cpp in Sources */,
 				1ED00036124BC2690029177F /* ChartTranslationOption.cpp in Sources */,
-				1E2B861D12555F25000770D6 /* LanguageModelRandLM.cpp in Sources */,
-				1E5AAF1512B25C9E0071864D /* LanguageModelImplementation.cpp in Sources */,
 				1E1C589512F310A70067DEB7 /* ChartRuleLookupManagerMemory.cpp in Sources */,
 				1E1C589712F310A70067DEB7 /* ChartRuleLookupManagerOnDisk.cpp in Sources */,
 				1E2E161A132A890D00ED4085 /* ChartCell.cpp in Sources */,
@@ -1181,13 +1156,25 @@
 				1E2E163C132A892800ED4085 /* RuleCubeQueue.cpp in Sources */,
 				1E2E163E132A892800ED4085 /* ThreadPool.cpp in Sources */,
 				1EE58D9F133726C700D93158 /* NonTerminal.cpp in Sources */,
-				1E528B9913A12ACC00E9A67E /* LanguageModelORLM.cpp in Sources */,
 				1E528B9D13A12B2D00E9A67E /* params.cpp in Sources */,
 				1E528B9E13A12B2D00E9A67E /* SyntacticLanguageModel.cpp in Sources */,
 				1E07291F13B3854D004454FD /* AlignmentInfoCollection.cpp in Sources */,
 				1E46B5A613BA5C7F0084F898 /* RuleCubeItem.cpp in Sources */,
 				1EA6AB4A13BCC838004465AF /* ChartRuleLookupManager.cpp in Sources */,
 				1ED22EE513DD96B0000DE8C9 /* DotChartInMemory.cpp in Sources */,
+				1ED0DE291432A0D200C20FBE /* RuleTableLoaderCompact.cpp in Sources */,
+				1ED0DE2C1432A0D200C20FBE /* RuleTableLoaderFactory.cpp in Sources */,
+				1ED0DE2F1432A0D200C20FBE /* RuleTableLoaderStandard.cpp in Sources */,
+				1E16D0A3144DAA6C00B60B4F /* Base.cpp in Sources */,
+				1E16D0A7144DAA6C00B60B4F /* Factory.cpp in Sources */,
+				1E16D0A9144DAA6C00B60B4F /* Implementation.cpp in Sources */,
+				1E16D0AB144DAA6C00B60B4F /* IRST.cpp in Sources */,
+				1E16D0AD144DAA6C00B60B4F /* Joint.cpp in Sources */,
+				1E16D0AF144DAA6C00B60B4F /* Ken.cpp in Sources */,
+				1E16D0B1144DAA6C00B60B4F /* MultiFactor.cpp in Sources */,
+				1E16D0B5144DAA6C00B60B4F /* ParallelBackoff.cpp in Sources */,
+				1E16D0BB144DAA6C00B60B4F /* SingleFactor.cpp in Sources */,
+				1E16D0BD144DAA6C00B60B4F /* SRI.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1200,7 +1187,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1210,16 +1196,17 @@
 					LM_INTERNAL,
 					LM_KEN,
 					LM_IRST,
-					LM_RAND,
-					HAVE_CONFIG_H,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
+					src,
 					../irstlm/include,
 					../srilm/include,
 					../kenlm,
 					../randlm/include,
 					../,
-					/usr/local/include,
+					/opt/local/include,
 					../synlm/hhmm/wsjparse/include,
 					../synlm/hhmm/rvtl/include/,
 				);
@@ -1241,16 +1228,17 @@
 					LM_INTERNAL,
 					LM_KEN,
 					LM_IRST,
-					LM_RAND,
-					HAVE_CONFIG_H,
+					"_FILE_OFFSET_BITS=64",
+					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
+					src,
 					../irstlm/include,
 					../srilm/include,
 					../kenlm,
 					../randlm/include,
 					../,
-					/usr/local/include,
+					/opt/local/include,
 					../synlm/hhmm/wsjparse/include,
 					../synlm/hhmm/rvtl/include/,
 				);
@@ -1281,10 +1269,10 @@
 					../srilm/include,
 					../kenlm,
 					../randlm/include,
+					/opt/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -1309,10 +1297,10 @@
 					../srilm/include,
 					../kenlm,
 					../randlm/include,
+					/opt/local/include,
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};

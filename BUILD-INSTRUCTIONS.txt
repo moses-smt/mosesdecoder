@@ -91,3 +91,4 @@ Binaries for all external libraries needed can be downloaded from
 Only the decoder is developed and tested under Windows. There are difficulties using the training scripts under Windows, even with Cygwin.
 
 
+

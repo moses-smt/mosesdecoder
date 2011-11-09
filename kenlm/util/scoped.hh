@@ -1,10 +1,11 @@
 #ifndef UTIL_SCOPED__
 #define UTIL_SCOPED__
 
-/* Other scoped objects in the style of scoped_ptr. */
+#include "util/exception.hh"
 
+/* Other scoped objects in the style of scoped_ptr. */
 #include <cstddef>
-#include <cstdio>
+#include <cstdlib>
 
 namespace util {
 
@@ -34,52 +35,33 @@ template <class T, class R, R (*Free)(T*)> class scoped_thing {
     scoped_thing &operator=(const scoped_thing &);
 };
 
-class scoped_fd {
+class scoped_malloc {
   public:
-    scoped_fd() : fd_(-1) {}
+    scoped_malloc() : p_(NULL) {}
 
-    explicit scoped_fd(int fd) : fd_(fd) {}
+    scoped_malloc(void *p) : p_(p) {}
 
-    ~scoped_fd();
+    ~scoped_malloc() { std::free(p_); }
 
-    void reset(int to) {
-      scoped_fd other(fd_);
-      fd_ = to;
+    void reset(void *p = NULL) {
+      scoped_malloc other(p_);
+      p_ = p;
     }
 
-    int get() const { return fd_; }
-
-    int operator*() const { return fd_; }
-
-    int release() {
-      int ret = fd_;
-      fd_ = -1;
-      return ret;
+    void call_realloc(std::size_t to) {
+      void *ret;
+      UTIL_THROW_IF(!(ret = std::realloc(p_, to)) && to, util::ErrnoException, "realloc to " << to << " bytes failed.");
+      p_ = ret;
     }
+
+    void *get() { return p_; }
+    const void *get() const { return p_; }
 
   private:
-    int fd_;
+    void *p_;
 
-    scoped_fd(const scoped_fd &);
-    scoped_fd &operator=(const scoped_fd &);
-};
-
-class scoped_FILE {
-  public:
-    explicit scoped_FILE(std::FILE *file = NULL) : file_(file) {}
-
-    ~scoped_FILE();
-
-    std::FILE *get() { return file_; }
-    const std::FILE *get() const { return file_; }
-
-    void reset(std::FILE *to = NULL) {
-      scoped_FILE other(file_);
-      file_ = to;
-    }
-
-  private:
-    std::FILE *file_;
+    scoped_malloc(const scoped_malloc &);
+    scoped_malloc &operator=(const scoped_malloc &);
 };
 
 // Hat tip to boost.  

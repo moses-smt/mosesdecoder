@@ -10,19 +10,17 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 namespace lm {
 namespace ngram {
 namespace {
 const char kMagicBeforeVersion[] = "mmap lm http://kheafield.com/code format version";
-const char kMagicBytes[] = "mmap lm http://kheafield.com/code format version 4\n\0";
+const char kMagicBytes[] = "mmap lm http://kheafield.com/code format version 5\n\0";
 // This must be shorter than kMagicBytes and indicates an incomplete binary file (i.e. build failed). 
 const char kMagicIncomplete[] = "mmap lm http://kheafield.com/code incomplete\n";
-const long int kMagicVersion = 4;
+const long int kMagicVersion = 5;
 
 // Test values.  
 struct Sanity {
@@ -42,20 +40,18 @@ struct Sanity {
 
 const char *kModelNames[6] = {"hashed n-grams with probing", "hashed n-grams with sorted uniform find", "trie", "trie with quantization", "trie with array-compressed pointers", "trie with quantization and array-compressed pointers"};
 
-std::size_t Align8(std::size_t in) {
-  std::size_t off = in % 8;
-  if (!off) return in;
-  return in + 8 - off;
-}
-
 std::size_t TotalHeaderSize(unsigned char order) {
   return Align8(sizeof(Sanity) + sizeof(FixedWidthParameters) + sizeof(uint64_t) * order);
 }
 
-void ReadLoop(int fd, void *to_void, std::size_t size) {
+void ReadLoop(FD fd, void *to_void, std::size_t size) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   while (size) {
+#ifdef WIN32
+	ssize_t ret;
+#else
     ssize_t ret = read(fd, to, size);
+#endif
     if (ret == -1) UTIL_THROW(util::ErrnoException, "Failed to read from binary file");
     if (ret == 0) UTIL_THROW(util::ErrnoException, "Binary file too short");
     to += ret;
@@ -80,12 +76,18 @@ void WriteHeader(void *to, const Parameters &params) {
 
 } // namespace
 
-void SeekOrThrow(int fd, off_t off) {
+void SeekOrThrow(FD fd, off_t off) {
+#ifdef WIN32
+#else
   if ((off_t)-1 == lseek(fd, off, SEEK_SET)) UTIL_THROW(util::ErrnoException, "Seek failed");
+#endif
 }
 
-void AdvanceOrThrow(int fd, off_t off) {
+void AdvanceOrThrow(FD fd, off_t off) {
+#ifdef WIN32
+#else
   if ((off_t)-1 == lseek(fd, off, SEEK_CUR)) UTIL_THROW(util::ErrnoException, "Seek failed");
+#endif
 }
 
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing) {
@@ -119,7 +121,7 @@ uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t 
   } 
 }
 
-void FinishFile(const Config &config, ModelType model_type, const std::vector<uint64_t> &counts, Backing &backing) {
+void FinishFile(const Config &config, ModelType model_type, unsigned int search_version, const std::vector<uint64_t> &counts, Backing &backing) {
   if (config.write_mmap) {
     if (msync(backing.search.get(), backing.search.size(), MS_SYNC) || msync(backing.vocab.get(), backing.vocab.size(), MS_SYNC)) 
       UTIL_THROW(util::ErrnoException, "msync failed for " << config.write_mmap);
@@ -130,13 +132,14 @@ void FinishFile(const Config &config, ModelType model_type, const std::vector<ui
     params.fixed.probing_multiplier = config.probing_multiplier;
     params.fixed.model_type = model_type;
     params.fixed.has_vocabulary = config.include_vocab;
+    params.fixed.search_version = search_version;
     WriteHeader(backing.vocab.get(), params);
   }
 }
 
 namespace detail {
 
-bool IsBinaryFormat(int fd) {
+bool IsBinaryFormat(FD fd) {
   const off_t size = util::SizeFile(fd);
   if (size == util::kBadSize || (size <= static_cast<off_t>(sizeof(Sanity)))) return false;
   // Try reading the header.  
@@ -164,7 +167,7 @@ bool IsBinaryFormat(int fd) {
   return false;
 }
 
-void ReadHeader(int fd, Parameters &out) {
+void ReadHeader(FD fd, Parameters &out) {
   SeekOrThrow(fd, sizeof(Sanity));
   ReadLoop(fd, &out.fixed, sizeof(out.fixed));
   if (out.fixed.probing_multiplier < 1.0)
@@ -174,15 +177,16 @@ void ReadHeader(int fd, Parameters &out) {
   ReadLoop(fd, &*out.counts.begin(), sizeof(uint64_t) * out.fixed.order);
 }
 
-void MatchCheck(ModelType model_type, const Parameters &params) {
+void MatchCheck(ModelType model_type, unsigned int search_version, const Parameters &params) {
   if (params.fixed.model_type != model_type) {
     if (static_cast<unsigned int>(params.fixed.model_type) >= (sizeof(kModelNames) / sizeof(const char *)))
       UTIL_THROW(FormatLoadException, "The binary file claims to be model type " << static_cast<unsigned int>(params.fixed.model_type) << " but this is not implemented for in this inference code.");
     UTIL_THROW(FormatLoadException, "The binary file was built for " << kModelNames[params.fixed.model_type] << " but the inference code is trying to load " << kModelNames[model_type]);
   }
+  UTIL_THROW_IF(search_version != params.fixed.search_version, FormatLoadException, "The binary file has " << kModelNames[params.fixed.model_type] << " version " << params.fixed.search_version << " but this code expects " << kModelNames[params.fixed.model_type] << " version " << search_version);
 }
 
-void SeekPastHeader(int fd, const Parameters &params) {
+void SeekPastHeader(FD fd, const Parameters &params) {
   SeekOrThrow(fd, TotalHeaderSize(params.counts.size()));
 }
 

@@ -13,9 +13,10 @@ libkenlm_la_SOURCES = \
 	lm/quantize.cc \
 	lm/read_arpa.cc \
 	lm/trie.cc \
+	lm/trie_sort.cc \
 	lm/virtual_interface.cc \
 	lm/vocab.cc \
-	util/scoped.cc \
+	util/file.cc \
 	util/murmur_hash.cc   \
 	util/mmap.cc   \
 	util/file_piece.cc   \

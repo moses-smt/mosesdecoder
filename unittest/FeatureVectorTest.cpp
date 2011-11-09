@@ -30,13 +30,14 @@ BOOST_AUTO_TEST_SUITE(fv)
 
 BOOST_AUTO_TEST_CASE(vector_sum_diff) 
 {
-  FVector f1,f2;
+  FVector f1,f2,f3;
   FName n1("a");
   FName n2("b");
   FName n3("c");
   FName n4("d");
   f1[n1] = 1.2; f1[n2] = 1.4; f1[n3] = -0.1;
   f2[n1] = 0.01; f2[n3] = 5.6; f2[n4] = 0.6;
+  f3[n1] =1.2;
   FVector sum = f1 + f2;
   FVector diff = f1 - f2;
   BOOST_CHECK_CLOSE((FValue)sum[n1], 1.21, TOL); 
@@ -47,6 +48,9 @@ BOOST_AUTO_TEST_CASE(vector_sum_diff)
   BOOST_CHECK_CLOSE((FValue)diff[n2], 1.4, TOL); 
   BOOST_CHECK_CLOSE((FValue)diff[n3], -5.7, TOL); 
   BOOST_CHECK_CLOSE((FValue)diff[n4], -0.6, TOL); 
+  f1 -= f3;
+  cerr << f1 << endl << f3 << endl ;
+  BOOST_CHECK_CLOSE((FValue)f1[n1],0,TOL);
 }
 
 

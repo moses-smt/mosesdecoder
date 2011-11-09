@@ -148,8 +148,8 @@ safesystem($qsubcmd) or die;
 my $res;
 open (IN,"$jobscript.log") or die "Can't read main job id: $jobscript.log";
 chomp($res=<IN>);
-split(/\s+/,$res);
-my $id=$_[2];
+my @arrayStr = split(/\s+/,$res);
+my $id=$arrayStr[2];
 die "Failed to get job id from $jobscript.log, got: $res"
   if $id !~ /^[0-9]+$/;
 close(IN);

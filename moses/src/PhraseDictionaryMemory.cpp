@@ -1,4 +1,4 @@
-// $Id$
+// $Id: PhraseDictionaryMemory.cpp 4365 2011-10-14 16:40:30Z heafield $
 // vim:tabstop=2
 
 /***********************************************************************
@@ -24,7 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <iterator>
 #include <algorithm>
+#include <memory>
 #include <sys/stat.h>
+#include <stdlib.h>
+#include "util/file_piece.hh"
+#include "util/tokenize_piece.hh"
+
 #include "PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "Word.h"
@@ -39,6 +44,20 @@ using namespace std;
 
 namespace Moses
 {
+
+namespace {
+void ParserDeath(const std::string &file, size_t line_num) {
+  stringstream strme;
+  strme << "Syntax error at " << file << ":" << line_num;
+  UserMessage::Add(strme.str());
+  abort();
+}
+template <class It> StringPiece GrabOrDie(It &it, const std::string &file, size_t line_num) {
+  if (!it) ParserDeath(file, line_num);
+  return *it++;
+}
+} // namespace
+
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
                                   , const std::vector<FactorType> &output
                                   , const string &filePath
@@ -51,90 +70,109 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
   m_tableLimit = tableLimit;
 
+  util::FilePiece inFile(filePath.c_str(), staticData.GetVerboseLevel() >= 1 ? &std::cerr : NULL);
 
-  // data from file
-  InputFileStream inFile(filePath);
-
-  // create hash file if necessary
-  ofstream tempFile;
-  string tempFilePath;
-
-  vector< vector<string> >	phraseVector;
-  string line, prevSourcePhrase = "";
-  size_t count = 0;
   size_t line_num = 0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
+  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
-  while(getline(inFile, line)) {
+  Phrase sourcePhrase(Input, 0);
+  std::vector<float> scv;
+  scv.reserve(m_numScoreComponent);
+
+  TargetPhraseCollection *preSourceNode = NULL;
+  std::string preSourceString;
+
+  while(true) {
     ++line_num;
-    vector<string> tokens = TokenizeMultiCharSeparator( line , "|||" );
-
-    if (numElement == NOT_FOUND) {
-      // init numElement
-      numElement = tokens.size();
-      assert(numElement >= 3);
-      // extended style: source ||| target ||| scores ||| [alignment] ||| [counts]
+    StringPiece line;
+    try {
+      line = inFile.ReadLine();
+    } catch (util::EndOfFileException &e) {
+      break;
     }
 
-    if (tokens.size() != numElement) {
-      stringstream strme;
-      strme << "Syntax error at " << filePath << ":" << line_num;
-      UserMessage::Add(strme.str());
-      abort();
-    }
+    util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter("|||"));
+    StringPiece sourcePhraseString(GrabOrDie(pipes, filePath, line_num));
+    StringPiece targetPhraseString(GrabOrDie(pipes, filePath, line_num));
+    StringPiece scoreString(GrabOrDie(pipes, filePath, line_num));
 
-    const string &sourcePhraseString=tokens[0]
-                                     ,&targetPhraseString=tokens[1]
-                                         ,&scoreString = tokens[2];
-
-    bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
+    bool isLHSEmpty = !util::TokenIter<util::AnyCharacter, true>(sourcePhraseString, util::AnyCharacter(" \t"));
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-      TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty target, skipping\n");
+      TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty source, skipping\n");
       continue;
     }
+ 
+    //target
+    std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
+    targetPhrase->SetSourcePhrase(sourcePhrase); // TODO(bhaddow): This is a dangling pointer
+    targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
 
-    const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-    if (sourcePhraseString != prevSourcePhrase)
-      phraseVector = Phrase::Parse(sourcePhraseString, input, factorDelimiter);
-
-    vector<float> scoreVector = Tokenize<float>(scoreString);
-    if (scoreVector.size() != m_numScoreComponent) {
+    scv.clear();
+    for (util::TokenIter<util::AnyCharacter, true> token(scoreString, util::AnyCharacter(" \t")); token; ++token) {
+      char *err_ind;
+      // Token is always delimited by some form of space.  Also, apparently strtod is portable but strtof isn't.  
+      scv.push_back(FloorScore(TransformScore(static_cast<float>(strtod(token->data(), &err_ind)))));
+      if (err_ind == token->data()) {
+        stringstream strme;
+        strme << "Bad number " << token << " on line " << line_num;
+        UserMessage::Add(strme.str());
+        abort();
+      }
+    }
+    if (scv.size() != m_numScoreComponent) {
       stringstream strme;
-      strme << "Size of scoreVector != number (" <<scoreVector.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
+      strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
       UserMessage::Add(strme.str());
       abort();
     }
 
-    // source
-    Phrase sourcePhrase(Input, 0);
-    sourcePhrase.CreateFromString( input, phraseVector);
-    //target
-    TargetPhrase targetPhrase(Output);
-    targetPhrase.SetSourcePhrase(sourcePhrase);
-    targetPhrase.CreateFromString( output, targetPhraseString, factorDelimiter);
 
-    if (tokens.size() > 3)
-      targetPhrase.SetAlignmentInfo(tokens[3]);
+    
+    size_t consumed = 3;
+    if (pipes) {
+      targetPhrase->SetAlignmentInfo(*pipes++);
+      ++consumed;
+    }
 
     ScoreComponentCollection sparse;
-    if (tokens.size() > 5) {
+    if (pipes) pipes++; //counts
+    if (pipes) {
       //sparse features
       SparsePhraseDictionaryFeature* spdf = 
         GetFeature()->GetSparsePhraseDictionaryFeature();
       if (spdf) {
-        sparse.Assign(spdf,tokens[5]);
+        sparse.Assign(spdf,(pipes++)->as_string());
       }
     }
 
-    // component score, for n-best output
-    std::vector<float> scv(scoreVector.size());
-    std::transform(scoreVector.begin(),scoreVector.end(),scv.begin(),TransformScore);
-    std::transform(scv.begin(),scv.end(),scv.begin(),FloorScore);
-    targetPhrase.SetScore(m_feature, scv, sparse, weight, weightWP, languageModels);
 
-    AddEquivPhrase(sourcePhrase, targetPhrase);
+    // scv good to go sir!
+    targetPhrase->SetScore(m_feature, scv, sparse, weight, weightWP, languageModels);
 
-    count++;
+    // Check number of entries delimited by ||| agrees across all lines.  
+    for (; pipes; ++pipes, ++consumed) {}
+    if (numElement != consumed) {
+      if (numElement == NOT_FOUND) {
+        numElement = consumed;
+      } else {
+        stringstream strme;
+        strme << "Syntax error at " << filePath << ":" << line_num;
+        UserMessage::Add(strme.str());
+        abort();
+      }
+    }
+
+    // Reuse source if possible.  Otherwise, create node for it.  
+    if (preSourceString == sourcePhraseString && preSourceNode) {
+      preSourceNode->Add(targetPhrase.release());
+    } else {
+      sourcePhrase.Clear();
+      sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
+      preSourceNode = CreateTargetPhraseCollection(sourcePhrase);
+      preSourceNode->Add(targetPhrase.release());
+      preSourceString.assign(sourcePhraseString.data(), sourcePhraseString.size());
+    }
   }
 
   // sort each target phrase collection

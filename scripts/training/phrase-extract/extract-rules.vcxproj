@@ -60,6 +60,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -80,11 +81,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="extract-rules.cpp" />
+    <ClCompile Include="ExtractedRule.cpp" />
     <ClCompile Include="HoleCollection.cpp" />
+    <ClCompile Include="InputFileStream.cpp" />
     <ClCompile Include="SentenceAlignment.cpp" />
     <ClCompile Include="SentenceAlignmentWithSyntax.cpp" />
     <ClCompile Include="SyntaxTree.cpp" />
@@ -92,6 +96,7 @@
     <ClCompile Include="XmlTree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExtractedRule.h" />
     <ClInclude Include="Hole.h" />
     <ClInclude Include="HoleCollection.h" />
     <ClInclude Include="SentenceAlignment.h" />

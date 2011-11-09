@@ -1,6 +1,7 @@
 #include "util/file_piece.hh"
 
 #include "util/exception.hh"
+#include "util/file.hh"
 
 #include <iostream>
 #include <string>
@@ -10,21 +11,12 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
 
 namespace util {
-
-EndOfFileException::EndOfFileException() throw() {
-  *this << "End of file";
-}
-EndOfFileException::~EndOfFileException() throw() {}
 
 ParseNumberException::ParseNumberException(StringPiece value) throw() {
   *this << "Could not parse \"" << value << "\" into a number";
@@ -40,25 +32,13 @@ GZException::GZException(void *file) {
 // Sigh this is the only way I could come up with to do a _const_ bool.  It has ' ', '\f', '\n', '\r', '\t', and '\v' (same as isspace on C locale). 
 const bool kSpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-int OpenReadOrThrow(const char *name) {
-  int ret;
-  UTIL_THROW_IF(-1 == (ret = open(name, O_RDONLY)), ErrnoException, "while opening " << name);
-  return ret;
-}
-
-off_t SizeFile(int fd) {
-  struct stat sb;
-  if (fstat(fd, &sb) == -1 || (!sb.st_size && !S_ISREG(sb.st_mode))) return kBadSize;
-  return sb.st_size;
-}
-
 FilePiece::FilePiece(const char *name, std::ostream *show_progress, off_t min_buffer) : 
   file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())), page_(sysconf(_SC_PAGE_SIZE)),
   progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
   Initialize(name, show_progress, min_buffer);
 }
 
-FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, off_t min_buffer)  : 
+FilePiece::FilePiece(FD fd, const char *name, std::ostream *show_progress, off_t min_buffer)  : 
   file_(fd), total_size_(SizeFile(file_.get())), page_(sysconf(_SC_PAGE_SIZE)),
   progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
   Initialize(name, show_progress, min_buffer);
@@ -245,7 +225,11 @@ void FilePiece::MMapShift(off_t desired_begin) {
         , *file_, mapped_offset), mapped_size, scoped_memory::MMAP_ALLOCATED);
   if (data_.get() == MAP_FAILED) {
     if (desired_begin) {
+#ifdef WIN32
+
+#else
       if (((off_t)-1) == lseek(*file_, desired_begin, SEEK_SET)) UTIL_THROW(ErrnoException, "mmap failed even though it worked before.  lseek failed too, so using read isn't an option either.");
+#endif
     }
     // The mmap was scheduled to end the file, but now we're going to read it.  
     at_end_ = false;
@@ -270,8 +254,14 @@ void FilePiece::TransitionToRead() {
 
 #ifdef HAVE_ZLIB
   assert(!gz_file_);
+
+#ifdef WIN32
+
+#else
   gz_file_ = gzdopen(file_.get(), "r");
   UTIL_THROW_IF(!gz_file_, GZException, "zlib failed to open " << file_name_);
+#endif
+
 #endif
 }
 
@@ -313,7 +303,11 @@ void FilePiece::ReadShift() {
   if (read_return == -1) throw GZException(gz_file_);
   if (total_size_ != kBadSize) {
     // Just get the position, don't actually seek.  Apparently this is how you do it. . . 
+#ifdef WIN32
+  off_t ret;
+#else
     off_t ret = lseek(file_.get(), 0, SEEK_CUR);
+#endif
     if (ret != -1) progress_.Set(ret);
   }
 #else

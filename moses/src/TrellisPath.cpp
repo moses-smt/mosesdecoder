@@ -41,6 +41,25 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
   }
 }
 
+void TrellisPath::InitScore() {
+  m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
+  m_scoreBreakdown= m_path[0]->GetWinningHypo()->GetScoreBreakdown();
+
+  //calc score
+  size_t sizePath = m_path.size();
+  for (size_t pos = 0 ; pos < sizePath ; pos++) {
+    const Hypothesis *hypo = m_path[pos];
+    const Hypothesis *winningHypo = hypo->GetWinningHypo();
+    if (hypo != winningHypo) {
+      m_totalScore = m_totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
+      m_scoreBreakdown.MinusEquals(winningHypo->GetScoreBreakdown());
+      m_scoreBreakdown.PlusEquals(hypo->GetScoreBreakdown());
+    }
+  }
+
+
+}
+
 TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc)
   :m_prevEdgeChanged(edgeIndex)
 {
@@ -60,21 +79,19 @@ TrellisPath::TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypoth
     prevHypo = prevHypo->GetPrevHypo();
   }
 
-  // Calc score
-  m_totalScore		= m_path[0]->GetWinningHypo()->GetTotalScore();
-  m_scoreBreakdown= m_path[0]->GetWinningHypo()->GetScoreBreakdown();
-
-  size_t sizePath = m_path.size();
-  for (size_t pos = 0 ; pos < sizePath ; pos++) {
-    const Hypothesis *hypo = m_path[pos];
-    const Hypothesis *winningHypo = hypo->GetWinningHypo();
-    if (hypo != winningHypo) {
-      m_totalScore = m_totalScore - winningHypo->GetTotalScore() + hypo->GetTotalScore();
-      m_scoreBreakdown.MinusEquals(winningHypo->GetScoreBreakdown());
-      m_scoreBreakdown.PlusEquals(hypo->GetScoreBreakdown());
-    }
-  }
+  InitScore();
 }
+
+TrellisPath::TrellisPath(const vector<const Hypothesis*> edges) 
+:m_prevEdgeChanged(NOT_FOUND)
+{
+  m_path.resize(edges.size());
+  copy(edges.rbegin(),edges.rend(),m_path.begin());
+  InitScore();
+
+
+}
+
 
 void TrellisPath::CreateDeviantPaths(TrellisPathCollection &pathColl) const
 {

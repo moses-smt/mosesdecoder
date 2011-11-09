@@ -44,6 +44,7 @@
 #include "SyntaxTree.h"
 #include "tables-core.h"
 #include "XmlTree.h"
+#include "InputFileStream.h"
 
 #define LINE_MAX_LENGTH 500000
 
@@ -226,12 +227,10 @@ int main(int argc, char* argv[])
   cerr << "extracting hierarchical rules" << endl;
 
   // open input files
-  ifstream tFile;
-  ifstream sFile;
-  ifstream aFile;
-  tFile.open(fileNameT);
-  sFile.open(fileNameS);
-  aFile.open(fileNameA);
+  Moses::InputFileStream tFile(fileNameT);
+  Moses::InputFileStream sFile(fileNameS);
+  Moses::InputFileStream aFile(fileNameA);
+
   istream *tFileP = &tFile;
   istream *sFileP = &sFile;
   istream *aFileP = &aFile;
@@ -281,9 +280,9 @@ int main(int argc, char* argv[])
     if (options.onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
 
-  tFile.close();
-  sFile.close();
-  aFile.close();
+  tFile.Close();
+  sFile.Close();
+  aFile.Close();
   // only close if we actually opened it
   if (!options.onlyOutputSpanInfo) {
     extractFile.close();

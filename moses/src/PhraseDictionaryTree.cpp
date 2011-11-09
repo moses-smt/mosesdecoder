@@ -33,6 +33,8 @@ class TgtCand
   IPhrase fnames;
   std::vector<FValue> fvalues;
 
+  static const float SPARSE_FLAG;
+
 public:
   TgtCand() {}
 
@@ -51,18 +53,26 @@ public:
 
   void writeBin(FILE* f) const {
     fWriteVector(f,e);
-    fWriteVector(f,sc);
-    fWriteVector(f,fnames);
+    //This is a bit ugly, but if there is a sparse vector, add
+    //an extra score with value 100. Can the last score be 100?
+    //Probably not, since scores are probabilities and phrase penalty.
     if (fnames.size()) {
+      Scores sc_copy(sc);
+      sc_copy.push_back(SPARSE_FLAG);
+      fWriteVector(f,sc_copy);
+      fWriteVector(f,fnames);
       fWriteVector(f,fvalues);
+    } else {
+      fWriteVector(f,sc);
     }
   }
 
   void readBin(FILE* f) {
     fReadVector(f,e);
     fReadVector(f,sc);
-    fReadVector(f,fnames);
-    if (fnames.size()) {
+    if (sc.back() == 100) {
+      sc.pop_back();
+      fReadVector(f,fnames);
       fReadVector(f,fvalues);
     }
   }
@@ -101,6 +111,8 @@ public:
     fvalues = values;
   }
 };
+
+const float TgtCand::SPARSE_FLAG = 100;
 
 
 class TgtCands : public std::vector<TgtCand>
@@ -498,7 +510,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (numElement == NOT_FOUND) {
       // init numElement
       numElement = tokens.size();
-      assert(numElement == 3 || numElement >= 5);
+      assert(numElement >= 3);
     }
 
     if (tokens.size() != numElement) {
