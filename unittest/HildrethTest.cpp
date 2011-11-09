@@ -131,7 +131,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_1, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs1(featureValueDiffs);
-	FVector totalUpdate1;
+	FVector totalUpdate1 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs1.size(); ++k) {
 		featureValueDiffs1[k].MultiplyEquals(alphas1[k]);
 		cerr << k << ": " << featureValueDiffs1[k].GetScoresVector() << endl;
@@ -161,7 +161,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_1, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs2(featureValueDiffs);
-	FVector totalUpdate2;
+	FVector totalUpdate2 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs2.size(); ++k) {
 		featureValueDiffs2[k].MultiplyEquals(alphas2[k]);
 		cerr << k << ": " << featureValueDiffs2[k].GetScoresVector() << endl;
@@ -342,7 +342,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_3, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs1(featureValueDiffs);
-	FVector totalUpdate1;
+	FVector totalUpdate1 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs1.size(); ++k) {
 		featureValueDiffs1[k].MultiplyEquals(alphas1[k]);
 		cerr << k << ": " << featureValueDiffs1[k].GetScoresVector() << endl;
@@ -374,7 +374,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_3, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs2(featureValueDiffs);
-	FVector totalUpdate2;
+	FVector totalUpdate2 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs2.size(); ++k) {
 		featureValueDiffs2[k].MultiplyEquals(alphas2[k]);
 		cerr << k << ": " << featureValueDiffs2[k].GetScoresVector() << endl;
@@ -558,7 +558,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_4, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs1(featureValueDiffs);
-	FVector totalUpdate1;
+	FVector totalUpdate1 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs1.size(); ++k) {
 		featureValueDiffs1[k].MultiplyEquals(alphas1[k]);
 		cerr << k << ": " << featureValueDiffs1[k].GetScoresVector() << endl;
@@ -590,7 +590,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_4, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs2(featureValueDiffs);
-	FVector totalUpdate2;
+	FVector totalUpdate2 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs2.size(); ++k) {
 		featureValueDiffs2[k].MultiplyEquals(alphas2[k]);
 		cerr << k << ": " << featureValueDiffs2[k].GetScoresVector() << endl;
@@ -680,7 +680,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_5, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs1(featureValueDiffs);
-	FVector totalUpdate1;
+	FVector totalUpdate1 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs1.size(); ++k) {
 		featureValueDiffs1[k].MultiplyEquals(alphas1[k]);
 		cerr << k << ": " << featureValueDiffs1[k].GetScoresVector() << endl;
@@ -715,7 +715,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_5, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs2(featureValueDiffs);
-	FVector totalUpdate2;
+	FVector totalUpdate2 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs2.size(); ++k) {
 		featureValueDiffs2[k].MultiplyEquals(alphas2[k]);
 		cerr << k << ": " << featureValueDiffs2[k].GetScoresVector() << endl;
@@ -750,7 +750,7 @@ BOOST_FIXTURE_TEST_CASE(test_hildreth_5, MockProducers)
 
 	cerr << "partial updates:" << endl;
 	vector< ScoreComponentCollection> featureValueDiffs3(featureValueDiffs);
-	FVector totalUpdate3;
+	FVector totalUpdate3 = ScoreComponentCollection::CreateFVector();
 	for (size_t k = 0; k < featureValueDiffs3.size(); ++k) {
 		featureValueDiffs3[k].MultiplyEquals(alphas3[k]);
 		cerr << k << ": " << featureValueDiffs3[k].GetScoresVector() << endl;

@@ -65,6 +65,16 @@ class ScoreComponentCollection
   friend std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs);
 private:
 	FVector m_scores;
+  typedef std::pair<size_t,size_t> IndexPair;
+  typedef std::map<const ScoreProducer*,IndexPair> ScoreIndexMap;
+  static  ScoreIndexMap s_scoreIndexes;
+  static size_t s_denseVectorSize;
+  static IndexPair GetIndexes(const ScoreProducer* sp) 
+  {
+    ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
+    assert(indexIter != s_scoreIndexes.end());
+    return indexIter->second;
+  }
 
 public:
   //! Create a new score collection with all values set to 0.0
@@ -75,20 +85,39 @@ public:
 	: m_scores(rhs.m_scores)
 	{}
 
+  /**
+    * Register a ScoreProducer with a fixed number of scores, so that it can 
+    * be allocated space in the dense part of the feature vector.
+    **/
+  static void RegisterScoreProducer(const ScoreProducer* scoreProducer);
+
   /** Load from file */
   bool Load(const std::string& filename) 
   {
       return m_scores.load(filename);
   }
 
-  FVector GetScoresVector() const
+  const FVector& GetScoresVector() const
   {
 	  return m_scores;
   }
 
-  size_t Size()
+  size_t Size() const
   {
 	  return m_scores.size();
+  }
+
+  void Resize() 
+  {
+    if (m_scores.coreSize() != s_denseVectorSize) {
+      m_scores.resize(s_denseVectorSize);
+    }
+  }
+
+  /** Create and FVector with the right number of core features */
+  static FVector CreateFVector()
+  {
+    return FVector(s_denseVectorSize);
   }
 
   //! Set all values to 0.0
@@ -124,10 +153,9 @@ public:
 	//! produced by sp
 	void PlusEquals(const ScoreProducer* sp, const ScoreComponentCollection& scores)
 	{
-    const std::vector<FName>& names = sp->GetFeatureNames();
-    for (std::vector<FName>::const_iterator i = names.begin();
-         i != names.end(); ++i) {
-      m_scores[*i] += scores.m_scores[*i];
+    IndexPair indexes = GetIndexes(sp);
+    for (size_t i = indexes.first; i < indexes.second; ++i) {
+      m_scores[i] += scores.m_scores[i];
     }
 	}
 
@@ -136,10 +164,10 @@ public:
 	//! produced by sp
   void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
   {
-    const std::vector<FName>& names = sp->GetFeatureNames();
-    assert(names.size() == scores.size());
+    IndexPair indexes = GetIndexes(sp);
+    assert(scores.size() == indexes.second - indexes.first);
     for (size_t i = 0; i < scores.size(); ++i) {
-      m_scores[names[i]] += scores[i];
+      m_scores[i + indexes.first] += scores[i];
     }
   }
 
@@ -148,8 +176,9 @@ public:
 	//! a single value
 	void PlusEquals(const ScoreProducer* sp, float score)
 	{
-		assert(1 == sp->GetNumScoreComponents());
-    m_scores[sp->GetFeatureNames()[0]] += score;
+    IndexPair indexes = GetIndexes(sp);
+    assert(1 == indexes.second - indexes.first);
+    m_scores[indexes.first] += score;
 	}
 
   //For features which have an unbounded number of components
@@ -162,10 +191,10 @@ public:
 
 	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
 	{
-		assert(scores.size() == sp->GetNumScoreComponents());
-    const std::vector<FName>& names = sp->GetFeatureNames();
+    IndexPair indexes = GetIndexes(sp);
+    assert(scores.size() == indexes.second - indexes.first);
     for (size_t i = 0; i < scores.size(); ++i) {
-      m_scores[names[i]] = scores[i];
+      m_scores[i + indexes.first] = scores[i];
     }
 	}
 
@@ -174,8 +203,9 @@ public:
 	//! a single value
 	void Assign(const ScoreProducer* sp, float score)
 	{
-		assert(1 == sp->GetNumScoreComponents());
-    m_scores[sp->GetFeatureNames()[0]] = score;
+    IndexPair indexes = GetIndexes(sp);
+    assert(1 == indexes.second - indexes.first);
+    m_scores[indexes.first] = score;
 	}
 
   //For features which have an unbounded number of components
@@ -214,9 +244,9 @@ public:
     size_t components = sp->GetNumScoreComponents();
     if (components == ScoreProducer::unlimited) return std::vector<float>();
     std::vector<float> res(components);
-    const std::vector<FName>& names = sp->GetFeatureNames();
-    for (size_t i = 0; i < names.size(); ++i) {
-      res[i] = m_scores[names[i]];
+    IndexPair indexes = GetIndexes(sp);
+    for (size_t i = 0; i < res.size(); ++i) {
+      res[i] = m_scores[i + indexes.first];
     }
     return res;
 	}
@@ -224,7 +254,7 @@ public:
   //! get subset of scores that belong to a certain sparse ScoreProducer
   FVector GetVectorForProducer(const ScoreProducer* sp) const
   {
-    FVector fv;
+    FVector fv(s_denseVectorSize);
     std::string prefix = sp->GetScoreProducerWeightShortName() + FName::SEP;
     for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
       std::stringstream name;
@@ -251,8 +281,9 @@ public:
 	//! this will return it.  If not, this method will throw
 	float GetScoreForProducer(const ScoreProducer* sp) const
 	{
-    assert(sp->GetNumScoreComponents() == 1);
-    return m_scores[sp->GetFeatureNames()[0]];
+    IndexPair indexes = GetIndexes(sp);
+    assert(indexes.second - indexes.first == 1);
+    return m_scores[indexes.first];
 	}
 
   //For features which have an unbounded number of components

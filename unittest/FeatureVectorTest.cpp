@@ -168,6 +168,39 @@ BOOST_AUTO_TEST_CASE(core_arith)
   BOOST_CHECK_CLOSE((FValue)quot[1], -0.4 , TOL);
   BOOST_CHECK_CLOSE((FValue)quot[n1], 0.277777777  , TOL);
   BOOST_CHECK_CLOSE((FValue)quot[n2], 0 , TOL);
+
+  //with different length vectors
+  FVector f3(2);
+  FVector f4(1);
+  f3[0] = 2; f3[1] = -1;
+  f4[0] = 5;
+  
+  FVector sum1 = f3 + f4;
+  FVector sum2 = f4 + f3;
+  BOOST_CHECK_EQUAL(sum1,sum2);
+  BOOST_CHECK_CLOSE(sum1[0], 7, TOL);
+  BOOST_CHECK_CLOSE(sum1[1], -1, TOL);
+
+  FVector diff1 = f3 - f4;
+  FVector diff2 = f4 - f3;
+  BOOST_CHECK_CLOSE(diff1[0], -3, TOL);
+  BOOST_CHECK_CLOSE(diff1[1], -1, TOL);
+  BOOST_CHECK_CLOSE(diff2[0], 3, TOL);
+  BOOST_CHECK_CLOSE(diff2[1], 1, TOL);
+
+  FVector prod1 = f3 * f4;
+  FVector prod2 = f4 * f3;
+  BOOST_CHECK_EQUAL(prod1,prod2);
+  BOOST_CHECK_CLOSE(prod1[0], 10, TOL);
+  BOOST_CHECK_CLOSE(prod1[1], 0, TOL);
+
+  FVector quot1 = f3 / f4;
+  FVector quot2 = f4 / f3;
+  BOOST_CHECK_CLOSE(quot1[0], 0.4, TOL);
+  BOOST_CHECK_EQUAL(quot1[1], -numeric_limits<float>::infinity());
+  BOOST_CHECK_CLOSE(quot2[0], 2.5, TOL);
+  BOOST_CHECK_CLOSE(quot2[1], 0, TOL);
+  
 }
 
 BOOST_AUTO_TEST_CASE(core_scalar)

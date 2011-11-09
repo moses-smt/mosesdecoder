@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "ScoreComponentCollection.h"
 #include "ScoreProducer.h"
 
 using namespace std;
@@ -25,6 +26,10 @@ ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComp
     dstream << ":" << count;
   }
   m_description = dstream.str();
+  if (numScoreComponents != unlimited)
+  {
+    ScoreComponentCollection::RegisterScoreProducer(this);
+  }
 }
 
 ScoreProducer::~ScoreProducer() {}

@@ -91,6 +91,14 @@ namespace Moses {
   
 	FVector::FVector(size_t coreFeatures) :
      m_coreFeatures(coreFeatures) {}
+
+  void FVector::resize(size_t newsize) {
+      valarray<FValue> newCoreFeatures(newsize);
+      for (size_t i = 0; i < min(newsize,m_coreFeatures.size()); ++i)  {
+        newCoreFeatures[i] = m_coreFeatures[i];
+      }
+      m_coreFeatures = newCoreFeatures;
+    }
 	
 	void FVector::clear() {
     m_features.clear();
@@ -254,7 +262,9 @@ namespace Moses {
   }
 
   FVector& FVector::operator+= (const FVector& rhs) {
-    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+      resize(rhs.m_coreFeatures.size());
+    }
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second + rhs.get(i->first));
     }
@@ -263,12 +273,18 @@ namespace Moses {
         set(i->first,i->second);
       }
     }
-    m_coreFeatures += rhs.m_coreFeatures;
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      if (i < rhs.m_coreFeatures.size()) {
+        m_coreFeatures[i] += rhs.m_coreFeatures[i];
+      }
+    }
     return *this;
   }
   
   FVector& FVector::operator-= (const FVector& rhs) {
-    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+      resize(rhs.m_coreFeatures.size());
+    }
     for (iterator i = begin(); i != end(); ++i) {
       set(i->first,i->second - rhs.get(i->first));
     }
@@ -277,34 +293,56 @@ namespace Moses {
         set(i->first,-(i->second));
       }
     }
-    m_coreFeatures -= rhs.m_coreFeatures;
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      if (i < rhs.m_coreFeatures.size()) {
+        m_coreFeatures[i] -= rhs.m_coreFeatures[i];
+      }
+    }
     return *this;
   }
   
   FVector& FVector::operator*= (const FVector& rhs) {
-    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+      resize(rhs.m_coreFeatures.size());
+    }
     for (iterator i = begin(); i != end(); ++i) {
       FValue lhsValue = i->second;
       FValue rhsValue = rhs.get(i->first);
       set(i->first,lhsValue*rhsValue);
     }
-    m_coreFeatures *= rhs.m_coreFeatures;
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      if (i < rhs.m_coreFeatures.size()) {
+        m_coreFeatures[i] *= rhs.m_coreFeatures[i];
+      } else {
+        m_coreFeatures[i] = 0;
+      }
+    }
     return *this;
   }
   
   FVector& FVector::operator/= (const FVector& rhs) {
-    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+      resize(rhs.m_coreFeatures.size());
+    }
     for (iterator i = begin(); i != end(); ++i) {
       FValue lhsValue = i->second;
       FValue rhsValue = rhs.get(i->first);
       set(i->first, lhsValue / rhsValue) ;
     }
-    m_coreFeatures /= rhs.m_coreFeatures;
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      if (i < rhs.m_coreFeatures.size()) {
+        m_coreFeatures[i] /= rhs.m_coreFeatures[i];
+      } else {
+        m_coreFeatures[i] /= 0;
+      }
+    }
     return *this;
   }
   
 	FVector& FVector::max_equals(const FVector& rhs) {
-    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+      resize(rhs.m_coreFeatures.size());
+    }
 		for (iterator i = begin(); i != end(); ++i) {
 		  set(i->first, max(i->second , rhs.get(i->first) ));
 		}
@@ -314,7 +352,11 @@ namespace Moses {
       }
 		}
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
-      m_coreFeatures[i] = max(m_coreFeatures[i], rhs.m_coreFeatures[i]);
+      if (i < rhs.m_coreFeatures.size()) {
+        m_coreFeatures[i] = max(m_coreFeatures[i], rhs.m_coreFeatures[i]);
+      } else {
+        m_coreFeatures[i] = max(m_coreFeatures[i],(float)0);
+      }
     }
 		return *this;
 	}

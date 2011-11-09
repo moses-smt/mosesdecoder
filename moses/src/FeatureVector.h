@@ -112,6 +112,11 @@ namespace Moses {
   public:
     /** Empty feature vector */
     FVector(size_t coreFeatures = 0);
+
+    /* 
+     * Change the number of core features
+    **/
+    void resize(size_t newsize);
     
     typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     /** Iterators */
@@ -141,6 +146,10 @@ namespace Moses {
     size_t size() const {
       return m_features.size() + m_coreFeatures.size();
     }
+
+    size_t coreSize() const {
+      return m_coreFeatures.size();
+    }
     
     /** Equality */
     bool operator== (const FVector& rhs) const;
@@ -152,6 +161,7 @@ namespace Moses {
     
     /**arithmetic */
     //Element-wise
+    //If one side has fewer core features, take the missing ones to be 0.
     FVector& operator+= (const FVector& rhs);
     FVector& operator-= (const FVector& rhs);
     FVector& operator*= (const FVector& rhs);

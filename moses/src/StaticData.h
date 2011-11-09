@@ -658,7 +658,6 @@ public:
   Parameter* GetParameter() {
     return m_parameter;
   }
-  void SetAllWeightsScoreComponentCollection(const ScoreComponentCollection &weightsScoreComponentCollection);
 
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;

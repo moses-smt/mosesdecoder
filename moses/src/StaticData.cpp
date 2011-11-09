@@ -701,11 +701,13 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
 
 void StaticData::SetWeight(const ScoreProducer* sp, float weight)
 {
+  m_allWeights.Resize();
   m_allWeights.Assign(sp,weight);
 }
 
 void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& weights)
 {
+  m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
 }
 

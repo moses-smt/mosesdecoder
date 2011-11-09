@@ -8,9 +8,24 @@ using namespace std;
 
 namespace Moses
 {
-ScoreComponentCollection::ScoreComponentCollection()
+
+ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
+size_t ScoreComponentCollection::s_denseVectorSize = 0;
+
+ScoreComponentCollection::ScoreComponentCollection() : m_scores(s_denseVectorSize)
 {}
 
+
+void ScoreComponentCollection::RegisterScoreProducer
+  (const ScoreProducer* scoreProducer) 
+{
+  assert(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
+  size_t start = s_denseVectorSize;
+  size_t end = start + scoreProducer->GetNumScoreComponents();
+  VERBOSE(1,"ScoreProducer: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
+  s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
+  s_denseVectorSize = end;
+}
 
 float ScoreComponentCollection::GetWeightedScore() const
 {
