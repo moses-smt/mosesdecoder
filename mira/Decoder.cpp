@@ -66,21 +66,21 @@ namespace Mira {
     delete[] mosesargv;
   }
  
-  MosesDecoder::MosesDecoder(bool scaleByInputLength, float historySmoothing)
+  MosesDecoder::MosesDecoder(bool scaleByInputLength, bool scaleByTargetLength, bool scaleByAvgLength, float scaleByX, float historySmoothing)
 		: m_manager(NULL) {
 	  // force initialisation of the phrase dictionary (TODO: why?)
 	  const StaticData &staticData = StaticData::Instance();
-      m_sentence = new Sentence(Input);
+      /*m_sentence = new Sentence(Input);
       stringstream in("Initialising decoder..\n");
       const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      m_sentence->Read(in,inputFactorOrder);
+      m_sentence->Read(in,inputFactorOrder);*/
 
       const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-      m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
-      m_manager->ProcessSentence();
+      /*m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
+      m_manager->ProcessSentence();*/
 
       // Add the bleu feature
-      m_bleuScoreFeature = new BleuScoreFeature(scaleByInputLength, historySmoothing);
+      m_bleuScoreFeature = new BleuScoreFeature(scaleByInputLength, scaleByTargetLength, scaleByAvgLength, scaleByX, historySmoothing);
       (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
   }
   
@@ -136,11 +136,10 @@ namespace Mira {
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
-    	cerr << "Rank " << rank << ", epoch " << epoch << ", total score: " << path.GetTotalScore() << ", Score w/o bleu: " << scoreWithoutBleu << ", Bleu: " << bleuScore << endl;
 
     	Phrase bestPhrase = path.GetTargetPhrase();
 
-    	cerr << "Rank " << rank << ", epoch " << epoch << ": ";
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
     	Phrase phrase = path.GetTargetPhrase();
     	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
     		const Word &word = phrase.GetWord(pos);
@@ -148,7 +147,7 @@ namespace Mira {
     		cerr << *newWord;
     	}
 
-    	cerr << endl;
+    	cerr << "\", score: " << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
@@ -212,6 +211,14 @@ namespace Mira {
 
   void MosesDecoder::printReferenceLength(const vector<size_t>& ref_ids) {
   	m_bleuScoreFeature->PrintReferenceLength(ref_ids);
+  }
+
+  size_t MosesDecoder::getReferenceLength(size_t ref_id) {
+  	return m_bleuScoreFeature->GetReferenceLength(ref_id);
+  }
+
+  void MosesDecoder::setBleuSmoothingScheme(size_t scheme) {
+  	m_bleuScoreFeature->SetBleuSmoothingScheme(scheme);
   }
 } 
 

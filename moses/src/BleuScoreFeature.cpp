@@ -9,7 +9,7 @@ namespace Moses {
 size_t BleuScoreState::bleu_order = 4;
 
 BleuScoreState::BleuScoreState(): m_words(Output,1),
-                                  m_source_length(0),
+//                                  m_source_length(0),
                                   m_target_length(0),
                                   m_scaled_ref_length(0),
                                   m_ngram_counts(bleu_order),
@@ -24,10 +24,10 @@ int BleuScoreState::Compare(const FFState& o) const
 
     const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
 
-    if (m_source_length < other.m_source_length)
-    	return -1;
-    if (m_source_length > other.m_source_length)
-    	return 1;
+//    if (m_source_length < other.m_source_length)
+//    	return -1;
+//    if (m_source_length > other.m_source_length)
+//    	return 1;
 
     if (m_target_length < other.m_target_length)
         return -1;
@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& out, const BleuScoreState& state) {
 }
 
 void BleuScoreState::print(std::ostream& out) const {
-  out << "ref=" << m_scaled_ref_length << ";source=" << m_source_length
+  out << "ref=" << m_scaled_ref_length //<< ";source=" << m_source_length
 	  << ";target=" << m_target_length << ";counts=";
   for (size_t i = 0; i < bleu_order; ++i) {
     out << m_ngram_matches[i] << "/" << m_ngram_counts[i] << ",";
@@ -83,6 +83,7 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
+	cerr << "BleuScoreFeature: loading reference sentences.. " << endl;
 	m_refs.clear();
     FactorCollection& fc = FactorCollection::Instance();
     for (size_t file_id = 0; file_id < refs.size(); file_id++) {
@@ -199,6 +200,15 @@ void BleuScoreFeature::PrintReferenceLength(const vector<size_t>& ref_ids) {
 	    size_t cur_ref_length = m_refs[ref_ids[batchPosition]].first;
 	    cerr << "reference length: " << cur_ref_length << endl;
 	}
+}
+
+size_t BleuScoreFeature::GetReferenceLength(size_t ref_id) {
+	size_t cur_ref_length = m_refs[ref_id].first;
+	return cur_ref_length;
+}
+
+void BleuScoreFeature::SetBleuSmoothingScheme(size_t scheme) {
+	m_smoothing_scheme = (SmoothingScheme)scheme;
 }
 
 /*
@@ -321,11 +331,12 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
       ctx_start_idx = 0;
     }
 
-    new_state->m_source_length = cur_hypo.GetWordsBitmap().GetSize();
+    WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
+    new_state->m_source_length = coverageVector.GetNumWordsCovered();
+
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_end_idx));
     new_state->m_target_length += cur_hypo.GetTargetPhrase().GetSize();
-    WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
 
     // we need a scaled reference length to compare the current target phrase to the corresponding reference phrase
     new_state->m_scaled_ref_length = m_cur_ref_length * 
@@ -348,23 +359,45 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     if (!state->m_ngram_matches[0]) return 0;      	// if we have no unigram matches, score should be 0
 
     float precision = 1.0;
+    float smooth = 1;
     float smoothed_count, smoothed_matches;
 
     // Calculate geometric mean of modified ngram precisions
-	// BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
+    // BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
     // 		= BP * 4th root(PRODUCT_1_4 p_n)
-    for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
-        if (state->m_ngram_counts[i]) {
-            smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
-            smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
-            if (i > 0) {
-            	// smoothing for all n > 1
-            	smoothed_matches += 1;
-            	smoothed_count += 1;
-            }
+    for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
+    	if (state->m_ngram_counts[i]) {
+    		smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
+    		smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
 
-            precision *= smoothed_matches / smoothed_count;
-        }
+    		switch (m_smoothing_scheme) {
+    			case PLUS_ONE:
+    			default:
+    				if (i > 0) {
+    					// smoothing for all n > 1
+    					smoothed_matches += 1;
+    					smoothed_count += 1;
+    				}
+    				break;
+    			case LIGHT:
+      			if (i > 0) {
+      				// smoothing for all n > 1
+      				smoothed_matches += 0.1;
+      				smoothed_count += 0.1;
+      			}
+    				break;
+    			case PAPINENI:
+      			if (state->m_ngram_matches[i] == 0) {
+      				smooth *= 0.5;
+      				smoothed_matches += smooth;
+      				smoothed_count += smooth;
+      			}
+    				break;
+    		}
+
+    		precision *= smoothed_matches / smoothed_count;
+      }
+    }
 
     // take geometric mean
     precision = pow(precision, (float)1/4);
@@ -375,20 +408,27 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // where
     // c: length of the candidate translation
     // r: effective reference length (sum of best match lengths for each candidate sentence)
-	if (state->m_target_length < state->m_scaled_ref_length) {
-		float smoothed_target_length = m_target_length_history + state->m_target_length;
-		float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-		precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
-	}
+    if (state->m_target_length < state->m_scaled_ref_length) {
+    	float smoothed_target_length = m_target_length_history + state->m_target_length;
+    	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
+    	precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
+    }
 
     // Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
     // B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
     // where c(e;) is a vector of reference length, ngram counts and ngram matches
-	if (m_scale_by_input_length) {
-		precision *= m_source_length_history + state->m_source_length;
-	}
 
-    return precision;
+    if (m_scale_by_input_length) {
+    	precision *= m_source_length_history + m_cur_source_length;
+		}
+    else if (m_scale_by_ref_length) {
+    	precision *= m_ref_length_history + m_cur_ref_length;
+    }
+    else if (m_scale_by_avg_length) {
+    	precision *= (m_source_length_history + m_ref_length_history + m_cur_source_length +  + m_cur_ref_length) / 2;
+    }
+
+    return precision*m_scale_by_x;
 }
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const

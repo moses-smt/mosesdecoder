@@ -115,6 +115,7 @@ libmoses_la_HEADERS = \
         SquareMatrix.h \
         StaticData.h \
         TargetBigramFeature.h \
+	TargetNgramFeature.h \
         TargetPhrase.h \
         TargetPhraseCollection.h \
         TargetWordInsertionFeature.h \
@@ -273,6 +274,7 @@ libmoses_la_SOURCES = \
         SquareMatrix.cpp \
         StaticData.cpp \
         TargetBigramFeature.cpp \
+	TargetNgramFeature.cpp \
         TargetPhrase.cpp \
         TargetPhraseCollection.cpp \
         TargetWordInsertionFeature.cpp \

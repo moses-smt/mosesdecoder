@@ -72,6 +72,7 @@ class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class TargetBigramFeature;
+class TargetNgramFeature;
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
@@ -106,6 +107,7 @@ protected:
   // Other		= 1 = used to calculate LM score once all steps have been processed
   std::map<std::string, TranslationSystem> m_translationSystems;
   TargetBigramFeature *m_targetBigramFeature;
+  TargetNgramFeature *m_targetNgramFeature;
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhrasePairFeature *m_phrasePairFeature;
   PhraseLengthFeature* m_phraseLengthFeature;

@@ -35,7 +35,6 @@ namespace Mira {
 				  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 				  const std::vector<std::vector<float> >& bleuScoresHope,
 				  const std::vector<std::vector<float> >& bleuScoresFear,
-				  const std::vector< size_t> sentenceIds,
 				  float learning_rate,
 				  size_t rank,
 				  size_t epoch) = 0;
@@ -48,7 +47,6 @@ namespace Mira {
 					const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 					const std::vector<std::vector<float> >& bleuScoresHope,
 					const std::vector<std::vector<float> >& bleuScoresFear,
-					const std::vector< size_t> sentenceIds,
 					float learning_rate,
 					size_t rank,
 					size_t epoch);
@@ -73,7 +71,6 @@ namespace Mira {
       						  const std::vector<std::vector<float> >& bleuScores,
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
       						  const std::vector< float> oracleBleuScores,
-      						  const std::vector< size_t> sentenceIds,
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);
@@ -82,7 +79,6 @@ namespace Mira {
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
       						  const std::vector<std::vector<float> >& bleuScoresHope,
       						  const std::vector<std::vector<float> >& bleuScoresFear,
-      						  const std::vector< size_t> sentenceIds,
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);

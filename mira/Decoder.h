@@ -50,7 +50,7 @@ void initMoses(const std::string& inifile, int debuglevel,  int argc, std::vecto
  **/
 class MosesDecoder {
   public:
-    MosesDecoder(bool scaleByInputLength, float historySmoothing);
+    MosesDecoder(bool scaleByInputLength, bool scaleByTargetLength, bool scaleByAvgLength, float scaleByX, float historySmoothing);
 	
     //returns the best sentence
     std::vector<const Moses::Word*> getNBest(const std::string& source,
@@ -70,6 +70,8 @@ class MosesDecoder {
     void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
     void printBleuFeatureHistory(std::ostream& out);
     void printReferenceLength(const std::vector<size_t>& ref_ids);
+    size_t getReferenceLength(size_t ref_id);
+    void setBleuSmoothingScheme(size_t scheme);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
 	void cleanup();

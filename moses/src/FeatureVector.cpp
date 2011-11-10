@@ -333,7 +333,11 @@ namespace Moses {
       if (i < rhs.m_coreFeatures.size()) {
         m_coreFeatures[i] /= rhs.m_coreFeatures[i];
       } else {
-        m_coreFeatures[i] /= 0;
+        if (m_coreFeatures[i] < 0) {
+          m_coreFeatures[i] = -numeric_limits<FValue>::infinity();
+        } else if (m_coreFeatures[i] > 0) {
+          m_coreFeatures[i] = numeric_limits<FValue>::infinity();
+        }
       }
     }
     return *this;

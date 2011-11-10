@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "TranslationOption.h"
 #include "TargetBigramFeature.h"
+#include "TargetNgramFeature.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
 #include "BleuScoreFeature.h"
@@ -85,6 +86,7 @@ StaticData StaticData::s_instance;
 
 StaticData::StaticData()
   :m_targetBigramFeature(NULL)
+  ,m_targetNgramFeature(NULL)
   ,m_phraseBoundaryFeature(NULL)
   ,m_phrasePairFeature(NULL)
   ,m_phraseLengthFeature(NULL)
@@ -527,6 +529,8 @@ bool StaticData::LoadData(Parameter *parameter)
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
       if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_targetBigramFeature->SetSparseFeatureReporting();
+      if (m_targetNgramFeature && name.compare(m_targetNgramFeature->GetScoreProducerWeightShortName(0)) == 0)
+      	m_targetNgramFeature->SetSparseFeatureReporting();
       if (m_phrasePairFeature && name.compare(m_phrasePairFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_phrasePairFeature->SetSparseFeatureReporting();
       if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName(0)) == 0)
@@ -630,6 +634,9 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     if (m_targetBigramFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetBigramFeature);
+    }
+    if (m_targetNgramFeature) {
+    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetNgramFeature);
     }
     if (m_phrasePairFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phrasePairFeature);
@@ -735,6 +742,7 @@ StaticData::~StaticData()
   // small score producers
   delete m_unknownWordPenaltyProducer;
   delete m_targetBigramFeature;
+  delete m_targetNgramFeature;
   delete m_phrasePairFeature;
   delete m_phraseBoundaryFeature;
   delete m_phraseLengthFeature;
@@ -1371,7 +1379,7 @@ bool StaticData::LoadDecodeGraphs()
 
 bool StaticData::LoadReferences()
 {
-  vector<string> bleuWeightStr = m_parameter->GetParam("weight-b");
+  vector<string> bleuWeightStr = m_parameter->GetParam("weight-bl");
   vector<string> referenceFiles = m_parameter->GetParam("references");
   if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
     UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
@@ -1411,7 +1419,6 @@ bool StaticData::LoadReferences()
   }
   //Set the references in the bleu feature
   m_bleuScoreFeature->LoadReferences(references);
-  m_bleuScoreFeature->SetCurrentReference(0); //TODO: Temporary, for testing
 
   return true;
 }
@@ -1430,28 +1437,35 @@ bool StaticData::LoadDiscrimLMFeature()
   }
 
   vector<string> tokens = Tokenize(wordFile[0]);
-  if (tokens.size() != 2 && tokens.size() != 3) {
-    UserMessage::Add("Format of discriminative language model parameter is <order> [factor] <filename>");
+  if (tokens.size() != 3 && tokens.size() != 4) {
+    UserMessage::Add("Format of discriminative language model parameter is <order> <include-lower-ngrams> [factor] <filename>");
     return false;
+  }
+
+  bool include_lower_ngrams = Scan<bool>(tokens[1]);
+  FactorType factorId = 0;
+  string filename = tokens[2];
+  if (tokens.size() == 4) {
+    factorId = Scan<size_t>(tokens[2]);
+    filename = tokens[3];
   }
 
   size_t order = Scan<size_t>(tokens[0]);
-  if (order != 2) {
-    UserMessage::Add("Only bigrams are supported by the discriminative LM");
-    return false;
+  if (order == 2 && !include_lower_ngrams) {
+    m_targetBigramFeature = new TargetBigramFeature(factorId);
+    cerr << "loading from " << filename << endl;
+    if (!m_targetBigramFeature->Load(filename)) {
+      UserMessage::Add("Unable to load word list from file " + filename);
+      return false;
+    }
   }
-  FactorType factorId = 0;
-  string filename = tokens[1];
-  if (tokens.size() == 3) {
-    factorId = Scan<size_t>(tokens[1]);
-    filename = tokens[2];
-  }
-
-  m_targetBigramFeature = new TargetBigramFeature(factorId);
-  cerr << "loading from " << filename << endl;
-  if (!m_targetBigramFeature->Load(filename)) {
-    UserMessage::Add("Unable to load word list from file " + filename);
-    return false;
+  else {
+    m_targetNgramFeature = new TargetNgramFeature(factorId, order, include_lower_ngrams);
+    cerr << "loading from " << filename << endl;
+    if (!m_targetNgramFeature->Load(filename)) {
+      UserMessage::Add("Unable to load word list from file " + filename);
+      return false;
+    }
   }
 
   return true;
