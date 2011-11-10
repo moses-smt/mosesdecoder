@@ -7,16 +7,17 @@
 #include <string>
 
 #include <ctype.h>
-
-#include "util/portability.hh"
+#if !defined(_WIN32) && !defined(_WIN64)
+#include <sys/resource.h>
+#endif
+#include <sys/time.h>
 
 float FloatSec(const struct timeval &tv) {
   return static_cast<float>(tv.tv_sec) + (static_cast<float>(tv.tv_usec) / 1000000000.0);
 }
 
 void PrintUsage(const char *message) {
-#ifdef WIN32
-#else
+#if !defined(_WIN32) && !defined(_WIN64)
   struct rusage usage;
   if (getrusage(RUSAGE_SELF, &usage)) {
     perror("getrusage");
@@ -24,7 +25,6 @@ void PrintUsage(const char *message) {
   }
   std::cerr << message;
   std::cerr << "user\t" << FloatSec(usage.ru_utime) << "\nsys\t" << FloatSec(usage.ru_stime) << '\n';
-#endif
 
   // Linux doesn't set memory usage :-(.  
   std::ifstream status("/proc/self/status", std::ios::in);
@@ -35,6 +35,7 @@ void PrintUsage(const char *message) {
       break;
     }
   }
+#endif
 }
 
 template <class Model> void Query(const Model &model, bool sentence_context) {

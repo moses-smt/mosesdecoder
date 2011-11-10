@@ -4,13 +4,14 @@
 
 #include <cstddef>
 
-#include "util/portability.hh"
-#include <stdint.h>
+#include <inttypes.h>
 #include <sys/types.h>
 
 namespace util {
 
 class scoped_fd;
+
+long SizePage();
 
 // (void*)-1 is MAP_FAILED; this is done to avoid including the mmap header here.  
 class scoped_mmap {
@@ -95,14 +96,18 @@ typedef enum {
 extern const int kFileFlags;
 
 // Wrapper around mmap to check it worked and hide some platform macros.  
-void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, FD fd, off_t offset = 0);
+void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, int fd, uint64_t offset = 0);
 
-void MapRead(LoadMethod method, FD fd, off_t offset, std::size_t size, scoped_memory &out);
+void MapRead(LoadMethod method, int fd, uint64_t offset, std::size_t size, scoped_memory &out);
 
 void *MapAnonymous(std::size_t size);
 
 // Open file name with mmap of size bytes, all of which are initially zero.  
+void *MapZeroedWrite(int fd, std::size_t size);
 void *MapZeroedWrite(const char *name, std::size_t size, scoped_fd &file);
+
+// msync wrapper 
+void SyncOrThrow(void *start, size_t length);
 
 } // namespace util
 

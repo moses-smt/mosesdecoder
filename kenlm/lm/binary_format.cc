@@ -1,17 +1,15 @@
 #include "lm/binary_format.hh"
 
 #include "lm/lm_exception.hh"
+#include "util/file.hh"
 #include "util/file_piece.hh"
 
+#include <cstddef>
+#include <cstring>
 #include <limits>
 #include <string>
 
-#include <fcntl.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <inttypes.h>
 
 namespace lm {
 namespace ngram {
@@ -30,6 +28,7 @@ struct Sanity {
   uint64_t one_uint64;
 
   void SetToReference() {
+    std::memset(this, 0, sizeof(Sanity));
     std::memcpy(magic, kMagicBytes, sizeof(magic));
     zero_f = 0.0; one_f = 1.0; minus_half_f = -0.5;
     one_word_index = 1;
@@ -41,28 +40,13 @@ struct Sanity {
 const char *kModelNames[6] = {"hashed n-grams with probing", "hashed n-grams with sorted uniform find", "trie", "trie with quantization", "trie with array-compressed pointers", "trie with quantization and array-compressed pointers"};
 
 std::size_t TotalHeaderSize(unsigned char order) {
-  return Align8(sizeof(Sanity) + sizeof(FixedWidthParameters) + sizeof(uint64_t) * order);
-}
-
-void ReadLoop(FD fd, void *to_void, std::size_t size) {
-  uint8_t *to = static_cast<uint8_t*>(to_void);
-  while (size) {
-#ifdef WIN32
-	ssize_t ret;
-#else
-    ssize_t ret = read(fd, to, size);
-#endif
-    if (ret == -1) UTIL_THROW(util::ErrnoException, "Failed to read from binary file");
-    if (ret == 0) UTIL_THROW(util::ErrnoException, "Binary file too short");
-    to += ret;
-    size -= ret;
-  }
+  return ALIGN8(sizeof(Sanity) + sizeof(FixedWidthParameters) + sizeof(uint64_t) * order);
 }
 
 void WriteHeader(void *to, const Parameters &params) {
   Sanity header = Sanity();
   header.SetToReference();
-  memcpy(to, &header, sizeof(Sanity));
+  std::memcpy(to, &header, sizeof(Sanity));
   char *out = reinterpret_cast<char*>(to) + sizeof(Sanity);
 
   *reinterpret_cast<FixedWidthParameters*>(out) = params.fixed;
@@ -75,20 +59,6 @@ void WriteHeader(void *to, const Parameters &params) {
 }
 
 } // namespace
-
-void SeekOrThrow(FD fd, off_t off) {
-#ifdef WIN32
-#else
-  if ((off_t)-1 == lseek(fd, off, SEEK_SET)) UTIL_THROW(util::ErrnoException, "Seek failed");
-#endif
-}
-
-void AdvanceOrThrow(FD fd, off_t off) {
-#ifdef WIN32
-#else
-  if ((off_t)-1 == lseek(fd, off, SEEK_CUR)) UTIL_THROW(util::ErrnoException, "Seek failed");
-#endif
-}
 
 uint8_t *SetupJustVocab(const Config &config, uint8_t order, std::size_t memory_size, Backing &backing) {
   if (config.write_mmap) {
@@ -110,8 +80,8 @@ uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t 
       UTIL_THROW(util::ErrnoException, "ftruncate on " << config.write_mmap << " to " << (adjusted_vocab + memory_size) << " failed");
 
     // We're skipping over the header and vocab for the search space mmap.  mmap likes page aligned offsets, so some arithmetic to round the offset down.  
-    off_t page_size = sysconf(_SC_PAGE_SIZE);
-    off_t alignment_cruft = adjusted_vocab % page_size;
+    std::size_t page_size = util::SizePage();
+    std::size_t alignment_cruft = adjusted_vocab % page_size;
     backing.search.reset(util::MapOrThrow(alignment_cruft + memory_size, true, util::kFileFlags, false, backing.file.get(), adjusted_vocab - alignment_cruft), alignment_cruft + memory_size, util::scoped_memory::MMAP_ALLOCATED);
 
     return reinterpret_cast<uint8_t*>(backing.search.get()) + alignment_cruft;
@@ -123,8 +93,8 @@ uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t 
 
 void FinishFile(const Config &config, ModelType model_type, unsigned int search_version, const std::vector<uint64_t> &counts, Backing &backing) {
   if (config.write_mmap) {
-    if (msync(backing.search.get(), backing.search.size(), MS_SYNC) || msync(backing.vocab.get(), backing.vocab.size(), MS_SYNC)) 
-      UTIL_THROW(util::ErrnoException, "msync failed for " << config.write_mmap);
+    util::SyncOrThrow(backing.search.get(), backing.search.size());
+    util::SyncOrThrow(backing.vocab.get(), backing.vocab.size());
     // header and vocab share the same mmap.  The header is written here because we know the counts.  
     Parameters params;
     params.counts = counts;
@@ -139,9 +109,9 @@ void FinishFile(const Config &config, ModelType model_type, unsigned int search_
 
 namespace detail {
 
-bool IsBinaryFormat(FD fd) {
-  const off_t size = util::SizeFile(fd);
-  if (size == util::kBadSize || (size <= static_cast<off_t>(sizeof(Sanity)))) return false;
+bool IsBinaryFormat(int fd) {
+  const uint64_t size = util::SizeFile(fd);
+  if (size == util::kBadSize || (size <= static_cast<uint64_t>(sizeof(Sanity)))) return false;
   // Try reading the header.  
   util::scoped_memory memory;
   try {
@@ -167,14 +137,14 @@ bool IsBinaryFormat(FD fd) {
   return false;
 }
 
-void ReadHeader(FD fd, Parameters &out) {
-  SeekOrThrow(fd, sizeof(Sanity));
-  ReadLoop(fd, &out.fixed, sizeof(out.fixed));
+void ReadHeader(int fd, Parameters &out) {
+  util::SeekOrThrow(fd, sizeof(Sanity));
+  util::ReadOrThrow(fd, &out.fixed, sizeof(out.fixed));
   if (out.fixed.probing_multiplier < 1.0)
     UTIL_THROW(FormatLoadException, "Binary format claims to have a probing multiplier of " << out.fixed.probing_multiplier << " which is < 1.0.");
 
   out.counts.resize(static_cast<std::size_t>(out.fixed.order));
-  ReadLoop(fd, &*out.counts.begin(), sizeof(uint64_t) * out.fixed.order);
+  util::ReadOrThrow(fd, &*out.counts.begin(), sizeof(uint64_t) * out.fixed.order);
 }
 
 void MatchCheck(ModelType model_type, unsigned int search_version, const Parameters &params) {
@@ -186,12 +156,12 @@ void MatchCheck(ModelType model_type, unsigned int search_version, const Paramet
   UTIL_THROW_IF(search_version != params.fixed.search_version, FormatLoadException, "The binary file has " << kModelNames[params.fixed.model_type] << " version " << params.fixed.search_version << " but this code expects " << kModelNames[params.fixed.model_type] << " version " << search_version);
 }
 
-void SeekPastHeader(FD fd, const Parameters &params) {
-  SeekOrThrow(fd, TotalHeaderSize(params.counts.size()));
+void SeekPastHeader(int fd, const Parameters &params) {
+  util::SeekOrThrow(fd, TotalHeaderSize(params.counts.size()));
 }
 
 uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t memory_size, Backing &backing) {
-  const off_t file_size = util::SizeFile(backing.file.get());
+  const uint64_t file_size = util::SizeFile(backing.file.get());
   // The header is smaller than a page, so we have to map the whole header as well.  
   std::size_t total_map = TotalHeaderSize(params.counts.size()) + memory_size;
   if (file_size != util::kBadSize && static_cast<uint64_t>(file_size) < total_map)
@@ -203,7 +173,7 @@ uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t
     UTIL_THROW(FormatLoadException, "The decoder requested all the vocabulary strings, but this binary file does not have them.  You may need to rebuild the binary file with an updated version of build_binary.");
 
   if (config.enumerate_vocab) {
-    SeekOrThrow(backing.file.get(), total_map);
+    util::SeekOrThrow(backing.file.get(), total_map);
   }
   return reinterpret_cast<uint8_t*>(backing.search.get()) + TotalHeaderSize(params.counts.size());
 }

@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <cstring>
 
-#include <stdint.h>
+#include <inttypes.h>
 
 namespace util {
 
