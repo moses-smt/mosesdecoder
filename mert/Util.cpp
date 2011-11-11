@@ -18,6 +18,15 @@ Timer g_timer;
 
 int verbose=0;
 
+namespace {
+
+bool FindDelimiter(const std::string &str, const std::string &delim, size_t *pos)
+{
+  *pos = str.find(delim);
+  return *pos != std::string::npos ? true : false;
+}
+} // namespace
+
 int verboselevel()
 {
   return verbose;
@@ -29,21 +38,22 @@ int setverboselevel(int v)
   return verbose;
 }
 
-int getNextPound(std::string &theString, std::string &substring, const std::string delimiter)
+size_t getNextPound(std::string &theString, std::string &substring, const std::string delimiter)
 {
-  unsigned int pos = 0;
+  size_t pos = 0;
 
   //skip all occurrences of delimiter
-  while ( pos == 0 ) {
-    if ((pos = theString.find(delimiter)) != std::string::npos) {
+  while (pos == 0) {
+    // if ((pos = theString.find(delimiter)) != std::string::npos) {
+    if (FindDelimiter(theString, delimiter, &pos)) {
       substring.assign(theString, 0, pos);
-      theString.erase(0,pos + delimiter.size());
+      theString.erase(0, pos + delimiter.size());
     } else {
       substring.assign(theString);
       theString.assign("");
     }
   }
-  return (pos);
+  return pos;
 };
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -51,6 +61,16 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
   std::string item;
   while(std::getline(ss, item, delim)) {
     elems.push_back(item);
+  }
+}
+
+void Tokenize(const char *str, const char delim,
+              std::vector<std::string> *res) {
+  while (1) {
+    const char *begin = str;
+    while (*str != delim && *str) str++;
+    res->push_back(std::string(begin, str));
+    if (*str++ == 0) break;
   }
 }
 

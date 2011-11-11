@@ -46,8 +46,10 @@ class FeatureStats;
 int verboselevel();
 int setverboselevel(int v);
 
-int getNextPound(std::string &theString, std::string &substring, const std::string delimiter=DELIMITER_SYMBOL);
+size_t getNextPound(std::string &theString, std::string &substring, const std::string delimiter=DELIMITER_SYMBOL);
 void split(const std::string &s, char delim, std::vector<std::string> &elems);
+
+void Tokenize(const char *str, const char delim, std::vector<std::string> *res);
 
 template<typename T>
 inline T Scan(const std::string &input)

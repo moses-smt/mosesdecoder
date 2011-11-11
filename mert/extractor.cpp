@@ -129,41 +129,24 @@ int main(int argc, char** argv)
       throw runtime_error("Error: reference file is not specified; you can not score the nbest");
     }
 
-
     vector<string> nbestFiles;
     if (nbestFile.length() > 0) {
-      std::string substring;
-      while (!nbestFile.empty()) {
-        getNextPound(nbestFile, substring, ",");
-        nbestFiles.push_back(substring);
-      }
+      Tokenize(nbestFile.c_str(), ',', &nbestFiles);
     }
 
     vector<string> referenceFiles;
     if (referenceFile.length() > 0) {
-      std::string substring;
-      while (!referenceFile.empty()) {
-        getNextPound(referenceFile, substring, ",");
-        referenceFiles.push_back(substring);
-      }
+      Tokenize(referenceFile.c_str(), ',', &referenceFiles);
     }
 
     vector<string> prevScoreDataFiles;
     if (prevScoreDataFile.length() > 0) {
-      std::string substring;
-      while (!prevScoreDataFile.empty()) {
-        getNextPound(prevScoreDataFile, substring, ",");
-        prevScoreDataFiles.push_back(substring);
-      }
+      Tokenize(prevScoreDataFile.c_str(), ',', &prevScoreDataFiles);
     }
 
     vector<string> prevFeatureDataFiles;
     if (prevFeatureDataFile.length() > 0) {
-      std::string substring;
-      while (!prevFeatureDataFile.empty()) {
-        getNextPound(prevFeatureDataFile, substring, ",");
-        prevFeatureDataFiles.push_back(substring);
-      }
+      Tokenize(prevFeatureDataFile.c_str(), ',', &prevFeatureDataFiles);
     }
 
     if (prevScoreDataFiles.size() != prevFeatureDataFiles.size()) {

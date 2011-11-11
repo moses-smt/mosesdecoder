@@ -279,20 +279,12 @@ int main (int argc, char **argv)
 
   vector<string> ScoreDataFiles;
   if (scorerfile.length() > 0) {
-    std::string substring;
-    while (!scorerfile.empty()) {
-      getNextPound(scorerfile, substring, ",");
-      ScoreDataFiles.push_back(substring);
-    }
+    Tokenize(scorerfile.c_str(), ',', &ScoreDataFiles);
   }
 
   vector<string> FeatureDataFiles;
   if (featurefile.length() > 0) {
-    std::string substring;
-    while (!featurefile.empty()) {
-      getNextPound(featurefile, substring, ",");
-      FeatureDataFiles.push_back(substring);
-    }
+    Tokenize(featurefile.c_str(), ',', &FeatureDataFiles);
   }
 
   if (ScoreDataFiles.size() != FeatureDataFiles.size()) {
@@ -404,7 +396,7 @@ int main (int argc, char **argv)
     }
   }
 
-    
+
   //wait for all threads to finish
 #ifdef WITH_THREADS
   pool.Stop(true);
