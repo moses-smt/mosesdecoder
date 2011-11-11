@@ -122,6 +122,4 @@ public:
   friend ostream& operator<<(ostream& o, const FeatureStats& e);
 };
 
-#endif
-
-
+#endif  // FEATURE_STATS_H

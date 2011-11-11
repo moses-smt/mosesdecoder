@@ -54,4 +54,4 @@ private:
   vector<multiset<int> > _reftokens;
 };
 
-#endif //__PERSCORER_H
+#endif  // __PERSCORER_H__

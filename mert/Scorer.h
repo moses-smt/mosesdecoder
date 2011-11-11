@@ -250,5 +250,4 @@ protected:
 
 };
 
-
-#endif //__SCORER_H
+#endif // __SCORER_H__

@@ -104,12 +104,12 @@ public:
 
   /**
    *  Create shard_count shards. If shard_size == 0, then the shards are non-overlapping
-   *  and exhaust the data. If 0 < shard_size <= 1, then shards are chosen by sampling 
+   *  and exhaust the data. If 0 < shard_size <= 1, then shards are chosen by sampling
    *  the data (with replacement) and shard_size is interpreted as the proportion
    * of the total size.
    */
-  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig, 
+  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig,
        std::vector<Data>& shards);
 };
 
-#endif
+#endif  // DATA_H

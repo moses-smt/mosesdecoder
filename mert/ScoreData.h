@@ -109,5 +109,4 @@ public:
   }
 };
 
-
-#endif
+#endif  // SCORE_DATA_H

@@ -54,4 +54,4 @@ private:
   ~ScorerFactory() {}
 };
 
-#endif //__SCORER_FACTORY_H
+#endif  // __SCORER_FACTORY_H

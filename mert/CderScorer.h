@@ -41,11 +41,11 @@ private:
   vector<vector<sent_t> > ref_sentences;
 
   vector<int> computeCD(const sent_t& cand, const sent_t& ref);
-  int distance(int word1, int word2) 
+  int distance(int word1, int word2)
   {
-	  if (word1 == word2) 
+	  if (word1 == word2)
 		  return 0;
-	  else 
+	  else
 		  return 1;
   }
 
@@ -56,4 +56,4 @@ private:
 };
 
 
-#endif
+#endif  // __CDERSCORER_H__

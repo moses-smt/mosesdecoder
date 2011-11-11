@@ -94,6 +94,4 @@ public:
   friend ostream& operator<<(ostream& o, const ScoreStats& e);
 };
 
-
-#endif
-
+#endif  // SCORE_STATS_H

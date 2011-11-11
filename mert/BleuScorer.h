@@ -108,5 +108,4 @@ private:
   vector<vector<size_t> > _reflengths;
 };
 
-
-#endif //__BLEUSCORER_H
+#endif  // __BLEUSCORER_H__

@@ -81,4 +81,4 @@ private:
   char _buff[_buffsize];
 };
 
-#endif
+#endif  // _GZFILEBUF_H_

@@ -43,8 +43,8 @@ public:
     array_.clear();
   }
 
-  inline bool hasSparseFeatures() const { 
-    return _sparse_flag; 
+  inline bool hasSparseFeatures() const {
+    return _sparse_flag;
   }
   inline FeatureArray get(const std::string& idx) {
     return array_.at(getIndex(idx));
@@ -136,6 +136,4 @@ public:
   void setFeatureMap(const std::string feat);
 };
 
-
-#endif
-
+#endif  // FEATURE_DATA_H

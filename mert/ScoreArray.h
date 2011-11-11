@@ -99,6 +99,4 @@ public:
   bool check_consistency();
 };
 
-
-#endif
-
+#endif  // SCORE_ARRAY_H

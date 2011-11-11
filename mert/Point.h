@@ -1,5 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
+
 #include <vector>
 #include "Types.h"
 #include "FeatureStats.h"
@@ -68,5 +69,4 @@ public:
   };
 };
 
-#endif
-
+#endif  // POINT_H

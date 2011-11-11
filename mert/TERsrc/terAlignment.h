@@ -1,7 +1,6 @@
 #ifndef __TERCPPTERALIGNMENT_H__
 #define __TERCPPTERALIGNMENT_H__
 
-
 #include <vector>
 #include <stdio.h>
 #include <string.h>
@@ -48,4 +47,5 @@ public:
 };
 
 }
-#endif
+
+#endif  // __TERCPPTERALIGNMENT_H__

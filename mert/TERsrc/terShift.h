@@ -1,13 +1,11 @@
 #ifndef __TERCPPTERSHIFT_H__
 #define __TERCPPTERSHIFT_H__
 
-
 #include <vector>
 #include <stdio.h>
 #include <string>
 #include <sstream>
 #include "tools.h"
-
 
 using namespace std;
 using namespace Tools;
@@ -42,4 +40,5 @@ public:
 };
 
 }
-#endif
+
+#endif  // __TERCPPTERSHIFT_H__

@@ -1,7 +1,6 @@
 #ifndef __TERSCORER_H__
 #define __TERSCORER_H__
 
-// #include <stdio.h>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -63,5 +62,4 @@ private:
 
 };
 
-
-#endif //__TERSCORER_H
+#endif // __TERSCORER_H__

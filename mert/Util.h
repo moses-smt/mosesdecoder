@@ -104,5 +104,4 @@ void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
-#endif
-
+#endif  // UTIL_H

@@ -99,5 +99,4 @@ public:
   bool check_consistency();
 };
 
-
-#endif
+#endif  // FEATURE_ARRAY_H
