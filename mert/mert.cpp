@@ -1,5 +1,5 @@
 /**
-\description The is the main for the new version of the mert algorithm developed during the 2nd MT marathon
+ * \description The is the main for the new version of the mert algorithm developed during the 2nd MT marathon
 */
 
 #include <limits>
@@ -79,8 +79,8 @@ static struct option long_options[] = {
 int option_index;
 
 /**
-  * Runs an optimisation, or a random restart.
-**/
+ * Runs an optimisation, or a random restart.
+ */
 class OptimizationTask : public Moses::Task
 {
   public:
@@ -153,7 +153,7 @@ int main (int argc, char **argv)
   vector<vector<parameter_t> > start_list;
   vector<parameter_t> min;
   vector<parameter_t> max;
-  //note: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
+  // NOTE: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
 
   while ((c=getopt_long (argc, argv, "o:r:d:n:m:t:s:S:F:v:p:", long_options, &option_index)) != -1) {
     switch (c) {
@@ -291,7 +291,7 @@ int main (int argc, char **argv)
     throw runtime_error("Error: there is a different number of previous score and feature files");
   }
 
-  //it make sense to know what parameter set were used to generate the nbest
+  // it make sense to know what parameter set were used to generate the nbest
   Scorer *TheScorer = ScorerFactory::getScorer(scorertype,scorerconfig);
 
   //load data
@@ -312,8 +312,7 @@ int main (int argc, char **argv)
   if (tooptimizestr.length() > 0) {
     cerr << "Weights to optimize: " << tooptimizestr << endl;
 
-    //parse string to get weights to optimize
-    //and set them as active
+    // Parse string to get weights to optimize, and set them as active
     std::string substring;
     int index;
     while (!tooptimizestr.empty()) {
@@ -376,7 +375,7 @@ int main (int argc, char **argv)
     allTasks.resize(shard_count);
   }
 
-  //launch tasks
+  // launch tasks
   for (size_t i = 0 ; i < allTasks.size(); ++i) {
     Data& data = D;
     if (shard_count) data = shards[i]; //use the sharded data if it exists
@@ -396,8 +395,7 @@ int main (int argc, char **argv)
     }
   }
 
-
-  //wait for all threads to finish
+  // wait for all threads to finish
 #ifdef WITH_THREADS
   pool.Stop(true);
 #endif
@@ -405,7 +403,7 @@ int main (int argc, char **argv)
   statscore_t total = 0;
   Point totalP;
 
-  //collect results
+  // collect results
   for (size_t i = 0; i < allTasks.size(); ++i) {
     statscore_t best=0, mean=0, var=0;
     Point bestP;

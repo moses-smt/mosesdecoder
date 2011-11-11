@@ -22,7 +22,7 @@ using namespace std;
 
 #define featbytes_ (entries_*sizeof(FeatureStatsType))
 
-//Minimal sparse vector
+// Minimal sparse vector
 class SparseVector {
 
   public:
@@ -118,7 +118,9 @@ public:
     clear();
   }
 
-  /**write the whole object to a stream*/
+  /**
+   * Write the whole object to a stream.
+   */
   friend ostream& operator<<(ostream& o, const FeatureStats& e);
 };
 

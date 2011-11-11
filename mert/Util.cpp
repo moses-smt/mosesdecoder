@@ -13,7 +13,7 @@
 
 using namespace std;
 
-//global variable
+// global variables
 Timer g_timer;
 
 int verbose=0;
@@ -42,7 +42,7 @@ size_t getNextPound(std::string &theString, std::string &substring, const std::s
 {
   size_t pos = 0;
 
-  //skip all occurrences of delimiter
+  // skip all occurrences of delimiter
   while (pos == 0) {
     // if ((pos = theString.find(delimiter)) != std::string::npos) {
     if (FindDelimiter(theString, delimiter, &pos)) {
@@ -78,7 +78,7 @@ inputfilestream::inputfilestream(const std::string &filePath)
   : std::istream(0),
     m_streambuf(0)
 {
-  //check if file is readable
+  // check if file is readable
   std::filebuf* fb = new std::filebuf();
   _good=(fb->open(filePath.c_str(), std::ios::in)!=NULL);
 
@@ -107,7 +107,7 @@ outputfilestream::outputfilestream(const std::string &filePath)
   : std::ostream(0),
     m_streambuf(0)
 {
-  //check if file is readable
+  // check if file is readable
   std::filebuf* fb = new std::filebuf();
   _good=(fb->open(filePath.c_str(), std::ios::out)!=NULL);
 

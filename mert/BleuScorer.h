@@ -22,8 +22,8 @@ enum BleuReferenceLengthStrategy { BLEU_AVERAGE, BLEU_SHORTEST, BLEU_CLOSEST };
 
 
 /**
-  * Bleu scoring
- **/
+ * Bleu scoring
+ */
 class BleuScorer: public StatisticsBasedScorer
 {
 public:
@@ -91,6 +91,9 @@ private:
 
   typedef ScopedVector<counts_t> refcounts_t;
 
+  /**
+   * Count the ngrams of each type, up to the given length in the input line.
+   */
   size_t countNgrams(const string& line, counts_t& counts, unsigned int n);
 
   void dump_counts(counts_t& counts) {

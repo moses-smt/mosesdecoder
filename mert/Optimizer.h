@@ -13,12 +13,15 @@
 typedef float featurescore;
 
 using namespace std;
-/**abstract virtual class*/
+
+/**
+ * Abstract optimizer class.
+ */
 class Optimizer
 {
 protected:
-  Scorer *scorer; //no accessor for them only child can use them
-  FeatureData *FData;//no accessor for them only child can use them
+  Scorer *scorer;      // no accessor for them only child can use them
+  FeatureData *FData;  // no accessor for them only child can use them
   unsigned int number_of_random_directions;
 
 public:
@@ -30,24 +33,43 @@ public:
   unsigned size()const {
     return (FData?FData->size():0);
   }
-  /**Generic wrapper around TrueRun to check a few things. Non virtual*/
+
+  /**
+   * Generic wrapper around TrueRun to check a few things. Non virtual.
+   */
   statscore_t  Run(Point&)const;
-  /**main function that perform an optimization*/
+
+  /**
+   * Main function that performs an optimization.
+   */
   virtual  statscore_t  TrueRun(Point&)const=0;
-  /**given a set of lambdas, get the nbest for each sentence*/
+
+  /**
+   * Given a set of lambdas, get the nbest for each sentence.
+   */
   void Get1bests(const Point& param,vector<unsigned>& bests)const;
-  /**given a set of nbests, get the Statistical score*/
+
+  /**
+   * Given a set of nbests, get the Statistical score.
+   */
   statscore_t  GetStatScore(const vector<unsigned>& nbests)const {
     return scorer->score(nbests);
   };
-  /**given a set of lambdas, get the total statistical score*/
   statscore_t  GetStatScore(const Point& param)const;
+
   vector<statscore_t > GetIncStatScore(vector<unsigned> ref,vector<vector <pair<unsigned,unsigned> > >)const;
-  statscore_t  LineOptimize(const Point& start,const Point& direction,Point& best)const;//Get the optimal Lambda and the best score in a particular direction from a given Point
+
+  /**
+   * Get the optimal Lambda and the best score in a particular direction from a given Point.
+   */
+  statscore_t  LineOptimize(const Point& start,const Point& direction,Point& best)const;
 };
 
 
-/**default basic optimizer*/
+/**
+ * Default basic optimizer.
+ * This class implements Powell's method.
+ */
 class SimpleOptimizer: public Optimizer
 {
 private:
@@ -57,7 +79,9 @@ public:
   virtual statscore_t  TrueRun(Point&)const;
 };
 
-/**optimizer with random directions*/
+/**
+ * An optimizer with random directions.
+ */
 class RandomDirectionOptimizer: public Optimizer
 {
 private:
@@ -67,7 +91,9 @@ public:
   virtual statscore_t  TrueRun(Point&)const;
 };
 
-/**dumb baseline optimizer: just picks a random point and quits*/
+/**
+ * Dumb baseline optimizer: just picks a random point and quits.
+ */
 class RandomOptimizer: public Optimizer
 {
 public:
@@ -83,7 +109,8 @@ public:
   static vector<string> GetTypeNames();
   static Optimizer* BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,vector<parameter_t> start,string type,unsigned int nrandom);
 private:
-  enum OptType {POWELL=0,RANDOM_DIRECTION=1,RANDOM,NOPTIMIZER}; //Add new optimizer here BEFORE NOPTIMZER
+  // Add new optimizer here BEFORE NOPTIMZER
+  enum OptType {POWELL=0,RANDOM_DIRECTION=1,RANDOM,NOPTIMIZER};
   static OptType GetOType(string);
   static vector<string> typenames;
   static void SetTypeNames();

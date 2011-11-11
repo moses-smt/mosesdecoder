@@ -65,7 +65,7 @@ SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
   }
 
   //Any elements in rhs, that have no value in *this
-  for (fvector_t::const_iterator i = rhs.fvector_.begin(); 
+  for (fvector_t::const_iterator i = rhs.fvector_.begin();
       i != rhs.fvector_.end(); ++i) {
     if (fvector_.find(i->first) == fvector_.end()) {
       fvector_[i->first] = -(i->second);
@@ -211,8 +211,6 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
   return *this;
 }
 
-
-/**write the whole object to a stream*/
 ostream& operator<<(ostream& o, const FeatureStats& e)
 {
   // print regular features

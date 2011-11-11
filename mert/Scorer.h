@@ -21,10 +21,11 @@ enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
 class ScoreStats;
 
 /**
-  * Superclass of all scorers and dummy implementation. In order to add a new
-  * scorer it should be sufficient to override prepareStats(), setReferenceFiles()
-  * and score() (or calculateScore()).
-**/
+ * Superclass of all scorers and dummy implementation.
+ *
+ * In order to add a new scorer it should be sufficient to override the members
+ * prepareStats(), setReferenceFiles() and score() (or calculateScore()).
+ */
 class Scorer
 {
 private:
@@ -57,16 +58,16 @@ public:
 
 
   /**
-      * returns the number of statistics needed for the computation of the score
-      **/
+   * Return the number of statistics needed for the computation of the score.
+   */
   virtual size_t NumberOfScores() {
     cerr << "Scorer: 0" << endl;
     return 0;
   };
 
   /**
-    * set the reference files. This must be called before prepareStats.
-    **/
+   * Set the reference files. This must be called before prepareStats().
+   */
   virtual void setReferenceFiles(const vector<string>& referenceFiles) {
     //do nothing
   }
@@ -74,7 +75,7 @@ public:
   /**
    * Process the given guessed text, corresponding to the given reference sindex
    * and add the appropriate statistics to the entry.
-  **/
+   */
   virtual void prepareStats(size_t sindex, const string& text, ScoreStats& entry)
   {}
 
@@ -86,9 +87,9 @@ public:
   }
 
   /**
-    * Score using each of the candidate index, then go through the diffs
-    * applying each in turn, and calculating a new score each time.
-    **/
+   * Score using each of the candidate index, then go through the diffs
+   * applying each in turn, and calculating a new score each time.
+   */
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores) {
     //dummy impl
@@ -101,11 +102,10 @@ public:
     }
   }
 
-
   /**
-    * Calculate the score of the sentences corresponding to the list of candidate
-    * indices. Each index indicates the 1-best choice from the n-best list.
-    **/
+   * Calculate the score of the sentences corresponding to the list of candidate
+   * indices. Each index indicates the 1-best choice from the n-best list.
+   */
   float score(const candidates_t& candidates) {
     diffs_t diffs;
     statscores_t scores;
@@ -124,10 +124,9 @@ public:
     return 0;
   }
 
-
   /**
-    * Set the score data, prior to scoring.
-    **/
+   * Set the score data, prior to scoring.
+   */
   void setScoreData(ScoreData* data) {
     _scoreData = data;
   }
@@ -142,8 +141,8 @@ protected:
   bool _preserveCase;
 
   /**
-    * Value of config variable. If not provided, return default.
-    **/
+   * Get value of config variable. If not provided, return default.
+   */
   string getConfig(const string& key, const string& def="") {
     map<string,string>::iterator i = _config.find(key);
     if (i  == _config.end()) {
@@ -156,8 +155,8 @@ protected:
 
   /**
    * Tokenise line and encode.
-   *     Note: We assume that all tokens are separated by single spaces
-   **/
+   * Note: We assume that all tokens are separated by single spaces.
+   */
   void encode(const string& line, vector<int>& encoded) {
     //cerr << line << endl;
     istringstream in (line);
@@ -185,15 +184,13 @@ protected:
 
 private:
   map<string,string> _config;
-
-
 };
 
 
-
 /**
-  * Abstract base class for scorers that work by adding statistics across all
-  * outout sentences, then apply some formula, e.g. bleu, per. **/
+ * Abstract base class for Scorers that work by adding statistics across all
+ * outout sentences, then apply some formula, e.g., BLEU, PER.
+ */
 class StatisticsBasedScorer : public Scorer
 {
 
@@ -241,10 +238,12 @@ public:
                      statscores_t& scores);
 
 protected:
-  //calculate the actual score
+  /**
+   * Calculate the actual score.
+   */
   virtual statscore_t calculateScore(const vector<int>& totals) = 0;
 
-  //regularisation
+  // regularisation
   ScorerRegularisationStrategy _regularisationStrategy;
   size_t  _regularisationWindow;
 

@@ -126,8 +126,6 @@ ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
   return *this;
 }
 
-
-/**write the whole object to a stream*/
 ostream& operator<<(ostream& o, const ScoreStats& e)
 {
   for (size_t i=0; i< e.size(); i++)

@@ -32,8 +32,9 @@ protected:
   size_t number_of_scores;
 
 private:
-  std::string  idx; // idx to identify the utterance, it can differ from the index inside the vector
-
+  // idx to identify the utterance.
+  // It can differ from the index inside the vector.
+  std::string  idx;
 
 public:
   ScoreArray();

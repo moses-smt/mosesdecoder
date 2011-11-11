@@ -24,8 +24,8 @@ using namespace TERCpp;
 
 
 /**
-  * Bleu scoring
- **/
+ * TER scoring
+ */
 class TerScorer: public StatisticsBasedScorer
 {
 public:
@@ -49,17 +49,17 @@ public:
 private:
   string javaEnv;
   string tercomEnv;
-  //no copy
+  // no copying allowed
   TerScorer(const TerScorer&);
   ~TerScorer() {};
   TerScorer& operator=(const TerScorer&);
+
   // data extracted from reference files
   vector<size_t> _reflengths;
   vector<multiset<int> > _reftokens;
   vector<vector<int> > m_references;
   vector<vector<vector<int> > > m_multi_references;
   string m_pid;
-
 };
 
 #endif // __TERSCORER_H__

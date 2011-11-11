@@ -28,8 +28,8 @@ using namespace TERCpp;
 
 
 /**
-  * Bleu scoring
- **/
+ * Merge scoring.
+ */
 class MergeScorer: public StatisticsBasedScorer {
 
 	public:

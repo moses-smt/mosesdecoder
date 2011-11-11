@@ -18,10 +18,11 @@
 using namespace std;
 
 /**
-  * Implementation of position-independent word error rate. This is defined
-  * as 1 - (correct - max(0,output_length - ref_length)) / ref_length
-  * In fact, we ignore the " 1 - " so that it can be maximised.
- **/
+ * An implementation of position-independent word error rate.
+ * This is defined as
+ *   1 - (correct - max(0,output_length - ref_length)) / ref_length
+ * In fact, we ignore the " 1 - " so that it can be maximised.
+ */
 class PerScorer: public StatisticsBasedScorer
 {
 public:
@@ -43,8 +44,7 @@ public:
   virtual float calculateScore(const vector<int>& comps) ;
 
 private:
-
-  //no copy
+  // no copying allowed
   PerScorer(const PerScorer&);
   ~PerScorer() {};
   PerScorer& operator=(const PerScorer&);

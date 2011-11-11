@@ -77,7 +77,7 @@ Point::Point(const vector<parameter_t>& init,
 
 double Point::operator*(const FeatureStats& F)const
 {
-  ncall++;//to track performance
+  ncall++; // to track performance
   double prod=0.0;
   if(OptimizeAll())
     for (unsigned i=0; i<size(); i++)

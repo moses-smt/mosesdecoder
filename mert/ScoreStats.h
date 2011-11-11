@@ -90,7 +90,9 @@ public:
     clear();
   }
 
-  /**write the whole object to a stream*/
+  /**
+   * Write the whole object to a stream.
+   */
   friend ostream& operator<<(ostream& o, const ScoreStats& e);
 };
 

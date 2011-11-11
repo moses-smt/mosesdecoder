@@ -114,17 +114,17 @@ int main(int argc, char** argv)
   }
   try {
 
-//check whether score statistics file is specified
+    // check whether score statistics file is specified
     if (scoreDataFile.length() == 0) {
       throw runtime_error("Error: output score statistics file is not specified");
     }
 
-//check wheter feature file is specified
+    // check wheter feature file is specified
     if (featureDataFile.length() == 0) {
       throw runtime_error("Error: output feature file is not specified");
     }
 
-//check whether reference file is specified when nbest is specified
+    // check whether reference file is specified when nbest is specified
     if ((nbestFile.length() > 0 && referenceFile.length() == 0)) {
       throw runtime_error("Error: reference file is not specified; you can not score the nbest");
     }
@@ -161,7 +161,7 @@ int main(int argc, char** argv)
     // ScorerFactory sfactory;
     Scorer* scorer = ScorerFactory::getScorer(scorerType,scorerConfig);
 
-    //load references
+    // load references
     if (referenceFiles.size() > 0)
       scorer->setReferenceFiles(referenceFiles);
 
@@ -169,14 +169,14 @@ int main(int argc, char** argv)
 
     Data data(*scorer);
 
-    //load old data
+    // load old data
     for (size_t i=0; i < prevScoreDataFiles.size(); i++) {
       data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
     }
 
     PrintUserTime("Previous data loaded");
 
-    //computing score statistics of each nbest file
+    // computing score statistics of each nbest file
     for (size_t i=0; i < nbestFiles.size(); i++) {
       data.loadnbest(nbestFiles.at(i));
     }

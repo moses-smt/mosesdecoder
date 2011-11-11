@@ -24,8 +24,8 @@ class ScoreData
 {
 protected:
   scoredata_t array_;
-  idx2name idx2arrayname_; //map from index to name of array
-  name2idx arrayname2idx_; //map from name to index of array
+  idx2name idx2arrayname_; // map from index to name of array
+  name2idx arrayname2idx_; // map from name to index of array
 
 private:
   Scorer* theScorer;

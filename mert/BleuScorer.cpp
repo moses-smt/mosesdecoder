@@ -2,10 +2,6 @@
 
 const int BleuScorer::LENGTH = 4;
 
-
-/**
-  * count the ngrams of each type, up to the given length in the input line.
- **/
 size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned int n)
 {
   vector<int> encoded_tokens;
@@ -176,4 +172,3 @@ float BleuScorer::calculateScore(const vector<int>& comps)
   //cerr << " " << exp(logbleu) << endl;
   return exp(logbleu);
 }
-

@@ -32,7 +32,7 @@ protected:
     throw;
   }
 
-  //read one character
+  // read one character
   virtual int_type underflow () {
     // is read position before end of _buff?
     if (gptr() < egptr()) {
