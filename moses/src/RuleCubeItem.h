@@ -103,9 +103,7 @@ private:
   const HypoList *m_orderedHypos;
 };
 
-#ifdef HAVE_BOOST
 std::size_t hash_value(const HypothesisDimension &);
-#endif
 
 class RuleCubeItem
 {

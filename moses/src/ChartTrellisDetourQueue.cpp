@@ -17,41 +17,37 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
+#include "ChartTrellisDetourQueue.h"
 
-#include "RuleTableLoader.h"
+#include "Util.h"
 
-namespace Moses
-{
+namespace Moses {
 
-enum FormatType
-{
-  MosesFormat
-  ,HieroFormat
-};
+ChartTrellisDetourQueue::~ChartTrellisDetourQueue() {
+  RemoveAllInColl(m_queue);
+}
 
-class RuleTableLoaderStandard : public RuleTableLoader
-{
-protected:
+void ChartTrellisDetourQueue::Push(const ChartTrellisDetour *detour) {
+  if (m_capacity == 0 || m_queue.size() < m_capacity) {
+    m_queue.insert(detour);
+  } else if (detour->GetTotalScore() > (*m_queue.rbegin())->GetTotalScore()) {
+    // Remove the worst-scoring item from the queue and insert detour.
+    QueueType::iterator p = m_queue.end();
+    delete *--p;
+    m_queue.erase(p);
+    m_queue.insert(detour);
+  } else {
+    // The detour is unusable: the queue is full and detour has a worse (or
+    // equal) score than the worst-scoring item already held.
+    delete detour;
+  }
+}
 
-  bool Load(FormatType format,
-            const std::vector<FactorType> &input,
-            const std::vector<FactorType> &output,
-            std::istream &inStream,
-            const std::vector<float> &weight,
-            size_t tableLimit,
-            const LMList &languageModels,
-            const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
- public:
-  bool Load(const std::vector<FactorType> &input,
-            const std::vector<FactorType> &output,
-            std::istream &inStream,
-            const std::vector<float> &weight,
-            size_t tableLimit,
-            const LMList &languageModels,
-            const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
-};
+const ChartTrellisDetour *ChartTrellisDetourQueue::Pop() {
+  QueueType::iterator p = m_queue.begin();
+  const ChartTrellisDetour *top = *p;
+  m_queue.erase(p);
+  return top;
+}
 
 }  // namespace Moses

@@ -13,7 +13,6 @@
 #include "lm/weights.hh"
 
 #include "util/murmur_hash.hh"
-#include "util/portability.hh"
 
 #include <algorithm>
 #include <vector>
@@ -138,21 +137,16 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
         unsigned char &next_use) const;
 
   private:
-    friend void lm::ngram::LoadLM<>(const char *file, const Config &config, GenericModel<Search, VocabularyT> &to);
+    friend void LoadLM<>(const char *file, const Config &config, GenericModel<Search, VocabularyT> &to);
 
-    static void UpdateConfigFromBinary(FD fd, const std::vector<uint64_t> &counts, Config &config) {
-      AdvanceOrThrow(fd, VocabularyT::Size(counts[0], config));
-      Search::UpdateConfigFromBinary(fd, counts, config);
-    }
-
-    float SlowBackoffLookup(const WordIndex *const context_rbegin, const WordIndex *const context_rend, unsigned char start) const;
+    static void UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config);
 
     FullScoreReturn ScoreExceptBackoff(const WordIndex *context_rbegin, const WordIndex *context_rend, const WordIndex new_word, State &out_state) const;
 
     // Appears after Size in the cc file.
     void SetupMemory(void *start, const std::vector<uint64_t> &counts, const Config &config);
 
-    void InitializeFromBinary(void *start, const Parameters &params, const Config &config, FD fd);
+    void InitializeFromBinary(void *start, const Parameters &params, const Config &config, int fd);
 
     void InitializeFromARPA(const char *file, const Config &config);
 

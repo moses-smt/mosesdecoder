@@ -174,6 +174,8 @@ enum PhraseTableImplementation {
   ,SCFG					= 6
   //,BerkeleyDb	= 7
   ,SuffixArray	= 8
+  ,Hiero        = 9
+  ,ALSuffixArray = 10
 };
 
 enum InputTypeEnum {
@@ -181,6 +183,8 @@ enum InputTypeEnum {
   ,ConfusionNetworkInput	= 1
   ,WordLatticeInput				= 2
   ,TreeInputType					= 3
+  ,WordLatticeInput2			= 4
+  
 };
 
 enum XmlInputType {

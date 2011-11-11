@@ -40,8 +40,109 @@ using namespace std;
 
 namespace Moses
 {
-
 bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
+                                   , const std::vector<FactorType> &output
+                                   , std::istream &inStream
+                                   , const std::vector<float> &weight
+                                   , size_t tableLimit
+                                   , const LMList &languageModels
+                                   , const WordPenaltyProducer* wpProducer
+                                   , PhraseDictionarySCFG &ruleTable)
+{
+  bool ret = Load(MosesFormat
+                  ,input, output
+                  ,inStream, weight
+                  ,tableLimit, languageModels
+                  ,wpProducer, ruleTable);
+  return ret;
+
+}
+  
+void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
+{
+  vector<string> toks;
+  Tokenize(toks, phrase, " ");
+
+  for (size_t i = 0; i < toks.size(); ++i)
+  {
+    string &tok = toks[i];
+    size_t tokLen = tok.size();
+    if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]")
+    { // no-term
+      vector<string> split = Tokenize(tok, ",");
+      assert(split.size() == 2);
+      
+      tok = "[X]" + split[0] + "]";
+      size_t coIndex = Scan<size_t>(split[1]);
+      
+      pair<size_t, size_t> &alignPoint = ntAlign[coIndex];
+      if (sourceTarget == 0)
+      {
+        alignPoint.first = i;
+      }
+      else
+      {
+        alignPoint.second = i;
+      }
+    }
+  }
+  
+  phrase = Join(" ", toks) + " [X]";
+  
+}
+
+void ReformateHieroScore(string &scoreString)
+{
+  vector<string> toks;
+  Tokenize(toks, scoreString, " ");
+
+  for (size_t i = 0; i < toks.size(); ++i)
+  {
+    string &tok = toks[i];
+
+    float score = Scan<float>(tok);
+    score = exp(-score);
+    tok = SPrint(score);
+  }
+  
+  scoreString = Join(" ", toks);
+}
+  
+string *ReformatHieroRule(const string &lineOrig)
+{  
+  vector<string> tokens;
+  vector<float> scoreVector;
+  
+  TokenizeMultiCharSeparator(tokens, lineOrig, "|||" );
+
+  string &sourcePhraseString = tokens[1]
+              , &targetPhraseString = tokens[2]
+              , &scoreString        = tokens[3];
+
+  map<size_t, pair<size_t, size_t> > ntAlign;
+  ReformatHieroRule(0, sourcePhraseString, ntAlign);
+  ReformatHieroRule(1, targetPhraseString, ntAlign);
+  ReformateHieroScore(scoreString);
+  
+  stringstream align;
+  map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
+  for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign)
+  {
+    const pair<size_t, size_t> &alignPoint = iterAlign->second;
+    align << alignPoint.first << "-" << alignPoint.second << " ";
+  }
+  
+  stringstream ret;
+  ret << sourcePhraseString << " ||| "
+      << targetPhraseString << " ||| " 
+      << scoreString << " ||| "
+      << align.str();
+  
+  return new string(ret.str());
+}
+  
+bool RuleTableLoaderStandard::Load(FormatType format
+                                , const std::vector<FactorType> &input
                                 , const std::vector<FactorType> &output
                                 , std::istream &inStream
                                 , const std::vector<float> &weight
@@ -56,14 +157,23 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
 
-  string line;
+  string lineOrig;
   size_t count = 0;
 
-  while(getline(inStream, line)) {
+  while(getline(inStream, lineOrig)) {
+    const string *line;
+    if (format == HieroFormat) { // reformat line
+      line = ReformatHieroRule(lineOrig);
+    }
+    else
+    { // do nothing to format of line
+      line = &lineOrig;
+    }
+    
     vector<string> tokens;
     vector<float> scoreVector;
 
-    TokenizeMultiCharSeparator(tokens, line , "|||" );
+    TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
     if (tokens.size() != 4 && tokens.size() != 5) {
       stringstream strme;
@@ -122,6 +232,14 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
     phraseColl.Add(targetPhrase);
 
     count++;
+
+    if (format == HieroFormat) { // reformat line
+      delete line;
+    }
+    else
+    { // do nothing
+    }
+
   }
 
   // sort and prune each target phrase collection

@@ -191,9 +191,15 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
   for (; position < phrase.GetSize(); ++position) {
     const Word &word = phrase.GetWord(position);
     if (word.IsNonTerminal()) {
+      // If there's a non-terminal at 1 and we have a 5-gram LM, then positions 2 3 4 and 5 will be incomplete while position 6 is complete.  
+      ngramBoundary = m_ngram->Order() + position;
       *state0 = m_ngram->NullContextState();
     } else {
       lm::WordIndex index = TranslateID(word);
+      if (index == m_ngram->GetVocabulary().BeginSentence()) {
+        std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+        abort();
+      }
       float score = TransformLMScore(m_ngram->Score(*state0, index, *state1));
       std::swap(state0, state1);
       if (position >= ngramBoundary) ngramScore += score;

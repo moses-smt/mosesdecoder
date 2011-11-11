@@ -316,7 +316,10 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../kenlm,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/,
@@ -354,7 +357,10 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../kenlm,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/,
@@ -384,7 +390,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = ../moses/src;
+				HEADER_SEARCH_PATHS = (
+					../moses/src,
+					../kenlm,
+				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
 					../irstlm/lib/,

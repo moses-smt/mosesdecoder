@@ -2,6 +2,7 @@
 
 #include "util/exception.hh"
 #include "util/file.hh"
+#include "util/mmap.hh"
 
 #include <iostream>
 #include <string>
@@ -11,6 +12,9 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
@@ -32,14 +36,14 @@ GZException::GZException(void *file) {
 // Sigh this is the only way I could come up with to do a _const_ bool.  It has ' ', '\f', '\n', '\r', '\t', and '\v' (same as isspace on C locale). 
 const bool kSpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-FilePiece::FilePiece(const char *name, std::ostream *show_progress, off_t min_buffer) : 
-  file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())), page_(sysconf(_SC_PAGE_SIZE)),
+FilePiece::FilePiece(const char *name, std::ostream *show_progress, std::size_t min_buffer) : 
+  file_(OpenReadOrThrow(name)), total_size_(SizeFile(file_.get())), page_(SizePage()),
   progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
   Initialize(name, show_progress, min_buffer);
 }
 
-FilePiece::FilePiece(FD fd, const char *name, std::ostream *show_progress, off_t min_buffer)  : 
-  file_(fd), total_size_(SizeFile(file_.get())), page_(sysconf(_SC_PAGE_SIZE)),
+FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std::size_t min_buffer)  : 
+  file_(fd), total_size_(SizeFile(file_.get())), page_(SizePage()),
   progress_(total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name, total_size_) {
   Initialize(name, show_progress, min_buffer);
 }
@@ -59,7 +63,7 @@ FilePiece::~FilePiece() {
 }
 
 StringPiece FilePiece::ReadLine(char delim) {
-  size_t skip = 0;
+  std::size_t skip = 0;
   while (true) {
     for (const char *i = position_ + skip; i < position_end_; ++i) {
       if (*i == delim) {
@@ -90,13 +94,13 @@ unsigned long int FilePiece::ReadULong() {
   return ReadNumber<unsigned long int>();
 }
 
-void FilePiece::Initialize(const char *name, std::ostream *show_progress, off_t min_buffer)  {
+void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer)  {
 #ifdef HAVE_ZLIB
   gz_file_ = NULL;
 #endif
   file_name_ = name;
 
-  default_map_size_ = page_ * std::max<off_t>((min_buffer / page_ + 1), 2);
+  default_map_size_ = page_ * std::max<std::size_t>((min_buffer / page_ + 1), 2);
   position_ = NULL;
   position_end_ = NULL;
   mapped_offset_ = 0;
@@ -167,7 +171,7 @@ template <class T> T FilePiece::ReadNumber() {
 }
 
 const char *FilePiece::FindDelimiterOrEOF(const bool *delim)  {
-  size_t skip = 0;
+  std::size_t skip = 0;
   while (true) {
     for (const char *i = position_ + skip; i < position_end_; ++i) {
       if (delim[static_cast<unsigned char>(*i)]) return i;
@@ -186,7 +190,7 @@ void FilePiece::Shift() {
     progress_.Finished();
     throw EndOfFileException();
   }
-  off_t desired_begin = position_ - data_.begin() + mapped_offset_;
+  uint64_t desired_begin = position_ - data_.begin() + mapped_offset_;
 
   if (!fallback_to_read_) MMapShift(desired_begin);
   // Notice an mmap failure might set the fallback.  
@@ -197,18 +201,18 @@ void FilePiece::Shift() {
   }
 }
 
-void FilePiece::MMapShift(off_t desired_begin) {
+void FilePiece::MMapShift(uint64_t desired_begin) {
   // Use mmap.  
-  off_t ignore = desired_begin % page_;
+  uint64_t ignore = desired_begin % page_;
   // Duplicate request for Shift means give more data.  
   if (position_ == data_.begin() + ignore) {
     default_map_size_ *= 2;
   }
   // Local version so that in case of failure it doesn't overwrite the class variable.  
-  off_t mapped_offset = desired_begin - ignore;
+  uint64_t mapped_offset = desired_begin - ignore;
 
-  off_t mapped_size;
-  if (default_map_size_ >= static_cast<size_t>(total_size_ - mapped_offset)) {
+  uint64_t mapped_size;
+  if (default_map_size_ >= static_cast<std::size_t>(total_size_ - mapped_offset)) {
     at_end_ = true;
     mapped_size = total_size_ - mapped_offset;
   } else {
@@ -217,19 +221,11 @@ void FilePiece::MMapShift(off_t desired_begin) {
 
   // Forcibly clear the existing mmap first.  
   data_.reset();
-  data_.reset(mmap(NULL, mapped_size, PROT_READ, MAP_SHARED
-  // Populate where available on linux
-#ifdef MAP_POPULATE
-        | MAP_POPULATE
-#endif
-        , *file_, mapped_offset), mapped_size, scoped_memory::MMAP_ALLOCATED);
-  if (data_.get() == MAP_FAILED) {
+  try {
+    MapRead(POPULATE_OR_LAZY, *file_, mapped_offset, mapped_size, data_);
+  } catch (const util::ErrnoException &e) {
     if (desired_begin) {
-#ifdef WIN32
-
-#else
-      if (((off_t)-1) == lseek(*file_, desired_begin, SEEK_SET)) UTIL_THROW(ErrnoException, "mmap failed even though it worked before.  lseek failed too, so using read isn't an option either.");
-#endif
+      SeekOrThrow(*file_, desired_begin);
     }
     // The mmap was scheduled to end the file, but now we're going to read it.  
     at_end_ = false;
@@ -254,14 +250,8 @@ void FilePiece::TransitionToRead() {
 
 #ifdef HAVE_ZLIB
   assert(!gz_file_);
-
-#ifdef WIN32
-
-#else
   gz_file_ = gzdopen(file_.get(), "r");
   UTIL_THROW_IF(!gz_file_, GZException, "zlib failed to open " << file_name_);
-#endif
-
 #endif
 }
 
@@ -303,11 +293,7 @@ void FilePiece::ReadShift() {
   if (read_return == -1) throw GZException(gz_file_);
   if (total_size_ != kBadSize) {
     // Just get the position, don't actually seek.  Apparently this is how you do it. . . 
-#ifdef WIN32
-  off_t ret;
-#else
     off_t ret = lseek(file_.get(), 0, SEEK_CUR);
-#endif
     if (ret != -1) progress_.Set(ret);
   }
 #else

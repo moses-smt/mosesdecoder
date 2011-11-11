@@ -11,31 +11,43 @@ my $TMPDIR = "tmp";
 
 my $DEBUG = 0;
 my $BASIC = 0;
+my $OLD_BITPAR = 0;
 
 my $RAW = "";
 
 GetOptions(
     "basic" => \$BASIC,
     "bitpar=s" => \$BITPAR,
+    "old-bitpar" => \$OLD_BITPAR,
     "raw=s" => \$RAW
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
 my ($scriptname, $directories) = fileparse($0);
 my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
-open(INPUT,"iconv -c -f UTF-8 -t iso-8859-1 |");
+if ($OLD_BITPAR)
+{
+  open(INPUT,"iconv -c -f UTF-8 -t iso-8859-1 |");
+}
+else
+{
+  open (INPUT,"cat |");
+}
 while(<INPUT>)
 {
 		my $hasWords = 0;
 	  foreach (split)
     {
-        s/\(/\*LRB\*/g;
-        s/\)/\*RRB\*/g;
+        if ($OLD_BITPAR)
+        {
+            s/\(/\*LRB\*/g;
+            s/\)/\*RRB\*/g;
+        }
         print $TMP $_."\n";
 
 				$hasWords = 1;        
     }
-    
+
     if ($hasWords == 0) {
     	print $TMP " \n";
     }
@@ -49,7 +61,10 @@ if ($RAW)
 {
     $pipeline .= "tee \"$RAW\" |";
 }
-$pipeline .= "iconv -c -t UTF-8 -f iso-8859-1 |";
+if ($OLD_BITPAR)
+{
+  $pipeline .= "iconv -c -t UTF-8 -f iso-8859-1 |";
+}
 open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {
@@ -128,8 +143,11 @@ while(my $line = <PARSER>) {
     foreach (@OUT) {
         print " " unless $first;
         s/\\//;
-	s/\*RRB\*/\)/g;
-	s/\*LRB\*/\(/g;
+        if ($OLD_BITPAR)
+        {
+            s/\*RRB\*/\)/g;
+            s/\*LRB\*/\(/g;
+        }
         print $_;
         $first = 0;
     }

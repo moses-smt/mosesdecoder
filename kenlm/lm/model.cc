@@ -44,7 +44,7 @@ template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::Ge
   P::Init(begin_sentence, null_context, vocab_, search_.MiddleEnd() - search_.MiddleBegin() + 2);
 }
 
-template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::InitializeFromBinary(void *start, const Parameters &params, const Config &config, FD fd) {
+template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::InitializeFromBinary(void *start, const Parameters &params, const Config &config, int fd) {
   SetupMemory(start, params.counts, config);
   vocab_.LoadedBinary(fd, config.enumerate_vocab);
   search_.LoadedBinary();
@@ -89,10 +89,15 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
   }
 }
 
+template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config) {
+  util::AdvanceOrThrow(fd, VocabularyT::Size(counts[0], config));
+  Search::UpdateConfigFromBinary(fd, counts, config);
+}
+
 template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, VocabularyT>::FullScore(const State &in_state, const WordIndex new_word, State &out_state) const {
   FullScoreReturn ret = ScoreExceptBackoff(in_state.words, in_state.words + in_state.length, new_word, out_state);
-  if (ret.ngram_length - 1 < in_state.length) {
-    ret.prob = std::accumulate(in_state.backoff + ret.ngram_length - 1, in_state.backoff + in_state.length, ret.prob);
+  for (const float *i = in_state.backoff + ret.ngram_length - 1; i < in_state.backoff + in_state.length; ++i) {
+    ret.prob += *i;
   }
   return ret;
 }

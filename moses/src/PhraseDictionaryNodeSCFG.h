@@ -30,18 +30,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TargetPhraseCollection.h"
 
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/version.hpp>
-#endif
 
 namespace Moses
 {
 
 class PhraseDictionarySCFG;
 
-#ifdef HAVE_BOOST
 class TerminalHasher
 {
 public:
@@ -123,7 +120,6 @@ public:
     return true;
   }
 };
-#endif
 
 /** One node of the PhraseDictionarySCFG structure
 */
@@ -189,6 +185,8 @@ public:
     return m_nonTermMap;
   }
 
+  void Clear();
+  
   TO_STRING();
 };
 

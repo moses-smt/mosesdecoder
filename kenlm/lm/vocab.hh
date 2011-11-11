@@ -8,7 +8,6 @@
 #include "util/probing_hash_table.hh"
 #include "util/sorted_uniform.hh"
 #include "util/string_piece.hh"
-#include "util/portability.hh"
 
 #include <limits>
 #include <string>
@@ -37,7 +36,7 @@ class WriteWordsWrapper : public EnumerateVocab {
     
     void Add(WordIndex index, const StringPiece &str);
 
-    void Write(FD fd);
+    void Write(int fd);
 
   private:
     EnumerateVocab *inner_;
@@ -67,7 +66,6 @@ class SortedVocabulary : public base::Vocabulary {
     static size_t Size(std::size_t entries, const Config &config);
 
     // Vocab words are [0, Bound())  Only valid after FinishedLoading/LoadedBinary.  
-    // While this number is correct, ProbingVocabulary::Bound might not be correct in some cases.  
     WordIndex Bound() const { return bound_; }
 
     // Everything else is for populating.  I'm too lazy to hide and friend these, but you'll only get a const reference anyway.
@@ -85,7 +83,7 @@ class SortedVocabulary : public base::Vocabulary {
 
     bool SawUnk() const { return saw_unk_; }
 
-    void LoadedBinary(FD fd, EnumerateVocab *to);
+    void LoadedBinary(int fd, EnumerateVocab *to);
 
   private:
     uint64_t *begin_, *end_;
@@ -128,7 +126,7 @@ class ProbingVocabulary : public base::Vocabulary {
 
     bool SawUnk() const { return saw_unk_; }
 
-    void LoadedBinary(FD fd, EnumerateVocab *to);
+    void LoadedBinary(int fd, EnumerateVocab *to);
 
   private:
     // std::identity is an SGI extension :-(

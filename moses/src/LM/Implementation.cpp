@@ -99,7 +99,10 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
 
       if (word == GetSentenceStartArray()) {
         // do nothing, don't include prob for <s> unigram
-        assert(currPos == 0);
+        if (currPos != 0) {
+          std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+          abort();
+        }
       } else {
         LMResult result = GetValueGivenState(contextFactor, *state);
         fullScore += result.score;

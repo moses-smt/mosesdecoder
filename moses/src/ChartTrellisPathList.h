@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <boost/shared_ptr.hpp>
+
 #include <vector>
 
 namespace Moses
@@ -30,7 +32,7 @@ class ChartTrellisPath;
 class ChartTrellisPathList
 {
 protected:
-  typedef std::vector<const ChartTrellisPath*> CollType;
+  typedef std::vector<boost::shared_ptr<const ChartTrellisPath> > CollType;
   CollType m_collection;
 
 public:
@@ -54,14 +56,14 @@ public:
     m_collection.clear();
   }
 
-  virtual ~ChartTrellisPathList();
+  virtual ~ChartTrellisPathList() {}
 
   std::size_t GetSize() const {
     return m_collection.size();
   }
 
   //! add a new entry into collection
-  void Add(ChartTrellisPath *trellisPath) {
+  void Add(boost::shared_ptr<const ChartTrellisPath> trellisPath) {
     m_collection.push_back(trellisPath);
   }
 };

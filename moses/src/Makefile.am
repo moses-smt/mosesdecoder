@@ -21,9 +21,10 @@ libmoses_la_HEADERS = \
         ChartTranslationOption.h \
 	ChartTranslationOptionCollection.h \
         ChartTranslationOptionList.h \
+	ChartTrellisDetour.h \
+	ChartTrellisDetourQueue.h \
 	ChartTrellisNode.h \
 	ChartTrellisPath.h \
-	ChartTrellisPathCollection.h \
 	ChartTrellisPathList.h \
         ConfusionNet.h \
         DecodeFeature.h \
@@ -82,6 +83,7 @@ libmoses_la_HEADERS = \
         Phrase.h \
         PhraseBoundaryFeature.h \
         PhraseDictionary.h \
+        PhraseDictionaryALSuffixArray.h \
         PhraseDictionaryDynSuffixArray.h \
         PhraseDictionaryMemory.h \
         PhraseDictionarySCFG.h \
@@ -102,6 +104,7 @@ libmoses_la_HEADERS = \
         RuleTableLoader.h \
         RuleTableLoaderCompact.h \
         RuleTableLoaderFactory.h \
+        RuleTableLoaderHiero.h \
         RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreProducer.h \
@@ -189,10 +192,10 @@ libmoses_la_SOURCES = \
         ChartTranslationOption.cpp \
 	      ChartTranslationOptionCollection.cpp \
         ChartTranslationOptionList.cpp \
-	      ChartTrellisNode.cpp \
-      	ChartTrellisPath.cpp \
-	      ChartTrellisPathCollection.cpp \
-	      ChartTrellisPathList.cpp \
+        ChartTrellisDetour.cpp \
+        ChartTrellisDetourQueue.cpp \
+        ChartTrellisNode.cpp \
+        ChartTrellisPath.cpp \
         ConfusionNet.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
@@ -243,7 +246,9 @@ libmoses_la_SOURCES = \
         Phrase.cpp \
         PhraseBoundaryFeature.cpp \
         PhraseDictionary.cpp \
-        PhraseDictionaryDynSuffixArray.cpp \
+		PhraseDictionaryALSuffixArray.cpp \
+		PhraseDictionaryDynSuffixArray.cpp \
+        PhraseDictionaryHiero.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
         PhraseDictionaryNode.cpp \
@@ -261,6 +266,7 @@ libmoses_la_SOURCES = \
         RuleCubeQueue.cpp \
         RuleTableLoaderCompact.cpp \
         RuleTableLoaderFactory.cpp \
+        RuleTableLoaderHiero.cpp \
         RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreProducer.cpp \

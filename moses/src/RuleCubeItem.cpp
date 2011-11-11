@@ -27,20 +27,16 @@
 #include "WordsRange.h"
 #include "Util.h"
 
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
-#endif
 
 namespace Moses
 {
 
-#ifdef HAVE_BOOST
 std::size_t hash_value(const HypothesisDimension &dimension)
 {
   boost::hash<const ChartHypothesis*> hasher;
   return hasher(dimension.GetHypothesis());
 }
-#endif
 
 RuleCubeItem::RuleCubeItem(const ChartTranslationOption &transOpt,
                            const ChartCellCollection &allChartCells)

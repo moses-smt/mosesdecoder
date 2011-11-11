@@ -19,39 +19,34 @@
 
 #pragma once
 
-#include "RuleTableLoader.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
+class ChartHypothesis;
+class ChartTrellisNode;
+class ChartTrellisPath;
 
-enum FormatType
+class ChartTrellisDetour
 {
-  MosesFormat
-  ,HieroFormat
-};
-
-class RuleTableLoaderStandard : public RuleTableLoader
-{
-protected:
-
-  bool Load(FormatType format,
-            const std::vector<FactorType> &input,
-            const std::vector<FactorType> &output,
-            std::istream &inStream,
-            const std::vector<float> &weight,
-            size_t tableLimit,
-            const LMList &languageModels,
-            const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
  public:
-  bool Load(const std::vector<FactorType> &input,
-            const std::vector<FactorType> &output,
-            std::istream &inStream,
-            const std::vector<float> &weight,
-            size_t tableLimit,
-            const LMList &languageModels,
-            const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
+  ChartTrellisDetour(boost::shared_ptr<const ChartTrellisPath>,
+                     const ChartTrellisNode &, const ChartHypothesis &);
+
+  const ChartTrellisPath &GetBasePath() const { return *m_basePath; }
+  const ChartTrellisNode &GetSubstitutedNode() const {
+    return m_substitutedNode;
+  }
+  const ChartHypothesis &GetReplacementHypo() const {
+    return m_replacementHypo;
+  }
+  float GetTotalScore() const { return m_totalScore; }
+
+ private:
+  boost::shared_ptr<const ChartTrellisPath> m_basePath;
+  const ChartTrellisNode &m_substitutedNode;
+  const ChartHypothesis &m_replacementHypo;
+  float m_totalScore;
 };
 
 }  // namespace Moses
