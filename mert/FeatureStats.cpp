@@ -90,7 +90,7 @@ FeatureStats::FeatureStats()
 
 FeatureStats::~FeatureStats()
 {
-  delete[] array_;
+  delete [] array_;
 };
 
 FeatureStats::FeatureStats(const FeatureStats &stats)
@@ -121,7 +121,7 @@ void FeatureStats::expand()
   available_*=2;
   featstats_t t_ = new FeatureStatsType[available_];
   memcpy(t_,array_,featbytes_);
-  delete array_;
+  delete [] array_;
   array_=t_;
 }
 
@@ -201,7 +201,7 @@ void FeatureStats::savebin(std::ofstream& outFile)
 
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 {
-  delete array_;
+  delete [] array_;
   available_ = stats.available();
   entries_ = stats.size();
   array_ = new FeatureStatsType[available_];

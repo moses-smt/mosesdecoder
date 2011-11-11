@@ -35,7 +35,7 @@ private:
 
 public:
   Data(Scorer& sc);
-  ~Data() {};
+  ~Data();
 
   inline void clear() {
     scoredata->clear();

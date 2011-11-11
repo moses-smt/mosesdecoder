@@ -211,6 +211,8 @@ int main(int argc, char** argv)
      timer.stop("Stopping...");
     		*/
 
+    delete scorer;
+
     return EXIT_SUCCESS;
   } catch (const exception& e) {
     cerr << "Exception: " << e.what() << endl;

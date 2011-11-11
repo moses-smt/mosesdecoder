@@ -14,6 +14,7 @@
 #include "Types.h"
 #include "ScoreData.h"
 #include "Scorer.h"
+#include "ScopedVector.h"
 
 using namespace std;
 
@@ -88,7 +89,7 @@ private:
   typedef map<vector<int>,int,CompareNgrams> counts_t;
   typedef map<vector<int>,int,CompareNgrams>::iterator counts_it;
 
-  typedef vector<counts_t*> refcounts_t;
+  typedef ScopedVector<counts_t> refcounts_t;
 
   size_t countNgrams(const string& line, counts_t& counts, unsigned int n);
 
