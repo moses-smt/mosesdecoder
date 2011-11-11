@@ -22,9 +22,8 @@ using namespace std;
 
 class ScorerFactory
 {
-
 public:
-  vector<string> getTypes() {
+  static vector<string> getTypes() {
     vector<string> types;
     types.push_back(string("BLEU"));
     types.push_back(string("PER"));
@@ -34,7 +33,7 @@ public:
     return types;
   }
 
-  Scorer* getScorer(const string& type, const string& config = "") {
+  static Scorer* getScorer(const string& type, const string& config = "") {
     if (type == "BLEU") {
       return (BleuScorer*) new BleuScorer(config);
     } else if (type == "PER") {
@@ -49,6 +48,10 @@ public:
       throw runtime_error("Unknown scorer type: " + type);
     }
   }
+
+private:
+  ScorerFactory() {}
+  ~ScorerFactory() {}
 };
 
 #endif //__SCORER_FACTORY_H

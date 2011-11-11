@@ -16,13 +16,14 @@ using namespace std;
 class Optimizer
 {
 protected:
-  Scorer * scorer; //no accessor for them only child can use them
-  FeatureData * FData;//no accessor for them only child can use them
+  Scorer *scorer; //no accessor for them only child can use them
+  FeatureData *FData;//no accessor for them only child can use them
   unsigned int number_of_random_directions;
+
 public:
   Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom);
-  void SetScorer(Scorer *S);
-  void SetFData(FeatureData *F);
+  void SetScorer(Scorer *_scorer);
+  void SetFData(FeatureData *_FData);
   virtual ~Optimizer();
 
   unsigned size()const {

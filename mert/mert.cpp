@@ -81,11 +81,20 @@ int option_index;
 /**
   * Runs an optimisation, or a random restart.
 **/
-class OptimizationTask : public Moses::Task 
+class OptimizationTask : public Moses::Task
 {
   public:
     OptimizationTask(Optimizer* optimizer, const Point& point) :
        m_optimizer(optimizer), m_point(point) {}
+
+    ~OptimizationTask() {}
+
+    void resetOptimizer() {
+      if (m_optimizer) {
+        delete m_optimizer;
+        m_optimizer = NULL;
+      }
+    }
 
     bool DeleteAfterExecution() {
       return false;
@@ -291,8 +300,7 @@ int main (int argc, char **argv)
   }
 
   //it make sense to know what parameter set were used to generate the nbest
-  ScorerFactory SF;
-  Scorer *TheScorer=SF.getScorer(scorertype,scorerconfig);
+  Scorer *TheScorer = ScorerFactory::getScorer(scorertype,scorerconfig);
 
   //load data
   Data D(*TheScorer);
@@ -381,12 +389,12 @@ int main (int argc, char **argv)
     Data& data = D;
     if (shard_count) data = shards[i]; //use the sharded data if it exists
     vector<OptimizationTask*>& tasks = allTasks[i];
-    Optimizer *O=OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
+    Optimizer *O = OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
     O->SetScorer(data.getScorer());
     O->SetFData(data.getFeatureData());
     //A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
-      OptimizationTask* task = new OptimizationTask(O,startingPoints[j]);
+      OptimizationTask* task = new OptimizationTask(O, startingPoints[j]);
       tasks.push_back(task);
 #ifdef WITH_THREADS
       pool.Submit(task);
@@ -417,7 +425,6 @@ int main (int argc, char **argv)
         bestP = allTasks[i][j]->getPoint();
         best = score;
       }
-      delete allTasks[i][j];
     }
 
     mean/=(float)ntry;
@@ -447,5 +454,13 @@ int main (int argc, char **argv)
   ofstream res("weights.txt");
   res<<finalP<<endl;
 
+  for (size_t i = 0; i < allTasks.size(); ++i) {
+    allTasks[i][0]->resetOptimizer();
+    for (size_t j = 0; j < allTasks[i].size(); ++j) {
+      delete allTasks[i][j];
+    }
+  }
+
+  delete TheScorer;
   PrintUserTime("Stopping...");
 }

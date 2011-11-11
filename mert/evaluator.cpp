@@ -110,13 +110,12 @@ int main(int argc, char** argv)
 	if (candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
 	split(candidate,',',candFiles);
 
-	ScorerFactory sfactory;
-	scorer = sfactory.getScorer(scorerType,scorerConfig);
+	scorer = ScorerFactory::getScorer(scorerType,scorerConfig);
 	cerr << "Using scorer: " << scorer->getName() << endl;
 
 	scorer->setReferenceFiles(refFiles);
 	PrintUserTime("Reference files loaded");
-	
+
 
 	for (vector<string>::const_iterator it = candFiles.begin(); it != candFiles.end(); ++it)
 	{
@@ -124,6 +123,8 @@ int main(int argc, char** argv)
 	}
 
 	PrintUserTime("Evaluation done");
+
+        delete scorer;
 
     return EXIT_SUCCESS;
   } catch (const exception& e) {

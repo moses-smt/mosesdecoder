@@ -14,18 +14,14 @@ static const float MAX_FLOAT=numeric_limits<float>::max();
 
 
 
-void Optimizer::SetScorer(Scorer *S)
+void Optimizer::SetScorer(Scorer *_scorer)
 {
-  if(scorer)
-    delete scorer;
-  scorer=S;
+  scorer = _scorer;
 }
 
-void Optimizer::SetFData(FeatureData *F)
+void Optimizer::SetFData(FeatureData *_FData)
 {
-  if(FData)
-    delete FData;
-  FData=F;
+  FData = _FData;
 };
 
 Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start, unsigned int nrandom):scorer(NULL),FData(NULL),number_of_random_directions(nrandom)
@@ -49,11 +45,7 @@ Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start,
   }
 };
 
-Optimizer::~Optimizer()
-{
-  delete scorer;
-  delete FData;
-}
+Optimizer::~Optimizer() {}
 
 statscore_t Optimizer::GetStatScore(const Point& param)const
 {

@@ -30,9 +30,11 @@ Data::Data(Scorer& ptr):
 Data::~Data() {
   if (featdata) {
     delete featdata;
+    featdata = NULL;
   }
   if (scoredata) {
     delete scoredata;
+    scoredata = NULL;
   }
 }
 
@@ -284,9 +286,8 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
         shard_contents.push_back(rand() % data_size);
       }
     }
-    
-    ScorerFactory SF;
-    Scorer* scorer = SF.getScorer(score_type, scorerconfig);
+
+    Scorer* scorer = ScorerFactory::getScorer(score_type, scorerconfig);
 
     shards.push_back(Data(*scorer));
     shards.back().score_type = score_type;

@@ -175,8 +175,8 @@ int main(int argc, char** argv)
     else cerr << "Binary write mode is NOT selected" << endl;
 
     TRACE_ERR("Scorer type: " << scorerType << endl);
-    ScorerFactory sfactory;
-    Scorer* scorer = sfactory.getScorer(scorerType,scorerConfig);
+    // ScorerFactory sfactory;
+    Scorer* scorer = ScorerFactory::getScorer(scorerType,scorerConfig);
 
     //load references
     if (referenceFiles.size() > 0)
