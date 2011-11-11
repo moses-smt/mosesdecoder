@@ -23,9 +23,18 @@ Data::Data(Scorer& ptr):
   TRACE_ERR("Data::score_type " << score_type << std::endl);
 
   TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
-  featdata=new FeatureData;
-  scoredata=new ScoreData(*theScorer);
-};
+  featdata = new FeatureData;
+  scoredata = new ScoreData(*theScorer);
+}
+
+Data::~Data() {
+  if (featdata) {
+    delete featdata;
+  }
+  if (scoredata) {
+    delete scoredata;
+  }
+}
 
 void Data::loadnbest(const std::string &file)
 {

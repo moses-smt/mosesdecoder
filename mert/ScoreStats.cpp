@@ -21,7 +21,7 @@ ScoreStats::ScoreStats()
 
 ScoreStats::~ScoreStats()
 {
-  delete[] array_;
+  delete [] array_;
 };
 
 ScoreStats::ScoreStats(const ScoreStats &stats)
@@ -51,7 +51,7 @@ void ScoreStats::expand()
   available_*=2;
   scorestats_t t_ = new ScoreStatsType[available_];
   memcpy(t_,array_,scorebytes_);
-  delete array_;
+  delete [] array_;
   array_=t_;
 }
 
@@ -117,7 +117,7 @@ void ScoreStats::savebin(std::ofstream& outFile)
 
 ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 {
-  delete array_;
+  delete [] array_;
   available_ = stats.available();
   entries_ = stats.size();
   array_ = new ScoreStatsType[available_];

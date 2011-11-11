@@ -41,7 +41,7 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   //make sure reference data is clear
-  _refcounts.clear();
+  _refcounts.reset();
   _reflengths.clear();
   _encodings.clear();
 
@@ -57,7 +57,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
     while (getline(refin,line)) {
       //cerr << line << endl;
       if (i == 0) {
-        counts_t* counts = new counts_t(); //these get leaked
+        counts_t *counts = new counts_t; //these get leaked
         _refcounts.push_back(counts);
         vector<size_t> lengths;
         _reflengths.push_back(lengths);
