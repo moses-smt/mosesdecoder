@@ -27,7 +27,7 @@ enum BleuReferenceLengthStrategy { BLEU_AVERAGE, BLEU_SHORTEST, BLEU_CLOSEST };
 class BleuScorer: public StatisticsBasedScorer
 {
 public:
-  BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_CLOSEST) {
+  explicit BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_CLOSEST) {
     //configure regularisation
     static string KEY_REFLEN = "reflen";
     static string REFLEN_AVERAGE = "average";
@@ -61,10 +61,11 @@ public:
   float calculateScore(const vector<int>& comps);
 
 private:
-  //no copy
+  // no copying allowed
   BleuScorer(const BleuScorer&);
   ~BleuScorer() {}
   BleuScorer& operator=(const BleuScorer&);
+
   //Used to construct the ngram map
   struct CompareNgrams {
     int operator() (const vector<int>& a, const vector<int>& b) {

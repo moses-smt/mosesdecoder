@@ -57,9 +57,11 @@ private:
 
 public:
   FeatureStats();
-  FeatureStats(const size_t size);
+  explicit FeatureStats(const size_t size);
+  explicit FeatureStats(std::string &theString);
+
+  // We intentionally allow copying.
   FeatureStats(const FeatureStats &stats);
-  FeatureStats(std::string &theString);
   FeatureStats& operator=(const FeatureStats &stats);
 
   ~FeatureStats();

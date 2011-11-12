@@ -14,7 +14,7 @@ using namespace std;
 class CderScorer: public StatisticsBasedScorer
 {
 public:
-  CderScorer(const string& config);
+  explicit CderScorer(const string& config);
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry)
   {

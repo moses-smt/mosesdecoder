@@ -32,12 +32,13 @@ private:
 
 public:
   ScoreStats();
-  ScoreStats(const size_t size);
-  ScoreStats(const ScoreStats &stats);
-  ScoreStats(std::string &theString);
-  ScoreStats& operator=(const ScoreStats &stats);
-
+  explicit ScoreStats(const size_t size);
+  explicit ScoreStats(std::string &theString);
   ~ScoreStats();
+
+  // We intentionally allow copying.
+  ScoreStats(const ScoreStats &stats);
+  ScoreStats& operator=(const ScoreStats &stats);
 
   bool isfull() {
     return (entries_ < available_)?0:1;

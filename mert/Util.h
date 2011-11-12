@@ -65,9 +65,9 @@ class inputfilestream : public std::istream
 protected:
   std::streambuf *m_streambuf;
   bool _good;
-public:
 
-  inputfilestream(const std::string &filePath);
+public:
+  explicit inputfilestream(const std::string &filePath);
   ~inputfilestream();
   bool good() {
     return _good;
@@ -80,9 +80,9 @@ class outputfilestream : public std::ostream
 protected:
   std::streambuf *m_streambuf;
   bool _good;
-public:
 
-  outputfilestream(const std::string &filePath);
+public:
+  explicit outputfilestream(const std::string &filePath);
   ~outputfilestream();
   bool good() {
     return _good;

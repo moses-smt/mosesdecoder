@@ -13,7 +13,7 @@ class Optimizer;
  * A class that handles the subset of the Feature weight on which
  * we run the optimization.
  */
-class Point:public vector<parameter_t>
+class Point : public vector<parameter_t>
 {
   friend class Optimizer;
 private:
@@ -61,12 +61,13 @@ public:
   static bool OptimizeAll() {
     return fixedweights.empty();
   }
+
   statscore_t score;
-  Point():vector<parameter_t>(dim) {}
+
+  Point() : vector<parameter_t>(dim) {}
   Point(const vector<parameter_t>& init,
-    const vector<parameter_t>& min,
-    const vector<parameter_t>& max
-  );
+        const vector<parameter_t>& min,
+        const vector<parameter_t>& max);
   void Randomize();
 
   // Compute the feature function

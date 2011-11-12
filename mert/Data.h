@@ -34,7 +34,7 @@ private:
   bool _sparse_flag;
 
 public:
-  Data(Scorer& sc);
+  explicit Data(Scorer& sc);
   ~Data();
 
   inline void clear() {
