@@ -5,6 +5,13 @@
 
 using namespace std;
 
+namespace {
+bool IsGzipFile(const std::string &filename) {
+  return filename.size() > 3 &&
+      filename.substr(filename.size() - 3, 3) == ".gz";
+}
+} // namespace
+
 inputfilestream::inputfilestream(const std::string &filePath)
   : std::istream(0), m_streambuf(0)
 {
@@ -12,8 +19,7 @@ inputfilestream::inputfilestream(const std::string &filePath)
   std::filebuf* fb = new std::filebuf();
   is_good = (fb->open(filePath.c_str(), std::ios::in) != NULL);
 
-  if (filePath.size() > 3 &&
-      filePath.substr(filePath.size() - 3, 3) == ".gz") {
+  if (IsGzipFile(filePath)) {
     fb->close();
     delete fb;
     m_streambuf = new gzfilebuf(filePath.c_str());
@@ -40,7 +46,7 @@ outputfilestream::outputfilestream(const std::string &filePath)
   std::filebuf* fb = new std::filebuf();
   is_good = (fb->open(filePath.c_str(), std::ios::out) != NULL);
 
-  if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
+  if (IsGzipFile(filePath)) {
     throw runtime_error("Output to a zipped file not supported!");
   } else {
     m_streambuf = fb;
