@@ -54,7 +54,7 @@ public:
   size_t NumberOfScores() {
     // cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl;
     return (2 * LENGTH + 1);
-  };
+  }
 
 
 //protected:
@@ -63,7 +63,7 @@ public:
 private:
   //no copy
   BleuScorer(const BleuScorer&);
-  ~BleuScorer() {};
+  ~BleuScorer() {}
   BleuScorer& operator=(const BleuScorer&);
   //Used to construct the ngram map
   struct CompareNgrams {

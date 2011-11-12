@@ -34,8 +34,7 @@ private:
 
 public:
   ScoreData(Scorer& sc);
-
-  ~ScoreData() {};
+  ~ScoreData() {}
 
   inline void clear() {
     array_.clear();
@@ -67,10 +66,11 @@ public:
 
   inline std::string name() {
     return score_type;
-  };
+  }
+
   inline std::string name(std::string &sctype) {
     return score_type = sctype;
-  };
+  }
 
   void add(ScoreArray& e);
   void add(const ScoreStats& e, const std::string& sent_idx);

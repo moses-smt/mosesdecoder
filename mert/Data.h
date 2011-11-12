@@ -44,10 +44,11 @@ public:
 
   ScoreData* getScoreData() {
     return scoredata;
-  };
+  }
+
   FeatureData* getFeatureData() {
     return featdata;
-  };
+  }
 
   Scorer* getScorer() {
     return theScorer;
@@ -89,15 +90,15 @@ public:
 
   inline bool existsFeatureNames() {
     return featdata->existsFeatureNames();
-  };
+  }
 
   inline std::string getFeatureName(size_t idx) {
     return featdata->getFeatureName(idx);
-  };
+  }
 
   inline size_t getFeatureIndex(const std::string& name) {
     return featdata->getFeatureIndex(name);
-  };
+  }
 
   void sampleRankedPairs( const std::string &rankedPairFile );
   void outputSample( std::ostream &out, const FeatureStats &f1, const FeatureStats &f2 );

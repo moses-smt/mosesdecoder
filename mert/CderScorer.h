@@ -30,7 +30,7 @@ public:
 
   size_t NumberOfScores() {
     return 2;
-  };
+  }
 
   float calculateScore(const vector<int>& comps);
 
@@ -46,7 +46,7 @@ private:
 
   // no copying allowed
   CderScorer(const CderScorer&);
-  ~CderScorer() {};
+  ~CderScorer() {}
   CderScorer& operator=(const CderScorer&);
 };
 

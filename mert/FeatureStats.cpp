@@ -86,12 +86,12 @@ FeatureStats::FeatureStats()
   available_ = AVAILABLE_;
   entries_ = 0;
   array_ = new FeatureStatsType[available_];
-};
+}
 
 FeatureStats::~FeatureStats()
 {
   delete [] array_;
-};
+}
 
 FeatureStats::FeatureStats(const FeatureStats &stats)
 {
@@ -100,7 +100,7 @@ FeatureStats::FeatureStats(const FeatureStats &stats)
   array_ = new FeatureStatsType[available_];
   memcpy(array_,stats.getArray(),featbytes_);
   map_ = stats.getSparse();
-};
+}
 
 FeatureStats::FeatureStats(const size_t size)
 {
@@ -108,8 +108,7 @@ FeatureStats::FeatureStats(const size_t size)
   entries_ = size;
   array_ = new FeatureStatsType[available_];
   memset(array_,0,featbytes_);
-};
-
+}
 
 FeatureStats::FeatureStats(std::string &theString)
 {

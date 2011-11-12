@@ -54,7 +54,8 @@ public:
    */
   statscore_t  GetStatScore(const vector<unsigned>& nbests)const {
     return scorer->score(nbests);
-  };
+  }
+
   statscore_t  GetStatScore(const Point& param)const;
 
   vector<statscore_t > GetIncStatScore(vector<unsigned> ref,vector<vector <pair<unsigned,unsigned> > >)const;
@@ -75,7 +76,7 @@ class SimpleOptimizer: public Optimizer
 private:
   static float eps;
 public:
-  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom):Optimizer(dim,i2O,start,nrandom) {};
+  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom): Optimizer(dim, i2O, start,nrandom) {}
   virtual statscore_t  TrueRun(Point&)const;
 };
 
@@ -87,7 +88,7 @@ class RandomDirectionOptimizer: public Optimizer
 private:
   static float eps;
 public:
-  RandomDirectionOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom):Optimizer(dim,i2O,start,nrandom) {};
+  RandomDirectionOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom): Optimizer(dim,i2O,start,nrandom) {}
   virtual statscore_t  TrueRun(Point&)const;
 };
 
@@ -97,7 +98,7 @@ public:
 class RandomOptimizer: public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start, unsigned int nrandom):Optimizer(dim,i2O,start,nrandom) {};
+  RandomOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start, unsigned int nrandom): Optimizer(dim,i2O,start,nrandom) {}
   virtual statscore_t  TrueRun(Point&)const;
 };
 

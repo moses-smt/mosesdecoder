@@ -58,7 +58,7 @@ inline T Scan(const std::string &input)
   T ret;
   stream >> ret;
   return ret;
-};
+}
 
 class inputfilestream : public std::istream
 {

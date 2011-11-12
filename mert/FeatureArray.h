@@ -39,8 +39,7 @@ private:
 
 public:
   FeatureArray();
-
-  ~FeatureArray() {};
+  ~FeatureArray() {}
 
   inline void clear() {
     array_.clear();

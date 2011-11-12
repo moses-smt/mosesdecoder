@@ -20,7 +20,7 @@ ScoreData::ScoreData(Scorer& ptr):
   theScorer->setScoreData(this);
   number_of_scores = theScorer->NumberOfScores();
   // TRACE_ERR("ScoreData: number_of_scores: " << number_of_scores << std::endl);
-};
+}
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
 {

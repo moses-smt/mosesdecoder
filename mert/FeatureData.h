@@ -36,8 +36,7 @@ private:
 
 public:
   FeatureData();
-
-  ~FeatureData() {};
+  ~FeatureData() {}
 
   inline void clear() {
     array_.clear();
@@ -119,19 +118,19 @@ public:
 
   bool existsFeatureNames() {
     return (idx2featname_.size() > 0)?true:false;
-  };
+  }
 
   std::string getFeatureName(size_t idx) {
     if (idx >= idx2featname_.size())
       throw runtime_error("Error: you required an too big index");
     return idx2featname_[idx];
-  };
+  }
 
   size_t getFeatureIndex(const std::string& name) {
     if (featname2idx_.find(name)==featname2idx_.end())
       throw runtime_error("Error: feature " + name +" is unknown");
     return featname2idx_[name];
-  };
+  }
 
   void setFeatureMap(const std::string feat);
 };

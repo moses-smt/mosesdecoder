@@ -47,9 +47,10 @@ protected:
   float calculateScore(const vector<int>& comps);
 
  private:
-  //no copying allowed
+  // no copying allowed
   MergeScorer(const MergeScorer&);
-  ~MergeScorer(){};
+  ~MergeScorer() {}
+
   MergeScorer& operator=(const MergeScorer&);
 
   string javaEnv;

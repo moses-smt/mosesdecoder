@@ -14,7 +14,7 @@
 static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
 static const float MAX_FLOAT=numeric_limits<float>::max();
 
-FeatureData::FeatureData() {};
+FeatureData::FeatureData() {}
 
 void FeatureData::save(std::ofstream& outFile, bool bin)
 {

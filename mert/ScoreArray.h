@@ -38,8 +38,7 @@ private:
 
 public:
   ScoreArray();
-
-  ~ScoreArray() {};
+  ~ScoreArray() {}
 
   inline void clear() {
     array_.clear();
@@ -69,10 +68,11 @@ public:
 
   inline std::string name() const {
     return score_type;
-  };
+  }
+
   inline void name(std::string &sctype) {
     score_type = sctype;
-  };
+  }
 
   inline size_t size() {
     return array_.size();

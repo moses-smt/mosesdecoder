@@ -37,16 +37,16 @@ public:
   size_t NumberOfScores() {
     // cerr << "PerScorer: 3" << endl;
     return 3;
-  };
+  }
 
 //protected:
 
-  virtual float calculateScore(const vector<int>& comps) ;
+  virtual float calculateScore(const vector<int>& comps);
 
 private:
   // no copying allowed
   PerScorer(const PerScorer&);
-  ~PerScorer() {};
+  ~PerScorer() {}
   PerScorer& operator=(const PerScorer&);
 
   // data extracted from reference files

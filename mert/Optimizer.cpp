@@ -37,7 +37,7 @@ void Optimizer::SetScorer(Scorer *_scorer)
 void Optimizer::SetFData(FeatureData *_FData)
 {
   FData = _FData;
-};
+}
 
 Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start, unsigned int nrandom):scorer(NULL),FData(NULL),number_of_random_directions(nrandom)
 {
@@ -59,7 +59,7 @@ Optimizer::Optimizer(unsigned Pd,vector<unsigned> i2O,vector<parameter_t> start,
         Point::fixedweights[i]=start[i];
     }
   }
-};
+}
 
 Optimizer::~Optimizer() {}
 
@@ -70,7 +70,7 @@ statscore_t Optimizer::GetStatScore(const Point& param)const
   //copy(bests.begin(),bests.end(),ostream_iterator<unsigned>(cerr," "));
   statscore_t score = GetStatScore(bests);
   return score;
-};
+}
 
 map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap,float newt,pair<unsigned,unsigned> newdiff)
 {
@@ -88,7 +88,7 @@ map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap,float
     it=ins.first;
   }
   return it;
-};
+}
 
 
 statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,Point& bestpoint)const
@@ -299,8 +299,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
   bestpoint=direction*bestx+origin;
   bestpoint.score=bestscore;
   return bestscore;
-};
-
+}
 
 void  Optimizer::Get1bests(const Point& P,vector<unsigned>& bests)const
 {
@@ -360,8 +359,7 @@ vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<
 
   scorer->score(thefirst,thediffs,theres);
   return theres;
-};
-
+}
 
 
 float SimpleOptimizer::eps=0.0001;
@@ -502,7 +500,7 @@ OptimizerFactory::OptType OptimizerFactory::GetOType(string type)
     if(typenames[thetype]==type)
       break;
   return((OptType)thetype);
-};
+}
 
 Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,vector<parameter_t> start,string type, unsigned int nrandom)
 {

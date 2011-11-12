@@ -39,7 +39,7 @@ public:
   size_t NumberOfScores() {
     // cerr << "TerScorer: " << (LENGTH + 1) << endl;
     return (LENGTH + 1);
-  };
+  }
 
 
 //protected:
@@ -51,7 +51,7 @@ private:
   string tercomEnv;
   // no copying allowed
   TerScorer(const TerScorer&);
-  ~TerScorer() {};
+  ~TerScorer() {}
   TerScorer& operator=(const TerScorer&);
 
   // data extracted from reference files

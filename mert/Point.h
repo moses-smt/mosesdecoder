@@ -60,9 +60,9 @@ public:
   }
   static bool OptimizeAll() {
     return fixedweights.empty();
-  };
+  }
   statscore_t score;
-  Point():vector<parameter_t>(dim) {};
+  Point():vector<parameter_t>(dim) {}
   Point(const vector<parameter_t>& init,
     const vector<parameter_t>& min,
     const vector<parameter_t>& max
@@ -79,9 +79,8 @@ public:
    * Write the Whole featureweight to a stream (ie pdim float).
    */
   friend ostream& operator<<(ostream& o,const Point& P);
-  void Normalize() {
-    NormalizeL2();
-  };
+
+  void Normalize() { NormalizeL2(); }
   void NormalizeL2();
   void NormalizeL1();
 
@@ -92,7 +91,7 @@ public:
   vector<parameter_t> GetAllWeights()const;
   statscore_t GetScore()const {
     return score;
-  };
+  }
 };
 
 #endif  // POINT_H

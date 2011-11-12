@@ -52,10 +52,9 @@ public:
       _config[name] = value;
       start = end+1;
     }
+  }
 
-  };
-  virtual ~Scorer() {};
-
+  virtual ~Scorer() {}
 
   /**
    * Return the number of statistics needed for the computation of the score.
@@ -63,7 +62,7 @@ public:
   virtual size_t NumberOfScores() {
     cerr << "Scorer: 0" << endl;
     return 0;
-  };
+  }
 
   /**
    * Set the reference files. This must be called before prepareStats().
@@ -232,7 +231,7 @@ public:
 //    cerr << "Using case preservation: " << _preserveCase << endl;
   }
 
-  ~StatisticsBasedScorer() {};
+  ~StatisticsBasedScorer() {}
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores);
 

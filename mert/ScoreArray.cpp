@@ -10,8 +10,7 @@
 #include "ScoreArray.h"
 #include "Util.h"
 
-ScoreArray::ScoreArray(): idx("")
-{};
+ScoreArray::ScoreArray() : idx("") {}
 
 void ScoreArray::savetxt(std::ofstream& outFile, const std::string& sctype)
 {

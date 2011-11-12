@@ -72,7 +72,7 @@ Point::Point(const vector<parameter_t>& init,
       m_max[i] = max[optindices[i]];
     }
   }
-};
+}
 
 
 double Point::operator*(const FeatureStats& F)const
@@ -90,6 +90,7 @@ double Point::operator*(const FeatureStats& F)const
   }
   return prod;
 }
+
 Point Point::operator+(const Point& p2)const
 {
   assert(p2.size()==size());
@@ -98,7 +99,7 @@ Point Point::operator+(const Point& p2)const
     Res[i]+=p2[i];
   Res.score=numeric_limits<statscore_t>::max();
   return Res;
-};
+}
 
 void Point::operator+=(const Point& p2)
 {
@@ -106,8 +107,7 @@ void Point::operator+=(const Point& p2)
   for(unsigned i=0; i<size(); i++)
     operator[](i)+=p2[i];
   score=numeric_limits<statscore_t>::max();
-};
-
+}
 
 Point Point::operator*(float l)const
 {
@@ -116,7 +116,7 @@ Point Point::operator*(float l)const
     Res[i]*=l;
   Res.score=numeric_limits<statscore_t>::max();
   return Res;
-};
+}
 
 ostream& operator<<(ostream& o,const Point& P)
 {
@@ -126,7 +126,7 @@ ostream& operator<<(ostream& o,const Point& P)
     o << w[i] << " ";
 //	 o << "=> " << P.GetScore();
   return o;
-};
+}
 
 vector<parameter_t> Point::GetAllWeights()const
 {
@@ -141,7 +141,7 @@ vector<parameter_t> Point::GetAllWeights()const
       w[it->first]=it->second;
   }
   return w;
-};
+}
 
 
 

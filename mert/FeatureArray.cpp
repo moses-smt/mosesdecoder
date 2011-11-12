@@ -11,8 +11,7 @@
 #include "Util.h"
 
 
-FeatureArray::FeatureArray(): idx(""), _sparse_flag(false)
-{};
+FeatureArray::FeatureArray() : idx(""), _sparse_flag(false) {}
 
 void FeatureArray::savetxt(std::ofstream& outFile)
 {

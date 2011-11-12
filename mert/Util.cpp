@@ -54,7 +54,7 @@ size_t getNextPound(std::string &theString, std::string &substring, const std::s
     }
   }
   return pos;
-};
+}
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
   std::stringstream ss(s);
@@ -143,12 +143,12 @@ int swapbytes(char *p, int sz, int n)
   }
   return 0;
 
-};
+}
 
 void ResetUserTime()
 {
   g_timer.start();
-};
+}
 
 void PrintUserTime(const std::string &message)
 {

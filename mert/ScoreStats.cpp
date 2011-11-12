@@ -17,12 +17,12 @@ ScoreStats::ScoreStats()
   available_ = AVAILABLE_;
   entries_ = 0;
   array_ = new ScoreStatsType[available_];
-};
+}
 
 ScoreStats::~ScoreStats()
 {
   delete [] array_;
-};
+}
 
 ScoreStats::ScoreStats(const ScoreStats &stats)
 {
@@ -30,8 +30,7 @@ ScoreStats::ScoreStats(const ScoreStats &stats)
   entries_ = stats.size();
   array_ = new ScoreStatsType[available_];
   memcpy(array_,stats.getArray(),scorebytes_);
-};
-
+}
 
 ScoreStats::ScoreStats(const size_t size)
 {
@@ -39,7 +38,7 @@ ScoreStats::ScoreStats(const size_t size)
   entries_ = size;
   array_ = new ScoreStatsType[available_];
   memset(array_,0,scorebytes_);
-};
+}
 
 ScoreStats::ScoreStats(std::string &theString)
 {
