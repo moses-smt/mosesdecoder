@@ -4,8 +4,6 @@
 #include <vector>
 #include "Types.h"
 #include "FeatureStats.h"
-#include <cassert>
-
 
 class Optimizer;
 
@@ -45,6 +43,8 @@ private:
   static vector<parameter_t> m_min;
   static vector<parameter_t> m_max;
 
+  statscore_t score_;
+
 public:
   static unsigned int getdim() {
     return dim;
@@ -62,8 +62,6 @@ public:
     return fixedweights.empty();
   }
 
-  statscore_t score;
-
   Point() : vector<parameter_t>(dim) {}
   Point(const vector<parameter_t>& init,
         const vector<parameter_t>& min,
@@ -71,10 +69,10 @@ public:
   void Randomize();
 
   // Compute the feature function
-  double operator*(const FeatureStats&)const;
-  Point operator+(const Point&)const;
+  double operator*(const FeatureStats&) const;
+  Point operator+(const Point&) const;
   void operator+=(const Point&);
-  Point operator*(float)const;
+  Point operator*(float) const;
 
   /**
    * Write the Whole featureweight to a stream (ie pdim float).
@@ -89,10 +87,13 @@ public:
    * Return a vector of size pdim where all weights have been
    * put (including fixed ones).
    */
-  vector<parameter_t> GetAllWeights()const;
-  statscore_t GetScore()const {
-    return score;
+  vector<parameter_t> GetAllWeights() const;
+
+  statscore_t GetScore() const {
+    return score_;
   }
+
+  void SetScore(statscore_t score) { score_ = score; }
 };
 
 #endif  // POINT_H

@@ -297,7 +297,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin,const Point& direction,P
 //    cerr<<"end Lineopt, bestx="<<bestx<<endl;
   }
   bestpoint=direction*bestx+origin;
-  bestpoint.score=bestscore;
+  bestpoint.SetScore(bestscore);
   return bestscore;
 }
 
@@ -338,16 +338,19 @@ statscore_t Optimizer::Run(Point& P)const
     exit(2);
   }
 
-  statscore_t score=GetStatScore(P);
-  P.score=score;
+  P.SetScore(GetStatScore(P));
 
-  if(verboselevel()>2)
-    cerr<<"Starting point: "<< P << " => "<< P.score << endl;
-  statscore_t s=TrueRun(P);
-  P.score=s;//just in case its not done in TrueRun
-  if (verboselevel()>2)
-    cerr<<"Ending point: "<< P <<" => "<< s << endl;
-  return s;
+  if (verboselevel () > 2) {
+    cerr << "Starting point: " << P << " => " << P.GetScore() << endl;
+  }
+  statscore_t score = TrueRun(P);
+
+  // just in case its not done in TrueRun
+  P.SetScore(score);
+  if (verboselevel() > 2) {
+    cerr << "Ending point: " << P << " => " << score << endl;
+  }
+  return score;
 }
 
 
@@ -366,13 +369,13 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const
 {
   statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
-  Point  best;
+  Point best;
 
   // If P is already defined and provides a score,
   // We must improve over this score.
-  if(P.score>bestscore) {
-    bestscore=P.score;
-    best=P;
+  if(P.GetScore() > bestscore) {
+    bestscore = P.GetScore();
+    best = P;
   }
 
   int nrun=0;
@@ -427,7 +430,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const
 
 statscore_t RandomDirectionOptimizer::TrueRun(Point& P)const
 {
-  statscore_t prevscore=P.score;
+  statscore_t prevscore = P.GetScore();
 
   // do specified number of random direction optimizations
   unsigned int nrun = 0;
@@ -458,11 +461,11 @@ statscore_t RandomDirectionOptimizer::TrueRun(Point& P)const
 }
 
 
-statscore_t RandomOptimizer::TrueRun(Point& P)const
+statscore_t RandomOptimizer::TrueRun(Point& P) const
 {
   P.Randomize();
-  statscore_t score=GetStatScore(P);
-  P.score=score;
+  statscore_t score = GetStatScore(P);
+  P.SetScore(score);
   return score;
 }
 
