@@ -93,11 +93,11 @@ namespace Moses {
      m_coreFeatures(coreFeatures) {}
 
   void FVector::resize(size_t newsize) {
-      valarray<FValue> newCoreFeatures(newsize);
-      for (size_t i = 0; i < min(newsize,m_coreFeatures.size()); ++i)  {
-        newCoreFeatures[i] = m_coreFeatures[i];
+      valarray<FValue> oldValues(m_coreFeatures);
+      m_coreFeatures.resize(newsize);
+      for (size_t i = 0; i < min(m_coreFeatures.size(), oldValues.size()); ++i) {
+        m_coreFeatures[i] = oldValues[i];
       }
-      m_coreFeatures = newCoreFeatures;
     }
 	
 	void FVector::clear() {
