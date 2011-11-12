@@ -17,11 +17,6 @@ using namespace std;
 
 #include "Util.h"
 
-#define FEATURE_STATS_MIN (numeric_limits<FeatureStatsType>::min())
-#define ATOFST(str) ((FeatureStatsType) atof(str))
-
-#define featbytes_ (entries_*sizeof(FeatureStatsType))
-
 // Minimal sparse vector
 class SparseVector {
 public:
@@ -66,15 +61,15 @@ public:
 
   ~FeatureStats();
 
-  bool isfull() {
-    return (entries_ < available_)?0:1;
+  bool isfull() const {
+    return (entries_ < available_) ? 0 : 1;
   }
   void expand();
   void add(FeatureStatsType v);
   void addSparse(string name, FeatureStatsType v);
 
   inline void clear() {
-    memset((void*) array_,0,featbytes_);
+    memset((void*)array_, 0, GetArraySizeWithBytes());
     map_.clear();
   }
 
@@ -94,11 +89,17 @@ public:
   void set(std::string &theString);
 
   inline size_t bytes() const {
-    return featbytes_;
+    return GetArraySizeWithBytes();
   }
+
+  size_t GetArraySizeWithBytes() const {
+    return entries_ * sizeof(FeatureStatsType);
+  }
+
   inline size_t size() const {
     return entries_;
   }
+
   inline size_t available() const {
     return available_;
   }

@@ -18,11 +18,6 @@ using namespace std;
 
 #include "Util.h"
 
-#define SCORE_STATS_MIN (numeric_limits<ScoreStatsType>::min())
-#define ATOSST(str) ((ScoreStatsType) atoi(str))
-
-#define scorebytes_ (entries_*sizeof(ScoreStatsType))
-
 class ScoreStats
 {
 private:
@@ -48,7 +43,7 @@ public:
   void add(ScoreStatsType v);
 
   inline void clear() {
-    memset((void*) array_,0,scorebytes_);
+    memset((void*)array_, 0, GetArraySizeWithBytes());
   }
 
   inline ScoreStatsType get(size_t i) {
@@ -64,8 +59,13 @@ public:
   void set(std::string &theString);
 
   inline size_t bytes() const {
-    return scorebytes_;
+    return GetArraySizeWithBytes();
   }
+
+  size_t GetArraySizeWithBytes() const {
+    return entries_ * sizeof(ScoreStatsType);
+  }
+
   inline size_t size() const {
     return entries_;
   }

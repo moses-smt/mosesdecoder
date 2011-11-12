@@ -10,7 +10,9 @@
 #include <fstream>
 #include "FeatureStats.h"
 
-#define AVAILABLE_ 8;
+namespace {
+const int kAvailableSize = 8;
+} // namespace
 
 SparseVector::name2id_t SparseVector::name2id_;
 SparseVector::id2name_t SparseVector::id2name_;
@@ -20,7 +22,6 @@ FeatureStatsType SparseVector::get(string name) const {
   if (name2id_iter == name2id_.end()) return 0;
   size_t id = name2id_iter->second;
   return get(id);
-
 }
 
 FeatureStatsType SparseVector::get(size_t id) const {
@@ -83,7 +84,7 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
 
 FeatureStats::FeatureStats()
 {
-  available_ = AVAILABLE_;
+  available_ = kAvailableSize;
   entries_ = 0;
   array_ = new FeatureStatsType[available_];
 }
@@ -98,7 +99,7 @@ FeatureStats::FeatureStats(const FeatureStats &stats)
   available_ = stats.available();
   entries_ = stats.size();
   array_ = new FeatureStatsType[available_];
-  memcpy(array_,stats.getArray(),featbytes_);
+  memcpy(array_, stats.getArray(), GetArraySizeWithBytes());
   map_ = stats.getSparse();
 }
 
@@ -107,7 +108,7 @@ FeatureStats::FeatureStats(const size_t size)
   available_ = size;
   entries_ = size;
   array_ = new FeatureStatsType[available_];
-  memset(array_,0,featbytes_);
+  memset(array_, 0, GetArraySizeWithBytes());
 }
 
 FeatureStats::FeatureStats(std::string &theString)
@@ -119,7 +120,7 @@ void FeatureStats::expand()
 {
   available_*=2;
   featstats_t t_ = new FeatureStatsType[available_];
-  memcpy(t_,array_,featbytes_);
+  memcpy(t_, array_, GetArraySizeWithBytes());
   delete [] array_;
   array_=t_;
 }
@@ -144,7 +145,7 @@ void FeatureStats::set(std::string &theString)
     getNextPound(theString, substring);
     // regular feature
     if (substring.find(":") == string::npos) {
-      add(ATOFST(substring.c_str()));
+      add(ConvertStringToFeatureStatsType(substring));
     }
     // sparse feature
     else {
@@ -157,7 +158,7 @@ void FeatureStats::set(std::string &theString)
 
 void FeatureStats::loadbin(std::ifstream& inFile)
 {
-  inFile.read((char*) array_, featbytes_);
+  inFile.read((char*) array_, GetArraySizeWithBytes());
 }
 
 void FeatureStats::loadtxt(std::ifstream& inFile)
@@ -195,7 +196,7 @@ void FeatureStats::savetxt(std::ofstream& outFile)
 
 void FeatureStats::savebin(std::ofstream& outFile)
 {
-  outFile.write((char*) array_, featbytes_);
+  outFile.write((char*) array_, GetArraySizeWithBytes());
 }
 
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
@@ -204,7 +205,7 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
   available_ = stats.available();
   entries_ = stats.size();
   array_ = new FeatureStatsType[available_];
-  memcpy(array_,stats.getArray(),featbytes_);
+  memcpy(array_,stats.getArray(), GetArraySizeWithBytes());
   map_ = stats.getSparse();
 
   return *this;

@@ -66,6 +66,26 @@ inline std::string stringify(T x)
   return o.str();
 }
 
+inline ScoreStatsType ConvertCharToScoreStatsType(const char *str)
+{
+  return std::atoi(str);
+}
+
+inline ScoreStatsType ConvertStringToScoreStatsType(const std::string& str)
+{
+  return ConvertCharToScoreStatsType(str.c_str());
+}
+
+inline FeatureStatsType ConvertCharToFeatureStatsType(const char *str)
+{
+  return static_cast<FeatureStatsType>(std::atof(str));
+}
+
+inline FeatureStatsType ConvertStringToFeatureStatsType(const std::string &str)
+{
+  return ConvertCharToFeatureStatsType(str.c_str());
+}
+
 // Utilities to measure decoding time
 void ResetUserTime();
 void PrintUserTime(const std::string &message);

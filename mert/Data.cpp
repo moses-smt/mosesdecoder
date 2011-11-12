@@ -114,7 +114,7 @@ void Data::loadnbest(const std::string &file)
 
       // no ':' -> feature value that needs to be stored
       if ((loc = subsubstring.find_last_of(":")) != subsubstring.length()-1) {
-        featentry.add(ATOFST(subsubstring.c_str()));
+        featentry.add(ConvertStringToFeatureStatsType(subsubstring));
       }
       // sparse feature name? store as well
       else if (subsubstring.find("_") != string::npos) {
