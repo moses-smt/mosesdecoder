@@ -9,6 +9,7 @@
 #include <fstream>
 #include "ScoreArray.h"
 #include "Util.h"
+#include "FileStream.h"
 
 ScoreArray::ScoreArray() : idx("") {}
 

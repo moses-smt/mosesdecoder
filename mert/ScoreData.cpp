@@ -10,7 +10,7 @@
 #include "ScoreData.h"
 #include "Scorer.h"
 #include "Util.h"
-
+#include "FileStream.h"
 
 ScoreData::ScoreData(Scorer& ptr):
   theScorer(&ptr)

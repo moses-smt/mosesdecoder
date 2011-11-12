@@ -9,11 +9,11 @@
 #include <cassert>
 #include <fstream>
 
+#include "Data.h"
+#include "FileStream.h"
 #include "Scorer.h"
 #include "ScorerFactory.h"
-#include "Data.h"
 #include "Util.h"
-
 
 Data::Data(Scorer& ptr):
   theScorer(&ptr),

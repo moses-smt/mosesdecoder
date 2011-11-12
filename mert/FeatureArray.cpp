@@ -9,7 +9,7 @@
 #include <fstream>
 #include "FeatureArray.h"
 #include "Util.h"
-
+#include "FileStream.h"
 
 FeatureArray::FeatureArray() : idx(""), _sparse_flag(false) {}
 

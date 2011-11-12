@@ -25,9 +25,6 @@ using namespace std;
 #include <string>
 #include <cstring>
 
-#include <fstream>
-#include "gzfilebuf.h"
-
 #include "Types.h"
 #include "ScoreStats.h"
 #include "FeatureStats.h"
@@ -59,32 +56,6 @@ inline T Scan(const std::string &input)
   stream >> ret;
   return ret;
 }
-
-class inputfilestream : public std::istream
-{
-protected:
-  std::streambuf *m_streambuf;
-  bool is_good;
-
-public:
-  explicit inputfilestream(const std::string &filePath);
-  ~inputfilestream();
-  bool good() const { return is_good; }
-  void close();
-};
-
-class outputfilestream : public std::ostream
-{
-protected:
-  std::streambuf *m_streambuf;
-  bool is_good;
-
-public:
-  explicit outputfilestream(const std::string &filePath);
-  ~outputfilestream();
-  bool good() const { return is_good; }
-  void close();
-};
 
 template<typename T>
 inline std::string stringify(T x)
