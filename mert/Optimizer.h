@@ -109,7 +109,11 @@ public:
   //Point Start;
   static vector<string> GetTypeNames();
   static Optimizer* BuildOptimizer(unsigned dim,vector<unsigned>tooptimize,vector<parameter_t> start,string type,unsigned int nrandom);
+
 private:
+  OptimizerFactory() {}
+  ~OptimizerFactory() {}
+
   // Add new optimizer here BEFORE NOPTIMZER
   enum OptType {POWELL=0,RANDOM_DIRECTION=1,RANDOM,NOPTIMIZER};
   static OptType GetOType(string);
