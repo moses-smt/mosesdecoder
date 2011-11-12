@@ -195,3 +195,12 @@ float BleuScorer::calculateScore(const vector<int>& comps)
   //cerr << " " << exp(logbleu) << endl;
   return exp(logbleu);
 }
+
+void BleuScorer::dump_counts(counts_t& counts) {
+  for (counts_it i = counts.begin(); i != counts.end(); ++i) {
+    cerr << "(";
+    copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
+    cerr << ") " << i->second << ", ";
+  }
+  cerr << endl;
+}
