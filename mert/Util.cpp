@@ -75,12 +75,11 @@ void Tokenize(const char *str, const char delim,
 }
 
 inputfilestream::inputfilestream(const std::string &filePath)
-  : std::istream(0),
-    m_streambuf(0)
+  : std::istream(0), m_streambuf(0)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
-  _good=(fb->open(filePath.c_str(), std::ios::in)!=NULL);
+  is_good = (fb->open(filePath.c_str(), std::ios::in) != NULL);
 
   if (filePath.size() > 3 &&
       filePath.substr(filePath.size() - 3, 3) == ".gz") {
@@ -104,12 +103,11 @@ void inputfilestream::close()
 }
 
 outputfilestream::outputfilestream(const std::string &filePath)
-  : std::ostream(0),
-    m_streambuf(0)
+  : std::ostream(0), m_streambuf(0)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
-  _good=(fb->open(filePath.c_str(), std::ios::out)!=NULL);
+  is_good = (fb->open(filePath.c_str(), std::ios::out) != NULL);
 
   if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
     throw runtime_error("Output to a zipped file not supported!");

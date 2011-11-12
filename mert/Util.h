@@ -64,14 +64,12 @@ class inputfilestream : public std::istream
 {
 protected:
   std::streambuf *m_streambuf;
-  bool _good;
+  bool is_good;
 
 public:
   explicit inputfilestream(const std::string &filePath);
   ~inputfilestream();
-  bool good() {
-    return _good;
-  }
+  bool good() const { return is_good; }
   void close();
 };
 
@@ -79,14 +77,12 @@ class outputfilestream : public std::ostream
 {
 protected:
   std::streambuf *m_streambuf;
-  bool _good;
+  bool is_good;
 
 public:
   explicit outputfilestream(const std::string &filePath);
   ~outputfilestream();
-  bool good() {
-    return _good;
-  }
+  bool good() const { return is_good; }
   void close();
 };
 
