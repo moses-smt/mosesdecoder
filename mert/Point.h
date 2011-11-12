@@ -62,10 +62,12 @@ public:
     return fixedweights.empty();
   }
 
-  Point() : vector<parameter_t>(dim) {}
+  Point();
   Point(const vector<parameter_t>& init,
         const vector<parameter_t>& min,
         const vector<parameter_t>& max);
+  ~Point();
+
   void Randomize();
 
   // Compute the feature function

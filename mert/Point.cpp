@@ -17,11 +17,13 @@ unsigned Point::ncall = 0;
 vector<parameter_t> Point::m_min;
 vector<parameter_t> Point::m_max;
 
+Point::Point() : vector<parameter_t>(dim), score_(0.0) {}
+
 //Can initialize from a vector of dim or pdim
 Point::Point(const vector<parameter_t>& init,
              const vector<parameter_t>& min,
              const vector<parameter_t>& max)
-    : vector<parameter_t>(Point::dim), score_(0.0f)
+    : vector<parameter_t>(Point::dim), score_(0.0)
 {
   m_min.resize(Point::dim);
   m_max.resize(Point::dim);
@@ -40,6 +42,8 @@ Point::Point(const vector<parameter_t>& init,
     }
   }
 }
+
+Point::~Point() {}
 
 void Point::Randomize()
 {
