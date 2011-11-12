@@ -21,9 +21,9 @@ using namespace std;
 class ScoreStats
 {
 private:
-  scorestats_t array_;
-  size_t entries_;
   size_t available_;
+  size_t entries_;
+  scorestats_t array_;
 
 public:
   ScoreStats();
@@ -34,6 +34,8 @@ public:
   // We intentionally allow copying.
   ScoreStats(const ScoreStats &stats);
   ScoreStats& operator=(const ScoreStats &stats);
+
+  void Copy(const ScoreStats &stats);
 
   bool isfull() const {
     return (entries_ < available_) ? 0 : 1;

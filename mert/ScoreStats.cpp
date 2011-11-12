@@ -9,22 +9,34 @@
 #include <fstream>
 #include "ScoreStats.h"
 
-#define AVAILABLE_ 8;
-
+namespace {
+const int kAvailableSize = 8;
+} // namespace
 
 ScoreStats::ScoreStats()
+    : available_(kAvailableSize), entries_(0),
+      array_(new ScoreStatsType[available_]) {}
+
+ScoreStats::ScoreStats(const size_t size)
+    : available_(size), entries_(size),
+      array_(new ScoreStatsType[available_])
 {
-  available_ = AVAILABLE_;
-  entries_ = 0;
-  array_ = new ScoreStatsType[available_];
+  memset(array_, 0, GetArraySizeWithBytes());
+}
+
+ScoreStats::ScoreStats(std::string &theString)
+    : available_(0), entries_(0), array_(NULL)
+{
+  set(theString);
 }
 
 ScoreStats::~ScoreStats()
 {
-  delete [] array_;
+  if (array_)
+    delete [] array_;
 }
 
-ScoreStats::ScoreStats(const ScoreStats &stats)
+void ScoreStats::Copy(const ScoreStats &stats)
 {
   available_ = stats.available();
   entries_ = stats.size();
@@ -32,26 +44,25 @@ ScoreStats::ScoreStats(const ScoreStats &stats)
   memcpy(array_, stats.getArray(), GetArraySizeWithBytes());
 }
 
-ScoreStats::ScoreStats(const size_t size)
+ScoreStats::ScoreStats(const ScoreStats &stats)
 {
-  available_ = size;
-  entries_ = size;
-  array_ = new ScoreStatsType[available_];
-  memset(array_, 0, GetArraySizeWithBytes());
+  Copy(stats);
 }
 
-ScoreStats::ScoreStats(std::string &theString)
+ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 {
-  set(theString);
+  delete [] array_;
+  Copy(stats);
+  return *this;
 }
 
 void ScoreStats::expand()
 {
   available_ *= 2;
-  scorestats_t t_ = new ScoreStatsType[available_];
-  memcpy(t_, array_, GetArraySizeWithBytes());
+  scorestats_t buf = new ScoreStatsType[available_];
+  memcpy(buf, array_, GetArraySizeWithBytes());
   delete [] array_;
-  array_ = t_;
+  array_ = buf;
 }
 
 void ScoreStats::add(ScoreStatsType v)
@@ -113,22 +124,9 @@ void ScoreStats::savebin(std::ofstream& outFile)
   outFile.write((char*)array_, GetArraySizeWithBytes());
 }
 
-
-ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
-{
-  delete [] array_;
-  available_ = stats.available();
-  entries_ = stats.size();
-  array_ = new ScoreStatsType[available_];
-  memcpy(array_, stats.getArray(), GetArraySizeWithBytes());
-
-  return *this;
-}
-
 ostream& operator<<(ostream& o, const ScoreStats& e)
 {
   for (size_t i=0; i< e.size(); i++)
     o << e.get(i) << " ";
   return o;
 }
-

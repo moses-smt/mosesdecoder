@@ -45,21 +45,23 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
 class FeatureStats
 {
 private:
+  size_t available_;
+  size_t entries_;
   featstats_t array_;
   SparseVector map_;
-  size_t entries_;
-  size_t available_;
 
 public:
   FeatureStats();
   explicit FeatureStats(const size_t size);
   explicit FeatureStats(std::string &theString);
 
+  ~FeatureStats();
+
   // We intentionally allow copying.
   FeatureStats(const FeatureStats &stats);
   FeatureStats& operator=(const FeatureStats &stats);
 
-  ~FeatureStats();
+  void Copy(const FeatureStats &stats);
 
   bool isfull() const {
     return (entries_ < available_) ? 0 : 1;

@@ -81,20 +81,30 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
   return res;
 }
 
-
 FeatureStats::FeatureStats()
+    : available_(kAvailableSize), entries_(0),
+      array_(new FeatureStatsType[available_]) {}
+
+FeatureStats::FeatureStats(const size_t size)
+    : available_(size), entries_(size),
+      array_(new FeatureStatsType[available_])
 {
-  available_ = kAvailableSize;
-  entries_ = 0;
-  array_ = new FeatureStatsType[available_];
+  memset(array_, 0, GetArraySizeWithBytes());
+}
+
+FeatureStats::FeatureStats(std::string &theString)
+    : available_(0), entries_(0), array_(NULL)
+{
+  set(theString);
 }
 
 FeatureStats::~FeatureStats()
 {
-  delete [] array_;
+  if (array_)
+    delete [] array_;
 }
 
-FeatureStats::FeatureStats(const FeatureStats &stats)
+void FeatureStats::Copy(const FeatureStats &stats)
 {
   available_ = stats.available();
   entries_ = stats.size();
@@ -103,17 +113,16 @@ FeatureStats::FeatureStats(const FeatureStats &stats)
   map_ = stats.getSparse();
 }
 
-FeatureStats::FeatureStats(const size_t size)
+FeatureStats::FeatureStats(const FeatureStats &stats)
 {
-  available_ = size;
-  entries_ = size;
-  array_ = new FeatureStatsType[available_];
-  memset(array_, 0, GetArraySizeWithBytes());
+  Copy(stats);
 }
 
-FeatureStats::FeatureStats(std::string &theString)
+FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 {
-  set(theString);
+  delete [] array_;
+  Copy(stats);
+  return *this;
 }
 
 void FeatureStats::expand()
@@ -197,18 +206,6 @@ void FeatureStats::savetxt(std::ofstream& outFile)
 void FeatureStats::savebin(std::ofstream& outFile)
 {
   outFile.write((char*) array_, GetArraySizeWithBytes());
-}
-
-FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
-{
-  delete [] array_;
-  available_ = stats.available();
-  entries_ = stats.size();
-  array_ = new FeatureStatsType[available_];
-  memcpy(array_,stats.getArray(), GetArraySizeWithBytes());
-  map_ = stats.getSparse();
-
-  return *this;
 }
 
 ostream& operator<<(ostream& o, const FeatureStats& e)
