@@ -88,7 +88,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
   entry.set ( stats_str );
 }
 
-float TerScorer::calculateScore ( const vector<int>& comps )
+float TerScorer::calculateScore(const vector<int>& comps) const
 {
   float denom = 1.0 * comps[1];
   float num =  -1.0 * comps[0];
@@ -99,17 +99,3 @@ float TerScorer::calculateScore ( const vector<int>& comps )
     return (1.0+(num / denom));
   }
 }
-
-/*
-float TerScorer::calculateScore ( const vector<float>& comps )
-{
-  float denom = 1.0 * comps[1];
-  float num =  -1.0 * comps[0];
-  if ( denom == 0 ) {
-//         shouldn't happen!
-    return 1.0;
-  } else {
-    return (1.0+(num / denom));
-  }
-}
-*/

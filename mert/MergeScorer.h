@@ -44,7 +44,7 @@ public:
 
 protected:
   friend class PerScorer;
-  float calculateScore(const vector<int>& comps);
+  virtual float calculateScore(const vector<int>& comps) const;
 
  private:
   const int kLENGTH;

@@ -34,7 +34,7 @@ public:
     return 2;
   }
 
-  float calculateScore(const vector<int>& comps);
+  virtual float calculateScore(const vector<int>& comps) const;
 
 private:
   typedef vector<int> sent_t;

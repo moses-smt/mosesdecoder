@@ -43,10 +43,7 @@ public:
     return (kLENGTH + 1);
   }
 
-
-//protected:
-  float calculateScore(const vector<int>& comps);
-//  float calculateScore(const vector<float>& comps);
+  virtual float calculateScore(const vector<int>& comps) const;
 
 private:
   const int kLENGTH;

@@ -45,7 +45,7 @@ void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>&
   }
 }
 
-float CderScorer::calculateScore(const vector<int>& comps)
+float CderScorer::calculateScore(const vector<int>& comps) const
 {
   if (comps.size() != 2)
   {

@@ -181,7 +181,7 @@ protected:
   /**
    * Calculate the actual score.
    */
-  virtual statscore_t calculateScore(const vector<int>& totals) = 0;
+  virtual statscore_t calculateScore(const vector<int>& totals) const = 0;
 
   // regularisation
   ScorerRegularisationStrategy _regularisationStrategy;

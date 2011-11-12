@@ -63,7 +63,7 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats_str);
 }
 
-float PerScorer::calculateScore(const vector<int>& comps)
+float PerScorer::calculateScore(const vector<int>& comps) const
 {
   float denom = comps[2];
   float num = comps[0] - max(0,comps[1]-comps[2]);

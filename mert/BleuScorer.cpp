@@ -43,7 +43,7 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
         ngram.push_back(encoded_tokens[j]);
       }
       int count = 1;
-      counts_it oldcount = counts.find(ngram);
+      counts_iterator oldcount = counts.find(ngram);
       if (oldcount != counts.end()) {
         count = (oldcount->second) + 1;
       }
@@ -87,8 +87,8 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
       counts_t counts;
       size_t length = countNgrams(line,counts,kLENGTH);
       //for any counts larger than those already there, merge them in
-      for (counts_it ci = counts.begin(); ci != counts.end(); ++ci) {
-        counts_it oldcount_it = _refcounts[sid]->find(ci->first);
+      for (counts_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
+        counts_iterator oldcount_it = _refcounts[sid]->find(ci->first);
         int oldcount = 0;
         if (oldcount_it != _refcounts[sid]->end()) {
           oldcount = oldcount_it->second;
@@ -156,9 +156,9 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   }
   //cerr << "computed length" << endl;
   //precision on each ngram type
-  for (counts_it testcounts_it = testcounts.begin();
+  for (counts_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    counts_it refcounts_it = _refcounts[sid]->find(testcounts_it->first);
+    counts_iterator refcounts_it = _refcounts[sid]->find(testcounts_it->first);
     int correct = 0;
     int guess = testcounts_it->second;
     if (refcounts_it != _refcounts[sid]->end()) {
@@ -175,7 +175,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats_str);
 }
 
-float BleuScorer::calculateScore(const vector<int>& comps)
+float BleuScorer::calculateScore(const vector<int>& comps) const
 {
   //cerr << "BLEU: ";
   //copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
@@ -196,8 +196,8 @@ float BleuScorer::calculateScore(const vector<int>& comps)
   return exp(logbleu);
 }
 
-void BleuScorer::dump_counts(counts_t& counts) {
-  for (counts_it i = counts.begin(); i != counts.end(); ++i) {
+void BleuScorer::dump_counts(counts_t& counts) const {
+  for (counts_const_iterator i = counts.begin(); i != counts.end(); ++i) {
     cerr << "(";
     copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
     cerr << ") " << i->second << ", ";

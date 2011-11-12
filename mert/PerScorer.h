@@ -41,9 +41,7 @@ public:
     return 3;
   }
 
-//protected:
-
-  virtual float calculateScore(const vector<int>& comps);
+  virtual float calculateScore(const vector<int>& comps) const;
 
 private:
   // no copying allowed

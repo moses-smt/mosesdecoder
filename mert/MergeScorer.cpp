@@ -29,7 +29,7 @@ float MergeScorer::calculateScore(const vector<int>& comps)
 }
 */
 
-float MergeScorer::calculateScore(const std::vector< int >& comps)
+float MergeScorer::calculateScore(const std::vector< int >& comps) const
 {
   float result=0.0;
   float weight=1.0;
