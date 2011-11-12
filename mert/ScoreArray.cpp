@@ -11,6 +11,13 @@
 #include "Util.h"
 #include "FileStream.h"
 
+namespace {
+const char SCORES_TXT_BEGIN[] = "SCORES_TXT_BEGIN_0";
+const char SCORES_TXT_END[] = "SCORES_TXT_END_0";
+const char SCORES_BIN_BEGIN[] = "SCORES_BIN_BEGIN_0";
+const char SCORES_BIN_END[] = "SCORES_BIN_END_0";
+} // namespace
+
 ScoreArray::ScoreArray() : idx("") {}
 
 void ScoreArray::savetxt(std::ofstream& outFile, const std::string& sctype)

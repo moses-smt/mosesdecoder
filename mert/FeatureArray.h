@@ -9,11 +9,6 @@
 #ifndef FEATURE_ARRAY_H
 #define FEATURE_ARRAY_H
 
-#define FEATURES_TXT_BEGIN "FEATURES_TXT_BEGIN_0"
-#define FEATURES_TXT_END "FEATURES_TXT_END_0"
-#define FEATURES_BIN_BEGIN "FEATURES_BIN_BEGIN_0"
-#define FEATURES_BIN_END "FEATURES_BIN_END_0"
-
 using namespace std;
 
 #include <limits>

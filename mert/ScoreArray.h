@@ -9,11 +9,6 @@
 #ifndef SCORE_ARRAY_H
 #define SCORE_ARRAY_H
 
-#define SCORES_TXT_BEGIN "SCORES_TXT_BEGIN_0"
-#define SCORES_TXT_END "SCORES_TXT_END_0"
-#define SCORES_BIN_BEGIN "SCORES_BIN_BEGIN_0"
-#define SCORES_BIN_END "SCORES_BIN_END_0"
-
 using namespace std;
 
 #include <limits>

@@ -11,6 +11,13 @@
 #include "Util.h"
 #include "FileStream.h"
 
+namespace {
+const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";
+const char FEATURES_TXT_END[] = "FEATURES_TXT_END_0";
+const char FEATURES_BIN_BEGIN[] = "FEATURES_BIN_BEGIN_0";
+const char FEATURES_BIN_END[] = "FEATURES_BIN_END_0";
+} // namespace
+
 FeatureArray::FeatureArray() : idx(""), _sparse_flag(false) {}
 
 void FeatureArray::savetxt(std::ofstream& outFile)
