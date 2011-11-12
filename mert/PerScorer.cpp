@@ -1,5 +1,9 @@
 #include "PerScorer.h"
 
+PerScorer::PerScorer(const string& config)
+  : StatisticsBasedScorer("PER",config) {}
+
+PerScorer::~PerScorer() {}
 
 void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {

@@ -362,10 +362,8 @@ vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst,vector<
 }
 
 
-float SimpleOptimizer::eps=0.0001;
 statscore_t SimpleOptimizer::TrueRun(Point& P)const
 {
-
   statscore_t prevscore=0;
   statscore_t bestscore=MIN_FLOAT;
   Point  best;
@@ -417,7 +415,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const
     P=best; //update the current vector with the best point on all line tested
     if(verboselevel()>3)
       cerr<<nrun<<"\t"<<P<<endl;
-  } while(bestscore-prevscore>eps);
+  } while(bestscore-prevscore>kEPS);
 
   if(verboselevel()>2) {
     cerr<<"end Powell Algo, nrun="<<nrun<<endl;
@@ -427,8 +425,6 @@ statscore_t SimpleOptimizer::TrueRun(Point& P)const
   return bestscore;
 }
 
-
-float RandomDirectionOptimizer::eps=0.0001;
 statscore_t RandomDirectionOptimizer::TrueRun(Point& P)const
 {
   statscore_t prevscore=P.score;
@@ -450,7 +446,7 @@ statscore_t RandomDirectionOptimizer::TrueRun(Point& P)const
       cerr<<"\tending point: "<< P << " => " << score << endl;
     }
 
-    if (score-prevscore > eps)
+    if (score-prevscore > kEPS)
       nrun_no_change=0;
     prevscore = score;
   }

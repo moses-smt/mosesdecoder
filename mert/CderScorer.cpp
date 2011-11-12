@@ -5,9 +5,9 @@
 #include <algorithm>
 
 CderScorer::CderScorer(const string& config)
-    : StatisticsBasedScorer("CDER",config)
-{
-}
+    : StatisticsBasedScorer("CDER",config) {}
+
+CderScorer::~CderScorer() {}
 
 void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {

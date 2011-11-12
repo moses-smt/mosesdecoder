@@ -2,10 +2,13 @@
 #include "TERsrc/tercalc.h"
 #include "TERsrc/terAlignment.h"
 
-const int TerScorer::LENGTH = 2;
 using namespace TERCpp;
 using namespace std;
 
+TerScorer::TerScorer(const string& config)
+    : StatisticsBasedScorer("TER",config), kLENGTH(2) {}
+
+TerScorer::~TerScorer() {}
 
 void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
 {

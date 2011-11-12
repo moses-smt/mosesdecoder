@@ -26,7 +26,9 @@ using namespace std;
 class PerScorer: public StatisticsBasedScorer
 {
 public:
-  explicit PerScorer(const string& config = "") : StatisticsBasedScorer("PER",config) {}
+  explicit PerScorer(const string& config = "");
+  ~PerScorer();
+
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 
@@ -46,7 +48,6 @@ public:
 private:
   // no copying allowed
   PerScorer(const PerScorer&);
-  ~PerScorer() {}
   PerScorer& operator=(const PerScorer&);
 
   // data extracted from reference files

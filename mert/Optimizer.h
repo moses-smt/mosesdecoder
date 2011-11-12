@@ -74,9 +74,9 @@ public:
 class SimpleOptimizer: public Optimizer
 {
 private:
-  static float eps;
+  const float kEPS;
 public:
-  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom): Optimizer(dim, i2O, start,nrandom) {}
+  SimpleOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom): Optimizer(dim, i2O, start,nrandom), kEPS(0.0001) {}
   virtual statscore_t  TrueRun(Point&)const;
 };
 
@@ -86,9 +86,9 @@ public:
 class RandomDirectionOptimizer: public Optimizer
 {
 private:
-  static float eps;
+  const float kEPS;
 public:
-  RandomDirectionOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom): Optimizer(dim,i2O,start,nrandom) {}
+  RandomDirectionOptimizer(unsigned dim,vector<unsigned> i2O,vector<parameter_t> start,unsigned int nrandom): Optimizer(dim,i2O,start,nrandom), kEPS(0.0001) {}
   virtual statscore_t  TrueRun(Point&)const;
 };
 

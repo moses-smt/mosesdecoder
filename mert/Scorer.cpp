@@ -1,5 +1,27 @@
 #include "Scorer.h"
 
+Scorer::Scorer(const string& name, const string& config)
+    : _name(name), _scoreData(0), _preserveCase(true) {
+//    cerr << "Scorer config string: " << config << endl;
+  size_t start = 0;
+  while (start < config.size()) {
+    size_t end = config.find(",",start);
+    if (end == string::npos) {
+      end = config.size();
+    }
+    string nv = config.substr(start,end-start);
+    size_t split = nv.find(":");
+    if (split == string::npos) {
+      throw runtime_error("Missing colon when processing scorer config: " + config);
+    }
+    string name = nv.substr(0,split);
+    string value = nv.substr(split+1,nv.size()-split-1);
+    cerr << "name: " << name << " value: " << value << endl;
+    _config[name] = value;
+    start = end+1;
+  }
+}
+
 //regularisation strategies
 static float score_min(const statscores_t& scores, size_t start, size_t end)
 {
@@ -24,6 +46,43 @@ static float score_average(const statscores_t& scores, size_t start, size_t end)
   }
 
   return total / (end - start);
+}
+
+StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& config)
+    : Scorer(name,config) {
+  //configure regularisation
+  static string KEY_TYPE = "regtype";
+  static string KEY_WINDOW = "regwin";
+  static string KEY_CASE = "case";
+  static string TYPE_NONE = "none";
+  static string TYPE_AVERAGE = "average";
+  static string TYPE_MINIMUM = "min";
+  static string TRUE = "true";
+  static string FALSE = "false";
+
+  string type = getConfig(KEY_TYPE,TYPE_NONE);
+  if (type == TYPE_NONE) {
+    _regularisationStrategy = REG_NONE;
+  } else if (type == TYPE_AVERAGE) {
+    _regularisationStrategy = REG_AVERAGE;
+  } else if (type == TYPE_MINIMUM) {
+    _regularisationStrategy = REG_MINIMUM;
+  } else {
+    throw runtime_error("Unknown scorer regularisation strategy: " + type);
+  }
+  //    cerr << "Using scorer regularisation strategy: " << type << endl;
+
+  string window = getConfig(KEY_WINDOW,"0");
+  _regularisationWindow = atoi(window.c_str());
+  //    cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
+
+  string preservecase = getConfig(KEY_CASE,TRUE);
+  if (preservecase == TRUE) {
+    _preserveCase = true;
+  } else if (preservecase == FALSE) {
+    _preserveCase = false;
+  }
+  //    cerr << "Using case preservation: " << _preserveCase << endl;
 }
 
 void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t& diffs,

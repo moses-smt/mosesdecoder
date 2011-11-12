@@ -27,33 +27,15 @@ enum BleuReferenceLengthStrategy { BLEU_AVERAGE, BLEU_SHORTEST, BLEU_CLOSEST };
 class BleuScorer: public StatisticsBasedScorer
 {
 public:
-  explicit BleuScorer(const string& config = "") : StatisticsBasedScorer("BLEU",config),_refLengthStrategy(BLEU_CLOSEST) {
-    //configure regularisation
-    static string KEY_REFLEN = "reflen";
-    static string REFLEN_AVERAGE = "average";
-    static string REFLEN_SHORTEST = "shortest";
-    static string REFLEN_CLOSEST = "closest";
+  explicit BleuScorer(const string& config = "");
+  ~BleuScorer();
 
-
-    string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
-    if (reflen == REFLEN_AVERAGE) {
-      _refLengthStrategy = BLEU_AVERAGE;
-    } else if (reflen == REFLEN_SHORTEST) {
-      _refLengthStrategy = BLEU_SHORTEST;
-    } else if (reflen == REFLEN_CLOSEST) {
-      _refLengthStrategy = BLEU_CLOSEST;
-    } else {
-      throw runtime_error("Unknown reference length strategy: " + reflen);
-    }
-//    cerr << "Using reference length strategy: " << reflen << endl;
-  }
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-  static const int LENGTH;
 
   size_t NumberOfScores() {
     // cerr << "BleuScorer: " << (2 * LENGTH + 1) << endl;
-    return (2 * LENGTH + 1);
+    return (2 * kLENGTH + 1);
   }
 
 
@@ -63,7 +45,6 @@ public:
 private:
   // no copying allowed
   BleuScorer(const BleuScorer&);
-  ~BleuScorer() {}
   BleuScorer& operator=(const BleuScorer&);
 
   //Used to construct the ngram map
@@ -105,6 +86,8 @@ private:
     }
     cerr << endl;
   }
+
+  const int kLENGTH;
   BleuReferenceLengthStrategy _refLengthStrategy;
 
   // data extracted from reference files
