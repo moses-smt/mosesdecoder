@@ -100,8 +100,10 @@ FeatureStats::FeatureStats(std::string &theString)
 
 FeatureStats::~FeatureStats()
 {
-  if (array_)
+  if (array_) {
     delete [] array_;
+    array_ = NULL;
+  }
 }
 
 void FeatureStats::Copy(const FeatureStats &stats)
@@ -127,11 +129,11 @@ FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 
 void FeatureStats::expand()
 {
-  available_*=2;
+  available_ *= 2;
   featstats_t t_ = new FeatureStatsType[available_];
   memcpy(t_, array_, GetArraySizeWithBytes());
   delete [] array_;
-  array_=t_;
+  array_ = t_;
 }
 
 void FeatureStats::add(FeatureStatsType v)

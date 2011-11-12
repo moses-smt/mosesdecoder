@@ -47,6 +47,8 @@ class FeatureStats
 private:
   size_t available_;
   size_t entries_;
+
+  // TODO: Use smart pointer for exceptional-safety.
   featstats_t array_;
   SparseVector map_;
 
@@ -70,9 +72,14 @@ public:
   void add(FeatureStatsType v);
   void addSparse(string name, FeatureStatsType v);
 
-  inline void clear() {
+  void clear() {
     memset((void*)array_, 0, GetArraySizeWithBytes());
     map_.clear();
+  }
+
+  void reset() {
+    entries_ = 0;
+    clear();
   }
 
   inline FeatureStatsType get(size_t i) {
@@ -116,11 +123,6 @@ public:
   void loadtxt(const std::string &file);
   void loadtxt(ifstream& inFile);
   void loadbin(ifstream& inFile);
-
-  inline void reset() {
-    entries_ = 0;
-    clear();
-  }
 
   /**
    * Write the whole object to a stream.

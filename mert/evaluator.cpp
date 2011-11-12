@@ -156,6 +156,7 @@ void evaluate(const string& candFile)
     vector<float> scores;
     for (int i = 0; i < bootstrap; ++i)
     {
+      // TODO: Use smart pointer for exceptional-safety.
       ScoreData* scoredata = new ScoreData(*scorer);
       for (int j = 0; j < n; ++j)
       {
@@ -179,6 +180,7 @@ void evaluate(const string& candFile)
   }
   else
   {
+    // TODO: Use smart pointer for exceptional-safety.
     ScoreData* scoredata = new ScoreData(*scorer);
     for (int sid = 0; sid < n; ++sid)
     {

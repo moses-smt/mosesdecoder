@@ -15,16 +15,16 @@
 #include "ScorerFactory.h"
 #include "Util.h"
 
-Data::Data(Scorer& ptr):
-  theScorer(&ptr),
-  _sparse_flag(false)
+Data::Data(Scorer& ptr)
+    : theScorer(&ptr),
+      score_type(theScorer->getName()),
+      number_of_scores(0),
+      _sparse_flag(false),
+      scoredata(new ScoreData(*theScorer)),
+      featdata(new FeatureData)
 {
-  score_type = (*theScorer).getName();
   TRACE_ERR("Data::score_type " << score_type << std::endl);
-
   TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
-  featdata = new FeatureData;
-  scoredata = new ScoreData(*theScorer);
 }
 
 Data::~Data() {

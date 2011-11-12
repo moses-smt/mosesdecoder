@@ -32,8 +32,10 @@ ScoreStats::ScoreStats(std::string &theString)
 
 ScoreStats::~ScoreStats()
 {
-  if (array_)
+  if (array_) {
     delete [] array_;
+    array_ = NULL;
+  }
 }
 
 void ScoreStats::Copy(const ScoreStats &stats)

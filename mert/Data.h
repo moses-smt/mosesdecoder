@@ -23,15 +23,16 @@ class Scorer;
 
 class Data
 {
-protected:
-  ScoreData* scoredata;
-  FeatureData* featdata;
-
 private:
   Scorer* theScorer;
   std::string score_type;
-  size_t number_of_scores; // number of scores
+  size_t number_of_scores;
   bool _sparse_flag;
+
+protected:
+  // TODO: Use smart pointers for exceptional-safety.
+  ScoreData* scoredata;
+  FeatureData* featdata;
 
 public:
   explicit Data(Scorer& sc);
