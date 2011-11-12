@@ -21,20 +21,20 @@ using namespace std;
 
 class FeatureArray
 {
+private:
+  // idx to identify the utterance. It can differ from
+  // the index inside the vector.
+  std::string idx;
+
 protected:
   featarray_t array_;
   size_t number_of_features;
   std::string features;
   bool _sparse_flag;
 
-private:
-  // idx to identify the utterance. It can differ from
-  // the index inside the vector.
-  std::string idx;
-
 public:
   FeatureArray();
-  ~FeatureArray() {}
+  ~FeatureArray();
 
   inline void clear() {
     array_.clear();

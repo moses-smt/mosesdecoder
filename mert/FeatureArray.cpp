@@ -18,7 +18,10 @@ const char FEATURES_BIN_BEGIN[] = "FEATURES_BIN_BEGIN_0";
 const char FEATURES_BIN_END[] = "FEATURES_BIN_END_0";
 } // namespace
 
-FeatureArray::FeatureArray() : idx(""), _sparse_flag(false) {}
+FeatureArray::FeatureArray()
+    : idx(""), number_of_features(0), _sparse_flag(false) {}
+
+FeatureArray::~FeatureArray() {}
 
 void FeatureArray::savetxt(std::ofstream& outFile)
 {
