@@ -88,15 +88,15 @@ public:
     scoredata->save(scorefile, bin);
   }
 
-  inline bool existsFeatureNames() {
+  inline bool existsFeatureNames() const {
     return featdata->existsFeatureNames();
   }
 
-  inline std::string getFeatureName(size_t idx) {
+  inline std::string getFeatureName(size_t idx) const {
     return featdata->getFeatureName(idx);
   }
 
-  inline size_t getFeatureIndex(const std::string& name) {
+  inline size_t getFeatureIndex(const std::string& name) const {
     return featdata->getFeatureIndex(name);
   }
 

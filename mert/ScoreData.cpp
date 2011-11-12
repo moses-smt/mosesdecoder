@@ -112,13 +112,12 @@ void ScoreData::add(const ScoreStats& e, const std::string& sent_idx)
   }
 }
 
-
-bool ScoreData::check_consistency()
+bool ScoreData::check_consistency() const
 {
   if (array_.size() == 0)
     return true;
 
-  for (scoredata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+  for (scoredata_t::const_iterator i = array_.begin(); i != array_.end(); ++i)
     if (!i->check_consistency()) return false;
 
   return true;

@@ -49,7 +49,7 @@ public:
     return _sparse_flag;
   }
 
-  inline std::string getIndex() {
+  inline std::string getIndex() const {
     return idx;
   }
   inline void setIndex(const std::string & value) {
@@ -68,7 +68,7 @@ public:
 
   void merge(FeatureArray& e);
 
-  inline size_t size() {
+  inline size_t size() const {
     return array_.size();
   }
   inline size_t NumberOfFeatures() const {
@@ -97,7 +97,7 @@ public:
   void load(ifstream& inFile);
   void load(const std::string &file);
 
-  bool check_consistency();
+  bool check_consistency() const;
 };
 
 #endif  // FEATURE_ARRAY_H

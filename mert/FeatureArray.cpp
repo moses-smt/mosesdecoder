@@ -135,19 +135,16 @@ void FeatureArray::merge(FeatureArray& e)
     add(e.get(i));
 }
 
-
-
-bool FeatureArray::check_consistency()
+bool FeatureArray::check_consistency() const
 {
-  size_t sz = NumberOfFeatures();
-
+  const size_t sz = NumberOfFeatures();
   if (sz == 0)
     return true;
 
-  for (featarray_t::iterator i=array_.begin(); i!=array_.end(); i++)
-    if (i->size()!=sz)
+  for (featarray_t::const_iterator i = array_.begin(); i != array_.end(); i++) {
+    if (i->size() != sz)
       return false;
-
+  }
   return true;
 }
 

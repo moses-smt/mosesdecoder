@@ -44,7 +44,7 @@ public:
     array_.clear();
   }
 
-  inline std::string getIndex() {
+  inline std::string getIndex() const {
     return idx;
   }
   inline void setIndex(const std::string& value) {
@@ -74,7 +74,7 @@ public:
     score_type = sctype;
   }
 
-  inline size_t size() {
+  inline size_t size() const {
     return array_.size();
   }
   inline size_t NumberOfScores() const {
@@ -97,7 +97,7 @@ public:
   void load(ifstream& inFile);
   void load(const std::string &file);
 
-  bool check_consistency();
+  bool check_consistency() const;
 };
 
 #endif  // SCORE_ARRAY_H

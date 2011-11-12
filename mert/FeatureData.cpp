@@ -107,12 +107,12 @@ void FeatureData::add(FeatureStats& e, const std::string & sent_idx)
   }
 }
 
-bool FeatureData::check_consistency()
+bool FeatureData::check_consistency() const
 {
   if (array_.size() == 0)
     return true;
 
-  for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+  for (featdata_t::const_iterator i = array_.begin(); i != array_.end(); i++)
     if (!i->check_consistency()) return false;
 
   return true;
@@ -127,7 +127,6 @@ void FeatureData::setIndex()
     j++;
   }
 }
-
 
 void FeatureData::setFeatureMap(const std::string feat)
 {

@@ -40,9 +40,10 @@ public:
   ScoreStats(const ScoreStats &stats);
   ScoreStats& operator=(const ScoreStats &stats);
 
-  bool isfull() {
-    return (entries_ < available_)?0:1;
+  bool isfull() const {
+    return (entries_ < available_) ? 0 : 1;
   }
+
   void expand();
   void add(ScoreStatsType v);
 
