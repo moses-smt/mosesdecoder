@@ -24,26 +24,25 @@ using namespace std;
 
 // Minimal sparse vector
 class SparseVector {
+public:
+  typedef std::map<size_t,FeatureStatsType> fvector_t;
+  typedef std::map<std::string, size_t> name2id_t;
+  typedef std::vector<std::string> id2name_t;
 
-  public:
-    typedef std::map<size_t,FeatureStatsType> fvector_t;
-    typedef std::map<std::string, size_t> name2id_t;
-    typedef std::vector<std::string> id2name_t;
+  FeatureStatsType get(std::string name) const;
+  FeatureStatsType get(size_t id) const;
+  void set(std::string name, FeatureStatsType value);
+  void clear();
+  size_t size() const;
 
-    FeatureStatsType get(std::string name) const;
-    FeatureStatsType get(size_t id) const;
-    void set(std::string name, FeatureStatsType value);
-    void clear();
-    size_t size() const;
+  void write(std::ostream& out, const std::string& sep = " ") const;
 
-    void write(std::ostream& out, const std::string& sep = " ") const;
+  SparseVector& operator-=(const SparseVector& rhs);
 
-    SparseVector& operator-=(const SparseVector& rhs);
-
-  private:
-    static name2id_t name2id_;
-    static id2name_t id2name_;
-    fvector_t fvector_;
+private:
+  static name2id_t name2id_;
+  static id2name_t id2name_;
+  fvector_t fvector_;
 };
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);

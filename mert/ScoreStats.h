@@ -78,12 +78,9 @@ public:
     savetxt("/dev/stdout");
   }
 
-
-
   void loadtxt(const std::string &file);
   void loadtxt(ifstream& inFile);
   void loadbin(ifstream& inFile);
-
 
   inline void reset() {
     entries_ = 0;

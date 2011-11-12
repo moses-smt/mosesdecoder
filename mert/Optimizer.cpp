@@ -517,17 +517,17 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,vector<unsigned> i2o,ve
   }
 
   switch((OptType)T) {
-  case POWELL:
-    return new SimpleOptimizer(dim,i2o,start,nrandom);
-    break;
-  case RANDOM_DIRECTION:
-    return new RandomDirectionOptimizer(dim,i2o,start,nrandom);
-    break;
-  case RANDOM:
-    return new RandomOptimizer(dim,i2o,start,nrandom);
-    break;
-  default:
-    cerr<<"Error: unknown optimizer"<<type<<endl;
-    return NULL;
+    case POWELL:
+      return new SimpleOptimizer(dim,i2o,start,nrandom);
+      break;
+    case RANDOM_DIRECTION:
+      return new RandomDirectionOptimizer(dim,i2o,start,nrandom);
+      break;
+    case RANDOM:
+      return new RandomOptimizer(dim,i2o,start,nrandom);
+      break;
+    default:
+      cerr<<"Error: unknown optimizer"<<type<<endl;
+      return NULL;
   }
 }

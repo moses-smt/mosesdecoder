@@ -78,42 +78,41 @@ int main(int argc, char** argv)
   int c;
   while ((c=getopt_long (argc,argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
     switch(c) {
-    case 's':
-      scorerType = string(optarg);
-      break;
-    case 'c':
-      scorerConfig = string(optarg);
-      break;
-    case 'r':
-      referenceFile = string(optarg);
-      break;
-    case 'b':
-      binmode = true;
-      break;
-    case 'n':
-      nbestFile = string(optarg);
-      break;
-    case 'S':
-      scoreDataFile = string(optarg);
-      break;
-    case 'F':
-      featureDataFile = string(optarg);
-      break;
-    case 'E':
-      prevFeatureDataFile = string(optarg);
-      break;
-    case 'R':
-      prevScoreDataFile = string(optarg);
-      break;
-    case 'v':
-      verbosity = atoi(optarg);
-      break;
-    default:
-      usage();
+      case 's':
+        scorerType = string(optarg);
+        break;
+      case 'c':
+        scorerConfig = string(optarg);
+        break;
+      case 'r':
+        referenceFile = string(optarg);
+        break;
+      case 'b':
+        binmode = true;
+        break;
+      case 'n':
+        nbestFile = string(optarg);
+        break;
+      case 'S':
+        scoreDataFile = string(optarg);
+        break;
+      case 'F':
+        featureDataFile = string(optarg);
+        break;
+      case 'E':
+        prevFeatureDataFile = string(optarg);
+        break;
+      case 'R':
+        prevScoreDataFile = string(optarg);
+        break;
+      case 'v':
+        verbosity = atoi(optarg);
+        break;
+      default:
+        usage();
     }
   }
   try {
-
     // check whether score statistics file is specified
     if (scoreDataFile.length() == 0) {
       throw runtime_error("Error: output score statistics file is not specified");
@@ -190,9 +189,8 @@ int main(int argc, char** argv)
 
     data.save(featureDataFile, scoreDataFile, binmode);
     PrintUserTime("Stopping...");
-    /*
-     timer.stop("Stopping...");
-    		*/
+
+    // timer.stop("Stopping...");
 
     delete scorer;
 

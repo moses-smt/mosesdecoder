@@ -98,17 +98,17 @@ void ScoreData::add(const ScoreStats& e, const std::string& sent_idx)
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     // Enlarge array at position e.getIndex()
     size_t pos = getIndex(sent_idx);
-    //		TRACE_ERR("Inserting in array " << sent_idx << std::endl);
+    //          TRACE_ERR("Inserting in array " << sent_idx << std::endl);
     array_.at(pos).add(e);
-    //		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
+    //          TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
   } else {
-    //		TRACE_ERR("Creating a new entry in the array" << std::endl);
+    //          TRACE_ERR("Creating a new entry in the array" << std::endl);
     ScoreArray a;
     a.NumberOfScores(number_of_scores);
     a.add(e);
     a.setIndex(sent_idx);
     add(a);
-    //		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
+    //          TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
   }
 }
 

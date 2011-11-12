@@ -86,7 +86,7 @@ void ScoreStats::loadtxt(std::ifstream& inFile)
 
 void ScoreStats::loadtxt(const std::string &file)
 {
-//	TRACE_ERR("loading the stats from " << file << std::endl);
+//      TRACE_ERR("loading the stats from " << file << std::endl);
 
   std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
 
@@ -96,7 +96,7 @@ void ScoreStats::loadtxt(const std::string &file)
 
 void ScoreStats::savetxt(const std::string &file)
 {
-//	TRACE_ERR("saving the stats into " << file << std::endl);
+//      TRACE_ERR("saving the stats into " << file << std::endl);
 
   std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 

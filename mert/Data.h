@@ -99,7 +99,7 @@ public:
     return featdata->getFeatureIndex(name);
   };
 
-	void sampleRankedPairs( const std::string &rankedPairFile );
+  void sampleRankedPairs( const std::string &rankedPairFile );
   void outputSample( std::ostream &out, const FeatureStats &f1, const FeatureStats &f2 );
 
   /**
@@ -109,7 +109,7 @@ public:
    * of the total size.
    */
   void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig,
-       std::vector<Data>& shards);
+                    std::vector<Data>& shards);
 };
 
 #endif  // DATA_H

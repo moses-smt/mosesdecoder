@@ -134,11 +134,13 @@ int swapbytes(char *p, int sz, int n)
   char c, *l, *h;
 
   if((n<1) || (sz<2)) return 0;
-  for(; n--; p+=sz) for(h=(l=p)+sz; --h>l; l++) {
+  for (; n--; p+=sz) {
+    for(h=(l=p)+sz; --h>l; l++) {
       c=*h;
       *h=*l;
       *l=c;
     }
+  }
   return 0;
 
 };
@@ -157,4 +159,3 @@ double GetUserTime()
 {
   return g_timer.get_elapsed_time();
 }
-

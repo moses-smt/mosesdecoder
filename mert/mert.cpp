@@ -38,7 +38,7 @@ void usage(int ret)
   cerr<<"[-o] the indexes to optimize(default all)"<<endl;
   cerr<<"[-t] the optimizer(default powell)"<<endl;
   cerr<<"[-r] the random seed (defaults to system clock)"<<endl;
-	cerr<<"[-p] only create data for paired ranked optimizer"<<endl;
+  cerr<<"[-p] only create data for paired ranked optimizer"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
@@ -60,7 +60,7 @@ static struct option long_options[] = {
   {"nrandom",1,0,'m'},
   {"rseed",required_argument,0,'r'},
   {"optimize",1,0,'o'},
-	{"pro",required_argument,0,'p'},
+  {"pro",required_argument,0,'p'},
   {"type",1,0,'t'},
   {"sctype",1,0,'s'},
   {"scconfig",required_argument,0,'c'},
@@ -83,45 +83,43 @@ int option_index;
  */
 class OptimizationTask : public Moses::Task
 {
-  public:
-    OptimizationTask(Optimizer* optimizer, const Point& point) :
-       m_optimizer(optimizer), m_point(point) {}
+ public:
+  OptimizationTask(Optimizer* optimizer, const Point& point) :
+      m_optimizer(optimizer), m_point(point) {}
 
-    ~OptimizationTask() {}
+  ~OptimizationTask() {}
 
-    void resetOptimizer() {
-      if (m_optimizer) {
-        delete m_optimizer;
-        m_optimizer = NULL;
-      }
+  void resetOptimizer() {
+    if (m_optimizer) {
+      delete m_optimizer;
+      m_optimizer = NULL;
     }
+  }
 
-    bool DeleteAfterExecution() {
-      return false;
-    }
+  bool DeleteAfterExecution() {
+    return false;
+  }
 
-    void Run() {
-      m_score = m_optimizer->Run(m_point);
-    }
+  void Run() {
+    m_score = m_optimizer->Run(m_point);
+  }
 
-    statscore_t getScore() const {
-      return m_score;
-    }
+  statscore_t getScore() const {
+    return m_score;
+  }
 
-    const Point& getPoint() const  {
-      return m_point;
-    }
+  const Point& getPoint() const  {
+    return m_point;
+  }
 
-  private:
-    Optimizer* m_optimizer;
-    Point m_point;
-    statscore_t m_score;
+ private:
+  Optimizer* m_optimizer;
+  Point m_point;
+  statscore_t m_score;
 };
 
 int main (int argc, char **argv)
 {
-
-
   ResetUserTime();
 
   /*
@@ -146,7 +144,7 @@ int main (int argc, char **argv)
   string scorerfile("statscore.data");
   string featurefile("features.data");
   string initfile("init.opt");
-	string pairedrankfile("");
+  string pairedrankfile("");
 
   string tooptimizestr("");
   vector<unsigned> tooptimize;
@@ -157,63 +155,63 @@ int main (int argc, char **argv)
 
   while ((c=getopt_long (argc, argv, "o:r:d:n:m:t:s:S:F:v:p:", long_options, &option_index)) != -1) {
     switch (c) {
-    case 'o':
-      tooptimizestr = string(optarg);
-      break;
-		case 'p':
-			pairedrankfile = string(optarg);
-			break;
-    case 'd':
-      pdim = strtol(optarg, NULL, 10);
-      break;
-    case 'n':
+      case 'o':
+        tooptimizestr = string(optarg);
+        break;
+      case 'p':
+        pairedrankfile = string(optarg);
+        break;
+      case 'd':
+        pdim = strtol(optarg, NULL, 10);
+        break;
+      case 'n':
       ntry=strtol(optarg, NULL, 10);
       break;
-    case 'm':
-      nrandom=strtol(optarg, NULL, 10);
-      break;
-    case 'r':
-      seed=strtol(optarg, NULL, 10);
-      hasSeed = true;
-      break;
-    case 't':
-      type=string(optarg);
-      break;
-    case's':
-      scorertype=string(optarg);
-      break;
-    case 'c':
-      scorerconfig = string(optarg);
-      break;
-    case 'S':
-      scorerfile=string(optarg);
-      break;
-    case 'F':
-      featurefile=string(optarg);
-      break;
-    case 'i':
-      initfile=string(optarg);
-      break;
-    case 'v':
-      setverboselevel(strtol(optarg,NULL,10));
-      break;
+      case 'm':
+        nrandom=strtol(optarg, NULL, 10);
+        break;
+      case 'r':
+        seed=strtol(optarg, NULL, 10);
+        hasSeed = true;
+        break;
+      case 't':
+        type=string(optarg);
+        break;
+      case's':
+        scorertype=string(optarg);
+        break;
+      case 'c':
+        scorerconfig = string(optarg);
+        break;
+      case 'S':
+        scorerfile=string(optarg);
+        break;
+      case 'F':
+        featurefile=string(optarg);
+        break;
+      case 'i':
+        initfile=string(optarg);
+        break;
+      case 'v':
+        setverboselevel(strtol(optarg,NULL,10));
+        break;
 #ifdef WITH_THREADS
-    case 'T':
-      threads = strtol(optarg, NULL, 10);
-      if (threads < 1) threads = 1;
-      break;
+      case 'T':
+        threads = strtol(optarg, NULL, 10);
+        if (threads < 1) threads = 1;
+        break;
 #endif
-    case 'a':
-      shard_count = strtof(optarg,NULL);
-      break;
-    case 'b':
-      shard_size = strtof(optarg,NULL);
-      break;
-    case 'h':
-      usage(0);
-      break;
-    default:
-      usage(1);
+      case 'a':
+        shard_count = strtof(optarg,NULL);
+        break;
+      case 'b':
+        shard_size = strtof(optarg,NULL);
+        break;
+      case 'h':
+        usage(0);
+        break;
+      default:
+        usage(1);
     }
   }
   if (pdim < 0)
@@ -334,11 +332,11 @@ int main (int argc, char **argv)
     }
   }
 
-	if (pairedrankfile.compare("") != 0) {
-		D.sampleRankedPairs(pairedrankfile);
-		PrintUserTime("Stopping...");
-		exit(0);
-	}
+  if (pairedrankfile.compare("") != 0) {
+    D.sampleRankedPairs(pairedrankfile);
+    PrintUserTime("Stopping...");
+    exit(0);
+  }
 
   // treat sparse features just like regular features
   if (D.hasSparseFeatures()) {

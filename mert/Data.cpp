@@ -58,7 +58,7 @@ void Data::loadnbest(const std::string &file)
   while (getline(inp,stringBuf,'\n')) {
     if (stringBuf.empty()) continue;
 
-//		TRACE_ERR("stringBuf: " << stringBuf << std::endl);
+//              TRACE_ERR("stringBuf: " << stringBuf << std::endl);
 
     getNextPound(stringBuf, substring, "|||"); //first field
     sentence_index = substring;
@@ -66,7 +66,7 @@ void Data::loadnbest(const std::string &file)
     getNextPound(stringBuf, substring, "|||"); //second field
     theSentence = substring;
 
-// adding statistics for error measures
+    // adding statistics for error measures
     featentry.reset();
     scoreentry.clear();
 
@@ -84,7 +84,7 @@ void Data::loadnbest(const std::string &file)
 
       size_t tmpidx=0;
       while (!stringsupport.empty()) {
-        //			TRACE_ERR("Decompounding: " << substring << std::endl);
+        //                      TRACE_ERR("Decompounding: " << substring << std::endl);
         getNextPound(stringsupport, subsubstring);
 
         // string ending with ":" are skipped, because they are the names of the features
@@ -109,7 +109,7 @@ void Data::loadnbest(const std::string &file)
 
     // adding features
     while (!substring.empty()) {
-//			TRACE_ERR("Decompounding: " << substring << std::endl);
+//                      TRACE_ERR("Decompounding: " << substring << std::endl);
       getNextPound(substring, subsubstring);
 
       // no ':' -> feature value that needs to be stored
@@ -132,119 +132,119 @@ void Data::loadnbest(const std::string &file)
 }
 
 // TODO
-void Data::mergeSparseFeatures() { 
+void Data::mergeSparseFeatures() {
   std::cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
   exit(1);
 }
 
 // really not the right place...
 float sentenceLevelBleuPlusOne( ScoreStats &stats ) {
-	float logbleu = 0.0;
-	const unsigned int bleu_order = 4;
-	for (unsigned int j=0; j<bleu_order; j++) {
-		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
-		logbleu += log(stats.get(2*j)+1) - log(stats.get(2*j+1)+1);
-	}
-	logbleu /= bleu_order;
-	float brevity = 1.0 - (float)stats.get(bleu_order*2)/stats.get(1);
-	if (brevity < 0.0) {
-		logbleu += brevity;
-	}
-	//cerr << brevity << " -> " << exp(logbleu) << endl;
-	return exp(logbleu);
+  float logbleu = 0.0;
+  const unsigned int bleu_order = 4;
+  for (unsigned int j=0; j<bleu_order; j++) {
+    //cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
+    logbleu += log(stats.get(2*j)+1) - log(stats.get(2*j+1)+1);
+  }
+  logbleu /= bleu_order;
+  float brevity = 1.0 - (float)stats.get(bleu_order*2)/stats.get(1);
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+  //cerr << brevity << " -> " << exp(logbleu) << endl;
+  return exp(logbleu);
 }
 
 class SampledPair {
 private:
-	unsigned int translation1;
-	unsigned int translation2;
-	float scoreDiff;
+  unsigned int translation1;
+  unsigned int translation2;
+  float scoreDiff;
 public:
-	SampledPair( unsigned int t1, unsigned int t2, float diff ) {
-		if (diff > 0) {
-			translation1 = t1;
-			translation2 = t2;
-			scoreDiff = diff;
-		}
-		else {
-			translation1 = t2;
-			translation2 = t1;
-			scoreDiff = -diff;
-		}			
-	}
-	float getDiff() { return scoreDiff; }
-	unsigned int getTranslation1() { return translation1; }
-	unsigned int getTranslation2() { return translation2; }
+  SampledPair( unsigned int t1, unsigned int t2, float diff ) {
+    if (diff > 0) {
+      translation1 = t1;
+      translation2 = t2;
+      scoreDiff = diff;
+    }
+    else {
+      translation1 = t2;
+      translation2 = t1;
+      scoreDiff = -diff;
+    }
+  }
+  float getDiff() { return scoreDiff; }
+  unsigned int getTranslation1() { return translation1; }
+  unsigned int getTranslation2() { return translation2; }
 };
-	
+
 
 void Data::sampleRankedPairs( const std::string &rankedpairfile ) {
-	cout << "Sampling ranked pairs." << endl;
+  cout << "Sampling ranked pairs." << endl;
 
-	ofstream *outFile = new ofstream();
-	outFile->open( rankedpairfile.c_str() );
-	ostream *out = outFile;
+  ofstream *outFile = new ofstream();
+  outFile->open( rankedpairfile.c_str() );
+  ostream *out = outFile;
 
-	const unsigned int n_samplings = 5000;
-	const unsigned int n_samples = 50;
-	const float min_diff = 0.05;
+  const unsigned int n_samplings = 5000;
+  const unsigned int n_samples = 50;
+  const float min_diff = 0.05;
 
-	// loop over all sentences
+  // loop over all sentences
   for(unsigned int S=0; S<featdata->size(); S++) {
-		unsigned int n_translations = featdata->get(S).size();
-		// sample a fixed number of times
-		vector< SampledPair* > samples;
-		vector< float > scores;
-		for(unsigned int i=0; i<n_samplings; i++) {
-			unsigned int translation1 = rand() % n_translations;
-			float bleu1 = sentenceLevelBleuPlusOne(scoredata->get(S,translation1));
+    unsigned int n_translations = featdata->get(S).size();
+    // sample a fixed number of times
+    vector< SampledPair* > samples;
+    vector< float > scores;
+    for(unsigned int i=0; i<n_samplings; i++) {
+      unsigned int translation1 = rand() % n_translations;
+      float bleu1 = sentenceLevelBleuPlusOne(scoredata->get(S,translation1));
 
-			unsigned int translation2 = rand() % n_translations;
-			float bleu2 = sentenceLevelBleuPlusOne(scoredata->get(S,translation2));
-			
-			if (abs(bleu1-bleu2) < min_diff)
-				continue;
-			
-			samples.push_back( new SampledPair( translation1, translation2, bleu1-bleu2) );
-			scores.push_back( 1.0 - abs(bleu1-bleu2) );
-		}
-		//cerr << "sampled " << samples.size() << " pairs\n";
+      unsigned int translation2 = rand() % n_translations;
+      float bleu2 = sentenceLevelBleuPlusOne(scoredata->get(S,translation2));
 
-		float min_diff = -1.0;
-		if (samples.size() > n_samples) {
-			nth_element(scores.begin(), scores.begin()+(n_samples-1), scores.end());
-			min_diff = 0.99999-scores[n_samples-1];
-			//cerr << "min_diff = " << min_diff << endl;
-		}
+      if (abs(bleu1-bleu2) < min_diff)
+        continue;
 
-		unsigned int collected = 0;
-		for(unsigned int i=0; i<samples.size() && collected < n_samples; i++) {
-			if (samples[i]->getDiff() >= min_diff) {
-				collected++;
+      samples.push_back( new SampledPair( translation1, translation2, bleu1-bleu2) );
+      scores.push_back( 1.0 - abs(bleu1-bleu2) );
+    }
+    //cerr << "sampled " << samples.size() << " pairs\n";
 
-				*out << "1";
-        outputSample( *out, featdata->get(S,samples[i]->getTranslation1()),
-                            featdata->get(S,samples[i]->getTranslation2()) );
+    float min_diff = -1.0;
+    if (samples.size() > n_samples) {
+      nth_element(scores.begin(), scores.begin()+(n_samples-1), scores.end());
+      min_diff = 0.99999-scores[n_samples-1];
+      //cerr << "min_diff = " << min_diff << endl;
+    }
+
+    unsigned int collected = 0;
+    for(unsigned int i=0; i<samples.size() && collected < n_samples; i++) {
+      if (samples[i]->getDiff() >= min_diff) {
+        collected++;
+
+        *out << "1";
+        outputSample(*out, featdata->get(S,samples[i]->getTranslation1()),
+                     featdata->get(S,samples[i]->getTranslation2()));
         *out << endl;
-				*out << "0";
-        outputSample( *out, featdata->get(S,samples[i]->getTranslation2()),
-                            featdata->get(S,samples[i]->getTranslation1()) );
+        *out << "0";
+        outputSample(*out, featdata->get(S,samples[i]->getTranslation2()),
+                     featdata->get(S,samples[i]->getTranslation1()));
         *out << endl;
-			}
-			delete samples[i];
-		}
-		//cerr << "collected " << collected << endl;
-	}
-	out->flush();
-	outFile->close();
+      }
+      delete samples[i];
+    }
+    //cerr << "collected " << collected << endl;
+  }
+  out->flush();
+  outFile->close();
 }
 
-void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStats &f2 ) 
+void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStats &f2 )
 {
   // difference in score in regular features
-	for(unsigned int j=0; j<f1.size(); j++)
-		if (abs(f1.get(j)-f2.get(j)) > 0.00001)
-			out << " F" << j << " " << (f1.get(j)-f2.get(j));
+  for(unsigned int j=0; j<f1.size(); j++)
+    if (abs(f1.get(j)-f2.get(j)) > 0.00001)
+      out << " F" << j << " " << (f1.get(j)-f2.get(j));
 
   if (!hasSparseFeatures())
     return;
@@ -260,7 +260,7 @@ void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStat
 
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
-      std::vector<Data>& shards) 
+      std::vector<Data>& shards)
 {
   assert(shard_count);
   assert(shard_size >=0);
@@ -298,7 +298,5 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
       shards.back().scoredata->add(scoredata->get(shard_contents[i]));
     }
     //cerr << endl;
-    
   }
 }
-

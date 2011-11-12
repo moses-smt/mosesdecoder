@@ -94,10 +94,10 @@ void FeatureData::add(FeatureStats& e, const std::string & sent_idx)
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
     size_t pos = getIndex(sent_idx);
-//		TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
+//              TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
     array_.at(pos).add(e);
   } else {
-//		TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
+//              TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
     FeatureArray a;
     a.NumberOfFeatures(number_of_features);
     a.Features(features);

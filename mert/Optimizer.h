@@ -114,7 +114,6 @@ private:
   static OptType GetOType(string);
   static vector<string> typenames;
   static void SetTypeNames();
-
 };
 
 #endif  // OPTIMIZER_H

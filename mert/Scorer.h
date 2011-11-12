@@ -230,9 +230,8 @@ public:
       _preserveCase = false;
     }
 //    cerr << "Using case preservation: " << _preserveCase << endl;
-
-
   }
+
   ~StatisticsBasedScorer() {};
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores);
@@ -246,7 +245,6 @@ protected:
   // regularisation
   ScorerRegularisationStrategy _regularisationStrategy;
   size_t  _regularisationWindow;
-
 };
 
 #endif // __SCORER_H__
