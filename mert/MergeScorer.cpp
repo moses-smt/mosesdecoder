@@ -2,10 +2,12 @@
 #include "TERsrc/tercalc.h"
 #include "TERsrc/terAlignment.h"
 
-const int MergeScorer::LENGTH = 4;
 using namespace TERCpp;
 using namespace std;
 
+MergeScorer::MergeScorer(const string& config)
+    : StatisticsBasedScorer("MERGE",config), kLENGTH(4) {}
+MergeScorer::~MergeScorer() {}
 
 void MergeScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {

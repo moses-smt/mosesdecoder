@@ -32,26 +32,22 @@ using namespace TERCpp;
  */
 class MergeScorer: public StatisticsBasedScorer {
 public:
-  explicit MergeScorer(const string& config = "") : StatisticsBasedScorer("MERGE",config){}
+  explicit MergeScorer(const string& config = "");
+  ~MergeScorer();
+
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-  static const int LENGTH;
-  virtual void whoami()
+  virtual void whoami() const
   {
     cerr << "I AM MergeScorer" << std::endl;
   }
-//              size_t NumberOfScores(){ cerr << "MergeScorer: " << (2 * LENGTH + 1) << endl; return (2 * LENGTH + 1); };
 
 protected:
   friend class PerScorer;
   float calculateScore(const vector<int>& comps);
 
  private:
-  // no copying allowed
-  MergeScorer(const MergeScorer&);
-  ~MergeScorer() {}
-
-  MergeScorer& operator=(const MergeScorer&);
+  const int kLENGTH;
 
   string javaEnv;
   string tercomEnv;
@@ -61,6 +57,10 @@ protected:
   vector<multiset<int> > _reftokens;
   vector<vector<int> > m_references;
   string m_pid;
+
+  // no copying allowed
+  MergeScorer(const MergeScorer&);
+  MergeScorer& operator=(const MergeScorer&);
 };
 
 #endif  //__TERSCORER_H
