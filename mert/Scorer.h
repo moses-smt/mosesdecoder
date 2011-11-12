@@ -38,7 +38,7 @@ public:
   /**
    * Return the number of statistics needed for the computation of the score.
    */
-  virtual size_t NumberOfScores() {
+  virtual size_t NumberOfScores() const {
     cerr << "Scorer: 0" << endl;
     return 0;
   }
@@ -69,7 +69,7 @@ public:
    * applying each in turn, and calculating a new score each time.
    */
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores) {
+                     statscores_t& scores) const {
     //dummy impl
     if (!_scoreData) {
       throw runtime_error("score data not loaded");
@@ -84,7 +84,7 @@ public:
    * Calculate the score of the sentences corresponding to the list of candidate
    * indices. Each index indicates the 1-best choice from the n-best list.
    */
-  float score(const candidates_t& candidates) {
+  float score(const candidates_t& candidates) const {
     diffs_t diffs;
     statscores_t scores;
     score(candidates, diffs, scores);
@@ -95,7 +95,7 @@ public:
     return _name;
   }
 
-  size_t getReferenceSize() {
+  size_t getReferenceSize() const {
     if (_scoreData) {
       return _scoreData->size();
     }
@@ -121,9 +121,9 @@ protected:
   /**
    * Get value of config variable. If not provided, return default.
    */
-  string getConfig(const string& key, const string& def="") {
-    map<string,string>::iterator i = _config.find(key);
-    if (i  == _config.end()) {
+  string getConfig(const string& key, const string& def="") const {
+    map<string,string>::const_iterator i = _config.find(key);
+    if (i == _config.end()) {
       return def;
     } else {
       return i->second;
@@ -175,7 +175,7 @@ public:
   StatisticsBasedScorer(const string& name, const string& config);
   virtual ~StatisticsBasedScorer() {}
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores);
+                     statscores_t& scores) const;
 
 protected:
   /**

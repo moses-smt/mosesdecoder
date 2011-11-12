@@ -55,7 +55,7 @@ float CderScorer::calculateScore(const vector<int>& comps) const
   return 1 - (comps[0] / (float) comps[1]);
 }
 
-vector<int> CderScorer::computeCD(const sent_t& cand, const sent_t& ref)
+vector<int> CderScorer::computeCD(const sent_t& cand, const sent_t& ref) const
 {
   int I = cand.size() + 1; // Number of inter-words positions in candidate sentence
   int L = ref.size() + 1; // Number of inter-words positions in reference sentence

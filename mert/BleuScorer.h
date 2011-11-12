@@ -34,7 +34,7 @@ public:
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
   virtual float calculateScore(const vector<int>& comps) const;
 
-  size_t NumberOfScores() const {
+  virtual size_t NumberOfScores() const {
     return 2 * kLENGTH + 1;
   }
 

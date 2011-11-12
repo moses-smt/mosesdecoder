@@ -30,7 +30,7 @@ public:
   }
   virtual void prepareStatsVector(size_t sid, const string& text, vector<int>& stats);
 
-  size_t NumberOfScores() {
+  virtual size_t NumberOfScores() const {
     return 2;
   }
 
@@ -40,7 +40,7 @@ private:
   typedef vector<int> sent_t;
   vector<vector<sent_t> > ref_sentences;
 
-  vector<int> computeCD(const sent_t& cand, const sent_t& ref);
+  vector<int> computeCD(const sent_t& cand, const sent_t& ref) const;
   int distance(int word1, int word2) const
   {
     return word1 == word2 ? 0 : 1;

@@ -86,7 +86,7 @@ StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& c
 }
 
 void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t& diffs,
-                                   statscores_t& scores)
+                                   statscores_t& scores) const
 {
   if (!_scoreData) {
     throw runtime_error("Score data not loaded");
