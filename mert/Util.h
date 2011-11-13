@@ -38,12 +38,24 @@ class FeatureStats;
 #define TRACE_ERR(str) { }
 #endif
 
-#define DELIMITER_SYMBOL " "
+const char kDefaultDelimiterSymbol[] = " ";
 
 int verboselevel();
 int setverboselevel(int v);
 
-size_t getNextPound(std::string &theString, std::string &substring, const std::string delimiter=DELIMITER_SYMBOL);
+/**
+ * Find the specified delimiter for the string 'str', and 'str' is assigned
+ * to a substring object that starts at the position of first occurrence of
+ * the delimiter in 'str'. 'substr' is copied from 'str' ranging from
+ * the start position of 'str' to the position of first occurrence of
+ * the delimiter.
+ *
+ * It returns the position of first occurrence in the queried string.
+ * If the content is not found, std::string::npos is returned.
+ */
+size_t getNextPound(std::string &str, std::string &substr,
+                    const std::string &delimiter = kDefaultDelimiterSymbol);
+
 void split(const std::string &s, char delim, std::vector<std::string> &elems);
 
 void Tokenize(const char *str, const char delim, std::vector<std::string> *res);

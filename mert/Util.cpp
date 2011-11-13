@@ -38,19 +38,19 @@ int setverboselevel(int v)
   return verbose;
 }
 
-size_t getNextPound(std::string &theString, std::string &substring, const std::string delimiter)
+size_t getNextPound(std::string &str, std::string &substr,
+                    const std::string &delimiter)
 {
   size_t pos = 0;
 
   // skip all occurrences of delimiter
   while (pos == 0) {
-    // if ((pos = theString.find(delimiter)) != std::string::npos) {
-    if (FindDelimiter(theString, delimiter, &pos)) {
-      substring.assign(theString, 0, pos);
-      theString.erase(0, pos + delimiter.size());
+    if (FindDelimiter(str, delimiter, &pos)) {
+      substr.assign(str, 0, pos);
+      str.erase(0, pos + delimiter.size());
     } else {
-      substring.assign(theString);
-      theString.assign("");
+      substr.assign(str);
+      str.assign("");
     }
   }
   return pos;
