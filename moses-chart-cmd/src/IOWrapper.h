@@ -85,9 +85,7 @@ public:
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
-  void ResetTranslationId() {
-    m_translationId = 0;
-  }
+  void ResetTranslationId();
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;

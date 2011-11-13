@@ -334,7 +334,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -375,7 +374,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -408,7 +406,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
