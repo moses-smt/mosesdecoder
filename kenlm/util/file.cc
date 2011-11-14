@@ -1,6 +1,7 @@
 #include "util/file.hh"
 
 #include "util/exception.hh"
+#include "util/portability.hh"
 
 #include <cstdlib>
 #include <cstdio>
@@ -9,7 +10,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdint.h>
 
 #if defined(_WIN32) || defined(_WIN64)
