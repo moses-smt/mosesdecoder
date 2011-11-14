@@ -29,41 +29,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <fstream>
 #include <map>
+#include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/shared_ptr.hpp>
 
+#include "util/file_piece.hh"
 
-//Minimal sparse vector
-class SparseVector {
+#include "FeatureStats.h"
 
-  public:
-    typedef std::map<size_t,float> fvector_t;
-    typedef std::map<std::string, size_t> name2id_t;
-    typedef std::vector<std::string> id2name_t;
-
-    float get(std::string name) const;
-    float get(size_t id) const;
-    void set(std::string name, float value);
-    void clear();
-    size_t size() const;
-
-    void write(std::ostream& out, const std::string& sep = " ") const;
-
-    SparseVector& operator-=(const SparseVector& rhs);
-
-  private:
-    static name2id_t name2id_;
-    static id2name_t id2name_;
-    fvector_t fvector_;
-};
-
-SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
 
 class FeatureDataItem {
   public:
     std::vector<float> dense;
     SparseVector sparse;
+};
+
+class FileFormatException : public util::Exception {
+  public:
+    explicit FileFormatException(const std::string filename, const std::string& line) {
+      *this << "Error in line \"" << line << "\" of " << filename;
+    }
 };
 
 class FeatureDataIterator : 
@@ -72,10 +60,11 @@ class FeatureDataIterator :
                                 boost::forward_traversal_tag> 
 {
   public:
+    FeatureDataIterator();
     FeatureDataIterator(const std::string filename);
 
     static FeatureDataIterator end() {
-      return FeatureDataIterator("");
+      return FeatureDataIterator();
     }
 
 
@@ -86,7 +75,10 @@ class FeatureDataIterator :
     bool equal(const FeatureDataIterator& rhs) const;
     const std::vector<FeatureDataItem>& dereference() const;
 
-    std::ifstream* in_;
+    void readNext();
+
+    boost::shared_ptr<util::FilePiece> m_in;
+    std::vector<FeatureDataItem> m_next;
 };
 
 #endif

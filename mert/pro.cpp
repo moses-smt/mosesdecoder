@@ -77,6 +77,7 @@ int main(int argc, char** argv)
   }
 
   FeatureDataIterator fi(featureFiles[0]);
+  //cerr << featureFiles[0] << endl;
   for (; fi != FeatureDataIterator::end(); ++fi) {
     const vector<FeatureDataItem>& featureData = *fi;
   }
