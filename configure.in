@@ -17,6 +17,7 @@ AC_PROG_LIBTOOL
 AX_XMLRPC_C
 BOOST_REQUIRE([1.36.0])
 BOOST_SMART_PTR
+BOOST_PROGRAM_OPTIONS
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],

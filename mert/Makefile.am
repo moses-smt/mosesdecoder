@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libmert.la
-bin_PROGRAMS = mert extractor evaluator
+bin_PROGRAMS = mert extractor evaluator pro
 AM_CPPFLAGS = -W -Wall -Wno-unused -ffor-scope -DTRACE_ENABLE $(BOOST_CPPFLAGS)
 
 libmert_la_SOURCES =  \
@@ -7,6 +7,7 @@ Util.cpp \
 Timer.cpp \
 ScoreStats.cpp ScoreArray.cpp ScoreData.cpp \
 FeatureStats.cpp FeatureArray.cpp FeatureData.cpp \
+FeatureDataIterator.cpp \
 Data.cpp \
 BleuScorer.cpp \
 Point.cpp \
@@ -29,9 +30,13 @@ CderScorer.cpp \
 MergeScorer.cpp
 
 mert_SOURCES = mert.cpp $(top_builddir)/moses/src/ThreadPool.cpp
-extractor_SOURCES  = extractor.cpp 
-evaluator_SOURCES = evaluator.cpp 
+extractor_SOURCES  = extractor.cpp
+evaluator_SOURCES = evaluator.cpp
+pro_SOURCES = pro.cpp
 
 extractor_LDADD = libmert.la -lm -lz
 mert_LDADD = libmert.la -lm -lz $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)
 evaluator_LDADD = libmert.la -lm -lz
+pro_LDADD = libmert.la @KENLM_LDFLAGS@ $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS)
+pro_DEPENDENCIES = $(top_srcdir)/kenlm/libkenlm.la
+
