@@ -17,6 +17,7 @@ my @tests = qw (
   score.hierarchical
   score.hierarchical-inv
   mert.basic
+  mert.pro
   mert.extractor-txt
   mert.extractor-bin
   chart.target-syntax
