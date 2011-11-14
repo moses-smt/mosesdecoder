@@ -24,11 +24,13 @@ public:
   typedef std::map<std::string, size_t> name2id_t;
   typedef std::vector<std::string> id2name_t;
 
-  FeatureStatsType get(std::string name) const;
+  FeatureStatsType get(const std::string& name) const;
   FeatureStatsType get(size_t id) const;
-  void set(std::string name, FeatureStatsType value);
+  void set(const std::string& name, FeatureStatsType value);
   void clear();
-  size_t size() const;
+  size_t size() const {
+    return fvector_.size();
+  }
 
   void write(std::ostream& out, const std::string& sep = " ") const;
 
@@ -70,7 +72,7 @@ public:
   }
   void expand();
   void add(FeatureStatsType v);
-  void addSparse(string name, FeatureStatsType v);
+  void addSparse(const string& name, FeatureStatsType v);
 
   void clear() {
     memset((void*)array_, 0, GetArraySizeWithBytes());

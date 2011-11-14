@@ -91,7 +91,7 @@ void FeatureData::add(FeatureArray& e)
   }
 }
 
-void FeatureData::add(FeatureStats& e, const std::string & sent_idx)
+void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
@@ -130,19 +130,18 @@ void FeatureData::setIndex()
   }
 }
 
-void FeatureData::setFeatureMap(const std::string feat)
+void FeatureData::setFeatureMap(const std::string& feat)
 {
   number_of_features = 0;
-  features=feat;
+  features = feat;
 
   std::string substring, stringBuf;
-  stringBuf=features;
+  stringBuf = features;
   while (!stringBuf.empty()) {
     getNextPound(stringBuf, substring);
 
-    featname2idx_[substring]=idx2featname_.size();
-    idx2featname_[idx2featname_.size()]=substring;
+    featname2idx_[substring] = idx2featname_.size();
+    idx2featname_[idx2featname_.size()] = substring;
     number_of_features++;
   }
 }
-

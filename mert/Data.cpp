@@ -267,16 +267,16 @@ void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStat
 
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
-      std::vector<Data>& shards)
+                        std::vector<Data>& shards)
 {
   assert(shard_count);
-  assert(shard_size >=0);
+  assert(shard_size >= 0);
   assert(shard_size <= 1);
 
   size_t data_size = scoredata->size();
   assert(data_size == featdata->size());
 
-  shard_size *=  data_size;
+  shard_size *= data_size;
 
   for (size_t shard_id = 0; shard_id < shard_count; ++shard_id) {
     vector<size_t> shard_contents;

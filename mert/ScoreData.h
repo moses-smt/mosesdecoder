@@ -53,7 +53,7 @@ public:
     return array_.at(idx);
   }
 
-  inline bool exists(const std::string & sent_idx) const {
+  inline bool exists(const std::string& sent_idx) const {
     return exists(getIndex(sent_idx));
   }
   inline bool exists(int sent_idx) const {
@@ -71,7 +71,7 @@ public:
     return score_type;
   }
 
-  inline std::string name(std::string &sctype) {
+  inline std::string name(const std::string &sctype) {
     return score_type = sctype;
   }
 

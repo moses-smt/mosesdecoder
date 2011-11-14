@@ -65,7 +65,7 @@ public:
   inline std::string Features() const {
     return featdata->Features();
   }
-  inline void Features(const std::string f) {
+  inline void Features(const std::string &f) {
     featdata->Features(f);
   }
 

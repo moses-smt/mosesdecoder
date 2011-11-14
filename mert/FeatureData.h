@@ -54,7 +54,7 @@ public:
     return array_.at(idx);
   }
 
-  inline bool exists(const std::string & sent_idx) {
+  inline bool exists(const std::string& sent_idx) {
     return exists(getIndex(sent_idx));
   }
   inline bool exists(int sent_idx) {
@@ -83,7 +83,7 @@ public:
   inline std::string Features() const {
     return features;
   }
-  inline void Features(const std::string f) {
+  inline void Features(const std::string& f) {
     features = f;
   }
 
@@ -136,7 +136,7 @@ public:
     return it->second;
   }
 
-  void setFeatureMap(const std::string feat);
+  void setFeatureMap(const std::string& feat);
 };
 
 #endif  // FEATURE_DATA_H

@@ -16,7 +16,7 @@ using namespace std;
 // global variables
 Timer g_timer;
 
-int verbose=0;
+int verbose = 0;
 
 namespace {
 
@@ -34,7 +34,7 @@ int verboselevel()
 
 int setverboselevel(int v)
 {
-  verbose=v;
+  verbose = v;
   return verbose;
 }
 
@@ -74,18 +74,16 @@ void Tokenize(const char *str, const char delim,
   }
 }
 
-
-
 int swapbytes(char *p, int sz, int n)
 {
   char c, *l, *h;
 
-  if((n<1) || (sz<2)) return 0;
-  for (; n--; p+=sz) {
-    for(h=(l=p)+sz; --h>l; l++) {
-      c=*h;
-      *h=*l;
-      *l=c;
+  if((n < 1) || (sz < 2)) return 0;
+  for (; n--; p += sz) {
+    for (h = (l = p) + sz; --h > l; l++) {
+      c = *h;
+      *h = *l;
+      *l = c;
     }
   }
   return 0;

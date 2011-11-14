@@ -17,7 +17,7 @@ const int kAvailableSize = 8;
 SparseVector::name2id_t SparseVector::name2id_;
 SparseVector::id2name_t SparseVector::id2name_;
 
-FeatureStatsType SparseVector::get(string name) const {
+FeatureStatsType SparseVector::get(const string& name) const {
   name2id_t::const_iterator name2id_iter = name2id_.find(name);
   if (name2id_iter == name2id_.end()) return 0;
   size_t id = name2id_iter->second;
@@ -30,7 +30,7 @@ FeatureStatsType SparseVector::get(size_t id) const {
   return fvector_iter->second;
 }
 
-void SparseVector::set(string name, FeatureStatsType value) {
+void SparseVector::set(const string& name, FeatureStatsType value) {
   name2id_t::const_iterator name2id_iter = name2id_.find(name);
   size_t id = 0;
   if (name2id_iter == name2id_.end()) {
@@ -53,10 +53,6 @@ void SparseVector::write(ostream& out, const string& sep) const {
 
 void SparseVector::clear() {
   fvector_.clear();
-}
-
-size_t SparseVector::size() const {
-  return fvector_.size();
 }
 
 SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
@@ -142,7 +138,7 @@ void FeatureStats::add(FeatureStatsType v)
   array_[entries_++]=v;
 }
 
-void FeatureStats::addSparse(string name, FeatureStatsType v)
+void FeatureStats::addSparse(const string& name, FeatureStatsType v)
 {
   map_.set(name,v);
 }

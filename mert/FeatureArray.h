@@ -47,17 +47,17 @@ public:
   inline std::string getIndex() const {
     return idx;
   }
-  inline void setIndex(const std::string & value) {
-    idx=value;
+  inline void setIndex(const std::string& value) {
+    idx = value;
   }
 
-  inline FeatureStats&  get(size_t i) {
+  inline FeatureStats& get(size_t i) {
     return array_.at(i);
   }
-  inline const FeatureStats&  get(size_t i)const {
+  inline const FeatureStats& get(size_t i)const {
     return array_.at(i);
   }
-  void add(FeatureStats e) {
+  void add(FeatureStats& e) {
     array_.push_back(e);
   }
 
@@ -75,7 +75,7 @@ public:
   inline std::string Features() const {
     return features;
   }
-  inline void Features(const std::string f) {
+  inline void Features(const std::string& f) {
     features = f;
   }
 

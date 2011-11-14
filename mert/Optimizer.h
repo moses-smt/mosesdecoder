@@ -118,7 +118,8 @@ private:
   enum OptType {
     POWELL = 0,
     RANDOM_DIRECTION = 1,
-    RANDOM,NOPTIMIZER
+    RANDOM,
+    NOPTIMIZER
   };
 
   static OptType GetOType(string);
