@@ -15,6 +15,13 @@
 #include "ScorerFactory.h"
 #include "Util.h"
 
+Data::Data()
+  : theScorer(NULL),
+    number_of_scores(0),
+    _sparse_flag(false),
+    scoredata(NULL),
+    featdata(NULL) {}
+
 Data::Data(Scorer& ptr)
     : theScorer(&ptr),
       score_type(theScorer->getName()),

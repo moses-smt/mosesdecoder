@@ -36,6 +36,7 @@ protected:
 
 public:
   explicit Data(Scorer& sc);
+  Data();
   ~Data();
 
   inline void clear() {
