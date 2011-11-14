@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cassert>
+#include <limits>
 #include "FeatureStats.h"
 
 using namespace std;

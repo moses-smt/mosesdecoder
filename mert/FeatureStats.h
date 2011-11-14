@@ -9,14 +9,15 @@
 #ifndef FEATURE_STATS_H
 #define FEATURE_STATS_H
 
-using namespace std;
-
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
 #include "Types.h"
+
+using namespace std;
 
 // Minimal sparse vector
 class SparseVector {

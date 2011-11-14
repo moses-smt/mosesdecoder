@@ -1,5 +1,8 @@
 #include "BleuScorer.h"
+
+#include <algorithm>
 #include <cmath>
+#include <climits>
 #include <fstream>
 #include <iterator>
 #include <stdexcept>

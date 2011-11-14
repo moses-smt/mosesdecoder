@@ -1,4 +1,5 @@
 #include "Scorer.h"
+#include <limits>
 
 Scorer::Scorer(const string& name, const string& config)
     : _name(name), _scoreData(0), _preserveCase(true) {
