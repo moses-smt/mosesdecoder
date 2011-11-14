@@ -13,7 +13,7 @@ bool IsGzipFile(const std::string &filename) {
 } // namespace
 
 inputfilestream::inputfilestream(const std::string &filePath)
-  : std::istream(0), m_streambuf(0)
+    : std::istream(0), m_streambuf(0), is_good(false)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
@@ -40,7 +40,7 @@ void inputfilestream::close()
 }
 
 outputfilestream::outputfilestream(const std::string &filePath)
-  : std::ostream(0), m_streambuf(0)
+    : std::ostream(0), m_streambuf(0), is_good(false)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
