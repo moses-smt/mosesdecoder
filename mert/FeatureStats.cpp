@@ -6,9 +6,10 @@
  *
  */
 
-#include <cmath>
-#include <fstream>
 #include "FeatureStats.h"
+
+#include <cmath>
+#include "Util.h"
 
 namespace {
 const int kAvailableSize = 8;

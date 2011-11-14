@@ -1,11 +1,15 @@
+#include "Optimizer.h"
+
+#include <cmath>
 #include <cassert>
 #include <vector>
 #include <limits>
-#include <list>
+#include <map>
 #include <cfloat>
 #include <iostream>
 
-#include "Optimizer.h"
+#include "Point.h"
+#include "Util.h"
 
 using namespace std;
 

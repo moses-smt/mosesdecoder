@@ -6,7 +6,7 @@
  *
  */
 
-#include <fstream>
+#include "Util.h"
 #include "ScoreStats.h"
 
 namespace {

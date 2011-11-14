@@ -9,15 +9,12 @@
 #ifndef FEATURE_ARRAY_H
 #define FEATURE_ARRAY_H
 
-using namespace std;
-
-#include <limits>
 #include <vector>
 #include <iostream>
 #include <fstream>
-
-#include "Util.h"
 #include "FeatureStats.h"
+
+using namespace std;
 
 class FeatureArray
 {

@@ -1,4 +1,9 @@
 #include "BleuScorer.h"
+#include <cmath>
+#include <fstream>
+#include <iterator>
+#include <stdexcept>
+#include "Util.h"
 
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU",config),

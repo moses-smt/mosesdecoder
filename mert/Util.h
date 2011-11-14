@@ -9,15 +9,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-using namespace std;
-
 #include <stdexcept>
 #include <limits>
-
-#define US_NOSET (numeric_limits<unsigned short>::max())
-
-#define MAX_LINE  1024
-
 #include <vector>
 #include <map>
 #include <iostream>
@@ -26,11 +19,11 @@ using namespace std;
 #include <cstring>
 
 #include "Types.h"
-#include "ScoreStats.h"
-#include "FeatureStats.h"
 
-class ScoreStats;
-class FeatureStats;
+using namespace std;
+
+#define US_NOSET (numeric_limits<unsigned short>::max())
+#define MAX_LINE  1024
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }

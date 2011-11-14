@@ -7,6 +7,7 @@
  */
 
 #include <cassert>
+#include <cmath>
 #include <fstream>
 
 #include "Data.h"

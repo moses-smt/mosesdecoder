@@ -6,10 +6,9 @@
  *
  */
 
-#include <fstream>
 #include "FeatureArray.h"
-#include "Util.h"
 #include "FileStream.h"
+#include "Util.h"
 
 namespace {
 const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";

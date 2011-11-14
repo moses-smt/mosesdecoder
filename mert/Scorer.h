@@ -1,12 +1,7 @@
 #ifndef __SCORER_H__
 #define __SCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
-#include <limits>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>

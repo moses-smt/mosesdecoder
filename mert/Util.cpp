@@ -6,9 +6,7 @@
  *
  */
 
-#include <stdexcept>
 #include "Util.h"
-
 #include "Timer.h"
 
 using namespace std;

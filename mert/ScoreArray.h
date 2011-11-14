@@ -11,12 +11,10 @@
 
 using namespace std;
 
-#include <limits>
 #include <vector>
 #include <iostream>
-#include <fstream>
+#include <string>
 
-#include "Util.h"
 #include "ScoreStats.h"
 
 class ScoreArray

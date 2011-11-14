@@ -11,11 +11,9 @@
 
 using namespace std;
 
-#include <limits>
 #include <vector>
 #include <iostream>
-
-#include "Util.h"
+#include <stdexcept>
 #include "FeatureArray.h"
 
 class FeatureData

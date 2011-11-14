@@ -1,21 +1,17 @@
 #ifndef __PERSCORER_H__
 #define __PERSCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
 #include <set>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "ScoreData.h"
 #include "Scorer.h"
 
-
 using namespace std;
+
+class ScoreStats;
 
 /**
  * An implementation of position-independent word error rate.

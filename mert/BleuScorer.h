@@ -1,16 +1,10 @@
 #ifndef __BLEUSCORER_H__
 #define __BLEUSCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
-#include <set>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
-#include <limits.h>
+
 #include "Types.h"
 #include "ScoreData.h"
 #include "Scorer.h"

@@ -3,10 +3,10 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "ScoreData.h"
 #include "Scorer.h"
 
 using namespace std;

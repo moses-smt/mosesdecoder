@@ -1,9 +1,15 @@
 #include "TerScorer.h"
+
+#include <cmath>
+#include <sstream>
+#include <stdexcept>
+
+#include "ScoreStats.h"
 #include "TERsrc/tercalc.h"
 #include "TERsrc/terAlignment.h"
+#include "Util.h"
 
 using namespace TERCpp;
-using namespace std;
 
 TerScorer::TerScorer(const string& config)
     : StatisticsBasedScorer("TER",config), kLENGTH(2) {}

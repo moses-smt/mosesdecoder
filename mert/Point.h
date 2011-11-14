@@ -1,10 +1,12 @@
 #ifndef POINT_H
 #define POINT_H
 
+#include <fstream>
+#include <map>
 #include <vector>
 #include "Types.h"
-#include "FeatureStats.h"
 
+class FeatureStats;
 class Optimizer;
 
 /**

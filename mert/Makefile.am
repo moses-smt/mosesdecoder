@@ -13,6 +13,7 @@ BleuScorer.cpp \
 Point.cpp \
 PerScorer.cpp \
 Scorer.cpp \
+ScorerFactory.cpp \
 Optimizer.cpp \
 TERsrc/alignmentStruct.cpp \
 TERsrc/hashMap.cpp \

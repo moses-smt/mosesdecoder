@@ -6,8 +6,9 @@
  *
  */
 
-#include <fstream>
 #include "FeatureData.h"
+
+#include <limits>
 #include "FileStream.h"
 #include "Util.h"
 

@@ -1,27 +1,19 @@
 #ifndef __TERSCORER_H__
 #define __TERSCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
 #include <set>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
-#include <limits.h>
+
 #include "Types.h"
-#include "ScoreData.h"
 #include "Scorer.h"
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
 
 using namespace std;
-using namespace TERCpp;
 
 // enum TerReferenceLengthStrategy { TER_AVERAGE, TER_SHORTEST, TER_CLOSEST };
 
+class ScoreStats;
 
 /**
  * TER scoring

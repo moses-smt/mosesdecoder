@@ -1,7 +1,9 @@
 #include "Point.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cassert>
+#include "FeatureStats.h"
 
 using namespace std;
 

@@ -9,14 +9,15 @@
 #ifndef SCORE_DATA_H
 #define SCORE_DATA_H
 
-using namespace std;
-
-#include <limits>
+#include <fstream>
 #include <vector>
 #include <iostream>
-
-#include "Util.h"
+#include <stdexcept>
+#include <string>
 #include "ScoreArray.h"
+#include "ScoreStats.h"
+
+using namespace std;
 
 class Scorer;
 

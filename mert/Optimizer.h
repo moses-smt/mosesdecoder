@@ -2,16 +2,16 @@
 #define OPTIMIZER_H
 
 #include <vector>
-#include "FeatureStats.h"
+#include <string>
 #include "FeatureData.h"
-#include "FeatureArray.h"
 #include "Scorer.h"
-#include "Point.h"
 #include "Types.h"
+
+using namespace std;
 
 typedef float featurescore;
 
-using namespace std;
+class Point;
 
 /**
  * Abstract optimizer class.

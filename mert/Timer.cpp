@@ -1,8 +1,5 @@
-#include <ctime>
-#include <iostream>
-#include <iomanip>
-#include "Util.h"
 #include "Timer.h"
+#include "Util.h"
 
 double Timer::elapsed_time()
 {

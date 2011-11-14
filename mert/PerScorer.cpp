@@ -1,5 +1,13 @@
 #include "PerScorer.h"
 
+#include <fstream>
+#include <stdexcept>
+
+#include "ScoreStats.h"
+#include "Util.h"
+
+using namespace std;
+
 PerScorer::PerScorer(const string& config)
   : StatisticsBasedScorer("PER",config) {}
 

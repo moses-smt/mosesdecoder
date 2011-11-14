@@ -1,8 +1,6 @@
 #include "CderScorer.h"
-
+#include <fstream>
 #include <stdexcept>
-#include <iostream>
-#include <algorithm>
 
 CderScorer::CderScorer(const string& config)
     : StatisticsBasedScorer("CDER",config) {}

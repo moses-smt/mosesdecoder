@@ -1,9 +1,17 @@
 #include "MergeScorer.h"
+
+#include <cmath>
+#include <stdexcept>
+#include "ScoreStats.h"
+#include "TerScorer.h"
+#include "BleuScorer.h"
+#include "PerScorer.h"
+#include "CderScorer.h"
+
 #include "TERsrc/tercalc.h"
 #include "TERsrc/terAlignment.h"
 
 using namespace TERCpp;
-using namespace std;
 
 MergeScorer::MergeScorer(const string& config)
     : StatisticsBasedScorer("MERGE",config), kLENGTH(4) {}

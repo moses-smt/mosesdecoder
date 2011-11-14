@@ -1,31 +1,19 @@
 #ifndef __MERGESCORER_H__
 #define __MERGESCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
 #include <set>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
-#include <limits.h>
-#include "Types.h"
-#include "ScoreData.h"
+
 #include "Scorer.h"
-#include "TerScorer.h"
-#include "BleuScorer.h"
-#include "PerScorer.h"
-#include "CderScorer.h"
-//#include "TERsrc/tercalc.h"
-//#include "TERsrc/terAlignment.h"
 
 using namespace std;
-using namespace TERCpp;
 
 // enum MergeReferenceLengthStrategy { MERGE_AVERAGE, MERGE_SHORTEST, MERGE_CLOSEST };
 
+class PerScorer;
+class ScoreStats;
 
 /**
  * Merge scoring.

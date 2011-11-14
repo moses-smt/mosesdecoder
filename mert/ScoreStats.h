@@ -9,14 +9,15 @@
 #ifndef SCORE_STATS_H
 #define SCORE_STATS_H
 
-using namespace std;
-
-#include <limits>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
+#include <cstring>
 
-#include "Util.h"
+#include "Types.h"
+
+using namespace std;
 
 class ScoreStats
 {
