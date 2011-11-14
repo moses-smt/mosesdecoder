@@ -113,6 +113,9 @@ class OptimizationTask : public Moses::Task
   }
 
  private:
+  // Do not allow the user to instanciate without arguments.
+  OptimizationTask() {}
+
   Optimizer* m_optimizer;
   Point m_point;
   statscore_t m_score;

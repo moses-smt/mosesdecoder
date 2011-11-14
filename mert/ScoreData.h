@@ -28,6 +28,9 @@ protected:
   name2idx arrayname2idx_; // map from name to index of array
 
 private:
+  // Do not allow the user to instanciate without arguments.
+  ScoreData() {}
+
   Scorer* theScorer;
   std::string score_type;
   size_t number_of_scores;
