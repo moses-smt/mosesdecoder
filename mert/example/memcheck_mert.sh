@@ -10,7 +10,7 @@ mert=../mert
 # Make sure you need to run extractor.
 for f in SCORESTAT FEATSTAT; do
     if ! [ -f "$f" ]; then
-        echo "$f does not exists. Now we run extractor."
+        echo "Error: $f does not exist. Now we are running extractor."
         $extractor --nbest NBEST --reference REF.0,REF.1,REF.2 \
             --ffile FEATSTAT --scfile SCORESTAT --sctype BLEU
         break
