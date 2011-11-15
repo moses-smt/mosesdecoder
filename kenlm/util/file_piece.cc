@@ -3,6 +3,7 @@
 #include "util/exception.hh"
 #include "util/file.hh"
 #include "util/mmap.hh"
+#include "util/portability.hh"
 
 #include <iostream>
 #include <string>
@@ -14,7 +15,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>

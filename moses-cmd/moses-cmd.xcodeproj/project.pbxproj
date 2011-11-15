@@ -319,13 +319,13 @@
 				HEADER_SEARCH_PATHS = (
 					../moses/src,
 					../kenlm,
+					/opt/local/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/,
+					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
-					../randlm/lib,
+					../kenlm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -334,7 +334,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -360,13 +359,13 @@
 				HEADER_SEARCH_PATHS = (
 					../moses/src,
 					../kenlm,
+					/opt/local/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/,
+					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
-					../randlm/lib,
+					../kenlm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -375,7 +374,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -393,13 +391,13 @@
 				HEADER_SEARCH_PATHS = (
 					../moses/src,
 					../kenlm,
+					/opt/local/include,
 				);
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib/,
+					../irstlm/lib,
 					../srilm/lib/macosx,
-					../kenlm/lm,
-					../randlm/lib,
+					../kenlm,
 				);
 				OTHER_LDFLAGS = (
 					"-lflm",
@@ -408,7 +406,6 @@
 					"-ldstruct",
 					"-lz",
 					"-lirstlm",
-					"-lrandlm",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";

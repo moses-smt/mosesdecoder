@@ -431,6 +431,9 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
+          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
+
   // Read in constraint decoding file, if provided
   if(m_parameter->GetParam("constraint").size()) {
     if (m_parameter->GetParam("search-algorithm").size() > 0
@@ -443,8 +446,8 @@ bool StaticData::LoadData(Parameter *parameter)
     InputFileStream constraintFile(m_constraintFileName);
 
     std::string line;
-
-    long sentenceID = -1;
+    
+    long sentenceID = GetStartTranslationId() - 1;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
 

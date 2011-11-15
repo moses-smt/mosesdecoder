@@ -129,6 +129,10 @@ IOWrapper::~IOWrapper()
   delete m_singleBestOutputCollector;
 }
 
+void IOWrapper::ResetTranslationId() {
+  m_translationId = StaticData::Instance().GetStartTranslationId();
+}
+
 InputType*IOWrapper::GetInput(InputType* inputType)
 {
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {

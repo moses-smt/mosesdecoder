@@ -210,7 +210,8 @@ protected:
   WordAlignmentSort m_wordAlignmentSort;
 
   int m_threadCount;
-
+  long m_startTranslationId;
+  
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -610,6 +611,9 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
+  
+  long GetStartTranslationId() const
+  { return m_startTranslationId; }
 };
 
 }

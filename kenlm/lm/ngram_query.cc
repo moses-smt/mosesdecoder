@@ -9,8 +9,8 @@
 #include <ctype.h>
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <sys/resource.h>
-#endif
 #include <sys/time.h>
+#endif
 
 float FloatSec(const struct timeval &tv) {
   return static_cast<float>(tv.tv_sec) + (static_cast<float>(tv.tv_usec) / 1000000000.0);

@@ -190,9 +190,15 @@ public:
 void Data::sampleRankedPairs( const std::string &rankedpairfile ) {
   cout << "Sampling ranked pairs." << endl;
 
-  ofstream *outFile = new ofstream();
-  outFile->open( rankedpairfile.c_str() );
-  ostream *out = outFile;
+  ostream* out = NULL;
+  ofstream* outFile = NULL;
+  if (rankedpairfile == "stdout") {
+    out = &cout;
+  } else {
+    outFile = new ofstream();
+    outFile->open(rankedpairfile.c_str());
+    out = outFile;
+  }
 
   const unsigned int n_samplings = 5000;
   const unsigned int n_samples = 50;
@@ -245,7 +251,10 @@ void Data::sampleRankedPairs( const std::string &rankedpairfile ) {
     //cerr << "collected " << collected << endl;
   }
   out->flush();
-  outFile->close();
+  if (outFile) {
+    outFile->close();
+    delete outFile;
+  }
 }
 
 void Data::outputSample( ostream &out, const FeatureStats &f1, const FeatureStats &f2 )
