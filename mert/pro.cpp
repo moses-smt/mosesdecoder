@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/program_options.hpp>
 
 #include "FeatureDataIterator.h"
+#include "ScoreDataIterator.h"
 
 using namespace std;
 
@@ -80,6 +81,29 @@ int main(int argc, char** argv)
   //cerr << featureFiles[0] << endl;
   for (; fi != FeatureDataIterator::end(); ++fi) {
     const vector<FeatureDataItem>& featureData = *fi;
+    cerr << "Read " << featureData.size() << " items " << endl;
+    for (size_t i = 0; i < featureData.size(); ++i) {
+      cerr << "Dense: ";
+      for (size_t j = 0; j < featureData[i].dense.size(); ++j) {
+        cerr << featureData[i].dense[j] << " ";
+      }
+      cerr << "\n";
+    }
+    cerr << "\n";
+  }
+
+  ScoreDataIterator si(scoreFiles[0]);
+  for (; si != ScoreDataIterator::end(); ++si) {
+    const vector<ScoreDataItem>& scoreData = *si;
+    cerr << "Read " << scoreData.size() << " items " << endl;
+    for (size_t i = 0; i < scoreData.size(); ++i) {
+      cerr << "SD: ";
+      for (size_t j = 0; j < scoreData[i].size(); ++j) {
+        cerr << scoreData[i][j] << " ";
+      }
+      cerr << "\n";
+    }
+    cerr << "\n";
   }
 
 }

@@ -17,17 +17,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef _FEATURE_DATA_ITERATOR_
-#define _FEATURE_DATA_ITERATOR_
+#ifndef _SCORE_DATA_ITERATOR_
+#define _SCORE_DATA_ITERATOR_
 
-/**
-  * For loading from the feature data file.
+/*
+ * For loading from the score data file.
 **/
-
-#include <fstream>
-#include <map>
-#include <stdexcept>
 #include <vector>
+
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
@@ -35,59 +32,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 
-#include "FeatureStats.h"
+#include "FeatureDataIterator.h"
 
+typedef std::vector<float> ScoreDataItem;
 
-class FileFormatException : public util::Exception 
+class ScoreDataIterator :
+  public boost::iterator_facade<ScoreDataIterator,
+                                const std::vector<ScoreDataItem>,
+                                boost::forward_traversal_tag>
 {
   public:
-    explicit FileFormatException(const std::string filename, const std::string& line) {
-      *this << "Error in line \"" << line << "\" of " << filename;
+    ScoreDataIterator();
+    ScoreDataIterator(const std::string& filename);
+
+    static ScoreDataIterator end() {
+      return ScoreDataIterator();
     }
-};
-
-
-/** Assumes a delimiter, so only apply to tokens */
-int ParseInt(const StringPiece& str );
-
-/** Assumes a delimiter, so only apply to tokens */
-float ParseFloat(const StringPiece& str); 
-
-
-class FeatureDataItem 
-{
-  public:
-    std::vector<float> dense;
-    SparseVector sparse;
-};
-
-class FeatureDataIterator : 
-  public boost::iterator_facade<FeatureDataIterator,
-                                const std::vector<FeatureDataItem>,
-                                boost::forward_traversal_tag> 
-{
-  public:
-    FeatureDataIterator();
-    FeatureDataIterator(const std::string& filename);
-
-    static FeatureDataIterator end() {
-      return FeatureDataIterator();
-    }
-
 
   private:
     friend class boost::iterator_core_access;
 
     void increment();
-    bool equal(const FeatureDataIterator& rhs) const;
-    const std::vector<FeatureDataItem>& dereference() const;
+    bool equal(const ScoreDataIterator& rhs) const;
+    const std::vector<ScoreDataItem>& dereference() const;
 
     void readNext();
 
     boost::shared_ptr<util::FilePiece> m_in;
-    std::vector<FeatureDataItem> m_next;
+    std::vector<ScoreDataItem> m_next;
 };
 
-#endif
 
+#endif
 

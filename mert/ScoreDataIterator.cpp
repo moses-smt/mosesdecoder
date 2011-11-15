@@ -17,93 +17,60 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <iostream>
-#include <sstream>
 
 #include "util/tokenize_piece.hh"
 
-#include "FeatureArray.h"
-#include "FeatureDataIterator.h"
-
+#include "ScoreArray.h"
+#include "ScoreDataIterator.h"
 
 using namespace std;
 using namespace util;
 
-int ParseInt(const StringPiece& str ) {
-  char* errIndex;
-  //could wrap?
-  int value = static_cast<int>(strtol(str.data(), &errIndex,10));
-  if (errIndex == str.data()) {
-    throw util::ParseNumberException(str);
-  }
-  return value;
-}
+ScoreDataIterator::ScoreDataIterator() {}
 
-float ParseFloat(const StringPiece& str) {
-  char* errIndex;
-  float value = static_cast<float>(strtod(str.data(), &errIndex));
-  if (errIndex == str.data()) {
-    throw util::ParseNumberException(str);
-  }
-  return value;
-}
-
-
-
-FeatureDataIterator::FeatureDataIterator() {}
-
-FeatureDataIterator::FeatureDataIterator(const string& filename) {
+ScoreDataIterator::ScoreDataIterator(const string& filename) {
   m_in.reset(new FilePiece(filename.c_str()));
   readNext();
 }
 
-void FeatureDataIterator::readNext() {
+void ScoreDataIterator::readNext() {
   m_next.clear();
   try {
     StringPiece marker = m_in->ReadDelimited();
-    if (marker != StringPiece(FEATURES_TXT_BEGIN)) {
+    if (marker != StringPiece(SCORES_TXT_BEGIN)) {
       throw FileFormatException(m_in->FileName(), marker.as_string());
     }
     size_t sentenceId = m_in->ReadULong();
     size_t count = m_in->ReadULong();
     size_t length = m_in->ReadULong();
-    m_in->ReadLine(); //discard rest of line
+    m_in->ReadLine(); //ignore rest of line
     for (size_t i = 0; i < count; ++i) {
       StringPiece line = m_in->ReadLine();
-      m_next.push_back(FeatureDataItem());
-      for (TokenIter<AnyCharacter, true> token(line, AnyCharacter(" \t")); token; ++token) {
-        TokenIter<AnyCharacter,false> value(*token,AnyCharacter(":"));
-        if (!value) throw FileFormatException(m_in->FileName(), line.as_string());
-        StringPiece first = *value;
-        ++value;
-        if (!value) {
-          //regular feature
-          float floatValue = ParseFloat(first);
-          m_next.back().dense.push_back(floatValue);
-        } else {
-          //sparse feature
-          StringPiece second = *value;
-          float floatValue = ParseFloat(second);
-          m_next.back().sparse.set(first.as_string(),floatValue); 
-        }
+      cerr << line << endl;
+      m_next.push_back(ScoreDataItem());
+      for (TokenIter<AnyCharacter, true> token(line,AnyCharacter(" \t")); token; ++token) {
+        float value = ParseFloat(*token);
+        m_next.back().push_back(value);
       }
-      if (length != m_next.back().dense.size()) {
+      if (length != m_next.back().size()) {
         throw FileFormatException(m_in->FileName(), line.as_string());
       }
     }
     StringPiece line = m_in->ReadLine();
-    if (line != StringPiece(FEATURES_TXT_END)) {
+    if (line != StringPiece(SCORES_TXT_END)) {
       throw FileFormatException(m_in->FileName(), line.as_string());
     }
-  } catch (EndOfFileException &e) {
+  } catch (EndOfFileException& e) {
     m_in.reset();
   }
 }
 
-void FeatureDataIterator::increment() {
+void ScoreDataIterator::increment() {
   readNext();
 }
 
-bool FeatureDataIterator::equal(const FeatureDataIterator& rhs) const {
+
+bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const {
   if (!m_in && !rhs.m_in) {
     return true;
   } else if (!m_in) {
@@ -116,6 +83,8 @@ bool FeatureDataIterator::equal(const FeatureDataIterator& rhs) const {
   }
 }
 
-const vector<FeatureDataItem>& FeatureDataIterator::dereference() const {
+
+const vector<ScoreDataItem>& ScoreDataIterator::dereference() const {
   return m_next;
 }
+
