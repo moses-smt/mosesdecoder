@@ -32,7 +32,13 @@ ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComp
   }
 }
 
-ScoreProducer::~ScoreProducer() {}
+ScoreProducer::~ScoreProducer() {
+  if (GetNumScoreComponents() != unlimited)
+  {
+    ScoreComponentCollection::UnregisterScoreProducer(this);
+  }
+  
+}
 
 }
 

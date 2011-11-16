@@ -90,6 +90,7 @@ public:
     * be allocated space in the dense part of the feature vector.
     **/
   static void RegisterScoreProducer(const ScoreProducer* scoreProducer);
+  static void UnregisterScoreProducer(const ScoreProducer* scoreProducer);
 
   /** Load from file */
   bool Load(const std::string& filename) 
@@ -300,9 +301,10 @@ public:
   void ZeroAllLM(const LMList& lmList);
   void PlusEqualsAllLM(const LMList& lmList, const ScoreComponentCollection& rhs);
   void L1Normalise();
-  float GetL1Norm();
-  float GetL2Norm();
-  void Save(std::string filename);
+  float GetL1Norm() const;
+  float GetL2Norm() const;
+  void Save(const std::string& filename) const;
+  void Save(std::ostream&) const;
 
 #ifdef MPI_ENABLE
   public:

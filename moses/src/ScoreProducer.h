@@ -50,8 +50,6 @@ public:
     return 0;
   };
 
-  const std::vector<FName>& GetFeatureNames() const;
-
 	virtual bool IsStateless() const = 0;
 
   void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }

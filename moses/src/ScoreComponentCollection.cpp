@@ -22,9 +22,19 @@ void ScoreComponentCollection::RegisterScoreProducer
   assert(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
-  VERBOSE(1,"ScoreProducer: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
+  cerr << "ScoreProducer: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl;
   s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
   s_denseVectorSize = end;
+}
+
+void ScoreComponentCollection::UnregisterScoreProducer
+  (const ScoreProducer* scoreProducer) 
+{
+  assert(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
+  ScoreIndexMap::iterator iter = s_scoreIndexes.find(scoreProducer);
+  assert(iter != s_scoreIndexes.end());
+  s_scoreIndexes.erase(iter);
+
 }
 
 float ScoreComponentCollection::GetWeightedScore() const
@@ -70,35 +80,38 @@ void ScoreComponentCollection::L1Normalise() {
   m_scores /= m_scores.l1norm();
 }
 
-float ScoreComponentCollection::GetL1Norm() {
+float ScoreComponentCollection::GetL1Norm() const {
   return m_scores.l1norm();
 }
 
-float ScoreComponentCollection::GetL2Norm() {
+float ScoreComponentCollection::GetL2Norm() const {
   return m_scores.l2norm();
 }
 
-void ScoreComponentCollection::Save(string filename) {
+void ScoreComponentCollection::Save(ostream& out) const {
+  ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
+  for (; iter != s_scoreIndexes.end(); ++iter ) {
+    string name = iter->first->GetScoreProducerDescription();
+    IndexPair ip = iter->second; // feature indices
+    for (size_t i=ip.first; i < ip.second; ++i) {
+      ostringstream fullname;
+      fullname << name << "_" << (i + 1 - ip.first);
+      out << fullname.str() << " " << m_scores[i] << endl;
+    }
+  }
+
+  // write sparse features
+  m_scores.write(out);
+}
+
+void ScoreComponentCollection::Save(const string& filename) const {
   ofstream out(filename.c_str());
   if (!out) {
     ostringstream msg;
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }
-
-  ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
-  for (; iter != s_scoreIndexes.end(); ++iter ) {
-	const vector<FName> featureNames = iter->first->GetFeatureNames();
-	IndexPair ip = iter->second; // feature indices
-	size_t f_index = ip.first;
-	for (size_t i=0; (i < featureNames.size()) && (f_index < ip.second); ++i) {
-		out << featureNames[i] << " " << m_scores.getCoreFeature(f_index) << endl;
-		++f_index;
-	}
-  }
-
-  // write sparse features
-  m_scores.write(out);
+  Save(out);
   out.close();
 }
 

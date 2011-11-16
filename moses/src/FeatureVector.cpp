@@ -210,10 +210,6 @@ namespace Moses {
     return out;
   }
   
-  FValue FVector::getCoreFeature(size_t index) const {
-	  return m_coreFeatures[index];
-  }
-
   ostream& operator<<(ostream& out, const FVector& fv) {
     return fv.print(out);
   }

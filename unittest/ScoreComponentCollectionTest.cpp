@@ -102,6 +102,36 @@ BOOST_FIXTURE_TEST_CASE(sparse_feature, MockProducers)
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -3.8f);
 }
 
+BOOST_FIXTURE_TEST_CASE(save, MockProducers)
+{
+  ScoreComponentCollection scc;
+  scc.Assign(&sparse, "first", 1.1f);
+  scc.Assign(&single, 0.25f);
+  float arr[] = {1,2.1,3,4,5};
+  std::vector<float> vec1(arr,arr+5);
+  scc.Assign(&multi,vec1);
+  ostringstream out;
+  scc.Save(out);
+  cerr << out.str() << endl;
+  istringstream in (out.str());
+  string line;
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line, "MockSingle:4_1 0.25");
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line, "MockMulti:4_1 1");
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line, "MockMulti:4_2 2.1");
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line, "MockMulti:4_3 3");
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line, "MockMulti:4_4 4");
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line, "MockMulti:4_5 5");
+  getline(in,line);
+  BOOST_CHECK_EQUAL(line,"MockSparse:4_first 1.1");
+  BOOST_CHECK(!getline(in,line));
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 
