@@ -196,7 +196,6 @@ void Data::sampleRankedPairs( const std::string &rankedpairfile ) {
 
 			unsigned int translation2 = rand() % n_translations;
 			float bleu2 = sentenceLevelBleuPlusOne(scoredata->get(S,translation2));
-      cerr << "Sampled " << translation1 << " " << translation2 << endl;
 			
 			if (abs(bleu1-bleu2) < min_diff)
 				continue;

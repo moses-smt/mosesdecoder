@@ -108,6 +108,7 @@ int main(int argc, char** argv)
   vector<string> scoreFiles;
   vector<string> featureFiles;
   int seed;
+  string outputFile;
   //TODO: options
 	const unsigned int n_candidates = 5000; // Gamma, in Hopkins & May
 	const unsigned int n_samples = 50; // Xi, in Hopkins & May
@@ -119,6 +120,7 @@ int main(int argc, char** argv)
     ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
     ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
     ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
+    ("output-file,o", po::value<string>(&outputFile), "Output file")
     ;
 
   po::options_description cmdline_options;
@@ -150,6 +152,19 @@ int main(int argc, char** argv)
     cerr << "Error: Number of feature files (" << featureFiles.size() <<
       ") does not match number of score files (" << scoreFiles.size() << ")" << endl;
     exit(1);
+  }
+
+  ostream* out;
+  ofstream outFile;
+  if (!outputFile.empty() ) {
+    outFile.open(outputFile.c_str());
+    if (!(outFile)) {
+      cerr << "Error: Failed to open " << outputFile << endl;
+      exit(1);
+    }
+    out = &outFile;
+  } else {
+    out = &cout;
   }
 
   
@@ -199,7 +214,6 @@ int main(int argc, char** argv)
       size_t rand2 = rand() % n_translations;
       pair<size_t,size_t> translation2 = hypotheses[rand2];
       float bleu2 = sentenceLevelBleuPlusOne(scoreDataIters[translation2.first]->operator[](translation2.second));
-      cerr << "Sampled " << translation1.second<< " " << translation2.second << endl;
       
       /*
       cerr << "t(" << translation1.first << "," << translation1.second << ") = " << bleu1 <<
@@ -227,14 +241,14 @@ int main(int argc, char** argv)
       size_t hypo_id1 = samples[i].getTranslation1().second;
       size_t file_id2 = samples[i].getTranslation2().first;
       size_t hypo_id2 = samples[i].getTranslation2().second;
-      cout << "1";
-      outputSample(cout, featureDataIters[file_id1]->operator[](hypo_id1),
+      *out << "1";
+      outputSample(*out, featureDataIters[file_id1]->operator[](hypo_id1),
                         featureDataIters[file_id2]->operator[](hypo_id2));
-      cout << endl;
-      cout << "0";
-      outputSample(cout, featureDataIters[file_id2]->operator[](hypo_id2),
+      *out << endl;
+      *out << "0";
+      outputSample(*out, featureDataIters[file_id2]->operator[](hypo_id2),
                         featureDataIters[file_id1]->operator[](hypo_id1));
-      cout << endl;
+      *out << endl;
     }
     //advance all iterators
     for (size_t i = 0; i < featureFiles.size(); ++i) {
@@ -243,6 +257,8 @@ int main(int argc, char** argv)
     }
     ++sentenceId;
   }
+
+  outFile.close();
 
 }
 
