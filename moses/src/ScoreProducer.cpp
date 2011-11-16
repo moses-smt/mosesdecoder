@@ -34,28 +34,5 @@ ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComp
 
 ScoreProducer::~ScoreProducer() {}
 
-const vector<FName>& ScoreProducer::GetFeatureNames() const
-{
-  if (m_names.size() != GetNumScoreComponents() && 
-      unlimited != GetNumScoreComponents()) 
-  {
-    const string& desc = GetScoreProducerDescription();
-    if (GetNumScoreComponents() == 1) 
-    {
-      m_names.push_back(FName(desc));
-    }
-    else 
-    {
-      for (size_t i = 1; i <= GetNumScoreComponents(); ++i) 
-      {
-        ostringstream id;
-        id << i;
-        m_names.push_back(FName(desc,id.str()));
-      }
-    }
-  }
-  return m_names;
-}
-
 }
 

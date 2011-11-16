@@ -19,7 +19,6 @@ namespace Moses
 class ScoreProducer
 {
 private:
-  mutable  std::vector<FName> m_names; //for features with fixed number of values
   std::string m_description;
   bool m_reportSparseFeatures;
   size_t m_numScoreComponents;
