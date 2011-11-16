@@ -46,7 +46,6 @@ void ScoreDataIterator::readNext() {
     m_in->ReadLine(); //ignore rest of line
     for (size_t i = 0; i < count; ++i) {
       StringPiece line = m_in->ReadLine();
-      cerr << line << endl;
       m_next.push_back(ScoreDataItem());
       for (TokenIter<AnyCharacter, true> token(line,AnyCharacter(" \t")); token; ++token) {
         float value = ParseFloat(*token);

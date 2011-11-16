@@ -8,8 +8,8 @@ DS?=$(shell date '+%Y%m%d')
 # Set TARGETDIR to directory where you want the compiled scripts to be copied
 # to.
 # Set BINDIR to the directory where GIZA++ and other tools are installed.
-TARGETDIR=/home/bhaddow/work/moses.svn
-BINDIR=/opt/statmt/moses/bin/
+TARGETDIR=/home/bhaddow/moses.github
+BINDIR=/home/bhaddow/moses/bin
 
 MAIN_SCRIPTS_TARGET_DIR=$(TARGETDIR)
 # MAIN_SCRIPTS_TARGET_DIR=$(shell echo `pwd`/temp)

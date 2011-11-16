@@ -3,6 +3,9 @@
 /* Defined if the requested minimum BOOST version is satisfied */
 #undef HAVE_BOOST
 
+/* Define to 1 if you have <boost/program_options.hpp> */
+#undef HAVE_BOOST_PROGRAM_OPTIONS_HPP
+
 /* Define to 1 if you have <boost/scoped_ptr.hpp> */
 #undef HAVE_BOOST_SCOPED_PTR_HPP
 

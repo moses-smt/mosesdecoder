@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   *
   *   For details of PRO, refer to Hopkins & May (EMNLP 2011)
  **/
+#include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
@@ -42,12 +44,74 @@ using namespace std;
 
 namespace po = boost::program_options;
 
+class SampledPair {
+private:
+	pair<size_t,size_t> translation1;
+	pair<size_t,size_t> translation2;
+	float scoreDiff;
+public:
+	SampledPair(const pair<size_t,size_t>& t1, const pair<size_t,size_t>& t2, float diff ) {
+		if (diff > 0) {
+			translation1 = t1;
+			translation2 = t2;
+			scoreDiff = diff;
+		}
+		else {
+			translation1 = t2;
+			translation2 = t1;
+			scoreDiff = -diff;
+		}			
+	}
+	float getDiff() const { return scoreDiff; }
+	const pair<size_t,size_t>& getTranslation1() const { return translation1; }
+	const pair<size_t,size_t>& getTranslation2() const { return translation2; }
+};
+
+
+static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
+	float logbleu = 0.0;
+	const unsigned int bleu_order = 4;
+	for (unsigned int j=0; j<bleu_order; j++) {
+		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
+		logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
+	}
+	logbleu /= bleu_order;
+	float brevity = 1.0 - (float)stats[(bleu_order*2)]/stats[1];
+	if (brevity < 0.0) {
+		logbleu += brevity;
+	}
+	//cerr << brevity << " -> " << exp(logbleu) << endl;
+	return exp(logbleu);
+}
+
+static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2) {
+  // difference in score in regular features
+	for(unsigned int j=0; j<f1.dense.size(); j++)
+		if (abs(f1.dense[j]-f2.dense[j]) > 0.00001)
+			out << " F" << j << " " << (f1.dense[j]-f2.dense[j]);
+
+  if (f1.sparse.size() || f2.sparse.size()) {
+    out << " ";
+
+    // sparse features
+    const SparseVector &s1 = f1.sparse;
+    const SparseVector &s2 = f2.sparse;
+    SparseVector diff = s1 - s2;
+    diff.write(out);
+  }
+}
+
+	
 int main(int argc, char** argv) 
 {
   bool help;
   vector<string> scoreFiles;
   vector<string> featureFiles;
   int seed;
+  //TODO: options
+	const unsigned int n_candidates = 5000; // Gamma, in Hopkins & May
+	const unsigned int n_samples = 50; // Xi, in Hopkins & May
+	const float min_diff = 0.05;
 
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -66,7 +130,7 @@ int main(int argc, char** argv)
   if (help) {
       cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
       cout << desc << endl;
-      return 0;
+      exit(0);
   }
   
   if (vm.count("random-seed")) {
@@ -77,33 +141,107 @@ int main(int argc, char** argv)
     srand(time(NULL));
   }
 
-  FeatureDataIterator fi(featureFiles[0]);
-  //cerr << featureFiles[0] << endl;
-  for (; fi != FeatureDataIterator::end(); ++fi) {
-    const vector<FeatureDataItem>& featureData = *fi;
-    cerr << "Read " << featureData.size() << " items " << endl;
-    for (size_t i = 0; i < featureData.size(); ++i) {
-      cerr << "Dense: ";
-      for (size_t j = 0; j < featureData[i].dense.size(); ++j) {
-        cerr << featureData[i].dense[j] << " ";
-      }
-      cerr << "\n";
-    }
-    cerr << "\n";
+  if (scoreFiles.size() == 0 || featureFiles.size() == 0) {
+    cerr << "No data to process" << endl;
+    exit(0);
   }
 
-  ScoreDataIterator si(scoreFiles[0]);
-  for (; si != ScoreDataIterator::end(); ++si) {
-    const vector<ScoreDataItem>& scoreData = *si;
-    cerr << "Read " << scoreData.size() << " items " << endl;
-    for (size_t i = 0; i < scoreData.size(); ++i) {
-      cerr << "SD: ";
-      for (size_t j = 0; j < scoreData[i].size(); ++j) {
-        cerr << scoreData[i][j] << " ";
-      }
-      cerr << "\n";
+  if (featureFiles.size() != scoreFiles.size()) {
+    cerr << "Error: Number of feature files (" << featureFiles.size() <<
+      ") does not match number of score files (" << scoreFiles.size() << ")" << endl;
+    exit(1);
+  }
+
+  
+  vector<FeatureDataIterator> featureDataIters;
+  vector<ScoreDataIterator> scoreDataIters;
+  for (size_t i = 0; i < featureFiles.size(); ++i) {
+    featureDataIters.push_back(FeatureDataIterator(featureFiles[i]));
+    scoreDataIters.push_back(ScoreDataIterator(scoreFiles[i]));
+  }
+
+  //loop through nbest lists
+  size_t sentenceId = 0;
+  while(1) {
+    vector<pair<size_t,size_t> > hypotheses;
+    //TODO: de-deuping. Collect hashes of score,feature pairs and 
+    //only add index if it's unique.
+    if (featureDataIters[0] == FeatureDataIterator::end()) {
+      break;
     }
-    cerr << "\n";
+    for (size_t i = 0; i < featureFiles.size(); ++i) {
+      if (featureDataIters[i] == FeatureDataIterator::end()) {
+        cerr << "Error: Feature file " << i << " ended prematurely" << endl;
+        exit(1);
+      }
+      if (scoreDataIters[i] == ScoreDataIterator::end()) {
+        cerr << "Error: Score file " << i << " ended prematurely" << endl;
+        exit(1);
+      }
+      if (featureDataIters[i]->size() != scoreDataIters[i]->size()) {
+        cerr << "Error: For sentence " << sentenceId << " features and scores have different size" << endl;
+        exit(1);
+      }
+      for (size_t j = 0; j < featureDataIters[i]->size(); ++j) {
+        hypotheses.push_back(pair<size_t,size_t>(i,j));
+      }
+    }
+
+    //collect the candidates
+    vector<SampledPair> samples;
+    vector<float> scores;
+    size_t n_translations = hypotheses.size();
+    for(size_t  i=0; i<n_candidates; i++) {
+      size_t rand1 = rand() % n_translations;
+      pair<size_t,size_t> translation1 = hypotheses[rand1];
+      float bleu1 = sentenceLevelBleuPlusOne(scoreDataIters[translation1.first]->operator[](translation1.second));
+
+      size_t rand2 = rand() % n_translations;
+      pair<size_t,size_t> translation2 = hypotheses[rand2];
+      float bleu2 = sentenceLevelBleuPlusOne(scoreDataIters[translation2.first]->operator[](translation2.second));
+      cerr << "Sampled " << translation1.second<< " " << translation2.second << endl;
+      
+      /*
+      cerr << "t(" << translation1.first << "," << translation1.second << ") = " << bleu1 <<
+        " t(" << translation2.first << "," << translation2.second << ") = " <<
+          bleu2  << " diff = " << abs(bleu1-bleu2) << endl;
+      */
+      if (abs(bleu1-bleu2) < min_diff)
+        continue;
+      
+      samples.push_back(SampledPair(translation1, translation2, bleu1-bleu2));
+      scores.push_back(1.0-abs(bleu1-bleu2));
+    }
+
+    float sample_threshold = -1.0;
+    if (samples.size() > n_samples) {
+      nth_element(scores.begin(), scores.begin() + (n_samples-1), scores.end());
+      sample_threshold = 0.99999-scores[n_samples-1];
+    }
+
+    size_t collected = 0;
+    for (size_t i = 0; collected < n_samples && i < samples.size(); ++i) {
+      if (samples[i].getDiff() < sample_threshold) continue;
+      ++collected;
+      size_t file_id1 = samples[i].getTranslation1().first;
+      size_t hypo_id1 = samples[i].getTranslation1().second;
+      size_t file_id2 = samples[i].getTranslation2().first;
+      size_t hypo_id2 = samples[i].getTranslation2().second;
+      cout << "1";
+      outputSample(cout, featureDataIters[file_id1]->operator[](hypo_id1),
+                        featureDataIters[file_id2]->operator[](hypo_id2));
+      cout << endl;
+      cout << "0";
+      outputSample(cout, featureDataIters[file_id2]->operator[](hypo_id2),
+                        featureDataIters[file_id1]->operator[](hypo_id1));
+      cout << endl;
+    }
+    //advance all iterators
+    for (size_t i = 0; i < featureFiles.size(); ++i) {
+      ++featureDataIters[i];
+      ++scoreDataIters[i];
+    }
+    ++sentenceId;
   }
 
 }
