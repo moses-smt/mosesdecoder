@@ -127,7 +127,7 @@ namespace Moses {
     const_iterator cbegin() const {return m_features.cbegin();}
     const_iterator cend() const {return m_features.cend();}
 		
-		bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
+	bool hasNonDefaultValue(FName name) const { return m_features.find(name) != m_features.end();}
     void clear();
     
     
@@ -179,6 +179,8 @@ namespace Moses {
     
     /** pretty printing */
     std::ostream& print(std::ostream& out) const;
+
+    FValue getCoreFeature(size_t index) const;
 
     void applyLog(size_t baseOfLog);
     //scale so that abs. value is less than maxvalue

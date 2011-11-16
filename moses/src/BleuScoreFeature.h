@@ -56,20 +56,6 @@ public:
 	                                 m_historySmoothing(0.7),
 	                                 m_smoothing_scheme(PLUS_ONE) {}
 
-	BleuScoreFeature(bool scaleByInputLength, bool scaleByTargetLength, bool scaleByAvgLength, float scaleByX, float historySmoothing):
-	                                 StatefulFeatureFunction("BleuScore",1),
-	                                 m_count_history(BleuScoreState::bleu_order),
-	                                 m_match_history(BleuScoreState::bleu_order),
-	                                 m_source_length_history(0),
-	                                 m_target_length_history(0),
-	                                 m_ref_length_history(0),
-	                                 m_scale_by_input_length(scaleByInputLength),
-	                                 m_scale_by_ref_length(scaleByTargetLength),
-	                                 m_scale_by_avg_length(scaleByAvgLength),
-	                                 m_scale_by_x(scaleByX),
-	                                 m_historySmoothing(historySmoothing),
-	                                 m_smoothing_scheme(PLUS_ONE) {}
-
     std::string GetScoreProducerDescription() const
     {
     	return "BleuScoreFeature";
@@ -88,7 +74,8 @@ public:
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     size_t GetReferenceLength(size_t ref_id);
-    void SetBleuSmoothingScheme(size_t scheme);
+    void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
+  		  float scaleByX, float historySmoothing, size_t scheme);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,

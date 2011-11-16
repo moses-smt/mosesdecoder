@@ -78,6 +78,30 @@ float ScoreComponentCollection::GetL2Norm() {
   return m_scores.l2norm();
 }
 
+void ScoreComponentCollection::Save(string filename) {
+  ofstream out(filename.c_str());
+  if (!out) {
+    ostringstream msg;
+    msg << "Unable to open " << filename;
+    throw runtime_error(msg.str());
+  }
+
+  ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
+  for (; iter != s_scoreIndexes.end(); ++iter ) {
+	const vector<FName> featureNames = iter->first->GetFeatureNames();
+	IndexPair ip = iter->second; // feature indices
+	size_t f_index = ip.first;
+	for (size_t i=0; (i < featureNames.size()) && (f_index < ip.second); ++i) {
+		out << featureNames[i] << " " << m_scores.getCoreFeature(f_index) << endl;
+		++f_index;
+	}
+  }
+
+  // write sparse features
+  m_scores.write(out);
+  out.close();
+}
+
 void ScoreComponentCollection::Assign(const ScoreProducer* sp, const string line) {
   assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
   istringstream istr(line);
