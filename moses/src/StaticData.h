@@ -314,7 +314,6 @@ public:
     return m_outputFactorOrder;
   }
 
-
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
   }
@@ -344,6 +343,9 @@ public:
   }
   bool IsWordDeletionEnabled() const {
     return m_wordDeletionEnabled;
+  }
+  BleuScoreFeature* GetBleuScoreFeature() const {
+  	return m_bleuScoreFeature;
   }
   size_t GetMaxHypoStackSize() const {
     return m_maxHypoStackSize;
@@ -656,7 +658,8 @@ public:
   }
 
   void ReLoadParameter();
-  void ReLoadBleuScoreFeatureParameter();
+  void ReLoadBleuScoreFeatureParameter(float weight);
+
   Parameter* GetParameter() {
     return m_parameter;
   }

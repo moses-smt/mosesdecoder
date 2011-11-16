@@ -302,7 +302,7 @@ public:
   void L1Normalise();
   float GetL1Norm();
   float GetL2Norm();
-  void Save(std::string filename) {m_scores.save(filename);}
+  void Save(std::string filename);
 
 #ifdef MPI_ENABLE
   public:

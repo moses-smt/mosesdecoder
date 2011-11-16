@@ -1425,7 +1425,6 @@ bool StaticData::LoadReferences()
   }
   //Set the references in the bleu feature
   m_bleuScoreFeature->LoadReferences(references);
-
   return true;
 }
 
@@ -1781,18 +1780,17 @@ void StaticData::ReLoadParameter()
 
 }
 
-void StaticData::ReLoadBleuScoreFeatureParameter()
+void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
 {
-  //loop over all ScoreProducer to update weights
+  //loop over ScoreProducers to update weights of BleuScoreFeature
   const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
 
   std::vector<const ScoreProducer*>::const_iterator iterSP;
   for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP) {
     std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
-    vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
-
     if (paramShortName == "bl") {
-      SetWeights(*iterSP, Weights);
+      SetWeight(*iterSP, weight);
+      break;
     }
   }
 }

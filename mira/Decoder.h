@@ -39,18 +39,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Mira {
   
 /**
- * Initialise moses (including StaticData) using the given ini file and debuglevel, passing through any 
- * other command line arguments. 
- **/
-void initMoses(const std::string& inifile, int debuglevel,  int argc, std::vector<std::string> decoder_params);
-
-
-/**
   * Wraps moses decoder.
  **/
 class MosesDecoder {
   public:
-    MosesDecoder(bool scaleByInputLength, bool scaleByTargetLength, bool scaleByAvgLength, float scaleByX, float historySmoothing);
+	/**
+	 * Initialise moses (including StaticData) using the given ini file and debuglevel, passing through any
+	 * other command line arguments.
+	 **/
+    MosesDecoder(const std::string& inifile, int debuglevel,  int argc, std::vector<std::string> decoder_params);
 	
     //returns the best sentence
     std::vector<const Moses::Word*> getNBest(const std::string& source,
@@ -71,7 +68,8 @@ class MosesDecoder {
     void printBleuFeatureHistory(std::ostream& out);
     void printReferenceLength(const std::vector<size_t>& ref_ids);
     size_t getReferenceLength(size_t ref_id);
-    void setBleuSmoothingScheme(size_t scheme);
+    void setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
+  		  float scaleByX, float historySmoothing, size_t scheme);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
 	void cleanup();

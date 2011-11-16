@@ -101,7 +101,8 @@ namespace Moses {
     }
 	
 	void FVector::clear() {
-    m_features.clear();
+	  m_coreFeatures.resize(0);
+	  m_features.clear();
 	}
 	
 	bool FVector::load(const std::string& filename) {
@@ -123,7 +124,7 @@ namespace Moses {
 		}
     return true;
   }
-  
+
   void FVector::save(const string& filename) const {
     ofstream out(filename.c_str());
     if (!out) {
@@ -140,7 +141,7 @@ namespace Moses {
       out << i->first << " " << i->second << endl;
     }
   }
-  
+
   static bool equalsTolerance(FValue lhs, FValue rhs) {
     if (lhs == rhs) return true;
     static const FValue TOLERANCE = 1e-4;
@@ -169,19 +170,15 @@ namespace Moses {
     return true;
   }
   
-  
   bool FVector::operator!= (const FVector& rhs) const {
     return ! (*this == rhs);
   }
 	
-	
-	
-	ProxyFVector FVector::operator[](const FName& name) {
-		// At this point, we don't know whether operator[] was called, so we return
-		// a proxy object and defer the decision until later
-		return ProxyFVector(this, name);
-		
-	}
+  ProxyFVector FVector::operator[](const FName& name) {
+	  // At this point, we don't know whether operator[] was called, so we return
+	  // a proxy object and defer the decision until later
+	  return ProxyFVector(this, name);
+  }
 
   /** Equivalent for core features. */
   FValue& FVector::operator[](size_t index) {
@@ -189,18 +186,16 @@ namespace Moses {
   }
 
 	
-	FValue FVector::operator[](const FName& name) const {
-		return get(name);
-	}
+  FValue FVector::operator[](const FName& name) const {
+	  return get(name);
+  }
 
   FValue FVector::operator[](size_t index) const {
     return m_coreFeatures[index];
   }
-	
-	
-	
+
   ostream& FVector::print(ostream& out) const {
-    out << "{";
+	out << "{";
     out << "core=(";
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       out << m_coreFeatures[i];
@@ -216,6 +211,10 @@ namespace Moses {
     return out;
   }
   
+  FValue FVector::getCoreFeature(size_t index) const {
+	  return m_coreFeatures[index];
+  }
+
   ostream& operator<<(ostream& out, const FVector& fv) {
     return fv.print(out);
   }

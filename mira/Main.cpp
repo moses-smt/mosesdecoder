@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <cassert>
 #include <string>
 #include <vector>
 #include <map>
@@ -273,10 +274,17 @@ int main(int argc, char** argv) {
 	}
 
 	// initialise Moses
+	// add initial Bleu weight and references to initialize Bleu feature
+	decoder_settings += "-weight-bl 1 -references";
+	for (size_t i=0; i < referenceFiles.size(); ++i) {
+		decoder_settings += " ";
+		decoder_settings += referenceFiles[i];
+	}
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
-	initMoses(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	MosesDecoder* decoder = new MosesDecoder(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength, scaleByX, historySmoothing);
+	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
+	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength,
+			scaleByX, historySmoothing, bleu_smoothing_scheme);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
@@ -353,11 +361,6 @@ int main(int argc, char** argv) {
 		max_length_dev_hypos = max_length_deviation;
 	}
 
-	// References are loaded by StaticData::LoadReferences() when the parameter "references" is specified in the ini file.
-	// To be sure they are available, load explicitly here.
-	decoder->loadReferenceSentences(referenceSentences);
-	decoder->setBleuSmoothingScheme(bleu_smoothing_scheme);
-
 #ifdef MPI_ENABLE
 	mpi::broadcast(world, order, 0);
 #endif
@@ -374,9 +377,11 @@ int main(int argc, char** argv) {
 	shard.resize(shardSize);
 	copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 
-	// set core weights
+	// get reference to feature functions
 	const vector<const ScoreProducer*> featureFunctions =
-	    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+		    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+
+	// set core weights
 	ScoreComponentCollection initialWeights = decoder->getWeights();
 	if (coreWeightMap.size() > 0) {
 		StrFloatMap::iterator p;
@@ -607,8 +612,10 @@ int main(int argc, char** argv) {
 					}
 				}
 
-				// set weight for bleu feature to 0
-				mosesWeights.Assign(featureFunctions.back(), 0);
+				// set weight for bleu feature to 0 before optimizing
+				const ScoreProducer* sp = featureFunctions.back();
+				assert(sp->GetScoreProducerWeightShortName() == "bl");
+				mosesWeights.Assign(sp, 0);
 
 				// take logs of feature values
 				if (logFeatureValues) {

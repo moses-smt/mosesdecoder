@@ -78,6 +78,27 @@ float ScoreComponentCollection::GetL2Norm() {
   return m_scores.l2norm();
 }
 
+void ScoreComponentCollection::Save(string filename) {
+  ofstream out(filename.c_str());
+  if (!out) {
+    ostringstream msg;
+    msg << "Unable to open " << filename;
+    throw runtime_error(msg.str());
+  }
+
+  ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
+  for (; iter != s_scoreIndexes.end(); ++iter ) {
+	out << iter->first->GetScoreProducerDescription() << " ";
+	IndexPair ip = iter->second;
+	for (size_t i = ip.first; i < ip.second; ++i)
+	  out << m_scores.getCoreFeature(i) << " " << endl;
+  }
+
+  // write sparse features
+  m_scores.write(out);
+  out.close();
+}
+
 void ScoreComponentCollection::Assign(const ScoreProducer* sp, const string line) {
   assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
   istringstream istr(line);

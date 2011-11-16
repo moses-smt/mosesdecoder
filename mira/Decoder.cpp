@@ -40,48 +40,34 @@ namespace Mira {
     strcpy(c,s.c_str());
     return c;
   }
-      
-  void initMoses(const string& inifile, int debuglevel,  int argc, vector<string> decoder_params) {
-    static int BASE_ARGC = 5;
-    Parameter* params = new Parameter();
-    char ** mosesargv = new char*[BASE_ARGC + argc];
-    mosesargv[0] = strToChar("-f");
-    mosesargv[1] = strToChar(inifile);
-    mosesargv[2] = strToChar("-v");
-    stringstream dbgin;
-    dbgin << debuglevel;
-    mosesargv[3] = strToChar(dbgin.str());
-    mosesargv[4] = strToChar("-mbr"); //so we can do nbest
-    
-    for (int i = 0; i < argc; ++i) {
-    	char *cstr = &(decoder_params[i])[0];
-      mosesargv[BASE_ARGC + i] = cstr;
-    }
 
-    params->LoadParam(BASE_ARGC + argc,mosesargv);
-    StaticData::LoadDataStatic(params);
-    for (int i = 0; i < BASE_ARGC; ++i) {
-      delete[] mosesargv[i];
-    }
-    delete[] mosesargv;
-  }
- 
-  MosesDecoder::MosesDecoder(bool scaleByInputLength, bool scaleByTargetLength, bool scaleByAvgLength, float scaleByX, float historySmoothing)
+  MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
 		: m_manager(NULL) {
-	  // force initialisation of the phrase dictionary (TODO: why?)
+	  static int BASE_ARGC = 5;
+	  Parameter* params = new Parameter();
+	  char ** mosesargv = new char*[BASE_ARGC + argc];
+	  mosesargv[0] = strToChar("-f");
+	  mosesargv[1] = strToChar(inifile);
+	  mosesargv[2] = strToChar("-v");
+	  stringstream dbgin;
+	  dbgin << debuglevel;
+	  mosesargv[3] = strToChar(dbgin.str());
+	  mosesargv[4] = strToChar("-mbr"); //so we can do nbest
+
+	  for (int i = 0; i < argc; ++i) {
+		  char *cstr = &(decoder_params[i])[0];
+		  mosesargv[BASE_ARGC + i] = cstr;
+	  }
+
+	  params->LoadParam(BASE_ARGC + argc,mosesargv);
+	  StaticData::LoadDataStatic(params);
+	  for (int i = 0; i < BASE_ARGC; ++i) {
+		  delete[] mosesargv[i];
+	  }
+	  delete[] mosesargv;
+
 	  const StaticData &staticData = StaticData::Instance();
-      /*m_sentence = new Sentence(Input);
-      stringstream in("Initialising decoder..\n");
-      const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-      m_sentence->Read(in,inputFactorOrder);*/
-
-      const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-      /*m_manager = new Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
-      m_manager->ProcessSentence();*/
-
-      // Add the bleu feature
-      m_bleuScoreFeature = new BleuScoreFeature(scaleByInputLength, scaleByTargetLength, scaleByAvgLength, scaleByX, historySmoothing);
-      (const_cast<TranslationSystem&>(system)).AddFeatureFunction(m_bleuScoreFeature);
+      m_bleuScoreFeature = staticData.GetBleuScoreFeature();
   }
   
   void MosesDecoder::cleanup() {
@@ -109,13 +95,12 @@ namespace Mira {
     m_sentence->Read(in,inputFactorOrder);
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
-    // set the weight for the bleu feature
-    ostringstream bleuWeightStr;
-    bleuWeightStr << (bleuObjectiveWeight * bleuScoreWeight);
+    // set weight of BleuScoreFeature
+    /*ostringstream bleuWeightStr;
+    bleuWeightStr << (bleuObjectiveWeight*bleuScoreWeight);
     PARAM_VEC bleuWeight(1,bleuWeightStr.str());
-
-    staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);
-    staticData.ReLoadBleuScoreFeatureParameter();
+    staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);*/
+    staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
 
     m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
     m_bleuScoreFeature->SetCurrentReference(sentenceid);
@@ -156,7 +141,6 @@ namespace Mira {
     // get the best
     vector<const Word*> best;
     if (oracle) {
-
         assert(sentences.GetSize() > 0);
         const TrellisPath &path = sentences.at(0);
         Phrase bestPhrase = path.GetTargetPhrase();
@@ -169,7 +153,6 @@ namespace Mira {
     }
 
 //    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
-
     return best;
   }
 
@@ -217,8 +200,10 @@ namespace Mira {
   	return m_bleuScoreFeature->GetReferenceLength(ref_id);
   }
 
-  void MosesDecoder::setBleuSmoothingScheme(size_t scheme) {
-  	m_bleuScoreFeature->SetBleuSmoothingScheme(scheme);
+  void MosesDecoder::setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
+		  float scaleByX, float historySmoothing, size_t scheme) {
+	  m_bleuScoreFeature->SetBleuParameters(scaleByInputLength, scaleByRefLength, scaleByAvgLength,
+			  scaleByX, historySmoothing, scheme);
   }
 } 
 
