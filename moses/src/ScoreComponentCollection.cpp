@@ -22,7 +22,7 @@ void ScoreComponentCollection::RegisterScoreProducer
   assert(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
-  cerr << "ScoreProducer: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl;
+  VERBOSE(1, "ScoreProducer: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
   s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
   s_denseVectorSize = end;
 }
