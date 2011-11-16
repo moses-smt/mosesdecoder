@@ -88,10 +88,13 @@ void ScoreComponentCollection::Save(string filename) {
 
   ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
   for (; iter != s_scoreIndexes.end(); ++iter ) {
-	out << iter->first->GetScoreProducerDescription() << " ";
-	IndexPair ip = iter->second;
-	for (size_t i = ip.first; i < ip.second; ++i)
-	  out << m_scores.getCoreFeature(i) << " " << endl;
+	const vector<FName> featureNames = iter->first->GetFeatureNames();
+	IndexPair ip = iter->second; // feature indices
+	size_t f_index = ip.first;
+	for (size_t i=0; (i < featureNames.size()) && (f_index < ip.second); ++i) {
+		out << featureNames[i] << " " << m_scores.getCoreFeature(f_index) << endl;
+		++f_index;
+	}
   }
 
   // write sparse features

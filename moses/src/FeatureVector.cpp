@@ -89,8 +89,7 @@ namespace Moses {
     return ! (*this == rhs);
   }
   
-	FVector::FVector(size_t coreFeatures) :
-     m_coreFeatures(coreFeatures) {}
+  FVector::FVector(size_t coreFeatures) : m_coreFeatures(coreFeatures) {}
 
   void FVector::resize(size_t newsize) {
       valarray<FValue> oldValues(m_coreFeatures);
