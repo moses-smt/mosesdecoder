@@ -201,9 +201,9 @@ namespace Mira {
   }
 
   void MosesDecoder::setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-		  float scaleByX, float historySmoothing, size_t scheme) {
+		  float scaleByX, float historySmoothing, size_t scheme, float relax_BP) {
 	  m_bleuScoreFeature->SetBleuParameters(scaleByInputLength, scaleByRefLength, scaleByAvgLength,
-			  scaleByX, historySmoothing, scheme);
+			  scaleByX, historySmoothing, scheme, relax_BP);
   }
 } 
 

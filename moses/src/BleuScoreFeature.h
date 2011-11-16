@@ -75,7 +75,7 @@ public:
     void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     size_t GetReferenceLength(size_t ref_id);
     void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-  		  float scaleByX, float historySmoothing, size_t scheme);
+  		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,
@@ -129,6 +129,9 @@ private:
 
     enum SmoothingScheme { PLUS_ONE = 1, LIGHT = 2, PAPINENI = 3 };
     SmoothingScheme m_smoothing_scheme;
+
+    // relax application of the BP by setting a value between 0 and 1
+    float m_relax_BP;
 };
 
 } // Namespace.

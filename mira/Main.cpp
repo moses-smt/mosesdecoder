@@ -118,6 +118,7 @@ int main(int argc, char** argv) {
 	float max_length_deviation;
 	float max_length_dev_hypos;
 	float max_length_dev_reference;
+	float relax_BP;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -127,7 +128,7 @@ int main(int argc, char** argv) {
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
 		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1, papineni (2) (default:1)")
+		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
@@ -160,6 +161,7 @@ int main(int argc, char** argv) {
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
 		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale BLEU by (a history of) the reference length")
 		("scale-by-avg-length", po::value<bool>(&scaleByAvgLength)->default_value(false), "Scale BLEU by (a history of) the average of input and reference length")
@@ -284,7 +286,7 @@ int main(int argc, char** argv) {
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
 	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength,
-			scaleByX, historySmoothing, bleu_smoothing_scheme);
+			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();

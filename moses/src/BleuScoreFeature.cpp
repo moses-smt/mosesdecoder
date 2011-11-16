@@ -82,13 +82,14 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 }
 
 void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-		  float scaleByX, float historySmoothing, size_t scheme) {
+		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_ref_length = scaleByRefLength;
 	m_scale_by_avg_length = scaleByAvgLength;
 	m_scale_by_x = scaleByX;
 	m_historySmoothing = historySmoothing;
 	m_smoothing_scheme = (SmoothingScheme)scheme;
+	m_relax_BP = relaxBP;
 }
 
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
@@ -413,9 +414,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   // where
   // c: length of the candidate translation
   // r: effective reference length (sum of best match lengths for each candidate sentence)
-  if (state->m_target_length < state->m_scaled_ref_length) {
+  if (state->m_target_length < (state->m_scaled_ref_length * m_relax_BP)) {
     float smoothed_target_length = m_target_length_history + state->m_target_length;
-    float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
+    float smoothed_ref_length = m_ref_length_history + (state->m_scaled_ref_length * m_relax_BP);
     precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
   }
 
