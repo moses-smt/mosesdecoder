@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
 
 	// initialise Moses
 	// add initial Bleu weight and references to initialize Bleu feature
-	decoder_settings += "-weight-bl 1 -references";
+	decoder_settings += " -weight-bl 1 -references";
 	for (size_t i=0; i < referenceFiles.size(); ++i) {
 		decoder_settings += " ";
 		decoder_settings += referenceFiles[i];
