@@ -88,6 +88,9 @@ StaticData::StaticData()
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
 
+  m_xmlBrackets.first="<";
+  m_xmlBrackets.second=">";
+
   // memory pools
   Phrase::InitializeMemPool();
 }
@@ -476,6 +479,18 @@ bool StaticData::LoadData(Parameter *parameter)
   else {
     UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
     return false;
+  }
+
+  // specify XML tags opening and closing brackets for XML option
+  if (m_parameter->GetParam("xml-brackets").size() > 0) {
+     std::vector<std::string> brackets = Tokenize(m_parameter->GetParam("xml-brackets")[0]);
+     if(brackets.size()!=2) {
+          cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
+          exit(1);
+     }
+     m_xmlBrackets.first= brackets[0];
+     m_xmlBrackets.second=brackets[1];
+     cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
   }
 
 #ifdef HAVE_SYNLM

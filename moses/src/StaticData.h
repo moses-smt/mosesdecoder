@@ -158,6 +158,7 @@ protected:
   size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
+  std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
@@ -558,6 +559,10 @@ public:
 
   XmlInputType GetXmlInputType() const {
     return m_xmlInputType;
+  }
+
+  std::pair<std::string,std::string> GetXmlBrackets() const {
+    return m_xmlBrackets;
   }
 
   bool GetUseTransOptCache() const {
