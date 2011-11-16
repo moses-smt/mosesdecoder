@@ -728,8 +728,8 @@ while(1) {
   }
 
   my $file_settings = " --ffile $ffiles --scfile $scfiles";
-  my $pro_file_settings = "--ffile " . join( "--ffile ", split(/,/, $ffiles)) .
-                          " --scfile " .  join( "--scfile ", split(/,/, $scfiles)); 
+  my $pro_file_settings = "--ffile " . join( " --ffile ", split(/,/, $ffiles)) .
+                          " --scfile " .  join( " --scfile ", split(/,/, $scfiles)); 
   
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";

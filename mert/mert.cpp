@@ -38,7 +38,6 @@ void usage(int ret)
   cerr<<"[-o] the indexes to optimize(default all)"<<endl;
   cerr<<"[-t] the optimizer(default powell)"<<endl;
   cerr<<"[-r] the random seed (defaults to system clock)"<<endl;
-	cerr<<"[-p] only create data for paired ranked optimizer"<<endl;
   cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
@@ -137,7 +136,6 @@ int main (int argc, char **argv)
   string scorerfile("statscore.data");
   string featurefile("features.data");
   string initfile("init.opt");
-	string pairedrankfile("");
 
   string tooptimizestr("");
   vector<unsigned> tooptimize;
@@ -151,9 +149,6 @@ int main (int argc, char **argv)
     case 'o':
       tooptimizestr = string(optarg);
       break;
-		case 'p':
-			pairedrankfile = string(optarg);
-			break;
     case 'd':
       pdim = strtol(optarg, NULL, 10);
       break;
@@ -334,12 +329,6 @@ int main (int argc, char **argv)
       tooptimize[i]=1;
     }
   }
-
-	if (pairedrankfile.compare("") != 0) {
-		D.sampleRankedPairs(pairedrankfile);
-		PrintUserTime("Stopping...");
-		exit(0);
-	}
 
   // treat sparse features just like regular features
   if (D.hasSparseFeatures()) {
