@@ -99,7 +99,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   std::vector<XmlOption*> xmlOptionsList(0);
   std::vector< size_t > xmlWalls;
   if (staticData.GetXmlInputType() != XmlPassThrough) {
-    if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls )) {
+    if (!ProcessAndStripXMLTags(line, xmlOptionsList, m_reorderingConstraint, xmlWalls, staticData.GetXmlBrackets().first, staticData.GetXmlBrackets().second)) {
       const string msg("Unable to parse XML in line: " + line);
       TRACE_ERR(msg << endl);
       throw runtime_error(msg);

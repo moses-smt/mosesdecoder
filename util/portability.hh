@@ -32,18 +32,6 @@ int ftruncate(FD, unsigned int);
 
 long lrint(float); 
 
-/*
-struct timeval 
-{
-	float tv_sec, tv_usec;
-};
-
-struct rusage
-{
-	timeval ru_utime, ru_stime;
-};
-*/
-
 //inline int getrusage(int, struct rusage*) { return 0; }
 //extern int RUSAGE_SELF;
 

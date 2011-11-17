@@ -11,40 +11,36 @@
 
 using namespace std;
 
-#include <limits>
 #include <vector>
 #include <iostream>
-
-#include "Util.h"
+#include <stdexcept>
 #include "FeatureArray.h"
 
 class FeatureData
 {
-
-protected:
-  featdata_t array_;
-  idx2name idx2arrayname_; //map from index to name of array
-  name2idx arrayname2idx_; //map from name to index of array
-
 private:
   size_t number_of_features;
   std::string features;
   bool _sparse_flag;
 
-  map<std::string, size_t> featname2idx_; //map from name to index of features
-  map<size_t, std::string> idx2featname_; //map from index to name of features
+  map<std::string, size_t> featname2idx_; // map from name to index of features
+  map<size_t, std::string> idx2featname_; // map from index to name of features
+
+protected:
+  featdata_t array_;
+  idx2name idx2arrayname_; // map from index to name of array
+  name2idx arrayname2idx_; // map from name to index of array
 
 public:
   FeatureData();
-
-  ~FeatureData() {};
+  ~FeatureData() {}
 
   inline void clear() {
     array_.clear();
   }
 
-  inline bool hasSparseFeatures() const { 
-    return _sparse_flag; 
+  inline bool hasSparseFeatures() const {
+    return _sparse_flag;
   }
   inline FeatureArray get(const std::string& idx) {
     return array_.at(getIndex(idx));
@@ -56,7 +52,7 @@ public:
     return array_.at(idx);
   }
 
-  inline bool exists(const std::string & sent_idx) {
+  inline bool exists(const std::string& sent_idx) {
     return exists(getIndex(sent_idx));
   }
   inline bool exists(int sent_idx) {
@@ -73,7 +69,7 @@ public:
   void add(FeatureArray& e);
   void add(FeatureStats& e, const std::string& sent_idx);
 
-  inline size_t size() {
+  inline size_t size() const {
     return array_.size();
   }
   inline size_t NumberOfFeatures() const {
@@ -85,7 +81,7 @@ public:
   inline std::string Features() const {
     return features;
   }
-  inline void Features(const std::string f) {
+  inline void Features(const std::string& f) {
     features = f;
   }
 
@@ -98,44 +94,47 @@ public:
   void load(ifstream& inFile);
   void load(const std::string &file);
 
-  bool check_consistency();
+  bool check_consistency() const;
   void setIndex();
 
-  inline int getIndex(const std::string& idx) {
-    name2idx::iterator i = arrayname2idx_.find(idx);
-    if (i!=arrayname2idx_.end())
+  inline int getIndex(const std::string& idx) const {
+    name2idx::const_iterator i = arrayname2idx_.find(idx);
+    if (i != arrayname2idx_.end())
       return i->second;
     else
       return -1;
   }
 
-  inline std::string getIndex(size_t idx) {
-    idx2name::iterator i = idx2arrayname_.find(idx);
-    if (i!=idx2arrayname_.end())
+  inline std::string getIndex(size_t idx) const {
+    idx2name::const_iterator i = idx2arrayname_.find(idx);
+    if (i != idx2arrayname_.end())
       throw runtime_error("there is no entry at index " + idx);
     return i->second;
   }
 
+  bool existsFeatureNames() const {
+    return (idx2featname_.size() > 0) ? true : false;
+  }
 
-  bool existsFeatureNames() {
-    return (idx2featname_.size() > 0)?true:false;
-  };
-
-  std::string getFeatureName(size_t idx) {
+  std::string getFeatureName(size_t idx) const {
     if (idx >= idx2featname_.size())
       throw runtime_error("Error: you required an too big index");
-    return idx2featname_[idx];
-  };
+    map<size_t, std::string>::const_iterator it = idx2featname_.find(idx);
+    if (it == idx2featname_.end()) {
+      throw runtime_error("Error: specified id is unknown: " + idx);
+    } else {
+      return it->second;
+    }
+  }
 
-  size_t getFeatureIndex(const std::string& name) {
-    if (featname2idx_.find(name)==featname2idx_.end())
-      throw runtime_error("Error: feature " + name +" is unknown");
-    return featname2idx_[name];
-  };
+  size_t getFeatureIndex(const std::string& name) const {
+    map<std::string, size_t>::const_iterator it = featname2idx_.find(name);
+    if (it == featname2idx_.end())
+      throw runtime_error("Error: feature " + name + " is unknown");
+    return it->second;
+  }
 
-  void setFeatureMap(const std::string feat);
+  void setFeatureMap(const std::string& feat);
 };
 
-
-#endif
-
+#endif  // FEATURE_DATA_H

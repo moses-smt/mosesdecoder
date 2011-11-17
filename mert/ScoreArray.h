@@ -9,20 +9,18 @@
 #ifndef SCORE_ARRAY_H
 #define SCORE_ARRAY_H
 
-#define SCORES_TXT_BEGIN "SCORES_TXT_BEGIN_0"
-#define SCORES_TXT_END "SCORES_TXT_END_0"
-#define SCORES_BIN_BEGIN "SCORES_BIN_BEGIN_0"
-#define SCORES_BIN_END "SCORES_BIN_END_0"
-
 using namespace std;
 
-#include <limits>
 #include <vector>
 #include <iostream>
-#include <fstream>
+#include <string>
 
-#include "Util.h"
 #include "ScoreStats.h"
+
+const char SCORES_TXT_BEGIN[] = "SCORES_TXT_BEGIN_0";
+const char SCORES_TXT_END[] = "SCORES_TXT_END_0";
+const char SCORES_BIN_BEGIN[] = "SCORES_BIN_BEGIN_0";
+const char SCORES_BIN_END[] = "SCORES_BIN_END_0";
 
 class ScoreArray
 {
@@ -32,19 +30,19 @@ protected:
   size_t number_of_scores;
 
 private:
-  std::string  idx; // idx to identify the utterance, it can differ from the index inside the vector
-
+  // idx to identify the utterance.
+  // It can differ from the index inside the vector.
+  std::string  idx;
 
 public:
   ScoreArray();
-
-  ~ScoreArray() {};
+  ~ScoreArray() {}
 
   inline void clear() {
     array_.clear();
   }
 
-  inline std::string getIndex() {
+  inline std::string getIndex() const {
     return idx;
   }
   inline void setIndex(const std::string& value) {
@@ -68,12 +66,13 @@ public:
 
   inline std::string name() const {
     return score_type;
-  };
+  }
+
   inline void name(std::string &sctype) {
     score_type = sctype;
-  };
+  }
 
-  inline size_t size() {
+  inline size_t size() const {
     return array_.size();
   }
   inline size_t NumberOfScores() const {
@@ -96,9 +95,7 @@ public:
   void load(ifstream& inFile);
   void load(const std::string &file);
 
-  bool check_consistency();
+  bool check_consistency() const;
 };
 
-
-#endif
-
+#endif  // SCORE_ARRAY_H

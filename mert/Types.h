@@ -1,5 +1,6 @@
 #ifndef TYPE_H
 #define TYPE_H
+
 #include <vector>
 #include <map>
 #include <string>
@@ -39,4 +40,4 @@ typedef vector<ScoreArray> scoredata_t;
 typedef map<size_t, std::string> idx2name;
 typedef map<std::string, size_t> name2idx;
 
-#endif
+#endif  // TYPE_H

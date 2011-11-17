@@ -1,8 +1,10 @@
 /*
  * Generic hashmap manipulation functions
  */
+
 #ifndef __HASHMAP_H__
 #define __HASHMAP_H__
+
 #include "stringHasher.h"
 #include <vector>
 #include <string>
@@ -36,8 +38,6 @@ public:
   string printStringHashForLexicon();
 };
 
-
 }
 
-
-#endif
+#endif  // __HASHMAP_H__

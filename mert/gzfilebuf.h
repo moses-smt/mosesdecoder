@@ -3,11 +3,12 @@
 
 #include <streambuf>
 #include <zlib.h>
+#include <cstring>
 
 class gzfilebuf : public std::streambuf
 {
 public:
-  gzfilebuf(const char *filename) {
+  explicit gzfilebuf(const char *filename) {
     _gzf = gzopen(filename, "rb");
     setg (_buff+sizeof(int),     // beginning of putback area
           _buff+sizeof(int),     // read position
@@ -32,7 +33,7 @@ protected:
     throw;
   }
 
-  //read one character
+  // read one character
   virtual int_type underflow () {
     // is read position before end of _buff?
     if (gptr() < egptr()) {
@@ -81,4 +82,4 @@ private:
   char _buff[_buffsize];
 };
 
-#endif
+#endif  // _GZFILEBUF_H_

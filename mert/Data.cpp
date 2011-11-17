@@ -6,26 +6,46 @@
  *
  */
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <fstream>
 
+#include "Data.h"
+#include "FileStream.h"
 #include "Scorer.h"
 #include "ScorerFactory.h"
-#include "Data.h"
 #include "Util.h"
 
+Data::Data()
+  : theScorer(NULL),
+    number_of_scores(0),
+    _sparse_flag(false),
+    scoredata(NULL),
+    featdata(NULL) {}
 
-Data::Data(Scorer& ptr):
-  theScorer(&ptr),
-  _sparse_flag(false)
+Data::Data(Scorer& ptr)
+    : theScorer(&ptr),
+      score_type(theScorer->getName()),
+      number_of_scores(0),
+      _sparse_flag(false),
+      scoredata(new ScoreData(*theScorer)),
+      featdata(new FeatureData)
 {
-  score_type = (*theScorer).getName();
   TRACE_ERR("Data::score_type " << score_type << std::endl);
-
   TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
-  featdata=new FeatureData;
-  scoredata=new ScoreData(*theScorer);
-};
+}
+
+Data::~Data() {
+  if (featdata) {
+    delete featdata;
+    featdata = NULL;
+  }
+  if (scoredata) {
+    delete scoredata;
+    scoredata = NULL;
+  }
+}
 
 void Data::loadnbest(const std::string &file)
 {
@@ -47,7 +67,7 @@ void Data::loadnbest(const std::string &file)
   while (getline(inp,stringBuf,'\n')) {
     if (stringBuf.empty()) continue;
 
-//		TRACE_ERR("stringBuf: " << stringBuf << std::endl);
+//              TRACE_ERR("stringBuf: " << stringBuf << std::endl);
 
     getNextPound(stringBuf, substring, "|||"); //first field
     sentence_index = substring;
@@ -55,7 +75,7 @@ void Data::loadnbest(const std::string &file)
     getNextPound(stringBuf, substring, "|||"); //second field
     theSentence = substring;
 
-// adding statistics for error measures
+    // adding statistics for error measures
     featentry.reset();
     scoreentry.clear();
 
@@ -73,7 +93,7 @@ void Data::loadnbest(const std::string &file)
 
       size_t tmpidx=0;
       while (!stringsupport.empty()) {
-        //			TRACE_ERR("Decompounding: " << substring << std::endl);
+        //                      TRACE_ERR("Decompounding: " << substring << std::endl);
         getNextPound(stringsupport, subsubstring);
 
         // string ending with ":" are skipped, because they are the names of the features
@@ -98,12 +118,12 @@ void Data::loadnbest(const std::string &file)
 
     // adding features
     while (!substring.empty()) {
-//			TRACE_ERR("Decompounding: " << substring << std::endl);
+//                      TRACE_ERR("Decompounding: " << substring << std::endl);
       getNextPound(substring, subsubstring);
 
       // no ':' -> feature value that needs to be stored
       if ((loc = subsubstring.find_last_of(":")) != subsubstring.length()-1) {
-        featentry.add(ATOFST(subsubstring.c_str()));
+        featentry.add(ConvertStringToFeatureStatsType(subsubstring));
       }
       // sparse feature name? store as well
       else if (subsubstring.find("_") != string::npos) {
@@ -121,22 +141,22 @@ void Data::loadnbest(const std::string &file)
 }
 
 // TODO
-void Data::mergeSparseFeatures() { 
+void Data::mergeSparseFeatures() {
   std::cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
   exit(1);
 }
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
-      std::vector<Data>& shards) 
+                        std::vector<Data>& shards)
 {
   assert(shard_count);
-  assert(shard_size >=0);
+  assert(shard_size >= 0);
   assert(shard_size <= 1);
 
   size_t data_size = scoredata->size();
   assert(data_size == featdata->size());
 
-  shard_size *=  data_size;
+  shard_size *= data_size;
 
   for (size_t shard_id = 0; shard_id < shard_count; ++shard_id) {
     vector<size_t> shard_contents;
@@ -153,9 +173,8 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
         shard_contents.push_back(rand() % data_size);
       }
     }
-    
-    ScorerFactory SF;
-    Scorer* scorer = SF.getScorer(score_type, scorerconfig);
+
+    Scorer* scorer = ScorerFactory::getScorer(score_type, scorerconfig);
 
     shards.push_back(Data(*scorer));
     shards.back().score_type = score_type;
@@ -166,7 +185,5 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
       shards.back().scoredata->add(scoredata->get(shard_contents[i]));
     }
     //cerr << endl;
-    
   }
 }
-

@@ -43,4 +43,5 @@ public:
 };
 
 }
-#endif
+
+#endif  // __TERCPPALIGNMENTSTRUCT_H__
