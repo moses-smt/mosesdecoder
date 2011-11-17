@@ -9,15 +9,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-using namespace std;
-
+#include <cstdlib>
 #include <stdexcept>
 #include <limits>
-
-#define US_NOSET (numeric_limits<unsigned short>::max())
-
-#define MAX_LINE  1024
-
 #include <vector>
 #include <map>
 #include <iostream>
@@ -25,15 +19,12 @@ using namespace std;
 #include <string>
 #include <cstring>
 
-#include <fstream>
-#include "gzfilebuf.h"
-
 #include "Types.h"
-#include "ScoreStats.h"
-#include "FeatureStats.h"
 
-class ScoreStats;
-class FeatureStats;
+using namespace std;
+
+#define US_NOSET (numeric_limits<unsigned short>::max())
+#define MAX_LINE  1024
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
@@ -41,13 +32,27 @@ class FeatureStats;
 #define TRACE_ERR(str) { }
 #endif
 
-#define DELIMITER_SYMBOL " "
+const char kDefaultDelimiterSymbol[] = " ";
 
 int verboselevel();
 int setverboselevel(int v);
 
-int getNextPound(std::string &theString, std::string &substring, const std::string delimiter=DELIMITER_SYMBOL);
+/**
+ * Find the specified delimiter for the string 'str', and 'str' is assigned
+ * to a substring object that starts at the position of first occurrence of
+ * the delimiter in 'str'. 'substr' is copied from 'str' ranging from
+ * the start position of 'str' to the position of first occurrence of
+ * the delimiter.
+ *
+ * It returns the position of first occurrence in the queried string.
+ * If the content is not found, std::string::npos is returned.
+ */
+size_t getNextPound(std::string &str, std::string &substr,
+                    const std::string &delimiter = kDefaultDelimiterSymbol);
+
 void split(const std::string &s, char delim, std::vector<std::string> &elems);
+
+void Tokenize(const char *str, const char delim, std::vector<std::string> *res);
 
 template<typename T>
 inline T Scan(const std::string &input)
@@ -56,37 +61,7 @@ inline T Scan(const std::string &input)
   T ret;
   stream >> ret;
   return ret;
-};
-
-class inputfilestream : public std::istream
-{
-protected:
-  std::streambuf *m_streambuf;
-  bool _good;
-public:
-
-  inputfilestream(const std::string &filePath);
-  ~inputfilestream();
-  bool good() {
-    return _good;
-  }
-  void close();
-};
-
-class outputfilestream : public std::ostream
-{
-protected:
-  std::streambuf *m_streambuf;
-  bool _good;
-public:
-
-  outputfilestream(const std::string &filePath);
-  ~outputfilestream();
-  bool good() {
-    return _good;
-  }
-  void close();
-};
+}
 
 template<typename T>
 inline std::string stringify(T x)
@@ -97,10 +72,29 @@ inline std::string stringify(T x)
   return o.str();
 }
 
+inline ScoreStatsType ConvertCharToScoreStatsType(const char *str)
+{
+  return std::atoi(str);
+}
+
+inline ScoreStatsType ConvertStringToScoreStatsType(const std::string& str)
+{
+  return ConvertCharToScoreStatsType(str.c_str());
+}
+
+inline FeatureStatsType ConvertCharToFeatureStatsType(const char *str)
+{
+  return static_cast<FeatureStatsType>(std::atof(str));
+}
+
+inline FeatureStatsType ConvertStringToFeatureStatsType(const std::string &str)
+{
+  return ConvertCharToFeatureStatsType(str.c_str());
+}
+
 // Utilities to measure decoding time
 void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
-#endif
-
+#endif  // UTIL_H

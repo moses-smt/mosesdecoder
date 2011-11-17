@@ -79,4 +79,4 @@ public:
 
 }
 
-#endif
+#endif  // _TERCPPTERCALC_H___

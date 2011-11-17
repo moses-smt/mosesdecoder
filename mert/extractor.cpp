@@ -78,92 +78,74 @@ int main(int argc, char** argv)
   int c;
   while ((c=getopt_long (argc,argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
     switch(c) {
-    case 's':
-      scorerType = string(optarg);
-      break;
-    case 'c':
-      scorerConfig = string(optarg);
-      break;
-    case 'r':
-      referenceFile = string(optarg);
-      break;
-    case 'b':
-      binmode = true;
-      break;
-    case 'n':
-      nbestFile = string(optarg);
-      break;
-    case 'S':
-      scoreDataFile = string(optarg);
-      break;
-    case 'F':
-      featureDataFile = string(optarg);
-      break;
-    case 'E':
-      prevFeatureDataFile = string(optarg);
-      break;
-    case 'R':
-      prevScoreDataFile = string(optarg);
-      break;
-    case 'v':
-      verbosity = atoi(optarg);
-      break;
-    default:
-      usage();
+      case 's':
+        scorerType = string(optarg);
+        break;
+      case 'c':
+        scorerConfig = string(optarg);
+        break;
+      case 'r':
+        referenceFile = string(optarg);
+        break;
+      case 'b':
+        binmode = true;
+        break;
+      case 'n':
+        nbestFile = string(optarg);
+        break;
+      case 'S':
+        scoreDataFile = string(optarg);
+        break;
+      case 'F':
+        featureDataFile = string(optarg);
+        break;
+      case 'E':
+        prevFeatureDataFile = string(optarg);
+        break;
+      case 'R':
+        prevScoreDataFile = string(optarg);
+        break;
+      case 'v':
+        verbosity = atoi(optarg);
+        break;
+      default:
+        usage();
     }
   }
   try {
-
-//check whether score statistics file is specified
+    // check whether score statistics file is specified
     if (scoreDataFile.length() == 0) {
       throw runtime_error("Error: output score statistics file is not specified");
     }
 
-//check wheter feature file is specified
+    // check wheter feature file is specified
     if (featureDataFile.length() == 0) {
       throw runtime_error("Error: output feature file is not specified");
     }
 
-//check whether reference file is specified when nbest is specified
+    // check whether reference file is specified when nbest is specified
     if ((nbestFile.length() > 0 && referenceFile.length() == 0)) {
       throw runtime_error("Error: reference file is not specified; you can not score the nbest");
     }
 
-
     vector<string> nbestFiles;
     if (nbestFile.length() > 0) {
-      std::string substring;
-      while (!nbestFile.empty()) {
-        getNextPound(nbestFile, substring, ",");
-        nbestFiles.push_back(substring);
-      }
+      Tokenize(nbestFile.c_str(), ',', &nbestFiles);
     }
 
     vector<string> referenceFiles;
     if (referenceFile.length() > 0) {
-      std::string substring;
-      while (!referenceFile.empty()) {
-        getNextPound(referenceFile, substring, ",");
-        referenceFiles.push_back(substring);
-      }
+      Tokenize(referenceFile.c_str(), ',', &referenceFiles);
     }
 
     vector<string> prevScoreDataFiles;
     if (prevScoreDataFile.length() > 0) {
-      std::string substring;
-      while (!prevScoreDataFile.empty()) {
-        getNextPound(prevScoreDataFile, substring, ",");
-        prevScoreDataFiles.push_back(substring);
-      }
+      Tokenize(prevScoreDataFile.c_str(), ',', &prevScoreDataFiles);
     }
 
     vector<string> prevFeatureDataFiles;
     if (prevFeatureDataFile.length() > 0) {
-      std::string substring;
-      while (!prevFeatureDataFile.empty()) {
-        getNextPound(prevFeatureDataFile, substring, ",");
-        prevFeatureDataFiles.push_back(substring);
-      }
+      Tokenize(prevFeatureDataFile.c_str(), ',', &prevFeatureDataFiles);
     }
 
     if (prevScoreDataFiles.size() != prevFeatureDataFiles.size()) {
@@ -175,10 +157,10 @@ int main(int argc, char** argv)
     else cerr << "Binary write mode is NOT selected" << endl;
 
     TRACE_ERR("Scorer type: " << scorerType << endl);
-    ScorerFactory sfactory;
-    Scorer* scorer = sfactory.getScorer(scorerType,scorerConfig);
+    // ScorerFactory sfactory;
+    Scorer* scorer = ScorerFactory::getScorer(scorerType,scorerConfig);
 
-    //load references
+    // load references
     if (referenceFiles.size() > 0)
       scorer->setReferenceFiles(referenceFiles);
 
@@ -186,14 +168,14 @@ int main(int argc, char** argv)
 
     Data data(*scorer);
 
-    //load old data
+    // load old data
     for (size_t i=0; i < prevScoreDataFiles.size(); i++) {
       data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
     }
 
     PrintUserTime("Previous data loaded");
 
-    //computing score statistics of each nbest file
+    // computing score statistics of each nbest file
     for (size_t i=0; i < nbestFiles.size(); i++) {
       data.loadnbest(nbestFiles.at(i));
     }
@@ -207,9 +189,10 @@ int main(int argc, char** argv)
 
     data.save(featureDataFile, scoreDataFile, binmode);
     PrintUserTime("Stopping...");
-    /*
-     timer.stop("Stopping...");
-    		*/
+
+    // timer.stop("Stopping...");
+
+    delete scorer;
 
     return EXIT_SUCCESS;
   } catch (const exception& e) {

@@ -50,7 +50,7 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
     if (i != m_set.end()) return &i->in;
   }
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-#if BOOST_VERSION >= 102400
+#if BOOST_VERSION >= 104200
   FactorFriend to_ins;
   to_ins.in.m_string.assign(factorString.data(), factorString.size());
 #endif // BOOST_VERSION

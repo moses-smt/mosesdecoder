@@ -68,8 +68,6 @@ Use language model 8 in your moses.ini:
 [lmodel-file]
 8 0 2 /path/to/lm.arpa
 
-If you don't want Ken's LM, ./configure --without-kenlm
-
 --------------------------------------------------------------------------
 
 

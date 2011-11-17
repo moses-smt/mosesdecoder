@@ -6,15 +6,18 @@
  *
  */
 
-#include <fstream>
 #include "FeatureData.h"
-#include "Util.h"
 
+#include <limits>
+#include "FileStream.h"
+#include "Util.h"
 
 static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
 static const float MAX_FLOAT=numeric_limits<float>::max();
 
-FeatureData::FeatureData() {};
+FeatureData::FeatureData()
+    : number_of_features(0),
+      _sparse_flag(false) {}
 
 void FeatureData::save(std::ofstream& outFile, bool bin)
 {
@@ -89,15 +92,15 @@ void FeatureData::add(FeatureArray& e)
   }
 }
 
-void FeatureData::add(FeatureStats& e, const std::string & sent_idx)
+void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
     size_t pos = getIndex(sent_idx);
-//		TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
+//              TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
     array_.at(pos).add(e);
   } else {
-//		TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
+//              TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
     FeatureArray a;
     a.NumberOfFeatures(number_of_features);
     a.Features(features);
@@ -107,12 +110,12 @@ void FeatureData::add(FeatureStats& e, const std::string & sent_idx)
   }
 }
 
-bool FeatureData::check_consistency()
+bool FeatureData::check_consistency() const
 {
   if (array_.size() == 0)
     return true;
 
-  for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+  for (featdata_t::const_iterator i = array_.begin(); i != array_.end(); i++)
     if (!i->check_consistency()) return false;
 
   return true;
@@ -128,20 +131,18 @@ void FeatureData::setIndex()
   }
 }
 
-
-void FeatureData::setFeatureMap(const std::string feat)
+void FeatureData::setFeatureMap(const std::string& feat)
 {
   number_of_features = 0;
-  features=feat;
+  features = feat;
 
   std::string substring, stringBuf;
-  stringBuf=features;
+  stringBuf = features;
   while (!stringBuf.empty()) {
     getNextPound(stringBuf, substring);
 
-    featname2idx_[substring]=idx2featname_.size();
-    idx2featname_[idx2featname_.size()]=substring;
+    featname2idx_[substring] = idx2featname_.size();
+    idx2featname_[idx2featname_.size()] = substring;
     number_of_features++;
   }
 }
-

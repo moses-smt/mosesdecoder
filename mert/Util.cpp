@@ -6,17 +6,24 @@
  *
  */
 
-#include <stdexcept>
 #include "Util.h"
-
 #include "Timer.h"
 
 using namespace std;
 
-//global variable
+// global variables
 Timer g_timer;
 
-int verbose=0;
+int verbose = 0;
+
+namespace {
+
+bool FindDelimiter(const std::string &str, const std::string &delim, size_t *pos)
+{
+  *pos = str.find(delim);
+  return *pos != std::string::npos ? true : false;
+}
+} // namespace
 
 int verboselevel()
 {
@@ -25,26 +32,27 @@ int verboselevel()
 
 int setverboselevel(int v)
 {
-  verbose=v;
+  verbose = v;
   return verbose;
 }
 
-int getNextPound(std::string &theString, std::string &substring, const std::string delimiter)
+size_t getNextPound(std::string &str, std::string &substr,
+                    const std::string &delimiter)
 {
-  unsigned int pos = 0;
+  size_t pos = 0;
 
-  //skip all occurrences of delimiter
-  while ( pos == 0 ) {
-    if ((pos = theString.find(delimiter)) != std::string::npos) {
-      substring.assign(theString, 0, pos);
-      theString.erase(0,pos + delimiter.size());
+  // skip all occurrences of delimiter
+  while (pos == 0) {
+    if (FindDelimiter(str, delimiter, &pos)) {
+      substr.assign(str, 0, pos);
+      str.erase(0, pos + delimiter.size());
     } else {
-      substring.assign(theString);
-      theString.assign("");
+      substr.assign(str);
+      str.assign("");
     }
   }
-  return (pos);
-};
+  return pos;
+}
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
   std::stringstream ss(s);
@@ -54,79 +62,36 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
   }
 }
 
-inputfilestream::inputfilestream(const std::string &filePath)
-  : std::istream(0),
-    m_streambuf(0)
-{
-  //check if file is readable
-  std::filebuf* fb = new std::filebuf();
-  _good=(fb->open(filePath.c_str(), std::ios::in)!=NULL);
-
-  if (filePath.size() > 3 &&
-      filePath.substr(filePath.size() - 3, 3) == ".gz") {
-    fb->close();
-    delete fb;
-    m_streambuf = new gzfilebuf(filePath.c_str());
-  } else {
-    m_streambuf = fb;
+void Tokenize(const char *str, const char delim,
+              std::vector<std::string> *res) {
+  while (1) {
+    const char *begin = str;
+    while (*str != delim && *str) str++;
+    res->push_back(std::string(begin, str));
+    if (*str++ == 0) break;
   }
-  this->init(m_streambuf);
-}
-
-inputfilestream::~inputfilestream()
-{
-  delete m_streambuf;
-  m_streambuf = 0;
-}
-
-void inputfilestream::close()
-{
-}
-
-outputfilestream::outputfilestream(const std::string &filePath)
-  : std::ostream(0),
-    m_streambuf(0)
-{
-  //check if file is readable
-  std::filebuf* fb = new std::filebuf();
-  _good=(fb->open(filePath.c_str(), std::ios::out)!=NULL);
-
-  if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
-    throw runtime_error("Output to a zipped file not supported!");
-  } else {
-    m_streambuf = fb;
-  }
-  this->init(m_streambuf);
-}
-
-outputfilestream::~outputfilestream()
-{
-  delete m_streambuf;
-  m_streambuf = 0;
-}
-
-void outputfilestream::close()
-{
 }
 
 int swapbytes(char *p, int sz, int n)
 {
   char c, *l, *h;
 
-  if((n<1) || (sz<2)) return 0;
-  for(; n--; p+=sz) for(h=(l=p)+sz; --h>l; l++) {
-      c=*h;
-      *h=*l;
-      *l=c;
+  if((n < 1) || (sz < 2)) return 0;
+  for (; n--; p += sz) {
+    for (h = (l = p) + sz; --h > l; l++) {
+      c = *h;
+      *h = *l;
+      *l = c;
     }
+  }
   return 0;
 
-};
+}
 
 void ResetUserTime()
 {
   g_timer.start();
-};
+}
 
 void PrintUserTime(const std::string &message)
 {
@@ -137,4 +102,3 @@ double GetUserTime()
 {
   return g_timer.get_elapsed_time();
 }
-

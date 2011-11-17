@@ -109,6 +109,9 @@ StaticData::StaticData()
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
 
+  m_xmlBrackets.first="<";
+  m_xmlBrackets.second=">";
+
   // memory pools
   Phrase::InitializeMemPool();
 }
@@ -458,6 +461,9 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
+          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
+
   // Read in constraint decoding file, if provided
   if(m_parameter->GetParam("constraint").size()) {
     if (m_parameter->GetParam("search-algorithm").size() > 0
@@ -470,8 +476,8 @@ bool StaticData::LoadData(Parameter *parameter)
     InputFileStream constraintFile(m_constraintFileName);
 
     std::string line;
-
-    long sentenceID = -1;
+    
+    long sentenceID = GetStartTranslationId() - 1;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
 
@@ -500,6 +506,18 @@ bool StaticData::LoadData(Parameter *parameter)
   else {
     UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
     return false;
+  }
+
+  // specify XML tags opening and closing brackets for XML option
+  if (m_parameter->GetParam("xml-brackets").size() > 0) {
+     std::vector<std::string> brackets = Tokenize(m_parameter->GetParam("xml-brackets")[0]);
+     if(brackets.size()!=2) {
+          cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
+          exit(1);
+     }
+     m_xmlBrackets.first= brackets[0];
+     m_xmlBrackets.second=brackets[1];
+     cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
   }
 
 #ifdef HAVE_SYNLM

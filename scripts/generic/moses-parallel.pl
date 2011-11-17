@@ -553,6 +553,8 @@ remove_temporary_files();
 
 #script creation
 sub preparing_script(){
+  my $currStartTranslationId = 0;
+  
   foreach my $idx (@idxlist){
     my $scriptheader="";
     $scriptheader.="\#\! /bin/bash\n\n";
@@ -588,7 +590,9 @@ sub preparing_script(){
       $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
     }
 
-    print OUT "$mosescmd $mosesparameters $tmpalioutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+	my $tmpStartTranslationId = "-start-translation-id $currStartTranslationId";
+
+    print OUT "$mosescmd $mosesparameters $tmpStartTranslationId $tmpalioutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
     if (defined $alifile){
@@ -615,6 +619,8 @@ sub preparing_script(){
 
     #setting permissions of each script
     chmod(oct(755),"${jobscript}${idx}.bash");
+    
+    $currStartTranslationId += $splitN;
   }
 }
 

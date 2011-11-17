@@ -9,36 +9,34 @@
 #ifndef FEATURE_ARRAY_H
 #define FEATURE_ARRAY_H
 
-#define FEATURES_TXT_BEGIN "FEATURES_TXT_BEGIN_0"
-#define FEATURES_TXT_END "FEATURES_TXT_END_0"
-#define FEATURES_BIN_BEGIN "FEATURES_BIN_BEGIN_0"
-#define FEATURES_BIN_END "FEATURES_BIN_END_0"
-
-using namespace std;
-
-#include <limits>
 #include <vector>
 #include <iostream>
 #include <fstream>
-
-#include "Util.h"
 #include "FeatureStats.h"
+
+using namespace std;
+
+const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";
+const char FEATURES_TXT_END[] = "FEATURES_TXT_END_0";
+const char FEATURES_BIN_BEGIN[] = "FEATURES_BIN_BEGIN_0";
+const char FEATURES_BIN_END[] = "FEATURES_BIN_END_0";
 
 class FeatureArray
 {
+private:
+  // idx to identify the utterance. It can differ from
+  // the index inside the vector.
+  std::string idx;
+
 protected:
   featarray_t array_;
   size_t number_of_features;
   std::string features;
   bool _sparse_flag;
 
-private:
-  std::string idx; // idx to identify the utterance, it can differ from the index inside the vector
-
 public:
   FeatureArray();
-
-  ~FeatureArray() {};
+  ~FeatureArray();
 
   inline void clear() {
     array_.clear();
@@ -48,26 +46,26 @@ public:
     return _sparse_flag;
   }
 
-  inline std::string getIndex() {
+  inline std::string getIndex() const {
     return idx;
   }
-  inline void setIndex(const std::string & value) {
-    idx=value;
+  inline void setIndex(const std::string& value) {
+    idx = value;
   }
 
-  inline FeatureStats&  get(size_t i) {
+  inline FeatureStats& get(size_t i) {
     return array_.at(i);
   }
-  inline const FeatureStats&  get(size_t i)const {
+  inline const FeatureStats& get(size_t i)const {
     return array_.at(i);
   }
-  void add(FeatureStats e) {
+  void add(FeatureStats& e) {
     array_.push_back(e);
   }
 
   void merge(FeatureArray& e);
 
-  inline size_t size() {
+  inline size_t size() const {
     return array_.size();
   }
   inline size_t NumberOfFeatures() const {
@@ -79,7 +77,7 @@ public:
   inline std::string Features() const {
     return features;
   }
-  inline void Features(const std::string f) {
+  inline void Features(const std::string& f) {
     features = f;
   }
 
@@ -96,8 +94,7 @@ public:
   void load(ifstream& inFile);
   void load(const std::string &file);
 
-  bool check_consistency();
+  bool check_consistency() const;
 };
 
-
-#endif
+#endif  // FEATURE_ARRAY_H

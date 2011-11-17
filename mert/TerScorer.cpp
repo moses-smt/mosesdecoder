@@ -1,16 +1,25 @@
 #include "TerScorer.h"
+
+#include <cmath>
+#include <sstream>
+#include <stdexcept>
+
+#include "ScoreStats.h"
 #include "TERsrc/tercalc.h"
 #include "TERsrc/terAlignment.h"
+#include "Util.h"
 
-const int TerScorer::LENGTH = 2;
 using namespace TERCpp;
-using namespace std;
 
+TerScorer::TerScorer(const string& config)
+    : StatisticsBasedScorer("TER",config), kLENGTH(2) {}
+
+TerScorer::~TerScorer() {}
 
 void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
 {
   // for each line in the reference file, create a multiset of the
-  // word ids
+  // word ids.
   for ( int incRefs = 0; incRefs < ( int ) referenceFiles.size(); incRefs++ ) {
     stringstream convert;
     m_references.clear();
@@ -78,13 +87,14 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
 
   }
   ostringstream stats;
-//		multiplication by 100 in order to keep the average precision in the TER calculation
+  // multiplication by 100 in order to keep the average precision
+  // in the TER calculation.
   stats << result.numEdits*100.0 << " " << result.averageWords*100.0 << " " << result.scoreAv()*100.0 << " " ;
   string stats_str = stats.str();
   entry.set ( stats_str );
 }
 
-float TerScorer::calculateScore ( const vector<int>& comps )
+float TerScorer::calculateScore(const vector<int>& comps) const
 {
   float denom = 1.0 * comps[1];
   float num =  -1.0 * comps[0];
@@ -95,17 +105,3 @@ float TerScorer::calculateScore ( const vector<int>& comps )
     return (1.0+(num / denom));
   }
 }
-
-/*
-float TerScorer::calculateScore ( const vector<float>& comps )
-{
-  float denom = 1.0 * comps[1];
-  float num =  -1.0 * comps[0];
-  if ( denom == 0 ) {
-//         shouldn't happen!
-    return 1.0;
-  } else {
-    return (1.0+(num / denom));
-  }
-}
-*/

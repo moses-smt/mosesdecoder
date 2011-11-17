@@ -1,7 +1,7 @@
 #ifndef __INFOSHASHER_H__
 #define __INFOSHASHER_H__
+
 #include <string>
-// #include <ext/hash_map>
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -26,6 +26,6 @@ public:
 
 };
 
-
 }
-#endif
+
+#endif  // __INFOSHASHER_H__

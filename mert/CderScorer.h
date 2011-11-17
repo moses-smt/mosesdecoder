@@ -3,20 +3,20 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "ScoreData.h"
 #include "Scorer.h"
 
-
 using namespace std;
-
 
 class CderScorer: public StatisticsBasedScorer
 {
 public:
-  CderScorer(const string& config);
+  explicit CderScorer(const string& config);
+  ~CderScorer();
+
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry)
   {
@@ -30,30 +30,25 @@ public:
   }
   virtual void prepareStatsVector(size_t sid, const string& text, vector<int>& stats);
 
-  size_t NumberOfScores() {
+  virtual size_t NumberOfScores() const {
     return 2;
-  };
+  }
 
-  float calculateScore(const vector<int>& comps);
+  virtual float calculateScore(const vector<int>& comps) const;
 
 private:
   typedef vector<int> sent_t;
   vector<vector<sent_t> > ref_sentences;
 
-  vector<int> computeCD(const sent_t& cand, const sent_t& ref);
-  int distance(int word1, int word2) 
+  vector<int> computeCD(const sent_t& cand, const sent_t& ref) const;
+  int distance(int word1, int word2) const
   {
-	  if (word1 == word2) 
-		  return 0;
-	  else 
-		  return 1;
+    return word1 == word2 ? 0 : 1;
   }
 
-  //no copy
+  // no copying allowed
   CderScorer(const CderScorer&);
-  ~CderScorer() {};
   CderScorer& operator=(const CderScorer&);
 };
 
-
-#endif
+#endif  // __CDERSCORER_H__

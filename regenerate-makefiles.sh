@@ -46,7 +46,7 @@ fi
 
 if [ -z "$LIBTOOLIZE" ]; then
     LIBTOOLIZE=`which libtoolize`
-    
+
     if [ -z "$LIBTOOLIZE" ]; then
         LIBTOOLIZE=`which glibtoolize`
     fi
@@ -70,8 +70,19 @@ $AUTOMAKE || die "automake failed"
 echo "Calling $LIBTOOLIZE"
 $LIBTOOLIZE || die "libtoolize failed"
 
+case `uname -s` in
+    Darwin)
+        cores=$(sysctl -n hw.ncpu)
+        ;;
+    Linux)
+        cores=$(cat /proc/cpuinfo | fgrep -c processor)
+        ;;
+    *)
+        echo "Unknown platform."
+        cores=
+        ;;
+esac
 
-cores=$(cat /proc/cpuinfo | fgrep -c processor)
 if [ -z "$cores" ]; then
     cores=2 # assume 2 cores if we can't figure it out
     echo >&2 "Assuming 2 cores"
@@ -81,7 +92,7 @@ fi
 
 echo
 echo "You should now be able to configure and build:"
-echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
+echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
 echo "   make -j ${cores}"
 echo
 

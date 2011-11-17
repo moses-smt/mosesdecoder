@@ -1,52 +1,47 @@
 #ifndef __PERSCORER_H__
 #define __PERSCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
 #include <set>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "ScoreData.h"
 #include "Scorer.h"
-
 
 using namespace std;
 
+class ScoreStats;
+
 /**
-  * Implementation of position-independent word error rate. This is defined
-  * as 1 - (correct - max(0,output_length - ref_length)) / ref_length
-  * In fact, we ignore the " 1 - " so that it can be maximised.
- **/
+ * An implementation of position-independent word error rate.
+ * This is defined as
+ *   1 - (correct - max(0,output_length - ref_length)) / ref_length
+ * In fact, we ignore the " 1 - " so that it can be maximised.
+ */
 class PerScorer: public StatisticsBasedScorer
 {
 public:
-  PerScorer(const string& config = "") : StatisticsBasedScorer("PER",config) {}
+  explicit PerScorer(const string& config = "");
+  ~PerScorer();
+
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 
-  virtual void whoami() {
+  virtual void whoami() const {
     cerr << "I AM PerScorer" << std::endl;
   }
 
-  size_t NumberOfScores() {
+  virtual size_t NumberOfScores() const {
     // cerr << "PerScorer: 3" << endl;
     return 3;
-  };
+  }
 
-//protected:
-
-  virtual float calculateScore(const vector<int>& comps) ;
+  virtual float calculateScore(const vector<int>& comps) const;
 
 private:
-
-  //no copy
+  // no copying allowed
   PerScorer(const PerScorer&);
-  ~PerScorer() {};
   PerScorer& operator=(const PerScorer&);
 
   // data extracted from reference files
@@ -54,4 +49,4 @@ private:
   vector<multiset<int> > _reftokens;
 };
 
-#endif //__PERSCORER_H
+#endif  // __PERSCORER_H__

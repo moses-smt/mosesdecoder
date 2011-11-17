@@ -1,7 +1,6 @@
 #ifndef __BESTSHIFTSTRUCT_H__
 #define __BESTSHIFTSTRUCT_H__
 
-
 #include <vector>
 #include <stdio.h>
 #include <string>
@@ -47,4 +46,5 @@ public:
 };
 
 }
-#endif
+
+#endif  // __BESTSHIFTSTRUCT_H__

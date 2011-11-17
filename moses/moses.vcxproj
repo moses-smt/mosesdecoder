@@ -41,6 +41,8 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\boost\boost_1_47;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\boost\boost_1_47;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -90,10 +92,10 @@
     <ClCompile Include="src\ChartTranslationOption.cpp" />
     <ClCompile Include="src\ChartTranslationOptionCollection.cpp" />
     <ClCompile Include="src\ChartTranslationOptionList.cpp" />
+    <ClCompile Include="src\ChartTrellisDetour.cpp" />
+    <ClCompile Include="src\ChartTrellisDetourQueue.cpp" />
     <ClCompile Include="src\ChartTrellisNode.cpp" />
     <ClCompile Include="src\ChartTrellisPath.cpp" />
-    <ClCompile Include="src\ChartTrellisPathCollection.cpp" />
-    <ClCompile Include="src\ChartTrellisPathList.cpp" />
     <ClCompile Include="src\ConfusionNet.cpp" />
     <ClCompile Include="src\DecodeFeature.cpp" />
     <ClCompile Include="src\DecodeGraph.cpp" />
@@ -207,6 +209,8 @@
     <ClInclude Include="src\ChartTranslationOption.h" />
     <ClInclude Include="src\ChartTranslationOptionCollection.h" />
     <ClInclude Include="src\ChartTranslationOptionList.h" />
+    <ClInclude Include="src\ChartTrellisDetour.h" />
+    <ClInclude Include="src\ChartTrellisDetourQueue.h" />
     <ClInclude Include="src\ChartTrellisNode.h" />
     <ClInclude Include="src\ChartTrellisPath.h" />
     <ClInclude Include="src\ChartTrellisPathCollection.h" />

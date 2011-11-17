@@ -23,19 +23,21 @@ class Scorer;
 
 class Data
 {
-protected:
-  ScoreData* scoredata;
-  FeatureData* featdata;
-
 private:
   Scorer* theScorer;
   std::string score_type;
-  size_t number_of_scores; //number of scores
+  size_t number_of_scores;
   bool _sparse_flag;
 
+protected:
+  // TODO: Use smart pointers for exceptional-safety.
+  ScoreData* scoredata;
+  FeatureData* featdata;
+
 public:
-  Data(Scorer& sc);
-  ~Data() {};
+  explicit Data(Scorer& sc);
+  Data();
+  ~Data();
 
   inline void clear() {
     scoredata->clear();
@@ -44,10 +46,11 @@ public:
 
   ScoreData* getScoreData() {
     return scoredata;
-  };
+  }
+
   FeatureData* getFeatureData() {
     return featdata;
-  };
+  }
 
   Scorer* getScorer() {
     return theScorer;
@@ -62,7 +65,7 @@ public:
   inline std::string Features() const {
     return featdata->Features();
   }
-  inline void Features(const std::string f) {
+  inline void Features(const std::string &f) {
     featdata->Features(f);
   }
 
@@ -87,29 +90,26 @@ public:
     scoredata->save(scorefile, bin);
   }
 
-  inline bool existsFeatureNames() {
+  inline bool existsFeatureNames() const {
     return featdata->existsFeatureNames();
-  };
+  }
 
-  inline std::string getFeatureName(size_t idx) {
+  inline std::string getFeatureName(size_t idx) const {
     return featdata->getFeatureName(idx);
-  };
+  }
 
-  inline size_t getFeatureIndex(const std::string& name) {
+  inline size_t getFeatureIndex(const std::string& name) const {
     return featdata->getFeatureIndex(name);
-  };
-
-	void sampleRankedPairs( const std::string &rankedPairFile );
-  void outputSample( std::ostream &out, const FeatureStats &f1, const FeatureStats &f2 );
+  }
 
   /**
-   *  Create shard_count shards. If shard_size == 0, then the shards are non-overlapping
-   *  and exhaust the data. If 0 < shard_size <= 1, then shards are chosen by sampling 
-   *  the data (with replacement) and shard_size is interpreted as the proportion
+   * Create shard_count shards. If shard_size == 0, then the shards are non-overlapping
+   * and exhaust the data. If 0 < shard_size <= 1, then shards are chosen by sampling
+   * the data (with replacement) and shard_size is interpreted as the proportion
    * of the total size.
    */
-  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig, 
-       std::vector<Data>& shards);
+  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig,
+                    std::vector<Data>& shards);
 };
 
-#endif
+#endif  // DATA_H

@@ -232,6 +232,7 @@ libmoses_la_SOURCES = \
         LM/Factory.cpp \
         LM/Implementation.cpp \
         LM/Joint.cpp \
+				LM/Ken.cpp \
         LM/MultiFactor.cpp \
         LM/Remote.cpp \
         LM/SingleFactor.cpp \
@@ -353,8 +354,4 @@ if SYN_LM
 libmoses_la_SOURCES += SyntacticLanguageModel.cpp
 endif
 
-if KEN_LM
-libmoses_la_SOURCES += LM/Ken.cpp
-endif
-
-libmoses_la_LIBADD = $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)
+libmoses_la_LIBADD = $(top_srcdir)/util/libkenutil.la $(top_srcdir)/lm/libkenlm.la $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)

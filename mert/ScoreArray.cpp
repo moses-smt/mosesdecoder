@@ -6,12 +6,13 @@
  *
  */
 
-#include <fstream>
 #include "ScoreArray.h"
 #include "Util.h"
+#include "FileStream.h"
 
-ScoreArray::ScoreArray(): idx("")
-{};
+
+ScoreArray::ScoreArray()
+    : number_of_scores(0), idx("") {}
 
 void ScoreArray::savetxt(std::ofstream& outFile, const std::string& sctype)
 {
@@ -132,17 +133,15 @@ void ScoreArray::merge(ScoreArray& e)
     add(e.get(i));
 }
 
-bool ScoreArray::check_consistency()
+bool ScoreArray::check_consistency() const
 {
-  size_t sz = NumberOfScores();
-
+  const size_t sz = NumberOfScores();
   if (sz == 0)
     return true;
 
-  for (scorearray_t::iterator i=array_.begin(); i!=array_.end(); i++)
-    if (i->size()!=sz)
+  for (scorearray_t::const_iterator i = array_.begin(); i != array_.end(); ++i) {
+    if (i->size() != sz)
       return false;
+  }
   return true;
 }
-
-

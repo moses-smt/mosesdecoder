@@ -9,44 +9,51 @@
 #ifndef SCORE_STATS_H
 #define SCORE_STATS_H
 
-using namespace std;
-
-#include <limits>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
+#include <cstring>
 
-#include "Util.h"
+#include "Types.h"
 
-#define SCORE_STATS_MIN (numeric_limits<ScoreStatsType>::min())
-#define ATOSST(str) ((ScoreStatsType) atoi(str))
-
-#define scorebytes_ (entries_*sizeof(ScoreStatsType))
+using namespace std;
 
 class ScoreStats
 {
 private:
-  scorestats_t array_;
-  size_t entries_;
   size_t available_;
+  size_t entries_;
+
+  // TODO: Use smart pointer for exceptional-safety.
+  scorestats_t array_;
 
 public:
   ScoreStats();
-  ScoreStats(const size_t size);
-  ScoreStats(const ScoreStats &stats);
-  ScoreStats(std::string &theString);
-  ScoreStats& operator=(const ScoreStats &stats);
-
+  explicit ScoreStats(const size_t size);
+  explicit ScoreStats(std::string &theString);
   ~ScoreStats();
 
-  bool isfull() {
-    return (entries_ < available_)?0:1;
+  // We intentionally allow copying.
+  ScoreStats(const ScoreStats &stats);
+  ScoreStats& operator=(const ScoreStats &stats);
+
+  void Copy(const ScoreStats &stats);
+
+  bool isfull() const {
+    return (entries_ < available_) ? 0 : 1;
   }
+
   void expand();
   void add(ScoreStatsType v);
 
-  inline void clear() {
-    memset((void*) array_,0,scorebytes_);
+  void clear() {
+    memset((void*)array_, 0, GetArraySizeWithBytes());
+  }
+
+  void reset() {
+    entries_ = 0;
+    clear();
   }
 
   inline ScoreStatsType get(size_t i) {
@@ -62,8 +69,13 @@ public:
   void set(std::string &theString);
 
   inline size_t bytes() const {
-    return scorebytes_;
+    return GetArraySizeWithBytes();
   }
+
+  size_t GetArraySizeWithBytes() const {
+    return entries_ * sizeof(ScoreStatsType);
+  }
+
   inline size_t size() const {
     return entries_;
   }
@@ -78,22 +90,14 @@ public:
     savetxt("/dev/stdout");
   }
 
-
-
   void loadtxt(const std::string &file);
   void loadtxt(ifstream& inFile);
   void loadbin(ifstream& inFile);
 
-
-  inline void reset() {
-    entries_ = 0;
-    clear();
-  }
-
-  /**write the whole object to a stream*/
+  /**
+   * Write the whole object to a stream.
+   */
   friend ostream& operator<<(ostream& o, const ScoreStats& e);
 };
 
-
-#endif
-
+#endif  // SCORE_STATS_H
