@@ -27,9 +27,6 @@
 /* flag for IRSTLM */
 #undef HAVE_IRSTLM
 
-/* flag for KENLM */
-#undef HAVE_KENLM
-
 /* Define to 1 if you have the `oolm' library (-loolm). */
 #undef HAVE_LIBOOLM
 

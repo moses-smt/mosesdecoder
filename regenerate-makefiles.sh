@@ -92,7 +92,7 @@ fi
 
 echo
 echo "You should now be able to configure and build:"
-echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
+echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
 echo "   make -j ${cores}"
 echo
 
