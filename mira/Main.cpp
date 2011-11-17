@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
-#include <cassert>
 #include <string>
 #include <vector>
 #include <map>
@@ -615,9 +614,12 @@ int main(int argc, char** argv) {
 				}
 
 				// set weight for bleu feature to 0 before optimizing
-				const ScoreProducer* sp = featureFunctions.back();
-				assert(sp->GetScoreProducerWeightShortName() == "bl");
-				mosesWeights.Assign(sp, 0);
+				vector<const ScoreProducer*>::const_iterator iter = featureFunctions.begin();
+				for (; iter != featureFunctions.end(); ++iter)
+				  if ((*iter)->GetScoreProducerWeightShortName() == "bl") {
+				    mosesWeights.Assign(*iter, 0);
+				    break;
+				  }
 
 				// take logs of feature values
 				if (logFeatureValues) {
@@ -744,51 +746,60 @@ int main(int argc, char** argv) {
 
 			// Dump weights?
 			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
-				ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
-				if (accumulateWeights) {
-					tmpAverageWeights.DivideEquals(numberOfUpdates);
-				} else {
-					tmpAverageWeights.DivideEquals(numberOfUpdatesThisEpoch);
-				}
-
+			  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
+			  bool proceed = false;
+			  if (accumulateWeights) {
+			    if (numberOfUpdates > 0) {
+			      tmpAverageWeights.DivideEquals(numberOfUpdates);
+			      proceed = true;
+			    }
+			  } else {
+			    if (numberOfUpdatesThisEpoch > 0) {
+			      tmpAverageWeights.DivideEquals(numberOfUpdatesThisEpoch);
+			      proceed = true;
+			    }
+			  }
+			  
+			  if (proceed) {
 #ifdef MPI_ENABLE
-				// average across processes
-				mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
+			    // average across processes
+			    mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
 #endif
 #ifndef MPI_ENABLE
-				mixedAverageWeights = tmpAverageWeights;
+			    mixedAverageWeights = tmpAverageWeights;
 #endif
-				if (rank == 0 && !weightDumpStem.empty()) {
-					// divide by number of processes
-					mixedAverageWeights.DivideEquals(size);
-
-					// normalise weights after averaging
-					if (normaliseWeights) {
-						mixedAverageWeights.L1Normalise();
-					}
-
-					// dump final average weights
-					ostringstream filename;
-					if (epoch < 10) {
-							filename << weightDumpStem << "_0" << epoch;
-					} else {
-						filename << weightDumpStem << "_" << epoch;
-					}
-
-					if (weightDumpFrequency > 1) {
-						filename << "_" << weightEpochDump;
-					}
-
-					if (accumulateWeights) {
-						cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
-					} else {
-						cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
-					}
-
-					cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
-					mixedAverageWeights.Save(filename.str());
-					++weightEpochDump;
-				}
+			    if (rank == 0 && !weightDumpStem.empty()) {
+			      // divide by number of processes
+			      mixedAverageWeights.DivideEquals(size);
+			      
+			      // normalise weights after averaging
+			      if (normaliseWeights) {
+				mixedAverageWeights.L1Normalise();
+			      }
+			      
+			      // dump final average weights
+			      ostringstream filename;
+			      if (epoch < 10) {
+				filename << weightDumpStem << "_0" << epoch;
+			      } else {
+				filename << weightDumpStem << "_" << epoch;
+			      }
+			      
+			      if (weightDumpFrequency > 1) {
+				filename << "_" << weightEpochDump;
+			      }
+			      
+			      if (accumulateWeights) {
+				cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+			      } else {
+				cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+			      }
+			      
+			      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
+			      mixedAverageWeights.Save(filename.str());
+			      ++weightEpochDump;
+			    }
+			  }
 			}// end dumping
 		} // end of shard loop, end of this epoch
 
