@@ -59,16 +59,17 @@ echo >&2 "Detected autoconf: $($AUTOCONF --version | head -n1)"
 echo >&2 "Detected automake: $($AUTOMAKE --version | head -n1)"
 echo >&2 "Detected libtoolize: $($LIBTOOLIZE --version | head -n1)"
 
-echo "Calling $ACLOCAL..."
+echo "Calling $ACLOCAL -I m4..."
 $ACLOCAL -I m4 || die "aclocal failed"
+
 echo "Calling $AUTOCONF..."
 $AUTOCONF  || die "autoconf failed"
-rm ltmain.sh 2>/dev/null
-touch ltmain.sh
-echo "Calling $AUTOMAKE..."
-$AUTOMAKE || die "automake failed"
+
 echo "Calling $LIBTOOLIZE"
 $LIBTOOLIZE || die "libtoolize failed"
+
+echo "Calling $AUTOMAKE --add-missing..."
+$AUTOMAKE --add-missing || die "automake failed"
 
 case `uname -s` in
     Darwin)
@@ -92,7 +93,7 @@ fi
 
 echo
 echo "You should now be able to configure and build:"
-echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
+echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
 echo "   make -j ${cores}"
 echo
 
