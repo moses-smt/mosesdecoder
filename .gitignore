@@ -12,10 +12,12 @@ config.h
 config.log
 config.status
 configure
-kenlm/.deps/
-kenlm/.libs/
-kenlm/build_binary
-kenlm/query
+lm/.deps/
+lm/.libs/
+util/.deps/
+util/.libs/
+lm/build_binary
+lm/query
 libtool
 mert/.deps/
 mert/Makefile
