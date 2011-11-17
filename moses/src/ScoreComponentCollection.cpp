@@ -93,10 +93,14 @@ void ScoreComponentCollection::Save(ostream& out) const {
   for (; iter != s_scoreIndexes.end(); ++iter ) {
     string name = iter->first->GetScoreProducerDescription();
     IndexPair ip = iter->second; // feature indices
-    for (size_t i=ip.first; i < ip.second; ++i) {
-      ostringstream fullname;
-      fullname << name << "_" << (i + 1 - ip.first);
-      out << fullname.str() << " " << m_scores[i] << endl;
+    if (ip.second-ip.first == 1) {
+      out << name << " " << m_scores[ip.first] << endl;
+    } else {
+      for (size_t i=ip.first; i < ip.second; ++i) {
+        ostringstream fullname;
+        fullname << name << "_" << (i + 1 - ip.first);
+        out << fullname.str() << " " << m_scores[i] << endl;
+      }
     }
   }
 
