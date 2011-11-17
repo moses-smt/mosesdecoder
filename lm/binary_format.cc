@@ -20,11 +20,30 @@ const char kMagicBytes[] = "mmap lm http://kheafield.com/code format version 5\n
 const char kMagicIncomplete[] = "mmap lm http://kheafield.com/code incomplete\n";
 const long int kMagicVersion = 5;
 
-// Test values.  
-struct Sanity {
+// Old binary files built on 32-bit machines have this header.  
+// TODO: eliminate with next binary release.
+struct OldSanity {
   char magic[sizeof(kMagicBytes)];
   float zero_f, one_f, minus_half_f;
   WordIndex one_word_index, max_word_index;
+  uint64_t one_uint64;
+
+  void SetToReference() {
+    std::memset(this, 0, sizeof(OldSanity));
+    std::memcpy(magic, kMagicBytes, sizeof(magic));
+    zero_f = 0.0; one_f = 1.0; minus_half_f = -0.5;
+    one_word_index = 1;
+    max_word_index = std::numeric_limits<WordIndex>::max();
+    one_uint64 = 1;
+  }
+};
+
+
+// Test values aligned to 8 bytes.    
+struct Sanity {
+  char magic[ALIGN8(sizeof(kMagicBytes))];
+  float zero_f, one_f, minus_half_f;
+  WordIndex one_word_index, max_word_index, padding_to_8;
   uint64_t one_uint64;
 
   void SetToReference() {
@@ -33,6 +52,7 @@ struct Sanity {
     zero_f = 0.0; one_f = 1.0; minus_half_f = -0.5;
     one_word_index = 1;
     max_word_index = std::numeric_limits<WordIndex>::max();
+    padding_to_8 = 0;
     one_uint64 = 1;
   }
 };
@@ -76,8 +96,12 @@ uint8_t *GrowForSearch(const Config &config, std::size_t vocab_pad, std::size_t 
   std::size_t adjusted_vocab = backing.vocab.size() + vocab_pad;
   if (config.write_mmap) {
     // Grow the file to accomodate the search, using zeros.  
-    if (-1 == ftruncate(backing.file.get(), adjusted_vocab + memory_size))
-      UTIL_THROW(util::ErrnoException, "ftruncate on " << config.write_mmap << " to " << (adjusted_vocab + memory_size) << " failed");
+    try {
+      util::ResizeOrThrow(backing.file.get(), adjusted_vocab + memory_size);
+    } catch (util::ErrnoException &e) {
+      e << " for file " << config.write_mmap;
+      throw e;
+    }
 
     // We're skipping over the header and vocab for the search space mmap.  mmap likes page aligned offsets, so some arithmetic to round the offset down.  
     std::size_t page_size = util::SizePage();
@@ -96,7 +120,7 @@ void FinishFile(const Config &config, ModelType model_type, unsigned int search_
     util::SyncOrThrow(backing.search.get(), backing.search.size());
     util::SyncOrThrow(backing.vocab.get(), backing.vocab.size());
     // header and vocab share the same mmap.  The header is written here because we know the counts.  
-    Parameters params;
+    Parameters params = Parameters();
     params.counts = counts;
     params.fixed.order = counts.size();
     params.fixed.probing_multiplier = config.probing_multiplier;
@@ -132,6 +156,10 @@ bool IsBinaryFormat(int fd) {
     if ((end_ptr != begin_version) && version != kMagicVersion) {
       UTIL_THROW(FormatLoadException, "Binary file has version " << version << " but this implementation expects version " << kMagicVersion << " so you'll have to use the ARPA to rebuild your binary");
     }
+
+    OldSanity old_sanity = OldSanity();
+    old_sanity.SetToReference();
+    UTIL_THROW_IF(!memcmp(memory.get(), &old_sanity, sizeof(OldSanity)), FormatLoadException, "Looks like this is an old 32-bit format.  The old 32-bit format has been removed so that 64-bit and 32-bit files are exchangeable.");
     UTIL_THROW(FormatLoadException, "File looks like it should be loaded with mmap, but the test values don't match.  Try rebuilding the binary format LM using the same code revision, compiler, and architecture");
   }
   return false;
@@ -172,9 +200,8 @@ uint8_t *SetupBinary(const Config &config, const Parameters &params, std::size_t
   if (config.enumerate_vocab && !params.fixed.has_vocabulary)
     UTIL_THROW(FormatLoadException, "The decoder requested all the vocabulary strings, but this binary file does not have them.  You may need to rebuild the binary file with an updated version of build_binary.");
 
-  if (config.enumerate_vocab) {
-    util::SeekOrThrow(backing.file.get(), total_map);
-  }
+  // Seek to vocabulary words
+  util::SeekOrThrow(backing.file.get(), total_map);
   return reinterpret_cast<uint8_t*>(backing.search.get()) + TotalHeaderSize(params.counts.size());
 }
 

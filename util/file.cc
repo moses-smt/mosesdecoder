@@ -1,7 +1,6 @@
 #include "util/file.hh"
 
 #include "util/exception.hh"
-#include "util/portability.hh"
 
 #include <cstdlib>
 #include <cstdio>
@@ -14,6 +13,7 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#include <io.h>
 #endif
 
 namespace util {
@@ -43,10 +43,27 @@ int OpenReadOrThrow(const char *name) {
 }
 
 uint64_t SizeFile(int fd) {
+#if defined(_WIN32) || defined(_WIN64)
+  __int64 ret = _filelengthi64(fd);
+  return (ret == -1) ? kBadSize : ret;
+#else
   struct stat sb;
   if (fstat(fd, &sb) == -1 || (!sb.st_size && !S_ISREG(sb.st_mode))) return kBadSize;
   return sb.st_size;
+#endif
 }
+
+void ResizeOrThrow(int fd, uint64_t to) {
+#if defined(_WIN32) || defined(_WIN64)
+  UTIL_THROW_IF(_chsize_s(fd, to), ErrnoException, "Resizing to " << to << " bytes failed");
+#else
+  UTIL_THROW_IF(ftruncate(fd, to), ErrnoException, "Resizing to " << to << " bytes failed");
+#endif
+}
+
+#ifdef WIN32
+typedef int ssize_t;
+#endif
 
 void ReadOrThrow(int fd, void *to_void, std::size_t amount) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
