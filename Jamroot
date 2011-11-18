@@ -5,8 +5,14 @@ project : default-build
   <link>static
   ;
 
-lib boost_thread : : <link>shared ;
+#The linked Boost libraries we use so far.  Link shared because most people don't have the static version.  
+import boost ;
+boost.use-project ;
+alias boost_thread : /boost//thread : <link>shared ;
+alias boost_unit_test_framework : /boost//unit_test_framework : <link>shared ;
+alias boost_program_options : /boost//program_options : <link>shared ;
 
+import option ;
 if [ option.get "notrace" : no : yes ] = yes
 {
   trace = ;
@@ -17,8 +23,20 @@ if [ option.get "notrace" : no : yes ] = yes
 project : requirements 
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
-  <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES $(trace)
+  <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES <define>USE_HYPO_POOL
+  $(trace)
   ;
+
+# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
+rule trim-nl ( str )
+{
+  return [ MATCH "([^
+]*)" : $(str) ] ;
+}
+rule _shell ( cmd )
+{
+  return [ trim-nl [ SHELL $(cmd) ] ] ;
+}
 
 path-constant TOP : . ;
 
@@ -29,6 +47,7 @@ build-project OnDiskPt/src ;
 build-project CreateOnDisk/src ;
 build-project moses-chart-cmd/src ;
 build-project moses-cmd/src ;
+build-project mert ;
 
 install dist : 
   lm//query
@@ -36,4 +55,5 @@ install dist :
   moses-chart-cmd/src//moses_chart 
   moses-cmd/src//programs
   CreateOnDisk/src//CreateOnDisk
+  mert//programs
   : <location>dist <install-type>EXE <install-dependencies>on <dll-path>$(TOP)/dist <link>shared:<install-type>LIB ;

@@ -1,0 +1,43 @@
+lib m ;
+lib z ;
+
+lib mert_lib :
+Util.cpp
+FileStream.cpp
+Timer.cpp
+ScoreStats.cpp ScoreArray.cpp ScoreData.cpp
+ScoreDataIterator.cpp
+FeatureStats.cpp FeatureArray.cpp FeatureData.cpp
+FeatureDataIterator.cpp
+Data.cpp
+BleuScorer.cpp
+Point.cpp
+PerScorer.cpp
+Scorer.cpp
+ScorerFactory.cpp
+Optimizer.cpp
+TERsrc/alignmentStruct.cpp
+TERsrc/hashMap.cpp
+TERsrc/hashMapStringInfos.cpp
+TERsrc/stringHasher.cpp
+TERsrc/terAlignment.cpp
+TERsrc/terShift.cpp
+TERsrc/hashMapInfos.cpp
+TERsrc/infosHasher.cpp
+TERsrc/stringInfosHasher.cpp
+TERsrc/tercalc.cpp
+TERsrc/tools.cpp
+TerScorer.cpp
+CderScorer.cpp
+MergeScorer.cpp
+../util//util m z ;
+
+exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
+
+exe extractor : extractor.cpp mert_lib ;
+
+exe evaluator : evaluator.cpp mert_lib ;
+
+exe pro : pro.cpp mert_lib ..//boost_program_options ;
+
+alias programs : mert extractor evaluator pro ;

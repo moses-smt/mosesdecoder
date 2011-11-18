@@ -1,16 +1,5 @@
 import option ;
 
-# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str )
-{
-  return [ MATCH "([^
-]*)" : $(str) ] ;
-}
-rule _shell ( cmd )
-{
-  return [ trim-nl [ SHELL $(cmd) ] ] ;
-}
-
 with-irstlm = [ option.get "with-irstlm" ] ;
 if $(with-irstlm) != ""
 {

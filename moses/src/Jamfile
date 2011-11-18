@@ -3,6 +3,8 @@ alias headers : ../../util//util : : : <include>. ;
 lib z ;
 alias InputFileStream : InputFileStream.cpp z headers ;
 
+alias ThreadPool : ThreadPool.cpp ;
+
 if [ option.get "with-synlm" : no : yes ] = yes
 {
   lib m ;
@@ -103,7 +105,6 @@ SquareMatrix.cpp
 StaticData.cpp
 TargetPhrase.cpp
 TargetPhraseCollection.cpp
-ThreadPool.cpp
 Timer.cpp
 TranslationOption.cpp
 TranslationOptionCollection.cpp
@@ -122,5 +123,4 @@ WordsBitmap.cpp
 WordsRange.cpp
 XmlOption.cpp
 
-synlm
-InputFileStream LM//LM headers ;
+synlm ThreadPool InputFileStream LM//LM headers ;
