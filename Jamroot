@@ -1,0 +1,39 @@
+project : default-build
+  <threading>multi
+  <warnings>on
+  <variant>release
+  <link>static
+  ;
+
+lib boost_thread : : <link>shared ;
+
+if [ option.get "without-trace" : no ] = no
+{
+  trace = ;
+} else {
+  trace = <define>TRACE_ENABLE=1 ;
+}
+
+project : requirements 
+  <threading>multi:<define>WITH_THREADS
+  <threading>multi:<library>boost_thread
+  <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES $(trace)
+  ;
+
+path-constant TOP : . ;
+
+build-project lm ; 
+build-project util ;
+build-project moses/src ;
+build-project OnDiskPt/src ;
+build-project CreateOnDisk/src ;
+build-project moses-chart-cmd/src ;
+build-project moses-cmd/src ;
+
+install dist : 
+  lm//query
+  lm//build_binary
+  moses-chart-cmd/src//moses_chart 
+  moses-cmd/src//programs
+  CreateOnDisk/src//CreateOnDisk
+  : <location>dist <install-type>EXE <install-dependencies>on <dll-path>$(TOP)/dist <link>shared:<install-type>LIB ;
