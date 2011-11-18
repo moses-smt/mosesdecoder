@@ -138,7 +138,7 @@ public:
   void CreateUnknownWord(const Word &sourceWord);
 
   inline size_t hash() const {
-    return util::MurmurHashNative(m_factorArray, MAX_NUM_FACTORS, m_isNonTerminal);
+    return util::MurmurHashNative(m_factorArray, MAX_NUM_FACTORS*sizeof(Factor*), m_isNonTerminal);
   }
 };
 
