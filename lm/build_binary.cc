@@ -194,10 +194,9 @@ int main(int argc, char *argv[]) {
   }
   catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
-    std::cerr << "ERROR" << std::endl;
     return 1;
   }
 
-  std::cerr << "SUCCESS" << std::endl;
+  std::cerr << "KenLM build_binary SUCCESS" << std::endl;
   return 0;
 }
