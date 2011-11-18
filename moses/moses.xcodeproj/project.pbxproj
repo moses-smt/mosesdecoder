@@ -1232,6 +1232,7 @@
 					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
+					../,
 					src,
 					../irstlm/include,
 					../srilm/include,
@@ -1264,6 +1265,7 @@
 					_LARGE_FILES,
 				);
 				HEADER_SEARCH_PATHS = (
+					../,
 					src,
 					../irstlm/include,
 					../srilm/include,
