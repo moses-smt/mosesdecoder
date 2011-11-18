@@ -1,0 +1,58 @@
+import option ;
+
+# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
+rule trim-nl ( str )
+{
+  return [ MATCH "([^
+]*)" : $(str) ] ;
+}
+rule _shell ( cmd )
+{
+  return [ trim-nl [ SHELL $(cmd) ] ] ;
+}
+
+with-irstlm = [ option.get "with-irstlm" ] ;
+if $(with-irstlm) != ""
+{
+  lib irstlm : : <search>$(with-irstlm)/lib ;
+  obj IRST.o : IRST.cpp ../../../util//util : <include>$(with-irstlm)/include <include>.. ;
+  alias irst : IRST.o irstlm : : : <define>LM_IRST ;
+  echo "" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "" ;
+} else {
+  alias irst ;
+}
+
+with-srilm = [ option.get "with-srilm" ] ;
+if $(with-srilm) != ""
+{
+  if [ option.get "with-srilm-dynamic" ] != ""
+  {
+    alias sri-libs : srilm ;
+  } else {
+    sri-arch = [ option.get "with-srilm-arch" ] ;
+    sri-arch ?= [ _shell $(with-srilm)/sbin/machine-type ] ;
+    sri-lib = <search>$(with-srilm)/lib/$(sri-arch) <search>$(with-srilm)/flm/obj/$(sri-arch) ;
+
+    lib flm : : $(sri-lib) ;
+    lib misc : flm : $(sri-lib) ;
+    lib dstruct : misc flm : $(sri-lib) ;
+    lib oolm : dstruct misc flm : $(sri-lib) ;
+
+    alias sri-libs : oolm dstruct misc flm ;
+  }
+
+  obj SRI.o : SRI.cpp ../../../util//util : <include>$(with-srilm)/include <include>.. ;
+  obj ParallelBackoff.o : ParallelBackoff.cpp ../../../util//util : <include>$(with-srilm)/include <include>.. ;
+  alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+} else {
+  alias sri ;
+}
+
+lib LM : Base.cpp Factory.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp 
+  ../../../lm//lm 
+  irst sri
+: <include>.. $(requirements) : : <include>.. ;
