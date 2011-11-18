@@ -49,7 +49,7 @@ bool BilingualDynSuffixArray::Load(
 	LoadCorpus(sourceStrme, m_inputFactors, Input, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
 	cerr << "Loading target corpus...\n";	
 	LoadCorpus(targetStrme, m_outputFactors, Output, *m_trgCorpus, m_trgSntBreaks, m_trgVocab);
-	assert(m_srcSntBreaks.size() == m_trgSntBreaks.size());
+	CHECK(m_srcSntBreaks.size() == m_trgSntBreaks.size());
 
 	// build suffix arrays and auxilliary arrays
 	cerr << "Building Source Suffix Array...\n"; 
@@ -76,7 +76,7 @@ int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align)
 	std::vector<int> vtmp;
 	while(getline(align, line)) {
 		Utils::splitToInt(line, vtmp, "- ");
-		assert(vtmp.size() % 2 == 0);
+		CHECK(vtmp.size() % 2 == 0);
 		std::vector<short> vAlgn;	// store as short ints for memory
         for (std::vector<int>::const_iterator itr = vtmp.begin();
             itr != vtmp.end(); ++itr) {
@@ -90,7 +90,7 @@ int BilingualDynSuffixArray::LoadRawAlignments(string& align) {
   // stores the alignments in the raw file format 
   vector<int> vtmp;
   Utils::splitToInt(align, vtmp, "- ");
-  assert(vtmp.size() % 2 == 0);
+  CHECK(vtmp.size() % 2 == 0);
   vector<short> vAlgn;  // store as short ints for memory
   for (std::vector<int>::const_iterator itr = vtmp.begin();
       itr != vtmp.end(); ++itr) {
@@ -108,7 +108,7 @@ int BilingualDynSuffixArray::LoadAlignments(InputFileStream& align)
 	
 	while(getline(align, line)) {
 		Utils::splitToInt(line, vtmp, "- ");
-		assert(vtmp.size() % 2 == 0);
+		CHECK(vtmp.size() % 2 == 0);
 	
 		int sourceSize = GetSourceSentenceSize(sntIndex);
 		int targetSize = GetTargetSentenceSize(sntIndex);
@@ -117,8 +117,8 @@ int BilingualDynSuffixArray::LoadAlignments(InputFileStream& align)
 		for(int i=0; i < (int)vtmp.size(); i+=2) {
 		int sourcePos = vtmp[i];
 		int targetPos = vtmp[i+1];
-		assert(sourcePos < sourceSize);
-		assert(targetPos < targetSize);
+		CHECK(sourcePos < sourceSize);
+		CHECK(targetPos < targetSize);
 		
 			curSnt.alignedList[sourcePos].push_back(targetPos);	// list of target nodes for each source word 
 			curSnt.numberAligned[targetPos]++; // cnt of how many source words connect to this target word 
@@ -240,7 +240,7 @@ pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& p
 				CacheWordProbs(srcWord);
 				itrCache = m_wordPairCache.find(wordpair); // search cache again
 			}
-			assert(itrCache != m_wordPairCache.end());
+			CHECK(itrCache != m_wordPairCache.end());
 			srcSumPairProbs += itrCache->second.first;
 			targetProbs[wordpair] = itrCache->second.second;
 		}
@@ -255,7 +255,7 @@ pair<float, float> BilingualDynSuffixArray::GetLexicalWeight(const PhrasePair& p
           CacheWordProbs(srcWord);
 					itrCache = m_wordPairCache.find(wordpair); // search cache again
 				}
-				assert(itrCache != m_wordPairCache.end());
+				CHECK(itrCache != m_wordPairCache.end());
 				srcSumPairProbs += itrCache->second.first;
 				targetProbs[wordpair] = itrCache->second.second;	
 			} 
@@ -306,13 +306,13 @@ void BilingualDynSuffixArray::CacheWordProbs(wordID_t srcWord) const
 	std::map<wordID_t, int> counts;
 	std::vector<wordID_t> sword(1, srcWord), wrdIndices;
 	bool ret = m_srcSA->GetCorpusIndex(&sword, &wrdIndices);
-	assert(ret);
+	CHECK(ret);
 	std::vector<int> sntIndexes = GetSntIndexes(wrdIndices, 1, m_srcSntBreaks);	
 	float denom(0);
 	// for each occurrence of this word 
 	for(size_t snt = 0; snt < sntIndexes.size(); ++snt) {
 		int sntIdx = sntIndexes.at(snt); // get corpus index for sentence
-		assert(sntIdx != -1); 
+		CHECK(sntIdx != -1); 
 		int srcWrdSntIdx = wrdIndices.at(snt) - m_srcSntBreaks.at(sntIdx); // get word index in sentence
 		const std::vector<int> srcAlg = GetSentenceAlignment(sntIdx).alignedList.at(srcWrdSntIdx); // list of target words for this source word
 		if(srcAlg.size() == 0) {
@@ -356,7 +356,7 @@ TargetPhrase* BilingualDynSuffixArray::GetMosesFactorIDs(const SAPhrase& phrase)
 	TargetPhrase* targetPhrase = new TargetPhrase(Output);
 	for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
 		Word& word = m_trgVocab->GetWord( phrase.words[i]);
-		assert(word != m_trgVocab->GetkOOVWord());
+		CHECK(word != m_trgVocab->GetkOOVWord());
 		targetPhrase->AddWord(word);
 	}
 	// scoring
@@ -409,7 +409,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	for(iterPhrases = phraseCounts.begin(); iterPhrases != phraseCounts.end(); ++iterPhrases) {
 		float trg2SrcMLE = float(iterPhrases->second) / totalTrgPhrases;
 		itrLexW = lexicalWeights.find(iterPhrases->first);
-		assert(itrLexW != lexicalWeights.end());
+		CHECK(itrLexW != lexicalWeights.end());
 		Scores scoreVector(3);
 		scoreVector[0] = trg2SrcMLE; 
 		scoreVector[1] = itrLexW->second.first;

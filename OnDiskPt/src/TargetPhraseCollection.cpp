@@ -107,7 +107,7 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
   free(mem);
 
   UINT64 endPos = file.tellp();
-  assert(startPos + memUsed == endPos);
+  CHECK(startPos + memUsed == endPos);
 
   m_filePos = startPos;
 

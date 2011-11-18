@@ -20,7 +20,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -74,7 +74,7 @@ Phrase::~Phrase()
 
 void Phrase::MergeFactors(const Phrase &copy)
 {
-  assert(GetSize() == copy.GetSize());
+  CHECK(GetSize() == copy.GetSize());
   size_t size = GetSize();
   const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
   for (size_t currPos = 0 ; currPos < size ; currPos++) {
@@ -89,14 +89,14 @@ void Phrase::MergeFactors(const Phrase &copy)
 
 void Phrase::MergeFactors(const Phrase &copy, FactorType factorType)
 {
-  assert(GetSize() == copy.GetSize());
+  CHECK(GetSize() == copy.GetSize());
   for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
     SetFactor(currPos, factorType, copy.GetFactor(currPos, factorType));
 }
 
 void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& factorVec)
 {
-  assert(GetSize() == copy.GetSize());
+  CHECK(GetSize() == copy.GetSize());
   for (size_t currPos = 0 ; currPos < GetSize() ; currPos++)
     for (std::vector<FactorType>::const_iterator i = factorVec.begin();
          i != factorVec.end(); ++i) {
@@ -199,7 +199,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
       isNonTerminal = true;
 
       size_t nextPos = annotatedWord.find("[", 1);
-      assert(nextPos != string::npos);
+      CHECK(nextPos != string::npos);
 
       if (direction == Input)
         annotatedWord = annotatedWord.substr(1, nextPos - 2);
@@ -216,11 +216,11 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 
   // lhs
   string &annotatedWord = annotatedWordVector.back();
-  assert(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
+  CHECK(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
   annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
 
   lhs.CreateFromString(direction, factorOrder, annotatedWord, true);
-  assert(lhs.IsNonTerminal());
+  CHECK(lhs.IsNonTerminal());
 }
 
 int Phrase::Compare(const Phrase &other) const

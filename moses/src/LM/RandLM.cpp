@@ -17,7 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+
 
 namespace Moses
 {
@@ -42,7 +43,7 @@ bool LanguageModelRandLM::Load(const std::string &filePath, FactorType factorTyp
   m_nGramOrder = nGramOrder;
   int cache_MB = 50; // increase cache size
   m_lm = randlm::RandLM::initRandLM(filePath, nGramOrder, cache_MB);
-  assert(m_lm != NULL);
+  CHECK(m_lm != NULL);
   // get special word ids
   m_oov_id = m_lm->getWordID(m_lm->getOOV());
   CreateFactors(factorCollection);

@@ -67,7 +67,6 @@ bool LanguageModelParallelBackoff::Load(const std::string &filePath, const std::
   cerr << "Factored stats\n";
 
   FNgram* fngramLM = new FNgram(*m_srilmVocab,*fnSpecs);
-  assert(fngramLM != 0);
 
   cerr << "FNgram object created\n";
 

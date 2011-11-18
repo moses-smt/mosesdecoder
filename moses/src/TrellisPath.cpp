@@ -198,7 +198,7 @@ Phrase TrellisPath::GetSurfacePhrase() const
     for (size_t i = 0 ; i < outputFactor.size() ; i++) {
       FactorType factorType = outputFactor[i];
       const Factor *factor = targetPhrase.GetFactor(pos, factorType);
-      assert(factor);
+      CHECK(factor);
       newWord[factorType] = factor;
     }
   }
@@ -221,7 +221,7 @@ WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
   }
 
   // have to give a hypo in the trellis path, but u didn't.
-  assert(false);
+  CHECK(false);
   return WordsRange(NOT_FOUND, NOT_FOUND);
 }
 

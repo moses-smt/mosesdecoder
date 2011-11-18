@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 #include <iostream>
-#include <cassert>
+#include "util/check.hh"
 #include "../../moses/src/Util.h"
 #include "Phrase.h"
 
@@ -49,7 +49,7 @@ void Phrase::AddWord(Word *word)
 
 void Phrase::AddWord(Word *word, size_t pos)
 {
-  assert(pos < m_words.size());
+  CHECK(pos < m_words.size());
   m_words.insert(m_words.begin() + pos + 1, word);
 }
 
@@ -73,7 +73,7 @@ int Phrase::Compare(const Phrase &compare) const
   }
 
   if (ret == 0) {
-    assert(compare.GetSize() >= GetSize());
+    CHECK(compare.GetSize() >= GetSize());
     ret = (compare.GetSize() > GetSize()) ? 1 : 0;
   }
   return ret;

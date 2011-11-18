@@ -22,7 +22,7 @@ public:
 	
 	void SetId(size_t pos, wordID_t id)
 	{
-    assert(pos < words.size());
+    CHECK(pos < words.size());
 		words[pos] = id;
 	}
 	bool operator<(const SAPhrase& phr2) const

@@ -186,7 +186,7 @@ public:
     const Hypothesis *hypo = this;
     while (pos < hypo->GetCurrTargetWordsRange().GetStartPos()) {
       hypo = hypo->GetPrevHypo();
-      assert(hypo != NULL);
+      CHECK(hypo != NULL);
     }
     return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
   }

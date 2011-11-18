@@ -145,7 +145,7 @@ public:
   }
 
   void RemoveWord(size_t pos) {
-    assert(pos < m_words.size());
+    CHECK(pos < m_words.size());
     m_words.erase(m_words.begin() + pos);
   }
 

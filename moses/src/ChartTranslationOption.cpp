@@ -43,7 +43,7 @@ void ChartTranslationOption::CalcEstimateOfBestScore(
       // add the score of the best underlying hypothesis
       const ChartCellLabel &cellLabel = rule->GetChartCellLabel();
       const ChartHypothesisCollection *hypoColl = cellLabel.GetStack();
-      assert(hypoColl);
+      CHECK(hypoColl);
       m_estimateOfBestScore += hypoColl->GetBestScore();
     }
     rule = rule->GetPrev();

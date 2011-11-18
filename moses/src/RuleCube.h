@@ -31,7 +31,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/version.hpp>
 
-#include <cassert>
+#include "util/check.hh"
 #include <queue>
 #include <set>
 #include <vector>
@@ -93,7 +93,7 @@ class RuleCube
   ~RuleCube();
 
   float GetTopScore() const {
-    assert(!m_queue.empty());
+    CHECK(!m_queue.empty());
     RuleCubeItem *item = m_queue.top();
     return item->GetScore();
   }

@@ -158,13 +158,13 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
   if (staticData.IsDetailedTranslationReportingEnabled()) {
     const std::string &path = staticData.GetDetailedTranslationReportingFilePath();
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
-    assert(m_detailedTranslationReportingStream->good());
+    CHECK(m_detailedTranslationReportingStream->good());
   }
 
   // sentence alignment output
   if (! staticData.GetAlignmentOutputFile().empty()) {
     m_alignmentOutputStream = new ofstream(staticData.GetAlignmentOutputFile().c_str());
-    assert(m_alignmentOutputStream->good());
+    CHECK(m_alignmentOutputStream->good());
   }
 
 }
@@ -188,7 +188,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
-  assert(outputFactorOrder.size() > 0);
+  CHECK(outputFactorOrder.size() > 0);
   if (reportAllFactors == true) {
     out << phrase;
   } else {

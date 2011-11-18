@@ -232,7 +232,7 @@ void Manager::CalcNBest(size_t count, TrellisPathList &ret,bool onlyDistinct) co
   for (size_t iteration = 0 ; (onlyDistinct ? distinctHyps.size() : ret.GetSize()) < count && contenders.GetSize() > 0 && (iteration < count * nBestFactor) ; iteration++) {
     // get next best from list of contenders
     TrellisPath *path = contenders.pop();
-    assert(path);
+    CHECK(path);
     // create deviations from current best
     path->CreateDeviantPaths(contenders);
     if(onlyDistinct) {
@@ -304,11 +304,11 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const {
     //forward from current
     if (i->forward >= 0) {
       map<int,const Hypothesis*>::const_iterator idToHypIter = idToHyp.find(i->forward);
-      assert(idToHypIter != idToHyp.end());
+      CHECK(idToHypIter != idToHyp.end());
       const Hypothesis* nextHypo = idToHypIter->second;
       outgoingHyps[hypo].insert(nextHypo);
       map<int,float>::const_iterator fscoreIter = fscores.find(nextHypo->GetId());
-      assert(fscoreIter != fscores.end());
+      CHECK(fscoreIter != fscores.end());
       edgeScores[Edge(hypo->GetId(),nextHypo->GetId())] = 
         i->fscore - fscoreIter->second;
     }
@@ -325,15 +325,15 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const {
       map<const Hypothesis*, set<const Hypothesis*> >::const_iterator outIter = 
         outgoingHyps.find(i->hypo);
       
-      assert(outIter != outgoingHyps.end());
+      CHECK(outIter != outgoingHyps.end());
       float sigma = 0;
       for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
         j != outIter->second.end(); ++j) {
         map<const Hypothesis*, float>::const_iterator succIter = sigmas.find(*j);
-        assert(succIter != sigmas.end());
+        CHECK(succIter != sigmas.end());
         map<Edge,float>::const_iterator edgeScoreIter = 
           edgeScores.find(Edge(i->hypo->GetId(),(*j)->GetId()));
-        assert(edgeScoreIter != edgeScores.end());
+        CHECK(edgeScoreIter != edgeScores.end());
         float term = edgeScoreIter->second + succIter->second; // Add sigma(*j)
         if (sigma == 0) {
            sigma = term;
@@ -347,7 +347,7 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const {
 
   //The actual sampling!
   const Hypothesis* startHypo = searchGraph.back().hypo;
-  assert(startHypo->GetId() == 0);
+  CHECK(startHypo->GetId() == 0);
   for (size_t i = 0; i < count; ++i) {
     vector<const Hypothesis*> path;
     path.push_back(startHypo);
@@ -365,9 +365,9 @@ void Manager::CalcLatticeSamples(size_t count, TrellisPathList &ret) const {
       for (set<const Hypothesis*>::const_iterator j = outIter->second.begin();
         j != outIter->second.end(); ++j) {
         candidates.push_back(*j);
-        assert(sigmas.find(*j) != sigmas.end());
+        CHECK(sigmas.find(*j) != sigmas.end());
         Edge edge(path.back()->GetId(),(*j)->GetId());
-        assert(edgeScores.find(edge) != edgeScores.end());
+        CHECK(edgeScores.find(edge) != edgeScores.end());
         candidateScores.push_back(sigmas[*j]  + edgeScores[edge]);
         if (scoreTotal == 0) {
           scoreTotal = candidateScores.back();
@@ -875,7 +875,7 @@ void Manager::SerializeSearchGraphPB(
           ArcList::const_iterator iterArcList;
           for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList) {
             const Hypothesis *loserHypo = *iterArcList;
-            assert(connected[loserHypo->GetId()]);
+            CHECK(connected[loserHypo->GetId()]);
             Hypergraph_Edge* edge = hg.add_edges();
             SerializeEdgeInfo(loserHypo, edge);
             edge->set_head_node(headNodeIdx);

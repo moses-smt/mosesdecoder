@@ -1,7 +1,7 @@
 #ifndef INC_ALLHASHFUNCS_H
 #define INC_ALLHASHFUNCS_H
 
-#include <cassert>
+#include "util/check.hh"
 #include <cmath>
 #include "types.h"
 #include "utils.h"
@@ -28,12 +28,12 @@ class HashBase {
     virtual T hash(const wordID_t* id, const int len, count_t h)=0;  // vocab mapped hashing
     count_t size() { return H_;}
     virtual void save(FileHandler* fout) {
-      assert(fout != 0);
+      CHECK(fout != 0);
       fout->write((char*)&m_, sizeof(m_));
       fout->write((char*)&H_, sizeof(H_));
     }
     virtual void load(FileHandler* fin) {
-      assert(fin != 0);
+      CHECK(fin != 0);
       fin->read((char*)&m_, sizeof(m_));
       fin->read((char*)&H_, sizeof(H_));
     }
@@ -43,7 +43,7 @@ class UnivHash_linear: public HashBase<T> {
   public:
     UnivHash_linear(float m, count_t H, P pr):
       HashBase<T>(m, H), pr_(pr) {
-      //assert(isPrime(pr_));
+      //CHECK(isPrime(pr_));
       initSeeds();
     }
     UnivHash_linear(FileHandler* fin):
@@ -177,7 +177,7 @@ T UnivHash_tableXOR<T>::hash(const char* s, count_t h = 0) {
   unsigned char c;
   while((c = *s++) && (++pos < MAX_STR_LEN))
     value ^= table_[h][idx += c];
-  assert(value < this->m_); 
+  CHECK(value < this->m_); 
   return value;
 }
 
@@ -265,7 +265,7 @@ void UnivHash_linear<T>::freeSeeds() {
 template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t* id, const int len, 
                            count_t h=0) {
-  assert(h < this->H_);
+  CHECK(h < this->H_);
   T value = 0;
   int pos(0);
   while(pos < len) {
@@ -277,7 +277,7 @@ inline T UnivHash_linear<T>::hash(const wordID_t* id, const int len,
 template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t id, const count_t pos,
                            const T prevValue, count_t h=0) {
-  assert(h < this->H_);
+  CHECK(h < this->H_);
   T value = prevValue + ((a_[h][pos] * id) + b_[h][pos]); // % pr_;
   return value % this->m_;
 }
@@ -315,7 +315,7 @@ void UnivHash_linear<T>::load(FileHandler* fin) {
 /*
 template <typename T>
 T UnivHash_linear<T>::hash(const char* s, count_t h=0) {
-  assert(h < this->H_);
+  CHECK(h < this->H_);
   T value = 0;
   int pos(0);
   unsigned char c;

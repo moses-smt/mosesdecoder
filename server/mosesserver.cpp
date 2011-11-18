@@ -1,4 +1,4 @@
-#include <cassert>
+#include "util/check.hh"
 #include <stdexcept>
 #include <iostream>
 
@@ -376,6 +376,6 @@ int main(int argc, char** argv)
     myAbyssServer.run();
   }
   // xmlrpc_c::serverAbyss.run() never returns
-  assert(false);
+  CHECK(false);
   return 0;
 }

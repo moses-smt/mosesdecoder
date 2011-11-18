@@ -39,7 +39,7 @@ public:
   void GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
-    assert(false);
+    CHECK(false);
     return *(new NonTerminalSet());
   }
 

@@ -103,7 +103,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
 {
-  assert(phrase.GetSize() == m_targetPhrase.GetSize());
+  CHECK(phrase.GetSize() == m_targetPhrase.GetSize());
   if (featuresToAdd.size() == 1) {
     m_targetPhrase.MergeFactors(phrase, featuresToAdd[0]);
   } else if (featuresToAdd.empty()) {

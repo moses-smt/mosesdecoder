@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <memory>
@@ -95,7 +95,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       }
     } else {
       ShiftOrPush(contextFactor, word);
-      assert(contextFactor.size() <= GetNGramOrder());
+      CHECK(contextFactor.size() <= GetNGramOrder());
 
       if (word == GetSentenceStartArray()) {
         // do nothing, don't include prob for <s> unigram
@@ -264,7 +264,7 @@ private:
    */
   size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
   {
-    assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
+    CHECK(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
     // special handling for small hypotheses
     // does the prefix match the entire hypothesis string? -> just copy prefix
@@ -407,7 +407,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartArray())
       {
-        assert(phrasePos == 0);
+        CHECK(phrasePos == 0);
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }

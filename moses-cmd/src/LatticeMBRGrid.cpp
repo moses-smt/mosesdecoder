@@ -64,7 +64,7 @@ public:
   /** Add a parameter with key, command line argument, and default value */
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
-    assert(m_grid.find(key) == m_grid.end());
+    CHECK(m_grid.find(key) == m_grid.end());
     m_grid[key].push_back(defaultValue);
   }
 

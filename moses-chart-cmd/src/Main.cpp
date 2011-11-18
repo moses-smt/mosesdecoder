@@ -92,7 +92,7 @@ public:
     ChartManager manager(*m_source, &system);
     manager.ProcessSentence();
 
-    assert(!staticData.UseMBR());
+    CHECK(!staticData.UseMBR());
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
@@ -123,7 +123,7 @@ public:
       std::ostringstream out;
       manager.GetSearchGraph(lineNumber, out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
-      assert(oc);
+      CHECK(oc);
       oc->Write(lineNumber, out.str());
     }
 
@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
     exit(0);
   }
 
-  assert(staticData.GetSearchAlgorithm() == ChartDecoding);
+  CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
 
   // set up read/writing class
   IOWrapper *ioWrapper = GetIODevice(staticData);

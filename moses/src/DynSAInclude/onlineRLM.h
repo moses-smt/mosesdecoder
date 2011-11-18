@@ -21,7 +21,7 @@ public:
   OnlineRLM(uint16_t MBs, int width, int bucketRange, count_t order, 
     Vocab* v, float qBase = 8): PerfectHash<T>(MBs, width, bucketRange, qBase), 
     vocab_(v), bAdapting_(false), order_(order), corpusSize_(0), alpha_(0) {
-    assert(vocab_ != 0);
+    CHECK(vocab_ != 0);
     //instantiate quantizer class here
     cache_ = new Cache<float>(8888.8888, 9999.9999); // unknown_value, null_value
     alpha_ = new float[order_ + 1];
@@ -137,7 +137,7 @@ int OnlineRLM<T>::query(const wordID_t* IDs, int len) {
       value -= ((value & this->hitMask_) != 0) ? this->hitMask_ : 0; // check for previous hit marks
     }
     else {
-      assert(filterIdx < this->cells_);
+      CHECK(filterIdx < this->cells_);
       //markQueried(filterIdx);
     }
   }
@@ -158,12 +158,12 @@ bool OnlineRLM<T>::markPrefix(const wordID_t* IDs, const int len, bool bSet) {
       return false;
     }
     if(filterIndex != this->cells_ + 1) {
-      assert(hpdItr == this->dict_.end());
+      CHECK(hpdItr == this->dict_.end());
       if(bSet) bPrefix_->setBit(filterIndex); // mark index
       else bPrefix_->clearBit(filterIndex);   // unset index
     }
     else {
-      assert(filterIndex == this->cells_ + 1);
+      CHECK(filterIndex == this->cells_ + 1);
       //how to handle hpd prefixes? 
     }
     if(pfCache.nodes() > 10000) pfCache.clear();
@@ -289,14 +289,14 @@ float OnlineRLM<T>::getProb(const wordID_t* ngram, int len,
         logprob = alpha_[len] + oovprob;
         break;
       case 1: // unigram found only
-        assert(in[len - 1] > 0);
+        CHECK(in[len - 1] > 0);
         logprob = alpha_[len - 1] + (corpusSize_ > 0 ?  
           log10(static_cast<float>(in[len - 1]) / static_cast<float>(corpusSize_)) : 0);
         //logprob = alpha_[len - 1] + 
           //log10(static_cast<float>(in[len - 1]) / static_cast<float>(corpusSize_));
         break;
       default:
-        assert(den_val > 0);
+        CHECK(den_val > 0);
         //if(subgram == in[len - found]) ++subgram; // avoid returning zero probs????
         logprob = alpha_[len - num_fnd] + 
           log10(static_cast<float>(in[len - num_fnd]) / static_cast<float>(den_val));
@@ -313,7 +313,7 @@ template<typename T>
 const void* OnlineRLM<T>::getContext(const wordID_t* ngram, int len) {
   int dummy(0);
   float* addresses[len];  // only interested in addresses of cache
-  assert(cache_->getCache2(ngram, len, &addresses[0], &dummy) == len);
+  CHECK(cache_->getCache2(ngram, len, &addresses[0], &dummy) == len);
   // return address of cache node
   return (const void*)addresses[0]; 
 }
@@ -391,7 +391,7 @@ void OnlineRLM<T>::load(FileHandler* fin) {
   cerr << "Loading ORLM...\n";
   // load vocab first
   vocab_ = new Vocab(fin);
-  assert(vocab_ != 0);
+  CHECK(vocab_ != 0);
   fin->read((char*)&corpusSize_, sizeof(corpusSize_));
   cerr << "\tCorpus size = " << corpusSize_ << endl;
   fin->read((char*)&order_, sizeof(order_));

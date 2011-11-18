@@ -103,7 +103,7 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
 
 void ChartTrellisNode::CreateChildren()
 {
-  assert(m_children.empty());
+  CHECK(m_children.empty());
   const std::vector<const ChartHypothesis*> &prevHypos = m_hypo.GetPrevHypos();
   m_children.reserve(prevHypos.size());
   for (size_t ind = 0; ind < prevHypos.size(); ++ind) {
@@ -118,7 +118,7 @@ void ChartTrellisNode::CreateChildren(const ChartTrellisNode &rootNode,
                                       const ChartHypothesis &replacementHypo,
                                       ChartTrellisNode *&deviationPoint)
 {
-  assert(m_children.empty());
+  CHECK(m_children.empty());
   const NodeChildren &children = rootNode.GetChildren();
   m_children.reserve(children.size());
   for (size_t ind = 0; ind < children.size(); ++ind) {

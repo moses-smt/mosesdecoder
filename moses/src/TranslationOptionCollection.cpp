@@ -565,7 +565,7 @@ void TranslationOptionCollection::CreateXmlOptionsForRange(size_t, size_t)
 void TranslationOptionCollection::Add(TranslationOption *translationOption)
 {
   const WordsRange &coverage = translationOption->GetSourceWordsRange();
-  assert(coverage.GetEndPos() - coverage.GetStartPos() < m_collection[coverage.GetStartPos()].size());
+  CHECK(coverage.GetEndPos() - coverage.GetStartPos() < m_collection[coverage.GetStartPos()].size());
   m_collection[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()].Add(translationOption);
 }
 
@@ -636,7 +636,7 @@ TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(siz
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  assert(maxSize < m_collection[startPos].size());
+  CHECK(maxSize < m_collection[startPos].size());
   return m_collection[startPos][maxSize];
 }
 const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
@@ -645,7 +645,7 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
   size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
   maxSize = std::min(maxSize, maxSizePhrase);
 
-  assert(maxSize < m_collection[startPos].size());
+  CHECK(maxSize < m_collection[startPos].size());
   return m_collection[startPos][maxSize];
 }
 

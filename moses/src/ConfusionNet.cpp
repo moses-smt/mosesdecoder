@@ -247,7 +247,7 @@ ConfusionNet::CreateTranslationOptionCollection(const TranslationSystem* system)
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(system, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
-  assert(rv);
+  CHECK(rv);
   return rv;
 }
 
