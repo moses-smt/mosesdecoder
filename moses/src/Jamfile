@@ -1,6 +1,15 @@
 lib z ;
 alias InputFileStream : InputFileStream.cpp z ;
 
+if [ option.get "with-synlm" : no : yes ] = yes
+{
+  lib m ;
+  obj SyntacticLanguageModel.o : SyntacticLanguageModel.cpp ../../util//util : <include>$(TOP)/synlm/hhmm/rvtl/include <include>$(TOP)/synlm/hhmm/wsjparse/include ;
+  alias synlm : SyntacticLanguageModel.o m : : : <define>HAVE_SYNLM ;
+} else {
+  alias synlm ;
+}
+
 lib moses :
 AlignmentInfo.cpp
 AlignmentInfoCollection.cpp
@@ -111,4 +120,5 @@ WordsBitmap.cpp
 WordsRange.cpp
 XmlOption.cpp
 
+synlm
 InputFileStream LM//LM ../../util//util : <include>. : : <include>. ;

@@ -7,7 +7,7 @@ project : default-build
 
 lib boost_thread : : <link>shared ;
 
-if [ option.get "without-trace" : no ] = no
+if [ option.get "without-trace" : no : yes ] = yes
 {
   trace = ;
 } else {
