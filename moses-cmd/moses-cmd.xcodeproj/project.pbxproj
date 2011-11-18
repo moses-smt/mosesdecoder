@@ -15,6 +15,7 @@
 		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
 		1CE646E411679F6900EC77CC /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CE646E311679F5F00EC77CC /* libOnDiskPt.a */; };
 		1EE8C2DD1476A3F2002496F2 /* libutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EE8C2DC1476A34A002496F2 /* libutil.a */; };
+		1EE8C3C91476AB64002496F2 /* liblm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EE8C3C81476AB3C002496F2 /* liblm.a */; };
 		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
 		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
 		B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */; };
@@ -56,6 +57,13 @@
 			remoteGlobalIDString = 1EE8C2711476A262002496F2;
 			remoteInfo = util;
 		};
+		1EE8C3C71476AB3C002496F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1EE8C2E91476A48E002496F2;
+			remoteInfo = lm;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -83,6 +91,7 @@
 		1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
 		1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
 		1EE8C2D41476A34A002496F2 /* util.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = util.xcodeproj; path = ../util/util.xcodeproj; sourceTree = "<group>"; };
+		1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = lm.xcodeproj; path = ../lm/lm.xcodeproj; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* moses-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
 		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
@@ -95,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EE8C3C91476AB64002496F2 /* liblm.a in Frameworks */,
 				1EE8C2DD1476A3F2002496F2 /* libutil.a in Frameworks */,
 				1CE646E411679F6900EC77CC /* libOnDiskPt.a in Frameworks */,
 				B219B8540E93812700EAB407 /* libmoses.a in Frameworks */,
@@ -115,6 +125,7 @@
 		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
 			isa = PBXGroup;
 			children = (
+				1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */,
 				1EE8C2D41476A34A002496F2 /* util.xcodeproj */,
 				1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */,
 				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
@@ -162,6 +173,14 @@
 			isa = PBXGroup;
 			children = (
 				1EE8C2DC1476A34A002496F2 /* libutil.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EE8C3C11476AB3C002496F2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EE8C3C81476AB3C002496F2 /* liblm.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -215,6 +234,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 1EE8C3C11476AB3C002496F2 /* Products */;
+					ProjectRef = 1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */;
+				},
+				{
 					ProductGroup = 03306D600C0B240B00CA1311 /* Products */;
 					ProjectRef = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
 				},
@@ -254,6 +277,13 @@
 			fileType = archive.ar;
 			path = libutil.a;
 			remoteRef = 1EE8C2DB1476A34A002496F2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EE8C3C81476AB3C002496F2 /* liblm.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liblm.a;
+			remoteRef = 1EE8C3C71476AB3C002496F2 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
