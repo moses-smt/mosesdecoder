@@ -12,6 +12,9 @@ config.h
 config.log
 config.status
 configure
+jam-files/bjam
+jam-files/engine/bootstrap
+jam-files/engine/bin.*
 lm/.deps/
 lm/.libs/
 util/.deps/
