@@ -15,7 +15,7 @@ with-irstlm = [ option.get "with-irstlm" ] ;
 if $(with-irstlm) != ""
 {
   lib irstlm : : <search>$(with-irstlm)/lib ;
-  obj IRST.o : IRST.cpp ../../../util//util : <include>$(with-irstlm)/include <include>.. ;
+  obj IRST.o : IRST.cpp ..//headers : <include>$(with-irstlm)/include ;
   alias irst : IRST.o irstlm : : : <define>LM_IRST ;
   echo "" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
@@ -29,7 +29,7 @@ if $(with-irstlm) != ""
 with-srilm = [ option.get "with-srilm" ] ;
 if $(with-srilm) != ""
 {
-  if [ option.get "with-srilm-dynamic" ] != ""
+  if [ option.get "with-srilm-dynamic" : no : yes ] = yes
   {
     alias sri-libs : srilm ;
   } else {
@@ -45,14 +45,22 @@ if $(with-srilm) != ""
     alias sri-libs : oolm dstruct misc flm ;
   }
 
-  obj SRI.o : SRI.cpp ../../../util//util : <include>$(with-srilm)/include <include>.. ;
-  obj ParallelBackoff.o : ParallelBackoff.cpp ../../../util//util : <include>$(with-srilm)/include <include>.. ;
+  obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include ;
+  obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include ;
   alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
 } else {
   alias sri ;
 }
 
+with-randlm = [ option.get "with-randlm" ] ;
+if $(with-randlm) != ""
+{
+  lib randlm : : <search>$(with-randlm)/lib ;
+  obj Rand.o : Rand.cpp randlm ..//headers : <include>$(with-randlm)/include ;
+  alias rand : Rand.o : : : <define>LM_RAND ;
+} else {
+  alias rand ;
+}
+
 lib LM : Base.cpp Factory.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp 
-  ../../../lm//lm 
-  irst sri
-: <include>.. $(requirements) : : <include>.. ;
+  ../../../lm//lm irst sri rand ..//headers ;

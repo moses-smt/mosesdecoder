@@ -64,7 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #  include "LM/IRST.h"
 #endif
 #ifdef LM_RAND
-#  include "LM/RandLM.h"
+#  include "LM/Rand.h"
 #endif
 #ifdef LM_ORLM
 #  include "LM/ORLM.h"
@@ -102,7 +102,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
   switch (lmImplementation) {
   case RandLM:
 #ifdef LM_RAND
-    lm = new LanguageModelRandLM();
+    lm = NewRandLM();
 #endif
     break;
   case ORLM:

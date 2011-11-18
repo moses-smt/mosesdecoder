@@ -1,10 +1,12 @@
+alias headers : ../../util//util : : : <include>. ;
+
 lib z ;
-alias InputFileStream : InputFileStream.cpp z ;
+alias InputFileStream : InputFileStream.cpp z headers ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
 {
   lib m ;
-  obj SyntacticLanguageModel.o : SyntacticLanguageModel.cpp ../../util//util : <include>$(TOP)/synlm/hhmm/rvtl/include <include>$(TOP)/synlm/hhmm/wsjparse/include ;
+  obj SyntacticLanguageModel.o : SyntacticLanguageModel.cpp headers : <include>$(TOP)/synlm/hhmm/rvtl/include <include>$(TOP)/synlm/hhmm/wsjparse/include ;
   alias synlm : SyntacticLanguageModel.o m : : : <define>HAVE_SYNLM ;
 } else {
   alias synlm ;
@@ -121,4 +123,4 @@ WordsRange.cpp
 XmlOption.cpp
 
 synlm
-InputFileStream LM//LM ../../util//util : <include>. : : <include>. ;
+InputFileStream LM//LM headers ;
