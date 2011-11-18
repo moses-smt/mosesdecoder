@@ -142,7 +142,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     break;
   case ParallelBackoff:
 #ifdef LM_SRI
-    lm = new LanguageModelParallelBackoff();
+    lm = NewParallelBackoff();
 #endif
     break;
   case DMapLM:
