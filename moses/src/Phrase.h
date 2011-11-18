@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <list>
 #include <string>
+
+#include <boost/functional/hash.hpp>
+
 #include "Word.h"
 #include "WordsBitmap.h"
 #include "TypeDef.h"
@@ -177,6 +180,13 @@ public:
 	}
 };
 
+inline size_t hash_value(const Phrase& phrase) {
+  size_t  seed = 0;
+  for (size_t i = 0; i < phrase.GetSize(); ++i) {
+    boost::hash_combine(seed, phrase.GetWord(i));
+  }
+  return seed;
+}
 
 }
 #endif

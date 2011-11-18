@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <vector>
 #include <list>
+
+#include "util/murmur_hash.hh"
+
 #include "TypeDef.h"
 #include "Factor.h"
 #include "Util.h"
@@ -134,6 +137,9 @@ public:
 
   void CreateUnknownWord(const Word &sourceWord);
 
+  inline size_t hash() const {
+    return util::MurmurHashNative(m_factorArray, MAX_NUM_FACTORS, m_isNonTerminal);
+  }
 };
 
 struct WordComparer {
@@ -142,6 +148,11 @@ struct WordComparer {
     return *a < *b;
   }
 };
+
+
+inline size_t hash_value(const Word& word) {
+  return word.hash();    
+}
 
 }
 
