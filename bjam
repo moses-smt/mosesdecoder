@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 set -e
 which bjam >/dev/null 2>/dev/null && exec bjam "$@"
 
@@ -10,4 +10,5 @@ if [ ! -x "$top"/jam-files/bjam ]; then
   popd
 fi
 
-BOOST_BUILD_PATH="$top"/jam-files/boost-build exec "$top"/jam-files/bjam "$@"
+export BOOST_BUILD_PATH="$top"/jam-files/boost-build 
+exec "$top"/jam-files/bjam "$@"
