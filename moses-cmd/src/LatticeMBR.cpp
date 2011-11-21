@@ -191,7 +191,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
     // is its best predecessor already included ?
     if (survivingHyps.find(currHyp->GetPrevHypo()) != survivingHyps.end()) { //yes, then add an edge
       vector <Edge>& edges = incomingEdges[currHyp];
-      Edge winningEdge(currHyp->GetPrevHypo(),currHyp,scale*(currHyp->GetScore() - currHyp->GetPrevHypo()->GetScore()),currHyp->GetTargetPhrase());
+      Edge winningEdge(currHyp->GetPrevHypo(),currHyp,scale*(currHyp->GetScore() - currHyp->GetPrevHypo()->GetScore()),currHyp->GetCurrTargetPhrase());
       edges.push_back(winningEdge);
       ++numEdgesCreated;
     }
@@ -205,7 +205,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         const Hypothesis* loserPrevHypo = loserHypo->GetPrevHypo();
         if (survivingHyps.find(loserPrevHypo) != survivingHyps.end()) { //found it, add edge
           double arcScore = loserHypo->GetScore() - loserPrevHypo->GetScore();
-          Edge losingEdge(loserPrevHypo, currHyp, arcScore*scale, loserHypo->GetTargetPhrase());
+          Edge losingEdge(loserPrevHypo, currHyp, arcScore*scale, loserHypo->GetCurrTargetPhrase());
           vector <Edge>& edges = incomingEdges[currHyp];
           edges.push_back(losingEdge);
           ++numEdgesCreated;
@@ -227,7 +227,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         //Curr Hyp can be : a) the best predecessor  of succ b) or an arc attached to succ
         if (succHyp->GetPrevHypo() == currHyp) { //best predecessor
           vector <Edge>& succEdges = incomingEdges[succHyp];
-          Edge succWinningEdge(currHyp, succHyp, scale*(succHyp->GetScore() - currHyp->GetScore()), succHyp->GetTargetPhrase());
+          Edge succWinningEdge(currHyp, succHyp, scale*(succHyp->GetScore() - currHyp->GetScore()), succHyp->GetCurrTargetPhrase());
           succEdges.push_back(succWinningEdge);
           survivingHyps.insert(succHyp);
           ++numEdgesCreated;
@@ -244,7 +244,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
             if (loserPrevHypo == currHyp) { //found it
               vector <Edge>& succEdges = incomingEdges[succHyp];
               double arcScore = loserHypo->GetScore() - currHyp->GetScore();
-              Edge losingEdge(currHyp, succHyp,scale* arcScore, loserHypo->GetTargetPhrase());
+              Edge losingEdge(currHyp, succHyp,scale* arcScore, loserHypo->GetCurrTargetPhrase());
               succEdges.push_back(losingEdge);
               ++numEdgesCreated;
             }
