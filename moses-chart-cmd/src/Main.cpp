@@ -147,7 +147,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
   delete source;
   switch(inputType) {
   case SentenceInput:
-    source = ioWrapper.GetInput(new Sentence(Input));
+    source = ioWrapper.GetInput(new Sentence);
     break;
   case ConfusionNetworkInput:
     source = ioWrapper.GetInput(new ConfusionNet);
@@ -156,7 +156,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
     source = ioWrapper.GetInput(new WordLattice);
     break;
   case TreeInputType:
-    source = ioWrapper.GetInput(new TreeInput(Input));
+    source = ioWrapper.GetInput(new TreeInput);
     break;
   default:
     TRACE_ERR("Unknown input type: " << inputType << "\n");

@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 
   while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
     ++lineCount;
-    Sentence sentence(Input);
+    Sentence sentence;
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
     Manager manager(*source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();

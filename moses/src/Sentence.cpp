@@ -33,11 +33,10 @@ using namespace std;
 namespace Moses
 {
 
-Sentence::Sentence(FactorDirection direction)
+Sentence::Sentence()
   : Phrase(0)
   , InputType()
 {
-  CHECK(direction == Input);
   const StaticData& staticData = StaticData::Instance();
   if (staticData.GetSearchAlgorithm() == ChartDecoding) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());

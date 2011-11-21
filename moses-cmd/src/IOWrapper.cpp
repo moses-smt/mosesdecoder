@@ -530,7 +530,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
   delete source;
   switch(inputType) {
   case SentenceInput:
-    source = ioWrapper.GetInput(new Sentence(Input));
+    source = ioWrapper.GetInput(new Sentence);
     break;
   case ConfusionNetworkInput:
     source = ioWrapper.GetInput(new ConfusionNet);

@@ -60,7 +60,7 @@ private:
 
 
 public:
-  Sentence(FactorDirection direction);
+  Sentence();
 
   InputTypeEnum GetType() const {
     return SentenceInput;
