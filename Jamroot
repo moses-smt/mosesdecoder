@@ -32,9 +32,11 @@ if [ SHELL $(TOP)"/jam-files/test.sh -static -lboost_program_options" ] = 1 {
 #With shared linkage, defines macro.  See tools/build/v2/contrib/boost.jam in a
 #boost tarball for a table of dynamic linking macros.  
 rule boost_lib ( name macro ) {
-  lib boost_$(name) : : <threading>single <name>boost_$(name) $(force-boost-link) : : <link>shared:<define>BOOST_$(macro) ;
-
-  lib boost_$(name) : : <threading>multi <name>boost_$(name)-mt $(force-boost-link) : : <link>shared:<define>BOOST_$(macro) ;
+#Add -mt if multi-threaded.
+  lib inner_boost_$(name) : : <threading>single <name>boost_$(name) ;
+  lib inner_boost_$(name) : : <threading>multi <name>boost_$(name)-mt ;
+#link dynamically
+  alias boost_$(name) : inner_boost_$(name) : $(force-boost-link) : : <link>shared:<define>BOOST_$(macro) ;
 }
 boost_lib thread THREAD_DYN_DLL ;
 boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
