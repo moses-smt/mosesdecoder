@@ -46,7 +46,7 @@ if $(with-srilm) != ""
   }
 
   obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <warnings>off ;
-  obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include : <warnings>off ;
+  obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <warnings>off ;
   alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
 } else {
   alias sri ;
