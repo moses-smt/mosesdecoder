@@ -26,10 +26,12 @@
 #-j$NCPUS to compile in parallel
 #clean to clean
 
+#Other compilers might work, but this stops bjam from whining.  
+using gcc ;
+
 path-constant TOP : . ;
 
 import option ;
-
 import boost ;
 boost.use-project ;
 #If boost static libraries are not installed, use dynamic linking.  
