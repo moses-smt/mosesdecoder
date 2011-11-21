@@ -1,5 +1,4 @@
 lib m ;
-lib z ;
 
 lib mert_lib :
 Util.cpp
@@ -30,7 +29,7 @@ TERsrc/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 MergeScorer.cpp
-../util//util m z ;
+../util//util m ..//z ;
 
 exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
 

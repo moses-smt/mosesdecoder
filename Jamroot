@@ -24,7 +24,7 @@ path-constant TOP : . ;
 import option ;
 
 #If boost static libraries are not installed, use dynamic linking.  
-if [ SHELL $(TOP)"/jam-files/test.sh -static -lboost_program_options" ] = 1 {
+if [ SHELL $(TOP)"/jam-files/test.sh -static -lboost_program_options" ] != 0 {
   force-boost-link = "<link>shared" ;
 }
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
@@ -41,6 +41,12 @@ rule boost_lib ( name macro ) {
 boost_lib thread THREAD_DYN_DLL ;
 boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
 boost_lib unit_test_framework TEST_DYN_LINK ;
+
+if [ SHELL $(TOP)"/jam-files/test.sh -static -lz" ] != 0 {
+  lib z : : <link>shared ;
+} else {
+  lib z ;
+}
 
 trace = [ option.get "notrace" : : <define>TRACE_ENABLE=1 ] ;
 
