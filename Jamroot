@@ -70,6 +70,9 @@ project : requirements
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-project lm ; 
 build-project util ;
+#Trigger instllation into legacy paths.  
+build-project moses-cmd/src ;
+build-project moses-chart-cmd/src ;
 
 install-location = [ option.get "install" : $(TOP)/dist ] ;
 install dist : 
