@@ -312,13 +312,13 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     old_bleu = CalculateBleu(new_state);
 
     // Get context and append new words.
-    num_new_words = cur_hypo.GetTargetPhrase().GetSize();
+    num_new_words = cur_hypo.GetCurrTargetLength();
     if (num_new_words == 0) {
 	return new_state;
     }
  
     Phrase new_words = ps.m_words;
-    new_words.Append(cur_hypo.GetTargetPhrase());
+    new_words.Append(cur_hypo.GetCurrTargetPhrase());
     //cerr << "NW: " << new_words << endl;
 
     // get ngram matches for new words
@@ -342,7 +342,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_end_idx));
-    new_state->m_target_length += cur_hypo.GetTargetPhrase().GetSize();
+    new_state->m_target_length += cur_hypo.GetCurrTargetLength();
 
     // we need a scaled reference length to compare the current target phrase to the corresponding reference phrase
     new_state->m_scaled_ref_length = m_cur_ref_length * 
