@@ -1,8 +1,5 @@
 alias headers : ../../util//util : : : <include>. ;
 
-lib z ;
-alias InputFileStream : InputFileStream.cpp z headers ;
-
 alias ThreadPool : ThreadPool.cpp ;
 
 if [ option.get "with-synlm" : no : yes ] = yes
@@ -14,113 +11,9 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-lib moses :
-AlignmentInfo.cpp
-AlignmentInfoCollection.cpp
-BilingualDynSuffixArray.cpp
-BitmapContainer.cpp
-ChartCell.cpp
-ChartCellCollection.cpp
-ChartHypothesis.cpp
-ChartHypothesisCollection.cpp
-ChartManager.cpp
-ChartRuleLookupManager.cpp
-ChartRuleLookupManagerMemory.cpp
-ChartRuleLookupManagerOnDisk.cpp
-ChartTranslationOption.cpp
-ChartTranslationOptionCollection.cpp
-ChartTranslationOptionList.cpp
-ChartTrellisDetour.cpp
-ChartTrellisDetourQueue.cpp
-ChartTrellisNode.cpp
-ChartTrellisPath.cpp
-ConfusionNet.cpp
-DecodeFeature.cpp
-DecodeGraph.cpp
-DecodeStep.cpp
-DecodeStepGeneration.cpp
-DecodeStepTranslation.cpp
-Dictionary.cpp
-DotChart.cpp
-DotChartInMemory.cpp
-DotChartOnDisk.cpp
-DummyScoreProducers.cpp
-DynSAInclude/file.cpp
-DynSAInclude/vocab.cpp
-DynSuffixArray.cpp
-FFState.cpp
-Factor.cpp
-FactorCollection.cpp
-FactorTypeSet.cpp
-FeatureFunction.cpp
-FloydWarshall.cpp
-GenerationDictionary.cpp
-GlobalLexicalModel.cpp
-hash.cpp
-Hypothesis.cpp
-HypothesisStack.cpp
-HypothesisStackCubePruning.cpp
-HypothesisStackNormal.cpp
-InputType.cpp
-LMList.cpp
-LVoc.cpp
-LexicalReordering.cpp
-LexicalReorderingState.cpp
-LexicalReorderingTable.cpp
-Manager.cpp
-PCNTools.cpp
-Parameter.cpp
-PartialTranslOptColl.cpp
-Phrase.cpp
-PhraseDictionary.cpp
-PhraseDictionaryALSuffixArray.cpp
-PhraseDictionaryDynSuffixArray.cpp
-PhraseDictionaryHiero.cpp
-PhraseDictionaryMemory.cpp
-PhraseDictionarySCFG.cpp
-PhraseDictionaryNode.cpp
-PhraseDictionaryNodeSCFG.cpp
-PhraseDictionaryOnDisk.cpp
-PhraseDictionaryTree.cpp
-PhraseDictionaryTreeAdaptor.cpp
-PrefixTreeMap.cpp
-ReorderingConstraint.cpp
-ReorderingStack.cpp
-RuleCube.cpp
-RuleCubeItem.cpp
-RuleCubeQueue.cpp
-RuleTableLoaderCompact.cpp
-RuleTableLoaderFactory.cpp
-RuleTableLoaderHiero.cpp
-RuleTableLoaderStandard.cpp
-ScoreComponentCollection.cpp
-ScoreIndexManager.cpp
-ScoreProducer.cpp
-Search.cpp
-SearchCubePruning.cpp
-SearchNormal.cpp
-Sentence.cpp
-SentenceStats.cpp
-SquareMatrix.cpp
-StaticData.cpp
-TargetPhrase.cpp
-TargetPhraseCollection.cpp
-Timer.cpp
-TranslationOption.cpp
-TranslationOptionCollection.cpp
-TranslationOptionCollectionConfusionNet.cpp
-TranslationOptionCollectionText.cpp
-TranslationOptionList.cpp
-TranslationSystem.cpp
-TreeInput.cpp
-TrellisPath.cpp
-TrellisPathCollection.cpp
-UserMessage.cpp
-Util.cpp
-Word.cpp
-WordLattice.cpp
-WordsBitmap.cpp
-WordsRange.cpp
-XmlOption.cpp
+lib z ;
 
-synlm ThreadPool InputFileStream LM//LM headers ;
+lib moses :
+#All cpp files except those listed
+[ glob *.cpp DynSAInclude/*.cpp : ThreadPool.cpp SyntacticLanguageModel.cpp ]
+synlm ThreadPool LM//LM headers z ;
