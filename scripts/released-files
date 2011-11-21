@@ -88,6 +88,7 @@ training/zmert-moses.pl
 training/mert-moses.pl
 training/mert-moses-multi.pl
 training/phrase-extract/extract
+training/phrase-extract/extract-ghkm/tools/extract-ghkm
 training/phrase-extract/extract-rules
 training/phrase-extract/score
 training/phrase-extract/consolidate
