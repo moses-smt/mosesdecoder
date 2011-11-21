@@ -16,7 +16,7 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTargetPhrase(Output, source.m_initialTargetPhrase)
+  ,m_initialTargetPhrase(source.m_initialTargetPhrase)
   ,m_start(clock())
   ,interrupted_flag(0)
   ,m_transOptColl(transOptColl)

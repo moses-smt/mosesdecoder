@@ -75,7 +75,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
-  Phrase sourcePhrase(Input, 0);
+  Phrase sourcePhrase(0);
   std::vector<float> scv;
   scv.reserve(m_numScoreComponent);
 

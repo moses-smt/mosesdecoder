@@ -36,31 +36,13 @@ using namespace std;
 
 namespace Moses
 {
-Phrase::Phrase(const Phrase &copy)
-  :m_direction(copy.m_direction)
-  ,m_words(copy.m_words)
-{
-}
 
-Phrase& Phrase::operator=(const Phrase& x)
-{
-  if(this!=&x) {
-
-    m_direction=x.m_direction;
-    m_words = x.m_words;
-  }
-  return *this;
-}
-
-
-Phrase::Phrase(FactorDirection direction, size_t reserveSize)
-  : m_direction(direction)
+Phrase::Phrase(size_t reserveSize)
 {
   m_words.reserve(reserveSize);
 }
 
-Phrase::Phrase(FactorDirection direction, const vector< const Word* > &mergeWords)
-  :m_direction(direction)
+Phrase::Phrase(const vector< const Word* > &mergeWords)
 {
   m_words.reserve(mergeWords.size());
   for (size_t currPos = 0 ; currPos < mergeWords.size() ; currPos++) {
@@ -76,7 +58,7 @@ void Phrase::MergeFactors(const Phrase &copy)
 {
   CHECK(GetSize() == copy.GetSize());
   size_t size = GetSize();
-  const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
+  const size_t maxNumFactors = MAX_NUM_FACTORS;
   for (size_t currPos = 0 ; currPos < size ; currPos++) {
     for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++) {
       FactorType factorType = static_cast<FactorType>(currFactor);
@@ -107,7 +89,7 @@ void Phrase::MergeFactors(const Phrase &copy, const std::vector<FactorType>& fac
 
 Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 {
-  Phrase retPhrase(m_direction, wordsRange.GetNumWordsCovered());
+  Phrase retPhrase(wordsRange.GetNumWordsCovered());
 
   for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++) {
     Word &word = retPhrase.AddWord();
@@ -288,7 +270,7 @@ bool Phrase::IsCompatible(const Phrase &inputPhrase) const
 
   const size_t size = GetSize();
 
-  const size_t maxNumFactors = StaticData::Instance().GetMaxNumFactors(this->GetDirection());
+  const size_t maxNumFactors = MAX_NUM_FACTORS;
   for (size_t currPos = 0 ; currPos < size ; currPos++) {
     for (unsigned int currFactor = 0 ; currFactor < maxNumFactors ; currFactor++) {
       FactorType factorType = static_cast<FactorType>(currFactor);

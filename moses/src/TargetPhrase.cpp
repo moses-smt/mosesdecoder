@@ -40,8 +40,8 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
-  :Phrase(direction, 0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+TargetPhrase::TargetPhrase( std::string out_string)
+  :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
@@ -51,8 +51,8 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
 }
 
 
-TargetPhrase::TargetPhrase(FactorDirection direction)
-  :Phrase(direction, ARRAY_SIZE_INCR)
+TargetPhrase::TargetPhrase()
+  :Phrase(ARRAY_SIZE_INCR)
   , m_transScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)

@@ -279,7 +279,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
       if (StaticData::Instance().IsPathRecoveryEnabled()) {
         out << "||| ";
       }
-      Phrase outPhrase(Output, ARRAY_SIZE_INCR);
+      Phrase outPhrase(ARRAY_SIZE_INCR);
       hypo->CreateOutputPhrase(outPhrase);
 
       // delete 1st & last

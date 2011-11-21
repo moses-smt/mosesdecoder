@@ -210,7 +210,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word sourceLHS, targetLHS;
 
     // source
-    Phrase sourcePhrase(Input, 0);
+    Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     // create target phrase obj

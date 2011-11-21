@@ -571,8 +571,8 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f)
   if(m_FactorsE.empty()) {
     //f is all of key...
     Candidates cands;
-    m_Table->GetCandidates(MakeTableKey(f,Phrase(Output, ARRAY_SIZE_INCR)),&cands);
-    m_Cache[MakeCacheKey(f,Phrase(Output, ARRAY_SIZE_INCR))] = cands;
+    m_Table->GetCandidates(MakeTableKey(f,Phrase(ARRAY_SIZE_INCR)),&cands);
+    m_Cache[MakeCacheKey(f,Phrase(ARRAY_SIZE_INCR))] = cands;
   } else {
     ObjectPool<PPimp>     pool;
     PPimp* pPos  = m_Table->GetRoot();

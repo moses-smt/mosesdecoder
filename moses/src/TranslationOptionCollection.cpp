@@ -220,7 +220,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
     // modify the starting bitmap
   }
 
-  Phrase* m_unksrc = new Phrase(Input, 1);
+  Phrase* m_unksrc = new Phrase(1);
   m_unksrc->AddWord() = sourceWord;
   m_unksrcs.push_back(m_unksrc);
 

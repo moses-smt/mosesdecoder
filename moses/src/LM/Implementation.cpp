@@ -310,8 +310,8 @@ private:
 public:
   LanguageModelChartState(const ChartHypothesis &hypo, int featureID, size_t order)
       :m_lmRightContext(NULL)
-      ,m_contextPrefix(Output, order - 1)
-      ,m_contextSuffix(Output, order - 1)
+      ,m_contextPrefix(order - 1)
+      ,m_contextSuffix( order - 1)
       ,m_hypo(hypo)
   {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();

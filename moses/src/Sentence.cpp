@@ -34,7 +34,7 @@ namespace Moses
 {
 
 Sentence::Sentence(FactorDirection direction)
-  : Phrase(direction, 0)
+  : Phrase(0)
   , InputType()
 {
   CHECK(direction == Input);

@@ -76,7 +76,7 @@ ChartTrellisNode::~ChartTrellisNode()
 Phrase ChartTrellisNode::GetOutputPhrase() const
 {
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
-  Phrase ret(Output, ARRAY_SIZE_INCR);
+  Phrase ret(ARRAY_SIZE_INCR);
 
   const ChartTranslationOption &transOpt = m_hypo.GetTranslationOption();
 
