@@ -30,24 +30,19 @@ path-constant TOP : . ;
 
 import option ;
 
+import boost ;
+boost.use-project ;
 #If boost static libraries are not installed, use dynamic linking.  
 if [ SHELL $(TOP)"/jam-files/test.sh -static -lboost_program_options" ] != 0 {
   force-boost-link = "<link>shared" ;
 }
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
-#If multi-threaded, links against the -mt version.  
-#With shared linkage, defines macro.  See tools/build/v2/contrib/boost.jam in a
-#boost tarball for a table of dynamic linking macros.  
-rule boost_lib ( name macro ) {
-#Add -mt if multi-threaded.
-  lib inner_boost_$(name) : : <threading>single <name>boost_$(name) ;
-  lib inner_boost_$(name) : : <threading>multi <name>boost_$(name)-mt ;
-#Link dynamically if necessary and define the dynamic linking macro if so
-  alias boost_$(name) : inner_boost_$(name) : $(force-boost-link) : : <link>shared:<define>BOOST_$(macro) ;
+rule boost_lib ( name ) {
+  alias boost_$(name) : /boost//$(name) : $(force-boost-link) ;
 }
-boost_lib thread THREAD_DYN_DLL ;
-boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
-boost_lib unit_test_framework TEST_DYN_LINK ;
+boost_lib thread ;
+boost_lib program_options ;
+boost_lib unit_test_framework ;
 
 #Dynamic libz if we have to.  
 if [ SHELL $(TOP)"/jam-files/test.sh -static -lz" ] != 0 {
