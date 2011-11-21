@@ -6,18 +6,25 @@
 #--with-randlm=/path/to/randlm
 #KenLM is always compiled.  
 #
-#threading=single compiles single-threaded
+#--with-xmlrpc-c=/path/to/xmlrpc-c for libxmlrpc-c (used by server)
+#Note that, like language models, this is the --prefix where the library was
+#installed, not some executable within the library.  
 #
-#variant=debug for debugging (or just "debug")
-#variant=profile for profiling
-#
-#link=shared for dynamic linking
-#
-#--install=/path/to/install sets the install directory (default dist)
 #--notrace compiles without TRACE macros
 #
-#-j$NCPUS to compile in parallel
+#--install=/path/to/install sets the install directory (default dist)
 #
+#By default, the build is multi-threaded, optimized, and statically linked.
+#
+#General help with bjam:
+#threading=single compiles single-threaded
+#variant=debug for debugging (or just "debug")
+#variant=profile for profiling
+#link=shared for dynamic linking
+#
+#-a to build from scratch
+#-j$NCPUS to compile in parallel
+#clean to clean
 
 path-constant TOP : . ;
 
@@ -35,13 +42,14 @@ rule boost_lib ( name macro ) {
 #Add -mt if multi-threaded.
   lib inner_boost_$(name) : : <threading>single <name>boost_$(name) ;
   lib inner_boost_$(name) : : <threading>multi <name>boost_$(name)-mt ;
-#link dynamically
+#Link dynamically if necessary and define the dynamic linking macro if so
   alias boost_$(name) : inner_boost_$(name) : $(force-boost-link) : : <link>shared:<define>BOOST_$(macro) ;
 }
 boost_lib thread THREAD_DYN_DLL ;
 boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
 boost_lib unit_test_framework TEST_DYN_LINK ;
 
+#Dynamic libz if we have to.  
 if [ SHELL $(TOP)"/jam-files/test.sh -static -lz" ] != 0 {
   lib z : : <link>shared ;
 } else {
@@ -76,4 +84,5 @@ install dist :
   moses-cmd/src//programs
   CreateOnDisk/src//CreateOnDisk
   mert//programs
+  server//mosesserver
   : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;
