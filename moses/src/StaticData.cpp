@@ -86,7 +86,6 @@ StaticData StaticData::s_instance;
 
 StaticData::StaticData()
   :m_targetBigramFeature(NULL)
-  ,m_targetNgramFeature(NULL)
   ,m_phraseBoundaryFeature(NULL)
   ,m_phrasePairFeature(NULL)
   ,m_phraseLengthFeature(NULL)
@@ -547,8 +546,10 @@ bool StaticData::LoadData(Parameter *parameter)
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
       if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_targetBigramFeature->SetSparseFeatureReporting();
-      if (m_targetNgramFeature && name.compare(m_targetNgramFeature->GetScoreProducerWeightShortName(0)) == 0)
-      	m_targetNgramFeature->SetSparseFeatureReporting();
+      if (m_targetNgramFeatures.size() > 0)
+      	for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
+      		if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerWeightShortName(0)) == 0)
+      			m_targetNgramFeatures[i]->SetSparseFeatureReporting();
       if (m_phrasePairFeature && name.compare(m_phrasePairFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_phrasePairFeature->SetSparseFeatureReporting();
       if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName(0)) == 0)
@@ -653,8 +654,9 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_targetBigramFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetBigramFeature);
     }
-    if (m_targetNgramFeature) {
-    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetNgramFeature);
+    if (m_targetNgramFeatures.size() > 0) {
+    	for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
+    		m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetNgramFeatures[i]);
     }
     if (m_phrasePairFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phrasePairFeature);
@@ -760,7 +762,8 @@ StaticData::~StaticData()
   // small score producers
   delete m_unknownWordPenaltyProducer;
   delete m_targetBigramFeature;
-  delete m_targetNgramFeature;
+  for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
+  	delete m_targetNgramFeatures[i];
   delete m_phrasePairFeature;
   delete m_phraseBoundaryFeature;
   delete m_phraseLengthFeature;
@@ -1454,41 +1457,34 @@ bool StaticData::LoadDiscrimLMFeature()
     return true;
   }
 
-  if (wordFile.size() != 1) {
-    UserMessage::Add("Can only have one discrim-lmodel-file");
-    return false;
-  }
+  for (size_t i = 0; i < wordFile.size(); ++i) {
+  	vector<string> tokens = Tokenize(wordFile[i]);
+  	if (tokens.size() != 4) {
+  		UserMessage::Add("Format of discriminative language model parameter is <order> <factor> <include-lower-ngrams> <filename>");
+  		return false;
+  	}
 
-  vector<string> tokens = Tokenize(wordFile[0]);
-  if (tokens.size() != 3 && tokens.size() != 4) {
-    UserMessage::Add("Format of discriminative language model parameter is <order> <include-lower-ngrams> [factor] <filename>");
-    return false;
-  }
+  	size_t order = Scan<size_t>(tokens[0]);
+  	FactorType factorId = Scan<size_t>(tokens[1]);
+  	bool include_lower_ngrams = Scan<bool>(tokens[2]);
+  	string filename = tokens[3];
 
-  bool include_lower_ngrams = Scan<bool>(tokens[1]);
-  FactorType factorId = 0;
-  string filename = tokens[2];
-  if (tokens.size() == 4) {
-    factorId = Scan<size_t>(tokens[2]);
-    filename = tokens[3];
-  }
-
-  size_t order = Scan<size_t>(tokens[0]);
-  if (order == 2 && !include_lower_ngrams) {
-    m_targetBigramFeature = new TargetBigramFeature(factorId);
-    cerr << "loading from " << filename << endl;
-    if (!m_targetBigramFeature->Load(filename)) {
-      UserMessage::Add("Unable to load word list from file " + filename);
-      return false;
-    }
-  }
-  else {
-    m_targetNgramFeature = new TargetNgramFeature(factorId, order, include_lower_ngrams);
-    cerr << "loading from " << filename << endl;
-    if (!m_targetNgramFeature->Load(filename)) {
-      UserMessage::Add("Unable to load word list from file " + filename);
-      return false;
-    }
+  	if (order == 2 && !include_lower_ngrams) { // TODO: remove TargetBigramFeature ?
+  		m_targetBigramFeature = new TargetBigramFeature(factorId);
+  		cerr << "loading from " << filename << endl;
+  		if (!m_targetBigramFeature->Load(filename)) {
+  			UserMessage::Add("Unable to load word list from file " + filename);
+  			return false;
+  		}
+  	}
+  	else {
+  		m_targetNgramFeatures.push_back(new TargetNgramFeature(factorId, order, include_lower_ngrams));
+  		cerr << "loading from " << filename << endl;
+  		if (!m_targetNgramFeatures[i]->Load(filename)) {
+  			UserMessage::Add("Unable to load word list from file " + filename);
+  			return false;
+  		}
+  	}
   }
 
   return true;
