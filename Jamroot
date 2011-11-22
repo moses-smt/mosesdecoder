@@ -59,9 +59,9 @@ trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 project : default-build
   <threading>multi
   <warnings>on
+  <debug-symbols>on
   <variant>release
   <link>static
-  <debug-symbols>on
   ;
 
 project : requirements 
