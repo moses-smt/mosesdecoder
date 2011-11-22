@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
-which bjam >/dev/null 2>/dev/null && exec bjam "$@"
+if 
+  which bjam >/dev/null 2>/dev/null && #Have a bjam in path
+  ! grep UFIHGUFIHBDJKNCFZXAEVA "$(which bjam)" >/dev/null && #bjam in path isn't this script
+  bjam --help >/dev/null 2>/dev/null #bjam in path isn't broken (i.e. has boost-build)
+then
+  #Delegate to system bjam
+  exec bjam "$@"
+fi
 
 top="$(dirname "$0")"
 if [ ! -x "$top"/jam-files/bjam ]; then

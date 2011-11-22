@@ -1,6 +1,4 @@
-lib z ;
-
-lib util : bit_packing.cc ersatz_progress.cc exception.cc file.cc file_piece.cc mmap.cc murmur_hash.cc z : <include>.. : : <include>.. ;
+lib util : bit_packing.cc ersatz_progress.cc exception.cc file.cc file_piece.cc mmap.cc murmur_hash.cc ..//z : <include>.. : : <include>.. ;
 
 import testing ;
 

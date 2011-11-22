@@ -11,9 +11,7 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-lib z ;
-
 lib moses :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : ThreadPool.cpp SyntacticLanguageModel.cpp ]
-synlm ThreadPool LM//LM headers z ;
+synlm ThreadPool LM//LM headers ../..//z ;

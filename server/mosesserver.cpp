@@ -182,7 +182,7 @@ public:
 
     const TranslationSystem& system = getTranslationSystem(params);
 
-    Sentence sentence(Input);
+    Sentence sentence;
     const vector<FactorType> &inputFactorOrder =
       staticData.GetInputFactorOrder();
     stringstream in(source + "\n");
@@ -217,7 +217,7 @@ public:
   void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
       outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
-      Phrase p = hypo->GetTargetPhrase();
+      Phrase p = hypo->GetCurrTargetPhrase();
       if(reportAllFactors) {
         out << p << " ";
       } else {
