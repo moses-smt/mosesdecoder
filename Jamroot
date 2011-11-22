@@ -16,11 +16,12 @@
 #
 #By default, the build is multi-threaded, optimized, and statically linked.
 #
-#General help with bjam:
+#Compilation modes:
 #threading=single compiles single-threaded
 #variant=debug for debugging (or just "debug")
 #variant=profile for profiling
 #link=shared for dynamic linking
+#debug-symbols=off to disable debugging symbols
 #
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
@@ -53,13 +54,14 @@ if [ SHELL $(TOP)"/jam-files/test.sh -static -lz" ] != 0 {
   lib z ;
 }
 
-trace = [ option.get "notrace" : : <define>TRACE_ENABLE=1 ] ;
+trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 
 project : default-build
   <threading>multi
   <warnings>on
   <variant>release
   <link>static
+  <debug-symbols>on
   ;
 
 project : requirements 
