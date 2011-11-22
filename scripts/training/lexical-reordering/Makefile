@@ -8,7 +8,7 @@ clean:
 	$(CXX) -O6 -g -c $<
 
 score: score.cpp reordering_classes.o
-	$(CXX) -lz score.cpp reordering_classes.o -o score
+	$(CXX) score.cpp reordering_classes.o -lz -o score
 
 #reordering_classes.o: reordering_classes.h reordering_classes.cpp
 #	$(CXX) reordering_classes.cpp

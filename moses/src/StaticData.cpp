@@ -1044,8 +1044,6 @@ bool StaticData::LoadPhraseTables()
       for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
         weight.push_back(weightAll[weightAllOffset + currScore]);
 
-      cerr << weight.size() << endl;
-      
       if(weight.size() - tableInputScores != numScoreComponent) {
         stringstream strme;
         strme << "Your phrase table has " << numScoreComponent
