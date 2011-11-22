@@ -107,7 +107,7 @@ protected:
   // Other		= 1 = used to calculate LM score once all steps have been processed
   std::map<std::string, TranslationSystem> m_translationSystems;
   TargetBigramFeature *m_targetBigramFeature;
-  TargetNgramFeature *m_targetNgramFeature;
+  std::vector<TargetNgramFeature*> m_targetNgramFeatures;
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhrasePairFeature *m_phrasePairFeature;
   PhraseLengthFeature* m_phraseLengthFeature;
