@@ -34,7 +34,7 @@
 #--clean to clean
 
 #Other compilers might work, but this stops bjam from whining.  
-using gcc ;
+#using gcc ;
 
 path-constant TOP : . ;
 
@@ -93,4 +93,5 @@ install dist :
   CreateOnDisk/src//CreateOnDisk
   mert//programs
   server//mosesserver
+  misc//programs
   : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;
