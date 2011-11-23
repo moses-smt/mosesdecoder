@@ -24,7 +24,7 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 
 all: compile
 
-SUBDIRS=training/phrase-extract training/symal training/mbr training/lexical-reordering ems/biconcor
+SUBDIRS=training/phrase-extract training/symal training/lexical-reordering ems/biconcor
 SUBDIRS_CLEAN=$(SUBDIRS) training/memscore training/eppex training/compact-rule-table
 
 compile: compile-memscore compile-eppex compile-compact-rule-table compile-extract-ghkm
