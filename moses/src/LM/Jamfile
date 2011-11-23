@@ -15,17 +15,6 @@ if $(with-irstlm) != ""
   alias irst ;
 }
 
-# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str )
-{
-  return [ MATCH "([^
-]*)" : $(str) ] ;
-}
-rule _shell ( cmd )
-{
-  return [ trim-nl [ SHELL $(cmd) ] ] ;
-}
-
 with-srilm = [ option.get "with-srilm" ] ;
 if $(with-srilm) != ""
 {
