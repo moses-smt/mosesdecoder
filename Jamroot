@@ -116,6 +116,6 @@ install dist :
   moses-cmd/src//programs
   CreateOnDisk/src//CreateOnDisk
   mert//programs
-  server//mosesserver
+  contrib/server//mosesserver
   misc//programs
   : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;
