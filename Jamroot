@@ -12,7 +12,8 @@
 #
 #--notrace compiles without TRACE macros
 #
-#--install=/path/to/install sets the install directory (default dist)
+#--install=/path/to/install sets the install directory (default dist).
+#--git appends the git revision to the install directory name.
 #
 # By default, the build is multi-threaded, optimized, and statically linked.  
 # Pass these to change the build:
@@ -33,9 +34,6 @@
 #-j$NCPUS to compile in parallel
 #--clean to clean
 
-#Other compilers might work, but this stops bjam from whining.  
-#using gcc ;
-
 path-constant TOP : . ;
 
 import option ;
@@ -53,11 +51,21 @@ boost_lib thread ;
 boost_lib program_options ;
 boost_lib unit_test_framework ;
 
-#Dynamic libz if we have to.  
-if [ SHELL $(TOP)"/jam-files/test.sh -static -lz" ] != 0 {
-  lib z : : <link>shared ;
-} else {
-  lib z ;
+#Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
+rule external_lib ( name ) {
+  if [ SHELL $(TOP)"/jam-files/test.sh -static -l"$(name) ] != 0 {
+    lib $(name) : : <link>shared ;
+  } else {
+    lib $(name) ;
+  }
+}
+
+external_lib z ;
+
+#libSegFault prints a stack trace on segfault.  Link against it if available.  
+if [ SHELL $(TOP)"/jam-files/test.sh -lSegFault" ] = 0 {
+  external_lib SegFault ;
+  segfault = <library>SegFault ;
 }
 
 trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
@@ -73,6 +81,7 @@ project : default-build
 project : requirements 
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
+  $(segfault)
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(trace)
   ;
@@ -85,6 +94,21 @@ build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 
 install-location = [ option.get "install" : $(TOP)/dist ] ;
+
+# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
+rule trim-nl ( str ) {
+  return [ MATCH "([^
+]*)" : $(str) ] ;
+}
+rule _shell ( cmd ) {
+  return [ trim-nl [ SHELL $(cmd) ] ] ;
+}
+
+if [ option.get "git" : : "yes" ] {
+  install-tag = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
+  install-location = $(install-location).$(install-tag) ;
+}
+
 install dist : 
   lm//query
   lm//build_binary
