@@ -58,7 +58,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   bool ret = loader->Load(*m_input, *m_output, inFile, *m_weight, m_tableLimit,
                           *m_languageModels, m_wpProducer, *this);
   
-  assert(ret);
+  CHECK(ret);
 }
 
 }

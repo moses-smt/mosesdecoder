@@ -38,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ostream>
 #include <vector>
-#include <cassert>
+#include "util/check.hh"
 
 #include "TypeDef.h"
 #include "Sentence.h"

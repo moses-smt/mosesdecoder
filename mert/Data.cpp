@@ -7,7 +7,7 @@
  */
 
 #include <algorithm>
-#include <cassert>
+#include "util/check.hh"
 #include <cmath>
 #include <fstream>
 
@@ -149,12 +149,12 @@ void Data::mergeSparseFeatures() {
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
                         std::vector<Data>& shards)
 {
-  assert(shard_count);
-  assert(shard_size >= 0);
-  assert(shard_size <= 1);
+  CHECK(shard_count);
+  CHECK(shard_size >= 0);
+  CHECK(shard_size <= 1);
 
   size_t data_size = scoredata->size();
-  assert(data_size == featdata->size());
+  CHECK(data_size == featdata->size());
 
   shard_size *= data_size;
 

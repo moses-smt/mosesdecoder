@@ -36,7 +36,7 @@ bool Vocab::Load(OnDiskWrapper &onDiskWrapper)
   while(getline(file, line)) {
     vector<string> tokens;
     Moses::Tokenize(tokens, line);
-    assert(tokens.size() == 2);
+    CHECK(tokens.size() == 2);
     const string &key = tokens[0];
     m_vocabColl[key] =  Moses::Scan<UINT64>(tokens[1]);
   }

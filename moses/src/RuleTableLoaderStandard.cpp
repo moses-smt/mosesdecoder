@@ -70,7 +70,7 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
     if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]")
     { // no-term
       vector<string> split = Tokenize(tok, ",");
-      assert(split.size() == 2);
+      CHECK(split.size() == 2);
       
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
@@ -202,7 +202,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
       UserMessage::Add(strme.str());
       abort();
     }
-    assert(scoreVector.size() == numScoreComponents);
+    CHECK(scoreVector.size() == numScoreComponents);
 
     // parse source & find pt node
 
@@ -210,7 +210,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word sourceLHS, targetLHS;
 
     // source
-    Phrase sourcePhrase(Input, 0);
+    Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     // create target phrase obj

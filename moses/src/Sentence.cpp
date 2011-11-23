@@ -33,11 +33,10 @@ using namespace std;
 namespace Moses
 {
 
-Sentence::Sentence(FactorDirection direction)
-  : Phrase(direction, 0)
+Sentence::Sentence()
+  : Phrase(0)
   , InputType()
 {
-  assert(direction == Input);
   const StaticData& staticData = StaticData::Instance();
   if (staticData.GetSearchAlgorithm() == ChartDecoding) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
@@ -176,7 +175,7 @@ Sentence::CreateTranslationOptionCollection(const TranslationSystem* system) con
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float transOptThreshold = StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv= new TranslationOptionCollectionText(system, *this, maxNoTransOptPerCoverage, transOptThreshold);
-  assert(rv);
+  CHECK(rv);
   return rv;
 }
 void Sentence::Print(std::ostream& out) const

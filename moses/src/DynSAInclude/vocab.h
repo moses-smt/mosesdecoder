@@ -39,7 +39,7 @@ public:
     m_kBOSWordID(1) {
     InitSpecialWords();
     bool ret = Load(vocab_path, direction, factors, closed);
-    assert(ret);
+    CHECK(ret);
   }
   Vocab(FileHandler * fin, const FactorDirection& direction,
         const FactorList& factors, bool closed = true):
@@ -47,7 +47,7 @@ public:
     m_kBOSWordID(1) {
     InitSpecialWords();
     bool ret = Load(fin, direction, factors, closed);
-    assert(ret);
+    CHECK(ret);
   }
   Vocab(FileHandler *fin):
     m_kOOVWordID(0),

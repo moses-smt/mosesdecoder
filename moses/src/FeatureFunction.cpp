@@ -1,6 +1,6 @@
 #include "FeatureFunction.h"
 
-#include <cassert>
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -19,7 +19,7 @@ void StatelessFeatureFunction::Evaluate(
   const TargetPhrase& /* cur_hypo */,
   ScoreComponentCollection* /* accumulator */) const
 {
-  assert(!"Please implement Evaluate or set ComputeValueInTranslationOption to true");
+  CHECK(!"Please implement Evaluate or set ComputeValueInTranslationOption to true");
 }
 
 bool StatefulFeatureFunction::IsStateless() const

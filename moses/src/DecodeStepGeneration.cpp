@@ -149,7 +149,7 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
     }
 
     // merge with existing trans opt
-    Phrase genPhrase(Output, mergeWords);
+    Phrase genPhrase( mergeWords);
     TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
     if (newTransOpt != NULL) {
       outputPartialTranslOptColl.Add(system, newTransOpt);

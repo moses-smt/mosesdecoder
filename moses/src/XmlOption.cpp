@@ -344,7 +344,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               targetPhrase.SetScore(scoreValue);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
-              assert(option);
+              CHECK(option);
 
               res.push_back(option);
             }

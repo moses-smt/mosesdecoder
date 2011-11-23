@@ -43,7 +43,7 @@ Parameter::Parameter()
   AddParam("beam-threshold", "b", "threshold for threshold pruning");
   AddParam("config", "f", "location of the configuration file");
   AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
-  AddParam("decode-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
+  AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");

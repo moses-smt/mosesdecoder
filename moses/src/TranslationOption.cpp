@@ -84,7 +84,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
 TranslationOption::TranslationOption(const TranslationOption &copy)
   : m_targetPhrase(copy.m_targetPhrase)
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(Input, ARRAY_SIZE_INCR) : new Phrase(*copy.m_sourcePhrase))
+  , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(ARRAY_SIZE_INCR) : new Phrase(*copy.m_sourcePhrase))
   , m_sourceWordsRange(copy.m_sourceWordsRange)
   , m_futureScore(copy.m_futureScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
@@ -94,7 +94,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy)
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
   : m_targetPhrase(copy.m_targetPhrase)
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(Input, ARRAY_SIZE_INCR) : new Phrase(*copy.m_sourcePhrase))
+  , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(ARRAY_SIZE_INCR) : new Phrase(*copy.m_sourcePhrase))
   , m_sourceWordsRange(sourceWordsRange)
   , m_futureScore(copy.m_futureScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
@@ -103,7 +103,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
 {
-  assert(phrase.GetSize() == m_targetPhrase.GetSize());
+  CHECK(phrase.GetSize() == m_targetPhrase.GetSize());
   if (featuresToAdd.size() == 1) {
     m_targetPhrase.MergeFactors(phrase, featuresToAdd[0]);
   } else if (featuresToAdd.empty()) {

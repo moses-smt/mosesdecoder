@@ -63,12 +63,12 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
   // Load source phrases.
   std::vector<Phrase> sourcePhrases;
   std::vector<size_t> sourceLhsIds;
-  LoadPhraseSection(reader, Input, vocab, sourcePhrases, sourceLhsIds);
+  LoadPhraseSection(reader, vocab, sourcePhrases, sourceLhsIds);
 
   // Load target phrases.
   std::vector<Phrase> targetPhrases;
   std::vector<size_t> targetLhsIds;
-  LoadPhraseSection(reader, Output, vocab, targetPhrases, targetLhsIds);
+  LoadPhraseSection(reader, vocab, targetPhrases, targetLhsIds);
 
   // Load alignments.
   std::vector<const AlignmentInfo *> alignmentSets;
@@ -111,7 +111,6 @@ void RuleTableLoaderCompact::LoadVocabularySection(
 
 void RuleTableLoaderCompact::LoadPhraseSection(
     LineReader &reader,
-    FactorDirection direction,
     const std::vector<Word> &vocab,
     std::vector<Phrase> &rhsPhrases,
     std::vector<size_t> &lhsIds)
@@ -121,7 +120,7 @@ void RuleTableLoaderCompact::LoadPhraseSection(
   const size_t phraseCount = std::atoi(reader.m_line.c_str());
 
   // Reads lines, storing Phrase object for each RHS and vocab ID for each LHS.
-  rhsPhrases.resize(phraseCount, Phrase(direction, 0));
+  rhsPhrases.resize(phraseCount, Phrase(0));
   lhsIds.resize(phraseCount);
   std::vector<size_t> tokenPositions;
   for (size_t i = 0; i < phraseCount; ++i) {

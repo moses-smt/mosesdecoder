@@ -56,14 +56,14 @@ class PhraseDictionarySCFG : public PhraseDictionary
   // Required by PhraseDictionary.
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const
   {
-    assert(false);
+    CHECK(false);
     return NULL;
   }
 
   // Required by PhraseDictionary.
   void AddEquivPhrase(const Phrase &, const TargetPhrase &)
   {
-    assert(false);
+    CHECK(false);
   }
 
   void InitializeForInput(const InputType& i);
