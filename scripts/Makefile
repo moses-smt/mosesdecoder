@@ -25,9 +25,9 @@ RELEASEDIR=$(TARGETDIR)/scripts-$(TS)
 all: compile
 
 SUBDIRS=training/phrase-extract training/symal training/lexical-reordering ems/biconcor
-SUBDIRS_CLEAN=$(SUBDIRS) training/memscore training/eppex training/compact-rule-table
+SUBDIRS_CLEAN=$(SUBDIRS) training/compact-rule-table
 
-compile: compile-memscore compile-eppex compile-compact-rule-table compile-extract-ghkm
+compile: compile-compact-rule-table compile-extract-ghkm
 	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
@@ -36,23 +36,6 @@ compile: compile-memscore compile-eppex compile-compact-rule-table compile-extra
 	  cd $$pwd; \
 	done
 	## All files that need compilation were compiled
-
-compile-memscore:
-	# Building memscore may fail e.g. if boost is not available.
-	# We ignore this because traditional scoring will still work and memscore isn't used by default.
-	cd training/memscore ; \
-	  ./configure && $(MAKE) \
-	  || ( echo "WARNING: Building memscore failed."; \
-	       echo 'training/memscore/memscore' >> ../../release-exclude )
-
-compile-eppex:
-	# Building eppex may fail e.g. if boost is not available.
-	# We ignore this because traditional extraction will still work and eppex isn't used by default.
-	cd training/eppex ; \
-	  ./configure && $(MAKE) \
-	  || ( echo "WARNING: Building eppex failed."; \
-	       echo 'training/eppex/counter' >> ../../release-exclude; \
-	       echo 'training/eppex/eppex' >> ../../release-exclude )
 
 compile-compact-rule-table:
 	# Building the compact rule table tools may fail e.g. if boost is not available.
