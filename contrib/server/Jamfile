@@ -23,7 +23,7 @@ if $(build-moses-server) = "yes"
     xmlrpc-deps = $(xmlrpc-deps) $(xmllib) ;
   }
 
-  exe mosesserver : mosesserver.cpp ../moses/src//moses ../OnDiskPt/src//OnDiskPt $(xmlrpc-deps) ;
+  exe mosesserver : mosesserver.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt $(xmlrpc-deps) ;
 } else {
   alias mosesserver ;
 }
