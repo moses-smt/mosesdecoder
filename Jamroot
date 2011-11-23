@@ -14,18 +14,24 @@
 #
 #--install=/path/to/install sets the install directory (default dist)
 #
-#By default, the build is multi-threaded, optimized, and statically linked.
+# By default, the build is multi-threaded, optimized, and statically linked.  
+# Pass these to change the build:
 #
-#Compilation modes:
-#threading=single compiles single-threaded
-#variant=debug for debugging (or just "debug")
-#variant=profile for profiling
-#link=shared for dynamic linking
-#debug-symbols=off to disable debugging symbols
+# threading=single|multi         controls threading (default multi)
 #
+# variant=release|debug|profile  builds optimized (default), for debug, or for
+#                                profiling
+#
+# link=static|shared             controls linking (default static)
+#
+# debug-symbols=on|off           include (default) or exclude debugging
+#                                information also known as -g
+#
+#
+#Controlling the build process:
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
-#clean to clean
+#--clean to clean
 
 #Other compilers might work, but this stops bjam from whining.  
 using gcc ;
