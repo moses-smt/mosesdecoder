@@ -12,6 +12,9 @@ config.h
 config.log
 config.status
 configure
+jam-files/bjam
+jam-files/engine/bootstrap
+jam-files/engine/bin.*
 lm/.deps/
 lm/.libs/
 util/.deps/
@@ -58,6 +61,18 @@ scripts/training/phrase-extract/consolidate
 scripts/training/phrase-extract/consolidate-direct
 scripts/training/phrase-extract/consolidate-reverse
 scripts/training/phrase-extract/extract
+scripts/training/phrase-extract/extract-ghkm/config.guess
+scripts/training/phrase-extract/extract-ghkm/config.h.in
+scripts/training/phrase-extract/extract-ghkm/config.sub
+scripts/training/phrase-extract/extract-ghkm/depcomp
+scripts/training/phrase-extract/extract-ghkm/install-sh
+scripts/training/phrase-extract/extract-ghkm/m4/libtool.m4
+scripts/training/phrase-extract/extract-ghkm/m4/ltoptions.m4
+scripts/training/phrase-extract/extract-ghkm/m4/ltsugar.m4
+scripts/training/phrase-extract/extract-ghkm/m4/ltversion.m4
+scripts/training/phrase-extract/extract-ghkm/m4/lt~obsolete.m4
+scripts/training/phrase-extract/extract-ghkm/missing
+scripts/training/phrase-extract/extract-ghkm/tools/extract-ghkm
 scripts/training/phrase-extract/extract-lex
 scripts/training/phrase-extract/extract-rules
 scripts/training/phrase-extract/relax-parse
@@ -71,3 +86,5 @@ m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
+dist
+bin

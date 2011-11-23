@@ -172,7 +172,7 @@ float TranslationSystem::GetWeightUnknownWordPenalty() const
 
 float TranslationSystem::GetWeightDistortion() const
 {
-  assert(m_distortionScoreProducer);
+  CHECK(m_distortionScoreProducer);
   size_t distIndex = StaticData::Instance().GetScoreIndexManager().
                      GetBeginIndex(m_distortionScoreProducer->GetScoreBookkeepingID());
   return StaticData::Instance().GetAllWeights()[distIndex];

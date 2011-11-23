@@ -59,9 +59,9 @@ bool Parameters::loadParams(int argc, char ** argv) {
     //if the parameter is of type booL no corresponding value
     if( getValueType(param) == kBoolValue ) {
       jumpBy = 1;
-      assert(setParamValue(param, kTrueValue));
+      CHECK(setParamValue(param, kTrueValue));
     } else { //not of type bool so must have corresponding value
-      assert(i+1 < argc);
+      CHECK(i+1 < argc);
       jumpBy = 2;
       std::string val = argv[i+1];
       Utils::trim(val);

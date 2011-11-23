@@ -166,9 +166,6 @@ public:
 
   std::string GetSourcePhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
   std::string GetTargetPhraseStringRep(const std::vector<FactorType> factorsToPrint) const;
-  inline const TargetPhrase GetTargetPhrase() const {
-    return m_targetPhrase;
-  }
   std::string GetSourcePhraseStringRep() const;
   std::string GetTargetPhraseStringRep() const;
 
@@ -186,7 +183,7 @@ public:
     const Hypothesis *hypo = this;
     while (pos < hypo->GetCurrTargetWordsRange().GetStartPos()) {
       hypo = hypo->GetPrevHypo();
-      assert(hypo != NULL);
+      CHECK(hypo != NULL);
     }
     return hypo->GetCurrWord(pos - hypo->GetCurrTargetWordsRange().GetStartPos());
   }

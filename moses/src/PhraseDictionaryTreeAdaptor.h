@@ -4,7 +4,7 @@
 #define moses_PhraseDictionaryTreeAdaptor_h
 
 #include <vector>
-#include <cassert>
+#include "util/check.hh"
 #include "TypeDef.h"
 #include "PhraseDictionaryMemory.h"
 #include "TargetPhraseCollection.h"
@@ -69,7 +69,7 @@ public:
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollection &) {
-    assert(false);
+    CHECK(false);
     return 0;
   }
 };

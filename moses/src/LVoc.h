@@ -37,11 +37,11 @@ public:
     std::pair<typename M::iterator,bool> p
     =m.insert(std::make_pair(k,data.size()));
     if(p.second) data.push_back(k);
-    assert(static_cast<size_t>(p.first->second)<data.size());
+    CHECK(static_cast<size_t>(p.first->second)<data.size());
     return p.first->second;
   }
   Key const& symbol(LabelId i) const {
-    assert(static_cast<size_t>(i)<data.size());
+    CHECK(static_cast<size_t>(i)<data.size());
     return data[i];
   }
 

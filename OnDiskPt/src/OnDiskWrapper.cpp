@@ -21,7 +21,7 @@
 #include <direct.h>
 #endif
 #include <sys/stat.h>
-#include <cassert>
+#include "util/check.hh"
 #include <string>
 #include "OnDiskWrapper.h"
 
@@ -56,19 +56,19 @@ bool OnDiskWrapper::BeginLoad(const std::string &filePath)
 bool OnDiskWrapper::OpenForLoad(const std::string &filePath)
 {
   m_fileSource.open((filePath + "/Source.dat").c_str(), ios::in | ios::binary);
-  assert(m_fileSource.is_open());
+  CHECK(m_fileSource.is_open());
 
   m_fileTargetInd.open((filePath + "/TargetInd.dat").c_str(), ios::in | ios::binary);
-  assert(m_fileTargetInd.is_open());
+  CHECK(m_fileTargetInd.is_open());
 
   m_fileTargetColl.open((filePath + "/TargetColl.dat").c_str(), ios::in | ios::binary);
-  assert(m_fileTargetColl.is_open());
+  CHECK(m_fileTargetColl.is_open());
 
   m_fileVocab.open((filePath + "/Vocab.dat").c_str(), ios::in);
-  assert(m_fileVocab.is_open());
+  CHECK(m_fileVocab.is_open());
 
   m_fileMisc.open((filePath + "/Misc.dat").c_str(), ios::in);
-  assert(m_fileMisc.is_open());
+  CHECK(m_fileMisc.is_open());
 
   // set up root node
   LoadMisc();
@@ -86,7 +86,7 @@ bool OnDiskWrapper::LoadMisc()
   while(m_fileMisc.getline(line, 100000)) {
     vector<string> tokens;
     Moses::Tokenize(tokens, line);
-    assert(tokens.size() == 2);
+    CHECK(tokens.size() == 2);
     const string &key = tokens[0];
     m_miscInfo[key] =  Moses::Scan<UINT64>(tokens[1]);
   }
@@ -109,33 +109,33 @@ bool OnDiskWrapper::BeginSave(const std::string &filePath
 #endif
 
   m_fileSource.open((filePath + "/Source.dat").c_str(), ios::out | ios::in | ios::binary | ios::ate | ios::trunc);
-  assert(m_fileSource.is_open());
+  CHECK(m_fileSource.is_open());
 
   m_fileTargetInd.open((filePath + "/TargetInd.dat").c_str(), ios::out | ios::binary | ios::ate | ios::trunc);
-  assert(m_fileTargetInd.is_open());
+  CHECK(m_fileTargetInd.is_open());
 
   m_fileTargetColl.open((filePath + "/TargetColl.dat").c_str(), ios::out | ios::binary | ios::ate | ios::trunc);
-  assert(m_fileTargetColl.is_open());
+  CHECK(m_fileTargetColl.is_open());
 
   m_fileVocab.open((filePath + "/Vocab.dat").c_str(), ios::out | ios::ate | ios::trunc);
-  assert(m_fileVocab.is_open());
+  CHECK(m_fileVocab.is_open());
 
   m_fileMisc.open((filePath + "/Misc.dat").c_str(), ios::out | ios::ate | ios::trunc);
-  assert(m_fileMisc.is_open());
+  CHECK(m_fileMisc.is_open());
 
   // offset by 1. 0 offset is reserved
   char c = 0xff;
   m_fileSource.write(&c, 1);
-  assert(1 == m_fileSource.tellp());
+  CHECK(1 == m_fileSource.tellp());
 
   m_fileTargetInd.write(&c, 1);
-  assert(1 == m_fileTargetInd.tellp());
+  CHECK(1 == m_fileTargetInd.tellp());
 
   m_fileTargetColl.write(&c, 1);
-  assert(1 == m_fileTargetColl.tellp());
+  CHECK(1 == m_fileTargetColl.tellp());
 
   // set up root node
-  assert(GetNumCounts() == 1);
+  CHECK(GetNumCounts() == 1);
   vector<float> counts(GetNumCounts());
   counts[0] = DEFAULT_COUNT;
   m_rootSourceNode = new PhraseNode();
@@ -147,7 +147,7 @@ bool OnDiskWrapper::BeginSave(const std::string &filePath
 void OnDiskWrapper::EndSave()
 {
   bool ret = m_rootSourceNode->Saved();
-  assert(ret);
+  CHECK(ret);
 
   GetVocab().Save(*this);
 
@@ -184,7 +184,7 @@ UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
 {
   std::map<std::string, UINT64>::const_iterator iter;
   iter = m_miscInfo.find(key);
-  assert(iter != m_miscInfo.end());
+  CHECK(iter != m_miscInfo.end());
 
   return iter->second;
 }
@@ -205,7 +205,7 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
     size_t factorType = factorsVec[ind];
 
     const Moses::Factor *factor = origWord.GetFactor(factorType);
-    assert(factor);
+    CHECK(factor);
 
     string str = factor->GetString();
     if (isNonTerminal) {

@@ -26,7 +26,7 @@
 #include "DotChart.h"
 #include "PhraseDictionaryNodeSCFG.h"
 
-#include <cassert>
+#include "util/check.hh"
 #include <vector>
 
 namespace Moses
@@ -96,7 +96,7 @@ public:
   }
 
   void Add(size_t pos, const DottedRuleInMemory *dottedRule) {
-    assert(dottedRule);
+    CHECK(dottedRule);
     m_coll[pos].push_back(dottedRule);
     if (!dottedRule->GetLastNode().IsLeaf()) {
       m_expandableDottedRuleList.push_back(dottedRule);

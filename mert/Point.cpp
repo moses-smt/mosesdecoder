@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <cassert>
+#include "util/check.hh"
 #include <limits>
 #include "FeatureStats.h"
 
@@ -37,7 +37,7 @@ Point::Point(const vector<parameter_t>& init,
       m_max[i] = max[i];
     }
   } else {
-    assert(init.size()==pdim);
+    CHECK(init.size()==pdim);
     for (unsigned int i=0; i<Point::dim; i++) {
       operator[](i)=init[optindices[i]];
       m_min[i] = min[optindices[i]];
@@ -50,8 +50,8 @@ Point::~Point() {}
 
 void Point::Randomize()
 {
-  assert(m_min.size()==Point::dim);
-  assert(m_max.size()==Point::dim);
+  CHECK(m_min.size()==Point::dim);
+  CHECK(m_max.size()==Point::dim);
   for (unsigned int i=0; i<size(); i++) {
     operator[](i) = m_min[i] +
                    (float)random()/(float)RAND_MAX * (float)(m_max[i]-m_min[i]);
@@ -76,7 +76,7 @@ double Point::operator*(const FeatureStats& F) const
 
 Point Point::operator+(const Point& p2) const
 {
-  assert(p2.size() == size());
+  CHECK(p2.size() == size());
   Point Res(*this);
   for (unsigned i = 0; i < size(); i++) {
     Res[i] += p2[i];
@@ -88,7 +88,7 @@ Point Point::operator+(const Point& p2) const
 
 void Point::operator+=(const Point& p2)
 {
-  assert(p2.size() == size());
+  CHECK(p2.size() == size());
   for (unsigned i = 0; i < size(); i++) {
     operator[](i) += p2[i];
   }

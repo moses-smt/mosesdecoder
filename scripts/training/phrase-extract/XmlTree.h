@@ -33,3 +33,4 @@ std::string TrimXml(const std::string& str);
 bool isXmlTag(const std::string& tag);
 std::vector<std::string> TokenizeXml(const std::string& str);
 bool ProcessAndStripXMLTags(std::string &line, SyntaxTree &tree, std::set< std::string > &labelCollection, std::map< std::string, int > &topLabelCollection );
+std::string unescape(const std::string &str);

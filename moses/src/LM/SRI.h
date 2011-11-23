@@ -26,12 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Factor.h"
 #include "TypeDef.h"
-#include "Vocab.h"
-#include "Ngram.h"
 #include "LM/SingleFactor.h"
 
 class Factor;
 class Phrase;
+class Vocab;
+class Ngram;
 
 namespace Moses
 {
@@ -39,15 +39,15 @@ namespace Moses
 class LanguageModelSRI : public LanguageModelPointerState
 {
 protected:
-  std::vector<VocabIndex> m_lmIdLookup;
+  std::vector<unsigned int> m_lmIdLookup;
   ::Vocab			*m_srilmVocab;
   Ngram 			*m_srilmModel;
-  VocabIndex	m_unknownId;
+  unsigned int	m_unknownId;
 
-  LMResult GetValue(VocabIndex wordId, VocabIndex *context) const;
+  LMResult GetValue(unsigned int wordId, unsigned int *context) const;
   void CreateFactors();
-  VocabIndex GetLmID( const std::string &str ) const;
-  VocabIndex GetLmID( const Factor *factor ) const;
+  unsigned int GetLmID( const std::string &str ) const;
+  unsigned int GetLmID( const Factor *factor ) const;
 
 public:
   LanguageModelSRI();

@@ -197,6 +197,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					../kenlm,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = OnDiskPt;
@@ -212,6 +213,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					../kenlm,
+					../,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = OnDiskPt;

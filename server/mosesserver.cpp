@@ -1,4 +1,4 @@
-#include <cassert>
+#include "util/check.hh"
 #include <stdexcept>
 #include <iostream>
 
@@ -182,7 +182,7 @@ public:
 
     const TranslationSystem& system = getTranslationSystem(params);
 
-    Sentence sentence(Input);
+    Sentence sentence;
     const vector<FactorType> &inputFactorOrder =
       staticData.GetInputFactorOrder();
     stringstream in(source + "\n");
@@ -217,7 +217,7 @@ public:
   void outputHypo(ostream& out, const Hypothesis* hypo, bool addAlignmentInfo, vector<xmlrpc_c::value>& alignInfo, bool reportAllFactors = false) {
     if (hypo->GetPrevHypo() != NULL) {
       outputHypo(out,hypo->GetPrevHypo(),addAlignmentInfo, alignInfo, reportAllFactors);
-      Phrase p = hypo->GetTargetPhrase();
+      Phrase p = hypo->GetCurrTargetPhrase();
       if(reportAllFactors) {
         out << p << " ";
       } else {
@@ -376,6 +376,6 @@ int main(int argc, char** argv)
     myAbyssServer.run();
   }
   // xmlrpc_c::serverAbyss.run() never returns
-  assert(false);
+  CHECK(false);
   return 0;
 }

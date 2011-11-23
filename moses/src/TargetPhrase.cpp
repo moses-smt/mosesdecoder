@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include "util/tokenize_piece.hh"
@@ -40,8 +40,8 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
-  :Phrase(direction, 0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+TargetPhrase::TargetPhrase( std::string out_string)
+  :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
@@ -51,8 +51,8 @@ TargetPhrase::TargetPhrase(FactorDirection direction, std::string out_string)
 }
 
 
-TargetPhrase::TargetPhrase(FactorDirection direction)
-  :Phrase(direction, ARRAY_SIZE_INCR)
+TargetPhrase::TargetPhrase()
+  :Phrase(ARRAY_SIZE_INCR)
   , m_transScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
@@ -140,7 +140,7 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
   std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
 
   //expand the input weight vector
-  assert(scoreVector.size() <= prod->GetNumScoreComponents());
+  CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
   Scores sizedScoreVector = scoreVector;
   sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
@@ -152,7 +152,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
                             const vector<float> &weightT,
                             float weightWP, const LMList &languageModels)
 {
-  assert(weightT.size() == scoreVector.size());
+  CHECK(weightT.size() == scoreVector.size());
   // calc average score if non-best
 
   m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
@@ -205,7 +205,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
                                  ,const WordPenaltyProducer* wpProducer)
 {
 
-  assert(weightT.size() == scoreVector.size());
+  CHECK(weightT.size() == scoreVector.size());
 
   // calc average score if non-best
   m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
@@ -266,7 +266,7 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
   // calling this function in case of confusion net input is undefined
-  assert(StaticData::Instance().GetInputType()==SentenceInput);
+  CHECK(StaticData::Instance().GetInputType()==SentenceInput);
 
   /* one way to fix this, you have to make sure the weightT contains (in
      addition to the usual phrase translation scaling factors) the input

@@ -57,13 +57,13 @@ void TargetPhrase::Create1AlignFromString(const std::string &align1Str)
 {
   vector<size_t> alignPoints;
   Moses::Tokenize<size_t>(alignPoints, align1Str, "-");
-  assert(alignPoints.size() == 2);
+  CHECK(alignPoints.size() == 2);
   m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
 }
 
 void TargetPhrase::SetScore(float score, size_t ind)
 {
-  assert(ind < m_scores.size());
+  CHECK(ind < m_scores.size());
   m_scores[ind] = score;
 }
 
@@ -101,7 +101,7 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
     memUsed += word.WriteToMemory((char*) currPtr);
   }
 
-  assert(memUsed == memNeeded);
+  CHECK(memUsed == memNeeded);
   return (char *) mem;
 }
 
@@ -119,7 +119,7 @@ void TargetPhrase::Save(OnDiskWrapper &onDiskWrapper)
   file.write(mem, memUsed);
 
   UINT64 endPos = file.tellp();
-  assert(startPos + memUsed == endPos);
+  CHECK(startPos + memUsed == endPos);
 
   m_filePos = startPos;
   free(mem);
@@ -151,7 +151,7 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   memUsed += WriteScoresToMemory(mem + memUsed);
 
   //DebugMem(mem, memNeeded);
-  assert(memNeeded == memUsed);
+  CHECK(memNeeded == memUsed);
   return mem;
 }
 
@@ -203,7 +203,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 
   // words
   size_t phraseSize = GetSize();
-  assert(phraseSize > 0); // last word is lhs
+  CHECK(phraseSize > 0); // last word is lhs
   --phraseSize;
 
   for (size_t pos = 0; pos < phraseSize; ++pos) {
@@ -232,18 +232,18 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 
 UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl)
 {
-  assert(filePos == fileTPColl.tellg());
+  CHECK(filePos == fileTPColl.tellg());
 
   UINT64 memUsed = 0;
   fileTPColl.read((char*) &m_filePos, sizeof(UINT64));
   memUsed += sizeof(UINT64);
-  assert(m_filePos != 0);
+  CHECK(m_filePos != 0);
 
   memUsed += ReadAlignFromFile(fileTPColl);
-  assert((memUsed + filePos) == fileTPColl.tellg());
+  CHECK((memUsed + filePos) == fileTPColl.tellg());
 
   memUsed += ReadScoresFromFile(fileTPColl);
-  assert((memUsed + filePos) == fileTPColl.tellg());
+  CHECK((memUsed + filePos) == fileTPColl.tellg());
 
   return memUsed;
 }
@@ -289,7 +289,7 @@ UINT64 TargetPhrase::ReadAlignFromFile(std::fstream &fileTPColl)
 
 UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
 {
-  assert(m_scores.size() > 0);
+  CHECK(m_scores.size() > 0);
 
   UINT64 bytesRead = 0;
 

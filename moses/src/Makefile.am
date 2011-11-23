@@ -148,7 +148,7 @@ libmoses_la_HEADERS += LM/IRST.h
 endif
 
 if RAND_LM
-libmoses_la_HEADERS += LM/RandLM.h
+libmoses_la_HEADERS += LM/Rand.h
 endif
 
 if ORLM_LM
@@ -318,7 +318,7 @@ libmoses_la_SOURCES += LM/IRST.cpp
 endif
 
 if RAND_LM
-libmoses_la_SOURCES += LM/RandLM.cpp
+libmoses_la_SOURCES += LM/Rand.cpp
 endif
 
 if ORLM_LM

@@ -64,7 +64,7 @@ public:
   /** Add a parameter with key, command line argument, and default value */
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
-    assert(m_grid.find(key) == m_grid.end());
+    CHECK(m_grid.find(key) == m_grid.end());
     m_grid[key].push_back(defaultValue);
   }
 
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 
   while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
     ++lineCount;
-    Sentence sentence(Input);
+    Sentence sentence;
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
     Manager manager(*source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();

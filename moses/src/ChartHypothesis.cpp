@@ -108,7 +108,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 /** Return full output phrase */
 Phrase ChartHypothesis::GetOutputPhrase() const
 {
-  Phrase outPhrase(Output, ARRAY_SIZE_INCR);
+  Phrase outPhrase(ARRAY_SIZE_INCR);
   CreateOutputPhrase(outPhrase);
   return outPhrase;
 }

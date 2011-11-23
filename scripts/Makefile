@@ -27,7 +27,7 @@ all: compile
 SUBDIRS=training/phrase-extract training/symal training/mbr training/lexical-reordering ems/biconcor
 SUBDIRS_CLEAN=$(SUBDIRS) training/memscore training/eppex training/compact-rule-table
 
-compile: compile-memscore compile-eppex compile-compact-rule-table
+compile: compile-memscore compile-eppex compile-compact-rule-table compile-extract-ghkm
 	touch release-exclude # No files excluded by default
 	pwd=`pwd`; \
 	for subdir in $(SUBDIRS); do \
@@ -61,6 +61,19 @@ compile-compact-rule-table:
 	  ./configure && $(MAKE) \
 	  || ( echo "WARNING: Building compact rule table tools failed."; \
 	       echo 'training/compact-rule-table/tools/compactify' >> ../../release-exclude )
+
+compile-extract-ghkm:
+	# Building the GHKM rule extractor may fail e.g. if certain boost libraries are not available.
+	# We ignore this because the tool isn't used by default.
+	cd training/phrase-extract/extract-ghkm ; \
+	  if [ ! -f configure ]; then \
+	    autoreconf -i \
+	      || ( echo "WARNING: Bootstrapping extract-ghkm build environment failed."; \
+	           echo 'training/phrase-extract/extract-ghkm/tools/extract-ghkm' >> ../../release-exclude ); \
+          fi; \
+	  ./configure && $(MAKE) \
+	  || ( echo "WARNING: Building extract-ghkm failed."; \
+	       echo 'training/phrase-extract/extract-ghkm/tools/extract-ghkm' >> ../../release-exclude )
 
 clean:
 	pwd=`pwd`; \

@@ -110,7 +110,7 @@ struct GCData {
          const std::vector<std::vector<float> >& b)
     : pdicts(a),weights(b),totalTuples(0),distinctTuples(0) {
 
-    assert(pdicts.size()==weights.size());
+    CHECK(pdicts.size()==weights.size());
     std::set<FactorType> distinctOutFset;
     inF.resize(pdicts.size());
     outF.resize(pdicts.size());
@@ -152,7 +152,7 @@ void GeneratePerFactorTgtList(size_t factorType,PPtr pptr,GCData& data,Len2Cands
   data.pdicts[factorType]->GetTargetCandidates(pptr,cands);
 
   for(std::vector<FactorTgtCand>::const_iterator cand=cands.begin(); cand!=cands.end(); ++cand) {
-    assert(data.weights[factorType].size()==cand->second.size());
+    CHECK(data.weights[factorType].size()==cand->second.size());
     float costs=std::inner_product(data.weights[factorType].begin(),
                                    data.weights[factorType].end(),
                                    cand->second.begin(),
@@ -176,7 +176,7 @@ void GenerateTupleTgtCands(OutputFactor2TgtCandList& tCand,E2Costs& e2costs,GCDa
 
   if(gotCands) {
     // enumerate tuples
-    assert(data.DistinctOutFactors()==tCand.size());
+    CHECK(data.DistinctOutFactors()==tCand.size());
     std::vector<unsigned> radix(data.DistinctOutFactors());
     for(size_t i=0; i<tCand.size(); ++i) radix[i]=tCand[i].size();
 
@@ -189,7 +189,7 @@ void GenerateTupleTgtCands(OutputFactor2TgtCandList& tCand,E2Costs& e2costs,GCDa
       mPhrase e(radix.size());
       float costs=0.0;
       for(size_t j=0; j<radix.size(); ++j) {
-        assert(tuples[radix.size()*i+j]<tCand[j].size());
+        CHECK(tuples[radix.size()*i+j]<tCand[j].size());
         std::pair<float,vFactor> const& mycand=tCand[j][tuples[radix.size()*i+j]];
         e[j]=mycand.second;
         costs+=mycand.first;
@@ -198,7 +198,7 @@ void GenerateTupleTgtCands(OutputFactor2TgtCandList& tCand,E2Costs& e2costs,GCDa
       bool mismatch=0;
       for(size_t j=1; !mismatch && j<e.size(); ++j)
         if(e[j].size()!=e[j-1].size()) mismatch=1;
-      assert(mismatch==0);
+      CHECK(mismatch==0);
 #endif
       std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(e,costs));
       if(p.second) ++data.distinctTuples;
@@ -244,7 +244,7 @@ void GenerateCandidates(const ConfusionNet& src,
 
     //std::cerr<<"processing state "<<curr<<" stack size: "<<stack.size()<<"\n";
 
-    assert(curr.end()<src.GetSize());
+    CHECK(curr.end()<src.GetSize());
     const ConfusionNet::Column &currCol=src[curr.end()];
     for(size_t colidx=0; colidx<currCol.size(); ++colidx) {
       const Word& w=currCol[colidx].first;

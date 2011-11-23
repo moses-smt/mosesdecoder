@@ -24,7 +24,7 @@ FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags
     exit(EXIT_FAILURE);
   } else {
     bool ret = setStreamBuffer(flags & std::ios::in);
-    assert(ret);
+    CHECK(ret);
   }
   this->precision(32);
 }
@@ -59,11 +59,11 @@ bool FileHandler::setStreamBuffer(bool checkExists)
 {
   // redirect stdin or stdout if necesary
   if (path_ == FileHandler::kStdInDescriptor) {
-    assert(flags_ & std::ios::in);
+    CHECK(flags_ & std::ios::in);
     std::streambuf* sb = std::cin.rdbuf();
     buffer_ = sb;
   } else if (path_ == FileHandler::kStdOutDescriptor) {
-    assert(flags_ & std::ios::out);
+    CHECK(flags_ & std::ios::out);
     std::streambuf* sb = std::cout.rdbuf();
     buffer_ = sb;
   } else {
