@@ -101,7 +101,8 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
       for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
           const string& ref = refs[file_id][ref_id];
           vector<string> refTokens  = Tokenize(ref);
-          std::pair< size_t, std::map< Phrase, size_t > > ref_pair;
+          m_refs[ref_id] = pair<size_t,NGrams>();
+           pair<size_t,NGrams>& ref_pair = m_refs[ref_id];
           ref_pair.first = refTokens.size();
           for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {
               for (size_t end_idx = order; end_idx <= refTokens.size(); end_idx++) {
@@ -115,7 +116,6 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
                   ref_pair.second[ngram] += 1;
               }
           }
-          m_refs[ref_id] = ref_pair;
       }
     }
 }
@@ -228,7 +228,7 @@ void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
                                            std::vector< size_t >& ret_matches,
                                            size_t skip_first) const
 {
-    std::map< Phrase, size_t >::const_iterator ref_ngram_counts_iter;
+    NGrams::const_iterator ref_ngram_counts_iter;
     size_t ngram_start_idx, ngram_end_idx;
 
     // Chiang et al (2008) use unclipped counts of ngram matches
@@ -255,10 +255,10 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
                                            std::vector< size_t >& ret_matches,
                                            size_t skip_first) const
 {
-	std::map< Phrase, size_t >::const_iterator ref_ngram_counts_iter;
+	NGrams::const_iterator ref_ngram_counts_iter;
 	size_t ngram_start_idx, ngram_end_idx;
 
-	std::map<size_t, std::map<Phrase, size_t> > ngram_matches;
+	Matches ngram_matches;
 	for (size_t end_idx = skip_first; end_idx < phrase.GetSize(); end_idx++) {
 		for (size_t order = 0; order < BleuScoreState::bleu_order; order++) {
 			if (order > end_idx) break;
@@ -278,7 +278,7 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
 
 	// clip ngram matches
 	for (size_t order = 0; order < BleuScoreState::bleu_order; order++) {
-		std::map<Phrase, size_t>::const_iterator iter;
+		NGrams::const_iterator iter;
 
 		// iterate over ngram counts for every ngram order
 		for (iter=ngram_matches[order].begin(); iter != ngram_matches[order].end(); ++iter) {
@@ -301,7 +301,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
                                     const FFState* prev_state, 
                                     ScoreComponentCollection* accumulator) const
 {
-    std::map< Phrase, size_t >::const_iterator reference_ngrams_iter;
+    NGrams::const_iterator reference_ngrams_iter;
     const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
     BleuScoreState* new_state = new BleuScoreState(ps);
     //cerr << "PS: " << ps << endl;
@@ -313,13 +313,13 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     old_bleu = CalculateBleu(new_state);
 
     // Get context and append new words.
-    num_new_words = cur_hypo.GetTargetPhrase().GetSize();
+    num_new_words = cur_hypo.GetCurrTargetLength();
     if (num_new_words == 0) {
 	return new_state;
     }
  
     Phrase new_words = ps.m_words;
-    new_words.Append(cur_hypo.GetTargetPhrase());
+    new_words.Append(cur_hypo.GetCurrTargetPhrase());
     //cerr << "NW: " << new_words << endl;
 
     // get ngram matches for new words
@@ -343,7 +343,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
     new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
                                                            ctx_end_idx));
-    new_state->m_target_length += cur_hypo.GetTargetPhrase().GetSize();
+    new_state->m_target_length += cur_hypo.GetCurrTargetLength();
 
     // we need a scaled reference length to compare the current target phrase to the corresponding reference phrase
     new_state->m_scaled_ref_length = m_cur_ref_length * 

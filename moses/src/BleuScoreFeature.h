@@ -1,10 +1,11 @@
 #ifndef BLUESCOREFEATURE_H
 #define BLUESCOREFEATURE_H
 
-#include <map>
 #include <utility>
 #include <string>
 #include <vector>
+
+#include <boost/unordered_map.hpp>
 
 #include "FeatureFunction.h"
 
@@ -38,10 +39,14 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state);
 
-typedef std::map< Phrase, size_t > NGrams;
 
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
+
+  typedef boost::unordered_map< Phrase, size_t > NGrams;
+  typedef boost::unordered_map<size_t, std::pair<size_t,NGrams> > RefCounts;
+  typedef boost::unordered_map<size_t, NGrams> Matches;
+
 	BleuScoreFeature():
 	                                 StatefulFeatureFunction("BleuScore",1),
 	                                 m_count_history(BleuScoreState::bleu_order),
@@ -110,7 +115,7 @@ private:
     float m_ref_length_history;
 
     size_t m_cur_source_length;
-    std::map< size_t, std::pair< size_t, NGrams > > m_refs;
+    RefCounts m_refs;
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
 
