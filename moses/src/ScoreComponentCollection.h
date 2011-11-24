@@ -130,6 +130,7 @@ public:
 	void MultiplyEquals(float scalar);
 	void DivideEquals(float scalar);
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
+	void MultiplyEquals(const ScoreProducer* sp, float scalar);
 
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
@@ -256,7 +257,7 @@ public:
   FVector GetVectorForProducer(const ScoreProducer* sp) const
   {
     FVector fv(s_denseVectorSize);
-    std::string prefix = sp->GetScoreProducerWeightShortName() + FName::SEP;
+    std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
     for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
       std::stringstream name;
       name << i->first;
@@ -266,7 +267,7 @@ public:
     return fv;
   }
 
-	void ApplyLog(size_t baseOfLog) {
+  void ApplyLog(size_t baseOfLog) {
 		m_scores.applyLog(baseOfLog);
 	}
 

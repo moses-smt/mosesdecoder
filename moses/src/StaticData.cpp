@@ -701,6 +701,14 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
       return false;
     }
+
+    // apply additional weight to sparse features if applicable
+    for (size_t i = 0; i < m_targetNgramFeatures.size(); ++i) {
+    	float dlmWeight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
+    	if (dlmWeight != 1)
+    		extraWeights.MultiplyEquals(m_targetNgramFeatures[i], dlmWeight);
+    }
+
     m_allWeights.PlusEquals(extraWeights);
   }
 
@@ -1451,11 +1459,20 @@ bool StaticData::LoadReferences()
 
 bool StaticData::LoadDiscrimLMFeature()
 {
+	cerr << "Loading discriminative language models.. ";
+
   // only load if specified
   const vector<string> &wordFile = m_parameter->GetParam("discrim-lmodel-file");
   if (wordFile.empty()) {
     return true;
   }
+  cerr << wordFile.size() << " models" << endl;
+
+  // if this weight is specified, the sparse DLM weights will be scaled with an additional weight
+  vector<string> dlmWeightStr = m_parameter->GetParam("weight-dlm");
+  vector<float> dlmWeights;
+  for (size_t i=0; i<dlmWeightStr.size(); ++i)
+  	dlmWeights.push_back(Scan<float>(dlmWeightStr[i]));
 
   for (size_t i = 0; i < wordFile.size(); ++i) {
   	vector<string> tokens = Tokenize(wordFile[i]);
@@ -1471,7 +1488,7 @@ bool StaticData::LoadDiscrimLMFeature()
 
   	if (order == 2 && !include_lower_ngrams) { // TODO: remove TargetBigramFeature ?
   		m_targetBigramFeature = new TargetBigramFeature(factorId);
-  		cerr << "loading from " << filename << endl;
+  		cerr << "loading vocab from " << filename << endl;
   		if (!m_targetBigramFeature->Load(filename)) {
   			UserMessage::Add("Unable to load word list from file " + filename);
   			return false;
@@ -1479,7 +1496,9 @@ bool StaticData::LoadDiscrimLMFeature()
   	}
   	else {
   		m_targetNgramFeatures.push_back(new TargetNgramFeature(factorId, order, include_lower_ngrams));
-  		cerr << "loading from " << filename << endl;
+  		if (i < dlmWeights.size())
+  			m_targetNgramFeatures[i]->SetSparseProducerWeight(dlmWeights[i]);
+  		cerr << "loading vocab from " << filename << endl;
   		if (!m_targetNgramFeatures[i]->Load(filename)) {
   			UserMessage::Add("Unable to load word list from file " + filename);
   			return false;

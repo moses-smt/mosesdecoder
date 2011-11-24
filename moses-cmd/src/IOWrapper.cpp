@@ -44,6 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "DummyScoreProducers.h"
 #include "FeatureVector.h"
 #include "InputFileStream.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 using namespace Moses;
@@ -507,7 +508,7 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
     // report weighted aggregate
     if (! ff->GetSparseFeatureReporting()) {
       const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-      if (labeledOutput)
+      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
         out << " " << ff->GetScoreProducerWeightShortName() << ":";
       out << " " << scores.inner_product(weights);
     }

@@ -89,6 +89,7 @@ Parameter::Parameter()
   AddParam("references", "Reference file(s) - used for bleu score feature");
   AddParam("weight-bl", "bl", "weight for bleu score feature");
 	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+	AddParam("weight-dlm", "dlm", "weight for discriminative LM feature function (on top of sparse weights)");
   AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
 	AddParam("weight-generation", "g", "weight(s) for generation components");
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");

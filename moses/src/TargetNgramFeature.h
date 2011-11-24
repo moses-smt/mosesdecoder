@@ -30,7 +30,8 @@ public:
      StatefulFeatureFunction("dlmn", ScoreProducer::unlimited),
      m_factorType(factorType),
      m_n(n),
-     m_lower_ngrams(lower_ngrams)
+     m_lower_ngrams(lower_ngrams),
+     m_sparseProducerWeight(1)
   {
     FactorCollection& factorCollection = FactorCollection::Instance();
     const Factor* bosFactor =
@@ -43,6 +44,9 @@ public:
 
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 	size_t GetNumInputScores() const;
+
+  void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
+  float GetSparseProducerWeight() { return m_sparseProducerWeight; }
 
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -62,6 +66,9 @@ private:
 	std::set<std::string> m_vocab;
 	size_t m_n;
 	bool m_lower_ngrams;
+
+	// additional weight that all sparse weights are scaled with
+	float m_sparseProducerWeight;
 
 	void appendNgram(const Word& word, bool& skip, std::string& ngram) const;
 };
