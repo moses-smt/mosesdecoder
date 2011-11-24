@@ -36,34 +36,63 @@
 
 path-constant TOP : . ;
 
+# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
+rule trim-nl ( str ) {
+  return [ MATCH "([^
+]*)" : $(str) ] ;
+}
+rule _shell ( cmd ) {
+  return [ trim-nl [ SHELL $(cmd) ] ] ;
+}
+
 import option ;
-import boost ;
-boost.use-project ;
-#If boost static libraries are not installed, use dynamic linking.  
-if [ SHELL $(TOP)"/jam-files/test.sh -static -lboost_program_options" ] != 0 {
-  force-boost-link = "<link>shared" ;
+
+rule test_flags ( flags ) {
+  if [ SHELL $(TOP)"/jam-files/test.sh "$(flags) ] = 0 {
+    return true ;
+  } else {
+    return ;
+  }
 }
+
+rule auto_shared ( name ) {
+  if [ test_flags "-static -l "$(name) ] {
+    return ;
+  } else {
+    return "<link>shared" ;
+  }
+}
+
+#Are we 
+boost-auto-shared = [ auto_shared "boost_program_options" ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
-rule boost_lib ( name ) {
-  alias boost_$(name) : /boost//$(name) : $(force-boost-link) ;
+rule boost_lib ( name macro ) {
+#Link multi-threaded programs against the -mt version if available.  Old 
+#versions of boost do not have -mt tagged versions of all libraries.   Sadly,
+#boost.jam does not handle this correctly.  
+  if [ test_flags "-lboost_"$(name)"-mt" ] {
+    lib inner_boost_$(name) : : <threading>single <name>boost_$(name) ;
+    lib inner_boost_$(name) : : <threading>multi <name>boost_$(name)-mt ;
+  } else {
+    lib inner_boost_$(name) : : <name>boost_$(name) ;
+  }
+
+  alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) ;
 }
-boost_lib thread ;
-boost_lib program_options ;
-boost_lib unit_test_framework ;
+#See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
+boost_lib thread THREAD_DYN_DLL ;
+boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
+boost_lib unit_test_framework TEST_DYN_LINK ;
 
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
 rule external_lib ( name ) {
-  if [ SHELL $(TOP)"/jam-files/test.sh -static -l"$(name) ] != 0 {
-    lib $(name) : : <link>shared ;
-  } else {
-    lib $(name) ;
-  }
+  lib $(name) : : [ auto_shared $(name) ] ;
 }
 
 external_lib z ;
 
 #libSegFault prints a stack trace on segfault.  Link against it if available.  
-if [ SHELL $(TOP)"/jam-files/test.sh -lSegFault" ] = 0 {
+if [ test_flags "-lSegfault" ] {
   external_lib SegFault ;
   segfault = <library>SegFault ;
 }
@@ -94,15 +123,6 @@ build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 
 install-location = [ option.get "install" : $(TOP)/dist ] ;
-
-# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str ) {
-  return [ MATCH "([^
-]*)" : $(str) ] ;
-}
-rule _shell ( cmd ) {
-  return [ trim-nl [ SHELL $(cmd) ] ] ;
-}
 
 if [ option.get "git" : : "yes" ] {
   install-tag = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
