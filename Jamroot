@@ -70,7 +70,7 @@ rule boost_lib ( name macro ) {
 #Link multi-threaded programs against the -mt version if available.  Old 
 #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
 #boost.jam does not handle this correctly.  
-  if [ test_flags "-l"$(name)"-mt" ] {
+  if [ test_flags "-lboost_"$(name)"-mt" ] {
     lib inner_boost_$(name) : : <threading>single <name>boost_$(name) ;
     lib inner_boost_$(name) : : <threading>multi <name>boost_$(name)-mt ;
   } else {
