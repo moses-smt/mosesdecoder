@@ -82,6 +82,7 @@ int main(int argc, char** argv) {
 	float historySmoothing;
 	bool scaleByInputLength;
 	bool scaleByReferenceLength;
+	bool scaleByTargetLength;
 	bool scaleByAvgLength;
 	float scaleByX;
 	float slack;
@@ -123,7 +124,7 @@ int main(int argc, char** argv) {
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
-		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for log-ing feature values")
+		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for taking logs of feature values")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
 		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
@@ -163,6 +164,7 @@ int main(int argc, char** argv) {
 		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
 		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale BLEU by (a history of) the reference length")
+		("scale-by-target-length", po::value<bool>(&scaleByTargetLength)->default_value(false), "Scale BLEU by (a history of) the target length")
 		("scale-by-avg-length", po::value<bool>(&scaleByAvgLength)->default_value(false), "Scale BLEU by (a history of) the average of input and reference length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
@@ -266,13 +268,12 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	if (scaleByReferenceLength) {
+	if (scaleByReferenceLength)
 		scaleByInputLength = false;
-	}
-	if (scaleByAvgLength) {
+	if (scaleByTargetLength)
 		scaleByInputLength = false;
-		scaleByReferenceLength = false;
-	}
+	if (scaleByAvgLength)
+		scaleByInputLength = false;
 
 	// initialise Moses
 	// add initial Bleu weight and references to initialize Bleu feature
@@ -284,7 +285,7 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength,
+	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength, scaleByTargetLength,
 			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();

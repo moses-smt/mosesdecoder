@@ -81,10 +81,11 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
   }
 }
 
-void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
+void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength, bool scaleByTargetLength,
 		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_ref_length = scaleByRefLength;
+	m_scale_by_target_length = scaleByTargetLength;
 	m_scale_by_avg_length = scaleByAvgLength;
 	m_scale_by_x = scaleByX;
 	m_historySmoothing = historySmoothing;
@@ -428,6 +429,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   }
   else if (m_scale_by_ref_length) {
     precision *= m_ref_length_history + m_cur_ref_length;
+  }
+  else if (m_scale_by_target_length) {
+  	precision *= m_target_length_history + state->m_target_length;
   }
   else if (m_scale_by_avg_length) {
     precision *= (m_source_length_history + m_ref_length_history + m_cur_source_length +  + m_cur_ref_length) / 2;
