@@ -96,25 +96,7 @@ if $(location) {
     generic/multi-bleu.perl
     generic/qsub-wrapper.pl
     README
-    tokenizer/detokenizer.perl
-    tokenizer/tokenizer.perl
-    tokenizer/lowercase.perl
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.ru
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.ro
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.de
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.fr
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.el
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.is
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.pt
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.nl
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.it
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.sl
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.sk
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.pl
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.sv
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.es
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.en
-    tokenizer/nonbreaking_prefixes/nonbreaking_prefix.ca
+    [ glob tokenizer/*.perl tokenizer/nonbreaking_prefixes/* ]
     training/absolutize_moses_model.pl
     training/build-generation-table.perl
     training/clean-corpus-n.perl
@@ -133,11 +115,7 @@ if $(location) {
     training/wrappers/make-factor-en-pos.mxpost.perl
     training/wrappers/make-factor-pos.tree-tagger.perl
     training/wrappers/make-factor-stem.perl
-    recaser/train-recaser.perl
-    recaser/recase.perl
-    recaser/truecase.perl
-    recaser/detruecase.perl
-    recaser/train-truecaser.perl
+    [ glob recaser/*.perl ]
     : <install-source-root>. <location>$(location) ;
 
   alias install : ghkm compactify phrase-extract lexical-reordering symal scripts train-model ;
