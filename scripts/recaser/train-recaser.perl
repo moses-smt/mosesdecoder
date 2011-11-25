@@ -16,23 +16,67 @@ my $TRAIN_SCRIPT = "train-factored-phrase-model.perl";
 my $MAX_LEN = 1;
 my $FIRST_STEP = 1;
 my $LAST_STEP = 11;
-die("train-recaser.perl --dir recaser --corpus cased")
+my $HELP = 0;
+my $ERROR = 0;
+$ERROR = "training Aborted."
     unless &GetOptions('first-step=i' => \$FIRST_STEP,
                        'last-step=i' => \$LAST_STEP,
                        'corpus=s' => \$CORPUS,
                        'config=s' => \$CONFIG,
-		       'dir=s' => \$DIR,
-		       'ngram-count=s' => \$NGRAM_COUNT,
-		       'build-lm=s' => \$BUILD_LM,
-		       'lm=s' => \$LM,
-		       'train-script=s' => \$TRAIN_SCRIPT,
-		       'scripts-root-dir=s' => \$SCRIPTS_ROOT_DIR,
-		       'max-len=i' => \$MAX_LEN);
+                       'dir=s' => \$DIR,
+                       'ngram-count=s' => \$NGRAM_COUNT,
+                       'build-lm=s' => \$BUILD_LM,
+                       'lm=s' => \$LM,
+                       'train-script=s' => \$TRAIN_SCRIPT,
+                       'scripts-root-dir=s' => \$SCRIPTS_ROOT_DIR,
+                       'max-len=i' => \$MAX_LEN,
+                       'help' => \$HELP);
 
 # check and set default to unset parameters
-die("please specify working dir --dir") unless defined($DIR);
-die("please specify --corpus") if !defined($CORPUS) 
+$ERROR = "please specify working dir --dir" unless defined($DIR);
+$ERROR = "please specify --corpus" if !defined($CORPUS) 
                                   && $FIRST_STEP <= 2 && $LAST_STEP >= 1;
+
+if ($HELP || $ERROR) {
+    if ($ERROR) {
+        print STDERR "ERROR: " . $ERROR . "\n";
+    }
+    print STDERR "Usage: $0 --dir /output/recaser --corpus /Cased/corpus/files [options ...]";
+
+    print STDERR "\n\nOptions:
+  == MANDATORY ==
+  --dir=dir                 ... outputted recaser directory.
+  --corpus=file             ... inputted cased corpus.
+
+  == OPTIONAL ==
+  = Recaser Training configuration =
+  --train-script=file       ... path to the train script (default: train-factored-phrase-model.perl in \$PATH).
+  --config=config           ... training script configuration.
+  --scripts-root-dir=dir    ... scripts directory.
+  --max-len=int             ... max phrase length (default: 1).
+
+  = Language Model Training configuration =
+  --lm=[IRSTLM,SRILM]       ... language model (default: SRILM).
+  --build-lm=file           ... path to build-lm.sh if not in \$PATH (used only with --lm=IRSTLM).
+  --ngram-count=file        ... path to ngram-count.sh if not in \$PATH (used only with --lm=SRILM).
+
+  = Steps this script will perform =
+  (1) Truecasing (disabled);
+  (2) Language Model Training;
+  (3) Data Preparation
+  (4-10) Recaser Model Training; 
+  (11) Cleanup.
+  --first-step=[1-11]       ... step where script starts (default: 1).
+  --last-step=[1-11]        ... step where script ends (default: 11).
+
+  --help                    ... this usage output.\n";
+  if ($ERROR) {
+    exit(1);
+  }
+  else {
+    exit(0);
+  }
+}
 
 # main loop
 `mkdir -p $DIR`;
