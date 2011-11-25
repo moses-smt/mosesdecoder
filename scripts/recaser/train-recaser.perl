@@ -9,6 +9,8 @@ binmode(STDOUT, ":utf8");
 
 # apply switches
 my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG);
+my $LM = "SRILM"; # SRILM is default.
+my $BUILD_LM = "build-lm.sh";
 my $NGRAM_COUNT = "ngram-count";
 my $TRAIN_SCRIPT = "train-factored-phrase-model.perl";
 my $MAX_LEN = 1;
@@ -21,6 +23,8 @@ die("train-recaser.perl --dir recaser --corpus cased")
                        'config=s' => \$CONFIG,
 		       'dir=s' => \$DIR,
 		       'ngram-count=s' => \$NGRAM_COUNT,
+		       'build-lm=s' => \$BUILD_LM,
+		       'lm=s' => \$LM,
 		       'train-script=s' => \$TRAIN_SCRIPT,
 		       'scripts-root-dir=s' => \$SCRIPTS_ROOT_DIR,
 		       'max-len=i' => \$MAX_LEN);
@@ -46,7 +50,15 @@ sub truecase {
 
 sub train_lm {
     print STDERR "(2) Train language model on cased data @ ".`date`;
-    my $cmd = "$NGRAM_COUNT -text $CORPUS -lm $DIR/cased.srilm.gz -interpolate -kndiscount";
+    my $cmd = "";
+    if (uc $LM eq "IRSTLM") {
+        $cmd = "$BUILD_LM -t /tmp -i $CORPUS -n 3 -o $DIR/cased.irstlm.gz";
+    }
+    else {
+        $LM = "SRILM";
+        $cmd = "$NGRAM_COUNT -text $CORPUS -lm $DIR/cased.srilm.gz -interpolate -kndiscount";
+    }
+    print STDERR "** Using $LM **" . "\n";
     print STDERR $cmd."\n";
     print STDERR `$cmd`;
 }
@@ -88,7 +100,13 @@ sub train_recase_model {
     my $first = $FIRST_STEP;
     $first = 4 if $first < 4;
     print STDERR "\n(4) Training recasing model @ ".`date`;
-    my $cmd = "$TRAIN_SCRIPT --root-dir $DIR --model-dir $DIR --first-step $first --alignment a --corpus $DIR/aligned --f lowercased --e cased --max-phrase-length $MAX_LEN --lm 0:3:$DIR/cased.srilm.gz:0";
+    my $cmd = "$TRAIN_SCRIPT --root-dir $DIR --model-dir $DIR --first-step $first --alignment a --corpus $DIR/aligned --f lowercased --e cased --max-phrase-length $MAX_LEN";
+    if (uc $LM eq "IRSTLM") {
+        $cmd .= " --lm 0:3:$DIR/cased.irstlm.gz:1";
+    }
+    else {
+        $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:0";
+    }
     $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
