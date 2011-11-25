@@ -8,7 +8,7 @@ This directory should contain all multi-purpose scripts for:
 - lib         ... perl modules used by various scripts
 
 
-The Makefile then takes care of proper 'release' from your CVS directory to
+The Jamfile then takes care of proper 'release' from your git directory to
 the shared directories.
 
 The released scripts should remain in the *same directory structure*.

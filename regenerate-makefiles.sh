@@ -1,4 +1,14 @@
 #!/bin/bash
+cat <<EOF
+Moses is moving to Boost Jam.  To build Moses, run one command:
+./bjam [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] -j4
+
+If that's not working for you, complain to moses-support then run 
+./regenerate-makefiles.sh --force to continue using autotools.  
+EOF
+if [ z"$1" != z--force ]; then
+  exit 1
+fi
 
 # NOTE:
 # Versions 1.9 (or higher) of aclocal and automake are required.

@@ -1,0 +1,3 @@
+exe score : reordering_classes.cpp score.cpp ../../..//z ;
+
+install dist : score : <location>. <install-type>EXE ;

@@ -1,0 +1,3 @@
+exe compactify : [ glob *.cpp ] ../../..//boost_program_options ;
+
+install tools : compactify : <install-type>EXE ;
