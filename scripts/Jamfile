@@ -1,14 +1,38 @@
+#MOSES SCRIPTS INSTRUCTIONS
+#
+#--bindir=/path/to/bindir where GIZA++ binaries live
+#
+#--install=/path/to/install to set a path to install (default dist)
+#--git appends the git revision to the install directory
+#
+#--with-boost=/path/to/boost to specify a non-standard Boost installation
+#
+#See also: bjam --help one level up.  
+
 import option ;
 
 build-project training ;
 
 location = [ option.get "install" : $(TOP)/scripts/dist ] ;
+location = $(location)$(GITTAG) ;
 
-constant BINDIR : [ option.get "bindir" ] ;
-
-if ! $(BINDIR) {
-  exit "Pass --bindir=/path/to/bindir to indicate where GIZA++, snt2cooc.out, and mkcls live." : 1 ;
+bindir = [ option.get "bindir" ] ;
+if ! $(bindir) {
+  echo "Pass --bindir=/path/to/bindir" ;
+  echo "It should contain GIZA++, snt2cooc.out, and mkcls." ;
+  echo "These are available from http://www.fjoch.com/GIZA++.html and" ;
+  echo "http://www-i6.informatik.rwth-aachen.de/Colleagues/och/software/mkcls.html ." ;
+  exit : 1 ;
 }
+rule check-for-bin ( name ) {
+  if ! [ FILE_OPEN $(bindir)/$(name) : "r" ] {
+    exit "Did not find $(bindir)/$(name)." : 1 ;
+  }
+}
+check-for-bin GIZA++ ;
+check-for-bin snt2cooc.out ;
+check-for-bin mkcls ;
+constant BINDIR : $(bindir) ;
 
 #These two used to live in a tools directory.  
 install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
