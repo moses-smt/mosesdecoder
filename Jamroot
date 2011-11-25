@@ -1,6 +1,8 @@
-#MOSES BUILD OPTIONS
+#BUILDING MOSES
 #
-#Language models
+#
+#PACKAGES
+#Language models (optional):
 #--with-irstlm=/path/to/irstlm 
 #--with-srilm=/path/to/srilm See moses/src/LM/Jamfile for more options.
 #--with-randlm=/path/to/randlm
@@ -18,13 +20,14 @@
 #Indicates where binaries GIZA++, snt2cooc.out, and mkcls live.  
 #Builds scripts/training/train-model.perl using these paths. 
 #
-#--notrace compiles without TRACE macros
 #
 #INSTALLATION
 #--install=/path/to/install sets the install directory (default dist).
 #--install-scripts=/path/to/scripts copies scripts into a directory.
 #--git appends the git revision to the install directory name.
 #
+#
+#BUILD OPTIONS
 # By default, the build is multi-threaded, optimized, and statically linked.  
 # Pass these to change the build:
 #
@@ -38,8 +41,10 @@
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
 #
+#--notrace                       compiles without TRACE macros
 #
-#Controlling the build process:
+#
+#CONTROLLING THE BUILD
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
 #--clean to clean
