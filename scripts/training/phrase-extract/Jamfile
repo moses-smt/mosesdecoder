@@ -22,3 +22,5 @@ exe statistics : tables-core.cpp AlignmentPhrase.cpp statistics.cpp InputFileStr
 alias programs : extract extract-rules extract-lex score consolidate consolidate-direct consolidate-direct consolidate-reverse relax-parse statistics ;
 
 install legacy : programs : <location>. <install-type>EXE ;
+
+build-project extract-ghkm ;

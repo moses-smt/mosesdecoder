@@ -1,0 +1,4 @@
+build-project compact-rule-table ;
+build-project phrase-extract ;
+build-project lexical-reordering ;
+build-project symal ;
