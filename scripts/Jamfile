@@ -1,6 +1,7 @@
 #MOSES SCRIPTS INSTRUCTIONS
 #
-#--bindir=/path/to/bindir where GIZA++ binaries live
+#--with-giza=/path/to/giza where GIZA++ binaries GIZA++, snt2cooc.out, and
+#    mkcls live.  
 #
 #--install=/path/to/install to set a path to install (default dist)
 #--git appends the git revision to the install directory
@@ -16,24 +17,6 @@ build-project training ;
 location = [ option.get "install" : $(TOP)/scripts/dist ] ;
 location = $(location)$(GITTAG) ;
 
-bindir = [ option.get "bindir" ] ;
-if ! $(bindir) {
-  echo "Pass --bindir=/path/to/bindir" ;
-  echo "It should contain GIZA++, snt2cooc.out, and mkcls." ;
-  echo "These are available from http://www.fjoch.com/GIZA++.html and" ;
-  echo "http://www-i6.informatik.rwth-aachen.de/Colleagues/och/software/mkcls.html ." ;
-  exit : 1 ;
-}
-rule check-for-bin ( name ) {
-  if ! [ FILE_OPEN $(bindir)/$(name) : "r" ] {
-    exit "Did not find $(bindir)/$(name)." : 1 ;
-  }
-}
-check-for-bin GIZA++ ;
-check-for-bin snt2cooc.out ;
-check-for-bin mkcls ;
-constant BINDIR : $(bindir) ;
-
 #These two used to live in a tools directory.  
 install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
 install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
@@ -42,7 +25,29 @@ install phrase-extract : training/phrase-extract//released-programs : <location>
 install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
 install symal : training/symal//symal : <location>$(location)/symal ;
 
-install train-model : training//train-model.perl : <location>$(location)/training ;
+with-giza = [ option.get "with-giza" ] ;
+if $(with-giza) {
+  rule check-for-bin ( name ) {
+    if ! [ FILE_OPEN $(with-giza)/$(name) : "r" ] {
+      echo "Did not find "$(with-giza)/$(name)"." ;
+      echo "The with-giza directory should contain GIZA++, snt2cooc.out, and mkcls." ;
+      echo "These are available from http://www.fjoch.com/GIZA++.html and" ;
+      echo "http://www-i6.informatik.rwth-aachen.de/Colleagues/och/software/mkcls.html ." ;
+      exit : 1 ;
+    }
+  }
+
+  constant WITH-GIZA : $(with-giza) ;
+
+  check-for-bin GIZA++ ;
+  check-for-bin snt2cooc.out ;
+  check-for-bin mkcls ;
+
+  install train-model : training//train-model.perl : <location>$(location)/training ;
+} else {
+  echo "If you want training/train-model.perl, pass --with-giza=/path/to/giza" ;
+  constant WITH-GIZA : "no" ;
+}
 
 install scripts : 
   analysis/README
@@ -98,7 +103,6 @@ install scripts :
   generic/multi-bleu.perl
   generic/qsub-wrapper.pl
   README
-  released-files
   tokenizer/detokenizer.perl
   tokenizer/tokenizer.perl
   tokenizer/lowercase.perl
