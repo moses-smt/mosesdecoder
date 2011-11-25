@@ -144,6 +144,7 @@ project : requirements
 build-project lm ; 
 build-project util ;
 #Trigger instllation into legacy paths.  
+build-project mert ;
 build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 #Scripts have their own binaries
