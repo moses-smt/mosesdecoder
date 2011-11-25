@@ -3,9 +3,11 @@ build-project phrase-extract ;
 build-project lexical-reordering ;
 build-project symal ;
 
-make train-model.perl : train-model.perl.missing_bin_dir : @missing_bin_dir ;
-actions missing_bin_dir {
-  sed 's#^my \$BINDIR\s*=.*#my\ \$BINDIR=\"$(BINDIR)\";#' $(>) >$(<)
-}
+if $(WITH-GIZA) != no {
+  make train-model.perl : train-model.perl.missing_bin_dir : @missing_bin_dir ;
+  actions missing_bin_dir {
+    sed 's#^my \$BINDIR\s*=.*#my\ \$BINDIR=\"$(WITH-GIZA)\";#' $(>) >$(<)
+  }
 
-install legacy : train-model.perl : <location>. ;
+  install legacy : train-model.perl : <location>. ;
+}
