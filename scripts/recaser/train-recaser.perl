@@ -51,12 +51,10 @@ sub truecase {
 sub train_lm {
     print STDERR "(2) Train language model on cased data @ ".`date`;
     my $cmd = "";
-    if (uc $LM eq "IRSTLM")
-    {
+    if (uc $LM eq "IRSTLM") {
         $cmd = "$BUILD_LM -t /tmp -i $CORPUS -n 3 -o $DIR/cased.irstlm.gz";
     }
-    else
-    {
+    else {
         $LM = "SRILM";
         $cmd = "$NGRAM_COUNT -text $CORPUS -lm $DIR/cased.srilm.gz -interpolate -kndiscount";
     }
@@ -103,12 +101,10 @@ sub train_recase_model {
     $first = 4 if $first < 4;
     print STDERR "\n(4) Training recasing model @ ".`date`;
     my $cmd = "$TRAIN_SCRIPT --root-dir $DIR --model-dir $DIR --first-step $first --alignment a --corpus $DIR/aligned --f lowercased --e cased --max-phrase-length $MAX_LEN";
-    if (uc $LM eq "IRSTLM")
-    {
+    if (uc $LM eq "IRSTLM") {
         $cmd .= " --lm 0:3:$DIR/cased.irstlm.gz:1";
     }
-    else
-    {
+    else {
         $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:0";
     }
     $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
