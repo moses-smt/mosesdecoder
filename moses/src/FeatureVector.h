@@ -180,7 +180,7 @@ namespace Moses {
     /** pretty printing */
     std::ostream& print(std::ostream& out) const;
 
-    void applyLog(size_t baseOfLog);
+    void logCoreFeatures(size_t baseOfLog);
     //scale so that abs. value is less than maxvalue
     void thresholdScale(float maxValue );
 

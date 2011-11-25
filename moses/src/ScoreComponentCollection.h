@@ -267,8 +267,8 @@ public:
     return fv;
   }
 
-  void ApplyLog(size_t baseOfLog) {
-		m_scores.applyLog(baseOfLog);
+  void LogCoreFeatures(size_t baseOfLog) {
+		m_scores.logCoreFeatures(baseOfLog);
 	}
 
 	void ThresholdScaling(float maxValue)

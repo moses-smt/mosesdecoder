@@ -628,7 +628,7 @@ int main(int argc, char** argv) {
 					takeLogs(featureValuesFear, baseOfLog);
 					takeLogs(featureValues, baseOfLog);
 					for (size_t i = 0; i < oracleFeatureValues.size(); ++i) {
-						oracleFeatureValues[i].ApplyLog(baseOfLog);
+						oracleFeatureValues[i].LogCoreFeatures(baseOfLog);
 					}
 				}
 
@@ -1006,7 +1006,7 @@ void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues
 void takeLogs(vector<vector<ScoreComponentCollection> > &featureValues, size_t base) {
 	for (size_t i = 0; i < featureValues.size(); ++i) {
 		for (size_t j = 0; j < featureValues[i].size(); ++j) {
-			featureValues[i][j].ApplyLog(base);
+			featureValues[i][j].LogCoreFeatures(base);
 		}
 	}
 }

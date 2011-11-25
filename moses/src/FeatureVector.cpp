@@ -239,19 +239,19 @@ namespace Moses {
     m_features[name] = value;
   }
   
-  void FVector::applyLog(size_t baseOfLog) {
-	  for (const_iterator i = cbegin(); i != cend(); ++i) {
-		  FValue value = i->second;
-		  // log_a(value) = ln(value) / ln(a)
-		  float logOfValue = 0;
-		  if (value < 0) {
+  void FVector::logCoreFeatures(size_t baseOfLog) {
+  	float logOfValue = 0;
+  	// log_a(value) = ln(value) / ln(a)
+	  for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+		  FValue value = m_coreFeatures[i];
+		  if (value == 0) continue;
+		  else if (value < 0) {
 			  logOfValue = log(-1*value) / log(baseOfLog);
 			  logOfValue *= -1;
 		  }
-		  else if (value > 0) {
-			  logOfValue = log(value) / log(baseOfLog);
-		  }
-		  m_features[i->first] = logOfValue;
+		  else
+		  	logOfValue = log(value) / log(baseOfLog);
+		  m_coreFeatures[i] = logOfValue;
 	  }
   }
 
@@ -400,8 +400,6 @@ namespace Moses {
   FValue FVector::l2norm() const {
     return sqrt(inner_product(*this));
   }
-  
-	
   
   FValue FVector::inner_product(const FVector& rhs) const {
     assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
