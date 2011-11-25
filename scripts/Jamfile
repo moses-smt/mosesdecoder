@@ -1,6 +1,14 @@
+import option ;
+
 build-project training ;
 
-location = dist ;
+location = [ option.get "install" : $(TOP)/scripts/dist ] ;
+
+constant BINDIR : [ option.get "bindir" ] ;
+
+if ! $(BINDIR) {
+  exit "Pass --bindir=/path/to/bindir to indicate where GIZA++, snt2cooc.out, and mkcls live." : 1 ;
+}
 
 #These two used to live in a tools directory.  
 install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
@@ -9,6 +17,8 @@ install compactify : training/compact-rule-table//compactify : <location>$(locat
 install phrase-extract : training/phrase-extract//released-programs : <location>$(location)/training/phrase-extract ;
 install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
 install symal : training/symal//symal : <location>$(location)/symal ;
+
+install train-model : training//train-model.perl : <location>$(location)/training ;
 
 install scripts : 
   analysis/README
@@ -96,7 +106,6 @@ install scripts :
   training/postprocess-lopar.perl
   training/reduce_combine.pl
   training/combine_factors.pl
-  training/train-model.perl
   training/symal/giza2bal.pl
   training/wrappers/parse-de-bitpar.perl
   training/wrappers/parse-en-collins.perl
