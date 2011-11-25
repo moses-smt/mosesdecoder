@@ -140,9 +140,13 @@ build-project moses-chart-cmd/src ;
 install-location = [ option.get "install" : $(TOP)/dist ] ;
 
 if [ option.get "git" : : "yes" ] {
-  install-tag = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
-  install-location = $(install-location).$(install-tag) ;
+  local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
+  constant GITTAG : "."$(revision) ;
+} else {
+  constant GITTAG : "" ;
 }
+
+install-location = $(install-location)$(GITTAG) ;
 
 install dist : 
   lm//query
