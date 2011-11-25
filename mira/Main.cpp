@@ -82,7 +82,8 @@ int main(int argc, char** argv) {
 	float historySmoothing;
 	bool scaleByInputLength;
 	bool scaleByReferenceLength;
-	bool scaleByTargetLength;
+	bool scaleByTargetLengthLinear;
+	bool scaleByTargetLengthTrend;
 	bool scaleByAvgLength;
 	float scaleByX;
 	float slack;
@@ -164,7 +165,8 @@ int main(int argc, char** argv) {
 		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
 		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale BLEU by (a history of) the reference length")
-		("scale-by-target-length", po::value<bool>(&scaleByTargetLength)->default_value(false), "Scale BLEU by (a history of) the target length")
+		("scale-by-target-length-linear", po::value<bool>(&scaleByTargetLengthLinear)->default_value(false), "Scale BLEU by (a history of) the target length (linear future estimate)")
+		("scale-by-target-length-trend", po::value<bool>(&scaleByTargetLengthTrend)->default_value(false), "Scale BLEU by (a history of) the target length (trend-based future estimate)")
 		("scale-by-avg-length", po::value<bool>(&scaleByAvgLength)->default_value(false), "Scale BLEU by (a history of) the average of input and reference length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
@@ -268,11 +270,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	if (scaleByReferenceLength)
-		scaleByInputLength = false;
-	if (scaleByTargetLength)
-		scaleByInputLength = false;
-	if (scaleByAvgLength)
+	if (scaleByReferenceLength || scaleByTargetLengthLinear || scaleByTargetLengthTrend || scaleByAvgLength)
 		scaleByInputLength = false;
 
 	// initialise Moses
@@ -285,7 +283,8 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength, scaleByTargetLength,
+	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength,
+			scaleByTargetLengthLinear, scaleByTargetLengthTrend,
 			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
