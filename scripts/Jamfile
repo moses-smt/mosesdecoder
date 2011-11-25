@@ -1,0 +1,140 @@
+#See ../Jamroot for options.  
+import option ;
+
+build-project training ;
+
+location = [ option.get "install-scripts" : $(TOP)/scripts/dist ] ;
+location = $(location)$(GITTAG) ;
+
+#These two used to live in a tools directory.  
+install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
+install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
+
+install phrase-extract : training/phrase-extract//released-programs : <location>$(location)/training/phrase-extract ;
+install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
+install symal : training/symal//symal : <location>$(location)/symal ;
+
+with-giza = [ option.get "with-giza" ] ;
+if $(with-giza) {
+  rule check-for-bin ( name ) {
+    if ! [ FILE_OPEN $(with-giza)/$(name) : "r" ] {
+      echo "Did not find "$(with-giza)/$(name)"." ;
+      echo "The with-giza directory should contain GIZA++, snt2cooc.out, and mkcls." ;
+      echo "These are available from http://code.google.com/p/giza-pp/ ." ;
+      exit : 1 ;
+    }
+  }
+
+  constant WITH-GIZA : $(with-giza) ;
+
+  check-for-bin GIZA++ ;
+  check-for-bin snt2cooc.out ;
+  check-for-bin mkcls ;
+
+  install train-model : training//train-model.perl : <location>$(location)/training ;
+} else {
+  echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza" ;
+  constant WITH-GIZA : "no" ;
+  alias train-model ;
+}
+
+install scripts : 
+  analysis/README
+  analysis/sentence-by-sentence.pl
+  ems/experiment.machines
+  ems/experiment.meta
+  ems/experiment.perl
+  ems/example/config.basic
+  ems/example/config.factored
+  ems/example/config.hierarchical
+  ems/example/config.syntax
+  ems/example/config.toy
+  ems/example/data/nc-5k.en
+  ems/example/data/nc-5k.fr
+  ems/example/data/test-ref.en.sgm
+  ems/example/data/test-src.fr.sgm
+  ems/support/analysis.perl
+  ems/support/berkeley-process.sh
+  ems/support/berkeley-train.sh
+  ems/support/consolidate-training-data.perl
+  ems/support/generic-multicore-parallelizer.perl
+  ems/support/generic-parallelizer.perl
+  ems/support/input-from-sgm.perl
+  ems/support/interpolate-lm.perl
+  ems/support/reference-from-sgm.perl
+  ems/support/remove-segmenation-markup.perl
+  ems/support/report-experiment-scores.perl
+  ems/support/reuse-weights.perl
+  ems/support/run-command-on-multiple-refsets.perl
+  ems/support/wrap-xml.perl
+  ems/web/analysis.php
+  ems/web/analysis_diff.php
+  ems/web/comment.php
+  ems/web/diff.php
+  ems/web/index.php
+  ems/web/lib.php
+  ems/web/overview.php
+  ems/web/setup
+  ems/web/javascripts/builder.js
+  ems/web/javascripts/controls.js
+  ems/web/javascripts/dragdrop.js
+  ems/web/javascripts/effects.js
+  ems/web/javascripts/prototype.js
+  ems/web/javascripts/scriptaculous.js
+  ems/web/javascripts/slider.js
+  ems/web/javascripts/sound.js
+  ems/web/javascripts/unittest.js
+  generic/compound-splitter.perl
+  generic/extract-factors.pl
+  generic/lopar2pos.pl
+  generic/moses-parallel.pl
+  generic/mteval-v12.pl
+  generic/multi-bleu.perl
+  generic/qsub-wrapper.pl
+  README
+  tokenizer/detokenizer.perl
+  tokenizer/tokenizer.perl
+  tokenizer/lowercase.perl
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.ru
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.ro
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.de
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.fr
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.el
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.is
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.pt
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.nl
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.it
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.sl
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.sk
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.pl
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.sv
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.es
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.en
+  tokenizer/nonbreaking_prefixes/nonbreaking_prefix.ca
+  training/absolutize_moses_model.pl
+  training/build-generation-table.perl
+  training/clean-corpus-n.perl
+  training/clone_moses_model.pl
+  training/filter-model-given-input.pl
+  training/filter-rule-table.py
+  training/zmert-moses.pl
+  training/mert-moses.pl
+  training/mert-moses-multi.pl
+  training/postprocess-lopar.perl
+  training/reduce_combine.pl
+  training/combine_factors.pl
+  training/symal/giza2bal.pl
+  training/wrappers/parse-de-bitpar.perl
+  training/wrappers/parse-en-collins.perl
+  training/wrappers/make-factor-en-pos.mxpost.perl
+  training/wrappers/make-factor-pos.tree-tagger.perl
+  training/wrappers/make-factor-stem.perl
+  recaser/train-recaser.perl
+  recaser/recase.perl
+  recaser/truecase.perl
+  recaser/detruecase.perl
+  recaser/train-truecaser.perl
+  : <install-source-root>. <location>$(location) ;
+
+alias install : ghkm compactify phrase-extract lexical-reordering symal scripts train-model ;
+explicit install ghkm compactify phrase-extract lexical-reordering symal scripts train-model ;

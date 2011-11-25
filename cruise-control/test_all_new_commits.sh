@@ -85,26 +85,26 @@ function run_single_test () {
   git checkout --force $commit 2>/dev/null || die "Failed to checkout commit $commit"
 
   err=""
-  echo "## regenerate-makefiles.sh" >> $longlog
-  ./regenerate-makefiles.sh >> $longlog 2>&1 || err="regenerate-makefiles"
+#  echo "## regenerate-makefiles.sh" >> $longlog
+#  ./regenerate-makefiles.sh >> $longlog 2>&1 || err="regenerate-makefiles"
 
-  echo "## make clean" >> $longlog
-  make clean >> $longlog 2>&1 || warn "make clean failed, suspicious"
+  echo "## ./bjam clean" >> $longlog
+  ./bjam clean >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
 
-  echo "## ./configure $MCC_CONFIGURE_ARGS" >> $longlog
+#  echo "## ./configure $MCC_CONFIGURE_ARGS" >> $longlog
+#  if [ -z "$err" ]; then
+#    ./configure $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="configure"
+#  fi
+
+  echo "## ./bjam $MCC_CONFIGURE_ARGS" >> $longlog
   if [ -z "$err" ]; then
-    ./configure $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="configure"
-  fi
-
-  echo "## make" >> $longlog
-  if [ -z "$err" ]; then
-    make >> $longlog 2>&1 || err="make"
+    ./bjam $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="make"
   fi
 
   echo "## make scripts" >> $longlog
   cd scripts
   if [ -z "$err" ]; then
-    make >> $longlog 2>&1 || err="make scripts"
+    ../bjam >> $longlog 2>&1 || err="bjam scripts"
   fi
   cd ..
 
@@ -139,8 +139,8 @@ function run_single_test () {
       cd ..
       touch giza-pp.ok
     fi
-    sed -i 's#^my \$BINDIR\s*=.*#my \$BINDIR="'$(pwd)/giza-pp/bin/'";#' \
-      scripts/training/train-model.perl
+    sed 's#^my \$BINDIR\s*=.*#my \$BINDIR="'$(pwd)/giza-pp/bin/'";#' \
+      <scripts/training/train-model.perl.missing_bin_dir >scripts/training/train-model.perl
     srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -r 's/.*--with-srilm=([^ ]+) .*/\1/')
     mach_type=$($srilm_dir/sbin/machine-type)
     mkdir -p "$WORKDIR/ems_workdir"
