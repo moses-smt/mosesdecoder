@@ -101,12 +101,12 @@ function run_single_test () {
     ./bjam $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="make"
   fi
 
-  echo "## make scripts" >> $longlog
-  cd scripts
-  if [ -z "$err" ]; then
-    ../bjam >> $longlog 2>&1 || err="bjam scripts"
-  fi
-  cd ..
+#  echo "## make scripts" >> $longlog
+#  cd scripts
+#  if [ -z "$err" ]; then
+#    ../bjam >> $longlog 2>&1 || err="bjam scripts"
+#  fi
+#  cd ..
 
   cd regression-testing
   regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
