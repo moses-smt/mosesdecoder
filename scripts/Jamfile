@@ -1,20 +1,9 @@
-#MOSES SCRIPTS INSTRUCTIONS
-#
-#--with-giza=/path/to/giza where GIZA++ binaries GIZA++, snt2cooc.out, and
-#    mkcls live.  
-#
-#--install=/path/to/install to set a path to install (default dist)
-#--git appends the git revision to the install directory
-#
-#--with-boost=/path/to/boost to specify a non-standard Boost installation
-#
-#See also: bjam --help one level up.  
-
+#See ../Jamroot for options.  
 import option ;
 
 build-project training ;
 
-location = [ option.get "install" : $(TOP)/scripts/dist ] ;
+location = [ option.get "install-scripts" : $(TOP)/scripts/dist ] ;
 location = $(location)$(GITTAG) ;
 
 #These two used to live in a tools directory.  
@@ -44,8 +33,9 @@ if $(with-giza) {
 
   install train-model : training//train-model.perl : <location>$(location)/training ;
 } else {
-  echo "If you want training/train-model.perl, pass --with-giza=/path/to/giza" ;
+  echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza" ;
   constant WITH-GIZA : "no" ;
+  alias train-model ;
 }
 
 install scripts : 
@@ -145,3 +135,6 @@ install scripts :
   recaser/detruecase.perl
   recaser/train-truecaser.perl
   : <install-source-root>. <location>$(location) ;
+
+alias install : ghkm compactify phrase-extract lexical-reordering symal scripts train-model ;
+explicit install ghkm compactify phrase-extract lexical-reordering symal scripts train-model ;
