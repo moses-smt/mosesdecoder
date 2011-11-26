@@ -90,6 +90,7 @@ scripts/training/phrase-extract/relax-parse
 scripts/training/phrase-extract/score
 scripts/training/phrase-extract/statistics
 scripts/training/symal/symal
+scripts/training/train-model.perl
 stamp-h1
 ltmain.sh
 m4/libtool.m4

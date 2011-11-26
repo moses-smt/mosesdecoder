@@ -7,3 +7,6 @@ run model_test.cc lm ..//boost_unit_test_framework : : test.arpa test_nounk.arpa
 
 exe query : ngram_query.cc lm ;
 exe build_binary : build_binary.cc lm ;
+
+install legacy : build_binary query 
+  : <location>$(TOP)/lm <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(TOP)/lm <link>shared:<install-type>LIB ;
