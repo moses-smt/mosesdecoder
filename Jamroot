@@ -1,20 +1,32 @@
-#MOSES BUILD OPTIONS
+#BUILDING MOSES
 #
-#Language models
-#--with-irstlm=/path/to/irstlm
-#--with-srilm=/path/to/srilm
+#PACKAGES
+#Language models (optional):
+#--with-irstlm=/path/to/irstlm 
+#--with-srilm=/path/to/srilm See moses/src/LM/Jamfile for more options.
 #--with-randlm=/path/to/randlm
 #KenLM is always compiled.  
+#
+#--with-boost=/path/to/boost
+#If Boost is in a non-standard location, specify it here.  This directory is
+#expected to contain include and lib or lib64.  
 #
 #--with-xmlrpc-c=/path/to/xmlrpc-c for libxmlrpc-c (used by server)
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
-#--notrace compiles without TRACE macros
+#--with-giza=/path/to/giza 
+#Indicates where binaries GIZA++, snt2cooc.out, and mkcls live.  
+#Builds scripts/training/train-model.perl using these paths. 
 #
+#
+#INSTALLATION
 #--install=/path/to/install sets the install directory (default dist).
+#--install-scripts=/path/to/scripts copies scripts into a directory.
 #--git appends the git revision to the install directory name.
 #
+#
+#BUILD OPTIONS
 # By default, the build is multi-threaded, optimized, and statically linked.  
 # Pass these to change the build:
 #
@@ -28,8 +40,10 @@
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
 #
+# --notrace                      compiles without TRACE macros
 #
-#Controlling the build process:
+#
+#CONTROLLING THE BUILD
 #-a to build from scratch
 #-j$NCPUS to compile in parallel
 #--clean to clean
@@ -55,29 +69,40 @@ rule test_flags ( flags ) {
   }
 }
 
-rule auto_shared ( name ) {
-  if [ test_flags "-static -l "$(name) ] {
+rule auto_shared ( name : additional ? ) {
+  additional ?= "" ;
+  if [ test_flags $(additional)" -static -l"$(name) ] {
     return ;
   } else {
     return "<link>shared" ;
   }
 }
 
-#Are we 
-boost-auto-shared = [ auto_shared "boost_program_options" ] ;
+with-boost = [ option.get "with-boost" ] ;
+if $(with-boost) {
+  L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
+  boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
+  boost-include = <include>$(with-boost)/include ;
+} else {
+  L-boost-search = "" ;
+  boost-search = ;
+  boost-incldue = ;
+}
+#Are we linking static binaries against shared boost?
+boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost_lib ( name macro ) {
 #Link multi-threaded programs against the -mt version if available.  Old 
 #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
 #boost.jam does not handle this correctly.  
-  if [ test_flags "-lboost_"$(name)"-mt" ] {
-    lib inner_boost_$(name) : : <threading>single <name>boost_$(name) ;
-    lib inner_boost_$(name) : : <threading>multi <name>boost_$(name)-mt ;
+  if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
+    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
   } else {
-    lib inner_boost_$(name) : : <name>boost_$(name) ;
+    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) ;
   }
 
-  alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) ;
+  alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) $(boost-include) ;
 }
 #See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
 boost_lib thread THREAD_DYN_DLL ;
@@ -119,15 +144,22 @@ project : requirements
 build-project lm ; 
 build-project util ;
 #Trigger instllation into legacy paths.  
+build-project mert ;
 build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
+#Scripts have their own binaries
+build-project scripts ;
 
 install-location = [ option.get "install" : $(TOP)/dist ] ;
 
 if [ option.get "git" : : "yes" ] {
-  install-tag = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
-  install-location = $(install-location).$(install-tag) ;
+  local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
+  constant GITTAG : "."$(revision) ;
+} else {
+  constant GITTAG : "" ;
 }
+
+install-location = $(install-location)$(GITTAG) ;
 
 install dist : 
   lm//query

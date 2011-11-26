@@ -40,3 +40,5 @@ exe evaluator : evaluator.cpp mert_lib ;
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 alias programs : mert extractor evaluator pro ;
+
+install legacy : programs : <location>. ;
