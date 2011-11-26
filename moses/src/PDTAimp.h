@@ -109,21 +109,6 @@ public:
     uniqSrcPhr.clear();
   }
 
-  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) {
-    std::cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << std::endl;
-    CHECK(GetTargetPhraseCollection(source)==0);
-
-    VERBOSE(2, "adding unk source phrase "<<source<<"\n");
-    std::pair<MapSrc2Tgt::iterator,bool> p
-    =m_cache.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
-    if(p.second || p.first->second==0) {
-      TargetPhraseCollection *ptr=new TargetPhraseCollection;
-      ptr->Add(new TargetPhrase(targetPhrase));
-      p.first->second=ptr;
-      m_tgtColls.push_back(ptr);
-    } else VERBOSE(2, "WARNING: you added an already existing phrase!\n");
-  }
-
   TargetPhraseCollection const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
