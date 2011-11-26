@@ -9,7 +9,7 @@ if [ option.get "with-xmlrpc-c" ]
   xmlrpc-include = <include>$(with-xmlrpc-c)/include ;
   build-moses-server = "yes" ;
 } else {
-  if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -E" ] = 0 {
+  if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -lxmlrpc_server_abyss++" ] = 0 {
     build-moses-server = "yes" ;
   }
 }
