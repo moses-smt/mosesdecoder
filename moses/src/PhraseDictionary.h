@@ -74,7 +74,6 @@ public:
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
   //! Create entry for translation of source to targetPhrase
-  virtual void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)=0;
   virtual void InitializeForInput(InputType const& source) = 0;
 
   //! Create a sentence-specific manager for SCFG rule lookup.
