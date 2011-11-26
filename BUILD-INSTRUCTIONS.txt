@@ -18,11 +18,6 @@ http://hlt.fbk.eu/en/irstlm
 
 Ken's LM is included with the Moses distribution.  
 
-IMPORTANT: These instructions are for building the moses decoder ONLY,
-the training and tuning SCRIPTS contained in scripts/ must be built
-and installed separately.  Also, they may require modification to
-work in certain environments.
-
 --------------------------------------------------------------------------
 
 1) Instructions for building with SRILM
