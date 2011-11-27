@@ -108,7 +108,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 /** Return full output phrase */
 Phrase ChartHypothesis::GetOutputPhrase() const
 {
-  Phrase outPhrase(Output, ARRAY_SIZE_INCR);
+  Phrase outPhrase(ARRAY_SIZE_INCR);
   CreateOutputPhrase(outPhrase);
   return outPhrase;
 }
@@ -257,13 +257,13 @@ TO_STRING_BODY(ChartHypothesis)
 std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 {
 
-  out << &hypo;
+  out << hypo.GetId();
 	
 	// recombination
 	if (hypo.GetWinningHypothesis() != NULL &&
 			hypo.GetWinningHypothesis() != &hypo)
 	{
-		out << "->" << hypo.GetWinningHypothesis();
+		out << "->" << hypo.GetWinningHypothesis()->GetId();
 	}
 
   out << " " << hypo.GetCurrTargetPhrase()
@@ -273,7 +273,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
   HypoList::const_iterator iter;
   for (iter = hypo.GetPrevHypos().begin(); iter != hypo.GetPrevHypos().end(); ++iter) {
     const ChartHypothesis &prevHypo = **iter;
-    out << " " << &prevHypo;
+    out << " " << prevHypo.GetId();
   }
 
   out << " [total=" << hypo.GetTotalScore() << "]";

@@ -1,7 +1,7 @@
 
 #include <vector>
 #include <string>
-#include <cassert>
+#include "util/check.hh"
 
 #include "FFState.h"
 #include "Hypothesis.h"
@@ -121,7 +121,7 @@ LexicalReorderingState *LexicalReorderingConfiguration::CreateLexicalReorderingS
 void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption &topt, ReorderingType reoType) const
 {
   // don't call this on a bidirectional object
-  assert(m_direction == LexicalReorderingConfiguration::Backward || m_direction == LexicalReorderingConfiguration::Forward);
+  CHECK(m_direction == LexicalReorderingConfiguration::Backward || m_direction == LexicalReorderingConfiguration::Forward);
   const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
                                topt.GetCachedScores(m_configuration.GetScoreProducer()) : m_prevScore;
 
@@ -183,7 +183,7 @@ int PhraseBasedReorderingState::Compare(const FFState& o) const
     return 0;
 
   const PhraseBasedReorderingState* other = dynamic_cast<const PhraseBasedReorderingState*>(&o);
-  assert(other != NULL);
+  CHECK(other != NULL);
   if (m_prevRange == other->m_prevRange) {
     if (m_direction == LexicalReorderingConfiguration::Forward) {
       return ComparePrevScores(other->m_prevScore);
@@ -400,7 +400,7 @@ int HierarchicalReorderingForwardState::Compare(const FFState& o) const
     return 0;
 
   const HierarchicalReorderingForwardState* other = dynamic_cast<const HierarchicalReorderingForwardState*>(&o);
-  assert(other != NULL);
+  CHECK(other != NULL);
   if (m_prevRange == other->m_prevRange) {
     return ComparePrevScores(other->m_prevScore);
   } else if (m_prevRange < other->m_prevRange) {

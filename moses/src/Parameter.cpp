@@ -43,7 +43,7 @@ Parameter::Parameter()
   AddParam("beam-threshold", "b", "threshold for threshold pruning");
   AddParam("config", "f", "location of the configuration file");
   AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
-  AddParam("decode-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
+  AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
@@ -102,6 +102,7 @@ Parameter::Parameter()
   AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
   AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
   AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
+  AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
   AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
   AddParam("consensus-decoding", "con", "use consensus decoding (De Nero et. al. 2009)");
@@ -146,6 +147,7 @@ Parameter::Parameter()
   AddParam("show-weights", "print feature weights and exit");
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
+  AddParam("start-translation-id", "Id of 1st input. Default = 0");
 }
 
 Parameter::~Parameter()

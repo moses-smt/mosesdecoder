@@ -158,6 +158,7 @@ protected:
   size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
+  std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
@@ -210,7 +211,8 @@ protected:
   WordAlignmentSort m_wordAlignmentSort;
 
   int m_threadCount;
-
+  long m_startTranslationId;
+  
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -559,6 +561,10 @@ public:
     return m_xmlInputType;
   }
 
+  std::pair<std::string,std::string> GetXmlBrackets() const {
+    return m_xmlBrackets;
+  }
+
   bool GetUseTransOptCache() const {
     return m_useTransOptCache;
   }
@@ -610,6 +616,9 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
+  
+  long GetStartTranslationId() const
+  { return m_startTranslationId; }
 };
 
 }

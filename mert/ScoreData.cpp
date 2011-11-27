@@ -6,20 +6,20 @@
  *
  */
 
-#include <fstream>
 #include "ScoreData.h"
 #include "Scorer.h"
 #include "Util.h"
-
+#include "FileStream.h"
 
 ScoreData::ScoreData(Scorer& ptr):
   theScorer(&ptr)
 {
   score_type = theScorer->getName();
-  theScorer->setScoreData(this);//this is not dangerous: we dont use the this pointer in SetScoreData
+  // This is not dangerous: we don't use the this pointer in SetScoreData.
+  theScorer->setScoreData(this);
   number_of_scores = theScorer->NumberOfScores();
   // TRACE_ERR("ScoreData: number_of_scores: " << number_of_scores << std::endl);
-};
+}
 
 void ScoreData::save(std::ofstream& outFile, bool bin)
 {
@@ -33,7 +33,8 @@ void ScoreData::save(const std::string &file, bool bin)
   if (file.empty()) return;
   TRACE_ERR("saving the array into " << file << std::endl);
 
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
+  // matches a stream with a file. Opens the file.
+  std::ofstream outFile(file.c_str(), std::ios::out);
 
   ScoreStats entry;
 
@@ -94,29 +95,28 @@ void ScoreData::add(ScoreArray& e)
 void ScoreData::add(const ScoreStats& e, const std::string& sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
-    //enlarge array at position e.getIndex()
+    // Enlarge array at position e.getIndex()
     size_t pos = getIndex(sent_idx);
-    //		TRACE_ERR("Inserting in array " << sent_idx << std::endl);
+    //          TRACE_ERR("Inserting in array " << sent_idx << std::endl);
     array_.at(pos).add(e);
-    //		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
+    //          TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
   } else {
-    //		TRACE_ERR("Creating a new entry in the array" << std::endl);
+    //          TRACE_ERR("Creating a new entry in the array" << std::endl);
     ScoreArray a;
     a.NumberOfScores(number_of_scores);
     a.add(e);
     a.setIndex(sent_idx);
     add(a);
-    //		TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
+    //          TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
   }
 }
 
-
-bool ScoreData::check_consistency()
+bool ScoreData::check_consistency() const
 {
   if (array_.size() == 0)
     return true;
 
-  for (scoredata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+  for (scoredata_t::const_iterator i = array_.begin(); i != array_.end(); ++i)
     if (!i->check_consistency()) return false;
 
   return true;

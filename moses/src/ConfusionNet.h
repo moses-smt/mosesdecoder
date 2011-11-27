@@ -39,7 +39,7 @@ public:
   }
 
   const Column& GetColumn(size_t i) const {
-    assert(i<data.size());
+    CHECK(i<data.size());
     return data[i];
   }
   const Column& operator[](size_t i) const {
@@ -69,7 +69,7 @@ public:
   TranslationOptionCollection* CreateTranslationOptionCollection(const TranslationSystem* system) const;
 
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
-    assert(false);
+    CHECK(false);
     return *(new NonTerminalSet());
   }
 

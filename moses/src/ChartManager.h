@@ -27,20 +27,31 @@
 #include "ChartCellCollection.h"
 #include "InputType.h"
 #include "WordsRange.h"
-#include "ChartTrellisPathList.h"
 #include "SentenceStats.h"
 #include "TranslationSystem.h"
 #include "ChartRuleLookupManager.h"
+
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
 
 class ChartHypothesis;
+class ChartTrellisDetourQueue;
+class ChartTrellisNode;
+class ChartTrellisPath;
 class ChartTrellisPathList;
 
 class ChartManager
 {
 private:
+  static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
+                                 ChartTrellisDetourQueue &);
+
+  static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
+                                 const ChartTrellisNode &,
+                                 ChartTrellisDetourQueue &);
+
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */

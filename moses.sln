@@ -25,6 +25,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "extract-rules", "scripts\tr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "score", "scripts\training\phrase-extract\score.vcxproj", "{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kenlm", "kenlm\kenlm.vcxproj", "{E834D71C-5D5F-4FB4-A361-88694C438FF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -79,6 +81,10 @@ Global
 		{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}.Debug|Win32.Build.0 = Debug|Win32
 		{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}.Release|Win32.ActiveCfg = Release|Win32
 		{34AC84C7-62A1-4BBE-BCA9-4E95B2341039}.Release|Win32.Build.0 = Release|Win32
+		{E834D71C-5D5F-4FB4-A361-88694C438FF9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E834D71C-5D5F-4FB4-A361-88694C438FF9}.Debug|Win32.Build.0 = Debug|Win32
+		{E834D71C-5D5F-4FB4-A361-88694C438FF9}.Release|Win32.ActiveCfg = Release|Win32
+		{E834D71C-5D5F-4FB4-A361-88694C438FF9}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,9 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "PhraseDictionarySCFG.h"
 #include "PhraseDictionaryOnDisk.h"
+#include "PhraseDictionaryHiero.h"
+#include "PhraseDictionaryALSuffixArray.h"
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
 #endif
+
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOption.h"
@@ -85,7 +88,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     }
     if (staticData.GetInputType() != SentenceInput) {
       UserMessage::Add("Must use binary phrase table for this input type");
-      assert(false);
+      CHECK(false);
     }
 
     PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
@@ -95,7 +98,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWeightWordPenalty());
-    assert(ret);
+    CHECK(ret);
     return pdm;
   } else if (m_implementation == Binary) {
     PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
@@ -106,7 +109,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                , m_tableLimit
                , system->GetLanguageModels()
                , system->GetWeightWordPenalty());
-    assert(ret);
+    CHECK(ret);
     return pdta;
   } else if (m_implementation == SCFG) {
     // memory phrase table
@@ -124,7 +127,43 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
-    assert(ret);
+    CHECK(ret);
+    return pdm;
+  } else if (m_implementation == Hiero) {
+    // memory phrase table
+    VERBOSE(2,"using Hiero format phrase tables" << std::endl);
+    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+      m_filePath += ".gz";
+      VERBOSE(2,"Using gzipped file" << std::endl);
+    }
+    
+    PhraseDictionaryHiero* pdm  = new PhraseDictionaryHiero(m_numScoreComponent,this);
+    bool ret = pdm->Load(GetInput()
+                         , GetOutput()
+                         , m_filePath
+                         , m_weight
+                         , m_tableLimit
+                         , system->GetLanguageModels()
+                         , system->GetWordPenaltyProducer());
+    CHECK(ret);
+    return pdm;
+  } else if (m_implementation == ALSuffixArray) {
+    // memory phrase table
+    VERBOSE(2,"using Hiero format phrase tables" << std::endl);
+    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+      m_filePath += ".gz";
+      VERBOSE(2,"Using gzipped file" << std::endl);
+    }
+    
+    PhraseDictionaryALSuffixArray* pdm  = new PhraseDictionaryALSuffixArray(m_numScoreComponent,this);
+    bool ret = pdm->Load(GetInput()
+                         , GetOutput()
+                         , m_filePath
+                         , m_weight
+                         , m_tableLimit
+                         , system->GetLanguageModels()
+                         , system->GetWordPenaltyProducer());
+    CHECK(ret);
     return pdm;
   } else if (m_implementation == OnDisk) {
 
@@ -136,7 +175,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                           , m_tableLimit
                           , system->GetLanguageModels()
                           , system->GetWordPenaltyProducer());
-    assert(ret);
+    CHECK(ret);
     return pdta;
   } else if (m_implementation == SuffixArray) {
 #ifndef WIN32
@@ -157,11 +196,11 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     std::cerr << "Suffix array phrase table loaded" << std::endl;
     return pd;
 #else
-    assert(false);
+    CHECK(false);
 #endif
   } else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
-    assert(false);
+    CHECK(false);
   }
 }
 
@@ -192,7 +231,7 @@ void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system, co
     }
     dict = m_threadUnsafePhraseDictionary.get();
   }
-  assert(dict);
+  CHECK(dict);
   dict->InitializeForInput(source);
 }
 
@@ -204,7 +243,7 @@ const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const
   } else {
     dict = m_threadUnsafePhraseDictionary.get();
   }
-  assert(dict);
+  CHECK(dict);
   return dict;
 }
 

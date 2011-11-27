@@ -93,7 +93,7 @@ size_t Word::ReadFromFile(std::fstream &file, size_t numFactors)
   file.read(mem, memAlloc);
 
   size_t memUsed = ReadFromMemory(mem, numFactors);
-  assert(memAlloc == memUsed);
+  CHECK(memAlloc == memUsed);
   free(mem);
 
   return memUsed;

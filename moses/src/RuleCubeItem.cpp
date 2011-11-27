@@ -27,20 +27,16 @@
 #include "WordsRange.h"
 #include "Util.h"
 
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
-#endif
 
 namespace Moses
 {
 
-#ifdef HAVE_BOOST
 std::size_t hash_value(const HypothesisDimension &dimension)
 {
   boost::hash<const ChartHypothesis*> hasher;
   return hasher(dimension.GetHypothesis());
 }
-#endif
 
 RuleCubeItem::RuleCubeItem(const ChartTranslationOption &transOpt,
                            const ChartCellCollection &allChartCells)
@@ -90,7 +86,7 @@ void RuleCubeItem::CreateHypothesis(const ChartTranslationOption &transOpt,
 
 ChartHypothesis *RuleCubeItem::ReleaseHypothesis()
 {
-  assert(m_hypothesis);
+  CHECK(m_hypothesis);
   ChartHypothesis *hypo = m_hypothesis;
   m_hypothesis = 0;
   return hypo;
@@ -102,7 +98,7 @@ void RuleCubeItem::CreateHypothesisDimensions(
   const DottedRule &dottedRule,
   const ChartCellCollection &allChartCells)
 {
-  assert(!dottedRule.IsRoot());
+  CHECK(!dottedRule.IsRoot());
 
   const DottedRule *prev = dottedRule.GetPrev();
   if (!prev->IsRoot()) {
@@ -114,12 +110,12 @@ void RuleCubeItem::CreateHypothesisDimensions(
     // get a sorted list of the underlying hypotheses
     const ChartCellLabel &cellLabel = dottedRule.GetChartCellLabel();
     const ChartHypothesisCollection *hypoColl = cellLabel.GetStack();
-    assert(hypoColl);
+    CHECK(hypoColl);
     const HypoList &hypoList = hypoColl->GetSortedHypotheses();
 
     // there have to be hypothesis with the desired non-terminal
     // (otherwise the rule would not be considered)
-    assert(!hypoList.empty());
+    CHECK(!hypoList.empty());
 
     // create a list of hypotheses that match the non-terminal
     HypothesisDimension dimension(0, hypoList);

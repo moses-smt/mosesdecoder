@@ -1,14 +1,12 @@
 #ifndef __TERCPPTOOLS_H__
 #define __TERCPPTOOLS_H__
 
-
 #include <vector>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <sstream>
-
 
 using namespace std;
 
@@ -61,5 +59,7 @@ string normalizeStd(string str);
 string printParams(param p);
 // };
 param copyParam(param p);
+
 }
-#endif
+
+#endif  // __TERCPPTOOLS_H__

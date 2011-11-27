@@ -84,11 +84,6 @@ PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,Word
   }
 }
 
-void PhraseDictionaryTreeAdaptor::
-AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
-{
-  imp->AddEquivPhrase(source,targetPhrase);
-}
 void PhraseDictionaryTreeAdaptor::EnableCache()
 {
   imp->useCache=1;

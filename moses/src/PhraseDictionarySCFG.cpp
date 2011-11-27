@@ -63,13 +63,18 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
   return ret;
 }
 
-TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(const Phrase &source, const TargetPhrase &target)
+TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
+                                                                                const Phrase &source
+                                                                                , const TargetPhrase &target
+                                                                                , const Word &sourceLHS)
 {
-  PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target);
+  PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
-PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source, const TargetPhrase &target)
+PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source
+                                                                , const TargetPhrase &target
+                                                                , const Word &sourceLHS)
 {
   const size_t size = source.GetSize();
 
@@ -84,8 +89,8 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      assert(iterAlign != target.GetAlignmentInfo().end());
-      assert(iterAlign->first == pos);
+      CHECK(iterAlign != target.GetAlignmentInfo().end());
+      CHECK(iterAlign->first == pos);
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -95,9 +100,14 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    assert(currNode != NULL);
+    CHECK(currNode != NULL);
   }
+  
+  // finally, the source LHS
+  //currNode = currNode->GetOrCreateChild(sourceLHS);
+  //CHECK(currNode != NULL);
 
+  
   return *currNode;
 }
 

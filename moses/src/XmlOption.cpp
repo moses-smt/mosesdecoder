@@ -56,15 +56,17 @@ string ParseXmlTagAttribute(const string& tag,const string& attributeName)
  * Remove "<" and ">" from XML tag
  *
  * \param str xml token to be stripped
+ * \param lbrackStr xml tag's left bracket string, typically "<"
+ * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-string TrimXml(const string& str)
+string TrimXml(const string& str, const std::string& lbrackStr, const std::string& rbrackStr)
 {
   // too short to be xml token -> do nothing
-  if (str.size() < 2) return str;
+  if (str.size() < lbrackStr.length()+rbrackStr.length() ) return str;
 
   // strip first and last character
-  if (str[0] == '<' && str[str.size() - 1] == '>') {
-    return str.substr(1, str.size() - 2);
+  if (str.substr(0,lbrackStr.length()) == lbrackStr  &&  str.substr(str.size()-rbrackStr.length()) == rbrackStr) {
+    return str.substr(lbrackStr.length(), str.size()-lbrackStr.length()-rbrackStr.length());
   }
   // not an xml token -> do nothing
   else {
@@ -76,13 +78,15 @@ string TrimXml(const string& str)
  * Check if the token is an XML tag, i.e. starts with "<"
  *
  * \param tag token to be checked
+ * \param lbrackStr xml tag's left bracket string, typically "<"
+ * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-bool isXmlTag(const string& tag)
+bool isXmlTag(const string& tag, const std::string& lbrackStr, const std::string& rbrackStr)
 {
-  return (tag[0] == '<' &&
-          (tag[1] == '/' ||
-           (tag[1] >= 'a' && tag[1] <= 'z') ||
-           (tag[1] >= 'A' && tag[1] <= 'Z')));
+   return (tag.substr(0,lbrackStr.length()) == lbrackStr &&
+	   (tag[lbrackStr.length()] == '/' ||
+           (tag[lbrackStr.length()] >= 'a' && tag[lbrackStr.length()] <= 'z') ||
+           (tag[lbrackStr.length()] >= 'A' && tag[lbrackStr.length()] <= 'Z')));
 }
 
 /**
@@ -92,11 +96,13 @@ bool isXmlTag(const string& tag)
  *       => (this ), (<b>), ( is a ), (</b>), ( test .)
  *
  * \param str input string
+ * \param lbrackStr xml tag's left bracket string, typically "<"
+ * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-vector<string> TokenizeXml(const string& str)
+vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, const std::string& rbrackStr)
 {
-  string lbrack = "<";
-  string rbrack = ">";
+  string lbrack = lbrackStr; // = "<";
+  string rbrack = rbrackStr; // = ">";
   vector<string> tokens; // vector of tokens to be returned
   string::size_type cpos = 0; // current position in string
   string::size_type lpos = 0; // left start of xml tag
@@ -105,10 +111,10 @@ vector<string> TokenizeXml(const string& str)
   // walk thorugh the string (loop vver cpos)
   while (cpos != str.size()) {
     // find the next opening "<" of an xml tag
-    lpos = str.find_first_of(lbrack, cpos);
+       lpos = str.find(lbrack, cpos);			// lpos = str.find_first_of(lbrack, cpos);
     if (lpos != string::npos) {
       // find the end of the xml tag
-      rpos = str.find_first_of(rbrack, lpos);
+      rpos = str.find(rbrack, lpos+lbrackStr.length()-1);			// rpos = str.find_first_of(rbrack, lpos);
       // sanity check: there has to be closing ">"
       if (rpos == string::npos) {
         TRACE_ERR("ERROR: malformed XML: " << str << endl);
@@ -125,8 +131,8 @@ vector<string> TokenizeXml(const string& str)
       tokens.push_back(str.substr(cpos, lpos - cpos));
 
     // add xml tag as token
-    tokens.push_back(str.substr(lpos, rpos-lpos+1));
-    cpos = rpos + 1;
+    tokens.push_back(str.substr(lpos, rpos-lpos+rbrackStr.length()));
+    cpos = rpos + rbrackStr.length();
   }
   return tokens;
 }
@@ -140,19 +146,23 @@ vector<string> TokenizeXml(const string& str)
  * \param res vector with translation options specified by xml
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
+ * \param lbrackStr xml tag's left bracket string, typically "<"
+ * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls )
+bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls, 
+	const std::string& lbrackStr, const std::string& rbrackStr)
 {
   //parse XML markup in translation line
 
   // no xml tag? we're done.
-  if (line.find_first_of('<') == string::npos) {
+//if (line.find_first_of('<') == string::npos) {
+  if (line.find(lbrackStr) == string::npos) {
     return true;
   }
 
   // break up input into a vector of xml tags and text
   // example: (this), (<b>), (is a), (</b>), (test .)
-  vector<string> xmlTokens = TokenizeXml(line);
+  vector<string> xmlTokens = TokenizeXml(line, lbrackStr, rbrackStr);
 
   // we need to store opened tags, until they are closed
   // tags are stored as tripled (tagname, startpos, contents)
@@ -168,7 +178,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
     // not a xml tag, but regular text (may contain many words)
-    if(!isXmlTag(xmlTokens[xmlTokenPos])) {
+    if(!isXmlTag(xmlTokens[xmlTokenPos], lbrackStr, rbrackStr)) {
       // add a space at boundary, if necessary
       if (cleanLine.size()>0 &&
           cleanLine[cleanLine.size() - 1] != ' ' &&
@@ -184,7 +194,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
       // *** get essential information about tag ***
 
       // strip extra boundary spaces and "<" and ">"
-      string tag =  Trim(TrimXml(xmlTokens[xmlTokenPos]));
+      string tag =  Trim(TrimXml(xmlTokens[xmlTokenPos], lbrackStr, rbrackStr));
       VERBOSE(3,"XML TAG IS: " << tag << std::endl);
 
       if (tag.size() == 0) {
@@ -200,7 +210,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
       bool isOpen = !isClosed;
 
       if (isClosed && isUnary) {
-        TRACE_ERR("ERROR: can't have both closed and unary tag <" << tag << ">: " << line << endl);
+        TRACE_ERR("ERROR: can't have both closed and unary tag " << lbrackStr << tag << rbrackStr << ": " << line << endl);
         return false;
       }
 
@@ -334,7 +344,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               targetPhrase.SetScore(scoreValue);
 
               XmlOption *option = new XmlOption(range,targetPhrase);
-              assert(option);
+              CHECK(option);
 
               res.push_back(option);
             }

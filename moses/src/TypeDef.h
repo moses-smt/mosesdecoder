@@ -72,38 +72,6 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // for those using autoconf/automake
 #if HAVE_CONFIG_H
 #include "config.h"
-
-//#define TRACE_ENABLE 1		// REMOVE after we figure this out
-
-#define LM_INTERNAL 1
-#define LM_REMOTE 1
-
-#  ifdef HAVE_SRILM
-#    define LM_SRI 1
-#  else
-#    undef LM_SRI
-#  endif
-
-#  ifdef HAVE_IRSTLM
-#    define LM_IRST 1
-#  endif
-
-#  ifdef HAVE_RANDLM
-#    define LM_RAND 1
-#  endif
-
-#  ifdef HAVE_ORLM
-#    define LM_ORLM 1
-#  endif
-
-#  ifdef HAVE_KENLM
-#    define LM_KEN 1
-#  endif
-
-#  ifdef HAVE_DMAPLM
-#    define LM_DMAP
-#  endif
-
 #endif
 /////////////////////////////////////////////////
 
@@ -174,6 +142,8 @@ enum PhraseTableImplementation {
   ,SCFG					= 6
   //,BerkeleyDb	= 7
   ,SuffixArray	= 8
+  ,Hiero        = 9
+  ,ALSuffixArray = 10
 };
 
 enum InputTypeEnum {
@@ -181,6 +151,8 @@ enum InputTypeEnum {
   ,ConfusionNetworkInput	= 1
   ,WordLatticeInput				= 2
   ,TreeInputType					= 3
+  ,WordLatticeInput2			= 4
+  
 };
 
 enum XmlInputType {

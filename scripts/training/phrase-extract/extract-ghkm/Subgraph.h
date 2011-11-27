@@ -1,71 +1,81 @@
 /***********************************************************************
-  Moses - factored phrase-based language decoder
-  Copyright (C) 2010 University of Edinburgh
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************************/
+ Moses - statistical machine translation system
+ Copyright (C) 2006-2011 University of Edinburgh
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+***********************************************************************/
 
 #pragma once
-#ifndef SUBGRAPH_H_INCLUDED_
-#define SUBGRAPH_H_INCLUDED_
+#ifndef EXTRACT_GHKM_SUBGRAPH_H_
+#define EXTRACT_GHKM_SUBGRAPH_H_
+
+#include "Node.h"
+
+#include <set>
+#include <vector>
+
+namespace Moses {
+namespace GHKM {
 
 class Node;
 
-#include <set>
-#include <stack>
-#include <vector>
-
 class Subgraph
 {
-public:
-  Subgraph(Node * root);
+ public:
+  Subgraph(const Node *root)
+      : m_root(root)
+      , m_depth(0)
+      , m_size(root->GetType() == TREE ? 1 : 0)
+      , m_nodeCount(1) {}
 
-  bool
-  isTrivial() const;
+  Subgraph(const Node *root, const std::set<const Node *> &leaves)
+      : m_root(root)
+      , m_leaves(leaves)
+      , m_depth(-1)
+      , m_size(-1)
+      , m_nodeCount(-1)
+  {
+    m_depth = CalcDepth(m_root);
+    m_size = CalcSize(m_root);
+    m_nodeCount = CountNodes(m_root);
+  }
 
-  bool
-  isFragment() const;
+  const Node *GetRoot() const { return m_root; }
+  const std::set<const Node *> &GetLeaves() const { return m_leaves; }
+  int GetDepth() const { return m_depth; }
+  int GetSize() const { return m_size; }
+  int GetNodeCount() const { return m_nodeCount; }
 
-  bool
-  canFormSCFGRule() const;
+  bool IsTrivial() const { return m_leaves.empty(); }
 
-  bool
-  isSinkNode(Node *) const;
+  void GetTargetLeaves(std::vector<const Node *> &) const;
 
-  bool
-  expand(const std::set<Node *> & frontierSet);
+ private:
+  void GetTargetLeaves(const Node *, std::vector<const Node *> &) const;
+  int CalcDepth(const Node *) const;
+  int CalcSize(const Node *) const;
+  int CountNodes(const Node *) const;
 
-  const Node *
-  getRoot() const {
-    return m_root;
-  };
-
-  std::set<Node *>
-  getSinkNodes() const;
-
-  std::vector<Node *>
-  getLeafNodes() const;
-
-private:
-  Node * m_root;
-  std::stack<Node *> m_expandableNodes;
-  std::set<Node *> m_expandedNodes;
-
-  void
-  getLeafNodes(Node * root, std::vector<Node *> & leafNodes,
-               const std::set<Node *> & sinkNodes) const;
+  const Node *m_root;
+  std::set<const Node *> m_leaves;
+  int m_depth;
+  int m_size;
+  int m_nodeCount;
 };
+
+}  // namespace GHKM
+}  // namespace Moses
 
 #endif

@@ -57,8 +57,6 @@ public:
 
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 
-  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
-
   // for mert
   virtual void InitializeForInput(InputType const&) {
     /* Don't do anything source specific here as this object is shared between threads.*/
@@ -67,7 +65,7 @@ public:
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollection &) {
-    assert(false);
+    CHECK(false);
     return 0;
   }
 

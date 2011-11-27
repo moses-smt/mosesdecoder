@@ -20,9 +20,10 @@ libmoses_la_HEADERS = \
         ChartTranslationOption.h \
 	ChartTranslationOptionCollection.h \
         ChartTranslationOptionList.h \
+	ChartTrellisDetour.h \
+	ChartTrellisDetourQueue.h \
 	ChartTrellisNode.h \
 	ChartTrellisPath.h \
-	ChartTrellisPathCollection.h \
 	ChartTrellisPathList.h \
         ConfusionNet.h \
         DecodeFeature.h \
@@ -78,6 +79,7 @@ libmoses_la_HEADERS = \
         PartialTranslOptColl.h \
         Phrase.h \
         PhraseDictionary.h \
+        PhraseDictionaryALSuffixArray.h \
         PhraseDictionaryDynSuffixArray.h \
         PhraseDictionaryMemory.h \
         PhraseDictionarySCFG.h \
@@ -96,6 +98,7 @@ libmoses_la_HEADERS = \
         RuleTableLoader.h \
         RuleTableLoaderCompact.h \
         RuleTableLoaderFactory.h \
+        RuleTableLoaderHiero.h \
         RuleTableLoaderStandard.h \
         ScoreComponentCollection.h \
         ScoreIndexManager.h \
@@ -145,7 +148,7 @@ libmoses_la_HEADERS += LM/IRST.h
 endif
 
 if RAND_LM
-libmoses_la_HEADERS += LM/RandLM.h
+libmoses_la_HEADERS += LM/Rand.h
 endif
 
 if ORLM_LM
@@ -177,10 +180,10 @@ libmoses_la_SOURCES = \
         ChartTranslationOption.cpp \
 	ChartTranslationOptionCollection.cpp \
         ChartTranslationOptionList.cpp \
+	ChartTrellisDetour.cpp \
+	ChartTrellisDetourQueue.cpp \
 	ChartTrellisNode.cpp \
 	ChartTrellisPath.cpp \
-	ChartTrellisPathCollection.cpp \
-	ChartTrellisPathList.cpp \
         ConfusionNet.cpp \
         DecodeFeature.cpp \
         DecodeGraph.cpp \
@@ -216,6 +219,7 @@ libmoses_la_SOURCES = \
         LM/Factory.cpp \
         LM/Implementation.cpp \
         LM/Joint.cpp \
+				LM/Ken.cpp \
         LM/MultiFactor.cpp \
         LM/Remote.cpp \
         LM/SingleFactor.cpp \
@@ -228,7 +232,9 @@ libmoses_la_SOURCES = \
         PartialTranslOptColl.cpp \
         Phrase.cpp \
         PhraseDictionary.cpp \
-        PhraseDictionaryDynSuffixArray.cpp \
+		PhraseDictionaryALSuffixArray.cpp \
+		PhraseDictionaryDynSuffixArray.cpp \
+        PhraseDictionaryHiero.cpp \
         PhraseDictionaryMemory.cpp \
         PhraseDictionarySCFG.cpp \
         PhraseDictionaryNode.cpp \
@@ -244,6 +250,7 @@ libmoses_la_SOURCES = \
         RuleCubeQueue.cpp \
         RuleTableLoaderCompact.cpp \
         RuleTableLoaderFactory.cpp \
+        RuleTableLoaderHiero.cpp \
         RuleTableLoaderStandard.cpp \
         ScoreComponentCollection.cpp \
         ScoreIndexManager.cpp \
@@ -311,7 +318,7 @@ libmoses_la_SOURCES += LM/IRST.cpp
 endif
 
 if RAND_LM
-libmoses_la_SOURCES += LM/RandLM.cpp
+libmoses_la_SOURCES += LM/Rand.cpp
 endif
 
 if ORLM_LM
@@ -325,8 +332,4 @@ if SYN_LM
 libmoses_la_SOURCES += SyntacticLanguageModel.cpp
 endif
 
-if KEN_LM
-libmoses_la_SOURCES += LM/Ken.cpp
-endif
-
-libmoses_la_LIBADD = $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)
+libmoses_la_LIBADD = $(top_srcdir)/util/libkenutil.la $(top_srcdir)/lm/libkenlm.la $(BOOST_THREAD_LDFLAGS) $(BOOST_THREAD_LIBS)

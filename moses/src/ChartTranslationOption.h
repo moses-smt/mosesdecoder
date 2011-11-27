@@ -24,7 +24,7 @@
 #include "TargetPhraseCollection.h"
 #include "WordsRange.h"
 
-#include <cassert>
+#include "util/check.hh"
 #include <vector>
 
 namespace Moses

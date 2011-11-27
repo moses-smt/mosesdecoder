@@ -3,6 +3,7 @@
  */
 #ifndef __HASHMAPINFOS_H__
 #define __HASHMAPINFOS_H__
+
 #include "infosHasher.h"
 #include <vector>
 #include <string>
@@ -36,8 +37,6 @@ public:
   string printStringHashForLexicon();
 };
 
-
 }
 
-
-#endif
+#endif  // __HASHMAPINFOS_H__

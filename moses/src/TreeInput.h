@@ -37,8 +37,7 @@ protected:
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels);
 
 public:
-  TreeInput(FactorDirection direction)
-    : Sentence(direction)
+  TreeInput()
   {}
 
   InputTypeEnum GetType() const {

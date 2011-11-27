@@ -64,7 +64,7 @@ void PhraseDictionaryNodeSCFG::Sort(size_t tableLimit)
 
 PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word &sourceTerm)
 {
-  assert(!sourceTerm.IsNonTerminal());
+  //CHECK(!sourceTerm.IsNonTerminal());
 
   std::pair <TerminalMap::iterator,bool> insResult;
   insResult = m_sourceTermMap.insert( std::make_pair(sourceTerm, PhraseDictionaryNodeSCFG()) );
@@ -75,8 +75,8 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
 
 PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word &sourceNonTerm, const Word &targetNonTerm)
 {
-  assert(sourceNonTerm.IsNonTerminal());
-  assert(targetNonTerm.IsNonTerminal());
+  CHECK(sourceNonTerm.IsNonTerminal());
+  CHECK(targetNonTerm.IsNonTerminal());
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
   std::pair <NonTerminalMap::iterator,bool> insResult;
@@ -88,7 +88,7 @@ PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetOrCreateChild(const Word 
 
 const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &sourceTerm) const
 {
-  assert(!sourceTerm.IsNonTerminal());
+  CHECK(!sourceTerm.IsNonTerminal());
 
   TerminalMap::const_iterator p = m_sourceTermMap.find(sourceTerm);
   return (p == m_sourceTermMap.end()) ? NULL : &p->second;
@@ -96,14 +96,22 @@ const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &s
 
 const PhraseDictionaryNodeSCFG *PhraseDictionaryNodeSCFG::GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const
 {
-  assert(sourceNonTerm.IsNonTerminal());
-  assert(targetNonTerm.IsNonTerminal());
+  CHECK(sourceNonTerm.IsNonTerminal());
+  CHECK(targetNonTerm.IsNonTerminal());
 
   NonTerminalMapKey key(sourceNonTerm, targetNonTerm);
   NonTerminalMap::const_iterator p = m_nonTermMap.find(key);
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
+void PhraseDictionaryNodeSCFG::Clear()
+{
+  m_sourceTermMap.clear();
+  m_nonTermMap.clear();
+  delete m_targetPhraseCollection;
+  
+}
+  
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeSCFG &node)
 {
   out << node.GetTargetPhraseCollection();

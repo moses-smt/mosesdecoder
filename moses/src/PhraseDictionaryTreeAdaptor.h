@@ -4,7 +4,7 @@
 #define moses_PhraseDictionaryTreeAdaptor_h
 
 #include <vector>
-#include <cassert>
+#include "util/check.hh"
 #include "TypeDef.h"
 #include "PhraseDictionaryMemory.h"
 #include "TargetPhraseCollection.h"
@@ -56,10 +56,6 @@ public:
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
   TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
-
-  // this function can be only used for UNKNOWN source phrases
-  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
-
   std::string GetScoreProducerDescription(unsigned idx=0) const;
   std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
 
@@ -69,7 +65,7 @@ public:
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollection &) {
-    assert(false);
+    CHECK(false);
     return 0;
   }
 };

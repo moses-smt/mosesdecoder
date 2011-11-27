@@ -2,7 +2,7 @@
 #define moses_TranslationOptionList_h
 
 #include <vector>
-#include <cassert>
+#include "util/check.hh"
 #include <iostream>
 #include "Util.h"
 
@@ -48,11 +48,11 @@ public:
   }
 
   const TranslationOption *Get(size_t ind) const {
-    assert(ind < m_coll.size());
+    CHECK(ind < m_coll.size());
     return m_coll[ind];
   }
   void Remove( size_t ind ) {
-    assert(ind < m_coll.size());
+    CHECK(ind < m_coll.size());
     m_coll.erase( m_coll.begin()+ind );
   }
   void Add(TranslationOption *transOpt) {

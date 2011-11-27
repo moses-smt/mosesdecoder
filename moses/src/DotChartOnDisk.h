@@ -20,7 +20,7 @@
 #pragma once
 
 #include <vector>
-#include <cassert>
+#include "util/check.hh"
 
 #include "DotChart.h"
 
@@ -108,7 +108,7 @@ class SavedNodeOnDisk
 public:
   SavedNodeOnDisk(const DottedRuleOnDisk *dottedRule)
     :m_dottedRule(dottedRule) {
-    assert(m_dottedRule);
+    CHECK(m_dottedRule);
   }
 
   ~SavedNodeOnDisk() {
@@ -164,7 +164,7 @@ public:
   }
 
   void Add(size_t pos, const DottedRuleOnDisk *dottedRule) {
-    assert(dottedRule);
+    CHECK(dottedRule);
 
     m_coll[pos]->Add(dottedRule);
     m_savedNode.push_back(new SavedNodeOnDisk(dottedRule));

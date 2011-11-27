@@ -1,7 +1,7 @@
 #ifndef __STRINGHASHER_H__
 #define __STRINGHASHER_H__
+
 #include <string>
-//#include <ext/hash_map>
 #include <iostream>
 
 using namespace std;
@@ -21,10 +21,8 @@ public:
   string getKey();
   string getValue();
   void setValue ( string value );
-
-
 };
 
-
 }
-#endif
+
+#endif  // __STRINGHASHER_H__

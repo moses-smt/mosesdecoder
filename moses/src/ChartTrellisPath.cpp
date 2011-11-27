@@ -20,40 +20,33 @@
  ***********************************************************************/
 
 #include "ChartTrellisPath.h"
-#include "ChartHypothesis.h"
-#include "ChartTrellisPathCollection.h"
-#include "StaticData.h"
-#include "Word.h"
 
-using namespace std;
+#include "ChartHypothesis.h"
+#include "ChartTrellisDetour.h"
+#include "ChartTrellisDetourQueue.h"
+#include "ChartTrellisNode.h"
 
 namespace Moses
 {
 
-ChartTrellisPath::ChartTrellisPath(const ChartHypothesis *hypo)
-  :m_finalNode(new ChartTrellisNode(hypo))
-  ,m_scoreBreakdown(hypo->GetScoreBreakdown())
-  ,m_totalScore(hypo->GetTotalScore())
-  ,m_prevNodeChanged(NULL)
-  ,m_prevPath(NULL)
+ChartTrellisPath::ChartTrellisPath(const ChartHypothesis &hypo)
+    : m_finalNode(new ChartTrellisNode(hypo))
+    , m_deviationPoint(NULL)
+    , m_scoreBreakdown(hypo.GetScoreBreakdown())
+    , m_totalScore(hypo.GetTotalScore())
 {
 }
 
-ChartTrellisPath::ChartTrellisPath(const ChartTrellisPath &origPath
-                         , const ChartTrellisNode &soughtNode
-                         , const ChartHypothesis &replacementHypo
-                         , ScoreComponentCollection	&scoreChange)
-  :m_scoreBreakdown(origPath.GetScoreBreakdown())
-  ,m_prevPath(&origPath)
+ChartTrellisPath::ChartTrellisPath(const ChartTrellisDetour &detour)
+   : m_finalNode(new ChartTrellisNode(detour, m_deviationPoint))
+   , m_scoreBreakdown(detour.GetBasePath().m_scoreBreakdown)
+   , m_totalScore(0)
 {
-  m_finalNode = new ChartTrellisNode(origPath.GetFinalNode()
-                                , soughtNode
-                                , replacementHypo
-                                , scoreChange
-                                , m_prevNodeChanged);
-
+  CHECK(m_deviationPoint);
+  ScoreComponentCollection scoreChange;
+  scoreChange = detour.GetReplacementHypo().GetScoreBreakdown();
+  scoreChange.MinusEquals(detour.GetSubstitutedNode().GetHypothesis().GetScoreBreakdown());
   m_scoreBreakdown.PlusEquals(scoreChange);
-
   m_totalScore = m_scoreBreakdown.GetWeightedScore();
 }
 
@@ -68,61 +61,4 @@ Phrase ChartTrellisPath::GetOutputPhrase() const
   return ret;
 }
 
-void ChartTrellisPath::CreateDeviantPaths(ChartTrellisPathCollection &pathColl, const ChartTrellisNode &soughtNode) const
-{
-  // copy this path but replace startHypo with its arc
-  const ChartArcList *arcList = soughtNode.GetHypothesis().GetArcList();
-
-  if (arcList) {
-    ChartArcList::const_iterator iterChartArcList;
-    for (iterChartArcList = arcList->begin(); iterChartArcList != arcList->end(); ++iterChartArcList) {
-      ScoreComponentCollection	scoreChange;
-
-      const ChartHypothesis &replacementHypo = **iterChartArcList;
-      ChartTrellisPath *newPath = new ChartTrellisPath(*this, soughtNode, replacementHypo, scoreChange);
-      pathColl.Add(newPath);
-    }
-  }
-
-  // recusively create deviant paths for child nodes
-  const ChartTrellisNode::NodeChildren &children = soughtNode.GetChildren();
-
-  ChartTrellisNode::NodeChildren::const_iterator iter;
-  for (iter = children.begin(); iter != children.end(); ++iter) {
-    const ChartTrellisNode &child = **iter;
-    CreateDeviantPaths(pathColl, child);
-  }
-}
-
-void ChartTrellisPath::CreateDeviantPaths(ChartTrellisPathCollection &pathColl) const
-{
-  if (m_prevNodeChanged == NULL) {
-    // initial enumeration from a pure hypo
-    CreateDeviantPaths(pathColl, GetFinalNode());
-  } else {
-    // don't change m_prevNodeChanged, just it's children
-    const ChartTrellisNode::NodeChildren &children = m_prevNodeChanged->GetChildren();
-
-    ChartTrellisNode::NodeChildren::const_iterator iter;
-    for (iter = children.begin(); iter != children.end(); ++iter) {
-      const ChartTrellisNode &child = **iter;
-      CreateDeviantPaths(pathColl, child);
-    }
-  }
-}
-
-std::ostream& operator<<(std::ostream &out, const ChartTrellisPath &path)
-{
-  out << &path << "  " << path.m_prevPath << "  " << path.GetOutputPhrase() << endl;
-
-  if (path.m_prevNodeChanged) {
-    out << "changed " << path.m_prevNodeChanged->GetHypothesis() << endl;
-  }
-
-  out << path.GetFinalNode() << endl;
-
-  return out;
-}
-
-};
-
+}  // namespace Moses

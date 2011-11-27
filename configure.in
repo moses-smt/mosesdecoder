@@ -16,6 +16,8 @@ AC_PROG_LIBTOOL
 
 AX_XMLRPC_C
 BOOST_REQUIRE([1.36.0])
+BOOST_SMART_PTR
+BOOST_PROGRAM_OPTIONS
 
 AC_ARG_WITH(protobuf,
             [AC_HELP_STRING([--with-protobuf=PATH], [(optional) path to Google protobuf])],
@@ -46,12 +48,6 @@ AC_ARG_WITH(irstlm,
             [AC_HELP_STRING([--with-irstlm=PATH], [(optional) path to IRST's LM toolkit])],
             [with_irstlm=$withval],
             [with_irstlm=no]
-           )
-
-AC_ARG_WITH(kenlm,
-            [AC_HELP_STRING([--with-kenlm], [(optional) Include Ken's LM toolkit; default is yes])],
-            [with_kenlm=$withval],
-            [with_kenlm=yes]
            )
 
 AC_ARG_WITH(randlm,
@@ -223,25 +219,13 @@ then
   AM_CONDITIONAL([IRST_LM], true)
 fi
 
-if test "x$with_kenlm" != 'xno'
-then
-  SAVE_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS -I${PWD}/kenlm"
-
-  AC_CHECK_HEADER(lm/model.hh,
-                 [AC_DEFINE([HAVE_KENLM], [], [flag for KENLM])],
-                 [AC_MSG_ERROR([Cannot find KEN-LM in ${PWD}/kenlm])])
-
-  KENLM_LDFLAGS="-L\$(top_srcdir)/kenlm -lkenlm -lz"
-  KENLM_DEPS="\$(top_srcdir)/kenlm/libkenlm.la"
-  FMTLIBS="$FMTLIBS libkenlm.la"
-  AM_CONDITIONAL([KEN_LM], true)
-else
-  KENLM_LDFLAGS=""
-  KENLM_DEPS=""
-fi
-AC_SUBST(KENLM_LDFLAGS)
-AC_SUBST(KENLM_DEPS)
+CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)"
+#LDFLAGS="$LDFLAGS -L\$(top_srcdir)/util -lkenutil -L\$(top_srcdir)/lm -lkenlm -lz"
+#KENUTIL_DEPS="\$(top_srcdir)/util/libkenutil.la"
+#KENLM_DEPS="\$(top_srcdir)/lm/libkenlm.la"
+#FMTLIBS="$FMTLIBS libkenutil.la libkenlm.la"
+#AC_SUBST(KENUTIL_DEPS)
+#AC_SUBST(KENLM_DEPS)
 
 if test "x$with_randlm" != 'xno'
 then
@@ -343,6 +327,6 @@ AC_CHECK_HEADER(zlib.h,
 LIBS="$LIBS -lz"
 
 
-AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile server/Makefile CreateOnDisk/src/Makefile kenlm/Makefile)
+AC_CONFIG_FILES(Makefile OnDiskPt/src/Makefile moses/src/Makefile moses-cmd/src/Makefile moses-chart-cmd/src/Makefile misc/Makefile mert/Makefile contrib/server/Makefile CreateOnDisk/src/Makefile util/Makefile lm/Makefile)
 
 AC_OUTPUT()

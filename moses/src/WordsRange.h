@@ -75,7 +75,7 @@ public:
   }
 
   inline size_t GetNumWordsBetween(const WordsRange& x) const {
-    assert(!Overlap(x));
+    CHECK(!Overlap(x));
 
     if (x.m_endPos < m_startPos) {
       return m_startPos - x.m_endPos;

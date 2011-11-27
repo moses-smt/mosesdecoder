@@ -17,7 +17,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <algorithm>
-#include <cassert>
+#include "util/check.hh"
 #include "AlignmentInfo.h"
 #include "TypeDef.h"
 #include "StaticData.h"
@@ -76,7 +76,7 @@ std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignment
       break;
       
     default:
-      assert(false);
+      CHECK(false);
   }
   
   return ret;

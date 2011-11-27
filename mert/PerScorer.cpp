@@ -1,10 +1,22 @@
 #include "PerScorer.h"
 
+#include <fstream>
+#include <stdexcept>
+
+#include "ScoreStats.h"
+#include "Util.h"
+
+using namespace std;
+
+PerScorer::PerScorer(const string& config)
+  : StatisticsBasedScorer("PER",config) {}
+
+PerScorer::~PerScorer() {}
 
 void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
-  // for each line in the reference file, create a multiset of the
-  // word ids
+  // For each line in the reference file, create a multiset of
+  // the word ids.
   if (referenceFiles.size() != 1) {
     throw runtime_error("PER only supports a single reference");
   }
@@ -40,8 +52,8 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
   }
-  //calculate correct, output_length and ref_length for
-  //the line and store it in entry
+  // Calculate correct, output_length and ref_length for
+  // the line and store it in entry
   vector<int> testtokens;
   encode(text,testtokens);
   multiset<int> testtokens_all(testtokens.begin(),testtokens.end());
@@ -59,12 +71,12 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats_str);
 }
 
-float PerScorer::calculateScore(const vector<int>& comps)
+float PerScorer::calculateScore(const vector<int>& comps) const
 {
   float denom = comps[2];
   float num = comps[0] - max(0,comps[1]-comps[2]);
   if (denom == 0) {
-    //shouldn't happen!
+    // This shouldn't happen!
     return 0.0;
   } else {
     return num/denom;

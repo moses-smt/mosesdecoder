@@ -100,7 +100,7 @@ public:
   }
 
   void CleanUp() {
-    assert(m_dict);
+    CHECK(m_dict);
     m_dict->FreeMemory();
     for(size_t i=0; i<m_tgtColls.size(); ++i) delete m_tgtColls[i];
     m_tgtColls.clear();
@@ -109,25 +109,10 @@ public:
     uniqSrcPhr.clear();
   }
 
-  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) {
-    std::cerr << "AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)" << std::endl;
-    assert(GetTargetPhraseCollection(source)==0);
-
-    VERBOSE(2, "adding unk source phrase "<<source<<"\n");
-    std::pair<MapSrc2Tgt::iterator,bool> p
-    =m_cache.insert(std::make_pair(source,static_cast<TargetPhraseCollection const*>(0)));
-    if(p.second || p.first->second==0) {
-      TargetPhraseCollection *ptr=new TargetPhraseCollection;
-      ptr->Add(new TargetPhrase(targetPhrase));
-      p.first->second=ptr;
-      m_tgtColls.push_back(ptr);
-    } else VERBOSE(2, "WARNING: you added an already existing phrase!\n");
-  }
-
   TargetPhraseCollection const*
   GetTargetPhraseCollection(Phrase const &src) const {
 
-    assert(m_dict);
+    CHECK(m_dict);
     if(src.GetSize()==0) return 0;
 
     std::pair<MapSrc2Tgt::iterator,bool> piter;
@@ -236,11 +221,11 @@ public:
     std::vector<float> scores;
     Phrase src;
 
-    State() : range(0,0),scores(0),src(Input, ARRAY_SIZE_INCR) {}
+    State() : range(0,0),scores(0),src(ARRAY_SIZE_INCR) {}
     State(Position b,Position e,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0))
-      : ptr(v),range(b,e),scores(sv),src(Input, ARRAY_SIZE_INCR) {}
+      : ptr(v),range(b,e),scores(sv),src(ARRAY_SIZE_INCR) {}
     State(Range const& r,const PPtr& v,const std::vector<float>& sv=std::vector<float>(0))
-      : ptr(v),range(r),scores(sv),src(Input, ARRAY_SIZE_INCR) {}
+      : ptr(v),range(r),scores(sv),src(ARRAY_SIZE_INCR) {}
 
     Position begin() const {
       return range.first;
@@ -281,7 +266,7 @@ public:
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
       std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
-      assert(factors.size()==m_output.size());
+      CHECK(factors.size()==m_output.size());
       Word& w=targetPhrase.AddWord();
       for(size_t l=0; l<m_output.size(); ++l) {
         w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
@@ -326,7 +311,7 @@ public:
   };
 
   void CacheSource(ConfusionNet const& src) {
-    assert(m_dict);
+    CHECK(m_dict);
     const size_t srcSize=src.GetSize();
 
     std::vector<size_t> exploredPaths(srcSize+1,0);
@@ -373,7 +358,7 @@ public:
       State curr(stack.back());
       stack.pop_back();
 
-      assert(curr.end()<srcSize);
+      CHECK(curr.end()<srcSize);
       const ConfusionNet::Column &currCol=src[curr.end()];
       // in a given column, loop over all possibilities
       for(size_t colidx=0; colidx<currCol.size(); ++colidx) {
@@ -383,7 +368,7 @@ public:
         bool isEpsilon=(s=="" || s==EPSILON);
 
         //assert that we have the right number of link params in this CN option
-        assert(currCol[colidx].second.size() >= m_numInputScores);
+        CHECK(currCol[colidx].second.size() >= m_numInputScores);
 
         // do not start with epsilon (except at first position)
         if(isEpsilon && curr.begin()==curr.end() && curr.begin()>0) continue;
@@ -444,7 +429,7 @@ public:
               //put in phrase table scores, logging as we insert
               std::transform(tcands[i].second.begin(),tcands[i].second.end(),nscores.begin() + m_numInputScores,TransformScore);
 
-              assert(nscores.size()==m_weights.size());
+              CHECK(nscores.size()==m_weights.size());
 
               //tally up
               float score=std::inner_product(nscores.begin(), nscores.end(), m_weights.begin(), 0.0f);
@@ -485,10 +470,10 @@ public:
     m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
 
     for(std::map<Range,E2Costs>::const_iterator i=cov2cand.begin(); i!=cov2cand.end(); ++i) {
-      assert(i->first.first<m_rangeCache.size());
-      assert(i->first.second>0);
-      assert(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
-      assert(m_rangeCache[i->first.first][i->first.second-1]==0);
+      CHECK(i->first.first<m_rangeCache.size());
+      CHECK(i->first.second>0);
+      CHECK(static_cast<size_t>(i->first.second-1)<m_rangeCache[i->first.first].size());
+      CHECK(m_rangeCache[i->first.first][i->first.second-1]==0);
 
       std::vector<TargetPhrase> tCands;
       tCands.reserve(i->second.size());

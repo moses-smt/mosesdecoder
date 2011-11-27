@@ -1,0 +1,1 @@
+exe CreateOnDisk : Main.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt ;

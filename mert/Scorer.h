@@ -1,12 +1,7 @@
 #ifndef __SCORER_H__
 #define __SCORER_H__
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <iterator>
-#include <limits>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -21,52 +16,31 @@ enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
 class ScoreStats;
 
 /**
-  * Superclass of all scorers and dummy implementation. In order to add a new
-  * scorer it should be sufficient to override prepareStats(), setReferenceFiles()
-  * and score() (or calculateScore()).
-**/
+ * Superclass of all scorers and dummy implementation.
+ *
+ * In order to add a new scorer it should be sufficient to override the members
+ * prepareStats(), setReferenceFiles() and score() (or calculateScore()).
+ */
 class Scorer
 {
 private:
   string _name;
 
 public:
-
-  Scorer(const string& name, const string& config): _name(name), _scoreData(0), _preserveCase(true) {
-//    cerr << "Scorer config string: " << config << endl;
-    size_t start = 0;
-    while (start < config.size()) {
-      size_t end = config.find(",",start);
-      if (end == string::npos) {
-        end = config.size();
-      }
-      string nv = config.substr(start,end-start);
-      size_t split = nv.find(":");
-      if (split == string::npos) {
-        throw runtime_error("Missing colon when processing scorer config: " + config);
-      }
-      string name = nv.substr(0,split);
-      string value = nv.substr(split+1,nv.size()-split-1);
-      cerr << "name: " << name << " value: " << value << endl;
-      _config[name] = value;
-      start = end+1;
-    }
-
-  };
-  virtual ~Scorer() {};
-
+  Scorer(const string& name, const string& config);
+  virtual ~Scorer() {}
 
   /**
-      * returns the number of statistics needed for the computation of the score
-      **/
-  virtual size_t NumberOfScores() {
+   * Return the number of statistics needed for the computation of the score.
+   */
+  virtual size_t NumberOfScores() const {
     cerr << "Scorer: 0" << endl;
     return 0;
-  };
+  }
 
   /**
-    * set the reference files. This must be called before prepareStats.
-    **/
+   * Set the reference files. This must be called before prepareStats().
+   */
   virtual void setReferenceFiles(const vector<string>& referenceFiles) {
     //do nothing
   }
@@ -74,7 +48,7 @@ public:
   /**
    * Process the given guessed text, corresponding to the given reference sindex
    * and add the appropriate statistics to the entry.
-  **/
+   */
   virtual void prepareStats(size_t sindex, const string& text, ScoreStats& entry)
   {}
 
@@ -86,11 +60,11 @@ public:
   }
 
   /**
-    * Score using each of the candidate index, then go through the diffs
-    * applying each in turn, and calculating a new score each time.
-    **/
+   * Score using each of the candidate index, then go through the diffs
+   * applying each in turn, and calculating a new score each time.
+   */
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores) {
+                     statscores_t& scores) const {
     //dummy impl
     if (!_scoreData) {
       throw runtime_error("score data not loaded");
@@ -101,12 +75,11 @@ public:
     }
   }
 
-
   /**
-    * Calculate the score of the sentences corresponding to the list of candidate
-    * indices. Each index indicates the 1-best choice from the n-best list.
-    **/
-  float score(const candidates_t& candidates) {
+   * Calculate the score of the sentences corresponding to the list of candidate
+   * indices. Each index indicates the 1-best choice from the n-best list.
+   */
+  float score(const candidates_t& candidates) const {
     diffs_t diffs;
     statscores_t scores;
     score(candidates, diffs, scores);
@@ -117,17 +90,16 @@ public:
     return _name;
   }
 
-  size_t getReferenceSize() {
+  size_t getReferenceSize() const {
     if (_scoreData) {
       return _scoreData->size();
     }
     return 0;
   }
 
-
   /**
-    * Set the score data, prior to scoring.
-    **/
+   * Set the score data, prior to scoring.
+   */
   void setScoreData(ScoreData* data) {
     _scoreData = data;
   }
@@ -142,11 +114,11 @@ protected:
   bool _preserveCase;
 
   /**
-    * Value of config variable. If not provided, return default.
-    **/
-  string getConfig(const string& key, const string& def="") {
-    map<string,string>::iterator i = _config.find(key);
-    if (i  == _config.end()) {
+   * Get value of config variable. If not provided, return default.
+   */
+  string getConfig(const string& key, const string& def="") const {
+    map<string,string>::const_iterator i = _config.find(key);
+    if (i == _config.end()) {
       return def;
     } else {
       return i->second;
@@ -156,8 +128,8 @@ protected:
 
   /**
    * Tokenise line and encode.
-   *     Note: We assume that all tokens are separated by single spaces
-   **/
+   * Note: We assume that all tokens are separated by single spaces.
+   */
   void encode(const string& line, vector<int>& encoded) {
     //cerr << line << endl;
     istringstream in (line);
@@ -185,70 +157,30 @@ protected:
 
 private:
   map<string,string> _config;
-
-
 };
-
 
 
 /**
-  * Abstract base class for scorers that work by adding statistics across all
-  * outout sentences, then apply some formula, e.g. bleu, per. **/
+ * Abstract base class for Scorers that work by adding statistics across all
+ * outout sentences, then apply some formula, e.g., BLEU, PER.
+ */
 class StatisticsBasedScorer : public Scorer
 {
-
 public:
-  StatisticsBasedScorer(const string& name, const string& config): Scorer(name,config) {
-    //configure regularisation
-    static string KEY_TYPE = "regtype";
-    static string KEY_WINDOW = "regwin";
-    static string KEY_CASE = "case";
-    static string TYPE_NONE = "none";
-    static string TYPE_AVERAGE = "average";
-    static string TYPE_MINIMUM = "min";
-    static string TRUE = "true";
-    static string FALSE = "false";
-
-
-    string type = getConfig(KEY_TYPE,TYPE_NONE);
-    if (type == TYPE_NONE) {
-      _regularisationStrategy = REG_NONE;
-    } else if (type == TYPE_AVERAGE) {
-      _regularisationStrategy = REG_AVERAGE;
-    } else if (type == TYPE_MINIMUM) {
-      _regularisationStrategy = REG_MINIMUM;
-    } else {
-      throw runtime_error("Unknown scorer regularisation strategy: " + type);
-    }
-//    cerr << "Using scorer regularisation strategy: " << type << endl;
-
-    string window = getConfig(KEY_WINDOW,"0");
-    _regularisationWindow = atoi(window.c_str());
-//    cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
-
-    string preservecase = getConfig(KEY_CASE,TRUE);
-    if (preservecase == TRUE) {
-      _preserveCase = true;
-    } else if (preservecase == FALSE) {
-      _preserveCase = false;
-    }
-//    cerr << "Using case preservation: " << _preserveCase << endl;
-
-
-  }
-  ~StatisticsBasedScorer() {};
+  StatisticsBasedScorer(const string& name, const string& config);
+  virtual ~StatisticsBasedScorer() {}
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores);
+                     statscores_t& scores) const;
 
 protected:
-  //calculate the actual score
-  virtual statscore_t calculateScore(const vector<int>& totals) = 0;
+  /**
+   * Calculate the actual score.
+   */
+  virtual statscore_t calculateScore(const vector<int>& totals) const = 0;
 
-  //regularisation
+  // regularisation
   ScorerRegularisationStrategy _regularisationStrategy;
   size_t  _regularisationWindow;
-
 };
 
-
-#endif //__SCORER_H
+#endif // __SCORER_H__

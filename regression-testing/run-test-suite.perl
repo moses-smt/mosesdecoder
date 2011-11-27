@@ -17,21 +17,18 @@ my @tests = qw (
   score.hierarchical
   score.hierarchical-inv
   mert.basic
+  mert.pro
   mert.extractor-txt
   mert.extractor-bin
   chart.target-syntax
   chart.target-syntax.ondisk
   chart.hierarchical
   chart.hierarchical-withsrilm
-  #chart.hierarchical-withkenlm
   chart.hierarchical.ondisk
   phrase.basic-surface-only
   phrase.basic-surface-only-withirstlm
   phrase.basic-surface-only-withirstlm-binlm
-  #phrase.basic-surface-only-withkenlm
-  #phrase.basic-surface-only-withkenlm.bin
   phrase.basic-lm-oov
-  #phrase.basic-lm-oov-withkenlm
   phrase.ptable-filtering
   phrase.multi-factor
   phrase.multi-factor-drop
@@ -51,6 +48,10 @@ my @tests = qw (
   phrase.show-weights
   phrase.xml-markup
 );
+  #phrase.basic-lm-oov-withkenlm
+  #phrase.basic-surface-only-withkenlm
+  #phrase.basic-surface-only-withkenlm.bin
+  #chart.hierarchical-withkenlm
 
 ############################################################
 use MosesRegressionTesting;

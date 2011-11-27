@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_ScoreComponentCollection_h
 
 #include <numeric>
-#include <cassert>
+#include "util/check.hh"
 
 #include "LMList.h"
 #include "ScoreProducer.h"
@@ -85,7 +85,7 @@ public:
 
   //! add the score in rhs
   void PlusEquals(const ScoreComponentCollection& rhs) {
-    assert(m_scores.size() >= rhs.m_scores.size());
+    CHECK(m_scores.size() >= rhs.m_scores.size());
     const size_t l = rhs.m_scores.size();
     for (size_t i=0; i<l; i++) {
       m_scores[i] += rhs.m_scores[i];
@@ -94,7 +94,7 @@ public:
 
   //! subtract the score in rhs
   void MinusEquals(const ScoreComponentCollection& rhs) {
-    assert(m_scores.size() >= rhs.m_scores.size());
+    CHECK(m_scores.size() >= rhs.m_scores.size());
     const size_t l = rhs.m_scores.size();
     for (size_t i=0; i<l; i++) {
       m_scores[i] -= rhs.m_scores[i];
@@ -105,7 +105,7 @@ public:
   //! The length of scores must be equal to the number of score components
   //! produced by sp
   void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores) {
-    assert(scores.size() == sp->GetNumScoreComponents());
+    CHECK(scores.size() == sp->GetNumScoreComponents());
     size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
     for (std::vector<float>::const_iterator vi = scores.begin();
          vi != scores.end(); ++vi) {
@@ -128,13 +128,13 @@ public:
   //! to add the score from a single ScoreProducer that produces
   //! a single value
   void PlusEquals(const ScoreProducer* sp, float score) {
-    assert(1 == sp->GetNumScoreComponents());
+    CHECK(1 == sp->GetNumScoreComponents());
     const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
     m_scores[i] += score;
   }
 
   void Assign(const ScoreProducer* sp, const std::vector<float>& scores) {
-    assert(scores.size() == sp->GetNumScoreComponents());
+    CHECK(scores.size() == sp->GetNumScoreComponents());
     size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
     for (std::vector<float>::const_iterator vi = scores.begin();
          vi != scores.end(); ++vi) {
@@ -150,7 +150,7 @@ public:
   //! to add the score from a single ScoreProducer that produces
   //! a single value
   void Assign(const ScoreProducer* sp, float score) {
-    assert(1 == sp->GetNumScoreComponents());
+    CHECK(1 == sp->GetNumScoreComponents());
     const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
     m_scores[i] = score;
   }
@@ -163,7 +163,7 @@ public:
 
   float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const {
     std::vector<float> lhs = GetScoresForProducer(sp);
-    assert(lhs.size() == rhs.size());
+    CHECK(lhs.size() == rhs.size());
     return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
   }
 
@@ -187,7 +187,7 @@ public:
     const size_t begin = m_sim->GetBeginIndex(id);
 #ifndef NDEBUG
     const size_t end = m_sim->GetEndIndex(id);
-    assert(end-begin == 1);
+    CHECK(end-begin == 1);
 #endif
     return m_scores[begin];
   }

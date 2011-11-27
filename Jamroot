@@ -1,0 +1,190 @@
+#BUILDING MOSES
+#
+#PACKAGES
+#Language models (optional):
+#--with-irstlm=/path/to/irstlm 
+#--with-srilm=/path/to/srilm See moses/src/LM/Jamfile for more options.
+#--with-randlm=/path/to/randlm
+#KenLM is always compiled.  
+#
+#--with-boost=/path/to/boost
+#If Boost is in a non-standard location, specify it here.  This directory is
+#expected to contain include and lib or lib64.  
+#
+#--with-xmlrpc-c=/path/to/xmlrpc-c for libxmlrpc-c (used by server)
+#Note that, like language models, this is the --prefix where the library was
+#installed, not some executable within the library.  
+#
+#--with-giza=/path/to/giza 
+#Indicates where binaries GIZA++, snt2cooc.out, and mkcls live.  
+#Builds scripts/training/train-model.perl using these paths. 
+#
+#
+#INSTALLATION
+#--install=/path/to/install sets the install directory (default dist).
+#--install-scripts=/path/to/scripts copies scripts into a directory.
+#--git appends the git revision to the install directory name.
+#
+#
+#BUILD OPTIONS
+# By default, the build is multi-threaded, optimized, and statically linked.  
+# Pass these to change the build:
+#
+# threading=single|multi         controls threading (default multi)
+#
+# variant=release|debug|profile  builds optimized (default), for debug, or for
+#                                profiling
+#
+# link=static|shared             controls linking (default static)
+#
+# debug-symbols=on|off           include (default) or exclude debugging
+#                                information also known as -g
+#
+# --notrace                      compiles without TRACE macros
+#
+# --enable-boost-pool            uses Boost pools for the memory SCFG table
+#
+#
+#CONTROLLING THE BUILD
+#-a to build from scratch
+#-j$NCPUS to compile in parallel
+#--clean to clean
+
+path-constant TOP : . ;
+
+# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
+rule trim-nl ( str ) {
+  return [ MATCH "([^
+]*)" : $(str) ] ;
+}
+rule _shell ( cmd ) {
+  return [ trim-nl [ SHELL $(cmd) ] ] ;
+}
+
+import option ;
+
+#Run g++ with empty main and these arguments to see if it passes.  
+rule test_flags ( flags ) {
+  if [ SHELL $(TOP)"/jam-files/test.sh "$(flags) ] = 0 {
+    return true ;
+  } else {
+    return ;
+  }
+}
+
+#Determine if a library can be compiled statically.  
+rule auto_shared ( name : additional ? ) {
+  additional ?= "" ;
+  if [ test_flags $(additional)" -static -l"$(name) ] {
+    return ;
+  } else {
+    return "<link>shared" ;
+  }
+}
+
+with-boost = [ option.get "with-boost" ] ;
+if $(with-boost) {
+  L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
+  boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
+  I-boost-include = -I$(with-boost)/include ;
+  boost-include = <include>$(with-boost)/include ;
+} else {
+  L-boost-search = "" ;
+  boost-search = ;
+  I-boost-include = "" ;
+  boost-include = ;
+}
+
+boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp |grep '#define BOOST_VERSION '" : exit-status ] ;
+if $(boost-shell[2]) != 0 {
+  exit Boost does not seem to be installed or g++ is confused. : 1 ;
+}
+boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
+if $(boost-version) < 103600 {
+  exit You have Boost $(boost-version).  Moses requires at least 103600 (and preferably newer). : 1 ;
+}
+#Are we linking static binaries against shared boost?
+boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
+#Convenience rule for boost libraries.  Defines library boost_$(name).  
+rule boost_lib ( name macro ) {
+  #Link multi-threaded programs against the -mt version if available.  Old 
+  #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
+  #boost.jam does not handle this correctly.  
+  if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
+    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
+  } else {
+    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) ;
+  }
+
+  alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) $(boost-include) ;
+}
+#See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
+boost_lib thread THREAD_DYN_DLL ;
+boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
+boost_lib unit_test_framework TEST_DYN_LINK ;
+
+#Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
+rule external_lib ( name ) {
+  lib $(name) : : [ auto_shared $(name) ] ;
+}
+
+external_lib z ;
+
+#libSegFault prints a stack trace on segfault.  Link against it if available.  
+if [ test_flags "-lSegfault" ] {
+  external_lib SegFault ;
+  segfault = <library>SegFault ;
+}
+
+trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
+boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
+
+project : default-build
+  <threading>multi
+  <warnings>on
+  <debug-symbols>on
+  <variant>release
+  <link>static
+  ;
+
+project : requirements 
+  <threading>multi:<define>WITH_THREADS
+  <threading>multi:<library>boost_thread
+  <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
+  $(segfault)
+  $(trace)
+  $(boost-pool)
+  ;
+
+#Add directories here if you want their incidental targets too (i.e. tests).
+build-project lm ; 
+build-project util ;
+#Trigger instllation into legacy paths.  
+build-project mert ;
+build-project moses-cmd/src ;
+build-project moses-chart-cmd/src ;
+#Scripts have their own binaries.
+build-project scripts ;
+
+install-location = [ option.get "install" : $(TOP)/dist ] ;
+
+if [ option.get "git" : : "yes" ] {
+  local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
+  constant GITTAG : "."$(revision) ;
+} else {
+  constant GITTAG : "" ;
+}
+
+install-location = $(install-location)$(GITTAG) ;
+
+install dist : 
+  lm//query
+  lm//build_binary
+  moses-chart-cmd/src//moses_chart 
+  moses-cmd/src//programs
+  CreateOnDisk/src//CreateOnDisk
+  mert//programs
+  contrib/server//mosesserver
+  misc//programs
+  : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;

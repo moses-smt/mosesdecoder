@@ -27,13 +27,11 @@
 
 #include "RuleCubeItem.h"
 
-#ifdef HAVE_BOOST
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_set.hpp>
 #include <boost/version.hpp>
-#endif
 
-#include <cassert>
+#include "util/check.hh"
 #include <queue>
 #include <set>
 #include <vector>
@@ -66,7 +64,6 @@ class RuleCubeItemPositionOrderer
   }
 };
 
-#ifdef HAVE_BOOST
 class RuleCubeItemHasher
 {
  public:
@@ -86,7 +83,6 @@ class RuleCubeItemEqualityPred
            p->GetTranslationDimension() == q->GetTranslationDimension();
   }
 };
-#endif
 
 class RuleCube
 {
@@ -97,7 +93,7 @@ class RuleCube
   ~RuleCube();
 
   float GetTopScore() const {
-    assert(!m_queue.empty());
+    CHECK(!m_queue.empty());
     RuleCubeItem *item = m_queue.top();
     return item->GetScore();
   }

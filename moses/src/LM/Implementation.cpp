@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <memory>
@@ -95,11 +95,14 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       }
     } else {
       ShiftOrPush(contextFactor, word);
-      assert(contextFactor.size() <= GetNGramOrder());
+      CHECK(contextFactor.size() <= GetNGramOrder());
 
       if (word == GetSentenceStartArray()) {
         // do nothing, don't include prob for <s> unigram
-        assert(currPos == 0);
+        if (currPos != 0) {
+          std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+          abort();
+        }
       } else {
         LMResult result = GetValueGivenState(contextFactor, *state);
         fullScore += result.score;
@@ -261,7 +264,7 @@ private:
    */
   size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
   {
-    assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
+    CHECK(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
     // special handling for small hypotheses
     // does the prefix match the entire hypothesis string? -> just copy prefix
@@ -307,8 +310,8 @@ private:
 public:
   LanguageModelChartState(const ChartHypothesis &hypo, int featureID, size_t order)
       :m_lmRightContext(NULL)
-      ,m_contextPrefix(Output, order - 1)
-      ,m_contextSuffix(Output, order - 1)
+      ,m_contextPrefix(order - 1)
+      ,m_contextSuffix( order - 1)
       ,m_hypo(hypo)
   {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
@@ -404,7 +407,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartArray())
       {
-        assert(phrasePos == 0);
+        CHECK(phrasePos == 0);
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }

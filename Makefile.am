@@ -9,6 +9,6 @@ if WITH_MERT
     MERT = mert
 endif
 if WITH_SERVER
-    SERVER = server
+    SERVER = contrib/server
 endif
-SUBDIRS = kenlm moses/src OnDiskPt/src moses-cmd/src misc moses-chart-cmd/src CreateOnDisk/src $(MERT) $(SERVER)
+SUBDIRS = util lm moses/src OnDiskPt/src moses-cmd/src misc moses-chart-cmd/src CreateOnDisk/src $(MERT) $(SERVER)

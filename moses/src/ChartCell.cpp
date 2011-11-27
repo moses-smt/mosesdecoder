@@ -62,7 +62,7 @@ const HypoList &ChartCell::GetSortedHypotheses(const Word &constituentLabel) con
 {
   std::map<Word, ChartHypothesisCollection>::const_iterator
   iter = m_hypoColl.find(constituentLabel);
-  assert(iter != m_hypoColl.end());
+  CHECK(iter != m_hypoColl.end());
   return iter->second.GetSortedHypotheses();
 }
 
@@ -117,7 +117,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 void ChartCell::SortHypotheses()
 {
   // sort each mini cells & fill up target lhs list
-  assert(m_targetLabelSet.Empty());
+  CHECK(m_targetLabelSet.Empty());
   std::map<Word, ChartHypothesisCollection>::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
@@ -135,7 +135,7 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   std::map<Word, ChartHypothesisCollection>::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
-    assert(sortedList.size() > 0);
+    CHECK(sortedList.size() > 0);
 
     const ChartHypothesis *hypo = sortedList[0];
     if (hypo->GetTotalScore() > bestScore) {

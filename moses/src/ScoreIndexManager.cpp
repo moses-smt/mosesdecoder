@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <string>
 #include <cstdio>
-#include <cassert>
+#include "util/check.hh"
 #include "Util.h"
 #include "StaticData.h"
 #include "ScoreIndexManager.h"
@@ -19,13 +19,13 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
 {
   // Producers must be inserted in the order they are created
   const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
-  assert(m_begins.size() == (sp->GetScoreBookkeepingID()));
+  CHECK(m_begins.size() == (sp->GetScoreBookkeepingID()));
 
   m_producers.push_back(sp);
 
   m_begins.push_back(m_last);
   size_t numScoreCompsProduced = sp->GetNumScoreComponents();
-  assert(numScoreCompsProduced > 0);
+  CHECK(numScoreCompsProduced > 0);
   m_last += numScoreCompsProduced;
   m_ends.push_back(m_last);
   VERBOSE(3,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
@@ -42,7 +42,7 @@ void ScoreIndexManager::PrintLabeledScores(std::ostream& os, const ScoreComponen
 
 void ScoreIndexManager::PrintLabeledWeightedScores(std::ostream& os, const ScoreComponentCollection& scores, const std::vector<float>& weights) const
 {
-  assert(m_featureShortNames.size() == weights.size());
+  CHECK(m_featureShortNames.size() == weights.size());
   string lastName = "";
   for (size_t i = 0; i < m_featureShortNames.size(); ++i) {
     if (i>0) {
@@ -102,9 +102,9 @@ void ScoreIndexManager::SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const
 
 void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector<float>* m_allWeights) const
 {
-  assert(m_allWeights->size() == m_featureNames.size());
+  CHECK(m_allWeights->size() == m_featureNames.size());
   ifstream in(fnam.c_str());
-  assert(in.good());
+  CHECK(in.good());
   char buf[2000];
   map<string, double> name2val;
   while (!in.eof()) {
@@ -116,10 +116,10 @@ void ScoreIndexManager::InitWeightVectorFromFile(const std::string& fnam, vector
     double val;
     is >> fname >> val;
     map<string, double>::iterator i = name2val.find(fname);
-    assert(i == name2val.end()); // duplicate weight name
+    CHECK(i == name2val.end()); // duplicate weight name
     name2val[fname] = val;
   }
-  assert(m_allWeights->size() == m_featureNames.size());
+  CHECK(m_allWeights->size() == m_featureNames.size());
   for (size_t i = 0; i < m_featureNames.size(); ++i) {
     map<string, double>::iterator iter = name2val.find(m_featureNames[i]);
     if (iter == name2val.end()) {

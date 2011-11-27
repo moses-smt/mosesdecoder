@@ -1,4 +1,14 @@
 #!/bin/bash
+cat <<EOF
+Moses is moving to Boost Jam.  To build Moses, run one command:
+./bjam [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] -j4
+
+If that's not working for you, complain to moses-support then run 
+./regenerate-makefiles.sh --force to continue using autotools.  
+EOF
+if [ z"$1" != z--force ]; then
+  exit 1
+fi
 
 # NOTE:
 # Versions 1.9 (or higher) of aclocal and automake are required.
@@ -46,7 +56,7 @@ fi
 
 if [ -z "$LIBTOOLIZE" ]; then
     LIBTOOLIZE=`which libtoolize`
-    
+
     if [ -z "$LIBTOOLIZE" ]; then
         LIBTOOLIZE=`which glibtoolize`
     fi
@@ -59,19 +69,31 @@ echo >&2 "Detected autoconf: $($AUTOCONF --version | head -n1)"
 echo >&2 "Detected automake: $($AUTOMAKE --version | head -n1)"
 echo >&2 "Detected libtoolize: $($LIBTOOLIZE --version | head -n1)"
 
-echo "Calling $ACLOCAL..."
+echo "Calling $ACLOCAL -I m4..."
 $ACLOCAL -I m4 || die "aclocal failed"
+
 echo "Calling $AUTOCONF..."
 $AUTOCONF  || die "autoconf failed"
-rm ltmain.sh 2>/dev/null
-touch ltmain.sh
-echo "Calling $AUTOMAKE..."
-$AUTOMAKE || die "automake failed"
+
 echo "Calling $LIBTOOLIZE"
 $LIBTOOLIZE || die "libtoolize failed"
 
+echo "Calling $AUTOMAKE --add-missing..."
+$AUTOMAKE --add-missing || die "automake failed"
 
-cores=$(cat /proc/cpuinfo | fgrep -c processor)
+case `uname -s` in
+    Darwin)
+        cores=$(sysctl -n hw.ncpu)
+        ;;
+    Linux)
+        cores=$(cat /proc/cpuinfo | fgrep -c processor)
+        ;;
+    *)
+        echo "Unknown platform."
+        cores=
+        ;;
+esac
+
 if [ -z "$cores" ]; then
     cores=2 # assume 2 cores if we can't figure it out
     echo >&2 "Assuming 2 cores"
@@ -81,7 +103,7 @@ fi
 
 echo
 echo "You should now be able to configure and build:"
-echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--without-kenlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
+echo "   ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm] [--with-randlm=/path/to/randlm] [--with-synlm] [--with-xmlrpc-c=/path/to/xmlrpc-c-config]"
 echo "   make -j ${cores}"
 echo
 

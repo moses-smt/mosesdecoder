@@ -38,7 +38,7 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   : ChartRuleLookupManager(src, cellColl)
   , m_ruleTable(ruleTable)
 {
-  assert(m_dottedRuleColls.size() == 0);
+  CHECK(m_dottedRuleColls.size() == 0);
   size_t sourceSize = src.GetSize();
   m_dottedRuleColls.resize(sourceSize);
 
@@ -77,7 +77,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // get list of all rules that apply to spans at same starting position
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
-
+  
   const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
 
   // loop through the rules

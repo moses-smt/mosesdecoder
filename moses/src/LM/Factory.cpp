@@ -26,6 +26,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "FactorCollection.h"
 
+/////////////////////////////////////////////////
+// for those using autoconf/automake
+#if HAVE_CONFIG_H
+#include "config.h"
+
+#define LM_REMOTE 1
+#  ifdef HAVE_SRILM
+#    define LM_SRI 1
+#  else
+#    undef LM_SRI
+#  endif
+
+#  ifdef HAVE_IRSTLM
+#    define LM_IRST 1
+#  endif
+
+#  ifdef HAVE_RANDLM
+#    define LM_RAND 1
+#  endif
+
+#  ifdef HAVE_ORLM
+#    define LM_ORLM 1
+#  endif
+
+#  ifdef HAVE_DMAPLM
+#    define LM_DMAP
+#  endif
+#endif
+
 // include appropriate header
 #ifdef LM_SRI
 #  include "LM/SRI.h"
@@ -35,7 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #  include "LM/IRST.h"
 #endif
 #ifdef LM_RAND
-#  include "LM/RandLM.h"
+#  include "LM/Rand.h"
 #endif
 #ifdef LM_ORLM
 #  include "LM/ORLM.h"
@@ -43,9 +72,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_REMOTE
 #	include "LM/Remote.h"
 #endif
-#ifdef LM_KEN
-#	include "LM/Ken.h"
-#endif
+#include "LM/Ken.h"
 #ifdef LM_DMAP
 #   include "LM/DMapLM.h"
 #endif
@@ -69,18 +96,13 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                                    , int dub )
 {
   if (lmImplementation == Ken || lmImplementation == LazyKen) {
-#ifdef LM_KEN
     return ConstructKenLM(languageModelFile, scoreIndexManager, factorTypes[0], lmImplementation == LazyKen);
-#else
-    UserMessage::Add("KenLM isn't compiled in but your config asked for it");
-    return NULL;
-#endif
   }
   LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
   case RandLM:
 #ifdef LM_RAND
-    lm = new LanguageModelRandLM();
+    lm = NewRandLM();
 #endif
     break;
   case ORLM:
@@ -111,7 +133,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     break;
   case ParallelBackoff:
 #ifdef LM_SRI
-    lm = new LanguageModelParallelBackoff();
+    lm = NewParallelBackoff();
 #endif
     break;
   case DMapLM:

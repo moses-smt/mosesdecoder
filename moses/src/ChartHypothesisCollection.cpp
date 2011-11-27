@@ -73,7 +73,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
   // equiv hypo exists, recombine with other hypo
   HCType::iterator &iterExisting = addRet.first;
   ChartHypothesis *hypoExisting = *iterExisting;
-  assert(iterExisting != m_hypos.end());
+  CHECK(iterExisting != m_hypos.end());
 
   //StaticData::Instance().GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -225,7 +225,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
       for (iter = hyposOrdered.begin() + (m_maxHypoStackSize * 2); iter != hyposOrdered.end(); ++iter) {
         ChartHypothesis *hypo = *iter;
         HCType::iterator iterFindHypo = m_hypos.find(hypo);
-        assert(iterFindHypo != m_hypos.end());
+        CHECK(iterFindHypo != m_hypos.end());
         Remove(iterFindHypo);
       }
     }
@@ -234,7 +234,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 
 void ChartHypothesisCollection::SortHypotheses()
 {
-  assert(m_hyposOrdered.empty());
+  CHECK(m_hyposOrdered.empty());
   if (!m_hypos.empty()) {
     // done everything for this cell.
     // sort

@@ -149,7 +149,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
         // specified translations -> vector of phrases
         // multiple translations may be specified, separated by "||"
         vector<string> altTexts = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"label"), "||");
-        assert(altTexts.size() == 1);
+        CHECK(altTexts.size() == 1);
 
         XMLParseOutput item(altTexts[0], range);
         sourceLabels.push_back(item);
@@ -230,7 +230,7 @@ TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() cons
 void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
                               , const std::vector<FactorType>& /* factorOrder */)
 {
-  assert(label.IsNonTerminal());
+  CHECK(label.IsNonTerminal());
 
   SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
   NonTerminalSet &list = GetLabelSet(startPos, endPos);
@@ -273,7 +273,7 @@ std::ostream& operator<<(std::ostream &out, const TreeInput &input)
         const Word &word = *iter;
         out << "[" << startPos <<"," << endPos << "]="
             << word << "(" << word.IsNonTerminal() << ") ";
-        assert(word.IsNonTerminal());
+        CHECK(word.IsNonTerminal());
       }
     }
   }

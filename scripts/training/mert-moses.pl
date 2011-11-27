@@ -307,9 +307,11 @@ if (!defined $mertdir) {
 
 my $mert_extract_cmd = "$mertdir/extractor";
 my $mert_mert_cmd = "$mertdir/mert";
+my $mert_pro_cmd = "$mertdir/pro";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
+die "Not executable: $mert_pro_cmd" if ! -x $mert_pro_cmd;
 
 my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
@@ -691,10 +693,12 @@ while(1) {
   $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args";
   
   my $mert_settings = " -n $___RANDOM_RESTARTS";
+  my $seed_settings = "";
   if ($___PREDICTABLE_SEEDS) {
       my $seed = $run * 1000;
-      $mert_settings .= " -r $seed";
+      $seed_settings .= " -r $seed";
   }
+  $mert_settings .= $seed_settings;
   if ($___RANDOM_DIRECTIONS) {
     if ($___NUM_RANDOM_DIRECTIONS == 0) {
       $mert_settings .= " -m 50";
@@ -708,19 +712,25 @@ while(1) {
     $mert_settings .= " --threads $__THREADS";
   }
 
-  my $file_settings = "";
+  my $ffiles = "";
+  my $scfiles = "";
   if (defined $prev_feature_file) {
-    $file_settings .= " --ffile $prev_feature_file,$feature_file";
+    $ffiles = "$prev_feature_file,$feature_file";
   }
   else{
-    $file_settings .= " --ffile $feature_file";
+    $ffiles = "$feature_file";
   }
   if (defined $prev_score_file) {
-    $file_settings .= " --scfile $prev_score_file,$score_file";
+    $scfiles = "$prev_score_file,$score_file";
   }
   else{
-    $file_settings .= " --scfile $score_file";
+    $scfiles = "$score_file";
   }
+
+  my $file_settings = " --ffile $ffiles --scfile $scfiles";
+  my $pro_file_settings = "--ffile " . join( " --ffile ", split(/,/, $ffiles)) .
+                          " --scfile " .  join( " --scfile ", split(/,/, $scfiles)); 
+  
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   }
@@ -732,13 +742,13 @@ while(1) {
 
   # pro optimization
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
-    $cmd .= " --pro run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
     &submit_or_exec($cmd,$mert_outfile,$mert_logfile);
   }
   # first pro, then mert
   elsif ($___PRO_STARTING_POINT) {
     # run pro...
-    my $pro_cmd = $cmd." --pro run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
     &submit_or_exec($pro_cmd,"run$run.pro.out","run$run.pro.err");
     # ... get results ...
     my %dummy;

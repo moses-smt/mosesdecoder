@@ -65,7 +65,6 @@ class RuleTableLoaderCompact : public RuleTableLoader
                              std::vector<Word> &);
 
   void LoadPhraseSection(LineReader &,
-                         FactorDirection,
                          const std::vector<Word> &,
                          std::vector<Phrase> &,
                          std::vector<size_t> &);
