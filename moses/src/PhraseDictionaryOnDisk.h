@@ -76,11 +76,6 @@ public:
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
 
-  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
-
-  //! Create entry for translation of source to targetPhrase
-  virtual void AddEquivPhrase(const Phrase &source, TargetPhrase *targetPhrase);
-
   void InitializeForInput(const InputType& input);
   void CleanUp();
 

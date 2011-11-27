@@ -60,12 +60,6 @@ class PhraseDictionarySCFG : public PhraseDictionary
     return NULL;
   }
 
-  // Required by PhraseDictionary.
-  void AddEquivPhrase(const Phrase &, const TargetPhrase &)
-  {
-    CHECK(false);
-  }
-
   void InitializeForInput(const InputType& i);
 
   void CleanUp();
