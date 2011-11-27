@@ -104,7 +104,7 @@ sub train_lm {
     }
     print STDERR "** Using $LM **" . "\n";
     print STDERR $cmd."\n";
-    print STDERR `$cmd`;
+    system($cmd) == 0 || die("Language model training failed with error " . ($? >> 8) . "\n");
 }
 
 sub prepare_data {
@@ -154,12 +154,18 @@ sub train_recase_model {
     $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
-    print STDERR `$cmd`;
+    system($cmd) == 0 || die("Recaser model training failed with error " . ($? >> 8) . "\n");
 }
 
 sub cleanup {
     print STDERR "\n(11) Cleaning up @ ".`date`;
     `rm -f $DIR/extract*`;
+    my $clean_1 = $?;
     `rm -f $DIR/aligned*`;
+    my $clean_2 = $?;
     `rm -f $DIR/lex*`;
+    my $clean_3 = $?;
+    if ($clean_1 + $clean_2 + $clean_3 != 0) {
+        print STDERR "Training successful but some files could not be cleaned.\n";
+    }
 }
