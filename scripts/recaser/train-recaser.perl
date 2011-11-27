@@ -8,7 +8,7 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
 # apply switches
-my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG);
+my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG,$HELP,$ERROR);
 my $LM = "SRILM"; # SRILM is default.
 my $BUILD_LM = "build-lm.sh";
 my $NGRAM_COUNT = "ngram-count";
@@ -16,8 +16,6 @@ my $TRAIN_SCRIPT = "train-factored-phrase-model.perl";
 my $MAX_LEN = 1;
 my $FIRST_STEP = 1;
 my $LAST_STEP = 11;
-my $HELP = 0;
-my $ERROR = 0;
 $ERROR = "training Aborted."
     unless &GetOptions('first-step=i' => \$FIRST_STEP,
                        'last-step=i' => \$LAST_STEP,
@@ -33,8 +31,8 @@ $ERROR = "training Aborted."
                        'help' => \$HELP);
 
 # check and set default to unset parameters
-$ERROR = "please specify working dir --dir" unless defined($DIR);
-$ERROR = "please specify --corpus" if !defined($CORPUS) 
+$ERROR = "please specify working dir --dir" unless defined($DIR) || defined($HELP);
+$ERROR = "please specify --corpus" if !defined($CORPUS) && !defined($HELP) 
                                   && $FIRST_STEP <= 2 && $LAST_STEP >= 1;
 
 if ($HELP || $ERROR) {
