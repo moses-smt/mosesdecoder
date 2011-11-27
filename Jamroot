@@ -42,6 +42,8 @@
 #
 # --notrace                      compiles without TRACE macros
 #
+# --enable-boost-pool            uses Boost pools for the memory SCFG table
+#
 #
 #CONTROLLING THE BUILD
 #-a to build from scratch
@@ -61,6 +63,7 @@ rule _shell ( cmd ) {
 
 import option ;
 
+#Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags ) {
   if [ SHELL $(TOP)"/jam-files/test.sh "$(flags) ] = 0 {
     return true ;
@@ -69,6 +72,7 @@ rule test_flags ( flags ) {
   }
 }
 
+#Determine if a library can be compiled statically.  
 rule auto_shared ( name : additional ? ) {
   additional ?= "" ;
   if [ test_flags $(additional)" -static -l"$(name) ] {
@@ -103,9 +107,9 @@ if $(boost-version) < 103600 {
 boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost_lib ( name macro ) {
-#Link multi-threaded programs against the -mt version if available.  Old 
-#versions of boost do not have -mt tagged versions of all libraries.   Sadly,
-#boost.jam does not handle this correctly.  
+  #Link multi-threaded programs against the -mt version if available.  Old 
+  #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
+  #boost.jam does not handle this correctly.  
   if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
     lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
     lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
@@ -134,6 +138,7 @@ if [ test_flags "-lSegfault" ] {
 }
 
 trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
+boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
 
 project : default-build
   <threading>multi
@@ -146,9 +151,10 @@ project : default-build
 project : requirements 
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
-  $(segfault)
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
+  $(segfault)
   $(trace)
+  $(boost-pool)
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
