@@ -52,4 +52,4 @@ if $(with-randlm) != ""
 }
 
 lib LM : Base.cpp Factory.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp 
-  ../../../lm//lm irst sri rand ..//headers ;
+  ../../../lm//kenlm irst sri rand ..//headers ;
