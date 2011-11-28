@@ -178,8 +178,6 @@ build-project moses-chart-cmd/src ;
 #Scripts have their own binaries.
 build-project scripts ;
 
-install-location = [ option.get "install" : $(TOP)/dist ] ;
-
 if [ option.get "git" : : "yes" ] {
   local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
   constant GITTAG : "/"$(revision) ;
