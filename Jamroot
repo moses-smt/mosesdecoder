@@ -140,6 +140,12 @@ if [ test_flags "-lSegfault" ] {
 trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
 
+import os ;
+
+cxxflags = [ os.environ "CXXFLAGS" ] ;
+cflags = [ os.environ "CFLAGS" ] ;
+ldflags = [ os.environ "LDFLAGS" ] ;
+
 project : default-build
   <threading>multi
   <warnings>on
@@ -155,6 +161,9 @@ project : requirements
   $(segfault)
   $(trace)
   $(boost-pool)
+  <cxxflags>$(cxxflags)
+  <cflags>$(cflags)
+  <linkflags>$(ldflags)
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
