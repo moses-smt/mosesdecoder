@@ -20,6 +20,10 @@
 #Builds scripts/training/train-model.perl using these paths. 
 #
 #
+#REGRESSION TESTING
+#--with-regtest=/path/to/moses-reg-test-data
+#
+#
 #INSTALLATION
 #--prefix=/path/to/prefix sets the install prefix [dist].
 #--bindir=/path/to/prefix/bin sets the bin directory [PREFIX/bin]
@@ -177,6 +181,8 @@ build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 #Scripts have their own binaries.
 build-project scripts ;
+#Regression tests (only enabled if --data-dir is passed)
+build-project regression-testing ;
 
 if [ option.get "git" : : "yes" ] {
   local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
