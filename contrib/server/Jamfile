@@ -2,28 +2,23 @@
 
 import option ;
 
-if [ option.get "with-xmlrpc-c" ]
-{
-  with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
-  xmlrpc-lib = <search>$(with-xmlrpc-c)/lib ;
-  xmlrpc-include = <include>$(with-xmlrpc-c)/include ;
-  build-moses-server = "yes" ;
+with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
+if $(with-xmlrpc-c) {
+  build-moses-server = true ;
+  shell-prefix = $(with-xmlrpc-c)/bin/ ;
 } else {
   if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -lxmlrpc_server_abyss++" ] = 0 {
-    build-moses-server = "yes" ;
+    build-moses-server = true ;
   }
+  shell-prefix = "" ;
 }
 
-if $(build-moses-server) = "yes"
+if $(build-moses-server) = true
 {
-  xmlrpc-deps = ;
-  #This is the libraries in reverse order
-  for xmllib in xmlrpc_xmltok xmlrpc_xmlparse xmlrpc_util xmlrpc xmlrpc_abyss xmlrpc_server xmlrpc_server_abyss xmlrpc++ xmlrpc_server++ xmlrpc_server_abyss++ {
-    lib $(xmllib) : : <use>$(xmlrpc-deps) $(xmlrpc-lib) : : $(xmlrpc-include) ;
-    xmlrpc-deps = $(xmlrpc-deps) $(xmllib) ;
-  }
+  xmlrpc-linkflags = [ _shell "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --libs" ] ;
+  xmlrpc-cxxflags = [ _shell "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --cflags" ] ;
 
-  exe mosesserver : mosesserver.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt $(xmlrpc-deps) ;
+  exe mosesserver : mosesserver.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
 } else {
   alias mosesserver ;
 }

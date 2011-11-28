@@ -20,10 +20,16 @@
 #Builds scripts/training/train-model.perl using these paths. 
 #
 #
+#REGRESSION TESTING
+#--with-regtest=/path/to/moses-reg-test-data
+#
+#
 #INSTALLATION
-#--install=/path/to/install sets the install directory (default dist).
+#--prefix=/path/to/prefix sets the install prefix [dist].
+#--bindir=/path/to/prefix/bin sets the bin directory [PREFIX/bin]
+#--libdir=/path/to/prefix/lib sets the lib directory [PREFIX/lib]
 #--install-scripts=/path/to/scripts copies scripts into a directory.
-#--git appends the git revision to the install directory name.
+#--git appends the git revision to the prefix directory.
 #
 #
 #BUILD OPTIONS
@@ -140,6 +146,12 @@ if [ test_flags "-lSegfault" ] {
 trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
 
+import os ;
+
+cxxflags = [ os.environ "CXXFLAGS" ] ;
+cflags = [ os.environ "CFLAGS" ] ;
+ldflags = [ os.environ "LDFLAGS" ] ;
+
 project : default-build
   <threading>multi
   <warnings>on
@@ -155,6 +167,9 @@ project : requirements
   $(segfault)
   $(trace)
   $(boost-pool)
+  <cxxflags>$(cxxflags)
+  <cflags>$(cflags)
+  <linkflags>$(ldflags)
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
@@ -166,25 +181,20 @@ build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 #Scripts have their own binaries.
 build-project scripts ;
-
-install-location = [ option.get "install" : $(TOP)/dist ] ;
+#Regression tests (only enabled if --data-dir is passed)
+build-project regression-testing ;
 
 if [ option.get "git" : : "yes" ] {
   local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
-  constant GITTAG : "."$(revision) ;
+  constant GITTAG : "/"$(revision) ;
 } else {
   constant GITTAG : "" ;
 }
 
-install-location = $(install-location)$(GITTAG) ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs CreateOnDisk/src//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
 
-install dist : 
-  lm//query
-  lm//build_binary
-  moses-chart-cmd/src//moses_chart 
-  moses-cmd/src//programs
-  CreateOnDisk/src//CreateOnDisk
-  mert//programs
-  contrib/server//mosesserver
-  misc//programs
-  : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;
+prefix = [ option.get "prefix" : $(TOP)/dist$(GITTAG) ] ;
+bindir = [ option.get "bindir" : $(prefix)/bin ] ;
+libdir = [ option.get "libdir" : $(prefix)/lib ] ;
+install prefix-bin : programs : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
+install prefix-lib : programs : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
