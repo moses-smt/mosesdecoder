@@ -8,6 +8,7 @@ if $(with-regtest) {
     alias $(name) : $(tests:D=).passed ;
     for test in $(tests) {
       make $(test:D=).passed : $(program) : $(action) ;
+      alias $(test) : $(test:D=).passed ;
     }
   }
   
