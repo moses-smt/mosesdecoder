@@ -10,6 +10,7 @@ if $(with-xmlrpc-c) {
   if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -lxmlrpc_server_abyss++" ] = 0 {
     build-moses-server = true ;
   }
+  shell-prefix = "" ;
 }
 
 if $(build-moses-server) = true
