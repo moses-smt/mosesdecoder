@@ -4,13 +4,10 @@ with-regtest = [ option.get "with-regtest" ] ;
 if $(with-regtest) {
   path-constant TESTS : tests ;
   
-  local all-tests = ;
-  
   rule reg_test ( name : tests * : program : action ) {
     alias $(name) : $(tests:D=).passed ;
     for test in $(tests) {
       make $(test:D=).passed : $(program) : $(action) ;
-      all-tests = $(test:D=).passed $(all-tests) ;
     }
   }
   
