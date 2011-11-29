@@ -179,12 +179,6 @@ TargetPhraseCollection *PhraseDictionaryMemory::CreateTargetPhraseCollection(con
   return currNode->CreateTargetPhraseCollection();
 }
 
-void PhraseDictionaryMemory::AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
-{
-  TargetPhraseCollection &phraseColl = *CreateTargetPhraseCollection(source);
-  phraseColl.Add(new TargetPhrase(targetPhrase));
-}
-
 const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(const Phrase &source) const
 {
   // exactly like CreateTargetPhraseCollection, but don't create

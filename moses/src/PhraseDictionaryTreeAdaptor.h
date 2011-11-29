@@ -56,10 +56,6 @@ public:
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
   TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
-
-  // this function can be only used for UNKNOWN source phrases
-  void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
-
   std::string GetScoreProducerDescription(unsigned idx=0) const;
   std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
 
