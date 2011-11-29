@@ -96,9 +96,9 @@ function run_single_test () {
     tar xzf $regtest_file
     touch $regtest_file.ok
   fi
+  regtest_dir=$PWD/$(basename $regtest_file .tgz)
   cd ..
 
-  regtest_dir=$PWD/$(basename $regtest_file .tgz)
 
   echo "## ./bjam clean" >> $longlog
   ./bjam clean $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
