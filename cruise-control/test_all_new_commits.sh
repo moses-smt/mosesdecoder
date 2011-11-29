@@ -86,15 +86,7 @@ function run_single_test () {
 
   err=""
 
-  echo "## ./bjam clean" >> $longlog
-  ./bjam clean >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
-
-  echo "## ./bjam $MCC_CONFIGURE_ARGS" >> $longlog
-  if [ -z "$err" ]; then
-    ./bjam $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="bjam"
-  fi
-
-  cd regression-testing
+   cd regression-testing
   regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
 
   # download data for regression tests if necessary
@@ -104,12 +96,22 @@ function run_single_test () {
     tar xzf $regtest_file
     touch $regtest_file.ok
   fi
+  cd ..
 
+  regtest_dir=$PWD/$(basename $regtest_file .tgz)
+
+  echo "## ./bjam clean" >> $longlog
+  ./bjam clean $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
+
+  echo "## ./bjam $MCC_CONFIGURE_ARGS" >> $longlog
+  if [ -z "$err" ]; then
+    ./bjam $MCC_CONFIGURE_ARGS >> $longlog 2>&1 || err="bjam"
+  fi
+  
   echo "## regression tests" >> $longlog
   if [ -z "$err" ]; then
-    ../bjam $MCC_CONFIGURE_ARGS --with-regtest=$PWD/$(basename $regtest_file .tar.gz)  >> $longlog 2>&1 || err="regression tests"
+    ./bjam $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || err="regression tests"
   fi
-  cd ..
 
   if [ -z "$err" ] && [ "$MCC_RUN_EMS" = "yes" ]; then
     echo "## EMS" >> $longlog
