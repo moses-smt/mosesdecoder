@@ -1,0 +1,24 @@
+#If you get compilation errors here, make sure you have xmlrpc-c installed properly. . . 
+
+import option ;
+
+with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
+if $(with-xmlrpc-c) {
+  build-moses-server = true ;
+  shell-prefix = $(with-xmlrpc-c)/bin/ ;
+} else {
+  if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -lxmlrpc_server_abyss++" ] = 0 {
+    build-moses-server = true ;
+  }
+  shell-prefix = "" ;
+}
+
+if $(build-moses-server) = true
+{
+  xmlrpc-linkflags = [ _shell "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --libs" ] ;
+  xmlrpc-cxxflags = [ _shell "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --cflags" ] ;
+
+  exe mosesserver : mosesserver.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
+} else {
+  alias mosesserver ;
+}

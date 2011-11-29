@@ -1,0 +1,32 @@
+import option ;
+
+with-regtest = [ option.get "with-regtest" ] ;
+if $(with-regtest) {
+  path-constant TESTS : tests ;
+  
+  rule reg_test ( name : tests * : program : action ) {
+    alias $(name) : $(tests:D=).passed ;
+    for test in $(tests) {
+      make $(test:D=).passed : $(program) : $(action) ;
+      alias $(test) : $(test:D=).passed ;
+    }
+  }
+  
+  actions reg_test_decode {
+    $(TOP)/regression-testing/run-single-test.perl --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
+  }
+  reg_test phrase : [ glob tests/phrase.* ] : ../moses-cmd/src//moses : @reg_test_decode ;
+  reg_test chart : chart.target-syntax chart.target-syntax.ondisk chart.hierarchical chart.hierarchical-withsrilm chart.hierarchical.ondisk : ../moses-chart-cmd/src//moses_chart : @reg_test_decode ;
+  
+  actions reg_test_score {
+    $(TOP)/regression-testing/run-test-scorer.perl --scorer=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
+  }
+  reg_test score : [ glob tests/score.* ] : ../scripts/training/phrase-extract//score : @reg_test_score ;
+  
+  actions reg_test_mert {
+    $(TOP)/regression-testing/run-test-mert.perl --mert-dir=$(TOP)/mert --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
+  }
+  reg_test mert : [ glob tests/mert.* ] : ../mert//legacy : @reg_test_mert ;
+  
+  alias all : phrase chart score mert ;
+}
