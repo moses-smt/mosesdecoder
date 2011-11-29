@@ -107,10 +107,7 @@ function run_single_test () {
 
   echo "## regression tests" >> $longlog
   if [ -z "$err" ]; then
-    ./run-test-suite.perl &>> $longlog
-    regtest_status=$?
-    [ $regtest_status -eq 1 ] && die "Failed to run regression tests"
-    [ $regtest_status -eq 2 ] && err="regression tests"
+    ../bjam $MCC_CONFIGURE_ARGS --with-regtest=$PWD/$(basename $regtest_file .tar.gz)  >> $longlog 2>&1 || err="regression tests"
   fi
   cd ..
 
