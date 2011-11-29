@@ -20,10 +20,16 @@
 #Builds scripts/training/train-model.perl using these paths. 
 #
 #
+#REGRESSION TESTING
+#--with-regtest=/path/to/moses-reg-test-data
+#
+#
 #INSTALLATION
-#--install=/path/to/install sets the install directory (default dist).
+#--prefix=/path/to/prefix sets the install prefix [dist].
+#--bindir=/path/to/prefix/bin sets the bin directory [PREFIX/bin]
+#--libdir=/path/to/prefix/lib sets the lib directory [PREFIX/lib]
 #--install-scripts=/path/to/scripts copies scripts into a directory.
-#--git appends the git revision to the install directory name.
+#--git appends the git revision to the prefix directory.
 #
 #
 #BUILD OPTIONS
@@ -41,6 +47,8 @@
 #                                information also known as -g
 #
 # --notrace                      compiles without TRACE macros
+#
+# --enable-boost-pool            uses Boost pools for the memory SCFG table
 #
 #
 #CONTROLLING THE BUILD
@@ -61,6 +69,7 @@ rule _shell ( cmd ) {
 
 import option ;
 
+#Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags ) {
   if [ SHELL $(TOP)"/jam-files/test.sh "$(flags) ] = 0 {
     return true ;
@@ -69,6 +78,7 @@ rule test_flags ( flags ) {
   }
 }
 
+#Determine if a library can be compiled statically.  
 rule auto_shared ( name : additional ? ) {
   additional ?= "" ;
   if [ test_flags $(additional)" -static -l"$(name) ] {
@@ -82,19 +92,30 @@ with-boost = [ option.get "with-boost" ] ;
 if $(with-boost) {
   L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
   boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
+  I-boost-include = -I$(with-boost)/include ;
   boost-include = <include>$(with-boost)/include ;
 } else {
   L-boost-search = "" ;
   boost-search = ;
-  boost-incldue = ;
+  I-boost-include = "" ;
+  boost-include = ;
+}
+
+boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp |grep '#define BOOST_VERSION '" : exit-status ] ;
+if $(boost-shell[2]) != 0 {
+  exit Boost does not seem to be installed or g++ is confused. : 1 ;
+}
+boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
+if $(boost-version) < 103600 {
+  exit You have Boost $(boost-version).  Moses requires at least 103600 (and preferably newer). : 1 ;
 }
 #Are we linking static binaries against shared boost?
 boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost_lib ( name macro ) {
-#Link multi-threaded programs against the -mt version if available.  Old 
-#versions of boost do not have -mt tagged versions of all libraries.   Sadly,
-#boost.jam does not handle this correctly.  
+  #Link multi-threaded programs against the -mt version if available.  Old 
+  #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
+  #boost.jam does not handle this correctly.  
   if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
     lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
     lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
@@ -123,6 +144,13 @@ if [ test_flags "-lSegfault" ] {
 }
 
 trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
+boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
+
+import os ;
+
+cxxflags = [ os.environ "CXXFLAGS" ] ;
+cflags = [ os.environ "CFLAGS" ] ;
+ldflags = [ os.environ "LDFLAGS" ] ;
 
 project : default-build
   <threading>multi
@@ -135,9 +163,13 @@ project : default-build
 project : requirements 
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
-  $(segfault)
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
+  $(segfault)
   $(trace)
+  $(boost-pool)
+  <cxxflags>$(cxxflags)
+  <cflags>$(cflags)
+  <linkflags>$(ldflags)
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
@@ -147,27 +179,22 @@ build-project util ;
 build-project mert ;
 build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
-#Scripts have their own binaries
+#Scripts have their own binaries.
 build-project scripts ;
-
-install-location = [ option.get "install" : $(TOP)/dist ] ;
+#Regression tests (only enabled if --data-dir is passed)
+build-project regression-testing ;
 
 if [ option.get "git" : : "yes" ] {
   local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
-  constant GITTAG : "."$(revision) ;
+  constant GITTAG : "/"$(revision) ;
 } else {
   constant GITTAG : "" ;
 }
 
-install-location = $(install-location)$(GITTAG) ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs CreateOnDisk/src//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
 
-install dist : 
-  lm//query
-  lm//build_binary
-  moses-chart-cmd/src//moses_chart 
-  moses-cmd/src//programs
-  CreateOnDisk/src//CreateOnDisk
-  mert//programs
-  contrib/server//mosesserver
-  misc//programs
-  : <location>$(install-location) <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(install-location) <link>shared:<install-type>LIB ;
+prefix = [ option.get "prefix" : $(TOP)/dist$(GITTAG) ] ;
+bindir = [ option.get "bindir" : $(prefix)/bin ] ;
+libdir = [ option.get "libdir" : $(prefix)/lib ] ;
+install prefix-bin : programs : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
+install prefix-lib : programs : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;

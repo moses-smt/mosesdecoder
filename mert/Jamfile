@@ -29,7 +29,7 @@ TERsrc/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 MergeScorer.cpp
-../util//util m ..//z ;
+../util//kenutil m ..//z ;
 
 exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
 

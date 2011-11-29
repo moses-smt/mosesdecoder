@@ -1,4 +1,4 @@
-alias headers : ../../util//util : : : <include>. ;
+alias headers : ../../util//kenutil : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
