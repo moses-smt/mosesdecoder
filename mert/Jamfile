@@ -29,7 +29,7 @@ TERsrc/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 MergeScorer.cpp
-../util//util m ..//z ;
+../util//kenutil m ..//z ;
 
 exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
 
@@ -40,3 +40,5 @@ exe evaluator : evaluator.cpp mert_lib ;
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 alias programs : mert extractor evaluator pro ;
+
+install legacy : programs : <location>. ;

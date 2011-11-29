@@ -1,6 +1,10 @@
 #include "PrefixTreeMap.h"
 #include "TypeDef.h"
 
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
+
 namespace Moses
 {
 void GenericCandidate::readBin(FILE* f)

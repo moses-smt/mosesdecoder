@@ -73,17 +73,6 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
   return NULL;
 }
 
-void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase& /* source */, const TargetPhrase& /*targetPhrase */)
-{
-  CHECK(false); // TODO
-}
-
-
-//! Create entry for translation of source to targetPhrase
-void PhraseDictionaryOnDisk::AddEquivPhrase(const Phrase& /* source */, TargetPhrase * /* targetPhrase */)
-{
-}
-
 void PhraseDictionaryOnDisk::InitializeForInput(const InputType& /* input */)
 {
   // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager

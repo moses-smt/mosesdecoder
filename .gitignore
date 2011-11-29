@@ -2,6 +2,7 @@
 *.la
 *.lo
 *.Po
+*.so
 *~
 CreateOnDisk/src/CreateOnDiskPt
 Makefile
@@ -10,8 +11,13 @@ aclocal.m4
 autom4te.cache/
 config.h
 config.log
+config.guess
 config.status
+config.sub
 configure
+depcomp
+dist*
+install-sh
 jam-files/bjam
 jam-files/engine/bootstrap
 jam-files/engine/bin.*
@@ -28,6 +34,8 @@ mert/Makefile.in
 mert/evaluator
 mert/extractor
 mert/mert
+mert/megam_i686.opt
+mert/pro
 misc/.deps/
 mert/.libs/
 misc/Makefile
@@ -48,6 +56,10 @@ moses/src/.deps/
 moses/src/.libs/
 moses/src/Makefile
 moses/src/Makefile.in
+regression-testing/moses-reg-test-data-*
+regression-testing/tests/mert.extractor-bin/FEATSTAT*
+regression-testing/tests/mert.extractor-bin/SCORESTAT*
+scripts-2*
 scripts/ems/biconcor/biconcor
 scripts/release-exclude
 scripts/training/cmert-0.5/mert
@@ -79,6 +91,7 @@ scripts/training/phrase-extract/relax-parse
 scripts/training/phrase-extract/score
 scripts/training/phrase-extract/statistics
 scripts/training/symal/symal
+scripts/training/train-model.perl
 stamp-h1
 ltmain.sh
 m4/libtool.m4
