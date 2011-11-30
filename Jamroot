@@ -59,12 +59,12 @@
 path-constant TOP : . ;
 
 # Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str ) {
+rule trim-nl ( str extras * ) {
   return [ MATCH "([^
-]*)" : $(str) ] ;
+]*)" : $(str) ] $(extras) ;
 }
-rule _shell ( cmd ) {
-  return [ trim-nl [ SHELL $(cmd) ] ] ;
+rule _shell ( cmd : extras * ) {
+  return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
 import option ;

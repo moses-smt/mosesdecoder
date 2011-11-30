@@ -160,44 +160,45 @@ int main(int argc, char *argv[]) {
     }
     if (optind + 1 == argc) {
       ShowSizes(argv[optind], config);
-    } else if (optind + 2 == argc) {
+      return 0;
+    }
+    const char *model_type, *from_file;
+    if (optind + 2 == argc) {
+      model_type = "probing";
+      from_file = argv[optind];
       config.write_mmap = argv[optind + 1];
-      if (quantize || set_backoff_bits) ProbingQuantizationUnsupported();
-      ProbingModel(argv[optind], config);
     } else if (optind + 3 == argc) {
-      const char *model_type = argv[optind];
-      const char *from_file = argv[optind + 1];
+      model_type = argv[optind];
+      from_file = argv[optind + 1];
       config.write_mmap = argv[optind + 2];
-      if (!strcmp(model_type, "probing")) {
-        if (quantize || set_backoff_bits) ProbingQuantizationUnsupported();
-        ProbingModel(from_file, config);
-      } else if (!strcmp(model_type, "trie")) {
-        if (quantize) {
-          if (bhiksha) {
-            QuantArrayTrieModel(from_file, config);
-          } else {
-            QuantTrieModel(from_file, config);
-          }
+    } else {
+      Usage(argv[0]);
+    }
+    if (!strcmp(model_type, "probing")) {
+      if (quantize || set_backoff_bits) ProbingQuantizationUnsupported();
+      ProbingModel(from_file, config);
+    } else if (!strcmp(model_type, "trie")) {
+      if (quantize) {
+        if (bhiksha) {
+          QuantArrayTrieModel(from_file, config);
         } else {
-          if (bhiksha) {
-            ArrayTrieModel(from_file, config);
-          } else {
-            TrieModel(from_file, config);
-          }
+          QuantTrieModel(from_file, config);
         }
       } else {
-        Usage(argv[0]);
+        if (bhiksha) {
+          ArrayTrieModel(from_file, config);
+        } else {
+          TrieModel(from_file, config);
+        }
       }
     } else {
       Usage(argv[0]);
     }
-  }
-  catch (const std::exception &e) {
+    std::cerr << "Built " << config.write_mmap << " successfully." << std::endl;
+  } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
-    std::cerr << "ERROR" << std::endl;
     return 1;
   }
 
-  std::cerr << "SUCCESS" << std::endl;
   return 0;
 }

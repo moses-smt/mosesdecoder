@@ -8,7 +8,7 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
 # apply switches
-my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG);
+my ($DIR,$CORPUS,$SCRIPTS_ROOT_DIR,$CONFIG,$HELP,$ERROR);
 my $LM = "SRILM"; # SRILM is default.
 my $BUILD_LM = "build-lm.sh";
 my $NGRAM_COUNT = "ngram-count";
@@ -16,23 +16,65 @@ my $TRAIN_SCRIPT = "train-factored-phrase-model.perl";
 my $MAX_LEN = 1;
 my $FIRST_STEP = 1;
 my $LAST_STEP = 11;
-die("train-recaser.perl --dir recaser --corpus cased")
+$ERROR = "training Aborted."
     unless &GetOptions('first-step=i' => \$FIRST_STEP,
                        'last-step=i' => \$LAST_STEP,
                        'corpus=s' => \$CORPUS,
                        'config=s' => \$CONFIG,
-		       'dir=s' => \$DIR,
-		       'ngram-count=s' => \$NGRAM_COUNT,
-		       'build-lm=s' => \$BUILD_LM,
-		       'lm=s' => \$LM,
-		       'train-script=s' => \$TRAIN_SCRIPT,
-		       'scripts-root-dir=s' => \$SCRIPTS_ROOT_DIR,
-		       'max-len=i' => \$MAX_LEN);
+                       'dir=s' => \$DIR,
+                       'ngram-count=s' => \$NGRAM_COUNT,
+                       'build-lm=s' => \$BUILD_LM,
+                       'lm=s' => \$LM,
+                       'train-script=s' => \$TRAIN_SCRIPT,
+                       'scripts-root-dir=s' => \$SCRIPTS_ROOT_DIR,
+                       'max-len=i' => \$MAX_LEN,
+                       'help' => \$HELP);
 
 # check and set default to unset parameters
-die("please specify working dir --dir") unless defined($DIR);
-die("please specify --corpus") if !defined($CORPUS) 
+$ERROR = "please specify working dir --dir" unless defined($DIR) || defined($HELP);
+$ERROR = "please specify --corpus" if !defined($CORPUS) && !defined($HELP) 
                                   && $FIRST_STEP <= 2 && $LAST_STEP >= 1;
+
+if ($HELP || $ERROR) {
+    if ($ERROR) {
+        print STDERR "ERROR: " . $ERROR . "\n";
+    }
+    print STDERR "Usage: $0 --dir /output/recaser --corpus /Cased/corpus/files [options ...]";
+
+    print STDERR "\n\nOptions:
+  == MANDATORY ==
+  --dir=dir                 ... outputted recaser directory.
+  --corpus=file             ... inputted cased corpus.
+
+  == OPTIONAL ==
+  = Recaser Training configuration =
+  --train-script=file       ... path to the train script (default: train-factored-phrase-model.perl in \$PATH).
+  --config=config           ... training script configuration.
+  --scripts-root-dir=dir    ... scripts directory.
+  --max-len=int             ... max phrase length (default: 1).
+
+  = Language Model Training configuration =
+  --lm=[IRSTLM,SRILM]       ... language model (default: SRILM).
+  --build-lm=file           ... path to build-lm.sh if not in \$PATH (used only with --lm=IRSTLM).
+  --ngram-count=file        ... path to ngram-count.sh if not in \$PATH (used only with --lm=SRILM).
+
+  = Steps this script will perform =
+  (1) Truecasing (disabled);
+  (2) Language Model Training;
+  (3) Data Preparation
+  (4-10) Recaser Model Training; 
+  (11) Cleanup.
+  --first-step=[1-11]       ... step where script starts (default: 1).
+  --last-step=[1-11]        ... step where script ends (default: 11).
+
+  --help                    ... this usage output.\n";
+  if ($ERROR) {
+    exit(1);
+  }
+  else {
+    exit(0);
+  }
+}
 
 # main loop
 `mkdir -p $DIR`;
@@ -60,7 +102,7 @@ sub train_lm {
     }
     print STDERR "** Using $LM **" . "\n";
     print STDERR $cmd."\n";
-    print STDERR `$cmd`;
+    system($cmd) == 0 || die("Language model training failed with error " . ($? >> 8) . "\n");
 }
 
 sub prepare_data {
@@ -110,12 +152,18 @@ sub train_recase_model {
     $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
-    print STDERR `$cmd`;
+    system($cmd) == 0 || die("Recaser model training failed with error " . ($? >> 8) . "\n");
 }
 
 sub cleanup {
     print STDERR "\n(11) Cleaning up @ ".`date`;
     `rm -f $DIR/extract*`;
+    my $clean_1 = $?;
     `rm -f $DIR/aligned*`;
+    my $clean_2 = $?;
     `rm -f $DIR/lex*`;
+    my $clean_3 = $?;
+    if ($clean_1 + $clean_2 + $clean_3 != 0) {
+        print STDERR "Training successful but some files could not be cleaned.\n";
+    }
 }
