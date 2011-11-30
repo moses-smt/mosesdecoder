@@ -137,14 +137,20 @@ rule external_lib ( name ) {
 
 external_lib z ;
 
+requirements = ;
+
 #libSegFault prints a stack trace on segfault.  Link against it if available.  
 if [ test_flags "-lSegfault" ] {
   external_lib SegFault ;
-  segfault = <library>SegFault ;
+  requirements += <library>SegFault ;
 }
 
-trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
-boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
+requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
+requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
+
+if [ option.get "with-irstlm" ] {
+  requirements += <threading>single ;
+}
 
 import os ;
 
@@ -164,9 +170,7 @@ project : requirements
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
-  $(segfault)
-  $(trace)
-  $(boost-pool)
+  $(requirements)
   <cxxflags>$(cxxflags)
   <cflags>$(cflags)
   <linkflags>$(ldflags)
