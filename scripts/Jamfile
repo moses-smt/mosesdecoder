@@ -39,7 +39,7 @@ if $(location) {
 
   install phrase-extract : training/phrase-extract//released-programs : <location>$(location)/training/phrase-extract ;
   install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
-  install symal : training/symal//symal : <location>$(location)/symal ;
+  install symal : training/symal//symal : <location>$(location)/training/symal ;
 
   if $(WITH-GIZA) != no {
     install train-model : training//train-model.perl : <location>$(location)/training ;
