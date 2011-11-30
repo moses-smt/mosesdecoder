@@ -38,23 +38,21 @@ if $(location) {
   install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
   install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
 
-  install phrase-extract : training/phrase-extract//released-programs : <location>$(location)/training/phrase-extract ;
+  install phrase-extract : training/phrase-extract//programs : <location>$(location)/training/phrase-extract ;
   install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
   install symal : training/symal//symal : <location>$(location)/training/symal ;
 
+  install biconcor : ems/biconcor//biconcor : <location>$(location)/ems/biconcor ;
+
   if $(WITH-GIZA) != no {
     install train-model : training//train-model.perl : <location>$(location)/training ;
-  } else {
-    alias train-model ;
   }
 
   install scripts : 
-    [ glob-tree README *.js *.pl *.perl *.py *.sh *.php : tests regression-testing other bin train_model.perl ]
-    [ glob tokenizer/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ]
+    [ glob-tree README *.js *.pl *.perl *.pm *.py *.sh *.php : tests regression-testing other bin train_model.perl ]
+    [ glob tokenizer/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ems/web/* analysis/smtgui/* : ems/web/javascripts ]
+    generic/fsa-sample.fsa
     ems/experiment.machines
     ems/experiment.meta
-    ems/web/setup
     : <install-source-root>. <location>$(location) ;
-
-  alias install : ghkm compactify phrase-extract lexical-reordering symal scripts train-model ;
 }
