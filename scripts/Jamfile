@@ -1,6 +1,7 @@
 #See ../Jamroot for options.  
 import option ;
 
+build-project ems/biconcor ;
 build-project training ;
 
 with-giza = [ option.get "with-giza" ] ;
