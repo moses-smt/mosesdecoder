@@ -6,15 +6,20 @@ import path ;
 with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 if $(with-xmlrpc-c) {
   build-moses-server = true ;
-  shell-prefix = $(with-xmlrpc-c)/bin/ ;
-  if ! [ path.exists $(shell-prefix)xmlrpc-c-config ] {
-    exit Could not find $(shell-prefix)xmlrpc-c-config : 1 ;
+  xmlrpc-command = $(with-xmlrpc-c)/bin/xmlrpc-c-config ;
+  if ! [ path.exists $(xmlrpc-command) ] {
+    exit Could not find $(xmlrpc-command) : 1 ;
   }
 } else {
-  if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -lxmlrpc_server_abyss++" ] = 0 {
-    build-moses-server = true ;
+  xmlrpc-check = [ _shell "xmlrpc-c-config --features 2>/dev/null" : exit-status ] ;
+  if $(xmlrpc-check[2]) = 0 {
+    if [ MATCH "(abyss-server)" : $(xmlrpc-check[1]) ] {
+      build-moses-server = true ;
+    } else {
+      echo "Found xmlrpc-c but it does not have abyss-server.  Skipping mosesserver." ;
+    } 
   }
-  shell-prefix = "" ;
+  xmlrpc-command = "xmlrpc-c-config" ;
 }
 
 rule shell_or_die ( cmd ) {
@@ -27,8 +32,8 @@ rule shell_or_die ( cmd ) {
 
 if $(build-moses-server) = true
 {
-  xmlrpc-linkflags = [ shell_or_die "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --libs" ] ;
-  xmlrpc-cxxflags = [ shell_or_die "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --cflags" ] ;
+  xmlrpc-linkflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --libs" ] ;
+  xmlrpc-cxxflags = [ shell_or_die "$(xmlrpc-command) c++2 abyss-server --cflags" ] ;
 
   exe mosesserver : mosesserver.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
 } else {
