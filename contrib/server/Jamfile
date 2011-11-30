@@ -1,11 +1,15 @@
-#If you get compilation errors here, make sure you have xmlrpc-c installed properly. . . 
+#If you get compilation errors here, make sure you have xmlrpc-c installed properly, including the abyss server option.  
 
 import option ;
+import path ;
 
 with-xmlrpc-c = [ option.get "with-xmlrpc-c" ] ;
 if $(with-xmlrpc-c) {
   build-moses-server = true ;
   shell-prefix = $(with-xmlrpc-c)/bin/ ;
+  if ! [ path.exists $(shell-prefix)xmlrpc-c-config ] {
+    exit Could not find $(shell-prefix)xmlrpc-c-config : 1 ;
+  }
 } else {
   if [ SHELL $(TOP)"/jam-files/test.sh -include xmlrpc-c/base.hpp -lxmlrpc_server_abyss++" ] = 0 {
     build-moses-server = true ;
@@ -13,10 +17,18 @@ if $(with-xmlrpc-c) {
   shell-prefix = "" ;
 }
 
+rule shell_or_die ( cmd ) {
+  local ret = [ _shell $(cmd) : exit-status ] ;
+  if $(ret[2]) != 0 {
+    exit "Failed to run $(cmd)" : 1 ;
+  }
+  return $(ret[1]) ;
+}
+
 if $(build-moses-server) = true
 {
-  xmlrpc-linkflags = [ _shell "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --libs" ] ;
-  xmlrpc-cxxflags = [ _shell "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --cflags" ] ;
+  xmlrpc-linkflags = [ shell_or_die "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --libs" ] ;
+  xmlrpc-cxxflags = [ shell_or_die "$(shell-prefix)xmlrpc-c-config c++2 abyss-server --cflags" ] ;
 
   exe mosesserver : mosesserver.cpp ../../moses/src//moses ../../OnDiskPt/src//OnDiskPt : <linkflags>$(xmlrpc-linkflags) <cxxflags>$(xmlrpc-cxxflags) ;
 } else {
