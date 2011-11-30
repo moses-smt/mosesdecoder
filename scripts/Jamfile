@@ -50,7 +50,7 @@ if $(location) {
 
   install scripts : 
     [ glob-tree README *.js *.pl *.perl *.py *.sh *.php : tests regression-testing other bin train_model.perl ]
-    [ glob tokenizer/nonbreaking_prefixes/* ems/example/* ems/example/data/* ]
+    [ glob tokenizer/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ]
     ems/experiment.machines
     ems/experiment.meta
     ems/web/setup
