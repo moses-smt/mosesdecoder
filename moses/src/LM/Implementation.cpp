@@ -100,7 +100,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       if (word == GetSentenceStartArray()) {
         // do nothing, don't include prob for <s> unigram
         if (currPos != 0) {
-          std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+          std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
           abort();
         }
       } else {

@@ -59,12 +59,12 @@
 path-constant TOP : . ;
 
 # Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str ) {
+rule trim-nl ( str extras * ) {
   return [ MATCH "([^
-]*)" : $(str) ] ;
+]*)" : $(str) ] $(extras) ;
 }
-rule _shell ( cmd ) {
-  return [ trim-nl [ SHELL $(cmd) ] ] ;
+rule _shell ( cmd : extras * ) {
+  return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
 import option ;
@@ -110,7 +110,7 @@ if $(boost-version) < 103600 {
   exit You have Boost $(boost-version).  Moses requires at least 103600 (and preferably newer). : 1 ;
 }
 #Are we linking static binaries against shared boost?
-boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
+boost-auto-shared = [ auto_shared "boost_program_options" : $(L-boost-search) ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost_lib ( name macro ) {
   #Link multi-threaded programs against the -mt version if available.  Old 
@@ -137,14 +137,20 @@ rule external_lib ( name ) {
 
 external_lib z ;
 
+requirements = ;
+
 #libSegFault prints a stack trace on segfault.  Link against it if available.  
 if [ test_flags "-lSegfault" ] {
   external_lib SegFault ;
-  segfault = <library>SegFault ;
+  requirements += <library>SegFault ;
 }
 
-trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
-boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
+requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
+requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
+
+if [ option.get "with-irstlm" ] {
+  requirements += <threading>single ;
+}
 
 import os ;
 
@@ -164,9 +170,7 @@ project : requirements
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
-  $(segfault)
-  $(trace)
-  $(boost-pool)
+  $(requirements)
   <cxxflags>$(cxxflags)
   <cflags>$(cflags)
   <linkflags>$(ldflags)
