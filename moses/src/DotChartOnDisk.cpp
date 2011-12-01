@@ -20,7 +20,7 @@
 #include <algorithm>
 #include "DotChartOnDisk.h"
 #include "Util.h"
-#include "../../OnDiskPt/src/PhraseNode.h"
+#include "../../OnDiskPt/PhraseNode.h"
 
 using namespace std;
 
