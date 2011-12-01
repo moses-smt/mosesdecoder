@@ -110,7 +110,7 @@ if $(boost-version) < 103600 {
   exit You have Boost $(boost-version).  Moses requires at least 103600 (and preferably newer). : 1 ;
 }
 #Are we linking static binaries against shared boost?
-boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
+boost-auto-shared = [ auto_shared "boost_program_options" : $(L-boost-search) ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost_lib ( name macro ) {
   #Link multi-threaded programs against the -mt version if available.  Old 
