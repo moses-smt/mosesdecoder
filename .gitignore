@@ -2,7 +2,6 @@
 *.a
 *.swp
 *~
-CreateOnDisk/src/CreateOnDiskPt
 dist*
 jam-files/bjam
 jam-files/engine/bootstrap
