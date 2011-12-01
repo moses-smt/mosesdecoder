@@ -229,7 +229,7 @@ void MissingSentenceMarker(const Config &config, const char *str) throw(SpecialW
       if (config.messages) *config.messages << "Missing special word " << str << "; will treat it as <unk>.";
       break;
     case THROW_UP:
-      UTIL_THROW(SpecialWordMissingException, "The ARPA file is missing " << str << " and the model is configured to reject these models.  Run build_binary -s to disable this check.");
+      UTIL_THROW(SpecialWordMissingException, "The ARPA file is missing " << str << " and the model is configured to reject these models.  If you built your APRA with IRSTLM and forgot to run add-start-end.sh, complain to <bertoldi at fbk.eu> stating that you think build-lm.sh should do this by default, then go back and retrain your model from the start.  To bypass this check and treat " << str << " as an OOV, pass -s.  The resulting model will not work with e.g. Moses.");
   }
 }
 
