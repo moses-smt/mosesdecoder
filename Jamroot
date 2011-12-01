@@ -191,7 +191,7 @@ if [ option.get "git" : : "yes" ] {
   constant GITTAG : "" ;
 }
 
-alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs CreateOnDisk/src//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
 
 prefix = [ option.get "prefix" : $(TOP)/dist$(GITTAG) ] ;
 bindir = [ option.get "bindir" : $(prefix)/bin ] ;

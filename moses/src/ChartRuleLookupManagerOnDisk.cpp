@@ -25,7 +25,7 @@
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
 #include "ChartTranslationOptionList.h"
-#include "../../OnDiskPt/src/TargetPhraseCollection.h"
+#include "../../OnDiskPt/TargetPhraseCollection.h"
 
 using namespace std;
 
