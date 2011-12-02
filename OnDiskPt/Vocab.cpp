@@ -21,7 +21,7 @@
 #include <fstream>
 #include "OnDiskWrapper.h"
 #include "Vocab.h"
-#include "../../moses/src/FactorCollection.h"
+#include "../moses/src/FactorCollection.h"
 
 using namespace std;
 

@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "../../moses/src/Util.h"
-#include "../../moses/src/Word.h"
+#include "../moses/src/Util.h"
+#include "../moses/src/Word.h"
 #include "Word.h"
 
 using namespace std;
