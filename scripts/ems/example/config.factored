@@ -141,7 +141,7 @@ order = 5
 #lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
 
 # kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/kenlm/build_binary
+#lm-binarizer = $moses-src-dir/dist/bin/build_binary
 #type = 8
 
 ### script to create quantized language model format (irstlm)
@@ -221,7 +221,7 @@ tuning-sgm = $wmt10-data/dev/news-test2008-ref.$output-extension.sgm
 #lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
 
 # kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/kenlm/build_binary
+#lm-binarizer = $moses-src-dir/dist/bin/build_binary
 #type = 8
 
 ### script to create quantized language model format (irstlm)
