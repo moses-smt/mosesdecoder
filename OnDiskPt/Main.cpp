@@ -23,15 +23,15 @@
 #include <string>
 #include <vector>
 #include <iterator>
-#include "../../moses/src/InputFileStream.h"
-#include "../../moses/src/Util.h"
-#include "../../moses/src/UserMessage.h"
-#include "../../OnDiskPt/src/OnDiskWrapper.h"
-#include "../../OnDiskPt/src/SourcePhrase.h"
-#include "../../OnDiskPt/src/TargetPhrase.h"
-#include "../../OnDiskPt/src/TargetPhraseCollection.h"
-#include "../../OnDiskPt/src/Word.h"
-#include "../../OnDiskPt/src/Vocab.h"
+#include "../moses/src/InputFileStream.h"
+#include "../moses/src/Util.h"
+#include "../moses/src/UserMessage.h"
+#include "../OnDiskPt/OnDiskWrapper.h"
+#include "../OnDiskPt/SourcePhrase.h"
+#include "../OnDiskPt/TargetPhrase.h"
+#include "../OnDiskPt/TargetPhraseCollection.h"
+#include "../OnDiskPt/Word.h"
+#include "../OnDiskPt/Vocab.h"
 #include "Main.h"
 
 using namespace std;

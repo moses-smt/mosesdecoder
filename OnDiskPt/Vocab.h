@@ -20,7 +20,7 @@
  ***********************************************************************/
 #include <string>
 #include <map>
-#include "../../moses/src/TypeDef.h"
+#include "../moses/src/TypeDef.h"
 
 namespace Moses
 {

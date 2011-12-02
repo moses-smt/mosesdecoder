@@ -1,0 +1,2 @@
+lib OnDiskPt : OnDiskWrapper.cpp SourcePhrase.cpp TargetPhrase.cpp Word.cpp Phrase.cpp PhraseNode.cpp TargetPhraseCollection.cpp Vocab.cpp ../moses/src//headers ;
+exe CreateOnDisk : Main.cpp ../moses/src//moses OnDiskPt ;

@@ -6,7 +6,6 @@ if $(with-irstlm) != ""
   lib irstlm : : <search>$(with-irstlm)/lib ;
   obj IRST.o : IRST.cpp ..//headers : <include>$(with-irstlm)/include ;
   alias irst : IRST.o irstlm : : : <define>LM_IRST ;
-  echo "Forcing single-threaded build because of IRSTLM." ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
   echo "!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
