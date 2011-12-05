@@ -69,8 +69,9 @@ rule _shell ( cmd : extras * ) {
 
 import option ;
 
-cleaning = [ option.get "clean" : : yes ] ;
+local cleaning = [ option.get "clean" : : yes ] ;
 cleaning ?= [ option.get "clean-all" : no : yes ] ;
+constant CLEANING : $(cleaning) ;
 
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags ) {
@@ -105,7 +106,7 @@ if $(with-boost) {
 }
 
 boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '" : exit-status ] ;
-if $(boost-shell[2]) != 0 && $(cleaning) = no {
+if $(boost-shell[2]) != 0 && $(CLEANING) = no {
   exit Boost does not seem to be installed or g++ is confused. : 1 ;
 }
 boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
@@ -184,7 +185,7 @@ build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 #Scripts have their own binaries.
 build-project scripts ;
-#Regression tests (only enabled if --data-dir is passed)
+#Regression tests (only does anything if --with-regtest is passed)
 build-project regression-testing ;
 
 if [ option.get "git" : : "yes" ] {
