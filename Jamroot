@@ -56,6 +56,9 @@
 #-j$NCPUS to compile in parallel
 #--clean to clean
 
+import option ;
+import modules ;
+
 path-constant TOP : . ;
 
 # Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
@@ -67,10 +70,11 @@ rule _shell ( cmd : extras * ) {
   return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
-import option ;
-
 local cleaning = [ option.get "clean" : : yes ] ;
 cleaning ?= [ option.get "clean-all" : no : yes ] ;
+if "clean" in [ modules.peek : ARGV ] {
+  cleaning = yes ;
+}
 constant CLEANING : $(cleaning) ;
 
 #Run g++ with empty main and these arguments to see if it passes.  
