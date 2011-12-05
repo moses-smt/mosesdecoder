@@ -67,7 +67,9 @@ for local i in srilm irstlm randlm {
 
 if $(current) != $(previous) {
   #Write inconsistent while the build is running
-  local ignored = @($(LM-LOG):E=inconsistent) ;
+  if [ path.exists $(LM-LOG) ] {
+    local ignored = @($(LM-LOG):E=inconsistent) ;
+  }
   #Write $(current) to $(LM-LOG) after the build completes.  
   rule post-build ( ok ? ) {
     if $(ok) {
