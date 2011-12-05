@@ -51,7 +51,7 @@ lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp
 
 #Huge kludge to force building if different --with options are passed.  
 #Could have used features like <srilm>on but getting these to apply only to linking was ugly and it still didn't trigger an install (since the install path doesn't encode features).  
-path-constant LM-LOG : bin/lm.log ;
+path-constant LM-LOG : ../../../bin/lm.log ;
 #Is there no other way to read a file with bjam?  
 local previous = none ;
 if [ path.exists $(LM-LOG) ] {
