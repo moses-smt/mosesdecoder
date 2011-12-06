@@ -149,6 +149,13 @@ public:
 	  m_scores -= rhs.m_scores;
 	}
 
+  //For features which have an unbounded number of components
+  void MinusEquals(const ScoreProducer*sp, const std::string& name, float score)
+  {
+    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] -= score;
+  }
 
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components

@@ -1459,14 +1459,12 @@ bool StaticData::LoadReferences()
 
 bool StaticData::LoadDiscrimLMFeature()
 {
-	cerr << "Loading discriminative language models.. ";
-
-  // only load if specified
+	// only load if specified
   const vector<string> &wordFile = m_parameter->GetParam("discrim-lmodel-file");
   if (wordFile.empty()) {
     return true;
   }
-  cerr << wordFile.size() << " models" << endl;
+  cerr << "Loading " << wordFile.size() << " discriminative language model(s).." << endl;
 
   // if this weight is specified, the sparse DLM weights will be scaled with an additional weight
   vector<string> dlmWeightStr = m_parameter->GetParam("weight-dlm");

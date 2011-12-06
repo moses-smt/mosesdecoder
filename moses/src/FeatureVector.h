@@ -290,6 +290,10 @@ namespace Moses {
       return (m_fv->m_features[m_name] += lhs);
     }
     
+    FValue operator -=(FValue lhs) {
+      return (m_fv->m_features[m_name] -= lhs);
+    }
+
   private:
     FValue m_tmp;
     
