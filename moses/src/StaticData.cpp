@@ -1493,6 +1493,11 @@ bool StaticData::LoadDiscrimLMFeature()
   		}
   	}
   	else {
+  		if (m_searchAlgorithm == ChartDecoding && !include_lower_ngrams) {
+  			UserMessage::Add("Excluding lower order DLM ngrams is currently not supported for chart decoding.");
+  			return false;
+  		}
+
   		m_targetNgramFeatures.push_back(new TargetNgramFeature(factorId, order, include_lower_ngrams));
   		if (i < dlmWeights.size())
   			m_targetNgramFeatures[i]->SetSparseProducerWeight(dlmWeights[i]);

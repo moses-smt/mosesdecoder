@@ -236,7 +236,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     }
 
     // non-terminal, add phrase from underlying hypothesis
-    else
+    else if (GetNGramOrder() > 1)
     {
       // look up underlying hypothesis
       size_t nonTermIndex = nonTermIndexMap[phrasePos];
@@ -331,24 +331,26 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     }
   }
 
-  if (makePrefix) {
-  	size_t terminals = beforeSubphrase? 1 : terminalsBeforeSubphrase;
-  	MakePrefixNgrams(contextFactor, accumulator, terminals);
-  }
-  if (makeSuffix) {
-  	size_t terminals = beforeSubphrase? 1 : terminalsAfterSubphrase;
-  	MakeSuffixNgrams(contextFactor, accumulator, terminals);
-  }
-
-  // remove duplicates
-  if (makePrefix && makeSuffix && (contextFactor.size() <= GetNGramOrder())) {
-  	string curr_ngram;
-  	for (size_t i = 0; i < contextFactor.size(); ++i) {
-  		curr_ngram.append((*contextFactor[i]).GetString(GetFactorType(), false));
-  		if (i < contextFactor.size()-1)
-  			curr_ngram.append(":");
+  if (GetNGramOrder() > 1) {
+  	if (makePrefix) {
+  		size_t terminals = beforeSubphrase? 1 : terminalsBeforeSubphrase;
+  		MakePrefixNgrams(contextFactor, accumulator, terminals);
   	}
-  	accumulator->MinusEquals(this,curr_ngram,1);
+  	if (makeSuffix) {
+  		size_t terminals = beforeSubphrase? 1 : terminalsAfterSubphrase;
+  		MakeSuffixNgrams(contextFactor, accumulator, terminals);
+  	}
+
+  	// remove duplicates
+  	if (makePrefix && makeSuffix && (contextFactor.size() <= GetNGramOrder())) {
+  		string curr_ngram;
+  		for (size_t i = 0; i < contextFactor.size(); ++i) {
+  			curr_ngram.append((*contextFactor[i]).GetString(GetFactorType(), false));
+  			if (i < contextFactor.size()-1)
+  				curr_ngram.append(":");
+  		}
+  		accumulator->MinusEquals(this,curr_ngram,1);
+  	}
   }
 
   ret->Set(lmState);
