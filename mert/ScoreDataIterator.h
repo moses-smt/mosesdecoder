@@ -43,7 +43,7 @@ class ScoreDataIterator :
 {
   public:
     ScoreDataIterator();
-    ScoreDataIterator(const std::string& filename);
+    explicit ScoreDataIterator(const std::string& filename);
 
     static ScoreDataIterator end() {
       return ScoreDataIterator();
@@ -62,6 +62,4 @@ class ScoreDataIterator :
     std::vector<ScoreDataItem> m_next;
 };
 
-
 #endif
-
