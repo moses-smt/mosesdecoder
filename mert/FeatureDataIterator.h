@@ -68,7 +68,7 @@ class FeatureDataIterator :
 {
   public:
     FeatureDataIterator();
-    FeatureDataIterator(const std::string& filename);
+    explicit FeatureDataIterator(const std::string& filename);
 
     static FeatureDataIterator end() {
       return FeatureDataIterator();
@@ -89,5 +89,3 @@ class FeatureDataIterator :
 };
 
 #endif
-
-
