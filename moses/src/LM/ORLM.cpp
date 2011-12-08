@@ -1,4 +1,3 @@
-#include <cassert>
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -22,7 +21,6 @@ bool LanguageModelORLM::Load(const std::string &filePath, FactorType factorType,
   m_lm = new OnlineRLM<T>(&fLmIn, m_nGramOrder);
   fLmIn.close();
   //m_lm = new MultiOnlineRLM<T>(m_filePath, m_nGramOrder);
-  assert(m_lm != NULL);
   // get special word ids
   m_oov_id = m_lm->vocab_->GetWordID("<unk>");
   CreateFactors();

@@ -89,8 +89,8 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      assert(iterAlign != target.GetAlignmentInfo().end());
-      assert(iterAlign->first == pos);
+      CHECK(iterAlign != target.GetAlignmentInfo().end());
+      CHECK(iterAlign->first == pos);
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;
       const Word &targetNonTerm = target.GetWord(targetNonTermInd);
@@ -100,12 +100,12 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
       currNode = currNode->GetOrCreateChild(word);
     }
 
-    assert(currNode != NULL);
+    CHECK(currNode != NULL);
   }
   
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
-  //assert(currNode != NULL);
+  //CHECK(currNode != NULL);
 
   
   return *currNode;

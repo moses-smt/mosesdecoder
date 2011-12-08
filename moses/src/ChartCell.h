@@ -72,7 +72,7 @@ public:
   const ChartHypothesis *GetBestHypothesis() const;
 
   const ChartCellLabel &GetSourceWordLabel() const {
-    assert(m_coverage.GetNumWordsCovered() == 1);
+    CHECK(m_coverage.GetNumWordsCovered() == 1);
     return *m_sourceWordLabel;
   }
 

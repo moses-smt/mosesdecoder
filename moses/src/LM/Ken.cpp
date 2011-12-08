@@ -19,7 +19,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -197,7 +196,7 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
     } else {
       lm::WordIndex index = TranslateID(word);
       if (index == m_ngram->GetVocabulary().BeginSentence()) {
-        std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+        std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
         abort();
       }
       float score = TransformLMScore(m_ngram->Score(*state0, index, *state1));

@@ -1,0 +1,3 @@
+exe moses_chart : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp ../../moses/src//moses ;
+
+install legacy-install : moses_chart : <location>. <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(TOP)/moses-chart-cmd/src <link>shared:<install-type>LIB ;

@@ -162,7 +162,7 @@ namespace Moses {
     }
     
     float TranslationSystem::GetWeightDistortion() const {
-      assert(m_distortionScoreProducer);
+      CHECK(m_distortionScoreProducer);
       return StaticData::Instance().GetWeight(m_distortionScoreProducer);
     }
 

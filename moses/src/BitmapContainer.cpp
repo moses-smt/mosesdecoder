@@ -59,7 +59,7 @@ public:
   const TranslationSystem* m_system;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    assert (m_transOptRange != NULL);
+    CHECK(m_transOptRange != NULL);
 
     const float weightDistortion = m_system->GetWeightDistortion();
     const DistortionScoreProducer *dsp = m_system->GetDistortionProducer();
@@ -149,11 +149,11 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   if (m_translations.size() > 1) {
-    assert(m_translations.Get(0)->GetFutureScore() >= m_translations.Get(1)->GetFutureScore());
+    CHECK(m_translations.Get(0)->GetFutureScore() >= m_translations.Get(1)->GetFutureScore());
   }
 
   if (m_hypotheses.size() > 1) {
-    assert(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
+    CHECK(m_hypotheses[0]->GetTotalScore() >= m_hypotheses[1]->GetTotalScore());
   }
 
   HypothesisScoreOrdererWithDistortion orderer (&transOptRange, system);
@@ -202,8 +202,8 @@ BackwardsEdge::SeenPosition(const size_t x, const size_t y)
 void
 BackwardsEdge::SetSeenPosition(const size_t x, const size_t y)
 {
-  assert(x < (1<<17));
-  assert(y < (1<<17));
+  CHECK(x < (1<<17));
+  CHECK(y < (1<<17));
 
   m_seenPosition.insert((x<<16) + y);
 }
@@ -367,7 +367,7 @@ BitmapContainer::AddHypothesis(Hypothesis *hypothesis)
 
     ++iter;
   }
-  assert(itemExists == false);
+  CHECK(itemExists == false);
   m_hypotheses.push_back(hypothesis);
 }
 
@@ -410,12 +410,12 @@ BitmapContainer::ProcessBestHypothesis()
   HypothesisQueueItem *item = Dequeue();
 
   // If the priority queue is exhausted, we are done and should have exited
-  assert(item != NULL);
+  CHECK(item != NULL);
 
   // check we are pulling things off of priority queue in right order
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
-    assert(item->GetHypothesis()->GetTotalScore() >= check->GetHypothesis()->GetTotalScore());
+    CHECK(item->GetHypothesis()->GetTotalScore() >= check->GetHypothesis()->GetTotalScore());
   }
 
   // Logging for the criminally insane

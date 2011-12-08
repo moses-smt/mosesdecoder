@@ -109,7 +109,7 @@ void DynSuffixArray::Insert(vuint_t* newSent, unsigned newIndex)
   //stage 3...all words of new sentence are inserted backwards
   // stage 2: k=ISA[newIndex], tmp= L[k], L[k]  = newChar
   //PrintAuxArrays();
-  assert(newIndex <= m_SA->size());
+  CHECK(newIndex <= m_SA->size());
   int k(-1), kprime(-1);
   k = (newIndex < m_SA->size() ? m_ISA->at(newIndex) : m_ISA->at(0)); // k is now index of the cycle that starts at newindex
   int true_pos = LastFirstFunc(k); // track cycle shift (newIndex - 1)
@@ -161,7 +161,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
     //cerr << "j=" << j << "\tj'=" << jprime << endl;
     int isaIdx(-1);
     int new_j = LastFirstFunc(j);
-    assert(j <= jprime);
+    CHECK(j <= jprime);
     // for SA and L, the element at pos j is moved to pos j'
     m_L->insert(m_L->begin() + jprime + 1, m_L->at(j)); 
     m_L->erase(m_L->begin() + j);

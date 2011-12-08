@@ -153,7 +153,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  */
 void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
 {
-  assert(outputFactorOrder.size() > 0);
+  CHECK(outputFactorOrder.size() > 0);
   if (reportAllFactors == true) {
     out << phrase;
   } else {
@@ -258,7 +258,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   }
   std::ostringstream out;
   OutputTranslationOptions(out, hypo, translationId);
-  assert(m_detailOutputCollector);
+  CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
 
@@ -280,11 +280,11 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
       if (StaticData::Instance().IsPathRecoveryEnabled()) {
         out << "||| ";
       }
-      Phrase outPhrase(Output, ARRAY_SIZE_INCR);
+      Phrase outPhrase(ARRAY_SIZE_INCR);
       hypo->CreateOutputPhrase(outPhrase);
 
       // delete 1st & last
-      assert(outPhrase.GetSize() >= 2);
+      CHECK(outPhrase.GetSize() >= 2);
       outPhrase.RemoveWord(0);
       outPhrase.RemoveWord(outPhrase.GetSize() - 1);
 
@@ -338,7 +338,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     Moses::Phrase outputPhrase = path.GetOutputPhrase();
 
     // delete 1st & last
-    assert(outputPhrase.GetSize() >= 2);
+    CHECK(outputPhrase.GetSize() >= 2);
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
 
@@ -439,7 +439,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
   out <<std::flush;
 
-  assert(m_nBestOutputCollector);
+  CHECK(m_nBestOutputCollector);
   m_nBestOutputCollector->Write(translationId, out.str());
 }
 

@@ -47,9 +47,13 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+use strict;
 use FindBin qw($Bin);
 use File::Basename;
 use File::Path;
+use File::Spec;
+use Cwd;
+
 my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
@@ -82,7 +86,10 @@ my $minimum_required_change_in_weights = 0.00001;
 
 my $verbose = 0;
 my $usage = 0; # request for --help
-my $___WORKING_DIR = "mert-work";
+
+# We assume that if you don't specify working directory,
+# we set the default is set to `pwd`/mert-work
+my $___WORKING_DIR = File::Spec->catfile(Cwd::getcwd(), "mert-work");
 my $___DEV_F = undef; # required, input text to decode
 my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
@@ -144,10 +151,9 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
-                                  # and so on 
+                                  # and so on
 my $maximum_iterations = 25;
 
-use strict;
 use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
@@ -1298,19 +1304,16 @@ sub submit_or_exec {
 sub create_extractor_script()
 {
   my ($cmd, $outdir) = @_;
+  my $script_path = File::Spec->catfile($outdir, "extractor.sh");
 
-  my $script_path = $outdir."/extractor.sh";
-
-  open(OUT,"> $script_path")
-    or die "Can't write $script_path";
-  print OUT "#!/bin/bash\n";
-  print OUT "cd $outdir\n";
-  print OUT $cmd."\n";
-  close(OUT);
+  open my $out, '>', $script_path
+      or die "Couldn't open $script_path for writing: $!\n";
+  print $out "#!/bin/bash\n";
+  print $out "cd $outdir\n";
+  print $out "$cmd\n";
+  close($out);
 
   `chmod +x $script_path`;
 
-  return $script_path;  
+  return $script_path;
 }
-
-

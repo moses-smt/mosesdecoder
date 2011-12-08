@@ -3,7 +3,7 @@
 #include "FeatureVector.h"
 #include "PhraseDictionaryTree.h"
 #include <map>
-#include <cassert>
+#include "util/check.hh"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -227,7 +227,7 @@ public:
     if(f.empty()) return;
     if(f[0]>=data.size()) return;
     if(!data[f[0]]) return;
-    assert(data[f[0]]->findKey(f[0])<data[f[0]]->size());
+    CHECK(data[f[0]]->findKey(f[0])<data[f[0]]->size());
     OFF_T tCandOffset=data[f[0]]->find(f);
     if(tCandOffset==InvalidOffT) return;
     fSeek(ot,tCandOffset);
@@ -239,7 +239,7 @@ public:
   typedef PhraseDictionaryTree::PrefixPtr PPtr;
 
   void GetTargetCandidates(PPtr p,TgtCands& tgtCands) {
-    assert(p);
+    CHECK(p);
     if(p.imp->isRoot()) return;
     OFF_T tCandOffset=p.imp->ptr()->getData(p.imp->idx);
     if(tCandOffset==InvalidOffT) return;
@@ -276,7 +276,7 @@ public:
   }
 
   PPtr Extend(PPtr p,const std::string& w) {
-    assert(p);
+    CHECK(p);
     if(w.empty() || w==EPSILON) return p;
 
     LabelId wi=sv->index(w);
@@ -285,7 +285,7 @@ public:
     else if(p.imp->isRoot()) {
       if(wi<data.size() && data[wi]) {
         const void* ptr = data[wi]->findKeyPtr(wi);
-        assert(ptr);
+        CHECK(ptr);
         return PPtr(pPool.get(PPimp(data[wi],data[wi]->findKey(wi),0)));
       }
     } else if(PTF const* nextP=p.imp->ptr()->getPtr(p.imp->idx)) {
@@ -510,7 +510,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     if (numElement == NOT_FOUND) {
       // init numElement
       numElement = tokens.size();
-      assert(numElement >= 3);
+      CHECK(numElement >= 3);
     }
 
     if (tokens.size() != numElement) {
@@ -555,7 +555,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       ++count;
       currF=f;
       // insert src phrase in prefix tree
-      assert(psa);
+      CHECK(psa);
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
@@ -608,7 +608,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       }
 
       // insert src phrase in prefix tree
-      assert(psa);
+      CHECK(psa);
       PSA::Data& d=psa->insert(f);
       if(d==InvalidOffT) d=fTell(ot);
       else {
@@ -618,7 +618,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
       }
     }
     tgtCands.push_back(TgtCand(e,sc, alignmentString));
-    assert(currFirstWord!=InvalidLabelId);
+    CHECK(currFirstWord!=InvalidLabelId);
     tgtCands.back().SetFeatures(fnames, fvalues);
   }
   if (PrintWordAlignment())

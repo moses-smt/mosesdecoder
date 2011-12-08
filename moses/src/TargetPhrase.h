@@ -61,8 +61,8 @@ protected:
 	Word m_lhsTarget;
 
 public:
-  TargetPhrase(FactorDirection direction=Output);
-  TargetPhrase(FactorDirection direction, std::string out_string);
+  TargetPhrase();
+  TargetPhrase(std::string out_string);
   TargetPhrase(const Phrase &);
   ~TargetPhrase();
 

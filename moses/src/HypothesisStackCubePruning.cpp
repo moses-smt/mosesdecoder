@@ -99,7 +99,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
   // equiv hypo exists, recombine with other hypo
   iterator &iterExisting = addRet.first;
   Hypothesis *hypoExisting = *iterExisting;
-  assert(iterExisting != m_hypos.end());
+  CHECK(iterExisting != m_hypos.end());
 
   m_manager.GetSentenceStats().AddRecombination(*hypo, **iterExisting);
 
@@ -119,7 +119,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     if (!added) {
       iterExisting = m_hypos.find(hypo);
       TRACE_ERR("Offending hypo = " << **iterExisting << endl);
-      assert(false);
+      CHECK(false);
     }
     return false;
   } else {
@@ -137,7 +137,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
 {
   std::pair<iterator, bool> addRet = Add(hypo);
-  assert (addRet.second);
+  CHECK(addRet.second);
 
   const WordsBitmap &bitmap = hypo->GetWordsBitmap();
   m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);

@@ -36,7 +36,7 @@ void extract_ngrams(const vector<Word >& sentence, map < Phrase, int >  & allngr
 {
   for (int k = 0; k < (int)bleu_order; k++) {
     for(int i =0; i < max((int)sentence.size()-k,0); i++) {
-      Phrase ngram(Output, k+1);
+      Phrase ngram( k+1);
       for ( int j = i; j<= i+k; j++) {
         ngram.AddWord(sentence[j]);
       }
@@ -191,7 +191,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
     // is its best predecessor already included ?
     if (survivingHyps.find(currHyp->GetPrevHypo()) != survivingHyps.end()) { //yes, then add an edge
       vector <Edge>& edges = incomingEdges[currHyp];
-      Edge winningEdge(currHyp->GetPrevHypo(),currHyp,scale*(currHyp->GetScore() - currHyp->GetPrevHypo()->GetScore()),currHyp->GetTargetPhrase());
+      Edge winningEdge(currHyp->GetPrevHypo(),currHyp,scale*(currHyp->GetScore() - currHyp->GetPrevHypo()->GetScore()),currHyp->GetCurrTargetPhrase());
       edges.push_back(winningEdge);
       ++numEdgesCreated;
     }
@@ -205,7 +205,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         const Hypothesis* loserPrevHypo = loserHypo->GetPrevHypo();
         if (survivingHyps.find(loserPrevHypo) != survivingHyps.end()) { //found it, add edge
           double arcScore = loserHypo->GetScore() - loserPrevHypo->GetScore();
-          Edge losingEdge(loserPrevHypo, currHyp, arcScore*scale, loserHypo->GetTargetPhrase());
+          Edge losingEdge(loserPrevHypo, currHyp, arcScore*scale, loserHypo->GetCurrTargetPhrase());
           vector <Edge>& edges = incomingEdges[currHyp];
           edges.push_back(losingEdge);
           ++numEdgesCreated;
@@ -227,7 +227,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
         //Curr Hyp can be : a) the best predecessor  of succ b) or an arc attached to succ
         if (succHyp->GetPrevHypo() == currHyp) { //best predecessor
           vector <Edge>& succEdges = incomingEdges[succHyp];
-          Edge succWinningEdge(currHyp, succHyp, scale*(succHyp->GetScore() - currHyp->GetScore()), succHyp->GetTargetPhrase());
+          Edge succWinningEdge(currHyp, succHyp, scale*(succHyp->GetScore() - currHyp->GetScore()), succHyp->GetCurrTargetPhrase());
           succEdges.push_back(succWinningEdge);
           survivingHyps.insert(succHyp);
           ++numEdgesCreated;
@@ -244,7 +244,7 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
             if (loserPrevHypo == currHyp) { //found it
               vector <Edge>& succEdges = incomingEdges[succHyp];
               double arcScore = loserHypo->GetScore() - currHyp->GetScore();
-              Edge losingEdge(currHyp, succHyp,scale* arcScore, loserHypo->GetTargetPhrase());
+              Edge losingEdge(currHyp, succHyp,scale* arcScore, loserHypo->GetCurrTargetPhrase());
               succEdges.push_back(losingEdge);
               ++numEdgesCreated;
             }
@@ -403,7 +403,7 @@ const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & inco
   for (size_t start = 0; start < currPhrase.GetSize(); ++start) {
     for (size_t end = start; end < start + bleu_order; ++end) {
       if (end < currPhrase.GetSize()) {
-        Phrase edgeNgram(Output, end-start+1);
+        Phrase edgeNgram(end-start+1);
         for (size_t index = start; index <= end; ++index) {
           edgeNgram.AddWord(currPhrase.GetWord(index));
         }
@@ -434,8 +434,8 @@ const NgramHistory& Edge::GetNgrams(map<const Hypothesis*, vector<Edge> > & inco
           cerr << "edgeInNgram: " << edgeIncomingNgram << endl;
         }
 
-        Phrase edgeSuffix(Output, ARRAY_SIZE_INCR);
-        Phrase ngramSuffix(Output, ARRAY_SIZE_INCR);
+        Phrase edgeSuffix(ARRAY_SIZE_INCR);
+        Phrase ngramSuffix(ARRAY_SIZE_INCR);
         GetPhraseSuffix(edgeWords,back,edgeSuffix);
         GetPhraseSuffix(edgeIncomingNgram,back,ngramSuffix);
 

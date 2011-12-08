@@ -198,7 +198,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
        ++i) {
     // Get the best detour from the queue.
     std::auto_ptr<const ChartTrellisDetour> detour(contenders.Pop());
-    assert(detour.get());
+    CHECK(detour.get());
 
     // Create a full base path from the chosen detour.
     basePath.reset(new ChartTrellisPath(*detour));
@@ -206,7 +206,7 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
-    assert(basePath->GetDeviationPoint());
+    CHECK(basePath->GetDeviationPoint());
     CreateDeviantPaths(basePath, *(basePath->GetDeviationPoint()), contenders);
 
     // If the n-best list is allowed to contain duplicate translations (at the

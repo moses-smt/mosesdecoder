@@ -142,7 +142,7 @@ template <class M> float TreeMiddle(const M &m, const std::vector<WordIndex> &wo
 
 template <class M> void LookupVocab(const M &m, const StringPiece &str, std::vector<WordIndex> &out) {
   out.clear();
-  for (util::PieceIterator<' '> i(str); i; ++i) {
+  for (util::TokenIter<util::SingleCharacter, true> i(str, ' '); i; ++i) {
     out.push_back(m.GetVocabulary().Index(*i));
   }
 }
@@ -326,10 +326,17 @@ template <class M> void FullGrow(const M &m) {
   }
 }
 
+const char *FileLocation() {
+  if (boost::unit_test::framework::master_test_suite().argc < 2) {
+    return "test.arpa";
+  }
+  return boost::unit_test::framework::master_test_suite().argv[1];
+}
+
 template <class M> void Everything() {
   Config config;
   config.messages = NULL;
-  M m("test.arpa", config);
+  M m(FileLocation(), config);
 
   Short(m);
   Charge(m);

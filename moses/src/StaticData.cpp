@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <string>
-#include <cassert>
+#include "util/check.hh"
 #include "PhraseDictionaryMemory.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -482,16 +482,16 @@ bool StaticData::LoadData(Parameter *parameter)
 
       if (vecStr.size() == 1) {
         sentenceID++;
-        Phrase phrase(Output, 0);
+        Phrase phrase(0);
         phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else if (vecStr.size() == 2) {
         sentenceID = Scan<long>(vecStr[0]);
-        Phrase phrase(Output, 0);
+        Phrase phrase(0);
         phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else {
-        assert(false);
+        CHECK(false);
       }
     }
   }
@@ -1057,14 +1057,14 @@ bool StaticData::LoadGenerationTables()
       VERBOSE(1, filePath << endl);
 
       m_generationDictionary.push_back(new GenerationDictionary(numFeatures, input,output));
-      assert(m_generationDictionary.back() && "could not create GenerationDictionary");
+      CHECK(m_generationDictionary.back() && "could not create GenerationDictionary");
       if (!m_generationDictionary.back()->Load(filePath, Output)) {
         delete m_generationDictionary.back();
         return false;
       }
       vector<float> gdWeights;
       for(size_t i = 0; i < numFeatures; i++) {
-        assert(currWeightNum < weight.size());
+        CHECK(currWeightNum < weight.size());
         gdWeights.push_back(weight[currWeightNum++]);
       }
       SetWeights(m_generationDictionary.back(), gdWeights);
@@ -1083,7 +1083,7 @@ bool StaticData::LoadPhraseTables()
   VERBOSE(2,"Creating phrase table features" << endl);
 
   // language models must be loaded prior to loading phrase tables
-  assert(m_fLMsLoaded);
+  CHECK(m_fLMsLoaded);
   // load phrase translation tables
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
@@ -1130,7 +1130,7 @@ bool StaticData::LoadPhraseTables()
       } else
         implementation = (PhraseTableImplementation) Scan<int>(token[0]);
 
-      assert(token.size() >= 5);
+      CHECK(token.size() >= 5);
       //characteristics of the phrase table
 
       vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
@@ -1141,7 +1141,7 @@ bool StaticData::LoadPhraseTables()
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath= token[4];
 
-      assert(weightAll.size() >= weightAllOffset + numScoreComponent);
+      CHECK(weightAll.size() >= weightAllOffset + numScoreComponent);
 
       // weights for this phrase dictionary
       // first InputScores (if any), then translation scores
@@ -1205,7 +1205,7 @@ bool StaticData::LoadPhraseTables()
         alignmentsFile= token[6];
       }
 
-      assert(numScoreComponent==weight.size());
+      CHECK(numScoreComponent==weight.size());
 
 
       //This is needed for regression testing, but the phrase table
@@ -1282,7 +1282,7 @@ void StaticData::LoadNonTerminals()
     string line;
     while(getline(inStream, line)) {
       vector<string> tokens = Tokenize(line);
-      assert(tokens.size() == 2);
+      CHECK(tokens.size() == 2);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
     }
@@ -1342,7 +1342,7 @@ bool StaticData::LoadDecodeGraphs()
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      assert(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
+      CHECK(decodeGraphInd == prevDecodeGraphInd || decodeGraphInd == prevDecodeGraphInd + 1);
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
       }
@@ -1350,7 +1350,7 @@ bool StaticData::LoadDecodeGraphs()
       index = Scan<size_t>(token[2]);
     } else {
       UserMessage::Add("Malformed mapping!");
-      assert(false);
+      CHECK(false);
     }
 
     DecodeStep* decodeStep = NULL;
@@ -1361,7 +1361,7 @@ bool StaticData::LoadDecodeGraphs()
         strme << "No phrase dictionary with index "
               << index << " available!";
         UserMessage::Add(strme.str());
-        assert(false);
+        CHECK(false);
       }
       decodeStep = new DecodeStepTranslation(m_phraseDictionary[index], prev);
       break;
@@ -1371,16 +1371,16 @@ bool StaticData::LoadDecodeGraphs()
         strme << "No generation dictionary with index "
               << index << " available!";
         UserMessage::Add(strme.str());
-        assert(false);
+        CHECK(false);
       }
       decodeStep = new DecodeStepGeneration(m_generationDictionary[index], prev);
       break;
     case InsertNullFertilityWord:
-      assert(!"Please implement NullFertilityInsertion.");
+      CHECK(!"Please implement NullFertilityInsertion.");
       break;
     }
 
-    assert(decodeStep);
+    CHECK(decodeStep);
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
       if (m_searchAlgorithm == ChartDecoding) {

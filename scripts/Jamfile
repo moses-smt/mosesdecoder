@@ -1,0 +1,60 @@
+#See ../Jamroot for options.  
+import option ;
+
+build-project ems/biconcor ;
+build-project training ;
+
+with-giza = [ option.get "with-giza" ] ;
+if $(with-giza) {
+  rule check-for-bin ( name ) {
+    if ! [ FILE_OPEN $(with-giza)/$(name) : "r" ] {
+      echo "Did not find "$(with-giza)/$(name)"." ;
+      echo "The with-giza directory should contain GIZA++, snt2cooc.out, and mkcls." ;
+      echo "These are available from http://code.google.com/p/giza-pp/ :" ;
+      echo "  wget https://giza-pp.googlecode.com/files/giza-pp.tgz" ;
+      echo "  tar xzf giza-pp.tgz" ;
+      echo "  cd giza-pp" ;
+      echo "  make" ;
+      echo "  cp GIZA++-v2/{GIZA++,plain2snt.out,snt2cooc.out,snt2plain.out,trainGIZA++.sh} mkcls-v2/mkcls ." ;
+      exit "Then run bjam --with-giza=/path/to/giza-pp" : 1 ;
+    }
+  }
+
+  constant WITH-GIZA : $(with-giza) ;
+
+  check-for-bin GIZA++ ;
+  check-for-bin snt2cooc.out ;
+  check-for-bin mkcls ;
+} else {
+  if $(CLEANING) = no {
+    echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza-pp" ;
+  }
+  constant WITH-GIZA : "no" ;
+}
+
+location = [ option.get "install-scripts" ] ;
+if $(location) {
+  location = $(location)$(GITTAG) ;
+
+  #These two used to live in a tools directory.  
+  install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
+  install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
+
+  install phrase-extract : training/phrase-extract//programs : <location>$(location)/training/phrase-extract ;
+  install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
+  install symal : training/symal//symal : <location>$(location)/training/symal ;
+
+  install biconcor : ems/biconcor//biconcor : <location>$(location)/ems/biconcor ;
+
+  if $(WITH-GIZA) != no {
+    install train-model : training//train-model.perl : <location>$(location)/training ;
+  }
+
+  install scripts : 
+    [ glob-tree README *.js *.pl *.perl *.pm *.py *.sh *.php : tests regression-testing other bin train_model.perl ]
+    [ glob tokenizer/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ems/web/* analysis/smtgui/* : ems/web/javascripts ]
+    generic/fsa-sample.fsa
+    ems/experiment.machines
+    ems/experiment.meta
+    : <install-source-root>. <location>$(location) ;
+}

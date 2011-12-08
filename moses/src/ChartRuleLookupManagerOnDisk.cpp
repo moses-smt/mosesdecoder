@@ -25,7 +25,7 @@
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
 #include "ChartTranslationOptionList.h"
-#include "../../OnDiskPt/src/TargetPhraseCollection.h"
+#include "../../OnDiskPt/TargetPhraseCollection.h"
 
 using namespace std;
 
@@ -53,7 +53,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_weight(weight)
   , m_filePath(filePath)
 {
-  assert(m_expandableDottedRuleListVec.size() == 0);
+  CHECK(m_expandableDottedRuleListVec.size() == 0);
   size_t sourceSize = sentence.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
 
@@ -258,7 +258,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
             targetPhraseCollection = iterCache->second;
           }
 
-          assert(targetPhraseCollection);
+          CHECK(targetPhraseCollection);
           if (!targetPhraseCollection->IsEmpty()) {
             outColl.Add(*targetPhraseCollection, prevDottedRule,
                         GetCellCollection(), adhereTableLimit, rulesLimit);

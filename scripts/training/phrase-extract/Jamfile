@@ -1,0 +1,26 @@
+alias InputFileStream : InputFileStream.cpp ../../..//z ;
+alias trees : SyntaxTree.cpp XmlTree.cpp : : : <include>. ;
+
+exe extract : tables-core.cpp SentenceAlignment.cpp extract.cpp InputFileStream ;
+
+exe extract-rules : tables-core.cpp SentenceAlignment.cpp SentenceAlignmentWithSyntax.cpp SyntaxTree.cpp XmlTree.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp InputFileStream ;
+
+exe extract-lex : extract-lex.cpp InputFileStream ;
+
+exe score : tables-core.cpp AlignmentPhrase.cpp score.cpp PhraseAlignment.cpp InputFileStream ;
+
+exe consolidate : consolidate.cpp tables-core.cpp InputFileStream ;
+
+exe consolidate-direct : consolidate-direct.cpp InputFileStream ;
+
+exe consolidate-reverse :  consolidate-reverse.cpp tables-core.cpp InputFileStream ;
+
+exe relax-parse : tables-core.cpp SyntaxTree.cpp XmlTree.cpp relax-parse.cpp ;
+
+exe statistics : tables-core.cpp AlignmentPhrase.cpp statistics.cpp InputFileStream ;
+
+alias programs : extract extract-rules extract-lex score consolidate consolidate-direct consolidate-reverse relax-parse statistics ;
+
+install legacy : programs : <location>. <install-type>EXE ;
+
+build-project extract-ghkm ;

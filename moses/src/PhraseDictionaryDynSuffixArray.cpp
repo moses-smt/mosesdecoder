@@ -40,7 +40,7 @@ bool PhraseDictionaryDynSuffixArray::Load(const std::vector<FactorType>& input,
 
 void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
 {
-  assert(&input == &input);
+  CHECK(&input == &input);
 }
 
 void PhraseDictionaryDynSuffixArray::CleanUp()
@@ -81,7 +81,7 @@ void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* n
 
 ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollection&)
 {
-  assert(false);
+  CHECK(false);
   return 0;
 }
 

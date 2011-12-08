@@ -1662,6 +1662,10 @@ sub define_training_extract_phrases {
 	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
 	  $cmd .= "-unknown-word-label $unknown_word_label ";
       }
+
+      if (&get("TRAINING:use-ghkm")) {
+        $cmd .= "-ghkm ";
+      }
     }
 
 

@@ -51,7 +51,7 @@ public:
   virtual FFState* EvaluateChart(const ChartHypothesis&,
                                  int /* featureID */,
 																 ScoreComponentCollection*) const {
-		assert(0); // not valid for chart decoder
+		CHECK(0); // not valid for chart decoder
 		return NULL;
 	}
 

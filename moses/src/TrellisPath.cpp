@@ -173,7 +173,7 @@ void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
 
 Phrase TrellisPath::GetTargetPhrase() const
 {
-  Phrase targetPhrase(Output, ARRAY_SIZE_INCR);
+  Phrase targetPhrase(ARRAY_SIZE_INCR);
 
   int numHypo = (int) m_path.size();
   for (int node = numHypo - 2 ; node >= 0 ; --node) {
@@ -191,14 +191,14 @@ Phrase TrellisPath::GetSurfacePhrase() const
 {
   const std::vector<FactorType> &outputFactor = StaticData::Instance().GetOutputFactorOrder();
   Phrase targetPhrase = GetTargetPhrase()
-                        ,ret(Output, targetPhrase.GetSize());
+                        ,ret(targetPhrase.GetSize());
 
   for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos) {
     Word &newWord = ret.AddWord();
     for (size_t i = 0 ; i < outputFactor.size() ; i++) {
       FactorType factorType = outputFactor[i];
       const Factor *factor = targetPhrase.GetFactor(pos, factorType);
-      assert(factor);
+      CHECK(factor);
       newWord[factorType] = factor;
     }
   }
@@ -221,7 +221,7 @@ WordsRange TrellisPath::GetTargetWordsRange(const Hypothesis &hypo) const
   }
 
   // have to give a hypo in the trellis path, but u didn't.
-  assert(false);
+  CHECK(false);
   return WordsRange(NOT_FOUND, NOT_FOUND);
 }
 

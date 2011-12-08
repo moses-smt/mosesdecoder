@@ -95,7 +95,7 @@ public:
     // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
     // input sentence
-    Sentence sentence(Input);
+    Sentence sentence();
     // set translation system
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
