@@ -47,9 +47,13 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+use strict;
 use FindBin qw($Bin);
 use File::Basename;
 use File::Path;
+use File::Spec;
+use Cwd;
+
 my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
@@ -82,7 +86,10 @@ my $minimum_required_change_in_weights = 0.00001;
 
 my $verbose = 0;
 my $usage = 0; # request for --help
-my $___WORKING_DIR = "mert-work";
+
+# We assume that if you don't specify working directory,
+# we set the default is set to `pwd`/mert-work
+my $___WORKING_DIR = File::Spec->catfile(Cwd::getcwd(), "mert-work");
 my $___DEV_F = undef; # required, input text to decode
 my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
