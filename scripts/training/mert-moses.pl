@@ -151,10 +151,9 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
-                                  # and so on 
+                                  # and so on
 my $maximum_iterations = 25;
 
-use strict;
 use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
