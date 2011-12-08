@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 class FileFormatException : public util::Exception 
 {
   public:
-    explicit FileFormatException(const std::string filename, const std::string& line) {
+    explicit FileFormatException(const std::string& filename, const std::string& line) {
       *this << "Error in line \"" << line << "\" of " << filename;
     }
 };
