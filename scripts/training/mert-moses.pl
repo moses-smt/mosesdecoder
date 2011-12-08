@@ -1305,19 +1305,16 @@ sub submit_or_exec {
 sub create_extractor_script()
 {
   my ($cmd, $outdir) = @_;
+  my $script_path = File::Spec->catfile($outdir, "extractor.sh");
 
-  my $script_path = $outdir."/extractor.sh";
-
-  open(OUT,"> $script_path")
-    or die "Can't write $script_path";
-  print OUT "#!/bin/bash\n";
-  print OUT "cd $outdir\n";
-  print OUT $cmd."\n";
-  close(OUT);
+  open my $out, '>', $script_path
+      or die "Couldn't open $script_path for writing: $!\n";
+  print $out "#!/bin/bash\n";
+  print $out "cd $outdir\n";
+  print $out "$cmd\n";
+  close($out);
 
   `chmod +x $script_path`;
 
-  return $script_path;  
+  return $script_path;
 }
-
-
