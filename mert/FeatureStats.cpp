@@ -218,3 +218,19 @@ ostream& operator<<(ostream& o, const FeatureStats& e)
 
   return o;
 }
+
+//ADEED_BY_TS
+bool operator==(const FeatureStats& f1, const FeatureStats& f2) {
+  size_t size = f1.size();
+
+  if (size != f2.size())
+    return false;
+
+  for (size_t k=0; k < size; k++) {
+    if (f1.get(k) != f2.get(k))
+      return false;
+  }
+  
+  return true;
+}
+//END_ADDED
