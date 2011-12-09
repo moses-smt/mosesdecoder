@@ -41,7 +41,7 @@ void TargetWordInsertionFeature::Evaluate(const TargetPhrase& targetPhrase,
   // flag aligned words
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
   bool aligned[16];
-  assert(targetLength < 16);
+  CHECK(targetLength < 16);
   for(size_t i=0; i<targetLength; i++) {
     aligned[i] = false;
   }

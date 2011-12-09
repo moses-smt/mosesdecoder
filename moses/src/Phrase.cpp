@@ -101,7 +101,7 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
 
 Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType) const
 {
-	Phrase retPhrase(m_direction, wordsRange.GetNumWordsCovered());
+	Phrase retPhrase(wordsRange.GetNumWordsCovered());
 
 	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
 	{

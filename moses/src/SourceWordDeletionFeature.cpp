@@ -41,7 +41,7 @@ void SourceWordDeletionFeature::Evaluate(const TargetPhrase& targetPhrase,
   // flag aligned words
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
   bool aligned[16];
-  assert(sourceLength < 16);
+  CHECK(sourceLength < 16);
   for(size_t i=0; i<sourceLength; i++) {
     aligned[i] = false;
   }

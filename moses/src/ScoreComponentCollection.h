@@ -211,14 +211,15 @@ public:
     m_scores[indexes.first] = score;
 	}
 
-  //! Special version PlusEquals(ScoreProducer, vector<float>)
-  //! to add the score from a single ScoreProducer that produces
-  //! a single value
-  void Assign(const ScoreProducer* sp, float score) {
-    CHECK(1 == sp->GetNumScoreComponents());
-    const size_t i = m_sim->GetBeginIndex(sp->GetScoreBookkeepingID());
-    m_scores[i] = score;
+
+  //For features which have an unbounded number of components
+  void Assign(const ScoreProducer*sp, const std::string name, float score)
+  {
+    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] = score;
   }
+
 
   //Read sparse features from string
   void Assign(const ScoreProducer* sp, const std::string line);

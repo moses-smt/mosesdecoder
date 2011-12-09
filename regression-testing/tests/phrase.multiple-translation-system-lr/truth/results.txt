@@ -5,9 +5,9 @@ TRANSLATION_4=in the , the council , it is train of examiner the inclusion of su
 TRANSLATION_5=secondly , in the transparency for the citizens , which are now the droits which they disposent vis-à-vis of those appliquent and élaborent the european law and , to those , precisely appliquent and élaborent this european law . 
 LMLOAD_TIME ~ 8.00
 PTLOAD_TIME ~ 9.00
-SCORE_1 = -621.292
+SCORE_1 = -621.293
 SCORE_2 = -1402.951
 SCORE_3 = -636.300
 SCORE_4 = -631.966
-SCORE_5 = -1110.523
+SCORE_5 = -1110.522
 TOTAL_WALLTIME ~ 16

@@ -57,8 +57,7 @@ public:
                                   int /* featureID */,
                                   ScoreComponentCollection* ) const
                                   {
-                                    /* Not implemented */
-                                    assert(0);
+                                    abort();
                                   }
 private:
   FactorType m_factorType;

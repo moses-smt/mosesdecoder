@@ -77,7 +77,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        ScoreComponentCollection* accumulator) const
 {
   const TargetNgramState* tnState = dynamic_cast<const TargetNgramState*>(prev_state);
-  assert(tnState);
+  CHECK(tnState);
 
   // current hypothesis target phrase
   const Phrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();

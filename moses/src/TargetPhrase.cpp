@@ -54,7 +54,7 @@ TargetPhrase::TargetPhrase()
   :Phrase(ARRAY_SIZE_INCR)
   , m_transScore(0.0)
   , m_fullScore(0.0)
-  ,m_sourcePhrase(direction, 0)
+  ,m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
@@ -63,7 +63,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
   , m_transScore(0.0)
   , m_fullScore(0.0)
-  , m_sourcePhrase(phrase.GetDirection(),0)
+  , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }

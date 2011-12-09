@@ -101,7 +101,7 @@ public:
                                     ScoreComponentCollection* ) const
                                     {
                                       /* Not implemented */
-                                      assert(0);
+                                      CHECK(0);
                                     }
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;

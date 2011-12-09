@@ -106,7 +106,7 @@ public:
   }
 
   void SetFeatures(const IPhrase& names, const std::vector<FValue>& values) {
-    assert(names.size() == values.size());
+    CHECK(names.size() == values.size());
     fnames = names;
     fvalues = values;
   }

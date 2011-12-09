@@ -254,7 +254,7 @@ PhraseDictionary* PhraseDictionaryFeature::GetDictionary()
   } else {
     dict = m_threadUnsafePhraseDictionary.get();
   }
-  assert(dict);
+  CHECK(dict);
   return dict;
 }
 
