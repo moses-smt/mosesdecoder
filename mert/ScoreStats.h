@@ -100,4 +100,8 @@ public:
   friend ostream& operator<<(ostream& o, const ScoreStats& e);
 };
 
+//ADDED_BY_TS
+bool operator==(const ScoreStats& s1, const ScoreStats& s2); 
+//END_ADDED
+
 #endif  // SCORE_STATS_H
