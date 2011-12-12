@@ -15,7 +15,8 @@ namespace Moses
 class Factor;
 class Phrase;
 
-class LanguageModelORLM : public LanguageModelPointerState {
+class LanguageModelORLM : public LanguageModelPointerState
+{
 public:
   typedef count_t T;  // type for ORLM filter
   LanguageModelORLM()
@@ -30,13 +31,15 @@ public:
     fout.close();
     delete m_lm;
   }
-  void CleanUpAfterSentenceProcessing() {m_lm->clearCache();} // clear caches
+  void CleanUpAfterSentenceProcessing() {
+    m_lm->clearCache(); // clear caches
+  }
   void InitializeBeforeSentenceProcessing() { // nothing to do
     //m_lm->initThreadSpecificData(); // Creates thread specific data iff
-                                    // compiled with multithreading.
+    // compiled with multithreading.
   }
   bool UpdateORLM(const std::vector<string>& ngram, const int value);
- protected:
+protected:
   OnlineRLM<T>* m_lm;
   //MultiOnlineRLM<T>* m_lm;
   wordID_t m_oov_id;

@@ -74,9 +74,9 @@ protected:
 
 public:
   ChartTranslationOptionCollection(InputType const& source
-                              , const TranslationSystem* system
-                              , const ChartCellCollection &hypoStackColl
-                              , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers);
+                                   , const TranslationSystem* system
+                                   , const ChartCellCollection &hypoStackColl
+                                   , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers);
   virtual ~ChartTranslationOptionCollection();
   void CreateTranslationOptionsForRange(size_t startPos
                                         , size_t endPos);

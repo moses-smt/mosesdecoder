@@ -12,20 +12,22 @@
 #include "LM/SingleFactor.h"
 #include "Util.h"
 
-namespace Moses {
+namespace Moses
+{
 
-class DMapLMState : public FFState {
+class DMapLMState : public FFState
+{
 public:
-    int Compare(const FFState &o) const {
-        const DMapLMState& cast_other = static_cast<const DMapLMState&>(o);
-        if (cast_other.m_last_succeeding_order < m_last_succeeding_order)
-            return -1;
-        else if (cast_other.m_last_succeeding_order > m_last_succeeding_order)
-            return 1;
-        else
-            return 0;
-    }
-    uint8_t m_last_succeeding_order;
+  int Compare(const FFState &o) const {
+    const DMapLMState& cast_other = static_cast<const DMapLMState&>(o);
+    if (cast_other.m_last_succeeding_order < m_last_succeeding_order)
+      return -1;
+    else if (cast_other.m_last_succeeding_order > m_last_succeeding_order)
+      return 1;
+    else
+      return 0;
+  }
+  uint8_t m_last_succeeding_order;
 };
 
 class LanguageModelDMapLM : public LanguageModelSingleFactor

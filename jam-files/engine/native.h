@@ -7,20 +7,19 @@
 
 #include "rules.h"
 
-struct native_rule_t
-{
-    char* name;
-    argument_list* arguments;
-    PARSE* procedure;
-    /* Version of the interface that the native rule provides.
-       It's possible that we want to change the set parameter
-       for existing native rule. In that case, version number
-       should be incremented so that Boost.Build can check for
-       version it relies on.
+struct native_rule_t {
+  char* name;
+  argument_list* arguments;
+  PARSE* procedure;
+  /* Version of the interface that the native rule provides.
+     It's possible that we want to change the set parameter
+     for existing native rule. In that case, version number
+     should be incremented so that Boost.Build can check for
+     version it relies on.
 
-       Versions are numbered from 1.
-    */
-    int version;
+     Versions are numbered from 1.
+  */
+  int version;
 };
 
 /* MSVC debugger gets confused unless this is provided */

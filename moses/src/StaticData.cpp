@@ -138,7 +138,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if(m_parameter->GetParam("sort-word-alignment").size()) {
     m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
   }
-  
+
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -435,7 +435,7 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
-          Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
+                         Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
 
   // Read in constraint decoding file, if provided
   if(m_parameter->GetParam("constraint").size()) {
@@ -449,7 +449,7 @@ bool StaticData::LoadData(Parameter *parameter)
     InputFileStream constraintFile(m_constraintFileName);
 
     std::string line;
-    
+
     long sentenceID = GetStartTranslationId() - 1;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
@@ -483,22 +483,22 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // specify XML tags opening and closing brackets for XML option
   if (m_parameter->GetParam("xml-brackets").size() > 0) {
-     std::vector<std::string> brackets = Tokenize(m_parameter->GetParam("xml-brackets")[0]);
-     if(brackets.size()!=2) {
-          cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
-          exit(1);
-     }
-     m_xmlBrackets.first= brackets[0];
-     m_xmlBrackets.second=brackets[1];
-     cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
+    std::vector<std::string> brackets = Tokenize(m_parameter->GetParam("xml-brackets")[0]);
+    if(brackets.size()!=2) {
+      cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
+      exit(1);
+    }
+    m_xmlBrackets.first= brackets[0];
+    m_xmlBrackets.second=brackets[1];
+    cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
   }
 
 #ifdef HAVE_SYNLM
-	if (m_parameter->GetParam("slmodel-file").size() > 0) {
-	  if (!LoadSyntacticLanguageModel()) return false;
-	}
+  if (m_parameter->GetParam("slmodel-file").size() > 0) {
+    if (!LoadSyntacticLanguageModel()) return false;
+  }
 #endif
-	
+
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -625,9 +625,9 @@ StaticData::~StaticData()
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
   RemoveAllInColl(m_globalLexicalModels);
-	
+
 #ifdef HAVE_SYNLM
-	delete m_syntacticLanguageModel;
+  delete m_syntacticLanguageModel;
 #endif
 
 
@@ -650,58 +650,59 @@ StaticData::~StaticData()
 }
 
 #ifdef HAVE_SYNLM
-  bool StaticData::LoadSyntacticLanguageModel() {
-    cerr << "Loading syntactic language models..." << std::endl;
-    
-    const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
-    const vector<string> files = m_parameter->GetParam("slmodel-file");
-    
-    const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
-      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
-      : 0;
+bool StaticData::LoadSyntacticLanguageModel()
+{
+  cerr << "Loading syntactic language models..." << std::endl;
 
-    const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
-      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
-      : 500;
+  const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
+  const vector<string> files = m_parameter->GetParam("slmodel-file");
 
-    if (files.size() < 1) {
-      cerr << "No syntactic language model files specified!" << std::endl;
+  const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
+                                TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
+                                : 0;
+
+  const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
+                           TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
+                           : 500;
+
+  if (files.size() < 1) {
+    cerr << "No syntactic language model files specified!" << std::endl;
+    return false;
+  }
+
+  // check if feature is used
+  if (weights.size() >= 1) {
+
+    //cout.setf(ios::scientific,ios::floatfield);
+    //cerr.setf(ios::scientific,ios::floatfield);
+
+    // create the feature
+    m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth);
+
+    /*
+    /////////////////////////////////////////
+    // BEGIN LANE's UNSTABLE EXPERIMENT :)
+    //
+
+    double ppl = m_syntacticLanguageModel->perplexity();
+    cerr << "Probability is " << ppl << endl;
+
+
+    //
+    // END LANE's UNSTABLE EXPERIMENT
+    /////////////////////////////////////////
+    */
+
+
+    if (m_syntacticLanguageModel==NULL) {
       return false;
     }
 
-    // check if feature is used
-    if (weights.size() >= 1) {
-
-      //cout.setf(ios::scientific,ios::floatfield);
-      //cerr.setf(ios::scientific,ios::floatfield);
-      
-      // create the feature
-      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
-
-      /* 
-      /////////////////////////////////////////
-      // BEGIN LANE's UNSTABLE EXPERIMENT :)
-      //
-
-      double ppl = m_syntacticLanguageModel->perplexity();
-      cerr << "Probability is " << ppl << endl;
-
-
-      //
-      // END LANE's UNSTABLE EXPERIMENT
-      /////////////////////////////////////////
-      */
-
-
-      if (m_syntacticLanguageModel==NULL) {
-	return false;
-      }
-
-    }
-    
-    return true;
-
   }
+
+  return true;
+
+}
 #endif
 
 bool StaticData::LoadLexicalReorderingModel()
@@ -830,7 +831,7 @@ bool StaticData::LoadLanguageModels()
     for(size_t i=0; i<lmVector.size(); i++) {
       LanguageModel* lm = NULL;
       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager); 
+        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager);
       } else {
         vector<string>	token		= Tokenize(lmVector[i]);
         if (token.size() != 4 && token.size() != 5 ) {
@@ -1009,13 +1010,12 @@ bool StaticData::LoadPhraseTables()
         // it only work with binrary file. This is a hack
 
         m_numInputScores=m_parameter->GetParam("weight-i").size();
-        
-        if (implementation == Binary)
-        {
+
+        if (implementation == Binary) {
           for(unsigned k=0; k<m_numInputScores; ++k)
             weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
         }
-        
+
         if(m_parameter->GetParam("link-param-count").size())
           m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
 
@@ -1033,7 +1033,7 @@ bool StaticData::LoadPhraseTables()
             return false;
           }
         }
-        
+
       }
       if (!m_inputType) {
         m_numInputScores=0;
@@ -1327,7 +1327,8 @@ void StaticData::AddTransOptListToCache(const DecodeGraph &decodeGraph, const Ph
   m_transOptCache[key] = make_pair( storedTransOptList, clock() );
   ReduceTransOptCache();
 }
-void StaticData::ClearTransOptionCache() const {
+void StaticData::ClearTransOptionCache() const
+{
   map<std::pair<size_t, Phrase>, std::pair< TranslationOptionList*, clock_t > >::iterator iterCache;
   for (iterCache = m_transOptCache.begin() ; iterCache != m_transOptCache.end() ; ++iterCache) {
     TranslationOptionList *transOptList = iterCache->second.first;

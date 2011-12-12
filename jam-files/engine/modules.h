@@ -8,15 +8,14 @@
 
 #include "lists.h"
 
-struct module_t
-{
-    char* name;
-    struct hash* rules;
-    struct hash* variables;
-    struct hash* imported_modules;
-    struct module_t* class_module;
-    struct hash* native_rules;
-    int user_module;
+struct module_t {
+  char* name;
+  struct hash* rules;
+  struct hash* variables;
+  struct hash* imported_modules;
+  struct module_t* class_module;
+  struct hash* native_rules;
+  int user_module;
 };
 
 typedef struct module_t module_t ; /* MSVC debugger gets confused unless this is provided */

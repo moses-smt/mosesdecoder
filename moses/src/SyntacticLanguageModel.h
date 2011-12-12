@@ -12,39 +12,40 @@ class XModel; // observed model
 namespace Moses
 {
 
-  template <class MH, class MO> class SyntacticLanguageModelFiles;
-  
-  class SyntacticLanguageModel : public StatefulFeatureFunction {
+template <class MH, class MO> class SyntacticLanguageModelFiles;
 
-  public:
+class SyntacticLanguageModel : public StatefulFeatureFunction
+{
 
-    SyntacticLanguageModel(const std::vector<std::string>& filePaths,
-			   const std::vector<float>& weights,
-			   const FactorType factorType,
-			   const size_t beamWidth);
+public:
 
-    ~SyntacticLanguageModel();
+  SyntacticLanguageModel(const std::vector<std::string>& filePaths,
+                         const std::vector<float>& weights,
+                         const FactorType factorType,
+                         const size_t beamWidth);
 
-    size_t GetNumScoreComponents() const;
-    std::string GetScoreProducerDescription(unsigned) const;
-    std::string GetScoreProducerWeightShortName(unsigned) const;
+  ~SyntacticLanguageModel();
 
-    const FFState* EmptyHypothesisState(const InputType &input) const;
+  size_t GetNumScoreComponents() const;
+  std::string GetScoreProducerDescription(unsigned) const;
+  std::string GetScoreProducerWeightShortName(unsigned) const;
 
-    FFState* Evaluate(const Hypothesis& cur_hypo,
-		      const FFState* prev_state,
-		      ScoreComponentCollection* accumulator) const;
+  const FFState* EmptyHypothesisState(const InputType &input) const;
 
-    //    double perplexity();
+  FFState* Evaluate(const Hypothesis& cur_hypo,
+                    const FFState* prev_state,
+                    ScoreComponentCollection* accumulator) const;
 
-  private:
+  //    double perplexity();
 
-    const size_t m_NumScoreComponents;
-    SyntacticLanguageModelFiles<YModel,XModel>* m_files;
-    const FactorType m_factorType;
-    const size_t m_beamWidth;
+private:
 
-  };
+  const size_t m_NumScoreComponents;
+  SyntacticLanguageModelFiles<YModel,XModel>* m_files;
+  const FactorType m_factorType;
+  const size_t m_beamWidth;
+
+};
 
 
 }

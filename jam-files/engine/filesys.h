@@ -33,14 +33,13 @@ int file_is_file(char* filename);
 int file_mkdir(char *pathname);
 
 typedef struct file_info_t file_info_t ;
-struct file_info_t
-{
-    char          * name;
-    short           is_file;
-    short           is_dir;
-    unsigned long   size;
-    time_t          time;
-    LIST          * files;
+struct file_info_t {
+  char          * name;
+  short           is_file;
+  short           is_dir;
+  unsigned long   size;
+  time_t          time;
+  LIST          * files;
 };
 
 

@@ -136,7 +136,8 @@ static WordVoc* ReadVoc(const std::string& filename)
 }
 
 
-class PDTimp {
+class PDTimp
+{
 public:
   typedef PrefixTreeF<LabelId,OFF_T> PTF;
   typedef FilePtr<PTF> CPT;

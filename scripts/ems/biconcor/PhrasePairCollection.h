@@ -17,7 +17,7 @@ private:
   TargetCorpus *m_targetCorpus;
   Alignment *m_alignment;
   vector< vector<PhrasePair*> > m_collection;
-	vector< Mismatch* > m_mismatch, m_unaligned;
+  vector< Mismatch* > m_mismatch, m_unaligned;
   int m_size;
   int m_max_lookup;
   int m_max_pp_target;

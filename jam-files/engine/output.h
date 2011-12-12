@@ -14,13 +14,13 @@
 #define EXIT_TIMEOUT 2
 
 void out_action(
-    const char * action,
-    const char * target,
-    const char * command,
-    const char * out_data,
-    const char * err_data,
-    int exit_reason
-    );
+  const char * action,
+  const char * target,
+  const char * command,
+  const char * out_data,
+  const char * err_data,
+  int exit_reason
+);
 
 char * outf_int( int value );
 char * outf_double( double value );

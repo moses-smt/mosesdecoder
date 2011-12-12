@@ -39,13 +39,13 @@ public:
   virtual FFState* Evaluate(const Hypothesis& cur_hypo,
                             const FFState* prev_state,
                             ScoreComponentCollection* accumulator) const;
-	
+
   virtual FFState* EvaluateChart(const ChartHypothesis&,
                                  int /* featureID */,
-																 ScoreComponentCollection*) const {
-		CHECK(0); // not valid for chart decoder
-		return NULL;
-	}
+                                 ScoreComponentCollection*) const {
+    CHECK(0); // not valid for chart decoder
+    return NULL;
+  }
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 

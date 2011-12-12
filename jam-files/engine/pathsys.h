@@ -28,17 +28,15 @@
 typedef struct _pathname PATHNAME;
 typedef struct _pathpart PATHPART;
 
-struct _pathpart
-{
-    char * ptr;
-    int    len;
+struct _pathpart {
+  char * ptr;
+  int    len;
 };
 
-struct _pathname
-{
-    PATHPART    part[6];
+struct _pathname {
+  PATHPART    part[6];
 #ifdef OS_VMS
-    int     parent;
+  int     parent;
 #endif
 
 #define f_grist    part[0]

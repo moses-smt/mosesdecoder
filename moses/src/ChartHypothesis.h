@@ -55,7 +55,7 @@ protected:
   const ChartTranslationOption &m_transOpt;
 
   WordsRange					m_currSourceWordsRange;
-	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
+  std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   ,m_lmNGram
   ,m_lmPrefix;
@@ -94,7 +94,9 @@ public:
 
   ~ChartHypothesis();
 
-  unsigned GetId() const { return m_id; }
+  unsigned GetId() const {
+    return m_id;
+  }
 
   const ChartTranslationOption &GetTranslationOption()const {
     return m_transOpt;
@@ -108,15 +110,17 @@ public:
   inline const ChartArcList* GetArcList() const {
     return m_arcList;
   }
-	inline const FFState* GetFFState( size_t featureID ) const {
-		return m_ffStates[ featureID ];
-	}
-	inline const ChartManager& GetManager() const { return m_manager; }
+  inline const FFState* GetFFState( size_t featureID ) const {
+    return m_ffStates[ featureID ];
+  }
+  inline const ChartManager& GetManager() const {
+    return m_manager;
+  }
 
   void CreateOutputPhrase(Phrase &outPhrase) const;
   Phrase GetOutputPhrase() const;
 
-	int RecombineCompare(const ChartHypothesis &compare) const;
+  int RecombineCompare(const ChartHypothesis &compare) const;
 
   void CalcScore();
 
@@ -135,17 +139,17 @@ public:
     return m_prevHypos;
   }
 
-	const ChartHypothesis* GetPrevHypo(size_t pos) const {
-		return m_prevHypos[pos];
-	}
+  const ChartHypothesis* GetPrevHypo(size_t pos) const {
+    return m_prevHypos[pos];
+  }
 
   const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();
   }
 
-	const ChartHypothesis* GetWinningHypothesis() const {
-		return m_winningHypo;
-	}
+  const ChartHypothesis* GetWinningHypothesis() const {
+    return m_winningHypo;
+  }
 
   TO_STRING();
 

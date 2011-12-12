@@ -11,10 +11,9 @@
  *  \ -) "Command line option."
  */
 
-typedef struct bjam_option
-{
-    char    flag;       /* filled in by getoption() */
-    char    *val;       /* set to random address if true */
+typedef struct bjam_option {
+  char    flag;       /* filled in by getoption() */
+  char    *val;       /* set to random address if true */
 } bjam_option;
 
 # define N_OPTS 256

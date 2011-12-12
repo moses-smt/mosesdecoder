@@ -33,7 +33,7 @@ FactorCollection FactorCollection::s_instance;
 
 const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
-// Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
+// Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.
 #ifdef WITH_THREADS
 #if BOOST_VERSION < 104200
   FactorFriend to_ins;
@@ -42,7 +42,7 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
   {
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
 #if BOOST_VERSION >= 104200
-    // If this line doesn't compile, upgrade your Boost.  
+    // If this line doesn't compile, upgrade your Boost.
     Set::const_iterator i = m_set.find(factorString, HashFactor(), EqualsFactor());
 #else // BOOST_VERSION
     Set::const_iterator i = m_set.find(to_ins);

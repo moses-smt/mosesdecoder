@@ -10,10 +10,12 @@
 namespace Moses
 {
 
-LanguageModelDMapLM::LanguageModelDMapLM() : m_lm(0) {
+LanguageModelDMapLM::LanguageModelDMapLM() : m_lm(0)
+{
 }
 
-LanguageModelDMapLM::~LanguageModelDMapLM() {
+LanguageModelDMapLM::~LanguageModelDMapLM()
+{
   delete m_lm;
 }
 
@@ -51,8 +53,8 @@ void LanguageModelDMapLM::CreateFactor(FactorCollection& factorCollection)
 }
 
 LMResult LanguageModelDMapLM::GetValueGivenState(
-    const std::vector<const Word*>& contextFactor,
-    FFState& state) const
+  const std::vector<const Word*>& contextFactor,
+  FFState& state) const
 {
   DMapLMState& cast_state = static_cast<DMapLMState&>(state);
   LMResult result;
@@ -65,8 +67,8 @@ LMResult LanguageModelDMapLM::GetValueGivenState(
 }
 
 LMResult LanguageModelDMapLM::GetValueForgotState(
-    const std::vector<const Word*>& contextFactor,
-    FFState& outState) const
+  const std::vector<const Word*>& contextFactor,
+  FFState& outState) const
 {
   DMapLMState& cast_state = static_cast<DMapLMState&>(outState);
   LMResult result;
@@ -78,13 +80,13 @@ LMResult LanguageModelDMapLM::GetValueForgotState(
 }
 
 float LanguageModelDMapLM::GetValue(
-    const std::vector<const Word*>& contextFactor,
-    size_t target_order,
-    size_t* succeeding_order) const
+  const std::vector<const Word*>& contextFactor,
+  size_t target_order,
+  size_t* succeeding_order) const
 {
   FactorType factorType = GetFactorType();
   float score;
-  
+
   std::string ngram_string("");
   ngram_string.append(((*contextFactor[0])[factorType])->GetString());
   for (size_t i = 1; i < contextFactor.size(); ++i) {
@@ -97,38 +99,44 @@ float LanguageModelDMapLM::GetValue(
   return score;
 }
 
-const FFState* LanguageModelDMapLM::GetNullContextState() const {
-    DMapLMState* state = new DMapLMState();
-    state->m_last_succeeding_order = GetNGramOrder();
-    return state;
+const FFState* LanguageModelDMapLM::GetNullContextState() const
+{
+  DMapLMState* state = new DMapLMState();
+  state->m_last_succeeding_order = GetNGramOrder();
+  return state;
 }
 
-FFState* LanguageModelDMapLM::GetNewSentenceState() const {
-    DMapLMState* state = new DMapLMState();
-    state->m_last_succeeding_order = GetNGramOrder();
-    return state;
+FFState* LanguageModelDMapLM::GetNewSentenceState() const
+{
+  DMapLMState* state = new DMapLMState();
+  state->m_last_succeeding_order = GetNGramOrder();
+  return state;
 }
 
-const FFState* LanguageModelDMapLM::GetBeginSentenceState() const {
-    DMapLMState* state = new DMapLMState();
-    state->m_last_succeeding_order = GetNGramOrder();
-    return state;
+const FFState* LanguageModelDMapLM::GetBeginSentenceState() const
+{
+  DMapLMState* state = new DMapLMState();
+  state->m_last_succeeding_order = GetNGramOrder();
+  return state;
 }
 
-FFState* LanguageModelDMapLM::NewState(const FFState* state) const {
-    DMapLMState* new_state = new DMapLMState();
-    const DMapLMState* cast_state = static_cast<const DMapLMState*>(state);
-    new_state->m_last_succeeding_order = cast_state->m_last_succeeding_order;
-    return new_state;
+FFState* LanguageModelDMapLM::NewState(const FFState* state) const
+{
+  DMapLMState* new_state = new DMapLMState();
+  const DMapLMState* cast_state = static_cast<const DMapLMState*>(state);
+  new_state->m_last_succeeding_order = cast_state->m_last_succeeding_order;
+  return new_state;
 }
 
-void LanguageModelDMapLM::CleanUpAfterSentenceProcessing() {
+void LanguageModelDMapLM::CleanUpAfterSentenceProcessing()
+{
   m_lm->printStats();
   m_lm->resetStats();
   m_lm->clearCaches();
 }
 
-void LanguageModelDMapLM::InitializeBeforeSentenceProcessing() {
+void LanguageModelDMapLM::InitializeBeforeSentenceProcessing()
+{
 }
 
 }  // namespace Moses

@@ -85,7 +85,7 @@ protected:
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
 #ifdef HAVE_SYNLM
-	SyntacticLanguageModel* m_syntacticLanguageModel;
+  SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
   ScoreIndexManager				m_scoreIndexManager;
   std::vector<float>			m_allWeights;
@@ -212,7 +212,7 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -225,7 +225,7 @@ protected:
   bool LoadLanguageModels();
 #ifdef HAVE_SYNLM
   //! load syntactic language model
-	bool LoadSyntacticLanguageModel();
+  bool LoadSyntacticLanguageModel();
 #endif
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
@@ -439,8 +439,8 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  LMList GetLMList() const { 
-    return m_languageModel; 
+  LMList GetLMList() const {
+    return m_languageModel;
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;
@@ -616,9 +616,10 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
-  
-  long GetStartTranslationId() const
-  { return m_startTranslationId; }
+
+  long GetStartTranslationId() const {
+    return m_startTranslationId;
+  }
 };
 
 }

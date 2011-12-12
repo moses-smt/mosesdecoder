@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
       cerr << "not computing lexical translation score\n";
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
-      if (i+1==argc) { 
+      if (i+1==argc) {
         cerr << "ERROR: specify count of count files for Good Turing discounting!\n";
         exit(1);
       }
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
       cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
     } else if (strcmp(argv[i],"--KneserNey") == 0) {
       kneserNeyFlag = true;
-      if (i+1==argc) { 
+      if (i+1==argc) {
         cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
         exit(1);
       }
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
       cerr << "using unaligned word penalty\n";
     } else if (strcmp(argv[i],"--UnalignedFunctionWordPenalty") == 0) {
       unalignedFWFlag = true;
-      if (i+1==argc) { 
+      if (i+1==argc) {
         cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
         exit(1);
       }
@@ -182,22 +182,21 @@ int main(int argc, char* argv[])
   istream &extractFileP = extractFile;
 
   // output file: phrase translation table
-	ostream *phraseTableFile;
+  ostream *phraseTableFile;
 
-	if (strcmp(fileNamePhraseTable, "-") == 0) {
-		phraseTableFile = &cout;
-	}
-	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNamePhraseTable);
-		if (outputFile->fail()) {
-			cerr << "ERROR: could not open file phrase table file "
-					 << fileNamePhraseTable << endl;
-			exit(1);
-		}
-		phraseTableFile = outputFile;
-	}
-	
+  if (strcmp(fileNamePhraseTable, "-") == 0) {
+    phraseTableFile = &cout;
+  } else {
+    ofstream *outputFile = new ofstream();
+    outputFile->open(fileNamePhraseTable);
+    if (outputFile->fail()) {
+      cerr << "ERROR: could not open file phrase table file "
+           << fileNamePhraseTable << endl;
+      exit(1);
+    }
+    phraseTableFile = outputFile;
+  }
+
   // loop through all extracted phrase translations
   float lastCount = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
@@ -242,12 +241,12 @@ int main(int argc, char* argv[])
     lastPhrasePair = &phrasePairsWithSameF.back();
   }
   processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
-	
-	phraseTableFile->flush();
-	if (phraseTableFile != &cout) {
-		(dynamic_cast<ofstream*>(phraseTableFile))->close();
-		delete phraseTableFile;
-	}
+
+  phraseTableFile->flush();
+  if (phraseTableFile != &cout) {
+    (dynamic_cast<ofstream*>(phraseTableFile))->close();
+    delete phraseTableFile;
+  }
 
   // output count of count statistics
   if (goodTuringFlag || kneserNeyFlag) {
@@ -258,13 +257,13 @@ int main(int argc, char* argv[])
 void writeCountOfCounts( const char* fileNameCountOfCounts )
 {
   // open file
-	ofstream countOfCountsFile;
-	countOfCountsFile.open(fileNameCountOfCounts);
-	if (countOfCountsFile.fail()) {
-		cerr << "ERROR: could not open count-of-counts file "
-				 << fileNameCountOfCounts << endl;
+  ofstream countOfCountsFile;
+  countOfCountsFile.open(fileNameCountOfCounts);
+  if (countOfCountsFile.fail()) {
+    cerr << "ERROR: could not open count-of-counts file "
+         << fileNameCountOfCounts << endl;
     return;
-	}
+  }
 
   // Kneser-Ney needs the total number of phrase pairs
   countOfCountsFile << totalDistinct;
@@ -273,7 +272,7 @@ void writeCountOfCounts( const char* fileNameCountOfCounts )
   for(int i=1; i<=COC_MAX; i++) {
     countOfCountsFile << countOfCounts[ i ] << endl;
   }
-	countOfCountsFile.close();
+  countOfCountsFile.close();
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
@@ -335,14 +334,12 @@ void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
                       , map<size_t, map<size_t, float> > &probs)
 {
   map<size_t, map<size_t, size_t> >::const_iterator iterOuter;
-  for (iterOuter = lengths.begin(); iterOuter != lengths.end(); ++iterOuter)
-  {
+  for (iterOuter = lengths.begin(); iterOuter != lengths.end(); ++iterOuter) {
     size_t sourcePos = iterOuter->first;
     const map<size_t, size_t> &inner = iterOuter->second;
-    
+
     map<size_t, size_t>::const_iterator iterInner;
-    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
-    {
+    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner) {
       size_t length = iterInner->first;
       size_t count = iterInner->second;
       float prob = (float) count / (float) total;
@@ -360,54 +357,49 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
   map<size_t, size_t> totals;
   // 1st = position in source phrase, 2nd = total counts
   // each source pos should have same count?
-  
+
   vector< PhraseAlignment* >::const_iterator iterOuter;
-  for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter)
-  {
+  for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter) {
     const PhraseAlignment &phrasePair = **iterOuter;
     const std::map<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
-    
+
     std::map<size_t, std::pair<size_t, size_t> >::const_iterator iterInner;
-    for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner)
-    {
+    for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner) {
       size_t sourcePos = iterInner->first;
       size_t sourceLength = iterInner->second.first;
       size_t targetLength = iterInner->second.second;
-      
+
       sourceLengths[sourcePos][sourceLength]++;
       targetLengths[sourcePos][targetLength]++;
 
       totals[sourcePos]++;
     }
   }
-    
-  if (totals.size() == 0)
-  { // no non-term. Don't bother
+
+  if (totals.size() == 0) {
+    // no non-term. Don't bother
     return;
   }
 
   size_t total = totals.begin()->second;
-  if (totals.size() > 1)
-  {
+  if (totals.size() > 1) {
     assert(total == (++totals.begin())->second );
   }
-  
+
   calcNTLengthProb(sourceLengths, total, sourceProb);
   calcNTLengthProb(targetLengths, total, targetProb);
-  
+
 }
 
 void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
 {
   map<size_t, map<size_t, float> >::const_iterator iterOuter;
-  for (iterOuter = probs.begin(); iterOuter != probs.end(); ++iterOuter)
-  {
+  for (iterOuter = probs.begin(); iterOuter != probs.end(); ++iterOuter) {
     size_t sourcePos = iterOuter->first;
     const map<size_t, float> &inner = iterOuter->second;
-    
+
     map<size_t, float>::const_iterator iterInner;
-    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
-    {
+    for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner) {
       size_t length = iterInner->first;
       float prob = iterInner->second;
 
@@ -422,7 +414,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   if (phrasePair.size() == 0) return;
 
   PhraseAlignment *bestAlignment = findBestAlignment( phrasePair );
-    
+
   // compute count
   float count = 0;
   for(size_t i=0; i<phrasePair.size(); i++) {
@@ -522,28 +514,26 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   }
 
   // counts
-  
+
   phraseTableFile << " ||| " << totalCount << " " << count;
-  if (kneserNeyFlag) 
+  if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
-  
-  // nt lengths  
-  if (outputNTLengths)
-  {
+
+  // nt lengths
+  if (outputNTLengths) {
     phraseTableFile << " ||| ";
 
-    if (!inverseFlag)
-    {
+    if (!inverseFlag) {
       map<size_t, map<size_t, float> > sourceProb, targetProb;
       // 1st sourcePos, 2nd = length, 3rd = prob
 
       calcNTLengthProb(phrasePair, sourceProb, targetProb);
-      
+
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
       outputNTLengthProbs(phraseTableFile, targetProb, "T");
-    }    
+    }
   }
-  
+
   phraseTableFile << endl;
 }
 

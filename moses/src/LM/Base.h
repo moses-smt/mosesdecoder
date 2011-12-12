@@ -35,7 +35,8 @@ class Phrase;
 class ScoreIndexManager;
 
 //! Abstract base class which represent a language model on a contiguous phrase
-class LanguageModel : public StatefulFeatureFunction {
+class LanguageModel : public StatefulFeatureFunction
+{
 protected:
   LanguageModel();
 
@@ -43,11 +44,11 @@ protected:
   void Init(ScoreIndexManager &scoreIndexManager);
 
   bool m_enableOOVFeature;
-  
+
 public:
   virtual ~LanguageModel();
 
-  // Make another feature without copying the underlying model data.  
+  // Make another feature without copying the underlying model data.
   virtual LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const = 0;
 
   //! see ScoreProducer.h

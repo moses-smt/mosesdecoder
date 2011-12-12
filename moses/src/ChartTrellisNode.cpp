@@ -31,16 +31,16 @@ namespace Moses
 {
 
 ChartTrellisNode::ChartTrellisNode(const ChartHypothesis &hypo)
-    : m_hypo(hypo)
+  : m_hypo(hypo)
 {
   CreateChildren();
 }
 
 ChartTrellisNode::ChartTrellisNode(const ChartTrellisDetour &detour,
                                    ChartTrellisNode *&deviationPoint)
-    : m_hypo((&detour.GetBasePath().GetFinalNode() == &detour.GetSubstitutedNode())
-             ? detour.GetReplacementHypo()
-             : detour.GetBasePath().GetFinalNode().GetHypothesis())
+  : m_hypo((&detour.GetBasePath().GetFinalNode() == &detour.GetSubstitutedNode())
+           ? detour.GetReplacementHypo()
+           : detour.GetBasePath().GetFinalNode().GetHypothesis())
 {
   if (&m_hypo == &detour.GetReplacementHypo()) {
     deviationPoint = this;
@@ -56,9 +56,9 @@ ChartTrellisNode::ChartTrellisNode(const ChartTrellisNode &root,
                                    const ChartTrellisNode &substitutedNode,
                                    const ChartHypothesis &replacementHypo,
                                    ChartTrellisNode *&deviationPoint)
-    : m_hypo((&root == &substitutedNode)
-             ? replacementHypo
-             : root.GetHypothesis())
+  : m_hypo((&root == &substitutedNode)
+           ? replacementHypo
+           : root.GetHypothesis())
 {
   if (&root == &substitutedNode) {
     deviationPoint = this;
@@ -124,8 +124,8 @@ void ChartTrellisNode::CreateChildren(const ChartTrellisNode &rootNode,
   for (size_t ind = 0; ind < children.size(); ++ind) {
     const ChartTrellisNode *origChild = children[ind];
     ChartTrellisNode *child = new ChartTrellisNode(*origChild, substitutedNode,
-                                                   replacementHypo,
-                                                   deviationPoint);
+        replacementHypo,
+        deviationPoint);
     m_children.push_back(child);
   }
 }

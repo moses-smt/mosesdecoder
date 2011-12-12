@@ -8,16 +8,18 @@
 #include <set>
 #include <vector>
 
-namespace moses {
+namespace moses
+{
 
 class Options;
 
 // Tool for converting a rule table into a more compact format.
-class Compactify : public Tool {
- public:
+class Compactify : public Tool
+{
+public:
   Compactify() : Tool("compactify") {}
   virtual int main(int, char *[]);
- private:
+private:
   typedef unsigned int SymbolIDType;
   typedef unsigned int PhraseIDType;
   typedef unsigned int AlignmentSetIDType;

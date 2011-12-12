@@ -15,30 +15,31 @@
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
 bool PhraseDictionaryHiero::Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , const LMList &languageModels
-            , const WordPenaltyProducer* wpProducer)
+                                 , const std::vector<FactorType> &output
+                                 , const std::string &filePath
+                                 , const std::vector<float> &weight
+                                 , size_t tableLimit
+                                 , const LMList &languageModels
+                                 , const WordPenaltyProducer* wpProducer)
 {
   m_filePath = filePath;
   m_tableLimit = tableLimit;
-  
-  
+
+
   // data from file
   InputFileStream inFile(filePath);
-  
+
   std::auto_ptr<RuleTableLoader> loader =
-  RuleTableLoaderFactory::Create(filePath);
+    RuleTableLoaderFactory::Create(filePath);
   bool ret = loader->Load(input, output, inFile, weight, tableLimit,
                           languageModels, wpProducer, *this);
   return ret;
 }
-  
+
 } // namespace
 
 

@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,8 +41,10 @@
 #include <sstream>
 #include <vector>
 
-namespace Moses {
-namespace GHKM {
+namespace Moses
+{
+namespace GHKM
+{
 
 int ExtractGHKM::Main(int argc, char *argv[])
 {
@@ -249,49 +251,49 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Declare the command line options that are visible to the user.
   po::options_description visible(usageTop.str());
   visible.add_options()
-    //("help", "print this help message and exit")
-    ("AllowUnary",
-        "allow fully non-lexical unary rules")
-    ("GlueGrammar",
-        po::value(&options.glueGrammarFile),
-        "write glue grammar to named file")
-    ("MaxNodes",
-        po::value(&options.maxNodes)->default_value(options.maxNodes),
-        "set maximum number of tree nodes for composed rules")
-    ("MaxRuleDepth",
-        po::value(&options.maxRuleDepth)->default_value(options.maxRuleDepth),
-        "set maximum depth for composed rules")
-    ("MaxRuleSize",
-        po::value(&options.maxRuleSize)->default_value(options.maxRuleSize),
-        "set maximum size for composed rules")
-    ("MaxScope",
-        po::value(&options.maxScope)->default_value(options.maxScope),
-        "set maximum allowed scope")
-    ("Minimal",
-        "extract minimal rules only")
-    ("UnknownWordLabel",
-        po::value(&options.unknownWordFile),
-        "write unknown word labels to named file")
-    ("UnpairedExtractFormat",
-        "do not pair non-terminals in extract files")
+  //("help", "print this help message and exit")
+  ("AllowUnary",
+   "allow fully non-lexical unary rules")
+  ("GlueGrammar",
+   po::value(&options.glueGrammarFile),
+   "write glue grammar to named file")
+  ("MaxNodes",
+   po::value(&options.maxNodes)->default_value(options.maxNodes),
+   "set maximum number of tree nodes for composed rules")
+  ("MaxRuleDepth",
+   po::value(&options.maxRuleDepth)->default_value(options.maxRuleDepth),
+   "set maximum depth for composed rules")
+  ("MaxRuleSize",
+   po::value(&options.maxRuleSize)->default_value(options.maxRuleSize),
+   "set maximum size for composed rules")
+  ("MaxScope",
+   po::value(&options.maxScope)->default_value(options.maxScope),
+   "set maximum allowed scope")
+  ("Minimal",
+   "extract minimal rules only")
+  ("UnknownWordLabel",
+   po::value(&options.unknownWordFile),
+   "write unknown word labels to named file")
+  ("UnpairedExtractFormat",
+   "do not pair non-terminals in extract files")
   ;
 
   // Declare the command line options that are hidden from the user
   // (these are used as positional options).
   po::options_description hidden("Hidden options");
   hidden.add_options()
-    ("TargetFile",
-        po::value(&options.targetFile),
-        "target file")
-    ("SourceFile",
-        po::value(&options.sourceFile),
-        "source file")
-    ("AlignmentFile",
-        po::value(&options.alignmentFile),
-        "alignment file")
-    ("ExtractFile",
-        po::value(&options.extractFile),
-        "extract file")
+  ("TargetFile",
+   po::value(&options.targetFile),
+   "target file")
+  ("SourceFile",
+   po::value(&options.sourceFile),
+   "source file")
+  ("AlignmentFile",
+   po::value(&options.alignmentFile),
+   "alignment file")
+  ("ExtractFile",
+   po::value(&options.extractFile),
+   "extract file")
   ;
 
   // Compose the full set of command-line options.
@@ -308,8 +310,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   // Process the command-line.
   po::variables_map vm;
   const int optionStyle = cls::allow_long
-                        | cls::long_allow_adjacent
-                        | cls::long_allow_next;
+                          | cls::long_allow_adjacent
+                          | cls::long_allow_next;
   try {
     po::store(po::command_line_parser(argc, argv).style(optionStyle).
               options(cmdLineOptions).positional(p).run(), vm);
@@ -429,9 +431,9 @@ void ExtractGHKM::RecordTreeLabels(const ParseTree &t,
 }
 
 void ExtractGHKM::CollectWordLabelCounts(
-    ParseTree &root,
-    std::map<std::string, int> &wordCount,
-    std::map<std::string, std::string> &wordLabel)
+  ParseTree &root,
+  std::map<std::string, int> &wordCount,
+  std::map<std::string, std::string> &wordLabel)
 {
   std::vector<const ParseTree*> leaves;
   root.GetLeaves(std::back_inserter(leaves));
@@ -446,9 +448,9 @@ void ExtractGHKM::CollectWordLabelCounts(
 }
 
 void ExtractGHKM::WriteUnknownWordLabel(
-    const std::map<std::string, int> &wordCount,
-    const std::map<std::string, std::string> &wordLabel,
-    std::ostream &out)
+  const std::map<std::string, int> &wordCount,
+  const std::map<std::string, std::string> &wordLabel,
+  std::ostream &out)
 {
   std::map<std::string, int> labelCount;
   int total = 0;

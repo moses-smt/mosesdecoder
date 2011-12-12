@@ -544,13 +544,13 @@ void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
   HoleList::const_iterator iterHole;
   for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
     const Hole &hole = *iterHole;
-        
+
     std::string sourceSymbolIndex = IntToString(hole.GetPos(0));
     std::string targetSymbolIndex = IntToString(hole.GetPos(1));
     rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
     if (!options.onlyDirectFlag)
       rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
-  
+
     rule.SetSpanLength(hole.GetPos(0), hole.GetSize(0), hole.GetSize(1) ) ;
 
   }
@@ -883,7 +883,7 @@ void writeRulesToFile()
                 << rule->count;
     if (options.outputNTLengths) {
       extractFile << " ||| ";
-      rule->OutputNTLengths(extractFile); 
+      rule->OutputNTLengths(extractFile);
     }
     extractFile << "\n";
 
@@ -891,7 +891,7 @@ void writeRulesToFile()
       extractFileInv << rule->target << " ||| "
                      << rule->source << " ||| "
                      << rule->alignmentInv << " ||| "
-                      << rule->count << "\n";
+                     << rule->count << "\n";
     }
   }
 }

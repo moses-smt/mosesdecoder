@@ -34,7 +34,7 @@ class Word;
 
 class ChartCellLabel
 {
- public:
+public:
   ChartCellLabel(const WordsRange &coverage, const Word &label,
                  const ChartHypothesisCollection *stack=NULL)
     : m_coverage(coverage)
@@ -42,12 +42,17 @@ class ChartCellLabel
     , m_stack(stack)
   {}
 
-  const WordsRange &GetCoverage() const { return m_coverage; }
-  const Word &GetLabel() const { return m_label; }
-  const ChartHypothesisCollection *GetStack() const { return m_stack; }
+  const WordsRange &GetCoverage() const {
+    return m_coverage;
+  }
+  const Word &GetLabel() const {
+    return m_label;
+  }
+  const ChartHypothesisCollection *GetStack() const {
+    return m_stack;
+  }
 
-  bool operator<(const ChartCellLabel &other) const
-  {
+  bool operator<(const ChartCellLabel &other) const {
     // m_coverage and m_label uniquely identify a ChartCellLabel, so don't
     // need to compare m_stack.
     if (m_coverage == other.m_coverage) {
@@ -56,7 +61,7 @@ class ChartCellLabel
     return m_coverage < other.m_coverage;
   }
 
- private:
+private:
   const WordsRange &m_coverage;
   const Word &m_label;
   const ChartHypothesisCollection *m_stack;

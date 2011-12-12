@@ -69,7 +69,7 @@ public:
   void CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct=0) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
-	void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
+  void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
 
   const InputType& GetSource() const {
     return m_source;
@@ -89,7 +89,9 @@ public:
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
   }
 
-  unsigned GetNextHypoId() { return m_hypothesisId++; }
+  unsigned GetNextHypoId() {
+    return m_hypothesisId++;
+  }
 };
 
 }

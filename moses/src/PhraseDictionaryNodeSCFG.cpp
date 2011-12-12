@@ -109,9 +109,9 @@ void PhraseDictionaryNodeSCFG::Clear()
   m_sourceTermMap.clear();
   m_nonTermMap.clear();
   delete m_targetPhraseCollection;
-  
+
 }
-  
+
 std::ostream& operator<<(std::ostream &out, const PhraseDictionaryNodeSCFG &node)
 {
   out << node.GetTargetPhraseCollection();

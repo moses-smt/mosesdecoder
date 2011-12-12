@@ -10,18 +10,22 @@
 #include <istream>
 #include <string>
 
-namespace moses {
+namespace moses
+{
 
 RuleTableParser::RuleTableParser()
-  : m_input(0) {
+  : m_input(0)
+{
 }
 
 RuleTableParser::RuleTableParser(std::istream &input)
-  : m_input(&input) {
+  : m_input(&input)
+{
   ++(*this);
 }
 
-RuleTableParser & RuleTableParser::operator++() {
+RuleTableParser & RuleTableParser::operator++()
+{
   if (!m_input) {
     return *this;
   }
@@ -33,13 +37,15 @@ RuleTableParser & RuleTableParser::operator++() {
   return *this;
 }
 
-RuleTableParser RuleTableParser::operator++(int) {
+RuleTableParser RuleTableParser::operator++(int)
+{
   RuleTableParser tmp(*this);
   ++(*this);
   return tmp;
 }
 
-void RuleTableParser::parseLine(const std::string &line) {
+void RuleTableParser::parseLine(const std::string &line)
+{
   // Source symbols
   size_t pos = line.find("|||");
   if (pos == std::string::npos) {
@@ -129,7 +135,8 @@ void RuleTableParser::parseLine(const std::string &line) {
                boost::algorithm::token_compress_on);
 }
 
-void RuleTableParser::trimPairedSymbolFromLeft(std::string &s) {
+void RuleTableParser::trimPairedSymbolFromLeft(std::string &s)
+{
   size_t len = s.size();
   if (len < 2 || s[0] != '[' || s[len-1] != ']') {
     return;
@@ -143,7 +150,8 @@ void RuleTableParser::trimPairedSymbolFromLeft(std::string &s) {
   s.erase(0, pos);
 }
 
-void RuleTableParser::trimPairedSymbolFromRight(std::string &s) {
+void RuleTableParser::trimPairedSymbolFromRight(std::string &s)
+{
   size_t len = s.size();
   if (len < 2 || s[0] != '[' || s[len-1] != ']') {
     return;
@@ -157,11 +165,13 @@ void RuleTableParser::trimPairedSymbolFromRight(std::string &s) {
   s.resize(pos);
 }
 
-bool operator==(const RuleTableParser &lhs, const RuleTableParser &rhs) {
+bool operator==(const RuleTableParser &lhs, const RuleTableParser &rhs)
+{
   return lhs.m_input == rhs.m_input;
 }
 
-bool operator!=(const RuleTableParser &lhs, const RuleTableParser &rhs) {
+bool operator!=(const RuleTableParser &lhs, const RuleTableParser &rhs)
+{
   return !(lhs == rhs);
 }
 

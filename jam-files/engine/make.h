@@ -14,12 +14,12 @@ int make( int n_targets, const char **targets, int anyhow );
 int make1( TARGET *t );
 
 typedef struct {
-    int temp;
-    int updating;
-    int cantfind;
-    int cantmake;
-    int targets;
-    int made;
+  int temp;
+  int updating;
+  int cantfind;
+  int cantmake;
+  int targets;
+  int made;
 } COUNTS ;
 
 

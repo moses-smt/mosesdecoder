@@ -34,40 +34,45 @@ class ChartHypothesisCollection;
 
 class ChartCellLabelSet
 {
- private:
+private:
   typedef std::set<ChartCellLabel> SetType;
 
- public:
+public:
   typedef SetType::const_iterator const_iterator;
 
   ChartCellLabelSet(const WordsRange &coverage) : m_coverage(coverage) {}
 
-  const_iterator begin() const { return m_set.begin(); }
-  const_iterator end() const { return m_set.end(); }
+  const_iterator begin() const {
+    return m_set.begin();
+  }
+  const_iterator end() const {
+    return m_set.end();
+  }
 
-  void AddWord(const Word &w)
-  {
+  void AddWord(const Word &w) {
     ChartCellLabel cellLabel(m_coverage, w);
     m_set.insert(cellLabel);
   }
 
-  void AddConstituent(const Word &w, const ChartHypothesisCollection &stack)
-  {
+  void AddConstituent(const Word &w, const ChartHypothesisCollection &stack) {
     ChartCellLabel cellLabel(m_coverage, w, &stack);
     m_set.insert(cellLabel);
   }
 
-  bool Empty() const { return m_set.empty(); }
+  bool Empty() const {
+    return m_set.empty();
+  }
 
-  size_t GetSize() const { return m_set.size(); }
+  size_t GetSize() const {
+    return m_set.size();
+  }
 
-  const ChartCellLabel *Find(const Word &w) const
-  {
+  const ChartCellLabel *Find(const Word &w) const {
     SetType::const_iterator p = m_set.find(ChartCellLabel(m_coverage, w));
     return p == m_set.end() ? 0 : &(*p);
   }
 
- private:
+private:
   const WordsRange &m_coverage;
   SetType m_set;
 };

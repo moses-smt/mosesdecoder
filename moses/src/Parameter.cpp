@@ -71,10 +71,10 @@ Parameter::Parameter()
   AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 #ifdef HAVE_SYNLM
-	AddParam("slmodel-file", "location of the syntactic language model file(s)");
-	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
-	AddParam("slmodel-factor", "factor to use with syntactic language model");
-	AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
+  AddParam("slmodel-file", "location of the syntactic language model file(s)");
+  AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
+  AddParam("slmodel-factor", "factor to use with syntactic language model");
+  AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
 #endif
   AddParam("stack", "s", "maximum stack size for histogram pruning");
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
@@ -277,14 +277,13 @@ bool Parameter::Validate()
   PARAM_MAP::const_iterator iterParams;
   for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
     const std::string &key = iterParams->first;
-    
-    if (m_valid.find(key) == m_valid.end())
-    {
+
+    if (m_valid.find(key) == m_valid.end()) {
       UserMessage::Add("Unknown parameter " + key);
       noErrorFlag = false;
     }
   }
-  
+
 
   // required parameters
   if (m_setting["ttable-file"].size() == 0) {
@@ -307,7 +306,7 @@ bool Parameter::Validate()
   }
 
   if (m_setting["lmodel-file"].size() * (m_setting.find("lmodel-oov-feature") != m_setting.end() ? 2 : 1)
-         != m_setting["weight-l"].size()) {
+      != m_setting["weight-l"].size()) {
     stringstream errorMsg("");
     errorMsg << "Config and parameters specify "
              << static_cast<int>(m_setting["lmodel-file"].size())
@@ -457,8 +456,7 @@ bool Parameter::ReadConfigFile(const string &filePath )
 
     if (line.size() == 0) {
       // blank line. do nothing.
-    }
-    else if (line[0]=='[') {
+    } else if (line[0]=='[') {
       // new parameter
       for (size_t currPos = 0 ; currPos < line.size() ; currPos++) {
         if (line[currPos] == ']') {

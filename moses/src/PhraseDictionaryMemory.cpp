@@ -44,14 +44,17 @@ using namespace std;
 namespace Moses
 {
 
-namespace {
-void ParserDeath(const std::string &file, size_t line_num) {
+namespace
+{
+void ParserDeath(const std::string &file, size_t line_num)
+{
   stringstream strme;
   strme << "Syntax error at " << file << ":" << line_num;
   UserMessage::Add(strme.str());
   abort();
 }
-template <class It> StringPiece GrabOrDie(It &it, const std::string &file, size_t line_num) {
+template <class It> StringPiece GrabOrDie(It &it, const std::string &file, size_t line_num)
+{
   if (!it) ParserDeath(file, line_num);
   return *it++;
 }
@@ -101,7 +104,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty source, skipping\n");
       continue;
     }
- 
+
     //target
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
     targetPhrase->SetSourcePhrase(&sourcePhrase); // TODO(bhaddow): This is a dangling pointer
@@ -110,7 +113,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     scv.clear();
     for (util::TokenIter<util::AnyCharacter, true> token(scoreString, util::AnyCharacter(" \t")); token; ++token) {
       char *err_ind;
-      // Token is always delimited by some form of space.  Also, apparently strtod is portable but strtof isn't.  
+      // Token is always delimited by some form of space.  Also, apparently strtod is portable but strtof isn't.
       scv.push_back(FloorScore(TransformScore(static_cast<float>(strtod(token->data(), &err_ind)))));
       if (err_ind == token->data()) {
         stringstream strme;
@@ -133,7 +136,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       targetPhrase->SetAlignmentInfo(*pipes++);
       ++consumed;
     }
-    // Check number of entries delimited by ||| agrees across all lines.  
+    // Check number of entries delimited by ||| agrees across all lines.
     for (; pipes; ++pipes, ++consumed) {}
     if (numElement != consumed) {
       if (numElement == NOT_FOUND) {
@@ -146,7 +149,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
 
-    // Reuse source if possible.  Otherwise, create node for it.  
+    // Reuse source if possible.  Otherwise, create node for it.
     if (preSourceString == sourcePhraseString && preSourceNode) {
       preSourceNode->Add(targetPhrase.release());
     } else {

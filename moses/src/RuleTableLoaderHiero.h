@@ -11,7 +11,8 @@
 
 #include "RuleTableLoaderStandard.h"
 
-namespace Moses {
+namespace Moses
+{
 
 class RuleTableLoaderHiero : public RuleTableLoaderStandard
 {

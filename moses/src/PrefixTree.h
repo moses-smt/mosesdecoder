@@ -61,7 +61,7 @@ public:
       keys.insert(i,*b);
       data.insert(data.begin()+pos,def);
 
-	  Self *self = NULL;
+      Self *self = NULL;
       ptr.insert(ptr.begin()+pos, self);
     }
     if(++b!=e) {

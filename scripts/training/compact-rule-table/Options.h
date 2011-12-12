@@ -4,10 +4,11 @@
 
 #include <string>
 
-namespace moses {
+namespace moses
+{
 
 struct Options {
- public:
+public:
   Options() {}
   std::string inputFile;
   std::string outputFile;

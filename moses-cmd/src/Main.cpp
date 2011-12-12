@@ -83,7 +83,7 @@ public:
     m_detailedTranslationCollector(detailedTranslationCollector),
     m_alignmentInfoCollector(alignmentInfoCollector) {}
 
-	/** Translate one sentence
+  /** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
 
@@ -130,7 +130,7 @@ public:
         manager.SerializeSearchGraphPB(m_lineNumber, output);
       }
 #endif
-    }		
+    }
 
     // apply decision rule and output best translation(s)
     if (m_outputCollector) {
@@ -145,8 +145,7 @@ public:
 
       // MAP decoding: best hypothesis
       const Hypothesis* bestHypo = NULL;
-      if (!staticData.UseMBR()) 
-			{
+      if (!staticData.UseMBR()) {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
           if (staticData.IsPathRecoveryEnabled()) {
@@ -165,11 +164,10 @@ public:
           }
         }
         out << endl;
-			}
+      }
 
       // MBR decoding (n-best MBR, lattice MBR, consensus)
-      else 
-			{
+      else {
         // we first need the n-best translations
         size_t nBestSize = staticData.GetMBRSize();
         if (nBestSize <= 0) {
@@ -205,7 +203,7 @@ public:
         }
 
         // consensus decoding
-				else if (staticData.UseConsensusDecoding()) {
+        else if (staticData.UseConsensusDecoding()) {
           const TrellisPath &conBestHypo = doConsensusDecoding(manager,nBestList);
           OutputBestHypo(conBestHypo, m_lineNumber,
                          staticData.GetReportSegmentation(),
@@ -214,8 +212,8 @@ public:
           IFVERBOSE(2) {
             PrintUserTime("finished Consensus decoding");
           }
-				}
-				
+        }
+
         // n-best MBR decoding
         else {
           const Moses::TrellisPath &mbrBestHypo = doMBR(nBestList);
@@ -482,7 +480,7 @@ int main(int argc, char** argv)
                           alignmentInfoCollector.get() );
     // execute task
 #ifdef WITH_THREADS
-  pool.Submit(task);
+    pool.Submit(task);
 #else
     task->Run();
 #endif

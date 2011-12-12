@@ -231,17 +231,17 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
 {
   size_t size = m_source.GetSize();
 
-	// which hypotheses are reachable?
-	std::map<unsigned,bool> reachable;
-	WordsRange fullRange(0, size-1);
-	const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
+  // which hypotheses are reachable?
+  std::map<unsigned,bool> reachable;
+  WordsRange fullRange(0, size-1);
+  const ChartCell &lastCell = m_hypoStackColl.Get(fullRange);
   const ChartHypothesis *hypo = lastCell.GetBestHypothesis();
 
   if (hypo == NULL) {
     // no hypothesis
     return;
   }
-	FindReachableHypotheses( hypo, reachable);
+  FindReachableHypotheses( hypo, reachable);
 
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
@@ -257,42 +257,40 @@ void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearch
 
 void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const
 {
-	// do not recurse, if already visited
-	if (reachable.find(hypo->GetId()) != reachable.end())
-	{
-		return;
-	}
+  // do not recurse, if already visited
+  if (reachable.find(hypo->GetId()) != reachable.end()) {
+    return;
+  }
 
-	// recurse
-	reachable[ hypo->GetId() ] = true;
-	const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
-	for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i)
-	{
-		FindReachableHypotheses( *i, reachable );
-	}	
+  // recurse
+  reachable[ hypo->GetId() ] = true;
+  const std::vector<const ChartHypothesis*> &previous = hypo->GetPrevHypos();
+  for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i) {
+    FindReachableHypotheses( *i, reachable );
+  }
 
-	// also loop over recombined hypotheses (arcs)
-	const ChartArcList *arcList = hypo->GetArcList();
-	if (arcList) {
-		ChartArcList::const_iterator iterArc;
-		for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
-			const ChartHypothesis &arc = **iterArc;
-			FindReachableHypotheses( &arc, reachable );
-		}
-	}
+  // also loop over recombined hypotheses (arcs)
+  const ChartArcList *arcList = hypo->GetArcList();
+  if (arcList) {
+    ChartArcList::const_iterator iterArc;
+    for (iterArc = arcList->begin(); iterArc != arcList->end(); ++iterArc) {
+      const ChartHypothesis &arc = **iterArc;
+      FindReachableHypotheses( &arc, reachable );
+    }
+  }
 }
 
 void ChartManager::CreateDeviantPaths(
-    boost::shared_ptr<const ChartTrellisPath> basePath,
-    ChartTrellisDetourQueue &q)
+  boost::shared_ptr<const ChartTrellisPath> basePath,
+  ChartTrellisDetourQueue &q)
 {
   CreateDeviantPaths(basePath, basePath->GetFinalNode(), q);
 }
 
 void ChartManager::CreateDeviantPaths(
-    boost::shared_ptr<const ChartTrellisPath> basePath,
-    const ChartTrellisNode &substitutedNode,
-    ChartTrellisDetourQueue &queue)
+  boost::shared_ptr<const ChartTrellisPath> basePath,
+  const ChartTrellisNode &substitutedNode,
+  ChartTrellisDetourQueue &queue)
 {
   const ChartArcList *arcList = substitutedNode.GetHypothesis().GetArcList();
   if (arcList) {

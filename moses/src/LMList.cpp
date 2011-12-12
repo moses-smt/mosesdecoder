@@ -46,7 +46,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
     const float weightLM = lm.GetWeight();
     const float oovWeightLM = lm.GetOOVWeight();
 
-    float fullScore, nGramScore; 
+    float fullScore, nGramScore;
     size_t oovCount;
 
     // do not process, if factors not defined yet (happens in partial translation options)
@@ -64,7 +64,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
     } else {
       breakdown->Assign(&lm, nGramScore);  // I'm not sure why += doesn't work here- it should be 0.0 right?
     }
-    
+
 
     retFullScore   += fullScore * weightLM;
     retNGramScore	+= nGramScore * weightLM;

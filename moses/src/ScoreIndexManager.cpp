@@ -1,4 +1,4 @@
- // $Id$
+// $Id$
 
 #include <iostream>
 #include <iomanip>
@@ -29,9 +29,9 @@ void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
   m_last += numScoreCompsProduced;
   m_ends.push_back(m_last);
   VERBOSE(3,"Added ScoreProducer(" << sp->GetScoreBookkeepingID()
-  					<< " " << sp->GetScoreProducerDescription()
-  					<< ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
-  
+          << " " << sp->GetScoreProducerDescription()
+          << ") index=" << m_begins.back() << "-" << m_ends.back()-1 << std::endl);
+
 }
 
 void ScoreIndexManager::PrintLabeledScores(std::ostream& os, const ScoreComponentCollection& scores) const

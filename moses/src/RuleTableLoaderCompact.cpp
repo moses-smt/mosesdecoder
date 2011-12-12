@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -88,9 +88,9 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 }
 
 void RuleTableLoaderCompact::LoadVocabularySection(
-    LineReader &reader,
-    const std::vector<FactorType> &factorTypes,
-    std::vector<Word> &vocabulary)
+  LineReader &reader,
+  const std::vector<FactorType> &factorTypes,
+  std::vector<Word> &vocabulary)
 {
   // Read symbol count.
   reader.ReadLine();
@@ -110,10 +110,10 @@ void RuleTableLoaderCompact::LoadVocabularySection(
 }
 
 void RuleTableLoaderCompact::LoadPhraseSection(
-    LineReader &reader,
-    const std::vector<Word> &vocab,
-    std::vector<Phrase> &rhsPhrases,
-    std::vector<size_t> &lhsIds)
+  LineReader &reader,
+  const std::vector<Word> &vocab,
+  std::vector<Phrase> &rhsPhrases,
+  std::vector<size_t> &lhsIds)
 {
   // Read phrase count.
   reader.ReadLine();
@@ -136,7 +136,7 @@ void RuleTableLoaderCompact::LoadPhraseSection(
 }
 
 void RuleTableLoaderCompact::LoadAlignmentSection(
-    LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets)
+  LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets)
 {
   // Read alignment set count.
   reader.ReadLine();
@@ -164,16 +164,16 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
 }
 
 bool RuleTableLoaderCompact::LoadRuleSection(
-    LineReader &reader,
-    const std::vector<Word> &vocab,
-    const std::vector<Phrase> &sourcePhrases,
-    const std::vector<Phrase> &targetPhrases,
-    const std::vector<size_t> &targetLhsIds,
-    const std::vector<const AlignmentInfo *> &alignmentSets,
-    const LMList &languageModels,
-    const WordPenaltyProducer *wpProducer,
-    const std::vector<float> &weights,
-    PhraseDictionarySCFG &ruleTable)
+  LineReader &reader,
+  const std::vector<Word> &vocab,
+  const std::vector<Phrase> &sourcePhrases,
+  const std::vector<Phrase> &targetPhrases,
+  const std::vector<size_t> &targetLhsIds,
+  const std::vector<const AlignmentInfo *> &alignmentSets,
+  const LMList &languageModels,
+  const WordPenaltyProducer *wpProducer,
+  const std::vector<float> &weights,
+  PhraseDictionarySCFG &ruleTable)
 {
   // Read rule count.
   reader.ReadLine();
@@ -181,7 +181,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
   // Read rules and add to table.
   const size_t numScoreComponents =
-      ruleTable.GetFeature()->GetNumScoreComponents();
+    ruleTable.GetFeature()->GetNumScoreComponents();
   std::vector<float> scoreVector(numScoreComponents);
   std::vector<size_t> tokenPositions;
   for (size_t i = 0; i < ruleCount; ++i) {
@@ -229,7 +229,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-        ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
+                                     ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     coll.Add(targetPhrase);
   }
 

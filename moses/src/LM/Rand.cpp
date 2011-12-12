@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-namespace 
+namespace
 {
 using namespace std;
 
@@ -57,7 +57,7 @@ public:
   }
   void InitializeBeforeSentenceProcessing() {
     m_lm->initThreadSpecificData(); // Creates thread specific data iff
-                                    // compiled with multithreading.
+    // compiled with multithreading.
   }
 protected:
   std::vector<randlm::WordID> m_randlm_ids_vec;
@@ -133,7 +133,7 @@ randlm::WordID LanguageModelRandLM::GetLmID( const std::string &str ) const
 }
 
 LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
-                                    State* finalState) const
+                                       State* finalState) const
 {
   FactorType factorType = GetFactorType();
   // set up context
@@ -156,7 +156,8 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
 
 }
 
-LanguageModelPointerState *NewRandLM() {
+LanguageModelPointerState *NewRandLM()
+{
   return new LanguageModelRandLM();
 }
 

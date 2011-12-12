@@ -30,7 +30,7 @@ namespace Moses
 {
 
 void ChartTranslationOption::CalcEstimateOfBestScore(
-    const ChartCellCollection &allChartCells)
+  const ChartCellCollection &allChartCells)
 {
   const TargetPhrase &targetPhrase = **(m_targetPhraseCollection.begin());
   m_estimateOfBestScore = targetPhrase.GetFutureScore();

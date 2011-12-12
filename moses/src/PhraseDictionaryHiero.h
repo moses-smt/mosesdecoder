@@ -11,13 +11,14 @@
 
 #include "PhraseDictionarySCFG.h"
 
-namespace Moses {
+namespace Moses
+{
 
 class PhraseDictionaryHiero : public PhraseDictionarySCFG
 {
 public:
   PhraseDictionaryHiero(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-  : PhraseDictionarySCFG(numScoreComponent,feature) {}
+    : PhraseDictionarySCFG(numScoreComponent,feature) {}
 
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output

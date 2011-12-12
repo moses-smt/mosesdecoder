@@ -14,9 +14,11 @@
 #include <set>
 #include <sstream>
 
-namespace moses {
+namespace moses
+{
 
-int Compactify::main(int argc, char *argv[]) {
+int Compactify::main(int argc, char *argv[])
+{
   // Process the command-line arguments.
   Options options;
   processOptions(argc, argv, options);
@@ -116,7 +118,7 @@ int Compactify::main(int argc, char *argv[]) {
 
       // Insert the alignments into alignmentSetSet.
       AlignmentSetIDType alignmentSetId = alignmentSetSet.insert(
-          entry.alignments);
+                                            entry.alignments);
 
       // Write this rule to the temporary file.
       tempFileStream << sourceId << " " << targetId << " " << alignmentSetId;
@@ -196,7 +198,7 @@ int Compactify::main(int argc, char *argv[]) {
        p != alignmentSetSet.end(); ++p) {
     const AlignmentSet &alignmentSet = **p;
     for (AlignmentSet::const_iterator q = alignmentSet.begin();
-          q != alignmentSet.end(); ++q) {
+         q != alignmentSet.end(); ++q) {
       if (q != alignmentSet.begin()) {
         output << " ";
       }
@@ -219,7 +221,8 @@ int Compactify::main(int argc, char *argv[]) {
 }
 
 void Compactify::processOptions(int argc, char *argv[],
-                                Options &options) const {
+                                Options &options) const
+{
   namespace po = boost::program_options;
 
   std::ostringstream usageMsg;
@@ -229,16 +232,16 @@ void Compactify::processOptions(int argc, char *argv[],
   std::string caption = usageMsg.str() + std::string("\n\nAllowed options");
   po::options_description visible(caption);
   visible.add_options()
-    ("help", "print help message and exit")
-    ("output,o", po::value<std::string>(),
-                 "write rule table to arg instead of standard output")
+  ("help", "print help message and exit")
+  ("output,o", po::value<std::string>(),
+   "write rule table to arg instead of standard output")
   ;
 
   // Declare the command line options that are hidden from the user
   // (these are used as positional options).
   po::options_description hidden("Hidden options");
   hidden.add_options()
-    ("input", po::value<std::string>(), "input file")
+  ("input", po::value<std::string>(), "input file")
   ;
 
   // Compose the full set of command-line options.
@@ -281,7 +284,8 @@ void Compactify::processOptions(int argc, char *argv[],
 }
 
 void Compactify::encodePhrase(const std::string &lhs, const StringPhrase &rhs,
-                              SymbolSet &symbolSet, SymbolPhrase &vec) const {
+                              SymbolSet &symbolSet, SymbolPhrase &vec) const
+{
   vec.clear();
   vec.reserve(rhs.size()+1);
   SymbolIDType id = symbolSet.insert(lhs);

@@ -45,7 +45,7 @@ class Phrase;
 struct LMResult {
   // log probability
   float score;
-  // Is the word unknown?  
+  // Is the word unknown?
   bool unknown;
 };
 
@@ -126,54 +126,55 @@ public:
   virtual void CleanUpAfterSentenceProcessing() {};
 };
 
-class LMRefCount : public LanguageModel {
-  public:
-    LMRefCount(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *impl) : m_impl(impl) {
-      Init(scoreIndexManager);
-    }
+class LMRefCount : public LanguageModel
+{
+public:
+  LMRefCount(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *impl) : m_impl(impl) {
+    Init(scoreIndexManager);
+  }
 
-    LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const {
-      return new LMRefCount(scoreIndexManager, *this);
-    }
+  LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const {
+    return new LMRefCount(scoreIndexManager, *this);
+  }
 
-    void InitializeBeforeSentenceProcessing() {
-      m_impl->InitializeBeforeSentenceProcessing();
-    }
+  void InitializeBeforeSentenceProcessing() {
+    m_impl->InitializeBeforeSentenceProcessing();
+  }
 
-    void CleanUpAfterSentenceProcessing() {
-      m_impl->CleanUpAfterSentenceProcessing();
-    }
+  void CleanUpAfterSentenceProcessing() {
+    m_impl->CleanUpAfterSentenceProcessing();
+  }
 
-    const FFState* EmptyHypothesisState(const InputType &/*input*/) const {
-      return m_impl->NewState(m_impl->GetBeginSentenceState());
-    }
+  const FFState* EmptyHypothesisState(const InputType &/*input*/) const {
+    return m_impl->NewState(m_impl->GetBeginSentenceState());
+  }
 
-    bool Useable(const Phrase &phrase) const {
-      return m_impl->Useable(phrase);
-    }
+  bool Useable(const Phrase &phrase) const {
+    return m_impl->Useable(phrase);
+  }
 
-    void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
-      return m_impl->CalcScore(phrase, fullScore, ngramScore, oovCount);
-    }
+  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+    return m_impl->CalcScore(phrase, fullScore, ngramScore, oovCount);
+  }
 
-    FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state, ScoreComponentCollection* accumulator) const {
-      return m_impl->Evaluate(cur_hypo, prev_state, accumulator, this);
-    }
+  FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state, ScoreComponentCollection* accumulator) const {
+    return m_impl->Evaluate(cur_hypo, prev_state, accumulator, this);
+  }
 
-    FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator) const {
-      return m_impl->EvaluateChart(cur_hypo, featureID, accumulator, this);
-    }
+  FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator) const {
+    return m_impl->EvaluateChart(cur_hypo, featureID, accumulator, this);
+  }
 
-    std::string GetScoreProducerDescription(unsigned int param) const {
-      return m_impl->GetScoreProducerDescription(param);
-    }
+  std::string GetScoreProducerDescription(unsigned int param) const {
+    return m_impl->GetScoreProducerDescription(param);
+  }
 
-  private:
-    LMRefCount(ScoreIndexManager &scoreIndexManager, const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {
-      Init(scoreIndexManager);
-    }
+private:
+  LMRefCount(ScoreIndexManager &scoreIndexManager, const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {
+    Init(scoreIndexManager);
+  }
 
-    boost::shared_ptr<LanguageModelImplementation> m_impl;
+  boost::shared_ptr<LanguageModelImplementation> m_impl;
 };
 
 }

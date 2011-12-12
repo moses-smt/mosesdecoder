@@ -4,16 +4,20 @@
 
 #include <string>
 
-namespace moses {
+namespace moses
+{
 
-class Exception {
- public:
+class Exception
+{
+public:
   Exception(const char *msg) : m_msg(msg) {}
   Exception(const std::string &msg) : m_msg(msg) {}
 
-  const std::string &getMsg() const { return m_msg; }
+  const std::string &getMsg() const {
+    return m_msg;
+  }
 
- private:
+private:
   std::string m_msg;
 };
 

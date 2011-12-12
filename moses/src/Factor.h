@@ -33,9 +33,9 @@ namespace Moses
 class FactorFriend;
 class FactorCollection;
 
-/** Represents a factor (word, POS, etc).  
+/** Represents a factor (word, POS, etc).
  *
- * A Factor has a contiguous identifier and string value.  
+ * A Factor has a contiguous identifier and string value.
  */
 class Factor
 {
@@ -45,17 +45,17 @@ class Factor
   friend class FactorCollection;
   friend class FactorFriend;
 
-  // FactorCollection writes here.  
+  // FactorCollection writes here.
   std::string m_string;
   size_t			m_id;
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
   Factor() {}
 
-  // Needed for STL containers.  They'll delegate through FactorFriend, which is never exposed publicly.  
+  // Needed for STL containers.  They'll delegate through FactorFriend, which is never exposed publicly.
   Factor(const Factor &factor) : m_string(factor.m_string), m_id(factor.m_id) {}
 
-  // Not implemented.  Shouldn't be called.  
+  // Not implemented.  Shouldn't be called.
   Factor &operator=(const Factor &factor);
 
 public:
