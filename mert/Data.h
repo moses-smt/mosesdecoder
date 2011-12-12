@@ -73,13 +73,17 @@ public:
   void mergeSparseFeatures();
 
   void loadnbest(const std::string &file);
-
+  
   void load(const std::string &featfile,const std::string &scorefile) {
     featdata->load(featfile);
     scoredata->load(scorefile);
     if (featdata->hasSparseFeatures())
       _sparse_flag = true;
   }
+
+  //ADDED BY TS
+  void remove_duplicates();
+  //END_ADDED
 
   void save(const std::string &featfile,const std::string &scorefile, bool bin=false) {
 
