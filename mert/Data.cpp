@@ -50,10 +50,10 @@ Data::~Data() {
 //ADDED BY TS
 void Data::remove_duplicates() {
 
-  uint nSentences = featdata->size();
+  size_t nSentences = featdata->size();
   assert(scoredata->size() == nSentences);
 
-  for (uint s=0; s < nSentences; s++) {
+  for (size_t s=0; s < nSentences; s++) {
 
     FeatureArray& feat_array =  featdata->get(s);
     ScoreArray& score_array =  scoredata->get(s);
@@ -61,29 +61,29 @@ void Data::remove_duplicates() {
     assert(feat_array.size() == score_array.size());
 
     //serves as a hash-map:
-    std::map<double, std::vector<uint> > lookup;
+    std::map<double, std::vector<size_t> > lookup;
 
-    uint end_pos = feat_array.size() - 1;
+    size_t end_pos = feat_array.size() - 1;
 
-    uint nRemoved = 0;
-    for (uint k=0; k <= end_pos; k++) {
+    size_t nRemoved = 0;
+    for (size_t k=0; k <= end_pos; k++) {
 
       const FeatureStats& cur_feats = feat_array.get(k);
 
       double sum = 0.0;
-      for (uint l=0; l < cur_feats.size(); l++)
+      for (size_t l=0; l < cur_feats.size(); l++)
 	sum += cur_feats.get(l);
 
       if (lookup.find(sum) != lookup.end()) {
 
 	//std::cerr << "hit" << std::endl;
 
-	std::vector<uint>& cur_list = lookup[sum];
+	std::vector<size_t>& cur_list = lookup[sum];
 
-	uint l=0;
+	size_t l=0;
 	for (l=0; l < cur_list.size(); l++) {
 	  
-	  uint j=cur_list[l];
+	  size_t j=cur_list[l];
 
 	  if (cur_feats == feat_array.get(j)
 	      && score_array.get(k) == score_array.get(j)) {
@@ -108,7 +108,7 @@ void Data::remove_duplicates() {
       else
 	lookup[sum].push_back(k);
 
-      // for (uint j=0; j < k; j++) {
+      // for (size_t j=0; j < k; j++) {
 
       // 	if (feat_array.get(k) == feat_array.get(j)
       // 	    && score_array.get(k) == score_array.get(j)) {
