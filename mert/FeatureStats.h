@@ -134,4 +134,8 @@ public:
   friend ostream& operator<<(ostream& o, const FeatureStats& e);
 };
 
+//ADEED_BY_TS
+bool operator==(const FeatureStats& f1, const FeatureStats& f2);
+//END_ADDED
+
 #endif  // FEATURE_STATS_H

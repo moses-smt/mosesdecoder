@@ -3,7 +3,7 @@
 # Compatible with sri LM-creating script, eg.
 #    ngram-count -order 5 -interpolate -wbdiscount -unk -text corpus.txt -lm lm.txt
 # To use it in the EMS, add this to the [LM] section
-#    lm-training = "$moses-script-dir/generic/trainlm.irst.perl -cores $cores -irst-dir $irst-dir"
+#    lm-training = "$moses-script-dir/generic/trainlm-irst.perl -cores $cores -irst-dir $irst-dir"
 #    settings = ""
 # Also, make sure that $irst-dir is defined (in the [LM] or [GENERAL] section. 
 # It should point to the root of the LM toolkit, eg

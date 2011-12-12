@@ -63,6 +63,16 @@ public:
     array_.push_back(e);
   }
 
+  //ADDED BY TS
+  void swap(size_t i, size_t j) {
+    std::swap(array_[i],array_[j]);
+  }
+  
+  void resize(size_t new_size) {
+    array_.resize(std::min(new_size,array_.size()));
+  }
+  //END_ADDED
+
   void merge(FeatureArray& e);
 
   inline size_t size() const {
